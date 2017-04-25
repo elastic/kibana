@@ -1,7 +1,6 @@
 import SetupError from './setup_error';
-import { mappings } from './kibana_index_mappings';
 
-module.exports = function (server) {
+module.exports = function (server, mappings) {
   const { callWithInternalUser } = server.plugins.elasticsearch.getCluster('admin');
   const index = server.config().get('kibana.index');
 
@@ -15,7 +14,8 @@ module.exports = function (server) {
     index: index,
     body: {
       settings: {
-        number_of_shards: 1
+        number_of_shards: 1,
+        'index.mapper.dynamic': false,
       },
       mappings
     }

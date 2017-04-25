@@ -35,7 +35,8 @@ module.exports = function (kibana) {
       ],
       visTypes: [
         'plugins/timelion/vis'
-      ]
+      ],
+      mappings: require('./mappings.json')
     },
     init: require('./init.js'),
   });
