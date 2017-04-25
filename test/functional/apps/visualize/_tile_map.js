@@ -57,6 +57,11 @@ export default function ({ getService, getPageObjects }) {
 
         return PageObjects.visualize.collapseChart()
         .then(function () {
+          //level 1
+          return PageObjects.visualize.clickMapZoomOut();
+        })
+        .then(function () {
+          //level 0
           return PageObjects.visualize.clickMapZoomOut();
         })
         .then(function () {
