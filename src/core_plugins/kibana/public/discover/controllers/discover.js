@@ -155,7 +155,91 @@ function discoverController($scope, config, courier, $route, $window, Notifier,
   const $appStatus = $scope.appStatus = this.appStatus = {
     dirty: !savedSearch.id
   };
+
   const $state = $scope.state = new AppState(getStateDefaults());
+
+  const getSourceFieldSharingData = async () => {
+    const { body, index } = await $scope.searchSource.getESQuery();
+
+    const esQuery = {
+      index,
+      body: {
+        query: body.query,
+        sort: body.sort,
+        version: body.version,
+        docvalue_fields: body.docvalue_fields,
+        script_fields: body.script_fields,
+        stored_fields: body.stored_fields,
+        _source: body._source,
+      }
+    };
+
+    const fields = _.keys($scope.fieldCounts).sort();
+    return {
+      esQuery,
+      fields,
+      metaFields: $scope.indexPattern.metaFields,
+      conflictedTypesFields: $scope.indexPattern.fields.filter(f => f.type === 'conflict'),
+    };
+  };
+
+  const getSelectedFieldsSharingData = async () => {
+    const { body, index } = await $scope.searchSource.getESQuery();
+
+    const timeFieldName = $scope.indexPattern.timeFieldName;
+    const selectedFields = $state.columns;
+
+    // add the timeFieldName to the list of selectedFields if it's there
+    const fields = timeFieldName ? [timeFieldName, ...selectedFields] : selectedFields;
+
+    // the query that Discover executes against Elasticsearch includes all of the fields so that
+    // we have the Table/JSON view in the expanded row, but when we're sharing the data
+    // we only want to include the selected fields, so we're manually limiting this in the query here
+    const computedFields = $scope.indexPattern.getComputedFields();
+    const docvalueFields = _.intersection(computedFields.docvalueFields, fields);
+    const scriptFields = _.pick(computedFields.scriptFields, fields);
+    const storedFields = computedFields.storedFields; // indexPattern has this hardcoded to ['*'] so we can't filter
+    const sourceFields = _.difference(fields, [...docvalueFields, ..._.keys(scriptFields)]);
+
+    const esQuery = {
+      index,
+      body: {
+        query: body.query,
+        sort: body.sort,
+        version: body.version,
+        docvalue_fields: docvalueFields,
+        script_fields: scriptFields,
+        stored_fields: storedFields,
+        _source: sourceFields,
+      }
+    };
+
+    return {
+      esQuery,
+      fields,
+      metaFields: $scope.indexPattern.metaFields,
+      conflictedTypesFields: $scope.indexPattern.fields.filter(f => f.type === 'conflict'),
+    };
+  };
+
+  this.getSharingData = async () => {
+    const selectedFields = $state.columns;
+
+    if (selectedFields.length === 1 && selectedFields[0] ===  '_source') {
+      return await getSourceFieldSharingData();
+    }
+
+    return await getSelectedFieldsSharingData();
+  };
+
+  this.getSharingType = () => {
+    return 'search';
+  };
+
+  this.getSharingTitle = () => {
+    return savedSearch.title;
+  };
+
   $scope.uiState = $state.makeStateful('uiState');
 
   function getStateDefaults() {

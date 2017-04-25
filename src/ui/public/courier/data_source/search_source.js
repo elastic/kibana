@@ -288,5 +288,9 @@ export function SearchSourceProvider(Promise, Private, config) {
     }
   };
 
+  SearchSource.prototype.getESQuery = function () {
+    return this._flatten();
+  };
+
   return SearchSource;
 }
