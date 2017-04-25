@@ -21,11 +21,6 @@ uiModules.get('apps/management')
   const intervals = indexPatterns.intervals;
   let samplePromise;
 
-  const DEFAULT_TIME_FIELD = {
-    name: $translate.instant('KIBANA-NO_TIME_FILTER_FIELD')
-  };
-
-
   // Configure the new index pattern we're going to create.
   this.newIndexPattern = {
     name: config.get('indexPattern:placeholder'),
@@ -43,6 +38,15 @@ uiModules.get('apps/management')
   this.nameIntervalOptions = intervals;
   this.patternErrors = [];
   this.fetchFieldsError = $translate.instant('KIBANA-LOADING');
+
+  const TIME_FILTER_FIELD_OPTIONS = {
+    NO_DATE_FIELD_SELECTED: {
+      name: $translate.instant('KIBANA-NO_DATE_FIELD_SELECTED')
+    },
+    NO_DATE_FIELDS_IN_INDEX: {
+      name: $translate.instant('KIBANA-NO_DATE_FIELDS_IN_INDEX')
+    }
+  };
 
   const fetchFieldList = () => {
     this.dateFields = this.newIndexPattern.timeField = null;
@@ -98,8 +102,12 @@ uiModules.get('apps/management')
     }
 
     this.dateFields = results.dateFields || [];
-    this.dateFields.unshift(DEFAULT_TIME_FIELD);
-    this.newIndexPattern.timeField = DEFAULT_TIME_FIELD;
+    if (this.dateFields.length === 0) {
+      this.dateFields.unshift(TIME_FILTER_FIELD_OPTIONS.NO_DATE_FIELDS_IN_INDEX);
+    } else {
+      this.dateFields.unshift(TIME_FILTER_FIELD_OPTIONS.NO_DATE_FIELD_SELECTED);
+    }
+    this.newIndexPattern.timeField = this.dateFields[0];
   };
 
   const updateFieldListAndSetTimeField = (results, timeFieldName) => {
@@ -196,7 +204,8 @@ uiModules.get('apps/management')
   this.createIndexPattern = () => {
     const id = this.newIndexPattern.name;
     let timeFieldName;
-    if (this.newIndexPattern.timeField !== DEFAULT_TIME_FIELD) {
+    if ((this.newIndexPattern.timeField !== TIME_FILTER_FIELD_OPTIONS.NO_DATE_FIELD_SELECTED)
+      && (this.newIndexPattern.timeField !== TIME_FILTER_FIELD_OPTIONS.NO_DATE_FIELDS_IN_INDEX)) {
       timeFieldName = this.newIndexPattern.timeField.name;
     }
 
