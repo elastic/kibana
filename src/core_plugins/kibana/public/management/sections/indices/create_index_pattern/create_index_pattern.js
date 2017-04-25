@@ -102,10 +102,11 @@ uiModules.get('apps/management')
     }
 
     this.dateFields = results.dateFields || [];
-    if (this.dateFields.length === 0) {
-      this.dateFields.unshift(TIME_FILTER_FIELD_OPTIONS.NO_DATE_FIELDS_IN_INDEX);
-    } else {
+    this.doesIndexHaveDateFields = this.dateFields.length > 0;
+    if (this.doesIndexHaveDateFields) {
       this.dateFields.unshift(TIME_FILTER_FIELD_OPTIONS.NO_DATE_FIELD_SELECTED);
+    } else {
+      this.dateFields.unshift(TIME_FILTER_FIELD_OPTIONS.NO_DATE_FIELDS_IN_INDEX);
     }
     this.newIndexPattern.timeField = this.dateFields[0];
   };

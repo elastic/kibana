@@ -60,6 +60,9 @@
               auto-select-if-only-one="controller.dateFields"
               class="form-control"
             ></select>
+            <p class="help-block" ng-if="!controller.doesIndexHaveDateFields">
+              The indices which match this index pattern don&rsquo;t contain any time fields.
+            </p>
           </div>
 
           <div class="form-group" ng-if="controller.canExpandIndices()">
