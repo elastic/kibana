@@ -9,9 +9,9 @@ import { KuiModalOverlay } from './modal_overlay';
 
 import { KuiButton } from '../index';
 
-export function KuiConfirmModal({ message, title, onCancel, onConfirm, cancelButtonText, confirmButtonText }) {
+export function KuiConfirmModal({ message, title, onCancel, onConfirm, cancelButtonText, confirmButtonText, ...rest }) {
   return (
-    <KuiModalOverlay>
+    <KuiModalOverlay { ...rest }>
       <KuiModal style={{ 'width': '450px' }} data-test-subj="confirmModal">
         {
           title ?
@@ -31,6 +31,7 @@ export function KuiConfirmModal({ message, title, onCancel, onConfirm, cancelBut
         <KuiModalFooter>
           <KuiButton
             type="hollow"
+            data-test-subj="confirmModalCancelButton"
             onClick={ onCancel }
           >
             {cancelButtonText}
