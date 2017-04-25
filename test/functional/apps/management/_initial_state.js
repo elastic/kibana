@@ -41,10 +41,10 @@ export default function ({ getService, getPageObjects }) {
       });
     });
 
-    it('should not be enable creation', function () {
+    it('should enable creation', function () {
       return PageObjects.settings.getCreateIndexPatternButton().isEnabled()
       .then(function (enabled) {
-        expect(enabled).to.not.be.ok();
+        expect(enabled).to.be.ok();
       });
     });
   });
