@@ -2,7 +2,7 @@ import _ from 'lodash';
 import sinon from 'sinon';
 import expect from 'expect.js';
 import Promise from 'bluebird';
-
+import mappings from './fixtures/mappings';
 import createKibanaIndex from '../create_kibana_index';
 import SetupError from '../setup_error';
 
@@ -23,13 +23,12 @@ describe('plugins/elasticsearch', function () {
       get.withArgs('kibana.index').returns(config.kibana.index);
       config = function () { return { get: get }; };
 
-      _.set(server, 'plugins.elasticsearch', {});
       _.set(server, 'config', config);
 
       callWithInternalUser = sinon.stub();
       cluster = { callWithInternalUser: callWithInternalUser };
 
-      server.plugins.elasticsearch.getCluster = sinon.stub().withArgs('admin').returns(cluster);
+      _.set(server, 'plugins.elasticsearch.getCluster', sinon.stub().withArgs('admin').returns(cluster));
     });
 
     describe('successful requests', function () {
@@ -39,14 +38,14 @@ describe('plugins/elasticsearch', function () {
       });
 
       it('should check cluster.health upon successful index creation', function () {
-        const fn = createKibanaIndex(server);
+        const fn = createKibanaIndex(server, mappings);
         return fn.then(function () {
           sinon.assert.calledOnce(callWithInternalUser.withArgs('cluster.health', sinon.match.any));
         });
       });
 
       it('should be created with mappings for config.buildNum', function () {
-        const fn = createKibanaIndex(server);
+        const fn = createKibanaIndex(server, mappings);
         return fn.then(function () {
           const params = callWithInternalUser.args[0][1];
           expect(params)
@@ -60,14 +59,12 @@ describe('plugins/elasticsearch', function () {
           expect(params.body.mappings.config.properties)
             .to.have.property('buildNum');
           expect(params.body.mappings.config.properties.buildNum)
-            .to.have.property('type', 'string');
-          expect(params.body.mappings.config.properties.buildNum)
-            .to.have.property('index', 'not_analyzed');
+            .to.have.property('type', 'keyword');
         });
       });
 
       it('should be created with 1 shard and default replica', function () {
-        const fn = createKibanaIndex(server);
+        const fn = createKibanaIndex(server, mappings);
         return fn.then(function () {
           const params = callWithInternalUser.args[0][1];
           expect(params)
@@ -82,7 +79,7 @@ describe('plugins/elasticsearch', function () {
       });
 
       it('should be created with index name set in the config', function () {
-        const fn = createKibanaIndex(server);
+        const fn = createKibanaIndex(server, mappings);
         return fn.then(function () {
           const params = callWithInternalUser.args[0][1];
           expect(params)

@@ -9,6 +9,7 @@ import search from './server/routes/api/search';
 import settings from './server/routes/api/settings';
 import scripts from './server/routes/api/scripts';
 import * as systemApi from './server/lib/system_api';
+import mappings from './mappings.json';
 
 const mkdirp = Promise.promisify(mkdirpNode);
 
@@ -16,7 +17,6 @@ module.exports = function (kibana) {
   const kbnBaseUrl = '/app/kibana';
   return new kibana.Plugin({
     id: 'kibana',
-
     config: function (Joi) {
       return Joi.object({
         enabled: Joi.boolean().default(true),
@@ -42,7 +42,6 @@ module.exports = function (kibana) {
           'devTools',
           'docViews'
         ],
-
         injectVars: function (server) {
           const serverConfig = server.config();
 
@@ -120,7 +119,8 @@ module.exports = function (kibana) {
 
       translations: [
         resolve(__dirname, './translations/en.json')
-      ]
+      ],
+      mappings
     },
 
     preInit: async function (server) {
