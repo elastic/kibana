@@ -6,17 +6,17 @@
           <span ng-if="filter.label">- {{ filter.label }}</span>
       </label>
 
-      <div class="btn-group">
+      <div class="kuiButtonGroup kuiButtonGroup--united">
         <button
           ng-click="showConfig = !showConfig"
           type="button"
-          class="btn btn-default btn-xs">
+          class="kuiButton kuiButton--basic kuiButton--small">
           <i class="fa fa-tag"></i>
         </button>
         <button
           type="button"
           ng-click="agg.params.filters.splice($index, 1)"
-          class="btn btn-danger btn-xs">
+          class="kuiButton kuiButton--danger kuiButton--small">
           <i class="fa fa-times"></i>
         </button>
       </div>
@@ -51,9 +51,10 @@
   </p>
 </div>
 
-<div
+<button
   click-focus="'filter'+(agg.params.filters.length-1)"
   ng-click="agg.params.filters.push({input:{}})"
-  class="sidebar-item-button primary">
+  class="kuiButton kuiButton--primary kuiButton--fullWidth"
+>
   Add Filter
-</div>
+</button>

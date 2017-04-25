@@ -116,10 +116,10 @@ angular.module('ui.bootstrap.tabs', [])
 <example module="ui.bootstrap">
   <file name="index.html">
     <div ng-controller="TabsDemoCtrl">
-      <button class="btn btn-small" ng-click="items[0].active = true">
+      <button class="kuiButton kuiButton--small" ng-click="items[0].active = true">
         Select item 1, using active binding
       </button>
-      <button class="btn btn-small" ng-click="items[1].disabled = !items[1].disabled">
+      <button class="kuiButton kuiButton--small" ng-click="items[1].disabled = !items[1].disabled">
         Enable/disable item 2, using disabled binding
       </button>
       <br />

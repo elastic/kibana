@@ -127,7 +127,7 @@ export function HeaderPageProvider({ getService, getPageObjects }) {
       log.debug('clickGoButton');
       await retry.try(async () => {
         remote.setFindTimeout(defaultFindTimeout);
-        await remote.findByClassName('kbn-timepicker-go').click();
+        await testSubjects.click('timepickerGoButton');
         await this.waitUntilLoadingHasFinished();
       });
     }
