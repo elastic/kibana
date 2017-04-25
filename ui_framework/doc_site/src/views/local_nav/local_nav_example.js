@@ -16,6 +16,7 @@ const menuItemStatesHtml = require('./local_nav_menu_item_states.html');
 const dropdownHtml = require('./local_nav_dropdown.html');
 const dropdownPanelsHtml = require('./local_nav_dropdown_panels.html');
 const tabsHtml = require('./local_nav_tabs.html');
+const datePickerHtml = require('./local_nav_date_picker.html');
 
 export default props => (
   <GuidePage title={props.route.name}>
@@ -183,6 +184,23 @@ export default props => (
 
       <GuideDemo
         html={tabsHtml}
+        isDarkTheme={true}
+      />
+    </GuideSection>
+
+    <GuideSection
+      title="DatePicker"
+      source={[{
+        type: GuideSectionTypes.HTML,
+        code: datePickerHtml,
+      }]}
+    >
+      <GuideDemo
+        html={datePickerHtml}
+      />
+
+      <GuideDemo
+        html={datePickerHtml}
         isDarkTheme={true}
       />
     </GuideSection>
