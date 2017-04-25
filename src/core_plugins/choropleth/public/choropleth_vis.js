@@ -17,12 +17,16 @@ visTypes.register(function ChoroplethProvider(Private, vectormapsConfig) {
   const defaultLayers = [
     {
       type: 'default',
-      url: '../plugins/choropleth/data/world_countries.geojson',
+      url: '../plugins/choropleth/data/world_countries.json',
       name: 'World Countries',
       fields: [
         {
-          name: 'iso',
-          description: '2-letter abbreviation'
+          name: 'iso2',
+          description: 'Two letter abbreviation'
+        },
+        {
+          name: 'iso3',
+          description: 'Three letter abbreviation'
         },
         {
           name: 'name',
@@ -32,13 +36,13 @@ visTypes.register(function ChoroplethProvider(Private, vectormapsConfig) {
     },
     {
       type: 'default',
-      url: '../plugins/choropleth/data/state.geojson',
+      url: '../plugins/choropleth/data/us_states.json',
       name: 'US States',
       fields: [{
-        name: 'STUSPS10',
+        name: 'postal',
         description: 'Two letter abbreviation'
       }, {
-        name: 'NAME10',
+        name: 'name',
         description: 'State name'
       }]
     }
