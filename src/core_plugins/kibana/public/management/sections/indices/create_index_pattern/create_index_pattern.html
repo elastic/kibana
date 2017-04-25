@@ -53,7 +53,7 @@
             </label>
             <select
               data-test-subj="createIndexPatternTimeFieldSelect"
-              ng-disabled="controller.fetchFieldsError"
+              ng-disabled="controller.fetchFieldsError || (controller.dateFields.length === 1)"
               ng-required="!controller.fetchFieldsError"
               ng-options="field.name for field in controller.dateFields"
               ng-model="controller.newIndexPattern.timeField"

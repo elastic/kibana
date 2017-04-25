@@ -21,6 +21,11 @@ uiModules.get('apps/management')
   const intervals = indexPatterns.intervals;
   let samplePromise;
 
+  const DEFAULT_TIME_FIELD = {
+    name: $translate.instant('KIBANA-NO_TIME_FILTER_FIELD')
+  };
+
+
   // Configure the new index pattern we're going to create.
   this.newIndexPattern = {
     name: config.get('indexPattern:placeholder'),
@@ -88,7 +93,13 @@ uiModules.get('apps/management')
 
   const updateFieldList = results => {
     this.fetchFieldsError = results.fetchFieldsError;
-    this.dateFields = results.dateFields;
+    if (this.fetchFieldsError) {
+      return;
+    }
+
+    this.dateFields = results.dateFields || [];
+    this.dateFields.unshift(DEFAULT_TIME_FIELD);
+    this.newIndexPattern.timeField = DEFAULT_TIME_FIELD;
   };
 
   const updateFieldListAndSetTimeField = (results, timeFieldName) => {
@@ -99,12 +110,13 @@ uiModules.get('apps/management')
     }
 
     const matchingTimeField = results.dateFields.find(field => field.name === timeFieldName);
-    const defaultTimeField = results.dateFields[0];
 
     //assign the field from the results-list
     //angular recreates a new timefield instance, each time the list is refreshed.
     //This ensures the selected field matches one of the instances in the list.
-    this.newIndexPattern.timeField = matchingTimeField ? matchingTimeField : defaultTimeField;
+    if (matchingTimeField) {
+      this.newIndexPattern.timeField = matchingTimeField;
+    }
   };
 
   const resetIndex = () => {
@@ -183,7 +195,10 @@ uiModules.get('apps/management')
 
   this.createIndexPattern = () => {
     const id = this.newIndexPattern.name;
-    const timeFieldName = this.newIndexPattern.timeField.name;
+    let timeFieldName;
+    if (this.newIndexPattern.timeField !== DEFAULT_TIME_FIELD) {
+      timeFieldName = this.newIndexPattern.timeField.name;
+    }
 
     // Only event-time-based index patterns set an intervalName.
     const intervalName =
