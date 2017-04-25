@@ -17,14 +17,6 @@ export default function ({ getService, getPageObjects }) {
       });
     });
 
-    it('should load with time pattern checked', function () {
-      return PageObjects.settings.getTimeBasedEventsCheckbox().isSelected()
-      .then(function (selected) {
-        PageObjects.common.saveScreenshot('Settings-initial-state');
-        expect(selected).to.be.ok();
-      });
-    });
-
     it('should load with name pattern unchecked', function () {
       return PageObjects.settings.getTimeBasedIndexPatternCheckbox().isSelected()
       .then(function (selected) {
