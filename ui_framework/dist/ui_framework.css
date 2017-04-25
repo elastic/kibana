@@ -1278,6 +1278,150 @@ body {
 .kuiLocalBreadcrumb__emphasis {
   font-weight: 700; }
 
+.kuiDatePicker {
+  background-color: transparent;
+  border-collapse: collapse;
+  border-spacing: 0;
+  line-height: 1.5; }
+
+.kuiDatePickerNavigationCell {
+  padding: 0; }
+
+.kuiDatePickerNavigation {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-align: center;
+  -webkit-align-items: center;
+      -ms-flex-align: center;
+          align-items: center;
+  -webkit-box-pack: justify;
+  -webkit-justify-content: space-between;
+      -ms-flex-pack: justify;
+          justify-content: space-between;
+  margin-bottom: 4px; }
+
+/**
+ * 1. Override inherited styles.
+ */
+.kuiDatePickerNavigationButton {
+  -webkit-appearance: none;
+     -moz-appearance: none;
+          appearance: none;
+  background-color: transparent;
+  border: none;
+  font-size: 12px;
+  color: #5a5a5a;
+  padding: 3px 6px;
+  border-radius: 4px; }
+  .kuiDatePickerNavigationButton:hover, .kuiDatePickerNavigationButton:active {
+    cursor: pointer;
+    color: #000000;
+    background-color: rgba(0, 0, 0, 0.1); }
+  .kuiDatePickerNavigationButton:focus {
+    z-index: 1;
+    /* 1 */
+    outline: none !important;
+    /* 2 */
+    box-shadow: 0 0 0 1px #f6f6f6, 0 0 0 2px #6EADC1;
+    /* 3 */
+    color: #5a5a5a;
+    /* 1 */ }
+  .theme-dark .kuiDatePickerNavigationButton {
+    color: #dedede; }
+    .theme-dark .kuiDatePickerNavigationButton:hover, .theme-dark .kuiDatePickerNavigationButton:active {
+      color: #ffffff;
+      background-color: rgba(0, 0, 0, 0.4); }
+    .theme-dark .kuiDatePickerNavigationButton:focus {
+      z-index: 1;
+      /* 1 */
+      outline: none !important;
+      /* 2 */
+      box-shadow: 0 0 0 1px #525252, 0 0 0 2px #6EADC1;
+      /* 3 */
+      color: #dedede;
+      /* 1 */ }
+
+.kuiDatePickerHeaderCell {
+  padding: 9px 0;
+  color: #2d2d2d;
+  font-size: 12px;
+  font-weight: bold;
+  text-align: center;
+  line-height: 1.2; }
+  .theme-dark .kuiDatePickerHeaderCell {
+    color: #cecece; }
+
+.kuiDatePickerRowCell {
+  padding: 0;
+  text-align: center;
+  /**
+   * This state class exists to support weird angular-bootstrap datepicker functionality,
+   * in which you can't select a day on the "From" calendar if it falls after the selected day in
+   * the "To" calendar (and vice versa, you can't select a "To" day if it is before the "From" day).
+   */ }
+  .kuiDatePickerRowCell.kuiDatePickerRowCell-isBlocked {
+    cursor: not-allowed; }
+    .kuiDatePickerRowCell.kuiDatePickerRowCell-isBlocked .kuiDatePickerRowCellContent {
+      pointer-events: none; }
+
+/**
+ * 1. Override inherited styles.
+ */
+.kuiDatePickerRowCellContent {
+  -webkit-appearance: none;
+     -moz-appearance: none;
+          appearance: none;
+  background-color: transparent;
+  width: 100%;
+  border: 1px solid transparent;
+  color: #2d2d2d;
+  font-size: 12px;
+  padding: 8px;
+  border-radius: 4px;
+  line-height: 1.2; }
+  .kuiDatePickerRowCellContent:focus {
+    z-index: 1;
+    /* 1 */
+    outline: none !important;
+    /* 2 */
+    box-shadow: 0 0 0 1px #f6f6f6, 0 0 0 2px #6EADC1;
+    /* 3 */
+    color: #2d2d2d;
+    /* 1 */ }
+  .kuiDatePickerRowCellContent:disabled {
+    pointer-events: none;
+    opacity: 0.5; }
+  .kuiDatePickerRowCellContent.kuiDatePickerRowCellContent-isOtherMonth {
+    visibility: hidden;
+    pointer-events: none; }
+  .kuiDatePickerRowCellContent.kuiDatePickerRowCellContent-isCurrent {
+    color: #3CAED2; }
+  .kuiDatePickerRowCellContent.kuiDatePickerRowCellContent-isSelected {
+    background-color: #777777;
+    color: #ffffff; }
+  .kuiDatePickerRowCellContent:hover, .kuiDatePickerRowCellContent:active {
+    cursor: pointer;
+    color: #000000;
+    background-color: rgba(0, 0, 0, 0.1); }
+  .theme-dark .kuiDatePickerRowCellContent {
+    color: #cecece; }
+    .theme-dark .kuiDatePickerRowCellContent:focus {
+      z-index: 1;
+      /* 1 */
+      outline: none !important;
+      /* 2 */
+      box-shadow: 0 0 0 1px #525252, 0 0 0 2px #6EADC1;
+      /* 3 */ }
+    .theme-dark .kuiDatePickerRowCellContent.kuiDatePickerRowCellContent-isCurrent {
+      color: #b7e2ea; }
+    .theme-dark .kuiDatePickerRowCellContent.kuiDatePickerRowCellContent-isSelected {
+      color: #ffffff; }
+    .theme-dark .kuiDatePickerRowCellContent:hover, .theme-dark .kuiDatePickerRowCellContent:active {
+      color: #ffffff;
+      background-color: rgba(0, 0, 0, 0.4); }
+
 .kuiLocalDropdown {
   position: relative;
   padding: 10px 10px 14px;

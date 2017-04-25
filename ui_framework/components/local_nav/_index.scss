@@ -17,6 +17,9 @@ $localTabTextColor-isSelected: $localNavButtonTextColor-isHover;
 $localBreadcrumbLinkColor: #328caa;
 $localSearchButtonBackgroundColor: #9c9c9c;
 $localSearchButtonTextColor: #ffffff;
+$localDatePickerButtonHoverBackgroundColor: $localNavButtonBackgroundColor-isHover;
+$localDatePickerCellSelectedBackgroundColor: #777777;
+$localDatePickerCellSelectedTextColor: #ffffff;
 
 // Dark theme colors
 $localNavTextColor--darkTheme: $globalTextColor--darkTheme;
@@ -37,14 +40,24 @@ $localTabTextColor-isHover--darkTheme: $localNavButtonTextColor-isHover--darkThe
 $localTabTextColor-isSelected--darkTheme: $localNavButtonTextColor-isHover--darkTheme;
 $localSearchButtonBackgroundColor--darkTheme: #777777;
 $localSearchButtonTextColor--darkTheme: #ffffff;
+$localDatePickerButtonHoverBackgroundColor--darkTheme: rgba(#000000, 0.4);
+$localDatePickerCellSelectedTextColor--darkTheme: #ffffff;
 
 // Spacing
 $localNavSideSpacing: 10px;
 $localSearchHeight: 30px;
+$localDatePickerBottomSpacing: 4px;
+$localDatePickerButtonPadding: 3px 6px;
+$localDatePickerCellPadding: 8px;
+// Match the height of body cells, but leave out side padding so content can expand without
+// affecting the cell's width.
+$localDatePickerHeaderCellPadding: #{$localDatePickerCellPadding + 1px} 0;
+$localDatePickerCellLineHeight: 1.2;
 
 // Fonts
 
 @import "local_breadcrumbs";
+@import "local_date_picker";
 @import "local_dropdown";
 @import "local_menu";
 @import "local_nav";
