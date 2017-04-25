@@ -3,7 +3,6 @@
   "UI-WELCOME_ERROR": "Kibana did not load properly. Check the server output for more information.",
   "KIBANA-CONFIGURE_INDEX_PATTERN": "Configure an index pattern",
   "KIBANA-MUST_CONFIGURE_INDEX_PATTERN": "In order to use Kibana you must configure at least one index pattern. Index patterns are used to identify the Elasticsearch index to run search and analytics against. They are also used to configure fields.",
-  "KIBANA-CONTAINS_TIME_BASED_EVENTS": "Index contains time-based events",
   "KIBANA-INDEX_NAME_CREATED_BY_EVENT_TIMES": "Use event times to create index names ",
   "KIBANA-DEPRECATED": "[DEPRECATED]",
   "KIBANA-ALERT_INDEX_PATTERN_DEPRECATED": "Time-interval based index patterns are deprecated!",

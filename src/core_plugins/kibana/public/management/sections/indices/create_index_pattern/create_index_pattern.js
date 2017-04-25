@@ -24,7 +24,6 @@ uiModules.get('apps/management')
   // Configure the new index pattern we're going to create.
   this.newIndexPattern = {
     name: config.get('indexPattern:placeholder'),
-    isTimeBased: true,
     nameIsPattern: false,
     expandable: false,
     nameInterval: _.find(intervals, { name: 'daily' }),
@@ -42,7 +41,7 @@ uiModules.get('apps/management')
 
   const fetchFieldList = () => {
     this.dateFields = this.newIndexPattern.timeField = null;
-    const useIndexList = this.newIndexPattern.isTimeBased && this.newIndexPattern.nameIsPattern;
+    const useIndexList = this.newIndexPattern.nameIsPattern;
     let fetchFieldsError;
     let dateFields;
 
@@ -168,7 +167,7 @@ uiModules.get('apps/management')
   this.canExpandIndices = () => {
     // to maximize performance in the digest cycle, move from the least
     // expensive operation to most
-    return this.newIndexPattern.isTimeBased && !this.newIndexPattern.nameIsPattern && _.includes(this.newIndexPattern.name, '*');
+    return !this.newIndexPattern.nameIsPattern && _.includes(this.newIndexPattern.name, '*');
   };
 
   this.refreshFieldList = () => {
@@ -184,14 +183,11 @@ uiModules.get('apps/management')
 
   this.createIndexPattern = () => {
     const id = this.newIndexPattern.name;
-    const timeFieldName =
-      this.newIndexPattern.isTimeBased
-      ? this.newIndexPattern.timeField.name
-      : undefined;
+    const timeFieldName = this.newIndexPattern.timeField.name;
 
     // Only event-time-based index patterns set an intervalName.
     const intervalName =
-      this.newIndexPattern.isTimeBased  && this.newIndexPattern.nameIsPattern
+      this.newIndexPattern.nameIsPattern
       ? this.newIndexPattern.nameInterval.name
       : undefined;
 
@@ -228,21 +224,15 @@ uiModules.get('apps/management')
   };
 
   $scope.$watchMulti([
-    'controller.newIndexPattern.isTimeBased',
     'controller.newIndexPattern.nameIsPattern',
     'controller.newIndexPattern.nameInterval.name'
   ], (newVal, oldVal) => {
-    const isTimeBased = newVal[0];
     const nameIsPattern = newVal[1];
     const newDefault = getDefaultPatternForInterval(newVal[2]);
     const oldDefault = getDefaultPatternForInterval(oldVal[2]);
 
     if (this.newIndexPattern.name === oldDefault) {
       this.newIndexPattern.name = newDefault;
-    }
-
-    if (!isTimeBased) {
-      this.newIndexPattern.nameIsPattern = false;
     }
 
     if (!nameIsPattern) {
@@ -301,7 +291,6 @@ uiModules.get('apps/management')
   });
 
   $scope.$watchMulti([
-    'controller.newIndexPattern.isTimeBased',
     'controller.sampleCount'
   ], () => {
     this.refreshFieldList();
