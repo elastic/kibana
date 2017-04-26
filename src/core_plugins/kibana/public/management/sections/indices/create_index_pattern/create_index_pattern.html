@@ -53,14 +53,14 @@
             </label>
             <select
               data-test-subj="createIndexPatternTimeFieldSelect"
-              ng-disabled="controller.fetchFieldsError || !controller.doesIndexHaveDateFields"
+              ng-disabled="controller.fetchFieldsError || !controller.indexHasDateFields"
               ng-required="!controller.fetchFieldsError"
               ng-options="field.name for field in controller.dateFields"
               ng-model="controller.newIndexPattern.timeField"
               auto-select-if-only-one="controller.dateFields"
               class="form-control"
             ></select>
-            <p class="help-block" ng-if="!controller.fetchFieldsError && !controller.doesIndexHaveDateFields">
+            <p class="help-block" ng-if="!controller.fetchFieldsError && !controller.indexHasDateFields">
               The indices which match this index pattern don&rsquo;t contain any time fields.
             </p>
           </div>
