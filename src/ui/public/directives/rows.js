@@ -37,6 +37,7 @@ module.directive('kbnRows', function ($compile, $rootScope, getAppState, Private
         }
 
         let $cell;
+        let $cellContent;
 
         if (contents instanceof AggConfigResult) {
           const isCellContentFilterable =
@@ -46,15 +47,16 @@ module.directive('kbnRows', function ($compile, $rootScope, getAppState, Private
 
           if (isCellContentFilterable) {
             $cell = createFilterableCell(contents);
+            $cellContent = $cell.find('[data-cell-content]');
           } else {
-            $cell = createCell();
+            $cell = $cellContent = createCell();
           }
 
           // An AggConfigResult can "enrich" cell contents by applying a field formatter,
           // which we want to do if possible.
           contents = contents.toString('html');
         } else {
-          $cell = createCell();
+          $cell = $cellContent = createCell();
 
           // TODO: It would be better to actually check the type of the field, but we don't have
           // access to it here. This may become a problem with the switch to BigNumber
@@ -65,27 +67,27 @@ module.directive('kbnRows', function ($compile, $rootScope, getAppState, Private
 
         if (_.isObject(contents)) {
           if (contents.attr) {
-            $cell.attr(contents.attr);
+            $cellContent.attr(contents.attr);
           }
 
           if (contents.class) {
-            $cell.addClass(contents.class);
+            $cellContent.addClass(contents.class);
           }
 
           if (contents.scope) {
-            $cell = $compile($cell.prepend(contents.markup))(contents.scope);
+            $cellContent = $compile($cellContent.prepend(contents.markup))(contents.scope);
           } else {
-            $cell.prepend(contents.markup);
+            $cellContent.prepend(contents.markup);
           }
 
           if (contents.attr) {
-            $cell.attr(contents.attr);
+            $cellContent.attr(contents.attr);
           }
         } else {
           if (contents === '') {
-            $cell.prepend('&nbsp;');
+            $cellContent.prepend('&nbsp;');
           } else {
-            $cell.prepend(contents);
+            $cellContent.prepend(contents);
           }
         }
 
