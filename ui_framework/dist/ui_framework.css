@@ -2659,7 +2659,9 @@ body {
   /* 1 */
   line-height: inherit;
   /* 1 */
-  color: #3CAED2; }
+  color: #191E23; }
+  .kuiToggleButton:focus {
+    color: #191E23; }
   .kuiToggleButton:active {
     color: #3CAED2 !important;
     /* 2 */ }
@@ -2675,6 +2677,19 @@ body {
 .kuiToggleButton__icon {
   width: 0.8em;
   /* 1 */ }
+
+.kuiTogglePanelHeader {
+  padding-bottom: 4px;
+  margin-bottom: 15px;
+  border-bottom: 1px solid #E4E4E4;
+  /**
+   * 1. Allow the user to click anywhere on the header, not just on the button text.
+   */ }
+  .kuiTogglePanelHeader .kuiToggleButton {
+    width: 100%;
+    /* 1 */
+    text-align: left;
+    /* 1 */ }
 
 .kuiToolBar {
   display: -webkit-box;
