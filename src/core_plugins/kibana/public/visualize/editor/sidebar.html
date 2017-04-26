@@ -58,7 +58,7 @@
               data-test-subj="visualizeEditorRenderButton"
               class="kuiButton kuiButton--primary navbar-btn-link"
               type="submit"
-              ng-disabled="!vis.dirty"
+              ng-disabled="!vis.dirty || visualizeEditor.errorCount() > 0"
             >
               <i class="fa fa-play"></i>
             </button>
