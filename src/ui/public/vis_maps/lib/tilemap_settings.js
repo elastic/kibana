@@ -159,11 +159,9 @@ uiModules.get('kibana')
        * @return {{maxZoom: (*|number), minZoom: (*|number)}}
        */
       getMinMaxZoom(isWMSEnabled) {
-
-        //for backward compatibilty, we preserve the 1-18 setting. https://git.io/vMn5o
         if (isWMSEnabled) {
           return {
-            minZoom: 1,
+            minZoom: 0,
             maxZoom: 18
           };
         }
