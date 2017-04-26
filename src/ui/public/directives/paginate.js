@@ -39,7 +39,7 @@ uiModules.get('kibana')
       }
     },
     controllerAs: 'paginate',
-    controller: function ($scope, $document) {
+    controller: function ($scope, $rootScope, $document) {
       const self = this;
       const ALL = 0;
 
@@ -92,6 +92,7 @@ uiModules.get('kibana')
         if (number) {
           if (number.hasOwnProperty('number')) number = number.number;
           $scope.page = $scope.pages[number - 1] || $scope.pages[0];
+          self.updatePaginationCount(number);
         }
       };
 
@@ -135,6 +136,17 @@ uiModules.get('kibana')
         } else {
           $scope.page = $scope.pages[0];
         }
+
+        //set initial value of paginationCount
+        self.updatePaginationCount(count ? 1 : 0);
+      };
+
+      self.updatePaginationCount = function (number) {
+        $rootScope.paginationCount = 0;
+        for(let i = 0; i < number; i++) {
+          $rootScope.paginationCount = $rootScope.paginationCount + $scope.pages[i].length;
+        }
+        return;
       };
 
       self.changePage = function (page) {
