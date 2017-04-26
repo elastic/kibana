@@ -12,31 +12,55 @@ module.directive('kbnRows', function ($compile, $rootScope, getAppState, Private
     restrict: 'A',
     link: function ($scope, $el, attr) {
       function addCell($tr, contents) {
-        let $cell = $(document.createElement('td'));
+        function createCell() {
+          return $(document.createElement('td'));
+        }
 
-        // TODO: It would be better to actually check the type of the field, but we don't have
-        // access to it here. This may become a problem with the switch to BigNumber
-        if (_.isNumeric(contents)) $cell.addClass('numeric-value');
+        function createFilterableCell(aggConfigResult) {
+          const $template = $(tableCellFilterHtml);
+          $template.addClass('cell-hover');
 
-        const createAggConfigResultCell = function (aggConfigResult) {
-          const $cell = $(tableCellFilterHtml);
+          const scope = $scope.$new();
 
           const $state = getAppState();
-          const clickHandler = filterBarClickHandler($state);
-          $cell.scope = $scope.$new();
-          $cell.addClass('cell-hover');
-          $cell.scope.clickHandler = function (event, negate) {
-            if ($(event.target).is('a')) return; // Don't add filter if a link was clicked
-            clickHandler({ point: { aggConfigResult: aggConfigResult }, negate });
+          const addFilter = filterBarClickHandler($state);
+          scope.onFilterClick = (event, negate) => {
+            // Don't add filter if a link was clicked.
+            if ($(event.target).is('a')) {
+              return;
+            }
+
+            addFilter({ point: { aggConfigResult: aggConfigResult }, negate });
           };
-          return $compile($cell)($cell.scope);
-        };
+
+          return $compile($template)(scope);
+        }
+
+        let $cell;
 
         if (contents instanceof AggConfigResult) {
-          if (contents.type === 'bucket' && contents.aggConfig.getField() && contents.aggConfig.getField().filterable) {
-            $cell = createAggConfigResultCell(contents);
+          const isCellContentFilterable =
+            contents.type === 'bucket'
+            && contents.aggConfig.getField()
+            && contents.aggConfig.getField().filterable;
+
+          if (isCellContentFilterable) {
+            $cell = createFilterableCell(contents);
+          } else {
+            $cell = createCell();
           }
+
+          // An AggConfigResult can "enrich" cell contents by applying a field formatter,
+          // which we want to do if possible.
           contents = contents.toString('html');
+        } else {
+          $cell = createCell();
+
+          // TODO: It would be better to actually check the type of the field, but we don't have
+          // access to it here. This may become a problem with the switch to BigNumber
+          if (_.isNumeric(contents)) {
+            $cell.addClass('numeric-value');
+          }
         }
 
         if (_.isObject(contents)) {
