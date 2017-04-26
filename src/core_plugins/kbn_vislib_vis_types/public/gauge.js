@@ -1,19 +1,21 @@
-//import { VisVisTypeProvider } from 'ui/vis/vis_type';
+import { VisVisTypeProvider } from 'ui/vis/vis_type';
 import { VislibVisTypeVislibVisTypeProvider } from 'ui/vislib_vis_type/vislib_vis_type';
 import { VisSchemasProvider } from 'ui/vis/schemas';
 import gaugeTemplate from 'plugins/kbn_vislib_vis_types/editors/gauge.html';
 import { vislibColorMaps } from 'ui/vislib/components/color/colormaps';
 
 export default function GaugeVisType(Private) {
+  const VisType = Private(VisVisTypeProvider);
   const VislibVisType = Private(VislibVisTypeVislibVisTypeProvider);
   const Schemas = Private(VisSchemasProvider);
 
   return new VislibVisType({
     name: 'gauge',
-    title: 'Gauge Chart',
+    title: 'Gauge',
     icon: 'fa-tachometer',
     description: 'A gauge chart shows much more than one value. It gives the minimum, the maximum, ' +
     'the current value and how far from the maximum you are ',
+    category: VisType.CATEGORY.DATA,
     params: {
       defaults: {
         addTooltip: true,
@@ -21,7 +23,7 @@ export default function GaugeVisType(Private) {
 
         gauge: {
           verticalSplit: false,
-          autoExtend: false,
+          extendRange: true,
           percentageMode: false,
           gaugeType: 'Meter',
           gaugeStyle: 'Full',
@@ -54,6 +56,7 @@ export default function GaugeVisType(Private) {
             bgFill: '#eee',
             bgColor: true,
             subText: '',
+            fontSize: 60,
           }
         }
       },

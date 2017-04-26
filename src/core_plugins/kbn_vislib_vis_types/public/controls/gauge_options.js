@@ -65,6 +65,14 @@ module.directive('gaugeOptions', function () {
         }
       });
 
+      $scope.$watch('vis.params.gauge.style.labelColor', newValue => {
+        if (newValue) $scope.vis.params.gauge.style.bgColor = !newValue;
+      });
+
+      $scope.$watch('vis.params.gauge.style.bgColor', newValue => {
+        if (newValue) $scope.vis.params.gauge.style.labelColor = !newValue;
+      });
+
       $scope.resetColors = function () {
         $scope.uiState.set('vis.colors', null);
         $scope.customColors = false;

@@ -105,7 +105,9 @@ export function SimpleGaugeProvider() {
       const tooltip = this.gaugeChart.tooltip;
       const isTooltip = this.gaugeChart.handler.visConfig.get('addTooltip');
       const yFieldFormatter = this.gaugeChart.handler.data.get('yAxisFormatter');
+      const fontSize = this.gaugeChart.handler.visConfig.get('fontSize');
 
+      const labelColor = this.gaugeConfig.style.labelColor;
       const bgColor = this.gaugeConfig.style.bgColor;
       const bgFill = this.gaugeConfig.style.bgFill;
       const min = this.gaugeConfig.colorsRange[0].from;
@@ -139,70 +141,53 @@ export function SimpleGaugeProvider() {
       const smallContainer = svg.node().getBBox().height < 70;
       let hiddenLabels = smallContainer;
 
+      const isTextTooLong = function () {
+        const textLength = this.getBBox().width;
+        const textTooLong = textLength > width;
+        if (textTooLong) {
+          hiddenLabels = true;
+        }
+        return smallContainer || textTooLong ? 'none' : 'initial';
+      };
+
 
       if (this.gaugeConfig.labels.show) {
         svg
           .append('text')
           .attr('class', 'chart-label')
           .text(data.label)
-          .attr('y', -30)
+          .attr('y', Math.min(-25, -fontSize))
           .attr('style', 'dominant-baseline: central; text-anchor: middle;')
-          .style('display', function () {
-            const textLength = this.getBBox().width;
-            const textTooLong = textLength > width;
-            if (textTooLong) {
-              hiddenLabels = true;
-            }
-            return smallContainer || textTooLong ? 'none' : 'initial';
-          })
-          .style('fill', function () {
-            return !bgColor ? self.getColorBucket(data.values[0].y) : bgFill;
-          });
+          .style('display', isTextTooLong)
+          .style('fill', bgFill);
 
         svg
           .append('text')
           .attr('class', 'chart-label')
           .text(this.gaugeConfig.style.subText)
-          .attr('y', 20)
+          .attr('y', Math.max(15, fontSize))
           .attr('style', 'dominant-baseline: central; text-anchor: middle;')
-          .style('display', function () {
-            const textLength = this.getBBox().width;
-            const textTooLong = textLength > width;
-            if (textTooLong) {
-              hiddenLabels = true;
-            }
-            return smallContainer || textTooLong ? 'none' : 'initial';
-          })
-          .style('fill', function () {
-            return !bgColor ? self.getColorBucket(data.values[0].y) : bgFill;
-          });
-
-        gauges
-          .append('text')
-          .attr('class', 'chart-label')
-          .attr('y', -5)
-          .text(d => {
-            if (this.gaugeConfig.percentageMode) {
-              const percentage = Math.round(100 * (d.y - min) / (max - min));
-              return `${percentage}%`;
-            }
-            return yFieldFormatter(d.y);
-          })
-          .attr('style', 'dominant-baseline: central;')
-          .style('text-anchor', 'middle')
-          .style('font-size', '2em')
-          .style('display', function () {
-            const textLength = this.getBBox().width;
-            const textTooLong = textLength > width;
-            if (textTooLong) {
-              hiddenLabels = true;
-            }
-            return textTooLong ? 'none' : 'initial';
-          })
-          .style('fill', function () {
-            return !bgColor ? self.getColorBucket(data.values[0].y) : bgFill;
-          });
+          .style('display', isTextTooLong)
+          .style('fill', bgFill);
       }
+
+      gauges
+        .append('text')
+        .attr('class', 'chart-label')
+        .attr('y', -5)
+        .text(d => {
+          if (this.gaugeConfig.percentageMode) {
+            const percentage = Math.round(100 * (d.y - min) / (max - min));
+            return `${percentage}%`;
+          }
+          return yFieldFormatter(d.y);
+        })
+        .attr('style', 'dominant-baseline: central; font-weight: bold; white-space: nowrap;text-overflow: ellipsis;overflow: hidden;')
+        .style('text-anchor', 'middle')
+        .style('font-size', fontSize + 'pt')
+        .style('fill', function () {
+          return !bgColor && labelColor ? self.getColorBucket(data.values[0].y) : bgFill;
+        });
 
       if (isTooltip) {
         series.each(function () {
