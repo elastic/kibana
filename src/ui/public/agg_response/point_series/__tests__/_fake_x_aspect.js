@@ -1,9 +1,10 @@
 import expect from 'expect.js';
 import ngMock from 'ng_mock';
-import VisProvider from 'ui/vis';
-import VisAggConfigProvider from 'ui/vis/agg_config';
-import AggTypesAggTypeProvider from 'ui/agg_types/agg_type';
-import AggResponsePointSeriesFakeXAspectProvider from 'ui/agg_response/point_series/_fake_x_aspect';
+import { VisProvider } from 'ui/vis';
+import { VisAggConfigProvider } from 'ui/vis/agg_config';
+import { AggTypesAggTypeProvider } from 'ui/agg_types/agg_type';
+import { PointSeriesFakeXAxisProvider } from 'ui/agg_response/point_series/_fake_x_aspect';
+
 describe('makeFakeXAspect', function () {
 
   let makeFakeXAspect;
@@ -18,7 +19,7 @@ describe('makeFakeXAspect', function () {
     AggConfig = Private(VisAggConfigProvider);
     AggType = Private(AggTypesAggTypeProvider);
     indexPattern = Private(VisProvider);
-    makeFakeXAspect = Private(AggResponsePointSeriesFakeXAspectProvider);
+    makeFakeXAspect = Private(PointSeriesFakeXAxisProvider);
   }));
 
   it('creates an object that looks like an aspect', function () {

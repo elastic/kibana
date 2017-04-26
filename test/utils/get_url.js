@@ -23,7 +23,7 @@ import url from 'url';
 module.exports = getUrl;
 
 function getUrl(config, app) {
-  return url.format(_.assign(config, app));
+  return url.format(_.assign({}, config, app));
 }
 
 getUrl.noAuth = function getUrlNoAuth(config, app) {

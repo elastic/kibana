@@ -12,6 +12,7 @@ import exportApi from './server/routes/api/export';
 import scripts from './server/routes/api/scripts';
 import * as systemApi from './server/lib/system_api';
 import handleEsError from './server/lib/handle_es_error';
+import mappings from './mappings.json';
 
 const mkdirp = Promise.promisify(mkdirpNode);
 
@@ -19,7 +20,6 @@ module.exports = function (kibana) {
   const kbnBaseUrl = '/app/kibana';
   return new kibana.Plugin({
     id: 'kibana',
-
     config: function (Joi) {
       return Joi.object({
         enabled: Joi.boolean().default(true),
@@ -45,7 +45,6 @@ module.exports = function (kibana) {
           'devTools',
           'docViews'
         ],
-
         injectVars: function (server) {
           const serverConfig = server.config();
 
@@ -64,7 +63,7 @@ module.exports = function (kibana) {
                 config: tilemapConfig,
               },
               manifestServiceUrl: serverConfig.get('tilemap.manifestServiceUrl')
-            },
+            }
           };
         },
       },
@@ -88,7 +87,13 @@ module.exports = function (kibana) {
           id: 'kibana:dashboard',
           title: 'Dashboard',
           order: -1001,
-          url: `${kbnBaseUrl}#/dashboard`,
+          url: `${kbnBaseUrl}#/dashboards`,
+          // The subUrlBase is the common substring of all urls for this app. If not given, it defaults to the url
+          // above. This app has to use a different subUrlBase, in addition to the url above, because "#/dashboard"
+          // routes to a page that creates a new dashboard. When we introduced a landing page, we needed to change
+          // the url above in order to preserve the original url for BWC. The subUrlBase helps the Chrome api nav
+          // to determine what url to use for the app link.
+          subUrlBase: `${kbnBaseUrl}#/dashboard`,
           description: 'compose visualizations for much win',
           icon: 'plugins/kibana/assets/dashboard.svg',
         }, {
@@ -118,7 +123,8 @@ module.exports = function (kibana) {
 
       translations: [
         resolve(__dirname, './translations/en.json')
-      ]
+      ],
+      mappings
     },
 
     preInit: async function (server) {

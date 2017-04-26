@@ -1,7 +1,8 @@
-import SavedObjectRegistryProvider from 'ui/saved_objects/saved_object_registry';
+import { SavedObjectRegistryProvider } from 'ui/saved_objects/saved_object_registry';
 import 'ui/pager_control';
 import 'ui/pager';
-import _ from 'lodash';
+import { DashboardConstants, createDashboardEditUrl } from '../dashboard_constants';
+import { SortableProperties } from 'ui_framework/services';
 
 export function DashboardListingController($injector, $scope) {
   const $filter = $injector.get('$filter');
@@ -20,21 +21,17 @@ export function DashboardListingController($injector, $scope) {
   const notify = new Notifier({ location: 'Dashboard' });
 
   let selectedItems = [];
-
-  /**
-   * Sorts hits either ascending or descending
-   * @param  {Array} hits Array of saved finder object hits
-   * @return {Array} Array sorted either ascending or descending
-   */
-  const sortItems = () => {
-    this.items =
-      this.isAscending
-      ? _.sortBy(this.items, 'title')
-      : _.sortBy(this.items, 'title').reverse();
-  };
+  const sortableProperties = new SortableProperties([
+    {
+      name: 'title',
+      getValue: item => item.title,
+      isAscending: true,
+    }
+  ],
+  'title');
 
   const calculateItemsOnPage = () => {
-    sortItems();
+    this.items = sortableProperties.sortItems(this.items);
     this.pager.setTotalItems(this.items.length);
     this.pageOfItems = limitTo(this.items, this.pager.pageSize, this.pager.startIndex);
   };
@@ -69,16 +66,11 @@ export function DashboardListingController($injector, $scope) {
     deselectAll();
     fetchItems();
   });
+  this.isAscending = (name) => sortableProperties.isAscendingByName(name);
+  this.getSortedProperty = () => sortableProperties.getSortedProperty();
 
-  /**
-   * Boolean that keeps track of whether hits are sorted ascending (true)
-   * or descending (false) by title
-   * @type {Boolean}
-   */
-  this.isAscending = true;
-
-  this.toggleSort = function toggleSort() {
-    this.isAscending = !this.isAscending;
+  this.sortOn = function sortOn(propertyName) {
+    sortableProperties.sortOn(propertyName);
     deselectAll();
     calculateItemsOnPage();
   };
@@ -145,6 +137,10 @@ export function DashboardListingController($injector, $scope) {
   };
 
   this.getUrlForItem = function getUrlForItem(item) {
-    return `#/dashboard/${item.id}`;
+    return `#${createDashboardEditUrl(item.id)}`;
+  };
+
+  this.getCreateDashboardHref = function getCreateDashboardHref() {
+    return `#${DashboardConstants.CREATE_NEW_DASHBOARD_URL}`;
   };
 }

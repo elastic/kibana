@@ -1,7 +1,7 @@
 import d3 from 'd3';
 import ngMock from 'ng_mock';
 import expect from 'expect.js';
-import VislibLibVisConfigProvider from 'ui/vislib/lib/vis_config';
+import { VislibVisConfigProvider } from 'ui/vislib/lib/vis_config';
 import 'ui/persisted_state';
 
 describe('Vislib VisConfig Class Test Suite', function () {
@@ -68,7 +68,7 @@ describe('Vislib VisConfig Class Test Suite', function () {
 
   beforeEach(ngMock.module('kibana'));
   beforeEach(ngMock.inject(function (Private, $injector) {
-    const VisConfig = Private(VislibLibVisConfigProvider);
+    const VisConfig = Private(VislibVisConfigProvider);
     const PersistedState = $injector.get('PersistedState');
     el = d3.select('body')
       .attr('class', 'vis-wrapper')

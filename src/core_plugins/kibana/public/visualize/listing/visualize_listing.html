@@ -17,18 +17,11 @@
   <div class="kuiViewContentItem kuiControlledTable kuiVerticalRhythm">
     <!-- ToolBar -->
     <div class="kuiToolBar">
-      <div class="kuiToolBarSearch">
-        <div class="kuiToolBarSearchBox">
-          <div class="kuiToolBarSearchBox__icon kuiIcon fa-search"></div>
-          <input
-            class="kuiToolBarSearchBox__input"
-            type="text"
-            placeholder="Search..."
-            aria-label="Filter"
-            ng-model="listingController.filter"
-          >
-        </div>
-      </div>
+      <tool-bar-search-box
+        class="kuiToolBarSection"
+        filter="listingController.filter"
+        on-filter="listingController.onFilter"
+      ></tool-bar-search-box>
 
       <div class="kuiToolBarSection">
         <!-- Bulk delete button -->
@@ -97,8 +90,10 @@
             class="kuiButton kuiButton--primary kuiButton--iconText"
             href="#/visualize/new"
           >
-            <span class="kuiButton__icon kuiIcon fa-plus"></span>
-            Create a visualization
+            <span class="kuiButton__inner">
+              <span class="kuiButton__icon kuiIcon fa-plus"></span>
+              <span>Create a visualization</span>
+            </span>
           </a>
         </div>
       </div>
@@ -125,7 +120,7 @@
             <span
               class="kuiIcon"
               ng-show="listingController.getSortProperty().name === 'title'"
-              ng-class="listingController.isAscending() ? 'fa-caret-up' : 'fa-caret-down'"
+              ng-class="listingController.isAscending('title') ? 'fa-caret-up' : 'fa-caret-down'"
             ></span>
           </th>
 
@@ -137,7 +132,7 @@
             <span
               class="kuiIcon"
               ng-show="listingController.getSortProperty().name === 'type'"
-              ng-class="listingController.isAscending() ? 'fa-caret-up' : 'fa-caret-down'"
+              ng-class="listingController.isAscending('type') ? 'fa-caret-up' : 'fa-caret-down'"
             ></span>
           </th>
         </tr>
@@ -170,7 +165,19 @@
           <td class="kuiTableRowCell">
             <div class="kuiTableRowCell__liner">
               <span class="kuiStatusText">
-                <span class="kuiStatusText__icon kuiIcon {{ item.icon }}"></span>
+                <img
+                  class="kuiStatusText__icon kuiIcon"
+                  ng-if="item.type.image"
+                  aria-hidden="true"
+                  ng-src="{{ item.type.image }}"
+                />
+
+                <!-- If there's no image, default to an icon, for BWC. -->
+                <span
+                  class="kuiStatusText__icon kuiIcon {{ item.icon }}"
+                  ng-if="!item.type.image"
+                ></span>
+
                 {{ item.type.title }}
               </span>
             </div>

@@ -1,11 +1,12 @@
-import modules from 'ui/modules';
+import { uiModules } from 'ui/modules';
 import '../services/executor';
-import 'plugins/timelion/directives/refresh_hack';
 import createNewPanel from '../lib/create_new_panel';
 import '../directives/vis_editor';
 import _ from 'lodash';
 import angular from 'angular';
-const app = modules.get('kibana/metrics_vis', ['kibana']);
+import { FilterBarQueryFilterProvider } from 'ui/filter_bar/query_filter';
+
+const app = uiModules.get('kibana/metrics_vis', ['kibana']);
 app.controller('MetricsEditorController', (
   $location,
   $element,
@@ -16,7 +17,7 @@ app.controller('MetricsEditorController', (
 ) => {
 
   $scope.embedded = $location.search().embed === 'true';
-  const queryFilter = Private(require('ui/filter_bar/query_filter'));
+  const queryFilter = Private(FilterBarQueryFilterProvider);
   const createFetch = Private(require('../lib/fetch'));
   const fetch = () => {
     const fn = createFetch($scope);

@@ -1,19 +1,22 @@
 import 'plugins/metric_vis/metric_vis.less';
 import 'plugins/metric_vis/metric_vis_controller';
-import TemplateVisTypeTemplateVisTypeProvider from 'ui/template_vis_type/template_vis_type';
-import VisSchemasProvider from 'ui/vis/schemas';
+import { VisVisTypeProvider } from 'ui/vis/vis_type';
+import { TemplateVisTypeProvider } from 'ui/template_vis_type/template_vis_type';
+import { VisSchemasProvider } from 'ui/vis/schemas';
 import metricVisTemplate from 'plugins/metric_vis/metric_vis.html';
 import metricVisParamsTemplate from 'plugins/metric_vis/metric_vis_params.html';
-import visTypesRegistry from 'ui/registry/vis_types';
+import { VisTypesRegistryProvider } from 'ui/registry/vis_types';
+import image from './images/icon-number.svg';
 // we need to load the css ourselves
 
 // we also need to load the controller and used by the template
 
 // register the provider with the visTypes registry
-visTypesRegistry.register(MetricVisProvider);
+VisTypesRegistryProvider.register(MetricVisProvider);
 
 function MetricVisProvider(Private) {
-  const TemplateVisType = Private(TemplateVisTypeTemplateVisTypeProvider);
+  const VisType = Private(VisVisTypeProvider);
+  const TemplateVisType = Private(TemplateVisTypeProvider);
   const Schemas = Private(VisSchemasProvider);
 
   // return the visType object, which kibana will use to display and configure new
@@ -21,9 +24,9 @@ function MetricVisProvider(Private) {
   return new TemplateVisType({
     name: 'metric',
     title: 'Metric',
-    description: 'One big number for all of your one big number needs. Perfect for showing ' +
-      'a count of hits, or the exact average of a numeric field.',
-    icon: 'fa-calculator',
+    image,
+    description: 'Display a calculation as a single number',
+    category: VisType.CATEGORY.DATA,
     template: metricVisTemplate,
     params: {
       defaults: {

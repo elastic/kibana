@@ -23,7 +23,7 @@ function omitIndicesWithoutTimeField(indices, timeFieldName) {
   return _.pick(indices, index => index.fields[timeFieldName]);
 }
 
-export default function CalculateIndicesFactory(Promise, es) {
+export function IndexPatternsCalculateIndicesProvider(es) {
 
   // Uses the field stats api to determine the names of indices that need to
   // be queried against that match the given pattern and fall within the

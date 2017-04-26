@@ -3,14 +3,14 @@ import angular from 'angular';
 
 import 'ui/promises';
 
-import RequestQueueProvider from '../_request_queue';
-import ErrorHandlersProvider from '../_error_handlers';
-import FetchProvider from '../fetch';
-import DecorateQueryProvider from './_decorate_query';
-import FieldWildcardProvider from '../../field_wildcard';
+import { RequestQueueProvider } from '../_request_queue';
+import { ErrorHandlersProvider } from '../_error_handlers';
+import { FetchProvider } from '../fetch';
+import { DecorateQueryProvider } from './_decorate_query';
+import { FieldWildcardProvider } from '../../field_wildcard';
 import { getHighlightRequestProvider } from '../../highlight';
 
-export default function SourceAbstractFactory(Private, Promise, PromiseEmitter) {
+export function AbstractDataSourceProvider(Private, Promise, PromiseEmitter) {
   const requestQueue = Private(RequestQueueProvider);
   const errorHandlers = Private(ErrorHandlersProvider);
   const courierFetch = Private(FetchProvider);

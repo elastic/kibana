@@ -1,5 +1,6 @@
 import { download } from './download';
 import Promise from 'bluebird';
+import path from 'path';
 import { cleanPrevious, cleanArtifacts } from './cleanup';
 import { extract, getPackData } from './pack';
 import { renamePlugin } from './rename';
@@ -27,7 +28,7 @@ export default async function install(settings, logger) {
 
     assertVersion(settings);
 
-    await renamePlugin(settings.workingPath, settings.plugins[0].path);
+    await renamePlugin(settings.workingPath, path.join(settings.pluginDir, settings.plugins[0].name));
 
     await rebuildCache(settings, logger);
 

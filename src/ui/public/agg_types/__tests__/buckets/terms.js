@@ -1,6 +1,6 @@
 import expect from 'expect.js';
 import ngMock from 'ng_mock';
-import AggTypesIndexProvider from 'ui/agg_types/index';
+import { AggTypesIndexProvider } from 'ui/agg_types/index';
 
 describe('Terms Agg', function () {
   describe('order agg editor UI', function () {
@@ -122,6 +122,35 @@ describe('Terms Agg', function () {
           id: 'agg1',
           type: {
             name: 'top_hits'
+          }
+        }
+      ];
+      $rootScope.$digest();
+      expect($rootScope.agg.params.orderBy).to.be('_term');
+    });
+
+    it('selects first metric if it is avg', function () {
+      init({
+        responseValueAggs: [
+          {
+            id: 'agg1',
+            type: {
+              name: 'avg',
+              field: 'bytes'
+            }
+          }
+        ]
+      });
+      expect($rootScope.agg.params.orderBy).to.be('agg1');
+    });
+
+    it('selects _term if the first metric is avg_bucket', function () {
+      $rootScope.responseValueAggs = [
+        {
+          id: 'agg1',
+          type: {
+            name: 'avg_bucket',
+            metric: 'custom'
           }
         }
       ];

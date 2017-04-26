@@ -2,18 +2,18 @@
 import _ from 'lodash';
 import expect from 'expect.js';
 import ngMock from 'ng_mock';
-import VisProvider from 'ui/vis';
+import { VisProvider } from 'ui/vis';
 import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
 import FixturesAggRespGeohashGridProvider from 'fixtures/agg_resp/geohash_grid';
-import AggResponseTabifyTabifyProvider from 'ui/agg_response/tabify/tabify';
-import AggResponseGeoJsonGeoJsonProvider from 'ui/agg_response/geo_json/geo_json';
+import { AggResponseTabifyProvider } from 'ui/agg_response/tabify/tabify';
+import { AggResponseGeoJsonProvider } from 'ui/agg_response/geo_json/geo_json';
 
 describe('GeoJson Agg Response Converter', function () {
   let vis;
   let tabify;
   let convert;
   let esResponse;
-  let aggs;
+  let expectedAggs;
 
   beforeEach(ngMock.module('kibana'));
   beforeEach(ngMock.inject(function (Private) {
@@ -21,15 +21,14 @@ describe('GeoJson Agg Response Converter', function () {
     const indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
 
     esResponse = Private(FixturesAggRespGeohashGridProvider);
-    tabify = Private(AggResponseTabifyTabifyProvider);
-    convert = Private(AggResponseGeoJsonGeoJsonProvider);
+    tabify = Private(AggResponseTabifyProvider);
+    convert = Private(AggResponseGeoJsonProvider);
 
     vis = new Vis(indexPattern, {
       type: 'tile_map',
       aggs: [
         { schema: 'metric', type: 'avg', params: { field: 'bytes' } },
-        { schema: 'split', type: 'terms', params: { field: '@tags' } },
-        { schema: 'segment', type: 'geohash_grid', params: { field: 'geo.coordinates', precision: 3 } }
+        { schema: 'segment', type: 'geohash_grid', params: { field: 'geo.coordinates', precision: 3, useGeocentroid: false } }
       ],
       params: {
         isDesaturated: true,
@@ -37,17 +36,16 @@ describe('GeoJson Agg Response Converter', function () {
       }
     });
 
-    aggs = {
+    expectedAggs = {
       metric: vis.aggs[0],
-      split: vis.aggs[1],
-      geo: vis.aggs[2]
+      geo: vis.aggs[1]
     };
   }));
 
   [ { asAggConfigResults: true }, { asAggConfigResults: false } ].forEach(function (tableOpts) {
 
     function makeTable() {
-      return _.sample(_.sample(tabify(vis, esResponse, tableOpts).tables).tables);
+      return _.sample(tabify(vis, esResponse, tableOpts).tables);
     }
 
     function makeSingleChart(table) {
@@ -72,8 +70,8 @@ describe('GeoJson Agg Response Converter', function () {
 
         expect(chart.title).to.be(table.title());
         expect(chart.tooltipFormatter).to.be.a('function');
-        expect(chart.valueFormatter).to.be(aggs.metric.fieldFormatter());
-        expect(chart.geohashGridAgg).to.be(aggs.geo);
+        expect(chart.valueFormatter).to.be(expectedAggs.metric.fieldFormatter());
+        expect(chart.geohashGridAgg).to.be(expectedAggs.geo);
         expect(chart.geoJson).to.be.an('object');
       });
 
@@ -116,8 +114,8 @@ describe('GeoJson Agg Response Converter', function () {
           before(function () {
             table = makeTable();
             chart = makeSingleChart(table);
-            geoColI = _.findIndex(table.columns, { aggConfig: aggs.geo });
-            metricColI = _.findIndex(table.columns, { aggConfig: aggs.metric });
+            geoColI = _.findIndex(table.columns, { aggConfig: expectedAggs.geo });
+            metricColI = _.findIndex(table.columns, { aggConfig: expectedAggs.metric });
           });
 
           it('should be geoJson format', function () {

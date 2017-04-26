@@ -81,64 +81,20 @@ describe('ui/modals/confirm_modal', function () {
     });
   });
 
-  describe('x icon', function () {
-    it('is visible when showClose is true', function () {
-      const confirmModalOptions = {
-        confirmButtonText: 'bye',
-        onConfirm: _.noop,
-        showClose: true,
-        title: 'hi'
-      };
-      confirmModal('hi', confirmModalOptions);
-
-      $rootScope.$digest();
-      const xIcon = findByDataTestSubj('confirmModalCloseButton');
-      expect(xIcon.length).to.be(1);
-    });
-
-    it('is not visible when showClose is false', function () {
-      const confirmModalOptions = {
-        confirmButtonText: 'bye',
-        onConfirm: _.noop,
-        title: 'hi',
-        showClose: false
-      };
-      confirmModal('hi', confirmModalOptions);
-
-      $rootScope.$digest();
-      const xIcon = findByDataTestSubj('confirmModalCloseButton');
-      expect(xIcon.length).to.be(0);
-    });
-  });
-
   describe('callbacks are called:', function () {
     const confirmCallback = sinon.spy();
-    const closeCallback = sinon.spy();
     const cancelCallback = sinon.spy();
 
     const confirmModalOptions = {
       confirmButtonText: 'bye',
       onConfirm: confirmCallback,
       onCancel: cancelCallback,
-      onClose: closeCallback,
-      title: 'hi',
-      showClose: true
+      title: 'hi'
     };
 
     beforeEach(() => {
       confirmCallback.reset();
-      closeCallback.reset();
       cancelCallback.reset();
-    });
-
-    it('onClose', function () {
-      confirmModal('hi', confirmModalOptions);
-      $rootScope.$digest();
-      findByDataTestSubj('confirmModalCloseButton').click();
-
-      expect(closeCallback.called).to.be(true);
-      expect(confirmCallback.called).to.be(false);
-      expect(cancelCallback.called).to.be(false);
     });
 
     it('onCancel', function () {
@@ -146,7 +102,6 @@ describe('ui/modals/confirm_modal', function () {
       $rootScope.$digest();
       findByDataTestSubj('confirmModalCancelButton').click();
 
-      expect(closeCallback.called).to.be(false);
       expect(confirmCallback.called).to.be(false);
       expect(cancelCallback.called).to.be(true);
     });
@@ -156,27 +111,8 @@ describe('ui/modals/confirm_modal', function () {
       $rootScope.$digest();
       findByDataTestSubj('confirmModalConfirmButton').click();
 
-      expect(closeCallback.called).to.be(false);
       expect(confirmCallback.called).to.be(true);
       expect(cancelCallback.called).to.be(false);
-    });
-
-
-    it('onClose defaults to onCancel if not specified', function () {
-      const confirmModalOptions = {
-        confirmButtonText: 'bye',
-        onConfirm: confirmCallback,
-        onCancel: cancelCallback,
-        title: 'hi',
-        showClose: true
-      };
-
-      confirmModal('hi', confirmModalOptions);
-      $rootScope.$digest();
-      findByDataTestSubj('confirmModalCloseButton').click();
-
-      expect(confirmCallback.called).to.be(false);
-      expect(cancelCallback.called).to.be(true);
     });
 
     it('onKeyDown detects ESC and calls onCancel', function () {

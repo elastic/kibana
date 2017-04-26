@@ -1,5 +1,5 @@
 import expect from 'expect.js';
-import AggTypesBucketsGeoHashProvider from 'ui/agg_types/buckets/geo_hash';
+import { AggTypesBucketsGeoHashProvider } from 'ui/agg_types/buckets/geo_hash';
 
 describe('Geohash Agg', function () {
 
@@ -8,7 +8,7 @@ describe('Geohash Agg', function () {
 
     const paramWriter = new AggTypesBucketsGeoHashProvider(function PrivateMock() {
       return function BucketMock(geohashProvider) {
-        return geohashProvider.params[4];
+        return geohashProvider.params[5];
       };
     }, {
       get: function () {

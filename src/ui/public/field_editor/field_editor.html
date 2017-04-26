@@ -16,7 +16,7 @@
       class="form-control"
       data-test-subj="editorFieldName">
   </div>
-  <div ng-if="editor.creating && editor.indexPattern.fields.byName[editor.field.name]" class="hintbox">
+  <div ng-if="editor.creating && editor.existingFieldNames.includes(editor.field.name)" class="hintbox">
     <p>
       <i class="fa fa-danger text-danger"></i>
       <strong>Mapping Conflict:</strong>
@@ -86,30 +86,44 @@
 
   <div class="form-group">
     <label for="editor.field.count">Popularity</label>
-    <div class="input-group">
+    <div class="kuiFieldGroup">
+      <div class="kuiFieldGroupSection">
+        <input
+          ng-model="editor.field.count"
+          type="number"
+          class="form-control"
+          data-test-subj=editorFieldCount
+        >
+      </div>
 
-      <input
-        ng-model="editor.field.count"
-        type="number"
-        class="form-control"
-        data-test-subj=editorFieldCount>
+      <div class="kuiFieldGroupSection">
+        <div class="kuiButtonGroup kuiButtonGroup--united">
+          <button
+            data-test-subj="fieldIncreasePopularityButton"
+            type="button"
+            ng-click="editor.field.count = editor.field.count + 1"
+            aria-label="Plus"
+            class="kuiButton kuiButton--basic"
+          >
+            <span
+              aria-hidden="true"
+              class="kuiIcon fa-plus"
+            ></span>
+          </button>
 
-      <span class="input-group-btn">
-        <button
-          type="button"
-          ng-click="editor.field.count = editor.field.count + 1"
-          aria-label="Plus"
-          class="btn btn-default">
-          <i aria-hidden="true" class="fa fa-plus" data-test-subj=editorFieldCountPlus></i>
-        </button>
-        <button
-          type="button"
-          ng-click="editor.field.count = editor.field.count - 1"
-          aria-label="Minus"
-          class="btn btn-default">
-          <i aria-hidden="true" class="fa fa-minus" data-test-subj=editorFieldCountMinus></i>
-        </button>
-      </span>
+          <button
+            type="button"
+            ng-click="editor.field.count = editor.field.count - 1"
+            aria-label="Minus"
+            class="kuiButton kuiButton--basic"
+          >
+            <span
+              aria-hidden="true"
+              class="kuiIcon fa-minus"
+            ></span>
+          </button>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -209,25 +223,31 @@
   <div class="form-group">
     <button
       type="button"
-      ng-click="editor.cancel()"
-      aria-label="Cancel"
-      class="btn btn-primary">
-      Cancel
-    </button>
-    <button
-      type="button"
       ng-if="editor.field.scripted && !editor.creating"
       ng-click="editor.delete()"
       aria-label="Delete"
-      class="btn btn-danger">
+      class="kuiButton kuiButton--danger"
+    >
       Delete Field
     </button>
+
     <button
+      data-test-subj="fieldSaveButton"
       ng-disabled="form.$invalid"
       type="submit"
       aria-label="{{ editor.creating ? 'Create' : 'Update' }} Field"
-      class="btn btn-success">
+      class="kuiButton kuiButton--primary"
+    >
       {{ editor.creating ? 'Create' : 'Update' }} Field
+    </button>
+
+    <button
+      data-test-subj="fieldCancelButton"
+      type="button"
+      ng-click="editor.cancel()"
+      class="kuiButton kuiButton--hollow"
+    >
+      Cancel
     </button>
   </div>
 </form>

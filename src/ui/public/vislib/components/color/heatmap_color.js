@@ -1,5 +1,5 @@
 import _ from 'lodash';
-import colormaps from './colormaps';
+import { vislibColorMaps } from './colormaps';
 
 function enforceBounds(x) {
   if (x < 0) {
@@ -10,6 +10,7 @@ function enforceBounds(x) {
     return x;
   }
 }
+
 
 function interpolateLinearly(x, values) {
   // Split values into four lists
@@ -35,12 +36,12 @@ function interpolateLinearly(x, values) {
   return [enforceBounds(r), enforceBounds(g), enforceBounds(b)];
 }
 
-function getColor(value, colorSchemaName) {
+export function getHeatmapColors(value, colorSchemaName) {
   if (!_.isNumber(value) || value < 0 || value > 1) {
     throw new Error('heatmap_color expects a number from 0 to 1 as first parameter');
   }
 
-  const colorSchema = colormaps[colorSchemaName];
+  const colorSchema = vislibColorMaps[colorSchemaName];
   if (!colorSchema) {
     throw new Error('invalid colorSchemaName provided');
   }
@@ -58,12 +59,10 @@ function drawColormap(colorSchema, width = 100, height = 10) {
   canvas.height = height;
   const ctx = canvas.getContext('2d');
   for (let i = 0; i <= width; i++) {
-    ctx.fillStyle = getColor(i / width, colorSchema);
+    ctx.fillStyle = getHeatmapColors(i / width, colorSchema);
     ctx.fillRect(i, 0, 1, height);
   }
   return canvas;
 }
 
-getColor.prototype.drawColormap = drawColormap;
-
-export default getColor;
+getHeatmapColors.prototype.drawColormap = drawColormap;

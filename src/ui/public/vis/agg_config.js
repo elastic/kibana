@@ -6,8 +6,9 @@
  */
 
 import _ from 'lodash';
-import RegistryFieldFormatsProvider from 'ui/registry/field_formats';
-export default function AggConfigFactory(Private) {
+import { RegistryFieldFormatsProvider } from 'ui/registry/field_formats';
+
+export function VisAggConfigProvider(Private) {
   const fieldFormats = Private(RegistryFieldFormatsProvider);
 
   function AggConfig(vis, opts) {
@@ -258,6 +259,11 @@ export default function AggConfigFactory(Private) {
       (this.type) ? this.type.params.raw : [],
       (this.schema) ? this.schema.params.raw : []
     );
+  };
+
+  AggConfig.prototype.getRequestAggs = function () {
+    if (!this.type) return;
+    return this.type.getRequestAggs(this) || [this];
   };
 
   AggConfig.prototype.getResponseAggs = function () {

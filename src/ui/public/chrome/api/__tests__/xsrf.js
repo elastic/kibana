@@ -3,7 +3,7 @@ import expect from 'expect.js';
 import { stub } from 'auto-release-sinon';
 import ngMock from 'ng_mock';
 
-import xsrfChromeApi from '../xsrf';
+import { initChromeXsrfApi } from '../xsrf';
 import { version } from '../../../../../../package.json';
 
 const xsrfHeader = 'kbn-version';
@@ -12,24 +12,24 @@ describe('chrome xsrf apis', function () {
   describe('#getXsrfToken()', function () {
     it('exposes the token', function () {
       const chrome = {};
-      xsrfChromeApi(chrome, { version });
+      initChromeXsrfApi(chrome, { version });
       expect(chrome.getXsrfToken()).to.be(version);
     });
   });
 
-  context('jQuery support', function () {
+  describe('jQuery support', function () {
     it('adds a global jQuery prefilter', function () {
       stub($, 'ajaxPrefilter');
-      xsrfChromeApi({}, { version });
+      initChromeXsrfApi({}, { version });
       expect($.ajaxPrefilter.callCount).to.be(1);
     });
 
-    context('jQuery prefilter', function () {
+    describe('jQuery prefilter', function () {
       let prefilter;
 
       beforeEach(function () {
         stub($, 'ajaxPrefilter');
-        xsrfChromeApi({}, { version });
+        initChromeXsrfApi({}, { version });
         prefilter = $.ajaxPrefilter.args[0][0];
       });
 
@@ -51,7 +51,7 @@ describe('chrome xsrf apis', function () {
       });
     });
 
-    context('Angular support', function () {
+    describe('Angular support', function () {
 
       let $http;
       let $httpBackend;
@@ -59,7 +59,7 @@ describe('chrome xsrf apis', function () {
       beforeEach(function () {
         stub($, 'ajaxPrefilter');
         const chrome = {};
-        xsrfChromeApi(chrome, { version });
+        initChromeXsrfApi(chrome, { version });
         ngMock.module(chrome.$setupXsrfRequestInterceptor);
       });
 

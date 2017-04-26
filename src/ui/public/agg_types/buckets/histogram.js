@@ -1,10 +1,11 @@
 import 'ui/validate_date_interval';
-import AggTypesBucketsBucketAggTypeProvider from 'ui/agg_types/buckets/_bucket_agg_type';
-import AggTypesBucketsCreateFilterHistogramProvider from 'ui/agg_types/buckets/create_filter/histogram';
+import { AggTypesBucketsBucketAggTypeProvider } from 'ui/agg_types/buckets/_bucket_agg_type';
+import { AggTypesBucketsCreateFilterHistogramProvider } from 'ui/agg_types/buckets/create_filter/histogram';
 import intervalTemplate from 'ui/agg_types/controls/interval.html';
 import minDocCountTemplate from 'ui/agg_types/controls/min_doc_count.html';
 import extendedBoundsTemplate from 'ui/agg_types/controls/extended_bounds.html';
-export default function HistogramAggDefinition(Private) {
+
+export function AggTypesBucketsHistogramProvider(Private) {
   const BucketAggType = Private(AggTypesBucketsBucketAggTypeProvider);
   const createFilter = Private(AggTypesBucketsCreateFilterHistogramProvider);
 

@@ -2,7 +2,7 @@ import sinon from 'auto-release-sinon';
 import expect from 'expect.js';
 import ngMock from 'ng_mock';
 
-import Binder from 'ui/binder';
+import { Binder } from 'ui/binder';
 import $ from 'jquery';
 
 describe('Binder class', function () {
@@ -13,7 +13,7 @@ describe('Binder class', function () {
     $scope = $rootScope.$new();
   }));
 
-  context('Constructing with a $scope', function () {
+  describe('Constructing with a $scope', function () {
     it('accepts a $scope and listens for $destroy', function () {
       sinon.stub($scope, '$on');
       new Binder($scope);

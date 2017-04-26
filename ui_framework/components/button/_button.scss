@@ -1,134 +1,178 @@
 /**
  * 1. Setting to inline-block guarantees the same height when applied to both
  *    button elements and anchor tags.
- * 2. Disable for Angular.
- * 3. Safari won't respect :enabled:active on links.
+ * 2. Links can be focused when they're "disabled" (since we're just faking this with a class), but
+ *    at least make them look like they're not focused.
  */
 .kuiButton {
   display: inline-block; /* 1 */
   appearance: none;
   cursor: pointer;
   padding: 4px 12px 5px;
-  font-size: $fontSize;
-  font-weight: 400;
-  line-height: $lineHeight;
+  font-size: $globalFontSize;
+  font-weight: $buttonFontWeight;
+  line-height: $globalLineHeight;
+  height: $buttonHeight;
   text-decoration: none;
   border: none;
-  border-radius: $buttonBorderRadius;
+  border-radius: $globalBorderRadius;
 
-  &:disabled {
+  @include kuiButtonDisabled {
     cursor: default;
-    pointer-events: none; /* 2 */
   }
 
-  &:active { /* 3 */
+  @include kuiButtonActive {
     transform: translateY(1px);
   }
 
   &:focus {
+    outline: none; /* 2 */
+  }
+
+  @include kuiButtonFocus {
     @include focus;
   }
 }
 
+  /**
+   * 1. Solves whitespace problems introduced by inline elements.
+   */
+  .kuiButton__inner {
+    display: flex; /* 1 */
+    align-items: center; /* 1 */
+  }
+
+.kuiButton--small {
+  font-size: $buttonSmallFontSize;
+  padding: $buttonSmallPadding;
+  height: $buttonSmallHeight;
+}
+
+.kuiButton--fullWidth {
+  width: 100%;
+  text-align: center;
+}
+
 .kuiButton--iconText {
   .kuiButton__icon {
-    &:first-child {
-      margin-right: 4px;
+    &:first-child:not(:only-child) {
+      margin-right: $buttonIconSpacing;
     }
 
-    &:last-child {
-      margin-left: 4px;
+    &:last-child:not(:only-child) {
+      margin-left: $buttonIconSpacing;
+    }
+  }
+
+  &.kuiButton--small {
+    .kuiButton__icon {
+      &:first-child:not(:only-child) {
+        margin-right: $buttonIconSmallSpacing;
+      }
+
+      &:last-child:not(:only-child) {
+        margin-left: $buttonIconSmallSpacing;
+      }
     }
   }
 }
 
 /**
  * 1. Override Bootstrap.
- * 2. Safari won't respect :enabled:hover/active on links.
  */
 .kuiButton--basic {
-  color: #5a5a5a;
-  background-color: #F2F2F2;
+  color: $buttonBasicTextColor;
+  background-color: $buttonBasicBackgroundColor;
 
-  // Goes before hover, so that hover can override it.
-  &:focus {
-    color: #5a5a5a !important; /* 1 */
+  @include kuiButtonFocus {
+    color: $buttonBasicTextColor;
   }
 
-  &:hover, /* 2 */
-  &:active { /* 2 */
-    color: #ffffff !important; /* 1 */
-    background-color: #9B9B9B !important;
+  @include kuiButtonHoverAndActive {
+    color: $buttonDefaultTextColor !important; /* 1 */
+    background-color: $buttonBasicHoverBackgroundColor !important; /* 1 */
   }
 
-  &:disabled {
-    color: #9B9B9B;
+  @include kuiButtonDisabled {
+    color: $buttonBasicDisabledTextColor;
+  }
+
+  @include darkTheme {
+    color: $buttonBasicTextColor--darkTheme;
+    background-color: $buttonBasicBackgroundColor--darkTheme;
+
+    @include kuiButtonFocus {
+      @include focus($globalFocusColor, $globalBackgroundColor--darkTheme);
+      color: $buttonBasicTextColor--darkTheme;
+    }
+
+    @include kuiButtonHoverAndActive {
+      background-color: $buttonBasicHoverBackgroundColor--darkTheme !important; /* 1 */
+    }
+
+    @include kuiButtonDisabled {
+      color: rgba($buttonBasicTextColor--darkTheme, 0.5);
+    }
   }
 }
 
 /**
  * 1. Override Bootstrap.
- * 2. Safari won't respect :enabled:hover/active on links.
  */
 .kuiButton--primary {
-  color: #FFFFFF;
-  background-color: #6EADC1;
+  color: $buttonDefaultTextColor;
+  background-color: $buttonPrimaryBackgroundColor;
 
-  &:hover, /* 2 */
-  &:active { /* 2 */
-    color: #FFFFFF !important; /* 1 */
-    background-color: #006E8A;
+  @include kuiButtonFocus {
+    color: $buttonDefaultTextColor;
   }
 
-  &:disabled {
-    background-color: #B6D6E0;
+  @include kuiButtonHoverAndActive {
+    color: $buttonDefaultTextColor !important; /* 1 */
+    background-color: $buttonPrimaryHoverBackgroundColor;
   }
 
-  &:focus {
-    color: #FFFFFF !important; /* 1 */
+  @include kuiButtonDisabled {
+    background-color: $buttonPrimaryDisabledBackgroundColor;
   }
 }
 
 /**
  * 1. Override Bootstrap.
- * 2. Safari won't respect :enabled:hover/active on links.
  */
 .kuiButton--danger {
-  color: #FFFFFF;
-  background-color: #D76051;
+  color: $buttonDefaultTextColor;
+  background-color: $buttonDangerBackgroundColor;
 
-  &:hover, /* 2 */
-  &:active { /* 2 */
-    color: #FFFFFF !important; /* 1 */
-    background-color: #A52E1F;
+  @include kuiButtonFocus {
+    @include focus($globalFocusDangerColor);
+    color: $buttonDefaultTextColor;
   }
 
-  &:disabled {
-    background-color: #efc0ba;
+  @include kuiButtonHoverAndActive {
+    color: $buttonDefaultTextColor !important; /* 1 */
+    background-color: $buttonDangerHoverBackgroundColor;
   }
 
-  &:focus {
-    @include focus($focusDangerColor);
-    color: #FFFFFF !important; /* 1 */
+  @include kuiButtonDisabled {
+    background-color: $buttonDangerDisabledBackgroundColor;
   }
 }
 
 /**
  * 1. Override Bootstrap.
  * 2. Override either Bootstrap or Timelion styles.
- * 3. Safari won't respect :enabled:hover/active on links.
  */
 .kuiButton--hollow {
-  color: $linkColor !important; /* 2 */
+  color: $globalLinkColor !important; /* 2 */
   background-color: transparent;
 
-  &:hover, /* 3 */
-  &:active { /* 3 */
-    color: $linkHoverColor !important; /* 1 */
+  @include kuiButtonHoverAndActive {
+    color: $globalLinkHoverColor !important; /* 1 */
     text-decoration: underline;
   }
 
-  &:disabled {
-    color: #dddddd !important; /* 1 */
+  @include kuiButtonDisabled {
+    color: $buttonHollowDiabledTextColor;
   }
 }

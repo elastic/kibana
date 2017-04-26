@@ -1,5 +1,5 @@
 import _ from 'lodash';
-import inflector from 'ui/indexed_array/inflector';
+import { inflector } from 'ui/indexed_array/inflector';
 
 
 const pathGetter = _(_.get).rearg(1, 0).ary(2);
@@ -26,7 +26,7 @@ const OPT_NAMES = IndexedArray.OPT_NAMES = ['index', 'group', 'order', 'initialS
  *                                       methods are also removed
  */
 _.class(IndexedArray).inherits(Array);
-function IndexedArray(config) {
+export function IndexedArray(config) {
   IndexedArray.Super.call(this);
 
   // just to remind future us that this list is important
@@ -154,5 +154,3 @@ IndexedArray.prototype.remove = function (predicate, context) {
 IndexedArray.prototype.toJSON = function () {
   return this.raw;
 };
-
-export default IndexedArray;

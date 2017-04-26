@@ -17,24 +17,32 @@ describe('discoverField', function () {
 
   beforeEach(ngMock.module('kibana'));
   beforeEach(ngMock.inject(function (Private, $rootScope, $compile) {
-    $elem = angular.element('<discover-field></discover-field>');
+    $elem = angular.element(`
+      <discover-field
+        field="field"
+        on-add-field="addField"
+        on-remove-field="removeField"
+        on-show-details="showDetails"
+      ></discover-field>
+    `);
     indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
 
     _.assign($rootScope, {
       field: indexPattern.fields.byName.extension,
-      increaseFieldCounter: sinon.spy(),
-      toggle: function (field) {
-        indexPattern.fields.byName[field].display = !indexPattern.fields.byName[field].display;
-      }
+      addField: sinon.spy(() => $rootScope.field.display = true),
+      removeField: sinon.spy(() => $rootScope.field.display = false),
+      showDetails: sinon.spy(() => $rootScope.field.details = { exists: true }),
     });
 
     $compile($elem)($rootScope);
 
-    $scope = $elem.scope();
+    $scope = $elem.isolateScope();
     $scope.$digest();
+    sinon.spy($scope, 'toggleDetails');
   }));
 
   afterEach(function () {
+    $scope.toggleDetails.restore();
     $scope.$destroy();
   });
 
@@ -43,14 +51,27 @@ describe('discoverField', function () {
       expect($scope.toggleDisplay).to.be.a(Function);
     });
 
-    it('should toggle the display of the field', function () {
+    it('should call onAddField or onRemoveField depending on the display state', function () {
       $scope.toggleDisplay($scope.field);
-      expect($scope.field.display).to.be(true);
+      expect($scope.onAddField.callCount).to.be(1);
+      expect($scope.onAddField.firstCall.args).to.eql([$scope.field.name]);
+
+      $scope.toggleDisplay($scope.field);
+      expect($scope.onRemoveField.callCount).to.be(1);
+      expect($scope.onRemoveField.firstCall.args).to.eql([$scope.field.name]);
     });
 
-    it('should increase the field popularity', function () {
+    it('should call toggleDetails when currently showing the details', function () {
+      $scope.toggleDetails($scope.field);
       $scope.toggleDisplay($scope.field);
-      expect($scope.increaseFieldCounter.called).to.be(true);
+      expect($scope.toggleDetails.callCount).to.be(2);
+    });
+  });
+
+  describe('toggleDetails', function () {
+    it('should notify the parent when showing the details', function () {
+      $scope.toggleDetails($scope.field);
+      expect($scope.onShowDetails.callCount).to.be(1);
     });
   });
 });

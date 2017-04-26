@@ -21,7 +21,7 @@ describe('plugins/console', function () {
       };
     });
 
-    context('proxyConfig', function () {
+    describe('proxyConfig', function () {
       it('leaves the proxyConfig settings', function () {
         const proxyConfigOne = {};
         const proxyConfigTwo = {};

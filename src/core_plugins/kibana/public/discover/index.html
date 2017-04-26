@@ -23,7 +23,7 @@
         name="discoverSearch"
         ng-submit="fetch()"
       >
-        <div class="typeahead" kbn-typeahead="discover">
+        <div class="typeahead" kbn-typeahead="discover" on-select="fetch()">
           <div class="kuiLocalSearch">
             <input
               parse-query
@@ -59,13 +59,15 @@
       <div class="col-md-2 sidebar-container collapsible-sidebar">
         <disc-field-chooser
           columns="state.columns"
-          refresh="refreshFieldList"
           hits="rows"
           field-counts="fieldCounts"
-          filter="filterQuery"
           index-pattern="searchSource.get('index')"
           index-pattern-list="opts.indexPatternList"
-          state="state">
+          state="state"
+          on-add-field="addColumn"
+          on-add-filter="filterQuery"
+          on-remove-field="removeColumn"
+        >
         </disc-field-chooser>
       </div>
 
@@ -90,20 +92,23 @@
 
                   &mdash;
 
-                  <span class="results-interval" ng-hide="showInterval">
-                    <a
-                      ng-click="toggleInterval()">
-                      {{ intervalName }}
-                    </a>
-                  </span>
-
-                  <span ng-show="showInterval" class="results-interval form-inline">
+                  <span class="results-interval form-inline">
                     <select
                       class="form-control"
                       ng-model="state.interval"
                       ng-options="interval.val as interval.display for interval in intervalOptions | filter: intervalEnabled"
+                      ng-blur="toggleInterval()"
+                      data-test-subj="discoverIntervalSelect"
                       >
                     </select>
+                    <span ng-show="bucketInterval.scaled">
+                      <kbn-info
+                        placement="right"
+                        class="kuiIcon--info"
+                        info="This interval creates {{ bucketInterval.scale > 1 ? 'buckets that are too large' : 'too many buckets' }} to show in the selected time range, so it has been scaled to {{ bucketInterval.description }}">
+                      </kbn-info>
+                      Scaled to {{ bucketInterval.description }}
+                    </span>
                   </span>
                 </center>
 
@@ -126,11 +131,15 @@
                 columns="state.columns"
                 infinite-scroll="true"
                 filter="filterQuery"
-                shared-item
+                data-shared-item
                 data-title="{{opts.savedSearch.lastSavedTitle}}"
                 data-description="{{opts.savedSearch.description}}"
-                render-counter>
-              </doc-table>
+                render-counter
+                on-add-column="addColumn"
+                on-change-sort-order="setSortOrder"
+                on-move-column="moveColumn"
+                on-remove-column="removeColumn"
+              ></doc-table>
 
               <div ng-if="rows.length == opts.sampleSize" class="discover-table-footer">
                 <center>

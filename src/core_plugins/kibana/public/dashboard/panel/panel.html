@@ -3,31 +3,42 @@
     <span class="panel-title" title="{{::savedObj.title}}">
       {{::savedObj.title}}
     </span>
-    <div class="btn-group">
-      <a aria-label="Expand"
-         data-test-subj="dashboardPanelExpandIcon"
-         ng-click="toggleExpand()"
+    <div class="kuiMicroButtonGroup">
+      <a
+        class="kuiMicroButton"
+        aria-label="Expand"
+        data-test-subj="dashboardPanelExpandIcon"
+        ng-click="toggleExpand()"
       >
         <span class="fa" ng-class="{'fa-expand': !isExpanded, 'fa-compress': isExpanded}"></span>
       </a>
-      <a aria-label="Edit"
-         data-test-subj="dashboardPanelEditLink"
-         ng-show="!isViewOnlyMode() && editUrl"
-         ng-href="{{::editUrl}}"
+
+      <a
+        class="kuiMicroButton"
+        aria-label="Edit"
+        data-test-subj="dashboardPanelEditLink"
+        ng-show="!isViewOnlyMode() && editUrl"
+        ng-href="{{::editUrl}}"
       >
         <i aria-hidden="true" class="fa fa-pencil"></i>
       </a>
-      <a aria-label="Move"
-         data-test-subj="dashboardPanelMoveIcon"
-         ng-show="!isViewOnlyMode() && !isExpanded"
-         class="panel-move"
+
+      <a
+        class="kuiMicroButton"
+        aria-label="Move"
+        data-test-subj="dashboardPanelMoveIcon"
+        ng-show="!isViewOnlyMode() && !isExpanded"
+        class="panel-move"
       >
         <i aria-hidden="true" class="fa fa-arrows"></i>
       </a>
-      <a aria-label="Remove"
-         data-test-subj="dashboardPanelRemoveIcon"
-         ng-show="!isViewOnlyMode() && !isExpanded"
-         ng-click="remove()"
+
+      <a
+        class="kuiMicroButton"
+        aria-label="Remove"
+        data-test-subj="dashboardPanelRemoveIcon"
+        ng-show="!isViewOnlyMode() && !isExpanded"
+        ng-click="remove()"
       >
         <i aria-hidden="true" class="fa fa-times"></i>
       </a>
@@ -47,7 +58,7 @@
     search-source="savedObj.searchSource"
     show-spy-panel="!isFullScreenMode"
     ui-state="uiState"
-    shared-item
+    data-shared-item
     data-title="{{savedObj.title}}"
     data-description="{{savedObj.description}}"
     render-counter
@@ -60,11 +71,16 @@
     search-source="savedObj.searchSource"
     sorting="panel.sort"
     columns="panel.columns"
-    shared-item
+    data-shared-item
     data-title="{{savedObj.title}}"
     data-description="{{savedObj.description}}"
     render-counter
     class="panel-content"
-    filter="filter">
+    filter="filter"
+    on-add-column="addColumn"
+    on-change-sort-order="setSortOrder"
+    on-move-column="moveColumn"
+    on-remove-column="removeColumn"
+    >
   </doc-table>
 </div>

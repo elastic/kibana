@@ -1,17 +1,20 @@
-import VislibVisTypeVislibVisTypeProvider from 'ui/vislib_vis_type/vislib_vis_type';
-import VisSchemasProvider from 'ui/vis/schemas';
+import { VisVisTypeProvider } from 'ui/vis/vis_type';
+import { VislibVisTypeVislibVisTypeProvider } from 'ui/vislib_vis_type/vislib_vis_type';
+import { VisSchemasProvider } from 'ui/vis/schemas';
 import pointSeriesTemplate from 'plugins/kbn_vislib_vis_types/editors/point_series.html';
+import image from './images/icon-line.svg';
 
 export default function PointSeriesVisType(Private) {
+  const VisType = Private(VisVisTypeProvider);
   const VislibVisType = Private(VislibVisTypeVislibVisTypeProvider);
   const Schemas = Private(VisSchemasProvider);
 
   return new VislibVisType({
     name: 'line',
-    title: 'Line chart',
-    icon: 'fa-line-chart',
-    description: 'Often the best chart for high density time series. Great for comparing one series to another. ' +
-    'Be careful with sparse sets as the connection between points can be misleading.',
+    title: 'Line',
+    image,
+    description: 'Emphasize trends',
+    category: VisType.CATEGORY.BASIC,
     params: {
       defaults: {
         grid: {

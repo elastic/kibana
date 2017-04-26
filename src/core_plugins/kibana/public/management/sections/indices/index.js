@@ -1,9 +1,8 @@
-import management from 'ui/management';
-import 'plugins/kibana/management/sections/indices/_create';
-import 'plugins/kibana/management/sections/indices/_edit';
-import 'plugins/kibana/management/sections/indices/_field_editor';
+import { management } from 'ui/management';
+import './create_index_pattern';
+import './edit_index_pattern';
 import uiRoutes from 'ui/routes';
-import uiModules from 'ui/modules';
+import { uiModules } from 'ui/modules';
 import indexTemplate from 'plugins/kibana/management/sections/indices/index.html';
 
 const indexPatternsResolutions = {

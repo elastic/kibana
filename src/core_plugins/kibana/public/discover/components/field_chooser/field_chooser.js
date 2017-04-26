@@ -2,12 +2,13 @@ import 'ui/directives/css_truncate';
 import 'ui/directives/field_name';
 import 'ui/filters/unique';
 import 'plugins/kibana/discover/components/field_chooser/discover_field';
+import 'angular-ui-select';
 import _ from 'lodash';
 import $ from 'jquery';
 import rison from 'rison-node';
-import fieldCalculator from 'plugins/kibana/discover/components/field_chooser/lib/field_calculator';
-import IndexPatternsFieldListProvider from 'ui/index_patterns/_field_list';
-import uiModules from 'ui/modules';
+import { fieldCalculator } from 'plugins/kibana/discover/components/field_chooser/lib/field_calculator';
+import { IndexPatternsFieldListProvider } from 'ui/index_patterns/_field_list';
+import { uiModules } from 'ui/modules';
 import fieldChooserTemplate from 'plugins/kibana/discover/components/field_chooser/field_chooser.html';
 const app = uiModules.get('apps/discover');
 
@@ -25,7 +26,9 @@ app.directive('discFieldChooser', function ($location, globalState, config, $rou
       state: '=',
       indexPattern: '=',
       indexPatternList: '=',
-      updateFilterInQuery: '=filter'
+      onAddField: '=',
+      onAddFilter: '=',
+      onRemoveField: '=',
     },
     template: fieldChooserTemplate,
     link: function ($scope) {
@@ -97,11 +100,6 @@ app.directive('discFieldChooser', function ($location, globalState, config, $rou
         filter.active = filter.getActive();
       });
 
-      $scope.toggle = function (fieldName) {
-        $scope.increaseFieldCounter(fieldName);
-        _.toggleInOut($scope.columns, fieldName);
-      };
-
       $scope.$watchMulti([
         '[]fieldCounts',
         '[]columns',
@@ -155,7 +153,7 @@ app.directive('discFieldChooser', function ($location, globalState, config, $rou
         $scope.indexPattern.popularizeField(fieldName, 1);
       };
 
-      $scope.vizLocation = function (field) {
+      function getVisualizeUrl(field) {
         if (!$scope.state) {return '';}
 
         let agg = {};
@@ -209,16 +207,21 @@ app.directive('discFieldChooser', function ($location, globalState, config, $rou
             }
           })
         }));
-      };
+      }
 
-      $scope.details = function (field, recompute) {
+      $scope.computeDetails = function (field, recompute) {
         if (_.isUndefined(field.details) || recompute) {
-          field.details = fieldCalculator.getFieldValueCounts({
-            hits: $scope.hits,
-            field: field,
-            count: 5,
-            grouped: false
-          });
+          field.details = Object.assign(
+            {
+              visualizeUrl: field.visualizable ? getVisualizeUrl(field) : null,
+            },
+            fieldCalculator.getFieldValueCounts({
+              hits: $scope.hits,
+              field: field,
+              count: 5,
+              grouped: false
+            }),
+          );
           _.each(field.details.buckets, function (bucket) {
             bucket.display = field.format.convert(bucket.value);
           });

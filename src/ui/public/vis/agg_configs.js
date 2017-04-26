@@ -8,10 +8,11 @@
  */
 
 import _ from 'lodash';
-import IndexedArray from 'ui/indexed_array';
-import VisAggConfigProvider from 'ui/vis/agg_config';
-import AggTypesIndexProvider from 'ui/agg_types/index';
-export default function AggConfigsFactory(Private) {
+import { IndexedArray } from 'ui/indexed_array';
+import { VisAggConfigProvider } from 'ui/vis/agg_config';
+import { AggTypesIndexProvider } from 'ui/agg_types/index';
+
+export function VisAggConfigsProvider(Private) {
   const AggConfig = Private(VisAggConfigProvider);
 
   AggConfig.aggTypes = Private(AggTypesIndexProvider);
@@ -108,7 +109,6 @@ export default function AggConfigsFactory(Private) {
       })
       .value();
     }
-
     this.getRequestAggs()
     .filter(function (config) {
       return !config.type.hasNoDsl;
@@ -145,12 +145,17 @@ export default function AggConfigsFactory(Private) {
     });
 
     removeParentAggs(dslTopLvl);
-
     return dslTopLvl;
   };
 
   AggConfigs.prototype.getRequestAggs = function () {
-    return _.sortBy(this, function (agg) {
+    //collect all the aggregations
+    const aggregations = this.reduce((requestValuesAggs, agg) => {
+      const aggs = agg.getRequestAggs();
+      return aggs ? requestValuesAggs.concat(aggs) : requestValuesAggs;
+    }, []);
+    //move metrics to the end
+    return _.sortBy(aggregations, function (agg) {
       return agg.schema.group === 'metrics' ? 1 : 0;
     });
   };

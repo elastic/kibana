@@ -7,15 +7,15 @@ import 'ui/collapsible_sidebar';
 import 'ui/share';
 import chrome from 'ui/chrome';
 import angular from 'angular';
-import Notifier from 'ui/notify/notifier';
-import RegistryVisTypesProvider from 'ui/registry/vis_types';
-import DocTitleProvider from 'ui/doc_title';
-import UtilsBrushEventProvider from 'ui/utils/brush_event';
-import FilterBarQueryFilterProvider from 'ui/filter_bar/query_filter';
-import FilterBarFilterBarClickHandlerProvider from 'ui/filter_bar/filter_bar_click_handler';
-import stateMonitorFactory from 'ui/state_management/state_monitor_factory';
+import { Notifier } from 'ui/notify/notifier';
+import { VisTypesRegistryProvider } from 'ui/registry/vis_types';
+import { DocTitleProvider } from 'ui/doc_title';
+import { UtilsBrushEventProvider } from 'ui/utils/brush_event';
+import { FilterBarQueryFilterProvider } from 'ui/filter_bar/query_filter';
+import { FilterBarClickHandlerProvider } from 'ui/filter_bar/filter_bar_click_handler';
+import { stateMonitorFactory } from 'ui/state_management/state_monitor_factory';
 import uiRoutes from 'ui/routes';
-import uiModules from 'ui/modules';
+import { uiModules } from 'ui/modules';
 import editorTemplate from 'plugins/kibana/visualize/editor/editor.html';
 import { DashboardConstants } from 'plugins/kibana/dashboard/dashboard_constants';
 import { VisualizeConstants } from '../visualize_constants';
@@ -25,7 +25,7 @@ uiRoutes
   template: editorTemplate,
   resolve: {
     savedVis: function (savedVisualizations, courier, $route, Private) {
-      const visTypes = Private(RegistryVisTypesProvider);
+      const visTypes = Private(VisTypesRegistryProvider);
       const visType = _.find(visTypes, { name: $route.current.params.type });
       if (visType.requiresSearch && !$route.current.params.indexPattern && !$route.current.params.savedSearchId) {
         throw new Error('You must provide either an indexPattern or a savedSearchId');
@@ -66,21 +66,24 @@ uiModules
   };
 });
 
-function VisEditor($scope, $route, timefilter, AppState, $window, kbnUrl, courier, Private, Promise) {
+function VisEditor($rootScope, $scope, $route, timefilter, AppState, $window, kbnUrl, courier, Private, Promise) {
   const docTitle = Private(DocTitleProvider);
   const brushEvent = Private(UtilsBrushEventProvider);
   const queryFilter = Private(FilterBarQueryFilterProvider);
-  const filterBarClickHandler = Private(FilterBarFilterBarClickHandlerProvider);
+  const filterBarClickHandler = Private(FilterBarClickHandlerProvider);
 
   const notify = new Notifier({
     location: 'Visualization Editor'
   });
 
   let stateMonitor;
-  const $appStatus = this.appStatus = {};
 
   // Retrieve the resolved SavedVis instance.
   const savedVis = $route.current.locals.savedVis;
+
+  const $appStatus = this.appStatus = {
+    dirty: !savedVis.id
+  };
 
   // Instance of src/ui/public/vis/vis.js.
   const vis = savedVis.vis;
@@ -186,7 +189,7 @@ function VisEditor($scope, $route, timefilter, AppState, $window, kbnUrl, courie
 
     stateMonitor = stateMonitorFactory.create($state, stateDefaults);
     stateMonitor.ignoreProps([ 'vis.listeners' ]).onChange((status) => {
-      $appStatus.dirty = status.dirty;
+      $appStatus.dirty = status.dirty || !savedVis.id;
     });
     $scope.$on('$destroy', () => stateMonitor.destroy());
 
@@ -219,8 +222,11 @@ function VisEditor($scope, $route, timefilter, AppState, $window, kbnUrl, courie
       return savedVis.lastSavedTitle || `${savedVis.title} (unsaved)`;
     };
 
-    $scope.$watch('searchSource.get("index").timeFieldName', function (timeField) {
-      timefilter.enabled = !!timeField;
+    $scope.$watchMulti([
+      'searchSource.get("index").timeFieldName',
+      'vis.type.requiresTimePicker',
+    ], function ([timeField, requiresTimePicker]) {
+      timefilter.enabled = Boolean(timeField || requiresTimePicker);
     });
 
     // update the searchSource when filters update
@@ -279,6 +285,8 @@ function VisEditor($scope, $route, timefilter, AppState, $window, kbnUrl, courie
   }
 
   $scope.fetch = function () {
+    // This is used by some plugins to trigger a fetch (Timelion and Time Series Visual Builder)
+    $rootScope.$broadcast('fetch');
     $state.save();
     searchSource.set('filter', queryFilter.getFilters());
     if (!$state.linked) searchSource.set('query', $state.query);

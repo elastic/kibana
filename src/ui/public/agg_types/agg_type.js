@@ -1,7 +1,8 @@
 import _ from 'lodash';
-import AggTypesAggParamsProvider from 'ui/agg_types/agg_params';
-import RegistryFieldFormatsProvider from 'ui/registry/field_formats';
-export default function AggTypeFactory(Private) {
+import { AggTypesAggParamsProvider } from 'ui/agg_types/agg_params';
+import { RegistryFieldFormatsProvider } from 'ui/registry/field_formats';
+
+export function AggTypesAggTypeProvider(Private) {
   const AggParams = Private(AggTypesAggParamsProvider);
   const fieldFormats = Private(RegistryFieldFormatsProvider);
 
@@ -109,6 +110,17 @@ export default function AggTypeFactory(Private) {
 
       this.params = new AggParams(this.params);
     }
+
+    /**
+     * Designed for multi-value metric aggs, this method can return a
+     * set of AggConfigs that should replace this aggConfig in requests
+     *
+     * @method getRequestAggs
+     * @returns {array[AggConfig]|undefined} - an array of aggConfig objects
+     *                                         that should replace this one,
+     *                                         or undefined
+     */
+    this.getRequestAggs = config.getRequestAggs || _.noop;
 
     /**
      * Designed for multi-value metric aggs, this method can return a

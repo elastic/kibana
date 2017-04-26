@@ -1,12 +1,18 @@
 import React, { PropTypes } from 'react';
 import createLegendSeries from '../lib/create_legend_series';
+import reactcss from 'reactcss';
 
 function HorizontalLegend(props) {
   const rows = props.series.map(createLegendSeries(props));
-  const legendStyle = { };
+  const styles = reactcss({
+    hideLegned: {
+      legend: {
+        display: 'none'
+      }
+    }
+  }, { hideLegned: !props.showLegend });
   let legendControlClass = 'fa fa-chevron-down';
   if (!props.showLegend) {
-    legendStyle.display = 'none';
     legendControlClass = 'fa fa-chevron-up';
   }
   return (
@@ -14,7 +20,7 @@ function HorizontalLegend(props) {
       <div className="rhythm_chart__legend-control">
         <i className={legendControlClass} onClick={props.onClick}/>
       </div>
-      <div className="rhythm_chart__legend-series" style={legendStyle}>
+      <div className="rhythm_chart__legend-series" style={styles.legend}>
         { rows }
       </div>
     </div>

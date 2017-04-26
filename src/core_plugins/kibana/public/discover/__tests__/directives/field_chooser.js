@@ -37,18 +37,20 @@ const destroy = function () {
 };
 
 describe('discover field chooser directives', function () {
-  const $elem = angular.element(
-    '<disc-field-chooser' +
-    '  columns="columns"' +
-    '  toggle="toggle"' +
-    '  hits="hits"' +
-    '  field-counts="fieldCounts"' +
-    '  filter="filter"' +
-    '  index-pattern="indexPattern"' +
-    '  index-pattern-list="indexPatternList"' +
-    '  state="state">' +
-    '</disc-field-chooser>'
-  );
+  const $elem = angular.element(`
+    <disc-field-chooser
+      columns="columns"
+      toggle="toggle"
+      hits="hits"
+      field-counts="fieldCounts"
+      index-pattern="indexPattern"
+      index-pattern-list="indexPatternList"
+      state="state"
+      on-add-field="addField"
+      on-add-filter="addFilter"
+      on-remove-field="removeField"
+    ></disc-field-chooser>
+  `);
 
   beforeEach(ngMock.module('kibana', ($provide) => {
     $provide.decorator('config', ($delegate) => {
@@ -81,9 +83,11 @@ describe('discover field chooser directives', function () {
       toggle: sinon.spy(),
       hits: hits,
       fieldCounts: fieldCounts,
-      filter: sinon.spy(),
+      addField: sinon.spy(),
+      addFilter: sinon.spy(),
       indexPattern: indexPattern,
-      indexPatternList: indexPatternList
+      indexPatternList: indexPatternList,
+      removeField: sinon.spy(),
     });
 
     $scope.$digest();
@@ -101,7 +105,8 @@ describe('discover field chooser directives', function () {
 
   describe('Index list', function () {
     it('should be in alphabetical order', function (done) {
-      expect($elem.find('li.sidebar-item-title').text()).to.be('abc');
+      $elem.find('.ui-select-toggle').click();
+      expect($elem.find('[role=option]').text().replace(/\W+/g, '')).to.be('abc');
       done();
     });
   });
@@ -194,37 +199,37 @@ describe('discover field chooser directives', function () {
       field = getField();
     });
 
-    it('should have a details function', function () {
-      expect($scope.details).to.be.a(Function);
+    it('should have a computeDetails function', function () {
+      expect($scope.computeDetails).to.be.a(Function);
     });
 
     it('should increase the field popularity when called', function () {
       indexPattern.popularizeField = sinon.spy();
-      $scope.details(field);
+      $scope.computeDetails(field);
       expect(indexPattern.popularizeField.called).to.be(true);
     });
 
     it('should append a details object to the field', function () {
-      $scope.details(field);
+      $scope.computeDetails(field);
       expect(field.details).to.not.be(undefined);
     });
 
     it('should delete the field details if they already exist', function () {
-      $scope.details(field);
+      $scope.computeDetails(field);
       expect(field.details).to.not.be(undefined);
-      $scope.details(field);
+      $scope.computeDetails(field);
       expect(field.details).to.be(undefined);
     });
 
     it('... unless recompute is true', function () {
-      $scope.details(field);
+      $scope.computeDetails(field);
       expect(field.details).to.not.be(undefined);
-      $scope.details(field, true);
+      $scope.computeDetails(field, true);
       expect(field.details).to.not.be(undefined);
     });
 
     it('should create buckets with formatted and raw values', function () {
-      $scope.details(field);
+      $scope.computeDetails(field);
       expect(field.details.buckets).to.not.be(undefined);
       expect(field.details.buckets[0].value).to.be(40.141592);
       expect(field.details.buckets[0].display).to.be('40.142');
@@ -238,7 +243,7 @@ describe('discover field chooser directives', function () {
       $scope.$apply();
 
       field = getField();
-      $scope.details(field);
+      $scope.computeDetails(field);
       expect(getField().details.total).to.be(1);
 
       $scope.hits = [

@@ -41,15 +41,6 @@
       border-top-color: @sidebar-border;
       font-size: @sidebar-item-font-size;
 
-      a:not(.sidebar-item-button) {
-        color: @sidebar-item-color;
-
-        &:hover {
-          color: @sidebar-item-color;
-          text-decoration: none;
-        }
-      }
-
       .active {
         background-color: @sidebar-active-bg !important;
         color: @sidebar-active-color;
@@ -153,11 +144,8 @@
     }
   }
 
-  .index-pattern-selection .sidebar-item-title {
-    background-color: @sidebar-index-pattern-selection-bg;
-    &:hover {
-      background-color: @sidebar-index-pattern-selection-bg-hover;
-    }
+  .index-pattern-selection .ui-select-toggle {
+    border-radius: 0;
   }
 
 }

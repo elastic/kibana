@@ -1,5 +1,6 @@
 import { has } from 'lodash';
-export default function mapRangeProvider(Promise, courier) {
+
+export function FilterBarLibMapRangeProvider(Promise, courier) {
   return function (filter) {
     if (!filter.range) return Promise.reject(filter);
 

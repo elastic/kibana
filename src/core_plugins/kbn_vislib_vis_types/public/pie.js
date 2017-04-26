@@ -1,17 +1,20 @@
-import VislibVisTypeVislibVisTypeProvider from 'ui/vislib_vis_type/vislib_vis_type';
-import VisSchemasProvider from 'ui/vis/schemas';
+import { VisVisTypeProvider } from 'ui/vis/vis_type';
+import { VislibVisTypeVislibVisTypeProvider } from 'ui/vislib_vis_type/vislib_vis_type';
+import { VisSchemasProvider } from 'ui/vis/schemas';
 import pieTemplate from 'plugins/kbn_vislib_vis_types/editors/pie.html';
+import image from './images/icon-pie.svg';
 
 export default function HistogramVisType(Private) {
+  const VisType = Private(VisVisTypeProvider);
   const VislibVisType = Private(VislibVisTypeVislibVisTypeProvider);
   const Schemas = Private(VisSchemasProvider);
 
   return new VislibVisType({
     name: 'pie',
-    title: 'Pie chart',
-    icon: 'fa-pie-chart',
-    description: 'Pie charts are ideal for displaying the parts of some whole. For example, sales percentages by department.' +
-     'Pro Tip: Pie charts are best used sparingly, and with no more than 7 slices per pie.',
+    title: 'Pie',
+    image,
+    description: 'Compare parts of a whole',
+    category: VisType.CATEGORY.BASIC,
     params: {
       defaults: {
         addTooltip: true,

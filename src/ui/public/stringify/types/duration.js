@@ -1,9 +1,9 @@
 import 'ui/stringify/editors/duration.less';
 import moment from 'moment';
-import IndexPatternsFieldFormatProvider from 'ui/index_patterns/_field_format/field_format';
+import { IndexPatternsFieldFormatProvider } from 'ui/index_patterns/_field_format/field_format';
 import durationTemplate from 'ui/stringify/editors/duration.html';
 
-export default function DurationFormatProvider(Private) {
+export function stringifyDuration(Private) {
   const ratioToSeconds = {
     picoseconds: 0.000000000001,
     nanoseconds: 0.000000001,

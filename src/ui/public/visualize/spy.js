@@ -1,13 +1,14 @@
 import $ from 'jquery';
 import _ from 'lodash';
-import RegistrySpyModesProvider from 'ui/registry/spy_modes';
-import uiModules from 'ui/modules';
+import { SpyModesRegistryProvider } from 'ui/registry/spy_modes';
+import { uiModules } from 'ui/modules';
 import spyTemplate from 'ui/visualize/spy.html';
+
 uiModules
   .get('app/visualize')
   .directive('visualizeSpy', function (Private, $compile) {
 
-    const spyModes = Private(RegistrySpyModesProvider);
+    const spyModes = Private(SpyModesRegistryProvider);
     const defaultMode = spyModes.inOrder[0].name;
 
     return {
@@ -15,7 +16,7 @@ uiModules
       template: spyTemplate,
       link: function ($scope, $el) {
         let currentSpy;
-        const $container = $el.find('.visualize-spy-container');
+        const $container = $el.find('[data-spy-content-container]');
         let fullPageSpy = _.get($scope.spy, 'mode.fill', false);
         $scope.modes = spyModes;
         $scope.spy.params = $scope.spy.params || {};
@@ -28,6 +29,11 @@ uiModules
             name: name,
             fill: fullPageSpy,
           };
+        }
+
+        function setSpyMode(modeName) {
+          if (!_.isString(modeName)) modeName = null;
+          $scope.spy.mode = getSpyObject(modeName);
         }
 
         const renderSpy = function (spyName) {
@@ -45,7 +51,9 @@ uiModules
           if (!newMode) return;
 
           // update the spy mode and append to the container
-          $scope.spy.mode = getSpyObject(newMode.name);
+          const selectedSpyMode = getSpyObject(newMode.name);
+          $scope.spy.mode = selectedSpyMode;
+          $scope.selectedModeName = selectedSpyMode.name;
 
           currentSpy = _.assign({
             $scope: $scope.$new(),
@@ -58,7 +66,7 @@ uiModules
 
         $scope.toggleDisplay = function () {
           const modeName = _.get($scope.spy, 'mode.name');
-          $scope.setSpyMode(modeName ? null : defaultMode);
+          setSpyMode(modeName ? null : defaultMode);
         };
 
         $scope.toggleFullPage = function () {
@@ -66,10 +74,8 @@ uiModules
           $scope.spy.mode = getSpyObject();
         };
 
-        $scope.setSpyMode = function (modeName) {
-          // save the spy mode to the UI state
-          if (!_.isString(modeName)) modeName = null;
-          $scope.spy.mode = getSpyObject(modeName);
+        $scope.onSpyModeChange = function onSpyModeChange() {
+          setSpyMode($scope.selectedModeName);
         };
 
         if ($scope.uiState) {

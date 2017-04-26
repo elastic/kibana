@@ -8,6 +8,7 @@ import StdDeviation from '../aggs/std_deviation';
 import StdSibling from '../aggs/std_sibling';
 import SeriesAgg from '../aggs/series_agg';
 import SerialDiff from '../aggs/serial_diff';
+import PositiveOnly from '../aggs/positive_only';
 import FilterRatio from '../aggs/filter_ratio';
 import PercentileRank from '../aggs/percentile_rank';
 export default {
@@ -36,7 +37,8 @@ export default {
   derivative: Derivative,
   series_agg: SeriesAgg,
   serial_diff: SerialDiff,
-  filter_ratio: FilterRatio
+  filter_ratio: FilterRatio,
+  positive_only: PositiveOnly
 };
 
 

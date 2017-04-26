@@ -1,8 +1,8 @@
 import $ from 'jquery';
 import ngMock from 'ng_mock';
 import expect from 'expect.js';
-import IndexPatternsFieldProvider from 'ui/index_patterns/_field';
-import RegistryFieldFormatsProvider from 'ui/registry/field_formats';
+import { IndexPatternsFieldProvider } from 'ui/index_patterns/_field';
+import { RegistryFieldFormatsProvider } from 'ui/registry/field_formats';
 import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
 import _ from 'lodash';
 

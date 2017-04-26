@@ -1,9 +1,10 @@
 import expect from 'expect.js';
 import ngMock from 'ng_mock';
-import AggTypesParamTypesBaseProvider from 'ui/agg_types/param_types/base';
-import AggTypesParamTypesRegexProvider from 'ui/agg_types/param_types/regex';
-import VisProvider from 'ui/vis';
+import { AggTypesParamTypesBaseProvider } from 'ui/agg_types/param_types/base';
+import { AggTypesParamTypesRegexProvider } from 'ui/agg_types/param_types/regex';
+import { VisProvider } from 'ui/vis';
 import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
+
 describe('Regex', function () {
 
   let BaseAggParam;

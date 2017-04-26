@@ -1,13 +1,13 @@
 import $ from 'jquery';
 import _ from 'lodash';
 import AggConfigResult from 'ui/vis/agg_config_result';
-import FilterBarFilterBarClickHandlerProvider from 'ui/filter_bar/filter_bar_click_handler';
-import uiModules from 'ui/modules';
+import { FilterBarClickHandlerProvider } from 'ui/filter_bar/filter_bar_click_handler';
+import { uiModules } from 'ui/modules';
 import tableCellFilterHtml from './partials/table_cell_filter.html';
 const module = uiModules.get('kibana');
 
 module.directive('kbnRows', function ($compile, $rootScope, getAppState, Private) {
-  const filterBarClickHandler = Private(FilterBarFilterBarClickHandlerProvider);
+  const filterBarClickHandler = Private(FilterBarClickHandlerProvider);
   return {
     restrict: 'A',
     link: function ($scope, $el, attr) {

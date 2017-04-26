@@ -1,8 +1,5 @@
-.kuiMenu {
-}
-
 .kuiMenu--contained {
-  border: $tableRowBorder;
+  border: $globalBorderThin;
 
   .kuiMenuItem {
     padding: 6px 10px;
@@ -13,6 +10,6 @@
   padding: 6px 0;
 
   & + & {
-    border-top: $tableRowBorder;
+    border-top: $globalBorderThin;
   }
 }

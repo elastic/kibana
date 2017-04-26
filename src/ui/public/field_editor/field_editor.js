@@ -2,11 +2,11 @@ import 'ui/field_format_editor';
 import 'angular-bootstrap-colorpicker';
 import 'angular-bootstrap-colorpicker/css/colorpicker.css';
 import _ from 'lodash';
-import RegistryFieldFormatsProvider from 'ui/registry/field_formats';
-import IndexPatternsFieldProvider from 'ui/index_patterns/_field';
-import uiModules from 'ui/modules';
+import { RegistryFieldFormatsProvider } from 'ui/registry/field_formats';
+import { IndexPatternsFieldProvider } from 'ui/index_patterns/_field';
+import { uiModules } from 'ui/modules';
 import fieldEditorTemplate from 'ui/field_editor/field_editor.html';
-import IndexPatternsCastMappingTypeProvider from 'ui/index_patterns/_cast_mapping_type';
+import { IndexPatternsCastMappingTypeProvider } from 'ui/index_patterns/_cast_mapping_type';
 import { scriptedFields as docLinks } from '../documentation_links/documentation_links';
 import './field_editor.less';
 import { GetEnabledScriptingLanguagesProvider, getSupportedScriptingLanguages } from '../scripting_languages';
@@ -51,6 +51,7 @@ uiModules
 
       // only init on first create
       self.creating = !self.indexPattern.fields.byName[self.field.name];
+      self.existingFieldNames = self.indexPattern.fields.map(field => field.name); //used for mapping conflict validation
       self.selectedFormatId = _.get(self.indexPattern, ['fieldFormatMap', self.field.name, 'type', 'id']);
       self.defFormatType = initDefaultFormat();
 

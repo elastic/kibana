@@ -1,6 +1,6 @@
 import _ from 'lodash';
 
-import uiModules from 'ui/modules';
+import { uiModules } from 'ui/modules';
 import contextAppTemplate from './app.html';
 import './components/loading_button';
 import './components/size_picker/size_picker';
@@ -42,9 +42,12 @@ module.directive('contextApp', function ContextApp() {
   };
 });
 
-function ContextAppController($scope, config, Private) {
+function ContextAppController($scope, config, Private, timefilter) {
   const queryParameterActions = Private(QueryParameterActionsProvider);
   const queryActions = Private(QueryActionsProvider);
+
+  // this is apparently the "canonical" way to disable the time picker
+  timefilter.enabled = false;
 
   this.state = createInitialState(
     parseInt(config.get('context:step'), 10),

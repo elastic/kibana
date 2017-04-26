@@ -1,4 +1,4 @@
-function WorkQueue() {
+export function WorkQueue() {
   const q = this;
 
   const work = [];
@@ -44,5 +44,3 @@ function WorkQueue() {
     checkIfFull();
   };
 }
-
-export default WorkQueue;

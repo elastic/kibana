@@ -1,7 +1,7 @@
 import _ from 'lodash';
 import ngMock from 'ng_mock';
 import expect from 'expect.js';
-import VislibLibLayoutLayoutTypesProvider from 'ui/vislib/lib/layout/layout_types';
+import { VislibLibLayoutLayoutTypesProvider } from 'ui/vislib/lib/layout/layout_types';
 
 describe('Vislib Layout Types Test Suite', function () {
   let layoutType;

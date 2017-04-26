@@ -1,14 +1,15 @@
 import 'plugins/kibana/discover/saved_searches/_saved_search';
 import 'ui/notify';
-import uiModules from 'ui/modules';
+import { uiModules } from 'ui/modules';
 import { SavedObjectLoader } from 'ui/courier/saved_object/saved_object_loader';
+import { savedObjectManagementRegistry } from 'plugins/kibana/management/saved_object_registry';
 const module = uiModules.get('discover/saved_searches', [
   'kibana/notify'
 ]);
 
 // Register this service with the saved object registry so it can be
 // edited by the object editor.
-require('plugins/kibana/management/saved_object_registry').register({
+savedObjectManagementRegistry.register({
   service: 'savedSearches',
   title: 'searches'
 });

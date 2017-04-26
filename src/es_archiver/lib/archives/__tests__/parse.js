@@ -12,7 +12,7 @@ import {
 import { createParseArchiveStreams } from '../parse';
 
 describe('esArchiver createParseArchiveStreams', () => {
-  context('{ gzip: false }', () => {
+  describe('{ gzip: false }', () => {
     it('returns an array of streams', () => {
       const streams = createParseArchiveStreams({ gzip: false });
       expect(streams).to.be.an('array');
@@ -100,7 +100,7 @@ describe('esArchiver createParseArchiveStreams', () => {
     });
   });
 
-  context('{ gzip: true }', () => {
+  describe('{ gzip: true }', () => {
     it('returns an array of streams', () => {
       const streams = createParseArchiveStreams({ gzip: true });
       expect(streams).to.be.an('array');
@@ -160,7 +160,7 @@ describe('esArchiver createParseArchiveStreams', () => {
     });
   });
 
-  context('defaults', () => {
+  describe('defaults', () => {
     it('does not try to gunzip the content', async () => {
       const output = await createPromiseFromStreams([
         createListStream([

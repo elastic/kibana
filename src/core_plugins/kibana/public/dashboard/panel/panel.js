@@ -1,10 +1,12 @@
 import _ from 'lodash';
 import 'ui/visualize';
 import 'ui/doc_table';
+import * as columnActions from 'ui/doc_table/actions/columns';
 import 'plugins/kibana/dashboard/panel/get_object_loaders_for_dashboard';
-import FilterManagerProvider from 'ui/filter_manager';
-import uiModules from 'ui/modules';
+import { FilterManagerProvider } from 'ui/filter_manager';
+import { uiModules } from 'ui/modules';
 import panelTemplate from 'plugins/kibana/dashboard/panel/panel.html';
+import { savedObjectManagementRegistry } from 'plugins/kibana/management/saved_object_registry';
 import { getPersistedStateId } from 'plugins/kibana/dashboard/panel/panel_state';
 import { loadSavedObject } from 'plugins/kibana/dashboard/panel/load_saved_object';
 import { DashboardViewMode } from '../dashboard_view_mode';
@@ -14,7 +16,7 @@ uiModules
 .directive('dashboardPanel', function (savedVisualizations, savedSearches, Notifier, Private, $injector, getObjectLoadersForDashboard) {
   const filterManager = Private(FilterManagerProvider);
 
-  const services = require('plugins/kibana/management/saved_object_registry').all().map(function (serviceObj) {
+  const services = savedObjectManagementRegistry.all().map(function (serviceObj) {
     const service = $injector.get(serviceObj.service);
     return {
       type: service.type,
@@ -108,15 +110,27 @@ uiModules
           $scope.panel.columns = $scope.panel.columns || $scope.savedObj.columns;
           $scope.panel.sort = $scope.panel.sort || $scope.savedObj.sort;
 
-          // If the user updates the sort direction or columns in a saved search, we want to save that
-          // to the ui state so the share url will show our temporary modifications.
-          $scope.$watchCollection('panel.columns', function () {
+          $scope.setSortOrder = function setSortOrder(columnName, direction) {
+            $scope.panel.sort = [columnName, direction];
             $scope.saveState();
-          });
+          };
 
-          $scope.$watchCollection('panel.sort', function () {
-            $scope.saveState();
-          });
+          $scope.addColumn = function addColumn(columnName) {
+            $scope.savedObj.searchSource.get('index').popularizeField(columnName, 1);
+            columnActions.addColumn($scope.panel.columns, columnName);
+            $scope.saveState();  // sync to sharing url
+          };
+
+          $scope.removeColumn = function removeColumn(columnName) {
+            $scope.savedObj.searchSource.get('index').popularizeField(columnName, 1);
+            columnActions.removeColumn($scope.panel.columns, columnName);
+            $scope.saveState();  // sync to sharing url
+          };
+
+          $scope.moveColumn = function moveColumn(columnName, newIndex) {
+            columnActions.moveColumn($scope.panel.columns, columnName, newIndex);
+            $scope.saveState();  // sync to sharing url
+          };
         }
 
         $scope.filter = function (field, value, operator) {
@@ -130,6 +144,11 @@ uiModules
         .then(initializePanel)
         .catch(function (e) {
           $scope.error = e.message;
+
+          // Dashboard listens for this broadcast, once for every visualization (pendingVisCount).
+          // We need to broadcast even in the event of an error or it'll never fetch the data for
+          // other visualizations.
+          $scope.$root.$broadcast('ready:vis');
 
           // If the savedObjectType matches the panel type, this means the object itself has been deleted,
           // so we shouldn't even have an edit link. If they don't match, it means something else is wrong

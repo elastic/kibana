@@ -4,7 +4,7 @@ import _ from 'lodash';
 import 'ui/directives/css_truncate';
 import 'ui/directives/field_name';
 import detailsHtml from 'plugins/kibana/discover/components/field_chooser/lib/detail_views/string.html';
-import uiModules from 'ui/modules';
+import { uiModules } from 'ui/modules';
 const app = uiModules.get('apps/discover');
 
 
@@ -14,9 +14,16 @@ app.directive('discoverField', function ($compile) {
     restrict: 'E',
     template: html,
     replace: true,
+    scope: {
+      field: '=',
+      onAddField: '=',
+      onAddFilter: '=',
+      onRemoveField: '=',
+      onShowDetails: '=',
+    },
     link: function ($scope, $elem) {
       let detailsElem;
-      let detailScope = $scope.$new();
+      let detailScope;
 
 
       const init = function () {
@@ -60,9 +67,11 @@ app.directive('discoverField', function ($compile) {
       };
 
       $scope.toggleDisplay = function (field) {
-        // This is inherited from fieldChooser
-        $scope.toggle(field.name);
-        if (field.display) $scope.increaseFieldCounter(field);
+        if (field.display) {
+          $scope.onRemoveField(field.name);
+        } else {
+          $scope.onAddField(field.name);
+        }
 
         if (field.details) {
           $scope.toggleDetails(field);
@@ -71,9 +80,7 @@ app.directive('discoverField', function ($compile) {
 
       $scope.toggleDetails = function (field, recompute) {
         if (_.isUndefined(field.details) || recompute) {
-          // This is inherited from fieldChooser
-          $scope.details(field, recompute);
-          detailScope.$destroy();
+          $scope.onShowDetails(field, recompute);
           detailScope = $scope.$new();
           detailScope.warnings = getWarnings(field);
 
@@ -82,6 +89,7 @@ app.directive('discoverField', function ($compile) {
           $elem.append(detailsElem).addClass('active');
         } else {
           delete field.details;
+          detailScope.$destroy();
           detailsElem.remove();
           $elem.removeClass('active');
         }

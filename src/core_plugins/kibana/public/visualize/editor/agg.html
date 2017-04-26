@@ -6,7 +6,7 @@
     aria-label="{{ editorOpen ? 'Close Editor' : 'Open Editor' }}"
     ng-click="editorOpen = !editorOpen"
     type="button"
-    class="btn btn-primary btn-xs vis-editor-agg-header-toggle">
+    class="kuiButton kuiButton--primary kuiButton--small vis-editor-agg-header-toggle">
     <i aria-hidden="true" ng-class="{ 'fa-caret-down': editorOpen, 'fa-caret-right': !editorOpen }" class="fa"></i>
   </button>
 
@@ -26,7 +26,7 @@
   </span>
 
   <!-- controls !!!actually disabling buttons will break tooltips¡¡¡ -->
-  <div class="vis-editor-agg-header-controls btn-group">
+  <div class="vis-editor-agg-header-controls kuiButtonGroup kuiButtonGroup--united">
     <!-- disable aggregation -->
     <button
       ng-if="agg.enabled && canRemove(agg)"
@@ -35,7 +35,7 @@
       tooltip="Disable aggregation"
       tooltip-append-to-body="true"
       type="button"
-      class="btn btn-xs">
+      class="kuiButton kuiButton--basic kuiButton--small">
       <i aria-hidden="true" class="fa fa-toggle-on"></i>
     </button>
 
@@ -47,7 +47,7 @@
       tooltip="Enable aggregation"
       tooltip-append-to-body="true"
       type="button"
-      class="btn btn-xs">
+      class="kuiButton kuiButton--basic kuiButton--small">
       <i aria-hidden="true" class="fa fa-toggle-off"></i>
     </button>
 
@@ -59,7 +59,7 @@
       tooltip="Modify Priority by Dragging"
       tooltip-append-to-body="true"
       type="button"
-      class="btn btn-xs">
+      class="kuiButton kuiButton--basic kuiButton--small">
       <i aria-hidden="true" class="fa fa-arrows-v"></i>
     </button>
 
@@ -72,7 +72,7 @@
       tooltip="Remove Dimension"
       tooltip-append-to-body="true"
       type="button"
-      class="btn btn-xs btn-danger">
+      class="kuiButton kuiButton--danger kuiButton--small">
       <i aria-hidden="true" class="fa fa-times"></i>
     </button>
 

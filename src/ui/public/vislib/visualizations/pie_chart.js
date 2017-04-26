@@ -1,9 +1,10 @@
 import d3 from 'd3';
 import _ from 'lodash';
 import $ from 'jquery';
-import errors from 'ui/errors';
-import VislibVisualizationsChartProvider from './_chart';
-export default function PieChartFactory(Private) {
+import { PieContainsAllZeros, ContainerTooSmall } from 'ui/errors';
+import { VislibVisualizationsChartProvider } from './_chart';
+
+export function VislibVisualizationsPieChartProvider(Private) {
 
   const Chart = Private(VislibVisualizationsChartProvider);
 
@@ -46,7 +47,7 @@ export default function PieChartFactory(Private) {
       });
 
       if (isAllZeros) {
-        throw new errors.PieContainsAllZeros();
+        throw new PieContainsAllZeros();
       }
     }
 
@@ -176,7 +177,7 @@ export default function PieChartFactory(Private) {
       const minHeight = 20;
 
       if (width <= minWidth || height <= minHeight) {
-        throw new errors.ContainerTooSmall();
+        throw new ContainerTooSmall();
       }
     }
 

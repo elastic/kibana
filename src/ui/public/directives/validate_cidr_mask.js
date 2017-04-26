@@ -1,5 +1,5 @@
-import CidrMask from 'ui/utils/cidr_mask';
-import uiModules from 'ui/modules';
+import { CidrMask } from 'ui/utils/cidr_mask';
+import { uiModules } from 'ui/modules';
 
 uiModules.get('kibana').directive('validateCidrMask', function () {
   return {

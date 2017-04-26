@@ -1,17 +1,17 @@
 import expect from 'expect.js';
 import ngMock from 'ng_mock';
-import BucketSum from 'ui/agg_types/metrics/bucket_sum';
-import BucketAvg from 'ui/agg_types/metrics/bucket_avg';
-import BucketMin from 'ui/agg_types/metrics/bucket_min';
-import BucketMax from 'ui/agg_types/metrics/bucket_max';
-import VisProvider from 'ui/vis';
+import { AggTypesMetricsBucketSumProvider } from 'ui/agg_types/metrics/bucket_sum';
+import { AggTypesMetricsBucketAvgProvider } from 'ui/agg_types/metrics/bucket_avg';
+import { AggTypesMetricsBucketMinProvider } from 'ui/agg_types/metrics/bucket_min';
+import { AggTypesMetricsBucketMaxProvider } from 'ui/agg_types/metrics/bucket_max';
+import { VisProvider } from 'ui/vis';
 import StubbedIndexPattern from 'fixtures/stubbed_logstash_index_pattern';
 
 const metrics = [
-  { name: 'sum_bucket', title: 'Overall Sum', provider: BucketSum },
-  { name: 'avg_bucket', title: 'Overall Average', provider: BucketAvg },
-  { name: 'min_bucket', title: 'Overall Min', provider: BucketMin },
-  { name: 'max_bucket', title: 'Overall Max', provider: BucketMax },
+  { name: 'sum_bucket', title: 'Overall Sum', provider: AggTypesMetricsBucketSumProvider },
+  { name: 'avg_bucket', title: 'Overall Average', provider: AggTypesMetricsBucketAvgProvider },
+  { name: 'min_bucket', title: 'Overall Min', provider: AggTypesMetricsBucketMinProvider },
+  { name: 'max_bucket', title: 'Overall Max', provider: AggTypesMetricsBucketMaxProvider },
 ];
 
 describe('sibling pipeline aggs', function () {

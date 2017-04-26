@@ -1,6 +1,6 @@
 import 'ui/elastic_textarea';
 import 'ui/filters/markdown';
-import uiModules from 'ui/modules';
+import { uiModules } from 'ui/modules';
 import advancedRowTemplate from 'plugins/kibana/management/sections/settings/advanced_row.html';
 
 uiModules.get('apps/management')
@@ -65,6 +65,14 @@ uiModules.get('apps/management')
         });
       };
 
+      $scope.isDefaultValue = (conf) => {
+        // conf.isCustom = custom setting, provided by user, so there is no notion of
+        // having a default or non-default value for it
+        return conf.isCustom
+          || conf.value === undefined
+          || conf.value === ''
+          || String(conf.value) === String(conf.defVal);
+      };
     }
   };
 });

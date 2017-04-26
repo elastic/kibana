@@ -1,4 +1,4 @@
-export default function FetchStrategyForDoc(Promise) {
+export function DocAdminStrategyProvider(Promise) {
   return {
     id: 'doc_admin',
     clientMethod: 'mget',

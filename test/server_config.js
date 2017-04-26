@@ -1,5 +1,4 @@
 const shield = require('./shield');
-
 const kibanaURL = '/app/kibana';
 
 module.exports = {
@@ -28,7 +27,7 @@ module.exports = {
   },
   apps: {
     status_page: {
-      pathname: 'status'
+      pathname: '/status'
     },
     discover: {
       pathname: kibanaURL,
@@ -44,7 +43,7 @@ module.exports = {
     },
     dashboard: {
       pathname: kibanaURL,
-      hash: '/dashboard',
+      hash: '/dashboards',
     },
     settings: {
       pathname: kibanaURL,

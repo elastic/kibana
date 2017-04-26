@@ -35,6 +35,20 @@ export default function query(req, panel, annotation) {
       });
     }
 
+    const globalFilters = req.payload.filters;
+    if (!annotation.ignore_global_filters) {
+      doc.query.bool.must = doc.query.bool.must.concat(globalFilters);
+    }
+
+    if (!annotation.ignore_panel_filters && panel.filter) {
+      doc.query.bool.must.push({
+        query_string: {
+          query: panel.filter,
+          analyze_wildcard: true
+        }
+      });
+    }
+
     if (annotation.fields) {
       const fields = annotation.fields.split(/[,\s]+/) || [];
       fields.forEach(field => {

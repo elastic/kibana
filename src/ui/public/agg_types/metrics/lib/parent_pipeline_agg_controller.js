@@ -1,5 +1,5 @@
 import _ from 'lodash';
-import safeMakeLabel from './safe_make_label';
+import { safeMakeLabel } from './safe_make_label';
 
 const parentPipelineAggController = function ($scope) {
 

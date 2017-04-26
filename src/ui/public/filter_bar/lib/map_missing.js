@@ -1,4 +1,4 @@
-export default function mapMissingProvider(Promise) {
+export function FilterBarLibMapMissingProvider(Promise) {
   return function (filter) {
     let key;
     let value;

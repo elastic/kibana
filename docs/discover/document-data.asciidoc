@@ -18,8 +18,9 @@ image::images/Expanded-Document.png[]
 
 To view the original JSON document (pretty-printed), click the *JSON* tab.
 
-To view the document data as a separate page, click the document link. You can
-bookmark and share this link to provide direct access to a particular document.
+To view the document data as a separate page, click the *View single document* 
+link. You can bookmark and share this link to provide direct access to a 
+particular document.
 
 To display or hide a field's column in the Documents table, click the
 image:images/add-column-button.png[Add Column] *Toggle column in table* button.

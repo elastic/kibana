@@ -1,9 +1,9 @@
 import _ from 'lodash';
-import toEditableConfig from 'plugins/kibana/management/sections/settings/lib/to_editable_config';
+import { toEditableConfig } from 'plugins/kibana/management/sections/settings/lib/to_editable_config';
 import 'plugins/kibana/management/sections/settings/advanced_row';
-import management from 'ui/management';
+import { management } from 'ui/management';
 import uiRoutes from 'ui/routes';
-import uiModules from 'ui/modules';
+import { uiModules } from 'ui/modules';
 import indexTemplate from 'plugins/kibana/management/sections/settings/index.html';
 
 uiRoutes

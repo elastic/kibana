@@ -1,6 +1,6 @@
 import moment from 'moment';
 
-export default {
+export const dateRange = {
   toString: function (range, format) {
     if (!range.from) {
       return 'Before ' + format(range.to);

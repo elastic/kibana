@@ -1,4 +1,4 @@
-export default function (_) {
+export function lodashStringMixin(_) {
 
   const DOT_PREFIX_RE = /(.).+?\./g;
 

@@ -2,12 +2,15 @@ import 'ui/paginated_table';
 import 'ui/compile_recursive_directive';
 import 'ui/agg_table/agg_table.less';
 import _ from 'lodash';
-import uiModules from 'ui/modules';
+import { uiModules } from 'ui/modules';
 import aggTableTemplate from 'ui/agg_table/agg_table.html';
+import { RegistryFieldFormatsProvider } from 'ui/registry/field_formats';
 
 uiModules
 .get('kibana')
 .directive('kbnAggTable', function ($filter, config, Private, compileRecursiveDirective) {
+  const fieldFormats = Private(RegistryFieldFormatsProvider);
+  const numberFormatter = fieldFormats.getDefaultInstance('number').getConverterFor('html');
 
   return {
     restrict: 'E',
@@ -95,29 +98,59 @@ uiModules
             formattedColumn.class = 'visualize-table-right';
           }
 
-          const isFieldNumeric = (field && field.type === 'number');
-          const isFirstValueNumeric = _.isNumber(_.get(table, `rows[0][${i}].value`));
-
-          if (isFieldNumeric || isFirstValueNumeric) {
-            function sum(tableRows) {
-              return _.reduce(tableRows, function (prev, curr) {return prev + curr[i].value; }, 0);
+          let isFieldNumeric = false;
+          let isFieldDate = false;
+          const aggType = agg.type;
+          if (aggType && aggType.type === 'metrics') {
+            if (aggType.name === 'top_hits') {
+              if (agg._opts.params.aggregate !== 'concat') {
+                // all other aggregate types for top_hits output numbers
+                // so treat this field as numeric
+                isFieldNumeric = true;
+              }
+            } else if (field) {
+              // if the metric has a field, check if it is either number or date
+              isFieldNumeric = field.type === 'number';
+              isFieldDate = field.type === 'date';
+            } else {
+              // if there is no field, then it is count or similar so just say number
+              isFieldNumeric = true;
             }
+          } else if (field) {
+            isFieldNumeric = field.type === 'number';
+            isFieldDate = field.type === 'date';
+          }
+
+          if (isFieldNumeric || isFieldDate || $scope.totalFunc === 'count') {
+            function sum(tableRows) {
+              return _.reduce(tableRows, function (prev, curr) {
+                // some metrics return undefined for some of the values
+                // derivative is an example of this as it returns undefined in the first row
+                if (curr[i].value === undefined) return prev;
+                return prev + curr[i].value;
+              }, 0);
+            }
+            const formatter = agg.fieldFormatter('html');
 
             switch ($scope.totalFunc) {
               case 'sum':
-                formattedColumn.total = sum(table.rows);
+                if (!isFieldDate) {
+                  formattedColumn.total = formatter(sum(table.rows));
+                }
                 break;
               case 'avg':
-                formattedColumn.total = sum(table.rows) / table.rows.length;
+                if (!isFieldDate) {
+                  formattedColumn.total = formatter(sum(table.rows) / table.rows.length);
+                }
                 break;
               case 'min':
-                formattedColumn.total = _.chain(table.rows).map(i).map('value').min().value();
+                formattedColumn.total = formatter(_.chain(table.rows).map(i).map('value').min().value());
                 break;
               case 'max':
-                formattedColumn.total = _.chain(table.rows).map(i).map('value').max().value();
+                formattedColumn.total = formatter(_.chain(table.rows).map(i).map('value').max().value());
                 break;
               case 'count':
-                formattedColumn.total = table.rows.length;
+                formattedColumn.total = numberFormatter(table.rows.length);
                 break;
               default:
                 break;

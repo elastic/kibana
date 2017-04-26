@@ -37,16 +37,6 @@ A high level overview of our contributing guidelines.
 
 Don't fret, it's not as daunting as the table of contents makes it out to be!
 
-## Effective issue reporting in Kibana
-
-At any given time the Kibana team at Elastic is working on dozens of features and enhancements, both for Kibana itself and for a few other projects at Elastic. When you file an issue, we'll take the time to digest it, consider solutions, and weigh its applicability to both the Kibana user base at large and the long-term vision for the project. Once we've completed that process, we will assign the issue a priority.
-
-- **P1**: A high-priority issue that affects virtually all Kibana users. Bugs that would cause incorrect results, security issues and features that would vastly improve the user experience for everyone. Work arounds for P1s generally don't exist without a code change.
-- **P2**: A broadly applicable, high visibility, issue that enhances the usability of Kibana for a majority users.
-- **P3**: Nice-to-have bug fixes or functionality. Work arounds for P3 items generally exist.
-- **P4**: Niche and special interest issues that may not fit our core goals. We would take a high quality pull for this if implemented in such a way that it does not meaningfully impact other functionality or existing code. Issues may also be labeled P4 if they would be better implemented in Elasticsearch.
-- **P5**: Highly niche or in opposition to our core goals. Should usually be closed. This doesn't mean we wouldn't take a pull for it, but if someone really wanted this they would be better off working on a plugin. The Kibana team will usually not work on P5 issues but may be willing to assist plugin developers on IRC.
-
 ### Voicing the importance of an issue
 
 We seriously appreciate thoughtful comments. If an issue is important to you, add a comment with a solid write up of your use case and explain why it's so important. Please avoid posting comments comprised solely of a thumbs up emoji 👍.
@@ -245,10 +235,11 @@ npm run test:dev
 
 This should work super if you're using the [Kibana plugin generator](https://github.com/elastic/generator-kibana-plugin). If you're not using the generator, well, you're on your own. We suggest you look at how the generator works.
 
-To run the tests for just your particular plugin, assuming you plugin lives outside of the `plugins directory`, use the following command.
+To run the tests for just your particular plugin run the following command from your plugin:
 
 ```bash
-npm run test:dev -- --kbnServer.testsBundle.pluginId=some_special_plugin --kbnServer.plugin-path=../some_special_plugin
+npm run test:server
+npm run test:browser -- --dev # remove the --dev flag to run them once and close
 ```
 
 ### Cross-browser Compatibility
@@ -269,8 +260,6 @@ npm run test:dev -- --kbnServer.testsBundle.pluginId=some_special_plugin --kbnSe
 
 The following will start Kibana, Elasticsearch and the chromedriver for you. To run the functional UI tests use the following commands
 
-If you want to run the functional UI tests one time and exit, use the following command. This is used by the CI systems and is great for quickly checking that things pass. It is essentially a combination of the next two tasks.  This supports options `--grep=foo` for only running tests that match a regular expression, and `--appSuites=management` for running tests for a specific application.
-
 ```bash
 npm run test:ui
 ```
@@ -287,6 +276,8 @@ To execute the front-end browser tests, enter the following. This requires the s
 ```bash
 npm run test:ui:runner
 ```
+
+To filter these tests, use `--grep=foo` for only running tests that match a regular expression.
 
 To run these browser tests against against some other Elasticsearch and Kibana instance you can set these environment variables and then run the test runner.
 Here's an example to run against an Elastic Cloud instance (note that you should run the same branch of tests as the version of Kibana you're testing);
@@ -308,12 +299,7 @@ npm run test:ui:runner
 
 ##### Browser Automation Notes
 
-- Using Page Objects pattern (https://theintern.github.io/intern/#writing-functional-test)
-- At least the initial tests for the Settings, Discover, and Visualize tabs all depend on a very specific set of logstash-type data (generated with makelogs).  Since that is a static set of data, all the Discover and Visualize tests use a specific Absolute time range.  This guarantees the same results each run.
-- These tests have been developed and tested with Chrome and Firefox browser.  In theory, they should work on all browsers (that's the benefit of Intern using Leadfoot).
-- These tests should also work with an external testing service like https://saucelabs.com/ or https://www.browserstack.com/ but that has not been tested.
-- https://theintern.github.io/
-- https://theintern.github.io/leadfoot/module-leadfoot_Element.html
+[Read about the `FunctionalTestRunner`](https://www.elastic.co/guide/en/kibana/current/development-functional-tests.html) to learn more about how you can run and develop functional tests for Kibana core and plugins.
 
 ### Building OS packages
 
