@@ -51,6 +51,23 @@ class VisEditorVisualization extends Component {
     if (this.state.dragging) {
       style.userSelect = 'none';
     }
+    let applyButton;
+    if (this.props.dirty) {
+      applyButton = (
+        <div className="vis_editor__dirty_controls">
+          <div className="vis_editor__dirty_controls-message">
+            The changes to this visualization have not been applied.
+          </div>
+          <div className="vis_editor__dirty_controls-button">
+            <button
+              disabled={!this.props.dirty}
+              onClick={this.props.onCommit}
+              className="thor__button-solid-default md">
+              <i className="fa fa-play"></i> Apply Changes</button>
+          </div>
+        </div>
+      );
+    }
     const visBackgroundColor = '#FFF';
     return (
       <div>
@@ -67,6 +84,7 @@ class VisEditorVisualization extends Component {
             onChange={this.handleChange}
             visData={this.props.visData} />
         </div>
+        {applyButton}
         <div
           className="vis_editor__visualization-draghandle"
           onMouseDown={this.handleMouseDown}
@@ -82,7 +100,9 @@ VisEditorVisualization.propTypes = {
   model: PropTypes.object,
   onBrush: PropTypes.func,
   onChange: PropTypes.func,
-  visData: PropTypes.object
+  onCommit: PropTypes.func,
+  visData: PropTypes.object,
+  dirty: PropTypes.bool
 };
 
 export default VisEditorVisualization;

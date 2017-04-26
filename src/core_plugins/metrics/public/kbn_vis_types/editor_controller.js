@@ -28,12 +28,12 @@ app.controller('MetricsEditorController', (
   };
   const fetchFields = Private(require('../lib/fetch_fields'));
 
-  const debouncedFetch = _.debounce(() => {
-    fetch();
-  }, 1000, {
-    leading: false,
-    trailing: true
-  });
+  // const debouncedFetch = _.debounce(() => {
+  //   fetch();
+  // }, 1000, {
+  //   leading: false,
+  //   trailing: true
+  // });
 
   const debouncedFetchFields = _.debounce(fetchFields($scope), 1000, {
     leading: false,
@@ -49,12 +49,18 @@ app.controller('MetricsEditorController', (
       $scope.model = createNewPanel();
       angular.copy($scope.model, $scope.vis._editableVis.params);
     }
+    fetch();
   }
 
-  $scope.$watchCollection('model', newValue => {
-    angular.copy(newValue, $scope.vis._editableVis.params);
+  $scope.commit = () => {
     $scope.stageEditableVis();
-    debouncedFetch();
+    fetch();
+    $scope.dirty = false;
+  };
+
+  $scope.$watchCollection('model', (newValue, oldValue) => {
+    angular.copy(newValue, $scope.vis._editableVis.params);
+    $scope.dirty = !_.isEqual(newValue, oldValue);
 
     const patternsToFetch = [];
     // Fetch any missing index patterns
