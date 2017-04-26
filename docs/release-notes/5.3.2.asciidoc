@@ -1,0 +1,7 @@
+[[release-notes-5.3.2]]
+== 5.3.2 Release Notes
+
+Version 5.3.2 of the Elastic Stack doesn't have any changes for Kibana.
+
+
+
