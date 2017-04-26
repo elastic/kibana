@@ -12,7 +12,7 @@ export default function collectSearchSources(req, panels) {
       }
     }
     return acc;
-  }, []);
+  }, []).filter(id => id);
 
   if (!ids.length) {
     return Promise.resolve([]);
@@ -23,6 +23,7 @@ export default function collectSearchSources(req, panels) {
     type: 'search',
     body: { ids }
   };
+
 
   return callWithRequest(req, 'mget', params).then(resp => resp.docs).then(savedSearches => {
     return deps.collectIndexPatterns(req, savedSearches)

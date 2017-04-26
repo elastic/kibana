@@ -11,7 +11,7 @@ export default function collectIndexPatterns(req, panels) {
       }
     }
     return acc;
-  }, []);
+  }, []).filter(id => id);
 
   if (!ids.length) {
     return Promise.resolve([]);
@@ -22,6 +22,7 @@ export default function collectIndexPatterns(req, panels) {
     type: 'index-pattern',
     body: { ids }
   };
+
 
   return callWithRequest(req, 'mget', params).then(resp => resp.docs);
 
