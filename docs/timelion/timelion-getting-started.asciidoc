@@ -1,0 +1,22 @@
+[[timelion-getting-started]]
+== Getting Started
+
+Ready to experience all that is Timelion? This getting started tutorial will show you how to:
+
+* https://www.elastic.co/guide/en/kibana/current/timelion-create.html[Create a time series chart with multiple expressions]
+* https://www.elastic.co/guide/en/kibana/current/timelion-customize.html[Customize the visualization type and formatting options]
+* https://www.elastic.co/guide/en/kibana/current/timelion-math.html[Use mathematical functions to manipulate your data]
+* https://www.elastic.co/guide/en/kibana/current/timelion-conditional.html[Track trends and use conditional logic to format outliers]
+* https://www.elastic.co/guide/en/kibana/current/timelion-save.html[Add Timelion visualizations to a dashboard]
+* https://www.elastic.co/guide/en/kibana/current/timelion-inline-help.html[Inline help and documentation]
+
+
+include::getting-started/timelion-create.asciidoc[]
+
+include::getting-started/timelion-customize.asciidoc[]
+
+include::getting-started/timelion-math.asciidoc[]
+
+include::getting-started/timelion-conditional.asciidoc[]
+
+include::getting-started/timelion-save.asciidoc[]
