@@ -16,8 +16,6 @@ export function KbnUrlProvider($injector, $location, $rootScope, $parse, Private
    *
    *  "features" that `kbnUrl` does it's best to guarantee, which
    *  are not guaranteed with the `$location` service:
-   *   - calling `kbnUrl.change()` within a route.resolve() function will
-   *     always prevent the current route from rendering
    *   - calling `kbnUrl.change()` with a url that resolves to the current
    *     route will force a full transition (rather than just updating the
    *     properties of the $route object)
