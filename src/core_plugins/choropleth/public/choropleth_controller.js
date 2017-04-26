@@ -29,26 +29,8 @@ module.controller('KbnChoroplethController', function ($scope, $element, Private
   });
   let choroplethLayer = null;
 
-  async function makeKibanaMap() {
-
-    if (!tilemapSettings.isInitialized()) {
-      await tilemapSettings.loadSettings();
-    }
-
-    const minMaxZoom = tilemapSettings.getMinMaxZoom(false);
-    kibanaMap = new KibanaMap(containerNode, minMaxZoom);
-    kibanaMap.setZoomLevel(2);
-    const url = tilemapSettings.getUrl();
-    const options = tilemapSettings.getTMSOptions();
-    kibanaMap.setBaseLayer({ baseLayerType: 'tms', options: { url, ...options } });
-    kibanaMap.addLegendControl();
-    kibanaMap.addFitControl();
-    kibanaMap.persistUiStateForVisualization($scope.vis);
-  }
-
   const kibanaMapReady = makeKibanaMap();
   $scope.$watch('esResponse', async function (response) {
-
     kibanaMapReady.then(() => {
       const metricsAgg = _.first($scope.vis.aggs.bySchemaName.metric);
       const termAggId = _.first(_.pluck($scope.vis.aggs.bySchemaName.segment, 'id'));
@@ -98,6 +80,30 @@ module.controller('KbnChoroplethController', function ($scope, $element, Private
     });
   });
 
+  getAvailableVectorLayers()
+    .then(function (layersFromService) {
+      // $scope.vis.params.vectorLayers = $scope.vis.params.defaults.vectorLayers.concat(layersFromService);
+      console.log(layersFromService);
+      $scope.vis.type.params.vectorLayers = $scope.vis.type.params.vectorLayers.concat(layersFromService);
+      $scope.$apply();
+    });
+
+  async function makeKibanaMap() {
+
+    if (!tilemapSettings.isInitialized()) {
+      await tilemapSettings.loadSettings();
+    }
+
+    const minMaxZoom = tilemapSettings.getMinMaxZoom(false);
+    kibanaMap = new KibanaMap(containerNode, minMaxZoom);
+    kibanaMap.setZoomLevel(2);
+    const url = tilemapSettings.getUrl();
+    const options = tilemapSettings.getTMSOptions();
+    kibanaMap.setBaseLayer({ baseLayerType: 'tms', options: { url, ...options } });
+    kibanaMap.addLegendControl();
+    kibanaMap.addFitControl();
+    kibanaMap.persistUiStateForVisualization($scope.vis);
+  }
 
   function setTooltipFormatter() {
     const metricsAgg = _.first($scope.vis.aggs.bySchemaName.metric);
@@ -137,6 +143,12 @@ module.controller('KbnChoroplethController', function ($scope, $element, Private
       }
     });
     kibanaMap.addLayer(choroplethLayer);
+  }
+
+  async function getAvailableVectorLayers() {
+    await mapSettings.loadSettings();
+    console.log('thing!');
+    return mapSettings.getVectorLayers();
   }
 
 

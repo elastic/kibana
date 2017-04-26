@@ -1,7 +1,7 @@
 import { uiModules } from 'ui/modules';
 import _ from 'lodash';
 import marked from 'marked';
-import { modifyUrl } from 'ui/url';
+// import { modifyUrl } from 'ui/url';
 
 marked.setOptions({
   gfm: true, // Github-flavored markdown
@@ -9,13 +9,11 @@ marked.setOptions({
 });
 
 uiModules.get('kibana')
-  .service('mapSettings', function ($http, tilemapsConfig, $sanitize, vectormapsConfig, kbnVersion) {
-    const attributionFromConfig = $sanitize(marked(tilemapsConfig.deprecated.config.options.attribution || ''));
-    const optionsFromConfig = _.assign({}, tilemapsConfig.deprecated.config.options, { attribution: attributionFromConfig });
+  .service('mapSettings', function ($http, $sanitize, vectormapsConfig, kbnVersion) {
 
-    const extendUrl = (url, props) => (
-      modifyUrl(url, parsed => _.merge(parsed, props))
-    );
+    // const extendUrl = (url, props) => (
+    //   modifyUrl(url, parsed => _.merge(parsed, props))
+    // );
 
     /**
      *  Unescape a url template that was escaped by encodeURI() so leaflet
@@ -23,10 +21,10 @@ uiModules.get('kibana')
      *  @param  {String} url
      *  @return {String}
      */
-    const unescapeTemplateVars = url => {
-      const ENCODED_TEMPLATE_VARS_RE = /%7B(\w+?)%7D/g;
-      return url.replace(ENCODED_TEMPLATE_VARS_RE, (total, varName) => `{${varName}}`);
-    };
+    // const unescapeTemplateVars = url => {
+    //   const ENCODED_TEMPLATE_VARS_RE = /%7B(\w+?)%7D/g;
+    //   return url.replace(ENCODED_TEMPLATE_VARS_RE, (total, varName) => `{${varName}}`);
+    // };
 
 
     /**
@@ -40,47 +38,32 @@ uiModules.get('kibana')
           my_app_version: kbnVersion
         };
         this._error = null;
-
-        //initialize settings with the default of the configuration
-        this._url = tilemapsConfig.deprecated.config.url;
-        this._tmsOptions = optionsFromConfig;
-
         this._invalidateSettings();
-
       }
 
 
       _invalidateSettings() {
 
         this._settingsInitialized = false;
+        this._response = null;
         this._loadSettings = _.once(async() => {
-
-          if (tilemapsConfig.deprecated.isOverridden) {//if settings are overridden, we will use those.
-            this._settingsInitialized = true;
-          }
 
           if (this._settingsInitialized) {
             return true;
           }
 
-          return this._getTileServiceManifest(tilemapsConfig.manifestServiceUrl, this._queryParams)
+          return this._getVectormapsManifest(vectormapsConfig.manifestServiceUrl, this._queryParams)
             .then(response => {
-              const service = _.get(response, 'data.services[0]');
-              if (!service) {
-                throw new Error('Manifest response does not include sufficient service data.');
-              }
-
-              this._error = null;
-              this._tmsOptions = {
-                attribution: $sanitize(marked(service.attribution)),
-                minZoom: service.minZoom,
-                maxZoom: service.maxZoom,
-                subdomains: service.subdomains || []
-              };
-
-              this._url = unescapeTemplateVars(extendUrl(service.url, {
-                query: this._queryParams
-              }));
+              this._response = response;
+              // const service = _.get(response, 'data.services[0]');
+              // if (!service) {
+              //   throw new Error('Manifest response does not include sufficient service data.');
+              // }
+              //
+              // this._error = null;
+              // this._url = unescapeTemplateVars(extendUrl(service.url, {
+              //   query: this._queryParams
+              // }));
 
               this._settingsInitialized = true;
             })
@@ -136,6 +119,14 @@ uiModules.get('kibana')
 
       }
 
+      getVectorLayers() {
+        if (!this._settingsInitialized) {
+          throw new Error('Should wait until vector layers are initialized');
+        }
+
+        return this._response.layers;
+      }
+
       isInitialized() {
         return this._settingsInitialized;
       }
@@ -155,14 +146,71 @@ uiModules.get('kibana')
       /**
        * Make this a method to allow for overrides by test code
        */
-      _getTileServiceManifest(manifestUrl) {
-        return $http({
-          url: extendUrl(manifestUrl, { query: this._queryParams }),
-          method: 'GET'
-        });
+      _getVectormapsManifest() {
+        // return $http({
+        //   url: extendUrl(manifestUrl, { query: this._queryParams }),
+        //   method: 'GET'
+        // });
+        return mockRequest();
       }
 
     }
 
     return new MapSettings();
   });
+
+
+async function mockRequest() {
+
+  return new Promise(function (resolve) {
+    setTimeout(function () {
+
+      const ret = `{
+        "layers":[
+        {
+          "attribution":"",
+          "name":"US States",
+          "url":"https://storage.googleapis.com/elastic-layer.appspot.com/L2FwcGhvc3RpbmdfcHJvZC9ibG9icy9BRW5CMlVvNGJ0aVNidFNJR2dEQl9rbTBjeXhKMU01WjRBeW1kN3JMXzM2Ry1qc3F6QjF4WE5XdHY2ODlnQkRpZFdCY2g1T2dqUGRHSFhSRTU3amlxTVFwZjNBSFhycEFwV2lYR29vTENjZjh1QTZaZnRpaHBzby5VXzZoNk1paGJYSkNPalpI",
+          "fields":[
+            {
+              "name":"postal",
+              "description":"Two letter abbreviation"
+            },
+            {
+              "name":"name",
+              "description":"State name"
+            }
+          ],
+          "created_at":"2017-04-26T19:45:22.377820",
+          "id":5086441721823232
+        },   
+        {
+          "attribution":"\u00a9 [Elastic Tile Service](https://www.elastic.co/elastic-tile-service)",
+          "name":"World Countries",
+          "url":"https://storage.googleapis.com/elastic-layer.appspot.com/L2FwcGhvc3RpbmdfcHJvZC9ibG9icy9BRW5CMlVwWTZTWnhRRzNmUk9HUE93TENjLXNVd2IwdVNpc09SRXRyRzBVWWdqOU5qY2hldGJLOFNZSFpUMmZmZWdNZGx0NWprT1R1ZkZ0U1JEdFBtRnkwUWo0S0JuLTVYY1I5RFdSMVZ5alBIZkZuME1qVS04TS5oQTRNTl9yRUJCWk9tMk03",
+          "fields":[
+            {
+              "name":"iso2",
+              "description":"Two letter abbreviation"
+            },
+            {
+              "name":"name",
+              "description":"Country name"
+            },
+            {
+              "name":"iso3",
+              "description":"Three letter abbreviation"
+            }
+          ],
+          "created_at":"2017-04-26T17:12:15.978370",
+          "id":5659313586569216
+        }
+      ]
+      }`;
+
+      resolve(JSON.parse(ret));
+    }, 100);
+  });
+
+
+}
