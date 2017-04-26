@@ -182,6 +182,11 @@ module.exports = () => Joi.object({
     }).default()
   }).default(),
   vectormap: Joi.object({
+    manifestServiceUrl: Joi.when('$dev', {
+      is: true,
+      then: Joi.string().default('https://elastic-layer.appspot.com/manifest'),
+      otherwise: Joi.string().default('https://elastic-layer.appspot.com/manifest')
+    }),
     layers: Joi.array().items(Joi.object({
       url: Joi.string(),
       type: Joi.string(),
@@ -191,7 +196,7 @@ module.exports = () => Joi.object({
         description: Joi.string()
       }))
     }))
-  }),
+  }).default(),
   uiSettings: Joi.object({
     // this is used to prevent the uiSettings from initializing. Since they
     // require the elasticsearch plugin in order to function we need to turn

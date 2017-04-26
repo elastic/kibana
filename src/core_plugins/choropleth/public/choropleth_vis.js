@@ -14,41 +14,13 @@ VisTypesRegistryProvider.register(function ChoroplethProvider(Private, vectormap
   const TemplateVisType = Private(TemplateVisTypeProvider);
   const Schemas = Private(VisSchemasProvider);
 
-  const defaultLayers = [
-    {
-      type: 'default',
-      url: '../plugins/choropleth/data/world_countries.json',
-      name: 'World Countries',
-      fields: [
-        {
-          name: 'iso2',
-          description: 'Two letter abbreviation'
-        },
-        {
-          name: 'iso3',
-          description: 'Three letter abbreviation'
-        },
-        {
-          name: 'name',
-          description: 'Country name'
-        }
-      ]
-    },
-    {
-      type: 'default',
-      url: '../plugins/choropleth/data/us_states.json',
-      name: 'US States',
-      fields: [{
-        name: 'postal',
-        description: 'Two letter abbreviation'
-      }, {
-        name: 'name',
-        description: 'State name'
-      }]
-    }
-  ];
+  const vectorLayers = vectormapsConfig.layers.slice();
+  const selectedLayer = vectorLayers[0];
+  const selectedJoinField = selectedLayer ? vectorLayers[0].fields[0] : null;
 
-  const vectorLayers = vectormapsConfig.layers.concat(defaultLayers);
+
+  console.log('vector layers', vectorLayers);
+
   return new TemplateVisType({
     name: 'choropleth',
     title: 'Vector Map',
@@ -63,8 +35,8 @@ VisTypesRegistryProvider.register(function ChoroplethProvider(Private, vectormap
         legendPosition: 'bottomright',
         addTooltip: true,
         colorSchema: 'Yellow to Red',
-        selectedLayer: vectorLayers[0],
-        selectedJoinField: vectorLayers[0].fields[0]
+        selectedLayer: selectedLayer,
+        selectedJoinField: selectedJoinField
       },
       legendPositions: [{
         value: 'bottomleft',
@@ -80,7 +52,7 @@ VisTypesRegistryProvider.register(function ChoroplethProvider(Private, vectormap
         text: 'top right',
       }],
       colorSchemas: Object.keys(truncatedColorMaps),
-      vectormap: vectorLayers,
+      vectorLayers: vectorLayers,
       editor: '<choropleth-vis-params></choropleth-vis-params>'
     },
     schemas: new Schemas([

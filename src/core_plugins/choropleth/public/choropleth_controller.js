@@ -7,10 +7,12 @@ import ChoroplethLayer from './choropleth_layer';
 import { truncatedColorMaps }  from 'ui/vislib/components/color/truncated_colormaps';
 import AggResponsePointSeriesTooltipFormatterProvider from './tooltip_formatter';
 import { ResizeCheckerProvider } from 'ui/resize_checker';
+import 'ui/vis_maps/lib/map_settings';
 
 
 const module = uiModules.get('kibana/choropleth', ['kibana']);
-module.controller('KbnChoroplethController', function ($scope, $element, Private, Notifier, getAppState, tilemapSettings, config) {
+module.controller('KbnChoroplethController', function ($scope, $element, Private, Notifier, getAppState,
+                                                       tilemapSettings, mapSettings, config) {
 
   const tooltipFormatter = Private(AggResponsePointSeriesTooltipFormatterProvider);
   const ResizeChecker = Private(ResizeCheckerProvider);

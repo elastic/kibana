@@ -1,4 +1,5 @@
 import { resolve } from 'path';
+import _ from 'lodash';
 
 import Promise from 'bluebird';
 import { mkdirp as mkdirpNode } from 'mkdirp';
