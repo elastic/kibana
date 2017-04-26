@@ -28,7 +28,7 @@ module.exports = class RouteSetupManager {
    * and accepting promises from it.
    * @return {[type]} [description]
    */
-  doWork(Promise, $injector, userWork) {
+  doWork(Promise, $injector, userWork, kbnUrl) {
 
     const invokeEach = (arr, locals) => {
       return Promise.map(arr, fn => {
@@ -74,6 +74,7 @@ module.exports = class RouteSetupManager {
     .then(
       () => invokeEach(this.onWorkComplete),
       err => callErrorHandlers(this.onWorkError, err)
-    );
+    )
+    .finally(() => kbnUrl.awaitPendingUrlChanges());
   }
 };

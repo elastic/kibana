@@ -7,18 +7,39 @@ import { AppStateProvider } from 'ui/state_management/app_state';
 uiModules.get('kibana/url')
 .service('kbnUrl', function (Private) { return Private(KbnUrlProvider); });
 
-export function KbnUrlProvider($injector, $location, $rootScope, $parse, Private) {
+export function KbnUrlProvider($injector, $location, $rootScope, $parse, Private, Promise, $browser) {
+  /**
+   *  the `kbnUrl` service was created to smooth over some of the
+   *  inconsistent behavior that occurs when modifying the url via
+   *  the `$location` api. In general it is recommended that you use
+   *  the `kbnUrl` service any time you want to modify the url.
+   *
+   *  "features" that `kbnUrl` does it's best to guarantee, which
+   *  are not guaranteed with the `$location` service:
+   *   - calling `kbnUrl.change()` within a route.resolve() function will
+   *     always prevent the current route from rendering
+   *   - calling `kbnUrl.change()` with a url that resolves to the current
+   *     route will force a full transition (rather than just updating the
+   *     properties of the $route object)
+   *
+   *  Additional features of `kbnUrl`
+   *   - parameterized urls
+   *   - easily include an app state with the url
+   *
+   *  @type {KbnUrl}
+   */
   const self = this;
+  const pendingUrlChangedPromises = [];
 
   /**
    * Navigate to a url
    *
    * @param  {String} url - the new url, can be a template. See #eval
    * @param  {Object} [paramObj] - optional set of parameters for the url template
-   * @return {undefined}
+   * @return {Promise<undefined>} - promise that resolves when the change goes into effect
    */
   self.change = function (url, paramObj, appState) {
-    self._changeLocation('url', url, paramObj, false, appState);
+    return self._changeLocation('url', url, paramObj, false, appState);
   };
 
   /**
@@ -27,10 +48,10 @@ export function KbnUrlProvider($injector, $location, $rootScope, $parse, Private
    *
    * @param  {String} path - the new path, can be a template. See #eval
    * @param  {Object} [paramObj] - optional set of parameters for the path template
-   * @return {undefined}
+   * @return {Promise<undefined>} - promise that resolves when the change goes into effect
    */
   self.changePath = function (path, paramObj) {
-    self._changeLocation('path', path, paramObj);
+    return self._changeLocation('path', path, paramObj);
   };
 
   /**
@@ -38,10 +59,10 @@ export function KbnUrlProvider($injector, $location, $rootScope, $parse, Private
    *
    * @param  {String} url - the new url, can be a template. See #eval
    * @param  {Object} [paramObj] - optional set of parameters for the url template
-   * @return {undefined}
+   * @return {Promise<undefined>} - promise that resolves when the change goes into effect
    */
   self.redirect = function (url, paramObj, appState) {
-    self._changeLocation('url', url, paramObj, true, appState);
+    return self._changeLocation('url', url, paramObj, true, appState);
   };
 
   /**
@@ -50,10 +71,10 @@ export function KbnUrlProvider($injector, $location, $rootScope, $parse, Private
    *
    * @param  {String} path - the new path, can be a template. See #eval
    * @param  {Object} [paramObj] - optional set of parameters for the path template
-   * @return {undefined}
+   * @return {Promise<undefined>} - promise that resolves when the change goes into effect
    */
   self.redirectPath = function (path, paramObj) {
-    self._changeLocation('path', path, paramObj, true);
+    return self._changeLocation('path', path, paramObj, true);
   };
 
   /**
@@ -146,6 +167,63 @@ export function KbnUrlProvider($injector, $location, $rootScope, $parse, Private
     $location.search(param, null).replace();
   };
 
+  /**
+   *  When the route resolve functions always resolve their promises immediately,
+   *  because they didn't need to make network requests and used only Angular promises,
+   *  the router will render the view in the same tick of the digest loop. This is ideal
+   *  for performance but can lead to view flickering and unnecessary controller loading
+   *  if `kbnUrl.change()` (or similar) is called within the resolve functions (or setup
+   *  work).
+   *
+   *  It plays out like this:
+   *   1. url change is detected by the router
+   *   2. new route is selected and transition begins
+   *   3. route resolve functions runs:
+   *     a. it's determined that the user does not have a default index
+   *        pattern selected (for example)
+   *     b. `kbnUrl.change()` is called to send the user to settings
+   *       i. `kbnUrl` calls `$location.url()` with the new url
+   *       ii. `$location` debounces the calls it receives within a single
+   *           digest cycle, on the next digest cycle it will reconcile with
+   *           `$browser` to determine if a transition is still necessary
+   *   4. route resolve functions complete within a single digest cycle because
+   *      all promises were immediately resolved
+   *   5. the router checks that the route it's working on is still the
+   *      current route, and it is
+   *   6. the router renders the view, initialing controllers and directives
+   *   6. view rendering completes and the digest cycle completes
+   *   --- next digest cycle ---
+   *   7. `$location` detects that it's debounced url is different from `$browser`
+   *      so it updates `$browser` and fires a `$locationChangeSuccess` event
+   *   8. The router hears the change event, loads the new route, and starts over again
+   *
+   *  The tell-tale sign of this is flickering during redirection, but the
+   *  part that is really undesirable is that when the view is rendered and all of
+   *  it's controllers/directives are instantiated. This often causes data to load
+   *  unnecessarily or can lead to fatal errors because the resolve functions didn't
+   *  run as expected.
+   *
+   *  To fix this we need to ensure that route resolve() functions do not resolve
+   *  before the `$location` service syncs with the `$browser` service. In order to
+   *  know if that is the case we:
+   *
+   *   - create a urlChangedPromise for each call to `$location.url()` that
+   *     only resolves once `$location.absUrl()` and `$browser.url()` return
+   *     the same value
+   *   - keep an array of all pending urlChangedPromises
+   *   - after any setup work completes or fails, call `kbnUrl.awaitPendingUrlChanges()`
+   *     and delay resolution until that promise resolves.
+   *
+   *  When route setup work does not call kbnUrl methods, `awaitPendingUrlChanges()` returns
+   *  a resolved promise so that route load time will not increase and will simply fill the
+   *  gaps caused by the specific timing required to reproduce this error.
+   *
+   *  @return {Promise<undefined>}
+   */
+  self.awaitPendingUrlChanges = function () {
+    return Promise.all(pendingUrlChangedPromises);
+  };
+
   /////
   // private api
   /////
@@ -170,22 +248,42 @@ export function KbnUrlProvider($injector, $location, $rootScope, $parse, Private
       search: $location.search()
     };
 
-    if ($injector.has('$route')) {
-      const $route = $injector.get('$route');
-
-      if (self._shouldForceReload(next, prev, $route)) {
-        const appState = Private(AppStateProvider).getAppState();
-        if (appState) appState.destroy();
-
-        reloading = $rootScope.$on('$locationChangeSuccess', function () {
-          // call the "unlisten" function returned by $on
-          reloading();
-          reloading = false;
-
-          $route.reload();
-        });
-      }
+    const urlChangedPromise = this.createUrlPersistedPromise();
+    if (!$injector.has('$route')) {
+      return urlChangedPromise;
     }
+
+    const $route = $injector.get('$route');
+    if (!self._shouldForceReload(next, prev, $route)) {
+      return urlChangedPromise;
+    }
+
+    reloading = true;
+    const currentAppState = Private(AppStateProvider).getAppState();
+    if (currentAppState) currentAppState.destroy();
+    return urlChangedPromise.then(() => {
+      reloading = false;
+      $route.reload();
+    });
+  };
+
+  self.createUrlPersistedPromise = function () {
+    const promise = new Promise(resolve => {
+      const unwatch = $rootScope.$watch(function () {
+        if ($browser.url() !== $location.absUrl()) {
+          // url change still pending
+          return;
+        }
+
+        unwatch();
+        const i = pendingUrlChangedPromises.indexOf(promise);
+        if (i > -1) pendingUrlChangedPromises.splice(i, 1);
+        resolve();
+      });
+    });
+
+    pendingUrlChangedPromises.push(promise);
+    return promise;
   };
 
   // determine if the router will automatically reload the route

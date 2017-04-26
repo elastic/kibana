@@ -13,6 +13,7 @@ let $route;
 let $location;
 let $rootScope;
 let appState;
+let Promise;
 
 class StubAppState {
   constructor() {
@@ -26,7 +27,8 @@ function init() {
   ngMock.module('kibana/url', 'kibana', function ($provide, PrivateProvider) {
     $provide.service('$route', function () {
       return {
-        reload: _.noop
+        reload: _.noop,
+        current: { $$route: { reloadOnSearch: true } }
       };
     });
 
@@ -43,6 +45,7 @@ function init() {
     $location = $injector.get('$location');
     $rootScope = $injector.get('$rootScope');
     kbnUrl = $injector.get('kbnUrl');
+    Promise = $injector.get('Promise');
   });
 }
 
@@ -53,88 +56,51 @@ describe('kbnUrl', function () {
   });
 
   describe('forcing reload', function () {
-    it('schedules a listener for $locationChangeSuccess on the $rootScope', function () {
+    it('waits for urlChangedPromise before calling $route.reload()', function () {
       $location.url('/url');
-      $route.current = {
-        $$route: {
-          regex: /.*/
-        }
-      };
+      sinon.stub($route, 'reload');
 
-      sinon.stub($rootScope, '$on');
+      const defer = Promise.defer();
+      sinon.spy(defer.promise, 'then');
+      sinon.stub(kbnUrl, 'createUrlPersistedPromise').returns(defer.promise);
 
-      expect($rootScope.$on.callCount).to.be(0);
       kbnUrl.change('/url');
-      sinon.assert.calledOnce(appState.destroy);
-      expect($rootScope.$on.callCount).to.be(1);
-      expect($rootScope.$on.firstCall.args[0]).to.be('$locationChangeSuccess');
+      sinon.assert.calledOnce(defer.promise.then);
+      sinon.assert.notCalled($route.reload);
+      defer.resolve();
+      $rootScope.$digest();
+      sinon.assert.calledOnce($route.reload);
     });
 
-    it('handler unbinds the listener and calls reload', function () {
+    it('reloads once even if multiple changes are sent', function () {
       $location.url('/url');
-      $route.current = {
-        $$route: {
-          regex: /.*/
-        }
-      };
-
-      const unbind = sinon.stub();
-      sinon.stub($rootScope, '$on').returns(unbind);
-      $route.reload = sinon.stub();
-
-      expect($rootScope.$on.callCount).to.be(0);
-      kbnUrl.change('/url');
-      expect($rootScope.$on.callCount).to.be(1);
-
-      const handler = $rootScope.$on.firstCall.args[1];
-      handler();
-      expect(unbind.callCount).to.be(1);
-      expect($route.reload.callCount).to.be(1);
-    });
-
-    it('reloads requested before the first are ignored', function () {
-      $location.url('/url');
-      $route.current = {
-        $$route: {
-          regex: /.*/
-        }
-      };
-      $route.reload = sinon.stub();
-
-      sinon.stub($rootScope, '$on').returns(sinon.stub());
-
-      expect($rootScope.$on.callCount).to.be(0);
-      kbnUrl.change('/url');
-      expect($rootScope.$on.callCount).to.be(1);
-
-      // don't call the first handler
+      sinon.stub($route, 'reload');
+      sinon.stub(kbnUrl, 'createUrlPersistedPromise', () => Promise.resolve());
 
       kbnUrl.change('/url');
-      expect($rootScope.$on.callCount).to.be(1);
+      kbnUrl.change('/url');
+      kbnUrl.change('/url');
+      kbnUrl.change('/url');
+      kbnUrl.change('/url');
+      kbnUrl.change('/url');
+      kbnUrl.change('/url');
+      $rootScope.$digest();
+      sinon.assert.calledOnce($route.reload);
     });
 
     it('one reload can happen once the first has completed', function () {
       $location.url('/url');
-      $route.current = {
-        $$route: {
-          regex: /.*/
-        }
-      };
-      $route.reload = sinon.stub();
+      sinon.stub($route, 'reload');
+      sinon.stub(kbnUrl, 'createUrlPersistedPromise', () => Promise.resolve());
 
-      sinon.stub($rootScope, '$on').returns(sinon.stub());
-
-      expect($rootScope.$on.callCount).to.be(0);
       kbnUrl.change('/url');
-      expect($rootScope.$on.callCount).to.be(1);
-
-      // call the first handler
-      $rootScope.$on.firstCall.args[1]();
-      expect($route.reload.callCount).to.be(1);
-
-      expect($rootScope.$on.callCount).to.be(1);
+      $rootScope.$digest();
       kbnUrl.change('/url');
-      expect($rootScope.$on.callCount).to.be(2);
+      $rootScope.$digest();
+      kbnUrl.change('/url');
+      $rootScope.$digest();
+
+      sinon.assert.calledThrice($route.reload);
     });
   });
 
