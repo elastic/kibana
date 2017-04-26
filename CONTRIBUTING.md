@@ -270,8 +270,6 @@ npm run test:browser -- --dev # remove the --dev flag to run them once and close
 
 The following will start Kibana, Elasticsearch and the chromedriver for you. To run the functional UI tests use the following commands
 
-If you want to run the functional UI tests one time and exit, use the following command. This is used by the CI systems and is great for quickly checking that things pass. It is essentially a combination of the next two tasks.  This supports options `--grep=foo` for only running tests that match a regular expression, and `--appSuites=management` for running tests for a specific application.
-
 ```bash
 npm run test:ui
 ```
@@ -288,6 +286,8 @@ To execute the front-end browser tests, enter the following. This requires the s
 ```bash
 npm run test:ui:runner
 ```
+
+To filter these tests, use `--grep=foo` for only running tests that match a regular expression.
 
 To run these browser tests against against some other Elasticsearch and Kibana instance you can set these environment variables and then run the test runner.
 Here's an example to run against an Elastic Cloud instance (note that you should run the same branch of tests as the version of Kibana you're testing);
