@@ -19,7 +19,6 @@ release-state can be: released | prerelease | unreleased
 :blob:           {repo}blob/{branch}/
 :security:       https://www.elastic.co/community/security/
 
-
 include::introduction.asciidoc[]
 
 include::setup.asciidoc[]
