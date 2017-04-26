@@ -4,7 +4,7 @@ import 'ui/pager';
 
 import { SortableProperties } from 'ui_framework/services';
 
-export function VisualizeListingController($injector, $scope) {
+export function VisualizeListingController($injector) {
   const $filter = $injector.get('$filter');
   const confirmModal = $injector.get('confirmModal');
   const Notifier = $injector.get('Notifier');
@@ -76,10 +76,12 @@ export function VisualizeListingController($injector, $scope) {
 
   this.pager = pagerFactory.create(this.items.length, 20, 1);
 
-  $scope.$watch(() => this.filter, () => {
+  this.onFilter = (newFilter) => {
+    this.filter = newFilter;
     deselectAll();
     fetchItems();
-  });
+  };
+  fetchItems();
 
   this.toggleAll = function toggleAll() {
     if (this.areAllItemsChecked()) {
