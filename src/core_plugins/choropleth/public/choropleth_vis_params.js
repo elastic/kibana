@@ -1,4 +1,4 @@
-import uiModules from 'ui/modules';
+import { uiModules } from 'ui/modules';
 import choroplethVisParamsTemplate from 'plugins/choropleth/choropleth_vis_params.html';
 
 uiModules.get('kibana/choropleth')

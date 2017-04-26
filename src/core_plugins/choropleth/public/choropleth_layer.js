@@ -2,8 +2,8 @@ import $ from 'jquery';
 import L from 'leaflet';
 import _ from 'lodash';
 import d3 from 'd3';
-import KibanaMapLayer from 'ui/vis_maps/kibana_map_layer';
-import colorramps from 'ui/vislib/components/color/colormaps';
+import { KibanaMapLayer } from 'ui/vis_maps/kibana_map_layer';
+import { truncatedColorMaps } from 'ui/vislib/components/color/truncated_colormaps';
 
 export default class ChoroplethLayer extends KibanaMapLayer {
 
@@ -12,7 +12,7 @@ export default class ChoroplethLayer extends KibanaMapLayer {
 
     this._metrics = null;
     this._joinField = null;
-    this._colorRamp = colorramps['Yellow to Red'];
+    this._colorRamp = truncatedColorMaps['Yellow to Red'];
     this._tooltipFormatter = () => '';
 
     this._geojsonUrl = geojsonUrl;

@@ -1,17 +1,17 @@
 import 'plugins/choropleth/choropleth.less';
 import 'plugins/choropleth/choropleth_controller';
 import 'plugins/choropleth/choropleth_vis_params';
-import TemplateVisTypeTemplateVisTypeProvider from 'ui/template_vis_type/template_vis_type';
-import VisSchemasProvider from 'ui/vis/schemas';
+import { TemplateVisTypeProvider } from 'ui/template_vis_type/template_vis_type';
+import { VisSchemasProvider } from 'ui/vis/schemas';
 import choroplethTemplate from 'plugins/choropleth/choropleth_controller.html';
-import visTypes from 'ui/registry/vis_types';
-import VisVisTypeProvider from 'ui/vis/vis_type';
-import colorramps from 'ui/vislib/components/color/colormaps';
+import { VisTypesRegistryProvider } from 'ui/registry/vis_types';
+import { VisVisTypeProvider } from 'ui/vis/vis_type';
+import { truncatedColorMaps } from 'ui/vislib/components/color/truncated_colormaps';
 
-visTypes.register(function ChoroplethProvider(Private, vectormapsConfig) {
+VisTypesRegistryProvider.register(function ChoroplethProvider(Private, vectormapsConfig) {
 
   const VisType = Private(VisVisTypeProvider);
-  const TemplateVisType = Private(TemplateVisTypeTemplateVisTypeProvider);
+  const TemplateVisType = Private(TemplateVisTypeProvider);
   const Schemas = Private(VisSchemasProvider);
 
   const defaultLayers = [
@@ -79,7 +79,7 @@ visTypes.register(function ChoroplethProvider(Private, vectormapsConfig) {
         value: 'topright',
         text: 'top right',
       }],
-      colorSchemas: Object.keys(colorramps),
+      colorSchemas: Object.keys(truncatedColorMaps),
       vectormap: vectorLayers,
       editor: '<choropleth-vis-params></choropleth-vis-params>'
     },
