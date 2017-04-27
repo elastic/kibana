@@ -394,15 +394,17 @@ style-compile {
 
 
 .cell-hover {
-  background-color: @table-cell-hover-bg;
   position: relative;
 
+  /**
+   * 1. Center vertically regardless of row height.
+   */
   .table-cell-filter {
     position: absolute;
-    background-color: @table-cell-hover-bg;
     white-space: nowrap;
     right: 0;
-    top: 5px;
+    top: 50%; /* 1 */
+    transform: translateY(-50%); /* 1 */
     display: none;
   }
 }
