@@ -8,7 +8,7 @@ Timelion has plenty of options for customization. You can personalize nearly eve
 * Change the color and opacity of a series
 * Modify the legend
 
-In the https://www.elastic.co/guide/en/kibana/current/timelion-create.html[previous section], you created a Timelion chart with two series. Let’s continue to customize this visualization.
+In the <<timelion-create, previous section>>, you created a Timelion chart with two series. Let’s continue to customize this visualization.
 
 Before making any other modifications, append the `title()` function to the end of an expression to add a title with a meaningful name. This will make it much easier for unfamiliar users to understand the visualizations purpose. For this example, add `title('CPU usage over time')` to the original series. Use the following expression in your Timelion querybar:
 
