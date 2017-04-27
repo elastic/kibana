@@ -2,7 +2,7 @@ import { defaultsDeep } from 'lodash';
 
 import { Config } from './config';
 
-export async function readConfigFile(log, configFile, settingOverrides) {
+export async function readConfigFile(log, configFile, settingOverrides = {}) {
   log.debug('Loading config file from %j', configFile);
 
   const configModule = require(configFile);

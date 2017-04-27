@@ -79,8 +79,9 @@ export function CommonPageProvider({ getService, getPageObjects }) {
             return remote.getCurrentUrl();
           })
           .then(function (currentUrl) {
-            const loginPage = new RegExp('login').test(currentUrl);
-            if (loginPage) {
+            const loginPage = currentUrl.includes('/login');
+            const wantedLoginPage = appUrl.includes('/login') || appUrl.includes('/logout');
+            if (loginPage && !wantedLoginPage) {
               log.debug('Found loginPage username = '
                 + config.get('servers.kibana.username'));
               return PageObjects.shield.login(config.get('servers.kibana.username'),
