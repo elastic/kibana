@@ -4,13 +4,14 @@ import postcssConfig from '../src/optimize/postcss.config';
 import chokidar from 'chokidar';
 import debounce from 'lodash/function/debounce';
 const platform = require('os').platform();
+const isPlatformWindows = /^win/.test(platform);
 
 module.exports = function (grunt) {
   grunt.registerTask('uiFramework:build', function () {
     const done = this.async();
 
     const serverCmd = {
-      cmd: /^win/.test(platform) ? '.\\node_modules\\.bin\\webpack.cmd' : './node_modules/.bin/webpack',
+      cmd: isPlatformWindows ? '.\\node_modules\\.bin\\webpack.cmd' : './node_modules/.bin/webpack',
       args: [
         '-p',
         '--config=ui_framework/doc_site/webpack.config.js',
@@ -44,7 +45,7 @@ module.exports = function (grunt) {
 
   function uiFrameworkServerStart() {
     const serverCmd = {
-      cmd: /^win/.test(platform) ? '.\\node_modules\\.bin\\webpack-dev-server.cmd' : './node_modules/.bin/webpack-dev-server',
+      cmd: isPlatformWindows ? '.\\node_modules\\.bin\\webpack-dev-server.cmd' : './node_modules/.bin/webpack-dev-server',
       args: [
         '--config=ui_framework/doc_site/webpack.config.js',
         '--hot ',
