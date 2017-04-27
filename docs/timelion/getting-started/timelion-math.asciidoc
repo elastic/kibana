@@ -48,7 +48,7 @@ To make this visualization a bit easier to consume, convert the series from byte
 image::images/timelion-math05.png[]
 {nbsp}
 
-Utilizing the formatting functions `.title()`, `.label()`, `.color()`, `.lines()` and `.legend()` learned in https://www.elastic.co/guide/en/kibana/current/timelion-customize.html[the last section], let’s clean up the visualization a bit. Use the following expression to update your visualization:
+Utilizing the formatting functions `.title()`, `.label()`, `.color()`, `.lines()` and `.legend()` learned in <<timelion-customize, the last section>>, let’s clean up the visualization a bit. Use the following expression to update your visualization:
 
 [source,text]
 ----------------------------------
