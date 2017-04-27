@@ -63,9 +63,7 @@ export default function ({ getService, getPageObjects }) {
         };
       }
 
-      const act = JSON.stringify(actual.map(tokenize));
-      const exp = JSON.stringify(expected.map(tokenize));
-      expect(act).to.eql(exp);
+      expect(actual.map(tokenize)).to.eql(expected.map(tokenize));
     }
 
 
