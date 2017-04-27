@@ -259,12 +259,17 @@
               </div>
             </div>
 
+            <!-- Percentage of indices which match the index pattern -->
             <div
-              class="kuiInfoPanel kuiInfoPanel--success kuiVerticalRhythmSmall"
+              class="kuiInfoPanel kuiVerticalRhythmSmall"
+              ng-class="controller.existing.matches.length ? 'kuiInfoPanel--success' : 'kuiInfoPanel--error'"
               ng-if="controller.existing"
             >
               <div class="kuiInfoPanelHeader">
-                <span class="kuiInfoPanelHeader__icon kuiIcon kuiIcon--success fa-check"></span>
+                <span
+                  class="kuiInfoPanelHeader__icon kuiIcon"
+                  ng-class="controller.existing.matches.length ? 'kuiIcon--success fa-check' : 'kuiIcon--error fa-warning'"
+                ></span>
                 <span
                   class="kuiInfoPanelHeader__title"
                   translate="KIBANA-EXISTING_MATCH_PERCENT"
@@ -274,7 +279,7 @@
 
               <div
                 class="kuiInfoPanelBody"
-                ng-if="ontroller.existing.matches.length"
+                ng-if="controller.existing.matches.length"
               >
                 <div
                   class="kuiInfoPanelBody__message"
