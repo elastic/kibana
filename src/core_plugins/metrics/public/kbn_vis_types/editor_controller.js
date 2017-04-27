@@ -28,13 +28,6 @@ app.controller('MetricsEditorController', (
   };
   const fetchFields = Private(require('../lib/fetch_fields'));
 
-  // const debouncedFetch = _.debounce(() => {
-  //   fetch();
-  // }, 1000, {
-  //   leading: false,
-  //   trailing: true
-  // });
-
   const debouncedFetchFields = _.debounce(fetchFields($scope), 1000, {
     leading: false,
     trailing: true
