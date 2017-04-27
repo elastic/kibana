@@ -5,9 +5,7 @@
 .node_binaries
 node_modules
 trash
-/optimize/bundles
-/optimize/testdev
-/optimize/testUiServer
+/optimize
 target
 /build
 .jruby
