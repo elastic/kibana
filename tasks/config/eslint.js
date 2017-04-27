@@ -5,6 +5,7 @@ export default grunt => ({
       'Gruntfile.js',
       'bin',
       'config',
+      'platform',
       'src',
       'scripts',
       'tasks',

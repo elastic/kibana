@@ -1,0 +1,21 @@
+{
+  "plugins": [
+    "jest",
+    "flowtype"
+  ],
+  "settings": {
+    "flowtype": {
+      "onlyFilesWithFlowAnnotation": true
+    }
+  },
+  "rules": {
+    "jest/no-disabled-tests": "error",
+    "jest/no-focused-tests": "error",
+    "jest/no-identical-title": "error",
+    "flowtype/define-flow-type": "warn",
+    "flowtype/use-flow-type": "warn"
+  },
+  "env": {
+    "jest/globals": true
+  }
+}

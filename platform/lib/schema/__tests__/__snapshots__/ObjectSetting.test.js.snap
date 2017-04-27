@@ -1,0 +1,7 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`fails if key does not exist in schema 1`] = `"Invalid setting. missing definitions in schema for keys [bar]"`;
+
+exports[`fails if missing string 1`] = `"Invalid [name] setting. expected value of type [string] but got undefined"`;
+
+exports[`object within object with required 1`] = `"Invalid [foo.bar] setting. expected value of type [string] but got undefined"`;

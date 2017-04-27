@@ -1,0 +1,15 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`#maxLength returns error when longer string 1`] = `"Invalid setting. value is [foo] but it must have a maximum length of [2]."`;
+
+exports[`#minLength returns error when shorter string 1`] = `"Invalid setting. value is [foo] but it must have a minimum length of [4]."`;
+
+exports[`#validate throws when returns string 1`] = `"Invalid setting. validator failure"`;
+
+exports[`is required by default 1`] = `"Invalid setting. expected value of type [string] but got undefined"`;
+
+exports[`returns error when not string 1`] = `"Invalid setting. expected value of type [string] but got number"`;
+
+exports[`returns error when not string 2`] = `"Invalid setting. expected value of type [string] but got Array"`;
+
+exports[`returns error when not string 3`] = `"Invalid setting. expected value of type [string] but got RegExp"`;

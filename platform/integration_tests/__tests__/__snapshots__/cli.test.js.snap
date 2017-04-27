@@ -1,0 +1,35 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`displays help 1`] = `
+"Usage: bin/kibana [options]
+
+Kibana is an open source (Apache Licensed), browser-based analytics and search
+dashboard for Elasticsearch.
+
+Options:
+  --version, -v        Show version number                             [boolean]
+  --help, -h           Show help                                       [boolean]
+  --config, -c         Path to the config file, can be changed with the
+                       \`CONFIG_PATH\` environment variable as well. Use multiple
+                       --config args to include multiple config files.  [string]
+  --elasticsearch, -e  URI for Elasticsearch instance                   [string]
+  --host, -H           The host to bind to                              [string]
+  --port, -p           The port to bind Kibana to                       [number]
+  --quiet, -q          Prevent all logging except errors
+  --silent, -Q         Prevent all logging
+  --verbose            Turns on verbose logging
+  --log-file, -l       The file to log to                               [string]
+  --dev                Run the server with development mode defaults
+  --ssl                Dev only. Specify --no-ssl to not run the dev server
+                       using HTTPS                     [boolean] [default: true]
+  --base-path          Dev only. Specify --no-base-path to not put a proxy with
+                       a random base path in front of the dev server
+                                                       [boolean] [default: true]
+  --watch              Dev only. Specify --no-watch to prevent automatic
+                       restarts of the server in dev mode
+                                                       [boolean] [default: true]
+
+Documentation: https://elastic.co/kibana
+
+"
+`;
