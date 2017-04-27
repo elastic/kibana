@@ -700,6 +700,7 @@ body {
   /* 2 */
   font-size: 10px !important;
   /* 2 */
+  -webkit-transition: background-color 0.1s linear;
   transition: background-color 0.1s linear; }
   .kuiCheckBox:before {
     position: relative;
@@ -709,6 +710,7 @@ body {
     font-size: 1em;
     opacity: 0;
     color: #FFF;
+    -webkit-transition: opacity 0.1s linear;
     transition: opacity 0.1s linear; }
   .kuiCheckBox:checked {
     border-color: #328CAA;
@@ -735,15 +737,19 @@ body {
   -webkit-align-items: center;
       -ms-flex-align: center;
           align-items: center;
-  font-weight: normal !important; }
+  font-weight: normal !important;
+  line-height: 1.5; }
 
 .kuiCheckBoxLabel__text {
+  font-size: 14px;
   margin-left: 8px; }
 
 /**
  * 1. Override Bootstrap.
  */
 .kuiLabel {
+  font-size: 14px;
+  line-height: 1.5;
   font-weight: bold;
   margin-bottom: 0;
   /* 1 */ }
@@ -777,6 +783,7 @@ body {
   background-color: #ffffff;
   border: 1px solid #DEDEDE;
   border-radius: 4px;
+  -webkit-transition: border-color 0.1s linear;
   transition: border-color 0.1s linear;
   /**
    * 1. Angular will add an ng-untouched class to an input if it hasn't been touched yet.
@@ -817,6 +824,7 @@ body {
   background-color: #ffffff;
   border: 1px solid #DEDEDE;
   border-radius: 4px;
+  -webkit-transition: border-color 0.1s linear;
   transition: border-color 0.1s linear;
   /**
    * 1. Angular will add an ng-untouched class to an input if it hasn't been touched yet.
@@ -884,6 +892,7 @@ body {
   background-color: #ffffff;
   border: 1px solid #DEDEDE;
   border-radius: 4px;
+  -webkit-transition: border-color 0.1s linear;
   transition: border-color 0.1s linear;
   /**
    * 1. Angular will add an ng-untouched class to an input if it hasn't been touched yet.
@@ -923,6 +932,7 @@ body {
   background-color: #ffffff;
   border: 1px solid #DEDEDE;
   border-radius: 4px;
+  -webkit-transition: border-color 0.1s linear;
   transition: border-color 0.1s linear;
   /**
    * 1. Angular will add an ng-untouched class to an input if it hasn't been touched yet.
@@ -1723,6 +1733,7 @@ body {
   background-color: #ffffff;
   border: 1px solid #DEDEDE;
   border-radius: 4px;
+  -webkit-transition: border-color 0.1s linear;
   transition: border-color 0.1s linear;
   /**
    * 1. Angular will add an ng-untouched class to an input if it hasn't been touched yet.
@@ -1804,6 +1815,7 @@ body {
   background-color: #ffffff;
   border: 1px solid #DEDEDE;
   border-radius: 4px;
+  -webkit-transition: border-color 0.1s linear;
   transition: border-color 0.1s linear;
   /**
    * 1. Angular will add an ng-untouched class to an input if it hasn't been touched yet.
@@ -2870,6 +2882,7 @@ body {
   border: 1px solid #ffffff;
   line-height: normal;
   /* 1 */
+  -webkit-transition: border-color 0.1s linear;
   transition: border-color 0.1s linear; }
   .kuiToolBarSearchBox__input:focus {
     outline: none;

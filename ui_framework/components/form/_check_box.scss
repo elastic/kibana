@@ -58,8 +58,10 @@ $checkboxDisabledOpacity: 0.3;
   display: flex;
   align-items: center;
   font-weight: normal !important;
+  line-height: $globalLineHeight;
 }
 
   .kuiCheckBoxLabel__text {
+    font-size: $globalFontSize;
     margin-left: 8px;
   }
