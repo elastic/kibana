@@ -539,9 +539,6 @@ body {
     margin-left: 0;
     border-left: 1px solid #E0E0E0; }
 
-/**
- * 1. Override Bootstrap styles.
- */
 .kuiCollapseButton {
   -webkit-appearance: none;
      -moz-appearance: none;
