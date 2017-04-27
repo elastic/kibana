@@ -31,6 +31,7 @@ function ContextAppRouteController(
 
   $scope.$watchGroup([
     'contextAppRoute.state.columns',
+    'contextAppRoute.state.filters',
     'contextAppRoute.state.predecessorCount',
     'contextAppRoute.state.successorCount',
   ], () => this.state.save(true));
@@ -42,6 +43,7 @@ function ContextAppRouteController(
 function createDefaultAppState(config, indexPattern) {
   return {
     columns: ['_source'],
+    filters: [],
     predecessorCount: parseInt(config.get('context:defaultSize'), 10),
     sort: [indexPattern.timeFieldName, 'desc'],
     successorCount: parseInt(config.get('context:defaultSize'), 10),

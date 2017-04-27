@@ -1,5 +1,6 @@
 import _ from 'lodash';
 
+import { FilterBarQueryFilterProvider } from 'ui/filter_bar/query_filter';
 import { uiModules } from 'ui/modules';
 import contextAppTemplate from './app.html';
 import './components/loading_button';
@@ -33,6 +34,7 @@ module.directive('contextApp', function ContextApp() {
       anchorUid: '=',
       columns: '=',
       indexPattern: '=',
+      filters: '=',
       predecessorCount: '=',
       successorCount: '=',
       sort: '=',
@@ -45,6 +47,7 @@ module.directive('contextApp', function ContextApp() {
 function ContextAppController($scope, config, Private, timefilter) {
   const queryParameterActions = Private(QueryParameterActionsProvider);
   const queryActions = Private(QueryActionsProvider);
+  const queryFilter = Private(FilterBarQueryFilterProvider);
 
   // this is apparently the "canonical" way to disable the time picker
   timefilter.enabled = false;
@@ -70,6 +73,13 @@ function ContextAppController($scope, config, Private, timefilter) {
     () => this.state.rows.successors,
   ], (newValues) => this.actions.setAllRows(...newValues));
 
+  $scope.$listen(queryFilter, 'update', () => {
+    const filters = _.cloneDeep(queryFilter.getFilters());
+    this.actions.fetchContextRowsWithNewQueryParameters({
+      filters,
+    });
+  });
+
   /**
    * Sync query parameters to arguments
    */
@@ -78,18 +88,30 @@ function ContextAppController($scope, config, Private, timefilter) {
       ...(_.pick(this, QUERY_PARAMETER_KEYS)),
       indexPatternId: this.indexPattern.id,
     }),
-    (newValues) => {
-      // break the watch cycle
-      if (!_.isEqual(newValues, this.state.queryParameters)) {
-        this.actions.fetchAllRowsWithNewQueryParameters(newValues);
+    (newQueryParameters) => {
+      const { queryParameters } = this.state;
+      if (
+        (newQueryParameters.indexPatternId !== queryParameters.indexPatternId)
+        || (newQueryParameters.anchorUid !== queryParameters.anchorUid)
+        || (!_.isEqual(newQueryParameters.sort, queryParameters.sort))
+      ) {
+        this.actions.fetchAllRowsWithNewQueryParameters(_.cloneDeep(newQueryParameters));
+      } else if (
+        (newQueryParameters.predecessorCount !== queryParameters.predecessorCount)
+        || (newQueryParameters.successorCount !== queryParameters.successorCount)
+      ) {
+        this.actions.fetchContextRowsWithNewQueryParameters(_.cloneDeep(newQueryParameters));
       }
     },
   );
 
   $scope.$watchCollection(
-    () => this.state.queryParameters,
-    (newValues) => {
-      _.assign(this, newValues);
+    () => ({
+      predecessorCount: this.state.queryParameters.predecessorCount,
+      successorCount: this.state.queryParameters.successorCount,
+    }),
+    (newParameters) => {
+      _.assign(this, newParameters);
     },
   );
 }

@@ -49,14 +49,14 @@ export function QueryActionsProvider(courier, Notifier, Private, Promise) {
 
   const fetchPredecessorRows = (state) => () => {
     const {
-      queryParameters: { indexPatternId, predecessorCount, sort },
+      queryParameters: { indexPatternId, filters, predecessorCount, sort },
       rows: { anchor },
     } = state;
 
     setLoadingStatus(state)('predecessors', LOADING_STATUS.LOADING);
 
     return Promise.try(() => (
-      fetchPredecessors(indexPatternId, anchor, _.zipObject([sort]), predecessorCount)
+      fetchPredecessors(indexPatternId, anchor, _.zipObject([sort]), predecessorCount, filters)
     ))
       .then(
         (predecessorDocuments) => {
@@ -74,14 +74,14 @@ export function QueryActionsProvider(courier, Notifier, Private, Promise) {
 
   const fetchSuccessorRows = (state) => () => {
     const {
-      queryParameters: { indexPatternId, sort, successorCount },
+      queryParameters: { indexPatternId, filters, sort, successorCount },
       rows: { anchor },
     } = state;
 
     setLoadingStatus(state)('successors', LOADING_STATUS.LOADING);
 
     return Promise.try(() => (
-      fetchSuccessors(indexPatternId, anchor, _.zipObject([sort]), successorCount)
+      fetchSuccessors(indexPatternId, anchor, _.zipObject([sort]), successorCount, filters)
     ))
       .then(
         (successorDocuments) => {
@@ -97,13 +97,22 @@ export function QueryActionsProvider(courier, Notifier, Private, Promise) {
       );
   };
 
+  const fetchContextRows = (state) => () => (
+    Promise.all([
+      fetchPredecessorRows(state)(),
+      fetchSuccessorRows(state)(),
+    ])
+  );
+
   const fetchAllRows = (state) => () => (
     Promise.try(fetchAnchorRow(state))
-      .then(() => Promise.all([
-        fetchPredecessorRows(state)(),
-        fetchSuccessorRows(state)(),
-      ]))
+      .then(fetchContextRows(state))
   );
+
+  const fetchContextRowsWithNewQueryParameters = (state) => (queryParameters) => {
+    setQueryParameters(state)(queryParameters);
+    return fetchContextRows(state)();
+  };
 
   const fetchAllRowsWithNewQueryParameters = (state) => (queryParameters) => {
     setQueryParameters(state)(queryParameters);
@@ -142,6 +151,8 @@ export function QueryActionsProvider(courier, Notifier, Private, Promise) {
     fetchAllRows,
     fetchAllRowsWithNewQueryParameters,
     fetchAnchorRow,
+    fetchContextRows,
+    fetchContextRowsWithNewQueryParameters,
     fetchGivenPredecessorRows,
     fetchGivenSuccessorRows,
     fetchMorePredecessorRows,
