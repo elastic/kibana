@@ -1,4 +1,4 @@
-import toMS from '../../server/lib/to_milliseconds.js';
+const toMS = require('../../server/lib/to_milliseconds.js');
 
 module.exports = function calculateInterval(from, to, size, interval, min) {
   if (interval !== 'auto') return interval;
