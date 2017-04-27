@@ -13,37 +13,40 @@ function fetchContextProvider(Private) {
     fetchSuccessors,
   };
 
-  async function fetchSuccessors(indexPattern, anchorDocument, contextSort, size) {
+  async function fetchSuccessors(indexPattern, anchorDocument, contextSort, size, filters) {
     const successorsSort = [contextSort, { _uid: 'asc' }];
     const successorsSearchSource = createSearchSource(
       indexPattern,
       anchorDocument,
       successorsSort,
       size,
+      filters,
     );
     const results = await performQuery(successorsSearchSource);
     return results;
   }
 
-  async function fetchPredecessors(indexPattern, anchorDocument, contextSort, size) {
+  async function fetchPredecessors(indexPattern, anchorDocument, contextSort, size, filters) {
     const predecessorsSort = [reverseSortDirective(contextSort), { _uid: 'desc' }];
     const predecessorsSearchSource = createSearchSource(
       indexPattern,
       anchorDocument,
       predecessorsSort,
       size,
+      filters,
     );
     const reversedResults = await performQuery(predecessorsSearchSource);
     const results = reversedResults.slice().reverse();
     return results;
   }
 
-  function createSearchSource(indexPattern, anchorDocument, sort, size) {
+  function createSearchSource(indexPattern, anchorDocument, sort, size, filters) {
     return new SearchSource()
       .inherits(false)
       .set('index', indexPattern)
       .set('version', true)
       .set('size', size)
+      .set('filter', filters)
       .set('query', {
         match_all: {},
       })

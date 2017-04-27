@@ -35,6 +35,7 @@ module.directive('kbnTableRow', function ($compile, $httpParamSerializer, kbnUrl
     scope: {
       columns: '=',
       filter: '=',
+      filters: '=?',
       indexPattern: '=',
       row: '=kbnTableRow',
       onAddColumn: '=?',
@@ -102,6 +103,7 @@ module.directive('kbnTableRow', function ($compile, $httpParamSerializer, kbnUrl
         const hash = $httpParamSerializer({
           _a: rison.encode({
             columns: $scope.columns,
+            filters: $scope.filters || [],
           }),
         });
         return `${path}?${hash}`;
