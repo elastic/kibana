@@ -45,6 +45,30 @@ export default function ({ getService, getPageObjects }) {
       });
     });
 
+
+    /**
+     * manually compare data due to possible small difference in numbers. This is browser dependent.
+     */
+    function compareTableData(expected, actual) {
+
+      expect(actual.length).to.eql(expected.length);
+
+      function tokenize(row) {
+        const tokens = row.split(' ');
+        return {
+          geohash: tokens[0],
+          count: tokens[1],
+          lat: Math.floor(parseFloat(tokens[4])),
+          lon: Math.floor(parseFloat(tokens[6]))
+        };
+      }
+
+      const act = JSON.stringify(actual.map(tokenize));
+      const exp = JSON.stringify(expected.map(tokenize));
+      expect(act).to.eql(exp);
+    }
+
+
     describe('tile map chart', function indexPatternCreation() {
 
       it('should show correct tile map data on default zoom level', function () {
@@ -64,15 +88,18 @@ export default function ({ getService, getPageObjects }) {
           //level 0
           return PageObjects.visualize.clickMapZoomOut();
         })
+          .then(function sleep() {
+            return PageObjects.common.sleep(2000);
+          })
         .then(function () {
           return PageObjects.settings.setPageSize('All');
         })
         .then(function getDataTableData() {
           return PageObjects.visualize.getDataTableData()
-          .then(function showData(data) {
-            expect(data.trim().split('\n')).to.eql(expectedTableData);
-            return PageObjects.visualize.collapseChart();
-          });
+            .then(function showData(actualTableData) {
+              compareTableData(expectedTableData, actualTableData.trim().split('\n'));
+              return PageObjects.visualize.collapseChart();
+            });
         });
       });
 
@@ -204,7 +231,7 @@ export default function ({ getService, getPageObjects }) {
           return PageObjects.visualize.getDataTableData();
         })
         .then(function showData(data) {
-          expect(data.trim().split('\n')).to.eql(expectedTableData);
+          compareTableData(expectedTableData, data.trim().split('\n'));
           return PageObjects.visualize.collapseChart();
         })
         .then(function () {
@@ -219,8 +246,7 @@ export default function ({ getService, getPageObjects }) {
           return PageObjects.visualize.getDataTableData();
         })
         .then(function showData(data) {
-
-          expect(data.trim().split('\n')).to.eql(expectedTableDataZoomed);
+          compareTableData(expectedTableDataZoomed, data.trim().split('\n'));
           return PageObjects.visualize.collapseChart();
         })
         .then(function () {
@@ -241,7 +267,7 @@ export default function ({ getService, getPageObjects }) {
           return PageObjects.visualize.getDataTableData();
         })
         .then(function showData(data) {
-          expect(data.trim().split('\n')).to.eql(expectedTableData);
+          compareTableData(expectedTableData, data.trim().split('\n'));
           return PageObjects.visualize.collapseChart();
         })
         .then(function takeScreenshot() {
