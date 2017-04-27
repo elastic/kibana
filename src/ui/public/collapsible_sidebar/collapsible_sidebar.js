@@ -13,7 +13,10 @@ uiModules
   return {
     restrict: 'C',
     link: function ($scope, $elem) {
-      const $collapser = $('<div class="sidebar-collapser"><div class="chevron-cont"></div></div>');
+      let isCollapsed = false;
+      const $collapser = $('<button type="button" class="kuiCollapseButton sidebar-collapser"></button>');
+      const $icon = $('<span class="kuiIcon fa-chevron-circle-left"></span>');
+      $collapser.append($icon);
       const $siblings = $elem.siblings();
 
       const siblingsClass = listOfWidthClasses.reduce(function (prev, className) {
@@ -23,6 +26,17 @@ uiModules
 
       $collapser.on('click', function () {
         $elem.toggleClass('closed');
+
+        if (isCollapsed) {
+          isCollapsed = false;
+          $icon.addClass('fa-chevron-circle-left');
+          $icon.removeClass('fa-chevron-circle-right');
+        } else {
+          isCollapsed = true;
+          $icon.removeClass('fa-chevron-circle-left');
+          $icon.addClass('fa-chevron-circle-right');
+        }
+
         // if there is are only two elements we can assume the other one will take 100% of the width
         if ($siblings.length === 1 && siblingsClass) {
           $siblings.toggleClass(siblingsClass + ' col-md-12');

@@ -32,6 +32,25 @@
 }
 
 /**
+ * 1. Override Bootstrap styles.
+ */
+@mixin collapseButton {
+  appearance: none;
+  background-color: transparent;
+  padding: 4px;
+  border: none;
+  line-height: 1;
+  font-size: 16px;
+  color: $globalTextColor !important; /* 1 */
+  cursor: pointer;
+  opacity: 0.35;
+
+  &:hover {
+    opacity: 1;
+  }
+}
+
+/**
  * 1. Links can't have a disabled attribute, so they can't support :disabled.
  */
 @mixin kuiButtonDisabled {
