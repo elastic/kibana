@@ -162,10 +162,12 @@ export function HeaderPageProvider({ getService, getPageObjects }) {
       .findByLinkText(quickTime).click();
     }
 
-    async getToastMessage() {
-      remote.setFindTimeout(defaultFindTimeout);
-      return await remote.findDisplayedByCssSelector('kbn-truncated.toast-message.ng-isolate-scope')
-      .getVisibleText();
+    async getToastMessage(findTimeout = defaultFindTimeout) {
+      await remote.setFindTimeout(findTimeout);
+      const message = await remote.findDisplayedByCssSelector('kbn-truncated.toast-message.ng-isolate-scope')
+        .getVisibleText();
+      await remote.setFindTimeout(defaultFindTimeout);
+      return message;
     }
 
     async waitForToastMessageGone() {
