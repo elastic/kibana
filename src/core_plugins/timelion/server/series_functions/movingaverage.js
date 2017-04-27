@@ -1,6 +1,8 @@
 import alter from '../lib/alter.js';
 import _ from 'lodash';
 import Chainable from '../lib/classes/chainable';
+import toMS from '../lib/to_milliseconds.js';
+
 module.exports = new Chainable('movingaverage', {
   args: [
     {
@@ -9,8 +11,10 @@ module.exports = new Chainable('movingaverage', {
     },
     {
       name: 'window',
-      types: ['number'],
-      help: 'Number of points to average over'
+      types: ['number', 'string'],
+      help: 'Number of points, or a date math expression (eg 1d, 1M) to average over. ' +
+      'If you specify a date math expression, I\'ll get as close as I can given your current interval selection' +
+      'If they don\'t divide nicely things might get weird.'
     },
     {
       name: 'position',
@@ -20,8 +24,20 @@ module.exports = new Chainable('movingaverage', {
   ],
   aliases: ['mvavg'],
   help: 'Calculate the moving average over a given window. Nice for smoothing noisey series',
-  fn: function movingaverageFn(args) {
+  fn: function movingaverageFn(args, tlConfig) {
     return alter(args, function (eachSeries, _window, _position) {
+
+      _window = (function () {
+        if (typeof _window === 'number') return _window;
+        // Ok, I guess its a datemath expression
+        const windowMilliseconds = toMS(_window);
+
+        // calculate how many buckets that _window represents
+        const intervalMilliseconds = toMS(tlConfig.time.interval);
+
+        // Round, floor, ceil? We're going with round because it splits the difference.
+        return Math.round(windowMilliseconds / intervalMilliseconds) || 1;
+      }());
 
       _position = _position || 'center';
       const validPositions = ['left', 'right', 'center'];
