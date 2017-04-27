@@ -88,18 +88,18 @@ export default function ({ getService, getPageObjects }) {
           //level 0
           return PageObjects.visualize.clickMapZoomOut();
         })
-          .then(function sleep() {
-            return PageObjects.common.sleep(2000);
-          })
+        .then(function sleep() {
+          return PageObjects.common.sleep(2000);
+        })
         .then(function () {
           return PageObjects.settings.setPageSize('All');
         })
         .then(function getDataTableData() {
           return PageObjects.visualize.getDataTableData()
-            .then(function showData(actualTableData) {
-              compareTableData(expectedTableData, actualTableData.trim().split('\n'));
-              return PageObjects.visualize.collapseChart();
-            });
+          .then(function showData(actualTableData) {
+            compareTableData(expectedTableData, actualTableData.trim().split('\n'));
+            return PageObjects.visualize.collapseChart();
+          });
         });
       });
 
