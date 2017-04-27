@@ -1,5 +1,6 @@
 import { execFile } from 'child_process';
 import { all, fromNode } from 'bluebird';
+const isWin = /^win/.test(process.platform);
 
 export default (grunt) => {
   const { config, log } = grunt;
@@ -13,10 +14,16 @@ export default (grunt) => {
   }
 
   async function archives({ name, buildName, zipPath, tarPath }) {
-    if (/windows/.test(name)) {
-      await exec('zip', ['-rq', '-ll', zipPath, buildName]);
+    if (isWin) {
+      await exec('jar', ['-cMf', tarPath, buildName]);
+      await exec('jar', ['-cMf', zipPath, buildName]);
     } else {
-      await exec('tar', ['-zchf', tarPath, buildName]);
+      await exec('tar', ['-chzf', tarPath, buildName]);
+      if (/windows/.test(name)) {
+        await exec('zip', ['-rq', '-ll', zipPath, buildName]);
+      } else {
+        await exec('zip', ['-rq', zipPath, buildName]);
+      }
     }
   }
 
