@@ -45,6 +45,28 @@ export default function ({ getService, getPageObjects }) {
         });
     });
 
+
+    /**
+     * manually compare data due to possible small difference in numbers. This is browser dependent.
+     */
+    function compareTableData(expected, actual) {
+
+      expect(actual.length).to.eql(expected.length);
+
+      function tokenize(row) {
+        const tokens = row.split(' ');
+        return {
+          geohash: tokens[0],
+          count: tokens[1],
+          lat: Math.floor(parseFloat(tokens[4])),
+          lon: Math.floor(parseFloat(tokens[6]))
+        };
+      }
+
+      expect(actual.map(tokenize)).to.eql(expected.map(tokenize));
+    }
+
+
     describe('tile map chart', function indexPatternCreation() {
 
       it('should show correct tile map data on default zoom level', function () {
@@ -69,15 +91,14 @@ export default function ({ getService, getPageObjects }) {
           })
           .then(function getDataTableData() {
             return PageObjects.visualize.getDataTableData()
-              .then(function showData(data) {
-                expect(data.trim().split('\n')).to.eql(expectedTableData);
-                return PageObjects.visualize.collapseChart();
-              });
+            .then(function showData(actualTableData) {
+              compareTableData(expectedTableData, actualTableData.trim().split('\n'));
+              return PageObjects.visualize.collapseChart();
+            });
           });
-      });
 
-      it('should not be able to zoom out beyond 0', function () {
-        return PageObjects.visualize.getMapZoomOutEnabled()
+        it('should not be able to zoom out beyond 0', function () {
+          return PageObjects.visualize.getMapZoomOutEnabled()
         // we can tell we're at level 1 because zoom out is disabled
           .then(function () {
             return retry.try(function tryingForTime() {
@@ -92,10 +113,10 @@ export default function ({ getService, getPageObjects }) {
             log.debug('Take screenshot (success)');
             PageObjects.common.saveScreenshot('map-at-zoom-0');
           });
-      });
+        });
 
-      it('Fit data bounds should zoom to level 3', function () {
-        const expectedPrecision2ZoomCircles = [
+        it('Fit data bounds should zoom to level 3', function () {
+          const expectedPrecision2ZoomCircles = [
           { color: '#750000', radius: 192 },
           { color: '#750000', radius: 191 },
           { color: '#750000', radius: 177 },
@@ -142,46 +163,46 @@ export default function ({ getService, getPageObjects }) {
           { color: '#b99939', radius: 12 },
           { color: '#b99939', radius: 9 },
           { color: '#b99939', radius: 9 }
-        ];
+          ];
 
-        return PageObjects.visualize.clickMapFitDataBounds()
+          return PageObjects.visualize.clickMapFitDataBounds()
           .then(function () {
             return PageObjects.visualize.getTileMapData();
           })
           .then(function (data) {
             expect(data).to.eql(expectedPrecision2ZoomCircles);
           });
-      });
+        });
 
       /*
        ** NOTE: Since we don't have a reliable way to know the zoom level, we can
        ** check some data after we save the viz, then zoom in and check that the data
        ** changed, then open the saved viz and check that it's back to the original data.
        */
-      it('should save with zoom level and load, take screenshot', function () {
-        const expectedTableData = [ 'dr4 127 { "lat": 40.142432276496855, "lon": -75.17097956302949 }',
-          'dr7 92 { "lat": 41.48015560278588, "lon": -73.90037568609999 }',
-          '9q5 91 { "lat": 34.293431888365156, "lon": -118.57068410102319 }',
-          '9qc 89 { "lat": 38.645468642830515, "lon": -121.59105310990904 }',
-          'drk 87 { "lat": 41.38891646156794, "lon": -72.50977680472464 }',
-          'dps 82 { "lat": 42.79333563657796, "lon": -83.55129436180904 }',
-          'dph 82 { "lat": 40.03466797526926, "lon": -83.6603344113725 }',
-          'dp3 79 { "lat": 41.68207621697006, "lon": -87.98703811709073 }',
-          'dpe 78 { "lat": 42.83740988287788, "lon": -85.13176125187714 }',
-          'dp8 77 { "lat": 43.00976751178697, "lon": -89.27605860007854 }' ];
-        const expectedTableDataZoomed = [ 'dr5r 21 { "lat": 40.73313889359789, "lon": -74.00737997410553 }',
-          'dps8 20 { "lat": 42.25258858362213, "lon": -83.4615091625601 }',
-          '9q5b 19 { "lat": 33.8619567100939, "lon": -118.28354520723224 }',
-          'b6uc 17 { "lat": 60.721656321274004, "lon": -161.86279475141097 }',
-          '9y63 17 { "lat": 35.48034298178904, "lon": -97.90940423550852 }',
-          'c20g 16 { "lat": 45.59211885672994, "lon": -122.47455088770948 }',
-          'dqfz 15 { "lat": 39.24278838559985, "lon": -74.69487586989999 }',
-          'dr8h 14 { "lat": 42.9455179042582, "lon": -78.65373932623437 }',
-          'dp8p 14 { "lat": 43.52336289028504, "lon": -89.84673104515034 }',
-          'dp3k 14 { "lat": 41.569707432229606, "lon": -88.12707824898618 }' ];
-        const vizName1 = 'Visualization TileMap';
+        it('should save with zoom level and load, take screenshot', function () {
+          const expectedTableData = [ 'dr4 127 { "lat": 40.142432276496855, "lon": -75.17097956302949 }',
+            'dr7 92 { "lat": 41.48015560278588, "lon": -73.90037568609999 }',
+            '9q5 91 { "lat": 34.293431888365156, "lon": -118.57068410102319 }',
+            '9qc 89 { "lat": 38.645468642830515, "lon": -121.59105310990904 }',
+            'drk 87 { "lat": 41.38891646156794, "lon": -72.50977680472464 }',
+            'dps 82 { "lat": 42.79333563657796, "lon": -83.55129436180904 }',
+            'dph 82 { "lat": 40.03466797526926, "lon": -83.6603344113725 }',
+            'dp3 79 { "lat": 41.68207621697006, "lon": -87.98703811709073 }',
+            'dpe 78 { "lat": 42.83740988287788, "lon": -85.13176125187714 }',
+            'dp8 77 { "lat": 43.00976751178697, "lon": -89.27605860007854 }' ];
+          const expectedTableDataZoomed = [ 'dr5r 21 { "lat": 40.73313889359789, "lon": -74.00737997410553 }',
+            'dps8 20 { "lat": 42.25258858362213, "lon": -83.4615091625601 }',
+            '9q5b 19 { "lat": 33.8619567100939, "lon": -118.28354520723224 }',
+            'b6uc 17 { "lat": 60.721656321274004, "lon": -161.86279475141097 }',
+            '9y63 17 { "lat": 35.48034298178904, "lon": -97.90940423550852 }',
+            'c20g 16 { "lat": 45.59211885672994, "lon": -122.47455088770948 }',
+            'dqfz 15 { "lat": 39.24278838559985, "lon": -74.69487586989999 }',
+            'dr8h 14 { "lat": 42.9455179042582, "lon": -78.65373932623437 }',
+            'dp8p 14 { "lat": 43.52336289028504, "lon": -89.84673104515034 }',
+            'dp3k 14 { "lat": 41.569707432229606, "lon": -88.12707824898618 }' ];
+          const vizName1 = 'Visualization TileMap';
 
-        return PageObjects.visualize.clickMapZoomIn()
+          return PageObjects.visualize.clickMapZoomIn()
           .then(function () {
             return PageObjects.visualize.clickMapZoomIn();
           })
@@ -204,7 +225,7 @@ export default function ({ getService, getPageObjects }) {
             return PageObjects.visualize.getDataTableData();
           })
           .then(function showData(data) {
-            expect(data.trim().split('\n')).to.eql(expectedTableData);
+            compareTableData(expectedTableData, data.trim().split('\n'));
             return PageObjects.visualize.collapseChart();
           })
           .then(function () {
@@ -219,8 +240,7 @@ export default function ({ getService, getPageObjects }) {
             return PageObjects.visualize.getDataTableData();
           })
           .then(function showData(data) {
-
-            expect(data.trim().split('\n')).to.eql(expectedTableDataZoomed);
+            compareTableData(expectedTableDataZoomed, data.trim().split('\n'));
             return PageObjects.visualize.collapseChart();
           })
           .then(function () {
@@ -241,18 +261,18 @@ export default function ({ getService, getPageObjects }) {
             return PageObjects.visualize.getDataTableData();
           })
           .then(function showData(data) {
-            expect(data.trim().split('\n')).to.eql(expectedTableData);
+            compareTableData(expectedTableData, data.trim().split('\n'));
             return PageObjects.visualize.collapseChart();
           })
           .then(function takeScreenshot() {
             log.debug('Take screenshot');
             PageObjects.common.saveScreenshot('Visualize-site-map');
           });
-      });
+        });
 
-      it('should zoom in to level 10', function () {
+        it('should zoom in to level 10', function () {
         // 6
-        return PageObjects.visualize.clickMapZoomIn()
+          return PageObjects.visualize.clickMapZoomIn()
           .then(function () {
             // 7
             return PageObjects.visualize.clickMapZoomIn();
@@ -283,6 +303,7 @@ export default function ({ getService, getPageObjects }) {
           .then(function (enabled) {
             expect(enabled).to.be(false);
           });
+        });
       });
     });
   });
