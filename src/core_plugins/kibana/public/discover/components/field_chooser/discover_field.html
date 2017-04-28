@@ -13,10 +13,11 @@
     ></field-name>
     <div class="discover-sidebar-item-actions">
       <button
+        ng-if="field.name !== '_source'"
         ng-click="toggleDisplay(field)"
         ng-class="::field.display ? 'kuiButton--danger' : 'kuiButton--primary'"
         ng-bind="::field.display ? 'remove' : 'add'"
-        class="kuiButton kuiButton--small kuiButton--primary discover-field-toggle"
+        class="kuiButton kuiButton--small kuiButton--primary"
         data-test-subj="fieldToggle-{{::field.name}}"
       ></button>
     </div>
