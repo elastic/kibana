@@ -109,7 +109,7 @@ export default function ({ getService, getPageObjects }) {
 
       it('should show correct data, ordered by Term', function () {
 
-        const expectedChartData = ['png 1,373', 'php 445', 'jpg 9,109', 'gif 918', 'css 2,159'];
+        const expectedChartData = ['png', '1,373', 'php', '445', 'jpg', '9,109', 'gif', '918', 'css', '2,159'];
 
         return PageObjects.visualize.collapseChart()
         .then(function getDataTableData() {
