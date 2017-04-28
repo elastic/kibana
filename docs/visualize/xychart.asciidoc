@@ -1,6 +1,6 @@
 [[xy-chart]]
-== X/Y Charts
-X/Y charts refer to Area, Line and Bar charts which allow you to plot your data on X/Y axis.
+== Line, Area, and Bar charts
+Line, Area, and Bar charts allow you to plot your data on X/Y axis.
 
 First you need to select your _metrics_ which define Value axis. 
 
@@ -33,68 +33,60 @@ NOTE: In Elasticsearch releases 1.4.3 and later, this functionality requires you
 
 The availability of these options varies depending on the aggregation you choose.
 
-=== Options
+=== Metrics & Axes
 
-Select the *Options* tab to change the way your data is visualized. Customization options are grouped into areas to provide easier access:
+Select the *Metrics & Axes* tab to change the way each individual metric is shown on the chart. 
+The data series are styled in the _Metrics_ section, while the axes are styled in the X and Y axis sections.
 
-==== General Settings
+==== Metrics
+Modify how each metric from the Data panel is visualized on the chart.
 
-*Legend Position*:: Allows you to move your legend to the *left*, *right*, *top* or *bottom*
-*Show Tooltip*:: Enables or disables the display of tooltip on hovering over chart objects
-*Order buckets by descending sum*:: Check this box to enforce sorting of buckets by descending sum in the visualization
+*Chart type*:: Choose between *Area*, *Line*, and *Bar* types.
+*Mode*:: stack the different metrics, or plot them next to each other 
+*Value Axis*:: choose the axis you want to plot this data too (the properties of each are configured under Y-axes).
+*Line mode*:: should the outline of lines or bars appear *smooth*, *straight*, or *stepped*. 
 
-==== Category Axis
-The category axis is defined by the bucket aggregation you chose under Data tab. Here you can customize how its displayed:
+==== Y-axis
 
-*Show*:: You can chose if you want to display category axis or not
-*Position*:: You can choose where you want to display category axis. If you position your category axis on the left or right the chart will turn to the horizontal type.
+Style all the Y-axes of the chart.
+
+*Position*:: position of the Y-axis (*left* or *right* for vertical charts, and *top* or *bottom* for horizontal charts).
+*Scale type*:: scaling of the values (*linear*, *log*, or *square root*)
 *Advanced Options*::
 *Labels - Show Labels*:::: Allows you to hide axis labels
 *Labels - Filter Labels*:::: If filter labels is enabled some labels will be hidden in case there is not enough space to display them
 *Labels - Rotate*:::: You can enter the number in degrees for how much you want to rotate labels
 *Labels - Truncate*:::: You can enter the size in pixels to which the label is truncated
+*Scale to Data Bounds*:::: The default Y-axis bounds are zero and the maximum value returned in the data. Check
+                           this box to change both upper and lower bounds to match the values returned in the data.
+*Custom Extents*:::: You can define custom minimum and maximum for each axis
 
-==== Grid
-You can enable grid on the chart. By default grid is displayed on the category axis only.
+==== X-Axis
+By default one X-axis is defined on a chart, but you can add as much as you need. Clicking on the + sign to create a new
+X-axis.
 
-*Category Lines*:: You can disable the display of grid lines on category axis
-*Value Axis*:: You can choose on which (if any) of the value axes you want to display grid lines
-*Color*:: You can specify the color for gird lines 
-
-==== Value Axes
-By default one value axis is defined on a chart, but you can add as much as you need. Clicking on the + sign will create a new value axis.
-
-Each value axis has this options:
-
-*Show*:: You can decide to hide the value axis completely
-*Label*:: Allows to define a custom label
-*Position*:: Options for position depend on the position of your category axis. If category axis is positioned on the top or bottom you can position value axis on the left or right. In the opposite case you can position your value axis on the top or bottom.
-*Mode*:: Mode allows you to define how value axis represents the values. You can choose among the following:
-_wiggle_:::: Displays the aggregations as a https://en.wikipedia.org/wiki/Streamgraph[streamgraph].
-_percentage_:::: Displays each aggregation as a proportion of the total.
-_silhouette_:::: Displays each aggregation as variance from a central line.
-*Scale Type*:: Allows you to choose between *linear*, *square root* and *log* scale
-
+*Position*:: position of the X-Axis (*left* or *right* for horizontal charts, and *top* or *bottom* for vertical charts).
 *Advanced Options*::
 *Labels - Show Labels*:::: Allows you to hide axis labels
 *Labels - Filter Labels*:::: If filter labels is enabled some labels will be hidden in case there is not enough spave to display them
 *Labels - Rotate*:::: You can enter the number in degrees for how much you want to rotate labels
 *Labels - Truncate*:::: You can enter the size in pixels to which the label is truncated
-*Scale to Data Bounds*:::: The default Y axis bounds are zero and the maximum value returned in the data. Check
-                           this box to change both upper and lower bounds to match the values returned in the data.
-*Custom Extents*:::: You can define custom minimum and maximum for each axis
 
-==== Series
-Each of the *Series* represents a metric you added in the data tab. For each Series you can define the following options:
 
-*Show*:: Allows you to hide specific series.
-*Type*:: Allows you to choose between *Area*, *Line* and *Histogram* types. This allows you to show each metrics as a different chart type.
-*Mode*:: Allows you to choose how your values are showed on the chart. 
-_stacked_:::: Values for this series will be stacked. Stacking happens per value axis. This means that if you have two series on one value axis and both modes are set to stacked they will be stacked on top of each other. If one of the series modes is set to normal the other series values (in case series are split) will be split and the second series will be grouped next to them. If you want both series to be stacked but not to be stacked on top of each other you will want to plot them on separate value axes.
-_normal_:::: In normal mode values will not be stacked.
-*Value Axis*:: You can define to which value axis this series belongs. If you dont select a value it will belong to the first value axis.
+=== Panel Settings
 
-Additional options might be available depending the on the *type* selected. For Area and Line types you can decide to smooth the lines. And for Line chart you can decide to not show lines or circles.
+These are options that apply to the entire chart and not just the individual data series.
+
+==== Common options
+*Legend Position*:: Move your legend to the *left*, *right*, *top* or *bottom*
+*Show Tooltip*:: Enables or disables the display of tooltip on hovering over chart objects
+*Current Time Marker*:: Show a line indicating the current time
+
+==== Grid options
+You can enable grid on the chart. By default grid is displayed on the category axis only.
+
+*X-axis*:: You can disable the display of grid lines on category axis
+*Y-axis*:: You can choose on which (if any) of the value axes you want to display grid lines 
 
 [float]
 [[vertbar-viewing-detailed-information]]
