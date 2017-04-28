@@ -3,6 +3,7 @@ export default function ({ getService, getPageObjects, loadTestFile }) {
   const remote = getService('remote');
   const esArchiver = getService('esArchiver');
   const PageObjects = getPageObjects(['common']);
+  const kibanaServer = getService('kibanaServer');
 
   describe('context app', function () {
     this.timeout(config.get('timeouts.test'));
@@ -11,6 +12,11 @@ export default function ({ getService, getPageObjects, loadTestFile }) {
       await remote.setWindowSize(1200,800);
       await esArchiver.loadIfNeeded('logstash_functional');
       await esArchiver.load('visualize');
+      await kibanaServer.uiSettings.replace({
+        'dateFormat:tz':'UTC',
+        'defaultIndex':'logstash-*'
+      });
+
       await PageObjects.common.navigateToApp('discover');
     });
 
