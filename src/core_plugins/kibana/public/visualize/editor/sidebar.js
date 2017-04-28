@@ -12,6 +12,7 @@ uiModules
     template: sidebarTemplate,
     scope: true,
     controllerAs: 'sidebar',
+    replace: true,
     controller: function ($scope) {
       $scope.$bind('vis', 'editableVis');
 

@@ -69,6 +69,9 @@ import NoticeSandbox
 import PanelExample
   from '../../views/panel/panel_example';
 
+import SideBarExample
+  from '../../views/side_bar/side_bar_example';
+
 import StatusTextExample
   from '../../views/status_text/status_text_example';
 
@@ -154,6 +157,9 @@ const components = [{
 }, {
   name: 'Panel',
   component: PanelExample,
+}, {
+  name: 'SideBar',
+  component: SideBarExample,
 }, {
   name: 'StatusText',
   component: StatusTextExample,

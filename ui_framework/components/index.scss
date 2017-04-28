@@ -17,6 +17,7 @@
 @import "variables";
 @import "mixins";
 @import "common_styles";
+@import "utilities";
 
 // Components
 @import "action_item/index";
@@ -43,6 +44,7 @@
 @import "notice/index";
 @import "panel/index";
 @import "prompt_for_items/index";
+@import "side_bar/index";
 @import "status_text/index";
 @import "table/index";
 @import "tabs/index";

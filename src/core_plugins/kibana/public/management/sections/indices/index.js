@@ -4,6 +4,7 @@ import './edit_index_pattern';
 import uiRoutes from 'ui/routes';
 import { uiModules } from 'ui/modules';
 import indexTemplate from 'plugins/kibana/management/sections/indices/index.html';
+import './index.less';
 
 const indexPatternsResolutions = {
   indexPatternIds: function (courier) {

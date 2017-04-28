@@ -88,6 +88,30 @@
   @include kuiButtonActive { @content }
 }
 
+/*
+ * 1. Allow user to scroll to see clipped nav items when the nav is too short.
+ * 2. Style the scrollbar to look good in Chrome and Safari.
+ */
+@mixin verticalScroll {
+  overflow-x: hidden; /* 1 */
+  overflow-y: auto; /* 1 */
+
+  &::-webkit-scrollbar { /* 2 */
+    width: 16px;
+    height: 16px;
+  }
+
+  &::-webkit-scrollbar-thumb { /* 2 */
+    background-color: $globalScrollBarColor;
+    border: 6px solid transparent;
+    background-clip: content-box;
+  }
+
+  &::-webkit-scrollbar-track { /* 2 */
+    background-color: transparent;
+  }
+}
+
 /**
  * 1. Make sure outline doesn't get hidden beneath adjacent elements.
  * 2. Override inherited styles (possibly from Bootstrap).

@@ -13,6 +13,10 @@
 /**
  * 1. Links can't have a disabled attribute, so they can't support :enabled.
  */
+/*
+ * 1. Allow user to scroll to see clipped nav items when the nav is too short.
+ * 2. Style the scrollbar to look good in Chrome and Safari.
+ */
 /**
  * 1. Make sure outline doesn't get hidden beneath adjacent elements.
  * 2. Override inherited styles (possibly from Bootstrap).
@@ -49,6 +53,12 @@
 
 body {
   font-family: "Open Sans", Helvetica, Arial, sans-serif; }
+
+.fullWidth {
+  width: 100% !important; }
+
+.noPadding {
+  padding: 0 !important; }
 
 .kuiActionItem {
   display: -webkit-box;
@@ -188,6 +198,7 @@ body {
 
 /**
    * 1. Solves whitespace problems introduced by inline elements.
+   * 2. If the button is full-width, we want the content to be horizontally centered.
    */
 .kuiButton__inner {
   display: -webkit-box;
@@ -199,7 +210,12 @@ body {
   -webkit-align-items: center;
       -ms-flex-align: center;
           align-items: center;
-  /* 1 */ }
+  /* 1 */
+  -webkit-box-pack: center;
+  -webkit-justify-content: center;
+      -ms-flex-pack: center;
+          justify-content: center;
+  /* 2 */ }
 
 .kuiButton--small {
   font-size: 12px;
@@ -420,6 +436,17 @@ body {
           align-items: center; }
   .kuiButtonGroup .kuiButton + .kuiButton {
     margin-left: 4px; }
+
+.kuiButtonGroup--fullWidth {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex; }
+  .kuiButtonGroup--fullWidth > .kuiButton {
+    -webkit-box-flex: 1;
+    -webkit-flex: 1 1 auto;
+        -ms-flex: 1 1 auto;
+            flex: 1 1 auto; }
 
 .kuiButtonGroup--united > .kuiButton:not(:first-child):not(:last-child) {
   border-radius: 0; }
@@ -2330,6 +2357,86 @@ body {
 
 .kuiPromptForItems__actions {
   margin-top: 10px; }
+
+/**
+ * 1. Override Bootstrap styles.
+ */
+.kuiSideBar {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-orient: vertical;
+  -webkit-box-direction: normal;
+  -webkit-flex-direction: column;
+      -ms-flex-direction: column;
+          flex-direction: column;
+  border-right: 1px solid #E4E4E4 !important;
+  /* 1 */ }
+
+/**
+ * 1. Sometimes your markup may require a wrapper element inside of the SideBar. In this case,
+ *    this class can be used to expand to fill the container.
+ * 2. Set the flex-basis to 0 so that it collapses and becomes scrollable when the window is short.
+ */
+.kuiSideBarInner {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  /* 1 */
+  -webkit-box-orient: vertical;
+  -webkit-box-direction: normal;
+  -webkit-flex-direction: column;
+      -ms-flex-direction: column;
+          flex-direction: column;
+  /* 1 */
+  -webkit-box-flex: 1;
+  -webkit-flex: 1 1 0;
+      -ms-flex: 1 1 0px;
+          flex: 1 1 0;
+  /* 1, 2 */ }
+
+/**
+ * 1. Shrink to the size of the SideBar content.
+ */
+.kuiSideBarContent {
+  overflow-x: hidden;
+  /* 1 */
+  overflow-y: auto;
+  /* 1 */
+  -webkit-box-flex: 0;
+  -webkit-flex: 0 1 auto;
+      -ms-flex: 0 1 auto;
+          flex: 0 1 auto;
+  /* 1 */ }
+  .kuiSideBarContent::-webkit-scrollbar {
+    /* 2 */
+    width: 16px;
+    height: 16px; }
+  .kuiSideBarContent::-webkit-scrollbar-thumb {
+    /* 2 */
+    background-color: #E4E4E4;
+    border: 6px solid transparent;
+    background-clip: content-box; }
+  .kuiSideBarContent::-webkit-scrollbar-track {
+    /* 2 */
+    background-color: transparent; }
+
+/**
+ * 1. When the SideBar content is short, the controls will expand to be near them. When the content
+ *    is tall, the controls will anchor at the bottom of the screen.
+ */
+.kuiSideBarControls {
+  -webkit-box-flex: 1;
+  -webkit-flex: 1 0 auto;
+      -ms-flex: 1 0 auto;
+          flex: 1 0 auto;
+  /* 1 */
+  height: 70px;
+  padding: 20px 10px;
+  border-top: 1px solid #E4E4E4;
+  background-color: rgba(255, 255, 255, 0.8); }
 
 .kuiStatusText {
   display: -webkit-inline-box;
