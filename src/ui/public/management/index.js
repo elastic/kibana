@@ -20,7 +20,7 @@ management.register('kibana', {
   order: 30,
 });
 
-management.register('kibana', {
+management.register('logstash', {
   display: 'Logstash',
   order: 30,
 });
