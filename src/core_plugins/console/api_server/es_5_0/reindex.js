@@ -10,7 +10,8 @@ module.exports = function (api) {
       wait_for_completion: 'true',
       wait_for_active_shards: 1,
       timeout: '1m',
-      requests_per_second: 0
+      requests_per_second: 0,
+      slices: 1
     },
     data_autocomplete_rules: {
       __template: {
