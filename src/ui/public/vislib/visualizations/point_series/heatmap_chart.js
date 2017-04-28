@@ -157,7 +157,7 @@ export default function HeatmapChartFactory(Private) {
             val = Math.min(colorsNumber - 1, Math.floor(val * colorsNumber));
           }
         }
-        return val || -1;
+        return val;
       }
 
       function label(d) {
