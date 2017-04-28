@@ -21,7 +21,7 @@
 }
 
 start
- = tree:series+ {
+ = tree:series {
   return {
     tree: tree.filter(function (o) {return o != null}),
     functions: functions,
@@ -31,15 +31,12 @@ start
  }
 
 arg_list
- = first:argument rest:more_args* {
+ = first:argument rest:(space? ',' space? arg:argument {return arg})* space? ','? {
   return [first].concat(rest);
  }
 
-more_args
- = ','? space? arg:argument {return arg;}
-
 argument
- = name:function_name '=' value:arg_type {
+ = name:function_name space? '=' space? value:arg_type {
   return {
    type: 'namedArg',
    name: name,
@@ -82,13 +79,15 @@ series_type
  / reference
 
 series
- = series:series_type ','? space? { return series }
+ = first:series_type rest:(space? ',' space? series:series_type {return series})* ','? {
+  return [first].concat(rest)
+ }
 
 function_name
- = (first:[a-zA-Z]+ rest:[.a-zA-Z0-9_-]* ) { return first.join('') + rest.join('') }
+ = first:[a-zA-Z]+ rest:[.a-zA-Z0-9_-]* { return first.join('') + rest.join('') }
 
 function "function"
- = '.' name:function_name '(' space? arg_list:arg_list? space? ')' {
+ = space? '.' name:function_name space? '(' space? arg_list:arg_list? space? ')' {
   var result = {
     type: 'function',
     function: name,
@@ -132,10 +131,10 @@ reference
 
 
 chain
- = func:function rest:function* {return {type: 'chain', chain: [func].concat(rest)}}
+ = func:function space? rest:function* {return {type: 'chain', chain: [func].concat(rest)}}
 
 group
- = '(' space? grouped:series+ space? ')' functions:function* {
+ = '(' space? grouped:series space? ')' functions:function* {
   var first = {
     type: 'chainList',
     list: grouped
@@ -162,7 +161,7 @@ literal "literal"
   }
 
 space
- = [\ \t]+
+ = [\ \t\r\n]+
 
 dq_char
   = "\\" sequence:('"' / "\\") { return sequence; }

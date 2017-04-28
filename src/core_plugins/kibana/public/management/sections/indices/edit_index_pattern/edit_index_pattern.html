@@ -15,7 +15,7 @@
 
       <p ng-if="indexPattern.timeFieldName" class="kuiText kuiVerticalRhythm">
         <span class="label label-success">
-          <i class="fa fa-clock-o"></i> Configured time field: {{indexPattern.timeFieldName}}
+          <i class="fa fa-clock-o"></i><span translate="KIBANA-TIME_FILTER_FIELD_NAME"></span>: {{indexPattern.timeFieldName}}
         </span>
       </p>
 
@@ -131,21 +131,23 @@
       </form>
 
       <!-- Tab content -->
-      <indexed-fields-table
-        ng-show="state.tab == 'indexedFields'"
-        class="fields indexed-fields"
-      ></indexed-fields-table>
+      <div class="kuiVerticalRhythm">
+        <indexed-fields-table
+          ng-show="state.tab == 'indexedFields'"
+          class="fields indexed-fields"
+        ></indexed-fields-table>
 
-      <scripted-fields-table
-        ng-show="state.tab == 'scriptedFields'"
-        class="fields scripted-fields"
-      ></scripted-fields-table>
+        <scripted-fields-table
+          ng-show="state.tab == 'scriptedFields'"
+          class="fields scripted-fields"
+        ></scripted-fields-table>
 
-      <source-filters-table
-        ng-show="state.tab == 'sourceFilters'"
-        index-pattern="indexPattern"
-        class="fields source-filters"
-      ></source-filters-table>
+        <source-filters-table
+          ng-show="state.tab == 'sourceFilters'"
+          index-pattern="indexPattern"
+          class="fields source-filters"
+        ></source-filters-table>
+      </div>
     </div>
   </kbn-management-indices>
 </kbn-management-app>

@@ -237,13 +237,6 @@ field-name,
 }
 
 disc-field-chooser {
-  ul.discover-selected-fields {
-    /* If only _source is presend in the selected fields list, hide its toggle button */
-    li:first-child:nth-last-child(1)[attr-field=_source] .discover-field-toggle {
-      display: none;
-    }
-  }
-
   .sidebar-item.active .sidebar-item-title {
     background-color: @sidebar-active-bg;
     color: @sidebar-active-color;

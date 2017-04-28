@@ -19,7 +19,7 @@
           <div class="form-group">
             <label translate="KIBANA-INDEX_NAME_OR_PATTERN"></label>
             <p class="help-block" ng-if="!controller.newIndexPattern.nameIsPattern" translate="KIBANA-WILDCARD_DYNAMIC_INDEX_PATTERNS"></p>
-            <p class="help-block" ng-if="controller.newIndexPattern.isTimeBased && controller.newIndexPattern.nameIsPattern"><span translate="KIBANA-STATIC_TEXT_IN_DYNAMIC_INDEX_PATTERNS"></span> &mdash;
+            <p class="help-block" ng-if="controller.newIndexPattern.nameIsPattern"><span translate="KIBANA-STATIC_TEXT_IN_DYNAMIC_INDEX_PATTERNS"></span> &mdash;
               <small><a target="_blank" href="http://momentjs.com/docs/#/displaying/format/" translate="KIBANA-DATE_FORMAT_DOCS"></a></small></p>
             <input
               data-test-subj="createIndexPatternNameInput"
@@ -41,19 +41,9 @@
             </small>
           </div>
 
-          <div class="form-group time-and-pattern">
+          <div class="form-group">
             <label>
-              <input
-                data-test-subj="createIndexPatternIsTimeBasedCheckBox"
-                ng-model="controller.newIndexPattern.isTimeBased"
-                type="checkbox">
-              <span translate="KIBANA-CONTAINS_TIME_BASED_EVENTS"></span>
-            </label>
-          </div>
-
-          <div class="form-group" ng-if="controller.newIndexPattern.isTimeBased">
-            <label>
-              <span translate="KIBANA-TIME_FIELD_NAME"></span>
+              <span translate="KIBANA-TIME_FILTER_FIELD_NAME"></span>
               &nbsp;
               <kbn-info info="{{ 'KIBANA-FIELD_FILTER_EVENTS_GLOBAL_TIME' | translate }}"></kbn-info>
               &nbsp;
@@ -63,13 +53,16 @@
             </label>
             <select
               data-test-subj="createIndexPatternTimeFieldSelect"
-              ng-disabled="controller.fetchFieldsError"
+              ng-disabled="controller.fetchFieldsError || !controller.indexHasDateFields"
               ng-required="!controller.fetchFieldsError"
               ng-options="field.name for field in controller.dateFields"
               ng-model="controller.newIndexPattern.timeField"
               auto-select-if-only-one="controller.dateFields"
               class="form-control"
             ></select>
+            <p class="help-block" ng-if="!controller.fetchFieldsError && !controller.indexHasDateFields">
+              The indices which match this index pattern don&rsquo;t contain any time fields.
+            </p>
           </div>
 
           <div class="form-group" ng-if="controller.canExpandIndices()">
@@ -92,7 +85,7 @@
           </div>
 
           <div class="form-group time-and-pattern">
-            <label ng-if="controller.newIndexPattern.isTimeBased">
+            <label>
               <input
                 data-test-subj="createIndexPatternNameIsPatternCheckBox"
                 ng-model="controller.newIndexPattern.nameIsPattern"
@@ -103,7 +96,7 @@
             </label>
           </div>
 
-          <div class="form-group" ng-if="controller.newIndexPattern.isTimeBased && controller.newIndexPattern.nameIsPattern">
+          <div class="form-group" ng-if="controller.newIndexPattern.nameIsPattern">
             <div class="alert alert-warning">
               </p>
               <h4 translate="KIBANA-ALERT_INDEX_PATTERN_DEPRECATED"></h4>

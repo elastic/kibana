@@ -63,7 +63,8 @@
     "mocha": "mocha",
     "mocha:debug": "mocha --debug-brk",
     "sterilize": "grunt sterilize",
-    "uiFramework:start": "grunt uiFramework:start"
+    "uiFramework:start": "grunt uiFramework:start",
+    "uiFramework:build": "grunt uiFramework:build"
   },
   "repository": {
     "type": "git",

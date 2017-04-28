@@ -14,11 +14,6 @@ label > small {
   font-weight: normal;
 }
 
-button {
-  // buttons have a stupid 1990's default look which should be disabled
-  .btn();
-}
-
 .small {
   font-size: 0.9em !important;
 }
@@ -153,10 +148,6 @@ a {
       margin-left: auto;
       padding-right: 0;
       line-height: 20px;
-
-      .button-group > :last-child {
-        border-radius: 0;
-      }
     }
   }
 
@@ -197,28 +188,14 @@ kbn-info i {
   cursor: help;
 }
 
-.kbn-timepicker .btn-default {
-  background: transparent;
-  color: @text-color;
-  border: 0px;
-  box-shadow: none;
-  text-shadow: none;
-}
-
-.kbn-timepicker .btn-info {
-  .button-variant(@btn-info-color; @btn-info-bg; @btn-info-border);
-  .text-info { color: @btn-info-color; }
-  text-shadow: none;
-}
-
 .kbn-timepicker .refresh-interval {
   padding: 0.2em 0.4em;
   border-radius: @border-radius-small;
 }
 
 .kbn-timepicker .refresh-interval-active {
-  background-color: @btn-info-bg;
-  color: @btn-info-color;
+  background-color: @brand-info;
+  color: @white;
 }
 
 //== Table
@@ -325,11 +302,6 @@ paginated-selectable-list {
   padding: @padding-base-vertical @padding-base-horizontal;
 }
 
-//== clicking disabled buttons should not cause the whole page to get selected
-button[disabled] {
-  user-select: none;
-}
-
 //== override the disabled cursor that doesn't work everywhere
 .form-control{
   &[disabled],
@@ -386,15 +358,17 @@ style-compile {
 
 
 .cell-hover {
-  background-color: @table-cell-hover-bg;
   position: relative;
 
+  /**
+   * 1. Center vertically regardless of row height.
+   */
   .table-cell-filter {
     position: absolute;
-    background-color: @table-cell-hover-bg;
     white-space: nowrap;
     right: 0;
-    top: 5px;
+    top: 50%; /* 1 */
+    transform: translateY(-50%); /* 1 */
     display: none;
   }
 }
