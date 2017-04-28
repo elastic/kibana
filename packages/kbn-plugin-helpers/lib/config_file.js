@@ -3,6 +3,7 @@ var readFileSync = require('fs').readFileSync;
 
 var configFiles = [ '.kibana-plugin-helpers.json', '.kibana-plugin-helpers.dev.json' ];
 var configCache = {};
+var KIBANA_ROOT_OVERRIDE = process.env.KIBANA_ROOT ? resolve(process.env.KIBANA_ROOT) : null;
 
 module.exports = function (root) {
   if (!root) root = process.cwd();
@@ -25,6 +26,7 @@ module.exports = function (root) {
 
   // if the kibanaRoot is set, use resolve to ensure correct resolution
   if (config.kibanaRoot) config.kibanaRoot = resolve(root, config.kibanaRoot);
+  if (KIBANA_ROOT_OVERRIDE) config.kibanaRoot = KIBANA_ROOT_OVERRIDE;
 
   return config;
 };
