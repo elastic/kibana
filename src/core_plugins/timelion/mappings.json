@@ -1,0 +1,43 @@
+{
+  "timelion-sheet": {
+    "properties": {
+      "description": {
+        "type": "text"
+      },
+      "hits": {
+        "type": "integer"
+      },
+      "kibanaSavedObjectMeta": {
+        "properties": {
+          "searchSourceJSON": {
+            "type": "text"
+          }
+        }
+      },
+      "timelion_chart_height": {
+        "type": "integer"
+      },
+      "timelion_columns": {
+        "type": "integer"
+      },
+      "timelion_interval": {
+        "type": "keyword"
+      },
+      "timelion_other_interval": {
+        "type": "keyword"
+      },
+      "timelion_rows": {
+        "type": "integer"
+      },
+      "timelion_sheet": {
+        "type": "text"
+      },
+      "title": {
+        "type": "text"
+      },
+      "version": {
+        "type": "integer"
+      }
+    }
+  }
+}

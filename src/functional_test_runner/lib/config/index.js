@@ -1,1 +1,1 @@
-export { readConfigFile } from './create_config';
+export { readConfigFile } from './read_config_file';

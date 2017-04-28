@@ -32,8 +32,7 @@ Contributing Language Packs
 For this example, we will demonstrate translation into Maltese (Language
 code `mt`). Add-on functionality for Kibana is implemented with plug-in modules.
 Refer to
-https://www.elastic.co/guide/en/kibana/current/kibana-plugins.html[Kibana
-Plugins] for more details.
+<<kibana-plugins, Kibana Plugins>> for more details.
 
 * Fork the `kibana` source, and ensure you have an up to date copy of
 the source.
@@ -170,8 +169,8 @@ New Plugin Authors
 
 Add-on functionality for Kibana is implemented with plug-in modules.
 Refer to
-https://www.elastic.co/guide/en/kibana/current/kibana-plugins.html[Kibana
-Plugins] for more details. It is recommended that when creating a plugin
+<<kibana-plugins, Kibana
+Plugins>> for more details. It is recommended that when creating a plugin
 you enable translations (see link:#Enabling%20Translations%20on%20Existing%20Plugins[Enabling Translations on Existing Plugins], above).
 
 [[enabling-translation-in-a-plugin]]

@@ -24,7 +24,6 @@ uiModules.get('apps/management')
   // Configure the new index pattern we're going to create.
   this.newIndexPattern = {
     name: config.get('indexPattern:placeholder'),
-    isTimeBased: true,
     nameIsPattern: false,
     expandable: false,
     nameInterval: _.find(intervals, { name: 'daily' }),
@@ -40,9 +39,18 @@ uiModules.get('apps/management')
   this.patternErrors = [];
   this.fetchFieldsError = $translate.instant('KIBANA-LOADING');
 
+  const TIME_FILTER_FIELD_OPTIONS = {
+    NO_DATE_FIELD_SELECTED: {
+      name: $translate.instant('KIBANA-NO_DATE_FIELD_SELECTED')
+    },
+    NO_DATE_FIELDS_IN_INDICES: {
+      name: $translate.instant('KIBANA-NO_DATE_FIELDS_IN_INDICES')
+    }
+  };
+
   const fetchFieldList = () => {
     this.dateFields = this.newIndexPattern.timeField = null;
-    const useIndexList = this.newIndexPattern.isTimeBased && this.newIndexPattern.nameIsPattern;
+    const useIndexList = this.newIndexPattern.nameIsPattern;
     let fetchFieldsError;
     let dateFields;
 
@@ -89,7 +97,18 @@ uiModules.get('apps/management')
 
   const updateFieldList = results => {
     this.fetchFieldsError = results.fetchFieldsError;
-    this.dateFields = results.dateFields;
+    if (this.fetchFieldsError) {
+      return;
+    }
+
+    this.dateFields = results.dateFields || [];
+    this.indexHasDateFields = this.dateFields.length > 0;
+    if (this.indexHasDateFields) {
+      this.dateFields.unshift(TIME_FILTER_FIELD_OPTIONS.NO_DATE_FIELD_SELECTED);
+    } else {
+      this.dateFields.unshift(TIME_FILTER_FIELD_OPTIONS.NO_DATE_FIELDS_IN_INDICES);
+    }
+    this.newIndexPattern.timeField = this.dateFields[0];
   };
 
   const updateFieldListAndSetTimeField = (results, timeFieldName) => {
@@ -100,12 +119,13 @@ uiModules.get('apps/management')
     }
 
     const matchingTimeField = results.dateFields.find(field => field.name === timeFieldName);
-    const defaultTimeField = results.dateFields[0];
 
     //assign the field from the results-list
     //angular recreates a new timefield instance, each time the list is refreshed.
     //This ensures the selected field matches one of the instances in the list.
-    this.newIndexPattern.timeField = matchingTimeField ? matchingTimeField : defaultTimeField;
+    if (matchingTimeField) {
+      this.newIndexPattern.timeField = matchingTimeField;
+    }
   };
 
   const resetIndex = () => {
@@ -168,7 +188,7 @@ uiModules.get('apps/management')
   this.canExpandIndices = () => {
     // to maximize performance in the digest cycle, move from the least
     // expensive operation to most
-    return this.newIndexPattern.isTimeBased && !this.newIndexPattern.nameIsPattern && _.includes(this.newIndexPattern.name, '*');
+    return !this.newIndexPattern.nameIsPattern && _.includes(this.newIndexPattern.name, '*');
   };
 
   this.refreshFieldList = () => {
@@ -184,14 +204,15 @@ uiModules.get('apps/management')
 
   this.createIndexPattern = () => {
     const id = this.newIndexPattern.name;
-    const timeFieldName =
-      this.newIndexPattern.isTimeBased
-      ? this.newIndexPattern.timeField.name
-      : undefined;
+    let timeFieldName;
+    if ((this.newIndexPattern.timeField !== TIME_FILTER_FIELD_OPTIONS.NO_DATE_FIELD_SELECTED)
+      && (this.newIndexPattern.timeField !== TIME_FILTER_FIELD_OPTIONS.NO_DATE_FIELDS_IN_INDICES)) {
+      timeFieldName = this.newIndexPattern.timeField.name;
+    }
 
     // Only event-time-based index patterns set an intervalName.
     const intervalName =
-      this.newIndexPattern.isTimeBased  && this.newIndexPattern.nameIsPattern
+      this.newIndexPattern.nameIsPattern
       ? this.newIndexPattern.nameInterval.name
       : undefined;
 
@@ -228,21 +249,15 @@ uiModules.get('apps/management')
   };
 
   $scope.$watchMulti([
-    'controller.newIndexPattern.isTimeBased',
     'controller.newIndexPattern.nameIsPattern',
     'controller.newIndexPattern.nameInterval.name'
   ], (newVal, oldVal) => {
-    const isTimeBased = newVal[0];
     const nameIsPattern = newVal[1];
     const newDefault = getDefaultPatternForInterval(newVal[2]);
     const oldDefault = getDefaultPatternForInterval(oldVal[2]);
 
     if (this.newIndexPattern.name === oldDefault) {
       this.newIndexPattern.name = newDefault;
-    }
-
-    if (!isTimeBased) {
-      this.newIndexPattern.nameIsPattern = false;
     }
 
     if (!nameIsPattern) {
@@ -301,7 +316,6 @@ uiModules.get('apps/management')
   });
 
   $scope.$watchMulti([
-    'controller.newIndexPattern.isTimeBased',
     'controller.sampleCount'
   ], () => {
     this.refreshFieldList();

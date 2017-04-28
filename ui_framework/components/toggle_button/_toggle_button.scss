@@ -10,7 +10,11 @@
   padding: 0;
   font-size: inherit; /* 1 */
   line-height: inherit; /* 1 */
-  color: $globalLinkColor;
+  color: $globalFontColor;
+
+  &:focus {
+    color: $globalFontColor;
+  }
 
   &:active {
     color: $globalLinkColor !important; /* 2 */

@@ -5,6 +5,7 @@ import url from 'url';
 
 const NoConnections = require('elasticsearch').errors.NoConnections;
 
+import mappings from './fixtures/mappings';
 import healthCheck from '../health_check';
 import kibanaVersion from '../kibana_version';
 import serverConfig from '../../../../../test/server_config';
@@ -70,7 +71,7 @@ describe('plugins/elasticsearch', () => {
         }
       };
 
-      health = healthCheck(plugin, server);
+      health = healthCheck(plugin, server, { mappings });
     });
 
     afterEach(() => {

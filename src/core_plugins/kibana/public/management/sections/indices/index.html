@@ -5,26 +5,29 @@
         <a
           ng-if="editingId"
           href="#/management/kibana/index"
-          class="btn btn-primary btn-xs"
-          aria-label="{{ 'KIBANA-ADD_NEW' | translate }}">
-          <span class="sr-only" translate="KIBANA-ADD_NEW"></span>
-          <i aria-hidden="true" class="fa fa-plus"></i>
-          <span class="sr-only" translate="KIBANA-ADD_NEW"></span>
+          class="kuiButton kuiButton--primary kuiButton--small"
+          aria-label="{{ 'KIBANA-ADD_NEW' | translate }}"
+        >
+          <span aria-hidden="true" class="kuiIcon fa-plus"></span>
+          <span translate="KIBANA-ADD_NEW"></span>
         </a>
       </h5>
     </div>
     <ul class="list-unstyled">
       <li
         ng-if="!defaultIndex"
-        class="sidebar-item">
+        class="sidebar-item"
+      >
         <div class="sidebar-item-title full-title">
-            <span class="label label-warning" translate="KIBANA-WARNING"></span>
-            <p translate="KIBANA-NO_DEFAULT_INDEX_PATTERN"></p>
+          <span class="label label-warning" translate="KIBANA-WARNING"></span>
+          <p translate="KIBANA-NO_DEFAULT_INDEX_PATTERN"></p>
         </div>
       </li>
+
       <li
         ng-repeat="pattern in indexPatternList | orderBy:['-default','id'] track by pattern.id "
-        class="sidebar-item">
+        class="sidebar-item"
+      >
         <a href="{{::pattern.url}}">
           <div class="{{::pattern.class}}">
             <i aria-hidden="true" ng-if="pattern.default" class="fa fa-star"></i>

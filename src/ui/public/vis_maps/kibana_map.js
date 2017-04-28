@@ -96,11 +96,15 @@ export class KibanaMap extends EventEmitter {
     this._listeners = [];
     this._showTooltip = false;
 
-    this._leafletMap = L.map(containerNode, {
+
+    const leafletOptions = {
       minZoom: options.minZoom,
-      maxZoom: options.maxZoom
-    });
-    this._leafletMap.fitWorld();
+      maxZoom: options.maxZoom,
+      center: options.center ? options.center : [0, 0],
+      zoom: options.zoom ? options.zoom : 0
+    };
+
+    this._leafletMap = L.map(containerNode, leafletOptions);
     const worldBounds = L.latLngBounds(L.latLng(-90, -180), L.latLng(90, 180));
     this._leafletMap.setMaxBounds(worldBounds);
 
@@ -112,7 +116,7 @@ export class KibanaMap extends EventEmitter {
       }
     });
     this._leafletMap.on('zoomend', () => this.emit('zoomend'));
-    this._leafletMap.on('moveend', () => this.emit('moveend'));
+    this._leafletMap.on('dragend', () => this.emit('dragend'));
     this._leafletMap.on('dragend', e => this._layers.forEach(layer => layer.updateExtent('dragend', e)));
     this._leafletMap.on('mousemove', e => this._layers.forEach(layer => layer.movePointer('mousemove', e)));
     this._leafletMap.on('mouseout', e => this._layers.forEach(layer => layer.movePointer('mouseout', e)));
@@ -170,6 +174,7 @@ export class KibanaMap extends EventEmitter {
 
     this.resize();
 
+
   }
 
   setShowTooltip(showTooltip) {
@@ -205,7 +210,6 @@ export class KibanaMap extends EventEmitter {
           this._popup.setContent(event.content);
         }
       }
-
 
     };
 
@@ -257,7 +261,9 @@ export class KibanaMap extends EventEmitter {
       this._leafletMap.removeControl(this._leafletLegendControl);
     }
     this.setBaseLayer(null);
-    for (const layer of this._layers) {
+    let layer;
+    while (this._layers.length) {
+      layer = this._layers.pop();
       layer.removeFromLeafletMap(this._leafletMap);
     }
     this._leafletMap.remove();
@@ -508,7 +514,7 @@ export class KibanaMap extends EventEmitter {
   }
 
   persistUiStateForVisualization(visualization) {
-    this.on('moveend', () => {
+    function persistMapStateInUiState() {
       const uiState = visualization.getUiState();
       const centerFromUIState = uiState.get('mapCenter');
       const zoomFromUiState = parseInt(uiState.get('mapZoom'));
@@ -519,7 +525,10 @@ export class KibanaMap extends EventEmitter {
       if (!centerFromUIState || centerFromMap.lon !== centerFromUIState[1] || centerFromMap.lat !== centerFromUIState[0]) {
         uiState.set('mapCenter', [centerFromMap.lat, centerFromMap.lon]);
       }
-    });
+    }
+
+    this.on('dragend', persistMapStateInUiState);
+    this.on('zoomend', persistMapStateInUiState);
   }
 
   useUiStateFromVisualization(visualization) {

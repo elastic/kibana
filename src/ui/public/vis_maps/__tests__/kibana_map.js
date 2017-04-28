@@ -29,7 +29,9 @@ describe('kibana_map tests', function () {
       setupDOM();
       kibanaMap = new KibanaMap(domNode, {
         minZoom: 1,
-        maxZoom: 10
+        maxZoom: 10,
+        center: [0,0],
+        zoom: 0
       });
     });
 
@@ -74,7 +76,9 @@ describe('kibana_map tests', function () {
       setupDOM();
       kibanaMap = new KibanaMap(domNode, {
         minZoom: 1,
-        maxZoom: 10
+        maxZoom: 10,
+        center: [0,0],
+        zoom: 0
       });
     });
 
