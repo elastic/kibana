@@ -7,7 +7,7 @@
 
 <select
   class="timelion-interval"
-  ng-options="i for i in intervalOptions"
+  ng-options="intervalOption for intervalOption in intervalOptions"
   ng-class="{'form-control': !inHeader, 'kuiLocalSearchSelect': inHeader, 'timelion-interval-compact': interval === 'other'}"
   ng-model="interval"
 ></select>
