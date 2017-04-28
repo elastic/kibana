@@ -90,8 +90,8 @@ export default function ({ getService, getPageObjects }) {
       });
 
       it('should show correct data', function () {
-        const expectedTableData =  [ '0 55', '40,000 50', '80,000 41', '120,000 43',
-          '160,000 44', '200,000 40', '240,000 46', '280,000 39', '320,000 40', '360,000 47'
+        const expectedTableData =  [ '0', '55', '40,000', '50', '80,000', '41', '120,000', '43',
+          '160,000', '44', '200,000', '40', '240,000', '46', '280,000', '39', '320,000', '40', '360,000', '47'
         ];
 
         return PageObjects.visualize.collapseChart()
