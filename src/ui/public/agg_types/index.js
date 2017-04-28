@@ -29,7 +29,7 @@ import AggTypesMetricsBucketSumProvider from 'ui/agg_types/metrics/bucket_sum';
 import AggTypesMetricsBucketAvgProvider from 'ui/agg_types/metrics/bucket_avg';
 import AggTypesMetricsBucketMinProvider from 'ui/agg_types/metrics/bucket_min';
 import AggTypesMetricsBucketMaxProvider from 'ui/agg_types/metrics/bucket_max';
-
+import 'ui/directives/validate_agg';
 
 export default function AggTypeService(Private) {
 
