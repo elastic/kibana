@@ -261,7 +261,9 @@ class KibanaMap extends EventEmitter {
       this._leafletMap.removeControl(this._leafletLegendControl);
     }
     this.setBaseLayer(null);
-    for (const layer of this._layers) {
+    let layer;
+    while (this._layers.length) {
+      layer = this._layers.pop();
       layer.removeFromLeafletMap(this._leafletMap);
     }
     this._leafletMap.remove();
