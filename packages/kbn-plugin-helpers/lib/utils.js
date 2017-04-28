@@ -1,6 +1,6 @@
 var resolve = require('path').resolve;
 
-var pluginConfig = require('./config_file');
+var pluginConfig = require('./plugin_config');
 
 function babelRegister() {
   var plugin = pluginConfig();
