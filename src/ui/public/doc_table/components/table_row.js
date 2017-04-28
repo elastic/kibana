@@ -118,17 +118,6 @@ module.directive('kbnTableRow', function ($compile, $httpParamSerializer, kbnUrl
         ];
 
         const mapping = indexPattern.fields.byName;
-        if (indexPattern.timeFieldName) {
-          newHtmls.push(cellTemplate({
-            timefield: true,
-            formatted: _displayField(row, indexPattern.timeFieldName),
-            filterable: (
-              mapping[indexPattern.timeFieldName].filterable
-              && _.isFunction($scope.filter)
-            ),
-            column: indexPattern.timeFieldName
-          }));
-        }
 
         $scope.columns.forEach(function (column) {
           const isFilterable = $scope.flattenedRow[column] !== undefined
