@@ -1,0 +1,8 @@
+[[timelion-inline-help]]
+== Inline Help and Documentation
+
+Can't remember a function or searching for a new one? You can always reference the inline help and documentation in Timelion.
+
+Documentation for the Timelion expression language is built-in. Click `Docs` in the top menu to view the available functions and access the inline reference. As you start to enter functions in the query bar, Timelion will display the relevant arguments in real time.
+
+image::images/timelion-arg-help.jpg["Timelion inline help"]
