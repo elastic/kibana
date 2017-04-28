@@ -41,7 +41,7 @@ The data series are styled in the _Metrics_ section, while the axes are styled i
 ==== Metrics
 Modify how each metric from the Data panel is visualized on the chart.
 
-*Chart type*:: Choose between *Area*, *Line* and *Bar* types.
+*Chart type*:: Choose between *Area*, *Line*, and *Bar* types.
 *Mode*:: stack the different metrics, or plot them next to each other 
 *Value Axis*:: choose the axis you want to plot this data too (the properties of each are configured under Y-axes).
 *Line mode*:: should the outline of lines or bars appear *smooth*, *straight*, or *stepped*. 
