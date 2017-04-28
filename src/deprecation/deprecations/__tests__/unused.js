@@ -1,6 +1,6 @@
 import expect from 'expect.js';
 import sinon from 'sinon';
-import unused from '../unused';
+import { unused } from '../unused';
 
 describe('deprecation/deprecations', function () {
   describe('unused', function () {

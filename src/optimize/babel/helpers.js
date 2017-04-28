@@ -15,15 +15,11 @@ const commonPreset = {
   ],
   plugins: [
     require.resolve('babel-plugin-add-module-exports'),
-
-    // See https://github.com/elastic/kibana/issues/9472
     // stage 3
     require.resolve('babel-plugin-transform-async-generator-functions'),
     require.resolve('babel-plugin-transform-object-rest-spread'),
     // stage 2
     require.resolve('babel-plugin-transform-class-properties'),
-    // stage 1
-    require.resolve('babel-plugin-transform-export-extensions'),
   ],
 }
 
