@@ -1,11 +1,40 @@
+import { get } from 'lodash';
+import Samples from './samples';
 import ServerStatus from './server_status';
 import wrapAuthConfig from './wrap_auth_config';
+import { Metrics } from './metrics';
 
 export default function (kbnServer, server, config) {
   kbnServer.status = new ServerStatus(kbnServer.server);
+  kbnServer.legacyMetrics = new Samples(12);
 
   if (server.plugins['even-better']) {
-    kbnServer.mixin(require('./metrics').collectMetrics);
+    const metrics = new Metrics(config, server);
+    const port = config.get('server.port');
+
+    let lastReport = Date.now();
+
+    server.plugins['even-better'].monitor.on('ops', event => {
+      const now = Date.now();
+      const secSinceLast = (now - lastReport) / 1000;
+      lastReport = now;
+
+      const requests = get(event, ['requests', port, 'total'], 0);
+      const requestsPerSecond = requests / secSinceLast;
+
+      metrics.capture(event).then(data => {
+        kbnServer.metrics = data;
+
+        kbnServer.legacyMetrics.add({
+          heapTotal: get(event, 'psmem.heapTotal'),
+          heapUsed: get(event, 'psmem.heapUsed'),
+          load: event.osload,
+          responseTimeAvg: get(data, 'response_times.avg_in_millis'),
+          responseTimeMax: get(data, 'response_times.max_in_millis'),
+          requestsPerSecond: requestsPerSecond
+        });
+      });
+    });
   }
 
   const wrapAuth = wrapAuthConfig(config.get('status.allowAnonymous'));
