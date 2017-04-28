@@ -4,15 +4,15 @@
 *Experimental Feature*
 
 Time Series Visual Builder is a time series data visualizer with an emphasis
-on allowing the user to use the full power of Elasticsearch aggregation framework.
-Time Series Visual Builder allows the user to combine an infinite number of
+on allowing you to use the full power of Elasticsearch aggregation framework.
+Time Series Visual Builder allows you to combine an infinite number of
 aggregations and pipeline aggregations to display complex data in a meaningful way.
 
 image:images/tsvb-screenshot.png["Time Series Visual Builder Interface"]
 
 === Featured Visualizations
 
-Time Series Visual Build comes with 5 different visualization types. The user can
+Time Series Visual Build comes with 5 different visualization types. You can
 switch between each visualization type using the tabbed picker at the top of the
 interface.
 
@@ -20,7 +20,7 @@ interface.
 ==== Time Series
 
 A histogram visualization that supports area, line, bar, and steps along with
-multiple y-axis. The user can fully customize the colors, points, line thickness
+multiple y-axis. You can fully customize the colors, points, line thickness
 and fill opacity. This visualization also supports time shifting to compare two
 time periods. This visualization also supports annotations which can be loaded from
 a seperate index based on a query.
@@ -49,7 +49,7 @@ image:images/tsvb-top-n.png["Top N Visualization"]
 ==== Gauge
 
 This is a single value gauge visualization based on the latest value in a series.
-The face of the gauge can either be a half-circle gauge or full-circle. The user
+The face of the gauge can either be a half-circle gauge or full-circle. You
 can customize the thicknesses of the inner and outer lines to achieve a desired
 design aesthetic. The color of the gauge and the text are fully customizable based
 on a set of rules.
@@ -59,7 +59,7 @@ image:images/tsvb-gauge.png["Gauge Visualization"]
 
 ==== Markdown
 
-This visualization allows the user to enter Markdown text and embed Mustache
+This visualization allows you to enter Markdown text and embed Mustache
 template syntax to customize the Markdown with data based on a set of series.
 This visualization also supports HTML markup along with the ability to define
 a custom stylesheet.
@@ -77,15 +77,15 @@ the editor.
 ==== Data Tab
 
 The data tab is used for configuring the series for each visualization. This tab
-allows the users to add multiple series, depending on what the visualization
+allows you to add multiple series, depending on what the visualization
 supports, with multiple aggregations composed together to create a single metric.
 Here is a breakdown of the significant components of the data tab UI.
 
 ===== Series Label and Color
 
 Each series supports a label which will be used for legends and titles depending on
-which visualization type is selected. For series that are grouped by a term, the
-user can specify a mustache variable of `{{key}}` to substitute the term. For most
+which visualization type is selected. For series that are grouped by a term, you
+can specify a mustache variable of `{{key}}` to substitute the term. For most
 visualizations you can also choose a color by clicking on the swatch, this will display
 the color picker.
 
@@ -104,8 +104,8 @@ image:images/tsvb-data-tab-derivative-example.png["Derivative Example"]
 ===== Series Options
 
 Each series also supports a set of options which are dependent on the type of
-visualizations the user has selected. Universal across each visualization type
-the user can configure:
+visualizations you have selected. Universal across each visualization type
+you can configure:
 
 * Data format
 * Time range offset
@@ -114,7 +114,7 @@ the user can configure:
 
 image:images/tsvb-data-tab-series-options.png["Default Series Options"]
 
-For the Time Series visualization the user can also configure:
+For the Time Series visualization you can also configure:
 
 * Chart type
 * Options for each chart type
@@ -126,8 +126,8 @@ image:images/tsvb-data-tab-series-options-time-series.png["Time Series Series Op
 
 ===== Group By Controls
 
-At the bottom of the metrics there is a set of "Group By" controls that allows the
-user to specify how the series should be grouped or split. There are four choices:
+At the bottom of the metrics there is a set of "Group By" controls that allows you
+to specify how the series should be grouped or split. There are four choices:
 
 * Everything
 * Filter (single)
@@ -139,7 +139,7 @@ By default the series is grouped by everything.
 ==== Panel Options Tab
 
 The panel options tab is used for configuring the entire panel; the set of options
-available is dependent on which visualization the user has selected. Below is a list
+available is dependent on which visualization you have selected. Below is a list
 of the options available per visualization:
 
 *Time Series*
@@ -190,7 +190,7 @@ of the options available per visualization:
 ==== Annotations Tab
 
 The annotations tab is used for adding annotation data sources to the Time Series
-Visualization. The user can configure the following options:
+Visualization. You can configure the following options:
 
 * Index pattern and time field
 * Annotation color
@@ -205,7 +205,7 @@ image:images/tsvb-annotations.png["Annotation Tab"]
 
 The markdown tab is used for editing the source for the Markdown visualization.
 The user interface has an editor on the left side and the available variables from
-the data tab on the right side. The user can click on the variable names to insert
+the data tab on the right side. You can click on the variable names to insert
 the mustache template variable into the markdown at the cursor position. The mustache
 syntax uses the Handlebar.js processor which is an extended version of the Mustache
 template language.
