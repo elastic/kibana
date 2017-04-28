@@ -46,12 +46,12 @@ module.exports = function (api) {
         'index': '',
         'version_type': { __one_of: [ 'internal', 'external' ] },
         'op_type': 'create',
-        'routing': { __one_of: [ 'keep', 'discard', '=SOME TEXT'] }
+        'routing': { __one_of: [ 'keep', 'discard', '=SOME TEXT'] },
+        'pipeline': ''
       },
       'conflicts': 'proceed',
       'size': 10,
       'script': { __scope_link: 'GLOBAL.script' },
-      'pipeline': ''
     }
   })
 };
