@@ -4,6 +4,7 @@ import template from './filter_editor.html';
 import { FILTER_OPERATORS } from './lib/filter_operators';
 import { buildExistsFilter, buildPhraseFilter, buildRangeFilter, buildTermsFilter } from '../filter_manager/lib';
 import '../filters/sort_prefix_first';
+import '../directives/ui_select_focus_on';
 
 const module = uiModules.get('kibana');
 module.directive('filterEditor', function (indexPatterns, $http) {
@@ -20,14 +21,18 @@ module.directive('filterEditor', function (indexPatterns, $http) {
     bindToController: true,
     controller: function ($scope) {
       this.init = (filter) => {
-        const { index, key } = filter.meta;
+        const { index, key, isNew } = filter.meta;
         this.indexPattern = indexPatterns.get(index)
-        .then((indexPattern) => {
-          this.setIndexPattern(indexPattern);
-          this.setField(indexPattern.fields.byName[key]);
-          this.setOperator(getOperatorFromFilter(filter));
-          this.params = getParamsFromFilter(filter);
-        });
+          .then((indexPattern) => {
+            this.setIndexPattern(indexPattern);
+            if (isNew) {
+              this.setFocus('field');
+            } else {
+              this.setField(indexPattern.fields.byName[key]);
+              this.setOperator(getOperatorFromFilter(filter));
+              this.params = getParamsFromFilter(filter);
+            }
+          });
       };
 
       $scope.$watch(() => this.filter, this.init);
@@ -39,8 +44,10 @@ module.directive('filterEditor', function (indexPatterns, $http) {
       };
 
       this.getSetField = (field) => {
-        if (field) return this.setField(field);
-        else return this.field;
+        if (field) {
+          return this.setField(field);
+        }
+        return this.field;
       };
 
       this.setField = (field) => {
@@ -50,7 +57,9 @@ module.directive('filterEditor', function (indexPatterns, $http) {
       };
 
       this.getSetOperator = (operator) => {
-        if (operator) return this.setOperator(operator);
+        if (operator) {
+          return this.setOperator(operator);
+        }
         return this.operator;
       };
 
@@ -62,9 +71,13 @@ module.directive('filterEditor', function (indexPatterns, $http) {
         }
       };
 
+      this.setFocus = (name) => {
+        $scope.$broadcast(`focus-${name}`);
+      };
+
       this.refreshValueSuggestions = (query) => {
         return getValueSuggestions(this.indexPattern, this.field, query)
-        .then(suggestions => this.valueSuggestions = suggestions);
+          .then(suggestions => this.valueSuggestions = suggestions);
       };
 
       this.save = () => {
@@ -115,12 +128,15 @@ module.directive('filterEditor', function (indexPatterns, $http) {
       }
 
       function getValueSuggestions(indexPattern, field, query) {
-        if (!_.get(field, 'aggregatable')) return Promise.resolve([]);
+        if (!_.get(field, 'aggregatable')) {
+          return Promise.resolve([]);
+        }
+
         return $http.post(`../api/kibana/suggestions/values/${indexPattern.id}`, {
           query,
           field: field.name
         })
-        .then(response => response.data);
+          .then(response => response.data);
       }
     }
   };

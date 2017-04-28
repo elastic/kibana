@@ -1,8 +1,8 @@
 <div class="filterEditor kuiModal" style="width: 500px; position: absolute; z-index: 20;">
   <div class="kuiModalHeader">
     <div class="kuiModalHeader__title">
-      <span ng-show="filterEditor.filter.meta.newFilter">Add</span>
-      <span ng-hide="filterEditor.filter.meta.newFilter">Edit</span>
+      <span ng-show="filterEditor.filter.meta.isNew">Add</span>
+      <span ng-hide="filterEditor.filter.meta.isNew">Edit</span>
       filter
     </div>
 
@@ -18,6 +18,8 @@
         <ui-select
           ng-model="filterEditor.getSetField"
           ng-model-options="{ getterSetter: true }"
+          ui-select-focus-on="focus-field"
+          on-select="filterEditor.setFocus('operator')"
         >
           <ui-select-match placeholder="Fields...">
             {{$select.selected.name}}
@@ -34,7 +36,9 @@
         <ui-select
           ng-model="filterEditor.getSetOperator"
           ng-model-options="{ getterSetter: true }"
-          ng-if="filterEditor.field"
+          ng-show="filterEditor.field"
+          ui-select-focus-on="focus-operator"
+          on-select="filterEditor.setFocus('params')"
         >
           <ui-select-match placeholder="Operators...">
             {{$select.selected.name}}
@@ -49,8 +53,9 @@
         class="kuiFieldGroupSection kuiColumn kuiColumn--4"
       >
         <ui-select
-          ng-if="filterEditor.operator.type === 'match'"
+          ng-show="filterEditor.operator.type === 'match'"
           ng-model="filterEditor.params.value"
+          ui-select-focus-on="focus-params"
         >
           <ui-select-match placeholder="Values...">
             {{$select.selected}}
@@ -65,9 +70,10 @@
         </ui-select>
 
         <ui-select
-          ng-if="filterEditor.operator.type === 'terms'"
+          ng-show="filterEditor.operator.type === 'terms'"
           ng-model="filterEditor.params.values"
           multiple
+          ui-select-focus-on="focus-params"
         >
           <ui-select-match placeholder="Values...">
             {{$item}}
@@ -83,7 +89,7 @@
 
         <div
           class="kuiFieldGroup"
-          ng-if="filterEditor.operator.type === 'range'"
+          ng-show="filterEditor.operator.type === 'range'"
         >
           <div class="kuiFieldGroupSection">
             <input
@@ -107,7 +113,7 @@
   </div>
 
   <div class="kuiModalFooter kuiBar">
-    <div class="kuiBarSection" ng-hide="filterEditor.filter.meta.newFilter">
+    <div class="kuiBarSection" ng-hide="filterEditor.filter.meta.isNew">
       <button
         class="kuiButton kuiButton--danger"
         ng-click="filterEditor.onDelete()"

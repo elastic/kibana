@@ -59,7 +59,7 @@ module.directive('filterBar', function (Private, Promise, getAppState) {
       $scope.addFilter = () => {
         const index = $scope.indexPattern.id;
         $scope.editingFilter = {
-          meta: { index, newFilter: true }
+          meta: { index, isNew: true }
         };
       };
 
@@ -77,7 +77,7 @@ module.directive('filterBar', function (Private, Promise, getAppState) {
       };
 
       $scope.saveEdit = (filter) => {
-        if (!$scope.editingFilter.newFilter) $scope.removeFilter($scope.editingFilter);
+        if (!$scope.editingFilter.isNew) $scope.removeFilter($scope.editingFilter);
         delete $scope.editingFilter;
         $scope.addFilters([filter]);
       };
