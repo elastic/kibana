@@ -12,6 +12,7 @@ describe('importDashboards(req)', () => {
     }));
 
     req = {
+      query: {},
       payload: {
         version: '6.0.0',
         objects: [
@@ -48,7 +49,7 @@ describe('importDashboards(req)', () => {
     });
   });
 
-  it('should make a bulk request with each asset', () => {
+  it('should make a bulk request to create each asset', () => {
     return importDashboards(req).then(() => {
       expect(requestStub.calledOnce).to.equal(true);
       expect(requestStub.args[0][1]).to.equal('bulk');
@@ -61,7 +62,36 @@ describe('importDashboards(req)', () => {
         ]
       });
     });
+  });
 
+  it('should make a bulk request index each asset if force is truthy', () => {
+    req.query = { force: 'true' };
+    return importDashboards(req).then(() => {
+      expect(requestStub.calledOnce).to.equal(true);
+      expect(requestStub.args[0][1]).to.equal('bulk');
+      expect(requestStub.args[0][2]).to.eql({
+        body: [
+          { index: { _index: '.kibana', _type: 'dashboard', _id: 'dashboard-01' } },
+          { panelJSON: '{}' },
+          { index: { _index: '.kibana', _type: 'visualization', _id: 'panel-01' } },
+          { visState: '{}' }
+        ]
+      });
+    });
+  });
+
+  it('should exclude types based on exclude argument', () => {
+    req.query = { exclude: 'visualization' };
+    return importDashboards(req).then(() => {
+      expect(requestStub.calledOnce).to.equal(true);
+      expect(requestStub.args[0][1]).to.equal('bulk');
+      expect(requestStub.args[0][2]).to.eql({
+        body: [
+          { create: { _index: '.kibana', _type: 'dashboard', _id: 'dashboard-01' } },
+          { panelJSON: '{}' }
+        ]
+      });
+    });
   });
 
 });
