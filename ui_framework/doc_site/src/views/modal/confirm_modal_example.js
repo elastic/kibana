@@ -32,8 +32,7 @@ export class ConfirmModalExample extends React.Component {
         </KuiButton>
         {
           this.state.showConfirmModal ?
-            <div>
-              <KuiModalOverlay/>
+            <KuiModalOverlay>
               <KuiConfirmModal
                 message="This is a confirmation modal example"
                 title="A confirmation modal"
@@ -41,8 +40,8 @@ export class ConfirmModalExample extends React.Component {
                 onConfirm={this.closeModal}
                 cancelButtonText="Cancel"
                 confirmButtonText="Confirm"
-                />
-           </div>
+              />
+            </KuiModalOverlay>
             : null
         }
       </div>
