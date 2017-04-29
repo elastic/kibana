@@ -14,7 +14,13 @@ uiModules
     restrict: 'C',
     link: function ($scope, $elem) {
       let isCollapsed = false;
-      const $collapser = $('<button type="button" class="kuiCollapseButton sidebar-collapser"></button>');
+      const $collapser = $(
+        `<button
+          data-test-subj="collapseSideBarButton"
+          type="button"
+          class="kuiCollapseButton sidebar-collapser"
+        ></button>`
+      );
       const $icon = $('<span class="kuiIcon fa-chevron-circle-left"></span>');
       $collapser.append($icon);
       const $siblings = $elem.siblings();
