@@ -33,6 +33,7 @@
   "KIBANA-NO_DATE_FIELD_SELECTED": "None selected",
   "KIBANA-NO_DATE_FIELDS_IN_INDICES": "None available",
   "KIBANA-REFRESH_FIELDS": "refresh fields",
+  "KIBANA-INDICES_DONT_CONTAIN_TIME_FIELDS": "The indices which match this index pattern don't contain any time fields.",
   "KIBANA-INVALID_INDEX_PATTERN": "Invalid index name pattern.",
   "KIBANA-DATE_FORMAT_DOCS": "Date Format Documentation",
   "KIBANA-WIKI_ISO_WEEK_DATE": "Wikipedia: ISO Week Date",
