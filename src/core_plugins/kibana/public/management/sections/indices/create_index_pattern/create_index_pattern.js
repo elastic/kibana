@@ -163,7 +163,6 @@ uiModules.get('apps/management')
 
         if (all.length) {
           return this.existing = {
-            class: 'success',
             all,
             matches,
             matchPercent: Math.round((matches.length / all.length) * 100) + '%',
@@ -252,9 +251,9 @@ uiModules.get('apps/management')
     'controller.newIndexPattern.nameIsPattern',
     'controller.newIndexPattern.nameInterval.name'
   ], (newVal, oldVal) => {
-    const nameIsPattern = newVal[1];
-    const newDefault = getDefaultPatternForInterval(newVal[2]);
-    const oldDefault = getDefaultPatternForInterval(oldVal[2]);
+    const nameIsPattern = newVal[0];
+    const newDefault = getDefaultPatternForInterval(newVal[1]);
+    const oldDefault = getDefaultPatternForInterval(oldVal[1]);
 
     if (this.newIndexPattern.name === oldDefault) {
       this.newIndexPattern.name = newDefault;
