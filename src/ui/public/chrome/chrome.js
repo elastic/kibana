@@ -6,7 +6,7 @@ import 'babel-polyfill';
 import 'ui/timefilter';
 import 'ui/notify';
 import 'ui/private';
-import 'ui/promises';
+import 'ui/promises/index';
 import 'ui/storage';
 import 'ui/directives/kbn_src';
 import 'ui/watch_multi';

@@ -19,7 +19,7 @@ import 'ui/notify';
 import 'ui/parse_query';
 import 'ui/persisted_log';
 import 'ui/private';
-import 'ui/promises';
+import 'ui/promises/index';
 import 'ui/modals';
 import 'ui/state_management/app_state';
 import 'ui/state_management/global_state';
