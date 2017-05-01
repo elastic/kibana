@@ -1,32 +1,10 @@
-<div class="kuiModal" style="width: 450px" data-test-subj="confirmModal">
-  <div class="kuiModalHeader" ng-if="title">
-    <div class="kuiModalHeader__title" data-test-subj="confirmModalTitleText">
-      {{title}}
-    </div>
-  </div>
-  <div class="kuiModalBody">
-    <div
-      class="kuiModalBodyText"
-      data-test-subj="confirmModalBodyText"
-    >
-      {{message}}
-    </div>
-  </div>
-
-  <div class="kuiModalFooter">
-    <button
-      class="kuiButton kuiButton--hollow"
-      data-test-subj="confirmModalCancelButton"
-      ng-click="onCancel()"
-    >
-      {{cancelButtonText}}
-    </button>
-    <button
-      class="kuiButton kuiButton--primary"
-      data-test-subj="confirmModalConfirmButton"
-      ng-click="onConfirm()"
-    >
-      {{confirmButtonText}}
-    </button>
-  </div>
-</div>
+<confirm-modal
+  className="kui"
+  data-test-subj="confirmModal"
+  on-cancel="onCancel"
+  on-confirm="onConfirm"
+  confirm-button-text="confirmButtonText"
+  cancel-button-text="cancelButtonText"
+  message="message"
+  title="title"
+></confirm-modal>

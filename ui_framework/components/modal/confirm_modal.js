@@ -44,3 +44,12 @@ export function KuiConfirmModal({ message, title, onCancel, onConfirm, cancelBut
     </KuiModal>
   );
 }
+
+KuiConfirmModal.propTypes = {
+  message: React.PropTypes.string,
+  title: React.PropTypes.string,
+  cancelButtonText: React.PropTypes.string,
+  confirmButtonText: React.PropTypes.string,
+  onCancel: React.PropTypes.func,
+  onConfirm: React.PropTypes.func,
+};
