@@ -4,7 +4,9 @@
     <select
       name="metricAgg"
       ng-model="agg.params.metricAgg"
+      agg="agg"
       required
+      validate-agg
       class="form-control">
       <option
         ng-repeat="respAgg in responseValueAggs track by respAgg.id"

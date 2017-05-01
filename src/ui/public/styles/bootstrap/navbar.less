@@ -325,22 +325,6 @@
 }
 
 
-// Buttons in navbars
-//
-// Vertically center a button within a navbar (when *not* in a form).
-
-.navbar-btn {
-  .navbar-vertical-align(@input-height-base);
-
-  &.btn-sm {
-    .navbar-vertical-align(@input-height-small);
-  }
-  &.btn-xs {
-    .navbar-vertical-align(22);
-  }
-}
-
-
 // Text in navbars
 //
 // Add a class to make any element properly align itself vertically within the navbars.
@@ -496,21 +480,6 @@
       color: @navbar-default-link-hover-color;
     }
   }
-
-  .btn-link {
-    color: @navbar-default-link-color;
-    &:hover,
-    &:focus {
-      color: @navbar-default-link-hover-color;
-    }
-    &[disabled],
-    fieldset[disabled] & {
-      &:hover,
-      &:focus {
-        color: @navbar-default-link-disabled-color;
-      }
-    }
-  }
 }
 
 // Inverse navbar
@@ -629,21 +598,6 @@
     color: @navbar-inverse-link-color;
     &:hover {
       color: @navbar-inverse-link-hover-color;
-    }
-  }
-
-  .btn-link {
-    color: @navbar-inverse-link-color;
-    &:hover,
-    &:focus {
-      color: @navbar-inverse-link-hover-color;
-    }
-    &[disabled],
-    fieldset[disabled] & {
-      &:hover,
-      &:focus {
-        color: @navbar-inverse-link-disabled-color;
-      }
     }
   }
 }

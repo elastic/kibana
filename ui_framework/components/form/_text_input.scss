@@ -3,5 +3,11 @@
 }
 
 .kuiTextInput--small {
-  width: 60px;
+  width: 100%;
+  max-width: 60px;
+}
+
+.kuiTextInput--large {
+  width: 100%;
+  max-width: 400px;
 }

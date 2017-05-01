@@ -70,9 +70,10 @@ export default function ({ getService, getPageObjects }) {
       });
 
       it('should show correct chart, take screenshot', function () {
-        const expectedChartValues = [null, null, '400 - 800', '1,200 - 1,600', '1,200 - 1,600', '400 - 800',
-          null, null, null, null, '400 - 800', '1,200 - 1,600', '1,200 - 1,600', '400 - 800', null, null,
-          null, null, '400 - 800', '1,200 - 1,600', '1,200 - 1,600', '400 - 800', null, null ];
+        const expectedChartValues = ['0 - 400', '0 - 400', '400 - 800', '1,200 - 1,600',
+          '1,200 - 1,600', '400 - 800', '0 - 400', '0 - 400', '0 - 400', '0 - 400', '400 - 800',
+          '1,200 - 1,600', '1,200 - 1,600', '400 - 800', '0 - 400', '0 - 400', '0 - 400', '0 - 400',
+          '400 - 800', '1,200 - 1,600', '1,200 - 1,600', '400 - 800', '0 - 400', '0 - 400' ];
 
         // Most recent failure on Jenkins usually indicates the bar chart is still being drawn?
         // return arguments[0].getAttribute(arguments[1]);","args":[{"ELEMENT":"592"},"fill"]}] arguments[0].getAttribute is not a function
@@ -92,16 +93,16 @@ export default function ({ getService, getPageObjects }) {
 
       it('should show correct data', function () {
         // this is only the first page of the tabular data.
-        const expectedChartData =  [ 'September 20th 2015, 00:00:00.000 37',
-          'September 20th 2015, 03:00:00.000 202',
-          'September 20th 2015, 06:00:00.000 740',
-          'September 20th 2015, 09:00:00.000 1,437',
-          'September 20th 2015, 12:00:00.000 1,371',
-          'September 20th 2015, 15:00:00.000 751',
-          'September 20th 2015, 18:00:00.000 188',
-          'September 20th 2015, 21:00:00.000 31',
-          'September 21st 2015, 00:00:00.000 42',
-          'September 21st 2015, 03:00:00.000 202'
+        const expectedChartData =  [ 'September 20th 2015, 00:00:00.000', '37',
+          'September 20th 2015, 03:00:00.000', '202',
+          'September 20th 2015, 06:00:00.000', '740',
+          'September 20th 2015, 09:00:00.000', '1,437',
+          'September 20th 2015, 12:00:00.000', '1,371',
+          'September 20th 2015, 15:00:00.000', '751',
+          'September 20th 2015, 18:00:00.000', '188',
+          'September 20th 2015, 21:00:00.000', '31',
+          'September 21st 2015, 00:00:00.000', '42',
+          'September 21st 2015, 03:00:00.000', '202'
         ];
 
         return PageObjects.visualize.collapseChart()
