@@ -7,7 +7,8 @@ export function FilterBarLibMapGeoBoundingBoxProvider(Promise, courier) {
       .indexPatterns
       .get(filter.meta.index).then(function (indexPattern) {
         const type = 'geo_bounding_box';
-        const key = _.keys(filter.geo_bounding_box)[0];
+        const key = _.keys(filter.geo_bounding_box)
+          .filter(key => key !== 'ignore_unmapped')[0];
         const field = indexPattern.fields.byName[key];
         const geoBoundingBox = filter.geo_bounding_box[key];
         const topLeft = field.format.convert(geoBoundingBox.top_left);
