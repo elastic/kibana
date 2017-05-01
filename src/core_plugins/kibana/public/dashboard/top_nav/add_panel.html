@@ -19,7 +19,6 @@
 
   <div class="list-group-item list-group-item--noBorder" ng-switch-when="visualization">
     <saved-object-finder
-      title="Choose a visualization"
       use-local-management="true"
       type="visualizations"
       on-add-new="opts.addNewVis"
@@ -28,6 +27,10 @@
   </div>
 
   <div class="list-group-item list-group-item--noBorder" ng-switch-when="search">
-    <saved-object-finder title="Choose a search" type="searches" use-local-management="true" on-choose="opts.addSearch"></saved-object-finder>
+    <saved-object-finder
+      type="searches"
+      use-local-management="true"
+      on-choose="opts.addSearch"
+    ></saved-object-finder>
   </div>
 </div>
