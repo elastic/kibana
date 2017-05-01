@@ -10,7 +10,8 @@ export default function mapGeoBoundBoxProvider(Promise, courier) {
       return courier
       .indexPatterns
       .get(filter.meta.index).then(function (indexPattern) {
-        key = _.keys(filter.geo_bounding_box)[0];
+        key = _.keys(filter.geo_bounding_box)
+          .filter(key => key !== 'ignore_unmapped')[0];
         field = indexPattern.fields.byName[key];
         topLeft = field.format.convert(filter.geo_bounding_box[field.name].top_left);
         bottomRight = field.format.convert(filter.geo_bounding_box[field.name].bottom_right);
