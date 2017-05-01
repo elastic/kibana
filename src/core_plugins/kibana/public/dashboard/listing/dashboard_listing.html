@@ -131,6 +131,13 @@
             ng-class="listingController.isAscending('title') ? 'fa-caret-up' : 'fa-caret-down'">
           </span>
         </th>
+        <th class="kuiTableHeaderCell" ng-click="listingController.sortOn('description')">
+          Description
+          <span
+            class="fa"
+            ng-class="listingController.isAscending('description') ? 'fa-caret-up' : 'fa-caret-down'">
+          </span>
+        </th>
       </tr>
       </thead>
 
@@ -154,6 +161,13 @@
           <div class="kuiTableRowCell__liner">
             <a class="kuiLink" ng-href="{{ listingController.getUrlForItem(item) }}">
               {{ item.title }}
+            </a>
+          </div>
+        </td>
+        <td class="kuiTableRowCell">
+          <div class="kuiTableRowCell__liner">
+            <a class="kuiLink" ng-href="{{ listingController.getUrlForItem(item) }}">
+              {{ item.description }}
             </a>
           </div>
         </td>
