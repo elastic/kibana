@@ -9,6 +9,7 @@ import { FetchProvider } from '../fetch';
 import { DecorateQueryProvider } from './_decorate_query';
 import { FieldWildcardProvider } from '../../field_wildcard';
 import { getHighlightRequestProvider } from '../../highlight';
+import { migrateFilter } from './_migrate_filter';
 
 export function AbstractDataSourceProvider(Private, Promise, PromiseEmitter) {
   const requestQueue = Private(RequestQueueProvider);
@@ -366,6 +367,7 @@ export function AbstractDataSourceProvider(Private, Promise, PromiseEmitter) {
                   .filter(filterNegate(true))
                   .map(translateToQuery)
                   .map(cleanFilter)
+                  .map(migrateFilter)
                 )
               }
             };
