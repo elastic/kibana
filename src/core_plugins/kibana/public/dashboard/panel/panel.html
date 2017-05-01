@@ -1,53 +1,74 @@
 <div class="panel panel-default" ng-class="{'panel--edit-mode': !isViewOnlyMode()}" ng-switch on="panel.type" ng-if="savedObj || error">
   <div class="panel-heading">
-    <span class="panel-title" title="{{::savedObj.title}}">
+    <span
+      data-test-subj="dashboardPanelTitle"
+      class="panel-title"
+      aria-label="{{:: 'Visualization panel: ' + savedObj.title }}"
+    >
       {{::savedObj.title}}
     </span>
     <div class="kuiMicroButtonGroup">
-      <a
+      <button
+        type="button"
         class="kuiMicroButton"
-        aria-label="Expand"
+        aria-label="Expand panel"
         data-test-subj="dashboardPanelExpandIcon"
         ng-click="toggleExpand()"
       >
-        <span class="fa" ng-class="{'fa-expand': !isExpanded, 'fa-compress': isExpanded}"></span>
-      </a>
+        <span
+          aria-hidden="true"
+          class="kuiIcon"
+          ng-class="{'fa-expand': !isExpanded, 'fa-compress': isExpanded}"
+        ></span>
+      </button>
 
       <a
         class="kuiMicroButton"
-        aria-label="Edit"
+        aria-label="Edit panel contents"
         data-test-subj="dashboardPanelEditLink"
         ng-show="!isViewOnlyMode() && editUrl"
         ng-href="{{::editUrl}}"
       >
-        <i aria-hidden="true" class="fa fa-pencil"></i>
+        <span
+          aria-hidden="true"
+          class="kuiIcon fa-pencil"
+        ></span>
       </a>
 
-      <a
+      <button
+        type="button"
         class="kuiMicroButton"
-        aria-label="Move"
+        aria-label="Move panel"
         data-test-subj="dashboardPanelMoveIcon"
         ng-show="!isViewOnlyMode() && !isExpanded"
         class="panel-move"
       >
-        <i aria-hidden="true" class="fa fa-arrows"></i>
-      </a>
+        <span
+          aria-hidden="true"
+          class="kuiIcon fa-arrows"
+          data-dashboard-panel-drag-handle
+        ></span>
+      </button>
 
-      <a
+      <button
+        type="button"
         class="kuiMicroButton"
-        aria-label="Remove"
+        aria-label="Remove panel from dashboard"
         data-test-subj="dashboardPanelRemoveIcon"
         ng-show="!isViewOnlyMode() && !isExpanded"
         ng-click="remove()"
       >
-        <i aria-hidden="true" class="fa fa-times"></i>
-      </a>
+        <span
+          aria-hidden="true"
+          class="kuiIcon fa-times"
+        ></span>
+      </button>
     </div>
     <div class="clearfix"></div>
   </div>
 
   <div ng-if="error" class="load-error">
-    <i aria-hidden="true" class="fa fa-exclamation-triangle"></i>
+    <span aria-hidden="true" class="kuiIcon fa-exclamation-triangle"></span>
     <span ng-bind="error"></span>
   </div>
 
