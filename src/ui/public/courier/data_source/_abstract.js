@@ -360,6 +360,7 @@ export function AbstractDataSourceProvider(Private, Promise, PromiseEmitter) {
                     .filter(filterNegate(false))
                     .map(translateToQuery)
                     .map(cleanFilter)
+                    .map(migrateFilter)
                   )
                 ),
                 must_not: (
