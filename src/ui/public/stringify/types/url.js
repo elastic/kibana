@@ -93,7 +93,7 @@ export function stringifyUrl(Private) {
 
       switch (this.param('type')) {
         case 'img':
-          return '<img src="' + url + '" alt="' + label + '" title="' + label + '">';
+          return `<img src="${url}" alt="A dynamically-specified image located at ${label}">`;
         default:
           if (hit && hit.highlight && hit.highlight[field.name]) {
             label = getHighlightHtml(label, hit.highlight[field.name]);
