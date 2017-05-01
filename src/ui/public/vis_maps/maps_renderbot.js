@@ -227,7 +227,7 @@ module.exports = function MapsRenderbotFactory(Private, $injector, tilemapSettin
     const indexPatternName = agg.vis.indexPattern.id;
     const field = agg.fieldName();
     const filter = {};
-    filter[filterName] = {};
+    filter[filterName] = { ignore_unmapped: true };
     filter[filterName][field] = filterData;
 
     const putFilter = Private(FilterBarPushFilterProvider)(getAppState());
@@ -237,5 +237,3 @@ module.exports = function MapsRenderbotFactory(Private, $injector, tilemapSettin
 
   return MapsRenderbot;
 };
-
-
