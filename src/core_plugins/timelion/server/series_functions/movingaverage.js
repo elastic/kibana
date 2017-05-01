@@ -60,18 +60,19 @@ module.exports = new Chainable('movingaverage', {
         const windowLeft = Math.floor(_window / 2);
         const windowRight = _window - windowLeft;
         eachSeries.data = _.map(pairs, function (point, i) {
-          if (i < windowLeft || i >= pairsLen - windowRight) return [point[0], null];
+          if (i < windowLeft || i > pairsLen - windowRight) return [point[0], null];
           return toPoint(point, pairs.slice(i - windowLeft, i + windowRight));
         });
       } else if (_position === 'left') {
         eachSeries.data = _.map(pairs, function (point, i) {
-          if (i < _window) return [point[0], null];
-          return toPoint(point, pairs.slice(i - _window, i));
+          const cursor = i + 1;
+          if (cursor < _window) return [point[0], null];
+          return toPoint(point, pairs.slice(cursor - _window , cursor));
         });
 
       } else if (_position === 'right') {
         eachSeries.data = _.map(pairs, function (point, i) {
-          if (i >= pairsLen - _window) return [point[0], null];
+          if (i > pairsLen - _window) return [point[0], null];
           return toPoint(point, pairs.slice(i , i + _window));
         });
 
