@@ -1,5 +1,5 @@
 <tr>
-  <th width="1%"></th>
+  <th class="docTableColumn__expandToggle"></th>
   <th ng-repeat="name in columns" data-test-subj="docTableHeaderField">
     <span class="table-header-name">
       {{name | shortDots}} <i ng-class="headerClass(name)" ng-click="cycleSortOrder(name)" tooltip="{{tooltip(name)}}" tooltip-append-to-body="1"></i>

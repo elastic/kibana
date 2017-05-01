@@ -126,7 +126,7 @@ module.directive('kbnTableRow', function ($compile, $httpParamSerializer, kbnUrl
             && _.isFunction($scope.filter);
 
           newHtmls.push(cellTemplate({
-            timefield: false,
+            timefield: (column === indexPattern.timeFieldName),
             sourcefield: (column === '_source'),
             formatted: _displayField(row, column, true),
             filterable: isFilterable,
