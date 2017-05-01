@@ -60,3 +60,4 @@ test('onCancel', () => {
   sinon.assert.notCalled(onConfirm);
   sinon.assert.calledOnce(onCancel);
 });
+
