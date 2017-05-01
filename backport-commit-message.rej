@@ -1,0 +1,13 @@
+Tag Cloud should deal with empty responses correctly
+
+Backports PR #9354
+
+**Commit 1:**
+Tag Cloud should deal with empty responses correctly
+
+tag cloud did not work with empty responses correctly. One of the side-effects is that the back button did not work properly. For example, pressing the back button would not empty out the screen and show stale clouds.
+
+This also caused a type-error. Empty configurations meant that we could not access any aggregation-configs to produce a label.
+
+* Original sha: 9b52ba45d2b719dda29f26e940ea5d55fc90a6ea
+* Authored by Thomas Neirynck <thomas@elastic.co> on 2016-12-02T22:58:54Z
