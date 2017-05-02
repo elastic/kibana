@@ -8,8 +8,8 @@ const ID_PATTERN = /^[a-zA-Z0-9_]+$/;
 const INSPECTING = process.execArgv.includes('--inspect');
 
 const urlPartsSchema = () => Joi.object().keys({
-  protocol: Joi.string().valid('http', 'https'),
-  hostname: Joi.string().hostname(),
+  protocol: Joi.string().valid('http', 'https').default('http'),
+  hostname: Joi.string().hostname().default('localhost'),
   port: Joi.number(),
   auth: Joi.string().regex(/^[^:]+:.+$/, 'username and password seperated by a colon'),
   username: Joi.string(),

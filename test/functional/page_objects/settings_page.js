@@ -51,10 +51,6 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
       await PageObjects.common.navigateToApp('settings');
     }
 
-    getTimeBasedEventsCheckbox() {
-      return testSubjects.find('createIndexPatternIsTimeBasedCheckBox');
-    }
-
     getTimeBasedIndexPatternCheckbox() {
       // fail faster since we're sometimes checking that it doesn't exist
       return testSubjects.find('createIndexPatternNameIsPatternCheckBox');
