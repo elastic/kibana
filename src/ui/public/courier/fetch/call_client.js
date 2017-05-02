@@ -17,8 +17,8 @@ export function CallClientProvider(Private, Promise, esAdmin, es) {
     const statuses = mergeDuplicateRequests(requests);
 
     // get the actual list of requests that we will be fetching
-    const executable = statuses.filter(isRequest);
-    let execCount = executable.length;
+    let requestsToFetch = statuses.filter(isRequest);
+    let execCount = requestsToFetch.length;
 
     if (!execCount) return Promise.resolve([]);
 
@@ -36,7 +36,7 @@ export function CallClientProvider(Private, Promise, esAdmin, es) {
           case DUPLICATE:
             return request._uniq.resp;
           default:
-            const index = _.findIndex(executable, request);
+            const index = _.findIndex(requestsToFetch, request);
             if (index < 0) {
               // This means the request failed.
               return ABORTED;
@@ -83,7 +83,7 @@ export function CallClientProvider(Private, Promise, esAdmin, es) {
 
     // Now that all of THAT^^^ is out of the way, lets actually
     // call out to elasticsearch
-    Promise.map(executable, function (request) {
+    Promise.map(requestsToFetch, function (request) {
       return Promise.try(request.getFetchParams, void 0, request)
         .then(function (fetchParams) {
           return (request.fetchParams = fetchParams);
@@ -92,17 +92,21 @@ export function CallClientProvider(Private, Promise, esAdmin, es) {
         .catch(error => ({ rejected: error }));
     })
     .then(function (results) {
-      const requestsWithFetchParams = results.map((result, index) => {
+      const requestsWithFetchParams = [];
+      // Gather the fetch param responses from all the successful requests.
+      results.forEach((result, index) => {
         if (result.resolved) {
-          return result.resolved;
+          requestsWithFetchParams.push(result.resolved);
         } else {
-          const request = executable[index];
+          const request = requestsToFetch[index];
           request.handleFailure(result.rejected);
-          executable[index] = undefined;
+          requestsToFetch[index] = undefined;
         }
       });
-      _.remove(executable, request => request === undefined);
-      _.remove(requestsWithFetchParams, request => request === undefined);
+      // The index of the request inside requestsToFetch determines which response is mapped to it. If a request
+      // won't generate a response, since it already failed, we need to remove the request
+      // from the requestsToFetch array so the indexes will continue to match up to the responses correctly.
+      requestsToFetch = requestsToFetch.filter(request => request !== undefined);
       return strategy.reqsFetchParamsToBody(requestsWithFetchParams);
     })
     .then(function (body) {
