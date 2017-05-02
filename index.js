@@ -34,4 +34,4 @@ export default function (kibana) {
     init: require('./init')
 
   });
-};
+}
