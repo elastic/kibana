@@ -42,6 +42,7 @@ locations.
 [horizontal]
 Timelion:: Compute and combine data from multiple time series
 data sets.
+<<time-series-visual-builder,Time Series Visual Builder>>:: Visualize time series data using pipeline aggregations.
 * *Other*
 [horizontal]
 <<tagcloud-chart,Tag cloud>>:: Display words as a cloud in which the size of the word correspond to its importance
@@ -63,7 +64,7 @@ from the saved search.
 
 . In the visualization builder, choose the metric aggregation for the
 visualization's Y axis:
-  
+
 * *Metric Aggregations*:
 
 * {es-ref}search-aggregations-metrics-valuecount-aggregation.html[count]
@@ -144,6 +145,8 @@ include::visualize/metric.asciidoc[]
 include::visualize/pie.asciidoc[]
 
 include::visualize/tilemap.asciidoc[]
+
+include::visualize/time-series-visual-builder.asciidoc[]
 
 include::visualize/tagcloud.asciidoc[]
 
