@@ -19,19 +19,15 @@
     "redux": "^3.6.0"
   },
   "devDependencies": {
-    "@elastic/eslint-config-kibana": "^0.1.0",
-    "babel-eslint": "^4.1.8",
-    "babel-register": "^6.24.1",
-    "bluebird": "^3.1.1",
-    "eslint": "^3.19.0",
-    "eslint-plugin-mocha": "^4.9.0",
-    "gulp": "^3.9.1",
-    "gulp-eslint": "^3.0.1",
-    "gulp-gzip": "^1.2.0",
-    "gulp-tar": "^1.8.0",
-    "gulp-util": "^3.0.8",
-    "mkdirp": "^0.5.1",
-    "rimraf": "^2.5.0",
-    "rsync": "^0.4.0"
+    "@elastic/eslint-config-kibana": "0.5.0",
+    "@elastic/eslint-plugin-kibana-custom": "1.0.3",
+    "babel-eslint": "6.1.2",
+    "eslint": "3.11.1",
+    "eslint-plugin-mocha": "4.7.0",
+    "eslint-plugin-babel": "4.0.0",
+    "eslint-plugin-react": "6.10.3",
+    "gulp": "3.9.1",
+    "gulp-eslint": "3.0.1",
+    "gulp-load-plugins": "1.5.0"
   }
 }
