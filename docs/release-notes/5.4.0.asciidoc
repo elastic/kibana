@@ -1,0 +1,100 @@
+[[release-notes-5.4.0]]
+== 5.4.0 Release Notes
+
+Also see <<breaking-changes-5.0>>.
+
+[float]
+[[enhancement-5.4.0]]
+=== Enhancements
+Core::
+* Kibana Globalization - Phase 1 {pull}7545[#7545] - community contribution by @hickeyma
+* Kibana Globalization - Phase 2 {pull}8766[#8766] - community contribution by @hickeyma
+* Navbarextensions improvements {pull}9871[#9871] - community contribution by @scampi
+CLI::
+* Replaces zip library and additional performance improvements {pull}11145[#11145]
+* Make dirs in correct location {pull}11188[#11188]
+Dev Tools::
+* Replace zeroclipboard with native copy {pull}10639[#10639]
+* Console support for HEAD requests {pull}10611[#10611]
+Dashboard::
+* Warn if the title is a duplicate {pull}10321[#10321]
+* Introducing view and edit modes {pull}10585[#10585]
+Discover::
+* Introduce autocompleting input as index pattern selector {pull}10144[#10144]
+* Do not expand index patterns by default {pull}11155[#11155]
+* When a date is selected in absolute mode, set to start/end of day {pull}10433[#10433]
+* Add link to switch to a view of an entrys surrounding documents {pull}9198[#9198]
+Management::
+* Indexed fields type filter {pull}10708[#10708] - community contribution by @coverslide
+* Update Index Pattern header to use UI Framework components. {pull}10390[#10390]
+Timepicker::
+* Add Set To Now button to from field in absolute mode {pull}10985[#10985]
+* Allow setting a custom to interval in relative mode {pull}10990[#10990]
+Visualize::
+* Re-implement Visualize Wizard using Gallery component for selecting visualization type {pull}10972[#10972]
+* Highlight area chart when hovered {pull}10460[#10460] - community contribution by @coverslide
+* Add percent tick formatter to Timelion {pull}10917[#10917]
+* Add advanced display options for Line, Bar, and Area Charts, such as overlaying multiple chart types, supporting horizontal layouts, and styling of axes and gridlines {pull}9642[#9642]
+* Add geocentroid support to Kibana. {pull}10871[#10871]
+* Add support for parent and sibling pipeline aggregations {pull}10070[#10070], {pull}10020[#10020], {pull}10033[#10033]
+* Add the Time Series Visual Builder UI {pull}9725[#9725]
+* Use unit formatters for y-axis labels in Timelion {pull}9065[#9065]
+* You can now zoom out to level 0 for WMS services {pull}11399[#11399]
+Miscellaneous::
+* Add shard allocation plugin {pull}10482[#10482]
+* adds missing editor param to vis-options {pull}10564[#10564]
+* Apply kui framework styles to single doc view {pull}10200[#10200]
+* babel 6 upgrade {pull}9702[#9702] - community contribution by @coverslide
+* Bump jquery from 2.1.4 -> 2.2.4 (latest in 2.x line) {pull}10950[#10950]
+* Bump makelogs to 3.2.3 {pull}10510[#10510]
+* do not use the jquery submit method since it makes a page reload and  {pull}11100[#11100] - community contribution by @scampi
+* Don't add $$hashKey to filter objects {pull}11064[#11064]
+
+[float]
+[[bug-5.4.0]]
+=== Bug fixes
+Core::
+* [Fix for #10129] only check for url overflows when not hashing states {pull}10878[#10878]
+* [Fix for #10558 and #10255] Improve the design of the Tab components focused and selected states. {pull}10560[#10560]
+* [Fix for #10656] Rename Side Nav Link title and href attributes to label and url. Now hovering over a navigation item in the Side Nav wont display a browser tooltip. {pull}10660[#10660]
+* [Fix for #3430, #7505] Update document table when auto refresh contains document updates {pull}10385[#10385]
+* [Fix for #8449] ensure that multi.allow_explicit_index=true {pull}10855[#10855]
+* Fix focus states of Buttons inside of the ToolBar. Now these buttons display the correct focus state. {pull}11129[#11129]
+* Fix incorrect background-color when Basic Button in ToolBar was in a hover state. {pull}10772[#10772]
+* Force kuiLink to have cursor: pointer, even if there's no href. Now the cursor will behave correctly when hovering over a link. {pull}10625[#10625]
+* Fix visual bugs with SavedObjectFinder UI. Replaces visually broken search input with the SearchInput component from the UI Framework. {pull}11029[#11029]
+Dashboard::
+* [Fix for #10121] Absolute time selection is now preserved when opening a dashboard  {pull}10152[#10152]
+* [Fix part of #8633] Add info notifications when adding visualizations or searches to the dashboard {pull}10310[#10310]
+* [Fix for #4161] where the pager in a saved search would indicate the wrong number of total items {pull}10827[#10827]
+Dev Tools::
+* [Fix for #10241] Add _open and _close autosuggestions for indices in console {pull}10614[#10614] - community contribution by @coverslide
+Discover::
+* [Fix for #10233] Fix issue where selected columns would persist when creating a new search {pull}10357[#10357]
+* [Fix for #6295, #10351] Fix interval drop-down for date histogram in discover {pull}10384[#10384]
+* [Fix for #5684] Allow sorting and filtering on _type field {pull}10254[#10254]
+Management::
+* [Fix for #4040] Use better logic for detecting non-default values {pull}11036[#11036]
+* [Fix for #5694, #6789, #7404, #7667, #8682, #9116, #9624 in Saved Object Importing] Fix the myriad problems with saved object importing related to order, errors, and formatting {pull}10521[#10521] {pull}10663[#10663] {pull}10666[#10666] {pull}10740[#10740] {pull}10788[#10788] {pull}11059[#11059]
+* [Fix for #5826] where an error is displayed when saving a new scripted field {pull}10820[#10820]
+* [Fix for #8682] Prompt about overwriting existing saved objects {pull}10663[#10663]
+* [Fix for #9678] Breadcrumb urls in management flow {pull}10084[#10084] - community contribution by @coverslide
+Visualize::
+* [Fix for #10202] Format the totals row correctly {pull}10414[#10414] - community contribution by @trevan
+* [Fix for #10294] fixing heatmap rotate checkbox {pull}10333[#10333]
+* [Fix for #10296] fixing heatmap labels to use field formatters {pull}10334[#10334]
+* [Fix for #10419] Tooltip no longer flickers on heatmaps 10467[#10467] - community contribution by @coverslide
+* [Fix for #10423] Correctly clean up the tooltip when removing a filter {pull}11146[#11146] - community contribution by @scampi
+* [Fix for #10476] Ensure Timelion charts do not go blank or continually flash {pull}10486[#10486]
+* [Fix for #10508] Use field formatters for heatmap legend {pull}10529[#10529]
+* [Fix for #6605] fixing pie chart tooltip custom label bug {pull}10219[#10219]
+* [Fix for #9156] fixes error with saving hidden metrics {pull}10220[#10220]
+* [Fix for #9492] Do not generate unnecessary requests to Elasticsearch {pull}9658[#9658] - community contribution by @nreese
+Miscellaneous::
+* Fixes URL image formatters when using a basePath {pull}11082[#11082]
+* Indicate if index is time-based or not {pull}10790[#10790]
+
+[float]
+[[deprecation-5.4.0]]
+=== Deprecations
+* Nothing is deprecated in Kibana 5.4.0
