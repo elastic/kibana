@@ -1,12 +1,11 @@
+import { resolve } from 'path';
+
 export default function (kibana) {
   return new kibana.Plugin({
+    id: 'testbed',
+    publicDir: resolve(__dirname, 'public'),
     uiExports: {
-      app: {
-        title: 'Testbed',
-        main: 'plugins/testbed/testbed',
-        hidden: true,
-        url: '/testbed'
-      }
+      hacks: [ 'plugins/testbed' ]
     }
   });
 }
