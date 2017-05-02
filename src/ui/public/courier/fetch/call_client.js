@@ -3,7 +3,6 @@ import _ from 'lodash';
 import { IsRequestProvider } from './is_request';
 import { MergeDuplicatesRequestProvider } from './merge_duplicate_requests';
 import { ReqStatusProvider } from './req_status';
-import { promiseMapSettled } from 'ui/promises';
 
 export function CallClientProvider(Private, Promise, esAdmin, es) {
 
@@ -84,15 +83,14 @@ export function CallClientProvider(Private, Promise, esAdmin, es) {
 
     // Now that all of THAT^^^ is out of the way, lets actually
     // call out to elasticsearch
-    promiseMapSettled(
-      executable,
-      function (request) {
-        return Promise.try(request.getFetchParams, void 0, request)
+    Promise.map(executable, function (request) {
+      return Promise.try(request.getFetchParams, void 0, request)
         .then(function (fetchParams) {
           return (request.fetchParams = fetchParams);
-        });
-      },
-      Promise)
+        })
+        .then(value => ({ resolved: value }))
+        .catch(error => ({ rejected: error }));
+    })
     .then(function (results) {
       const requestsWithFetchParams = results.map((result, index) => {
         if (result.resolved) {
