@@ -1,4 +1,4 @@
-<div class="kuiViewContent kuiViewContent--constrainedWidth">
+<div class="kuiViewContent">
   <div class="kuiViewContentItem kuiVerticalRhythm">
     <h1 class="kuiTitle">
       Welcome to Kibana
@@ -14,8 +14,8 @@
   </div>
 
   <div class="kuiViewContentItem kuiVerticalRhythm">
-    <ol>
-      <li class="kuiCard">
+    <ol class="kuiCardGroup kuiCardGroup--spaced">
+      <li class="kuiCard kuiCardGroup__card">
         <div class="kuiCard__description">
           <div class="kuiCard__descriptionTitle">
             <h2 class="kuiSubTitle">
@@ -34,7 +34,7 @@
         </div>
       </li>
 
-      <li class="kuiCard">
+      <li class="kuiCard kuiCardGroup__card">
         <div class="kuiCard__description">
           <div class="kuiCard__descriptionTitle">
             <h2 class="kuiSubTitle">
@@ -54,7 +54,7 @@
       </li>
 
       <li
-        class="kuiCard"
+        class="kuiCard kuiCardGroup__card"
         ng-if="gettingStarted.hasManageAndMonitorItems"
         >
         <div class="kuiCard__description">
@@ -79,12 +79,19 @@
   </div>
 
   <div class="kuiViewContentItem kuiVerticalRhythm">
-    Just want to see what Kibana is capable of doing?
-    <button class="kuiButton kuiButton--primary">
-      <span class="kuiButton__inner">
-        <span>View the demo site</span>
-      </span>
-    </button>  
+    <div class="kuiFieldGroup">
+      <div class="kuiFieldGroupSection">
+        <p class="kuiText">    Just want to see what Kibana is capable of doing? </p>
+      </div>
+
+      <div class="kuiFieldGroupSection">
+        <button class="kuiButton kuiButton--primary">
+          <span class="kuiButton__inner">
+            <span>View the demo site</span>
+          </span>
+        </button>  
+      </div>
+    </div>
   </div>
 
   <div class="kuiViewContentItem kuiVerticalRhythm">

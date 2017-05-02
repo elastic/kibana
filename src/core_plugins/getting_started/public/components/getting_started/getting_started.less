@@ -1,14 +1,47 @@
 getting-started {
-  ol {
+  .kuiCardGroup--spaced {
     display: flex;
 
-    li.kuiCard {
-      width: 28%;
-      display: inline-block;
-    }
-
-    li.kuiCard + li.kuiCard {
-      margin-left: 5%;
+    .kuiCard + .kuiCard {
+      margin-left: 10px;
     }
   }
 }
+
+
+/*
+// Top div
+display: flex;
+flex-direction: column;
+align-items: center;
+justify-content: center;
+position: relative;
+
+h1 {
+  transform: translateY(20);
+}
+
+// For logo with circle
+// see flexbox patterns
+position: absolute;
+left: 50%;
+top: 100%;
+transform: translate(-50%, -50%);
+
+// Bottom div
+display: flex;
+flex-direction: column;
+align-items: center;
+padding-top: xxx;
+
+// For centering text
+// should go into UI framework; file called overrides
+.kuiTextCenter {
+  text-align: center;
+}
+
+// Use SVG for icon
+// See visualization type icons
+
+
+*/
