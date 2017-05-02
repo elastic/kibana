@@ -1,9 +1,9 @@
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { Provider } from 'react-redux';
+import { uiModules } from 'ui/modules';
 
-
-const app = require('ui/modules').get('apps/canvas');
+const app = uiModules.get('apps/canvas');
 app.directive('react', ($store) => {
   return {
     restrict: 'E',

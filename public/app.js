@@ -1,20 +1,19 @@
-import './state/store_service';
+import { uiModules } from 'ui/modules';
+import uiRoutes from 'ui/routes';
+import template from 'plugins/canvas/index.html';
 import 'ui/autoload/all';
+import './state/store_service';
 import './directives/react';
 
 import { App } from './containers/app/app';
 
 require('./main.less');
 
-const app = require('ui/modules').get('apps/canvas', []);
+const app = uiModules.get('apps/canvas', []);
 
-require('ui/routes').enable();
-require('ui/routes')
-  .when('/', {
-    template: require('plugins/canvas/index.html')
-  });
+uiRoutes.enable();
+uiRoutes.when('/', { template });
 
-app
-.controller('kibanaReact', function ($scope) {
+app.controller('kibanaReact', function ($scope) {
   $scope.component = App;
 });

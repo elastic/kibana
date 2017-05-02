@@ -1,8 +1,9 @@
 import { createStore } from 'redux';
 import rootReducer from './reducers/root_reducer';
 import getInitialState from './initial_state';
+import { uiModules } from 'ui/modules';
 
-const app = require('ui/modules').get('apps/canvas');
+const app = uiModules.get('apps/canvas');
 
 app.service('$store', (kbnVersion, basePath) => {
 
