@@ -42,6 +42,7 @@ locations.
 [horizontal]
 Timelion:: Compute and combine data from multiple time series
 data sets.
+<<time-series-visual-builder,Time Series Visual Builder>>:: Visualize time series data using pipeline aggregations.
 * *Other*
 [horizontal]
 <<tagcloud-chart,Tag cloud>>:: Display words as a cloud in which the size of the word correspond to its importance
