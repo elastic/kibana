@@ -30,26 +30,28 @@ uiModules
         return $siblings.hasClass(className) && className;
       }, false);
 
-      $collapser.on('click', function () {
-        $elem.toggleClass('closed');
+      // If there is are only two elements we can assume the other one will take 100% of the width.
+      const hasSingleSibling = $siblings.length === 1 && siblingsClass;
 
+      $collapser.on('click', function () {
         if (isCollapsed) {
           isCollapsed = false;
+          $elem.removeClass('closed');
           $icon.addClass('fa-chevron-circle-left');
           $icon.removeClass('fa-chevron-circle-right');
         } else {
           isCollapsed = true;
+          $elem.addClass('closed');
           $icon.removeClass('fa-chevron-circle-left');
           $icon.addClass('fa-chevron-circle-right');
         }
 
-        // if there is are only two elements we can assume the other one will take 100% of the width
-        if ($siblings.length === 1 && siblingsClass) {
+        if (hasSingleSibling) {
           $siblings.toggleClass(siblingsClass + ' col-md-12');
         }
-      })
+      });
 
-      .appendTo($elem);
+      $collapser.appendTo($elem);
     }
   };
 });
