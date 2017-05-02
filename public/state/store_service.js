@@ -1,18 +1,10 @@
 import React from 'react';
-import modules from 'ui/modules';
 import { createStore, applyMiddleware, compose } from 'redux';
-
-import onStart from './on_start';
 import thunkMiddleware from 'redux-thunk';
-import promiseMiddleware from 'redux-promise';
-import persistState from 'redux-localstorage';
-import rootReducer from './reducers';
-import {bindHotkeys} from './hotkeys';
+import rootReducer from './reducers/root_reducer';
 import getInitialState from './initial_state';
-import _ from 'lodash';
 
-
-const app = modules.get('apps/rework');
+const app = require('ui/modules').get('apps/canvas');
 
 app.service('$store', (kbnVersion, basePath) => {
 
@@ -23,17 +15,13 @@ app.service('$store', (kbnVersion, basePath) => {
   // Limit redux updates to 20FPS
   //const debounceNotify = _.debounce(notify => notify(), 50, {maxWait: 50});
   const persistentStore = compose(
-    applyMiddleware(thunkMiddleware, promiseMiddleware),
-    persistState('persistent', {key: 'rework-persistent'}),
+    applyMiddleware(thunkMiddleware),
   );
 
   const store = createStore(rootReducer, initialState, persistentStore);
-  bindHotkeys(store);
 
   // TODO: Sticking this here so I can dispatch events from the console;
   window.store = store;
-
-  onStart(store);
 
   return store;
 });

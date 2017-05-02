@@ -1,16 +1,14 @@
-var path = require('path');
-
 module.exports = function (kibana) {
   return new kibana.Plugin({
-    name: 'rework',
-    require: ['kibana', 'elasticsearch', 'timelion'],
+    name: 'canvas',
+    require: ['kibana', 'elasticsearch'],
     uiExports: {
       app: {
-        title: 'The Rework',
-        description: 'Weeeeee',
-        icon: 'plugins/rework/icon.svg',
-        main: 'plugins/rework/app',
-        injectVars: function (server) {
+        title: 'Canvas',
+        description: 'Data driven workpads',
+        icon: 'plugins/canvas/icon.svg',
+        main: 'plugins/canvas/app',
+        injectVars: (server) => {
           var config = server.config();
           var basePath = config.get('server.basePath');
 
@@ -23,42 +21,11 @@ module.exports = function (kibana) {
         }
       },
       hacks: [
-        // Dataframes first
-        //'plugins/rework/arg_types/dataframe/frame_sources/csv/csv',
-        'plugins/rework/arg_types/dataframe/frame_sources/timelion/timelion',
-
-        // Then argument types
-        'plugins/rework/arg_types/number/number',
-        'plugins/rework/arg_types/string/string',
-        'plugins/rework/arg_types/image/image',
-        'plugins/rework/arg_types/palette/palette',
-        'plugins/rework/arg_types/tags/tags',
-        'plugins/rework/arg_types/select/select',
-        'plugins/rework/arg_types/icon_select/icon_select',
-        'plugins/rework/arg_types/style/style',
-        'plugins/rework/arg_types/container_style/container_style',
-        'plugins/rework/arg_types/text_style/text_style',
-        'plugins/rework/arg_types/dataframe/dataframe',
-        'plugins/rework/arg_types/dataframe_column/dataframe_column',
-
-        // Then the elements that use them.
-        // Thus, if an element plugin relies on an arg_type plugin,
-        // it must declare that requirement in the "require" property above. Neat.
-        'plugins/rework/elements/json/json',
-        'plugins/rework/elements/box/box',
-        'plugins/rework/elements/grow/grow',
-        'plugins/rework/elements/chart/chart',
-        'plugins/rework/elements/image/image',
-        'plugins/rework/elements/number/number',
-        'plugins/rework/elements/markdown/markdown',
-        'plugins/rework/elements/table/table',
-        'plugins/rework/elements/timelion/timelion',
-        'plugins/rework/elements/select/select',
-        'plugins/rework/elements/slider/slider',
+        // Plugins go here
       ],
     },
 
-    config: function (Joi) {
+    config: (Joi) => {
       return Joi.object({
         enabled: Joi.boolean().default(true),
       }).default();

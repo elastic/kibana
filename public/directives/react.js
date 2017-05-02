@@ -1,17 +1,16 @@
-import _ from 'lodash';
 import React from 'react';
-import { Provider } from 'react-redux';
 import { render, unmountComponentAtNode } from 'react-dom';
-import modules from 'ui/modules';
+import { Provider } from 'react-redux';
 
-const app = modules.get('apps/rework');
+
+const app = require('ui/modules').get('apps/canvas');
 app.directive('react', ($store) => {
   return {
     restrict: 'E',
     scope: {
       component: '='
     },
-    link: ($scope, $el, $attrs) => {
+    link: ($scope, $el) => {
       const Component = $scope.component;
       render(
           <Provider store={$store}>
