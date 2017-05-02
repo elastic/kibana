@@ -2,7 +2,7 @@
   "name": "canvas",
   "version": "1.0.0-milestone1",
   "description": "data driven workpads for kibana",
-  "main": "gulpfile.js",
+  "main": "index.js",
   "kibana": {
     "version": "kibana"
   },
