@@ -9,10 +9,6 @@ const Parser = PEG.generate(grammar);
 
 import Parser from './grammar';
 
-function fromExpression(expression) {
-  return Parser.parse(expression);
-}
-
 function getExpressionArgs(block) {
   const args = block.arguments;
 
@@ -65,7 +61,11 @@ function getExpression(chain, expType = 'expression', exp = '') {
   }, exp);
 }
 
-function toExpression(astObj) {
+export function fromExpression(expression) {
+  return Parser.parse(expression);
+}
+
+export function toExpression(astObj) {
   const validType = ['partial', 'expression', 'function'].includes(astObj.type);
   if (!validType) {
     throw new Error('Expression must be a partial, expression, or argument function');
@@ -81,5 +81,3 @@ function toExpression(astObj) {
   const expArgs = getExpressionArgs(astObj);
   return joinArgs(astObj.function, expArgs);
 }
-
-module.exports = { fromExpression, toExpression };
