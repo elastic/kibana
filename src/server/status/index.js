@@ -1,11 +1,16 @@
 import ServerStatus from './server_status';
 import wrapAuthConfig from './wrap_auth_config';
+import { Metrics } from './metrics';
 
 export default function (kbnServer, server, config) {
   kbnServer.status = new ServerStatus(kbnServer.server);
 
   if (server.plugins['even-better']) {
-    kbnServer.mixin(require('./metrics').collectMetrics);
+    const metrics = new Metrics(config, server);
+
+    server.plugins['even-better'].monitor.on('ops', event => {
+      metrics.capture(event).then(data => { kbnServer.metrics = data; });
+    });
   }
 
   const wrapAuth = wrapAuthConfig(config.get('status.allowAnonymous'));
