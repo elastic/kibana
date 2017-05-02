@@ -1,7 +1,7 @@
 import _ from 'lodash';
 import angular from 'angular';
 
-import 'ui/promises/index';
+import 'ui/promises';
 
 import { RequestQueueProvider } from '../_request_queue';
 import { ErrorHandlersProvider } from '../_error_handlers';

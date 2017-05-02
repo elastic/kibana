@@ -3,7 +3,7 @@ import _ from 'lodash';
 import { IsRequestProvider } from './is_request';
 import { MergeDuplicatesRequestProvider } from './merge_duplicate_requests';
 import { ReqStatusProvider } from './req_status';
-import { promiseMapSettled } from 'ui/promises/index';
+import { promiseMapSettled } from 'ui/promises';
 
 export function CallClientProvider(Private, Promise, esAdmin, es) {
 
