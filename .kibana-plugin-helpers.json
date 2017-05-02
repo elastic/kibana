@@ -1,0 +1,16 @@
+{
+  "buildSourcePatterns": [
+    "LICENSE",
+    "package.json",
+    "index.js",
+    "init.js",
+    ".node-version",
+    "common/**/*",
+    "server/**/*",
+    "public/**/*",
+    "!__tests__",
+    "!__tests__/**/*",
+    "!**/__tests__",
+    "!**/__tests__/**/*"
+  ]
+}
