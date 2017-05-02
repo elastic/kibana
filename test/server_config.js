@@ -3,11 +3,6 @@ const kibanaURL = '/app/kibana';
 
 module.exports = {
   servers: {
-    webdriver: {
-      protocol: process.env.TEST_WEBDRIVER_PROTOCOL || 'http',
-      hostname: process.env.TEST_WEBDRIVER_HOSTNAME || 'localhost',
-      port: parseInt(process.env.TEST_WEBDRIVER_PORT, 10) || 4444
-    },
     kibana: {
       protocol: process.env.TEST_KIBANA_PROTOCOL || 'http',
       hostname: process.env.TEST_KIBANA_HOSTNAME || 'localhost',
