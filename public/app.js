@@ -1,4 +1,3 @@
-
 import './state/store_service';
 import 'ui/autoload/all';
 import './directives/react';
