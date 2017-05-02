@@ -1,10 +1,10 @@
 import routes from 'ui/routes';
 import uiChrome from 'ui/chrome';
-import template from './landing_page_route.html';
-import './components/landing_page';
+import template from './getting_started_route.html';
+import './components/getting_started';
 
 routes
-.when('/management/kibana/landing_page', {
+.when('/management/kibana/getting_started', {
   template: template,
   resolve: {
     navDisplay: () => {
@@ -14,8 +14,8 @@ routes
       }
     }
   },
-  controllerAs: 'landingPageRoute',
-  controller: class LandingPageRouteController {
+  controllerAs: 'gettingStartedRoute',
+  controller: class GettingStartedRouteController {
     constructor() {
     }
   }

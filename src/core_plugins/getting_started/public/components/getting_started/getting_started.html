@@ -1,0 +1,93 @@
+<div class="kuiViewContent kuiViewContent--constrainedWidth">
+  <div class="kuiViewContentItem kuiVerticalRhythm">
+    <h1 class="kuiTitle">
+      Welcome to Kibana
+    </h1>
+  </div>
+
+  <div>
+    [Kibana logo]
+  </div>
+
+  <div class="kuiViewContentItem kuiVerticalRhythm">
+    optional top message slot
+  </div>
+
+  <div class="kuiViewContentItem kuiVerticalRhythm">
+    <ol>
+      <li class="kuiCard">
+        <div class="kuiCard__description">
+          <div class="kuiCard__descriptionTitle">
+            <h2 class="kuiSubTitle">
+              First, add your data
+            </h2>            
+          </div>
+
+          <div class="kuiCard__descriptionText">
+            [Beats logo] [Logstash logo]
+          </div>
+        </div>
+
+        <div class="kuiCard__footer">
+          Pull in data from the <a href="">Elasticsearch API</a>, <a href="">Beats</a>, <a href="">Logstash</a>.
+          Not sure how to do that? <a href="">Read this introduction.</a>
+        </div>
+      </li>
+
+      <li class="kuiCard">
+        <div class="kuiCard__description">
+          <div class="kuiCard__descriptionTitle">
+            <h2 class="kuiSubTitle">
+              Visualize and explore
+            </h2>
+          </div>
+
+          <div class="kuiCard__descriptionText">
+            [Some dashboard-like logo]
+          </div>
+        </div>
+
+        <div class="kuiCard__footer">
+          Once you've added data, you'll need to <a href="">configure an index pattern</a>
+          for your data before using our Discover and Visualize applications.
+        </div>
+      </li>
+
+      <li
+        class="kuiCard"
+        ng-if="gettingStarted.hasManageAndMonitorItems"
+        >
+        <div class="kuiCard__description">
+          <div class="kuiCard__descriptionTitle">
+            <h2 class="kuiSubTitle">
+              Manage and monitor
+            </h2>
+          </div>
+
+          <div class="kuiCard__descriptionText">
+          [Some shield-like logo]
+          </div>
+        </div>
+
+        <div class="kuiCard__footer">
+          <span ng-repeat="item in gettingStarted.manageAndMonitorItems">
+            {{ item }}
+          </span>
+        </div>
+      </li>
+    </ol>
+  </div>
+
+  <div class="kuiViewContentItem kuiVerticalRhythm">
+    Just want to see what Kibana is capable of doing?
+    <button class="kuiButton kuiButton--primary">
+      <span class="kuiButton__inner">
+        <span>View the demo site</span>
+      </span>
+    </button>  
+  </div>
+
+  <div class="kuiViewContentItem kuiVerticalRhythm">
+    <a href="">Kibana documentation</a> is always available to help.
+  </div>
+</div>
