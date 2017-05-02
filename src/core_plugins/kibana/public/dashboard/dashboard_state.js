@@ -12,6 +12,7 @@ import { getPersistedStateId } from 'plugins/kibana/dashboard/panel/panel_state'
 function getStateDefaults(dashboard) {
   return {
     title: dashboard.title,
+    description: dashboard.description,
     timeRestore: dashboard.timeRestore,
     panels: dashboard.panelsJSON ? JSON.parse(dashboard.panelsJSON) : [],
     options: dashboard.optionsJSON ? JSON.parse(dashboard.optionsJSON) : {},
@@ -120,6 +121,15 @@ export class DashboardState {
 
   getTitle() {
     return this.appState.title;
+  }
+
+  getDescription() {
+    return this.appState.description;
+  }
+
+  setDescription(description) {
+    this.appState.description = description;
+    this.saveState();
   }
 
   setTitle(title) {
@@ -341,7 +351,8 @@ export class DashboardState {
     this.saveState();
 
     const timeRestoreObj = _.pick(timeFilter.refreshInterval, ['display', 'pause', 'section', 'value']);
-    this.savedDashboard.title = this.appState.title;
+    this.savedDashboard.title = this.getTitle();
+    this.savedDashboard.description = this.getDescription();
     this.savedDashboard.timeRestore = this.appState.timeRestore;
     this.savedDashboard.panelsJSON = toJson(this.appState.panels);
     this.savedDashboard.uiStateJSON = toJson(this.uiState.getChanges());
