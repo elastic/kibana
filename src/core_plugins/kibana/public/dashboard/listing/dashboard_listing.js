@@ -26,6 +26,11 @@ export function DashboardListingController($injector, $scope) {
       name: 'title',
       getValue: item => item.title,
       isAscending: true,
+    },
+    {
+      name: 'description',
+      getValue: item => item.description,
+      isAscending: true
     }
   ],
   'title');
