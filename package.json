@@ -12,37 +12,26 @@
     "package": "gulp package",
     "test": "gulp test"
   },
+  "dependencies": {
+    "react": "^15.5.4",
+    "react-dom": "^15.5.4",
+    "react-redux": "^5.0.4",
+    "redux": "^3.6.0"
+  },
   "devDependencies": {
     "@elastic/eslint-config-kibana": "^0.1.0",
     "babel-eslint": "^4.1.8",
+    "babel-register": "^6.24.1",
     "bluebird": "^3.1.1",
-    "eslint": "^1.10.3",
-    "eslint-plugin-mocha": "^1.1.0",
-    "gulp": "^3.9.0",
-    "gulp-eslint": "^1.1.1",
+    "eslint": "^3.19.0",
+    "eslint-plugin-mocha": "^4.9.0",
+    "gulp": "^3.9.1",
+    "gulp-eslint": "^3.0.1",
     "gulp-gzip": "^1.2.0",
     "gulp-tar": "^1.8.0",
-    "gulp-util": "^3.0.7",
+    "gulp-util": "^3.0.8",
     "mkdirp": "^0.5.1",
     "rimraf": "^2.5.0",
     "rsync": "^0.4.0"
-  },
-  "dependencies": {
-    "@elastic/datemath": "^2.3.0",
-    "@elastic/kbn-react-ui": "github:rashidkpc/kbn-react-ui",
-    "@elastic/thor-visualizations": "github:elastic/thor-visualizations",
-    "angular": "^1.5.3",
-    "api-check": "^7.5.5",
-    "babel-register": "^6.3.13",
-    "bootstrap": "^3.3.6",
-    "isomorphic-fetch": "^2.2.1",
-    "lodash": "^4.16.1",
-    "react": "^15.4.2",
-    "react-dom": "^15.4.1",
-    "react-redux": "^5.0.1",
-    "redux": "^3.6.0",
-    "redux-actions": "^1.2.0",
-    "redux-thunk": "^2.1.0",
-    "uuid": "^3.0.1"
   }
 }
