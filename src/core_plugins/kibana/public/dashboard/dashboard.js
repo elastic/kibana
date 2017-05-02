@@ -116,7 +116,8 @@ app.directive('dashboardApp', function (Notifier, courier, AppState, timefilter,
         query: dashboardState.getQuery(),
         darkTheme: dashboardState.getDarkTheme(),
         timeRestore: dashboardState.getTimeRestore(),
-        title: dashboardState.getTitle()
+        title: dashboardState.getTitle(),
+        description: dashboardState.getDescription(),
       };
 
       $scope.panels = dashboardState.getPanels();
@@ -185,6 +186,7 @@ app.directive('dashboardApp', function (Notifier, courier, AppState, timefilter,
         dashboardState.setDarkTheme($scope.model.darkTheme);
         updateTheme();
       });
+      $scope.$watch('model.description', () => dashboardState.setDescription($scope.model.description));
       $scope.$watch('model.title', () => dashboardState.setTitle($scope.model.title));
       $scope.$watch('model.timeRestore', () => dashboardState.setTimeRestore($scope.model.timeRestore));
 
