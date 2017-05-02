@@ -4,7 +4,7 @@
   border: 1px solid $modalBorderColor;
   border-radius: $globalBorderRadius;
   box-shadow: 0 5px 22px rgba(#000000, 0.25);
-  z-index: 1001;
+  z-index: $globalModalDepth + 1;
 }
 
 .kuiModalHeader {

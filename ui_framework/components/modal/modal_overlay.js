@@ -1,10 +1,12 @@
 import React from 'react';
+import classnames from 'classnames';
 
-export function KuiModalOverlay(props) {
+export function KuiModalOverlay({ className,  ...rest }) {
+  const classes = classnames('kuiModalOverlay', className);
   return (
-    <div className="kuiModalOverlay"
-         data-test-subj="modalOverlay"
-         { ...props}
+    <div
+      className={ classes }
+      { ...rest}
     />
   );
 }

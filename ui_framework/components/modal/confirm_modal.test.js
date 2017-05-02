@@ -1,6 +1,6 @@
 import React from 'react';
 import sinon from 'sinon';
-import { mount } from 'enzyme';
+import { mount, render } from 'enzyme';
 
 import { requiredProps } from '../../test/required_props';
 
@@ -8,11 +8,16 @@ import {
   KuiConfirmModal,
 } from './confirm_modal';
 
-const onConfirm = sinon.spy();
-const onCancel = sinon.spy();
+let onConfirm;
+let onCancel;
+
+beforeEach(() => {
+  onConfirm = sinon.spy();
+  onCancel = sinon.spy();
+});
 
 test('renders KuiConfirmModal', () => {
-  const component = mount(<KuiConfirmModal
+  const component = render(<KuiConfirmModal
     message="This is a confirmation modal example"
     title="A confirmation modal"
     onCancel={() => {}}
@@ -22,9 +27,6 @@ test('renders KuiConfirmModal', () => {
     { ...requiredProps }
   />);
   expect(component).toMatchSnapshot();
-
-  component.find('[data-test-subj="confirmModalConfirmButton"]').simulate('click');
-  sinon.assert.calledOnce(onConfirm);
 });
 
 test('onConfirm', () => {
@@ -37,8 +39,6 @@ test('onConfirm', () => {
     confirmButtonText="Confirm"
     { ...requiredProps }
   />);
-  onConfirm.reset();
-  onCancel.reset();
   component.find('[data-test-subj="confirmModalConfirmButton"]').simulate('click');
   sinon.assert.calledOnce(onConfirm);
   sinon.assert.notCalled(onCancel);
@@ -54,8 +54,6 @@ test('onCancel', () => {
     confirmButtonText="Confirm"
     { ...requiredProps }
   />);
-  onConfirm.reset();
-  onCancel.reset();
   component.find('[data-test-subj="confirmModalCancelButton"]').simulate('click');
   sinon.assert.notCalled(onConfirm);
   sinon.assert.calledOnce(onCancel);

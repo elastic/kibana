@@ -3,7 +3,7 @@
 exports[`renders KuiModalFooter 1`] = `
 <div
   aria-label="aria-label"
-  class="testClass1 testClass2"
+  class="kuiModalFooter testClass1 testClass2"
   data-test-subj="test subject string"
 >
   children

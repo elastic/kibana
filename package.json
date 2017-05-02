@@ -161,6 +161,7 @@
     "node-uuid": "1.4.7",
     "pegjs": "0.9.0",
     "postcss-loader": "1.2.1",
+    "prop-types": "15.5.8",
     "pui-react-overlay-trigger": "7.5.4",
     "pui-react-tooltip": "7.5.4",
     "querystring-browser": "1.0.4",

@@ -1,118 +1,59 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`renders KuiConfirmModal 1`] = `
-<KuiConfirmModal
+<div
   aria-label="aria-label"
-  cancelButtonText="Cancel Button Text"
-  className="testClass1 testClass2"
-  confirmButtonText="Confirm Button Text"
-  data-test-subj="test subject string"
-  message="This is a confirmation modal example"
-  onCancel={[Function]}
-  onConfirm={[Function]}
-  title="A confirmation modal"
+  class="kuiModal testClass1 testClass2"
+  data-tests-subj="test subject string"
+  style="width:450px;"
 >
-  <KuiModal
-    aria-label="aria-label"
-    className="testClass1 testClass2"
-    data-test-subj="test subject string"
-    style={
-      Object {
-        "width": "450px",
-      }
-    }
+  <div
+    class="kuiModalHeader"
   >
     <div
-      aria-label="aria-label"
-      className="testClass1 testClass2"
-      data-test-subj="test subject string"
-      style={
-        Object {
-          "width": "450px",
-        }
-      }
+      class="kuiModalHeader__title"
+      data-test-subj="confirmModalTitleText"
     >
-      <KuiModalHeader>
-        <div
-          className="kuiModalHeader"
-        >
-          <div
-            className="kuiModalHeader__title"
-            data-test-subj="confirmModalTitleText"
-          >
-            A confirmation modal
-          </div>
-        </div>
-      </KuiModalHeader>
-      <KuiModalBody>
-        <div
-          className="kuiModalBody"
-        >
-          <KuiModalBodyText
-            data-test-subj="confirmModalBodyText"
-          >
-            <div
-              className="kuiModalBodyText"
-              data-test-subj="confirmModalBodyText"
-            >
-              This is a confirmation modal example
-            </div>
-          </KuiModalBodyText>
-        </div>
-      </KuiModalBody>
-      <KuiModalFooter>
-        <div
-          className="kuiModalFooter"
-        >
-          <KuiButton
-            data-test-subj="confirmModalCancelButton"
-            onClick={[Function]}
-            type="hollow"
-          >
-            <button
-              className="kuiButton kuiButton--hollow"
-              data-test-subj="confirmModalCancelButton"
-              onClick={[Function]}
-            >
-              <ContentWithIcon
-                iconPosition="left"
-              >
-                <span
-                  className="kuiButton__inner"
-                >
-                  <span>
-                    Cancel Button Text
-                  </span>
-                </span>
-              </ContentWithIcon>
-            </button>
-          </KuiButton>
-          <KuiButton
-            data-test-subj="confirmModalConfirmButton"
-            onClick={[Function]}
-            type="primary"
-          >
-            <button
-              className="kuiButton kuiButton--primary"
-              data-test-subj="confirmModalConfirmButton"
-              onClick={[Function]}
-            >
-              <ContentWithIcon
-                iconPosition="left"
-              >
-                <span
-                  className="kuiButton__inner"
-                >
-                  <span>
-                    Confirm Button Text
-                  </span>
-                </span>
-              </ContentWithIcon>
-            </button>
-          </KuiButton>
-        </div>
-      </KuiModalFooter>
+      A confirmation modal
     </div>
-  </KuiModal>
-</KuiConfirmModal>
+  </div>
+  <div
+    class="kuiModalBody"
+  >
+    <div
+      class="kuiModalBodyText"
+      data-test-subj="confirmModalBodyText"
+    >
+      This is a confirmation modal example
+    </div>
+  </div>
+  <div
+    class="kuiModalFooter"
+  >
+    <button
+      class="kuiButton kuiButton--hollow"
+      data-test-subj="confirmModalCancelButton"
+    >
+      <span
+        class="kuiButton__inner"
+      >
+        <span>
+          Cancel Button Text
+        </span>
+      </span>
+    </button>
+    <button
+      class="kuiButton kuiButton--primary"
+      data-test-subj="confirmModalConfirmButton"
+    >
+      <span
+        class="kuiButton__inner"
+      >
+        <span>
+          Confirm Button Text
+        </span>
+      </span>
+    </button>
+  </div>
+</div>
 `;

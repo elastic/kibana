@@ -1,21 +1,38 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 
-import { KuiModal } from '../modal';
+import { KuiModal } from './modal';
 import { KuiModalFooter } from './modal_footer';
 import { KuiModalHeader } from './modal_header';
+import { KuiModalHeaderTitle } from './modal_header_title';
 import { KuiModalBody } from './modal_body';
 import { KuiModalBodyText } from './modal_body_text';
 import { KuiButton } from '../index';
 
-export function KuiConfirmModal({ message, title, onCancel, onConfirm, cancelButtonText, confirmButtonText, ...rest }) {
+export function KuiConfirmModal({
+    message,
+    title,
+    onCancel,
+    onConfirm,
+    cancelButtonText,
+    confirmButtonText,
+    className,
+    ...rest }) {
+  const ariaLabel = rest['aria-label'];
+  const dataTestSubj = rest['data-test-subj'];
   return (
-    <KuiModal style={{ 'width': '450px' }} { ...rest }>
+    <KuiModal
+      style={{ 'width': '450px' }}
+      data-tests-subj={ dataTestSubj }
+      aria-label={ ariaLabel }
+      className={ className }
+    >
       {
         title ?
           <KuiModalHeader>
-            <div className="kuiModalHeader__title" data-test-subj="confirmModalTitleText">
+            <KuiModalHeaderTitle data-test-subj="confirmModalTitleText">
               { title }
-            </div>
+            </KuiModalHeaderTitle>
           </KuiModalHeader>
           : null
       }
@@ -46,10 +63,13 @@ export function KuiConfirmModal({ message, title, onCancel, onConfirm, cancelBut
 }
 
 KuiConfirmModal.propTypes = {
-  message: React.PropTypes.string,
-  title: React.PropTypes.string,
-  cancelButtonText: React.PropTypes.string,
-  confirmButtonText: React.PropTypes.string,
-  onCancel: React.PropTypes.func,
-  onConfirm: React.PropTypes.func,
+  message: PropTypes.string,
+  title: PropTypes.string,
+  cancelButtonText: PropTypes.string,
+  confirmButtonText: PropTypes.string,
+  onCancel: PropTypes.func,
+  onConfirm: PropTypes.func,
+  dataTestSubj: PropTypes.string,
+  ariaLabel: PropTypes.string,
+  className: PropTypes.string,
 };

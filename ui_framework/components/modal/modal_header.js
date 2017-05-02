@@ -1,8 +1,10 @@
 import React from 'react';
+import classnames from 'classnames';
 
-export function KuiModalHeader({ children, ...rest }) {
+export function KuiModalHeader({ className, children, ...rest }) {
+  const classes = classnames('kuiModalHeader', className);
   return (
-    <div className="kuiModalHeader" { ...rest }>
+    <div className={ classes } { ...rest }>
       { children }
     </div>
   );

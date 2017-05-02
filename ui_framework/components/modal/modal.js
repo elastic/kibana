@@ -1,8 +1,10 @@
 import React from 'react';
+import classnames from 'classnames';
 
-export function KuiModal({ children, ...rest }) {
+export function KuiModal({ className, children, ...rest }) {
+  const classes = classnames('kuiModal', className);
   return (
-    <div className="kuiModal" { ...rest }>
+    <div className={ classes } { ...rest }>
       { children }
     </div>
   );
