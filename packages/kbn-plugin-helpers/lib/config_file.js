@@ -1,9 +1,9 @@
-var resolve = require('path').resolve;
-var readFileSync = require('fs').readFileSync;
+const resolve = require('path').resolve;
+const readFileSync = require('fs').readFileSync;
 
-var configFiles = [ '.kibana-plugin-helpers.json', '.kibana-plugin-helpers.dev.json' ];
-var configCache = {};
-var KIBANA_ROOT_OVERRIDE = process.env.KIBANA_ROOT ? resolve(process.env.KIBANA_ROOT) : null;
+const configFiles = [ '.kibana-plugin-helpers.json', '.kibana-plugin-helpers.dev.json' ];
+const configCache = {};
+const KIBANA_ROOT_OVERRIDE = process.env.KIBANA_ROOT ? resolve(process.env.KIBANA_ROOT) : null;
 
 module.exports = function (root) {
   if (!root) root = process.cwd();
@@ -13,11 +13,11 @@ module.exports = function (root) {
   }
 
   // config files to read from, in the order they are merged together
-  var config = configCache[root] = {};
+  let config = configCache[root] = {};
 
   configFiles.forEach(function (configFile) {
     try {
-      var content = JSON.parse(readFileSync(resolve(root, configFile)));
+      const content = JSON.parse(readFileSync(resolve(root, configFile)));
       config = Object.assign(config, content);
     } catch (e) {
       // noop

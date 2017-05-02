@@ -17,7 +17,7 @@ describe('build_action', () => {
 
     it('creates a zip in the build directory', () => {
       return buildAction(PLUGIN).then(() => {
-        var buildFile = resolve(PLUGIN_BUILD_DIR, PLUGIN.id + '-' + PLUGIN.version + '.zip');
+        const buildFile = resolve(PLUGIN_BUILD_DIR, PLUGIN.id + '-' + PLUGIN.version + '.zip');
         if (!fs.existsSync(buildFile)) {
           throw new Error('Build file not found: ' + buildFile);
         }
@@ -26,7 +26,7 @@ describe('build_action', () => {
 
     it('skips zip creation based on flag', function () {
       return buildAction(PLUGIN, noop, { skipArchive: true }).then(() => {
-        var buildFile = resolve(PLUGIN_BUILD_DIR, PLUGIN.id + '-' + PLUGIN.version + '.zip');
+        const buildFile = resolve(PLUGIN_BUILD_DIR, PLUGIN.id + '-' + PLUGIN.version + '.zip');
         if (fs.existsSync(buildFile)) {
           throw new Error('Build file not found: ' + buildFile);
         }
@@ -53,6 +53,7 @@ describe('build_action', () => {
 
       return buildAction(PLUGIN, noop, options).then(() => {
         expect(mockBuild.mock.calls).toHaveLength(1);
+        // eslint-disable-next-line no-unused-vars
         const [ plugin, buildTarget, buildVersion, kibanaVersion, files ] = mockBuild.mock.calls[0];
         expect(buildVersion).toBe('1.2.3');
         expect(kibanaVersion).toBe('4.5.6');
@@ -62,6 +63,7 @@ describe('build_action', () => {
     it('uses default file list without files option', function () {
       return buildAction(PLUGIN).then(() => {
         expect(mockBuild.mock.calls).toHaveLength(1);
+        // eslint-disable-next-line no-unused-vars
         const [ plugin, buildTarget, buildVersion, kibanaVersion, files ] = mockBuild.mock.calls[0];
         PLUGIN.buildSourcePatterns.forEach(file => expect(files).toContain(file));
       });
@@ -79,6 +81,7 @@ describe('build_action', () => {
 
       return buildAction(PLUGIN, noop, options).then(() => {
         expect(mockBuild.mock.calls).toHaveLength(1);
+        // eslint-disable-next-line no-unused-vars
         const [ plugin, buildTarget, buildVersion, kibanaVersion, files ] = mockBuild.mock.calls[0];
         options.files.forEach(file => expect(files).toContain(file));
       });

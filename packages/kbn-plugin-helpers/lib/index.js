@@ -1,5 +1,5 @@
-var run = require('./run');
-var utils = require('./utils');
+const run = require('./run');
+const utils = require('./utils');
 
 module.exports = function () {
   console.error(

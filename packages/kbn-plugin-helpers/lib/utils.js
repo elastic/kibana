@@ -1,14 +1,14 @@
-var resolve = require('path').resolve;
+const resolve = require('path').resolve;
 
-var pluginConfig = require('./plugin_config');
+const pluginConfig = require('./plugin_config');
 
 function babelRegister() {
-  var plugin = pluginConfig();
+  const plugin = pluginConfig();
   require(resolve(plugin.kibanaRoot, 'src/optimize/babel/register'));
 }
 
 function resolveKibanaPath(path) {
-  var plugin = pluginConfig();
+  const plugin = pluginConfig();
   return resolve(plugin.kibanaRoot, path);
 }
 

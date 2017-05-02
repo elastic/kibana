@@ -1,18 +1,17 @@
-var join = require('path').join;
-var relative = require('path').relative;
-var del = require('del');
-var vfs = require('vinyl-fs');
-var zip = require('gulp-zip');
+const join = require('path').join;
+const relative = require('path').relative;
+const del = require('del');
+const vfs = require('vinyl-fs');
+const zip = require('gulp-zip');
 
-module.exports = function createBuild(plugin, buildVersion) {
-  var buildId = `${plugin.id}-${buildVersion}`;
-  var buildSource = plugin.root;
-  var buildTarget = join(plugin.root, 'build');
-  var buildRoot = join(buildTarget, 'kibana', plugin.id);
+module.exports = function createPackage(plugin, buildVersion) {
+  const buildId = `${plugin.id}-${buildVersion}`;
+  const buildTarget = join(plugin.root, 'build');
+  const buildRoot = join(buildTarget, 'kibana', plugin.id);
 
   // zip up the package
   return new Promise(function (resolve, reject) {
-    var buildFiles = [relative(buildTarget, buildRoot) + '/**/*'];
+    const buildFiles = [relative(buildTarget, buildRoot) + '/**/*'];
 
     vfs.src(buildFiles, { cwd: buildTarget, base: buildTarget })
       .pipe(zip(`${buildId}.zip`))

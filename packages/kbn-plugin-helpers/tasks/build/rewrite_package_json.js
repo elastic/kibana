@@ -1,10 +1,10 @@
-var map = require('through2-map').obj;
-var gitInfo = require('./git_info');
+const map = require('through2-map').obj;
+const gitInfo = require('./git_info');
 
 module.exports = function rewritePackage(buildSource, buildVersion, kibanaVersion) {
   return map(function (file) {
     if (file.basename === 'package.json' && file.dirname === buildSource) {
-      var pkg = JSON.parse(file.contents.toString('utf8'));
+      const pkg = JSON.parse(file.contents.toString('utf8'));
 
       // rewrite the target kibana version while the
       // file is on it's way to the archive

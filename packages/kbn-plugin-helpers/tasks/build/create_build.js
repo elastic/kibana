@@ -1,18 +1,17 @@
-var join = require('path').join;
-var relative = require('path').relative;
-var statSync = require('fs').statSync;
-var execFileSync = require('child_process').execFileSync;
-var del = require('del');
-var vfs = require('vinyl-fs');
-var rename = require('gulp-rename');
+const join = require('path').join;
+const relative = require('path').relative;
+const statSync = require('fs').statSync;
+const execFileSync = require('child_process').execFileSync;
+const del = require('del');
+const vfs = require('vinyl-fs');
+const rename = require('gulp-rename');
 
-var rewritePackageJson = require('./rewrite_package_json');
-var gitInfo = require('./git_info');
-var winCmd = require('../../lib/win_cmd');
+const rewritePackageJson = require('./rewrite_package_json');
+const winCmd = require('../../lib/win_cmd');
 
 module.exports = function createBuild(plugin, buildTarget, buildVersion, kibanaVersion, files) {
-  var buildSource = plugin.root;
-  var buildRoot = join(buildTarget, 'kibana', plugin.id);
+  const buildSource = plugin.root;
+  const buildRoot = join(buildTarget, 'kibana', plugin.id);
 
   return del(buildTarget)
     .then(function () {
@@ -24,7 +23,7 @@ module.exports = function createBuild(plugin, buildTarget, buildVersion, kibanaV
 
           // put all files inside the correct directories
           .pipe(rename(function nestFileInDir(path) {
-            var nonRelativeDirname = path.dirname.replace(/^(\.\.\/?)+/g, '');
+            const nonRelativeDirname = path.dirname.replace(/^(\.\.\/?)+/g, '');
             path.dirname = join(relative(buildTarget, buildRoot), nonRelativeDirname);
           }))
 
@@ -35,7 +34,7 @@ module.exports = function createBuild(plugin, buildTarget, buildVersion, kibanaV
     })
     .then(function () {
       // install packages in build
-      var options = {
+      const options = {
         cwd: buildRoot,
         stdio: ['ignore', 'ignore', 'pipe'],
       };

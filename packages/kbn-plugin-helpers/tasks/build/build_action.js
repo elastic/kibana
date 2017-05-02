@@ -1,16 +1,16 @@
-var join = require('path').join;
-var resolve = require('path').resolve;
-var inquirer = require('inquirer');
+const join = require('path').join;
+const resolve = require('path').resolve;
+const inquirer = require('inquirer');
 
-var createBuild = require('./create_build');
-var createPackage = require('./create_package');
+const createBuild = require('./create_build');
+const createPackage = require('./create_package');
 
 module.exports = function (plugin, run, options) {
   options = options || {};
-  var buildVersion = plugin.version;
-  var kibanaVersion = (plugin.pkg.kibana && plugin.pkg.kibana.version) || plugin.pkg.version;
-  var buildFiles = plugin.buildSourcePatterns;
-  var buildTarget = join(plugin.root, 'build');
+  let buildVersion = plugin.version;
+  let kibanaVersion = (plugin.pkg.kibana && plugin.pkg.kibana.version) || plugin.pkg.version;
+  let buildFiles = plugin.buildSourcePatterns;
+  let buildTarget = join(plugin.root, 'build');
 
   // allow source files to be overridden
   if (options.files && options.files.length) {
@@ -22,7 +22,7 @@ module.exports = function (plugin, run, options) {
   if (options.buildVersion) buildVersion = options.buildVersion;
   if (options.kibanaVersion) kibanaVersion = options.kibanaVersion;
 
-  var buildStep;
+  let buildStep;
   if (kibanaVersion === 'kibana') {
     buildStep = askForKibanaVersion().then(function (customKibanaVersion) {
       return createBuild(plugin, buildTarget, buildVersion, customKibanaVersion, buildFiles);
@@ -41,7 +41,7 @@ module.exports = function (plugin, run, options) {
     });
 };
 
-function askForKibanaVersion(cb) {
+function askForKibanaVersion() {
   return inquirer.prompt([
     {
       type: 'input',

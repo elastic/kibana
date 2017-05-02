@@ -18,7 +18,6 @@
     "lint": "eslint bin/ help/ tasks/"
   },
   "dependencies": {
-    "@elastic/eslint-config-kibana": "0.0.2",
     "commander": "^2.9.0",
     "del": "^2.2.2",
     "gulp-rename": "1.2.2",
@@ -31,9 +30,12 @@
     "doc": "docs"
   },
   "devDependencies": {
-    "babel-eslint": "4.1.8",
-    "eslint": "1.10.3",
-    "eslint-plugin-mocha": "1.1.0",
+    "@elastic/eslint-config-kibana": "0.5.0",
+    "babel-eslint": "6.1.2",
+    "eslint": "3.11.1",
+    "eslint-plugin-mocha": "4.7.0",
+    "eslint-plugin-babel": "4.0.0",
+    "eslint-plugin-react": "6.10.3",
     "jest": "^17.0.3"
   },
   "repository": {

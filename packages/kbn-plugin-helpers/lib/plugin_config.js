@@ -1,14 +1,14 @@
-var resolve = require('path').resolve;
-var statSync = require('fs').statSync;
-var configFile = require('./config_file');
+const resolve = require('path').resolve;
+const statSync = require('fs').statSync;
+const configFile = require('./config_file');
 
 module.exports = function (root) {
   if (!root) root = process.cwd();
 
-  var pkg = require(resolve(root, 'package.json'));
-  var config = configFile(root);
+  const pkg = require(resolve(root, 'package.json'));
+  const config = configFile(root);
 
-  var buildSourcePatterns = [
+  const buildSourcePatterns = [
     'package.json',
     'index.js',
     '{lib,public,server,webpackShims}/**/*',
@@ -35,7 +35,7 @@ module.exports = function (root) {
 
 function fileExists(path) {
   try {
-    var stat = statSync(path);
+    const stat = statSync(path);
     return stat.isFile();
   } catch (e) {
     return false;
