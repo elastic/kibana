@@ -1,4 +1,3 @@
-import chrome from 'ui/chrome';
 
 import './state/store_service';
 import 'ui/autoload/all';
@@ -17,6 +16,6 @@ require('ui/routes')
   });
 
 app
-.controller('kibanaReact', function ($scope, timefilter) {
+.controller('kibanaReact', function ($scope) {
   $scope.component = App;
 });
