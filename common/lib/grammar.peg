@@ -1,0 +1,119 @@
+/*
+ * Canvas syntax parser
+ *
+ * You MUST use PegJS to generate a .js file to use this.
+ * Yes, technically you can load this and build the parser in real time, but this makes it annoying
+ * to share the grammar between the front end and back, so, you know, just generate the parser.
+ * You shouldn't be futzing around in the grammar very often anyway.
+ */
+
+ /* ----- Helpers ----- */
+{
+ function ltoo (literal) {
+  return {type: literal == null ? 'null' : typeof literal, value: literal}
+ }
+}
+
+ /* ----- Expressions ----- */
+
+start
+ = expression
+ / partial_expression
+
+expression
+ = first:function rest:('.' fn:function {return fn})* {
+  return {
+   type: 'expression',
+   chain: [first].concat(rest)
+  }
+ }
+
+partial_expression
+ = '.' expression:expression {
+  return {
+   type: 'partial',
+   chain: expression.chain
+  }
+ }
+
+
+ /* ----- Functions ----- */
+
+function "function"
+ = name:function_name space? '(' space? arg_list:arg_list? space? ')' space? {
+  return {
+    type: 'function',
+    function: name,
+    arguments: arg_list || []
+  }
+ }
+
+function_name
+ = name:[a-zA-Z0-9_-]+ {
+  return name.join('')
+ }
+
+ /* ----- Arguments ----- */
+
+argument
+ = name:function_name space? '=' space? value:arg_type {
+  return {name: name, value: value};
+ }
+ / value:arg_type {return {name: '_', value: value}}
+
+arg_type
+ = expression
+ / partial_expression
+ / literal:literal { return ltoo(literal)}
+
+
+arg_list
+ = first:argument* rest:(space? ',' space? arg:argument {return arg})* ','? {
+  const orderedArgs = first.concat(rest);
+  const args = {};
+  orderedArgs.forEach((arg) => {
+   args[arg.name] = args[arg.name] || [];
+   args[arg.name].push(arg.value)
+  })
+  return args;
+ }
+
+ /* ----- Core types ----- */
+
+literal "literal"
+  = phrase
+  / boolean
+  / null
+  / unquoted_string_or_number
+
+phrase
+ = '"' chars:dq_char* '"' { return chars.join(''); } // double quoted string
+ / "'" chars:sq_char* "'" { return chars.join(''); } // single quoted string
+
+unquoted_string_or_number
+ // Make sure we're not matching the beginning of a search
+ = string:[^()"',=\ \t]+ { // this also matches numbers via Number()
+   var result = string.join('');
+   // Sort of hacky, but PEG doesn't have backtracking so
+   // a number rule is hard to read, and performs worse
+   if (isNaN(Number(result))) return result;
+   return Number(result);
+  }
+
+boolean
+ = 'true'  { return true; }
+ / 'false' { return false; }
+
+null
+ = 'null' {return null;}
+
+space
+ = [\ \t\r\n]+
+
+dq_char
+  = "\\" sequence:('"' / "\\") { return sequence; }
+  / [^"] // everything except "
+
+sq_char
+  = "\\" sequence:("'" / "\\") { return sequence; }
+  / [^'] // everything except '
