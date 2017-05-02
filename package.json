@@ -9,8 +9,8 @@
   "scripts": {
     "start": "gulp dev",
     "build": "gulp build",
-    "package": "gulp package",
-    "test": "gulp test"
+    "test": "gulp test",
+    "precommit": "gulp lint-staged"
   },
   "dependencies": {
     "react": "^15.5.4",
@@ -32,6 +32,7 @@
     "gulp-eslint": "3.0.1",
     "gulp-load-plugins": "1.5.0",
     "gulp-util": "3.0.8",
+    "husky": "^0.13.3",
     "semver": "5.3.0",
     "simple-git": "1.70.0",
     "yargs": "7.1.0"
