@@ -1,12 +1,21 @@
-import { fromExpression, toExpression } from '../../common/lib/ast';
+import { fromExpression, /*toExpression*/ } from '../../common/lib/ast';
 
 export function translate(server) {
-  console.log('HELLLLLOOOOOOO!!!!!!!!')
   /*
     Get AST from expression
   */
   server.route({
     method: 'GET',
+    path: '/api/canvas/ast',
+    handler: function (request, reply) {
+      console.log('word');
+      if (!request.query.expression) return reply({ error: '"expression" query is required' }).code(400);
+      reply(fromExpression(request.query.expression));
+    }
+  });
+
+  server.route({
+    method: 'POST',
     path: '/api/canvas/ast',
     handler: function (request, reply) {
       console.log('word');

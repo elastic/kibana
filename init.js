@@ -1,4 +1,4 @@
-import { routes } from './server/routes'
+import { routes } from './server/routes';
 
 module.exports = function (server, /*options*/) {
   server.plugins.canvas = {
