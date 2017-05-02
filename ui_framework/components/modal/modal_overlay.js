@@ -1,5 +1,6 @@
 import React from 'react';
 import classnames from 'classnames';
+import PropTypes from 'prop-types';
 
 export function KuiModalOverlay({ className,  ...rest }) {
   const classes = classnames('kuiModalOverlay', className);
@@ -12,5 +13,5 @@ export function KuiModalOverlay({ className,  ...rest }) {
 }
 
 KuiModalOverlay.propTypes = {
-  className: React.PropTypes.string,
+  className: PropTypes.string,
 };

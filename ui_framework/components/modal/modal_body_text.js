@@ -1,5 +1,6 @@
 import React from 'react';
 import classnames from 'classnames';
+import PropTypes from 'prop-types';
 
 export function KuiModalBodyText({ className, children, ...rest }) {
   const classes = classnames('kuiModalBodyText', className);
@@ -11,6 +12,6 @@ export function KuiModalBodyText({ className, children, ...rest }) {
 }
 
 KuiModalBodyText.propTypes = {
-  className: React.PropTypes.string,
-  children: React.PropTypes.node
+  className: PropTypes.string,
+  children: PropTypes.node
 };
