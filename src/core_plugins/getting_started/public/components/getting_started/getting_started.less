@@ -1,11 +1,36 @@
 getting-started {
-  .kuiCardGroup--spaced {
-    display: flex;
 
-    .kuiCard + .kuiCard {
-      margin-left: 10px;
+  .kuiViewContent {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+
+    .gettingStartedWelcome {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      height: 200px;
+      width: 100%;
+      background-color: #f7f7f7;
+
+      h1 {
+        transform: translateY('120px');
+      }
+    }
+
+    .gettingStartedLogo {
+    }
+
+    .kuiCardGroup--spaced {
+      display: flex;
+
+      .kuiCard + .kuiCard {
+        margin-left: 10px;
+      }
     }
   }
+
 }
 
 
@@ -16,10 +41,6 @@ flex-direction: column;
 align-items: center;
 justify-content: center;
 position: relative;
-
-h1 {
-  transform: translateY(20);
-}
 
 // For logo with circle
 // see flexbox patterns
