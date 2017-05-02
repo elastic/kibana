@@ -1,4 +1,4 @@
-module.exports = function (kibana) {
+export default function (kibana) {
   return new kibana.Plugin({
     name: 'canvas',
     require: ['kibana', 'elasticsearch'],
@@ -9,8 +9,8 @@ module.exports = function (kibana) {
         icon: 'plugins/canvas/icon.svg',
         main: 'plugins/canvas/app',
         injectVars: (server) => {
-          var config = server.config();
-          var basePath = config.get('server.basePath');
+          const config = server.config();
+          const basePath = config.get('server.basePath');
 
           return {
             kbnIndex: config.get('kibana.index'),
