@@ -28,18 +28,31 @@
       >
         <div class="typeahead" kbn-typeahead="dashboard" on-select="filterResults()">
           <div class="kuiLocalSearch">
-            <input
-              parse-query
-              input-focus
-              kbn-typeahead-input
-              ng-model="model.query"
-              placeholder="Query"
-              aria-label="Enter query"
-              data-test-subj="dashboardQuery"
-              type="text"
-              class="kuiLocalSearchInput"
-              ng-class="{'kuiLocalSearchInput-isInvalid': queryInput.$invalid}"
-            >
+            <div class="kuiLocalSearchAssistedInput">
+              <input
+                parse-query
+                input-focus
+                kbn-typeahead-input
+                ng-model="model.query"
+                placeholder="Search... (e.g. status:200 AND extension:PHP)"
+                aria-label="Enter query"
+                data-test-subj="dashboardQuery"
+                type="text"
+                class="kuiLocalSearchInput kuiLocalLuceneSearchInput"
+                ng-class="{'kuiLocalSearchInput-isInvalid': queryInput.$invalid}"
+              >
+              <div class="kuiLocalSearchAssistedInput__assistance">
+                <p class="kuiText">
+                  <a
+                    class="kuiLink"
+                    ng-href="{{queryDocLinks.luceneQuerySyntax}}"
+                    target="_blank"
+                  >
+                    Uses lucene query syntax
+                  </a>
+                </p>
+              </div>
+            </div>
             <button
               type="submit"
               aria-label="Submit query"
