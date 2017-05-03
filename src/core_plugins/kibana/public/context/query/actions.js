@@ -6,7 +6,7 @@ import { QueryParameterActionsProvider } from '../query_parameters';
 import { LOADING_STATUS } from './constants';
 
 
-export function QueryActionsProvider(es, Notifier, Private, Promise) {
+export function QueryActionsProvider(courier, Notifier, Private, Promise) {
   const fetchAnchor = Private(fetchAnchorProvider);
   const { fetchPredecessors, fetchSuccessors } = Private(fetchContextProvider);
   const {
@@ -26,12 +26,12 @@ export function QueryActionsProvider(es, Notifier, Private, Promise) {
   );
 
   const fetchAnchorRow = (state) => () => {
-    const { queryParameters: { indexPattern, anchorUid, sort } } = state;
+    const { queryParameters: { indexPatternId, anchorUid, sort } } = state;
 
     setLoadingStatus(state)('anchor', LOADING_STATUS.LOADING);
 
     return Promise.try(() => (
-      fetchAnchor(indexPattern, anchorUid, _.zipObject([sort]))
+      fetchAnchor(indexPatternId, anchorUid, _.zipObject([sort]))
     ))
       .then(
         (anchorDocument) => {
@@ -49,14 +49,14 @@ export function QueryActionsProvider(es, Notifier, Private, Promise) {
 
   const fetchPredecessorRows = (state) => () => {
     const {
-      queryParameters: { indexPattern, predecessorCount, sort },
+      queryParameters: { indexPatternId, predecessorCount, sort },
       rows: { anchor },
     } = state;
 
     setLoadingStatus(state)('predecessors', LOADING_STATUS.LOADING);
 
     return Promise.try(() => (
-      fetchPredecessors(indexPattern, anchor, _.zipObject([sort]), predecessorCount)
+      fetchPredecessors(indexPatternId, anchor, _.zipObject([sort]), predecessorCount)
     ))
       .then(
         (predecessorDocuments) => {
@@ -74,14 +74,14 @@ export function QueryActionsProvider(es, Notifier, Private, Promise) {
 
   const fetchSuccessorRows = (state) => () => {
     const {
-      queryParameters: { indexPattern, sort, successorCount },
+      queryParameters: { indexPatternId, sort, successorCount },
       rows: { anchor },
     } = state;
 
     setLoadingStatus(state)('successors', LOADING_STATUS.LOADING);
 
     return Promise.try(() => (
-      fetchSuccessors(indexPattern, anchor, _.zipObject([sort]), successorCount)
+      fetchSuccessors(indexPatternId, anchor, _.zipObject([sort]), successorCount)
     ))
       .then(
         (successorDocuments) => {

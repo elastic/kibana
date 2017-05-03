@@ -3,7 +3,7 @@ export function createInitialQueryParametersState(defaultStepSize) {
     anchorUid: null,
     columns: [],
     defaultStepSize,
-    indexPattern: null,
+    indexPatternId: null,
     predecessorCount: 0,
     successorCount: 0,
     sort: [],

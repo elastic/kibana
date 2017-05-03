@@ -74,7 +74,10 @@ function ContextAppController($scope, config, Private, timefilter) {
    * Sync query parameters to arguments
    */
   $scope.$watchCollection(
-    () => _.pick(this, QUERY_PARAMETER_KEYS),
+    () => ({
+      ...(_.pick(this, QUERY_PARAMETER_KEYS)),
+      indexPatternId: this.indexPattern.id,
+    }),
     (newValues) => {
       // break the watch cycle
       if (!_.isEqual(newValues, this.state.queryParameters)) {

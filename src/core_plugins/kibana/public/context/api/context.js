@@ -5,7 +5,7 @@ import { SearchSourceProvider } from 'ui/courier/data_source/search_source';
 import { reverseSortDirective } from './utils/sorting';
 
 
-function fetchContextProvider(Private) {
+function fetchContextProvider(courier, Private) {
   const SearchSource = Private(SearchSourceProvider);
 
   return {
@@ -13,10 +13,10 @@ function fetchContextProvider(Private) {
     fetchSuccessors,
   };
 
-  async function fetchSuccessors(indexPattern, anchorDocument, contextSort, size, filters) {
+  async function fetchSuccessors(indexPatternId, anchorDocument, contextSort, size, filters) {
     const successorsSort = [contextSort, { _uid: 'asc' }];
-    const successorsSearchSource = createSearchSource(
-      indexPattern,
+    const successorsSearchSource = await createSearchSource(
+      indexPatternId,
       anchorDocument,
       successorsSort,
       size,
@@ -26,10 +26,10 @@ function fetchContextProvider(Private) {
     return results;
   }
 
-  async function fetchPredecessors(indexPattern, anchorDocument, contextSort, size, filters) {
+  async function fetchPredecessors(indexPatternId, anchorDocument, contextSort, size, filters) {
     const predecessorsSort = [reverseSortDirective(contextSort), { _uid: 'desc' }];
-    const predecessorsSearchSource = createSearchSource(
-      indexPattern,
+    const predecessorsSearchSource = await createSearchSource(
+      indexPatternId,
       anchorDocument,
       predecessorsSort,
       size,
@@ -40,7 +40,10 @@ function fetchContextProvider(Private) {
     return results;
   }
 
-  function createSearchSource(indexPattern, anchorDocument, sort, size, filters) {
+  async function createSearchSource(indexPatternId, anchorDocument, sort, size, filters) {
+
+    const indexPattern = await courier.indexPatterns.get(indexPatternId);
+
     return new SearchSource()
       .inherits(false)
       .set('index', indexPattern)
