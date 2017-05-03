@@ -25,6 +25,7 @@ export default function ({ getService, loadTestFile }) {
       });
     });
 
+    loadTestFile(require.resolve('./_editor'));
     loadTestFile(require.resolve('./_chart_types'));
     loadTestFile(require.resolve('./_area_chart'));
     loadTestFile(require.resolve('./_line_chart'));
