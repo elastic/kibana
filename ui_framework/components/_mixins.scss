@@ -109,6 +109,7 @@
  */
 @mixin formControlBase {
   appearance: none;
+  font-family: $globalFontFamily;
   padding: $globalFormControlPadding;
   font-size: $globalFontSize;
   font-weight: 400;
