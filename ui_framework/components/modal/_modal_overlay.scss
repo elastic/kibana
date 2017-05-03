@@ -1,6 +1,6 @@
 .kuiModalOverlay {
   position: fixed;
-  z-index: 1000;
+  z-index: $globalModalDepth;
   top: 0;
   left: 0;
   right: 0;
