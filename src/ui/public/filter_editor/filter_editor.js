@@ -21,6 +21,9 @@ module.directive('filterEditor', function (indexPatterns, $http) {
     bindToController: true,
     controller: function ($scope) {
       this.init = (filter) => {
+        this.customJson = _.omit(filter, ['meta', '$state']);
+        this.manualAdvancedMode = false;
+
         const { index, key, isNew } = filter.meta;
         this.indexPattern = indexPatterns.get(index)
           .then((indexPattern) => {
@@ -80,21 +83,42 @@ module.directive('filterEditor', function (indexPatterns, $http) {
           .then(suggestions => this.valueSuggestions = suggestions);
       };
 
-      this.save = () => {
-        const { indexPattern, field, operator, params } = this;
+      const simpleTypes = _(FILTER_OPERATORS)
+        .map('type')
+        .uniq()
+        .value();
 
-        let filter;
-        if (operator.type === 'match') {
-          filter = buildPhraseFilter(field, params.value, indexPattern);
-        } else if (operator.type === 'terms') {
-          filter = buildTermsFilter(field, params.values, indexPattern);
-        } else if (operator.type === 'range') {
-          filter = buildRangeFilter(field, { gte: params.from, lt: params.to }, indexPattern);
-        } else if (operator.type === 'exists') {
-          filter = buildExistsFilter(field, indexPattern);
+      this.showAdvancedEditor = () => {
+        const { type, isNew } = this.filter.meta;
+        return this.manualAdvancedMode || (!isNew && !simpleTypes.includes(type));
+      };
+
+      $scope.aceLoaded = function (editor) {
+        editor.$blockScrolling = Infinity;
+        const session = editor.getSession();
+        session.setTabSize(2);
+        session.setUseSoftTabs(true);
+      };
+
+      this.save = () => {
+        let filter = Object.assign({}, this.filter, { ...this.customJson });
+
+        if (!this.showAdvancedEditor()) {
+          const { indexPattern, field, operator, params } = this;
+
+          if (operator.type === 'match') {
+            filter = buildPhraseFilter(field, params.value, indexPattern);
+          } else if (operator.type === 'terms') {
+            filter = buildTermsFilter(field, params.values, indexPattern);
+          } else if (operator.type === 'range') {
+            filter = buildRangeFilter(field, { gte: params.from, lt: params.to }, indexPattern);
+          } else if (operator.type === 'exists') {
+            filter = buildExistsFilter(field, indexPattern);
+          }
+
+          filter.meta.negate = operator.negate;
         }
 
-        filter.meta.negate = operator.negate;
         return this.onSave({ filter });
       };
 

@@ -13,7 +13,21 @@
   </div>
 
   <div class="kuiModalBody">
-    <div class="kuiFieldGroup">
+    <div
+      ng-show="filterEditor.showAdvancedEditor()"
+      json-input
+      require-keys="true"
+      ui-ace="{
+        mode: 'json',
+        onLoad: aceLoaded
+      }"
+      ng-model="filterEditor.customJson"
+    ></div>
+
+    <div
+      class="kuiFieldGroup kuiVerticalRhythm"
+      ng-hide="filterEditor.showAdvancedEditor()"
+    >
       <div class="kuiFieldGroupSection kuiColumn kuiColumn--4">
         <ui-select
           ng-model="filterEditor.getSetField"
@@ -30,9 +44,7 @@
         </ui-select>
       </div>
 
-      <div
-        class="kuiFieldGroupSection kuiColumn kuiColumn--4"
-      >
+      <div class="kuiFieldGroupSection kuiColumn kuiColumn--4">
         <ui-select
           ng-model="filterEditor.getSetOperator"
           ng-model-options="{ getterSetter: true }"
@@ -49,9 +61,7 @@
         </ui-select>
       </div>
 
-      <div
-        class="kuiFieldGroupSection kuiColumn kuiColumn--4"
-      >
+      <div class="kuiFieldGroupSection kuiColumn kuiColumn--4">
         <ui-select
           ng-show="filterEditor.operator.type === 'match'"
           ng-model="filterEditor.params.value"
@@ -109,6 +119,25 @@
           </div>
         </div>
       </div>
+    </div>
+
+    <div class="kuiMenuButtonGroup kuiVerticalRhythm">
+      <button
+        class="kuiMenuButton kuiMenuButton--basic"
+        ng-hide="filterEditor.showAdvancedEditor()"
+        ng-click="filterEditor.manualAdvancedMode = true"
+      >
+        <span>Edit the actual DSL</span>
+      </button>
+
+      <button
+        class="kuiMenuButton kuiMenuButton--basic"
+        ng-show="filterEditor.manualAdvancedMode"
+        ng-click="filterEditor.manualAdvancedMode = false"
+      >
+        <span class="kuiMenuButton__icon kuiIcon fa-chevron-left"></span>
+        <span>Back</span>
+      </button>
     </div>
   </div>
 
