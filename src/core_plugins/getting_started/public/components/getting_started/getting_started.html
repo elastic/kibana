@@ -1,4 +1,11 @@
-<div class="kuiViewContent">
+<div class="kuiViewContent gettingStartedContent">
+
+  <div class="kuiBar gettingStartedOptOutContent">
+    <div class="kuiBarSection">
+      <p><a href="">I'm a pro, skip this stuff &gt;</a></p>
+    </div>
+  </div>
+
   <div class="kuiViewContentItem kuiVerticalRhythm gettingStartedWelcome">
     <h1 class="kuiTitle">
       Welcome to Kibana
@@ -6,16 +13,19 @@
   </div>
 
   <div class="kuiViewContentItem kuiVerticalRhythm gettingStartedLogo">
-    <img src="{{ gettingStarted.logoUrls.kibana }}" />
+    <img src="{{ gettingStarted.imageUrls.kibanaLogo }}" />
+  </div>
+
+  <div
+    class="kuiViewContentItem kuiVerticalRhythm"
+    ng-if="gettingStarted.topMessage"
+  >
+    <p ng-bind-html="gettingStarted.topMessage"></p>
   </div>
 
   <div class="kuiViewContentItem kuiVerticalRhythm">
-    optional top message slot
-  </div>
-
-  <div class="kuiViewContentItem kuiVerticalRhythm">
-    <ol class="kuiCardGroup kuiCardGroup">
-      <li class="kuiCard kuiCardGroup__card">
+    <div class="kuiCardGroup kuiCardGroup">
+      <div class="kuiCard kuiCardGroup__card gettingStartedCard">
         <div class="kuiCard__description">
           <div class="kuiCard__descriptionTitle">
             <h2 class="kuiSubTitle">
@@ -23,21 +33,21 @@
             </h2>            
           </div>
 
-          <div class="kuiCard__descriptionText">
+          <div class="kuiCard__descriptionText gettingStartedCard__descriptionText">
             <div class="gettingStartedLogoRow">
-              <img src="{{ gettingStarted.logoUrls.beats }}" />
-              <img src="{{ gettingStarted.logoUrls.logstash }}" />
+              <img src="{{ gettingStarted.imageUrls.beatsLogo }}" />
+              <img src="{{ gettingStarted.imageUrls.logstashLogo }}" />
             </div>
           </div>
         </div>
 
         <div class="kuiCard__footer">
-          Pull in data from the <a href="">Elasticsearch API</a>, <a href="">Beats</a>, <a href="">Logstash</a>.
-          Not sure how to do that? <a href="">Read this introduction.</a>
+          <p>Pull in data from the <a href="">Elasticsearch API</a>, <a href="">Beats</a>, <a href="">Logstash</a>.
+          Not sure how to do that? <a href="">Read this introduction.</a></p>
         </div>
-      </li>
+      </div>
 
-      <li class="kuiCard kuiCardGroup__card">
+      <div class="kuiCard kuiCardGroup__card gettingStartedCard">
         <div class="kuiCard__description">
           <div class="kuiCard__descriptionTitle">
             <h2 class="kuiSubTitle">
@@ -45,20 +55,22 @@
             </h2>
           </div>
 
-          <div class="kuiCard__descriptionText">
-            [Some dashboard-like logo]
+          <div class="kuiCard__descriptionText gettingStartedCard__descriptionText">
+            <div class="gettingStartedLogoRow">
+              <img src="{{ gettingStarted.imageUrls.dashboardIcon }}" />
+            </div>
           </div>
         </div>
 
         <div class="kuiCard__footer">
-          Once you've added data, you'll need to <a href="">configure an index pattern</a>
-          for your data before using our Discover and Visualize applications.
+          <p>Once you've added data, you'll need to <a href="#/management/kibana/index">configure an index pattern</a>
+          for your data before using our Discover and Visualize applications.</p>
         </div>
-      </li>
+      </div>
 
-      <li
-        class="kuiCard kuiCardGroup__card"
-        ng-if="gettingStarted.hasManageAndMonitorItems"
+      <div
+        class="kuiCard kuiCardGroup__card gettingStartedCard"
+        ng-if="gettingStarted.hasManageAndMonitorMessages"
         >
         <div class="kuiCard__description">
           <div class="kuiCard__descriptionTitle">
@@ -67,24 +79,26 @@
             </h2>
           </div>
 
-          <div class="kuiCard__descriptionText">
-          [Some shield-like logo]
+          <div class="kuiCard__descriptionText gettingStartedCard__descriptionText">
+            <div class="gettingStartedLogoRow">
+              <img src="{{ gettingStarted.imageUrls.shieldIcon }}" />
+            </div>
           </div>
         </div>
 
         <div class="kuiCard__footer">
-          <span ng-repeat="item in gettingStarted.manageAndMonitorItems">
-            {{ item }}
-          </span>
+          <p
+            ng-if="gettingStarted.manageAndMonitorMessages"
+            ng-bind-html="gettingStarted.manageAndMonitorMessages"></p>
         </div>
-      </li>
-    </ol>
+      </div>
+    </div>
   </div>
 
   <div class="kuiViewContentItem kuiVerticalRhythm">
     <div class="kuiFieldGroup">
       <div class="kuiFieldGroupSection">
-        <p class="kuiText">    Just want to see what Kibana is capable of doing? </p>
+        <p class="kuiText">Just want to see what Kibana is capable of doing?</p>
       </div>
 
       <div class="kuiFieldGroupSection">
@@ -98,6 +112,6 @@
   </div>
 
   <div class="kuiViewContentItem kuiVerticalRhythm">
-    <a href="">Kibana documentation</a> is always available to help.
+    <p><a href="">Kibana documentation</a> is always available to help.</p>
   </div>
 </div>

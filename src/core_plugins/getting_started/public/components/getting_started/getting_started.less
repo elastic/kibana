@@ -1,58 +1,70 @@
-getting-started {
+.gettingStartedContent {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding-top: 0;
+}
 
-  .kuiViewContent {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
+.gettingStartedOptOutContent {
+  position: absolute;
+  top: 20px;
+  right: 30px;
+}
 
-    .gettingStartedWelcome {
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      height: 200px;
-      width: 100%;
-      background-color: #f7f7f7;
+.gettingStartedWelcome {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  height: 200px;
+  width: 100%;
+  background-color: #f7f7f7;
 
-      h1 {
-        transform: translateY(10px);
-      }
-    }
- 
-    .gettingStartedLogo {
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
+  h1 {
+    transform: translateY(10px);
+  }
+}
 
-      border: 1px solid #D7DBDD;
-      width: 100px;
-      height: 100px;
-      border-radius: 100%;
+.gettingStartedLogo {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
 
-      background-color: #ffffff;
+  border: 1px solid #D7DBDD;
+  width: 100px;
+  height: 100px;
+  border-radius: 100%;
 
-      transform: translateY(-60px);
-    }
+  background-color: #ffffff;
 
-    .gettingStartedLogoRow {
-      display: flex;
-      flex-direction: row;
-      justify-content: center;
+  transform: translateY(-60px);
+}
 
-      img {
-        height: 100px;
-      }
+.gettingStartedLogoRow {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
 
-      img + img {
-        margin-left: 50px;
-      }
-    }
-
-    .kuiCard__descriptionText {
-      margin-top: 40px;
-      margin-bottom: 40px;
-    }
+  img {
+    height: 80px;
   }
 
+  img + img {
+    margin-left: 40px;
+  }
 }
+
+.gettingStartedCard__descriptionText {
+  margin-top: 32px;
+  margin-bottom: 32px;
+}
+
+.gettingStartedCard {
+  width: 340px;  
+}
+
+
+/**
+2. Check width + flex-box in other browsers
+**/
