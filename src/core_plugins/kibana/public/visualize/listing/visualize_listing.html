@@ -119,7 +119,7 @@
             Name
             <span
               class="kuiIcon"
-              ng-show="listingController.getSortProperty().name === 'title'"
+              ng-show="listingController.getSortedProperty().name === 'title'"
               ng-class="listingController.isAscending('title') ? 'fa-caret-up' : 'fa-caret-down'"
             ></span>
           </th>
@@ -131,7 +131,7 @@
             Type
             <span
               class="kuiIcon"
-              ng-show="listingController.getSortProperty().name === 'type'"
+              ng-show="listingController.getSortedProperty().name === 'type'"
               ng-class="listingController.isAscending('type') ? 'fa-caret-up' : 'fa-caret-down'"
             ></span>
           </th>
