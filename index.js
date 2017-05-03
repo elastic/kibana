@@ -21,8 +21,9 @@ export default function (kibana) {
         }
       },
       hacks: [
-        'plugins/canvas/functions/load.js'
-        // Plugins go here
+        // Client side plugins go here
+        'plugins/canvas/lib/load_functions.js',
+        'plugins/canvas/lib/load_types.js'
       ],
     },
 
