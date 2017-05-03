@@ -15,7 +15,17 @@ describe('dashboard panel', function () {
   function init(mockDocResponse) {
     ngMock.module('kibana');
     ngMock.inject(($rootScope, $compile, esAdmin) => {
-      sinon.stub(esAdmin, 'mget').returns(Promise.resolve({ docs: [ mockDocResponse ] }));
+      sinon.stub(esAdmin, 'mget', function (request) {
+        const response = {
+          docs: []
+        };
+        request.body.docs.forEach(() => {
+          response.docs.push(mockDocResponse);
+        });
+
+        return Promise.resolve(response);
+      });
+
       sinon.stub(esAdmin.indices, 'getFieldMapping').returns(Promise.resolve({
         '.kibana': {
           mappings: {
@@ -63,7 +73,7 @@ describe('dashboard panel', function () {
       expect($scope.error).to.be('Could not locate that visualization (id: foo1)');
       parentScope.$digest();
       const content = $el.find('.panel-content');
-      expect(content).to.have.length(0);
+      expect(content.children().length).to.be(0);
     });
   });
 
@@ -73,7 +83,7 @@ describe('dashboard panel', function () {
       expect($scope.error).not.to.be.ok();
       parentScope.$digest();
       const content = $el.find('.panel-content');
-      expect(content).to.have.length(1);
+      expect(content.children().length).to.be.greaterThan(0);
     });
   });
 });

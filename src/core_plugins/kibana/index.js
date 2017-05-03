@@ -43,7 +43,8 @@ module.exports = function (kibana) {
           'navbarExtensions',
           'managementSections',
           'devTools',
-          'docViews'
+          'docViews',
+          'embeddableHandlers',
         ],
         injectVars,
       },

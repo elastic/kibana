@@ -18,12 +18,15 @@ import 'plugins/kibana/visualize/saved_visualizations/_saved_vis';
 import 'plugins/kibana/visualize/saved_visualizations/saved_visualizations';
 import 'ui/directives/scroll_bottom';
 import 'ui/filters/sort_prefix_first';
+
 import uiRoutes from 'ui/routes';
 import visualizeListingTemplate from './listing/visualize_listing.html';
 import { VisualizeListingController } from './listing/visualize_listing';
 import { VisualizeConstants } from './visualize_constants';
 import { SavedObjectRegistryProvider } from 'ui/saved_objects/saved_object_registry';
 import { savedVisualizationProvider } from 'plugins/kibana/visualize/saved_visualizations/saved_visualization_register';
+import { EmbeddableHandlersRegistryProvider } from 'ui/registry/embeddable_handlers';
+import { visualizeEmbeddableHandlerProvider } from './embeddable/visualize_embeddable_handler_provider';
 
 uiRoutes
 .defaults(/visualize/, {
@@ -38,3 +41,4 @@ uiRoutes
 // preloading
 
 SavedObjectRegistryProvider.register(savedVisualizationProvider);
+EmbeddableHandlersRegistryProvider.register(visualizeEmbeddableHandlerProvider);
