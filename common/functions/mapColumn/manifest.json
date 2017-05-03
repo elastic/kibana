@@ -1,0 +1,43 @@
+{
+  "name": "mapColumn",
+  "aliases": [
+    "mc"
+  ],
+  "type": "datatable",
+  "help": "Replace value in column with output of a function",
+  "context": {
+    "types": [
+      "datatable"
+    ]
+  },
+  "args": {
+    "column": {
+      "name": "column",
+      "types": [
+        "string"
+      ],
+      "aliases": [
+        "_"
+      ],
+      "multi": false
+    },
+    "function": {
+      "name": "function",
+      "types": [
+        "function"
+      ],
+      "aliases": [
+        "fn"
+      ],
+      "multi": false
+    },
+    "dest": {
+      "name": "dest",
+      "types": [
+        "string"
+      ],
+      "aliases": [],
+      "multi": false
+    }
+  }
+}

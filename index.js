@@ -21,6 +21,7 @@ export default function (kibana) {
         }
       },
       hacks: [
+        'plugins/canvas/functions/load.js'
         // Plugins go here
       ],
     },
