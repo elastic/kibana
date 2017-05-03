@@ -6,7 +6,7 @@
   </div>
 
   <div class="kuiViewContentItem kuiVerticalRhythm gettingStartedLogo">
-    <div>[Kibana logo]</div>
+    <img src="{{ gettingStarted.logoUrls.kibana }}" />
   </div>
 
   <div class="kuiViewContentItem kuiVerticalRhythm">
@@ -14,7 +14,7 @@
   </div>
 
   <div class="kuiViewContentItem kuiVerticalRhythm">
-    <ol class="kuiCardGroup kuiCardGroup--spaced">
+    <ol class="kuiCardGroup kuiCardGroup">
       <li class="kuiCard kuiCardGroup__card">
         <div class="kuiCard__description">
           <div class="kuiCard__descriptionTitle">
@@ -24,7 +24,10 @@
           </div>
 
           <div class="kuiCard__descriptionText">
-            [Beats logo] [Logstash logo]
+            <div class="gettingStartedLogoRow">
+              <img src="{{ gettingStarted.logoUrls.beats }}" />
+              <img src="{{ gettingStarted.logoUrls.logstash }}" />
+            </div>
           </div>
         </div>
 
