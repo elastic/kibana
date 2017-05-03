@@ -1,0 +1,59 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`renders KuiConfirmModal 1`] = `
+<div
+  aria-label="aria-label"
+  class="kuiModal testClass1 testClass2"
+  data-tests-subj="test subject string"
+  style="width:450px;"
+>
+  <div
+    class="kuiModalHeader"
+  >
+    <div
+      class="kuiModalHeader__title"
+      data-test-subj="confirmModalTitleText"
+    >
+      A confirmation modal
+    </div>
+  </div>
+  <div
+    class="kuiModalBody"
+  >
+    <div
+      class="kuiModalBodyText"
+      data-test-subj="confirmModalBodyText"
+    >
+      This is a confirmation modal example
+    </div>
+  </div>
+  <div
+    class="kuiModalFooter"
+  >
+    <button
+      class="kuiButton kuiButton--hollow"
+      data-test-subj="confirmModalCancelButton"
+    >
+      <span
+        class="kuiButton__inner"
+      >
+        <span>
+          Cancel Button Text
+        </span>
+      </span>
+    </button>
+    <button
+      class="kuiButton kuiButton--primary"
+      data-test-subj="confirmModalConfirmButton"
+    >
+      <span
+        class="kuiButton__inner"
+      >
+        <span>
+          Confirm Button Text
+        </span>
+      </span>
+    </button>
+  </div>
+</div>
+`;
