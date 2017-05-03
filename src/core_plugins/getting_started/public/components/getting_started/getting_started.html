@@ -2,7 +2,7 @@
 
   <div class="kuiBar gettingStartedOptOutContent">
     <div class="kuiBarSection">
-      <p><a href="">I'm a pro, skip this stuff &gt;</a></p>
+      <p class="kuiText kuiSubduedText"><a href="">I'm a pro, skip this stuff &gt;</a></p>
     </div>
   </div>
 
@@ -20,7 +20,10 @@
     class="kuiViewContentItem kuiVerticalRhythm"
     ng-if="gettingStarted.topMessage"
   >
-    <p ng-bind-html="gettingStarted.topMessage"></p>
+    <p
+      class="kuiText""
+      ng-bind-html="gettingStarted.topMessage"
+    ></p>
   </div>
 
   <div class="kuiViewContentItem kuiVerticalRhythm">
@@ -42,7 +45,7 @@
         </div>
 
         <div class="kuiCard__footer">
-          <p>Pull in data from the <a href="">Elasticsearch API</a>, <a href="">Beats</a>, <a href="">Logstash</a>.
+          <p class="kuiText">Pull in data from the <a href="">Elasticsearch API</a>, <a href="">Beats</a>, <a href="">Logstash</a>.
           Not sure how to do that? <a href="">Read this introduction.</a></p>
         </div>
       </div>
@@ -63,7 +66,7 @@
         </div>
 
         <div class="kuiCard__footer">
-          <p>Once you've added data, you'll need to <a href="#/management/kibana/index">configure an index pattern</a>
+          <p class="kuiText">Once you've added data, you'll need to <a href="#/management/kibana/index">configure an index pattern</a>
           for your data before using our Discover and Visualize applications.</p>
         </div>
       </div>
@@ -88,6 +91,7 @@
 
         <div class="kuiCard__footer">
           <p
+            class="kuiText"
             ng-if="gettingStarted.manageAndMonitorMessages"
             ng-bind-html="gettingStarted.manageAndMonitorMessages"></p>
         </div>
@@ -112,6 +116,6 @@
   </div>
 
   <div class="kuiViewContentItem kuiVerticalRhythm">
-    <p><a href="">Kibana documentation</a> is always available to help.</p>
+    <p class="kuiText"><a href="">Kibana documentation</a> is always available to help.</p>
   </div>
 </div>
