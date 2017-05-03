@@ -23,6 +23,7 @@ module.directive('filterEditor', function (indexPatterns, $http) {
       this.init = (filter) => {
         this.isPinned = _.get(filter, ['$state', 'store']) === 'globalState';
         this.isDisabled = filter.meta.disabled;
+        this.alias = filter.meta.alias;
         this.isEditingQueryDsl = false;
         this.queryDsl = _(filter)
           .omit(['meta', '$state'])
@@ -105,7 +106,7 @@ module.directive('filterEditor', function (indexPatterns, $http) {
       };
 
       this.save = () => {
-        const { indexPattern, field, operator, params, isPinned, isDisabled } = this;
+        const { indexPattern, field, operator, params, isPinned, isDisabled, alias } = this;
 
         let filter;
         if (this.showQueryDslEditor()) {
@@ -124,6 +125,7 @@ module.directive('filterEditor', function (indexPatterns, $http) {
           filter.meta.negate = operator.negate;
         }
         filter.meta.disabled = isDisabled;
+        filter.meta.alias = alias;
 
         return this.onSave({ filter, isPinned });
       };
