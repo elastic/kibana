@@ -885,7 +885,8 @@ body {
   line-height: 1.5;
   color: #191E23;
   border: 1px solid transparent;
-  /* 1 */ }
+  /* 1 */
+  background-color: transparent; }
   .theme-dark .kuiStaticInput {
     color: #cecece; }
 
