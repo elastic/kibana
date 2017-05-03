@@ -56,11 +56,10 @@ describe('ui/modals/confirm_modal_promise', function () {
         const cancelCallback = sinon.spy();
 
         promise.then(confirmCallback, cancelCallback);
+        $rootScope.$digest();
         const confirmButton = angular.element(document.body).find('[data-test-subj=confirmModalConfirmButton]');
 
-        $rootScope.$digest();
         confirmButton.click();
-
         expect(confirmCallback.called).to.be(true);
         expect(cancelCallback.called).to.be(false);
       });
@@ -72,9 +71,8 @@ describe('ui/modals/confirm_modal_promise', function () {
         const cancelCallback = sinon.spy();
         promise.then(confirmCallback, cancelCallback);
 
-        const noButton = angular.element(document.body).find('[data-test-subj=confirmModalCancelButton]');
-
         $rootScope.$digest();
+        const noButton = angular.element(document.body).find('[data-test-subj=confirmModalCancelButton]');
         noButton.click();
 
         expect(cancelCallback.called).to.be(true);
