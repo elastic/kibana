@@ -11,14 +11,6 @@
   .sidebar-well {
     background-color: @sidebar-well-bg;
   }
-  .vis-editor-agg-header-controls {
-    .btn-primary {
-        &.disabled,
-        &[disabled] {
-          background-color: @kibanaGray4;
-        }
-    }
-  }
 
   .sidebar-list {
     .navbar-nav.navbar-right {
@@ -54,8 +46,7 @@
     }
 
       .sidebar-item-title,
-      .sidebar-item-text,
-      .sidebar-item-button {
+      .sidebar-item-text {
         margin: 0;
         padding: 5px 10px;
         text-align: center;
@@ -76,45 +67,6 @@
 
       .sidebar-item-text {
         background: @sidebar-item-text-bg;
-      }
-
-      .sidebar-item-button {
-        font-size: inherit;
-        display: block;
-
-        &[disabled] {
-          opacity: 0.65;
-          cursor: default;
-        }
-
-        &.primary {
-          background-color: @btn-primary-bg;
-          color: @btn-primary-color;
-        }
-
-        &.info {
-          background-color: @btn-info-bg;
-          color: @btn-info-color
-        }
-
-        &.success {
-          background-color: @btn-success-bg;
-          color: @btn-success-color
-        }
-
-        &.warning {
-          background-color: @btn-warning-bg;
-          color: @btn-warning-color
-        }
-
-        &.danger {
-          background-color: @btn-danger-bg;
-          color: @btn-danger-color
-        }
-
-        &.default {
-          .button-variant(@btn-default-color; @btn-default-bg; @btn-default-border);
-        }
       }
   }
 

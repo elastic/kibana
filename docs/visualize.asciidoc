@@ -25,19 +25,29 @@ To create a visualization:
 . Click the *Create new visualization* button or the **+** button.
 . Choose the visualization type:
 +
+* *Basic charts*
 [horizontal]
-<<xy-chart,Line, Area and Bar chart>>:: Compare different series in X/Y charts.
-<<data-table,Data table>>:: Display the raw data of a composed aggregation.
-<<markdown-widget,Markdown widget>>:: Display free-form information or
-instructions.
-<<metric-chart,Metric>>:: Display a single number.
+<<xy-chart,Line&comma; Area and Bar charts>>:: Compare different series in X/Y charts.
+<<heatmap-chart,Heat maps>>:: Shade cells within a matrix.
 <<pie-chart,Pie chart>>:: Display each source's contribution to a total.
-<<tagcloud-chart,Tag cloud>>:: Display words as a cloud in which the size of the word correspond to its importance
+* *Data*
+[horizontal]
+<<data-table,Data table>>:: Display the raw data of a composed aggregation.
+<<metric-chart,Metric>>:: Display a single number.
+* *Maps*
+[horizontal]
 <<tilemap,Tile map>>:: Associate the results of an aggregation with geographic
 locations.
-Timelion:: Compute and combine data from multiple time series
+* *Time Series*
+[horizontal]
+<<timelion-getting-started,Timelion>>:: Compute and combine data from multiple time series
 data sets.
-
+<<time-series-visual-builder,Time Series Visual Builder>>:: Visualize time series data using pipeline aggregations.
+* *Other*
+[horizontal]
+<<tagcloud-chart,Tag cloud>>:: Display words as a cloud in which the size of the word correspond to its importance
+<<markdown-widget,Markdown widget>>:: Display free-form information or
+instructions.
 . Specify a search query to retrieve the data for your visualization:
 ** To enter new search criteria, select the index pattern for the indices that
 contain the data you want to visualize. This opens the visualization builder
@@ -54,7 +64,7 @@ from the saved search.
 
 . In the visualization builder, choose the metric aggregation for the
 visualization's Y axis:
-  
+
 * *Metric Aggregations*:
 
 * {es-ref}search-aggregations-metrics-valuecount-aggregation.html[count]
@@ -135,6 +145,8 @@ include::visualize/metric.asciidoc[]
 include::visualize/pie.asciidoc[]
 
 include::visualize/tilemap.asciidoc[]
+
+include::visualize/time-series-visual-builder.asciidoc[]
 
 include::visualize/tagcloud.asciidoc[]
 
