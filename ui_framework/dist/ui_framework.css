@@ -486,7 +486,8 @@ body {
   -webkit-justify-content: flex-start;
       -ms-flex-pack: start;
           justify-content: flex-start;
-  padding: 18px 0; }
+  padding: 18px 0;
+  text-align: center; }
 
 .kuiCard__descriptionTitle {
   font-size: 14px;
@@ -508,27 +509,32 @@ body {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
-  display: flex;
-  border: 1px solid #E0E0E0;
-  border-radius: 4px;
-  overflow: hidden;
-  margin-bottom: 18px; }
+  display: flex; }
 
 .kuiCardGroup__card {
   -webkit-box-flex: 1;
   -webkit-flex: 1 1 0%;
       -ms-flex: 1 1 0%;
-          flex: 1 1 0%;
-  border: none;
-  border-radius: 0; }
+          flex: 1 1 0%; }
   .kuiCardGroup__card + .kuiCardGroup__card {
-    border-left: 1px solid #E0E0E0; }
+    margin-left: 30px; }
 
 .kuiCardGroup__cardDescription {
   -webkit-box-flex: 1;
   -webkit-flex: 1 1 auto;
       -ms-flex: 1 1 auto;
           flex: 1 1 auto; }
+
+.kuiCardGroup--united {
+  border: 1px solid #E0E0E0;
+  border-radius: 4px;
+  overflow: hidden; }
+  .kuiCardGroup--united .kuiCardGroup__card {
+    border: none;
+    border-radius: 0; }
+  .kuiCardGroup--united .kuiCardGroup__card + .kuiCardGroup__card {
+    margin-left: 0;
+    border-left: 1px solid #E0E0E0; }
 
 /**
  * 1. If we use margins instead, columns get pushed to the next line.
@@ -2181,22 +2187,6 @@ body {
   margin: 20px;
   background-color: #FFF;
   line-height: 1.5; }
-
-.kuiNotice__header {
-  margin-bottom: 18px; }
-
-/**
- * 1. Override h1 styles.
- */
-.kuiNoticeTitle {
-  font-size: 22px;
-  margin-bottom: 12px;
-  margin-top: 0 !important;
-  /* 1 */ }
-
-.kuiNoticeText {
-  font-size: 14px;
-  margin-bottom: 12px; }
 
 .kuiPanel {
   border: 2px solid #E4E4E4; }
