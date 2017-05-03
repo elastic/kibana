@@ -21,8 +21,12 @@ module.directive('filterEditor', function (indexPatterns, $http) {
     bindToController: true,
     controller: function ($scope) {
       this.init = (filter) => {
-        this.customJson = _.omit(filter, ['meta', '$state']);
-        this.manualAdvancedMode = false;
+        this.isPinned = _.get(filter, ['$state', 'store']) === 'globalState';
+        this.isDisabled = filter.meta.disabled;
+        this.isEditingQueryDsl = false;
+        this.queryDsl = _(filter)
+          .omit(['meta', '$state'])
+          .cloneDeep();
 
         const { index, key, isNew } = filter.meta;
         this.indexPattern = indexPatterns.get(index)
@@ -88,9 +92,9 @@ module.directive('filterEditor', function (indexPatterns, $http) {
         .uniq()
         .value();
 
-      this.showAdvancedEditor = () => {
+      this.showQueryDslEditor = () => {
         const { type, isNew } = this.filter.meta;
-        return this.manualAdvancedMode || (!isNew && !simpleTypes.includes(type));
+        return this.isEditingQueryDsl || (!isNew && !simpleTypes.includes(type));
       };
 
       $scope.aceLoaded = function (editor) {
@@ -101,11 +105,13 @@ module.directive('filterEditor', function (indexPatterns, $http) {
       };
 
       this.save = () => {
-        let filter = Object.assign({}, this.filter, { ...this.customJson });
+        const { indexPattern, field, operator, params, isPinned, isDisabled } = this;
 
-        if (!this.showAdvancedEditor()) {
-          const { indexPattern, field, operator, params } = this;
-
+        let filter;
+        if (this.showQueryDslEditor()) {
+          const meta = _.pick(this.filter.meta, ['negate', 'index']);
+          filter = Object.assign(this.queryDsl, { meta });
+        } else {
           if (operator.type === 'match') {
             filter = buildPhraseFilter(field, params.value, indexPattern);
           } else if (operator.type === 'terms') {
@@ -115,11 +121,11 @@ module.directive('filterEditor', function (indexPatterns, $http) {
           } else if (operator.type === 'exists') {
             filter = buildExistsFilter(field, indexPattern);
           }
-
           filter.meta.negate = operator.negate;
         }
+        filter.meta.disabled = isDisabled;
 
-        return this.onSave({ filter });
+        return this.onSave({ filter, isPinned });
       };
 
       function getOperatorFromFilter(filter) {

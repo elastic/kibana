@@ -14,19 +14,19 @@
 
   <div class="kuiModalBody">
     <div
-      ng-show="filterEditor.showAdvancedEditor()"
+      ng-show="filterEditor.showQueryDslEditor()"
       json-input
       require-keys="true"
       ui-ace="{
         mode: 'json',
         onLoad: aceLoaded
       }"
-      ng-model="filterEditor.customJson"
+      ng-model="filterEditor.queryDsl"
     ></div>
 
     <div
       class="kuiFieldGroup kuiVerticalRhythm"
-      ng-hide="filterEditor.showAdvancedEditor()"
+      ng-hide="filterEditor.showQueryDslEditor()"
     >
       <div class="kuiFieldGroupSection kuiColumn kuiColumn--4">
         <ui-select
@@ -121,22 +121,62 @@
       </div>
     </div>
 
+    <div class="kuiHeaderBar kuiVerticalRhythm">
+      <div class="kuiHeaderBarSection">
+        <h2 class="kuiSubTitle">
+          More actions
+        </h2>
+      </div>
+    </div>
+
     <div class="kuiMenuButtonGroup kuiVerticalRhythm">
       <button
         class="kuiMenuButton kuiMenuButton--basic"
-        ng-hide="filterEditor.showAdvancedEditor()"
-        ng-click="filterEditor.manualAdvancedMode = true"
+        ng-hide="filterEditor.showQueryDslEditor()"
+        ng-click="filterEditor.isEditingQueryDsl = true"
       >
-        <span>Edit the actual DSL</span>
+        <span>Edit the query DSL</span>
       </button>
 
       <button
         class="kuiMenuButton kuiMenuButton--basic"
-        ng-show="filterEditor.manualAdvancedMode"
-        ng-click="filterEditor.manualAdvancedMode = false"
+        ng-show="filterEditor.isEditingQueryDsl"
+        ng-click="filterEditor.isEditingQueryDsl = false"
       >
         <span class="kuiMenuButton__icon kuiIcon fa-chevron-left"></span>
         <span>Back</span>
+      </button>
+
+      <button
+        class="kuiMenuButton kuiMenuButton--basic"
+        ng-hide="filterEditor.isPinned"
+        ng-click="filterEditor.isPinned = true"
+      >
+        <span>Pin across pages</span>
+      </button>
+
+      <button
+        class="kuiMenuButton kuiMenuButton--basic"
+        ng-show="filterEditor.isPinned"
+        ng-click="filterEditor.isPinned = false"
+      >
+        <span>Un-pin across pages</span>
+      </button>
+
+      <button
+        class="kuiMenuButton kuiMenuButton--basic"
+        ng-hide="filterEditor.isDisabled"
+        ng-click="filterEditor.isDisabled = true"
+      >
+        <span>Toggle to disabled</span>
+      </button>
+
+      <button
+        class="kuiMenuButton kuiMenuButton--basic"
+        ng-show="filterEditor.isDisabled"
+        ng-click="filterEditor.isDisabled = false"
+      >
+        <span>Toggle to enabled</span>
       </button>
     </div>
   </div>
