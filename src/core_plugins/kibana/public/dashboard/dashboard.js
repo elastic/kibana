@@ -22,7 +22,6 @@ import { UtilsBrushEventProvider } from 'ui/utils/brush_event';
 import { FilterBarClickHandlerProvider } from 'ui/filter_bar/filter_bar_click_handler';
 import { DashboardState } from './dashboard_state';
 import { notify } from 'ui/notify';
-import './panel/get_object_loaders_for_dashboard';
 import { documentationLinks } from 'ui/documentation_links/documentation_links';
 import { showCloneModal } from './top_nav/show_clone_modal';
 import { ESC_KEY_CODE } from 'ui_framework/services';

@@ -22,6 +22,10 @@ export default class UiExports {
       visEditorTypes: [
         'ui/vis/editors/default/default',
       ],
+      embeddableHandlers: [
+        'plugins/kibana/visualize/embeddable/visualize_embeddable_handler_provider',
+        'plugins/kibana/discover/embeddable/search_embeddable_handler_provider',
+      ],
     };
     this.urlBasePath = urlBasePath;
     this.exportConsumer = _.memoize(this.exportConsumer);
@@ -106,6 +110,7 @@ export default class UiExports {
       case 'visRequestHandlers':
       case 'visEditorTypes':
       case 'savedObjectTypes':
+      case 'embeddableHandlers':
       case 'fieldFormats':
       case 'fieldFormatEditors':
       case 'spyModes':

@@ -71,7 +71,7 @@ describe('dashboard panel', function () {
       expect($scope.error).to.be('Could not locate that visualization (id: foo1)');
       parentScope.$digest();
       const content = $el.find('.panel-content');
-      expect(content).to.have.length(0);
+      expect(content.children().length).to.be(0);
     });
   });
 
@@ -81,7 +81,7 @@ describe('dashboard panel', function () {
       expect($scope.error).not.to.be.ok();
       parentScope.$digest();
       const content = $el.find('.panel-content');
-      expect(content).to.have.length(1);
+      expect(content.children().length).to.be.greaterThan(0);
     });
   });
 });
