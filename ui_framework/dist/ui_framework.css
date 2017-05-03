@@ -1832,7 +1832,6 @@ body {
    * 1. Vertically center the assistance, regardless of its height.
    */
 .kuiLocalSearchAssistedInput__assistance {
-  display: none;
   position: absolute;
   right: 12px;
   top: 50%;
@@ -1841,7 +1840,11 @@ body {
           transform: translateY(-50%);
   /* 1 */ }
 
-.kuiLocalSearchInput:focus + .kuiLocalSearchAssistedInput__assistance {
+.kuiLocalSearchAssistedInput__assistanceLink {
+  display: none; }
+
+.kuiLocalSearchInput:focus + .kuiLocalSearchAssistedInput__assistance .kuiLocalSearchAssistedInput__assistanceLink,
+.kuiLocalSearchAssistedInput__assistanceLink:active {
   display: inherit; }
 
 .kuiLocalSearchSelect {
