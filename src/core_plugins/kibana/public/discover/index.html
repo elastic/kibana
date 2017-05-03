@@ -25,31 +25,37 @@
       >
         <div class="typeahead" kbn-typeahead="discover" on-select="fetch()">
           <div class="kuiLocalSearch">
-            <input
-              parse-query
-              input-focus
-              kbn-typeahead-input
-              ng-model="state.query"
-              placeholder="Search... e.g. status:200 AND extension:PHP"
-              aria-label="Search input"
-              type="text"
-              class="kuiLocalSearchInput"
-              ng-class="{'kuiLocalSearchInput-isInvalid': discoverSearch.$invalid}"
-            >
-            <a
-              class="kuiLink kuiLocalSearchHelp"
-              ng-href="{{queryDocLinks.luceneQuerySyntax}}"
-              target="_blank"
-            >
-              Uses lucene query syntax
-            </a>
+            <div class="kuiLocalSearchAssistedInput">
+              <input
+                parse-query
+                input-focus
+                kbn-typeahead-input
+                ng-model="state.query"
+                placeholder="Search... (e.g. status:200 AND extension:PHP)"
+                aria-label="Search input"
+                type="text"
+                class="kuiLocalSearchInput"
+                ng-class="{'kuiLocalSearchInput-isInvalid': discoverSearch.$invalid}"
+              >
+              <div class="kuiLocalSearchAssistedInput__assistance">
+                <p class="kuiText">
+                  <a
+                    class="kuiLink"
+                    ng-href="{{queryDocLinks.luceneQuerySyntax}}"
+                    target="_blank"
+                  >
+                    Uses lucene query syntax
+                  </a>
+                </p>
+              </div>
+            </div>
             <button
               type="submit"
               aria-label="Search"
               class="kuiLocalSearchButton"
               ng-disabled="discoverSearch.$invalid"
             >
-              <span class="fa fa-search" aria-hidden="true"></span>
+              <span class="kuiIcon fa-search" aria-hidden="true"></span>
             </button>
           </div>
           <kbn-typeahead-items></kbn-typeahead-items>
