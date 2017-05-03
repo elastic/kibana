@@ -2,7 +2,8 @@ import { uiModules } from 'ui/modules';
 import template from './getting_started.html';
 import './getting_started.less';
 import 'ui/storage';
-// import { gettingStartedRegistry } from 'ui/getting_started_registry';
+import 'ui/filters/trust_as_html';
+import { gettingStartedRegistry } from 'ui/getting_started_registry';
 
 import kibanaLogo from 'ui/images/logo-kibana-small.svg';
 import beatsLogo from 'ui/images/logo-beats-small.svg';
@@ -27,12 +28,8 @@ app.directive('gettingStarted', function ($injector) {
     controllerAs: 'gettingStarted',
     controller: class GettingStartedController {
       constructor() {
-        // this.manageAndMonitorMessages = gettingStartedRegistry.manageAndMonitorMessages;
-        this.manageAndMonitorMessages = [
-          'Manage your <a href="">users</a> and <a href="">roles</a>.',
-          'Use live <a href="">monitoring</a> for health checks.',
-          'Set up <a href="">watches</a> to keep tabs on your data.'
-        ].join(' ');
+        this.topMessage = gettingStartedRegistry.topMessage;
+        this.manageAndMonitorMessages = gettingStartedRegistry.manageAndMonitorMessages.join(' ');
 
         this.imageUrls = {
           kibanaLogo,
@@ -44,7 +41,6 @@ app.directive('gettingStarted', function ($injector) {
       }
 
       get hasManageAndMonitorMessages() {
-        // return this.manageAndMonitorMessages.length === 0;
         return this.manageAndMonitorMessages.length > 0;
       }
 
