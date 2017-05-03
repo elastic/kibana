@@ -7,12 +7,12 @@ import ChoroplethLayer from './choropleth_layer';
 import { truncatedColorMaps }  from 'ui/vislib/components/color/truncated_colormaps';
 import AggResponsePointSeriesTooltipFormatterProvider from './tooltip_formatter';
 import { ResizeCheckerProvider } from 'ui/resize_checker';
-import 'ui/vis_maps/lib/map_settings';
+import 'ui/vis_maps/lib/service_settings';
 
 
 const module = uiModules.get('kibana/choropleth', ['kibana']);
 module.controller('KbnChoroplethController', function ($scope, $element, Private, Notifier, getAppState,
-                                                       tilemapSettings, mapSettings, config) {
+                                                       serviceSettings, config) {
 
   const tooltipFormatter = Private(AggResponsePointSeriesTooltipFormatterProvider);
   const ResizeChecker = Private(ResizeCheckerProvider);
@@ -82,23 +82,21 @@ module.controller('KbnChoroplethController', function ($scope, $element, Private
 
   getAvailableVectorLayers()
     .then(function (layersFromService) {
-      // $scope.vis.params.vectorLayers = $scope.vis.params.defaults.vectorLayers.concat(layersFromService);
-      console.log(layersFromService);
+      //todo: disable play-button until these settings are loaded!
       $scope.vis.type.params.vectorLayers = $scope.vis.type.params.vectorLayers.concat(layersFromService);
       $scope.$apply();
     });
 
   async function makeKibanaMap() {
 
-    if (!tilemapSettings.isInitialized()) {
-      await tilemapSettings.loadSettings();
-    }
+    const tmsSettings = await serviceSettings.getTMSService();
+    console.log('settings...', tmsSettings);
 
-    const minMaxZoom = tilemapSettings.getMinMaxZoom(false);
+    const minMaxZoom = tmsSettings.getMinMaxZoom(false);
     kibanaMap = new KibanaMap(containerNode, minMaxZoom);
     kibanaMap.setZoomLevel(2);
-    const url = tilemapSettings.getUrl();
-    const options = tilemapSettings.getTMSOptions();
+    const url = tmsSettings.getUrl();
+    const options = tmsSettings.getTMSOptions();
     kibanaMap.setBaseLayer({ baseLayerType: 'tms', options: { url, ...options } });
     kibanaMap.addLegendControl();
     kibanaMap.addFitControl();
@@ -138,7 +136,7 @@ module.controller('KbnChoroplethController', function ($scope, $element, Private
         notify.warning(
           `Could not show ${event.mismatches.length} ${event.mismatches.length > 1 ? 'results' : 'result'} on the map.`
             + ` To avoid this, ensure that each term can be joined to a corresponding shape on that shape's join field.`
-            + ` Could not join terms: ${event.mismatches.join(',')}`
+          + ` Could not join following terms: ${event.mismatches.join(',')}`
         );
       }
     });
@@ -146,9 +144,14 @@ module.controller('KbnChoroplethController', function ($scope, $element, Private
   }
 
   async function getAvailableVectorLayers() {
-    await mapSettings.loadSettings();
-    console.log('thing!');
-    return mapSettings.getVectorLayers();
+    try {
+      const vectorLayers = await serviceSettings.getFileLayers();
+      return vectorLayers;
+    } catch (e) {
+      console.log('error getting vectorlayers', e);
+      //todo: handle
+      throw e;
+    }
   }
 
 

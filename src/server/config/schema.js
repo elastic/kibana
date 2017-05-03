@@ -162,6 +162,13 @@ module.exports = () => Joi.object({
   status: Joi.object({
     allowAnonymous: Joi.boolean().default(false)
   }).default(),
+  map: Joi.object({
+    manifestServiceUrl: Joi.when('$dev', {
+      is: true,
+      then: Joi.string().default('https://geo.elastic.co/manifest'),
+      otherwise: Joi.string().default('https://geo.elastic.co/manifest')
+    })
+  }).default(),
   tilemap: Joi.object({
     manifestServiceUrl: Joi.when('$dev', {
       is: true,
