@@ -1754,10 +1754,6 @@ body {
   display: flex;
   width: 100%; }
 
-/**
- * 1. em used for right padding so documentation link and query string
- *    won't overlap if the user increases their default browser font size
- */
 .kuiLocalSearchInput {
   -webkit-appearance: none;
      -moz-appearance: none;
@@ -1778,8 +1774,6 @@ body {
    *    We only want invalid inputs to appear invalid after the user has had a chance to interact
    *    with it.
    */
-  padding-right: 13em;
-  /* 1 */
   -webkit-box-flex: 1;
   -webkit-flex: 1 1 100%;
       -ms-flex: 1 1 100%;
@@ -1820,6 +1814,9 @@ body {
     border-left-color: #333333;
     border-right-color: #333333; }
 
+.kuiLocalLuceneSearchInput:focus {
+  padding-right: 13em; }
+
 .kuiLocalSearchAssistedInput {
   display: -webkit-box;
   display: -webkit-flex;
@@ -1835,6 +1832,7 @@ body {
    * 1. Vertically center the assistance, regardless of its height.
    */
 .kuiLocalSearchAssistedInput__assistance {
+  display: none;
   position: absolute;
   right: 12px;
   top: 50%;
@@ -1842,6 +1840,9 @@ body {
   -webkit-transform: translateY(-50%);
           transform: translateY(-50%);
   /* 1 */ }
+
+.kuiLocalSearchInput:focus + .kuiLocalSearchAssistedInput__assistance {
+  display: inherit; }
 
 .kuiLocalSearchSelect {
   -webkit-appearance: none;
