@@ -92,7 +92,7 @@ uiModules.get('kibana')
         if (number) {
           if (number.hasOwnProperty('number')) number = number.number;
           $scope.page = $scope.pages[number - 1] || $scope.pages[0];
-          self.updatePaginationCount(number);
+          self.updatePaginationLabel(number);
         }
       };
 
@@ -138,14 +138,25 @@ uiModules.get('kibana')
         }
 
         //set initial value of paginationCount
-        self.updatePaginationCount(count ? 1 : 0);
+        self.updatePaginationLabel(count ? 1 : 0);
       };
 
-      self.updatePaginationCount = function (number) {
-        $rootScope.paginationCount = 0;
-        for(let i = 0; i < number; i++) {
-          $rootScope.paginationCount = $rootScope.paginationCount + $scope.pages[i].length;
+      self.updatePaginationLabel = function (number) {
+      //if number is equal to 0 that means there is no hit
+        if (number === 0) {
+          $rootScope.paginationLabel = '0–0';
+          return;
         }
+
+        let firstItemIndex = 0;
+        const previousPageCount = number - 1;
+
+        for(let i = 0; i < previousPageCount; i++) {
+          firstItemIndex =  firstItemIndex + $scope.pages[i].length;
+        }
+
+        const lastItemIndex = firstItemIndex + $scope.pages[number - 1].length;
+        $rootScope.paginationLabel = (firstItemIndex + 1) + '–' + lastItemIndex;
         return;
       };
 
