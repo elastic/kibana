@@ -1,6 +1,6 @@
 import { format } from 'url';
 import { resolve } from 'path';
-import chromedriver from 'chromedriver';
+
 module.exports = function (grunt) {
   const platform = require('os').platform();
   const root = p => resolve(__dirname, '../../', p);
@@ -134,34 +134,6 @@ module.exports = function (grunt) {
         '--optimize.lazyPrebuild=true',
         '--optimize.bundleDir=optimize/testdev',
         ...kbnServerFlags,
-      ]
-    },
-
-    chromeDriver: {
-      options: {
-        wait: false,
-        ready: /Starting ChromeDriver/,
-        quiet: false,
-        failOnError: false
-      },
-      cmd: chromedriver.path,
-      args: [
-        `--port=${uiConfig.servers.webdriver.port}`,
-        '--url-base=wd/hub',
-      ]
-    },
-
-    devChromeDriver: {
-      options: {
-        wait: false,
-        ready: /Starting ChromeDriver/,
-        quiet: false,
-        failOnError: false
-      },
-      cmd: chromedriver.path,
-      args: [
-        `--port=${uiConfig.servers.webdriver.port}`,
-        '--url-base=wd/hub',
       ]
     },
 
