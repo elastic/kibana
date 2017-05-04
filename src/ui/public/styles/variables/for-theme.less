@@ -9,6 +9,18 @@
 
 @mark-bg: #fce571;
 
+// KUI coloring =====================================================================
+
+@globalColorBlue: #0096CC;
+@globalColorRed: #A30000;
+@globalColorLightestGray: #F5F5F5;
+@globalColorLightGray: #D9D9D9;
+@globalColorMediumGray: #999;
+@globalColorDarkGray: #666;
+@globalColorDarkestGray: #3F3F3F;
+@globalColorBlack: #000;
+@globalColorWhite: #FFF;
+
 
 // Sidebar =====================================================================
 @sidebar-color: @text-color;
@@ -335,5 +347,5 @@
 @global-nav-closed-width: 53px;
 @app-icon-height: 38px;
 @app-line-height: 24px;
-@app-links-wrapper-background: #3caed2;
-@app-links-active-background: #2f99c1;
+@app-links-wrapper-background: @globalColorDarkGray;
+@app-links-active-background: darken(@app-links-wrapper-background, 5%);

@@ -14,8 +14,11 @@
     }
   }
 
-  &:hover,
-  &.active {
+  &:hover {
+    background-color: darken(@app-links-active-background, 5%);
+  }
+
+  &.active, &:hover {
     background-color: @app-links-active-background;
 
     .global-nav-link__anchor {
@@ -34,10 +37,10 @@
   .global-nav-link__anchor {
     display: block;
     height: 100%;
-    color: #ebf7fa;
+    color: @globalColorWhite;
 
     &:focus {
-      color: @white;
+      color: @globalColorWhite;
     }
   }
 
