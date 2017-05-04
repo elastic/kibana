@@ -8,20 +8,25 @@ import { clientFunctions } from '../../lib/function_registry';
 socket.emit('getFunctionList');
 const getServerFunctions = new Promise((resolve) => socket.once('functionList', resolve));
 
+function interpret(AST) {
+  return getServerFunctions
+  .then(serverFunctionList =>
+    socketInterpreterProvider({
+      types: types,
+      functions: clientFunctions,
+      referableFunctions: serverFunctionList,
+      socket: socket,
+    }))
+  .then(interpretFn =>
+    interpretFn(AST));
+}
+
 export const expressionRun = (expression) => {
   return (/*dispatch, getState*/) => {
     const AST = fromExpression(expression);
-    getServerFunctions.then((serverFunctionList) => {
-      const interpret = socketInterpreterProvider({
-        types: types,
-        functions: clientFunctions,
-        referableFunctions: serverFunctionList,
-        socket: socket,
-      });
-      interpret(AST)
-      .then(renderable => {
-        console.log(renderable);
-      });
+    interpret(AST)
+    .then(renderable => {
+      console.log(renderable);
     });
   };
 };
