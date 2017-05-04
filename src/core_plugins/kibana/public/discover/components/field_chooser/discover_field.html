@@ -7,6 +7,7 @@
     tabindex="0"
     role="button"
     ng-click="toggleDetails(field)"
+    ng-keydown="onKeyDown($event)"
     ng-keyup="onKeyUp($event, field)"
     class="sidebar-item-title discover-sidebar-item"
   >
@@ -20,7 +21,7 @@
       ng-click="toggleDisplay(field)"
       ng-class="::field.display ? 'kuiButton--danger' : 'kuiButton--primary'"
       ng-bind="::field.display ? 'remove' : 'add'"
-      class="discover-sidebar-item-action kuiButton kuiButton--small kuiButton--primary"
+      class="discover-sidebar-item-action kuiButton kuiButton--small"
       data-test-subj="fieldToggle-{{::field.name}}"
     ></button>
   </div>

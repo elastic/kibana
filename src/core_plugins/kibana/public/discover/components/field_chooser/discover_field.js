@@ -93,6 +93,17 @@ app.directive('discoverField', function ($compile) {
         }
       };
 
+      $scope.onKeyDown = function onKeyUp(e) {
+        // We don't care if the user is actually interacting with a different element.
+        if (e.currentTarget !== e.target) {
+          return;
+        }
+
+        if ([13, 32].includes(e.keyCode)) {
+          e.preventDefault();
+        }
+      };
+
       $scope.onKeyUp = function onKeyUp(e, field) {
         // Support keyboard accessibility by toggling display on ENTER or SPACE keypress.
         if ([13, 32].includes(e.keyCode)) {
