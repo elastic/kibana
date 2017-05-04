@@ -8,7 +8,7 @@ import { clientFunctions } from '../../lib/function_registry';
 socket.emit('getFunctionList');
 const getServerFunctions = new Promise((resolve) => socket.once('functionList', resolve));
 
-function interpret(AST) {
+function interpret(AST, context) {
   return getServerFunctions
   .then(serverFunctionList =>
     socketInterpreterProvider({
@@ -18,8 +18,18 @@ function interpret(AST) {
       socket: socket,
     }))
   .then(interpretFn =>
-    interpretFn(AST));
+    interpretFn(AST, context));
 }
+
+
+socket.on('run', (msg) => {
+  console.log('got run', msg);
+
+  interpret(msg.ast, msg.context)
+  .then(resp => {
+    socket.emit('resp', { value: resp, id: msg.id });
+  });
+});
 
 export const expressionRun = (expression) => {
   return (/*dispatch, getState*/) => {

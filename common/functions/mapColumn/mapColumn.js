@@ -19,7 +19,7 @@ module.exports = new Fn({
       aliases: ['fn']
     },
     dest: {
-      types: ['string']
+      types: ['string', 'null']
     }
   },
   fn: (context, args) => {

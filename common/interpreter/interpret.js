@@ -109,6 +109,7 @@ module.exports = (config) => {
 
         // Otherwise return the final instance
         const argValue = _.last(val);
+        console.log(name, argValue);
         return cast(argValue, argDef.types);
       });
     });
