@@ -7,8 +7,6 @@ import detailsHtml from 'plugins/kibana/discover/components/field_chooser/lib/de
 import { uiModules } from 'ui/modules';
 const app = uiModules.get('apps/discover');
 
-
-
 app.directive('discoverField', function ($compile) {
   return {
     restrict: 'E',
@@ -92,6 +90,13 @@ app.directive('discoverField', function ($compile) {
           detailScope.$destroy();
           detailsElem.remove();
           $elem.removeClass('active');
+        }
+      };
+
+      $scope.onKeyUp = function onKeyUp(e, field) {
+        // Support keyboard accessibility by toggling display on ENTER or SPACE keypress.
+        if ([13, 32].includes(e.keyCode)) {
+          $scope.toggleDetails(field);
         }
       };
 

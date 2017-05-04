@@ -152,8 +152,9 @@
   padding-bottom: 0 !important; /* 1 */
   height: 32px;
 
-  &:hover {
-    .discover-sidebar-item-actions {
+  &:hover,
+  &:focus {
+    .discover-sidebar-item-action {
       opacity: 1;
     }
   }
@@ -168,10 +169,15 @@
   }
 
   /**
-   * 1. Only visually hide the actions, so that they're still accessible to screen readers.
+   * 1. Only visually hide the action, so that it's still accessible to screen readers.
+   * 2. When tabbed to, this element needs to be visible for keyboard accessibility.
    */
-  .discover-sidebar-item-actions {
+  .discover-sidebar-item-action {
     opacity: 0; /* 1 */
+
+    &:focus {
+      opacity: 1; /* 2 */
+    }
   }
 
 .discover-field-details {
