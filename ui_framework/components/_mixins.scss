@@ -109,6 +109,7 @@
  */
 @mixin formControlBase {
   appearance: none;
+  font-family: $globalFontFamily;
   padding: $globalFormControlPadding;
   font-size: $globalFontSize;
   font-weight: 400;
@@ -160,6 +161,7 @@
 /**
  * 1. Embedded SVG of fa-caret-down (https://github.com/encharm/Font-Awesome-SVG-PNG/blob/master/black/svg/caret-down.svg).
  * 2. Make room on right side for the caret.
+ * 3. Prevent Firefox from showing dotted line around text on focus.
  */
 @mixin select($borderRadius: $globalBorderRadius) {
   @include formControl($borderRadius);
@@ -168,6 +170,10 @@
   background-size: 14px;
   background-repeat: no-repeat;
   background-position: calc(100% - 8px); /* 2 */
+
+  &:-moz-focusring {
+    text-shadow: 0 0 0; /* 3 */
+  }
 
   @include darkTheme {
     background-image: url('data:image/svg+xml;utf8,<svg width="1792" height="1792" viewBox="0 0 1792 1792" xmlns="http://www.w3.org/2000/svg"><path d="M1408 704q0 26-19 45l-448 448q-19 19-45 19t-45-19l-448-448q-19-19-19-45t19-45 45-19h896q26 0 45 19t19 45z" fill="#CECECE"/></svg>'); /* 1 */
