@@ -1,5 +1,6 @@
 import _ from 'lodash';
 
+import { FilterManagerProvider } from 'ui/filter_manager';
 import {
   MAX_CONTEXT_SIZE,
   MIN_CONTEXT_SIZE,
@@ -7,7 +8,9 @@ import {
 } from './constants';
 
 
-export function QueryParameterActionsProvider() {
+export function QueryParameterActionsProvider(Private) {
+  const filterManager = Private(FilterManagerProvider);
+
   const setPredecessorCount = (state) => (predecessorCount) => (
     state.queryParameters.predecessorCount = clamp(
       MIN_CONTEXT_SIZE,
@@ -43,7 +46,13 @@ export function QueryParameterActionsProvider() {
     )
   );
 
+  const addTermsFilter = (state) => (field, values, operation) => {
+    const { queryParameters: { indexPatternId } } = state;
+    filterManager.add(field, values, operation, indexPatternId);
+  };
+
   return {
+    addTermsFilter,
     increasePredecessorCount,
     increaseSuccessorCount,
     setPredecessorCount,

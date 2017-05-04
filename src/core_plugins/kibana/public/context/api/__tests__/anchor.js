@@ -8,23 +8,25 @@ import { fetchAnchorProvider } from '../anchor';
 
 
 describe('context app', function () {
-  let fetchAnchor;
-  let SearchSourceStub;
-
-  beforeEach(ngMock.module('kibana', function createServiceStubs($provide) {
-    $provide.value('courier', createCourierStub());
-  }));
-
-  beforeEach(ngMock.inject(function createPrivateStubs(Private) {
-    SearchSourceStub = createSearchSourceStubProvider([
-      { _id: 'hit1' },
-    ]);
-    Private.stub(SearchSourceProvider, SearchSourceStub);
-
-    fetchAnchor = Private(fetchAnchorProvider);
-  }));
+  beforeEach(ngMock.module('kibana'));
 
   describe('function fetchAnchor', function () {
+    let fetchAnchor;
+    let SearchSourceStub;
+
+    beforeEach(ngMock.module(function createServiceStubs($provide) {
+      $provide.value('courier', createCourierStub());
+    }));
+
+    beforeEach(ngMock.inject(function createPrivateStubs(Private) {
+      SearchSourceStub = createSearchSourceStubProvider([
+        { _id: 'hit1' },
+      ]);
+      Private.stub(SearchSourceProvider, SearchSourceStub);
+
+      fetchAnchor = Private(fetchAnchorProvider);
+    }));
+
     it('should use the `fetch` method of the SearchSource', function () {
       const searchSourceStub = new SearchSourceStub();
 

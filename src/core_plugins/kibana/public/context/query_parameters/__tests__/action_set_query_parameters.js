@@ -1,13 +1,25 @@
 import expect from 'expect.js';
+import ngMock from 'ng_mock';
+
+import { FilterManagerProvider } from 'ui/filter_manager';
 
 import { createStateStub } from './_utils';
 import { QueryParameterActionsProvider } from '../actions';
 
 
 describe('context app', function () {
+  beforeEach(ngMock.module('kibana'));
+
   describe('action setQueryParameters', function () {
+    let setQueryParameters;
+
+    beforeEach(ngMock.inject(function createPrivateStubs(Private) {
+      Private.stub(FilterManagerProvider, {});
+
+      setQueryParameters = Private(QueryParameterActionsProvider).setQueryParameters;
+    }));
+
     it('should update the queryParameters with valid properties from the given object', function () {
-      const { setQueryParameters } = new QueryParameterActionsProvider();
       const state = createStateStub({
         queryParameters: {
           additionalParameter: 'ADDITIONAL_PARAMETER',
@@ -39,7 +51,6 @@ describe('context app', function () {
     });
 
     it('should ignore invalid properties', function () {
-      const { setQueryParameters } = new QueryParameterActionsProvider();
       const state = createStateStub();
 
       setQueryParameters(state)({
