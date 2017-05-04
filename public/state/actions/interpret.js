@@ -8,6 +8,7 @@ import { clientFunctions } from '../../lib/function_registry';
 socket.emit('getFunctionList');
 const getServerFunctions = new Promise((resolve) => socket.once('functionList', resolve));
 
+// Use the above promise to seed the interpreter with the functions it can defer to
 function interpret(AST, context) {
   return getServerFunctions
   .then(serverFunctionList =>
@@ -21,10 +22,7 @@ function interpret(AST, context) {
     interpretFn(AST, context));
 }
 
-
 socket.on('run', (msg) => {
-  console.log('got run', msg);
-
   interpret(msg.ast, msg.context)
   .then(resp => {
     socket.emit('resp', { value: resp, id: msg.id });

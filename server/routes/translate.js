@@ -8,7 +8,6 @@ export function translate(server) {
     method: 'GET',
     path: '/api/canvas/ast',
     handler: function (request, reply) {
-      console.log('word');
       if (!request.query.expression) return reply({ error: '"expression" query is required' }).code(400);
       reply(fromExpression(request.query.expression));
     }

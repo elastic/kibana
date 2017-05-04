@@ -6,12 +6,6 @@ import chrome from 'ui/chrome';
 const basePath = chrome.getBasePath();
 export const socket = io(undefined, { path: `${basePath}/socket.io` });
 
-socket.emit('getFunctionList');
-
 socket.on('getFunctionList', () => {
   socket.emit('functionList', map(clientFunctions, 'name'));
-});
-
-socket.on('functionList', (msg) => {
-  console.log(msg);
 });

@@ -1,29 +1,10 @@
 import React from 'react';
-import { clientFunctions } from '../../lib/function_registry';
-// Now we need some way to find out about server functions?
-import { types } from '../../lib/type_registry';
-import interpretProvider from '../../../common/interpreter/interpret';
 
-const interpret = interpretProvider({
-  functions: clientFunctions,
-  types: types,
-  onFunctionNotFound: (ast, context) => {
-    console.log(ast, context);
-  }
-});
-
+// TODO: This is currently my dumping ground for things that side effective
+// This will be cleaned up before shipping
 import '../../state/actions/interpret';
 
 export function App() {
-  interpret({
-    type: 'expression',
-    chain: [{
-      type: 'function',
-      function: 'clientdata',
-      arguments: {}
-    }]
-  }).then(console.log).catch(console.log);
-
   return (
     <div>
       Foo
