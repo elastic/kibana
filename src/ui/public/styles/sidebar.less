@@ -33,9 +33,11 @@
       border-top-color: @sidebar-border;
       font-size: @sidebar-item-font-size;
 
-      .active {
+      &.active {
         background-color: @sidebar-active-bg !important;
         color: @sidebar-active-color;
+        border-top: solid 1px @globalColorMediumGray;
+        border-bottom: solid 1px @globalColorMediumGray;
 
         &:hover,
         &:hover .text-muted {

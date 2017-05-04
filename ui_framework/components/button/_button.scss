@@ -156,3 +156,14 @@
     text-decoration: underline;
   }
 }
+
+.kuiButton--secondary {
+  color: $globalLinkColor !important; /* 2 */
+  border: solid 1px $globalColorBlue;
+  background-color: $globalColorWhite;
+
+  @include kuiButtonHoverAndActive {
+    color: darken($globalLinkColor, 10%) !important; /* 1 */
+    border: solid 1px darken($globalColorBlue, 10%);
+  }
+}

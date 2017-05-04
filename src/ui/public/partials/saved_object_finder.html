@@ -26,7 +26,7 @@
 
       <div class="kuiButtonGroup">
         <button
-          class="kuiButton kuiButton--basic"
+          class="kuiButton kuiButton--primary"
           ng-if="onAddNew"
           ng-click="onAddNew()"
           data-test-subj="addNewSavedObjectLink"
@@ -35,7 +35,7 @@
         </button>
 
         <button
-          class="kuiButton kuiButton--basic"
+          class="kuiButton kuiButton--secondary"
           ng-if="!useLocalManagement"
           ng-click="finder.manageObjects(finder.properties.name)"
         >
