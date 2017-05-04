@@ -1,6 +1,9 @@
 <div class="kuiViewContent gettingStartedContent">
 
-  <div class="kuiBar gettingStartedOptOutContent">
+  <div
+    ng-if="!gettingStarted.hasOptedOut"
+    class="kuiBar gettingStartedOptOutContent"
+  >
     <div class="kuiBarSection">
       <p class="kuiText kuiSubduedText">
         <a
@@ -71,7 +74,13 @@
         </div>
 
         <div class="kuiCard__footer">
-          <p class="kuiText">Once you've added data, you'll need to <a href="#/management/kibana/index">configure an index pattern</a>
+          <p class="kuiText">Once you've added data, you'll need to
+          <a
+            href="#/management/kibana/index"
+            ng-click="gettingStarted.recordOptOut()"
+          >
+            configure an index pattern
+          </a>
           for your data before using our Discover and Visualize applications.</p>
         </div>
       </div>

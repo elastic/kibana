@@ -1,19 +1,11 @@
 import routes from 'ui/routes';
-import uiChrome from 'ui/chrome';
 import template from './getting_started_route.html';
 import './components/getting_started';
+import { GETTING_STARTED_ROUTE } from './lib/constants';
 
 routes
-.when('/management/kibana/getting_started', {
+.when(GETTING_STARTED_ROUTE, {
   template: template,
-  resolve: {
-    navDisplay: () => {
-      const isSkipped = true;
-      if (isSkipped) {
-        uiChrome.setVisible(true);
-      }
-    }
-  },
   controllerAs: 'gettingStartedRoute',
   controller: class GettingStartedRouteController {
     constructor() {

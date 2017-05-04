@@ -7,7 +7,7 @@ const notify = new Notifier({
   location: 'Index Patterns'
 });
 
-module.exports = function (opts) {
+export function loadDefault(opts) {
   opts = opts || {};
   const whenMissingRedirectTo = opts.whenMissingRedirectTo || null;
   let defaultRequiredToasts = null;
@@ -19,6 +19,11 @@ module.exports = function (opts) {
 
     return getIds()
     .then(function (patterns) {
+      const indexPatternsExist = Array.isArray(patterns) && patterns.length > 0;
+      if (!indexPatternsExist) {
+        return;
+      }
+
       let defaultId = config.get('defaultIndex');
       let defined = !!defaultId;
       const exists = _.contains(patterns, defaultId);
@@ -55,4 +60,4 @@ module.exports = function (opts) {
   );
 
 
-};
+}

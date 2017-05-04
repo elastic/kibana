@@ -1,9 +1,9 @@
 import { uiModules } from 'ui/modules';
-import template from './getting_started.html';
-import './getting_started.less';
+import uiChrome from 'ui/chrome';
 import 'ui/storage';
 import 'ui/filters/trust_as_html';
 import { gettingStartedRegistry } from 'ui/getting_started_registry';
+import { GETTING_STARTED_OPT_OUT } from '../../lib/constants';
 
 import kibanaLogo from 'ui/images/logo-kibana-small.svg';
 import beatsLogo from 'ui/images/logo-beats-small.svg';
@@ -11,9 +11,10 @@ import logstashLogo from 'ui/images/logo-logstash-small.svg';
 import dashboardIcon from 'ui/images/icon-dashboard.svg';
 import shieldIcon from 'ui/images/icon-shield.svg';
 
-const app = uiModules.get('kibana');
+import template from './getting_started.html';
+import './getting_started.less';
 
-const GETTING_STARTED_OPT_OUT = 'kibana.isGettingStartedOptedOut';
+const app = uiModules.get('kibana');
 
 app.directive('gettingStarted', function ($injector) {
 
@@ -44,8 +45,13 @@ app.directive('gettingStarted', function ($injector) {
         return this.manageAndMonitorMessages.length > 0;
       }
 
+      get hasOptedOut() {
+        return localStorageService.get(GETTING_STARTED_OPT_OUT) || false;
+      }
+
       recordOptOut = () => {
         localStorageService.set(GETTING_STARTED_OPT_OUT, true);
+        uiChrome.setVisible(true);
       }
     }
   };
