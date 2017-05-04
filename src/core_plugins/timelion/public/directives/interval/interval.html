@@ -1,8 +1,13 @@
-<input input-focus ng-show="interval === 'other'"
-  class="form-control timelion-interval"
-  ng-model="otherInterval">
+<input
+  input-focus
+  ng-show="interval === 'other'"
+  ng-class="{'form-control form-group': !inHeader, 'kuiLocalSearchInput kuiLocalSearchInput--secondary timelion-interval-custom ': inHeader}"
+  ng-model="otherInterval"
+>
 
-<select class="form-control timelion-interval timelion-interval--select"
-  ng-options="i for i in intervalOptions"
-  ng-class="{'timelion-interval-other': interval == 'other'}"
-  ng-model="interval"></select>
+<select
+  class="timelion-interval-presets"
+  ng-options="intervalOption for intervalOption in intervalOptions"
+  ng-class="{'form-control': !inHeader, 'kuiLocalSearchSelect': inHeader, 'timelion-interval-presets-compact': interval === 'other'}"
+  ng-model="interval"
+></select>
