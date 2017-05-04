@@ -52,10 +52,14 @@
   border-radius: 0;
 }
 
+/**
+ * 1. Override inherited styles.
+ */
 .kuiLocalSearchButton {
   width: 43px;
   height: $localSearchHeight;
   font-size: $globalFontSize;
+  line-height: 0; /* 1 */
   color: $localSearchButtonTextColor;
   background-color: $localSearchButtonBackgroundColor;
   border: 0;
