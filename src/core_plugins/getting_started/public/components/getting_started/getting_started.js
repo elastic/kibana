@@ -29,9 +29,14 @@ app.directive('gettingStarted', function ($injector) {
     controllerAs: 'gettingStarted',
     controller: class GettingStartedController {
       constructor() {
+        if (this.hasOptedOut) {
+          uiChrome.setVisible(true);
+        } else {
+          uiChrome.setVisible(false);
+        }
+
         this.topMessage = gettingStartedRegistry.topMessage;
         this.manageAndMonitorMessages = gettingStartedRegistry.manageAndMonitorMessages.join(' ');
-
         this.imageUrls = {
           kibanaLogo,
           beatsLogo,
