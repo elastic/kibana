@@ -14,7 +14,8 @@
             }
           }
         },
-        "number_of_replicas": "0"
+        "number_of_replicas": "0",
+        "mapping.single_type": false
       }
     },
     "mappings": {
@@ -792,7 +793,8 @@
             }
           }
         },
-        "number_of_replicas": "0"
+        "number_of_replicas": "0",
+        "mapping.single_type": false
       }
     },
     "mappings": {
@@ -1570,7 +1572,8 @@
             }
           }
         },
-        "number_of_replicas": "0"
+        "number_of_replicas": "0",
+        "mapping.single_type": false
       }
     },
     "mappings": {

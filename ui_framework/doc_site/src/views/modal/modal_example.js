@@ -1,5 +1,7 @@
 import React from 'react';
 
+import { renderToHtml } from '../../services';
+
 import {
   GuideDemo,
   GuidePage,
@@ -7,38 +9,55 @@ import {
   GuideSectionTypes,
 } from '../../components';
 
-const modalHtml = require('./modal.html');
-const modalOverlayHtml = require('./modal_overlay.html');
-const modalOverlayJs = require('raw!./modal_overlay.js');
+import {
+  KuiConfirmModal,
+} from '../../../../components';
+
+import { ConfirmModalExample } from './confirm_modal_example';
+const showConfirmModalSource = require('!!raw!./confirm_modal_example');
+const showConfirmModalHtml = renderToHtml(ConfirmModalExample);
+
+const kuiConfirmModalSource = require('!!raw!../../../../components/modal/confirm_modal');
+const kuiConfirmModalHtml = renderToHtml(KuiConfirmModal);
 
 export default props => (
   <GuidePage title={props.route.name}>
+
     <GuideSection
-      title="Modal"
+      title="Confirmation Modal"
       source={[{
+        type: GuideSectionTypes.JS,
+        code: kuiConfirmModalSource,
+      }, {
         type: GuideSectionTypes.HTML,
-        code: modalHtml,
+        code: kuiConfirmModalHtml,
       }]}
     >
-      <GuideDemo
-        html={modalHtml}
-      />
+      <GuideDemo>
+          <KuiConfirmModal
+            onCancel={() => {}}
+            onConfirm={() => {}}
+            confirmButtonText="Confirm"
+            cancelButtonText="Cancel"
+            message="This is a confirmation modal"
+            title="Confirm Modal Title"
+          />
+      </GuideDemo>
     </GuideSection>
 
     <GuideSection
-      title="ModalOverlay"
+      title="Pop up Confirmation Modal with Overlay"
       source={[{
-        type: GuideSectionTypes.HTML,
-        code: modalOverlayHtml,
-      }, {
         type: GuideSectionTypes.JS,
-        code: modalOverlayJs,
+        code: showConfirmModalSource,
+      }, {
+        type: GuideSectionTypes.HTML,
+        code: showConfirmModalHtml,
       }]}
     >
-      <GuideDemo
-        html={modalOverlayHtml}
-        js={modalOverlayJs}
-      />
+      <GuideDemo>
+        <ConfirmModalExample />
+      </GuideDemo>
     </GuideSection>
   </GuidePage>
 );

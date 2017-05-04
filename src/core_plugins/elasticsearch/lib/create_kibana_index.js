@@ -7,6 +7,7 @@ module.exports = function (server, mappings) {
       settings: {
         number_of_shards: 1,
         'index.mapper.dynamic': false,
+        'index.mapping.single_type': false
       },
       mappings
     }
