@@ -79,7 +79,7 @@ export function VislibLibLayoutLayoutProvider(Private) {
       const width = el.width();
       const height = el.height();
       axis.destroy();
-      el.find('.chart-title svg').remove();
+      $(this.el).find('.chart-title svg').remove();
       el.css('visibility', '');
 
 
