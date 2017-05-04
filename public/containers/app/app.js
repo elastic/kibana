@@ -12,6 +12,8 @@ const interpret = interpretProvider({
   }
 });
 
+import '../../state/actions/interpret';
+
 export function App() {
   interpret({
     type: 'expression',
