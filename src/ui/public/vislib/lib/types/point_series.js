@@ -1,5 +1,5 @@
 import _ from 'lodash';
-
+import { RangeKeyProvider } from 'ui/agg_types/buckets/range_key';
 export function VislibTypesPointSeries() {
 
   const createSerieFromParams = (cfg, seri) => {
@@ -177,6 +177,7 @@ export function VislibTypesPointSeries() {
     }),
 
     heatmap: (cfg, data) => {
+      const RangeKey = new RangeKeyProvider();
       const defaults = create()(cfg, data);
       const seriesLimit = 25;
       const hasCharts = defaults.charts.length;
@@ -189,11 +190,21 @@ export function VislibTypesPointSeries() {
         rangePadding: 0,
         rangeOuterPadding: 0
       };
+      const labels = data.getLabels().map(val => {
+        if (val.includes(' to ')) {
+          const [ from, to ] = val.split(' to ');
+          val = new RangeKey({
+            from: from,
+            to: to
+          });
+        }
+        return val;
+      });
       defaults.valueAxes.push({
         id: 'CategoryAxis-2',
         type: 'category',
         position: 'left',
-        values: data.getLabels(),
+        values: labels,
         scale: {
           inverted: true
         },

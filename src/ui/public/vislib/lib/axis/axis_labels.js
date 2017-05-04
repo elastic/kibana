@@ -126,11 +126,6 @@ export function VislibAxisLabelsProvider() {
             .attr('style', function () {
               const currentStyle = d3.select(this).attr('style');
               return `${currentStyle} font-size: ${config.get('labels.fontSize')};`;
-            })
-            .text(function (d) {
-              // fixes issue with missing labels for range term agg on Y axis
-              if (this.innerHTML === ' to ') return d;
-              return this.innerHTML;
             });
 
           if (!config.get('labels.show')) selection.selectAll('text').attr('style', 'display: none;');
