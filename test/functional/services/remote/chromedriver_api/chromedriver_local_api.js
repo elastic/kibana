@@ -7,7 +7,7 @@ import { path as CHROMEDRIVER_EXEC } from 'chromedriver';
 
 import { ping } from './ping';
 import { ChromedriverApi } from './chromedriver_api';
-const START_TIMEOUT = 2000;
+const START_TIMEOUT = 15000;
 const PING_INTERVAL = 150;
 
 export function createLocalChromedriverApi(log, url) {
