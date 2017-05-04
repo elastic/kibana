@@ -1,6 +1,6 @@
 // All types must be universal and be castable on the client or on the server
-const _ = require('lodash');
-const getType = require('./get_type');
+import _ from 'lodash';
+import { getType } from './get_type';
 
 // TODO: Currently all casting functions must be syncronous.
 
@@ -24,7 +24,7 @@ module.exports = function Type(config) {
     const typeName = getType(node);
     if (typeName !== this.name) throw new Error(`Casting source type '${typeName}' does not match current type '${this.name}'`);
     if (!this.castsTo(types)) throw new Error(`Can not cast '${typeName}' to any of ${types.join(', ')}`);
-    return fns.to[castableTypeNames('to')[0]](node);
+    return fns.to[castableTypeNames(types, 'to')[0]](node);
   };
 
   this.from = (node) => {

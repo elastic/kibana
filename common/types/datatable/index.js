@@ -10,5 +10,14 @@ module.exports = new Type({
         columns: []
       };
     }
+  },
+  to: {
+    render: (datatable) => {
+      return {
+        type: 'render',
+        as: 'table',
+        value: datatable
+      };
+    }
   }
 });

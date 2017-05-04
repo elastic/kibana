@@ -1,6 +1,6 @@
 const _ = require('lodash');
 const castProvider = require('./cast');
-const getType = require('../types/get_type');
+import { getType } from '../types/get_type';
 
 module.exports = (config) => {
   const cast = castProvider(config.types);

@@ -7,6 +7,13 @@ module.exports = new Type({
     number: (n) => String(n)
   },
   to: {
-    number: (n) => Number(n)
+    number: (n) => Number(n),
+    render: (input) => {
+      return {
+        type: 'render',
+        as: 'markdown',
+        value: input
+      };
+    }
   }
 });
