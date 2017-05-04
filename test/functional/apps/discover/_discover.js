@@ -16,13 +16,13 @@ export default function ({ getService, getPageObjects }) {
 
     before(async function () {
       // delete .kibana index and update configDoc
+      await esArchiver.load('discover');
+
+      log.debug('load kibana index with default index pattern');
       await kibanaServer.uiSettings.replace({
         'dateFormat:tz':'UTC',
         'defaultIndex':'logstash-*'
       });
-
-      log.debug('load kibana index with default index pattern');
-      await esArchiver.load('discover');
 
       // and load a set of makelogs data
       await esArchiver.loadIfNeeded('logstash_functional');

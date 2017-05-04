@@ -21,13 +21,13 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
   class DashboardPage {
     async initTests() {
       const logstash = esArchiver.loadIfNeeded('logstash_functional');
+
+      log.debug('load kibana index with visualizations');
+      await esArchiver.load('dashboard');
       await kibanaServer.uiSettings.replace({
         'dateFormat:tz':'UTC',
         'defaultIndex':'logstash-*'
       });
-
-      log.debug('load kibana index with visualizations');
-      await esArchiver.load('dashboard');
 
       await PageObjects.common.navigateToApp('dashboard');
       return logstash;

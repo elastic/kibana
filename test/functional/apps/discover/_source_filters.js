@@ -12,13 +12,13 @@ export default function ({ getService, getPageObjects }) {
       const toTime = '2015-09-23 18:31:44.000';
 
       // delete .kibana index and update configDoc
-      return kibanaServer.uiSettings.replace({
-        'dateFormat:tz': 'UTC',
-        'defaultIndex':'logstash-*'
-      })
+      return esArchiver.load('visualize_source-filters')
       .then(function loadkibanaIndexPattern() {
         log.debug('load kibana index with default index pattern');
-        return esArchiver.load('visualize_source-filters');
+        return kibanaServer.uiSettings.replace({
+          'dateFormat:tz': 'UTC',
+          'defaultIndex':'logstash-*'
+        });
       })
       // and load a set of makelogs data
       .then(function loadIfEmptyMakelogs() {

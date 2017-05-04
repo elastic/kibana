@@ -13,11 +13,11 @@ export default function ({ getService, loadTestFile }) {
 
       log.debug('Starting visualize before method');
       const logstash = esArchiver.loadIfNeeded('logstash_functional');
-      // delete .kibana index and update configDoc
-      return kibanaServer.uiSettings.replace({ 'dateFormat:tz':'UTC', 'defaultIndex':'logstash-*' })
+      log.debug('load .kibana index with visualize test data');
+      return esArchiver.load('visualize')
       .then(function loadkibanaIndexPattern() {
-        log.debug('load kibana index with default index pattern');
-        return esArchiver.load('visualize');
+        log.debug('make sure UTC timezone and default index pattern are set in .kibana');
+        return kibanaServer.uiSettings.replace({ 'dateFormat:tz':'UTC', 'defaultIndex':'logstash-*' });
       })
       // wait for the logstash data load to finish if it hasn't already
       .then(function () {
