@@ -2,6 +2,9 @@
  * 1. Enforce pointer when there's no href.
  */
 /**
+ * 1. Override Bootstrap styles.
+ */
+/**
  * 1. Links can't have a disabled attribute, so they can't support :disabled.
  */
 /**
@@ -536,6 +539,22 @@ body {
   .kuiCardGroup--united .kuiCardGroup__card + .kuiCardGroup__card {
     margin-left: 0;
     border-left: 1px solid #E0E0E0; }
+
+.kuiCollapseButton {
+  -webkit-appearance: none;
+     -moz-appearance: none;
+          appearance: none;
+  background-color: transparent;
+  padding: 4px;
+  border: none;
+  line-height: 1;
+  font-size: 16px;
+  color: #2d2d2d !important;
+  /* 1 */
+  cursor: pointer;
+  opacity: 0.35; }
+  .kuiCollapseButton:hover {
+    opacity: 1; }
 
 /**
  * 1. If we use margins instead, columns get pushed to the next line.
@@ -1474,9 +1493,6 @@ body {
   .theme-dark .kuiLocalDropdown {
     background-color: #525252; }
 
-/**
- * 1. Override Bootstrap styles.
- */
 .kuiLocalDropdownCloseButton {
   -webkit-appearance: none;
      -moz-appearance: none;
@@ -1484,14 +1500,15 @@ body {
   background-color: transparent;
   padding: 4px;
   border: none;
-  position: absolute;
-  top: 1px;
-  right: 5px;
+  line-height: 1;
   font-size: 16px;
   color: #2d2d2d !important;
   /* 1 */
   cursor: pointer;
-  opacity: 0.35; }
+  opacity: 0.35;
+  position: absolute;
+  top: 1px;
+  right: 5px; }
   .kuiLocalDropdownCloseButton:hover {
     opacity: 1; }
   .theme-dark .kuiLocalDropdownCloseButton {
@@ -1867,10 +1884,15 @@ body {
     background-image: url('data:image/svg+xml;utf8,<svg width="1792" height="1792" viewBox="0 0 1792 1792" xmlns="http://www.w3.org/2000/svg"><path d="M1408 704q0 26-19 45l-448 448q-19 19-45 19t-45-19l-448-448q-19-19-19-45t19-45 45-19h896q26 0 45 19t19 45z" fill="#CECECE"/></svg>');
     /* 1 */ }
 
+/**
+ * 1. Override inherited styles.
+ */
 .kuiLocalSearchButton {
   width: 43px;
   height: 30px;
   font-size: 14px;
+  line-height: 0;
+  /* 1 */
   color: #ffffff;
   background-color: #9c9c9c;
   border: 0;

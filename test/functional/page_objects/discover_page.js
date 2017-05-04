@@ -222,8 +222,7 @@ export function DiscoverPageProvider({ getService, getPageObjects }) {
     }
 
     toggleSidebarCollapse() {
-      return getRemote().findDisplayedByCssSelector('.sidebar-collapser .chevron-cont')
-      .click();
+      return testSubjects.find('collapseSideBarButton').click();
     }
 
     getAllFieldNames() {
