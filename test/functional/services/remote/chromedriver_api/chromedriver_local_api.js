@@ -33,7 +33,7 @@ export function createLocalChromedriverApi(log, url) {
 
       proc.on('exit', (code) => {
         if (!api.isStopped() || code > 0) {
-          api.emit('error', new Error(`Chromedriver exitted with code ${code}`));
+          api.emit('error', new Error(`Chromedriver exited with code ${code}`));
         }
       });
 

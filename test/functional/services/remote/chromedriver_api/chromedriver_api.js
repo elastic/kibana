@@ -12,15 +12,6 @@ const noop = () => {};
  *  @type {Object}
  */
 export class ChromedriverApi extends EventEmitter {
-
-  /**
-   *  Create an instance of the ChromedriverApi for a url.
-   *
-   *  @param  {ToolingLog} log
-   *  @param  {Lifecycle} lifecycle
-   *  @param  {String} url
-   *  @return {Promise<ChromedriverApi>}
-   */
   static async factory(log, url) {
     return (await ping(url))
       ? createRemoteChromedriverApi(log, url)
