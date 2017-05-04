@@ -1,17 +1,18 @@
 import { initLeadfootCommand } from './leadfoot_command';
 import { createRemoteInterceptors } from './interceptors';
+import { ChromedriverApi } from './chromedriver_api';
 
 export async function RemoteProvider({ getService }) {
   const lifecycle = getService('lifecycle');
   const config = getService('config');
   const log = getService('log');
 
-  const { command } = await initLeadfootCommand({
-    log,
-    lifecycle,
-    tunnelConfig: config.get('servers.webdriver'),
-  });
+  const chromedriverApi = await ChromedriverApi.factory(log, config.get('chromedriver.url'));
+  lifecycle.on('cleanup', async () => await chromedriverApi.stop());
 
+  await chromedriverApi.start();
+
+  const { command } = await initLeadfootCommand({ log, chromedriverApi });
   const interceptors = createRemoteInterceptors(command);
 
   log.info('Remote initialized');
