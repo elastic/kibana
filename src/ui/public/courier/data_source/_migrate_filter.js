@@ -3,9 +3,8 @@ import _ from 'lodash';
 export function migrateFilter(filter) {
   if (filter.match) {
     const fieldName = Object.keys(filter.match)[0];
-    const params = filter.match[fieldName];
 
-    if (_.isPlainObject(params) && params.type === 'phrase') {
+    if (isMatchPhraseFilter(filter, fieldName)) {
       const newFilter = {
         match_phrase: _.clone(filter.match, true)
       };
@@ -17,3 +16,6 @@ export function migrateFilter(filter) {
   return filter;
 }
 
+function isMatchPhraseFilter(filter, fieldName) {
+  return _.get(filter, ['match', fieldName, 'type']) === 'phrase';
+}
