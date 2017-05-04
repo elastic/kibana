@@ -26,9 +26,21 @@ uiModules.get('kibana')
       $viewer.append($tabs);
       $viewer.append($content);
       docViews.inOrder.forEach(view => {
-        const $tab = $(`<li ng-show="docViews['${view.name}'].shouldShow(hit)" ng-class="{active: mode == '${view.name}'}">
-            <a ng-click="mode='${view.name}'">${view.title}</a>
-          </li>`);
+        const $tab = $(
+          `<li
+            ng-show="docViews['${view.name}'].shouldShow(hit)"
+            ng-class="{active: mode == '${view.name}'}"
+          >
+            <a
+              role="button"
+              tabindex="0"
+              ng-keyup="onKeyUp($event, view.name)"
+              ng-click="mode='${view.name}'"
+            >
+              ${view.title}
+            </a>
+          </li>`
+        );
         $tabs.append($tab);
         const $viewAttrs = `
           hit="hit"
@@ -48,6 +60,13 @@ uiModules.get('kibana')
     controller: function ($scope) {
       $scope.mode = docViews.inOrder[0].name;
       $scope.docViews = docViews.byName;
+
+      $scope.onKeyUp = function onKeyUp(e, name) {
+        // Support keyboard accessibility by setting mode on ENTER or SPACE keypress.
+        if ([13, 32].includes(e.keyCode)) {
+          $scope.mode = name;
+        }
+      };
     }
   };
 });
