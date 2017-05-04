@@ -5,11 +5,12 @@ export function migrateFilter(filter) {
     const fieldName = Object.keys(filter.match)[0];
 
     if (isMatchPhraseFilter(filter, fieldName)) {
-      const newFilter = {
-        match_phrase: _.clone(filter.match, true)
+      const params = _.get(filter, ['match', fieldName]);
+      return {
+        match_phrase: {
+          [fieldName]: _.omit(params, 'type'),
+        },
       };
-      delete newFilter.match_phrase[fieldName].type;
-      return newFilter;
     }
   }
 
