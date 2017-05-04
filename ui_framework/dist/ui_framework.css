@@ -440,6 +440,30 @@ body {
     /* 1 */
     text-decoration: underline; }
 
+.kuiButton--secondary {
+  color: #0096CC !important;
+  /* 2 */
+  border: solid 1px #0096CC;
+  background-color: #FFF; }
+  .kuiButton--secondary:enabled:hover {
+    color: #007199 !important;
+    /* 1 */
+    border: solid 1px #007199; }
+  a.kuiButton--secondary:not(.kuiButton-isDisabled):hover {
+    /* 1 */
+    color: #007199 !important;
+    /* 1 */
+    border: solid 1px #007199; }
+  .kuiButton--secondary:enabled:active {
+    color: #007199 !important;
+    /* 1 */
+    border: solid 1px #007199; }
+  a.kuiButton--secondary:not(.kuiButton-isDisabled):active {
+    /* 1 */
+    color: #007199 !important;
+    /* 1 */
+    border: solid 1px #007199; }
+
 .kuiButtonGroup {
   display: -webkit-box;
   display: -webkit-flex;
@@ -1680,6 +1704,7 @@ body {
   position: relative;
   padding: 10px 10px 14px;
   background-color: #F5F5F5;
+  border-bottom: solid 10px #D9D9D9;
   line-height: 20px; }
   .theme-dark .kuiLocalDropdown {
     background-color: #525252; }
