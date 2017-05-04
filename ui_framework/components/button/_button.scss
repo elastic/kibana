@@ -18,7 +18,8 @@
   border-radius: $globalBorderRadius;
 
   @include kuiButtonDisabled {
-    cursor: default;
+    cursor: not-allowed;
+    opacity: .5;
   }
 
   @include kuiButtonActive {
@@ -89,12 +90,7 @@
   }
 
   @include kuiButtonHoverAndActive {
-    color: $buttonDefaultTextColor !important; /* 1 */
     background-color: $buttonBasicHoverBackgroundColor !important; /* 1 */
-  }
-
-  @include kuiButtonDisabled {
-    color: $buttonBasicDisabledTextColor;
   }
 
   @include darkTheme {
@@ -108,10 +104,6 @@
 
     @include kuiButtonHoverAndActive {
       background-color: $buttonBasicHoverBackgroundColor--darkTheme !important; /* 1 */
-    }
-
-    @include kuiButtonDisabled {
-      color: rgba($buttonBasicTextColor--darkTheme, 0.5);
     }
   }
 }
@@ -131,10 +123,6 @@
     color: $buttonDefaultTextColor !important; /* 1 */
     background-color: $buttonPrimaryHoverBackgroundColor;
   }
-
-  @include kuiButtonDisabled {
-    background-color: $buttonPrimaryDisabledBackgroundColor;
-  }
 }
 
 /**
@@ -153,10 +141,6 @@
     color: $buttonDefaultTextColor !important; /* 1 */
     background-color: $buttonDangerHoverBackgroundColor;
   }
-
-  @include kuiButtonDisabled {
-    background-color: $buttonDangerDisabledBackgroundColor;
-  }
 }
 
 /**
@@ -170,9 +154,5 @@
   @include kuiButtonHoverAndActive {
     color: $globalLinkHoverColor !important; /* 1 */
     text-decoration: underline;
-  }
-
-  @include kuiButtonDisabled {
-    color: $buttonHollowDiabledTextColor;
   }
 }

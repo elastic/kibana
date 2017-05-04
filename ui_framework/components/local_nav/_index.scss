@@ -1,11 +1,11 @@
 // Normal colors
 $localNavTextColor: $globalTextColor;
-$localNavBackgroundColor: #e4e4e4;
-$localNavButtonTextColor: #5a5a5a;
-$localNavButtonTextColor-isHover: #000000;
+$localNavBackgroundColor: $globalColorLightGray;
+$localNavButtonTextColor: $globalTextColor;
+$localNavButtonTextColor-isHover: $globalColorWhite;
 $localNavButtonBackgroundColor: transparent;
-$localNavButtonBackgroundColor-isHover: rgba(#000000, 0.1);
-$localNavButtonBackgroundColor-isSelected: #f6f6f6;
+$localNavButtonBackgroundColor-isHover: $globalColorBlue;
+$localNavButtonBackgroundColor-isSelected: $globalColorLightestGray;
 $localNavBreadcrumbDelimiterColor: #5a5a5a;
 $localSearchBackgroundColor: #ffffff;
 $localSearchBorderColor-isInvalid: #e74C3c;
@@ -14,8 +14,8 @@ $localDropdownFormNoteTextColor: #737373;
 $localTabTextColor: $localNavButtonTextColor;
 $localTabTextColor-isHover: $localNavButtonTextColor-isHover;
 $localTabTextColor-isSelected: $localNavButtonTextColor-isHover;
-$localBreadcrumbLinkColor: #328caa;
-$localSearchButtonBackgroundColor: #9c9c9c;
+$localBreadcrumbLinkColor: $globalColorBlue;
+$localSearchButtonBackgroundColor: $globalColorDarkGray;
 $localSearchButtonTextColor: #ffffff;
 $localDatePickerButtonHoverBackgroundColor: $localNavButtonBackgroundColor-isHover;
 $localDatePickerCellSelectedBackgroundColor: #777777;

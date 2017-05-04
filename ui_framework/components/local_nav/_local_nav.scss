@@ -22,7 +22,7 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  height: 32px;
+  height: 30px;
 }
 
 .kuiLocalNavRow__section {
@@ -37,7 +37,7 @@
  *    of this container using padding.
  */
 .kuiLocalNavRow--secondary {
-  height: 38px; /* 1 */
-  padding: 4px $localNavSideSpacing 0; /* 1 */
+  height: 40px; /* 1 */
+  padding: 0 $localNavSideSpacing 0; /* 1 */
   align-items: flex-start; /* 1 */
 }

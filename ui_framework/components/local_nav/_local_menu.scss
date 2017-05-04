@@ -15,18 +15,21 @@
   border: 0;
   cursor: pointer;
 
-  &:hover {
+  &:hover, &:focus {
     background-color: $localNavButtonBackgroundColor-isHover;
     color: $localNavButtonTextColor-isHover;
   }
 
   &.kuiLocalMenuItem-isSelected {
     background-color: $localNavButtonBackgroundColor-isSelected;
+    &:hover, &:focus {
+      color: $localNavButtonTextColor;
+    }
   }
 
   &.kuiLocalMenuItem-isDisabled {
     opacity: 0.5;
-    cursor: default;
+    cursor: not-allowed;
 
     &:hover {
       background-color: $localNavButtonBackgroundColor;
