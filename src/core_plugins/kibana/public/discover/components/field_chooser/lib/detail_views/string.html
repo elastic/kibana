@@ -36,9 +36,9 @@
           </div>
 
           <!-- Add/remove filter buttons -->
-          <div ng-show="field.filterable" class="kuiMicroButtonGroup">
+          <div ng-show="field.filterable">
             <button
-              class="kuiMicroButton"
+              class="discover-field-details-item-button"
               ng-click="onAddFilter(field, bucket.value, '+')"
               data-test-subj="plus-{{::field.name}}-{{::bucket.display}}"
             >
@@ -47,7 +47,7 @@
             </button>
 
             <button
-              class="kuiMicroButton"
+              class="discover-field-details-item-button"
               ng-click="onAddFilter(field, bucket.value, '-')"
               data-test-subj="minus-{{::field.name}}-{{::bucket.display}}"
             >
