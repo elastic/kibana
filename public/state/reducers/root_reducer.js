@@ -10,11 +10,11 @@ const rootReducer = handleActions({
     }
   }),
 
-  RENDER_SET: (state, action) => ({
+  RENDERABLE_SET: (state, action) => ({
     ...state,
     throwAway: {
       ...state.throwAway,
-      render: action.payload
+      renderable: action.payload
     }
   }),
 }, getInitialState());

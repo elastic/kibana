@@ -5,7 +5,7 @@ import { expressionRun } from '../../state/actions/interpret';
 
 function mapStateToProps(state) {
   return {
-    render: state.throwAway.render,
+    renderable: state.throwAway.renderable,
     expression: state.throwAway.expression
   };
 }

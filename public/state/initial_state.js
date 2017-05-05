@@ -5,7 +5,7 @@ export default (path) => {
     app: {}, // Kibana stuff in here
     throwAway: {
       expression: 'demodata()',
-      render: null
+      renderable: null
     },
     transient: {},
     persistent: {}

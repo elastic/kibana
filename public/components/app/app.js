@@ -5,7 +5,7 @@ import { Grid, Row, Col, Button } from 'react-bootstrap';
 import { Expression } from '../expression';
 import { Render } from '../render';
 
-export function App({ expression, render, expressionSet, expressionRun }) {
+export function App({ expression, renderable, expressionSet, expressionRun }) {
   return (
     <div>
       <Grid fluid={true}>
@@ -17,7 +17,7 @@ export function App({ expression, render, expressionSet, expressionRun }) {
         </Row>
         <Row>
           <Col xs={12}>
-            <Render expressionOutput={render} />
+            <Render expressionOutput={renderable} />
           </Col>
         </Row>
       </Grid>
@@ -27,7 +27,7 @@ export function App({ expression, render, expressionSet, expressionRun }) {
 
 App.propTypes = {
   expression: PropTypes.string,
-  render: PropTypes.object,
+  renderable: PropTypes.object,
   expressionSet: PropTypes.func,
   expressionRun: PropTypes.func,
 };
