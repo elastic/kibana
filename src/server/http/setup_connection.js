@@ -58,7 +58,7 @@ export default function (kbnServer, server, config) {
       reply.redirect(formatUrl({
         port,
         protocol: 'https',
-        hostname: host,
+        hostname: req.headers.host || host,
         pathname: req.url.pathname,
         search: req.url.search,
       }));
