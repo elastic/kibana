@@ -1,6 +1,7 @@
 import React from 'react';
 import $ from 'jquery';
 import { getType } from '../../../common/types/get_type';
+import { elements } from '../../lib/elements';
 
 export class Render extends React.PureComponent {
   constructor(props) {
@@ -8,10 +9,13 @@ export class Render extends React.PureComponent {
   }
 
   renderElement(domNode) {
+    if (!domNode) return;
+
     if (getType(this.props.expressionOutput) !== 'render') {
       this.destroyMe = $(domNode).text('Waiting for expression to execute');
     } else {
-      this.destroyMe = $(domNode).text(JSON.stringify(this.props.expressionOutput));
+      const renderFn = elements.get(this.props.expressionOutput.as).render;
+      this.destroyMe = renderFn(domNode, this.props.expressionOutput.value, () => console.log('rendered!'));
     }
   }
 
@@ -21,7 +25,7 @@ export class Render extends React.PureComponent {
 
   render() {
     return (
-      <div style={{ height: '200px', width: '500px' }} ref={this.renderElement.bind(this)}></div>
+      <div style={{ height: '200px', width: '700px' }} ref={this.renderElement.bind(this)}></div>
     );
   }
 }
