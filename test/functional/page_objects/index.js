@@ -8,3 +8,4 @@ export { DashboardPageProvider } from './dashboard_page';
 export { VisualizePageProvider } from './visualize_page';
 export { SettingsPageProvider } from './settings_page';
 export { MonitoringPageProvider } from './monitoring_page';
+export { PointSeriesPageProvider } from './point_series_page';
