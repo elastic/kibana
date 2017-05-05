@@ -54,6 +54,9 @@ export default function HeatmapChartFactory(Private) {
           labels.push(`${from} - ${to}`);
         });
       } else {
+        if (max === min) {
+          return [ min.toString() ];
+        }
         for (let i = 0; i < colorsNumber; i++) {
           let label;
           let val = i / colorsNumber;
@@ -152,12 +155,14 @@ export default function HeatmapChartFactory(Private) {
         } else {
           if (isNaN(min) || isNaN(max)) {
             val = colorsNumber - 1;
+          } else if (min === max) {
+            val = 0;
           } else {
             val = (d.y - min) / (max - min); /* get val from 0 - 1 */
             val = Math.min(colorsNumber - 1, Math.floor(val * colorsNumber));
           }
         }
-        return val;
+        return !isNaN(val) ? val : -1;
       }
 
       function label(d) {
