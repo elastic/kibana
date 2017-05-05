@@ -1,0 +1,21 @@
+Refactor out state logic from dashboard directive (and a bugfix)
+
+Backports PR #10152
+
+**Commit 1:**
+New state and tests and time fixes
+
+* Original sha: 917a6fa1c7123b99b5b1f947873100b1ef474d6b
+* Authored by Stacey Gammon <gammon@elastic.co> on 2017-02-01T22:06:07Z
+
+**Commit 2:**
+Code review comments
+
+* Original sha: 418a4cb66577baa72ac824bc4e39da9bc7fe54e2
+* Authored by Stacey Gammon <gammon@elastic.co> on 2017-02-07T15:11:11Z
+
+**Commit 3:**
+Remove saving filters if "enter" hasn't been pressed
+
+* Original sha: 0704a8814772eb5f1feac0f3b5fb95b68bdc2f9f
+* Authored by Stacey Gammon <gammon@elastic.co> on 2017-02-07T15:37:10Z
