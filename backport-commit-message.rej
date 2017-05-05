@@ -1,0 +1,34 @@
+add option to confirm overwrite on save
+
+Backports PR #9659
+
+**Commit 1:**
+add option to confirm overwrite on save
+
+* Original sha: 5875c150577a4f68f91a17a597053387991cc048
+* Authored by Stacey Gammon <gammon@elastic.co> on 2016-12-27T14:29:48Z
+
+**Commit 2:**
+Make save options instead of using a boolean to increase readability.
+
+* Original sha: 1701b9c142b91cc5e25995c7fc253b296afc5175
+* Authored by Stacey Gammon <gammon@elastic.co> on 2016-12-27T21:07:56Z
+
+**Commit 3:**
+clean up comment
+
+* Original sha: bc2b9b15f1847ae8f5f559e2f71ed615e8d5979b
+* Authored by Stacey Gammon <gammon@elastic.co> on 2016-12-27T21:14:43Z
+
+**Commit 4:**
+Address code comments
+
+- implicit returns from arrow function
+- throw an error not an object
+
+clean up implicit return confusion
+
+use promise.reject instead of throw.
+
+* Original sha: 8e4334660c1748edec2866e930f75b48ec2b192f
+* Authored by Stacey Gammon <gammon@elastic.co> on 2016-12-29T19:11:50Z
