@@ -1,5 +1,5 @@
-import { clientFunctions } from './function_registry';
+import { functions } from './functions';
 
 export function addFunction(fnDef) {
-  clientFunctions.push(fnDef);
+  functions.push(fnDef);
 }

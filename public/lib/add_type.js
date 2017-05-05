@@ -1,4 +1,4 @@
-import { types } from './type_registry';
+import { types } from './types';
 
 export function addType(typeDef) {
   types.push(typeDef);

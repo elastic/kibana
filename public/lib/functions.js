@@ -1,3 +1,3 @@
 import { Registry } from '../../common/lib/registry';
 
-export const serverFunctions = new Registry();
+export const functions = new Registry();

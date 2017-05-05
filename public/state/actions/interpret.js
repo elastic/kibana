@@ -1,8 +1,8 @@
 import { socketInterpreterProvider } from '../../../common/interpreter/socket_interpret';
 import { fromExpression } from '../../../common/lib/ast';
 import { socket } from '../../socket.js';
-import { types } from '../../lib/type_registry';
-import { clientFunctions } from '../../lib/function_registry';
+import { types } from '../../lib/types';
+import { functions } from '../../lib/functions';
 import { getType } from '../../../common/types/get_type';
 import { renderSet } from './render';
 
@@ -16,7 +16,7 @@ function interpret(AST, context) {
   .then(serverFunctionList =>
     socketInterpreterProvider({
       types: types,
-      functions: clientFunctions,
+      functions: functions,
       referableFunctions: serverFunctionList,
       socket: socket,
     }))

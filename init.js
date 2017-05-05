@@ -1,6 +1,6 @@
 import { routes } from './server/routes';
-import { serverFunctions } from './server/lib/function_registry';
-import { types } from './common/lib/type_registry';
+import { functions } from './server/lib/functions';
+import { types } from './common/lib/types';
 
 module.exports = function (server, /*options*/) {
   server.plugins.canvas = {
@@ -11,7 +11,7 @@ module.exports = function (server, /*options*/) {
     */
 
     addFunction(fnDef) {
-      serverFunctions.push(fnDef);
+      functions.push(fnDef);
     },
 
     addType(typeDef) {

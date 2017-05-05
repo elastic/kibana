@@ -1,8 +1,7 @@
-import { serverFunctions } from '../lib/function_registry';
+import { functions } from '../lib/functions';
 import { map } from 'lodash';
 import { socketInterpreterProvider } from '../../common/interpreter/socket_interpret';
-import { types } from '../../common/lib/type_registry';
-
+import { types } from '../../common/lib/types';
 
 export function socketApi(server) {
   const io = require('socket.io')(server.listener);
@@ -13,11 +12,15 @@ export function socketApi(server) {
     socket.emit('getFunctionList');
     const getServerFunctions = new Promise((resolve) => socket.once('functionList', resolve));
 
+    socket.on('getFunctionList', () => {
+      socket.emit('functionList', map(functions, 'name'));
+    });
+
     const handler = (msg) => {
       getServerFunctions.then((clientFunctions) => {
         const interpret = socketInterpreterProvider({
           types: types,
-          functions: serverFunctions,
+          functions: functions,
           referableFunctions: clientFunctions,
           socket: socket
         });
@@ -32,15 +35,12 @@ export function socketApi(server) {
       });
     };
 
+    socket.on('run', handler);
     socket.on('disconnect', () => {
       console.log('User disconnected, removing handlers.');
       socket.removeListener('run', handler);
     });
 
-    socket.on('run', handler);
 
-    socket.on('getFunctionList', () => {
-      socket.emit('functionList', map(serverFunctions, 'name'));
-    });
   });
 }
