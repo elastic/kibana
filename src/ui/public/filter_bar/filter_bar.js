@@ -10,8 +10,11 @@ import { FilterBarLibChangeTimeFilterProvider } from 'ui/filter_bar/lib/change_t
 import { FilterBarQueryFilterProvider } from 'ui/filter_bar/query_filter';
 import { compareFilters } from './lib/compare_filters';
 import { uiModules } from 'ui/modules';
-const module = uiModules.get('kibana');
 
+export { disableFilter, enableFilter, setFilterDisabled, toggleFilterDisabled } from './lib/disable_filter';
+
+
+const module = uiModules.get('kibana');
 
 module.directive('filterBar', function (Private, Promise, getAppState) {
   const mapAndFlattenFilters = Private(FilterBarLibMapAndFlattenFiltersProvider);
