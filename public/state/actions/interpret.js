@@ -4,6 +4,7 @@ import { socket } from '../../socket.js';
 import { types } from '../../lib/type_registry';
 import { clientFunctions } from '../../lib/function_registry';
 import { getType } from '../../../common/types/get_type';
+import { renderSet } from './render';
 
 // Create the function list
 socket.emit('getFunctionList');
@@ -31,7 +32,7 @@ socket.on('run', (msg) => {
 });
 
 export const expressionRun = (expression) => {
-  return (/*dispatch, getState*/) => {
+  return (dispatch, /*getState*/) => {
     function run(exp, context) {
       const AST = fromExpression(exp);
       interpret(AST, context)
@@ -39,6 +40,7 @@ export const expressionRun = (expression) => {
         // If this is renderable, cool, do your thing
         if (getType(resp) === 'render') {
           console.log(resp);
+          dispatch(renderSet(resp));
         // Otherwise, cast it to a renderable
         } else {
           run('render()', resp);

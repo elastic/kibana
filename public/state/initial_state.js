@@ -3,14 +3,12 @@ import { get } from 'lodash';
 export default (path) => {
   const state = {
     app: {}, // Kibana stuff in here
-    transient: {
-      throwAway: {}
+    throwAway: {
+      expression: 'demodata()',
+      render: null
     },
-    persistent: {
-      throwAway: {
-        expression: 'demodata()'
-      }
-    }
+    transient: {},
+    persistent: {}
   };
 
   if (!path) {

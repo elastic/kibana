@@ -1,10 +1,22 @@
 import getInitialState from 'plugins/canvas/state/initial_state';
+import { handleActions } from 'redux-actions';
 
-function rootReducer(state = getInitialState(), { type }) {
-  switch (type) {
-    default:
-      return state;
-  }
-}
+const rootReducer = handleActions({
+  EXPRESSION_SET: (state, action) => ({
+    ...state,
+    throwAway: {
+      ...state.throwAway,
+      expression: action.payload
+    }
+  }),
+
+  RENDER_SET: (state, action) => ({
+    ...state,
+    throwAway: {
+      ...state.throwAway,
+      render: action.payload
+    }
+  }),
+}, getInitialState());
 
 export default rootReducer;

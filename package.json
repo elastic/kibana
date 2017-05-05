@@ -17,11 +17,14 @@
     "precommit": "gulp lint-staged"
   },
   "dependencies": {
+    "jquery": "^3.2.1",
     "lodash": "^4.17.4",
     "react": "^15.5.4",
+    "react-bootstrap": "^0.31.0",
     "react-dom": "^15.5.4",
     "react-redux": "^5.0.4",
     "redux": "^3.6.0",
+    "redux-actions": "^2.0.2",
     "redux-thunk": "^2.2.0",
     "socket.io": "^1.7.3",
     "uuid": "^3.0.1"

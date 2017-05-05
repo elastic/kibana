@@ -1,10 +1,14 @@
 import React from 'react';
+import { FormGroup, ControlLabel, FormControl } from 'react-bootstrap';
 
-export const Expression = ({ expression, onChange }) => (
-  <textarea
-    className="form-control"
-    rows="10"
-    onChange={(e) => onChange(e.target.value)}
-    value={expression}>
-  </textarea>
+export const Expression = ({ value, onChange }) => (
+  <FormGroup controlId="formControlsTextarea">
+    <ControlLabel>Expression</ControlLabel>
+    <FormControl
+      componentClass="textarea"
+      placeholder="Enter expression..."
+      onChange={(e) => onChange(e.target.value)}
+      value={value}
+    />
+  </FormGroup>
 );
