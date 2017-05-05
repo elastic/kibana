@@ -39,7 +39,7 @@ uiModules.get('kibana')
       }
     },
     controllerAs: 'paginate',
-    controller: function ($scope, $rootScope, $document) {
+    controller: function ($scope, $document) {
       const self = this;
       const ALL = 0;
 
@@ -92,7 +92,6 @@ uiModules.get('kibana')
         if (number) {
           if (number.hasOwnProperty('number')) number = number.number;
           $scope.page = $scope.pages[number - 1] || $scope.pages[0];
-          self.updatePaginationLabel(number);
         }
       };
 
@@ -123,6 +122,8 @@ uiModules.get('kibana')
           page.count = count;
           page.first = page.number === 1;
           page.last = page.number === count;
+          page.firstItem = (page.number - 1) * perPage + 1;
+          page.lastItem = Math.min(page.number * perPage, $scope.list.length);
 
           page.prev = $scope.pages[i - 1];
           if (page.prev) page.prev.next = page;
@@ -137,27 +138,9 @@ uiModules.get('kibana')
           $scope.page = $scope.pages[0];
         }
 
-        //set initial value of paginationCount
-        self.updatePaginationLabel(count ? 1 : 0);
-      };
-
-      self.updatePaginationLabel = function (number) {
-      //if number is equal to 0 that means there is no hit
-        if (number === 0) {
-          $rootScope.paginationLabel = '0–0';
-          return;
+        if ($scope.page) {
+          $scope.onPageChanged($scope.page);
         }
-
-        let firstItemIndex = 0;
-        const previousPageCount = number - 1;
-
-        for(let i = 0; i < previousPageCount; i++) {
-          firstItemIndex =  firstItemIndex + $scope.pages[i].length;
-        }
-
-        const lastItemIndex = firstItemIndex + $scope.pages[number - 1].length;
-        $rootScope.paginationLabel = (firstItemIndex + 1) + '–' + lastItemIndex;
-        return;
       };
 
       self.changePage = function (page) {
@@ -194,6 +177,8 @@ uiModules.get('kibana')
           if (other.last) $scope.otherPages.containsLast = true;
           if (other.first) $scope.otherPages.containsFirst = true;
         }
+
+        $scope.onPageChanged($scope.page);
       };
 
       function setPerPage(val) {
