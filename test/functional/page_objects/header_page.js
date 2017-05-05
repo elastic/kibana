@@ -3,6 +3,7 @@ export function HeaderPageProvider({ getService, getPageObjects }) {
   const remote = getService('remote');
   const log = getService('log');
   const retry = getService('retry');
+  const find = getService('find');
   const testSubjects = getService('testSubjects');
   const PageObjects = getPageObjects(['common']);
 
@@ -163,11 +164,8 @@ export function HeaderPageProvider({ getService, getPageObjects }) {
     }
 
     async getToastMessage(findTimeout = defaultFindTimeout) {
-      await remote.setFindTimeout(findTimeout);
-      const message = await remote.findDisplayedByCssSelector('kbn-truncated.toast-message.ng-isolate-scope')
+      return await find.displayedByCssSelector('kbn-truncated.toast-message.ng-isolate-scope', findTimeout)
         .getVisibleText();
-      await remote.setFindTimeout(defaultFindTimeout);
-      return message;
     }
 
     async waitForToastMessageGone() {
