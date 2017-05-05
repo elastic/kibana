@@ -57,6 +57,11 @@ uiModules.get('kibana')
         throw new Error(`kbnAccessibleClick doesn't need to be used on a link if it has a href attribute.`);
       }
 
+      // We're emulating a click action, so we should already have a regular click handler defined.
+      if (!$parse(attrs.ngClick)) {
+        throw new Error('kbnAccessibleClick requires ng-click to be defined on its element.');
+      }
+
       // If the developer hasn't already specified attributes required for accessibility, add them.
       if (attrs.tabindex === undefined) {
         element.attr('tabindex', '0');
@@ -69,19 +74,8 @@ uiModules.get('kibana')
       element.on('keyup', e => {
         // Support keyboard accessibility by emulating mouse click on ENTER or SPACE keypress.
         if (accessibleClickKeys[e.keyCode]) {
-          // If a unique click handler has been specified, then call it.
-          if (attrs.kbnAccessibleClick) {
-            return scope.kbnAccessibleClick();
-          }
-
-          // Otherwise, default to the specified ng-click.
-          const ngClick = $parse(attrs.ngClick);
-
-          if (!ngClick) {
-            throw new Error('kbnAccessibleClick requires a callback or ng-click defined on its element.');
-          }
-
-          ngClick(scope.$parent);
+          // Delegate to the click handler on the element (assumed to be ng-click).
+          element.click();
         }
       });
     },
