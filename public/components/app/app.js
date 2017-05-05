@@ -6,6 +6,10 @@ import { Expression } from '../expression';
 import { Render } from '../render';
 
 export function App({ expression, renderable, expressionSet, expressionRun }) {
+  function done() {
+    console.log('rendered!');
+  }
+
   return (
     <div>
       <Grid fluid>
@@ -17,7 +21,7 @@ export function App({ expression, renderable, expressionSet, expressionRun }) {
         </Row>
         <Row>
           <Col xs={12}>
-            <Render expressionOutput={renderable} />
+            <Render expressionOutput={renderable} done={done}/>
           </Col>
         </Row>
       </Grid>

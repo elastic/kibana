@@ -11,12 +11,12 @@ export class Render extends React.PureComponent {
   renderElement(domNode) {
     if (!domNode) return;
 
-    const { expressionType, expressionOutput } = this.props;
+    const { expressionType, expressionOutput, done } = this.props;
     if (expressionType !== 'render') {
       domNode.innerHTML = 'Waiting for expression to execute';
     } else {
       const renderFn = elements.get(expressionOutput.as).render;
-      this.destroyMe = renderFn(domNode, expressionOutput.value, () => console.log('rendered!'));
+      this.destroyMe = renderFn(domNode, expressionOutput.value, done);
     }
   }
 
@@ -31,4 +31,5 @@ export class Render extends React.PureComponent {
 Render.propTypes = {
   expressionOutput: PropTypes.object,
   expressionType: PropTypes.string,
+  done: PropTypes.func
 };
