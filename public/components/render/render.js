@@ -1,21 +1,18 @@
 import React from 'react';
-import $ from 'jquery';
-import { getType } from '../../../common/types/get_type';
+import PropTypes from 'prop-types';
+
 import { elements } from '../../lib/elements';
 
 export class Render extends React.PureComponent {
-  constructor(props) {
-    super(props);
-  }
-
   renderElement(domNode) {
     if (!domNode) return;
 
-    if (getType(this.props.expressionOutput) !== 'render') {
-      this.destroyMe = $(domNode).text('Waiting for expression to execute');
+    const { expressionType, expressionOutput } = this.props;
+    if (expressionType !== 'render') {
+      domNode.innerHTML = 'Waiting for expression to execute';
     } else {
-      const renderFn = elements.get(this.props.expressionOutput.as).render;
-      this.destroyMe = renderFn(domNode, this.props.expressionOutput.value, () => console.log('rendered!'));
+      const renderFn = elements.get(expressionOutput.as).render;
+      this.destroyMe = renderFn(domNode, expressionOutput.value, () => console.log('rendered!'));
     }
   }
 
@@ -29,3 +26,8 @@ export class Render extends React.PureComponent {
     );
   }
 }
+
+Render.propTypes = {
+  expressionOutput: PropTypes.object,
+  expressionType: PropTypes.string,
+};

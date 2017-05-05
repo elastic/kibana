@@ -5,7 +5,7 @@ import template from 'plugins/canvas/index.html';
 import './state/store_service';
 import './directives/react';
 
-import { App } from './containers/app/app';
+import { App } from './components/app';
 
 require('./main.less');
 

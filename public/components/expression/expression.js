@@ -1,4 +1,5 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 import { FormGroup, ControlLabel, FormControl } from 'react-bootstrap';
 
 export const Expression = ({ value, onChange }) => (
@@ -12,3 +13,8 @@ export const Expression = ({ value, onChange }) => (
     />
   </FormGroup>
 );
+
+Expression.propTypes = {
+  value: PropTypes.string,
+  onChange: PropTypes.func,
+};
