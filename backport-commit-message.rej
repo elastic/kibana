@@ -1,0 +1,10 @@
+Add Cohort analysis plugin in the known plugins
+
+Backports PR #9697
+
+**Commit 1:**
+Add Cohort analysis plugin in the known plugins
+
+* Original sha: 8732e9c397b538ab2a59f9f249a5d5fe5c12ea18
+* Authored by Mike Dias <mike.rodrigues.dias@gmail.com> on 2017-01-02T17:09:58Z
+* Committed by GitHub <noreply@github.com> on 2017-01-02T17:09:58Z
