@@ -4,6 +4,7 @@ import { Grid, Row, Col, Button } from 'react-bootstrap';
 
 import { connect } from 'react-redux';
 import { Expression } from '../../components/expression/expression';
+import { Render } from '../../components/render/render';
 import { expressionSet } from '../../state/actions/expression';
 import { expressionRun } from '../../state/actions/interpret';
 
@@ -19,7 +20,7 @@ function AppComponent({ expression, render, dispatch }) {
         </Row>
         <Row>
           <Col xs={12}>
-            {JSON.stringify(render, null, ' ')}
+            <Render expressionOutput={render} />
           </Col>
         </Row>
       </Grid>

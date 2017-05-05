@@ -39,7 +39,6 @@ export const expressionRun = (expression) => {
       .then(resp => {
         // If this is renderable, cool, do your thing
         if (getType(resp) === 'render') {
-          console.log(resp);
           dispatch(renderSet(resp));
         // Otherwise, cast it to a renderable
         } else {
@@ -48,8 +47,5 @@ export const expressionRun = (expression) => {
       });
     }
     run(expression);
-
   };
 };
-
-window.ep = expressionRun;
