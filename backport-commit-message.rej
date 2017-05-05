@@ -1,0 +1,18 @@
+Fix the mapping of indexes to body for msearch requests
+
+Backports PR #10913
+
+**Commit 1:**
+Fix the mapping of indexes to body for msearch requests
+
+Happened when one vis had no data in any indexes.  Pushing the index on
+indexList caused subsequent checks to seem like they *did* have data.
+
+* Original sha: 1516edb083b6b39b634f186653aee291842dc557
+* Authored by Stacey Gammon <gammon@elastic.co> on 2017-03-28T11:42:44Z
+
+**Commit 2:**
+address code comments
+
+* Original sha: 592db90fc50e4cce4606e1c50a5629cf6ec504aa
+* Authored by Stacey Gammon <gammon@elastic.co> on 2017-03-28T17:43:07Z
