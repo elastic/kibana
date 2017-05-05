@@ -40,12 +40,7 @@ module.directive('kbnRows', function ($compile, $rootScope, getAppState, Private
         let $cellContent;
 
         if (contents instanceof AggConfigResult) {
-          const isCellContentFilterable =
-            contents.type === 'bucket'
-            && contents.aggConfig.getField()
-            && contents.aggConfig.getField().filterable;
-
-          if (isCellContentFilterable) {
+          if (contents.type === 'bucket') {
             $cell = createFilterableCell(contents);
             $cellContent = $cell.find('[data-cell-content]');
           } else {
