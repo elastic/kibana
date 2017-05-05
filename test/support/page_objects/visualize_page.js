@@ -65,7 +65,7 @@ export default class VisualizePage {
   clickTileMap() {
     return this.remote
     .setFindTimeout(defaultFindTimeout)
-    .findByPartialLinkText('Tile Map')
+    .findByPartialLinkText('Coordinate Map')
     .click();
   }
 

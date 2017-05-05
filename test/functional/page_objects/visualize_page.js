@@ -60,7 +60,7 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
     clickTileMap() {
       return remote
       .setFindTimeout(defaultFindTimeout)
-      .findByPartialLinkText('Tile Map')
+      .findByPartialLinkText('Coordinate Map')
       .click();
     }
 

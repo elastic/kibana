@@ -18,12 +18,9 @@ VisTypesRegistryProvider.register(function ChoroplethProvider(Private, vectormap
   const selectedLayer = vectorLayers[0];
   const selectedJoinField = selectedLayer ? vectorLayers[0].fields[0] : null;
 
-
-  console.log('vector layers', vectorLayers);
-
   return new TemplateVisType({
     name: 'choropleth',
-    title: 'Vector Map',
+    title: 'Region Map',
     implementsRenderComplete: true,
     description: 'Show metrics on a thematic map. Use one of the provide base maps, or add your own. ' +
     'Darker colors represent higher values.',

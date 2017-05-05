@@ -133,7 +133,7 @@ export default function defaultSettingsProvider() {
         }
       }, null, 2),
       type: 'json',
-      description: 'Default <a href="http://leafletjs.com/reference.html#tilelayer-wms" target="_blank">properties</a> for the WMS map server support in the tile map'
+      description: 'Default <a href="http://leafletjs.com/reference.html#tilelayer-wms" target="_blank">properties</a> for the WMS map server support in the coordinate map'
     },
     'visualization:vectormap:showWarnings': {
       value: true,
