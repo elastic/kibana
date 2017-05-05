@@ -35,11 +35,10 @@
         <span ng-if="canToggleColumns()">
           <button
             class="doc-viewer-button"
-            ng-click="filter(mapping[field], flattened[field], '+')"
+            ng-click="toggleColumn(field)"
           >
             <i
               class="fa fa-columns"
-              ng-click="toggleColumn(field)"
               tooltip-append-to-body="1"
               tooltip="Toggle column in table"
             ></i>
