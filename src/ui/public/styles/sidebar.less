@@ -4,12 +4,12 @@
 .sidebar-container {
   padding-left: 0px !important;
   padding-right: 0px !important;
-  background-color: @sidebar-bg;
+  background-color: @globalColorLightestGray;
   border-right-color: @sidebar-border;
   border-bottom-color: @sidebar-border;
 
   .sidebar-well {
-    background-color: @sidebar-well-bg;
+    background-color: tint(@globalColorTeal, 80%);
   }
 
   .sidebar-list {
@@ -32,12 +32,13 @@
     .sidebar-item {
       border-top-color: @sidebar-border;
       font-size: @sidebar-item-font-size;
+      border-top: solid 1px transparent;
+      border-bottom: solid 1px transparent;
 
       &.active {
-        background-color: @sidebar-active-bg !important;
+        background-color: darken(@globalColorLightestGray, 10%) !important;
         color: @sidebar-active-color;
-        border-top: solid 1px @globalColorMediumGray;
-        border-bottom: solid 1px @globalColorMediumGray;
+        border-color: @globalColorLightGray;
 
         &:hover,
         &:hover .text-muted {
