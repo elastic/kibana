@@ -8,7 +8,7 @@ import { Render } from '../render';
 export function App({ expression, renderable, expressionSet, expressionRun }) {
   return (
     <div>
-      <Grid fluid={true}>
+      <Grid fluid>
         <Row>
           <Col xs={12}>
             <Expression value={expression} onChange={(val) => expressionSet(val)}/>

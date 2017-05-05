@@ -1,5 +1,5 @@
-import interpretProvider from './interpret';
-const _ = require('lodash');
+import _ from 'lodash';
+import { interpretProvider } from './interpret';
 
 /*
   Returns an interpet function that can shuttle partial ASTs and context between instances of itself over a socket

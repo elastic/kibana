@@ -1,7 +1,7 @@
 import _ from 'lodash';
 import { getType } from '../types/get_type';
 
-module.exports = function (types) {
+export function castProvider(types) {
   return function cast(node, toTypeNames) {
     // If you don't give us anything to cast to, you'll get your input back
     if (!toTypeNames || toTypeNames.length === 0) return node;
@@ -27,4 +27,4 @@ module.exports = function (types) {
 
     throw new Error(`Can not cast '${fromTypeName}' to any of '${toTypeNames.join(', ')}'`);
   };
-};
+}

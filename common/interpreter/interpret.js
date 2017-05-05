@@ -1,8 +1,8 @@
-const _ = require('lodash');
-const castProvider = require('./cast');
+import { clone, each, keys, last, map, mapValues, values, zipObject } from 'lodash';
+import { castProvider } from './cast';
 import { getType } from '../types/get_type';
 
-module.exports = (config) => {
+export function interpretProvider(config) {
   const cast = castProvider(config.types);
   const functions = config.functions;
   const onFunctionNotFound = config.onFunctionNotFound;
@@ -28,7 +28,7 @@ module.exports = (config) => {
   function invokeChain(chainArr, context) {
     if (!chainArr.length) return Promise.resolve(context);
 
-    const chain = _.clone(chainArr);
+    const chain = clone(chainArr);
     const link = chain.shift(); // Every think in the chain will always be a function right?
     const name = link.function;
     const args = link.arguments;
@@ -70,24 +70,24 @@ module.exports = (config) => {
     const fnDef = functions[fnName];
 
     // Because we don't have Promise.props, we break this into keys and values, then recombine later.
-    const argNames = _.keys(astArgs);
-    const multiValuedArgs = _.values(astArgs);
+    const argNames = keys(astArgs);
+    const multiValuedArgs = values(astArgs);
 
     // Create an array of promises, each representing 1 argument name
-    const argListPromises = _.map(multiValuedArgs, multiValueArg => {
+    const argListPromises = map(multiValuedArgs, multiValueArg => {
       // Also an array of promises. Since each argument in the AST is multivalued each
       // argument value is an array. We use Promise.all to turn the values into a single promise.
-      return Promise.all(_.map(multiValueArg, argValue => interpret(argValue, context)));
+      return Promise.all(map(multiValueArg, argValue => interpret(argValue, context)));
     });
 
     return Promise.all(argListPromises)
-    .then(resolvedArgs => _.zipObject(argNames, resolvedArgs)) // Recombine the keys
+    .then(resolvedArgs => zipObject(argNames, resolvedArgs)) // Recombine the keys
     .then(resolvedArgs => {
       const argDefs = fnDef.args;
 
       // Fill in defaults
       // This effectively means we simply ignore unknown arguments
-      const args = _.mapValues(argDefs, (argDef, name) => {
+      const args = mapValues(argDefs, (argDef, name) => {
         if (typeof resolvedArgs[name] !== 'undefined') return resolvedArgs[name];
 
         // Still treating everything as multivalued here
@@ -96,23 +96,23 @@ module.exports = (config) => {
       });
 
       // Validate and normalize the argument values.
-      return _.mapValues(args, (val, name) => {
+      return mapValues(args, (val, name) => {
         // TODO: Implement a system to allow for undeclared arguments
         const argDef = argDefs[name];
         if (!argDef) throw new Error(`Unknown argument to function: ${fnName}(${name})`);
 
         // Return an array for multi-valued arguments
         if (argDef.multi) {
-          _.each(val, argValue => cast(argValue, argDef.types));
+          each(val, argValue => cast(argValue, argDef.types));
           return val;
         }
 
         // Otherwise return the final instance
-        const argValue = _.last(val);
+        const argValue = last(val);
         return cast(argValue, argDef.types);
       });
     });
   }
 
   return interpret;
-};
+}

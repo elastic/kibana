@@ -4,6 +4,10 @@ import PropTypes from 'prop-types';
 import { elements } from '../../lib/elements';
 
 export class Render extends React.PureComponent {
+  componentWillUnmount() {
+    console.log(this.destroyMe);
+  }
+
   renderElement(domNode) {
     if (!domNode) return;
 
@@ -16,13 +20,10 @@ export class Render extends React.PureComponent {
     }
   }
 
-  componentWillUnmount() {
-    console.log(this.destroyMe);
-  }
-
   render() {
+    const style = { height: '200px', width: '700px' };
     return (
-      <div style={{ height: '200px', width: '700px' }} ref={this.renderElement.bind(this)}></div>
+      <div style={style} ref={this.renderElement.bind(this)} />
     );
   }
 }
