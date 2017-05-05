@@ -21,7 +21,7 @@ export default function TileMapVisType(Private, getAppState, courier, config) {
     params: {
       defaults: {
         mapType: 'Scaled Circle Markers',
-        isDesaturated: true,
+        isDesaturated: false,
         addTooltip: true,
         heatMaxZoom: 0,
         heatMinOpacity: 0.1,
