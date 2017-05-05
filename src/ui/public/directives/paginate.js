@@ -40,6 +40,12 @@ uiModules.get('kibana')
     },
     controllerAs: 'paginate',
     controller: function ($scope, $document) {
+      // Unfortunately this controller relies on inherited scope. Lets not fail if onPageChanged happens to not be
+      // implemented.
+      if (!$scope.onPageChanged) {
+        $scope.onPageChanged = () => {};
+      }
+
       const self = this;
       const ALL = 0;
 
