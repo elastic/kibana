@@ -11,11 +11,11 @@ module.exports = function (server, /*options*/) {
     */
 
     addFunction(fnDef) {
-      functions.push(fnDef);
+      functions.register(fnDef);
     },
 
     addType(typeDef) {
-      types.push(typeDef);
+      types.register(typeDef);
     }
   };
 

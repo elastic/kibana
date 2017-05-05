@@ -33,7 +33,7 @@ module.exports = (config) => {
     const name = link.function;
     const args = link.arguments;
 
-    const fnDef = functions.byName(name);
+    const fnDef = functions[name];
     if (!fnDef) {
       chain.unshift(link);
       return onFunctionNotFound({ type: 'expression', chain: chain }, context);
@@ -49,7 +49,7 @@ module.exports = (config) => {
 
   function invokeFunction(name, context, args) {
     // Check function input.
-    const fnDef = functions.byName(name);
+    const fnDef = functions[name];
     const acceptableContext =  cast(context, fnDef.context.types);
 
     return fnDef.fn(acceptableContext, args).then(output => {
@@ -67,7 +67,7 @@ module.exports = (config) => {
 
   // Processes the multi-valued AST argument values into arguments that can be passed to the function
   function resolveArgs(fnName, context, astArgs) {
-    const fnDef = functions.byName(fnName);
+    const fnDef = functions[fnName];
 
     // Because we don't have Promise.props, we break this into keys and values, then recombine later.
     const argNames = _.keys(astArgs);

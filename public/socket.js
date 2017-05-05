@@ -7,5 +7,5 @@ const basePath = chrome.getBasePath();
 export const socket = io(undefined, { path: `${basePath}/socket.io` });
 
 socket.on('getFunctionList', () => {
-  socket.emit('functionList', map(functions, 'name'));
+  socket.emit('functionList', map(functions.toJS(), 'name'));
 });

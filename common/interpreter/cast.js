@@ -10,20 +10,20 @@ module.exports = function (types) {
     const fromTypeName = getType(node);
     if (_.includes(toTypeNames, fromTypeName)) return node;
 
-    const fromTypeDef = types.byName(fromTypeName);
+    const fromTypeDef = types[fromTypeName];
 
     // First check if this object can make itself into any of the targets
     if (fromTypeDef && fromTypeDef.castsTo(toTypeNames)) return fromTypeDef.to(node, toTypeNames);
 
     // If that isn't possible, filter the valid types to ones that can create themselves from fromTypeName
     const validToTypeNames = _.filter(toTypeNames, toTypeName => {
-      const toTypeDef = types.byName(toTypeName);
+      const toTypeDef = types[toTypeName];
       if (!toTypeDef) return false;
       return toTypeDef.castsFrom([fromTypeName]);
     });
 
     // And return the first one
-    if (validToTypeNames.length > 0) return types.byName(validToTypeNames[0]).from(node);
+    if (validToTypeNames.length > 0) return types[validToTypeNames[0]].from(node);
 
     throw new Error(`Can not cast '${fromTypeName}' to any of '${toTypeNames.join(', ')}'`);
   };

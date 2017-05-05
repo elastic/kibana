@@ -15,8 +15,8 @@ function interpret(AST, context) {
   return getServerFunctions
   .then(serverFunctionList =>
     socketInterpreterProvider({
-      types: types,
-      functions: functions,
+      types: types.toJS(),
+      functions: functions.toJS(),
       referableFunctions: serverFunctionList,
       socket: socket,
     }))
