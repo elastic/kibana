@@ -270,12 +270,11 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
 
     getPanelTitles() {
       log.debug('in getPanelTitles');
-      return getRemote()
-      .findAllByCssSelector('span.panel-title')
+      return testSubjects.findAll('dashboardPanelTitle')
       .then(function (titleObjects) {
 
         function getTitles(chart) {
-          return chart.getAttribute('title');
+          return chart.getVisibleText();
         }
 
         const getTitlePromises = titleObjects.map(getTitles);
@@ -286,7 +285,7 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
     getPanelSizeData() {
       log.debug('in getPanelSizeData');
       return getRemote()
-      .findAllByCssSelector('li.gs-w')
+      .findAllByCssSelector('li.gs-w') // These are gridster-defined elements and classes
       .then(function (titleObjects) {
 
         function getTitles(chart) {
@@ -318,9 +317,9 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
             });
           })
           .then(chart => {
-            return chart.findByCssSelector('span.panel-title')
+            return chart.findByCssSelector('[data-test-subj="dashboardPanelTitle"]')
             .then(function (titleElement) {
-              return titleElement.getAttribute('title');
+              return titleElement.getVisibleText();
             })
             .then(theData => {
               obj.title = theData;
