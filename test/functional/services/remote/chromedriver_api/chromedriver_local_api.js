@@ -2,13 +2,13 @@ import { spawn } from 'child_process';
 import { parse as parseUrl } from 'url';
 
 import treeKill from 'tree-kill';
-import { fromNode as fcb } from 'bluebird';
+import { delay, fromNode as fcb } from 'bluebird';
 import { path as CHROMEDRIVER_EXEC } from 'chromedriver';
 
 import { ping } from './ping';
 import { ChromedriverApi } from './chromedriver_api';
 const START_TIMEOUT = 15000;
-const PING_INTERVAL = 150;
+const PING_INTERVAL = 500;
 
 export function createLocalChromedriverApi(log, url) {
   let proc = null;
@@ -37,13 +37,20 @@ export function createLocalChromedriverApi(log, url) {
         }
       });
 
-      let pingSuccess = false;
-      let remainingAttempts = Math.floor(START_TIMEOUT / PING_INTERVAL);
-      while (!pingSuccess && (remainingAttempts--) > 0) {
-        pingSuccess = await ping(url);
-      }
+      const pingsStartedAt = Date.now();
+      while (true) {
+        log.verbose('[chromedriver:ping] attempting to reach chromedriver at %j', url);
+        if (await ping(url)) {
+          // chromedriver is running and accepting connections
+          break;
+        }
 
-      if (!pingSuccess) {
+        if ((Date.now() - pingsStartedAt) < START_TIMEOUT) {
+          // chromedriver did not respond, wait for PING_INTERVAL and then try again
+          await delay(PING_INTERVAL);
+          continue;
+        }
+
         throw new Error(`Chromedriver did not start within the ${START_TIMEOUT}ms timeout`);
       }
     },
