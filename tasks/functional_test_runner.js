@@ -5,7 +5,7 @@ import { createToolingLog } from '../src/utils';
 
 export default function (grunt) {
   grunt.registerTask('functionalTestRunner', function () {
-    const log = createToolingLog('verbose');
+    const log = createToolingLog('debug');
     log.pipe(process.stdout);
 
     const functionalTestRunner = createFunctionalTestRunner({
