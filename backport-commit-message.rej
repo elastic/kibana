@@ -1,0 +1,26 @@
+Refactor top nav config generation
+
+Backports PR #9726
+
+**Commit 1:**
+Incorporate refactors to prep for view-edit mode
+
+* Original sha: 1507b55fba0c28cf8588eb07505d87e7f8d56182
+* Authored by Stacey Gammon <gammon@elastic.co> on 2016-12-15T17:37:51Z
+
+**Commit 2:**
+code review comments
+
+- Get rid of top nav config factory function refactor as it makes the
+parameters less clear.
+- Remove the watch on topNavMenu since it isn’t necessary for this PR.
+Will bring a better variation back in the view/edit mode PR.
+
+Note that these changes look somewhat pointless in and of themselves,
+but the refactor will be useful for the view/edit mode when the top nav
+configuration will change based on the dashboard mode, and then the
+refactored functions, which are all only being used one currently, will
+be called multiple times.
+
+* Original sha: 7c3c6cc09c151a515ffcf8015e9fbcf06884940a
+* Authored by Stacey Gammon <gammon@elastic.co> on 2017-01-05T14:42:16Z
