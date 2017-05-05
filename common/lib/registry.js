@@ -8,4 +8,8 @@ export function Registry(prop = 'name') {
   this.toJS = () => {
     return { ..._indexed };
   };
+
+  this.get = (name) => {
+    return _indexed[name];
+  };
 }
