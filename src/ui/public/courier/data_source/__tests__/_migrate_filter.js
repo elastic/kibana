@@ -39,6 +39,7 @@ describe('migrateFilter', function () {
     };
     const migratedFilter = migrateFilter(originalFilter);
     expect(migratedFilter).to.be(originalFilter);
+    expect(_.isEqual(migratedFilter, originalFilter)).to.be(true);
   });
 
 });
