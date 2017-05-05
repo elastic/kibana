@@ -1,0 +1,74 @@
+Refactor loading saved objects
+
+Backports PR #9406
+
+**Commit 1:**
+Refactor code that loads saved objects
+
+* Original sha: ddcdb6ab7f3dc84327c05dd6769ac4a6117941d4
+* Authored by Stacey Gammon <gammon@elastic.co> on 2016-12-07T20:01:51Z
+
+**Commit 2:**
+couple fixes and comments
+
+cleanup & comments
+
+cleanup
+
+* Original sha: d1bd3102d1439a402e8a756e47fe6109bacafa72
+* Authored by Stacey Gammon <gammon@elastic.co> on 2016-12-07T20:51:31Z
+
+**Commit 3:**
+Use es6 classes, make a note about getting rid of the 100 hard limit on results
+
+* Original sha: 78791b3b970cf2747617047e5c5c7b0261321733
+* Authored by Stacey Gammon <gammon@elastic.co> on 2016-12-08T20:37:24Z
+
+**Commit 4:**
+Address comments
+
+* Original sha: f8f842f1f055a941f99469b1492c69dc1dda8881
+* Authored by Stacey Gammon <gammon@elastic.co> on 2016-12-09T14:24:52Z
+
+**Commit 5:**
+Merge branch 'master' into saved-object-find-refactor
+
+* Original sha: 1ee49af7b84918f753bd0be6c1fb26d78ca18f11
+* Authored by Stacey Gammon <gammon@elastic.co> on 2016-12-14T15:43:04Z
+* Committed by GitHub <noreply@github.com> on 2016-12-14T15:43:04Z
+
+**Commit 6:**
+fix linter
+
+* Original sha: 6ce00ba1d827419d3d8fd89110f6527748f5aff3
+* Authored by Stacey Gammon <gammon@elastic.co> on 2016-12-14T15:54:25Z
+
+**Commit 7:**
+lint fixes with { } spacing
+
+* Original sha: 12ec497d9179a09246244eb5ae295839569312fb
+* Authored by Stacey Gammon <gammon@elastic.co> on 2016-12-15T16:43:07Z
+
+**Commit 8:**
+manual merge with master after fixing conflicts
+
+* Original sha: c8f570107dbf42e6705b9b6345c393b63af2fedb
+* Authored by Stacey Gammon <gammon@elastic.co> on 2016-12-15T16:55:01Z
+
+**Commit 9:**
+Fix linter
+
+* Original sha: eafcf64a07d4973963ea0c6a250b16b49781e5bb
+* Authored by Stacey Gammon <gammon@elastic.co> on 2016-12-15T16:56:22Z
+
+**Commit 10:**
+fix forgotten merge conflict
+
+* Original sha: 406de73f3599640cb5e54788448427ca5ecb75d3
+* Authored by Stacey Gammon <gammon@elastic.co> on 2016-12-15T17:03:09Z
+
+**Commit 11:**
+and linter
+
+* Original sha: e1b72cfa895962c29ec295a0c570019fe1ae2e85
+* Authored by Stacey Gammon <gammon@elastic.co> on 2016-12-15T17:03:20Z
