@@ -18,7 +18,10 @@
  * Apply this directive to any of these elements to automatically do the above.
  */
 
-import { accessibleClickKeys } from './accessible_click_keys';
+import {
+  accessibleClickKeys,
+  SPACE_KEY,
+} from './accessible_click_keys';
 import { uiModules } from 'ui/modules';
 
 uiModules.get('kibana')
@@ -30,13 +33,13 @@ uiModules.get('kibana')
     },
     controller: $element => {
       $element.on('keydown', e => {
-        // We don't care if the user is actually interacting with a different element.
+        // If the user is interacting with a different element, then we don't need to do anything.
         if (e.currentTarget !== e.target) {
           return;
         }
 
         // Prevent a scroll from occurring if the user has hit space.
-        if (accessibleClickKeys[e.keyCode]) {
+        if (e.keyCode === SPACE_KEY) {
           e.preventDefault();
         }
       });
@@ -47,7 +50,7 @@ uiModules.get('kibana')
       const elementType = element.prop('tagName');
 
       if (elementType === 'BUTTON') {
-        throw new Error(`kbnAccessibleClick doesn't need to be used a button.`);
+        throw new Error(`kbnAccessibleClick doesn't need to be used on a button.`);
       }
 
       if (elementType === 'A' && attrs.href !== undefined) {
@@ -64,7 +67,7 @@ uiModules.get('kibana')
       }
 
       element.on('keyup', e => {
-        // Support keyboard accessibility by toggling display on ENTER or SPACE keypress.
+        // Support keyboard accessibility by emulating mouse click on ENTER or SPACE keypress.
         if (accessibleClickKeys[e.keyCode]) {
           // If a unique click handler has been specified, then call it.
           if (attrs.kbnAccessibleClick) {
