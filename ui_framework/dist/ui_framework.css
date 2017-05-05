@@ -2147,7 +2147,7 @@ body {
   font-size: 18px;
   line-height: 22px;
   /* 1 */
-  color: #2d2d2d;
+  color: #3F3F3F;
   border-bottom: 2px solid transparent;
   text-decoration: none;
   cursor: pointer;
@@ -2156,12 +2156,12 @@ body {
      *    a regular cursor instead of setting pointer-events: none.
      */ }
   .kuiLocalTab:hover:not(.kuiLocalTab-isDisabled), .kuiLocalTab:active:not(.kuiLocalTab-isDisabled) {
-    color: #FFF; }
+    color: #0096CC; }
     .theme-dark .kuiLocalTab:hover:not(.kuiLocalTab-isDisabled), .theme-dark .kuiLocalTab:active:not(.kuiLocalTab-isDisabled) {
       color: #ffffff; }
   .kuiLocalTab.kuiLocalTab-isSelected {
-    color: #FFF;
-    border-bottom-color: #FFF;
+    color: #0096CC;
+    border-bottom-color: #0096CC;
     cursor: default; }
     .theme-dark .kuiLocalTab.kuiLocalTab-isSelected {
       color: #ffffff;
