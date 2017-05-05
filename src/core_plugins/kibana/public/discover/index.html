@@ -34,13 +34,13 @@
                 placeholder="Search... (e.g. status:200 AND extension:PHP)"
                 aria-label="Search input"
                 type="text"
-                class="kuiLocalSearchInput kuiLocalLuceneSearchInput"
+                class="kuiLocalSearchInput kuiLocalSearchInput--lucene"
                 ng-class="{'kuiLocalSearchInput-isInvalid': discoverSearch.$invalid}"
               >
               <div class="kuiLocalSearchAssistedInput__assistance">
                 <p class="kuiText">
                   <a
-                    class="kuiLink kuiLocalSearchAssistedInput__assistanceLink"
+                    class="kuiLink"
                     ng-href="{{queryDocLinks.luceneQuerySyntax}}"
                     target="_blank"
                   >

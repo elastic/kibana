@@ -28,10 +28,6 @@
   }
 }
 
-.kuiLocalLuceneSearchInput:focus {
-  padding-right: 13em;
-}
-
 .kuiLocalSearchAssistedInput {
   display: flex;
   flex: 1 1 100%;
@@ -46,15 +42,6 @@
     right: $globalFormControlHorizontalPadding;
     top: 50%; /* 1 */
     transform: translateY(-50%); /* 1 */
-  }
-
-  .kuiLocalSearchAssistedInput__assistanceLink {
-    display: none;
-  }
-
-  .kuiLocalSearchInput:focus + .kuiLocalSearchAssistedInput__assistance .kuiLocalSearchAssistedInput__assistanceLink,
-  .kuiLocalSearchAssistedInput__assistanceLink:active {
-    display: inherit;
   }
 
 .kuiLocalSearchSelect {

@@ -38,13 +38,13 @@
                 aria-label="Enter query"
                 data-test-subj="dashboardQuery"
                 type="text"
-                class="kuiLocalSearchInput kuiLocalLuceneSearchInput"
+                class="kuiLocalSearchInput kuiLocalSearchInput--lucene"
                 ng-class="{'kuiLocalSearchInput-isInvalid': queryInput.$invalid}"
               >
               <div class="kuiLocalSearchAssistedInput__assistance">
                 <p class="kuiText">
                   <a
-                    class="kuiLink kuiLocalSearchAssistedInput__assistanceLink"
+                    class="kuiLink"
                     ng-href="{{queryDocLinks.luceneQuerySyntax}}"
                     target="_blank"
                   >
