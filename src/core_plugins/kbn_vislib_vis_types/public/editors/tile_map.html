@@ -127,15 +127,10 @@
 
 <div ng-show="vis.params.wms.enabled" class="well">
   <div class="vis-option-item form-group">
-
-    <p>
-      WMS maps are 3rd party mapping services that have not been verified to work with Kibana.
-      These should be considered expert settings.
-    </p>
-
-    <label>
-      WMS url*
-    </label>
+      <p>WMS is an OGC standard for map image services. For more information, go <a href="http://www.opengeospatial.org/standards/wms">here</a>.</p>
+      <label>
+        WMS url* <kbn-info info="The URL of the WMS web service"></kbn-info>
+      </label>
     <input type="text" class="form-control"
       name="wms.url"
       ng-model="vis.params.wms.url">

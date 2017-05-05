@@ -116,14 +116,14 @@ export default function defaultSettingsProvider() {
     'visualization:tileMap:WMSdefaults': {
       value: JSON.stringify({
         enabled: false,
-        url: '',
+        url: undefined,
         options: {
           version: '1.3.0',
-          layers: '',
+          layers: undefined,
           format: 'image/png',
           transparent: true,
-          attribution: '',
-          styles: '',
+          attribution: undefined,
+          styles: undefined,
         }
       }, null, 2),
       type: 'json',

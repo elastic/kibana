@@ -135,6 +135,30 @@ describe('kibana_map tests', function () {
       });
     });
 
+    it('WMS - should handle invalid settings', async function () {
+
+      const invalidOptions = {
+        url: undefined,
+        version: '1.3.0',
+        layers: undefined,
+        format: 'image/png',
+        transparent: true,
+        attribution: undefined,
+        styles: '',
+        minZoom: 1,
+        maxZoom: 18
+      };
+
+      kibanaMap.setBaseLayer({
+        baseLayerType: 'wms',
+        options: invalidOptions
+      });
+
+      expect(kibanaMap.getLeafletBaseLayer()).to.eql(null);
+
+
+    });
+
   });
 
 
