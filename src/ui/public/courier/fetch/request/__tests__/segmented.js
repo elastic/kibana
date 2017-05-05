@@ -27,7 +27,7 @@ describe('SegmentedRequestProvider', () => {
     });
 
     it('returns promise', () => {
-      expect(returned.then).to.be.Function;
+      expect(returned.then).to.be.a(Function);
     });
 
     it('calls super.start() synchronously', () => {
