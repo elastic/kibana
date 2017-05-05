@@ -129,6 +129,7 @@ Start the development server.
   ```bash
   npm start
   ```
+- Now you can point your web browser to https://localhost:5601 and start playing with Kibana! _Please note that in dev mode, Kibana launches also basePath proxy in port 5603, and you will be a notice in the log about that, but the port to access Kibana is 5601._
 
 > On Windows, you'll need you use Git Bash, Cygwin, or a similar shell that exposes the `sh` command.  And to successfully build you'll need Cygwin optional packages zip, tar, and shasum.
 
