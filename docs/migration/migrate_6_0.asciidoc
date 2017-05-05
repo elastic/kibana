@@ -21,3 +21,11 @@ the status API has changed:
 * Metrics now provide the latest available data instead of samples over time
 
 *Impact:* You will need to update anything using the status API and expecting the previous response format.
+
+[float]
+=== Timelion requires comma to separate queries
+*Details:* Kibana 5.x allowed users to use spaces as a query separator in timelion `.es(400) .es(500)`. 
+This is no longer the case. Now, only commas are a valid query separator: e.g. `.es(400), .es(500)`
+
+
+*Impact:* You will need to migrate your stored timelion queries to the new syntax.
