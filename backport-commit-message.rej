@@ -1,0 +1,9 @@
+Bring back appStatus.dirty - it was part of the public plugin API
+
+Backports PR #10534
+
+**Commit 1:**
+Bring back appStatus.dirty - it was part of the public plugin API
+
+* Original sha: 415299f3fc57b45d22432bd7e1b540278d77693e
+* Authored by Stacey Gammon <gammon@elastic.co> on 2017-02-23T16:05:41Z
