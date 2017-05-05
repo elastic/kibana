@@ -172,7 +172,7 @@ class TimeseriesChart extends Component {
               <div style={styles.text}>{ item.series.label }</div>
               <div style={styles.value}>{ formatter(value) }</div>
             </div>
-            <div style={styles.date}>{ moment(item.datapoint[0]).format('lll') }</div>
+            <div style={styles.date}>{ moment(item.datapoint[0]).format('ll LTS') }</div>
           </div>
           <i className="fa fa-caret-right" style={styles.rightCaret}></i>
         </div>
