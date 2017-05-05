@@ -474,7 +474,7 @@ export class KibanaMap extends EventEmitter {
       }
     });
 
-    if (bounds) {
+    if (bounds && bounds.isValid()) {
       this._leafletMap.fitBounds(bounds);
     }
   }
