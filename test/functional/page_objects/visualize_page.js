@@ -64,6 +64,19 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
       .click();
     }
 
+    clickTagCloud() {
+      return remote
+      .setFindTimeout(defaultFindTimeout)
+      .findByPartialLinkText('Tag Cloud')
+      .click();
+    }
+
+    getTextTag() {
+      return remote
+      .setFindTimeout(defaultFindTimeout)
+      .findAllByCssSelector('text').getVisibleText();
+    }
+
     clickVerticalBarChart() {
       return remote
       .setFindTimeout(defaultFindTimeout)
