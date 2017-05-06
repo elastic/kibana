@@ -45,6 +45,8 @@ app.directive('timelionExpressionInput', function ($compile, $http, $timeout) {
     restrict: 'E',
     scope: {
       sheet: '=',
+      getCaretPosition: '&',
+      onExpressionChange: '&',
     },
     replace: true,
     transclude: true,
@@ -60,10 +62,8 @@ app.directive('timelionExpressionInput', function ($compile, $http, $timeout) {
 
       // Add the transcluded content. Assuming it's an input control of some sort, it will need
       // access to the parent scope so it can use ng-model correctly.
-      let input;
       transclude(scope.$parent, clone => {
         elem.prepend(clone);
-        input = elem.find('[data-timelion-expression-input]');
       });
 
       const functionReference = {};
@@ -80,23 +80,18 @@ app.directive('timelionExpressionInput', function ($compile, $http, $timeout) {
         });
       }
 
-      function setExpression(expression, caretPosition) {
-        input.val(expression);
-        input[0].selectionStart = input[0].selectionEnd = caretPosition;
-      }
-
       function completeExpression(suggestionIndex) {
         if (scope.functionSuggestions.isEmpty()) {
           return;
         }
 
         const functionName = `${scope.functionSuggestions.list[suggestionIndex].name}()`;
-        const expression = scope.sheet;
+        const currentExpression = scope.sheet;
         const { min, max } = caretLocation;
 
-        const newExpression = insertAtLocation(functionName, expression, min, max);
-        const newCaretPosition = min + functionName.length - 1;
-        setExpression(newExpression, newCaretPosition);
+        const expression = insertAtLocation(functionName, currentExpression, min, max);
+        const caretPosition = min + functionName.length - 1;
+        scope.onExpressionChange({ expression, caretPosition });
 
         scope.functionSuggestions.reset();
       }
@@ -113,7 +108,7 @@ app.directive('timelionExpressionInput', function ($compile, $http, $timeout) {
       }
 
       function getSuggestions() {
-        const caretPosition = input[0].selectionStart;
+        const caretPosition = scope.getCaretPosition();
 
         suggest(
           scope.sheet,
@@ -139,10 +134,6 @@ app.directive('timelionExpressionInput', function ($compile, $http, $timeout) {
         const keyCodes = _.values(navigationalKeys);
         return keyCodes.includes(keyCode);
       }
-
-      scope.mouseUpHandler = () => {
-        getSuggestions();
-      };
 
       scope.blurHandler = () => {
         $timeout(() => {

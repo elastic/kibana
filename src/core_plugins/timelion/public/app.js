@@ -1,3 +1,4 @@
+import $ from 'jquery';
 import _ from 'lodash';
 import moment from 'moment-timezone';
 
@@ -226,6 +227,25 @@ app.controller('timelion', function (
       notify.error(err);
 
     });
+  };
+
+  $scope.getInputCaretPosition = function getInputCaretPosition() {
+    return window.getSelection().getRangeAt(0).startOffset;
+  };
+
+  $scope.updateExpression = function updateExpression(expression, caretPosition) {
+    // We can't cache this element reference because this is a controller, not a directive, so the
+    // DOM isn't ready during initialization.
+    const expressionInput = $('[data-expression-input]');
+    expressionInput.text(expression);
+    expressionInput.focus();
+    const textNode = expressionInput[0].firstChild;
+    const range = document.createRange();
+    range.setStart(textNode, caretPosition);
+    range.setEnd(textNode, caretPosition);
+    const sel = window.getSelection();
+    sel.removeAllRanges();
+    sel.addRange(range);
   };
 
   $scope.safeSearch = _.debounce($scope.search, 500);

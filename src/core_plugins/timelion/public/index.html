@@ -26,16 +26,19 @@
         <div class="kuiLocalSearch timelionLocalSearch">
           <timelion-expression-input
             sheet="state.sheet[state.selected]"
+            get-caret-position="getInputCaretPosition()"
+            on-expression-change="updateExpression(expression, caretPosition)"
           >
-            <input
-              data-timelion-expression-input
+            <!-- NOTE: This element can't contain whitespace, or else our caret-finding logic
+            won't work. -->
+            <div
+              data-expression-input
               input-focus
+              class="kuiLocalSearchInput kuiLocalSearchInput--expandable"
               ng-model="state.sheet[state.selected]"
-              placeholder="Expression..."
+              bound-content-editable
               aria-label="Expression input"
-              type="text"
-              class="kuiLocalSearchInput"
-            >
+            ></div>
           </timelion-expression-input>
 
           <timelion-interval
