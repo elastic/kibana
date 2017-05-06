@@ -63,7 +63,7 @@ describe('ast toExpression', () => {
             test: [{
               type: argType,
               value: 'invalid type',
-            }]
+            }],
           },
         }],
       };
@@ -89,7 +89,7 @@ describe('ast toExpression', () => {
               test: [{
                 type: chainTypes[i],
                 invalid: 'no chain here',
-              }]
+              }],
             },
           }],
         };
@@ -125,8 +125,8 @@ describe('ast toExpression', () => {
         chain: [{
           type: 'function',
           function: 'csv',
-          arguments: {}
-        }]
+          arguments: {},
+        }],
       };
 
       const expression = toExpression(astObj);
@@ -143,9 +143,9 @@ describe('ast toExpression', () => {
             input: [{
               type: 'string',
               value: 'stuff\nthings',
-            }]
-          }
-        }]
+            }],
+          },
+        }],
       };
 
       const expression = toExpression(astObj);
@@ -166,9 +166,9 @@ describe('ast toExpression', () => {
             separator: [{
               type: 'string',
               value: '\\n',
-            }]
-          }
-        }]
+            }],
+          },
+        }],
       };
 
       const expression = toExpression(astObj);
@@ -192,9 +192,9 @@ describe('ast toExpression', () => {
             separator: [{
               type: 'string',
               value: '\\n',
-            }]
-          }
-        }]
+            }],
+          },
+        }],
       };
 
       const expression = toExpression(astObj);
@@ -220,8 +220,8 @@ describe('ast toExpression', () => {
               type: 'string',
               value: 'stuff\nthings',
             }],
-          }
-        }]
+          },
+        }],
       };
 
       const expression = toExpression(astObj);
@@ -247,8 +247,8 @@ describe('ast toExpression', () => {
               type: 'string',
               value: 'stuff\nthings',
             }],
-          }
-        }]
+          },
+        }],
       };
 
       const expression = toExpression(astObj);
@@ -271,7 +271,7 @@ describe('ast toExpression', () => {
                   type: [{
                     type: 'string',
                     value: 'comma',
-                  }]
+                  }],
                 },
               }],
             }],
@@ -311,9 +311,9 @@ describe('ast toExpression', () => {
           arguments: {
             input: [{
               type: 'string',
-              value: 'year,make,model,price\n2016,honda,cr-v,23845\n2016,honda,fit,15890,\n2016,honda,civic,18640'
-            }]
-          }
+              value: 'year,make,model,price\n2016,honda,cr-v,23845\n2016,honda,fit,15890,\n2016,honda,civic,18640',
+            }],
+          },
         }, {
           type: 'function',
           function: 'line',
@@ -326,10 +326,10 @@ describe('ast toExpression', () => {
                 arguments: {
                   f: [{
                     type: 'string',
-                    value: 'year'
-                  }]
-                }
-              }]
+                    value: 'year',
+                  }],
+                },
+              }],
             }],
             y: [{
               type: 'partial',
@@ -339,10 +339,10 @@ describe('ast toExpression', () => {
                 arguments: {
                   f: [{
                     type: 'string',
-                    value: 'price'
-                  }]
-                }
-              }]
+                    value: 'price',
+                  }],
+                },
+              }],
             }],
             colors: [{
               type: 'partial',
@@ -352,13 +352,13 @@ describe('ast toExpression', () => {
                 arguments: {
                   f: [{
                     type: 'string',
-                    value: 'model'
-                  }]
-                }
-              }]
-            }]
-          }
-        }]
+                    value: 'model',
+                  }],
+                },
+              }],
+            }],
+          },
+        }],
       };
 
       const expression = toExpression(astObj);
@@ -366,7 +366,7 @@ describe('ast toExpression', () => {
         'csv(input="year,make,model,price',
         '2016,honda,cr-v,23845',
         '2016,honda,fit,15890,',
-        '2016,honda,civic,18640").line(x=.distinct(f="year"), y=.sum(f="price"), colors=.distinct(f="model"))'
+        '2016,honda,civic,18640").line(x=.distinct(f="year"), y=.sum(f="price"), colors=.distinct(f="model"))',
       ];
       expect(expression).to.equal(expected.join('\n'));
     });
@@ -380,9 +380,9 @@ describe('ast toExpression', () => {
           arguments: {
             input: [{
               type: 'string',
-              value: 'year,make,model,price\n2016,honda,cr-v,23845\n2016,honda,fit,15890,\n2016,honda,civic,18640'
-            }]
-          }
+              value: 'year,make,model,price\n2016,honda,cr-v,23845\n2016,honda,fit,15890,\n2016,honda,civic,18640',
+            }],
+          },
         }, {
           type: 'function',
           function: 'pointseries',
@@ -395,10 +395,10 @@ describe('ast toExpression', () => {
                 arguments: {
                   f: [{
                     type: 'string',
-                    value: 'year'
-                  }]
-                }
-              }]
+                    value: 'year',
+                  }],
+                },
+              }],
             }],
             y: [{
               type: 'partial',
@@ -408,10 +408,10 @@ describe('ast toExpression', () => {
                 arguments: {
                   f: [{
                     type: 'string',
-                    value: 'price'
-                  }]
-                }
-              }]
+                    value: 'price',
+                  }],
+                },
+              }],
             }],
             colors: [{
               type: 'partial',
@@ -421,12 +421,12 @@ describe('ast toExpression', () => {
                 arguments: {
                   f: [{
                     type: 'string',
-                    value: 'model'
-                  }]
-                }
-              }]
-            }]
-          }
+                    value: 'model',
+                  }],
+                },
+              }],
+            }],
+          },
         }, {
           type: 'function',
           function: 'line',
@@ -445,7 +445,7 @@ describe('ast toExpression', () => {
               }],
             }],
           },
-        }]
+        }],
       };
 
       const expression = toExpression(astObj);
@@ -454,7 +454,7 @@ describe('ast toExpression', () => {
         '2016,honda,cr-v,23845',
         '2016,honda,fit,15890,',
         '2016,honda,civic,18640").pointseries(x=.distinct(f="year"), y=.sum(f="price"), ' +
-          'colors=.distinct(f="model")).line(pallette=getColorPallette(name="elastic"))'
+          'colors=.distinct(f="model")).line(pallette=getColorPallette(name="elastic"))',
       ];
       expect(expression).to.equal(expected.join('\n'));
     });
@@ -478,7 +478,7 @@ describe('ast toExpression', () => {
                   value: 'sum(price)',
                 }],
               },
-            }]
+            }],
           }],
         },
       };
@@ -504,8 +504,8 @@ describe('ast toExpression', () => {
               type: 'string',
               value: 'three',
             }],
-          }
-        }]
+          },
+        }],
       };
 
       const expression = toExpression(astObj);
@@ -537,8 +537,8 @@ describe('ast toExpression', () => {
               type: 'string',
               value: 'three',
             }],
-          }
-        }]
+          },
+        }],
       };
 
       const expression = toExpression(astObj);

@@ -16,7 +16,7 @@ module.exports = function (server, /*options*/) {
 
     addType(typeDef) {
       types.register(typeDef);
-    }
+    },
   };
 
   server.plugins.canvas.addFunction(require('./server/functions/demodata/demodata'));

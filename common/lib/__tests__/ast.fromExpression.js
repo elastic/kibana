@@ -90,9 +90,9 @@ describe('ast fromExpression', () => {
               q: [{
                 type: 'string',
                 value: 'do something',
-              }]
-            }
-          }]
+              }],
+            },
+          }],
         }]);
       });
     });
@@ -122,10 +122,10 @@ describe('ast fromExpression', () => {
             arguments: {
               q: [{
                 type: 'string',
-                value: 'do something'
-              }]
-            }
-          }]
+                value: 'do something',
+              }],
+            },
+          }],
         }]);
       });
     });

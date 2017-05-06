@@ -7,9 +7,9 @@ module.exports = new Fn({
   help: 'Render an object with its default renderer, if one exists',
   context: {
     types: [
-      'render'
-    ]
+      'render',
+    ],
   },
   args: {},
-  fn: (context) => context
+  fn: (context) => context,
 });

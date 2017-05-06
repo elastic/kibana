@@ -22,7 +22,7 @@ export function socketApi(server) {
           types: types.toJS(),
           functions: functions.toJS(),
           referableFunctions: clientFunctions,
-          socket: socket
+          socket: socket,
         });
 
         interpret(msg.ast, msg.context)

@@ -16,15 +16,15 @@ export default function (kibana) {
             kbnIndex: config.get('kibana.index'),
             esShardTimeout: config.get('elasticsearch.shardTimeout'),
             esApiVersion: config.get('elasticsearch.apiVersion'),
-            basePath
+            basePath,
           };
-        }
+        },
       },
       hacks: [
         // Client side plugins go here
         'plugins/canvas/lib/load_functions.js',
         'plugins/canvas/lib/load_types.js',
-        'plugins/canvas/lib/load_elements.js'
+        'plugins/canvas/lib/load_elements.js',
       ],
     },
 
@@ -34,7 +34,7 @@ export default function (kibana) {
       }).default();
     },
 
-    init: require('./init')
+    init: require('./init'),
 
   });
 }

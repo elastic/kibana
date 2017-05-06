@@ -13,7 +13,7 @@ module.exports = function Type(config) {
 
   const fns = {
     from: config.from || {},
-    to: config.to || {}
+    to: config.to || {},
   };
 
   const castableTypeNames = (types, toOrFrom) => _.intersection(types, _.keys(fns[toOrFrom]));

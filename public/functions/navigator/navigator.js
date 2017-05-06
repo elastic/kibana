@@ -10,13 +10,13 @@ module.exports = new Fn({
     _: {
       name: '_',
       types: [
-        'string'
+        'string',
       ],
       'aliases': [],
-      'multi': false
-    }
+      'multi': false,
+    },
   },
   fn: (context, args) => {
     return navigator[args._];
-  }
+  },
 });

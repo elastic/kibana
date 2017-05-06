@@ -7,20 +7,20 @@ module.exports = new Fn({
   type: 'datatable',
   help: 'Replace value in column with output of a function',
   context: {
-    types: ['datatable']
+    types: ['datatable'],
   },
   args: {
     column: {
       types: ['string'],
-      aliases: ['_']
+      aliases: ['_'],
     },
     function: {
       types: ['function'],
-      aliases: ['fn']
+      aliases: ['fn'],
     },
     dest: {
-      types: ['string', 'null']
-    }
+      types: ['string', 'null'],
+    },
   },
   fn: (context, args) => {
     if (args.dest) {
@@ -35,5 +35,5 @@ module.exports = new Fn({
     });
 
     return Promise.all(rowPromises).then(rows => _.assign(context, { rows: rows }));
-  }
+  },
 });

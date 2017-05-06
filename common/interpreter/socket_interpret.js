@@ -57,6 +57,6 @@ export function socketInterpreterProvider(config) {
           socket.on('resp', listener);
         });
       });
-    }
+    },
   });
 }

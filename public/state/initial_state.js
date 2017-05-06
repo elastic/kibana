@@ -5,10 +5,10 @@ export default (path) => {
     app: {}, // Kibana stuff in here
     throwAway: {
       expression: 'demodata()',
-      renderable: null
+      renderable: null,
     },
     transient: {},
-    persistent: {}
+    persistent: {},
   };
 
   if (!path) {

@@ -29,5 +29,5 @@ export class Render extends React.PureComponent {
 Render.propTypes = {
   expressionOutput: PropTypes.object,
   expressionType: PropTypes.string,
-  done: PropTypes.func
+  done: PropTypes.func,
 };

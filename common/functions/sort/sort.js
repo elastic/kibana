@@ -8,21 +8,21 @@ module.exports = new Fn({
   help: 'Sorts a datatable on a column',
   context: {
     types: [
-      'datatable'
-    ]
+      'datatable',
+    ],
   },
   args: {
     _: {
       types: [
-        'string'
+        'string',
       ],
       'aliases': [],
       'multi': false, // TODO: No reason you couldn't.
-      help: 'The column to sort on'
-    }
+      help: 'The column to sort on',
+    },
   },
   fn: (context, args) =>
     _.assign(context, {
-      rows: _.sortBy(context.rows, args._)
-    })
+      rows: _.sortBy(context.rows, args._),
+    }),
 });

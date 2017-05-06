@@ -10,7 +10,7 @@ export function translate(server) {
     handler: function (request, reply) {
       if (!request.query.expression) return reply({ error: '"expression" query is required' }).code(400);
       reply(fromExpression(request.query.expression));
-    }
+    },
   });
 
   server.route({
@@ -23,7 +23,7 @@ export function translate(server) {
       } catch (e) {
         reply({ error: e.message }).code(400);
       }
-    }
+    },
   });
 
 }

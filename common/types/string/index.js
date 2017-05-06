@@ -4,7 +4,7 @@ module.exports = new Type({
   name: 'string',
   from: {
     null: () => '',
-    number: (n) => String(n)
+    number: (n) => String(n),
   },
   to: {
     number: (n) => Number(n),
@@ -12,8 +12,8 @@ module.exports = new Type({
       return {
         type: 'render',
         as: 'markdown',
-        value: input
+        value: input,
       };
-    }
-  }
+    },
+  },
 });

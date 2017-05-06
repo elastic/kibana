@@ -7,17 +7,17 @@ module.exports = new Type({
       return {
         type: 'datatable',
         rows: [],
-        columns: []
+        columns: [],
       };
-    }
+    },
   },
   to: {
     render: (datatable) => {
       return {
         type: 'render',
         as: 'table',
-        value: datatable
+        value: datatable,
       };
-    }
-  }
+    },
+  },
 });

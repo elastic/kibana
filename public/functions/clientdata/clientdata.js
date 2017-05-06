@@ -19,9 +19,9 @@ module.exports = new Fn({
         { name: 'username', type: 'string' },
         { name: 'price', type: 'number' },
         { name: 'age', type: 'number' },
-        { name: 'country', type: 'string' }
+        { name: 'country', type: 'string' },
       ],
-      rows: _.cloneDeep(cheap)
+      rows: _.cloneDeep(cheap),
     };
-  }
+  },
 });

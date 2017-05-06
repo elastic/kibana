@@ -8,7 +8,7 @@ app.directive('react', ($store) => {
   return {
     restrict: 'E',
     scope: {
-      component: '='
+      component: '=',
     },
     link: ($scope, $el) => {
       const Component = $scope.component;
@@ -20,6 +20,6 @@ app.directive('react', ($store) => {
       $scope.$on('$destroy', () => {
         unmountComponentAtNode($el[0]);
       });
-    }
+    },
   };
 });

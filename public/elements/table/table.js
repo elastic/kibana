@@ -9,7 +9,7 @@ module.exports = new Element({
   icon: null,
   schema: {
     datasource: true,
-    model: 'pointseries'
+    model: 'pointseries',
   },
   destroy(plot) {
     //plot.destroy();
@@ -39,5 +39,5 @@ module.exports = new Element({
 
     ReactDOM.render(table, domNode);
     done();
-  }
+  },
 });

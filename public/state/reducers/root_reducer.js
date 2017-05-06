@@ -6,16 +6,16 @@ const rootReducer = handleActions({
     ...state,
     throwAway: {
       ...state.throwAway,
-      expression: action.payload
-    }
+      expression: action.payload,
+    },
   }),
 
   RENDERABLE_SET: (state, action) => ({
     ...state,
     throwAway: {
       ...state.throwAway,
-      renderable: action.payload
-    }
+      renderable: action.payload,
+    },
   }),
 }, getInitialState());
 
