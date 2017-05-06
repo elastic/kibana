@@ -38,6 +38,7 @@
               ng-model="state.sheet[state.selected]"
               bound-content-editable
               aria-label="Expression input"
+              ng-keydown="onKeyDownExpressionInput($event)"
             ></div>
           </timelion-expression-input>
 

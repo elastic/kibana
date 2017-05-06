@@ -229,6 +229,16 @@ app.controller('timelion', function (
     });
   };
 
+  $scope.onKeyDownExpressionInput = function onKeyDownExpressionInput(e) {
+    if (e.keyCode === 13) {
+      if (!e.shiftKey) {
+        // Enter will execute the expression unless Shift is held down, which will add a new line.
+        $scope.search();
+        e.preventDefault();
+      }
+    }
+  };
+
   $scope.getInputCaretPosition = function getInputCaretPosition() {
     return window.getSelection().getRangeAt(0).startOffset;
   };
