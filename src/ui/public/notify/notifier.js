@@ -121,6 +121,7 @@ function add(notif, cb) {
     notif.customActions = notif.customActions.map((action, index) => {
       return {
         key: action.text,
+        dataTestSubj: action.dataTestSubj,
         callback: closeNotif(notif, action.callback, action.text),
         getButtonClass() {
           const buttonTypeClass = typeToButtonClassMap[notif.type];
