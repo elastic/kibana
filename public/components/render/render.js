@@ -5,19 +5,17 @@ import { elements } from '../../lib/elements';
 
 export class Render extends React.PureComponent {
   componentWillUnmount() {
-    console.log(this.destroyMe);
+    const { expressionOutput } = this.props;
+    const destroyFn = elements.get(expressionOutput.as).destroy;
+    destroyFn(this.destroyMe);
   }
 
   renderElement(domNode) {
     if (!domNode) return;
 
-    const { expressionType, expressionOutput, done } = this.props;
-    if (expressionType !== 'render') {
-      domNode.innerHTML = 'Waiting for expression to execute';
-    } else {
-      const renderFn = elements.get(expressionOutput.as).render;
-      this.destroyMe = renderFn(domNode, expressionOutput.value, done);
-    }
+    const { expressionOutput, done } = this.props;
+    const renderFn = elements.get(expressionOutput.as).render;
+    this.destroyMe = renderFn(domNode, expressionOutput.value, done);
   }
 
   render() {
