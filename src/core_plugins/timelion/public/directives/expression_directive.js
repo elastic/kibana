@@ -150,17 +150,21 @@ app.directive('timelionExpressionInput', function ($compile, $http, $timeout) {
 
         switch (e.keyCode) {
           case navigationalKeys.UP:
-            // Up and down keys navigate through suggestions.
-            e.preventDefault();
-            scope.functionSuggestions.stepForward();
-            scrollTo(scope.functionSuggestions.index);
+            if (scope.functionSuggestions.isVisible) {
+              // Up and down keys navigate through suggestions.
+              e.preventDefault();
+              scope.functionSuggestions.stepForward();
+              scrollTo(scope.functionSuggestions.index);
+            }
             break;
 
           case navigationalKeys.DOWN:
-            // Up and down keys navigate through suggestions.
-            e.preventDefault();
-            scope.functionSuggestions.stepBackward();
-            scrollTo(scope.functionSuggestions.index);
+            if (scope.functionSuggestions.isVisible) {
+              // Up and down keys navigate through suggestions.
+              e.preventDefault();
+              scope.functionSuggestions.stepBackward();
+              scrollTo(scope.functionSuggestions.index);
+            }
             break;
 
           case navigationalKeys.TAB:
