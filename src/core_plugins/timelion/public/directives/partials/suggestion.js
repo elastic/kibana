@@ -12,7 +12,9 @@ app.directive('timelionExpressionSuggestions', () => {
     },
     replace: true,
     template: timelionExpressionSuggestionsTemplate,
-    link: function () {
+    link: function (scope) {
+      // This will prevent the expression input from losing focus.
+      scope.onMouseDown = e => e.preventDefault();
     }
   };
 });

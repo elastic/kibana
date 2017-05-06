@@ -1,10 +1,16 @@
-<div
-  class="timelionSearchInputContainer"
-  ng-keyup="keyUpHandler($event)"
-  ng-keydown="keyDownHandler($event)"
-  ng-mouseup="mouseUpHandler()"
-  ng-blur="blurHandler()"
->
+<div class="timelionSearchInputContainer">
+  <textarea
+    data-expression-input
+    input-focus
+    class="kuiLocalSearchInput kuiLocalSearchInput--expandable"
+    ng-model="sheet"
+    ng-focus="onFocusInput()"
+    ng-keydown="onKeyDownInput($event)"
+    ng-keyup="onKeyUpInput($event)"
+    ng-blur="onBlurInput()"
+    rows="9"
+  ></textarea>
+
   <timelion-expression-suggestions
     ng-show="functionSuggestions.isVisible"
     suggestions="functionSuggestions.list"

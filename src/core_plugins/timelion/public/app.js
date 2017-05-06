@@ -48,8 +48,21 @@ require('ui/routes')
   });
 
 app.controller('timelion', function (
-    $scope, $http, timefilter, AppState, courier, $route, $routeParams,
-    kbnUrl, Notifier, config, $timeout, Private, savedVisualizations, confirmModal) {
+    $http,
+    $route,
+    $routeParams,
+    $scope,
+    $timeout,
+    AppState,
+    config,
+    confirmModal,
+    courier,
+    kbnUrl,
+    Notifier,
+    Private,
+    savedVisualizations,
+    timefilter
+  ) {
 
   // Keeping this at app scope allows us to keep the current page when the user
   // switches to say, the timepicker.
@@ -123,7 +136,6 @@ app.controller('timelion', function (
     template: '<timelion-docs></timelion-docs>',
     testId: 'timelionDocsButton',
   }];
-
 
   $timeout(function () {
     if (config.get('timelion:showTutorial', true)) {

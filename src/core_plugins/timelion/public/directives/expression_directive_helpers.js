@@ -48,66 +48,58 @@ export class FunctionSuggestions {
   }
 }
 
-export function findFunction(position, functionList) {
-  let matchingFunction;
-
-  functionList.forEach(func => {
-    if ((func.location.min) < position && position < (func.location.max)) {
-      if (!matchingFunction || func.text.length < matchingFunction.text.length) {
-        matchingFunction = func;
-      }
-    }
-  });
-
-  return matchingFunction;
-}
-
-export function suggest(val, caretPosition, functionList, Parser) {
+export function suggest(expression, caretOffset, functionList, Parser) {
   return new Promise((resolve, reject) => {
     try {
-      // Inside an existing function providing suggestion only as a reference. Maybe suggest an argument?
-      findFunction(caretPosition, Parser.parse(val).functions);
+      // We rely on the grammar to throw an error in order to suggest function(s).
+      Parser.parse(expression);
 
-      // TODO: Reference suggestors. Only supporting completion right now;
-
-      // We rely on peg to throw an error in order to suggest function(s). If peg doesn't
-      // throw an error, then we have no suggestions to offer.
+      // If the grammar doesn't throw an error, then we have no suggestions to offer.
       return reject();
     } catch (e) {
-      // NOTE: This is a peg SyntaxError.
-      try { // Is this a structured exception?
-        const error = JSON.parse(e.message);
-        const location = error.location;
+      try {
+        // The grammar will throw an error containing a message if the expression is formatted
+        // correctly and is prepared to accept suggestions. If the expression is not formmated
+        // correctly the grammar will just throw a regular PEG SyntaxError, and this JSON.parse
+        // attempt will throw an error.
+        const message = JSON.parse(e.message);
+        const functionLocation = message.location;
 
-        if (location.min > caretPosition || location.max <= caretPosition) {
-          return reject({ location });
+        const isCaretInsideOfSuggestibleFunction =
+          caretOffset > functionLocation.min && caretOffset <= functionLocation.max;
+
+        // If the caret is outside of a suggestible function's range, we can't offer any
+        // suggestions.
+        if (!isCaretInsideOfSuggestibleFunction) {
+          return reject({ functionLocation });
         }
-        // TODO: Abstract structured exception handling;
-        if (error.type === 'incompleteFunction') {
-          if (error.function == null) {
-            return resolve({
-              list: functionList,
-              location,
-            });
+
+        if (message.type === 'incompleteFunction') {
+          let list;
+
+          if (message.function) {
+            // The user has start typing a function name, so we'll filter the list down to only
+            // possible matches.
+            list = functionList.filter(func => _.startsWith(func.name, message.function));
           } else {
-            const list = _.compact(_.map(functionList, func => {
-              if (_.startsWith(func.name, error.function)) {
-                return func;
-              }
-            }));
-            return resolve({ list, location });
+            // The user hasn't typed anything yet, so we'll just return the entire list.
+            list = functionList;
           }
+
+          return resolve({ list, functionLocation });
         }
       } catch (e) {
+        // The expression isn't correctly formatted, so JSON.parse threw an error.
         return reject();
       }
     }
   });
 }
 
-export function insertAtLocation(value, destination, min, max) {
+export function insertAtLocation(valueToInsert, destination, replacementRangeStart, replacementRangeEnd) {
   // Insert the value at a location caret within the destination.
-  const startOf = destination.slice(0, min);
-  const endOf =  destination.slice(max, destination.length);
-  return `${startOf}${value}${endOf}`;
+  const prefix = destination.slice(0, replacementRangeStart + 1);
+  const suffix =  destination.slice(replacementRangeEnd, destination.length);
+  const result = `${prefix}${valueToInsert}${suffix}`;
+  return result;
 }

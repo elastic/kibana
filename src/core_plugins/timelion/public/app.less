@@ -10,11 +10,6 @@
   flex-direction: column;
 }
 
-.suggestions {
-  position: absolute;
-  top: 30px;
-}
-
 .timelion {
   position: relative;
 
@@ -31,9 +26,13 @@
   position: relative; /* 1 */
 }
 
+/**
+ * 1. Anchor suggestions beneath input.
+ */
 .timelionSearchInputContainer {
   flex: 1 1 auto;
   display: flex;
+  flex-direction: column; /* 1 */
 }
 
 .timelion-container {

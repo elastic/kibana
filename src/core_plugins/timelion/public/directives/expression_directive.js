@@ -1,3 +1,26 @@
+/**
+ * Timelion Expression Autocompleter
+ *
+ * This directive allows users to enter multiline timelion expressions. If the user has entered
+ * a valid expression and then types a ".", this directive will display a list of suggestions.
+ *
+ * Users can navigate suggestions using the arrow keys. When a user selects a suggestion, it's
+ * inserted into the expression and the caret position is updated to be inside of the newly-
+ * added function's parentheses.
+ *
+ * Beneath the hood, we use a PEG grammar to validate the Timelion expression and detect if
+ * the caret is in a position within the expression that allows functions to be suggested.
+ *
+ * NOTE: This directive doesn't work well with contenteditable divs. Challenges include:
+ *   - You have to replace markup with newline characters and spaces when passing the expression
+ *     to the grammar.
+ *   - You have to do the opposite when loading a saved expression, so that it appears correctly
+ *     within the contenteditable (i.e. replace newlines with <br> markup).
+ *   - The Range and Selection APIs ignore newlines when providing caret position, so there is
+ *     literally no way to insert suggestions into the correct place in a multiline expression
+ *     that has more than a single consecutive newline.
+ */
+
 import _ from 'lodash';
 import $ from 'jquery';
 import grammar from 'raw!../chain.peg';
@@ -11,45 +34,21 @@ import {
   insertAtLocation,
 } from './expression_directive_helpers';
 
-/*
-Autocomplete proposal, this file doesn't actually work like this
-
-function names
-Do not auto complete .sometext(, rather insert a closing ) whenever a ( is typed.
-
-.| (single dot)
-.func|
-
-argument names
-We’ll need to sort out which function we’re inside, must be inside a function though
-
-.function(|) // Suggest the first name aka most important arg, e.g. foo=
-.function(fo|) // Suggest foo=
-.function(foo=|) // Suggest [bar,baz]
-
-.function(arg=bar, |) Suggest 2nd arg name, and so on
-
-argument values
-Only named arguments, necessarily provided optional by a plugin.
-Must be inside a function, and start must be adjacent to the argument name
-
-.function(arg=b|)
-*/
-
 const Parser = PEG.buildParser(grammar);
-
 const app = require('ui/modules').get('apps/timelion', []);
 
-app.directive('timelionExpressionInput', function ($compile, $http, $timeout) {
+app.directive('timelionExpressionInput', function ($http, $timeout) {
   return {
     restrict: 'E',
     scope: {
       sheet: '=',
+      updateChart: '&',
     },
     replace: true,
-    transclude: true,
     template: timelionExpressionInputTemplate,
-    link: function (scope, elem, attrs, ctrl, transclude) {
+    link: function (scope, elem) {
+      const expressionInput = elem.find('[data-expression-input]');
+
       const navigationalKeys = {
         ESC: 27,
         UP: 38,
@@ -58,16 +57,8 @@ app.directive('timelionExpressionInput', function ($compile, $http, $timeout) {
         ENTER: 13
       };
 
-      // Add the transcluded content. Assuming it's an input control of some sort, it will need
-      // access to the parent scope so it can use ng-model correctly.
-      let input;
-      transclude(scope.$parent, clone => {
-        elem.prepend(clone);
-        input = elem.find('[data-timelion-expression-input]');
-      });
-
       const functionReference = {};
-      const caretLocation = {};
+      let suggestibleFunctionLocation = {};
 
       scope.functionSuggestions = new FunctionSuggestions();
 
@@ -80,56 +71,70 @@ app.directive('timelionExpressionInput', function ($compile, $http, $timeout) {
         });
       }
 
-      function setExpression(expression, caretPosition) {
-        input.val(expression);
-        input[0].selectionStart = input[0].selectionEnd = caretPosition;
+      function getCaretOffset() {
+        return expressionInput[0].selectionStart;
       }
 
-      function completeExpression(suggestionIndex) {
+      function setCaretOffset(caretOffset) {
+        // Wait for Angular to can update the input with the new expression and *then* we can set
+        // the caret position.
+        $timeout(() => {
+          expressionInput.focus();
+          expressionInput[0].selectionStart = expressionInput[0].selectionEnd = caretOffset;
+          scope.$apply();
+        }, 0);
+      }
+
+      function insertSuggestionIntoExpression(suggestionIndex) {
         if (scope.functionSuggestions.isEmpty()) {
           return;
         }
 
         const functionName = `${scope.functionSuggestions.list[suggestionIndex].name}()`;
-        const expression = scope.sheet;
-        const { min, max } = caretLocation;
+        const { min, max } = suggestibleFunctionLocation;
 
-        const newExpression = insertAtLocation(functionName, expression, min, max);
-        const newCaretPosition = min + functionName.length - 1;
-        setExpression(newExpression, newCaretPosition);
+        // Update the expression with the function.
+        const updatedExpression = insertAtLocation(functionName, scope.sheet, min, max);
+        scope.sheet = updatedExpression;
 
+        // Position the caret inside of the function parentheses.
+        const newCaretOffset = min + functionName.length;
+        setCaretOffset(newCaretOffset);
+
+        // Hide suggestions.
         scope.functionSuggestions.reset();
       }
 
-      function scrollTo(selected) {
-        const suggestionsListElem = $('[data-suggestions-list]');
-        const suggestedElem = $($('[data-suggestion-list-item]')[selected]);
-
-        if (!suggestedElem.position() || !suggestedElem.position().top) {
-          return;
-        }
-
-        suggestionsListElem.scrollTop(suggestionsListElem.scrollTop() + suggestedElem.position().top);
+      function scrollToSuggestionAt(index) {
+        // We don't cache these because the list changes based on user input.
+        const suggestionsList = $('[data-suggestions-list]');
+        const suggestionListItem = $('[data-suggestion-list-item]')[index];
+        // Scroll to the position of the item relative to the list, not to the window.
+        suggestionsList.scrollTop(suggestionListItem.offsetTop - suggestionsList[0].offsetTop);
       }
 
       function getSuggestions() {
-        const caretPosition = input[0].selectionStart;
+        const caretOffset = getCaretOffset();
 
         suggest(
           scope.sheet,
-          caretPosition,
+          caretOffset,
           functionReference.list,
           Parser
-        ).then(({ list, location }) => {
+        ).then(suggestions => {
           // We're using ES6 Promises, not $q, so we have to wrap this in $apply.
           scope.$apply(() => {
-            scope.functionSuggestions.setList(list);
+            scope.functionSuggestions.setList(suggestions.list);
             scope.functionSuggestions.show();
-            Object.assign(caretLocation, location);
+            suggestibleFunctionLocation = suggestions.functionLocation;
+            $timeout(() => {
+              const suggestionsList = $('[data-suggestions-list]');
+              suggestionsList.scrollTop(0);
+            }, 0);
           });
-        }, ({ location } = {}) => {
+        }, (noSuggestions = {}) => {
           scope.$apply(() => {
-            Object.assign(caretLocation, location);
+            suggestibleFunctionLocation = noSuggestions.functionLocation;
             scope.functionSuggestions.reset();
           });
         });
@@ -140,36 +145,49 @@ app.directive('timelionExpressionInput', function ($compile, $http, $timeout) {
         return keyCodes.includes(keyCode);
       }
 
-      scope.mouseUpHandler = () => {
-        getSuggestions();
+      function isUserInsertingNewLine(keyCode, isShiftPressed) {
+        // SHIFT + ENTER will insert a new line.
+        return keyCode === navigationalKeys.ENTER && isShiftPressed;
+      }
+
+      scope.onFocusInput = () => {
+        // Wait for the caret position of the input to update and then we can get suggestions
+        // (which depends on the caret position).
+        $timeout(getSuggestions, 0);
       };
 
-      scope.blurHandler = () => {
-        $timeout(() => {
-          scope.functionSuggestions.hide();
-        }, 100);
+      scope.onBlurInput = () => {
+        scope.functionSuggestions.hide();
       };
 
-      scope.keyDownHandler = e => {
+      scope.onKeyDownInput = e => {
         // If we've pressed any non-navigational keys, then the user has typed something and we
-        // can exit early without doing any navigation.
+        // can exit early without doing any navigation. The keyup handler will pull up suggestions.
         if (!isNavigationalKey(e.keyCode)) {
+          return;
+        }
+
+        if (isUserInsertingNewLine(e.keyCode, e.shiftKey)) {
           return;
         }
 
         switch (e.keyCode) {
           case navigationalKeys.UP:
-            // Up and down keys navigate through suggestions.
-            e.preventDefault();
-            scope.functionSuggestions.stepForward();
-            scrollTo(scope.functionSuggestions.index);
+            if (scope.functionSuggestions.isVisible) {
+              // Up and down keys navigate through suggestions.
+              e.preventDefault();
+              scope.functionSuggestions.stepForward();
+              scrollToSuggestionAt(scope.functionSuggestions.index);
+            }
             break;
 
           case navigationalKeys.DOWN:
-            // Up and down keys navigate through suggestions.
-            e.preventDefault();
-            scope.functionSuggestions.stepBackward();
-            scrollTo(scope.functionSuggestions.index);
+            if (scope.functionSuggestions.isVisible) {
+              // Up and down keys navigate through suggestions.
+              e.preventDefault();
+              scope.functionSuggestions.stepBackward();
+              scrollToSuggestionAt(scope.functionSuggestions.index);
+            }
             break;
 
           case navigationalKeys.TAB:
@@ -180,15 +198,19 @@ app.directive('timelionExpressionInput', function ($compile, $http, $timeout) {
 
             // If we have suggestions, complete the selected one.
             e.preventDefault();
-            completeExpression(scope.functionSuggestions.index);
+            insertSuggestionIntoExpression(scope.functionSuggestions.index);
             break;
 
           case navigationalKeys.ENTER:
+            e.preventDefault();
+
             // If the suggestions are open, complete the expression with the suggestion.
             // Otherwise, the default action of submitting the input value will occur.
             if (!scope.functionSuggestions.isEmpty()) {
-              e.preventDefault();
-              completeExpression(scope.functionSuggestions.index);
+              insertSuggestionIntoExpression(scope.functionSuggestions.index);
+            } else {
+              // If the suggestions are closed, we should re-render the chart.
+              scope.updateChart();
             }
             break;
 
@@ -199,14 +221,16 @@ app.directive('timelionExpressionInput', function ($compile, $http, $timeout) {
         }
       };
 
-      scope.keyUpHandler = e => {
+      scope.onKeyUpInput = e => {
         // If the user isn't navigating, then we should update the suggestions based on their input.
         if (!isNavigationalKey(e.keyCode)) {
           getSuggestions();
         }
       };
 
-      scope.onClickSuggestion = completeExpression;
+      scope.onClickSuggestion = index => {
+        insertSuggestionIntoExpression(index);
+      };
 
       init();
     }
