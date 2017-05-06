@@ -1,6 +1,10 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { ArgType } from '../arg_type';
+// import { ArgType } from '../arg_type';
+
+function ArgType() {
+  return (<div>ArgType is not here :(</div>);
+}
 
 function wrapExpression(chain) {
   if (!Array.isArray(chain) || !chain.length) return null;
