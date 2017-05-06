@@ -206,6 +206,10 @@ app.directive('timelionExpressionInput', function ($compile, $http, $timeout) {
         }
       };
 
+      scope.onClickSuggestion = function onClickSuggestion(suggestionIndex) {
+        completeExpression(suggestionIndex);
+      };
+
       init();
     }
   };
