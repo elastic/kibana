@@ -62,8 +62,8 @@ app.directive('timelionExpressionInput', function ($compile, $http, $timeout) {
       // access to the parent scope so it can use ng-model correctly.
       let input;
       transclude(scope.$parent, clone => {
-        input = clone;
         elem.prepend(clone);
+        input = elem.find('[data-timelion-expression-input]');
       });
 
       const functionReference = {};
