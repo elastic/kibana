@@ -28,3 +28,38 @@ If the element doesn't have children, add the closing tag on the same line as th
   attribute3="value3"
 ></div>
 ```
+
+## Accessibility
+
+### Don't use the `title` attribute
+
+The `title` has no clear role within the accessibility standards. 
+[See the HTML5 spec](http://w3c.github.io/html/dom.html#the-title-attribute) for more information.
+
+To provide supplementary, descriptive information about a form control, button, link, or other element, use
+a tooltip component instead.
+
+Additional reading:
+
+* https://www.paciellogroup.com/blog/2010/11/using-the-html-title-attribute/
+* https://www.paciellogroup.com/blog/2012/01/html5-accessibility-chops-title-attribute-use-and-abuse/
+* https://www.deque.com/blog/text-links-practices-screen-readers/
+
+### Tooltips
+
+Elements which act as tooltips should have the `role="tooltip"` attribute and an ID to which the
+described element can point to with the `aria-describedby` attribute. For example:
+
+```html
+<div
+  class="kuiTooltip"
+  role="tooltip"
+  id="visualizationsTooltip"
+>
+  Visualizations help you make sense of your data.
+</div>
+
+<button aria-describedby="visualizationsTooltip">
+ Visualizations
+</button>
+```
