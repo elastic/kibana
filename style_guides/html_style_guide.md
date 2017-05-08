@@ -1,5 +1,30 @@
-
 # HTML Style Guide
+
+## Camel case ID and other attribute values
+
+Use camel case for the values of attributes such as IDs and data test subject selectors.
+
+```html
+<button
+  id="veryImportantButton"
+  data-test-subj="clickMeButton"
+>
+  Click me
+</button>
+```
+
+The only exception is in cases where you're dynamically creating the value, and you need to use
+hyphens as delimiters:
+
+```html
+<button
+  ng-repeat="button in buttons"
+  id="{{ 'veryImportantButton-' + button.id }}"
+  data-test-subj="{{ 'clickMeButton-' + button.id }}"
+>
+  {{ button.label }}
+</button>
+```
 
 ## Multiple attribute values
 
@@ -9,7 +34,7 @@ This makes the attributes easier to scan and compare across similar elements.
 The closing bracket should be on its own line. This allows attributes to be shuffled and edited without having to move the bracket around. It also makes it easier to scan vertically and match opening and closing brackets. This format
 is inspired by the positioning of the opening and closing parentheses in [Pug/Jade](https://pugjs.org/language/attributes.html#multiline-attributes).
 
-```
+```html
 <div
   attribute1="value1"
   attribute2="value2"
@@ -21,7 +46,7 @@ is inspired by the positioning of the opening and closing parentheses in [Pug/Ja
 
 If the element doesn't have children, add the closing tag on the same line as the opening tag's closing bracket.
 
-```
+```html
 <div
   attribute1="value1"
   attribute2="value2"
