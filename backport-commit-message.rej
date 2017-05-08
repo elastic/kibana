@@ -1,0 +1,27 @@
+Support Cloud Kibana UI testing
+
+Backports PR #8880
+
+**Commit 1:**
+Support Cloud Kibana testing
+
+* Original sha: c877b0d72a3810dd131dd8468e3b91b504c4198c
+* Authored by LeeDr <lee.drengenberg@elastic.co> on 2016-10-28T19:16:31Z
+
+**Commit 2:**
+Merge branch '5.0' into supportCloudTesting
+
+* Original sha: 0c2815bc5a53fd1d6e83ecd25e5f5a5ec184aa08
+* Authored by LeeDr <lee.drengenberg@elastic.co> on 2016-10-28T20:53:48Z
+
+**Commit 3:**
+Add xpack file
+
+* Original sha: d095dac24d42e7b219980c0596917f6a7c6bf1b2
+* Authored by LeeDr <lee.drengenberg@elastic.co> on 2016-10-29T00:02:18Z
+
+**Commit 4:**
+Use kibana for kibana server user, Don't log password
+
+* Original sha: 9f63224e7759625ee4880345315d73d1ef99f2f7
+* Authored by LeeDr <lee.drengenberg@elastic.co> on 2016-10-31T17:09:57Z
