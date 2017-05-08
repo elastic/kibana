@@ -56,7 +56,9 @@ class VisEditorVisualization extends Component {
     }
 
     const applyButtonClassName = dirty ? 'thor__button-solid-default' : 'thor__button-outlined-grayLight';
-    const applyMessage = dirty ? 'The changes to this visualization have not been applied.' : 'The latest changes have been applied.';
+    let applyMessage = 'The latest changes have been applied.';
+    if (dirty) applyMessage = 'The changes to this visualization have not been applied.';
+    if (autoApply) applyMessage = 'The changes will be automatically applied.';
     const applyButton = (
       <div className="vis_editor__dirty_controls">
         <div className="vis_editor__dirty_controls-button">
