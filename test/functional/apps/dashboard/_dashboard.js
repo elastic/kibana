@@ -135,7 +135,6 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.visualize.clickNewSearch();
       await PageObjects.visualize.saveVisualization('visualization from add new link');
       await PageObjects.header.clickToastOK();
-      await PageObjects.header.clickToastOK();
 
       const visualizations = PageObjects.dashboard.getTestVisualizations();
       return retry.tryForTime(10000, async function () {
