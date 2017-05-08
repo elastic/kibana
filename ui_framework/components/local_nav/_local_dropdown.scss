@@ -2,7 +2,9 @@
   position: relative;
   padding: 10px $localNavSideSpacing 14px;
   background-color: $localDropdownBackgroundColor;
-  border-bottom: solid 10px $globalColorWhite;
+  border-bottom: solid 1px $globalColorLightGray;
+  border-top: solid 1px $globalColorLightGray;
+  margin-bottom: 10px;
   line-height: 20px;
 
   @include darkTheme {

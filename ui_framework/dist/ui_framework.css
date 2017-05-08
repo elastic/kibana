@@ -329,8 +329,9 @@ body {
  * 1. Override Bootstrap.
  */
 .kuiButton--danger {
-  color: #FFF;
-  background-color: #A30000; }
+  color: #A30000;
+  background-color: #FFF;
+  border: solid 1px #A30000; }
   .kuiButton--danger:not(a):enabled:focus {
     z-index: 1;
     /* 1 */
@@ -338,7 +339,7 @@ body {
     /* 2 */
     box-shadow: 0 0 0 1px #ffffff, 0 0 0 2px #ff523c;
     /* 3 */
-    color: #FFF; }
+    color: #A30000; }
   a.kuiButton--danger:not(.kuiButton-isDisabled):focus {
     /* 1 */
     z-index: 1;
@@ -347,7 +348,7 @@ body {
     /* 2 */
     box-shadow: 0 0 0 1px #ffffff, 0 0 0 2px #ff523c;
     /* 3 */
-    color: #FFF; }
+    color: #A30000; }
   .kuiButton--danger:enabled:hover {
     color: #FFF !important;
     /* 1 */
@@ -1704,7 +1705,9 @@ body {
   position: relative;
   padding: 10px 10px 14px;
   background-color: #F5F5F5;
-  border-bottom: solid 10px #FFF;
+  border-bottom: solid 1px #D9D9D9;
+  border-top: solid 1px #D9D9D9;
+  margin-bottom: 10px;
   line-height: 20px; }
   .theme-dark .kuiLocalDropdown {
     background-color: #525252; }
@@ -1867,14 +1870,20 @@ body {
   background-color: transparent;
   color: #2d2d2d;
   border: 0;
-  cursor: pointer; }
+  cursor: pointer;
+  border-right: solid 1px transparent;
+  border-left: solid 1px transparent; }
   .kuiLocalMenuItem:hover, .kuiLocalMenuItem:focus {
     background-color: #0096CC;
     color: #F5F5F5; }
   .kuiLocalMenuItem.kuiLocalMenuItem-isSelected {
-    background-color: #F5F5F5; }
+    background-color: #F5F5F5;
+    border-color: #D9D9D9;
+    height: calc(100% + 1px);
+    z-index: 2;
+    color: #0096CC; }
     .kuiLocalMenuItem.kuiLocalMenuItem-isSelected:hover, .kuiLocalMenuItem.kuiLocalMenuItem-isSelected:focus {
-      color: #2d2d2d; }
+      color: #0096CC; }
   .kuiLocalMenuItem.kuiLocalMenuItem-isDisabled {
     opacity: 0.5;
     cursor: not-allowed; }
@@ -2460,10 +2469,8 @@ body {
   /* 1 */ }
 
 .kuiPanel {
-  border: 2px solid #E4E4E4; }
-
-.kuiPanel--withHeader {
-  border-top: none; }
+  border: 1px solid #E4E4E4;
+  border-radius: 4px; }
 
 .kuiPanel--centered {
   display: -webkit-box;
@@ -2496,7 +2503,7 @@ body {
   /* 1 */
   padding: 10px;
   height: 50px;
-  background-color: #E4E4E4; }
+  border-bottom: 1px solid #E4E4E4; }
   .kuiPanelHeader .kuiButton:not(a):enabled:focus {
     z-index: 1;
     /* 1 */

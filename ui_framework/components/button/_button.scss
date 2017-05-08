@@ -129,12 +129,13 @@
  * 1. Override Bootstrap.
  */
 .kuiButton--danger {
-  color: $buttonDefaultTextColor;
-  background-color: $buttonDangerBackgroundColor;
+  color: $globalColorRed;
+  background-color: $globalColorWhite;
+  border: solid 1px $globalColorRed;
 
   @include kuiButtonFocus {
     @include focus($globalFocusDangerColor);
-    color: $buttonDefaultTextColor;
+    color: $globalColorRed;
   }
 
   @include kuiButtonHoverAndActive {
