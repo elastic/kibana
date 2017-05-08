@@ -10,6 +10,17 @@ export default (path) => {
     transient: {
       selectedPage: 'page-f3ce-4bb7-86c8-0417606d6592',
       selectedElement: 'element-d88c-4bbd-9453-db22e949b92e',
+      resolvedArgs: {
+        'element-d88c-4bbd-9453-db22e949b92e': {
+          expressionContexts: {
+            0: {
+              state: 'ready',
+              value: '1234',
+              error: null,
+            },
+          },
+        },
+      },
     },
     persistent: {
       workpad: {
