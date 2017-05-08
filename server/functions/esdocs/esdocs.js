@@ -9,29 +9,29 @@ const client = new elasticsearch.Client({
 module.exports = new Fn({
   name: 'esdocs',
   context: {
-    types: ['filters', 'null']
+    types: ['filters', 'null'],
   },
   args: {
     index: {
       types: ['string', 'null'],
-      default: '_all'
+      default: '_all',
     },
     q: {
       types: ['string'],
       help: 'A Lucene query string',
-      default: '-_index:.kibana'
+      default: '-_index:.kibana',
     },
     size: {
       help: 'How many docs to fetch. If you have big docs set this low.',
       types: ['number'],
-      default: 100
+      default: 100,
     },
     // TODO: This doesn't work
     fields: {
       help: 'Comma seperated list of fields. Fewer fields will perform better.',
       types: ['string'],
-      default: ''
-    }
+      default: '',
+    },
   },
   type: 'datatable',
   help: 'Query elasticsearch and get back raw documents, flattened into a datatable. ' +
@@ -56,8 +56,8 @@ module.exports = new Fn({
       return {
         type: 'datatable',
         columns: columns,
-        rows: flatHits
+        rows: flatHits,
       };
     });
-  }
+  },
 });
