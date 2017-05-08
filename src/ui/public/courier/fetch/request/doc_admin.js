@@ -3,11 +3,11 @@ import { AbstractDocRequestProvider } from './_abstract_doc';
 
 export function AdminDocRequestProvider(Private) {
 
-  const docStrategy = Private(DocAdminStrategyProvider);
+  const DocAdminStrategy = Private(DocAdminStrategyProvider);
   const AbstractDocRequest = Private(AbstractDocRequestProvider);
 
   class AdminDocRequest extends AbstractDocRequest {
-    strategy = docStrategy;
+    strategy = DocAdminStrategy;
   }
 
   return AdminDocRequest;

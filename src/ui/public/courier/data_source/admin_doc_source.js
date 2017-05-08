@@ -4,12 +4,12 @@ import { AdminDocRequestProvider } from '../fetch/request/doc_admin';
 
 export function AdminDocSourceProvider(Private) {
   const AbstractDocSource = Private(AbstractDocSourceProvider);
-  const docStrategy = Private(DocAdminStrategyProvider);
+  const DocAdminStrategy = Private(DocAdminStrategyProvider);
   const AdminDocRequest = Private(AdminDocRequestProvider);
 
   class AdminDocSource extends AbstractDocSource {
     constructor(initialState) {
-      super(initialState, docStrategy);
+      super(initialState, DocAdminStrategy);
     }
 
     _createRequest(defer) {

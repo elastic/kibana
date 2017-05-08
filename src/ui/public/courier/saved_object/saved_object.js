@@ -13,12 +13,11 @@ import angular from 'angular';
 import _ from 'lodash';
 
 import { SavedObjectNotFound } from 'ui/errors';
-import uuid from 'node-uuid';
 import MappingSetupProvider from 'ui/utils/mapping_setup';
+import { SavedObjectsClientProvider } from 'ui/saved_objects';
 
 import { AdminDocSourceProvider } from '../data_source/admin_doc_source';
 import { SearchSourceProvider } from '../data_source/search_source';
-import { getTitleAlreadyExists } from './get_title_already_exists';
 
 /**
  * An error message to be used when the user rejects a confirm overwrite.
@@ -40,9 +39,9 @@ function isErrorNonFatal(error) {
   return error.message === OVERWRITE_REJECTED || error.message === SAVE_DUPLICATE_REJECTED;
 }
 
-export function SavedObjectProvider(esAdmin, kbnIndex, Promise, Private, Notifier, confirmModalPromise, indexPatterns) {
-
-  const DocSource = Private(AdminDocSourceProvider);
+export function SavedObjectProvider(kbnIndex, Promise, Private, Notifier, confirmModalPromise, indexPatterns) {
+  const savedObjectsClient = Private(SavedObjectsClientProvider);
+  const AdminDocSource = Private(AdminDocSourceProvider);
   const SearchSource = Private(SearchSourceProvider);
   const mappingSetup = Private(MappingSetupProvider);
 
@@ -53,7 +52,7 @@ export function SavedObjectProvider(esAdmin, kbnIndex, Promise, Private, Notifie
      * Initialize config vars
      ************/
     // the doc which is used to store this object
-    const docSource = new DocSource();
+    const docSource = new AdminDocSource();
 
     // type name for this object, used as the ES-type
     const esType = config.type;
@@ -283,62 +282,6 @@ export function SavedObjectProvider(esAdmin, kbnIndex, Promise, Private, Notifie
     };
 
     /**
-     * Queries es to refresh the index.
-     * @returns {Promise}
-     */
-    function refreshIndex() {
-      return esAdmin.indices.refresh({ index: kbnIndex });
-    }
-
-    /**
-     * Attempts to create the current object using the serialized source. If an object already
-     * exists, a warning message requests an overwrite confirmation.
-     * @param source - serialized version of this object (return value from this.serialize())
-     * What will be indexed into elasticsearch.
-     * @returns {Promise} - A promise that is resolved with the objects id if the object is
-     * successfully indexed. If the overwrite confirmation was rejected, an error is thrown with
-     * a confirmRejected = true parameter so that case can be handled differently than
-     * a create or index error.
-     * @resolved {String} - The id of the doc
-     */
-    const createSource = (source) => {
-      return docSource.doCreate(source)
-        .catch((err) => {
-          // record exists, confirm overwriting
-          if (_.get(err, 'origError.status') === 409) {
-            const confirmMessage = `Are you sure you want to overwrite ${this.title}?`;
-
-            return confirmModalPromise(confirmMessage, { confirmButtonText: `Overwrite ${this.getDisplayName()}` })
-              .then(() => docSource.doIndex(source))
-              .catch(() => Promise.reject(new Error(OVERWRITE_REJECTED)));
-          }
-          return Promise.reject(err);
-        });
-    };
-
-    /**
-     * Returns a promise that resolves to true if either the title is unique, or if the user confirmed they
-     * wished to save the duplicate title.  Promise is rejected if the user rejects the confirmation.
-     */
-    const warnIfDuplicateTitle = () => {
-      // Don't warn if the user isn't updating the title, otherwise that would become very annoying to have
-      // to confirm the save every time, except when copyOnSave is true, then we do want to check.
-      if (this.title === this.lastSavedTitle && !this.copyOnSave) {
-        return Promise.resolve();
-      }
-
-      return getTitleAlreadyExists(this, esAdmin)
-        .then((duplicateTitle) => {
-          if (!duplicateTitle) return true;
-          const confirmMessage =
-            `A ${this.getDisplayName()} with the title '${duplicateTitle}' already exists. Would you like to save anyway?`;
-
-          return confirmModalPromise(confirmMessage, { confirmButtonText: `Save ${this.getDisplayName()}` })
-            .catch(() => Promise.reject(new Error(SAVE_DUPLICATE_REJECTED)));
-        });
-    };
-
-    /**
      * @typedef {Object} SaveOptions
      * @property {boolean} confirmOverwrite - If true, attempts to create the source so it
      * can confirm an overwrite if a document with the id already exists.
@@ -347,11 +290,10 @@ export function SavedObjectProvider(esAdmin, kbnIndex, Promise, Private, Notifie
     /**
      * Saves this object.
      *
-     * @param {SaveOptions} saveOptions?
      * @return {Promise}
      * @resolved {String} - The id of the doc
      */
-    this.save = (saveOptions = {}) => {
+    this.save = () => {
       // Save the original id in case the save fails.
       const originalId = this.id;
       // Read https://github.com/elastic/kibana/issues/9056 and
@@ -365,7 +307,7 @@ export function SavedObjectProvider(esAdmin, kbnIndex, Promise, Private, Notifie
       }
 
       // Create a unique id for this object if it doesn't have one already.
-      this.id = this.id || uuid.v1();
+      this.id = this.id;
       // ensure that the docSource has the current id
       docSource.id(this.id);
 
@@ -373,27 +315,42 @@ export function SavedObjectProvider(esAdmin, kbnIndex, Promise, Private, Notifie
 
       this.isSaving = true;
 
-      return warnIfDuplicateTitle()
-        .then(() => {
-          return saveOptions.confirmOverwrite ? createSource(source) : docSource.doIndex(source);
-        })
-        .then((id) => {
-          this.id = id;
-        })
-        .then(refreshIndex)
-        .then(() => {
-          this.isSaving = false;
-          this.lastSavedTitle = this.title;
-          return this.id;
-        })
-        .catch((err) => {
-          this.isSaving = false;
-          this.id = originalId;
-          if (isErrorNonFatal(err)) {
-            return;
+      const index = (allowTitleConflict = false) => {
+        return savedObjectsClient.save(esType, this.id, source, { allowTitleConflict })
+          .then(resp => resp._id);
+      };
+
+      return index()
+        .catch(err => {
+          if (err.status !== 409 || !err.body.title_conflict) {
+            throw err;
           }
-          return Promise.reject(err);
-        });
+
+          const confirmMessage = (
+            `A ${this.getDisplayName()} with the title '${source.title}' already exists. ` +
+            'Would you like to save anyway?'
+          );
+          const confirmOptions = { confirmButtonText: `Save ${this.getDisplayName()}` };
+          return confirmModalPromise(confirmMessage, confirmOptions)
+            .catch(() => { throw new Error(SAVE_DUPLICATE_REJECTED); })
+            .then(() => index(true));
+        })
+        .then(
+          (id) => {
+            this.id = id;
+            this.isSaving = false;
+            this.lastSavedTitle = this.title;
+            return this.id;
+          },
+          (err) => {
+            this.isSaving = false;
+            this.id = originalId;
+            if (isErrorNonFatal(err)) {
+              return;
+            }
+            return Promise.reject(err);
+          }
+        );
     };
 
     this.destroy = () => {
@@ -408,15 +365,7 @@ export function SavedObjectProvider(esAdmin, kbnIndex, Promise, Private, Notifie
      * @return {promise}
      */
     this.delete = () => {
-      return esAdmin.delete(
-        {
-          index: kbnIndex,
-          type: esType,
-          id: this.id
-        })
-        .then(() => {
-          return refreshIndex();
-        });
+      return savedObjectsClient.delete(esType, this.id);
     };
   }
 

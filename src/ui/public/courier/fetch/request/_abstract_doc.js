@@ -15,6 +15,8 @@ export function AbstractDocRequestProvider(Private) {
       const parent = super.canStart();
       if (!parent) return false;
 
+      if (!this.source.get('id')) return false;
+
       const version = this.source._version;
       const storedVersion = this.source._getStoredVersion();
 

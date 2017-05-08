@@ -12,15 +12,20 @@ import _ from 'lodash';
 
 import 'ui/es';
 import 'ui/storage';
+import { RequestFailure } from 'ui/errors';
+import { RequestQueueProvider } from 'ui/courier/_request_queue';
+import { FetchProvider } from 'ui/courier/fetch/fetch';
 
-import { DocSendToEsProvider } from './_doc_send_to_es';
 import { AbstractDataSourceProvider } from './_abstract';
 import { AbstractDocRequestProvider } from '../fetch/request/_abstract_doc';
+import { SavedObjectsClientProvider } from 'ui/saved_objects';
 
 export function AbstractDocSourceProvider(Private, Promise, es, sessionStorage) {
-  const sendToEs = Private(DocSendToEsProvider);
+  const savedObjectsClient = Private(SavedObjectsClientProvider);
   const SourceAbstract = Private(AbstractDataSourceProvider);
   const DocRequest = Private(AbstractDocRequestProvider);
+  const requestQueue = Private(RequestQueueProvider);
+  const courierFetch = Private(FetchProvider);
 
   _.class(AbstractDocSource).inherits(SourceAbstract);
   function AbstractDocSource(initialState, strategy) {
@@ -51,31 +56,84 @@ export function AbstractDocSourceProvider(Private, Promise, es, sessionStorage) 
   ];
 
   /**
-   * Applies a partial update to the document
-   * @param  {object} fields - The fields to change and their new values (es doc field)
-   * @return {undefined}
+   * Update the document stored
+   * @param {Object} body
+   * @param {Object} options
+   * @property {Boolean} options.allowTitleConflict
+   * @return {Promise<String>}
    */
-  AbstractDocSource.prototype.doUpdate = function (fields) {
-    if (!this._state.id) return this.doIndex(fields);
-    return sendToEs.call(this, 'update', false, { doc: fields });
+  AbstractDocSource.prototype.doIndex = function (body, options = {}) {
+    const { allowTitleConflict } = options;
+    return this._save(body, {
+      allowOverwrite: true,
+      allowTitleConflict
+    });
   };
 
   /**
-   * Update the document stored
-   * @param  {[type]}   body [description]
-   * @return {[type]}        [description]
-   */
-  AbstractDocSource.prototype.doIndex = function (body) {
-    return sendToEs.call(this, 'index', false, body);
+  * Create the document, fails if the document already exists
+  * @param {Object} body
+  * @param {Object} options
+  * @property {Boolean} options.allowTitleConflict
+  * @return {Promise<String>}
+  */
+  AbstractDocSource.prototype.doCreate = function (body, options = {}) {
+    const { allowTitleConflict } = options;
+    return this._save(body, {
+      allowOverwrite: false,
+      allowTitleConflict
+    });
   };
 
-  AbstractDocSource.prototype.doCreate = function (body) {
-    return sendToEs.call(this, 'create', false, body, []);
-  };
 
   /*****
    * PRIVATE API
    *****/
+
+  AbstractDocSource.prototype._save = function (body, options) {
+    const type = this.get('type');
+    const id = this.get('id');
+    const { allowTitleConflict, allowOverwrite } = options;
+
+    return savedObjectsClient
+      .save(type, id, body, {
+        allowTitleConflict,
+        allowOverwrite
+      })
+      .then(resp => {
+        this._storeVersion(resp._version);
+        this.set('id', resp._id);
+        return this._notifyPendingCourierRequests(resp);
+      })
+      .then(() => this.get('id'))
+      .catch(err => {
+        throw new RequestFailure(err);
+      });
+  };
+
+  AbstractDocSource.prototype._notifyPendingCourierRequests = function (resp) {
+    // use the key to compair sources
+    const key = this._versionKey();
+
+    // clear the queue and filter out the removed items, pushing the
+    // unmatched ones back in.
+    const respondTo = requestQueue.splice(0).filter(function (req) {
+      const isDoc = req.source._getType() === 'doc';
+      const keyMatches = isDoc && req.source._versionKey() === key;
+
+      // put some request back into the queue
+      if (!keyMatches) {
+        requestQueue.push(req);
+        return false;
+      }
+
+      return true;
+    });
+
+    return courierFetch.fakeFetchThese(respondTo, respondTo.map(function () {
+      return _.cloneDeep(resp);
+    }));
+  };
 
   /**
    * Get the type of this SourceAbstract

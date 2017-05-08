@@ -1,6 +1,6 @@
 import { CourierNotifierProvider } from './notifier';
 import { ForEachStrategyProvider } from './for_each_strategy';
-import { CallClientProvider } from './call_client';
+import { SendRequestsProvider } from './send_requests';
 import { CallResponseHandlersProvider } from './call_response_handlers';
 import { ContinueIncompleteProvider } from './continue_incomplete';
 import { ReqStatusProvider } from './req_status';
@@ -10,7 +10,7 @@ export function FetchTheseProvider(Private, Promise) {
   const forEachStrategy = Private(ForEachStrategyProvider);
 
   // core tasks
-  const callClient = Private(CallClientProvider);
+  const sendRequests = Private(SendRequestsProvider);
   const callResponseHandlers = Private(CallResponseHandlersProvider);
   const continueIncomplete = Private(ContinueIncompleteProvider);
 
@@ -37,7 +37,7 @@ export function FetchTheseProvider(Private, Promise) {
     return startRequests(requests)
     .then(function () {
       replaceAbortedRequests();
-      return callClient(strategy, requests);
+      return sendRequests(strategy, requests);
     })
     .then(function (responses) {
       replaceAbortedRequests();

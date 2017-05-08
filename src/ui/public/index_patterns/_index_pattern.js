@@ -14,12 +14,12 @@ import { IndexPatternsFlattenHitProvider } from 'ui/index_patterns/_flatten_hit'
 import { IndexPatternsCalculateIndicesProvider } from 'ui/index_patterns/_calculate_indices';
 import { IndexPatternsPatternCacheProvider } from 'ui/index_patterns/_pattern_cache';
 
-export function IndexPatternProvider(Private, Notifier, config, kbnIndex, Promise, confirmModalPromise) {
+export function IndexPatternProvider(Private, Notifier, config, Promise, kbnIndex, confirmModalPromise) {
   const fieldformats = Private(RegistryFieldFormatsProvider);
   const getIds = Private(IndexPatternsGetIdsProvider);
   const mapper = Private(IndexPatternsMapperProvider);
   const intervals = Private(IndexPatternsIntervalsProvider);
-  const DocSource = Private(AdminDocSourceProvider);
+  const AdminDocSource = Private(AdminDocSourceProvider);
   const mappingSetup = Private(UtilsMappingSetupProvider);
   const FieldList = Private(IndexPatternsFieldListProvider);
   const flattenHit = Private(IndexPatternsFlattenHitProvider);
@@ -158,7 +158,7 @@ export function IndexPatternProvider(Private, Notifier, config, kbnIndex, Promis
   class IndexPattern {
     constructor(id) {
       setId(this, id);
-      docSources.set(this, new DocSource());
+      docSources.set(this, new AdminDocSource());
 
       this.metaFields = config.get('metaFields');
       this.getComputedFields = getComputedFields.bind(this);
@@ -181,18 +181,11 @@ export function IndexPatternProvider(Private, Notifier, config, kbnIndex, Promis
 
       watch(this);
 
-      return mappingSetup
-      .isDefined(type)
-      .then(defined => {
-        if (defined) {
-          return true;
-        }
-        return mappingSetup.setup(type, mapping);
-      })
-      .then(() => {
+      return Promise.try(() => {
         if (!this.id) {
           return; // no id === no elasticsearch document
         }
+
         return docSources.get(this)
         .fetch()
         .then(response => updateFromElasticSearch(this, response));

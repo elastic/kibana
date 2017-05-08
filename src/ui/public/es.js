@@ -38,16 +38,4 @@ uiModules
       apiVersion: esApiVersion,
       plugins
     });
-  })
-
-  //Elasticsearch client used for managing Kibana's state.  Connects to the /es-admin proxy,
-  //Always uses the base elasticsearch configuartion
-  .service('esAdmin', function (esFactory, esAdminUrl, esApiVersion, esRequestTimeout) {
-    return esFactory({
-      host: esAdminUrl,
-      log: 'info',
-      requestTimeout: esRequestTimeout,
-      apiVersion: esApiVersion,
-      plugins
-    });
   });

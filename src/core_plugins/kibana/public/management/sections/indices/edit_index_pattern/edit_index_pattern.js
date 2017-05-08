@@ -4,7 +4,6 @@ import './indexed_fields_table';
 import './scripted_fields_table';
 import './scripted_field_editor';
 import './source_filters_table';
-import { RefreshKibanaIndex } from '../refresh_kibana_index';
 import UrlProvider from 'ui/url';
 import { IndicesEditSectionsProvider } from './edit_sections';
 import uiRoutes from 'ui/routes';
@@ -44,7 +43,6 @@ uiModules.get('apps/management')
     $scope, $location, $route, config, courier, Notifier, Private, AppState, docTitle, confirmModal) {
   const notify = new Notifier();
   const $state = $scope.state = new AppState();
-  const refreshKibanaIndex = Private(RefreshKibanaIndex);
 
   $scope.kbnUrl = Private(UrlProvider);
   $scope.indexPattern = $route.current.locals.indexPattern;
@@ -110,7 +108,6 @@ uiModules.get('apps/management')
       }
 
       courier.indexPatterns.delete($scope.indexPattern)
-        .then(refreshKibanaIndex)
         .then(function () {
           $location.url('/management/kibana/index');
         })

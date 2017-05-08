@@ -1,36 +1,21 @@
 import _ from 'lodash';
+import { SavedObjectsClientProvider } from 'ui/saved_objects';
 
-export function IndexPatternsGetIdsProvider(esAdmin, kbnIndex) {
+export function IndexPatternsGetIdsProvider(Private) {
+  const savedObjectClients = Private(SavedObjectsClientProvider);
 
   // many places may require the id list, so we will cache it separately
   // didn't incorporate with the indexPattern cache to prevent id collisions.
   let cachedPromise;
 
   const getIds = function () {
-    if (cachedPromise) {
-      // return a clone of the cached response
-      return cachedPromise.then(function (cachedResp) {
-        return _.clone(cachedResp);
-      });
+    if (!cachedPromise) {
+      cachedPromise = savedObjectClients.getIds('index-pattern')
+        .then(resp => resp.ids);
     }
 
-    cachedPromise = esAdmin.search({
-      index: kbnIndex,
-      type: 'index-pattern',
-      storedFields: [],
-      body: {
-        query: { match_all: {} },
-        size: 10000
-      }
-    })
-    .then(function (resp) {
-      return _.pluck(resp.hits.hits, '_id');
-    });
-
-    // ensure that the response stays pristine by cloning it here too
-    return cachedPromise.then(function (resp) {
-      return _.clone(resp);
-    });
+    // return a clone of the cached response
+    return cachedPromise.then(_.clone);
   };
 
   getIds.clearCache = function () {
