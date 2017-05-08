@@ -1,4 +1,4 @@
-import createTransform from '../create_transform';
+import { createTransform } from '../create_transform';
 import expect from 'expect.js';
 import sinon from 'sinon';
 

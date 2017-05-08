@@ -1,7 +1,7 @@
 import d3 from 'd3';
 import $ from 'jquery';
 
-import Binder from '../../../utils/binder';
+import { Binder } from '../../../utils';
 
 export default class UiBinder extends Binder {
   constructor($scope) {
