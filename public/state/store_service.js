@@ -1,6 +1,6 @@
-import { createStore, applyMiddleware } from 'redux';
+import { createStore, applyMiddleware, combineReducers } from 'redux';
 import thunk from 'redux-thunk';
-import rootReducer from './reducers/root_reducer';
+import throwawayReducer from './reducers/throwaway_reducer';
 import getInitialState from './initial_state';
 import { uiModules } from 'ui/modules';
 
@@ -14,6 +14,10 @@ app.service('$store', (kbnVersion, basePath) => {
     kbnVersion,
     basePath,
   };
+
+  const rootReducer = combineReducers({
+    throwAway: throwawayReducer,
+  });
 
   const store = createStore(rootReducer, initialState, applyMiddleware(thunk));
 
