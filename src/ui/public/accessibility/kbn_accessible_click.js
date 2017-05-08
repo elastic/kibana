@@ -25,12 +25,9 @@ import {
 import { uiModules } from 'ui/modules';
 
 uiModules.get('kibana')
-.directive('kbnAccessibleClick', function ($parse) {
+.directive('kbnAccessibleClick', function () {
   return {
     restrict: 'A',
-    scope: {
-      kbnAccessibleClick: '&',
-    },
     controller: $element => {
       $element.on('keydown', e => {
         // If the user is interacting with a different element, then we don't need to do anything.
@@ -58,7 +55,7 @@ uiModules.get('kibana')
       }
 
       // We're emulating a click action, so we should already have a regular click handler defined.
-      if (!$parse(attrs.ngClick)) {
+      if (!attrs.ngClick) {
         throw new Error('kbnAccessibleClick requires ng-click to be defined on its element.');
       }
 
