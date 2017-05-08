@@ -1384,7 +1384,7 @@ body {
   border-radius: 4px; }
   .kuiDatePickerNavigationButton:hover, .kuiDatePickerNavigationButton:active {
     cursor: pointer;
-    color: #FFF;
+    color: #F5F5F5;
     background-color: #0096CC; }
   .kuiDatePickerNavigationButton:focus {
     z-index: 1;
@@ -1470,7 +1470,7 @@ body {
     color: #ffffff; }
   .kuiDatePickerRowCellContent:hover, .kuiDatePickerRowCellContent:active {
     cursor: pointer;
-    color: #FFF;
+    color: #F5F5F5;
     background-color: #0096CC; }
   .theme-dark .kuiDatePickerRowCellContent {
     color: #cecece; }
@@ -1493,7 +1493,7 @@ body {
   position: relative;
   padding: 10px 10px 14px;
   background-color: #F5F5F5;
-  border-bottom: solid 10px #D9D9D9;
+  border-bottom: solid 10px #FFF;
   line-height: 20px; }
   .theme-dark .kuiLocalDropdown {
     background-color: #525252; }
@@ -1618,7 +1618,7 @@ body {
   padding: 6px 10px;
   font-size: 14px;
   color: #2d2d2d;
-  background-color: #D9D9D9; }
+  background-color: #FFF; }
   .theme-dark .kuiLocalDropdownWarning {
     color: #cecece;
     background-color: #636363; }
@@ -1659,7 +1659,7 @@ body {
   cursor: pointer; }
   .kuiLocalMenuItem:hover, .kuiLocalMenuItem:focus {
     background-color: #0096CC;
-    color: #FFF; }
+    color: #F5F5F5; }
   .kuiLocalMenuItem.kuiLocalMenuItem-isSelected {
     background-color: #F5F5F5; }
     .kuiLocalMenuItem.kuiLocalMenuItem-isSelected:hover, .kuiLocalMenuItem.kuiLocalMenuItem-isSelected:focus {
@@ -1703,11 +1703,12 @@ body {
   -webkit-justify-content: space-between;
       -ms-flex-pack: justify;
           justify-content: space-between;
-  min-height: 70px;
+  min-height: 69px;
   /* 1 */
   color: #2d2d2d;
-  background-color: #D9D9D9;
-  line-height: 1.5; }
+  background-color: #FFF;
+  line-height: 1.5;
+  border-bottom: solid 1px #D9D9D9; }
   .theme-dark .kuiLocalNav {
     color: #cecece;
     background-color: #333333; }
@@ -1725,7 +1726,7 @@ body {
   -webkit-justify-content: space-between;
       -ms-flex-pack: justify;
           justify-content: space-between;
-  height: 30px; }
+  height: 29px; }
 
 .kuiLocalNavRow__section {
   height: 100%; }
@@ -1780,8 +1781,7 @@ body {
       -ms-flex: 1 1 100%;
           flex: 1 1 100%;
   border-color: #ffffff;
-  border-top-color: #ffffff;
-  border-bottom-color: #ffffff;
+  border-color: #D9D9D9;
   border-radius: 4px 0 0 4px; }
   .theme-dark .kuiLocalSearchInput {
     color: #cecece; }
@@ -1938,14 +1938,9 @@ body {
           align-items: flex-end;
   height: 100%; }
 
-/**
-   * 1. Make sure the bottom border is flush with the bottom of the LocalNav.
-   */
 .kuiLocalTab {
   padding: 5px 0 6px 0;
   font-size: 18px;
-  line-height: 22px;
-  /* 1 */
   color: #3F3F3F;
   border-bottom: 2px solid transparent;
   text-decoration: none;
