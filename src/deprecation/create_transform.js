@@ -1,7 +1,7 @@
 import { deepCloneWithBuffers as clone } from '../utils';
 import { forEach, noop } from 'lodash';
 
-export default function (deprecations) {
+export function createTransform(deprecations) {
   return (settings, log = noop) => {
     const result = clone(settings);
 
