@@ -109,7 +109,7 @@ module.directive('filterEditor', function (indexPatterns, $http) {
         session.setUseSoftTabs(true);
       };
 
-      $scope.union = _.union;
+      $scope.compactUnion = _.flow(_.union, _.compact);
 
       this.save = () => {
         const { indexPattern, field, operator, params, isPinned, isDisabled, alias } = this;

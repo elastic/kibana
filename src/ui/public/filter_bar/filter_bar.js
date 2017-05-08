@@ -23,8 +23,8 @@ module.directive('filterBar', function (Private, Promise, getAppState) {
   const queryFilter = Private(FilterBarQueryFilterProvider);
 
   return {
+    template,
     restrict: 'E',
-    template: template,
     scope: {
       indexPattern: '='
     },
