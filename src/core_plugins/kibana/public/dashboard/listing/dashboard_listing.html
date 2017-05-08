@@ -27,7 +27,7 @@
             class="kuiToolBarSearchBox__input"
             type="text"
             placeholder="Search..."
-            aria-label="Filter"
+            aria-label="Filter dashboards"
             data-test-subj="searchFilter"
             ng-model="listingController.filter"
           >
@@ -39,7 +39,7 @@
         <button
           class="kuiButton kuiButton--danger"
           ng-click="listingController.deleteSelectedItems()"
-          aria-label="Delete selected objects"
+          aria-label="Delete selected dashboards"
           ng-if="listingController.getSelectedItemsCount() > 0"
           tooltip="Delete selected dashboards"
           tooltip-append-to-body="true"
