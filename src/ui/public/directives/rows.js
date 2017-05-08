@@ -42,7 +42,7 @@ module.directive('kbnRows', function ($compile, $rootScope, getAppState, Private
         if (contents instanceof AggConfigResult) {
           const field = contents.aggConfig.getField();
           const isCellContentFilterable =
-            _.get(contents, 'aggConfig.type.createFilter')
+            contents.aggConfig.isFilterable()
             && (!field || field.filterable);
 
           if (isCellContentFilterable) {
