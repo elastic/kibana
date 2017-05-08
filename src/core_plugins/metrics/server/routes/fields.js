@@ -7,7 +7,12 @@ export default (server) => {
     handler: (req, reply) => {
       return getFields(req)
         .then(reply)
-        .catch(() => reply([]));
+        .catch((err) => {
+          if (err.isBoom) {
+            return reply(err);
+          }
+          reply([]);
+        });
     }
   });
 

@@ -9,7 +9,7 @@ export default (server) => {
       return getVisData(req)
         .then(reply)
         .catch(err => {
-          console.error(err.stack);
+          if (err.isBoom) return reply(err);
           reply(Boom.wrap(err, 400));
         });
     }
