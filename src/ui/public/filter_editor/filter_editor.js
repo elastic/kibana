@@ -35,6 +35,9 @@ module.directive('filterEditor', function (indexPatterns, $http) {
             this.setIndexPattern(indexPattern);
             if (isNew) {
               this.setFocus('field');
+              this.field = null;
+              this.operator = null;
+              this.params = {};
             } else {
               this.setField(indexPattern.fields.byName[key]);
               this.setOperator(getOperatorFromFilter(filter));
@@ -47,7 +50,6 @@ module.directive('filterEditor', function (indexPatterns, $http) {
 
       this.setIndexPattern = (indexPattern) => {
         this.indexPattern = indexPattern;
-        this.field = null;
         this.fieldSuggestions = indexPattern.fields;
       };
 
@@ -60,8 +62,10 @@ module.directive('filterEditor', function (indexPatterns, $http) {
 
       this.setField = (field) => {
         this.field = field;
-        this.operator = null;
         this.operatorSuggestions = getOperatorSuggestions(this.indexPattern, field);
+        if (!this.operatorSuggestions.includes(this.operator)) {
+          this.operator = null;
+        }
       };
 
       this.getSetOperator = (operator) => {
@@ -105,6 +109,8 @@ module.directive('filterEditor', function (indexPatterns, $http) {
         session.setUseSoftTabs(true);
       };
 
+      $scope.union = _.union;
+
       this.save = () => {
         const { indexPattern, field, operator, params, isPinned, isDisabled, alias } = this;
 
@@ -132,7 +138,7 @@ module.directive('filterEditor', function (indexPatterns, $http) {
 
       function getOperatorFromFilter(filter) {
         const { type, negate } = filter.meta;
-        return FILTER_OPERATORS.find(operator => {
+        return FILTER_OPERATORS.find((operator) => {
           return operator.type === type && operator.negate === negate;
         });
       }
@@ -149,6 +155,8 @@ module.directive('filterEditor', function (indexPatterns, $http) {
             from: params.gte || params.gt,
             to: params.lte || params.lt
           };
+        } else {
+          return {};
         }
       }
 
@@ -164,10 +172,12 @@ module.directive('filterEditor', function (indexPatterns, $http) {
           return Promise.resolve([]);
         }
 
-        return $http.post(`../api/kibana/suggestions/values/${indexPattern.id}`, {
+        const params = {
           query,
           field: field.name
-        })
+        };
+
+        return $http.post(`../api/kibana/suggestions/values/${indexPattern.id}`, params)
           .then(response => response.data);
       }
     }
