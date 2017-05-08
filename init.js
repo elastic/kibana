@@ -19,10 +19,13 @@ module.exports = function (server, /*options*/) {
     },
   };
 
+  server.plugins.canvas.addFunction(require('./server/functions/esdocs/esdocs'));
   server.plugins.canvas.addFunction(require('./server/functions/demodata/demodata'));
+
   server.plugins.canvas.addFunction(require('./common/functions/mapColumn/mapColumn'));
   server.plugins.canvas.addFunction(require('./common/functions/sort/sort'));
   server.plugins.canvas.addFunction(require('./common/functions/render/render'));
+
 
 
   server.plugins.canvas.addType(require('./common/types/datatable'));

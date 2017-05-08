@@ -1,0 +1,51 @@
+{
+  "name": "esdocs",
+  "aliases": [],
+  "type": "datatable",
+  "help": "Query elasticsearch and get back raw documents, flattened into a datatable. Most of the time you probably want esaggs(). Much like the csv() function this will only look at the first hit for determining columns. You would be wise to give all of your documents the same schema",
+  "context": {
+    "types": [
+      "filters",
+      "null"
+    ]
+  },
+  "args": {
+    "index": {
+      "name": "index",
+      "types": [
+        "string",
+        "null"
+      ],
+      "default": "_all",
+      "aliases": [],
+      "multi": false
+    },
+    "q": {
+      "name": "q",
+      "types": [
+        "string"
+      ],
+      "default": "*",
+      "aliases": [],
+      "multi": false
+    },
+    "size": {
+      "name": "size",
+      "types": [
+        "number"
+      ],
+      "default": 100,
+      "aliases": [],
+      "multi": false
+    },
+    "fields": {
+      "name": "fields",
+      "types": [
+        "string"
+      ],
+      "default": "",
+      "aliases": [],
+      "multi": false
+    }
+  }
+}
