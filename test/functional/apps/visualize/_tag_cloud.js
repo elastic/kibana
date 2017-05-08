@@ -53,12 +53,10 @@ export default function ({ getService, getPageObjects }) {
       it('should show correct tag cloud data', function () {
         return PageObjects.common.sleep(2000)
           .then(function () {
-            return PageObjects.visualize.getTextTag().then (function (results) {
+            return PageObjects.visualize.getTextTag().then(function (results) {
               log.debug(results);
               expect(results).to.eql([ '32212254720', '21474836480','20401094656','19327352832','18253611008' ]);
-            }
-
-          );
+            });
           });
       });
     });
