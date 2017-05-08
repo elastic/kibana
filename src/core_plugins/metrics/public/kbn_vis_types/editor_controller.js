@@ -16,6 +16,7 @@ app.controller('MetricsEditorController', (
   metricsExecutor
 ) => {
 
+  $scope.autoApply = true;
   $scope.embedded = $location.search().embed === 'true';
   const queryFilter = Private(FilterBarQueryFilterProvider);
   const createFetch = Private(require('../lib/fetch'));
@@ -46,14 +47,19 @@ app.controller('MetricsEditorController', (
   }
 
   $scope.commit = () => {
-    $scope.stageEditableVis();
     fetch();
     $scope.dirty = false;
   };
 
+  $scope.toggleAutoApply = () => {
+    $scope.autoApply = !$scope.autoApply;
+  };
+
   $scope.$watchCollection('model', (newValue, oldValue) => {
     angular.copy(newValue, $scope.vis._editableVis.params);
-    $scope.dirty = !_.isEqual(newValue, oldValue);
+    $scope.stageEditableVis();
+    $scope.dirty = !_.isEqual(newValue.series, oldValue.series);
+    if ($scope.autoApply) $scope.commit();
 
     const patternsToFetch = [];
     // Fetch any missing index patterns
