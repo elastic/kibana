@@ -1,4 +1,4 @@
-import unset from '../unset';
+import { unset } from '../unset';
 import expect from 'expect.js';
 
 describe('unset(obj, key)', function () {

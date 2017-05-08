@@ -6,6 +6,6 @@ function cloneBuffersCustomizer(val) {
   }
 }
 
-export default function (vals) {
+export function deepCloneWithBuffers(vals) {
   return cloneDeep(vals, cloneBuffersCustomizer);
 }
