@@ -206,7 +206,6 @@ export default function ({ getService, getPageObjects }) {
           await PageObjects.visualize.clickNewSearch();
           await PageObjects.visualize.saveVisualization('new viz panel');
           await PageObjects.header.clickToastOK();
-          await PageObjects.header.clickToastOK();
 
           await PageObjects.dashboard.clickCancelOutOfEditMode();
 
