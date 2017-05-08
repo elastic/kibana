@@ -13,5 +13,5 @@ export function getDefaultPatternForInterval(interval) {
     return defaultPattern;
   }
 
-  return 'logstash-*';
+  return '';
 }
