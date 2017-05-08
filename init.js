@@ -26,6 +26,8 @@ module.exports = function (server, /*options*/) {
   server.plugins.canvas.addFunction(require('./common/functions/sort/sort'));
   server.plugins.canvas.addFunction(require('./common/functions/render/render'));
   server.plugins.canvas.addFunction(require('./common/functions/alterColumn/alterColumn'));
+  server.plugins.canvas.addFunction(require('./common/functions/line/line'));
+  server.plugins.canvas.addFunction(require('./common/functions/pointseries/pointseries'));
 
   server.plugins.canvas.addType(require('./common/types/datatable'));
   server.plugins.canvas.addType(require('./common/types/number'));

@@ -21,6 +21,7 @@
     "elasticsearch": "^13.0.0",
     "jquery": "^3.2.1",
     "lodash": "^4.17.4",
+    "moment": "^2.18.1",
     "prop-types": "^15.5.8",
     "react": "^15.5.4",
     "react-bootstrap": "^0.31.0",
