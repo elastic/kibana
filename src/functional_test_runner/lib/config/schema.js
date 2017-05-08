@@ -58,9 +58,12 @@ export const schema = Joi.object().keys({
   ),
 
   servers: Joi.object().keys({
-    webdriver: urlPartsSchema(),
     kibana: urlPartsSchema(),
     elasticsearch: urlPartsSchema(),
+  }).default(),
+
+  chromedriver: Joi.object().keys({
+    url: Joi.string().uri({ scheme: /https?/ }).default('http://localhost:9515')
   }).default(),
 
   // definition of apps that work with `common.navigateToApp()`

@@ -225,17 +225,22 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
     getField() {
       return remote
       .setFindTimeout(defaultFindTimeout)
-      .findByCssSelector('.ng-valid-required[name="field"] option[selected="selected"]')
+      .findByCssSelector('.ng-valid-required[name="field"] .ui-select-match-text')
       .getVisibleText();
     }
 
     selectField(fieldValue, groupName = 'buckets') {
       return retry.try(function tryingForTime() {
         return remote
-        .setFindTimeout(defaultFindTimeout)
-        // the css below should be more selective
-        .findByCssSelector(`[group-name="${groupName}"] option[label="${fieldValue}"]`)
-        .click();
+          .setFindTimeout(defaultFindTimeout)
+          .findByCssSelector(`[group-name="${groupName}"] .ui-select-container`)
+          .click()
+          .then(() => {
+            return remote
+              .findByCssSelector(`[group-name="${groupName}"] input.ui-select-search`)
+              .type(fieldValue)
+              .pressKeys('\uE006');
+          });
       });
     }
 

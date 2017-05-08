@@ -347,18 +347,19 @@ export class KibanaMap extends EventEmitter {
   }
 
   addDrawControl() {
+    const shapeOptions = {
+      shapeOptions: {
+        stroke: false,
+        color: '#000'
+      }
+    };
     const drawOptions = {
       draw: {
         polyline: false,
         marker: false,
         circle: false,
-        polygon: false,
-        rectangle: {
-          shapeOptions: {
-            stroke: false,
-            color: '#000'
-          }
-        }
+        rectangle: shapeOptions,
+        polygon: shapeOptions
       }
     };
     this._leafletDrawControl = new L.Control.Draw(drawOptions);
