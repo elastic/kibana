@@ -1,13 +1,22 @@
-/**
- * Part of the exposed plugin API - do not remove without careful consideration.
- * @type {boolean}
- */
-let hideDashboardWriteControls = false;
+import { uiModules } from 'ui/modules';
+uiModules.get('kibana')
+  .provider('dashboardConfig', () => {
+    let hideWriteControls = false;
 
-export function getHideWriteControls() {
-  return hideDashboardWriteControls;
-}
-
-export function turnHideWriteControlsOn() {
-  hideDashboardWriteControls = true;
-}
+    return {
+      /**
+       * Part of the exposed plugin API - do not remove without careful consideration.
+       * @type {boolean}
+       */
+      turnHideWriteControlsOn() {
+        hideWriteControls = true;
+      },
+      $get() {
+        return {
+          getHideWriteControls() {
+            return hideWriteControls;
+          }
+        };
+      }
+    };
+  });

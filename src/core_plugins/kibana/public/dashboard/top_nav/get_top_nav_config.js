@@ -1,6 +1,5 @@
 import { DashboardViewMode } from '../dashboard_view_mode';
 import { TopNavIds } from './top_nav_ids';
-import { getHideWriteControls } from '../dashboard_config';
 
 /**
  * @param {DashboardMode} dashboardMode.
@@ -10,10 +9,6 @@ import { getHideWriteControls } from '../dashboard_config';
  * mode.
  */
 export function getTopNavConfig(dashboardMode, actions) {
-  if (getHideWriteControls()) {
-    return [];
-  }
-
   switch (dashboardMode) {
     case DashboardViewMode.VIEW:
       return [
