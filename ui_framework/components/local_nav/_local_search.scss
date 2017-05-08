@@ -7,8 +7,7 @@
   @include formControl;
   flex: 1 1 100%;
   border-color: $localSearchBackgroundColor;
-  border-top-color: $localSearchBackgroundColor;
-  border-bottom-color: $localSearchBackgroundColor;
+  border-color: $globalColorLightGray;
   border-radius: $globalBorderRadius 0 0 $globalBorderRadius;
 
   &.kuiLocalSearchInput-isInvalid {
