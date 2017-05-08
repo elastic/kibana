@@ -1,4 +1,4 @@
-export function PointSeriesVisProvider({ getService }) {
+export function PointSeriesPageProvider({ getService }) {
   const remote = getService('remote');
   const config = getService('config');
   const log = getService('log');

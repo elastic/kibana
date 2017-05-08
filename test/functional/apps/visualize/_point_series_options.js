@@ -2,8 +2,9 @@ import expect from 'expect.js';
 
 export default function ({ getService, getPageObjects }) {
   const log = getService('log');
-  const pointSeriesVis = getService('pointSeriesVis');
-  const PageObjects = getPageObjects(['common', 'visualize', 'header']);
+  const PageObjects = getPageObjects(['common', 'visualize', 'header', 'pointSeries']);
+  const pointSeriesVis = PageObjects.pointSeries;
+
 
   describe('visualize app', function describeIndexTests() {
     before(function () {
