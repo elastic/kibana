@@ -39,7 +39,7 @@
                 class="kuiTextInput kuiTextInput--large"
                 data-test-subj="createIndexPatternNameInput"
                 ng-model="controller.newIndexPattern.name"
-                ng-model-options="{ updateOn: 'default blur', debounce: {'default': 2500, 'blur': 0} }"
+                ng-model-options="{ updateOn: 'default blur', debounce: {'default': 200, 'blur': 0} }"
                 validate-index-name
                 allow-wildcard
                 name="name"
