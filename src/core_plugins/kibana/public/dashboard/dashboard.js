@@ -22,6 +22,8 @@ import { UtilsBrushEventProvider } from 'ui/utils/brush_event';
 import { FilterBarClickHandlerProvider } from 'ui/filter_bar/filter_bar_click_handler';
 import { DashboardState } from './dashboard_state';
 import { notify } from 'ui/notify';
+import { PanelUtils } from './panel/panel_utils';
+import './panel/get_object_loaders_for_dashboard';
 
 const app = uiModules.get('app/dashboard', [
   'elasticsearch',
@@ -69,7 +71,10 @@ uiRoutes
     }
   });
 
-app.directive('dashboardApp', function (Notifier, courier, AppState, timefilter, quickRanges, kbnUrl, confirmModal, Private) {
+app.directive('dashboardApp', function (
+  Notifier, courier, AppState, timefilter, quickRanges, kbnUrl,
+  confirmModal, Private, getObjectLoadersForDashboard
+) {
   const brushEvent = Private(UtilsBrushEventProvider);
   const filterBarClickHandler = Private(FilterBarClickHandlerProvider);
 
@@ -191,6 +196,14 @@ app.directive('dashboardApp', function (Notifier, courier, AppState, timefilter,
       $scope.$watch('model.description', () => dashboardState.setDescription($scope.model.description));
       $scope.$watch('model.title', () => dashboardState.setTitle($scope.model.title));
       $scope.$watch('model.timeRestore', () => dashboardState.setTimeRestore($scope.model.timeRestore));
+
+      const objectLoadersForDashboard = getObjectLoadersForDashboard();
+      $scope.$watchCollection('panels', (panels) => {
+        PanelUtils.getPanelIndexPatterns(panels, objectLoadersForDashboard)
+          .then((indexPatterns) => {
+            $scope.indexPatterns = indexPatterns;
+          });
+      });
 
       $scope.$listen(timefilter, 'fetch', $scope.refresh);
 

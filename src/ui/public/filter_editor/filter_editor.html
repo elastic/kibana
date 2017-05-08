@@ -38,7 +38,10 @@
           <ui-select-match placeholder="Fields...">
             {{$select.selected.name}}
           </ui-select-match>
-          <ui-select-choices repeat="field in filterEditor.fieldSuggestions | filter:{ name: $select.search } | orderBy:'name' | sortPrefixFirst:$select.search:'name'">
+          <ui-select-choices
+            repeat="field in filterEditor.fieldSuggestions | filter:{ name: $select.search } | orderBy:'name' | sortPrefixFirst:$select.search:'name'"
+            group-by="'indexPattern'"
+          >
             <div ng-bind-html="field.name | highlight: $select.search"></div>
           </ui-select-choices>
         </ui-select>

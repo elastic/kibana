@@ -26,7 +26,7 @@ module.directive('filterBar', function (Private, Promise, getAppState) {
     template,
     restrict: 'E',
     scope: {
-      indexPattern: '='
+      indexPatterns: '='
     },
     link: function ($scope) {
       // bind query filter actions to the scope
@@ -57,9 +57,8 @@ module.directive('filterBar', function (Private, Promise, getAppState) {
       };
 
       $scope.addFilter = () => {
-        const index = $scope.indexPattern.id;
         $scope.editingFilter = {
-          meta: { index, isNew: true }
+          meta: { isNew: true }
         };
       };
 

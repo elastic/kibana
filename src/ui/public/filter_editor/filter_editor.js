@@ -7,11 +7,12 @@ import '../filters/sort_prefix_first';
 import '../directives/ui_select_focus_on';
 
 const module = uiModules.get('kibana');
-module.directive('filterEditor', function (indexPatterns, $http) {
+module.directive('filterEditor', function ($http) {
   return {
     restrict: 'E',
     template,
     scope: {
+      indexPatterns: '=',
       filter: '=',
       onDelete: '&',
       onCancel: '&',
@@ -30,28 +31,23 @@ module.directive('filterEditor', function (indexPatterns, $http) {
           .cloneDeep();
 
         const { index, key, isNew } = filter.meta;
-        this.indexPattern = indexPatterns.get(index)
-          .then((indexPattern) => {
-            this.setIndexPattern(indexPattern);
-            if (isNew) {
-              this.setFocus('field');
-              this.field = null;
-              this.operator = null;
-              this.params = {};
-            } else {
-              this.setField(indexPattern.fields.byName[key]);
-              this.setOperator(getOperatorFromFilter(filter));
-              this.params = getParamsFromFilter(filter);
-            }
-          });
+        if (isNew) {
+          this.field = null;
+          this.operator = null;
+          this.params = {};
+          this.setFocus('field');
+        } else {
+          const indexPattern = this.indexPatterns.find(({ id }) => id === index);
+          this.setField(indexPattern.fields.byName[key]);
+          this.setOperator(getOperatorFromFilter(filter));
+          this.params = getParamsFromFilter(filter);
+        }
       };
 
       $scope.$watch(() => this.filter, this.init);
-
-      this.setIndexPattern = (indexPattern) => {
-        this.indexPattern = indexPattern;
-        this.fieldSuggestions = indexPattern.fields;
-      };
+      $scope.$watch(() => this.indexPatterns, (indexPatterns) => {
+        this.fieldSuggestions = getFieldSuggestions(indexPatterns);
+      });
 
       this.getSetField = (field) => {
         if (field) {
@@ -62,10 +58,8 @@ module.directive('filterEditor', function (indexPatterns, $http) {
 
       this.setField = (field) => {
         this.field = field;
-        this.operatorSuggestions = getOperatorSuggestions(this.indexPattern, field);
-        if (!this.operatorSuggestions.includes(this.operator)) {
-          this.operator = null;
-        }
+        this.operator = null;
+        this.operatorSuggestions = getOperatorSuggestions(field);
       };
 
       this.getSetOperator = (operator) => {
@@ -88,7 +82,7 @@ module.directive('filterEditor', function (indexPatterns, $http) {
       };
 
       this.refreshValueSuggestions = (query) => {
-        return getValueSuggestions(this.indexPattern, this.field, query)
+        return getValueSuggestions(this.field, query)
           .then(suggestions => this.valueSuggestions = suggestions);
       };
 
@@ -112,21 +106,22 @@ module.directive('filterEditor', function (indexPatterns, $http) {
       $scope.compactUnion = _.flow(_.union, _.compact);
 
       this.save = () => {
-        const { indexPattern, field, operator, params, isPinned, isDisabled, alias } = this;
+        const { field, operator, params, isPinned, isDisabled, alias } = this;
 
         let filter;
         if (this.showQueryDslEditor()) {
+          // TODO: If index isn't specified, assign it to something (what?)
           const meta = _.pick(this.filter.meta, ['negate', 'index']);
           filter = Object.assign(this.queryDsl, { meta });
         } else {
           if (operator.type === 'match') {
-            filter = buildPhraseFilter(field, params.value, indexPattern);
+            filter = buildPhraseFilter(field, params.value, field.indexPattern);
           } else if (operator.type === 'terms') {
-            filter = buildTermsFilter(field, params.values, indexPattern);
+            filter = buildTermsFilter(field, params.values, field.indexPattern);
           } else if (operator.type === 'range') {
-            filter = buildRangeFilter(field, { gte: params.from, lt: params.to }, indexPattern);
+            filter = buildRangeFilter(field, { gte: params.from, lt: params.to }, field.indexPattern);
           } else if (operator.type === 'exists') {
-            filter = buildExistsFilter(field, indexPattern);
+            filter = buildExistsFilter(field, field.indexPattern);
           }
           filter.meta.negate = operator.negate;
         }
@@ -160,14 +155,20 @@ module.directive('filterEditor', function (indexPatterns, $http) {
         }
       }
 
-      function getOperatorSuggestions(indexPattern, field) {
+      function getFieldSuggestions(indexPatterns) {
+        return indexPatterns.reduce((fields, indexPattern) => {
+          return [...fields, ...indexPattern.fields];
+        }, []);
+      }
+
+      function getOperatorSuggestions(field) {
         const type = _.get(field, 'type');
         return FILTER_OPERATORS.filter((operator) => {
           return !operator.fieldTypes || operator.fieldTypes.includes(type);
         });
       }
 
-      function getValueSuggestions(indexPattern, field, query) {
+      function getValueSuggestions(field, query) {
         if (!_.get(field, 'aggregatable')) {
           return Promise.resolve([]);
         }
@@ -177,7 +178,7 @@ module.directive('filterEditor', function (indexPatterns, $http) {
           field: field.name
         };
 
-        return $http.post(`../api/kibana/suggestions/values/${indexPattern.id}`, params)
+        return $http.post(`../api/kibana/suggestions/values/${field.indexPattern.id}`, params)
           .then(response => response.data);
       }
     }

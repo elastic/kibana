@@ -57,7 +57,10 @@
   </kbn-top-nav>
 
   <!-- Filters. -->
-  <filter-bar state="state"></filter-bar>
+  <filter-bar
+    state="state"
+    index-patterns="indexPatterns"
+  ></filter-bar>
 
   <div
     ng-show="getShouldShowEditHelp()"
