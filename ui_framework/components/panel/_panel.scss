@@ -1,9 +1,10 @@
 .kuiPanel {
-  border: $globalBorderThick;
+  border: $globalBorderThin;
+  border-radius: $globalBorderRadius;
 }
 
 .kuiPanel--withHeader {
-  border-top: none;
+  // border-top: none;
 }
 
 .kuiPanel--centered {
@@ -19,7 +20,7 @@
 
   padding: $panelPadding;
   height: $panelHeight;
-  background-color: $globalBorderColor;
+  border-bottom: $globalBorderThin;
 }
 
   .kuiPanelHeader__title {

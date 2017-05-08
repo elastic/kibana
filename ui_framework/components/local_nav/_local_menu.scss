@@ -14,6 +14,8 @@
   color: $localNavButtonTextColor;
   border: 0;
   cursor: pointer;
+  border-right: solid 1px transparent;
+  border-left: solid 1px transparent;
 
   &:hover, &:focus {
     background-color: $localNavButtonBackgroundColor-isHover;
@@ -22,8 +24,13 @@
 
   &.kuiLocalMenuItem-isSelected {
     background-color: $localNavButtonBackgroundColor-isSelected;
+    border-color: $globalColorLightGray;
+    height: calc(100% + 1px); // Cheat the border when opened
+    z-index: 2;
+    color: $globalColorBlue;
+
     &:hover, &:focus {
-      color: $localNavButtonTextColor;
+      color: $globalColorBlue;
     }
   }
 
