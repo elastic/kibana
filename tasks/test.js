@@ -80,12 +80,6 @@ module.exports = function (grunt) {
     'run:testUIDevServer:keepalive'
   ]);
 
-  grunt.registerTask('test:ui:runner', [
-    'checkPlugins',
-    'clean:screenshots',
-    'functionalTestRunner'
-  ]);
-
   grunt.registerTask('test:api', [
     'esvm:ui',
     'run:apiTestServer',

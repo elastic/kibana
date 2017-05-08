@@ -15,6 +15,9 @@ import ButtonExample
 import CardExample
   from '../../views/card/card_example';
 
+import CollapseButtonExample
+  from '../../views/collapse_button/collapse_button_example';
+
 import ColumnExample
   from '../../views/column/column_example';
 
@@ -112,6 +115,9 @@ const components = [{
 }, {
   name: 'Column',
   component: ColumnExample,
+}, {
+  name: 'CollapseButton',
+  component: CollapseButtonExample,
 }, {
   name: 'Event',
   component: EventExample,

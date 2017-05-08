@@ -1,6 +1,7 @@
 import { defaultsDeep } from 'lodash';
 
 import { Config } from './config';
+import { transformDeprecations } from './transform_deprecations';
 
 export async function readConfigFile(log, configFile, settingOverrides = {}) {
   log.debug('Loading config file from %j', configFile);
@@ -24,5 +25,7 @@ export async function readConfigFile(log, configFile, settingOverrides = {}) {
     })
   );
 
-  return new Config(settings);
+  return new Config(transformDeprecations(settings, msg => {
+    log.error(msg);
+  }));
 }
