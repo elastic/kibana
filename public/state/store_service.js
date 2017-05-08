@@ -1,6 +1,10 @@
 import { createStore, applyMiddleware, combineReducers } from 'redux';
 import thunk from 'redux-thunk';
+import reduceReducers from 'reduce-reducers';
 import throwawayReducer from './reducers/throwaway_reducer';
+import workpadReducer from './reducers/workpad';
+import pagesReducer from './reducers/pages';
+import elementsReducer from './reducers/elements';
 import getInitialState from './initial_state';
 import { uiModules } from 'ui/modules';
 
@@ -16,6 +20,11 @@ app.service('$store', (kbnVersion, basePath) => {
   };
 
   const rootReducer = combineReducers({
+    app: (state = getInitialState('app')) => state,
+    transient: (state = getInitialState('transient')) => state,
+    persistent: combineReducers({
+      workpad: reduceReducers(workpadReducer, pagesReducer, elementsReducer),
+    }),
     throwAway: throwawayReducer,
   });
 
