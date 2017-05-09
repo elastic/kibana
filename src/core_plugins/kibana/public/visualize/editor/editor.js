@@ -19,6 +19,7 @@ import { uiModules } from 'ui/modules';
 import editorTemplate from 'plugins/kibana/visualize/editor/editor.html';
 import { DashboardConstants } from 'plugins/kibana/dashboard/dashboard_constants';
 import { VisualizeConstants } from '../visualize_constants';
+import { documentationLinks } from 'ui/documentation_links/documentation_links';
 
 uiRoutes
 .when(VisualizeConstants.CREATE_PATH, {
@@ -168,6 +169,7 @@ function VisEditor($rootScope, $scope, $route, timefilter, AppState, $window, kb
     $scope.indexPattern = vis.indexPattern;
     $scope.editableVis = editableVis;
     $scope.state = $state;
+    $scope.queryDocLinks = documentationLinks.query;
 
     // Create a PersistedState instance.
     $scope.uiState = $state.makeStateful('uiState');

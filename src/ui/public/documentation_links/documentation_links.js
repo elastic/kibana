@@ -22,5 +22,8 @@ export const documentationLinks = {
     painlessApi: `${baseUrl}guide/en/elasticsearch/reference/${urlVersion}/modules-scripting-painless.html#painless-api`,
     painlessSyntax: `${baseUrl}guide/en/elasticsearch/reference/${urlVersion}/modules-scripting-painless-syntax.html`,
     luceneExpressions: `${baseUrl}guide/en/elasticsearch/reference/${urlVersion}/modules-scripting-expression.html`
+  },
+  query: {
+    luceneQuerySyntax: `${baseUrl}guide/en/elasticsearch/reference/${urlVersion}/query-dsl-query-string-query.html#query-string-syntax`
   }
 };
