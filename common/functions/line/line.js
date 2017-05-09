@@ -22,17 +22,19 @@ module.exports = new Fn({
 
     return {
       type: 'render',
-      as: 'flot',
-      data: data,
-      options: {
-        xaxis: {
-          mode: context.columns.x.type === 'date' ? 'time' : null,
-        },
-        series: {
-          lines: {
-            lineWidth: 4,
+      as: 'line',
+      value: {
+        data: data,
+        options: {
+          xaxis: {
+            mode: context.columns.x.type === 'date' ? 'time' : null,
           },
-          shadowSize: 0,
+          series: {
+            lines: {
+              lineWidth: 4,
+            },
+            shadowSize: 0,
+          },
         },
       },
     };
