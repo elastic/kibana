@@ -12,7 +12,9 @@ $guidePanelBackgroundColor: #ffffff;
 $guideTextColor: #444;
 $guideLinkHoverColor: #00a9e5;
 
-$normalBreakpoint: 1900px;
+// Breakpoints
+$guideMinWidth: 840px;
+$guideNormalBreakpoint: 1900px;
 
 @mixin whenNarrowerThan($browserWidth) {
   @media only screen and (max-width: #{$browserWidth}) {
