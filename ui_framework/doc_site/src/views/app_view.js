@@ -3,6 +3,10 @@ import React, {
   PropTypes,
 } from 'react';
 
+import {
+  Link,
+} from 'react-router';
+
 import classNames from 'classnames';
 
 import {
@@ -21,8 +25,14 @@ export class AppView extends Component {
   constructor(props) {
     super(props);
 
+    const currentRoute = props.routes[1];
+    const nextRoute = Routes.getNextRoute(currentRoute.name);
+    const previousRoute = Routes.getPreviousRoute(currentRoute.name);
+
     this.state = {
       isNavOpen: false,
+      nextRoute,
+      previousRoute,
     };
 
     this.onClickNavItem = this.onClickNavItem.bind(this);
@@ -44,6 +54,52 @@ export class AppView extends Component {
     this.setState({
       isNavOpen: !this.state.isNavOpen,
     });
+  }
+
+  componentWillReceiveProps(nextProps) {
+    const currentRoute = nextProps.routes[1];
+    const nextRoute = Routes.getNextRoute(currentRoute.name);
+    const previousRoute = Routes.getPreviousRoute(currentRoute.name);
+
+    this.setState({
+      nextRoute,
+      previousRoute,
+    });
+  }
+
+  renderPagination() {
+    const previousClasses = classNames('guidePaginationButton', {
+      'guidePaginationButton-isDisabled': !this.state.previousRoute,
+    });
+
+    const previousButton = (
+      <Link
+        className={previousClasses}
+        to={this.state.previousRoute ? this.state.previousRoute.path : ''}
+      >
+        <span className="fa fa-angle-left"></span>
+      </Link>
+    );
+
+    const nextClasses = classNames('guidePaginationButton', {
+      'guidePaginationButton-isDisabled': !this.state.nextRoute,
+    });
+
+    const nextButton = (
+      <Link
+        className={nextClasses}
+        to={this.state.nextRoute ? this.state.nextRoute.path : ''}
+      >
+        <span className="fa fa-angle-right"></span>
+      </Link>
+    );
+
+    return (
+      <div className="guidePaginationButtons">
+        {previousButton}
+        {nextButton}
+      </div>
+    );
   }
 
   render() {
@@ -72,6 +128,8 @@ export class AppView extends Component {
           title={this.props.title}
           source={this.props.source}
         />
+
+        {this.renderPagination()}
       </div>
     );
   }
