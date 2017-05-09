@@ -20,6 +20,7 @@ body {
   background-color: $guideBaseBackgroundColor;
   line-height: 40px; /* 1 */
   margin: 0;
+  min-width: $guideMinWidth;
 }
 
 .guide {
@@ -35,7 +36,7 @@ body {
   &.is-code-viewer-open {
     padding-right: $guideCodeViewerWidth;
 
-    @include whenNarrowerThan($normalBreakpoint) {
+    @include whenNarrowerThan($guideNormalBreakpoint) {
       padding-right: $guideCodeViewerSmallWidth;
     }
   }
@@ -51,38 +52,4 @@ body {
 
 .guideBreak {
   border: none;
-}
-
-.guidePaginationButtons {
-  position: fixed;
-  z-index: 10001;
-  top: 10px;
-  right: 10px;
-}
-
-.guidePaginationButton {
-  appearance: none;
-  border: none;
-  line-height: 10px;
-  padding: 4px 20px;
-  color: $guideLinkHoverColor;
-  background-color: #fff;
-  border: 1px solid $guideLinkHoverColor;
-  border-radius: 3px;
-  cursor: pointer;
-
-  &:hover,
-  &:active {
-    background-color: #e6f7fc;
-  }
-
-  &.guidePaginationButton-isDisabled {
-    pointer-events: none;
-    color: rgba($guideTextColor, 0.25);
-    border-color: rgba($guideTextColor, 0.25);
-  }
-
-  & + & {
-    margin-left: 10px;
-  }
 }
