@@ -1,5 +1,9 @@
 import { routes } from './server/routes';
 import { functions } from './server/lib/functions';
+import { serverFunctions } from './server/functions';
+import { commonFunctions } from './common/functions';
+import { typeSpecs } from './common/types';
+
 import { types } from './common/lib/types';
 
 module.exports = function (server, /*options*/) {
@@ -19,19 +23,9 @@ module.exports = function (server, /*options*/) {
     },
   };
 
-  server.plugins.canvas.addFunction(require('./server/functions/esdocs/esdocs'));
-  server.plugins.canvas.addFunction(require('./server/functions/demodata/demodata'));
-
-  server.plugins.canvas.addFunction(require('./common/functions/mapColumn/mapColumn'));
-  server.plugins.canvas.addFunction(require('./common/functions/sort/sort'));
-  server.plugins.canvas.addFunction(require('./common/functions/render/render'));
-  server.plugins.canvas.addFunction(require('./common/functions/alterColumn/alterColumn'));
-  server.plugins.canvas.addFunction(require('./common/functions/line/line'));
-  server.plugins.canvas.addFunction(require('./common/functions/pointseries/pointseries'));
-
-  server.plugins.canvas.addType(require('./common/types/datatable'));
-  server.plugins.canvas.addType(require('./common/types/number'));
-  server.plugins.canvas.addType(require('./common/types/string'));
+  serverFunctions.forEach(server.plugins.canvas.addFunction);
+  commonFunctions.forEach(server.plugins.canvas.addFunction);
+  typeSpecs.forEach(server.plugins.canvas.addType);
 
   // Load routes here
   routes(server);

@@ -1,4 +1,4 @@
 import { addElement } from './add_element';
+import { elementSpecs } from '../elements';
 
-addElement(require('../elements/line/line'));
-addElement(require('../elements/table/table'));
+elementSpecs.forEach(addElement);
