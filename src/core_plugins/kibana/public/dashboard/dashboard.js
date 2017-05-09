@@ -22,6 +22,7 @@ import { UtilsBrushEventProvider } from 'ui/utils/brush_event';
 import { FilterBarClickHandlerProvider } from 'ui/filter_bar/filter_bar_click_handler';
 import { DashboardState } from './dashboard_state';
 import { notify } from 'ui/notify';
+import { documentationLinks } from 'ui/documentation_links/documentation_links';
 
 const app = uiModules.get('app/dashboard', [
   'elasticsearch',
@@ -80,6 +81,7 @@ app.directive('dashboardApp', function (Notifier, courier, AppState, timefilter,
       const filterBar = Private(FilterBarQueryFilterProvider);
       const docTitle = Private(DocTitleProvider);
       const notify = new Notifier({ location: 'Dashboard' });
+      $scope.queryDocLinks = documentationLinks.query;
 
       const dash = $scope.dash = $route.current.locals.dash;
       if (dash.id) {
