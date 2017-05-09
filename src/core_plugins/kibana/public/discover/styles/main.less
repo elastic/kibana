@@ -98,6 +98,7 @@
     .discover-table-footer {
       background-color: @discover-table-footer-bg;
       padding: 5px 10px;
+      text-align: center;
     }
 
     .discover-table-details-toggle {
@@ -223,18 +224,18 @@
 
 field-name,
 [field-name] {
-  > i {
+  &.no-results {
+    color: @field-name-no-results-color;
+  }
+}
+
+  .field-name-icon {
     margin-right: 5px;
     text-align: center;
     display: inline-block;
     width: 12px;
     color: @field-name-color;
   }
-
-  &.no-results {
-    color: @field-name-no-results-color;
-  }
-}
 
 disc-field-chooser {
   .sidebar-item.active .sidebar-item-title {
