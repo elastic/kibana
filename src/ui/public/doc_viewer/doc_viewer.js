@@ -32,10 +32,8 @@ uiModules.get('kibana')
             ng-class="{active: mode == '${view.name}'}"
           >
             <a
-              role="button"
-              tabindex="0"
-              ng-keyup="onKeyUp($event, view.name)"
               ng-click="mode='${view.name}'"
+              kbn-accessible-click
             >
               ${view.title}
             </a>
@@ -60,13 +58,6 @@ uiModules.get('kibana')
     controller: function ($scope) {
       $scope.mode = docViews.inOrder[0].name;
       $scope.docViews = docViews.byName;
-
-      $scope.onKeyUp = function onKeyUp(e, name) {
-        // Support keyboard accessibility by setting mode on ENTER or SPACE keypress.
-        if ([13, 32].includes(e.keyCode)) {
-          $scope.mode = name;
-        }
-      };
     }
   };
 });
