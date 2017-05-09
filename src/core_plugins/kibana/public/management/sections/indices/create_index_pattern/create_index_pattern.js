@@ -111,6 +111,10 @@ uiModules.get('apps/management')
     }
 
     if (!moreThanOneDateField) {
+      // At this point the `dateFields` array contains the date fields and the "no selection"
+      // option. When we have less than two date fields we choose the last option, which will
+      // be the "no date fields available" option if there are zero date fields, or the only
+      // date field if there is one.
       this.newIndexPattern.timeField = this.dateFields[this.dateFields.length - 1];
     }
   };
