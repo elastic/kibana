@@ -150,8 +150,16 @@ app.directive('dashboardApp', function ($injector) {
         dashboardState.getIsDirty(timefilter));
       $scope.newDashboard = () => { kbnUrl.change(DashboardConstants.CREATE_NEW_DASHBOARD_URL, {}); };
       $scope.saveState = () => dashboardState.saveState();
-      $scope.getShouldShowEditHelp = () => !dashboardState.getPanels().length && dashboardState.getIsEditMode();
-      $scope.getShouldShowViewHelp = () => !dashboardState.getPanels().length && dashboardState.getIsViewMode();
+      $scope.getShouldShowEditHelp = () => (
+        !dashboardState.getPanels().length &&
+        dashboardState.getIsEditMode() &&
+        !dashboardConfig.getHideWriteControls()
+      );
+      $scope.getShouldShowViewHelp = () => (
+        !dashboardState.getPanels().length &&
+        dashboardState.getIsViewMode() &&
+        !dashboardConfig.getHideWriteControls()
+      );
 
       $scope.toggleExpandPanel = (panelIndex) => {
         if ($scope.expandedPanel && $scope.expandedPanel.panelIndex === panelIndex) {
