@@ -20,10 +20,10 @@ export function getSelectedElement(state) {
 
 export function getElements(state, pageId = null) {
   const id = pageId || getSelectedPage(state);
-  if (!id) return [];
+  if (!id) return;
 
   const page = getPageById(state, id);
-  return (!page) ? [] : page.elements;
+  return (page) ? page.elements : undefined;
 }
 
 export function getElementById(state, id) {
@@ -31,10 +31,10 @@ export function getElementById(state, id) {
 }
 
 export function getResolvedArgs(state, elementId) {
-  if (!elementId) return null;
+  if (!elementId) return;
   return get(state, ['transient', 'resolvedArgs', elementId]);
 }
 
 export function getSelectedResolvedArgs(state) {
-  return getResolvedArgs(state, state.transient.selectedElement);
+  return getResolvedArgs(state, getSelectedElement(state));
 }
