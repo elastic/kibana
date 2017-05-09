@@ -1,0 +1,22 @@
+{
+  "name": "bar",
+  "aliases": [],
+  "type": "flot",
+  "help": "Produces a bar chart",
+  "context": {
+    "types": [
+      "cartesian"
+    ]
+  },
+  "args": {
+    "stack": {
+      "name": "stack",
+      "types": [
+        "boolean",
+        "null"
+      ],
+      "aliases": [],
+      "multi": false
+    }
+  }
+}
