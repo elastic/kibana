@@ -3,6 +3,7 @@ import uiChrome from 'ui/chrome';
 import 'ui/storage';
 import 'ui/filters/trust_as_html';
 import { gettingStartedRegistry } from 'ui/getting_started_registry';
+import { documentationLinks } from 'ui/documentation_links';
 import { GETTING_STARTED_OPT_OUT } from '../../lib/constants';
 import angular from 'angular';
 
@@ -50,6 +51,7 @@ app.directive('gettingStarted', function ($injector) {
           dashboardIcon,
           shieldIcon
         };
+        this.documentationLinks = documentationLinks;
       }
 
       hasManageAndMonitorMessages = () => {
