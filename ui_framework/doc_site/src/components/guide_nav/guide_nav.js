@@ -10,11 +10,17 @@ import {
 import classNames from 'classnames';
 
 export class GuideNav extends Component {
-  constructor() {
-    super();
+  constructor(props) {
+    super(props);
+
+    const currentRoute = props.routes[1];
+    const nextRoute = this.props.getNextRoute(currentRoute.name);
+    const previousRoute = this.props.getPreviousRoute(currentRoute.name);
 
     this.state = {
       search: '',
+      nextRoute,
+      previousRoute,
     };
 
     this.onSearchChange = this.onSearchChange.bind(this);
@@ -26,11 +32,57 @@ export class GuideNav extends Component {
     });
   }
 
+  componentWillReceiveProps(nextProps) {
+    const currentRoute = nextProps.routes[1];
+    const nextRoute = this.props.getNextRoute(currentRoute.name);
+    const previousRoute = this.props.getPreviousRoute(currentRoute.name);
+
+    this.setState({
+      nextRoute,
+      previousRoute,
+    });
+  }
+
   renderNoItems(name) {
     return (
       <p className="guideNavNoItems">
         { `No ${name} match your search` }
       </p>
+    );
+  }
+
+  renderPagination() {
+    const previousClasses = classNames('guideNavPaginationButton', {
+      'guideNavPaginationButton-isDisabled': !this.state.previousRoute,
+    });
+
+    const previousButton = (
+      <Link
+        className={previousClasses}
+        to={this.state.previousRoute ? this.state.previousRoute.path : ''}
+      >
+        <span className="fa fa-angle-left"></span>
+      </Link>
+    );
+
+    const nextClasses = classNames('guideNavPaginationButton', {
+      'guideNavPaginationButton-isDisabled': !this.state.nextRoute,
+    });
+
+    const nextButton = (
+      <Link
+        className={nextClasses}
+        to={this.state.nextRoute ? this.state.nextRoute.path : ''}
+      >
+        <span className="fa fa-angle-right"></span>
+      </Link>
+    );
+
+    return (
+      <div className="guideNavPaginationButtons">
+        {previousButton}
+        {nextButton}
+      </div>
     );
   }
 
@@ -89,6 +141,9 @@ export class GuideNav extends Component {
           >
             Kibana UI Framework <span className="guideNav__version">{this.props.version}</span>
           </Link>
+          <div className="guideNav__elasticLogo" />
+
+          {this.renderPagination()}
         </div>
 
         <div>
@@ -125,6 +180,9 @@ GuideNav.propTypes = {
   onToggleNav: PropTypes.func,
   onClickNavItem: PropTypes.func,
   version: PropTypes.string,
+  routes: PropTypes.array,
+  getNextRoute: PropTypes.func,
+  getPreviousRoute: PropTypes.func,
   components: PropTypes.array,
   sandboxes: PropTypes.array,
 };
