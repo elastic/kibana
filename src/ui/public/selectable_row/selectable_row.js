@@ -7,7 +7,6 @@ app.directive('selectableRow', function () {
   return {
     restrict: 'E',
     replace: true,
-    transclude: true,
     template,
     scope: {
       id: '=',
