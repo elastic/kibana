@@ -80,7 +80,7 @@
 
 
 // table =======================================================================
-@table-dt-color: @brand-primary;
+@table-dt-color: @globalColorBlack;
 @table-cell-hover-bg: white;
 @table-cell-hover-hover-bg: @gray-lighter;
 @table-row-hover-bg: lighten(@gray-lighter, 4%);
@@ -307,8 +307,8 @@
 @tooltip-space: 8px;
 @tooltip-space-tight: @tooltip-space / 2;
 
-@tooltip-bg: fadeout(@gray-darker, 7%);
-@tooltip-color: @gray-lighter;
+@tooltip-bg: fadeout(darken(@globalColorBlue, 30%), 10%);
+@tooltip-color: @globalColorWhite;
 
 @tooltip-table-border: @gray;
 @tooltip-bold: 600;
