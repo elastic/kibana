@@ -15,6 +15,7 @@
     "test:common": "gulp test:common",
     "test:server": "gulp test:server",
     "test:browser": "gulp test:browser",
+    "test:dev": "gulp test:dev",
     "precommit": "gulp lint-staged"
   },
   "dependencies": {
