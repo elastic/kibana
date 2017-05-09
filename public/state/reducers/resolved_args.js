@@ -10,7 +10,7 @@ function _getState(hasError, loading) {
 }
 
 function _getValue(hasError, value, oldVal) {
-  if (hasError || value == null) return oldVal;
+  if (hasError || value == null) return oldVal && oldVal.value;
   return value;
 }
 
