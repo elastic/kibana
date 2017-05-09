@@ -6,7 +6,6 @@ on `localhost:5601`. To change the host or port number, or connect to Elasticsea
 you'll need to update your `kibana.yml` file. You can also enable SSL and set a variety of other options.
 
 .Kibana Configuration Settings
-[horizontal]
 `server.port:`:: *Default: 5601* Kibana is served by a back end server. This setting specifies the port to use.
 `server.host:`:: *Default: "localhost"* This setting specifies the host of the back end server.
 `server.basePath:`:: Enables you to specify a path to mount Kibana at if you are running behind a proxy. This only affects
