@@ -2,8 +2,8 @@
 @font-size-smaller: ceil((@font-size-base * 0.75));
 @input-border-width: 2px;
 
-@action-add: desaturate(@btn-success-bg, 30%);
-@action-remove: desaturate(@btn-danger-bg, 30%);
+@action-add: @globalColorBlue;
+@action-remove: @globalColorRed;
 
 @field-collapse-toggle-color: #999;
 
@@ -199,9 +199,9 @@
 @filter-bar-confirm-border: #ccc;
 @filter-bar-confirm-filter-bg: @gray-light;
 
-@filter-bar-bar-bg: @gray-lighter;
-@filter-bar-bar-border: #ccc;
-@filter-bar-bar-condensed-bg: darken(@filter-bar-bar-bg, 5%);
+@filter-bar-bar-bg: @globalColorLightestGray;
+@filter-bar-bar-border: @globalColorLightGray;
+@filter-bar-bar-condensed-bg: tint(@globalColorBlue, 90%);
 
 @filter-bar-bar-filter-bg: @action-add;
 @filter-bar-bar-filter-color: @white;
