@@ -2,7 +2,7 @@ import uiRoutes from 'ui/routes';
 import template from './testbed.html';
 import './testbed.less';
 
-import 'ui/selectable_row';
+import 'ui/check_box';
 
 uiRoutes.when('/testbed', {
   template: template,

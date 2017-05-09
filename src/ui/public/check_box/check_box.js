@@ -1,9 +1,9 @@
 import { uiModules } from 'ui/modules';
-import template from './selectable_row.html';
+import template from './check_box.html';
 
 const app = uiModules.get('kibana');
 
-app.directive('selectableRow', function () {
+app.directive('checkBox', function () {
   return {
     restrict: 'E',
     replace: true,
@@ -13,9 +13,9 @@ app.directive('selectableRow', function () {
       isSelected: '=',
       onSelectChange: '=',
     },
-    controllerAs: 'selectableRow',
+    controllerAs: 'checkBox',
     bindToController: true,
-    controller: class SelectableRowController {
+    controller: class CheckBoxController {
     }
   };
 });
