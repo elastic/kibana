@@ -45,6 +45,9 @@ module.exports = {
       loader: 'html',
       exclude: /node_modules/
     }, {
+      test: /\.(woff|woff2|ttf|eot|svg|ico)(\?|$)/,
+      loader: 'file',
+    }, {
       test: require.resolve('jquery'),
       loader: 'expose?jQuery!expose?$'
     }]
