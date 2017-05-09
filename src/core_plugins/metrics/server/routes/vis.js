@@ -6,7 +6,7 @@ export default (server) => {
     path: '/api/metrics/vis/data',
     method: 'POST',
     handler: (req, reply) => {
-      return getVisData(req)
+      getVisData(req)
         .then(reply)
         .catch(err => {
           reply(Boom.wrap(err, 400));
