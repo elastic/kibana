@@ -50,7 +50,7 @@ export default function ({ getService, getPageObjects }) {
     });
 
 
-    describe('tile map chart', function indexPatternCreation() {
+    describe('tile cloud chart', function indexPatternCreation() {
       const vizName1 = 'Visualization tagCloud';
 
       it('should show correct tag cloud data', function () {
