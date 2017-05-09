@@ -5,6 +5,7 @@ import { renderableSet } from './render';
 
 export const expressionRun = (expression) => {
   return (dispatch, /*getState*/) => {
+    let triedRender = false;
     function run(exp, context) {
       interpretAst(fromExpression(exp), context)
       .then(resp => {
@@ -13,6 +14,8 @@ export const expressionRun = (expression) => {
           dispatch(renderableSet(resp));
         // Otherwise, cast it to a renderable
         } else {
+          if (triedRender) throw new Error (`Ack! I don't know how to render a '${getType(resp)}'`);
+          triedRender = true;
           run('render()', resp);
         }
       });
