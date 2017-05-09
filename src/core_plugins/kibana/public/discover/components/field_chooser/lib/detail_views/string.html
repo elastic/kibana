@@ -24,14 +24,22 @@
     <div ng-if="!field.details.error">
       <div ng-repeat="bucket in ::field.details.buckets" class="discover-field-details-item">
         <div>
+          <!-- Add/remove filter buttons -->
           <span ng-show="field.filterable" class="pull-right">
-            <i aria-hidden="true" class="fa fa-search-minus pull-right discover-field-details-filter"
-              ng-click="onAddFilter(field, bucket.value, '-')"  data-test-subj="minus-{{::field.name}}-{{::bucket.display}}"></i>
-            <i aria-hidden="true" class="fa fa-search-plus pull-right discover-field-details-filter"
-              ng-click="onAddFilter(field, bucket.value, '+')" data-test-subj="plus-{{::field.name}}-{{::bucket.display}}"></i>
+            <span aria-hidden="true" class="fa fa-search-minus pull-right discover-field-details-filter"
+              ng-click="onAddFilter(field, bucket.value, '-')"  data-test-subj="minus-{{::field.name}}-{{::bucket.display}}"></span>
+            <span aria-hidden="true" class="fa fa-search-plus pull-right discover-field-details-filter"
+              ng-click="onAddFilter(field, bucket.value, '+')" data-test-subj="plus-{{::field.name}}-{{::bucket.display}}"></span>
           </span>
-          <div css-truncate css-truncate-expandable="true" class="discover-field-details-value" title="{{::bucket.display}}">
-            {{::bucket.display}} <i ng-show="bucket.display === ''">Empty string</i>
+
+          <!-- Field value -->
+          <div
+            css-truncate
+            css-truncate-expandable="true"
+            class="discover-field-details-value"
+            aria-label="Value: {{:: bucket.display === '' ? 'Empty string' : bucket.display }}"
+          >
+            {{::bucket.display}} <em ng-show="bucket.display === ''">Empty string</em>
           </div>
         </div>
         <kbn-tooltip text="{{::bucket.count}}" placement="right" append-to-body="1">
