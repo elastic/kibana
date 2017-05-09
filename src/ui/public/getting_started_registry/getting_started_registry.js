@@ -29,7 +29,7 @@ export class GettingStartedRegistry {
    * @param {string} message Message string
    * @return {string} And ID for the message that was added. This can be used later to remove the message.
    */
-  addManageAndMonitorMessagesMessage = (message) => {
+  addManageAndMonitorMessage = (message) => {
     const id = crypto.createHash('md5')
       .update(message)
       .digest('hex');
