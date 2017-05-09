@@ -18,9 +18,7 @@ export const setAst = createAction('setAst', ({ ast }) => {
 }));
 
 export const setExpressionAst = ({ ast, element, pageId, index }) => {
-  const { ast: elementAst } = element;
-  const newAst = set(elementAst, ['chain', index], ast);
-
+  const newAst = set(element, ['ast', 'chain', index], ast);
   return setAst({ ast: newAst, element, pageId });
 };
 

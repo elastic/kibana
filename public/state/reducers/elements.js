@@ -1,11 +1,13 @@
+import { handleActions } from 'redux-actions';
+import { get, findIndex } from 'lodash';
 import { assign } from 'object-path-immutable';
+import * as actions from '../actions/elements';
 
-export default function elementsReducer(workpadState = {}, { payload, type }) {
-  if (type === 'ELEMENT_SET_EXPRESSION_AND_AST') {
-    const { pageId, id, expression, ast } = payload;
-    const path = ['pages', pageId, 'elements', id];
-    return assign(workpadState, path, { expression, ast });
-  }
-
-  return workpadState;
-}
+export default handleActions({
+  [actions.setAstAndExpression]: (workpadState, { payload }) => {
+    const { expression, ast, pageId, element } = payload;
+    const elementsPath = ['pages', pageId, 'elements'];
+    const elementIndex = findIndex(get(workpadState, elementsPath), { id: element.id });
+    return assign(workpadState, elementsPath.concat(elementIndex), { ast, expression });
+  },
+}, {});
