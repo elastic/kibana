@@ -31,7 +31,7 @@ app.directive('gettingStarted', function ($injector) {
     controllerAs: 'gettingStarted',
     controller: class GettingStartedController {
       constructor($scope) {
-        if (this.hasOptedOut) {
+        if (this.hasOptedOut()) {
           uiChrome.setVisible(true);
         } else {
           uiChrome.setVisible(false);
@@ -52,11 +52,11 @@ app.directive('gettingStarted', function ($injector) {
         };
       }
 
-      hasManageAndMonitorMessages() {
+      hasManageAndMonitorMessages = () => {
         return this.manageAndMonitorMessages.length > 0;
       }
 
-      hasOptedOut() {
+      hasOptedOut = () => {
         return localStorageService.get(GETTING_STARTED_OPT_OUT) || false;
       }
 
