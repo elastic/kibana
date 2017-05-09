@@ -210,6 +210,13 @@
     justify-content: space-between;
   }
 
+  /**
+   * 1. If the field name is very long, don't let it sqash the buttons.
+   */
+  .discover-field-details-item-buttons {
+    flex: 0 0 auto; /* 1 */
+  }
+
   .discover-field-details-item-button {
     appearance: none;
     border: none;
