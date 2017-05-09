@@ -1,6 +1,9 @@
 export class GettingStartedRegistry {
   constructor() {
+    // This message will go in to the top message section of the Getting Started page
     this.topMessage = null;
+
+    // These messages will go in the Manage and Monitor section of the Getting Started page
     this._manageAndMonitorMessages = [];
   }
 
