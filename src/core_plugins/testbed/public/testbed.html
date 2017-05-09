@@ -4,7 +4,37 @@
     <!-- All markup within the CONTENT section below can be deleted and replaced with whatever markup
     you need to demonstate your functionality. Nothing need be preserved. -->
     <!-- CONTENT START -->
+    <table class="kuiTable kuiVerticalRhythm">
+      <thead>
+        <tr class="kuiTableRow">
+          <th class="kuiTableHeaderCell kuiTableHeaderCell--checkBox"></th>
+          <th class="kuiTableHeaderCell">Item</th>
+        </tr>
+      </thead>
+      <tr
+        ng-repeat="item in testbed.myItems"
+        class="kuiTableRow"
+      >
+        <td class="kuiTableRowCell kuiTableRowCell--checkBox">
+          <div class="kuiTableRowCell__liner">
+            <selectable-row
+              id="item.id"
+              is-selected="item.isSelected"
+              on-select-change="testbed.onSelectChange"
+            ></selectable-row>
+          </div>
+        </td>
+        <td class="kuiTableRowCell">
+          <div class="kuiTableRowCell__liner">
+            {{ item.name }}
+          </div>
+        </td>
+      </tr>
+    </table>
 
+    <p class="kuiVerticalRhythm kuiText kuiSubduedText">
+      {{ testbed.message }}
+    </p>
     <!-- CONTENT END -->
 
   </div>

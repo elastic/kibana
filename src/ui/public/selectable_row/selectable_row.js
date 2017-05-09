@@ -10,8 +10,8 @@ app.directive('selectableRow', function () {
     transclude: true,
     template: template,
     scope: {
-      item: '=',
-      selected: '=',
+      id: '=',
+      isSelected: '=',
       onSelectChange: '=',
     },
     controllerAs: 'selectableRow',
