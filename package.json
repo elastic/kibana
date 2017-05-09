@@ -59,8 +59,8 @@
     "elasticsearchWithPlugins": "grunt esvm:withPlugins:keepalive",
     "lint": "grunt eslint:source",
     "lintroller": "grunt eslint:fixSource",
-    "makelogs": "echo 'use `node script/makelogs`' && false",
-    "mocha": "echo 'use `node script/mocha`' && false",
+    "makelogs": "echo 'use `node scripts/makelogs`' && false",
+    "mocha": "echo 'use `node scripts/mocha`' && false",
     "sterilize": "grunt sterilize",
     "uiFramework:start": "grunt uiFramework:start",
     "uiFramework:build": "grunt uiFramework:build"
