@@ -69,6 +69,11 @@ uiModules.get('kibana')
       }
 
       element.on('keyup', e => {
+        // If the user is interacting with a different element, then we don't need to do anything.
+        if (e.currentTarget !== e.target) {
+          return;
+        }
+
         // Support keyboard accessibility by emulating mouse click on ENTER or SPACE keypress.
         if (accessibleClickKeys[e.keyCode]) {
           // Delegate to the click handler on the element (assumed to be ng-click).

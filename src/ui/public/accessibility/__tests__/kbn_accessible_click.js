@@ -24,21 +24,21 @@ describe('kbnAccessibleClick directive', () => {
       const html = `<button kbn-accessible-click></button>`;
       expect(() => {
         $compile(html)($rootScope);
-      }).to.throwError(`kbnAccessibleClick doesn't need to be used on a button.`);
+      }).to.throwError(/kbnAccessibleClick doesn't need to be used on a button./);
     });
 
     it('when the element is a link with an href', () => {
-      const html = `<a href="#"" kbn-accessible-click></a>`;
+      const html = `<a href="#" kbn-accessible-click></a>`;
       expect(() => {
         $compile(html)($rootScope);
-      }).to.throwError(`kbnAccessibleClick doesn't need to be used on a link if it has a href attribute.`);
+      }).to.throwError(/kbnAccessibleClick doesn't need to be used on a link if it has a href attribute./);
     });
 
     it(`when the element doesn't have an ng-click`, () => {
       const html = `<div kbn-accessible-click></div>`;
       expect(() => {
         $compile(html)($rootScope);
-      }).to.throwError(`kbnAccessibleClick requires ng-click to be defined on its element.`);
+      }).to.throwError(/kbnAccessibleClick requires ng-click to be defined on its element./);
     });
   });
 
@@ -47,7 +47,7 @@ describe('kbnAccessibleClick directive', () => {
       const html = `<a ng-click="noop" kbn-accessible-click></a>`;
       expect(() => {
         $compile(html)($rootScope);
-      }).not.to.throwError(`kbnAccessibleClick doesn't need to be used on a link if it has a href attribute.`);
+      }).not.to.throwError();
     });
   });
 
@@ -105,16 +105,31 @@ describe('kbnAccessibleClick directive', () => {
     });
   });
 
-  it(`doesn't call ng-click when the originating element is a child`, () => {
-    const scope = $rootScope.$new();
-    scope.handleClick = sinon.stub();
-    const html = `<div ng-click="handleClick()" kbn-accessible-click></div>`;
-    const element = $compile(html)(scope);
-    const child = angular.element(`<button></button>`);
-    element.append(child);
-    const e = angular.element.Event('keydown'); // eslint-disable-line new-cap
-    e.which = ENTER_KEY;
-    child.trigger(e);
-    expect(scope.handleClick.callCount).to.be(0);
+  describe(`doesn't call ng-click when the element being interacted with is a child`, () => {
+    it(`on ENTER keyup`, () => {
+      const scope = $rootScope.$new();
+      scope.handleClick = sinon.stub();
+      const html = `<div ng-click="handleClick()" kbn-accessible-click></div>`;
+      const element = $compile(html)(scope);
+      const child = angular.element(`<button></button>`);
+      element.append(child);
+      const e = angular.element.Event('keyup'); // eslint-disable-line new-cap
+      e.keyCode = ENTER_KEY;
+      child.trigger(e);
+      expect(scope.handleClick.callCount).to.be(0);
+    });
+
+    it(`on SPACE keyup`, () => {
+      const scope = $rootScope.$new();
+      scope.handleClick = sinon.stub();
+      const html = `<div ng-click="handleClick()" kbn-accessible-click></div>`;
+      const element = $compile(html)(scope);
+      const child = angular.element(`<button></button>`);
+      element.append(child);
+      const e = angular.element.Event('keyup'); // eslint-disable-line new-cap
+      e.keyCode = ENTER_KEY;
+      child.trigger(e);
+      expect(scope.handleClick.callCount).to.be(0);
+    });
   });
 });
