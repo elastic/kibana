@@ -26,7 +26,6 @@ uiRoutes
       const isGettingStartedOptedOut = localStorageService.get(GETTING_STARTED_OPT_OUT) || false;
       const isOnGettingStartedPage = get(currentRoute, 'originalPath') === GETTING_STARTED_ROUTE;
 
-      // If index patterns exist
       if (indexPatternsExist) {
 
         // Some routes require a default index pattern to be present. If we're
