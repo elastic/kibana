@@ -8,9 +8,7 @@ export default (server) => {
       return getFields(req)
         .then(reply)
         .catch((err) => {
-          if (err.isBoom) {
-            return reply(err);
-          }
+          if (err.isBoom && err.status === 401) return reply(err);
           reply([]);
         });
     }

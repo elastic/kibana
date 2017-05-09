@@ -1,5 +1,5 @@
 export default panel => error => {
-  if (error.isBoom) throw error;
+  if (error.isBoom && error.status === 401) throw error;
   const result = {};
   let errorResponse;
   try {
