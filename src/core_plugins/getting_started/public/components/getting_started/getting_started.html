@@ -1,7 +1,7 @@
 <div class="kuiViewContent gettingStartedContent">
 
   <div
-    ng-if="!gettingStarted.hasOptedOut"
+    ng-if="!gettingStarted.hasOptedOut()"
     class="kuiBar gettingStartedOptOutContent"
   >
     <div class="kuiBarSection">
@@ -97,7 +97,7 @@
 
       <div
         class="kuiCard kuiCardGroup__card gettingStartedCard"
-        ng-show="gettingStarted.hasManageAndMonitorMessages"
+        ng-show="gettingStarted.hasManageAndMonitorMessages()"
       >
         <div class="kuiCard__description">
           <div class="kuiCard__descriptionTitle">

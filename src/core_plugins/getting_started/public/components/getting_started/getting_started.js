@@ -52,11 +52,11 @@ app.directive('gettingStarted', function ($injector) {
         };
       }
 
-      get hasManageAndMonitorMessages() {
+      hasManageAndMonitorMessages() {
         return this.manageAndMonitorMessages.length > 0;
       }
 
-      get hasOptedOut() {
+      hasOptedOut() {
         return localStorageService.get(GETTING_STARTED_OPT_OUT) || false;
       }
 
