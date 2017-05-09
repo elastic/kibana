@@ -6,6 +6,7 @@
   top: 0;
   left: 0;
   right: 0;
+  min-width: $guideMinWidth;
   height: $guideNavHeight;
   border-bottom: 1px solid #CCCCCC;
   color: $guideTextColor;
@@ -21,6 +22,7 @@
 }
 
   .guideNav__header {
+    position: relative;
     flex: 0 0 auto;
     display: flex;
     align-items: center;
@@ -55,6 +57,17 @@
       margin-left: 10px;
       font-weight: 300;
       font-size: 14px;
+    }
+
+    .guideNav__elasticLogo {
+      position: absolute;
+      background-image: url("images/elastic-logo.svg");
+      width: 106px;
+      height: 36px;
+      background-repeat: no-repeat;
+      background-size: contain;
+      left: 50%;
+      transform: translateX(-50%);
     }
 
 .guideNavSearch {
@@ -117,4 +130,37 @@
   color: rgba($guideTextColor, 0.5);
   margin-top: 0;
   margin-bottom: 0;
+}
+
+.guideNavPaginationButtons {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+}
+
+.guideNavPaginationButton {
+  appearance: none;
+  border: none;
+  line-height: 10px;
+  padding: 4px 20px;
+  color: $guideLinkHoverColor;
+  background-color: #fff;
+  border: 1px solid $guideLinkHoverColor;
+  border-radius: 3px;
+  cursor: pointer;
+
+  &:hover,
+  &:active {
+    background-color: #e6f7fc;
+  }
+
+  &.guideNavPaginationButton-isDisabled {
+    pointer-events: none;
+    color: rgba($guideTextColor, 0.25);
+    border-color: rgba($guideTextColor, 0.25);
+  }
+
+  & + & {
+    margin-left: 10px;
+  }
 }
