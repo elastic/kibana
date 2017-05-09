@@ -297,6 +297,10 @@ export default function defaultSettingsProvider() {
       value: 2,
       description: 'Number of rows on a timelion sheet by default'
     },
+    'timelion:min_interval': {
+      value: '1ms',
+      description: 'The smallest interval that will be calculated when using "auto"'
+    },
     'timelion:graphite.url': {
       value: 'https://www.hostedgraphite.com/UID/ACCESS_KEY/graphite',
       description: '<em>[experimental]</em> The URL of your graphite host'
