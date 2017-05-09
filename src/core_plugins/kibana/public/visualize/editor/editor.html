@@ -40,16 +40,29 @@
         >
           <div class="typeahead" kbn-typeahead="visualize" on-select="fetch()">
             <div class="kuiLocalSearch">
-              <input
-                ng-model="state.query"
-                parse-query
-                input-focus
-                kbn-typeahead-input
-                placeholder="Search..."
-                type="text"
-                class="kuiLocalSearchInput"
-                ng-class="{'kuiLocalSearchInput-isInvalid': queryInput.$invalid}"
-              >
+              <div class="kuiLocalSearchAssistedInput">
+                <input
+                  ng-model="state.query"
+                  parse-query
+                  input-focus
+                  kbn-typeahead-input
+                  placeholder="Search... (e.g. status:200 AND extension:PHP)"
+                  type="text"
+                  class="kuiLocalSearchInput kuiLocalSearchInput--lucene"
+                  ng-class="{'kuiLocalSearchInput-isInvalid': queryInput.$invalid}"
+                >
+                <div class="kuiLocalSearchAssistedInput__assistance">
+                  <p class="kuiText">
+                    <a
+                      class="kuiLink"
+                      ng-href="{{queryDocLinks.luceneQuerySyntax}}"
+                      target="_blank"
+                    >
+                      Uses lucene query syntax
+                    </a>
+                  </p>
+                </div>
+              </div>
               <button
                 type="submit"
                 aria-label="Search"

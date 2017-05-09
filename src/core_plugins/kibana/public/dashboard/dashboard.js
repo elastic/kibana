@@ -24,6 +24,7 @@ import { DashboardState } from './dashboard_state';
 import { notify } from 'ui/notify';
 import { PanelUtils } from './panel/panel_utils';
 import './panel/get_object_loaders_for_dashboard';
+import { documentationLinks } from 'ui/documentation_links/documentation_links';
 
 const app = uiModules.get('app/dashboard', [
   'elasticsearch',
@@ -85,6 +86,7 @@ app.directive('dashboardApp', function (
       const filterBar = Private(FilterBarQueryFilterProvider);
       const docTitle = Private(DocTitleProvider);
       const notify = new Notifier({ location: 'Dashboard' });
+      $scope.queryDocLinks = documentationLinks.query;
 
       const dash = $scope.dash = $route.current.locals.dash;
       if (dash.id) {
