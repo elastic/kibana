@@ -29,7 +29,7 @@ const browserHistory = useRouterHistory(createHashHistory)({
 });
 const history = syncHistoryWithStore(browserHistory, store);
 
-const childRoutes = Routes.getAppRoutes();
+const childRoutes = [].concat(Routes.getAppRoutes());
 childRoutes.push({
   path: '*',
   component: NotFoundView,

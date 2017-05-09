@@ -57,6 +57,20 @@
       font-size: 14px;
     }
 
+.guideNavSearch {
+  margin: 0 20px;
+  width: 100%;
+  max-width: 400px;
+  font-size: 16px;
+  padding: 8px;
+  border: 1px solid rgba($guideTextColor, 0.2);
+
+  &:focus {
+    border-color: $guideLinkHoverColor;
+    outline: none;
+  }
+}
+
 .guideNavItemsContainer {
   @include scrollbar;
   display: flex;
@@ -81,16 +95,26 @@
   font-weight: 700;
 }
 
-.guideNavItem {
+.guideNavItem,
+.guideNavNoItems {
   min-width: 200px;
-  color: $guideTextColor;
   text-decoration: none;
   font-size: 20px;
   line-height: 20px;
   padding: 8px 20px;
   margin-left: 5px;
+}
+
+.guideNavItem {
+  color: $guideTextColor;
 
   &:hover {
     color: $guideLinkHoverColor;
   }
+}
+
+.guideNavNoItems {
+  color: rgba($guideTextColor, 0.5);
+  margin-top: 0;
+  margin-bottom: 0;
 }
