@@ -103,12 +103,16 @@ uiModules.get('apps/management')
 
     this.dateFields = results.dateFields || [];
     this.indexHasDateFields = this.dateFields.length > 0;
+    const moreThanOneDateField = this.dateFields.length > 1;
     if (this.indexHasDateFields) {
       this.dateFields.unshift(TIME_FILTER_FIELD_OPTIONS.NO_DATE_FIELD_SELECTED);
     } else {
       this.dateFields.unshift(TIME_FILTER_FIELD_OPTIONS.NO_DATE_FIELDS_IN_INDICES);
     }
-    this.newIndexPattern.timeField = this.dateFields[0];
+
+    if (!moreThanOneDateField) {
+      this.newIndexPattern.timeField = this.dateFields[this.dateFields.length - 1];
+    }
   };
 
   const updateFieldListAndSetTimeField = (results, timeFieldName) => {
