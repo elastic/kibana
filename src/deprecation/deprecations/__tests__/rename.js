@@ -1,5 +1,5 @@
 import expect from 'expect.js';
-import rename from '../rename';
+import { rename } from '../rename';
 import sinon from 'sinon';
 
 describe('deprecation/deprecations', function () {
