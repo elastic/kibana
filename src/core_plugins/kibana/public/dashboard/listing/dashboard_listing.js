@@ -11,6 +11,7 @@ export function DashboardListingController($injector, $scope) {
   const pagerFactory = $injector.get('pagerFactory');
   const Private = $injector.get('Private');
   const timefilter = $injector.get('timefilter');
+  const config = $injector.get('config');
 
   timefilter.enabled = false;
 
@@ -44,10 +45,13 @@ export function DashboardListingController($injector, $scope) {
   const fetchItems = () => {
     this.isFetchingItems = true;
 
-    dashboardService.find(this.filter)
+    dashboardService.find(this.filter, config.get('savedObjects:listingLimit'))
       .then(result => {
         this.isFetchingItems = false;
         this.items = result.hits;
+        this.totalItems = result.total;
+        this.showLimitError = result.total > config.get('savedObjects:listingLimit');
+        this.listingLimit = config.get('savedObjects:listingLimit');
         calculateItemsOnPage();
       });
   };

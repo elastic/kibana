@@ -16,6 +16,15 @@
   class="kuiViewContent kuiViewContent--constrainedWidth"
   data-test-subj="dashboardLandingPage"
 >
+  <div class="kuiViewContentItem kuiVerticalRhythm" ng-if="listingController.showLimitError">
+    <div class="kuiInfoPanel kuiInfoPanel--warning">
+      <div class="kuiInfoPanelBody">
+        <div class="kuiInfoPanelBody__message">
+          The number of matching dashboards ({{ listingController.totalItems }}) is larger than the listing limit {{ listingController.listingLimit }}. Sorting will only work for the first {{ listingController.listingLimit }} dashboards. To see more, either filter the list or increase the config savedObjects:listingLimit.
+        </div>
+      </div>
+    </div>
+  </div>
   <!-- ControlledTable -->
   <div class="kuiViewContentItem kuiControlledTable kuiVerticalRhythm">
     <!-- ToolBar -->

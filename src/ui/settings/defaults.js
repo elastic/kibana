@@ -211,6 +211,11 @@ export default function defaultSettingsProvider() {
       value: 5,
       description: 'Number of objects to show per page in the load dialog'
     },
+    'savedObjects:listingLimit': {
+      type: 'number',
+      value: 1000,
+      description: 'Number of objects to fetch for the listing pages'
+    },
     'timepicker:timeDefaults': {
       type: 'json',
       value:
