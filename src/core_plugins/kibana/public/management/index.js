@@ -8,7 +8,6 @@ import appTemplate from 'plugins/kibana/management/app.html';
 import landingTemplate from 'plugins/kibana/management/landing.html';
 import { management } from 'ui/management';
 import 'ui/kbn_top_nav';
-// import { loadDefault } from 'ui/index_patterns/route_setup/load_default';
 
 uiRoutes
 .when('/management', {
@@ -19,10 +18,6 @@ uiRoutes
 .when('/management/:section', {
   redirectTo: '/management'
 });
-
-// loadDefault({
-//   whenMissingRedirectTo: '/management/kibana/index'
-// });
 
 uiModules
 .get('apps/management')
