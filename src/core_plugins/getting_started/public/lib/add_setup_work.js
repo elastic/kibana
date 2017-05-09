@@ -44,7 +44,7 @@ uiRoutes
           config.set('defaultIndex', defaultIndexPattern);
         }
 
-        // At this point, we have a default index pattern and ar all set!
+        // At this point, we have a default index pattern and are all set!
         return;
       }
 
