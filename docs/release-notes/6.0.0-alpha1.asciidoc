@@ -75,7 +75,4 @@ Visualize::
 * [Fix for #8763] [vislib/tilemap/heatmap] scale the heatmap maxZoom with map zoom {pull}8765[#8765]
 * [Fix for #9184] fixes error with custom interval in datetime aggregation {pull}9427[#9427]
 
-[float]
-[[deprecation-6.0.0-alpha1]]
-=== Deprecations
-* Nothing is deprecated in Kibana 6.0.0-alpha1
+
