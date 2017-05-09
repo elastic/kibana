@@ -3,14 +3,14 @@ import 'ui/visualize/visualize.less';
 import 'ui/visualize/visualize_legend';
 import _ from 'lodash';
 import angular from 'angular';
-import uiModules from 'ui/modules';
+import { uiModules } from 'ui/modules';
 import 'angular-sanitize';
-import RegistryEditorTypesProvider from 'ui/registry/editor_types';
+import { EditorTypesRegistyProvider } from 'ui/registry/editor_types';
 
 uiModules
 .get('kibana/directive', ['ngSanitize'])
 .directive('visualizationEditor', function (Private, $compile) {
-  const editorTypes = Private(RegistryEditorTypesProvider);
+  const editorTypes = Private(EditorTypesRegistyProvider);
 
   return {
     restrict: 'E',

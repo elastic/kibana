@@ -1,6 +1,6 @@
-import VisVisTypeProvider from 'ui/vis/vis_type';
+import { VisVisTypeProvider } from 'ui/vis/vis_type';
 
-export default function TemplateVisTypeFactory(Private, $compile, $rootScope) {
+export function TemplateVisTypeProvider(Private, $compile, $rootScope) {
   const VisType = Private(VisVisTypeProvider);
 
   class TemplateVisType extends VisType {

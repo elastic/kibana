@@ -20,7 +20,6 @@ VisTypesRegistryProvider.register(function TagCloudProvider(Private) {
     implementsRenderComplete: true,
     description: 'A group of words, sized according to their importance',
     category: VisType.CATEGORY.OTHER,
-    template: tagCloudTemplate,
     visConfig: {
       defaults: {
         scale: 'linear',

@@ -1,9 +1,9 @@
 import _ from 'lodash';
 import { uiModules } from 'ui/modules';
-import stateMonitorFactory from 'ui/state_management/state_monitor_factory';
+import { stateMonitorFactory } from 'ui/state_management/state_monitor_factory';
 import visualizeTemplate from 'ui/visualize/visualize.html';
-import RequestHandlersProvider from 'ui/registry/request_handlers';
-import ResponseHandlersProvider from 'ui/registry/response_handlers';
+import { RequestHandlersRegistryProvider } from 'ui/registry/request_handlers';
+import { ResponseHandlersRegistryProvider } from 'ui/registry/response_handlers';
 import 'angular-sanitize';
 import './visualization';
 import './visualization_editor';
@@ -18,8 +18,8 @@ uiModules
   const notify = new Notifier({
     location: 'Visualize'
   });
-  const requestHandlers = Private(RequestHandlersProvider);
-  const responseHandlers = Private(ResponseHandlersProvider);
+  const requestHandlers = Private(RequestHandlersRegistryProvider);
+  const responseHandlers = Private(ResponseHandlersRegistryProvider);
 
   function getHandler(from, name) {
     if (typeof name === 'function') return name;

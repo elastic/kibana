@@ -42,7 +42,7 @@ export function VisVisTypeProvider(Private) {
       if (!this.name) throw('vis_type must define its name');
       if (!this.title) throw('vis_type must define its title');
       if (!this.description) throw('vis_type must define its description');
-      if (!this.icon) throw('vis_type must define its icon');
+      if (!this.icon && !this.image) throw('vis_type must define its icon or image');
 
       if (!this.editorConfig.optionTabs) {
         this.editorConfig.optionTabs = [

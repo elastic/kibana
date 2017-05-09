@@ -9,6 +9,9 @@ export function MapsVisTypeProvider(Private) {
 
   class MapsVisType extends VisType {
     constructor(opts) {
+      if (!opts.responseHandler) {
+        opts.responseHandler = 'basic';
+      }
       super(opts);
     }
 

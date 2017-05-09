@@ -1,12 +1,12 @@
 import { VisVisTypeProvider } from 'ui/vis/vis_type';
-import { VislibVisTypeVislibVisTypeProvider } from 'ui/vis/vis_types/vislib_vis_type';
+import { VislibVisTypeProvider } from 'ui/vis/vis_types/vislib_vis_type';
 import { VisSchemasProvider } from 'ui/vis/schemas';
 import pieTemplate from 'plugins/kbn_vislib_vis_types/editors/pie.html';
 import image from './images/icon-pie.svg';
 
 export default function HistogramVisType(Private) {
   const VisType = Private(VisVisTypeProvider);
-  const VislibVisType = Private(VislibVisTypeVislibVisTypeProvider);
+  const VislibVisType = Private(VislibVisTypeProvider);
   const Schemas = Private(VisSchemasProvider);
 
   return new VislibVisType({
