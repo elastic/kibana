@@ -1,5 +1,5 @@
 const path = require('path');
-
+const babelPreset = require('../../src/optimize/babel/helpers').webpackPreset;
 module.exports = {
   devtool: 'source-map',
 
@@ -34,7 +34,7 @@ module.exports = {
       loader: 'babel',
       exclude: /node_modules/,
       query: {
-        presets: ['es2015', 'react'],
+        presets: [babelPreset],
       },
     }, {
       test: /\.scss$/,
