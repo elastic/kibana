@@ -5,6 +5,7 @@ import { FILTER_OPERATORS } from './lib/filter_operators';
 import { buildExistsFilter, buildPhraseFilter, buildRangeFilter, buildTermsFilter } from '../filter_manager/lib';
 import '../filters/sort_prefix_first';
 import '../directives/ui_select_focus_on';
+import './filter_editor.less';
 
 const module = uiModules.get('kibana');
 module.directive('filterEditor', function ($http) {
