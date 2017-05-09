@@ -59,8 +59,7 @@
     "lint": "grunt eslint:source",
     "lintroller": "grunt eslint:fixSource",
     "makelogs": "echo 'use `node script/makelogs`' && false",
-    "mocha": "mocha",
-    "mocha:debug": "mocha --debug-brk",
+    "mocha": "echo 'use `node script/mocha`' && false",
     "sterilize": "grunt sterilize",
     "uiFramework:start": "grunt uiFramework:start",
     "uiFramework:build": "grunt uiFramework:build"
