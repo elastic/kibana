@@ -1,10 +1,10 @@
-const Fn = require('../fn.js');
-const _ = require('lodash');
-const moment = require('moment');
+import Fn from '../fn.js';
+import { groupBy, find, zipObject, sortBy } from 'lodash';
+import moment from 'moment';
 
-module.exports = new Fn({
+export default new Fn({
   name: 'pointseries',
-  type: 'cartesian',
+  type: 'pointseries',
   help: 'Turn a datatable into a point series model',
   context: {
     types: ['datatable'],
@@ -31,14 +31,12 @@ module.exports = new Fn({
     },
   },
   fn: (context, args) => {
-    const dimensionNames = ['color', 'x'];
-    const measureNames = ['y', 'size'];
     const columns = {
       _rowId: { type: 'number' }, // This will always be a string since it is effectly the label
       color: { type: 'string' }, // This will always be a string since it is effectly the label
       size: { type: 'number' }, // This will always be a number
       y: { type: 'number' }, // We could probably make this dynamic if we wanted to be able todo vertical & horizontal
-      x: { type: _.find(context.columns, { name: args.x }).type }, // This will determine if the renderer uses ordinal, nominal or temporal scale
+      x: { type: find(context.columns, { name: args.x }).type }, // This will determine if the renderer uses ordinal, nominal or temporal scale
     };
 
     // TODO: break this out into a utility
@@ -56,43 +54,44 @@ module.exports = new Fn({
     }
 
     // Dimensions. There's probably a better way todo this
-    const result = _.map(context.rows, row => {
+    const dimensionNames = ['color', 'x'];
+    const result = context.rows.map(row => {
       const newRow = { _rowId: row._rowId };
-      _.each(dimensionNames, dimension =>
+      dimensionNames.forEach(dimension =>
         newRow[dimension] = args[dimension] ? normalizeValue(dimension, row[args[dimension]]) : '_all');
       return newRow;
     });
 
     // Measures
-
     // First group up all of the distinct dimensioned bits. Each of these will be reduced to just 1 value
     // for each measure
-    const measureDimensions = _.groupBy(context.rows, (row) => {
-      const dimensions = _.map(dimensionNames, dimension => args[dimension] ? row[args[dimension]] : '_all');
+    const measureNames = ['y', 'size'];
+    const measureDimensions = groupBy(context.rows, (row) => {
+      const dimensions = dimensionNames.map(dimension => args[dimension] ? row[args[dimension]] : '_all');
       return dimensions.join('::%BURLAP%::');
     });
 
     // Then compute that 1 value for each measure
     const rowPromises = [];
-    _.each(measureDimensions, rows => {
+    Object.values(measureDimensions).forEach(rows => {
       const subtable = { type: 'datatable', columns: context.columns, rows: rows };
-      const measurePromises = _.map(measureNames, measure =>
+      const measurePromises = measureNames.map(measure =>
         typeof args[measure] === 'function' ? args[measure](subtable) : Promise.resolve(args[measure]));
 
-      _.each(rows, row => {
-        rowPromises[row._rowId] = Promise.all(measurePromises).then(measureValues => _.zipObject(measureNames, measureValues));
+      rows.forEach(row => {
+        rowPromises[row._rowId] = Promise.all(measurePromises).then(measureValues => zipObject(measureNames, measureValues));
       });
     });
 
     return Promise.all(rowPromises).then(measureRows => {
-      _.each(result, (row, i) => {
-        _.assign(row, measureRows[i]);
+      result.forEach((row, i) => {
+        Object.assign(row, measureRows[i]);
       });
 
       return {
-        type: 'cartesian',
+        type: 'pointseries',
         columns: columns,
-        rows: result,
+        rows: sortBy(result, ['x']),
       };
     });
   },

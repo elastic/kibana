@@ -8,7 +8,7 @@ module.exports = new Fn({
   help: 'Produces a line chart',
   context: {
     types: [
-      'cartesian',
+      'pointseries',
     ],
   },
   args: {},
