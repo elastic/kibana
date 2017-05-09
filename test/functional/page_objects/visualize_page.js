@@ -77,6 +77,27 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
       .findAllByCssSelector('text').getVisibleText();
     }
 
+
+    getTextSizes() {
+      return remote
+      .setFindTimeout(defaultFindTimeout)
+      .findAllByCssSelector('text')
+      .then(function (tags) {
+
+        function returnTagSize(tag) {
+          return tag.getAttribute('style')
+          .then(function (style) {
+            //return style.split(';')[0];
+            return style.match(/font-size: ([^;]*);/)[1];
+          });
+        }
+
+        return Promise.all(tags.map(returnTagSize));
+
+      });
+    }
+
+
     clickVerticalBarChart() {
       return remote
       .setFindTimeout(defaultFindTimeout)
