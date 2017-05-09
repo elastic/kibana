@@ -1,5 +1,5 @@
 import { VisVisTypeProvider } from 'ui/vis/vis_type';
-import { VislibVisTypeVislibVisTypeProvider } from 'ui/vislib_vis_type/vislib_vis_type';
+import { VislibVisTypeProvider } from 'ui/vis/vis_types/vislib_vis_type';
 import { VisSchemasProvider } from 'ui/vis/schemas';
 import heatmapTemplate from 'plugins/kbn_vislib_vis_types/editors/heatmap.html';
 import { vislibColorMaps } from 'ui/vislib/components/color/colormaps';
@@ -7,7 +7,7 @@ import image from './images/icon-heatmap.svg';
 
 export default function HeatmapVisType(Private) {
   const VisType = Private(VisVisTypeProvider);
-  const VislibVisType = Private(VislibVisTypeVislibVisTypeProvider);
+  const VislibVisType = Private(VislibVisTypeProvider);
   const Schemas = Private(VisSchemasProvider);
 
   return new VislibVisType({
