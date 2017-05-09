@@ -13,8 +13,8 @@ import elementsReducer from './reducers/elements';
 const app = uiModules.get('apps/canvas');
 
 app.service('$store', (kbnVersion, basePath) => {
-
   const initialState = getInitialState();
+
   // Set the defaults from Kibana plugin
   initialState.app = {
     kbnVersion,
@@ -22,7 +22,7 @@ app.service('$store', (kbnVersion, basePath) => {
   };
 
   const rootReducer = combineReducers({
-    app: (state = getInitialState('app')) => state,
+    app: (state = initialState.app) => state,
     transient: reduceReducers(transientReducer, resolvedArgsReducer),
     persistent: combineReducers({
       workpad: reduceReducers(workpadReducer, pagesReducer, elementsReducer),
