@@ -1,12 +1,12 @@
 export const FILTER_OPERATORS = [
   {
     name: 'is',
-    type: 'match',
+    type: 'phrase',
     negate: false,
   },
   {
     name: 'is not',
-    type: 'match',
+    type: 'phrase',
     negate: true,
   },
   {

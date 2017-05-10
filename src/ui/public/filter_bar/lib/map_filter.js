@@ -1,7 +1,7 @@
 import _ from 'lodash';
 import { FilterBarLibGenerateMappingChainProvider } from './generate_mapping_chain';
 import { FilterBarLibMapMatchAllProvider } from './map_match_all';
-import { FilterBarLibMapMatchProvider } from './map_match';
+import { FilterBarLibMapPhraseProvider } from './map_phrase';
 import { FilterBarLibMapTermsProvider } from './map_terms';
 import { FilterBarLibMapRangeProvider } from './map_range';
 import { FilterBarLibMapExistsProvider } from './map_exists';
@@ -33,7 +33,7 @@ export function FilterBarLibMapFilterProvider(Promise, Private) {
   // and add it here. ProTip: These are executed in order listed
   const mappers = [
     Private(FilterBarLibMapMatchAllProvider),
-    Private(FilterBarLibMapMatchProvider),
+    Private(FilterBarLibMapPhraseProvider),
     Private(FilterBarLibMapTermsProvider),
     Private(FilterBarLibMapRangeProvider),
     Private(FilterBarLibMapExistsProvider),

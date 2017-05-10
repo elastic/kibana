@@ -73,7 +73,7 @@ module.directive('filterEditor', function ($http) {
       this.setOperator = (operator) => {
         this.operator = operator;
         const type = _.get(operator, 'type');
-        if (type === 'match' || type === 'terms') {
+        if (type === 'phrase' || type === 'terms') {
           this.refreshValueSuggestions();
         }
       };
@@ -115,7 +115,7 @@ module.directive('filterEditor', function ($http) {
           const meta = _.pick(this.filter.meta, ['negate', 'index']);
           filter = Object.assign(this.queryDsl, { meta });
         } else {
-          if (operator.type === 'match') {
+          if (operator.type === 'phrase') {
             filter = buildPhraseFilter(field, params.value, field.indexPattern);
           } else if (operator.type === 'terms') {
             filter = buildTermsFilter(field, params.values, field.indexPattern);
@@ -141,7 +141,7 @@ module.directive('filterEditor', function ($http) {
 
       function getParamsFromFilter(filter) {
         const { type, key } = filter.meta;
-        if (type === 'match') {
+        if (type === 'phrase') {
           return { value: filter.query.match[key].query };
         } else if (type === 'terms') {
           return { values: filter.query.terms[key] };
