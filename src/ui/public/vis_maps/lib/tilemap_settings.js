@@ -12,7 +12,6 @@ uiModules.get('kibana')
   .service('tilemapSettings', function ($http, tilemapsConfig, $sanitize, kbnVersion) {
     const attributionFromConfig = $sanitize(marked(tilemapsConfig.deprecated.config.options.attribution || ''));
     const optionsFromConfig = _.assign({}, tilemapsConfig.deprecated.config.options, { attribution: attributionFromConfig });
-
     const extendUrl = (url, props) => (
       modifyUrl(url, parsed => _.merge(parsed, props))
     );
@@ -69,8 +68,8 @@ uiModules.get('kibana')
             this._error = null;
             this._tmsOptions = {
               attribution: $sanitize(marked(service.attribution)),
-              minZoom: service.minZoom,
-              maxZoom: service.maxZoom,
+              minZoom: Math.max(service.minZoom, this._tmsOptions.minZoom),
+              maxZoom: Math.min(service.maxZoom, this._tmsOptions.maxZoom),
               subdomains: service.subdomains || []
             };
 
