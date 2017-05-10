@@ -71,23 +71,23 @@ export default function LayoutFactory(Private) {
       const position = axis.axisConfig.get('position');
       const chartTitle = new ChartTitle(visConfig);
 
-      const el = $(this.el).find(`.axis-wrapper-${position}`);
+      const axisWrapperElement = $(this.el).find(`.axis-wrapper-${position}`);
 
-      el.css('visibility', 'hidden');
+      axisWrapperElement.css('visibility', 'hidden');
       axis.render();
       chartTitle.render();
-      const width = el.width();
-      const height = el.height();
+      const width = axisWrapperElement.width();
+      const height = axisWrapperElement.height();
       axis.destroy();
-      el.find('.chart-title svg').remove();
-      el.css('visibility', '');
+      $(this.el).find('.chart-title svg').remove();
+      axisWrapperElement.css('visibility', '');
 
 
       if (axis.axisConfig.isHorizontal()) {
         const spacerNodes = $(this.el).find(`.y-axis-spacer-block-${position}`);
         spacerNodes.height(`${height}px`);
       } else {
-        el.find('.y-axis-div-wrapper').width(`${width}px`);
+        axisWrapperElement.find('.y-axis-div-wrapper').width(`${width}px`);
       }
     }
 
