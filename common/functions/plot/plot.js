@@ -1,5 +1,5 @@
 const Fn = require('../fn.js');
-import { groupBy, keyBy, get, map } from 'lodash';
+import { groupBy, keyBy, get, map, last } from 'lodash';
 
 /*
 esdocs(size=1000).alterColumn(column=@timestamp, type=date, name=time)
@@ -58,25 +58,21 @@ module.exports = new Fn({
       };
     }
 
-    function getData(series) {
-      return series.map(point => [point.x, point.y, point.size]);
-    }
-
     const seriesStyles = keyBy(args.seriesStyle || [], 'label') || {};
+    console.log(seriesStyles);
     const data = map(groupBy(context.rows, 'color'), (series, label) => {
       const seriesStyle = seriesStyles[label];
       const result = {
         label: label,
-        data: getData(series),
+        data: series.map(point => [point.x, point.y, point.size]),
       };
 
       if (seriesStyle) {
         Object.assign(result, seriesStyleToFlot(seriesStyle));
+        console.log('Yep')
       }
       return result;
     });
-
-    console.log('data', data);
 
     return {
       type: 'render',
@@ -93,7 +89,17 @@ module.exports = new Fn({
             color: 'rgba(0,0,0,0)',
           },
           xaxis: {
-            mode: context.columns.x.type === 'date' ? 'time' : null,
+            mode: (function () {
+              switch (context.columns.x.type) {
+                case 'date':
+                  return 'time';
+                case 'string':
+                  return 'categories';
+                default:
+                  return null;
+              }
+              context.columns.x.type === 'date' ? 'time' : null;
+            }()),
           },
           series: Object.assign({
             lines: {
