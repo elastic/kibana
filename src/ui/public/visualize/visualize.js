@@ -48,20 +48,19 @@ uiModules
 
       $scope.vis = $scope.savedVis.vis;
 
-      //const visualizeApi = $scope.savedVis.vis.api;
-      // searchSource is only there for courier request handler
-      const searchSource = $scope.savedVis.searchSource;
+      const visualizeApi = $scope.savedVis.vis.API;
 
       // get request handler from registry (this should actually happen only once not on every fetch)
       const requestHandler = getHandler(requestHandlers, $scope.vis.type.requestHandler);
       const responseHandler = getHandler(responseHandlers, $scope.vis.type.responseHandler);
 
       // BWC
-      //$scope.vis.listeners.click = visualizeApi.events.filter;
-      //$scope.vis.listeners.brush = visualizeApi.events.brush;
+      $scope.vis.listeners.click = visualizeApi.events.filter;
+      $scope.vis.listeners.brush = visualizeApi.events.brush;
 
       $scope.fetch = function () {
-        requestHandler($scope.appState, searchSource)
+        // searchSource is only there for courier request handler
+        requestHandler($scope.appState, $scope.savedVis.searchSource)
           .then(resp => responseHandler($scope.vis, resp), e => {
             $el.trigger('renderComplete');
             if (isTermSizeZeroError(e)) {

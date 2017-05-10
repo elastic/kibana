@@ -10,9 +10,7 @@ import angular from 'angular';
 import { Notifier } from 'ui/notify/notifier';
 import { VisTypesRegistryProvider } from 'ui/registry/vis_types';
 import { DocTitleProvider } from 'ui/doc_title';
-import { UtilsBrushEventProvider } from 'ui/utils/brush_event';
 import { FilterBarQueryFilterProvider } from 'ui/filter_bar/query_filter';
-import { FilterBarClickHandlerProvider } from 'ui/filter_bar/filter_bar_click_handler';
 import { stateMonitorFactory } from 'ui/state_management/state_monitor_factory';
 import uiRoutes from 'ui/routes';
 import { uiModules } from 'ui/modules';
@@ -69,9 +67,7 @@ uiModules
 
 function VisEditor($scope, $route, timefilter, AppState, $window, kbnUrl, courier, Private, Promise) {
   const docTitle = Private(DocTitleProvider);
-  const brushEvent = Private(UtilsBrushEventProvider);
   const queryFilter = Private(FilterBarQueryFilterProvider);
-  const filterBarClickHandler = Private(FilterBarClickHandlerProvider);
 
   const notify = new Notifier({
     location: 'Visualization Editor'
@@ -168,14 +164,6 @@ function VisEditor($scope, $route, timefilter, AppState, $window, kbnUrl, courie
 
     $scope.timefilter = timefilter;
     $scope.opts = _.pick($scope, 'doSave', 'savedVis', 'shareData', 'timefilter', 'isAddToDashMode');
-    vis.api = {
-      timeFilter: timefilter,
-      queryFilter: queryFilter,
-      events: {
-        filter: filterBarClickHandler($state),
-        brush: brushEvent($state),
-      }
-    };
 
     stateMonitor = stateMonitorFactory.create($state, stateDefaults);
     stateMonitor.ignoreProps([ 'vis.listeners' ]).onChange((status) => {
