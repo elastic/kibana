@@ -222,6 +222,7 @@
       </button>
       <button
         class="kuiButton kuiButton--primary"
+        ng-disabled="!filterEditor.isValid()"
         ng-click="filterEditor.save()"
       >
         Save

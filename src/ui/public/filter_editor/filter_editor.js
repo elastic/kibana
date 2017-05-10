@@ -106,6 +106,23 @@ module.directive('filterEditor', function ($http) {
 
       $scope.compactUnion = _.flow(_.union, _.compact);
 
+      this.isValid = () => {
+        if (this.showQueryDslEditor()) {
+          return _.isObject(this.queryDsl);
+        } else if (!this.field || !this.operator) {
+          return false;
+        } else if (this.operator.type === 'phrase') {
+          return _.has(this.params, 'value') && this.params.value !== '';
+        } else if (this.operator.type === 'phrases') {
+          return _.has(this.params, 'values') && this.params.values.length > 0;
+        } else if (this.operator.type === 'range') {
+          const hasFrom = _.has(this.params, 'from') && this.params.from !== '';
+          const hasTo = _.has(this.params, 'to') && this.params.to !== '';
+          return hasFrom || hasTo;
+        }
+        return true;
+      };
+
       this.save = () => {
         const { field, operator, params, isPinned, isDisabled, alias } = this;
 
