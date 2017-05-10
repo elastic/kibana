@@ -483,6 +483,20 @@ describe('kibana_map tests', function () {
     });
 
 
+    it('should not throw when fitting on empty-data layer', function () {
+
+      const geohashLayer = new GeohashLayer({
+        type: 'FeatureCollection',
+        features: []
+      }, { 'mapType': 'Scaled Circle Markers' }, kibanaMap.getZoomLevel(), kibanaMap);
+      kibanaMap.addLayer(geohashLayer);
+
+      expect(() => {
+        kibanaMap.fitToData();
+      }).to.not.throwException();
+    });
+
+
   });
 
 });
