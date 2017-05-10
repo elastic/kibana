@@ -26,9 +26,19 @@ uiModules.get('kibana')
       $viewer.append($tabs);
       $viewer.append($content);
       docViews.inOrder.forEach(view => {
-        const $tab = $(`<li ng-show="docViews['${view.name}'].shouldShow(hit)" ng-class="{active: mode == '${view.name}'}">
-            <a ng-click="mode='${view.name}'">${view.title}</a>
-          </li>`);
+        const $tab = $(
+          `<li
+            ng-show="docViews['${view.name}'].shouldShow(hit)"
+            ng-class="{active: mode == '${view.name}'}"
+          >
+            <a
+              ng-click="mode='${view.name}'"
+              kbn-accessible-click
+            >
+              ${view.title}
+            </a>
+          </li>`
+        );
         $tabs.append($tab);
         const $viewAttrs = `
           hit="hit"
