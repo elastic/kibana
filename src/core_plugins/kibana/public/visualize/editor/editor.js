@@ -77,22 +77,6 @@ function VisEditor($scope, $route, timefilter, AppState, $window, kbnUrl, courie
     location: 'Visualization Editor'
   });
 
-  let stateMonitor;
-
-  // Retrieve the resolved SavedVis instance.
-  const savedVis = $route.current.locals.savedVis;
-
-  const $appStatus = this.appStatus = {
-    dirty: !savedVis.id
-  };
-
-  // Instance of src/ui/public/vis/vis.js.
-  const vis = savedVis.vis;
-
-  // SearchSource is a promise-based stream of search results that can inherit from other search
-  // sources.
-  const searchSource = savedVis.searchSource;
-
   $scope.topNavMenu = [{
     key: 'save',
     description: 'Save Visualization',
@@ -110,9 +94,23 @@ function VisEditor($scope, $route, timefilter, AppState, $window, kbnUrl, courie
     testId: 'visualizeRefreshButton',
   }];
 
+  let stateMonitor;
+
+  // Retrieve the resolved SavedVis instance.
+  const savedVis = $route.current.locals.savedVis;
+
+  const $appStatus = this.appStatus = {
+    dirty: !savedVis.id
+  };
+
   if (savedVis.id) {
     docTitle.change(savedVis.title);
   }
+
+  // vis is instance of src/ui/public/vis/vis.js.
+  // SearchSource is a promise-based stream of search results that can inherit from other search sources.
+  const { vis, searchSource } = savedVis;
+  $scope.vis = vis;
 
   // Extract visualization state with filtered aggs. You can see these filtered aggs in the URL.
   // Consists of things like aggs, params, listeners, title, type, etc.
@@ -126,7 +124,7 @@ function VisEditor($scope, $route, timefilter, AppState, $window, kbnUrl, courie
   };
 
   // Instance of app_state.js.
-  const $state = $scope.$state = (function initState() {
+  const $state = (function initState() {
     // This is used to sync visualization state with the url when `appState.save()` is called.
     const appState = new AppState(stateDefaults);
 
@@ -148,9 +146,8 @@ function VisEditor($scope, $route, timefilter, AppState, $window, kbnUrl, courie
   function init() {
     // export some objects
     $scope.savedVis = savedVis;
-    $scope.searchSource = searchSource;
-    $scope.vis = vis;
     $scope.indexPattern = vis.indexPattern;
+    $scope.searchSource = searchSource;
     $scope.state = $state;
     $scope.queryDocLinks = documentationLinks.query;
 
@@ -193,7 +190,7 @@ function VisEditor($scope, $route, timefilter, AppState, $window, kbnUrl, courie
 
     $scope.$watchMulti([
       'searchSource.get("index").timeFieldName',
-      'vis.type.requiresTimePicker',
+      'vis.type.options.showTimePicker',
     ], function ([timeField, requiresTimePicker]) {
       timefilter.enabled = Boolean(timeField || requiresTimePicker);
     });
@@ -203,6 +200,11 @@ function VisEditor($scope, $route, timefilter, AppState, $window, kbnUrl, courie
       $state.save();
     });
 
+    // update the searchSource when query updates
+    $scope.fetch = function () {
+      $state.save();
+    };
+
     $scope.$on('ready:vis', function () {
       $scope.$emit('application.load');
     });
@@ -211,10 +213,6 @@ function VisEditor($scope, $route, timefilter, AppState, $window, kbnUrl, courie
       savedVis.destroy();
       stateMonitor.destroy();
     });
-
-    $scope.fetch = function () {
-      $state.save();
-    };
   }
 
   /**

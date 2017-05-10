@@ -14,7 +14,7 @@ import {
 
 uiModules
 .get('kibana/directive', ['ngSanitize'])
-.directive('visualize', function (Notifier, SavedVis, indexPatterns, Private) {
+.directive('visualize', function (Notifier, SavedVis, indexPatterns, Private, timefilter) {
   const notify = new Notifier({
     location: 'Visualize'
   });
@@ -39,13 +39,17 @@ uiModules
     },
     template: visualizeTemplate,
     link: function ($scope, $el) {
+      if (_.isUndefined($scope.editorMode)) {
+        $scope.editorMode = false;
+      }
       if (_.isUndefined($scope.showSpyPanel)) {
         $scope.showSpyPanel = true;
       }
 
       $scope.vis = $scope.savedVis.vis;
 
-      const visualizeApi = $scope.savedVis.vis.api;
+      //const visualizeApi = $scope.savedVis.vis.api;
+      // searchSource is only there for courier request handler
       const searchSource = $scope.savedVis.searchSource;
 
       // get request handler from registry (this should actually happen only once not on every fetch)
@@ -53,14 +57,11 @@ uiModules
       const responseHandler = getHandler(responseHandlers, $scope.vis.type.responseHandler);
 
       // BWC
-      $scope.vis.listeners.click = visualizeApi.events.filter;
-      $scope.vis.listeners.brush = visualizeApi.events.brush;
+      //$scope.vis.listeners.click = visualizeApi.events.filter;
+      //$scope.vis.listeners.brush = visualizeApi.events.brush;
 
       $scope.fetch = function () {
-        searchSource.set('filter', visualizeApi.queryFilter.getFilters());
-        if (!$scope.appState.linked) searchSource.set('query', $scope.appState.query);
-
-        requestHandler(searchSource)
+        requestHandler($scope.appState, searchSource)
           .then(resp => responseHandler($scope.vis, resp), e => {
             $el.trigger('renderComplete');
             if (isTermSizeZeroError(e)) {
@@ -75,26 +76,35 @@ uiModules
           })
           .then(resp => {
             $scope.esResp = resp;
+            $scope.$apply();
             return resp;
           });
       };
 
       const stateMonitor = stateMonitorFactory.create($scope.appState);
 
+      $scope.$watch('vis.params', () => {
+        $scope.$broadcast('render');
+      });
+
       if (_.get($scope, 'savedVis.vis.type.requiresSearch')) {
-        let currentAggJson = JSON.stringify($scope.appState.vis.aggs);
+        let currentAggJson = $scope.editorMode ? JSON.stringify($scope.appState.vis.aggs) : null;
         stateMonitor.onChange((status, type, keys) => {
-          if (keys[0] === 'query') $scope.fetch();
-          if (keys[0] === 'vis') {
+          if (['query', 'filter'].includes(keys[0])) $scope.fetch();
+          if ($scope.editorMode && keys[0] === 'vis') {
+            // only send new query if aggs changed
             const isAggregationsChanged = JSON.stringify($scope.appState.vis.aggs) !== currentAggJson;
             if (isAggregationsChanged) {
               $scope.fetch();
+            } else {
+              $scope.$broadcast('render');
             }
             currentAggJson = JSON.stringify($scope.appState.vis.aggs);
           }
         });
-        $scope.$listen(visualizeApi.queryFilter, 'fetch', $scope.fetch);
-        $scope.$listen(visualizeApi.timeFilter, 'fetch', $scope.fetch);
+
+        // visualize needs to know about timeFilter
+        $scope.$listen(timefilter, 'fetch', $scope.fetch);
 
         $scope.fetch();
       }

@@ -107,20 +107,20 @@ uiModules
 
       const renderFunction = _.debounce(() => {
         $scope.vis.type.render($scope.vis, getVisEl(), $scope.uiState, $scope.visData);
-      }, 500);
+        $scope.$apply();
+      }, 100);
 
-      $scope.$watchGroup(['visData', 'vis.params'], () => {
-        if (!$scope.visData || !$scope.vis) return;
+      $scope.$on('render', () => {
+        if (!$scope.visData || !$scope.vis) {
+          return;
+        }
 
         renderFunction();
       });
 
-
-      $scope.$on('$destroy', function () {
-        if ($scope.renderbot) {
-          $el.off('renderComplete');
-          $scope.renderbot.destroy();
-        }
+      $scope.$watch('visData', (newVal) => {
+        if (!newVal) return;
+        renderFunction();
       });
     }
   };
