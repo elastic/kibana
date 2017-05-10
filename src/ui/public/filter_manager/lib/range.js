@@ -6,8 +6,7 @@ export function buildRangeFilter(field, params, indexPattern, formattedValue) {
   if (formattedValue) filter.meta.formattedValue = formattedValue;
 
   params = _.mapValues(params, (value) => {
-    if (field.type === 'number') return parseFloat(value);
-    return value;
+    return (field.type === 'number') ? parseFloat(value) : value;
   });
 
   if ('gte' in params && 'gt' in params) throw new Error('gte and gt are mutually exclusive');
