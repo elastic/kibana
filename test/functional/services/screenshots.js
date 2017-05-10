@@ -9,6 +9,7 @@ export async function ScreenshotsProvider({ getService }) {
   const log = getService('log');
   const config = getService('config');
   const remote = getService('remote');
+  const lifecycle = getService('lifecycle');
 
   const SESSION_DIRECTORY = resolve(config.get('screenshots.directory'), 'session');
   const FAILURE_DIRECTORY = resolve(config.get('screenshots.directory'), 'failure');
@@ -38,5 +39,11 @@ export async function ScreenshotsProvider({ getService }) {
     }
   }
 
-  return new Screenshots();
+  const screenshots = new Screenshots();
+
+  lifecycle
+    .on('testFailure', (err, test) => screenshots.takeForFailure(test.fullTitle()))
+    .on('testHookFailure', (err, test) => screenshots.takeForFailure(test.fullTitle()));
+
+  return screenshots;
 }
