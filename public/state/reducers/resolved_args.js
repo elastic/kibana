@@ -1,6 +1,7 @@
 import { handleActions } from 'redux-actions';
 import { get } from 'lodash';
 import { set, del } from 'object-path-immutable';
+import { prepend } from '../../lib/modify_path';
 import * as actions from '../actions/resolved_args';
 
 function _getState(hasError, loading) {
@@ -24,12 +25,10 @@ function getContext(value, loading, oldVal = null) {
 }
 
 function getFullPath(path) {
-  const pre = 'resolvedArgs';
   const isArray = Array.isArray(path);
   const isString = (typeof path === 'string');
-
   if (!isArray && !isString) throw new Error(`Resolved argument path is invalid: ${path}`);
-  return (isArray) ? [pre].concat(path) : `${pre}.${path}`;
+  return prepend(path, 'resolvedArgs');
 }
 
 const resolvedArgs = handleActions({
