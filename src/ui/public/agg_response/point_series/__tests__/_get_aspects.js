@@ -46,7 +46,7 @@ describe('getAspects', function () {
   }
 
   function init(group, x, y) {
-    // map args to indicies that should be removed
+    // map args to indices that should be removed
     const filter = filterByIndex([
       x > 0,
       x > 1,
