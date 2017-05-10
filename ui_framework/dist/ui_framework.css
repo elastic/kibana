@@ -321,6 +321,36 @@ body {
 /**
  * 1. Override Bootstrap.
  */
+.kuiButton--success {
+  color: #FFF;
+  background-color: #00A69B; }
+  .kuiButton--success:not(a):enabled:focus {
+    color: #FFF; }
+  a.kuiButton--success:not(.kuiButton-isDisabled):focus {
+    /* 1 */
+    color: #FFF; }
+  .kuiButton--success:enabled:hover {
+    color: #FFF !important;
+    /* 1 */
+    background-color: #00736b; }
+  a.kuiButton--success:not(.kuiButton-isDisabled):hover {
+    /* 1 */
+    color: #FFF !important;
+    /* 1 */
+    background-color: #00736b; }
+  .kuiButton--success:enabled:active {
+    color: #FFF !important;
+    /* 1 */
+    background-color: #00736b; }
+  a.kuiButton--success:not(.kuiButton-isDisabled):active {
+    /* 1 */
+    color: #FFF !important;
+    /* 1 */
+    background-color: #00736b; }
+
+/**
+ * 1. Override Bootstrap.
+ */
 .kuiButton--danger {
   color: #A30000;
   background-color: #FFF;

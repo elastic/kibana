@@ -128,6 +128,23 @@
 /**
  * 1. Override Bootstrap.
  */
+.kuiButton--success {
+  color: $buttonDefaultTextColor;
+  background-color: $buttonSuccessBackgroundColor;
+
+  @include kuiButtonFocus {
+    color: $buttonDefaultTextColor;
+  }
+
+  @include kuiButtonHoverAndActive {
+    color: $buttonDefaultTextColor !important; /* 1 */
+    background-color: $buttonSuccessHoverBackgroundColor;
+  }
+}
+
+/**
+ * 1. Override Bootstrap.
+ */
 .kuiButton--danger {
   color: $globalColorRed;
   background-color: $globalColorWhite;
