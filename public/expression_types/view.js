@@ -1,4 +1,5 @@
 import { pick } from 'lodash';
+import { Registry } from '../../common/lib/registry';
 import { BaseRenderable } from './base_renderable';
 
 export class View extends BaseRenderable {
@@ -16,3 +17,5 @@ export class View extends BaseRenderable {
     }
   }
 }
+
+export const viewRegistry = new Registry('expression_views');

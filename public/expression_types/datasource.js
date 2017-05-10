@@ -1,3 +1,4 @@
+import { Registry } from '../../common/lib/registry';
 import { BaseRenderable } from './base_renderable';
 
 export class Datasource extends BaseRenderable {
@@ -5,3 +6,5 @@ export class Datasource extends BaseRenderable {
     super(name, props);
   }
 }
+
+export const datasourceRegistry = new Registry('expression_datasources');

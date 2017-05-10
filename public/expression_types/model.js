@@ -1,6 +1,7 @@
 import React from 'react';
 import { Alert } from 'react-bootstrap';
 import { pick } from 'lodash';
+import { Registry } from '../../common/lib/registry';
 import { BaseRenderable } from './base_renderable';
 
 function getModelArgs(expressionType) {
@@ -50,3 +51,5 @@ export class Model extends BaseRenderable {
     }, []);
   }
 }
+
+export const modelRegistry = new Registry('expression_models');
