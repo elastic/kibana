@@ -37,6 +37,7 @@ module.controller('VisualizeWizardStep1', function ($scope, $route, kbnUrl, time
 
   const visTypeCategoryToHumanReadableMap = {
     [VisType.CATEGORY.BASIC]: 'Basic Charts',
+    [VisType.CATEGORY.CONTROL]: 'Dashboard Controls',
     [VisType.CATEGORY.DATA]: 'Data',
     [VisType.CATEGORY.GRAPHIC]: 'Graphic',
     [VisType.CATEGORY.MAP]: 'Maps',

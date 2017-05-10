@@ -37,6 +37,7 @@ export function VisVisTypeProvider(Private) {
 
   VisType.CATEGORY = {
     BASIC: 'basic',
+    CONTROL: 'control',
     DATA: 'data',
     MAP: 'map',
     OTHER: 'other',
