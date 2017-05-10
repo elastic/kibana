@@ -26,9 +26,9 @@ export function VisVisTypeProvider(Private) {
           collections: {},         // collections used for configuration (list of positions, ...)
         },
         options: {                // controls the visualize editor
-          showTimePicker: undefined,
-          showQueryBar: undefined,
-          showFilterBar: undefined,
+          showTimePicker: true,
+          showQueryBar: true,
+          showFilterBar: true,
           hierarchicalData: false  // we should get rid of this i guess ?
         },
         schemas: new VisTypeSchemas(),            // default editor needs a list of schemas ... not moved for refact. reasons
