@@ -1,6 +1,5 @@
 @import "../../dist/ui_framework.css";
 @import "./variables";
-@import "./views/home/home_view";
 @import "./components/guide_components";
 
 * {
@@ -29,6 +28,8 @@ body {
 }
 
 .guideContent {
+  display: flex;
+  flex-direction: column;
   flex: 1 1 auto;
   padding-top: $guideNavHeight;
   transition: padding-right $guideCodeViewerTransition;
@@ -40,6 +41,55 @@ body {
       padding-right: $guideCodeViewerSmallWidth;
     }
   }
+}
+
+@media only screen and (max-width: 1300px) {
+  .guideHomePage {
+    justify-content: flex-start !important;
+
+    .guideContentPage__content {
+      margin-left: 250px;
+    }
+  }
+}
+
+.guideContentPage {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  flex: 1 1 auto;
+  background-color: #ffffff;
+}
+
+  .guideContentPage__hint {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    max-width: 260px;
+    max-height: 500px;
+    padding: 30px;
+    margin: 20px;
+    border-radius: 4px;
+    background-color: #e8e8e8;
+    line-height: $guideLineHeight;
+  }
+
+  .guideContentPage__content {
+    width: 100%;
+    max-width: 800px;
+    padding: 30px 60px;
+  }
+
+.guideHintArrow {
+  position: absolute;
+  top: -15px;
+  left: 12px;
+  background-image: url("images/hint-arrow.svg");
+  width: 26px;
+  height: 40px;
+  background-repeat: no-repeat;
+  background-size: contain;
 }
 
 .guideWarning {
