@@ -11,12 +11,12 @@ export const FILTER_OPERATORS = [
   },
   {
     name: 'is one of',
-    type: 'terms',
+    type: 'phrases',
     negate: false,
   },
   {
     name: 'is not one of',
-    type: 'terms',
+    type: 'phrases',
     negate: true,
   },
   {

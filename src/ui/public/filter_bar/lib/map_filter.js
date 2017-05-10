@@ -2,7 +2,7 @@ import _ from 'lodash';
 import { FilterBarLibGenerateMappingChainProvider } from './generate_mapping_chain';
 import { FilterBarLibMapMatchAllProvider } from './map_match_all';
 import { FilterBarLibMapPhraseProvider } from './map_phrase';
-import { FilterBarLibMapTermsProvider } from './map_terms';
+import { FilterBarLibMapPhrasesProvider } from './map_phrases';
 import { FilterBarLibMapRangeProvider } from './map_range';
 import { FilterBarLibMapExistsProvider } from './map_exists';
 import { FilterBarLibMapMissingProvider } from './map_missing';
@@ -35,7 +35,7 @@ export function FilterBarLibMapFilterProvider(Promise, Private) {
     Private(FilterBarLibMapMatchAllProvider),
     Private(FilterBarLibMapRangeProvider),
     Private(FilterBarLibMapPhraseProvider),
-    Private(FilterBarLibMapTermsProvider),
+    Private(FilterBarLibMapPhrasesProvider),
     Private(FilterBarLibMapExistsProvider),
     Private(FilterBarLibMapMissingProvider),
     Private(FilterBarLibMapQueryStringProvider),

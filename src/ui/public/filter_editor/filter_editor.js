@@ -2,7 +2,7 @@ import _ from 'lodash';
 import { uiModules } from 'ui/modules';
 import template from './filter_editor.html';
 import { FILTER_OPERATORS } from './lib/filter_operators';
-import { buildExistsFilter, buildPhraseFilter, buildRangeFilter, buildTermsFilter } from '../filter_manager/lib';
+import { buildExistsFilter, buildPhraseFilter, buildRangeFilter, buildPhrasesFilter } from '../filter_manager/lib';
 import '../filters/sort_prefix_first';
 import '../directives/ui_select_focus_on';
 import './filter_editor.less';
@@ -73,7 +73,7 @@ module.directive('filterEditor', function ($http) {
       this.setOperator = (operator) => {
         this.operator = operator;
         const type = _.get(operator, 'type');
-        if (type === 'phrase' || type === 'terms') {
+        if (type === 'phrase' || type === 'phrases') {
           this.refreshValueSuggestions();
         }
       };
@@ -117,8 +117,8 @@ module.directive('filterEditor', function ($http) {
         } else {
           if (operator.type === 'phrase') {
             filter = buildPhraseFilter(field, params.value, field.indexPattern);
-          } else if (operator.type === 'terms') {
-            filter = buildTermsFilter(field, params.values, field.indexPattern);
+          } else if (operator.type === 'phrases') {
+            filter = buildPhrasesFilter(field, params.values, field.indexPattern);
           } else if (operator.type === 'range') {
             filter = buildRangeFilter(field, { gte: params.from, lt: params.to }, field.indexPattern);
           } else if (operator.type === 'exists') {
@@ -144,8 +144,8 @@ module.directive('filterEditor', function ($http) {
         if (type === 'phrase') {
           const value = filter.query ? filter.query.match[key].query : filter.script.script.params.value;
           return { value };
-        } else if (type === 'terms') {
-          return { values: filter.query.terms[key] };
+        } else if (type === 'phrases') {
+          return { values: filter.meta.values };
         } else if (type === 'range') {
           const params = filter.range ? filter.range[key] : filter.script.script.params;
           const from = _.has(params, 'gte') ? params.gte : params.gt;
