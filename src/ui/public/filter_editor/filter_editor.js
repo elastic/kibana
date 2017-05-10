@@ -142,15 +142,15 @@ module.directive('filterEditor', function ($http) {
       function getParamsFromFilter(filter) {
         const { type, key } = filter.meta;
         if (type === 'phrase') {
-          return { value: filter.query.match[key].query };
+          const value = filter.query ? filter.query.match[key].query : filter.script.script.params.value;
+          return { value };
         } else if (type === 'terms') {
           return { values: filter.query.terms[key] };
         } else if (type === 'range') {
-          const params = filter.range[key];
-          return {
-            from: params.gte || params.gt,
-            to: params.lte || params.lt
-          };
+          const params = filter.range ? filter.range[key] : filter.script.script.params;
+          const from = _.has(params, 'gte') ? params.gte : params.gt;
+          const to = _.has(params, 'lte') ? params.lte : params.lt;
+          return { from, to };
         } else {
           return {};
         }

@@ -33,9 +33,9 @@ export function FilterBarLibMapFilterProvider(Promise, Private) {
   // and add it here. ProTip: These are executed in order listed
   const mappers = [
     Private(FilterBarLibMapMatchAllProvider),
+    Private(FilterBarLibMapRangeProvider),
     Private(FilterBarLibMapPhraseProvider),
     Private(FilterBarLibMapTermsProvider),
-    Private(FilterBarLibMapRangeProvider),
     Private(FilterBarLibMapExistsProvider),
     Private(FilterBarLibMapMissingProvider),
     Private(FilterBarLibMapQueryStringProvider),
