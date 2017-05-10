@@ -22,11 +22,12 @@ export default function ({ getService, getPageObjects }) {
           'Pie',
           'Vertical Bar',
           'Data Table',
+          'Gauge',
+          'Goal',
           'Metric',
           'Tile Map',
           'Timelion',
           'Visual Builder',
-          'Gauge Chart',
           'Markdown',
           'Tag Cloud',
         ];

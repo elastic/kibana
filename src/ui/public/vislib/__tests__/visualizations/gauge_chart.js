@@ -116,9 +116,9 @@ describe('Vislib Gauge Chart Test Suite', function () {
     const fills = [];
     paths.each(function () { fills.push(this.style.fill); });
     expect(fills).to.eql([
-      'rgb(253, 191, 111)',
-      'rgb(183, 224, 117)',
-      'rgb(183, 224, 117)',
+      'rgb(165, 0, 38)',
+      'rgb(255, 255, 190)',
+      'rgb(255, 255, 190)',
       'rgb(0, 104, 55)',
       'rgb(0, 104, 55)'
     ]);
@@ -134,9 +134,9 @@ describe('Vislib Gauge Chart Test Suite', function () {
     const fills = [];
     paths.each(function () { fills.push(this.style.fill); });
     expect(fills).to.eql([
-      'rgb(55, 135, 192)',
-      'rgb(171, 208, 230)',
-      'rgb(171, 208, 230)',
+      'rgb(8, 48, 107)',
+      'rgb(107, 174, 214)',
+      'rgb(107, 174, 214)',
       'rgb(247, 251, 255)',
       'rgb(247, 251, 255)'
     ]);
