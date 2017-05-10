@@ -141,7 +141,7 @@ export class GuideNav extends Component {
           >
             Kibana UI Framework <span className="guideNav__version">{this.props.version}</span>
           </Link>
-          <div className="guideNav__elasticLogo" />
+          <a href="http://elastic.co" className="guideNav__elasticLogo" aria-label="Go to the Elastic website" />
 
           {this.renderPagination()}
         </div>
@@ -149,6 +149,7 @@ export class GuideNav extends Component {
         <div>
           <input
             type="text"
+            placeholder="Search components and sandboxes"
             className="guideNavSearch"
             value={this.state.search}
             onChange={this.onSearchChange}
