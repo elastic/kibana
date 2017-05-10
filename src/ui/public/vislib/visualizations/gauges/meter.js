@@ -25,11 +25,7 @@ export function MeterGaugeProvider() {
     },
     style: {
       bgWidth: 0.5,
-      width: 0.9,
-      mask: false,
-      bgMask: false,
-      maskBars: 20,
-      maskPadding: 0.3
+      width: 0.9
     }
   };
 
@@ -38,7 +34,6 @@ export function MeterGaugeProvider() {
       this.gaugeChart = gaugeChart;
       this.gaugeConfig = gaugeChart.gaugeConfig;
       this.gaugeConfig = _.defaultsDeep(this.gaugeConfig, defaultConfig);
-      this.randomNumber = Math.round(Math.random() * 100000);
 
       this.gaugeChart.handler.visConfig.set('legend', {
         labels: this.getLabels(),
@@ -74,11 +69,9 @@ export function MeterGaugeProvider() {
       const colorsRange = this.gaugeConfig.colorsRange;
       const labels = this.getLabels();
       const colors = {};
-      for (const i in labels) {
-        if (labels[i]) {
-          const val = invertColors ? 1 - i / colorsRange.length : i / colorsRange.length;
-          colors[labels[i]] = getHeatmapColors(val, colorSchema);
-        }
+      for (let i = 0; i < labels.length; i += 1) {
+        const val = invertColors ? 1 - i / (colorsRange.length - 1) : i / (colorsRange.length - 1);
+        colors[labels[i]] = getHeatmapColors(val, colorSchema);
       }
       return colors;
     }
@@ -108,7 +101,7 @@ export function MeterGaugeProvider() {
       return this.colorFunc(labels[bucket]);
     }
 
-    drawScale(svg, data, radius, angle) {
+    drawScale(svg, radius, angle) {
       //const maxAngle = this.gaugeConfig.maxAngle;
       //const minAngle = this.gaugeConfig.minAngle;
       const scaleWidth = this.gaugeConfig.scale.width;
@@ -153,48 +146,14 @@ export function MeterGaugeProvider() {
       return scale;
     }
 
-    drawBarMask(radius, angle, maskBars, maskPadding, name) {
-      const randomNumber = this.randomNumber;
-      return function (selection) {
-        selection.each(function (d, i, j) {
-          const svg = d3.select(this.parentNode).append('defs');
-          const mask = svg.append('mask').attr('id', `gauge-mask-${name}-${randomNumber}-${j}`);
-          const extents = angle.domain();
-
-          for (let i = 0; i < maskBars; i++) {
-            const val = i * (extents[1] - extents[0]) / maskBars;
-            const nextVal = (i + 1) * (extents[1] - extents[0]) / maskBars;
-            const padding = Math.asin(3 / (2 * radius(j))); //Math.abs(nextVal - val) * maskPadding / 2;
-            const maskArc = d3.svg.arc()
-              .startAngle(angle(val) + padding)
-              .endAngle(angle(nextVal) - padding)
-              .innerRadius(radius(j + 1))
-              .outerRadius(radius(j));
-
-            mask.append('path')
-              .attr('d', maskArc)
-              .style('stroke-width', 1)
-              .style('stroke-opacity', 0.7)
-              .style('stroke', 'white')
-              .style('fill', 'white');
-          }
-
-          return mask;
-        });
-      };
-    }
-
     drawGauge(svg, data, width, height) {
       const marginFactor = 0.95;
       const tooltip = this.gaugeChart.tooltip;
       const isTooltip = this.gaugeChart.handler.visConfig.get('addTooltip');
       const maxAngle = this.gaugeConfig.maxAngle;
       const minAngle = this.gaugeConfig.minAngle;
-      const applyMask = this.gaugeConfig.style.mask;
-      const applyMaskToBack = this.gaugeConfig.style.bgMask;
       const angleFactor = this.gaugeConfig.gaugeType === 'Meter' ? 0.75 : 1;
       const maxRadius = (Math.min(width, height / angleFactor) / 2) * marginFactor;
-      const randomNumber = this.randomNumber;
       const yFieldFormatter = this.gaugeChart.handler.data.get('yAxisFormatter');
 
       const extendRange = this.gaugeConfig.extendRange;
@@ -248,26 +207,10 @@ export function MeterGaugeProvider() {
         .enter();
 
 
-      const paths = gauges
+      gauges
         .append('path')
         .attr('d', bgArc)
-        .style('fill', this.gaugeConfig.style.bgFill)
-        .attr('mask', (d, i, j) => {
-          return applyMaskToBack ? `url(#gauge-mask-back-${randomNumber}-${j})` : '';
-        });
-
-
-      if (applyMask) {
-        const maskBars = this.gaugeConfig.style.maskBars;
-        const maskPadding = this.gaugeConfig.style.maskPadding;
-        paths.call(this.drawBarMask(radius, angle, maskBars, maskPadding, 'front'));
-      }
-
-      if (applyMaskToBack) {
-        const maskBars = this.gaugeConfig.style.bgMaskBars;
-        const maskPadding = this.gaugeConfig.style.bgMaskPadding;
-        paths.call(this.drawBarMask(radius, angle, maskBars, maskPadding, 'back'));
-      }
+        .style('fill', this.gaugeConfig.style.bgFill);
 
       const self = this;
       const series = gauges
@@ -275,14 +218,10 @@ export function MeterGaugeProvider() {
         .attr('d', arc)
         .style('fill', function (d) {
           return self.getColorBucket(d.y);
-        })
-        .attr('mask', (d, i, j) => {
-          return applyMask ? `url(#gauge-mask-front-${randomNumber}-${j})` : '';
         });
 
       const smallContainer = svg.node().getBBox().height < 70;
       let hiddenLabels = smallContainer;
-
 
       if (this.gaugeConfig.labels.show) {
         svg
@@ -340,7 +279,7 @@ export function MeterGaugeProvider() {
       }
 
       if (this.gaugeConfig.scale.show) {
-        this.drawScale(svg, data, radius(1), angle);
+        this.drawScale(svg, radius(1), angle);
       }
 
       if (isTooltip) {

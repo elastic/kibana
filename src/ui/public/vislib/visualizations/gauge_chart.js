@@ -1,5 +1,4 @@
 import d3 from 'd3';
-import _ from 'lodash';
 import $ from 'jquery';
 import { VislibVisualizationsChartProvider } from './_chart';
 import { GaugeTypesProvider } from './gauges/gauge_types';
@@ -8,17 +7,11 @@ export function GaugeChartProvider(Private) {
 
   const Chart = Private(VislibVisualizationsChartProvider);
   const gaugeTypes = Private(GaugeTypesProvider);
-  const defaults = {
-    type: 'meter',
-    style: {
-      bgFill: '#eee'
-    }
-  };
 
   class GaugeChart extends Chart {
     constructor(handler, chartEl, chartData) {
       super(handler, chartEl, chartData);
-      this.gaugeConfig = _.defaultsDeep(handler.visConfig.get('gauge', {}), defaults);
+      this.gaugeConfig = handler.visConfig.get('gauge', {});
       this.gauge = new gaugeTypes[this.gaugeConfig.type](this);
     }
 

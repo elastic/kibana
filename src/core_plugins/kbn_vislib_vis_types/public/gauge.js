@@ -3,6 +3,7 @@ import { VislibVisTypeVislibVisTypeProvider } from 'ui/vislib_vis_type/vislib_vi
 import { VisSchemasProvider } from 'ui/vis/schemas';
 import gaugeTemplate from 'plugins/kbn_vislib_vis_types/editors/gauge.html';
 import { vislibColorMaps } from 'ui/vislib/components/color/colormaps';
+import image from './images/icon-gauge.svg';
 
 export default function GaugeVisType(Private) {
   const VisType = Private(VisVisTypeProvider);
@@ -12,9 +13,9 @@ export default function GaugeVisType(Private) {
   return new VislibVisType({
     name: 'gauge',
     title: 'Gauge',
-    icon: 'fa-tachometer',
-    description: 'A gauge chart shows much more than one value. It gives the minimum, the maximum, ' +
-    'the current value and how far from the maximum you are ',
+    image,
+    description: `Gauges indicate the status of a metric. Use it to show how a metric's value relates 
+      to reference threshold values.`,
     category: VisType.CATEGORY.DATA,
     params: {
       defaults: {
@@ -73,7 +74,7 @@ export default function GaugeVisType(Private) {
         name: 'metric',
         title: 'Metric',
         min: 1,
-        aggFilter: '!std_dev',
+        aggFilter: ['!std_dev, !geo_centroid'],
         defaults: [
           { schema: 'metric', type: 'count' }
         ]

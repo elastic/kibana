@@ -3,6 +3,7 @@ import { VislibVisTypeVislibVisTypeProvider } from 'ui/vislib_vis_type/vislib_vi
 import { VisSchemasProvider } from 'ui/vis/schemas';
 import gaugeTemplate from 'plugins/kbn_vislib_vis_types/editors/gauge.html';
 import { vislibColorMaps } from 'ui/vislib/components/color/colormaps';
+import image from './images/icon-goal.svg';
 
 export default function GoalVisType(Private) {
   const VisType = Private(VisVisTypeProvider);
@@ -12,9 +13,8 @@ export default function GoalVisType(Private) {
   return new VislibVisType({
     name: 'goal',
     title: 'Goal',
-    icon: 'fa-tachometer',
-    description: 'A gauge chart shows much more than one value. It gives the minimum, the maximum, ' +
-    'the current value and how far from the maximum you are ',
+    image,
+    description: 'A goal chart indicates how close you are to your final goal.',
     category: VisType.CATEGORY.DATA,
     params: {
       defaults: {
@@ -71,7 +71,7 @@ export default function GoalVisType(Private) {
         name: 'metric',
         title: 'Metric',
         min: 1,
-        aggFilter: '!std_dev',
+        aggFilter: ['!std_dev, !geo_centroid'],
         defaults: [
           { schema: 'metric', type: 'count' }
         ]
