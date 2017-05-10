@@ -1,3 +1,5 @@
+import { getPhraseScript } from './phrase';
+
 export function buildPhrasesFilter(field, values, indexPattern) {
   const index = indexPattern.id;
   const type = 'phrases';
@@ -10,21 +12,25 @@ export function buildPhrasesFilter(field, values, indexPattern) {
     meta: { index, type, key, value, values }
   };
 
+  let should;
   if (field.scripted) {
-    // TODO: Support scripted fields
+    should = values.map((value) => ({
+      script: getPhraseScript(field, value)
+    }));
   } else {
-    const should = values.map((value) => ({
+    should = values.map((value) => ({
       match_phrase: {
         [field.name]: value
       }
     }));
-    filter.query = {
-      bool: {
-        should,
-        minimum_should_match: 1
-      }
-    };
   }
+
+  filter.query = {
+    bool: {
+      should,
+      minimum_should_match: 1
+    }
+  };
 
   return filter;
 }
