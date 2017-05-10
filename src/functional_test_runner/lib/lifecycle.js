@@ -15,6 +15,7 @@ export function createLifecycle() {
       }
 
       listeners[name].push(fn);
+      return this;
     }
 
     async trigger(name, ...args) {
