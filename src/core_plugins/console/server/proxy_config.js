@@ -45,7 +45,7 @@ export class ProxyConfig {
     };
 
     if (values(sslAgentOpts).filter(Boolean).length) {
-      sslAgentOpts.rejectUnauthorized = this.verifySsl === undefined ? true : this.verifySsl;
+      sslAgentOpts.rejectUnauthorized = this.verifySsl == null ? true : this.verifySsl;
       return new HttpsAgent(sslAgentOpts);
     }
   }
