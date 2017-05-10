@@ -78,7 +78,7 @@ curl -H 'Content-Type: application/json' -XPUT http://localhost:9200/shakespeare
 
 This mapping specifies the following qualities for the data set:
 
-* The _speaker_ field is a keyword that isn't analyzed. The text in this field is treated as a single unit, even if
+* The _speaker_ field is a field that isn't analyzed. The text in this field is treated as a single unit, even if
 there are multiple words in the field.
 * The same applies to the _play_name_ field.
 * The _line_id_ and _speech_number_ fields are integers.
