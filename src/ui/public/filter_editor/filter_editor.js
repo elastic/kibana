@@ -111,7 +111,6 @@ module.directive('filterEditor', function ($http) {
 
         let filter;
         if (this.showQueryDslEditor()) {
-          // TODO: If index isn't specified, assign it to something (what?)
           const meta = _.pick(this.filter.meta, ['negate', 'index']);
           filter = Object.assign(this.queryDsl, { meta });
         } else {

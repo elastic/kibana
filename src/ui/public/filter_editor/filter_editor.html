@@ -154,7 +154,7 @@
     <div class="kuiMenuButtonGroup kuiVerticalRhythm">
       <button
         class="kuiMenuButton kuiMenuButton--basic"
-        ng-hide="filterEditor.showQueryDslEditor()"
+        ng-hide="filterEditor.filter.meta.isNew || filterEditor.showQueryDslEditor()"
         ng-click="filterEditor.isEditingQueryDsl = true"
       >
         <span>Edit the query DSL</span>
