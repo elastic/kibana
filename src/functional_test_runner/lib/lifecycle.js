@@ -3,6 +3,8 @@ export function createLifecycle() {
     beforeLoadTests: [],
     beforeTests: [],
     beforeEachTest: [],
+    testFailure: [],
+    testHookFailure: [],
     cleanup: [],
     phaseStart: [],
     phaseEnd: [],
