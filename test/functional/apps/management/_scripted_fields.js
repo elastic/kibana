@@ -72,7 +72,7 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.visualize.waitForVisualization();
         await retry.try(async function() {
           const rowData = await PageObjects.discover.getDocTableIndex(1);
-          expect(rowData).to.be('September 18th 2015, 18:20:57.916 18');
+          expect(rowData).to.be('September 18th 2015, 18:20:57.916\n18');
         });
       });
 
@@ -139,7 +139,7 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.visualize.waitForVisualization();
         await retry.try(async function() {
           const rowData = await PageObjects.discover.getDocTableIndex(1);
-          expect(rowData).to.be('September 18th 2015, 18:20:57.916 18');
+          expect(rowData).to.be('September 18th 2015, 18:20:57.916\n18');
         });
       });
 
@@ -207,7 +207,7 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.visualize.waitForVisualization();
         await retry.try(async function() {
           const rowData = await PageObjects.discover.getDocTableIndex(1);
-          expect(rowData).to.be('September 18th 2015, 18:20:57.916 good');
+          expect(rowData).to.be('September 18th 2015, 18:20:57.916\ngood');
 
         });
       });
@@ -271,7 +271,7 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.visualize.waitForVisualization();
         await retry.try(async function() {
           const rowData = await PageObjects.discover.getDocTableIndex(1);
-          expect(rowData).to.be('September 18th 2015, 18:20:57.916 true');
+          expect(rowData).to.be('September 18th 2015, 18:20:57.916\ntrue');
 
         });
       });
@@ -336,7 +336,7 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.visualize.waitForVisualization();
         await retry.try(async function() {
           const rowData = await PageObjects.discover.getDocTableIndex(1);
-          expect(rowData).to.be('September 18th 2015, 06:52:55.953 2015-09-18 07:00');
+          expect(rowData).to.be('September 18th 2015, 06:52:55.953\n2015-09-18 07:00');
         });
       });
 
