@@ -20,7 +20,7 @@ export const ConfirmationButtonTypes = {
  * @property {String=} title - If given, shows a title on the confirm modal.
  */
 
-module.factory('confirmModal', function ($rootScope, $compile) {
+module.factory('confirmModal', function ($rootScope, $compile, $timeout) {
   let modalPopover;
   const confirmQueue = [];
 
@@ -73,15 +73,16 @@ module.factory('confirmModal', function ($rootScope, $compile) {
         }
       });
 
-      switch (options.defaultFocusedButton) {
-        case ConfirmationButtonTypes.CONFIRM:
-          modalInstance.find('[data-test-subj=confirmModalConfirmButton]').focus();
-          break;
-        case ConfirmationButtonTypes.CANCEL:
-          modalInstance.find('[data-test-subj=confirmModalCancelButton]').focus();
-          break;
-        default:
-      }
+      $timeout(() => {
+        switch (options.defaultFocusedButton) {
+          case ConfirmationButtonTypes.CONFIRM:
+            modalInstance.find('[data-test-subj=confirmModalConfirmButton]').focus();
+            break;
+          default:
+            modalInstance.find('[data-test-subj=confirmModalCancelButton]').focus();
+            break;
+        }
+      });
     }
 
     if (modalPopover) {
