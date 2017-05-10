@@ -1,5 +1,5 @@
 const Fn = require('../fn.js');
-import { groupBy, keyBy, get, map, last } from 'lodash';
+import { groupBy, keyBy, get, map } from 'lodash';
 
 /*
 esdocs(size=1000).alterColumn(column=@timestamp, type=date, name=time)
@@ -7,6 +7,14 @@ esdocs(size=1000).alterColumn(column=@timestamp, type=date, name=time)
 .plot(
   seriesStyle=seriesStyle(label='US', color=#333, line=0, bars=0.25, points=1),
   defaultStyle=seriesStyle(label='US', color=#333, line=0, bars=0.25, points=1)
+)
+
+demodata()
+.pointseries(x=country, y=.math("sum(cost)"),  color=country)
+.plot(
+  seriesStyle=seriesStyle(label='CN', color=#c66, line=1, bars=1, points=0),
+  seriesStyle=seriesStyle(label='US', color=#6cc, line=1, bars=1, points=0),
+  defaultStyle=seriesStyle(label='US', color=#333, line=0, bars=0.25, points=0)
 )
 */
 
@@ -69,7 +77,6 @@ module.exports = new Fn({
 
       if (seriesStyle) {
         Object.assign(result, seriesStyleToFlot(seriesStyle));
-        console.log('Yep')
       }
       return result;
     });
