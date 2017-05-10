@@ -9,9 +9,18 @@
       <div>
         <label>Timelion Expression</label>
       </div>
-      <textarea
-        ng-model="vis.params.expression" class="form-control" timelion-expression="{{vis.params.expression}}"
-        rows="5"></textarea>
+
+      <timelion-expression-input
+        sheet="vis.params.expression"
+      >
+        <textarea
+          data-timelion-expression-input
+          ng-model="vis.params.expression"
+          class="form-control"
+          timelion-expression=""
+          rows="5"
+        ></textarea>
+      </timelion-expression-input>
     </div>
   </div>
 
