@@ -1,12 +1,11 @@
 import expect from 'expect.js';
 import { bdd } from '../../../support';
 
-import { DASHBOARD_TITLE_CLONE_SUFFIX } from '../../../../src/core_plugins/kibana/public/dashboard/dashboard_strings';
 import PageObjects from '../../../support/page_objects';
 
 bdd.describe('dashboard save', function describeIndexTests() {
   const dashboardName = 'Dashboard Clone Test';
-  const clonedDashboardName = dashboardName + DASHBOARD_TITLE_CLONE_SUFFIX;
+  const clonedDashboardName = dashboardName + ' copy';
 
   bdd.before(async function () {
     return PageObjects.dashboard.initTests();
@@ -67,7 +66,7 @@ bdd.describe('dashboard save', function describeIndexTests() {
     await PageObjects.header.waitUntilLoadingHasFinished();
 
     const countOfDashboards =
-      await PageObjects.dashboard.getDashboardCountWithName(dashboardName + DASHBOARD_TITLE_CLONE_SUFFIX);
+      await PageObjects.dashboard.getDashboardCountWithName(dashboardName + ' copy');
     expect(countOfDashboards).to.equal(2);
   });
 });

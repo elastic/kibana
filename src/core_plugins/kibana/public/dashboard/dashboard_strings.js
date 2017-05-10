@@ -1,8 +1,6 @@
 import { DashboardViewMode } from './dashboard_view_mode';
 import _ from 'lodash';
 
-export const DASHBOARD_TITLE_CLONE_SUFFIX = ' Copy';
-
 /**
  * @param list {Array.<string>}
  * @returns {string} The list of strings concatenated with commas so it can be used in a message.
