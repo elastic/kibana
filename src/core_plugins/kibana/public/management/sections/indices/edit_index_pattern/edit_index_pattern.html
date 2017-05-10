@@ -73,12 +73,14 @@
           class="kuiTab"
           ng-repeat="editSection in editSections"
           ng-class="{ 'kuiTab-isSelected': state.tab === editSection.index }"
-          title="{{ editSection.title }}"
           ng-click="changeTab(editSection)"
           data-test-subj="tab-{{ editSection.index }}"
         >
           {{ editSection.title }}
-          <span data-test-subj="tab-count-{{ editSection.index }}">
+          <span
+            data-test-subj="tab-count-{{ editSection.index }}"
+            aria-label="{{:: editSection.count + ' ' + editSection.title}}"
+          >
             ({{ editSection.count }})
           </span>
         </button>
