@@ -22,7 +22,12 @@ export function registerFieldCapabilities(server) {
             return _.pick(value, ['searchable', 'aggregatable']);
           });
 
-          reply({ fields: fieldsFilteredValues });
+          const retVal = { fields: fieldsFilteredValues };
+          if (res._shards && res._shards.failed) {
+            retVal.shard_failure_response = res;
+          }
+
+          reply(retVal);
         },
         (error) => {
           reply(handleESError(error));

@@ -8,8 +8,8 @@ const ID_PATTERN = /^[a-zA-Z0-9_]+$/;
 const INSPECTING = process.execArgv.includes('--inspect');
 
 const urlPartsSchema = () => Joi.object().keys({
-  protocol: Joi.string().valid('http', 'https'),
-  hostname: Joi.string().hostname(),
+  protocol: Joi.string().valid('http', 'https').default('http'),
+  hostname: Joi.string().hostname().default('localhost'),
   port: Joi.number(),
   auth: Joi.string().regex(/^[^:]+:.+$/, 'username and password seperated by a colon'),
   username: Joi.string(),
@@ -58,9 +58,12 @@ export const schema = Joi.object().keys({
   ),
 
   servers: Joi.object().keys({
-    webdriver: urlPartsSchema(),
     kibana: urlPartsSchema(),
     elasticsearch: urlPartsSchema(),
+  }).default(),
+
+  chromedriver: Joi.object().keys({
+    url: Joi.string().uri({ scheme: /https?/ }).default('http://localhost:9515')
   }).default(),
 
   // definition of apps that work with `common.navigateToApp()`

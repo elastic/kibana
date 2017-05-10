@@ -24,17 +24,24 @@
         ng-submit="search()"
       >
         <div class="kuiLocalSearch timelionLocalSearch">
-          <input
-            input-focus
-            ng-model="state.sheet[state.selected]"
-            timelion-expression="{{state.sheet[state.selected]}}"
-            placeholder="Expression..."
-            aria-label="Expression input"
-            type="text"
-            class="kuiLocalSearchInput timelion-expression"
+          <timelion-expression-input
+            sheet="state.sheet[state.selected]"
           >
+            <input
+              data-timelion-expression-input
+              input-focus
+              ng-model="state.sheet[state.selected]"
+              placeholder="Expression..."
+              aria-label="Expression input"
+              type="text"
+              class="kuiLocalSearchInput"
+            >
+          </timelion-expression-input>
 
-          <timelion-interval model="state.interval"></timelion-interval>
+          <timelion-interval
+            model="state.interval"
+            in-header="true"
+          ></timelion-interval>
 
           <button
             type="submit"

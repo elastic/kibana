@@ -15,6 +15,9 @@ import ButtonExample
 import CardExample
   from '../../views/card/card_example';
 
+import CollapseButtonExample
+  from '../../views/collapse_button/collapse_button_example';
+
 import ColumnExample
   from '../../views/column/column_example';
 
@@ -113,6 +116,9 @@ const components = [{
   name: 'Column',
   component: ColumnExample,
 }, {
+  name: 'CollapseButton',
+  component: CollapseButtonExample,
+}, {
   name: 'Event',
   component: EventExample,
 }, {
@@ -191,10 +197,26 @@ const sandboxes = [{
   component: ViewSandbox,
 }];
 
+const allRoutes = components.concat(sandboxes);
+
 export default {
   components: Slugify.each(components, 'name', 'path'),
   sandboxes: Slugify.each(sandboxes, 'name', 'path'),
   getAppRoutes: function getAppRoutes() {
-    return this.components.concat(this.sandboxes);
+    return allRoutes;
+  },
+  getPreviousRoute: function getPreviousRoute(routeName) {
+    const index = allRoutes.findIndex(item => {
+      return item.name === routeName;
+    });
+
+    return index >= 0 ? allRoutes[index - 1] : undefined;
+  },
+  getNextRoute: function getNextRoute(routeName) {
+    const index = allRoutes.findIndex(item => {
+      return item.name === routeName;
+    });
+
+    return index < allRoutes.length - 1 ? allRoutes[index + 1] : undefined;
   },
 };

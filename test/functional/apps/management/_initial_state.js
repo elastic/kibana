@@ -13,15 +13,7 @@ export default function ({ getService, getPageObjects }) {
         return PageObjects.settings.navigateTo();
       })
       .then(function () {
-        return PageObjects.settings.clickKibanaIndicies();
-      });
-    });
-
-    it('should load with time pattern checked', function () {
-      return PageObjects.settings.getTimeBasedEventsCheckbox().isSelected()
-      .then(function (selected) {
-        PageObjects.common.saveScreenshot('Settings-initial-state');
-        expect(selected).to.be.ok();
+        return PageObjects.settings.clickKibanaIndices();
       });
     });
 
@@ -49,7 +41,7 @@ export default function ({ getService, getPageObjects }) {
       });
     });
 
-    it('should not be enable creation', function () {
+    it('should not enable creation', function () {
       return PageObjects.settings.getCreateIndexPatternButton().isEnabled()
       .then(function (enabled) {
         expect(enabled).to.not.be.ok();

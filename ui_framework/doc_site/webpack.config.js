@@ -1,5 +1,5 @@
 const path = require('path');
-
+const babelPreset = require('../../src/optimize/babel/helpers').webpackPreset;
 module.exports = {
   devtool: 'source-map',
 
@@ -8,7 +8,7 @@ module.exports = {
   },
 
   output: {
-    path: path.resolve(__dirname, 'ui_framework/doc_site/build'),
+    path: path.resolve(__dirname, 'build'),
     filename: 'bundle.js'
   },
 
@@ -34,7 +34,7 @@ module.exports = {
       loader: 'babel',
       exclude: /node_modules/,
       query: {
-        presets: ['es2015', 'react'],
+        presets: [babelPreset],
       },
     }, {
       test: /\.scss$/,
@@ -44,6 +44,9 @@ module.exports = {
       test: /\.html$/,
       loader: 'html',
       exclude: /node_modules/
+    }, {
+      test: /\.(woff|woff2|ttf|eot|svg|ico)(\?|$)/,
+      loader: 'file',
     }, {
       test: require.resolve('jquery'),
       loader: 'expose?jQuery!expose?$'

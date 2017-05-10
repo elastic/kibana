@@ -92,6 +92,9 @@ module.exports = function MapsRenderbotFactory(Private, $injector, tilemapSettin
       this._kibanaMap.on('drawCreated:rectangle', event => {
         addSpatialFilter(_.get(this._chartData, 'geohashGridAgg'), 'geo_bounding_box', event.bounds);
       });
+      this._kibanaMap.on('drawCreated:polygon', event => {
+        addSpatialFilter(_.get(this._chartData, 'geohashGridAgg'), 'geo_polygon', { points: event.points });
+      });
       this._kibanaMap.on('baseLayer:loaded', () => {
         this._baseLayerDirty = false;
         this._doRenderComplete();
@@ -227,7 +230,7 @@ module.exports = function MapsRenderbotFactory(Private, $injector, tilemapSettin
     const indexPatternName = agg.vis.indexPattern.id;
     const field = agg.fieldName();
     const filter = {};
-    filter[filterName] = {};
+    filter[filterName] = { ignore_unmapped: true };
     filter[filterName][field] = filterData;
 
     const putFilter = Private(FilterBarPushFilterProvider)(getAppState());
@@ -237,5 +240,3 @@ module.exports = function MapsRenderbotFactory(Private, $injector, tilemapSettin
 
   return MapsRenderbot;
 };
-
-

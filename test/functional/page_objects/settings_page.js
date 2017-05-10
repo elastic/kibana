@@ -26,7 +26,7 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
       await this.clickLinkText('Advanced Settings');
     }
 
-    async clickKibanaIndicies() {
+    async clickKibanaIndices() {
       await this.clickLinkText('Index Patterns');
     }
 
@@ -49,10 +49,6 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
 
     async navigateTo() {
       await PageObjects.common.navigateToApp('settings');
-    }
-
-    getTimeBasedEventsCheckbox() {
-      return testSubjects.find('createIndexPatternIsTimeBasedCheckBox');
     }
 
     getTimeBasedIndexPatternCheckbox() {
@@ -272,7 +268,7 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
     async createIndexPattern() {
       await retry.try(async () => {
         await this.navigateTo();
-        await this.clickKibanaIndicies();
+        await this.clickKibanaIndices();
         await this.selectTimeFieldOption('@timestamp');
         await this.getCreateButton().click();
       });

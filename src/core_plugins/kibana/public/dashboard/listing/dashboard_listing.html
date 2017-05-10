@@ -27,7 +27,7 @@
             class="kuiToolBarSearchBox__input"
             type="text"
             placeholder="Search..."
-            aria-label="Filter"
+            aria-label="Filter dashboards"
             data-test-subj="searchFilter"
             ng-model="listingController.filter"
           >
@@ -39,7 +39,7 @@
         <button
           class="kuiButton kuiButton--danger"
           ng-click="listingController.deleteSelectedItems()"
-          aria-label="Delete selected objects"
+          aria-label="Delete selected dashboards"
           ng-if="listingController.getSelectedItemsCount() > 0"
           tooltip="Delete selected dashboards"
           tooltip-append-to-body="true"
@@ -127,8 +127,19 @@
         <th class="kuiTableHeaderCell" ng-click="listingController.sortOn('title')">
           Name
           <span
-            class="fa"
-            ng-class="listingController.isAscending('title') ? 'fa-caret-up' : 'fa-caret-down'">
+            class="kuiIcon"
+            ng-show="listingController.getSortedProperty().name == 'title'"
+            ng-class="listingController.isAscending('title') ? 'fa-caret-up' : 'fa-caret-down'"
+          >
+          </span>
+        </th>
+        <th class="kuiTableHeaderCell" ng-click="listingController.sortOn('description')">
+          Description
+          <span
+            class="kuiIcon"
+            ng-show="listingController.getSortedProperty().name == 'description'"
+            ng-class="listingController.isAscending('description') ? 'fa-caret-up' : 'fa-caret-down'"
+          >
           </span>
         </th>
       </tr>
@@ -155,6 +166,11 @@
             <a class="kuiLink" ng-href="{{ listingController.getUrlForItem(item) }}">
               {{ item.title }}
             </a>
+          </div>
+        </td>
+        <td class="kuiTableRowCell kuiTableRowCell--wrap">
+          <div class="kuiTableRowCell__liner">
+            {{ item.description }}
           </div>
         </td>
       </tr>

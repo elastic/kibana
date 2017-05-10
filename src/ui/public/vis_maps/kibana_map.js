@@ -261,7 +261,9 @@ export class KibanaMap extends EventEmitter {
       this._leafletMap.removeControl(this._leafletLegendControl);
     }
     this.setBaseLayer(null);
-    for (const layer of this._layers) {
+    let layer;
+    while (this._layers.length) {
+      layer = this._layers.pop();
       layer.removeFromLeafletMap(this._leafletMap);
     }
     this._leafletMap.remove();
@@ -345,18 +347,19 @@ export class KibanaMap extends EventEmitter {
   }
 
   addDrawControl() {
+    const shapeOptions = {
+      shapeOptions: {
+        stroke: false,
+        color: '#000'
+      }
+    };
     const drawOptions = {
       draw: {
         polyline: false,
         marker: false,
         circle: false,
-        polygon: false,
-        rectangle: {
-          shapeOptions: {
-            stroke: false,
-            color: '#000'
-          }
-        }
+        rectangle: shapeOptions,
+        polygon: shapeOptions
       }
     };
     this._leafletDrawControl = new L.Control.Draw(drawOptions);
@@ -471,7 +474,7 @@ export class KibanaMap extends EventEmitter {
       }
     });
 
-    if (bounds) {
+    if (bounds && bounds.isValid()) {
       this._leafletMap.fitBounds(bounds);
     }
   }

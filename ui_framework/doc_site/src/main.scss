@@ -20,6 +20,7 @@ body {
   background-color: $guideBaseBackgroundColor;
   line-height: 40px; /* 1 */
   margin: 0;
+  min-width: $guideMinWidth;
 }
 
 .guide {
@@ -35,7 +36,7 @@ body {
   &.is-code-viewer-open {
     padding-right: $guideCodeViewerWidth;
 
-    @include whenNarrowerThan($normalBreakpoint) {
+    @include whenNarrowerThan($guideNormalBreakpoint) {
       padding-right: $guideCodeViewerSmallWidth;
     }
   }

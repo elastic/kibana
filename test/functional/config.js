@@ -11,6 +11,7 @@ import {
   VisualizePageProvider,
   SettingsPageProvider,
   MonitoringPageProvider,
+  PointSeriesPageProvider
 } from './page_objects';
 
 import {
@@ -21,8 +22,7 @@ import {
   KibanaServerProvider,
   EsProvider,
   EsArchiverProvider,
-  DocTableProvider,
-  PointSeriesVisProvider,
+  DocTableProvider
 } from './services';
 
 import { servers, apps } from '../server_config';
@@ -50,6 +50,7 @@ export default function () {
       visualize: VisualizePageProvider,
       settings: SettingsPageProvider,
       monitoring: MonitoringPageProvider,
+      pointSeries: PointSeriesPageProvider
     },
     services: {
       kibanaServer: KibanaServerProvider,
@@ -59,8 +60,7 @@ export default function () {
       testSubjects: TestSubjectsProvider,
       es: EsProvider,
       esArchiver: EsArchiverProvider,
-      docTable: DocTableProvider,
-      pointSeriesVis: PointSeriesVisProvider
+      docTable: DocTableProvider
     },
     servers,
     apps,

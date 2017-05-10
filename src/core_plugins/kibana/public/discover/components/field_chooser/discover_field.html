@@ -5,20 +5,21 @@
   <div
     data-test-subj="field-{{::field.name}}"
     ng-click="toggleDetails(field)"
+    kbn-accessible-click
     class="sidebar-item-title discover-sidebar-item"
   >
     <field-name
       class="discover-sidebar-item-label"
       field="field"
     ></field-name>
-    <div class="discover-sidebar-item-actions">
-      <button
-        ng-click="toggleDisplay(field)"
-        ng-class="::field.display ? 'kuiButton--danger' : 'kuiButton--primary'"
-        ng-bind="::field.display ? 'remove' : 'add'"
-        class="kuiButton kuiButton--small kuiButton--primary"
-        data-test-subj="fieldToggle-{{::field.name}}"
-      ></button>
-    </div>
+
+    <button
+      ng-if="field.name !== '_source'"
+      ng-click="toggleDisplay(field)"
+      ng-class="::field.display ? 'kuiButton--danger' : 'kuiButton--primary'"
+      ng-bind="::field.display ? 'remove' : 'add'"
+      class="discover-sidebar-item-action kuiButton kuiButton--small"
+      data-test-subj="fieldToggle-{{::field.name}}"
+    ></button>
   </div>
 </li>
