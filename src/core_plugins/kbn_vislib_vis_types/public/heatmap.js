@@ -16,8 +16,9 @@ export default function HeatmapVisType(Private) {
     image,
     description: 'Shade cells within a matrix',
     category: VisType.CATEGORY.BASIC,
-    params: {
+    visConfig: {
       defaults: {
+        type: 'heatmap',
         addTooltip: true,
         addLegend: true,
         enableHover: false,
@@ -44,22 +45,26 @@ export default function HeatmapVisType(Private) {
           }
         }]
       },
-      legendPositions: [{
-        value: 'left',
-        text: 'left',
-      }, {
-        value: 'right',
-        text: 'right',
-      }, {
-        value: 'top',
-        text: 'top',
-      }, {
-        value: 'bottom',
-        text: 'bottom',
-      }],
-      scales: ['linear', 'log', 'square root'],
-      colorSchemas: Object.keys(vislibColorMaps),
-      editor: heatmapTemplate
+    },
+    editorConfig: {
+      collectons: {
+        legendPositions: [{
+          value: 'left',
+          text: 'left',
+        }, {
+          value: 'right',
+          text: 'right',
+        }, {
+          value: 'top',
+          text: 'top',
+        }, {
+          value: 'bottom',
+          text: 'bottom',
+        }],
+        scales: ['linear', 'log', 'square root'],
+        colorSchemas: Object.keys(vislibColorMaps),
+      },
+      editorTemplate: heatmapTemplate
     },
     schemas: new Schemas([
       {

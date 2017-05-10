@@ -130,6 +130,7 @@ app.directive('dashboardApp', function (Notifier, courier, AppState, timefilter,
       $scope.timefilter = timefilter;
       $scope.expandedPanel = null;
       $scope.dashboardViewMode = dashboardState.getViewMode();
+      $scope.appState = dashboardState.getAppState();
 
       $scope.landingPageUrl = () => `#${DashboardConstants.LANDING_PAGE_PATH}`;
       $scope.getBrushEvent = () => brushEvent(dashboardState.getAppState());

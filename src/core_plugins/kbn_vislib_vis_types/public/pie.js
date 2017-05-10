@@ -15,27 +15,32 @@ export default function HistogramVisType(Private) {
     image,
     description: 'Compare parts of a whole',
     category: VisType.CATEGORY.BASIC,
-    params: {
+    visConfig: {
       defaults: {
+        type: 'pie',
         addTooltip: true,
         addLegend: true,
         legendPosition: 'right',
         isDonut: false
       },
-      legendPositions: [{
-        value: 'left',
-        text: 'left',
-      }, {
-        value: 'right',
-        text: 'right',
-      }, {
-        value: 'top',
-        text: 'top',
-      }, {
-        value: 'bottom',
-        text: 'bottom',
-      }],
-      editor: pieTemplate
+    },
+    editorConfig: {
+      collections: {
+        legendPositions: [{
+          value: 'left',
+          text: 'left',
+        }, {
+          value: 'right',
+          text: 'right',
+        }, {
+          value: 'top',
+          text: 'top',
+        }, {
+          value: 'bottom',
+          text: 'bottom',
+        }],
+      },
+      editorTemplate: pieTemplate
     },
     responseConverter: false,
     hierarchicalData: true,

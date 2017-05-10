@@ -15,8 +15,9 @@ export default function PointSeriesVisType(Private) {
     image,
     description: 'Emphasize the quantity beneath a line chart',
     category: VisType.CATEGORY.BASIC,
-    params: {
+    visConfig: {
       defaults: {
+        type: 'area',
         grid: {
           categoryLines: false,
           style: {
@@ -29,8 +30,7 @@ export default function PointSeriesVisType(Private) {
             type: 'category',
             position: 'bottom',
             show: true,
-            style: {
-            },
+            style: {},
             scale: {
               type: 'linear'
             },
@@ -48,8 +48,7 @@ export default function PointSeriesVisType(Private) {
             type: 'value',
             position: 'left',
             show: true,
-            style: {
-            },
+            style: {},
             scale: {
               type: 'linear',
               mode: 'normal'
@@ -89,31 +88,34 @@ export default function PointSeriesVisType(Private) {
         defaultYExtents: false,
         setYExtents: false
       },
-      positions: ['top', 'left', 'right', 'bottom'],
-      chartTypes: [{
-        value: 'line',
-        text: 'line'
-      }, {
-        value: 'area',
-        text: 'area'
-      }, {
-        value: 'histogram',
-        text: 'bar'
-      }],
-      axisModes: ['normal', 'percentage', 'wiggle', 'silhouette'],
-      scaleTypes: ['linear', 'log', 'square root'],
-      chartModes: ['normal', 'stacked'],
-      interpolationModes: [{
-        value: 'linear',
-        text: 'straight',
-      }, {
-        value: 'cardinal',
-        text: 'smoothed',
-      }, {
-        value: 'step-after',
-        text: 'stepped',
-      }],
-      editor: pointSeriesTemplate,
+    },
+    editorConfig: {
+      collections: {
+        positions: ['top', 'left', 'right', 'bottom'],
+        chartTypes: [{
+          value: 'line',
+          text: 'line'
+        }, {
+          value: 'area',
+          text: 'area'
+        }, {
+          value: 'histogram',
+          text: 'bar'
+        }],
+        axisModes: ['normal', 'percentage', 'wiggle', 'silhouette'],
+        scaleTypes: ['linear', 'log', 'square root'],
+        chartModes: ['normal', 'stacked'],
+        interpolationModes: [{
+          value: 'linear',
+          text: 'straight',
+        }, {
+          value: 'cardinal',
+          text: 'smoothed',
+        }, {
+          value: 'step-after',
+          text: 'stepped',
+        }],
+      },
       optionTabs: [
         {
           name: 'advanced',

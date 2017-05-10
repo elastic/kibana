@@ -77,7 +77,8 @@ uiModules
        * Call when changes should be propagated to the url and thus saved in state.
        * @type {function}
        */
-      saveState: '='
+      saveState: '=',
+      appState: '=',
     },
     link: function ($scope, element) {
       if (!$scope.panel.id || !$scope.panel.type) return;
