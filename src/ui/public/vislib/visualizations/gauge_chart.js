@@ -49,7 +49,8 @@ export function GaugeChartProvider(Private) {
             const svg = div.append('svg')
               .attr('width', width)
               .attr('height', height)
-              .style('display', 'inline-block');
+              .style('display', 'inline-block')
+              .style('overflow', 'hidden');
 
             const g = svg.append('g')
               .attr('transform', `translate(${transformX}, ${transformY})`);

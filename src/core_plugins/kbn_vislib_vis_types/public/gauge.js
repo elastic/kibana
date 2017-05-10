@@ -19,7 +19,7 @@ export default function GaugeVisType(Private) {
     params: {
       defaults: {
         addTooltip: true,
-        addLegend: false,
+        addLegend: true,
 
         gauge: {
           verticalSplit: false,

@@ -105,7 +105,7 @@ export function SimpleGaugeProvider() {
       const tooltip = this.gaugeChart.tooltip;
       const isTooltip = this.gaugeChart.handler.visConfig.get('addTooltip');
       const yFieldFormatter = this.gaugeChart.handler.data.get('yAxisFormatter');
-      const fontSize = this.gaugeChart.handler.visConfig.get('fontSize');
+      const fontSize = this.gaugeChart.handler.visConfig.get('gauge.style.fontSize');
 
       const labelColor = this.gaugeConfig.style.labelColor;
       const bgColor = this.gaugeConfig.style.bgColor;

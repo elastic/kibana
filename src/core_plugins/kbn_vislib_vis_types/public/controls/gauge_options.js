@@ -65,12 +65,22 @@ module.directive('gaugeOptions', function () {
         }
       });
 
+      const updateLegend = () => {
+        if (!$scope.vis.params.gauge.style.bgColor && !$scope.vis.params.gauge.style.labelColor) {
+          $scope.vis.params.addLegend = false;
+        } else {
+          $scope.vis.params.addLegend = true;
+        }
+      };
+
       $scope.$watch('vis.params.gauge.style.labelColor', newValue => {
         if (newValue) $scope.vis.params.gauge.style.bgColor = !newValue;
+        updateLegend();
       });
 
       $scope.$watch('vis.params.gauge.style.bgColor', newValue => {
         if (newValue) $scope.vis.params.gauge.style.labelColor = !newValue;
+        updateLegend();
       });
 
       $scope.resetColors = function () {
