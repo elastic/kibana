@@ -578,30 +578,32 @@ fieldset {
 }
 
 .kuiSideBarSection {
-  margin-bottom: 6px;
+  margin-bottom: 10px;
+  background-color: @globalColorWhite;
+  padding: 10px;
+  border-radius: 4px;
 }
 
+.kuiSideBarSection .kuiSideBarSection .kuiSideBarSection{
+  border-radius: 0px;
+  border-left: solid 1px tint(@globalColorBlue, 20%);
+  margin-left: 3px; // Align to caret open
+}
+
+
 .kuiSideBarSection__main {
-  margin-bottom: 25px;
 }
 
 .kuiSideBarSectionTitle {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 6px;
-  border-bottom: 1px solid #D4D4D4;
-}
-
-.kuiSideBarSection__main .kuiSideBarSectionTitle {
-  background-color: #E4E4E4;
-  padding: 2px 10px;
+  margin-bottom: 10px;
 }
 
 .kuiSideBarSectionTitle__text {
-  font-size: 14px;
-  font-weight: 700;
-  color: #5A5A5A;
+  font-size: 18px;
+  color: @globalColorDarkestGray;
 }
 
 /**
@@ -612,9 +614,10 @@ fieldset {
   padding: 0; // 1
   cursor: pointer;
   color: @globalColorBlue;
+  border: none;
 
   &:hover {
-    color: #105A73;
+    color: darken(@globalColorBlue, 10%);
   }
 }
 
@@ -623,8 +626,7 @@ fieldset {
   align-items: center;
   justify-content: space-between;
   width: 100%;
-  margin-bottom: 4px;
-  border-bottom: 1px solid #E8E8E8;
+  margin-bottom: 10px;
 }
 
 .kuiSideBarCollapsibleTitle__label {
@@ -636,17 +638,15 @@ fieldset {
  * 1. Override FontAwesome .fa styles.
  */
 .kuiSideBarCollapsibleTitle__caret {
-  width: 12px;
-  height: 12px;
-  font-size: 12px !important; // 1
-  font-weight: 700;
-  color: #5A5A5A;
+  width: 14px;
+  height: 14px;
+  font-size: 14px !important; // 1
+  color: @globalColorBlue;
 }
 
 .kuiSideBarCollapsibleTitle__text {
-  font-size: 12px;
-  font-weight: 700;
-  color: #5A5A5A;
+  font-size: 14px;
+  color: @globalColorBlue;
 }
 
 /**
@@ -657,14 +657,14 @@ fieldset {
   padding: 0; // 1
   cursor: pointer;
   color: @globalColorBlue;
+  border: none;
 
   &:hover {
-    color: #105A73;
+    color: darken(@globalColorBlue, 10%);
   }
 }
 
 .kuiSideBarCollapsibleSection {
-  padding-left: 16px;
 }
 
 /**
@@ -672,10 +672,8 @@ fieldset {
  */
 .kuiSideBarFormSectionTitle {
   font-size: 12px;
-  font-weight: 700;
-  color: #5A5A5A;
-  border-bottom: 1px solid #E8E8E8;
-  margin: 4px 0 !important; // 1
+  color: @globalColorMediumGray;
+  margin: 10px 0 !important; // 1
   padding-bottom: 2px;
 }
 
@@ -683,7 +681,7 @@ fieldset {
   display: flex;
   align-items: center;
   min-height: 24px;
-  margin-bottom: 1px;
+  margin-bottom: 10px;
 }
 
 /**
@@ -716,7 +714,6 @@ fieldset {
 .kuiSideBarOptionsLink {
   display: flex;
   align-items: baseline;
-  margin-bottom: 8px;
   font-size: 12px;
   color: @globalColorBlue !important; // 1
 

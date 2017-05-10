@@ -20,7 +20,6 @@
   }
 
   .visualization-options {
-    padding: @vis-editor-agg-editor-spacing;
 
     .form-group {
       margin-bottom: @vis-editor-agg-editor-spacing;
@@ -78,12 +77,17 @@
 
     .index-pattern,
     nav {
-      min-height: @app-icon-height;
+      min-height: auto;
       border-radius: 0px;
     }
 
     .sidebar-item {
       border-top: 0 !important;
+      padding: 10px;
+      border-radius: 4px;
+      margin-bottom: 10px;
+      background: @globalColorWhite;
+
     }
 
     .sidebar-container {
@@ -94,6 +98,7 @@
         .flex-parent(1, 1, auto);
 
         > div.vis-editor-config {
+          padding: 10px;
           @media (min-width: @screen-md-min) {
             .flex-parent(1, 1, 1px);
             overflow: auto;
@@ -115,11 +120,11 @@
     }
 
     .sidebar-item-title {
-      font-size: 14px;
-      font-weight: bold;
+      font-size: 18px;
       border: inherit !important;
-      margin-bottom: @vis-editor-agg-editor-spacing;
-      padding: 2px 5px !important;
+      margin-bottom: 10px !important;
+      padding: 0px !important;
+      text-transform: capitalize;
     }
 
     .hintbox {
@@ -133,6 +138,7 @@
       text-overflow: ellipsis;
       overflow: hidden;
       margin-bottom: 0;
+      font-size: 12px;
     }
   }
 
@@ -148,7 +154,6 @@
 
     //IE10/11 - prevent flex item from overflowing
     flex-basis: 100%;
-    padding: @vis-editor-agg-editor-spacing;
   }
 
     // wraps the .vis-editor-agg and nesting-indicator ^^
@@ -171,6 +176,9 @@
       .vis-editor-agg-header-toggle {
         flex: 0 0 auto;
         margin-right: @vis-editor-agg-editor-spacing;
+        min-width: 22px;
+        min-height: 22px;
+        text-align: center;
       }
 
       .vis-editor-agg-header-subagg-icon {
@@ -266,13 +274,13 @@
     }
 
       .vis-editor-agg-add-subagg {
-        margin-bottom: -@vis-editor-agg-editor-spacing - 1; // extra one pixel covers the aggs bottom border
-        margin-right: -@vis-editor-agg-editor-spacing;
-        margin-left: -@vis-editor-agg-editor-spacing;
+        // margin-bottom: -@vis-editor-agg-editor-spacing - 1; // extra one pixel covers the aggs bottom border
+        // margin-right: -@vis-editor-agg-editor-spacing;
+        // margin-left: -@vis-editor-agg-editor-spacing;
       }
 
       .vis-editor-agg-add-schemas {
-        margin: @vis-editor-agg-editor-spacing * 3;
+        margin-bottom: 10px;
       }
 
     .vis-editor-agg-order-agg {
@@ -355,12 +363,12 @@ vis-editor-vis-options > * {
    */
 .vis-editor-subnav-link {
   padding: 4px 10px 5px 10px !important; /* 1 */
-  color: @kibanaGray2 !important; /* 1 */
+  color: @globalColorDarkGray !important; /* 1 */
 
   &.is-vis-editor-sub-nav-link-selected {
-    border-bottom: 2px solid @kibanaGray2;
-    color: @kibanaGray1;
-    background-color: #f6f6f6;
+    border-bottom: 2px solid @globalColorBlue;
+    border-color: @globalColorBlue !important;
+    color: @globalColorBlue !important;
 
     &:before {
       display: none;
