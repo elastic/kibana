@@ -5,7 +5,7 @@ export default function (kibana) {
 
     uiExports: {
       visTypes: [
-        'plugins/control_visualizations/terms_vis/vis.js'
+        'plugins/terms/terms_vis/vis'
       ]
     }
   });
