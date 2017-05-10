@@ -119,7 +119,6 @@ export default function PointSeriesVisType(Private) {
           text: 'stepped',
         }],
       },
-      editor: pointSeriesTemplate,
       optionTabs: [
         {
           name: 'advanced',

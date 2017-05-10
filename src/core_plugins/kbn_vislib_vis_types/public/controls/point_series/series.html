@@ -39,7 +39,7 @@
               id="{{ 'seriesType' + $index }}"
               class="kuiSelect kuiSideBarSelect"
               ng-model="chart.type"
-              ng-options="mode.value as mode.text for mode in vis.type.params.chartTypes"
+              ng-options="mode.value as mode.text for mode in vis.type.editorConfig.collections.chartTypes"
             ></select>
           </div>
         </div>
@@ -53,7 +53,7 @@
               id="{{ 'seriesMode' + $index }}"
               class="kuiSelect kuiSideBarSelect"
               ng-model="chart.mode"
-              ng-options="mode for mode in vis.type.params.chartModes"
+              ng-options="mode for mode in vis.type.editorConfig.collections.chartModes"
             ></select>
           </div>
         </div>
@@ -85,7 +85,7 @@
                 id="{{ 'lineMode' + $index }}"
                 class="kuiSelect kuiSideBarSelect"
                 ng-model="chart.interpolate"
-                ng-options="mode.value as mode.text for mode in vis.type.params.interpolationModes"
+                ng-options="mode.value as mode.text for mode in vis.type.editorConfig.collections.interpolationModes"
               >
               </select>
             </div>

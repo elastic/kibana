@@ -82,7 +82,7 @@
               class="kuiSelect kuiSideBarSelect"
               ng-change="updateAxisName(axis)"
               ng-model="axis.position"
-              ng-options="mode disable when isPositionDisabled(mode) for mode in vis.type.params.positions"
+              ng-options="mode disable when isPositionDisabled(mode) for mode in vis.type.editorConfig.collections.positions"
             ></select>
           </div>
         </div>
@@ -96,7 +96,7 @@
               id="{{ 'valueAxisMode' + $index }}"
               class="kuiSelect kuiSideBarSelect"
               ng-model="axis.scale.mode"
-              ng-options="mode for mode in vis.type.params.axisModes"
+              ng-options="mode for mode in vis.type.editorConfig.collections.axisModes"
             ></select>
           </div>
         </div>
@@ -110,7 +110,7 @@
               id="{{ 'valueAxisScaleType' + $index }}"
               class="kuiSelect kuiSideBarSelect"
               ng-model="axis.scale.type"
-              ng-options="type for type in vis.type.params.scaleTypes"
+              ng-options="type for type in vis.type.editorConfig.collections.scaleTypes"
             ></select>
           </div>
         </div>
