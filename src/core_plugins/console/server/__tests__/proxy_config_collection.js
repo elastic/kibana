@@ -143,7 +143,7 @@ describe('ProxyConfigCollection', function () {
 
     it('verifies for config that produces ssl agent', function () {
       const conf = makeCollection().configForUri('https://es.internal.org/_search');
-      expect(conf).to.have.property('rejectUnauthorized', true);
+      expect(conf.agent.options).to.have.property('rejectUnauthorized', true);
       expect(conf.agent).to.be.an(HttpsAgent);
     });
 
