@@ -10,4 +10,5 @@ require('flot-charts/jquery.flot.pie');
 require('flot-charts/jquery.flot.stack');
 require('flot-charts/jquery.flot.threshold');
 require('flot-charts/jquery.flot.fillbetween');
+require('./jquery.flot.categories');
 module.exports = $;

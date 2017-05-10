@@ -2,8 +2,8 @@ import { Element } from '../element';
 import './flot';
 
 module.exports = new Element({
-  name: 'line',
-  displayName: 'Line Chart',
+  name: 'plot',
+  displayName: 'An XY coordinate plot',
   icon: null,
   schema: {
     datasource: true,

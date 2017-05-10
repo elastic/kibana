@@ -1,4 +1,4 @@
 export const elementSpecs = [
-  require('./line/line'),
+  require('./plot/plot'),
   require('./table/table'),
 ];

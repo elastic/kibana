@@ -58,12 +58,16 @@ module.exports = new Fn({
       };
     }
 
+    function getData(series) {
+      return series.map(point => [point.x, point.y, point.size]);
+    }
+
     const seriesStyles = keyBy(args.seriesStyle || [], 'label') || {};
     const data = map(groupBy(context.rows, 'color'), (series, label) => {
       const seriesStyle = seriesStyles[label];
       const result = {
         label: label,
-        data: series.map(point => [point.x, point.y, point.size]),
+        data: getData(series),
       };
 
       if (seriesStyle) {
@@ -72,9 +76,11 @@ module.exports = new Fn({
       return result;
     });
 
+    console.log('data', data);
+
     return {
       type: 'render',
-      as: 'line',
+      as: 'plot',
       value: {
         data: data,
         options: {
