@@ -13,7 +13,7 @@ export default function ({ getService, getPageObjects }) {
         return PageObjects.settings.navigateTo();
       })
       .then(function () {
-        return PageObjects.settings.clickKibanaIndicies();
+        return PageObjects.settings.clickKibanaIndices();
       })
       .then(function () {
         return PageObjects.settings.createIndexPattern();
@@ -25,7 +25,7 @@ export default function ({ getService, getPageObjects }) {
 
     after(async function afterAll() {
       await PageObjects.settings.navigateTo();
-      await PageObjects.settings.clickKibanaIndicies();
+      await PageObjects.settings.clickKibanaIndices();
       await PageObjects.settings.removeIndexPattern();
     });
 
