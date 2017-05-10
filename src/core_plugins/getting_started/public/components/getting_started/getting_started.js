@@ -16,6 +16,10 @@ import shieldIcon from 'ui/images/icon-shield.svg';
 import template from './getting_started.html';
 import './getting_started.less';
 
+function makeAngularParseableExpression(text) {
+  return `<span>${text}</span>`;
+}
+
 const app = uiModules.get('kibana');
 
 app.directive('gettingStarted', function ($injector) {
@@ -39,11 +43,22 @@ app.directive('gettingStarted', function ($injector) {
         }
 
         // Compile topMessageHtml and inject it into the DOM
-        const topMessageContainer = document.getElementById('gettingStartedTopMessageContainer');
-        const topMessageHtml = $compile(gettingStartedRegistry.topMessage)($scope);
-        angular.element(topMessageContainer).append(topMessageHtml);
+        if (gettingStartedRegistry.topMessage) {
+          const topMessageContainer = document.getElementById('gettingStartedTopMessageContainer');
+          const topMessageHtml = $compile(makeAngularParseableExpression(gettingStartedRegistry.topMessage))($scope);
+          angular.element(topMessageContainer).append(topMessageHtml);
+        }
 
-        this.manageAndMonitorMessages = gettingStartedRegistry.manageAndMonitorMessages.join(' ');
+        // Compile manageAndMonitorMessages and inject them into DOM
+        if (gettingStartedRegistry.manageAndMonitorMessages.length > 0) {
+          const manageAndMonitorMessagesContainer = document.getElementById('gettingStartedManageAndMonitorMessagesContainer');
+          gettingStartedRegistry.manageAndMonitorMessages.forEach(message => {
+            const paddedMessage = `${message}&nbsp;`;
+            const messageHtml = $compile(makeAngularParseableExpression(paddedMessage))($scope);
+            angular.element(manageAndMonitorMessagesContainer).append(messageHtml);
+          });
+        }
+
         this.imageUrls = {
           kibanaLogo,
           beatsLogo,
@@ -55,7 +70,7 @@ app.directive('gettingStarted', function ($injector) {
       }
 
       hasManageAndMonitorMessages = () => {
-        return this.manageAndMonitorMessages.length > 0;
+        return gettingStartedRegistry.manageAndMonitorMessages.length > 0;
       }
 
       hasOptedOut = () => {
