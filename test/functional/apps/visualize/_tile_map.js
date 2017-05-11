@@ -305,6 +305,42 @@ export default function ({ getService, getPageObjects }) {
           });
         });
       });
+
+      it('wms switch should change allow to zoom in further', function () {
+
+        return PageObjects.visualize.collapseChart()
+          .then(function () {
+            return PageObjects.visualize.clickOptions();
+          })
+          .then(function () {
+            return PageObjects.visualize.selectWMS();
+          })
+          .then(function () {
+            return PageObjects.visualize.clickGo();
+          })
+          .then(function () {
+            return PageObjects.header.waitUntilLoadingHasFinished();
+          })
+          .then(function () {
+            return PageObjects.common.sleep(2000);
+          })
+          .then(function () {
+            return PageObjects.visualize.getMapZoomInEnabled();
+          })
+          .then(function (enabled) {//should be able to zoom in again
+            expect(enabled).to.be(true);
+          })
+          .then(function () {
+            return PageObjects.visualize.clickMapZoomIn();
+          })
+          .then(function () {
+            return PageObjects.visualize.getMapZoomInEnabled();
+          })
+          .then(function (enabled) {//should be able to zoom in again
+            expect(enabled).to.be(true);
+          });
+
+      });
     });
   });
 }
