@@ -5,6 +5,14 @@ module.exports = new Type({
   from: {
     null: () => {
       return {
+        /*
+          columns: [
+            {name: 'foo', type: 'boolean', role: 'dimension'},
+            {name: 'bar', type: 'number',  role: 'measure'},
+            {name: 'baz', type: 'string',  role: 'dimension'}
+          ],
+          rows: [{foo: true, bar: 10, baz: 'awesome'}]
+        */
         type: 'datatable',
         rows: [],
         columns: [],

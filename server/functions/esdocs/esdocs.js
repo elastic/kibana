@@ -39,6 +39,20 @@ module.exports = new Fn({
         'will only look at the first hit for determining columns. You would be wise to give ' +
         'all of your documents the same schema',
   fn: (context, args) => {
+    function getColumnDefinition(fieldVal, fieldName) {
+      const type = typeof fieldVal;
+      const role = (function () {
+        switch (type) {
+          case 'number':
+            return 'measure';
+          default:
+            return 'dimension';
+        }
+      }());
+
+      return { name: fieldName, type, role };
+    }
+
     return client.search({
       index: args.index,
       q: args.q,
@@ -49,9 +63,7 @@ module.exports = new Fn({
       const flatHits = _.map(resp.hits.hits, (hit, i) => {
         return Object.assign(flattenHit(hit), { _rowId: i });
       });
-      const columns = _.map(flatHits[0], (fieldVal, fieldName) => {
-        return { name: fieldName, type: typeof fieldVal };
-      });
+      const columns = _.map(flatHits[0], getColumnDefinition);
 
       return {
         type: 'datatable',
