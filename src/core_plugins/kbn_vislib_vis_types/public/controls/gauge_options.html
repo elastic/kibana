@@ -58,7 +58,11 @@
     </div>
   </div>
 
-  <div class="kuiSideBarFormRow" ng-hide="vis.params.gauge.type === 'simple'">
+  <div
+    class="kuiSideBarFormRow"
+    ng-hide="vis.params.gauge.type === 'simple'"
+    ng-show="vis.params.gauge.colorsRange.length > 1"
+  >
     <label class="kuiSideBarFormRow__label" for="extendRange">
       Auto Extend Range
       <kbn-info
@@ -149,7 +153,7 @@
       </div>
     </div>
   </div>
-  <div>
+  <div ng-show="vis.params.gauge.colorsRange.length > 1">
     <div class="kuiSideBarCollapsibleTitle">
       <div
         class="kuiSideBarCollapsibleTitle__label"
@@ -221,7 +225,7 @@
       </div>
     </div>
     <div ng-if="showStyle" class="kuiSideBarCollapsibleSection">
-      <div class="kuiSideBarFormRow">
+      <div class="kuiSideBarFormRow" ng-show="vis.params.gauge.colorsRange.length > 1">
         <label class="kuiSideBarFormRow__label" for="labelColor">
           Color Labels
         </label>
@@ -255,7 +259,7 @@
         </div>
         <div ng-show="vis.params.gauge.type === 'simple'">
           <div class="kuiSideBarFormRow">
-            <label class="kuiSideBarFormRow__label" for="bgColor">
+            <label class="kuiSideBarFormRow__label" for="bgColor" ng-show="vis.params.gauge.colorsRange.length > 1">
               Color Background
             </label>
             <div class="kuiSideBarFormRow__control">
