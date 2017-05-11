@@ -42,7 +42,7 @@ function MetricVisProvider(Private) {
         name: 'metric',
         title: 'Metric',
         min: 1,
-        aggFilter: ['!derivative'],
+        aggFilter: ['!derivative', '!geo_centroid'],
         defaults: [
           { type: 'count', schema: 'metric' }
         ]
