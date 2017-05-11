@@ -16,8 +16,10 @@ describe('canvas plugin', () => {
 
     it('exposes plugin hooks', () => {
       const { canvas } = instance.server.plugins;
-      expect(canvas).to.have.property('addFunction');
-      expect(canvas).to.have.property('addType');
+      expect(canvas.addFunction).to.be.a('function');
+      expect(canvas.addType).to.be.a('function');
+      expect(canvas.addExpressionType).to.be.a('function');
+      expect(canvas.addArgType).to.be.a('function');
     });
   });
 });
