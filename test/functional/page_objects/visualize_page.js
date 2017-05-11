@@ -325,6 +325,21 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
       });
     }
 
+    clickOptions() {
+      return remote
+        .setFindTimeout(defaultFindTimeout)
+        .findByPartialLinkText('Options')
+        .click();
+    }
+
+    selectWMS() {
+      return remote
+        .setFindTimeout(defaultFindTimeout)
+        .findByCssSelector('input[name="wms.enabled"]')
+        .click();
+    }
+
+
     saveVisualization(vizName) {
       return testSubjects.click('visualizeSaveButton')
       .then(() => {
