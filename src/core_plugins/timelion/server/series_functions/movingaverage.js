@@ -13,8 +13,8 @@ module.exports = new Chainable('movingaverage', {
       name: 'window',
       types: ['number', 'string'],
       help: 'Number of points, or a date math expression (eg 1d, 1M) to average over. ' +
-      'If you specify a date math expression, I\'ll get as close as I can given your current interval selection' +
-      'If they don\'t divide nicely things might get weird.'
+      'If a date math expression is specified, the function will get as close as possible given the currently select interval' +
+      'If the date math expression is not evenly divisible by the interval the results may appear abnormal.'
     },
     {
       name: 'position',
@@ -27,8 +27,8 @@ module.exports = new Chainable('movingaverage', {
   fn: function movingaverageFn(args, tlConfig) {
     return alter(args, function (eachSeries, _window, _position) {
 
-      _window = (function () {
-        if (typeof _window === 'number') return _window;
+      // _window always needs to be a number, if isn't we have to make it into one.
+      if (typeof _window !== 'number') {
         // Ok, I guess its a datemath expression
         const windowMilliseconds = toMS(_window);
 
@@ -36,8 +36,8 @@ module.exports = new Chainable('movingaverage', {
         const intervalMilliseconds = toMS(tlConfig.time.interval);
 
         // Round, floor, ceil? We're going with round because it splits the difference.
-        return Math.round(windowMilliseconds / intervalMilliseconds) || 1;
-      }());
+        _window = Math.round(windowMilliseconds / intervalMilliseconds) || 1;
+      }
 
       _position = _position || 'center';
       const validPositions = ['left', 'right', 'center'];
