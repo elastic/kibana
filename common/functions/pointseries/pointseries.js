@@ -2,7 +2,7 @@ import Fn from '../fn.js';
 import { groupBy, find, zipObject, sortBy } from 'lodash';
 import moment from 'moment';
 
-export default new Fn({
+module.exports = new Fn({
   name: 'pointseries',
   type: 'pointseries',
   help: 'Turn a datatable into a point series model',
