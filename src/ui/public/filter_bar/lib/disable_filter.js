@@ -6,7 +6,13 @@ export function enableFilter(filter) {
   return setFilterDisabled(filter, false);
 }
 
-export function setFilterDisabled(filter, disabled) {
+export function toggleFilterDisabled(filter) {
+  const { meta: { disabled = false } = {} } = filter;
+
+  return setFilterDisabled(filter, !disabled);
+}
+
+function setFilterDisabled(filter, disabled) {
   const { meta = {} } = filter;
 
   return {
@@ -16,10 +22,4 @@ export function setFilterDisabled(filter, disabled) {
       disabled,
     }
   };
-}
-
-export function toggleFilterDisabled(filter) {
-  const { meta: { disabled = false } = {} } = filter;
-
-  return setFilterDisabled(filter, !disabled);
 }
