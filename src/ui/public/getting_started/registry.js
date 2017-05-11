@@ -12,7 +12,7 @@ const manageAndMonitorMessages = [];
  * @param {string} message Top message string
  */
 export function setTopMessage(message) {
-  topMessage = message;
+  topMessage = message.trim();
 }
 
 /**
@@ -42,7 +42,7 @@ export function addManageAndMonitorMessage(message) {
 
   manageAndMonitorMessages.push({
     id,
-    message
+    message: message.trim()
   });
 
   return id;
