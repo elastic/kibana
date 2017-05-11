@@ -118,6 +118,7 @@ export default function PointSeriesVisType(Private) {
         name: 'metric',
         title: 'Y-Axis',
         min: 1,
+        aggFilter: ['!geo_centroid'],
         defaults: [
           { schema: 'metric', type: 'count' }
         ]
