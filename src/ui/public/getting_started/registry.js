@@ -7,7 +7,11 @@ let topMessage = null;
 const manageAndMonitorMessages = [];
 
 /**
- * Sets the top message on the Getting Started page
+ * Sets the top message on the Getting Started page. This may be used by plugins (such as x-pack) to
+ * inject a welcome message or a warning message that they want first-time users to see.
+ *
+ * NOTE: There is only *one* top message, so the latest invocation of this function will win and its
+ * message will "win".
  *
  * @param {string} message Top message string
  */
