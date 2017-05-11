@@ -2,9 +2,9 @@ import { uiModules } from 'ui/modules';
 import uiChrome from 'ui/chrome';
 import 'ui/storage';
 import 'ui/filters/trust_as_html';
-import { gettingStartedRegistry } from 'ui/getting_started_registry';
+import { getTopMessage, getManageAndMonitorMessages } from 'ui/getting_started/registry';
+import { hasOptedOutOfGettingStarted, optOutOfGettingStarted } from 'ui/getting_started/opt_out_service';
 import { documentationLinks } from 'ui/documentation_links';
-import { GETTING_STARTED_OPT_OUT } from '../../lib/constants';
 import angular from 'angular';
 
 import kibanaLogo from 'ui/images/logo-kibana-small.svg';
@@ -24,7 +24,6 @@ const app = uiModules.get('kibana');
 
 app.directive('gettingStarted', function ($injector) {
 
-  const localStorageService = $injector.get('localStorage');
   const $compile = $injector.get('$compile');
 
   return {
@@ -43,16 +42,18 @@ app.directive('gettingStarted', function ($injector) {
         }
 
         // Compile topMessageHtml and inject it into the DOM
-        if (gettingStartedRegistry.topMessage) {
+        const topMessage = getTopMessage();
+        if (topMessage) {
           const topMessageContainer = document.getElementById('gettingStartedTopMessageContainer');
-          const topMessageHtml = $compile(makeAngularParseableExpression(gettingStartedRegistry.topMessage))($scope);
+          const topMessageHtml = $compile(makeAngularParseableExpression(topMessage))($scope);
           angular.element(topMessageContainer).append(topMessageHtml);
         }
 
         // Compile manageAndMonitorMessages and inject them into DOM
-        if (gettingStartedRegistry.manageAndMonitorMessages.length > 0) {
+        const manageAndMonitorMessages = getManageAndMonitorMessages();
+        if (manageAndMonitorMessages.length > 0) {
           const manageAndMonitorMessagesContainer = document.getElementById('gettingStartedManageAndMonitorMessagesContainer');
-          gettingStartedRegistry.manageAndMonitorMessages.forEach(message => {
+          manageAndMonitorMessages.forEach(message => {
             const paddedMessage = `${message}&nbsp;`;
             const messageHtml = $compile(makeAngularParseableExpression(paddedMessage))($scope);
             angular.element(manageAndMonitorMessagesContainer).append(messageHtml);
@@ -70,17 +71,12 @@ app.directive('gettingStarted', function ($injector) {
       }
 
       hasManageAndMonitorMessages = () => {
-        return gettingStartedRegistry.manageAndMonitorMessages.length > 0;
+        return getManageAndMonitorMessages().length > 0;
       }
 
-      hasOptedOut = () => {
-        return localStorageService.get(GETTING_STARTED_OPT_OUT) || false;
-      }
+      hasOptedOut = hasOptedOutOfGettingStarted;
 
-      recordOptOut = () => {
-        localStorageService.set(GETTING_STARTED_OPT_OUT, true);
-        uiChrome.setVisible(true);
-      }
+      optOut = optOutOfGettingStarted;
     }
   };
 });

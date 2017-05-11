@@ -1,0 +1,1 @@
+export const GETTING_STARTED_OPT_OUT_FLAG = 'kibana.isGettingStartedOptedOut';
