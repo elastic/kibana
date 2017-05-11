@@ -1,3 +1,5 @@
+import init from './init';
+
 export default function (kibana) {
   return new kibana.Plugin({
     name: 'canvas',
@@ -34,7 +36,6 @@ export default function (kibana) {
       }).default();
     },
 
-    init: require('./init'),
-
+    init,
   });
 }
