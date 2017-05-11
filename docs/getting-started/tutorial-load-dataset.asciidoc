@@ -61,7 +61,7 @@ field's searchability or whether or not it's _tokenized_, or broken up into sepa
 Use the following command in a terminal (eg `bash`) to set up a mapping for the Shakespeare data set:
 
 [source,shell]
-curl -H 'Content-Type: application/json' -XPUT http://localhost:9200/shakespeare -d '
+curl -u elastic -H 'Content-Type: application/json' -XPUT http://localhost:9200/shakespeare -d '
 {
  "mappings" : {
   "_default_" : {
