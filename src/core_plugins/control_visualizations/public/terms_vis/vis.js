@@ -1,5 +1,6 @@
 import './vis.less';
 import './vis_controller';
+import './editor_controller';
 import { VisVisTypeProvider } from 'ui/vis/vis_type';
 import { TemplateVisTypeProvider } from 'ui/template_vis_type/template_vis_type';
 import { VisTypesRegistryProvider } from 'ui/registry/vis_types';
@@ -19,6 +20,7 @@ export default function TermsProvider(Private) {
     params: {
       editor: require('./editor.html'),
       defaults: {
+        label: `terms`
       }
     },
     requiresSearch: false
