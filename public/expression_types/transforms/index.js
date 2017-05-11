@@ -1,1 +1,5 @@
-export { sort } from './sort';
+import { sort } from './sort';
+
+export default [
+  sort,
+];

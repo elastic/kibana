@@ -1,1 +1,5 @@
-export { pointSeries } from './point_series';
+import { pointSeries } from './point_series';
+
+export default [
+  pointSeries,
+];

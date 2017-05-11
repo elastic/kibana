@@ -1,1 +1,5 @@
-export { demodata } from './demodata';
+import { demodata } from './demodata';
+
+export default [
+  demodata,
+];

@@ -1,3 +1,9 @@
-export { bar } from './bar';
-export { image } from './image';
-export { line } from './line';
+import { bar } from './bar';
+import { image } from './image';
+import { line } from './line';
+
+export default [
+  bar,
+  image,
+  line,
+];
