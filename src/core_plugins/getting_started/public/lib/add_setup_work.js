@@ -4,7 +4,7 @@ import uiChrome from 'ui/chrome';
 import KbnUrlProvider from 'ui/url';
 import { Notifier } from 'ui/notify/notifier';
 import { IndexPatternsGetIdsProvider } from 'ui/index_patterns/_get_ids';
-import { hasOptedOutOfGettingStarted } from 'ui/getting_started/opt_out_service';
+import { hasOptedOutOfGettingStarted, optOutOfGettingStarted } from 'ui/getting_started/opt_out_service';
 
 import {
   GETTING_STARTED_ROUTE,
@@ -26,6 +26,9 @@ uiRoutes
       const isOnGettingStartedPage = get(currentRoute, 'originalPath') === GETTING_STARTED_ROUTE;
 
       if (indexPatternsExist) {
+
+        // The user need not see the Getting Started page, so opt them out of it
+        optOutOfGettingStarted();
 
         // Some routes require a default index pattern to be present. If we're
         // NOT on such a route, there's nothing more to do; send the user on their way
