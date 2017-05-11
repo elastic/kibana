@@ -40,12 +40,6 @@ uiModules.get('kibana')
     },
     controllerAs: 'paginate',
     controller: function ($scope, $document) {
-      // Unfortunately this controller relies on inherited scope. Lets not fail if onPageChanged happens to not be
-      // implemented.
-      if (!$scope.onPageChanged) {
-        $scope.onPageChanged = () => {};
-      }
-
       const self = this;
       const ALL = 0;
 
@@ -144,7 +138,7 @@ uiModules.get('kibana')
           $scope.page = $scope.pages[0];
         }
 
-        if ($scope.page) {
+        if ($scope.page && $scope.onPageChanged) {
           $scope.onPageChanged($scope.page);
         }
       };
@@ -184,7 +178,9 @@ uiModules.get('kibana')
           if (other.first) $scope.otherPages.containsFirst = true;
         }
 
-        $scope.onPageChanged($scope.page);
+        if ($scope.onPageChanged) {
+          $scope.onPageChanged($scope.page);
+        }
       };
 
       function setPerPage(val) {
