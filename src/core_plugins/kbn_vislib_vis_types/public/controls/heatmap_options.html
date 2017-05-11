@@ -86,11 +86,12 @@
           Custom Ranges
         </span>
       </div>
-      <input aria-label="enable"
-             ng-model="vis.params.setColorRange"
-             type="checkbox"
-             class="kuiSideBarSectionTitle__action"
-             ng-click="toggleColorRangeSection(true)"
+      <input
+        aria-label="Enable custom ranges"
+        ng-model="vis.params.setColorRange"
+        type="checkbox"
+        class="kuiSideBarSectionTitle__action"
+        ng-click="toggleColorRangeSection(true)"
       >
     </div>
 
@@ -172,10 +173,11 @@
           Show Labels
         </span>
       </div>
-      <input aria-label="enable"
-             ng-model="valueAxis.labels.show"
-             type="checkbox"
-             class="kuiSideBarSectionTitle__action"
+      <input
+        aria-label="Show labels"
+        ng-model="valueAxis.labels.show"
+        type="checkbox"
+        class="kuiSideBarSectionTitle__action"
       >
     </div>
     <div ng-if="valueAxis.labels.show" ng-show="showLabels" class="kuiSideBarCollapsibleSection">
