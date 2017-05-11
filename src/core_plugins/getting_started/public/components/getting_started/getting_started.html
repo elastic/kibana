@@ -23,7 +23,7 @@
 
   <div class="kuiViewContentItem kuiVerticalRhythm gettingStartedLogo">
     <img
-      src="{{ gettingStarted.imageUrls.kibanaLogo }}"
+      ng-src="{{ gettingStarted.imageUrls.kibanaLogo }}"
       alt="Kibana logo"
     />
   </div>
@@ -47,12 +47,12 @@
             <div class="gettingStartedLogoRow">
               <img
                 class="gettingStartedLogoRow__logo"
-                src="{{ gettingStarted.imageUrls.beatsLogo }}"
+                ng-src="{{ gettingStarted.imageUrls.beatsLogo }}"
                 alt="Beats logo"
               />
               <img
                 class="gettingStartedLogoRow__logo"
-                src="{{ gettingStarted.imageUrls.logstashLogo }}"
+                ng-src="{{ gettingStarted.imageUrls.logstashLogo }}"
                 alt="Logstash logo"
               />
             </div>
@@ -63,17 +63,17 @@
           <p class="kuiText">
             Pull in data from the
             <a
-              href="{{ gettingStarted.documentationLinks.elasticsearch.docs }}"
+              ng-href="{{ gettingStarted.documentationLinks.elasticsearch.docs }}"
               class="kuiLink"
               target="_blank"
             >Elasticsearch API</a>,
             <a
-              href="{{ gettingStarted.documentationLinks.beats.docs }}"
+              ng-href="{{ gettingStarted.documentationLinks.beats.docs }}"
               class="kuiLink"
               target="_blank"
             >Beats</a>,
             <a
-              href="{{ gettingStarted.documentationLinks.logstash.docs }}"
+              ng-href="{{ gettingStarted.documentationLinks.logstash.docs }}"
               class="kuiLink"
               target="_blank"
             >Logstash</a>.
@@ -99,7 +99,7 @@
             <div class="gettingStartedLogoRow">
               <img
                 class="gettingStartedLogoRow__logo"
-                src="{{ gettingStarted.imageUrls.dashboardIcon }}"
+                ng-src="{{ gettingStarted.imageUrls.dashboardIcon }}"
                 alt="Dashboard icon"
               />
             </div>
@@ -132,7 +132,7 @@
             <div class="gettingStartedLogoRow">
               <img
                 class="gettingStartedLogoRow__logo"
-                src="{{ gettingStarted.imageUrls.shieldIcon }}"
+                ng-src="{{ gettingStarted.imageUrls.shieldIcon }}"
                 alt="Shield icon"
               />
             </div>
@@ -156,7 +156,7 @@
       <div class="kuiFieldGroupSection">
         <a
           class="kuiButton kuiButton--primary"
-          href="{{ gettingStarted.documentationLinks.demoSite }}"
+          ng-href="{{ gettingStarted.documentationLinks.demoSite }}"
           target="_blank"
         >
           <span class="kuiButton__inner">
@@ -170,7 +170,7 @@
   <div class="kuiViewContentItem kuiVerticalRhythm">
     <p class="kuiText">
       <a
-        href="{{ gettingStarted.documentationLinks.kibana.docs }}"
+        ng-href="{{ gettingStarted.documentationLinks.kibana.docs }}"
         class="kuiLink"
         target="_blank"
       >Kibana documentation</a>
