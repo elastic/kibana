@@ -2,6 +2,7 @@ import expect from 'expect.js';
 
 export default function ({ getService, getPageObjects }) {
   const kibanaServer = getService('kibanaServer');
+  const screenshots = getService('screenshots');
   const PageObjects = getPageObjects(['settings', 'common']);
 
   describe('user input reactions', function () {
@@ -22,7 +23,7 @@ export default function ({ getService, getPageObjects }) {
       .then(function () {
         return PageObjects.settings.getCreateButton().isEnabled()
         .then(function (enabled) {
-          PageObjects.common.saveScreenshot('Settings-indices-enable-creation');
+          screenshots.take('Settings-indices-enable-creation');
           expect(enabled).to.be.ok();
         });
       });

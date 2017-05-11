@@ -53,16 +53,15 @@ describe('Scanner', function () {
       scroll = sinon.stub(scanner.client, 'scroll', (req, cb) => cb(null, mockScroll));
     });
 
-    it('should reject when an error occurs', function (done) {
+    it('should reject when an error occurs', function () {
       search.restore();
       search = sinon.stub(scanner.client, 'search', (req, cb) => cb(new Error('fail.')));
       return scanner.scanAndMap('')
       .then(function () {
-        done(new Error('should reject'));
+        throw new Error('should reject');
       })
       .catch(function (error) {
         expect(error.message).to.be('fail.');
-        done();
       });
     });
 
