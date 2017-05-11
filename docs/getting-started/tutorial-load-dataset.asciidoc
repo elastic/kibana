@@ -164,11 +164,9 @@ GET /_cat/indices?v
 
 //CONSOLE
 
-
-
 You should see output similar to the following:
 
-[source,js]
+[source,shell]
 health status index               pri rep docs.count docs.deleted store.size pri.store.size
 yellow open   bank                  5   1       1000            0    418.2kb        418.2kb
 yellow open   shakespeare           5   1     111396            0     17.6mb         17.6mb
