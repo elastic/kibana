@@ -47,7 +47,7 @@ export function QueryParameterActionsProvider(Private) {
   );
 
   const addFilter = (state) => (field, values, operation) => {
-    const { queryParameters: { indexPatternId } } = state;
+    const indexPatternId = state.queryParameters.indexPatternId;
     filterManager.add(field, values, operation, indexPatternId);
   };
 
