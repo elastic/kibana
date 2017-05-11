@@ -4,7 +4,7 @@ import uiChrome from 'ui/chrome';
 import KbnUrlProvider from 'ui/url';
 import { Notifier } from 'ui/notify/notifier';
 import { IndexPatternsGetIdsProvider } from 'ui/index_patterns/_get_ids';
-import { hasOptedOutOfGettingStarted, optOutOfGettingStarted } from 'ui/getting_started/opt_out_service';
+import { hasOptedOutOfGettingStarted, optOutOfGettingStarted } from 'ui/getting_started/opt_out_helpers';
 
 import {
   GETTING_STARTED_ROUTE,

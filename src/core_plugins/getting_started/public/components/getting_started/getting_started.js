@@ -5,7 +5,7 @@ import 'ui/filters/trust_as_html';
 import 'ui/getting_started/opt_out_directive';
 import { GettingStartedTopMessagesRegistryProvider } from 'ui/getting_started/top_messages_registry';
 import { GettingStartedMonitorAndManageMessagesRegistryProvider } from 'ui/getting_started/monitor_and_manage_messages_registry';
-import { hasOptedOutOfGettingStarted, optOutOfGettingStarted } from 'ui/getting_started/opt_out_service';
+import { hasOptedOutOfGettingStarted, optOutOfGettingStarted } from 'ui/getting_started/opt_out_helpers';
 import { documentationLinks } from 'ui/documentation_links';
 import angular from 'angular';
 

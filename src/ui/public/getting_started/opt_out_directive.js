@@ -1,5 +1,5 @@
 import { uiModules } from 'ui/modules';
-import { optOutOfGettingStarted } from './opt_out_service';
+import { optOutOfGettingStarted } from './opt_out_helpers';
 
 const app = uiModules.get('kibana');
 app.directive('kbnGettingStartedOptOut', () => {
