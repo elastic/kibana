@@ -68,8 +68,8 @@ uiModules.get('kibana')
             this._error = null;
             this._tmsOptions = {
               attribution: $sanitize(marked(service.attribution)),
-              minZoom: Math.max(service.minZoom, this._tmsOptions.minZoom),
-              maxZoom: Math.min(service.maxZoom, this._tmsOptions.maxZoom),
+              minZoom: service.minZoom,
+              maxZoom: service.maxZoom,
               subdomains: service.subdomains || []
             };
 

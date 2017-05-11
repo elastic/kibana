@@ -92,10 +92,10 @@ describe('tilemaptest - TileMapSettingsTests-mocked', function () {
 
     });
 
-    it('should get options - (yml should override zoom settings when min max fall in allowed range', async function () {
+    it('should get options - (yml should not override zoom settings when min max fall in allowed range', async function () {
       const options = tilemapSettings.getTMSOptions();
-      expect(options).to.have.property('minZoom', 1);
-      expect(options).to.have.property('maxZoom', 9);
+      expect(options).to.have.property('minZoom', 0);
+      expect(options).to.have.property('maxZoom', 12);
       expect(options).to.have.property('attribution').contain('&#169;'); // html entity for ©, ensures that attribution is escaped
     });
 
@@ -108,8 +108,8 @@ describe('tilemaptest - TileMapSettingsTests-mocked', function () {
 
     it('should get options - (yml should not override zoom settings when min max fall does not fall allowed range', async function () {
       const options = tilemapSettings.getTMSOptions();
-      expect(options).to.have.property('minZoom', 2);
-      expect(options).to.have.property('maxZoom', 8);
+      expect(options).to.have.property('minZoom', 0);
+      expect(options).to.have.property('maxZoom', 12);
       expect(options).to.have.property('attribution').contain('&#169;'); // html entity for ©, ensures that attribution is escaped
     });
 
