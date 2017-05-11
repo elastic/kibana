@@ -16,7 +16,7 @@ describe('tilemaptest - TileMapSettingsTests-mocked', function () {
           url: '',
           options: {
             minZoom: 1,
-            maxZoom: 9,
+            maxZoom: 10,
             attribution: '© [Elastic Tile Service](https://www.elastic.co/elastic_tile_service)'
           }
         },
@@ -28,19 +28,15 @@ describe('tilemaptest - TileMapSettingsTests-mocked', function () {
     tilemapSettings = $injector.get('tilemapSettings');
     tilemapsConfig = $injector.get('tilemapsConfig');
 
-    loadSettings = (expectedUrl, zoomOptions) => {
+    loadSettings = (expectedUrl) => {
       // body and headers copied from https://proxy-tiles.elastic.co/v1/manifest
-      zoomOptions = zoomOptions || {
-        min: 0,
-        max: 12
-      };
       const MANIFEST_BODY = `{
         "services":[
           {
             "id":"road_map",
             "url":"https://proxy-tiles.elastic.co/v1/default/{z}/{x}/{y}.png?elastic_tile_service_tos=agree&my_app_name=kibana",
-            "minZoom":${zoomOptions.min},
-            "maxZoom":${zoomOptions.max},
+            "minZoom":0,
+            "maxZoom":12,
             "attribution":"© [Elastic Tile Service](https://www.elastic.co/elastic-tile-service)"
           }
         ]
@@ -71,7 +67,7 @@ describe('tilemaptest - TileMapSettingsTests-mocked', function () {
     $httpBackend.verifyNoOutstandingExpectation();
   }));
 
-  describe('getting settings (with zoom override by yml)', function () {
+  describe('getting settings', function () {
     beforeEach(() => {
       loadSettings();
     });
@@ -92,21 +88,7 @@ describe('tilemaptest - TileMapSettingsTests-mocked', function () {
 
     });
 
-    it('should get options - (yml should not override zoom settings when min max fall in allowed range', async function () {
-      const options = tilemapSettings.getTMSOptions();
-      expect(options).to.have.property('minZoom', 0);
-      expect(options).to.have.property('maxZoom', 12);
-      expect(options).to.have.property('attribution').contain('&#169;'); // html entity for ©, ensures that attribution is escaped
-    });
-
-  });
-
-  describe('getting settings (with no override)', function () {
-    beforeEach(() => {
-      loadSettings(null, { min: 2, max: 8 });
-    });
-
-    it('should get options - (yml should not override zoom settings when min max fall does not fall allowed range', async function () {
+    it('should get options', async function () {
       const options = tilemapSettings.getTMSOptions();
       expect(options).to.have.property('minZoom', 0);
       expect(options).to.have.property('maxZoom', 12);
