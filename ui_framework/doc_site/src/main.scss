@@ -16,7 +16,7 @@ body {
  *    on styles inherited from body.
  */
 body {
-  background-color: $guideBaseBackgroundColor;
+  background-color: #000000;
   line-height: 40px; /* 1 */
   margin: 0;
   min-width: $guideMinWidth;
@@ -32,7 +32,10 @@ body {
   flex-direction: column;
   flex: 1 1 auto;
   padding-top: $guideNavHeight;
-  transition: padding-right $guideCodeViewerTransition;
+  background-color: $guideBaseBackgroundColor;
+  transition:
+    padding-right $guideCodeViewerTransition,
+    opacity $guideCodeViewerTransition;
 
   &.is-code-viewer-open {
     padding-right: $guideCodeViewerWidth;
@@ -40,6 +43,10 @@ body {
     @include whenNarrowerThan($guideNormalBreakpoint) {
       padding-right: $guideCodeViewerSmallWidth;
     }
+  }
+
+  .is-guide-nav-open + & {
+    opacity: 0.7;
   }
 }
 
