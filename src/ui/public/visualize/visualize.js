@@ -1,4 +1,3 @@
-import _ from 'lodash';
 import { uiModules } from 'ui/modules';
 import { stateMonitorFactory } from 'ui/state_management/state_monitor_factory';
 import visualizeTemplate from 'ui/visualize/visualize.html';
@@ -39,28 +38,16 @@ uiModules
     },
     template: visualizeTemplate,
     link: function ($scope, $el) {
-      if (_.isUndefined($scope.editorMode)) {
-        $scope.editorMode = false;
-      }
-      if (_.isUndefined($scope.showSpyPanel)) {
-        $scope.showSpyPanel = true;
-      }
-
       $scope.vis = $scope.savedVis.vis;
+      $scope.editorMode = $scope.editorMode || false;
+      $scope.showSpyPanel = $scope.showSpyPanel || false;
 
-      const visualizeApi = $scope.savedVis.vis.API;
-
-      // get request handler from registry (this should actually happen only once not on every fetch)
       const requestHandler = getHandler(requestHandlers, $scope.vis.type.requestHandler);
       const responseHandler = getHandler(responseHandlers, $scope.vis.type.responseHandler);
 
-      // BWC
-      $scope.vis.listeners.click = visualizeApi.events.filter;
-      $scope.vis.listeners.brush = visualizeApi.events.brush;
-
       $scope.fetch = function () {
         // searchSource is only there for courier request handler
-        requestHandler($scope.appState, $scope.savedVis.searchSource)
+        requestHandler($scope.vis, $scope.appState, $scope.uiState, $scope.savedVis.searchSource)
           .then(resp => responseHandler($scope.vis, resp), e => {
             $el.trigger('renderComplete');
             if (isTermSizeZeroError(e)) {
@@ -74,7 +61,7 @@ uiModules
             notify.error(e);
           })
           .then(resp => {
-            $scope.esResp = resp;
+            $scope.visData = resp;
             $scope.$apply();
             return resp;
           });
@@ -86,7 +73,7 @@ uiModules
         $scope.$broadcast('render');
       });
 
-      if (_.get($scope, 'savedVis.vis.type.requiresSearch')) {
+      if ($scope.vis.type.requiresSearch) {
         let currentAggJson = $scope.editorMode ? JSON.stringify($scope.appState.vis.aggs) : null;
         stateMonitor.onChange((status, type, keys) => {
           if (['query', 'filter'].includes(keys[0])) $scope.fetch();

@@ -6,7 +6,7 @@
 const CourierRequestHandlerProvider = function (Private, courier) {
   return {
     name: 'courier',
-    handler: function (appState, searchSource) {
+    handler: function (vis, appState, uiState, searchSource) {
       searchSource.set('filter', appState.filters);
       if (!appState.linked) searchSource.set('query', appState.query);
 
