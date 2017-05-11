@@ -1,5 +1,4 @@
 import { last, pick } from 'lodash';
-import { Registry } from '../../common/lib/registry';
 import { argTypeRegistry } from './arg_type';
 import { toExpression } from '../../common/lib/ast';
 
@@ -74,5 +73,3 @@ export class Arg {
     });
   }
 }
-
-export const argRegistry = new Registry();
