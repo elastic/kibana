@@ -21,7 +21,7 @@
 import {
   accessibleClickKeys,
   SPACE_KEY,
-} from './accessible_click_keys';
+} from 'ui_framework/services';
 import { uiModules } from 'ui/modules';
 
 uiModules.get('kibana')

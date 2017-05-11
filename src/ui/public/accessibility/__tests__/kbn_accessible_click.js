@@ -6,7 +6,7 @@ import '../kbn_accessible_click';
 import {
   ENTER_KEY,
   SPACE_KEY,
-} from '../accessible_click_keys';
+} from 'ui_framework/services';
 
 describe('kbnAccessibleClick directive', () => {
   let $compile;
