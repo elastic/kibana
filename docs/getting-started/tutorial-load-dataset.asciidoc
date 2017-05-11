@@ -79,7 +79,7 @@ PUT /shakespeare
 
 This mapping specifies the following qualities for the data set:
 
-* Because, the _speaker_ and _play_name_ fields are keyword fields, they are not analyzed. The strings are treated as a single unit even if they contain multiple words.
+* Because the _speaker_ and _play_name_ fields are keyword fields, they are not analyzed. The strings are treated as a single unit even if they contain multiple words.
 * The _line_id_ and _speech_number_ fields are integers.
 
 The logs data set requires a mapping to label the latitude/longitude pairs in the logs as geographic locations by
@@ -159,8 +159,10 @@ These commands may take some time to execute, depending on the computing resourc
 
 Verify successful loading with the following command:
 
-[source,shell]
-curl 'localhost:9200/_cat/indices?v'
+[source,js]
+GET /_cat/indices?v
+
+//CONSOLE
 
 
 
