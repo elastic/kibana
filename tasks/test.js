@@ -58,10 +58,18 @@ module.exports = function (grunt) {
     'checkPlugins',
     'esvm:ui',
     'run:testUIServer',
-    'clean:screenshots',
     'functionalTestRunner',
     'esvm_shutdown:ui',
     'stop:testUIServer'
+  ]);
+
+  grunt.registerTask('test:uiRelease', [
+    'checkPlugins',
+    'esvm:ui',
+    'run:testUIReleaseServer',
+    'functionalTestRunner',
+    'esvm_shutdown:ui',
+    'stop:testUIReleaseServer'
   ]);
 
   grunt.registerTask('test:ui:server', [

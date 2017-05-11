@@ -14,6 +14,7 @@ GET _search
 export default function ({ getService, getPageObjects }) {
   const retry = getService('retry');
   const log = getService('log');
+  const screenshots = getService('screenshots');
   const PageObjects = getPageObjects(['common', 'console']);
 
   describe('console app', function describeIndexTests() {
@@ -23,11 +24,11 @@ export default function ({ getService, getPageObjects }) {
     });
 
     it('should show the default request', function () {
-      PageObjects.common.saveScreenshot('Console-help-expanded');
+      screenshots.take('Console-help-expanded');
       // collapse the help pane because we only get the VISIBLE TEXT, not the part that is scrolled
       return PageObjects.console.collapseHelp()
       .then(function () {
-        PageObjects.common.saveScreenshot('Console-help-collapsed');
+        screenshots.take('Console-help-collapsed');
         return retry.try(function () {
           return PageObjects.console.getRequest()
           .then(function (actualRequest) {
@@ -42,7 +43,7 @@ export default function ({ getService, getPageObjects }) {
 
       return PageObjects.console.clickPlay()
       .then(function () {
-        PageObjects.common.saveScreenshot('Console-default-request');
+        screenshots.take('Console-default-request');
         return retry.try(function () {
           return PageObjects.console.getResponse()
           .then(function (actualResponse) {
