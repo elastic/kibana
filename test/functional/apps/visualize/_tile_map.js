@@ -3,6 +3,7 @@ import expect from 'expect.js';
 export default function ({ getService, getPageObjects }) {
   const log = getService('log');
   const retry = getService('retry');
+  const screenshots = getService('screenshots');
   const PageObjects = getPageObjects(['common', 'visualize', 'header', 'settings']);
 
   describe('visualize app', function describeIndexTests() {
@@ -111,7 +112,7 @@ export default function ({ getService, getPageObjects }) {
           })
           .then(function takeScreenshot() {
             log.debug('Take screenshot (success)');
-            PageObjects.common.saveScreenshot('map-at-zoom-0');
+            screenshots.take('map-at-zoom-0');
           });
         });
 
@@ -266,7 +267,7 @@ export default function ({ getService, getPageObjects }) {
           })
           .then(function takeScreenshot() {
             log.debug('Take screenshot');
-            PageObjects.common.saveScreenshot('Visualize-site-map');
+            screenshots.take('Visualize-site-map');
           });
         });
 
