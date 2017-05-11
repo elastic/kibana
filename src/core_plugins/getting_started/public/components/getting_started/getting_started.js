@@ -2,6 +2,7 @@ import { uiModules } from 'ui/modules';
 import uiChrome from 'ui/chrome';
 import 'ui/storage';
 import 'ui/filters/trust_as_html';
+import 'ui/getting_started/opt_out_directive';
 import { getTopMessage, getManageAndMonitorMessages } from 'ui/getting_started/registry';
 import { hasOptedOutOfGettingStarted, optOutOfGettingStarted } from 'ui/getting_started/opt_out_service';
 import { documentationLinks } from 'ui/documentation_links';
