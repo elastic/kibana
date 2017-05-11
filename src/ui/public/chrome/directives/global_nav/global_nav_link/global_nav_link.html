@@ -13,12 +13,11 @@
     data-test-subj="appLink"
   >
     <div class="global-nav-link__icon">
-      <!-- Empty alt attribute is for accessibility -->
       <img
         ng-if="icon"
         class="global-nav-link__icon-image"
         kbn-src="{{ '/' + icon }}"
-        alt=""
+        aria-hidden
       >
 
       <span
