@@ -3,7 +3,8 @@ import uiChrome from 'ui/chrome';
 import 'ui/storage';
 import 'ui/filters/trust_as_html';
 import 'ui/getting_started/opt_out_directive';
-import { getTopMessage, getManageAndMonitorMessages } from 'ui/getting_started/registry';
+import { GettingStartedTopMessagesRegistryProvider } from 'ui/getting_started/top_messages_registry';
+import { GettingStartedMonitorAndManageMessagesRegistryProvider } from 'ui/getting_started/monitor_and_manage_messages_registry';
 import { hasOptedOutOfGettingStarted, optOutOfGettingStarted } from 'ui/getting_started/opt_out_service';
 import { documentationLinks } from 'ui/documentation_links';
 import angular from 'angular';
@@ -26,6 +27,10 @@ const app = uiModules.get('kibana');
 app.directive('gettingStarted', function ($injector) {
 
   const $compile = $injector.get('$compile');
+  const Private = $injector.get('Private');
+
+  const topMessagesRegistry = Private(GettingStartedTopMessagesRegistryProvider);
+  const manageAndMonitorMessagesRegistry = Private(GettingStartedMonitorAndManageMessagesRegistryProvider);
 
   return {
     restrict: 'E',
@@ -42,24 +47,8 @@ app.directive('gettingStarted', function ($injector) {
           uiChrome.setVisible(false);
         }
 
-        // Compile topMessageHtml and inject it into the DOM
-        const topMessage = getTopMessage();
-        if (topMessage) {
-          const topMessageContainer = document.getElementById('gettingStartedTopMessageContainer');
-          const topMessageHtml = $compile(makeAngularParseableExpression(topMessage))($scope);
-          angular.element(topMessageContainer).append(topMessageHtml);
-        }
-
-        // Compile manageAndMonitorMessages and inject them into DOM
-        const manageAndMonitorMessages = getManageAndMonitorMessages();
-        if (manageAndMonitorMessages.length > 0) {
-          const manageAndMonitorMessagesContainer = document.getElementById('gettingStartedManageAndMonitorMessagesContainer');
-          manageAndMonitorMessages.forEach(message => {
-            const paddedMessage = `${message}&nbsp;`;
-            const messageHtml = $compile(makeAngularParseableExpression(paddedMessage))($scope);
-            angular.element(manageAndMonitorMessagesContainer).append(messageHtml);
-          });
-        }
+        this.topMessages = topMessagesRegistry.raw.map(item => item.template);
+        this.manageAndMonitorMessages = manageAndMonitorMessagesRegistry.raw.map(item => item.template);
 
         this.imageUrls = {
           kibanaLogo,
@@ -68,16 +57,35 @@ app.directive('gettingStarted', function ($injector) {
           dashboardIcon,
           shieldIcon
         };
+
         this.documentationLinks = documentationLinks;
+
+        // Inject top messages and manage-and-monitor messages into page
+        this.appendMessagesToContainer(this.topMessages, 'gettingStartedTopMessagesContainer', $scope);
+        this.appendMessagesToContainer(this.manageAndMonitorMessages, 'gettingStartedManageAndMonitorMessagesContainer', $scope);
+
       }
 
       hasManageAndMonitorMessages = () => {
-        return getManageAndMonitorMessages().length > 0;
+        return this.manageAndMonitorMessages.length > 0;
       }
 
       hasOptedOut = hasOptedOutOfGettingStarted;
 
       optOut = optOutOfGettingStarted;
+
+      appendMessagesToContainer = (messages, containerName, $scope) => {
+        const container = document.getElementById(containerName);
+        if ((messages.length > 0) && Boolean(container)) {
+          messages.forEach(message => {
+            const paddedMessage = `${message}&nbsp;`;
+
+            // Compile messageHtml with current $scope and append it into the container DOM element
+            const messageHtml = $compile(makeAngularParseableExpression(paddedMessage))($scope);
+            angular.element(container).append(messageHtml);
+          });
+        }
+      }
     }
   };
 });
