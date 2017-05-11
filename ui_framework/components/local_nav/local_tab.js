@@ -17,9 +17,11 @@ export function KuiLocalTab({ className, children, isDisabled, isSelected, ...re
 KuiLocalTab.propTypes = {
   className: PropTypes.string,
   children: PropTypes.node,
+  isDisabled: PropTypes.bool,
   isSelected: PropTypes.bool,
 };
 
 KuiLocalTab.defaultProps = {
+  isDisabled: false,
   isSelected: false,
 };
