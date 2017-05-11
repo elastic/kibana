@@ -1,7 +1,7 @@
 import { isAbsolute } from 'path';
 
-import { loadTracer } from './load_tracer';
-import { createDescribeNestingValidator } from './describe_nesting_validator';
+import { loadTracer } from '../load_tracer';
+import { decorateMochaUi } from './decorate_mocha_ui';
 
 /**
  *  Load an array of test files into a mocha instance
@@ -12,7 +12,7 @@ import { createDescribeNestingValidator } from './describe_nesting_validator';
  *  @param  {String} path
  *  @return {undefined} - mutates mocha, no return value
  */
-export const loadTestFiles = (mocha, log, providers, paths) => {
+export const loadTestFiles = (mocha, log, lifecycle, providers, paths) => {
   const innerLoadTestFile = (path) => {
     if (typeof path !== 'string' || !isAbsolute(path)) {
       throw new TypeError('loadTestFile() only accepts absolute paths');
@@ -38,7 +38,7 @@ export const loadTestFiles = (mocha, log, providers, paths) => {
     loadTracer(provider, `testProvider[${path}]`, () => {
       // mocha.suite hocus-pocus comes from: https://git.io/vDnXO
 
-      mocha.suite.emit('pre-require', createDescribeNestingValidator(global), path, mocha);
+      mocha.suite.emit('pre-require', decorateMochaUi(lifecycle, global), path, mocha);
 
       const returnVal = provider({
         loadTestFile: innerLoadTestFile,

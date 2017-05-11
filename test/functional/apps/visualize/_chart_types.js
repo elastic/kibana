@@ -2,6 +2,7 @@ import expect from 'expect.js';
 
 export default function ({ getService, getPageObjects }) {
   const log = getService('log');
+  const screenshots = getService('screenshots');
   const PageObjects = getPageObjects(['common', 'visualize']);
 
   describe('visualize app', function describeIndexTests() {
@@ -34,7 +35,7 @@ export default function ({ getService, getPageObjects }) {
         .then(function testChartTypes(chartTypes) {
           log.debug('returned chart types = ' + chartTypes);
           log.debug('expected chart types = ' + expectedChartTypes);
-          PageObjects.common.saveScreenshot('Visualize-chart-types');
+          screenshots.take('Visualize-chart-types');
           expect(chartTypes).to.eql(expectedChartTypes);
         });
       });
