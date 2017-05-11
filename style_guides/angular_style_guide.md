@@ -122,8 +122,8 @@ coupled to the angular application itself.
       controller: TableHeaderController,
       replace: true,
       scope: {
-        caption: '=',        // INPUT
-        isSortColumn: '=',   // INPUT
+        caption: '=',          // INPUT
+        isSortColumn: '=',     // INPUT
         onChangeSorting: '=',  // EFFECT
       },
       template: `<th
@@ -217,9 +217,9 @@ coupled to the angular application itself.
 
     ```html
     /* recommended */
-    <time-picker isExpanded="true">
+    <time-picker is-expanded="true">
 
-    <time-picker hasIcon="false">
+    <time-picker has-icon="false">
     ```
 
   - Prefix callback attributes with `on` and choose a name that indicates the
