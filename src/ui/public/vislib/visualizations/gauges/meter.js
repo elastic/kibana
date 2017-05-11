@@ -17,7 +17,7 @@ export function MeterGaugeProvider() {
       color: '#666',
       width: 2,
       ticks: 10,
-      tickLength: 5,
+      tickLength: 8,
     },
     labels: {
       show: true,
@@ -70,7 +70,8 @@ export function MeterGaugeProvider() {
       const labels = this.getLabels();
       const colors = {};
       for (let i = 0; i < labels.length; i += 1) {
-        const val = invertColors ? 1 - i / (colorsRange.length - 1) : i / (colorsRange.length - 1);
+        const divider = Math.max(colorsRange.length - 1, 1);
+        const val = invertColors ? 1 - i / divider : i / divider;
         colors[labels[i]] = getHeatmapColors(val, colorSchema);
       }
       return colors;
@@ -102,8 +103,6 @@ export function MeterGaugeProvider() {
     }
 
     drawScale(svg, radius, angle) {
-      //const maxAngle = this.gaugeConfig.maxAngle;
-      //const minAngle = this.gaugeConfig.minAngle;
       const scaleWidth = this.gaugeConfig.scale.width;
       const tickLength = this.gaugeConfig.scale.tickLength;
       const scaleTicks = this.gaugeConfig.scale.ticks;

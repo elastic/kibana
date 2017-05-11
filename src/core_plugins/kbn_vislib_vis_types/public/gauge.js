@@ -45,7 +45,6 @@ export default function GaugeVisType(Private) {
             show: true,
             labels: false,
             color: '#333',
-            width: 2
           },
           type: 'meter',
           style: {
@@ -61,7 +60,7 @@ export default function GaugeVisType(Private) {
           }
         }
       },
-      gaugeTypes: ['Meter', 'Circle', 'Metric'],
+      gaugeTypes: ['Arc', 'Circle', 'Metric'],
       gaugeStyles: ['Full', 'Bars', 'Lines'],
       scales: ['linear', 'log', 'square root'],
       colorSchemas: Object.keys(vislibColorMaps),

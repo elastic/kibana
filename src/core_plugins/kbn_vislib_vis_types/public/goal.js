@@ -24,7 +24,7 @@ export default function GoalVisType(Private) {
         gauge: {
           verticalSplit: false,
           autoExtend: false,
-          percentageMode: false,
+          percentageMode: true,
           gaugeType: 'Meter',
           gaugeStyle: 'Full',
           backStyle: 'Full',
@@ -32,7 +32,7 @@ export default function GoalVisType(Private) {
           useRanges: false,
           colorSchema: 'Green to Red',
           colorsRange: [
-            { from: 0, to: 100 }
+            { from: 0, to: 10000 }
           ],
           invertColors: false,
           labels: {
@@ -47,13 +47,9 @@ export default function GoalVisType(Private) {
           },
           type: 'meter',
           style: {
-            bgWidth: 0.9,
-            width: 0.9,
-            mask: false,
-            bgMask: false,
-            maskBars: 50,
-            bgFill: '#eee',
-            bgColor: true,
+            bgFill: '#000',
+            bgColor: false,
+            labelColor: false,
             subText: '',
             fontSize: 60,
           }

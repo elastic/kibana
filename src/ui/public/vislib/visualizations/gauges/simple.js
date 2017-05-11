@@ -68,7 +68,8 @@ export function SimpleGaugeProvider() {
       const labels = this.getLabels();
       const colors = {};
       for (let i = 0; i < labels.length; i += 1) {
-        const val = invertColors ? 1 - i / (colorsRange.length - 1) : i / (colorsRange.length - 1);
+        const divider = Math.max(colorsRange.length - 1, 1);
+        const val = (invertColors ? 1 - i : i) / divider;
         colors[labels[i]] = getHeatmapColors(val, colorSchema);
       }
       return colors;

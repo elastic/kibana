@@ -14,7 +14,7 @@ module.directive('gaugeOptions', function () {
 
       $scope.$watch('vis.params.gauge.gaugeType', type => {
         switch (type) {
-          case 'Meter':
+          case 'Arc':
             $scope.vis.params.gauge.type = 'meter';
             $scope.vis.params.gauge.minAngle = undefined;
             $scope.vis.params.gauge.maxAngle = undefined;
