@@ -11,21 +11,21 @@ import { QueryParameterActionsProvider } from '../actions';
 describe('context app', function () {
   beforeEach(ngMock.module('kibana'));
 
-  describe('action addTermsFilter', function () {
+  describe('action addFilter', function () {
     let filterManagerStub;
-    let addTermsFilter;
+    let addFilter;
 
     beforeEach(ngMock.inject(function createPrivateStubs(Private) {
       filterManagerStub = createFilterManagerStub();
       Private.stub(FilterManagerProvider, filterManagerStub);
 
-      addTermsFilter = Private(QueryParameterActionsProvider).addTermsFilter;
+      addFilter = Private(QueryParameterActionsProvider).addFilter;
     }));
 
     it('should pass the given arguments to the filterManager', function () {
       const state = createStateStub();
 
-      addTermsFilter(state)('FIELD_NAME', 'FIELD_VALUE', 'FILTER_OPERATION');
+      addFilter(state)('FIELD_NAME', 'FIELD_VALUE', 'FILTER_OPERATION');
 
       const filterManagerAddStub = filterManagerStub.add;
       expect(filterManagerAddStub.calledOnce).to.be(true);
@@ -37,7 +37,7 @@ describe('context app', function () {
     it('should pass the index pattern id to the filterManager', function () {
       const state = createStateStub();
 
-      addTermsFilter(state)('FIELD_NAME', 'FIELD_VALUE', 'FILTER_OPERATION');
+      addFilter(state)('FIELD_NAME', 'FIELD_VALUE', 'FILTER_OPERATION');
 
       const filterManagerAddStub = filterManagerStub.add;
       expect(filterManagerAddStub.calledOnce).to.be(true);

@@ -46,13 +46,13 @@ export function QueryParameterActionsProvider(Private) {
     )
   );
 
-  const addTermsFilter = (state) => (field, values, operation) => {
+  const addFilter = (state) => (field, values, operation) => {
     const { queryParameters: { indexPatternId } } = state;
     filterManager.add(field, values, operation, indexPatternId);
   };
 
   return {
-    addTermsFilter,
+    addFilter,
     increasePredecessorCount,
     increaseSuccessorCount,
     setPredecessorCount,
