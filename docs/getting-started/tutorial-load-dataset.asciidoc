@@ -159,10 +159,10 @@ These commands may take some time to execute, depending on the computing resourc
 
 Verify successful loading with the following command:
 
-[source,js]
-GET /_cat/indices?v
+[source,shell]
+curl 'localhost:9200/_cat/indices?v'
 
-//CONSOLE
+
 
 You should see output similar to the following:
 
