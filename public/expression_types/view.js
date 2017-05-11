@@ -18,4 +18,4 @@ export class View extends BaseRenderable {
   }
 }
 
-export const viewRegistry = new Registry('expression_views');
+export const viewRegistry = new Registry();

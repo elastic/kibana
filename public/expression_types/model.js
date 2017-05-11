@@ -52,4 +52,4 @@ export class Model extends BaseRenderable {
   }
 }
 
-export const modelRegistry = new Registry('expression_models');
+export const modelRegistry = new Registry();

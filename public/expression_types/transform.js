@@ -15,4 +15,4 @@ export class Transform extends BaseRenderable {
   }
 }
 
-export const transformRegistry = new Registry('expression_transforms');
+export const transformRegistry = new Registry();

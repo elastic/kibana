@@ -20,7 +20,7 @@ export class Arg {
 
     Object.assign(this, defaultProps, pick(props, propNames), {
       name,
-      // argType,
+      argType,
     });
   }
 

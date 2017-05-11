@@ -7,4 +7,4 @@ export class Datasource extends BaseRenderable {
   }
 }
 
-export const datasourceRegistry = new Registry('expression_datasources');
+export const datasourceRegistry = new Registry();
