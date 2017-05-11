@@ -119,6 +119,13 @@ module.directive('savedObjectFinder', function ($location, $injector, kbnUrl, Pr
         filterResults();
       });
 
+      $scope.pageFirstItem = 0;
+      $scope.pageLastItem = 0;
+      $scope.onPageChanged = (page) => {
+        $scope.pageFirstItem = page.firstItem;
+        $scope.pageLastItem = page.lastItem;
+      };
+
       //manages the state of the keyboard selector
       self.selector = {
         enabled: false,
