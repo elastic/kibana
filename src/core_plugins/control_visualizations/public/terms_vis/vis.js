@@ -20,7 +20,9 @@ export default function TermsProvider(Private) {
     params: {
       editor: require('./editor.html'),
       defaults: {
-        label: `terms`
+        fields: [{
+          label: ''
+        }]
       }
     },
     requiresSearch: false

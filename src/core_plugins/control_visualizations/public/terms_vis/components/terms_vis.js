@@ -3,7 +3,13 @@ import React, { Component } from 'react';
 export class TermsVis extends Component {
   render() {
     return (
-      <h1>{this.props.visParams.label}</h1>
+      <div>
+        {this.props.visParams.fields.map((field, index) =>
+          <div key={index}>
+            <h1>{field.label}</h1>
+          </div>
+        )}
+      </div>
     );
   }
 }
