@@ -31,9 +31,7 @@ export function VisVisTypeProvider(Private) {
           showFilterBar: true,
           hierarchicalData: false  // we should get rid of this i guess ?
         },
-        schemas: new VisTypeSchemas(),            // default editor needs a list of schemas ... not moved for refact. reasons
-        requiresSearch: true,   // BWC
-        implementsRenderComplete: false,
+        schemas: new VisTypeSchemas(),            // default editor needs a list of schemas ...
         isExperimental: false
       };
 
@@ -49,6 +47,8 @@ export function VisVisTypeProvider(Private) {
           { name: 'options', title: 'Options', editor: this.editorConfig.optionsTemplate }
         ];
       }
+
+      this.requiresSearch = !(this.requestHandler === 'none');
     }
 
     render() {

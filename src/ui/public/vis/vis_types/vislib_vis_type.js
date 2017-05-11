@@ -1,4 +1,3 @@
-import _ from 'lodash';
 import 'ui/vislib';
 import 'plugins/kbn_vislib_vis_types/controls/vislib_basic_options';
 import 'plugins/kbn_vislib_vis_types/controls/point_series_options';
@@ -32,20 +31,15 @@ export function VislibVisTypeProvider(Private) {
       }
 
       this.vislibVis = new vislib.Vis($el[0], vis.params);
-
-      _.each(vis.listeners, (listener, event) => {
-        this.vislibVis.on(event, listener);
-      });
-
+      this.vislibVis.on('brush', vis.API.events.brush);
+      this.vislibVis.on('click', vis.API.events.click);
       this.vislibVis.render(esResponse, uiState);
       this.refreshLegend++;
     }
 
     destroy(vis) {
-      _.each(vis.listeners, (listener, event) => {
-        this.vislibVis.off(event, listener);
-      });
-
+      this.vislibVis.off('brush', vis.API.events.brush);
+      this.vislibVis.off('click', vis.API.events.click);
       this.vislibVis.destroy();
     }
   }
