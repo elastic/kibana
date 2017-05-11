@@ -15,7 +15,7 @@
 
   /**
    * 1. Use the defined width of the card to determine when to wrap.
-   * 2. Use an event margin all around the card so that the spacing is still even when wrapped.
+   * 2. Use an even margin all around the card so that the spacing is still even when wrapped.
    */
   .kuiCardGroup__card {
     flex: 1 1 auto; /* 1 */
