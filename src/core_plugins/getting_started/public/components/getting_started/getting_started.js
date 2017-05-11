@@ -80,7 +80,9 @@ app.directive('gettingStarted', function ($injector) {
           messages.forEach(message => {
             const paddedMessage = `${message}&nbsp;`;
 
-            // Compile messageHtml with current $scope and append it into the container DOM element
+            // Compile messageHtml with current $scope and append it into the container DOM element.
+            // We do this because we want to dynamically inject content (strings) into the DOM. This content
+            // may contain Angular directives so it must first be $compiled with the current $scope.
             const messageHtml = $compile(makeAngularParseableExpression(paddedMessage))($scope);
             angular.element(container).append(messageHtml);
           });
