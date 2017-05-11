@@ -24,6 +24,7 @@ module.exports = function MapsRenderbotFactory(Private, $injector, tilemapSettin
       this._buildChartData = buildChartData.bind(this);
       this._geohashLayer = null;
       this._kibanaMap = null;
+      this._$container = $el;
       this._kibanaMapReady = this._makeKibanaMap($el);
 
       this._baseLayerDirty = true;
@@ -39,7 +40,7 @@ module.exports = function MapsRenderbotFactory(Private, $injector, tilemapSettin
       });
     }
 
-    async _makeKibanaMap($el) {
+    async _makeKibanaMap() {
 
       if (!tilemapSettings.isInitialized()) {
         await tilemapSettings.loadSettings();
@@ -51,8 +52,11 @@ module.exports = function MapsRenderbotFactory(Private, $injector, tilemapSettin
         notify.warning(tilemapSettings.getError().message);
       }
 
-      const containerElement = $($el)[0];
-      const options = _.clone(tilemapSettings.getMinMaxZoom(false));
+      if (this._kibanaMap) {
+        this._kibanaMap.destroy();
+      }
+      const containerElement = $(this._$container)[0];
+      const options = _.clone(this._getMinMaxZoom());
       const uiState = this.vis.getUiState();
       const zoomFromUiState = parseInt(uiState.get('mapZoom'));
       const centerFromUIState = uiState.get('mapCenter');
@@ -104,6 +108,11 @@ module.exports = function MapsRenderbotFactory(Private, $injector, tilemapSettin
       });
     }
 
+    _getMinMaxZoom() {
+      const mapParams = this._getMapsParams();
+      return tilemapSettings.getMinMaxZoom(mapParams.wms.enabled);
+    }
+
     _recreateGeohashLayer() {
       if (this._geohashLayer) {
         this._kibanaMap.removeLayer(this._geohashLayer);
@@ -146,10 +155,17 @@ module.exports = function MapsRenderbotFactory(Private, $injector, tilemapSettin
     updateParams() {
 
       this._paramsDirty = true;
-      this._kibanaMapReady.then(() => {
+      this._kibanaMapReady.then(async() => {
         const mapParams = this._getMapsParams();
+        const { minZoom, maxZoom } = this._getMinMaxZoom();
+
         if (mapParams.wms.enabled) {
-          const { minZoom, maxZoom } = tilemapSettings.getMinMaxZoom(true);
+
+          if (maxZoom > this._kibanaMap.getMaxZoomLevel()) {
+            this._geohashLayer = null;
+            this._kibanaMapReady = this._makeKibanaMap();
+          }
+
           this._kibanaMap.setBaseLayer({
             baseLayerType: 'wms',
             options: {
@@ -160,6 +176,13 @@ module.exports = function MapsRenderbotFactory(Private, $injector, tilemapSettin
             }
           });
         } else {
+
+          if (maxZoom < this._kibanaMap.getMaxZoomLevel()) {
+            this._geohashLayer = null;
+            this._kibanaMapReady = this._makeKibanaMap();
+            this._kibanaMap.setZoomLevel(maxZoom);
+          }
+
           if (!tilemapSettings.hasError()) {
             const url = tilemapSettings.getUrl();
             const options = tilemapSettings.getTMSOptions();

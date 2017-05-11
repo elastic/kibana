@@ -12,7 +12,6 @@ uiModules.get('kibana')
   .service('tilemapSettings', function ($http, tilemapsConfig, $sanitize, kbnVersion) {
     const attributionFromConfig = $sanitize(marked(tilemapsConfig.deprecated.config.options.attribution || ''));
     const optionsFromConfig = _.assign({}, tilemapsConfig.deprecated.config.options, { attribution: attributionFromConfig });
-
     const extendUrl = (url, props) => (
       modifyUrl(url, parsed => _.merge(parsed, props))
     );
