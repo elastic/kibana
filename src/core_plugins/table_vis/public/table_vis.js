@@ -61,6 +61,7 @@ function TableVisTypeProvider(Private) {
         group: 'metrics',
         name: 'metric',
         title: 'Metric',
+        aggFilter: '!geo_centroid',
         min: 1,
         defaults: [
           { type: 'count', schema: 'metric' }
