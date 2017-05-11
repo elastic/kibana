@@ -106,6 +106,7 @@ import ViewSandbox
 const components = [{
   name: 'Accessibility',
   component: AccessibilityExample,
+  hasReact: true,
 }, {
   name: 'ActionItem',
   component: ActionItemExample,
