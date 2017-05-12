@@ -109,30 +109,28 @@ describe('kibana_map tests', function () {
       });
     });
 
-    it('WMS', async function () {
+    it('WMS - should handle empty settings', async function () {
 
-      const options = {
-        url: 'https://basemap.nationalmap.gov/arcgis/services/USGSTopo/ MapServer/WMSServer',
-        version: '1.3.0',
-        layers: '0',
+      const invalidOptions = {
+        url: undefined,
+        version: undefined,
+        layers: undefined,
         format: 'image/png',
         transparent: true,
-        attribution: 'Maps provided by USGS',
+        attribution: undefined,
         styles: '',
         minZoom: 1,
         maxZoom: 18
       };
 
-
-      return new Promise(function (resolve) {
-        kibanaMap.on('baseLayer:loaded', () => {
-          resolve();
-        });
-        kibanaMap.setBaseLayer({
-          baseLayerType: 'wms',
-          options: options
-        });
+      kibanaMap.setBaseLayer({
+        baseLayerType: 'wms',
+        options: invalidOptions
       });
+
+      expect(kibanaMap.getLeafletBaseLayer()).to.eql(null);
+
+
     });
 
   });
