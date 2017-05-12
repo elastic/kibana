@@ -8,6 +8,7 @@
  * Not to be confused with vislib/vis.js.
  */
 
+import { EventEmitter } from 'events';
 import _ from 'lodash';
 import { VisTypesRegistryProvider } from 'ui/registry/vis_types';
 import { VisAggConfigsProvider } from 'ui/vis/agg_configs';
@@ -23,8 +24,9 @@ export function VisProvider(Private, timefilter) {
   const queryFilter = Private(FilterBarQueryFilterProvider);
   const filterBarClickHandler = Private(FilterBarClickHandlerProvider);
 
-  class Vis {
+  class Vis extends EventEmitter {
     constructor(indexPattern, state, uiState) {
+      super();
       state = state || {};
 
       if (_.isString(state)) {
@@ -32,10 +34,10 @@ export function VisProvider(Private, timefilter) {
           type: state
         };
       }
-
       this.indexPattern = indexPattern;
 
-      this.setState(state);
+      this.setCurrentState(state);
+      this.setState(this.getCurrentState(), false);
       this.setUiState(uiState);
 
       this.API = {
@@ -48,7 +50,7 @@ export function VisProvider(Private, timefilter) {
       };
     }
 
-    setState(state) {
+    setCurrentState(state) {
       this.title = state.title || '';
       const type = state.type || this.type;
       if (_.isString(type)) {
@@ -60,7 +62,6 @@ export function VisProvider(Private, timefilter) {
         this.type = type;
       }
 
-      this.listeners = _.assign({}, state.listeners);
       this.params = _.defaults({},
         _.cloneDeep(state.params || {}),
         _.cloneDeep(this.type.visConfig.defaults || {})
@@ -69,16 +70,39 @@ export function VisProvider(Private, timefilter) {
       this.aggs = new AggConfigs(this, state.aggs);
     }
 
-    getStateInternal(includeDisabled) {
+    setState(state, updateCurrentState = true) {
+      this._state = _.cloneDeep(state);
+      if (updateCurrentState) this.resetState();
+    }
+
+    updateState() {
+      this.setState(this.getCurrentState());
+      this.emit('update');
+    }
+
+    resetState() {
+      this.setCurrentState(this._state);
+    }
+
+    getCurrentState(includeDisabled) {
       return {
         title: this.title,
-        type: this.type.name,
+        type: this.type.type,
         params: this.params,
         aggs: this.aggs
-          .filter(agg => includeDisabled || agg.enabled)
           .map(agg => agg.toJSON())
-          .filter(Boolean),
-        listeners: this.listeners
+          .filter(agg => includeDisabled || agg.enabled)
+          .filter(Boolean)
+      };
+    }
+
+    getStateInternal(includeDisabled) {
+      return {
+        title: this._state.title,
+        type: this._state.name,
+        params: this._state.params,
+        aggs: this._state.aggs
+          .filter(agg => includeDisabled || agg.enabled)
       };
     }
 

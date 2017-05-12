@@ -14,9 +14,7 @@ import {
 uiModules
 .get('kibana/directive', ['ngSanitize'])
 .directive('visualize', function (Notifier, SavedVis, indexPatterns, Private, timefilter) {
-  const notify = new Notifier({
-    location: 'Visualize'
-  });
+  const notify = new Notifier({ location: 'Visualize' });
   const requestHandlers = Private(RequestHandlersRegistryProvider);
   const responseHandlers = Private(ResponseHandlersRegistryProvider);
 
@@ -24,7 +22,6 @@ uiModules
     if (typeof name === 'function') return name;
     return from.find(handler => handler.name === name).handler;
   }
-
 
   return {
     restrict: 'E',
@@ -69,23 +66,28 @@ uiModules
 
       const stateMonitor = stateMonitorFactory.create($scope.appState);
 
-      $scope.$watch('vis.params', () => {
-        $scope.$broadcast('render');
+      let currentAggJson = JSON.stringify($scope.vis.getState().aggs);
+      $scope.vis.on('update', () => {
+        const visState = $scope.vis.getState();
+
+        const isAggregationsChanged = JSON.stringify(visState.aggs) !== currentAggJson;
+        if (isAggregationsChanged) {
+          $scope.fetch();
+        } else {
+          $scope.$broadcast('render');
+        }
+        currentAggJson = JSON.stringify(visState.aggs);
+
+        if ($scope.editorMode) {
+          $scope.appState.vis = visState;
+          $scope.appState.save();
+        }
       });
 
       if ($scope.vis.type.requiresSearch) {
-        let currentAggJson = $scope.editorMode ? JSON.stringify($scope.appState.vis.aggs) : null;
         stateMonitor.onChange((status, type, keys) => {
-          if (['query', 'filter'].includes(keys[0])) $scope.fetch();
-          if ($scope.editorMode && keys[0] === 'vis') {
-            // only send new query if aggs changed
-            const isAggregationsChanged = JSON.stringify($scope.appState.vis.aggs) !== currentAggJson;
-            if (isAggregationsChanged) {
-              $scope.fetch();
-            } else {
-              $scope.$broadcast('render');
-            }
-            currentAggJson = JSON.stringify($scope.appState.vis.aggs);
+          if (['query', 'filter'].includes(keys[0])) {
+            $scope.fetch();
           }
         });
 
