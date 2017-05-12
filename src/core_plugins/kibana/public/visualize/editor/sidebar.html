@@ -6,7 +6,12 @@
     novalidate
   ><!-- see http://goo.gl/9kgz5w -->
 
-    <div css-truncate title="{{indexPattern.id}}" ng-if="vis.type.requiresSearch" class="index-pattern">
+    <div
+      css-truncate
+      aria-label="{{:: 'Index pattern: ' + indexPattern.id}}"
+      ng-if="vis.type.requiresSearch"
+      class="index-pattern"
+    >
       {{ indexPattern.id }}
     </div>
 

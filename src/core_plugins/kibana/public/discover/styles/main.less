@@ -98,6 +98,7 @@
     .discover-table-footer {
       background-color: @discover-table-footer-bg;
       padding: 5px 10px;
+      text-align: center;
     }
 
     .discover-table-details-toggle {
@@ -108,11 +109,18 @@
       white-space: nowrap;
     }
 
-    .discover-table-open-icon {
-      // when switching between open and closed, the toggle changes size
-      // slightly which is a problem because it forces the entire table to
-      // re-render which is SLOW
-      width: 7px;
+    /**
+     * 1. When switching between open and closed, the toggle changes size
+     *    slightly which is a problem because it forces the entire table to
+     *    re-render which is SLOW.
+     */
+    .discover-table-open-button {
+      appearance: none;
+      background-color: transparent;
+      padding: 0;
+      border: none;
+      width: 7px; /* 1 */
+      height: 7px;
     }
 
     .discover-field-filter {
@@ -151,8 +159,9 @@
   padding-bottom: 0 !important; /* 1 */
   height: 32px;
 
-  &:hover {
-    .discover-sidebar-item-actions {
+  &:hover,
+  &:focus {
+    .discover-sidebar-item-action {
       opacity: 1;
     }
   }
@@ -167,10 +176,15 @@
   }
 
   /**
-   * 1. Only visually hide the actions, so that they're still accessible to screen readers.
+   * 1. Only visually hide the action, so that it's still accessible to screen readers.
+   * 2. When tabbed to, this element needs to be visible for keyboard accessibility.
    */
-  .discover-sidebar-item-actions {
+  .discover-sidebar-item-action {
     opacity: 0; /* 1 */
+
+    &:focus {
+      opacity: 1; /* 2 */
+    }
   }
 
 .discover-field-details {
@@ -195,6 +209,26 @@
 
   .discover-field-details-filter {
     cursor: pointer;
+  }
+
+  .discover-field-details-item-title {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  /**
+   * 1. If the field name is very long, don't let it sqash the buttons.
+   */
+  .discover-field-details-item-buttons {
+    flex: 0 0 auto; /* 1 */
+  }
+
+  .discover-field-details-item-button {
+    appearance: none;
+    border: none;
+    padding: 0;
+    background-color: transparent;
   }
 
 /**
@@ -224,18 +258,18 @@
 
 field-name,
 [field-name] {
-  > i {
+  &.no-results {
+    color: @field-name-no-results-color;
+  }
+}
+
+  .field-name-icon {
     margin-right: 5px;
     text-align: center;
     display: inline-block;
     width: 12px;
     color: @field-name-color;
   }
-
-  &.no-results {
-    color: @field-name-no-results-color;
-  }
-}
 
 disc-field-chooser {
   .sidebar-item.active .sidebar-item-title {

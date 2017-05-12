@@ -17,7 +17,7 @@ function makeFitControl(fitContainer, kibanaMap) {
     },
     onAdd: function (leafletMap) {
       this._leafletMap = leafletMap;
-      $(this._fitContainer).html('<a class="fa fa-crop" href="#" title="Fit Data Bounds"></a>')
+      $(this._fitContainer).html('<a class="kuiIcon fa-crop" href="#" aria-label="Fit Data Bounds"></a>')
         .on('click', e => {
           e.preventDefault();
           this._kibanaMap.fitToData();
@@ -293,6 +293,10 @@ export class KibanaMap extends EventEmitter {
     return this._leafletMap.getZoom();
   }
 
+  getMaxZoomLevel() {
+    return this._leafletMap.getMaxZoom();
+  }
+
   getAutoPrecision() {
     return zoomToPrecision(this._leafletMap.getZoom(), 12, this._leafletMap.getMaxZoom());
   }
@@ -474,7 +478,7 @@ export class KibanaMap extends EventEmitter {
       }
     });
 
-    if (bounds) {
+    if (bounds && bounds.isValid()) {
       this._leafletMap.fitBounds(bounds);
     }
   }

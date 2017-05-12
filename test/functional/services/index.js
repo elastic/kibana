@@ -6,3 +6,4 @@ export { KibanaServerProvider } from './kibana_server';
 export { EsProvider } from './es';
 export { EsArchiverProvider } from './es_archiver';
 export { DocTableProvider } from './doc_table';
+export { ScreenshotsProvider } from './screenshots';

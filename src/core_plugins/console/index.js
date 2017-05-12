@@ -2,7 +2,7 @@ import Boom from 'boom';
 import apiServer from './api_server/server';
 import { existsSync } from 'fs';
 import { resolve, join, sep } from 'path';
-import { has } from 'lodash';
+import { has, isEmpty } from 'lodash';
 
 import {
   ProxyConfigCollection,
@@ -85,7 +85,7 @@ export default function (kibana) {
           const whitelist = config.get('elasticsearch.requestHeadersWhitelist');
           const headers = filterHeaders(req.headers, whitelist);
 
-          if (config.has('console.proxyConfig')) {
+          if (!isEmpty(config.get('console.proxyConfig'))) {
             return {
               ...proxyConfigCollection.configForUri(uri),
               headers,

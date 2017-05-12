@@ -18,6 +18,7 @@ export default function ({ getService, getPageObjects }) {
   const log = getService('log');
   const remote = getService('remote');
   const retry = getService('retry');
+  const screenshots = getService('screenshots');
   const PageObjects = getPageObjects(['common', 'header', 'settings', 'visualize', 'discover']);
 
   describe('scripted fields', () => {
@@ -27,14 +28,14 @@ export default function ({ getService, getPageObjects }) {
       // delete .kibana index and then wait for Kibana to re-create it
       await kibanaServer.uiSettings.replace({ 'dateFormat:tz':'UTC' });
       await PageObjects.settings.navigateTo();
-      await PageObjects.settings.clickKibanaIndicies();
+      await PageObjects.settings.clickKibanaIndices();
       await PageObjects.settings.createIndexPattern();
       await kibanaServer.uiSettings.update({ 'dateFormat:tz':'UTC' });
     });
 
     after(async function afterAll() {
       await PageObjects.settings.navigateTo();
-      await PageObjects.settings.clickKibanaIndicies();
+      await PageObjects.settings.clickKibanaIndices();
       await PageObjects.settings.removeIndexPattern();
     });
 
@@ -43,7 +44,7 @@ export default function ({ getService, getPageObjects }) {
 
       it('should create scripted field', async function () {
         await PageObjects.settings.navigateTo();
-        await PageObjects.settings.clickKibanaIndicies();
+        await PageObjects.settings.clickKibanaIndices();
         const startingCount = parseInt(await PageObjects.settings.getScriptedFieldsTabCount());
         await PageObjects.settings.clickScriptedFieldsTab();
         await log.debug('add scripted field');
@@ -72,7 +73,7 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.visualize.waitForVisualization();
         await retry.try(async function() {
           const rowData = await PageObjects.discover.getDocTableIndex(1);
-          expect(rowData).to.be('September 18th 2015, 18:20:57.916 18');
+          expect(rowData).to.be('September 18th 2015, 18:20:57.916\n18');
         });
       });
 
@@ -102,7 +103,7 @@ export default function ({ getService, getPageObjects }) {
         await log.debug('getDataTableData = ' + data.split('\n'));
         await log.debug('data=' + data);
         await log.debug('data.length=' + data.length);
-        await PageObjects.common.saveScreenshot('Visualize-vertical-bar-chart');
+        await screenshots.take('Visualize-vertical-bar-chart');
         expect(data.trim().split('\n')).to.eql(expectedChartValues);
       });
     });
@@ -112,7 +113,7 @@ export default function ({ getService, getPageObjects }) {
 
       it('should create scripted field', async function () {
         await PageObjects.settings.navigateTo();
-        await PageObjects.settings.clickKibanaIndicies();
+        await PageObjects.settings.clickKibanaIndices();
         const startingCount = parseInt(await PageObjects.settings.getScriptedFieldsTabCount());
         await PageObjects.settings.clickScriptedFieldsTab();
         await log.debug('add scripted field');
@@ -139,7 +140,7 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.visualize.waitForVisualization();
         await retry.try(async function() {
           const rowData = await PageObjects.discover.getDocTableIndex(1);
-          expect(rowData).to.be('September 18th 2015, 18:20:57.916 18');
+          expect(rowData).to.be('September 18th 2015, 18:20:57.916\n18');
         });
       });
 
@@ -169,7 +170,7 @@ export default function ({ getService, getPageObjects }) {
         await log.debug('getDataTableData = ' + data.split('\n'));
         await log.debug('data=' + data);
         await log.debug('data.length=' + data.length);
-        await PageObjects.common.saveScreenshot('Visualize-vertical-bar-chart');
+        await screenshots.take('Visualize-vertical-bar-chart');
         expect(data.trim().split('\n')).to.eql(expectedChartValues);
       });
     });
@@ -179,7 +180,7 @@ export default function ({ getService, getPageObjects }) {
 
       it('should create scripted field', async function () {
         await PageObjects.settings.navigateTo();
-        await PageObjects.settings.clickKibanaIndicies();
+        await PageObjects.settings.clickKibanaIndices();
         const startingCount = parseInt(await PageObjects.settings.getScriptedFieldsTabCount());
         await PageObjects.settings.clickScriptedFieldsTab();
         await log.debug('add scripted field');
@@ -207,7 +208,7 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.visualize.waitForVisualization();
         await retry.try(async function() {
           const rowData = await PageObjects.discover.getDocTableIndex(1);
-          expect(rowData).to.be('September 18th 2015, 18:20:57.916 good');
+          expect(rowData).to.be('September 18th 2015, 18:20:57.916\ngood');
 
         });
       });
@@ -243,7 +244,7 @@ export default function ({ getService, getPageObjects }) {
 
       it('should create scripted field', async function () {
         await PageObjects.settings.navigateTo();
-        await PageObjects.settings.clickKibanaIndicies();
+        await PageObjects.settings.clickKibanaIndices();
         const startingCount = parseInt(await PageObjects.settings.getScriptedFieldsTabCount());
         await PageObjects.settings.clickScriptedFieldsTab();
         await log.debug('add scripted field');
@@ -271,7 +272,7 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.visualize.waitForVisualization();
         await retry.try(async function() {
           const rowData = await PageObjects.discover.getDocTableIndex(1);
-          expect(rowData).to.be('September 18th 2015, 18:20:57.916 true');
+          expect(rowData).to.be('September 18th 2015, 18:20:57.916\ntrue');
 
         });
       });
@@ -307,7 +308,7 @@ export default function ({ getService, getPageObjects }) {
 
       it('should create scripted field', async function () {
         await PageObjects.settings.navigateTo();
-        await PageObjects.settings.clickKibanaIndicies();
+        await PageObjects.settings.clickKibanaIndices();
         const startingCount = parseInt(await PageObjects.settings.getScriptedFieldsTabCount());
         await PageObjects.settings.clickScriptedFieldsTab();
         await log.debug('add scripted field');
@@ -336,7 +337,7 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.visualize.waitForVisualization();
         await retry.try(async function() {
           const rowData = await PageObjects.discover.getDocTableIndex(1);
-          expect(rowData).to.be('September 18th 2015, 06:52:55.953 2015-09-18 07:00');
+          expect(rowData).to.be('September 18th 2015, 06:52:55.953\n2015-09-18 07:00');
         });
       });
 

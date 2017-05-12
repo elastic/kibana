@@ -76,7 +76,6 @@
                   class="kuiLink"
                   href="https://en.wikipedia.org/wiki/ISO_week_date"
                   target="_blank"
-                  title="Wikipedia: ISO Week Date"
                   translate="KIBANA-WIKI_ISO_WEEK_DATE"
                 ></a>
               </p>
@@ -102,12 +101,11 @@
             <div class="kuiVerticalRhythmSmall">
               <select
                 class="kuiSelect kuiSelect--large kuiVerticalRhythmSmall"
-                data-test-subj="createIndexPatternTimeFieldSelect || !controller.indexHasDateFields"
-                ng-disabled="controller.fetchFieldsError"
+                data-test-subj="createIndexPatternTimeFieldSelect"
+                ng-disabled="controller.fetchFieldsError || controller.dateFields.length === 1"
                 ng-required="!controller.fetchFieldsError"
                 ng-options="field.name for field in controller.dateFields"
                 ng-model="controller.newIndexPattern.timeField"
-                auto-select-if-only-one="controller.dateFields"
               ></select>
 
               <p

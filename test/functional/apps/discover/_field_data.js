@@ -5,6 +5,7 @@ export default function ({ getService, getPageObjects }) {
   const retry = getService('retry');
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
+  const screenshots = getService('screenshots');
   const PageObjects = getPageObjects(['common', 'header', 'discover']);
 
   describe('discover app', function describeIndexTests() {
@@ -44,7 +45,7 @@ export default function ({ getService, getPageObjects }) {
           return retry.try(function tryingForTime() {
             return PageObjects.discover.getHitCount()
             .then(function compareData(hitCount) {
-              PageObjects.common.saveScreenshot('Discover-field-data');
+              screenshots.take('Discover-field-data');
               expect(hitCount).to.be(expectedHitCount);
             });
           });
@@ -84,7 +85,7 @@ export default function ({ getService, getPageObjects }) {
       it('doc view should show oldest time first', function () {
         // Note: Could just check the timestamp, but might as well check that the whole doc is as expected.
         const ExpectedDoc =
-          'September 22nd 2015, 23:50:13.253 index:logstash-2015.09.22 @timestamp:September 22nd 2015, 23:50:13.253'
+          'September 22nd 2015, 23:50:13.253\nindex:logstash-2015.09.22 @timestamp:September 22nd 2015, 23:50:13.253'
           + ' ip:238.171.34.42 extension:jpg response:200 geo.coordinates:{ "lat": 38.66494528, "lon": -88.45299556'
           + ' } geo.src:FR geo.dest:KH geo.srcdest:FR:KH @tags:success, info utc_time:September 22nd 2015,'
           + ' 23:50:13.253 referer:http://twitter.com/success/nancy-currie agent:Mozilla/4.0 (compatible; MSIE 6.0;'
@@ -135,7 +136,7 @@ export default function ({ getService, getPageObjects }) {
       it('doc view should sort ascending', function () {
         // Note: Could just check the timestamp, but might as well check that the whole doc is as expected.
         const ExpectedDoc =
-          'September 20th 2015, 00:00:00.000 index:logstash-2015.09.20 @timestamp:September 20th 2015, 00:00:00.000'
+          'September 20th 2015, 00:00:00.000\nindex:logstash-2015.09.20 @timestamp:September 20th 2015, 00:00:00.000'
           + ' ip:143.84.142.7 extension:jpg response:200 geo.coordinates:{ "lat": 38.68407028, "lon": -120.9871642 }'
           + ' geo.src:ES geo.dest:US geo.srcdest:ES:US @tags:error, info utc_time:September 20th 2015, 00:00:00.000'
           + ' referer:http://www.slate.com/success/vladimir-kovalyonok agent:Mozilla/4.0 (compatible; MSIE 6.0;'
@@ -217,7 +218,7 @@ export default function ({ getService, getPageObjects }) {
           return retry.try(function tryingForTime() {
             return PageObjects.discover.getDocTableIndex(1)
             .then(function (rowData) {
-              PageObjects.common.saveScreenshot('Discover-sort-down');
+              screenshots.take('Discover-sort-down');
               expect(rowData).to.be(ExpectedDoc);
             });
           });
@@ -232,7 +233,7 @@ export default function ({ getService, getPageObjects }) {
           return PageObjects.header.getToastMessage();
         })
         .then(function (toastMessage) {
-          PageObjects.common.saveScreenshot('Discover-syntax-error-toast');
+          screenshots.take('Discover-syntax-error-toast');
           expect(toastMessage).to.be(expectedError);
         })
         .then(function () {
