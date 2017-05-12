@@ -49,6 +49,49 @@ export default (path) => {
               rotation: 90,
             },
             expression: 'demodata().sort("time").pointseries(x="time", y=.math("sum(price)")).line()',
+            ast: {
+              type: 'expression',
+              chain: [{
+                type: 'function',
+                function: 'demodata',
+                arguments: {},
+              }, {
+                type: 'function',
+                function: 'sort',
+                arguments: {
+                  _: [{
+                    type: 'string',
+                    value: 'time',
+                  }],
+                },
+              }, {
+                type: 'function',
+                function: 'pointseries',
+                arguments: {
+                  x: [{
+                    type: 'string',
+                    value: 'time',
+                  }],
+                  y: [{
+                    type: 'partial',
+                    chain: [{
+                      type: 'function',
+                      function: 'math',
+                      arguments: {
+                        _: [{
+                          type: 'string',
+                          value: 'sum(price)',
+                        }],
+                      },
+                    }],
+                  }],
+                },
+              }, {
+                type: 'function',
+                function: 'line',
+                arguments: {},
+              }],
+            },
           }],
         }],
       },
