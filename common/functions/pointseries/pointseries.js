@@ -1,42 +1,49 @@
 import Fn from '../fn.js';
-import { groupBy, find, zipObject, sortBy } from 'lodash';
 import moment from 'moment';
+import { groupBy, zipObject, sortBy, uniqBy, omit, pickBy } from 'lodash';
 
 module.exports = new Fn({
   name: 'pointseries',
   type: 'pointseries',
-  help: 'Turn a datatable into a point series model',
+  help: 'Turn a datatable into a point series model. Dimensions are combined to create unique keys. Measures are then ' +
+  'deduplicated by those keys.',
   context: {
     types: ['datatable'],
   },
   args: {
     // Dimensions
     x: {
-      types: ['string'],
-      help: 'A string representing the column name.',
+      types: ['string', 'function', 'null'],
+      help: 'A mathmatic expression that returns the values for a dimension or measure',
     },
     color: {
-      types: ['string'],
-      help: 'A string representing the column name', // If you need categorization, transform the field.
+      types: ['string', 'function', 'null'],
+      help: 'A string representing the column name or a function that returns a number', // If you need categorization, transform the field.
     },
     // Metrics
     y: {
-      types: ['function', 'number'],
+      types: ['string', 'function', 'null'],
       help: 'A static number, or a function (starts with a .) to use to aggregate when there are ' +
       'several points for the same x-axis value',
     },
+    // Size only makes sense as a number
     size: {
-      types: ['function', 'number'], // pointseries(size=.sum(profit))
-      help: 'For use in charts that support it, a static number or a function, eg .math() to use for calculating size',
+      types: ['string', 'function', 'null'], // pointseries(size=.sum(profit))
+      help: 'For use in charts that support it, a function that returns a number, eg .math() to use for calculating size',
     },
+    // In the future it may make sense to add things like shape, or tooltip values, but I think what we have is good for now
   },
   fn: (context, args) => {
+    function getType(arg) {
+      return typeof arg === 'string' ? find(context.columns, { name: args }).type : 'number';
+    }
+
     const columns = {
-      _rowId: { type: 'number' }, // This will always be a string since it is effectly the label
-      color: { type: 'string' }, // This will always be a string since it is effectly the label
-      size: { type: 'number' }, // This will always be a number
-      y: { type: 'number' }, // We could probably make this dynamic if we wanted to be able todo vertical & horizontal
-      x: { type: find(context.columns, { name: args.x }).type }, // This will determine if the renderer uses ordinal, nominal or temporal scale
+      // It seems reasonable that all dimensions would be strings and all measures would be numbers, right?
+      color: { type: getType(args.color) }, // This will always be a string since it is effectly the label
+      size: { type: getType(args.size) }, // This will always be a number
+      y: { type: getType(args.y) }, // We could probably make this dynamic if we wanted to be able todo vertical & horizontal
+      x: { type: getType(args.x) }, // This will determine if the renderer uses ordinal, nominal or temporal scale
     };
 
     // TODO: break this out into a utility
@@ -54,7 +61,7 @@ module.exports = new Fn({
     }
 
     // Dimensions. There's probably a better way todo this
-    const dimensionNames = ['color', 'x'];
+    const dimensionNames = Object.keys(pickBy(args, val => typeof val === 'string'));
     const result = context.rows.map(row => {
       const newRow = { _rowId: row._rowId };
       dimensionNames.forEach(dimension =>
@@ -65,7 +72,7 @@ module.exports = new Fn({
     // Measures
     // First group up all of the distinct dimensioned bits. Each of these will be reduced to just 1 value
     // for each measure
-    const measureNames = ['y', 'size'];
+    const measureNames = Object.keys(pickBy(args, val => typeof val === 'function'));
     const measureDimensions = groupBy(context.rows, (row) => {
       const dimensions = dimensionNames.map(dimension => args[dimension] ? row[args[dimension]] : '_all');
       return dimensions.join('::%BURLAP%::');
@@ -91,7 +98,9 @@ module.exports = new Fn({
       return {
         type: 'pointseries',
         columns: columns,
-        rows: sortBy(result, ['x']),
+        //rows: sortBy(result, ['x']),
+        // It only makes sense to uniq the rows in a point series as 2 values can not exist in the exact same place at the same time.
+        rows: sortBy(uniqBy(result, row => JSON.stringify(omit(row, '_rowId'))), ['x']),
       };
     });
   },
