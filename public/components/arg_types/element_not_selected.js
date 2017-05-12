@@ -1,6 +1,6 @@
 import React from 'react';
 
-export const ArgTypeNotSelected = () => (
+export const ElementNotSelected = () => (
   <div>
     <div>Select an element to show editor</div>
   </div>

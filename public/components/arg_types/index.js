@@ -1,23 +1,24 @@
 import { connect } from 'react-redux';
-import { branch, renderComponent } from 'recompose';
+import { branch, renderComponent, compose } from 'recompose';
 import { get } from 'lodash';
-import { ArgTypeNotSelected } from './arg_type_not_selected';
+import { ElementNotSelected } from './element_not_selected';
 import { ArgTypes as Component } from './arg_types';
 import { getElementById, getSelectedElement } from '../../state/selectors/workpad';
 
-const whenSelected = branch(
-  props => !props.selectedElement,
-  renderComponent(ArgTypeNotSelected)
+const elementNotSelected = branch(
+  props => !props.argTypeChain,
+  renderComponent(ElementNotSelected)
 );
 
 const mapStateToProps = (state) => {
   const selectedElement = getElementById(state, getSelectedElement(state));
 
   return {
-    chain: get(selectedElement, 'ast.chain'),
+    argTypeChain: get(selectedElement, 'ast.chain'),
   };
 };
 
-export const ArgTypes = connect(
-  mapStateToProps,
-)(whenSelected(Component));
+export const ArgTypes = compose(
+  connect(mapStateToProps),
+  elementNotSelected
+)(Component);
