@@ -7,7 +7,7 @@ import { positionTooltip } from '../position_tooltip';
 describe('Tooltip Positioning', function () {
 
   const positions = ['north', 'south', 'east', 'west'];
-  const bounds = ['top', 'left', 'bottom', 'right'];
+  const bounds = ['top', 'left', 'bottom', 'right', 'area'];
   let $window;
   let $chart;
   let $tooltip;
@@ -144,6 +144,31 @@ describe('Tooltip Positioning', function () {
           expect(overflow[p]).to.be.greaterThan(0);
         } else {
           expect(overflow[p]).to.be.lessThan(0);
+        }
+      });
+    });
+
+    it('ident only west overflow when tooltip overflows both sides of inner container but outer contains tooltip', function () {
+      // size the tooltip larger than chart
+      const largeWidth = $chart.width() + 10;
+      $tooltip.css({ width: largeWidth });
+      $sizer.css({ width: largeWidth });
+      const size = positionTooltip.getTtSize($tooltip.html(), $sizer);
+      expect(size).to.have.property('width', largeWidth);
+
+      // position the element in center of chart so overflows both sides of chart
+      const pos = positionTooltip.getBasePosition(size, makeEvent(0.5, 0.5));
+      //Make window large enough for tooltip
+      $window.css({ width: $chart.width() * 3 });
+      const overflow = positionTooltip.getOverflow(size, pos, [$chart, $window]);
+
+      positions.forEach(function (p) {
+        expect(overflow).to.have.property(p);
+
+        if (p === 'east') {
+          expect(overflow[p]).to.be.lessThan(0);
+        } else if (p === 'west') {
+          expect(overflow[p]).to.be.greaterThan(0);
         }
       });
     });

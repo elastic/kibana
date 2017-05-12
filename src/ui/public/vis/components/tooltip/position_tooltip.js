@@ -96,11 +96,10 @@ function mergeOverflows(dest, src) {
 
   //Tooltip overflows both sides of smaller container.
   //Remove overflow if larger container can contain tooltip.
-  if (dest.east && dest.west && dest.east > 0 && dest.west > 0) {
-    if (src.east < 0) {
+  if (dest.east && dest.west && dest.east > 0 && dest.west > 0 && (src.east < 0 || src.west < 0)) {
+    if (src.east < src.west) {
       dest.east = src.east;
-    }
-    if (src.west < 0) {
+    } else {
       dest.west = src.west;
     }
   }
