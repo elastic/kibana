@@ -27,15 +27,17 @@ export default function ({ getService, getPageObjects }) {
     it('should open the context view with the selected document as anchor', async function () {
       const discoverDocTable = await docTable.getTable();
       const firstRow = (await docTable.getBodyRows(discoverDocTable))[0];
+
+      // get the timestamp of the first row
       const firstTimestamp = await (await docTable.getFields(firstRow))[0]
         .getVisibleText();
 
-      // add a column in Discover
+      // navigate to the context view
       await (await docTable.getRowExpandToggle(firstRow)).click();
       const firstDetailsRow = (await docTable.getDetailsRows(discoverDocTable))[0];
       await (await docTable.getRowActions(firstDetailsRow))[0].click();
 
-      // check the column in the Context View
+      // check the anchor timestamp in the context view
       await retry.try(async () => {
         const contextDocTable = await docTable.getTable();
         const anchorRow = await docTable.getAnchorRow(contextDocTable);
