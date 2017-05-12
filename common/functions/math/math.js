@@ -1,6 +1,6 @@
-const Fn = require('../fn.js');
-const _ = require('lodash');
-const math = require('mathjs');
+import Fn from '../fn.js';
+import math from 'mathjs';
+import { getMathjsScope } from './get_mathjs_scope';
 
 module.exports = new Fn({
   name: 'math',
@@ -14,16 +14,5 @@ module.exports = new Fn({
       types: ['string'],
     },
   },
-  fn: (context, args) => {
-    // Make the datatable into a mathJS scope
-    const columnNames = _.map(context.columns, 'name');
-
-    const columnValues = _.map(columnNames, (name) => _.map(context.rows, name));
-
-    const mathScope = _.zipObject(columnNames, columnValues);
-
-    const result = math.eval(args._, mathScope);
-
-    return result || 0;
-  },
+  fn: (context, args) => math.eval(args._, getMathjsScope(context)),
 });
