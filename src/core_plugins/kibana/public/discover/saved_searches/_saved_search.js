@@ -36,7 +36,8 @@ module.factory('SavedSearch', function (courier) {
     hits: 'integer',
     columns: 'keyword',
     sort: 'keyword',
-    version: 'integer'
+    version: 'integer',
+    explicitTimeColumn: 'boolean'
   };
 
   // Order these fields to the top, the rest are alphabetical

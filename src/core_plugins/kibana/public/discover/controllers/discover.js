@@ -147,6 +147,12 @@ function discoverController($scope, config, courier, $route, $window, Notifier,
   .highlightAll(true)
   .version(true);
 
+  // we used to by default always add in the timeFieldName implicitly, so we're
+  // automatically adding this in for the user for legacy savedSearches
+  if (!savedSearch.explicitTimeColumn && $scope.indexPattern.timeFieldName) {
+    savedSearch.columns.unshift($scope.indexPattern.timeFieldName);
+  }
+
   if (savedSearch.id) {
     docTitle.change(savedSearch.title);
   }
@@ -323,6 +329,7 @@ function discoverController($scope, config, courier, $route, $window, Notifier,
   $scope.opts.saveDataSource = function () {
     return $scope.updateDataSource()
     .then(function () {
+      savedSearch.explicitTimeColumn = true;
       savedSearch.columns = $scope.state.columns;
       savedSearch.sort = $scope.state.sort;
 
