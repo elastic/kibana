@@ -1,5 +1,5 @@
 const Fn = require('../fn.js');
-import { groupBy, keyBy, get, map } from 'lodash';
+import { groupBy, keyBy, get, map, sortBy } from 'lodash';
 
 /*
 esdocs(size=1000).alterColumn(column=@timestamp, type=date, name=time)
@@ -56,6 +56,7 @@ module.exports = new Fn({
           lineWidth: get(seriesStyle, 'bars'),
         },
         points: {
+          // This is how we can vary shape and size of points
           symbol: 'circle',
           show: get(seriesStyle, 'points') > 0,
           radius: get(seriesStyle, 'points'),
@@ -67,12 +68,45 @@ module.exports = new Fn({
     }
 
     const seriesStyles = keyBy(args.seriesStyle || [], 'label') || {};
-    console.log(seriesStyles);
+
+    const ticks = {
+      x: {
+        hash: {},
+        counter: 0,
+      },
+      y: {
+        hash: {},
+        counter: 0,
+      },
+    };
+
+    if (context.columns.x.type === 'string') {
+      sortBy(context.rows, ['x']).forEach(row => {
+        if (!ticks.x.hash[row.x]) {
+          ticks.x.hash[row.x] = ticks.x.counter++;
+        }
+      });
+    }
+
+    if (context.columns.y.type === 'string') {
+      sortBy(context.rows, ['y']).reverse().forEach(row => {
+        if (!ticks.y.hash[row.y]) {
+          ticks.y.hash[row.y] = ticks.y.counter++;
+        }
+      });
+    }
+
+
     const data = map(groupBy(context.rows, 'color'), (series, label) => {
       const seriesStyle = seriesStyles[label];
       const result = {
         label: label,
-        data: series.map(point => [point.x, point.y, point.size]),
+        data: series.map(point => {
+          const x = context.columns.x.type === 'string' ? ticks.x.hash[point.x] : point.x;
+          const y = context.columns.y.type === 'string' ? ticks.y.hash[point.y] : point.y;
+
+          return [x, y, point.size];
+        }),
       };
 
       if (seriesStyle) {
@@ -81,7 +115,10 @@ module.exports = new Fn({
       return result;
     });
 
-    return {
+    //const xTicks = map(xTickUniq, (position, name) => [position, name]);
+    //console.log(xTicks);
+
+    const result = {
       type: 'render',
       as: 'plot',
       value: {
@@ -96,17 +133,10 @@ module.exports = new Fn({
             color: 'rgba(0,0,0,0)',
           },
           xaxis: {
-            mode: (function () {
-              switch (context.columns.x.type) {
-                case 'date':
-                  return 'time';
-                case 'string':
-                  return 'categories';
-                default:
-                  return null;
-              }
-              context.columns.x.type === 'date' ? 'time' : null;
-            }()),
+            ticks: context.columns.x.type === 'string' ? map(ticks.x.hash, (position, name) => [position, name]) : undefined,
+          },
+          yaxis: {
+            ticks: context.columns.y.type === 'string' ? map(ticks.y.hash, (position, name) => [position, name]) : undefined,
           },
           series: Object.assign({
             lines: {
@@ -117,5 +147,7 @@ module.exports = new Fn({
         },
       },
     };
+
+    return result;
   },
 });

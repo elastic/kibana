@@ -1,6 +1,6 @@
 import Fn from '../fn.js';
 import moment from 'moment';
-import { groupBy, zipObject, sortBy, uniqBy, omit, pickBy } from 'lodash';
+import { groupBy, zipObject, uniqBy, omit, pickBy, find } from 'lodash';
 
 module.exports = new Fn({
   name: 'pointseries',
@@ -35,7 +35,7 @@ module.exports = new Fn({
   },
   fn: (context, args) => {
     function getType(arg) {
-      return typeof arg === 'string' ? find(context.columns, { name: args }).type : 'number';
+      return typeof arg === 'string' ? find(context.columns, { name: arg }).type : 'number';
     }
 
     const columns = {
@@ -100,7 +100,7 @@ module.exports = new Fn({
         columns: columns,
         //rows: sortBy(result, ['x']),
         // It only makes sense to uniq the rows in a point series as 2 values can not exist in the exact same place at the same time.
-        rows: sortBy(uniqBy(result, row => JSON.stringify(omit(row, '_rowId'))), ['x']),
+        rows: uniqBy(result, row => JSON.stringify(omit(row, '_rowId'))),
       };
     });
   },
