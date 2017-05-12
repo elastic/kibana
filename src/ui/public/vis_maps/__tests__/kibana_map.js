@@ -113,7 +113,7 @@ describe('kibana_map tests', function () {
 
       const invalidOptions = {
         url: undefined,
-        version: '1.3.0',
+        version: undefined,
         layers: undefined,
         format: 'image/png',
         transparent: true,

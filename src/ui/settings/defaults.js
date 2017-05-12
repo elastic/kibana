@@ -118,7 +118,7 @@ export default function defaultSettingsProvider() {
         enabled: false,
         url: undefined,
         options: {
-          version: '1.3.0',
+          version: undefined,
           layers: undefined,
           format: 'image/png',
           transparent: true,

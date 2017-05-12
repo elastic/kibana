@@ -511,7 +511,7 @@ export class KibanaMap extends EventEmitter {
       maxZoom: options.maxZoom,
       styles: options.styles || '',
       transparent: options.transparent,
-      version: options.version
+      version: options.version || '1.3.0'
     };
 
     return (typeof options.url === 'string' && options.url.length) ? L.tileLayer.wms(options.url, wmsOptions) : null;
