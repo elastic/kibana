@@ -27,6 +27,7 @@
           tooltip-placement="bottom"
           tooltip-popup-delay="400"
           tooltip-append-to-body="1"
+          kbn-accessible-click
           data-test-subj="{{menuItem.testId}}"
         >
         </div>
@@ -43,7 +44,7 @@
     ng-show="kbnTopNav.rendered"
   >
     <button class="kuiLocalDropdownCloseButton" ng-click="kbnTopNav.close()">
-      <span class="fa fa-chevron-circle-up"></span>
+      <span class="kuiIcon fa-chevron-circle-up"></span>
     </button>
     <div id="template_wrapper">
       <!-- Content gets dynamically inserted here. -->
