@@ -33,7 +33,7 @@ function MarkdownVisualization(props) {
         </style>
         <div className={contentClassName}>
           <div id={`markdown-${model.id}`}>
-            <Markdown source={markdownSource}/>
+            <Markdown escapeHtml={true} source={markdownSource}/>
           </div>
         </div>
       </div>
