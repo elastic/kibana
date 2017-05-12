@@ -1,6 +1,5 @@
 import { uiModules } from 'ui/modules';
 import uiChrome from 'ui/chrome';
-import 'ui/filters/trust_as_html';
 import 'ui/getting_started/opt_out_directive';
 import { GettingStartedRegistryProvider } from 'ui/getting_started/registry';
 import { GETTING_STARTED_REGISTRY_TYPES } from 'ui/getting_started/constants';
