@@ -13,13 +13,13 @@ module.exports = new Fn({
     return {
       type: 'datatable',
       columns: [
-        { name: '_rowId',   type: 'number', role: 'measure' },
-        { name: 'time',     type: 'date',   role: 'dimension' },
-        { name: 'cost',     type: 'number', role: 'measure' },
-        { name: 'username', type: 'string', role: 'dimension' },
-        { name: 'price',    type: 'number', role: 'measure' },
-        { name: 'age',      type: 'number', role: 'measure' },
-        { name: 'country',  type: 'string', role: 'dimension' },
+        { name: '_rowId', type: 'number' },
+        { name: 'time', type: 'date' },
+        { name: 'cost', type: 'number' },
+        { name: 'username', type: 'string' },
+        { name: 'price', type: 'number' },
+        { name: 'age', type: 'number' },
+        { name: 'country', type: 'string' },
       ],
       rows: _.cloneDeep(cheap),
     };

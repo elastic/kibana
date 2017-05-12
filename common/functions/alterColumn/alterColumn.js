@@ -13,13 +13,10 @@ module.exports = new Fn({
       types: ['string'],
     },
     type: {
-      types: ['string', 'null'],
+      types: ['string'],
     },
     name: {
-      types: ['string', 'null'],
-    },
-    role: {
-      types: ['string', 'null'],
+      types: ['string'],
     },
   },
   fn: (context, args) => {
@@ -32,7 +29,6 @@ module.exports = new Fn({
     }
 
     const type = args.type || column.type;
-    const role = args.role || column.role;
 
     let handler = _.noop;
     if (args.type) {
@@ -49,7 +45,6 @@ module.exports = new Fn({
 
     column.name = destination;
     column.type = type;
-    column.role = role;
 
     context.rows = _.map(context.rows, row =>
       Object.assign(_.omit(row, args.column), { [destination]: handler(row[args.column]) })
