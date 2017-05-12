@@ -3,10 +3,12 @@ import expect from 'expect.js';
 const TEST_DISCOVER_START_TIME = '2015-09-19 06:31:44.000';
 const TEST_DISCOVER_END_TIME = '2015-09-23 18:31:44.000';
 const TEST_COLUMN_NAMES = ['@message'];
+const TEST_FILTER_COLUMN_NAMES = [['extension', 'jpg'], ['geo.src', 'IN']];
 
 export default function ({ getService, getPageObjects }) {
   const retry = getService('retry');
   const docTable = getService('docTable');
+  const filterBar = getService('filterBar');
   const PageObjects = getPageObjects(['common', 'header', 'discover']);
 
   describe('context link in discover', function contextSize() {
@@ -16,6 +18,10 @@ export default function ({ getService, getPageObjects }) {
       await Promise.all(TEST_COLUMN_NAMES.map((columnName) => (
         PageObjects.discover.clickFieldListItemAdd(columnName)
       )));
+      await Promise.all(TEST_FILTER_COLUMN_NAMES.map(async ([columnName, value]) => {
+        await PageObjects.discover.clickFieldListItem(columnName);
+        await PageObjects.discover.clickFieldListPlusFilter(columnName, value);
+      }));
     });
 
     it('should open the context view with the selected document as anchor', async function () {
@@ -51,6 +57,16 @@ export default function ({ getService, getPageObjects }) {
           ...TEST_COLUMN_NAMES,
         ]);
       });
+    });
+
+    it('should open the context view with the filters disabled', async function () {
+      const hasDisabledFilters = (
+        await Promise.all(TEST_FILTER_COLUMN_NAMES.map(
+          ([columnName, value]) => filterBar.hasFilter(columnName, value, false)
+        ))
+      ).reduce((result, hasDisabledFilter) => result && hasDisabledFilter, true);
+
+      expect(hasDisabledFilters).to.be(true);
     });
   });
 
