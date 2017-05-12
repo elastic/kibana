@@ -38,9 +38,7 @@ Kibana uses Webpack to bundle Kibana's dependencies.
 
 Here is how import/require statements are resolved to a file:
 
-NOTE: if you're familiar with the node.js algorithm, the changes are in *2.ii* and *3.i.f* to *3.i.g*
-
-. Pick an algorithm
+. Check the beginning of the given path :  
   * if the path starts with a '.'
     ** append it the directory of the current file
     ** proceed to *3*
