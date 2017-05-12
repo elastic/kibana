@@ -5,7 +5,7 @@ export default function ({ getService, getPageObjects }) {
   const PageObjects = getPageObjects(['common', 'visualize', 'header']);
 
   describe('visualize app', function describeIndexTests() {
-    before(async function () {
+    beforeEach(async function () {
       const fromTime = '2015-09-19 06:31:44.000';
       const toTime = '2015-09-23 18:31:44.000';
 
@@ -16,7 +16,7 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.visualize.clickLineChart();
       await PageObjects.visualize.clickNewSearch();
 
-      log.debug('Set absolute time range from \"' + fromTime + '\" to \"' + toTime + '\"');
+      log.debug(`Set absolute time range from "${fromTime}" to "${toTime}"`);
       await PageObjects.header.setAbsoluteRange(fromTime, toTime);
 
       // make sure that changes in the test are what will make the visualization dirty
