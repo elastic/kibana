@@ -716,6 +716,79 @@ body {
   line-height: 1.5;
   color: #9fa3a7; }
 
+.kuiExpression .kuiExpression__item {
+  display: inline-block;
+  margin-right: 10px;
+  position: relative; }
+
+.kuiExpression .kuiExpression__button {
+  background-color: transparent;
+  padding: 5px 0px;
+  border: none;
+  border-bottom: dotted 2px #E4E4E4; }
+  .kuiExpression .kuiExpression__button .kuiExpression__buttonDescription {
+    color: #00A69B;
+    text-transform: uppercase; }
+  .kuiExpression .kuiExpression__button .kuiExpression__buttonValue {
+    color: #2d2d2d;
+    text-transform: lowercase; }
+
+.kuiExpression .kuiExpression__button--active {
+  border-bottom: solid 2px #00A69B; }
+
+.kuiExpression .kuiExpression__popover {
+  position: absolute;
+  top: calc(100% + 15px);
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-orient: vertical;
+  -webkit-box-direction: normal;
+  -webkit-flex-direction: column;
+      -ms-flex-direction: column;
+          flex-direction: column;
+  -webkit-box-flex: 1;
+  -webkit-flex: 1 1 auto;
+      -ms-flex: 1 1 auto;
+          flex: 1 1 auto;
+  background-color: white;
+  border: 1px solid #E4E4E4;
+  border-radius: 6px;
+  box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.1);
+  visibility: visible;
+  opacity: 1;
+  -webkit-transform: translateY(-5px) translateZ(0);
+          transform: translateY(-5px) translateZ(0);
+  -webkit-transition: opacity 250ms cubic-bezier(0.34, 1.61, 0.7, 1), -webkit-transform 250ms cubic-bezier(0.34, 1.61, 0.7, 1);
+  transition: opacity 250ms cubic-bezier(0.34, 1.61, 0.7, 1), -webkit-transform 250ms cubic-bezier(0.34, 1.61, 0.7, 1);
+  transition: transform 250ms cubic-bezier(0.34, 1.61, 0.7, 1), opacity 250ms cubic-bezier(0.34, 1.61, 0.7, 1);
+  transition: transform 250ms cubic-bezier(0.34, 1.61, 0.7, 1), opacity 250ms cubic-bezier(0.34, 1.61, 0.7, 1), -webkit-transform 250ms cubic-bezier(0.34, 1.61, 0.7, 1); }
+  .kuiExpression .kuiExpression__popover.ng-hide {
+    display: block !important;
+    visibility: hidden;
+    opacity: 0;
+    -webkit-transform: translateY(0px) translateZ(0);
+            transform: translateY(0px) translateZ(0); }
+
+.kuiExpression .kuiExpression__popoverTitle {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-flex: 1;
+  -webkit-flex: 1 1 auto;
+      -ms-flex: 1 1 auto;
+          flex: 1 1 auto;
+  background-color: #f1f1f1;
+  border-radius: 4px 4px 0 0;
+  color: #2d2d2d;
+  padding: 5px 10px; }
+
+.kuiExpression .kuiExpression__popoverContent {
+  padding: 20px;
+  white-space: nowrap; }
+
 /**
  * 1. Set inline-block so this wrapper shrinks to fit the input.
  */
@@ -760,6 +833,7 @@ body {
   /* 2 */
   font-size: 10px !important;
   /* 2 */
+  -webkit-transition: background-color 0.1s linear;
   transition: background-color 0.1s linear; }
   .kuiCheckBox:before {
     position: relative;
@@ -769,6 +843,7 @@ body {
     font-size: 1em;
     opacity: 0;
     color: #FFF;
+    -webkit-transition: opacity 0.1s linear;
     transition: opacity 0.1s linear; }
   .kuiCheckBox:checked {
     border-color: #328CAA;
@@ -845,6 +920,7 @@ body {
   background-color: #ffffff;
   border: 1px solid #DEDEDE;
   border-radius: 4px;
+  -webkit-transition: border-color 0.1s linear;
   transition: border-color 0.1s linear;
   min-height: 30px;
   /* 1 */
@@ -883,6 +959,7 @@ body {
   background-color: #ffffff;
   border: 1px solid #DEDEDE;
   border-radius: 4px;
+  -webkit-transition: border-color 0.1s linear;
   transition: border-color 0.1s linear;
   min-height: 30px;
   /* 1 */
@@ -953,6 +1030,7 @@ body {
   background-color: #ffffff;
   border: 1px solid #DEDEDE;
   border-radius: 4px;
+  -webkit-transition: border-color 0.1s linear;
   transition: border-color 0.1s linear;
   min-height: 30px;
   /* 1 */ }
@@ -993,6 +1071,7 @@ body {
   background-color: #ffffff;
   border: 1px solid #DEDEDE;
   border-radius: 4px;
+  -webkit-transition: border-color 0.1s linear;
   transition: border-color 0.1s linear;
   min-height: 30px;
   /* 1 */ }
@@ -1804,6 +1883,7 @@ body {
   background-color: #ffffff;
   border: 1px solid #DEDEDE;
   border-radius: 4px;
+  -webkit-transition: border-color 0.1s linear;
   transition: border-color 0.1s linear;
   min-height: 30px;
   /* 1 */
@@ -1883,6 +1963,7 @@ body {
   background-color: #ffffff;
   border: 1px solid #DEDEDE;
   border-radius: 4px;
+  -webkit-transition: border-color 0.1s linear;
   transition: border-color 0.1s linear;
   min-height: 30px;
   /* 1 */
@@ -2975,6 +3056,7 @@ body {
   border: 1px solid #ffffff;
   line-height: normal;
   /* 1 */
+  -webkit-transition: border-color 0.1s linear;
   transition: border-color 0.1s linear; }
   .kuiToolBarSearchBox__input:focus {
     outline: none;

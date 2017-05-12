@@ -1,0 +1,72 @@
+$expressionColorHighlight: #00A69B;
+
+.kuiExpression {
+
+  .kuiExpression__item {
+    display: inline-block;
+    margin-right: 10px;
+    position: relative;
+  }
+
+  .kuiExpression__button {
+    background-color: transparent;
+    padding: 5px 0px;
+    border: none;
+    border-bottom: dotted 2px $globalBorderColor;
+
+    .kuiExpression__buttonDescription {
+      color: $expressionColorHighlight;
+      text-transform: uppercase;
+    }
+
+    .kuiExpression__buttonValue {
+      color: $globalTextColor;
+      text-transform: lowercase;
+    }
+  }
+
+  .kuiExpression__button--active {
+    border-bottom: solid 2px $expressionColorHighlight;
+  }
+
+  .kuiExpression__popover {
+    position: absolute;
+    top: calc(100% + 15px);
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 auto;
+    background-color: white;
+    border: 1px solid $globalBorderColor;
+    border-radius: 6px;
+    box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.1);
+    visibility: visible;
+    opacity: 1;
+    transform: translateY(-5px) translateZ(0);
+    transition: transform $globalAnimSpeedNormal $globalAnimSlightBounce, opacity $globalAnimSpeedNormal $globalAnimSlightBounce;
+
+    // Angular hide blocks animation.
+    &.ng-hide {
+      display: block !important;
+      visibility: hidden;
+      opacity: 0;
+      transform: translateY(0px) translateZ(0);
+    }
+  }
+
+  .kuiExpression__popoverTitle {
+    display: flex;
+    flex: 1 1 auto;
+    background-color: lighten($globalBorderColor, 5%);
+    border-radius: $globalBorderRadius $globalBorderRadius 0 0;
+    color: $globalTextColor;
+    padding: 5px 10px;
+  }
+
+  .kuiExpression__popoverContent {
+    padding: 20px;
+    white-space: nowrap;
+  }
+
+}
+
+
