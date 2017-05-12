@@ -90,8 +90,6 @@ module.controller('KbnChoroplethController', function ($scope, $element, Private
   async function makeKibanaMap() {
 
     const tmsSettings = await serviceSettings.getTMSService();
-    console.log('settings...', tmsSettings);
-
     const minMaxZoom = tmsSettings.getMinMaxZoom(false);
     kibanaMap = new KibanaMap(containerNode, minMaxZoom);
     kibanaMap.setZoomLevel(2);
@@ -132,7 +130,7 @@ module.controller('KbnChoroplethController', function ($scope, $element, Private
       $scope.vis.listeners.click({ point: { aggConfigResult: aggConfigResult } });
     });
     choroplethLayer.on('styleChanged', function (event) {
-      if (event.mismatches.length > 0 && config.get('visualization:vectormap:showWarnings')) {
+      if (event.mismatches.length > 0 && config.get('visualization:regionmap:showWarnings')) {
         notify.warning(
           `Could not show ${event.mismatches.length} ${event.mismatches.length > 1 ? 'results' : 'result'} on the map.`
             + ` To avoid this, ensure that each term can be joined to a corresponding shape on that shape's join field.`
@@ -148,8 +146,6 @@ module.controller('KbnChoroplethController', function ($scope, $element, Private
       const vectorLayers = await serviceSettings.getFileLayers();
       return vectorLayers;
     } catch (e) {
-      console.log('error getting vectorlayers', e);
-      //todo: handle
       throw e;
     }
   }

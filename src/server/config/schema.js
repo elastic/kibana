@@ -165,8 +165,8 @@ module.exports = () => Joi.object({
   map: Joi.object({
     manifestServiceUrl: Joi.when('$dev', {
       is: true,
-      then: Joi.string().default('https://geo.elastic.co/manifest'),
-      otherwise: Joi.string().default('https://geo.elastic.co/manifest')
+      then: Joi.string().default('https://geo.elastic.co/v1/manifest'),
+      otherwise: Joi.string().default('https://geo.elastic.co/v1/manifest')
     })
   }).default(),
   tilemap: Joi.object({
@@ -188,12 +188,7 @@ module.exports = () => Joi.object({
       bounds: Joi.array().items(Joi.array().items(Joi.number()).min(2).required()).min(2)
     }).default()
   }).default(),
-  vectormap: Joi.object({
-    manifestServiceUrl: Joi.when('$dev', {
-      is: true,
-      then: Joi.string().default('https://elastic-layer.appspot.com/manifest'),
-      otherwise: Joi.string().default('https://elastic-layer.appspot.com/manifest')
-    }),
+  regionmap: Joi.object({
     layers: Joi.array().items(Joi.object({
       url: Joi.string(),
       type: Joi.string(),
