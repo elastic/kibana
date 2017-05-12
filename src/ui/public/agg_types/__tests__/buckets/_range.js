@@ -6,7 +6,7 @@ import resp from 'fixtures/agg_resp/range';
 import AggTypesIndexProvider from 'ui/agg_types/index';
 import VisProvider from 'ui/vis';
 import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
-import RegistryFieldFormatsProvider from 'ui/registry/field_formats';
+
 describe('Range Agg', function () {
 
   const buckets = values(resp.aggregations[1].buckets);
@@ -20,14 +20,9 @@ describe('Range Agg', function () {
     range = Private(AggTypesIndexProvider).byName.range;
     Vis = Private(VisProvider);
     indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
-
-    const BytesFormat = Private(RegistryFieldFormatsProvider).byId.bytes;
-
-    indexPattern.fieldFormatMap.bytes = new BytesFormat({
+    indexPattern.stubSetFieldFormat('bytes', 'bytes', {
       pattern: '0,0.[000] b'
     });
-
-    indexPattern._indexFields();
   }));
 
   describe('formating', function () {
