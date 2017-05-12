@@ -30,6 +30,7 @@ module.exports = function (grunt) {
         'OFL-1.1 AND MIT',
         'Public domain',
         'WTFPL',
+        'WTFPL OR ISC',
         'new BSD, and MIT'
       ],
       overrides: {
