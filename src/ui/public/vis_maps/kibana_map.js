@@ -416,6 +416,10 @@ export class KibanaMap extends EventEmitter {
   }
 
 
+  getLeafletBaseLayer() {
+    return this._leafletBaseLayer;
+  }
+
   setBaseLayer(settings) {
 
     if (_.isEqual(settings, this._baseLayerSettings)) {
@@ -443,17 +447,23 @@ export class KibanaMap extends EventEmitter {
       baseLayer = this._getTMSBaseLayer((settings.options));
     }
 
-    baseLayer.on('tileload', () => this._updateDesaturation());
-    baseLayer.on('load', () => { this.emit('baseLayer:loaded');});
-    baseLayer.on('loading', () => {this.emit('baseLayer:loading');});
+    if (baseLayer) {
+      baseLayer.on('tileload', () => this._updateDesaturation());
+      baseLayer.on('load', () => {
+        this.emit('baseLayer:loaded');
+      });
+      baseLayer.on('loading', () => {
+        this.emit('baseLayer:loading');
+      });
 
-    this._leafletBaseLayer = baseLayer;
-    this._leafletBaseLayer.addTo(this._leafletMap);
-    this._leafletBaseLayer.bringToBack();
-    if (settings.options.minZoom > this._leafletMap.getZoom()) {
-      this._leafletMap.setZoom(settings.options.minZoom);
+      this._leafletBaseLayer = baseLayer;
+      this._leafletBaseLayer.addTo(this._leafletMap);
+      this._leafletBaseLayer.bringToBack();
+      if (settings.options.minZoom > this._leafletMap.getZoom()) {
+        this._leafletMap.setZoom(settings.options.minZoom);
+      }
+      this.resize();
     }
-    this.resize();
 
   }
 
@@ -493,16 +503,18 @@ export class KibanaMap extends EventEmitter {
   }
 
   _getWMSBaseLayer(options) {
-    return L.tileLayer.wms(options.url, {
-      attribution: options.attribution,
-      format: options.format,
-      layers: options.layers,
+    const wmsOptions = {
+      attribution: options.attribution || '',
+      format: options.format || '',
+      layers: options.layers || '',
       minZoom: options.minZoom,
       maxZoom: options.maxZoom,
-      styles: options.styles,
+      styles: options.styles || '',
       transparent: options.transparent,
-      version: options.version
-    });
+      version: options.version || '1.3.0'
+    };
+
+    return (typeof options.url === 'string' && options.url.length) ? L.tileLayer.wms(options.url, wmsOptions) : null;
   }
 
   _updateExtent() {

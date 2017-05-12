@@ -116,14 +116,14 @@ export default function defaultSettingsProvider() {
     'visualization:tileMap:WMSdefaults': {
       value: JSON.stringify({
         enabled: false,
-        url: 'https://basemap.nationalmap.gov/arcgis/services/USGSTopo/MapServer/WMSServer',
+        url: undefined,
         options: {
-          version: '1.3.0',
-          layers: '0',
+          version: undefined,
+          layers: undefined,
           format: 'image/png',
           transparent: true,
-          attribution: 'Maps provided by USGS',
-          styles: '',
+          attribution: undefined,
+          styles: undefined,
         }
       }, null, 2),
       type: 'json',
