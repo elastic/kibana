@@ -6,7 +6,7 @@ import template from './injected_items.html';
 import './injected_items.less';
 
 function makeAngularParseableExpression(item) {
-  return `<div class="injectedItems__item">${item}&nbsp;</div>`;
+  return `<div class="injectedItems__item">${item} </div>`;
 }
 
 const app = uiModules.get('kibana');
