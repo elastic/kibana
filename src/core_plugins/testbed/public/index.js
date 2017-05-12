@@ -2,20 +2,24 @@ import './testbed';
 
 
 import './components/blahblah';
-import { GettingStartedTopMessagesRegistryProvider } from 'ui/getting_started/top_messages_registry';
-import { GettingStartedMonitorAndManageMessagesRegistryProvider } from 'ui/getting_started/monitor_and_manage_messages_registry';
+import { GettingStartedRegistryProvider } from 'ui/getting_started/registry';
+import { GETTING_STARTED_REGISTRY_TYPES } from 'ui/getting_started/constants';
 
-GettingStartedTopMessagesRegistryProvider.register(() => ({
+GettingStartedRegistryProvider.register(() => ({
+  type: GETTING_STARTED_REGISTRY_TYPES.TOP_MESSAGE,
   template: `<blahblah></blahblah>`
 }));
-GettingStartedTopMessagesRegistryProvider.register(() => ({
+GettingStartedRegistryProvider.register(() => ({
+  type: GETTING_STARTED_REGISTRY_TYPES.TOP_MESSAGE,
   template: `Nam hendrerit augue id egestas ultricies.`
 }));
 
-GettingStartedMonitorAndManageMessagesRegistryProvider.register(() => ({
+GettingStartedRegistryProvider.register(() => ({
+  type: GETTING_STARTED_REGISTRY_TYPES.MANAGE_AND_MONITOR_MESSAGE,
   template: `Lorem ipsum dolor sit amet, consectetur <a href="http://www.google.com">consectetur</a> adipiscing elit.`
 }));
 
-GettingStartedMonitorAndManageMessagesRegistryProvider.register(() => ({
+GettingStartedRegistryProvider.register(() => ({
+  type: GETTING_STARTED_REGISTRY_TYPES.MANAGE_AND_MONITOR_MESSAGE,
   template: `Nam luctus mattis urna, ac <a href="http://www.google.com">fringilla</a> tellus efficitur at.`
 }));

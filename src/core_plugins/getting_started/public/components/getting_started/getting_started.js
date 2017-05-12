@@ -2,8 +2,8 @@ import { uiModules } from 'ui/modules';
 import uiChrome from 'ui/chrome';
 import 'ui/filters/trust_as_html';
 import 'ui/getting_started/opt_out_directive';
-import { GettingStartedTopMessagesRegistryProvider } from 'ui/getting_started/top_messages_registry';
-import { GettingStartedMonitorAndManageMessagesRegistryProvider } from 'ui/getting_started/monitor_and_manage_messages_registry';
+import { GettingStartedRegistryProvider } from 'ui/getting_started/registry';
+import { GETTING_STARTED_REGISTRY_TYPES } from 'ui/getting_started/constants';
 import { hasOptedOutOfGettingStarted } from 'ui/getting_started/opt_out_helpers';
 import { documentationLinks } from 'ui/documentation_links';
 
@@ -22,8 +22,7 @@ const app = uiModules.get('kibana');
 app.directive('gettingStarted', function ($injector) {
   const Private = $injector.get('Private');
 
-  const topMessagesRegistry = Private(GettingStartedTopMessagesRegistryProvider);
-  const manageAndMonitorMessagesRegistry = Private(GettingStartedMonitorAndManageMessagesRegistryProvider);
+  const registry = Private(GettingStartedRegistryProvider);
 
   return {
     restrict: 'E',
@@ -40,8 +39,11 @@ app.directive('gettingStarted', function ($injector) {
           uiChrome.setVisible(false);
         }
 
-        this.topMessages = topMessagesRegistry.raw.map(item => item.template);
-        this.manageAndMonitorMessages = manageAndMonitorMessagesRegistry.raw.map(item => item.template);
+        const registeredTopMessages = registry.byType[GETTING_STARTED_REGISTRY_TYPES.TOP_MESSAGE] || [];
+        this.topMessages = registeredTopMessages.map(item => item.template);
+
+        const registeredManageAndMonitorMessages = registry.byType[GETTING_STARTED_REGISTRY_TYPES.MANAGE_AND_MONITOR_MESSAGE] || [];
+        this.manageAndMonitorMessages = registeredManageAndMonitorMessages.map(item => item.template);
 
         this.imageUrls = {
           kibanaLogo,
