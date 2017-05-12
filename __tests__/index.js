@@ -18,8 +18,6 @@ describe('canvas plugin', () => {
       const { canvas } = instance.server.plugins;
       expect(canvas.addFunction).to.be.a('function');
       expect(canvas.addType).to.be.a('function');
-      expect(canvas.addExpressionType).to.be.a('function');
-      expect(canvas.addArgType).to.be.a('function');
     });
   });
 });
