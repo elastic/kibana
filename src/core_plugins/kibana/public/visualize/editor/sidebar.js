@@ -13,7 +13,6 @@ uiModules
     scope: true,
     controllerAs: 'sidebar',
     controller: function ($scope) {
-      $scope.$bind('vis', 'editableVis');
 
       $scope.$watch('vis.type', (visType) => {
         if (visType) {
