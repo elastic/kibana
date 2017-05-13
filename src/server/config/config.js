@@ -97,7 +97,10 @@ module.exports = class Config {
       );
     }
 
-    const results = Joi.validate(newVals, this.getSchema(), { context });
+    const results = Joi.validate(newVals, this.getSchema(), {
+      context,
+      abortEarly: false
+    });
 
     if (results.error) {
       throw results.error;
