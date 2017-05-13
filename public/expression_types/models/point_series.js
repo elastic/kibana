@@ -3,7 +3,7 @@ import { Model } from '../model';
 import { Arg } from '../arg';
 import { getState, getValue } from '../../state/selectors/resolved_args';
 
-export const pointSeries = () => new Model('pointSeries', {
+export const pointseries = () => new Model('pointseries', {
   displayName: 'Pointseries Model',
   args: [
     new Arg('x', {
