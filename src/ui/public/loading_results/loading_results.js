@@ -1,7 +1,7 @@
 import { uiModules } from 'ui/modules';
 import template from './loading_results.html';
 
-const app = uiModules.get('xpack/watcher');
+const app = uiModules.get('kibana');
 
 app.directive('loadingResults', function () {
   return {
