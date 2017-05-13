@@ -3,6 +3,7 @@ import PropTypes from 'prop-types';
 import { Grid, Row, Col, Button } from 'react-bootstrap';
 
 import { Expression } from '../expression';
+import { Sidebar } from '../sidebar';
 import { Render } from '../render';
 
 export function App({ expression, renderable, expressionSet, expressionRun }) {
@@ -20,7 +21,10 @@ export function App({ expression, renderable, expressionSet, expressionRun }) {
           </Col>
         </Row>
         <Row>
-          <Col xs={12}>
+          <Col md={3} smHidden xsHidden>
+            <Sidebar />
+          </Col>
+          <Col md={9} xs={12}>
             <Render expressionOutput={renderable} done={done}/>
           </Col>
         </Row>
