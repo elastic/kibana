@@ -1,3 +1,5 @@
+import { clone } from 'lodash';
+
 export function Registry(prop = 'name') {
   let _indexed = new Object();
 
@@ -11,13 +13,13 @@ export function Registry(prop = 'name') {
 
   this.toJS = () => {
     return Object.keys(_indexed).reduce((acc, key) => {
-      acc[key] = Object.assign({}, _indexed[key]);
+      acc[key] = this.get(key);
       return acc;
     }, {});
   };
 
   this.get = (name) => {
-    return _indexed[name] ? { ..._indexed[name] } : null;
+    return _indexed[name] ? clone(_indexed[name]) : null;
   };
 
   this.reset = () => {

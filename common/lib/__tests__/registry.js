@@ -75,4 +75,38 @@ describe('Registry', () => {
       expect(check).to.throwException(/requires an object with a type property/i);
     });
   });
+
+  describe('shallow clone full prototype', () => {
+    const name = 'test_thing';
+    let registry;
+    let thing;
+
+    beforeEach(() => {
+      registry = new Registry();
+      class Base {
+        constructor(name) {
+          this.name = name;
+        }
+
+        baseFunc() { return 'base'; }
+      }
+
+      class Thing extends Base {
+        doThing() { return 'done'; }
+      }
+
+      thing = new Thing(name);
+      registry.register(thing);
+    });
+
+    it('get contains the full prototype', () => {
+      expect(thing.baseFunc).to.be.a('function');
+      expect(registry.get(name).baseFunc).to.be.a('function');
+    });
+
+    it('toJS contains the full prototype', () => {
+      const val = registry.toJS();
+      expect(val[name].baseFunc).to.be.a('function');
+    });
+  });
 });
