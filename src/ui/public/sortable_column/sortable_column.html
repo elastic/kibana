@@ -1,0 +1,11 @@
+<div ng-click="sortableColumn.toggle()">
+  <div class="sortable-column-liner" ng-transclude></div>
+  <span
+    class="kuiTableSortIcon kuiIcon fa-long-arrow-up"
+    ng-show="sortableColumn.isSortedAscending"
+  ></span>
+  <span
+    class="kuiTableSortIcon kuiIcon fa-long-arrow-down"
+    ng-show="sortableColumn.isSortedDescending"
+  ></span>
+</div>
