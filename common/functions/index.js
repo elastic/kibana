@@ -6,7 +6,7 @@ export const commonFunctions = [
   require('./render/render'),
   require('./plot/plot'),
   require('./seriesStyle/seriesStyle'),
-  require('./bar/bar'),
+  require('./palette/palette'),
   require('./pointseries/pointseries'),
   require('./replace/replace'),
   require('./droprows/droprows'),
