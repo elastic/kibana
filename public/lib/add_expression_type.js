@@ -5,19 +5,19 @@ import {
   viewRegistry,
 } from '../expression_types';
 
-export function addExpressionType(typeName, expFn) {
+export function addExpressionType(typeName, expObj) {
   switch(typeName) {
     case 'datasource':
-      datasourceRegistry.register(expFn);
+      datasourceRegistry.register(expObj);
       break;
     case 'transform':
-      transformRegistry.register(expFn);
+      transformRegistry.register(expObj);
       break;
     case 'model':
-      modelRegistry.register(expFn);
+      modelRegistry.register(expObj);
       break;
     case 'view':
-      viewRegistry.register(expFn);
+      viewRegistry.register(expObj);
       break;
     default:
       throw new Error(`Unknown expression type: ${typeName}`);
