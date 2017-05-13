@@ -1,6 +1,10 @@
 import { connect } from 'react-redux';
-import { get } from 'lodash';
+import { get, flowRight } from 'lodash';
+import { branch, renderComponent, withProps } from 'recompose';
 import { ArgType as Component } from './arg_type';
+import { ArgTypeUnknown } from './arg_type_unknown';
+import { ArgTypeContextPending } from './arg_type_context_pending';
+import { ArgTypeContextError } from './arg_type_context_error';
 import { findExpressionType } from '../../lib/find_expression_type';
 import { fetchContext, setExpressionAst } from '../../state/actions/elements';
 import {
@@ -10,16 +14,15 @@ import {
   getSelectedResolvedArgs,
 } from '../../state/selectors/workpad';
 
-function getExpressionContext(resolvedArgs, expressionIndex) {
-  if (expressionIndex === 0) return null;
-  return get(resolvedArgs, ['expressionContexts', expressionIndex - 1]);
-}
+const mapStateToProps = (state, { expressionIndex }) => {
+  const resolvedArgs = getSelectedResolvedArgs(state);
 
-const mapStateToProps = (state, { expressionIndex }) => ({
-  context: getExpressionContext(getSelectedResolvedArgs(state), expressionIndex),
-  pageId: getSelectedPage(state),
-  element: getElementById(state, getSelectedElement(state)),
-});
+  return {
+    context: get(resolvedArgs, ['expressionContexts', expressionIndex - 1], null),
+    element: getElementById(state, getSelectedElement(state)),
+    pageId: getSelectedPage(state),
+  };
+};
 
 const mapDispatchToProps = ({
   fetchContext,
@@ -28,27 +31,57 @@ const mapDispatchToProps = ({
 
 const mergeProps = (stateProps, dispatchProps, ownProps) => {
   const { context, element, pageId } = stateProps;
-  const { expressionIndex, argType, nextArgType } = ownProps;
-  const updateContext = () => dispatchProps.fetchContext({ element, index: expressionIndex });
-  const expressionType = findExpressionType(argType);
-  const nextExpressionType = nextArgType ? findExpressionType(nextArgType) : nextArgType;
+  const { expressionIndex, expressionType } = ownProps;
 
-  if (typeof context === 'undefined' && expressionType.requiresContext) {
-    updateContext();
-  }
-
-  return Object.assign({}, stateProps, dispatchProps, ownProps, {
-    expressionType,
-    nextExpressionType,
-    requiresContext: Boolean(expressionType && expressionType.requiresContext),
-    name: get(expressionType, 'displayName', argType),
-    updateContext,
+  const props = Object.assign({}, stateProps, dispatchProps, ownProps, {
+    updateContext: () => dispatchProps.fetchContext({ element, index: expressionIndex }),
     onValueChange: (ast) => dispatchProps.setExpressionAst({ ast, element, pageId, index: expressionIndex }),
   });
+
+  if (typeof context === 'undefined' && expressionType.requiresContext) {
+    props.updateContext();
+  }
+
+  return props;
 };
 
-export const ArgType = connect(
-  mapStateToProps,
-  mapDispatchToProps,
-  mergeProps
-)(Component);
+const contextPending = branch(
+  ({ context, expressionType }) => {
+    const requiresContext = Boolean(expressionType && expressionType.requiresContext);
+    const isPending = (!context || context.state === 'pending');
+    return requiresContext && isPending;
+  },
+  renderComponent(ArgTypeContextPending)
+);
+
+const contextError = branch(
+  ({ context, expressionType }) => {
+    const requiresContext = Boolean(expressionType && expressionType.requiresContext);
+    const isError = (!context || context.state === 'error');
+    return requiresContext && isError;
+  },
+  renderComponent(ArgTypeContextError)
+);
+
+const nullExpressionType = branch(
+  props => !props.expressionType,
+  renderComponent(ArgTypeUnknown)
+);
+
+const appendProps = withProps(({ argType, nextArgType }) => {
+  const expressionType = findExpressionType(argType);
+  const nextExpressionType = nextArgType ? findExpressionType(nextArgType) : nextArgType;
+  return {
+    expressionType,
+    nextExpressionType,
+    name: get(expressionType, 'displayName', argType),
+  };
+});
+
+export const ArgType = flowRight([
+  appendProps,
+  connect(mapStateToProps, mapDispatchToProps, mergeProps),
+  nullExpressionType,
+  contextPending,
+  contextError,
+])(Component);
