@@ -17,8 +17,30 @@ export default (path) => {
         'element-d88c-4bbd-9453-db22e949b92e': {
           expressionContexts: {
             0: {
+              // metadata form demodata()
               state: 'ready',
-              value: '1234',
+              value: {
+                type: 'datatable',
+                columns: [{
+                  type: 'date',
+                  name: 'time',
+                }, {
+                  type: 'number',
+                  name: 'cost',
+                }, {
+                  type: 'string',
+                  name: 'username',
+                }, {
+                  type: 'number',
+                  name: 'price',
+                }, {
+                  type: 'number',
+                  name: 'age',
+                }, {
+                  type: 'string',
+                  name: 'country',
+                }],
+              },
               error: null,
             },
           },
@@ -48,22 +70,13 @@ export default (path) => {
               width: 600,
               rotation: 90,
             },
-            expression: 'demodata().sort("time").pointseries(x="time", y=.math("sum(price)")).line()',
+            expression: 'demodata().pointseries(x=time, y=.math("sum(cost)")).line()',
             ast: {
               type: 'expression',
               chain: [{
                 type: 'function',
                 function: 'demodata',
                 arguments: {},
-              }, {
-                type: 'function',
-                function: 'sort',
-                arguments: {
-                  _: [{
-                    type: 'string',
-                    value: 'time',
-                  }],
-                },
               }, {
                 type: 'function',
                 function: 'pointseries',
@@ -80,7 +93,7 @@ export default (path) => {
                       arguments: {
                         _: [{
                           type: 'string',
-                          value: 'sum(price)',
+                          value: 'sum(cost)',
                         }],
                       },
                     }],
