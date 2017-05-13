@@ -1,5 +1,5 @@
 const Fn = require('../fn.js');
-import { groupBy, keyBy, get, map, sortBy } from 'lodash';
+import { groupBy, keyBy, get, map, sortBy /*, min, max*/ } from 'lodash';
 
 /*
 esdocs(size=1000).alterColumn(column=@timestamp, type=date, name=time)
@@ -38,6 +38,15 @@ module.exports = new Fn({
       multi: false,
       types: ['seriesStyle', 'null'],
       help: 'The default style to use for a series',
+    },
+    palette: {
+      types: ['palette', 'null'],
+      help: 'A palette object for describing the colors to use on this plot',
+      default: {
+        type: 'palette',
+        colors: ['#01A4A4', '#C66', '#D0D102', '#616161', '#00A1CB', '#32742C', '#F18D05', '#113F8C', '#61AE24', '#D70060'],
+        gradient: false,
+      },
     },
   },
   fn: (context, args) => {
@@ -80,6 +89,8 @@ module.exports = new Fn({
       },
     };
 
+    context.rows = sortBy(context.rows, ['x', 'y', 'color', 'size']);
+
     if (context.columns.x.type === 'string') {
       sortBy(context.rows, ['x']).forEach(row => {
         if (!ticks.x.hash[row.x]) {
@@ -96,6 +107,16 @@ module.exports = new Fn({
       });
     }
 
+    /*
+    const sizeInfo = (function () {
+      const sizes = map(context.rows, 'size');
+      return {
+        min: min(sizes),
+        max: max(sizes),
+        delta: max(sizes) - min(sizes),
+      };
+    }());
+    */
 
     const data = map(groupBy(context.rows, 'color'), (series, label) => {
       const seriesStyle = seriesStyles[label];
@@ -105,9 +126,17 @@ module.exports = new Fn({
           const x = context.columns.x.type === 'string' ? ticks.x.hash[point.x] : point.x;
           const y = context.columns.y.type === 'string' ? ticks.y.hash[point.y] : point.y;
 
-          return [x, y, point.size];
+          //const maxDot = 0.4;
+          //const minDot = 0.05;
+
+          //const size = (maxDot - minDot) /
+          //          sizeInfo.delta * (point.size - sizeInfo.min) + minDot || undefined;
+          const size = point.size;
+          return [x, y, size];
         }),
       };
+
+      console.log(result.data);
 
       if (seriesStyle) {
         Object.assign(result, seriesStyleToFlot(seriesStyle));
@@ -115,15 +144,13 @@ module.exports = new Fn({
       return result;
     });
 
-    //const xTicks = map(xTickUniq, (position, name) => [position, name]);
-    //console.log(xTicks);
-
     const result = {
       type: 'render',
       as: 'plot',
       value: {
         data: data,
         options: {
+          colors: args.palette.colors,
           legend: {
             show: false,
           },
@@ -141,6 +168,10 @@ module.exports = new Fn({
           series: Object.assign({
             lines: {
               lineWidth: 2,
+            },
+            bubbles: {
+              active: true,
+              show: true,
             },
             shadowSize: 0,
           }, seriesStyleToFlot(args.defaultStyle)),

@@ -1,5 +1,6 @@
 import { Element } from '../element';
 import './flot';
+import { size } from './plugins/size';
 
 module.exports = new Element({
   name: 'plot',
@@ -15,7 +16,7 @@ module.exports = new Element({
   },
   render(domNode, config, done) {
     const $ = window.$;
-    config.options.colors = ['#01A4A4', '#C66', '#D0D102', '#616161', '#00A1CB', '#32742C', '#F18D05', '#113F8C', '#61AE24', '#D70060'];
+    $.plot.plugins.push(size);
     $.plot($(domNode), config.data, config.options);
     done();
   },
