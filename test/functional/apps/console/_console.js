@@ -20,6 +20,7 @@ export default function ({ getService, getPageObjects }) {
   describe('console app', function describeIndexTests() {
     before(async function () {
       log.debug('navigateTo console');
+      await PageObjects.common.navigateToUrl('settings', 'kibana/getting_started');
       await PageObjects.gettingStarted.clickOptOutLink();
       return PageObjects.common.navigateToApp('console');
     });
