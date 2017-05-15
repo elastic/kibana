@@ -27,10 +27,11 @@ export function VislibVisTypeProvider(Private) {
 
     render(vis, $el, uiState, esResponse) {
       if (this.vislibVis) {
-        this.destroy(vis);
+        this.destroy();
       }
 
       return new Promise(resolve => {
+        this.vis = vis;
         this.vislibVis = new vislib.Vis($el[0], vis.params);
         this.vislibVis.on('brush', vis.API.events.brush);
         this.vislibVis.on('click', vis.API.events.click);
@@ -40,9 +41,9 @@ export function VislibVisTypeProvider(Private) {
       });
     }
 
-    destroy(vis) {
-      this.vislibVis.off('brush', vis.API.events.brush);
-      this.vislibVis.off('click', vis.API.events.click);
+    destroy() {
+      this.vislibVis.off('brush', this.vis.API.events.brush);
+      this.vislibVis.off('click', this.vis.API.events.click);
       this.vislibVis.destroy();
     }
   }

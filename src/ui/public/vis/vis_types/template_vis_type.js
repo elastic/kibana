@@ -15,16 +15,21 @@ export function TemplateVisTypeProvider(Private, $compile, $rootScope) {
 
     render(vis, $el, uiState, esResponse) {
       return new Promise((resolve, reject) => {
+        const updateScope = () => {
+          this.$scope.vis = vis.clone();
+          this.$scope.esResponse = esResponse;
+          this.$scope.renderComplete = resolve;
+          this.$scope.renderFailed = reject;
+        };
+
         if (!this.$scope) {
           this.$scope = $rootScope.$new();
+          updateScope();
           this.$scope.uiState = uiState;
           $el.html($compile(vis.type.visConfig.template)(this.$scope));
+        } else {
+          updateScope();
         }
-
-        this.$scope.vis = vis.clone();
-        this.$scope.esResponse = esResponse;
-        this.$scope.renderComplete = resolve;
-        this.$scope.renderFailed = reject;
       });
     }
 
