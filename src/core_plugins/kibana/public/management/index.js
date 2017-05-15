@@ -19,6 +19,10 @@ uiRoutes
   redirectTo: '/management'
 });
 
+require('ui/index_patterns/route_setup/load_default')({
+  whenMissingRedirectTo: '/management/kibana/index'
+});
+
 uiModules
 .get('apps/management')
 .directive('kbnManagementApp', function (Private, $location, timefilter, buildNum, buildSha) {
