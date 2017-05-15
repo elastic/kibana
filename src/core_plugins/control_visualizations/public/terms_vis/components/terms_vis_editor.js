@@ -5,6 +5,7 @@ import {
   KuiButton,
   KuiButtonIcon,
 } from 'ui_framework/components';
+import { addField, newField, setField } from '../lib/editor_utils';
 
 export class TermsVisEditor extends Component {
   constructor(props) {
@@ -19,48 +20,24 @@ export class TermsVisEditor extends Component {
   handleLabelChange(fieldIndex, evt) {
     const updatedField = this.props.visParams.fields[fieldIndex];
     updatedField.label = evt.target.value;
-    const updatedFields = [
-      ...this.props.visParams.fields.slice(0, fieldIndex),
-      updatedField,
-      ...this.props.visParams.fields.slice(fieldIndex + 1)
-    ];
-    this.props.setVisParam('fields', updatedFields);
+    this.props.setVisParam('fields', setField(this.props.visParams.fields, fieldIndex, updatedField));
   }
 
   handleIndexPatternChange(fieldIndex, evt) {
     const updatedField = this.props.visParams.fields[fieldIndex];
     updatedField.indexPattern = evt.value;
     updatedField.fieldName = '';
-    const updatedFields = [
-      ...this.props.visParams.fields.slice(0, fieldIndex),
-      updatedField,
-      ...this.props.visParams.fields.slice(fieldIndex + 1)
-    ];
-    this.props.setVisParam('fields', updatedFields);
+    this.props.setVisParam('fields', setField(this.props.visParams.fields, fieldIndex, updatedField));
   }
 
   handleFieldNameChange(fieldIndex, evt) {
     const updatedField = this.props.visParams.fields[fieldIndex];
     updatedField.fieldName = evt.value;
-    const updatedFields = [
-      ...this.props.visParams.fields.slice(0, fieldIndex),
-      updatedField,
-      ...this.props.visParams.fields.slice(fieldIndex + 1)
-    ];
-    this.props.setVisParam('fields', updatedFields);
+    this.props.setVisParam('fields', setField(this.props.visParams.fields, fieldIndex, updatedField));
   }
 
   addField() {
-    const newField = {
-      indexPattern: '',
-      fieldName: '',
-      label: ''
-    };
-    const updatedFields = [
-      ...this.props.visParams.fields,
-      newField
-    ];
-    this.props.setVisParam('fields', updatedFields);
+    this.props.setVisParam('fields', addField(this.props.visParams.fields, newField()));
   }
 
   renderFields() {

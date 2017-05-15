@@ -5,6 +5,7 @@ import './vis.less';
 import { VisVisTypeProvider } from 'ui/vis/vis_type';
 import { TemplateVisTypeProvider } from 'ui/template_vis_type/template_vis_type';
 import { VisTypesRegistryProvider } from 'ui/registry/vis_types';
+import { newField } from './lib/editor_utils';
 VisTypesRegistryProvider.register(TermsProvider);
 
 export default function TermsProvider(Private) {
@@ -21,11 +22,7 @@ export default function TermsProvider(Private) {
     params: {
       editor: require('./editor.html'),
       defaults: {
-        fields: [{
-          indexPattern: '',
-          fieldName: '',
-          label: ''
-        }]
+        fields: [newField()]
       }
     },
     requiresSearch: false
