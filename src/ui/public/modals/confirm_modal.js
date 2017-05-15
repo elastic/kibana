@@ -70,11 +70,6 @@ module.factory('confirmModal', function ($rootScope, $compile) {
     function showModal(confirmScope) {
       const modalInstance = $compile(template)(confirmScope);
       modalPopover = new ModalOverlay(modalInstance);
-      angular.element(document.body).on('keydown', (event) => {
-        if (event.keyCode === 27) {
-          confirmScope.onCancel();
-        }
-      });
     }
 
     if (modalPopover) {

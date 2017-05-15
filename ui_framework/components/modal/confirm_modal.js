@@ -36,6 +36,13 @@ export class KuiConfirmModal extends React.Component {
     }
   }
 
+  onKeyDown = (event) => {
+    // Treat the 'esc' key as a cancel indicator.
+    if (event.keyCode === 27) {
+      this.props.onCancel();
+    }
+  };
+
   render() {
     const {
       message,
@@ -56,6 +63,7 @@ export class KuiConfirmModal extends React.Component {
         data-tests-subj={ dataTestSubj }
         aria-label={ ariaLabel }
         className={ className }
+        onKeyDown={ this.onKeyDown }
       >
         {
           title ?
