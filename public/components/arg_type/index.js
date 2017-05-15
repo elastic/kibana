@@ -38,7 +38,7 @@ const mergeProps = (stateProps, dispatchProps, ownProps) => {
     onValueChange: (ast) => dispatchProps.setExpressionAst({ ast, element, pageId, index: expressionIndex }),
   });
 
-  if (typeof context === 'undefined' && expressionType.requiresContext) {
+  if (context == null && Boolean(expressionType && expressionType.requiresContext)) {
     props.updateContext();
   }
 
