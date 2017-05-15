@@ -1,15 +1,15 @@
 import { VisVisTypeProvider } from 'ui/vis/vis_type';
 
-export function TemplateVisTypeProvider(Private, $compile, $rootScope) {
+export function AngularVisTypeProvider(Private, $compile, $rootScope) {
   const VisType = Private(VisVisTypeProvider);
 
-  class TemplateVisType extends VisType {
+  class AngularVisType extends VisType {
     constructor(opts) {
       super(opts);
 
       this.visConfig.template = opts.visConfig ? opts.visConfig.template : opts.template;
       if (!this.visConfig.template) {
-        throw new Error('Missing template for TemplateVisType');
+        throw new Error('Missing template for AngularVisType');
       }
     }
 
@@ -39,5 +39,5 @@ export function TemplateVisTypeProvider(Private, $compile, $rootScope) {
     }
   }
 
-  return TemplateVisType;
+  return AngularVisType;
 }

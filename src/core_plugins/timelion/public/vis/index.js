@@ -2,7 +2,7 @@ import { VisVisTypeProvider } from 'ui/vis/vis_type';
 import image from '../images/icon-timelion.svg';
 import { VisTypesRegistryProvider } from 'ui/registry/vis_types';
 import { RequestHandlersRegistryProvider } from 'ui/registry/request_handlers';
-import { TemplateVisTypeProvider } from 'ui/vis/vis_types/template_vis_type';
+import { AngularVisTypeProvider } from 'ui/vis/vis_types/angular_vis_type';
 import { TimelionRequestHandlerProvider } from './timelion_request_handler';
 
 define(function (require) {
@@ -19,11 +19,11 @@ define(function (require) {
 
   function TimelionVisProvider(Private) {
     const VisType = Private(VisVisTypeProvider);
-    const TemplateVisType = Private(TemplateVisTypeProvider);
+    const AngularVisType = Private(AngularVisTypeProvider);
 
     // return the visType object, which kibana will use to display and configure new
     // Vis object of this type.
-    return new TemplateVisType({
+    return new AngularVisType({
       name: 'timelion',
       title: 'Timelion',
       image,

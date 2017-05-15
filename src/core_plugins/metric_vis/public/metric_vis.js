@@ -1,7 +1,7 @@
 import 'plugins/metric_vis/metric_vis.less';
 import 'plugins/metric_vis/metric_vis_controller';
 import { VisVisTypeProvider } from 'ui/vis/vis_type';
-import { TemplateVisTypeProvider } from 'ui/vis/vis_types/template_vis_type';
+import { AngularVisTypeProvider } from 'ui/vis/vis_types/angular_vis_type';
 import { VisSchemasProvider } from 'ui/vis/schemas';
 import metricVisTemplate from 'plugins/metric_vis/metric_vis.html';
 import metricVisParamsTemplate from 'plugins/metric_vis/metric_vis_params.html';
@@ -16,12 +16,12 @@ VisTypesRegistryProvider.register(MetricVisProvider);
 
 function MetricVisProvider(Private) {
   const VisType = Private(VisVisTypeProvider);
-  const TemplateVisType = Private(TemplateVisTypeProvider);
+  const AngularVisType = Private(AngularVisTypeProvider);
   const Schemas = Private(VisSchemasProvider);
 
   // return the visType object, which kibana will use to display and configure new
   // Vis object of this type.
-  return new TemplateVisType({
+  return new AngularVisType({
     name: 'metric',
     title: 'Metric',
     image,
