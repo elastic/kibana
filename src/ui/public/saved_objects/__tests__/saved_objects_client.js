@@ -23,21 +23,21 @@ describe('SavedObjectsClient', () => {
   describe('#_getUrl', () => {
     it('returns without arguments', () => {
       const url = savedObjectsClient._getUrl();
-      const expected = `${basePath}/api/kibana/saved_objects/`;
+      const expected = `${basePath}/api/saved_objects/`;
 
       expect(url).to.be(expected);
     });
 
     it('appends path', () => {
       const url = savedObjectsClient._getUrl(['some', 'path']);
-      const expected = `${basePath}/api/kibana/saved_objects/some/path`;
+      const expected = `${basePath}/api/saved_objects/some/path`;
 
       expect(url).to.be(expected);
     });
 
     it('appends query', () => {
       const url = savedObjectsClient._getUrl(['some', 'path'], { foo: 'Foo', bar: 'Bar' });
-      const expected = `${basePath}/api/kibana/saved_objects/some/path?foo=Foo&bar=Bar`;
+      const expected = `${basePath}/api/saved_objects/some/path?foo=Foo&bar=Bar`;
 
       expect(url).to.be(expected);
     });
@@ -111,7 +111,7 @@ describe('SavedObjectsClient', () => {
     beforeEach(() => {
       savedObjectsClient._$http.withArgs({
         method: 'GET',
-        url: `${basePath}/api/kibana/saved_objects/index-pattern/logstash-*`
+        url: `${basePath}/api/saved_objects/index-pattern/logstash-*`
       }).returns(Promise.resolve(attributes));
     });
 
@@ -154,7 +154,7 @@ describe('SavedObjectsClient', () => {
     beforeEach(() => {
       savedObjectsClient._$http.withArgs({
         method: 'DELETE',
-        url: `${basePath}/api/kibana/saved_objects/index-pattern/logstash-*`
+        url: `${basePath}/api/saved_objects/index-pattern/logstash-*`
       }).returns(Promise.resolve({ data: 'api-response' }));
     });
 
@@ -192,7 +192,7 @@ describe('SavedObjectsClient', () => {
     beforeEach(() => {
       savedObjectsClient._$http.withArgs({
         method: 'PUT',
-        url: `${basePath}/api/kibana/saved_objects/index-pattern/logstash-*`,
+        url: `${basePath}/api/saved_objects/index-pattern/logstash-*`,
         data: sinon.match.any
       }).returns(Promise.resolve({ data: 'api-response' }));
     });
@@ -244,7 +244,7 @@ describe('SavedObjectsClient', () => {
     beforeEach(() => {
       savedObjectsClient._$http.withArgs({
         method: 'POST',
-        url: `${basePath}/api/kibana/saved_objects/index-pattern`,
+        url: `${basePath}/api/saved_objects/index-pattern`,
         data: sinon.match.any
       }).returns(Promise.resolve({ data: 'api-response' }));
     });
@@ -298,7 +298,7 @@ describe('SavedObjectsClient', () => {
       expect(savedObjectsClient._$http.calledOnce).to.be(true);
 
       const options = savedObjectsClient._$http.getCall(0).args[0];
-      expect(options.url).to.eql(`${basePath}/api/kibana/saved_objects/index-pattern`);
+      expect(options.url).to.eql(`${basePath}/api/saved_objects/index-pattern`);
     });
 
     it('accepts fields', () => {

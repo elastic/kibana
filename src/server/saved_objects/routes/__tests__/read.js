@@ -3,7 +3,7 @@ import sinon from 'sinon';
 import { createReadRoute } from '../read';
 import { MockServer } from './mock_server';
 
-describe('GET /api/kibana/saved_objects/{type}/{id}', () => {
+describe('GET /api/saved_objects/{type}/{id}', () => {
   const savedObjectsClient = { get: sinon.stub() };
   let server;
 
@@ -29,7 +29,7 @@ describe('GET /api/kibana/saved_objects/{type}/{id}', () => {
   it('formats successful response', async () => {
     const request = {
       method: 'GET',
-      url: '/api/kibana/saved_objects/index-pattern/logstash-*'
+      url: '/api/saved_objects/index-pattern/logstash-*'
     };
     const clientResponse = {
       id: 'logstash-*',
@@ -50,7 +50,7 @@ describe('GET /api/kibana/saved_objects/{type}/{id}', () => {
   it('calls upon savedObjectClient.get', async () => {
     const request = {
       method: 'GET',
-      url: '/api/kibana/saved_objects/index-pattern/logstash-*'
+      url: '/api/saved_objects/index-pattern/logstash-*'
     };
 
     await server.inject(request);

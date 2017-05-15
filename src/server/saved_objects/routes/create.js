@@ -3,7 +3,7 @@ import { has } from 'lodash';
 
 export const createCreateRoute = (prereqs) => {
   return {
-    path: '/api/kibana/saved_objects/{type}/{id?}',
+    path: '/api/saved_objects/{type}/{id?}',
     method: 'POST',
     config: {
       pre: [prereqs.getSavedObjectsClient],

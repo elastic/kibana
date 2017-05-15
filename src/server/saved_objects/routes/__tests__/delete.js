@@ -3,7 +3,7 @@ import sinon from 'sinon';
 import { createDeleteRoute } from '../delete';
 import { MockServer } from './mock_server';
 
-describe('DELETE /api/kibana/saved_objects/{type}/{id}', () => {
+describe('DELETE /api/saved_objects/{type}/{id}', () => {
   const savedObjectsClient = { delete: sinon.stub() };
   let server;
 
@@ -29,7 +29,7 @@ describe('DELETE /api/kibana/saved_objects/{type}/{id}', () => {
   it('formats successful response', async () => {
     const request = {
       method: 'DELETE',
-      url: '/api/kibana/saved_objects/index-pattern/logstash-*'
+      url: '/api/saved_objects/index-pattern/logstash-*'
     };
     const clientResponse = true;
 
@@ -45,7 +45,7 @@ describe('DELETE /api/kibana/saved_objects/{type}/{id}', () => {
   it('calls upon savedObjectClient.delete', async () => {
     const request = {
       method: 'DELETE',
-      url: '/api/kibana/saved_objects/index-pattern/logstash-*'
+      url: '/api/saved_objects/index-pattern/logstash-*'
     };
 
     await server.inject(request);

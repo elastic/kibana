@@ -1,7 +1,7 @@
 import Joi from 'joi';
 
 export const createDeleteRoute = (prereqs) => ({
-  path: '/api/kibana/saved_objects/{type}/{id}',
+  path: '/api/saved_objects/{type}/{id}',
   method: 'DELETE',
   config: {
     pre: [prereqs.getSavedObjectsClient],

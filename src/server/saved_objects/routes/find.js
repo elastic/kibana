@@ -1,7 +1,7 @@
 import Joi from 'joi';
 
 export const createFindRoute = (prereqs) => ({
-  path: '/api/kibana/saved_objects/{type?}',
+  path: '/api/saved_objects/{type?}',
   method: 'GET',
   config: {
     pre: [prereqs.getSavedObjectsClient],

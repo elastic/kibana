@@ -3,7 +3,7 @@ import sinon from 'sinon';
 import { createUpdateRoute } from '../update';
 import { MockServer } from './mock_server';
 
-describe('PUT /api/kibana/saved_objects/{type}/{id?}', () => {
+describe('PUT /api/saved_objects/{type}/{id?}', () => {
   const savedObjectsClient = { update: sinon.stub() };
   let server;
 
@@ -29,7 +29,7 @@ describe('PUT /api/kibana/saved_objects/{type}/{id?}', () => {
   it('formats successful response', async () => {
     const request = {
       method: 'PUT',
-      url: '/api/kibana/saved_objects/index-pattern/logstash-*',
+      url: '/api/saved_objects/index-pattern/logstash-*',
       payload: {
         title: 'Testing'
       }
@@ -47,7 +47,7 @@ describe('PUT /api/kibana/saved_objects/{type}/{id?}', () => {
   it('calls upon savedObjectClient.update', async () => {
     const request = {
       method: 'PUT',
-      url: '/api/kibana/saved_objects/index-pattern/logstash-*',
+      url: '/api/saved_objects/index-pattern/logstash-*',
       payload: {
         title: 'Testing'
       }

@@ -2,7 +2,7 @@ import Joi from 'joi';
 
 export const createUpdateRoute = (prereqs) => {
   return {
-    path: '/api/kibana/saved_objects/{type}/{id}',
+    path: '/api/saved_objects/{type}/{id}',
     method: 'PUT',
     config: {
       pre: [prereqs.getSavedObjectsClient],

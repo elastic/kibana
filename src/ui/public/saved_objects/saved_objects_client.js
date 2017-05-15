@@ -10,7 +10,7 @@ const join = (...uriComponents) => (
 export class SavedObjectsClient {
   constructor($http, basePath) {
     this._$http = $http;
-    this._apiBaseUrl = `${basePath}/api/kibana/saved_objects/`;
+    this._apiBaseUrl = `${basePath}/api/saved_objects/`;
   }
 
   get(type, id) {
