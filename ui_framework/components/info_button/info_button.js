@@ -4,18 +4,18 @@ import React, {
 
 import classNames from 'classnames';
 
-const KuiHelpIcon = props => {
-  const iconClasses = classNames('kuiHelpIcon kuiIcon fa-info-circle', props.className);
+const KuiInfoButton = props => {
+  const iconClasses = classNames('kuiInfoButton kuiIcon fa-info-circle', props.className);
 
   return (
     <button className={iconClasses}></button>
   );
 };
 
-KuiHelpIcon.propTypes = {
+KuiInfoButton.propTypes = {
   className: PropTypes.string,
 };
 
 export {
-  KuiHelpIcon,
+  KuiInfoButton,
 };
