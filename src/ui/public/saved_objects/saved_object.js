@@ -23,7 +23,7 @@ export class SavedObject {
   }
 
   delete() {
-    return this.cient.delete(this.type, this.id);
+    return this.client.delete(this.type, this.id);
   }
 
   get id() {
