@@ -23,8 +23,8 @@ import { FilterBarClickHandlerProvider } from 'ui/filter_bar/filter_bar_click_ha
 import { DashboardState } from './dashboard_state';
 import { notify } from 'ui/notify';
 import { documentationLinks } from 'ui/documentation_links/documentation_links';
-import { showCloneModal } from './show_clone_modal';
-import { DashboardCloneModal } from './clone_modal';
+import { showCloneModal } from './top_nav/show_clone_modal';
+import { DashboardCloneModal } from './top_nav/clone_modal';
 
 const app = uiModules.get('app/dashboard', [
   'elasticsearch',

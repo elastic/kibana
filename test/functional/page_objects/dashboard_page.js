@@ -74,6 +74,25 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
       return testSubjects.click('dashboardQueryFilterButton');
     }
 
+    async clickClone() {
+      log.debug('Clicking clone');
+      await testSubjects.click('dashboardClone');
+    }
+
+    async confirmClone() {
+      log.debug('Confirming clone');
+      await testSubjects.click('cloneConfirmButton');
+    }
+
+    async cancelClone() {
+      log.debug('Canceling clone');
+      await testSubjects.click('cloneCancelButton');
+    }
+
+    async setClonedDashboardTitle(title) {
+      await testSubjects.setValue('clonedDashboardTitle', title);
+    }
+
     clickEdit() {
       log.debug('Clicking edit');
       return testSubjects.click('dashboardEditMode');

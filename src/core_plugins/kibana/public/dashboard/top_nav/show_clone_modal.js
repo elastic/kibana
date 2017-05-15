@@ -26,9 +26,4 @@ export function showCloneModal(onClone, title, $rootScope, $compile) {
 
   const modalInstance = $compile(template)(cloneScope);
   modalPopover = new ModalOverlay(modalInstance);
-  angular.element(document.body).on('keydown', (event) => {
-    if (event.keyCode === 27) {
-      cloneScope.onClose();
-    }
-  });
 }

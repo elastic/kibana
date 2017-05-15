@@ -34,13 +34,14 @@ bdd.describe('dashboard save', function describeIndexTests() {
     await PageObjects.dashboard.loadSavedDashboard(dashboardName);
     await PageObjects.dashboard.clickClone();
 
+    await PageObjects.dashboard.confirmClone();
     const isConfirmOpen = await PageObjects.common.isConfirmModalOpen();
     expect(isConfirmOpen).to.equal(true);
   });
 
   bdd.it('preserves the original title on cancel', async function() {
     await PageObjects.common.clickCancelOnModal();
-    await PageObjects.dashboard.clickClone();
+    await PageObjects.dashboard.confirmClone();
 
     // Should see the same confirmation if the title is the same.
     const isConfirmOpen = await PageObjects.common.isConfirmModalOpen();
@@ -49,6 +50,7 @@ bdd.describe('dashboard save', function describeIndexTests() {
 
   bdd.it('and doesn\'t save', async () => {
     await PageObjects.common.clickCancelOnModal();
+    await PageObjects.dashboard.cancelClone();
 
     const countOfDashboards = await PageObjects.dashboard.getDashboardCountWithName(dashboardName);
     expect(countOfDashboards).to.equal(1);
@@ -58,6 +60,7 @@ bdd.describe('dashboard save', function describeIndexTests() {
     await PageObjects.dashboard.loadSavedDashboard(dashboardName);
     await PageObjects.dashboard.clickClone();
 
+    await PageObjects.dashboard.confirmClone();
     await PageObjects.common.clickConfirmOnModal();
 
     // This is important since saving a new dashboard will cause a refresh of the page.  We have to
