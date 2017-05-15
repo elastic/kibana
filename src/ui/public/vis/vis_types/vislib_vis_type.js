@@ -42,9 +42,11 @@ export function VislibVisTypeProvider(Private) {
     }
 
     destroy() {
-      this.vislibVis.off('brush', this.vis.API.events.brush);
-      this.vislibVis.off('click', this.vis.API.events.click);
-      this.vislibVis.destroy();
+      if (this.vislibVis) {
+        this.vislibVis.off('brush', this.vis.API.events.brush);
+        this.vislibVis.off('click', this.vis.API.events.click);
+        this.vislibVis.destroy();
+      }
     }
   }
 
