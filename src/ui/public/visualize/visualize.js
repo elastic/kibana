@@ -86,7 +86,7 @@ uiModules
 
       if ($scope.vis.type.requiresSearch) {
         stateMonitor.onChange((status, type, keys) => {
-          if (['query', 'filter'].includes(keys[0])) {
+          if (['query', 'filters'].includes(keys[0])) {
             $scope.fetch();
           }
         });
