@@ -5,7 +5,7 @@ import {
   KuiButton,
   KuiButtonIcon,
 } from 'ui_framework/components';
-import { addField, newField, setField } from '../lib/editor_utils';
+import { addField, newField, removeField, setField } from '../lib/editor_utils';
 
 export class TermsVisEditor extends Component {
   constructor(props) {
@@ -14,7 +14,8 @@ export class TermsVisEditor extends Component {
     this.handleFieldNameChange = this.handleFieldNameChange.bind(this);
     this.handleLabelChange = this.handleLabelChange.bind(this);
     this.handleIndexPatternChange = this.handleIndexPatternChange.bind(this);
-    this.addField = this.addField.bind(this);
+    this.handleRemoveField = this.handleRemoveField.bind(this);
+    this.handleAddField = this.handleAddField.bind(this);
   }
 
   handleLabelChange(fieldIndex, evt) {
@@ -36,7 +37,11 @@ export class TermsVisEditor extends Component {
     this.props.setVisParam('fields', setField(this.props.visParams.fields, fieldIndex, updatedField));
   }
 
-  addField() {
+  handleRemoveField(fieldIndex) {
+    this.props.setVisParam('fields', removeField(this.props.visParams.fields, fieldIndex));
+  }
+
+  handleAddField() {
     this.props.setVisParam('fields', addField(this.props.visParams.fields, newField()));
   }
 
@@ -57,6 +62,11 @@ export class TermsVisEditor extends Component {
                 value={field.label}
                 onChange={this.handleLabelChange.bind(null, index)} />
             </div>
+            <button
+              className="kuiButton kuiButton--danger kuiButton--small"
+              onClick={this.handleRemoveField.bind(null, index)}>
+              <span className="kuiIcon fa-trash"></span>
+            </button>
           </div>
 
           <IndexPatternSelect
@@ -83,7 +93,7 @@ export class TermsVisEditor extends Component {
         <KuiButton
           type="primary"
           icon={<KuiButtonIcon type="create" />}
-          onClick={this.addField}
+          onClick={this.handleAddField}
         >
           Add
         </KuiButton>
