@@ -93,9 +93,9 @@ uiModules
 
         // visualize needs to know about timeFilter
         $scope.$listen(timefilter, 'fetch', $scope.fetch);
-
-        $scope.fetch();
       }
+
+      $scope.fetch();
     }
   };
 });
