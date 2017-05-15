@@ -294,7 +294,7 @@ export TEST_ES_HOSTNAME=aaa5d22032d76805fcce724ed9d9f5a2.us-east-1.aws.found.io
 export TEST_ES_PORT=9200
 export TEST_ES_USER=elastic
 export TEST_ES_PASS=<your password here>
-npm run node scripts/functional_test_runner
+node scripts/functional_test_runner
 ```
 
 ##### Browser Automation Notes
