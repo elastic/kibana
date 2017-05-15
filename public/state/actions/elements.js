@@ -14,7 +14,7 @@ export const setAst = ({ ast, element, pageId }) => (dispatch) => {
   dispatch(setAstAndExpression({ expression, ast, element, pageId }));
 };
 
-export const setExpressionAst = ({ ast, element, pageId, index }) => {
+export const setAstAtIndex = ({ ast, element, pageId, index }) => {
   const newAst = set(element, ['ast', 'chain', index], ast);
   return setAst({ ast: newAst, element, pageId });
 };
