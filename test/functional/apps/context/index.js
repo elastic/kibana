@@ -1,13 +1,10 @@
 export default function ({ getService, getPageObjects, loadTestFile }) {
-  const config = getService('config');
   const remote = getService('remote');
   const esArchiver = getService('esArchiver');
   const PageObjects = getPageObjects(['common']);
   const kibanaServer = getService('kibanaServer');
 
   describe('context app', function () {
-    this.timeout(config.get('timeouts.test'));
-
     before(async function () {
       await remote.setWindowSize(1200,800);
       await esArchiver.loadIfNeeded('logstash_functional');
