@@ -120,10 +120,10 @@ npm run elasticsearch
 If you're just getting started with `elasticsearch`, you could use the following command to populate your instance with a few fake logs to hit the ground running.
 
 ```bash
-npm run makelogs
+node scripts/makelogs
 ```
 
-> Make sure to execute `npm run makelogs` *after* elasticsearch is up and running!
+> Make sure to execute `node scripts/makelogs` *after* elasticsearch is up and running!
 
 Start the development server.
   ```bash
@@ -208,13 +208,13 @@ npm run test:server
 When you'd like to execute individual server-side test files, you can use the command below. Note that this command takes care of configuring Mocha with Babel compilation for you, and you'll be better off avoiding a globally installed `mocha` package. This command is great for development and for quickly identifying bugs.
 
 ```bash
-npm run mocha <file>
+node scripts/mocha <file>
 ```
 
-You could also add the `:debug` target so that `node` is run using the `--debug-brk` flag. You'll need to connect a remote debugger such as [`node-inspector`](https://github.com/node-inspector/node-inspector) to proceed in this mode.
+You could also add the `--debug` option so that `node` is run using the `--debug-brk` flag. You'll need to connect a remote debugger such as [`node-inspector`](https://github.com/node-inspector/node-inspector) to proceed in this mode.
 
 ```bash
-npm run mocha:debug <file>
+node scripts/mocha --debug <file>
 ```
 
 With `npm run test:browser`, you can run only the browser tests. Coverage reports are available for browser tests by running `npm run test:coverage`. You can find the results under the `coverage/` directory that will be created upon completion.
