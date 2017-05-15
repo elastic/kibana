@@ -22,7 +22,7 @@ const mapStateToProps = (state, { expressionIndex }) => {
   const resolvedArgs = getSelectedResolvedArgs(state);
 
   return {
-    context: get(resolvedArgs, ['expressionContexts', expressionIndex - 1], null),
+    context: get(resolvedArgs, ['expressionContext', expressionIndex - 1], null),
     element: getElementById(state, getSelectedElement(state)),
     pageId: getSelectedPage(state),
   };

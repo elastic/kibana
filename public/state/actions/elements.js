@@ -43,7 +43,7 @@ export const fetchContext = createAction('fetchContext', ({ element, index }) =>
   });
 }, ({ element, index }) => {
   const contextIndex = index - 1;
-  const argumentPath = [element.id, contextIndex];
+  const argumentPath = [element.id, 'expressionContext', contextIndex];
 
   return {
     onStart: (dispatch) => dispatch(args.setLoading({
