@@ -6,6 +6,8 @@ export {
   KuiSubmitButton,
 } from './button';
 
+export { KuiHelpIcon } from './help_icon';
+
 export {
   KuiToolBarSearchBox,
   KuiToolBar,
