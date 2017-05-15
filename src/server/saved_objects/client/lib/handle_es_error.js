@@ -23,7 +23,7 @@ export function handleEsError(error) {
     error instanceof NoConnections ||
     error instanceof RequestTimeout
   ) {
-    throw Boom.serverTimeout(error);
+    throw Boom.serverTimeout();
   }
 
   if (error instanceof Conflict || error.message.includes('index_template_already_exists')) {
@@ -31,15 +31,15 @@ export function handleEsError(error) {
   }
 
   if (error instanceof Forbidden) {
-    throw Boom.forbidden(error);
+    throw Boom.forbidden();
   }
 
   if (error instanceof NotFound) {
-    throw Boom.notFound(error);
+    throw Boom.notFound();
   }
 
   if (error instanceof BadRequest) {
-    throw Boom.badRequest(error);
+    throw Boom.badRequest();
   }
 
   throw error;
