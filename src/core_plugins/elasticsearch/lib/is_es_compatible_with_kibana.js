@@ -1,7 +1,8 @@
 /**
- * Let's weed out the ES versions that won't work with a given Kibana version.
- * 1. Major version differences will never work together.
- * 2. Older versions of ES won't work with newer versions of Kibana.
+ * Determines whether the version of Kibana is compatible with the version of
+ * Elasticsearch. Compatibility means that the versions are expected to behave
+ * at least satisfactorily together. Incompatible versions likely won't work at
+ * all.
  */
 
 import semver from 'semver';
@@ -19,7 +20,12 @@ export default function isEsCompatibleWithKibana(esVersion, kibanaVersion) {
     patch: semver.patch(kibanaVersion),
   };
 
-  // Reject mismatching major version numbers.
+  // Accept the next major version of ES.
+  if (esVersionNumbers.major === kibanaVersionNumbers.major + 1) {
+    return true;
+  }
+
+  // Reject any other major version mismatches with ES.
   if (esVersionNumbers.major !== kibanaVersionNumbers.major) {
     return false;
   }
