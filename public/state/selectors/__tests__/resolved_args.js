@@ -26,24 +26,22 @@ describe('resolved args selector', () => {
     };
   });
 
-  describe('getValue', () => {
-    it('should return the state', () => {
-      expect(selector.getState(state, 'test1')).to.equal('ready');
-      expect(selector.getState(state, 'test2')).to.equal('pending');
-      expect(selector.getState(state, 'test3')).to.equal('error');
-    });
+  it('getValue returns the state', () => {
+    expect(selector.getState(state, 'test1')).to.equal('ready');
+    expect(selector.getState(state, 'test2')).to.equal('pending');
+    expect(selector.getState(state, 'test3')).to.equal('error');
+  });
 
-    it('should return the value', () => {
-      expect(selector.getValue(state, 'test1')).to.equal('test value');
-      expect(selector.getValue(state, 'test2')).to.equal(null);
-      expect(selector.getValue(state, 'test3')).to.equal('some old value');
-    });
+  it('getValue returns the value', () => {
+    expect(selector.getValue(state, 'test1')).to.equal('test value');
+    expect(selector.getValue(state, 'test2')).to.equal(null);
+    expect(selector.getValue(state, 'test3')).to.equal('some old value');
+  });
 
-    it('should return the value', () => {
-      expect(selector.getError(state, 'test1')).to.equal(null);
-      expect(selector.getError(state, 'test2')).to.equal(null);
-      expect(selector.getError(state, 'test3')).to.be.an(Error);
-      expect(selector.getError(state, 'test3').toString()).to.match(/i\ have\ failed$/);
-    });
+  it('getError returns the error', () => {
+    expect(selector.getError(state, 'test1')).to.equal(null);
+    expect(selector.getError(state, 'test2')).to.equal(null);
+    expect(selector.getError(state, 'test3')).to.be.an(Error);
+    expect(selector.getError(state, 'test3').toString()).to.match(/i\ have\ failed$/);
   });
 });

@@ -1,21 +1,19 @@
 import { get } from 'lodash';
-import { append, prepend } from '../../lib/modify_path';
+import * as argHelper from '../../lib/resolved_arg';
+import { prepend } from '../../lib/modify_path';
 
-function wrapPath(path) {
-  return prepend(path, 'resolvedArgs');
+function getArg(transientState, path) {
+  return get(transientState, prepend(path, 'resolvedArgs'));
 }
 
 export function getValue(transientState, path) {
-  const fullPath = append(wrapPath(path), 'value');
-  return get(transientState, fullPath, null);
+  return argHelper.getValue(getArg(transientState, path));
 }
 
 export function getState(transientState, path) {
-  const fullPath = append(wrapPath(path), 'state');
-  return get(transientState, fullPath, 'pending');
+  return argHelper.getState(getArg(transientState, path));
 }
 
 export function getError(transientState, path) {
-  const fullPath = append(wrapPath(path), 'error');
-  return get(transientState, fullPath, null);
+  return argHelper.getError(getArg(transientState, path));
 }
