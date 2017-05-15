@@ -1,0 +1,19 @@
+Fix bug where the loading indicator was wider than the screen
+
+Backports PR #8854
+
+**Commit 1:**
+Fix bug where the loading indicator was wider than the screen, allowing you to drag a dashboard panel very wide and break the UI.
+- Refactor kbnLoadingIndicator to be a standalone component.
+- Uncouple from .spinner styles.
+- Set a max-width on it.
+- Rename Common PageObject getSpinnerDone method to isGlobalLoadingIndicatorHidden.
+
+* Original sha: 262784953c61e09adbcb8be73983104263951aca
+* Authored by CJ Cenizal <cj@cenizal.com> on 2016-10-27T16:04:49Z
+
+**Commit 2:**
+Make loadingIndicator fixed position so it doesn't disrupt the layout when it appears and disappears.
+
+* Original sha: 5f6fd88d014cf13875bc5830f00235e07b494f95
+* Authored by CJ Cenizal <cj@cenizal.com> on 2016-10-29T00:25:19Z
