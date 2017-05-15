@@ -14,6 +14,10 @@ import {
   getSelectedResolvedArgs,
 } from '../../state/selectors/workpad';
 
+function contextRequired(expressionType) {
+  return Boolean(expressionType && expressionType.requiresContext);
+}
+
 const mapStateToProps = (state, { expressionIndex }) => {
   const resolvedArgs = getSelectedResolvedArgs(state);
 
@@ -38,7 +42,7 @@ const mergeProps = (stateProps, dispatchProps, ownProps) => {
     onValueChange: (ast) => dispatchProps.setExpressionAst({ ast, element, pageId, index: expressionIndex }),
   });
 
-  if (context == null && Boolean(expressionType && expressionType.requiresContext)) {
+  if (context == null && contextRequired(expressionType)) {
     props.updateContext();
   }
 
@@ -47,18 +51,16 @@ const mergeProps = (stateProps, dispatchProps, ownProps) => {
 
 const contextPending = branch(
   ({ context, expressionType }) => {
-    const requiresContext = Boolean(expressionType && expressionType.requiresContext);
     const isPending = (!context || context.state === 'pending');
-    return requiresContext && isPending;
+    return contextRequired(expressionType) && isPending;
   },
   renderComponent(ArgTypeContextPending)
 );
 
 const contextError = branch(
   ({ context, expressionType }) => {
-    const requiresContext = Boolean(expressionType && expressionType.requiresContext);
-    const isError = (!context || context.state === 'error');
-    return requiresContext && isError;
+    const isError = (context && context.state === 'error');
+    return contextRequired(expressionType) && isError;
   },
   renderComponent(ArgTypeContextError)
 );
