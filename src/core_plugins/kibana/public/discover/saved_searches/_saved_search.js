@@ -24,7 +24,8 @@ module.factory('SavedSearch', function (courier) {
         hits: 0,
         sort: [],
         version: 1
-      }
+      },
+      afterESResp: SavedSearch._afterESResp
     });
   }
 
@@ -44,6 +45,24 @@ module.factory('SavedSearch', function (courier) {
   SavedSearch.fieldOrder = ['title', 'description'];
 
   SavedSearch.searchSource = true;
+
+  SavedSearch._afterESResp = function () {
+    // we used to by default always add in the timeFieldName implicitly, so we're
+    // automatically adding this in for the user for legacy savedSearches
+
+    if (this.explicitTimeColumn) {
+      return;
+    }
+
+    this.explicitTimeColumn = true;
+    if (!this.id) {
+      return;
+    }
+
+    const indexPattern = this.searchSource.get('index');
+    this.columns.unshift(indexPattern.timeFieldName);
+    return this;
+  };
 
   return SavedSearch;
 });
