@@ -122,7 +122,7 @@ function VisEditor($scope, $route, timefilter, AppState, $window, kbnUrl, courie
   const stateDefaults = {
     uiState: savedVis.uiStateJSON ? JSON.parse(savedVis.uiStateJSON) : {},
     linked: !!savedVis.savedSearchId,
-    query: searchSource.getOwn('query') || { query_string: { query: '*' } },
+    query: searchSource.getOwn('query') || { query_string: { analyze_wildcard: true, query: '*' } },
     filters: searchSource.getOwn('filter') || [],
     vis: savedVisState
   };
