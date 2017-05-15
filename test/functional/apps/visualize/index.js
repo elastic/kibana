@@ -1,13 +1,10 @@
 export default function ({ getService, loadTestFile }) {
-  const config = getService('config');
   const remote = getService('remote');
   const log = getService('log');
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
 
   describe('visualize app', function () {
-    this.timeout(config.get('timeouts.test'));
-
     before(function () {
       remote.setWindowSize(1280,800);
 
