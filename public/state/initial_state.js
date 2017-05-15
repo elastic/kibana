@@ -13,39 +13,7 @@ export default (path) => {
     transient: {
       selectedPage: 'page-f3ce-4bb7-86c8-0417606d6592',
       selectedElement: 'element-d88c-4bbd-9453-db22e949b92e',
-      resolvedArgs: {
-        'element-d88c-4bbd-9453-db22e949b92e': {
-          expressionContexts: {
-            0: {
-              // metadata form demodata()
-              state: 'ready',
-              value: {
-                type: 'datatable',
-                columns: [{
-                  type: 'date',
-                  name: 'time',
-                }, {
-                  type: 'number',
-                  name: 'cost',
-                }, {
-                  type: 'string',
-                  name: 'username',
-                }, {
-                  type: 'number',
-                  name: 'price',
-                }, {
-                  type: 'number',
-                  name: 'age',
-                }, {
-                  type: 'string',
-                  name: 'country',
-                }],
-              },
-              error: null,
-            },
-          },
-        },
-      },
+      resolvedArgs: {},
     },
     persistent: {
       workpad: {
