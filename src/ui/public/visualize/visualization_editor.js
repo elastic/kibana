@@ -3,12 +3,12 @@ import 'ui/visualize/visualize.less';
 import 'ui/visualize/visualize_legend';
 import { uiModules } from 'ui/modules';
 import 'angular-sanitize';
-import { EditorTypesRegistyProvider } from 'ui/registry/editor_types';
+import { EditorTypesRegistryProvider } from 'ui/registry/editor_types';
 
 uiModules
 .get('kibana/directive', ['ngSanitize'])
 .directive('visualizationEditor', function (Private) {
-  const editorTypes = Private(EditorTypesRegistyProvider);
+  const editorTypes = Private(EditorTypesRegistryProvider);
 
   return {
     restrict: 'E',

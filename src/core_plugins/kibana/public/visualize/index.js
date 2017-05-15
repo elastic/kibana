@@ -31,7 +31,7 @@ import { basicResponseHandler } from 'ui/vis/response_handlers/build_chart_data'
 import { defaultEditor } from 'ui/vis/editors/default';
 import { RequestHandlersRegistryProvider } from 'ui/registry/request_handlers';
 import { ResponseHandlersRegistryProvider } from 'ui/registry/response_handlers';
-import { EditorTypesRegistyProvider } from 'ui/registry/editor_types';
+import { EditorTypesRegistryProvider } from 'ui/registry/editor_types';
 
 uiRoutes
 .defaults(/visualize/, {
@@ -49,5 +49,5 @@ RequestHandlersRegistryProvider.register(CourierRequestHandlerProvider);
 RequestHandlersRegistryProvider.register(noneRequestHandlerProvider);
 ResponseHandlersRegistryProvider.register(noneResponseHandler);
 ResponseHandlersRegistryProvider.register(basicResponseHandler);
-EditorTypesRegistyProvider.register(defaultEditor);
+EditorTypesRegistryProvider.register(defaultEditor);
 
