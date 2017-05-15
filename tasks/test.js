@@ -58,7 +58,6 @@ module.exports = function (grunt) {
     'checkPlugins',
     'esvm:ui',
     'run:testUIServer',
-    'clean:screenshots',
     'functionalTestRunner',
     'esvm_shutdown:ui',
     'stop:testUIServer'
@@ -68,7 +67,6 @@ module.exports = function (grunt) {
     'checkPlugins',
     'esvm:ui',
     'run:testUIReleaseServer',
-    'clean:screenshots',
     'functionalTestRunner',
     'esvm_shutdown:ui',
     'stop:testUIReleaseServer'

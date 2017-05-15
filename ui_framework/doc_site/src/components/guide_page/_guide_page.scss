@@ -2,6 +2,8 @@
 
 .guidePage {
   display: flex;
+  flex: 1 0 auto;
+  padding-bottom: 20px;
 }
 
 .guidePageBody {
@@ -22,7 +24,7 @@
     width: calc(100vw - #{$leftMargin + $rightMargin + $scrollBarWidth + $guideCodeViewerWidth});
   }
 
-  @include whenNarrowerThan($normalBreakpoint) {
+  @include whenNarrowerThan($guideNormalBreakpoint) {
     $leftMargin: 20px + $guideSideNavSmallWidth;
     $rightMargin: 20px;
 

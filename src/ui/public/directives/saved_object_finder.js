@@ -15,7 +15,6 @@ module.directive('savedObjectFinder', function ($location, $injector, kbnUrl, Pr
     restrict: 'E',
     scope: {
       type: '@',
-      title: '@?',
       // optional make-url attr, sets the userMakeUrl in our scope
       userMakeUrl: '=?makeUrl',
       // optional on-choose attr, sets the userOnChoose in our scope
@@ -118,6 +117,13 @@ module.directive('savedObjectFinder', function ($location, $injector, kbnUrl, Pr
         currentFilter = newFilter || '';
         filterResults();
       });
+
+      $scope.pageFirstItem = 0;
+      $scope.pageLastItem = 0;
+      $scope.onPageChanged = (page) => {
+        $scope.pageFirstItem = page.firstItem;
+        $scope.pageLastItem = page.lastItem;
+      };
 
       //manages the state of the keyboard selector
       self.selector = {

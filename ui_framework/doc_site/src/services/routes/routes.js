@@ -109,6 +109,7 @@ const components = [{
 }, {
   name: 'Button',
   component: ButtonExample,
+  hasReact: true,
 }, {
   name: 'Card',
   component: CardExample,
@@ -157,6 +158,7 @@ const components = [{
 }, {
   name: 'Modal',
   component: ModalExample,
+  hasReact: true,
 }, {
   name: 'Panel',
   component: PanelExample,
@@ -175,6 +177,7 @@ const components = [{
 }, {
   name: 'ToolBar',
   component: ToolBarExample,
+  hasReact: true,
 }, {
   name: 'Typography',
   component: TypographyExample,

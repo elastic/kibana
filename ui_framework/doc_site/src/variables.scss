@@ -10,9 +10,12 @@ $guideCodeViewerTransition: 0.2s ease;
 $guideBaseBackgroundColor: #f7f7f7;
 $guidePanelBackgroundColor: #ffffff;
 $guideTextColor: #444;
+$guideLinkColor: #00a9e5;
 $guideLinkHoverColor: #00a9e5;
 
-$normalBreakpoint: 1900px;
+// Breakpoints
+$guideMinWidth: 840px;
+$guideNormalBreakpoint: 1900px;
 
 @mixin whenNarrowerThan($browserWidth) {
   @media only screen and (max-width: #{$browserWidth}) {

@@ -27,6 +27,6 @@ export async function setupMocha(lifecycle, log, config, providers) {
     await lifecycle.trigger('beforeEachTest');
   });
 
-  loadTestFiles(mocha, log, providers, config.get('testFiles'));
+  loadTestFiles(mocha, log, lifecycle, providers, config.get('testFiles'));
   return mocha;
 }

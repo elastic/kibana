@@ -5,6 +5,7 @@ export default function ({ getService, getPageObjects }) {
   const remote = getService('remote');
   const log = getService('log');
   const retry = getService('retry');
+  const screenshots = getService('screenshots');
   const PageObjects = getPageObjects(['settings', 'common']);
 
   describe('creating and deleting default index', function describeIndexTests() {
@@ -15,7 +16,7 @@ export default function ({ getService, getPageObjects }) {
         return PageObjects.settings.navigateTo();
       })
       .then(function () {
-        return PageObjects.settings.clickKibanaIndicies();
+        return PageObjects.settings.clickKibanaIndices();
       });
     });
 
@@ -27,7 +28,7 @@ export default function ({ getService, getPageObjects }) {
       it('should have index pattern in page header', function () {
         return PageObjects.settings.getIndexPageHeading().getVisibleText()
         .then(function (patternName) {
-          PageObjects.common.saveScreenshot('Settings-indices-new-index-pattern');
+          screenshots.take('Settings-indices-new-index-pattern');
           expect(patternName).to.be('logstash-*');
         });
       });
@@ -75,7 +76,7 @@ export default function ({ getService, getPageObjects }) {
         const expectedAlertText = 'Are you sure you want to remove this index pattern?';
         return PageObjects.settings.removeIndexPattern()
         .then(function (alertText) {
-          PageObjects.common.saveScreenshot('Settings-indices-confirm-remove-index-pattern');
+          screenshots.take('Settings-indices-confirm-remove-index-pattern');
           expect(alertText).to.be(expectedAlertText);
         });
       });
