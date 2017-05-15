@@ -1,0 +1,45 @@
+import React from 'react';
+import classNames from 'classnames';
+
+import { KuiPagerButtons } from './pager_buttons';
+
+export function KuiPager({
+    className,
+    startNumber,
+    endNumber,
+    totalItems,
+    hasPreviousPage,
+    hasNextPage,
+    onNextPage,
+    onPreviousPage,
+    ...rest }) {
+  const classes = classNames('kuiPager', className);
+  return (
+    <div className={classes} { ...rest }>
+      <div className="kuiPagerText">{startNumber}&ndash;{endNumber} of {totalItems}</div>
+      {
+        startNumber === 1 && endNumber === totalItems
+          ? null
+          : <KuiPagerButtons
+              hasNext={hasNextPage}
+              hasPrevious={hasPreviousPage}
+              onNext={onNextPage}
+              onPrevious={onPreviousPage}
+            />
+      }
+    </div>
+  );
+}
+
+KuiPager.propTypes = {
+  startNumber: React.PropTypes.number,
+  endNumber: React.PropTypes.number,
+  totalItems: React.PropTypes.number,
+  hasPreviousPage: React.PropTypes.bool.isRequired,
+  hasNextPage: React.PropTypes.bool.isRequired,
+  onNextPage: React.PropTypes.func.isRequired,
+  onPreviousPage: React.PropTypes.func.isRequired,
+  className: React.PropTypes.string
+};
+
+

@@ -1,0 +1,34 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`renders KuiPagerButtons 1`] = `
+<div
+  class="kuiButtonGroup kuiButtonGroup--united"
+>
+  <button
+    class="kuiButton kuiButton--basic kuiButton--iconText"
+    data-test-subj="pagerPreviousButton"
+  >
+    <span
+      class="kuiButton__inner"
+    >
+      <span
+        aria-hidden="true"
+        class="kuiButton__icon kuiIcon fa-chevron-left"
+      />
+    </span>
+  </button>
+  <button
+    class="kuiButton kuiButton--basic kuiButton--iconText"
+    data-test-subj="pagerNextButton"
+  >
+    <span
+      class="kuiButton__inner"
+    >
+      <span
+        aria-hidden="true"
+        class="kuiButton__icon kuiIcon fa-chevron-right"
+      />
+    </span>
+  </button>
+</div>
+`;
