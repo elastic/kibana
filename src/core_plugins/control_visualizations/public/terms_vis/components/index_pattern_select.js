@@ -10,21 +10,30 @@ export class IndexPatternSelect extends Component {
 
   loadOptions(input, callback) {
     this.props.getIndexPatternIds().then(ids => {
-      this.cachedOptions = ids.map(id => {
+      const options = ids.map(id => {
         return { label: id, value: id };
       });
       //Setting complete=true means loadOptions will never be called again.
-      callback(null, { options: this.cachedOptions, complete: true });
+      callback(null, { options: options, complete: true });
     });
   }
 
   render() {
     return (
-      <Select.Async
-        placeholder="Select..."
-        value={this.props.value}
-        loadOptions={this.loadOptions}
-        onChange={this.props.onChange}/>
+      <div className="kuiFieldGroup">
+        <div className="kuiFieldGroupSection">
+          <label>
+            Index Pattern
+          </label>
+        </div>
+        <div className="kuiFieldGroupSection">
+          <Select.Async
+            placeholder="Select..."
+            value={this.props.value}
+            loadOptions={this.loadOptions}
+            onChange={this.props.onChange}/>
+        </div>
+      </div>
     );
   }
 }

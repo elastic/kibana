@@ -11,6 +11,9 @@ module.controller('KbnTermsEditorController', ($scope, indexPatterns) => {
     },
     getIndexPatternIds: () => {
       return indexPatterns.getIds();
+    },
+    getIndexPattern: (indexPatternId) => {
+      return indexPatterns.get(indexPatternId);
     }
   };
 });
