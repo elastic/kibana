@@ -1,6 +1,6 @@
 import expect from 'expect.js';
 import ngMock from 'ng_mock';
-import { FilterBarLibMapTermsProvider } from 'ui/filter_bar/lib/map_terms';
+import { FilterBarLibMapPhrasesProvider } from '../map_phrases';
 
 describe('Filter Bar Directive', function () {
   describe('mapTerms()', function () {
@@ -17,7 +17,7 @@ describe('Filter Bar Directive', function () {
 
     beforeEach(ngMock.inject(function (Private, _$rootScope_) {
       $rootScope = _$rootScope_;
-      mapTerms = Private(FilterBarLibMapTermsProvider);
+      mapTerms = Private(FilterBarLibMapPhrasesProvider);
     }));
 
     it('should return the key and value for matching filters', function (done) {
