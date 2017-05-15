@@ -15,11 +15,12 @@ export default function ({ getService, getPageObjects }) {
   const retry = getService('retry');
   const log = getService('log');
   const screenshots = getService('screenshots');
-  const PageObjects = getPageObjects(['common', 'console']);
+  const PageObjects = getPageObjects(['common', 'console', 'gettingStarted']);
 
   describe('console app', function describeIndexTests() {
-    before(function () {
+    before(async function () {
       log.debug('navigateTo console');
+      await PageObjects.gettingStarted.clickOptOutLink();
       return PageObjects.common.navigateToApp('console');
     });
 
