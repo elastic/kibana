@@ -265,7 +265,7 @@ npm run test:ui
 ```
 
 
-In order to start the server required for the `test:ui:runner` tasks, use the following command. Once the server is started `test:ui:runner` can be run multiple times without waiting for the server to start.
+In order to start the server required for the `node scripts/functional_test_runner` tasks, use the following command. Once the server is started `node scripts/functional_test_runner` can be run multiple times without waiting for the server to start.
 
 ```bash
 npm run test:ui:server
@@ -274,7 +274,7 @@ npm run test:ui:server
 To execute the front-end browser tests, enter the following. This requires the server started by the `test:ui:server` task.
 
 ```bash
-npm run test:ui:runner
+node scripts/functional_test_runner
 ```
 
 To filter these tests, use `--grep=foo` for only running tests that match a regular expression.
@@ -294,7 +294,7 @@ export TEST_ES_HOSTNAME=aaa5d22032d76805fcce724ed9d9f5a2.us-east-1.aws.found.io
 export TEST_ES_PORT=9200
 export TEST_ES_USER=elastic
 export TEST_ES_PASS=<your password here>
-npm run test:ui:runner
+npm run node scripts/functional_test_runner
 ```
 
 ##### Browser Automation Notes
