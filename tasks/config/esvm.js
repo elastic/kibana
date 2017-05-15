@@ -130,43 +130,5 @@ module.exports = function (grunt) {
       }
     },
 
-    withPlugins: {
-      options: {
-        version: '2.1.0',
-        directory: resolve(directory, 'withPlugins'),
-        plugins: [
-          'license',
-          'shield',
-          'marvel-agent',
-          'watcher'
-        ],
-        shield: {
-          users: [
-            {
-              username: 'kibana',
-              password: 'notsecure',
-              roles: ['kibana4_server']
-            },
-            {
-              username: 'user',
-              password: 'notsecure',
-              roles: ['kibana4', 'marvel']
-            },
-            {
-              username: 'admin',
-              password: 'notsecure',
-              roles: ['admin']
-            }
-          ]
-        },
-        config: {
-          marvel: {
-            agent: {
-              interval: '60s'
-            }
-          }
-        }
-      }
-    }
   };
 };
