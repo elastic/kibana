@@ -8,25 +8,23 @@ import * as args from './resolved_args';
 // exported actions, used by reducers
 export const setAstAndExpression = createAction('setElementAstAndExpression');
 
-export const setAst = createAction('setAst', ({ ast, element, pageId }) => {
+export const setAst = ({ ast, element, pageId }) => (dispatch) => {
   const expression = toExpression(ast);
   if (element.expression === expression && isEqual(element.ast, ast)) return;
-  return setAstAndExpression({ expression, ast, element, pageId });
-});
+  dispatch(setAstAndExpression({ expression, ast, element, pageId }));
+};
 
 export const setExpressionAst = ({ ast, element, pageId, index }) => {
   const newAst = set(element, ['ast', 'chain', index], ast);
   return setAst({ ast: newAst, element, pageId });
 };
 
-export const setExpression = createAction('setExpression', ({ expression, element, pageId }) => {
-  return (dispatch) => {
-    const ast = fromExpression(expression);
-    if (element.expression === expression && isEqual(element.ast, ast)) return;
-    dispatch(args.clear({ path: element.id }));
-    return setAstAndExpression({ expression, ast, element, pageId });
-  };
-});
+export const setExpression = ({ expression, element, pageId }) => (dispatch) => {
+  const ast = fromExpression(expression);
+  if (element.expression === expression && isEqual(element.ast, ast)) return;
+  dispatch(args.clear({ path: element.id }));
+  dispatch(setAstAndExpression({ expression, ast, element, pageId }));
+};
 
 export const fetchContext = createAction('fetchContext', ({ element, index }) => {
   const invalidAst = !Array.isArray(element.ast.chain);
