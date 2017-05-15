@@ -87,7 +87,7 @@ export function VisProvider(Private, timefilter) {
     getCurrentState(includeDisabled) {
       return {
         title: this.title,
-        type: this.type.type,
+        type: this.type.name,
         params: this.params,
         aggs: this.aggs
           .map(agg => agg.toJSON())
@@ -99,7 +99,7 @@ export function VisProvider(Private, timefilter) {
     getStateInternal(includeDisabled) {
       return {
         title: this._state.title,
-        type: this._state.name,
+        type: this._state.type,
         params: this._state.params,
         aggs: this._state.aggs
           .filter(agg => includeDisabled || agg.enabled)
