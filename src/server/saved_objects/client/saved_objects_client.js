@@ -39,7 +39,7 @@ export class SavedObjectsClient {
       throw Boom.notFound();
     }
 
-    return get(response, 'deleted', false);
+    return get(response, 'result') === 'deleted';
   }
 
   async find(options = {}) {
@@ -82,8 +82,10 @@ export class SavedObjectsClient {
     const response = await this._withKibanaIndex('update', {
       type,
       id,
-      body,
-      refresh: true,
+      body: {
+        doc: body
+      },
+      refresh: 'wait_for'
     });
 
     return get(response, 'result') === 'updated';
