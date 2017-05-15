@@ -1,7 +1,7 @@
 import { get } from 'lodash';
 import { Transform } from '../transform';
 import { Arg } from '../arg';
-import { getState, getValue } from '../../state/selectors/resolved_args';
+import { getState, getValue } from '../../lib/resolved_arg';
 
 export const sort = () => new Transform('sort', {
   displayName: 'Sort Transform',

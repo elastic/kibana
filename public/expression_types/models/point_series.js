@@ -1,7 +1,7 @@
 import { get } from 'lodash';
 import { Model } from '../model';
 import { Arg } from '../arg';
-import { getState, getValue } from '../../state/selectors/resolved_args';
+import { getState, getValue } from '../../lib/resolved_arg';
 
 export const pointseries = () => new Model('pointseries', {
   displayName: 'Pointseries Model',
