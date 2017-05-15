@@ -1,18 +1,21 @@
 import { VisVisTypeProvider } from 'ui/vis/vis_type';
 import image from '../images/icon-timelion.svg';
 import { VisTypesRegistryProvider } from 'ui/registry/vis_types';
+import { RequestHandlersRegistryProvider } from 'ui/registry/request_handlers';
 import { TemplateVisTypeProvider } from 'ui/vis/vis_types/template_vis_type';
+import { TimelionRequestHandlerProvider } from './timelion_request_handler';
 
 define(function (require) {
   // we also need to load the controller and used by the template
   require('plugins/timelion/vis/timelion_vis_controller');
-  require('plugins/timelion/vis/timelion_vis_params_controller');
+  require('plugins/timelion/directives/expression_directive');
 
   // Stylin
   require('plugins/timelion/vis/timelion_vis.less');
 
   // register the provider with the visTypes registry so that other know it exists
   VisTypesRegistryProvider.register(TimelionVisProvider);
+  RequestHandlersRegistryProvider.register(TimelionRequestHandlerProvider);
 
   function TimelionVisProvider(Private) {
     const VisType = Private(VisVisTypeProvider);
@@ -26,13 +29,18 @@ define(function (require) {
       image,
       description: 'Build time-series using functional expressions',
       category: VisType.CATEGORY.TIME,
-      template: require('plugins/timelion/vis/timelion_vis.html'),
-      params: {
-        editor: require('plugins/timelion/vis/timelion_vis_params.html')
+      visConfig: {
+        defaults: {
+          expression: '.es(*)',
+          interval: '1m'
+        },
+        template: require('plugins/timelion/vis/timelion_vis.html'),
       },
-      requiresSearch: false,
-      requiresTimePicker: true,
-      implementsRenderComplete: true,
+      editorConfig: {
+        optionsTemplate: require('plugins/timelion/vis/timelion_vis_params.html')
+      },
+      requestHandler: 'timelion',
+      responseHandler: 'none',
     });
   }
 
