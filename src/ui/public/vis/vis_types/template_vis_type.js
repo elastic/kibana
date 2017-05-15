@@ -30,6 +30,7 @@ export function TemplateVisTypeProvider(Private, $compile, $rootScope) {
 
     destroy() {
       this.$scope.$destroy();
+      this.$scope = null;
     }
   }
 
