@@ -5,7 +5,7 @@ import 'plugins/kibana/discover/saved_searches/saved_searches';
 import './wizard.less';
 
 import _ from 'lodash';
-import { VisVisTypeProvider } from 'ui/vis/vis_type';
+import { VisTypeFactoryProvider } from 'ui/vis/vis_type';
 import { DashboardConstants } from 'plugins/kibana/dashboard/dashboard_constants';
 import { VisualizeConstants } from '../visualize_constants';
 import routes from 'ui/routes';
@@ -33,15 +33,15 @@ routes.when(VisualizeConstants.WIZARD_STEP_1_PAGE_PATH, {
 module.controller('VisualizeWizardStep1', function ($scope, $route, kbnUrl, timefilter, Private) {
   timefilter.enabled = false;
 
-  const VisType = Private(VisVisTypeProvider);
+  const VisTypeFactory = Private(VisTypeFactoryProvider);
 
   const visTypeCategoryToHumanReadableMap = {
-    [VisType.CATEGORY.BASIC]: 'Basic Charts',
-    [VisType.CATEGORY.DATA]: 'Data',
-    [VisType.CATEGORY.GRAPHIC]: 'Graphic',
-    [VisType.CATEGORY.MAP]: 'Maps',
-    [VisType.CATEGORY.OTHER]: 'Other',
-    [VisType.CATEGORY.TIME]: 'Time Series',
+    [VisTypeFactory.CATEGORY.BASIC]: 'Basic Charts',
+    [VisTypeFactory.CATEGORY.DATA]: 'Data',
+    [VisTypeFactory.CATEGORY.GRAPHIC]: 'Graphic',
+    [VisTypeFactory.CATEGORY.MAP]: 'Maps',
+    [VisTypeFactory.CATEGORY.OTHER]: 'Other',
+    [VisTypeFactory.CATEGORY.TIME]: 'Time Series',
   };
 
   const addToDashMode = $route.current.params[DashboardConstants.ADD_VISUALIZATION_TO_DASHBOARD_MODE_PARAM];
@@ -74,7 +74,7 @@ module.controller('VisualizeWizardStep1', function ($scope, $route, kbnUrl, time
 
   // Sort the categories alphabetically.
   const sortedVisTypeCategories = Object.values(categoryToVisTypesMap).sort((a, b) => {
-    const other = VisType.CATEGORY.OTHER.toLowerCase();
+    const other = VisTypeFactory.CATEGORY.OTHER.toLowerCase();
 
     // Put "other" category at the end of the list.
     const labelA = a.label.toLowerCase();

@@ -2,16 +2,16 @@ import { VisSchemasProvider } from './schemas';
 import _ from 'lodash';
 
 
-export function VisVisTypeProvider(Private) {
+export function VisTypeFactoryProvider(Private) {
   const VisTypeSchemas = Private(VisSchemasProvider);
 
-  class VisType {
+  class VisTypeFactory {
     constructor(opts) {
       opts = opts || {};
 
       const _defaults = {
         // name, title, description, icon, image
-        category: VisType.CATEGORY.OTHER,
+        category: VisTypeFactory.CATEGORY.OTHER,
         visController: null,       // must be a function (or object with render/resize/update?)
         visConfig: {
           defaults: {},            // default configuration
@@ -60,7 +60,7 @@ export function VisVisTypeProvider(Private) {
     }
   }
 
-  VisType.CATEGORY = {
+  VisTypeFactory.CATEGORY = {
     BASIC: 'basic',
     DATA: 'data',
     MAP: 'map',
@@ -68,5 +68,5 @@ export function VisVisTypeProvider(Private) {
     TIME: 'time',
   };
 
-  return VisType;
+  return VisTypeFactory;
 }

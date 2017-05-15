@@ -1,9 +1,9 @@
-import { VisVisTypeProvider } from 'ui/vis/vis_type';
+import { VisTypeFactoryProvider } from 'ui/vis/vis_type';
 
-export function AngularVisTypeProvider(Private, $compile, $rootScope) {
-  const VisType = Private(VisVisTypeProvider);
+export function AngularVisTypeFactoryProvider(Private, $compile, $rootScope) {
+  const VisTypeFactory = Private(VisTypeFactoryProvider);
 
-  class AngularVisType extends VisType {
+  class AngularVisTypeFactory extends VisTypeFactory {
     constructor(opts) {
       super(opts);
 
@@ -39,5 +39,5 @@ export function AngularVisTypeProvider(Private, $compile, $rootScope) {
     }
   }
 
-  return AngularVisType;
+  return AngularVisTypeFactory;
 }

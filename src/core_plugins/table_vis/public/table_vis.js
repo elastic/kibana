@@ -3,8 +3,8 @@ import 'plugins/table_vis/table_vis_controller';
 import 'plugins/table_vis/table_vis_params';
 import 'ui/agg_table';
 import 'ui/agg_table/agg_table_group';
-import { VisVisTypeProvider } from 'ui/vis/vis_type';
-import { AngularVisTypeProvider } from 'ui/vis/vis_types/angular_vis_type';
+import { VisTypeFactoryProvider } from 'ui/vis/vis_type';
+import { AngularVisTypeFactoryProvider } from 'ui/vis/vis_types/angular_vis_type';
 import { VisSchemasProvider } from 'ui/vis/schemas';
 import tableVisTemplate from 'plugins/table_vis/table_vis.html';
 import { VisTypesRegistryProvider } from 'ui/registry/vis_types';
@@ -22,8 +22,8 @@ VisTypesRegistryProvider.register(TableVisTypeProvider);
 
 // define the TableVisType
 function TableVisTypeProvider(Private) {
-  const VisType = Private(VisVisTypeProvider);
-  const AngularVisType = Private(AngularVisTypeProvider);
+  const VisTypeFactory = Private(VisTypeFactoryProvider);
+  const AngularVisTypeFactory = Private(AngularVisTypeFactoryProvider);
   const Schemas = Private(VisSchemasProvider);
 
   // define the TableVisController which is used in the template
@@ -31,13 +31,13 @@ function TableVisTypeProvider(Private) {
 
   // return the visType object, which kibana will use to display and configure new
   // Vis object of this type.
-  return new AngularVisType({
+  return new AngularVisTypeFactory({
     type: 'table',
     name: 'table',
     title: 'Data Table',
     image,
     description: 'Display values in a table',
-    category: VisType.CATEGORY.DATA,
+    category: VisTypeFactory.CATEGORY.DATA,
     visConfig: {
       defaults: {
         perPage: 10,

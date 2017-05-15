@@ -1,23 +1,23 @@
 import { supports } from 'ui/utils/supports';
-import { VisVisTypeProvider } from 'ui/vis/vis_type';
-import { MapsVisTypeProvider } from 'ui/vis/vis_types/maps_vis_type';
+import { VisTypeFactoryProvider } from 'ui/vis/vis_type';
+import { MapsVisTypeFactoryProvider } from 'ui/vis/vis_types/maps_vis_type';
 import { VisSchemasProvider } from 'ui/vis/schemas';
 import { AggResponseGeoJsonProvider } from 'ui/agg_response/geo_json/geo_json';
 import tileMapTemplate from 'plugins/kbn_vislib_vis_types/editors/tile_map.html';
 import image from './images/icon-tilemap.svg';
 
 export default function TileMapVisType(Private, getAppState, courier, config) {
-  const VisType = Private(VisVisTypeProvider);
-  const MapsVisType = Private(MapsVisTypeProvider);
+  const VisTypeFactory = Private(VisTypeFactoryProvider);
+  const MapsVisTypeFactory = Private(MapsVisTypeFactoryProvider);
   const Schemas = Private(VisSchemasProvider);
   const geoJsonConverter = Private(AggResponseGeoJsonProvider);
 
-  return new MapsVisType({
+  return new MapsVisTypeFactory({
     name: 'tile_map',
     title: 'Tile Map',
     image,
     description: 'Plot latitude and longitude coordinates on a map',
-    category: VisType.CATEGORY.MAP,
+    category: VisTypeFactory.CATEGORY.MAP,
     params: {
       defaults: {
         mapType: 'Scaled Circle Markers',
