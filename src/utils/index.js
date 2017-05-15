@@ -17,4 +17,5 @@ export {
   createPromiseFromStreams,
   createReduceStream,
   createSplitStream,
+  createMapStream,
 } from './streams';
