@@ -1,5 +1,5 @@
 import { createStore, combineReducers, applyMiddleware, compose } from 'redux';
-import thunk from 'redux-thunk';
+import thunkMiddleware from 'redux-thunk';
 import { middleware as promiseMiddleware } from 'redux-promise-actions';
 import reduceReducers from 'reduce-reducers';
 import { uiModules } from 'ui/modules';
@@ -32,7 +32,7 @@ app.service('$store', (kbnVersion, basePath) => {
   });
 
   const middleware = compose(
-    applyMiddleware(thunk),
+    applyMiddleware(thunkMiddleware),
     applyMiddleware(promiseMiddleware)
   );
   const store = createStore(rootReducer, initialState, middleware);

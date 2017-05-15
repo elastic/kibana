@@ -1,6 +1,6 @@
 import { connect } from 'react-redux';
-import { branch, renderComponent, compose } from 'recompose';
-import { get } from 'lodash';
+import { branch, renderComponent } from 'recompose';
+import { get, flowRight } from 'lodash';
 import { ElementNotSelected } from './element_not_selected';
 import { ArgTypes as Component } from './arg_types';
 import { getElementById, getSelectedElement } from '../../state/selectors/workpad';
@@ -18,7 +18,7 @@ const mapStateToProps = (state) => {
   };
 };
 
-export const ArgTypes = compose(
+export const ArgTypes = flowRight([
   connect(mapStateToProps),
-  elementNotSelected
-)(Component);
+  elementNotSelected,
+])(Component);

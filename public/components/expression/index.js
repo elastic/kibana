@@ -1,4 +1,30 @@
-import { pure } from 'recompose';
+import { connect } from 'react-redux';
+import { flowRight } from 'lodash';
 import { Expression as Component } from './expression';
+import { statefulInput } from '../../lib/stateful_hoc';
+import { getSelectedPage, getSelectedElement, getElementById } from '../../state/selectors/workpad';
+import { setExpression } from '../../state/actions/elements';
 
-export const Expression = pure(Component);
+const mapStateToProps = (state) => ({
+  pageId: getSelectedPage(state),
+  element: getElementById(state, getSelectedElement(state)),
+});
+
+const mapDispatchToProps = ({
+  setExpression,
+});
+
+const mergeProps = (stateProps, dispatchProps, ownProps) => {
+  const { element, pageId } = stateProps;
+  const { expression } = element;
+
+  return Object.assign({}, ownProps, stateProps, dispatchProps, {
+    expression,
+    onChange: (exp) => dispatchProps.setExpression({ expression: exp, element, pageId }),
+  });
+};
+
+export const Expression = flowRight([
+  connect(mapStateToProps, mapDispatchToProps, mergeProps),
+  statefulInput('expression'),
+])(Component);

@@ -1,12 +1,12 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { Grid, Row, Col, Button } from 'react-bootstrap';
+import { Grid, Row, Col } from 'react-bootstrap';
 
 import { Expression } from '../expression';
 import { Sidebar } from '../sidebar';
 import { Render } from '../render';
 
-export function App({ expression, renderable, expressionSet, expressionRun }) {
+export function App({ renderable }) {
   function done() {
     console.log('rendered!');
   }
@@ -16,8 +16,7 @@ export function App({ expression, renderable, expressionSet, expressionRun }) {
       <Grid fluid>
         <Row>
           <Col xs={12}>
-            <Expression value={expression} onChange={(val) => expressionSet(val)}/>
-            <Button bsStyle="primary" onClick={() => expressionRun(expression)}>Run</Button>
+            <Expression />
           </Col>
         </Row>
         <Row>
