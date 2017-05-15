@@ -94,7 +94,7 @@ function mergeOverflows(dest, src) {
     return Math.max(a, b);
   });
 
-  //Whentooltip overflows both sides of smaller container,
+  //When tooltip overflows both sides of smaller container,
   //remove overflow on one side if the outer container can contain tooltip.
   if (dest.east && dest.west && dest.east > 0 && dest.west > 0 && (src.east < 0 || src.west < 0)) {
     if (src.east < src.west) {
