@@ -106,15 +106,17 @@ uiModules
 
 
       const renderFunction = _.debounce(() => {
-        $scope.vis.type.render($scope.vis, getVisEl(), $scope.uiState, $scope.visData);
+        $scope.vis.type.render($scope.vis, getVisEl(), $scope.uiState, $scope.visData)
+          .then(() => {
+            // renderComplete
+          });
         $scope.$apply();
-      }, 100);
+      }, 200);
 
       $scope.$on('render', () => {
-        if (!$scope.visData || !$scope.vis) {
+        if (!$scope.vis || ($scope.vis.type.requiresSearch && !$scope.visData)) {
           return;
         }
-
         renderFunction();
       });
 
