@@ -94,10 +94,10 @@ describe('SavedObjectsClient', () => {
 
   describe('#delete', () => {
     it('returns based on ES success', async () => {
-      callWithRequest.returns(Promise.resolve({ deleted: 'testing' }));
+      callWithRequest.returns(Promise.resolve({ result: 'deleted' }));
       const response = await savedObjectsClient.delete('index-pattern', 'logstash-*');
 
-      expect(response).to.be('testing');
+      expect(response).to.be(true);
     });
 
     it('throws notFound when ES is unable to find the document', (done) => {
@@ -251,8 +251,8 @@ describe('SavedObjectsClient', () => {
       expect(args[2]).to.eql({
         type: 'index-pattern',
         id: 'logstash-*',
-        body: { title: 'Testing' },
-        refresh: true,
+        body: { doc: { title: 'Testing' } },
+        refresh: 'wait_for',
         index: '.kibana-test'
       });
     });
