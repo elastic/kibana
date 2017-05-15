@@ -16,7 +16,7 @@ import 'ui/state_management/app_state';
 import 'ui/timefilter';
 import 'ui/share';
 import { VisProvider } from 'ui/vis';
-import { basicResponseHandler } from 'ui/vis/response_handlers/build_chart_data';
+import { BasicResponseHandlerProvider } from 'ui/vis/response_handlers/basic';
 import { DocTitleProvider } from 'ui/doc_title';
 import { UtilsBrushEventProvider } from 'ui/utils/brush_event';
 import PluginsKibanaDiscoverHitSortFnProvider from 'plugins/kibana/discover/_hit_sort_fn';
@@ -99,7 +99,7 @@ function discoverController($scope, config, courier, $route, $window, Notifier,
   const HitSortFn = Private(PluginsKibanaDiscoverHitSortFnProvider);
   const queryFilter = Private(FilterBarQueryFilterProvider);
   const filterManager = Private(FilterManagerProvider);
-  const responseHandler = Private(basicResponseHandler).handler;
+  const responseHandler = Private(BasicResponseHandlerProvider).handler;
   const notify = new Notifier({
     location: 'Discover'
   });

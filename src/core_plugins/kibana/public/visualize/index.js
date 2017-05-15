@@ -27,7 +27,7 @@ import { savedVisualizationProvider } from 'plugins/kibana/visualize/saved_visua
 import { noneRequestHandlerProvider } from 'ui/vis/request_handlers/none';
 import { CourierRequestHandlerProvider } from 'ui/vis/request_handlers/courier';
 import { noneResponseHandler } from 'ui/vis/response_handlers/none';
-import { basicResponseHandler } from 'ui/vis/response_handlers/build_chart_data';
+import { BasicResponseHandlerProvider } from 'ui/vis/response_handlers/basic';
 import { defaultEditor } from 'ui/vis/editors/default';
 import { RequestHandlersRegistryProvider } from 'ui/registry/request_handlers';
 import { ResponseHandlersRegistryProvider } from 'ui/registry/response_handlers';
@@ -48,6 +48,6 @@ SavedObjectRegistryProvider.register(savedVisualizationProvider);
 RequestHandlersRegistryProvider.register(CourierRequestHandlerProvider);
 RequestHandlersRegistryProvider.register(noneRequestHandlerProvider);
 ResponseHandlersRegistryProvider.register(noneResponseHandler);
-ResponseHandlersRegistryProvider.register(basicResponseHandler);
+ResponseHandlersRegistryProvider.register(BasicResponseHandlerProvider);
 EditorTypesRegistryProvider.register(defaultEditor);
 

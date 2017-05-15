@@ -2,7 +2,7 @@ import { AggResponseIndexProvider } from 'ui/agg_response/index';
 import { AggResponseTabifyTableProvider } from 'ui/agg_response/tabify/_table';
 
 
-const basicResponseHandler = function (Private) {
+const BasicResponseHandlerProvider = function (Private) {
   const aggResponse = Private(AggResponseIndexProvider);
   const Table = Private(AggResponseTabifyTableProvider);
 
@@ -72,4 +72,4 @@ const basicResponseHandler = function (Private) {
   };
 };
 
-export { basicResponseHandler };
+export { BasicResponseHandlerProvider };
