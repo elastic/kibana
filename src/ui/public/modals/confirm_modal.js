@@ -6,9 +6,11 @@ import { ModalOverlay } from './modal_overlay';
 
 const module = uiModules.get('kibana');
 
+import { CONFIRM_BUTTON, CANCEL_BUTTON } from 'ui_framework/components/modal/confirm_modal';
+
 export const ConfirmationButtonTypes = {
-  CONFIRM: 'Confirm',
-  CANCEL: 'Cancel'
+  CONFIRM: CONFIRM_BUTTON,
+  CANCEL: CANCEL_BUTTON
 };
 
 /**
@@ -20,7 +22,7 @@ export const ConfirmationButtonTypes = {
  * @property {String=} title - If given, shows a title on the confirm modal.
  */
 
-module.factory('confirmModal', function ($rootScope, $compile, $timeout) {
+module.factory('confirmModal', function ($rootScope, $compile) {
   let modalPopover;
   const confirmQueue = [];
 
@@ -48,6 +50,7 @@ module.factory('confirmModal', function ($rootScope, $compile, $timeout) {
     const confirmScope = $rootScope.$new();
 
     confirmScope.message = message;
+    confirmScope.defaultFocusedButton = options.defaultFocusedButton;
     confirmScope.confirmButtonText = options.confirmButtonText;
     confirmScope.cancelButtonText = options.cancelButtonText;
     confirmScope.title = options.title;
@@ -70,20 +73,6 @@ module.factory('confirmModal', function ($rootScope, $compile, $timeout) {
       angular.element(document.body).on('keydown', (event) => {
         if (event.keyCode === 27) {
           confirmScope.onCancel();
-        }
-      });
-
-      // This timeout is a bit hacky, but I can't find another way to wait for ng-react to finish
-      // mounting the react dom.  Without the timeout the dom will only contain an empty confirm-modal tag
-      // with no buttons to focus.
-      $timeout(() => {
-        switch (options.defaultFocusedButton) {
-          case ConfirmationButtonTypes.CONFIRM:
-            modalInstance.find('[data-test-subj=confirmModalConfirmButton]').focus();
-            break;
-          default:
-            modalInstance.find('[data-test-subj=confirmModalCancelButton]').focus();
-            break;
         }
       });
     }
