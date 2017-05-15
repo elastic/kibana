@@ -1,5 +1,6 @@
-import { createStore, applyMiddleware, combineReducers } from 'redux';
+import { createStore, combineReducers, applyMiddleware, compose } from 'redux';
 import thunk from 'redux-thunk';
+import { middleware as promiseMiddleware } from 'redux-promise-actions';
 import reduceReducers from 'reduce-reducers';
 import { uiModules } from 'ui/modules';
 import getInitialState from './initial_state';
@@ -30,7 +31,11 @@ app.service('$store', (kbnVersion, basePath) => {
     throwAway: throwawayReducer,
   });
 
-  const store = createStore(rootReducer, initialState, applyMiddleware(thunk));
+  const middleware = compose(
+    applyMiddleware(thunk),
+    applyMiddleware(promiseMiddleware)
+  );
+  const store = createStore(rootReducer, initialState, middleware);
 
   // TODO: Sticking this here so I can dispatch events from the console;
   window.store = store;
