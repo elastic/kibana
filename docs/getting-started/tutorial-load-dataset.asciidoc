@@ -66,10 +66,10 @@ PUT /shakespeare
  "mappings" : {
   "doc" : {
    "properties" : {
-    "speaker" : {"type": "keyword" },
-    "play_name" : {"type": "keyword" },
-    "line_id" : { "type" : "integer" },
-    "speech_number" : { "type" : "integer" }
+    "speaker" : {"type": "keyword"},
+    "play_name" : {"type": "keyword"},
+    "line_id" : {"type" : "integer"},
+    "speech_number" : {"type" : "integer"}
    }
   }
  }
