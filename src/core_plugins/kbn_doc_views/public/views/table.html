@@ -1,6 +1,6 @@
 <table class="table table-condensed">
   <tbody>
-    <tr ng-repeat="field in fields">
+    <tr ng-repeat="field in fields" data-test-subj="tableDocViewRow-{{ field }}">
       <td field-name="field"
           field-type="mapping[field].type"
           width="1%"
@@ -11,6 +11,7 @@
           <button
             class="doc-viewer-button"
             ng-click="filter(mapping[field], flattened[field], '+')"
+            data-test-subj="addInclusiveFilterButton"
           >
             <i
               tooltip="Filter for value"
