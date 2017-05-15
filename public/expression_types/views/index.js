@@ -1,9 +1,7 @@
-import { bar } from './bar';
 import { image } from './image';
-import { line } from './line';
+import { plot } from './plot';
 
 export default [
-  bar,
   image,
-  line,
+  plot,
 ];

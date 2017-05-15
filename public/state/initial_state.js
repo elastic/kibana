@@ -70,7 +70,7 @@ export default (path) => {
               width: 600,
               rotation: 90,
             },
-            expression: 'demodata().pointseries(x=time, y=.math("sum(cost)")).line()',
+            expression: 'demodata().pointseries(x=time, y=.math("sum(cost)")).plot()',
             ast: {
               type: 'expression',
               chain: [{
@@ -101,7 +101,7 @@ export default (path) => {
                 },
               }, {
                 type: 'function',
-                function: 'line',
+                function: 'plot',
                 arguments: {},
               }],
             },
