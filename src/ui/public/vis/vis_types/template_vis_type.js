@@ -17,12 +17,11 @@ export function TemplateVisTypeProvider(Private, $compile, $rootScope) {
       return new Promise((resolve, reject) => {
         if (!this.$scope) {
           this.$scope = $rootScope.$new();
-          this.$scope.vis = vis;
           this.$scope.uiState = uiState;
-
           $el.html($compile(vis.type.visConfig.template)(this.$scope));
         }
 
+        this.$scope.vis = vis.clone();
         this.$scope.esResponse = esResponse;
         this.$scope.renderComplete = resolve;
         this.$scope.renderFailed = reject;
