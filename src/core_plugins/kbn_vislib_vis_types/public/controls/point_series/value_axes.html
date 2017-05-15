@@ -5,9 +5,10 @@
     </div>
 
     <button
-      aria-label="Add value axis"
+      data-test-subj="visualizeAddYAxisButton"
+      aria-label="Add Y axis"
       ng-click="addValueAxis()"
-      tooltip="Add value axis"
+      tooltip="Add Y axis"
       tooltip-append-to-body="true"
       type="button"
       class="fa fa-plus kuiSideBarSectionTitle__action"
@@ -37,9 +38,9 @@
 
       <button
         ng-hide="vis.params.valueAxes.length === 1"
-        aria-label="Remove value axis"
+        aria-label="Remove Y axis"
         ng-click="removeValueAxis(axis)"
-        tooltip="Remove value axis"
+        tooltip="Remove Y axis"
         tooltip-append-to-body="true"
         type="button"
         class="fa fa-remove kuiSideBarCollapsibleTitle__action"

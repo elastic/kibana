@@ -11,6 +11,7 @@ import {
   VisualizePageProvider,
   SettingsPageProvider,
   MonitoringPageProvider,
+  PointSeriesPageProvider,
 } from './page_objects';
 
 import {
@@ -22,7 +23,7 @@ import {
   EsProvider,
   EsArchiverProvider,
   DocTableProvider,
-  PointSeriesVisProvider,
+  ScreenshotsProvider,
 } from './services';
 
 import { servers, apps } from '../server_config';
@@ -50,6 +51,7 @@ export default function () {
       visualize: VisualizePageProvider,
       settings: SettingsPageProvider,
       monitoring: MonitoringPageProvider,
+      pointSeries: PointSeriesPageProvider,
     },
     services: {
       kibanaServer: KibanaServerProvider,
@@ -60,15 +62,15 @@ export default function () {
       es: EsProvider,
       esArchiver: EsArchiverProvider,
       docTable: DocTableProvider,
-      pointSeriesVis: PointSeriesVisProvider
+      screenshots: ScreenshotsProvider,
     },
     servers,
     apps,
     esArchiver: {
-      directory: resolve(__dirname, '../../src/fixtures/es_archives')
+      directory: resolve(__dirname, '../../src/fixtures/es_archives'),
     },
     screenshots: {
-      directory: resolve(__dirname, '../screenshots/session')
+      directory: resolve(__dirname, '../screenshots'),
     }
   };
 }

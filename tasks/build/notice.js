@@ -30,7 +30,7 @@ export default function licenses(grunt) {
         const licenses = glob.sync(path.join(modulePath, '*LICENSE*'));
         const notices = glob.sync(path.join(modulePath, '*NOTICE*'));
         packagePaths[packageName] = {
-          relative: modulePath.replace(/.*\/kibana\//, ''),
+          relative: modulePath.replace(/.*(\/|\\)kibana(\/|\\)/, ''),
           licenses,
           notices
         };

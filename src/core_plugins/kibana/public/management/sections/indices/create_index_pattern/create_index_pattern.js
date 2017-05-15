@@ -40,8 +40,8 @@ uiModules.get('apps/management')
   this.fetchFieldsError = $translate.instant('KIBANA-LOADING');
 
   const TIME_FILTER_FIELD_OPTIONS = {
-    NO_DATE_FIELD_SELECTED: {
-      name: $translate.instant('KIBANA-NO_DATE_FIELD_SELECTED')
+    NO_DATE_FIELD_DESIRED: {
+      name: $translate.instant('KIBANA-NO_DATE_FIELD_DESIRED')
     },
     NO_DATE_FIELDS_IN_INDICES: {
       name: $translate.instant('KIBANA-NO_DATE_FIELDS_IN_INDICES')
@@ -103,12 +103,20 @@ uiModules.get('apps/management')
 
     this.dateFields = results.dateFields || [];
     this.indexHasDateFields = this.dateFields.length > 0;
+    const moreThanOneDateField = this.dateFields.length > 1;
     if (this.indexHasDateFields) {
-      this.dateFields.unshift(TIME_FILTER_FIELD_OPTIONS.NO_DATE_FIELD_SELECTED);
+      this.dateFields.unshift(TIME_FILTER_FIELD_OPTIONS.NO_DATE_FIELD_DESIRED);
     } else {
       this.dateFields.unshift(TIME_FILTER_FIELD_OPTIONS.NO_DATE_FIELDS_IN_INDICES);
     }
-    this.newIndexPattern.timeField = this.dateFields[0];
+
+    if (!moreThanOneDateField) {
+      // At this point the `dateFields` array contains the date fields and the "no selection"
+      // option. When we have less than two date fields we choose the last option, which will
+      // be the "no date fields available" option if there are zero date fields, or the only
+      // date field if there is one.
+      this.newIndexPattern.timeField = this.dateFields[this.dateFields.length - 1];
+    }
   };
 
   const updateFieldListAndSetTimeField = (results, timeFieldName) => {
@@ -163,7 +171,6 @@ uiModules.get('apps/management')
 
         if (all.length) {
           return this.existing = {
-            class: 'success',
             all,
             matches,
             matchPercent: Math.round((matches.length / all.length) * 100) + '%',
@@ -205,7 +212,7 @@ uiModules.get('apps/management')
   this.createIndexPattern = () => {
     const id = this.newIndexPattern.name;
     let timeFieldName;
-    if ((this.newIndexPattern.timeField !== TIME_FILTER_FIELD_OPTIONS.NO_DATE_FIELD_SELECTED)
+    if ((this.newIndexPattern.timeField !== TIME_FILTER_FIELD_OPTIONS.NO_DATE_FIELD_DESIRED)
       && (this.newIndexPattern.timeField !== TIME_FILTER_FIELD_OPTIONS.NO_DATE_FIELDS_IN_INDICES)) {
       timeFieldName = this.newIndexPattern.timeField.name;
     }
@@ -252,9 +259,9 @@ uiModules.get('apps/management')
     'controller.newIndexPattern.nameIsPattern',
     'controller.newIndexPattern.nameInterval.name'
   ], (newVal, oldVal) => {
-    const nameIsPattern = newVal[1];
-    const newDefault = getDefaultPatternForInterval(newVal[2]);
-    const oldDefault = getDefaultPatternForInterval(oldVal[2]);
+    const nameIsPattern = newVal[0];
+    const newDefault = getDefaultPatternForInterval(newVal[1]);
+    const oldDefault = getDefaultPatternForInterval(oldVal[1]);
 
     if (this.newIndexPattern.name === oldDefault) {
       this.newIndexPattern.name = newDefault;

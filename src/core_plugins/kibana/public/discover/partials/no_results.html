@@ -13,8 +13,18 @@
       <ul>
         <li ng-repeat="failure in failures | limitTo: failuresShown"><strong>Index:</strong> {{failure.index}} <strong>Shard:</strong> {{failure.shard}} <strong>Reason:</strong> {{failure.reason}} </li>
       </ul>
-      <a ng-click="showAllFailures()" ng-if="failures.length > failuresShown" title="Show More">Show More</a>
-      <a ng-click="showLessFailures()" ng-if="failures.length === failuresShown && failures.length > 5" title="Show Less">Show Less</a>
+      <a
+        ng-click="showAllFailures()"
+        ng-if="failures.length > failuresShown"
+      >
+        Show More
+      </a>
+      <a
+        ng-click="showLessFailures()"
+        ng-if="failures.length === failuresShown && failures.length > 5"
+      >
+        Show Less
+      </a>
     </div>
 
     <div ng-show="opts.timefield">
@@ -26,7 +36,7 @@
 
     <h3>Refine your query</h3>
     <p>
-      The search bar at the top uses Elasticsearch's support for Lucene <a href="http://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-query-string-query.html#query-string-syntax" target="_blank">Query String syntax</a>. Let's say we're searching web server logs that have been parsed into a few fields.
+      The search bar at the top uses Elasticsearch's support for Lucene <a class="kuiLink" ng-href="{{queryDocLinks.luceneQuerySyntax}}" target="_blank">Query String syntax</a>. Let's say we're searching web server logs that have been parsed into a few fields.
     </p>
 
     <p>

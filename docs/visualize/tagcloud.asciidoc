@@ -39,6 +39,3 @@ regularize the display of data sets with variabilities that are themselves highl
 *Orientation*:: You can select how to orientate your text in the tag cloud. You can choose one of the following options:
 Single, right angles and multiple.
 *Font Size*:: Allows you to set minimum and maximum font size to use for this visualization.
-
-
-include::visualization-raw-data.asciidoc[]

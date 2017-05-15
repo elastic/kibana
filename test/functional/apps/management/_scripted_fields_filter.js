@@ -14,7 +14,7 @@ export default function ({ getService, getPageObjects }) {
       // delete .kibana index and then wait for Kibana to re-create it
       await kibanaServer.uiSettings.replace({ 'dateFormat:tz':'UTC' });
       await PageObjects.settings.navigateTo();
-      await PageObjects.settings.clickKibanaIndicies();
+      await PageObjects.settings.clickKibanaIndices();
       await PageObjects.settings.createIndexPattern();
       await kibanaServer.uiSettings.update({ 'dateFormat:tz':'UTC' });
     });
@@ -24,7 +24,7 @@ export default function ({ getService, getPageObjects }) {
 
     it('should filter scripted fields', async function () {
       await PageObjects.settings.navigateTo();
-      await PageObjects.settings.clickKibanaIndicies();
+      await PageObjects.settings.clickKibanaIndices();
       await PageObjects.settings.clickScriptedFieldsTab();
       const scriptedFieldLangsBefore = await PageObjects.settings.getScriptedFieldLangs();
       await log.debug('add scripted field');

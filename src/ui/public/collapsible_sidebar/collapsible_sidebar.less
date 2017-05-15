@@ -8,21 +8,8 @@
     position: absolute;
     top: 0;
     right: -(@collapser-width);
-    width: @collapser-width;
     cursor: pointer;
     z-index: -1;
-
-    .chevron-cont{
-      position: absolute;
-      left: 5px;
-      top: 5px;
-      color: @kibanaGray4;
-
-      &:before {
-        font-family: FontAwesome;
-        content: "\F137";
-      }
-    }
   }
 
   &.closed {

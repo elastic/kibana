@@ -3,6 +3,7 @@ import expect from 'expect.js';
 export default function ({ getService, getPageObjects }) {
   const log = getService('log');
   const retry = getService('retry');
+  const screenshots = getService('screenshots');
   const PageObjects = getPageObjects(['common', 'visualize', 'header', 'settings']);
 
   describe('visualize app', function describeIndexTests() {
@@ -85,7 +86,7 @@ export default function ({ getService, getPageObjects }) {
         return PageObjects.visualize.saveVisualization(vizName1)
         .then(function (message) {
           log.debug('Saved viz message = ' + message);
-          PageObjects.common.saveScreenshot('Visualize-area-chart-save-toast');
+          screenshots.take('Visualize-area-chart-save-toast');
           expect(message).to.be('Visualization Editor: Saved Visualization \"' + vizName1 + '\"');
         })
         .then(function testVisualizeWaitForToastMessageGone() {
@@ -134,36 +135,36 @@ export default function ({ getService, getPageObjects }) {
         .then(function (paths) {
           log.debug('expectedAreaChartData = ' + expectedAreaChartData);
           log.debug('actual chart data =     ' + paths);
-          PageObjects.common.saveScreenshot('Visualize-area-chart');
+          screenshots.take('Visualize-area-chart');
           expect(paths).to.eql(expectedAreaChartData);
         });
       });
 
       it('should show correct data', function () {
-        const expectedTableData = [ 'September 20th 2015, 00:00:00.000 37',
-          'September 20th 2015, 03:00:00.000 202',
-          'September 20th 2015, 06:00:00.000 740',
-          'September 20th 2015, 09:00:00.000 1,437',
-          'September 20th 2015, 12:00:00.000 1,371',
-          'September 20th 2015, 15:00:00.000 751',
-          'September 20th 2015, 18:00:00.000 188',
-          'September 20th 2015, 21:00:00.000 31',
-          'September 21st 2015, 00:00:00.000 42',
-          'September 21st 2015, 03:00:00.000 202',
-          'September 21st 2015, 06:00:00.000 683',
-          'September 21st 2015, 09:00:00.000 1,361',
-          'September 21st 2015, 12:00:00.000 1,415',
-          'September 21st 2015, 15:00:00.000 707',
-          'September 21st 2015, 18:00:00.000 177',
-          'September 21st 2015, 21:00:00.000 27',
-          'September 22nd 2015, 00:00:00.000 32',
-          'September 22nd 2015, 03:00:00.000 175',
-          'September 22nd 2015, 06:00:00.000 707',
-          'September 22nd 2015, 09:00:00.000 1,408',
-          'September 22nd 2015, 12:00:00.000 1,355',
-          'September 22nd 2015, 15:00:00.000 726',
-          'September 22nd 2015, 18:00:00.000 201',
-          'September 22nd 2015, 21:00:00.000 29'
+        const expectedTableData = [ 'September 20th 2015, 00:00:00.000', '37',
+          'September 20th 2015, 03:00:00.000', '202',
+          'September 20th 2015, 06:00:00.000', '740',
+          'September 20th 2015, 09:00:00.000', '1,437',
+          'September 20th 2015, 12:00:00.000', '1,371',
+          'September 20th 2015, 15:00:00.000', '751',
+          'September 20th 2015, 18:00:00.000', '188',
+          'September 20th 2015, 21:00:00.000', '31',
+          'September 21st 2015, 00:00:00.000', '42',
+          'September 21st 2015, 03:00:00.000', '202',
+          'September 21st 2015, 06:00:00.000', '683',
+          'September 21st 2015, 09:00:00.000', '1,361',
+          'September 21st 2015, 12:00:00.000', '1,415',
+          'September 21st 2015, 15:00:00.000', '707',
+          'September 21st 2015, 18:00:00.000', '177',
+          'September 21st 2015, 21:00:00.000', '27',
+          'September 22nd 2015, 00:00:00.000', '32',
+          'September 22nd 2015, 03:00:00.000', '175',
+          'September 22nd 2015, 06:00:00.000', '707',
+          'September 22nd 2015, 09:00:00.000', '1,408',
+          'September 22nd 2015, 12:00:00.000', '1,355',
+          'September 22nd 2015, 15:00:00.000', '726',
+          'September 22nd 2015, 18:00:00.000', '201',
+          'September 22nd 2015, 21:00:00.000', '29'
         ];
 
         return PageObjects.visualize.collapseChart()

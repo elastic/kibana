@@ -22,6 +22,7 @@ import { UtilsBrushEventProvider } from 'ui/utils/brush_event';
 import { FilterBarClickHandlerProvider } from 'ui/filter_bar/filter_bar_click_handler';
 import { DashboardState } from './dashboard_state';
 import { notify } from 'ui/notify';
+import { documentationLinks } from 'ui/documentation_links/documentation_links';
 
 const app = uiModules.get('app/dashboard', [
   'elasticsearch',
@@ -80,6 +81,7 @@ app.directive('dashboardApp', function (Notifier, courier, AppState, timefilter,
       const filterBar = Private(FilterBarQueryFilterProvider);
       const docTitle = Private(DocTitleProvider);
       const notify = new Notifier({ location: 'Dashboard' });
+      $scope.queryDocLinks = documentationLinks.query;
 
       const dash = $scope.dash = $route.current.locals.dash;
       if (dash.id) {
@@ -116,7 +118,8 @@ app.directive('dashboardApp', function (Notifier, courier, AppState, timefilter,
         query: dashboardState.getQuery(),
         darkTheme: dashboardState.getDarkTheme(),
         timeRestore: dashboardState.getTimeRestore(),
-        title: dashboardState.getTitle()
+        title: dashboardState.getTitle(),
+        description: dashboardState.getDescription(),
       };
 
       $scope.panels = dashboardState.getPanels();
@@ -156,10 +159,12 @@ app.directive('dashboardApp', function (Notifier, courier, AppState, timefilter,
       };
 
       // called by the saved-object-finder when a user clicks a vis
-      $scope.addVis = function (hit) {
+      $scope.addVis = function (hit, showToast = true) {
         pendingVisCount++;
         dashboardState.addNewPanel(hit.id, 'visualization');
-        notify.info(`Visualization successfully added to your dashboard`);
+        if (showToast) {
+          notify.info(`Visualization successfully added to your dashboard`);
+        }
       };
 
       $scope.addSearch = function (hit) {
@@ -185,6 +190,7 @@ app.directive('dashboardApp', function (Notifier, courier, AppState, timefilter,
         dashboardState.setDarkTheme($scope.model.darkTheme);
         updateTheme();
       });
+      $scope.$watch('model.description', () => dashboardState.setDescription($scope.model.description));
       $scope.$watch('model.title', () => dashboardState.setTitle($scope.model.title));
       $scope.$watch('model.timeRestore', () => dashboardState.setTimeRestore($scope.model.timeRestore));
 
@@ -291,7 +297,11 @@ app.directive('dashboardApp', function (Notifier, courier, AppState, timefilter,
       });
 
       if ($route.current.params && $route.current.params[DashboardConstants.NEW_VISUALIZATION_ID_PARAM]) {
-        $scope.addVis({ id: $route.current.params[DashboardConstants.NEW_VISUALIZATION_ID_PARAM] });
+        // Hide the toast message since they will already see a notification from saving the visualization,
+        // and one is sufficient (especially given how the screen jumps down a bit for each unique notification).
+        const showToast = false;
+        $scope.addVis({ id: $route.current.params[DashboardConstants.NEW_VISUALIZATION_ID_PARAM] }, showToast);
+
         kbnUrl.removeParam(DashboardConstants.ADD_VISUALIZATION_TO_DASHBOARD_MODE_PARAM);
         kbnUrl.removeParam(DashboardConstants.NEW_VISUALIZATION_ID_PARAM);
       }

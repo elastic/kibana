@@ -2,6 +2,7 @@ import expect from 'expect.js';
 
 export default function ({ getService, getPageObjects }) {
   const log = getService('log');
+  const screenshots = getService('screenshots');
   const PageObjects = getPageObjects(['common', 'visualize', 'header']);
 
   describe('visualize app', function describeIndexTests() {
@@ -84,7 +85,7 @@ export default function ({ getService, getPageObjects }) {
         .then(function showData(data) {
           log.debug('data=' + data);
           log.debug('data.length=' + data.length);
-          PageObjects.common.saveScreenshot('Visualize-vertical-bar-chart');
+          screenshots.take('Visualize-vertical-bar-chart');
           expect(data).to.eql(expectedChartValues);
         });
       });
@@ -92,16 +93,16 @@ export default function ({ getService, getPageObjects }) {
 
       it('should show correct data', function () {
         // this is only the first page of the tabular data.
-        const expectedChartData =  [ 'September 20th 2015, 00:00:00.000 37',
-          'September 20th 2015, 03:00:00.000 202',
-          'September 20th 2015, 06:00:00.000 740',
-          'September 20th 2015, 09:00:00.000 1,437',
-          'September 20th 2015, 12:00:00.000 1,371',
-          'September 20th 2015, 15:00:00.000 751',
-          'September 20th 2015, 18:00:00.000 188',
-          'September 20th 2015, 21:00:00.000 31',
-          'September 21st 2015, 00:00:00.000 42',
-          'September 21st 2015, 03:00:00.000 202'
+        const expectedChartData =  [ 'September 20th 2015, 00:00:00.000', '37',
+          'September 20th 2015, 03:00:00.000', '202',
+          'September 20th 2015, 06:00:00.000', '740',
+          'September 20th 2015, 09:00:00.000', '1,437',
+          'September 20th 2015, 12:00:00.000', '1,371',
+          'September 20th 2015, 15:00:00.000', '751',
+          'September 20th 2015, 18:00:00.000', '188',
+          'September 20th 2015, 21:00:00.000', '31',
+          'September 21st 2015, 00:00:00.000', '42',
+          'September 21st 2015, 03:00:00.000', '202'
         ];
 
         return PageObjects.visualize.collapseChart()

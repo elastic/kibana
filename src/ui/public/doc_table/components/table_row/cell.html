@@ -12,21 +12,21 @@ if (timefield) {
   <%= formatted %>
   <span class="table-cell-filter">
     <% if (filterable) { %>
-      <span
+      <button
         ng-click="inlineFilter($event, '+')"
-        class="fa fa-search-plus docTableRowFilterIcon"
+        class="fa fa-search-plus docTableRowFilterButton"
         data-column="<%- column %>"
         tooltip="Filter for value"
         tooltip-append-to-body="1"
-      ></span>
+      ></button>
 
-      <span
+      <button
         ng-click="inlineFilter($event, '-')"
-        class="fa fa-search-minus docTableRowFilterIcon"
+        class="fa fa-search-minus docTableRowFilterButton"
         data-column="<%- column %>"
         tooltip="Filter out value"
         tooltip-append-to-body="1"
-      ></span>
+      ></button>
     <% } %>
   </span>
 </td>

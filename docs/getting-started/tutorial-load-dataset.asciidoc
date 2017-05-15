@@ -60,27 +60,26 @@ field's searchability or whether or not it's _tokenized_, or broken up into sepa
 
 Use the following command in a terminal (eg `bash`) to set up a mapping for the Shakespeare data set:
 
-[source,shell]
-curl -H 'Content-Type: application/json' -XPUT http://localhost:9200/shakespeare -d '
+[source,js]
+PUT /shakespeare
 {
  "mappings" : {
   "_default_" : {
    "properties" : {
-    "speaker" : {"type": "string", "index" : "not_analyzed" },
-    "play_name" : {"type": "string", "index" : "not_analyzed" },
+    "speaker" : {"type": "keyword" },
+    "play_name" : {"type": "keyword" },
     "line_id" : { "type" : "integer" },
     "speech_number" : { "type" : "integer" }
    }
   }
  }
 }
-';
+
+//CONSOLE
 
 This mapping specifies the following qualities for the data set:
 
-* The _speaker_ field is a string that isn't analyzed. The string in this field is treated as a single unit, even if
-there are multiple words in the field.
-* The same applies to the _play_name_ field.
+* Because the _speaker_ and _play_name_ fields are keyword fields, they are not analyzed. The strings are treated as a single unit even if they contain multiple words.
 * The _line_id_ and _speech_number_ fields are integers.
 
 The logs data set requires a mapping to label the latitude/longitude pairs in the logs as geographic locations by
@@ -88,8 +87,8 @@ applying the `geo_point` type to those fields.
 
 Use the following commands to establish `geo_point` mapping for the logs:
 
-[source,shell]
-curl -H 'Content-Type: application/json' -XPUT http://localhost:9200/logstash-2015.05.18 -d '
+[source,js]
+PUT /logstash-2015.05.18
 {
   "mappings": {
     "log": {
@@ -105,29 +104,11 @@ curl -H 'Content-Type: application/json' -XPUT http://localhost:9200/logstash-20
     }
   }
 }
-';
 
-[source,shell]
-curl -H 'Content-Type: application/json' -XPUT http://localhost:9200/logstash-2015.05.19 -d '
-{
-  "mappings": {
-    "log": {
-      "properties": {
-        "geo": {
-          "properties": {
-            "coordinates": {
-              "type": "geo_point"
-            }
-          }
-        }
-      }
-    }
-  }
-}
-';
+//CONSOLE
 
-[source,shell]
-curl -H 'Content-Type: application/json' -XPUT http://localhost:9200/logstash-2015.05.20 -d '
+[source,js]
+PUT /logstash-2015.05.19
 {
   "mappings": {
     "log": {
@@ -143,7 +124,28 @@ curl -H 'Content-Type: application/json' -XPUT http://localhost:9200/logstash-20
     }
   }
 }
-';
+
+//CONSOLE
+
+[source,js]
+PUT /logstash-2015.05.20
+{
+  "mappings": {
+    "log": {
+      "properties": {
+        "geo": {
+          "properties": {
+            "coordinates": {
+              "type": "geo_point"
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+//CONSOLE
 
 The accounts data set doesn't require any mappings, so at this point we're ready to use the Elasticsearch
 {es-ref}docs-bulk.html[`bulk`] API to load the data sets with the following commands:
@@ -157,8 +159,10 @@ These commands may take some time to execute, depending on the computing resourc
 
 Verify successful loading with the following command:
 
-[source,shell]
-curl 'localhost:9200/_cat/indices?v'
+[source,js]
+GET /_cat/indices?v
+
+//CONSOLE
 
 You should see output similar to the following:
 

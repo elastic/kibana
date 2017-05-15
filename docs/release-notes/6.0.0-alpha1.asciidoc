@@ -1,0 +1,78 @@
+[[release-notes-6.0.0-alpha1]]
+== 6.0.0-alpha1 Release Notes
+
+Also see <<breaking-changes-6.0>>.
+
+[float]
+[[enhancement-6.0.0-alpha1]]
+=== Enhancements
+Core::
+* Deprecate Bootstrap buttons {pull}11352[#11352]
+* Fix missing border of PaginatedTable rows in Firefox {pull}11452[#11452]
+* Reinstate a few Bootstrap btn classes to support angular-ui-select. {pull}11569[#11569]
+* Remove Bootstrap btn classes. {pull}11353[#11353]
+* [UI Framework] Add AssistedInput. {pull}11343[#11343]
+* [UI Framework] Add example of disabled kuiSelect. {pull}11345[#11345]
+* [UI Framework] Add example of spinner Icon. {pull}11424[#11424]
+* [UI Framework] Add kuiButton--fullWidth kuiButton--small, and kuiButtonGroup--fullWidth modifiers. {pull}11365[#11365]
+* [UI Framework] Add support for dark theme links. {pull}11344[#11344]
+* [UI Framework] Add support for selects and secondary inputs to LocalNavSearch component of UI Framework. {pull}11287[#11287]
+* [UI Framework] Apply elastic.co look and feel to UI Framework docs site. {pull}11174[#11174]
+* [UI Framework] Fix appearance of some form components in Firefox {pull}11589[#11589]
+* [UI Framework] Make CardGroup split apart by default. Add kuiCardGroup--united modifier. {pull}11580[#11580]
+* [UI Framework] Vertical align children in a FieldGroup. {pull}11374[#11374]
+* Add small text input to UI framework {pull}11354[#11354]
+* [UI Framework] Add uiFramework:build task. {pull}11402[#11402]
+* Updates to status API, re-align status page {pull}10180[#10180]
+* [status] 15m load average should use the 3rd index {pull}11202[#11202]
+* Sets ES mapping to single_type=false {pull}11451[#11451]
+Dev Tools::
+* Adding autocomplete rules for reindex API to Console {pull}10150[#10150]
+* minimum_number_should_match was deprecated {pull}11316[#11316]
+Dashboard::
+* Improve Dashboard screen-reader accessibility. {pull}11600[#11600]
+* Update angular-bootstrap DatePicker with UI Framework classes. {pull}11378[#11378]
+* Finish loading a dashboard even if some visualizations throw errors {pull}11324[#11324]
+* React search box tool bar {pull}10821[#10821]
+* Don't kill an entire dashboard because of one bad request {pull}11337[#11337]
+* Add back dashboard descriptions {pull}11552[#11552]
+* Hide the second toast when adding a new visualization straight from dashboard {pull}11621[#11621]
+Discover::
+* Add ignore_unmapped to geo filters to prevent exceptions {pull}11461[#11461]
+* Create CollapseButton component class to standardize appearance of this button. {pull}11462[#11462]
+* Migrate deprecated match query syntax {pull}11554[#11554]
+* Remove the _source field toggle button which was accidentally reinstated {pull}11485[#11485]
+* Search bar drop-down for managing filters {pull}10976[#10976]
+Management::
+* Convert Index Pattern Creation form UI to use UI Framework components. {pull}11419[#11419]
+* Convert ScriptedFieldsTable and SourceFiltersTable to UI Framework components. {pull}11401[#11401]
+* Removes the "Index contains time-based events" checkbox {pull}11409[#11409]
+* Update Settings page with UI Framework components. {pull}11272[#11272]
+* Report shard failures in the field_capabilities response {pull}11450[#11450]
+Visualize::
+* Fix spelling in time series visual builder {pull}11212[#11212]
+* Adding label templates to legend keys for TSVB {pull}11266[#11266]
+* Fix missing icons in Visualize listing. {pull}11243[#11243]
+* Update illegible vis type icons with legible ones. {pull}11317[#11317]
+* Fixing the fields for the numbers for percentile aggs for Time Series Visual Builder {pull}11169[#11169]
+* using ui-select for field selection in visualize {pull}10998[#10998]
+* add polygon drawing tool {pull}11578[#11578]
+* Fix timelion's flot when neither thor nor monitoring are installed {pull}10412[#10412]
+
+[float]
+[[bug-6.0.0-alpha1]]
+=== Bug fixes
+Core::
+* [Fix for #4964] Disable dynamic/Implement static mappings {pull}10638[#10638]
+* Fix visualize sort icon bug {pull}11568[#11568]
+Visualize::
+* Fixes #11232 - Add option for panel and global filters to annotations for TSVB {pull}11260[#11260]
+* Fixes #11289 - Change top_n to not use split colors for TSVB {pull}11342[#11342]
+* [Fix for #10907] allows more flexible timelion queries {pull}10961[#10961]
+* [Fix for #10292] fixing heatmap black squares {pull}11489[#11489]
+* [Fix for #4599] Add "Sum of series in legend" option {pull}7970[#7970]
+* [Fix for #9053] [timelion/fit/carry] do nothing if there is not any data {pull}9054[#9054]
+* [Fix for #8763] [vislib/tilemap/heatmap] scale the heatmap maxZoom with map zoom {pull}8765[#8765]
+* [Fix for #9184] fixes error with custom interval in datetime aggregation {pull}9427[#9427]
+
+

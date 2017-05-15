@@ -4,21 +4,3 @@
   background-color: $noticeBackgroundColor;
   line-height: $globalLineHeight;
 }
-
-  .kuiNotice__header {
-    margin-bottom: 18px;
-  }
-
-/**
- * 1. Override h1 styles.
- */
-.kuiNoticeTitle {
-  font-size: $noticeTitleFontSize;
-  margin-bottom: 12px;
-  margin-top: 0 !important; /* 1 */
-}
-
-.kuiNoticeText {
-  font-size: $globalFontSize;
-  margin-bottom: 12px;
-}
