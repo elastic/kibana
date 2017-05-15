@@ -73,6 +73,9 @@ module.factory('confirmModal', function ($rootScope, $compile, $timeout) {
         }
       });
 
+      // This timeout is a bit hacky, but I can't find another way to wait for ng-react to finish
+      // mounting the react dom.  Without the timeout the dom will only contain an empty confirm-modal tag
+      // with no buttons to focus.
       $timeout(() => {
         switch (options.defaultFocusedButton) {
           case ConfirmationButtonTypes.CONFIRM:
