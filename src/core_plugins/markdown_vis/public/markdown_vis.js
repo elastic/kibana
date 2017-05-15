@@ -25,11 +25,13 @@ function MarkdownVisProvider(Private) {
     image,
     description: 'Create a document using markdown syntax',
     category: VisType.CATEGORY.OTHER,
-    template: markdownVisTemplate,
-    params: {
-      editor: markdownVisParamsTemplate
+    visConfig: {
+      template: markdownVisTemplate,
     },
-    requiresSearch: false,
+    editorConfig: {
+      optionsTemplate: markdownVisParamsTemplate
+    },
+    requestHandler: 'none',
     implementsRenderComplete: true,
   });
 }

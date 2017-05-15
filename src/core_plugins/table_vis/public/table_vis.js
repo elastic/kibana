@@ -32,13 +32,13 @@ function TableVisTypeProvider(Private) {
   // return the visType object, which kibana will use to display and configure new
   // Vis object of this type.
   return new TemplateVisType({
+    type: 'table',
     name: 'table',
     title: 'Data Table',
     image,
     description: 'Display values in a table',
     category: VisType.CATEGORY.DATA,
-    template: tableVisTemplate,
-    params: {
+    visConfig: {
       defaults: {
         perPage: 10,
         showPartialRows: false,
@@ -50,7 +50,10 @@ function TableVisTypeProvider(Private) {
         showTotal: false,
         totalFunc: 'sum'
       },
-      editor: '<table-vis-params></table-vis-params>'
+      template: tableVisTemplate,
+    },
+    editorConfig: {
+      optionsTemplate: '<table-vis-params></table-vis-params>'
     },
     implementsRenderComplete: true,
     hierarchicalData: function (vis) {

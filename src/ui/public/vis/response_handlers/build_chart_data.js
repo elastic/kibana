@@ -49,7 +49,7 @@ const basicResponseHandler = function (Private) {
       return new Promise((resolve) => {
         if (vis.isHierarchical()) {
           // the hierarchical converter is very self-contained (woot!)
-          return aggResponse.hierarchical(vis, response);
+          resolve(aggResponse.hierarchical(vis, response));
         }
 
         const tableGroup = aggResponse.tabify(vis, response, {

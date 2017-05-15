@@ -42,6 +42,7 @@ export function VisVisTypeProvider(Private) {
       if (!this.description) throw('vis_type must define its description');
       if (!this.icon && !this.image) throw('vis_type must define its icon or image');
 
+      if (!this.type) this.type = this.name;
       if (!this.editorConfig.optionTabs) {
         this.editorConfig.optionTabs = [
           { name: 'options', title: 'Options', editor: this.editorConfig.optionsTemplate }

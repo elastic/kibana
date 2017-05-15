@@ -30,7 +30,7 @@ module.controller('KbnMetricVisController', function ($scope, $element, Private)
 
       metrics.length = 0;
       $scope.processTableGroups(tabifyAggResponse($scope.vis, resp, options));
-      $element.trigger('renderComplete');
+      $scope.renderComplete();
     }
   });
 });

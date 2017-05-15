@@ -24,6 +24,7 @@ import { VisualizeListingController } from './listing/visualize_listing';
 import { VisualizeConstants } from './visualize_constants';
 import { SavedObjectRegistryProvider } from 'ui/saved_objects/saved_object_registry';
 import { savedVisualizationProvider } from 'plugins/kibana/visualize/saved_visualizations/saved_visualization_register';
+import { noneRequestHandlerProvider } from 'ui/vis/request_handlers/none';
 import { CourierRequestHandlerProvider } from 'ui/vis/request_handlers/courier';
 import { noneResponseHandler } from 'ui/vis/response_handlers/none';
 import { basicResponseHandler } from 'ui/vis/response_handlers/build_chart_data';
@@ -45,6 +46,7 @@ uiRoutes
 // preloading
 SavedObjectRegistryProvider.register(savedVisualizationProvider);
 RequestHandlersRegistryProvider.register(CourierRequestHandlerProvider);
+RequestHandlersRegistryProvider.register(noneRequestHandlerProvider);
 ResponseHandlersRegistryProvider.register(noneResponseHandler);
 ResponseHandlersRegistryProvider.register(basicResponseHandler);
 EditorTypesRegistyProvider.register(defaultEditor);

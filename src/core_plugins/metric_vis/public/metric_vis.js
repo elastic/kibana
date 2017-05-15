@@ -27,13 +27,15 @@ function MetricVisProvider(Private) {
     image,
     description: 'Display a calculation as a single number',
     category: VisType.CATEGORY.DATA,
-    template: metricVisTemplate,
-    params: {
+    visConfig: {
       defaults: {
         handleNoResults: true,
         fontSize: 60
       },
-      editor: metricVisParamsTemplate
+      template: metricVisTemplate,
+    },
+    editorConfig: {
+      optionsTemplate: metricVisParamsTemplate
     },
     implementsRenderComplete: true,
     schemas: new Schemas([

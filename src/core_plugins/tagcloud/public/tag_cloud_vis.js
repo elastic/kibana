@@ -17,7 +17,6 @@ VisTypesRegistryProvider.register(function TagCloudProvider(Private) {
     name: 'tagcloud',
     title: 'Tag Cloud',
     image,
-    implementsRenderComplete: true,
     description: 'A group of words, sized according to their importance',
     category: VisType.CATEGORY.OTHER,
     visConfig: {

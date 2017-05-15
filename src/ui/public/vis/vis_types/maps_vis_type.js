@@ -16,10 +16,13 @@ export function MapsVisTypeProvider(Private) {
     }
 
     render(vis, $el, uiState, esResponse) {
-      if (!this.renderbot) {
-        this.renderbot = new MapsRenderbot(vis, $el, uiState);
-      }
-      this.renderbot.render(esResponse);
+      return new Promise(resolve => {
+        if (!this.renderbot) {
+          this.renderbot = new MapsRenderbot(vis, $el, uiState);
+        }
+        this.renderbot.render(esResponse);
+        resolve();
+      });
     }
 
     destroy() {

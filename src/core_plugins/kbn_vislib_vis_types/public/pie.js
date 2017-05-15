@@ -40,9 +40,8 @@ export default function HistogramVisType(Private) {
           text: 'bottom',
         }],
       },
-      editorTemplate: pieTemplate
+      optionsTemplate: pieTemplate
     },
-    responseConverter: false,
     hierarchicalData: true,
     implementsRenderComplete: true,
     schemas: new Schemas([

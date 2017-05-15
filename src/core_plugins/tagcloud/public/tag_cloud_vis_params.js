@@ -26,7 +26,9 @@ uiModules.get('kibana/table_vis')
           const fontSize = slider.noUiSlider.get();
           $scope.vis.params.minFontSize = parseInt(fontSize[0], 10);
           $scope.vis.params.maxFontSize = parseInt(fontSize[1], 10);
+          $scope.$parent.stageEditableVis();
           $scope.$apply();
+
         });
       }
     };
