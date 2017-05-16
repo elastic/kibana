@@ -5,10 +5,12 @@ import React, {
 import classNames from 'classnames';
 
 const KuiInfoButton = props => {
-  const iconClasses = classNames('kuiInfoButton kuiIcon fa-info-circle', props.className);
+  const iconClasses = classNames('kuiInfoButton', props.className);
 
   return (
-    <button className={iconClasses} {...props}></button>
+    <button className={iconClasses} {...props}>
+      <span className='kuiIcon fa-info-circle'></span>
+    </button>
   );
 };
 

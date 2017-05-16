@@ -5,11 +5,19 @@ exports[`KuiInfoButton Baseline HTML attributes are rendered 1`] = `
   aria-label="aria label"
   class="testClass1 testClass2"
   data-test-subj="test subject string"
-/>
+>
+  <span
+    class="kuiIcon fa-info-circle"
+  />
+</button>
 `;
 
 exports[`KuiInfoButton Baseline is rendered 1`] = `
 <button
-  class="kuiInfoButton kuiIcon fa-info-circle"
-/>
+  class="kuiInfoButton"
+>
+  <span
+    class="kuiIcon fa-info-circle"
+  />
+</button>
 `;
