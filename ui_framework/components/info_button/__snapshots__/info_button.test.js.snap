@@ -2,7 +2,9 @@
 
 exports[`KuiInfoButton Baseline HTML attributes are rendered 1`] = `
 <button
-  class="kuiInfoButton kuiIcon fa-info-circle testClass1 testClass2"
+  aria-label="aria label"
+  class="testClass1 testClass2"
+  data-test-subj="test subject string"
 />
 `;
 
