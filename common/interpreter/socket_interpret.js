@@ -1,4 +1,5 @@
 import _ from 'lodash';
+import uuid from 'uuid/v4';
 import { interpretProvider } from './interpret';
 
 /*
@@ -14,8 +15,6 @@ import { interpretProvider } from './interpret';
 
 export function socketInterpreterProvider(config) {
   const { types, functions, referableFunctions, socket } = config;
-
-  let socketCounter = 0;
 
   // Return the interpet() function
   return interpretProvider({
@@ -34,7 +33,7 @@ export function socketInterpreterProvider(config) {
 
         // Keep a counter so we understand what message ID we're on. We might need a UUID at some point for when we're
         // resolving multiple expressions
-        const id = socketCounter++;
+        const id = uuid();
 
         // Go run the remaining AST and context somewhere else, meaning either the browser or the server, depending on
         // where this file was loaded
