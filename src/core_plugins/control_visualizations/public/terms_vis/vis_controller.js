@@ -8,15 +8,23 @@ module.controller('KbnTermsController', function ($scope, indexPatterns, Private
   const fetch = Private(FetchProvider);
   const SearchSource = Private(SearchSourceProvider);
 
+  const termsAgg = (fieldName, size, direction) => ({
+    'termsAgg': {
+      'terms': {
+        'field': fieldName,
+        'size': size,
+        'order': {
+          '_count': direction
+        }
+      }
+    }
+  });
+
   $scope.reactProps = {
     visParams: $scope.vis.params
   };
 
-  $scope.$watch('vis.params', function (visParams, oldParams) {
-    if (visParams === oldParams) {
-      return;
-    }
-
+  $scope.$watch('vis.params', function (visParams) {
     $scope.reactProps.visParams = visParams;
 
     const createRequestPromises = $scope.vis.params.fields.map(async (field) => {
@@ -25,12 +33,15 @@ module.controller('KbnTermsController', function ($scope, indexPatterns, Private
       searchSource.inherits(false); //Do not filter by time so can not inherit from rootSearchSource
       searchSource.size(0);
       searchSource.index(indexPattern);
+      searchSource.aggs(termsAgg(field.fieldName, 5, 'desc'));
 
       const defer = Promise.defer();
       defer.promise.then(function (resp) {
-        console.log('resp', resp);
+        const terms = resp.aggregations.termsAgg.buckets.map((bucket) => {
+          return bucket.key;
+        });
+        console.log('terms', terms);
       });
-
       return searchSource._createRequest(defer);
     });
     Promise.all(createRequestPromises).then(requests => {
