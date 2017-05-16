@@ -26,11 +26,11 @@ app.directive('sortableColumn', function () {
         }
       }
 
-      get isSortedAscending() {
+      isSortedAscending() {
         return (this.sortField === this.field) && (!this.sortReverse);
       }
 
-      get isSortedDescending() {
+      isSortedDescending() {
         return (this.sortField === this.field) && (this.sortReverse);
       }
     }
