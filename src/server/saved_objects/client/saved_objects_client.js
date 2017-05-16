@@ -22,7 +22,11 @@ export class SavedObjectsClient {
       body
     });
 
-    return Object.assign({ type: response._type, id: response._id }, body);
+    return Object.assign({
+      type: response._type,
+      id: response._id,
+      version: response._version
+    }, body);
   }
 
   async delete(type, id) {
@@ -93,7 +97,7 @@ export class SavedObjectsClient {
       refresh: 'wait_for'
     });
 
-    return get(response, 'result') === 'updated';
+    return { version: get(response, '_version') };
   }
 
   async _withKibanaIndex(method, params) {

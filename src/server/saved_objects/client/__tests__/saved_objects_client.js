@@ -63,7 +63,8 @@ describe('SavedObjectsClient', () => {
       expect(response).to.eql({
         type: 'index-pattern',
         id: 'logstash-*',
-        title: 'Logstash'
+        title: 'Logstash',
+        version: 2
       });
     });
 
@@ -228,11 +229,12 @@ describe('SavedObjectsClient', () => {
       callWithRequest.returns(Promise.resolve({
         _id: 'logstash-*',
         _type: 'index-pattern',
+        _version: 2,
         result: 'updated'
       }));
 
       const response = await savedObjectsClient.update('index-pattern', 'logstash-*', { title: 'Testing' });
-      expect(response).to.be(true);
+      expect(response).to.eql({ version: 2 });
     });
 
     it('passes the parameters to callWithRequest', async () => {
