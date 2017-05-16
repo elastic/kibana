@@ -60,7 +60,7 @@ export class SavedObjectsClient {
 
     return {
       data: get(response, 'hits.hits', []).map(r => {
-        return Object.assign({ id: r._id, type: r._type }, r._source);
+        return Object.assign({ id: r._id, type: r._type, version: r._version }, r._source);
       }),
       total: get(response, 'hits.total', 0),
       per_page: perPage,
@@ -75,15 +75,23 @@ export class SavedObjectsClient {
       id,
     });
 
-    return Object.assign({ id: response._id, type: response._type }, response._source);
+    return Object.assign({
+      id: response._id,
+      type: response._type,
+      version: response._version
+    }, response._source);
   }
 
   async update(type, id, body) {
+    const version = get(body, 'version');
+    const doc = omit(body, ['version']);
+
     const response = await this._withKibanaIndex('update', {
       type,
       id,
+      version,
       body: {
-        doc: body
+        doc: doc
       },
       refresh: 'wait_for'
     });

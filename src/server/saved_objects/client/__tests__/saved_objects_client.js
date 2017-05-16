@@ -53,7 +53,7 @@ describe('SavedObjectsClient', () => {
 
   describe('#create', () => {
     it('formats Elasticsearch response', async () => {
-      callWithRequest.returns({ _type: 'index-pattern', _id: 'logstash-*' });
+      callWithRequest.returns({ _type: 'index-pattern', _id: 'logstash-*', _version: 2 });
 
       const response = await savedObjectsClient.create('index-pattern', {
         id: 'logstash-*',
@@ -68,7 +68,7 @@ describe('SavedObjectsClient', () => {
     });
 
     it('should use ES create action with specifying an id', async () => {
-      callWithRequest.returns({ _type: 'index-pattern', _id: 'logstash-*' });
+      callWithRequest.returns({ _type: 'index-pattern', _id: 'logstash-*', _version: 2 });
 
       await savedObjectsClient.create('index-pattern', {
         id: 'logstash-*',
@@ -138,7 +138,7 @@ describe('SavedObjectsClient', () => {
       expect(response.data).to.have.length(count);
       docs.hits.hits.forEach((doc, i) => {
         expect(response.data[i]).to.eql(Object.assign(
-          { id: doc._id, type: doc._type },
+          { id: doc._id, type: doc._type, version: doc._version },
           doc._source)
         );
       });
@@ -190,6 +190,7 @@ describe('SavedObjectsClient', () => {
         'hits.total',
         'hits.hits._id',
         'hits.hits._type',
+        'hits.hits._version',
         'hits.hits._source.title'
       ]);
     });
@@ -205,7 +206,8 @@ describe('SavedObjectsClient', () => {
         'hits.hits._source.description',
         'hits.total',
         'hits.hits._id',
-        'hits.hits._type'
+        'hits.hits._type',
+        'hits.hits._version'
       ]);
     });
   });
@@ -215,6 +217,7 @@ describe('SavedObjectsClient', () => {
       callWithRequest.returns(Promise.resolve({
         _id: 'logstash-*',
         _type: 'index-pattern',
+        _version: 2,
         _source: {
           title: 'Testing'
         }
@@ -224,7 +227,8 @@ describe('SavedObjectsClient', () => {
       expect(response).to.eql({
         id: 'logstash-*',
         type: 'index-pattern',
-        title: 'Testing'
+        title: 'Testing',
+        version: 2
       });
     });
   });
@@ -251,6 +255,7 @@ describe('SavedObjectsClient', () => {
       expect(args[2]).to.eql({
         type: 'index-pattern',
         id: 'logstash-*',
+        version: undefined,
         body: { doc: { title: 'Testing' } },
         refresh: 'wait_for',
         index: '.kibana-test'

@@ -8,6 +8,7 @@ describe('createFilterPath', () => {
       'hits.total',
       'hits.hits._id',
       'hits.hits._type',
+      'hits.hits._version',
       'hits.hits._source.foo'
     ]);
   });
@@ -19,7 +20,8 @@ describe('createFilterPath', () => {
       'hits.hits._source.bar',
       'hits.total',
       'hits.hits._id',
-      'hits.hits._type'
+      'hits.hits._type',
+      'hits.hits._version',
     ]);
   });
 });
