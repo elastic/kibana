@@ -79,7 +79,7 @@ describe('SavedObjectsClient', () => {
       expect(callWithRequest.calledOnce).to.be(true);
 
       const args = callWithRequest.getCall(0).args;
-      expect(args[1]).to.be('create');
+      expect(args[1]).to.be('index');
     });
   });
 

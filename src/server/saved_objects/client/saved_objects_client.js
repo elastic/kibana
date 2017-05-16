@@ -17,7 +17,7 @@ export class SavedObjectsClient {
   async create(type, options = {}) {
     const body = omit(options, 'id');
 
-    const response = await this._withKibanaIndex('create', {
+    const response = await this._withKibanaIndex('index', {
       type,
       body
     });
