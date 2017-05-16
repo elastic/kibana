@@ -10,10 +10,10 @@ import {
   GuideText,
 } from '../../components';
 
-import Basic from './info_button';
+import Example from './info_button';
 
 const basicSource = require('!!raw!./info_button');
-const basicHtml = renderToHtml(Basic);
+const basicHtml = renderToHtml(Example);
 
 export default props => (
   <GuidePage title={props.route.name}>
@@ -28,15 +28,13 @@ export default props => (
       }]}
     >
       <GuideText>
-        Use the Info Button as a trigger to provide some helpful inline content. For example, use it as a tooltip trigger.
+        Is just button with an info icon, used for a keyboard-accessible
+        trigger for helpful inline content. For example, use it as a tooltip
+        trigger. This styles the button to have no background color or border.
       </GuideText>
 
       <GuideDemo>
-        <Basic />
-      </GuideDemo>
-
-      <GuideDemo isDarkTheme={true}>
-        <Basic />
+        <Example />
       </GuideDemo>
     </GuideSection>
 
