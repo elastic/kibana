@@ -21,7 +21,7 @@ module.exports = new Fn({
       types: ['string', 'null'],
       help: 'Color to assign the line',
     },
-    line: {
+    lines: {
       types: ['number', 'null'],
       help: 'Width of the line',
       default: 2,

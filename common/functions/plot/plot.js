@@ -1,5 +1,5 @@
 const Fn = require('../fn.js');
-import { groupBy, keyBy, get, map, sortBy /*, min, max*/ } from 'lodash';
+import { groupBy, keyBy, get, map, sortBy } from 'lodash';
 
 /*
 esdocs(size=1000).alterColumn(column=@timestamp, type=date, name=time)
@@ -54,7 +54,7 @@ module.exports = new Fn({
       if (!seriesStyle) return {};
       return {
         lines: {
-          show: get(seriesStyle, 'line') > 0,
+          show: get(seriesStyle, 'lines') > 0,
           lineWidth: get(seriesStyle, 'line'),
           steps: get(seriesStyle, 'steps'),
           fillColor: get(seriesStyle, 'color'),
@@ -107,17 +107,6 @@ module.exports = new Fn({
       });
     }
 
-    /*
-    const sizeInfo = (function () {
-      const sizes = map(context.rows, 'size');
-      return {
-        min: min(sizes),
-        max: max(sizes),
-        delta: max(sizes) - min(sizes),
-      };
-    }());
-    */
-
     const data = map(groupBy(context.rows, 'color'), (series, label) => {
       const seriesStyle = seriesStyles[label];
       const result = {
@@ -126,17 +115,11 @@ module.exports = new Fn({
           const x = context.columns.x.type === 'string' ? ticks.x.hash[point.x] : point.x;
           const y = context.columns.y.type === 'string' ? ticks.y.hash[point.y] : point.y;
 
-          //const maxDot = 0.4;
-          //const minDot = 0.05;
-
-          //const size = (maxDot - minDot) /
-          //          sizeInfo.delta * (point.size - sizeInfo.min) + minDot || undefined;
           const size = point.size;
+          //const size = point.size;
           return [x, y, size];
         }),
       };
-
-      console.log(result.data);
 
       if (seriesStyle) {
         Object.assign(result, seriesStyleToFlot(seriesStyle));
@@ -158,6 +141,13 @@ module.exports = new Fn({
             borderWidth: 0,
             borderColor: null,
             color: 'rgba(0,0,0,0)',
+            labelMargin: 30,
+            margin: {
+              right: 30,
+              top: 20,
+              bottom: 0,
+              left: 0,
+            },
           },
           xaxis: {
             ticks: context.columns.x.type === 'string' ? map(ticks.x.hash, (position, name) => [position, name]) : undefined,

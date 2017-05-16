@@ -95,12 +95,15 @@ module.exports = new Fn({
         Object.assign(row, measureRows[i]);
       });
 
+      const rows = uniqBy(result, row => JSON.stringify(omit(row, '_rowId')));
+      console.log(rows.length);
+
       return {
         type: 'pointseries',
         columns: columns,
         //rows: sortBy(result, ['x']),
         // It only makes sense to uniq the rows in a point series as 2 values can not exist in the exact same place at the same time.
-        rows: uniqBy(result, row => JSON.stringify(omit(row, '_rowId'))),
+        rows: rows,
       };
     });
   },

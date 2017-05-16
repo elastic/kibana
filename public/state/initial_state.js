@@ -4,7 +4,8 @@ export default (path) => {
   const state = {
     app: {}, // Kibana stuff in here
     throwAway: {
-      expression: 'demodata().pointseries(x=time, y=.math("sum(cost)")).line()',
+      expression: 'demodata().pointseries(x=state, y=project, size=.math("median(age)"), color="country")' +
+      '.plot(palette=palette(#F2385A, #E9F1DF, #36B1BF))',
       renderable: null,
     },
     transient: {
