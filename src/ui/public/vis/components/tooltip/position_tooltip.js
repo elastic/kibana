@@ -69,7 +69,7 @@ function getOverflow(size, pos, containers) {
 
   containers.map(getBounds)
   .sort(function (a, b) {
-    //ensure smallest containers are merged first
+    // ensure smallest containers are merged first
     return a.area - b.area;
   })
   .forEach(function (bounds) {
@@ -94,8 +94,8 @@ function mergeOverflows(dest, src) {
     return Math.max(a, b);
   });
 
-  //When tooltip overflows both sides of smaller container,
-  //remove overflow on one side if the outer container can contain tooltip.
+  // When tooltip overflows both sides of smaller container,
+  // remove overflow on one side if the outer container can contain tooltip.
   if (dest.east && dest.west && dest.east > 0 && dest.west > 0 && (src.east < 0 || src.west < 0)) {
     if (src.east < src.west) {
       dest.east = src.east;
