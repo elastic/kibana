@@ -161,9 +161,11 @@ body {
   border: none;
   border-radius: 4px; }
   .kuiButton:disabled {
-    cursor: default; }
+    cursor: not-allowed;
+    opacity: .5; }
   a.kuiButton.kuiButton-isDisabled {
-    cursor: default; }
+    cursor: not-allowed;
+    opacity: .5; }
   .kuiButton:enabled:active {
     -webkit-transform: translateY(1px);
             transform: translateY(1px); }
@@ -179,7 +181,7 @@ body {
     /* 1 */
     outline: none !important;
     /* 2 */
-    box-shadow: 0 0 0 1px #ffffff, 0 0 0 2px #6EADC1;
+    box-shadow: 0 0 0 1px #ffffff, 0 0 0 2px #0096CC;
     /* 3 */ }
   a.kuiButton:not(.kuiButton-isDisabled):focus {
     /* 1 */
@@ -187,7 +189,7 @@ body {
     /* 1 */
     outline: none !important;
     /* 2 */
-    box-shadow: 0 0 0 1px #ffffff, 0 0 0 2px #6EADC1;
+    box-shadow: 0 0 0 1px #ffffff, 0 0 0 2px #0096CC;
     /* 3 */ }
 
 /**
@@ -230,39 +232,27 @@ body {
  * 1. Override Bootstrap.
  */
 .kuiButton--basic {
-  color: #5a5a5a;
-  background-color: #F2F2F2; }
+  color: #2d2d2d;
+  background-color: #F5F5F5; }
   .kuiButton--basic:not(a):enabled:focus {
-    color: #5a5a5a; }
+    color: #2d2d2d; }
   a.kuiButton--basic:not(.kuiButton-isDisabled):focus {
     /* 1 */
-    color: #5a5a5a; }
+    color: #2d2d2d; }
   .kuiButton--basic:enabled:hover {
-    color: #FFF !important;
-    /* 1 */
-    background-color: #9B9B9B !important;
+    background-color: silver !important;
     /* 1 */ }
   a.kuiButton--basic:not(.kuiButton-isDisabled):hover {
     /* 1 */
-    color: #FFF !important;
-    /* 1 */
-    background-color: #9B9B9B !important;
+    background-color: silver !important;
     /* 1 */ }
   .kuiButton--basic:enabled:active {
-    color: #FFF !important;
-    /* 1 */
-    background-color: #9B9B9B !important;
+    background-color: silver !important;
     /* 1 */ }
   a.kuiButton--basic:not(.kuiButton-isDisabled):active {
     /* 1 */
-    color: #FFF !important;
-    /* 1 */
-    background-color: #9B9B9B !important;
+    background-color: silver !important;
     /* 1 */ }
-  .kuiButton--basic:disabled {
-    color: #9B9B9B; }
-  a.kuiButton--basic.kuiButton-isDisabled {
-    color: #9B9B9B; }
   .theme-dark .kuiButton--basic {
     color: #FFF;
     background-color: #9c9c9c; }
@@ -271,7 +261,7 @@ body {
       /* 1 */
       outline: none !important;
       /* 2 */
-      box-shadow: 0 0 0 1px #777777, 0 0 0 2px #6EADC1;
+      box-shadow: 0 0 0 1px #777777, 0 0 0 2px #0096CC;
       /* 3 */
       color: #FFF; }
     a.theme-dark .kuiButton--basic:not(.kuiButton-isDisabled):focus {
@@ -280,7 +270,7 @@ body {
       /* 1 */
       outline: none !important;
       /* 2 */
-      box-shadow: 0 0 0 1px #777777, 0 0 0 2px #6EADC1;
+      box-shadow: 0 0 0 1px #777777, 0 0 0 2px #0096CC;
       /* 3 */
       color: #FFF; }
     .theme-dark .kuiButton--basic:enabled:hover {
@@ -297,17 +287,13 @@ body {
       /* 1 */
       background-color: dimgray !important;
       /* 1 */ }
-    .theme-dark .kuiButton--basic:disabled {
-      color: rgba(255, 255, 255, 0.5); }
-    a.theme-dark .kuiButton--basic.kuiButton-isDisabled {
-      color: rgba(255, 255, 255, 0.5); }
 
 /**
  * 1. Override Bootstrap.
  */
 .kuiButton--primary {
   color: #FFF;
-  background-color: #6EADC1; }
+  background-color: #0096CC; }
   .kuiButton--primary:not(a):enabled:focus {
     color: #FFF; }
   a.kuiButton--primary:not(.kuiButton-isDisabled):focus {
@@ -316,32 +302,59 @@ body {
   .kuiButton--primary:enabled:hover {
     color: #FFF !important;
     /* 1 */
-    background-color: #006E8A; }
+    background-color: #007199; }
   a.kuiButton--primary:not(.kuiButton-isDisabled):hover {
     /* 1 */
     color: #FFF !important;
     /* 1 */
-    background-color: #006E8A; }
+    background-color: #007199; }
   .kuiButton--primary:enabled:active {
     color: #FFF !important;
     /* 1 */
-    background-color: #006E8A; }
+    background-color: #007199; }
   a.kuiButton--primary:not(.kuiButton-isDisabled):active {
     /* 1 */
     color: #FFF !important;
     /* 1 */
-    background-color: #006E8A; }
-  .kuiButton--primary:disabled {
-    background-color: #B6D6E0; }
-  a.kuiButton--primary.kuiButton-isDisabled {
-    background-color: #B6D6E0; }
+    background-color: #007199; }
+
+/**
+ * 1. Override Bootstrap.
+ */
+.kuiButton--success {
+  color: #FFF;
+  background-color: #00A69B; }
+  .kuiButton--success:not(a):enabled:focus {
+    color: #FFF; }
+  a.kuiButton--success:not(.kuiButton-isDisabled):focus {
+    /* 1 */
+    color: #FFF; }
+  .kuiButton--success:enabled:hover {
+    color: #FFF !important;
+    /* 1 */
+    background-color: #00736b; }
+  a.kuiButton--success:not(.kuiButton-isDisabled):hover {
+    /* 1 */
+    color: #FFF !important;
+    /* 1 */
+    background-color: #00736b; }
+  .kuiButton--success:enabled:active {
+    color: #FFF !important;
+    /* 1 */
+    background-color: #00736b; }
+  a.kuiButton--success:not(.kuiButton-isDisabled):active {
+    /* 1 */
+    color: #FFF !important;
+    /* 1 */
+    background-color: #00736b; }
 
 /**
  * 1. Override Bootstrap.
  */
 .kuiButton--danger {
-  color: #FFF;
-  background-color: #D76051; }
+  color: #A30000;
+  background-color: #FFF;
+  border: solid 1px #A30000; }
   .kuiButton--danger:not(a):enabled:focus {
     z-index: 1;
     /* 1 */
@@ -349,7 +362,7 @@ body {
     /* 2 */
     box-shadow: 0 0 0 1px #ffffff, 0 0 0 2px #ff523c;
     /* 3 */
-    color: #FFF; }
+    color: #A30000; }
   a.kuiButton--danger:not(.kuiButton-isDisabled):focus {
     /* 1 */
     z-index: 1;
@@ -358,36 +371,32 @@ body {
     /* 2 */
     box-shadow: 0 0 0 1px #ffffff, 0 0 0 2px #ff523c;
     /* 3 */
-    color: #FFF; }
+    color: #A30000; }
   .kuiButton--danger:enabled:hover {
     color: #FFF !important;
     /* 1 */
-    background-color: #A52E1F; }
+    background-color: #700000; }
   a.kuiButton--danger:not(.kuiButton-isDisabled):hover {
     /* 1 */
     color: #FFF !important;
     /* 1 */
-    background-color: #A52E1F; }
+    background-color: #700000; }
   .kuiButton--danger:enabled:active {
     color: #FFF !important;
     /* 1 */
-    background-color: #A52E1F; }
+    background-color: #700000; }
   a.kuiButton--danger:not(.kuiButton-isDisabled):active {
     /* 1 */
     color: #FFF !important;
     /* 1 */
-    background-color: #A52E1F; }
-  .kuiButton--danger:disabled {
-    background-color: #efc0ba; }
-  a.kuiButton--danger.kuiButton-isDisabled {
-    background-color: #efc0ba; }
+    background-color: #700000; }
 
 /**
  * 1. Override Bootstrap.
  * 2. Override either Bootstrap or Timelion styles.
  */
 .kuiButton--hollow {
-  color: #3CAED2 !important;
+  color: #0096CC !important;
   /* 2 */
   background-color: transparent; }
   .kuiButton--hollow:enabled:hover {
@@ -408,10 +417,30 @@ body {
     color: #006E8A !important;
     /* 1 */
     text-decoration: underline; }
-  .kuiButton--hollow:disabled {
-    color: #dddddd; }
-  a.kuiButton--hollow.kuiButton-isDisabled {
-    color: #dddddd; }
+
+.kuiButton--secondary {
+  color: #0096CC !important;
+  /* 2 */
+  border: solid 1px #0096CC;
+  background-color: #FFF; }
+  .kuiButton--secondary:enabled:hover {
+    color: #007199 !important;
+    /* 1 */
+    border: solid 1px #007199; }
+  a.kuiButton--secondary:not(.kuiButton-isDisabled):hover {
+    /* 1 */
+    color: #007199 !important;
+    /* 1 */
+    border: solid 1px #007199; }
+  .kuiButton--secondary:enabled:active {
+    color: #007199 !important;
+    /* 1 */
+    border: solid 1px #007199; }
+  a.kuiButton--secondary:not(.kuiButton-isDisabled):active {
+    /* 1 */
+    color: #007199 !important;
+    /* 1 */
+    border: solid 1px #007199; }
 
 .kuiButtonGroup {
   display: -webkit-box;
@@ -706,7 +735,7 @@ body {
 .kuiEventBody__metadata {
   font-size: 14px;
   line-height: 1.5;
-  color: #9fa3a7; }
+  color: #666; }
 
 /**
  * 1. Set inline-block so this wrapper shrinks to fit the input.
@@ -752,6 +781,7 @@ body {
   /* 2 */
   font-size: 10px !important;
   /* 2 */
+  -webkit-transition: background-color 0.1s linear;
   transition: background-color 0.1s linear; }
   .kuiCheckBox:before {
     position: relative;
@@ -761,10 +791,11 @@ body {
     font-size: 1em;
     opacity: 0;
     color: #FFF;
+    -webkit-transition: opacity 0.1s linear;
     transition: opacity 0.1s linear; }
   .kuiCheckBox:checked {
-    border-color: #328CAA;
-    background-color: #328CAA; }
+    border-color: #0096CC;
+    background-color: #0096CC; }
     .kuiCheckBox:checked:before {
       opacity: 1; }
   .kuiCheckBox:focus {
@@ -772,7 +803,7 @@ body {
     /* 1 */
     outline: none !important;
     /* 2 */
-    box-shadow: 0 0 0 1px #ffffff, 0 0 0 2px #6EADC1;
+    box-shadow: 0 0 0 1px #ffffff, 0 0 0 2px #0096CC;
     /* 3 */ }
   .kuiCheckBox:disabled {
     opacity: 0.3;
@@ -834,6 +865,7 @@ body {
   background-color: #ffffff;
   border: 1px solid #DEDEDE;
   border-radius: 4px;
+  -webkit-transition: border-color 0.1s linear;
   transition: border-color 0.1s linear;
   /**
    * 1. Angular will add an ng-untouched class to an input if it hasn't been touched yet.
@@ -875,6 +907,7 @@ body {
   background-color: #ffffff;
   border: 1px solid #DEDEDE;
   border-radius: 4px;
+  -webkit-transition: border-color 0.1s linear;
   transition: border-color 0.1s linear;
   /**
    * 1. Angular will add an ng-untouched class to an input if it hasn't been touched yet.
@@ -948,6 +981,7 @@ body {
   background-color: #ffffff;
   border: 1px solid #DEDEDE;
   border-radius: 4px;
+  -webkit-transition: border-color 0.1s linear;
   transition: border-color 0.1s linear;
   /**
    * 1. Angular will add an ng-untouched class to an input if it hasn't been touched yet.
@@ -988,6 +1022,7 @@ body {
   background-color: #ffffff;
   border: 1px solid #DEDEDE;
   border-radius: 4px;
+  -webkit-transition: border-color 0.1s linear;
   transition: border-color 0.1s linear;
   /**
    * 1. Angular will add an ng-untouched class to an input if it hasn't been touched yet.
@@ -1123,7 +1158,7 @@ body {
   position: absolute;
   top: 5px;
   right: 5px;
-  color: #9fa3a7; }
+  color: #666; }
 
 .kuiHeaderBar {
   display: -webkit-box;
@@ -1293,12 +1328,12 @@ body {
   line-height: 1.5; }
 
 .kuiLink {
-  color: #3CAED2;
+  color: #0096CC;
   text-decoration: none;
   cursor: pointer;
   /* 1 */ }
   .kuiLink:visited, .kuiLink:active {
-    color: #3CAED2; }
+    color: #0096CC; }
   .kuiLink:hover {
     color: #006E8A;
     text-decoration: underline; }
@@ -1310,7 +1345,7 @@ body {
 .kuiLoadingItems {
   padding: 30px;
   font-size: 18px;
-  color: #9fa3a7;
+  color: #666;
   line-height: 1.5; }
 
 /**
@@ -1347,15 +1382,15 @@ body {
  * 1. Make it a bit darker to contrast with the gray background.
  */
 .kuiLocalBreadcrumb__link {
-  color: #3CAED2;
+  color: #0096CC;
   text-decoration: none;
   cursor: pointer;
   /* 1 */
-  color: #328caa;
+  color: #0096CC;
   /* 1 */
   font-size: 14px; }
   .kuiLocalBreadcrumb__link:visited, .kuiLocalBreadcrumb__link:active {
-    color: #3CAED2; }
+    color: #0096CC; }
   .kuiLocalBreadcrumb__link:hover {
     color: #006E8A;
     text-decoration: underline; }
@@ -1401,21 +1436,21 @@ body {
   background-color: transparent;
   border: none;
   font-size: 12px;
-  color: #5a5a5a;
+  color: #2d2d2d;
   padding: 3px 6px;
   border-radius: 4px; }
   .kuiDatePickerNavigationButton:hover, .kuiDatePickerNavigationButton:active {
     cursor: pointer;
-    color: #000000;
-    background-color: rgba(0, 0, 0, 0.1); }
+    color: #F5F5F5;
+    background-color: #0096CC; }
   .kuiDatePickerNavigationButton:focus {
     z-index: 1;
     /* 1 */
     outline: none !important;
     /* 2 */
-    box-shadow: 0 0 0 1px #f6f6f6, 0 0 0 2px #6EADC1;
+    box-shadow: 0 0 0 1px #F5F5F5, 0 0 0 2px #0096CC;
     /* 3 */
-    color: #5a5a5a;
+    color: #2d2d2d;
     /* 1 */ }
   .theme-dark .kuiDatePickerNavigationButton {
     color: #dedede; }
@@ -1427,7 +1462,7 @@ body {
       /* 1 */
       outline: none !important;
       /* 2 */
-      box-shadow: 0 0 0 1px #525252, 0 0 0 2px #6EADC1;
+      box-shadow: 0 0 0 1px #525252, 0 0 0 2px #0096CC;
       /* 3 */
       color: #dedede;
       /* 1 */ }
@@ -1475,7 +1510,7 @@ body {
     /* 1 */
     outline: none !important;
     /* 2 */
-    box-shadow: 0 0 0 1px #f6f6f6, 0 0 0 2px #6EADC1;
+    box-shadow: 0 0 0 1px #F5F5F5, 0 0 0 2px #0096CC;
     /* 3 */
     color: #2d2d2d;
     /* 1 */ }
@@ -1486,14 +1521,14 @@ body {
     visibility: hidden;
     pointer-events: none; }
   .kuiDatePickerRowCellContent.kuiDatePickerRowCellContent-isCurrent {
-    color: #3CAED2; }
+    color: #0096CC; }
   .kuiDatePickerRowCellContent.kuiDatePickerRowCellContent-isSelected {
     background-color: #777777;
     color: #ffffff; }
   .kuiDatePickerRowCellContent:hover, .kuiDatePickerRowCellContent:active {
     cursor: pointer;
-    color: #000000;
-    background-color: rgba(0, 0, 0, 0.1); }
+    color: #F5F5F5;
+    background-color: #0096CC; }
   .theme-dark .kuiDatePickerRowCellContent {
     color: #cecece; }
     .theme-dark .kuiDatePickerRowCellContent:focus {
@@ -1501,7 +1536,7 @@ body {
       /* 1 */
       outline: none !important;
       /* 2 */
-      box-shadow: 0 0 0 1px #525252, 0 0 0 2px #6EADC1;
+      box-shadow: 0 0 0 1px #525252, 0 0 0 2px #0096CC;
       /* 3 */ }
     .theme-dark .kuiDatePickerRowCellContent.kuiDatePickerRowCellContent-isCurrent {
       color: #b7e2ea; }
@@ -1514,7 +1549,10 @@ body {
 .kuiLocalDropdown {
   position: relative;
   padding: 10px 10px 14px;
-  background-color: #f6f6f6;
+  background-color: #F5F5F5;
+  border-bottom: solid 1px #D9D9D9;
+  border-top: solid 1px #D9D9D9;
+  margin-bottom: 10px;
   line-height: 20px; }
   .theme-dark .kuiLocalDropdown {
     background-color: #525252; }
@@ -1600,14 +1638,14 @@ body {
   display: flex; }
 
 .kuiLocalDropdownHeader__action {
-  color: #3CAED2;
+  color: #0096CC;
   font-size: 12px;
   text-decoration: none;
   cursor: pointer; }
   .kuiLocalDropdownHeader__action + .kuiLocalDropdownHeader__action {
     margin-left: 10px; }
   .kuiLocalDropdownHeader__action:hover, .kuiLocalDropdownHeader__action:active {
-    color: #105A73; }
+    color: #007199; }
   .theme-dark .kuiLocalDropdownHeader__action {
     color: #b7e2ea; }
     .theme-dark .kuiLocalDropdownHeader__action:hover, .theme-dark .kuiLocalDropdownHeader__action:active {
@@ -1620,8 +1658,8 @@ body {
   padding: 5px 15px;
   font-size: 14px;
   color: #2d2d2d;
-  background-color: #ffffff;
-  border: 2px solid #ffffff;
+  background-color: #FFF;
+  border: 2px solid #FFF;
   border-radius: 4px; }
   .theme-dark .kuiLocalDropdownInput {
     color: #cecece;
@@ -1639,7 +1677,7 @@ body {
   padding: 6px 10px;
   font-size: 14px;
   color: #2d2d2d;
-  background-color: #e4e4e4; }
+  background-color: #FFF; }
   .theme-dark .kuiLocalDropdownWarning {
     color: #cecece;
     background-color: #636363; }
@@ -1675,20 +1713,28 @@ body {
   padding: 0 10px;
   font-size: 14px;
   background-color: transparent;
-  color: #5a5a5a;
+  color: #2d2d2d;
   border: 0;
-  cursor: pointer; }
-  .kuiLocalMenuItem:hover {
-    background-color: rgba(0, 0, 0, 0.1);
-    color: #000000; }
+  cursor: pointer;
+  border-right: solid 1px transparent;
+  border-left: solid 1px transparent; }
+  .kuiLocalMenuItem:hover, .kuiLocalMenuItem:focus {
+    background-color: #0096CC;
+    color: #F5F5F5; }
   .kuiLocalMenuItem.kuiLocalMenuItem-isSelected {
-    background-color: #f6f6f6; }
+    background-color: #F5F5F5;
+    border-color: #D9D9D9;
+    height: calc(100% + 1px);
+    z-index: 2;
+    color: #0096CC; }
+    .kuiLocalMenuItem.kuiLocalMenuItem-isSelected:hover, .kuiLocalMenuItem.kuiLocalMenuItem-isSelected:focus {
+      color: #0096CC; }
   .kuiLocalMenuItem.kuiLocalMenuItem-isDisabled {
     opacity: 0.5;
-    cursor: default; }
+    cursor: not-allowed; }
     .kuiLocalMenuItem.kuiLocalMenuItem-isDisabled:hover {
       background-color: transparent;
-      color: #5a5a5a; }
+      color: #2d2d2d; }
   .theme-dark .kuiLocalMenuItem {
     color: #dedede; }
     .theme-dark .kuiLocalMenuItem:hover {
@@ -1722,11 +1768,12 @@ body {
   -webkit-justify-content: space-between;
       -ms-flex-pack: justify;
           justify-content: space-between;
-  min-height: 70px;
+  min-height: 69px;
   /* 1 */
   color: #2d2d2d;
-  background-color: #e4e4e4;
-  line-height: 1.5; }
+  background-color: #FFF;
+  line-height: 1.5;
+  border-bottom: solid 1px #D9D9D9; }
   .theme-dark .kuiLocalNav {
     color: #cecece;
     background-color: #333333; }
@@ -1744,7 +1791,7 @@ body {
   -webkit-justify-content: space-between;
       -ms-flex-pack: justify;
           justify-content: space-between;
-  height: 32px; }
+  height: 29px; }
 
 .kuiLocalNavRow__section {
   height: 100%; }
@@ -1757,9 +1804,9 @@ body {
  *    of this container using padding.
  */
 .kuiLocalNavRow--secondary {
-  height: 38px;
+  height: 40px;
   /* 1 */
-  padding: 4px 10px 0;
+  padding: 0 10px 0;
   /* 1 */
   -webkit-box-align: start;
   -webkit-align-items: flex-start;
@@ -1787,6 +1834,7 @@ body {
   background-color: #ffffff;
   border: 1px solid #DEDEDE;
   border-radius: 4px;
+  -webkit-transition: border-color 0.1s linear;
   transition: border-color 0.1s linear;
   /**
    * 1. Angular will add an ng-untouched class to an input if it hasn't been touched yet.
@@ -1798,8 +1846,7 @@ body {
       -ms-flex: 1 1 100%;
           flex: 1 1 100%;
   border-color: #ffffff;
-  border-top-color: #ffffff;
-  border-bottom-color: #ffffff;
+  border-color: #D9D9D9;
   border-radius: 4px 0 0 4px; }
   .theme-dark .kuiLocalSearchInput {
     color: #cecece; }
@@ -1869,6 +1916,7 @@ body {
   background-color: #ffffff;
   border: 1px solid #DEDEDE;
   border-radius: 4px;
+  -webkit-transition: border-color 0.1s linear;
   transition: border-color 0.1s linear;
   /**
    * 1. Angular will add an ng-untouched class to an input if it hasn't been touched yet.
@@ -1920,7 +1968,7 @@ body {
   line-height: 0;
   /* 1 */
   color: #ffffff;
-  background-color: #9c9c9c;
+  background-color: #666;
   border: 0;
   border-radius: 0 4px 4px 0; }
   .kuiLocalSearchButton:focus {
@@ -1928,7 +1976,7 @@ body {
     /* 1 */
     outline: none !important;
     /* 2 */
-    box-shadow: 0 0 0 1px #E4E4E4, 0 0 0 2px #6EADC1;
+    box-shadow: 0 0 0 1px #E4E4E4, 0 0 0 2px #0096CC;
     /* 3 */ }
   .theme-dark .kuiLocalSearchButton {
     color: #ffffff;
@@ -1938,7 +1986,7 @@ body {
       /* 1 */
       outline: none !important;
       /* 2 */
-      box-shadow: 0 0 0 1px #333333, 0 0 0 2px #6EADC1;
+      box-shadow: 0 0 0 1px #333333, 0 0 0 2px #0096CC;
       /* 3 */ }
 
 /**
@@ -1955,15 +2003,10 @@ body {
           align-items: flex-end;
   height: 100%; }
 
-/**
-   * 1. Make sure the bottom border is flush with the bottom of the LocalNav.
-   */
 .kuiLocalTab {
   padding: 5px 0 6px 0;
   font-size: 18px;
-  line-height: 22px;
-  /* 1 */
-  color: #5a5a5a;
+  color: #3F3F3F;
   border-bottom: 2px solid transparent;
   text-decoration: none;
   cursor: pointer;
@@ -1972,12 +2015,12 @@ body {
      *    a regular cursor instead of setting pointer-events: none.
      */ }
   .kuiLocalTab:hover:not(.kuiLocalTab-isDisabled), .kuiLocalTab:active:not(.kuiLocalTab-isDisabled) {
-    color: #000000; }
+    color: #0096CC; }
     .theme-dark .kuiLocalTab:hover:not(.kuiLocalTab-isDisabled), .theme-dark .kuiLocalTab:active:not(.kuiLocalTab-isDisabled) {
       color: #ffffff; }
   .kuiLocalTab.kuiLocalTab-isSelected {
-    color: #000000;
-    border-bottom-color: #000000;
+    color: #0096CC;
+    border-bottom-color: #0096CC;
     cursor: default; }
     .theme-dark .kuiLocalTab.kuiLocalTab-isSelected {
       color: #ffffff;
@@ -2048,7 +2091,7 @@ body {
     /* 1 */
     outline: none !important;
     /* 2 */
-    box-shadow: 0 0 0 1px #ffffff, 0 0 0 2px #6EADC1;
+    box-shadow: 0 0 0 1px #ffffff, 0 0 0 2px #0096CC;
     /* 3 */ }
 
 .kuiMenuButton--iconText .kuiMenuButton__icon:first-child {
@@ -2138,7 +2181,7 @@ body {
   cursor: pointer;
   padding: 2px 5px;
   border: 1px solid transparent;
-  color: #9fa3a7;
+  color: #666;
   background-color: transparent;
   line-height: 1;
   /* 2 */
@@ -2212,7 +2255,7 @@ body {
   cursor: pointer;
   padding: 2px 5px;
   border: 1px solid transparent;
-  color: #9fa3a7;
+  color: #666;
   background-color: transparent;
   line-height: 1;
   /* 2 */
@@ -2242,7 +2285,7 @@ body {
 .kuiNoItems {
   padding: 30px;
   font-size: 18px;
-  color: #9fa3a7;
+  color: #666;
   line-height: 1.5; }
 
 .kuiNotice {
@@ -2252,10 +2295,8 @@ body {
   line-height: 1.5; }
 
 .kuiPanel {
-  border: 2px solid #E4E4E4; }
-
-.kuiPanel--withHeader {
-  border-top: none; }
+  border: 1px solid #E4E4E4;
+  border-radius: 4px; }
 
 .kuiPanel--centered {
   display: -webkit-box;
@@ -2288,13 +2329,13 @@ body {
   /* 1 */
   padding: 10px;
   height: 50px;
-  background-color: #E4E4E4; }
+  border-bottom: 1px solid #E4E4E4; }
   .kuiPanelHeader .kuiButton:not(a):enabled:focus {
     z-index: 1;
     /* 1 */
     outline: none !important;
     /* 2 */
-    box-shadow: 0 0 0 1px #E4E4E4, 0 0 0 2px #6EADC1;
+    box-shadow: 0 0 0 1px #E4E4E4, 0 0 0 2px #0096CC;
     /* 3 */ }
   a.kuiPanelHeader .kuiButton:not(.kuiButton-isDisabled):focus {
     /* 1 */
@@ -2302,7 +2343,7 @@ body {
     /* 1 */
     outline: none !important;
     /* 2 */
-    box-shadow: 0 0 0 1px #E4E4E4, 0 0 0 2px #6EADC1;
+    box-shadow: 0 0 0 1px #E4E4E4, 0 0 0 2px #0096CC;
     /* 3 */ }
   .kuiPanelHeader .kuiButton--danger:not(a):enabled:focus {
     z-index: 1;
@@ -2413,7 +2454,7 @@ body {
 
 .kuiPromptForItems__message {
   font-size: 18px;
-  color: #9fa3a7;
+  color: #666;
   line-height: 1.5; }
 
 .kuiPromptForItems__actions {
@@ -2607,7 +2648,7 @@ body {
   cursor: pointer;
   padding: 10px 30px;
   font-size: 14px;
-  color: #9fa3a7;
+  color: #666;
   background-color: #FFF;
   /* 1 */
   border: 1px solid #E4E4E4;
@@ -2631,7 +2672,7 @@ body {
     /* 1 */ }
   .kuiTab:focus:not(.kuiTab-isSelected):not(:active) {
     z-index: 1;
-    color: #3CAED2;
+    color: #0096CC;
     border: 1px solid #6EADC1 !important;
     padding-bottom: 11px;
     /* 4 */ }
@@ -2663,7 +2704,7 @@ body {
   .kuiToggleButton:focus {
     color: #191E23; }
   .kuiToggleButton:active {
-    color: #3CAED2 !important;
+    color: #0096CC !important;
     /* 2 */ }
   .kuiToggleButton:hover {
     color: #006E8A !important;
@@ -2708,13 +2749,13 @@ body {
   /* 1 */
   padding: 10px;
   height: 50px;
-  background-color: #E4E4E4; }
+  background-color: #D9D9D9; }
   .kuiToolBar .kuiButton:not(a):enabled:focus {
     z-index: 1;
     /* 1 */
     outline: none !important;
     /* 2 */
-    box-shadow: 0 0 0 1px #E4E4E4, 0 0 0 2px #6EADC1;
+    box-shadow: 0 0 0 1px #E4E4E4, 0 0 0 2px #0096CC;
     /* 3 */ }
   a.kuiToolBar .kuiButton:not(.kuiButton-isDisabled):focus {
     /* 1 */
@@ -2722,7 +2763,7 @@ body {
     /* 1 */
     outline: none !important;
     /* 2 */
-    box-shadow: 0 0 0 1px #E4E4E4, 0 0 0 2px #6EADC1;
+    box-shadow: 0 0 0 1px #E4E4E4, 0 0 0 2px #0096CC;
     /* 3 */ }
   .kuiToolBar .kuiButton--danger:not(a):enabled:focus {
     z-index: 1;
@@ -2928,6 +2969,7 @@ body {
   border: 1px solid #ffffff;
   line-height: normal;
   /* 1 */
+  -webkit-transition: border-color 0.1s linear;
   transition: border-color 0.1s linear; }
   .kuiToolBarSearchBox__input:focus {
     outline: none;
@@ -2999,7 +3041,7 @@ body {
   font-size: 12px; }
 
 .kuiSubduedText {
-  color: #9fa3a7 !important; }
+  color: #666 !important; }
 
 .kuiVerticalRhythm + .kuiVerticalRhythm {
   margin-top: 10px; }

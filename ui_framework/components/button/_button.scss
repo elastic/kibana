@@ -18,7 +18,8 @@
   border-radius: $globalBorderRadius;
 
   @include kuiButtonDisabled {
-    cursor: default;
+    cursor: not-allowed;
+    opacity: .5;
   }
 
   @include kuiButtonActive {
@@ -89,12 +90,7 @@
   }
 
   @include kuiButtonHoverAndActive {
-    color: $buttonDefaultTextColor !important; /* 1 */
     background-color: $buttonBasicHoverBackgroundColor !important; /* 1 */
-  }
-
-  @include kuiButtonDisabled {
-    color: $buttonBasicDisabledTextColor;
   }
 
   @include darkTheme {
@@ -108,10 +104,6 @@
 
     @include kuiButtonHoverAndActive {
       background-color: $buttonBasicHoverBackgroundColor--darkTheme !important; /* 1 */
-    }
-
-    @include kuiButtonDisabled {
-      color: rgba($buttonBasicTextColor--darkTheme, 0.5);
     }
   }
 }
@@ -131,9 +123,22 @@
     color: $buttonDefaultTextColor !important; /* 1 */
     background-color: $buttonPrimaryHoverBackgroundColor;
   }
+}
 
-  @include kuiButtonDisabled {
-    background-color: $buttonPrimaryDisabledBackgroundColor;
+/**
+ * 1. Override Bootstrap.
+ */
+.kuiButton--success {
+  color: $buttonDefaultTextColor;
+  background-color: $buttonSuccessBackgroundColor;
+
+  @include kuiButtonFocus {
+    color: $buttonDefaultTextColor;
+  }
+
+  @include kuiButtonHoverAndActive {
+    color: $buttonDefaultTextColor !important; /* 1 */
+    background-color: $buttonSuccessHoverBackgroundColor;
   }
 }
 
@@ -141,21 +146,18 @@
  * 1. Override Bootstrap.
  */
 .kuiButton--danger {
-  color: $buttonDefaultTextColor;
-  background-color: $buttonDangerBackgroundColor;
+  color: $globalColorRed;
+  background-color: $globalColorWhite;
+  border: solid 1px $globalColorRed;
 
   @include kuiButtonFocus {
     @include focus($globalFocusDangerColor);
-    color: $buttonDefaultTextColor;
+    color: $globalColorRed;
   }
 
   @include kuiButtonHoverAndActive {
     color: $buttonDefaultTextColor !important; /* 1 */
     background-color: $buttonDangerHoverBackgroundColor;
-  }
-
-  @include kuiButtonDisabled {
-    background-color: $buttonDangerDisabledBackgroundColor;
   }
 }
 
@@ -171,8 +173,15 @@
     color: $globalLinkHoverColor !important; /* 1 */
     text-decoration: underline;
   }
+}
 
-  @include kuiButtonDisabled {
-    color: $buttonHollowDiabledTextColor;
+.kuiButton--secondary {
+  color: $globalLinkColor !important; /* 2 */
+  border: solid 1px $globalColorBlue;
+  background-color: $globalColorWhite;
+
+  @include kuiButtonHoverAndActive {
+    color: darken($globalLinkColor, 10%) !important; /* 1 */
+    border: solid 1px darken($globalColorBlue, 10%);
   }
 }

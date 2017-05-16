@@ -188,9 +188,7 @@
   }
 
 .discover-field-details {
-  border-top: 1px solid;
-  border-top-color: @discover-field-details-border;
-  padding: 5px 10px;
+  padding: 10px;
   background-color: @discover-field-details-bg;
   color: @discover-field-details-color;
 }
@@ -236,17 +234,18 @@
  */
 .discover-field-details {
   .progress {
+    background-color: darken(@globalColorLightGray, 5%);
     margin-bottom: 0px;
+    border-radius: 0px;
 
     .progress-bar {
       padding-left: 10px;
       text-align: right;
-      line-height: 18px;
+      line-height: 20px;
       max-width: 100%;
-      border-radius: 4px;
 
       span {
-        background-color: @discover-field-details-progress-bar-bg;
+        background-color: rgba(0,0,0,.8);
         padding: 3px;
         border-radius: 4px;
         margin-left: 3px;
@@ -273,8 +272,9 @@ field-name,
 
 disc-field-chooser {
   .sidebar-item.active .sidebar-item-title {
-    background-color: @sidebar-active-bg;
-    color: @sidebar-active-color;
+    background: @discover-field-details-bg;
+    color: @globalColorBlack;
+    font-weight: bold;
   }
   .sidebar-item-title {
     position: relative;
