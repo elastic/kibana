@@ -1,7 +1,7 @@
 import { get } from 'lodash';
 
 export function getState(resolvedArg) {
-  return get(resolvedArg, 'state', 'pending');
+  return get(resolvedArg, 'state', null);
 }
 
 export function getValue(resolvedArg) {

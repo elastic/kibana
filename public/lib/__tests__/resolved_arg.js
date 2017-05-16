@@ -4,7 +4,7 @@ import { getState, getValue, getError } from '../resolved_arg';
 describe('resolved arg helper', () => {
   describe('getState', () => {
     it('returns pending by default', () => {
-      expect(getState()).to.equal('pending');
+      expect(getState()).to.be(null);
     });
 
     it('returns the state', () => {
