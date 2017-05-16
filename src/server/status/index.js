@@ -1,6 +1,7 @@
 import ServerStatus from './server_status';
 import wrapAuthConfig from './wrap_auth_config';
 import { Metrics } from './metrics';
+import { getStats } from './stats';
 
 export default function (kbnServer, server, config) {
   kbnServer.status = new ServerStatus(kbnServer.server);
@@ -18,7 +19,11 @@ export default function (kbnServer, server, config) {
   server.route(wrapAuth({
     method: 'GET',
     path: '/api/status',
-    handler: function (request, reply) {
+    handler: async function (request, reply) {
+      const stats = getStats(
+        server.config().get('kibana.index'),
+        request,
+        server.plugins.elasticsearch.getCluster('admin').callWithRequest);
       const status = {
         name: config.get('server.name'),
         uuid: config.get('server.uuid'),
@@ -29,7 +34,8 @@ export default function (kbnServer, server, config) {
           build_snapshot: matchSnapshot.test(config.get('pkg.version'))
         },
         status: kbnServer.status.toJSON(),
-        metrics: kbnServer.metrics
+        metrics: kbnServer.metrics,
+        stats,
       };
 
       return reply(status);
