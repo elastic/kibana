@@ -60,6 +60,7 @@ module.directive('filterEditor', function ($http) {
       this.setField = (field) => {
         this.field = field;
         this.operator = null;
+        this.params = {};
         this.operatorSuggestions = getOperatorSuggestions(field);
       };
 
