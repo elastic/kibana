@@ -10,7 +10,7 @@ export const createFindRoute = (prereqs) => ({
         type: Joi.string()
       }),
       query: Joi.object().keys({
-        per_page: Joi.number().min(1).default(20),
+        per_page: Joi.number().min(0).default(20),
         page: Joi.number().min(0).default(1),
         type: Joi.string(),
         search: Joi.string().allow('').optional(),
