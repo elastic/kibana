@@ -25,15 +25,18 @@
               class="vis-editor-subnav-link"
               ng-class="{'is-vis-editor-sub-nav-link-selected': sidebar.section == 'data'}"
               ng-click="sidebar.section='data'"
+              kbn-accessible-click
             >
               Data
             </a>
           </li>
+
           <li ng-repeat="tab in vis.type.params.optionTabs" ng-class="{active: sidebar.section == tab.name}">
             <a
               class="vis-editor-subnav-link"
               ng-class="{'is-vis-editor-sub-nav-link-selected': sidebar.section == tab.name}"
               ng-click="sidebar.section=tab.name"
+              kbn-accessible-click
             >
               {{tab.title}}
             </a>
@@ -51,9 +54,10 @@
             tooltip-append-to-body="1"
           >
             <a class="vis-editor-subnav-link vis-editor-subnav-link--danger">
-              <i class="fa fa-warning"></i>
+              <span class="kuiIcon fa-warning"></span>
             </a>
           </li>
+
           <li
             tooltip="Apply changes"
             tooltip-placement="bottom"
@@ -64,21 +68,25 @@
               class="kuiButton kuiButton--primary navbar-btn-link"
               type="submit"
               ng-disabled="!vis.dirty || visualizeEditor.errorCount() > 0"
+              aria-label="Update the visualization with your changes"
             >
-              <i class="fa fa-play"></i>
+              <span aria-hidden="true" class="kuiIcon fa-play"></span>
             </button>
           </li>
+
           <li
             tooltip="Discard changes"
             tooltip-placement="bottom"
             tooltip-popup-delay="400"
             tooltip-append-to-body="1"
           >
-            <button class="kuiButton kuiButton--basic navbar-btn-link"
+            <button
+              class="kuiButton kuiButton--basic navbar-btn-link"
               ng-disabled="!vis.dirty"
-              ng-click="resetEditableVis()">
-
-              <i class="fa fa-close"></i>
+              ng-click="resetEditableVis()"
+              aria-label="Reset the visualization"
+            >
+              <span class="kuiIcon fa-close"></span>
             </button>
           </li>
         </ul>
