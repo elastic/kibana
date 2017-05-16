@@ -8,14 +8,15 @@ const join = (...uriComponents) => (
 );
 
 export class SavedObjectsClient {
-  constructor($http, basePath) {
+  constructor($http, basePath, PromiseCtor = Promise) {
     this._$http = $http;
     this._apiBaseUrl = `${basePath}/api/saved_objects/`;
+    this._PromiseCtor = PromiseCtor;
   }
 
   get(type, id) {
     if (!type || !id) {
-      return Promise.reject(new Error('requires type and id'));
+      return this._PromiseCtor.reject(new Error('requires type and id'));
     }
 
     return this._request('GET', this._getUrl([type, id])).then(resp => {
@@ -25,7 +26,7 @@ export class SavedObjectsClient {
 
   delete(type, id) {
     if (!type || !id) {
-      return Promise.reject(new Error('requires type and id'));
+      return this._PromiseCtor.reject(new Error('requires type and id'));
     }
 
     return this._request('DELETE', this._getUrl([type, id]));
@@ -33,7 +34,7 @@ export class SavedObjectsClient {
 
   update(type, id, body) {
     if (!type || !id || !body) {
-      return Promise.reject(new Error('requires type, id and body'));
+      return this._PromiseCtor.reject(new Error('requires type, id and body'));
     }
 
     return this._request('PUT', this._getUrl([type, id]), body);
@@ -41,7 +42,7 @@ export class SavedObjectsClient {
 
   create(type, body) {
     if (!type || !body) {
-      return Promise.reject(new Error('requires type and body'));
+      return this._PromiseCtor.reject(new Error('requires type and body'));
     }
 
     const url = this._getUrl([type]);

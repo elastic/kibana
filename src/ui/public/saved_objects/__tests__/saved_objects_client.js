@@ -140,8 +140,10 @@ describe('SavedObjectsClient', () => {
     it('resolves with instantiated ObjectClass', async () => {
       const response = await savedObjectsClient.get('index-pattern', 'logstash-*');
       expect(response).to.be.a(SavedObject);
-      expect(response.attributes).to.eql(attributes);
-      expect(response.client).to.be.a(SavedObjectsClient);
+      expect(response.get('type')).to.eql('index-pattern');
+      expect(response.get('foo')).to.eql('Foo');
+      expect(response._attributes).to.eql(attributes);
+      expect(response._client).to.be.a(SavedObjectsClient);
     });
 
     it('makes HTTP call', () => {
