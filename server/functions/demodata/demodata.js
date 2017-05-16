@@ -2,6 +2,10 @@ const Fn = require('../../../common/functions/fn.js');
 const rows = require('./mock.json');
 const _ = require('lodash');
 
+//const states = ['start', 'running', 'done'];
+//const projects = ['logstash', 'beats', 'kibana', 'elasticsearch', 'opbeat', 'machine-learning', 'x-pack'];
+
+
 module.exports = new Fn({
   name: 'demodata',
   aliases: [],
@@ -20,8 +24,14 @@ module.exports = new Fn({
         { name: 'price', type: 'number' },
         { name: 'age', type: 'number' },
         { name: 'country', type: 'string' },
+        { name: 'state', type: 'string' },
+        { name: 'project', type: 'string' },
       ],
-      rows: _.map(_.cloneDeep(rows), (row, i) => _.assign(row, { _rowId: i })),
+      rows: _.map(_.cloneDeep(rows), (row, i) => _.assign(row, {
+        _rowId: i,
+        //state: states[Math.round(row.cost) % states.length],
+        //project: projects[Math.round(row.age) % projects.length],
+      })),
     };
   },
 });
