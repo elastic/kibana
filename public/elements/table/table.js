@@ -14,20 +14,20 @@ module.exports = new Element({
   destroy(args) {
     console.log('destory table', args);
   },
-  render(domNode, data, done) {
+  render(domNode, config, done) {
     const table = (
       <Table striped bordered condensed>
         <thead>
           <tr>
-            {data.columns.map(col => (
+            {config.columns.map(col => (
               <th key={`header-${col.name}`}>{col.name}</th>
             ))}
           </tr>
         </thead>
         <tbody>
-          {data.rows.map(row => (
+          {config.rows.map(row => (
             <tr key={`row-${row._rowId}`}>
-              {data.columns.map(col => (
+              {config.columns.map(col => (
                 <td key={`row-${row._rowId}-${col.name}`}>{row[col.name]}</td>
               ))}
             </tr>
