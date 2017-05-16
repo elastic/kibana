@@ -1,5 +1,5 @@
 import Boom from 'boom';
-import { get, omit, pick } from 'lodash';
+import { get, omit } from 'lodash';
 
 import {
   createFindQuery,
@@ -44,18 +44,22 @@ export class SavedObjectsClient {
   }
 
   async find(options = {}) {
-    const { search, searchFields, type, fields } = options;
-    const esOptions = pick(options, ['type']);
-    const perPage = get(options, 'per_page', 20);
-    const page = get(options, 'page', 1);
+    const {
+      search,
+      searchFields,
+      type,
+      fields,
+      perPage = 20,
+      page = 1,
+    } = options;
 
-    if (fields) {
-      esOptions.filterPath = createFilterPath(fields);
-    }
-
-    esOptions.size = perPage;
-    esOptions.from = esOptions.size * (page - 1);
-    esOptions.body = createFindQuery({ search, searchFields, type });
+    const esOptions = {
+      type,
+      filterPath: fields ? createFilterPath(fields) : undefined,
+      size: perPage,
+      from: perPage * (page - 1),
+      body: createFindQuery({ search, searchFields, type })
+    };
 
     const response = await this._withKibanaIndex('search', esOptions);
 

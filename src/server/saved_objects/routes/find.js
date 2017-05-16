@@ -1,4 +1,5 @@
 import Joi from 'joi';
+import { keysToCamelCaseShallow } from '../../../utils/case_conversion';
 
 export const createFindRoute = (prereqs) => ({
   path: '/api/saved_objects/{type?}',
@@ -19,7 +20,7 @@ export const createFindRoute = (prereqs) => ({
       })
     },
     handler(request, reply) {
-      const options = Object.assign({}, request.query);
+      const options = keysToCamelCaseShallow(request.query);
 
       if (request.params.type) {
         options.type = request.params.type;

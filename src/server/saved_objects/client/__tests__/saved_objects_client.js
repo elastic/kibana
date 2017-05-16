@@ -136,7 +136,7 @@ describe('SavedObjectsClient', () => {
     });
 
     it('accepts per_page/page', async () => {
-      await savedObjectsClient.find({ per_page: 10, page: 6 });
+      await savedObjectsClient.find({ perPage: 10, page: 6 });
 
       expect(callWithRequest.calledOnce).to.be(true);
 
@@ -144,8 +144,10 @@ describe('SavedObjectsClient', () => {
       expect(options).to.eql({
         index: '.kibana-test',
         body: { query: { match_all: {} }, version: true },
+        filterPath: undefined,
         from: 50,
-        size: 10
+        size: 10,
+        type: undefined
       });
     });
 
@@ -163,6 +165,7 @@ describe('SavedObjectsClient', () => {
       };
 
       expect(options).to.eql({
+        filterPath: undefined,
         from: 0,
         index: '.kibana-test',
         size: 20,

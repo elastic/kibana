@@ -71,7 +71,7 @@ describe('GET /api/saved_objects/{type?}', () => {
     expect(savedObjectsClient.find.calledOnce).to.be(true);
 
     const options = savedObjectsClient.find.getCall(0).args[0];
-    expect(options).to.eql({ per_page: 20, page: 1 });
+    expect(options).to.eql({ perPage: 20, page: 1 });
   });
 
   it('accepts the query parameter page/per_page', async () => {
@@ -85,7 +85,7 @@ describe('GET /api/saved_objects/{type?}', () => {
     expect(savedObjectsClient.find.calledOnce).to.be(true);
 
     const options = savedObjectsClient.find.getCall(0).args[0];
-    expect(options).to.eql({ per_page: 10, page: 50 });
+    expect(options).to.eql({ perPage: 10, page: 50 });
   });
 
   it('accepts the query parameter fields as a string', async () => {
@@ -99,7 +99,7 @@ describe('GET /api/saved_objects/{type?}', () => {
     expect(savedObjectsClient.find.calledOnce).to.be(true);
 
     const options = savedObjectsClient.find.getCall(0).args[0];
-    expect(options).to.eql({ per_page: 20, page: 1, fields: 'title' });
+    expect(options).to.eql({ perPage: 20, page: 1, fields: 'title' });
   });
 
   it('accepts the query parameter fields as an array', async () => {
@@ -114,7 +114,7 @@ describe('GET /api/saved_objects/{type?}', () => {
 
     const options = savedObjectsClient.find.getCall(0).args[0];
     expect(options).to.eql({
-      per_page: 20, page: 1, fields: ['title', 'description']
+      perPage: 20, page: 1, fields: ['title', 'description']
     });
   });
 
@@ -129,7 +129,7 @@ describe('GET /api/saved_objects/{type?}', () => {
     expect(savedObjectsClient.find.calledOnce).to.be(true);
 
     const options = savedObjectsClient.find.getCall(0).args[0];
-    expect(options).to.eql({ per_page: 20, page: 1, type: 'index-pattern' });
+    expect(options).to.eql({ perPage: 20, page: 1, type: 'index-pattern' });
   });
 
   it('accepts the type as a URL parameter', async () => {
@@ -143,6 +143,6 @@ describe('GET /api/saved_objects/{type?}', () => {
     expect(savedObjectsClient.find.calledOnce).to.be(true);
 
     const options = savedObjectsClient.find.getCall(0).args[0];
-    expect(options).to.eql({ per_page: 20, page: 1, type: 'index-pattern' });
+    expect(options).to.eql({ perPage: 20, page: 1, type: 'index-pattern' });
   });
 });
