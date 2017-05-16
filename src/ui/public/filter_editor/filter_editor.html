@@ -66,7 +66,7 @@
 
       <div class="kuiFieldGroupSection kuiColumn kuiColumn--4">
         <ui-select
-          ng-show="filterEditor.operator.type === 'phrase'"
+          ng-if="filterEditor.operator.type === 'phrase'"
           ng-model="filterEditor.params.value"
           ui-select-focus-on="focus-params"
         >
@@ -83,7 +83,7 @@
         </ui-select>
 
         <ui-select
-          ng-show="filterEditor.operator.type === 'phrases'"
+          ng-if="filterEditor.operator.type === 'phrases'"
           ng-model="filterEditor.params.values"
           multiple
           ui-select-focus-on="focus-params"
@@ -102,7 +102,7 @@
 
         <div
           class="kuiFieldGroup"
-          ng-show="filterEditor.operator.type === 'range'"
+          ng-if="filterEditor.operator.type === 'range'"
         >
           <div class="kuiFieldGroupSection">
             <input

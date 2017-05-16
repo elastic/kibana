@@ -86,9 +86,11 @@ module.directive('filterEditor', function ($http) {
       };
 
       this.refreshValueSuggestions = (query) => {
-        return getValueSuggestions(this.field, query)
+        return this.getValueSuggestions(this.field, query)
           .then(suggestions => this.valueSuggestions = suggestions);
       };
+
+      this.getValueSuggestions = _.memoize(getValueSuggestions, getFieldQueryHash);
 
       const simpleTypes = _(FILTER_OPERATORS)
         .map('type')
@@ -201,6 +203,10 @@ module.directive('filterEditor', function ($http) {
 
         return $http.post(`../api/kibana/suggestions/values/${field.indexPattern.id}`, params)
           .then(response => response.data);
+      }
+
+      function getFieldQueryHash(field, query) {
+        return `${field.indexPattern.id}/${field.name}/${query}`;
       }
     }
   };
