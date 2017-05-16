@@ -6,21 +6,23 @@ describe('resolved args selector', () => {
 
   beforeEach(() => {
     state = {
-      resolvedArgs: {
-        'test1': {
-          state: 'ready',
-          value: 'test value',
-          error: null,
-        },
-        'test2': {
-          state: 'pending',
-          value: null,
-          error: null,
-        },
-        'test3': {
-          state: 'error',
-          value: 'some old value',
-          error: new Error('i have failed'),
+      transient: {
+        resolvedArgs: {
+          'test1': {
+            state: 'ready',
+            value: 'test value',
+            error: null,
+          },
+          'test2': {
+            state: 'pending',
+            value: null,
+            error: null,
+          },
+          'test3': {
+            state: 'error',
+            value: 'some old value',
+            error: new Error('i have failed'),
+          },
         },
       },
     };
