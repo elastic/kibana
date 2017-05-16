@@ -3,11 +3,12 @@
     <div
       class="kuiSideBarCollapsibleTitle__label"
       ng-click="isGridOpen = !isGridOpen"
+      kbn-accessible-click
     >
       <span
         aria-hidden="true"
         ng-class="{ 'fa-caret-down': isGridOpen, 'fa-caret-right': !isGridOpen }"
-        class="fa fa-caret-right kuiSideBarCollapsibleTitle__caret"
+        class="kuiIcon fa-caret-right kuiSideBarCollapsibleTitle__caret"
       ></span>
       <span class="kuiSideBarCollapsibleTitle__text">
         Grid
