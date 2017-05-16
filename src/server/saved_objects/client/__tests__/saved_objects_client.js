@@ -3,7 +3,7 @@ import sinon from 'sinon';
 import { SavedObjectsClient } from '../saved_objects_client';
 
 describe('SavedObjectsClient', () => {
-  let callWithRequest;
+  let callAdminCluster;
   let savedObjectsClient;
   const docs = {
     hits: {
@@ -42,18 +42,18 @@ describe('SavedObjectsClient', () => {
   };
 
   beforeEach(() => {
-    callWithRequest = sinon.mock();
-    savedObjectsClient = new SavedObjectsClient('.kibana-test', {}, callWithRequest);
+    callAdminCluster = sinon.mock();
+    savedObjectsClient = new SavedObjectsClient('.kibana-test', callAdminCluster);
   });
 
   afterEach(() => {
-    callWithRequest.reset();
+    callAdminCluster.reset();
   });
 
 
   describe('#create', () => {
     it('formats Elasticsearch response', async () => {
-      callWithRequest.returns({ _type: 'index-pattern', _id: 'logstash-*', _version: 2 });
+      callAdminCluster.returns({ _type: 'index-pattern', _id: 'logstash-*', _version: 2 });
 
       const response = await savedObjectsClient.create('index-pattern', {
         id: 'logstash-*',
@@ -69,30 +69,30 @@ describe('SavedObjectsClient', () => {
     });
 
     it('should use ES create action', async () => {
-      callWithRequest.returns({ _type: 'index-pattern', _id: 'logstash-*', _version: 2 });
+      callAdminCluster.returns({ _type: 'index-pattern', _id: 'logstash-*', _version: 2 });
 
       await savedObjectsClient.create('index-pattern', {
         id: 'logstash-*',
         title: 'Logstash'
       });
 
-      expect(callWithRequest.calledOnce).to.be(true);
+      expect(callAdminCluster.calledOnce).to.be(true);
 
-      const args = callWithRequest.getCall(0).args;
-      expect(args[1]).to.be('index');
+      const args = callAdminCluster.getCall(0).args;
+      expect(args[0]).to.be('index');
     });
   });
 
   describe('#delete', () => {
     it('returns based on ES success', async () => {
-      callWithRequest.returns(Promise.resolve({ result: 'deleted' }));
+      callAdminCluster.returns(Promise.resolve({ result: 'deleted' }));
       const response = await savedObjectsClient.delete('index-pattern', 'logstash-*');
 
       expect(response).to.be(true);
     });
 
     it('throws notFound when ES is unable to find the document', (done) => {
-      callWithRequest.returns(Promise.resolve({ found: false }));
+      callAdminCluster.returns(Promise.resolve({ found: false }));
 
       savedObjectsClient.delete('index-pattern', 'logstash-*').then(() => {
         done('failed');
@@ -102,14 +102,14 @@ describe('SavedObjectsClient', () => {
       });
     });
 
-    it('passes the parameters to callWithRequest', async () => {
+    it('passes the parameters to callAdminCluster', async () => {
       await savedObjectsClient.delete('index-pattern', 'logstash-*');
 
-      expect(callWithRequest.calledOnce).to.be(true);
+      expect(callAdminCluster.calledOnce).to.be(true);
 
-      const args = callWithRequest.getCall(0).args;
-      expect(args[1]).to.be('delete');
-      expect(args[2]).to.eql({
+      const args = callAdminCluster.getCall(0).args;
+      expect(args[0]).to.be('delete');
+      expect(args[1]).to.eql({
         type: 'index-pattern',
         id: 'logstash-*',
         refresh: 'wait_for',
@@ -122,7 +122,7 @@ describe('SavedObjectsClient', () => {
     it('formats Elasticsearch response', async () => {
       const count = docs.hits.hits.length;
 
-      callWithRequest.returns(Promise.resolve(docs));
+      callAdminCluster.returns(Promise.resolve(docs));
       const response = await savedObjectsClient.find();
 
       expect(response.total).to.be(count);
@@ -138,9 +138,9 @@ describe('SavedObjectsClient', () => {
     it('accepts per_page/page', async () => {
       await savedObjectsClient.find({ perPage: 10, page: 6 });
 
-      expect(callWithRequest.calledOnce).to.be(true);
+      expect(callAdminCluster.calledOnce).to.be(true);
 
-      const options = callWithRequest.getCall(0).args[2];
+      const options = callAdminCluster.getCall(0).args[1];
       expect(options).to.eql({
         index: '.kibana-test',
         body: { query: { match_all: {} }, version: true },
@@ -154,9 +154,9 @@ describe('SavedObjectsClient', () => {
     it('accepts type', async () => {
       await savedObjectsClient.find({ type: 'index-pattern' });
 
-      expect(callWithRequest.calledOnce).to.be(true);
+      expect(callAdminCluster.calledOnce).to.be(true);
 
-      const options = callWithRequest.getCall(0).args[2];
+      const options = callAdminCluster.getCall(0).args[1];
       const expectedQuery = {
         bool: {
           must: [{ match_all: {} }],
@@ -177,9 +177,9 @@ describe('SavedObjectsClient', () => {
     it('accepts fields as a string', async () => {
       await savedObjectsClient.find({ fields: 'title' });
 
-      expect(callWithRequest.calledOnce).to.be(true);
+      expect(callAdminCluster.calledOnce).to.be(true);
 
-      const options = callWithRequest.getCall(0).args[2];
+      const options = callAdminCluster.getCall(0).args[1];
       expect(options.filterPath).to.eql([
         'hits.total',
         'hits.hits._id',
@@ -192,9 +192,9 @@ describe('SavedObjectsClient', () => {
     it('accepts fields as an array', async () => {
       await savedObjectsClient.find({ fields: ['title', 'description'] });
 
-      expect(callWithRequest.calledOnce).to.be(true);
+      expect(callAdminCluster.calledOnce).to.be(true);
 
-      const options = callWithRequest.getCall(0).args[2];
+      const options = callAdminCluster.getCall(0).args[1];
       expect(options.filterPath).to.eql([
         'hits.hits._source.title',
         'hits.hits._source.description',
@@ -208,7 +208,7 @@ describe('SavedObjectsClient', () => {
 
   describe('#get', () => {
     it('formats Elasticsearch response', async () => {
-      callWithRequest.returns(Promise.resolve({
+      callAdminCluster.returns(Promise.resolve({
         _id: 'logstash-*',
         _type: 'index-pattern',
         _version: 2,
@@ -229,7 +229,7 @@ describe('SavedObjectsClient', () => {
 
   describe('#update', () => {
     it('returns based on ES success', async () => {
-      callWithRequest.returns(Promise.resolve({
+      callAdminCluster.returns(Promise.resolve({
         _id: 'logstash-*',
         _type: 'index-pattern',
         _version: 2,
@@ -240,14 +240,14 @@ describe('SavedObjectsClient', () => {
       expect(response).to.eql({ version: 2 });
     });
 
-    it('passes the parameters to callWithRequest', async () => {
+    it('passes the parameters to callAdminCluster', async () => {
       await savedObjectsClient.update('index-pattern', 'logstash-*', { title: 'Testing' });
 
-      expect(callWithRequest.calledOnce).to.be(true);
+      expect(callAdminCluster.calledOnce).to.be(true);
 
-      const args = callWithRequest.getCall(0).args;
-      expect(args[1]).to.be('update');
-      expect(args[2]).to.eql({
+      const args = callAdminCluster.getCall(0).args;
+      expect(args[0]).to.be('update');
+      expect(args[1]).to.eql({
         type: 'index-pattern',
         id: 'logstash-*',
         version: undefined,

@@ -8,10 +8,9 @@ import {
 } from './lib';
 
 export class SavedObjectsClient {
-  constructor(kibanaIndex, request, callWithRequest) {
+  constructor(kibanaIndex, callAdminCluster) {
     this._kibanaIndex = kibanaIndex;
-    this._request = request;
-    this._callWithRequest = callWithRequest;
+    this._callAdminCluster = callAdminCluster;
   }
 
   async create(type, options = {}) {
@@ -106,7 +105,7 @@ export class SavedObjectsClient {
 
   async _withKibanaIndex(method, params) {
     try {
-      return await this._callWithRequest(this._request, method, {
+      return await this._callAdminCluster(method, {
         ...params,
         index: this._kibanaIndex,
       });
