@@ -152,7 +152,7 @@ describe('SavedObjectsClient', () => {
       const options = callWithRequest.getCall(0).args[2];
       expect(options).to.eql({
         index: '.kibana-test',
-        body: { query: { match_all: {} } },
+        body: { query: { match_all: {} }, version: true },
         from: 50,
         size: 10
       });
@@ -175,7 +175,7 @@ describe('SavedObjectsClient', () => {
         from: 0,
         index: '.kibana-test',
         size: 20,
-        body: { query: expectedQuery },
+        body: { query: expectedQuery, version: true },
         type: 'index-pattern',
       });
     });

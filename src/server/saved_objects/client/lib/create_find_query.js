@@ -2,7 +2,7 @@ export function createFindQuery(options = {}) {
   const { type, search, searchFields } = options;
 
   if (!type && !search) {
-    return { query: { match_all: {} } };
+    return { version: true, query: { match_all: {} } };
   }
 
   const bool = { must: [], filter: [] };
@@ -35,5 +35,5 @@ export function createFindQuery(options = {}) {
     });
   }
 
-  return { query: { bool } };
+  return { version: true, query: { bool } };
 }

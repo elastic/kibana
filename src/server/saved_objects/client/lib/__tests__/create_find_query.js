@@ -4,7 +4,7 @@ import { createFindQuery } from '../create_find_query';
 describe('createFindQuery', () => {
   it('matches all when there is no type or filter', () => {
     const query = createFindQuery();
-    expect(query).to.eql({ query: { match_all: {} } });
+    expect(query).to.eql({ query: { match_all: {} }, version: true });
   });
 
   it('adds bool filter for type', () => {
@@ -21,7 +21,8 @@ describe('createFindQuery', () => {
             match_all: {}
           }]
         }
-      }
+      },
+      version: true
     });
   });
 
@@ -38,7 +39,8 @@ describe('createFindQuery', () => {
             }
           }]
         }
-      }
+      },
+      version: true
     });
   });
 
@@ -55,7 +57,8 @@ describe('createFindQuery', () => {
             }
           }]
         }
-      }
+      },
+      version: true
     });
   });
 
@@ -72,7 +75,8 @@ describe('createFindQuery', () => {
             }
           }]
         }
-      }
+      },
+      version: true
     });
   });
 });
