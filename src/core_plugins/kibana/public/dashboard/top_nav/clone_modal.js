@@ -8,7 +8,8 @@ import {
   KuiModalBody,
   KuiModalBodyText,
   KuiModalFooter,
-  KuiButton
+  KuiButton,
+  KuiModalOverlay
 } from 'ui_framework/components';
 
 export class DashboardCloneModal extends React.Component {
@@ -40,48 +41,50 @@ export class DashboardCloneModal extends React.Component {
 
   render() {
     return (
-      <KuiModal
-        data-tests-subj="dashboardCloneModal"
-        aria-label="Clone a dashboard"
-        className="dashboardCloneModal"
-        onKeyDown={ this.onKeyDown }
-      >
-        <KuiModalHeader>
-          <KuiModalHeaderTitle>
-            Clone Dashboard
-          </KuiModalHeaderTitle>
-        </KuiModalHeader>
-        <KuiModalBody>
-          <KuiModalBodyText className="kuiVerticalRhythm">
-            Please enter a new name for your dashboard.
-          </KuiModalBodyText>
-          <KuiModalBodyText className="kuiVerticalRhythm">
-            <input
-              data-test-subj="clonedDashboardTitle"
-              className="kuiTextInput kuiTextInput--large"
-              value={ this.state.newDashboardName }
-              onChange={ this.onInputChange } />
-          </KuiModalBodyText>
-        </KuiModalBody>
+      <KuiModalOverlay>
+        <KuiModal
+          data-tests-subj="dashboardCloneModal"
+          aria-label="Clone a dashboard"
+          className="dashboardCloneModal"
+          onKeyDown={ this.onKeyDown }
+        >
+          <KuiModalHeader>
+            <KuiModalHeaderTitle>
+              Clone Dashboard
+            </KuiModalHeaderTitle>
+          </KuiModalHeader>
+          <KuiModalBody>
+            <KuiModalBodyText className="kuiVerticalRhythm">
+              Please enter a new name for your dashboard.
+            </KuiModalBodyText>
+            <KuiModalBodyText className="kuiVerticalRhythm">
+              <input
+                data-test-subj="clonedDashboardTitle"
+                className="kuiTextInput kuiTextInput--large"
+                value={ this.state.newDashboardName }
+                onChange={ this.onInputChange } />
+            </KuiModalBodyText>
+          </KuiModalBody>
 
-        <KuiModalFooter>
-          <KuiButton
-            type="hollow"
-            data-test-subj="cloneCancelButton"
-            onClick={ this.props.onClose }
-          >
-            Cancel
-          </KuiButton>
-          <KuiButton
-            type="primary"
-            data-test-subj="cloneConfirmButton"
-            onClick={ this.cloneDashboard }
-            ref={ (button) => { this.confirmButton = button; } }
-          >
-            Confirm Clone
-          </KuiButton>
-        </KuiModalFooter>
-      </KuiModal>
+          <KuiModalFooter>
+            <KuiButton
+              type="hollow"
+              data-test-subj="cloneCancelButton"
+              onClick={ this.props.onClose }
+            >
+              Cancel
+            </KuiButton>
+            <KuiButton
+              type="primary"
+              data-test-subj="cloneConfirmButton"
+              onClick={ this.cloneDashboard }
+              ref={ (button) => { this.confirmButton = button; } }
+            >
+              Confirm Clone
+            </KuiButton>
+          </KuiModalFooter>
+        </KuiModal>
+      </KuiModalOverlay>
     );
   }
 }

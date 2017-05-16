@@ -1,15 +1,11 @@
-import template from './show_clone_template.html';
-import { ModalOverlay } from 'ui/modals';
-import angular from 'angular';
+import { DashboardCloneModal } from './clone_modal';
+import React from 'react';
+import ReactDOM from 'react-dom';
 
-export function showCloneModal(onClone, title, $rootScope, $compile) {
-  let modalPopover;
-  const cloneScope = $rootScope.$new();
+export function showCloneModal(onClone, title) {
+  const container = document.createElement('div');
   const closeModal = () => {
-    modalPopover.destroy();
-    modalPopover = undefined;
-    angular.element(document.body).off('keydown');
-    cloneScope.$destroy();
+    document.body.removeChild(container);
   };
 
   const onCloneConfirmed = (newTitle) => {
@@ -19,11 +15,9 @@ export function showCloneModal(onClone, title, $rootScope, $compile) {
       }
     });
   };
-
-  cloneScope.onClone = onCloneConfirmed;
-  cloneScope.onClose = closeModal;
-  cloneScope.title = title;
-
-  const modalInstance = $compile(template)(cloneScope);
-  modalPopover = new ModalOverlay(modalInstance);
+  document.body.appendChild(container);
+  const element = (
+    <DashboardCloneModal onClone={onCloneConfirmed} onClose={closeModal} title={title}></DashboardCloneModal>
+  );
+  ReactDOM.render(element, container);
 }
