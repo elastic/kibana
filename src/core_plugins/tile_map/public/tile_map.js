@@ -20,7 +20,7 @@ VisTypesRegistryProvider.register(function TileMapVisType(Private, getAppState, 
     image,
     description: 'Plot latitude and longitude coordinates on a map',
     category: VisTypeFactory.CATEGORY.MAP,
-    params: {
+    visConfig: {
       defaults: {
         mapType: 'Scaled Circle Markers',
         isDesaturated: true,
@@ -53,10 +53,17 @@ VisTypesRegistryProvider.register(function TileMapVisType(Private, getAppState, 
         'Heatmap'
       ],
       canDesaturate: !!supports.cssFilters,
-      editor: tileMapTemplate
+      // editor: tileMapTemplate
     },
     responseConverter: geoJsonConverter,
     implementsRenderComplete: true,
+    editorConfig: {
+      collections: {
+        scales: ['linear', 'log', 'square root'],
+        orientations: ['single', 'right angled', 'multiple'],
+      },
+      optionsTemplate: tileMapTemplate,
+    },
     schemas: new Schemas([
       {
         group: 'metrics',
