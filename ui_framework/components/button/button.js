@@ -23,6 +23,7 @@ const buttonTypeToClassNameMap = {
   basic: 'kuiButton--basic',
   hollow: 'kuiButton--hollow',
   danger: 'kuiButton--danger',
+  warning: 'kuiButton--warning',
   primary: 'kuiButton--primary',
 };
 

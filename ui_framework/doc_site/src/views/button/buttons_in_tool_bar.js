@@ -38,5 +38,16 @@ export default () => (
     >
       Danger button, disabled
     </KuiButton>
+
+    <KuiButton type="warning">
+      Warning button
+    </KuiButton>
+
+    <KuiButton
+      type="warning"
+      disabled
+    >
+      Warning button, disabled
+    </KuiButton>
   </div>
 );
