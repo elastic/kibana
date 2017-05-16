@@ -5,8 +5,10 @@ import { VisSchemasProvider } from 'ui/vis/schemas';
 import { AggResponseGeoJsonProvider } from 'ui/agg_response/geo_json/geo_json';
 import tileMapTemplate from 'plugins/kbn_vislib_vis_types/editors/tile_map.html';
 import image from './images/icon-tilemap.svg';
+import { VisTypesRegistryProvider } from 'ui/registry/vis_types';
 
-export default function TileMapVisType(Private, getAppState, courier, config) {
+VisTypesRegistryProvider.register(function TileMapVisType(Private, getAppState, courier, config) {
+
   const VisTypeFactory = Private(VisTypeFactoryProvider);
   const MapsVisTypeFactory = Private(MapsVisTypeFactoryProvider);
   const Schemas = Private(VisSchemasProvider);
@@ -77,4 +79,4 @@ export default function TileMapVisType(Private, getAppState, courier, config) {
       }
     ])
   });
-}
+});
