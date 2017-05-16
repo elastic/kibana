@@ -29,7 +29,7 @@ export function interpretProvider(config) {
     if (!chainArr.length) return Promise.resolve(context);
 
     const chain = clone(chainArr);
-    const link = chain.shift(); // Every think in the chain will always be a function right?
+    const link = chain.shift(); // Every thing in the chain will always be a function right?
     const name = link.function;
     const args = link.arguments;
 

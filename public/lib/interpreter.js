@@ -10,13 +10,14 @@ const getServerFunctions = new Promise((resolve) => socket.once('functionList', 
 // Use the above promise to seed the interpreter with the functions it can defer to
 export function interpretAst(ast, context) {
   return getServerFunctions
-  .then(serverFunctionList =>
-    socketInterpreterProvider({
+  .then((serverFunctionList) => {
+    return socketInterpreterProvider({
       types: types.toJS(),
       functions: functions.toJS(),
       referableFunctions: serverFunctionList,
       socket: socket,
-    }))
+    });
+  })
   .then(interpretFn => interpretFn(ast, context));
 }
 
