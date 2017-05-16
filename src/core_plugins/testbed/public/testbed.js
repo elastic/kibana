@@ -23,7 +23,7 @@ uiRoutes.when('/testbed', {
       this.sortField = 'lastName';
       this.sortReverse = false;
 
-      $scope.$watchMulti([
+      $scope.$watchGroup([
         'testbed.sortField',
         'testbed.sortReverse'
       ], this.calculateItems);
