@@ -35,6 +35,7 @@ module.directive('filterEditor', function ($http) {
         if (isNew) {
           this.field = null;
           this.operator = null;
+          this.valueSuggestions = [];
           this.params = {};
           this.setFocus('field');
         } else {
@@ -61,6 +62,7 @@ module.directive('filterEditor', function ($http) {
         this.field = field;
         this.operator = null;
         this.params = {};
+        this.valueSuggestions = [];
         this.operatorSuggestions = getOperatorSuggestions(field);
       };
 
