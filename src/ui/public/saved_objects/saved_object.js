@@ -2,35 +2,27 @@ import _ from 'lodash';
 
 export class SavedObject {
   constructor(client, attributes) {
-    this.client = client;
-    this.attributes = attributes;
+    this._client = client;
+    this._attributes = attributes;
   }
 
   get(key) {
-    return _.get(this.attributes, key);
+    return _.get(this._attributes, key);
   }
 
   set(key, value) {
-    return _.set(this.attributes, key, value);
+    return _.set(this._attributes, key, value);
   }
 
   save() {
     if (this.id) {
-      return this.client.update(this.type, this.id, this.attributes);
+      return this._client.update(this.type, this.id, this._attributes);
     } else {
-      return this.client.create(this.type, this.attributes);
+      return this._client.create(this.type, this._attributes);
     }
   }
 
   delete() {
-    return this.client.delete(this.type, this.id);
-  }
-
-  get id() {
-    return this.get('id');
-  }
-
-  get type() {
-    return this.get('type');
+    return this._client.delete(this.type, this.id);
   }
 }
