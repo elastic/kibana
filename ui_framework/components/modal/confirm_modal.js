@@ -8,11 +8,12 @@ import { KuiModalHeaderTitle } from './modal_header_title';
 import { KuiModalBody } from './modal_body';
 import { KuiModalBodyText } from './modal_body_text';
 import { KuiButton } from '../index';
+import { ESC_KEY_CODE } from 'ui_framework/services';
 
 export const CONFIRM_BUTTON = 'confirm';
 export const CANCEL_BUTTON = 'cancel';
 
-export const CONFIRM_MODAL_BUTTONS = [
+const CONFIRM_MODAL_BUTTONS = [
   CONFIRM_BUTTON,
   CANCEL_BUTTON,
 ];
@@ -21,8 +22,8 @@ export class KuiConfirmModal extends React.Component {
   constructor(props) {
     super(props);
 
-    this.confirmButton;
-    this.cancelButton;
+    this.confirmButton = null;
+    this.cancelButton = null;
   }
 
   componentDidMount() {
@@ -38,7 +39,7 @@ export class KuiConfirmModal extends React.Component {
 
   onKeyDown = (event) => {
     // Treat the 'esc' key as a cancel indicator.
-    if (event.keyCode === 27) {
+    if (event.keyCode === ESC_KEY_CODE) {
       this.props.onCancel();
     }
   };

@@ -60,6 +60,11 @@ const ContentWithIcon = ({ children, icon, iconPosition, isLoading }) => {
 };
 
 class KuiButton extends React.Component {
+  constructor(props) {
+    super(props);
+    this.kuiButton = null;
+  }
+
   focus() {
     this.kuiButton.focus();
   }
