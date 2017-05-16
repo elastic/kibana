@@ -1192,10 +1192,13 @@ body {
 
 .kuiInfoButton {
   font-size: 16px;
+  background-color: inherit;
+  color: #328CAA;
   cursor: pointer;
   border: none;
-  background-color: inherit;
   padding: 0; }
+  .kuiInfoButton:hover, .kuiInfoButton:active {
+    color: #328CAA; }
 
 /**
  * 1. Copied from FontAwesome's .fa class. We use a custom class to make it easier to migrate away

@@ -1,7 +1,13 @@
 .kuiInfoButton {
   font-size: 16px;
+  background-color: inherit;
+  color: $infoButtonColor;
   cursor: pointer;
   border: none;
-  background-color: inherit;
   padding: 0;
+
+  &:hover,
+  &:active {
+    color: $infoButtonColor;
+  }
 }
