@@ -35,6 +35,12 @@ module.controller('KbnTermsController', function ($scope, indexPatterns, Private
     setFilter: (field, value, indexPattern) => {
       const filter = buildPhraseFilter(field, value, indexPattern);
       queryFilter.addFilters(filter);
+    },
+    removeFilter: (field, indexPattern) => {
+      const filters = findFilter(indexPattern.id, field.name);
+      filters.forEach((filter) => {
+        queryFilter.removeFilter(filter);
+      });
     }
   };
 

@@ -9,7 +9,11 @@ export class TermsVis extends Component {
   }
 
   handleOnChange(control, evt) {
-    this.props.setFilter(control.field, evt.value, control.indexPattern);
+    if (evt) {
+      this.props.setFilter(control.field, evt.value, control.indexPattern);
+    } else {
+      this.props.removeFilter(control.field, control.indexPattern);
+    }
   }
 
   render() {

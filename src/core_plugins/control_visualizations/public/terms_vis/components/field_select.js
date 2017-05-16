@@ -46,7 +46,8 @@ export class FieldSelect extends Component {
             placeholder="Select..."
             value={this.props.value}
             loadOptions={this.loadFields}
-            onChange={this.props.onChange}/>
+            onChange={this.props.onChange}
+            resetValue={''}/>
         </div>
       </div>
     );

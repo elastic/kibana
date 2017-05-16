@@ -31,7 +31,8 @@ export class IndexPatternSelect extends Component {
             placeholder="Select..."
             value={this.props.value}
             loadOptions={this.loadOptions}
-            onChange={this.props.onChange}/>
+            onChange={this.props.onChange}
+            resetValue={''}/>
         </div>
       </div>
     );
