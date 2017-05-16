@@ -174,7 +174,8 @@ module.directive('filterEditor', function ($http) {
 
       function getFieldSuggestions(indexPatterns) {
         return indexPatterns.reduce((fields, indexPattern) => {
-          return [...fields, ...indexPattern.fields];
+          const filterableFields = indexPattern.fields.filter(field => field.filterable);
+          return [...fields, ...filterableFields];
         }, []);
       }
 
