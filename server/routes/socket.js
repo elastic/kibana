@@ -10,14 +10,14 @@ export function socketApi(server) {
 
     // Create the function list
     socket.emit('getFunctionList');
-    const getServerFunctions = new Promise((resolve) => socket.once('functionList', resolve));
+    const getClientFunctions = new Promise((resolve) => socket.once('functionList', resolve));
 
     socket.on('getFunctionList', () => {
       socket.emit('functionList', map(functions.toJS(), 'name'));
     });
 
     const handler = (msg) => {
-      getServerFunctions.then((clientFunctions) => {
+      getClientFunctions.then((clientFunctions) => {
         const interpret = socketInterpreterProvider({
           types: types.toJS(),
           functions: functions.toJS(),

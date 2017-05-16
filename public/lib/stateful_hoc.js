@@ -13,7 +13,6 @@ export function statefulInput(fieldname) {
       }
 
       componentWillReceiveProps(nextProps) {
-        console.log({nextProps})
         this.setState({ value: nextProps[fieldname] });
       }
 

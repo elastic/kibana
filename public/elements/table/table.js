@@ -11,9 +11,8 @@ module.exports = new Element({
     datasource: true,
     model: 'pointseries',
   },
-  destroy(plot) {
-    //plot.destroy();
-    console.log(plot);
+  destroy(args) {
+    console.log('destory table', args);
   },
   render(domNode, data, done) {
     const table = (

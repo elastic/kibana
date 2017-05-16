@@ -39,6 +39,7 @@ export function interpretProvider(config) {
       return onFunctionNotFound({ type: 'expression', chain: chain }, context);
     }
 
+    // TODO: handle errors here
     return resolveArgs(name, context, args) // Resolve arguments before passing to function
     .then(resolvedArgs =>
       invokeFunction(name, context, resolvedArgs) // Then invoke function with resolved arguments

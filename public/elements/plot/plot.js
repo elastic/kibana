@@ -14,9 +14,9 @@ module.exports = new Element({
     datasource: true,
     model: 'pointseries',
   },
-  destroy(plot) {
+  destroy(args) {
     //plot.destroy();
-    console.log(plot);
+    console.log('destory plot', args);
   },
   render(domNode, config, done) {
     plot = $.plot($(domNode), config.data, config.options);
