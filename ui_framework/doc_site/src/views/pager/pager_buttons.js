@@ -2,7 +2,7 @@ import React from 'react';
 
 import {
   KuiButton,
-  KuiPagerButtons
+  KuiPagerButtonGroup
 } from '../../../../components';
 
 export class PagerButtons extends React.Component {
@@ -33,7 +33,7 @@ export class PagerButtons extends React.Component {
   render() {
     return (
       <div>
-        <KuiPagerButtons
+        <KuiPagerButtonGroup
           hasNext={this.hasNext()}
           hasPrevious={this.hasPrevious()}
           onNext={this.onNext}

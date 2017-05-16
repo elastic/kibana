@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`renders KuiPagerButtons 1`] = `
+exports[`renders KuiPagerButtonGroup 1`] = `
 <div
   class="kuiButtonGroup kuiButtonGroup--united"
 >

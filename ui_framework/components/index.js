@@ -30,5 +30,5 @@ export {
 
 export {
   KuiPager,
-  KuiPagerButtons
+  KuiPagerButtonGroup
 } from './pager';

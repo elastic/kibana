@@ -4,8 +4,8 @@ import { render, mount } from 'enzyme';
 import { requiredProps } from '../../test/required_props';
 
 import {
-  KuiPagerButtons,
-} from './pager_buttons';
+  KuiPagerButtonGroup,
+} from './pager_button_group';
 
 let onNext;
 let onPrevious;
@@ -15,8 +15,8 @@ beforeEach(() => {
   onPrevious = sinon.spy();
 });
 
-test('renders KuiPagerButtons', () => {
-  const component = <KuiPagerButtons
+test('renders KuiPagerButtonGroup', () => {
+  const component = <KuiPagerButtonGroup
     onNext={onNext}
     onPrevious={onPrevious}
     hasNext={true}
@@ -36,7 +36,7 @@ describe('property', () => {
   }
 
   test('onNext', () => {
-    const component = <KuiPagerButtons
+    const component = <KuiPagerButtonGroup
       onNext={onNext}
       onPrevious={onPrevious}
       hasNext={true}
@@ -49,7 +49,7 @@ describe('property', () => {
   });
 
   test('onPrevious', () => {
-    const component = <KuiPagerButtons
+    const component = <KuiPagerButtonGroup
       onNext={onNext}
       onPrevious={onPrevious}
       hasNext={true}
@@ -63,7 +63,7 @@ describe('property', () => {
 
   describe('hasNext', () => {
     test('is enabled when true', () => {
-      const component = <KuiPagerButtons
+      const component = <KuiPagerButtonGroup
         onNext={onNext}
         onPrevious={onPrevious}
         hasNext={true}
@@ -75,7 +75,7 @@ describe('property', () => {
     });
 
     test('is disabled when false', () => {
-      const component = <KuiPagerButtons
+      const component = <KuiPagerButtonGroup
         onNext={onNext}
         onPrevious={onPrevious}
         hasNext={false}
@@ -89,7 +89,7 @@ describe('property', () => {
 
   describe('hasPrevious', () => {
     test('is enabled when true', () => {
-      const component = <KuiPagerButtons
+      const component = <KuiPagerButtonGroup
         onNext={onNext}
         onPrevious={onPrevious}
         hasNext={true}
@@ -101,7 +101,7 @@ describe('property', () => {
     });
 
     test('is disabled when false', () => {
-      const component = <KuiPagerButtons
+      const component = <KuiPagerButtonGroup
         onNext={onNext}
         onPrevious={onPrevious}
         hasNext={true}

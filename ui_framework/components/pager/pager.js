@@ -1,7 +1,7 @@
 import React from 'react';
 import classNames from 'classnames';
 
-import { KuiPagerButtons } from './pager_buttons';
+import { KuiPagerButtonGroup } from './pager_button_group';
 
 export function KuiPager({
     className,
@@ -20,7 +20,7 @@ export function KuiPager({
       {
         startNumber === 1 && endNumber === totalItems
           ? null
-          : <KuiPagerButtons
+          : <KuiPagerButtonGroup
               hasNext={hasNextPage}
               hasPrevious={hasPreviousPage}
               onNext={onNextPage}
