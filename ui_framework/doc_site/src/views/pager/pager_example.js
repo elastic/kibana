@@ -30,7 +30,7 @@ export default props => (
       }]}
     >
       <GuideText>
-        Use the Pager in a tool bar
+        Use the Pager in a tool bar.
       </GuideText>
 
       <GuideDemo>
@@ -49,7 +49,7 @@ export default props => (
       }]}
     >
       <GuideText>
-        Use the Pager Buttons to navigate through a set of items
+        Use the Pager Buttons to navigate through a set of items.
       </GuideText>
 
       <GuideDemo>

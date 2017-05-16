@@ -12,13 +12,14 @@ export function KuiPager({
     hasNextPage,
     onNextPage,
     onPreviousPage,
-    ...rest }) {
+    ...rest,
+  }) {
   const classes = classNames('kuiPager', className);
   return (
     <div className={classes} { ...rest }>
       <div className="kuiPagerText">{startNumber}&ndash;{endNumber} of {totalItems}</div>
       {
-        startNumber === 1 && endNumber === totalItems
+        (startNumber === 1 && endNumber === totalItems)
           ? null
           : <KuiPagerButtonGroup
               hasNext={hasNextPage}
@@ -32,9 +33,9 @@ export function KuiPager({
 }
 
 KuiPager.propTypes = {
-  startNumber: React.PropTypes.number,
-  endNumber: React.PropTypes.number,
-  totalItems: React.PropTypes.number,
+  startNumber: React.PropTypes.number.isRequired,
+  endNumber: React.PropTypes.number.isRequired,
+  totalItems: React.PropTypes.number.isRequired,
   hasPreviousPage: React.PropTypes.bool.isRequired,
   hasNextPage: React.PropTypes.bool.isRequired,
   onNextPage: React.PropTypes.func.isRequired,

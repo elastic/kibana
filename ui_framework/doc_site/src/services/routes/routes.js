@@ -173,6 +173,7 @@ const components = [{
 }, {
   name: 'Pager',
   component: PagerExample,
+  hasReact: true,
 }, {
   name: 'Panel',
   component: PanelExample,
