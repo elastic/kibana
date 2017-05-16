@@ -13,7 +13,7 @@ export default function ({ getService, getPageObjects }) {
         return PageObjects.settings.navigateTo();
       })
       .then(function () {
-        return PageObjects.settings.clickKibanaIndicies();
+        return PageObjects.settings.clickKibanaIndices();
       });
     });
 
@@ -27,7 +27,7 @@ export default function ({ getService, getPageObjects }) {
 
     it('should filter indexed fields', async function () {
       await PageObjects.settings.navigateTo();
-      await PageObjects.settings.clickKibanaIndicies();
+      await PageObjects.settings.clickKibanaIndices();
       await PageObjects.settings.getFieldTypes();
 
       await PageObjects.settings.setFieldTypeFilter('string');

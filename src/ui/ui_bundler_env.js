@@ -1,4 +1,4 @@
-import fromRoot from '../utils/from_root';
+import { fromRoot } from '../utils';
 import { includes } from 'lodash';
 
 const arr = v => [].concat(v || []);

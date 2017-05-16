@@ -10,7 +10,7 @@
 
   @include scrollbar;
 
-  @include whenNarrowerThan($normalBreakpoint) {
+  @include whenNarrowerThan($guideNormalBreakpoint) {
     width: $guideSideNavSmallWidth;
   }
 }

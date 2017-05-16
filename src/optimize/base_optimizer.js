@@ -10,7 +10,7 @@ import DefinePlugin from 'webpack/lib/DefinePlugin';
 import UglifyJsPlugin from 'webpack/lib/optimize/UglifyJsPlugin';
 import { defaults, transform } from 'lodash';
 
-import fromRoot from '../utils/from_root';
+import { fromRoot } from '../utils';
 import babelOptions from './babel/options';
 import pkg from '../../package.json';
 import { setLoaderQueryParam, makeLoaderString } from './loaders';

@@ -151,3 +151,5 @@ include::visualize/time-series-visual-builder.asciidoc[]
 include::visualize/tagcloud.asciidoc[]
 
 include::visualize/heatmap.asciidoc[]
+
+include::visualize/visualization-raw-data.asciidoc[]

@@ -19,6 +19,7 @@ import { uiModules } from 'ui/modules';
 import editorTemplate from 'plugins/kibana/visualize/editor/editor.html';
 import { DashboardConstants } from 'plugins/kibana/dashboard/dashboard_constants';
 import { VisualizeConstants } from '../visualize_constants';
+import { documentationLinks } from 'ui/documentation_links/documentation_links';
 
 uiRoutes
 .when(VisualizeConstants.CREATE_PATH, {
@@ -112,6 +113,14 @@ function VisEditor($rootScope, $scope, $route, timefilter, AppState, $window, kb
     description: 'Save Visualization',
     template: require('plugins/kibana/visualize/editor/panels/save.html'),
     testId: 'visualizeSaveButton',
+    disableButton() {
+      return Boolean(editableVis.dirty);
+    },
+    tooltip() {
+      if (editableVis.dirty) {
+        return 'Apply or Discard your changes before saving';
+      }
+    }
   }, {
     key: 'share',
     description: 'Share Visualization',
@@ -168,6 +177,7 @@ function VisEditor($rootScope, $scope, $route, timefilter, AppState, $window, kb
     $scope.indexPattern = vis.indexPattern;
     $scope.editableVis = editableVis;
     $scope.state = $state;
+    $scope.queryDocLinks = documentationLinks.query;
 
     // Create a PersistedState instance.
     $scope.uiState = $state.makeStateful('uiState');
