@@ -14,7 +14,7 @@
     <!-- Right-side: menu -->
     <div class="kuiLocalNavRow__section">
       <div class="kuiLocalMenu">
-        <div
+        <button
           class="kuiLocalMenuItem"
           ng-repeat="menuItem in kbnTopNav.menuItems"
           aria-label="{{::menuItem.description}}"
@@ -27,10 +27,8 @@
           tooltip-placement="bottom"
           tooltip-popup-delay="400"
           tooltip-append-to-body="1"
-          kbn-accessible-click
           data-test-subj="{{menuItem.testId}}"
-        >
-        </div>
+        ></button>
 
         <!-- Time-picker "menu item" -->
         <kbn-global-timepicker></kbn-global-timepicker>
