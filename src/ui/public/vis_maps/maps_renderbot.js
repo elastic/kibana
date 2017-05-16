@@ -227,7 +227,6 @@ module.exports = function MapsRenderbotFactory(Private, $injector, tilemapSettin
           heatBlur: newParams.heatBlur,
           heatMaxZoom: newParams.heatMaxZoom,
           heatMinOpacity: newParams.heatMinOpacity,
-          heatNormalizeData: newParams.heatNormalizeData,
           heatRadius: newParams.heatRadius
         }
       };
