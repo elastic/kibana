@@ -10,6 +10,10 @@ import {
   CREATE_INDEX_PATTERN_ROUTE
 } from './constants';
 
+// Start out with the chrome not being shown to prevent a flicker by
+// hiding it later
+uiChrome.setVisible(false);
+
 uiRoutes
   .addSetupWork(function gettingStartedGateCheck(Private, $injector) {
     const getIds = Private(IndexPatternsGetIdsProvider);
@@ -25,6 +29,12 @@ uiRoutes
       const isOnGettingStartedPage = get(currentRoute, 'originalPath') === GETTING_STARTED_ROUTE;
 
       if (indexPatternsExist) {
+
+        // TODO: extract out into fucntion
+
+        // If index patterns exist, we're not going to show the user the Getting Starte page.
+        // So we can show the chrome again at this point.
+        uiChrome.setVisible(true);
 
         // The user need not see the Getting Started page, so opt them out of it
         optOutOfGettingStarted();
@@ -54,6 +64,12 @@ uiRoutes
       // If the user has explicitly opted out of the Getting Started page
       if (hasOptedOutOfGettingStarted()) {
 
+        // TODO: extract out into fucntion
+
+        // If the user has opted out of the Getting Started page, we're not going to show them that page.
+        // So we can show the chrome again at this point.
+        uiChrome.setVisible(true);
+
         // Some routes require a default index pattern to be present. If we're
         // NOT on such a route, there's nothing more to do; send the user on their way
         if (!currentRoute.requireDefaultIndex) {
@@ -70,9 +86,11 @@ uiRoutes
         throw WAIT_FOR_URL_CHANGE_TOKEN;
       }
 
+      // At this point we want to show the user the Getting Started page. So show the chrome.
+      uiChrome.setVisible(false);
+
       // Redirect the user to the Getting Started page (unless they are on it already)
       if (!isOnGettingStartedPage) {
-        uiChrome.setVisible(false);
         kbnUrl.change(GETTING_STARTED_ROUTE);
         throw WAIT_FOR_URL_CHANGE_TOKEN;
       }
