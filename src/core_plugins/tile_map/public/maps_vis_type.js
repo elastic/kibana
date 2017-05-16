@@ -1,7 +1,7 @@
 import 'ui/vislib';
 import 'plugins/kbn_vislib_vis_types/controls/vislib_basic_options';
 import { VisTypeFactoryProvider } from 'ui/vis/vis_type';
-import MapsVisTypeMapsRenderbotProvider from 'ui/vis_maps/maps_renderbot';
+import MapsVisTypeMapsRenderbotProvider from './maps_renderbot';
 
 export function MapsVisTypeFactoryProvider(Private) {
   const VisTypeFactory = Private(VisTypeFactoryProvider);
