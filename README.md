@@ -11,6 +11,7 @@ browser-based analytics and search dashboard for Elasticsearch.
 - [Documentation](#documentation)
 - [Version Compatibility with Elasticsearch](#version-compatibility-with-elasticsearch)
 - [Questions? Problems? Suggestions?](#questions-problems-suggestions)
+  - [Forking Kibana](#forking-kibana)
 
 ## Getting Started
 
@@ -71,7 +72,21 @@ _Note: The version numbers below are only examples, meant to illustrate the rela
 
 ## Questions? Problems? Suggestions?
 
-- If you've found a bug or want to request a feature, please create a [GitHub Issue](https://github.com/elastic/kibana/issues/new).
-Please check to make sure someone else hasn't already created an issue for the same topic.
-- Need help using Kibana? Ask away on our [Kibana Discuss Forum](https://discuss.elastic.co/c/kibana) and a fellow community member or
-Elastic engineer will be glad to help you out.
+- If you've found a bug or want to request a feature, please create a [GitHub Issue](https://github.com/elastic/kibana/issues/new). Please check to make sure someone else hasn't already created an issue for the same topic.
+- Need help using Kibana? Ask away on our [Kibana Discuss Forum](https://discuss.elastic.co/c/kibana) and a fellow community member or Elastic engineer will be glad to help you out.
+
+### Forking Kibana
+
+If you really want to see a feature in Kibana, we would love to help you define the requirements,
+create a pull request, and review the code and UX. If this interests you, check out our
+[CONTRIBUTING.md](CONTRIBUTING.md) guidelines.
+
+But if you're thinking of **maintaining** your own Kibana fork...
+you might want to think twice! This maneuver is so risky that we advise against it.
+
+* Keeping your own fork in sync with the main repository will be really tough. We merge code often and can make some pretty deep-reaching changes if we're refactoring. These kinds of changes may be difficult to reconcile with a fork that's diverged far from master.
+* Maintaining your own fork also creates a codebase that we won't be familiar with, so if you encounter bugs and need help (like on the [Kibana Discuss Forum](https://discuss.elastic.co/c/kibana)), it's possible we won't be able to help you.
+* And last, using your own fork could create potential problems if you're using X-Pack, since there's no way for us to ensure that our plugins will integrate with your fork correctly.
+
+So if you're contemplating maintaining your own fork, try creating a PR into master first.
+It could save you some headaches!
