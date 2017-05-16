@@ -327,5 +327,11 @@ export default function defaultSettingsProvider() {
       value: 5,
       description: 'The step size to increment or decrement the context size by',
     },
+    'discover:aggs:terms:size': {
+      value: 20,
+      type: 'number',
+      description: 'Determines how many terms will be visualized when clicking the "visualize" ' +
+      'button, in the field drop downs, in the discover sidebar.'
+    }
   };
 }
