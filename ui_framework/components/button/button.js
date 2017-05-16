@@ -59,42 +59,34 @@ const ContentWithIcon = ({ children, icon, iconPosition, isLoading }) => {
   }
 };
 
-class KuiButton extends React.Component {
-  focus() {
-    this.kuiButton.focus();
-  }
-
-  render() {
-    const {
-      isLoading,
-      iconPosition = DEFAULT_ICON_POSITION,
-      className,
-      type,
-      icon,
-      children,
-      ...rest
-    } = this.props;
-    return (
-      <button
-        ref={ (kuiButton) => { this.kuiButton = kuiButton; } }
-        className={getClassName({
-          className,
-          type,
-          hasIcon: icon || isLoading,
-        })}
-        {...rest}
+const KuiButton = ({
+  isLoading,
+  iconPosition = DEFAULT_ICON_POSITION,
+  className,
+  type,
+  icon,
+  children,
+  ...rest
+}) => {
+  return (
+    <button
+      className={getClassName({
+        className,
+        type,
+        hasIcon: icon || isLoading,
+      })}
+      {...rest}
+    >
+      <ContentWithIcon
+        icon={icon}
+        iconPosition={iconPosition}
+        isLoading={isLoading}
       >
-        <ContentWithIcon
-          icon={icon}
-          iconPosition={iconPosition}
-          isLoading={isLoading}
-        >
-          {children}
-        </ContentWithIcon>
-      </button>
-    );
-  }
-}
+        {children}
+      </ContentWithIcon>
+    </button>
+  );
+};
 
 KuiButton.propTypes = {
   icon: PropTypes.node,

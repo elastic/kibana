@@ -21,10 +21,6 @@ export class DashboardCloneModal extends React.Component {
     };
   }
 
-  componentDidMount() {
-    this.confirmButton.focus();
-  }
-
   cloneDashboard = () => {
     this.props.onClone(this.state.newDashboardName);
   };
@@ -34,7 +30,7 @@ export class DashboardCloneModal extends React.Component {
   };
 
   onKeyDown = (event) => {
-    if (event.keyCode === 27) {
+    if (event.keyCode === 27) { // ESC key
       this.props.onClose();
     }
   };
@@ -59,6 +55,7 @@ export class DashboardCloneModal extends React.Component {
             </KuiModalBodyText>
             <KuiModalBodyText className="kuiVerticalRhythm">
               <input
+                autoFocus
                 data-test-subj="clonedDashboardTitle"
                 className="kuiTextInput kuiTextInput--large"
                 value={ this.state.newDashboardName }
@@ -78,7 +75,6 @@ export class DashboardCloneModal extends React.Component {
               type="primary"
               data-test-subj="cloneConfirmButton"
               onClick={ this.cloneDashboard }
-              ref={ (button) => { this.confirmButton = button; } }
             >
               Confirm Clone
             </KuiButton>

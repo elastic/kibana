@@ -24,7 +24,6 @@ import { DashboardState } from './dashboard_state';
 import { notify } from 'ui/notify';
 import { documentationLinks } from 'ui/documentation_links/documentation_links';
 import { showCloneModal } from './top_nav/show_clone_modal';
-import { DashboardCloneModal } from './top_nav/clone_modal';
 
 const app = uiModules.get('app/dashboard', [
   'elasticsearch',
@@ -33,12 +32,7 @@ const app = uiModules.get('app/dashboard', [
   'kibana/config',
   'kibana/notify',
   'kibana/typeahead',
-  'react',
 ]);
-
-app.directive('dashboardCloneModal', function (reactDirective) {
-  return reactDirective(DashboardCloneModal);
-});
 
 uiRoutes
   .when(DashboardConstants.CREATE_NEW_DASHBOARD_URL, {
