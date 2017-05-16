@@ -1192,7 +1192,7 @@ body {
 
 .kuiInfoButton {
   font-size: 16px;
-  background-color: inherit;
+  background-color: transparent;
   color: #328CAA;
   cursor: pointer;
   border: none;
