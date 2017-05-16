@@ -10,6 +10,64 @@ import {
   CREATE_INDEX_PATTERN_ROUTE
 } from './constants';
 
+function handleExistingIndexPatternsScenario(indexPatterns, currentRoute, config) {
+  // If index patterns exist, we're not going to show the user the Getting Starte page.
+  // So we can show the chrome again at this point.
+  uiChrome.setVisible(true);
+
+  // The user need not see the Getting Started page, so opt them out of it
+  optOutOfGettingStarted();
+
+  // Some routes require a default index pattern to be present. If we're
+  // NOT on such a route, there's nothing more to do; send the user on their way
+  if (!currentRoute.requireDefaultIndex) {
+    return;
+  }
+
+  // Otherwise, check if we have a default index pattern
+  let defaultIndexPattern = config.get('defaultIndex');
+
+  // If we don't have an default index pattern, make the first index pattern the
+  // default one
+  if (!Boolean(defaultIndexPattern)) {
+    defaultIndexPattern = indexPatterns[0];
+    config.set('defaultIndex', defaultIndexPattern);
+  }
+
+  // At this point, we have a default index pattern and are all set!
+  return;
+}
+
+function handleGettingStartedOptedOutScenario(currentRoute, kbnUrl) {
+  // If the user has opted out of the Getting Started page, we're not going to show them that page.
+  // So we can show the chrome again at this point.
+  uiChrome.setVisible(true);
+
+  // Some routes require a default index pattern to be present. If we're
+  // NOT on such a route, there's nothing more to do; send the user on their way
+  if (!currentRoute.requireDefaultIndex) {
+    return;
+  }
+
+  // Otherwise, redirect the user to the index pattern creation page with
+  // a notification about creating an index pattern
+  const notify = new Notifier({
+    location: 'Index Patterns'
+  });
+  notify.error('Please create a new index pattern');
+
+  kbnUrl.change(CREATE_INDEX_PATTERN_ROUTE);
+  throw WAIT_FOR_URL_CHANGE_TOKEN;
+}
+
+function showGettingStartedPage(kbnUrl, isOnGettingStartedPage) {
+  // Redirect the user to the Getting Started page (unless they are on it already)
+  if (!isOnGettingStartedPage) {
+    kbnUrl.change(GETTING_STARTED_ROUTE);
+    throw WAIT_FOR_URL_CHANGE_TOKEN;
+  }
+}
+
 // Start out with the chrome not being shown to prevent a flicker by
 // hiding it later
 uiChrome.setVisible(false);
@@ -29,70 +87,13 @@ uiRoutes
       const indexPatternsExist = Array.isArray(indexPatterns) && indexPatterns.length > 0;
 
       if (indexPatternsExist) {
-        return handleExistingIndexPatternsScenario(indexPatterns);
+        return handleExistingIndexPatternsScenario(indexPatterns, currentRoute, config);
       }
 
       if (hasOptedOutOfGettingStarted()) {
-        return handleGettingStartedOptedOutScenario();
+        return handleGettingStartedOptedOutScenario(currentRoute, kbnUrl);
       }
 
-      return showGettingStartedPage();
+      return showGettingStartedPage(kbnUrl, isOnGettingStartedPage);
     });
-
-    function handleExistingIndexPatternsScenario(indexPatterns) {
-      // If index patterns exist, we're not going to show the user the Getting Starte page.
-      // So we can show the chrome again at this point.
-      uiChrome.setVisible(true);
-
-      // The user need not see the Getting Started page, so opt them out of it
-      optOutOfGettingStarted();
-
-      // Some routes require a default index pattern to be present. If we're
-      // NOT on such a route, there's nothing more to do; send the user on their way
-      if (!currentRoute.requireDefaultIndex) {
-        return;
-      }
-
-      // Otherwise, check if we have a default index pattern
-      let defaultIndexPattern = config.get('defaultIndex');
-
-      // If we don't have an default index pattern, make the first index pattern the
-      // default one
-      if (!Boolean(defaultIndexPattern)) {
-        defaultIndexPattern = indexPatterns[0];
-        config.set('defaultIndex', defaultIndexPattern);
-      }
-
-      // At this point, we have a default index pattern and are all set!
-      return;
-    }
-
-    function handleGettingStartedOptedOutScenario() {
-      // If the user has opted out of the Getting Started page, we're not going to show them that page.
-      // So we can show the chrome again at this point.
-      uiChrome.setVisible(true);
-
-      // Some routes require a default index pattern to be present. If we're
-      // NOT on such a route, there's nothing more to do; send the user on their way
-      if (!currentRoute.requireDefaultIndex) {
-        return;
-      }
-
-      // Otherwise, redirect the user to the index pattern creation page with
-      // a notification about creating an index pattern
-      const notify = new Notifier({
-        location: 'Index Patterns'
-      });
-      notify.error('Please create a new index pattern');
-      kbnUrl.change(CREATE_INDEX_PATTERN_ROUTE);
-      throw WAIT_FOR_URL_CHANGE_TOKEN;
-    }
-
-    function showGettingStartedPage() {
-      // Redirect the user to the Getting Started page (unless they are on it already)
-      if (!isOnGettingStartedPage) {
-        kbnUrl.change(GETTING_STARTED_ROUTE);
-        throw WAIT_FOR_URL_CHANGE_TOKEN;
-      }
-    }
   });
