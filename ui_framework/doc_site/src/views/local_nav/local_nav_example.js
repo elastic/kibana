@@ -1,5 +1,7 @@
 import React from 'react';
 
+import { renderToHtml } from '../../services';
+
 import {
   GuideDemo,
   GuidePage,
@@ -8,9 +10,18 @@ import {
   GuideText,
 } from '../../components';
 
-const simpleHtml = require('./local_nav_simple.html');
-const breadcrumbsHtml = require('./local_nav_breadcrumbs.html');
-const searchHtml = require('./local_nav_search.html');
+import Simple from './local_nav_simple';
+import simpleSource from '!!raw!./local_nav_simple';
+const simpleHtml = renderToHtml(Simple);
+
+import Breadcrumbs from './local_nav_breadcrumbs';
+import breadcrumbsSource from '!!raw!./local_nav_breadcrumbs';
+const breadcrumbsHtml = renderToHtml(Breadcrumbs);
+
+import Search from './local_nav_search';
+import searchSource from '!!raw!./local_nav_search';
+const searchHtml = renderToHtml(Search);
+
 const searchErrorHtml = require('./local_nav_search_error.html');
 const menuItemStatesHtml = require('./local_nav_menu_item_states.html');
 const dropdownHtml = require('./local_nav_dropdown.html');
@@ -22,65 +33,80 @@ export default props => (
   <GuidePage title={props.route.name}>
     <GuideSection
       title="Simple"
-      source={[{
-        type: GuideSectionTypes.HTML,
-        code: simpleHtml,
-      }]}
+      source={[
+        {
+          type: GuideSectionTypes.JS,
+          code: simpleSource,
+        },
+        {
+          type: GuideSectionTypes.HTML,
+          code: simpleHtml,
+        },
+      ]}
     >
       <GuideText>
         Here's a simple LocalNav with a Title in the top left corner and Menu in the top right.
       </GuideText>
 
-      <GuideDemo
-        html={simpleHtml}
-      />
+      <GuideDemo>
+        <Simple />
+      </GuideDemo>
 
-      <GuideDemo
-        html={simpleHtml}
-        isDarkTheme={true}
-      />
+      <GuideDemo isDarkTheme={true}>
+        <Simple />
+      </GuideDemo>
     </GuideSection>
 
     <GuideSection
       title="Breadcrumbs"
-      source={[{
-        type: GuideSectionTypes.HTML,
-        code: breadcrumbsHtml,
-      }]}
+      source={[
+        {
+          type: GuideSectionTypes.JS,
+          code: breadcrumbsSource,
+        },
+        {
+          type: GuideSectionTypes.HTML,
+          code: breadcrumbsHtml,
+        },
+      ]}
     >
       <GuideText>
         You can replace the Title with Breadcrumbs.
       </GuideText>
 
-      <GuideDemo
-        html={breadcrumbsHtml}
-      />
+      <GuideDemo>
+        <Breadcrumbs />
+      </GuideDemo>
 
-      <GuideDemo
-        html={breadcrumbsHtml}
-        isDarkTheme={true}
-      />
+      <GuideDemo isDarkTheme={true}>
+        <Breadcrumbs />
+      </GuideDemo>
     </GuideSection>
 
     <GuideSection
       title="Search"
-      source={[{
-        type: GuideSectionTypes.HTML,
-        code: searchHtml,
-      }]}
+      source={[
+        {
+          type: GuideSectionTypes.JS,
+          code: searchSource,
+        },
+        {
+          type: GuideSectionTypes.HTML,
+          code: searchHtml,
+        },
+      ]}
     >
       <GuideText>
         You can add a Search component for filtering results.
       </GuideText>
 
-      <GuideDemo
-        html={searchHtml}
-      />
+      <GuideDemo>
+        <Search />
+      </GuideDemo>
 
-      <GuideDemo
-        html={searchHtml}
-        isDarkTheme={true}
-      />
+      <GuideDemo isDarkTheme={true}>
+        <Search />
+      </GuideDemo>
     </GuideSection>
 
     <GuideSection
