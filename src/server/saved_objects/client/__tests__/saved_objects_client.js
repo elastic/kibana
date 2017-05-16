@@ -67,7 +67,7 @@ describe('SavedObjectsClient', () => {
       });
     });
 
-    it('should use ES create action with specifying an id', async () => {
+    it('should use ES create action', async () => {
       callWithRequest.returns({ _type: 'index-pattern', _id: 'logstash-*', _version: 2 });
 
       await savedObjectsClient.create('index-pattern', {
@@ -79,16 +79,6 @@ describe('SavedObjectsClient', () => {
 
       const args = callWithRequest.getCall(0).args;
       expect(args[1]).to.be('create');
-    });
-
-    it('should use ES index action with specifying an id', async () => {
-      callWithRequest.returns({ _type: 'index-pattern', _id: 'abc123' });
-
-      await savedObjectsClient.create('index-pattern', { title: 'Logstash' });
-      expect(callWithRequest.calledOnce).to.be(true);
-
-      const args = callWithRequest.getCall(0).args;
-      expect(args[1]).to.be('index');
     });
   });
 

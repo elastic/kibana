@@ -3,7 +3,7 @@ import sinon from 'sinon';
 import { createCreateRoute } from '../create';
 import { MockServer } from './mock_server';
 
-describe('POST /api/saved_objects/{type}/{id?}', () => {
+describe('POST /api/saved_objects/{type}', () => {
   const savedObjectsClient = { create: sinon.stub() };
   let server;
 
@@ -52,7 +52,7 @@ describe('POST /api/saved_objects/{type}/{id?}', () => {
   it('calls upon savedObjectClient.create', async () => {
     const request = {
       method: 'POST',
-      url: '/api/saved_objects/index-pattern/logstash-*',
+      url: '/api/saved_objects/index-pattern',
       payload: {
         title: 'Testing'
       }
@@ -62,6 +62,6 @@ describe('POST /api/saved_objects/{type}/{id?}', () => {
     expect(savedObjectsClient.create.calledOnce).to.be(true);
 
     const args = savedObjectsClient.create.getCall(0).args;
-    expect(args).to.eql(['index-pattern', { title: 'Testing', id: 'logstash-*' }]);
+    expect(args).to.eql(['index-pattern', { title: 'Testing' }]);
   });
 });
