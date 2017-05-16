@@ -89,9 +89,6 @@ uiRoutes
     }
 
     function showGettingStartedPage() {
-      // At this point we want to show the user the Getting Started page. So show the chrome.
-      uiChrome.setVisible(false);
-
       // Redirect the user to the Getting Started page (unless they are on it already)
       if (!isOnGettingStartedPage) {
         kbnUrl.change(GETTING_STARTED_ROUTE);
