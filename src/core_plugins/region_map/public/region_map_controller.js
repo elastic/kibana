@@ -14,8 +14,6 @@ const module = uiModules.get('kibana/region_map', ['kibana']);
 module.controller('KbnRegionMapController', function ($scope, $element, Private, Notifier, getAppState,
                                                        serviceSettings, config) {
 
-  console.log($element);
-
   const tooltipFormatter = Private(AggResponsePointSeriesTooltipFormatterProvider);
   const ResizeChecker = Private(ResizeCheckerProvider);
   const notify = new Notifier({ location: 'Vectormap' });

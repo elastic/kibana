@@ -1,5 +1,5 @@
 import { uiModules } from 'ui/modules';
-import regionMapVisParamsTemplate from 'plugins/region_map/region_map_vis_params.html';
+import regionMapVisParamsTemplate from './region_map_vis_params.html';
 
 uiModules.get('kibana/region_map')
   .directive('regionMapVisParams', function () {
