@@ -26,7 +26,7 @@ export class IndexPatternSelect extends Component {
             Index Pattern
           </label>
         </div>
-        <div className="kuiFieldGroupSection">
+        <div className="kuiFieldGroupSection kuiFieldGroupSection--wide">
           <Select.Async
             placeholder="Select..."
             value={this.props.value}

@@ -41,7 +41,7 @@ export class FieldSelect extends Component {
             Terms Field
           </label>
         </div>
-        <div className="kuiFieldGroupSection">
+        <div className="kuiFieldGroupSection kuiFieldGroupSection--wide">
           <Select.Async
             placeholder="Select..."
             value={this.props.value}
