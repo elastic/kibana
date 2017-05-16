@@ -28,9 +28,9 @@ export default props => (
       }]}
     >
       <GuideText>
-        Is just button with an info icon, used for a keyboard-accessible
+        This is just button with an info icon, used for a keyboard-accessible
         trigger for helpful inline content. For example, use it as a tooltip
-        trigger. This styles the button to have no background color or border.
+        trigger.
       </GuideText>
 
       <GuideDemo>
