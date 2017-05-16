@@ -4,33 +4,27 @@ import { Grid, Row, Col } from 'react-bootstrap';
 
 import { Expression } from '../expression';
 import { Sidebar } from '../sidebar';
-import { Render } from '../render';
+import { RenderExpression } from '../render_expression';
 
-export function App({ renderable }) {
-  function done() {
-    console.log('rendered!');
-  }
-
-  return (
-    <div>
-      <Grid fluid>
-        <Row>
-          <Col xs={12}>
-            <Expression />
-          </Col>
-        </Row>
-        <Row>
-          <Col md={3} smHidden xsHidden>
-            <Sidebar />
-          </Col>
-          <Col md={9} xs={12}>
-            <Render expressionOutput={renderable} done={done}/>
-          </Col>
-        </Row>
-      </Grid>
-    </div>
-  );
-}
+export const App = () => (
+  <div>
+    <Grid fluid>
+      <Row>
+        <Col xs={12}>
+          <Expression />
+        </Col>
+      </Row>
+      <Row>
+        <Col md={3} smHidden xsHidden>
+          <Sidebar />
+        </Col>
+        <Col md={9} xs={12}>
+          <RenderExpression />
+        </Col>
+      </Row>
+    </Grid>
+  </div>
+);
 
 App.propTypes = {
   expression: PropTypes.string,
