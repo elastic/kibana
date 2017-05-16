@@ -63,13 +63,13 @@ Use the following command in a terminal (eg `bash`) to set up a mapping for the 
 [source,js]
 PUT /shakespeare
 {
- "mappings" : {
-  "doc" : {
-   "properties" : {
-    "speaker" : {"type": "keyword"},
-    "play_name" : {"type": "keyword"},
-    "line_id" : {"type" : "integer"},
-    "speech_number" : {"type" : "integer"}
+ "mappings": {
+  "doc": {
+   "properties": {
+    "speaker": {"type" : "keyword"},
+    "play_name": {"type" : "keyword"},
+    "line_id": {"type" : "integer"},
+    "speech_number": {"type" : "integer"}
    }
   }
  }
