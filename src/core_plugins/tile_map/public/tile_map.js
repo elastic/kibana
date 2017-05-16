@@ -33,34 +33,32 @@ VisTypesRegistryProvider.register(function TileMapVisType(Private, getAppState, 
         mapZoom: 2,
         mapCenter: [0, 0],
         wms: config.get('visualization:tileMap:WMSdefaults')
-      },
-      legendPositions: [{
-        value: 'bottomleft',
-        text: 'bottom left',
-      }, {
-        value: 'bottomright',
-        text: 'bottom right',
-      }, {
-        value: 'topleft',
-        text: 'top left',
-      }, {
-        value: 'topright',
-        text: 'top right',
-      }],
-      mapTypes: ['Scaled Circle Markers',
-        'Shaded Circle Markers',
-        'Shaded Geohash Grid',
-        'Heatmap'
-      ],
-      canDesaturate: !!supports.cssFilters,
+      }
       // editor: tileMapTemplate
     },
     responseConverter: geoJsonConverter,
     implementsRenderComplete: true,
     editorConfig: {
       collections: {
-        scales: ['linear', 'log', 'square root'],
-        orientations: ['single', 'right angled', 'multiple'],
+        legendPositions: [{
+          value: 'bottomleft',
+          text: 'bottom left',
+        }, {
+          value: 'bottomright',
+          text: 'bottom right',
+        }, {
+          value: 'topleft',
+          text: 'top left',
+        }, {
+          value: 'topright',
+          text: 'top right',
+        }],
+        mapTypes: ['Scaled Circle Markers',
+          'Shaded Circle Markers',
+          'Shaded Geohash Grid',
+          'Heatmap'
+        ],
+        canDesaturate: !!supports.cssFilters
       },
       optionsTemplate: tileMapTemplate,
     },

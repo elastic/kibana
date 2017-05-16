@@ -57,8 +57,8 @@ module.exports = function MapsRenderbotFactory(Private, $injector, tilemapSettin
       const uiState = this.vis.getUiState();
       const zoomFromUiState = parseInt(uiState.get('mapZoom'));
       const centerFromUIState = uiState.get('mapCenter');
-      options.zoom = !isNaN(zoomFromUiState) ? zoomFromUiState : this.vis.type.params.defaults.mapZoom;
-      options.center = centerFromUIState ? centerFromUIState : this.vis.type.params.defaults.mapCenter;
+      options.zoom = !isNaN(zoomFromUiState) ? zoomFromUiState : this.vis.type.visConfig.defaults.mapZoom;
+      options.center = centerFromUIState ? centerFromUIState : this.vis.type.visConfig.defaults.mapCenter;
 
       this._kibanaMap = new KibanaMap(containerElement, options);
       this._kibanaMap.addDrawControl();
@@ -208,7 +208,7 @@ module.exports = function MapsRenderbotFactory(Private, $injector, tilemapSettin
     _getMapsParams() {
       return _.assign(
         {},
-        this.vis.type.params.defaults,
+        this.vis.type.visConfig.defaults,
         {
           type: this.vis.type.name,
           hasTimeField: this.vis.indexPattern && this.vis.indexPattern.hasTimeField()// Add attribute which determines whether an index is time based or not.
