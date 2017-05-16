@@ -1,14 +1,14 @@
-import 'plugins/choropleth/choropleth.less';
-import 'plugins/choropleth/choropleth_controller';
-import 'plugins/choropleth/choropleth_vis_params';
+import 'plugins/region_map/region_map.less';
+import 'plugins/region_map/region_map_controller';
+import 'plugins/region_map/region_map_vis_params';
 import { TemplateVisTypeProvider } from 'ui/template_vis_type/template_vis_type';
 import { VisSchemasProvider } from 'ui/vis/schemas';
-import choroplethTemplate from 'plugins/choropleth/choropleth_controller.html';
+import regionTemplate from 'plugins/region_map/region_map_controller.html';
 import { VisTypesRegistryProvider } from 'ui/registry/vis_types';
 import { VisVisTypeProvider } from 'ui/vis/vis_type';
 import { truncatedColorMaps } from 'ui/vislib/components/color/truncated_colormaps';
 
-VisTypesRegistryProvider.register(function ChoroplethProvider(Private, vectormapsConfig) {
+VisTypesRegistryProvider.register(function RegionMapProvider(Private, vectormapsConfig) {
 
   const VisType = Private(VisVisTypeProvider);
   const TemplateVisType = Private(TemplateVisTypeProvider);
@@ -19,14 +19,14 @@ VisTypesRegistryProvider.register(function ChoroplethProvider(Private, vectormap
   const selectedJoinField = selectedLayer ? vectorLayers[0].fields[0] : null;
 
   return new TemplateVisType({
-    name: 'choropleth',
+    name: 'region_map',
     title: 'Region Map',
     implementsRenderComplete: true,
     description: 'Show metrics on a thematic map. Use one of the provide base maps, or add your own. ' +
     'Darker colors represent higher values.',
     category: VisType.CATEGORY.MAP,
     icon: 'fa-globe',
-    template: choroplethTemplate,
+    template: regionTemplate,
     params: {
       defaults: {
         legendPosition: 'bottomright',
@@ -50,7 +50,7 @@ VisTypesRegistryProvider.register(function ChoroplethProvider(Private, vectormap
       }],
       colorSchemas: Object.keys(truncatedColorMaps),
       vectorLayers: vectorLayers,
-      editor: '<choropleth-vis-params></choropleth-vis-params>'
+      editor: '<region_map-vis-params></region_map-vis-params>'
     },
     schemas: new Schemas([
       {

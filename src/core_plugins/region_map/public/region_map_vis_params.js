@@ -1,11 +1,11 @@
 import { uiModules } from 'ui/modules';
-import choroplethVisParamsTemplate from 'plugins/choropleth/choropleth_vis_params.html';
+import regionMapVisParamsTemplate from 'plugins/region_map/region_map_vis_params.html';
 
-uiModules.get('kibana/choropleth')
-  .directive('choroplethVisParams', function () {
+uiModules.get('kibana/region_map')
+  .directive('regionMapVisParams', function () {
     return {
       restrict: 'E',
-      template: choroplethVisParamsTemplate,
+      template: regionMapVisParamsTemplate,
       link: function ($scope) {
 
         $scope.onLayerChange = function () {

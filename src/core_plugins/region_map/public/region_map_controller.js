@@ -10,9 +10,11 @@ import { ResizeCheckerProvider } from 'ui/resize_checker';
 import 'ui/vis_maps/lib/service_settings';
 
 
-const module = uiModules.get('kibana/choropleth', ['kibana']);
-module.controller('KbnChoroplethController', function ($scope, $element, Private, Notifier, getAppState,
+const module = uiModules.get('kibana/region_map', ['kibana']);
+module.controller('KbnRegionMapController', function ($scope, $element, Private, Notifier, getAppState,
                                                        serviceSettings, config) {
+
+  console.log($element);
 
   const tooltipFormatter = Private(AggResponsePointSeriesTooltipFormatterProvider);
   const ResizeChecker = Private(ResizeCheckerProvider);
@@ -48,9 +50,14 @@ module.controller('KbnChoroplethController', function ($scope, $element, Private
         });
       }
 
-      if (!$scope.vis.params.selectedJoinField) {
+      if (!$scope.vis.params.selectedJoinField && $scope.vis.params.selectedLayer) {
         $scope.vis.params.selectedJoinField = $scope.vis.params.selectedLayer.fields[0];
       }
+
+      if (!$scope.vis.params.selectedLayer) {
+        return;
+      }
+
       updateChoroplethLayer($scope.vis.params.selectedLayer.url);
       choroplethLayer.setMetrics(results, metricsAgg);
       setTooltipFormatter();
@@ -63,8 +70,12 @@ module.controller('KbnChoroplethController', function ($scope, $element, Private
 
   $scope.$watch('vis.params', (visParams) => {
     kibanaMapReady.then(() => {
-      if (!visParams.selectedJoinField) {
+      if (!visParams.selectedJoinField && visParams.selectedLayer) {
         visParams.selectedJoinField = visParams.selectedLayer.fields[0];
+      }
+
+      if (!visParams.selectedJoinField || !visParams.selectedLayer) {
+        return;
       }
 
       updateChoroplethLayer(visParams.selectedLayer.url);
