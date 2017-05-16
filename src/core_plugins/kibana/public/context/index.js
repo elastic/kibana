@@ -1,3 +1,6 @@
+import _ from 'lodash';
+
+import { FilterBarQueryFilterProvider } from 'ui/filter_bar/query_filter';
 import uiRoutes from 'ui/routes';
 
 import './app';
@@ -25,19 +28,27 @@ function ContextAppRouteController(
   chrome,
   config,
   indexPattern,
+  Private,
 ) {
+  const queryFilter = Private(FilterBarQueryFilterProvider);
+
   this.state = new AppState(createDefaultAppState(config, indexPattern));
   this.state.save(true);
 
   $scope.$watchGroup([
     'contextAppRoute.state.columns',
-    'contextAppRoute.state.filters',
     'contextAppRoute.state.predecessorCount',
     'contextAppRoute.state.successorCount',
   ], () => this.state.save(true));
+
+  $scope.$listen(queryFilter, 'update', () => {
+    this.filters = _.cloneDeep(queryFilter.getFilters());
+  });
+
   this.anchorUid = getDocumentUid($routeParams.type, $routeParams.id);
   this.indexPattern = indexPattern;
   this.discoverUrl = chrome.getNavLinkById('kibana:discover').lastSubUrl;
+  this.filters = _.cloneDeep(queryFilter.getFilters());
 }
 
 function createDefaultAppState(config, indexPattern) {

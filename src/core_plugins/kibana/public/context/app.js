@@ -1,6 +1,5 @@
 import _ from 'lodash';
 
-import { FilterBarQueryFilterProvider } from 'ui/filter_bar/query_filter';
 import { uiModules } from 'ui/modules';
 import contextAppTemplate from './app.html';
 import './components/loading_button';
@@ -47,7 +46,6 @@ module.directive('contextApp', function ContextApp() {
 function ContextAppController($scope, config, Private, timefilter) {
   const queryParameterActions = Private(QueryParameterActionsProvider);
   const queryActions = Private(QueryActionsProvider);
-  const queryFilter = Private(FilterBarQueryFilterProvider);
 
   // this is apparently the "canonical" way to disable the time picker
   timefilter.enabled = false;
@@ -73,15 +71,8 @@ function ContextAppController($scope, config, Private, timefilter) {
     () => this.state.rows.successors,
   ], (newValues) => this.actions.setAllRows(...newValues));
 
-  $scope.$listen(queryFilter, 'update', () => {
-    const filters = _.cloneDeep(queryFilter.getFilters());
-    this.actions.fetchContextRowsWithNewQueryParameters({
-      filters,
-    });
-  });
-
   /**
-   * Sync query parameters to arguments
+   * Sync properties to state
    */
   $scope.$watchCollection(
     () => ({
@@ -99,12 +90,16 @@ function ContextAppController($scope, config, Private, timefilter) {
       } else if (
         (newQueryParameters.predecessorCount !== queryParameters.predecessorCount)
         || (newQueryParameters.successorCount !== queryParameters.successorCount)
+        || (!_.isEqual(newQueryParameters.filters, queryParameters.filters))
       ) {
         this.actions.fetchContextRowsWithNewQueryParameters(_.cloneDeep(newQueryParameters));
       }
     },
   );
 
+  /**
+   * Sync state to properties
+   */
   $scope.$watchCollection(
     () => ({
       predecessorCount: this.state.queryParameters.predecessorCount,
