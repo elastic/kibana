@@ -17,7 +17,7 @@ export function registerValueSuggestions(server) {
         const suggestions = res.aggregations.suggestions.buckets.map(bucket => bucket.key);
         return reply(suggestions);
       })
-      .catch(error => handleESError(error));
+      .catch(error => reply(handleESError(error)));
     }
   });
 }

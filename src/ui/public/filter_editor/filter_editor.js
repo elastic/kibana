@@ -186,7 +186,7 @@ module.directive('filterEditor', function ($http) {
       }
 
       function getValueSuggestions(field, query) {
-        if (!_.get(field, 'aggregatable')) {
+        if (!_.get(field, 'aggregatable') || field.type !== 'string') {
           return Promise.resolve([]);
         }
 
