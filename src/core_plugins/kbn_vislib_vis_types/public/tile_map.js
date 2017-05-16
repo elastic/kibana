@@ -27,7 +27,6 @@ export default function TileMapVisType(Private, getAppState, courier, config) {
         heatMinOpacity: 0.1,
         heatRadius: 25,
         heatBlur: 15,
-        heatNormalizeData: true,
         legendPosition: 'bottomright',
         mapZoom: 2,
         mapCenter: [0, 0],
