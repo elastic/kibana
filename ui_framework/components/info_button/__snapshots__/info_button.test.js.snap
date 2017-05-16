@@ -1,0 +1,13 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`KuiInfoButton Baseline HTML attributes are rendered 1`] = `
+<button
+  class="kuiInfoButton kuiIcon fa-info-circle testClass1 testClass2"
+/>
+`;
+
+exports[`KuiInfoButton Baseline is rendered 1`] = `
+<button
+  class="kuiInfoButton kuiIcon fa-info-circle"
+/>
+`;
