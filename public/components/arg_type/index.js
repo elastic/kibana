@@ -8,7 +8,6 @@ import { ArgTypeContextError } from './arg_type_context_error';
 import { findExpressionType } from '../../lib/find_expression_type';
 import { fetchContext, setAstAtIndex } from '../../state/actions/elements';
 import {
-  getElementById,
   getSelectedElement,
   getSelectedPage,
   getSelectedResolvedArgs,
@@ -23,7 +22,7 @@ const mapStateToProps = (state, { expressionIndex }) => {
 
   return {
     context: get(resolvedArgs, ['expressionContext', expressionIndex - 1], null),
-    element: getElementById(state, getSelectedElement(state)),
+    element: getSelectedElement(state),
     pageId: getSelectedPage(state),
   };
 };

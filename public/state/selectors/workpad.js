@@ -14,8 +14,12 @@ export function getPageById(state, id) {
 }
 
 // element getters
-export function getSelectedElement(state) {
+export function getSelectedElementId(state) {
   return get(state, 'transient.selectedElement');
+}
+
+export function getSelectedElement(state) {
+  return getElementById(state, getSelectedElementId(state));
 }
 
 export function getElements(state, pageId = null) {
@@ -36,5 +40,5 @@ export function getResolvedArgs(state, elementId) {
 }
 
 export function getSelectedResolvedArgs(state) {
-  return getResolvedArgs(state, getSelectedElement(state));
+  return getResolvedArgs(state, getSelectedElementId(state));
 }

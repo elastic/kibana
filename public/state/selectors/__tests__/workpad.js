@@ -47,6 +47,7 @@ describe('workpad selectors', () => {
       expect(selector.getPages({})).to.be(undefined);
       expect(selector.getPageById({}, 'page-1')).to.be(undefined);
       expect(selector.getSelectedElement({})).to.be(undefined);
+      expect(selector.getSelectedElementId({})).to.be(undefined);
       expect(selector.getElements({})).to.be(undefined);
       expect(selector.getElementById({}, 'element-1')).to.be(undefined);
       expect(selector.getResolvedArgs({}, 'element-1')).to.be(undefined);
@@ -74,7 +75,14 @@ describe('workpad selectors', () => {
 
   describe('getSelectedElement', () => {
     it('returns selected element', () => {
-      expect(selector.getSelectedElement(state)).to.equal('element-1');
+      const { elements } = state.persistent.workpad.pages[0];
+      expect(selector.getSelectedElement(state)).to.equal(elements[1]);
+    });
+  });
+
+  describe('getSelectedElementId', () => {
+    it('returns selected element id', () => {
+      expect(selector.getSelectedElementId(state)).to.equal('element-1');
     });
   });
 

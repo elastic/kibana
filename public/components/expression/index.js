@@ -2,12 +2,12 @@ import { connect } from 'react-redux';
 import { flowRight } from 'lodash';
 import { Expression as Component } from './expression';
 import { statefulInput } from '../../lib/stateful_hoc';
-import { getSelectedPage, getSelectedElement, getElementById } from '../../state/selectors/workpad';
+import { getSelectedPage, getSelectedElement } from '../../state/selectors/workpad';
 import { setExpression } from '../../state/actions/elements';
 
 const mapStateToProps = (state) => ({
   pageId: getSelectedPage(state),
-  element: getElementById(state, getSelectedElement(state)),
+  element: getSelectedElement(state),
 });
 
 const mapDispatchToProps = ({
