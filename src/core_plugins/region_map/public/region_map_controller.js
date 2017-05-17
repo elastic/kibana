@@ -17,9 +17,7 @@ module.controller('KbnRegionMapController', function ($scope, $element, Private,
   const tooltipFormatter = Private(AggResponsePointSeriesTooltipFormatterProvider);
   const ResizeChecker = Private(ResizeCheckerProvider);
   const notify = new Notifier({ location: 'Vectormap' });
-
   const resizeChecker = new ResizeChecker($element);
-  const containerNode = $element[0];
 
   let kibanaMap = null;
   resizeChecker.on('resize', () => {
@@ -28,8 +26,18 @@ module.controller('KbnRegionMapController', function ($scope, $element, Private,
     }
   });
   let choroplethLayer = null;
-
   const kibanaMapReady = makeKibanaMap();
+  let layersLoaded = false;
+  if (!layersLoaded) {
+    getAvailableVectorLayers()
+      .then(function (layersFromService) {
+        //todo: disable play-button until these settings are loaded!
+        $scope.vis.type.params.vectorLayers = $scope.vis.type.params.vectorLayers.concat(layersFromService);
+        layersLoaded = true;
+        $scope.$apply();
+      });
+  }
+
   $scope.$watch('esResponse', async function (response) {
     kibanaMapReady.then(() => {
       const metricsAgg = _.first($scope.vis.aggs.bySchemaName.metric);
@@ -89,19 +97,11 @@ module.controller('KbnRegionMapController', function ($scope, $element, Private,
     });
   });
 
-  getAvailableVectorLayers()
-    .then(function (layersFromService) {
-      //todo: disable play-button until these settings are loaded!
-      $scope.vis.type.params.vectorLayers = $scope.vis.type.params.vectorLayers.concat(layersFromService);
-      $scope.$apply();
-    });
-
   async function makeKibanaMap() {
 
     const tmsSettings = await serviceSettings.getTMSService();
     const minMaxZoom = tmsSettings.getMinMaxZoom(false);
-    kibanaMap = new KibanaMap(containerNode, minMaxZoom);
-    kibanaMap.setZoomLevel(2);
+    kibanaMap = new KibanaMap($element[0], minMaxZoom);
     const url = tmsSettings.getUrl();
     const options = tmsSettings.getTMSOptions();
     kibanaMap.setBaseLayer({ baseLayerType: 'tms', options: { url, ...options } });
@@ -151,12 +151,7 @@ module.controller('KbnRegionMapController', function ($scope, $element, Private,
   }
 
   async function getAvailableVectorLayers() {
-    try {
-      const vectorLayers = await serviceSettings.getFileLayers();
-      return vectorLayers;
-    } catch (e) {
-      throw e;
-    }
+    return await serviceSettings.getFileLayers();
   }
 
 
