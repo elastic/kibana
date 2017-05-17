@@ -26,7 +26,7 @@ uiModules
         editorTypes.find(editor => editor.name === vis.type.editorController).render;
 
       const renderFunction = _.debounce(() => {
-        editor(vis, element, $scope.visState, $scope.visData, $scope);
+        editor(vis, element, $scope.uiState, $scope.visData);
         $scope.$apply();
       }, 200);
 

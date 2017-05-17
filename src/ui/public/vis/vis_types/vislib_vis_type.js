@@ -34,7 +34,7 @@ export function VislibVisTypeFactoryProvider(Private) {
         this.vis = vis;
         this.vislibVis = new vislib.Vis($el[0], vis.params);
         this.vislibVis.on('brush', vis.API.events.brush);
-        this.vislibVis.on('click', vis.API.events.click);
+        this.vislibVis.on('click', vis.API.events.filter);
         this.vislibVis.on('renderComplete', resolve);
         this.vislibVis.render(esResponse, uiState);
         this.refreshLegend++;
@@ -44,7 +44,7 @@ export function VislibVisTypeFactoryProvider(Private) {
     destroy() {
       if (this.vislibVis) {
         this.vislibVis.off('brush', this.vis.API.events.brush);
-        this.vislibVis.off('click', this.vis.API.events.click);
+        this.vislibVis.off('click', this.vis.API.events.filter);
         this.vislibVis.destroy();
       }
     }
