@@ -73,16 +73,23 @@ function VisEditor($scope, $route, timefilter, AppState, $window, kbnUrl, courie
     location: 'Visualization Editor'
   });
 
+  // Retrieve the resolved SavedVis instance.
+  const savedVis = $route.current.locals.savedVis;
+  // vis is instance of src/ui/public/vis/vis.js.
+  // SearchSource is a promise-based stream of search results that can inherit from other search sources.
+  const { vis, searchSource } = savedVis;
+  $scope.vis = vis;
+
   $scope.topNavMenu = [{
     key: 'save',
     description: 'Save Visualization',
     template: require('plugins/kibana/visualize/editor/panels/save.html'),
     testId: 'visualizeSaveButton',
     disableButton() {
-      return Boolean(editableVis.dirty);
+      return Boolean(vis.dirty);
     },
     tooltip() {
-      if (editableVis.dirty) {
+      if (vis.dirty) {
         return 'Apply or Discard your changes before saving';
       }
     }
@@ -100,9 +107,6 @@ function VisEditor($scope, $route, timefilter, AppState, $window, kbnUrl, courie
 
   let stateMonitor;
 
-  // Retrieve the resolved SavedVis instance.
-  const savedVis = $route.current.locals.savedVis;
-
   const $appStatus = this.appStatus = {
     dirty: !savedVis.id
   };
@@ -110,11 +114,6 @@ function VisEditor($scope, $route, timefilter, AppState, $window, kbnUrl, courie
   if (savedVis.id) {
     docTitle.change(savedVis.title);
   }
-
-  // vis is instance of src/ui/public/vis/vis.js.
-  // SearchSource is a promise-based stream of search results that can inherit from other search sources.
-  const { vis, searchSource } = savedVis;
-  $scope.vis = vis;
 
   // Extract visualization state with filtered aggs. You can see these filtered aggs in the URL.
   // Consists of things like aggs, params, listeners, title, type, etc.
