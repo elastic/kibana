@@ -22,6 +22,7 @@ export function GettingStartedPageProvider({ getService, getPageObjects }) {
     }
 
     async optOutLinkExists() {
+      log.debug('Checking if opt-out link exists');
       return await testSubjects.exists('lnkGettingStartedOptOut');
     }
 
