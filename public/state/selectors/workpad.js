@@ -34,11 +34,13 @@ export function getElementById(state, id) {
   return find(getElements(state), { id });
 }
 
-export function getResolvedArgs(state, elementId) {
+export function getResolvedArgs(state, elementId, path) {
   if (!elementId) return;
-  return get(state, ['transient', 'resolvedArgs', elementId]);
+  const args = get(state, ['transient', 'resolvedArgs', elementId]);
+  if (path) return get(args, path);
+  return args;
 }
 
-export function getSelectedResolvedArgs(state) {
-  return getResolvedArgs(state, getSelectedElementId(state));
+export function getSelectedResolvedArgs(state, path) {
+  return getResolvedArgs(state, getSelectedElementId(state), path);
 }

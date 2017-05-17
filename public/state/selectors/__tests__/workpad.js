@@ -12,6 +12,15 @@ describe('workpad selectors', () => {
         resolvedArgs: {
           'element-0': 'test resolved arg, el 0',
           'element-1': 'test resolved arg, el 1',
+          'element-2': {
+            example1: 'first thing',
+            example2: ['why not', 'an array?'],
+            example3: {
+              deeper: {
+                object: true,
+              },
+            },
+          },
         },
       },
       persistent: {
@@ -105,11 +114,40 @@ describe('workpad selectors', () => {
     it('returns resolved args by element id', () => {
       expect(selector.getResolvedArgs(state, 'element-0')).to.equal('test resolved arg, el 0');
     });
+
+    it('returns resolved args at given path', () => {
+      const arg = selector.getResolvedArgs(state, 'element-2', 'example1');
+      expect(arg).to.equal('first thing');
+    });
   });
 
   describe('getSelectedResolvedArgs', () => {
     it('returns resolved args for selected element', () => {
       expect(selector.getSelectedResolvedArgs(state)).to.equal('test resolved arg, el 1');
+    });
+
+    it('returns resolved args at given path', () => {
+      const tmpState = {
+        ...state,
+        transient: {
+          ...state.transient,
+          selectedElement: 'element-2',
+        },
+      };
+      const arg = selector.getSelectedResolvedArgs(tmpState, 'example2');
+      expect(arg).to.eql(['why not', 'an array?']);
+    });
+
+    it('returns resolved args at given deep path', () => {
+      const tmpState = {
+        ...state,
+        transient: {
+          ...state.transient,
+          selectedElement: 'element-2',
+        },
+      };
+      const arg = selector.getSelectedResolvedArgs(tmpState, ['example3', 'deeper', 'object']);
+      expect(arg).to.be(true);
     });
   });
 });
