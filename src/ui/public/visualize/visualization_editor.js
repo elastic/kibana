@@ -23,10 +23,10 @@ uiModules
       // Clone the _vis instance.
       const vis = $scope.vis;
       const editor = typeof vis.type.editorController === 'function' ? vis.type.editorController :
-        editorTypes.find(editor => editor.name === vis.type.editorController).render;
+        editorTypes.find(editor => editor.name === vis.type.editorController);
 
       const renderFunction = _.debounce(() => {
-        editor(vis, element, $scope.uiState, $scope.visData);
+        editor.render(vis, element, $scope.uiState, $scope.visData);
         $scope.$apply();
       }, 200);
 
@@ -35,6 +35,10 @@ uiModules
           return;
         }
         renderFunction();
+      });
+
+      $scope.$on('$destroy', () => {
+        editor.destroy();
       });
 
     }

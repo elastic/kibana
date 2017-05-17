@@ -53,7 +53,14 @@ const defaultEditor = function ($rootScope, $compile) {
       }
 
       $scope.$broadcast('render');
-    }
+    },
+    destroy: () => {
+      if (this.$scope) {
+        this.$scope.$destroy();
+        this.$scope = null;
+      }
+    },
+    resize: () => {}
   };
 };
 

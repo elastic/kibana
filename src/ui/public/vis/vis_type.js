@@ -54,10 +54,11 @@ export function VisTypeFactoryProvider(Private) {
       if (!this.visController) {
         throw new Error('vis_type render function not implemented');
       }
-      this.visController(vis, $el, uiState, esResponse);
+      this.visController.render(vis, $el, uiState, esResponse);
     }
 
     destroy() {
+      this.visController.destroy();
     }
   }
 
