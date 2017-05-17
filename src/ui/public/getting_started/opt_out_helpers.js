@@ -1,7 +1,7 @@
 import { GETTING_STARTED_OPT_OUT_FLAG } from './constants';
 
 export function hasOptedOutOfGettingStarted() {
-  return window.localStorage.getItem(GETTING_STARTED_OPT_OUT_FLAG) || false;
+  return Boolean(window.localStorage.getItem(GETTING_STARTED_OPT_OUT_FLAG));
 }
 
 export function optOutOfGettingStarted() {

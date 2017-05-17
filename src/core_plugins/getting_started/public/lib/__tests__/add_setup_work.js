@@ -1,23 +1,29 @@
 import expect from 'expect.js';
 import sinon from 'sinon';
 import uiChrome from 'ui/chrome';
+import { Notifier } from 'ui/notify/notifier';
 
 import {
   showGettingStartedPage,
-  handleGettingStartedOptedOutScenario
+  handleGettingStartedOptedOutScenario,
+  handleExistingIndexPatternsScenario
 } from '../add_setup_work';
 import {
   GETTING_STARTED_ROUTE,
   CREATE_INDEX_PATTERN_ROUTE
 } from '../constants';
+import { hasOptedOutOfGettingStarted } from 'ui/getting_started/opt_out_helpers';
 
 describe('Getting Started page', () => {
   describe('add_setup_work', () => {
-    let spyKbnUrl;
+    let kbnUrl;
+    let currentRoute;
+
     beforeEach(() => {
-      spyKbnUrl = {
+      kbnUrl = {
         change: sinon.spy()
       };
+      currentRoute = {};
     });
 
     describe('showGettingStartedPage', () => {
@@ -29,8 +35,8 @@ describe('Getting Started page', () => {
         });
 
         it ('redirects the user to the Getting Started page', () => {
-          showGettingStartedPage(spyKbnUrl, isOnGettingstartedPage);
-          expect(spyKbnUrl.change.calledWith(GETTING_STARTED_ROUTE)).to.be(true);
+          showGettingStartedPage(kbnUrl, isOnGettingstartedPage);
+          expect(kbnUrl.change.calledWith(GETTING_STARTED_ROUTE)).to.be(true);
         });
       });
 
@@ -40,20 +46,15 @@ describe('Getting Started page', () => {
         });
 
         it ('redirects the user to the Getting Started page', () => {
-          showGettingStartedPage(spyKbnUrl, isOnGettingstartedPage);
-          expect(spyKbnUrl.change.called).to.be(false);
+          showGettingStartedPage(kbnUrl, isOnGettingstartedPage);
+          expect(kbnUrl.change.called).to.be(false);
         });
       });
     });
 
     describe('handleGettingStartedOptedOutScenario', () => {
-      let currentRoute;
-      beforeEach(() => {
-        currentRoute = {};
-      });
-
       it ('sets the chrome to visible', () => {
-        handleGettingStartedOptedOutScenario(currentRoute, spyKbnUrl);
+        handleGettingStartedOptedOutScenario(currentRoute, kbnUrl);
         expect(uiChrome.getVisible()).to.be(true);
       });
 
@@ -63,8 +64,8 @@ describe('Getting Started page', () => {
         });
 
         it ('returns without redirecting the user', () => {
-          handleGettingStartedOptedOutScenario(currentRoute, spyKbnUrl);
-          expect(spyKbnUrl.change.called).to.be(false);
+          handleGettingStartedOptedOutScenario(currentRoute, kbnUrl);
+          expect(kbnUrl.change.called).to.be(false);
         });
       });
 
@@ -73,9 +74,85 @@ describe('Getting Started page', () => {
           currentRoute.requireDefaultIndex = true;
         });
 
+        afterEach(() => {
+          // Clear out any notifications
+          Notifier.prototype._notifs.length = 0;
+        });
+
         it ('redirects the user to the Create Index Pattern page', () => {
-          handleGettingStartedOptedOutScenario(currentRoute, spyKbnUrl);
-          expect(spyKbnUrl.change.calledWith(CREATE_INDEX_PATTERN_ROUTE)).to.be(true);
+          handleGettingStartedOptedOutScenario(currentRoute, kbnUrl);
+          expect(kbnUrl.change.calledWith(CREATE_INDEX_PATTERN_ROUTE)).to.be(true);
+        });
+      });
+    });
+
+    describe('handleExistingIndexPatternsScenario', () => {
+
+      let indexPatterns;
+      let config;
+
+      beforeEach(() => {
+        config = {
+          get: sinon.stub(),
+          set: sinon.spy()
+        };
+      });
+
+      it ('sets the chrome to visible', () => {
+        handleExistingIndexPatternsScenario(indexPatterns, currentRoute, config);
+        expect(uiChrome.getVisible()).to.be(true);
+      });
+
+      it ('opts the user out of the Getting Started page', () => {
+        handleExistingIndexPatternsScenario(indexPatterns, currentRoute, config);
+        expect(hasOptedOutOfGettingStarted()).to.be(true);
+      });
+
+      describe('current route does not require a default index pattern', () => {
+        beforeEach(() => {
+          currentRoute.requireDefaultIndex = false;
+        });
+
+        it ('returns without performing any default index pattern checks', () => {
+          handleExistingIndexPatternsScenario(indexPatterns, currentRoute, config);
+          expect(config.get.called).to.be(false);
+          expect(config.set.called).to.be(false);
+        });
+      });
+
+      describe('current route requires a default index pattern', () => {
+        beforeEach(() => {
+          currentRoute.requireDefaultIndex = true;
+        });
+
+        describe('default index pattern exists', () => {
+          beforeEach(() => {
+            config.get
+              .withArgs('defaultIndex')
+              .returns('an-index-pattern');
+          });
+
+          it ('returns without setting a default index pattern', () => {
+            handleExistingIndexPatternsScenario(indexPatterns, currentRoute, config);
+            expect(config.set.called).to.be(false);
+          });
+        });
+
+        describe('default index pattern does not exist', () => {
+          beforeEach(() => {
+            indexPatterns = [
+              'logstash-*',
+              'cars'
+            ];
+            config.get
+              .withArgs('defaultIndex')
+              .returns(undefined);
+          });
+
+          it ('sets the first index pattern as the default index pattern', () => {
+            handleExistingIndexPatternsScenario(indexPatterns, currentRoute, config);
+            expect(config.set.calledWith('defaultIndex', indexPatterns[0])).to.be(true);
+          });
         });
       });
     });
