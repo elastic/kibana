@@ -23,6 +23,46 @@ exports[`KuiButton Baseline is rendered 1`] = `
 </button>
 `;
 
+exports[`KuiButton Props buttonType basic renders the basic class 1`] = `
+<button
+  class="kuiButton kuiButton--basic"
+>
+  <span
+    class="kuiButton__inner"
+  />
+</button>
+`;
+
+exports[`KuiButton Props buttonType danger renders the danger class 1`] = `
+<button
+  class="kuiButton kuiButton--danger"
+>
+  <span
+    class="kuiButton__inner"
+  />
+</button>
+`;
+
+exports[`KuiButton Props buttonType hollow renders the hollow class 1`] = `
+<button
+  class="kuiButton kuiButton--hollow"
+>
+  <span
+    class="kuiButton__inner"
+  />
+</button>
+`;
+
+exports[`KuiButton Props buttonType primary renders the primary class 1`] = `
+<button
+  class="kuiButton kuiButton--primary"
+>
+  <span
+    class="kuiButton__inner"
+  />
+</button>
+`;
+
 exports[`KuiButton Props children is rendered 1`] = `
 <button
   class="kuiButton"
@@ -106,45 +146,5 @@ exports[`KuiButton Props isLoading renders a spinner 1`] = `
       class="kuiButton__icon kuiIcon fa-spinner fa-spin"
     />
   </span>
-</button>
-`;
-
-exports[`KuiButton Props type basic renders the basic class 1`] = `
-<button
-  class="kuiButton kuiButton--basic"
->
-  <span
-    class="kuiButton__inner"
-  />
-</button>
-`;
-
-exports[`KuiButton Props type danger renders the danger class 1`] = `
-<button
-  class="kuiButton kuiButton--danger"
->
-  <span
-    class="kuiButton__inner"
-  />
-</button>
-`;
-
-exports[`KuiButton Props type hollow renders the hollow class 1`] = `
-<button
-  class="kuiButton kuiButton--hollow"
->
-  <span
-    class="kuiButton__inner"
-  />
-</button>
-`;
-
-exports[`KuiButton Props type primary renders the primary class 1`] = `
-<button
-  class="kuiButton kuiButton--primary"
->
-  <span
-    class="kuiButton__inner"
-  />
 </button>
 `;

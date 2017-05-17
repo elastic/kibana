@@ -34,11 +34,11 @@ describe('KuiButton', () => {
   });
 
   describe('Props', () => {
-    describe('type', () => {
-      BUTTON_TYPES.forEach(type => {
-        describe(type, () => {
-          test(`renders the ${type} class`, () => {
-            const $button = render(<KuiButton type={type} />);
+    describe('buttonType', () => {
+      BUTTON_TYPES.forEach(buttonType => {
+        describe(buttonType, () => {
+          test(`renders the ${buttonType} class`, () => {
+            const $button = render(<KuiButton buttonType={buttonType} />);
             expect($button).toMatchSnapshot();
           });
         });
