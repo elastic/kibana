@@ -9,6 +9,7 @@ const BUTTON_TYPES = [
   'basic',
   'hollow',
   'danger',
+  'warning',
   'primary',
 ];
 
