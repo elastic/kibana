@@ -4,8 +4,8 @@ import React from 'react';
 
 export function KuiLocalTab({ className, children, isDisabled, isSelected, ...rest }) {
   const classes = classnames('kuiLocalTab', className, {
-    'kuiLocalTab--isDisabled': isDisabled,
-    'kuiLocalTab--isSelected': isSelected,
+    'kuiLocalTab-isDisabled': isDisabled,
+    'kuiLocalTab-isSelected': isSelected,
   });
   return (
     <a className={ classes } { ...rest }>

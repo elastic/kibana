@@ -3,7 +3,7 @@
 exports[`property isDisabled renders the isDisabled modifier 1`] = `
 <a
   aria-label="aria-label"
-  class="kuiLocalTab testClass1 testClass2 kuiLocalTab--isDisabled"
+  class="kuiLocalTab testClass1 testClass2 kuiLocalTab-isDisabled"
   data-test-subj="test subject string"
 >
   children
@@ -13,7 +13,7 @@ exports[`property isDisabled renders the isDisabled modifier 1`] = `
 exports[`property isSelected renders the isSelected modifier 1`] = `
 <a
   aria-label="aria-label"
-  class="kuiLocalTab testClass1 testClass2 kuiLocalTab--isSelected"
+  class="kuiLocalTab testClass1 testClass2 kuiLocalTab-isSelected"
   data-test-subj="test subject string"
 >
   children
