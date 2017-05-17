@@ -24,6 +24,7 @@ describe('KuiLinkButton', () => {
           className="testClass1 testClass2"
           data-test-subj="test subject string"
           disabled
+          type="submit"
           href="#"
           target="_blank"
         />

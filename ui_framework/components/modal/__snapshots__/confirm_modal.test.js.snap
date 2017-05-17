@@ -31,9 +31,8 @@ exports[`renders KuiConfirmModal 1`] = `
     class="kuiModalFooter"
   >
     <button
-      class="kuiButton"
+      class="kuiButton kuiButton--hollow"
       data-test-subj="confirmModalCancelButton"
-      type="hollow"
     >
       <span
         class="kuiButton__inner"
@@ -44,9 +43,8 @@ exports[`renders KuiConfirmModal 1`] = `
       </span>
     </button>
     <button
-      class="kuiButton"
+      class="kuiButton kuiButton--primary"
       data-test-subj="confirmModalConfirmButton"
-      type="primary"
     >
       <span
         class="kuiButton__inner"
