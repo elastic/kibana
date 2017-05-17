@@ -10,7 +10,7 @@ import {
   CREATE_INDEX_PATTERN_ROUTE
 } from './constants';
 
-export function handleExistingIndexPatternsScenario(indexPatterns, currentRoute, config) {
+function handleExistingIndexPatternsScenario(indexPatterns, currentRoute, config) {
   // If index patterns exist, we're not going to show the user the Getting Started page.
   // So we can show the chrome again at this point.
   uiChrome.setVisible(true);
@@ -38,7 +38,7 @@ export function handleExistingIndexPatternsScenario(indexPatterns, currentRoute,
   return;
 }
 
-export function handleGettingStartedOptedOutScenario(currentRoute, kbnUrl) {
+function handleGettingStartedOptedOutScenario(currentRoute, kbnUrl) {
   // If the user has opted out of the Getting Started page, we're not going to show them that page.
   // So we can show the chrome again at this point.
   uiChrome.setVisible(true);
@@ -60,7 +60,7 @@ export function handleGettingStartedOptedOutScenario(currentRoute, kbnUrl) {
   throw WAIT_FOR_URL_CHANGE_TOKEN;
 }
 
-export function showGettingStartedPage(kbnUrl, isOnGettingStartedPage) {
+function showGettingStartedPage(kbnUrl, isOnGettingStartedPage) {
   // Redirect the user to the Getting Started page (unless they are on it already)
   if (!isOnGettingStartedPage) {
     kbnUrl.change(GETTING_STARTED_ROUTE);
@@ -68,12 +68,10 @@ export function showGettingStartedPage(kbnUrl, isOnGettingStartedPage) {
   }
 }
 
-export function gettingStartedGateCheck(Private, $injector) {
-  const getIds = Private(IndexPatternsGetIdsProvider);
-  const kbnUrl = Private(KbnUrlProvider);
-  const config = $injector.get('config');
-  const $route = $injector.get('$route');
-
+/*
+ * This function is exported for unit testing
+ */
+export function gettingStartedGateCheck(getIds, kbnUrl, config, $route) {
   const currentRoute = get($route, 'current.$$route');
   const isOnGettingStartedPage = get(currentRoute, 'originalPath') === GETTING_STARTED_ROUTE;
 
@@ -93,7 +91,19 @@ export function gettingStartedGateCheck(Private, $injector) {
   });
 }
 
+/**
+ * This function sets up Angular-injected dependencies and immediately calls
+ * gettingStartedGateCheck, which does the actual work.
+ */
+function _gettingStartedGateCheck(Private, $injector) {
+  const getIds = Private(IndexPatternsGetIdsProvider);
+  const kbnUrl = Private(KbnUrlProvider);
+  const config = $injector.get('config');
+  const $route = $injector.get('$route');
+  return gettingStartedGateCheck(getIds, kbnUrl, config, $route);
+}
+
 // Start out with the chrome not being shown to prevent a flicker by
 // hiding it later
 uiChrome.setVisible(false);
-uiRoutes.addSetupWork(gettingStartedGateCheck);
+uiRoutes.addSetupWork(_gettingStartedGateCheck);
