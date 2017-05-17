@@ -1,9 +1,9 @@
 import { uiModules } from 'ui/modules';
-import template from './loading_results.html';
+import template from './table_info.html';
 
 const app = uiModules.get('kibana');
 
-app.directive('loadingResults', function () {
+app.directive('tableInfo', function () {
   return {
     restrict: 'E',
     replace: true,
@@ -11,9 +11,9 @@ app.directive('loadingResults', function () {
     scope: {
       resultsName: '@',
     },
-    controllerAs: 'loadingResults',
+    controllerAs: 'tableInfo',
     bindToController: true,
-    controller: class LoadingResultsController {
+    controller: class TableInfoController {
       constructor() {
         this.resultsName = this.resultsName || 'items';
       }

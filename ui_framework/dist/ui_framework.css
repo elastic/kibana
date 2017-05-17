@@ -1317,7 +1317,7 @@ body {
     .theme-dark .kuiLink:hover {
       color: #b7e2ea; }
 
-.kuiLoadingItems {
+.kuiTableInfo {
   padding: 30px;
   font-size: 18px;
   color: #9fa3a7;
@@ -2249,7 +2249,7 @@ body {
   .kuiModalFooter > * + * {
     margin-left: 5px; }
 
-.kuiNoItems {
+.kuiTableInfo {
   padding: 30px;
   font-size: 18px;
   color: #9fa3a7;
