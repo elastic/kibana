@@ -455,5 +455,28 @@ describe('timepicker directive', function () {
 
       done();
     });
+
+    describe('datepicker timezone issue', function () {
+      it('should ignore the timezone from the datepicker because it does not respect dateFormat:tz advanced setting', function (done) {
+        moment.tz.setDefault('UTC');
+
+        $scope.pickFromDate(new Date('2012-02-01 12:00-05:00'));
+        $scope.pickToDate(new Date('2012-02-11 12:00-05:00'));
+        $scope.$digest();
+
+        const formattedFrom = inputs.fromInput.val();
+        const formattedTo = inputs.toInput.val();
+
+        expect(formattedFrom).to.be('2012-02-01 00:00:00.000');
+        expect(formattedTo).to.be('2012-02-11 23:59:59.999');
+
+        done();
+      });
+
+      after(function () {
+        moment.tz.setDefault('Browser');
+      });
+    });
+
   });
 });
