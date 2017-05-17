@@ -1,4 +1,4 @@
-import deepCloneWithBuffers from '../deep_clone_with_buffers';
+import { deepCloneWithBuffers } from '../deep_clone_with_buffers';
 import expect from 'expect.js';
 
 describe('deepCloneWithBuffers()', function () {

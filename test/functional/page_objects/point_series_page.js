@@ -1,6 +1,7 @@
-export function PointSeriesVisProvider({ getService }) {
+export function PointSeriesPageProvider({ getService }) {
   const remote = getService('remote');
   const config = getService('config');
+  const testSubjects = getService('testSubjects');
   const log = getService('log');
 
   const defaultFindTimeout = config.get('timeouts.find');
@@ -21,9 +22,7 @@ export function PointSeriesVisProvider({ getService }) {
     }
 
     clickAddAxis() {
-      return remote
-        .setFindTimeout(defaultFindTimeout)
-        .findByCssSelector('button[aria-label="Add value axis"]')
+      return testSubjects.find('visualizeAddYAxisButton')
         .click();
     }
 

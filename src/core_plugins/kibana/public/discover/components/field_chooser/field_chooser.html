@@ -45,10 +45,11 @@
       ></span>
 
       <button
+        type="button"
         ng-class="{ 'kuiButton--basic': !filter.active, 'kuiButton--primary': filter.active, 'hidden-xs': !showFields, 'hidden-sm': !showFields }"
         class="kuiButton kuiButton--small pull-right discover-field-filter-toggle"
         ng-click="showFilter = !showFilter"
-        aria-label="Field Settings"
+        aria-label="Show field settings"
         aria-haspopup="true"
         aria-expanded="{{showFilter}}"
       >

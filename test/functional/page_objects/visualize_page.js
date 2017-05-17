@@ -64,6 +64,36 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
       .click();
     }
 
+    clickTagCloud() {
+      return remote
+      .setFindTimeout(defaultFindTimeout)
+      .findByPartialLinkText('Tag Cloud')
+      .click();
+    }
+
+    getTextTag() {
+      return remote
+      .setFindTimeout(defaultFindTimeout)
+      .findAllByCssSelector('text').getVisibleText();
+    }
+
+
+    getTextSizes() {
+      return remote
+      .setFindTimeout(defaultFindTimeout)
+      .findAllByCssSelector('text')
+      .then(function (tags) {
+        function returnTagSize(tag) {
+          return tag.getAttribute('style')
+          .then(function (style) {
+            return style.match(/font-size: ([^;]*);/)[1];
+          });
+        }
+        return Promise.all(tags.map(returnTagSize));
+      });
+    }
+
+
     clickVerticalBarChart() {
       return remote
       .setFindTimeout(defaultFindTimeout)
@@ -293,6 +323,27 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
       .then(function () {
         return PageObjects.header.waitUntilLoadingHasFinished();
       });
+    }
+
+    clickOptions() {
+      return remote
+        .setFindTimeout(defaultFindTimeout)
+        .findByPartialLinkText('Options')
+        .click();
+    }
+
+    selectWMS() {
+      return remote
+        .setFindTimeout(defaultFindTimeout)
+        .findByCssSelector('input[name="wms.enabled"]')
+        .click();
+    }
+
+
+    async isSaveButtonEnabled() {
+      const saveButton = await testSubjects.find('visualizeSaveButton');
+      const clazz = await saveButton.getProperty('className');
+      return clazz.indexOf('kuiLocalMenuItem-isDisabled') === -1;
     }
 
     saveVisualization(vizName) {

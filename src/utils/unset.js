@@ -1,7 +1,7 @@
 import _ from 'lodash';
 import toPath from 'lodash/internal/toPath';
 
-module.exports = function unset(object, rawPath) {
+export function unset(object, rawPath) {
   if (!object) return;
   const path = toPath(rawPath);
 
@@ -23,4 +23,4 @@ module.exports = function unset(object, rawPath) {
       }
       break;
   }
-};
+}

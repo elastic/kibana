@@ -22,6 +22,14 @@ export function FindProvider({ getService }) {
       log.debug(`Found ${elements.length} for selector ${selector}`);
       return elements;
     }
+
+    async displayedByCssSelector(selector, timeout = defaultFindTimeout) {
+      log.debug('in displayedByCssSelector: ' + selector);
+      const remoteWithTimeout = remote.setFindTimeout(timeout);
+      const element = await remoteWithTimeout.findDisplayedByCssSelector(selector);
+      remoteWithTimeout.setFindTimeout(defaultFindTimeout);
+      return element;
+    }
   }
 
   return new Find();

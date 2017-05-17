@@ -1,12 +1,6 @@
-import { delay, promisify } from 'bluebird';
-import fs from 'fs';
-import mkdirp from 'mkdirp';
-import { resolve } from 'path';
+import { delay } from 'bluebird';
 
 import getUrl from '../../utils/get_url';
-
-const mkdirpAsync = promisify(mkdirp);
-const writeFileAsync = promisify(fs.writeFile);
 
 export function CommonPageProvider({ getService, getPageObjects }) {
   const log = getService('log');
@@ -17,7 +11,6 @@ export function CommonPageProvider({ getService, getPageObjects }) {
   const kibanaServer = getService('kibanaServer');
   const PageObjects = getPageObjects(['shield']);
 
-  const screenshotDirectory = config.get('screenshots.directory');
   const defaultTryTimeout = config.get('timeouts.try');
   const defaultFindTimeout = config.get('timeouts.find');
 
@@ -30,6 +23,10 @@ export function CommonPageProvider({ getService, getPageObjects }) {
       return getUrl.baseUrl(config.get('servers.elasticsearch'));
     }
 
+    /**
+     * @param {string} appName As defined in the apps objects in test/server_config.js
+     * @param {string} subUrl The route after the hash (#)
+     */
     navigateToUrl(appName, subUrl) {
       const appConfig = Object.assign({}, config.get(['apps', appName]), {
         // Overwrite the default hash with the URL we really want.
@@ -192,21 +189,6 @@ export function CommonPageProvider({ getService, getPageObjects }) {
           throw error;
         });
       };
-    }
-
-    async saveScreenshot(fileName, isFailure = false) {
-      try {
-        const type = isFailure ? 'failure' : 'session';
-        const directory = resolve(screenshotDirectory, type);
-        const path = resolve(directory, `${fileName}.png`);
-        log.debug(`Taking screenshot "${path}"`);
-
-        const screenshot = await remote.takeScreenshot();
-        await mkdirpAsync(directory);
-        await writeFileAsync(path, screenshot);
-      } catch (err) {
-        log.warning(`SCREENSHOT FAILED: ${err}`);
-      }
     }
 
     async waitUntilUrlIncludes(path) {

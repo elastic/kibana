@@ -1,11 +1,12 @@
 export { BinderBase } from './binder';
-export BinderFor from './binder_for';
-export deepCloneWithBuffers from './deep_clone_with_buffers';
-export fromRoot from './from_root';
-export pkg from './package_json';
-export unset from './unset';
-
+export { BinderFor } from './binder_for';
+export { deepCloneWithBuffers } from './deep_clone_with_buffers';
+export { fromRoot } from './from_root';
+export { pkg } from './package_json';
+export { unset } from './unset';
 export { encodeQueryComponent } from './encode_query_component';
+export { modifyUrl } from './modify_url';
+export { createToolingLog } from './tooling_log';
 
 export {
   createConcatStream,
@@ -16,7 +17,5 @@ export {
   createPromiseFromStreams,
   createReduceStream,
   createSplitStream,
+  createMapStream,
 } from './streams';
-
-export { modifyUrl } from './modify_url';
-export { createToolingLog } from './tooling_log';
