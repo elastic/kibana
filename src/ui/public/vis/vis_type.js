@@ -15,7 +15,6 @@ export function VisTypeFactoryProvider(Private) {
         visController: null,       // must be a function (or object with render/resize/update?)
         visConfig: {
           defaults: {},            // default configuration
-          template: '',           // angular vis type requires template html
         },
         requestHandler: 'courier',    // select one from registry or pass a function
         responseHandler: 'none',      // ...
@@ -51,12 +50,14 @@ export function VisTypeFactoryProvider(Private) {
       this.requiresSearch = !(this.requestHandler === 'none');
     }
 
-    render() {
-      throw new Error('vis_type render function not implemented');
+    render(vis, $el, uiState, esResponse) {
+      if (!this.visController) {
+        throw new Error('vis_type render function not implemented');
+      }
+      this.visController(vis, $el, uiState, esResponse);
     }
 
     destroy() {
-
     }
   }
 
