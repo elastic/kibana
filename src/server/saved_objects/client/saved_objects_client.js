@@ -3,7 +3,6 @@ import { get, omit } from 'lodash';
 
 import {
   createFindQuery,
-  createFilterPath,
   handleEsError,
 } from './lib';
 
@@ -54,7 +53,7 @@ export class SavedObjectsClient {
 
     const esOptions = {
       type,
-      filterPath: fields ? createFilterPath(fields) : undefined,
+      _source: fields,
       size: perPage,
       from: perPage * (page - 1),
       body: createFindQuery({ search, searchFields, type })

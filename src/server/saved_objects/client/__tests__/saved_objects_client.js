@@ -144,7 +144,7 @@ describe('SavedObjectsClient', () => {
       expect(options).to.eql({
         index: '.kibana-test',
         body: { query: { match_all: {} }, version: true },
-        filterPath: undefined,
+        _source: undefined,
         from: 50,
         size: 10,
         type: undefined
@@ -165,7 +165,7 @@ describe('SavedObjectsClient', () => {
       };
 
       expect(options).to.eql({
-        filterPath: undefined,
+        _source: undefined,
         from: 0,
         index: '.kibana-test',
         size: 20,
@@ -174,35 +174,13 @@ describe('SavedObjectsClient', () => {
       });
     });
 
-    it('accepts fields as a string', async () => {
+    it('can filter by fields', async () => {
       await savedObjectsClient.find({ fields: 'title' });
 
       expect(callAdminCluster.calledOnce).to.be(true);
 
       const options = callAdminCluster.getCall(0).args[1];
-      expect(options.filterPath).to.eql([
-        'hits.total',
-        'hits.hits._id',
-        'hits.hits._type',
-        'hits.hits._version',
-        'hits.hits._source.title'
-      ]);
-    });
-
-    it('accepts fields as an array', async () => {
-      await savedObjectsClient.find({ fields: ['title', 'description'] });
-
-      expect(callAdminCluster.calledOnce).to.be(true);
-
-      const options = callAdminCluster.getCall(0).args[1];
-      expect(options.filterPath).to.eql([
-        'hits.hits._source.title',
-        'hits.hits._source.description',
-        'hits.total',
-        'hits.hits._id',
-        'hits.hits._type',
-        'hits.hits._version'
-      ]);
+      expect(options._source).to.eql('title');
     });
   });
 
