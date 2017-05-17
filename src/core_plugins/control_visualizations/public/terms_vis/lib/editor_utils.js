@@ -14,6 +14,8 @@ export const removeField = (fields, fieldIndex) => [
 export const newField = () => ({
   indexPattern: '',
   fieldName: '',
-  label: ''
+  label: '',
+  size: 5,
+  order: 'desc'
 });
 

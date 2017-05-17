@@ -16,7 +16,7 @@ export class FieldSelect extends Component {
 
     this.props.getIndexPattern(this.props.indexPatternId).then(index => {
       const fields = index.fields.filter(function (field) {
-        return field.aggregatable && field.type === 'string';
+        return field.aggregatable && ['number', 'boolean', 'date', 'ip',  'string'].includes(field.type);
       }).sort((a, b) => {
         if (a.name < b.name) return -1;
         if (a.name > b.name) return 1;

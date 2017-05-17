@@ -12,21 +12,39 @@ module.controller('KbnTermsController', function ($scope, indexPatterns, Private
   const queryFilter = Private(FilterBarQueryFilterProvider);
   const SearchSource = Private(SearchSourceProvider);
 
-  const termsAgg = (fieldName, size, direction) => ({
-    'termsAgg': {
-      'terms': {
-        'field': fieldName,
-        'size': size,
-        'order': {
-          '_count': direction
-        }
+  const termsAgg = (field, size, direction) => {
+    const terms = {
+      'size': size,
+      'order': {
+        '_count': direction
       }
+    };
+    if (field.scripted) {
+      terms.script = {
+        inline: field.script,
+        lang: field.lang
+      };
+      terms.valueType = field.type === 'number' ? 'float' : field.type;
+    } else {
+      terms.field = field.name;
     }
-  });
+    return {
+      'termsAgg': {
+        'terms': terms
+      }
+    };
+  };
 
   const findFilter = (indexPatternId, fieldName) => {
     return _.flatten([queryFilter.getAppFilters(), queryFilter.getGlobalFilters()]).filter(function (filter) {
-      return filter.meta && filter.meta.index === indexPatternId && filter.meta.key === fieldName;
+      if (_.has(filter, 'script') && _.get(filter, 'meta.index') === indexPatternId && _.get(filter, 'meta.field') === fieldName) {
+        //filter is a scripted filter for this index/field
+        return true;
+      } else if (_.has(filter, ['query', 'match', fieldName]) && _.get(filter, 'meta.index') === indexPatternId) {
+        //filter is a match filter for this index/field
+        return true;
+      }
+      return false;
     });
   };
 
@@ -35,7 +53,10 @@ module.controller('KbnTermsController', function ($scope, indexPatterns, Private
     if (filters.length === 0) {
       return '';
     } else {
-      return filters[0].meta.value;
+      if (_.has(filters[0], 'script')) {
+        return _.get(filters[0], 'script.script.params.value');
+      }
+      return _.get(filters[0], ['query', 'match', fieldName, 'query']);
     }
   };
 
@@ -76,7 +97,7 @@ module.controller('KbnTermsController', function ($scope, indexPatterns, Private
       searchSource.inherits(false); //Do not filter by time so can not inherit from rootSearchSource
       searchSource.size(0);
       searchSource.index(indexPattern);
-      searchSource.aggs(termsAgg(field.fieldName, 5, 'desc'));
+      searchSource.aggs(termsAgg(indexPattern.fields.byName[field.fieldName], 5, 'desc'));
 
       const defer = Promise.defer();
       defer.promise.then(function (resp) {
