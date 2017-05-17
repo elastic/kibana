@@ -7,3 +7,10 @@ export function hasOptedOutOfGettingStarted() {
 export function optOutOfGettingStarted() {
   window.localStorage.setItem(GETTING_STARTED_OPT_OUT_FLAG, true);
 }
+
+/**
+ * This function is intended for unit testing
+ */
+export function undoOptOutOfGettingStarted() {
+  window.localStorage.removeItem(GETTING_STARTED_OPT_OUT_FLAG);
+}
