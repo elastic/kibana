@@ -229,6 +229,10 @@ export function CommonPageProvider({ getService, getPageObjects }) {
       await this.ensureModalOverlayHidden();
     }
 
+    async pressEnterKey() {
+      await remote.pressKeys('\uE007');
+    }
+
     async clickCancelOnModal() {
       log.debug('Clicking modal cancel');
       await testSubjects.click('confirmModalCancelButton');
