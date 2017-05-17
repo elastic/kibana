@@ -8,15 +8,10 @@ app.directive('tableInfo', function () {
     restrict: 'E',
     replace: true,
     template: template,
-    scope: {
-      resultsName: '@',
-    },
+    transclude: true,
     controllerAs: 'tableInfo',
     bindToController: true,
     controller: class TableInfoController {
-      constructor() {
-        this.resultsName = this.resultsName || 'items';
-      }
     }
   };
 });
