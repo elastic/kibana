@@ -20,7 +20,6 @@ export default function MetricVisType(Private) {
       defaults: {
         addTooltip: true,
         addLegend: false,
-        fontSize: 60,
         type: 'gauge',
         gauge: {
           verticalSplit: false,
@@ -50,11 +49,7 @@ export default function MetricVisType(Private) {
           },
           type: 'simple',
           style: {
-            bgWidth: 0.9,
-            width: 0.9,
-            mask: false,
-            bgMask: false,
-            maskBars: 50,
+            fontSize: 60,
             bgFill: '#000',
             bgColor: false,
             labelColor: false,
