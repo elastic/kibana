@@ -1,3 +1,4 @@
+import _ from 'lodash';
 import 'ui/visualize/spy';
 import 'ui/visualize/visualize.less';
 import 'ui/visualize/visualize_legend';
@@ -24,8 +25,17 @@ uiModules
       const editor = typeof vis.type.editorController === 'function' ? vis.type.editorController :
         editorTypes.find(editor => editor.name === vis.type.editorController).render;
 
-      editor(vis, element, $scope.visState, $scope.visData, $scope);
+      const renderFunction = _.debounce(() => {
+        editor(vis, element, $scope.visState, $scope.visData, $scope);
+        $scope.$apply();
+      }, 200);
 
+      $scope.$on('render', () => {
+        if (!$scope.vis) {
+          return;
+        }
+        renderFunction();
+      });
 
     }
   };
