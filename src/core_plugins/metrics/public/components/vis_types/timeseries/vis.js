@@ -4,6 +4,7 @@ import _ from 'lodash';
 import { Timeseries } from 'plugins/metrics/visualizations';
 import color from 'color';
 import replaceVars from '../../lib/replace_vars';
+import { getAxisLabelString } from '../../lib/get_axis_label_string';
 
 function hasSeperateAxis(row) {
   return row.seperate_axis;
@@ -76,6 +77,10 @@ function TimeseriesVisualization(props) {
     }
   });
 
+  const interval = series.reduce((currentInterval, item) => {
+    const seriesInterval = item.data[1][0] - item.data[0][0];
+    if (!currentInterval || seriesInterval < currentInterval) return seriesInterval;
+  }, 0);
 
   let axisCount = 1;
   if (seriesModel.some(hasSeperateAxis)) {
@@ -120,6 +125,9 @@ function TimeseriesVisualization(props) {
       if (props.onBrush) props.onBrush(ranges);
     }
   };
+  if (interval) {
+    params.xaxisLabel = getAxisLabelString(interval);
+  }
   const style = { };
   const panelBackgroundColor = model.background_color || backgroundColor;
   if (panelBackgroundColor) {
