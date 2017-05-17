@@ -47,8 +47,8 @@ The Kibana directory must be named `kibana`, and your plugin directory must be l
  - <<development-uiexports>>: What type of exports are available?
 
 [float]
-==== UI Framework
-If you're developing a plugin which has a user interface, take a look at our {eui-ref}[Elastic UI Framework].
+==== Elastic UI Framework
+If you're developing a plugin which has a user interface, take a look at our https://elastic.github.io/eui[Elastic UI Framework].
 It documents the CSS and React components we use to build Kibana's user interface.
 
 You're welcome to use these components, but be aware that we are rapidly evolving them and it's

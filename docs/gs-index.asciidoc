@@ -18,7 +18,6 @@ release-state can be: released | prerelease | unreleased
 :pull:           {repo}pull/
 :commit:         {repo}commit/
 :security:       https://www.elastic.co/community/security/
-:eui-ref:        https://elastic.github.io/eui
 
 include::introduction.asciidoc[]
 
