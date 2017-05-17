@@ -22,11 +22,26 @@ import Search from './local_nav_search';
 import searchSource from '!!raw!./local_nav_search';
 const searchHtml = renderToHtml(Search);
 
-const searchErrorHtml = require('./local_nav_search_error.html');
-const menuItemStatesHtml = require('./local_nav_menu_item_states.html');
-const dropdownHtml = require('./local_nav_dropdown.html');
-const dropdownPanelsHtml = require('./local_nav_dropdown_panels.html');
-const tabsHtml = require('./local_nav_tabs.html');
+import SearchError from './local_nav_search_error';
+import searchErrorSource from '!!raw!./local_nav_search_error';
+const searchErrorHtml = renderToHtml(SearchError);
+
+import MenuItemStates from './local_nav_menu_item_states';
+import menuItemStatesSource from '!!raw!./local_nav_menu_item_states';
+const menuItemStatesHtml = renderToHtml(MenuItemStates);
+
+import Dropdown from './local_nav_dropdown';
+import dropdownSource from '!!raw!./local_nav_dropdown';
+const dropdownHtml = renderToHtml(Dropdown);
+
+import DropdownPanels from './local_nav_dropdown_panels';
+import dropdownPanelsSource from '!!raw!./local_nav_dropdown_panels';
+const dropdownPanelsHtml = renderToHtml(DropdownPanels);
+
+import Tabs from './local_nav_tabs';
+import tabsSource from '!!raw!./local_nav_tabs';
+const tabsHtml = renderToHtml(Tabs);
+
 const datePickerHtml = require('./local_nav_date_picker.html');
 
 export default props => (
@@ -111,27 +126,38 @@ export default props => (
 
     <GuideSection
       title="Invalid Search"
-      source={[{
-        type: GuideSectionTypes.HTML,
-        code: searchErrorHtml,
-      }]}
+      source={[
+        {
+          type: GuideSectionTypes.JS,
+          code: searchErrorSource,
+        },
+        {
+          type: GuideSectionTypes.HTML,
+          code: searchErrorHtml,
+        },
+      ]}
     >
-      <GuideDemo
-        html={searchErrorHtml}
-      />
+      <GuideDemo>
+        <SearchError />
+      </GuideDemo>
 
-      <GuideDemo
-        html={searchErrorHtml}
-        isDarkTheme={true}
-      />
+      <GuideDemo isDarkTheme={true}>
+        <SearchError />
+      </GuideDemo>
     </GuideSection>
 
     <GuideSection
       title="Selected and disabled Menu Item states"
-      source={[{
-        type: GuideSectionTypes.HTML,
-        code: menuItemStatesHtml,
-      }]}
+      source={[
+        {
+          type: GuideSectionTypes.JS,
+          code: menuItemStatesSource,
+        },
+        {
+          type: GuideSectionTypes.HTML,
+          code: menuItemStatesHtml,
+        },
+      ]}
     >
       <GuideText>
         When the user selects a Menu Item, additional content can be displayed inside of a Dropdown.
@@ -141,77 +167,91 @@ export default props => (
         Menu Items can also be disabled, in which case they become non-interactive.
       </GuideText>
 
-      <GuideDemo
-        html={menuItemStatesHtml}
-      />
+      <GuideDemo>
+        <MenuItemStates />
+      </GuideDemo>
 
-      <GuideDemo
-        html={menuItemStatesHtml}
-        isDarkTheme={true}
-      />
+      <GuideDemo isDarkTheme={true}>
+        <MenuItemStates />
+      </GuideDemo>
     </GuideSection>
 
     <GuideSection
       title="Dropdown"
-      source={[{
-        type: GuideSectionTypes.HTML,
-        code: dropdownHtml,
-      }]}
+      source={[
+        {
+          type: GuideSectionTypes.JS,
+          code: dropdownSource,
+        },
+        {
+          type: GuideSectionTypes.HTML,
+          code: dropdownHtml,
+        },
+      ]}
     >
       <GuideText>
         Selecting a Menu Item will commonly result in an open Dropdown.
       </GuideText>
 
-      <GuideDemo
-        html={dropdownHtml}
-      />
+      <GuideDemo>
+        <Dropdown />
+      </GuideDemo>
 
-      <GuideDemo
-        html={dropdownHtml}
-        isDarkTheme={true}
-      />
+      <GuideDemo isDarkTheme={true}>
+        <Dropdown />
+      </GuideDemo>
     </GuideSection>
 
     <GuideSection
       title="Dropdown panels"
-      source={[{
-        type: GuideSectionTypes.HTML,
-        code: dropdownPanelsHtml,
-      }]}
+      source={[
+        {
+          type: GuideSectionTypes.JS,
+          code: dropdownPanelsSource,
+        },
+        {
+          type: GuideSectionTypes.HTML,
+          code: dropdownPanelsHtml,
+        },
+      ]}
     >
       <GuideText>
         You can split the Dropdown into side-by-side Panels.
       </GuideText>
 
-      <GuideDemo
-        html={dropdownPanelsHtml}
-      />
+      <GuideDemo>
+        <DropdownPanels />
+      </GuideDemo>
 
-      <GuideDemo
-        html={dropdownPanelsHtml}
-        isDarkTheme={true}
-      />
+      <GuideDemo isDarkTheme={true}>
+        <DropdownPanels />
+      </GuideDemo>
     </GuideSection>
 
     <GuideSection
       title="Tabs"
-      source={[{
-        type: GuideSectionTypes.HTML,
-        code: tabsHtml,
-      }]}
+      source={[
+        {
+          type: GuideSectionTypes.JS,
+          code: tabsSource,
+        },
+        {
+          type: GuideSectionTypes.HTML,
+          code: tabsHtml,
+        },
+      ]}
     >
       <GuideText>
         You can display Tabs for navigating local content.
       </GuideText>
 
-      <GuideDemo
-        html={tabsHtml}
-      />
+      <GuideDemo>
+        <Tabs />
+      </GuideDemo>
 
-      <GuideDemo
-        html={tabsHtml}
-        isDarkTheme={true}
-      />
+      <GuideDemo isDarkTheme={true}>
+        <Tabs />
+      </GuideDemo>
     </GuideSection>
 
     <GuideSection
