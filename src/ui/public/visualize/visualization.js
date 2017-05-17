@@ -120,11 +120,6 @@ uiModules
         renderFunction();
       });
 
-      $scope.$watch('visData', (newVal) => {
-        if (!newVal) return;
-        renderFunction();
-      });
-
       $scope.$on('$destroy', () => {
         $scope.vis.type.destroy();
       });

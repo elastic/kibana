@@ -60,6 +60,7 @@ uiModules
           .then(resp => {
             $scope.visData = resp;
             $scope.$apply();
+            $scope.$broadcast('render');
             return resp;
           });
       };
