@@ -15,6 +15,7 @@ module.exports = function (grunt) {
       args: [
         '-p',
         '--config=ui_framework/doc_site/webpack.config.js',
+        '--devtool', // Prevent the source map from being generated
       ],
       opts: { stdio: 'inherit' }
     };
