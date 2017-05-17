@@ -9,7 +9,7 @@ export function CommonPageProvider({ getService, getPageObjects }) {
   const retry = getService('retry');
   const testSubjects = getService('testSubjects');
   const kibanaServer = getService('kibanaServer');
-  const PageObjects = getPageObjects(['shield']);
+  const PageObjects = getPageObjects(['shield', 'gettingStarted']);
 
   const defaultTryTimeout = config.get('timeouts.try');
   const defaultFindTimeout = config.get('timeouts.find');
@@ -78,17 +78,27 @@ export function CommonPageProvider({ getService, getPageObjects }) {
           .then(function (currentUrl) {
             const loginPage = currentUrl.includes('/login');
             const wantedLoginPage = appUrl.includes('/login') || appUrl.includes('/logout');
+
             if (loginPage && !wantedLoginPage) {
-              log.debug('Found loginPage username = '
-                + config.get('servers.kibana.username'));
-              return PageObjects.shield.login(config.get('servers.kibana.username'),
-                config.get('servers.kibana.password'))
+              log.debug(`Found loginPage username = ${config.get('servers.kibana.username')}`);
+              return PageObjects.shield.login(
+                config.get('servers.kibana.username'),
+                config.get('servers.kibana.password')
+              )
               .then(function () {
                 return remote.getCurrentUrl();
               });
             } else {
               return currentUrl;
             }
+          })
+          .then(async function (currentUrl) {
+            if (await PageObjects.gettingStarted.doesContainerExist()) {
+              await PageObjects.gettingStarted.optOut();
+              throw new Error('Retrying after receiving Getting Started page');
+            }
+
+            return currentUrl;
           })
           .then(function (currentUrl) {
             currentUrl = currentUrl.replace(/\/\/\w+:\w+@/, '//');
