@@ -19,6 +19,8 @@ export default function ({ getService, getPageObjects }) {
 
   describe('console app', function describeIndexTests() {
     before(async function () {
+      await PageObjects.gettingStarted.optOut();
+
       log.debug('navigateTo console');
       await PageObjects.common.navigateToApp('console');
     });
