@@ -10,7 +10,7 @@ import {
   CREATE_INDEX_PATTERN_ROUTE
 } from './constants';
 
-function handleExistingIndexPatternsScenario(indexPatterns, currentRoute, config) {
+export function handleExistingIndexPatternsScenario(indexPatterns, currentRoute, config) {
   // If index patterns exist, we're not going to show the user the Getting Started page.
   // So we can show the chrome again at this point.
   uiChrome.setVisible(true);
@@ -38,7 +38,7 @@ function handleExistingIndexPatternsScenario(indexPatterns, currentRoute, config
   return;
 }
 
-function handleGettingStartedOptedOutScenario(currentRoute, kbnUrl) {
+export function handleGettingStartedOptedOutScenario(currentRoute, kbnUrl) {
   // If the user has opted out of the Getting Started page, we're not going to show them that page.
   // So we can show the chrome again at this point.
   uiChrome.setVisible(true);
@@ -60,7 +60,7 @@ function handleGettingStartedOptedOutScenario(currentRoute, kbnUrl) {
   throw WAIT_FOR_URL_CHANGE_TOKEN;
 }
 
-function showGettingStartedPage(kbnUrl, isOnGettingStartedPage) {
+export function showGettingStartedPage(kbnUrl, isOnGettingStartedPage) {
   // Redirect the user to the Getting Started page (unless they are on it already)
   if (!isOnGettingStartedPage) {
     kbnUrl.change(GETTING_STARTED_ROUTE);
@@ -68,32 +68,32 @@ function showGettingStartedPage(kbnUrl, isOnGettingStartedPage) {
   }
 }
 
+export function gettingStartedGateCheck(Private, $injector) {
+  const getIds = Private(IndexPatternsGetIdsProvider);
+  const kbnUrl = Private(KbnUrlProvider);
+  const config = $injector.get('config');
+  const $route = $injector.get('$route');
+
+  const currentRoute = get($route, 'current.$$route');
+  const isOnGettingStartedPage = get(currentRoute, 'originalPath') === GETTING_STARTED_ROUTE;
+
+  return getIds()
+  .then(indexPatterns => {
+    const indexPatternsExist = Array.isArray(indexPatterns) && indexPatterns.length > 0;
+
+    if (indexPatternsExist) {
+      return handleExistingIndexPatternsScenario(indexPatterns, currentRoute, config);
+    }
+
+    if (hasOptedOutOfGettingStarted()) {
+      return handleGettingStartedOptedOutScenario(currentRoute, kbnUrl);
+    }
+
+    return showGettingStartedPage(kbnUrl, isOnGettingStartedPage);
+  });
+}
+
 // Start out with the chrome not being shown to prevent a flicker by
 // hiding it later
 uiChrome.setVisible(false);
-
-uiRoutes
-  .addSetupWork(function gettingStartedGateCheck(Private, $injector) {
-    const getIds = Private(IndexPatternsGetIdsProvider);
-    const config = $injector.get('config');
-    const kbnUrl = $injector.get('kbnUrl');
-    const $route = $injector.get('$route');
-
-    const currentRoute = get($route, 'current.$$route');
-    const isOnGettingStartedPage = get(currentRoute, 'originalPath') === GETTING_STARTED_ROUTE;
-
-    return getIds()
-    .then(indexPatterns => {
-      const indexPatternsExist = Array.isArray(indexPatterns) && indexPatterns.length > 0;
-
-      if (indexPatternsExist) {
-        return handleExistingIndexPatternsScenario(indexPatterns, currentRoute, config);
-      }
-
-      if (hasOptedOutOfGettingStarted()) {
-        return handleGettingStartedOptedOutScenario(currentRoute, kbnUrl);
-      }
-
-      return showGettingStartedPage(kbnUrl, isOnGettingStartedPage);
-    });
-  });
+uiRoutes.addSetupWork(gettingStartedGateCheck);
