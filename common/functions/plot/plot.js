@@ -62,7 +62,9 @@ module.exports = new Fn({
         },
         bars: {
           show: get(seriesStyle, 'bars') > 0,
-          lineWidth: get(seriesStyle, 'bars'),
+          barWidth: get(seriesStyle, 'bars'),
+          fill: 1,
+          align: 'center',
         },
         points: {
           // This is how we can vary shape and size of points
@@ -151,9 +153,11 @@ module.exports = new Fn({
           },
           xaxis: {
             ticks: context.columns.x.type === 'string' ? map(ticks.x.hash, (position, name) => [position, name]) : undefined,
+            mode: context.columns.x.type === 'date' ? 'time' : undefined,
           },
           yaxis: {
             ticks: context.columns.y.type === 'string' ? map(ticks.y.hash, (position, name) => [position, name]) : undefined,
+            mode: context.columns.y.type === 'date' ? 'time' : undefined,
           },
           series: Object.assign({
             lines: {
