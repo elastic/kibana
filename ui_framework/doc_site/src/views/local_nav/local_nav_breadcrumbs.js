@@ -6,32 +6,34 @@ import {
   KuiLocalNavRowSection,
 } from '../../../../components';
 
-export default () => (
-  <KuiLocalNav>
-    <KuiLocalNavRow>
-      <KuiLocalNavRowSection>
-        <div className="kuiLocalBreadcrumbs">
-          <div className="kuiLocalBreadcrumb">
-            <a className="kuiLocalBreadcrumb__link" href="#">
-              Discover
-            </a>
+export function LocalNavWithBreadcrumbs() {
+  return (
+    <KuiLocalNav>
+      <KuiLocalNavRow>
+        <KuiLocalNavRowSection>
+          <div className="kuiLocalBreadcrumbs">
+            <div className="kuiLocalBreadcrumb">
+              <a className="kuiLocalBreadcrumb__link" href="#">
+                Discover
+              </a>
+            </div>
+            <div className="kuiLocalBreadcrumb">
+              <span className="kuiLocalBreadcrumb__emphasis">0</span> hits
+            </div>
           </div>
-          <div className="kuiLocalBreadcrumb">
-            <span className="kuiLocalBreadcrumb__emphasis">0</span> hits
+        </KuiLocalNavRowSection>
+        <KuiLocalNavRowSection>
+          <div className="kuiLocalMenu">
+            <div className="kuiLocalMenuItem">New</div>
+            <div className="kuiLocalMenuItem">Save</div>
+            <div className="kuiLocalMenuItem">Open</div>
+            <button className="kuiLocalMenuItem">
+              <div className="kuiLocalMenuItem__icon kuiIcon fa-clock-o"></div>
+              Last 5 minutes
+            </button>
           </div>
-        </div>
-      </KuiLocalNavRowSection>
-      <KuiLocalNavRowSection>
-        <div className="kuiLocalMenu">
-          <div className="kuiLocalMenuItem">New</div>
-          <div className="kuiLocalMenuItem">Save</div>
-          <div className="kuiLocalMenuItem">Open</div>
-          <button className="kuiLocalMenuItem">
-            <div className="kuiLocalMenuItem__icon kuiIcon fa-clock-o"></div>
-            Last 5 minutes
-          </button>
-        </div>
-      </KuiLocalNavRowSection>
-    </KuiLocalNavRow>
-  </KuiLocalNav>
-);
+        </KuiLocalNavRowSection>
+      </KuiLocalNavRow>
+    </KuiLocalNav>
+  );
+}

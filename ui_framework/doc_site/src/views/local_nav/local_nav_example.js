@@ -10,37 +10,37 @@ import {
   GuideText,
 } from '../../components';
 
-import Simple from './local_nav_simple';
-import simpleSource from '!!raw!./local_nav_simple';
-const simpleHtml = renderToHtml(Simple);
+import { SimpleLocalNav } from './local_nav_simple';
+import simpleLocalNavSource from '!!raw!./local_nav_simple';
+const SimpleLocalNavHtml = renderToHtml(SimpleLocalNav);
 
-import Breadcrumbs from './local_nav_breadcrumbs';
-import breadcrumbsSource from '!!raw!./local_nav_breadcrumbs';
-const breadcrumbsHtml = renderToHtml(Breadcrumbs);
+import { LocalNavWithBreadcrumbs } from './local_nav_breadcrumbs';
+import localNavWithBreadcrumbsSource from '!!raw!./local_nav_breadcrumbs';
+const localNavWithBreadcrumbsHtml = renderToHtml(LocalNavWithBreadcrumbs);
 
-import Search from './local_nav_search';
-import searchSource from '!!raw!./local_nav_search';
-const searchHtml = renderToHtml(Search);
+import { LocalNavWithSearch } from './local_nav_search';
+import localNavWithSearchSource from '!!raw!./local_nav_search';
+const localNavWithSearchHtml = renderToHtml(LocalNavWithSearch);
 
-import SearchError from './local_nav_search_error';
-import searchErrorSource from '!!raw!./local_nav_search_error';
-const searchErrorHtml = renderToHtml(SearchError);
+import { LocalNavWithSearchError } from './local_nav_search_error';
+import localNavWithSearchErrorSource from '!!raw!./local_nav_search_error';
+const localNavWithSearchErrorHtml = renderToHtml(LocalNavWithSearchError);
 
-import MenuItemStates from './local_nav_menu_item_states';
-import menuItemStatesSource from '!!raw!./local_nav_menu_item_states';
-const menuItemStatesHtml = renderToHtml(MenuItemStates);
+import { LocalNavWithMenuItemStates } from './local_nav_menu_item_states';
+import localNavWithMenuItemStatesSource from '!!raw!./local_nav_menu_item_states';
+const localNavWithMenuItemStatesHtml = renderToHtml(LocalNavWithMenuItemStates);
 
-import Dropdown from './local_nav_dropdown';
-import dropdownSource from '!!raw!./local_nav_dropdown';
-const dropdownHtml = renderToHtml(Dropdown);
+import { LocalNavWithDropdown } from './local_nav_dropdown';
+import localNavWithDropdownSource from '!!raw!./local_nav_dropdown';
+const localNavWithDropdownHtml = renderToHtml(LocalNavWithDropdown);
 
-import DropdownPanels from './local_nav_dropdown_panels';
-import dropdownPanelsSource from '!!raw!./local_nav_dropdown_panels';
-const dropdownPanelsHtml = renderToHtml(DropdownPanels);
+import { LocalNavWithDropdownPanels } from './local_nav_dropdown_panels';
+import localNavWithDropdownPanelsSource from '!!raw!./local_nav_dropdown_panels';
+const localNavWithDropdownPanelsHtml = renderToHtml(LocalNavWithDropdownPanels);
 
-import Tabs from './local_nav_tabs';
-import tabsSource from '!!raw!./local_nav_tabs';
-const tabsHtml = renderToHtml(Tabs);
+import { LocalNavWithTabs } from './local_nav_tabs';
+import localNavWithTabsSource from '!!raw!./local_nav_tabs';
+const localNavWithTabsHtml = renderToHtml(LocalNavWithTabs);
 
 const datePickerHtml = require('./local_nav_date_picker.html');
 
@@ -51,11 +51,11 @@ export default props => (
       source={[
         {
           type: GuideSectionTypes.JS,
-          code: simpleSource,
+          code: simpleLocalNavSource,
         },
         {
           type: GuideSectionTypes.HTML,
-          code: simpleHtml,
+          code: SimpleLocalNavHtml,
         },
       ]}
     >
@@ -64,11 +64,11 @@ export default props => (
       </GuideText>
 
       <GuideDemo>
-        <Simple />
+        <SimpleLocalNav />
       </GuideDemo>
 
       <GuideDemo isDarkTheme={true}>
-        <Simple />
+        <SimpleLocalNav />
       </GuideDemo>
     </GuideSection>
 
@@ -77,11 +77,11 @@ export default props => (
       source={[
         {
           type: GuideSectionTypes.JS,
-          code: breadcrumbsSource,
+          code: localNavWithBreadcrumbsSource,
         },
         {
           type: GuideSectionTypes.HTML,
-          code: breadcrumbsHtml,
+          code: localNavWithBreadcrumbsHtml,
         },
       ]}
     >
@@ -90,11 +90,11 @@ export default props => (
       </GuideText>
 
       <GuideDemo>
-        <Breadcrumbs />
+        <LocalNavWithBreadcrumbs />
       </GuideDemo>
 
       <GuideDemo isDarkTheme={true}>
-        <Breadcrumbs />
+        <LocalNavWithBreadcrumbs />
       </GuideDemo>
     </GuideSection>
 
@@ -103,11 +103,11 @@ export default props => (
       source={[
         {
           type: GuideSectionTypes.JS,
-          code: searchSource,
+          code: localNavWithSearchSource,
         },
         {
           type: GuideSectionTypes.HTML,
-          code: searchHtml,
+          code: localNavWithSearchHtml,
         },
       ]}
     >
@@ -116,11 +116,11 @@ export default props => (
       </GuideText>
 
       <GuideDemo>
-        <Search />
+        <LocalNavWithSearch />
       </GuideDemo>
 
       <GuideDemo isDarkTheme={true}>
-        <Search />
+        <LocalNavWithSearch />
       </GuideDemo>
     </GuideSection>
 
@@ -129,20 +129,20 @@ export default props => (
       source={[
         {
           type: GuideSectionTypes.JS,
-          code: searchErrorSource,
+          code: localNavWithSearchErrorSource,
         },
         {
           type: GuideSectionTypes.HTML,
-          code: searchErrorHtml,
+          code: localNavWithSearchErrorHtml,
         },
       ]}
     >
       <GuideDemo>
-        <SearchError />
+        <LocalNavWithSearchError />
       </GuideDemo>
 
       <GuideDemo isDarkTheme={true}>
-        <SearchError />
+        <LocalNavWithSearchError />
       </GuideDemo>
     </GuideSection>
 
@@ -151,11 +151,11 @@ export default props => (
       source={[
         {
           type: GuideSectionTypes.JS,
-          code: menuItemStatesSource,
+          code: localNavWithMenuItemStatesSource,
         },
         {
           type: GuideSectionTypes.HTML,
-          code: menuItemStatesHtml,
+          code: localNavWithMenuItemStatesHtml,
         },
       ]}
     >
@@ -168,11 +168,11 @@ export default props => (
       </GuideText>
 
       <GuideDemo>
-        <MenuItemStates />
+        <LocalNavWithMenuItemStates />
       </GuideDemo>
 
       <GuideDemo isDarkTheme={true}>
-        <MenuItemStates />
+        <LocalNavWithMenuItemStates />
       </GuideDemo>
     </GuideSection>
 
@@ -181,11 +181,11 @@ export default props => (
       source={[
         {
           type: GuideSectionTypes.JS,
-          code: dropdownSource,
+          code: localNavWithDropdownSource,
         },
         {
           type: GuideSectionTypes.HTML,
-          code: dropdownHtml,
+          code: localNavWithDropdownHtml,
         },
       ]}
     >
@@ -194,11 +194,11 @@ export default props => (
       </GuideText>
 
       <GuideDemo>
-        <Dropdown />
+        <LocalNavWithDropdown />
       </GuideDemo>
 
       <GuideDemo isDarkTheme={true}>
-        <Dropdown />
+        <LocalNavWithDropdown />
       </GuideDemo>
     </GuideSection>
 
@@ -207,11 +207,11 @@ export default props => (
       source={[
         {
           type: GuideSectionTypes.JS,
-          code: dropdownPanelsSource,
+          code: localNavWithDropdownPanelsSource,
         },
         {
           type: GuideSectionTypes.HTML,
-          code: dropdownPanelsHtml,
+          code: localNavWithDropdownPanelsHtml,
         },
       ]}
     >
@@ -220,11 +220,11 @@ export default props => (
       </GuideText>
 
       <GuideDemo>
-        <DropdownPanels />
+        <LocalNavWithDropdownPanels />
       </GuideDemo>
 
       <GuideDemo isDarkTheme={true}>
-        <DropdownPanels />
+        <LocalNavWithDropdownPanels />
       </GuideDemo>
     </GuideSection>
 
@@ -233,11 +233,11 @@ export default props => (
       source={[
         {
           type: GuideSectionTypes.JS,
-          code: tabsSource,
+          code: localNavWithTabsSource,
         },
         {
           type: GuideSectionTypes.HTML,
-          code: tabsHtml,
+          code: localNavWithTabsHtml,
         },
       ]}
     >
@@ -246,11 +246,11 @@ export default props => (
       </GuideText>
 
       <GuideDemo>
-        <Tabs />
+        <LocalNavWithTabs />
       </GuideDemo>
 
       <GuideDemo isDarkTheme={true}>
-        <Tabs />
+        <LocalNavWithTabs />
       </GuideDemo>
     </GuideSection>
 
