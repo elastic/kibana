@@ -8,6 +8,15 @@ import { KuiModalHeaderTitle } from './modal_header_title';
 import { KuiModalBody } from './modal_body';
 import { KuiModalBodyText } from './modal_body_text';
 import { KuiButton } from '../index';
+import { ESC_KEY_CODE } from '../../services';
+
+export const CONFIRM_BUTTON = 'confirm';
+export const CANCEL_BUTTON = 'cancel';
+
+const CONFIRM_MODAL_BUTTONS = [
+  CONFIRM_BUTTON,
+  CANCEL_BUTTON,
+];
 
 export function KuiConfirmModal({
     message,
@@ -17,7 +26,17 @@ export function KuiConfirmModal({
     cancelButtonText,
     confirmButtonText,
     className,
-    ...rest }) {
+    defaultFocusedButton,
+    ...rest,
+  }) {
+
+  const onKeyDown = (event) => {
+    // Treat the 'esc' key as a cancel indicator.
+    if (event.keyCode === ESC_KEY_CODE) {
+      onCancel();
+    }
+  };
+
   const ariaLabel = rest['aria-label'];
   const dataTestSubj = rest['data-test-subj'];
   return (
@@ -26,6 +45,7 @@ export function KuiConfirmModal({
       data-tests-subj={ dataTestSubj }
       aria-label={ ariaLabel }
       className={ className }
+      onKeyDown={ onKeyDown }
     >
       {
         title ?
@@ -45,6 +65,7 @@ export function KuiConfirmModal({
       <KuiModalFooter>
         <KuiButton
           type="hollow"
+          autoFocus={ defaultFocusedButton === CANCEL_BUTTON }
           data-test-subj="confirmModalCancelButton"
           onClick={ onCancel }
         >
@@ -52,6 +73,7 @@ export function KuiConfirmModal({
         </KuiButton>
         <KuiButton
           type="primary"
+          autoFocus={ defaultFocusedButton === CONFIRM_BUTTON }
           data-test-subj="confirmModalConfirmButton"
           onClick={ onConfirm }
         >
@@ -72,4 +94,5 @@ KuiConfirmModal.propTypes = {
   dataTestSubj: PropTypes.string,
   ariaLabel: PropTypes.string,
   className: PropTypes.string,
+  defaultFocusedButton: PropTypes.oneOf(CONFIRM_MODAL_BUTTONS)
 };
