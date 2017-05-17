@@ -2,14 +2,14 @@ import { delay } from 'bluebird';
 
 import getUrl from '../../utils/get_url';
 
-export function CommonPageProvider({ getService, getPageObjects }) {
+export function CommonPageProvider({ getService, getPageObjects, getPageObject }) {
   const log = getService('log');
   const config = getService('config');
   const remote = getService('remote');
   const retry = getService('retry');
   const testSubjects = getService('testSubjects');
   const kibanaServer = getService('kibanaServer');
-  const PageObjects = getPageObjects(['shield', 'gettingStarted']);
+  const PageObjects = getPageObjects(['shield']);
 
   const defaultTryTimeout = config.get('timeouts.try');
   const defaultFindTimeout = config.get('timeouts.find');
@@ -93,8 +93,9 @@ export function CommonPageProvider({ getService, getPageObjects }) {
             }
           })
           .then(async function (currentUrl) {
-            if (await PageObjects.gettingStarted.doesContainerExist()) {
-              await PageObjects.gettingStarted.optOut();
+            const gettingStartedPage = getPageObject('gettingStarted');
+            if (await gettingStartedPage.doesContainerExist()) {
+              await gettingStartedPage.optOut();
               throw new Error('Retrying after receiving Getting Started page');
             }
 
