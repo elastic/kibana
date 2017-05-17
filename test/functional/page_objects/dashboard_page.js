@@ -93,6 +93,22 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
       return testSubjects.click('newDashboardLink');
     }
 
+    async clickCreateDashboardPrompt() {
+      await retry.try(() => testSubjects.click('createDashboardPromptButton'));
+    }
+
+    async getCreateDashboardPromptExists() {
+      return await testSubjects.exists('createDashboardPromptButton');
+    }
+
+    async clickListItemCheckbox() {
+      await testSubjects.click('dashboardListItemCheckbox');
+    }
+
+    async clickDeleteSelectedDashboards() {
+      await testSubjects.click('deleteSelectedDashboards');
+    }
+
     clickAddVisualization() {
       return testSubjects.click('dashboardAddPanelButton');
     }
@@ -135,9 +151,9 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
 
     filterVizNames(vizName) {
       return retry.try(() => getRemote()
-      .findByCssSelector('input[placeholder="Visualizations Filter..."]')
-      .click()
-      .pressKeys(vizName));
+        .findByCssSelector('input[placeholder="Visualizations Filter..."]')
+        .click()
+        .pressKeys(vizName));
     }
 
     clickVizNameLink(vizName) {
@@ -242,6 +258,7 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
 
       await retry.try(async () => {
         const searchFilter = await testSubjects.find('searchFilter');
+        await searchFilter.clearValue();
         await searchFilter.click();
         // Note: this replacement of - to space is to preserve original logic but I'm not sure why or if it's needed.
         await searchFilter.type(dashName.replace('-',' '));
