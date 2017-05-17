@@ -1,0 +1,59 @@
+import expect from 'expect.js';
+
+export default ({ getService, getPageObjects }) => {
+  const kibanaServer = getService('kibanaServer');
+  const esArchiver = getService('esArchiver');
+  const log = getService('log');
+
+  const PageObjects = getPageObjects(['common', 'gettingStarted']);
+
+  describe('Getting Started page', () => {
+    describe('when no index patterns exist', () => {
+      beforeEach(async () => {
+        // delete .kibana index and then wait for Kibana to re-create it
+        await kibanaServer.uiSettings.replace({});
+      });
+
+      describe('when user has not opted out of Getting Started page', () => {
+        it('redirects to the Getting Started page', async () => {
+          await PageObjects.common.navigateToUrl('discover', '');
+          await PageObjects.common.waitUntilUrlIncludes('getting_started');
+          const isLoaded = await PageObjects.gettingStarted.optOutLinkExists();
+          expect(isLoaded).to.be(true);
+        });
+      });
+
+      describe('when user has opted out of Getting Started page', () => {
+        beforeEach(async () => {
+          await PageObjects.gettingStarted.optOut();
+        });
+
+        it('does not redirect to the Getting Started page', async () => {
+          await PageObjects.common.navigateToUrl('discover', '');
+          const isLoaded = await PageObjects.gettingStarted.optOutLinkExists();
+          expect(isLoaded).to.be(false);
+        });
+      });
+
+    });
+
+    describe('when index patterns exist', () => {
+      beforeEach(async () => {
+        // delete .kibana index and update configDoc
+        await kibanaServer.uiSettings.replace({
+          'dateFormat:tz':'UTC',
+          'defaultIndex':'logstash-*'
+        });
+
+        log.debug('load kibana index with default index pattern');
+        await esArchiver.load('discover');
+      });
+
+      it('does not redirect to the Getting Started page', async () => {
+        await PageObjects.common.navigateToUrl('discover', '');
+        const isLoaded = await PageObjects.gettingStarted.optOutLinkExists();
+        expect(isLoaded).to.be(false);
+      });
+    });
+  });
+};
