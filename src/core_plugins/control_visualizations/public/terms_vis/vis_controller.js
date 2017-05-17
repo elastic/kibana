@@ -30,11 +30,34 @@ module.controller('KbnTermsController', function ($scope, indexPatterns, Private
     });
   };
 
+  const getSelected = (indexPatternId, fieldName) => {
+    const filters = findFilter(indexPatternId, fieldName);
+    if (filters.length === 0) {
+      return '';
+    } else {
+      return filters[0].meta.value;
+    }
+  };
+
   $scope.reactProps = {
     controls: [],
     setFilter: (field, value, indexPattern) => {
-      const filter = buildPhraseFilter(field, value, indexPattern);
-      queryFilter.addFilters(filter);
+      const newFilter = buildPhraseFilter(field, value, indexPattern);
+      const filters = findFilter(indexPattern.id, field.name);
+      if (filters.length === 0) {
+        queryFilter.addFilters(newFilter);
+      } else {
+        const model = {};
+        if (field.scripted) {
+          model.script = newFilter.script;
+        } else {
+          model.query = newFilter.query;
+        }
+        queryFilter.updateFilter({
+          model: model,
+          source: filters[0]
+        });
+      }
     },
     removeFilter: (field, indexPattern) => {
       const filters = findFilter(indexPattern.id, field.name);
@@ -61,6 +84,7 @@ module.controller('KbnTermsController', function ($scope, indexPatterns, Private
           return { label: bucket.key, value: bucket.key };
         });
         $scope.reactProps.controls.push({
+          selected: getSelected(indexPattern.id, field.fieldName),
           indexPattern: indexPattern,
           field: indexPattern.fields.byName[field.fieldName],
           label: field.label ? field.label : field.fieldName,
@@ -76,12 +100,7 @@ module.controller('KbnTermsController', function ($scope, indexPatterns, Private
 
   queryFilter.on('update', function () {
     $scope.reactProps.controls = $scope.reactProps.controls.map((control) => {
-      const filters = findFilter(control.indexPattern.id, control.field.name);
-      if (filters.length === 0) {
-        control.selected = '';
-      } else {
-        control.selected = filters[0].meta.value;
-      }
+      control.selected = getSelected(control.indexPattern.id, control.field.name);
       return control;
     });
   });
