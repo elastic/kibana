@@ -2496,6 +2496,9 @@ body {
   line-height: 1.5;
   color: #a7a7a7; }
 
+.kuiTableHeaderCell__liner {
+  display: inline-block; }
+
 /**
  * 1. Prevent rapid clicking from selecting text.
  */
