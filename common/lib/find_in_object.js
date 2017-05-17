@@ -1,10 +1,10 @@
 import { isObject, each } from 'lodash';
 
-export function findInObject(o, fn, memo) {
+export function findInObject(o, fn, memo, name) {
   memo = memo || [];
-  if (fn(o)) memo.push(o);
+  if (fn(o, name)) memo.push(o);
   if (isObject(o)) {
-    each(o, val => findInObject(val, fn, memo));
+    each(o, (val, name) => findInObject(val, fn, memo, name));
   }
   return memo;
 }
