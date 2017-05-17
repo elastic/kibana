@@ -11,7 +11,7 @@ import {
 } from './constants';
 
 function handleExistingIndexPatternsScenario(indexPatterns, currentRoute, config) {
-  // If index patterns exist, we're not going to show the user the Getting Starte page.
+  // If index patterns exist, we're not going to show the user the Getting Started page.
   // So we can show the chrome again at this point.
   uiChrome.setVisible(true);
 
