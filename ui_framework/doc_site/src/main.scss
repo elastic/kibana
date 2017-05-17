@@ -22,9 +22,13 @@ body {
   min-width: $guideMinWidth;
 }
 
+/**
+ * 1. Expand container to fit the page if the content is shorter than the page, or expand with the
+ *    content if it's taller than the page.
+ */
 .guide {
   display: flex;
-  height: 100%;
+  min-height: 100%; /* 1 */
 }
 
 .guideContent {
