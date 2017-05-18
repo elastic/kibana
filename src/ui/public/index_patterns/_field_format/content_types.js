@@ -6,7 +6,7 @@ export function IndexPatternsFieldFormatContentTypesProvider() {
 
   const types = {
     html: function (format, convert) {
-      return function recurse(value, field, hit) {
+      function recurse(value, field, hit) {
         if (value == null) {
           return _.asPrettyString(value);
         }
@@ -23,6 +23,10 @@ export function IndexPatternsFieldFormatContentTypesProvider() {
         });
 
         return subVals.join(',' + (useMultiLine ? '\n' : ' '));
+      }
+
+      return function (...args) {
+        return `<span ng-non-bindable>${recurse(...args)}</span>`;
       };
     },
 
