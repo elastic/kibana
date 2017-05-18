@@ -72,7 +72,6 @@ export const fetchRenderable = () => (dispatch, getState) => {
 // actions without a reducer, typically used to dispatch other actions
 export const setAst = ({ ast, element, pageId }) => (dispatch) => {
   const expression = toExpression(ast);
-  if (element.expression === expression && isEqual(element.ast, ast)) return;
   dispatch(setElementExpression({ expression, element, pageId }));
   dispatch(fetchRenderable());
 };
@@ -84,7 +83,10 @@ export const setAstAtIndex = ({ ast, element, pageId, index }) => {
 
 export const setExpression = ({ expression, element, pageId }) => (dispatch) => {
   const ast = fromExpression(expression);
-  if (element.expression === expression && isEqual(element.ast, ast)) return;
+
+  // if ast is unchanged, short circuit state update
+  if (isEqual(element.ast, ast)) return;
+
   dispatch(args.clear({ path: [ element.id, 'expressionContext' ] }));
   dispatch(setElementExpression({ expression, element, pageId }));
   dispatch(fetchRenderable());

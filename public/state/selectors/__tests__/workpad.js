@@ -2,9 +2,22 @@ import expect from 'expect.js';
 import * as selector from '../workpad';
 
 describe('workpad selectors', () => {
+  let asts;
   let state;
 
   beforeEach(() => {
+    asts = {
+      'element-0': undefined,
+      'element-1': {
+        type: 'expression',
+        chain: [{
+          type: 'function',
+          function: 'demodata',
+          arguments: {},
+        }],
+      },
+    };
+
     state = {
       transient: {
         selectedPage: 'page-1',
@@ -31,18 +44,9 @@ describe('workpad selectors', () => {
             elements: [{
               id: 'element-0',
               expression: '',
-              ast: '',
             }, {
               id: 'element-1',
               expression: 'demodata()',
-              ast: {
-                type: 'expression',
-                chain: [{
-                  type: 'function',
-                  function: 'demodata',
-                  arguments: {},
-                }],
-              },
             }],
           }],
         },
@@ -85,7 +89,10 @@ describe('workpad selectors', () => {
   describe('getSelectedElement', () => {
     it('returns selected element', () => {
       const { elements } = state.persistent.workpad.pages[0];
-      expect(selector.getSelectedElement(state)).to.equal(elements[1]);
+      expect(selector.getSelectedElement(state)).to.eql({
+        ...elements[1],
+        ast: asts['element-1'],
+      });
     });
   });
 
@@ -98,15 +105,25 @@ describe('workpad selectors', () => {
   describe('getElements', () => {
     it('returns all elements on the page', () => {
       const { elements } = state.persistent.workpad.pages[0];
-      expect(selector.getElements(state)).to.equal(elements);
+      const expected = elements.map(element => ({
+        ...element,
+        ast: asts[element.id],
+      }));
+      expect(selector.getElements(state)).to.eql(expected);
     });
   });
 
   describe('getElementById', () => {
     it('returns element matching id', () => {
       const { elements } = state.persistent.workpad.pages[0];
-      expect(selector.getElementById(state, 'element-0')).to.equal(elements[0]);
-      expect(selector.getElementById(state, 'element-1')).to.equal(elements[1]);
+      expect(selector.getElementById(state, 'element-0')).to.eql({
+        ...elements[0],
+        ast: asts['element-0'],
+      });
+      expect(selector.getElementById(state, 'element-1')).to.eql({
+        ...elements[1],
+        ast: asts['element-1'],
+      });
     });
   });
 

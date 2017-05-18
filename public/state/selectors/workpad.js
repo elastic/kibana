@@ -1,4 +1,5 @@
 import { get, find } from 'lodash';
+import { fromExpression } from '../../../common/lib/ast';
 
 // page getters
 export function getSelectedPage(state) {
@@ -27,7 +28,13 @@ export function getElements(state, pageId = null) {
   if (!id) return;
 
   const page = getPageById(state, id);
-  return (page) ? page.elements : undefined;
+  const elements = get(page, 'elements');
+  if (!elements) return elements;
+
+  return elements.map(element => ({
+    ...element,
+    ast: fromExpression(element.expression),
+  }));
 }
 
 export function getElementById(state, id) {
