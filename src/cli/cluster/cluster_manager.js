@@ -62,24 +62,23 @@ module.exports = class ClusterManager {
     bindAll(this, 'onWatcherAdd', 'onWatcherError', 'onWatcherChange');
 
     if (opts.watch) {
-      this.setupWatching(
-        [
-          ...settings.plugins.paths,
-          ...settings.plugins.scanDirs,
-        ],
-        [
-          settings.plugins.scanDirs
-            .map(scanDir => resolve(scanDir, '*'))
-            .concat(settings.plugins.paths)
-            .reduce((acc, path) => acc.concat(
-              resolve(path, 'test'),
-              resolve(path, 'build'),
-              resolve(path, 'target'),
-              resolve(path, 'scripts'),
-              resolve(path, 'docs'),
-            ), []),
-        ]
-      );
+      const extraPaths = [
+        ...settings.plugins.paths,
+        ...settings.plugins.scanDirs,
+      ];
+
+      const extraIgnores = settings.plugins.scanDirs
+        .map(scanDir => resolve(scanDir, '*'))
+        .concat(settings.plugins.paths)
+        .reduce((acc, path) => acc.concat(
+          resolve(path, 'test'),
+          resolve(path, 'build'),
+          resolve(path, 'target'),
+          resolve(path, 'scripts'),
+          resolve(path, 'docs'),
+        ), []);
+
+      this.setupWatching(extraPaths, extraIgnores);
     }
 
     else this.startCluster();
