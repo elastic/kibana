@@ -7,18 +7,15 @@ export function MapsVisTypeFactoryProvider(Private) {
   const VisType = Private(VisTypeProvider);
   const MapsRenderbot = Private(MapsVisTypeMapsRenderbotProvider);
 
-  class MapsVisTypeFactory extends VisType {
-    constructor(opts) {
-      if (!opts.responseHandler) {
-        opts.responseHandler = 'basic';
-      }
-      super(opts);
+  class MapsVisController {
+    constructor(el) {
+      this.el = el;
     }
 
-    render(vis, $el, uiState, esResponse) {
+    render(vis, esResponse) {
       return new Promise(resolve => {
         if (!this.renderbot) {
-          this.renderbot = new MapsRenderbot(vis, $el, uiState);
+          this.renderbot = new MapsRenderbot(vis, this.el, vis.getUiState());
         }
         this.renderbot.render(esResponse);
         resolve();
@@ -27,6 +24,16 @@ export function MapsVisTypeFactoryProvider(Private) {
 
     destroy() {
       this.renderbot.destroy();
+    }
+  }
+
+  class MapsVisTypeFactory extends VisType {
+    constructor(opts) {
+      if (!opts.responseHandler) {
+        opts.responseHandler = 'basic';
+      }
+      opts.visualization = MapsVisController;
+      super(opts);
     }
   }
 

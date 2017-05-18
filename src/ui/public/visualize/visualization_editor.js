@@ -22,11 +22,12 @@ uiModules
     link: function ($scope, element) {
       // Clone the _vis instance.
       const vis = $scope.vis;
-      const editor = typeof vis.type.editor === 'function' ? vis.type.editor :
-        editorTypes.find(editor => editor.name === vis.type.editor);
+      const Editor = typeof vis.type.editor === 'function' ? vis.type.editor :
+        editorTypes.find(editor => editor.key === vis.type.editor);
+      const editor = new Editor(element);
 
       const renderFunction = _.debounce(() => {
-        editor.render(vis, element, $scope.uiState, $scope.visData);
+        editor.render(vis, $scope.visData);
         $scope.$apply();
       }, 200);
 

@@ -3,17 +3,12 @@ import { VisTypeProvider } from 'ui/vis/vis_types';
 export function AngularVisTypeProvider(Private, $compile, $rootScope) {
   const VisType = Private(VisTypeProvider);
 
-  class AngularVisType extends VisType {
-    constructor(opts) {
-      super(opts);
-
-      this.visConfig.template = opts.visConfig ? opts.visConfig.template : opts.template;
-      if (!this.visConfig.template) {
-        throw new Error('Missing template for AngularVisType');
-      }
+  class AngularVisController {
+    constructor(el) {
+      this.el = el;
     }
 
-    render(vis, $el, uiState, esResponse) {
+    render(vis, esResponse) {
       return new Promise((resolve, reject) => {
         const updateScope = () => {
           this.$scope.vis = vis.clone();
@@ -25,8 +20,8 @@ export function AngularVisTypeProvider(Private, $compile, $rootScope) {
         if (!this.$scope) {
           this.$scope = $rootScope.$new();
           updateScope();
-          this.$scope.uiState = uiState;
-          $el.html($compile(vis.type.visConfig.template)(this.$scope));
+          this.$scope.uiState = vis.getUiState();
+          this.el.html($compile(vis.type.visConfig.template)(this.$scope));
         } else {
           updateScope();
         }
@@ -36,6 +31,19 @@ export function AngularVisTypeProvider(Private, $compile, $rootScope) {
     destroy() {
       this.$scope.$destroy();
       this.$scope = null;
+    }
+  }
+
+  class AngularVisType extends VisType {
+    constructor(opts) {
+      opts.visualization = AngularVisController;
+
+      super(opts);
+
+      this.visConfig.template = opts.visConfig ? opts.visConfig.template : opts.template;
+      if (!this.visConfig.template) {
+        throw new Error('Missing template for AngularVisType');
+      }
     }
   }
 

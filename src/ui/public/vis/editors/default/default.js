@@ -7,15 +7,20 @@ import angular from 'angular';
 import defaultEditorTemplate from './default.html';
 
 const defaultEditor = function ($rootScope, $compile) {
-  return {
-    name: 'default',
-    render: (vis, element, uiState, visData) => {
+  return class DefaultEditor {
+    static key = 'default';
+
+    constructor(el) {
+      this.el = el;
+    }
+
+    render(vis, visData) {
       let $scope;
 
       const updateScope = function () {
         $scope.vis = vis;
         $scope.visData = visData;
-        $scope.uiState = uiState;
+        $scope.uiState = vis.getUiState();
       };
 
       if (!this.$scope) {
@@ -50,21 +55,21 @@ const defaultEditor = function ($rootScope, $compile) {
           catch (e) {} // eslint-disable-line no-empty
         }, true);
 
-        element.html($compile(defaultEditorTemplate)($scope));
+        this.el.html($compile(defaultEditorTemplate)($scope));
       } else {
         $scope = this.$scope;
         updateScope();
       }
 
       $scope.$broadcast('render');
-    },
-    destroy: () => {
+    }
+    destroy() {
       if (this.$scope) {
         this.$scope.$destroy();
         this.$scope = null;
       }
-    },
-    resize: () => {}
+    }
+    resize() {}
   };
 };
 

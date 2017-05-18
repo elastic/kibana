@@ -104,9 +104,11 @@ uiModules
         applyClassNames();
       });
 
+      const Visualization = $scope.vis.type.visualization;
+      const visualization = new Visualization(getVisEl());
 
       const renderFunction = _.debounce(() => {
-        $scope.vis.type.render($scope.vis, getVisEl(), $scope.uiState, $scope.visData)
+        visualization.render($scope.vis, $scope.visData)
           .then(() => {
             // renderComplete
           });
@@ -121,7 +123,7 @@ uiModules
       });
 
       $scope.$on('$destroy', () => {
-        $scope.vis.type.destroy();
+        visualization.destroy();
       });
     }
   };

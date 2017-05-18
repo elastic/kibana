@@ -13,30 +13,23 @@ export function VislibVisTypeProvider(Private) {
   const pointSeries = Private(AggResponsePointSeriesProvider);
   const vislib = Private(VislibProvider);
 
-  class VislibVisType extends VisType {
-    constructor(opts) {
-      if (!opts.responseHandler) {
-        opts.responseHandler = 'basic';
-      }
-      if (!opts.responseConverter) {
-        opts.responseConverter = pointSeries;
-      }
-      super(opts);
-      this.refreshLegend = 0;
+  class VislibVisController {
+    constructor(el) {
+      this.el = el[0];
     }
 
-    render(vis, $el, uiState, esResponse) {
+    render(vis, esResponse) {
       if (this.vislibVis) {
         this.destroy();
       }
 
       return new Promise(resolve => {
         this.vis = vis;
-        this.vislibVis = new vislib.Vis($el[0], vis.params);
+        this.vislibVis = new vislib.Vis(this.el, vis.params);
         this.vislibVis.on('brush', vis.API.events.brush);
         this.vislibVis.on('click', vis.API.events.filter);
         this.vislibVis.on('renderComplete', resolve);
-        this.vislibVis.render(esResponse, uiState);
+        this.vislibVis.render(esResponse, vis.getUiState());
         this.refreshLegend++;
       });
     }
@@ -47,6 +40,20 @@ export function VislibVisTypeProvider(Private) {
         this.vislibVis.off('click', this.vis.API.events.filter);
         this.vislibVis.destroy();
       }
+    }
+  }
+
+  class VislibVisType extends VisType {
+    constructor(opts) {
+      if (!opts.responseHandler) {
+        opts.responseHandler = 'basic';
+      }
+      if (!opts.responseConverter) {
+        opts.responseConverter = pointSeries;
+      }
+      opts.visualization = VislibVisController;
+      super(opts);
+      this.refreshLegend = 0;
     }
   }
 

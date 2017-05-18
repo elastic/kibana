@@ -41,6 +41,7 @@ export function VisTypeProvider(Private) {
       if (!this.title) throw('vis_type must define its title');
       if (!this.description) throw('vis_type must define its description');
       if (!this.icon && !this.image) throw('vis_type must define its icon or image');
+      if (!this.visualization) throw('vis_type must define visualization controller');
 
       if (!this.editorConfig.optionTabs) {
         this.editorConfig.optionTabs = [
@@ -49,17 +50,6 @@ export function VisTypeProvider(Private) {
       }
 
       this.requiresSearch = !(this.requestHandler === 'none');
-    }
-
-    render(vis, $el, uiState, esResponse) {
-      if (!this.visualization) {
-        throw new Error('vis_type render function not implemented');
-      }
-      this.visualization.render(vis, $el, uiState, esResponse);
-    }
-
-    destroy() {
-      this.visualization.destroy();
     }
   }
 
