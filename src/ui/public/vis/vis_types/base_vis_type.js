@@ -13,7 +13,7 @@ export function VisTypeProvider(Private) {
       const _defaults = {
         // name, title, description, icon, image
         category: CATEGORY.OTHER,
-        visController: null,       // must be a function (or object with render/resize/update?)
+        visualization: null,       // must be a class with render/resize/destroy methods
         visConfig: {
           defaults: {},            // default configuration
         },
@@ -52,14 +52,14 @@ export function VisTypeProvider(Private) {
     }
 
     render(vis, $el, uiState, esResponse) {
-      if (!this.visController) {
+      if (!this.visualization) {
         throw new Error('vis_type render function not implemented');
       }
-      this.visController.render(vis, $el, uiState, esResponse);
+      this.visualization.render(vis, $el, uiState, esResponse);
     }
 
     destroy() {
-      this.visController.destroy();
+      this.visualization.destroy();
     }
   }
 
