@@ -1,5 +1,7 @@
 const Type = require('../type');
 
+import { map } from 'lodash';
+
 module.exports = new Type({
   name: 'datatable',
   from: {
@@ -8,6 +10,13 @@ module.exports = new Type({
         type: 'datatable',
         rows: [],
         columns: [],
+      };
+    },
+    pointseries: (context) => {
+      return {
+        type: 'datatable',
+        rows: context.rows,
+        columns: map(context.columns, (val, name) => { return { name: name, type: val.type, role: val.role }; }),
       };
     },
   },
