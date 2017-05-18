@@ -38,7 +38,10 @@ export default (path) => {
               width: 600,
               rotation: 90,
             },
-            expression: 'demodata().pointseries(x=time, y=.math("sum(cost)")).plot()',
+            expression: `demodata().pointseries(y="median(cost)", x=time, color="project").plot(
+              palette=palette(#04BFBF, #CAFCD8, #F7E967, #A9CF54, #588F27),
+              defaultStyle=seriesStyle(bars=0, lines=0, weight=0, points=1)
+            )`,
             ast: {
               type: 'expression',
               chain: [{
@@ -49,28 +52,74 @@ export default (path) => {
                 type: 'function',
                 function: 'pointseries',
                 arguments: {
+                  y: [{
+                    type: 'string',
+                    value: 'median(cost)',
+                  }],
                   x: [{
                     type: 'string',
                     value: 'time',
                   }],
-                  y: [{
-                    type: 'partial',
-                    chain: [{
-                      type: 'function',
-                      function: 'math',
-                      arguments: {
-                        _: [{
-                          type: 'string',
-                          value: 'sum(cost)',
-                        }],
-                      },
-                    }],
+                  color: [{
+                    type: 'string',
+                    value: 'project',
                   }],
                 },
               }, {
                 type: 'function',
                 function: 'plot',
-                arguments: {},
+                arguments: {
+                  palette: [{
+                    type: 'expression',
+                    chain: [{
+                      type: 'function',
+                      function: 'palette',
+                      arguments: {
+                        _: [{
+                          type: 'string',
+                          value: '#04BFBF',
+                        }, {
+                          type: 'string',
+                          value: '#CAFCD8',
+                        }, {
+                          type: 'string',
+                          value: '#F7E967',
+                        }, {
+                          type: 'string',
+                          value: '#A9CF54',
+                        }, {
+                          type: 'string',
+                          value: '#588F27',
+                        }],
+                      },
+                    }],
+                  }],
+                  defaultStyle: [{
+                    type: 'expression',
+                    chain: [{
+                      type: 'function',
+                      function: 'seriesStyle',
+                      arguments: {
+                        bars: [{
+                          type: 'number',
+                          value: 0,
+                        }],
+                        lines: [{
+                          type: 'number',
+                          value: 0,
+                        }],
+                        weight: [{
+                          type: 'number',
+                          value: 0,
+                        }],
+                        points: [{
+                          type: 'number',
+                          value: 1,
+                        }],
+                      },
+                    }],
+                  }],
+                },
               }],
             },
           }],
