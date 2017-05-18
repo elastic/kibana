@@ -37,7 +37,7 @@ const mergeProps = (stateProps, dispatchProps, ownProps) => {
   const { expressionIndex, expressionType } = ownProps;
 
   const props = Object.assign({}, stateProps, dispatchProps, ownProps, {
-    updateContext: () => dispatchProps.fetchContext({ element, index: expressionIndex }),
+    updateContext: () => dispatchProps.fetchContext({ index: expressionIndex }),
     onValueChange: (ast) => dispatchProps.setAstAtIndex({ ast, element, pageId, index: expressionIndex }),
   });
 

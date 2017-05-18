@@ -1,5 +1,5 @@
 import { createAction } from 'redux-actions';
-import { isEqual } from 'lodash';
+import { get, isEqual } from 'lodash';
 import { set } from 'object-path-immutable';
 import { getSelectedElement } from '../selectors/workpad';
 import { interpretAst } from '../../lib/interpreter';
@@ -10,33 +10,34 @@ import * as args from './resolved_args';
 // exported actions, used by reducers
 export const setElementExpression = createAction('setElementExpression');
 
-export const fetchContext = createAction('fetchContext', ({ element, index }) => {
-  const invalidAst = !Array.isArray(element.ast.chain);
-  const invalidIndex = index >= element.ast.chain.length;
+export const fetchContext = ({ index }) => (dispatch, getState) => {
+  const element = getSelectedElement(getState());
+  const chain = get(element, ['ast', 'chain']);
+  const invalidIndex = (chain) ? index >= chain.length : true;
 
-  if (!element || invalidAst || invalidIndex) {
+  if (!element || !chain || invalidIndex) {
     return Promise.reject(`Invalid argument index: ${index}`);
   }
+
+  const contextIndex = index - 1;
+  const argumentPath = [element.id, 'expressionContext', contextIndex];
+
+  dispatch(args.setLoading({
+    path: argumentPath,
+  }));
 
   // get context data from a partial AST
   return interpretAst({
     ...element.ast,
     chain: element.ast.chain.filter((exp, i) => i < index),
-  });
-}, ({ element, index }) => {
-  const contextIndex = index - 1;
-  const argumentPath = [element.id, 'expressionContext', contextIndex];
-
-  return {
-    onStart: (dispatch) => dispatch(args.setLoading({
-      path: argumentPath,
-    })),
-    onComplete: (dispatch, getState, value) => dispatch(args.setValue({
+  })
+  .then((value) => {
+    dispatch(args.setValue({
       path: argumentPath,
       value,
-    })),
-  };
-});
+    }));
+  });
+};
 
 export const fetchRenderable = () => (dispatch, getState) => {
   const element = getSelectedElement(getState());
