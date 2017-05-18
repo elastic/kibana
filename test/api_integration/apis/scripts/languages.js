@@ -18,7 +18,7 @@ export default function ({ getService }) {
         .then((response) => {
           expect(response.body).to.contain('expression');
           expect(response.body).to.contain('painless');
-          expect(response.body).to.not.contain('groovy');
+          expect(response.body).to.contain('groovy');
         })
     ));
   });
