@@ -9,6 +9,7 @@ export function AngularVisTypeProvider(Private, $compile, $rootScope) {
     }
 
     render(vis, esResponse) {
+
       return new Promise((resolve, reject) => {
         const updateScope = () => {
           this.$scope.vis = vis.clone();

@@ -1,18 +1,25 @@
 import { supports } from 'ui/utils/supports';
 import { CATEGORY } from 'ui/vis/vis_category';
-import { MapsVisTypeFactoryProvider } from './maps_vis_type';
+import { VisFactoryProvider } from 'ui/vis/vis_factory';
+import { MapsVisualizationProvider } from './maps_visualization';
 import { VisSchemasProvider } from 'ui/vis/schemas';
 import { AggResponseGeoJsonProvider } from 'ui/agg_response/geo_json/geo_json';
 import tileMapTemplate from './editors/tile_map.html';
 import image from './images/icon-tilemap.svg';
 import { VisTypesRegistryProvider } from 'ui/registry/vis_types';
 
+
 VisTypesRegistryProvider.register(function TileMapVisType(Private, getAppState, courier, config) {
-  const MapsVisTypeFactory = Private(MapsVisTypeFactoryProvider);
+
   const Schemas = Private(VisSchemasProvider);
   const geoJsonConverter = Private(AggResponseGeoJsonProvider);
+  const VisFactory = Private(VisFactoryProvider);
+  const MapsVisualization = Private(MapsVisualizationProvider);
 
-  return new MapsVisTypeFactory({
+
+  console.log(Schemas, VisFactory, MapsVisualization);
+
+  const visualization = VisFactory.createBaseVisualization({
     name: 'tile_map',
     title: 'Tile Map',
     image,
@@ -32,10 +39,11 @@ VisTypesRegistryProvider.register(function TileMapVisType(Private, getAppState, 
         mapCenter: [0, 0],
         wms: config.get('visualization:tileMap:WMSdefaults')
       }
-      // editor: tileMapTemplate
     },
     responseConverter: geoJsonConverter,
+    responseHandler: 'basic',
     implementsRenderComplete: true,
+    visualization: MapsVisualization,
     editorConfig: {
       collections: {
         legendPositions: [{
@@ -51,7 +59,8 @@ VisTypesRegistryProvider.register(function TileMapVisType(Private, getAppState, 
           value: 'topright',
           text: 'top right',
         }],
-        mapTypes: ['Scaled Circle Markers',
+        mapTypes: [
+          'Scaled Circle Markers',
           'Shaded Circle Markers',
           'Shaded Geohash Grid',
           'Heatmap'
@@ -82,4 +91,7 @@ VisTypesRegistryProvider.register(function TileMapVisType(Private, getAppState, 
       }
     ])
   });
+
+
+  return visualization;
 });
