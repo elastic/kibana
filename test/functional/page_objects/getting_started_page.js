@@ -21,20 +21,9 @@ export function GettingStartedPageProvider({ getService, getPageObjects }) {
       });
     }
 
-    async optOutLinkExists() {
-      log.debug('Checking if opt-out link exists');
-      return await testSubjects.exists('lnkGettingStartedOptOut');
-    }
-
     async navigateTo() {
       log.debug('Navigating directly to Getting Started page');
       await PageObjects.common.navigateToUrl('settings', 'kibana/getting_started');
-    }
-
-    async optOut() {
-      log.debug('Opting out of Getting Started page');
-      await this.navigateTo();
-      await this.clickOptOutLink();
     }
   }
 

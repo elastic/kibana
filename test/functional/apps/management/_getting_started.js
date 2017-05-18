@@ -59,6 +59,17 @@ export default ({ getService, getPageObjects }) => {
         const isLoaded = await PageObjects.gettingStarted.doesContainerExist();
         expect(isLoaded).to.be(false);
       });
+
+      describe('when a user directly navigates to the Getting Started page', () => {
+        beforeEach(async () => {
+          await PageObjects.gettingStarted.navigateTo();
+        });
+
+        it('the kibana chrome (which contains the global nav) is visible', async () => {
+          const isChromeVisible = await PageObjects.common.isChromeVisible();
+          expect(isChromeVisible).to.be(true);
+        });
+      });
     });
   });
 };
