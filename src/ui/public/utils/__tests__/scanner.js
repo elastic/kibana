@@ -6,7 +6,7 @@ import ngMock from 'ng_mock';
 import sinon from 'sinon';
 import url from 'url';
 
-import serverConfig from '../../../../../test/server_config';
+import { esTestServerUrlParts } from '../../../../../test/es_test_server_url_parts';
 
 describe('Scanner', function () {
   let es;
@@ -14,7 +14,7 @@ describe('Scanner', function () {
   beforeEach(ngMock.module('kibana'));
   beforeEach(ngMock.inject(function (esFactory) {
     es = esFactory({
-      host: url.format(serverConfig.servers.elasticsearch),
+      host: url.format(esTestServerUrlParts),
       defer: function () {
         return Bluebird.defer();
       }
