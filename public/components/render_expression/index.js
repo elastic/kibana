@@ -8,8 +8,7 @@ import { elements } from '../../lib/elements';
 import { getState, getValue, getError } from '../../lib/resolved_arg';
 import { getType } from '../../../common/types/get_type';
 import { fetchRenderable } from '../../state/actions/elements';
-import { getArg } from '../../state/selectors/resolved_args';
-import { getSelectedElement, getSelectedElementId } from '../../state/selectors/workpad';
+import { getSelectedResolvedArgs } from '../../state/selectors/workpad';
 
 const renderLoading = branch(
   props => [null, 'pending'].includes(getState(props.renderable)),
@@ -22,12 +21,8 @@ const renderInvalidExpression = branch(
 );
 
 function mapStateToProps(state) {
-  const elementId = getSelectedElementId(state);
-  const selectedElement = getSelectedElement(state);
-
   return {
-    selectedElement,
-    renderable: getArg(state, [elementId, 'expressionRenderable']),
+    renderable: getSelectedResolvedArgs(state, 'expressionRenderable'),
   };
 }
 
@@ -45,7 +40,6 @@ function mergeProps(stateProps, dispatchProps, ownProps) {
   if (getState(renderable) === null) {
     dispatchProps.fetchRenderable({ element: stateProps.selectedElement });
   }
-
 
   return Object.assign({}, stateProps, dispatchProps, ownProps, {
     element,
