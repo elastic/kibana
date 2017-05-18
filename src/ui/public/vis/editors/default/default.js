@@ -1,3 +1,7 @@
+import './sidebar';
+import './vis_options';
+
+
 import _ from 'lodash';
 import angular from 'angular';
 import defaultEditorTemplate from './default.html';

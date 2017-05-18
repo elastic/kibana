@@ -3,7 +3,7 @@ import angular from 'angular';
 import _ from 'lodash';
 import expect from 'expect.js';
 import ngMock from 'ng_mock';
-import 'plugins/kibana/visualize/editor/agg';
+import '../agg';
 
 
 describe('Vis-Editor-Agg plugin directive', function () {

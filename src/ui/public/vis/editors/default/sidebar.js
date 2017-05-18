@@ -1,7 +1,8 @@
-import 'plugins/kibana/visualize/editor/agg_group';
-import 'plugins/kibana/visualize/editor/vis_options';
+import './agg_group';
+import './vis_options';
 import { uiModules } from 'ui/modules';
-import sidebarTemplate from 'plugins/kibana/visualize/editor/sidebar.html';
+import sidebarTemplate from './sidebar.html';
+
 uiModules
 .get('app/visualize')
 .directive('visEditorSidebar', function () {

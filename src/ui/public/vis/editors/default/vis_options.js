@@ -1,5 +1,5 @@
 import { uiModules } from 'ui/modules';
-import visOptionsTemplate from 'plugins/kibana/visualize/editor/vis_options.html';
+import visOptionsTemplate from './vis_options.html';
 
 /**
  * This directive sort of "transcludes" in whatever template you pass in via the `editor` attribute.
