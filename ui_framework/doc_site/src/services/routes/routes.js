@@ -146,6 +146,7 @@ const components = [{
 }, {
   name: 'LocalNav',
   component: LocalNavExample,
+  hasReact: true,
 }, {
   name: 'Menu',
   component: MenuExample,
