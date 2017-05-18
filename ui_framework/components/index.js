@@ -7,6 +7,15 @@ export {
 } from './button';
 
 export {
+  KuiLocalNav,
+  KuiLocalNavRow,
+  KuiLocalNavRowSection,
+  KuiLocalTab,
+  KuiLocalTabs,
+  KuiLocalTitle,
+} from './local_nav';
+
+export {
   KuiToolBarSearchBox,
   KuiToolBar,
   KuiToolBarFooter,
