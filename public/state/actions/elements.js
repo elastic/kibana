@@ -1,6 +1,6 @@
 import { createAction } from 'redux-actions';
 import { get, isEqual } from 'lodash';
-import { set } from 'object-path-immutable';
+import { assign } from 'object-path-immutable';
 import { getSelectedElement } from '../selectors/workpad';
 import { interpretAst } from '../../lib/interpreter';
 import { getType } from '../../../common/types/get_type';
@@ -72,14 +72,16 @@ export const fetchRenderable = () => (dispatch, getState) => {
 
 // actions without a reducer, typically used to dispatch other actions
 export const setAst = ({ ast, element, pageId }) => (dispatch) => {
+  if (!ast) return;
+
   const expression = toExpression(ast);
   dispatch(setElementExpression({ expression, element, pageId }));
   dispatch(fetchRenderable());
 };
 
-export const setAstAtIndex = ({ ast, element, pageId, index }) => {
-  const newAst = set(element, ['ast', 'chain', index], ast);
-  return setAst({ ast: newAst, element, pageId });
+export const setArgumentAtIndex = ({ arg, element, pageId, index }) => {
+  const newElement = assign(element, ['ast', 'chain', index, 'arguments'], arg);
+  return setAst({ ast: get(newElement, 'ast'), element, pageId });
 };
 
 export const setExpression = ({ expression, element, pageId }) => (dispatch) => {

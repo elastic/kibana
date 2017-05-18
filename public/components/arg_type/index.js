@@ -6,7 +6,7 @@ import { ArgTypeUnknown } from './arg_type_unknown';
 import { ArgTypeContextPending } from './arg_type_context_pending';
 import { ArgTypeContextError } from './arg_type_context_error';
 import { findExpressionType } from '../../lib/find_expression_type';
-import { fetchContext, setAstAtIndex } from '../../state/actions/elements';
+import { fetchContext, setArgumentAtIndex } from '../../state/actions/elements';
 import {
   getSelectedElement,
   getSelectedPage,
@@ -29,7 +29,7 @@ const mapStateToProps = (state, { expressionIndex }) => {
 
 const mapDispatchToProps = ({
   fetchContext,
-  setAstAtIndex,
+  setArgumentAtIndex,
 });
 
 const mergeProps = (stateProps, dispatchProps, ownProps) => {
@@ -38,7 +38,12 @@ const mergeProps = (stateProps, dispatchProps, ownProps) => {
 
   const props = Object.assign({}, stateProps, dispatchProps, ownProps, {
     updateContext: () => dispatchProps.fetchContext({ index: expressionIndex }),
-    onValueChange: (ast) => dispatchProps.setAstAtIndex({ ast, element, pageId, index: expressionIndex }),
+    onValueChange: (arg) => dispatchProps.setArgumentAtIndex({
+      arg,
+      element,
+      pageId,
+      index: expressionIndex,
+    }),
   });
 
   if (context == null && contextRequired(expressionType)) {
