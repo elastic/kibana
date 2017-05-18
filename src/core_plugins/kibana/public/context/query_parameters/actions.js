@@ -1,5 +1,6 @@
 import _ from 'lodash';
 
+import { FilterManagerProvider } from 'ui/filter_manager';
 import {
   MAX_CONTEXT_SIZE,
   MIN_CONTEXT_SIZE,
@@ -7,7 +8,9 @@ import {
 } from './constants';
 
 
-export function QueryParameterActionsProvider() {
+export function QueryParameterActionsProvider(courier, Private) {
+  const filterManager = Private(FilterManagerProvider);
+
   const setPredecessorCount = (state) => (predecessorCount) => (
     state.queryParameters.predecessorCount = clamp(
       MIN_CONTEXT_SIZE,
@@ -43,7 +46,15 @@ export function QueryParameterActionsProvider() {
     )
   );
 
+  const addFilter = (state) => async (field, values, operation) => {
+    const indexPatternId = state.queryParameters.indexPatternId;
+    filterManager.add(field, values, operation, indexPatternId);
+    const indexPattern = await courier.indexPatterns.get(indexPatternId);
+    indexPattern.popularizeField(field.name, 1);
+  };
+
   return {
+    addFilter,
     increasePredecessorCount,
     increaseSuccessorCount,
     setPredecessorCount,
