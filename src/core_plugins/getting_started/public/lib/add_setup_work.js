@@ -91,19 +91,13 @@ export function gettingStartedGateCheck(getIds, kbnUrl, config, $route) {
   });
 }
 
-/**
- * This function sets up Angular-injected dependencies and immediately calls
- * gettingStartedGateCheck, which does the actual work.
- */
-function _gettingStartedGateCheck(Private, $injector) {
+// Start out with the chrome not being shown to prevent a flicker by
+// hiding it later
+uiChrome.setVisible(false);
+uiRoutes.addSetupWork((Private, $injector) => {
   const getIds = Private(IndexPatternsGetIdsProvider);
   const kbnUrl = Private(KbnUrlProvider);
   const config = $injector.get('config');
   const $route = $injector.get('$route');
   return gettingStartedGateCheck(getIds, kbnUrl, config, $route);
-}
-
-// Start out with the chrome not being shown to prevent a flicker by
-// hiding it later
-uiChrome.setVisible(false);
-uiRoutes.addSetupWork(_gettingStartedGateCheck);
+});
