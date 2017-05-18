@@ -32,13 +32,24 @@ export function KibanaServerProvider({ getService }) {
       const startMs = Date.now();
       const timeout = config.get('timeouts.kibanaStabilize');
 
-      while (true) {
-        const exists = await uiSettings.existInEs();
-        const state = await status.getOverallState();
+      let exists;
+      let state;
 
-        if (exists && state === 'green') {
-          log.debug(`Kibana uiSettings are in elasticsearch and the server is reporting a green status`);
-          return;
+      while (true) {
+        try {
+          exists = await uiSettings.existInEs();
+          state = await status.getOverallState();
+
+          if (exists && state === 'green') {
+            log.debug(`Kibana uiSettings are in elasticsearch and the server is reporting a green status`);
+            return;
+          }
+        } catch (err) {
+          log.warning(`Failed to check for kibana stabilization: ${err.stack}`);
+        }
+
+        if (Date.now() - startMs >= timeout) {
+          break;
         }
 
         if (firstCheck) {
@@ -46,15 +57,11 @@ export function KibanaServerProvider({ getService }) {
           firstCheck = false;
           log.debug(`waiting up to ${timeout}ms for kibana to stabilize...`);
         }
-
-        if (Date.now() - startMs < timeout) {
-          await delay(pingInterval);
-          continue;
-        }
-
-        const docState = exists ? 'exists' : `doesn't exist`;
-        throw new Error(`Kibana never stabilized: config doc ${docState} and status is ${state}`);
+        await delay(pingInterval);
       }
+
+      const docState = exists ? 'exists' : `doesn't exist`;
+      throw new Error(`Kibana never stabilized: config doc ${docState} and status is ${state}`);
     }
   }
 
