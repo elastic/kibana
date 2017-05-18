@@ -19,7 +19,7 @@ export function VisTypeProvider(Private) {
         },
         requestHandler: 'courier',    // select one from registry or pass a function
         responseHandler: 'none',      // ...
-        editorController: 'default',  // ...
+        editor: 'default',
         editorConfig: {
           //optionTabs: {},          // default editor needs a list of option tabs
           optionsTemplate: '',      // default editor needs an optionsTemplate if optionsTab is not provided
