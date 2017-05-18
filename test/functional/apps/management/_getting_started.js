@@ -3,6 +3,7 @@ import expect from 'expect.js';
 export default ({ getService, getPageObjects }) => {
   const kibanaServer = getService('kibanaServer');
   const esArchiver = getService('esArchiver');
+  const remote = getService('remote');
   const log = getService('log');
 
   const PageObjects = getPageObjects(['common', 'gettingStarted']);
@@ -15,10 +16,14 @@ export default ({ getService, getPageObjects }) => {
       });
 
       describe('when user has not opted out of Getting Started page', () => {
-        it('redirects to the Getting Started page', async () => {
+        before(async () => {
           await PageObjects.common.navigateToUrl('discover', '');
+          await remote.deleteLocalStorageItem('kibana.isGettingStartedOptedOut');
+        });
+
+        it('redirects to the Getting Started page', async () => {
           await PageObjects.common.waitUntilUrlIncludes('getting_started');
-          const isLoaded = await PageObjects.gettingStarted.optOutLinkExists();
+          const isLoaded = await PageObjects.gettingStarted.doesContainerExist();
           expect(isLoaded).to.be(true);
         });
       });
@@ -30,7 +35,7 @@ export default ({ getService, getPageObjects }) => {
 
         it('does not redirect to the Getting Started page', async () => {
           await PageObjects.common.navigateToUrl('discover', '');
-          const isLoaded = await PageObjects.gettingStarted.optOutLinkExists();
+          const isLoaded = await PageObjects.gettingStarted.doesContainerExist();
           expect(isLoaded).to.be(false);
         });
       });
@@ -51,7 +56,7 @@ export default ({ getService, getPageObjects }) => {
 
       it('does not redirect to the Getting Started page', async () => {
         await PageObjects.common.navigateToUrl('discover', '');
-        const isLoaded = await PageObjects.gettingStarted.optOutLinkExists();
+        const isLoaded = await PageObjects.gettingStarted.doesContainerExist();
         expect(isLoaded).to.be(false);
       });
     });
