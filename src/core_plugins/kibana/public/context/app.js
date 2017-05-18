@@ -33,6 +33,7 @@ module.directive('contextApp', function ContextApp() {
       anchorUid: '=',
       columns: '=',
       indexPattern: '=',
+      filters: '=',
       predecessorCount: '=',
       successorCount: '=',
       sort: '=',
@@ -71,22 +72,41 @@ function ContextAppController($scope, config, Private, timefilter) {
   ], (newValues) => this.actions.setAllRows(...newValues));
 
   /**
-   * Sync query parameters to arguments
+   * Sync properties to state
    */
   $scope.$watchCollection(
-    () => _.pick(this, QUERY_PARAMETER_KEYS),
-    (newValues) => {
-      // break the watch cycle
-      if (!_.isEqual(newValues, this.state.queryParameters)) {
-        this.actions.fetchAllRowsWithNewQueryParameters(newValues);
+    () => ({
+      ...(_.pick(this, QUERY_PARAMETER_KEYS)),
+      indexPatternId: this.indexPattern.id,
+    }),
+    (newQueryParameters) => {
+      const { queryParameters } = this.state;
+      if (
+        (newQueryParameters.indexPatternId !== queryParameters.indexPatternId)
+        || (newQueryParameters.anchorUid !== queryParameters.anchorUid)
+        || (!_.isEqual(newQueryParameters.sort, queryParameters.sort))
+      ) {
+        this.actions.fetchAllRowsWithNewQueryParameters(_.cloneDeep(newQueryParameters));
+      } else if (
+        (newQueryParameters.predecessorCount !== queryParameters.predecessorCount)
+        || (newQueryParameters.successorCount !== queryParameters.successorCount)
+        || (!_.isEqual(newQueryParameters.filters, queryParameters.filters))
+      ) {
+        this.actions.fetchContextRowsWithNewQueryParameters(_.cloneDeep(newQueryParameters));
       }
     },
   );
 
+  /**
+   * Sync state to properties
+   */
   $scope.$watchCollection(
-    () => this.state.queryParameters,
-    (newValues) => {
-      _.assign(this, newValues);
+    () => ({
+      predecessorCount: this.state.queryParameters.predecessorCount,
+      successorCount: this.state.queryParameters.successorCount,
+    }),
+    (newParameters) => {
+      _.assign(this, newParameters);
     },
   );
 }

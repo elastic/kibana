@@ -4,7 +4,7 @@ import sinon from 'sinon';
 import expect from 'expect.js';
 import url from 'url';
 
-import serverConfig from '../../../../../test/server_config';
+import { esTestServerUrlParts } from '../../../../../test/es_test_server_url_parts';
 import { ensureEsVersion } from '../ensure_es_version';
 
 describe('plugins/elasticsearch', () => {
@@ -22,7 +22,7 @@ describe('plugins/elasticsearch', () => {
             status: {
               red: sinon.stub()
             },
-            url: url.format(serverConfig.servers.elasticsearch)
+            url: url.format(esTestServerUrlParts)
           }
         }
       };
