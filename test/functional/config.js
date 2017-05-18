@@ -15,6 +15,7 @@ import {
 
 import {
   RemoteProvider,
+  FilterBarProvider,
   FindProvider,
   RetryProvider,
   TestSubjectsProvider,
@@ -55,6 +56,7 @@ export default async function ({ readConfigFile }) {
       esArchiver: commonConfig.get('services.esArchiver'),
       kibanaServer: commonConfig.get('services.kibanaServer'),
       remote: RemoteProvider,
+      filterBar: FilterBarProvider,
       find: FindProvider,
       retry: RetryProvider,
       testSubjects: TestSubjectsProvider,
