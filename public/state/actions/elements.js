@@ -8,7 +8,7 @@ import { fromExpression, toExpression } from '../../../common/lib/ast';
 import * as args from './resolved_args';
 
 // exported actions, used by reducers
-export const setAstAndExpression = createAction('setElementAstAndExpression');
+export const setElementExpression = createAction('setElementExpression');
 
 export const fetchContext = createAction('fetchContext', ({ element, index }) => {
   const invalidAst = !Array.isArray(element.ast.chain);
@@ -73,7 +73,7 @@ export const fetchRenderable = () => (dispatch, getState) => {
 export const setAst = ({ ast, element, pageId }) => (dispatch) => {
   const expression = toExpression(ast);
   if (element.expression === expression && isEqual(element.ast, ast)) return;
-  dispatch(setAstAndExpression({ expression, ast, element, pageId }));
+  dispatch(setElementExpression({ expression, element, pageId }));
   dispatch(fetchRenderable());
 };
 
@@ -86,7 +86,6 @@ export const setExpression = ({ expression, element, pageId }) => (dispatch) => 
   const ast = fromExpression(expression);
   if (element.expression === expression && isEqual(element.ast, ast)) return;
   dispatch(args.clear({ path: [ element.id, 'expressionContext' ] }));
-  dispatch(setAstAndExpression({ expression, ast, element, pageId }));
+  dispatch(setElementExpression({ expression, element, pageId }));
   dispatch(fetchRenderable());
 };
-
