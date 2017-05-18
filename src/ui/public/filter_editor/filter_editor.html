@@ -13,16 +13,26 @@
   </div>
 
   <div class="kuiModalBody">
-    <div
-      ng-show="filterEditor.showQueryDslEditor()"
-      json-input
-      require-keys="true"
-      ui-ace="{
-        mode: 'json',
-        onLoad: aceLoaded
-      }"
-      ng-model="filterEditor.queryDsl"
-    ></div>
+    <div ng-show="filterEditor.showQueryDslEditor()">
+      <div
+        json-input
+        require-keys="true"
+        ui-ace="{
+          mode: 'json',
+          onLoad: aceLoaded
+        }"
+        ng-model="filterEditor.queryDsl"
+      ></div>
+      <div
+        ng-show="filterEditor.isEditingQueryDsl"
+        ng-click="filterEditor.isEditingQueryDsl = false"
+      >
+        <button class="kuiMenuButton kuiMenuButton--basic">
+          <span class="kuiMenuButton__icon kuiIcon fa-chevron-left"></span>
+          <span>Back</span>
+        </button>
+      </div>
+    </div>
 
     <div
       class="kuiFieldGroup kuiVerticalRhythm"
@@ -181,19 +191,10 @@
 
       <button
         class="kuiMenuButton kuiMenuButton--basic"
-        ng-show="filterEditor.isEditingQueryDsl"
-        ng-click="filterEditor.isEditingQueryDsl = false"
-      >
-        <span class="kuiMenuButton__icon kuiIcon fa-chevron-left"></span>
-        <span>Back</span>
-      </button>
-
-      <button
-        class="kuiMenuButton kuiMenuButton--basic"
         ng-hide="filterEditor.isPinned"
         ng-click="filterEditor.isPinned = true"
       >
-        <span>Pin across pages</span>
+        <span>Pin</span>
       </button>
 
       <button
@@ -201,7 +202,7 @@
         ng-show="filterEditor.isPinned"
         ng-click="filterEditor.isPinned = false"
       >
-        <span>Un-pin across pages</span>
+        <span>Unpin</span>
       </button>
 
       <button
@@ -209,7 +210,7 @@
         ng-hide="filterEditor.isDisabled"
         ng-click="filterEditor.isDisabled = true"
       >
-        <span>Toggle to disabled</span>
+        <span>Disable</span>
       </button>
 
       <button
@@ -217,7 +218,7 @@
         ng-show="filterEditor.isDisabled"
         ng-click="filterEditor.isDisabled = false"
       >
-        <span>Toggle to enabled</span>
+        <span>Enable</span>
       </button>
     </div>
   </div>

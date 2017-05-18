@@ -62,6 +62,25 @@
   </div>
 
   <div
+    class="filter-link pull-right"
+    ng-show="filters.length > 1"
+  >
+    <div class="filter-description small">
+      <a ng-click="showFilterActions = !showFilterActions">
+        Actions
+        <span
+          class="fa"
+          ng-class="{
+            'fa-caret-down': showFilterActions,
+            'fa-caret-right': !showFilterActions
+          }"
+          data-test-subj="showFilterActions"
+        ></span>
+      </a>
+    </div>
+  </div>
+
+  <div
     class="filter-edit-container"
     ng-if="editingFilter"
   >
@@ -72,5 +91,37 @@
       on-save="saveEdit(filter, isPinned)"
       on-cancel="cancelEdit()"
     ></filter-editor>
+  </div>
+</div>
+
+<div
+  class="filter-bar filter-bar-condensed"
+  ng-show="filters.length > 1 && showFilterActions"
+>
+  <div class="filter-actions-all">
+    <div class="filter-link">
+      <div class="filter-description"><strong>All filters:</strong></div>
+    </div>
+      <div class="filter-link">
+        <div class="filter-description"><a ng-click="toggleAll(false)">Enable</a></div>
+      </div>
+    <div class="filter-link">
+      <div class="filter-description"><a ng-click="toggleAll(true)">Disable</a></div>
+    </div>
+    <div class="filter-link">
+      <div class="filter-description"><a ng-click="pinAll(true)">Pin</a></div>
+    </div>
+    <div class="filter-link">
+      <div class="filter-description"><a ng-click="pinAll(false)">Unpin</a></div>
+    </div>
+    <div class="filter-link">
+      <div class="filter-description"><a ng-click="invertAll()">Invert</a></div>
+    </div>
+    <div class="filter-link">
+      <div class="filter-description"><a ng-click="toggleAll()">Toggle</a></div>
+    </div>
+    <div class="filter-link">
+      <div class="filter-description"><a ng-click="removeAll()" data-test-subj="removeAllFilters">Remove</a></div>
+    </div>
   </div>
 </div>
