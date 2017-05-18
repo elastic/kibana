@@ -114,12 +114,13 @@ module.exports = new Fn({
       const result = {
         label: label,
         data: series.map(point => {
+          const attrs = {};
           const x = context.columns.x.type === 'string' ? ticks.x.hash[point.x] : point.x;
           const y = context.columns.y.type === 'string' ? ticks.y.hash[point.y] : point.y;
 
-          const size = point.size;
-          //const size = point.size;
-          return [x, y, size];
+          if (point.size != null) attrs.size = point.size;
+
+          return [x, y, attrs];
         }),
       };
 

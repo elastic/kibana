@@ -56,6 +56,7 @@ const defaultOptions = {
 function drawbubbleDefault(ctx, series, x, y, radius, c) {
   ctx.fillStyle = c;
   ctx.strokeStyle = c;
+
   ctx.lineWidth = series.bubbles.lineWidth;
   ctx.beginPath();
 
@@ -81,7 +82,7 @@ function init(plot) {
 
   function drawSeries(plot, ctx, series) {
     // Actually need to calculate the min/max for the entire set up here, not on an individual series basis;
-    const allSizes = map(flatten(map(plot.getData(), 'data')), 2);
+    const allSizes = map(map(flatten(map(plot.getData(), 'data')), 2), 'size');
     const minPoint = min(allSizes);
     const maxPoint = max(allSizes);
 
@@ -92,11 +93,16 @@ function init(plot) {
       function drawPoint(point) {
         const x = offset.left + series.xaxis.p2c(point[0]);
         const y = offset.top + series.yaxis.p2c(point[1]);
-        const size = point[2];
+        const size = point[2].size;
 
-        // r = radius. We need to calculate a min/max here
-        const radius = (series.bubbles.size.max - series.bubbles.size.min) /
-          (maxPoint - minPoint) * (size - minPoint) + series.bubbles.size.min || 1;
+        const delta = maxPoint - minPoint;
+        const radius = (function () {
+          if (size == null) return 0; // If there is no size, draw nothing
+          if (delta === 0) return series.bubbles.size.min; // If there is no difference between the min and the max, draw the minimum bubble.
+
+          // Otherwise draw something between the min and max acceptable radius.
+          return ((series.bubbles.size.max - series.bubbles.size.min) / delta * (size - minPoint) + series.bubbles.size.min);
+        }());
 
         const color = series.color === 'function' ? series.color.apply(this, point) : series.color;
 

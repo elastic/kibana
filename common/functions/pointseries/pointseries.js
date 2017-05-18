@@ -61,11 +61,15 @@ module.exports = new Fn({
     function isMeasure(mathExpression) {
       if (isColumnReference(mathExpression)) return false;
       const parsedMath = math.parse(mathExpression);
-      if (parsedMath.type !== 'FunctionNode') {
+
+      if (parsedMath.type !== 'FunctionNode' && parsedMath.type !== 'ConstantNode') {
         throw new Error ('Expressions must be wrapped in a function such as sum()');
       }
 
+      if (parsedMath.type !== 'ConstantNode') return true;
+
       // This will throw if the field isn't found on scope.
+      // Must be a function node!
       const evaluated = math.eval(mathExpression, mathScope);
       if (typeof evaluated !== 'number') return false;
 
@@ -91,7 +95,7 @@ module.exports = new Fn({
 
     // Dimensions. There's probably a better way todo this
     // const dimensionNames = Object.keys(pickBy(args, val => typeof val === 'string'));
-    const dimensionNames = Object.keys(pickBy(args, val => !isMeasure(val)));
+    const dimensionNames = Object.keys(pickBy(args, val => !isMeasure(val))).filter(arg => args[arg] != null);
     const result = context.rows.map((row, i) => {
       const newRow = { _rowId: row._rowId };
       dimensionNames.forEach(dimension =>
