@@ -1,6 +1,6 @@
 import { createStore, combineReducers, applyMiddleware, compose } from 'redux';
 import thunkMiddleware from 'redux-thunk';
-import { middleware as promiseMiddleware } from 'redux-promise-actions';
+import persistState from 'redux-localstorage';
 import reduceReducers from 'reduce-reducers';
 import { uiModules } from 'ui/modules';
 import getInitialState from './initial_state';
@@ -13,6 +13,7 @@ import elementsReducer from './reducers/elements';
 const app = uiModules.get('apps/canvas');
 
 app.service('$store', (kbnVersion, basePath) => {
+  const storageKey = 'canvas';
   const initialState = getInitialState();
 
   // Set the defaults from Kibana plugin
@@ -31,7 +32,7 @@ app.service('$store', (kbnVersion, basePath) => {
 
   const middleware = compose(
     applyMiddleware(thunkMiddleware),
-    applyMiddleware(promiseMiddleware)
+    persistState('persistent', { key: storageKey })
   );
   const store = createStore(rootReducer, initialState, middleware);
 

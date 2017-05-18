@@ -37,7 +37,7 @@
     "reduce-reducers": "^0.1.2",
     "redux": "^3.6.0",
     "redux-actions": "^2.0.2",
-    "redux-promise-actions": "^0.5.1",
+    "redux-localstorage": "^0.4.1",
     "redux-thunk": "^2.2.0",
     "socket.io": "^1.7.3",
     "uuid": "^3.0.1"
