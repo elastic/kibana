@@ -1,5 +1,5 @@
 import _ from 'lodash';
-import { SavedObjectNotFound, DuplicateField } from 'ui/errors';
+import { SavedObjectNotFound, DuplicateField, IndexPatternMissingIndices } from 'ui/errors';
 import angular from 'angular';
 import { getComputedFields } from 'ui/index_patterns/_get_computed_fields';
 import { formatHit } from 'ui/index_patterns/_format_hit';
@@ -372,6 +372,10 @@ export function IndexPatternProvider(Private, Notifier, config, kbnIndex, Promis
         // we still want to notify the user that there is a problem
         // but we do not want to potentially make any pages unusable
         // so do not rethrow the error here
+        if (err instanceof IndexPatternMissingIndices) {
+          return;
+        }
+        return Promise.reject(err);
       });
     }
 
