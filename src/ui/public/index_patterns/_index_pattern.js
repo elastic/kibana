@@ -366,7 +366,12 @@ export function IndexPatternProvider(Private, Notifier, config, kbnIndex, Promis
       .then(() => this.save())
       .catch((err) => {
         notify.error(err);
-        return Promise.reject(err);
+        // https://github.com/elastic/kibana/issues/9224
+        // This call will attempt to remap fields from the matching
+        // ES index which may not actually exist. In that scenario,
+        // we still want to notify the user that there is a problem
+        // but we do not want to potentially make any pages unusable
+        // so do not rethrow the error here
       });
     }
 
