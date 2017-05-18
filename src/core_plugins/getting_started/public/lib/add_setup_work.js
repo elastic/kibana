@@ -17,6 +17,7 @@ uiRoutes
     const kbnUrl = Private(KbnUrlProvider);
     const config = $injector.get('config');
     const $route = $injector.get('$route');
+    const Promise = $injector.get('Promise');
 
     const currentRoute = get($route, 'current.$$route');
 
@@ -68,14 +69,14 @@ uiRoutes
         });
         notify.error('Please create a new index pattern');
         kbnUrl.change(CREATE_INDEX_PATTERN_ROUTE);
-        return;
+        return Promise.halt(); //prevent route resolve
       }
 
       // Redirect the user to the Getting Started page (unless they are on it already)
       if (!isOnGettingStartedPage) {
         uiChrome.setVisible(false);
         kbnUrl.change(GETTING_STARTED_ROUTE);
-        return;
+        return Promise.halt(); //prevent route resolve
       }
     });
   });
