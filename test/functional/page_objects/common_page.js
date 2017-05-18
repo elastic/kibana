@@ -92,15 +92,6 @@ export function CommonPageProvider({ getService, getPageObjects, getPageObject }
               return currentUrl;
             }
           })
-          .then(async function (currentUrl) {
-            const gettingStartedPage = getPageObject('gettingStarted');
-            if (await gettingStartedPage.doesContainerExist()) {
-              await gettingStartedPage.optOut();
-              throw new Error('Retrying after receiving Getting Started page');
-            }
-
-            return currentUrl;
-          })
           .then(function (currentUrl) {
             currentUrl = currentUrl.replace(/\/\/\w+:\w+@/, '//');
             const maxAdditionalLengthOnNavUrl = 230;
@@ -153,6 +144,15 @@ export function CommonPageProvider({ getService, getPageObjects, getPageObject }
               }
             });
           });
+        })
+        .then(async function (currentUrl) {
+          const gettingStartedPage = getPageObject('gettingStarted');
+          if (await gettingStartedPage.doesContainerExist()) {
+            await gettingStartedPage.optOut();
+            throw new Error('Retrying after receiving Getting Started page');
+          }
+
+          return currentUrl;
         })
         .then(async () => {
           if (appName === 'status_page') return;
