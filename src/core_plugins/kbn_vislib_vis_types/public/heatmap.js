@@ -1,21 +1,20 @@
-import { VisTypeFactoryProvider } from 'ui/vis/vis_type';
-import { VislibVisTypeFactoryProvider } from 'ui/vis/vis_types/vislib_vis_type';
+import { VisFactoryProvider } from 'ui/vis/vis_factory';
 import { VisSchemasProvider } from 'ui/vis/schemas';
+import { CATEGORY } from 'ui/vis/vis_category';
 import heatmapTemplate from 'plugins/kbn_vislib_vis_types/editors/heatmap.html';
 import { vislibColorMaps } from 'ui/vislib/components/color/colormaps';
 import image from './images/icon-heatmap.svg';
 
 export default function HeatmapVisType(Private) {
-  const VisTypeFactory = Private(VisTypeFactoryProvider);
-  const VislibVisTypeFactory = Private(VislibVisTypeFactoryProvider);
+  const VisFactory = Private(VisFactoryProvider);
   const Schemas = Private(VisSchemasProvider);
 
-  return new VislibVisTypeFactory({
+  return VisFactory.createVislibVisualization({
     name: 'heatmap',
     title: 'Heat Map',
     image,
     description: 'Shade cells within a matrix',
-    category: VisTypeFactory.CATEGORY.BASIC,
+    category: CATEGORY.BASIC,
     visConfig: {
       defaults: {
         type: 'heatmap',

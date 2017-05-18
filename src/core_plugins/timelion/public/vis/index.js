@@ -1,8 +1,8 @@
-import { VisTypeFactoryProvider } from 'ui/vis/vis_type';
+import { VisFactoryProvider } from 'ui/vis/vis_factory';
+import { CATEGORY } from 'ui/vis/vis_category';
 import image from '../images/icon-timelion.svg';
 import { VisTypesRegistryProvider } from 'ui/registry/vis_types';
 import { RequestHandlersRegistryProvider } from 'ui/registry/request_handlers';
-import { AngularVisTypeFactoryProvider } from 'ui/vis/vis_types/angular_vis_type';
 import { TimelionRequestHandlerProvider } from './timelion_request_handler';
 
 define(function (require) {
@@ -18,17 +18,16 @@ define(function (require) {
   RequestHandlersRegistryProvider.register(TimelionRequestHandlerProvider);
 
   function TimelionVisProvider(Private) {
-    const VisTypeFactory = Private(VisTypeFactoryProvider);
-    const AngularVisTypeFactory = Private(AngularVisTypeFactoryProvider);
+    const VisFactory = Private(VisFactoryProvider);
 
     // return the visType object, which kibana will use to display and configure new
     // Vis object of this type.
-    return new AngularVisTypeFactory({
+    return VisFactory.createAngularVisualization({
       name: 'timelion',
       title: 'Timelion',
       image,
       description: 'Build time-series using functional expressions',
-      category: VisTypeFactory.CATEGORY.TIME,
+      category: CATEGORY.TIME,
       visConfig: {
         defaults: {
           expression: '.es(*)',

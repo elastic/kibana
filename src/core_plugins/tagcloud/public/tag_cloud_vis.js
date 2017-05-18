@@ -1,24 +1,23 @@
 import 'plugins/tagcloud/tag_cloud.less';
 import 'plugins/tagcloud/tag_cloud_controller';
 import 'plugins/tagcloud/tag_cloud_vis_params';
-import { VisTypeFactoryProvider } from 'ui/vis/vis_type';
-import { AngularVisTypeFactoryProvider } from 'ui/vis/vis_types/angular_vis_type';
+import { VisFactoryProvider } from 'ui/vis/vis_factory';
+import { CATEGORY } from 'ui/vis/vis_category';
 import { VisSchemasProvider } from 'ui/vis/schemas';
 import tagCloudTemplate from 'plugins/tagcloud/tag_cloud_controller.html';
 import { VisTypesRegistryProvider } from 'ui/registry/vis_types';
 import image from './images/icon-tagcloud.svg';
 
 VisTypesRegistryProvider.register(function TagCloudProvider(Private) {
-  const VisTypeFactory = Private(VisTypeFactoryProvider);
-  const AngularVisTypeFactory = Private(AngularVisTypeFactoryProvider);
+  const VisFactory = Private(VisFactoryProvider);
   const Schemas = Private(VisSchemasProvider);
 
-  return new AngularVisTypeFactory({
+  return VisFactory.createAngularVisualization({
     name: 'tagcloud',
     title: 'Tag Cloud',
     image,
     description: 'A group of words, sized according to their importance',
-    category: VisTypeFactory.CATEGORY.OTHER,
+    category: CATEGORY.OTHER,
     visConfig: {
       defaults: {
         scale: 'linear',

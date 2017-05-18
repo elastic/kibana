@@ -1,20 +1,19 @@
-import { VisTypeFactoryProvider } from 'ui/vis/vis_type';
-import { VislibVisTypeFactoryProvider } from 'ui/vis/vis_types/vislib_vis_type';
+import { VisFactoryProvider } from 'ui/vis/vis_factory';
 import { VisSchemasProvider } from 'ui/vis/schemas';
+import { CATEGORY } from 'ui/vis/vis_category';
 import pointSeriesTemplate from 'plugins/kbn_vislib_vis_types/editors/point_series.html';
 import image from './images/icon-area.svg';
 
 export default function PointSeriesVisType(Private) {
-  const VisTypeFactory = Private(VisTypeFactoryProvider);
-  const VislibVisTypeFactory = Private(VislibVisTypeFactoryProvider);
+  const VisFactory = Private(VisFactoryProvider);
   const Schemas = Private(VisSchemasProvider);
 
-  return new VislibVisTypeFactory({
+  return VisFactory.createVislibVisualization({
     name: 'area',
     title: 'Area',
     image,
     description: 'Emphasize the quantity beneath a line chart',
-    category: VisTypeFactory.CATEGORY.BASIC,
+    category: CATEGORY.BASIC,
     visConfig: {
       defaults: {
         type: 'area',

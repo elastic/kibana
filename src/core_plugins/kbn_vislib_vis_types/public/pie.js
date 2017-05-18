@@ -1,20 +1,19 @@
-import { VisTypeFactoryProvider } from 'ui/vis/vis_type';
-import { VislibVisTypeFactoryProvider } from 'ui/vis/vis_types/vislib_vis_type';
+import { VisFactoryProvider } from 'ui/vis/vis_factory';
 import { VisSchemasProvider } from 'ui/vis/schemas';
+import { CATEGORY } from 'ui/vis/vis_category';
 import pieTemplate from 'plugins/kbn_vislib_vis_types/editors/pie.html';
 import image from './images/icon-pie.svg';
 
 export default function HistogramVisType(Private) {
-  const VisTypeFactory = Private(VisTypeFactoryProvider);
-  const VislibVisTypeFactory = Private(VislibVisTypeFactoryProvider);
+  const VisFactory = Private(VisFactoryProvider);
   const Schemas = Private(VisSchemasProvider);
 
-  return new VislibVisTypeFactory({
+  return VisFactory.createVislibVisualization({
     name: 'pie',
     title: 'Pie',
     image,
     description: 'Compare parts of a whole',
-    category: VisTypeFactory.CATEGORY.BASIC,
+    category: CATEGORY.BASIC,
     visConfig: {
       defaults: {
         type: 'pie',

@@ -4,16 +4,16 @@ import 'plugins/kbn_vislib_vis_types/controls/point_series_options';
 import 'plugins/kbn_vislib_vis_types/controls/line_interpolation_option';
 import 'plugins/kbn_vislib_vis_types/controls/heatmap_options';
 import 'plugins/kbn_vislib_vis_types/controls/point_series';
-import { VisTypeFactoryProvider } from 'ui/vis/vis_type';
+import { VisTypeProvider } from './base_vis_type';
 import { AggResponsePointSeriesProvider } from 'ui/agg_response/point_series/point_series';
 import VislibProvider from 'ui/vislib';
 
-export function VislibVisTypeFactoryProvider(Private) {
-  const VisTypeFactory = Private(VisTypeFactoryProvider);
+export function VislibVisTypeProvider(Private) {
+  const VisType = Private(VisTypeProvider);
   const pointSeries = Private(AggResponsePointSeriesProvider);
   const vislib = Private(VislibProvider);
 
-  class VislibVisTypeFactory extends VisTypeFactory {
+  class VislibVisType extends VisType {
     constructor(opts) {
       if (!opts.responseHandler) {
         opts.responseHandler = 'basic';
@@ -50,5 +50,5 @@ export function VislibVisTypeFactoryProvider(Private) {
     }
   }
 
-  return VislibVisTypeFactory;
+  return VislibVisType;
 }

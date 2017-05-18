@@ -1,13 +1,13 @@
 import 'ui/vislib';
 import 'plugins/kbn_vislib_vis_types/controls/vislib_basic_options';
-import { VisTypeFactoryProvider } from 'ui/vis/vis_type';
+import { VisTypeProvider } from 'ui/vis/vis_types';
 import MapsVisTypeMapsRenderbotProvider from './maps_renderbot';
 
 export function MapsVisTypeFactoryProvider(Private) {
-  const VisTypeFactory = Private(VisTypeFactoryProvider);
+  const VisType = Private(VisTypeProvider);
   const MapsRenderbot = Private(MapsVisTypeMapsRenderbotProvider);
 
-  class MapsVisTypeFactory extends VisTypeFactory {
+  class MapsVisTypeFactory extends VisType {
     constructor(opts) {
       if (!opts.responseHandler) {
         opts.responseHandler = 'basic';

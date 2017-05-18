@@ -1,20 +1,19 @@
-import { VisTypeFactoryProvider } from 'ui/vis/vis_type';
-import { VislibVisTypeFactoryProvider } from 'ui/vis/vis_types/vislib_vis_type';
+import { VisFactoryProvider } from 'ui/vis/vis_factory';
 import { VisSchemasProvider } from 'ui/vis/schemas';
+import { CATEGORY } from 'ui/vis/vis_category';
 import pointSeriesTemplate from 'plugins/kbn_vislib_vis_types/editors/point_series.html';
 import image from './images/icon-horizontal.svg';
 
 export default function PointSeriesVisType(Private) {
-  const VisTypeFactory = Private(VisTypeFactoryProvider);
-  const VislibVisTypeFactory = Private(VislibVisTypeFactoryProvider);
+  const VisFactory = Private(VisFactoryProvider);
   const Schemas = Private(VisSchemasProvider);
 
-  return new VislibVisTypeFactory({
+  return VisFactory.createVislibVisualization({
     name: 'horizontal_bar',
     title: 'Horizontal Bar',
     image,
     description: 'Assign a continuous variable to each axis',
-    category: VisTypeFactory.CATEGORY.BASIC,
+    category: CATEGORY.BASIC,
     visConfig: {
       defaults: {
         type: 'histogram',

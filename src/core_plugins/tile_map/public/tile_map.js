@@ -1,5 +1,5 @@
 import { supports } from 'ui/utils/supports';
-import { VisTypeFactoryProvider } from 'ui/vis/vis_type';
+import { CATEGORY } from 'ui/vis/vis_category';
 import { MapsVisTypeFactoryProvider } from './maps_vis_type';
 import { VisSchemasProvider } from 'ui/vis/schemas';
 import { AggResponseGeoJsonProvider } from 'ui/agg_response/geo_json/geo_json';
@@ -8,8 +8,6 @@ import image from './images/icon-tilemap.svg';
 import { VisTypesRegistryProvider } from 'ui/registry/vis_types';
 
 VisTypesRegistryProvider.register(function TileMapVisType(Private, getAppState, courier, config) {
-
-  const VisTypeFactory = Private(VisTypeFactoryProvider);
   const MapsVisTypeFactory = Private(MapsVisTypeFactoryProvider);
   const Schemas = Private(VisSchemasProvider);
   const geoJsonConverter = Private(AggResponseGeoJsonProvider);
@@ -19,7 +17,7 @@ VisTypesRegistryProvider.register(function TileMapVisType(Private, getAppState, 
     title: 'Tile Map',
     image,
     description: 'Plot latitude and longitude coordinates on a map',
-    category: VisTypeFactory.CATEGORY.MAP,
+    category: CATEGORY.MAP,
     visConfig: {
       defaults: {
         mapType: 'Scaled Circle Markers',
