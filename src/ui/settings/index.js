@@ -68,6 +68,13 @@ export default function setupSettings(kbnServer, server, config) {
     assertRequest(req);
     const { callWithRequest, errors } = server.plugins.elasticsearch;
 
+    // If the ui settings status isn't green, we shouldn't be attempting to get
+    // user settings, since we can't be sure that all the necessary conditions
+    // (e.g. elasticsearch being available) are met.
+    if (status.state !== 'green') {
+      return hydrateUserSettings({});
+    }
+
     const params = getClientSettings(config);
     const allowedErrors = [errors[404], errors[403], errors.NoConnections];
     if (ignore401Errors) allowedErrors.push(errors[401]);

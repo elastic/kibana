@@ -81,13 +81,20 @@ module.exports = function (plugin, server) {
     });
   }
 
+  function waitForEsVersion() {
+    return checkEsVersion(server, kibanaVersion.get()).catch(err => {
+      plugin.status.red(err);
+      return Promise.delay(REQUEST_DELAY).then(waitForEsVersion);
+    });
+  }
+
   function setGreenStatus() {
     return plugin.status.green('Kibana index ready');
   }
 
   function check() {
     return waitForPong()
-    .then(() => checkEsVersion(server, kibanaVersion.get()))
+    .then(waitForEsVersion)
     .then(waitForShards)
     .then(setGreenStatus)
     .then(_.partial(migrateConfig, server))
