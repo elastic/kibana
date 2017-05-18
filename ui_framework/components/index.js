@@ -6,6 +6,8 @@ export {
   KuiSubmitButton,
 } from './button';
 
+export { KuiInfoButton } from './info_button';
+
 export {
   KuiLocalNav,
   KuiLocalNavRow,
