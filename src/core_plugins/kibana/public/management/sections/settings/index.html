@@ -21,10 +21,10 @@
       </div>
     </div>
 
-    <!-- Search -->
-    <form
-      role="form"
-      class="kuiVerticalRhythm"
+    <!-- Search and Import/Export -->
+    <div
+      class="kuiToolBar kuiVerticalRhythm"
+      ng-if="!importState.isImporting()"
     >
       <div class="kuiSearchInput">
         <div class="kuiSearchInput__icon kuiIcon fa-search"></div>
@@ -36,10 +36,19 @@
           placeholder="Filter..."
         >
       </div>
-    </form>
+      <div class="kuiToolBarSection">
+        <advanced-import-controls></advanced-import-controls>
+      </div>
+    </div>
+
+    <!-- Post-import screen -->
+    <advanced-import></advanced-import>
 
     <!-- Settings table -->
-    <table class="kuiTable kuiVerticalRhythm">
+    <table
+      class="kuiTable kuiVerticalRhythm"
+      ng-if="!importState.isImporting()"
+    >
       <thead>
         <tr>
           <th class="kuiTableHeaderCell">

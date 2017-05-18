@@ -1,0 +1,179 @@
+<div
+  class="kuiVerticalRhythm"
+  ng-if="importState.isImporting()"
+>
+  <!-- Notice -->
+  <div
+    class="kuiVerticalRhythm kuiInfoPanel kuiInfoPanel--info"
+    ng-if="importState.getSettings().length"
+  >
+    <div class="kuiInfoPanelHeader">
+      <span class="kuiInfoPanelHeader__icon kuiIcon kuiIcon--info fa-info"></span>
+      <span class="kuiInfoPanelHeader__title">
+        Imported Settings
+      </span>
+    </div>
+
+    <div class="kuiInfoPanelBody">
+      <div class="kuiInfoPanelBody__message">
+        Please review the following settings. All settings are imported by default but you can
+        manage them individually in the table below.
+      </div>
+      <div class="kuiInfoPanelBody__message">
+        Hit the Done button to go back to the Advanced Settings page.
+      </div>
+    </div>
+  </div>
+
+  <!-- No settings error -->
+  <div
+    class="kuiVerticalRhythm kuiInfoPanel kuiInfoPanel--error"
+    ng-if="!importState.getSettings().length"
+  >
+    <div class="kuiInfoPanelHeader">
+      <span class="kuiInfoPanelHeader__icon kuiIcon kuiIcon--error fa-warning"></span>
+      <span class="kuiInfoPanelHeader__title">
+        No changed settings found.
+      </span>
+    </div>
+
+    <div class="kuiInfoPanelBody">
+      <div class="kuiInfoPanelBody__message">
+        We did not find any changed settings from the imported settings file.
+      </div>
+    </div>
+  </div>
+
+  <!-- Import/Abandon All Buttons -->
+  <div
+    class="kuiVerticalRhythm"
+    ng-if="importState.getSettings().length"
+  >
+    <!--<button
+      class="kuiButton kuiButton--basic"
+      ng-click="importAllSettings()"
+    >
+      <span class="kuiButton__inner">
+        <span>Import All</span>
+      </span>
+    </button>-->
+    <button
+      class="kuiButton kuiButton--danger"
+      ng-click="abandonAllSettings()"
+    >
+      <span class="kuiButton__inner">
+        <span>Abandon All</span>
+      </span>
+    </button>
+  </div>
+
+  <!-- Settings table -->
+  <table
+    class="kuiTable kuiVerticalRhythm"
+    ng-if="importState.getSettings().length"
+  >
+    <thead>
+      <tr>
+        <th class="kuiTableHeaderCell">
+          Name
+        </th>
+        <th class="kuiTableHeaderCell">
+          Old Value
+        </th>
+        <th class="kuiTableHeaderCell">
+          New Value
+        </th>
+        <th
+          class="kuiTableHeaderCell"
+          style="width: 50px"
+        >
+          Status
+        </th>
+        <th
+          class="kuiTableHeaderCell kuiTableHeaderCell--alignRight"
+          style="width: 180px"
+        >
+          Actions
+        </th>
+      </tr>
+    </thead>
+
+    <tbody>
+      <tr
+        class="kuiTableRow"
+        ng-repeat="setting in importState.getSettings()"
+      >
+        <td class="kuiTableRowCell kuiTableRowCell--wrap">
+          <div class="kuiTableRowCell__liner">
+            {{setting.name}}
+            <p
+              class="kuiSubText kuiVerticalRhythmSmall"
+              ng-bind-html="setting.config.description | trustAsHtml"
+            ></p>
+          </div>
+        </td>
+        <td class="kuiTableRowCell kuiTableRowCell--wrap">
+          <div class="kuiTableRowCell__liner">
+            {{setting.oldValue}}
+          </div>
+        </td>
+        <td class="kuiTableRowCell kuiTableRowCell--wrap">
+          <div class="kuiTableRowCell__liner">
+            {{setting.value}}
+          </div>
+        </td>
+        <td class="kuiTableRowCell kuiTableRowCell--wrap">
+          <div class="kuiTableRowCell__liner">
+            <div
+              class="kuiIcon kuiIcon--warning fa-bolt"
+              ng-if="!setting.isValid"
+            >
+            </div>
+            <div
+              class="kuiIcon kuiIcon--success fa-check"
+              ng-if="importState.hasBeenImported(setting)"
+            >
+            </div>
+            <div
+              class="kuiIcon kuiIcon--inactive fa-circle-o"
+              ng-if="importState.hasBeenAbandoned(setting)"
+            >
+            </div>
+          </div>
+        </td>
+        <td class="kuiTableRowCell kuiTableRowCell--alignRight">
+          <div class="kuiTableRowCell__liner">
+            <div class="kuiMenuButtonGroup kuiMenuButtonGroup--alignRight">
+              <button
+                class="kuiMenuButton kuiMenuButton--basic"
+                ng-click="importSetting(setting)"
+                ng-disabled="importState.hasBeenImported(setting)"
+              >
+                Import
+              </button>
+              <button
+                class="kuiMenuButton kuiMenuButton--danger"
+                ng-click="abandonSetting(setting)"
+                ng-disabled="importState.hasBeenAbandoned(setting)"
+              >
+                Abandon
+              </button>
+            </div>
+          </div>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <!-- Done button -->
+  <div class="kuiVerticalRhythm">
+    <button
+      class="kuiButton kuiButton--primary"
+      ng-click="done()"
+    >
+      <span class="kuiButton__inner">
+        <span>Done</span>
+      </span>
+    </button>
+  </div>
+</div>

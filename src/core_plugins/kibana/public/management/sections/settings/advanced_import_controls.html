@@ -1,0 +1,25 @@
+<div>
+  <button
+    class="kuiButton kuiButton--basic kuiButton--iconText"
+    ng-click="export()"
+  >
+    <span class="kuiButton__inner">
+      <span aria-hidden="true" class="kuiButton__icon kuiIcon fa-download"></span>
+      <span>Export</span>
+    </span>
+  </button>
+  <file-upload
+    on-read="import(fileContents)"
+    upload-selector="[data-import-saved-objects-button]"
+  >
+    <button
+      class="kuiButton kuiButton--basic kuiButton--iconText"
+      data-import-saved-objects-button
+    >
+      <span class="kuiButton__inner">
+        <span aria-hidden="true" class="kuiButton__icon kuiIcon fa-upload"></span>
+        <span>Import</span>
+      </span>
+    </button>
+  </file-upload>
+</div>

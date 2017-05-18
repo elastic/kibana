@@ -1,6 +1,9 @@
 import _ from 'lodash';
 import { toEditableConfig } from 'plugins/kibana/management/sections/settings/lib/to_editable_config';
 import 'plugins/kibana/management/sections/settings/advanced_row';
+import 'plugins/kibana/management/sections/settings/advanced_import';
+import 'plugins/kibana/management/sections/settings/advanced_import_controls';
+import { AdvancedImportState } from 'plugins/kibana/management/sections/settings/advanced_import_state.js';
 import { management } from 'ui/management';
 import uiRoutes from 'ui/routes';
 import { uiModules } from 'ui/modules';
@@ -12,7 +15,9 @@ uiRoutes
 });
 
 uiModules.get('apps/management')
-.directive('kbnManagementAdvanced', function (config) {
+.directive('kbnManagementAdvanced', function (config, Private) {
+  const advancedImportState = Private(AdvancedImportState);
+
   return {
     restrict: 'E',
     link: function ($scope) {
@@ -35,6 +40,8 @@ uiModules.get('apps/management')
         const writable = _.reject(editable, 'readonly');
         $scope.configs = writable;
       }
+
+      $scope.importState = advancedImportState;
     }
   };
 });
