@@ -1,6 +1,7 @@
 import { createAction } from 'redux-actions';
 import { isEqual } from 'lodash';
 import { set } from 'object-path-immutable';
+import { getSelectedElement } from '../selectors/workpad';
 import { interpretAst } from '../../lib/interpreter';
 import { getType } from '../../../common/types/get_type';
 import { fromExpression, toExpression } from '../../../common/lib/ast';
@@ -37,8 +38,14 @@ export const fetchContext = createAction('fetchContext', ({ element, index }) =>
   };
 });
 
-export const fetchRenderable = createAction('fetchRenderable', ({ element }) => {
+export const fetchRenderable = () => (dispatch, getState) => {
+  const element = getSelectedElement(getState());
+  const argumentPath = [element.id, 'expressionRenderable'];
   const { ast } = element;
+
+  dispatch(args.setLoading({
+    path: argumentPath,
+  }));
 
   function run(ast, context) {
     return interpretAst(ast, context)
@@ -53,27 +60,21 @@ export const fetchRenderable = createAction('fetchRenderable', ({ element }) => 
     });
   }
 
-  return run(ast);
-}, ({ element }) => {
-  const argumentPath = [element.id, 'expressionRenderable'];
-
-  return {
-    onStart: (dispatch) => dispatch(args.setLoading({
-      path: argumentPath,
-    })),
-    onComplete: (dispatch, getState, renderable) => dispatch(args.setValue({
+  return run(ast)
+  .then((renderable) => {
+    dispatch(args.setValue({
       path: argumentPath,
       value: renderable,
-    })),
-  };
-});
+    }));
+  });
+};
 
 // actions without a reducer, typically used to dispatch other actions
 export const setAst = ({ ast, element, pageId }) => (dispatch) => {
   const expression = toExpression(ast);
   if (element.expression === expression && isEqual(element.ast, ast)) return;
   dispatch(setAstAndExpression({ expression, ast, element, pageId }));
-  // dispatch(fetchRenderable({ element }));
+  dispatch(fetchRenderable());
 };
 
 export const setAstAtIndex = ({ ast, element, pageId, index }) => {
@@ -86,6 +87,6 @@ export const setExpression = ({ expression, element, pageId }) => (dispatch) => 
   if (element.expression === expression && isEqual(element.ast, ast)) return;
   dispatch(args.clear({ path: [ element.id, 'expressionContext' ] }));
   dispatch(setAstAndExpression({ expression, ast, element, pageId }));
-  // dispatch(fetchRenderable({ element }));
+  dispatch(fetchRenderable());
 };
 

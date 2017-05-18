@@ -38,7 +38,7 @@ function mergeProps(stateProps, dispatchProps, ownProps) {
   const element = elements.get(get(getValue(renderable), 'as'));
 
   if (getState(renderable) === null) {
-    dispatchProps.fetchRenderable({ element: stateProps.selectedElement });
+    dispatchProps.fetchRenderable();
   }
 
   return Object.assign({}, stateProps, dispatchProps, ownProps, {
