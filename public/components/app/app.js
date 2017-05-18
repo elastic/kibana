@@ -1,5 +1,4 @@
 import React from 'react';
-import PropTypes from 'prop-types';
 import { Grid, Row, Col } from 'react-bootstrap';
 
 import { Expression } from '../expression';
@@ -25,10 +24,3 @@ export const App = () => (
     </Grid>
   </div>
 );
-
-App.propTypes = {
-  expression: PropTypes.string,
-  renderable: PropTypes.object,
-  expressionSet: PropTypes.func,
-  expressionRun: PropTypes.func,
-};

@@ -4,7 +4,6 @@ import { middleware as promiseMiddleware } from 'redux-promise-actions';
 import reduceReducers from 'reduce-reducers';
 import { uiModules } from 'ui/modules';
 import getInitialState from './initial_state';
-import throwawayReducer from './reducers/throwaway_reducer';
 import transientReducer from './reducers/transient';
 import resolvedArgsReducer from './reducers/resolved_args';
 import workpadReducer from './reducers/workpad';
@@ -28,7 +27,6 @@ app.service('$store', (kbnVersion, basePath) => {
     persistent: combineReducers({
       workpad: reduceReducers(workpadReducer, pagesReducer, elementsReducer),
     }),
-    throwAway: throwawayReducer,
   });
 
   const middleware = compose(
