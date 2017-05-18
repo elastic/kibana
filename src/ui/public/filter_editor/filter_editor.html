@@ -64,9 +64,9 @@
         </ui-select>
       </div>
 
-      <div class="kuiFieldGroupSection kuiColumn kuiColumn--4">
+      <div class="kuiFieldGroupSection kuiFieldGroupSection--wide kuiColumn kuiColumn--4">
         <ui-select
-          ng-if="filterEditor.operator.type === 'phrase'"
+          ng-if="filterEditor.operator.type === 'phrase' && filterEditor.field.type === 'string'"
           ng-model="filterEditor.params.value"
           ui-select-focus-on="focus-params"
         >
@@ -81,6 +81,23 @@
             <div ng-bind-html="value | highlight: $select.search"></div>
           </ui-select-choices>
         </ui-select>
+
+        <input
+          type="number"
+          step="any"
+          class="kuiTextInput"
+          ng-if="filterEditor.operator.type === 'phrase' && filterEditor.field.type === 'number'"
+          ng-model="filterEditor.params.value"
+          placeholder="Value..."
+        />
+
+        <input
+          type="text"
+          class="kuiTextInput"
+          ng-if="filterEditor.operator.type === 'phrase' && filterEditor.field.type === 'date'"
+          ng-model="filterEditor.params.value"
+          placeholder="Value..."
+        />
 
         <ui-select
           ng-if="filterEditor.operator.type === 'phrases'"
