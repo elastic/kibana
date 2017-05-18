@@ -25,13 +25,13 @@ export function socketApi(server) {
           socket: socket,
         });
 
-        interpret(msg.ast, msg.context)
-          .then(resp => {
-            socket.emit('resp', { value: resp, id: msg.id });
-          })
-          .catch(e => {
-            socket.emit('resp', { error: e, id: msg.id });
-          });
+        return interpret(msg.ast, msg.context)
+        .then(resp => {
+          socket.emit('resp', { value: resp, id: msg.id });
+        })
+        .catch(e => {
+          socket.emit('resp', { error: e, id: msg.id });
+        });
       });
     };
 

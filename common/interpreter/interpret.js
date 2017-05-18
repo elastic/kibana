@@ -41,10 +41,11 @@ export function interpretProvider(config) {
 
     // TODO: handle errors here
     return resolveArgs(name, context, args) // Resolve arguments before passing to function
-    .then(resolvedArgs =>
-      invokeFunction(name, context, resolvedArgs) // Then invoke function with resolved arguments
+    .then((resolvedArgs) => {
+      return invokeFunction(name, context, resolvedArgs) // Then invoke function with resolved arguments
       .then(newContext => invokeChain(chain, newContext)) // Continue re-invoking chain until its empty
-      .catch(e => console.log('Function rejected', e)))
+      .catch(e => console.log('Function rejected', e));
+    })
     .catch(e => console.log('Args rejected', e));
   }
 

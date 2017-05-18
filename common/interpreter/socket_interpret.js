@@ -21,13 +21,11 @@ export function socketInterpreterProvider(config) {
     types: types,
     functions: functions,
     onFunctionNotFound: (chain, context) => {
-
       // Get the name of the function that wasn't found
       const functionName = chain.chain[0].function;
 
       // Get the list of functions that are known elsewhere
       return Promise.resolve(referableFunctions).then((referableFunctionArray) => {
-
         // Check if the not-found function is in the list of alternatives, if not, throw
         if (!_.includes(referableFunctionArray, functionName)) throw new Error(`Function not found: ${functionName}`);
 
@@ -53,6 +51,7 @@ export function socketInterpreterProvider(config) {
               }
             }
           };
+
           socket.on('resp', listener);
         });
       });
