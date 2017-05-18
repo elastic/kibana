@@ -1,14 +1,15 @@
-import { resolve } from 'path';
-
 import moment from 'moment';
-
 import { createFunctionalTestRunner } from '../src/functional_test_runner';
 import { createToolingLog, createMapStream } from '../src/utils';
 
 export default function (grunt) {
-  grunt.registerTask('functionalTestRunner', function () {
-    const log = createToolingLog('debug');
+  grunt.registerMultiTask('functional_test_runner', 'run tests with the functional test runner', function () {
+    const {
+      logLevel,
+      configFile,
+    } = this.options();
 
+    const log = createToolingLog(logLevel);
     log
       .pipe(createMapStream(line => {
         return `${moment().format('hh:mm:ss.SSS')} ${line}`;
@@ -17,7 +18,7 @@ export default function (grunt) {
 
     const functionalTestRunner = createFunctionalTestRunner({
       log,
-      configFile: resolve(__dirname, '../test/functional/config.js'),
+      configFile,
     });
 
     const callback = this.async();

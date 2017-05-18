@@ -1,3 +1,5 @@
+import { resolve, dirname } from 'path';
+
 import Joi from 'joi';
 
 import { ConsoleReporterProvider } from '../reporters';
@@ -18,8 +20,20 @@ const urlPartsSchema = () => Joi.object().keys({
   hash: Joi.string().regex(/^\//, 'start with a /')
 }).default();
 
+const defaultRelativeToConfigPath = path => {
+  const makeDefault = (locals, options) => (
+    resolve(dirname(options.context.path), path)
+  );
+  makeDefault.description = `<config.js directory>/${path}`;
+  return makeDefault;
+};
+
 export const schema = Joi.object().keys({
-  testFiles: Joi.array().items(Joi.string()).required(),
+  testFiles: Joi.array().items(Joi.string()).when('$primary', {
+    is: true,
+    then: Joi.required(),
+    otherwise: Joi.default([]),
+  }),
 
   services: Joi.object().pattern(
     ID_PATTERN,
@@ -74,11 +88,11 @@ export const schema = Joi.object().keys({
 
   // settings for the esArchiver module
   esArchiver: Joi.object().keys({
-    directory: Joi.string().required()
-  }),
+    directory: Joi.string().default(defaultRelativeToConfigPath('fixtures/es_archiver'))
+  }).default(),
 
   // settings for the screenshots module
   screenshots: Joi.object().keys({
-    directory: Joi.string().required()
-  }),
+    directory: Joi.string().default(defaultRelativeToConfigPath('screenshots'))
+  }).default(),
 }).default();
