@@ -1190,6 +1190,16 @@ body {
     margin-left: 0;
     /* 1 */ }
 
+.kuiInfoButton {
+  font-size: 16px;
+  background-color: transparent;
+  color: #3CAED2;
+  cursor: pointer;
+  border: none;
+  padding: 0; }
+  .kuiInfoButton:hover, .kuiInfoButton:active {
+    color: #105A73; }
+
 /**
  * 1. Copied from FontAwesome's .fa class. We use a custom class to make it easier to migrate away
  *    from FontAwesome someday. When we do migrate away, we can just update this definition.
