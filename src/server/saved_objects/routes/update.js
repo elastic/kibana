@@ -11,13 +11,18 @@ export const createUpdateRoute = (prereqs) => {
           type: Joi.string().required(),
           id: Joi.string().required(),
         }).required(),
-        payload: Joi.object().required()
+        payload: Joi.object({
+          attributes: Joi.object().required(),
+          version: Joi.number().min(1)
+        }).required()
       },
       handler(request, reply) {
         const { savedObjectsClient } = request.pre;
         const { type, id } = request.params;
+        const { attributes, version } = request.payload;
+        const options = { version };
 
-        reply(savedObjectsClient.update(type, id, request.payload));
+        reply(savedObjectsClient.update(type, id, attributes, options));
       }
     }
   };

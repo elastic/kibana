@@ -1,5 +1,5 @@
 import Boom from 'boom';
-import { get, omit } from 'lodash';
+import { get } from 'lodash';
 
 import {
   createFindQuery,
@@ -12,19 +12,18 @@ export class SavedObjectsClient {
     this._callAdminCluster = callAdminCluster;
   }
 
-  async create(type, options = {}) {
-    const body = omit(options, 'id');
-
+  async create(type, body = {}) {
     const response = await this._withKibanaIndex('index', {
       type,
       body
     });
 
-    return Object.assign({
+    return {
       type: response._type,
       id: response._id,
-      version: response._version
-    }, body);
+      version: response._version,
+      attributes: body
+    };
   }
 
   async delete(type, id) {
@@ -63,7 +62,12 @@ export class SavedObjectsClient {
 
     return {
       data: get(response, 'hits.hits', []).map(r => {
-        return Object.assign({ id: r._id, type: r._type, version: r._version }, r._source);
+        return {
+          id: r._id,
+          type: r._type,
+          version: r._version,
+          attributes: r._source
+        };
       }),
       total: get(response, 'hits.total', 0),
       per_page: perPage,
@@ -78,28 +82,31 @@ export class SavedObjectsClient {
       id,
     });
 
-    return Object.assign({
+    return {
       id: response._id,
       type: response._type,
-      version: response._version
-    }, response._source);
+      version: response._version,
+      attributes: response._source
+    };
   }
 
-  async update(type, id, body) {
-    const version = get(body, 'version');
-    const doc = omit(body, ['version']);
-
+  async update(type, id, attributes, options = {}) {
     const response = await this._withKibanaIndex('update', {
       type,
       id,
-      version,
+      version: get(options, 'version'),
       body: {
-        doc: doc
+        doc: attributes
       },
       refresh: 'wait_for'
     });
 
-    return { version: get(response, '_version') };
+    return {
+      id: id,
+      type: type,
+      version: get(response, '_version'),
+      attributes: attributes
+    };
   }
 
   async _withKibanaIndex(method, params) {

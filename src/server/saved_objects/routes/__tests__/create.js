@@ -31,7 +31,9 @@ describe('POST /api/saved_objects/{type}', () => {
       method: 'POST',
       url: '/api/saved_objects/index-pattern',
       payload: {
-        title: 'Testing'
+        attributes: {
+          title: 'Testing'
+        }
       }
     };
     const clientResponse = {
@@ -49,12 +51,30 @@ describe('POST /api/saved_objects/{type}', () => {
     expect(response).to.eql(clientResponse);
   });
 
+  it('requires attributes', async () => {
+    const request = {
+      method: 'POST',
+      url: '/api/saved_objects/index-pattern',
+      payload: {}
+    };
+
+    const { statusCode, payload } = await server.inject(request);
+    const response = JSON.parse(payload);
+
+    expect(response.validation.keys).to.contain('attributes');
+    expect(response.message).to.match(/is required/);
+    expect(response.statusCode).to.be(400);
+    expect(statusCode).to.be(400);
+  });
+
   it('calls upon savedObjectClient.create', async () => {
     const request = {
       method: 'POST',
       url: '/api/saved_objects/index-pattern',
       payload: {
-        title: 'Testing'
+        attributes: {
+          title: 'Testing'
+        }
       }
     };
 

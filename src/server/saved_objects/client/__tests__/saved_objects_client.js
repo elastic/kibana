@@ -56,15 +56,16 @@ describe('SavedObjectsClient', () => {
       callAdminCluster.returns({ _type: 'index-pattern', _id: 'logstash-*', _version: 2 });
 
       const response = await savedObjectsClient.create('index-pattern', {
-        id: 'logstash-*',
         title: 'Logstash'
       });
 
       expect(response).to.eql({
         type: 'index-pattern',
         id: 'logstash-*',
-        title: 'Logstash',
-        version: 2
+        version: 2,
+        attributes: {
+          title: 'Logstash',
+        }
       });
     });
 
@@ -128,10 +129,12 @@ describe('SavedObjectsClient', () => {
       expect(response.total).to.be(count);
       expect(response.data).to.have.length(count);
       docs.hits.hits.forEach((doc, i) => {
-        expect(response.data[i]).to.eql(Object.assign(
-          { id: doc._id, type: doc._type, version: doc._version },
-          doc._source)
-        );
+        expect(response.data[i]).to.eql({
+          id: doc._id,
+          type: doc._type,
+          version: doc._version,
+          attributes: doc._source
+        });
       });
     });
 
@@ -141,14 +144,8 @@ describe('SavedObjectsClient', () => {
       expect(callAdminCluster.calledOnce).to.be(true);
 
       const options = callAdminCluster.getCall(0).args[1];
-      expect(options).to.eql({
-        index: '.kibana-test',
-        body: { query: { match_all: {} }, version: true },
-        _source: undefined,
-        from: 50,
-        size: 10,
-        type: undefined
-      });
+      expect(options.size).to.be(10);
+      expect(options.from).to.be(50);
     });
 
     it('accepts type', async () => {
@@ -164,13 +161,8 @@ describe('SavedObjectsClient', () => {
         }
       };
 
-      expect(options).to.eql({
-        _source: undefined,
-        from: 0,
-        index: '.kibana-test',
-        size: 20,
-        body: { query: expectedQuery, version: true },
-        type: 'index-pattern',
+      expect(options.body).to.eql({
+        query: expectedQuery, version: true
       });
     });
 
@@ -199,23 +191,47 @@ describe('SavedObjectsClient', () => {
       expect(response).to.eql({
         id: 'logstash-*',
         type: 'index-pattern',
-        title: 'Testing',
-        version: 2
+        version: 2,
+        attributes: {
+          title: 'Testing'
+        }
       });
     });
   });
 
   describe('#update', () => {
-    it('returns based on ES success', async () => {
+    it('returns current ES document version', async () => {
+      const id = 'logstash-*';
+      const type = 'index-pattern';
+      const version = 2;
+      const attributes = { title: 'Testing' };
+
       callAdminCluster.returns(Promise.resolve({
-        _id: 'logstash-*',
-        _type: 'index-pattern',
-        _version: 2,
+        _id: id,
+        _type: type,
+        _version: version,
         result: 'updated'
       }));
 
-      const response = await savedObjectsClient.update('index-pattern', 'logstash-*', { title: 'Testing' });
-      expect(response).to.eql({ version: 2 });
+      const response = await savedObjectsClient.update('index-pattern', 'logstash-*', attributes);
+      expect(response).to.eql({
+        id,
+        type,
+        version,
+        attributes
+      });
+    });
+
+    it('accepts version', async () => {
+      await savedObjectsClient.update(
+        'index-pattern',
+        'logstash-*',
+        { title: 'Testing' },
+        { version: 1 }
+      );
+
+      const esParams = callAdminCluster.getCall(0).args[1];
+      expect(esParams.version).to.be(1);
     });
 
     it('passes the parameters to callAdminCluster', async () => {
@@ -224,6 +240,7 @@ describe('SavedObjectsClient', () => {
       expect(callAdminCluster.calledOnce).to.be(true);
 
       const args = callAdminCluster.getCall(0).args;
+
       expect(args[0]).to.be('update');
       expect(args[1]).to.eql({
         type: 'index-pattern',

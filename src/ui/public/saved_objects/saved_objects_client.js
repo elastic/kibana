@@ -32,10 +32,15 @@ export class SavedObjectsClient {
     return this._request('DELETE', this._getUrl([type, id]));
   }
 
-  update(type, id, body) {
-    if (!type || !id || !body) {
-      return this._PromiseCtor.reject(new Error('requires type, id and body'));
+  update(type, id, attributes, { version } = {}) {
+    if (!type || !id || !attributes) {
+      return this._PromiseCtor.reject(new Error('requires type, id and attributes'));
     }
+
+    const body = {
+      attributes,
+      version
+    };
 
     return this._request('PUT', this._getUrl([type, id]), body);
   }
@@ -84,12 +89,13 @@ export class SavedObjectsClient {
       options.data = body;
     }
 
-    return this._$http(options)
-    .catch(resp => {
+    return this._$http(options).catch(resp => {
       const respBody = resp.data || {};
       const err = new Error(respBody.message || respBody.error || `${resp.status} Response`);
+
       err.status = resp.status;
       err.body = respBody;
+
       throw err;
     });
   }

@@ -1,9 +1,12 @@
 import _ from 'lodash';
 
 export class SavedObject {
-  constructor(client, attributes) {
+  constructor(client, { id, type, version, attributes }) {
     this._client = client;
-    this._attributes = attributes;
+    this._id = id;
+    this._type = type;
+    this._attributes = attributes || {};
+    this._version = version;
   }
 
   get(key) {
@@ -14,8 +17,12 @@ export class SavedObject {
     return _.set(this._attributes, key, value);
   }
 
+  has(key) {
+    return _.has(this._attributes, key);
+  }
+
   save() {
-    if (this.id) {
+    if (this._id) {
       return this._client.update(this.type, this.id, this._attributes);
     } else {
       return this._client.create(this.type, this._attributes);

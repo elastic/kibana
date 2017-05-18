@@ -31,7 +31,9 @@ describe('PUT /api/saved_objects/{type}/{id?}', () => {
       method: 'PUT',
       url: '/api/saved_objects/index-pattern/logstash-*',
       payload: {
-        title: 'Testing'
+        attributes: {
+          title: 'Testing'
+        }
       }
     };
 
@@ -45,11 +47,14 @@ describe('PUT /api/saved_objects/{type}/{id?}', () => {
   });
 
   it('calls upon savedObjectClient.update', async () => {
+    const attributes = { title: 'Testing' };
+    const options = { version: 2 };
     const request = {
       method: 'PUT',
       url: '/api/saved_objects/index-pattern/logstash-*',
       payload: {
-        title: 'Testing'
+        attributes,
+        version: options.version
       }
     };
 
@@ -57,6 +62,6 @@ describe('PUT /api/saved_objects/{type}/{id?}', () => {
     expect(savedObjectsClient.update.calledOnce).to.be(true);
 
     const args = savedObjectsClient.update.getCall(0).args;
-    expect(args).to.eql(['index-pattern', 'logstash-*', { title: 'Testing' }]);
+    expect(args).to.eql(['index-pattern', 'logstash-*', attributes, options]);
   });
 });

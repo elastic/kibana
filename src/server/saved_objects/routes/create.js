@@ -10,13 +10,16 @@ export const createCreateRoute = (prereqs) => {
         params: Joi.object().keys({
           type: Joi.string().required()
         }).required(),
-        payload: Joi.object().required()
+        payload: Joi.object({
+          attributes: Joi.object().required()
+        }).required()
       },
       handler(request, reply) {
         const { savedObjectsClient } = request.pre;
         const { type } = request.params;
+        const { attributes } = request.payload;
 
-        reply(savedObjectsClient.create(type, request.payload));
+        reply(savedObjectsClient.create(type, attributes));
       }
     }
   };
