@@ -1,6 +1,6 @@
 import { delay } from 'bluebird';
 
-import getUrl from '../../utils/get_url';
+import getUrl from '../../../src/test_utils/get_url';
 
 export function CommonPageProvider({ getService, getPageObjects }) {
   const log = getService('log');
@@ -24,7 +24,7 @@ export function CommonPageProvider({ getService, getPageObjects }) {
     }
 
     /**
-     * @param {string} appName As defined in the apps objects in test/server_config.js
+     * @param {string} appName As defined in the apps config
      * @param {string} subUrl The route after the hash (#)
      */
     navigateToUrl(appName, subUrl) {
