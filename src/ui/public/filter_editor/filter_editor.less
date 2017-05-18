@@ -1,3 +1,5 @@
+@import (reference) "~ui/styles/mixins";
+
 .filterEditor.kuiModal {
   position: absolute;
   width: 500px;
@@ -9,9 +11,16 @@
   max-height: 300px;
 }
 
-.filterEditor .ui-select-match-item {
-    display: inline-block;
-    max-width: 100%;
-    text-overflow: ellipsis;
-    overflow: hidden;
+.filterEditor .ui-select-match-text span {
+  .ellipsis();
 }
+
+.filterEditor .ui-select-match-item {
+  max-width: 100%;
+}
+
+  .filterEditor .ui-select-match-item .pillWithTooltip {
+    display: block;
+    margin-right: 16px;
+    .ellipsis();
+  }
