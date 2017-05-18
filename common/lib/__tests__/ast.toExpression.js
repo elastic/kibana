@@ -133,7 +133,7 @@ describe('ast toExpression', () => {
       expect(expression).to.equal('csv()');
     });
 
-    it('single expression with argument', () => {
+    it('single expression with string argument', () => {
       const astObj = {
         type: 'expression',
         chain: [{
@@ -150,6 +150,25 @@ describe('ast toExpression', () => {
 
       const expression = toExpression(astObj);
       expect(expression).to.equal('csv(input="stuff\nthings")');
+    });
+
+    it('single expression with number argument', () => {
+      const astObj = {
+        type: 'expression',
+        chain: [{
+          type: 'function',
+          function: 'series',
+          arguments: {
+            input: [{
+              type: 'number',
+              value: 1234,
+            }],
+          },
+        }],
+      };
+
+      const expression = toExpression(astObj);
+      expect(expression).to.equal('series(input="1234")');
     });
 
     it('single expression with multiple arguments', () => {

@@ -20,7 +20,7 @@ function getExpressionArgs(block) {
     const multiArgs = args[argKey];
 
     return multiArgs.reduce((acc, arg) => {
-      if (arg.type === 'string') {
+      if (arg.type === 'string' || arg.type === 'number') {
         if (argKey === '_') return acc.concat(`"${arg.value}"`);
         return acc.concat(`${argKey}="${arg.value}"`);
       }
@@ -30,7 +30,7 @@ function getExpressionArgs(block) {
         return acc.concat(`${argKey}=${getExpression(arg.chain, arg.type)}`);
       }
 
-      throw new Error(`invalid argument type: ${arg.type}`);
+      throw new Error(`Invalid argument type in AST: ${arg.type}`);
     }, []).join(', ');
   });
 }
