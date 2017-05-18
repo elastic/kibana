@@ -58,7 +58,7 @@ module.exports = function (grunt) {
     'checkPlugins',
     'esvm:ui',
     'run:testUIServer',
-    'functionalTestRunner',
+    'functional_test_runner:functional',
     'esvm_shutdown:ui',
     'stop:testUIServer'
   ]);
@@ -67,7 +67,7 @@ module.exports = function (grunt) {
     'checkPlugins',
     'esvm:ui',
     'run:testUIReleaseServer',
-    'functionalTestRunner',
+    'functional_test_runner:functional',
     'esvm_shutdown:ui',
     'stop:testUIReleaseServer'
   ]);
@@ -81,7 +81,7 @@ module.exports = function (grunt) {
   grunt.registerTask('test:api', [
     'esvm:ui',
     'run:apiTestServer',
-    'simplemocha:api',
+    'functional_test_runner:apiIntegration',
     'esvm_shutdown:ui',
     'stop:apiTestServer'
   ]);
@@ -91,9 +91,9 @@ module.exports = function (grunt) {
     'run:apiTestServer:keepalive'
   ]);
 
-  grunt.registerTask('test:api:runner', [
-    'simplemocha:api'
-  ]);
+  grunt.registerTask('test:api:runner', () => {
+    grunt.fail.fatal('test:api:runner has moved, use: `node scripts/function_test_runner --config test/api_integration/config.js`');
+  });
 
   grunt.registerTask('test', subTask => {
     if (subTask) grunt.fail.fatal(`invalid task "test:${subTask}"`);

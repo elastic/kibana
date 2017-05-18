@@ -2,7 +2,7 @@
   <div class="kuiLocalNavRow">
     <div class="kuiLocalNavRow__section">
       <div class="kuiLocalTitle">
-        Surrounding Documents in {{ contextApp.state.queryParameters.indexPattern.id }}
+        Surrounding Documents in {{ contextApp.state.queryParameters.indexPatternId }}
       </div>
     </div>
   </div>
@@ -12,6 +12,8 @@
     </div>
   </div>
 </div>
+
+<filter-bar></filter-bar>
 
 <!-- Error feedback -->
 <div
@@ -96,8 +98,9 @@
   >
     <div class="discover-table" fixed-scroll>
       <doc-table
+        filter="contextApp.actions.addFilter"
         hits="contextApp.state.rows.all"
-        index-pattern="contextApp.state.queryParameters.indexPattern"
+        index-pattern="contextApp.indexPattern"
         sorting="contextApp.state.queryParameters.sort"
         columns="contextApp.state.queryParameters.columns"
         infinite-scroll="true"
