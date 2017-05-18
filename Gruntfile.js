@@ -12,7 +12,6 @@ module.exports = function (grunt) {
     plugins: __dirname + '/src/core_plugins',
     server: __dirname + '/src/server',
     target: __dirname + '/target', // location of the compressed build targets
-    testUtilsDir: __dirname + '/src/test_utils',
     configFile: __dirname + '/src/config/kibana.yml',
 
     karmaBrowser: (function () {

@@ -1,6 +1,6 @@
 import { resolve } from 'path';
 
-import { createServer } from '../../../../test/utils/kbn_server';
+import { createServer } from '../../../test_utils/kbn_server';
 
 export async function startupKibana({ port, esUrl }) {
   const server = createServer({

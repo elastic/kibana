@@ -1,9 +1,9 @@
 import url from 'url';
 import { defaultsDeep, set } from 'lodash';
 import { header as basicAuthHeader } from './base_auth';
-import { kibanaUser, kibanaServer } from '../shield';
+import { kibanaUser, kibanaServer } from '../../test/shield';
+import { esTestServerUrlParts } from '../../test/es_test_server_url_parts';
 import KbnServer from '../../src/server/kbn_server';
-import serverConfig from '../server_config';
 
 const SERVER_DEFAULTS = {
   server: {
@@ -20,7 +20,7 @@ const SERVER_DEFAULTS = {
     enabled: false
   },
   elasticsearch: {
-    url: url.format(serverConfig.servers.elasticsearch),
+    url: url.format(esTestServerUrlParts),
     username: kibanaServer.username,
     password: kibanaServer.password
   }
