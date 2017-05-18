@@ -2,6 +2,18 @@ import expect from 'expect.js';
 import { fromExpression } from '../ast';
 
 describe('ast fromExpression', () => {
+  describe('invalid expression', () => {
+    it('returns undefined when empty', () => {
+      const expression = '';
+      expect(fromExpression(expression)).to.be(undefined);
+    });
+
+    it('throws with invalid expression', () => {
+      const check = () => fromExpression('wat!');
+      expect(check).to.throwException(/Unable to parse expression/i);
+    });
+  });
+
   describe('single item expression', () => {
     it('is a chain', () => {
       const expression = 'whatever()';

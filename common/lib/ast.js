@@ -62,7 +62,12 @@ function getExpression(chain, expType = 'expression', exp = '') {
 }
 
 export function fromExpression(expression) {
-  return Parser.parse(expression);
+  if (typeof expression === 'string' && expression.length === 0) return;
+  try {
+    return Parser.parse(expression);
+  } catch (e) {
+    throw new Error(`Unable to parse expression: ${e.message}`);
+  }
 }
 
 export function toExpression(astObj) {
