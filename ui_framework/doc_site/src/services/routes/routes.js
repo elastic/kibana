@@ -45,6 +45,9 @@ import HeaderBarSandbox
 import IconExample
   from '../../views/icon/icon_example';
 
+import InfoButtonExample
+  from '../../views/info_button/info_button_example';
+
 import InfoPanelExample
   from '../../views/info_panel/info_panel_example';
 
@@ -137,6 +140,10 @@ const components = [{
 }, {
   name: 'Icon',
   component: IconExample,
+}, {
+  name: 'InfoButton',
+  component: InfoButtonExample,
+  hasReact: true,
 }, {
   name: 'InfoPanel',
   component: InfoPanelExample,
