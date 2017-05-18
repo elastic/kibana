@@ -72,28 +72,30 @@ export function CommonPageProvider({ getService, getPageObjects, getPageObject }
             log.debug('returned from get, calling refresh');
             return remote.refresh();
           })
-          .then(function () {
-            return remote.getCurrentUrl();
-          })
-          .then(function (currentUrl) {
+          .then(async function () {
+            const currentUrl = await remote.getCurrentUrl();
             const loginPage = currentUrl.includes('/login');
             const wantedLoginPage = appUrl.includes('/login') || appUrl.includes('/logout');
 
             if (loginPage && !wantedLoginPage) {
               log.debug(`Found loginPage username = ${config.get('servers.kibana.username')}`);
-              return PageObjects.shield.login(
+              await PageObjects.shield.login(
                 config.get('servers.kibana.username'),
                 config.get('servers.kibana.password')
-              )
-              .then(function () {
-                return remote.getCurrentUrl();
-              });
-            } else {
-              return currentUrl;
+              );
+            }
+
+            if (currentUrl.includes('app/kibana')) {
+              await testSubjects.find('kibanaChrome');
+              const gettingStartedPage = getPageObject('gettingStarted');
+              if (await gettingStartedPage.doesContainerExist()) {
+                await gettingStartedPage.optOut();
+                throw new Error('Retrying after receiving Getting Started page');
+              }
             }
           })
-          .then(function (currentUrl) {
-            currentUrl = currentUrl.replace(/\/\/\w+:\w+@/, '//');
+          .then(async function () {
+            const currentUrl = (await remote.getCurrentUrl()).replace(/\/\/\w+:\w+@/, '//');
             const maxAdditionalLengthOnNavUrl = 230;
             // On several test failures at the end of the TileMap test we try to navigate back to
             // Visualize so we can create the next Vertical Bar Chart, but we can see from the
@@ -144,15 +146,6 @@ export function CommonPageProvider({ getService, getPageObjects, getPageObject }
               }
             });
           });
-        })
-        .then(async function (currentUrl) {
-          const gettingStartedPage = getPageObject('gettingStarted');
-          if (await gettingStartedPage.doesContainerExist()) {
-            await gettingStartedPage.optOut();
-            throw new Error('Retrying after receiving Getting Started page');
-          }
-
-          return currentUrl;
         })
         .then(async () => {
           if (appName === 'status_page') return;
