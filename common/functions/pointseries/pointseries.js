@@ -76,8 +76,11 @@ module.exports = new Fn({
       return true;
     }
 
+    const dimensionNames = Object.keys(pickBy(args, val => !isMeasure(val))).filter(arg => args[arg] != null);
+    const measureNames = Object.keys(pickBy(args, val => isMeasure(val)));
     const columns = mapValues(args, arg => {
-      return { type: getType(arg) };
+      // TODO: We're setting the measure/dimension break down here, but it should probably come from the datatable right?
+      return { type: getType(arg), role: isMeasure(arg) ? 'measure' : 'dimension' };
     });
 
     function normalizeValue(expression, value) {
@@ -95,7 +98,6 @@ module.exports = new Fn({
 
     // Dimensions. There's probably a better way todo this
     // const dimensionNames = Object.keys(pickBy(args, val => typeof val === 'string'));
-    const dimensionNames = Object.keys(pickBy(args, val => !isMeasure(val))).filter(arg => args[arg] != null);
     const result = context.rows.map((row, i) => {
       const newRow = { _rowId: row._rowId };
       dimensionNames.forEach(dimension =>
@@ -106,7 +108,6 @@ module.exports = new Fn({
     // Measures
     // First group up all of the distinct dimensioned bits. Each of these will be reduced to just 1 value
     // for each measure
-    const measureNames = Object.keys(pickBy(args, val => isMeasure(val)));
     const measureDimensions = groupBy(context.rows, (row) => {
       const dimensions = dimensionNames.map(dimension => args[dimension] ? row[args[dimension]] : '_all');
       return dimensions.join('::%BURLAP%::');
@@ -125,7 +126,6 @@ module.exports = new Fn({
 
     // It only makes sense to uniq the rows in a point series as 2 values can not exist in the exact same place at the same time.
     const rows = uniqBy(result, row => JSON.stringify(omit(row, '_rowId')));
-    console.log(rows.length);
 
     return {
       type: 'pointseries',
