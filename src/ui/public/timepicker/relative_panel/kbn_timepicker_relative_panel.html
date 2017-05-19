@@ -1,0 +1,99 @@
+<form role="form" ng-submit="applyRelative()" class="form-inline" name="relativeTime">
+  <div class="kbn-timepicker-section">
+    <label>
+      From:
+      <span ng-show="relative.from.preview">{{relative.from.preview}}</span>
+      <a class="label label-default" ng-click="setRelativeToNow({key:'from'})">Set To Now</a>
+      <span ng-hide="relative.from.preview"><i>Invalid Expression</i></span>
+    </label>
+    <br>
+    <div class="form-group" ng-class="{ 'has-error': checkRelative() }">
+      <input
+        required
+        ng-model="relative.from.count"
+        ng-change="formatRelative({key:'from'})"
+        greater-than="-1"
+        min="0"
+        type="number"
+        class="form-control">
+    </div>
+    <div class="form-group" ng-class="{ 'has-error': checkRelative() }">
+      <select
+        ng-model="relative.from.unit"
+        ng-options="opt.value as opt.text for opt in relativeOptions"
+        ng-change="formatRelative({key:'from'})"
+        class="form-control col-xs-2">
+      </select>
+    </div>
+    <br>
+    <div class="small">
+      <label>
+        <input
+          ng-model="relative.from.round"
+          ng-checked="relative.from.round"
+          ng-change="formatRelative({key:'from'})"
+          type="checkbox">
+        round to the {{units[relative.from.unit.substring(0,1)]}}
+      </label>
+      <div
+        ng-class="{ 'kbn-timepicker-error': checkRelative() }"
+        ng-show="checkRelative()">
+        <strong>From</strong> must occur before <strong>To</strong>
+      </div>
+    </div>
+  </div>
+
+  <div class="kbn-timepicker-section">
+    <label>
+      To:
+      <span ng-show="relative.to.preview">{{relative.to.preview}}</span>
+      <a class="label label-default" ng-click="setRelativeToNow({key:'to'})">Set To Now</a>
+      <span ng-hide="relative.to.preview"><i>Invalid Expression</i></span>
+    </label>
+    <br>
+    <div class="form-group" ng-class="{ 'has-error': checkRelative() }">
+      <input
+        required
+        ng-model="relative.to.count"
+        ng-change="formatRelative({key:'to'})"
+        greater-than="-1"
+        min="0"
+        type="number"
+        class="form-control">
+    </div>
+    <div class="form-group" ng-class="{ 'has-error': checkRelative() }">
+      <select
+        ng-model="relative.to.unit"
+        ng-options="opt.value as opt.text for opt in relativeOptions"
+        ng-change="formatRelative({key:'to'})"
+        class="form-control col-xs-2">
+      </select>
+    </div>
+    <br>
+    <div class="small">
+      <label>
+        <input
+          ng-model="relative.to.round"
+          ng-checked="relative.to.round"
+          ng-change="formatRelative('to')"
+          type="checkbox">
+        round to the {{units[relative.to.unit.substring(0,1)]}}
+      </label>
+    </div>
+  </div>
+
+  <div class="kbn-timepicker-section">
+    <label>&nbsp;</label>
+    <br>
+    <div class="form-group">
+      <button
+        data-test-subj="timepickerGoButton"
+        type="submit"
+        class="kuiButton kuiButton--primary"
+        ng-disabled="!(relative.from.preview && relative.to.preview) || checkRelative()"
+      >
+        Go
+      </button>
+    </div>
+  </div>
+</form>
