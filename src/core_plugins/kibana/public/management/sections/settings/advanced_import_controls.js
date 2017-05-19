@@ -20,10 +20,25 @@ uiModules.get('apps/management')
           // set to those user-defined values
           const userValues = Object.keys(all).reduce((values, configKey) => {
             const configObj = all[configKey];
-            // Readonly objects are not configurable, so skip
-            if (configObj.hasOwnProperty('userValue') && !configObj.readonly) {
-              values[configKey] = configObj.userValue;
+
+            // This logic is a bit messy. We only want user-defined values that are configurable
+            // so that immediately excludes readonly values
+            if (configObj.readonly) {
+              return values;
             }
+
+            // Now, we need to make sure they have a user-defined value
+            if (!configObj.hasOwnProperty('userValue')) {
+              return values;
+            }
+
+            // It is also possible that the user-defined value matches
+            // the default value
+            if (configObj.userValue === configObj.value) {
+              return values;
+            }
+
+            values[configKey] = configObj.userValue;
             return values;
           }, {});
           const blob = new Blob([JSON.stringify(userValues)], { type: 'application/json' });
