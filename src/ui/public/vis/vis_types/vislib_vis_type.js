@@ -25,20 +25,20 @@ export function VislibVisTypeProvider(Private) {
 
       return new Promise(resolve => {
         this.vis = vis;
-        this.vislibVis = new vislib.Vis(this.el, vis.params);
-        this.vislibVis.on('brush', vis.API.events.brush);
-        this.vislibVis.on('click', vis.API.events.filter);
-        this.vislibVis.on('renderComplete', resolve);
-        this.vislibVis.render(esResponse, vis.getUiState());
-        this.refreshLegend++;
+        vis.vislibVis = new vislib.Vis(this.el, vis.params);
+        vis.vislibVis.on('brush', vis.API.events.brush);
+        vis.vislibVis.on('click', vis.API.events.filter);
+        vis.vislibVis.on('renderComplete', resolve);
+        vis.vislibVis.render(esResponse, vis.getUiState());
+        vis.refreshLegend++;
       });
     }
 
     destroy() {
       if (this.vislibVis) {
-        this.vislibVis.off('brush', this.vis.API.events.brush);
-        this.vislibVis.off('click', this.vis.API.events.filter);
-        this.vislibVis.destroy();
+        this.vis.vislibVis.off('brush', this.vis.API.events.brush);
+        this.vis.vislibVis.off('click', this.vis.API.events.filter);
+        this.vis.vislibVis.destroy();
       }
     }
   }

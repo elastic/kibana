@@ -23,13 +23,13 @@ uiModules.get('kibana')
         $scope.data = data;
       });
 
-      $scope.$watch('vis.type.refreshLegend', () => {
+      $scope.$watch('vis.refreshLegend', () => {
         refresh();
       });
 
       $scope.highlight = function (event) {
         const el = event.currentTarget;
-        const handler = $scope.vis.type.vislibVis.handler;
+        const handler = $scope.vis.vislibVis.handler;
 
         //there is no guarantee that a Chart will set the highlight-function on its handler
         if (!handler || typeof handler.highlight !== 'function') {
@@ -40,7 +40,7 @@ uiModules.get('kibana')
 
       $scope.unhighlight = function (event) {
         const el = event.currentTarget;
-        const handler = $scope.vis.type.vislibVis.handler;
+        const handler = $scope.vis.vislibVis.handler;
         //there is no guarantee that a Chart will set the unhighlight-function on its handler
         if (!handler || typeof handler.unHighlight !== 'function') {
           return;
@@ -102,7 +102,7 @@ uiModules.get('kibana')
       ];
 
       function refresh() {
-        const vislibVis = $scope.vis.type.vislibVis;
+        const vislibVis = $scope.vis.vislibVis;
         if (!vislibVis || !vislibVis.visConfig) {
           $scope.labels = [{ label: 'loading ...' }];
           return;
