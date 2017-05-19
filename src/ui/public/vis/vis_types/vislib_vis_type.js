@@ -15,7 +15,7 @@ export function VislibVisTypeProvider(Private) {
 
   class VislibVisController {
     constructor(el) {
-      this.el = el[0];
+      this.el = el;
     }
 
     render(vis, esResponse) {

@@ -1,11 +1,13 @@
 import { VisTypeProvider } from 'ui/vis/vis_types';
+import $ from 'jquery';
+
 
 export function AngularVisTypeProvider(Private, $compile, $rootScope) {
   const VisType = Private(VisTypeProvider);
 
   class AngularVisController {
-    constructor(el) {
-      this.el = el;
+    constructor(domeElement) {
+      this.el = $(domeElement);
     }
 
     render(vis, esResponse) {

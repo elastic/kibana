@@ -7,6 +7,8 @@ import visualizationTemplate from 'ui/visualize/visualization.html';
 import 'angular-sanitize';
 
 
+
+
 uiModules
 .get('kibana/directive', ['ngSanitize'])
 .directive('visualization', function (Notifier, SavedVis, indexPatterns, Private, config, $timeout) {
@@ -25,16 +27,11 @@ uiModules
 
       $scope.showSpyPanel = $scope.vis && $scope.vis.showSpyPanel || false;
 
-      function getter(selector) {
-        return function () {
-          const $sel = $el.find(selector);
-          if ($sel.size()) return $sel;
-        };
-      }
 
-      const getVisEl = getter('.visualize-chart');
-      const getVisContainer = getter('.vis-container');
-      const getSpyContainer = getter('.visualize-spy-container');
+      //todo: lets make this a simple function call.
+      const getVisEl = jQueryGetter('.visualize-chart');
+      const getVisContainer = jQueryGetter('.vis-container');
+      const getSpyContainer = jQueryGetter('.visualize-spy-container');
 
       // Show no results message when isZeroHits is true and it requires search
       $scope.showNoResultsMessage = function () {
@@ -105,7 +102,9 @@ uiModules
       });
 
       const Visualization = $scope.vis.type.visualization;
-      const visualization = new Visualization(getVisEl());
+
+      //todo: make this not a jquery element
+      const visualization = new Visualization(getVisEl()[0]);
 
       const renderFunction = _.debounce(() => {
         visualization.render($scope.vis, $scope.visData)
@@ -125,6 +124,14 @@ uiModules
       $scope.$on('$destroy', () => {
         visualization.destroy();
       });
+
+
+      function jQueryGetter(selector) {
+        return function () {
+          const $sel = $el.find(selector);
+          if ($sel.size()) return $sel;
+        };
+      }
     }
   };
 });

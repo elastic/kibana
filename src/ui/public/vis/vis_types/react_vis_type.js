@@ -7,7 +7,7 @@ export function ReactVisTypeProvider(Private) {
 
   class ReactVisController {
     constructor(el) {
-      this.el = el[0];
+      this.el = el;
     }
 
     render(vis, visData) {

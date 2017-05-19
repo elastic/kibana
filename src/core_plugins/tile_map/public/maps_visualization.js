@@ -1,6 +1,7 @@
 import 'ui/vislib';
 import 'plugins/kbn_vislib_vis_types/controls/vislib_basic_options';
 import MapsVisTypeMapsRenderbotProvider from './maps_renderbot';
+import $ from 'jquery';
 
 export function MapsVisualizationProvider(Private) {
 
@@ -8,7 +9,7 @@ export function MapsVisualizationProvider(Private) {
 
   class MapsVisController {
     constructor(el) {
-      this.el = el;
+      this.el = $(el);
     }
 
     render(vis, esResponse) {
