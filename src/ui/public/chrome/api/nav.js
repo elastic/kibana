@@ -110,6 +110,32 @@ export function initChromeNavApi(chrome, internals) {
     });
   }
 
+  function relativeToAbsolute(url) {
+    // convert all link urls to absolute urls
+    const a = document.createElement('a');
+    a.setAttribute('href', url);
+    return a.href;
+  }
+
+  /**
+   * Manually sets the last url for the given app.
+   * @param appId {String}
+   * @param url {String} The relative url for the app. Should not include the base path portion.
+   */
+  chrome.trackSubUrlForApp = (appId, url) => {
+    for (const link of internals.nav) {
+      if (link.id === appId) {
+        if (!url.startsWith('/')) {
+          url += '/';
+        }
+        url = `${chrome.getBasePath()}${url}`;
+        url = relativeToAbsolute(url);
+        setLastUrl(link, url);
+        return;
+      }
+    }
+  };
+
   internals.trackPossibleSubUrl = function (url) {
     const { appId, globalState: newGlobalState } = decodeKibanaUrl(url);
 
@@ -127,13 +153,6 @@ export function initChromeNavApi(chrome, internals) {
       }
     }
   };
-
-  function relativeToAbsolute(url) {
-    // convert all link urls to absolute urls
-    const a = document.createElement('a');
-    a.setAttribute('href', url);
-    return a.href;
-  }
 
   internals.nav.forEach(link => {
     link.url = relativeToAbsolute(link.url);

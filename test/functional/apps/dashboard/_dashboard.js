@@ -5,9 +5,14 @@ import {
   DEFAULT_PANEL_HEIGHT,
 } from '../../../../src/core_plugins/kibana/public/dashboard/panel/panel_state';
 
+import {
+  VisualizeConstants
+} from '../../../../src/core_plugins/kibana/public/visualize/visualize_constants';
+
 export default function ({ getService, getPageObjects }) {
   const retry = getService('retry');
   const log = getService('log');
+  const remote = getService('remote');
   const screenshots = getService('screenshots');
   const PageObjects = getPageObjects(['common', 'dashboard', 'header', 'visualize']);
 
@@ -128,20 +133,28 @@ export default function ({ getService, getPageObjects }) {
       });
     });
 
-    it('add new visualization link', async function checkTitles() {
-      await PageObjects.dashboard.clickAddVisualization();
-      await PageObjects.dashboard.clickAddNewVisualizationLink();
-      await PageObjects.visualize.clickAreaChart();
-      await PageObjects.visualize.clickNewSearch();
-      await PageObjects.visualize.saveVisualization('visualization from add new link');
-      await PageObjects.header.clickToastOK();
+    describe('add new visualization link', () => {
+      it('adds a new visualization', async () => {
+        await PageObjects.dashboard.clickAddVisualization();
+        await PageObjects.dashboard.clickAddNewVisualizationLink();
+        await PageObjects.visualize.clickAreaChart();
+        await PageObjects.visualize.clickNewSearch();
+        await PageObjects.visualize.saveVisualization('visualization from add new link');
+        await PageObjects.header.clickToastOK();
 
-      const visualizations = PageObjects.dashboard.getTestVisualizations();
-      return retry.tryForTime(10000, async function () {
-        const panelTitles = await PageObjects.dashboard.getPanelSizeData();
-        log.info('visualization titles = ' + panelTitles.map(item => item.title));
-        screenshots.take('Dashboard-visualization-sizes');
-        expect(panelTitles.length).to.eql(visualizations.length + 1);
+        const visualizations = PageObjects.dashboard.getTestVisualizations();
+        return retry.tryForTime(10000, async function () {
+          const panelTitles = await PageObjects.dashboard.getPanelSizeData();
+          log.info('visualization titles = ' + panelTitles.map(item => item.title));
+          screenshots.take('Dashboard-visualization-sizes');
+          expect(panelTitles.length).to.eql(visualizations.length + 1);
+        });
+      });
+
+      it('saves the saved visualization url to the app link', async () => {
+        await PageObjects.header.clickVisualize();
+        const currentUrl = await remote.getCurrentUrl();
+        expect(currentUrl).to.contain(VisualizeConstants.EDIT_PATH);
       });
     });
   });
