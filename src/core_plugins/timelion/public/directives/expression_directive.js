@@ -10,6 +10,15 @@
  *
  * Beneath the hood, we use a PEG grammar to validate the Timelion expression and detect if
  * the caret is in a position within the expression that allows functions to be suggested.
+ *
+ * NOTE: This directive doesn't work well with contenteditable divs. Challenges include:
+ *   - You have to replace markup with newline characters and spaces when passing the expression
+ *     to the grammar.
+ *   - You have to do the opposite when loading a saved expression, so that it appears correctly
+ *     within the contenteditable (i.e. replace newlines with <br> markup).
+ *   - The Range and Selection APIs ignore newlines when providing caret position, so there is
+ *     literally no way to insert suggestions into the correct place in a multiline expression
+ *     that has more than a single consecutive newline.
  */
 
 import _ from 'lodash';

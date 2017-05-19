@@ -23,7 +23,6 @@ const app = require('ui/modules').get('apps/timelion', []);
 
 require('plugins/timelion/services/saved_sheets');
 require('plugins/timelion/services/_saved_sheet');
-import './directives/timelion_model';
 
 require('plugins/kibana/visualize/saved_visualizations/saved_visualizations');
 require('plugins/kibana/discover/saved_searches/saved_searches');
