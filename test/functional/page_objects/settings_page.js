@@ -26,7 +26,8 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
       await this.clickLinkText('Advanced Settings');
     }
 
-    async clickKibanaIndicies() {
+    async clickKibanaIndices() {
+      log.debug('clickKibanaIndices link');
       await this.clickLinkText('Index Patterns');
     }
 
@@ -71,6 +72,7 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
       (await this.getTimeFieldNameField()).click();
       await PageObjects.header.waitUntilLoadingHasFinished();
       await retry.try(async () => {
+        log.debug(`selectTimeFieldOption(${selection})`);
         (await this.getTimeFieldOption(selection)).click();
         const selected = (await this.getTimeFieldOption(selection)).isSelected();
         if (!selected) throw new Error('option not selected: ' + selected);
@@ -265,11 +267,12 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
       await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
-    async createIndexPattern() {
+    async createIndexPattern(indexPatternName = 'logstash-*', timefield = '@timestamp') {
       await retry.try(async () => {
         await this.navigateTo();
-        await this.clickKibanaIndicies();
-        await this.selectTimeFieldOption('@timestamp');
+        await this.clickKibanaIndices();
+        await this.setIndexPatternField(indexPatternName);
+        await this.selectTimeFieldOption(timefield);
         await this.getCreateButton().click();
       });
       await PageObjects.header.waitUntilLoadingHasFinished();
@@ -283,6 +286,13 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
         }
       });
     }
+
+    async setIndexPatternField(pattern) {
+      log.debug(`setIndexPatternField(${pattern})`);
+      return testSubjects.find('createIndexPatternNameInput')
+        .clearValue().type(pattern);
+    }
+
 
     async removeIndexPattern() {
       let alertText;
