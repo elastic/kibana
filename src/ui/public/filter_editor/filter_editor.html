@@ -14,7 +14,10 @@
 
   <div class="kuiModalBody">
     <div ng-show="filterEditor.showQueryDslEditor()">
-      <filter-dsl-editor ng-model="filterEditor.queryDsl"></filter-dsl-editor>
+      <filter-query-dsl-editor
+        filter="filterEditor.filter"
+        on-change="filterEditor.setQueryDsl(queryDsl)"
+      ></filter-query-dsl-editor>
       <div
         ng-show="filterEditor.isEditingQueryDsl"
         ng-click="filterEditor.isEditingQueryDsl = false"

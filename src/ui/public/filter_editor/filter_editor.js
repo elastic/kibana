@@ -5,7 +5,7 @@ import { FILTER_OPERATORS } from './lib/filter_operators';
 import { buildExistsFilter, buildPhraseFilter, buildRangeFilter, buildPhrasesFilter } from '../filter_manager/lib';
 import '../filters/sort_prefix_first';
 import '../directives/ui_select_focus_on';
-import './filter_dsl_editor';
+import './filter_query_dsl_editor';
 import './filter_editor.less';
 
 const module = uiModules.get('kibana');
@@ -28,9 +28,7 @@ module.directive('filterEditor', function ($http) {
         this.isDisabled = filter.meta.disabled;
         this.alias = filter.meta.alias;
         this.isEditingQueryDsl = false;
-        this.queryDsl = _(filter)
-          .omit(['meta', '$state'])
-          .cloneDeep();
+        this.queryDsl = getQueryDslFromFilter(filter);
 
         const { index, key, isNew } = filter.meta;
         if (isNew) {
@@ -51,6 +49,10 @@ module.directive('filterEditor', function ($http) {
       $scope.$watch(() => this.indexPatterns, (indexPatterns) => {
         this.fieldSuggestions = getFieldSuggestions(indexPatterns);
       });
+
+      this.setQueryDsl = (queryDsl) => {
+        this.queryDsl = queryDsl;
+      };
 
       this.getSetField = (field) => {
         if (field) {
@@ -153,6 +155,12 @@ module.directive('filterEditor', function ($http) {
 
         return this.onSave({ filter, isPinned });
       };
+
+      function getQueryDslFromFilter(filter) {
+        return _(filter)
+          .omit(['meta', '$state'])
+          .cloneDeep();
+      }
 
       function getOperatorFromFilter(filter) {
         const { type, negate } = filter.meta;
