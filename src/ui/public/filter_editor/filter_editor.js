@@ -6,6 +6,7 @@ import { buildExistsFilter, buildPhraseFilter, buildRangeFilter, buildPhrasesFil
 import '../filters/sort_prefix_first';
 import '../directives/ui_select_focus_on';
 import './filter_query_dsl_editor';
+import './filter_field_select';
 import './filter_editor.less';
 
 const module = uiModules.get('kibana');
@@ -39,7 +40,7 @@ module.directive('filterEditor', function ($http) {
 
       $scope.$watch(() => this.filter, this.init);
       $scope.$watch(() => this.indexPatterns, (indexPatterns) => {
-        this.fieldSuggestions = getFieldSuggestions(indexPatterns);
+        this.fieldOptions = getFieldOptions(indexPatterns);
       });
 
       $scope.compactUnion = _.flow(_.union, _.compact);
@@ -61,6 +62,11 @@ module.directive('filterEditor', function ($http) {
         this.params = {};
         this.valueSuggestions = [];
         this.operatorSuggestions = getOperatorSuggestions(field);
+      };
+
+      this.onFieldSelect = (field) => {
+        this.setField(field);
+        this.setFocus('operator');
       };
 
       this.getSetOperator = (operator) => {
@@ -171,7 +177,7 @@ module.directive('filterEditor', function ($http) {
         return {};
       }
 
-      function getFieldSuggestions(indexPatterns) {
+      function getFieldOptions(indexPatterns) {
         return indexPatterns.reduce((fields, indexPattern) => {
           const filterableFields = indexPattern.fields.filter(field => field.filterable);
           return [...fields, ...filterableFields];

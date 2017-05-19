@@ -12,16 +12,16 @@ module.directive('filterQueryDslEditor', function () {
       filter: '=',
       onChange: '&'
     },
-    controllerAs: 'filterQueryDslEditor',
-    bindToController: true,
-    controller: function ($scope) {
-      this.queryDsl = _.omit(this.filter, ['meta', '$state']);
-      $scope.aceLoaded = function (editor) {
-        editor.$blockScrolling = Infinity;
-        const session = editor.getSession();
-        session.setTabSize(2);
-        session.setUseSoftTabs(true);
-      };
+    link: {
+      pre: function ($scope) {
+        $scope.queryDsl = _.omit($scope.filter, ['meta', '$state']);
+        $scope.aceLoaded = function (editor) {
+          editor.$blockScrolling = Infinity;
+          const session = editor.getSession();
+          session.setTabSize(2);
+          session.setUseSoftTabs(true);
+        };
+      }
     }
   };
 });
