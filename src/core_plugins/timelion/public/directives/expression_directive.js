@@ -98,15 +98,11 @@ app.directive('timelionExpressionInput', function ($compile, $http, $timeout) {
         scope.functionSuggestions.reset();
       }
 
-      function scrollTo(selected) {
-        const suggestionsListElem = $('[data-suggestions-list]');
-        const suggestedElem = $($('[data-suggestion-list-item]')[selected]);
-
-        if (!suggestedElem.position() || !suggestedElem.position().top) {
-          return;
-        }
-
-        suggestionsListElem.scrollTop(suggestionsListElem.scrollTop() + suggestedElem.position().top);
+      function scrollToSuggestionAt(index) {
+        const suggestionsList = $('[data-suggestions-list]');
+        const suggestionListItem = $('[data-suggestion-list-item]')[index];
+        // Scroll to the position of the item relative to the list, not to the window.
+        suggestionsList.scrollTop(suggestionListItem.offsetTop - suggestionsList[0].offsetTop);
       }
 
       function getSuggestions() {
@@ -165,7 +161,7 @@ app.directive('timelionExpressionInput', function ($compile, $http, $timeout) {
               // Up and down keys navigate through suggestions.
               e.preventDefault();
               scope.functionSuggestions.stepForward();
-              scrollTo(scope.functionSuggestions.index);
+              scrollToSuggestionAt(scope.functionSuggestions.index);
             }
             break;
 
@@ -174,7 +170,7 @@ app.directive('timelionExpressionInput', function ($compile, $http, $timeout) {
               // Up and down keys navigate through suggestions.
               e.preventDefault();
               scope.functionSuggestions.stepBackward();
-              scrollTo(scope.functionSuggestions.index);
+              scrollToSuggestionAt(scope.functionSuggestions.index);
             }
             break;
 
