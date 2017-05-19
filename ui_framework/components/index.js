@@ -23,10 +23,7 @@ export {
   KuiToolBarFooter,
 } from './tool_bar';
 
-export {
-  KuiConfirmModal,
-  KuiModalOverlay
-} from './modal';
+export * from './modal';
 
 export {
   KuiPager,
