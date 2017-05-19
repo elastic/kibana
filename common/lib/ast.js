@@ -55,7 +55,6 @@ function getExpression(chain, expType = 'expression', exp = '') {
 
       const expArgs = getExpressionArgs(chainObj);
 
-      // return `${expression}${fnName}(${expArgs.join(', ')})`;
       return `${expression}${joinArgs(fnName, expArgs)}`;
     }
   }, exp);

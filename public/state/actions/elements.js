@@ -1,6 +1,7 @@
 import { createAction } from 'redux-actions';
 import { get, isEqual } from 'lodash';
 import { assign } from 'object-path-immutable';
+import { notify } from 'ui/notify';
 import { getSelectedElement } from '../selectors/workpad';
 import { interpretAst } from '../../lib/interpreter';
 import { getType } from '../../../common/types/get_type';
@@ -72,11 +73,13 @@ export const fetchRenderable = () => (dispatch, getState) => {
 
 // actions without a reducer, typically used to dispatch other actions
 export const setAst = ({ ast, element, pageId }) => (dispatch) => {
-  if (!ast) return;
-
-  const expression = toExpression(ast);
-  dispatch(setElementExpression({ expression, element, pageId }));
-  dispatch(fetchRenderable());
+  try {
+    const expression = toExpression(ast);
+    dispatch(setElementExpression({ expression, element, pageId }));
+    dispatch(fetchRenderable());
+  } catch (e) {
+    notify.error(e);
+  }
 };
 
 export const setArgumentAtIndex = ({ arg, element, pageId, index }) => {
@@ -85,13 +88,17 @@ export const setArgumentAtIndex = ({ arg, element, pageId, index }) => {
 };
 
 export const setExpression = ({ expression, element, pageId }) => (dispatch) => {
-  const ast = fromExpression(expression);
+  try {
+    const ast = fromExpression(expression);
 
-  // if ast is unchanged, short circuit state update
-  if (!isEqual(element.ast, ast)) {
-    dispatch(args.clear({ path: [ element.id, 'expressionContext' ] }));
-    dispatch(setElementExpression({ expression, element, pageId }));
+    // if ast is unchanged, short circuit state update
+    if (!isEqual(element.ast, ast)) {
+      dispatch(args.clear({ path: [ element.id, 'expressionContext' ] }));
+      dispatch(setElementExpression({ expression, element, pageId }));
+    }
+
+    dispatch(fetchRenderable());
+  } catch (e) {
+    notify.error(e);
   }
-
-  dispatch(fetchRenderable());
 };
