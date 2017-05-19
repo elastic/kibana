@@ -74,8 +74,13 @@ export const fetchRenderable = () => (dispatch, getState) => {
 // actions without a reducer, typically used to dispatch other actions
 export const setAst = ({ ast, element, pageId }) => (dispatch) => {
   try {
-    const expression = toExpression(ast);
-    dispatch(setElementExpression({ expression, element, pageId }));
+    // short-circuit ast updates if nothing changed
+    const currentAst = fromExpression(element.expression);
+    if (!isEqual(currentAst, ast)) {
+      const expression = toExpression(ast);
+      dispatch(setElementExpression({ expression, element, pageId }));
+    }
+
     dispatch(fetchRenderable());
   } catch (e) {
     notify.error(e);
