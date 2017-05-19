@@ -15,14 +15,12 @@ export default function ({ getService, getPageObjects }) {
   const retry = getService('retry');
   const log = getService('log');
   const screenshots = getService('screenshots');
-  const PageObjects = getPageObjects(['common', 'console', 'gettingStarted']);
+  const PageObjects = getPageObjects(['common', 'console']);
 
   describe('console app', function describeIndexTests() {
     before(async function () {
       log.debug('navigateTo console');
-      await PageObjects.common.navigateToUrl('settings', 'kibana/getting_started');
-      await PageObjects.gettingStarted.clickOptOutLink();
-      return PageObjects.common.navigateToApp('console');
+      await PageObjects.common.navigateToApp('console');
     });
 
     it('should show the default request', function () {

@@ -1,6 +1,11 @@
 import _ from 'lodash';
 
-module.exports = class RouteSetupManager {
+// Throw this inside of an Angular route resolver after calling `kbnUrl.change`
+// so that the $router can observe the $location update. Otherwise, the location
+// route setup work will resovle before the route update occurs.
+export const WAIT_FOR_URL_CHANGE_TOKEN = new Error('WAIT_FOR_URL_CHANGE_TOKEN');
+
+export class RouteSetupManager {
   constructor() {
     this.setupWork = [];
     this.onSetupComplete = [];
@@ -71,9 +76,18 @@ module.exports = class RouteSetupManager {
 
       return defer.promise.then(() => Promise.all(userWork.doWork()));
     })
+    .catch(error => {
+      if (error === WAIT_FOR_URL_CHANGE_TOKEN) {
+        // prevent moving forward, return a promise that never resolves
+        // so that the $router can observe the $location update
+        return Promise.halt();
+      }
+
+      throw error;
+    })
     .then(
       () => invokeEach(this.onWorkComplete),
       err => callErrorHandlers(this.onWorkError, err)
     );
   }
-};
+}
