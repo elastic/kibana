@@ -15,6 +15,7 @@ export function AggTypesMetricsBucketAvgProvider(Private) {
     params: [
       ...siblingPipelineHelper.params()
     ],
+    getFormat: siblingPipelineHelper.getFormat,
     getValue: function (agg, bucket) {
       const customMetric = agg.params.customMetric;
       const scaleMetrics = customMetric.type && customMetric.type.isScalable();
