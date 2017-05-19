@@ -2,7 +2,7 @@ import { supports } from 'ui/utils/supports';
 import { CATEGORY } from 'ui/vis/vis_category';
 import { VisFactoryProvider } from 'ui/vis/vis_factory';
 import { MapsVisualizationProvider } from './maps_visualization';
-import { VisSchemasProvider } from 'ui/vis/schemas';
+import { VisSchemasProvider } from 'ui/vis/editors/default/schemas';
 import { AggResponseGeoJsonProvider } from 'ui/agg_response/geo_json/geo_json';
 import tileMapTemplate from './editors/tile_map.html';
 import image from './images/icon-tilemap.svg';
@@ -17,9 +17,7 @@ VisTypesRegistryProvider.register(function TileMapVisType(Private, getAppState, 
   const MapsVisualization = Private(MapsVisualizationProvider);
 
 
-  console.log(Schemas, VisFactory, MapsVisualization);
-
-  const visualization = VisFactory.createBaseVisualization({
+  return VisFactory.createBaseVisualization({
     name: 'tile_map',
     title: 'Tile Map',
     image,
@@ -68,30 +66,28 @@ VisTypesRegistryProvider.register(function TileMapVisType(Private, getAppState, 
         canDesaturate: !!supports.cssFilters
       },
       optionsTemplate: tileMapTemplate,
-    },
-    schemas: new Schemas([
-      {
-        group: 'metrics',
-        name: 'metric',
-        title: 'Value',
-        min: 1,
-        max: 1,
-        aggFilter: ['count', 'avg', 'sum', 'min', 'max', 'cardinality', 'top_hits'],
-        defaults: [
-          { schema: 'metric', type: 'count' }
-        ]
-      },
-      {
-        group: 'buckets',
-        name: 'segment',
-        title: 'Geo Coordinates',
-        aggFilter: 'geohash_grid',
-        min: 1,
-        max: 1
-      }
-    ])
+      schemas: new Schemas([
+        {
+          group: 'metrics',
+          name: 'metric',
+          title: 'Value',
+          min: 1,
+          max: 1,
+          aggFilter: ['count', 'avg', 'sum', 'min', 'max', 'cardinality', 'top_hits'],
+          defaults: [
+            { schema: 'metric', type: 'count' }
+          ]
+        },
+        {
+          group: 'buckets',
+          name: 'segment',
+          title: 'Geo Coordinates',
+          aggFilter: 'geohash_grid',
+          min: 1,
+          max: 1
+        }
+      ])
+    }
   });
 
-
-  return visualization;
 });

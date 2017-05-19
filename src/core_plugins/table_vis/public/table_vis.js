@@ -5,7 +5,7 @@ import 'ui/agg_table';
 import 'ui/agg_table/agg_table_group';
 import { VisFactoryProvider } from 'ui/vis/vis_factory';
 import { CATEGORY } from 'ui/vis/vis_category';
-import { VisSchemasProvider } from 'ui/vis/schemas';
+import { VisSchemasProvider } from 'ui/vis/editors/default/schemas';
 import tableVisTemplate from 'plugins/table_vis/table_vis.html';
 import { VisTypesRegistryProvider } from 'ui/registry/vis_types';
 import image from './images/icon-table.svg';
@@ -52,34 +52,34 @@ function TableVisTypeProvider(Private) {
       template: tableVisTemplate,
     },
     editorConfig: {
-      optionsTemplate: '<table-vis-params></table-vis-params>'
+      optionsTemplate: '<table-vis-params></table-vis-params>',
+      schemas: new Schemas([
+        {
+          group: 'metrics',
+          name: 'metric',
+          title: 'Metric',
+          aggFilter: '!geo_centroid',
+          min: 1,
+          defaults: [
+            { type: 'count', schema: 'metric' }
+          ]
+        },
+        {
+          group: 'buckets',
+          name: 'bucket',
+          title: 'Split Rows'
+        },
+        {
+          group: 'buckets',
+          name: 'split',
+          title: 'Split Table'
+        }
+      ])
     },
     implementsRenderComplete: true,
     hierarchicalData: function (vis) {
       return Boolean(vis.params.showPartialRows || vis.params.showMeticsAtAllLevels);
-    },
-    schemas: new Schemas([
-      {
-        group: 'metrics',
-        name: 'metric',
-        title: 'Metric',
-        aggFilter: '!geo_centroid',
-        min: 1,
-        defaults: [
-          { type: 'count', schema: 'metric' }
-        ]
-      },
-      {
-        group: 'buckets',
-        name: 'bucket',
-        title: 'Split Rows'
-      },
-      {
-        group: 'buckets',
-        name: 'split',
-        title: 'Split Table'
-      }
-    ])
+    }
   });
 }
 

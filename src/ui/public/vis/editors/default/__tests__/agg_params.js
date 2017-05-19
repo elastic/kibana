@@ -6,7 +6,7 @@ import ngMock from 'ng_mock';
 import '../agg_params';
 import { VisProvider } from 'ui/vis';
 import { VisAggConfigProvider } from 'ui/vis/agg_config';
-import { VisSchemasProvider } from 'ui/vis/schemas';
+import { VisSchemasProvider } from 'ui/vis/editors/default/schemas';
 import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
 
 

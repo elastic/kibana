@@ -1,4 +1,4 @@
-import { VisSchemasProvider } from '../schemas';
+import { VisSchemasProvider } from '../editors/default/schemas';
 import { CATEGORY } from '../vis_category';
 import _ from 'lodash';
 
@@ -9,6 +9,15 @@ export function VisTypeProvider(Private) {
   class VisType {
     constructor(opts) {
       opts = opts || {};
+
+      //todo: clean this up!
+      if (opts.schemas && !opts.editorConfig) {
+        throw 'can\'t configure schemas without using default-editor';
+      }
+
+      if (opts.editorConfig && opts.schemas) {
+        throw 'should configure schemas on the editorConfig object, not the top-level options';
+      }
 
       const _defaults = {
         // name, title, description, icon, image
@@ -24,6 +33,7 @@ export function VisTypeProvider(Private) {
           //optionTabs: {},          // default editor needs a list of option tabs
           optionsTemplate: '',      // default editor needs an optionsTemplate if optionsTab is not provided
           collections: {},         // collections used for configuration (list of positions, ...)
+          schemas: new VisTypeSchemas()            // default editor needs a list of schemas ...
         },
         options: {                // controls the visualize editor
           showTimePicker: true,
@@ -31,17 +41,19 @@ export function VisTypeProvider(Private) {
           showFilterBar: true,
           hierarchicalData: false  // we should get rid of this i guess ?
         },
-        schemas: new VisTypeSchemas(),            // default editor needs a list of schemas ...
         isExperimental: false
       };
 
+
+      //todo: validate options here, not later
       _.defaultsDeep(this, opts, _defaults);
 
+      //todo: move validation up to options object, not after we already create
       if (!this.name) throw('vis_type must define its name');
       if (!this.title) throw('vis_type must define its title');
       if (!this.description) throw('vis_type must define its description');
       if (!this.icon && !this.image) throw('vis_type must define its icon or image');
-      if (!this.visualization) throw('vis_type must define visualization controller');
+      if (typeof this.visualization !== 'function') throw('vis_type must define visualization controller');
 
       if (!this.editorConfig.optionTabs) {
         this.editorConfig.optionTabs = [
@@ -52,6 +64,17 @@ export function VisTypeProvider(Private) {
       this.requiresSearch = !(this.requestHandler === 'none');
     }
   }
+
+
+  Object.defineProperty(VisType.prototype, 'schemas', {
+    get() {
+      if (this.editorConfig && this.editorConfig.schemas) {
+        return this.editorConfig.schemas;
+      }
+
+      throw `Can't get schemas from a visualization without using the default editor`;
+    }
+  });
 
   return VisType;
 }

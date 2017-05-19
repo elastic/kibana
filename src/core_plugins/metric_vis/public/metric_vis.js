@@ -2,7 +2,7 @@ import 'plugins/metric_vis/metric_vis.less';
 import 'plugins/metric_vis/metric_vis_controller';
 import { VisFactoryProvider } from 'ui/vis/vis_factory';
 import { CATEGORY } from 'ui/vis/vis_category';
-import { VisSchemasProvider } from 'ui/vis/schemas';
+import { VisSchemasProvider } from 'ui/vis/editors/default/schemas';
 import metricVisTemplate from 'plugins/metric_vis/metric_vis.html';
 import metricVisParamsTemplate from 'plugins/metric_vis/metric_vis_params.html';
 import { VisTypesRegistryProvider } from 'ui/registry/vis_types';
@@ -34,21 +34,21 @@ function MetricVisProvider(Private) {
       template: metricVisTemplate,
     },
     editorConfig: {
-      optionsTemplate: metricVisParamsTemplate
+      optionsTemplate: metricVisParamsTemplate,
+      schemas: new Schemas([
+        {
+          group: 'metrics',
+          name: 'metric',
+          title: 'Metric',
+          min: 1,
+          aggFilter: ['!derivative', '!geo_centroid'],
+          defaults: [
+            { type: 'count', schema: 'metric' }
+          ]
+        }
+      ])
     },
-    implementsRenderComplete: true,
-    schemas: new Schemas([
-      {
-        group: 'metrics',
-        name: 'metric',
-        title: 'Metric',
-        min: 1,
-        aggFilter: ['!derivative', '!geo_centroid'],
-        defaults: [
-          { type: 'count', schema: 'metric' }
-        ]
-      }
-    ])
+    implementsRenderComplete: true
   });
 }
 

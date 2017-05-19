@@ -1,5 +1,5 @@
 import { VisFactoryProvider } from 'ui/vis/vis_factory';
-import { VisSchemasProvider } from 'ui/vis/schemas';
+import { VisSchemasProvider } from 'ui/vis/editors/default/schemas';
 import { CATEGORY } from 'ui/vis/vis_category';
 import heatmapTemplate from 'plugins/kbn_vislib_vis_types/editors/heatmap.html';
 import { vislibColorMaps } from 'ui/vislib/components/color/colormaps';
@@ -63,44 +63,45 @@ export default function HeatmapVisType(Private) {
         scales: ['linear', 'log', 'square root'],
         colorSchemas: Object.keys(vislibColorMaps),
       },
-      editorTemplate: heatmapTemplate
-    },
-    schemas: new Schemas([
-      {
-        group: 'metrics',
-        name: 'metric',
-        title: 'Value',
-        min: 1,
-        max: 1,
-        aggFilter: ['count', 'avg', 'median', 'sum', 'min', 'max', 'cardinality', 'std_dev', 'top_hits'],
-        defaults: [
-          { schema: 'metric', type: 'count' }
-        ]
-      },
-      {
-        group: 'buckets',
-        name: 'segment',
-        title: 'X-Axis',
-        min: 0,
-        max: 1,
-        aggFilter: '!geohash_grid'
-      },
-      {
-        group: 'buckets',
-        name: 'group',
-        title: 'Y-Axis',
-        min: 0,
-        max: 1,
-        aggFilter: '!geohash_grid'
-      },
-      {
-        group: 'buckets',
-        name: 'split',
-        title: 'Split Chart',
-        min: 0,
-        max: 1,
-        aggFilter: '!geohash_grid'
-      }
-    ])
+      editorTemplate: heatmapTemplate,
+      schemas: new Schemas([
+        {
+          group: 'metrics',
+          name: 'metric',
+          title: 'Value',
+          min: 1,
+          max: 1,
+          aggFilter: ['count', 'avg', 'median', 'sum', 'min', 'max', 'cardinality', 'std_dev', 'top_hits'],
+          defaults: [
+            { schema: 'metric', type: 'count' }
+          ]
+        },
+        {
+          group: 'buckets',
+          name: 'segment',
+          title: 'X-Axis',
+          min: 0,
+          max: 1,
+          aggFilter: '!geohash_grid'
+        },
+        {
+          group: 'buckets',
+          name: 'group',
+          title: 'Y-Axis',
+          min: 0,
+          max: 1,
+          aggFilter: '!geohash_grid'
+        },
+        {
+          group: 'buckets',
+          name: 'split',
+          title: 'Split Chart',
+          min: 0,
+          max: 1,
+          aggFilter: '!geohash_grid'
+        }
+      ])
+    }
+
   });
 }
