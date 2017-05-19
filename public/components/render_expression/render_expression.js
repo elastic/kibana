@@ -14,7 +14,7 @@ export class RenderExpression extends React.PureComponent {
   }
 
   render() {
-    const style = { height: '200px', width: '700px' };
+    const style = { height: '500px', width: '700px' };
     return (
       <div style={style} ref={this.renderElement.bind(this)} />
     );
