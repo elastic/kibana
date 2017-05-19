@@ -63,7 +63,10 @@ export function AggResponseTabifyProvider(Private, Notifier) {
         }
         break;
       case 'metrics':
-        const value = agg.getValue(bucket) * aggScale;
+        let value = agg.getValue(bucket);
+        if (aggScale !== 1) {
+          value *= aggScale;
+        }
         write.cell(agg, value, function () {
           if (!write.aggStack.length) {
             // row complete
