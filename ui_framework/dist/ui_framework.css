@@ -781,7 +781,6 @@ body {
   /* 2 */
   font-size: 10px !important;
   /* 2 */
-  -webkit-transition: background-color 0.1s linear;
   transition: background-color 0.1s linear; }
   .kuiCheckBox:before {
     position: relative;
@@ -791,7 +790,6 @@ body {
     font-size: 1em;
     opacity: 0;
     color: #FFF;
-    -webkit-transition: opacity 0.1s linear;
     transition: opacity 0.1s linear; }
   .kuiCheckBox:checked {
     border-color: #0096CC;
@@ -865,7 +863,6 @@ body {
   background-color: #ffffff;
   border: 1px solid #DEDEDE;
   border-radius: 4px;
-  -webkit-transition: border-color 0.1s linear;
   transition: border-color 0.1s linear;
   /**
    * 1. Angular will add an ng-untouched class to an input if it hasn't been touched yet.
@@ -907,7 +904,6 @@ body {
   background-color: #ffffff;
   border: 1px solid #DEDEDE;
   border-radius: 4px;
-  -webkit-transition: border-color 0.1s linear;
   transition: border-color 0.1s linear;
   /**
    * 1. Angular will add an ng-untouched class to an input if it hasn't been touched yet.
@@ -981,7 +977,6 @@ body {
   background-color: #ffffff;
   border: 1px solid #DEDEDE;
   border-radius: 4px;
-  -webkit-transition: border-color 0.1s linear;
   transition: border-color 0.1s linear;
   /**
    * 1. Angular will add an ng-untouched class to an input if it hasn't been touched yet.
@@ -1022,7 +1017,6 @@ body {
   background-color: #ffffff;
   border: 1px solid #DEDEDE;
   border-radius: 4px;
-  -webkit-transition: border-color 0.1s linear;
   transition: border-color 0.1s linear;
   /**
    * 1. Angular will add an ng-untouched class to an input if it hasn't been touched yet.
@@ -1228,12 +1222,12 @@ body {
 .kuiInfoButton {
   font-size: 16px;
   background-color: transparent;
-  color: #3CAED2;
+  color: #0096CC;
   cursor: pointer;
   border: none;
   padding: 0; }
   .kuiInfoButton:hover, .kuiInfoButton:active {
-    color: #105A73; }
+    color: #007199; }
 
 /**
  * 1. Copied from FontAwesome's .fa class. We use a custom class to make it easier to migrate away
@@ -1351,12 +1345,6 @@ body {
     color: #b7e2ea; }
     .theme-dark .kuiLink:hover {
       color: #b7e2ea; }
-
-.kuiLoadingItems {
-  padding: 30px;
-  font-size: 18px;
-  color: #666;
-  line-height: 1.5; }
 
 /**
  * 1. Breadcrumbs are placed in the top-left corner and need to be bumped over
@@ -1844,7 +1832,6 @@ body {
   background-color: #ffffff;
   border: 1px solid #DEDEDE;
   border-radius: 4px;
-  -webkit-transition: border-color 0.1s linear;
   transition: border-color 0.1s linear;
   /**
    * 1. Angular will add an ng-untouched class to an input if it hasn't been touched yet.
@@ -1926,7 +1913,6 @@ body {
   background-color: #ffffff;
   border: 1px solid #DEDEDE;
   border-radius: 4px;
-  -webkit-transition: border-color 0.1s linear;
   transition: border-color 0.1s linear;
   /**
    * 1. Angular will add an ng-untouched class to an input if it hasn't been touched yet.
@@ -2292,12 +2278,6 @@ body {
   .kuiModalFooter > * + * {
     margin-left: 5px; }
 
-.kuiNoItems {
-  padding: 30px;
-  font-size: 18px;
-  color: #666;
-  line-height: 1.5; }
-
 .kuiNotice {
   padding: 40px 60px 48px;
   margin: 20px;
@@ -2635,6 +2615,12 @@ body {
   .kuiTableRowCell--checkBox .kuiTableRowCell__liner {
     overflow: visible;
     /* 3 */ }
+
+.kuiTableInfo {
+  padding: 30px;
+  font-size: 18px;
+  color: #666;
+  line-height: 1.5; }
 
 .kuiTabs {
   display: -webkit-box;
@@ -2980,7 +2966,6 @@ body {
   border: 1px solid #D9D9D9;
   line-height: normal;
   /* 1 */
-  -webkit-transition: border-color 0.1s linear;
   transition: border-color 0.1s linear; }
   .kuiToolBarSearchBox__input:focus {
     outline: none;
