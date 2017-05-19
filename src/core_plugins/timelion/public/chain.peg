@@ -91,7 +91,7 @@ function_name
  = first:[a-zA-Z]+ rest:[.a-zA-Z0-9_-]* { return first.join('') + rest.join('') }
 
 function "function"
- = space? '.' name:function_name space? '(' space? arg_list:arg_list? space? ')' {
+ = space? '.' name:function_name space? '(' space? arg_list:arg_list? space? ')' space? {
   var result = {
     type: 'function',
     function: name,
@@ -108,7 +108,7 @@ function "function"
   functions.push(result)
   return result;
  }
- / space? '.' func:function_name? {
+ / '.' func:function_name? {
   var exception = {
    type: 'incompleteFunction',
    function: func,

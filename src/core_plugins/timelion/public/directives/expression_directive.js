@@ -181,10 +181,11 @@ app.directive('timelionExpressionInput', function ($compile, $http, $timeout) {
             break;
 
           case navigationalKeys.ENTER:
+            e.preventDefault();
+
             // If the suggestions are open, complete the expression with the suggestion.
             // Otherwise, the default action of submitting the input value will occur.
             if (!scope.functionSuggestions.isEmpty()) {
-              e.preventDefault();
               insertSuggestionIntoExpression(scope.functionSuggestions.index);
             } else {
               // If the suggestions are closed, we should re-render the chart.
