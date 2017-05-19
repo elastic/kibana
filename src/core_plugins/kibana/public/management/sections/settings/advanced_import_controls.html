@@ -1,7 +1,7 @@
 <div>
   <button
     class="kuiButton kuiButton--basic kuiButton--iconText"
-    ng-click="export()"
+    ng-click="advancedImportControls.export()"
   >
     <span class="kuiButton__inner">
       <span aria-hidden="true" class="kuiButton__icon kuiIcon fa-download"></span>
@@ -9,7 +9,7 @@
     </span>
   </button>
   <file-upload
-    on-read="import(fileContents)"
+    on-read="advancedImportControls.import(fileContents)"
     upload-selector="[data-import-saved-objects-button]"
   >
     <button

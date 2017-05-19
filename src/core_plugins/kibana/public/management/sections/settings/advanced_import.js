@@ -20,18 +20,21 @@ uiModules.get('apps/management')
       restrict: 'E',
       replace: true,
       template: advancedImportTemplate,
-      link: function ($scope) {
-        $scope.importState = advancedImportState;
+      controllerAs: 'advancedImport',
+      bindToController: true,
+      controller: class AdvancedImportController {
+        constructor() {
+          this.importState = advancedImportState;
+          this.importSetting = importSetting;
+          this.abandonSetting = abandonSetting;
+          this.importAllSettings = () => advancedImportState.getSettings().forEach(importSetting);
+          this.abandonAllSettings = () => advancedImportState.getSettings().forEach(abandonSetting);
 
-        $scope.importSetting = importSetting;
-        $scope.abandonSetting = abandonSetting;
-        $scope.importAllSettings = () => advancedImportState.getSettings().forEach(importSetting);
-        $scope.abandonAllSettings = () => advancedImportState.getSettings().forEach(abandonSetting);
-
-        $scope.done = function () {
-          advancedImportState.clearSettings();
-          advancedImportState.setImporting(false);
-        };
+          this.done = () => {
+            advancedImportState.clearSettings();
+            advancedImportState.setImporting(false);
+          };
+        }
       }
     };
   });

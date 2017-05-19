@@ -1,11 +1,11 @@
 <div
   class="kuiVerticalRhythm"
-  ng-if="importState.isImporting()"
+  ng-if="advancedImport.importState.isImporting()"
 >
   <!-- Notice -->
   <div
     class="kuiVerticalRhythm kuiInfoPanel kuiInfoPanel--info"
-    ng-if="importState.getSettings().length"
+    ng-if="advancedImport.importState.getSettings().length"
   >
     <div class="kuiInfoPanelHeader">
       <span class="kuiInfoPanelHeader__icon kuiIcon kuiIcon--info fa-info"></span>
@@ -28,7 +28,7 @@
   <!-- No settings error -->
   <div
     class="kuiVerticalRhythm kuiInfoPanel kuiInfoPanel--error"
-    ng-if="!importState.getSettings().length"
+    ng-if="!advancedImport.importState.getSettings().length"
   >
     <div class="kuiInfoPanelHeader">
       <span class="kuiInfoPanelHeader__icon kuiIcon kuiIcon--error fa-warning"></span>
@@ -47,7 +47,7 @@
   <!-- Import/Abandon All Buttons -->
   <div
     class="kuiVerticalRhythm"
-    ng-if="importState.getSettings().length"
+    ng-if="advancedImport.importState.getSettings().length"
   >
     <!--<button
       class="kuiButton kuiButton--basic"
@@ -59,7 +59,7 @@
     </button>-->
     <button
       class="kuiButton kuiButton--danger"
-      ng-click="abandonAllSettings()"
+      ng-click="advancedImport.abandonAllSettings()"
     >
       <span class="kuiButton__inner">
         <span>Abandon All</span>
@@ -70,7 +70,7 @@
   <!-- Settings table -->
   <table
     class="kuiTable kuiVerticalRhythm"
-    ng-if="importState.getSettings().length"
+    ng-if="advancedImport.importState.getSettings().length"
   >
     <thead>
       <tr>
@@ -101,7 +101,7 @@
     <tbody>
       <tr
         class="kuiTableRow"
-        ng-repeat="setting in importState.getSettings()"
+        ng-repeat="setting in advancedImport.importState.getSettings()"
       >
         <td class="kuiTableRowCell kuiTableRowCell--wrap">
           <div class="kuiTableRowCell__liner">
@@ -131,12 +131,12 @@
             </div>
             <div
               class="kuiIcon kuiIcon--success fa-check"
-              ng-if="importState.hasBeenImported(setting)"
+              ng-if="advancedImport.importState.hasBeenImported(setting)"
             >
             </div>
             <div
               class="kuiIcon kuiIcon--inactive fa-circle-o"
-              ng-if="importState.hasBeenAbandoned(setting)"
+              ng-if="advancedImport.importState.hasBeenAbandoned(setting)"
             >
             </div>
           </div>
@@ -146,15 +146,15 @@
             <div class="kuiMenuButtonGroup kuiMenuButtonGroup--alignRight">
               <button
                 class="kuiMenuButton kuiMenuButton--basic"
-                ng-click="importSetting(setting)"
-                ng-disabled="importState.hasBeenImported(setting)"
+                ng-click="advancedImport.importSetting(setting)"
+                ng-disabled="advancedImport.importState.hasBeenImported(setting)"
               >
                 Import
               </button>
               <button
                 class="kuiMenuButton kuiMenuButton--danger"
-                ng-click="abandonSetting(setting)"
-                ng-disabled="importState.hasBeenAbandoned(setting)"
+                ng-click="advancedImport.abandonSetting(setting)"
+                ng-disabled="advancedImport.importState.hasBeenAbandoned(setting)"
               >
                 Abandon
               </button>
@@ -169,7 +169,7 @@
   <div class="kuiVerticalRhythm">
     <button
       class="kuiButton kuiButton--primary"
-      ng-click="done()"
+      ng-click="advancedImport.done()"
     >
       <span class="kuiButton__inner">
         <span>Done</span>
