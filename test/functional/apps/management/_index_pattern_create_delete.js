@@ -16,7 +16,7 @@ export default function ({ getService, getPageObjects }) {
         return PageObjects.settings.navigateTo();
       })
       .then(function () {
-        return PageObjects.settings.clickKibanaIndicies();
+        return PageObjects.settings.clickKibanaIndices();
       });
     });
 
