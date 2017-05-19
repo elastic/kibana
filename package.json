@@ -22,7 +22,6 @@
   "dependencies": {
     "axios": "^0.16.1",
     "elasticsearch": "^13.0.0",
-    "isomorphic-fetch": "^2.2.1",
     "jquery": "^3.2.1",
     "lodash": "^4.17.4",
     "mathjs": "^3.12.3",

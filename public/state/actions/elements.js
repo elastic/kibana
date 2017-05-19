@@ -88,9 +88,10 @@ export const setExpression = ({ expression, element, pageId }) => (dispatch) => 
   const ast = fromExpression(expression);
 
   // if ast is unchanged, short circuit state update
-  if (isEqual(element.ast, ast)) return;
+  if (isEqual(element.ast, ast)) {
+    dispatch(args.clear({ path: [ element.id, 'expressionContext' ] }));
+    dispatch(setElementExpression({ expression, element, pageId }));
+  }
 
-  dispatch(args.clear({ path: [ element.id, 'expressionContext' ] }));
-  dispatch(setElementExpression({ expression, element, pageId }));
   dispatch(fetchRenderable());
 };
