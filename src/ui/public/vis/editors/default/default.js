@@ -14,13 +14,14 @@ const defaultEditor = function ($rootScope, $compile) {
       this.el = el;
     }
 
-    render(vis, visData) {
+    render(vis, visData, searchSource) {
       let $scope;
 
       const updateScope = function () {
         $scope.vis = vis;
         $scope.visData = visData;
         $scope.uiState = vis.getUiState();
+        $scope.searchSource = searchSource;
       };
 
       if (!this.$scope) {

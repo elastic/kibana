@@ -12,6 +12,7 @@ const CourierRequestHandlerProvider = function (Private, courier) {
 
       return new Promise((resolve, reject) => {
         searchSource.onResults().then(resp => {
+          searchSource.rawResponse = resp;
           resolve(resp);
         }).catch(e => reject(e));
 

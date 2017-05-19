@@ -19,7 +19,8 @@ uiModules
     scope : {
       vis: '=',
       visData: '=',
-      uiState: '=?'
+      uiState: '=?',
+      searchSource: '='
     },
     template: visualizationTemplate,
     link: function ($scope, $el, attr, renderCounter) {

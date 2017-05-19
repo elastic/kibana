@@ -17,7 +17,8 @@ uiModules
     scope : {
       vis: '=',
       visData: '=',
-      uiState: '=?'
+      uiState: '=?',
+      searchSource: '='
     },
     link: function ($scope, element) {
       // Clone the _vis instance.
@@ -27,7 +28,7 @@ uiModules
       const editor = new Editor(element);
 
       const renderFunction = _.debounce(() => {
-        editor.render(vis, $scope.visData);
+        editor.render(vis, $scope.visData, $scope.searchSource);
         $scope.$apply();
       }, 200);
 
