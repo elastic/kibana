@@ -22,6 +22,7 @@
           ng-class="showDetails ? 'legend-value-full' : 'legend-value-truncate'"
           class="legend-value-title"
           tooltip="{{legendData.label}}"
+          tooltip-animation="false"
         >
           <i class="fa fa-circle" ng-style="{color: getColor(legendData.label)}"></i> {{legendData.label}}
         </div>
