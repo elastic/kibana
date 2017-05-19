@@ -7,7 +7,6 @@ import {
   buildPhrasesFilter
 } from '../../filter_manager/lib';
 
-
 export function getQueryDslFromFilter(filter) {
   return _(filter)
     .omit(['meta', '$state'])

@@ -13,7 +13,6 @@ import {
   getFieldFromFilter,
   getOperatorFromFilter,
   getParamsFromFilter,
-  getOperatorOptions,
   isFilterValid,
   buildFilter
 } from './lib/filter_editor_utils';
@@ -60,7 +59,6 @@ module.directive('filterEditor', function ($http, $timeout) {
         this.operator = null;
         this.params = {};
         this.valueSuggestions = [];
-        this.operatorOptions = getOperatorOptions(field);
       };
 
       this.onFieldSelect = (field) => {
