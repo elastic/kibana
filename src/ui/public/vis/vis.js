@@ -17,7 +17,7 @@ import { UtilsBrushEventProvider } from 'ui/utils/brush_event';
 import { FilterBarQueryFilterProvider } from 'ui/filter_bar/query_filter';
 import { FilterBarClickHandlerProvider } from 'ui/filter_bar/filter_bar_click_handler';
 
-export function VisProvider(Private, timefilter) {
+export function VisProvider(Private, timefilter, getAppState) {
   const visTypes = Private(VisTypesRegistryProvider);
   const AggConfigs = Private(VisAggConfigsProvider);
   const brushEvent = Private(UtilsBrushEventProvider);
@@ -25,18 +25,18 @@ export function VisProvider(Private, timefilter) {
   const filterBarClickHandler = Private(FilterBarClickHandlerProvider);
 
   class Vis extends EventEmitter {
-    constructor(indexPattern, state, uiState) {
+    constructor(indexPattern, visState, uiState) {
       super();
-      state = state || {};
+      visState = visState || {};
 
-      if (_.isString(state)) {
-        state = {
-          type: state
+      if (_.isString(visState)) {
+        visState = {
+          type: visState
         };
       }
       this.indexPattern = indexPattern;
 
-      this.setCurrentState(state);
+      this.setCurrentState(visState);
       this.setState(this.getCurrentState(), false);
       this.setUiState(uiState);
 
@@ -44,8 +44,10 @@ export function VisProvider(Private, timefilter) {
         timeFilter: timefilter,
         queryFilter: queryFilter,
         events: {
-          filter: filterBarClickHandler(state),
-          brush: brushEvent(state),
+          filter: (event) => {
+            const appState = getAppState();
+            filterBarClickHandler(appState)(event);
+          }, brush: brushEvent(visState),
         }
       };
     }
