@@ -62,6 +62,7 @@
  * 2. Expand as the user enters text.
  * 3. Cap the height so that we can offer auto-completion suggestions below the input.
  * 4. When the input is collapsed, we want text input to be truncated with an ellipsis.
+ * 5. Prevent textarea from being resized.
  */
 .kuiLocalSearchInput--expandable {
   height: $localSearchHeight;
@@ -70,6 +71,7 @@
   white-space: nowrap; /* 4 */
   overflow: hidden; /* 4 */
   text-overflow: ellipsis; /* 4 */
+  resize: none; /* 5 */
 
   &:focus {
     z-index: 1; /* 1 */
