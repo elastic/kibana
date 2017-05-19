@@ -7,10 +7,11 @@ import '../filters/sort_prefix_first';
 import '../directives/ui_select_focus_on';
 import './filter_query_dsl_editor';
 import './filter_field_select';
+import './filter_operator_select';
 import './filter_editor.less';
 
 const module = uiModules.get('kibana');
-module.directive('filterEditor', function ($http) {
+module.directive('filterEditor', function ($http, $timeout) {
   return {
     restrict: 'E',
     template,
@@ -49,31 +50,17 @@ module.directive('filterEditor', function ($http) {
         this.queryDsl = queryDsl;
       };
 
-      this.getSetField = (field) => {
-        if (field) {
-          return this.setField(field);
-        }
-        return this.field;
-      };
-
       this.setField = (field) => {
         this.field = field;
         this.operator = null;
         this.params = {};
         this.valueSuggestions = [];
-        this.operatorSuggestions = getOperatorSuggestions(field);
+        this.operatorOptions = getOperatorOptions(field);
       };
 
       this.onFieldSelect = (field) => {
         this.setField(field);
         this.setFocus('operator');
-      };
-
-      this.getSetOperator = (operator) => {
-        if (operator) {
-          return this.setOperator(operator);
-        }
-        return this.operator;
       };
 
       this.setOperator = (operator) => {
@@ -84,8 +71,13 @@ module.directive('filterEditor', function ($http) {
         }
       };
 
+      this.onOperatorSelect = (operator) => {
+        this.setOperator(operator);
+        this.setFocus('params');
+      };
+
       this.setFocus = (name) => {
-        $scope.$broadcast(`focus-${name}`);
+        $timeout(() => $scope.$broadcast(`focus-${name}`));
       };
 
       this.refreshValueSuggestions = (query) => {
@@ -184,7 +176,7 @@ module.directive('filterEditor', function ($http) {
         }, []);
       }
 
-      function getOperatorSuggestions(field) {
+      function getOperatorOptions(field) {
         const type = _.get(field, 'type');
         return FILTER_OPERATORS.filter((operator) => {
           return !operator.fieldTypes || operator.fieldTypes.includes(type);
