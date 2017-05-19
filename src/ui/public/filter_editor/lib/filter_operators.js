@@ -1,3 +1,5 @@
+import _ from 'lodash';
+
 export const FILTER_OPERATORS = [
   {
     name: 'is',
@@ -42,3 +44,8 @@ export const FILTER_OPERATORS = [
     negate: true,
   },
 ];
+
+export const FILTER_OPERATOR_TYPES = _(FILTER_OPERATORS)
+  .map('type')
+  .uniq()
+  .value();

@@ -1,7 +1,7 @@
 import _ from 'lodash';
 import { uiModules } from 'ui/modules';
 import template from './filter_editor.html';
-import { FILTER_OPERATORS } from './lib/filter_operators';
+import { FILTER_OPERATORS, FILTER_OPERATOR_TYPES } from './lib/filter_operators';
 import { buildExistsFilter, buildPhraseFilter, buildRangeFilter, buildPhrasesFilter } from '../filter_manager/lib';
 import '../filters/sort_prefix_first';
 import '../directives/ui_select_focus_on';
@@ -29,19 +29,11 @@ module.directive('filterEditor', function ($http) {
         this.alias = filter.meta.alias;
         this.isEditingQueryDsl = false;
         this.queryDsl = getQueryDslFromFilter(filter);
-
-        const { index, key, isNew } = filter.meta;
-        if (isNew) {
-          this.field = null;
-          this.operator = null;
-          this.valueSuggestions = [];
-          this.params = {};
+        this.setField(getFieldFromFilter(filter, this.indexPatterns));
+        this.setOperator(getOperatorFromFilter(filter));
+        this.params = getParamsFromFilter(filter);
+        if (filter.meta.isNew) {
           this.setFocus('field');
-        } else {
-          const indexPattern = this.indexPatterns.find(({ id }) => id === index);
-          this.setField(indexPattern.fields.byName[key]);
-          this.setOperator(getOperatorFromFilter(filter));
-          this.params = getParamsFromFilter(filter);
         }
       };
 
@@ -49,6 +41,8 @@ module.directive('filterEditor', function ($http) {
       $scope.$watch(() => this.indexPatterns, (indexPatterns) => {
         this.fieldSuggestions = getFieldSuggestions(indexPatterns);
       });
+
+      $scope.compactUnion = _.flow(_.union, _.compact);
 
       this.setQueryDsl = (queryDsl) => {
         this.queryDsl = queryDsl;
@@ -95,24 +89,10 @@ module.directive('filterEditor', function ($http) {
 
       this.getValueSuggestions = _.memoize(getValueSuggestions, getFieldQueryHash);
 
-      const simpleTypes = _(FILTER_OPERATORS)
-        .map('type')
-        .uniq()
-        .value();
-
       this.showQueryDslEditor = () => {
         const { type, isNew } = this.filter.meta;
-        return this.isEditingQueryDsl || (!isNew && !simpleTypes.includes(type));
+        return this.isEditingQueryDsl || (!isNew && !FILTER_OPERATOR_TYPES.includes(type));
       };
-
-      $scope.aceLoaded = function (editor) {
-        editor.$blockScrolling = Infinity;
-        const session = editor.getSession();
-        session.setTabSize(2);
-        session.setUseSoftTabs(true);
-      };
-
-      $scope.compactUnion = _.flow(_.union, _.compact);
 
       this.isValid = () => {
         if (this.showQueryDslEditor()) {
@@ -162,6 +142,12 @@ module.directive('filterEditor', function ($http) {
           .cloneDeep();
       }
 
+      function getFieldFromFilter(filter, indexPatterns) {
+        const { index, key } = filter.meta;
+        const indexPattern = indexPatterns.find(({ id }) => id === index);
+        return indexPattern && indexPattern.fields.byName[key];
+      }
+
       function getOperatorFromFilter(filter) {
         const { type, negate } = filter.meta;
         return FILTER_OPERATORS.find((operator) => {
@@ -181,9 +167,8 @@ module.directive('filterEditor', function ($http) {
           const from = _.has(params, 'gte') ? params.gte : params.gt;
           const to = _.has(params, 'lte') ? params.lte : params.lt;
           return { from, to };
-        } else {
-          return {};
         }
+        return {};
       }
 
       function getFieldSuggestions(indexPatterns) {
