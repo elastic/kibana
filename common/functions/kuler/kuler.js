@@ -1,5 +1,5 @@
 import Fn from '../fn.js';
-import fetch from 'isomorphic-fetch';
+import fetch from 'axios';
 import { map } from 'lodash';
 
 module.exports = new Fn({
@@ -28,12 +28,12 @@ module.exports = new Fn({
       const path = id === 'random' ? '?filter=public&startIndex=0&maxNumber=36&sort=like_count&time=week' : `/${args._}?metadata=all`;
       return fetch(`https://color.adobe.com/api/v2/themes${path}`, {
         method: 'GET',
+        responseType: 'json',
         headers: {
           'x-api-key': APIKEY,
         },
       })
-      .then(reply => reply.json())
-      .then(reply => id === 'random' ? reply.themes[Math.floor(Math.random() * 36)] : reply);
+      .then(reply => id === 'random' ? reply.data.themes[Math.floor(Math.random() * 36)] : reply);
     }
 
     return getTheme(args._).then(theme => {
