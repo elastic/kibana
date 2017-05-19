@@ -1,14 +1,23 @@
 import _ from 'lodash';
 import { uiModules } from 'ui/modules';
+import { FILTER_OPERATOR_TYPES } from './lib/filter_operators';
 import template from './filter_editor.html';
-import { FILTER_OPERATORS, FILTER_OPERATOR_TYPES } from './lib/filter_operators';
-import { buildExistsFilter, buildPhraseFilter, buildRangeFilter, buildPhrasesFilter } from '../filter_manager/lib';
-import '../filters/sort_prefix_first';
-import '../directives/ui_select_focus_on';
 import './filter_query_dsl_editor';
 import './filter_field_select';
 import './filter_operator_select';
 import './filter_editor.less';
+import '../filters/sort_prefix_first';
+import '../directives/ui_select_focus_on';
+import {
+  getQueryDslFromFilter,
+  getFieldFromFilter,
+  getOperatorFromFilter,
+  getParamsFromFilter,
+  getFieldOptions,
+  getOperatorOptions,
+  isFilterValid,
+  buildFilter
+} from './lib/filter_editor_utils';
 
 const module = uiModules.get('kibana');
 module.directive('filterEditor', function ($http, $timeout) {
@@ -95,18 +104,9 @@ module.directive('filterEditor', function ($http, $timeout) {
       this.isValid = () => {
         if (this.showQueryDslEditor()) {
           return _.isObject(this.queryDsl);
-        } else if (!this.field || !this.operator) {
-          return false;
-        } else if (this.operator.type === 'phrase') {
-          return _.has(this.params, 'value') && this.params.value !== '';
-        } else if (this.operator.type === 'phrases') {
-          return _.has(this.params, 'values') && this.params.values.length > 0;
-        } else if (this.operator.type === 'range') {
-          const hasFrom = _.has(this.params, 'from') && this.params.from !== '';
-          const hasTo = _.has(this.params, 'to') && this.params.to !== '';
-          return hasFrom || hasTo;
         }
-        return true;
+        const { field, operator, params } = this;
+        return isFilterValid({ field, operator, params });
       };
 
       this.save = () => {
@@ -117,71 +117,13 @@ module.directive('filterEditor', function ($http, $timeout) {
           const meta = _.pick(this.filter.meta, ['negate', 'index']);
           filter = Object.assign(this.queryDsl, { meta });
         } else {
-          if (operator.type === 'phrase') {
-            filter = buildPhraseFilter(field, params.value, field.indexPattern);
-          } else if (operator.type === 'phrases') {
-            filter = buildPhrasesFilter(field, params.values, field.indexPattern);
-          } else if (operator.type === 'range') {
-            filter = buildRangeFilter(field, { gte: params.from, lt: params.to }, field.indexPattern);
-          } else if (operator.type === 'exists') {
-            filter = buildExistsFilter(field, field.indexPattern);
-          }
-          filter.meta.negate = operator.negate;
+          filter = buildFilter({ field, operator, params });
         }
         filter.meta.disabled = isDisabled;
         filter.meta.alias = alias;
 
         return this.onSave({ filter, isPinned });
       };
-
-      function getQueryDslFromFilter(filter) {
-        return _(filter)
-          .omit(['meta', '$state'])
-          .cloneDeep();
-      }
-
-      function getFieldFromFilter(filter, indexPatterns) {
-        const { index, key } = filter.meta;
-        const indexPattern = indexPatterns.find(({ id }) => id === index);
-        return indexPattern && indexPattern.fields.byName[key];
-      }
-
-      function getOperatorFromFilter(filter) {
-        const { type, negate } = filter.meta;
-        return FILTER_OPERATORS.find((operator) => {
-          return operator.type === type && operator.negate === negate;
-        });
-      }
-
-      function getParamsFromFilter(filter) {
-        const { type, key } = filter.meta;
-        if (type === 'phrase') {
-          const value = filter.query ? filter.query.match[key].query : filter.script.script.params.value;
-          return { value };
-        } else if (type === 'phrases') {
-          return { values: filter.meta.values };
-        } else if (type === 'range') {
-          const params = filter.range ? filter.range[key] : filter.script.script.params;
-          const from = _.has(params, 'gte') ? params.gte : params.gt;
-          const to = _.has(params, 'lte') ? params.lte : params.lt;
-          return { from, to };
-        }
-        return {};
-      }
-
-      function getFieldOptions(indexPatterns) {
-        return indexPatterns.reduce((fields, indexPattern) => {
-          const filterableFields = indexPattern.fields.filter(field => field.filterable);
-          return [...fields, ...filterableFields];
-        }, []);
-      }
-
-      function getOperatorOptions(field) {
-        const type = _.get(field, 'type');
-        return FILTER_OPERATORS.filter((operator) => {
-          return !operator.fieldTypes || operator.fieldTypes.includes(type);
-        });
-      }
 
       function getValueSuggestions(field, query) {
         if (!_.get(field, 'aggregatable') || field.type !== 'string') {

@@ -1,6 +1,7 @@
 import 'angular-ui-select';
 import { uiModules } from 'ui/modules';
 import template from './filter_field_select.html';
+import '../directives/ui_select_focus_on';
 import '../filters/sort_prefix_first';
 
 const module = uiModules.get('kibana');
