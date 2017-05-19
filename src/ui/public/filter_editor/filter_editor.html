@@ -53,7 +53,7 @@
       <div class="kuiFieldGroupSection kuiFieldGroupSection--wide kuiColumn kuiColumn--4">
         <ui-select
           ng-if="filterEditor.operator.type === 'phrase'"
-          ng-model="filterEditor.params.value"
+          ng-model="filterEditor.params.phrase"
           ui-select-focus-on="focus-params"
         >
           <ui-select-match placeholder="Values...">
@@ -70,7 +70,7 @@
 
         <ui-select
           ng-if="filterEditor.operator.type === 'phrases'"
-          ng-model="filterEditor.params.values"
+          ng-model="filterEditor.params.phrases"
           multiple
           ui-select-focus-on="focus-params"
         >
@@ -96,7 +96,7 @@
             <input
               type="text"
               class="kuiTextInput kuiTextInput--small"
-              ng-model="filterEditor.params.from"
+              ng-model="filterEditor.params.range.from"
               placeholder="From..."
             />
           </div>
@@ -104,7 +104,7 @@
             <input
               type="text"
               class="kuiTextInput kuiTextInput--small"
-              ng-model="filterEditor.params.to"
+              ng-model="filterEditor.params.range.to"
               placeholder="To..."
             />
           </div>
