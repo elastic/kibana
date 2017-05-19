@@ -2,7 +2,7 @@ import uiRoutes from 'ui/routes';
 import template from './testbed.html';
 import './testbed.less';
 
-import 'ui/table_info';
+import 'ui/no_items';
 
 uiRoutes.when('/testbed', {
   template: template,
