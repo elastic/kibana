@@ -1317,12 +1317,6 @@ body {
     .theme-dark .kuiLink:hover {
       color: #b7e2ea; }
 
-.kuiLoadingItems {
-  padding: 30px;
-  font-size: 18px;
-  color: #9fa3a7;
-  line-height: 1.5; }
-
 /**
  * 1. Breadcrumbs are placed in the top-left corner and need to be bumped over
  *    a bit.
@@ -2249,12 +2243,6 @@ body {
   .kuiModalFooter > * + * {
     margin-left: 5px; }
 
-.kuiNoItems {
-  padding: 30px;
-  font-size: 18px;
-  color: #9fa3a7;
-  line-height: 1.5; }
-
 .kuiNotice {
   padding: 40px 60px 48px;
   margin: 20px;
@@ -2594,6 +2582,12 @@ body {
   .kuiTableRowCell--checkBox .kuiTableRowCell__liner {
     overflow: visible;
     /* 3 */ }
+
+.kuiTableInfo {
+  padding: 30px;
+  font-size: 18px;
+  color: #9fa3a7;
+  line-height: 1.5; }
 
 .kuiTabs {
   display: -webkit-box;
