@@ -1,7 +1,7 @@
 import { createAction } from 'redux-actions';
 import { get, isEqual } from 'lodash';
 import { assign } from 'object-path-immutable';
-import { notify } from 'ui/notify';
+import { notify } from '../../lib/notify';
 import { getSelectedElement } from '../selectors/workpad';
 import { interpretAst } from '../../lib/interpreter';
 import { getType } from '../../../common/types/get_type';
