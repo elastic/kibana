@@ -1,3 +1,17 @@
+/**
+ * Timelion Expression Autocompleter
+ *
+ * This directive allows users to enter multiline timelion expressions. If the user has entered
+ * a valid expression and then types a ".", this directive will display a list of suggestions.
+ *
+ * Users can navigate suggestions using the arrow keys. When a user selects a suggestion, it's
+ * inserted into the expression and the caret position is updated to be inside of the newly-
+ * added function's parentheses.
+ *
+ * Beneath the hood, we use a PEG grammar to validate the Timelion expression and detect if
+ * the caret is in a position within the expression that allows functions to be suggested.
+ */
+
 import _ from 'lodash';
 import $ from 'jquery';
 import grammar from 'raw!../chain.peg';
@@ -11,33 +25,7 @@ import {
   insertAtLocation,
 } from './expression_directive_helpers';
 
-/*
-Autocomplete proposal, this file doesn't actually work like this
-
-function names
-Do not auto complete .sometext(, rather insert a closing ) whenever a ( is typed.
-
-.| (single dot)
-.func|
-
-argument names
-We’ll need to sort out which function we’re inside, must be inside a function though
-
-.function(|) // Suggest the first name aka most important arg, e.g. foo=
-.function(fo|) // Suggest foo=
-.function(foo=|) // Suggest [bar,baz]
-
-.function(arg=bar, |) Suggest 2nd arg name, and so on
-
-argument values
-Only named arguments, necessarily provided optional by a plugin.
-Must be inside a function, and start must be adjacent to the argument name
-
-.function(arg=b|)
-*/
-
 const Parser = PEG.buildParser(grammar);
-
 const app = require('ui/modules').get('apps/timelion', []);
 
 app.directive('timelionExpressionInput', function ($compile, $http, $timeout) {
@@ -89,10 +77,15 @@ app.directive('timelionExpressionInput', function ($compile, $http, $timeout) {
         const functionName = `${scope.functionSuggestions.list[suggestionIndex].name}()`;
         const { min, max } = suggestibleFunctionLocation;
 
-        scope.sheet = insertAtLocation(functionName, scope.sheet, min, max);
-        const newCaretOffset = min + functionName.length - 1;
+        // Update the expression with the function.
+        const updatedExpression = insertAtLocation(functionName, scope.sheet, min, max);
+        scope.sheet = updatedExpression;
+
+        // Position the caret inside of the function parentheses.
+        const newCaretOffset = min + functionName.length;
         scope.setCaretOffset({ caretOffset: newCaretOffset });
 
+        // Hide suggestions.
         scope.functionSuggestions.reset();
       }
 

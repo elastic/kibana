@@ -50,8 +50,21 @@ require('ui/routes')
   });
 
 app.controller('timelion', function (
-    $scope, $http, timefilter, AppState, courier, $route, $routeParams,
-    kbnUrl, Notifier, config, $timeout, Private, savedVisualizations, confirmModal) {
+    $http,
+    $route,
+    $routeParams,
+    $scope,
+    $timeout,
+    AppState,
+    config,
+    confirmModal,
+    courier,
+    kbnUrl,
+    Notifier,
+    Private,
+    savedVisualizations,
+    timefilter
+  ) {
 
   // TODO: For some reason the Kibana core doesn't correctly do this for all apps.
   moment.tz.setDefault(config.get('dateFormat:tz'));
@@ -233,26 +246,17 @@ app.controller('timelion', function (
   $scope.getCaretOffset = function getCaretOffset() {
     const expressionInput = $('[data-expression-input]');
     const element = expressionInput[0];
-    const range = window.getSelection().getRangeAt(0);
-    const preCaretRange = range.cloneRange();
-    preCaretRange.selectNodeContents(element);
-    preCaretRange.setEnd(range.endContainer, range.endOffset);
-    return preCaretRange.toString().length;
+    return element.selectionStart;
   };
 
   $scope.setCaretOffset = function setCaretOffset(caretOffset) {
-    // We can't cache this element reference because this is a controller, not a directive, so the
-    // DOM isn't ready during initialization.
-    const expressionInput = $('[data-expression-input]');
-    // expressionInput.text(expression);
-    expressionInput.focus();
-    const textNode = expressionInput[0].firstChild;
-    const range = document.createRange();
-    range.setStart(textNode, caretOffset);
-    range.setEnd(textNode, caretOffset);
-    const sel = window.getSelection();
-    sel.removeAllRanges();
-    sel.addRange(range);
+    $timeout(() => {
+      // We can't cache this element reference because this is a controller, not a directive, so the
+      // DOM isn't ready during initialization.
+      const expressionInput = $('[data-expression-input]');
+      const element = expressionInput[0];
+      element.selectionStart = element.selectionEnd = caretOffset;
+    }, 0);
   };
 
   $scope.safeSearch = _.debounce($scope.search, 500);

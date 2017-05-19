@@ -30,17 +30,14 @@
             set-caret-offset="setCaretOffset(caretOffset)"
             update-chart="search()"
           >
-            <!-- NOTE: This element can't contain whitespace, or else our caret-finding logic
-            won't work. -->
-            <div
+            <textarea
               data-expression-input
               input-focus
               class="kuiLocalSearchInput kuiLocalSearchInput--expandable"
               ng-model="state.sheet[state.selected]"
-              timelion-model
-              bound-content-editable
               aria-label="Expression input"
-            ></div>
+              rows="5"
+            ></textarea>
           </timelion-expression-input>
 
           <timelion-interval
