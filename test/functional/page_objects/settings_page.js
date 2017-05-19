@@ -290,8 +290,7 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
     async setIndexPatternField(pattern) {
       log.debug(`setIndexPatternField(${pattern})`);
       return testSubjects.find('createIndexPatternNameInput')
-      .clearValue()
-      .type(pattern);
+        .clearValue().type(pattern);
     }
 
 
