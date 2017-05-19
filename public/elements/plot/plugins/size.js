@@ -36,13 +36,12 @@ const options = {
   series: {
     bubbles: {
       size: {
-        max: 20,
-        min: 1,
+        max: 30,
+        min: 2,
       },
       active: true,
       show: true,
       fill: false,
-      lineWidth: 2,
       drawbubble: drawbubbleDefault,
     },
   },
@@ -54,10 +53,11 @@ const defaultOptions = {
 };
 
 function drawbubbleDefault(ctx, series, x, y, radius, c) {
+
   ctx.fillStyle = c;
   ctx.strokeStyle = c;
 
-  ctx.lineWidth = series.bubbles.lineWidth;
+  ctx.lineWidth = Math.round(radius / 3);
   ctx.beginPath();
 
   ctx.arc(x, y, radius, 0, Math.PI * 2, true);
