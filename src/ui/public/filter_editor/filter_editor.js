@@ -13,7 +13,6 @@ import {
   getFieldFromFilter,
   getOperatorFromFilter,
   getParamsFromFilter,
-  getFieldOptions,
   getOperatorOptions,
   isFilterValid,
   buildFilter
@@ -49,9 +48,6 @@ module.directive('filterEditor', function ($http, $timeout) {
       };
 
       $scope.$watch(() => this.filter, this.init);
-      $scope.$watch(() => this.indexPatterns, (indexPatterns) => {
-        this.fieldOptions = getFieldOptions(indexPatterns);
-      });
 
       $scope.compactUnion = _.flow(_.union, _.compact);
 

@@ -1,5 +1,6 @@
 import 'angular-ui-select';
 import { uiModules } from 'ui/modules';
+import { getFieldOptions } from './lib/filter_editor_utils';
 import template from './filter_field_select.html';
 import '../directives/ui_select_focus_on';
 import '../filters/sort_prefix_first';
@@ -11,8 +12,13 @@ module.directive('filterFieldSelect', function () {
     template,
     scope: {
       field: '=',
-      fieldOptions: '=',
+      indexPatterns: '=',
       onSelect: '&'
+    },
+    link: function ($scope) {
+      $scope.$watch('indexPatterns', (indexPatterns) => {
+        $scope.fieldOptions = getFieldOptions(indexPatterns);
+      });
     }
   };
 });
