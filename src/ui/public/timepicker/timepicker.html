@@ -39,22 +39,11 @@
 
         <div class="col-md-10">
           <div ng-switch on="mode" class="container-fluid">
-            <div ng-switch-when="quick">
-
-              <div ng-repeat="list in quickLists" class="kbn-timepicker-section">
-                <ul class="list-unstyled">
-                  <li ng-repeat="option in list">
-                    <a
-                      ng-click="setQuick(option.from, option.to)"
-                      ng-bind="::option.display"
-                      kbn-accessible-click
-                    ></a>
-                  </li>
-                </ul>
-              </div>
-
-              <!-- TODO: Add a section for custom intervals -->
-            </div>
+            <kbn-timepicker-quick-panel
+              ng-switch-when="quick"
+              quick-lists="quickLists"
+              set-quick="setQuick(from, to)"
+            ></kbn-timepicker-quick-panel>
 
             <div ng-switch-when="relative">
               <form role="form" ng-submit="applyRelative()" class="form-inline" name="relativeTime">
