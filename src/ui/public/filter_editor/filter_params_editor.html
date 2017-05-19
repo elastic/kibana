@@ -1,0 +1,62 @@
+<ui-select
+  ng-if="operator.type === 'phrase'"
+  ng-model="params.phrase"
+  ui-select-focus-on="focus-params"
+  on-select="onChange({ params: params })"
+>
+  <ui-select-match placeholder="Values...">
+    <span tooltip="{{$select.selected}}">{{$select.selected}}</span>
+  </ui-select-match>
+  <ui-select-choices
+    repeat="value in compactUnion([$select.search, $select.selected], valueSuggestions) | filter:$select.search | sortPrefixFirst:$select.search"
+    refresh="refreshValueSuggestions($select.search)"
+    refresh-delay="100"
+  >
+    <div ng-bind-html="value | highlight: $select.search"></div>
+  </ui-select-choices>
+</ui-select>
+
+<ui-select
+  ng-if="operator.type === 'phrases'"
+  ng-model="params.phrases"
+  multiple
+  ui-select-focus-on="focus-params"
+  on-select="onChange({ params: params })"
+>
+  <ui-select-match placeholder="Values...">
+    <span class="pillWithTooltip" tooltip="{{$item}}">
+      {{$item}}
+    </span>
+  </ui-select-match>
+  <ui-select-choices
+    repeat="value in compactUnion([$select.search], valueSuggestions) | filter:$select.search | sortPrefixFirst:$select.search"
+    refresh="refreshValueSuggestions($select.search)"
+    refresh-delay="100"
+  >
+    <div ng-bind-html="value | highlight: $select.search"></div>
+  </ui-select-choices>
+</ui-select>
+
+<div
+  class="kuiFieldGroup"
+  ng-if="operator.type === 'range'"
+>
+  <div class="kuiFieldGroupSection">
+    <input
+      type="text"
+      class="kuiTextInput kuiTextInput--small"
+      ng-model="params.range.from"
+      ng-change="onChange({ params: params })"
+      placeholder="From..."
+    />
+  </div>
+  <div class="kuiFieldGroupSection">
+    <input
+      type="text"
+      class="kuiTextInput kuiTextInput--small"
+      ng-model="params.range.to"
+      ng-change="onChange({ params: params })"
+      placeholder="To..."
+    />
+  </div>
+</div>

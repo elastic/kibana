@@ -11,8 +11,8 @@ module.directive('filterFieldSelect', function () {
     restrict: 'E',
     template,
     scope: {
-      field: '=',
       indexPatterns: '=',
+      field: '=',
       onSelect: '&'
     },
     link: function ($scope) {

@@ -10,8 +10,8 @@ module.directive('filterOperatorSelect', function () {
     restrict: 'E',
     template,
     scope: {
-      operator: '=',
       field: '=',
+      operator: '=',
       onSelect: '&'
     },
     link: function ($scope) {

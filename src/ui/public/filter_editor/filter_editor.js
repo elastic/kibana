@@ -5,9 +5,8 @@ import template from './filter_editor.html';
 import './filter_query_dsl_editor';
 import './filter_field_select';
 import './filter_operator_select';
+import './filter_params_editor';
 import './filter_editor.less';
-import '../filters/sort_prefix_first';
-import '../directives/ui_select_focus_on';
 import {
   getQueryDslFromFilter,
   getFieldFromFilter,
@@ -18,7 +17,7 @@ import {
 } from './lib/filter_editor_utils';
 
 const module = uiModules.get('kibana');
-module.directive('filterEditor', function ($http, $timeout) {
+module.directive('filterEditor', function ($timeout) {
   return {
     restrict: 'E',
     template,
@@ -48,8 +47,6 @@ module.directive('filterEditor', function ($http, $timeout) {
 
       $scope.$watch(() => this.filter, this.init);
 
-      $scope.compactUnion = _.flow(_.union, _.compact);
-
       this.setQueryDsl = (queryDsl) => {
         this.queryDsl = queryDsl;
       };
@@ -58,7 +55,6 @@ module.directive('filterEditor', function ($http, $timeout) {
         this.field = field;
         this.operator = null;
         this.params = {};
-        this.valueSuggestions = [];
       };
 
       this.onFieldSelect = (field) => {
@@ -68,10 +64,6 @@ module.directive('filterEditor', function ($http, $timeout) {
 
       this.setOperator = (operator) => {
         this.operator = operator;
-        const type = _.get(operator, 'type');
-        if (type === 'phrase' || type === 'phrases') {
-          this.refreshValueSuggestions();
-        }
       };
 
       this.onOperatorSelect = (operator) => {
@@ -79,16 +71,13 @@ module.directive('filterEditor', function ($http, $timeout) {
         this.setFocus('params');
       };
 
+      this.setParams = (params) => {
+        this.params = params;
+      };
+
       this.setFocus = (name) => {
         $timeout(() => $scope.$broadcast(`focus-${name}`));
       };
-
-      this.refreshValueSuggestions = (query) => {
-        return this.getValueSuggestions(this.field, query)
-          .then(suggestions => this.valueSuggestions = suggestions);
-      };
-
-      this.getValueSuggestions = _.memoize(getValueSuggestions, getFieldQueryHash);
 
       this.showQueryDslEditor = () => {
         const { type, isNew } = this.filter.meta;
@@ -118,24 +107,6 @@ module.directive('filterEditor', function ($http, $timeout) {
 
         return this.onSave({ filter, isPinned });
       };
-
-      function getValueSuggestions(field, query) {
-        if (!_.get(field, 'aggregatable') || field.type !== 'string') {
-          return Promise.resolve([]);
-        }
-
-        const params = {
-          query,
-          field: field.name
-        };
-
-        return $http.post(`../api/kibana/suggestions/values/${field.indexPattern.id}`, params)
-          .then(response => response.data);
-      }
-
-      function getFieldQueryHash(field, query) {
-        return `${field.indexPattern.id}/${field.name}/${query}`;
-      }
     }
   };
 });

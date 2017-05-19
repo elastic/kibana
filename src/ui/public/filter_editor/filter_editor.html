@@ -35,8 +35,8 @@
     >
       <div class="kuiFieldGroupSection kuiColumn kuiColumn--4">
         <filter-field-select
-          field="filterEditor.field"
           index-patterns="filterEditor.indexPatterns"
+          field="filterEditor.field"
           on-select="filterEditor.onFieldSelect(field)"
         ></filter-field-select>
       </div>
@@ -44,71 +44,20 @@
       <div class="kuiFieldGroupSection kuiColumn kuiColumn--4">
         <filter-operator-select
           ng-show="filterEditor.field"
-          operator="filterEditor.operator"
           field="filterEditor.field"
+          operator="filterEditor.operator"
           on-select="filterEditor.onOperatorSelect(operator)"
         ></filter-operator-select>
       </div>
 
       <div class="kuiFieldGroupSection kuiFieldGroupSection--wide kuiColumn kuiColumn--4">
-        <ui-select
-          ng-if="filterEditor.operator.type === 'phrase'"
-          ng-model="filterEditor.params.phrase"
-          ui-select-focus-on="focus-params"
-        >
-          <ui-select-match placeholder="Values...">
-            <span tooltip="{{$select.selected}}">{{$select.selected}}</span>
-          </ui-select-match>
-          <ui-select-choices
-            repeat="value in compactUnion([$select.search, $select.selected], filterEditor.valueSuggestions) | filter:$select.search | sortPrefixFirst:$select.search"
-            refresh="filterEditor.refreshValueSuggestions($select.search)"
-            refresh-delay="100"
-          >
-            <div ng-bind-html="value | highlight: $select.search"></div>
-          </ui-select-choices>
-        </ui-select>
-
-        <ui-select
-          ng-if="filterEditor.operator.type === 'phrases'"
-          ng-model="filterEditor.params.phrases"
-          multiple
-          ui-select-focus-on="focus-params"
-        >
-          <ui-select-match placeholder="Values...">
-            <span class="pillWithTooltip" tooltip="{{$item}}">
-              {{$item}}
-            </span>
-          </ui-select-match>
-          <ui-select-choices
-            repeat="value in compactUnion([$select.search], filterEditor.valueSuggestions) | filter:$select.search | sortPrefixFirst:$select.search"
-            refresh="filterEditor.refreshValueSuggestions($select.search)"
-            refresh-delay="100"
-          >
-            <div ng-bind-html="value | highlight: $select.search"></div>
-          </ui-select-choices>
-        </ui-select>
-
-        <div
-          class="kuiFieldGroup"
-          ng-if="filterEditor.operator.type === 'range'"
-        >
-          <div class="kuiFieldGroupSection">
-            <input
-              type="text"
-              class="kuiTextInput kuiTextInput--small"
-              ng-model="filterEditor.params.range.from"
-              placeholder="From..."
-            />
-          </div>
-          <div class="kuiFieldGroupSection">
-            <input
-              type="text"
-              class="kuiTextInput kuiTextInput--small"
-              ng-model="filterEditor.params.range.to"
-              placeholder="To..."
-            />
-          </div>
-        </div>
+        <filter-params-editor
+          ng-show="filterEditor.operator"
+          field="filterEditor.field"
+          operator="filterEditor.operator"
+          params="filterEditor.params"
+          on-change="filterEditor.setParams(params)"
+        ></filter-params-editor>
       </div>
     </div>
 
