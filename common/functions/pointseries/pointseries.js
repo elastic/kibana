@@ -79,6 +79,7 @@ module.exports = new Fn({
     const dimensionNames = Object.keys(pickBy(args, val => !isMeasure(val))).filter(arg => args[arg] != null);
     const measureNames = Object.keys(pickBy(args, val => isMeasure(val)));
     const columns = mapValues(args, arg => {
+      if (!arg) return;
       // TODO: We're setting the measure/dimension break down here, but it should probably come from the datatable right?
       return { type: getType(arg), role: isMeasure(arg) ? 'measure' : 'dimension' };
     });

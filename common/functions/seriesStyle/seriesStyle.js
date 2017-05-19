@@ -36,18 +36,10 @@ module.exports = new Fn({
       help: 'Size of points on line',
       default: 0,
     },
-    weight: {
-      types: ['number', 'null'],
-      help: 'Width of line around points, if any',
-      default: 2,
-    },
-    steps: {
-      types: ['boolean', 'null'],
-      help: 'Show a stepped line',
-    },
     fill: {
-      types: ['number', 'null'],
-      help: 'A number from 0 to 10 of opacity of the area fill in the line. 0 for no fill, 10 for completely filled',
+      types: ['boolean', 'null'],
+      help: 'Should we fill points?',
+      default: false,
     },
   },
   fn: (context, args) => {

@@ -1,5 +1,5 @@
 const Fn = require('../fn.js');
-import { groupBy, keyBy, get, map, sortBy } from 'lodash';
+import { groupBy, keyBy, get, set, map, sortBy } from 'lodash';
 
 /*
 esdocs(size=1000).alterColumn(column=@timestamp, type=date, name=time)
@@ -50,6 +50,7 @@ module.exports = new Fn({
     },
   },
   fn: (context, args) => {
+    console.log(context.columns);
     function seriesStyleToFlot(seriesStyle) {
       if (!seriesStyle) return {};
       return {
@@ -66,13 +67,11 @@ module.exports = new Fn({
           fill: 1,
           align: 'center',
         },
-        points: {
-          // This is how we can vary shape and size of points
-          symbol: 'circle',
-          show: get(seriesStyle, 'points') > 0,
-          radius: get(seriesStyle, 'points'),
-          lineWidth: get(seriesStyle, 'weight'),
-          fill: true,
+        // This is here intentionally even though it is the default.
+        // We use the `size` plugins for this and if the user says they want points we just set the size to be static.
+        points: { show: false },
+        bubbles: {
+          fill: get(seriesStyle, 'fill'),
         },
         color: get(seriesStyle, 'color'),
       };
@@ -110,23 +109,32 @@ module.exports = new Fn({
     }
 
     const data = map(groupBy(context.rows, 'color'), (series, label) => {
-      const seriesStyle = seriesStyles[label];
-      const result = {
+      const seriesStyle = seriesStyles[label] || args.defaultStyle;
+
+      const result = {};
+      if (seriesStyle) {
+        Object.assign(result, seriesStyleToFlot(seriesStyle));
+      }
+
+      Object.assign(result, {
         label: label,
         data: series.map(point => {
           const attrs = {};
           const x = context.columns.x.type === 'string' ? ticks.x.hash[point.x] : point.x;
           const y = context.columns.y.type === 'string' ? ticks.y.hash[point.y] : point.y;
 
-          if (point.size != null) attrs.size = point.size;
+          if (point.size != null) {
+            attrs.size = point.size;
+          } else if (get(seriesStyle, 'points')) {
+            attrs.size = seriesStyle.points;
+            set(result, 'bubbles.size.min', seriesStyle.points);
+          }
 
+          console.log(attrs.size);
           return [x, y, attrs];
         }),
-      };
+      });
 
-      if (seriesStyle) {
-        Object.assign(result, seriesStyleToFlot(seriesStyle));
-      }
       return result;
     });
 
