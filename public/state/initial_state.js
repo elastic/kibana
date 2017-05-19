@@ -33,7 +33,7 @@ export default (path) => {
             },
             expression: `demodata().pointseries(y="median(cost)", x=time, color="project").plot(
               palette=palette(#04BFBF, #CAFCD8, #F7E967, #A9CF54, #588F27),
-              defaultStyle=seriesStyle(bars=0, lines=0, weight=0, points=1)
+              defaultStyle=seriesStyle(bars=1, lines=0, weight=0, points=1)
             )`,
             ast: {
               type: 'expression',
