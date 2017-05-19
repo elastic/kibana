@@ -13,6 +13,7 @@ exports[`property hasNextPage disables next button when false 1`] = `
     class="kuiButtonGroup kuiButtonGroup--united"
   >
     <button
+      aria-label="Show previous page"
       class="kuiButton kuiButton--basic kuiButton--iconText"
       data-test-subj="pagerPreviousButton"
     >
@@ -26,6 +27,7 @@ exports[`property hasNextPage disables next button when false 1`] = `
       </span>
     </button>
     <button
+      aria-label="Show next page"
       class="kuiButton kuiButton--basic kuiButton--iconText"
       data-test-subj="pagerNextButton"
       disabled=""
@@ -56,6 +58,7 @@ exports[`property hasPreviousPage disables previous button when false 1`] = `
     class="kuiButtonGroup kuiButtonGroup--united"
   >
     <button
+      aria-label="Show previous page"
       class="kuiButton kuiButton--basic kuiButton--iconText"
       data-test-subj="pagerPreviousButton"
       disabled=""
@@ -70,6 +73,7 @@ exports[`property hasPreviousPage disables previous button when false 1`] = `
       </span>
     </button>
     <button
+      aria-label="Show next page"
       class="kuiButton kuiButton--basic kuiButton--iconText"
       data-test-subj="pagerNextButton"
     >
@@ -101,6 +105,7 @@ exports[`renders KuiPager 1`] = `
     class="kuiButtonGroup kuiButtonGroup--united"
   >
     <button
+      aria-label="Show previous page"
       class="kuiButton kuiButton--basic kuiButton--iconText"
       data-test-subj="pagerPreviousButton"
       disabled=""
@@ -115,6 +120,7 @@ exports[`renders KuiPager 1`] = `
       </span>
     </button>
     <button
+      aria-label="Show next page"
       class="kuiButton kuiButton--basic kuiButton--iconText"
       data-test-subj="pagerNextButton"
     >

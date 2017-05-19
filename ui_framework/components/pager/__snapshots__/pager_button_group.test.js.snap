@@ -5,6 +5,7 @@ exports[`renders KuiPagerButtonGroup 1`] = `
   class="kuiButtonGroup kuiButtonGroup--united"
 >
   <button
+    aria-label="Show previous page"
     class="kuiButton kuiButton--basic kuiButton--iconText"
     data-test-subj="pagerPreviousButton"
   >
@@ -18,6 +19,7 @@ exports[`renders KuiPagerButtonGroup 1`] = `
     </span>
   </button>
   <button
+    aria-label="Show next page"
     class="kuiButton kuiButton--basic kuiButton--iconText"
     data-test-subj="pagerNextButton"
   >
