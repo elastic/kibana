@@ -23,6 +23,7 @@ const app = require('ui/modules').get('apps/timelion', []);
 
 require('plugins/timelion/services/saved_sheets');
 require('plugins/timelion/services/_saved_sheet');
+import './directives/timelion_model';
 
 require('plugins/kibana/visualize/saved_visualizations/saved_visualizations');
 require('plugins/kibana/discover/saved_searches/saved_searches');
@@ -229,30 +230,26 @@ app.controller('timelion', function (
     });
   };
 
-  $scope.onKeyDownExpressionInput = function onKeyDownExpressionInput(e) {
-    if (e.keyCode === 13) {
-      if (!e.shiftKey) {
-        // Enter will execute the expression unless Shift is held down, which will add a new line.
-        $scope.search();
-        e.preventDefault();
-      }
-    }
+  $scope.getCaretOffset = function getCaretOffset() {
+    const expressionInput = $('[data-expression-input]');
+    const element = expressionInput[0];
+    const range = window.getSelection().getRangeAt(0);
+    const preCaretRange = range.cloneRange();
+    preCaretRange.selectNodeContents(element);
+    preCaretRange.setEnd(range.endContainer, range.endOffset);
+    return preCaretRange.toString().length;
   };
 
-  $scope.getInputCaretPosition = function getInputCaretPosition() {
-    return window.getSelection().getRangeAt(0).startOffset;
-  };
-
-  $scope.updateExpression = function updateExpression(expression, caretPosition) {
+  $scope.setCaretOffset = function setCaretOffset(caretOffset) {
     // We can't cache this element reference because this is a controller, not a directive, so the
     // DOM isn't ready during initialization.
     const expressionInput = $('[data-expression-input]');
-    expressionInput.text(expression);
+    // expressionInput.text(expression);
     expressionInput.focus();
     const textNode = expressionInput[0].firstChild;
     const range = document.createRange();
-    range.setStart(textNode, caretPosition);
-    range.setEnd(textNode, caretPosition);
+    range.setStart(textNode, caretOffset);
+    range.setEnd(textNode, caretOffset);
     const sel = window.getSelection();
     sel.removeAllRanges();
     sel.addRange(range);

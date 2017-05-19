@@ -1,5 +1,10 @@
+/**
+ * 1. If we're using an expandable input, make sure that it doesn't force sibling elements to expand
+ *    with it.
+ */
 .kuiLocalSearch {
   display: flex;
+  align-items: flex-start; /* 1 */
   width: 100%;
 }
 

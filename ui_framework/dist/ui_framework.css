@@ -1771,11 +1771,20 @@ body {
           align-items: flex-start;
   /* 1 */ }
 
+/**
+ * 1. If we're using an expandable input, make sure that it doesn't force sibling elements to expand
+ *    with it.
+ */
 .kuiLocalSearch {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
   display: flex;
+  -webkit-box-align: start;
+  -webkit-align-items: flex-start;
+      -ms-flex-align: start;
+          align-items: flex-start;
+  /* 1 */
   width: 100%; }
 
 .kuiLocalSearchInput {

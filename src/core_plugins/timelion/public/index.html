@@ -26,8 +26,9 @@
         <div class="kuiLocalSearch timelionLocalSearch">
           <timelion-expression-input
             sheet="state.sheet[state.selected]"
-            get-caret-position="getInputCaretPosition()"
-            on-expression-change="updateExpression(expression, caretPosition)"
+            get-caret-offset="getCaretOffset()"
+            set-caret-offset="setCaretOffset(caretOffset)"
+            update-chart="search()"
           >
             <!-- NOTE: This element can't contain whitespace, or else our caret-finding logic
             won't work. -->
@@ -36,9 +37,9 @@
               input-focus
               class="kuiLocalSearchInput kuiLocalSearchInput--expandable"
               ng-model="state.sheet[state.selected]"
+              timelion-model
               bound-content-editable
               aria-label="Expression input"
-              ng-keydown="onKeyDownExpressionInput($event)"
             ></div>
           </timelion-expression-input>
 
