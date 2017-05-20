@@ -37,7 +37,7 @@ import {
 const Parser = PEG.buildParser(grammar);
 const app = require('ui/modules').get('apps/timelion', []);
 
-app.directive('timelionExpressionInput', function ($compile, $http, $timeout) {
+app.directive('timelionExpressionInput', function ($http, $timeout) {
   return {
     restrict: 'E',
     scope: {
@@ -50,6 +50,17 @@ app.directive('timelionExpressionInput', function ($compile, $http, $timeout) {
     transclude: true,
     template: timelionExpressionInputTemplate,
     link: function (scope, elem, attrs, ctrl, transclude) {
+      // Add the transcluded content. Assuming it's an input control of some sort, it will need
+      // access to the parent scope so it can use ng-model correctly.
+      transclude(scope.$parent, clone => {
+        elem.prepend(clone);
+      });
+
+      const input = elem.find('[data-expression-input]');
+      if (!input.length) {
+        throw new Error('timelionExpressionInput directive requires a transcluded input element with the data-expression-input attribute.');
+      }
+
       const navigationalKeys = {
         ESC: 27,
         UP: 38,
@@ -57,12 +68,6 @@ app.directive('timelionExpressionInput', function ($compile, $http, $timeout) {
         TAB: 9,
         ENTER: 13
       };
-
-      // Add the transcluded content. Assuming it's an input control of some sort, it will need
-      // access to the parent scope so it can use ng-model correctly.
-      transclude(scope.$parent, clone => {
-        elem.prepend(clone);
-      });
 
       const functionReference = {};
       let suggestibleFunctionLocation = {};
@@ -99,6 +104,7 @@ app.directive('timelionExpressionInput', function ($compile, $http, $timeout) {
       }
 
       function scrollToSuggestionAt(index) {
+        // We don't cache these because the list changes based on user input.
         const suggestionsList = $('[data-suggestions-list]');
         const suggestionListItem = $('[data-suggestion-list-item]')[index];
         // Scroll to the position of the item relative to the list, not to the window.
@@ -119,6 +125,10 @@ app.directive('timelionExpressionInput', function ($compile, $http, $timeout) {
             scope.functionSuggestions.setList(suggestions.list);
             scope.functionSuggestions.show();
             suggestibleFunctionLocation = suggestions.functionLocation;
+            $timeout(() => {
+              const suggestionsList = $('[data-suggestions-list]');
+              suggestionsList.scrollTop(0);
+            }, 0);
           });
         }, (noSuggestions = {}) => {
           scope.$apply(() => {
@@ -138,79 +148,83 @@ app.directive('timelionExpressionInput', function ($compile, $http, $timeout) {
         return keyCode === navigationalKeys.ENTER && isShiftPressed;
       }
 
-      scope.blurHandler = () => {
-        $timeout(() => {
+      input.on('blur', () => {
+        scope.$apply(() => {
           scope.functionSuggestions.hide();
-        }, 100);
-      };
+        });
+      });
 
-      scope.keyDownHandler = e => {
-        // If we've pressed any non-navigational keys, then the user has typed something and we
-        // can exit early without doing any navigation.
-        if (!isNavigationalKey(e.keyCode)) {
-          return;
-        }
+      input.on('keydown', e => {
+        scope.$apply(() => {
+          // If we've pressed any non-navigational keys, then the user has typed something and we
+          // can exit early without doing any navigation.
+          if (!isNavigationalKey(e.keyCode)) {
+            return;
+          }
 
-        if (isUserInsertingNewLine(e.keyCode, e.shiftKey)) {
-          return;
-        }
+          if (isUserInsertingNewLine(e.keyCode, e.shiftKey)) {
+            return;
+          }
 
-        switch (e.keyCode) {
-          case navigationalKeys.UP:
-            if (scope.functionSuggestions.isVisible) {
-              // Up and down keys navigate through suggestions.
+          switch (e.keyCode) {
+            case navigationalKeys.UP:
+              if (scope.functionSuggestions.isVisible) {
+                // Up and down keys navigate through suggestions.
+                e.preventDefault();
+                scope.functionSuggestions.stepForward();
+                scrollToSuggestionAt(scope.functionSuggestions.index);
+              }
+              break;
+
+            case navigationalKeys.DOWN:
+              if (scope.functionSuggestions.isVisible) {
+                // Up and down keys navigate through suggestions.
+                e.preventDefault();
+                scope.functionSuggestions.stepBackward();
+                scrollToSuggestionAt(scope.functionSuggestions.index);
+              }
+              break;
+
+            case navigationalKeys.TAB:
+              // If there are no suggestions, the user tabs to the next input.
+              if (scope.functionSuggestions.isEmpty()) {
+                return;
+              }
+
+              // If we have suggestions, complete the selected one.
               e.preventDefault();
-              scope.functionSuggestions.stepForward();
-              scrollToSuggestionAt(scope.functionSuggestions.index);
-            }
-            break;
-
-          case navigationalKeys.DOWN:
-            if (scope.functionSuggestions.isVisible) {
-              // Up and down keys navigate through suggestions.
-              e.preventDefault();
-              scope.functionSuggestions.stepBackward();
-              scrollToSuggestionAt(scope.functionSuggestions.index);
-            }
-            break;
-
-          case navigationalKeys.TAB:
-            // If there are no suggestions, the user tabs to the next input.
-            if (scope.functionSuggestions.isEmpty()) {
-              return;
-            }
-
-            // If we have suggestions, complete the selected one.
-            e.preventDefault();
-            insertSuggestionIntoExpression(scope.functionSuggestions.index);
-            break;
-
-          case navigationalKeys.ENTER:
-            e.preventDefault();
-
-            // If the suggestions are open, complete the expression with the suggestion.
-            // Otherwise, the default action of submitting the input value will occur.
-            if (!scope.functionSuggestions.isEmpty()) {
               insertSuggestionIntoExpression(scope.functionSuggestions.index);
-            } else {
-              // If the suggestions are closed, we should re-render the chart.
-              scope.updateChart();
-            }
-            break;
+              break;
 
-          case navigationalKeys.ESC:
-            e.preventDefault();
-            scope.functionSuggestions.hide();
-            break;
-        }
-      };
+            case navigationalKeys.ENTER:
+              e.preventDefault();
 
-      scope.keyUpHandler = e => {
-        // If the user isn't navigating, then we should update the suggestions based on their input.
-        if (!isNavigationalKey(e.keyCode)) {
-          getSuggestions();
-        }
-      };
+              // If the suggestions are open, complete the expression with the suggestion.
+              // Otherwise, the default action of submitting the input value will occur.
+              if (!scope.functionSuggestions.isEmpty()) {
+                insertSuggestionIntoExpression(scope.functionSuggestions.index);
+              } else {
+                // If the suggestions are closed, we should re-render the chart.
+                scope.updateChart();
+              }
+              break;
+
+            case navigationalKeys.ESC:
+              e.preventDefault();
+              scope.functionSuggestions.hide();
+              break;
+          }
+        });
+      });
+
+      input.on('keyup', e => {
+        scope.$apply(() => {
+          // If the user isn't navigating, then we should update the suggestions based on their input.
+          if (!isNavigationalKey(e.keyCode)) {
+            getSuggestions();
+          }
+        });
+      });
 
       scope.onClickSuggestion = insertSuggestionIntoExpression;
 
