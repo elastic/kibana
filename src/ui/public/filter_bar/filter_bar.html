@@ -23,7 +23,12 @@
 </div>
 
 <div class="filter-bar">
-  <div class="filter" ng-class="{ negate: filter.meta.negate, disabled: filter.meta.disabled }" ng-repeat="filter in filters track by $index">
+  <div
+    class="filter"
+    ng-class="{ negate: filter.meta.negate, disabled: filter.meta.disabled }"
+    ng-repeat="filter in filters track by $index"
+    data-test-subj="filter filter-{{ filter.meta.disabled ? 'disabled' : 'enabled' }} {{ filter.meta.key ? 'filter-key-' + filter.meta.key : '' }} {{ filter.meta.value ? 'filter-value-' + filter.meta.value : '' }}"
+  >
     <div class="filter-description">
       <span ng-if="filter.$state.store == 'globalState'"><i class="fa fa-fw fa-thumb-tack pinned"></i></span>
       <span ng-if="filter.meta.alias">{{ filter.meta.alias }}</span>

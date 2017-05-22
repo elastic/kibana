@@ -25,6 +25,7 @@ import { notify } from 'ui/notify';
 import { PanelUtils } from './panel/panel_utils';
 import './panel/get_object_loaders_for_dashboard';
 import { documentationLinks } from 'ui/documentation_links/documentation_links';
+import { showCloneModal } from './top_nav/show_clone_modal';
 
 const app = uiModules.get('app/dashboard', [
   'elasticsearch',
@@ -32,7 +33,7 @@ const app = uiModules.get('app/dashboard', [
   'kibana/courier',
   'kibana/config',
   'kibana/notify',
-  'kibana/typeahead'
+  'kibana/typeahead',
 ]);
 
 uiRoutes
@@ -72,17 +73,24 @@ uiRoutes
     }
   });
 
-app.directive('dashboardApp', function (
-  Notifier, courier, AppState, timefilter, quickRanges, kbnUrl,
-  confirmModal, Private, getObjectLoadersForDashboard
-) {
+app.directive('dashboardApp', function ($injector) {
+  const Notifier = $injector.get('Notifier');
+  const courier = $injector.get('courier');
+  const AppState = $injector.get('AppState');
+  const timefilter = $injector.get('timefilter');
+  const quickRanges = $injector.get('quickRanges');
+  const kbnUrl = $injector.get('kbnUrl');
+  const confirmModal = $injector.get('confirmModal');
+  const getObjectLoadersForDashboard = $injector.get('getObjectLoadersForDashboard');
+  const Private = $injector.get('Private');
+
   const brushEvent = Private(UtilsBrushEventProvider);
   const filterBarClickHandler = Private(FilterBarClickHandlerProvider);
 
   return {
     restrict: 'E',
     controllerAs: 'dashboardApp',
-    controller: function ($scope, $rootScope, $route, $routeParams, $location, Private, getAppState) {
+    controller: function ($scope, $rootScope, $route, $routeParams, $location, getAppState, $compile) {
       const filterBar = Private(FilterBarQueryFilterProvider);
       const docTitle = Private(DocTitleProvider);
       const notify = new Notifier({ location: 'Dashboard' });
@@ -251,12 +259,6 @@ app.directive('dashboardApp', function (
         );
       };
 
-      const navActions = {};
-      navActions[TopNavIds.EXIT_EDIT_MODE] = () => onChangeViewMode(DashboardViewMode.VIEW);
-      navActions[TopNavIds.ENTER_EDIT_MODE] = () => onChangeViewMode(DashboardViewMode.EDIT);
-
-      updateViewMode(dashboardState.getViewMode());
-
       $scope.save = function () {
         return dashboardState.saveDashboard(angular.toJson, timefilter).then(function (id) {
           $scope.kbnTopNav.close('save');
@@ -269,8 +271,33 @@ app.directive('dashboardApp', function (
               updateViewMode(DashboardViewMode.VIEW);
             }
           }
+          return id;
         }).catch(notify.fatal);
       };
+
+      const navActions = {};
+      navActions[TopNavIds.EXIT_EDIT_MODE] = () => onChangeViewMode(DashboardViewMode.VIEW);
+      navActions[TopNavIds.ENTER_EDIT_MODE] = () => onChangeViewMode(DashboardViewMode.EDIT);
+      navActions[TopNavIds.CLONE] = () => {
+        const currentTitle = $scope.model.title;
+        const onClone = (newTitle) => {
+          dashboardState.savedDashboard.copyOnSave = true;
+          dashboardState.setTitle(newTitle);
+          return $scope.save().then(id => {
+            // If the save wasn't successful, put the original title back.
+            if (!id) {
+              $scope.model.title = currentTitle;
+              // There is a watch on $scope.model.title that *should* call this automatically but
+              // angular is failing to trigger it, so do so manually here.
+              dashboardState.setTitle(currentTitle);
+            }
+            return id;
+          });
+        };
+
+        showCloneModal(onClone, currentTitle, $rootScope, $compile);
+      };
+      updateViewMode(dashboardState.getViewMode());
 
       // update root source when filters update
       $scope.$listen(filterBar, 'update', function () {

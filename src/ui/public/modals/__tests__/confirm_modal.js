@@ -114,39 +114,5 @@ describe('ui/modals/confirm_modal', function () {
       expect(confirmCallback.called).to.be(true);
       expect(cancelCallback.called).to.be(false);
     });
-
-    it('onKeyDown detects ESC and calls onCancel', function () {
-      const confirmModalOptions = {
-        confirmButtonText: 'bye',
-        onConfirm: confirmCallback,
-        onCancel: cancelCallback,
-        title: 'hi'
-      };
-
-      confirmModal('hi', confirmModalOptions);
-
-      const e = angular.element.Event('keydown'); // eslint-disable-line new-cap
-      e.keyCode = 27;
-      angular.element(document.body).trigger(e);
-
-      expect(cancelCallback.called).to.be(true);
-    });
-
-    it('onKeyDown ignores keys other than ESC', function () {
-      const confirmModalOptions = {
-        confirmButtonText: 'bye',
-        onConfirm: confirmCallback,
-        onCancel: cancelCallback,
-        title: 'hi'
-      };
-
-      confirmModal('hi', confirmModalOptions);
-
-      const e = angular.element.Event('keydown'); // eslint-disable-line new-cap
-      e.keyCode = 50;
-      angular.element(document.body).trigger(e);
-
-      expect(cancelCallback.called).to.be(false);
-    });
   });
 });

@@ -1,6 +1,6 @@
 <table class="table table-condensed">
   <tbody>
-    <tr ng-repeat="field in fields">
+    <tr ng-repeat="field in fields" data-test-subj="tableDocViewRow-{{ field }}">
       <td field-name="field"
           field-type="mapping[field].type"
           width="1%"
@@ -11,6 +11,7 @@
           <button
             class="doc-viewer-button"
             ng-click="filter(mapping[field], flattened[field], '+')"
+            data-test-subj="addInclusiveFilterButton"
           >
             <i
               tooltip="Filter for value"
@@ -64,15 +65,15 @@
         <i ng-if="!mapping[field] && field[0] === '_'"
           tooltip-placement="top"
           tooltip="Field names beginning with _ are not supported"
-          class="fa fa-warning text-color-warning ng-scope doc-viewer-underscore"></i>
+          class="fa fa-warning text-color-warning doc-viewer-underscore"></i>
         <i ng-if="!mapping[field] && field[0] !== '_' && !showArrayInObjectsWarning(doc, field)"
           tooltip-placement="top"
           tooltip="No cached mapping for this field. Refresh field list from the Management > Index Patterns page"
-          class="fa fa-warning text-color-warning ng-scope doc-viewer-no-mapping"></i>
+          class="fa fa-warning text-color-warning doc-viewer-no-mapping"></i>
         <i ng-if="showArrayInObjectsWarning(doc, field)"
           tooltip-placement="top"
           tooltip="Objects in arrays are not well supported."
-          class="fa fa-warning text-color-warning ng-scope doc-viewer-object-array"></i>
+          class="fa fa-warning text-color-warning doc-viewer-object-array"></i>
         <div class="doc-viewer-value" ng-bind-html="typeof(formatted[field]) === 'undefined' ? hit[field] : formatted[field] | trustAsHtml"></div>
       </td>
     </tr>

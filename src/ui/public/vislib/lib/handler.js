@@ -195,7 +195,7 @@ export function VisHandlerProvider(Private) {
 
       if (message === 'No results found') {
         div.append('div')
-        .attr('class', 'text-center visualize-error visualize-chart ng-scope')
+        .attr('class', 'text-center visualize-error visualize-chart')
         .append('div').attr('class', 'item top')
         .append('div').attr('class', 'item')
         .append('h2').html('<i class="fa fa-meh-o"></i>')

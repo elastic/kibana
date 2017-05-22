@@ -13,6 +13,15 @@
 </kbn-top-nav>
 
 <div class="kuiViewContent kuiViewContent--constrainedWidth">
+  <div class="kuiViewContentItem kuiVerticalRhythm" ng-if="listingController.showLimitError">
+    <div class="kuiInfoPanel kuiInfoPanel--warning">
+      <div class="kuiInfoPanelBody">
+        <div class="kuiInfoPanelBody__message">
+          You have {{ listingController.totalItems }} visualizations, but your "listingLimit" setting prevents the table below from displaying more than {{ listingController.listingLimit }}. You can change this setting under <a kbn-href="#/management/kibana/settings" class="kuiLink">Advanced Settings</a>.
+        </div>
+      </div>
+    </div>
+  </div>
   <!-- ControlledTable -->
   <div class="kuiViewContentItem kuiControlledTable kuiVerticalRhythm">
     <!-- ToolBar -->
@@ -65,12 +74,12 @@
       </div>
     </div>
 
-    <!-- NoItems -->
+    <!-- TableInfo -->
     <div
       class="kuiPanel kuiPanel--centered kuiPanel--withHeader"
       ng-if="!listingController.items.length && listingController.filter"
     >
-      <div class="kuiNoItems">
+      <div class="kuiTableInfo">
         No visualizations matched your search.
       </div>
     </div>
