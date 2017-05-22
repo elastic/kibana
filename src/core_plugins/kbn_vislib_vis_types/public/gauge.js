@@ -26,7 +26,7 @@ export default function GaugeVisType(Private) {
           verticalSplit: false,
           extendRange: true,
           percentageMode: false,
-          gaugeType: 'Meter',
+          gaugeType: 'Arc',
           gaugeStyle: 'Full',
           backStyle: 'Full',
           orientation: 'vertical',
@@ -61,6 +61,7 @@ export default function GaugeVisType(Private) {
         }
       },
       gaugeTypes: ['Arc', 'Circle', 'Metric'],
+      gaugeColorMode: ['None', 'Labels', 'Background'],
       gaugeStyles: ['Full', 'Bars', 'Lines'],
       scales: ['linear', 'log', 'square root'],
       colorSchemas: Object.keys(vislibColorMaps),

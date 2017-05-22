@@ -25,7 +25,7 @@ export default function GoalVisType(Private) {
           verticalSplit: false,
           autoExtend: false,
           percentageMode: true,
-          gaugeType: 'Meter',
+          gaugeType: 'Arc',
           gaugeStyle: 'Full',
           backStyle: 'Full',
           orientation: 'vertical',
@@ -55,7 +55,8 @@ export default function GoalVisType(Private) {
           }
         }
       },
-      gaugeTypes: ['Meter', 'Circle', 'Metric'],
+      gaugeTypes: ['Arc', 'Circle', 'Metric'],
+      gaugeColorMode: ['None', 'Labels', 'Background'],
       scales: ['linear', 'log', 'square root'],
       colorSchemas: Object.keys(vislibColorMaps),
       editor: gaugeTemplate
