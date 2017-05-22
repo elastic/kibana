@@ -70,6 +70,12 @@ export default function defaultSettingsProvider() {
       value: 500,
       description: 'The number of rows to show in the table',
     },
+    'discover:aggs:terms:size': {
+      value: 20,
+      type: 'number',
+      description: 'Determines how many terms will be visualized when clicking the "visualize" ' +
+      'button, in the field drop downs, in the discover sidebar.'
+    },
     'doc_table:highlight': {
       value: true,
       description: 'Highlight results in Discover and Saved Searches Dashboard.' +
@@ -116,14 +122,14 @@ export default function defaultSettingsProvider() {
     'visualization:tileMap:WMSdefaults': {
       value: JSON.stringify({
         enabled: false,
-        url: 'https://basemap.nationalmap.gov/arcgis/services/USGSTopo/MapServer/WMSServer',
+        url: undefined,
         options: {
-          version: '1.3.0',
-          layers: '0',
+          version: undefined,
+          layers: undefined,
           format: 'image/png',
           transparent: true,
-          attribution: 'Maps provided by USGS',
-          styles: '',
+          attribution: undefined,
+          styles: undefined,
         }
       }, null, 2),
       type: 'json',
@@ -210,6 +216,11 @@ export default function defaultSettingsProvider() {
       type: 'number',
       value: 5,
       description: 'Number of objects to show per page in the load dialog'
+    },
+    'savedObjects:listingLimit': {
+      type: 'number',
+      value: 1000,
+      description: 'Number of objects to fetch for the listing pages'
     },
     'timepicker:timeDefaults': {
       type: 'json',
@@ -326,6 +337,6 @@ export default function defaultSettingsProvider() {
     'context:step': {
       value: 5,
       description: 'The step size to increment or decrement the context size by',
-    },
+    }
   };
 }
