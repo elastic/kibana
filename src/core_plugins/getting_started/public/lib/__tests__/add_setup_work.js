@@ -3,7 +3,7 @@ import sinon from 'sinon';
 import { set } from 'lodash';
 import uiChrome from 'ui/chrome';
 import { Notifier } from 'ui/notify/notifier';
-
+import { WAIT_FOR_URL_CHANGE_TOKEN } from 'ui/routes';
 import { gettingStartedGateCheck } from '../add_setup_work';
 import {
   GETTING_STARTED_ROUTE,
@@ -130,7 +130,11 @@ describe('Getting Started page', () => {
             });
 
             it('redirects the user to the Create Index Pattern page', async () => {
-              await gettingStartedGateCheck(getIds, kbnUrl, config, $route);
+              try {
+                await gettingStartedGateCheck(getIds, kbnUrl, config, $route);
+              } catch (e) {
+                expect(e).to.be(WAIT_FOR_URL_CHANGE_TOKEN);
+              }
               expect(kbnUrl.change.calledWith(CREATE_INDEX_PATTERN_ROUTE)).to.be(true);
             });
           });
@@ -149,7 +153,11 @@ describe('Getting Started page', () => {
             });
 
             it('redirects the user to the Getting Started page', async () => {
-              await gettingStartedGateCheck(getIds, kbnUrl, config, $route);
+              try {
+                await gettingStartedGateCheck(getIds, kbnUrl, config, $route);
+              } catch (e) {
+                expect(e).to.be(WAIT_FOR_URL_CHANGE_TOKEN);
+              }
               expect(kbnUrl.change.calledWith(GETTING_STARTED_ROUTE)).to.be(true);
             });
           });
