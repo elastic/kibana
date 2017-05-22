@@ -31,8 +31,10 @@ uiModules
       const editor = new Editor(element[0]);
 
       const renderFunction = _.debounce(() => {
-        editor.render(vis, $scope.visData, $scope.searchSource);
-        $scope.$apply();
+        editor.render(vis, $scope.visData, $scope.searchSource).then(() => {
+          $scope.$emit('renderComplete');
+          $scope.$apply();
+        });
       }, 200);
 
       $scope.$on('render', () => {

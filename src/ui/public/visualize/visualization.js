@@ -22,7 +22,7 @@ uiModules
       searchSource: '='
     },
     template: visualizationTemplate,
-    link: function ($scope, $el, attr, renderCounter) {
+    link: function ($scope, $el) {
       const minVisChartHeight = 180;
       const resizeChecker = new ResizeChecker($el);
 
@@ -53,10 +53,6 @@ uiModules
       $scope.getVisContainerClasses = function () {
         return legendPositionToVisContainerClassMap[$scope.vis.params.legendPosition];
       };
-
-      if (renderCounter && !$scope.vis.implementsRenderComplete()) {
-        renderCounter.disable();
-      }
 
       $scope.spy = {};
       $scope.spy.mode = ($scope.uiState) ? $scope.uiState.get('spy.mode', {}) : {};
@@ -111,6 +107,7 @@ uiModules
         visualization.render($scope.vis, $scope.visData)
           .then(() => {
             // renderComplete
+            $scope.$emit('renderComplete');
           });
         $scope.$apply();
       }, 200);
