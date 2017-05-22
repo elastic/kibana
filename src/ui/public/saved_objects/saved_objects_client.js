@@ -1,5 +1,6 @@
 import { resolve as resolveUrl, format as formatUrl } from 'url';
 import { pick, partial } from 'lodash';
+import { keysToSnakeCaseShallow, keysToCamelCaseShallow } from '../../../utils/case_conversion';
 
 import { SavedObject } from './saved_object';
 
@@ -57,11 +58,10 @@ export class SavedObjectsClient {
 
   find(options = {}) {
     const url = this._getUrl([options.type]);
-    const validOptions = pick(options, ['from', 'size', 'fields', 'filter']);
 
-    return this._request('GET', url, validOptions).then(resp => {
+    return this._request('GET', url, keysToSnakeCaseShallow(options)).then(resp => {
       resp.data = resp.data.map(d => new this.ObjectClass(d));
-      return resp;
+      return keysToCamelCaseShallow(resp);
     });
   }
 
@@ -89,14 +89,16 @@ export class SavedObjectsClient {
       options.data = body;
     }
 
-    return this._$http(options).catch(resp => {
-      const respBody = resp.data || {};
-      const err = new Error(respBody.message || respBody.error || `${resp.status} Response`);
+    return this._$http(options)
+      .then(resp => resp.data)
+      .catch(resp => {
+        const respBody = resp.data || {};
+        const err = new Error(respBody.message || respBody.error || `${resp.status} Response`);
 
-      err.status = resp.status;
-      err.body = respBody;
+        err.status = resp.status;
+        err.body = respBody;
 
-      throw err;
-    });
+        throw err;
+      });
   }
 }

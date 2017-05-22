@@ -116,7 +116,7 @@ describe('SavedObjectsClient', () => {
       $http.withArgs({
         method: 'GET',
         url: `${basePath}/api/saved_objects/index-pattern/logstash-*`
-      }).returns(Promise.resolve(doc));
+      }).returns(Promise.resolve({ data: doc }));
     });
 
     it('returns a promise', () => {
@@ -144,7 +144,7 @@ describe('SavedObjectsClient', () => {
     it('resolves with instantiated ObjectClass', async () => {
       const response = await savedObjectsClient.get('index-pattern', 'logstash-*');
       expect(response).to.be.a(SavedObject);
-      expect(response._type).to.eql('config');
+      expect(response.type).to.eql('config');
       expect(response.get('title')).to.eql('Example title');
       expect(response._client).to.be.a(SavedObjectsClient);
     });
@@ -291,7 +291,7 @@ describe('SavedObjectsClient', () => {
     const object = { id: 'logstash-*', type: 'index-pattern', title: 'Test' };
 
     beforeEach(() => {
-      $http.returns(Promise.resolve({ data: [object] }));
+      $http.returns(Promise.resolve({ data: { data: [object] } }));
     });
 
     it('returns a promise', () => {
@@ -309,7 +309,7 @@ describe('SavedObjectsClient', () => {
     });
 
     it('accepts fields', () => {
-      const body = { fields: ['title', 'description'], invalid: true };
+      const body = { fields: ['title', 'description'] };
 
       savedObjectsClient.find(body);
       expect($http.calledOnce).to.be(true);
@@ -319,7 +319,7 @@ describe('SavedObjectsClient', () => {
     });
 
     it('accepts from/size', () => {
-      const body = { from: 50, size: 10, invalid: true };
+      const body = { from: 50, size: 10 };
 
       savedObjectsClient.find(body);
       expect($http.calledOnce).to.be(true);

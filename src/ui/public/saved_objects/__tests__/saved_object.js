@@ -10,8 +10,8 @@ describe('SavedObject', () => {
     const client = sinon.stub();
     const savedObject = new SavedObject(client, { id, type });
 
-    expect(savedObject._id).to.be(id);
-    expect(savedObject._type).to.be(type);
+    expect(savedObject.id).to.be(id);
+    expect(savedObject.type).to.be(type);
   });
 
   it('persists attributes', () => {

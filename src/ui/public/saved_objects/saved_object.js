@@ -1,10 +1,10 @@
 import _ from 'lodash';
 
 export class SavedObject {
-  constructor(client, { id, type, version, attributes }) {
+  constructor(client, { id, type, version, attributes } = {}) {
     this._client = client;
-    this._id = id;
-    this._type = type;
+    this.id = id;
+    this.type = type;
     this._attributes = attributes || {};
     this._version = version;
   }
@@ -22,7 +22,7 @@ export class SavedObject {
   }
 
   save() {
-    if (this._id) {
+    if (this.id) {
       return this._client.update(this.type, this.id, this._attributes);
     } else {
       return this._client.create(this.type, this._attributes);
