@@ -201,8 +201,8 @@ export function VislibVisualizationsPointSeriesProvider(Private) {
       const width = this.chartConfig.width = $elem.width();
       const height = this.chartConfig.height = $elem.height();
       const xScale = this.handler.categoryAxes[0].getScale();
-      const minWidth = 50;
-      const minHeight = 50;
+      const minWidth = 5;
+      const minHeight = 5;
       const addTimeMarker = this.chartConfig.addTimeMarker;
       const times = this.chartConfig.times || [];
       let div;

@@ -105,6 +105,11 @@ export function VislibVisualizationsColumnChartProvider(Private) {
         const groupSpacing = groupWidth * groupSpacingPercentage;
 
         barWidth = (groupWidth - groupSpacing) / groupCount;
+
+        const minBarWidth = 1;
+        if (barWidth < minBarWidth) {
+          throw new ContainerTooSmall();
+        }
       }
 
       function x(d) {
