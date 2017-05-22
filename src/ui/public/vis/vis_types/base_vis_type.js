@@ -52,7 +52,7 @@ export function VisTypeProvider() {
         return this.editorConfig.schemas;
       }
 
-      throw `Can't get schemas from a visualization without using the default editor`;
+      return []; //throw `Can't get schemas from a visualization without using the default editor`;
     }
   });
 

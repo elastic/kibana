@@ -1,5 +1,6 @@
 import './sidebar';
 import './vis_options';
+import $ from 'jquery';
 
 
 import _ from 'lodash';
@@ -11,7 +12,7 @@ const defaultEditor = function ($rootScope, $compile) {
     static key = 'default';
 
     constructor(el) {
-      this.el = el;
+      this.el = $(el);
     }
 
     render(vis, visData, searchSource) {
