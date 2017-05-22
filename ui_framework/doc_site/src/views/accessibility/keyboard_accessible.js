@@ -39,15 +39,15 @@ export default () => (
     </KuiKeyboardAccessible>
 
     <KuiKeyboardAccessible>
-      <div onClick={() => window.alert('Div clicked')}>
-        Click this div, which itself contains another acessible element:&nbsp;
+      <div onClick={() => window.alert('Outer KuiKeyboardAccessible clicked')}>
+        This KuiKeyboardAccessible contains another KuiKeyboardAccessible&nbsp;
 
         <KuiKeyboardAccessible>
           <a
             className="kuiLink"
-            onClick={() => window.alert('Anchor tag clicked')}
+            onClick={() => window.alert('Inner KuiKeyboardAccessible clicked')}
           >
-            Click this nested anchor tag
+            Clicking this inner one should call both onClick handlers
           </a>
         </KuiKeyboardAccessible>
       </div>

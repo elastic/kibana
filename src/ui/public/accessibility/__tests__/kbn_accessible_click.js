@@ -104,32 +104,4 @@ describe('kbnAccessibleClick directive', () => {
       sinon.assert.calledOnce(scope.handleClick);
     });
   });
-
-  describe(`doesn't call ng-click when the element being interacted with is a child`, () => {
-    let scope;
-    let child;
-
-    beforeEach(function () {
-      scope = $rootScope.$new();
-      scope.handleClick = sinon.stub();
-      const html = `<div ng-click="handleClick()" kbn-accessible-click></div>`;
-      const element = $compile(html)(scope);
-      child = angular.element(`<button></button>`);
-      element.append(child);
-    });
-
-    it(`on ENTER keyup`, () => {
-      const e = angular.element.Event('keyup'); // eslint-disable-line new-cap
-      e.keyCode = ENTER_KEY;
-      child.trigger(e);
-      expect(scope.handleClick.callCount).to.be(0);
-    });
-
-    it(`on SPACE keyup`, () => {
-      const e = angular.element.Event('keyup'); // eslint-disable-line new-cap
-      e.keyCode = SPACE_KEY;
-      child.trigger(e);
-      expect(scope.handleClick.callCount).to.be(0);
-    });
-  });
 });

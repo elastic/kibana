@@ -24,17 +24,12 @@ import {
 } from 'react';
 
 import {
-  accessibleClickKeys,
+  ENTER_KEY,
   SPACE_KEY,
 } from '../../services';
 
 export class KuiKeyboardAccessible extends Component {
   onKeyDown = e => {
-    // If the user is interacting with a different element, then we don't need to do anything.
-    if (e.currentTarget !== e.target) {
-      return;
-    }
-
     // Prevent a scroll from occurring if the user has hit space.
     if (e.keyCode === SPACE_KEY) {
       e.preventDefault();
@@ -42,28 +37,22 @@ export class KuiKeyboardAccessible extends Component {
   }
 
   onKeyUp = e => {
-    // If the user is interacting with a different element, then we don't need to do anything.
-    if (e.currentTarget !== e.target) {
-      return;
-    }
-
     // Support keyboard accessibility by emulating mouse click on ENTER or SPACE keypress.
-    if (accessibleClickKeys[e.keyCode]) {
+    if (e.keyCode === ENTER_KEY || e.keyCode === SPACE_KEY) {
       // Delegate to the click handler on the element.
       this.props.children.props.onClick(e);
     }
   }
 
   applyKeyboardAccessibility(child) {
-    // If the developer hasn't already specified attributes required for accessibility, add them.
-    const props =  Object.assign({
+    // Add attributes required for accessibility unless they are already specified.
+    const props = {
       tabIndex: '0',
       role: 'button',
-    }, child.props, {
-      // We don't want to allow the child to overwrite these handlers.
+      ...child.props,
       onKeyDown: this.onKeyDown,
       onKeyUp: this.onKeyUp,
-    });
+    };
 
     return cloneElement(child, props);
   }
@@ -97,6 +86,14 @@ const keyboardInaccessibleElement = (props, propName, componentName) => {
 
   if (typeof child.props.onClick !== 'function') {
     throw new Error(`${componentName}'s child's onClick prop needs to be a function.`);
+  }
+
+  if (child.props.onKeyDown) {
+    throw new Error(`${componentName}'s child can't have an onKeyDown prop because the implementation will override it.`);
+  }
+
+  if (child.props.onKeyUp) {
+    throw new Error(`${componentName}'s child can't have an onKeyUp prop because the implementation will override it.`);
   }
 };
 

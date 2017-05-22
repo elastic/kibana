@@ -77,6 +77,15 @@ app.directive('discoverField', function ($compile) {
         }
       };
 
+      $scope.onClickToggleDetails = function onClickToggleDetails($event, field) {
+        // Do nothing if the event originated from a child.
+        if ($event.currentTarget !== $event.target) {
+          $event.preventDefault();
+        }
+
+        $scope.toggleDetails(field);
+      };
+
       $scope.toggleDetails = function (field, recompute) {
         if (_.isUndefined(field.details) || recompute) {
           $scope.onShowDetails(field, recompute);

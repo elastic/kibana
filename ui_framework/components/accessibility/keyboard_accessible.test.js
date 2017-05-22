@@ -86,6 +86,32 @@ describe('KuiKeyboardAccessible', () => {
         `child's onClick prop needs to be a function.`
       );
     });
+
+    test(`when the child has an onKeyDown prop`, () => {
+      const component = ( // eslint-disable-line no-unused-vars
+        <KuiKeyboardAccessible>
+          <div onClick={() => {}} onKeyDown={() => {}} />
+        </KuiKeyboardAccessible>
+      );
+
+      expect(consoleStub.calledOnce).toBe(true);
+      expect(consoleStub.getCall(0).args[0]).toContain(
+        `child can't have an onKeyDown prop because the implementation will override it.`
+      );
+    });
+
+    test(`when the child has an onKeyUp prop`, () => {
+      const component = ( // eslint-disable-line no-unused-vars
+        <KuiKeyboardAccessible>
+          <div onClick={() => {}} onKeyUp={() => {}} />
+        </KuiKeyboardAccessible>
+      );
+
+      expect(consoleStub.calledOnce).toBe(true);
+      expect(consoleStub.getCall(0).args[0]).toContain(
+        `child can't have an onKeyUp prop because the implementation will override it.`
+      );
+    });
   });
 
   describe(`doesn't throw an error`, () => {
@@ -170,39 +196,6 @@ describe('KuiKeyboardAccessible', () => {
       });
 
       sinon.assert.calledOnce(onClickHandler);
-    });
-  });
-
-  describe(`doesn't call onClick when the element being interacted with is a child`, () => {
-    let $button;
-    let onClickHandler;
-
-    beforeEach(() => {
-      onClickHandler = sinon.stub();
-
-      $button = shallow(
-        <KuiKeyboardAccessible>
-          <div onClick={onClickHandler}>
-            <button data-button></button>
-          </div>
-        </KuiKeyboardAccessible>
-      );
-    });
-
-    test(`on ENTER keyup`, () => {
-      $button.find('[data-button]').simulate('keyup', {
-        keyCode: ENTER_KEY
-      });
-
-      sinon.assert.notCalled(onClickHandler);
-    });
-
-    test(`on SPACE keyup`, () => {
-      $button.find('[data-button]').simulate('keyup', {
-        keyCode: SPACE_KEY
-      });
-
-      sinon.assert.notCalled(onClickHandler);
     });
   });
 });
