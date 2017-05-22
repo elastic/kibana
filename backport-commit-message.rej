@@ -1,0 +1,12 @@
+Update known-plugins.asciidoc
+
+Backports PR #10738
+
+**Commit 1:**
+Update known-plugins.asciidoc
+
+Added the Funnel Visualization plugin
+
+* Original sha: e2fd3ebdd7e0a9a45530be9db23a4bed6944ad33
+* Authored by yershalom <yershalom@gmail.com> on 2017-03-09T16:02:35Z
+* Committed by GitHub <noreply@github.com> on 2017-03-09T16:02:35Z
