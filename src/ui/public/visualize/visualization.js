@@ -3,15 +3,14 @@ import 'ui/visualize/visualize.less';
 import 'ui/visualize/visualize_legend';
 import _ from 'lodash';
 import { uiModules } from 'ui/modules';
+import { ResizeCheckerProvider } from 'ui/resize_checker';
 import visualizationTemplate from 'ui/visualize/visualization.html';
 import 'angular-sanitize';
-
-
-
 
 uiModules
 .get('kibana/directive', ['ngSanitize'])
 .directive('visualization', function (Notifier, SavedVis, indexPatterns, Private, config, $timeout) {
+  const ResizeChecker = Private(ResizeCheckerProvider);
 
   return {
     restrict: 'E',
@@ -25,6 +24,7 @@ uiModules
     template: visualizationTemplate,
     link: function ($scope, $el, attr, renderCounter) {
       const minVisChartHeight = 180;
+      const resizeChecker = new ResizeChecker($el);
 
       $scope.showSpyPanel = $scope.vis && $scope.vis.showSpyPanel || false;
 
@@ -124,6 +124,10 @@ uiModules
 
       $scope.$on('$destroy', () => {
         visualization.destroy();
+      });
+
+      resizeChecker.on('resize', () => {
+        visualization.resize();
       });
 
 
