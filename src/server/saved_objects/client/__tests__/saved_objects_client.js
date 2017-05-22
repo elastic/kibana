@@ -85,13 +85,6 @@ describe('SavedObjectsClient', () => {
   });
 
   describe('#delete', () => {
-    it('returns based on ES success', async () => {
-      callAdminCluster.returns(Promise.resolve({ result: 'deleted' }));
-      const response = await savedObjectsClient.delete('index-pattern', 'logstash-*');
-
-      expect(response).to.be(true);
-    });
-
     it('throws notFound when ES is unable to find the document', (done) => {
       callAdminCluster.returns(Promise.resolve({ found: false }));
 

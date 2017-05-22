@@ -36,8 +36,6 @@ export class SavedObjectsClient {
     if (get(response, 'found') === false) {
       throw Boom.notFound();
     }
-
-    return get(response, 'result') === 'deleted';
   }
 
   async find(options = {}) {
