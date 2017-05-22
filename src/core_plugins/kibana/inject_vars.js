@@ -12,7 +12,7 @@ export function injectVars(server) {
     kbnDefaultAppId: serverConfig.get('kibana.defaultAppId'),
     tilemapsConfig: {
       deprecated: {
-        isOverridden: isOverridden,
+        isOverridden,
         config: tilemapConfig,
       },
       manifestServiceUrl: serverConfig.get('tilemap.manifestServiceUrl')
