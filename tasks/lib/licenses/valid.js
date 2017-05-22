@@ -33,8 +33,12 @@ export function assertLicensesValid(options = {}) {
     licenses.filter(license => !validLicenses.includes(license))
   );
 
+  const isPackageInvalid = pkg => (
+    !pkg.licenses.length || getInvalid(pkg.licenses).length > 0
+  );
+
   const invalidMsgs = packages
-    .filter(pkg => getInvalid(pkg.licenses).length > 0)
+    .filter(isPackageInvalid)
     .map(describeInvalidLicenses(getInvalid));
 
   if (invalidMsgs.length) {
