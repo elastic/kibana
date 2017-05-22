@@ -9,6 +9,13 @@ export { modifyUrl } from './modify_url';
 export { createToolingLog } from './tooling_log';
 
 export {
+  getEsTypes,
+  getKbnFieldType,
+  castEsToKbnFieldType,
+  castEsToKbnFieldTypeName,
+} from './kbn_field_types';
+
+export {
   createConcatStream,
   createIntersperseStream,
   createJsonParseStream,
