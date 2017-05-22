@@ -14,11 +14,12 @@
         ng-init="isSeriesOpen = ($index === 0)"
         class="kuiSideBarCollapsibleTitle__label"
         ng-click="isSeriesOpen = !isSeriesOpen"
+        kbn-accessible-click
       >
         <span
           aria-hidden="true"
           ng-class="{ 'fa-caret-down': isSeriesOpen, 'fa-caret-right': !isSeriesOpen }"
-          class="fa fa-caret-right kuiSideBarCollapsibleTitle__caret"
+          class="kuiIcon fa-caret-right kuiSideBarCollapsibleTitle__caret"
         ></span>
         <span class="kuiSideBarCollapsibleTitle__text">
           {{chart.data.label}}

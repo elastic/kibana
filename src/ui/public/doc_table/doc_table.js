@@ -23,6 +23,7 @@ uiModules.get('kibana')
       searchSource: '=?',
       infiniteScroll: '=?',
       filter: '=?',
+      filters: '=?',
       onAddColumn: '=?',
       onChangeSortOrder: '=?',
       onMoveColumn: '=?',

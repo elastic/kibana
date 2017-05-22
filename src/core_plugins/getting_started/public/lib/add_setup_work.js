@@ -1,7 +1,6 @@
 import { get } from 'lodash';
-import uiRoutes from 'ui/routes';
+import uiRoutes, { WAIT_FOR_URL_CHANGE_TOKEN } from 'ui/routes';
 import uiChrome from 'ui/chrome';
-import KbnUrlProvider from 'ui/url';
 import { Notifier } from 'ui/notify/notifier';
 import { IndexPatternsGetIdsProvider } from 'ui/index_patterns/_get_ids';
 import { hasOptedOutOfGettingStarted, optOutOfGettingStarted } from 'ui/getting_started/opt_out_helpers';
@@ -14,8 +13,8 @@ import {
 uiRoutes
   .addSetupWork(function gettingStartedGateCheck(Private, $injector) {
     const getIds = Private(IndexPatternsGetIdsProvider);
-    const kbnUrl = Private(KbnUrlProvider);
     const config = $injector.get('config');
+    const kbnUrl = $injector.get('kbnUrl');
     const $route = $injector.get('$route');
 
     const currentRoute = get($route, 'current.$$route');
@@ -68,14 +67,14 @@ uiRoutes
         });
         notify.error('Please create a new index pattern');
         kbnUrl.change(CREATE_INDEX_PATTERN_ROUTE);
-        return;
+        throw WAIT_FOR_URL_CHANGE_TOKEN;
       }
 
       // Redirect the user to the Getting Started page (unless they are on it already)
       if (!isOnGettingStartedPage) {
         uiChrome.setVisible(false);
         kbnUrl.change(GETTING_STARTED_ROUTE);
-        return;
+        throw WAIT_FOR_URL_CHANGE_TOKEN;
       }
     });
   });

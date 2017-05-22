@@ -172,7 +172,7 @@ class TimeseriesChart extends Component {
               <div style={styles.text}>{ item.series.label }</div>
               <div style={styles.value}>{ formatter(value) }</div>
             </div>
-            <div style={styles.date}>{ moment(item.datapoint[0]).format('lll') }</div>
+            <div style={styles.date}>{ moment(item.datapoint[0]).format('ll LTS') }</div>
           </div>
           <i className="fa fa-caret-right" style={styles.rightCaret}></i>
         </div>
@@ -197,12 +197,17 @@ class TimeseriesChart extends Component {
     };
 
     const annotations = this.state.annotations.map(this.renderAnnotations);
+    let axisLabelClass = 'rhythm_chart__axis-label';
+    if (this.props.reversed) {
+      axisLabelClass += ' reversed';
+    }
 
     return (
       <div ref={(el) => this.container = el} className="rhythm_chart__timeseries-container">
         { tooltip }
         { annotations }
         <FlotChart {...params}/>
+        <div className={axisLabelClass}>{this.props.xaxisLabel}</div>
       </div>
     );
   }
@@ -221,6 +226,7 @@ TimeseriesChart.propTypes = {
   show: PropTypes.array,
   tickFormatter: PropTypes.func,
   yaxes: PropTypes.array,
+  xaxisLabel: PropTypes.string
 };
 
 export default TimeseriesChart;

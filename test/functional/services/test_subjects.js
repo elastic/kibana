@@ -50,6 +50,13 @@ export function TestSubjectsProvider({ getService }) {
       const all = await find.allByCssSelector(testSubjSelector(selector));
       return await filterAsync(all, el => el.isDisplayed());
     }
+
+    async setValue(selector, value) {
+      const input = await retry.try(() => this.find(selector));
+      await retry.try(() => input.click());
+      await input.clearValue();
+      await input.type(value);
+    }
   }
 
   return new TestSubjects();
