@@ -34,6 +34,10 @@ export function VislibVisTypeProvider(Private) {
       });
     }
 
+    resize() {
+      return;
+    }
+
     destroy() {
       if (this.vislibVis) {
         this.vis.vislibVis.off('brush', this.vis.API.events.brush);

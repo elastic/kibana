@@ -31,6 +31,10 @@ export function AngularVisTypeProvider(Private, $compile, $rootScope) {
       });
     }
 
+    resize() {
+      this.$scope.$emit('resize');
+    }
+
     destroy() {
       this.$scope.$destroy();
       this.$scope = null;
