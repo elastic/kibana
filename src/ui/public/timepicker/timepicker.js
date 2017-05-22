@@ -1,6 +1,7 @@
 import html from 'ui/timepicker/timepicker.html';
 import './quick_panel';
 import './relative_panel';
+import './absolute_panel';
 import _ from 'lodash';
 import { relativeOptions } from './relative_options';
 import { parseRelativeParts } from './parse_relative_parts';
