@@ -1,11 +1,8 @@
 import expect from 'expect.js';
 import { documentationLinks } from '../documentation_links';
-import semver from 'semver';
 import { metadata } from '../../metadata';
 
-const major = semver.major(metadata.version);
-const minor = semver.minor(metadata.version);
-const urlVersion = `${major}.${minor}`;
+const urlVersion = metadata.branch;
 
 describe('documentation link service', function () {
 
