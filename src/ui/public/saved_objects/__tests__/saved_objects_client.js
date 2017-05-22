@@ -291,7 +291,7 @@ describe('SavedObjectsClient', () => {
     const object = { id: 'logstash-*', type: 'index-pattern', title: 'Test' };
 
     beforeEach(() => {
-      $http.returns(Promise.resolve({ data: { data: [object] } }));
+      $http.returns(Promise.resolve({ data: { saved_objects: [object] } }));
     });
 
     it('returns a promise', () => {

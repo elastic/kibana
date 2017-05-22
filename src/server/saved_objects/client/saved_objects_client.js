@@ -61,7 +61,7 @@ export class SavedObjectsClient {
     const response = await this._withKibanaIndex('search', esOptions);
 
     return {
-      data: get(response, 'hits.hits', []).map(r => {
+      saved_objects: get(response, 'hits.hits', []).map(r => {
         return {
           id: r._id,
           type: r._type,

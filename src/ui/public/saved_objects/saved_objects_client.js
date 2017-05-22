@@ -60,7 +60,7 @@ export class SavedObjectsClient {
     const url = this._getUrl([options.type]);
 
     return this._request('GET', url, keysToSnakeCaseShallow(options)).then(resp => {
-      resp.data = resp.data.map(d => new this.ObjectClass(d));
+      resp.saved_objects = resp.saved_objects.map(d => new this.ObjectClass(d));
       return keysToCamelCaseShallow(resp);
     });
   }

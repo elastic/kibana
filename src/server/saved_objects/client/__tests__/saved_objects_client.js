@@ -127,9 +127,9 @@ describe('SavedObjectsClient', () => {
       const response = await savedObjectsClient.find();
 
       expect(response.total).to.be(count);
-      expect(response.data).to.have.length(count);
+      expect(response.saved_objects).to.have.length(count);
       docs.hits.hits.forEach((doc, i) => {
-        expect(response.data[i]).to.eql({
+        expect(response.saved_objects[i]).to.eql({
           id: doc._id,
           type: doc._type,
           version: doc._version,
