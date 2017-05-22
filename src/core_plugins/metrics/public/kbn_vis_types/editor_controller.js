@@ -5,6 +5,7 @@ import '../directives/vis_editor';
 import _ from 'lodash';
 import angular from 'angular';
 import { FilterBarQueryFilterProvider } from 'ui/filter_bar/query_filter';
+const AUTO_APPLY_KEY = 'metrics_autoApply';
 
 const app = uiModules.get('kibana/metrics_vis', ['kibana']);
 app.controller('MetricsEditorController', (
@@ -13,9 +14,12 @@ app.controller('MetricsEditorController', (
   $scope,
   Private,
   timefilter,
+  localStorage,
   metricsExecutor
 ) => {
 
+  const autoApply = localStorage.get(AUTO_APPLY_KEY);
+  $scope.autoApply = autoApply != null ? autoApply : true;
   $scope.embedded = $location.search().embed === 'true';
   const queryFilter = Private(FilterBarQueryFilterProvider);
   const createFetch = Private(require('../lib/fetch'));
@@ -28,9 +32,7 @@ app.controller('MetricsEditorController', (
   };
   const fetchFields = Private(require('../lib/fetch_fields'));
 
-  const debouncedFetch = _.debounce(() => {
-    fetch();
-  }, 1000, {
+  const debouncedFetch = _.debounce(() => fetch(), 1000, {
     leading: false,
     trailing: true
   });
@@ -49,12 +51,28 @@ app.controller('MetricsEditorController', (
       $scope.model = createNewPanel();
       angular.copy($scope.model, $scope.vis._editableVis.params);
     }
+    fetch();
   }
 
-  $scope.$watchCollection('model', newValue => {
+  $scope.commit = () => {
+    fetch();
+    $scope.dirty = false;
+  };
+
+  $scope.toggleAutoApply = () => {
+    $scope.autoApply = !$scope.autoApply;
+    localStorage.set(AUTO_APPLY_KEY, $scope.autoApply);
+  };
+
+  $scope.$watchCollection('model', (newValue, oldValue) => {
     angular.copy(newValue, $scope.vis._editableVis.params);
     $scope.stageEditableVis();
-    debouncedFetch();
+    $scope.dirty = !_.isEqual(newValue.series, oldValue.series);
+
+    if ($scope.dirty && $scope.autoApply) {
+      debouncedFetch();
+      $scope.dirty = false;
+    }
 
     const patternsToFetch = [];
     // Fetch any missing index patterns
