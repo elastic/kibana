@@ -26,7 +26,6 @@ VisTypesRegistryProvider.register(function StateTrackerProvider(Private) {
 
     requestHandler: 'none',
     responseHandler: 'none',
-    editor: DummyEditor,
     editorConfig: {
       //make this dummy
       schemas: new Schemas([])
