@@ -21,6 +21,7 @@ export function VislibVisTypeVislibVisTypeProvider(Private) {
     const updateIfSet = (from, to, prop, func) => {
       if (from[prop]) {
         to[prop] = func ? func(from[prop]) : from[prop];
+        delete from[prop];
       }
     };
 
