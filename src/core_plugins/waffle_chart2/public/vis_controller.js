@@ -1,9 +1,8 @@
 import d3 from 'd3';
 
-
-class WaffleVisualization {
-  constructor(container) {
-    this._container = container;
+class VisController {
+  constructor(el) {
+    this._container = el;
     this._waffleContainer = document.createElement('div');
     this._waffleContainer.setAttribute('class', 'waffle-waffle');
     this._legendContainer = document.createElement('div');
@@ -12,23 +11,28 @@ class WaffleVisualization {
     this._container.appendChild(this._legendContainer);
   }
 
-
-  async render(vis, esResponse) {
+  render(vis, visData) {
     return new Promise((resolve) => {
 
       this._clear();
-      const data = convertResponse(esResponse);
-      console.log(data);
-      this._createWaffleVis(data);
+      try {
+        const data = convertResponse(visData);
+        this._createWaffleVis(data);
+      } catch (e) {
+        //handle error
+      }
       resolve(true);
     });
   }
 
+  _clear() {
+    d3.select(this._waffleContainer).selectAll('*').remove();
+    d3.select(this._legendContainer).selectAll('*').remove();
+  }
+
 
   _createWaffleVis(data) {
-
-    //copy pasted from http://bl.ocks.org/XavierGimenez/8070956
-    let total = 0;
+//copy pasted from http://bl.ocks.org/XavierGimenez/8070956
     const widthSquares = 20;
     const heightSquares = 5;
     const squareSize = 25;
@@ -39,7 +43,7 @@ class WaffleVisualization {
     const color = d3.scale.category10();
 
     //total
-    total = d3.sum(data, function (d) {
+    let total = d3.sum(data, function (d) {
       return d.value;
     });
 
@@ -135,17 +139,15 @@ class WaffleVisualization {
 
   }
 
-  _clear() {
-    d3.select(this._waffleContainer).selectAll('*').remove();
-    d3.select(this._legendContainer).selectAll('*').remove();
+  resize() {
+    console.log('resizing visualization');
   }
 
-
   destroy() {
+    this._clear();
     this._container.innerHTML = '';
   }
 }
-
 
 function convertResponse(esResponse) {
   const data = [];
@@ -161,6 +163,4 @@ function convertResponse(esResponse) {
 }
 
 
-export {
-  WaffleVisualization
-};
+export {VisController};
