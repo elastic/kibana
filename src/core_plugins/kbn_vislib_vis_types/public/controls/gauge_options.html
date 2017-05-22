@@ -130,7 +130,7 @@
                 type="button"
                 ng-click="removeRange($index)"
                 ng-show="vis.params.gauge.colorsRange.length > 1"
-                class="btn btn-danger btn-xs">
+                class="kuiButton kuiButton--danger kuiButton--small">
                 <i class="fa fa-times"></i>
               </button>
             </td>
@@ -146,7 +146,7 @@
 
         <div
           ng-click="addRange()"
-          class="sidebar-item-button primary">
+          class="kuiButton kuiButton--primary kuiButton--fullWidth">
           Add Range
         </div>
         <div class="text text-center text-info">Note: colors can be changed in the legend</div>
@@ -225,16 +225,17 @@
       </div>
     </div>
     <div ng-if="showStyle" class="kuiSideBarCollapsibleSection">
-      <div class="kuiSideBarFormRow" ng-show="vis.params.gauge.colorsRange.length > 1">
-        <label class="kuiSideBarFormRow__label" for="labelColor">
-          Color Labels
-        </label>
-        <div class="kuiSideBarFormRow__control">
-          <input class="kuiCheckBox" id="labelColor" type="checkbox" ng-model="vis.params.gauge.style.labelColor">
-        </div>
-      </div>
+
       <div class="kuiSideBarSection">
         <div ng-hide="vis.params.gauge.type === 'simple'">
+          <div class="kuiSideBarFormRow" ng-show="vis.params.gauge.colorsRange.length > 1">
+            <label class="kuiSideBarFormRow__label" for="labelColor">
+              Color Labels
+            </label>
+            <div class="kuiSideBarFormRow__control">
+              <input class="kuiCheckBox" id="labelColor" type="checkbox" ng-model="vis.params.gauge.style.labelColor">
+            </div>
+          </div>
           <div class="kuiSideBarFormRow">
             <label class="kuiSideBarFormRow__label" for="showScale">
               Show Scale
@@ -243,27 +244,19 @@
               <input class="kuiCheckBox" id="showScale" type="checkbox" ng-model="vis.params.gauge.scale.show">
             </div>
           </div>
-
-          <div class="kuiSideBarFormRow">
-            <label class="kuiSideBarFormRow__label" for="backColor">
-              Background Color
-            </label>
-            <div class="kuiSideBarFormRow__control">
-              <input
-                id="backColor"
-                class="kuiInput kuiSideBarInput"
-                ng-model="vis.params.gauge.style.bgFill"
-              >
-            </div>
-          </div>
         </div>
         <div ng-show="vis.params.gauge.type === 'simple'">
           <div class="kuiSideBarFormRow">
-            <label class="kuiSideBarFormRow__label" for="bgColor" ng-show="vis.params.gauge.colorsRange.length > 1">
-              Color Background
+            <label class="kuiSideBarFormRow__label" for="gaugeColorMode">
+              Color
             </label>
             <div class="kuiSideBarFormRow__control">
-              <input class="kuiCheckBox" id="bgColor" type="checkbox" ng-model="vis.params.gauge.style.bgColor">
+              <select
+                id="gaugeColorMode"
+                class="kuiSelect kuiSideBarSelect"
+                ng-model="vis.params.gauge.gaugeColorMode"
+                ng-options="mode for mode in vis.type.params.gaugeColorMode"
+              ></select>
             </div>
           </div>
           <div class="kuiSideBarFormRow">

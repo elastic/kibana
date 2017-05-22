@@ -29,41 +29,6 @@ module.directive('gaugeOptions', function () {
         }
       });
 
-      $scope.$watch('vis.params.gauge.gaugeStyle', style => {
-        switch (style) {
-          case 'Full':
-            $scope.vis.params.gauge.style.mask = false;
-            break;
-          case 'Bars':
-            $scope.vis.params.gauge.style.mask = true;
-            $scope.vis.params.gauge.style.maskBars = 50;
-            $scope.vis.params.gauge.style.maskPadding = 0.04;
-            break;
-          case 'Lines':
-            $scope.vis.params.gauge.style.mask = true;
-            $scope.vis.params.gauge.style.maskBars = 200;
-            $scope.vis.params.gauge.style.maskPadding = 0.2;
-            break;
-        }
-      });
-
-      $scope.$watch('vis.params.gauge.backStyle', style => {
-        switch (style) {
-          case 'Full':
-            $scope.vis.params.gauge.style.bgMask = false;
-            break;
-          case 'Bars':
-            $scope.vis.params.gauge.style.bgMask = true;
-            $scope.vis.params.gauge.style.bgMaskBars = 50;
-            $scope.vis.params.gauge.style.bgMaskPadding = 0.04;
-            break;
-          case 'Lines':
-            $scope.vis.params.gauge.style.bgMask = true;
-            $scope.vis.params.gauge.style.bgMaskBars = 200;
-            $scope.vis.params.gauge.style.bgMaskPadding = 0.2;
-            break;
-        }
-      });
 
       const updateLegend = () => {
         if (!$scope.vis.params.gauge.style.bgColor && !$scope.vis.params.gauge.style.labelColor) {
@@ -73,13 +38,21 @@ module.directive('gaugeOptions', function () {
         }
       };
 
-      $scope.$watch('vis.params.gauge.style.labelColor', newValue => {
-        if (newValue) $scope.vis.params.gauge.style.bgColor = !newValue;
-        updateLegend();
-      });
-
-      $scope.$watch('vis.params.gauge.style.bgColor', newValue => {
-        if (newValue) $scope.vis.params.gauge.style.labelColor = !newValue;
+      $scope.$watch('vis.params.gauge.gaugeColorMode', newValue => {
+        switch (newValue) {
+          case 'Labels':
+            $scope.vis.params.gauge.style.labelColor = true;
+            $scope.vis.params.gauge.style.bgColor = false;
+            break;
+          case 'Background':
+            $scope.vis.params.gauge.style.labelColor = false;
+            $scope.vis.params.gauge.style.bgColor = true;
+            break;
+          case 'None':
+            $scope.vis.params.gauge.style.labelColor = false;
+            $scope.vis.params.gauge.style.bgColor = false;
+            break;
+        }
         updateLegend();
       });
 
