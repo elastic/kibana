@@ -1,5 +1,5 @@
 import { resolve as resolveUrl, format as formatUrl } from 'url';
-import { pick, partial } from 'lodash';
+import { pick, get } from 'lodash';
 import { keysToSnakeCaseShallow, keysToCamelCaseShallow } from '../../../utils/case_conversion';
 
 import { SavedObject } from './saved_object';
@@ -21,7 +21,7 @@ export class SavedObjectsClient {
     }
 
     return this._request('GET', this._getUrl([type, id])).then(resp => {
-      return new this.ObjectClass(resp);
+      return this.createSavedObject(resp);
     });
   }
 
@@ -57,16 +57,16 @@ export class SavedObjectsClient {
   }
 
   find(options = {}) {
-    const url = this._getUrl([options.type]);
+    const url = this._getUrl([options.type], keysToSnakeCaseShallow(options));
 
-    return this._request('GET', url, keysToSnakeCaseShallow(options)).then(resp => {
-      resp.saved_objects = resp.saved_objects.map(d => new this.ObjectClass(d));
+    return this._request('GET', url).then(resp => {
+      resp.saved_objects = resp.saved_objects.map(d => this.createSavedObject(d));
       return keysToCamelCaseShallow(resp);
     });
   }
 
-  get ObjectClass() {
-    return partial(SavedObject, this);
+  createSavedObject(options) {
+    return new SavedObject(this, options);
   }
 
   _getUrl(path, query) {
@@ -80,17 +80,15 @@ export class SavedObjectsClient {
     }));
   }
 
-  _request(method, url, body) {
-    const options = { method, url };
+  _request(method, url, data) {
+    const options = { method, url, data };
 
-    if (method === 'GET' && body) {
-      options.params = body;
-    } else if (body) {
-      options.data = body;
+    if (method === 'GET' && data) {
+      return this._PromiseCtor.reject(new Error('data not permitted for GET requests'));
     }
 
     return this._$http(options)
-      .then(resp => resp.data)
+      .then(resp => get(resp, 'data'))
       .catch(resp => {
         const respBody = resp.data || {};
         const err = new Error(respBody.message || respBody.error || `${resp.status} Response`);

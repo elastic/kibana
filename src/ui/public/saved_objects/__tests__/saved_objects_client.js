@@ -1,6 +1,5 @@
 import sinon from 'sinon';
 import expect from 'expect.js';
-import { pick } from 'lodash';
 import { SavedObjectsClient } from '../saved_objects_client';
 import { SavedObject } from '../saved_object';
 
@@ -63,16 +62,13 @@ describe('SavedObjectsClient', () => {
       expect($http.calledOnce).to.be(true);
     });
 
-    it('sets params for GET request', () => {
-      $http.withArgs({
-        method: 'GET',
-        url: '/api/path',
-        params: params
-      }).returns(Promise.resolve({ data: '' }));
-
-      savedObjectsClient._request('GET', '/api/path', params);
-
-      expect($http.calledOnce).to.be(true);
+    it('throws error when body is provided for GET', async () => {
+      try {
+        await savedObjectsClient._request('GET', '/api/path', params);
+        expect().fail('should have error');
+      } catch (e) {
+        expect(e.message).to.eql('data not permitted for GET requests');
+      }
     });
 
     it('catches API error', async () => {
@@ -80,19 +76,7 @@ describe('SavedObjectsClient', () => {
       $http.returns(Promise.reject({ data: { error: message } }));
 
       try {
-        await savedObjectsClient._request('GET', '/api/path', params);
-        expect().fail('should have error');
-      } catch (e) {
-        expect(e.message).to.eql(message);
-      }
-    });
-
-    it('catches API error message', async () => {
-      const message = 'Request failed';
-      $http.returns(Promise.reject({ data: { message: message } }));
-
-      try {
-        await savedObjectsClient._request('GET', '/api/path', params);
+        await savedObjectsClient._request('POST', '/api/path', params);
         expect().fail('should have error');
       } catch (e) {
         expect(e.message).to.eql(message);
@@ -103,7 +87,7 @@ describe('SavedObjectsClient', () => {
       $http.returns(Promise.reject({ status: 404 }));
 
       try {
-        await savedObjectsClient._request('GET', '/api/path', params);
+        await savedObjectsClient._request('POST', '/api/path', params);
         expect().fail('should have error');
       } catch (e) {
         expect(e.message).to.eql('404 Response');
@@ -115,7 +99,8 @@ describe('SavedObjectsClient', () => {
     beforeEach(() => {
       $http.withArgs({
         method: 'GET',
-        url: `${basePath}/api/saved_objects/index-pattern/logstash-*`
+        url: `${basePath}/api/saved_objects/index-pattern/logstash-*`,
+        data: undefined
       }).returns(Promise.resolve({ data: doc }));
     });
 
@@ -141,7 +126,7 @@ describe('SavedObjectsClient', () => {
       }
     });
 
-    it('resolves with instantiated ObjectClass', async () => {
+    it('resolves with instantiated SavedObject', async () => {
       const response = await savedObjectsClient.get('index-pattern', 'logstash-*');
       expect(response).to.be.a(SavedObject);
       expect(response.type).to.eql('config');
@@ -305,7 +290,7 @@ describe('SavedObjectsClient', () => {
       expect($http.calledOnce).to.be(true);
 
       const options = $http.getCall(0).args[0];
-      expect(options.url).to.eql(`${basePath}/api/saved_objects/index-pattern`);
+      expect(options.url).to.eql(`${basePath}/api/saved_objects/index-pattern?type=index-pattern&invalid=true`);
     });
 
     it('accepts fields', () => {
@@ -315,7 +300,7 @@ describe('SavedObjectsClient', () => {
       expect($http.calledOnce).to.be(true);
 
       const options = $http.getCall(0).args[0];
-      expect(options.params).to.eql(pick(body, ['fields']));
+      expect(options.url).to.eql(`${basePath}/api/saved_objects/?fields=title&fields=description`);
     });
 
     it('accepts from/size', () => {
@@ -325,7 +310,8 @@ describe('SavedObjectsClient', () => {
       expect($http.calledOnce).to.be(true);
 
       const options = $http.getCall(0).args[0];
-      expect(options.params).to.eql(pick(body, ['from', 'size']));
+      expect(options.url).to.eql(`${basePath}/api/saved_objects/?from=50&size=10`);
+
     });
   });
 });
