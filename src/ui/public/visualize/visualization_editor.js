@@ -5,11 +5,13 @@ import 'ui/visualize/visualize_legend';
 import { uiModules } from 'ui/modules';
 import 'angular-sanitize';
 import { EditorTypesRegistryProvider } from 'ui/registry/editor_types';
+import { ResizeCheckerProvider } from 'ui/resize_checker';
 
 uiModules
 .get('kibana/directive', ['ngSanitize'])
 .directive('visualizationEditor', function (Private) {
   const editorTypes = Private(EditorTypesRegistryProvider);
+  const ResizeChecker = Private(ResizeCheckerProvider);
 
   return {
     restrict: 'E',
@@ -23,6 +25,7 @@ uiModules
     link: function ($scope, element) {
       // Clone the _vis instance.
       const vis = $scope.vis;
+      const resizeChecker = new ResizeChecker(element);
       const Editor = typeof vis.type.editor === 'function' ? vis.type.editor :
         editorTypes.find(editor => editor.key === vis.type.editor);
       const editor = new Editor(element[0]);
@@ -37,6 +40,10 @@ uiModules
           return;
         }
         renderFunction();
+      });
+
+      resizeChecker.on('resize', () => {
+        editor.resize();
       });
 
       $scope.$on('$destroy', () => {

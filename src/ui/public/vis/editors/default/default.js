@@ -65,6 +65,11 @@ const defaultEditor = function ($rootScope, $compile) {
 
       $scope.$broadcast('render');
     }
+
+    resize() {
+
+    }
+
     destroy() {
       if (this.$scope) {
         this.$scope.$destroy();
