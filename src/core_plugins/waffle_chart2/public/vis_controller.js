@@ -12,12 +12,18 @@ class VisController {
   }
 
   render(vis, visData) {
+
+    window._vis = vis;
+
     return new Promise((resolve) => {
 
       this._clear();
+
+
       try {
+        const label = vis.aggs[0].makeLabel() + ': '+  vis.aggs[1].makeLabel();
         const data = convertResponse(visData);
-        this._createWaffleVis(data);
+        this._createWaffleVis(data, label);
       } catch (e) {
         //handle error
       }
@@ -31,7 +37,7 @@ class VisController {
   }
 
 
-  _createWaffleVis(data) {
+  _createWaffleVis(data, label) {
 //copy pasted from http://bl.ocks.org/XavierGimenez/8070956
     const widthSquares = 20;
     const heightSquares = 5;
@@ -96,7 +102,7 @@ class VisController {
       })
       .append('title')
       .text(function (d) {
-        return 'Age range: ' + data[d.groupIndex].key + ' | ' + d.value + ' , ' + d.units + '%';
+        return label +  ' ' + data[d.groupIndex].key + ' | ' + d.value + ' , ' + d.units + '%';
       });
 
     //add legend with categorical data
