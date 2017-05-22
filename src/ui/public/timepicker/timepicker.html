@@ -41,7 +41,6 @@
           <div ng-switch on="mode" class="container-fluid">
             <kbn-timepicker-quick-panel
               ng-switch-when="quick"
-              quick-lists="quickLists"
               set-quick="setQuick(from, to)"
             ></kbn-timepicker-quick-panel>
 
@@ -61,8 +60,6 @@
               absolute="absolute"
               apply-absolute="applyAbsolute()"
               format="format"
-              pick-from-date="pickFromDate"
-              pick-to-date="pickToDate"
               set-to-now="setToNow(key)"
             ></kbn-timepicker-absolute-panel>
           </div>

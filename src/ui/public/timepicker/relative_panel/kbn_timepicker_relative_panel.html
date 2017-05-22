@@ -75,7 +75,7 @@
         <input
           ng-model="relative.to.round"
           ng-checked="relative.to.round"
-          ng-change="formatRelative('to')"
+          ng-change="formatRelative({key:'to'})"
           type="checkbox">
         round to the {{units[relative.to.unit.substring(0,1)]}}
       </label>
