@@ -13,6 +13,9 @@ import 'ui/vis_maps/lib/service_settings';
 const module = uiModules.get('kibana/region_map', ['kibana']);
 module.controller('KbnRegionMapController', function ($scope, $element, Private, Notifier, getAppState,
                                                        serviceSettings, config) {
+
+  window._contScope = $scope;
+
   const tooltipFormatter = Private(AggResponsePointSeriesTooltipFormatterProvider);
   const ResizeChecker = Private(ResizeCheckerProvider);
   const notify = new Notifier({ location: 'Vectormap' });
@@ -37,12 +40,6 @@ module.controller('KbnRegionMapController', function ($scope, $element, Private,
         }
       }
       $scope.vis.type.params.vectorLayers = newVectorLayers;
-
-      //check if layer is selected
-      console.log($scope.vis.params.selectedJoinField, $scope.vis.params.selectedLayer);
-
-
-
       $scope.$apply();
     });
 
