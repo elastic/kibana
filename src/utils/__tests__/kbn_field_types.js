@@ -1,5 +1,7 @@
 import expect from 'expect.js';
+import Chance from 'chance';
 
+const chance = new Chance();
 import {
   KbnFieldType,
   getKbnFieldType,
@@ -15,7 +17,7 @@ describe('utils/kbn_field_types', () => {
     });
 
     it('returns undefined for invalid name', () => {
-      expect(getKbnFieldType(Math.random())).to.be(undefined);
+      expect(getKbnFieldType(chance.sentence())).to.be(undefined);
     });
   });
 
@@ -26,7 +28,7 @@ describe('utils/kbn_field_types', () => {
     });
 
     it('returns unknown for unknown es types', () => {
-      expect(castEsToKbnFieldTypeName(Math.random())).to.be('unknown');
+      expect(castEsToKbnFieldTypeName(chance.sentence())).to.be('unknown');
     });
   });
 
@@ -36,7 +38,7 @@ describe('utils/kbn_field_types', () => {
     });
 
     it('returns the unknown field type for unknown es types', () => {
-      expect(castEsToKbnFieldType(Math.random())).to.be(getKbnFieldType('unknown'));
+      expect(castEsToKbnFieldType(chance.sentence())).to.be(getKbnFieldType('unknown'));
     });
   });
 
