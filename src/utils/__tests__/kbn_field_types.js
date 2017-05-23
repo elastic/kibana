@@ -7,7 +7,7 @@ import {
   getKbnFieldType,
   castEsToKbnFieldTypeName,
   castEsToKbnFieldType,
-  getEsTypes
+  getKbnTypeNames
 } from '../kbn_field_types';
 
 describe('utils/kbn_field_types', () => {
@@ -42,12 +42,14 @@ describe('utils/kbn_field_types', () => {
     });
   });
 
-  describe('getEsTypes()', () => {
-    it('returns a list of all esTypes known in kibana types', () => {
-      const esTypes = getEsTypes();
-      expect(esTypes).to.contain('keyword');
-      expect(esTypes).to.contain('float');
+  describe('getKbnTypeNames()', () => {
+    it('returns a list of all kbnFieldType names', () => {
+      const esTypes = getKbnTypeNames();
+      expect(esTypes).to.contain('string');
+      expect(esTypes).to.contain('number');
       expect(esTypes).to.contain('geo_point');
+      expect(esTypes).to.not.contain('keyword');
+      expect(esTypes).to.not.contain('float');
     });
   });
 });

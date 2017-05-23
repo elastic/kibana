@@ -100,6 +100,6 @@ export function castEsToKbnFieldType(esType) {
  *  Get the esTypes known by all kbnFieldTypes
  *  @return {Array<string>}
  */
-export function getEsTypes() {
-  return KBN_FIELD_TYPES.reduce((acc, type) => acc.concat(type.esTypes), []);
+export function getKbnTypeNames() {
+  return KBN_FIELD_TYPES.map(type => type.name);
 }

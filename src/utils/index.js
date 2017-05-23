@@ -9,7 +9,7 @@ export { modifyUrl } from './modify_url';
 export { createToolingLog } from './tooling_log';
 
 export {
-  getEsTypes,
+  getKbnTypeNames,
   getKbnFieldType,
   castEsToKbnFieldType,
   castEsToKbnFieldTypeName,
