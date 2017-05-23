@@ -52,8 +52,6 @@ app.directive('timelionInterval', function ($compile, $timeout) {
         if (newVal === oldVal) return;
         $scope.model = newVal;
       });
-
-
     }
   };
 });
