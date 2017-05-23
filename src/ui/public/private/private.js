@@ -1,5 +1,5 @@
 import _ from 'lodash';
-import uiModules from 'ui/modules';
+import { uiModules } from 'ui/modules';
 /**
  * # `Private()`
  * Private module loader, used to merge angular and require js dependency styles

@@ -1,6 +1,6 @@
 import expect from 'expect.js';
 
-import initChromeNavApi from 'ui/chrome/api/nav';
+import { initChromeNavApi } from 'ui/chrome/api/nav';
 import StubBrowserStorage from 'test_utils/stub_browser_storage';
 
 const basePath = '/someBasePath';
@@ -95,9 +95,18 @@ describe('chrome nav apis', function () {
     it('injects the globalState of the current url to all links for the same app', function () {
       const appUrlStore = new StubBrowserStorage();
       const nav = [
-        { url: 'https://localhost:9200/app/kibana#discover' },
-        { url: 'https://localhost:9200/app/kibana#visualize' },
-        { url: 'https://localhost:9200/app/kibana#dashboard' },
+        {
+          url: 'https://localhost:9200/app/kibana#discover',
+          subUrlBase: 'https://localhost:9200/app/kibana#discover'
+        },
+        {
+          url: 'https://localhost:9200/app/kibana#visualize',
+          subUrlBase: 'https://localhost:9200/app/kibana#visualize'
+        },
+        {
+          url: 'https://localhost:9200/app/kibana#dashboards',
+          subUrlBase: 'https://localhost:9200/app/kibana#dashboard'
+        },
       ].map(l => {
         l.lastSubUrl = l.url;
         return l;

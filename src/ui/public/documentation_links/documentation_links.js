@@ -1,12 +1,24 @@
 import semver from 'semver';
-import metadata from '../metadata';
+import { metadata } from '../metadata';
 
 const major = semver.major(metadata.version);
 const minor = semver.minor(metadata.version);
 const urlVersion = `${major}.${minor}`;
 const baseUrl = 'https://www.elastic.co/';
 
-export default {
+export const documentationLinks = {
+  elasticsearch: {
+    docs: `${baseUrl}guide/en/elasticsearch/reference/current`
+  },
+  beats: {
+    docs: `${baseUrl}guide/en/beats/libbeat/current`
+  },
+  logstash: {
+    docs: `${baseUrl}guide/en/logstash/current`
+  },
+  kibana: {
+    docs: `${baseUrl}guide/en/kibana/current`
+  },
   filebeat: {
     installation: `${baseUrl}guide/en/beats/filebeat/${urlVersion}/filebeat-installation.html`,
     configuration: `${baseUrl}guide/en/beats/filebeat/${urlVersion}/filebeat-configuration.html`,
@@ -22,5 +34,10 @@ export default {
     painlessApi: `${baseUrl}guide/en/elasticsearch/reference/${urlVersion}/modules-scripting-painless.html#painless-api`,
     painlessSyntax: `${baseUrl}guide/en/elasticsearch/reference/${urlVersion}/modules-scripting-painless-syntax.html`,
     luceneExpressions: `${baseUrl}guide/en/elasticsearch/reference/${urlVersion}/modules-scripting-expression.html`
-  }
+  },
+  query: {
+    luceneQuerySyntax: `${baseUrl}guide/en/elasticsearch/reference/${urlVersion}/query-dsl-query-string-query.html#query-string-syntax`
+  },
+  demoSite: 'http://demo.elastic.co',
+  gettingStarted: `${baseUrl}products/kibana/getting-started-link`
 };

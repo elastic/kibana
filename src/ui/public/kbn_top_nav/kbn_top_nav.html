@@ -14,7 +14,7 @@
     <!-- Right-side: menu -->
     <div class="kuiLocalNavRow__section">
       <div class="kuiLocalMenu">
-        <div
+        <button
           class="kuiLocalMenuItem"
           ng-repeat="menuItem in kbnTopNav.menuItems"
           aria-label="{{::menuItem.description}}"
@@ -28,7 +28,7 @@
           tooltip-popup-delay="400"
           tooltip-append-to-body="1"
           data-test-subj="{{menuItem.testId}}"
-        ></div>
+        ></button>
 
         <!-- Time-picker "menu item" -->
         <kbn-global-timepicker></kbn-global-timepicker>
@@ -42,7 +42,7 @@
     ng-show="kbnTopNav.rendered"
   >
     <button class="kuiLocalDropdownCloseButton" ng-click="kbnTopNav.close()">
-      <span class="fa fa-chevron-circle-up"></span>
+      <span class="kuiIcon fa-chevron-circle-up"></span>
     </button>
     <div id="template_wrapper">
       <!-- Content gets dynamically inserted here. -->

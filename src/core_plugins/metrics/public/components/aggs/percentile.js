@@ -29,15 +29,6 @@ class Percentiles extends Component {
     };
   }
 
-  handleNumberChange(item, name) {
-    return (e) => {
-      const handleChange = collectionActions.handleChange.bind(null, this.props);
-      const part = {};
-      part[name] = Number(_.get(e, 'value', _.get(e, 'target.value')));
-      handleChange(_.assign({}, item, part));
-    };
-  }
-
   renderRow(row, i, items) {
     const defaults = { value: '', percentile: '', shade: '' };
     const model = { ...defaults, ...row };
@@ -57,8 +48,9 @@ class Percentiles extends Component {
           <input
             placeholder="Percentile"
             className="vis_editor__input-grows"
-            type="text"
-            onChange={this.handleNumberChange(model, 'value')}
+            type="number"
+            step="1"
+            onChange={this.handleTextChange(model, 'value')}
             value={model.value}/>
           <div className="vis_editor__label">Mode</div>
           <div className="vis_editor__row_item">
@@ -72,15 +64,17 @@ class Percentiles extends Component {
           <input
             style={optionsStyle}
             className="vis_editor__input-grows"
-            type="text"
-            onChange={this.handleNumberChange(model, 'percentile')}
+            type="number"
+            step="1"
+            onChange={this.handleTextChange(model, 'percentile')}
             value={model.percentile}/>
           <div style={optionsStyle} className="vis_editor__label">Shade (0 to 1)</div>
           <input
             style={optionsStyle}
             className="vis_editor__input-grows"
-            type="text"
-            onChange={this.handleNumberChange(model, 'shade')}
+            type="number"
+            step="0.1"
+            onChange={this.handleTextChange(model, 'shade')}
             value={model.shade}/>
         </div>
         <AddDeleteButtons

@@ -1,11 +1,12 @@
 import { IndexPatternMissingIndices } from 'ui/errors';
 import _ from 'lodash';
 import moment from 'moment';
-import EnhanceFieldsWithCapabilitiesProvider from 'ui/index_patterns/_enhance_fields_with_capabilities';
-import IndexPatternsTransformMappingIntoFieldsProvider from 'ui/index_patterns/_transform_mapping_into_fields';
-import IndexPatternsPatternToWildcardProvider from 'ui/index_patterns/_pattern_to_wildcard';
-import IndexPatternsLocalCacheProvider from 'ui/index_patterns/_local_cache';
-export default function MapperService(Private, Promise, es, esAdmin, config, kbnIndex) {
+import { EnhanceFieldsWithCapabilitiesProvider } from 'ui/index_patterns/_enhance_fields_with_capabilities';
+import { IndexPatternsTransformMappingIntoFieldsProvider } from 'ui/index_patterns/_transform_mapping_into_fields';
+import { IndexPatternsPatternToWildcardProvider } from 'ui/index_patterns/_pattern_to_wildcard';
+import { IndexPatternsLocalCacheProvider } from 'ui/index_patterns/_local_cache';
+
+export function IndexPatternsMapperProvider(Private, Promise, es, esAdmin, config, kbnIndex) {
   const enhanceFieldsWithCapabilities = Private(EnhanceFieldsWithCapabilitiesProvider);
   const transformMappingIntoFields = Private(IndexPatternsTransformMappingIntoFieldsProvider);
   const patternToWildcard = Private(IndexPatternsPatternToWildcardProvider);
@@ -27,13 +28,13 @@ export default function MapperService(Private, Promise, es, esAdmin, config, kbn
      * @returns {Promise}
      * @async
      */
-    self.getFieldsForIndexPattern = function (indexPattern, skipIndexPatternCache) {
+    self.getFieldsForIndexPattern = function (indexPattern, opts) {
       const id = indexPattern.id;
 
       const cache = fieldCache.get(id);
       if (cache) return Promise.resolve(cache);
 
-      if (!skipIndexPatternCache) {
+      if (!opts.skipIndexPatternCache) {
         return esAdmin.get({
           index: kbnIndex,
           type: 'index-pattern',
@@ -44,7 +45,7 @@ export default function MapperService(Private, Promise, es, esAdmin, config, kbn
           if (resp.found && resp._source.fields) {
             fieldCache.set(id, JSON.parse(resp._source.fields));
           }
-          return self.getFieldsForIndexPattern(indexPattern, true);
+          return self.getFieldsForIndexPattern(indexPattern, { skipIndexPatternCache: true });
         });
       }
 
@@ -123,7 +124,7 @@ export default function MapperService(Private, Promise, es, esAdmin, config, kbn
   function handleMissingIndexPattern(err) {
     if (err.status >= 400) {
       // transform specific error type
-      return Promise.reject(new IndexPatternMissingIndices());
+      return Promise.reject(new IndexPatternMissingIndices(err.message));
     } else {
       // rethrow all others
       throw err;

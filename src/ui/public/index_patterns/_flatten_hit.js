@@ -2,7 +2,7 @@ import _ from 'lodash';
 
 // Takes a hit, merges it with any stored/scripted fields, and with the metaFields
 // returns a flattened version
-export default function FlattenHitProvider(config) {
+export function IndexPatternsFlattenHitProvider(config) {
   let metaFields = config.get('metaFields');
 
   config.watch('metaFields', value => {

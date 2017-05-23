@@ -1,6 +1,7 @@
 import d3 from 'd3';
 import $ from 'jquery';
-export default function AxisTitleFactory() {
+
+export function VislibLibAxisTitleProvider() {
 
   class AxisTitle {
     constructor(axisConfig) {
@@ -28,10 +29,12 @@ export default function AxisTitleFactory() {
           const width = $(el).width();
           const height = $(el).height();
           const titlePadding = 15;
+          const axisPrefix = config.isHorizontal() ? 'x' : 'y';
 
           const svg = div.append('svg')
-          .attr('width', width)
-          .attr('height', height);
+            .attr('width', width)
+            .attr('height', height)
+            .attr('class', `axis-title ${axisPrefix}-axis-title`);
 
           const bbox = svg.append('text')
           .attr('transform', function () {

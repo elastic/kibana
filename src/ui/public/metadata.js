@@ -1,7 +1,7 @@
 import $ from 'jquery';
 import _ from 'lodash';
 
-export default deepFreeze(getState());
+export const metadata = deepFreeze(getState());
 
 function deepFreeze(object) {
   // for any properties that reference an object, makes sure that object is

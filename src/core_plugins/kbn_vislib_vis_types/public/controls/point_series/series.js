@@ -1,5 +1,5 @@
 import _ from 'lodash';
-import uiModules from 'ui/modules';
+import { uiModules } from 'ui/modules';
 import vislibSeriesTemplate from 'plugins/kbn_vislib_vis_types/controls/point_series/series.html';
 const module = uiModules.get('kibana');
 
@@ -18,6 +18,7 @@ module.directive('vislibSeries', function () {
           drawLinesBetweenPoints: true,
           showCircles: true,
           interpolate: 'linear',
+          lineWidth: 2,
           data: {
             id: id,
             label: label

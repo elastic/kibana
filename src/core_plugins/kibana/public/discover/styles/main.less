@@ -1,4 +1,5 @@
 @import (reference) "~ui/styles/variables";
+@import "~ui/styles/local_search.less";
 
 .tab-discover {
   overflow-x: hidden;
@@ -97,6 +98,7 @@
     .discover-table-footer {
       background-color: @discover-table-footer-bg;
       padding: 5px 10px;
+      text-align: center;
     }
 
     .discover-table-details-toggle {
@@ -107,11 +109,18 @@
       white-space: nowrap;
     }
 
-    .discover-table-open-icon {
-      // when switching between open and closed, the toggle changes size
-      // slightly which is a problem because it forces the entire table to
-      // re-render which is SLOW
-      width: 7px;
+    /**
+     * 1. When switching between open and closed, the toggle changes size
+     *    slightly which is a problem because it forces the entire table to
+     *    re-render which is SLOW.
+     */
+    .discover-table-open-button {
+      appearance: none;
+      background-color: transparent;
+      padding: 0;
+      border: none;
+      width: 7px; /* 1 */
+      height: 7px;
     }
 
     .discover-field-filter {
@@ -121,11 +130,6 @@
       .form-group {
         margin-bottom: 0px;
       }
-    }
-
-    .discover-field-toggle {
-      color: @discover-field-toggle-color;
-      font-size: 9px;
     }
 
     .discover-table-row--highlight td {
@@ -144,18 +148,44 @@
   }
 }
 
-.sidebar-item button.discover-field-toggle {
-  display: none;
-  font-size: 9px;
-  position: absolute;
-  right: 0;
-  top: 0;
-  margin: 5px 10px;
+/**
+ * 1. Override sidebar-item-title styles.
+ */
+.discover-sidebar-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-top: 0 !important; /* 1 */
+  padding-bottom: 0 !important; /* 1 */
+  height: 32px;
+
+  &:hover,
+  &:focus {
+    .discover-sidebar-item-action {
+      opacity: 1;
+    }
+  }
 }
 
-.sidebar-item:hover:hover button.discover-field-toggle {
-  display: block;
-}
+  /**
+   * 1. Truncate long text so it doesn't push the actions outside of the container.
+   */
+  .discover-sidebar-item-label {
+    overflow: hidden; /* 1 */
+    text-overflow: ellipsis; /* 1 */
+  }
+
+  /**
+   * 1. Only visually hide the action, so that it's still accessible to screen readers.
+   * 2. When tabbed to, this element needs to be visible for keyboard accessibility.
+   */
+  .discover-sidebar-item-action {
+    opacity: 0; /* 1 */
+
+    &:focus {
+      opacity: 1; /* 2 */
+    }
+  }
 
 .discover-field-details {
   border-top: 1px solid;
@@ -181,18 +211,30 @@
     cursor: pointer;
   }
 
+  .discover-field-details-item-title {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  /**
+   * 1. If the field name is very long, don't let it sqash the buttons.
+   */
+  .discover-field-details-item-buttons {
+    flex: 0 0 auto; /* 1 */
+  }
+
+  .discover-field-details-item-button {
+    appearance: none;
+    border: none;
+    padding: 0;
+    background-color: transparent;
+  }
+
 /**
  * TODO: Refactor these selectors to be less specific.
  */
 .discover-field-details {
-  a {
-    color: @discover-link-color !important;
-  }
-
-  a.btn {
-    color: @discover-link-btn-color !important;
-  }
-
   .progress {
     margin-bottom: 0px;
 
@@ -216,7 +258,12 @@
 
 field-name,
 [field-name] {
-  > i {
+  &.no-results {
+    color: @field-name-no-results-color;
+  }
+}
+
+  .field-name-icon {
     margin-right: 5px;
     text-align: center;
     display: inline-block;
@@ -224,19 +271,7 @@ field-name,
     color: @field-name-color;
   }
 
-  &.no-results {
-    color: @field-name-no-results-color;
-  }
-}
-
 disc-field-chooser {
-  ul.discover-selected-fields {
-    /* If only _source is presend in the selected fields list, hide its toggle button */
-    li:first-child:nth-last-child(1)[attr-field=_source] button.discover-field-toggle {
-      display: none;
-    }
-  }
-
   .sidebar-item.active .sidebar-item-title {
     background-color: @sidebar-active-bg;
     color: @sidebar-active-color;

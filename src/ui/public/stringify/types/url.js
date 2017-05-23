@@ -1,11 +1,11 @@
 import _ from 'lodash';
 import 'ui/field_format_editor/pattern/pattern';
 import 'ui/stringify/icons';
-import IndexPatternsFieldFormatProvider from 'ui/index_patterns/_field_format/field_format';
+import { IndexPatternsFieldFormatProvider } from 'ui/index_patterns/_field_format/field_format';
 import urlTemplate from 'ui/stringify/editors/url.html';
 import { getHighlightHtml } from 'ui/highlight';
 
-export default function UrlFormatProvider(Private) {
+export function stringifyUrl(Private) {
 
   const FieldFormat = Private(IndexPatternsFieldFormatProvider);
 
@@ -32,8 +32,8 @@ export default function UrlFormatProvider(Private) {
   Url.editor = {
     template: urlTemplate,
     controllerAs: 'url',
-    controller: function ($scope) {
-      const iconPattern = '/bundles/src/ui/public/stringify/icons/{{value}}.png';
+    controller: function ($scope, chrome) {
+      const iconPattern = `${chrome.getBasePath()}/bundles/src/ui/public/stringify/icons/{{value}}.png`;
 
       this.samples = {
         a: [ 'john', '/some/pathname/asset.png', 1234 ],
@@ -89,17 +89,28 @@ export default function UrlFormatProvider(Private) {
 
     html: function (rawValue, field, hit) {
       const url = _.escape(this._formatUrl(rawValue));
-      let label = _.escape(this._formatLabel(rawValue, url));
+      const label = _.escape(this._formatLabel(rawValue, url));
 
       switch (this.param('type')) {
         case 'img':
-          return '<img src="' + url + '" alt="' + label + '" title="' + label + '">';
+          // If the URL hasn't been formatted to become a meaningful label then the best we can do
+          // is tell screen readers where the image comes from.
+          const imageLabel =
+            label === url
+            ? `A dynamically-specified image located at ${url}`
+            : label;
+
+          return `<img src="${url}" alt="${imageLabel}">`;
         default:
+          let linkLabel;
+
           if (hit && hit.highlight && hit.highlight[field.name]) {
-            label = getHighlightHtml(label, hit.highlight[field.name]);
+            linkLabel = getHighlightHtml(label, hit.highlight[field.name]);
+          } else {
+            linkLabel = label;
           }
 
-          return '<a href="' + url + '" target="_blank">' + label + '</a>';
+          return `<a href="${url}" target="_blank">${linkLabel}</a>`;
       }
     }
   };

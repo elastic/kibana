@@ -24,25 +24,36 @@
     <h5>Selected Fields</h5>
   </div>
   <ul class="list-unstyled discover-selected-fields" >
-    <discover-field ng-repeat="field in fields.raw|filter:{display:true}">
+    <discover-field
+      ng-repeat="field in fields.raw|filter:{display:true}"
+      field="field"
+      on-add-field="onAddField"
+      on-add-filter="onAddFilter"
+      on-remove-field="onRemoveField"
+      on-show-details="computeDetails"
+    >
     </discover-field>
   </ul>
 
   <div class="sidebar-list-header sidebar-item">
     <h5>Available Fields
-      <i
+      <span
         ng-class="{ 'fa-chevron-right': !showFields, 'fa-chevron-down': showFields }"
         ng-click="showFields = !showFields"
         aria-hidden="true"
-        class="fa visible-xs visible-sm pull-right field-collapse-toggle" ></i>
+        class="fa visible-xs visible-sm pull-right field-collapse-toggle"
+      ></span>
+
       <button
-        ng-class="{ 'btn-default': !filter.active, 'btn-success': filter.active, 'hidden-xs': !showFields, 'hidden-sm': !showFields }"
-        class="btn btn-xs btn-default pull-right discover-field-filter-toggle"
+        type="button"
+        ng-class="{ 'kuiButton--basic': !filter.active, 'kuiButton--primary': filter.active, 'hidden-xs': !showFields, 'hidden-sm': !showFields }"
+        class="kuiButton kuiButton--small pull-right discover-field-filter-toggle"
         ng-click="showFilter = !showFilter"
-        aria-label="Field Settings"
+        aria-label="Show field settings"
         aria-haspopup="true"
-        aria-expanded="{{showFilter}}">
-        <i aria-hidden="true" class="fa fa-gear"></i>
+        aria-expanded="{{showFilter}}"
+      >
+        <span aria-hidden="true" class="kuiIcon fa-gear"></span>
       </button>
     </h5>
   </div>
@@ -92,12 +103,13 @@
         </label>
       </div>
     </form>
-    <div
+    <button
       ng-click="filter.reset()"
       ng-disabled="!filter.active"
-      class="sidebar-item-button danger ng-scope">
+      class="kuiButton kuiButton--danger kuiButton--fullWidth"
+    >
       Reset Filters
-    </div>
+    </button>
   </div>
 
   <ul
@@ -108,7 +120,13 @@
       <h6>Popular</h6>
     </li>
     <discover-field
-      ng-repeat="field in popularFields | filter:filter.isFieldFiltered">
+      ng-repeat="field in popularFields | filter:filter.isFieldFiltered"
+      field="field"
+      on-add-field="onAddField"
+      on-add-filter="onAddFilter"
+      on-remove-field="onRemoveField"
+      on-show-details="computeDetails"
+    >
     </discover-field>
   </ul>
 
@@ -116,7 +134,13 @@
     ng-class="{ 'hidden-sm': !showFields, 'hidden-xs': !showFields  }"
     class="list-unstyled discover-unpopular-fields">
     <discover-field
-      ng-repeat="field in unpopularFields | filter:filter.isFieldFiltered">
+      ng-repeat="field in unpopularFields | filter:filter.isFieldFiltered"
+      field="field"
+      on-add-field="onAddField"
+      on-add-filter="onAddFilter"
+      on-remove-field="onRemoveField"
+      on-show-details="computeDetails"
+    >
     </discover-field>
   </ul>
 

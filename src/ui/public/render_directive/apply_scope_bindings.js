@@ -4,7 +4,7 @@ import 'ui/bind';
 
 const bindingRE = /^(=|=\?|&|@)([a-zA-Z0-9_$]+)?$/;
 
-export default function ($parse) {
+export function ApplyScopeBindingsProvider($parse) {
   return function (bindings, $scope, $attrs) {
     forOwn(bindings, (binding, local) => {
       if (!bindingRE.test(binding)) {

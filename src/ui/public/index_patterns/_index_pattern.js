@@ -1,25 +1,25 @@
 import _ from 'lodash';
-import errors from 'ui/errors';
+import { SavedObjectNotFound, DuplicateField, IndexPatternMissingIndices } from 'ui/errors';
 import angular from 'angular';
-import getComputedFields from 'ui/index_patterns/_get_computed_fields';
-import formatHit from 'ui/index_patterns/_format_hit';
-import RegistryFieldFormatsProvider from 'ui/registry/field_formats';
-import IndexPatternsGetIdsProvider from 'ui/index_patterns/_get_ids';
-import IndexPatternsMapperProvider from 'ui/index_patterns/_mapper';
-import IndexPatternsIntervalsProvider from 'ui/index_patterns/_intervals';
-import DocSourceProvider from 'ui/courier/data_source/admin_doc_source';
+import { getComputedFields } from 'ui/index_patterns/_get_computed_fields';
+import { formatHit } from 'ui/index_patterns/_format_hit';
+import { RegistryFieldFormatsProvider } from 'ui/registry/field_formats';
+import { IndexPatternsGetIdsProvider } from 'ui/index_patterns/_get_ids';
+import { IndexPatternsMapperProvider } from 'ui/index_patterns/_mapper';
+import { IndexPatternsIntervalsProvider } from 'ui/index_patterns/_intervals';
+import { AdminDocSourceProvider } from 'ui/courier/data_source/admin_doc_source';
 import UtilsMappingSetupProvider from 'ui/utils/mapping_setup';
-import IndexPatternsFieldListProvider from 'ui/index_patterns/_field_list';
-import IndexPatternsFlattenHitProvider from 'ui/index_patterns/_flatten_hit';
-import IndexPatternsCalculateIndicesProvider from 'ui/index_patterns/_calculate_indices';
-import IndexPatternsPatternCacheProvider from 'ui/index_patterns/_pattern_cache';
+import { IndexPatternsFieldListProvider } from 'ui/index_patterns/_field_list';
+import { IndexPatternsFlattenHitProvider } from 'ui/index_patterns/_flatten_hit';
+import { IndexPatternsCalculateIndicesProvider } from 'ui/index_patterns/_calculate_indices';
+import { IndexPatternsPatternCacheProvider } from 'ui/index_patterns/_pattern_cache';
 
-export default function IndexPatternFactory(Private, Notifier, config, kbnIndex, Promise, confirmModalPromise) {
+export function IndexPatternProvider(Private, Notifier, config, kbnIndex, Promise, confirmModalPromise) {
   const fieldformats = Private(RegistryFieldFormatsProvider);
   const getIds = Private(IndexPatternsGetIdsProvider);
   const mapper = Private(IndexPatternsMapperProvider);
   const intervals = Private(IndexPatternsIntervalsProvider);
-  const DocSource = Private(DocSourceProvider);
+  const DocSource = Private(AdminDocSourceProvider);
   const mappingSetup = Private(UtilsMappingSetupProvider);
   const FieldList = Private(IndexPatternsFieldListProvider);
   const flattenHit = Private(IndexPatternsFlattenHitProvider);
@@ -69,7 +69,7 @@ export default function IndexPatternFactory(Private, Notifier, config, kbnIndex,
 
   function updateFromElasticSearch(indexPattern, response) {
     if (!response.found) {
-      throw new errors.SavedObjectNotFound(type, indexPattern.id);
+      throw new SavedObjectNotFound(type, indexPattern.id);
     }
 
     _.forOwn(mapping, (fieldMapping, name) => {
@@ -147,7 +147,7 @@ export default function IndexPatternFactory(Private, Notifier, config, kbnIndex,
 
   function fetchFields(indexPattern) {
     return mapper
-    .getFieldsForIndexPattern(indexPattern, true)
+    .getFieldsForIndexPattern(indexPattern, { skipIndexPatternCache: true })
     .then(fields => {
       const scripted = indexPattern.getScriptedFields();
       const all = fields.concat(scripted);
@@ -212,7 +212,7 @@ export default function IndexPatternFactory(Private, Notifier, config, kbnIndex,
       const names = _.pluck(scriptedFields, 'name');
 
       if (_.contains(names, name)) {
-        throw new errors.DuplicateField(name);
+        throw new DuplicateField(name);
       }
 
       this.fields.push({
@@ -363,7 +363,20 @@ export default function IndexPatternFactory(Private, Notifier, config, kbnIndex,
       return mapper
       .clearCache(this)
       .then(() => fetchFields(this))
-      .then(() => this.save());
+      .then(() => this.save())
+      .catch((err) => {
+        notify.error(err);
+        // https://github.com/elastic/kibana/issues/9224
+        // This call will attempt to remap fields from the matching
+        // ES index which may not actually exist. In that scenario,
+        // we still want to notify the user that there is a problem
+        // but we do not want to potentially make any pages unusable
+        // so do not rethrow the error here
+        if (err instanceof IndexPatternMissingIndices) {
+          return;
+        }
+        return Promise.reject(err);
+      });
     }
 
     toJSON() {

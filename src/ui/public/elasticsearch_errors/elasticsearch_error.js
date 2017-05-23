@@ -1,6 +1,6 @@
 import _ from 'lodash';
 
-export default class ElasticsearchError {
+export class ElasticsearchError {
   constructor(error) {
     this.error = error;
 

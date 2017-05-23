@@ -1,7 +1,8 @@
 import _ from 'lodash';
 import expect from 'expect.js';
 import ngMock from 'ng_mock';
-import IndexPatternsFieldFormatFieldFormatProvider from 'ui/index_patterns/_field_format/field_format';
+import { IndexPatternsFieldFormatProvider } from 'ui/index_patterns/_field_format/field_format';
+
 describe('FieldFormat class', function () {
 
   let FieldFormat;
@@ -9,7 +10,7 @@ describe('FieldFormat class', function () {
 
   beforeEach(ngMock.module('kibana'));
   beforeEach(ngMock.inject(function (Private) {
-    FieldFormat = Private(IndexPatternsFieldFormatFieldFormatProvider);
+    FieldFormat = Private(IndexPatternsFieldFormatProvider);
 
     TestFormat = function (params) {
       TestFormat.Super.call(this, params);
@@ -86,7 +87,7 @@ describe('FieldFormat class', function () {
         const html = f.getConverterFor('html');
         expect(text).to.not.be(html);
         expect(text('formatted')).to.be('formatted');
-        expect(html('formatted')).to.be('formatted');
+        expect(html('formatted')).to.be('<span ng-non-bindable>formatted</span>');
       });
 
       it('can be an object, with seperate text and html converter', function () {
@@ -100,7 +101,7 @@ describe('FieldFormat class', function () {
         const html = f.getConverterFor('html');
         expect(text).to.not.be(html);
         expect(text('formatted text')).to.be('formatted text');
-        expect(html('formatted html')).to.be('formatted html');
+        expect(html('formatted html')).to.be('<span ng-non-bindable>formatted html</span>');
       });
 
       it('does not escape the output of the text converter', function () {
@@ -112,7 +113,8 @@ describe('FieldFormat class', function () {
       it('does escape the output of the text converter if used in an html context', function () {
         TestFormat.prototype._convert = _.constant('<script>alert("xxs");</script>');
         const f = new TestFormat();
-        expect(f.convert('', 'html')).to.not.contain('<');
+        expect(_.trimRight(_.trimLeft(f.convert('', 'html'), '<span ng-non-bindable>'), '</span>'))
+          .to.not.contain('<');
       });
 
       it('does not escape the output of an html specific converter', function () {
@@ -123,7 +125,7 @@ describe('FieldFormat class', function () {
 
         const f = new TestFormat();
         expect(f.convert('', 'text')).to.be('<img>');
-        expect(f.convert('', 'html')).to.be('<img>');
+        expect(f.convert('', 'html')).to.be('<span ng-non-bindable><img></span>');
       });
     });
 
@@ -145,7 +147,7 @@ describe('FieldFormat class', function () {
         };
 
         const f = new TestFormat();
-        expect(f.convert('val', 'html')).to.be('html');
+        expect(f.convert('val', 'html')).to.be('<span ng-non-bindable>html</span>');
       });
 
       it('formats a value as " - " when no value is specified', function () {

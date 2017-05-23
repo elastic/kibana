@@ -2,7 +2,7 @@ import _ from 'lodash';
 import 'plugins/kibana/visualize/editor/agg';
 import 'plugins/kibana/visualize/editor/agg_add';
 import 'plugins/kibana/visualize/editor/nesting_indicator';
-import uiModules from 'ui/modules';
+import { uiModules } from 'ui/modules';
 import aggGroupTemplate from 'plugins/kibana/visualize/editor/agg_group.html';
 
 uiModules

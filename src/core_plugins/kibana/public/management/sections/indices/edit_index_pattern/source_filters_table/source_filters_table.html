@@ -1,0 +1,56 @@
+<h3 class="kuiTextTitle kuiVerticalRhythm">
+  Source Filters
+</h3>
+
+<p class="kuiText kuiVerticalRhythm">
+  Source filters can be used to exclude one or more fields when fetching the document source. This happens when viewing a document in the Discover app, or with a table displaying results from a saved search in the Dashboard app. Each row is built using the source of a single document, and if you have documents with large or unimportant fields you may benefit from filtering those out at this lower level.
+</p>
+
+<p class="kuiText kuiVerticalRhythm">
+  Note that multi-fields will incorrectly appear as matches in the table below. These filters only actually apply to fields in the original source document, so matching multi-fields are not actually being filtered.
+</p>
+
+<div
+  ng-class="{ saving: sourceFilters.saving }"
+  class="source-filters-container kuiVerticalRhythm"
+>
+  <form
+    name="form"
+    ng-submit="sourceFilters.create()"
+    class="kuiVerticalRhythm"
+  >
+    <div class="kuiFieldGroup">
+      <div class="kuiFieldGroupSection kuiFieldGroupSection--wide">
+        <input
+          ng-model="sourceFilters.newValue"
+          placeholder="{{ sourceFilters.placeHolder }}"
+          type="text"
+          class="kuiTextInput"
+        >
+      </div>
+
+      <div
+        class="kuiFieldGroupSection"
+        aria-label="Source Filter Editor Controls"
+      >
+        <button
+          type="submit"
+          class="kuiButton kuiButton--primary"
+          ng-disabled="!sourceFilters.newValue"
+        >
+          Add
+        </button>
+      </div>
+    </div>
+  </form>
+
+  <div class="kuiVerticalRhythm">
+    <paginated-table
+      columns="columns"
+      rows="rows"
+      link-to-top="true"
+      per-page="perPage"
+      show-blank-rows="false"
+    ></paginated-table>
+  </div>
+</div>

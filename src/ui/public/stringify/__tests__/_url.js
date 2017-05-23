@@ -1,7 +1,7 @@
 import $ from 'jquery';
 import expect from 'expect.js';
 import ngMock from 'ng_mock';
-import RegistryFieldFormatsProvider from 'ui/registry/field_formats';
+import { RegistryFieldFormatsProvider } from 'ui/registry/field_formats';
 describe('Url Format', function () {
 
   let fieldFormats;
@@ -10,6 +10,11 @@ describe('Url Format', function () {
   beforeEach(ngMock.inject(function (Private) {
     fieldFormats = Private(RegistryFieldFormatsProvider);
   }));
+
+  const unwrap = $el => {
+    expect($el.is('span[ng-non-bindable]')).to.be.ok();
+    return $el.children();
+  };
 
   describe('Url Format', function () {
     let Url;
@@ -21,7 +26,7 @@ describe('Url Format', function () {
     it('ouputs a simple <a> tab by default', function () {
       const url = new Url();
 
-      const $a = $(url.convert('http://elastic.co', 'html'));
+      const $a = unwrap($(url.convert('http://elastic.co', 'html')));
       expect($a.is('a')).to.be(true);
       expect($a.size()).to.be(1);
       expect($a.attr('href')).to.be('http://elastic.co');
@@ -32,7 +37,7 @@ describe('Url Format', function () {
     it('outputs an <image> if type === "img"', function () {
       const url = new Url({ type: 'img' });
 
-      const $img = $(url.convert('http://elastic.co', 'html'));
+      const $img = unwrap($(url.convert('http://elastic.co', 'html')));
       expect($img.is('img')).to.be(true);
       expect($img.attr('src')).to.be('http://elastic.co');
     });
@@ -40,7 +45,7 @@ describe('Url Format', function () {
     describe('url template', function () {
       it('accepts a template', function () {
         const url = new Url({ urlTemplate: 'url: {{ value }}' });
-        const $a = $(url.convert('url', 'html'));
+        const $a = unwrap($(url.convert('url', 'html')));
         expect($a.is('a')).to.be(true);
         expect($a.size()).to.be(1);
         expect($a.attr('href')).to.be('url: url');
@@ -57,7 +62,7 @@ describe('Url Format', function () {
     describe('label template', function () {
       it('accepts a template', function () {
         const url = new Url({ labelTemplate: 'extension: {{ value }}' });
-        const $a = $(url.convert('php', 'html'));
+        const $a = unwrap($(url.convert('php', 'html')));
         expect($a.is('a')).to.be(true);
         expect($a.size()).to.be(1);
         expect($a.attr('href')).to.be('php');

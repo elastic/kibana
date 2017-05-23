@@ -1,7 +1,7 @@
 import _ from 'lodash';
 
-import wrapRouteWithPrep from './wrap_route_with_prep';
-import RouteSetupManager from './route_setup_manager';
+import { wrapRouteWithPrep } from './wrap_route_with_prep';
+import { RouteSetupManager } from './route_setup_manager';
 
 function RouteManager() {
   const self = this;

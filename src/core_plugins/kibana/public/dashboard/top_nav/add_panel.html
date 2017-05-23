@@ -6,12 +6,18 @@
 
   <ul class="nav nav-tabs">
     <li ng-class="{active: mode == 'visualization'}">
-      <a ng-click="mode='visualization'" title="Visualizations">
+      <a
+        ng-click="mode='visualization'"
+        aria-label="List visualizations"
+      >
         Visualization
       </a>
     </li>
     <li ng-class="{active: mode == 'search'}">
-      <a ng-click="mode='search'" title="Searches">
+      <a
+        ng-click="mode='search'"
+        aria-label="List saved searches"
+      >
         Saved Search
       </a>
     </li>
@@ -19,7 +25,6 @@
 
   <div class="list-group-item list-group-item--noBorder" ng-switch-when="visualization">
     <saved-object-finder
-      title="Choose a visualization"
       use-local-management="true"
       type="visualizations"
       on-add-new="opts.addNewVis"
@@ -28,6 +33,10 @@
   </div>
 
   <div class="list-group-item list-group-item--noBorder" ng-switch-when="search">
-    <saved-object-finder title="Choose a search" type="searches" use-local-management="true" on-choose="opts.addSearch"></saved-object-finder>
+    <saved-object-finder
+      type="searches"
+      use-local-management="true"
+      on-choose="opts.addSearch"
+    ></saved-object-finder>
   </div>
 </div>

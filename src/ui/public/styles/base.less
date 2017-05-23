@@ -14,11 +14,6 @@ label > small {
   font-weight: normal;
 }
 
-button {
-  // buttons have a stupid 1990's default look which should be disabled
-  .btn();
-}
-
 .small {
   font-size: 0.9em !important;
 }
@@ -153,10 +148,6 @@ a {
       margin-left: auto;
       padding-right: 0;
       line-height: 20px;
-
-      .button-group > :last-child {
-        border-radius: 0;
-      }
     }
   }
 
@@ -189,14 +180,6 @@ a {
   }
 }
 
-.navbtn {
-  .button-variant(@navbar-default-color; @navbar-default-bg; @navbar-default-border);
-}
-
-.navbtn-inverse {
-  .button-variant(@navbar-default-color; @navbar-default-bg; @navbar-default-border);
-}
-
   .navbar-timepicker-time-desc > .fa-clock-o {
     padding-right: 5px;
   }
@@ -205,28 +188,14 @@ kbn-info i {
   cursor: help;
 }
 
-.kbn-timepicker .btn-default {
-  background: transparent;
-  color: @text-color;
-  border: 0px;
-  box-shadow: none;
-  text-shadow: none;
-}
-
-.kbn-timepicker .btn-info {
-  .button-variant(@btn-info-color; @btn-info-bg; @btn-info-border);
-  .text-info { color: @btn-info-color; }
-  text-shadow: none;
-}
-
 .kbn-timepicker .refresh-interval {
   padding: 0.2em 0.4em;
   border-radius: @border-radius-small;
 }
 
 .kbn-timepicker .refresh-interval-active {
-  background-color: @btn-info-bg;
-  color: @btn-info-color;
+  background-color: @brand-info;
+  color: @white;
 }
 
 //== Table
@@ -268,56 +237,6 @@ table {
 //== SavedObjectFinder
 saved-object-finder,
 paginated-selectable-list {
-  .row {
-    padding: 10px;
-    display: flex;
-    flex-direction: row;
-  }
-
-  .finder-hit-count,
-  .finder-manage-object {
-    min-width: 80px;
-    padding: 5px;
-    text-align: center;
-  }
-
-  .finder-hit-count {
-    flex: 1;
-
-    span {
-      color: @kibanaGray3;
-    }
-  }
-
-  .finder-manage-object {
-    flex: 3;
-    text-align: left;
-    text-transform: capitalize;
-  }
-
-  .form-group {
-    margin-bottom: 0;
-    float: left;
-    flex: 8;
-
-    input {
-      border: none;
-      padding: 5px 0px;
-      border-radius: @border-radius-base;
-    }
-
-    span {
-      padding: 5px 0px;
-      background-color: @white;
-      border: none;
-
-      i {
-        color: @kibanaGray3;
-        width: 15px;
-      }
-    }
-  }
-
   ul.li-striped {
     li {
       border: none;
@@ -369,45 +288,6 @@ paginated-selectable-list {
     }
   }
 
-  .finder-form {
-    position: relative;
-  }
-
-    .finder-form-options {
-      .flex-parent();
-      flex-direction: row;
-      justify-content: flex-end;
-    }
-
-  .finder-options {
-    max-height: 300px;
-    overflow: auto;
-    padding: 0;
-    .border-top-radius(0);
-
-    // replace the padding that was originally on the outer well
-    > * {
-      padding: @padding-base-vertical @padding-base-horizontal;
-      margin: 0;
-    }
-
-    // enable bigger backgrounds for "active" elements
-    > li {
-      margin-top: -ceil(@padding-base-vertical / 2);
-
-      &:first-child {
-        margin: 0;
-      }
-      &.active {
-        background-color: @component-active-bg;
-        color: @component-active-color;
-        a {
-          color: @component-active-color;
-        }
-      }
-    }
-  }
-
   paginate {
     paginate-controls {
       margin: 20px;
@@ -415,22 +295,11 @@ paginated-selectable-list {
   }
 }
 
-// when rendered within a config dropdown, don't use a bottom margin
-.config saved-object-finder .finder-options {
-  margin-bottom: 0;
-  background: @config-saved-object-finder-options-bg;
-}
-
 //== inputDatetime
 .input-datetime-format {
   font-size: @font-size-small;
   color: @text-muted;
   padding: @padding-base-vertical @padding-base-horizontal;
-}
-
-//== clicking disabled buttons should not cause the whole page to get selected
-button[disabled] {
-  user-select: none;
 }
 
 //== override the disabled cursor that doesn't work everywhere
@@ -489,15 +358,17 @@ style-compile {
 
 
 .cell-hover {
-  background-color: @table-cell-hover-bg;
   position: relative;
 
+  /**
+   * 1. Center vertically regardless of row height.
+   */
   .table-cell-filter {
     position: absolute;
-    background-color: @table-cell-hover-bg;
     white-space: nowrap;
     right: 0;
-    top: 5px;
+    top: 50%; /* 1 */
+    transform: translateY(-50%); /* 1 */
     display: none;
   }
 }

@@ -3,10 +3,12 @@ import 'plugins/table_vis/table_vis_controller';
 import 'plugins/table_vis/table_vis_params';
 import 'ui/agg_table';
 import 'ui/agg_table/agg_table_group';
-import TemplateVisTypeTemplateVisTypeProvider from 'ui/template_vis_type/template_vis_type';
-import VisSchemasProvider from 'ui/vis/schemas';
+import { VisVisTypeProvider } from 'ui/vis/vis_type';
+import { TemplateVisTypeProvider } from 'ui/template_vis_type/template_vis_type';
+import { VisSchemasProvider } from 'ui/vis/schemas';
 import tableVisTemplate from 'plugins/table_vis/table_vis.html';
-import visTypesRegistry from 'ui/registry/vis_types';
+import { VisTypesRegistryProvider } from 'ui/registry/vis_types';
+import image from './images/icon-table.svg';
 // we need to load the css ourselves
 
 // we also need to load the controller and used by the template
@@ -16,11 +18,12 @@ import visTypesRegistry from 'ui/registry/vis_types';
 // require the directives that we use as well
 
 // register the provider with the visTypes registry
-visTypesRegistry.register(TableVisTypeProvider);
+VisTypesRegistryProvider.register(TableVisTypeProvider);
 
 // define the TableVisType
 function TableVisTypeProvider(Private) {
-  const TemplateVisType = Private(TemplateVisTypeTemplateVisTypeProvider);
+  const VisType = Private(VisVisTypeProvider);
+  const TemplateVisType = Private(TemplateVisTypeProvider);
   const Schemas = Private(VisSchemasProvider);
 
   // define the TableVisController which is used in the template
@@ -30,10 +33,10 @@ function TableVisTypeProvider(Private) {
   // Vis object of this type.
   return new TemplateVisType({
     name: 'table',
-    title: 'Data table',
-    icon: 'fa-table',
-    description: 'The data table provides a detailed breakdown, in tabular format, of the results of a composed ' +
-      'aggregation. Tip, a data table is available from many other charts by clicking the grey bar at the bottom of the chart.',
+    title: 'Data Table',
+    image,
+    description: 'Display values in a table',
+    category: VisType.CATEGORY.DATA,
     template: tableVisTemplate,
     params: {
       defaults: {
@@ -58,6 +61,7 @@ function TableVisTypeProvider(Private) {
         group: 'metrics',
         name: 'metric',
         title: 'Metric',
+        aggFilter: '!geo_centroid',
         min: 1,
         defaults: [
           { type: 'count', schema: 'metric' }

@@ -7,12 +7,14 @@
       <div
         data-transclude-slot="topLeftCorner"
       >
-        <!-- Breadcrumbs. -->
-        <bread-crumbs
-          page-title="getDashTitle()"
-          use-links="true"
-          omit-current-page="true"
-        ></bread-crumbs>
+        <div class="kuiLocalBreadcrumbs" data-test-subj="breadcrumbs">
+          <div class="kuiLocalBreadcrumb">
+            <a class="kuiLocalBreadcrumb__link" href="{{landingPageUrl()}}">Dashboard</a>
+          </div>
+          <div class="kuiLocalBreadcrumb">
+            {{ getDashTitle() }}
+          </div>
+        </div>
       </div>
 
       <!-- Search. -->
@@ -24,28 +26,41 @@
         name="queryInput"
         ng-submit="filterResults()"
       >
-        <div class="typeahead" kbn-typeahead="dashboard">
+        <div class="typeahead" kbn-typeahead="dashboard" on-select="filterResults()">
           <div class="kuiLocalSearch">
-            <input
-              parse-query
-              input-focus
-              kbn-typeahead-input
-              ng-model="model.query"
-              placeholder="Filter..."
-              aria-label="Filter input"
-              data-test-subj="dashboardQuery"
-              type="text"
-              class="kuiLocalSearchInput"
-              ng-class="{'kuiLocalSearchInput-isInvalid': queryInput.$invalid}"
-            >
+            <div class="kuiLocalSearchAssistedInput">
+              <input
+                parse-query
+                input-focus
+                kbn-typeahead-input
+                ng-model="model.query"
+                placeholder="Search... (e.g. status:200 AND extension:PHP)"
+                aria-label="Enter query"
+                data-test-subj="dashboardQuery"
+                type="text"
+                class="kuiLocalSearchInput kuiLocalSearchInput--lucene"
+                ng-class="{'kuiLocalSearchInput-isInvalid': queryInput.$invalid}"
+              >
+              <div class="kuiLocalSearchAssistedInput__assistance">
+                <p class="kuiText">
+                  <a
+                    class="kuiLink"
+                    ng-href="{{queryDocLinks.luceneQuerySyntax}}"
+                    target="_blank"
+                  >
+                    Uses lucene query syntax
+                  </a>
+                </p>
+              </div>
+            </div>
             <button
               type="submit"
-              aria-label="Filter Dashboards"
+              aria-label="Submit query"
               class="kuiLocalSearchButton"
               data-test-subj="dashboardQueryFilterButton"
               ng-disabled="queryInput.$invalid"
             >
-              <span class="fa fa-search" aria-hidden="true"></span>
+              <span class="kuiIcon fa-search" aria-hidden="true"></span>
             </button>
           </div>
           <kbn-typeahead-items></kbn-typeahead-items>
@@ -57,14 +72,27 @@
   <!-- Filters. -->
   <filter-bar state="state"></filter-bar>
 
-  <div ng-show="getShouldShowEditHelp()" class="text-center start-screen">
-    <h2>This dashboard is empty. Let's fill it up!</h2>
-    <p>Click the <a class="btn btn-xs navbtn-inverse" ng-click="kbnTopNav.open('add'); toggleAddVisualization = !toggleAddVisualization" aria-label="Add visualization">Add</a> button in the menu bar above to add a visualization to the dashboard. <br/>If you haven't setup a visualization yet visit <a href="#/visualize" title="Visualize">"Visualize"</a> to create your first visualization.</p>
+  <div
+    ng-show="getShouldShowEditHelp()"
+    class="text-center start-screen"
+  >
+    <h2 class="kuiTitle kuiVerticalRhythm">
+      This dashboard is empty. Let&rsquo;s fill it up!
+    </h2>
+
+    <p class="kuiText kuiVerticalRhythm">
+      Click the <a class="kuiButton kuiButton--primary kuiButton--small" ng-click="kbnTopNav.open('add'); toggleAddVisualization = !toggleAddVisualization" aria-label="Add visualization">Add</a> button in the menu bar above to add a visualization to the dashboard. <br/>If you haven't set up any visualizations yet, <a class="kuiLink" href="#/visualize">visit the Visualize app</a> to create your first visualization.
+    </p>
   </div>
 
   <div ng-show="getShouldShowViewHelp()" class="text-center start-screen">
-    <h2>This dashboard is empty. Let's fill it up!</h2>
-    <p>Click the <a class="btn btn-xs navbtn-inverse" ng-click="kbnTopNav.open('edit');" aria-label="Edit">Edit</a> button in the menu bar above to start working on your new dashboard.
+    <h2 class="kuiTitle kuiVerticalRhythm">
+      This dashboard is empty. Let&rsquo;s fill it up!
+    </h2>
+
+    <p class="kuiText kuiVerticalRhythm">
+      Click the <a class="kuiButton kuiButton--primary kuiButton--small" ng-click="kbnTopNav.click('edit');">Edit</a> button in the menu bar above to start working on your new dashboard.
+    </p>
   </div>
 
   <dashboard-grid
@@ -78,19 +106,20 @@
     toggle-expand="toggleExpandPanel"
     create-child-ui-state="createChildUiState"
     toggle-expand="toggleExpandPanel"
-    shared-items-count="{{panels.length}}"
+    data-shared-items-count="{{panels.length}}"
   ></dashboard-grid>
 
-  <dashboard-panel ng-if="hasExpandedPanel()"
-                   panel="expandedPanel"
-                   is-full-screen-mode="!chrome.getVisible()"
-                   is-expanded="true"
-                   dashboard-view-mode="dashboardViewMode"
-                   get-vis-click-handler="getFilterBarClickHandler"
-                   get-vis-brush-handler="getBrushEvent"
-                   save-state="saveState"
-                   create-child-ui-state="createChildUiState"
-                   toggle-expand="toggleExpandPanel(expandedPanel.panelIndex)">
-  </dashboard-panel>
+  <dashboard-panel
+    ng-if="hasExpandedPanel()"
+    panel="expandedPanel"
+    is-full-screen-mode="!chrome.getVisible()"
+    is-expanded="true"
+    dashboard-view-mode="dashboardViewMode"
+    get-vis-click-handler="getFilterBarClickHandler"
+    get-vis-brush-handler="getBrushEvent"
+    save-state="saveState"
+    create-child-ui-state="createChildUiState"
+    toggle-expand="toggleExpandPanel(expandedPanel.panelIndex)"
+  ></dashboard-panel>
 
 </dashboard-app>

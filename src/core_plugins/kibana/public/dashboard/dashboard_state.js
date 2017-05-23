@@ -5,13 +5,14 @@ import { DashboardViewMode } from './dashboard_view_mode';
 import { PanelUtils } from './panel/panel_utils';
 import moment from 'moment';
 
-import stateMonitorFactory  from 'ui/state_management/state_monitor_factory';
+import { stateMonitorFactory } from 'ui/state_management/state_monitor_factory';
 import { createPanelState } from 'plugins/kibana/dashboard/panel/panel_state';
 import { getPersistedStateId } from 'plugins/kibana/dashboard/panel/panel_state';
 
 function getStateDefaults(dashboard) {
   return {
     title: dashboard.title,
+    description: dashboard.description,
     timeRestore: dashboard.timeRestore,
     panels: dashboard.panelsJSON ? JSON.parse(dashboard.panelsJSON) : [],
     options: dashboard.optionsJSON ? JSON.parse(dashboard.optionsJSON) : {},
@@ -82,6 +83,11 @@ export class DashboardState {
    * Resets the state back to the last saved version of the dashboard.
    */
   resetState() {
+    // In order to show the correct warning for the saved-object-save-as-check-box we have to store the unsaved
+    // title on the dashboard object. We should fix this at some point, but this is how all the other object
+    // save panels work at the moment.
+    this.savedDashboard.title = this.savedDashboard.lastSavedTitle;
+
     // appState.reset uses the internal defaults to reset the state, but some of the default settings (e.g. the panels
     // array) point to the same object that is stored on appState and is getting modified.
     // The right way to fix this might be to ensure the defaults object stored on state is a deep
@@ -117,8 +123,21 @@ export class DashboardState {
     return this.appState.title;
   }
 
+  getDescription() {
+    return this.appState.description;
+  }
+
+  setDescription(description) {
+    this.appState.description = description;
+    this.saveState();
+  }
+
   setTitle(title) {
     this.appState.title = title;
+    // The saved-object-save-as-check-box shows a warning if the current object title is different then
+    // the existing object title. It calculates this difference by comparing this.dashboard.title to
+    // this.dashboard.lastSavedTitle, so we need to push the temporary, unsaved title, onto the dashboard.
+    this.savedDashboard.title = title;
     this.saveState();
   }
 
@@ -332,7 +351,8 @@ export class DashboardState {
     this.saveState();
 
     const timeRestoreObj = _.pick(timeFilter.refreshInterval, ['display', 'pause', 'section', 'value']);
-    this.savedDashboard.title = this.appState.title;
+    this.savedDashboard.title = this.getTitle();
+    this.savedDashboard.description = this.getDescription();
     this.savedDashboard.timeRestore = this.appState.timeRestore;
     this.savedDashboard.panelsJSON = toJson(this.appState.panels);
     this.savedDashboard.uiStateJSON = toJson(this.uiState.getChanges());

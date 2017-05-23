@@ -4,7 +4,7 @@
 import moment from 'moment-timezone';
 import chrome from 'ui/chrome';
 import routes from 'ui/routes';
-import modules from 'ui/modules';
+import { uiModules } from 'ui/modules';
 
 import 'ui/autoload/all';
 import 'plugins/kibana/discover/index';
@@ -18,7 +18,8 @@ import 'ui/vislib';
 import 'ui/agg_response';
 import 'ui/agg_types';
 import 'ui/timepicker';
-import Notifier from 'ui/notify/notifier';
+import 'ui/react_components';
+import { Notifier } from 'ui/notify/notifier';
 import 'leaflet';
 
 routes.enable();
@@ -48,4 +49,4 @@ chrome
   }
 });
 
-modules.get('kibana').run(Notifier.pullMessageFromUrl);
+uiModules.get('kibana').run(Notifier.pullMessageFromUrl);

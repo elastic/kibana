@@ -34,14 +34,14 @@
   <!-- Advanced options -->
   <div class="kuiSideBarSection">
     <a
-      href=""
       class="kuiSideBarOptionsLink"
       ng-click="isCategoryAxisAdvancedOptionsOpen = !isCategoryAxisAdvancedOptionsOpen"
+      kbn-accessible-click
     >
       <span
         aria-hidden="true"
         ng-class="{ 'fa-caret-down': isCategoryAxisAdvancedOptionsOpen, 'fa-caret-right': !isCategoryAxisAdvancedOptionsOpen }"
-        class="fa fa-caret-right kuiSideBarOptionsLink__caret"
+        class="kuiIcon fa-caret-right kuiSideBarOptionsLink__caret"
       ></span>
       <span class="kuiSideBarOptionsLink__text">
         <span ng-show="!isCategoryAxisAdvancedOptionsOpen">

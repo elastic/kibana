@@ -3,16 +3,17 @@ import sinon from 'auto-release-sinon';
 import ngMock from 'ng_mock';
 import expect from 'expect.js';
 import Promise from 'bluebird';
-import errors from 'ui/errors';
-import IndexedArray from 'ui/indexed_array';
+import { DuplicateField } from 'ui/errors';
+import { IndexedArray } from 'ui/indexed_array';
 import FixturesLogstashFieldsProvider from 'fixtures/logstash_fields';
 import FixturesStubbedDocSourceResponseProvider from 'fixtures/stubbed_doc_source_response';
-import DocSourceProvider from 'ui/courier/data_source/admin_doc_source';
+import { AdminDocSourceProvider } from 'ui/courier/data_source/admin_doc_source';
 import UtilsMappingSetupProvider from 'ui/utils/mapping_setup';
-import IndexPatternsIntervalsProvider from 'ui/index_patterns/_intervals';
-import IndexPatternsIndexPatternProvider from 'ui/index_patterns/_index_pattern';
+import { IndexPatternsIntervalsProvider } from 'ui/index_patterns/_intervals';
+import { IndexPatternProvider } from 'ui/index_patterns/_index_pattern';
 import NoDigestPromises from 'test_utils/no_digest_promises';
 import { stubMapper } from 'test_utils/stub_mapper';
+import { IndexPatternsCalculateIndicesProvider } from 'ui/index_patterns/_calculate_indices';
 
 describe('index pattern', function () {
   NoDigestPromises.activateForSuite();
@@ -33,7 +34,7 @@ describe('index pattern', function () {
     mockLogstashFields = Private(FixturesLogstashFieldsProvider);
     docSourceResponse = Private(FixturesStubbedDocSourceResponseProvider);
 
-    DocSource = Private(DocSourceProvider);
+    DocSource = Private(AdminDocSourceProvider);
     sinon.stub(DocSource.prototype, 'doIndex');
     sinon.stub(DocSource.prototype, 'fetch');
     mapper = stubMapper(Private, mockLogstashFields);
@@ -51,7 +52,7 @@ describe('index pattern', function () {
         { index: 'bar', max: Infinity, min: -Infinity }
       ]);
     });
-    Private.stub(require('ui/index_patterns/_calculate_indices'), calculateIndices);
+    Private.stub(IndexPatternsCalculateIndicesProvider, calculateIndices);
 
     // spy on intervals
     intervals = Private(IndexPatternsIntervalsProvider);
@@ -60,7 +61,7 @@ describe('index pattern', function () {
       { index: 'bar', max: Infinity, min: -Infinity }
     ]);
 
-    IndexPattern = Private(IndexPatternsIndexPatternProvider);
+    IndexPattern = Private(IndexPatternProvider);
   }));
 
   // create an indexPattern instance for each test
@@ -255,7 +256,7 @@ describe('index pattern', function () {
       expect(function () {
         indexPattern.addScriptedField(scriptedField.name, '\'new script\'', 'string');
       }).to.throwError(function (e) {
-        expect(e).to.be.a(errors.DuplicateField);
+        expect(e).to.be.a(DuplicateField);
       });
     });
   });
@@ -309,7 +310,7 @@ describe('index pattern', function () {
   });
 
   describe('#toDetailedIndexList', function () {
-    context('when index pattern is an interval', function () {
+    describe('when index pattern is an interval', function () {
       let interval;
       beforeEach(function () {
         interval = 'result:getInterval';
@@ -327,7 +328,7 @@ describe('index pattern', function () {
         expect(indexList[1].index).to.equal('bar');
       });
 
-      context('with sort order', function () {
+      describe('with sort order', function () {
         it('passes the sort order to the intervals module', function () {
           return indexPattern.toDetailedIndexList(1, 2, 'SORT_DIRECTION')
           .then(function () {
@@ -338,7 +339,7 @@ describe('index pattern', function () {
       });
     });
 
-    context('when index pattern is a time-base wildcard', function () {
+    describe('when index pattern is a time-base wildcard', function () {
       beforeEach(function () {
         sinon.stub(indexPattern, 'getInterval').returns(false);
         sinon.stub(indexPattern, 'hasTimeField').returns(true);
@@ -359,7 +360,7 @@ describe('index pattern', function () {
       });
     });
 
-    context('when index pattern is a time-base wildcard that is configured not to expand', function () {
+    describe('when index pattern is a time-base wildcard that is configured not to expand', function () {
       beforeEach(function () {
         sinon.stub(indexPattern, 'getInterval').returns(false);
         sinon.stub(indexPattern, 'hasTimeField').returns(true);
@@ -373,7 +374,7 @@ describe('index pattern', function () {
       });
     });
 
-    context('when index pattern is neither an interval nor a time-based wildcard', function () {
+    describe('when index pattern is neither an interval nor a time-based wildcard', function () {
       beforeEach(function () {
         sinon.stub(indexPattern, 'getInterval').returns(false);
       });
@@ -386,7 +387,7 @@ describe('index pattern', function () {
   });
 
   describe('#toIndexList', function () {
-    context('when index pattern is an interval', function () {
+    describe('when index pattern is an interval', function () {
 
       let interval;
       beforeEach(function () {
@@ -405,7 +406,7 @@ describe('index pattern', function () {
         expect(indexList[1]).to.equal('bar');
       });
 
-      context('with sort order', function () {
+      describe('with sort order', function () {
         it('passes the sort order to the intervals module', function () {
           return indexPattern.toIndexList(1, 2, 'SORT_DIRECTION')
           .then(function () {
@@ -416,7 +417,7 @@ describe('index pattern', function () {
       });
     });
 
-    context('when index pattern is a time-base wildcard', function () {
+    describe('when index pattern is a time-base wildcard', function () {
       beforeEach(function () {
         sinon.stub(indexPattern, 'getInterval').returns(false);
         sinon.stub(indexPattern, 'hasTimeField').returns(true);
@@ -437,7 +438,7 @@ describe('index pattern', function () {
       });
     });
 
-    context('when index pattern is a time-base wildcard that is configured not to expand', function () {
+    describe('when index pattern is a time-base wildcard that is configured not to expand', function () {
       beforeEach(function () {
         sinon.stub(indexPattern, 'getInterval').returns(false);
         sinon.stub(indexPattern, 'hasTimeField').returns(true);
@@ -451,7 +452,7 @@ describe('index pattern', function () {
       });
     });
 
-    context('when index pattern is neither an interval nor a time-based wildcard', function () {
+    describe('when index pattern is neither an interval nor a time-based wildcard', function () {
       beforeEach(function () {
         sinon.stub(indexPattern, 'getInterval').returns(false);
       });

@@ -2,12 +2,12 @@ import ngMock from 'ng_mock';
 import expect from 'expect.js';
 
 import MockState from 'fixtures/mock_state';
-import notify from 'ui/notify';
+import { notify } from 'ui/notify';
 import AggConfigResult from 'ui/vis/agg_config_result';
 
-import VisProvider from 'ui/vis';
+import { VisProvider } from 'ui/vis';
 import StubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
-import FilterBarClickHandlerProvider from 'ui/filter_bar/filter_bar_click_handler';
+import { FilterBarClickHandlerProvider } from 'ui/filter_bar/filter_bar_click_handler';
 
 describe('filterBarClickHandler', function () {
   let setup = null;
@@ -43,7 +43,7 @@ describe('filterBarClickHandler', function () {
     notify._notifs.splice(0);
   });
 
-  context('on non-filterable fields', function () {
+  describe('on non-filterable fields', function () {
     it('warns about trying to filter on a non-filterable field', function () {
       const { clickHandler, aggConfigResult } = setup();
       expect(notify._notifs).to.have.length(0);

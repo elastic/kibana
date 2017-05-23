@@ -4,9 +4,9 @@ import fixtures from 'fixtures/fake_hierarchical_data';
 import sinon from 'auto-release-sinon';
 import expect from 'expect.js';
 import ngMock from 'ng_mock';
-import VisProvider from 'ui/vis';
+import { VisProvider } from 'ui/vis';
 import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
-import AggResponseHierarchicalBuildHierarchicalDataProvider from 'ui/agg_response/hierarchical/build_hierarchical_data';
+import { BuildHierarchicalDataProvider } from 'ui/agg_response/hierarchical/build_hierarchical_data';
 
 let Vis;
 let Notifier;
@@ -23,7 +23,7 @@ describe('buildHierarchicalData', function () {
 
     Vis = Private(VisProvider);
     indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
-    buildHierarchicalData = Private(AggResponseHierarchicalBuildHierarchicalDataProvider);
+    buildHierarchicalData = Private(BuildHierarchicalDataProvider);
   }));
 
 

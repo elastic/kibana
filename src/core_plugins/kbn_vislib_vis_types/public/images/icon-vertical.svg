@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="60px" height="46px" viewBox="0 0 60 46" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <!-- Generator: Sketch 42 (36781) - http://www.bohemiancoding.com/sketch -->
+    <title>icon-vertical</title>
+    <desc>Created with Sketch.</desc>
+    <defs></defs>
+    <g id="Visualize" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="Visualize-Create-New" transform="translate(-278.000000, -222.000000)" fill="#000000">
+            <g id="charts" transform="translate(75.000000, 148.000000)">
+                <g id="vertical-bar" transform="translate(161.000000, 43.000000)">
+                    <g id="icon-vertical" transform="translate(42.000000, 31.000000)">
+                        <path d="M16,25 L16,35 L9,35 L9,25 L16,25 Z M27,9 L27,35 L20,35 L20,9 L27,9 Z M38,17 L38,35 L31,35 L31,17 L38,17 Z M50.0000536,5 L50.0000536,35 L43.0000536,35 L43.0000536,5 L50.0000536,5 Z" id="bars"></path>
+                        <polygon id="xy-axis" fill-rule="nonzero" points="4 0 0 0 0 45.0116263 60.0000011 45.0116263 60.0000011 41.0116263 4 41.0116263"></polygon>
+                    </g>
+                </g>
+            </g>
+        </g>
+    </g>
+</svg>

@@ -2,7 +2,7 @@ import 'ui/visualize/spy';
 import 'ui/visualize/visualize.less';
 import 'ui/visualize/visualize_legend';
 import _ from 'lodash';
-import uiModules from 'ui/modules';
+import { uiModules } from 'ui/modules';
 import visualizeTemplate from 'ui/visualize/visualize.html';
 import 'angular-sanitize';
 
@@ -43,9 +43,9 @@ uiModules
         };
       }
 
-      const getVisEl = getter('.visualize-chart');
-      const getVisContainer = getter('.vis-container');
-      const getSpyContainer = getter('.visualize-spy-container');
+      const getVisEl = getter('[data-visualize-chart]');
+      const getVisContainer = getter('[data-visualize-chart-container]');
+      const getSpyContainer = getter('[data-spy-content-container]');
 
       // Show no results message when isZeroHits is true and it requires search
       $scope.showNoResultsMessage = function () {
@@ -74,19 +74,19 @@ uiModules
       $scope.spy = {};
       $scope.spy.mode = ($scope.uiState) ? $scope.uiState.get('spy.mode', {}) : {};
 
-      const applyClassNames = function () {
-        const $visEl = getVisContainer();
+      const updateSpy = function () {
+        const $visContainer = getVisContainer();
         const $spyEl = getSpyContainer();
         if (!$spyEl) return;
 
         const fullSpy = ($scope.spy.mode && ($scope.spy.mode.fill || $scope.fullScreenSpy));
 
-        $visEl.toggleClass('spy-only', Boolean(fullSpy));
+        $visContainer.toggleClass('spy-only', Boolean(fullSpy));
         $spyEl.toggleClass('only', Boolean(fullSpy));
 
         $timeout(function () {
           if (shouldHaveFullSpy()) {
-            $visEl.addClass('spy-only');
+            $visContainer.addClass('spy-only');
             $spyEl.addClass('only');
           }
         }, 0);
@@ -129,11 +129,11 @@ uiModules
       }
 
       // spy watchers
-      $scope.$watch('fullScreenSpy', applyClassNames);
+      $scope.$watch('fullScreenSpy', updateSpy);
 
       $scope.$watchCollection('spy.mode', function () {
         $scope.fullScreenSpy = shouldHaveFullSpy();
-        applyClassNames();
+        updateSpy();
       });
 
       function updateVisAggs() {

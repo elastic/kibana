@@ -6,8 +6,8 @@
 
 import _ from 'lodash';
 import toPath from 'lodash/internal/toPath';
-import errors from 'ui/errors';
-import SimpleEmitter from 'ui/utils/simple_emitter';
+import { PersistedStateError } from 'ui/errors';
+import { SimpleEmitter } from 'ui/utils/simple_emitter';
 
 function prepSetParams(key, value, path) {
   // key must be the value, set the entire state using it
@@ -54,13 +54,13 @@ export class PersistedState {
     // Some validations
     if (this._parent) {
       if (this._path.length <= 0) {
-        throw new errors.PersistedStateError('PersistedState child objects must contain a path');
+        throw new PersistedStateError('PersistedState child objects must contain a path');
       }
       if (!(this._parent instanceof PersistedState)) {
-        throw new errors.PersistedStateError('Parent object must be an instance of PersistedState');
+        throw new PersistedStateError('Parent object must be an instance of PersistedState');
       }
     } else if (!this._path.length && value && !_.isPlainObject(value)) {
-      throw new errors.PersistedStateError('State value must be a plain object');
+      throw new PersistedStateError('State value must be a plain object');
     }
 
     value = value || this._getDefault();

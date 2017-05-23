@@ -3,20 +3,20 @@ import _ from 'lodash';
 import 'ui/es';
 import 'ui/promises';
 import 'ui/index_patterns';
-import uiModules from 'ui/modules';
-import Notifier from 'ui/notify/notifier';
+import { uiModules } from 'ui/modules';
+import { Notifier } from 'ui/notify/notifier';
 
-import DocSourceProvider from './data_source/doc_source';
-import SearchSourceProvider from './data_source/search_source';
-import SearchStrategyProvider from './fetch/strategy/search';
-import RequestQueueProvider from './_request_queue';
-import FetchProvider from './fetch';
-import DocDataLooperProvider from './looper/doc_data';
-import DocAdminLooperProvider from './looper/doc_admin';
-import SearchLooperProvider from './looper/search';
-import RootSearchSourceProvider from './data_source/_root_search_source';
-import SavedObjectProvider from './saved_object';
-import RedirectWhenMissingProvider from './_redirect_when_missing';
+import { DocSourceProvider } from './data_source/doc_source';
+import { SearchSourceProvider } from './data_source/search_source';
+import { SearchStrategyProvider } from './fetch/strategy/search';
+import { RequestQueueProvider } from './_request_queue';
+import { FetchProvider } from './fetch';
+import { DocDataLooperProvider } from './looper/doc_data';
+import { DocAdminLooperProvider } from './looper/doc_admin';
+import { SearchLooperProvider } from './looper/search';
+import { RootSearchSourceProvider } from './data_source/_root_search_source';
+import { SavedObjectProvider } from './saved_object';
+import { RedirectWhenMissingProvider } from './_redirect_when_missing';
 
 
 uiModules.get('kibana/courier')

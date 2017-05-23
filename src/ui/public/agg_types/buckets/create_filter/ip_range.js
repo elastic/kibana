@@ -1,6 +1,7 @@
-import CidrMask from 'ui/utils/cidr_mask';
-import buildRangeFilter from 'ui/filter_manager/lib/range';
-export default function createIpRangeFilterProvider() {
+import { CidrMask } from 'ui/utils/cidr_mask';
+import { buildRangeFilter } from 'ui/filter_manager/lib/range';
+
+export function AggTypesBucketsCreateFilterIpRangeProvider() {
   return function (aggConfig, key) {
     let range;
     if (aggConfig.params.ipRangeType === 'mask') {

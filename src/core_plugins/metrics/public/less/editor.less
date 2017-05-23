@@ -416,6 +416,10 @@
       margin-bottom: 4px;
     }
   }
+  .vis_editor__row-item-small {
+    .vis_editor__row-item;
+    flex-grow: 0;
+  }
 }
 
 .vis_editor__icon_select-option {
@@ -435,3 +439,37 @@
   color: @gray;
   font-size: 0.9em;
 }
+
+.vis_editor__dirty_controls {
+  padding: 8px 6px;
+  background-color: @grayLightest;
+  display: flex;
+  align-content: center;
+}
+
+.vis_editor__dirty_controls-button {
+  flex: 0 0 auto;
+}
+
+.vis_editor__dirty_controls-message {
+  flex: 1 0 auto;
+  color: @grayLight;
+  padding: 4px 10px 0;
+}
+
+.vis_editor__dirty_controls-message-dirty {
+  flex: 1 0 auto;
+  color: @gray;
+  padding: 4px 10px 0;
+}
+
+.vis_editor__dirty_controls-toggle-label {
+  padding: 4px 10px 0;
+  flex: 0 0 auto;
+  color: @gray;
+}
+
+.vis_editor__dirty_controls-toggle {
+  flex: 0 0 auto;
+}
+

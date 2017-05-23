@@ -8,10 +8,10 @@ import columns from 'fixtures/vislib/mock_data/date_histogram/_columns';
 import rows from 'fixtures/vislib/mock_data/date_histogram/_rows';
 import stackedSeries from 'fixtures/vislib/mock_data/date_histogram/_stacked_series';
 import $ from 'jquery';
-import VislibLibLayoutLayoutProvider from 'ui/vislib/lib/layout/layout';
+import { VislibLibLayoutLayoutProvider } from 'ui/vislib/lib/layout/layout';
 import FixturesVislibVisFixtureProvider from 'fixtures/vislib/_vis_fixture';
 import 'ui/persisted_state';
-import VislibVisConfig from 'ui/vislib/lib/vis_config';
+import { VislibVisConfigProvider } from 'ui/vislib/lib/vis_config';
 
 const dateHistogramArray = [
   series,
@@ -42,7 +42,7 @@ dateHistogramArray.forEach(function (data, i) {
         Layout = Private(VislibLibLayoutLayoutProvider);
         vis = Private(FixturesVislibVisFixtureProvider)();
         persistedState = new ($injector.get('PersistedState'))();
-        VisConfig = Private(VislibVisConfig);
+        VisConfig = Private(VislibVisConfigProvider);
         vis.render(data, persistedState);
         numberOfCharts = vis.handler.charts.length;
       });
@@ -58,13 +58,13 @@ dateHistogramArray.forEach(function (data, i) {
         expect($(vis.el).find('.y-axis-col-wrapper').length).to.be(2);
         expect($(vis.el).find('.vis-col-wrapper').length).to.be(1);
         expect($(vis.el).find('.y-axis-col').length).to.be(2);
-        expect($(vis.el).find('.y-axis-title').length).to.be(2);
+        expect($(vis.el).find('.y-axis-title').length).to.be.above(0);
         expect($(vis.el).find('.y-axis-div-wrapper').length).to.be(2);
         expect($(vis.el).find('.y-axis-spacer-block').length).to.be(4);
         expect($(vis.el).find('.chart-wrapper').length).to.be(numberOfCharts);
         expect($(vis.el).find('.x-axis-wrapper').length).to.be(2);
         expect($(vis.el).find('.x-axis-div-wrapper').length).to.be(2);
-        expect($(vis.el).find('.x-axis-title').length).to.be(2);
+        expect($(vis.el).find('.x-axis-title').length).to.be.above(0);
       });
     });
 

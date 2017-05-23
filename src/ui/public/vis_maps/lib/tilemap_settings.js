@@ -1,4 +1,4 @@
-import uiModules from 'ui/modules';
+import { uiModules } from 'ui/modules';
 import _ from 'lodash';
 import marked from 'marked';
 import { modifyUrl } from 'ui/url';
@@ -12,7 +12,6 @@ uiModules.get('kibana')
   .service('tilemapSettings', function ($http, tilemapsConfig, $sanitize, kbnVersion) {
     const attributionFromConfig = $sanitize(marked(tilemapsConfig.deprecated.config.options.attribution || ''));
     const optionsFromConfig = _.assign({}, tilemapsConfig.deprecated.config.options, { attribution: attributionFromConfig });
-
     const extendUrl = (url, props) => (
       modifyUrl(url, parsed => _.merge(parsed, props))
     );
@@ -159,11 +158,9 @@ uiModules.get('kibana')
        * @return {{maxZoom: (*|number), minZoom: (*|number)}}
        */
       getMinMaxZoom(isWMSEnabled) {
-
-        //for backward compatibilty, we preserve the 1-18 setting. https://git.io/vMn5o
         if (isWMSEnabled) {
           return {
-            minZoom: 1,
+            minZoom: 0,
             maxZoom: 18
           };
         }

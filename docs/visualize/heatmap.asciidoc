@@ -78,6 +78,3 @@ this box to change both upper and lower bounds to match the values returned in t
 the minimum value (inclusive) and the maximum value (exclusive) of a range. 
 *Show Label*:: Enables showing labels with cell values in each cell
   *Rotate*:: Allows rotating the cell value label by 90 degrees.
-
-
-include::visualization-raw-data.asciidoc[]

@@ -1,7 +1,8 @@
 import _ from 'lodash';
 import angular from 'angular';
 import moment from 'moment';
-import getSort from 'ui/doc_table/lib/get_sort';
+import { getSort } from 'ui/doc_table/lib/get_sort';
+import * as columnActions from 'ui/doc_table/actions/columns';
 import dateMath from '@elastic/datemath';
 import 'ui/doc_table';
 import 'ui/visualize';
@@ -14,18 +15,19 @@ import 'ui/index_patterns';
 import 'ui/state_management/app_state';
 import 'ui/timefilter';
 import 'ui/share';
-import VisProvider from 'ui/vis';
-import DocTitleProvider from 'ui/doc_title';
-import UtilsBrushEventProvider from 'ui/utils/brush_event';
+import { VisProvider } from 'ui/vis';
+import { DocTitleProvider } from 'ui/doc_title';
+import { UtilsBrushEventProvider } from 'ui/utils/brush_event';
 import PluginsKibanaDiscoverHitSortFnProvider from 'plugins/kibana/discover/_hit_sort_fn';
-import FilterBarQueryFilterProvider from 'ui/filter_bar/query_filter';
-import FilterManagerProvider from 'ui/filter_manager';
-import AggTypesBucketsIntervalOptionsProvider from 'ui/agg_types/buckets/_interval_options';
-import stateMonitorFactory  from 'ui/state_management/state_monitor_factory';
+import { FilterBarQueryFilterProvider } from 'ui/filter_bar/query_filter';
+import { FilterManagerProvider } from 'ui/filter_manager';
+import { AggTypesBucketsIntervalOptionsProvider } from 'ui/agg_types/buckets/_interval_options';
+import { stateMonitorFactory } from 'ui/state_management/state_monitor_factory';
 import uiRoutes from 'ui/routes';
-import uiModules from 'ui/modules';
+import { uiModules } from 'ui/modules';
 import indexTemplate from 'plugins/kibana/discover/index.html';
-import StateProvider from 'ui/state_management/state';
+import { StateProvider } from 'ui/state_management/state';
+import { documentationLinks } from 'ui/documentation_links/documentation_links';
 
 const app = uiModules.get('apps/discover', [
   'kibana/notify',
@@ -101,6 +103,7 @@ function discoverController($scope, config, courier, $route, $window, Notifier,
     location: 'Discover'
   });
 
+  $scope.queryDocLinks = documentationLinks.query;
   $scope.intervalOptions = Private(AggTypesBucketsIntervalOptionsProvider);
   $scope.showInterval = false;
 
@@ -149,7 +152,9 @@ function discoverController($scope, config, courier, $route, $window, Notifier,
   }
 
   let stateMonitor;
-  const $appStatus = $scope.appStatus = this.appStatus = {};
+  const $appStatus = $scope.appStatus = this.appStatus = {
+    dirty: !savedSearch.id
+  };
   const $state = $scope.state = new AppState(getStateDefaults());
   $scope.uiState = $state.makeStateful('uiState');
 
@@ -194,7 +199,7 @@ function discoverController($scope, config, courier, $route, $window, Notifier,
 
     stateMonitor = stateMonitorFactory.create($state, getStateDefaults());
     stateMonitor.onChange((status) => {
-      $appStatus.dirty = status.dirty;
+      $appStatus.dirty = status.dirty || !savedSearch.id;
     });
     $scope.$on('$destroy', () => stateMonitor.destroy());
 
@@ -475,10 +480,28 @@ function discoverController($scope, config, courier, $route, $window, Notifier,
     .set('filter', queryFilter.getFilters());
   });
 
+  $scope.setSortOrder = function setSortOrder(columnName, direction) {
+    $scope.state.sort = [columnName, direction];
+  };
+
   // TODO: On array fields, negating does not negate the combination, rather all terms
   $scope.filterQuery = function (field, values, operation) {
     $scope.indexPattern.popularizeField(field, 1);
     filterManager.add(field, values, operation, $state.index);
+  };
+
+  $scope.addColumn = function addColumn(columnName) {
+    $scope.indexPattern.popularizeField(columnName, 1);
+    columnActions.addColumn($scope.state.columns, columnName);
+  };
+
+  $scope.removeColumn = function removeColumn(columnName) {
+    $scope.indexPattern.popularizeField(columnName, 1);
+    columnActions.removeColumn($scope.state.columns, columnName);
+  };
+
+  $scope.moveColumn = function moveColumn(columnName, newIndex) {
+    columnActions.moveColumn($scope.state.columns, columnName, newIndex);
   };
 
   $scope.toTop = function () {

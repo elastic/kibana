@@ -1,4 +1,4 @@
-export default function ErrorHandlerList() {
+export function ErrorHandlersProvider() {
   /**
    * Queue of pending error handlers, they are removed as
    * they are resolved.

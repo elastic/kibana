@@ -25,7 +25,9 @@ const lookup = {
   'std_deviation_bucket': 'Overall Std. Deviation',
   'series_agg': 'Series Agg',
   'serial_diff': 'Serial Difference',
-  'filter_ratio': 'Filter Ratio'
+  'filter_ratio': 'Filter Ratio',
+  'positive_only': 'Positive Only',
+  'static': 'Static Value'
 };
 
 const pipeline = [
@@ -41,7 +43,8 @@ const pipeline = [
   'sum_of_squares_bucket',
   'std_deviation_bucket',
   'series_agg',
-  'serial_diff'
+  'serial_diff',
+  'positive_only'
 ];
 
 const byType = {

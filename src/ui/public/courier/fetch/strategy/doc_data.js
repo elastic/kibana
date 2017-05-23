@@ -1,4 +1,4 @@
-export default function FetchStrategyForDoc(Promise) {
+export function DocDataStrategyProvider(Promise) {
   return {
     clientMethod: 'mget',
 

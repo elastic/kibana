@@ -1,26 +1,23 @@
+export default function ({ getService, getPageObjects, loadTestFile }) {
+  const remote = getService('remote');
+  const esArchiver = getService('esArchiver');
+  const PageObjects = getPageObjects(['common']);
 
-import {
-  bdd,
-  defaultTimeout,
-  esArchiver,
-} from '../../../support';
+  describe('context app', function () {
+    before(async function () {
+      await remote.setWindowSize(1200,800);
+      await esArchiver.loadIfNeeded('logstash_functional');
+      await esArchiver.load('visualize');
+      await PageObjects.common.navigateToApp('discover');
+    });
 
-import PageObjects from '../../../support/page_objects';
+    after(function unloadMakelogs() {
+      return esArchiver.unload('logstash_functional');
+    });
 
-bdd.describe('context app', function () {
-  this.timeout = defaultTimeout;
-
-  bdd.before(async function () {
-    await PageObjects.remote.setWindowSize(1200,800);
-    await esArchiver.loadIfNeeded('logstash_functional');
-    await esArchiver.load('visualize');
-    await PageObjects.common.navigateToApp('discover');
+    loadTestFile(require.resolve('./_discover_navigation'));
+    loadTestFile(require.resolve('./_filters'));
+    loadTestFile(require.resolve('./_size'));
   });
 
-  bdd.after(function unloadMakelogs() {
-    return esArchiver.unload('logstash_functional');
-  });
-
-  require('./_discover_navigation');
-  require('./_size');
-});
+}

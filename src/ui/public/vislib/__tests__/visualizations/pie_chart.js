@@ -5,10 +5,10 @@ import _ from 'lodash';
 import fixtures from 'fixtures/fake_hierarchical_data';
 import $ from 'jquery';
 import FixturesVislibVisFixtureProvider from 'fixtures/vislib/_vis_fixture';
-import VisProvider from 'ui/vis';
+import { VisProvider } from 'ui/vis';
 import 'ui/persisted_state';
 import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
-import AggResponseHierarchicalBuildHierarchicalDataProvider from 'ui/agg_response/hierarchical/build_hierarchical_data';
+import { BuildHierarchicalDataProvider } from 'ui/agg_response/hierarchical/build_hierarchical_data';
 
 const rowAgg = [
   { type: 'avg', schema: 'metric', params: { field: 'bytes' } },
@@ -80,7 +80,7 @@ describe('No global chart settings', function () {
     Vis = Private(VisProvider);
     persistedState = new ($injector.get('PersistedState'))();
     indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
-    buildHierarchicalData = Private(AggResponseHierarchicalBuildHierarchicalDataProvider);
+    buildHierarchicalData = Private(BuildHierarchicalDataProvider);
 
     let id1 = 1;
     let id2 = 1;
@@ -174,7 +174,7 @@ aggArray.forEach(function (dataAgg, i) {
       Vis = Private(VisProvider);
       persistedState = new ($injector.get('PersistedState'))();
       indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
-      buildHierarchicalData = Private(AggResponseHierarchicalBuildHierarchicalDataProvider);
+      buildHierarchicalData = Private(BuildHierarchicalDataProvider);
 
       let id = 1;
       const stubVis = new Vis(indexPattern, {

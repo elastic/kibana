@@ -1,8 +1,14 @@
-<div class="suggestions" ng-show="suggestions.show">
-  <div class="suggestion"
-    ng-click="completeExpression($index)"
-    ng-class="{active: $index === suggestions.selected}"
-    ng-repeat="suggestion in suggestions.list track by $index | orderBy:'name'">
+<div
+  class="suggestions"
+  data-suggestions-list
+>
+  <div
+    class="suggestion"
+    data-suggestion-list-item
+    ng-click="onClickSuggestion({ suggestionIndex: $index })"
+    ng-class="{active: $index === selectedIndex}"
+    ng-repeat="suggestion in suggestions track by $index | orderBy:'name'"
+  >
     <h4>
       <strong>.{{suggestion.name}}()</strong>
       <small>
@@ -12,7 +18,7 @@
     </h4>
 
     <div ng-show="suggestion.args.length > (suggestion.chainable ? 1: 0)">
-      <div ng-show="suggestions.list.length > 1">
+      <div ng-show="suggestions.length > 1">
         <strong>Arguments:</strong>
         <span ng-repeat="arg in suggestion.args" ng-hide="$index < 1 && suggestion.chainable">
           <strong>{{arg.name}}</strong>=(<em>{{arg.types.join(' | ')}}</em>)
@@ -20,7 +26,7 @@
         </span>
       </div>
 
-      <div class="suggestion-details" ng-show="suggestions.list.length === 1">
+      <div class="suggestion-details" ng-show="suggestions.length === 1">
         <table class="table table-striped table-condensed table-bordered">
         <thead>
           <th>Argument Name</th>

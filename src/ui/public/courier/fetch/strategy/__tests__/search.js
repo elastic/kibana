@@ -2,10 +2,10 @@ import _ from 'lodash';
 import expect from 'expect.js';
 import ngMock from 'ng_mock';
 
-import SearchStrategyProvider from '../search';
+import { SearchStrategyProvider } from '../search';
 import StubIndexPatternProvider from 'test_utils/stub_index_pattern';
 
-describe('ui/courier/fetch/strategy/search', () => {
+describe('SearchStrategyProvider', () => {
   require('test_utils/no_digest_promises').activateForSuite();
 
   let search;
@@ -42,7 +42,7 @@ describe('ui/courier/fetch/strategy/search', () => {
       });
     });
 
-    context('when indexList is not empty', () => {
+    describe('when indexList is not empty', () => {
       it('includes the index', () => {
         return search.reqsFetchParamsToBody(reqsFetchParams).then(value => {
           expect(_.includes(value, '"index":["logstash-123"]')).to.be(true);
@@ -50,7 +50,7 @@ describe('ui/courier/fetch/strategy/search', () => {
       });
     });
 
-    context('when indexList is empty', () => {
+    describe('when indexList is empty', () => {
       beforeEach(() => {
         reqsFetchParams.forEach(request => request.index = []);
       });
@@ -72,7 +72,7 @@ describe('ui/courier/fetch/strategy/search', () => {
       });
     });
 
-    context('when passed IndexPatterns', () => {
+    describe('when passed IndexPatterns', () => {
       it(' that are out of range, queries .kibana', () => {
         // Check out https://github.com/elastic/kibana/issues/10905 for the reasons behind this
         // test. When an IndexPattern is out of time range, it returns an array that is then stored in a cache.  This

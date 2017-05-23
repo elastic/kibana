@@ -1,10 +1,10 @@
 import $ from 'jquery';
 import _ from 'lodash';
-import VisRenderbotProvider from 'ui/vis/renderbot';
-import MapsVisTypeBuildChartDataProvider from 'ui/vislib_vis_type/build_chart_data';
-import FilterBarPushFilterProvider from 'ui/filter_bar/push_filter';
-import KibanaMap from './kibana_map';
-import GeohashLayer from './geohash_layer';
+import { VisRenderbotProvider } from 'ui/vis/renderbot';
+import { VislibVisTypeBuildChartDataProvider } from 'ui/vislib_vis_type/build_chart_data';
+import { FilterBarPushFilterProvider } from 'ui/filter_bar/push_filter';
+import { KibanaMap } from './kibana_map';
+import { GeohashLayer } from './geohash_layer';
 import './lib/tilemap_settings';
 import './styles/_tilemap.less';
 import { ResizeCheckerProvider } from 'ui/resize_checker';
@@ -14,7 +14,7 @@ module.exports = function MapsRenderbotFactory(Private, $injector, tilemapSettin
 
   const ResizeChecker = Private(ResizeCheckerProvider);
   const Renderbot = Private(VisRenderbotProvider);
-  const buildChartData = Private(MapsVisTypeBuildChartDataProvider);
+  const buildChartData = Private(VislibVisTypeBuildChartDataProvider);
   const notify = new Notifier({ location: 'Tilemap' });
 
   class MapsRenderbot extends Renderbot {
@@ -24,6 +24,7 @@ module.exports = function MapsRenderbotFactory(Private, $injector, tilemapSettin
       this._buildChartData = buildChartData.bind(this);
       this._geohashLayer = null;
       this._kibanaMap = null;
+      this._$container = $el;
       this._kibanaMapReady = this._makeKibanaMap($el);
 
       this._baseLayerDirty = true;
@@ -39,7 +40,7 @@ module.exports = function MapsRenderbotFactory(Private, $injector, tilemapSettin
       });
     }
 
-    async _makeKibanaMap($el) {
+    async _makeKibanaMap() {
 
       if (!tilemapSettings.isInitialized()) {
         await tilemapSettings.loadSettings();
@@ -51,15 +52,22 @@ module.exports = function MapsRenderbotFactory(Private, $injector, tilemapSettin
         notify.warning(tilemapSettings.getError().message);
       }
 
-      const containerElement = $($el)[0];
-      const minMaxZoom = tilemapSettings.getMinMaxZoom(false);
-      this._kibanaMap = new KibanaMap(containerElement, minMaxZoom);
+      if (this._kibanaMap) {
+        this._kibanaMap.destroy();
+      }
+      const containerElement = $(this._$container)[0];
+      const options = _.clone(this._getMinMaxZoom());
+      const uiState = this.vis.getUiState();
+      const zoomFromUiState = parseInt(uiState.get('mapZoom'));
+      const centerFromUIState = uiState.get('mapCenter');
+      options.zoom = !isNaN(zoomFromUiState) ? zoomFromUiState : this.vis.type.params.defaults.mapZoom;
+      options.center = centerFromUIState ? centerFromUIState : this.vis.type.params.defaults.mapCenter;
+
+      this._kibanaMap = new KibanaMap(containerElement, options);
       this._kibanaMap.addDrawControl();
       this._kibanaMap.addFitControl();
       this._kibanaMap.addLegendControl();
-
       this._kibanaMap.persistUiStateForVisualization(this.vis);
-      this._kibanaMap.useUiStateFromVisualization(this.vis);
 
       let previousPrecision = this._kibanaMap.getAutoPrecision();
       let precisionChange = false;
@@ -88,6 +96,9 @@ module.exports = function MapsRenderbotFactory(Private, $injector, tilemapSettin
       this._kibanaMap.on('drawCreated:rectangle', event => {
         addSpatialFilter(_.get(this._chartData, 'geohashGridAgg'), 'geo_bounding_box', event.bounds);
       });
+      this._kibanaMap.on('drawCreated:polygon', event => {
+        addSpatialFilter(_.get(this._chartData, 'geohashGridAgg'), 'geo_polygon', { points: event.points });
+      });
       this._kibanaMap.on('baseLayer:loaded', () => {
         this._baseLayerDirty = false;
         this._doRenderComplete();
@@ -95,6 +106,11 @@ module.exports = function MapsRenderbotFactory(Private, $injector, tilemapSettin
       this._kibanaMap.on('baseLayer:loading', () => {
         this._baseLayerDirty = true;
       });
+    }
+
+    _getMinMaxZoom() {
+      const mapParams = this._getMapsParams();
+      return tilemapSettings.getMinMaxZoom(mapParams.wms.enabled);
     }
 
     _recreateGeohashLayer() {
@@ -139,10 +155,17 @@ module.exports = function MapsRenderbotFactory(Private, $injector, tilemapSettin
     updateParams() {
 
       this._paramsDirty = true;
-      this._kibanaMapReady.then(() => {
+      this._kibanaMapReady.then(async() => {
         const mapParams = this._getMapsParams();
+        const { minZoom, maxZoom } = this._getMinMaxZoom();
+
         if (mapParams.wms.enabled) {
-          const { minZoom, maxZoom } = tilemapSettings.getMinMaxZoom(true);
+
+          if (maxZoom > this._kibanaMap.getMaxZoomLevel()) {
+            this._geohashLayer = null;
+            this._kibanaMapReady = this._makeKibanaMap();
+          }
+
           this._kibanaMap.setBaseLayer({
             baseLayerType: 'wms',
             options: {
@@ -153,6 +176,13 @@ module.exports = function MapsRenderbotFactory(Private, $injector, tilemapSettin
             }
           });
         } else {
+
+          if (maxZoom < this._kibanaMap.getMaxZoomLevel()) {
+            this._geohashLayer = null;
+            this._kibanaMapReady = this._makeKibanaMap();
+            this._kibanaMap.setZoomLevel(maxZoom);
+          }
+
           if (!tilemapSettings.hasError()) {
             const url = tilemapSettings.getUrl();
             const options = tilemapSettings.getTMSOptions();
@@ -200,7 +230,6 @@ module.exports = function MapsRenderbotFactory(Private, $injector, tilemapSettin
           heatBlur: newParams.heatBlur,
           heatMaxZoom: newParams.heatMaxZoom,
           heatMinOpacity: newParams.heatMinOpacity,
-          heatNormalizeData: newParams.heatNormalizeData,
           heatRadius: newParams.heatRadius
         }
       };
@@ -210,7 +239,7 @@ module.exports = function MapsRenderbotFactory(Private, $injector, tilemapSettin
       if (this._paramsDirty || this._dataDirty || this._baseLayerDirty) {
         return;
       }
-      $(this.el).trigger('renderComplete');
+      this.$el.trigger('renderComplete');
     }
 
   }
@@ -223,7 +252,7 @@ module.exports = function MapsRenderbotFactory(Private, $injector, tilemapSettin
     const indexPatternName = agg.vis.indexPattern.id;
     const field = agg.fieldName();
     const filter = {};
-    filter[filterName] = {};
+    filter[filterName] = { ignore_unmapped: true };
     filter[filterName][field] = filterData;
 
     const putFilter = Private(FilterBarPushFilterProvider)(getAppState());
@@ -233,5 +262,3 @@ module.exports = function MapsRenderbotFactory(Private, $injector, tilemapSettin
 
   return MapsRenderbot;
 };
-
-

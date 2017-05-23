@@ -1,18 +1,18 @@
 import d3 from 'd3';
 import _ from 'lodash';
 import $ from 'jquery';
-import errors from 'ui/errors';
-import TooltipProvider from 'ui/vis/components/tooltip';
-import VislibVisualizationsChartProvider from './_chart';
-import VislibVisualizationsTimeMarkerProvider from './time_marker';
-import VislibVisualizationsSeriTypesProvider from './point_series/series_types';
+import { ContainerTooSmall } from 'ui/errors';
+import { TooltipProvider } from 'ui/vis/components/tooltip';
+import { VislibVisualizationsChartProvider } from './_chart';
+import { VislibVisualizationsTimeMarkerProvider } from './time_marker';
+import { VislibVisualizationsSeriesTypesProvider } from './point_series/series_types';
 
-export default function PointSeriesFactory(Private) {
+export function VislibVisualizationsPointSeriesProvider(Private) {
 
   const Chart = Private(VislibVisualizationsChartProvider);
   const Tooltip = Private(TooltipProvider);
   const TimeMarker = Private(VislibVisualizationsTimeMarkerProvider);
-  const seriTypes = Private(VislibVisualizationsSeriTypesProvider);
+  const seriTypes = Private(VislibVisualizationsSeriesTypesProvider);
   const touchdownTmpl = _.template(require('../partials/touchdown.tmpl.html'));
   /**
    * Line Chart Visualization
@@ -214,7 +214,7 @@ export default function PointSeriesFactory(Private) {
           const el = this;
 
           if (width < minWidth || height < minHeight) {
-            throw new errors.ContainerTooSmall();
+            throw new ContainerTooSmall();
           }
 
           if (addTimeMarker) {

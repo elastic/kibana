@@ -11,13 +11,17 @@ import { TopNavIds } from './top_nav_ids';
 export function getTopNavConfig(dashboardMode, actions) {
   switch (dashboardMode) {
     case DashboardViewMode.VIEW:
-      return [getShareConfig(), getEditConfig(actions[TopNavIds.ENTER_EDIT_MODE])];
+      return [
+        getShareConfig(),
+        getCloneConfig(actions[TopNavIds.CLONE]),
+        getEditConfig(actions[TopNavIds.ENTER_EDIT_MODE])];
     case DashboardViewMode.EDIT:
       return [
         getSaveConfig(),
         getViewConfig(actions[TopNavIds.EXIT_EDIT_MODE]),
         getAddConfig(),
-        getOptionsConfig()];
+        getOptionsConfig(),
+        getShareConfig()];
     default:
       return [];
   }
@@ -42,7 +46,7 @@ function getSaveConfig() {
   return {
     key: 'save',
     description: 'Save your dashboard',
-    testId: 'dashboardSaveButton',
+    testId: 'dashboardSaveMenuItem',
     template: require('plugins/kibana/dashboard/top_nav/save.html')
   };
 }
@@ -55,6 +59,18 @@ function getViewConfig(action) {
     key: 'cancel',
     description: 'Cancel editing and switch to view-only mode',
     testId: 'dashboardViewOnlyMode',
+    run: action
+  };
+}
+
+/**
+ * @returns {kbnTopNavConfig}
+ */
+function getCloneConfig(action) {
+  return {
+    key: 'clone',
+    description: 'Create a copy of your dashboard',
+    testId: 'dashboardClone',
     run: action
   };
 }

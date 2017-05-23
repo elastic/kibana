@@ -1,11 +1,11 @@
 import { saveAs } from '@spalger/filesaver';
 import { extend, find, flattenDeep, partialRight, pick, pluck, sortBy } from 'lodash';
 import angular from 'angular';
-import registry from 'plugins/kibana/management/saved_object_registry';
+import { savedObjectManagementRegistry } from 'plugins/kibana/management/saved_object_registry';
 import objectIndexHTML from 'plugins/kibana/management/sections/objects/_objects.html';
 import 'ui/directives/file_upload';
 import uiRoutes from 'ui/routes';
-import uiModules from 'ui/modules';
+import { uiModules } from 'ui/modules';
 
 uiRoutes
 .when('/management/kibana/objects', {
@@ -38,7 +38,7 @@ uiModules.get('apps/management')
       };
 
       const getData = function (filter) {
-        const services = registry.all().map(function (obj) {
+        const services = savedObjectManagementRegistry.all().map(function (obj) {
           const service = $injector.get(obj.service);
           return service.find(filter).then(function (data) {
             return {
@@ -164,6 +164,13 @@ uiModules.get('apps/management')
           docs = JSON.parse(fileContents);
         } catch (e) {
           notify.error('The file could not be processed.');
+          return;
+        }
+
+        // make sure we have an array, show an error otherwise
+        if (!Array.isArray(docs)) {
+          notify.error('Saved objects file format is invalid and cannot be imported.');
+          return;
         }
 
         return new Promise((resolve) => {

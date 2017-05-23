@@ -15,7 +15,7 @@ function shouldNot(candidate, ...constructorArgs) {
 
 
 describe('WildcardMatcher', function () {
-  context('pattern = *', function () {
+  describe('pattern = *', function () {
     it('matches http', () => should('http', '*'));
     it('matches https', () => should('https', '*'));
     it('matches nothing', () => should('', '*'));
@@ -23,12 +23,12 @@ describe('WildcardMatcher', function () {
     it('matches localhost', () => should('localhost', '*'));
     it('matches a path', () => should('/index/type/_search', '*'));
 
-    context('defaultValue = /', function () {
+    describe('defaultValue = /', function () {
       it('matches /', () => should('/', '*', '/'));
     });
   });
 
-  context('pattern = http', function () {
+  describe('pattern = http', function () {
     it('matches http', () => should('http', 'http'));
     it('does not match https', () => shouldNot('https', 'http'));
     it('does not match nothing', () => shouldNot('', 'http'));
@@ -36,7 +36,7 @@ describe('WildcardMatcher', function () {
     it('does not match a path', () => shouldNot('/index/type/_search', 'http'));
   });
 
-  context('pattern = 560{1..9}', function () {
+  describe('pattern = 560{1..9}', function () {
     it('does not match http', () => shouldNot('http', '560{1..9}'));
     it('does not matches 5600', () => shouldNot('5600', '560{1..9}'));
     it('matches 5601', () => should('5601', '560{1..9}'));

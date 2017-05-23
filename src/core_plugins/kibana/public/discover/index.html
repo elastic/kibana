@@ -23,26 +23,39 @@
         name="discoverSearch"
         ng-submit="fetch()"
       >
-        <div class="typeahead" kbn-typeahead="discover">
+        <div class="typeahead" kbn-typeahead="discover" on-select="fetch()">
           <div class="kuiLocalSearch">
-            <input
-              parse-query
-              input-focus
-              kbn-typeahead-input
-              ng-model="state.query"
-              placeholder="Search..."
-              aria-label="Search input"
-              type="text"
-              class="kuiLocalSearchInput"
-              ng-class="{'kuiLocalSearchInput-isInvalid': discoverSearch.$invalid}"
-            >
+            <div class="kuiLocalSearchAssistedInput">
+              <input
+                parse-query
+                input-focus
+                kbn-typeahead-input
+                ng-model="state.query"
+                placeholder="Search... (e.g. status:200 AND extension:PHP)"
+                aria-label="Search input"
+                type="text"
+                class="kuiLocalSearchInput kuiLocalSearchInput--lucene"
+                ng-class="{'kuiLocalSearchInput-isInvalid': discoverSearch.$invalid}"
+              >
+              <div class="kuiLocalSearchAssistedInput__assistance">
+                <p class="kuiText">
+                  <a
+                    class="kuiLink"
+                    ng-href="{{queryDocLinks.luceneQuerySyntax}}"
+                    target="_blank"
+                  >
+                    Uses lucene query syntax
+                  </a>
+                </p>
+              </div>
+            </div>
             <button
               type="submit"
               aria-label="Search"
               class="kuiLocalSearchButton"
               ng-disabled="discoverSearch.$invalid"
             >
-              <span class="fa fa-search" aria-hidden="true"></span>
+              <span class="kuiIcon fa-search" aria-hidden="true"></span>
             </button>
           </div>
           <kbn-typeahead-items></kbn-typeahead-items>
@@ -61,10 +74,13 @@
           columns="state.columns"
           hits="rows"
           field-counts="fieldCounts"
-          filter="filterQuery"
           index-pattern="searchSource.get('index')"
           index-pattern-list="opts.indexPatternList"
-          state="state">
+          state="state"
+          on-add-field="addColumn"
+          on-add-filter="filterQuery"
+          on-remove-field="removeColumn"
+        >
         </disc-field-chooser>
       </div>
 
@@ -128,18 +144,21 @@
                 columns="state.columns"
                 infinite-scroll="true"
                 filter="filterQuery"
-                shared-item
+                filters="state.filters"
+                data-shared-item
                 data-title="{{opts.savedSearch.lastSavedTitle}}"
                 data-description="{{opts.savedSearch.description}}"
-                render-counter>
-              </doc-table>
+                render-counter
+                on-add-column="addColumn"
+                on-change-sort-order="setSortOrder"
+                on-move-column="moveColumn"
+                on-remove-column="removeColumn"
+              ></doc-table>
 
               <div ng-if="rows.length == opts.sampleSize" class="discover-table-footer">
-                <center>
-                  These are the first {{opts.sampleSize}} documents matching
-                  your search, refine your search to see others.
-                  <a ng-click="toTop()" title="Back to top">Back to top.</a>
-                </center>
+                These are the first {{opts.sampleSize}} documents matching
+                your search, refine your search to see others.
+                <a ng-click="toTop()">Back to top.</a>
               </div>
             </div>
           </div>

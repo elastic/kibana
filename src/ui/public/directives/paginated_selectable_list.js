@@ -1,5 +1,5 @@
 import _ from 'lodash';
-import uiModules from 'ui/modules';
+import { uiModules } from 'ui/modules';
 import paginatedSelectableListTemplate from 'ui/partials/paginated_selectable_list.html';
 
 const module = uiModules.get('kibana');

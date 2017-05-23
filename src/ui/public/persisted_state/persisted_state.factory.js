@@ -12,9 +12,9 @@
  * would call the callback, and finish with a $rootScope.$apply().
  */
 
-import EventsProvider from 'ui/events';
+import { EventsProvider } from 'ui/events';
 import { PersistedState } from './persisted_state';
-import uiModules from 'ui/modules';
+import { uiModules } from 'ui/modules';
 
 const module = uiModules.get('kibana');
 

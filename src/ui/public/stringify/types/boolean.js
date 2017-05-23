@@ -1,7 +1,7 @@
-import IndexPatternsFieldFormatProvider from 'ui/index_patterns/_field_format/field_format';
+import { IndexPatternsFieldFormatProvider } from 'ui/index_patterns/_field_format/field_format';
 import _ from 'lodash';
 
-export default function TruncateFormatProvider(Private) {
+export function stringifyBoolean(Private) {
 
   const FieldFormat = Private(IndexPatternsFieldFormatProvider);
 

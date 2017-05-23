@@ -1,17 +1,20 @@
-import VislibVisTypeVislibVisTypeProvider from 'ui/vislib_vis_type/vislib_vis_type';
-import VisSchemasProvider from 'ui/vis/schemas';
+import { VisVisTypeProvider } from 'ui/vis/vis_type';
+import { VislibVisTypeVislibVisTypeProvider } from 'ui/vislib_vis_type/vislib_vis_type';
+import { VisSchemasProvider } from 'ui/vis/schemas';
 import pointSeriesTemplate from 'plugins/kbn_vislib_vis_types/editors/point_series.html';
+import image from './images/icon-vertical.svg';
 
 export default function PointSeriesVisType(Private) {
+  const VisType = Private(VisVisTypeProvider);
   const VislibVisType = Private(VislibVisTypeVislibVisTypeProvider);
   const Schemas = Private(VisSchemasProvider);
 
   return new VislibVisType({
     name: 'histogram',
-    title: 'Vertical bar chart',
-    icon: 'fa-bar-chart',
-    description: 'The goto chart for oh-so-many needs. Great for time and non-time data. Stacked or grouped, ' +
-    'exact numbers or percentages. If you are not sure which chart you need, you could do worse than to start here.',
+    title: 'Vertical Bar',
+    image,
+    description: 'Assign a continuous variable to each axis',
+    category: VisType.CATEGORY.BASIC,
     params: {
       defaults: {
         grid: {
@@ -128,6 +131,7 @@ export default function PointSeriesVisType(Private) {
         name: 'metric',
         title: 'Y-Axis',
         min: 1,
+        aggFilter: ['!geo_centroid'],
         defaults: [
           { schema: 'metric', type: 'count' }
         ]

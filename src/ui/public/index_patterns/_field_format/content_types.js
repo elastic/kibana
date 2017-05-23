@@ -1,11 +1,12 @@
 import _ from 'lodash';
 import angular from 'angular';
 import { getHighlightHtml } from 'ui/highlight';
-export default function contentTypesProvider() {
+
+export function IndexPatternsFieldFormatContentTypesProvider() {
 
   const types = {
     html: function (format, convert) {
-      return function recurse(value, field, hit) {
+      function recurse(value, field, hit) {
         if (value == null) {
           return _.asPrettyString(value);
         }
@@ -22,6 +23,10 @@ export default function contentTypesProvider() {
         });
 
         return subVals.join(',' + (useMultiLine ? '\n' : ' '));
+      }
+
+      return function (...args) {
+        return `<span ng-non-bindable>${recurse(...args)}</span>`;
       };
     },
 

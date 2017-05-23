@@ -22,21 +22,32 @@ or start with a new search query.
 To create a visualization:
 
 . Click on *Visualize* in the side navigation.
+. Click the *Create new visualization* button or the **+** button.
 . Choose the visualization type:
 +
+* *Basic charts*
 [horizontal]
-<<xy-chart,Line, Area and Bar chart>>:: Compare different series in X/Y charts.
-<<data-table,Data table>>:: Display the raw data of a composed aggregation.
-<<markdown-widget,Markdown widget>>:: Display free-form information or
-instructions.
-<<metric-chart,Metric>>:: Display a single number.
+<<xy-chart,Line&comma; Area and Bar charts>>:: Compare different series in X/Y charts.
+<<heatmap-chart,Heat maps>>:: Shade cells within a matrix.
 <<pie-chart,Pie chart>>:: Display each source's contribution to a total.
-<<tagcloud-chart,Tag cloud>>:: Display words as a cloud in which the size of the word correspond to its importance
+* *Data*
+[horizontal]
+<<data-table,Data table>>:: Display the raw data of a composed aggregation.
+<<metric-chart,Metric>>:: Display a single number.
+* *Maps*
+[horizontal]
 <<tilemap,Tile map>>:: Associate the results of an aggregation with geographic
 locations.
-Timelion:: Compute and combine data from multiple time series
+* *Time Series*
+[horizontal]
+<<timelion-getting-started,Timelion>>:: Compute and combine data from multiple time series
 data sets.
-
+<<time-series-visual-builder,Time Series Visual Builder>>:: Visualize time series data using pipeline aggregations.
+* *Other*
+[horizontal]
+<<tagcloud-chart,Tag cloud>>:: Display words as a cloud in which the size of the word correspond to its importance
+<<markdown-widget,Markdown widget>>:: Display free-form information or
+instructions.
 . Specify a search query to retrieve the data for your visualization:
 ** To enter new search criteria, select the index pattern for the indices that
 contain the data you want to visualize. This opens the visualization builder
@@ -53,16 +64,38 @@ from the saved search.
 
 . In the visualization builder, choose the metric aggregation for the
 visualization's Y axis:
-+
+
+* *Metric Aggregations*:
+
 * {es-ref}search-aggregations-metrics-valuecount-aggregation.html[count]
 * {es-ref}search-aggregations-metrics-avg-aggregation.html[average]
 * {es-ref}search-aggregations-metrics-sum-aggregation.html[sum]
 * {es-ref}search-aggregations-metrics-min-aggregation.html[min]
 * {es-ref}search-aggregations-metrics-max-aggregation.html[max]
+* {es-ref}search-aggregations-metrics-stats-aggregation.html[standard deviation]
 * {es-ref}search-aggregations-metrics-cardinality-aggregation.html[unique count]
 * {es-ref}search-aggregations-metrics-percentile-aggregation.html[median] (50th percentile)
 * {es-ref}search-aggregations-metrics-percentile-aggregation.html[percentiles]
 * {es-ref}search-aggregations-metrics-percentile-rank-aggregation.html[percentile ranks]
+* {es-ref}search-aggregations-metrics-top-hits-aggregation.html[top hit]
+* {es-ref}search-aggregations-metrics-geocentroid-aggregation.html[geo centroid]
+
+
+* *Parent Pipeline Aggregations*:
+
+* {es-ref}search-aggregations-pipeline-derivative-aggregation.html[derivative]
+* {es-ref}search-aggregations-pipeline-cumulative-sum-aggregation.html[cumulative sum]
+* {es-ref}search-aggregations-pipeline-movavg-aggregation.html[moving average]
+* {es-ref}search-aggregations-pipeline-serialdiff-aggregation.html[serial diff]
+
+
+* *Sibling Pipeline Aggregations*:
+
+* {es-ref}search-aggregations-pipeline-avg-bucket-aggregation.html[average bucket]
+* {es-ref}search-aggregations-pipeline-sum-bucket-aggregation.html[sum bucket]
+* {es-ref}search-aggregations-pipeline-min-bucket-aggregation.html[min bucket]
+* {es-ref}search-aggregations-pipeline-max-bucket-aggregation.html[max bucket]
+
 
 . For the visualizations X axis, select a bucket aggregation:
 +
@@ -113,6 +146,10 @@ include::visualize/pie.asciidoc[]
 
 include::visualize/tilemap.asciidoc[]
 
+include::visualize/time-series-visual-builder.asciidoc[]
+
 include::visualize/tagcloud.asciidoc[]
 
 include::visualize/heatmap.asciidoc[]
+
+include::visualize/visualization-raw-data.asciidoc[]

@@ -1,38 +1,56 @@
-<form role="form" class="form-inline">
-  <div class="container-fluid">
-    <div class="row">
-      <div class="input-group form-group finder-form col-md-7">
-        <span class="input-group-addon savedObjectFinderSearchIcon">
-          <span class="fa fa-search"></span>
-        </span>
+<form
+  role="form"
+  class="kuiVerticalRhythm"
+>
+  <div class="kuiBar">
+    <div class="kuiBarSection">
+      <div class="kuiSearchInput fullWidth">
+        <div class="kuiSearchInput__icon kuiIcon fa-search"></div>
         <input
+          class="kuiSearchInput__input"
           input-focus
           ng-model="filter"
-          ng-attr-placeholder="{{finder.properties.nouns | label }} Filter..."
+          ng-attr-placeholder="{{ finder.properties.nouns | label }} Filter..."
           ng-keydown="finder.filterKeyDown($event)"
-          class="form-control"
           name="filter"
           type="text"
           autocomplete="off"
-        />
+        >
       </div>
-      <div class="finder-hit-count col-md-2">
-        <span>{{finder.hitCount}} of {{finder.hitCount}}</span>
-      </div>
-      <div class="finder-manage-object col-md-2" ng-if="onAddNew">
-        <a class="small" ng-click="onAddNew()" data-test-subj="addNewSavedObjectLink">
-          Add new {{finder.properties.noun}}
-        </a>
-      </div>
-      <div class="finder-manage-object col-md-2" ng-if="!useLocalManagement">
-        <a class="small" ng-click="finder.manageObjects(finder.properties.name)">
-          Manage {{finder.properties.nouns}}
-        </a>
+    </div>
+
+    <div class="kuiBarSection">
+      <p class="kuiText kuiSubduedText">
+        {{ pageFirstItem }}-{{ pageLastItem }} of {{ finder.hitCount }}
+      </p>
+
+      <div class="kuiButtonGroup">
+        <button
+          class="kuiButton kuiButton--basic"
+          ng-if="onAddNew"
+          ng-click="onAddNew()"
+          data-test-subj="addNewSavedObjectLink"
+        >
+          Add new {{ finder.properties.noun }}
+        </button>
+
+        <button
+          class="kuiButton kuiButton--basic"
+          ng-if="!useLocalManagement"
+          ng-click="finder.manageObjects(finder.properties.name)"
+        >
+          Manage {{ finder.properties.nouns }}
+        </button>
       </div>
     </div>
   </div>
 </form>
-<paginate list="finder.hits" per-page="20">
+
+<paginate
+  list="finder.hits"
+  per-page="20"
+  class="kuiVerticalRhythm"
+>
   <ul class="li-striped list-group list-group-menu" ng-class="{'select-mode': finder.selector.enabled}">
     <li class="list-group-item" ng-click="finder.sortHits(finder.hits)">
       <span class="paginate-heading">

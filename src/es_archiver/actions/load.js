@@ -9,7 +9,7 @@ import {
   isGzip,
   createStats,
   prioritizeMappings,
-  getArchiveFiles,
+  readDirectory,
   createParseArchiveStreams,
   createCreateIndexStream,
   createIndexDocRecordsStream,
@@ -19,7 +19,7 @@ export async function loadAction({ name, skipExisting, client, dataDir, log }) {
   const inputDir = resolve(dataDir, name);
   const stats = createStats(name, log);
 
-  const files = prioritizeMappings(await getArchiveFiles(inputDir));
+  const files = prioritizeMappings(await readDirectory(inputDir));
   for (const filename of files) {
     log.info('[%s] Loading %j', name, filename);
 
@@ -31,8 +31,14 @@ export async function loadAction({ name, skipExisting, client, dataDir, log }) {
     ]);
   }
 
+  const indicesToRefresh = [];
   stats.forEachIndex((index, { docs }) => {
     log.info('[%s] Indexed %d docs into %j', name, docs.indexed, index);
+    indicesToRefresh.push(index);
+  });
+
+  await client.indices.refresh({
+    index: indicesToRefresh
   });
 
   return stats.toJSON();

@@ -1,7 +1,7 @@
 import expect from 'expect.js';
 import { fromNode as fn } from 'bluebird';
 import { resolve } from 'path';
-import * as kbnTestServer from '../../../../test/utils/kbn_server';
+import * as kbnTestServer from '../../../test_utils/kbn_server';
 
 const nonDestructiveMethods = ['GET', 'HEAD'];
 const destructiveMethods = ['POST', 'PUT', 'DELETE'];
@@ -46,7 +46,7 @@ describe('xsrf request filter', function () {
   afterEach(async () => await kbnServer.close());
 
   for (const method of nonDestructiveMethods) {
-    context(`nonDestructiveMethod: ${method}`, function () { // eslint-disable-line no-loop-func
+    describe(`nonDestructiveMethod: ${method}`, function () { // eslint-disable-line no-loop-func
       it('accepts requests without a token', async function () {
         const resp = await inject(kbnServer, {
           url: '/xsrf/test/route',
@@ -75,7 +75,7 @@ describe('xsrf request filter', function () {
   }
 
   for (const method of destructiveMethods) {
-    context(`destructiveMethod: ${method}`, function () { // eslint-disable-line no-loop-func
+    describe(`destructiveMethod: ${method}`, function () { // eslint-disable-line no-loop-func
       it('accepts requests with the xsrf header', async function () {
         const resp = await inject(kbnServer, {
           url: '/xsrf/test/route',

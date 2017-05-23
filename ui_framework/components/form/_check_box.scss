@@ -1,3 +1,10 @@
+$checkboxBackgroundColor: #FFF;
+$checkboxBorderColor: #BEBEBE;
+$checkboxIconColor: #FFF;
+$checkboxCheckedBackgroundColor: #328CAA;
+$checkboxDisabledOpacity: 0.3;
+
+
 /**
  * 1. Deliberately disable only webkit appearance. If we disable it in Firefox, we get a really
  *    ugly default appearance which we can't customize, so our best option is to give Firefox
@@ -6,17 +13,17 @@
  */
 .kuiCheckBox {
   -webkit-appearance: none; /* 1 */
-  background-color: #FFFFFF;
-  border: 1px solid #BEBEBE;
-  border-radius: $buttonBorderRadius;
+  background-color: $checkboxBackgroundColor;
+  border: 1px solid $checkboxBorderColor;
+  border-radius: $globalBorderRadius;
   width: 16px;
   height: 16px;
-  line-height: $lineHeight !important; /* 2 */
+  line-height: $globalLineHeight !important; /* 2 */
   margin: 0 !important; /* 2 */
-  font: $font !important; /* 2 */
-  font-family: $font !important; /* 2 */
+  font: $globalFontFamily !important; /* 2 */
+  font-family: $globalFontFamily !important; /* 2 */
   font-size: 10px !important; /* 2 */
-  transition: background-color $formTransitionTiming;
+  transition: background-color $globalInputTransitionTiming;
 
   &:before {
     position: relative;
@@ -25,13 +32,13 @@
     content: "\F00C";
     font-size: 1em;
     opacity: 0;
-    color: #ffffff;
-    transition: opacity $formTransitionTiming;
+    color: $checkboxIconColor;
+    transition: opacity $globalInputTransitionTiming;
   }
 
   &:checked {
-    border-color: #328CAA;
-    background-color: #328CAA;
+    border-color: $checkboxCheckedBackgroundColor;
+    background-color: $checkboxCheckedBackgroundColor;
     &:before {
       opacity: 1;
     }
@@ -42,7 +49,19 @@
   }
 
   &:disabled {
-    opacity: 0.3;
+    opacity: $checkboxDisabledOpacity;
     cursor: not-allowed;
   }
 }
+
+.kuiCheckBoxLabel {
+  display: flex;
+  align-items: center;
+  font-weight: normal !important;
+  line-height: $globalLineHeight;
+}
+
+  .kuiCheckBoxLabel__text {
+    font-size: $globalFontSize;
+    margin-left: 8px;
+  }

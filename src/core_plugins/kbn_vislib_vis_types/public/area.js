@@ -1,19 +1,20 @@
-import VislibVisTypeVislibVisTypeProvider from 'ui/vislib_vis_type/vislib_vis_type';
-import VisSchemasProvider from 'ui/vis/schemas';
+import { VisVisTypeProvider } from 'ui/vis/vis_type';
+import { VislibVisTypeVislibVisTypeProvider } from 'ui/vislib_vis_type/vislib_vis_type';
+import { VisSchemasProvider } from 'ui/vis/schemas';
 import pointSeriesTemplate from 'plugins/kbn_vislib_vis_types/editors/point_series.html';
+import image from './images/icon-area.svg';
 
 export default function PointSeriesVisType(Private) {
+  const VisType = Private(VisVisTypeProvider);
   const VislibVisType = Private(VislibVisTypeVislibVisTypeProvider);
   const Schemas = Private(VisSchemasProvider);
 
   return new VislibVisType({
     name: 'area',
-    title: 'Area chart',
-    icon: 'fa-area-chart',
-    description: 'Great for stacked timelines in which the total of all series is more important ' +
-    'than comparing any two or more series. Less useful for assessing the relative change of ' +
-    'unrelated data points as changes in a series lower down the stack will have a difficult to gauge ' +
-    'effect on the series above it.',
+    title: 'Area',
+    image,
+    description: 'Emphasize the quantity beneath a line chart',
+    category: VisType.CATEGORY.BASIC,
     params: {
       defaults: {
         grid: {
@@ -128,6 +129,7 @@ export default function PointSeriesVisType(Private) {
         group: 'metrics',
         name: 'metric',
         title: 'Y-Axis',
+        aggFilter: ['!geo_centroid'],
         min: 1,
         defaults: [
           { schema: 'metric', type: 'count' }

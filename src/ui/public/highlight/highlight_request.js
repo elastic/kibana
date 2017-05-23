@@ -1,5 +1,5 @@
 import _ from 'lodash';
-import highlightTags from './highlight_tags';
+import { highlightTags } from './highlight_tags';
 
 const FRAGMENT_SIZE = Math.pow(2, 31) - 1; // Max allowed value for fragment_size (limit of a java int)
 
@@ -9,7 +9,11 @@ const FRAGMENT_SIZE = Math.pow(2, 31) - 1; // Max allowed value for fragment_siz
 function getHighlightQuery(query) {
   const clone = _.cloneDeep(query);
 
-  if (_.has(clone, 'query_string')) {
+  if (
+    _.has(clone, 'query_string')
+    && !_.has(clone, ['query_string', 'default_field'])
+    && !_.has(clone, ['query_string', 'fields'])
+  ) {
     clone.query_string.all_fields = true;
   } else if (_.has(clone, 'bool.must')) {
     if (Array.isArray(clone.bool.must)) {
@@ -22,7 +26,7 @@ function getHighlightQuery(query) {
   return clone;
 }
 
-export default function getHighlightRequestProvider(config) {
+export function getHighlightRequestProvider(config) {
   return function getHighlightRequest(query) {
     if (!config.get('doc_table:highlight')) return;
 

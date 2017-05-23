@@ -4,7 +4,7 @@
 //////////
 release-state can be: released | prerelease | unreleased
 //////////
-:release-state:  unreleased
+:release-state:  prerelease
 :version:        6.0.0-alpha1
 :major-version:  6.x
 :branch:         master
@@ -16,8 +16,8 @@ release-state can be: released | prerelease | unreleased
 :issue:          {repo}issues/
 :pull:           {repo}pull/
 :commit:         {repo}commit/
+:blob:           {repo}blob/{branch}/
 :security:       https://www.elastic.co/community/security/
-
 
 include::introduction.asciidoc[]
 
@@ -42,3 +42,7 @@ include::management.asciidoc[]
 include::plugins.asciidoc[]
 
 include::development.asciidoc[]
+
+include::limitations.asciidoc[]
+
+include::release-notes.asciidoc[]

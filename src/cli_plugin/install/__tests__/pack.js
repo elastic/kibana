@@ -98,10 +98,9 @@ describe('kibana cli', function () {
         })
         .then(() => {
           expect(settings.plugins[0].name).to.be('test-plugin');
-          expect(settings.plugins[0].folder).to.be('test-plugin');
+          expect(settings.plugins[0].archivePath).to.be('kibana/test-plugin');
           expect(settings.plugins[0].version).to.be('1.0.0');
           expect(settings.plugins[0].kibanaVersion).to.be('1.0.0');
-          expect(settings.plugins[0].platform).to.be(undefined);
         });
       });
 
@@ -134,40 +133,28 @@ describe('kibana cli', function () {
         })
         .then(() => {
           expect(settings.plugins[0].name).to.be('funger-plugin');
-          expect(settings.plugins[0].file).to.be('kibana/funger-plugin/package.json');
-          expect(settings.plugins[0].folder).to.be('funger-plugin');
+          expect(settings.plugins[0].archivePath).to.be('kibana/funger-plugin');
           expect(settings.plugins[0].version).to.be('1.0.0');
-          expect(settings.plugins[0].platform).to.be(undefined);
 
           expect(settings.plugins[1].name).to.be('pdf');
-          expect(settings.plugins[1].file).to.be('kibana/pdf-linux/package.json');
-          expect(settings.plugins[1].folder).to.be('pdf-linux');
+          expect(settings.plugins[1].archivePath).to.be('kibana/pdf-linux');
           expect(settings.plugins[1].version).to.be('1.0.0');
-          expect(settings.plugins[1].platform).to.be('linux');
 
           expect(settings.plugins[2].name).to.be('pdf');
-          expect(settings.plugins[2].file).to.be('kibana/pdf-win32/package.json');
-          expect(settings.plugins[2].folder).to.be('pdf-win32');
+          expect(settings.plugins[2].archivePath).to.be('kibana/pdf-win32');
           expect(settings.plugins[2].version).to.be('1.0.0');
-          expect(settings.plugins[2].platform).to.be('win32');
 
           expect(settings.plugins[3].name).to.be('pdf');
-          expect(settings.plugins[3].file).to.be('kibana/pdf-win64/package.json');
-          expect(settings.plugins[3].folder).to.be('pdf-win64');
+          expect(settings.plugins[3].archivePath).to.be('kibana/pdf-win64');
           expect(settings.plugins[3].version).to.be('1.0.0');
-          expect(settings.plugins[3].platform).to.be('win64');
 
           expect(settings.plugins[4].name).to.be('pdf');
-          expect(settings.plugins[4].file).to.be('kibana/pdf/package.json');
-          expect(settings.plugins[4].folder).to.be('pdf');
+          expect(settings.plugins[4].archivePath).to.be('kibana/pdf');
           expect(settings.plugins[4].version).to.be('1.0.0');
-          expect(settings.plugins[4].platform).to.be(undefined);
 
           expect(settings.plugins[5].name).to.be('test-plugin');
-          expect(settings.plugins[5].file).to.be('kibana/test-plugin/package.json');
-          expect(settings.plugins[5].folder).to.be('test-plugin');
+          expect(settings.plugins[5].archivePath).to.be('kibana/test-plugin');
           expect(settings.plugins[5].version).to.be('1.0.0');
-          expect(settings.plugins[5].platform).to.be(undefined);
         });
       });
 

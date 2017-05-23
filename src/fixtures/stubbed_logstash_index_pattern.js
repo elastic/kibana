@@ -1,7 +1,8 @@
 import _ from 'lodash';
 import TestUtilsStubIndexPatternProvider from 'test_utils/stub_index_pattern';
-import IndexPatternsFieldTypesProvider from 'ui/index_patterns/_field_types';
+import { IndexPatternsFieldTypesProvider } from 'ui/index_patterns/_field_types';
 import FixturesLogstashFieldsProvider from 'fixtures/logstash_fields';
+
 export default function stubbedLogstashIndexPatternService(Private) {
   const StubIndexPattern = Private(TestUtilsStubIndexPatternProvider);
   const fieldTypes = Private(IndexPatternsFieldTypesProvider);

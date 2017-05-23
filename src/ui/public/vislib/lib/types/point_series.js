@@ -1,6 +1,6 @@
 import _ from 'lodash';
 
-export default function ColumnHandler() {
+export function VislibTypesPointSeries() {
 
   const createSerieFromParams = (cfg, seri) => {
     const matchingSeriParams = cfg.seriesParams ? cfg.seriesParams.find(seriConfig => {
@@ -34,7 +34,8 @@ export default function ColumnHandler() {
       valueAxis: matchingSeriParams.valueAxis,
       drawLinesBetweenPoints: matchingSeriParams.drawLinesBetweenPoints,
       showCircles: matchingSeriParams.showCircles,
-      radiusRatio: matchingSeriParams.radiusRatio,
+      radiusRatio: cfg.radiusRatio,
+      lineWidth: matchingSeriParams.lineWidth,
       data: seri
     };
   };
@@ -198,11 +199,14 @@ export default function ColumnHandler() {
         },
         labels: {
           filter: false,
-          axisFormatter: data.data.yAxisFormatter
+          axisFormatter: data.get('zAxisFormatter') || function () { return ''; }
         },
         style: {
           rangePadding: 0,
           rangeOuterPadding: 0
+        },
+        title: {
+          text: data.get('zAxisLabel') || ''
         }
       });
       return defaults;

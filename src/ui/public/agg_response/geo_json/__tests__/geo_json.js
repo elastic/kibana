@@ -2,11 +2,11 @@
 import _ from 'lodash';
 import expect from 'expect.js';
 import ngMock from 'ng_mock';
-import VisProvider from 'ui/vis';
+import { VisProvider } from 'ui/vis';
 import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
 import FixturesAggRespGeohashGridProvider from 'fixtures/agg_resp/geohash_grid';
-import AggResponseTabifyTabifyProvider from 'ui/agg_response/tabify/tabify';
-import AggResponseGeoJsonGeoJsonProvider from 'ui/agg_response/geo_json/geo_json';
+import { AggResponseTabifyProvider } from 'ui/agg_response/tabify/tabify';
+import { AggResponseGeoJsonProvider } from 'ui/agg_response/geo_json/geo_json';
 
 describe('GeoJson Agg Response Converter', function () {
   let vis;
@@ -21,8 +21,8 @@ describe('GeoJson Agg Response Converter', function () {
     const indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
 
     esResponse = Private(FixturesAggRespGeohashGridProvider);
-    tabify = Private(AggResponseTabifyTabifyProvider);
-    convert = Private(AggResponseGeoJsonGeoJsonProvider);
+    tabify = Private(AggResponseTabifyProvider);
+    convert = Private(AggResponseGeoJsonProvider);
 
     vis = new Vis(indexPattern, {
       type: 'tile_map',

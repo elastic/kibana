@@ -1,10 +1,11 @@
 import ngMock from 'ng_mock';
 import expect from 'expect.js';
-import AggTypesAggParamsProvider from 'ui/agg_types/agg_params';
-import AggTypesParamTypesBaseProvider from 'ui/agg_types/param_types/base';
-import AggTypesParamTypesFieldProvider from 'ui/agg_types/param_types/field';
-import AggTypesParamTypesOptionedProvider from 'ui/agg_types/param_types/optioned';
-import AggTypesParamTypesRegexProvider from 'ui/agg_types/param_types/regex';
+import { AggTypesAggParamsProvider } from 'ui/agg_types/agg_params';
+import { AggTypesParamTypesBaseProvider } from 'ui/agg_types/param_types/base';
+import { AggTypesParamTypesFieldProvider } from 'ui/agg_types/param_types/field';
+import { AggTypesParamTypesOptionedProvider } from 'ui/agg_types/param_types/optioned';
+import { AggTypesParamTypesRegexProvider } from 'ui/agg_types/param_types/regex';
+
 describe('AggParams class', function () {
 
   let AggParams;

@@ -3,6 +3,7 @@ import minimatch from 'minimatch';
 
 import UiAppCollection from './ui_app_collection';
 import UiNavLinkCollection from './ui_nav_link_collection';
+import { MappingsCollection } from './ui_mappings';
 
 class UiExports {
   constructor({ urlBasePath }) {
@@ -15,6 +16,7 @@ class UiExports {
     this.bundleProviders = [];
     this.defaultInjectedVars = {};
     this.injectedVarsReplacers = [];
+    this.mappings = new MappingsCollection();
   }
 
   consumePlugin(plugin) {
@@ -122,6 +124,11 @@ class UiExports {
           plugin.extendInit(async (server, options) => {
             _.merge(this.defaultInjectedVars, await injector.call(plugin, server, options));
           });
+        };
+
+      case 'mappings':
+        return (plugin, mappings) => {
+          this.mappings.register(mappings, { plugin: plugin.id });
         };
 
       case 'replaceInjectedVars':

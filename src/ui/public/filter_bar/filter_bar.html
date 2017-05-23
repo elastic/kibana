@@ -2,17 +2,35 @@
   <form ng-submit="applyFilters(newFilters)">
   <ul class="list-unstyled">
     <li>Apply these filters?</li>
-    <li ng-repeat="filter in newFilters" class="filter" ng-click="filter.meta.apply = !filter.meta.apply"><input type="checkbox" ng-checked="filter.meta.apply"/> {{ filter.meta.key }}: {{ filter.meta.value }}</li>
+    <li ng-repeat="filter in newFilters track by $index" class="filter" ng-click="filter.meta.apply = !filter.meta.apply"><input type="checkbox" ng-checked="filter.meta.apply"/> {{ filter.meta.key }}: {{ filter.meta.value }}</li>
     <li ng-if="changeTimeFilter" class="changeTimeFilter filter" ng-click="changeTimeFilter.meta.apply = !changeTimeFilter.meta.apply"><input type="checkbox" ng-checked="changeTimeFilter.meta.apply"/> <strong>Change time to:</strong> {{changeTimeFilter.meta.value}} </li>
-    <li><button class="btn btn-xs btn-primary">Apply Now</button> or <a ng-click="clearFilterBar();">Cancel</a></li>
+    <li>
+      <div class="kuiButtonGroup">
+        <button class="kuiButton kuiButton--primary kuiButton--small">
+          Apply Now
+        </button>
+
+        <button
+          class="kuiButton kuiButton--hollow"
+          ng-click="clearFilterBar();"
+        >
+          Cancel
+        </button>
+      </div>
+    </li>
   </ul>
   </form>
 </div>
 
 <div class="filter-bar" ng-show="filters.length">
-  <div class="filter" ng-class="{ negate: filter.meta.negate, disabled: filter.meta.disabled }" ng-repeat="filter in filters">
+  <div
+    class="filter"
+    ng-class="{ negate: filter.meta.negate, disabled: filter.meta.disabled }"
+    ng-repeat="filter in filters track by $index"
+    data-test-subj="filter filter-{{ filter.meta.disabled ? 'disabled' : 'enabled' }} {{ filter.meta.key ? 'filter-key-' + filter.meta.key : '' }} {{ filter.meta.value ? 'filter-value-' + filter.meta.value : '' }}"
+  >
     <div class="filter-description">
-      <span ng-if="filter.$state.store === 'globalState' && showFilterPin()"><i class="fa fa-fw fa-thumb-tack pinned"></i></span>
+      <span ng-if="filter.$state.store == 'globalState'"><i class="fa fa-fw fa-thumb-tack pinned"></i></span>
       <span ng-if="filter.meta.alias">{{ filter.meta.alias }}</span>
       <span ng-if="!filter.meta.alias">{{ filter.meta.key }}:</span>
       <span ng-if="!filter.meta.alias">"{{ filter.meta.value }}"</span>
@@ -22,7 +40,7 @@
         <i ng-show="filter.meta.disabled" class="fa fa-fw fa-square-o disabled"></i>
         <i ng-hide="filter.meta.disabled" class="fa fa-fw fa-check-square-o enabled"></i>
       </a>
-      <a class="action filter-pin" ng-if="showFilterPin()" ng-click="pinFilter(filter)" data-test-subj="pinFilter-{{ filter.meta.key }}">
+      <a class="action filter-pin" ng-click="pinFilter(filter)" data-test-subj="pinFilter-{{ filter.meta.key }}">
         <i ng-show="filter.$state.store == 'globalState'" class="fa fa-fw fa-thumb-tack pinned"></i>
         <i ng-hide="filter.$state.store == 'globalState'" class="fa fa-fw fa-thumb-tack fa-rotate-270 unpinned"></i>
       </a>
@@ -57,13 +75,28 @@
           mode: 'json',
           onLoad: aceLoaded
         }"
-        ng-model="editingFilter.model"></div>
+        ng-model="editingFilter.model"
+      ></div>
+
       <div class="form-group">
-        <button class="btn btn-primary" ng-click="stopEditingFilter()">Cancel</button>
-        <button type="submit" class="btn btn-success"
+        <button
+          class="kuiButton kuiButton--hollow"
+          ng-click="stopEditingFilter()"
+        >
+          Cancel
+        </button>
+
+        <button
+          type="submit"
+          class="kuiButton kuiButton--primary"
           ng-disabled="editFilterForm.$invalid"
-          >Done</button>
-        <small ng-show="editFilterForm.$invalid">Could not parse JSON input</small>
+        >
+          Done
+        </button>
+
+        <small ng-show="editFilterForm.$invalid">
+          Could not parse JSON input
+        </small>
       </div>
     </form>
   </div>
@@ -90,10 +123,10 @@
     <div class="filter-link">
       <div class="filter-description"><a ng-click="toggleAll(true)">Disable</a></div>
     </div>
-    <div class="filter-link" ng-if="showFilterPin()">
+    <div class="filter-link">
       <div class="filter-description"><a ng-click="pinAll(true)">Pin</a></div>
     </div>
-    <div class="filter-link" ng-if="showFilterPin()">
+    <div class="filter-link">
       <div class="filter-description"><a ng-click="pinAll(false)">Unpin</a></div>
     </div>
     <div class="filter-link">

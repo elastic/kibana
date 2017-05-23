@@ -1,19 +1,19 @@
 import d3 from 'd3';
 import _ from 'lodash';
 import $ from 'jquery';
-import ErrorHandlerProvider from '../_error_handler';
-import AxisTitleProvider from './axis_title';
-import AxisLabelsProvider from './axis_labels';
-import AxisScaleProvider from './axis_scale';
-import AxisConfigProvider from './axis_config';
-import errors from 'ui/errors';
+import { VislibLibErrorHandlerProvider } from '../_error_handler';
+import { VislibLibAxisTitleProvider } from './axis_title';
+import { VislibAxisLabelsProvider } from './axis_labels';
+import { VislibAxisScaleProvider } from './axis_scale';
+import { VislibLibAxisConfigProvider } from './axis_config';
+import { VislibError } from 'ui/errors';
 
-export default function AxisFactory(Private) {
-  const ErrorHandler = Private(ErrorHandlerProvider);
-  const AxisTitle = Private(AxisTitleProvider);
-  const AxisLabels = Private(AxisLabelsProvider);
-  const AxisScale = Private(AxisScaleProvider);
-  const AxisConfig = Private(AxisConfigProvider);
+export function VislibLibAxisProvider(Private) {
+  const ErrorHandler = Private(VislibLibErrorHandlerProvider);
+  const AxisTitle = Private(VislibLibAxisTitleProvider);
+  const AxisLabels = Private(VislibAxisLabelsProvider);
+  const AxisScale = Private(VislibAxisScaleProvider);
+  const AxisConfig = Private(VislibLibAxisConfigProvider);
 
   class Axis extends ErrorHandler {
     constructor(visConfig, axisConfigArgs) {
@@ -162,7 +162,7 @@ export default function AxisFactory(Private) {
 
     validate() {
       if (this.axisConfig.isLogScale() && this.axisConfig.isPercentage()) {
-        throw new errors.VislibError(`Can't mix percentage mode with log scale.`);
+        throw new VislibError(`Can't mix percentage mode with log scale.`);
       }
     }
 

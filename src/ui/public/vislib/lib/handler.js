@@ -1,21 +1,21 @@
 import d3 from 'd3';
 import _ from 'lodash';
 import $ from 'jquery';
-import errors from 'ui/errors';
-import Binder from 'ui/binder';
-import VislibLibLayoutLayoutProvider from './layout/layout';
-import VislibLibChartTitleProvider from './chart_title';
-import VislibLibAlertsProvider from './alerts';
-import VislibAxisProvider from './axis/axis';
-import VislibGridProvider from './chart_grid';
-import VislibVisualizationsVisTypesProvider from '../visualizations/vis_types';
+import { NoResults } from 'ui/errors';
+import { Binder } from 'ui/binder';
+import { VislibLibLayoutLayoutProvider } from './layout/layout';
+import { VislibLibChartTitleProvider } from './chart_title';
+import { VislibLibAlertsProvider } from './alerts';
+import { VislibLibAxisProvider } from './axis/axis';
+import { VislibGridProvider } from './chart_grid';
+import { VislibVisualizationsVisTypesProvider } from '../visualizations/vis_types';
 
-export default function HandlerBaseClass(Private) {
+export function VisHandlerProvider(Private) {
   const chartTypes = Private(VislibVisualizationsVisTypesProvider);
   const Layout = Private(VislibLibLayoutLayoutProvider);
   const ChartTitle = Private(VislibLibChartTitleProvider);
   const Alerts = Private(VislibLibAlertsProvider);
-  const Axis = Private(VislibAxisProvider);
+  const Axis = Private(VislibLibAxisProvider);
   const Grid = Private(VislibGridProvider);
 
   /**
@@ -104,7 +104,7 @@ export default function HandlerBaseClass(Private) {
       const dataType = this.data.type;
 
       if (!dataType) {
-        throw new errors.NoResults();
+        throw new NoResults();
       }
     }
 
@@ -195,7 +195,7 @@ export default function HandlerBaseClass(Private) {
 
       if (message === 'No results found') {
         div.append('div')
-        .attr('class', 'text-center visualize-error visualize-chart ng-scope')
+        .attr('class', 'text-center visualize-error visualize-chart')
         .append('div').attr('class', 'item top')
         .append('div').attr('class', 'item')
         .append('h2').html('<i class="fa fa-meh-o"></i>')

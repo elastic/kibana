@@ -1,6 +1,6 @@
-import DomLocationProvider from 'ui/dom_location';
+import { DomLocationProvider } from 'ui/dom_location';
 import { parse } from 'url';
-import uiModules from 'ui/modules';
+import { uiModules } from 'ui/modules';
 import appSwitcherTemplate from './app_switcher.html';
 
 uiModules

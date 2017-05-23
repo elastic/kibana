@@ -1,24 +1,49 @@
 <div class="visualize-show-spy">
-  <div ng-click="toggleDisplay()" class="visualize-show-spy-tab">
-    <i class="fa" ng-class="spy.mode.name ? 'fa-chevron-circle-down' : 'fa-chevron-circle-up'"></i>
-  </div>
+  <button
+    data-test-subj="spyToggleButton"
+    ng-click="toggleDisplay()"
+    class="kuiCollapseButton visualize-show-spy-tab"
+    type="button"
+  >
+    <span
+      class="kuiIcon"
+      ng-class="spy.mode.name ? 'fa-chevron-circle-down' : 'fa-chevron-circle-up'"
+    ></span>
+  </button>
 </div>
-<div ng-show="spy.mode.name" class="visualize-spy-container">
-  <header class="control-group">
-    <div class="fill visualize-spy-nav">
-      <a
-        class="btn btn-default"
-        ng-repeat="mode in modes.inOrder"
-        ng-class="{ active: spy.mode.name === mode.name }"
-        ng-click="setSpyMode(mode.name)">
-        {{mode.display}}
-      </a>
+
+<div
+  class="visualize-spy-container"
+  ng-show="spy.mode.name"
+>
+  <div class="kuiBar kuiVerticalRhythm">
+    <div class="kuiBarSection">
+      <select
+        class="kuiSelect"
+        ng-model="selectedModeName"
+        ng-change="onSpyModeChange()"
+      >
+        <option
+          ng-repeat="mode in modes.inOrder"
+          value="{{mode.name}}"
+        >
+          {{mode.display}}
+        </option>
+      </select>
     </div>
-    <div class="button-group visualize-spy-fill">
-      <a ng-click="toggleFullPage()">
-        <i ng-if="!spy.mode.fill" class="fa fa-expand"></i>
-        <i ng-if="spy.mode.fill" class="fa fa-compress"></i>
-      </a>
+
+    <div class="kuiBarSection">
+      <button class="kuiButton kuiButton--hollow" ng-click="toggleFullPage()">
+        <span
+          class="kuiIcon"
+          ng-class="spy.mode.fill ? 'fa-compress' : 'fa-expand'"
+        ></span>
+      </button>
     </div>
-  </header>
+  </div>
+
+  <div
+    data-spy-content-container
+    class="kuiVerticalRhythm"
+  ></div>
 </div>

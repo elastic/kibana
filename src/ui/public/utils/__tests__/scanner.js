@@ -1,4 +1,4 @@
-import Scanner from 'ui/utils/scanner';
+import { Scanner } from 'ui/utils/scanner';
 import expect from 'expect.js';
 import Bluebird from 'bluebird';
 import 'elasticsearch-browser';
@@ -6,7 +6,7 @@ import ngMock from 'ng_mock';
 import sinon from 'sinon';
 import url from 'url';
 
-import serverConfig from '../../../../../test/server_config';
+import { esTestServerUrlParts } from '../../../../../test/es_test_server_url_parts';
 
 describe('Scanner', function () {
   let es;
@@ -14,7 +14,7 @@ describe('Scanner', function () {
   beforeEach(ngMock.module('kibana'));
   beforeEach(ngMock.inject(function (esFactory) {
     es = esFactory({
-      host: url.format(serverConfig.servers.elasticsearch),
+      host: url.format(esTestServerUrlParts),
       defer: function () {
         return Bluebird.defer();
       }
@@ -53,16 +53,15 @@ describe('Scanner', function () {
       scroll = sinon.stub(scanner.client, 'scroll', (req, cb) => cb(null, mockScroll));
     });
 
-    it('should reject when an error occurs', function (done) {
+    it('should reject when an error occurs', function () {
       search.restore();
       search = sinon.stub(scanner.client, 'search', (req, cb) => cb(new Error('fail.')));
       return scanner.scanAndMap('')
       .then(function () {
-        done(new Error('should reject'));
+        throw new Error('should reject');
       })
       .catch(function (error) {
         expect(error.message).to.be('fail.');
-        done();
       });
     });
 

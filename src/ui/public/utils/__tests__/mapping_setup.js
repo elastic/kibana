@@ -22,7 +22,7 @@ describe('ui/utils/mapping_setup', function () {
       expect(mapping.foo.type).to.be('integer');
     });
 
-    context('when type is json', function () {
+    describe('when type is json', function () {
       it('returned object is type text', function () {
         const mapping = mappingSetup.expandShorthand({ foo: 'json' });
         expect(mapping.foo.type).to.be('text');

@@ -27,7 +27,7 @@
             ng-dblclick="unlink()"
             tooltip="Double click to unlink from Saved Search"
           >
-            <span aria-hidden="true" class="fa fa-chain-broken"></span>
+            <span aria-hidden="true" class="kuiIcon fa-chain-broken"></span>
           </a>
         </div>
 
@@ -38,25 +38,38 @@
           ng-submit="fetch()"
           class="fullWidth"
         >
-          <div class="typeahead" kbn-typeahead="visualize">
+          <div class="typeahead" kbn-typeahead="visualize" on-select="fetch()">
             <div class="kuiLocalSearch">
-              <input
-                ng-model="state.query"
-                parse-query
-                input-focus
-                kbn-typeahead-input
-                placeholder="Search..."
-                type="text"
-                class="kuiLocalSearchInput"
-                ng-class="{'kuiLocalSearchInput-isInvalid': queryInput.$invalid}"
-              >
+              <div class="kuiLocalSearchAssistedInput">
+                <input
+                  ng-model="state.query"
+                  parse-query
+                  input-focus
+                  kbn-typeahead-input
+                  placeholder="Search... (e.g. status:200 AND extension:PHP)"
+                  type="text"
+                  class="kuiLocalSearchInput kuiLocalSearchInput--lucene"
+                  ng-class="{'kuiLocalSearchInput-isInvalid': queryInput.$invalid}"
+                >
+                <div class="kuiLocalSearchAssistedInput__assistance">
+                  <p class="kuiText">
+                    <a
+                      class="kuiLink"
+                      ng-href="{{queryDocLinks.luceneQuerySyntax}}"
+                      target="_blank"
+                    >
+                      Uses lucene query syntax
+                    </a>
+                  </p>
+                </div>
+              </div>
               <button
                 type="submit"
                 aria-label="Search"
                 class="kuiLocalSearchButton"
                 ng-disabled="queryInput.$invalid"
               >
-                <span aria-hidden="true" class="fa fa-search"></span>
+                <span aria-hidden="true" class="kuiIcon fa-search"></span>
               </button>
             </div>
             <kbn-typeahead-items></kbn-typeahead-items>
@@ -69,24 +82,45 @@
   <!-- Filters. -->
   <filter-bar state="state"></filter-bar>
 
-  <div class="vis-editor-content">
+  <!-- Custom, full-screen editing UI. -->
+  <div
+    ng-if="vis.type.fullEditor"
+    class="vis-editor-content"
+  >
+    <vis-editor-vis-options
+      vis="vis"
+      saved-vis="savedVis"
+      editor="vis.type.params.editor"
+      ui-state="uiState"
+      stage-editable-vis="stageEditableVis"
+      class="vis-editor-full-options"
+    ></vis-editor-vis-options>
+  </div>
 
-    <vis-editor-vis-options ng-if="vis.type.fullEditor"
-                            vis="vis"
-                            saved-vis="savedVis"
-                            editor="vis.type.params.editor"
-                            ui-state="uiState"
-                            stage-editable-vis="stageEditableVis"
-                            class="vis-editor-full-options"></vis-editor-vis-options>
-
-    <div class="collapsible-sidebar" ng-if="!vis.type.fullEditor && chrome.getVisible()" >
-      <vis-editor-sidebar vis="editableVis" class="vis-editor-sidebar"></vis-editor-sidebar>
+  <!-- Traditional sidebar-and-visualization editor. -->
+  <div
+    ng-if="!vis.type.fullEditor"
+    class="vis-editor-content"
+  >
+    <!-- Sidebar -->
+    <div
+      class="collapsible-sidebar"
+      ng-if="chrome.getVisible()"
+    >
+      <vis-editor-sidebar
+        vis="editableVis"
+        class="vis-editor-sidebar"
+      ></vis-editor-sidebar>
     </div>
 
-    <div class="vis-editor-canvas" ng-if="!vis.type.fullEditor" ng-class="{ embedded: !chrome.getVisible() }">
+    <!-- Visualization -->
+    <div
+      class="vis-editor-canvas"
+      ng-class="{ embedded: !chrome.getVisible() }"
+    >
       <visualize
         vis="vis"
-        shared-item
+        data-shared-item
         data-title="{{savedVis.lastSavedTitle}}"
         data-description="{{savedVis.description}}"
         render-counter
@@ -96,6 +130,5 @@
         search-source="savedVis.searchSource">
       </visualize>
     </div>
-
   </div>
 </visualize-app>

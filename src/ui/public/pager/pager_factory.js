@@ -1,4 +1,4 @@
-import uiModules from 'ui/modules';
+import { uiModules } from 'ui/modules';
 import { Pager } from './pager';
 
 const app = uiModules.get('kibana');

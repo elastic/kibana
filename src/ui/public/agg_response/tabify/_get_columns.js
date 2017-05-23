@@ -1,6 +1,7 @@
 import _ from 'lodash';
-import VisAggConfigProvider from 'ui/vis/agg_config';
-export default function GetColumnsProvider(Private) {
+import { VisAggConfigProvider } from 'ui/vis/agg_config';
+
+export function AggResponseGetColumnsProvider(Private) {
   const AggConfig = Private(VisAggConfigProvider);
 
   return function getColumns(vis, minimal) {

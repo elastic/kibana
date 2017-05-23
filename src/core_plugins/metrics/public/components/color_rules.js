@@ -29,10 +29,10 @@ class ColorRules extends Component {
     const handleAdd = collectionActions.handleAdd.bind(null, this.props);
     const handleDelete = collectionActions.handleDelete.bind(null, this.props, model);
     const operatorOptions = [
-      { label: '> greater then', value: 'gt' },
-      { label: '>= greater then or equal', value: 'gte' },
-      { label: '< less then', value: 'lt' },
-      { label: '<= less then or equal', value: 'lte' },
+      { label: '> greater than', value: 'gt' },
+      { label: '>= greater than or equal', value: 'gte' },
+      { label: '< less than', value: 'lt' },
+      { label: '<= less than or equal', value: 'lte' },
     ];
     const handleColorChange = (part) => {
       const handleChange = collectionActions.handleChange.bind(null, this.props);

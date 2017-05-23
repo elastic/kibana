@@ -1,0 +1,13 @@
+<div>
+  <div class="kuiTogglePanelHeader">
+    <toggle-button
+      text="{{ togglePanel.text }}"
+      is-collapsed="togglePanel.isCollapsed"
+      on-click="togglePanel.toggle"
+    ></toggle-button>
+  </div>
+  <div
+    ng-hide="togglePanel.isCollapsed"
+    ng-transclude
+  ></div>
+</div>

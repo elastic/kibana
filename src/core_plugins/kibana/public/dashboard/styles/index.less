@@ -1,8 +1,13 @@
 @import (reference) "~ui/styles/variables";
 @import (reference) "~ui/styles/mixins";
+@import "~ui/styles/local_search.less";
 
 .tab-dashboard {
   background-color: @dashboard-bg;
+}
+
+.dashboardCloneModal {
+  width: 450px;
 }
 
 dashboard-grid {
@@ -35,18 +40,11 @@ dashboard-grid {
 
   .gs-w {
 
-    .panel .panel-heading .btn-group {
-      display: none;
-    }
-
     &:hover {
 
       dashboard-panel {
         .visualize-show-spy {
           visibility: visible;
-        }
-        .panel .panel-heading .btn-group {
-          display: block !important;
         }
       }
 
@@ -55,9 +53,6 @@ dashboard-grid {
       border-color: @kibanaGray4;
       .visualize-show-spy {
         visibility: visible;
-      }
-      .panel-heading .btn-group {
-        display: block !important;
       }
     }
   }
@@ -75,9 +70,6 @@ dashboard-grid {
   border-color: @kibanaGray4;
   .visualize-show-spy {
     visibility: visible;
-  }
-  .panel-heading .btn-group {
-    display: block !important;
   }
 }
 
@@ -120,14 +112,6 @@ dashboard-panel {
       background-color: @white;
       border: none;
 
-      .btn-group {
-        a {
-          color: inherit;
-        }
-        white-space: nowrap;
-        flex: 0 0 auto;
-      }
-
       .panel-title {
         font-size: inherit;
 
@@ -147,16 +131,6 @@ dashboard-panel {
 
       .panel-move:hover {
         cursor: move;
-      }
-
-      a {
-        color: @dashboard-panel-heading-link-color;
-        border: none;
-        background: none;
-        padding: 0px 3px;
-        &:hover {
-          color: @dashboard-panel-heading-link-hover-color;
-        }
       }
     }
 

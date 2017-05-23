@@ -1,7 +1,7 @@
 import _ from 'lodash';
 import angular from 'angular';
 
-import metadata from 'ui/metadata';
+import { metadata } from 'ui/metadata';
 import 'babel-polyfill';
 import 'ui/timefilter';
 import 'ui/notify';
@@ -12,14 +12,14 @@ import 'ui/directives/kbn_src';
 import 'ui/watch_multi';
 import './services';
 
-import angularApi from './api/angular';
+import { initAngularApi } from './api/angular';
 import appsApi from './api/apps';
 import controlsApi from './api/controls';
-import navApi from './api/nav';
+import { initChromeNavApi } from './api/nav';
 import templateApi from './api/template';
 import themeApi from './api/theme';
 import translationsApi from './api/translations';
-import xsrfApi from './api/xsrf';
+import { initChromeXsrfApi } from './api/xsrf';
 
 const chrome = {};
 const internals = _.defaults(
@@ -38,9 +38,9 @@ const internals = _.defaults(
 );
 
 appsApi(chrome, internals);
-xsrfApi(chrome, internals);
-navApi(chrome, internals);
-angularApi(chrome, internals);
+initChromeXsrfApi(chrome, internals);
+initChromeNavApi(chrome, internals);
+initAngularApi(chrome, internals);
 controlsApi(chrome, internals);
 templateApi(chrome, internals);
 themeApi(chrome, internals);

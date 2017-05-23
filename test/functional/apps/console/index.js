@@ -1,16 +1,11 @@
+export default function ({ getService, loadTestFile }) {
+  const remote = getService('remote');
 
-import {
-  bdd,
-  remote,
-  defaultTimeout,
-} from '../../../support';
+  describe('console app', function () {
+    before(async function () {
+      await remote.setWindowSize(1200,800);
+    });
 
-bdd.describe('console app', function () {
-  this.timeout = defaultTimeout;
-
-  bdd.before(function () {
-    return remote.setWindowSize(1200,800);
+    loadTestFile(require.resolve('./_console'));
   });
-
-  require('./_console');
-});
+}
