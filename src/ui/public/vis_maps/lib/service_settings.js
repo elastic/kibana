@@ -20,10 +20,10 @@ uiModules.get('kibana')
      *  @param  {String} url
      *  @return {String}
      */
-    // const unescapeTemplateVars = url => {
-    //   const ENCODED_TEMPLATE_VARS_RE = /%7B(\w+?)%7D/g;
-    //   return url.replace(ENCODED_TEMPLATE_VARS_RE, (total, varName) => `{${varName}}`);
-    // };
+    const unescapeTemplateVars = url => {
+      const ENCODED_TEMPLATE_VARS_RE = /%7B(\w+?)%7D/g;
+      return url.replace(ENCODED_TEMPLATE_VARS_RE, (total, varName) => `{${varName}}`);
+    };
 
 
 
@@ -40,7 +40,6 @@ uiModules.get('kibana')
 
         this._invalidateSettings();
       }
-
       _invalidateSettings() {
 
         this._loadCatalogue = _.once(async() => {
@@ -64,8 +63,9 @@ uiModules.get('kibana')
           const fileService = catalogue.services.filter((service) => service.type === 'file')[0];
           const manifest = await this._getManifest(fileService.manifest, this._queryParams);
           const layers = manifest.data.layers.filter(layer => layer.format === 'geojson');
-
-          //todo. add query-params to all layer-urls
+          layers.forEach((layer) => {
+            layer.url = this._extendUrlWithParams(layer.url);
+          });
           return layers;
         });
 
@@ -76,12 +76,24 @@ uiModules.get('kibana')
           const manifest = await this._getManifest(tmsService.manifest, this._queryParams);
           const services = manifest.data.services;
 
-          const firstService = services[0];
+          const firstService = _.cloneDeep(services[0]);
+          if (!firstService) {
+            throw new Error('Manifest response does not include sufficient service data.');
+          }
 
-          //todo. add query-params to all layer-urls
+
+          firstService.attribution = $sanitize(marked(firstService.attribution));
+          firstService.subdomains = firstService.subdomains || [];
+          firstService.url = this._extendUrlWithParams(firstService.url);
           return firstService;
         });
 
+      }
+
+      _extendUrlWithParams(url) {
+        return unescapeTemplateVars(extendUrl(url, {
+          query: this._queryParams
+        }));
       }
 
       async _getManifest(manifestUrl) {
