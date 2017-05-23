@@ -67,7 +67,7 @@ describe('SavedObjectsClient', () => {
         await savedObjectsClient._request('GET', '/api/path', params);
         expect().fail('should have error');
       } catch (e) {
-        expect(e.message).to.eql('data not permitted for GET requests');
+        expect(e.message).to.eql('body not permitted for GET requests');
       }
     });
 

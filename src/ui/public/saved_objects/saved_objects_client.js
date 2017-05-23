@@ -80,11 +80,11 @@ export class SavedObjectsClient {
     }));
   }
 
-  _request(method, url, data) {
-    const options = { method, url, data };
+  _request(method, url, body) {
+    const options = { method, url, data: body };
 
-    if (method === 'GET' && data) {
-      return this._PromiseCtor.reject(new Error('data not permitted for GET requests'));
+    if (method === 'GET' && body) {
+      return this._PromiseCtor.reject(new Error('body not permitted for GET requests'));
     }
 
     return this._$http(options)
