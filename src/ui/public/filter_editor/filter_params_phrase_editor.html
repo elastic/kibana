@@ -1,4 +1,5 @@
 <ui-select
+  ng-if="field.aggregatable && field.type === 'string'"
   ng-model="params.phrase"
   ui-select-focus-on="focus-params"
 >
@@ -13,3 +14,14 @@
     <div ng-bind="value"></div>
   </ui-select-choices>
 </ui-select>
+
+<div
+  ng-if="!(field.aggregatable && field.type === 'string')"
+  class="kuiFieldGroupSection kuiFieldGroupSection--wide"
+>
+  <input
+    ng-model="params.phrase"
+    type="text"
+    class="kuiTextInput"
+  />
+</div>
