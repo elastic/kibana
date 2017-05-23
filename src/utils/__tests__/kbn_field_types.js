@@ -34,7 +34,7 @@ describe('utils/kbn_field_types', () => {
 
   describe('castEsToKbnFieldType()', () => {
     it('returns the kbnFieldType instance that matches the esType', () => {
-      expect(castEsToKbnFieldType('keyword')).to.be.a(KbnFieldType);
+      expect(castEsToKbnFieldType('keyword')).to.be(getKbnFieldType('string'));
     });
 
     it('returns the unknown field type for unknown es types', () => {
