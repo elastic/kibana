@@ -1,0 +1,26 @@
+@import (reference) "../../style/main";
+
+.canvas__navbarButton {
+  line-height: @spacingXXXXL;
+  height: 64px;
+  font-size: @textXSmall;
+  color: @lightGrey;
+  padding-right: @spacingM;
+  padding-left: @spacingM;
+  cursor: pointer;
+  border: 0;
+  background: transparent;
+
+  &:focus, &:active {
+    border: 0;
+    outline: none;
+  }
+
+  i.fa {
+    margin-right: @spacingXS;
+  }
+
+  &:hover {
+    color: @trueWhite;
+  }
+}
