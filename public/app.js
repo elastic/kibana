@@ -4,10 +4,9 @@ import uiRoutes from 'ui/routes';
 import template from 'plugins/canvas/index.html';
 import './state/store_service';
 import './directives/react';
+import './style/main.less';
 
 import { App } from './components/app';
-
-require('./main.less');
 
 const app = uiModules.get('apps/canvas', []);
 
