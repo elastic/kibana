@@ -1,9 +1,6 @@
-import semver from 'semver';
 import { metadata } from '../metadata';
 
-const major = semver.major(metadata.version);
-const minor = semver.minor(metadata.version);
-const urlVersion = `${major}.${minor}`;
+const urlVersion = metadata.branch;
 const baseUrl = 'https://www.elastic.co/';
 
 export const documentationLinks = {
