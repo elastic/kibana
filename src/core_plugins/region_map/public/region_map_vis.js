@@ -26,7 +26,7 @@ VisTypesRegistryProvider.register(function RegionMapProvider(Private, vectormaps
     description: 'Show metrics on a thematic map. Use one of the provide base maps, or add your own. ' +
     'Darker colors represent higher values.',
     category: VisType.CATEGORY.MAP,
-    icon: 'fa-globe',
+    image: 'fa-globe',
     template: regionTemplate,
     params: {
       defaults: {

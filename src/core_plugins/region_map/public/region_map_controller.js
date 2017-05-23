@@ -13,7 +13,6 @@ import 'ui/vis_maps/lib/service_settings';
 const module = uiModules.get('kibana/region_map', ['kibana']);
 module.controller('KbnRegionMapController', function ($scope, $element, Private, Notifier, getAppState,
                                                        serviceSettings, config) {
-
   const tooltipFormatter = Private(AggResponsePointSeriesTooltipFormatterProvider);
   const ResizeChecker = Private(ResizeCheckerProvider);
   const notify = new Notifier({ location: 'Vectormap' });
@@ -38,6 +37,12 @@ module.controller('KbnRegionMapController', function ($scope, $element, Private,
         }
       }
       $scope.vis.type.params.vectorLayers = newVectorLayers;
+
+      //check if layer is selected
+      console.log($scope.vis.params.selectedJoinField, $scope.vis.params.selectedLayer);
+
+
+
       $scope.$apply();
     });
 
@@ -124,7 +129,7 @@ module.controller('KbnRegionMapController', function ($scope, $element, Private,
 
   function updateChoroplethLayer(url) {
 
-    if (choroplethLayer && choroplethLayer.equalsGeoJsonUrl(url)) {
+    if (choroplethLayer && choroplethLayer.equalsGeoJsonUrl(url)) {//no need to recreate the layer
       return;
     }
     kibanaMap.removeLayer(choroplethLayer);

@@ -10,9 +10,10 @@ export default class ChoroplethLayer extends KibanaMapLayer {
   constructor(geojsonUrl) {
     super();
 
+
     this._metrics = null;
     this._joinField = null;
-    this._colorRamp = truncatedColorMaps['Yellow to Red'];
+    this._colorRamp = truncatedColorMaps[Object.keys(truncatedColorMaps)[0]];
     this._tooltipFormatter = () => '';
 
     this._geojsonUrl = geojsonUrl;
