@@ -1,0 +1,92 @@
+Warn if the title is a duplicate
+
+Backports PR #10321
+
+**Commit 1:**
+Warn if the title is a duplicate
+
+* Original sha: b0aa0b85f89ae7140d8606bef1aa8a45e1ff41ab
+* Authored by Stacey Gammon <gammon@elastic.co> on 2017-02-13T18:07:23Z
+
+**Commit 2:**
+warn when copyOnSave is checked.  add a test
+
+* Original sha: ee42002a16ccafdac76873057d2aff7a92692f4e
+* Authored by Stacey Gammon <gammon@elastic.co> on 2017-02-14T14:20:37Z
+
+**Commit 3:**
+update message
+
+* Original sha: c90c8ae6b574f6523be4c6750135a3729dce7c01
+* Authored by Stacey Gammon <gammon@elastic.co> on 2017-02-14T14:24:50Z
+
+**Commit 4:**
+fix tests
+
+* Original sha: 5ec1a92ba016a46b7ef5da0300914e04bd8ce684
+* Authored by Stacey Gammon <gammon@elastic.co> on 2017-02-14T15:04:14Z
+
+**Commit 5:**
+Fix issues with substring matching
+
+add more tests.
+
+* Original sha: 4335e9e404881cbd3db88367b113605740c83d3e
+* Authored by Stacey Gammon <gammon@elastic.co> on 2017-02-14T18:54:58Z
+
+**Commit 6:**
+make case insensitive and return matching title
+
+* Original sha: 8881739e9c952b1970e258651a230c7b0d08aa77
+* Authored by Stacey Gammon <gammon@elastic.co> on 2017-02-14T19:34:04Z
+
+**Commit 7:**
+Fix bug caused by subtle difference between this.type and type
+
+Add a comment and rename one of the variables to make the distinction
+clearer.
+
+* Original sha: f4011ced2ed5a8c8b73230abd543c50802dd6a26
+* Authored by Stacey Gammon <gammon@elastic.co> on 2017-02-16T16:31:13Z
+
+**Commit 8:**
+add debug messages.
+
+* Original sha: 2d448891c71ee4157549b49b15c2b43cd8ac3282
+* Authored by Stacey Gammon <gammon@elastic.co> on 2017-02-16T18:05:03Z
+
+**Commit 9:**
+fix tests again
+
+* Original sha: 3212c915aca70c2e3e7b253f81d02f4ea6f95919
+* Authored by Stacey Gammon <gammon@elastic.co> on 2017-02-16T22:10:25Z
+
+**Commit 10:**
+uncomment out tests
+
+* Original sha: 1f2cb28657deb856ee3bf70c6d315c21d1b5e7aa
+* Authored by Stacey Gammon <gammon@elastic.co> on 2017-02-16T22:12:06Z
+
+**Commit 11:**
+more debug messages
+
+* Original sha: 807b1904759f997f343e73141473af0d1b6f8c28
+* Authored by Stacey Gammon <gammon@elastic.co> on 2017-02-17T02:09:37Z
+
+**Commit 12:**
+save more screenshots
+
+* Original sha: 3d025e953b5a5564ffb1b89a08145bd5e7cd7bd9
+* Authored by Stacey Gammon <gammon@elastic.co> on 2017-02-17T02:34:29Z
+
+**Commit 13:**
+Need to wait till save finishes or the page may redirect the url after the page has navigated away
+
+* Original sha: de00e24a850b9b847b87c804e8cc6df6ef61c531
+* Authored by Stacey Gammon <gammon@elastic.co> on 2017-02-17T14:01:22Z
+
+**Commit 14:**
+address code review comments
+
+* Original sha: 7bc02684b4d5c0289e5044e71deaa5c9fe5e77f3
+* Authored by Stacey Gammon <gammon@elastic.co> on 2017-02-17T17:28:34Z
