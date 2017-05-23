@@ -15,7 +15,7 @@ module.exports = function MapsRenderbotFactory(Private, $injector, serviceSettin
   const ResizeChecker = Private(ResizeCheckerProvider);
   const Renderbot = Private(VisRenderbotProvider);
   const buildChartData = Private(VislibVisTypeBuildChartDataProvider);
-  const notify = new Notifier({ location: 'Tilemap' });
+  const notify = new Notifier({ location: 'Coordinate Map' });
 
   class MapsRenderbot extends Renderbot {
 
