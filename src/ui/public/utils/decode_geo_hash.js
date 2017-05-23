@@ -63,7 +63,6 @@ function refine_interval(interval, cd, mask) {
  * @returns {number} Number of geohash cells (rows or columns) at that precision
  */
 function geohashCells(precision, axis) {
-  precision = (typeof precision === 'number') ? precision : 1;
   let cells = 1;
   for (let i = 1; i <= precision; i += 1) {
     //On odd precisions, rows divide by 4 and columns by 8. Vice-versa on even precisions.

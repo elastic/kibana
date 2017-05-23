@@ -17,9 +17,6 @@ module.exports = function MapsRenderbotFactory(Private, $injector, serviceSettin
   const buildChartData = Private(VislibVisTypeBuildChartDataProvider);
   const notify = new Notifier({ location: 'Tilemap' });
 
-
-  let tilemapSettings;
-
   class MapsRenderbot extends Renderbot {
 
     constructor(vis, $el, uiState) {
@@ -29,12 +26,9 @@ module.exports = function MapsRenderbotFactory(Private, $injector, serviceSettin
       this._kibanaMap = null;
       this._$container = $el;
       this._kibanaMapReady = this._makeKibanaMap($el);
-
       this._baseLayerDirty = true;
       this._dataDirty = true;
       this._paramsDirty = true;
-
-
       this._resizeChecker = new ResizeChecker($el);
       this._resizeChecker.on('resize', () => {
         if (this._kibanaMap) {
@@ -45,29 +39,19 @@ module.exports = function MapsRenderbotFactory(Private, $injector, serviceSettin
 
     async _makeKibanaMap() {
 
-
-      let tmsService;
       try {
-        tmsService = await serviceSettings.getTMSService();
-        console.log('got the tms service...', tmsService);
-        tilemapSettings = tmsService;
+        this._tmsService = await serviceSettings.getTMSService();
+        this._tmsError = null;
       } catch (e) {
-        console.log('error!');
+        this._tmsService = null;
+        this._tmsError = e;
         notify.warning(e.message);
-        tilemapSettings = {
-          getError: () => {
-            console.log('no good!');
-            return {message: 'foobar'};
-          },
-          hasError: () => true
-        };
       }
 
       if (this._kibanaMap) {
         this._kibanaMap.destroy();
       }
 
-      console.log('whats going on here...');
       const containerElement = $(this._$container)[0];
       const options = _.clone(this._getMinMaxZoom());
       const uiState = this.vis.getUiState();
@@ -122,9 +106,12 @@ module.exports = function MapsRenderbotFactory(Private, $injector, serviceSettin
     }
 
     _getMinMaxZoom() {
-      console.log('get min max zoom');
       const mapParams = this._getMapsParams();
-      return tilemapSettings.getMinMaxZoom(mapParams.wms.enabled);
+      if (this._tmsError) {
+        return serviceSettings.getFallbackZoomSettings(mapParams.wms.enabled);
+      } else {
+        return this._tmsService.getMinMaxZoom(mapParams.wms.enabled);
+      }
     }
 
     _recreateGeohashLayer() {
@@ -197,9 +184,9 @@ module.exports = function MapsRenderbotFactory(Private, $injector, serviceSettin
             this._kibanaMap.setZoomLevel(maxZoom);
           }
 
-          if (!tilemapSettings.hasError()) {
-            const url = tilemapSettings.getUrl();
-            const options = tilemapSettings.getTMSOptions();
+          if (!this._tmsError) {
+            const url = this._tmsService.getUrl();
+            const options = this._tmsService.getTMSOptions();
             this._kibanaMap.setBaseLayer({
               baseLayerType: 'tms',
               options: { url, ...options }

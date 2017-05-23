@@ -43,9 +43,6 @@ uiModules.get('kibana')
 
       _invalidateSettings() {
 
-        console.log('_invalidateSettings');
-        console.trace();
-
         this._loadCatalogue = _.once(async() => {
           try {
             const response = await this._getManifest(mapConfig.manifestServiceUrl, this._queryParams);
@@ -74,7 +71,6 @@ uiModules.get('kibana')
 
         this._loadTMSServices = _.once(async() => {
 
-          console.log('load catalgoue');
           const catalogue = await this._loadCatalogue();
           const tmsService = catalogue.services.filter((service) => service.type === 'tms')[0];
           const manifest = await this._getManifest(tmsService.manifest, this._queryParams);
@@ -82,7 +78,6 @@ uiModules.get('kibana')
 
           const firstService = services[0];
 
-          console.log('first service');
           //todo. add query-params to all layer-urls
           return firstService;
         });
@@ -103,7 +98,6 @@ uiModules.get('kibana')
 
       async getTMSService() {
         const tmsService = await this._loadTMSServices();
-        console.log('oaded tms!', tmsService);
         return {
           getUrl: function () {
             return tmsService.url;
@@ -126,14 +120,6 @@ uiModules.get('kibana')
           },
           getTMSOptions: function () {
             return tmsService;
-          },
-          hasError: function () {
-            console.log('TODO Strip! hasError');
-            return false;
-          },
-          getError: function () {
-            console.log('TODO Strip! getError');
-            return {message: 'foobarstrip'};
           }
         };
       }
