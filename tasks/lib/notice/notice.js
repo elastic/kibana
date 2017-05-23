@@ -1,7 +1,7 @@
 import { resolve } from 'path';
 import { readFileSync } from 'fs';
 
-import { generatePackagesNoticeText } from './packages_notice';
+import { generatePackageNoticeText } from './package_notice';
 import { generateNodeNoticeText } from './node_notice';
 
 const BASE_NOTICE = resolve(__dirname, './base_notice.txt');
@@ -20,9 +20,14 @@ const BASE_NOTICE = resolve(__dirname, './base_notice.txt');
  */
 export async function generateNoticeText(options = {}) {
   const { packages, nodeDir } = options;
+
+  const packageNotices = await Promise.all(
+    packages.map(generatePackageNoticeText)
+  );
+
   return [
     readFileSync(BASE_NOTICE, 'utf8'),
-    await generatePackagesNoticeText(packages),
-    generateNodeNoticeText(nodeDir)
-  ].join('');
+    ...packageNotices,
+    generateNodeNoticeText(nodeDir),
+  ].join('\n---\n');
 }
