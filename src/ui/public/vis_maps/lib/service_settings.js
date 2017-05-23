@@ -125,7 +125,7 @@ uiModules.get('kibana')
       }
 
       getFallbackZoomSettings(isWMSEnabled) {
-        return (isWMSEnabled) ? {minZoom: 0, maxZoom: 18} : {minZoom: 0, maxZoom: 10};
+        return (isWMSEnabled) ? { minZoom: 0, maxZoom: 18 } : { minZoom: 0, maxZoom: 10 };
       }
 
       /**
