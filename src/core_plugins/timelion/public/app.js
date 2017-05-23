@@ -1,4 +1,3 @@
-import $ from 'jquery';
 import _ from 'lodash';
 import moment from 'moment-timezone';
 
@@ -133,7 +132,6 @@ app.controller('timelion', function (
     testId: 'timelionDocsButton',
   }];
 
-
   $timeout(function () {
     if (config.get('timelion:showTutorial', true)) {
       $scope.kbnTopNav.open('docs');
@@ -240,22 +238,6 @@ app.controller('timelion', function (
       notify.error(err);
 
     });
-  };
-
-  $scope.getCaretOffset = function getCaretOffset() {
-    const expressionInput = $('[data-expression-input]');
-    const element = expressionInput[0];
-    return element.selectionStart;
-  };
-
-  $scope.setCaretOffset = function setCaretOffset(caretOffset) {
-    $timeout(() => {
-      // We can't cache this element reference because this is a controller, not a directive, so the
-      // DOM isn't ready during initialization.
-      const expressionInput = $('[data-expression-input]');
-      const element = expressionInput[0];
-      element.selectionStart = element.selectionEnd = caretOffset;
-    }, 0);
   };
 
   $scope.safeSearch = _.debounce($scope.search, 500);

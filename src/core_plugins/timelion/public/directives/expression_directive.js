@@ -42,24 +42,12 @@ app.directive('timelionExpressionInput', function ($http, $timeout) {
     restrict: 'E',
     scope: {
       sheet: '=',
-      getCaretOffset: '&',
-      setCaretOffset: '&',
       updateChart: '&',
     },
     replace: true,
-    transclude: true,
     template: timelionExpressionInputTemplate,
-    link: function (scope, elem, attrs, ctrl, transclude) {
-      // Add the transcluded content. Assuming it's an input control of some sort, it will need
-      // access to the parent scope so it can use ng-model correctly.
-      transclude(scope.$parent, clone => {
-        elem.prepend(clone);
-      });
-
-      const input = elem.find('[data-expression-input]');
-      if (!input.length) {
-        throw new Error('timelionExpressionInput directive requires a transcluded input element with the data-expression-input attribute.');
-      }
+    link: function (scope, elem) {
+      const expressionInput = elem.find('[data-expression-input]');
 
       const navigationalKeys = {
         ESC: 27,
@@ -83,6 +71,20 @@ app.directive('timelionExpressionInput', function ($http, $timeout) {
         });
       }
 
+      function getCaretOffset() {
+        return expressionInput[0].selectionStart;
+      }
+
+      function setCaretOffset(caretOffset) {
+        // Wait for Angular to can update the input with the new expression and *then* we can set
+        // the caret position.
+        $timeout(() => {
+          expressionInput.focus();
+          expressionInput[0].selectionStart = expressionInput[0].selectionEnd = caretOffset;
+          scope.$apply();
+        }, 0);
+      }
+
       function insertSuggestionIntoExpression(suggestionIndex) {
         if (scope.functionSuggestions.isEmpty()) {
           return;
@@ -97,7 +99,7 @@ app.directive('timelionExpressionInput', function ($http, $timeout) {
 
         // Position the caret inside of the function parentheses.
         const newCaretOffset = min + functionName.length;
-        scope.setCaretOffset({ caretOffset: newCaretOffset });
+        setCaretOffset(newCaretOffset);
 
         // Hide suggestions.
         scope.functionSuggestions.reset();
@@ -112,7 +114,7 @@ app.directive('timelionExpressionInput', function ($http, $timeout) {
       }
 
       function getSuggestions() {
-        const caretOffset = scope.getCaretOffset();
+        const caretOffset = getCaretOffset();
 
         suggest(
           scope.sheet,
@@ -148,85 +150,87 @@ app.directive('timelionExpressionInput', function ($http, $timeout) {
         return keyCode === navigationalKeys.ENTER && isShiftPressed;
       }
 
-      input.on('blur', () => {
-        scope.$apply(() => {
-          scope.functionSuggestions.hide();
-        });
-      });
+      scope.onFocusInput = () => {
+        // Wait for the caret position of the input to update and then we can get suggestions
+        // (which depends on the caret position).
+        $timeout(getSuggestions, 0);
+      };
 
-      input.on('keydown', e => {
-        scope.$apply(() => {
-          // If we've pressed any non-navigational keys, then the user has typed something and we
-          // can exit early without doing any navigation.
-          if (!isNavigationalKey(e.keyCode)) {
-            return;
-          }
+      scope.onBlurInput = () => {
+        scope.functionSuggestions.hide();
+      };
 
-          if (isUserInsertingNewLine(e.keyCode, e.shiftKey)) {
-            return;
-          }
+      scope.onKeyDownInput = e => {
+        // If we've pressed any non-navigational keys, then the user has typed something and we
+        // can exit early without doing any navigation. The keyup handler will pull up suggestions.
+        if (!isNavigationalKey(e.keyCode)) {
+          return;
+        }
 
-          switch (e.keyCode) {
-            case navigationalKeys.UP:
-              if (scope.functionSuggestions.isVisible) {
-                // Up and down keys navigate through suggestions.
-                e.preventDefault();
-                scope.functionSuggestions.stepForward();
-                scrollToSuggestionAt(scope.functionSuggestions.index);
-              }
-              break;
+        if (isUserInsertingNewLine(e.keyCode, e.shiftKey)) {
+          return;
+        }
 
-            case navigationalKeys.DOWN:
-              if (scope.functionSuggestions.isVisible) {
-                // Up and down keys navigate through suggestions.
-                e.preventDefault();
-                scope.functionSuggestions.stepBackward();
-                scrollToSuggestionAt(scope.functionSuggestions.index);
-              }
-              break;
-
-            case navigationalKeys.TAB:
-              // If there are no suggestions, the user tabs to the next input.
-              if (scope.functionSuggestions.isEmpty()) {
-                return;
-              }
-
-              // If we have suggestions, complete the selected one.
+        switch (e.keyCode) {
+          case navigationalKeys.UP:
+            if (scope.functionSuggestions.isVisible) {
+              // Up and down keys navigate through suggestions.
               e.preventDefault();
+              scope.functionSuggestions.stepForward();
+              scrollToSuggestionAt(scope.functionSuggestions.index);
+            }
+            break;
+
+          case navigationalKeys.DOWN:
+            if (scope.functionSuggestions.isVisible) {
+              // Up and down keys navigate through suggestions.
+              e.preventDefault();
+              scope.functionSuggestions.stepBackward();
+              scrollToSuggestionAt(scope.functionSuggestions.index);
+            }
+            break;
+
+          case navigationalKeys.TAB:
+            // If there are no suggestions, the user tabs to the next input.
+            if (scope.functionSuggestions.isEmpty()) {
+              return;
+            }
+
+            // If we have suggestions, complete the selected one.
+            e.preventDefault();
+            insertSuggestionIntoExpression(scope.functionSuggestions.index);
+            break;
+
+          case navigationalKeys.ENTER:
+            e.preventDefault();
+
+            // If the suggestions are open, complete the expression with the suggestion.
+            // Otherwise, the default action of submitting the input value will occur.
+            if (!scope.functionSuggestions.isEmpty()) {
               insertSuggestionIntoExpression(scope.functionSuggestions.index);
-              break;
+            } else {
+              // If the suggestions are closed, we should re-render the chart.
+              scope.updateChart();
+            }
+            break;
 
-            case navigationalKeys.ENTER:
-              e.preventDefault();
+          case navigationalKeys.ESC:
+            e.preventDefault();
+            scope.functionSuggestions.hide();
+            break;
+        }
+      };
 
-              // If the suggestions are open, complete the expression with the suggestion.
-              // Otherwise, the default action of submitting the input value will occur.
-              if (!scope.functionSuggestions.isEmpty()) {
-                insertSuggestionIntoExpression(scope.functionSuggestions.index);
-              } else {
-                // If the suggestions are closed, we should re-render the chart.
-                scope.updateChart();
-              }
-              break;
+      scope.onKeyUpInput = e => {
+        // If the user isn't navigating, then we should update the suggestions based on their input.
+        if (!isNavigationalKey(e.keyCode)) {
+          getSuggestions();
+        }
+      };
 
-            case navigationalKeys.ESC:
-              e.preventDefault();
-              scope.functionSuggestions.hide();
-              break;
-          }
-        });
-      });
-
-      input.on('keyup', e => {
-        scope.$apply(() => {
-          // If the user isn't navigating, then we should update the suggestions based on their input.
-          if (!isNavigationalKey(e.keyCode)) {
-            getSuggestions();
-          }
-        });
-      });
-
-      scope.onClickSuggestion = insertSuggestionIntoExpression;
+      scope.onClickSuggestion = index => {
+        insertSuggestionIntoExpression(index);
+      };
 
       init();
     }
