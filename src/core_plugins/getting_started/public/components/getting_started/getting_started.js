@@ -1,5 +1,4 @@
 import { uiModules } from 'ui/modules';
-import uiChrome from 'ui/chrome';
 import 'ui/getting_started/opt_out_directive';
 import { GettingStartedRegistryProvider } from 'ui/getting_started/registry';
 import { GETTING_STARTED_REGISTRY_TYPES } from 'ui/getting_started/constants';
@@ -32,12 +31,6 @@ app.directive('gettingStarted', function ($injector) {
     controllerAs: 'gettingStarted',
     controller: class GettingStartedController {
       constructor() {
-        if (this.hasOptedOut()) {
-          uiChrome.setVisible(true);
-        } else {
-          uiChrome.setVisible(false);
-        }
-
         const registeredTopMessages = registry.byType[GETTING_STARTED_REGISTRY_TYPES.TOP_MESSAGE] || [];
         this.topMessages = registeredTopMessages.map(item => item.template);
 
