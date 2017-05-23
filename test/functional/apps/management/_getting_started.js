@@ -12,7 +12,6 @@ export default ({ getService, getPageObjects }) => {
     describe('when no index patterns exist', () => {
       beforeEach(async () => {
         // delete .kibana index and then wait for Kibana to re-create it
-        await kibanaServer.uiSettings.replace({});
         await esArchiver.unload('logstash_functional');
         await esArchiver.load('empty_kibana');
       });
