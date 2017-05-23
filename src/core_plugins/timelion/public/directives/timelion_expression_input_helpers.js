@@ -48,7 +48,7 @@ export class FunctionSuggestions {
   }
 }
 
-export function suggest(expression, caretOffset, functionList, Parser) {
+export function suggest(expression, functionList, Parser) {
   return new Promise((resolve, reject) => {
     try {
       // We rely on the grammar to throw an error in order to suggest function(s).
@@ -64,15 +64,6 @@ export function suggest(expression, caretOffset, functionList, Parser) {
         // attempt will throw an error.
         const message = JSON.parse(e.message);
         const functionLocation = message.location;
-
-        const isCaretInsideOfSuggestibleFunction =
-          caretOffset > functionLocation.min && caretOffset <= functionLocation.max;
-
-        // If the caret is outside of a suggestible function's range, we can't offer any
-        // suggestions.
-        if (!isCaretInsideOfSuggestibleFunction) {
-          return reject({ functionLocation });
-        }
 
         if (message.type === 'incompleteFunction') {
           let list;

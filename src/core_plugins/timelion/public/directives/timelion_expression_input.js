@@ -73,10 +73,6 @@ app.directive('timelionExpressionInput', function ($http, $timeout) {
         });
       }
 
-      function getCaretOffset() {
-        return expressionInput[0].selectionStart;
-      }
-
       function setCaretOffset(caretOffset) {
         // Wait for Angular to can update the input with the new expression and *then* we can set
         // the caret position.
@@ -102,9 +98,6 @@ app.directive('timelionExpressionInput', function ($http, $timeout) {
         // Position the caret inside of the function parentheses.
         const newCaretOffset = min + functionName.length;
         setCaretOffset(newCaretOffset);
-
-        // Hide suggestions.
-        scope.functionSuggestions.reset();
       }
 
       function scrollToSuggestionAt(index) {
@@ -116,11 +109,8 @@ app.directive('timelionExpressionInput', function ($http, $timeout) {
       }
 
       function getSuggestions() {
-        const caretOffset = getCaretOffset();
-
         suggest(
           scope.sheet,
-          caretOffset,
           functionReference.list,
           Parser
         ).then(suggestions => {
