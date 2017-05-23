@@ -8,6 +8,7 @@ import { getData } from '../path';
 module.exports = () => Joi.object({
   pkg: Joi.object({
     version: Joi.string().default(Joi.ref('$version')),
+    branch: Joi.string().default(Joi.ref('$branch')),
     buildNum: Joi.number().default(Joi.ref('$buildNum')),
     buildSha: Joi.string().default(Joi.ref('$buildSha')),
   }).default(),

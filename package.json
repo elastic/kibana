@@ -12,6 +12,7 @@
   ],
   "private": false,
   "version": "5.5.0",
+  "branch": "5.x",
   "build": {
     "number": 8467,
     "sha": "6cb7fec4e154faa0a4a3fee4b33dfef91b9870d9"
