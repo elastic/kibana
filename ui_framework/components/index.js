@@ -1,4 +1,8 @@
 export {
+  KuiKeyboardAccessible,
+} from './accessibility';
+
+export {
   KuiButton,
   KuiButtonGroup,
   KuiButtonIcon,
