@@ -12,8 +12,7 @@ module.directive('filterParamsEditor', function () {
     scope: {
       field: '=',
       operator: '=',
-      params: '=',
-      onChange: '&'
+      params: '='
     }
   };
 });

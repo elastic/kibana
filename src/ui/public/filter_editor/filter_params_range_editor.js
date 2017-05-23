@@ -8,8 +8,7 @@ module.directive('filterParamsRangeEditor', function () {
     template,
     scope: {
       field: '=',
-      params: '=',
-      onChange: '&'
+      params: '='
     }
   };
 });

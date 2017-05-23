@@ -12,8 +12,7 @@ module.directive('filterParamsPhraseEditor', function () {
     template,
     scope: {
       field: '=',
-      params: '=',
-      onChange: '&'
+      params: '='
     },
     controllerAs: 'filterParamsPhraseEditor',
     controller: filterParamsPhraseController
