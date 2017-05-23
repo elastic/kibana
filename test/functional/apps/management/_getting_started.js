@@ -17,11 +17,15 @@ export default ({ getService, getPageObjects }) => {
 
       describe('when user has not opted out of Getting Started page', () => {
         before(async () => {
+          // First, we navigate to *somewhere* in Kibana so the browser loads up Kibana. This allows us...
           await PageObjects.common.navigateToUrl('discover', '');
+
+          // ... to remove the Getting Started page opt-out flag from local storage for the Kibana domain
           await remote.deleteLocalStorageItem('kibana.isGettingStartedOptedOut');
         });
 
         it('redirects to the Getting Started page', async () => {
+          await PageObjects.common.navigateToUrl('discover', '');
           await PageObjects.common.waitUntilUrlIncludes('getting_started');
           const isLoaded = await PageObjects.gettingStarted.doesContainerExist();
           expect(isLoaded).to.be(true);
