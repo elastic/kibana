@@ -6,6 +6,7 @@ import { uiModules } from 'ui/modules';
 import getInitialState from './initial_state';
 import transientReducer from './reducers/transient';
 import resolvedArgsReducer from './reducers/resolved_args';
+import appReducer from './reducers/app';
 import workpadReducer from './reducers/workpad';
 import pagesReducer from './reducers/pages';
 import elementsReducer from './reducers/elements';
@@ -24,7 +25,7 @@ app.service('$store', (kbnVersion, basePath) => {
 
   const rootReducer = combineReducers({
     app: (state = initialState.app) => state,
-    transient: reduceReducers(transientReducer, resolvedArgsReducer),
+    transient: reduceReducers(transientReducer, resolvedArgsReducer, appReducer),
     persistent: combineReducers({
       workpad: reduceReducers(workpadReducer, pagesReducer, elementsReducer),
     }),

@@ -4,6 +4,7 @@ export default (path) => {
   const state = {
     app: {}, // Kibana stuff in here
     transient: {
+      editing: true,
       selectedPage: 'page-f3ce-4bb7-86c8-0417606d6592',
       selectedElement: 'element-d88c-4bbd-9453-db22e949b92e',
       resolvedArgs: {},
