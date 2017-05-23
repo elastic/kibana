@@ -5,6 +5,8 @@ import { NavbarButton } from '../navbar_button';
 
 import { Sidebar } from '../sidebar';
 import { Workpad } from '../workpad';
+import { ToggleEdit } from '../toggle_edit';
+
 import './app.less';
 
 export const App = () => (
@@ -16,7 +18,7 @@ export const App = () => (
     <div className="canvas__main">
       <div className="canvas__app--workspace">
         <div className="canvas__app--title">
-          <h2>Canvas</h2>
+          <h2>Canvas <ToggleEdit /></h2>
         </div>
         <div className="canvas__app--workpad">
           <Workpad />
