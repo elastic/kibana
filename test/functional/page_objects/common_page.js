@@ -266,6 +266,10 @@ export function CommonPageProvider({ getService, getPageObjects, getPageObject }
       log.debug(`exists? ${exists}`);
       return exists;
     }
+
+    async isChromeVisible() {
+      return await testSubjects.exists('kibanaChrome');
+    }
   }
 
   return new CommonPage();
