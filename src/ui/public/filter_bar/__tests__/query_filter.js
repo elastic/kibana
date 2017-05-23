@@ -39,7 +39,6 @@ describe('Query Filter', function () {
         expect(queryFilter.toggleAll).to.be.a('function');
         expect(queryFilter.removeFilter).to.be.a('function');
         expect(queryFilter.removeAll).to.be.a('function');
-        expect(queryFilter.updateFilter).to.be.a('function');
         expect(queryFilter.invertFilter).to.be.a('function');
         expect(queryFilter.invertAll).to.be.a('function');
         expect(queryFilter.pinFilter).to.be.a('function');
