@@ -16,7 +16,7 @@ export default ({ getService, getPageObjects }) => {
       });
 
       describe('when user has not opted out of Getting Started page', () => {
-        before(async () => {
+        beforeEach(async () => {
           // First, we navigate to *somewhere* in Kibana so the browser loads up Kibana. This allows us...
           await PageObjects.common.navigateToUrl('discover', '');
 
