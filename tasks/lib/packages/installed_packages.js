@@ -50,5 +50,6 @@ export async function getInstalledPackages(options = {}) {
         directory: realPath,
         relative: relative(directory, realPath)
       };
-    });
+    })
+    .filter(pkg => pkg.directory !== directory);
 }
