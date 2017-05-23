@@ -1,5 +1,8 @@
 @import '../styles/bootstrap/variables.less';
 .kbn-timepicker {
+  display: flex;
+  justify-content: flex-end;
+
   [kbn-time-input] {
     text-align: center;
   }
@@ -19,5 +22,23 @@
   }
   .kbn-timepicker-error {
     color: @brand-danger;
+  }
+  .kbn-timepicker-title {
+    display: flex;
+    justify-content: space-between;
+  }
+  .kbn-timepicker-title__section {
+    display: flex;
+    align-items: center;
+  }
+  .nav > li > a {
+    padding: 3px 10px;
+    font-size: 14px;
+  }
+  /**
+   * Avoid last nav overlaping collapse button
+   */
+  .nav:last-child {
+    margin-right: 24px;
   }
 }
