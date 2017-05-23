@@ -24,7 +24,6 @@ export class Model extends BaseRenderable {
   renderArgs(props, args) {
     let hasError = false;
     const { nextExpressionType } = props.data;
-
     const modelArgs = getModelArgs(nextExpressionType);
 
     return args.reduce((acc, arg) => {

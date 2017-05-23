@@ -23,9 +23,7 @@ export const pointseries = () => new Model('pointseries', {
     }),
   ],
   resolve({ context }) {
-    if (getState(context) === 'ready') {
-      return { columns: get(getValue(context), 'columns', []) };
-    }
-    return { columns: [] };
+    if (getState(context) !== 'ready') return { columns: [] };
+    return { columns: get(getValue(context), 'columns', []) };
   },
 });
