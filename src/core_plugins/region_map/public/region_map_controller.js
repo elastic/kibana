@@ -18,7 +18,7 @@ module.controller('KbnRegionMapController', function ($scope, $element, Private,
 
   const tooltipFormatter = Private(AggResponsePointSeriesTooltipFormatterProvider);
   const ResizeChecker = Private(ResizeCheckerProvider);
-  const notify = new Notifier({ location: 'Vectormap' });
+  const notify = new Notifier({ location: 'Region map' });
   const resizeChecker = new ResizeChecker($element);
 
   let kibanaMap = null;
@@ -29,6 +29,7 @@ module.controller('KbnRegionMapController', function ($scope, $element, Private,
   });
   let choroplethLayer = null;
   const kibanaMapReady = makeKibanaMap();
+
   serviceSettings.getFileLayers()
     .then(function (layersFromService) {
       const newVectorLayers = $scope.vis.type.params.vectorLayers.slice();
@@ -41,6 +42,9 @@ module.controller('KbnRegionMapController', function ($scope, $element, Private,
       }
       $scope.vis.type.params.vectorLayers = newVectorLayers;
       $scope.$apply();
+    })
+    .catch(function (error) {
+      notify.warning(error.message);
     });
 
   $scope.$watch('esResponse', async function (response) {
