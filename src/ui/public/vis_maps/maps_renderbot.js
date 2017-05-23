@@ -5,17 +5,20 @@ import { VislibVisTypeBuildChartDataProvider } from 'ui/vislib_vis_type/build_ch
 import { FilterBarPushFilterProvider } from 'ui/filter_bar/push_filter';
 import { KibanaMap } from './kibana_map';
 import { GeohashLayer } from './geohash_layer';
-import './lib/tilemap_settings';
+import './lib/service_settings';
 import './styles/_tilemap.less';
 import { ResizeCheckerProvider } from 'ui/resize_checker';
 
 
-module.exports = function MapsRenderbotFactory(Private, $injector, tilemapSettings, Notifier, courier, getAppState) {
+module.exports = function MapsRenderbotFactory(Private, $injector, serviceSettings, Notifier, courier, getAppState) {
 
   const ResizeChecker = Private(ResizeCheckerProvider);
   const Renderbot = Private(VisRenderbotProvider);
   const buildChartData = Private(VislibVisTypeBuildChartDataProvider);
   const notify = new Notifier({ location: 'Tilemap' });
+
+
+  let tilemapSettings;
 
   class MapsRenderbot extends Renderbot {
 
@@ -42,19 +45,29 @@ module.exports = function MapsRenderbotFactory(Private, $injector, tilemapSettin
 
     async _makeKibanaMap() {
 
-      if (!tilemapSettings.isInitialized()) {
-        await tilemapSettings.loadSettings();
-      }
 
-      if (tilemapSettings.getError()) {
-        //Still allow the visualization to be built, but show a toast that there was a problem retrieving map settings
-        //Even though the basemap will not display, the user will at least still see the overlay data
-        notify.warning(tilemapSettings.getError().message);
+      let tmsService;
+      try {
+        this._tmsService = await serviceSettings.getTMSService();
+        console.log('got the tms service...', tmsService);
+        tilemapSettings = tmsService;
+      } catch (e) {
+        console.log('error!');
+        notify.warning(e.message);
+        tilemapSettings = {
+          getError: () => {
+            console.log('no good!');
+            return {message: 'foobar'};
+          },
+          hasError: () => true
+        };
       }
 
       if (this._kibanaMap) {
         this._kibanaMap.destroy();
       }
+
+      console.log('whats going on here...');
       const containerElement = $(this._$container)[0];
       const options = _.clone(this._getMinMaxZoom());
       const uiState = this.vis.getUiState();
@@ -109,6 +122,7 @@ module.exports = function MapsRenderbotFactory(Private, $injector, tilemapSettin
     }
 
     _getMinMaxZoom() {
+      console.log('get min max zoom');
       const mapParams = this._getMapsParams();
       return tilemapSettings.getMinMaxZoom(mapParams.wms.enabled);
     }

@@ -29,7 +29,7 @@ module.controller('KbnRegionMapController', function ($scope, $element, Private,
   const kibanaMapReady = makeKibanaMap();
   let layersLoaded = false;
   if (!layersLoaded) {
-    getAvailableVectorLayers()
+    serviceSettings.getFileLayers()
       .then(function (layersFromService) {
         //todo: disable play-button until these settings are loaded!
         $scope.vis.type.params.vectorLayers = $scope.vis.type.params.vectorLayers.concat(layersFromService);
@@ -98,7 +98,6 @@ module.controller('KbnRegionMapController', function ($scope, $element, Private,
   });
 
   async function makeKibanaMap() {
-
     const tmsSettings = await serviceSettings.getTMSService();
     const minMaxZoom = tmsSettings.getMinMaxZoom(false);
     kibanaMap = new KibanaMap($element[0], minMaxZoom);
@@ -148,10 +147,6 @@ module.controller('KbnRegionMapController', function ($scope, $element, Private,
       }
     });
     kibanaMap.addLayer(choroplethLayer);
-  }
-
-  async function getAvailableVectorLayers() {
-    return await serviceSettings.getFileLayers();
   }
 
 
