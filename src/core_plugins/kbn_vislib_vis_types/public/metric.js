@@ -30,6 +30,7 @@ export default function MetricVisType(Private) {
           backStyle: 'Full',
           orientation: 'vertical',
           colorSchema: 'Green to Red',
+          gaugeColorMode: 'None',
           useRange: false,
           colorsRange: [
             { from: 0, to: 100 },
@@ -55,7 +56,7 @@ export default function MetricVisType(Private) {
           }
         }
       },
-      gaugeTypes: ['Meter', 'Circle', 'Metric'],
+      gaugeTypes: ['Arc', 'Circle', 'Metric'],
       gaugeColorMode: ['None', 'Labels', 'Background'],
       scales: ['linear', 'log', 'square root'],
       colorSchemas: Object.keys(vislibColorMaps),

@@ -31,6 +31,7 @@ export default function GoalVisType(Private) {
           orientation: 'vertical',
           useRanges: false,
           colorSchema: 'Green to Red',
+          gaugeColorMode: 'None',
           colorsRange: [
             { from: 0, to: 10000 }
           ],

@@ -31,6 +31,7 @@ export default function GaugeVisType(Private) {
           backStyle: 'Full',
           orientation: 'vertical',
           colorSchema: 'Green to Red',
+          gaugeColorMode: 'Labels',
           colorsRange: [
             { from: 0, to: 50 },
             { from: 50, to: 75 },
