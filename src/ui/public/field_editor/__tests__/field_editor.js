@@ -161,7 +161,7 @@ describe('FieldEditor directive', function () {
         expect(editor.scriptingLangs).to.eql(['expression', 'painless']);
       });
 
-      it('provides curated type options based on language', function () {
+      it('provides specific type when language is painless', function () {
         $rootScope.$apply();
         expect(editor.fieldTypes).to.have.length(1);
         expect(editor.fieldTypes[0]).to.be('number');
@@ -171,6 +171,23 @@ describe('FieldEditor directive', function () {
 
         expect(editor.fieldTypes).to.have.length(4);
         expect(_.isEqual(editor.fieldTypes, ['number', 'string', 'date', 'boolean'])).to.be.ok();
+      });
+
+      it('provides all kibana types when language is groovy (only possible in 5.x)', function () {
+        $rootScope.$apply();
+        expect(editor.fieldTypes).to.have.length(1);
+        expect(editor.fieldTypes[0]).to.be('number');
+
+        editor.field.lang = 'groovy';
+        $rootScope.$apply();
+
+        expect(editor.fieldTypes).to.contain('number');
+        expect(editor.fieldTypes).to.contain('string');
+        expect(editor.fieldTypes).to.contain('geo_point');
+        expect(editor.fieldTypes).to.contain('ip');
+        expect(editor.fieldTypes).to.not.contain('text');
+        expect(editor.fieldTypes).to.not.contain('keyword');
+        expect(editor.fieldTypes).to.not.contain('attachement');
       });
 
       it('updates formatter options based on field type', function () {

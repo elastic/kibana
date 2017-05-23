@@ -9,7 +9,7 @@ import fieldEditorTemplate from 'ui/field_editor/field_editor.html';
 import { documentationLinks } from '../documentation_links/documentation_links';
 import './field_editor.less';
 import { GetEnabledScriptingLanguagesProvider, getSupportedScriptingLanguages } from '../scripting_languages';
-import { getEsTypes } from '../../../utils';
+import { getKbnTypeNames } from '../../../utils';
 
 uiModules
 .get('kibana', ['colorpicker.module'])
@@ -21,7 +21,7 @@ uiModules
   const fieldTypesByLang = {
     painless: ['number', 'string', 'date', 'boolean'],
     expression: ['number'],
-    default: getEsTypes()
+    default: getKbnTypeNames()
   };
 
   return {
