@@ -48,7 +48,7 @@ module.exports = function MapsRenderbotFactory(Private, $injector, serviceSettin
 
       let tmsService;
       try {
-        this._tmsService = await serviceSettings.getTMSService();
+        tmsService = await serviceSettings.getTMSService();
         console.log('got the tms service...', tmsService);
         tilemapSettings = tmsService;
       } catch (e) {
