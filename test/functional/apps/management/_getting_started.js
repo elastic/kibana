@@ -13,6 +13,8 @@ export default ({ getService, getPageObjects }) => {
       beforeEach(async () => {
         // delete .kibana index and then wait for Kibana to re-create it
         await kibanaServer.uiSettings.replace({});
+        await esArchiver.unload('logstash_functional');
+        await esArchiver.load('empty_kibana');
       });
 
       describe('when user has not opted out of Getting Started page', () => {
