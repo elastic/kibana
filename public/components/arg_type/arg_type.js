@@ -1,6 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { Panel } from 'react-bootstrap';
+import { Label } from 'react-bootstrap';
 
 export function ArgType(props) {
   const { name, expressionType } = props;
@@ -12,9 +12,13 @@ export function ArgType(props) {
   };
 
   return (
-    <Panel header={ name }>
+    <div>
+      {/*
+        TODO: I'm leaving the { name } thing here for you Joe, while you debug. Get rid of it before we ship.
+      */}
+      <Label className="pull-right">{ name }</Label><br/>
       { expressionType.render(expressionProps) }
-    </Panel>
+    </div>
   );
 }
 

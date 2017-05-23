@@ -33,8 +33,7 @@ export function ArgTypes({ argTypeChain }) {
   }
 
   return (
-    <div style={{ border: '1px solid #ddd', padding: '5px' }}>
-      <div>ArgTypes</div>
+    <div>
       {renderArguments(argTypeChain)}
     </div>
   );
