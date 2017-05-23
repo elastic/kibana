@@ -49,14 +49,12 @@ export default ({ getService, getPageObjects }) => {
 
     describe('when index patterns exist', () => {
       beforeEach(async () => {
-        // delete .kibana index and update configDoc
+        log.debug('load kibana index with default index pattern');
+        await esArchiver.load('discover');
         await kibanaServer.uiSettings.replace({
           'dateFormat:tz':'UTC',
           'defaultIndex':'logstash-*'
         });
-
-        log.debug('load kibana index with default index pattern');
-        await esArchiver.load('discover');
       });
 
       it('does not redirect to the Getting Started page', async () => {
