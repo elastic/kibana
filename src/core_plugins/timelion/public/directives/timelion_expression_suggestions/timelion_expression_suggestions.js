@@ -1,4 +1,4 @@
-import timelionExpressionSuggestionsTemplate from './suggestion.html';
+import template from './timelion_expression_suggestions.html';
 
 const app = require('ui/modules').get('apps/timelion', []);
 
@@ -11,7 +11,7 @@ app.directive('timelionExpressionSuggestions', () => {
       onClickSuggestion: '&',
     },
     replace: true,
-    template: timelionExpressionSuggestionsTemplate,
+    template,
     link: function (scope) {
       // This will prevent the expression input from losing focus.
       scope.onMouseDown = e => e.preventDefault();

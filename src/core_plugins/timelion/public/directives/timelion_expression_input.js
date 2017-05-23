@@ -26,13 +26,13 @@ import $ from 'jquery';
 import grammar from 'raw!../chain.peg';
 import PEG from 'pegjs';
 
-import './partials/suggestion';
-import timelionExpressionInputTemplate from './expression_directive.html';
+import './timelion_expression_suggestions/timelion_expression_suggestions';
+import timelionExpressionInputTemplate from './timelion_expression_input.html';
 import {
   FunctionSuggestions,
   suggest,
   insertAtLocation,
-} from './expression_directive_helpers';
+} from './timelion_expression_input_helpers';
 
 const Parser = PEG.buildParser(grammar);
 const app = require('ui/modules').get('apps/timelion', []);
