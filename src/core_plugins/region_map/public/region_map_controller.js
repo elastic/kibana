@@ -27,16 +27,19 @@ module.controller('KbnRegionMapController', function ($scope, $element, Private,
   });
   let choroplethLayer = null;
   const kibanaMapReady = makeKibanaMap();
-  let layersLoaded = false;
-  if (!layersLoaded) {
-    serviceSettings.getFileLayers()
-      .then(function (layersFromService) {
-        //todo: disable play-button until these settings are loaded!
-        $scope.vis.type.params.vectorLayers = $scope.vis.type.params.vectorLayers.concat(layersFromService);
-        layersLoaded = true;
-        $scope.$apply();
-      });
-  }
+  serviceSettings.getFileLayers()
+    .then(function (layersFromService) {
+      const newVectorLayers = $scope.vis.type.params.vectorLayers.slice();
+      for (let i = 0; i < layersFromService.length; i += 1) {
+        const layerFromService = layersFromService[i];
+        const alreadyAdded = newVectorLayers.some((layer) =>_.eq(layerFromService, layer));
+        if (!alreadyAdded) {
+          newVectorLayers.push(layerFromService);
+        }
+      }
+      $scope.vis.type.params.vectorLayers = newVectorLayers;
+      $scope.$apply();
+    });
 
   $scope.$watch('esResponse', async function (response) {
     kibanaMapReady.then(() => {
