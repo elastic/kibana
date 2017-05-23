@@ -3,7 +3,8 @@ import dateMath from '@elastic/datemath';
 export function TimeBucketsCalcEsIntervalProvider() {
 
   const unitsDesc = dateMath.unitsDesc;
-  const largeMax = unitsDesc.indexOf('M');
+  const weekUnitDesc = 'w';
+  const largeMax = unitsDesc.indexOf(weekUnitDesc);
 
   /**
    * Convert a moment.duration into an es
