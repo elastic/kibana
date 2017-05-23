@@ -44,6 +44,7 @@ app.directive('timelionExpressionInput', function ($http, $timeout) {
       rows: '=',
       sheet: '=',
       updateChart: '&',
+      shouldPopoverSuggestions: '@',
     },
     replace: true,
     template: timelionExpressionInputTemplate,

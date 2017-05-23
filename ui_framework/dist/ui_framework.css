@@ -1034,8 +1034,16 @@ body {
           align-items: center;
   /* 1 */ }
 
-.kuiFieldGroupSection + .kuiFieldGroupSection {
-  margin-left: 10px; }
+.kuiFieldGroup--alignTop {
+  -webkit-box-align: start;
+  -webkit-align-items: flex-start;
+      -ms-flex-align: start;
+          align-items: flex-start; }
+
+.kuiFieldGroupSection {
+  line-height: 1.5; }
+  .kuiFieldGroupSection + .kuiFieldGroupSection {
+    margin-left: 10px; }
 
 .kuiFieldGroupSection--wide {
   -webkit-box-flex: 1;

@@ -9,6 +9,7 @@ app.directive('timelionExpressionSuggestions', () => {
       suggestions: '=',
       selectedIndex: '=',
       onClickSuggestion: '&',
+      shouldPopover: '=',
     },
     replace: true,
     template,
