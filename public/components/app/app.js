@@ -1,26 +1,34 @@
 import React from 'react';
-import { Grid, Row, Col } from 'react-bootstrap';
+import { Navbar } from '../navbar';
+import { NavbarButton } from '../navbar_button';
 
-import { Expression } from '../expression';
+
 import { Sidebar } from '../sidebar';
-import { RenderExpression } from '../render_expression';
+import { Workpad } from '../workpad';
+import './app.less';
 
 export const App = () => (
-  <div>
-    <Grid fluid>
-      <Row>
-        <Col xs={12}>
-          <Expression />
-        </Col>
-      </Row>
-      <Row>
-        <Col md={3} smHidden xsHidden>
-          <Sidebar />
-        </Col>
-        <Col md={9} xs={12}>
-          <RenderExpression />
-        </Col>
-      </Row>
-    </Grid>
+  <div className="canvas">
+    {/*
+      <div className="canvas__app--expression">
+      </div>
+    */}
+    <div className="canvas__main">
+      <div className="canvas__app--workspace">
+        <div className="canvas__app--title">
+          <h2>Canvas</h2>
+        </div>
+        <div className="canvas__app--workpad">
+          <Workpad />
+        </div>
+      </div>
+      <div className="canvas__app--sidebar">
+        <Sidebar />
+      </div>
+    </div>
+    <Navbar>
+      <NavbarButton><i className="fa fa-plus" /> Add an element</NavbarButton>
+      <NavbarButton><i className="fa fa-plus-square" /> Add a page</NavbarButton>
+    </Navbar>
   </div>
 );

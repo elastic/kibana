@@ -1,0 +1,45 @@
+@import (reference) "../../style/main";
+
+
+.canvas {
+  background-color: @background;
+  display: flex;
+  flex-grow: 1;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.canvas__main {
+  display: flex;
+  flex-grow: 1;
+  flex-direction: row;
+}
+
+.canvas__app--sidebar {
+  background-color: @cardBackground;
+  border-left: @borderStyle;
+  width: 350px;
+  flex-grow: 0;
+}
+
+.canvas__app--workspace {
+  background-color: @background;
+  margin: @spacingM;
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.canvas__app--workpad {
+  background-color: @trueWhite;
+  flex-grow: 1;
+  box-shadow: 0px 0px 7px 0px rgba(0,0,0,0.2);
+}
+
+.canvas__app--title {
+  flex-grow: 0;
+
+  h2 {
+    margin-top: 2px;
+  }
+}
