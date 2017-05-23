@@ -50,7 +50,6 @@ module.exports = new Fn({
     },
   },
   fn: (context, args) => {
-    console.log(context.columns);
     function seriesStyleToFlot(seriesStyle) {
       if (!seriesStyle) return {};
       return {
@@ -130,7 +129,6 @@ module.exports = new Fn({
             set(result, 'bubbles.size.min', seriesStyle.points);
           }
 
-          console.log(attrs.size);
           return [x, y, attrs];
         }),
       });
@@ -146,7 +144,7 @@ module.exports = new Fn({
         options: {
           colors: args.palette.colors,
           legend: {
-            show: false,
+            show: true,
           },
           grid: {
             borderWidth: 0,

@@ -1,5 +1,6 @@
 import { Element } from '../element';
 import './flot';
+import './plot.less';
 import { size } from './plugins/size';
 
 const $ = window.$;
@@ -19,6 +20,7 @@ module.exports = new Element({
     console.log('destory plot', args);
   },
   render(domNode, config, done) {
+    config.options.legend.labelBoxBorderColor = 'transparent';
     plot = $.plot($(domNode), config.data, config.options);
     return done(plot);
   },
