@@ -16,13 +16,13 @@ describe('FieldEditor directive', function () {
   let $el;
 
   let $httpBackend;
+  let getScriptedLangsResponse;
 
   beforeEach(ngMock.module('kibana'));
   beforeEach(ngMock.inject(function ($compile, $injector, Private) {
     $httpBackend = $injector.get('$httpBackend');
-    $httpBackend
-    .when('GET', '/api/kibana/scripts/languages')
-    .respond(['expression', 'painless']);
+    getScriptedLangsResponse = $httpBackend.when('GET', '/api/kibana/scripts/languages');
+    getScriptedLangsResponse.respond(['expression', 'painless']);
 
     $rootScope = $injector.get('$rootScope');
     Field = Private(IndexPatternsFieldProvider);
@@ -153,9 +153,12 @@ describe('FieldEditor directive', function () {
         expect(field.lang).to.be('expression');
       });
 
-      it('provides lang options based on what is enabled for inline use in ES', function () {
+      it('limits lang options to "expression" and "painless"', function () {
+        getScriptedLangsResponse
+          .respond(['expression', 'painless', 'groovy']);
+
         $httpBackend.flush();
-        expect(_.isEqual(editor.scriptingLangs, ['expression', 'painless'])).to.be.ok();
+        expect(editor.scriptingLangs).to.eql(['expression', 'painless']);
       });
 
       it('provides curated type options based on language', function () {
