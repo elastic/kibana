@@ -11,7 +11,6 @@ export { createToolingLog } from './tooling_log';
 export {
   getKbnTypeNames,
   getKbnFieldType,
-  castEsToKbnFieldType,
   castEsToKbnFieldTypeName,
 } from './kbn_field_types';
 

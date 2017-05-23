@@ -6,7 +6,6 @@ import {
   KbnFieldType,
   getKbnFieldType,
   castEsToKbnFieldTypeName,
-  castEsToKbnFieldType,
   getKbnTypeNames
 } from '../kbn_field_types';
 
@@ -29,16 +28,6 @@ describe('utils/kbn_field_types', () => {
 
     it('returns unknown for unknown es types', () => {
       expect(castEsToKbnFieldTypeName(chance.sentence())).to.be('unknown');
-    });
-  });
-
-  describe('castEsToKbnFieldType()', () => {
-    it('returns the kbnFieldType instance that matches the esType', () => {
-      expect(castEsToKbnFieldType('keyword')).to.be(getKbnFieldType('string'));
-    });
-
-    it('returns the unknown field type for unknown es types', () => {
-      expect(castEsToKbnFieldType(chance.sentence())).to.be(getKbnFieldType('unknown'));
     });
   });
 

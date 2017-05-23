@@ -88,15 +88,6 @@ export function castEsToKbnFieldTypeName(esType) {
 }
 
 /**
- *  Get the KbnFieldType object for an esType string
- *  @param {string} esType
- *  @return {KbnFieldType}
- */
-export function castEsToKbnFieldType(esType) {
-  return getKbnFieldType(castEsToKbnFieldTypeName(esType));
-}
-
-/**
  *  Get the esTypes known by all kbnFieldTypes
  *  @return {Array<string>}
  */
