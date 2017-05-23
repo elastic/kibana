@@ -33,5 +33,5 @@
   "KIBANA-INTERVAL_INDICES_POPULATED" : "Select the interval at which your indices are populated.",
   "KIBANA-INDICES_MATCH_PATTERN" : "Unable to fetch mapping. Do you have indices matching the pattern?",
   "KIBANA-ADD_NEW" : "Create Index Pattern",
-  "KIBANA-CREATE" : "Create"
+  "KIBANA-CREATE" : "Create new index pattern"
 }

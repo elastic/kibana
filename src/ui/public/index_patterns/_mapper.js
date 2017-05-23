@@ -51,13 +51,6 @@ export function IndexPatternsMapperProvider(Private, Promise, es, esAdmin, confi
 
       let indexList = id;
       let promise = Promise.resolve();
-      if (indexPattern.intervalName) {
-        promise = self.getIndicesForIndexPattern(indexPattern)
-        .then(function (existing) {
-          if (existing.matches.length === 0) throw new IndexPatternMissingIndices();
-          indexList = existing.matches.slice(-config.get('indexPattern:fieldMapping:lookBack')); // Grab the most recent
-        });
-      }
 
       return promise.then(function () {
         return es.indices.getFieldMapping({
@@ -75,38 +68,6 @@ export function IndexPatternsMapperProvider(Private, Promise, es, esAdmin, confi
         fieldCache.set(id, fields);
         return fieldCache.get(id);
       });
-    };
-
-    self.getIndicesForIndexPattern = function (indexPattern) {
-      return es.indices.getAlias({
-        index: patternToWildcard(indexPattern.id)
-      })
-      .then(function (resp) {
-        // let all = Object.keys(resp).sort();
-        const all = _(resp)
-        .map(function (index, key) {
-          if (index.aliases) {
-            return [Object.keys(index.aliases), key];
-          } else {
-            return key;
-          }
-        })
-        .flattenDeep()
-        .sort()
-        .uniq(true)
-        .value();
-
-        const matches = all.filter(function (existingIndex) {
-          const parsed = moment(existingIndex, indexPattern.id);
-          return existingIndex === parsed.format(indexPattern.id);
-        });
-
-        return {
-          all: all,
-          matches: matches
-        };
-      })
-      .catch(handleMissingIndexPattern);
     };
 
     /**

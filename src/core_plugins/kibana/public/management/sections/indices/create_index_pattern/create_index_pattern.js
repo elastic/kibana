@@ -14,7 +14,17 @@ uiRoutes
 });
 
 uiModules.get('apps/management')
-.controller('managementIndicesCreate', function ($scope, kbnUrl, Private, Notifier, indexPatterns, es, config, Promise, $translate) {
+.controller('managementIndicesCreate', function (
+  $http,
+  $scope,
+  $translate,
+  config,
+  es,
+  indexPatterns,
+  kbnUrl,
+  Notifier,
+  Private
+) {
   const notify = new Notifier();
   const refreshKibanaIndex = Private(RefreshKibanaIndex);
 
@@ -29,6 +39,8 @@ uiModules.get('apps/management')
   this.dateFields = null;
   this.patternErrors = [];
   this.fetchFieldsError = $translate.instant('KIBANA-LOADING');
+  this.isFetchingMatchingIndices = false;
+  this.matchingIndices = [];
 
   const TIME_FILTER_FIELD_OPTIONS = {
     NO_DATE_FIELD_DESIRED: {
@@ -82,7 +94,12 @@ uiModules.get('apps/management')
 
   const updateFieldList = results => {
     this.fetchFieldsError = results.fetchFieldsError;
+
     if (this.fetchFieldsError) {
+      if (this.fetchFieldsError === 'Unable to fetch mapping. Do you have indices matching the pattern?') {
+        // TODO: Show "No matching indices" in dropdown
+      }
+
       return;
     }
 
@@ -132,6 +149,21 @@ uiModules.get('apps/management')
     return _.includes(this.newIndexPattern.name, '*');
   };
 
+  this.fetchIndicesMatchingIndexPattern = () => {
+    console.log('fetch')
+    return $http.get(`../api/kibana/fetching_matching_indices?index_pattern=${this.newIndexPattern.name}`)
+      .success(resp => {
+        console.log(resp)
+      })
+      .error(resp => {
+
+      });
+  };
+
+  this.fetchIndicesSimilarToIndexPattern = () => {
+
+  };
+
   this.refreshFieldList = () => {
     const timeField = this.newIndexPattern.timeField;
     const fetchFieldListPromise = fetchFieldList();
@@ -145,6 +177,7 @@ uiModules.get('apps/management')
         updateTimeField(results.dateFields, timeField.name);
       }
     });
+    this.fetchIndicesMatchingIndexPattern();
   };
 
   this.createIndexPattern = () => {

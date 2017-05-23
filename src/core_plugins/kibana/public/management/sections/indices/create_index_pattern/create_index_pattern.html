@@ -20,6 +20,19 @@
       ></p>
 
       <div class="kuiVerticalRhythm">
+        <!-- Form errors -->
+        <div
+          class="kuiInfoPanel kuiInfoPanel--error kuiVerticalRhythm"
+          ng-if="controller.fetchFieldsError && !form.name.$error.indexNameInput"
+        >
+          <div class="kuiInfoPanelHeader">
+            <span class="kuiInfoPanelHeader__icon kuiIcon kuiIcon--error fa-warning"></span>
+            <span class="kuiInfoPanelHeader__title">
+              {{ controller.fetchFieldsError }}
+            </span>
+          </div>
+        </div>
+
         <!-- Form -->
         <form
           name="form"
@@ -47,6 +60,21 @@
                 required
                 type="text"
               >
+
+              <!--
+                <div
+                  class="kuiInfoPanel kuiInfoPanel--error kuiVerticalRhythm"
+                  ng-if="form.name.$error.indexNameInput"
+                >
+                  <div class="kuiInfoPanelHeader">
+                    <span class="kuiInfoPanelHeader__icon kuiIcon kuiIcon--error fa-warning"></span>
+                    <span
+                      class="kuiInfoPanelHeader__title"
+                      translate="KIBANA-INVALID_INDEX_PATTERN"
+                    ></span>
+                  </div>
+                </div>
+                -->
             </div>
 
             <!-- Input error text -->
@@ -161,18 +189,9 @@
             data-test-subj="createIndexPatternCreateButton"
             ng-disabled="form.$invalid || controller.fetchFieldsError"
             class="kuiButton kuiButton--primary kuiVerticalRhythm"
+            translate="KIBANA-CREATE"
             type="submit"
-          >
-            <span
-              ng-hide="form.name.$error.indexNameInput"
-              translate="KIBANA-CREATE"
-            ></span>
-
-            <span
-              ng-show="form.name.$error.indexNameInput"
-              translate="KIBANA-INVALID_INDEX_PATTERN"
-            ></span>
-          </button>
+          ></button>
         </form>
       </div>
     </div>
