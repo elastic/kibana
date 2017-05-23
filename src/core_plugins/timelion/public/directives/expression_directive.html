@@ -1,14 +1,16 @@
 <div class="timelionSearchInputContainer">
   <textarea
     data-expression-input
+    type="text"
+    class="kuiTextArea fullWidth"
+    placeholder=".es(*)"
+    rows="{{ rows }}"
     input-focus
-    class="kuiLocalSearchInput kuiLocalSearchInput--expandable"
     ng-model="sheet"
     ng-focus="onFocusInput()"
     ng-keydown="onKeyDownInput($event)"
     ng-keyup="onKeyUpInput($event)"
     ng-blur="onBlurInput()"
-    rows="9"
   ></textarea>
 
   <timelion-expression-suggestions

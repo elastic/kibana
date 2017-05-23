@@ -41,6 +41,7 @@ app.directive('timelionExpressionInput', function ($http, $timeout) {
   return {
     restrict: 'E',
     scope: {
+      rows: '=',
       sheet: '=',
       updateChart: '&',
     },
