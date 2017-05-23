@@ -1,6 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { FormGroup, ControlLabel, FormControl, Button } from 'react-bootstrap';
+import { FormGroup, ControlLabel, FormControl } from 'react-bootstrap';
 
 
 export const Expression = ({ expression, updateValue, onChange }) => {
@@ -9,8 +9,14 @@ export const Expression = ({ expression, updateValue, onChange }) => {
   return (
     <div>
       <FormGroup controlId="formControlsTextarea">
-        <ControlLabel>Expression</ControlLabel>
+        <ControlLabel>
+          Expression &nbsp;
+          <a className="pull-right" onClick={() => onChange(input.value)}> <i className="fa fa-play-circle"/></a>
+        </ControlLabel>
+
+
         <FormControl
+          spellCheck={false}
           componentClass="textarea"
           placeholder="Enter expression..."
           inputRef={ref => input = ref}
@@ -18,9 +24,6 @@ export const Expression = ({ expression, updateValue, onChange }) => {
           value={expression}
         />
       </FormGroup>
-      <Button bsStyle="primary" onClick={() => onChange(input.value)}>
-        Run Expression
-      </Button>
     </div>
   );
 };
