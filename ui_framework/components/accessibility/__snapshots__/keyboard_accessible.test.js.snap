@@ -1,0 +1,22 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`KuiKeyboardAccessible adds accessibility attributes tabindex and role 1`] = `
+<div
+  role="button"
+  tabindex="0"
+/>
+`;
+
+exports[`KuiKeyboardAccessible doesn't override pre-existing accessibility attributes role 1`] = `
+<div
+  role="submit"
+  tabindex="0"
+/>
+`;
+
+exports[`KuiKeyboardAccessible doesn't override pre-existing accessibility attributes tabindex 1`] = `
+<div
+  role="button"
+  tabindex="1"
+/>
+`;
