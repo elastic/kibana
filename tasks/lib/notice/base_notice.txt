@@ -56,4 +56,3 @@ THE SOFTWARE.
 ---
 This product bundles geohash.js which is available under a
 "MIT" license.  For details, see src/ui/public/utils/decode_geo_hash.js.
----
