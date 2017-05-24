@@ -95,9 +95,21 @@ export function IndexPatternProvider(Private, Notifier, config, kbnIndex, Promis
     return promise;
   }
 
-  function containsFieldCapabilities(fields) {
-    return _.any(fields, (field) => {
-      return _.has(field, 'aggregatable') && _.has(field, 'searchable');
+  function isFieldRefreshRequired(indexPattern) {
+    if (!indexPattern.fields) {
+      return true;
+    }
+
+    return indexPattern.fields.every(field => {
+      // added in 5.0 #8421
+      const hasFieldCaps = ('aggregatable' in field) && ('searchable' in field);
+
+      // slotted for 5.5 #11969
+      const hasDocValuesFlag = ('readFromDocValues' in field);
+
+      if (!hasFieldCaps || !hasDocValuesFlag) {
+        return true;
+      }
     });
   }
 
@@ -108,7 +120,7 @@ export function IndexPatternProvider(Private, Notifier, config, kbnIndex, Promis
       return promise;
     }
 
-    if (!indexPattern.fields || !containsFieldCapabilities(indexPattern.fields)) {
+    if (isFieldRefreshRequired(indexPattern)) {
       promise = indexPattern.refreshFields();
     }
     return promise.then(() => {initFields(indexPattern);});

@@ -62,21 +62,21 @@
     <form role="form" class="discover-field-details">
       <div class="form-group">
         <label>
-          Analyzed
+          Aggregatable
         </label>
         <select
           ng-options="opt.value as opt.label for opt in filter.boolOpts"
-          ng-model="filter.vals.analyzed"
+          ng-model="filter.vals.aggregatable"
           class="form-control">
         </select>
       </div>
       <div class="form-group">
         <label>
-          Indexed
+          Searchable
         </label>
         <select
           ng-options="opt.value as opt.label for opt in filter.boolOpts"
-          ng-model="filter.vals.indexed"
+          ng-model="filter.vals.searchable"
           class="form-control">
         </select>
       </div>
