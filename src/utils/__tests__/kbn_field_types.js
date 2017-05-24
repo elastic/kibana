@@ -71,12 +71,20 @@ describe('utils/kbn_field_types', () => {
 
   describe('getKbnTypeNames()', () => {
     it('returns a list of all kbnFieldType names', () => {
-      const esTypes = getKbnTypeNames();
-      expect(esTypes).to.contain('string');
-      expect(esTypes).to.contain('number');
-      expect(esTypes).to.contain('geo_point');
-      expect(esTypes).to.not.contain('keyword');
-      expect(esTypes).to.not.contain('float');
+      expect(getKbnTypeNames().sort()).to.eql([
+        '_source',
+        'attachment',
+        'boolean',
+        'conflict',
+        'date',
+        'geo_point',
+        'geo_shape',
+        'ip',
+        'murmur3',
+        'number',
+        'string',
+        'unknown',
+      ]);
     });
   });
 });
