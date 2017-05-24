@@ -2,6 +2,9 @@
  * 1. Enforce pointer when there's no href.
  */
 /**
+ * 1. Override Bootstrap styles.
+ */
+/**
  * 1. Links can't have a disabled attribute, so they can't support :disabled.
  */
 /**
@@ -24,6 +27,7 @@
 /**
  * 1. Embedded SVG of fa-caret-down (https://github.com/encharm/Font-Awesome-SVG-PNG/blob/master/black/svg/caret-down.svg).
  * 2. Make room on right side for the caret.
+ * 3. Prevent Firefox from showing dotted line around text on focus.
  */
 /**
  * 1. Setting to inline-block guarantees the same height when applied to both
@@ -486,7 +490,8 @@ body {
   -webkit-justify-content: flex-start;
       -ms-flex-pack: start;
           justify-content: flex-start;
-  padding: 18px 0; }
+  padding: 18px 0;
+  text-align: center; }
 
 .kuiCard__descriptionTitle {
   font-size: 14px;
@@ -504,31 +509,78 @@ body {
   font-size: 14px;
   padding: 0 15px 20px; }
 
+/**
+ * 1. Use this container to offset the spacing between wrapped cards.
+ */
+.kuiCardGroupContainer {
+  margin: -15px;
+  /* 1 */ }
+
+/**
+ * 1. Wrap cards when necessary.
+ */
 .kuiCardGroup {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
   display: flex;
-  border: 1px solid #E0E0E0;
-  border-radius: 4px;
-  overflow: hidden;
-  margin-bottom: 18px; }
+  -webkit-flex-wrap: wrap;
+      -ms-flex-wrap: wrap;
+          flex-wrap: wrap;
+  /* 1 */ }
 
+/**
+   * 1. Use the defined width of the card to determine when to wrap.
+   * 2. Use an even margin all around the card so that the spacing is still even when wrapped.
+   */
 .kuiCardGroup__card {
   -webkit-box-flex: 1;
-  -webkit-flex: 1 1 0%;
-      -ms-flex: 1 1 0%;
-          flex: 1 1 0%;
-  border: none;
-  border-radius: 0; }
-  .kuiCardGroup__card + .kuiCardGroup__card {
-    border-left: 1px solid #E0E0E0; }
+  -webkit-flex: 1 1 auto;
+      -ms-flex: 1 1 auto;
+          flex: 1 1 auto;
+  /* 1 */
+  margin: 15px;
+  /* 2 */ }
 
 .kuiCardGroup__cardDescription {
   -webkit-box-flex: 1;
   -webkit-flex: 1 1 auto;
       -ms-flex: 1 1 auto;
           flex: 1 1 auto; }
+
+/**
+ * 1. There's no way to make this look good when wrapped.
+ */
+.kuiCardGroup--united {
+  -webkit-flex-wrap: nowrap;
+      -ms-flex-wrap: nowrap;
+          flex-wrap: nowrap;
+  /* 1 */
+  border: 1px solid #E0E0E0;
+  border-radius: 4px;
+  overflow: hidden; }
+  .kuiCardGroup--united .kuiCardGroup__card {
+    border: none;
+    border-radius: 0; }
+  .kuiCardGroup--united .kuiCardGroup__card + .kuiCardGroup__card {
+    margin: 0;
+    border-left: 1px solid #E0E0E0; }
+
+.kuiCollapseButton {
+  -webkit-appearance: none;
+     -moz-appearance: none;
+          appearance: none;
+  background-color: transparent;
+  padding: 4px;
+  border: none;
+  line-height: 1;
+  font-size: 16px;
+  color: #2d2d2d !important;
+  /* 1 */
+  cursor: pointer;
+  opacity: 0.35; }
+  .kuiCollapseButton:hover {
+    opacity: 1; }
 
 /**
  * 1. If we use margins instead, columns get pushed to the next line.
@@ -726,6 +778,32 @@ body {
     opacity: 0.3;
     cursor: not-allowed; }
 
+.kuiCheckBoxLabel {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-align: center;
+  -webkit-align-items: center;
+      -ms-flex-align: center;
+          align-items: center;
+  font-weight: normal !important;
+  line-height: 1.5; }
+
+.kuiCheckBoxLabel__text {
+  font-size: 14px;
+  margin-left: 8px; }
+
+/**
+ * 1. Override Bootstrap.
+ */
+.kuiLabel {
+  font-size: 14px;
+  line-height: 1.5;
+  font-weight: bold;
+  margin-bottom: 0;
+  /* 1 */ }
+
 .kuiSearchInput {
   display: inline-block;
   position: relative;
@@ -747,6 +825,7 @@ body {
   -webkit-appearance: none;
      -moz-appearance: none;
           appearance: none;
+  font-family: "Open Sans", Helvetica, Arial, sans-serif;
   padding: 3px 12px 4px;
   font-size: 14px;
   font-weight: 400;
@@ -787,6 +866,7 @@ body {
   -webkit-appearance: none;
      -moz-appearance: none;
           appearance: none;
+  font-family: "Open Sans", Helvetica, Arial, sans-serif;
   padding: 3px 12px 4px;
   font-size: 14px;
   font-weight: 400;
@@ -826,9 +906,15 @@ body {
     .theme-dark .kuiSelect:focus {
       outline: none;
       border-color: #6EADC1; }
+  .kuiSelect:-moz-focusring {
+    text-shadow: 0 0 0;
+    /* 3 */ }
   .theme-dark .kuiSelect {
     background-image: url('data:image/svg+xml;utf8,<svg width="1792" height="1792" viewBox="0 0 1792 1792" xmlns="http://www.w3.org/2000/svg"><path d="M1408 704q0 26-19 45l-448 448q-19 19-45 19t-45-19l-448-448q-19-19-19-45t19-45 45-19h896q26 0 45 19t19 45z" fill="#CECECE"/></svg>');
     /* 1 */ }
+
+.kuiSelect--large {
+  min-width: 400px; }
 
 /**
  * 1. Have the same spatial footprint as the regular input.
@@ -837,13 +923,15 @@ body {
   -webkit-appearance: none;
      -moz-appearance: none;
           appearance: none;
+  font-family: "Open Sans", Helvetica, Arial, sans-serif;
   padding: 3px 12px 4px;
   font-size: 14px;
   font-weight: 400;
   line-height: 1.5;
   color: #191E23;
   border: 1px solid transparent;
-  /* 1 */ }
+  /* 1 */
+  background-color: transparent; }
   .theme-dark .kuiStaticInput {
     color: #cecece; }
 
@@ -851,6 +939,7 @@ body {
   -webkit-appearance: none;
      -moz-appearance: none;
           appearance: none;
+  font-family: "Open Sans", Helvetica, Arial, sans-serif;
   padding: 3px 12px 4px;
   font-size: 14px;
   font-weight: 400;
@@ -890,6 +979,7 @@ body {
   -webkit-appearance: none;
      -moz-appearance: none;
           appearance: none;
+  font-family: "Open Sans", Helvetica, Arial, sans-serif;
   padding: 3px 12px 4px;
   font-size: 14px;
   font-weight: 400;
@@ -923,7 +1013,12 @@ body {
       border-color: #6EADC1; }
 
 .kuiTextInput--small {
-  width: 60px; }
+  width: 100%;
+  max-width: 60px; }
+
+.kuiTextInput--large {
+  width: 100%;
+  max-width: 400px; }
 
 /**
  * 1. We may want to put elements in here which have different heights.
@@ -1095,6 +1190,16 @@ body {
     margin-left: 0;
     /* 1 */ }
 
+.kuiInfoButton {
+  font-size: 16px;
+  background-color: transparent;
+  color: #3CAED2;
+  cursor: pointer;
+  border: none;
+  padding: 0; }
+  .kuiInfoButton:hover, .kuiInfoButton:active {
+    color: #105A73; }
+
 /**
  * 1. Copied from FontAwesome's .fa class. We use a custom class to make it easier to migrate away
  *    from FontAwesome someday. When we do migrate away, we can just update this definition.
@@ -1211,12 +1316,6 @@ body {
     color: #b7e2ea; }
     .theme-dark .kuiLink:hover {
       color: #b7e2ea; }
-
-.kuiLoadingItems {
-  padding: 30px;
-  font-size: 18px;
-  color: #9fa3a7;
-  line-height: 1.5; }
 
 /**
  * 1. Breadcrumbs are placed in the top-left corner and need to be bumped over
@@ -1424,9 +1523,6 @@ body {
   .theme-dark .kuiLocalDropdown {
     background-color: #525252; }
 
-/**
- * 1. Override Bootstrap styles.
- */
 .kuiLocalDropdownCloseButton {
   -webkit-appearance: none;
      -moz-appearance: none;
@@ -1434,14 +1530,15 @@ body {
   background-color: transparent;
   padding: 4px;
   border: none;
-  position: absolute;
-  top: 1px;
-  right: 5px;
+  line-height: 1;
   font-size: 16px;
   color: #2d2d2d !important;
   /* 1 */
   cursor: pointer;
-  opacity: 0.35; }
+  opacity: 0.35;
+  position: absolute;
+  top: 1px;
+  right: 5px; }
   .kuiLocalDropdownCloseButton:hover {
     opacity: 1; }
   .theme-dark .kuiLocalDropdownCloseButton {
@@ -1685,6 +1782,7 @@ body {
   -webkit-appearance: none;
      -moz-appearance: none;
           appearance: none;
+  font-family: "Open Sans", Helvetica, Arial, sans-serif;
   padding: 3px 12px 4px;
   font-size: 14px;
   font-weight: 400;
@@ -1766,6 +1864,7 @@ body {
   -webkit-appearance: none;
      -moz-appearance: none;
           appearance: none;
+  font-family: "Open Sans", Helvetica, Arial, sans-serif;
   padding: 3px 12px 4px;
   font-size: 14px;
   font-weight: 400;
@@ -1808,14 +1907,22 @@ body {
     .theme-dark .kuiLocalSearchSelect:focus {
       outline: none;
       border-color: #6EADC1; }
+  .kuiLocalSearchSelect:-moz-focusring {
+    text-shadow: 0 0 0;
+    /* 3 */ }
   .theme-dark .kuiLocalSearchSelect {
     background-image: url('data:image/svg+xml;utf8,<svg width="1792" height="1792" viewBox="0 0 1792 1792" xmlns="http://www.w3.org/2000/svg"><path d="M1408 704q0 26-19 45l-448 448q-19 19-45 19t-45-19l-448-448q-19-19-19-45t19-45 45-19h896q26 0 45 19t19 45z" fill="#CECECE"/></svg>');
     /* 1 */ }
 
+/**
+ * 1. Override inherited styles.
+ */
 .kuiLocalSearchButton {
   width: 43px;
   height: 30px;
   font-size: 14px;
+  line-height: 0;
+  /* 1 */
   color: #ffffff;
   background-color: #9c9c9c;
   border: 0;
@@ -2078,7 +2185,8 @@ body {
   background-color: #FFF;
   border: 1px solid #6EADC1;
   border-radius: 4px;
-  box-shadow: 0 5px 22px rgba(0, 0, 0, 0.25); }
+  box-shadow: 0 5px 22px rgba(0, 0, 0, 0.25);
+  z-index: 1001; }
 
 .kuiModalHeader {
   display: -webkit-box;
@@ -2135,33 +2243,11 @@ body {
   .kuiModalFooter > * + * {
     margin-left: 5px; }
 
-.kuiNoItems {
-  padding: 30px;
-  font-size: 18px;
-  color: #9fa3a7;
-  line-height: 1.5; }
-
 .kuiNotice {
   padding: 40px 60px 48px;
   margin: 20px;
   background-color: #FFF;
   line-height: 1.5; }
-
-.kuiNotice__header {
-  margin-bottom: 18px; }
-
-/**
- * 1. Override h1 styles.
- */
-.kuiNoticeTitle {
-  font-size: 22px;
-  margin-bottom: 12px;
-  margin-top: 0 !important;
-  /* 1 */ }
-
-.kuiNoticeText {
-  font-size: 14px;
-  margin-bottom: 12px; }
 
 .kuiPanel {
   border: 2px solid #E4E4E4; }
@@ -2410,6 +2496,9 @@ body {
   line-height: 1.5;
   color: #a7a7a7; }
 
+.kuiTableHeaderCell__liner {
+  display: inline-block; }
+
 /**
  * 1. Prevent rapid clicking from selecting text.
  */
@@ -2496,6 +2585,12 @@ body {
   .kuiTableRowCell--checkBox .kuiTableRowCell__liner {
     overflow: visible;
     /* 3 */ }
+
+.kuiTableInfo {
+  padding: 30px;
+  font-size: 18px;
+  color: #9fa3a7;
+  line-height: 1.5; }
 
 .kuiTabs {
   display: -webkit-box;

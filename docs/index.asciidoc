@@ -4,7 +4,7 @@
 //////////
 release-state can be: released | prerelease | unreleased
 //////////
-:release-state:  unreleased
+:release-state:  prerelease
 :version:        6.0.0-alpha1
 :major-version:  6.x
 :branch:         master
@@ -44,3 +44,5 @@ include::plugins.asciidoc[]
 include::development.asciidoc[]
 
 include::limitations.asciidoc[]
+
+include::release-notes.asciidoc[]

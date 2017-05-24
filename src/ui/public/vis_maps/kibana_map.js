@@ -17,7 +17,7 @@ function makeFitControl(fitContainer, kibanaMap) {
     },
     onAdd: function (leafletMap) {
       this._leafletMap = leafletMap;
-      $(this._fitContainer).html('<a class="fa fa-crop" href="#" title="Fit Data Bounds"></a>')
+      $(this._fitContainer).html('<a class="kuiIcon fa-crop" href="#" aria-label="Fit Data Bounds"></a>')
         .on('click', e => {
           e.preventDefault();
           this._kibanaMap.fitToData();
@@ -105,6 +105,7 @@ export class KibanaMap extends EventEmitter {
     };
 
     this._leafletMap = L.map(containerNode, leafletOptions);
+    this._leafletMap.scrollWheelZoom.disable();
     const worldBounds = L.latLngBounds(L.latLng(-90, -180), L.latLng(90, 180));
     this._leafletMap.setMaxBounds(worldBounds);
 
@@ -293,6 +294,10 @@ export class KibanaMap extends EventEmitter {
     return this._leafletMap.getZoom();
   }
 
+  getMaxZoomLevel() {
+    return this._leafletMap.getMaxZoom();
+  }
+
   getAutoPrecision() {
     return zoomToPrecision(this._leafletMap.getZoom(), 12, this._leafletMap.getMaxZoom());
   }
@@ -347,18 +352,19 @@ export class KibanaMap extends EventEmitter {
   }
 
   addDrawControl() {
+    const shapeOptions = {
+      shapeOptions: {
+        stroke: false,
+        color: '#000'
+      }
+    };
     const drawOptions = {
       draw: {
         polyline: false,
         marker: false,
         circle: false,
-        polygon: false,
-        rectangle: {
-          shapeOptions: {
-            stroke: false,
-            color: '#000'
-          }
-        }
+        rectangle: shapeOptions,
+        polygon: shapeOptions
       }
     };
     this._leafletDrawControl = new L.Control.Draw(drawOptions);
@@ -411,6 +417,10 @@ export class KibanaMap extends EventEmitter {
   }
 
 
+  getLeafletBaseLayer() {
+    return this._leafletBaseLayer;
+  }
+
   setBaseLayer(settings) {
 
     if (_.isEqual(settings, this._baseLayerSettings)) {
@@ -438,17 +448,23 @@ export class KibanaMap extends EventEmitter {
       baseLayer = this._getTMSBaseLayer((settings.options));
     }
 
-    baseLayer.on('tileload', () => this._updateDesaturation());
-    baseLayer.on('load', () => { this.emit('baseLayer:loaded');});
-    baseLayer.on('loading', () => {this.emit('baseLayer:loading');});
+    if (baseLayer) {
+      baseLayer.on('tileload', () => this._updateDesaturation());
+      baseLayer.on('load', () => {
+        this.emit('baseLayer:loaded');
+      });
+      baseLayer.on('loading', () => {
+        this.emit('baseLayer:loading');
+      });
 
-    this._leafletBaseLayer = baseLayer;
-    this._leafletBaseLayer.addTo(this._leafletMap);
-    this._leafletBaseLayer.bringToBack();
-    if (settings.options.minZoom > this._leafletMap.getZoom()) {
-      this._leafletMap.setZoom(settings.options.minZoom);
+      this._leafletBaseLayer = baseLayer;
+      this._leafletBaseLayer.addTo(this._leafletMap);
+      this._leafletBaseLayer.bringToBack();
+      if (settings.options.minZoom > this._leafletMap.getZoom()) {
+        this._leafletMap.setZoom(settings.options.minZoom);
+      }
+      this.resize();
     }
-    this.resize();
 
   }
 
@@ -473,7 +489,7 @@ export class KibanaMap extends EventEmitter {
       }
     });
 
-    if (bounds) {
+    if (bounds && bounds.isValid()) {
       this._leafletMap.fitBounds(bounds);
     }
   }
@@ -488,16 +504,18 @@ export class KibanaMap extends EventEmitter {
   }
 
   _getWMSBaseLayer(options) {
-    return L.tileLayer.wms(options.url, {
-      attribution: options.attribution,
-      format: options.format,
-      layers: options.layers,
+    const wmsOptions = {
+      attribution: options.attribution || '',
+      format: options.format || '',
+      layers: options.layers || '',
       minZoom: options.minZoom,
       maxZoom: options.maxZoom,
-      styles: options.styles,
+      styles: options.styles || '',
       transparent: options.transparent,
-      version: options.version
-    });
+      version: options.version || '1.3.0'
+    };
+
+    return (typeof options.url === 'string' && options.url.length) ? L.tileLayer.wms(options.url, wmsOptions) : null;
   }
 
   _updateExtent() {

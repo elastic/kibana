@@ -30,9 +30,10 @@
   "KIBANA-NON_MATCHING_INDICES_AND_ALIASES": "Indices and aliases that were found, but did not match the pattern:",
   "KIBANA-MORE": "more",
   "KIBANA-TIME_FILTER_FIELD_NAME": "Time Filter field name",
-  "KIBANA-NO_DATE_FIELD_SELECTED": "None selected",
+  "KIBANA-NO_DATE_FIELD_DESIRED": "I don't want to use the Time Filter",
   "KIBANA-NO_DATE_FIELDS_IN_INDICES": "None available",
   "KIBANA-REFRESH_FIELDS": "refresh fields",
+  "KIBANA-INDICES_DONT_CONTAIN_TIME_FIELDS": "The indices which match this index pattern don't contain any time fields.",
   "KIBANA-INVALID_INDEX_PATTERN": "Invalid index name pattern.",
   "KIBANA-DATE_FORMAT_DOCS": "Date Format Documentation",
   "KIBANA-WIKI_ISO_WEEK_DATE": "Wikipedia: ISO Week Date",
@@ -44,10 +45,9 @@
   "KIBANA-WARNING" : "Warning",
   "KIBANA-NO_DEFAULT_INDEX_PATTERN" : "No default index pattern. You must select or create one to continue.",
   "KIBANA-LOADING": "Loading",
-  "KIBANA-SET_INDEX_NAME_FIRST": "Set an index name first",
-  "KIBANA-INTERVAL_INDICES_POPULATED" : "Select the interval at which your indices are populated.",
   "KIBANA-INDICES_MATCH_PATTERN" : "Unable to fetch mapping. Do you have indices matching the pattern?",
   "KIBANA-ADD_NEW" : "Create Index Pattern",
   "KIBANA-SEE" : "See",
-  "KIBANA-CREATE" : "Create"
+  "KIBANA-CREATE" : "Create",
+  "KIBANA-FIELD_IS_REQUIRED": "{{fieldName}} is required"
 }

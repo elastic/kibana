@@ -106,7 +106,7 @@ app.directive('dashboardGrid', function ($compile, Notifier) {
             stop: readGridsterChangeHandler
           },
           draggable: {
-            handle: '.panel-move, .fa-arrows',
+            handle: '[data-dashboard-panel-drag-handle]',
             stop: readGridsterChangeHandler
           }
         }).data('gridster');

@@ -47,7 +47,7 @@ describe('ui/modals/confirm_modal', function () {
     confirmModal(myMessage, { confirmButtonText: 'GREAT!', onConfirm: _.noop });
 
     $rootScope.$digest();
-    const message = findByDataTestSubj('confirmModalBodyText')[0].innerText;
+    const message = findByDataTestSubj('confirmModalBodyText')[0].innerText.trim();
     expect(message).to.equal(myMessage);
   });
 
@@ -62,21 +62,21 @@ describe('ui/modals/confirm_modal', function () {
     it('for confirm button', () => {
       confirmModal('What\'s your favorite dinosaur?', confirmModalOptions);
       $rootScope.$digest();
-      const confirmButtonText = findByDataTestSubj('confirmModalConfirmButton')[0].innerText;
+      const confirmButtonText = findByDataTestSubj('confirmModalConfirmButton')[0].innerText.trim();
       expect(confirmButtonText).to.equal('Troodon');
     });
 
     it('for cancel button', () => {
       confirmModal('What\'s your favorite dinosaur?', confirmModalOptions);
       $rootScope.$digest();
-      const cancelButtonText = findByDataTestSubj('confirmModalCancelButton')[0].innerText;
+      const cancelButtonText = findByDataTestSubj('confirmModalCancelButton')[0].innerText.trim();
       expect(cancelButtonText).to.equal('Dilophosaurus');
     });
 
     it('for title text', () => {
       confirmModal('What\'s your favorite dinosaur?', confirmModalOptions);
       $rootScope.$digest();
-      const titleText = findByDataTestSubj('confirmModalTitleText')[0].innerText;
+      const titleText = findByDataTestSubj('confirmModalTitleText')[0].innerText.trim();
       expect(titleText).to.equal('Dinosaurs');
     });
   });
@@ -112,40 +112,6 @@ describe('ui/modals/confirm_modal', function () {
       findByDataTestSubj('confirmModalConfirmButton').click();
 
       expect(confirmCallback.called).to.be(true);
-      expect(cancelCallback.called).to.be(false);
-    });
-
-    it('onKeyDown detects ESC and calls onCancel', function () {
-      const confirmModalOptions = {
-        confirmButtonText: 'bye',
-        onConfirm: confirmCallback,
-        onCancel: cancelCallback,
-        title: 'hi'
-      };
-
-      confirmModal('hi', confirmModalOptions);
-
-      const e = angular.element.Event('keydown'); // eslint-disable-line new-cap
-      e.keyCode = 27;
-      angular.element(document.body).trigger(e);
-
-      expect(cancelCallback.called).to.be(true);
-    });
-
-    it('onKeyDown ignores keys other than ESC', function () {
-      const confirmModalOptions = {
-        confirmButtonText: 'bye',
-        onConfirm: confirmCallback,
-        onCancel: cancelCallback,
-        title: 'hi'
-      };
-
-      confirmModal('hi', confirmModalOptions);
-
-      const e = angular.element.Event('keydown'); // eslint-disable-line new-cap
-      e.keyCode = 50;
-      angular.element(document.body).trigger(e);
-
       expect(cancelCallback.called).to.be(false);
     });
   });

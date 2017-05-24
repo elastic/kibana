@@ -1,7 +1,7 @@
 import expect from 'expect.js';
 import sinon from 'sinon';
-import * as kbnTestServer from '../../../../../../test/utils/kbn_server.js';
-import fromRoot from '../../../../../utils/from_root';
+import * as kbnTestServer from '../../../../../test_utils/kbn_server.js';
+import { fromRoot } from '../../../../../utils';
 import manageUuid from '../manage_uuid';
 
 describe('core_plugins/kibana/server/lib', function () {

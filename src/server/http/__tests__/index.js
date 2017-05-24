@@ -1,6 +1,6 @@
 import expect from 'expect.js';
-import * as kbnTestServer from '../../../../test/utils/kbn_server';
-import fromRoot from '../../../utils/from_root';
+import * as kbnTestServer from '../../../test_utils/kbn_server';
+import { fromRoot } from '../../../utils';
 
 describe('routes', function () {
   this.slow(10000);

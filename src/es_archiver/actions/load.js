@@ -31,8 +31,14 @@ export async function loadAction({ name, skipExisting, client, dataDir, log }) {
     ]);
   }
 
+  const indicesToRefresh = [];
   stats.forEachIndex((index, { docs }) => {
     log.info('[%s] Indexed %d docs into %j', name, docs.indexed, index);
+    indicesToRefresh.push(index);
+  });
+
+  await client.indices.refresh({
+    index: indicesToRefresh
   });
 
   return stats.toJSON();

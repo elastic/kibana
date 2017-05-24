@@ -3,6 +3,7 @@ import expect from 'expect.js';
 export default function ({ getService, getPageObjects }) {
   const log = getService('log');
   const retry = getService('retry');
+  const screenshots = getService('screenshots');
   const PageObjects = getPageObjects(['common', 'visualize', 'header', 'settings']);
 
   describe('visualize app', function describeIndexTests() {
@@ -112,7 +113,7 @@ export default function ({ getService, getPageObjects }) {
         })
         .then(function takeScreenshot() {
           log.debug('Take screenshot (success)');
-          PageObjects.common.saveScreenshot('map-at-zoom-0');
+          screenshots.take('map-at-zoom-0');
         });
       });
 
@@ -267,7 +268,7 @@ export default function ({ getService, getPageObjects }) {
         })
         .then(function takeScreenshot() {
           log.debug('Take screenshot');
-          PageObjects.common.saveScreenshot('Visualize-site-map');
+          screenshots.take('Visualize-site-map');
         });
       });
 
@@ -304,6 +305,42 @@ export default function ({ getService, getPageObjects }) {
         .then(function (enabled) {
           expect(enabled).to.be(false);
         });
+      });
+
+      it('wms switch should change allow to zoom in further', function () {
+
+        return PageObjects.visualize.collapseChart()
+          .then(function () {
+            return PageObjects.visualize.clickOptions();
+          })
+          .then(function () {
+            return PageObjects.visualize.selectWMS();
+          })
+          .then(function () {
+            return PageObjects.visualize.clickGo();
+          })
+          .then(function () {
+            return PageObjects.header.waitUntilLoadingHasFinished();
+          })
+          .then(function () {
+            return PageObjects.common.sleep(2000);
+          })
+          .then(function () {
+            return PageObjects.visualize.getMapZoomInEnabled();
+          })
+          .then(function (enabled) {//should be able to zoom in again
+            expect(enabled).to.be(true);
+          })
+          .then(function () {
+            return PageObjects.visualize.clickMapZoomIn();
+          })
+          .then(function () {
+            return PageObjects.visualize.getMapZoomInEnabled();
+          })
+          .then(function (enabled) {//should be able to zoom in again
+            expect(enabled).to.be(true);
+          });
+
       });
     });
   });

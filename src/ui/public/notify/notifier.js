@@ -121,6 +121,7 @@ function add(notif, cb) {
     notif.customActions = notif.customActions.map((action, index) => {
       return {
         key: action.text,
+        dataTestSubj: action.dataTestSubj,
         callback: closeNotif(notif, action.callback, action.text),
         getButtonClass() {
           const buttonTypeClass = typeToButtonClassMap[notif.type];
@@ -229,8 +230,8 @@ Notifier.config = {
   errorLifetime: 300000,
   warningLifetime: 10000,
   infoLifetime: 5000,
-  setInterval: window.setInterval,
-  clearInterval: window.clearInterval
+  setInterval: window.setInterval.bind(window),
+  clearInterval: window.clearInterval.bind(window)
 };
 
 Notifier.applyConfig = function (config) {

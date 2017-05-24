@@ -1,5 +1,8 @@
 import Slugify from '../string/slugify';
 
+import AccessibilityExample
+  from '../../views/accessibility/accessibility_example';
+
 import ActionItemExample
   from '../../views/action_item/action_item_example';
 
@@ -14,6 +17,9 @@ import ButtonExample
 
 import CardExample
   from '../../views/card/card_example';
+
+import CollapseButtonExample
+  from '../../views/collapse_button/collapse_button_example';
 
 import ColumnExample
   from '../../views/column/column_example';
@@ -41,6 +47,9 @@ import HeaderBarSandbox
 
 import IconExample
   from '../../views/icon/icon_example';
+
+import InfoButtonExample
+  from '../../views/info_button/info_button_example';
 
 import InfoPanelExample
   from '../../views/info_panel/info_panel_example';
@@ -95,6 +104,10 @@ import ViewSandbox
 
 // Component route names should match the component name exactly.
 const components = [{
+  name: 'Accessibility',
+  component: AccessibilityExample,
+  hasReact: true,
+}, {
   name: 'ActionItem',
   component: ActionItemExample,
 }, {
@@ -106,12 +119,16 @@ const components = [{
 }, {
   name: 'Button',
   component: ButtonExample,
+  hasReact: true,
 }, {
   name: 'Card',
   component: CardExample,
 }, {
   name: 'Column',
   component: ColumnExample,
+}, {
+  name: 'CollapseButton',
+  component: CollapseButtonExample,
 }, {
   name: 'Event',
   component: EventExample,
@@ -131,6 +148,10 @@ const components = [{
   name: 'Icon',
   component: IconExample,
 }, {
+  name: 'InfoButton',
+  component: InfoButtonExample,
+  hasReact: true,
+}, {
   name: 'InfoPanel',
   component: InfoPanelExample,
 }, {
@@ -139,6 +160,7 @@ const components = [{
 }, {
   name: 'LocalNav',
   component: LocalNavExample,
+  hasReact: true,
 }, {
   name: 'Menu',
   component: MenuExample,
@@ -151,6 +173,7 @@ const components = [{
 }, {
   name: 'Modal',
   component: ModalExample,
+  hasReact: true,
 }, {
   name: 'Panel',
   component: PanelExample,
@@ -169,6 +192,7 @@ const components = [{
 }, {
   name: 'ToolBar',
   component: ToolBarExample,
+  hasReact: true,
 }, {
   name: 'Typography',
   component: TypographyExample,
@@ -191,10 +215,26 @@ const sandboxes = [{
   component: ViewSandbox,
 }];
 
+const allRoutes = components.concat(sandboxes);
+
 export default {
   components: Slugify.each(components, 'name', 'path'),
   sandboxes: Slugify.each(sandboxes, 'name', 'path'),
   getAppRoutes: function getAppRoutes() {
-    return this.components.concat(this.sandboxes);
+    return allRoutes;
+  },
+  getPreviousRoute: function getPreviousRoute(routeName) {
+    const index = allRoutes.findIndex(item => {
+      return item.name === routeName;
+    });
+
+    return index >= 0 ? allRoutes[index - 1] : undefined;
+  },
+  getNextRoute: function getNextRoute(routeName) {
+    const index = allRoutes.findIndex(item => {
+      return item.name === routeName;
+    });
+
+    return index < allRoutes.length - 1 ? allRoutes[index + 1] : undefined;
   },
 };

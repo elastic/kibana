@@ -1,7 +1,11 @@
 <div class="legend-col-wrapper" ng-if="labels.length">
-  <div ng-click="toggleLegend()" class="legend-toggle">
-    <i class="legend-icon fa {{getToggleLegendClasses()}}"></i>
-  </div>
+  <button
+    type="button"
+    ng-click="toggleLegend()"
+    class="kuiCollapseButton legend-collapse-button"
+  >
+    <span class="kuiIcon {{getToggleLegendClasses()}}"></span>
+  </button>
   <ul class="legend-ul" ng-show="open">
 
     <li
@@ -18,6 +22,7 @@
           ng-class="showDetails ? 'legend-value-full' : 'legend-value-truncate'"
           class="legend-value-title"
           tooltip="{{legendData.label}}"
+          tooltip-animation="false"
         >
           <i class="fa fa-circle" ng-style="{color: getColor(legendData.label)}"></i> {{legendData.label}}
         </div>

@@ -87,9 +87,3 @@ You can enable grid on the chart. By default grid is displayed on the category a
 
 *X-axis*:: You can disable the display of grid lines on category axis
 *Y-axis*:: You can choose on which (if any) of the value axes you want to display grid lines 
-
-[float]
-[[vertbar-viewing-detailed-information]]
-== Viewing Detailed Information
-
-include::visualization-raw-data.asciidoc[]

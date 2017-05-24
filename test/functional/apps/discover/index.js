@@ -1,11 +1,8 @@
 export default function ({ getService, loadTestFile }) {
-  const config = getService('config');
   const esArchiver = getService('esArchiver');
   const remote = getService('remote');
 
   describe('discover app', function () {
-    this.timeout(config.get('timeouts.test'));
-
     before(function () {
       return remote.setWindowSize(1200,800);
     });

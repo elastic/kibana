@@ -48,12 +48,11 @@
           class="kuiTab kbn-management-tab"
           ng-class="{ 'kuiTab-isSelected': state.tab === service.title }"
           ng-repeat="service in services"
-          title="{{ service.title }}"
           ng-click="changeTab(service)"
         >
           {{ service.title }}
-          <small>
-          ({{service.data.length}}<span ng-show="service.total > service.data.length"> of {{service.total}}</span>)
+          <small aria-label="{{:: service.data.length + ' of ' + service.total + ' ' + service.title }}">
+            ({{service.data.length}}<span ng-show="service.total > service.data.length"> of {{service.total}}</span>)
           </small>
         </button>
       </div>
@@ -118,7 +117,7 @@
         class="kuiPanel kuiPanel--centered kuiPanel--withHeader"
         ng-if="!service.data.length"
       >
-        <div class="kuiNoItems">
+        <div class="kuiTableInfo">
           No {{service.title}} matched your search.
         </div>
       </div>

@@ -38,6 +38,10 @@
   color: $tableHeaderTextColor;
 }
 
+.kuiTableHeaderCell__liner {
+  display: inline-block;
+}
+
 /**
  * 1. Prevent rapid clicking from selecting text.
  */

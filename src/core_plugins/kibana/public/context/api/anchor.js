@@ -3,10 +3,12 @@ import _ from 'lodash';
 import { SearchSourceProvider } from 'ui/courier/data_source/search_source';
 
 
-function fetchAnchorProvider(Private) {
+function fetchAnchorProvider(courier, Private) {
   const SearchSource = Private(SearchSourceProvider);
 
-  return async function fetchAnchor(indexPattern, uid, sort) {
+  return async function fetchAnchor(indexPatternId, uid, sort) {
+    const indexPattern = await courier.indexPatterns.get(indexPatternId);
+
     const searchSource = new SearchSource()
       .inherits(false)
       .set('index', indexPattern)

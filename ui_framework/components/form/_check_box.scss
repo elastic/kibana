@@ -53,3 +53,15 @@ $checkboxDisabledOpacity: 0.3;
     cursor: not-allowed;
   }
 }
+
+.kuiCheckBoxLabel {
+  display: flex;
+  align-items: center;
+  font-weight: normal !important;
+  line-height: $globalLineHeight;
+}
+
+  .kuiCheckBoxLabel__text {
+    font-size: $globalFontSize;
+    margin-left: 8px;
+  }

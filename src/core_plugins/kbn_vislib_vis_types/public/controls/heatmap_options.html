@@ -11,7 +11,14 @@
         ng-options="mode for mode in vis.type.params.colorSchemas"
       ></select>
     </div>
-    <div class="text-info text-center" ng-show="customColors" ng-click="resetColors()">reset colors</div>
+    <div
+      class="text-info text-center"
+      ng-show="customColors"
+      ng-click="resetColors()"
+      kbn-accessible-click
+    >
+      reset colors
+    </div>
   </div>
 
   <div class="kuiSideBarFormRow">
@@ -76,21 +83,24 @@
       <div
         class="kuiSideBarCollapsibleTitle__label"
         ng-click="toggleColorRangeSection()"
+        kbn-accessible-click
       >
         <span
           aria-hidden="true"
           ng-class="{ 'fa-caret-down': showColorRange, 'fa-caret-right': !showColorRange }"
-          class="fa fa-caret-right kuiSideBarCollapsibleTitle__caret"
+          class="kuiIcon fa-caret-right kuiSideBarCollapsibleTitle__caret"
         ></span>
         <span class="kuiSideBarCollapsibleTitle__text">
           Custom Ranges
         </span>
       </div>
-      <input aria-label="enable"
-             ng-model="vis.params.setColorRange"
-             type="checkbox"
-             class="kuiSideBarSectionTitle__action"
-             ng-click="toggleColorRangeSection(true)"
+      <input
+        aria-label="Enable custom ranges"
+        ng-model="vis.params.setColorRange"
+        type="checkbox"
+        class="kuiSideBarSectionTitle__action"
+        ng-click="toggleColorRangeSection(true)"
+        kbn-accessible-click
       >
     </div>
 
@@ -131,7 +141,7 @@
                 ng-click="removeRange($index)"
                 class="kuiButton kuiButton--danger kuiButton--small"
               >
-                <i class="fa fa-times"></i>
+                <span class="kuiIcon fa-times"><span>
               </button>
             </td>
           </tr>
@@ -139,7 +149,7 @@
 
         <div class="hintbox" ng-show="!vis.params.colorsRange.length">
           <p>
-            <i class="fa fa-danger text-danger"></i>
+            <span class="kuiIcon fa-danger text-danger"><span>
             <strong>Required:</strong> You must specify at least one range.
           </p>
         </div>
@@ -159,6 +169,7 @@
       <div
         class="kuiSideBarCollapsibleTitle__label"
         ng-click="toggleLabelSection()"
+        kbn-accessible-click
       >
         <span
           aria-hidden="true"
@@ -166,16 +177,17 @@
           'fa-caret-down': showLabels,
           'fa-caret-right': !showLabels
           }"
-          class="fa fa-caret-right kuiSideBarCollapsibleTitle__caret"
+          class="kuiIcon fa-caret-right kuiSideBarCollapsibleTitle__caret"
         ></span>
         <span class="kuiSideBarCollapsibleTitle__text">
           Show Labels
         </span>
       </div>
-      <input aria-label="enable"
-             ng-model="valueAxis.labels.show"
-             type="checkbox"
-             class="kuiSideBarSectionTitle__action"
+      <input
+        aria-label="Show labels"
+        ng-model="valueAxis.labels.show"
+        type="checkbox"
+        class="kuiSideBarSectionTitle__action"
       >
     </div>
     <div ng-if="valueAxis.labels.show" ng-show="showLabels" class="kuiSideBarCollapsibleSection">

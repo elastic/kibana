@@ -9,39 +9,47 @@ if (!env.BABEL_CACHE_PATH) {
 
 exports.webpackCacheDir = env.WEBPACK_BABEL_CACHE_DIR || fromRoot('optimize/.webpack.babelcache');
 
-exports.nodePresets = [
-  [
-    require.resolve('babel-preset-env'),
-    {
+const commonPreset = {
+  presets: [
+    require.resolve('babel-preset-react')
+  ],
+  plugins: [
+    require.resolve('babel-plugin-add-module-exports'),
+    // stage 3
+    require.resolve('babel-plugin-transform-async-generator-functions'),
+    require.resolve('babel-plugin-transform-object-rest-spread'),
+    // stage 2
+    require.resolve('babel-plugin-transform-class-properties'),
+  ],
+}
+
+exports.nodePreset = {
+  presets: [
+    [require.resolve('babel-preset-env'), {
       targets: {
         node: 'current'
-      }
-    }
+      },
+      useBuiltIns: true,
+    }],
+    commonPreset,
   ],
-  require.resolve('babel-preset-stage-1'),
-  require.resolve('babel-preset-react'),
-];
+};
 
-exports.webpackPresets = [
-  [
-    require.resolve('babel-preset-env'),
-    {
+exports.webpackPreset = {
+  presets: [
+    [require.resolve('babel-preset-env'), {
       targets: {
         browsers: [
           'last 2 versions',
           '> 5%',
           'Safari 7' // for PhantomJS support
         ]
-      }
-    }
+      },
+      useBuiltIns: true,
+    }],
+    commonPreset,
   ],
-  require.resolve('babel-preset-stage-1'),
-  require.resolve('babel-preset-react'),
-]
-
-exports.plugins = [
-  require.resolve('babel-plugin-add-module-exports'),
-];
+}
 
 exports.devIgnore = [
   /[\\\/](node_modules|bower_components)[\\\/]/

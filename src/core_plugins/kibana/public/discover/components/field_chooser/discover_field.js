@@ -3,11 +3,10 @@ import html from 'plugins/kibana/discover/components/field_chooser/discover_fiel
 import _ from 'lodash';
 import 'ui/directives/css_truncate';
 import 'ui/directives/field_name';
+import 'ui/accessibility/kbn_accessible_click';
 import detailsHtml from 'plugins/kibana/discover/components/field_chooser/lib/detail_views/string.html';
 import { uiModules } from 'ui/modules';
 const app = uiModules.get('apps/discover');
-
-
 
 app.directive('discoverField', function ($compile) {
   return {
@@ -76,6 +75,15 @@ app.directive('discoverField', function ($compile) {
         if (field.details) {
           $scope.toggleDetails(field);
         }
+      };
+
+      $scope.onClickToggleDetails = function onClickToggleDetails($event, field) {
+        // Do nothing if the event originated from a child.
+        if ($event.currentTarget !== $event.target) {
+          $event.preventDefault();
+        }
+
+        $scope.toggleDetails(field);
       };
 
       $scope.toggleDetails = function (field, recompute) {

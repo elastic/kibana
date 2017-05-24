@@ -10,6 +10,7 @@ const metricAggs = [
   { label: 'Min', value: 'min' },
   { label: 'Percentile', value: 'percentile' },
   { label: 'Percentile Rank', value: 'percentile_rank' },
+  { label: 'Static Value', value: 'static' },
   { label: 'Std. Deviation', value: 'std_deviation' },
   { label: 'Sum', value: 'sum' },
   { label: 'Sum of Squares', value: 'sum_of_squares' },
@@ -72,11 +73,13 @@ class AggSelectOption extends Component {
         note = (<span className="vis_editor__agg_select-note">(requires child aggregation)</span>);
       }
       return (
-        <div className="Select-option vis_editor__agg_select-heading"
+        <div
+          className="Select-option vis_editor__agg_select-heading"
           onMouseEnter={this.handleMouseEnter}
           onMouseDown={this.handleMouseDown}
           onMouseMove={this.handleMouseMove}
-          title={label}>
+          ariaLabel={label}
+        >
           <span className="Select-value-label" style={style}>
             <strong>{label}</strong>
             {note}
@@ -85,11 +88,13 @@ class AggSelectOption extends Component {
       );
     }
     return (
-      <div className={this.props.className}
+      <div
+        className={this.props.className}
         onMouseEnter={this.handleMouseEnter}
         onMouseDown={this.handleMouseDown}
         onMouseMove={this.handleMouseMove}
-        title={label}>
+        ariaLabel={label}
+      >
         <span className="Select-value-label" style={style}>
           { this.props.children }
         </span>
