@@ -3,9 +3,9 @@ import angular from 'angular';
 import rison from 'rison-node';
 import { savedObjectManagementRegistry } from 'plugins/kibana/management/saved_object_registry';
 import objectViewHTML from 'plugins/kibana/management/sections/objects/_view.html';
-import { IndexPatternsCastMappingTypeProvider } from 'ui/index_patterns/_cast_mapping_type';
 import uiRoutes from 'ui/routes';
 import { uiModules } from 'ui/modules';
+import { castEsToKbnFieldTypeName } from '../../../../../../utils';
 
 uiRoutes
 .when('/management/kibana/objects/:service/:id', {
@@ -16,9 +16,8 @@ uiModules.get('apps/management')
 .directive('kbnManagementObjectsView', function (kbnIndex, Notifier, confirmModal) {
   return {
     restrict: 'E',
-    controller: function ($scope, $injector, $routeParams, $location, $window, $rootScope, esAdmin, Private) {
+    controller: function ($scope, $injector, $routeParams, $location, $window, $rootScope, esAdmin) {
       const notify = new Notifier({ location: 'SavedObject view' });
-      const castMappingType = Private(IndexPatternsCastMappingTypeProvider);
       const serviceObj = savedObjectManagementRegistry.get($routeParams.service);
       const service = $injector.get(serviceObj.service);
 
@@ -81,7 +80,7 @@ uiModules.get('apps/management')
           fields.push({
             name: name,
             type: (function () {
-              switch (castMappingType(esType)) {
+              switch (castEsToKbnFieldTypeName(esType)) {
                 case 'string': return 'text';
                 case 'number': return 'number';
                 case 'boolean': return 'boolean';
