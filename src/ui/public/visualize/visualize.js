@@ -13,7 +13,7 @@ import {
 
 uiModules
 .get('kibana/directive', ['ngSanitize'])
-.directive('visualize', function (Notifier, SavedVis, indexPatterns, Private, timefilter) {
+.directive('visualize', function (Notifier, Private, timefilter) {
   const notify = new Notifier({ location: 'Visualize' });
   const requestHandlers = Private(RequestHandlersRegistryProvider);
   const responseHandlers = Private(ResponseHandlersRegistryProvider);
@@ -28,13 +28,13 @@ uiModules
     scope : {
       showSpyPanel: '=?',
       editorMode: '=?',
-      savedVis: '=',
+      savedObj: '=',
       appState: '=',
       uiState: '=?'
     },
     template: visualizeTemplate,
     link: function ($scope, $el) {
-      $scope.vis = $scope.savedVis.vis;
+      $scope.vis = $scope.savedObj.vis;
       $scope.editorMode = $scope.editorMode || false;
       $scope.vis.showSpyPanel = $scope.showSpyPanel || false;
 
@@ -43,7 +43,7 @@ uiModules
 
       $scope.fetch = function () {
         // searchSource is only there for courier request handler
-        requestHandler($scope.vis, $scope.appState, $scope.uiState, $scope.savedVis.searchSource)
+        requestHandler($scope.vis, $scope.appState, $scope.uiState, $scope.savedObj.searchSource)
           .then(resp => responseHandler($scope.vis, resp), e => {
             $el.trigger('renderComplete');
             if (isTermSizeZeroError(e)) {
