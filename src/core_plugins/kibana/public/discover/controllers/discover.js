@@ -179,7 +179,7 @@ function discoverController($scope, config, courier, $route, $window, Notifier,
       esQuery,
       fields,
       metaFields: $scope.indexPattern.metaFields,
-      conflictedTypesFields: $scope.indexPattern.fields.filter(f => f.type === 'conflict'),
+      conflictedTypesFields: $scope.indexPattern.fields.filter(f => f.type === 'conflict').map(f => f.name),
     };
   };
 
@@ -218,7 +218,7 @@ function discoverController($scope, config, courier, $route, $window, Notifier,
       esQuery,
       fields,
       metaFields: $scope.indexPattern.metaFields,
-      conflictedTypesFields: $scope.indexPattern.fields.filter(f => f.type === 'conflict'),
+      conflictedTypesFields: $scope.indexPattern.fields.filter(f => f.type === 'conflict').map(f => f.name),
     };
   };
 
