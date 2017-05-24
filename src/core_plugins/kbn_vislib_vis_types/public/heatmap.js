@@ -63,7 +63,7 @@ export default function HeatmapVisType(Private) {
         scales: ['linear', 'log', 'square root'],
         colorSchemas: Object.keys(vislibColorMaps),
       },
-      editorTemplate: heatmapTemplate,
+      optionsTemplate: heatmapTemplate,
       schemas: new Schemas([
         {
           group: 'metrics',

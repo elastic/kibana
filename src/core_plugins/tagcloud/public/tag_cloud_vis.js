@@ -27,6 +27,7 @@ VisTypesRegistryProvider.register(function TagCloudProvider(Private) {
       },
       template: tagCloudTemplate,
     },
+    responseHandler: 'none',
     editorConfig: {
       collections: {
         scales: ['linear', 'log', 'square root'],
