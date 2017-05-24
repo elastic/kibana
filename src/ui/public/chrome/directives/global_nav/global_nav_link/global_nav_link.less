@@ -15,11 +15,11 @@
   }
 
   &:hover {
-    background-color: darken(@app-links-active-background, 5%);
+    background-color: darken(@globalColorBlue, 10%);
   }
 
-  &.active, &:hover {
-    background-color: shade(@globalColorBlue, 50%);
+  &.active {
+    background-color: @globalColorBlue;
 
     .global-nav-link__anchor {
       color: @white;
