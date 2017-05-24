@@ -6,7 +6,7 @@ function stubbedLogstashFields() {
     //                                  |      |analyzed
     //                                  |      |      |aggregatable
     //                                  |      |      |      |searchable
-    // name                type         |      |      |      |     |metadata
+    // name               esType        |      |      |      |     |metadata
     ['bytes',             'long',       true,  true,  true,  true,  { count: 10, docValues: true } ],
     ['ssl',               'boolean',    true,  true,  true,  true,  { count: 20 } ],
     ['@timestamp',        'date',       true,  true,  true,  true,  { count: 30 } ],
@@ -53,9 +53,13 @@ function stubbedLogstashFields() {
       scripted = !!script,
     } = metadata;
 
+    const type = (esType === 'conflict' || esType === 'unknown')
+      ? esType
+      : castEsToKbnFieldTypeName(esType);
+
     return {
       name,
-      type: castEsToKbnFieldTypeName(esType),
+      type,
       doc_values: docValues,
       indexed,
       analyzed,
