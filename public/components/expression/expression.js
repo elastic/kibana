@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import { FormGroup, ControlLabel, FormControl } from 'react-bootstrap';
 
 
-export const Expression = ({ expression, updateValue, onChange }) => {
+export const Expression = ({ expression, onChange, setExpression }) => {
   let input;
 
   return (
@@ -11,7 +11,7 @@ export const Expression = ({ expression, updateValue, onChange }) => {
       <FormGroup controlId="formControlsTextarea">
         <ControlLabel>
           Expression &nbsp;
-          <a className="pull-right" onClick={() => onChange(input.value)}> <i className="fa fa-play-circle"/></a>
+          <a className="pull-right" onClick={() => setExpression(input.value)}> <i className="fa fa-play-circle"/></a>
         </ControlLabel>
 
 
@@ -20,7 +20,7 @@ export const Expression = ({ expression, updateValue, onChange }) => {
           componentClass="textarea"
           placeholder="Enter expression..."
           inputRef={ref => input = ref}
-          onChange={updateValue}
+          onChange={(ev) => onChange(ev.target.value)}
           value={expression}
         />
       </FormGroup>
@@ -30,6 +30,6 @@ export const Expression = ({ expression, updateValue, onChange }) => {
 
 Expression.propTypes = {
   expression: PropTypes.string,
-  updateValue: PropTypes.func,
   onChange: PropTypes.func,
+  setExpression: PropTypes.func,
 };

@@ -1,7 +1,6 @@
 import { connect } from 'react-redux';
-import { flowRight } from 'lodash';
+import { compose, withState } from 'recompose';
 import { Expression as Component } from './expression';
-import { statefulInput } from '../../lib/stateful_hoc';
 import { getSelectedPage, getSelectedElement } from '../../state/selectors/workpad';
 import { setExpression } from '../../state/actions/elements';
 
@@ -20,11 +19,11 @@ const mergeProps = (stateProps, dispatchProps, ownProps) => {
 
   return Object.assign({}, ownProps, stateProps, dispatchProps, {
     expression,
-    onChange: (exp) => dispatchProps.setExpression({ expression: exp, element, pageId }),
+    setExpression: (exp) => dispatchProps.setExpression({ expression: exp, element, pageId }),
   });
 };
 
-export const Expression = flowRight([
+export const Expression = compose(
   connect(mapStateToProps, mapDispatchToProps, mergeProps),
-  statefulInput('expression'),
-])(Component);
+  withState('expression', 'onChange', props => props.expression),
+)(Component);
