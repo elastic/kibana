@@ -1,0 +1,1 @@
+export { assertLicensesValid } from './valid';
