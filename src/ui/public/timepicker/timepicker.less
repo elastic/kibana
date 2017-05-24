@@ -3,6 +3,11 @@
   display: flex;
   justify-content: flex-end;
 
+  .kbn-timepicker-content {
+    width: 100%;
+    max-width: 600px;
+  }
+
   [kbn-time-input] {
     text-align: center;
   }
@@ -12,6 +17,29 @@
   .kbn-timepicker-section {
     float: left;
     padding-right: 15px;
+  }
+  .kbn-timepicker-body {
+    display: flex;
+    align-itmes: top;
+    justify-content: stretch;
+    width: 100%;
+
+    @media (max-width: 660px) {
+      flex-direction: column;
+    }
+  }
+  .kbn-timepicker-body-column {
+    width: 100%;
+  }
+  .kbn-timepicker-form-header {
+    margin-bottom: 0 !important;
+  }
+  .kbn-timepicker-actions {
+    display: flex;
+    justify-content: flex-end;
+  }
+  .kbn-timepicker-submit-button {
+    min-width: 100px;
   }
   .kbn-refresh-section {
     float: left;
