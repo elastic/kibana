@@ -3,12 +3,14 @@ import _ from 'lodash';
 export function filterParamsPhraseController($http, $scope) {
   this.compactUnion = _.flow(_.union, _.compact);
 
+  this.getValueSuggestions = _.memoize(getValueSuggestions, getFieldQueryHash);
+
   this.refreshValueSuggestions = (query) => {
     return this.getValueSuggestions($scope.field, query)
       .then(suggestions => $scope.valueSuggestions = suggestions);
   };
 
-  this.getValueSuggestions = _.memoize(getValueSuggestions, getFieldQueryHash);
+  this.refreshValueSuggestions();
 
   function getValueSuggestions(field, query) {
     if (!_.get(field, 'aggregatable') || field.type !== 'string') {

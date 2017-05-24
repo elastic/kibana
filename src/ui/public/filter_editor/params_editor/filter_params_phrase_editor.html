@@ -15,13 +15,19 @@
   </ui-select-choices>
 </ui-select>
 
-<div
+<filter-params-input-type
   ng-if="!(field.aggregatable && field.type === 'string')"
-  class="kuiFieldGroupSection kuiFieldGroupSection--wide"
->
-  <input
-    ng-model="params.phrase"
-    type="text"
-    class="kuiTextInput"
-  />
-</div>
+  type="field.type"
+  value="{{params.phrase}}"
+  on-change="params.phrase = value"
+></filter-params-input-type>
+
+<small>
+  <a
+    ng-if="field.type === 'date'"
+    class="kuiLink"
+    href="https://www.elastic.co/guide/en/elasticsearch/reference/current/common-options.html#date-math"
+  >
+    Accepted date formats
+  </a>
+</small>
