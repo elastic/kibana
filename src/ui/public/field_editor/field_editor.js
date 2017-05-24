@@ -61,8 +61,12 @@ uiModules
         const fields = indexPattern.fields;
         const field = self.field.toActualField();
 
-        fields.remove({ name: field.name });
-        fields.push(field);
+        const index = fields.findIndex(f => f.name === field.name);
+        if (index > -1) {
+          fields.splice(index, 1, field);
+        } else {
+          fields.push(field);
+        }
 
         if (!self.selectedFormatId) {
           delete indexPattern.fieldFormatMap[field.name];
