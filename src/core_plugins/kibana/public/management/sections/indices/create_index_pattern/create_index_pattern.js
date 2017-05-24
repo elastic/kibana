@@ -8,6 +8,7 @@ import { uiModules } from 'ui/modules';
 import template from './create_index_pattern.html';
 import { getDefaultPatternForInterval } from './get_default_pattern_for_interval';
 import { sendCreateIndexPatternRequest } from './send_create_index_pattern_request';
+import { pickCreateButtonText } from './pick_create_button_text';
 
 uiRoutes
 .when('/management/kibana/index', {
@@ -20,6 +21,7 @@ uiModules.get('apps/management')
   const refreshKibanaIndex = Private(RefreshKibanaIndex);
   const intervals = indexPatterns.intervals;
   let samplePromise;
+  let loadingCount = 0;
 
   // Configure the new index pattern we're going to create.
   this.formValues = {
@@ -37,7 +39,7 @@ uiModules.get('apps/management')
   this.existing = null;
   this.nameIntervalOptions = intervals;
   this.patternErrors = [];
-  this.fetchFieldsError = $translate.instant('KIBANA-LOADING');
+  this.fetchFieldsError = null;
 
   const TIME_FILTER_FIELD_OPTIONS = {
     NO_DATE_FIELD_DESIRED: {
@@ -60,6 +62,7 @@ uiModules.get('apps/management')
       return;
     }
 
+    loadingCount += 1;
     return indexPatterns.mapper.clearCache(this.formValues.name)
     .then(() => {
       const pattern = mockIndexPattern(this.formValues);
@@ -87,7 +90,10 @@ uiModules.get('apps/management')
         fetchFieldsError,
         dateFields,
       };
-    }, notify.fatal);
+    }, notify.fatal)
+    .finally(() => {
+      loadingCount -= 1;
+    });
   };
 
   const updateFieldList = results => {
@@ -135,7 +141,7 @@ uiModules.get('apps/management')
     this.patternErrors = [];
     this.samples = null;
     this.existing = null;
-    this.fetchFieldsError = $translate.instant('KIBANA-LOADING');
+    this.fetchFieldsError = null;
   };
 
   function mockIndexPattern(index) {
@@ -155,6 +161,7 @@ uiModules.get('apps/management')
 
     const pattern = mockIndexPattern(this.formValues);
 
+    loadingCount += 1;
     return indexPatterns.mapper.getIndicesForIndexPattern(pattern)
       .catch(err => {
         if (err instanceof IndexPatternMissingIndices) return;
@@ -184,6 +191,9 @@ uiModules.get('apps/management')
         }
 
         throw patternErrors;
+      })
+      .finally(() => {
+        loadingCount -= 1;
       });
   };
 
@@ -193,14 +203,21 @@ uiModules.get('apps/management')
     return !this.formValues.nameIsPattern && _.includes(this.formValues.name, '*');
   };
 
+  this.isLoading = () => {
+    return loadingCount > 0;
+  };
+
   this.refreshFieldList = () => {
     const timeField = this.formValues.timeField;
+    loadingCount += 1;
     fetchFieldList().then(results => {
       if (timeField) {
         updateFieldListAndSetTimeField(results, timeField.name);
       } else {
         updateFieldList(results);
       }
+    }).finally(() => {
+      loadingCount -= 1;
     });
   };
 
@@ -223,6 +240,7 @@ uiModules.get('apps/management')
       ? true
       : undefined;
 
+    loadingCount += 1;
     sendCreateIndexPatternRequest(indexPatterns, {
       id,
       timeFieldName,
@@ -240,6 +258,9 @@ uiModules.get('apps/management')
 
         indexPatterns.cache.clear(id);
         kbnUrl.change(`/management/kibana/indices/${id}`);
+
+        // force loading while kbnUrl.change takes effect
+        loadingCount = Infinity;
       });
     }).catch(err => {
       if (err instanceof IndexPatternMissingIndices) {
@@ -247,6 +268,8 @@ uiModules.get('apps/management')
       }
 
       notify.fatal(err);
+    }).finally(() => {
+      loadingCount -= 1;
     });
   };
 
@@ -321,5 +344,14 @@ uiModules.get('apps/management')
     'controller.sampleCount'
   ], () => {
     this.refreshFieldList();
+  });
+
+  $scope.$watchMulti([
+    'controller.isLoading()',
+    'form.name.$error.indexNameInput',
+    'controller.newIndexPattern.timeField'
+  ], ([loading, invalidIndexName, timeField]) => {
+    const state = { loading, invalidIndexName, timeField };
+    this.createButtonText = pickCreateButtonText($translate, state);
   });
 });

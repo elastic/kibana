@@ -347,19 +347,11 @@
           <!-- Form actions -->
           <button
             data-test-subj="createIndexPatternCreateButton"
-            ng-disabled="form.$invalid || controller.fetchFieldsError"
+            ng-disabled="form.$invalid || controller.fetchFieldsError || controller.isLoading()"
             class="kuiButton kuiButton--primary kuiVerticalRhythm"
             type="submit"
           >
-            <span
-              ng-hide="form.name.$error.indexNameInput"
-              translate="KIBANA-CREATE"
-            ></span>
-
-            <span
-              ng-show="form.name.$error.indexNameInput"
-              translate="KIBANA-INVALID_INDEX_PATTERN"
-            ></span>
+            {{controller.createButtonText}}
           </button>
         </form>
       </div>
