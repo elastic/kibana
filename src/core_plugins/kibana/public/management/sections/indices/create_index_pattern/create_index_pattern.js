@@ -8,7 +8,6 @@ import { uiModules } from 'ui/modules';
 import template from './create_index_pattern.html';
 import { getDefaultPatternForInterval } from './get_default_pattern_for_interval';
 import { sendCreateIndexPatternRequest } from './send_create_index_pattern_request';
-import { createLoadingTracker } from './loading_tracker';
 import { pickCreateButtonText } from './pick_create_button_text';
 
 uiRoutes
@@ -22,7 +21,7 @@ uiModules.get('apps/management')
   const refreshKibanaIndex = Private(RefreshKibanaIndex);
   const intervals = indexPatterns.intervals;
   let samplePromise;
-  const loadingTracker = createLoadingTracker(Promise);
+  let loadingCount = 0;
 
   // Configure the new index pattern we're going to create.
   this.newIndexPattern = {
@@ -51,7 +50,7 @@ uiModules.get('apps/management')
     }
   };
 
-  const fetchFieldList = loadingTracker.wrap(() => {
+  const fetchFieldList = () => {
     this.dateFields = this.newIndexPattern.timeField = null;
     const useIndexList = this.newIndexPattern.nameIsPattern;
     let fetchFieldsError;
@@ -68,6 +67,7 @@ uiModules.get('apps/management')
       return;
     }
 
+    loadingCount += 1;
     return indexPatterns.mapper.clearCache(this.newIndexPattern.name)
     .then(() => {
       const pattern = mockIndexPattern(this.newIndexPattern);
@@ -95,8 +95,11 @@ uiModules.get('apps/management')
         fetchFieldsError,
         dateFields,
       };
-    }, notify.fatal);
-  });
+    }, notify.fatal)
+    .finally(() => {
+      loadingCount -= 1;
+    });
+  };
 
   const updateFieldList = results => {
     this.fetchFieldsError = results.fetchFieldsError;
@@ -154,7 +157,7 @@ uiModules.get('apps/management')
     };
   }
 
-  const updateSamples = loadingTracker.wrap(() => {
+  const updateSamples = () => {
     const patternErrors = [];
 
     if (!this.newIndexPattern.nameInterval || !this.newIndexPattern.name) {
@@ -163,6 +166,7 @@ uiModules.get('apps/management')
 
     const pattern = mockIndexPattern(this.newIndexPattern);
 
+    loadingCount += 1;
     return indexPatterns.mapper.getIndicesForIndexPattern(pattern)
       .catch(err => {
         if (err instanceof IndexPatternMissingIndices) return;
@@ -192,8 +196,11 @@ uiModules.get('apps/management')
         }
 
         throw patternErrors;
+      })
+      .finally(() => {
+        loadingCount -= 1;
       });
-  });
+  };
 
   this.canExpandIndices = () => {
     // to maximize performance in the digest cycle, move from the least
@@ -202,21 +209,24 @@ uiModules.get('apps/management')
   };
 
   this.isLoading = () => {
-    return loadingTracker.isLoading();
+    return loadingCount > 0;
   };
 
-  this.refreshFieldList = loadingTracker.wrap(() => {
+  this.refreshFieldList = () => {
     const timeField = this.newIndexPattern.timeField;
+    loadingCount += 1;
     return fetchFieldList().then(results => {
       if (timeField) {
         updateFieldListAndSetTimeField(results, timeField.name);
       } else {
         updateFieldList(results);
       }
+    }).finally(() => {
+      loadingCount -= 1;
     });
-  });
+  };
 
-  this.createIndexPattern = loadingTracker.wrap(() => {
+  this.createIndexPattern = () => {
     const id = this.newIndexPattern.name;
     let timeFieldName;
     if ((this.newIndexPattern.timeField !== TIME_FILTER_FIELD_OPTIONS.NO_DATE_FIELD_DESIRED)
@@ -235,6 +245,7 @@ uiModules.get('apps/management')
       ? true
       : undefined;
 
+    loadingCount += 1;
     return sendCreateIndexPatternRequest(indexPatterns, {
       id,
       timeFieldName,
@@ -253,8 +264,8 @@ uiModules.get('apps/management')
         indexPatterns.cache.clear(id);
         kbnUrl.change(`/management/kibana/indices/${id}`);
 
-        // force loading to be true while kbnUrl.change takes effect
-        loadingTracker.forceLoading();
+        // force loading while kbnUrl.change takes effect
+        loadingCount = Infinity;
       });
     }).catch(err => {
       if (err instanceof IndexPatternMissingIndices) {
@@ -262,8 +273,10 @@ uiModules.get('apps/management')
       }
 
       notify.fatal(err);
+    }).finally(() => {
+      loadingCount -= 1;
     });
-  });
+  };
 
   $scope.$watchMulti([
     'controller.newIndexPattern.nameIsPattern',
