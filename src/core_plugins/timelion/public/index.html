@@ -27,14 +27,12 @@
         class="kuiFieldGroup kuiFieldGroup--alignTop kuiVerticalRhythm"
       >
         <div class="kuiFieldGroupSection kuiFieldGroupSection--wide">
-          <div class="kuiLocalSearch timelionLocalSearch">
-            <timelion-expression-input
-              sheet="state.sheet[state.selected]"
-              rows="1"
-              update-chart="search()"
-              should-popover-suggestions="true"
-            ></timelion-expression-input>
-          </div>
+          <timelion-expression-input
+            sheet="state.sheet[state.selected]"
+            rows="1"
+            update-chart="search()"
+            should-popover-suggestions="true"
+          ></timelion-expression-input>
         </div>
 
         <div class="kuiFieldGroupSection">
