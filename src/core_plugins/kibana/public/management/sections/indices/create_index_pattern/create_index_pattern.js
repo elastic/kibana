@@ -207,7 +207,7 @@ uiModules.get('apps/management')
 
   this.refreshFieldList = loadingTracker.wrap(() => {
     const timeField = this.newIndexPattern.timeField;
-    fetchFieldList().then(results => {
+    return fetchFieldList().then(results => {
       if (timeField) {
         updateFieldListAndSetTimeField(results, timeField.name);
       } else {
@@ -235,7 +235,7 @@ uiModules.get('apps/management')
       ? true
       : undefined;
 
-    sendCreateIndexPatternRequest(indexPatterns, {
+    return sendCreateIndexPatternRequest(indexPatterns, {
       id,
       timeFieldName,
       intervalName,
