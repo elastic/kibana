@@ -39,7 +39,7 @@ module.controller('VisualizeWizardStep1', function ($scope, $route, kbnUrl, time
     [CATEGORY.GRAPHIC]: 'Graphic',
     [CATEGORY.MAP]: 'Maps',
     [CATEGORY.OTHER]: 'Other',
-    [CATEGORY.TIME]: 'Time Series',
+    [CATEGORY.TIME]: 'Time Series'
   };
 
   const addToDashMode = $route.current.params[DashboardConstants.ADD_VISUALIZATION_TO_DASHBOARD_MODE_PARAM];
@@ -51,6 +51,8 @@ module.controller('VisualizeWizardStep1', function ($scope, $route, kbnUrl, time
 
   visTypes.forEach(visType => {
     const categoryName = visType.category;
+
+    if (categoryName === CATEGORY.HIDDEN) return;
 
     // Create category object if it doesn't exist yet.
     if (!categoryToVisTypesMap[categoryName]) {

@@ -4,4 +4,5 @@ export const CATEGORY = {
   MAP: 'map',
   OTHER: 'other',
   TIME: 'time',
+  HIDDEN: 'hidden'
 };
