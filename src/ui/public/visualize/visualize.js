@@ -64,29 +64,21 @@ uiModules
           });
       };
 
-      const stateMonitor = stateMonitorFactory.create($scope.appState);
-
-      let currentAggJson = JSON.stringify($scope.vis.getState().aggs);
       $scope.vis.on('update', () => {
-        const visState = $scope.vis.getState();
-
-        const isAggregationsChanged = JSON.stringify(visState.aggs) !== currentAggJson;
-        if (isAggregationsChanged) {
-          $scope.fetch();
-        } else {
-          $scope.$broadcast('render');
-        }
-        currentAggJson = JSON.stringify(visState.aggs);
-
         if ($scope.editorMode) {
+          const visState = $scope.vis.getState();
           $scope.appState.vis = visState;
           $scope.appState.save();
+        } else {
+          $scope.fetch();
         }
       });
 
+      const stateMonitor = stateMonitorFactory.create($scope.appState);
       if ($scope.vis.type.requiresSearch) {
         stateMonitor.onChange((status, type, keys) => {
-          if (['query', 'filters'].includes(keys[0])) {
+          if (['query', 'filters', 'vis'].includes(keys[0])) {
+            $scope.vis.setState($scope.appState.vis);
             $scope.fetch();
           }
         });
