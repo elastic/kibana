@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<link rel="shortcut icon" type="image/ico" href="http://www.datatables.net/favicon.ico">
+	<meta name="viewport" content="initial-scale=1.0, maximum-scale=2.0">
+	<link rel="stylesheet" type="text/css" href="../resources/syntax/shCore.css">
+	<link rel="stylesheet" type="text/css" href="../resources/demo.css">
+	<script type="text/javascript" language="javascript" src="../../media/js/jquery.js"></script>
+	<script type="text/javascript" language="javascript" src="../resources/syntax/shCore.js"></script>
+	<script type="text/javascript" language="javascript" src="../resources/demo.js"></script>
+
+	<title>DataTables examples - Server-side processing</title>
+</head>
+
+<body class="dt-example">
+	<div class="container">
+		<section>
+			<h1>DataTables example <span>Server-side processing</span></h1>
+
+			<div class="info">
+				<p>There are many ways to get your data into DataTables, and if you are working with seriously large databases, you might want to consider using the server-side
+				options that DataTables provides. With server-side processing enabled, all paging, searching, ordering etc actions that DataTables performs are handed off to a
+				server where an SQL engine (or similar) can perform these actions on the large data set (after all, that's what the database engine is designed for!). As such,
+				each draw of the table will result in a new Ajax request being made to get the required data.</p>
+
+				<p>Server-side processing is enabled by setting the <a href="//datatables.net/reference/option/serverSide"><code class="option" title=
+				"DataTables initialisation option">serverSide<span>DT</span></code></a> option to <code>true</code> and providing an Ajax data source through the <a href=
+				"//datatables.net/reference/option/ajax"><code class="option" title="DataTables initialisation option">ajax<span>DT</span></code></a> option.</p>
+
+				<p>The examples in this section shows server-side processing in use and how it can be customised to suit your needs.</p>
+			</div>
+		</section>
+	</div>
+
+	<section>
+		<div class="footer">
+			<div class="gradient"></div>
+
+			<div class="liner">
+				<div class="toc">
+					<div class="toc-group">
+						<h3><a href="./index.html">Server-side</a></h3>
+						<ul class="toc">
+							<li><a href="./simple.html">Server-side processing</a></li>
+							<li><a href="./custom_vars.html">Custom HTTP variables</a></li>
+							<li><a href="./post.html">POST data</a></li>
+							<li><a href="./ids.html">Automatic addition of row ID attributes</a></li>
+							<li><a href="./object_data.html">Object data source</a></li>
+							<li><a href="./row_details.html">Row details</a></li>
+							<li><a href="./select_rows.html">Row selection</a></li>
+							<li><a href="./jsonp.html">JSONP data source for remote domains</a></li>
+							<li><a href="./defer_loading.html">Deferred loading of data</a></li>
+							<li><a href="./pipeline.html">Pipelining data to reduce Ajax calls for paging</a></li>
+						</ul>
+					</div>
+				</div>
+
+				<div class="epilogue">
+					<p>Please refer to the <a href="http://www.datatables.net">DataTables documentation</a> for full information about its API properties and methods.<br>
+					Additionally, there are a wide range of <a href="http://www.datatables.net/extras">extras</a> and <a href="http://www.datatables.net/plug-ins">plug-ins</a>
+					which extend the capabilities of DataTables.</p>
+
+					<p class="copyright">DataTables designed and created by <a href="http://www.sprymedia.co.uk">SpryMedia Ltd</a> &#169; 2007-2015<br>
+					DataTables is licensed under the <a href="http://www.datatables.net/mit">MIT license</a>.</p>
+				</div>
+			</div>
+		</div>
+	</section>
+</body>
+</html>
