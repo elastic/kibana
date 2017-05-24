@@ -8,6 +8,8 @@ import { uiModules } from 'ui/modules';
 import template from './create_index_pattern.html';
 import { getDefaultPatternForInterval } from './get_default_pattern_for_interval';
 import { sendCreateIndexPatternRequest } from './send_create_index_pattern_request';
+import { createLoadingTracker } from './loading_tracker';
+import { pickCreateButtonText } from './pick_create_button_text';
 
 uiRoutes
 .when('/management/kibana/index', {
@@ -20,6 +22,7 @@ uiModules.get('apps/management')
   const refreshKibanaIndex = Private(RefreshKibanaIndex);
   const intervals = indexPatterns.intervals;
   let samplePromise;
+  const loadingTracker = createLoadingTracker(Promise);
 
   // Configure the new index pattern we're going to create.
   this.newIndexPattern = {
@@ -37,7 +40,7 @@ uiModules.get('apps/management')
   this.existing = null;
   this.nameIntervalOptions = intervals;
   this.patternErrors = [];
-  this.fetchFieldsError = $translate.instant('KIBANA-LOADING');
+  this.fetchFieldsError = null;
 
   const TIME_FILTER_FIELD_OPTIONS = {
     NO_DATE_FIELD_DESIRED: {
@@ -48,7 +51,7 @@ uiModules.get('apps/management')
     }
   };
 
-  const fetchFieldList = () => {
+  const fetchFieldList = loadingTracker.wrap(() => {
     this.dateFields = this.newIndexPattern.timeField = null;
     const useIndexList = this.newIndexPattern.nameIsPattern;
     let fetchFieldsError;
@@ -93,7 +96,7 @@ uiModules.get('apps/management')
         dateFields,
       };
     }, notify.fatal);
-  };
+  });
 
   const updateFieldList = results => {
     this.fetchFieldsError = results.fetchFieldsError;
@@ -140,7 +143,7 @@ uiModules.get('apps/management')
     this.patternErrors = [];
     this.samples = null;
     this.existing = null;
-    this.fetchFieldsError = $translate.instant('KIBANA-LOADING');
+    this.fetchFieldsError = null;
   };
 
   function mockIndexPattern(index) {
@@ -151,7 +154,7 @@ uiModules.get('apps/management')
     };
   }
 
-  const updateSamples = () => {
+  const updateSamples = loadingTracker.wrap(() => {
     const patternErrors = [];
 
     if (!this.newIndexPattern.nameInterval || !this.newIndexPattern.name) {
@@ -190,7 +193,7 @@ uiModules.get('apps/management')
 
         throw patternErrors;
       });
-  };
+  });
 
   this.canExpandIndices = () => {
     // to maximize performance in the digest cycle, move from the least
@@ -198,7 +201,11 @@ uiModules.get('apps/management')
     return !this.newIndexPattern.nameIsPattern && _.includes(this.newIndexPattern.name, '*');
   };
 
-  this.refreshFieldList = () => {
+  this.isLoading = () => {
+    return loadingTracker.isLoading();
+  };
+
+  this.refreshFieldList = loadingTracker.wrap(() => {
     const timeField = this.newIndexPattern.timeField;
     fetchFieldList().then(results => {
       if (timeField) {
@@ -207,9 +214,9 @@ uiModules.get('apps/management')
         updateFieldList(results);
       }
     });
-  };
+  });
 
-  this.createIndexPattern = () => {
+  this.createIndexPattern = loadingTracker.wrap(() => {
     const id = this.newIndexPattern.name;
     let timeFieldName;
     if ((this.newIndexPattern.timeField !== TIME_FILTER_FIELD_OPTIONS.NO_DATE_FIELD_DESIRED)
@@ -245,6 +252,9 @@ uiModules.get('apps/management')
 
         indexPatterns.cache.clear(id);
         kbnUrl.change(`/management/kibana/indices/${id}`);
+
+        // force loading to be true while kbnUrl.change takes effect
+        loadingTracker.forceLoading();
       });
     }).catch(err => {
       if (err instanceof IndexPatternMissingIndices) {
@@ -253,7 +263,7 @@ uiModules.get('apps/management')
 
       notify.fatal(err);
     });
-  };
+  });
 
   $scope.$watchMulti([
     'controller.newIndexPattern.nameIsPattern',
@@ -326,5 +336,14 @@ uiModules.get('apps/management')
     'controller.sampleCount'
   ], () => {
     this.refreshFieldList();
+  });
+
+  $scope.$watchMulti([
+    'controller.isLoading()',
+    'form.name.$error.indexNameInput',
+    'controller.newIndexPattern.timeField'
+  ], ([loading, invalidIndexName, timeField]) => {
+    const state = { loading, invalidIndexName, timeField };
+    this.createButtonText = pickCreateButtonText($translate, state);
   });
 });
