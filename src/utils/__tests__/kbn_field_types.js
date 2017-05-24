@@ -10,6 +10,44 @@ import {
 } from '../kbn_field_types';
 
 describe('utils/kbn_field_types', () => {
+  describe('KbnFieldType', () => {
+    it('defaults', () => {
+      expect(new KbnFieldType())
+        .to.have.property('name', undefined)
+        .and.have.property('sortable', false)
+        .and.have.property('filterable', false)
+        .and.have.property('esTypes').eql([]);
+    });
+
+    it('assigns name, sortable, filterable, and esTypes options to itself', () => {
+      const name = chance.word();
+      const sortable = chance.bool();
+      const filterable = chance.bool();
+      const esTypes = chance.n(chance.word, 3);
+
+      expect(new KbnFieldType({ name, sortable, filterable, esTypes }))
+        .to.have.property('name', name)
+        .and.have.property('sortable', sortable)
+        .and.have.property('filterable', filterable)
+        .and.have.property('esTypes').eql(esTypes);
+    });
+
+    it('prevents modification', () => {
+      const type = new KbnFieldType();
+      expect(() => type.name = null).to.throwError();
+      expect(() => type.sortable = null).to.throwError();
+      expect(() => type.filterable = null).to.throwError();
+      expect(() => type.esTypes = null).to.throwError();
+      expect(() => type.esTypes.push(null)).to.throwError();
+    });
+
+    it('allows extension', () => {
+      const type = new KbnFieldType();
+      type.$hashKey = '123';
+      expect(type).to.have.property('$hashKey', '123');
+    });
+  });
+
   describe('getKbnFieldType()', () => {
     it('returns a KbnFieldType instance by name', () => {
       expect(getKbnFieldType('string')).to.be.a(KbnFieldType);

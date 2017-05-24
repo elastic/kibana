@@ -1,11 +1,19 @@
 
 export class KbnFieldType {
-  constructor({ name, sortable, filterable, esTypes }) {
-    this.name = name;
-    this.sortable = !!sortable;
-    this.filterable = !!filterable;
-    this.esTypes = Object.freeze(esTypes || []);
-    Object.freeze(this);
+  constructor(options = {}) {
+    const {
+      name,
+      sortable = false,
+      filterable = false,
+      esTypes = []
+    } = options;
+
+    Object.defineProperties(this, {
+      name: { value: name },
+      sortable: { value: sortable },
+      filterable: { value: filterable },
+      esTypes: { value: Object.freeze(esTypes.slice()) },
+    });
   }
 }
 
