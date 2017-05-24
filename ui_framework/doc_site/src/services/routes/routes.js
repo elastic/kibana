@@ -1,5 +1,8 @@
 import Slugify from '../string/slugify';
 
+import AccessibilityExample
+  from '../../views/accessibility/accessibility_example';
+
 import ActionItemExample
   from '../../views/action_item/action_item_example';
 
@@ -101,6 +104,10 @@ import ViewSandbox
 
 // Component route names should match the component name exactly.
 const components = [{
+  name: 'Accessibility',
+  component: AccessibilityExample,
+  hasReact: true,
+}, {
   name: 'ActionItem',
   component: ActionItemExample,
 }, {
