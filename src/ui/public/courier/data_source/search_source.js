@@ -100,6 +100,7 @@ export function SearchSourceProvider(Promise, Private, config) {
     'size',
     'source',
     'version',
+    'fields',
   ];
 
   SearchSource.prototype.index = function (indexPattern) {
@@ -268,6 +269,9 @@ export function SearchSourceProvider(Promise, Private, config) {
         val = normalizeSortRequest(val, this.get('index'));
         addToBody();
         break;
+      case 'fields':
+        state[key] = [...state[key] || [], ...val];
+        break;
       default:
         addToBody();
     }
@@ -286,6 +290,13 @@ export function SearchSourceProvider(Promise, Private, config) {
         state.body[key] = val;
       }
     }
+  };
+
+  SearchSource.prototype.clone = function () {
+    const clone = new SearchSource(this.toString());
+    clone.set('index', this.get('index'));
+    clone.inherits(this.getParent());
+    return clone;
   };
 
   SearchSource.prototype.getESQuery = function () {

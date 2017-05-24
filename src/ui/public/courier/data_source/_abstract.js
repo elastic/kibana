@@ -287,20 +287,26 @@ export function AbstractDataSourceProvider(Private, Promise, PromiseEmitter) {
           };
         }
 
-        if (flatState.body.size > 0) {
-          const computedFields = flatState.index.getComputedFields();
-          flatState.body.stored_fields = computedFields.storedFields;
-          flatState.body.script_fields = flatState.body.script_fields || {};
-          flatState.body.docvalue_fields = flatState.body.docvalue_fields || [];
+        const computedFields = flatState.index.getComputedFields();
+        flatState.body.stored_fields = computedFields.storedFields;
+        flatState.body.script_fields = flatState.body.script_fields || {};
+        flatState.body.docvalue_fields = flatState.body.docvalue_fields || [];
 
-          _.extend(flatState.body.script_fields, computedFields.scriptFields);
-          flatState.body.docvalue_fields = _.union(flatState.body.docvalue_fields, computedFields.docvalueFields);
+        _.extend(flatState.body.script_fields, computedFields.scriptFields);
+        flatState.body.docvalue_fields = _.union(flatState.body.docvalue_fields, computedFields.docvalueFields);
 
-          if (flatState.body._source) {
-            // exclude source fields for this index pattern specified by the user
-            const filter = fieldWildcardFilter(flatState.body._source.excludes);
-            flatState.body.docvalue_fields = flatState.body.docvalue_fields.filter(filter);
-          }
+        if (flatState.body._source) {
+          // exclude source fields for this index pattern specified by the user
+          const filter = fieldWildcardFilter(flatState.body._source.excludes);
+          flatState.body.docvalue_fields = flatState.body.docvalue_fields.filter(filter);
+        }
+
+        // if we only want to search for certain fields
+        const fields = flatState.fields;
+        if (fields) {
+          flatState.body.docvalue_fields = _.intersection(flatState.body.docvalue_fields, fields);
+          flatState.body.script_fields = _.pick(flatState.body.script_fields, fields);
+          flatState.body._source = _.difference(fields, [...flatState.body.docvalue_fields, ..._.keys(flatState.body.script_fields)]);
         }
 
         decorateQuery(flatState.body.query);
