@@ -158,6 +158,25 @@ function discoverController($scope, config, courier, $route, $window, Notifier,
 
   const $state = $scope.state = new AppState(getStateDefaults());
 
+  const getFieldCounts = async () => {
+    // the field counts aren't set until we have the data back,
+    // so we sometimes have to wait for this to be available
+    if (Object.keys($scope.fieldCounts).length) {
+      return $scope.fieldCounts;
+    }
+
+    return await new Promise(resolve => {
+      const unwatch = $scope.$watch('fieldCounts', (newValue) => {
+        if (!Object.keys(newValue).length) {
+          return;
+        }
+
+        unwatch();
+        resolve(newValue);
+      });
+    });
+  };
+
   const getSourceFieldSharingData = async () => {
     const { body, index } = await $scope.searchSource.getESQuery();
 
@@ -174,7 +193,9 @@ function discoverController($scope, config, courier, $route, $window, Notifier,
       }
     };
 
-    const fields = _.keys($scope.fieldCounts).sort();
+    const fieldCounts = await getFieldCounts();
+    const fields = _.keys(fieldCounts).sort();
+
     return {
       esQuery,
       fields,
