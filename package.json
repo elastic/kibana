@@ -52,7 +52,7 @@
     "babel-preset-react": "^6.24.1",
     "del": "^2.2.2",
     "eslint": "3.11.1",
-    "eslint-import-resolver-kibana": "^0.1.0",
+    "eslint-import-resolver-kibana": "^0.3.0",
     "eslint-plugin-babel": "4.0.0",
     "eslint-plugin-import": "^2.2.0",
     "eslint-plugin-mocha": "4.7.0",
