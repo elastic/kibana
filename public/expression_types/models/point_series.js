@@ -9,17 +9,14 @@ export const pointseries = () => new Model('pointseries', {
     new Arg('x', {
       displayName: 'X-axis',
       argType: 'dataframe_column',
-      types: ['string'],
     }),
     new Arg('y', {
       displayName: 'Y-axis',
       argType: 'dataframe_column',
-      types: ['string'],
     }),
     new Arg('color', {
       displayName: 'Color',
       argType: 'dataframe_column',
-      types: ['string'],
     }),
   ],
   resolve({ context }) {

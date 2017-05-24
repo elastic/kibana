@@ -9,7 +9,6 @@ export const sort = () => new Transform('sort', {
     new Arg('_', {
       displayName: 'Sort Field',
       argType: 'dataframe_column',
-      types: ['string'],
     }),
   ],
   resolve({ context }) {

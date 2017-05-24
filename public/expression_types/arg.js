@@ -45,11 +45,6 @@ export class Arg {
         });
       }
 
-      // enforce types, if defined
-      if (Array.isArray(this.types) && this.types.indexOf(val.type) === -1) {
-        throw new Error(`${this.name} does not accept arguments of type "${val.type}"`);
-      }
-
       return acc.concat({
         type: val.type,
         value: val.value,
