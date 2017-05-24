@@ -48,5 +48,6 @@
   "KIBANA-INDICES_MATCH_PATTERN" : "Unable to fetch mapping. Do you have indices matching the pattern?",
   "KIBANA-ADD_NEW" : "Create Index Pattern",
   "KIBANA-SEE" : "See",
-  "KIBANA-CREATE" : "Create"
+  "KIBANA-CREATE" : "Create",
+  "KIBANA-FIELD_IS_REQUIRED": "{{fieldName}} is required"
 }
