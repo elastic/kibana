@@ -33,6 +33,7 @@ class SomVisualization {
 
       if (vis.aggs.length === 1) {
         console.log('must have more configs');
+        this._somHolder.innerHTML = '';
         return;
       }
 
@@ -42,9 +43,11 @@ class SomVisualization {
         console.log('table', tableFromTab);
       } catch (e) {
         console.error(e);
+        this._somHolder.innerHTML = '';
         return;
       }
 
+      this._somHolder.innerHTML = template;
       this._somApp = window.PONDER.createSOM({
         table: tableFromTab,
         nodes: {
