@@ -41,6 +41,11 @@ module.exports = new Fn({
       help: 'Should we fill points?',
       default: false,
     },
+    stack: {
+      types: ['boolean', 'null'],
+      help: 'Should we stack the series?',
+      default: false,
+    },
   },
   fn: (context, args) => {
     return { type: 'seriesStyle', ...args };

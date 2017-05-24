@@ -53,6 +53,7 @@ module.exports = new Fn({
     function seriesStyleToFlot(seriesStyle) {
       if (!seriesStyle) return {};
       return {
+        stack: get(seriesStyle, 'stack'),
         lines: {
           show: get(seriesStyle, 'lines') > 0,
           lineWidth: get(seriesStyle, 'line'),
