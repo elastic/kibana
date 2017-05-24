@@ -1,12 +1,11 @@
 import { ObjDefine } from 'ui/utils/obj_define';
 import { IndexPatternsFieldFormatProvider } from 'ui/index_patterns/_field_format/field_format';
-import { IndexPatternsFieldTypesProvider } from 'ui/index_patterns/_field_types';
 import { RegistryFieldFormatsProvider } from 'ui/registry/field_formats';
+import { getKbnFieldType } from '../../../utils';
 
 export function IndexPatternsFieldProvider(Private, shortDotsFilter, $rootScope, Notifier) {
   const notify = new Notifier({ location: 'IndexPattern Field' });
   const FieldFormat = Private(IndexPatternsFieldFormatProvider);
-  const fieldTypes = Private(IndexPatternsFieldTypesProvider);
   const fieldFormats = Private(RegistryFieldFormatsProvider);
 
   function Field(indexPattern, spec) {
@@ -23,7 +22,7 @@ export function IndexPatternsFieldProvider(Private, shortDotsFilter, $rootScope,
     }
 
     // find the type for this field, fallback to unknown type
-    let type = fieldTypes.byName[spec.type];
+    let type = getKbnFieldType(spec.type);
     if (spec.type && !type) {
       notify.error(
         'Unknown field type "' + spec.type + '"' +
@@ -32,7 +31,7 @@ export function IndexPatternsFieldProvider(Private, shortDotsFilter, $rootScope,
       );
     }
 
-    if (!type) type = fieldTypes.byName.unknown;
+    if (!type) type = getKbnFieldType('unknown');
 
     let format = spec.format;
     if (!format || !(format instanceof FieldFormat)) {
