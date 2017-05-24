@@ -327,7 +327,7 @@ export default function defaultSettingsProvider() {
         'sessions storage could help. Please let us know how it goes!'
     },
     'indexPattern:placeholder': {
-      value: 'logstash-*',
+      value: '',
       description: 'The placeholder for the field "Index name or pattern" in the "Settings > Indices" tab.',
     },
     'context:defaultSize': {
