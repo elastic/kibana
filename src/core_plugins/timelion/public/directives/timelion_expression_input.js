@@ -137,11 +137,6 @@ app.directive('timelionExpressionInput', function ($http, $timeout) {
         return keyCodes.includes(keyCode);
       }
 
-      function isUserInsertingNewLine(keyCode, isShiftPressed) {
-        // SHIFT + ENTER will insert a new line.
-        return keyCode === navigationalKeys.ENTER && isShiftPressed;
-      }
-
       scope.onFocusInput = () => {
         // Wait for the caret position of the input to update and then we can get suggestions
         // (which depends on the caret position).
@@ -156,10 +151,6 @@ app.directive('timelionExpressionInput', function ($http, $timeout) {
         // If we've pressed any non-navigational keys, then the user has typed something and we
         // can exit early without doing any navigation. The keyup handler will pull up suggestions.
         if (!isNavigationalKey(e.keyCode)) {
-          return;
-        }
-
-        if (isUserInsertingNewLine(e.keyCode, e.shiftKey)) {
           return;
         }
 
@@ -194,15 +185,14 @@ app.directive('timelionExpressionInput', function ($http, $timeout) {
             break;
 
           case navigationalKeys.ENTER:
-            e.preventDefault();
-
-            // If the suggestions are open, complete the expression with the suggestion.
-            // Otherwise, the default action of submitting the input value will occur.
-            if (!scope.functionSuggestions.isEmpty()) {
-              insertSuggestionIntoExpression(scope.functionSuggestions.index);
-            } else {
-              // If the suggestions are closed, we should re-render the chart.
+            if (e.metaKey) {
+              // Re-render the chart when the user hits CMD+ENTER.
+              e.preventDefault();
               scope.updateChart();
+            } else if (!scope.functionSuggestions.isEmpty()) {
+              // If the suggestions are open, complete the expression with the suggestion.
+              e.preventDefault();
+              insertSuggestionIntoExpression(scope.functionSuggestions.index);
             }
             break;
 
