@@ -53,9 +53,9 @@ function stubbedLogstashFields() {
       scripted = !!script,
     } = metadata;
 
-    const type = (esType === 'conflict' || esType === 'unknown')
-      ? esType
-      : castEsToKbnFieldTypeName(esType);
+    // the conflict type is actually a kbnFieldType, we
+    // don't have any other way to represent it here
+    const type = esType === 'conflict' ? esType : castEsToKbnFieldTypeName(esType);
 
     return {
       name,
