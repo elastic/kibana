@@ -1,0 +1,27 @@
+Refine kuiStaticInput, Bar, and Button components.
+
+Backports PR #9917
+
+**Commit 1:**
+Override Bootstrap link styles in Button component. Give kuiStaticInput a transparent background.
+
+* Original sha: 29a4f5305f06d6e034268ac91083114adb25bedc
+* Authored by CJ Cenizal <cj@cenizal.com> on 2017-01-17T23:39:18Z
+
+**Commit 2:**
+Fix incorrect markup in MicroButton examples.
+
+* Original sha: ee8eb78c8475b8ea2fb885a9080aed3a84cb2e57
+* Authored by CJ Cenizal <cj@cenizal.com> on 2017-01-17T23:39:39Z
+
+**Commit 3:**
+Give Bar component a min height of 30px so it has a consistent height even when it has shorter children.
+
+* Original sha: 445b0be9985be4326499d9ddfea628349023ef23
+* Authored by CJ Cenizal <cj@cenizal.com> on 2017-01-17T23:42:53Z
+
+**Commit 4:**
+Remove kuiSubHeader class. Migrate Saved Objects to use Bar component instead.
+
+* Original sha: b1c51463a2465446bc9711187143cd029f54b759
+* Authored by CJ Cenizal <cj@cenizal.com> on 2017-01-17T23:48:24Z
