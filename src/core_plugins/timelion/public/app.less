@@ -20,13 +20,6 @@
 }
 
 /**
- * 1. Needs to be relative to contain absolutely-positioned typeahead suggestions.
- */
-.timelionLocalSearch {
-  position: relative; /* 1 */
-}
-
-/**
  * 1. Anchor suggestions beneath input.
  * 2. Allow for option of positioning suggestions absolutely.
  */
@@ -35,6 +28,10 @@
   display: flex;
   flex-direction: column; /* 1 */
   position: relative; /* 2 */
+}
+
+.timelionExpressionInput {
+  min-height: 65px;
 }
 
 .timelion-container {

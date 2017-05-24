@@ -11,9 +11,6 @@ app.directive('timelionInterval', function ($compile, $timeout) {
     scope: {
       // The interval model
       model: '=',
-      // Differentiates between contexts, e.g. when this directive is used in the header in the
-      // Timelion app or in the sidebar in the Visualize app.
-      inHeader: '=',
     },
     template,
     link: function ($scope, $elem) {

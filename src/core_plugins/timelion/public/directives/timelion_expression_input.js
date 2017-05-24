@@ -50,11 +50,6 @@ app.directive('timelionExpressionInput', function ($document, $http, $interval, 
     template: timelionExpressionInputTemplate,
     link: function (scope, elem) {
       const expressionInput = elem.find('[data-expression-input]');
-      const TEASE_MULTILINE_HEIGHT = 80;
-      let expressionInputHeight;
-      let isExpressionInputResizing = false;
-      let hasExpressionInputResized = false;
-      let checkIfExpressionInputIsResizingInterval;
 
       const navigationalKeys = {
         ESC: 27,
@@ -68,10 +63,6 @@ app.directive('timelionExpressionInput', function ($document, $http, $interval, 
       let suggestibleFunctionLocation = {};
 
       scope.functionSuggestions = new FunctionSuggestions();
-
-      function getExpressionInputHeight() {
-        return expressionInput.outerHeight();
-      }
 
       function init() {
         $http.get('../api/timelion/functions').then(function (resp) {
@@ -150,49 +141,11 @@ app.directive('timelionExpressionInput', function ($document, $http, $interval, 
         // Wait for the caret position of the input to update and then we can get suggestions
         // (which depends on the caret position).
         $timeout(getSuggestions, 0);
-
-        // Show the user that the input can support multiple lines by making it a bit taller when
-        // the user focuses (but only if the user hasn't resized it).
-        if (!hasExpressionInputResized) {
-          expressionInputHeight = TEASE_MULTILINE_HEIGHT;
-          expressionInput.css('height', `${TEASE_MULTILINE_HEIGHT}px`);
-        }
       };
 
       scope.onBlurInput = () => {
         scope.functionSuggestions.hide();
-
-        if (!hasExpressionInputResized) {
-          expressionInput.css('height', '');
-        }
       };
-
-      // We have to track resizing of the textarea by polling and comparing change in height because
-      // there is no native browser 'resize' event for textareas.
-      function checkIfExpressionInputIsResizing() {
-        const newExpressionInputHeight = getExpressionInputHeight();
-
-        if (newExpressionInputHeight !== expressionInputHeight) {
-          hasExpressionInputResized = true;
-        }
-
-        expressionInputHeight = newExpressionInputHeight;
-      }
-
-      scope.onMouseDownInput = () => {
-        isExpressionInputResizing = true;
-        checkIfExpressionInputIsResizingInterval = $interval(checkIfExpressionInputIsResizing, 100);
-      };
-
-      function onMouseUpDocument() {
-        if (isExpressionInputResizing) {
-          checkIfExpressionInputIsResizing();
-          $interval.cancel(checkIfExpressionInputIsResizingInterval);
-          isExpressionInputResizing = false;
-        }
-      }
-
-      $document.on('mouseup', onMouseUpDocument);
 
       scope.onKeyDownInput = e => {
         // If we've pressed any non-navigational keys, then the user has typed something and we
@@ -260,10 +213,6 @@ app.directive('timelionExpressionInput', function ($document, $http, $interval, 
       scope.onClickSuggestion = index => {
         insertSuggestionIntoExpression(index);
       };
-
-      scope.$on('$destroy', () => {
-        $document.off('mouseup', onMouseUpDocument);
-      });
 
       init();
     }
