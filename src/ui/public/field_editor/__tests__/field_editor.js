@@ -16,13 +16,13 @@ describe('FieldEditor directive', function () {
   let $el;
 
   let $httpBackend;
+  let getScriptedLangsResponse;
 
   beforeEach(ngMock.module('kibana'));
   beforeEach(ngMock.inject(function ($compile, $injector, Private) {
     $httpBackend = $injector.get('$httpBackend');
-    $httpBackend
-    .when('GET', '/api/kibana/scripts/languages')
-    .respond(['expression', 'painless']);
+    getScriptedLangsResponse = $httpBackend.when('GET', '/api/kibana/scripts/languages');
+    getScriptedLangsResponse.respond(['expression', 'painless']);
 
     $rootScope = $injector.get('$rootScope');
     Field = Private(IndexPatternsFieldProvider);
@@ -153,12 +153,15 @@ describe('FieldEditor directive', function () {
         expect(field.lang).to.be('expression');
       });
 
-      it('provides lang options based on what is enabled for inline use in ES', function () {
+      it('limits lang options to "expression" and "painless"', function () {
+        getScriptedLangsResponse
+          .respond(['expression', 'painless', 'groovy']);
+
         $httpBackend.flush();
-        expect(_.isEqual(editor.scriptingLangs, ['expression', 'painless'])).to.be.ok();
+        expect(editor.scriptingLangs).to.eql(['expression', 'painless']);
       });
 
-      it('provides curated type options based on language', function () {
+      it('provides specific type when language is painless', function () {
         $rootScope.$apply();
         expect(editor.fieldTypes).to.have.length(1);
         expect(editor.fieldTypes[0]).to.be('number');
@@ -168,6 +171,23 @@ describe('FieldEditor directive', function () {
 
         expect(editor.fieldTypes).to.have.length(4);
         expect(_.isEqual(editor.fieldTypes, ['number', 'string', 'date', 'boolean'])).to.be.ok();
+      });
+
+      it('provides all kibana types when language is groovy (only possible in 5.x)', function () {
+        $rootScope.$apply();
+        expect(editor.fieldTypes).to.have.length(1);
+        expect(editor.fieldTypes[0]).to.be('number');
+
+        editor.field.lang = 'groovy';
+        $rootScope.$apply();
+
+        expect(editor.fieldTypes).to.contain('number');
+        expect(editor.fieldTypes).to.contain('string');
+        expect(editor.fieldTypes).to.contain('geo_point');
+        expect(editor.fieldTypes).to.contain('ip');
+        expect(editor.fieldTypes).to.not.contain('text');
+        expect(editor.fieldTypes).to.not.contain('keyword');
+        expect(editor.fieldTypes).to.not.contain('attachement');
       });
 
       it('updates formatter options based on field type', function () {
