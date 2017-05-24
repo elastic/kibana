@@ -3,8 +3,14 @@
     <label>
       From:
       <span ng-show="relative.from.preview">{{relative.from.preview}}</span>
-      <a class="label label-default" ng-click="setRelativeToNow({key:'from'})">Set To Now</a>
-      <span ng-hide="relative.from.preview"><i>Invalid Expression</i></span>
+      <a
+        class="label label-default"
+        ng-click="setRelativeToNow({key:'from'})"
+        kbn-accessible-click
+      >
+        Set To Now
+      </a>
+      <span ng-hide="relative.from.preview"><em>Invalid Expression</em></span>
     </label>
     <br>
     <div class="form-group" ng-class="{ 'has-error': checkRelative() }">
@@ -47,8 +53,14 @@
     <label>
       To:
       <span ng-show="relative.to.preview">{{relative.to.preview}}</span>
-      <a class="label label-default" ng-click="setRelativeToNow({key:'to'})">Set To Now</a>
-      <span ng-hide="relative.to.preview"><i>Invalid Expression</i></span>
+      <a
+        class="label label-default"
+        ng-click="setRelativeToNow({key:'to'})"
+        kbn-accessible-click
+      >
+        Set To Now
+      </a>
+      <span ng-hide="relative.to.preview"><em>Invalid Expression</em></span>
     </label>
     <br>
     <div class="form-group" ng-class="{ 'has-error': checkRelative() }">

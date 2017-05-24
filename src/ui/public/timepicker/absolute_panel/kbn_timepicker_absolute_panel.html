@@ -1,8 +1,14 @@
 <form name="absoluteTime" ng-submit="applyAbsolute()">
   <div class="kbn-timepicker-section">
     <div>
-      <label class="small">From: <span ng-show="!absolute.from"><i>Invalid Date</i></span>
-        <a class="label label-default" ng-click="setToNow({key:'from'})">Set To Now</a>
+      <label class="small">From: <span ng-show="!absolute.from"><em>Invalid Date</em></span>
+        <a
+          class="label label-default"
+          ng-click="setToNow({key:'from'})"
+          kbn-accessible-click
+        >
+          Set To Now
+        </a>
       </label>
       <input type="text" required class="form-control" input-datetime="{{format}}" ng-model="absolute.from">
     </div>
@@ -14,9 +20,15 @@
   <div class="kbn-timepicker-section">
     <div>
       <label class="small">To:
-        <a class="label label-default" ng-click="setToNow({key:'to'})">Set To Now</a>
+        <a
+          class="label label-default"
+          ng-click="setToNow({key:'to'})"
+          kbn-accessible-click
+        >
+          Set To Now
+        </a>
       </label>
-      <span ng-show="!absolute.to"><i>Invalid Date</i></span>
+      <span ng-show="!absolute.to"><em>Invalid Date</em></span>
       <input type="text" required class="form-control" input-datetime="{{format}}" ng-model="absolute.to">
     </div>
     <div>
