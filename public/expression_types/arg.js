@@ -25,10 +25,10 @@ export class Arg {
 
   mapArgValue(argValue) {
     // if not multiVal, only use the last value
-    const val = (!this.multiVal) ? [last(argValue)] : argValue;
+    const vals = (!this.multiVal) ? [last(argValue)] : argValue;
 
-    const resolvedVal = val.reduce((acc, v) => {
-      if (v == null) {
+    const resolvedVal = vals.reduce((acc, val) => {
+      if (val == null) {
         return acc.concat({
           type: 'string',
           value: null,
@@ -37,23 +37,23 @@ export class Arg {
       }
 
       // if value is a function, convert it to an expression
-      if (v.type === 'expression' || v.type === 'partial') {
+      if (val.type === 'expression' || val.type === 'partial') {
         return acc.concat({
-          type: v.type,
-          value: toExpression(v),
-          function: v.function,
+          type: val.type,
+          value: toExpression(val),
+          function: val.function,
         });
       }
 
       // enforce types, if defined
-      if (Array.isArray(this.types) && this.types.indexOf(v.type) === -1) {
-        throw new Error(`${this.name} does not accept arguments of type "${v.type}"`);
+      if (Array.isArray(this.types) && this.types.indexOf(val.type) === -1) {
+        throw new Error(`${this.name} does not accept arguments of type "${val.type}"`);
       }
 
       return acc.concat({
-        type: v.type,
-        value: v.value,
-        function: v.function,
+        type: val.type,
+        value: val.value,
+        function: val.function,
       });
     }, []);
 
