@@ -201,6 +201,7 @@ function discoverController($scope, config, courier, $route, $window, Notifier,
 
     const { searchFields, selectFields } = await getSharingDataFields();
     searchSource.set('fields', searchFields);
+    searchSource.set('sort', getSort($state.sort, $scope.indexPattern));
     searchSource.set('highlight', null);
     searchSource.set('highlightAll', null);
     searchSource.set('aggs', null);
