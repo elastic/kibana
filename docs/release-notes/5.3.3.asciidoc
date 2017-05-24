@@ -1,0 +1,10 @@
+[[release-notes-5.3.3]]
+== 5.3.3 Release Notes
+
+Also see <<breaking-changes-5.0>>.
+
+[float]
+[[bug-5.3.3]]
+=== Bug fixes
+Core::
+* Formatted output is now non-bindable {pull}11911[#11911]
