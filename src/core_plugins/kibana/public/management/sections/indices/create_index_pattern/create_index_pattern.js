@@ -49,19 +49,14 @@ uiModules.get('apps/management')
   };
 
   const fetchFieldList = () => {
-    this.dateFields = this.formValues.timeField = null;
-    const useIndexList = this.formValues.nameIsPattern;
+    this.dateFields = null;
+    this.formValues.timeField = null;
     let fetchFieldsError;
     let dateFields;
 
-    // we don't have enough info to continue
-    if (!this.formValues.name) {
-      fetchFieldsError = $translate.instant('KIBANA-SET_INDEX_NAME_FIRST');
-      return;
-    }
-
-    if (useIndexList && !this.formValues.nameInterval) {
-      fetchFieldsError = $translate.instant('KIBANA-INTERVAL_INDICES_POPULATED');
+    const missingPattern = !this.formValues.name;
+    const missingInterval = this.formValues.nameIsPattern && !this.formValues.nameInterval;
+    if (missingPattern || missingInterval)  {
       return;
     }
 

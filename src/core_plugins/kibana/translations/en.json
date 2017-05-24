@@ -45,8 +45,6 @@
   "KIBANA-WARNING" : "Warning",
   "KIBANA-NO_DEFAULT_INDEX_PATTERN" : "No default index pattern. You must select or create one to continue.",
   "KIBANA-LOADING": "Loading",
-  "KIBANA-SET_INDEX_NAME_FIRST": "Set an index name first",
-  "KIBANA-INTERVAL_INDICES_POPULATED" : "Select the interval at which your indices are populated.",
   "KIBANA-INDICES_MATCH_PATTERN" : "Unable to fetch mapping. Do you have indices matching the pattern?",
   "KIBANA-ADD_NEW" : "Create Index Pattern",
   "KIBANA-SEE" : "See",
