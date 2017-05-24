@@ -10,6 +10,7 @@ export default (path) => {
       resolvedArgs: {},
     },
     persistent: {
+      schemaVersion: 0,
       workpad: {
         name: 'Untitled Workpad',
         id: 'workpad-2235-4af1-b781-24e42a453e5b',
@@ -36,86 +37,6 @@ export default (path) => {
               palette=palette(#04BFBF, #CAFCD8, #F7E967, #A9CF54, #588F27),
               defaultStyle=seriesStyle(bars=1, lines=0, weight=0, points=1)
             )`,
-            ast: {
-              type: 'expression',
-              chain: [{
-                type: 'function',
-                function: 'demodata',
-                arguments: {},
-              }, {
-                type: 'function',
-                function: 'pointseries',
-                arguments: {
-                  y: [{
-                    type: 'string',
-                    value: 'median(cost)',
-                  }],
-                  x: [{
-                    type: 'string',
-                    value: 'time',
-                  }],
-                  color: [{
-                    type: 'string',
-                    value: 'project',
-                  }],
-                },
-              }, {
-                type: 'function',
-                function: 'plot',
-                arguments: {
-                  palette: [{
-                    type: 'expression',
-                    chain: [{
-                      type: 'function',
-                      function: 'palette',
-                      arguments: {
-                        _: [{
-                          type: 'string',
-                          value: '#04BFBF',
-                        }, {
-                          type: 'string',
-                          value: '#CAFCD8',
-                        }, {
-                          type: 'string',
-                          value: '#F7E967',
-                        }, {
-                          type: 'string',
-                          value: '#A9CF54',
-                        }, {
-                          type: 'string',
-                          value: '#588F27',
-                        }],
-                      },
-                    }],
-                  }],
-                  defaultStyle: [{
-                    type: 'expression',
-                    chain: [{
-                      type: 'function',
-                      function: 'seriesStyle',
-                      arguments: {
-                        bars: [{
-                          type: 'number',
-                          value: 0,
-                        }],
-                        lines: [{
-                          type: 'number',
-                          value: 0,
-                        }],
-                        weight: [{
-                          type: 'number',
-                          value: 0,
-                        }],
-                        points: [{
-                          type: 'number',
-                          value: 1,
-                        }],
-                      },
-                    }],
-                  }],
-                },
-              }],
-            },
           }],
         }],
       },
