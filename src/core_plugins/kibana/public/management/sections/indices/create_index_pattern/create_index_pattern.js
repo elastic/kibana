@@ -166,7 +166,7 @@ uiModules.get('apps/management')
     return loadingCount > 0;
   };
 
-  this.refreshFieldList = () => {
+  this.refreshTimeFieldOptions = () => {
     const prevSelection = this.formValues.timeFieldOption;
 
     loadingCount += 1;
@@ -223,7 +223,7 @@ uiModules.get('apps/management')
 
     const id = name;
 
-    const fieldName = timeFieldOption && timeFieldOption.fieldName;
+    const timeFieldName = timeFieldOption && timeFieldOption.fieldName;
 
     // this seems wrong, but it's the original logic... https://git.io/vHYFo
     const notExpandable = (!expandable && this.canExpandIndices())
@@ -238,7 +238,7 @@ uiModules.get('apps/management')
     loadingCount += 1;
     sendCreateIndexPatternRequest(indexPatterns, {
       id,
-      fieldName,
+      timeFieldName,
       intervalName,
       notExpandable,
     }).then(createdId => {
@@ -325,7 +325,7 @@ uiModules.get('apps/management')
     .finally(() => {
       // prevent running when no change happened (ie, first watcher call)
       if (!_.isEqual(newVal, oldVal)) {
-        this.refreshFieldList();
+        this.refreshTimeFieldOptions();
       }
     });
   });
@@ -333,7 +333,7 @@ uiModules.get('apps/management')
   $scope.$watchMulti([
     'controller.sampleCount'
   ], () => {
-    this.refreshFieldList();
+    this.refreshTimeFieldOptions();
   });
 
   $scope.$watchMulti([
