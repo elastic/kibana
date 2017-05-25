@@ -93,19 +93,19 @@ module.directive('filterEditor', function ($timeout) {
       };
 
       this.save = () => {
-        const { field, operator, params, isPinned, isDisabled, alias } = this;
+        const { filter, field, operator, params, isPinned, isDisabled, alias } = this;
 
-        let filter;
+        let newFilter;
         if (this.showQueryDslEditor()) {
-          const meta = _.pick(this.filter.meta, ['negate', 'index']);
-          filter = Object.assign(this.queryDsl, { meta });
+          const meta = _.pick(filter.meta, ['negate', 'index']);
+          newFilter = Object.assign(this.queryDsl, { meta });
         } else {
-          filter = buildFilter({ field, operator, params });
+          newFilter = buildFilter({ field, operator, params });
         }
-        filter.meta.disabled = isDisabled;
-        filter.meta.alias = alias;
+        newFilter.meta.disabled = isDisabled;
+        newFilter.meta.alias = alias;
 
-        return this.onSave({ filter, isPinned });
+        return this.onSave({ filter, newFilter, isPinned });
       };
     }
   };
