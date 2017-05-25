@@ -186,10 +186,28 @@ uiModules.get('apps/management')
       });
   };
 
+  this.isTimeBased = () => {
+    if (!this.formValues.timeFieldOption) {
+      // if they haven't choosen a time field, assume they will
+      return true;
+    }
+
+    // if timeFieldOption has a fieldName it's a time field, otherwise
+    // it's a way to opt-out of the time field or an indication that there
+    // are no fields available
+    return !!this.formValues.timeFieldOption.fieldName;
+  };
+
   this.canExpandIndices = () => {
-    // to maximize performance in the digest cycle, move from the least
-    // expensive operation to most
-    return !this.formValues.nameIsPattern && _.includes(this.formValues.name, '*');
+    return (
+      this.isTimeBased() &&
+        !this.formValues.nameIsPattern &&
+        _.includes(this.formValues.name, '*')
+    );
+  };
+
+  this.canUseTimePattern = () => {
+    return this.isTimeBased() && !this.formValues.expandable;
   };
 
   this.isLoading = () => {
@@ -238,12 +256,12 @@ uiModules.get('apps/management')
       : undefined;
 
     // this seems wrong, but it's the original logic... https://git.io/vHYFo
-    const notExpandable = (!expandable && this.canExpandIndices())
+    const notExpandable = (this.canExpandIndices() && !expandable)
       ? true
       : undefined;
 
     // Only event-time-based index patterns set an intervalName.
-    const intervalName = (nameIsPattern && nameInterval)
+    const intervalName = (this.canUseTimePattern() && nameIsPattern && nameInterval)
       ? nameInterval.name
       : undefined;
 
@@ -282,7 +300,7 @@ uiModules.get('apps/management')
 
   $scope.$watchMulti([
     'controller.formValues.nameIsPattern',
-    'controller.formValues.nameInterval.name'
+    'controller.formValues.nameInterval.name',
   ], (newVal, oldVal) => {
     const nameIsPattern = newVal[0];
     const newDefault = getDefaultPatternForInterval(newVal[1]);
@@ -308,7 +326,7 @@ uiModules.get('apps/management')
   $scope.$watchMulti([
     'controller.formValues.name',
     'controller.formValues.nameInterval'
-  ], (newVal, oldVal) => {
+  ], () => {
     function promiseMatch(lastPromise, cb) {
       if (lastPromise === samplePromise) {
         cb();
@@ -320,24 +338,28 @@ uiModules.get('apps/management')
 
     let lastPromise;
     resetIndex();
-    samplePromise = lastPromise = updateSamples()
+    samplePromise = lastPromise = Promise.resolve()
     .then(() => {
-      promiseMatch(lastPromise, () => {
-        this.samples = null;
-        this.patternErrors = [];
-      });
-    })
-    .catch(errors => {
-      promiseMatch(lastPromise, () => {
-        this.existing = null;
-        this.patternErrors = errors;
-      });
-    })
-    .finally(() => {
-      // prevent running when no change happened (ie, first watcher call)
-      if (!_.isEqual(newVal, oldVal)) {
-        this.refreshTimeFieldOptions();
+      if (!this.formValues.nameInterval || !this.formValues.name) {
+        return;
       }
+
+      return updateSamples()
+      .then(() => {
+        promiseMatch(lastPromise, () => {
+          this.samples = null;
+          this.patternErrors = [];
+        });
+      })
+      .catch(errors => {
+        promiseMatch(lastPromise, () => {
+          this.existing = null;
+          this.patternErrors = errors;
+        });
+      })
+      .finally(() => {
+        this.refreshTimeFieldOptions();
+      });
     });
   });
 
