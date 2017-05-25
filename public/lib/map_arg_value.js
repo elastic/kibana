@@ -22,11 +22,13 @@ function mapToMathValue(mathObj, val) {
 
 function mapFromMathValue(argValue) {
   if (argValue.type !== 'math') return argValue;
+  const noFunction = argValue.function == null || argValue.function.length === 0;
 
-  if (argValue.function === null) {
+  if (noFunction) {
     return {
-      ...argValue,
       type: 'string',
+      function: null,
+      value: argValue.value,
     };
   }
 
@@ -41,7 +43,7 @@ function mapFromFunctionValue(argValue) {
   const isExpression = argValue.type === 'expression';
   const isPartial = argValue.type === 'partial';
 
-  if (!isExpression && !isPartial)  return argValue;
+  if (!isExpression && !isPartial) return argValue;
 
   return fromExpression(argValue.value);
 }

@@ -115,6 +115,20 @@ describe('mapArgValue.toAstValue', () => {
       });
     });
 
+    it('treats empty function string as no function', () => {
+      const argValue = {
+        type: 'math',
+        value: 'sum(cost + 100)',
+        function: '',
+      };
+
+      expect(toAstValue(argValue)).to.eql({
+        type: 'string',
+        value: 'sum(cost + 100)',
+        function: null,
+      });
+    });
+
     it('turns simple and complex math strings from array', () => {
       const argValue = [{
         type: 'math',
@@ -124,6 +138,10 @@ describe('mapArgValue.toAstValue', () => {
         type: 'math',
         value: 'percent(cost) * 100',
         function: null,
+      }, {
+        type: 'math',
+        value: 'cost',
+        function: '',
       }];
 
       expect(toAstValue(argValue)).to.eql([{
@@ -133,6 +151,10 @@ describe('mapArgValue.toAstValue', () => {
       }, {
         type: 'string',
         value: 'percent(cost) * 100',
+        function: null,
+      }, {
+        type: 'string',
+        value: 'cost',
         function: null,
       }]);
     });
