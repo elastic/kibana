@@ -8,30 +8,49 @@ const template = ({ data, typeInstance }) => {
   const { name, displayName } = typeInstance;
 
   const formControl = (argVal) => {
-    let select;
-
-    const updateValue = (valueType) => () => {
+    const updateValue = (valueType) => ({ target }) => {
       onValueChange({
         [name]: [{
           type: valueType,
-          value: select.value,
+          value: target.value,
+        }],
+      });
+    };
+
+    const updateFunction = (valueType) => ({ target }) => {
+      onValueChange({
+        [name]: [{
+          type: valueType,
+          function: target.function,
         }],
       });
     };
 
     switch (argVal.type) {
       case 'string':
+      case 'math':
         return (
-          <FormControl
-            componentClass="select"
-            placeholder="select"
-            defaultValue={argVal.value}
-            inputRef={ref => select = ref}
-            onChange={updateValue(argVal.type)}
-          >
-            <option value="select" disabled>select column</option>
-            { columns.map(column => <option key={column.name} value={column.name}>{column.name}</option>) }
-          </FormControl>
+          <div>
+            <FormControl
+              componentClass="select"
+              placeholder="raw"
+              defaultValue={argVal.function}
+              onChange={updateFunction(argVal.type)}
+            >
+              <option value="raw">value</option>
+              <option value="median">median</option>
+            </FormControl>
+
+            <FormControl
+              componentClass="select"
+              placeholder="select"
+              defaultValue={argVal.value}
+              onChange={updateValue(argVal.type)}
+            >
+              <option value="select" disabled>select column</option>
+              { columns.map(column => <option key={column.name} value={column.name}>{column.name}</option>) }
+            </FormControl>
+          </div>
         );
 
       default:
