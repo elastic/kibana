@@ -153,14 +153,6 @@ describe('FieldEditor directive', function () {
         expect(field.lang).to.be('expression');
       });
 
-      it('limits lang options to "expression" and "painless"', function () {
-        getScriptedLangsResponse
-          .respond(['expression', 'painless', 'groovy']);
-
-        $httpBackend.flush();
-        expect(editor.scriptingLangs).to.eql(['expression', 'painless']);
-      });
-
       it('provides specific type when language is painless', function () {
         $rootScope.$apply();
         expect(editor.fieldTypes).to.have.length(1);
