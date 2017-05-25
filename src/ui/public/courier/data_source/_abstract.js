@@ -304,13 +304,14 @@ export function AbstractDataSourceProvider(Private, Promise, PromiseEmitter) {
         // if we only want to search for certain fields
         const fields = flatState.fields;
         if (fields) {
+          // filter out the docvalue_fields, and script_fields to only include those that we are concerned with
           flatState.body.docvalue_fields = _.intersection(flatState.body.docvalue_fields, fields);
           flatState.body.script_fields = _.pick(flatState.body.script_fields, fields);
 
-          if (!flatState.body._source) {
-            flatState.body._source = {};
-          }
-          flatState.body._source.includes = _.difference(fields, [..._.keys(flatState.body.script_fields)]);
+          // request the remaining fields from both stored_fields and _source
+          const remainingFields = _.difference(fields, [..._.keys(flatState.body.script_fields)]);
+          flatState.body.stored_fields = remainingFields;
+          _.set(flatState.body, '_source.includes', remainingFields);
         }
 
         decorateQuery(flatState.body.query);
