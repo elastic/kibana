@@ -15,55 +15,54 @@ describe('service_settings (FKA tilemaptest)', function () {
   const manifestUrl2 = 'https://foobar/v1/manifest';
 
   const manifest = {
-    "services": [
+    'services': [{
+      'id': 'tiles_v2',
+      'name': 'Elastic Tile Service',
+      'manifest': tmsManifestUrl,
+      'type': 'tms'
+    },
       {
-        "id": "tiles_v2",
-        "name": "Elastic Tile Service",
-        "manifest": tmsManifestUrl,
-        "type": "tms"
-      },
-      {
-        "id": "geo_layers",
-        "name": "Elastic Layer Service",
-        "manifest": vectorManifestUrl,
-        "type": "file"
+        'id': 'geo_layers',
+        'name': 'Elastic Layer Service',
+        'manifest': vectorManifestUrl,
+        'type': 'file'
       }
     ]
   };
 
   const tmsManifest = {
-    "services": [{
-      "id": "road_map",
-      "url": "https://tiles.elastic.co/v2/default/{z}/{x}/{y}.png?elastic_tile_service_tos=agree&my_app_name=kibana",
-      "minZoom": 0,
-      "maxZoom": 10,
-      "attribution": "© [OpenStreetMap](http://www.openstreetmap.org/copyright) © [Elastic Tile Service](https://www.elastic.co/elastic-tile-service)"
+    'services': [{
+      'id': 'road_map',
+      'url': 'https://tiles.elastic.co/v2/default/{z}/{x}/{y}.png?elastic_tile_service_tos=agree&my_app_name=kibana',
+      'minZoom': 0,
+      'maxZoom': 10,
+      'attribution': '© [OpenStreetMap](http://www.openstreetmap.org/copyright) © [Elastic Tile Service](https://www.elastic.co/elastic-tile-service)'
     }]
   };
 
   const vectorManifest = {
-    "layers": [{
-      "attribution": "",
-      "name": "US States",
-      "format": "geojson",
-      "url": "https://storage.googleapis.com/elastic-layer.appspot.com/L2FwcGhvc3RpbmdfcHJvZC9ibG9icy9BRW5CMlVvNGJ0aVNidFNJR2dEQl9rbTBjeXhKMU01WjRBeW1kN3JMXzM2Ry1qc3F6QjF4WE5XdHY2ODlnQkRpZFdCY2g1T2dqUGRHSFhSRTU3amlxTVFwZjNBSFhycEFwV2lYR29vTENjZjh1QTZaZnRpaHBzby5VXzZoNk1paGJYSkNPalpI?elastic_tile_service_tos=agree",
-      "fields": [{"name": "postal", "description": "Two letter abbreviation"}, {
-        "name": "name",
-        "description": "State name"
+    'layers': [{
+      'attribution': '',
+      'name': 'US States',
+      'format': 'geojson',
+      'url': 'https://storage.googleapis.com/elastic-layer.appspot.com/L2FwcGhvc3RpbmdfcHJvZC9ibG9icy9BRW5CMlVvNGJ0aVNidFNJR2dEQl9rbTBjeXhKMU01WjRBeW1kN3JMXzM2Ry1qc3F6QjF4WE5XdHY2ODlnQkRpZFdCY2g1T2dqUGRHSFhSRTU3amlxTVFwZjNBSFhycEFwV2lYR29vTENjZjh1QTZaZnRpaHBzby5VXzZoNk1paGJYSkNPalpI?elastic_tile_service_tos=agree',
+      'fields': [{ 'name': 'postal', 'description': 'Two letter abbreviation' }, {
+        'name': 'name',
+        'description': 'State name'
       }],
-      "created_at": "2017-04-26T19:45:22.377820",
-      "id": 5086441721823232
+      'created_at': '2017-04-26T19:45:22.377820',
+      'id': 5086441721823232
     }, {
-      "attribution": "Â© [Elastic Tile Service](https://www.elastic.co/elastic-tile-service)",
-      "name": "World Countries",
-      "format": "geojson",
-      "url": "https://storage.googleapis.com/elastic-layer.appspot.com/L2FwcGhvc3RpbmdfcHJvZC9ibG9icy9BRW5CMlVwWTZTWnhRRzNmUk9HUE93TENjLXNVd2IwdVNpc09SRXRyRzBVWWdqOU5qY2hldGJLOFNZSFpUMmZmZWdNZGx0NWprT1R1ZkZ0U1JEdFBtRnkwUWo0S0JuLTVYY1I5RFdSMVZ5alBIZkZuME1qVS04TS5oQTRNTl9yRUJCWk9tMk03?elastic_tile_service_tos=agree",
-      "fields": [{"name": "iso2", "description": "Two letter abbreviation"}, {
-        "name": "name",
-        "description": "Country name"
-      }, {"name": "iso3", "description": "Three letter abbreviation"}],
-      "created_at": "2017-04-26T17:12:15.978370",
-      "id": 5659313586569216
+      'attribution': 'Â© [Elastic Tile Service](https://www.elastic.co/elastic-tile-service)',
+      'name': 'World Countries',
+      'format': 'geojson',
+      'url': 'https://storage.googleapis.com/elastic-layer.appspot.com/L2FwcGhvc3RpbmdfcHJvZC9ibG9icy9BRW5CMlVwWTZTWnhRRzNmUk9HUE93TENjLXNVd2IwdVNpc09SRXRyRzBVWWdqOU5qY2hldGJLOFNZSFpUMmZmZWdNZGx0NWprT1R1ZkZ0U1JEdFBtRnkwUWo0S0JuLTVYY1I5RFdSMVZ5alBIZkZuME1qVS04TS5oQTRNTl9yRUJCWk9tMk03?elastic_tile_service_tos=agree',
+      'fields': [{ 'name': 'iso2', 'description': 'Two letter abbreviation' }, {
+        'name': 'name',
+        'description': 'Country name'
+      }, { 'name': 'iso3', 'description': 'Three letter abbreviation' }],
+      'created_at': '2017-04-26T17:12:15.978370',
+      'id': 5659313586569216
     }]
   };
 
@@ -82,13 +81,17 @@ describe('service_settings (FKA tilemaptest)', function () {
     serviceSettings = $injector.get('serviceSettings');
     mapsConfig = $injector.get('mapConfig');
 
-    sinon.stub(serviceSettings, "_getManifest", function (url) {
-      const contents =
-            (url.startsWith(tmsManifestUrl)) ? tmsManifest :
-            (url.startsWith(vectorManifestUrl)) ? vectorManifest :
-            (url.startsWith(manifestUrl)) ? manifest :
-            (url.startsWith(manifestUrl2)) ? manifest : null;
-
+    sinon.stub(serviceSettings, '_getManifest', function (url) {
+      let contents = null;
+      if (url.startsWith(tmsManifestUrl)) {
+        contents = tmsManifest;
+      } else if (url.startsWith(vectorManifestUrl)) {
+        contents = vectorManifest;
+      } else if (url.startsWith(manifestUrl)) {
+        contents = manifest;
+      } else if (url.startsWith(manifestUrl2)) {
+        contents = manifest;
+      }
       return {
         data: contents
       };
@@ -127,6 +130,7 @@ describe('service_settings (FKA tilemaptest)', function () {
     describe('modify - url', function () {
 
       let tilemapSettings;
+
       function assertQuery(expected) {
         const mapUrl = tilemapSettings.getUrl();
         const urlObject = url.parse(mapUrl, true);
@@ -136,33 +140,33 @@ describe('service_settings (FKA tilemaptest)', function () {
       }
 
       it('accepts an object', async() => {
-        serviceSettings.addQueryParams({foo: 'bar'});
+        serviceSettings.addQueryParams({ foo: 'bar' });
         tilemapSettings = await serviceSettings.getTMSService();
-        assertQuery({foo: 'bar'});
+        assertQuery({ foo: 'bar' });
       });
 
       it('merged additions with previous values', async() => {
         // ensure that changes are always additive
-        serviceSettings.addQueryParams({foo: 'bar'});
-        serviceSettings.addQueryParams({bar: 'stool'});
+        serviceSettings.addQueryParams({ foo: 'bar' });
+        serviceSettings.addQueryParams({ bar: 'stool' });
         tilemapSettings = await serviceSettings.getTMSService();
-        assertQuery({foo: 'bar', bar: 'stool'});
-      });
-      
-      it('overwrites conflicting previous values', async () => {
-        // ensure that conflicts are overwritten
-        serviceSettings.addQueryParams({foo: 'bar'});
-        serviceSettings.addQueryParams({bar: 'stool'});
-        serviceSettings.addQueryParams({foo: 'tstool'});
-        tilemapSettings = await serviceSettings.getTMSService();
-        assertQuery({foo: 'tstool', bar: 'stool'});
+        assertQuery({ foo: 'bar', bar: 'stool' });
       });
 
-      it('when overridden, should continue to work', async () => {
-        mapsConfig.manifestServiceUrl = manifestUrl2;
-        serviceSettings.addQueryParams({foo: 'bar'});
+      it('overwrites conflicting previous values', async() => {
+        // ensure that conflicts are overwritten
+        serviceSettings.addQueryParams({ foo: 'bar' });
+        serviceSettings.addQueryParams({ bar: 'stool' });
+        serviceSettings.addQueryParams({ foo: 'tstool' });
         tilemapSettings = await serviceSettings.getTMSService();
-        assertQuery({foo: 'bar'});
+        assertQuery({ foo: 'tstool', bar: 'stool' });
+      });
+
+      it('when overridden, should continue to work', async() => {
+        mapsConfig.manifestServiceUrl = manifestUrl2;
+        serviceSettings.addQueryParams({ foo: 'bar' });
+        tilemapSettings = await serviceSettings.getTMSService();
+        assertQuery({ foo: 'bar' });
       });
 
     });

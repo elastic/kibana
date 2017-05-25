@@ -10,9 +10,6 @@ marked.setOptions({
 uiModules.get('kibana')
   .service('serviceSettings', function ($http, $sanitize, mapConfig, kbnVersion) {
 
-
-    console.log('loading service settings');
-
     const extendUrl = (url, props) => (
       modifyUrl(url, parsed => _.merge(parsed, props))
     );
@@ -47,9 +44,7 @@ uiModules.get('kibana')
 
         this._loadCatalogue = _.once(async() => {
           try {
-            console.log('laod cat', mapConfig.manifestServiceUrl);
             const response = await this._getManifest(mapConfig.manifestServiceUrl, this._queryParams);
-            console.log('resp', response.data);
             return response.data;
           } catch (e) {
             if (!e) {
@@ -76,11 +71,8 @@ uiModules.get('kibana')
 
         this._loadTMSServices = _.once(async() => {
 
-          console.log('load!');
           const catalogue = await this._loadCatalogue();
-          console.log('got cataloge');
           const tmsService = catalogue.services.filter((service) => service.type === 'tms')[0];
-          console.log('got tmsservice', tmsService);
           const manifest = await this._getManifest(tmsService.manifest, this._queryParams);
           const services = manifest.data.services;
 
@@ -117,9 +109,7 @@ uiModules.get('kibana')
       }
 
       async getTMSService() {
-        console.log('thing');
         const tmsService = await this._loadTMSServices();
-        console.log('done', tmsService);
         return {
           getUrl: function () {
             return tmsService.url;
