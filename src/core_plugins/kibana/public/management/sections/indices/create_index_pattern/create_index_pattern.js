@@ -349,7 +349,7 @@ uiModules.get('apps/management')
   $scope.$watchMulti([
     'controller.isLoading()',
     'form.name.$error.indexNameInput',
-    'controller.newIndexPattern.timeField'
+    'controller.formValues.timeField'
   ], ([loading, invalidIndexName, timeField]) => {
     const state = { loading, invalidIndexName, timeField };
     this.createButtonText = pickCreateButtonText($translate, state);
