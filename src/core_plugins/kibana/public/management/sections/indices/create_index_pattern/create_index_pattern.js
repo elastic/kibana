@@ -213,6 +213,7 @@ uiModules.get('apps/management')
           return;
         }
 
+        // Restore the preivously selected state, or select the default option in the UI
         const restoredOption = findTimeFieldOption(prevOption);
         const defaultOption = pickDefaultTimeFieldOption();
         this.formValues.timeFieldOption = restoredOption || defaultOption;
