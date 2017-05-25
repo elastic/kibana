@@ -74,7 +74,7 @@ module.exports = class Config {
     let env = newVals.env;
     delete newVals.env;
     if (_.isObject(env)) env = env.name;
-    if (!env) env = process.env.NODE_ENV || 'production';
+    if (!env) env = 'production';
 
     const dev = env === 'development';
     const prod = env === 'production';
