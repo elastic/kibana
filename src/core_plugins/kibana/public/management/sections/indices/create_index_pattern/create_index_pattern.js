@@ -204,9 +204,9 @@ uiModules.get('apps/management')
     this.timeFieldOptionsError = null;
     this.formValues.timeFieldOption = null;
     getTimeFieldOptions()
-      .then(results => {
-        this.timeFieldOptions = results.options;
-        this.timeFieldOptionsError = results.error;
+      .then(({ options, error }) => {
+        this.timeFieldOptions = options;
+        this.timeFieldOptionsError = error;
         if (!this.timeFieldOptions) {
           return;
         }
