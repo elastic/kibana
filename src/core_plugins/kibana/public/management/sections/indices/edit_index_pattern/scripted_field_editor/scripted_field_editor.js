@@ -6,7 +6,8 @@ import template from './scripted_field_editor.html';
 
 uiRoutes
 .when('/management/kibana/indices/:indexPatternId/field/:fieldName*', { mode: 'edit' })
-.when('/management/kibana/indices/:indexPatternId/create-field/', { mode: 'create' })
+.when('/management/kibana/indices/:indexPatternId/create-field/metaField', { mode: 'create', type: 'meta' })
+.when('/management/kibana/indices/:indexPatternId/create-field/scriptedField', { mode: 'create', type: 'scripted' })
 .defaults(/management\/kibana\/indices\/[^\/]+\/(field|create-field)(\/|$)/, {
   template,
   resolve: {
@@ -23,7 +24,7 @@ uiRoutes
 
     this.mode = $route.current.mode;
     this.indexPattern = $route.current.locals.indexPattern;
-
+    this.type = $route.current.type;
 
     if (this.mode === 'edit') {
       const fieldName = $route.current.params.fieldName;
@@ -37,16 +38,22 @@ uiRoutes
 
     }
     else if (this.mode === 'create') {
-      this.field = new Field(this.indexPattern, {
-        scripted: true,
-        type: 'number'
-      });
+      if (this.type === 'meta') {
+        this.field = new Field(this.indexPattern, {
+          meta: true
+        });
+      } else {
+        this.field = new Field(this.indexPattern, {
+          scripted: true,
+          type: 'number'
+        });
+      }
     }
     else {
       throw new Error('unknown fieldSettings mode ' + this.mode);
     }
 
-    docTitle.change([this.field.name || 'New Scripted Field', this.indexPattern.id]);
+    docTitle.change([this.field.name || ((this.type === 'meta') ? 'New Meta Field' : 'New Scripted Field'), this.indexPattern.id]);
     this.goBack = function () {
       kbnUrl.changeToRoute(this.indexPattern, 'edit');
     };

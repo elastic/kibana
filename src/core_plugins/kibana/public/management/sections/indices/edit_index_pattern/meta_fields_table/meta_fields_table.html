@@ -1,0 +1,23 @@
+<h3>Meta fields</h3>
+<p>These meta fields exist outside of _source to merge into index pattern when displaying it</p>
+
+<header>
+  <a
+    data-test-subj="addMetaFieldLink"
+    ng-href="{{ kbnUrl.getRouteHref(indexPattern, 'addMetaField') }}"
+    class="kuiButton kuiButton--primary kuiButton--iconText"
+  >
+    <span aria-hidden="true" class="kuiButton__icon kuiIcon fa-plus"></span>
+    <span>Add Meta Field</span>
+  </a>
+</header>
+
+<paginated-table
+  columns="columns"
+  rows="rows"
+  per-page="perPage"
+  link-to-top="true"
+  show-blank-rows="false"
+></paginated-table>
+
+<p class="text-center" ng-if="rows.length === 0">No matching meta fields found.</p>

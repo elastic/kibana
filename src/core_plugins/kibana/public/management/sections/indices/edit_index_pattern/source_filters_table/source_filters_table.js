@@ -61,7 +61,7 @@ uiModules.get('kibana')
             each($scope.indexPattern.sourceFilters, (filter) => {
               const matcher = fieldWildcardMatcher([ filter.value ]);
               // compute which fields match a filter
-              const matches = $scope.indexPattern.getNonScriptedFields().map(f => f.name).filter(matcher).sort();
+              const matches = $scope.indexPattern.getNonMetaScriptedFields().map(f => f.name).filter(matcher).sort();
               if ($scope.$parent.fieldFilter && !angularFilter(matches, $scope.$parent.fieldFilter).length) {
                 return;
               }

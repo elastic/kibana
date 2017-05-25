@@ -92,9 +92,13 @@ describe('index pattern', function () {
         expect(indexPattern).to.have.property('popularizeField');
         expect(indexPattern).to.have.property('getScriptedFields');
         expect(indexPattern).to.have.property('getNonScriptedFields');
+        expect(indexPattern).to.have.property('getMetaFields');
+        expect(indexPattern).to.have.property('getNonMetaFields');
         expect(indexPattern).to.have.property('getInterval');
         expect(indexPattern).to.have.property('addScriptedField');
         expect(indexPattern).to.have.property('removeScriptedField');
+        expect(indexPattern).to.have.property('addMetaField');
+        expect(indexPattern).to.have.property('removeMetaField');
         expect(indexPattern).to.have.property('toString');
         expect(indexPattern).to.have.property('toJSON');
         expect(indexPattern).to.have.property('save');
@@ -120,6 +124,7 @@ describe('index pattern', function () {
       expect(indexPattern.fields[0]).to.have.property('format');
       expect(indexPattern.fields[0]).to.have.property('sortable');
       expect(indexPattern.fields[0]).to.have.property('scripted');
+      expect(indexPattern.fields[0]).to.have.property('meta');
     });
   });
 
@@ -140,6 +145,23 @@ describe('index pattern', function () {
 
   });
 
+  describe('getMetaFields', function () {
+    it('should return all meta fields', function () {
+      const metaNames = _(mockLogstashFields).where({ meta: true }).pluck('name').value();
+      const respNames = _.pluck(indexPattern.getMetaFields(), 'name');
+      expect(respNames).to.eql(metaNames);
+    });
+  });
+
+  describe('getNonMetaFields', function () {
+    it('should return all non-meta fields', function () {
+      const notMetaNames = _(mockLogstashFields).where({ meta: false }).pluck('name').value();
+      const respNames = _.pluck(indexPattern.getNonMetaFields(), 'name');
+      expect(respNames).to.eql(notMetaNames);
+    });
+
+  });
+
   describe('refresh fields', function () {
     // override the default indexPattern, with a truncated field list
     const indexPatternId = 'test-pattern';
@@ -154,6 +176,7 @@ describe('index pattern', function () {
         indexed: true,
         name: 'foo',
         scripted: false,
+        meta: false,
         sortable: true,
         type: 'number',
         aggregatable: true,
@@ -165,6 +188,10 @@ describe('index pattern', function () {
         scripted: true,
         script: '1234',
         lang: 'expression'
+      },
+      {
+        name: 'meta string',
+        meta: true,
       }];
 
       return create(indexPatternId, {
@@ -194,7 +221,7 @@ describe('index pattern', function () {
       ])
       .then(function (data) {
         const expected = data[0]; // just the fields in the index
-        const fields = indexPattern.getNonScriptedFields(); // get all but scripted fields
+        const fields = indexPattern.getNonMetaScriptedFields(); // get all but meta and scripted fieldss
 
         expect(_.pluck(fields, 'name')).to.eql(_.pluck(expected, 'name'));
       });
@@ -214,6 +241,23 @@ describe('index pattern', function () {
 
         const expected = _.filter(indexPattern.fields, { scripted: true });
         expect(_.pluck(expected, 'name')).to.eql(['script number']);
+      });
+    });
+
+    it('should preserve the meta fields', function () {
+      // ensure that all fields will be included in the returned docSource
+      setDocsourcePayload(docSourceResponse(indexPatternId));
+
+      // add spy to indexPattern.getMetaFields
+      const metaFieldsSpy = sinon.spy(indexPattern, 'getMetaFields');
+
+      // refresh fields, which will fetch
+      return indexPattern.refreshFields().then(function () {
+        // called to append meta fields to the response from mapper.getFieldsForIndexPattern
+        expect(metaFieldsSpy.callCount).to.equal(1);
+
+        const expected = _.filter(indexPattern.fields, {meta: true});
+        expect(_.pluck(expected, 'name')).to.eql(['meta string']);
       });
     });
   });
@@ -257,6 +301,48 @@ describe('index pattern', function () {
         indexPattern.addScriptedField(scriptedField.name, '\'new script\'', 'string');
       }).to.throwError(function (e) {
         expect(e).to.be.a(DuplicateField);
+      });
+    });
+  });
+
+  describe('add and remove meta fields', function () {
+    it('should append the meta field', function () {
+      // keep a copy of the current meta field count
+      const saveSpy = sinon.spy(indexPattern, 'save');
+      const oldCount = indexPattern.getMetaFields().length;
+
+      // add a new meta field
+      const metaField = {
+        name: 'new meta field',
+        type: 'boolean'
+      };
+      indexPattern.addMetaField(metaField.name, metaField.script, metaField.type);
+      const metaFields = indexPattern.getMetaFields();
+      expect(saveSpy.callCount).to.equal(1);
+      expect(metaFields).to.have.length(oldCount + 1);
+      expect(indexPattern.fields.byName[metaField.name].name).to.equal(metaField.name);
+    });
+
+    it('should remove meta field, by name', function () {
+      const saveSpy = sinon.spy(indexPattern, 'save');
+      const metaFields = indexPattern.getMetaFields();
+      const oldCount = metaFields.length;
+      const metaField = _.last(metaFields);
+
+      indexPattern.removeMetaField(metaField.name);
+
+      expect(saveSpy.callCount).to.equal(1);
+      expect(indexPattern.getMetaFields().length).to.equal(oldCount - 1);
+      expect(indexPattern.fields.byName[metaField.name]).to.equal(undefined);
+    });
+
+    it('should not allow duplicate names', function () {
+      const metaFields = indexPattern.getMetaFields();
+      const metaField = _.last(metaFields);
+      expect(function () {
+        indexPattern.addMetaField(metaField.name, '\'new meta\'', 'string');
+      }).to.throwError(function (e) {
+        expect(e).to.be.a(errors.DuplicateField);
       });
     });
   });

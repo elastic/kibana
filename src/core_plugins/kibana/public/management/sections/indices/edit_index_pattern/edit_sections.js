@@ -4,13 +4,20 @@ export function IndicesEditSectionsProvider() {
 
   return function (indexPattern) {
     const fieldCount = _.countBy(indexPattern.fields, function (field) {
-      return (field.scripted) ? 'scripted' : 'indexed';
+      if (field.scripted) {
+        return 'scripted';
+      } else if (field.meta) {
+        return 'meta';
+      } else {
+        return 'indexed';
+      }
     });
 
     _.defaults(fieldCount, {
       indexed: 0,
       scripted: 0,
-      sourceFilters: 0
+      sourceFilters: 0,
+      metaFilters: 0
     });
 
     return [
@@ -28,6 +35,11 @@ export function IndicesEditSectionsProvider() {
         title: 'source filters',
         index: 'sourceFilters',
         count: fieldCount.sourceFilters
+      },
+      {
+        title: 'meta fields',
+        index: 'metaFields',
+        count: fieldCount.meta
       }
     ];
   };
