@@ -1,6 +1,6 @@
-import { last, pick } from 'lodash';
+import { pick } from 'lodash';
 import { argTypeRegistry } from './arg_type';
-import { toExpression } from '../../common/lib/ast';
+import { toInterfaceValue } from '../lib/map_arg_value';
 
 export class Arg {
   constructor(name, props) {
@@ -23,45 +23,12 @@ export class Arg {
     });
   }
 
-  mapArgValue(argValue) {
-    // if not multiVal, only use the last value
-    const vals = (!this.multiVal) ? [last(argValue)] : argValue;
-
-    const resolvedVal = vals.reduce((acc, val) => {
-      if (val == null) {
-        return acc.concat({
-          type: 'string',
-          value: null,
-          function: null,
-        });
-      }
-
-      // if value is a function, convert it to an expression
-      if (val.type === 'expression' || val.type === 'partial') {
-        return acc.concat({
-          type: val.type,
-          value: toExpression(val),
-          function: val.function,
-        });
-      }
-
-      return acc.concat({
-        type: val.type,
-        value: val.value,
-        function: val.function,
-      });
-    }, []);
-
-    // if multival, return array, otherwise just the value
-    return (this.multiVal) ? resolvedVal : resolvedVal[0];
-  }
-
   render({ data, resolvedData }) {
     return this.argType.template({
       data: {
         ...data,
         ...resolvedData,
-        argValue: this.mapArgValue(data.argValue),
+        argValue: toInterfaceValue(data.argValue, this.multiVal),
       },
       resolvedData: this.resolve(data),
       typeInstance: this,
