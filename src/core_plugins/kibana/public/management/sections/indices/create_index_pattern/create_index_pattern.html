@@ -115,10 +115,10 @@
               <select
                 class="kuiSelect kuiSelect--large kuiVerticalRhythmSmall"
                 data-test-subj="createIndexPatternTimeFieldSelect"
-                ng-disabled="controller.fetchFieldsError || controller.dateFields.length === 1"
+                ng-disabled="controller.fetchFieldsError || controller.timeFieldOptions.length === 1"
                 ng-required="!controller.fetchFieldsError"
-                ng-options="field.name for field in controller.dateFields"
-                ng-model="controller.formValues.timeField"
+                ng-options="option.display for option in controller.timeFieldOptions"
+                ng-model="controller.formValues.timeFieldOption"
               ></select>
 
               <p
