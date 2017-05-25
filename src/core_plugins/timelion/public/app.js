@@ -158,6 +158,7 @@ app.controller('timelion', function (
       search: $scope.search,
       dontShowHelp: function () {
         config.set('timelion:showTutorial', false);
+        $scope.setPage(0);
         $scope.kbnTopNav.close('docs');
       }
     };
