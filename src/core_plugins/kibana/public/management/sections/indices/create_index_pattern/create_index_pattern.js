@@ -41,16 +41,11 @@ uiModules.get('apps/management')
   this.nameIntervalOptions = intervals;
   this.patternErrors = [];
 
-
-  /**
-   *  Get the time field options from the indexPatterns.mapper.
-   *  @return {Promise<Array<{display,fieldName}>>}
-   */
   const getTimeFieldOptions = () => {
     const missingPattern = !this.formValues.name;
     const missingInterval = this.formValues.nameIsPattern && !this.formValues.nameInterval;
     if (missingPattern || missingInterval)  {
-      return [];
+      return Promise.resolve({ options: [] });
     }
 
     loadingCount += 1;
@@ -67,26 +62,32 @@ uiModules.get('apps/management')
         const dateFields = fields.filter(field => field.type === 'date');
 
         if (dateFields.length === 0) {
-          return [
-            {
-              display: $translate.instant('KIBANA-INDICES_DONT_CONTAIN_TIME_FIELDS')
-            }
-          ];
+          return {
+            options: [
+              {
+                display: $translate.instant('KIBANA-INDICES_DONT_CONTAIN_TIME_FIELDS')
+              }
+            ]
+          };
         }
 
-        return [
-          {
-            display: $translate.instant('KIBANA-NO_DATE_FIELD_DESIRED')
-          },
-          ...dateFields.map(field => ({
-            display: field.name,
-            fieldName: field.name
-          })),
-        ];
+        return {
+          options: [
+            {
+              display: $translate.instant('KIBANA-NO_DATE_FIELD_DESIRED')
+            },
+            ...dateFields.map(field => ({
+              display: field.name,
+              fieldName: field.name
+            })),
+          ]
+        };
       },
       err => {
         if (err instanceof IndexPatternMissingIndices) {
-          throw new Error($translate.instant('KIBANA-INDICES_MATCH_PATTERN'));
+          return {
+            error: $translate.instant('KIBANA-INDICES_MATCH_PATTERN')
+          };
         }
 
         throw err;
@@ -95,6 +96,34 @@ uiModules.get('apps/management')
     .finally(() => {
       loadingCount -= 1;
     });
+  };
+
+  const findTimeFieldOption = match => {
+    if (!match) return;
+
+    return this.timeFieldOptions.find(option => (
+      // comparison is not done with _.isEqual() because options get a unique
+      // `$$hashKey` tag attached to them by ng-repeat
+      option.fieldName === match.fieldName &&
+        option.display === match.display
+    ));
+  };
+
+  const pickDefaultTimeFieldOption = () => {
+    const noOptions = this.timeFieldOptions.length === 0;
+    const fieldOptions = this.timeFieldOptions.filter(option => !!option.fieldName);
+    const infoOptions = this.timeFieldOptions.filter(option => !option.fieldName);
+    const tooManyOptions = fieldOptions.length > 1 || infoOptions.length > 1;
+
+    if (noOptions || tooManyOptions) {
+      return null;
+    }
+
+    if (fieldOptions.length === 1) {
+      return fieldOptions[0];
+    }
+
+    return infoOptions[0];
   };
 
   const resetIndex = () => {
@@ -167,49 +196,28 @@ uiModules.get('apps/management')
   };
 
   this.refreshTimeFieldOptions = () => {
-    const prevSelection = this.formValues.timeFieldOption;
+    const prevOption = this.formValues.timeFieldOption;
 
     loadingCount += 1;
     this.timeFieldOptions = [];
     this.timeFieldOptionsError = null;
+    this.formValues.timeFieldOption = null;
     getTimeFieldOptions()
-    .then(
-      results => this.timeFieldOptions = results,
-      err => this.timeFieldOptionsError = err.message
-    )
-    .then(() => {
-      if (this.timeFieldOptionsError) return;
-
-      if (prevSelection) {
-        this.formValues.timeFieldOption = this.timeFieldOptions.find(option => (
-          // comparison is not done with _.isEqual() because options get a unique
-          // `$$hashKey` tag attached to them by ng-repeat
-          option.fieldName === prevSelection.fieldName
-            && option.display === prevSelection.display
-        ));
-      }
-
-      const fieldOptions = this.timeFieldOptions.filter(option => !!option.fieldName);
-      const infoOptions = this.timeFieldOptions.filter(option => !option.fieldName);
-      this.indexHasDateFields = fieldOptions.length > 0;
-
-      if (!this.formValues.timeFieldOptions) {
-        const noOptions = this.timeFieldOptions.length === 0;
-        const tooManyOptions = fieldOptions.length > 1 || infoOptions.length > 1;
-
-        if (noOptions || tooManyOptions) {
-          // no default
-        } else if (fieldOptions.length === 1) {
-          this.formValues.timeFieldOption = fieldOptions[0];
-        } else {
-          this.formValues.timeFieldOption = infoOptions[0];
+      .then(results => {
+        this.timeFieldOptions = results.options;
+        this.timeFieldOptionsError = results.error;
+        if (!this.timeFieldOptions) {
+          return;
         }
-      }
-    })
-    .catch(notify.error)
-    .finally(() => {
-      loadingCount -= 1;
-    });
+
+        const restoredOption = findTimeFieldOption(prevOption);
+        const defaultOption = pickDefaultTimeFieldOption();
+        this.formValues.timeFieldOption = restoredOption || defaultOption;
+      })
+      .catch(notify.error)
+      .finally(() => {
+        loadingCount -= 1;
+      });
   };
 
   this.createIndexPattern = () => {
