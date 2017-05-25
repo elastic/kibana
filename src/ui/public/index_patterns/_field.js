@@ -81,17 +81,17 @@ export function IndexPatternsFieldProvider(Private, shortDotsFilter, $rootScope,
   Object.defineProperties(Field.prototype, {
     indexed: {
       get() {
-        throw new Error('field.indexed has been removed.');
+        throw new Error('field.indexed has been removed, see https://github.com/elastic/kibana/pull/11969');
       }
     },
     analyzed: {
       get() {
-        throw new Error('field.analyzed has been removed.');
+        throw new Error('field.analyzed has been removed, see https://github.com/elastic/kibana/pull/11969');
       }
     },
     doc_values: {
       get() {
-        throw new Error('field.doc_values has been removed.');
+        throw new Error('field.doc_values has been removed, see https://github.com/elastic/kibana/pull/11969');
       }
     },
   });

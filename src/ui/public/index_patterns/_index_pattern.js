@@ -107,9 +107,7 @@ export function IndexPatternProvider(Private, Notifier, config, kbnIndex, Promis
       // slotted for 5.5 #11969
       const hasDocValuesFlag = ('readFromDocValues' in field);
 
-      if (!hasFieldCaps || !hasDocValuesFlag) {
-        return true;
-      }
+      return !hasFieldCaps || !hasDocValuesFlag;
     });
   }
 
