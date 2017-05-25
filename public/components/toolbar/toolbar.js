@@ -2,20 +2,27 @@ import React from 'react';
 import PropTypes from 'prop-types';
 
 import { Navbar } from '../navbar';
-//import { Tray } from './tray';
+import { Tray } from './tray';
 import { NavbarButton } from '../navbar_button';
+
+import { Expression } from '../expression';
+
+
 
 import './toolbar.less';
 
-export const Toolbar = ({ editing }) => {
+export const Toolbar = ({ editing, tray, setTray }) => {
+  const done = () => setTray(null);
+
+  const ExpressionTray = (<Expression done={done} />);
+
   const toolbar = editing ? (
     <div className="canvas__toolbar">
-      { /*<Tray></Tray>*/ }
+      {tray ? (<Tray>{ tray }</Tray>) : null }
       <Navbar>
         <NavbarButton><i className="fa fa-plus" /> Add an element</NavbarButton>
         <NavbarButton><i className="fa fa-plus-square" /> Add a page</NavbarButton>
-        <NavbarButton><i className="fa fa-terminal" /> Code</NavbarButton>
-
+        <NavbarButton onClick={() => setTray(ExpressionTray)}><i className="fa fa-terminal" /> Code</NavbarButton>
       </Navbar>
     </div>
 
@@ -26,4 +33,5 @@ export const Toolbar = ({ editing }) => {
 
 Toolbar.propTypes = {
   editing: PropTypes.bool,
+  tray: PropTypes.node,
 };

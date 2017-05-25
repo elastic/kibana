@@ -11,8 +11,9 @@
 
 .canvas__main {
   display: flex;
-  flex-grow: 1;
+  flex: 1 1 auto;
   flex-direction: row;
+  height: 0px; // Essentially a hack to make the sidebar and workspace scroll when the tray is open
 }
 
 .canvas__app--sidebar {
@@ -20,14 +21,16 @@
   border-left: @borderStyle;
   width: 350px;
   flex-grow: 0;
+  overflow: auto;
 }
 
 .canvas__app--workspace {
   background-color: @background;
-  margin: @spacingM;
+  padding: @spacingM;
   flex-grow: 1;
   display: flex;
   flex-direction: column;
+  overflow: auto;
 }
 
 .canvas__app--workpad {

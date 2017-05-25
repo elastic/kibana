@@ -1,11 +1,9 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 
-import { Navbar } from '../navbar';
-import { NavbarButton } from '../navbar_button';
-
-
 import { Sidebar } from '../sidebar';
+import { Toolbar } from '../toolbar';
+
 import { Workpad } from '../workpad';
 import { ToggleEditing } from './toggle_editing';
 
@@ -13,10 +11,6 @@ import './app.less';
 
 export const App = ({ editing, toggleEditing }) => (
   <div className="canvas">
-    {/*
-      <div className="canvas__app--expression">
-      </div>
-    */}
     <div className="canvas__main">
       <div className="canvas__app--workspace">
         <div className="canvas__app--title">
@@ -36,10 +30,7 @@ export const App = ({ editing, toggleEditing }) => (
       ) : null }
     </div>
     { editing ? (
-      <Navbar>
-        <NavbarButton><i className="fa fa-plus" /> Add an element</NavbarButton>
-        <NavbarButton><i className="fa fa-plus-square" /> Add a page</NavbarButton>
-      </Navbar>
+      <Toolbar />
     ) : null }
 
   </div>

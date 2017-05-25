@@ -2,10 +2,10 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import './navbar_button.less';
 
-export const NavbarButton = ({ children }) => {
+export const NavbarButton = ({ children, onClick }) => {
 
   return (
-    <button className="canvas__navbarButton">
+    <button className="canvas__navbarButton" onClick={onClick}>
       {children}
     </button>
   );
@@ -13,4 +13,5 @@ export const NavbarButton = ({ children }) => {
 
 NavbarButton.propTypes = {
   children: PropTypes.node,
+  onClick: PropTypes.func,
 };

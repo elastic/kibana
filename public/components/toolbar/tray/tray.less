@@ -3,4 +3,20 @@
 .canvas__tray {
   height: 400px;
   padding: @spacingM @spacingM 0 @spacingM;
+  display: flex;
+  flex-direction: column;
+
+  .canvas__expression, .form-group {
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+
+    textarea {
+      flex-grow: 1;
+      height: 200px;
+      background: @lightestGrey;
+      padding: @spacingS;
+      border-left: @spacingS solid @lightGrey;
+    }
+  }
 }

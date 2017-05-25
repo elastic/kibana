@@ -1,4 +1,5 @@
 import { connect } from 'react-redux';
+import { compose, withState } from 'recompose';
 
 import { getEditing } from '../../state/selectors/app';
 
@@ -8,10 +9,7 @@ const mapStateToProps = (state) => ({
   editing: getEditing(state),
 });
 
-/*
-const mapDispatchToProps = ({
-  toggleEditing,
-});
-*/
-
-export const Toolbar = connect(mapStateToProps /*, mapDispatchToProps*/)(Component);
+export const Toolbar = compose(
+  connect(mapStateToProps),
+  withState('tray', 'setTray', props => props.tray),
+)(Component);
