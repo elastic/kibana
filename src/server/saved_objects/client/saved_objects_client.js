@@ -138,16 +138,49 @@ export class SavedObjectsClient {
   }
 
   async get(type, id) {
-    const response = await this._withKibanaIndex('get', {
-      type,
-      id,
+    const response = await this._withKibanaIndex('search', {
+      body: {
+        version: true,
+        query: {
+          bool: {
+            should: [
+              {
+                ids: {
+                  values: id,
+                  type
+                }
+              },
+              {
+                bool: {
+                  must: [
+                    {
+                      term: {
+                        id: {
+                          value: id
+                        }
+                      }
+                    },
+                    {
+                      type: {
+                        value: 'doc'
+                      }
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        }
+      }
     });
 
+    const hit = get(response, 'hits.hits.0');
+    const attributes =  get(hit, `_source.${type}`) || get(hit, '_source');
     return {
-      id: response._id,
-      type: response._type,
-      version: response._version,
-      attributes: response._source
+      id: hit._id,
+      type: hit._type,
+      version: hit._version,
+      attributes
     };
   }
 
