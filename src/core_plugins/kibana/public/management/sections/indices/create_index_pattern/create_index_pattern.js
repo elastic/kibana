@@ -235,7 +235,9 @@ uiModules.get('apps/management')
 
     const id = name;
 
-    const timeFieldName = timeFieldOption && timeFieldOption.fieldName;
+    const timeFieldName = timeFieldOption
+      ? timeFieldOption.fieldName
+      : undefined;
 
     // this seems wrong, but it's the original logic... https://git.io/vHYFo
     const notExpandable = (!expandable && this.canExpandIndices())
