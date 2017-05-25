@@ -24,7 +24,6 @@ export function AggTypesMetricsTopHitProvider(Private) {
       {
         name: 'field',
         onlyAggregatable: false,
-        showAnalyzedWarning: false,
         filterFieldTypes: function (vis, value) {
           if (vis.type.name === 'table' || vis.type.name === 'metric') {
             return true;
@@ -45,7 +44,7 @@ export function AggTypesMetricsTopHitProvider(Private) {
               }
             };
           } else {
-            if (field.doc_values) {
+            if (field.readFromDocValues) {
               output.params.docvalue_fields = [ field.name ];
             }
             output.params._source = field.name === '_source' ? true : field.name;

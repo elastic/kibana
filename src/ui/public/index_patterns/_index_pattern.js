@@ -95,9 +95,19 @@ export function IndexPatternProvider(Private, Notifier, config, kbnIndex, Promis
     return promise;
   }
 
-  function containsFieldCapabilities(fields) {
-    return _.any(fields, (field) => {
-      return _.has(field, 'aggregatable') && _.has(field, 'searchable');
+  function isFieldRefreshRequired(indexPattern) {
+    if (!indexPattern.fields) {
+      return true;
+    }
+
+    return indexPattern.fields.every(field => {
+      // See https://github.com/elastic/kibana/pull/8421
+      const hasFieldCaps = ('aggregatable' in field) && ('searchable' in field);
+
+      // See https://github.com/elastic/kibana/pull/11969
+      const hasDocValuesFlag = ('readFromDocValues' in field);
+
+      return !hasFieldCaps || !hasDocValuesFlag;
     });
   }
 
@@ -108,7 +118,7 @@ export function IndexPatternProvider(Private, Notifier, config, kbnIndex, Promis
       return promise;
     }
 
-    if (!indexPattern.fields || !containsFieldCapabilities(indexPattern.fields)) {
+    if (isFieldRefreshRequired(indexPattern)) {
       promise = indexPattern.refreshFields();
     }
     return promise.then(() => {initFields(indexPattern);});

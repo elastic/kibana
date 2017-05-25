@@ -52,7 +52,6 @@ export default function ({ getService, getPageObjects }) {
             'format',
             'searchable',
             'aggregatable',
-            'analyzed',
             'excluded',
             'controls'
           ];

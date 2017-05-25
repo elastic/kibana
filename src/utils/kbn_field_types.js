@@ -22,7 +22,7 @@ const KBN_FIELD_TYPES = [
     name: 'string',
     sortable: true,
     filterable: true,
-    esTypes: ['string', 'text', 'keyword'],
+    esTypes: ['string', 'text', 'keyword', '_type', '_id'],
   }),
   new KbnFieldType({
     name: 'number',
