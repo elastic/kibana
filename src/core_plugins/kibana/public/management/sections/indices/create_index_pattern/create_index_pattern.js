@@ -111,9 +111,12 @@ uiModules.get('apps/management')
 
   const pickDefaultTimeFieldOption = () => {
     const noOptions = this.timeFieldOptions.length === 0;
+    // options that represent a time field
     const fieldOptions = this.timeFieldOptions.filter(option => !!option.fieldName);
-    const infoOptions = this.timeFieldOptions.filter(option => !option.fieldName);
-    const tooManyOptions = fieldOptions.length > 1 || infoOptions.length > 1;
+    // options like "I don't want the time filter" or "There are no date fields"
+    const nonFieldOptions = this.timeFieldOptions.filter(option => !option.fieldName);
+    // if there are multiple field or non-field options then we can't select a default, the user must choose
+    const tooManyOptions = fieldOptions.length > 1 || nonFieldOptions.length > 1;
 
     if (noOptions || tooManyOptions) {
       return null;
@@ -123,7 +126,7 @@ uiModules.get('apps/management')
       return fieldOptions[0];
     }
 
-    return infoOptions[0];
+    return nonFieldOptions[0];
   };
 
   const resetIndex = () => {
