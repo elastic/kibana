@@ -21,7 +21,7 @@ endif::[]
 
 ifeval::["{release-state}"!="unreleased"]
 
-The 64-bit Linux archive for Kibana v{version} can be downloaded and installed as follows:
+The Linux archive for Kibana v{version} can be downloaded and installed as follows:
 
 ["source","sh",subs="attributes"]
 --------------------------------------------
@@ -32,33 +32,6 @@ cd kibana/ <2>
 --------------------------------------------
 <1> Compare the SHA produced by `sha1sum` or `shasum` with the
     https://artifacts.elastic.co/downloads/kibana/kibana-{version}-linux-x86_64.tar.gz.sha1[published SHA].
-<2> This directory is known as `$KIBANA_HOME`.
-
-endif::[]
-
-
-[[install-linux32]]
-==== Download and install the Linux 32-bit package
-
-ifeval::["{release-state}"=="unreleased"]
-
-Version {version} of Kibana has not yet been released.
-
-endif::[]
-
-ifeval::["{release-state}"!="unreleased"]
-
-The 32-bit Linux archive for Kibana v{version} can be downloaded and installed as follows:
-
-["source","sh",subs="attributes"]
---------------------------------------------
-wget https://artifacts.elastic.co/downloads/kibana/kibana-{version}-linux-x86.tar.gz
-sha1sum kibana-{version}-linux-x86.tar.gz <1>
-tar -xzf kibana-{version}-linux-x86.tar.gz
-cd kibana/ <2>
---------------------------------------------
-<1> Compare the SHA produced by `sha1sum` or `shasum` with the
-    https://artifacts.elastic.co/downloads/kibana/kibana-{version}-linux-x86.tar.gz.sha1[published SHA].
 <2> This directory is known as `$KIBANA_HOME`.
 
 endif::[]
