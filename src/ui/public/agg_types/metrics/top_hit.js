@@ -44,7 +44,6 @@ export function AggTypesMetricsTopHitProvider(Private) {
               }
             };
           } else {
-            // https://git.io/vSPvJ
             if (field.readFromDocValues) {
               output.params.docvalue_fields = [ field.name ];
             }
