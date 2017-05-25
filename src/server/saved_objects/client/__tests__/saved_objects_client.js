@@ -141,6 +141,42 @@ describe('SavedObjectsClient', () => {
       expect(options.from).to.be(50);
     });
 
+    it('accepts ids', async () => {
+      const ids = ['a', 'b'];
+      await savedObjectsClient.find({ ids: ids });
+
+      expect(callAdminCluster.calledOnce).to.be(true);
+
+      const options = callAdminCluster.getCall(0).args[1];
+      expect(options.body).to.eql({
+        version: true,
+        query: {
+          ids: {
+            type: undefined,
+            values: ids
+          }
+        }
+      });
+    });
+
+    it('accepts ids with type', async () => {
+      const ids = ['a', 'b'];
+      await savedObjectsClient.find({ ids: ids, type: 'settings' });
+
+      expect(callAdminCluster.calledOnce).to.be(true);
+
+      const options = callAdminCluster.getCall(0).args[1];
+      expect(options.body).to.eql({
+        version: true,
+        query: {
+          ids: {
+            type: 'settings',
+            values: ids
+          }
+        }
+      });
+    });
+
     it('accepts type', async () => {
       await savedObjectsClient.find({ type: 'index-pattern' });
 

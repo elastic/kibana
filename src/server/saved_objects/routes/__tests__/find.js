@@ -102,6 +102,20 @@ describe('GET /api/saved_objects/{type?}', () => {
     expect(options).to.eql({ perPage: 20, page: 1, searchFields: 'title' });
   });
 
+  it('accepts the query parameter ids', async() => {
+    const request = {
+      method: 'GET',
+      url: '/api/saved_objects?ids=a&ids=b'
+    };
+
+    await server.inject(request);
+
+    expect(savedObjectsClient.find.calledOnce).to.be(true);
+
+    const options = savedObjectsClient.find.getCall(0).args[0];
+    expect(options).to.eql({ perPage: 20, page: 1, ids: ['a', 'b'] });
+  });
+
   it('accepts the query parameter fields as a string', async () => {
     const request = {
       method: 'GET',
