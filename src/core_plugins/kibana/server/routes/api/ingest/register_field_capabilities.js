@@ -1,5 +1,7 @@
 import _ from 'lodash';
+
 import handleESError from '../../../lib/handle_es_error';
+import { shouldReadFieldFromDocValues } from './should_read_field_from_doc_values';
 
 export function registerFieldCapabilities(server) {
   server.route({
@@ -19,7 +21,11 @@ export function registerFieldCapabilities(server) {
         (res) => {
           const fields = _.get(res, 'indices._all.fields', {});
           const fieldsFilteredValues = _.mapValues(fields, (value) => {
-            return _.pick(value, ['searchable', 'aggregatable']);
+            return {
+              searchable: value.searchable,
+              aggregatable: value.aggregatable,
+              readFromDocValues: shouldReadFieldFromDocValues(value.aggregatable, value.type)
+            };
           });
 
           const retVal = { fields: fieldsFilteredValues };
