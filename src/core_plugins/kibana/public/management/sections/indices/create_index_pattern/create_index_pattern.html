@@ -116,7 +116,7 @@
                 class="kuiSelect kuiSelect--large kuiVerticalRhythmSmall"
                 data-test-subj="createIndexPatternTimeFieldSelect"
                 ng-disabled="controller.isLoading() || controller.timeFieldOptionsError || controller.timeFieldOptions.length === 1"
-                required
+                ng-required="controller.timeFieldOptions.length"
                 ng-options="option.display for option in controller.timeFieldOptions"
                 ng-model="controller.formValues.timeFieldOption"
               ></select>
