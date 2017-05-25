@@ -69,14 +69,14 @@ uiModules.get('apps/management')
         if (dateFields.length === 0) {
           return [
             {
-              display: $translate.instant('KIBANA-NO_DATE_FIELD_DESIRED')
+              display: $translate.instant('KIBANA-INDICES_DONT_CONTAIN_TIME_FIELDS')
             }
           ];
         }
 
         return [
           {
-            display: $translate.instant('KIBANA-NO_DATE_FIELDS_IN_INDICES')
+            display: $translate.instant('KIBANA-NO_DATE_FIELD_DESIRED')
           },
           ...dateFields.map(field => ({
             display: field.name,

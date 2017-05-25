@@ -120,12 +120,6 @@
                 ng-options="option.display for option in controller.timeFieldOptions"
                 ng-model="controller.formValues.timeFieldOption"
               ></select>
-
-              <p
-                class="kuiSubText kuiVerticalRhythmSmall"
-                ng-if="!controller.timeFieldOptionsError && !controller.indexHasDateFields"
-                translate="KIBANA-INDICES_DONT_CONTAIN_TIME_FIELDS"
-              ></p>
             </div>
           </div>
 

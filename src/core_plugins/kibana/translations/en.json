@@ -31,7 +31,6 @@
   "KIBANA-MORE": "more",
   "KIBANA-TIME_FILTER_FIELD_NAME": "Time Filter field name",
   "KIBANA-NO_DATE_FIELD_DESIRED": "I don't want to use the Time Filter",
-  "KIBANA-NO_DATE_FIELDS_IN_INDICES": "None available",
   "KIBANA-REFRESH_FIELDS": "refresh fields",
   "KIBANA-INDICES_DONT_CONTAIN_TIME_FIELDS": "The indices which match this index pattern don't contain any time fields.",
   "KIBANA-INVALID_INDEX_PATTERN": "Invalid index name pattern.",
