@@ -126,10 +126,10 @@ describe('SavedObjectsClient', () => {
 
       expect(args[0]).to.be('bulk');
       expect(args[1].body).to.eql([
-        { create: { _type: 'config', _id: 'one' } },
-        { title: 'Test One' },
-        { create: { _type: 'index-pattern', _id: 'two' } },
-        { title: 'Test Two' }
+        { create: { _type: 'doc', _id: 'one' } },
+        { config: { title: 'Test One' }, type: 'config' },
+        { create: { _type: 'doc', _id: 'two' } },
+        { 'index-pattern': { title: 'Test Two' }, type: 'index-pattern' }
       ]);
     });
 
@@ -145,10 +145,10 @@ describe('SavedObjectsClient', () => {
 
       expect(args[0]).to.be('bulk');
       expect(args[1].body).to.eql([
-        { index: { _type: 'config', _id: 'one' } },
-        { title: 'Test One' },
-        { index: { _type: 'index-pattern', _id: 'two' } },
-        { title: 'Test Two' }
+        { index: { _type: 'doc', _id: 'one' } },
+        { config: { title: 'Test One' }, type: 'config' },
+        { index: { _type: 'doc', _id: 'two' } },
+        { 'index-pattern': { title: 'Test Two' }, type: 'index-pattern' }
       ]);
     });
 
@@ -237,7 +237,9 @@ describe('SavedObjectsClient', () => {
 
   describe('#delete', () => {
     it('throws notFound when ES is unable to find the document', (done) => {
-      callAdminCluster.returns(Promise.resolve({ found: false }));
+      callAdminCluster.returns(Promise.resolve({
+        deleted: 0
+      }));
 
       savedObjectsClient.delete('index-pattern', 'logstash-*').then(() => {
         done('failed');
@@ -253,12 +255,43 @@ describe('SavedObjectsClient', () => {
       expect(callAdminCluster.calledOnce).to.be(true);
 
       const args = callAdminCluster.getCall(0).args;
-      expect(args[0]).to.be('delete');
+      expect(args[0]).to.be('deleteByQuery');
       expect(args[1]).to.eql({
-        type: 'index-pattern',
-        id: 'logstash-*',
         refresh: 'wait_for',
-        index: '.kibana-test'
+        index: '.kibana-test',
+        body: {
+          version: true,
+          query: {
+            bool: {
+              should: [
+                {
+                  ids: {
+                    type: 'index-pattern',
+                    values: 'logstash-*'
+                  }
+                },
+                {
+                  bool: {
+                    must: [
+                      {
+                        term: {
+                          id: {
+                            value: 'logstash-*'
+                          }
+                        }
+                      },
+                      {
+                        type: {
+                          value: 'doc'
+                        }
+                      }
+                    ]
+                  }
+                }
+              ]
+            }
+          }
+        }
       });
     });
   });
@@ -301,7 +334,23 @@ describe('SavedObjectsClient', () => {
       const expectedQuery = {
         bool: {
           must: [{ match_all: {} }],
-          filter: [{ term: { _type: 'index-pattern' } }]
+          filter: [
+            {
+              bool: {
+                should: [
+                  {
+                    term: {
+                      _type: 'index-pattern'
+                    }
+                  }, {
+                    term: {
+                      type: 'index-pattern'
+                    }
+                  }
+                ]
+              }
+            }
+          ]
         }
       };
 
@@ -323,11 +372,17 @@ describe('SavedObjectsClient', () => {
   describe('#get', () => {
     it('formats Elasticsearch response', async () => {
       callAdminCluster.returns(Promise.resolve({
-        _id: 'logstash-*',
-        _type: 'index-pattern',
-        _version: 2,
-        _source: {
-          title: 'Testing'
+        hits: {
+          hits: [
+            {
+              _id: 'logstash-*',
+              _type: 'index-pattern',
+              _version: 2,
+              _source: {
+                title: 'Testing'
+              }
+            }
+          ]
         }
       }));
 
@@ -354,10 +409,13 @@ describe('SavedObjectsClient', () => {
       expect(callAdminCluster.calledOnce).to.be(true);
 
       const options = callAdminCluster.getCall(0).args[1];
-      expect(options.body.docs).to.eql([
-        { _type: 'config', _id: 'one' },
-        { _type: 'index-pattern', _id: 'two' },
-        { _type: undefined, _id: 'three' }
+      expect(options.body).to.eql([
+        {},
+        { version: true, query: { bool: { should: [{ ids: { values: 'one', type: 'config' } }, { bool: { must: [{ term: { id: { value: 'one' } } }, { type: { value: 'doc' } }] } }] } } }, //eslint-disable-line max-len
+        {},
+        { version: true, query: { bool: { should: [{ ids: { values: 'two', type: 'index-pattern' } }, { bool: { must: [{ term: { id: { value: 'two' } } }, { type: { value: 'doc' } }] } }] } } }, //eslint-disable-line max-len
+        {},
+        { version: true, query: { bool: { should: [{ ids: { values: 'three' } }, { bool: { must: [{ term: { id: { value: 'three' } } }, { type: { value: 'doc' } }] } }] } } } //eslint-disable-line max-len
       ]);
     });
 
@@ -370,17 +428,25 @@ describe('SavedObjectsClient', () => {
 
     it('omits missed objects', async () => {
       callAdminCluster.returns(Promise.resolve({
-        docs:[{
-          _type: 'config',
-          _id: 'bad',
-          found: false
-        }, {
-          _type: 'config',
-          _id: 'good',
-          found: true,
-          _version: 2,
-          _source: { title: 'Test' }
-        }]
+        responses: [
+          {
+            hits: {
+              hits: [
+                {
+                  _id: 'good',
+                  _type: 'doc',
+                  _version: 2,
+                  _source: {
+                    type: 'config',
+                    config: {
+                      title: 'Test'
+                    }
+                  }
+                }
+              ]
+            }
+          }
+        ]
       }));
 
       const { saved_objects: savedObjects } = await savedObjectsClient.bulkGet(
@@ -441,10 +507,10 @@ describe('SavedObjectsClient', () => {
 
       expect(args[0]).to.be('update');
       expect(args[1]).to.eql({
-        type: 'index-pattern',
+        type: 'doc',
         id: 'logstash-*',
         version: undefined,
-        body: { doc: { title: 'Testing' } },
+        body: { doc: { 'index-pattern': { title: 'Testing' } } },
         refresh: 'wait_for',
         index: '.kibana-test'
       });

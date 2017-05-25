@@ -8,7 +8,7 @@ describe('importDashboards(req)', () => {
   let requestStub;
   beforeEach(() => {
     requestStub = sinon.stub().returns(Promise.resolve({
-      responses: []
+      items: []
     }));
 
     req = {
@@ -47,10 +47,10 @@ describe('importDashboards(req)', () => {
       expect(requestStub.args[0][1]).to.equal('bulk');
       expect(requestStub.args[0][2]).to.eql({
         body: [
-          { create: { _type: 'dashboard', _id: 'dashboard-01' } },
-          { panelJSON: '{}' },
-          { create: { _type: 'visualization', _id: 'panel-01' } },
-          { visState: '{}' }
+          { create: { _type: 'doc', _id: 'dashboard-01' } },
+          { dashboard: { panelJSON: '{}' }, type: 'dashboard' },
+          { create: { _type: 'doc', _id: 'panel-01' } },
+          { visualization: { visState: '{}' }, type: 'visualization' }
         ],
         index: '.kibana',
         refresh: 'wait_for'
@@ -65,10 +65,10 @@ describe('importDashboards(req)', () => {
       expect(requestStub.args[0][1]).to.equal('bulk');
       expect(requestStub.args[0][2]).to.eql({
         body: [
-          { index: { _type: 'dashboard', _id: 'dashboard-01' } },
-          { panelJSON: '{}' },
-          { index: { _type: 'visualization', _id: 'panel-01' } },
-          { visState: '{}' }
+          { index: { _type: 'doc', _id: 'dashboard-01' } },
+          { dashboard: { panelJSON: '{}' }, type: 'dashboard' },
+          { index: { _type: 'doc', _id: 'panel-01' } },
+          { visualization: { visState: '{}' }, type: 'visualization' }
         ],
         index: '.kibana',
         refresh: 'wait_for'
@@ -83,8 +83,8 @@ describe('importDashboards(req)', () => {
       expect(requestStub.args[0][1]).to.equal('bulk');
       expect(requestStub.args[0][2]).to.eql({
         body: [
-          { create: { _type: 'dashboard', _id: 'dashboard-01' } },
-          { panelJSON: '{}' }
+          { create: { _type: 'doc', _id: 'dashboard-01' } },
+          { dashboard: { panelJSON: '{}' }, type: 'dashboard' }
         ],
         index: '.kibana',
         refresh: 'wait_for'
