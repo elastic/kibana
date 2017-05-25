@@ -34,20 +34,23 @@ uiModules.get('apps/management')
 
   // UI state.
   this.timeFieldOptions = null;
+  this.timeFieldOptionsError = null;
   this.sampleCount = 5;
   this.samples = null;
   this.existing = null;
   this.nameIntervalOptions = intervals;
   this.patternErrors = [];
-  this.fetchFieldsError = null;
 
+
+  /**
+   *  Get the time field options from the indexPatterns.mapper.
+   *  @return {Promise<Array<{display,fieldName}>>}
+   */
   const getTimeFieldOptions = () => {
     const missingPattern = !this.formValues.name;
     const missingInterval = this.formValues.nameIsPattern && !this.formValues.nameInterval;
     if (missingPattern || missingInterval)  {
-      return {
-        timeFieldOptions: []
-      };
+      return [];
     }
 
     loadingCount += 1;
@@ -64,33 +67,26 @@ uiModules.get('apps/management')
         const dateFields = fields.filter(field => field.type === 'date');
 
         if (dateFields.length === 0) {
-          return {
-            timeFieldOptions: [
-              {
-                display: $translate.instant('KIBANA-NO_DATE_FIELD_DESIRED')
-              }
-            ]
-          };
+          return [
+            {
+              display: $translate.instant('KIBANA-NO_DATE_FIELD_DESIRED')
+            }
+          ];
         }
 
-        return {
-          timeFieldOptions: [
-            {
-              display: $translate.instant('KIBANA-NO_DATE_FIELDS_IN_INDICES')
-            },
-            ...dateFields.map(field => ({
-              display: field.name,
-              fieldName: field.name
-            })),
-          ]
-        };
+        return [
+          {
+            display: $translate.instant('KIBANA-NO_DATE_FIELDS_IN_INDICES')
+          },
+          ...dateFields.map(field => ({
+            display: field.name,
+            fieldName: field.name
+          })),
+        ];
       },
       err => {
         if (err instanceof IndexPatternMissingIndices) {
-          return {
-            fetchFieldsError: $translate.instant('KIBANA-INDICES_MATCH_PATTERN'),
-            timeFieldOptions: [],
-          };
+          throw new Error($translate.instant('KIBANA-INDICES_MATCH_PATTERN'));
         }
 
         throw err;
@@ -98,37 +94,13 @@ uiModules.get('apps/management')
     )
     .finally(() => {
       loadingCount -= 1;
-    })
-    .catch(notify.fatal);
-  };
-
-  const setTimeFieldOptions = (results = {}) => {
-    const {
-      fetchFieldsError,
-      timeFieldOptions = []
-    } = results;
-
-    this.fetchFieldsError = fetchFieldsError;
-    if (fetchFieldsError) {
-      return;
-    }
-
-    this.timeFieldOptions = timeFieldOptions;
-    const actualFields = timeFieldOptions.filter(option => !!option.fieldName);
-    this.indexHasDateFields = actualFields.length > 0;
-    if (actualFields.length < 2) {
-      // At this point the `timeFieldOptions` contains either 0 or 1 fields and potentially
-      // non-field "informational" options. We select the last option as it will either be
-      // the date field, an informational option if there are not date fields, or nothing.
-      this.formValues.timeFieldOption = timeFieldOptions[timeFieldOptions.length - 1];
-    }
+    });
   };
 
   const resetIndex = () => {
     this.patternErrors = [];
     this.samples = null;
     this.existing = null;
-    this.fetchFieldsError = null;
   };
 
   function mockIndexPattern(index) {
@@ -195,22 +167,47 @@ uiModules.get('apps/management')
   };
 
   this.refreshFieldList = () => {
-    const prevOption = this.formValues.timeFieldOption;
-    setTimeFieldOptions();
+    const prevSelection = this.formValues.timeFieldOption;
+
     loadingCount += 1;
-    getTimeFieldOptions().then(results => {
-      setTimeFieldOptions(results);
+    this.timeFieldOptions = [];
+    this.timeFieldOptionsError = null;
+    getTimeFieldOptions()
+    .then(
+      results => this.timeFieldOptions = results,
+      err => this.timeFieldOptionsError = err.message
+    )
+    .then(() => {
+      if (this.timeFieldOptionsError) return;
 
-      if (!prevOption) return;
+      if (prevSelection) {
+        this.formValues.timeFieldOption = this.timeFieldOptions.find(option => (
+          // comparison is not done with _.isEqual() because options get a unique
+          // `$$hashKey` tag attached to them by ng-repeat
+          option.fieldName === prevSelection.fieldName
+            && option.display === prevSelection.display
+        ));
+      }
 
-      // assign the field from the results-list
-      // angular recreates a new timefield instance, each time the list is refreshed.
-      // This ensures the selected field matches one of the instances in the list.
-      this.formValues.timeFieldOption = results.timeFieldOptions.find(option => (
-        option.fieldName === prevOption.fieldName
-          && option.display === prevOption.display
-      ));
-    }).finally(() => {
+      const fieldOptions = this.timeFieldOptions.filter(option => !!option.fieldName);
+      const infoOptions = this.timeFieldOptions.filter(option => !option.fieldName);
+      this.indexHasDateFields = fieldOptions.length > 0;
+
+      if (!this.formValues.timeFieldOptions) {
+        const noOptions = this.timeFieldOptions.length === 0;
+        const tooManyOptions = fieldOptions.length > 1 || infoOptions.length > 1;
+
+        if (noOptions || tooManyOptions) {
+          // no default
+        } else if (fieldOptions.length === 1) {
+          this.formValues.timeFieldOption = fieldOptions[0];
+        } else {
+          this.formValues.timeFieldOption = infoOptions[0];
+        }
+      }
+    })
+    .catch(notify.error)
+    .finally(() => {
       loadingCount -= 1;
     });
   };
@@ -328,12 +325,7 @@ uiModules.get('apps/management')
     .finally(() => {
       // prevent running when no change happened (ie, first watcher call)
       if (!_.isEqual(newVal, oldVal)) {
-        getTimeFieldOptions().then(results => {
-          if (lastPromise === samplePromise) {
-            setTimeFieldOptions(results);
-            samplePromise = null;
-          }
-        });
+        this.refreshFieldList();
       }
     });
   });

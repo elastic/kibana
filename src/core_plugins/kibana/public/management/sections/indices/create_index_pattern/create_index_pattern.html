@@ -47,12 +47,12 @@
             <!-- Input error text -->
             <div
               class="kuiVerticalRhythm"
-              ng-if="controller.fetchFieldsError"
+              ng-if="controller.timeFieldOptionsError"
             >
               <p class="kuiText">
                 <span class="kuiStatusText kuiStatusText--error">
                   <span class="kuiStatusText__icon kuiIcon fa-warning"></span>
-                  {{controller.fetchFieldsError}}
+                  {{controller.timeFieldOptionsError}}
                 </span>
               </p>
             </div>
@@ -115,15 +115,15 @@
               <select
                 class="kuiSelect kuiSelect--large kuiVerticalRhythmSmall"
                 data-test-subj="createIndexPatternTimeFieldSelect"
-                ng-disabled="controller.fetchFieldsError || controller.timeFieldOptions.length === 1"
-                ng-required="!controller.fetchFieldsError"
+                ng-disabled="controller.timeFieldOptionsError || controller.timeFieldOptions.length === 1"
+                required
                 ng-options="option.display for option in controller.timeFieldOptions"
                 ng-model="controller.formValues.timeFieldOption"
               ></select>
 
               <p
                 class="kuiSubText kuiVerticalRhythmSmall"
-                ng-if="!controller.fetchFieldsError && !controller.indexHasDateFields"
+                ng-if="!controller.timeFieldOptionsError && !controller.indexHasDateFields"
                 translate="KIBANA-INDICES_DONT_CONTAIN_TIME_FIELDS"
               ></p>
             </div>
@@ -347,7 +347,7 @@
           <!-- Form actions -->
           <button
             data-test-subj="createIndexPatternCreateButton"
-            ng-disabled="form.$invalid || controller.fetchFieldsError || controller.isLoading()"
+            ng-disabled="form.$invalid || controller.timeFieldOptionsError || controller.isLoading()"
             class="kuiButton kuiButton--primary kuiVerticalRhythm"
             type="submit"
           >
