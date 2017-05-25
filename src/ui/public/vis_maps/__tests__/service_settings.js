@@ -173,4 +173,30 @@ describe('service_settings (FKA tilemaptest)', function () {
 
 
   });
+
+  describe('File layers', function () {
+
+
+    it('should load manifest', async function () {
+      serviceSettings.addQueryParams({ foo:'bar' });
+      const fileLayers = await serviceSettings.getFileLayers();
+      fileLayers.forEach(function (fileLayer, index) {
+        const expected = vectorManifest.layers[index];
+        expect(expected.attribution).to.eql(fileLayer.attribution);
+        expect(expected.format).to.eql(fileLayer.format);
+        expect(expected.fields).to.eql(fileLayer.fields);
+        expect(expected.name).to.eql(fileLayer.name);
+        expect(expected.created_at).to.eql(fileLayer.created_at);
+
+        const urlObject = url.parse(fileLayer.url, true);
+        Object.keys({ foo:'bar', elastic_tile_service_tos: 'agree' }).forEach(key => {
+          expect(urlObject.query).to.have.property(key, expected[key]);
+        });
+
+      });
+    });
+
+
+
+  });
 });
