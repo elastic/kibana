@@ -2,7 +2,7 @@ import { FilterBarQueryFilterProvider } from 'ui/filter_bar/query_filter';
 
 define(function (require) {
   require('plugins/timelion/directives/chart/chart');
-  require('plugins/timelion/directives/interval/interval');
+  require('plugins/timelion/directives/timelion_interval/timelion_interval');
   require('ui/state_management/app_state');
 
   const _ = require('lodash');

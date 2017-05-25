@@ -3,6 +3,7 @@ import React from 'react';
 import { renderToHtml } from '../../services';
 
 import {
+  GuideCode,
   GuideDemo,
   GuidePage,
   GuideSection,
@@ -42,6 +43,8 @@ import { LocalNavWithTabs } from './local_nav_tabs';
 import localNavWithTabsSource from '!!raw!./local_nav_tabs';
 const localNavWithTabsHtml = renderToHtml(LocalNavWithTabs);
 
+const searchMultiLineHtml = require('./local_nav_search_multi_line.html');
+const searchMultiLineJs = require('raw!./local_nav_search_multi_line.js');
 const datePickerHtml = require('./local_nav_date_picker.html');
 
 export default props => (
@@ -122,6 +125,29 @@ export default props => (
       <GuideDemo isDarkTheme={true}>
         <LocalNavWithSearch />
       </GuideDemo>
+    </GuideSection>
+
+    <GuideSection
+      title="Multi-line search"
+      source={[{
+        type: GuideSectionTypes.HTML,
+        code: searchMultiLineHtml,
+      }]}
+    >
+      <GuideText>
+        By using <GuideCode>contenteditable</GuideCode>, you can support multi-line queries. You&rsquo;ll
+        have to supply your own logic for switching between single-line and multi-line input values.
+      </GuideText>
+
+      <GuideDemo
+        html={searchMultiLineHtml}
+        js={searchMultiLineJs}
+      />
+
+      <GuideDemo
+        html={searchMultiLineHtml}
+        isDarkTheme={true}
+      />
     </GuideSection>
 
     <GuideSection

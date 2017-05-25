@@ -10,11 +10,6 @@
   flex-direction: column;
 }
 
-.suggestions {
-  position: absolute;
-  top: 30px;
-}
-
 .timelion {
   position: relative;
 
@@ -31,9 +26,15 @@
   position: relative; /* 1 */
 }
 
+/**
+ * 1. Anchor suggestions beneath input.
+ * 2. Allow for option of positioning suggestions absolutely.
+ */
 .timelionSearchInputContainer {
   flex: 1 1 auto;
   display: flex;
+  flex-direction: column; /* 1 */
+  position: relative; /* 2 */
 }
 
 .timelion-container {
@@ -94,19 +95,6 @@
 
 .chart-container.running {
   opacity: 0.50;
-}
-
-.timelion-interval-custom {
-  width: 60px;
-}
-
-.timelion-interval-presets {
-  width: 90px;
-}
-
-.timelion-interval-presets-compact {
-  width: 10px;
-  padding-left: 0;
 }
 
 timelion-interval {

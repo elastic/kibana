@@ -1,0 +1,23 @@
+<div class="timelionSearchInputContainer">
+  <textarea
+    data-expression-input
+    type="text"
+    class="kuiTextArea fullWidth"
+    placeholder=".es(*)"
+    rows="{{ rows }}"
+    input-focus
+    ng-model="sheet"
+    ng-focus="onFocusInput()"
+    ng-keydown="onKeyDownInput($event)"
+    ng-keyup="onKeyUpInput($event)"
+    ng-blur="onBlurInput()"
+  ></textarea>
+
+  <timelion-expression-suggestions
+    ng-show="functionSuggestions.isVisible"
+    suggestions="functionSuggestions.list"
+    selected-index="functionSuggestions.index"
+    on-click-suggestion="onClickSuggestion(suggestionIndex)"
+    should-popover="shouldPopoverSuggestions"
+  ></timelion-expression-suggestions>
+</div>

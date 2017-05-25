@@ -2,7 +2,8 @@ import _ from 'lodash';
 import $ from 'jquery';
 
 const app = require('ui/modules').get('apps/timelion', []);
-import html from './interval.html';
+import template from './timelion_interval.html';
+import './timelion_interval.less';
 
 app.directive('timelionInterval', function ($compile, $timeout) {
   return {
@@ -14,7 +15,7 @@ app.directive('timelionInterval', function ($compile, $timeout) {
       // Timelion app or in the sidebar in the Visualize app.
       inHeader: '=',
     },
-    template: html,
+    template,
     link: function ($scope, $elem) {
       $scope.intervalOptions = ['auto', '1s', '1m', '1h', '1d', '1w', '1M', '1y', 'other'];
 
@@ -52,8 +53,6 @@ app.directive('timelionInterval', function ($compile, $timeout) {
         if (newVal === oldVal) return;
         $scope.model = newVal;
       });
-
-
     }
   };
 });
