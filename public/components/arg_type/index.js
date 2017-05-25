@@ -2,6 +2,7 @@ import { connect } from 'react-redux';
 import { get } from 'lodash';
 import { ArgType as Component } from './arg_type';
 import { findExpressionType } from '../../lib/find_expression_type';
+import { toAstValue } from '../../lib/map_arg_value';
 import { fetchContext, setArgumentAtIndex } from '../../state/actions/elements';
 import {
   getSelectedElement,
@@ -35,12 +36,18 @@ const mergeProps = (stateProps, dispatchProps, ownProps) => {
     nextExpressionType,
     name: get(expressionType, 'displayName', argType),
     updateContext: () => dispatchProps.fetchContext({ index: expressionIndex }),
-    onValueChange: (arg) => dispatchProps.setArgumentAtIndex({
-      arg,
-      element,
-      pageId,
-      index: expressionIndex,
-    }),
+    onValueChange: (arg) => {
+      const mappedArg = Object.keys(arg).reduce((acc, argName) => Object.assign(acc, {
+        [argName]: toAstValue(arg[argName]),
+      }), {});
+
+      return dispatchProps.setArgumentAtIndex({
+        arg: mappedArg,
+        element,
+        pageId,
+        index: expressionIndex,
+      });
+    },
   });
 
   if (context == null && Boolean(expressionType && expressionType.requiresContext)) {

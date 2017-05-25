@@ -6,22 +6,15 @@ import { ArgType } from '../arg_type';
 const template = ({ data, typeInstance }) => {
   const { onValueChange, columns, argValue } = data;
   const { name, displayName } = typeInstance;
+  const inputRefs = {};
 
   const formControl = (argVal) => {
-    const updateValue = (valueType) => ({ target }) => {
+    const updateValue = (valueType) => () => {
       onValueChange({
         [name]: [{
           type: valueType,
-          value: target.value,
-        }],
-      });
-    };
-
-    const updateFunction = (valueType) => ({ target }) => {
-      onValueChange({
-        [name]: [{
-          type: valueType,
-          function: target.function,
+          value: inputRefs.value.value,
+          function: inputRefs.function.value,
         }],
       });
     };
@@ -35,9 +28,10 @@ const template = ({ data, typeInstance }) => {
               componentClass="select"
               placeholder="raw"
               defaultValue={argVal.function}
-              onChange={updateFunction(argVal.type)}
+              inputRef={ref => inputRefs.function = ref}
+              onChange={updateValue(argVal.type)}
             >
-              <option value="raw">value</option>
+              <option value="">value</option>
               <option value="median">median</option>
             </FormControl>
 
@@ -45,6 +39,7 @@ const template = ({ data, typeInstance }) => {
               componentClass="select"
               placeholder="select"
               defaultValue={argVal.value}
+              inputRef={ref => inputRefs.value = ref}
               onChange={updateValue(argVal.type)}
             >
               <option value="select" disabled>select column</option>
