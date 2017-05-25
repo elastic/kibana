@@ -101,10 +101,10 @@ export function IndexPatternProvider(Private, Notifier, config, kbnIndex, Promis
     }
 
     return indexPattern.fields.every(field => {
-      // added in 5.0 #8421
+      // See https://github.com/elastic/kibana/pull/8421
       const hasFieldCaps = ('aggregatable' in field) && ('searchable' in field);
 
-      // slotted for 5.5 #11969
+      // See https://github.com/elastic/kibana/pull/11969
       const hasDocValuesFlag = ('readFromDocValues' in field);
 
       return !hasFieldCaps || !hasDocValuesFlag;
