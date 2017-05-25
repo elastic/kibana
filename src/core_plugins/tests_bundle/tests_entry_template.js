@@ -44,6 +44,9 @@ window.__KBN__ = {
     },
     vectormapsConfig: {
       layers: []
+    },
+    mapConfig: {
+      manifestServiceUrl: 'https://geo.elastic.co/v1/manifest'      
     }
   },
   uiSettings: {
