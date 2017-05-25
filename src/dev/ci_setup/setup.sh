@@ -41,13 +41,47 @@ fi
 
 
 ###
-### "install" node by extending the path with it's bin directory
+### "install" node into this shell
 ###
 export PATH="$nodeDir/bin:$PATH"
+hash -r
+
+###
+### downloading yarn
+###
+yarnVersion="$(node -e "console.log(String(require('./package.json').engines.yarn || '').replace(/^[^\d]+/,''))")"
+yarnUrl="https://github.com/yarnpkg/yarn/releases/download/v$yarnVersion/yarn-$yarnVersion.js"
+yarnDir="$cacheDir/yarn/$yarnVersion"
+if [ -z "$yarnVersion" ]; then
+  echo " !! missing engines.yarn in package.json";
+  exit 1
+elif [ -x "$yarnDir/bin/yarn" ] && [ "$($yarnDir/bin/yarn --version)" == "$yarnVersion" ]; then
+  echo " -- reusing yarn install"
+else
+  if [ -d "$yarnDir" ]; then
+    echo " -- clearing previous yarn install"
+    rm -rf "$yarnDir"
+  fi
+
+  echo " -- downloading yarn from $yarnUrl"
+  mkdir -p "$yarnDir/bin"
+  curl -L --silent "$yarnUrl" > "$yarnDir/bin/yarn"
+  chmod +x "$yarnDir/bin/yarn"
+fi
+
+
+###
+### "install" yarn into this shell
+###
+export PATH="$yarnDir/bin:$PATH"
+yarnGlobalDir="$(yarn global bin)"
+export PATH="$PATH:$yarnGlobalDir"
+hash -r
 
 
 ###
 ### install dependencies
 ###
 echo " -- installing node.js dependencies"
-npm install --cache "$cacheDir/npm"
+yarn config set cache-folder "$cacheDir/yarn"
+yarn

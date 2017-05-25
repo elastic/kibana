@@ -158,10 +158,16 @@ Install the version of node.js listed in the `.node-version` file _(this can be 
 nvm install "$(cat .node-version)"
 ```
 
-Install `npm` dependencies
+Install the latest version of [yarn](https://yarnpkg.com)
 
 ```bash
-npm install
+npm install -g yarn
+```
+
+Install dependencies
+
+```bash
+yarn
 ```
 
 Start elasticsearch.
