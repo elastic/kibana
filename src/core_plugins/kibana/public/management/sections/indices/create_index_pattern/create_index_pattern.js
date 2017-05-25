@@ -42,9 +42,6 @@ uiModules.get('apps/management')
   this.fetchFieldsError = null;
 
   const getTimeFieldOptions = () => {
-    this.timeFieldOptions = null;
-    this.formValues.timeFieldOption = null;
-
     const missingPattern = !this.formValues.name;
     const missingInterval = this.formValues.nameIsPattern && !this.formValues.nameInterval;
     if (missingPattern || missingInterval)  {
@@ -81,7 +78,7 @@ uiModules.get('apps/management')
             {
               display: $translate.instant('KIBANA-NO_DATE_FIELDS_IN_INDICES')
             },
-            ...fields.map(field => ({
+            ...dateFields.map(field => ({
               display: field.name,
               fieldName: field.name
             })),
@@ -105,19 +102,25 @@ uiModules.get('apps/management')
     .catch(notify.fatal);
   };
 
-  const updateFieldList = results => {
-    this.fetchFieldsError = results.fetchFieldsError;
-    if (this.fetchFieldsError) {
+  const setTimeFieldOptions = (results = {}) => {
+    const {
+      fetchFieldsError,
+      timeFieldOptions = []
+    } = results;
+
+    this.fetchFieldsError = fetchFieldsError;
+    if (fetchFieldsError) {
       return;
     }
 
-    const actualFields = this.timeFieldOptions.filter(option => !!option.fieldName);
+    this.timeFieldOptions = timeFieldOptions;
+    const actualFields = timeFieldOptions.filter(option => !!option.fieldName);
     this.indexHasDateFields = actualFields.length > 0;
     if (actualFields.length < 2) {
       // At this point the `timeFieldOptions` contains either 0 or 1 fields and potentially
       // non-field "informational" options. We select the last option as it will either be
       // the date field, an informational option if there are not date fields, or nothing.
-      this.formValues.timeFieldOption = this.timeFieldOptions[this.timeFieldOptions.length - 1];
+      this.formValues.timeFieldOption = timeFieldOptions[timeFieldOptions.length - 1];
     }
   };
 
@@ -193,9 +196,10 @@ uiModules.get('apps/management')
 
   this.refreshFieldList = () => {
     const prevOption = this.formValues.timeFieldOption;
+    setTimeFieldOptions();
     loadingCount += 1;
     getTimeFieldOptions().then(results => {
-      updateFieldList(results);
+      setTimeFieldOptions(results);
 
       if (!prevOption) return;
 
@@ -326,7 +330,7 @@ uiModules.get('apps/management')
       if (!_.isEqual(newVal, oldVal)) {
         getTimeFieldOptions().then(results => {
           if (lastPromise === samplePromise) {
-            updateFieldList(results);
+            setTimeFieldOptions(results);
             samplePromise = null;
           }
         });
