@@ -306,7 +306,11 @@ export function AbstractDataSourceProvider(Private, Promise, PromiseEmitter) {
         if (fields) {
           flatState.body.docvalue_fields = _.intersection(flatState.body.docvalue_fields, fields);
           flatState.body.script_fields = _.pick(flatState.body.script_fields, fields);
-          flatState.body._source = _.difference(fields, [...flatState.body.docvalue_fields, ..._.keys(flatState.body.script_fields)]);
+
+          if (!flatState.body._source) {
+            flatState.body._source = {};
+          }
+          flatState.body._source.includes = _.difference(fields, [..._.keys(flatState.body.script_fields)]);
         }
 
         decorateQuery(flatState.body.query);
