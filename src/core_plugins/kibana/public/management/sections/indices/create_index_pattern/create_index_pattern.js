@@ -57,42 +57,40 @@ uiModules.get('apps/management')
         skipIndexPatternCache: true,
       });
     })
-    .then(
-      fields => {
-        const dateFields = fields.filter(field => field.type === 'date');
+    .then(fields => {
+      const dateFields = fields.filter(field => field.type === 'date');
 
-        if (dateFields.length === 0) {
-          return {
-            options: [
-              {
-                display: $translate.instant('KIBANA-INDICES_DONT_CONTAIN_TIME_FIELDS')
-              }
-            ]
-          };
-        }
-
+      if (dateFields.length === 0) {
         return {
           options: [
             {
-              display: $translate.instant('KIBANA-NO_DATE_FIELD_DESIRED')
-            },
-            ...dateFields.map(field => ({
-              display: field.name,
-              fieldName: field.name
-            })),
+              display: $translate.instant('KIBANA-INDICES_DONT_CONTAIN_TIME_FIELDS')
+            }
           ]
         };
-      },
-      err => {
-        if (err instanceof IndexPatternMissingIndices) {
-          return {
-            error: $translate.instant('KIBANA-INDICES_MATCH_PATTERN')
-          };
-        }
-
-        throw err;
       }
-    )
+
+      return {
+        options: [
+          {
+            display: $translate.instant('KIBANA-NO_DATE_FIELD_DESIRED')
+          },
+          ...dateFields.map(field => ({
+            display: field.name,
+            fieldName: field.name
+          })),
+        ]
+      };
+    })
+    .catch(err => {
+      if (err instanceof IndexPatternMissingIndices) {
+        return {
+          error: $translate.instant('KIBANA-INDICES_MATCH_PATTERN')
+        };
+      }
+
+      throw err;
+    })
     .finally(() => {
       loadingCount -= 1;
     });
