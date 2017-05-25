@@ -21,7 +21,9 @@ export function ReactVisTypeProvider(Private) {
     }
 
     resize() {
-      this.render(this.vis, this.visData);
+      if (this.vis) {
+        this.render(this.vis, this.visData);
+      }
     }
 
     destroy() {
