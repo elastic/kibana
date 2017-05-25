@@ -4,6 +4,7 @@ import moment from 'moment-timezone';
 import { DocTitleProvider } from 'ui/doc_title';
 import { SavedObjectRegistryProvider } from 'ui/saved_objects/saved_object_registry';
 import { notify } from 'ui/notify';
+import 'ui/accessibility/kbn_accessible_click';
 
 require('plugins/timelion/directives/cells/cells');
 require('plugins/timelion/directives/fixed_element');

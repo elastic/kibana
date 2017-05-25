@@ -367,56 +367,81 @@
 </div>
 <div ng-show="page === 0">
   <div class="kuiLocalDropdownTitle">
-    Function reference
+    Help
   </div>
-  <div class="kuiLocalDropdownHelpText">
-    Click any function for more information. Just getting started?
-    <a ng-click="setPage(1)">Check out the tutorial</a>.
-  </div>
-  <div class="timelionFunctionsDropdownContent">
-    <table class="table table-condensed table-bordered timelionFunctionsTable">
-      <tr
-          class="timelionFunctionsTableRow"
-          ng-repeat-start="function in functions.list"
-          ng-class="{active: functions.details === function.name}"
-          ng-click="functions.details =
-                    (functions.details === function.name ?
-                      null : function.name)"
-      >
-        <td><strong>.{{function.name}}()</strong></td>
-        <td>{{function.help}}</td>
-      </tr>
-      <tr ng-if="functions.details === function.name" ng-repeat-end>
-        <td colspan=2>
-          <div class="suggestion-details" >
-            <table
-              class="table table-condensed table-bordered
-                     timelionFunctionDetailsTable"
-              ng-show="function.args.length > (function.chainable ? 1: 0)"
+
+  <tabset>
+    <tab heading="Function reference">
+      <div class="list-group-item list-group-item--noBorder">
+        <div class="kuiLocalDropdownHelpText">
+          Click any function for more information. Just getting started?
+          <a
+            class="kuiLink"
+            ng-click="setPage(1)"
+            kbn-accessible-click
+          >
+            Check out the tutorial
+          </a>.
+        </div>
+
+        <div class="timelionFunctionsDropdownContent">
+          <table class="table table-condensed table-bordered timelionFunctionsTable">
+            <tr
+              class="timelionFunctionsTableRow"
+              ng-repeat-start="function in functions.list"
+              ng-class="{active: functions.details === function.name}"
+              ng-click="functions.details =
+                        (functions.details === function.name ?
+                          null : function.name)"
+              kbn-accessible-click
             >
-              <thead>
-                <th>Argument Name</th>
-                <th>Accepted Types</th>
-                <th>Information</th>
-              </thead>
-              <tr
-                ng-repeat="arg in function.args"
-                ng-hide="$index < 1 && function.chainable"
-              >
-                <td>{{arg.name}}</td>
-                <td><em>{{arg.types.join(', ')}}</em></td>
-                <td>{{arg.help}}</td>
-              </tr>
-            </table>
-            <div ng-hide="function.args.length > (function.chainable ? 1: 0)">
-              <em>
-                This function does not accept any arguments.
-                Well that's simple, isn't it?
-              </em>
-            </div>
-          </div>
-        </td>
-      </tr>
-    </table>
-  </div>
+              <td><strong>.{{function.name}}()</strong></td>
+              <td>{{function.help}}</td>
+            </tr>
+            <tr ng-if="functions.details === function.name" ng-repeat-end>
+              <td colspan=2>
+                <div class="suggestion-details" >
+                  <table
+                    class="table table-condensed table-bordered
+                           timelionFunctionDetailsTable"
+                    ng-show="function.args.length > (function.chainable ? 1: 0)"
+                  >
+                    <thead>
+                      <th>Argument Name</th>
+                      <th>Accepted Types</th>
+                      <th>Information</th>
+                    </thead>
+                    <tr
+                      ng-repeat="arg in function.args"
+                      ng-hide="$index < 1 && function.chainable"
+                    >
+                      <td>{{arg.name}}</td>
+                      <td><em>{{arg.types.join(', ')}}</em></td>
+                      <td>{{arg.help}}</td>
+                    </tr>
+                  </table>
+                  <div ng-hide="function.args.length > (function.chainable ? 1: 0)">
+                    <em>
+                      This function does not accept any arguments.
+                      Well that's simple, isn't it?
+                    </em>
+                  </div>
+                </div>
+              </td>
+            </tr>
+          </table>
+        </div>
+      </div>
+    </tab>
+
+    <tab heading="Keyboard tips">
+      <div class="list-group-item list-group-item--noBorder">
+        <dl class="dl-horizontal" style="margin-bottom: 0">
+          <dt></dt>
+          <dt>Ctrl/Cmd + Enter</dt>
+          <dd>Submit request</dd>
+        </dl>
+      </div>
+    </tab>
+  </tabset>
 </div>
