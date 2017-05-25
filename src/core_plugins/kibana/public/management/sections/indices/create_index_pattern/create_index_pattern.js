@@ -33,7 +33,7 @@ uiModules.get('apps/management')
   };
 
   // UI state.
-  this.timeFieldOptions = null;
+  this.timeFieldOptions = [];
   this.timeFieldOptionsError = null;
   this.sampleCount = 5;
   this.samples = null;
@@ -290,7 +290,6 @@ uiModules.get('apps/management')
 
     if (!nameIsPattern) {
       delete this.formValues.nameInterval;
-      delete this.formValues.timeFieldOption;
     } else {
       this.formValues.nameInterval = this.formValues.nameInterval || intervals.byName.days;
       this.formValues.name = this.formValues.name || getDefaultPatternForInterval(this.formValues.nameInterval);
