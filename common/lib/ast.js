@@ -20,9 +20,14 @@ function getExpressionArgs(block) {
     const multiArgs = args[argKey];
 
     return multiArgs.reduce((acc, arg) => {
-      if (arg.type === 'string' || arg.type === 'number') {
+      if (arg.type === 'string') {
         if (argKey === '_') return acc.concat(`"${arg.value}"`);
         return acc.concat(`${argKey}="${arg.value}"`);
+      }
+
+      if (arg.type === 'boolean' || arg.type === 'null' || arg.type === 'number') {
+        if (argKey === '_') return acc.concat(`${arg.value}`);
+        return acc.concat(`${argKey}=${arg.value}`);
       }
 
       if (arg.type === 'expression' || arg.type === 'partial') {

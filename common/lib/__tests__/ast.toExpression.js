@@ -168,7 +168,45 @@ describe('ast toExpression', () => {
       };
 
       const expression = toExpression(astObj);
-      expect(expression).to.equal('series(input="1234")');
+      expect(expression).to.equal('series(input=1234)');
+    });
+
+    it('single expression with boolean argument', () => {
+      const astObj = {
+        type: 'expression',
+        chain: [{
+          type: 'function',
+          function: 'series',
+          arguments: {
+            input: [{
+              type: 'boolean',
+              value: true,
+            }],
+          },
+        }],
+      };
+
+      const expression = toExpression(astObj);
+      expect(expression).to.equal('series(input=true)');
+    });
+
+    it('single expression with null argument', () => {
+      const astObj = {
+        type: 'expression',
+        chain: [{
+          type: 'function',
+          function: 'series',
+          arguments: {
+            input: [{
+              type: 'null',
+              value: null,
+            }],
+          },
+        }],
+      };
+
+      const expression = toExpression(astObj);
+      expect(expression).to.equal('series(input=null)');
     });
 
     it('single expression with multiple arguments', () => {
