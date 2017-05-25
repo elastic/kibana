@@ -1,3 +1,10 @@
+@import (reference) "./main";
+
+/*
+  This file contains all the global scope and bootstrap garbage that should be removed
+  when the UI framework is capable of implementing everything we need
+*/
+
 // Make the kibana main container stretch to the bottom
 .application > * {
   .flex-parent;
@@ -5,4 +12,15 @@
   & > * {
     .flex-parent;
   }
+}
+
+// Give buttons some room to the right
+.btn-toolbar {
+  .btn {
+    margin-right: @spacingXS;
+  }
+}
+
+.btn-primary {
+  background-color: @blue;
 }
