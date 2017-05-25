@@ -114,5 +114,18 @@ describe('mapArgValue.toInterfaceValue', () => {
       expect(toInterfaceValue(argValue)).to.have.property('value', 'median(cost + 100)');
       expect(toInterfaceValue(argValue)).to.have.property('function', null);
     });
+
+    it('handles parens values', () => {
+      const value = [{
+        type: 'string',
+        value: '(testing)',
+      }];
+
+      expect(toInterfaceValue(value)).to.eql({
+        type: 'math',
+        value: '(testing)',
+        function: null,
+      });
+    });
   });
 });

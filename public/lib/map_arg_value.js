@@ -4,7 +4,9 @@ import { toExpression, fromExpression } from '../../common/lib/ast';
 
 function mapToMathValue(mathObj, val) {
   // if there's a single SymbolNode argument, map to the value
-  if (mathObj.args.length === 1 && mathObj.args[0].type === 'SymbolNode') {
+  const hasArgs = mathObj.args && mathObj.args.length === 1;
+
+  if (hasArgs && mathObj.args[0].type === 'SymbolNode') {
     return {
       type: 'math',
       value: mathObj.args[0].name,
@@ -21,8 +23,8 @@ function mapToMathValue(mathObj, val) {
 }
 
 function mapFromMathValue(argValue) {
-  if (argValue.type !== 'math') return argValue;
   const noFunction = argValue.function == null || argValue.function.length === 0;
+  if (argValue.type !== 'math' && noFunction) return argValue;
 
   if (noFunction) {
     return {
