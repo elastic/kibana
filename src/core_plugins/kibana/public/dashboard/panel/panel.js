@@ -3,6 +3,8 @@ import 'ui/visualize';
 import 'ui/doc_table';
 import * as columnActions from 'ui/doc_table/actions/columns';
 import 'plugins/kibana/dashboard/panel/get_object_loaders_for_dashboard';
+import 'plugins/kibana/visualize/saved_visualizations';
+import 'plugins/kibana/discover/saved_searches';
 import { FilterManagerProvider } from 'ui/filter_manager';
 import { uiModules } from 'ui/modules';
 import panelTemplate from 'plugins/kibana/dashboard/panel/panel.html';

@@ -2,23 +2,6 @@
   class="kuiViewContent gettingStartedContent"
   data-test-subj="gettingStartedContainer"
 >
-
-  <div
-    ng-if="!gettingStarted.hasOptedOut()"
-    class="kuiBar gettingStartedOptOutContent"
-  >
-    <div class="kuiBarSection">
-      <p class="kuiText kuiSubduedText">
-        <a
-          kbn-href="#/management"
-          class="kuiLink"
-          kbn-getting-started-opt-out
-          data-test-subj="lnkGettingStartedOptOut"
-        >I'm a pro, skip this stuff &gt;</a>
-      </p>
-    </div>
-  </div>
-
   <div class="kuiViewContentItem kuiVerticalRhythm gettingStartedWelcome">
     <h1 class="kuiTitle gettingStartedTitle">
       Welcome to Kibana
@@ -149,24 +132,35 @@
     </div>
   </div>
 
-  <div class="kuiViewContentItem kuiVerticalRhythm">
+  <div
+    ng-if="!gettingStarted.hasOptedOut()"
+    class="kuiViewContentItem kuiVerticalRhythm"
+  >
     <div class="kuiFieldGroup">
-      <div class="kuiFieldGroupSection">
-        <p class="kuiText">Just want to see what Kibana is capable of doing?</p>
-      </div>
-
       <div class="kuiFieldGroupSection">
         <a
           class="kuiButton kuiButton--primary"
-          ng-href="{{ gettingStarted.documentationLinks.demoSite }}"
-          target="_blank"
+          kbn-href="#/management"
+          kbn-getting-started-opt-out
+          data-test-subj="lnkGettingStartedOptOut"
         >
           <span class="kuiButton__inner">
-            <span>View the demo site</span>
+            <span>Got it, take me to Kibana</span>
           </span>
         </a>
       </div>
     </div>
+  </div>
+
+  <div class="kuiViewContentItem kuiVerticalRhythm">
+    <p class="kuiText">
+      Just want to see what Kibana is capable of doing?
+      <a
+        ng-href="{{ gettingStarted.documentationLinks.demoSite }}"
+        class="kuiLink"
+        target="_blank"
+      >View the demo site</a>.
+    </p>
   </div>
 
   <div class="kuiViewContentItem kuiVerticalRhythm">

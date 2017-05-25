@@ -8,6 +8,7 @@ import { uiModules } from 'ui/modules';
 import template from './create_index_pattern.html';
 import { getDefaultPatternForInterval } from './get_default_pattern_for_interval';
 import { sendCreateIndexPatternRequest } from './send_create_index_pattern_request';
+import { pickCreateButtonText } from './pick_create_button_text';
 
 uiRoutes
 .when('/management/kibana/index', {
@@ -20,9 +21,10 @@ uiModules.get('apps/management')
   const refreshKibanaIndex = Private(RefreshKibanaIndex);
   const intervals = indexPatterns.intervals;
   let samplePromise;
+  let loadingCount = 0;
 
   // Configure the new index pattern we're going to create.
-  this.newIndexPattern = {
+  this.formValues = {
     name: config.get('indexPattern:placeholder'),
     nameIsPattern: false,
     expandable: false,
@@ -37,7 +39,7 @@ uiModules.get('apps/management')
   this.existing = null;
   this.nameIntervalOptions = intervals;
   this.patternErrors = [];
-  this.fetchFieldsError = $translate.instant('KIBANA-LOADING');
+  this.fetchFieldsError = null;
 
   const TIME_FILTER_FIELD_OPTIONS = {
     NO_DATE_FIELD_DESIRED: {
@@ -49,25 +51,21 @@ uiModules.get('apps/management')
   };
 
   const fetchFieldList = () => {
-    this.dateFields = this.newIndexPattern.timeField = null;
-    const useIndexList = this.newIndexPattern.nameIsPattern;
+    this.dateFields = null;
+    this.formValues.timeField = null;
     let fetchFieldsError;
     let dateFields;
 
-    // we don't have enough info to continue
-    if (!this.newIndexPattern.name) {
-      fetchFieldsError = $translate.instant('KIBANA-SET_INDEX_NAME_FIRST');
+    const missingPattern = !this.formValues.name;
+    const missingInterval = this.formValues.nameIsPattern && !this.formValues.nameInterval;
+    if (missingPattern || missingInterval)  {
       return;
     }
 
-    if (useIndexList && !this.newIndexPattern.nameInterval) {
-      fetchFieldsError = $translate.instant('KIBANA-INTERVAL_INDICES_POPULATED');
-      return;
-    }
-
-    return indexPatterns.mapper.clearCache(this.newIndexPattern.name)
+    loadingCount += 1;
+    return indexPatterns.mapper.clearCache(this.formValues.name)
     .then(() => {
-      const pattern = mockIndexPattern(this.newIndexPattern);
+      const pattern = mockIndexPattern(this.formValues);
 
       return indexPatterns.mapper.getFieldsForIndexPattern(pattern, {
         skipIndexPatternCache: true,
@@ -92,7 +90,10 @@ uiModules.get('apps/management')
         fetchFieldsError,
         dateFields,
       };
-    }, notify.fatal);
+    }, notify.fatal)
+    .finally(() => {
+      loadingCount -= 1;
+    });
   };
 
   const updateFieldList = results => {
@@ -115,7 +116,7 @@ uiModules.get('apps/management')
       // option. When we have less than two date fields we choose the last option, which will
       // be the "no date fields available" option if there are zero date fields, or the only
       // date field if there is one.
-      this.newIndexPattern.timeField = this.dateFields[this.dateFields.length - 1];
+      this.formValues.timeField = this.dateFields[this.dateFields.length - 1];
     }
   };
 
@@ -132,7 +133,7 @@ uiModules.get('apps/management')
     //angular recreates a new timefield instance, each time the list is refreshed.
     //This ensures the selected field matches one of the instances in the list.
     if (matchingTimeField) {
-      this.newIndexPattern.timeField = matchingTimeField;
+      this.formValues.timeField = matchingTimeField;
     }
   };
 
@@ -140,7 +141,7 @@ uiModules.get('apps/management')
     this.patternErrors = [];
     this.samples = null;
     this.existing = null;
-    this.fetchFieldsError = $translate.instant('KIBANA-LOADING');
+    this.fetchFieldsError = null;
   };
 
   function mockIndexPattern(index) {
@@ -154,12 +155,13 @@ uiModules.get('apps/management')
   const updateSamples = () => {
     const patternErrors = [];
 
-    if (!this.newIndexPattern.nameInterval || !this.newIndexPattern.name) {
+    if (!this.formValues.nameInterval || !this.formValues.name) {
       return Promise.resolve();
     }
 
-    const pattern = mockIndexPattern(this.newIndexPattern);
+    const pattern = mockIndexPattern(this.formValues);
 
+    loadingCount += 1;
     return indexPatterns.mapper.getIndicesForIndexPattern(pattern)
       .catch(err => {
         if (err instanceof IndexPatternMissingIndices) return;
@@ -180,7 +182,7 @@ uiModules.get('apps/management')
 
         patternErrors.push($translate.instant('KIBANA-PATTERN_DOES_NOT_MATCH_EXIST_INDICES'));
         const radius = Math.round(this.sampleCount / 2);
-        const samples = intervals.toIndexList(this.newIndexPattern.name, this.newIndexPattern.nameInterval, -radius, radius);
+        const samples = intervals.toIndexList(this.formValues.name, this.formValues.nameInterval, -radius, radius);
 
         if (_.uniq(samples).length !== samples.length) {
           patternErrors.push($translate.instant('KIBANA-INVALID_NON_UNIQUE_INDEX_NAME_CREATED'));
@@ -189,45 +191,56 @@ uiModules.get('apps/management')
         }
 
         throw patternErrors;
+      })
+      .finally(() => {
+        loadingCount -= 1;
       });
   };
 
   this.canExpandIndices = () => {
     // to maximize performance in the digest cycle, move from the least
     // expensive operation to most
-    return !this.newIndexPattern.nameIsPattern && _.includes(this.newIndexPattern.name, '*');
+    return !this.formValues.nameIsPattern && _.includes(this.formValues.name, '*');
+  };
+
+  this.isLoading = () => {
+    return loadingCount > 0;
   };
 
   this.refreshFieldList = () => {
-    const timeField = this.newIndexPattern.timeField;
+    const timeField = this.formValues.timeField;
+    loadingCount += 1;
     fetchFieldList().then(results => {
       if (timeField) {
         updateFieldListAndSetTimeField(results, timeField.name);
       } else {
         updateFieldList(results);
       }
+    }).finally(() => {
+      loadingCount -= 1;
     });
   };
 
   this.createIndexPattern = () => {
-    const id = this.newIndexPattern.name;
+    const id = this.formValues.name;
     let timeFieldName;
-    if ((this.newIndexPattern.timeField !== TIME_FILTER_FIELD_OPTIONS.NO_DATE_FIELD_DESIRED)
-      && (this.newIndexPattern.timeField !== TIME_FILTER_FIELD_OPTIONS.NO_DATE_FIELDS_IN_INDICES)) {
-      timeFieldName = this.newIndexPattern.timeField.name;
+    if ((this.formValues.timeField !== TIME_FILTER_FIELD_OPTIONS.NO_DATE_FIELD_DESIRED)
+      && (this.formValues.timeField !== TIME_FILTER_FIELD_OPTIONS.NO_DATE_FIELDS_IN_INDICES)) {
+      timeFieldName = this.formValues.timeField.name;
     }
 
     // Only event-time-based index patterns set an intervalName.
     const intervalName =
-      this.newIndexPattern.nameIsPattern
-      ? this.newIndexPattern.nameInterval.name
+      this.formValues.nameIsPattern
+      ? this.formValues.nameInterval.name
       : undefined;
 
     const notExpandable =
-      !this.newIndexPattern.expandable && this.canExpandIndices()
+      !this.formValues.expandable && this.canExpandIndices()
       ? true
       : undefined;
 
+    loadingCount += 1;
     sendCreateIndexPatternRequest(indexPatterns, {
       id,
       timeFieldName,
@@ -245,6 +258,9 @@ uiModules.get('apps/management')
 
         indexPatterns.cache.clear(id);
         kbnUrl.change(`/management/kibana/indices/${id}`);
+
+        // force loading while kbnUrl.change takes effect
+        loadingCount = Infinity;
       });
     }).catch(err => {
       if (err instanceof IndexPatternMissingIndices) {
@@ -252,27 +268,29 @@ uiModules.get('apps/management')
       }
 
       notify.fatal(err);
+    }).finally(() => {
+      loadingCount -= 1;
     });
   };
 
   $scope.$watchMulti([
-    'controller.newIndexPattern.nameIsPattern',
-    'controller.newIndexPattern.nameInterval.name'
+    'controller.formValues.nameIsPattern',
+    'controller.formValues.nameInterval.name'
   ], (newVal, oldVal) => {
     const nameIsPattern = newVal[0];
     const newDefault = getDefaultPatternForInterval(newVal[1]);
     const oldDefault = getDefaultPatternForInterval(oldVal[1]);
 
-    if (this.newIndexPattern.name === oldDefault) {
-      this.newIndexPattern.name = newDefault;
+    if (this.formValues.name === oldDefault) {
+      this.formValues.name = newDefault;
     }
 
     if (!nameIsPattern) {
-      delete this.newIndexPattern.nameInterval;
-      delete this.newIndexPattern.timeField;
+      delete this.formValues.nameInterval;
+      delete this.formValues.timeField;
     } else {
-      this.newIndexPattern.nameInterval = this.newIndexPattern.nameInterval || intervals.byName.days;
-      this.newIndexPattern.name = this.newIndexPattern.name || getDefaultPatternForInterval(this.newIndexPattern.nameInterval);
+      this.formValues.nameInterval = this.formValues.nameInterval || intervals.byName.days;
+      this.formValues.name = this.formValues.name || getDefaultPatternForInterval(this.formValues.nameInterval);
     }
   });
 
@@ -282,8 +300,8 @@ uiModules.get('apps/management')
   };
 
   $scope.$watchMulti([
-    'controller.newIndexPattern.name',
-    'controller.newIndexPattern.nameInterval'
+    'controller.formValues.name',
+    'controller.formValues.nameInterval'
   ], (newVal, oldVal) => {
     function promiseMatch(lastPromise, cb) {
       if (lastPromise === samplePromise) {
@@ -326,5 +344,14 @@ uiModules.get('apps/management')
     'controller.sampleCount'
   ], () => {
     this.refreshFieldList();
+  });
+
+  $scope.$watchMulti([
+    'controller.isLoading()',
+    'form.name.$error.indexNameInput',
+    'controller.formValues.timeField'
+  ], ([loading, invalidIndexName, timeField]) => {
+    const state = { loading, invalidIndexName, timeField };
+    this.createButtonText = pickCreateButtonText($translate, state);
   });
 });
