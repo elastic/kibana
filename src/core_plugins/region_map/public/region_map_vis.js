@@ -2,7 +2,7 @@ import './region_map.less';
 import './region_map_controller';
 import './region_map_vis_params';
 import regionTemplate from './region_map_controller.html';
-
+import image from './images/icon-vector-map.svg';
 import { TemplateVisTypeProvider } from 'ui/template_vis_type/template_vis_type';
 import { VisSchemasProvider } from 'ui/vis/schemas';
 import { VisTypesRegistryProvider } from 'ui/registry/vis_types';
@@ -26,7 +26,7 @@ VisTypesRegistryProvider.register(function RegionMapProvider(Private, vectormaps
     description: 'Show metrics on a thematic map. Use one of the provide base maps, or add your own. ' +
     'Darker colors represent higher values.',
     category: VisType.CATEGORY.MAP,
-    icon: 'fa-globe',
+    image,
     template: regionTemplate,
     params: {
       defaults: {
