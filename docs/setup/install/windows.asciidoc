@@ -20,16 +20,16 @@ endif::[]
 ifeval::["{release-state}"!="unreleased"]
 
 Download the `.zip` windows archive for Kibana v{version} from
-https://artifacts.elastic.co/downloads/kibana/kibana-{version}-windows-x86.zip
+https://artifacts.elastic.co/downloads/kibana/kibana-{version}-windows-x86_64.zip
 
 Unzip it with your favourite unzip tool. This will create a folder called
-kibana-{version}-windows-x86, which we will refer to as `$KIBANA_HOME`. In a
+kibana-{version}-windows-x86_64, which we will refer to as `$KIBANA_HOME`. In a
 terminal window, `CD` to the `$KIBANA_HOME` directory, for instance:
 
 
 ["source","sh",subs="attributes"]
 ----------------------------
-CD c:\kibana-{version}-windows-x86
+CD c:\kibana-{version}-windows-x86_64
 ----------------------------
 
 endif::[]
