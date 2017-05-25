@@ -157,7 +157,8 @@ describe('index pattern', function () {
         sortable: true,
         type: 'number',
         aggregatable: true,
-        searchable: false
+        searchable: false,
+        readFromDocValues: true
       },
       {
         name: 'script number',
