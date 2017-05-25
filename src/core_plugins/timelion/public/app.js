@@ -51,6 +51,11 @@ app.controller('timelion', function (
     $scope, $http, timefilter, AppState, courier, $route, $routeParams,
     kbnUrl, Notifier, config, $timeout, Private, savedVisualizations, confirmModal) {
 
+  // Keeping this at app scope allows us to keep the current page when the user
+  // switches to say, the timepicker.
+  $scope.page = config.get('timelion:showTutorial', true) ? 1 : 0;
+  $scope.setPage = (page) => $scope.page = page;
+
   // TODO: For some reason the Kibana core doesn't correctly do this for all apps.
   moment.tz.setDefault(config.get('dateFormat:tz'));
 
