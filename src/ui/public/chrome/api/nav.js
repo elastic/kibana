@@ -1,3 +1,4 @@
+import { remove } from 'lodash';
 import { parse, format } from 'url';
 import { isString } from 'lodash';
 
@@ -16,6 +17,10 @@ export function initChromeNavApi(chrome, internals) {
       throw new Error(`Nav link for id = ${id} not found`);
     }
     return navLink;
+  };
+
+  chrome.showOnlyById = (id) => {
+    remove(internals.nav, app => app.id !== id);
   };
 
   chrome.getBasePath = function () {

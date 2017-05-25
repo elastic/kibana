@@ -30,6 +30,19 @@ export function FindProvider({ getService }) {
       remoteWithTimeout.setFindTimeout(defaultFindTimeout);
       return element;
     }
+
+    async existsByLinkText(linkText) {
+      log.debug(`existsByLinkText ${linkText}`);
+
+      const exists = await remote
+        .setFindTimeout(1000)
+        .findDisplayedByLinkText(linkText)
+        .then(() => true)
+        .catch(() => false);
+
+      remote.setFindTimeout(defaultFindTimeout);
+      return exists;
+    }
   }
 
   return new Find();

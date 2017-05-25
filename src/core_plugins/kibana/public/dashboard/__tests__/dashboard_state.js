@@ -10,9 +10,10 @@ describe('DashboardState', function () {
   let SavedDashboard;
   let timefilter;
   let quickTimeRanges;
+  let dashboardConfig;
 
   function initDashboardState() {
-    dashboardState = new DashboardState(savedDashboard, AppState);
+    dashboardState = new DashboardState(savedDashboard, AppState, dashboardConfig);
   }
 
   beforeEach(ngMock.module('kibana'));
@@ -21,6 +22,7 @@ describe('DashboardState', function () {
     quickTimeRanges = $injector.get('quickRanges');
     AppState = $injector.get('AppState');
     SavedDashboard = $injector.get('SavedDashboard');
+    dashboardConfig = $injector.get('dashboardConfig');
     savedDashboard = new SavedDashboard();
   }));
 
