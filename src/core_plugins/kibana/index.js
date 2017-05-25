@@ -12,6 +12,8 @@ import * as systemApi from './server/lib/system_api';
 import handleEsError from './server/lib/handle_es_error';
 import mappings from './mappings.json';
 
+import { injectVars } from './inject_vars';
+
 const mkdirp = Promise.promisify(mkdirpNode);
 
 module.exports = function (kibana) {
@@ -43,27 +45,7 @@ module.exports = function (kibana) {
           'devTools',
           'docViews'
         ],
-        injectVars: function (server) {
-          const serverConfig = server.config();
-
-          //DEPRECATED SETTINGS
-          //if the url is set, the old settings must be used.
-          //keeping this logic for backward compatibilty.
-          const configuredUrl = server.config().get('tilemap.url');
-          const isOverridden = typeof configuredUrl === 'string' && configuredUrl !== '';
-          const tilemapConfig = serverConfig.get('tilemap');
-
-          return {
-            kbnDefaultAppId: serverConfig.get('kibana.defaultAppId'),
-            tilemapsConfig: {
-              deprecated: {
-                isOverridden: isOverridden,
-                config: tilemapConfig,
-              },
-              manifestServiceUrl: serverConfig.get('tilemap.manifestServiceUrl')
-            }
-          };
-        },
+        injectVars,
       },
 
       links: [
@@ -148,6 +130,7 @@ module.exports = function (kibana) {
 
       server.expose('systemApi', systemApi);
       server.expose('handleEsError', handleEsError);
+      server.expose('injectVars', injectVars);
     }
   });
 };
