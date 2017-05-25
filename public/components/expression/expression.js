@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import { FormGroup, ControlLabel, FormControl, Button, ButtonToolbar } from 'react-bootstrap';
 import './expression.less';
 
-export const Expression = ({ expression, onChange, setExpression, done }) => {
+export const Expression = ({ expression, updateValue, setExpression, done }) => {
   let input;
 
   return (
@@ -11,13 +11,12 @@ export const Expression = ({ expression, onChange, setExpression, done }) => {
       <FormGroup controlId="formControlsTextarea">
 
 
-
         <FormControl
           spellCheck={false}
           componentClass="textarea"
           placeholder="Enter expression..."
           inputRef={ref => input = ref}
-          onChange={(ev) => onChange(ev.target.value)}
+          onChange={updateValue}
           value={expression}
         />
         <ControlLabel>
@@ -36,7 +35,7 @@ export const Expression = ({ expression, onChange, setExpression, done }) => {
 
 Expression.propTypes = {
   expression: PropTypes.string,
-  onChange: PropTypes.func,
+  updateValue: PropTypes.func,
   setExpression: PropTypes.func,
   done: PropTypes.func,
 };

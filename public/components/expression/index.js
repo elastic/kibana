@@ -1,6 +1,7 @@
 import { connect } from 'react-redux';
-import { compose, withState } from 'recompose';
+import { compose } from 'recompose';
 import { Expression as Component } from './expression';
+import { statefulProp } from '../../lib/stateful_component';
 import { getSelectedPage, getSelectedElement } from '../../state/selectors/workpad';
 import { setExpression } from '../../state/actions/elements';
 
@@ -25,5 +26,5 @@ const mergeProps = (stateProps, dispatchProps, ownProps) => {
 
 export const Expression = compose(
   connect(mapStateToProps, mapDispatchToProps, mergeProps),
-  withState('expression', 'onChange', props => props.expression),
+  statefulProp('expression'),
 )(Component);
