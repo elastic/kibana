@@ -15,7 +15,7 @@ export function getQueryDslFromFilter(filter) {
 
 export function getFieldFromFilter(filter, indexPatterns) {
   const { index, key } = filter.meta;
-  const indexPattern = indexPatterns.find(({ id }) => id === index);
+  const indexPattern = indexPatterns && indexPatterns.find(({ id }) => id === index);
   return indexPattern && indexPattern.fields.byName[key];
 }
 
@@ -45,7 +45,7 @@ export function getParamsFromFilter(filter) {
 }
 
 export function getFieldOptions(indexPatterns) {
-  return indexPatterns.reduce((fields, indexPattern) => {
+  return indexPatterns && indexPatterns.reduce((fields, indexPattern) => {
     const filterableFields = indexPattern.fields.filter(field => field.filterable);
     return [...fields, ...filterableFields];
   }, []);
