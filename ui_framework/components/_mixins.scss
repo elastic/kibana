@@ -149,7 +149,7 @@
   border: 1px solid $globalFormControlBorderColor;
   border-radius: $borderRadius;
   transition: border-color $globalInputTransitionTiming;
-  min-height: 30px; /* 1 */
+  min-height: $globalFormInputHeight; /* 1 */
 
   &:invalid {
     @include formControlInvalid;
