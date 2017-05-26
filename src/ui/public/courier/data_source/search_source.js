@@ -301,8 +301,9 @@ export function SearchSourceProvider(Promise, Private, config) {
     return clone;
   };
 
-  SearchSource.prototype.getESQuery = function () {
-    return this._flatten();
+  SearchSource.prototype.getSearchRequestBody = async function () {
+    const searchRequest = await this._flatten();
+    return searchRequest.body;
   };
 
   return SearchSource;

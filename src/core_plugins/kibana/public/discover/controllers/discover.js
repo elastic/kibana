@@ -207,9 +207,12 @@ function discoverController($scope, config, courier, $route, $window, Notifier,
     searchSource.set('aggs', null);
     searchSource.set('size', null);
 
-    const esQuery = await searchSource.getESQuery();
+    const body = await searchSource.getSearchRequestBody();
     return {
-      esQuery,
+      searchRequest: {
+        index: searchSource.get('index').id,
+        body
+      },
       fields: selectFields,
       metaFields: $scope.indexPattern.metaFields,
       conflictedTypesFields: $scope.indexPattern.fields.filter(f => f.type === 'conflict').map(f => f.name),
