@@ -9,9 +9,10 @@ export default function exportApi(server) {
       const currentDate = moment.utc();
       return exportDashboards(req)
         .then(resp => {
-          const json = JSON.stringify(resp, null, ' ');
+          const json = JSON.stringify(resp, null, '  ');
+          const filename = `kibana-dashboards.${currentDate.format('YYYY-MM-DD-HH-mm-ss')}.json`;
           reply(json)
-            .header('Content-Disposition', `attachment; filename="kibana-dashboards.${currentDate.format('YYYY-MM-DD-HH-mm-ss')}.json"`)
+            .header('Content-Disposition', `attachment; filename="${filename}"`)
             .header('Content-Type', 'application/json')
             .header('Content-Length', json.length);
         })

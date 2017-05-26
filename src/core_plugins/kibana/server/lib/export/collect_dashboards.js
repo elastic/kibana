@@ -13,18 +13,15 @@ export default function collectDashboards(req, ids) {
     body: { ids }
   };
   return callWithRequest(req, 'mget', params)
-    .then(resp => {
-      return Promise.all(resp.docs.map(d => deps.collectPanels(req, d)))
-        .then(results => {
-          return results.reduce((acc, result) => {
-            return acc.concat(result);
-          }, []).reduce((acc, obj) => {
-            if (!acc.find(o => o._id === obj._id)) {
-              acc.push(obj);
-            }
-            return acc;
-          }, []);
-        });
+    .then(resp => resp.docs.filter(d => d.found))
+    .then(docs => Promise.all(docs.map(d => deps.collectPanels(req, d))))
+    .then(results => {
+      return results
+        .reduce((acc, result) => acc.concat(result), [])
+        .reduce((acc, obj) => {
+          if (!acc.find(o => o._id === obj._id))  acc.push(obj);
+          return acc;
+        }, []);
     });
 }
 

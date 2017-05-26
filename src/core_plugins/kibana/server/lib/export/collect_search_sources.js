@@ -12,9 +12,9 @@ export default function collectSearchSources(req, panels) {
       }
     }
     return acc;
-  }, []).filter(id => id);
+  }, []);
 
-  if (!ids.length) {
+  if (ids.length === 0) {
     return Promise.resolve([]);
   }
 
@@ -25,11 +25,13 @@ export default function collectSearchSources(req, panels) {
   };
 
 
-  return callWithRequest(req, 'mget', params).then(resp => resp.docs).then(savedSearches => {
-    return deps.collectIndexPatterns(req, savedSearches)
-      .then(resp => {
-        return savedSearches.concat(resp);
-      });
-  });
+  return callWithRequest(req, 'mget', params)
+    .then(resp => resp.docs)
+    .then(savedSearches => {
+      return deps.collectIndexPatterns(req, savedSearches)
+        .then(resp => {
+          return savedSearches.concat(resp);
+        });
+    });
 
 }

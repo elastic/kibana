@@ -11,9 +11,9 @@ export default function collectIndexPatterns(req, panels) {
       }
     }
     return acc;
-  }, []).filter(id => id);
+  }, []);
 
-  if (!ids.length) {
+  if (ids.length === 0) {
     return Promise.resolve([]);
   }
 

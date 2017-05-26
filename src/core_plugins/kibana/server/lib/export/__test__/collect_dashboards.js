@@ -2,26 +2,26 @@ import sinon from 'sinon';
 import collectDashboards, { deps } from '../collect_dashboards';
 import { expect } from 'chai';
 
-describe('collectDashbaords(req, ids)', () => {
+describe('collectDashboards(req, ids)', () => {
 
   let req;
   let requestStub;
   let collectPanelsStub;
   beforeEach(() => {
     requestStub = sinon.stub().returns(Promise.resolve({
-      docs: [ { _id: 'dashboard-01' }, { _id: 'dashboard-02' } ]
+      docs: [ { _id: 'dashboard-01', found: true }, { _id: 'dashboard-02', found: true } ]
     }));
 
     collectPanelsStub = sinon.stub(deps, 'collectPanels');
     collectPanelsStub.onFirstCall().returns(Promise.resolve([
-      { _id: 'dashboard-01' },
-      { _id: 'panel-01' },
-      { _id: 'index-*' }
+      { _id: 'dashboard-01', found: true },
+      { _id: 'panel-01', found: true },
+      { _id: 'index-*', found: true }
     ]));
     collectPanelsStub.onSecondCall().returns(Promise.resolve([
-      { _id: 'dashboard-02' },
-      { _id: 'panel-01' },
-      { _id: 'index-*' }
+      { _id: 'dashboard-02', found: true },
+      { _id: 'panel-01', found: true },
+      { _id: 'index-*', found: true }
     ]));
 
     req = {
@@ -59,8 +59,8 @@ describe('collectDashbaords(req, ids)', () => {
     return collectDashboards(req, ['dashboard-01', 'dashboard-02'])
       .then(() => {
         expect(collectPanelsStub.calledTwice).to.equal(true);
-        expect(collectPanelsStub.args[0][1]).to.eql({ _id: 'dashboard-01' });
-        expect(collectPanelsStub.args[1][1]).to.eql({ _id: 'dashboard-02' });
+        expect(collectPanelsStub.args[0][1]).to.eql({ _id: 'dashboard-01', found: true });
+        expect(collectPanelsStub.args[1][1]).to.eql({ _id: 'dashboard-02', found: true });
       });
   });
 
@@ -68,10 +68,10 @@ describe('collectDashbaords(req, ids)', () => {
     return collectDashboards(req, ['dashboard-01', 'dashboard-02'])
       .then(results => {
         expect(results).to.eql([
-          { _id: 'dashboard-01' },
-          { _id: 'panel-01' },
-          { _id: 'index-*' },
-          { _id: 'dashboard-02' },
+          { _id: 'dashboard-01', found: true },
+          { _id: 'panel-01', found: true },
+          { _id: 'index-*', found: true },
+          { _id: 'dashboard-02', found: true },
         ]);
       });
   });
