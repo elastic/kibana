@@ -3,6 +3,7 @@ import _ from 'lodash';
 import uuid from 'node-uuid';
 import AggRow from './agg_row';
 import AggSelect from './agg_select';
+import Tooltip from '../tooltip';
 
 import createChangeHandler from '../lib/create_change_handler';
 import createSelectHandler from '../lib/create_select_handler';
@@ -52,7 +53,11 @@ class CalculationAgg extends Component {
                 model={model}/>
             </div>
             <div className="vis_editor__row_item">
-              <div className="vis_editor__label">Script (Painless)</div>
+              <div className="vis_editor__label">
+                Script (Painless) <Tooltip text="Reference a variable defined as 'foo' with 'params.foo'" placement="right">
+                  <i className="fa fa-info-circle"/>
+                </Tooltip>
+              </div>
               <input
                 className="vis_editor__input-grows-100"
                 type="text"
