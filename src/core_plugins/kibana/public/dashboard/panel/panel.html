@@ -35,7 +35,9 @@
         ></span>
       </a>
 
+      <!-- data-dashboard-panel-drag-handle works in Firefox when applied here -->
       <button
+        data-dashboard-panel-drag-handle
         type="button"
         class="kuiMicroButton"
         aria-label="Move panel"
@@ -43,6 +45,7 @@
         ng-show="!isViewOnlyMode() && !isExpanded"
         class="panel-move"
       >
+        <!-- data-dashboard-panel-drag-handle works in Chrome when applied here -->
         <span
           aria-hidden="true"
           class="kuiIcon fa-arrows"
