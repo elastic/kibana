@@ -1,5 +1,5 @@
+import expect from 'expect.js';
 import { phraseFilter } from 'src/fixtures/filters';
-
 import {
   getQueryDslFromFilter,
   // getFieldFromFilter,
@@ -7,7 +7,7 @@ import {
   // getParamsFromFilter,
   // isFilterValid,
   // buildFilter
-} from '../filter_editor_utils';import expect from 'expect.js';
+} from '../filter_editor_utils';
 
 describe('FilterEditorUtils', function () {
   describe('getQueryDslFromFilter', function () {
