@@ -99,6 +99,7 @@ module.directive('filterEditor', function ($timeout) {
         let newFilter;
         if (this.showQueryDslEditor()) {
           const meta = _.pick(filter.meta, ['negate', 'index']);
+          meta.index = meta.index || this.indexPatterns[0].id;
           newFilter = Object.assign(this.queryDsl, { meta });
         } else {
           newFilter = buildFilter({ field, operator, params });
