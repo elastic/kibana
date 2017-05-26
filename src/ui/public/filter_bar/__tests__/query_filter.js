@@ -3,7 +3,6 @@ import ngMock from 'ng_mock';
 import './_get_filters';
 import './_add_filters';
 import './_remove_filters';
-import './_update_filters';
 import './_toggle_filters';
 import './_invert_filters';
 import './_pin_filters';

@@ -50,7 +50,7 @@ function getConvertedValueForField(field, value) {
  * @param {object} scriptedField A Field object representing a scripted field
  * @returns {string} The inline script string
  */
-function buildInlineScriptForPhraseFilter(scriptedField) {
+export function buildInlineScriptForPhraseFilter(scriptedField) {
   // We must wrap painless scripts in a lambda in case they're more than a simple expression
   if (scriptedField.lang === 'painless') {
     return `boolean compare(Supplier s, def v) {return s.get() == v;}` +
