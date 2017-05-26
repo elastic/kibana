@@ -108,7 +108,7 @@ app.directive('discFieldChooser', function ($location, globalState, config, $rou
         const newHits = cur[2] !== prev[2];
         let fields = $scope.fields;
         const columns = $scope.columns || [];
-        const fieldCounts = $scope.fieldCounts;
+        const fieldCounts = $scope.fieldCounts || {};
 
         if (!fields || newHits) {
           $scope.fields = fields = getFields();
