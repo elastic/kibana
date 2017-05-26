@@ -97,7 +97,6 @@ ifeval::["{release-state}"!="unreleased"]
 
 The RPM for Kibana v{version} can be downloaded from the website and installed as follows:
 
-*64 bit:*
 ["source","sh",subs="attributes"]
 --------------------------------------------
 wget https://artifacts.elastic.co/downloads/kibana/kibana-{version}-x86_64.rpm
@@ -106,16 +105,6 @@ sudo rpm --install kibana-{version}-x86_64.rpm
 --------------------------------------------
 <1> Compare the SHA produced by `sha1sum` or `shasum` with the
     https://artifacts.elastic.co/downloads/kibana/kibana-{version}-x86_64.rpm.sha1[published SHA].
-
-*32 bit:*
-["source","sh",subs="attributes"]
---------------------------------------------
-wget https://artifacts.elastic.co/downloads/kibana/kibana-{version}-i686.rpm
-sha1sum kibana-{version}-i686.rpm <1>
-sudo rpm --install kibana-{version}-i686.rpm
---------------------------------------------
-<1> Compare the SHA produced by `sha1sum` or `shasum` with the
-    https://artifacts.elastic.co/downloads/kibana/kibana-{version}-i686.rpm.sha1[published SHA].
 
 endif::[]
 
