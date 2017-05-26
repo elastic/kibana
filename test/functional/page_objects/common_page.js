@@ -270,6 +270,19 @@ export function CommonPageProvider({ getService, getPageObjects, getPageObject }
     async isChromeVisible() {
       return await testSubjects.exists('kibanaChrome');
     }
+
+    async isLocalNavVisible() {
+      return await testSubjects.exists('kibanaLocalNav');
+    }
+
+    async waitForLocalNavToBeVisible() {
+      await retry.try(async () => {
+        const isNavVisible = await this.isLocalNavVisible();
+        if (!isNavVisible) {
+          throw 'Local nav not visible yet';
+        }
+      });
+    }
   }
 
   return new CommonPage();
