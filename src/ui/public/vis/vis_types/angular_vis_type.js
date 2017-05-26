@@ -6,15 +6,16 @@ export function AngularVisTypeProvider(Private, $compile, $rootScope) {
   const VisType = Private(VisTypeProvider);
 
   class AngularVisController {
-    constructor(domeElement) {
+    constructor(domeElement, vis) {
       this.el = $(domeElement);
+      this.vis = vis;
     }
 
-    render(vis, esResponse) {
+    render(esResponse) {
 
       return new Promise((resolve, reject) => {
         const updateScope = () => {
-          this.$scope.vis = vis.clone();
+          this.$scope.vis = this.vis.clone();
           this.$scope.esResponse = esResponse;
           this.$scope.renderComplete = resolve;
           this.$scope.renderFailed = reject;
@@ -23,8 +24,8 @@ export function AngularVisTypeProvider(Private, $compile, $rootScope) {
         if (!this.$scope) {
           this.$scope = $rootScope.$new();
           updateScope();
-          this.$scope.uiState = vis.getUiState();
-          this.el.html($compile(vis.type.visConfig.template)(this.$scope));
+          this.$scope.uiState = this.vis.getUiState();
+          this.el.html($compile(this.vis.type.visConfig.template)(this.$scope));
         } else {
           updateScope();
         }

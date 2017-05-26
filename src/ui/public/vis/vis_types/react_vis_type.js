@@ -6,22 +6,22 @@ export function ReactVisTypeProvider(Private) {
   const VisType = Private(VisTypeProvider);
 
   class ReactVisController {
-    constructor(el) {
+    constructor(el, vis) {
       this.el = el;
+      this.vis = vis;
     }
 
-    render(vis, visData) {
-      this.vis = vis;
+    render(visData) {
       this.visData = visData;
 
       return new Promise((resolve) => {
-        const Component = vis.type.visConfig.component;
-        render(<Component vis={vis} visData={visData} renderComplete={resolve} />, this.el);
+        const Component = this.vis.type.visConfig.component;
+        render(<Component vis={this.vis} visData={visData} renderComplete={resolve} />, this.el);
       });
     }
 
     resize() {
-      if (this.vis) {
+      if (this.visData) {
         this.render(this.vis, this.visData);
       }
     }

@@ -28,10 +28,10 @@ uiModules
       const resizeChecker = new ResizeChecker(element);
       const Editor = typeof vis.type.editor === 'function' ? vis.type.editor :
         editorTypes.find(editor => editor.key === vis.type.editor);
-      const editor = new Editor(element[0]);
+      const editor = new Editor(element[0], vis);
 
       const renderFunction = _.debounce(() => {
-        editor.render(vis, $scope.visData, $scope.searchSource).then(() => {
+        editor.render($scope.visData, $scope.searchSource).then(() => {
           $scope.$emit('renderComplete');
           $scope.$apply();
         });

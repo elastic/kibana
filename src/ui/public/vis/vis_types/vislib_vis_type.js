@@ -14,23 +14,25 @@ export function VislibVisTypeProvider(Private) {
   const vislib = Private(VislibProvider);
 
   class VislibVisController {
-    constructor(el) {
+    constructor(el, vis) {
       this.el = el;
+      this.vis = vis;
     }
 
-    render(vis, esResponse) {
-      if (this.vislibVis) {
+    render(esResponse) {
+      if (this.vis.vislibVis) {
         this.destroy();
+      } else {
+        this.vis.refreshLegend = 0;
       }
 
       return new Promise(resolve => {
-        this.vis = vis;
-        vis.vislibVis = new vislib.Vis(this.el, vis.params);
-        vis.vislibVis.on('brush', vis.API.events.brush);
-        vis.vislibVis.on('click', vis.API.events.filter);
-        vis.vislibVis.on('renderComplete', resolve);
-        vis.vislibVis.render(esResponse, vis.getUiState());
-        vis.refreshLegend++;
+        this.vis.vislibVis = new vislib.Vis(this.el, this.vis.params);
+        this.vis.vislibVis.on('brush', this.vis.API.events.brush);
+        this.vis.vislibVis.on('click', this.vis.API.events.filter);
+        this.vis.vislibVis.on('renderComplete', resolve);
+        this.vis.vislibVis.render(esResponse, this.vis.getUiState());
+        this.vis.refreshLegend++;
       });
     }
 

@@ -11,17 +11,18 @@ const defaultEditor = function ($rootScope, $compile) {
   return class DefaultEditor {
     static key = 'default';
 
-    constructor(el) {
+    constructor(el, vis) {
       this.el = $(el);
+      this.vis = vis;
     }
 
-    render(vis, visData, searchSource) {
+    render(visData, searchSource) {
       let $scope;
 
-      const updateScope = function () {
-        $scope.vis = vis;
+      const updateScope = () => {
+        $scope.vis = this.vis;
         $scope.visData = visData;
-        $scope.uiState = vis.getUiState();
+        $scope.uiState = this.vis.getUiState();
         $scope.searchSource = searchSource;
       };
 
