@@ -7,10 +7,7 @@ module.exports = new Element({
   name: 'table',
   displayName: 'Line Chart',
   icon: null,
-  schema: {
-    datasource: true,
-    model: 'pointseries',
-  },
+  expression: 'demodata()',
   destroy(args) {
     console.log('destory table', args);
   },

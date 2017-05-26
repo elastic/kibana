@@ -9,13 +9,8 @@ export function Element(config) {
   // An svg icon to use for representing this thing
   this.icon = config.icon;
 
-  /* schema:
-    {
-      datasource: true,
-      model: 'pointseries'
-    }
-  */
-  this.schema = config.schema;
+  if (!config.expression) throw new Error('Element types must have a default expression');
+  this.expression = config.expression;
 
   this.destroy = config.destroy || function destroy(/*renderFnReturnValue*/) {};
 

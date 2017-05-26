@@ -11,13 +11,10 @@ module.exports = new Element({
   name: 'plot',
   displayName: 'An XY coordinate plot',
   icon: null,
-  schema: {
-    datasource: true,
-    model: 'pointseries',
-  },
-  destroy(args) {
-    //plot.destroy();
-    console.log('destory plot', args);
+  expression: 'demodata().pointseries(x="time", y="sum(price)", color="state").plot(defaultStyle=seriesStyle(lines="2"))',
+  destroy(/*args*/) {
+    plot.destroy();
+    //console.log('destroy plot', args);
   },
   render(domNode, config, done) {
     config.options.legend.labelBoxBorderColor = 'transparent';
