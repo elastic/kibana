@@ -1,23 +1,25 @@
 import _ from 'lodash';
 import { SavedObjectNotFound, DuplicateField, IndexPatternMissingIndices } from 'ui/errors';
 import angular from 'angular';
-import { getComputedFields } from 'ui/index_patterns/_get_computed_fields';
-import { formatHit } from 'ui/index_patterns/_format_hit';
 import { RegistryFieldFormatsProvider } from 'ui/registry/field_formats';
-import { IndexPatternsGetIdsProvider } from 'ui/index_patterns/_get_ids';
-import { IndexPatternsMapperProvider } from 'ui/index_patterns/_mapper';
-import { IndexPatternsIntervalsProvider } from 'ui/index_patterns/_intervals';
 import { AdminDocSourceProvider } from 'ui/courier/data_source/admin_doc_source';
 import UtilsMappingSetupProvider from 'ui/utils/mapping_setup';
-import { IndexPatternsFieldListProvider } from 'ui/index_patterns/_field_list';
-import { IndexPatternsFlattenHitProvider } from 'ui/index_patterns/_flatten_hit';
-import { IndexPatternsCalculateIndicesProvider } from 'ui/index_patterns/_calculate_indices';
-import { IndexPatternsPatternCacheProvider } from 'ui/index_patterns/_pattern_cache';
+import { Notifier } from 'ui/notify';
 
-export function IndexPatternProvider(Private, Notifier, config, kbnIndex, Promise, confirmModalPromise) {
+import { getComputedFields } from './_get_computed_fields';
+import { formatHit } from './_format_hit';
+import { IndexPatternsGetIdsProvider } from './_get_ids';
+import { IndexPatternsIntervalsProvider } from './_intervals';
+import { IndexPatternsFieldListProvider } from './_field_list';
+import { IndexPatternsFlattenHitProvider } from './_flatten_hit';
+import { IndexPatternsCalculateIndicesProvider } from './_calculate_indices';
+import { IndexPatternsPatternCacheProvider } from './_pattern_cache';
+import { FieldsFetcherProvider } from './fields_fetcher_provider';
+
+export function IndexPatternProvider(Private, $http, config, kbnIndex, Promise, confirmModalPromise) {
   const fieldformats = Private(RegistryFieldFormatsProvider);
   const getIds = Private(IndexPatternsGetIdsProvider);
-  const mapper = Private(IndexPatternsMapperProvider);
+  const fieldsFetcher = Private(FieldsFetcherProvider);
   const intervals = Private(IndexPatternsIntervalsProvider);
   const DocSource = Private(AdminDocSourceProvider);
   const mappingSetup = Private(UtilsMappingSetupProvider);
@@ -47,22 +49,22 @@ export function IndexPatternProvider(Private, Notifier, config, kbnIndex, Promis
     fieldFormatMap: {
       type: 'text',
       _serialize(map = {}) {
-        const serialized = _.transform(map, serialize);
+        const serialized = _.transform(map, serializeFieldFormatMap);
         return _.isEmpty(serialized) ? undefined : angular.toJson(serialized);
       },
       _deserialize(map = '{}') {
-        return _.mapValues(angular.fromJson(map), deserialize);
+        return _.mapValues(angular.fromJson(map), deserializeFieldFormatMap);
       }
     }
   });
 
-  function serialize(flat, format, field) {
+  function serializeFieldFormatMap(flat, format, field) {
     if (format) {
       flat[field] = format;
     }
   }
 
-  function deserialize(mapping) {
+  function deserializeFieldFormatMap(mapping) {
     const FieldFormat = fieldformats.byId[mapping.id];
     return FieldFormat && new FieldFormat(mapping.params);
   }
@@ -156,8 +158,8 @@ export function IndexPatternProvider(Private, Notifier, config, kbnIndex, Promis
   }
 
   function fetchFields(indexPattern) {
-    return mapper
-    .getFieldsForIndexPattern(indexPattern, { skipIndexPatternCache: true })
+    return Promise.resolve()
+    .then(() => fieldsFetcher.fetch(indexPattern))
     .then(fields => {
       const scripted = indexPattern.getScriptedFields();
       const all = fields.concat(scripted);
@@ -283,33 +285,47 @@ export function IndexPatternProvider(Private, Notifier, config, kbnIndex, Promis
 
     toDetailedIndexList(start, stop, sortDirection) {
       return Promise.resolve().then(() => {
-        const interval = this.getInterval();
-        if (interval) {
+        if (this.isTimeBasedInterval()) {
           return intervals.toIndexList(
-            this.id, interval, start, stop, sortDirection
+            this.id, this.getInterval(), start, stop, sortDirection
           );
         }
 
-        if (this.isWildcard() && this.hasTimeField() && this.canExpandIndices()) {
+        if (this.isTimeBasedWildcard() && this.isIndexExpansionEnabled()) {
           return calculateIndices(
             this.id, this.timeFieldName, start, stop, sortDirection
           );
         }
 
-        return {
-          index: this.id,
-          min: -Infinity,
-          max: Infinity
-        };
+        return [
+          {
+            index: this.id,
+            min: -Infinity,
+            max: Infinity
+          }
+        ];
       });
     }
 
-    canExpandIndices() {
+    isIndexExpansionEnabled() {
       return !this.notExpandable;
     }
 
-    hasTimeField() {
-      return !!(this.timeFieldName && this.fields.byName[this.timeFieldName]);
+    isTimeBased() {
+      return !!this.timeFieldName && (!this.fields || !!this.getTimeField());
+    }
+
+    isTimeBasedInterval() {
+      return this.isTimeBased() && !!this.getInterval();
+    }
+
+    isTimeBasedWildcard() {
+      return this.isTimeBased() && this.isWildcard();
+    }
+
+    getTimeField() {
+      if (!this.timeFieldName || !this.fields || !this.fields.byName) return;
+      return this.fields.byName[this.timeFieldName];
     }
 
     isWildcard() {
@@ -370,9 +386,7 @@ export function IndexPatternProvider(Private, Notifier, config, kbnIndex, Promis
     }
 
     refreshFields() {
-      return mapper
-      .clearCache(this)
-      .then(() => fetchFields(this))
+      return fetchFields(this)
       .then(() => this.save())
       .catch((err) => {
         notify.error(err);
@@ -383,9 +397,10 @@ export function IndexPatternProvider(Private, Notifier, config, kbnIndex, Promis
         // but we do not want to potentially make any pages unusable
         // so do not rethrow the error here
         if (err instanceof IndexPatternMissingIndices) {
-          return;
+          return [];
         }
-        return Promise.reject(err);
+
+        throw err;
       });
     }
 

@@ -124,12 +124,12 @@
           </div>
 
           <!-- Expand index pattern checkbox -->
-          <div class="kuiVerticalRhythm" ng-if="controller.canExpandIndices()">
+          <div class="kuiVerticalRhythm" ng-if="controller.canEnableExpand()">
             <label class="kuiCheckBoxLabel kuiVerticalRhythm">
               <input
                 class="kuiCheckBox"
                 type="checkbox"
-                ng-model="controller.formValues.expandable"
+                ng-model="controller.formValues.expandWildcard"
               >
               <span
                 class="kuiCheckBoxLabel__text"
@@ -160,7 +160,7 @@
           </div>
 
           <!-- Use event times checkbox -->
-          <div class="kuiVerticalRhythm">
+          <div class="kuiVerticalRhythm" ng-if="controller.canUseTimePattern()">
             <label class="kuiCheckBoxLabel">
               <input
                 class="kuiCheckBox"
@@ -178,7 +178,7 @@
 
           <div
             class="kuiVerticalRhythm"
-            ng-if="controller.formValues.nameIsPattern"
+            ng-if="controller.canUseTimePattern() && controller.formValues.nameIsPattern"
           >
             <!-- Time-interval deprecation warning -->
             <div class="kuiInfoPanel kuiInfoPanel--warning kuiVerticalRhythm">
