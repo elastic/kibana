@@ -13,10 +13,6 @@ module.exports = function (grunt) {
         http: {
           port: 9200
         },
-        script: {
-          inline: true,
-          stored: true
-        }
       }
     },
 
