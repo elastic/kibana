@@ -156,8 +156,9 @@
   }
 
   @include kuiButtonHoverAndActive {
-    color: $buttonDefaultTextColor !important; /* 1 */
-    background-color: $buttonDangerHoverBackgroundColor;
+    color: darken($globalColorRed, 10%) !important;
+    background-color: $globalColorWhite;
+    border: solid 1px darken($globalColorRed, 10%);
   }
 }
 

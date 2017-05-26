@@ -373,23 +373,23 @@ body {
     /* 3 */
     color: #A30000; }
   .kuiButton--danger:enabled:hover {
-    color: #FFF !important;
-    /* 1 */
-    background-color: #700000; }
+    color: #700000 !important;
+    background-color: #FFF;
+    border: solid 1px #700000; }
   a.kuiButton--danger:not(.kuiButton-isDisabled):hover {
     /* 1 */
-    color: #FFF !important;
-    /* 1 */
-    background-color: #700000; }
+    color: #700000 !important;
+    background-color: #FFF;
+    border: solid 1px #700000; }
   .kuiButton--danger:enabled:active {
-    color: #FFF !important;
-    /* 1 */
-    background-color: #700000; }
+    color: #700000 !important;
+    background-color: #FFF;
+    border: solid 1px #700000; }
   a.kuiButton--danger:not(.kuiButton-isDisabled):active {
     /* 1 */
-    color: #FFF !important;
-    /* 1 */
-    background-color: #700000; }
+    color: #700000 !important;
+    background-color: #FFF;
+    border: solid 1px #700000; }
 
 /**
  * 1. Override Bootstrap.
@@ -2840,7 +2840,7 @@ body {
   padding: 10px;
   height: 40px;
   background-color: #ffffff;
-  border: 2px solid #E4E4E4; }
+  border: 1px solid #E4E4E4; }
 
 .kuiToolBarFooterSection {
   display: -webkit-box;
