@@ -38,3 +38,10 @@ This is no longer the case. Now, only commas are a valid query separator: e.g. `
 *Details:* Kibana 6.0.0 and onward only support 64 bit operating systems.
 
 *Impact:* You will need to install Kibana 6.x on a 64 bit operating system. No extra data migration steps are necessary when moving from 32 bit to 64 bit.
+
+
+[float]
+=== NODE_ENV no longer has an impact on Kibana
+*Details:* Setting the NODE_ENV environment variable can break Kibana processes in unexpected ways, which is especially unfortunate since it is a common environment variable to have configured on a system, and you wouldn't expect it to break anything in Kibana. Kibana will now effectively ignore NODE_ENV entirely.
+
+*Impact:* If you're developing a custom plugin that depends on NODE_ENV, you will need to update it to use a different, custom environment variable.
