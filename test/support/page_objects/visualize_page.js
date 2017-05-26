@@ -69,10 +69,10 @@ export default class VisualizePage {
     .click();
   }
 
-  clickVectorMap() {
+  clickRegionMap() {
     return this.remote
       .setFindTimeout(defaultFindTimeout)
-      .findByPartialLinkText('Vector Map')
+      .findByPartialLinkText('Region Map')
       .click();
   }
 
