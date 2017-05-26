@@ -15,7 +15,7 @@ import { Notifier } from 'ui/notify/notifier';
 
 import {
   createStateHash,
-  hashedItemStoreSingleton,
+  HashedItemStoreSingleton,
   isStateHash,
 } from './state_storage';
 
@@ -26,7 +26,7 @@ export function StateProvider(Private, $rootScope, $location, config, kbnUrl) {
   function State(
     urlParam,
     defaults,
-    hashedItemStore = hashedItemStoreSingleton,
+    hashedItemStore = HashedItemStoreSingleton,
     notifier = new Notifier()
   ) {
     State.Super.call(this);
