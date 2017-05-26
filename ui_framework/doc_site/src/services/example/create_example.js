@@ -1,3 +1,4 @@
+/* eslint import/named: 0 */
 import {
   GuideExample,
 } from '../../components';
