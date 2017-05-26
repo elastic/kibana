@@ -80,10 +80,11 @@ export function readFieldCapsResponse(fieldCapsResponse) {
     const esType = types[0];
     const caps = capsByType[esType];
     return {
-      ...caps,
       name: fieldName,
-      readFromDocValues: shouldReadFieldFromDocValues(caps.aggregatable, esType),
       type: castEsToKbnFieldTypeName(esType),
+      searchable: caps.searchable,
+      aggregatable: caps.aggregatable,
+      readFromDocValues: shouldReadFieldFromDocValues(caps.aggregatable, esType),
     };
   });
 }
