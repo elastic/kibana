@@ -48,6 +48,16 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
       await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
+    async toggleAdvancedSettingCheckbox(propertyName) {
+      await testSubjects.click(`advancedSetting-${propertyName}-editButton`);
+      await PageObjects.header.waitUntilLoadingHasFinished();
+      const checkbox = await testSubjects.find(`advancedSetting-${propertyName}-checkbox`);
+      await checkbox.click();
+      await PageObjects.header.waitUntilLoadingHasFinished();
+      await testSubjects.click(`advancedSetting-${propertyName}-saveButton`);
+      await PageObjects.header.waitUntilLoadingHasFinished();
+    }
+
     async navigateTo() {
       await PageObjects.common.navigateToApp('settings');
     }
