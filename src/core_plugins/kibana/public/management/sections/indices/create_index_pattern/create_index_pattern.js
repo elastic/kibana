@@ -175,7 +175,9 @@ uiModules.get('apps/management')
   this.canEnableExpandWildcard = () => {
     // to maximize performance in the digest cycle, move from the least
     // expensive operation to most
-    return !this.formValues.nameIsPattern && _.includes(this.formValues.name, '*');
+    return !this.formValues.nameIsPattern &&
+      !this.isCrossClusterName() &&
+      _.includes(this.formValues.name, '*');
   };
 
   this.isExpandWildcardEnabled = () => {
