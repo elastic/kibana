@@ -15,6 +15,7 @@ import {
   isFilterValid,
   buildFilter
 } from './lib/filter_editor_utils';
+import { keyMap } from '../utils/key_map';
 
 const module = uiModules.get('kibana');
 module.directive('filterEditor', function ($timeout) {
@@ -30,7 +31,7 @@ module.directive('filterEditor', function ($timeout) {
     },
     controllerAs: 'filterEditor',
     bindToController: true,
-    controller: function ($scope) {
+    controller: function ($scope, $element) {
       this.init = (filter) => {
         this.isPinned = _.get(filter, ['$state', 'store']) === 'globalState';
         this.isDisabled = filter.meta.disabled;
@@ -107,6 +108,12 @@ module.directive('filterEditor', function ($timeout) {
 
         return this.onSave({ filter, newFilter, isPinned });
       };
+
+      $element.on('keydown', (event) => {
+        if (keyMap[event.keyCode] === 'escape') {
+          $timeout(() => this.onCancel());
+        }
+      });
     }
   };
 });
