@@ -45,7 +45,7 @@ export default function ({ getService, getPageObjects }) {
         const appState = urlPieces[3];
 
         // We don't have to be exact, just need to ensure it's greater than when the hashed variation is being used,
-        // which is around 10 characters.
+        // which is less than 20 characters.
         expect(globalState.length).to.be.greaterThan(20);
         expect(appState.length).to.be.greaterThan(20);
       });
@@ -67,14 +67,16 @@ export default function ({ getService, getPageObjects }) {
         const globalState = urlPieces[2];
         const appState = urlPieces[3];
 
-        // We don't have to be exact, just need to ensure it's greater than when the hashed variation is being used,
-        // which is around 10 characters.
+        // We don't have to be exact, just need to ensure it's less than the unhashed version, which will be
+        // greater than 20 characters with the default state plus a time.
         expect(globalState.length).to.be.lessThan(20);
         expect(appState.length).to.be.lessThan(20);
       });
 
-      after('navigate back to settings page', async () => {
+      after('navigate to settings page and turn state:storeInSessionStorage back to false', async () => {
         await PageObjects.settings.navigateTo();
+        await PageObjects.settings.clickKibanaSettings();
+        await PageObjects.settings.toggleAdvancedSettingCheckbox('state:storeInSessionStorage');
       });
     });
 
