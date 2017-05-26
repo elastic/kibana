@@ -54,9 +54,8 @@ export class SavedObjectsClient {
   }
 
   async delete(type, id) {
-    const response = await this._withKibanaIndex('delete', {
-      type,
-      id,
+    const response = await this._withKibanaIndex('deleteByQuery', {
+      body: this.idBody(type, id),
       refresh: 'wait_for'
     });
 
@@ -138,41 +137,7 @@ export class SavedObjectsClient {
   }
 
   async get(type, id) {
-    const response = await this._withKibanaIndex('search', {
-      body: {
-        version: true,
-        query: {
-          bool: {
-            should: [
-              {
-                ids: {
-                  values: id,
-                  type
-                }
-              },
-              {
-                bool: {
-                  must: [
-                    {
-                      term: {
-                        id: {
-                          value: id
-                        }
-                      }
-                    },
-                    {
-                      type: {
-                        value: 'doc'
-                      }
-                    }
-                  ]
-                }
-              }
-            ]
-          }
-        }
-      }
-    });
+    const response = await this._withKibanaIndex('search', { body: this.idBody(type, id) });
 
     const hit = get(response, 'hits.hits.0');
     const attributes =  get(hit, `_source.${type}`) || get(hit, '_source');
@@ -212,5 +177,41 @@ export class SavedObjectsClient {
     } catch (err) {
       throw handleEsError(err);
     }
+  }
+
+  idBody(type, id) {
+    return {
+      version: true,
+      query: {
+        bool: {
+          should: [
+            {
+              ids: {
+                values: id,
+                type
+              }
+            },
+            {
+              bool: {
+                must: [
+                  {
+                    term: {
+                      id: {
+                        value: id
+                      }
+                    }
+                  },
+                  {
+                    type: {
+                      value: 'doc'
+                    }
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      }
+    };
   }
 }
