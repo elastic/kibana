@@ -33,7 +33,7 @@ describe('server/index_patterns/service/lib/resolve_time_pattern', () => {
 
         await resolveTimePattern(noop, timePattern);
         sinon.assert.calledOnce(timePatternToWildcard);
-        expect(timePatternToWildcard.args[0][0]).to.be(timePattern);
+        expect(timePatternToWildcard.firstCall.args).to.eql([timePattern]);
       });
 
       it('passes the converted wildcard as the index to callIndexAliasApi()', async () => {
@@ -46,7 +46,7 @@ describe('server/index_patterns/service/lib/resolve_time_pattern', () => {
 
         await resolveTimePattern(noop, timePattern);
         sinon.assert.calledOnce(callIndexAliasApi);
-        expect(callIndexAliasApi.args[0][1]).to.be(wildcard);
+        expect(callIndexAliasApi.firstCall.args[1]).to.be(wildcard);
       });
     });
 
