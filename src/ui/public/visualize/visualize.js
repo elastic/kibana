@@ -37,6 +37,7 @@ uiModules
       $scope.vis = $scope.savedObj.vis;
       $scope.editorMode = $scope.editorMode || false;
       $scope.vis.showSpyPanel = $scope.showSpyPanel || false;
+      $scope.vis.editorMode = $scope.editorMode;
 
       const requestHandler = getHandler(requestHandlers, $scope.vis.type.requestHandler);
       const responseHandler = getHandler(responseHandlers, $scope.vis.type.responseHandler);
