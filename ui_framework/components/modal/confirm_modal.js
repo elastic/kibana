@@ -64,7 +64,7 @@ export function KuiConfirmModal({
 
       <KuiModalFooter>
         <KuiButton
-          type="hollow"
+          buttonType="hollow"
           autoFocus={ defaultFocusedButton === CANCEL_BUTTON }
           data-test-subj="confirmModalCancelButton"
           onClick={ onCancel }
@@ -72,7 +72,7 @@ export function KuiConfirmModal({
           {cancelButtonText}
         </KuiButton>
         <KuiButton
-          type="primary"
+          buttonType="primary"
           autoFocus={ defaultFocusedButton === CONFIRM_BUTTON }
           data-test-subj="confirmModalConfirmButton"
           onClick={ onConfirm }
