@@ -195,7 +195,7 @@ uiModules.get('apps/management')
     // if timeFieldOption has a fieldName it's a time field, otherwise
     // it's a way to opt-out of the time field or an indication that there
     // are no fields available
-    return !!this.formValues.timeFieldOption.fieldName;
+    return Boolean(this.formValues.timeFieldOption.fieldName);
   };
 
   this.canExpandIndices = () => {
