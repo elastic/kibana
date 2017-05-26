@@ -294,6 +294,8 @@ export function SearchSourceProvider(Promise, Private, config) {
 
   SearchSource.prototype.clone = function () {
     const clone = new SearchSource(this.toString());
+    // when serializing the internal state with .toString() we lose the internal classes used in the index
+    // pattern, so we have to set it again to workaround this behavior
     clone.set('index', this.get('index'));
     clone.inherits(this.getParent());
     return clone;
