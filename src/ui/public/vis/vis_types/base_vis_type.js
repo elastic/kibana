@@ -36,9 +36,9 @@ export function VisTypeProvider() {
 
       _.defaultsDeep(this, opts, _defaults);
 
-      if (!this.editorConfig.optionTabs) {
+      if (!this.editorConfig.optionTabs && this.editorConfig.optionsTemplate) {
         this.editorConfig.optionTabs = [
-          { name: 'options', title: 'Options', editor: this.editorConfig.optionsTemplate || '' }
+          { name: 'options', title: 'Options', editor: this.editorConfig.optionsTemplate }
         ];
       }
 
