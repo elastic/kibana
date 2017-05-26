@@ -8,11 +8,15 @@ module.exports = function ($elem, fn, frequency) {
 
   function checkLoop() {
     timeout = setTimeout(function () {
-      if (currentHeight !== $elem.height() || currentWidth !== $elem.width()) {
+      const widthDiff = Math.abs(currentHeight - $elem.height());
+      const heightDiff = Math.abs(currentWidth - $elem.width());
+      const sizeHasChanged = widthDiff > 1 || heightDiff > 1;
+      if (sizeHasChanged) {
         currentHeight = $elem.height();
         currentWidth = $elem.width();
-
-        if (currentWidth > 0 && currentWidth > 0) fn();
+        if (currentWidth > 0 && currentWidth > 0) {
+          fn();
+        }
       }
       checkLoop();
     }, frequency);
