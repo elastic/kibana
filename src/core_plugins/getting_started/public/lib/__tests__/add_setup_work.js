@@ -31,6 +31,16 @@ describe('Getting Started page', () => {
         set($route, 'current.$$route', {});
       });
 
+      describe('if the user is on an embedded page', () => {
+        beforeEach(() => {
+          set($route, 'current.params.embed', true);
+        });
+
+        it('should not show the UI chrome', () => {
+          expect(uiChrome.getVisible()).to.be(false);
+        });
+      });
+
       describe('if index patterns exist', () => {
         beforeEach(() => {
           config = {

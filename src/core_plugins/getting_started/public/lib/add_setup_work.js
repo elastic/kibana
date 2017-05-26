@@ -75,6 +75,11 @@ function showGettingStartedPage(kbnUrl, isOnGettingStartedPage) {
 export function gettingStartedGateCheck(getIds, kbnUrl, config, $route) {
   const currentRoute = get($route, 'current.$$route');
   const isOnGettingStartedPage = get(currentRoute, 'originalPath') === GETTING_STARTED_ROUTE;
+  const isOnEmbeddedPage = Boolean(get($route, 'current.params.embed', false));
+
+  if (isOnEmbeddedPage) {
+    return Promise.resolve();
+  }
 
   return getIds()
   .then(indexPatterns => {
