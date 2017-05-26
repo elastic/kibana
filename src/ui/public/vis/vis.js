@@ -36,6 +36,10 @@ export function VisProvider(Private, timefilter, getAppState) {
       }
       this.indexPattern = indexPattern;
 
+      if (!uiState) {
+        uiState = new PersistedState();
+      }
+
       this.setCurrentState(visState);
       this.setState(this.getCurrentState(), false);
       this.setUiState(uiState);

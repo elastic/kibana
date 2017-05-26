@@ -127,6 +127,10 @@ uiModules
         visualization.resize();
       });
 
+      $scope.$watch('visData', () => {
+        $scope.$broadcast('render');
+      });
+
 
       function jQueryGetter(selector) {
         return function () {
