@@ -3,12 +3,4 @@
  * So we needed to come up with a color scheme of our own that creates consistent, pleasing color patterns.
  * The order allows us to guarantee that 1st, 2nd, 3rd, etc values always get the same color.
  */
-export const seedColors = [
-  '#6eadc1',
-  '#57c17b',
-  '#6f87d8',
-  '#663db8',
-  '#bc52bc',
-  '#9e3533',
-  '#daa05d'
-];
+export const seedColors = ['#228AE6', '#22B8CF', '#0C8599', '#C0EB75', '#E599F7', '#7048E8', '#FA5252', '#C2255C', '#FFA94D', '#343A40'];
