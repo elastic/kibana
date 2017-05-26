@@ -66,7 +66,7 @@ app.directive('timelionExpressionInput', function ($document, $http, $interval, 
       }
 
       function setCaretOffset(caretOffset) {
-        // Wait for Angular to can update the input with the new expression and *then* we can set
+        // Wait for Angular to update the input with the new expression and *then* we can set
         // the caret position.
         $timeout(() => {
           expressionInput.focus();
