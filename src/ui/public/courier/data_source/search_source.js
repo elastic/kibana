@@ -270,7 +270,7 @@ export function SearchSourceProvider(Promise, Private, config) {
         addToBody();
         break;
       case 'fields':
-        state[key] = [...state[key] || [], ...val];
+        state[key] = _.uniq([...(state[key] || []), ...val]);
         break;
       default:
         addToBody();
