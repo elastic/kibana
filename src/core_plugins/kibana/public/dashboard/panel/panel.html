@@ -8,19 +8,19 @@
       {{::savedObj.title}}
     </span>
     <div class="kuiMicroButtonGroup">
-      <button
-        type="button"
+      <a
         class="kuiMicroButton"
         aria-label="Expand panel"
         data-test-subj="dashboardPanelExpandIcon"
         ng-click="toggleExpand()"
+        kbn-accessible-click
       >
         <span
           aria-hidden="true"
           class="kuiIcon"
           ng-class="{'fa-expand': !isExpanded, 'fa-compress': isExpanded}"
         ></span>
-      </button>
+      </a>
 
       <a
         class="kuiMicroButton"
@@ -35,34 +35,38 @@
         ></span>
       </a>
 
-      <button
-        type="button"
-        class="kuiMicroButton"
+      <!-- data-dashboard-panel-drag-handle works in Firefox when applied here -->
+      <a
+        data-dashboard-panel-drag-handle
+        tabindex="0"
+        role="button"
+        class="kuiMicroButton panel-move"
         aria-label="Move panel"
         data-test-subj="dashboardPanelMoveIcon"
         ng-show="!isViewOnlyMode() && !isExpanded"
-        class="panel-move"
       >
+        <!-- data-dashboard-panel-drag-handle works in Chrome when applied here -->
         <span
           aria-hidden="true"
           class="kuiIcon fa-arrows"
           data-dashboard-panel-drag-handle
         ></span>
-      </button>
+      </a>
 
-      <button
+      <a
         type="button"
         class="kuiMicroButton"
         aria-label="Remove panel from dashboard"
         data-test-subj="dashboardPanelRemoveIcon"
         ng-show="!isViewOnlyMode() && !isExpanded"
         ng-click="remove()"
+        kbn-accessible-click
       >
         <span
           aria-hidden="true"
           class="kuiIcon fa-times"
         ></span>
-      </button>
+      </a>
     </div>
     <div class="clearfix"></div>
   </div>
