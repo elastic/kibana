@@ -20,7 +20,6 @@ uiModules.get('apps/management')
   const notify = new Notifier();
   const refreshKibanaIndex = Private(RefreshKibanaIndex);
   const intervals = indexPatterns.intervals;
-  let samplePromise;
   let loadingCount = 0;
 
   // Configure the new index pattern we're going to create.
@@ -323,44 +322,38 @@ uiModules.get('apps/management')
     if (andUpdate) updateSamples();
   };
 
+  let latestUpdateSampleId = -1;
   $scope.$watchMulti([
     'controller.formValues.name',
     'controller.formValues.nameInterval'
   ], () => {
-    function promiseMatch(lastPromise, cb) {
-      if (lastPromise === samplePromise) {
-        cb();
-      } else if (samplePromise != null) {
-        // haven't hit the last promise yet, reset index params
-        resetIndex();
-      }
+    resetIndex();
+    if (!this.formValues.nameInterval || !this.formValues.name) {
+      return;
     }
 
-    let lastPromise;
-    resetIndex();
-    samplePromise = lastPromise = Promise.resolve()
-    .then(() => {
-      if (!this.formValues.nameInterval || !this.formValues.name) {
-        return;
-      }
-
-      return updateSamples()
+    // track the latestUpdateSampleId at the time we started
+    // so that we can avoid mutating the controller if the
+    // watcher triggers again before we finish (which would
+    // cause latestUpdateSampleId to increment and the
+    // id === latestUpdateSampleId checks below to fail)
+    const id = (++latestUpdateSampleId);
+    updateSamples()
       .then(() => {
-        promiseMatch(lastPromise, () => {
+        if (latestUpdateSampleId === id) {
           this.samples = null;
           this.patternErrors = [];
-        });
+        }
       })
       .catch(errors => {
-        promiseMatch(lastPromise, () => {
+        if (latestUpdateSampleId === id) {
           this.existing = null;
           this.patternErrors = errors;
-        });
+        }
       })
       .finally(() => {
         this.refreshTimeFieldOptions();
       });
-    });
   });
 
   $scope.$watchMulti([
