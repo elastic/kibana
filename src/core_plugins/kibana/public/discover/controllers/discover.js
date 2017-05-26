@@ -161,13 +161,13 @@ function discoverController($scope, config, courier, $route, $window, Notifier,
   const getFieldCounts = async () => {
     // the field counts aren't set until we have the data back,
     // so we sometimes have to wait for this to be available
-    if ($scope.fieldCounts) {
+    if (Object.keys($scope.fieldCounts).length) {
       return $scope.fieldCounts;
     }
 
     return await new Promise(resolve => {
       const unwatch = $scope.$watch('fieldCounts', (newValue) => {
-        if (!newValue) {
+        if (!Object.keys(newValue).length) {
           return;
         }
 
@@ -428,7 +428,7 @@ function discoverController($scope, config, courier, $route, $window, Notifier,
       $scope.hits = 0;
       $scope.faliures = [];
       $scope.rows = [];
-      $scope.fieldCounts = null;
+      $scope.fieldCounts = {};
     }
 
     if (!$scope.rows) flushResponseData();
