@@ -299,9 +299,16 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
     async loadSavedDashboard(dashName) {
       log.debug(`Load Saved Dashboard ${dashName}`);
 
-      await this.searchForDashboardWithName(dashName);
-      await this.clickDashboardByLinkText(dashName);
-      return PageObjects.header.waitUntilLoadingHasFinished();
+      await retry.try(async () => {
+        await this.searchForDashboardWithName(dashName);
+        await this.clickDashboardByLinkText(dashName);
+        await PageObjects.header.waitUntilLoadingHasFinished();
+
+        const onDashboardLandingPage = await this.onDashboardLandingPage();
+        if (onDashboardLandingPage) {
+          throw new Error('Failed to open the dashboard up');
+        }
+      });
     }
 
     getPanelTitles() {

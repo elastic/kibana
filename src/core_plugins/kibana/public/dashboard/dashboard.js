@@ -80,14 +80,13 @@ app.directive('dashboardApp', function ($injector) {
   const kbnUrl = $injector.get('kbnUrl');
   const confirmModal = $injector.get('confirmModal');
   const Private = $injector.get('Private');
-
   const brushEvent = Private(UtilsBrushEventProvider);
   const filterBarClickHandler = Private(FilterBarClickHandlerProvider);
 
   return {
     restrict: 'E',
     controllerAs: 'dashboardApp',
-    controller: function ($scope, $rootScope, $route, $routeParams, $location, getAppState, $compile) {
+    controller: function ($scope, $rootScope, $route, $routeParams, $location, getAppState, $compile, dashboardConfig) {
       const filterBar = Private(FilterBarQueryFilterProvider);
       const docTitle = Private(DocTitleProvider);
       const notify = new Notifier({ location: 'Dashboard' });
@@ -98,7 +97,7 @@ app.directive('dashboardApp', function ($injector) {
         docTitle.change(dash.title);
       }
 
-      const dashboardState = new DashboardState(dash, AppState);
+      const dashboardState = new DashboardState(dash, AppState, dashboardConfig);
 
       // The 'previouslyStored' check is so we only update the time filter on dashboard open, not during
       // normal cross app navigation.
@@ -151,8 +150,16 @@ app.directive('dashboardApp', function ($injector) {
         dashboardState.getIsDirty(timefilter));
       $scope.newDashboard = () => { kbnUrl.change(DashboardConstants.CREATE_NEW_DASHBOARD_URL, {}); };
       $scope.saveState = () => dashboardState.saveState();
-      $scope.getShouldShowEditHelp = () => !dashboardState.getPanels().length && dashboardState.getIsEditMode();
-      $scope.getShouldShowViewHelp = () => !dashboardState.getPanels().length && dashboardState.getIsViewMode();
+      $scope.getShouldShowEditHelp = () => (
+        !dashboardState.getPanels().length &&
+        dashboardState.getIsEditMode() &&
+        !dashboardConfig.getHideWriteControls()
+      );
+      $scope.getShouldShowViewHelp = () => (
+        !dashboardState.getPanels().length &&
+        dashboardState.getIsViewMode() &&
+        !dashboardConfig.getHideWriteControls()
+      );
 
       $scope.toggleExpandPanel = (panelIndex) => {
         if ($scope.expandedPanel && $scope.expandedPanel.panelIndex === panelIndex) {
@@ -207,7 +214,7 @@ app.directive('dashboardApp', function ($injector) {
       $scope.$listen(timefilter, 'fetch', $scope.refresh);
 
       function updateViewMode(newMode) {
-        $scope.topNavMenu = getTopNavConfig(newMode, navActions); // eslint-disable-line no-use-before-define
+        $scope.topNavMenu = dashboardConfig.getHideWriteControls() ? [] : getTopNavConfig(newMode, navActions); // eslint-disable-line no-use-before-define
         dashboardState.switchViewMode(newMode);
         $scope.dashboardViewMode = newMode;
       }

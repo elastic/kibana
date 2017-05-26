@@ -230,8 +230,8 @@ Notifier.config = {
   errorLifetime: 300000,
   warningLifetime: 10000,
   infoLifetime: 5000,
-  setInterval: window.setInterval,
-  clearInterval: window.clearInterval
+  setInterval: window.setInterval.bind(window),
+  clearInterval: window.clearInterval.bind(window)
 };
 
 Notifier.applyConfig = function (config) {

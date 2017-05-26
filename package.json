@@ -12,6 +12,7 @@
   ],
   "private": false,
   "version": "6.0.0-alpha2",
+  "branch": "master",
   "build": {
     "number": 8467,
     "sha": "6cb7fec4e154faa0a4a3fee4b33dfef91b9870d9"
@@ -176,6 +177,7 @@
     "react-router-redux": "4.0.4",
     "react-select": "1.0.0-rc.1",
     "react-sortable": "1.1.0",
+    "react-toggle": "3.0.1",
     "reactcss": "1.0.7",
     "redux": "3.0.0",
     "redux-thunk": "0.1.0",
@@ -263,7 +265,6 @@
     "ncp": "2.0.0",
     "nock": "8.0.0",
     "node-sass": "3.8.0",
-    "npm": "3.10.10",
     "portscanner": "1.0.0",
     "proxyquire": "1.7.10",
     "sass-loader": "4.0.0",

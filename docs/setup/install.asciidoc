@@ -1,6 +1,8 @@
 [[install]]
 == Installing Kibana
 
+NOTE: Starting with version 6.0.0, Kibana only supports 64 bit operating systems.
+
 Kibana is provided in the following package formats:
 
 [horizontal]
