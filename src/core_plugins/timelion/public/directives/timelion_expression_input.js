@@ -23,9 +23,9 @@
 
 import _ from 'lodash';
 import $ from 'jquery';
-import grammar from 'raw!../chain.peg';
 import PEG from 'pegjs';
 
+import grammar from 'raw!../chain.peg';
 import './timelion_expression_suggestions/timelion_expression_suggestions';
 import timelionExpressionInputTemplate from './timelion_expression_input.html';
 import {
@@ -33,6 +33,7 @@ import {
   suggest,
   insertAtLocation,
 } from './timelion_expression_input_helpers';
+import { comboBoxKeyCodes } from 'ui_framework/services';
 
 const Parser = PEG.buildParser(grammar);
 const app = require('ui/modules').get('apps/timelion', []);
@@ -50,15 +51,6 @@ app.directive('timelionExpressionInput', function ($document, $http, $interval, 
     template: timelionExpressionInputTemplate,
     link: function (scope, elem) {
       const expressionInput = elem.find('[data-expression-input]');
-
-      const navigationalKeys = {
-        ESC: 27,
-        UP: 38,
-        DOWN: 40,
-        TAB: 9,
-        ENTER: 13
-      };
-
       const functionReference = {};
       let suggestibleFunctionLocation = {};
 
@@ -133,7 +125,7 @@ app.directive('timelionExpressionInput', function ($document, $http, $interval, 
       }
 
       function isNavigationalKey(keyCode) {
-        const keyCodes = _.values(navigationalKeys);
+        const keyCodes = _.values(comboBoxKeyCodes);
         return keyCodes.includes(keyCode);
       }
 
@@ -155,7 +147,7 @@ app.directive('timelionExpressionInput', function ($document, $http, $interval, 
         }
 
         switch (e.keyCode) {
-          case navigationalKeys.UP:
+          case comboBoxKeyCodes.UP:
             if (scope.functionSuggestions.isVisible) {
               // Up and down keys navigate through suggestions.
               e.preventDefault();
@@ -164,7 +156,7 @@ app.directive('timelionExpressionInput', function ($document, $http, $interval, 
             }
             break;
 
-          case navigationalKeys.DOWN:
+          case comboBoxKeyCodes.DOWN:
             if (scope.functionSuggestions.isVisible) {
               // Up and down keys navigate through suggestions.
               e.preventDefault();
@@ -173,7 +165,7 @@ app.directive('timelionExpressionInput', function ($document, $http, $interval, 
             }
             break;
 
-          case navigationalKeys.TAB:
+          case comboBoxKeyCodes.TAB:
             // If there are no suggestions, the user tabs to the next input.
             if (scope.functionSuggestions.isEmpty()) {
               return;
@@ -184,7 +176,7 @@ app.directive('timelionExpressionInput', function ($document, $http, $interval, 
             insertSuggestionIntoExpression(scope.functionSuggestions.index);
             break;
 
-          case navigationalKeys.ENTER:
+          case comboBoxKeyCodes.ENTER:
             if (e.metaKey) {
               // Re-render the chart when the user hits CMD+ENTER.
               e.preventDefault();
@@ -196,7 +188,7 @@ app.directive('timelionExpressionInput', function ($document, $http, $interval, 
             }
             break;
 
-          case navigationalKeys.ESC:
+          case comboBoxKeyCodes.ESC:
             e.preventDefault();
             scope.functionSuggestions.hide();
             break;
