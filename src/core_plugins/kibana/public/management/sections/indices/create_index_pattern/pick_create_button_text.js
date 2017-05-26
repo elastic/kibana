@@ -2,7 +2,7 @@ export function pickCreateButtonText($translate, state) {
   const {
     loading,
     invalidIndexName,
-    timeField
+    timeFieldOption
   } = state;
 
   if (loading) {
@@ -13,7 +13,7 @@ export function pickCreateButtonText($translate, state) {
     return $translate.instant('KIBANA-INVALID_INDEX_PATTERN');
   }
 
-  if (!timeField) {
+  if (!timeFieldOption) {
     return $translate.instant('KIBANA-FIELD_IS_REQUIRED', {
       fieldName: $translate.instant('KIBANA-TIME_FILTER_FIELD_NAME')
     });
