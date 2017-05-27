@@ -28,12 +28,10 @@ fi
 nvm install "$(cat .node-version)"
 
 ###*****###
-### NPM ###
+### yarn ###
 ###*****###
-npm install
-
-
-if [ -z "$(npm bin)" ]; then
-  echo "npm does not know where it stores executables..... huh??"
-  exit 1
-fi
+mkdir .bin
+curl -L https://github.com/yarnpkg/yarn/releases/download/v0.24.2/yarn-0.24.2.js > .bin/yarn
+chmod +x .bin/yarn
+PATH="$(pwd)/.bin:$PATH"
+yarn
