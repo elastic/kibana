@@ -8,18 +8,19 @@ export function MapsVisualizationProvider(Private) {
   const MapsRenderbot = Private(MapsVisTypeMapsRenderbotProvider);
 
   class MapsVisController {
-    constructor(el) {
+    constructor(el, vis) {
       this.el = $(el);
+      this._vis = vis;
+      this.renderbot = new MapsRenderbot(this._vis, this.el, vis.getUiState());
     }
 
-    render(vis, esResponse) {
-      return new Promise(resolve => {
-        if (!this.renderbot) {
-          this.renderbot = new MapsRenderbot(vis, this.el, vis.getUiState());
-        }
-        this.renderbot.render(esResponse);
-        resolve();
-      });
+    async render(esResponse) {
+      //todo: should notify of render-completeness, which it isn't doing correctly now
+      this.renderbot.render(esResponse);
+    }
+
+    resize() {
+      this.renderbot.resize();
     }
 
     destroy() {

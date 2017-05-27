@@ -5,12 +5,10 @@ import { KibanaMap } from './kibana_map';
 import { GeohashLayer } from './geohash_layer';
 import './lib/tilemap_settings';
 import './styles/_tilemap.less';
-import { ResizeCheckerProvider } from 'ui/resize_checker';
 
 
 module.exports = function MapsRenderbotFactory(Private, $injector, tilemapSettings, Notifier, courier, getAppState) {
 
-  const ResizeChecker = Private(ResizeCheckerProvider);
   const notify = new Notifier({ location: 'Tilemap' });
 
   class MapsRenderbot {
@@ -27,14 +25,12 @@ module.exports = function MapsRenderbotFactory(Private, $injector, tilemapSettin
       this._baseLayerDirty = true;
       this._dataDirty = true;
       this._paramsDirty = true;
+    }
 
-
-      this._resizeChecker = new ResizeChecker($el);
-      this._resizeChecker.on('resize', () => {
-        if (this._kibanaMap) {
-          this._kibanaMap.resize();
-        }
-      });
+    resize() {
+      if (this._kibanaMap) {
+        this._kibanaMap.resize();
+      }
     }
 
     async _makeKibanaMap() {
@@ -127,7 +123,7 @@ module.exports = function MapsRenderbotFactory(Private, $injector, tilemapSettin
      * called on data change
      * @param esResponse
      */
-    render(esResponse) {
+    async render(esResponse) {
       this._dataDirty = true;
       this._kibanaMapReady.then(() => {
         this._chartData = esResponse;
@@ -234,9 +230,10 @@ module.exports = function MapsRenderbotFactory(Private, $injector, tilemapSettin
 
     _doRenderComplete() {
       if (this._paramsDirty || this._dataDirty || this._baseLayerDirty) {
-        return;
+        return false;
       }
       this.$el.trigger('renderComplete');
+      return true;
     }
 
   }

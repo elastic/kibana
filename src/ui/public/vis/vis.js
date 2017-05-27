@@ -164,10 +164,6 @@ export function VisProvider(Private, timefilter, getAppState) {
       return this.__uiState;
     }
 
-    implementsRenderComplete() {
-      return this.type.implementsRenderComplete;
-    }
-
     /**
      * Currently this is only used to extract map-specific information
      * (e.g. mapZoom, mapCenter).
