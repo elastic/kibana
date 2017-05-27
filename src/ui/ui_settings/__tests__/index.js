@@ -2,7 +2,7 @@ import { isEqual } from 'lodash';
 import sinon from 'sinon';
 import expect from 'expect.js';
 import init from '..';
-import defaultsProvider from '../defaults';
+import { getDefaultSettings } from '../defaults';
 import { errors as esErrors } from 'elasticsearch';
 
 describe('ui settings', function () {
@@ -107,13 +107,13 @@ describe('ui settings', function () {
         uiSettings
       } = instantiate();
       const defaults = await uiSettings.getDefaults();
-      expect(isEqual(defaults, defaultsProvider())).to.equal(true);
+      expect(isEqual(defaults, getDefaultSettings())).to.equal(true);
     });
 
 
     describe('defaults for formatters', async function () {
 
-      const defaults = defaultsProvider();
+      const defaults = getDefaultSettings();
       const mapping = JSON.parse(defaults['format:defaultTypeMap'].value);
       const expected = {
         ip: { id: 'ip', params: {} },
@@ -252,7 +252,7 @@ describe('ui settings', function () {
         req
       } = instantiate({ getResult });
       const result = await uiSettings.getRaw(req);
-      expect(isEqual(result, defaultsProvider())).to.equal(true);
+      expect(isEqual(result, getDefaultSettings())).to.equal(true);
     });
 
     it(`user configuration gets merged with defaults`, async function () {
@@ -262,7 +262,7 @@ describe('ui settings', function () {
         req
       } = instantiate({ getResult });
       const result = await uiSettings.getRaw(req);
-      const merged = defaultsProvider();
+      const merged = getDefaultSettings();
       merged.foo = { userValue: 'bar' };
       expect(isEqual(result, merged)).to.equal(true);
     });
@@ -274,7 +274,7 @@ describe('ui settings', function () {
         req
       } = instantiate({ getResult });
       const result = await uiSettings.getRaw(req);
-      const merged = defaultsProvider();
+      const merged = getDefaultSettings();
       merged.dateFormat.userValue = 'YYYY-MM-DD';
       expect(isEqual(result, merged)).to.equal(true);
     });
@@ -295,7 +295,7 @@ describe('ui settings', function () {
         req
       } = instantiate({ getResult });
       const result = await uiSettings.getAll(req);
-      const defaults = defaultsProvider();
+      const defaults = getDefaultSettings();
       const expectation = {};
       Object.keys(defaults).forEach(key => {
         expectation[key] = defaults[key].value;
@@ -310,7 +310,7 @@ describe('ui settings', function () {
         req
       } = instantiate({ getResult });
       const result = await uiSettings.getAll(req);
-      const defaults = defaultsProvider();
+      const defaults = getDefaultSettings();
       const expectation = {};
       Object.keys(defaults).forEach(key => {
         expectation[key] = defaults[key].value;
@@ -326,7 +326,7 @@ describe('ui settings', function () {
         req
       } = instantiate({ getResult });
       const result = await uiSettings.getAll(req);
-      const defaults = defaultsProvider();
+      const defaults = getDefaultSettings();
       const expectation = {};
       Object.keys(defaults).forEach(key => {
         expectation[key] = defaults[key].value;
@@ -351,7 +351,7 @@ describe('ui settings', function () {
         req
       } = instantiate({ getResult });
       const result = await uiSettings.get(req, 'dateFormat');
-      const defaults = defaultsProvider();
+      const defaults = getDefaultSettings();
       expect(result).to.equal(defaults.dateFormat.value);
     });
 
