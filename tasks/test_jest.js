@@ -18,7 +18,7 @@ module.exports = function (grunt) {
     return new Promise((resolve, reject) => {
       grunt.util.spawn(serverCmd, (error, result, code) => {
         if (error || code !== 0) {
-          const error = new Error(`jest exitted with code ${code}`);
+          const error = new Error(`jest exited with code ${code}`);
           grunt.fail.fatal(error);
           reject(error);
           return;
