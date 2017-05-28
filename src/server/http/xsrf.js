@@ -15,7 +15,7 @@ export default function (kbnServer, server, config) {
     const hasXsrfHeader = xsrfHeader in req.headers;
 
     if (!isSafeMethod && !hasVersionHeader && !hasXsrfHeader) {
-      return reply(badRequest(`Request must contain an ${xsrfHeader} header`));
+      return reply(badRequest(`Request must contain an ${xsrfHeader} or ${versionHeader} header. Is a proxy removing them?`));
     }
 
     return reply.continue();
