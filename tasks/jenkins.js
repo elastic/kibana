@@ -7,7 +7,7 @@ module.exports = function (grunt) {
     'jenkins:env',
     'rejectRejFiles',
     'test',
-    process.env.JOB_NAME === 'kibana_core' ? 'build' : null
+    'build'
   ]));
 
   grunt.registerTask('jenkins:env', () => {
