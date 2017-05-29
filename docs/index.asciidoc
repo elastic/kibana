@@ -18,6 +18,18 @@ release-state can be: released | prerelease | unreleased
 :commit:         {repo}commit/
 :blob:           {repo}blob/{branch}/
 :security:       https://www.elastic.co/community/security/
+:xpack:             X-Pack
+:security:          X-Pack security
+:monitoring:        X-Pack monitoring
+:watcher:           Watcher
+:reporting:         X-Pack reporting
+:graph:             X-Pack graph
+:searchprofiler:    X-Pack search profiler
+:xpackml:           X-Pack machine learning
+:es:                Elasticsearch
+:kib:               Kibana
+
+:xkb-repo-dir: {docdir}/../../x-pack-kibana/docs/en
 
 include::introduction.asciidoc[]
 
@@ -35,9 +47,17 @@ include::dashboard.asciidoc[]
 
 include::timelion.asciidoc[]
 
-include::index-shared3.asciidoc[]
+//include::{xes-repo-dir}/ml/index.asciidoc[]
+
+//include::{xkb-repo-dir}/graph/index.asciidoc[]
+
+include::console.asciidoc[]
+
+//include::{xkb-repo-dir}/monitoring/index.asciidoc[]
 
 include::management.asciidoc[]
+
+include::{xkb-repo-dir}/reporting/index.asciidoc[]
 
 include::plugins.asciidoc[]
 
