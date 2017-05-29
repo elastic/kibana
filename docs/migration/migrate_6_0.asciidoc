@@ -45,3 +45,10 @@ This is no longer the case. Now, only commas are a valid query separator: e.g. `
 *Details:* Setting the NODE_ENV environment variable can break Kibana processes in unexpected ways, which is especially unfortunate since it is a common environment variable to have configured on a system, and you wouldn't expect it to break anything in Kibana. Kibana will now effectively ignore NODE_ENV entirely.
 
 *Impact:* If you're developing a custom plugin that depends on NODE_ENV, you will need to update it to use a different, custom environment variable.
+
+
+[float]
+=== Kibana 4.x configuration names using `_` instead of `.` have been removed
+*Details:* In Kibana 4.2, we renamed all configuration names in kibana.yml to use `.` as a separator instead of `_`, though the legacy configurations would still continue to work. In 5.0, we started logging deprecation notices whenever the legacy configurations were encountered. In 6.0 onward, legacy configuration names that use an underscore instead of a dot will no longer work.
+
+*Impact:* Any usages of underscore separated configuration names in kibana.yml need to be updated to their modern equivalents. See <<settings,Configuring Kibana>> for accepted configurations.
