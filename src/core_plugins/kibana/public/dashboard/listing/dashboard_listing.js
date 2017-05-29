@@ -13,6 +13,7 @@ export function DashboardListingController($injector, $scope) {
   const Private = $injector.get('Private');
   const timefilter = $injector.get('timefilter');
   const config = $injector.get('config');
+  const dashboardConfig = $injector.get('dashboardConfig');
 
   timefilter.enabled = false;
 
@@ -71,6 +72,8 @@ export function DashboardListingController($injector, $scope) {
   this.filter = '';
 
   this.pager = pagerFactory.create(this.items.length, 20, 1);
+
+  this.hideWriteControls = dashboardConfig.getHideWriteControls();
 
   $scope.$watch(() => this.filter, () => {
     deselectAll();

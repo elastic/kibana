@@ -52,7 +52,10 @@ class CalculationAgg extends Component {
                 model={model}/>
             </div>
             <div className="vis_editor__row_item">
-              <div className="vis_editor__label">Script (Painless)</div>
+              <div className="vis_editor__label">
+                Painless Script - Variables are keys on the <code>params</code>
+                object, i.e. <code>params.&lt;name&gt;</code>
+              </div>
               <input
                 className="vis_editor__input-grows-100"
                 type="text"
