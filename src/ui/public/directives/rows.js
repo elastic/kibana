@@ -94,14 +94,14 @@ module.directive('kbnRows', function ($compile, $rootScope, getAppState, Private
         //Change request #9834 Color field format should apply to the whole cell in data table
         //At this point $cell has the background color applied by the color field formatter. I'm parsing it out and applying it to the whole cell.
         let backgroundColor;
-        let fieldFormattedCell=$cell[0].querySelector('span > span');
-        if (fieldFormattedCell){
-          let style = fieldFormattedCell.getAttribute('style');
-          if(style){
-            let startIndex = style.indexOf('background-color: ');
-            if(startIndex){
+        const fieldFormattedCell = $cell[0].querySelector('span > span');
+        if (fieldFormattedCell) {
+          const style = fieldFormattedCell.getAttribute('style');
+          if (style) {
+            const startIndex = style.indexOf('background-color: ');
+            if (startIndex) {
               backgroundColor = style.substring(startIndex);
-              $cell[0].setAttribute("style", backgroundColor);
+              $cell[0].setAttribute('style', backgroundColor);
             }
           }
         }
