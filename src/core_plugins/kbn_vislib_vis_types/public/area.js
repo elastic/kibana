@@ -60,7 +60,9 @@ export default function PointSeriesVisType(Private) {
               filter: false,
               truncate: 100
             },
-            title: {}
+            title: {
+              text: 'Count'
+            }
           }
         ],
         seriesParams: [{

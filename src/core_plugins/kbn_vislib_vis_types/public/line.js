@@ -60,10 +60,25 @@ export default function PointSeriesVisType(Private) {
               filter: false,
               truncate: 100
             },
-            title: {}
+            title: {
+              text: 'Count'
+            }
           }
         ],
-        seriesParams: [],
+        seriesParams: [
+          {
+            show: 'true',
+            type: 'line',
+            mode: 'normal',
+            data: {
+              label: 'Count',
+              id: '1'
+            },
+            valueAxis: 'ValueAxis-1',
+            drawLinesBetweenPoints: true,
+            showCircles: true
+          }
+        ],
         addTooltip: true,
         addLegend: true,
         legendPosition: 'right',
