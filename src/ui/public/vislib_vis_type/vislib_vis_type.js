@@ -15,6 +15,7 @@ export function VislibVisTypeVislibVisTypeProvider(Private) {
   const pointSeries = Private(AggResponsePointSeriesProvider);
   const VislibRenderbot = Private(VislibVisTypeVislibRenderbotProvider);
 
+  // converts old config format (pre 5.2) to the new one
   const updateParams = function (params) {
     if (!params.seriesParams || !params.seriesParams.length) return;
 
