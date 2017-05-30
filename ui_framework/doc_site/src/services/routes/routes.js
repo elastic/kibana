@@ -75,6 +75,9 @@ import ModalExample
 import NoticeSandbox
   from '../../views/notice/notice_sandbox';
 
+import PagerExample
+  from '../../views/pager/pager_example';
+
 import PanelExample
   from '../../views/panel/panel_example';
 
@@ -173,6 +176,10 @@ const components = [{
 }, {
   name: 'Modal',
   component: ModalExample,
+  hasReact: true,
+}, {
+  name: 'Pager',
+  component: PagerExample,
   hasReact: true,
 }, {
   name: 'Panel',
