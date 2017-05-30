@@ -19,19 +19,22 @@ export function HeaderPageProvider({ getService, getPageObjects }) {
     async clickDiscover() {
       log.debug('click Discover tab');
       await this.clickSelector('a[href*=\'discover\']');
-      await PageObjects.common.waitForLocalNavToBeVisible();
+      await PageObjects.common.waitForTopNavToBeVisible();
+      await this.isGlobalLoadingIndicatorHidden();
     }
 
     async clickVisualize() {
       log.debug('click Visualize tab');
       await this.clickSelector('a[href*=\'visualize\']');
-      await PageObjects.common.waitForLocalNavToBeVisible();
+      await PageObjects.common.waitForTopNavToBeVisible();
+      await this.isGlobalLoadingIndicatorHidden();
     }
 
     async clickDashboard() {
       log.debug('click Dashboard tab');
       await this.clickSelector('a[href*=\'dashboard\']');
-      await PageObjects.common.waitForLocalNavToBeVisible();
+      await PageObjects.common.waitForTopNavToBeVisible();
+      await this.isGlobalLoadingIndicatorHidden();
     }
 
     async clickSettings() {
