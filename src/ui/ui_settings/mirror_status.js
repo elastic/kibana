@@ -4,11 +4,12 @@ export function mirrorStatus(status, esStatus) {
     return;
   }
 
-  const setStatus = state => {
+  const copyEsStatus = () => {
+    const { state } = esStatus;
     const statusMessage = state === 'green' ? 'Ready' : `Elasticsearch plugin is ${state}`;
     status[state](statusMessage);
   };
 
-  setStatus(esStatus.state);
-  esStatus.on('change', () => setStatus(esStatus.state));
+  copyEsStatus();
+  esStatus.on('change', copyEsStatus);
 }
