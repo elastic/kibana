@@ -15,6 +15,7 @@ import {
   isFilterValid,
   buildFilter
 } from './lib/filter_editor_utils';
+import * as filterBuilder from '../filter_manager/lib';
 import { keyMap } from '../utils/key_map';
 
 const module = uiModules.get('kibana');
@@ -102,7 +103,8 @@ module.directive('filterEditor', function ($timeout) {
           meta.index = meta.index || this.indexPatterns[0].id;
           newFilter = Object.assign(this.queryDsl, { meta });
         } else {
-          newFilter = buildFilter({ field, operator, params });
+          const indexPattern = field.indexPattern;
+          newFilter = buildFilter({ indexPattern, field, operator, params, filterBuilder });
         }
         newFilter.meta.disabled = isDisabled;
         newFilter.meta.alias = alias;

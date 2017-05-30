@@ -1,11 +1,5 @@
 import _ from 'lodash';
 import { FILTER_OPERATORS } from './filter_operators';
-import {
-  buildExistsFilter,
-  buildPhraseFilter,
-  buildRangeFilter,
-  buildPhrasesFilter
-} from '../../filter_manager/lib';
 
 export function getQueryDslFromFilter(filter) {
   return _(filter)
@@ -73,16 +67,16 @@ export function isFilterValid({ field, operator, params }) {
   return true;
 }
 
-export function buildFilter({ field, operator, params }) {
+export function buildFilter({ indexPattern, field, operator, params, filterBuilder }) {
   let filter;
   if (operator.type === 'phrase') {
-    filter = buildPhraseFilter(field, params.phrase, field.indexPattern);
+    filter = filterBuilder.buildPhraseFilter(field, params.phrase, indexPattern);
   } else if (operator.type === 'phrases') {
-    filter = buildPhrasesFilter(field, params.phrases, field.indexPattern);
+    filter = filterBuilder.buildPhrasesFilter(field, params.phrases, indexPattern);
   } else if (operator.type === 'range') {
-    filter = buildRangeFilter(field, { gte: params.range.from, lt: params.range.to }, field.indexPattern);
+    filter = filterBuilder.buildRangeFilter(field, { gte: params.range.from, lt: params.range.to }, indexPattern);
   } else if (operator.type === 'exists') {
-    filter = buildExistsFilter(field, field.indexPattern);
+    filter = filterBuilder.buildExistsFilter(field, indexPattern);
   }
   filter.meta.negate = operator.negate;
   return filter;

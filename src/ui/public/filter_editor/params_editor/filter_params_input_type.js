@@ -10,7 +10,7 @@ module.directive('filterParamsInputType', function () {
     template,
     scope: {
       type: '=',
-      value: '@',
+      value: '=',
       onChange: '&'
     }
   };

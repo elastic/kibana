@@ -1,22 +1,21 @@
 export const phraseFilter = {
-  'meta': {
-    'index': 'foo',
-    'type': 'phrase',
-    'key': 'bar',
-    'value': 'baz',
-    'disabled': false,
-    'negate': false,
-    'alias': null
+  meta: {
+    negate: false,
+    index: 'logstash-*',
+    type: 'phrase',
+    key: 'machine.os',
+    value: 'ios',
+    disabled: false
   },
-  'query': {
-    'match': {
-      'source_name': {
-        'query': 'baz',
-        'type': 'phrase'
+  query: {
+    match: {
+      'machine.os': {
+        query: 'ios',
+        type: 'phrase'
       }
     }
   },
-  '$state': {
-    'store': 'appState'
+  $state: {
+    store: 'appState'
   }
 };
