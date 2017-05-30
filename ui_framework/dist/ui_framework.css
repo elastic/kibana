@@ -25,6 +25,9 @@
  * Nothing fancy, just the basics so we can use this for both regular and static controls.
  */
 /**
+ * 1. Prevent Firefox users from being able to resize textareas to smaller than the min-height.
+ */
+/**
  * 1. Angular will add an ng-untouched class to an input if it hasn't been touched yet.
  *    We only want invalid inputs to appear invalid after the user has had a chance to interact
  *    with it.
@@ -843,6 +846,8 @@ body {
   border: 1px solid #DEDEDE;
   border-radius: 4px;
   transition: border-color 0.1s linear;
+  min-height: 30px;
+  /* 1 */
   padding-left: 28px;
   /* 1 */
   width: 100%;
@@ -879,6 +884,8 @@ body {
   border: 1px solid #DEDEDE;
   border-radius: 4px;
   transition: border-color 0.1s linear;
+  min-height: 30px;
+  /* 1 */
   padding-right: 30px;
   /* 2 */
   background-image: url('data:image/svg+xml;utf8,<svg width="1792" height="1792" viewBox="0 0 1792 1792" xmlns="http://www.w3.org/2000/svg"><path d="M1408 704q0 26-19 45l-448 448q-19 19-45 19t-45-19l-448-448q-19-19-19-45t19-45 45-19h896q26 0 45 19t19 45z"/></svg>');
@@ -946,7 +953,9 @@ body {
   background-color: #ffffff;
   border: 1px solid #DEDEDE;
   border-radius: 4px;
-  transition: border-color 0.1s linear; }
+  transition: border-color 0.1s linear;
+  min-height: 30px;
+  /* 1 */ }
   .theme-dark .kuiTextArea {
     color: #cecece; }
   .kuiTextArea:invalid:not(.ng-untouched) {
@@ -984,7 +993,9 @@ body {
   background-color: #ffffff;
   border: 1px solid #DEDEDE;
   border-radius: 4px;
-  transition: border-color 0.1s linear; }
+  transition: border-color 0.1s linear;
+  min-height: 30px;
+  /* 1 */ }
   .theme-dark .kuiTextInput {
     color: #cecece; }
   .kuiTextInput:invalid:not(.ng-untouched) {
@@ -1028,8 +1039,16 @@ body {
           align-items: center;
   /* 1 */ }
 
-.kuiFieldGroupSection + .kuiFieldGroupSection {
-  margin-left: 10px; }
+.kuiFieldGroup--alignTop {
+  -webkit-box-align: start;
+  -webkit-align-items: flex-start;
+      -ms-flex-align: start;
+          align-items: flex-start; }
+
+.kuiFieldGroupSection {
+  line-height: 1.5; }
+  .kuiFieldGroupSection + .kuiFieldGroupSection {
+    margin-left: 10px; }
 
 .kuiFieldGroupSection--wide {
   -webkit-box-flex: 1;
@@ -1786,6 +1805,8 @@ body {
   border: 1px solid #DEDEDE;
   border-radius: 4px;
   transition: border-color 0.1s linear;
+  min-height: 30px;
+  /* 1 */
   -webkit-box-flex: 1;
   -webkit-flex: 1 1 100%;
       -ms-flex: 1 1 100%;
@@ -1863,6 +1884,8 @@ body {
   border: 1px solid #DEDEDE;
   border-radius: 4px;
   transition: border-color 0.1s linear;
+  min-height: 30px;
+  /* 1 */
   padding-right: 30px;
   /* 2 */
   background-image: url('data:image/svg+xml;utf8,<svg width="1792" height="1792" viewBox="0 0 1792 1792" xmlns="http://www.w3.org/2000/svg"><path d="M1408 704q0 26-19 45l-448 448q-19 19-45 19t-45-19l-448-448q-19-19-19-45t19-45 45-19h896q26 0 45 19t19 45z"/></svg>');
