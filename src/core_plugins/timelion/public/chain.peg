@@ -8,9 +8,13 @@
  }
 
  function simpleLocation (location) {
+  // Returns an object representing the position of the function within the expression,
+  // demarcated by the position of its first character and last character. We calculate these values
+  // using the offset because the expression could span multiple lines, and we don't want to deal
+  // with column and line values.
   return {
-   min: location.start.column,
-   max: location.end.column
+   min: location.start.offset,
+   max: location.end.offset
   }
  }
 
@@ -21,7 +25,7 @@
 }
 
 start
- = tree:series {
+ = space? tree:series {
   return {
     tree: tree.filter(function (o) {return o != null}),
     functions: functions,
@@ -87,7 +91,7 @@ function_name
  = first:[a-zA-Z]+ rest:[.a-zA-Z0-9_-]* { return first.join('') + rest.join('') }
 
 function "function"
- = space? '.' name:function_name space? '(' space? arg_list:arg_list? space? ')' {
+ = space? '.' name:function_name space? '(' space? arg_list:arg_list? space? ')' space? {
   var result = {
     type: 'function',
     function: name,

@@ -1,5 +1,5 @@
 define(function (require) {
-  require('plugins/timelion/directives/expression_directive');
+  require('plugins/timelion/directives/timelion_expression_input');
 
   const module = require('ui/modules').get('kibana/timelion_vis', ['kibana']);
   module.controller('TimelionVisParamsController', function ($scope, $rootScope) {
