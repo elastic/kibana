@@ -4,14 +4,10 @@ import Bluebird from 'bluebird';
 import { getDefaultSettings } from './defaults';
 
 function hydrateUserSettings(user) {
-  return Object.keys(user).reduce(expand, {});
-  function expand(expanded, key) {
-    const userValue = user[key];
-    if (userValue !== null) {
-      expanded[key] = { userValue };
-    }
-    return expanded;
-  }
+  return Object.keys(user)
+    .map(key => ({ key, userValue: user[key] }))
+    .filter(({ userValue }) => userValue !== null)
+    .reduce((acc, { key, userValue }) => ({ ...acc, [key]: { userValue } }), {});
 }
 
 function assertRequest(req) {
