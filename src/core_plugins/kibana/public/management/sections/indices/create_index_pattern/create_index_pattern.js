@@ -20,7 +20,6 @@ uiModules.get('apps/management')
   const notify = new Notifier();
   const refreshKibanaIndex = Private(RefreshKibanaIndex);
   const intervals = indexPatterns.intervals;
-  let samplePromise;
   let loadingCount = 0;
 
   // Configure the new index pattern we're going to create.
@@ -186,10 +185,28 @@ uiModules.get('apps/management')
       });
   };
 
+  this.isTimeBased = () => {
+    if (!this.formValues.timeFieldOption) {
+      // if they haven't choosen a time field, assume they will
+      return true;
+    }
+
+    // if timeFieldOption has a fieldName it's a time field, otherwise
+    // it's a way to opt-out of the time field or an indication that there
+    // are no fields available
+    return Boolean(this.formValues.timeFieldOption.fieldName);
+  };
+
   this.canExpandIndices = () => {
-    // to maximize performance in the digest cycle, move from the least
-    // expensive operation to most
-    return !this.formValues.nameIsPattern && _.includes(this.formValues.name, '*');
+    return (
+      this.isTimeBased() &&
+        !this.formValues.nameIsPattern &&
+        _.includes(this.formValues.name, '*')
+    );
+  };
+
+  this.canUseTimePattern = () => {
+    return this.isTimeBased() && !this.formValues.expandable;
   };
 
   this.isLoading = () => {
@@ -238,12 +255,12 @@ uiModules.get('apps/management')
       : undefined;
 
     // this seems wrong, but it's the original logic... https://git.io/vHYFo
-    const notExpandable = (!expandable && this.canExpandIndices())
+    const notExpandable = (this.canExpandIndices() && !expandable)
       ? true
       : undefined;
 
     // Only event-time-based index patterns set an intervalName.
-    const intervalName = (nameIsPattern && nameInterval)
+    const intervalName = (this.canUseTimePattern() && nameIsPattern && nameInterval)
       ? nameInterval.name
       : undefined;
 
@@ -282,7 +299,7 @@ uiModules.get('apps/management')
 
   $scope.$watchMulti([
     'controller.formValues.nameIsPattern',
-    'controller.formValues.nameInterval.name'
+    'controller.formValues.nameInterval.name',
   ], (newVal, oldVal) => {
     const nameIsPattern = newVal[0];
     const newDefault = getDefaultPatternForInterval(newVal[1]);
@@ -305,40 +322,38 @@ uiModules.get('apps/management')
     if (andUpdate) updateSamples();
   };
 
+  let latestUpdateSampleId = -1;
   $scope.$watchMulti([
     'controller.formValues.name',
     'controller.formValues.nameInterval'
-  ], (newVal, oldVal) => {
-    function promiseMatch(lastPromise, cb) {
-      if (lastPromise === samplePromise) {
-        cb();
-      } else if (samplePromise != null) {
-        // haven't hit the last promise yet, reset index params
-        resetIndex();
-      }
+  ], () => {
+    resetIndex();
+    if (!this.formValues.nameInterval || !this.formValues.name) {
+      return;
     }
 
-    let lastPromise;
-    resetIndex();
-    samplePromise = lastPromise = updateSamples()
-    .then(() => {
-      promiseMatch(lastPromise, () => {
-        this.samples = null;
-        this.patternErrors = [];
-      });
-    })
-    .catch(errors => {
-      promiseMatch(lastPromise, () => {
-        this.existing = null;
-        this.patternErrors = errors;
-      });
-    })
-    .finally(() => {
-      // prevent running when no change happened (ie, first watcher call)
-      if (!_.isEqual(newVal, oldVal)) {
+    // track the latestUpdateSampleId at the time we started
+    // so that we can avoid mutating the controller if the
+    // watcher triggers again before we finish (which would
+    // cause latestUpdateSampleId to increment and the
+    // id === latestUpdateSampleId checks below to fail)
+    const id = (++latestUpdateSampleId);
+    updateSamples()
+      .then(() => {
+        if (latestUpdateSampleId === id) {
+          this.samples = null;
+          this.patternErrors = [];
+        }
+      })
+      .catch(errors => {
+        if (latestUpdateSampleId === id) {
+          this.existing = null;
+          this.patternErrors = errors;
+        }
+      })
+      .finally(() => {
         this.refreshTimeFieldOptions();
-      }
-    });
+      });
   });
 
   $scope.$watchMulti([
