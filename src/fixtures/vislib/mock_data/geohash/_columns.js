@@ -1,5 +1,6 @@
 import _ from 'lodash';
-module.exports = {
+
+export default {
   'columns': [
       {
         'title': 'Top 2 geo.dest: CN',
