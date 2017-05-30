@@ -10,8 +10,11 @@ export function VislibVisualizationsColumnChartProvider(Private) {
     mode: 'normal',
     showTooltip: true,
     color: undefined,
-    fillColor: undefined
+    fillColor: undefined,
   };
+
+  const minBarWidth = 1;
+
   /**
    * Vertical Bar Chart Visualization: renders vertical and/or stacked bars
    *
@@ -106,7 +109,6 @@ export function VislibVisualizationsColumnChartProvider(Private) {
 
         barWidth = (groupWidth - groupSpacing) / groupCount;
 
-        const minBarWidth = 1;
         if (barWidth < minBarWidth) {
           throw new ContainerTooSmall();
         }
@@ -164,7 +166,6 @@ export function VislibVisualizationsColumnChartProvider(Private) {
       const isTimeScale = this.getCategoryAxis().axisConfig.isTimeDomain();
       const isHorizontal = this.getCategoryAxis().axisConfig.isHorizontal();
       const isLogScale = this.getValueAxis().axisConfig.isLogScale();
-      const minWidth = 1;
       let barWidth;
 
       if (isTimeScale) {
@@ -192,7 +193,7 @@ export function VislibVisualizationsColumnChartProvider(Private) {
       }
 
       function widthFunc() {
-        if (barWidth < minWidth) {
+        if (barWidth < minBarWidth) {
           throw new ContainerTooSmall();
         }
 
