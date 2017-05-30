@@ -2233,6 +2233,29 @@ body {
   background-color: #FFF;
   line-height: 1.5; }
 
+/**
+ * 1. Put 10px of space between each child.
+ */
+.kuiPager {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-align: center;
+  -webkit-align-items: center;
+      -ms-flex-align: center;
+          align-items: center; }
+  .kuiPager > * + * {
+    margin-left: 10px;
+    /* 1 */ }
+
+.kuiPagerText {
+  font-size: 14px;
+  line-height: 1.5;
+  color: #5A5A5A;
+  white-space: nowrap;
+  /* 1 */ }
+
 .kuiPanel {
   border: 2px solid #E4E4E4; }
 
