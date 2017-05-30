@@ -1,0 +1,47 @@
+Grid isolate scope
+
+Backports PR #10074
+
+**Commit 1:**
+Dashboard clean up
+
+- Stop storing the grid element on the panel which caused a circular
+reference and required special code to make it serializable.
+- Call state.save directly rather than broadcasting change:vis
+
+This is in prep for possibly making grid scope isolate and view/edit
+mode implementation.
+
+* Original sha: acd3970f9576858836f0788636d70cb966031de8
+* Authored by Stacey Gammon <gammon@elastic.co> on 2017-01-25T21:02:12Z
+
+**Commit 2:**
+Make dashboard grid scope isolate
+
+This will help prepare for state changes for view/edit mode in
+dashboard.js
+
+* Original sha: b860127187bdbceba133975838493d4825e0fd88
+* Authored by Stacey Gammon <gammon@elastic.co> on 2017-01-26T01:02:39Z
+
+**Commit 3:**
+Remove unnecessary uses of findPanelByPanelIndex
+
+can just use the panelElement directly
+
+* Original sha: a8c9328c3814fda70e65c5c718facae7e218d7fc
+* Authored by Stacey Gammon <gammon@elastic.co> on 2017-01-26T17:25:48Z
+
+**Commit 4:**
+Only need the panelIndex stored on the inner element
+
+* Original sha: ce07decefe3f2f7d378836fdeb874e5e4837c40d
+* Authored by Stacey Gammon <gammon@elastic.co> on 2017-01-26T17:34:10Z
+
+**Commit 5:**
+Remove memory leak
+
+Clean up panelElementMapping
+
+* Original sha: 25f62ee9b1e43b07116fb6d74c468e477c8e9920
+* Authored by Stacey Gammon <gammon@elastic.co> on 2017-01-31T16:12:21Z
