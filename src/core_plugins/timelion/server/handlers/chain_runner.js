@@ -8,7 +8,7 @@ import repositionArguments from './lib/reposition_arguments.js';
 import indexArguments from './lib/index_arguments.js';
 import validateTime from './lib/validate_time.js';
 
-module.exports = function (tlConfig) {
+export default function chainRunner(tlConfig) {
   const preprocessChain = require('./lib/preprocess_chain')(tlConfig);
 
   let queryCache = {};

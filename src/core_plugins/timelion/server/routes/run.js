@@ -8,7 +8,7 @@ function replyWithError(e, reply) {
 }
 
 
-module.exports = (server) => {
+export default function (server) {
   server.route({
     method: ['POST', 'GET'],
     path: '/api/timelion/run',

@@ -2,7 +2,7 @@ import buckets from './bucketList';
 import getSeries from '../helpers/get_series';
 import getSeriesList from '../helpers/get_series_list';
 
-module.exports = function () {
+export default function () {
   return getSeriesList([
     getSeries('Negative', buckets,     [-51, 17, 82, 20]),
     getSeries('Nice', buckets,         [100, 50, 50, 20]),

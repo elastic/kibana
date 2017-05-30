@@ -4,7 +4,7 @@
 
 import _ from 'lodash';
 
-module.exports = function ses(points, alpha) {
+export default function ses(points, alpha) {
   let origin;
   let level;
 

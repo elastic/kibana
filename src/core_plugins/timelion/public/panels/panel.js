@@ -1,4 +1,4 @@
-module.exports = function Panel(name, config) {
+export default function Panel(name, config) {
 
   this.name = name;
 

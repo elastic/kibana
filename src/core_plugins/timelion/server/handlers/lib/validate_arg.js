@@ -1,7 +1,7 @@
 import argType from './arg_type';
 import _ from 'lodash';
 
-module.exports = function (functionDef) {
+export default function validateArgFn(functionDef) {
   return function validateArg(value, name, argDef) {
     const type = argType(value);
     const required = argDef.types;

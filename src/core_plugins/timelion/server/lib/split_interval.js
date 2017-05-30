@@ -1,4 +1,4 @@
-module.exports = function splitInterval(interval) {
+export default function splitInterval(interval) {
   if (!interval.match(/[0-9]+[mshdwMy]+/g)) {
     throw new Error ('Malformed `interval`: ' + interval);
   }

@@ -1,6 +1,6 @@
 import _ from 'lodash';
 
-module.exports = function (func) {
+export default function (func) {
   const functions = {};
   functions[func.name] = func;
   if (func.aliases) {

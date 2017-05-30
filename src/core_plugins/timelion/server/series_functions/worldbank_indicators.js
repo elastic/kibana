@@ -4,7 +4,7 @@ import Promise from 'bluebird';
 import Datasource from '../lib/classes/datasource';
 
 
-module.exports = new Datasource ('worldbank_indicators', {
+export default new Datasource ('worldbank_indicators', {
   args: [
     {
       name: 'country', // countries/all/indicators/SP.POP.TOTL

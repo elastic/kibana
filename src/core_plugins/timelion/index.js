@@ -1,5 +1,5 @@
 
-module.exports = function (kibana) {
+export default function (kibana) {
   let mainFile = 'plugins/timelion/app';
 
   const ownDescriptor = Object.getOwnPropertyDescriptor(kibana, 'autoload');

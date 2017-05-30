@@ -1,4 +1,4 @@
-module.exports = function generateTicksProvider() {
+export default function generateTicksProvider() {
 
   function floorInBase(n, base) {
     return base * Math.floor(n / base);

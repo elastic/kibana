@@ -8,7 +8,7 @@ import calculateInterval from 'plugins/timelion/lib/calculate_interval';
 
 const SET_LEGEND_NUMBERS_DELAY = 50;
 
-module.exports = function timechartFn(Private, config, $rootScope, timefilter, $compile) {
+export default function timechartFn(Private, config, $rootScope, timefilter, $compile) {
   return function () {
     return {
       help: 'Draw a timeseries chart',

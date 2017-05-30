@@ -1,4 +1,4 @@
-module.exports = function (server) {
+export default function (server) {
   server.route({
     method: 'GET',
     path: '/api/timelion/validate/es',
