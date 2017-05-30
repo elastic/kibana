@@ -3,7 +3,7 @@
 // e.g. a pattern with title `logstash-*` will have a matching template named `kibana-logstash-*`.
 // This module provides utility functions for easily converting between template and pattern names.
 
-module.exports = {
+export default {
   ingestToPattern: (templateName) => {
     if (templateName.indexOf('kibana-') === -1) {
       throw new Error('not a valid kibana namespaced template name');

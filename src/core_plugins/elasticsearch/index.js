@@ -13,7 +13,7 @@ import createProxy, { createPath } from './lib/create_proxy';
 
 const DEFAULT_REQUEST_HEADERS = [ 'authorization' ];
 
-module.exports = function (kibana) {
+export default function (kibana) {
   return new kibana.Plugin({
     require: ['kibana'],
     config(Joi) {

@@ -16,7 +16,7 @@ import { injectVars } from './inject_vars';
 
 const mkdirp = Promise.promisify(mkdirpNode);
 
-module.exports = function (kibana) {
+export default function (kibana) {
   const kbnBaseUrl = '/app/kibana';
   return new kibana.Plugin({
     id: 'kibana',

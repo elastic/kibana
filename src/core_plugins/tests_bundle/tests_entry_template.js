@@ -1,4 +1,4 @@
-module.exports = function ({ env, bundle }) {
+export default function ({ env, bundle }) {
 
   const pluginSlug = env.pluginInfo.sort()
     .map(p => ' *  - ' + p)

@@ -1,4 +1,4 @@
-module.exports = function (server, mappings) {
+export default function (server, mappings) {
   const { callWithInternalUser } = server.plugins.elasticsearch.getCluster('admin');
   const index = server.config().get('kibana.index');
   return callWithInternalUser('indices.create', {
