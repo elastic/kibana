@@ -1,5 +1,6 @@
 import testSubjSelector from '@spalger/test-subj-selector';
 
+// eslint-disable-next-line kibana-custom/no-default-export
 export default function bindToJquery($) {
 
   /**

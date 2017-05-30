@@ -1,3 +1,4 @@
+// eslint-disable-next-line kibana-custom/no-default-export
 export default function (chrome, internals) {
 
   /**

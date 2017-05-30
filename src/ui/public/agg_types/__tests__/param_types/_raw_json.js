@@ -4,6 +4,7 @@ import ngMock from 'ng_mock';
 import { AggTypesParamTypesBaseProvider } from 'ui/agg_types/param_types/base';
 import { AggTypesParamTypesRawJsonProvider } from 'ui/agg_types/param_types/raw_json';
 
+// eslint-disable-next-line kibana-custom/no-default-export
 export default describe('JSON', function () {
   const paramName = 'json_test';
   let BaseAggParam;

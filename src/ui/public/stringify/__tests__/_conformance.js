@@ -23,6 +23,7 @@ const formatIds = [
   'boolean'
 ];
 
+// eslint-disable-next-line kibana-custom/no-default-export
 export default describe('conformance', function () {
 
   beforeEach(ngMock.module('kibana'));

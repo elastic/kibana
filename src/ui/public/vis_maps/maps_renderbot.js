@@ -9,7 +9,7 @@ import './lib/service_settings';
 import './styles/_tilemap.less';
 import { ResizeCheckerProvider } from 'ui/resize_checker';
 
-
+// eslint-disable-next-line kibana-custom/no-default-export
 export default function MapsRenderbotFactory(Private, $injector, serviceSettings, Notifier, courier, getAppState) {
 
   const ResizeChecker = Private(ResizeCheckerProvider);
