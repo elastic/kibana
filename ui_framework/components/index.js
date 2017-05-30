@@ -28,3 +28,8 @@ export {
 } from './tool_bar';
 
 export * from './modal';
+
+export {
+  KuiPager,
+  KuiPagerButtonGroup
+} from './pager';
