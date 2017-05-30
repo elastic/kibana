@@ -1,13 +1,15 @@
 <div
   class="suggestions"
+  ng-class="{ 'suggestions-isPopover': shouldPopover === 'true' }"
   data-suggestions-list
 >
   <div
     class="suggestion"
     data-suggestion-list-item
-    ng-click="onClickSuggestion({ suggestionIndex: $index })"
     ng-class="{active: $index === selectedIndex}"
     ng-repeat="suggestion in suggestions track by $index | orderBy:'name'"
+    ng-mousedown="onMouseDown($event)"
+    ng-click="onClickSuggestion({ suggestionIndex: $index })"
   >
     <h4>
       <strong>.{{suggestion.name}}()</strong>
