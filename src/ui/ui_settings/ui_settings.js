@@ -12,12 +12,13 @@ function hydrateUserSettings(user) {
 
 function assertRequest(req) {
   if (
-    typeof req === 'object' &&
-    typeof req.path === 'string' &&
-    typeof req.headers === 'object'
-  ) return;
-
-  throw new TypeError('all uiSettings methods must be passed a hapi.Request object');
+    !req ||
+    typeof req !== 'object' &&
+    typeof req.path !== 'string' &&
+    typeof req.headers !== 'object'
+  ) {
+    throw new TypeError('all uiSettings methods must be passed a hapi.Request object');
+  }
 }
 
 export class UiSettings {
