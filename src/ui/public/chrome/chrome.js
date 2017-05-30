@@ -51,4 +51,4 @@ chrome.bootstrap = function () {
   angular.bootstrap(document, ['kibana']);
 };
 
-module.exports = chrome;
+export default chrome;

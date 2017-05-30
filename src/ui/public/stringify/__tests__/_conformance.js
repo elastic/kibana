@@ -23,7 +23,7 @@ const formatIds = [
   'boolean'
 ];
 
-module.exports = describe('conformance', function () {
+export default describe('conformance', function () {
 
   beforeEach(ngMock.module('kibana'));
   beforeEach(ngMock.inject(function (Private, $injector) {

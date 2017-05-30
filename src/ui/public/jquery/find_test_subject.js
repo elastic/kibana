@@ -1,6 +1,6 @@
 import testSubjSelector from '@spalger/test-subj-selector';
 
-module.exports = function bindToJquery($) {
+export default function bindToJquery($) {
 
   /**
    * Find elements with the `data-test-subj` attribute by the terms in that attribute.

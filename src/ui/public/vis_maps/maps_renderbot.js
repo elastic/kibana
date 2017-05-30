@@ -10,7 +10,7 @@ import './styles/_tilemap.less';
 import { ResizeCheckerProvider } from 'ui/resize_checker';
 
 
-module.exports = function MapsRenderbotFactory(Private, $injector, serviceSettings, Notifier, courier, getAppState) {
+export default function MapsRenderbotFactory(Private, $injector, serviceSettings, Notifier, courier, getAppState) {
 
   const ResizeChecker = Private(ResizeCheckerProvider);
   const Renderbot = Private(VisRenderbotProvider);
