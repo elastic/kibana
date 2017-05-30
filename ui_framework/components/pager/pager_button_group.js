@@ -8,7 +8,7 @@ export function KuiPagerButtonGroup({ className, onPrevious, onNext, hasNext, ha
       <KuiButton
         aria-label="Show previous page"
         data-test-subj="pagerPreviousButton"
-        type="basic"
+        buttonType="basic"
         onClick={onPrevious}
         disabled={!hasPrevious}
         icon={<KuiButtonIcon type="previous" />}
@@ -16,7 +16,7 @@ export function KuiPagerButtonGroup({ className, onPrevious, onNext, hasNext, ha
       <KuiButton
         aria-label="Show next page"
         data-test-subj="pagerNextButton"
-        type="basic"
+        buttonType="basic"
         onClick={onNext}
         disabled={!hasNext}
         icon={<KuiButtonIcon type="next" />}
