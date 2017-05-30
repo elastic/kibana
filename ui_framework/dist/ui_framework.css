@@ -2488,7 +2488,7 @@ body {
  */
 .kuiTable {
   width: 100%;
-  border: 2px solid #E4E4E4;
+  border: 1px solid #E4E4E4;
   border-collapse: collapse;
   background-color: #FFF; }
 
@@ -2723,7 +2723,8 @@ body {
   /* 1 */
   padding: 10px;
   height: 50px;
-  background-color: #D9D9D9; }
+  background-color: transparent;
+  border: solid 1px #D9D9D9; }
   .kuiToolBar .kuiButton:not(a):enabled:focus {
     z-index: 1;
     /* 1 */
@@ -2940,7 +2941,7 @@ body {
   color: #191E23;
   border-radius: 4px;
   font-size: 1em;
-  border: 1px solid #ffffff;
+  border: 1px solid #D9D9D9;
   line-height: normal;
   /* 1 */
   -webkit-transition: border-color 0.1s linear;
