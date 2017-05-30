@@ -75,7 +75,6 @@ export class SavedObjectsClient {
     } = options;
 
     const esOptions = {
-      type,
       _source: fields,
       size: perPage,
       from: perPage * (page - 1),
@@ -86,11 +85,12 @@ export class SavedObjectsClient {
 
     return {
       saved_objects: get(response, 'hits.hits', []).map(r => {
+        const docType =  get(r, '_source.type') || r._type;
         return {
           id: r._id,
-          type: r._type,
+          type: docType,
           version: r._version,
-          attributes: r._source
+          attributes: get(r, `_source.${docType}`) || r._source
         };
       }),
       total: get(response, 'hits.total', 0),
