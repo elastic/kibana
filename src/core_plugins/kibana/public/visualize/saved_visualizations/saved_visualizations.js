@@ -13,17 +13,17 @@ savedObjectManagementRegistry.register({
   title: 'visualizations'
 });
 
-app.service('savedVisualizations', function (Promise, esAdmin, kbnIndex, SavedVis, Private, Notifier, kbnUrl) {
+app.service('savedVisualizations', function (Promise, esAdmin, kbnIndex, SavedVis, Private, Notifier, kbnUrl, $http) {
   const visTypes = Private(VisTypesRegistryProvider);
   const notify = new Notifier({
     location: 'Saved Visualization Service'
   });
 
-  const saveVisualizationLoader = new SavedObjectLoader(SavedVis, kbnIndex, esAdmin, kbnUrl);
-  saveVisualizationLoader.mapHits = function (hit) {
-    const source = hit._source;
-    source.id = hit._id;
-    source.url = this.urlFor(hit._id);
+  const saveVisualizationLoader = new SavedObjectLoader(SavedVis, kbnIndex, esAdmin, kbnUrl, $http);
+
+  saveVisualizationLoader.mapHitSource = function (source, id) {
+    source.id = id;
+    source.url = this.urlFor(id);
 
     let typeName = source.typeName;
     if (source.visState) {
@@ -32,8 +32,8 @@ app.service('savedVisualizations', function (Promise, esAdmin, kbnIndex, SavedVi
     }
 
     if (!typeName || !visTypes.byName[typeName]) {
-      if (!typeName) notify.error('Visualization type is missing. Please add a type to this visualization.', hit);
-      else notify.error('Visualization type of "' + typeName + '" is invalid. Please change to a valid type.', hit);
+      if (!typeName) notify.error('Visualization type is missing. Please add a type to this visualization.', source);
+      else notify.error('Visualization type of "' + typeName + '" is invalid. Please change to a valid type.', source);
       return kbnUrl.redirect('/management/kibana/objects/savedVisualizations/{{id}}', { id: source.id });
     }
 
@@ -45,6 +45,5 @@ app.service('savedVisualizations', function (Promise, esAdmin, kbnIndex, SavedVi
   saveVisualizationLoader.urlFor = function (id) {
     return kbnUrl.eval('#/visualize/edit/{{id}}', { id: id });
   };
-
   return saveVisualizationLoader;
 });
