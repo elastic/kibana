@@ -43,7 +43,7 @@ export default function ({ getService }) {
     it('returns an empty response if it does not match any indexes', () =>
       supertest
         .get('/api/index_patterns/_test_time_pattern')
-        .query({ pattern: `[${chance.word()}]-YYYY` })
+        .query({ pattern: `[${chance.word({ length: 12 })}]-YYYY` })
         .expect(200, {
           all: [],
           matches: []
