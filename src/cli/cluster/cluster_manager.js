@@ -7,7 +7,7 @@ import BasePathProxy from './base_path_proxy';
 
 process.env.kbnWorkerType = 'managr';
 
-module.exports = class ClusterManager {
+export default class ClusterManager {
   constructor(opts = {}, settings = {}) {
     this.log = new Log(opts.quiet, opts.silent);
     this.addedCount = 0;

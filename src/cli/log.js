@@ -6,7 +6,7 @@ const log = _.restParam(function (color, label, rest1) {
 
 import color from './color';
 
-module.exports = class Log {
+export default class Log {
   constructor(quiet, silent) {
     this.good = quiet || silent ? _.noop : _.partial(log, color.green);
     this.warn = quiet || silent ? _.noop : _.partial(log, color.yellow);

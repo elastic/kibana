@@ -72,7 +72,7 @@ function readServerSettings(opts, extraCliOptions) {
   return settings;
 }
 
-module.exports = function (program) {
+export default function (program) {
   const command = program.command('serve');
 
   command

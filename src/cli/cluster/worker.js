@@ -17,7 +17,7 @@ const dead = fork => {
   return fork.isDead() || fork.killed;
 };
 
-module.exports = class Worker extends EventEmitter {
+export default class Worker extends EventEmitter {
   constructor(opts) {
     opts = opts || {};
     super();
