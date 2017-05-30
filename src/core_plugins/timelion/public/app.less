@@ -10,11 +10,6 @@
   flex-direction: column;
 }
 
-.suggestions {
-  position: absolute;
-  top: 30px;
-}
-
 .timelion {
   position: relative;
 
@@ -24,16 +19,25 @@
   }
 }
 
-/**
- * 1. Needs to be relative to contain absolutely-positioned typeahead suggestions.
- */
-.timelionLocalSearch {
-  position: relative; /* 1 */
+.timelionHelpKeyboardTipsSection {
+  &:last-child {
+    margin-bottom: 0;
+  }
 }
 
-.timelionSearchInputContainer {
+/**
+ * 1. Anchor suggestions beneath input.
+ * 2. Allow for option of positioning suggestions absolutely.
+ */
+.timelionExpressionInputContainer {
   flex: 1 1 auto;
   display: flex;
+  flex-direction: column; /* 1 */
+  position: relative; /* 2 */
+}
+
+.timelionExpressionInput {
+  min-height: 65px;
 }
 
 .timelion-container {
@@ -94,19 +98,6 @@
 
 .chart-container.running {
   opacity: 0.50;
-}
-
-.timelion-interval-custom {
-  width: 60px;
-}
-
-.timelion-interval-presets {
-  width: 90px;
-}
-
-.timelion-interval-presets-compact {
-  width: 10px;
-  padding-left: 0;
 }
 
 timelion-interval {

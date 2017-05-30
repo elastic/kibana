@@ -1,13 +1,13 @@
 define(function (require) {
-  const html = require('../partials/docs/tutorial.html');
+  const template = require('./timelion_help.html');
   const app = require('ui/modules').get('apps/timelion', []);
   const _ = require('lodash');
   const moment = require('moment');
 
-  app.directive('timelionDocs', function ($http) {
+  app.directive('timelionHelp', function ($http) {
     return {
       restrict: 'E',
-      template: html,
+      template,
       controller: function ($scope) {
         $scope.functions = {
           list: [],

@@ -1,27 +1,20 @@
 <div ng-controller="TimelionVisParamsController">
   <div class="form-group">
     <label>Interval</label>
-    <timelion-interval model="vis.params.interval"></timelion-interval>
+    <div class="form-group">
+      <timelion-interval model="vis.params.interval"></timelion-interval>
+    </div>
   </div>
 
   <div class="form-group">
-    <div class="timelion-vis-editor-expression">
-      <div>
-        <label>Timelion Expression</label>
-      </div>
-
-      <timelion-expression-input
-        sheet="vis.params.expression"
-      >
-        <textarea
-          data-timelion-expression-input
-          ng-model="vis.params.expression"
-          class="form-control"
-          timelion-expression=""
-          rows="5"
-        ></textarea>
-      </timelion-expression-input>
+    <div>
+      <label>Timelion Expression</label>
     </div>
+
+    <timelion-expression-input
+      sheet="vis.params.expression"
+      rows="9"
+    ></timelion-expression-input>
   </div>
 
 </div>
