@@ -1,4 +1,4 @@
-module.exports = function (api) {
+export default function (api) {
   api.addGlobalAutocompleteRules('highlight', {
     pre_tags: {},
     post_tags: {},

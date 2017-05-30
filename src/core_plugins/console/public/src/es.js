@@ -1,14 +1,13 @@
 import { stringify as formatQueryString } from 'querystring'
-
 import $ from 'jquery';
 
 let esVersion = [];
 
-module.exports.getVersion = function () {
+export function getVersion() {
   return esVersion;
-};
+}
 
-module.exports.send = function (method, path, data) {
+export function send(method, path, data) {
   var wrappedDfd = $.Deferred();
 
   console.log("Calling " + path);
@@ -57,10 +56,10 @@ module.exports.send = function (method, path, data) {
       wrappedDfd.rejectWith(this, [jqXHR, textStatus, errorThrown]);
     });
   return wrappedDfd;
-};
+}
 
-module.exports.constructESUrl = function (baseUri, path) {
+export function constructESUrl(baseUri, path) {
   baseUri = baseUri.replace(/\/+$/, '');
   path = path.replace(/^\/+/, '');
   return baseUri + '/' + path;
-};
+}

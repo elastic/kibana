@@ -1,4 +1,4 @@
-module.exports = function (api) {
+export default function (api) {
   api.addEndpointDescription('_nodes/hot_threads', {
     methods: ['GET'],
     patterns: [

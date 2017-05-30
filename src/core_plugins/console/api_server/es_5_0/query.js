@@ -67,7 +67,7 @@ var DECAY_FUNC_DESC = {
     }
   };
 
-module.exports = function (api) {
+export default function (api) {
   api.addGlobalAutocompleteRules('query', {
     match: {
       __template: {

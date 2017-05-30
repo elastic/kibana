@@ -5,7 +5,7 @@ let x_json = require('./x_json_highlight_rules');
 var oop = ace.require("ace/lib/oop");
 var JsonHighlightRules = ace.require("ace/mode/json_highlight_rules").JsonHighlightRules;
 
-var OutputJsonHighlightRules = function () {
+export function OutputJsonHighlightRules() {
 
   this.$rules = {};
 
@@ -29,5 +29,3 @@ var OutputJsonHighlightRules = function () {
 };
 
 oop.inherits(OutputJsonHighlightRules, JsonHighlightRules);
-
-module.exports.OutputJsonHighlightRules = OutputJsonHighlightRules;

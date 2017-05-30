@@ -1,4 +1,4 @@
-module.exports = function (api) {
+export default function (api) {
   api.addEndpointDescription('_cluster/nodes/stats');
   api.addEndpointDescription('_cluster/state', {
     patterns: [

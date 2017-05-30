@@ -10,7 +10,7 @@ var AceRange = ace.require('ace/range').Range;
 
 var LAST_EVALUATED_TOKEN = null;
 
-module.exports = function (editor) {
+export default function (editor) {
 
   function isSeparatorToken(token) {
     switch ((token || {}).type) {
@@ -955,7 +955,7 @@ module.exports = function (editor) {
   ace.define('ace/autocomplete/text_completer', ['require', 'exports', 'module'], function (require, exports) {
     exports.getCompletions = function (editor, session, pos, prefix, callback) {
       callback(null, []);
-    }
+    };
   });
 
   var langTools = ace.require('ace/ext/language_tools');

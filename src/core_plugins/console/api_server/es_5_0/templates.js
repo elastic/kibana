@@ -1,4 +1,4 @@
-module.exports = function (api) {
+export default function (api) {
   api.addEndpointDescription('_delete_template', {
     methods: ['DELETE'],
     patterns: [

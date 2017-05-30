@@ -378,7 +378,7 @@ GlobalOnlyComponent.prototype = _.create(
 
 
 // a list of component that match anything but give auto complete suggestions based on global API entries.
-module.exports.globalsOnlyAutocompleteComponents = function () {
+export function globalsOnlyAutocompleteComponents() {
   return [new GlobalOnlyComponent("__global__")];
 };
 
@@ -395,6 +395,6 @@ module.exports.globalsOnlyAutocompleteComponents = function () {
    *   }
    * }
  */
-module.exports.compileBodyDescription = function (endpoint_id, description, parametrizedComponentFactories) {
+export function compileBodyDescription(endpoint_id, description, parametrizedComponentFactories) {
   return compileDescription(description, new CompilingContext(endpoint_id, parametrizedComponentFactories));
 };
