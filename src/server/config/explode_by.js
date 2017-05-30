@@ -1,5 +1,6 @@
 import _ from 'lodash';
-module.exports = function (dot, flatObject) {
+
+export default function (dot, flatObject) {
   const fullObject = {};
   _.each(flatObject, function (value, key) {
     const keys = key.split(dot);

@@ -33,7 +33,7 @@ function disablePluginConfig(pluginCollection, plugin) {
   config.extendSchema(schema, { enabled: false }, plugin.configPrefix);
 }
 
-module.exports = class Plugins extends Collection {
+export default class Plugins extends Collection {
 
   constructor(kbnServer) {
     super();

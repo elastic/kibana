@@ -4,7 +4,7 @@ import states from './states';
 import Status from './status';
 import { version } from '../../../package.json';
 
-module.exports = class ServerStatus {
+export default class ServerStatus {
   constructor(server) {
     this.server = server;
     this._created = {};

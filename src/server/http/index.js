@@ -12,7 +12,7 @@ import setupConnectionMixin from './setup_connection';
 import registerHapiPluginsMixin from './register_hapi_plugins';
 import xsrfMixin from './xsrf';
 
-module.exports = async function (kbnServer, server, config) {
+export default async function (kbnServer, server, config) {
   server = kbnServer.server = new Hapi.Server();
 
   const shortUrlLookup = shortUrlLookupProvider(server);

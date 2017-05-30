@@ -24,7 +24,7 @@ import { savedObjectsMixin } from './saved_objects';
 
 const rootDir = fromRoot('.');
 
-module.exports = class KbnServer {
+export default class KbnServer {
   constructor(settings) {
     this.name = pkg.name;
     this.version = pkg.version;
