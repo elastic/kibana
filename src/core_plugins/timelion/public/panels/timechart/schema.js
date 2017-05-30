@@ -260,4 +260,4 @@ export default function timechartFn(Private, config, $rootScope, timefilter, $co
       }
     };
   };
-};
+}

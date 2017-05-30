@@ -1020,4 +1020,4 @@ export default function (editor) {
       removeChangeListener: removeChangeListener
     }
   }
-};
+}

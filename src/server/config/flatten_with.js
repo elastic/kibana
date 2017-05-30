@@ -13,6 +13,6 @@ export default function (dot, nestedObj, flattenArrays) {
     });
   }(nestedObj));
   return flatObj;
-};
+}
 
 

@@ -32,4 +32,4 @@ export default function dashboardContext(Private, getAppState) {
 
     return { bool: bool };
   };
-};
+}

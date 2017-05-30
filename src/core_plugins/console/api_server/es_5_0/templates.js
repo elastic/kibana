@@ -24,4 +24,4 @@ export default function (api) {
       settings: { __scope_link: '_put_settings' }
     }
   });
-};
+}

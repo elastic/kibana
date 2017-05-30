@@ -12,4 +12,4 @@ export default class Log {
     this.warn = quiet || silent ? _.noop : _.partial(log, color.yellow);
     this.bad = silent ? _.noop : _.partial(log, color.red);
   }
-};
+}

@@ -24,4 +24,4 @@ export default function nearest(dataTuples, targetTuples) {
 
     return [bucket[0], closest[1]];
   });
-};
+}

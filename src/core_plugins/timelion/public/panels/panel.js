@@ -9,4 +9,4 @@ export default function Panel(name, config) {
   if (!config.render) throw new Error ('Panel must have a rendering function');
 
 
-};
+}

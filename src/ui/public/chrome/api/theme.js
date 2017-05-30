@@ -97,4 +97,4 @@ export default function (chrome, internals) {
     return internals.applicationClasses.join(' ');
   };
 
-};
+}

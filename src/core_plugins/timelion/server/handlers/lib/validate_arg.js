@@ -20,4 +20,4 @@ export default function validateArgFn(functionDef) {
       throw new Error (functionDef.name + '(' + name + ') must be one of ' + JSON.stringify(required) + '. Got: ' + type);
     }
   };
-};
+}

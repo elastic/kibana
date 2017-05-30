@@ -383,4 +383,4 @@ export default function (api) {
       ]
     }
   });
-};
+}

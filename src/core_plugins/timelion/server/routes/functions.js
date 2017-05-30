@@ -12,4 +12,4 @@ export default function (server) {
       reply(_.sortBy(functionArray, 'name'));
     }
   });
-};
+}

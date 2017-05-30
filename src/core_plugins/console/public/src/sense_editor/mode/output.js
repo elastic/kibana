@@ -17,7 +17,7 @@ export function Mode() {
   this.$outdent = new MatchingBraceOutdent();
   this.$behaviour = new CstyleBehaviour();
   this.foldingRules = new CStyleFoldMode();
-};
+}
 oop.inherits(Mode, JSONMode);
 
 (function () {

@@ -53,4 +53,4 @@ export default function (api) {
   addSimpleCat('_cat/plugins', api);
   addSimpleCat('_cat/segments', api);
   addNodeattrsCat(api);
-};
+}

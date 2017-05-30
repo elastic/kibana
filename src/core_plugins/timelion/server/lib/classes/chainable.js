@@ -6,4 +6,4 @@ export default class Chainable extends TimelionFunction {
     this.chainable = true;
     Object.freeze(this);
   }
-};
+}

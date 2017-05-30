@@ -11,4 +11,4 @@ export function resolveApi(sense_version, apis, reply) {
   });
 
   return reply(result).type("application/json");
-};
+}

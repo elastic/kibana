@@ -8,4 +8,4 @@ export default function splitInterval(interval) {
     count: parts[0],
     unit: parts[1]
   };
-};
+}

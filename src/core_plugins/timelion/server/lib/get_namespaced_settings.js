@@ -22,4 +22,4 @@ export default function () {
     result['timelion:' + key] = value;
     return result;
   }, {});
-};
+}

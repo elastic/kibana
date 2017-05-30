@@ -231,4 +231,4 @@ export default function (api) {
       "{indices}/_open"
     ]
   });
-};
+}

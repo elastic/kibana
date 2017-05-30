@@ -332,5 +332,5 @@ filters.nested = {
 
 export default function (api) {
   api.addGlobalAutocompleteRules('filter', filters);
-};
+}
 

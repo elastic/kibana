@@ -36,4 +36,4 @@ export default class KbnLogger {
 
     callback();
   }
-};
+}

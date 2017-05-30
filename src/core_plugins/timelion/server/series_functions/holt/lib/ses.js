@@ -31,4 +31,4 @@ export default function ses(points, alpha) {
   }, []);
 
   return smoothedPoints;
-};
+}

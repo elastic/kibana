@@ -20,4 +20,4 @@ export default function tlConfigFn(setup) {
 
   tlConfig = _.extend(tlConfig, setup);
   return tlConfig;
-};
+}

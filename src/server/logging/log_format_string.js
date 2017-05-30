@@ -61,4 +61,4 @@ export default class KbnLoggerJsonFormat extends LogFormat {
 
     return `${workerType}${type(data.type)} [${time}] ${tags} ${msg}`;
   }
-};
+}

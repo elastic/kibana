@@ -10,4 +10,4 @@ export default class KbnLoggerJsonFormat extends LogFormat {
     data.message = stripColors(data.message);
     return stringify(data);
   }
-};
+}

@@ -137,4 +137,4 @@ export default class TransformObjStream extends Stream.Transform {
     }
     return data;
   }
-};
+}

@@ -23,7 +23,7 @@ export function Mode() {
   this.createModeDelegates({
     "script-": ScriptMode
   });
-};
+}
 oop.inherits(Mode, TextMode);
 
 (function () {

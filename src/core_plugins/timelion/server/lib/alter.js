@@ -27,4 +27,4 @@ export default function alter(args, fn) {
   }).catch(function (e) {
     throw e;
   });
-};
+}

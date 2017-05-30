@@ -9,5 +9,5 @@ export default function findPort(start, end, host) {
       resolve(port);
     });
   });
-};
+}
 

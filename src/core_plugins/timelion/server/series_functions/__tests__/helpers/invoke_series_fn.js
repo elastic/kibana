@@ -20,4 +20,4 @@ export default function invokeSeriesFn(fnDef, args, tlConfigOverrides) {
       return result;
     });
   });
-};
+}

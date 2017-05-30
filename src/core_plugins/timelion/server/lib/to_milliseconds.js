@@ -32,4 +32,4 @@ export default function (expr) {
 
     return parseFloat(match[1] || 1) * vals[match[2]];
   }
-};
+}

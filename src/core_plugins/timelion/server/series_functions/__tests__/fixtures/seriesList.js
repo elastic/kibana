@@ -10,4 +10,4 @@ export default function () {
     getSeries('Decimals', buckets,     [3.1415926535, 2, 1.439, 0.3424235]),
     getSeries('PowerOfTen', buckets,   [10, 100, 10, 1]),
   ]);
-};
+}

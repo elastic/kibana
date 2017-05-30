@@ -51,4 +51,4 @@ export default function repositionArguments(functionDef, unorderedArgs) {
 
   return args;
 
-};
+}

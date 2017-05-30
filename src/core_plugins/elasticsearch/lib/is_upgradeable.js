@@ -30,4 +30,4 @@ export default function (server, doc) {
     return false;
   }
   return true;
-};
+}

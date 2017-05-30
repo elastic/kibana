@@ -64,4 +64,4 @@ export default class Datasource extends TimelionFunction {
     Object.freeze(this);
   }
 
-};
+}

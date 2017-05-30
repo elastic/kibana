@@ -43,4 +43,4 @@ export default function stubParamClasses(Private) {
     AggTypesParamTypesOptionedProvider,
     new ParamClassStub(BaseAggParam)
   );
-};
+}

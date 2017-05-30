@@ -380,7 +380,7 @@ GlobalOnlyComponent.prototype = _.create(
 // a list of component that match anything but give auto complete suggestions based on global API entries.
 export function globalsOnlyAutocompleteComponents() {
   return [new GlobalOnlyComponent("__global__")];
-};
+}
 
 /**
  * @param endpoint_id id of the endpoint being compiled.
@@ -397,4 +397,4 @@ export function globalsOnlyAutocompleteComponents() {
  */
 export function compileBodyDescription(endpoint_id, description, parametrizedComponentFactories) {
   return compileDescription(description, new CompilingContext(endpoint_id, parametrizedComponentFactories));
-};
+}

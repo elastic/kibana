@@ -36,4 +36,4 @@ export default function readStatData(data, seriesNames) {
   });
 
   return metricList;
-};
+}

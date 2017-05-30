@@ -80,4 +80,4 @@ export default function reduce(args, fn) {
   }).catch(function (e) {
     throw e;
   });
-};
+}

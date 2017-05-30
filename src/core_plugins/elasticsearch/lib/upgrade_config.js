@@ -54,4 +54,4 @@ export default function (server) {
       id: config.get('pkg.version')
     });
   };
-};
+}

@@ -86,4 +86,4 @@ export default function tes(points, alpha, beta, gamma, seasonLength, seasonsToS
   });
 
   return result;
-};
+}

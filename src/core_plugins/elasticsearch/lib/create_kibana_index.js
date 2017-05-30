@@ -24,4 +24,4 @@ export default function (server, mappings) {
       throw new Error(`Waiting for Kibana index "${index}" to come online failed.`);
     });
   });
-};
+}

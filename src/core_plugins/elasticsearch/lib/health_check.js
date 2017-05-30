@@ -146,4 +146,4 @@ export default function (plugin, server, { mappings }) {
     isRunning: function () { return !!timeoutId; },
   };
 
-};
+}

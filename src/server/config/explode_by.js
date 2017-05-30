@@ -15,6 +15,6 @@ export default function (dot, flatObject) {
     }(fullObject, keys, value));
   });
   return fullObject;
-};
+}
 
 

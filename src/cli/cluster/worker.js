@@ -162,4 +162,4 @@ export default class Worker extends EventEmitter {
     // wait for the fork to report it is online before resolving
     await new Promise(cb => this.once('fork:online', cb));
   }
-};
+}

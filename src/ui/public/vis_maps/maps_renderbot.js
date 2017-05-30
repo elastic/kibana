@@ -259,4 +259,4 @@ export default function MapsRenderbotFactory(Private, $injector, serviceSettings
 
 
   return MapsRenderbot;
-};
+}

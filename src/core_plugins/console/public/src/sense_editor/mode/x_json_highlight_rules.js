@@ -108,4 +108,4 @@ export function addToRules(otherRules, embedUnder) {
      regex: '"""',
      next  : "pop",
   }]);
-};
+}

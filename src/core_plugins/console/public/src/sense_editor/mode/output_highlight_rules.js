@@ -26,6 +26,6 @@ export function OutputJsonHighlightRules() {
     this.normalizeRules();
   }
 
-};
+}
 
 oop.inherits(OutputJsonHighlightRules, JsonHighlightRules);

@@ -197,4 +197,4 @@ export default function chainRunner(tlConfig) {
     processRequest: processRequest,
     getStats: function () { return stats; }
   };
-};
+}

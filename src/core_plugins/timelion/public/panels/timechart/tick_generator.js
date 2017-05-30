@@ -40,4 +40,4 @@ export default function generateTicksProvider() {
   return function (axis) {
     return generateTicks(axis);
   };
-};
+}

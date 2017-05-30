@@ -54,4 +54,4 @@ export default function (api) {
       'script': { __scope_link: 'GLOBAL.script' },
     }
   })
-};
+}

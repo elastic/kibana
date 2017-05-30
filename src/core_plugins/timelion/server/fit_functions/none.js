@@ -4,4 +4,4 @@
 // Does not resample at all.
 export default function none(dataTuples) {
   return dataTuples;
-};
+}

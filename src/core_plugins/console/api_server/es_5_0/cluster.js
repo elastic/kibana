@@ -139,4 +139,4 @@ export default function (api) {
       dry_run: { __one_of: [true, false] }
     }
   });
-};
+}

@@ -93,4 +93,4 @@ export default class ServerStatus {
       statuses: _.values(this._created)
     };
   }
-};
+}

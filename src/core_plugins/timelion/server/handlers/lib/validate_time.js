@@ -12,4 +12,4 @@ export default function validateTime(time, tlConfig) {
       'Choose a larger interval or a shorter time span');
   }
   return true;
-};
+}

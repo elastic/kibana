@@ -19,4 +19,4 @@ export default function formatNumber(num, which) {
       break;
   }
   return numeral(num).format(format) + postfix;
-};
+}

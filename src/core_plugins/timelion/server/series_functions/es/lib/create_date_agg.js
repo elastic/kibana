@@ -39,4 +39,4 @@ export default function createDateAgg(config, tlConfig) {
   });
 
   return dateAgg;
-};
+}

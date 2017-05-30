@@ -175,4 +175,4 @@ export default class Config {
 
     return this[schema];
   }
-};
+}

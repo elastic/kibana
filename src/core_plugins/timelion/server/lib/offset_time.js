@@ -14,4 +14,4 @@ export default function offsetTime(milliseconds, offset, reverse) {
 
   const momentObj = moment(milliseconds)[mode](parts[1], parts[2]);
   return momentObj.valueOf();
-};
+}

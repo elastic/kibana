@@ -68,4 +68,4 @@ export default function (api) {
   api.addGlobalAutocompleteRules('aliases', {
     '*': aliasRules
   });
-};
+}

@@ -23,4 +23,4 @@ export default function carry(dataTuples, targetTuples) {
 
     return [bucket[0], currentCarry];
   });
-};
+}

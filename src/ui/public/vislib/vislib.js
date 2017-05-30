@@ -23,4 +23,4 @@ export default function VislibProvider(Private) {
     version: '0.0.0',
     Vis: Private(VislibVisProvider)
   };
-};
+}

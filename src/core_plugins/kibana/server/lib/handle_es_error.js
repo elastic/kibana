@@ -23,4 +23,4 @@ export default function handleESError(error) {
   } else {
     return error;
   }
-};
+}

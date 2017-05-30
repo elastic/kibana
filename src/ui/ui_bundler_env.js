@@ -81,4 +81,4 @@ export default class UiBundlerEnv {
   addNoParse(regExp) {
     this.noParse.push(regExp);
   }
-};
+}

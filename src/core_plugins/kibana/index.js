@@ -133,4 +133,4 @@ export default function (kibana) {
       server.expose('injectVars', injectVars);
     }
   });
-};
+}

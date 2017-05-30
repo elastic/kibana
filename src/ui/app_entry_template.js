@@ -26,4 +26,4 @@ require('ui/chrome').bootstrap(/* xoxo */);
 
 `;
 
-};
+}

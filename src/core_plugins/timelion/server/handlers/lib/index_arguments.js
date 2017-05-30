@@ -28,4 +28,4 @@ export default function indexArguments(functionDef, orderedArgs) {
   }
 
   return indexedArgs;
-};
+}

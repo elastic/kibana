@@ -65,4 +65,4 @@ export default class UiBundle {
       outputPath: this.outputPath
     };
   }
-};
+}

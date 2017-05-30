@@ -70,4 +70,4 @@ export default function scale(dataTuples, targetTuples) {
   }
 
   return result;
-};
+}

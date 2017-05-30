@@ -106,4 +106,4 @@ export default function AggParamWriterHelper(Private) {
 
   return AggParamWriter;
 
-};
+}

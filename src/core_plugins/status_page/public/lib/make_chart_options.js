@@ -25,4 +25,4 @@ export default function makeChartOptions(type) {
       x: function (d) { return d.x; }
     }
   };
-};
+}

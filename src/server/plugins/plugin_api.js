@@ -27,4 +27,4 @@ export default class PluginApi {
       require: []
     };
   }
-};
+}

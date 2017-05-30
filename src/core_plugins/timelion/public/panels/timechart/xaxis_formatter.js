@@ -24,4 +24,4 @@ export default function xaxisFormatterProvider(config) {
   return function (esInterval) {
     return getFormat(esInterval);
   };
-};
+}

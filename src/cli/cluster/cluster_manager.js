@@ -169,4 +169,4 @@ export default class ClusterManager {
     this.log.bad('failed to watch files!\n', err.stack);
     process.exit(1); // eslint-disable-line no-process-exit
   }
-};
+}

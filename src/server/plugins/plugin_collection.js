@@ -75,4 +75,4 @@ export default class Plugins extends Collection {
     return this[pluginApis];
   }
 
-};
+}

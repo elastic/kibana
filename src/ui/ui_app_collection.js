@@ -42,4 +42,4 @@ export default class UiAppCollection extends Collection {
     return this[byIdCache] || (this[byIdCache] = _.indexBy([...this], 'id'));
   }
 
-};
+}

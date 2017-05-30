@@ -7,4 +7,4 @@ export default function getSeries(name, buckets, points) {
     type: 'series',
     label: name
   };
-};
+}

@@ -172,4 +172,4 @@ export default class Plugin {
   toString() {
     return `${this.id}@${this.version}`;
   }
-};
+}

@@ -5,4 +5,4 @@ export default function (list, overrides) {
     type: 'seriesList',
     list: list
   }, overrides);
-};
+}

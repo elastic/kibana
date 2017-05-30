@@ -252,4 +252,4 @@ export default function (api) {
       local: "__flag__"
     }
   });
-};
+}

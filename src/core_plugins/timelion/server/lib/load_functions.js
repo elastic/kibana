@@ -33,4 +33,4 @@ export default function (directory) {
   });
 
   return functions;
-};
+}

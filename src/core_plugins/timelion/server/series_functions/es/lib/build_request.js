@@ -58,4 +58,4 @@ export default function buildRequest(config, tlConfig) {
       size: 0
     }
   };
-};
+}

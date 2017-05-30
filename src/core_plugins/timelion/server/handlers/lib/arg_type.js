@@ -15,4 +15,4 @@ export default function argType(arg) {
     return 'null';
   }
   return typeof arg;
-};
+}

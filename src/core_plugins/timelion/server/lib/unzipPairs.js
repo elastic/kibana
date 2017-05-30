@@ -7,4 +7,4 @@ export default function unzipPairs(timeValObject) {
     return point[0];
   }).value();
   return paired;
-};
+}

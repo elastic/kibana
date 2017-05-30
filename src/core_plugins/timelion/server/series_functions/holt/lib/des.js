@@ -37,4 +37,4 @@ export default function des(points, alpha, beta) {
   }, []);
 
   return smoothedPoints;
-};
+}

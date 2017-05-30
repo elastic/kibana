@@ -151,4 +151,4 @@ export default class KbnServer {
     this.server.log(['info', 'config'], 'New logging configuration:\n' + plain);
     this.server.plugins['even-better'].monitor.reconfigure(loggingOptions);
   }
-};
+}

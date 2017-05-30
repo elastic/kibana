@@ -72,4 +72,4 @@ export default function average(dataTuples, targetTuples) {
 
   const resultTuples = _.zip(resultTimes, resultValues);
   return resultTuples;
-};
+}

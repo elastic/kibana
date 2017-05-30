@@ -21,4 +21,4 @@ export default function (server, { mappings }) {
   };
 
   return callWithInternalUser('search', options).then(upgrade(server));
-};
+}

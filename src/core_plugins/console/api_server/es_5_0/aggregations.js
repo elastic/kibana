@@ -440,4 +440,4 @@ export default function (api) {
 
   api.addGlobalAutocompleteRules('aggregations', rules);
   api.addGlobalAutocompleteRules('aggs', rules);
-};
+}

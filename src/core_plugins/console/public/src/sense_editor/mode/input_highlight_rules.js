@@ -65,6 +65,6 @@ export function InputHighlightRules() {
     this.normalizeRules();
   }
 
-};
+}
 
 oop.inherits(InputHighlightRules, TextHighlightRules);

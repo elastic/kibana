@@ -170,7 +170,7 @@ export default function (program) {
 
     return kbnServer;
   });
-};
+}
 
 function logFatal(message, server) {
   if (server) {
