@@ -18,7 +18,7 @@
 <filter-params-input-type
   ng-if="!(field.aggregatable && field.type === 'string')"
   type="field.type"
-  value="{{params.phrase}}"
+  value="params.phrase"
   on-change="params.phrase = value"
 ></filter-params-input-type>
 
