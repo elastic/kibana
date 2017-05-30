@@ -1,7 +1,7 @@
 import { isEqual } from 'lodash';
 import sinon from 'sinon';
 import expect from 'expect.js';
-import init from '..';
+import { uiSettingsMixin } from '../ui_settings_mixin';
 import { getDefaultSettings } from '../defaults';
 import { errors as esErrors } from 'elasticsearch';
 
@@ -449,14 +449,6 @@ function instantiate({ getResult, callWithRequest, settingsStatusOverrides } = {
   adminCluster.callWithInternalUser.withArgs('get', sinon.match.any).returns(Promise.resolve({ _source: getResult }));
   adminCluster.callWithInternalUser.withArgs('update', sinon.match.any).returns(Promise.resolve());
 
-  const server = {
-    decorate: (_, key, value) => server[key] = value,
-    plugins: {
-      elasticsearch: {
-        getCluster: sinon.stub().withArgs('admin').returns(adminCluster)
-      }
-    }
-  };
   const configGet = sinon.stub();
   configGet.withArgs('kibana.index').returns('.kibana');
   configGet.withArgs('pkg.version').returns('1.2.3-test');
@@ -464,7 +456,17 @@ function instantiate({ getResult, callWithRequest, settingsStatusOverrides } = {
   const config = {
     get: configGet
   };
-  init(kbnServer, server, config);
+
+  const server = {
+    config: () => config,
+    decorate: (_, key, value) => server[key] = value,
+    plugins: {
+      elasticsearch: {
+        getCluster: sinon.stub().withArgs('admin').returns(adminCluster)
+      }
+    }
+  };
+  uiSettingsMixin(kbnServer, server, config);
   const uiSettings = server.uiSettings();
   return { server, uiSettings, configGet, req };
 }
