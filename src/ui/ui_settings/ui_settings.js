@@ -53,9 +53,8 @@ export class UiSettings {
 
   async getRaw(req) {
     assertRequest(req);
-    return Promise
-      .all([this.getDefaults(), this.getUserProvided(req)])
-      .then(([defaults, user]) => defaultsDeep(user, defaults));
+    return this.getUserProvided(req)
+      .then(user => defaultsDeep(user, this.getDefaults()));
   }
 
   async getUserProvided(req, { ignore401Errors = false } = {}) {
