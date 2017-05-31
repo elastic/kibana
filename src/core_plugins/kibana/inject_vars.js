@@ -1,5 +1,3 @@
-import _ from 'lodash';
-
 export function injectVars(server) {
   const serverConfig = server.config();
 
@@ -8,9 +6,9 @@ export function injectVars(server) {
   //keeping this logic for backward compatibilty.
   const configuredUrl = server.config().get('tilemap.url');
   const isOverridden = typeof configuredUrl === 'string' && configuredUrl !== '';
-  const tilemapConfig = _.cloneDeep(serverConfig.get('tilemap'));
-  const regionmapsConfig = _.cloneDeep(serverConfig.get('regionmap'));
-  const mapConfig = _.cloneDeep(serverConfig.get('map'));
+  const tilemapConfig = serverConfig.get('tilemap');
+  const regionmapsConfig = serverConfig.get('regionmap');
+  const mapConfig = serverConfig.get('map');
 
 
   regionmapsConfig.layers =  (regionmapsConfig.layers) ? regionmapsConfig.layers : [];
