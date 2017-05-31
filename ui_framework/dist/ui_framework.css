@@ -1744,7 +1744,8 @@ body {
   margin-bottom: 10px;
   line-height: 20px; }
   .theme-dark .kuiLocalDropdown {
-    background-color: #525252; }
+    background-color: #525252;
+    border-color: #1a1a1a; }
 
 .kuiLocalDropdownCloseButton {
   -webkit-appearance: none;
@@ -1930,7 +1931,8 @@ body {
       background-color: #000000;
       color: #ffffff; }
     .theme-dark .kuiLocalMenuItem.kuiLocalMenuItem-isSelected {
-      background-color: #525252; }
+      background-color: #525252;
+      border-color: #1a1a1a; }
     .theme-dark .kuiLocalMenuItem.kuiLocalMenuItem-isDisabled:hover {
       background-color: transparent;
       color: #dedede; }
@@ -1965,7 +1967,8 @@ body {
   border-bottom: solid 1px #D9D9D9; }
   .theme-dark .kuiLocalNav {
     color: #cecece;
-    background-color: #333333; }
+    background-color: #333333;
+    border-color: #1a1a1a; }
 
 .kuiLocalNavRow {
   display: -webkit-box;
