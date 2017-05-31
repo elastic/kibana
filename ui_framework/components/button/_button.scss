@@ -147,7 +147,7 @@
  */
 .kuiButton--danger {
   color: $globalColorRed;
-  background-color: $globalColorWhite;
+  background-color: rgba($globalColorWhite, 0.5);
   border: solid 1px $globalColorRed;
 
   @include kuiButtonFocus {
@@ -157,7 +157,7 @@
 
   @include kuiButtonHoverAndActive {
     color: darken($globalColorRed, 10%) !important;
-    background-color: $globalColorWhite;
+    background-color: rgba(lighten($globalColorRed, 50%), 0.5);
     border: solid 1px darken($globalColorRed, 10%);
   }
 }
@@ -201,10 +201,11 @@
 .kuiButton--secondary {
   color: $globalLinkColor !important; /* 2 */
   border: solid 1px $globalColorBlue;
-  background-color: $globalColorWhite;
+  background-color: rgba($globalColorWhite, 0.5);
 
   @include kuiButtonHoverAndActive {
     color: darken($globalLinkColor, 10%) !important; /* 1 */
     border: solid 1px darken($globalColorBlue, 10%);
+    background-color: rgba(lighten($globalLinkColor, 50%), 0.5);
   }
 }

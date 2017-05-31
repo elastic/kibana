@@ -15,7 +15,7 @@ $buttonDefaultTextColor: #FFF;
 // Basic
 $buttonBasicTextColor: $globalTextColor;
 $buttonBasicBackgroundColor: $globalColorLightestGray;
-$buttonBasicHoverBackgroundColor: darken($globalColorLightGray, 10%);
+$buttonBasicHoverBackgroundColor: darken($globalColorLightestGray, 10%);
 $buttonBasicDisabledTextColor: $globalTextColor;
 $buttonBasicTextColor--darkTheme: #FFF;
 $buttonBasicBackgroundColor--darkTheme: #9c9c9c;

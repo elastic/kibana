@@ -247,18 +247,18 @@ body {
     /* 1 */
     color: #2d2d2d; }
   .kuiButton--basic:enabled:hover {
-    background-color: silver !important;
+    background-color: gainsboro !important;
     /* 1 */ }
   a.kuiButton--basic:not(.kuiButton-isDisabled):hover {
     /* 1 */
-    background-color: silver !important;
+    background-color: gainsboro !important;
     /* 1 */ }
   .kuiButton--basic:enabled:active {
-    background-color: silver !important;
+    background-color: gainsboro !important;
     /* 1 */ }
   a.kuiButton--basic:not(.kuiButton-isDisabled):active {
     /* 1 */
-    background-color: silver !important;
+    background-color: gainsboro !important;
     /* 1 */ }
   .theme-dark .kuiButton--basic {
     color: #FFF;
@@ -360,7 +360,7 @@ body {
  */
 .kuiButton--danger {
   color: #A30000;
-  background-color: #FFF;
+  background-color: rgba(255, 255, 255, 0.5);
   border: solid 1px #A30000; }
   .kuiButton--danger:not(a):enabled:focus {
     z-index: 1;
@@ -381,21 +381,21 @@ body {
     color: #A30000; }
   .kuiButton--danger:enabled:hover {
     color: #700000 !important;
-    background-color: #FFF;
+    background-color: rgba(255, 163, 163, 0.5);
     border: solid 1px #700000; }
   a.kuiButton--danger:not(.kuiButton-isDisabled):hover {
     /* 1 */
     color: #700000 !important;
-    background-color: #FFF;
+    background-color: rgba(255, 163, 163, 0.5);
     border: solid 1px #700000; }
   .kuiButton--danger:enabled:active {
     color: #700000 !important;
-    background-color: #FFF;
+    background-color: rgba(255, 163, 163, 0.5);
     border: solid 1px #700000; }
   a.kuiButton--danger:not(.kuiButton-isDisabled):active {
     /* 1 */
     color: #700000 !important;
-    background-color: #FFF;
+    background-color: rgba(255, 163, 163, 0.5);
     border: solid 1px #700000; }
 
 /**
@@ -475,25 +475,29 @@ body {
   color: #0096CC !important;
   /* 2 */
   border: solid 1px #0096CC;
-  background-color: #FFF; }
+  background-color: rgba(255, 255, 255, 0.5); }
   .kuiButton--secondary:enabled:hover {
     color: #007199 !important;
     /* 1 */
-    border: solid 1px #007199; }
+    border: solid 1px #007199;
+    background-color: rgba(204, 242, 255, 0.5); }
   a.kuiButton--secondary:not(.kuiButton-isDisabled):hover {
     /* 1 */
     color: #007199 !important;
     /* 1 */
-    border: solid 1px #007199; }
+    border: solid 1px #007199;
+    background-color: rgba(204, 242, 255, 0.5); }
   .kuiButton--secondary:enabled:active {
     color: #007199 !important;
     /* 1 */
-    border: solid 1px #007199; }
+    border: solid 1px #007199;
+    background-color: rgba(204, 242, 255, 0.5); }
   a.kuiButton--secondary:not(.kuiButton-isDisabled):active {
     /* 1 */
     color: #007199 !important;
     /* 1 */
-    border: solid 1px #007199; }
+    border: solid 1px #007199;
+    background-color: rgba(204, 242, 255, 0.5); }
 
 .kuiButtonGroup {
   display: -webkit-box;
@@ -2564,15 +2568,6 @@ body {
     /* 2 */
     box-shadow: 0 0 0 1px #E4E4E4, 0 0 0 2px #ff523c;
     /* 3 */ }
-  .kuiPanelHeader .kuiButton--basic {
-    color: #5a5a5a;
-    background-color: #FFFFFF; }
-    .kuiPanelHeader .kuiButton--basic:disabled {
-      color: #a7a7a7;
-      background-color: #F3F3F3; }
-    a.kuiPanelHeader .kuiButton--basic.kuiButton-isDisabled {
-      color: #a7a7a7;
-      background-color: #F3F3F3; }
   .kuiPanelHeader .kuiSelect {
     border-color: #ffffff; }
     .kuiPanelHeader .kuiSelect:not(a):enabled:focus {
@@ -2994,15 +2989,6 @@ body {
     /* 2 */
     box-shadow: 0 0 0 1px #E4E4E4, 0 0 0 2px #ff523c;
     /* 3 */ }
-  .kuiToolBar .kuiButton--basic {
-    color: #5a5a5a;
-    background-color: #FFFFFF; }
-    .kuiToolBar .kuiButton--basic:disabled {
-      color: #a7a7a7;
-      background-color: #F3F3F3; }
-    a.kuiToolBar .kuiButton--basic.kuiButton-isDisabled {
-      color: #a7a7a7;
-      background-color: #F3F3F3; }
   .kuiToolBar .kuiSelect {
     border-color: #ffffff; }
     .kuiToolBar .kuiSelect:not(a):enabled:focus {

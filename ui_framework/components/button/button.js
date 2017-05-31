@@ -26,6 +26,7 @@ const buttonTypeToClassNameMap = {
   danger: 'kuiButton--danger',
   warning: 'kuiButton--warning',
   primary: 'kuiButton--primary',
+  secondary: 'kuiButton--secondary',
 };
 
 const getClassName = ({ className, buttonType, hasIcon = false }) =>
