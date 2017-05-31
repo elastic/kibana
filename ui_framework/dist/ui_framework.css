@@ -1022,6 +1022,14 @@ body {
   font-size: 14px;
   font-weight: bold; }
 
+/**
+ * padding-left: 0 and list-style: none rules
+ * are meant for ul.kuiMenu and li.kuiMenuItem
+ * elements.
+ *
+ * kuiMenu and kuiMenuItems can classify both
+ * nonsemantic divs as well as lists (ul, li).
+ */
 .kuiMenu {
   padding-left: 0; }
 
