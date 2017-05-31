@@ -133,7 +133,11 @@ export function getDefaultSettings() {
         }
       }, null, 2),
       type: 'json',
-      description: 'Default <a href="http://leafletjs.com/reference.html#tilelayer-wms" target="_blank">properties</a> for the WMS map server support in the tile map'
+      description: 'Default <a href="http://leafletjs.com/reference.html#tilelayer-wms" target="_blank">properties</a> for the WMS map server support in the coordinate map'
+    },
+    'visualization:regionmap:showWarnings': {
+      value: true,
+      description: 'Should the vector map show a warning when terms cannot be joined to a shape on the map.'
     },
     'visualization:colorMapping': {
       type: 'json',
