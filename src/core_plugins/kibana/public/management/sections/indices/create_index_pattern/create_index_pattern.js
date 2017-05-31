@@ -328,9 +328,6 @@ uiModules.get('apps/management')
     'controller.formValues.nameInterval'
   ], () => {
     resetIndex();
-    if (!this.formValues.nameInterval || !this.formValues.name) {
-      return;
-    }
 
     // track the latestUpdateSampleId at the time we started
     // so that we can avoid mutating the controller if the
