@@ -1,6 +1,7 @@
 import expect from 'expect.js';
 
-export default function ({ getPageObjects }) {
+export default function ({ getService, getPageObjects }) {
+  const retry = getService('retry');
   const PageObjects = getPageObjects(['dashboard', 'header', 'common']);
 
   describe('dashboard save', function describeIndexTests() {
@@ -25,7 +26,7 @@ export default function ({ getPageObjects }) {
 
     it('the copy should have all the same visualizations', async function () {
       await PageObjects.dashboard.loadSavedDashboard(clonedDashboardName);
-      return PageObjects.common.try(async function () {
+      await retry.try(async () => {
         const panelTitles = await PageObjects.dashboard.getPanelTitles();
         expect(panelTitles).to.eql(PageObjects.dashboard.getTestVisualizationNames());
       });
