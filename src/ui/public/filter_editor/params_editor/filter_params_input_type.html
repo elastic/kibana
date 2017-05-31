@@ -1,0 +1,36 @@
+<div
+  ng-switch="type"
+  class="kuiFieldGroupSection kuiFieldGroupSection--wide"
+>
+  <input
+    ng-switch-when="string"
+    type="text"
+    class="kuiTextInput"
+    ng-model="value"
+    ng-change="onChange({ value: value })"
+  />
+  <input
+    ng-switch-when="number"
+    type="number"
+    step="any"
+    class="kuiTextInput"
+    ng-model="value"
+    ng-change="onChange({ value: value })"
+  />
+  <input
+    ng-switch-when="date"
+    type="text"
+    validate-date-math
+    class="kuiTextInput"
+    ng-model="value"
+    ng-change="onChange({ value: value })"
+  />
+  <input
+    ng-switch-when="ip"
+    type="text"
+    validate-ip
+    class="kuiTextInput"
+    ng-model="value"
+    ng-change="onChange({ value: value })"
+  />
+</div>

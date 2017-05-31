@@ -8,6 +8,7 @@ import ingest from './server/routes/api/ingest';
 import search from './server/routes/api/search';
 import settings from './server/routes/api/settings';
 import scripts from './server/routes/api/scripts';
+import { registerSuggestionsApi } from './server/routes/api/suggestions';
 import * as systemApi from './server/lib/system_api';
 import handleEsError from './server/lib/handle_es_error';
 import mappings from './mappings.json';
@@ -127,6 +128,7 @@ module.exports = function (kibana) {
       search(server);
       settings(server);
       scripts(server);
+      registerSuggestionsApi(server);
 
       server.expose('systemApi', systemApi);
       server.expose('handleEsError', handleEsError);

@@ -1,0 +1,26 @@
+@import (reference) "~ui/styles/mixins";
+
+.filterEditor.kuiModal {
+  position: absolute;
+  width: 500px;
+  z-index: 101;
+}
+
+.filterEditor.kuiModal .ui-select-choices {
+  width: auto;
+  max-height: 300px;
+}
+
+.filterEditor .ui-select-match-text span {
+  .ellipsis();
+}
+
+.filterEditor .ui-select-match-item {
+  max-width: 100%;
+}
+
+  .filterEditor .ui-select-match-item .pillWithTooltip {
+    display: block;
+    margin-right: 16px;
+    .ellipsis();
+  }

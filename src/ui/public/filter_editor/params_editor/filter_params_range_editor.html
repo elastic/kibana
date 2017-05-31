@@ -1,0 +1,32 @@
+<div class="kuiVerticalRhythm">
+  <label class="kuiLabel">
+    From
+  </label>
+  <filter-params-input-type
+    type="field.type"
+    value="params.range.from"
+    on-change="params.range.from = value"
+  ></filter-params-input-type>
+</div>
+
+<div class="kuiVerticalRhythm">
+  <label class="kuiLabel">
+    To
+  </label>
+  <filter-params-input-type
+    type="field.type"
+    value="params.range.to"
+    on-change="params.range.to = value"
+  ></filter-params-input-type>
+</div>
+
+<small>
+  <a
+    ng-if="field.type === 'date'"
+    class="kuiLink"
+    ng-href="{{dateDocLinks.dateMath}}"
+    target="_blank"
+  >
+    Accepted date formats
+  </a>
+</small>

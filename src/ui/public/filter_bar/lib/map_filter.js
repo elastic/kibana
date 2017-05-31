@@ -1,7 +1,8 @@
 import _ from 'lodash';
 import { FilterBarLibGenerateMappingChainProvider } from './generate_mapping_chain';
 import { FilterBarLibMapMatchAllProvider } from './map_match_all';
-import { FilterBarLibMapTermsProvider } from './map_terms';
+import { FilterBarLibMapPhraseProvider } from './map_phrase';
+import { FilterBarLibMapPhrasesProvider } from './map_phrases';
 import { FilterBarLibMapRangeProvider } from './map_range';
 import { FilterBarLibMapExistsProvider } from './map_exists';
 import { FilterBarLibMapMissingProvider } from './map_missing';
@@ -32,8 +33,9 @@ export function FilterBarLibMapFilterProvider(Promise, Private) {
   // and add it here. ProTip: These are executed in order listed
   const mappers = [
     Private(FilterBarLibMapMatchAllProvider),
-    Private(FilterBarLibMapTermsProvider),
     Private(FilterBarLibMapRangeProvider),
+    Private(FilterBarLibMapPhraseProvider),
+    Private(FilterBarLibMapPhrasesProvider),
     Private(FilterBarLibMapExistsProvider),
     Private(FilterBarLibMapMissingProvider),
     Private(FilterBarLibMapQueryStringProvider),
@@ -63,6 +65,7 @@ export function FilterBarLibMapFilterProvider(Promise, Private) {
     // Apply the mapping function
     return mapFn(filter).then(function (result) {
       filter.meta = filter.meta || {};
+      filter.meta.type = result.type;
       filter.meta.key = result.key;
       filter.meta.value = result.value;
       filter.meta.disabled = !!(filter.meta.disabled);
