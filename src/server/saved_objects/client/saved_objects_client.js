@@ -91,25 +91,26 @@ export class SavedObjectsClient {
    *   { id: 'foo', type: 'index-pattern'
    * ])
    */
-  async bulkGet(ids = [], type) {
+  bulkGet(ids = [], type) {
+    if (!ids || ids.length === 0) {
+      return Promise.resolve([]);
+    }
+
     const docs = ids.map(doc => {
       const id = isString(doc) ? doc : doc.id;
       return { _type: get(doc, 'type', type), _id: id };
     });
 
-    const response = await this._withKibanaIndex('mget', {
-      body: { docs },
-    });
-
-    // TODO: how to handle { found: false }
-    return get(response, 'docs', []).map(r => {
-      return {
-        id: r._id,
-        type: r._type,
-        version: r._version,
-        attributes: r._source
-      };
-    });
+    return this._withKibanaIndex('mget', { body: { docs } })
+      .then(resp => get(resp, 'docs', []).filter(resp => resp.found))
+      .then(resp => resp.map(r => {
+        return {
+          id: r._id,
+          type: r._type,
+          version: r._version,
+          attributes: r._source
+        };
+      }));
   }
 
   async get(type, id) {

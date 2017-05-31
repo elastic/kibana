@@ -1,3 +1,5 @@
+import { get } from 'lodash';
+
 import collectIndexPatterns from './collect_index_patterns';
 import collectSearchSources from './collect_search_sources';
 
@@ -7,7 +9,11 @@ export const deps = {
 };
 
 export default function collectPanels(savedObjectsClient, dashboard) {
-  const panels = JSON.parse(dashboard.attributes.panelsJSON);
+  const panels = JSON.parse(get(dashboard, 'attributes.panelsJSON', '[]'));
+
+  if (!Array.isArray(panels)) {
+    Promise.resolve([].concat([dashboard]));
+  }
 
   return savedObjectsClient.bulkGet(panels)
     .then(resp => {

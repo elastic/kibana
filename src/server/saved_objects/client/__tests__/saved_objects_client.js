@@ -169,6 +169,61 @@ describe('SavedObjectsClient', () => {
     });
   });
 
+  describe('#bulkGet', () => {
+    it('accepts an array of ids', async () => {
+      await savedObjectsClient.bulkGet(['one', 'two'], 'index-pattern');
+      expect(callAdminCluster.calledOnce).to.be(true);
+
+      const options = callAdminCluster.getCall(0).args[1];
+      expect(options.body.docs).to.eql([
+        { _type: 'index-pattern', _id: 'one' },
+        { _type: 'index-pattern', _id: 'two' }
+      ]);
+    });
+
+    it('accepts a array of mixed type and ids', async () => {
+      await savedObjectsClient.bulkGet([
+        { id: 'one', type: 'config' },
+        { id: 'two', type: 'index-pattern' },
+        { id: 'three' }
+      ], 'foo');
+
+      expect(callAdminCluster.calledOnce).to.be(true);
+
+      const options = callAdminCluster.getCall(0).args[1];
+      expect(options.body.docs).to.eql([
+        { _type: 'config', _id: 'one' },
+        { _type: 'index-pattern', _id: 'two' },
+        { _type: 'foo', _id: 'three' }
+      ]);
+    });
+
+    it('omits missed objects', async () => {
+      callAdminCluster.returns(Promise.resolve({
+        docs:[{
+          _type: 'config',
+          _id: 'bad',
+          found: false
+        }, {
+          _type: 'config',
+          _id: 'good',
+          found: true,
+          _version: 2,
+          _source: { title: 'Test' }
+        }]
+      }));
+
+      const response = await savedObjectsClient.bulkGet(['good', 'bad', 'config']);
+      expect(response).to.have.length(1);
+      expect(response[0]).to.eql({
+        id: 'good',
+        type: 'config',
+        version: 2,
+        attributes: { title: 'Test' }
+      });
+    });
+  });
+
   describe('#get', () => {
     it('formats Elasticsearch response', async () => {
       callAdminCluster.returns(Promise.resolve({
