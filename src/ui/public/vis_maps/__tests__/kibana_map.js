@@ -40,13 +40,13 @@ describe('kibana_map tests', function () {
       teardownDOM();
     });
 
-    it('should instantiate with world in view', function () {
+    it('should instantiate at zoom level 2', function () {
       const bounds = kibanaMap.getBounds();
-      expect(bounds.bottom_right.lon).to.equal(180);
-      expect(bounds.top_left.lon).to.equal(-180);
+      expect(bounds.bottom_right.lon).to.equal(90);
+      expect(bounds.top_left.lon).to.equal(-90);
       expect(kibanaMap.getCenter().lon).to.equal(0);
       expect(kibanaMap.getCenter().lat).to.equal(0);
-      expect(kibanaMap.getZoomLevel()).to.equal(1);
+      expect(kibanaMap.getZoomLevel()).to.equal(2);
     });
 
     it('should resize to fit container', function () {

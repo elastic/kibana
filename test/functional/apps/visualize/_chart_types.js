@@ -12,6 +12,7 @@ export default function ({ getService, getPageObjects }) {
       return PageObjects.common.navigateToUrl('visualize', 'new');
     });
 
+
     describe('chart types', function indexPatternCreation() {
       it('should show the correct chart types', function () {
         const expectedChartTypes = [
@@ -25,7 +26,8 @@ export default function ({ getService, getPageObjects }) {
           'Gauge',
           'Goal',
           'Metric',
-          'Tile Map',
+          'Coordinate Map',
+          'Region Map',
           'Timelion',
           'Visual Builder',
           'Markdown',
