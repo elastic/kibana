@@ -1,8 +1,6 @@
 import { DEFAULT_PANEL_WIDTH, DEFAULT_PANEL_HEIGHT } from 'plugins/kibana/dashboard/panel/panel_state';
-import { loadSavedObject } from './load_saved_object';
 
 import _ from 'lodash';
-import Promise from 'bluebird';
 
 export class PanelUtils {
   /**
@@ -65,19 +63,5 @@ export class PanelUtils {
       return Math.max(id, panel.panelIndex || id);
     }, 0);
     return ++maxId;
-  }
-
-  static getPanelIndexPatterns(panels, objectLoadersForDashboard) {
-    return Promise.map(panels, (panel) => {
-      return loadSavedObject(objectLoadersForDashboard, panel)
-        .then(({ savedObj }) => {
-          if (savedObj.vis) {
-            return savedObj.vis.indexPattern;
-          } else if (savedObj.searchSource) {
-            return savedObj.searchSource.get('index');
-          }
-        });
-    })
-      .then(indexPatterns => _.uniq(indexPatterns));
   }
 }
