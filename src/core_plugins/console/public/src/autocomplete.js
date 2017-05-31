@@ -1,10 +1,15 @@
-let kb = require('./kb');
-let utils = require('./utils');
-let autocomplete_engine = require('./autocomplete/engine');
-let url_pattern_matcher = require('./autocomplete/url_pattern_matcher');
-let _ = require('lodash');
-let ace = require('ace');
-require('ace/ext-language_tools');
+import {
+  getTopLevelUrlCompleteComponents,
+  getEndpointBodyCompleteComponents,
+  getGlobalAutocompleteComponents,
+  getUnmatchedEndpointComponents
+} from './kb';
+import utils from './utils';
+import { populateContext } from './autocomplete/engine';
+import { URL_PATH_END_MARKER } from './autocomplete/url_pattern_matcher';
+import _ from 'lodash';
+import ace from 'ace';
+import 'ace/ext-language_tools';
 
 var AceRange = ace.require('ace/range').Range;
 
@@ -505,7 +510,7 @@ export default function (editor) {
     context.token = ret.token;
     context.otherTokenValues = ret.otherTokenValues;
     context.urlTokenPath = ret.urlTokenPath;
-    autocomplete_engine.populateContext(ret.urlTokenPath, context, editor, true, kb.getTopLevelUrlCompleteComponents());
+    populateContext(ret.urlTokenPath, context, editor, true, getTopLevelUrlCompleteComponents());
     context.autoCompleteSet = addMetaToTermsList(context.autoCompleteSet, "endpoint");
   }
 
@@ -520,7 +525,7 @@ export default function (editor) {
       return context;
     }
 
-    autocomplete_engine.populateContext(ret.urlTokenPath, context, editor, false, kb.getTopLevelUrlCompleteComponents());
+    populateContext(ret.urlTokenPath, context, editor, false, getTopLevelUrlCompleteComponents());
 
     if (!context.endpoint) {
       console.log("couldn't resolve an endpoint.");
@@ -537,7 +542,7 @@ export default function (editor) {
       context.otherTokenValues = currentParam[tokenPath[0]];
     }
 
-    autocomplete_engine.populateContext(tokenPath, context, editor, true,
+    populateContext(tokenPath, context, editor, true,
       context.endpoint.paramsAutocomplete.getTopLevelComponents());
     return context;
   }
@@ -554,7 +559,7 @@ export default function (editor) {
       return context;
     }
 
-    autocomplete_engine.populateContext(ret.urlTokenPath, context, editor, false, kb.getTopLevelUrlCompleteComponents());
+    populateContext(ret.urlTokenPath, context, editor, false, getTopLevelUrlCompleteComponents());
 
     context.bodyTokenPath = ret.bodyTokenPath;
     if (!ret.bodyTokenPath) { // zero length tokenPath is true
@@ -564,16 +569,16 @@ export default function (editor) {
     }
 
     // needed for scope linking + global term resolving
-    context.endpointComponentResolver = kb.getEndpointBodyCompleteComponents;
-    context.globalComponentResolver = kb.getGlobalAutocompleteComponents;
+    context.endpointComponentResolver = getEndpointBodyCompleteComponents;
+    context.globalComponentResolver = getGlobalAutocompleteComponents;
     var components;
     if (context.endpoint) {
       components = context.endpoint.bodyAutocompleteRootComponents;
     }
     else {
-      components = kb.getUnmatchedEndpointComponents();
+      components = getUnmatchedEndpointComponents();
     }
-    autocomplete_engine.populateContext(ret.bodyTokenPath, context, editor, true, components);
+    populateContext(ret.bodyTokenPath, context, editor, true, components);
 
     return context;
   }
@@ -806,7 +811,7 @@ export default function (editor) {
     }
     else {
       // mark the url as completed.
-      ret.urlTokenPath.push(url_pattern_matcher.URL_PATH_END_MARKER);
+      ret.urlTokenPath.push(URL_PATH_END_MARKER);
     }
 
     if (t && t.type == "method") {

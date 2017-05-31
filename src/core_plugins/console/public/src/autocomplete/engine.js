@@ -1,4 +1,4 @@
-let _ = require('lodash');
+const _ = require('lodash');
 
 export function AutocompleteComponent(name) {
   this.name = name;

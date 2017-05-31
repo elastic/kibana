@@ -13,7 +13,7 @@ AcceptEndpointComponent.prototype = _.create(engine.SharedComponent.prototype, {
 (function (cls) {
 
   cls.match = function (token, context, editor) {
-    if (token !== module.exports.URL_PATH_END_MARKER) {
+    if (token !== URL_PATH_END_MARKER) {
       return null;
     }
     if (this.endpoint.methods && -1 === _.indexOf(this.endpoint.methods, context.method)) {

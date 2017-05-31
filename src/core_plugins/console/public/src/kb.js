@@ -1,10 +1,10 @@
-let $ = require('jquery');
-let _ = require('lodash');
-let mappings = require('./mappings');
-let Api = require('./kb/api');
-let autocomplete_engine = require('./autocomplete/engine');
+const $ = require('jquery');
+const _ = require('lodash');
+const mappings = require('./mappings');
+const Api = require('./kb/api');
+const autocomplete_engine = require('./autocomplete/engine');
 
-var ACTIVE_API = new Api();
+let ACTIVE_API = new Api();
 
 function nonValidIndexType(token) {
   return !(token === "_all" || token[0] !== "_");
