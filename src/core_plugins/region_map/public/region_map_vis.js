@@ -60,7 +60,7 @@ VisTypesRegistryProvider.register(function RegionMapProvider(Private, vectormaps
         title: 'Value',
         min: 1,
         max: 1,
-        aggFilter: ['count', 'avg', 'sum', 'min', 'max', 'cardinality', 'top_hits'],
+        aggFilter: ['count', 'avg', 'sum', 'min', 'max', 'cardinality', 'top_hits', 'sum_bucket', 'min_bucket', 'max_bucket', 'avg_bucket'],
         defaults: [
           { schema: 'metric', type: 'count' }
         ]
