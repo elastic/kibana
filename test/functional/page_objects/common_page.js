@@ -271,13 +271,9 @@ export function CommonPageProvider({ getService, getPageObjects, getPageObject }
       return await testSubjects.exists('kibanaChrome');
     }
 
-    async isTopNavVisible() {
-      return await testSubjects.exists('top-nav');
-    }
-
     async waitForTopNavToBeVisible() {
       await retry.try(async () => {
-        const isNavVisible = await this.isTopNavVisible();
+        const isNavVisible = await testSubjects.exists('top-nav');
         if (!isNavVisible) {
           throw new Error('Local nav not visible yet');
         }
