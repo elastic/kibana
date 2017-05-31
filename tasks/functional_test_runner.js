@@ -7,6 +7,7 @@ export default function (grunt) {
     const {
       logLevel,
       configFile,
+      configOverrides
     } = this.options();
 
     const log = createToolingLog(logLevel);
@@ -19,6 +20,7 @@ export default function (grunt) {
     const functionalTestRunner = createFunctionalTestRunner({
       log,
       configFile,
+      configOverrides
     });
 
     const callback = this.async();
