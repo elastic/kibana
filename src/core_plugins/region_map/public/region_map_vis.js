@@ -15,7 +15,7 @@ VisTypesRegistryProvider.register(function RegionMapProvider(Private, regionmaps
   const TemplateVisType = Private(TemplateVisTypeProvider);
   const Schemas = Private(VisSchemasProvider);
 
-  const vectorLayers = regionmapsConfig.layers.slice();
+  const vectorLayers = regionmapsConfig.layers;
   const selectedLayer = vectorLayers[0];
   const selectedJoinField = selectedLayer ? vectorLayers[0].fields[0] : null;
 

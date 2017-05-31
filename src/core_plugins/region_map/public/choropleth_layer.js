@@ -226,6 +226,10 @@ function makeChoroplethStyler(data, colorramp, joinField) {
         fillOpacity: 0.7
       };
     },
+    /**
+     * should not be called until before getLeafletStyleFunction has been called
+     * @return {Array}
+     */
     getMismatches: function () {
       return data.map((bucket) => bucket.term);
     }
