@@ -2,7 +2,7 @@ import expect from 'expect.js';
 import { resolve } from 'path';
 
 import UiExports from '../ui_exports';
-import * as kbnTestServer from '../../../test/utils/kbn_server';
+import * as kbnTestServer from '../../test_utils/kbn_server';
 
 describe('UiExports', function () {
   describe('#find()', function () {

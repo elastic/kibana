@@ -1,6 +1,6 @@
 import { format } from 'util';
 
-import * as kbnTestServer from '../../../../../test/utils/kbn_server';
+import * as kbnTestServer from '../../../../test_utils/kbn_server';
 import { fromRoot } from '../../../../utils';
 
 describe('plugins/elasticsearch', function () {

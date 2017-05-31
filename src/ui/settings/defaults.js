@@ -70,6 +70,12 @@ export default function defaultSettingsProvider() {
       value: 500,
       description: 'The number of rows to show in the table',
     },
+    'discover:aggs:terms:size': {
+      value: 20,
+      type: 'number',
+      description: 'Determines how many terms will be visualized when clicking the "visualize" ' +
+      'button, in the field drop downs, in the discover sidebar.'
+    },
     'doc_table:highlight': {
       value: true,
       description: 'Highlight results in Discover and Saved Searches Dashboard.' +
@@ -127,7 +133,11 @@ export default function defaultSettingsProvider() {
         }
       }, null, 2),
       type: 'json',
-      description: 'Default <a href="http://leafletjs.com/reference.html#tilelayer-wms" target="_blank">properties</a> for the WMS map server support in the tile map'
+      description: 'Default <a href="http://leafletjs.com/reference.html#tilelayer-wms" target="_blank">properties</a> for the WMS map server support in the coordinate map'
+    },
+    'visualization:regionmap:showWarnings': {
+      value: true,
+      description: 'Should the vector map show a warning when terms cannot be joined to a shape on the map.'
     },
     'visualization:colorMapping': {
       type: 'json',
@@ -210,6 +220,11 @@ export default function defaultSettingsProvider() {
       type: 'number',
       value: 5,
       description: 'Number of objects to show per page in the load dialog'
+    },
+    'savedObjects:listingLimit': {
+      type: 'number',
+      value: 1000,
+      description: 'Number of objects to fetch for the listing pages'
     },
     'timepicker:timeDefaults': {
       type: 'json',
@@ -326,6 +341,6 @@ export default function defaultSettingsProvider() {
     'context:step': {
       value: 5,
       description: 'The step size to increment or decrement the context size by',
-    },
+    }
   };
 }

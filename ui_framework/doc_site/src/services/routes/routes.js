@@ -1,5 +1,8 @@
 import Slugify from '../string/slugify';
 
+import AccessibilityExample
+  from '../../views/accessibility/accessibility_example';
+
 import ActionItemExample
   from '../../views/action_item/action_item_example';
 
@@ -45,6 +48,9 @@ import HeaderBarSandbox
 import IconExample
   from '../../views/icon/icon_example';
 
+import InfoButtonExample
+  from '../../views/info_button/info_button_example';
+
 import InfoPanelExample
   from '../../views/info_panel/info_panel_example';
 
@@ -68,6 +74,9 @@ import ModalExample
 
 import NoticeSandbox
   from '../../views/notice/notice_sandbox';
+
+import PagerExample
+  from '../../views/pager/pager_example';
 
 import PanelExample
   from '../../views/panel/panel_example';
@@ -98,6 +107,10 @@ import ViewSandbox
 
 // Component route names should match the component name exactly.
 const components = [{
+  name: 'Accessibility',
+  component: AccessibilityExample,
+  hasReact: true,
+}, {
   name: 'ActionItem',
   component: ActionItemExample,
 }, {
@@ -138,6 +151,10 @@ const components = [{
   name: 'Icon',
   component: IconExample,
 }, {
+  name: 'InfoButton',
+  component: InfoButtonExample,
+  hasReact: true,
+}, {
   name: 'InfoPanel',
   component: InfoPanelExample,
 }, {
@@ -146,6 +163,7 @@ const components = [{
 }, {
   name: 'LocalNav',
   component: LocalNavExample,
+  hasReact: true,
 }, {
   name: 'Menu',
   component: MenuExample,
@@ -158,6 +176,10 @@ const components = [{
 }, {
   name: 'Modal',
   component: ModalExample,
+  hasReact: true,
+}, {
+  name: 'Pager',
+  component: PagerExample,
   hasReact: true,
 }, {
   name: 'Panel',

@@ -4,13 +4,14 @@ import moment from 'moment-timezone';
 import { DocTitleProvider } from 'ui/doc_title';
 import { SavedObjectRegistryProvider } from 'ui/saved_objects/saved_object_registry';
 import { notify } from 'ui/notify';
+import 'ui/accessibility/kbn_accessible_click';
 
 require('plugins/timelion/directives/cells/cells');
-require('plugins/timelion/directives/fullscreen/fullscreen');
-require('plugins/timelion/directives/interval/interval');
-require('plugins/timelion/directives/expression_directive');
 require('plugins/timelion/directives/fixed_element');
-require('plugins/timelion/directives/docs');
+require('plugins/timelion/directives/fullscreen/fullscreen');
+require('plugins/timelion/directives/timelion_expression_input');
+require('plugins/timelion/directives/timelion_help/timelion_help');
+require('plugins/timelion/directives/timelion_interval/timelion_interval');
 
 require('plugins/timelion/app.less');
 
@@ -48,8 +49,26 @@ require('ui/routes')
   });
 
 app.controller('timelion', function (
-    $scope, $http, timefilter, AppState, courier, $route, $routeParams,
-    kbnUrl, Notifier, config, $timeout, Private, savedVisualizations, confirmModal) {
+    $http,
+    $route,
+    $routeParams,
+    $scope,
+    $timeout,
+    AppState,
+    config,
+    confirmModal,
+    courier,
+    kbnUrl,
+    Notifier,
+    Private,
+    savedVisualizations,
+    timefilter
+  ) {
+
+  // Keeping this at app scope allows us to keep the current page when the user
+  // switches to say, the timepicker.
+  $scope.page = config.get('timelion:showTutorial', true) ? 1 : 0;
+  $scope.setPage = (page) => $scope.page = page;
 
   // TODO: For some reason the Kibana core doesn't correctly do this for all apps.
   moment.tz.setDefault(config.get('dateFormat:tz'));
@@ -113,16 +132,15 @@ app.controller('timelion', function (
     template: require('plugins/timelion/partials/sheet_options.html'),
     testId: 'timelionOptionsButton',
   }, {
-    key: 'docs',
-    description: 'Documentation',
-    template: '<timelion-docs></timelion-docs>',
+    key: 'help',
+    description: 'Help',
+    template: '<timelion-help></timelion-help>',
     testId: 'timelionDocsButton',
   }];
 
-
   $timeout(function () {
     if (config.get('timelion:showTutorial', true)) {
-      $scope.kbnTopNav.open('docs');
+      $scope.kbnTopNav.open('help');
     }
   }, 0);
 
@@ -153,7 +171,8 @@ app.controller('timelion', function (
       search: $scope.search,
       dontShowHelp: function () {
         config.set('timelion:showTutorial', false);
-        $scope.kbnTopNav.close('docs');
+        $scope.setPage(0);
+        $scope.kbnTopNav.close('help');
       }
     };
   };

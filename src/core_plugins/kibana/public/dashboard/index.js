@@ -1,7 +1,9 @@
 import 'plugins/kibana/dashboard/dashboard';
 import 'plugins/kibana/dashboard/saved_dashboard/saved_dashboards';
 import 'plugins/kibana/dashboard/styles/index.less';
+import 'plugins/kibana/dashboard/dashboard_config';
 import uiRoutes from 'ui/routes';
+import 'ui/accessibility/kbn_accessible_click';
 import { SavedObjectRegistryProvider } from 'ui/saved_objects/saved_object_registry';
 import { savedDashboardRegister } from 'plugins/kibana/dashboard/saved_dashboard/saved_dashboard_register';
 

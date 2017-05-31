@@ -130,6 +130,7 @@ class Timeseries extends Component {
               show={ this.state.show }
               tickFormatter={this.props.tickFormatter}
               options={this.props.options}
+              xaxisLabel={this.props.xaxisLabel}
               yaxes={this.props.yaxes} />
           </div>
           <Legend
@@ -162,7 +163,8 @@ Timeseries.propTypes = {
   annotations: PropTypes.array,
   reversed: PropTypes.bool,
   options: PropTypes.object,
-  tickFormatter: PropTypes.func
+  tickFormatter: PropTypes.func,
+  xaxisLabel: PropTypes.string
 };
 
 export default Timeseries;

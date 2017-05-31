@@ -76,9 +76,7 @@ class TagCloud extends EventEmitter {
   resize() {
     const newWidth = this._element.offsetWidth;
     const newHeight = this._element.offsetHeight;
-    if (newWidth < 1 || newHeight < 1) {
-      return;
-    }
+
     if (newWidth === this._size[0] && newHeight === this._size[1]) {
       return;
     }

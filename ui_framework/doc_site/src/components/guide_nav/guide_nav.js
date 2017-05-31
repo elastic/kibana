@@ -104,10 +104,9 @@ export class GuideNav extends Component {
           ? <div className="guideNavItem__reactLogo" />
           : undefined;
         return (
-          <div className="guideNavItem">
+          <div key={`componentNavItem-${index}`} className="guideNavItem">
             <Link
               className="guideNavItem__link"
-              key={index}
               to={item.path}
               onClick={this.props.onClickNavItem}
             >
@@ -124,9 +123,8 @@ export class GuideNav extends Component {
         item.name.toLowerCase().indexOf(this.state.search.toLowerCase()) !== -1
       )).map((item, index) => {
         return (
-          <div className="guideNavItem">
+          <div key={`sandboxNavItem-${index}`} className="guideNavItem">
             <Link
-              key={index}
               className="guideNavItem__link"
               to={item.path}
               onClick={this.props.onClickNavItem}

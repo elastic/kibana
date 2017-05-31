@@ -1,4 +1,5 @@
-import serverConfig from '../../test/server_config';
+import { esTestServerUrlParts } from '../../test/es_test_server_url_parts';
+
 module.exports = function (grunt) {
   const resolve = require('path').resolve;
   const directory = resolve(__dirname, '../../esvm');
@@ -11,7 +12,7 @@ module.exports = function (grunt) {
       config: {
         http: {
           port: 9200
-        }
+        },
       }
     },
 
@@ -88,7 +89,7 @@ module.exports = function (grunt) {
         purge: true,
         config: {
           http: {
-            port: serverConfig.servers.elasticsearch.port
+            port: esTestServerUrlParts.port
           },
           cluster: {
             name: 'esvm-test'
@@ -97,7 +98,7 @@ module.exports = function (grunt) {
             zen: {
               ping: {
                 unicast: {
-                  hosts: [ `localhost:${serverConfig.servers.elasticsearch.port}` ]
+                  hosts: [ `localhost:${esTestServerUrlParts.port}` ]
                 }
               }
             }
@@ -112,7 +113,7 @@ module.exports = function (grunt) {
         purge: true,
         config: {
           http: {
-            port: serverConfig.servers.elasticsearch.port
+            port: esTestServerUrlParts.port
           },
           cluster: {
             name: 'esvm-ui'
@@ -121,7 +122,7 @@ module.exports = function (grunt) {
             zen: {
               ping: {
                 unicast: {
-                  hosts: [ `localhost:${serverConfig.servers.elasticsearch.port}` ]
+                  hosts: [ `localhost:${esTestServerUrlParts.port}` ]
                 }
               }
             }
@@ -130,43 +131,5 @@ module.exports = function (grunt) {
       }
     },
 
-    withPlugins: {
-      options: {
-        version: '2.1.0',
-        directory: resolve(directory, 'withPlugins'),
-        plugins: [
-          'license',
-          'shield',
-          'marvel-agent',
-          'watcher'
-        ],
-        shield: {
-          users: [
-            {
-              username: 'kibana',
-              password: 'notsecure',
-              roles: ['kibana4_server']
-            },
-            {
-              username: 'user',
-              password: 'notsecure',
-              roles: ['kibana4', 'marvel']
-            },
-            {
-              username: 'admin',
-              password: 'notsecure',
-              roles: ['admin']
-            }
-          ]
-        },
-        config: {
-          marvel: {
-            agent: {
-              interval: '60s'
-            }
-          }
-        }
-      }
-    }
   };
 };

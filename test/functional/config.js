@@ -1,5 +1,3 @@
-import { resolve } from 'path';
-
 import {
   CommonPageProvider,
   ConsolePageProvider,
@@ -12,33 +10,32 @@ import {
   SettingsPageProvider,
   MonitoringPageProvider,
   PointSeriesPageProvider,
+  GettingStartedPageProvider
 } from './page_objects';
 
 import {
   RemoteProvider,
+  FilterBarProvider,
   FindProvider,
   RetryProvider,
   TestSubjectsProvider,
-  KibanaServerProvider,
-  EsProvider,
-  EsArchiverProvider,
   DocTableProvider,
   ScreenshotsProvider,
 } from './services';
 
-import { servers, apps } from '../server_config';
+export default async function ({ readConfigFile }) {
+  const commonConfig = await readConfigFile(require.resolve('../common/config'));
 
-export default function () {
   return {
     testFiles: [
-      resolve(__dirname, './apps/console/index.js'),
-      resolve(__dirname, './apps/context/index.js'),
-      resolve(__dirname, './apps/dashboard/index.js'),
-      resolve(__dirname, './apps/discover/index.js'),
-      resolve(__dirname, './apps/management/index.js'),
-      resolve(__dirname, './apps/status_page/index.js'),
-      resolve(__dirname, './apps/visualize/index.js'),
-      resolve(__dirname, './apps/xpack/index.js'),
+      require.resolve('./apps/console'),
+      require.resolve('./apps/context'),
+      require.resolve('./apps/dashboard'),
+      require.resolve('./apps/discover'),
+      require.resolve('./apps/management'),
+      require.resolve('./apps/status_page'),
+      require.resolve('./apps/visualize'),
+      require.resolve('./apps/xpack'),
     ],
     pageObjects: {
       common: CommonPageProvider,
@@ -52,25 +49,49 @@ export default function () {
       settings: SettingsPageProvider,
       monitoring: MonitoringPageProvider,
       pointSeries: PointSeriesPageProvider,
+      gettingStarted: GettingStartedPageProvider,
     },
     services: {
-      kibanaServer: KibanaServerProvider,
+      es: commonConfig.get('services.es'),
+      esArchiver: commonConfig.get('services.esArchiver'),
+      kibanaServer: commonConfig.get('services.kibanaServer'),
       remote: RemoteProvider,
+      filterBar: FilterBarProvider,
       find: FindProvider,
       retry: RetryProvider,
       testSubjects: TestSubjectsProvider,
-      es: EsProvider,
-      esArchiver: EsArchiverProvider,
       docTable: DocTableProvider,
       screenshots: ScreenshotsProvider,
     },
-    servers,
-    apps,
-    esArchiver: {
-      directory: resolve(__dirname, '../../src/fixtures/es_archives'),
+    servers: commonConfig.get('servers'),
+    apps: {
+      status_page: {
+        pathname: '/status',
+      },
+      discover: {
+        pathname: '/app/kibana',
+        hash: '/discover',
+      },
+      context: {
+        pathname: '/app/kibana',
+        hash: '/context',
+      },
+      visualize: {
+        pathname: '/app/kibana',
+        hash: '/visualize',
+      },
+      dashboard: {
+        pathname: '/app/kibana',
+        hash: '/dashboards',
+      },
+      settings: {
+        pathname: '/app/kibana',
+        hash: '/management',
+      },
+      console: {
+        pathname: '/app/kibana',
+        hash: '/dev_tools/console',
+      },
     },
-    screenshots: {
-      directory: resolve(__dirname, '../screenshots'),
-    }
   };
 }

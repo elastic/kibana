@@ -25,6 +25,14 @@
  * Nothing fancy, just the basics so we can use this for both regular and static controls.
  */
 /**
+ * 1. Prevent Firefox users from being able to resize textareas to smaller than the min-height.
+ */
+/**
+ * 1. Angular will add an ng-untouched class to an input if it hasn't been touched yet.
+ *    We only want invalid inputs to appear invalid after the user has had a chance to interact
+ *    with it.
+ */
+/**
  * 1. Embedded SVG of fa-caret-down (https://github.com/encharm/Font-Awesome-SVG-PNG/blob/master/black/svg/caret-down.svg).
  * 2. Make room on right side for the caret.
  * 3. Prevent Firefox from showing dotted line around text on focus.
@@ -809,6 +817,9 @@ body {
   position: relative;
   font-size: 14px;
   line-height: 1.5; }
+  .kuiSearchInput.kuiSearchInput-isInvalid .kuiSearchInput__input:not(.ng-untouched) {
+    /* 1 */
+    border-color: #D86051; }
 
 .kuiSearchInput__icon {
   position: absolute;
@@ -835,11 +846,8 @@ body {
   border: 1px solid #DEDEDE;
   border-radius: 4px;
   transition: border-color 0.1s linear;
-  /**
-   * 1. Angular will add an ng-untouched class to an input if it hasn't been touched yet.
-   *    We only want invalid inputs to appear invalid after the user has had a chance to interact
-   *    with it.
-   */
+  min-height: 30px;
+  /* 1 */
   padding-left: 28px;
   /* 1 */
   width: 100%;
@@ -876,11 +884,8 @@ body {
   border: 1px solid #DEDEDE;
   border-radius: 4px;
   transition: border-color 0.1s linear;
-  /**
-   * 1. Angular will add an ng-untouched class to an input if it hasn't been touched yet.
-   *    We only want invalid inputs to appear invalid after the user has had a chance to interact
-   *    with it.
-   */
+  min-height: 30px;
+  /* 1 */
   padding-right: 30px;
   /* 2 */
   background-image: url('data:image/svg+xml;utf8,<svg width="1792" height="1792" viewBox="0 0 1792 1792" xmlns="http://www.w3.org/2000/svg"><path d="M1408 704q0 26-19 45l-448 448q-19 19-45 19t-45-19l-448-448q-19-19-19-45t19-45 45-19h896q26 0 45 19t19 45z"/></svg>');
@@ -949,11 +954,8 @@ body {
   border: 1px solid #DEDEDE;
   border-radius: 4px;
   transition: border-color 0.1s linear;
-  /**
-   * 1. Angular will add an ng-untouched class to an input if it hasn't been touched yet.
-   *    We only want invalid inputs to appear invalid after the user has had a chance to interact
-   *    with it.
-   */ }
+  min-height: 30px;
+  /* 1 */ }
   .theme-dark .kuiTextArea {
     color: #cecece; }
   .kuiTextArea:invalid:not(.ng-untouched) {
@@ -971,6 +973,9 @@ body {
     .theme-dark .kuiTextArea:focus {
       outline: none;
       border-color: #6EADC1; }
+  .kuiTextArea.kuiTextArea-isInvalid:not(.ng-untouched) {
+    /* 1 */
+    border-color: #D86051; }
 
 .kuiTextArea--nonResizable {
   resize: none; }
@@ -989,11 +994,8 @@ body {
   border: 1px solid #DEDEDE;
   border-radius: 4px;
   transition: border-color 0.1s linear;
-  /**
-   * 1. Angular will add an ng-untouched class to an input if it hasn't been touched yet.
-   *    We only want invalid inputs to appear invalid after the user has had a chance to interact
-   *    with it.
-   */ }
+  min-height: 30px;
+  /* 1 */ }
   .theme-dark .kuiTextInput {
     color: #cecece; }
   .kuiTextInput:invalid:not(.ng-untouched) {
@@ -1011,6 +1013,9 @@ body {
     .theme-dark .kuiTextInput:focus {
       outline: none;
       border-color: #6EADC1; }
+  .kuiTextInput.kuiTextInput-isInvalid:not(.ng-untouched) {
+    /* 1 */
+    border-color: #D86051; }
 
 .kuiTextInput--small {
   width: 100%;
@@ -1034,8 +1039,16 @@ body {
           align-items: center;
   /* 1 */ }
 
-.kuiFieldGroupSection + .kuiFieldGroupSection {
-  margin-left: 10px; }
+.kuiFieldGroup--alignTop {
+  -webkit-box-align: start;
+  -webkit-align-items: flex-start;
+      -ms-flex-align: start;
+          align-items: flex-start; }
+
+.kuiFieldGroupSection {
+  line-height: 1.5; }
+  .kuiFieldGroupSection + .kuiFieldGroupSection {
+    margin-left: 10px; }
 
 .kuiFieldGroupSection--wide {
   -webkit-box-flex: 1;
@@ -1190,6 +1203,16 @@ body {
     margin-left: 0;
     /* 1 */ }
 
+.kuiInfoButton {
+  font-size: 16px;
+  background-color: transparent;
+  color: #3CAED2;
+  cursor: pointer;
+  border: none;
+  padding: 0; }
+  .kuiInfoButton:hover, .kuiInfoButton:active {
+    color: #105A73; }
+
 /**
  * 1. Copied from FontAwesome's .fa class. We use a custom class to make it easier to migrate away
  *    from FontAwesome someday. When we do migrate away, we can just update this definition.
@@ -1306,12 +1329,6 @@ body {
     color: #b7e2ea; }
     .theme-dark .kuiLink:hover {
       color: #b7e2ea; }
-
-.kuiLoadingItems {
-  padding: 30px;
-  font-size: 18px;
-  color: #9fa3a7;
-  line-height: 1.5; }
 
 /**
  * 1. Breadcrumbs are placed in the top-left corner and need to be bumped over
@@ -1788,11 +1805,8 @@ body {
   border: 1px solid #DEDEDE;
   border-radius: 4px;
   transition: border-color 0.1s linear;
-  /**
-   * 1. Angular will add an ng-untouched class to an input if it hasn't been touched yet.
-   *    We only want invalid inputs to appear invalid after the user has had a chance to interact
-   *    with it.
-   */
+  min-height: 30px;
+  /* 1 */
   -webkit-box-flex: 1;
   -webkit-flex: 1 1 100%;
       -ms-flex: 1 1 100%;
@@ -1870,11 +1884,8 @@ body {
   border: 1px solid #DEDEDE;
   border-radius: 4px;
   transition: border-color 0.1s linear;
-  /**
-   * 1. Angular will add an ng-untouched class to an input if it hasn't been touched yet.
-   *    We only want invalid inputs to appear invalid after the user has had a chance to interact
-   *    with it.
-   */
+  min-height: 30px;
+  /* 1 */
   padding-right: 30px;
   /* 2 */
   background-image: url('data:image/svg+xml;utf8,<svg width="1792" height="1792" viewBox="0 0 1792 1792" xmlns="http://www.w3.org/2000/svg"><path d="M1408 704q0 26-19 45l-448 448q-19 19-45 19t-45-19l-448-448q-19-19-19-45t19-45 45-19h896q26 0 45 19t19 45z"/></svg>');
@@ -2239,17 +2250,34 @@ body {
   .kuiModalFooter > * + * {
     margin-left: 5px; }
 
-.kuiNoItems {
-  padding: 30px;
-  font-size: 18px;
-  color: #9fa3a7;
-  line-height: 1.5; }
-
 .kuiNotice {
   padding: 40px 60px 48px;
   margin: 20px;
   background-color: #FFF;
   line-height: 1.5; }
+
+/**
+ * 1. Put 10px of space between each child.
+ */
+.kuiPager {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-align: center;
+  -webkit-align-items: center;
+      -ms-flex-align: center;
+          align-items: center; }
+  .kuiPager > * + * {
+    margin-left: 10px;
+    /* 1 */ }
+
+.kuiPagerText {
+  font-size: 14px;
+  line-height: 1.5;
+  color: #5A5A5A;
+  white-space: nowrap;
+  /* 1 */ }
 
 .kuiPanel {
   border: 2px solid #E4E4E4; }
@@ -2498,6 +2526,9 @@ body {
   line-height: 1.5;
   color: #a7a7a7; }
 
+.kuiTableHeaderCell__liner {
+  display: inline-block; }
+
 /**
  * 1. Prevent rapid clicking from selecting text.
  */
@@ -2584,6 +2615,12 @@ body {
   .kuiTableRowCell--checkBox .kuiTableRowCell__liner {
     overflow: visible;
     /* 3 */ }
+
+.kuiTableInfo {
+  padding: 30px;
+  font-size: 18px;
+  color: #9fa3a7;
+  line-height: 1.5; }
 
 .kuiTabs {
   display: -webkit-box;

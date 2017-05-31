@@ -29,6 +29,44 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
       .click();
     }
 
+
+    clickRegionMap() {
+      return remote
+        .setFindTimeout(defaultFindTimeout)
+        .findByPartialLinkText('Region Map')
+        .click();
+    }
+
+    getVectorMapData() {
+      return remote
+        .setFindTimeout(defaultFindTimeout)
+        .findAllByCssSelector('path.leaflet-clickable')
+        .then((chartTypes) => {
+
+
+          function getChartType(chart) {
+            let color;
+            return chart.getAttribute('fill')
+              .then((stroke) => {
+                color = stroke;
+              })
+              .then(() => {
+                return { color: color };
+              });
+          }
+
+          const getChartTypesPromises = chartTypes.map(getChartType);
+          return Promise.all(getChartTypesPromises);
+        })
+        .then((data) => {
+          data = data.filter((country) => {
+            //filter empty colors
+            return country.color !== 'rgb(200,200,200)';
+          });
+          return data;
+        });
+    }
+
     clickMarkdownWidget() {
       return remote
       .setFindTimeout(defaultFindTimeout)
@@ -50,6 +88,13 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
       .click();
     }
 
+    clickGauge() {
+      return remote
+        .setFindTimeout(defaultFindTimeout)
+        .findByPartialLinkText('Gauge')
+        .click();
+    }
+
     clickPieChart() {
       return remote
       .setFindTimeout(defaultFindTimeout)
@@ -60,7 +105,7 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
     clickTileMap() {
       return remote
       .setFindTimeout(defaultFindTimeout)
-      .findByPartialLinkText('Tile Map')
+      .findByPartialLinkText('Coordinate Map')
       .click();
     }
 
@@ -165,6 +210,13 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
       .setFindTimeout(2000)
       .findByCssSelector('div[ng-controller="KbnMetricVisController"]')
       .getVisibleText();
+    }
+
+    getGaugeValue() {
+      return remote
+        .setFindTimeout(2000)
+        .findAllByCssSelector('visualize .chart svg')
+        .getVisibleText();
     }
 
     clickMetricEditor() {
@@ -274,6 +326,16 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
       });
     }
 
+    selectFieldById(fieldValue, id) {
+      return retry.try(function tryingForTime() {
+        return remote
+          .setFindTimeout(defaultFindTimeout)
+          // the css below should be more selective
+          .findByCssSelector(`#${id} > option[label="${fieldValue}"]`)
+          .click();
+      });
+    }
+
     orderBy(fieldValue) {
       return remote
       .setFindTimeout(defaultFindTimeout)
@@ -339,6 +401,12 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
         .click();
     }
 
+
+    async isSaveButtonEnabled() {
+      const saveButton = await testSubjects.find('visualizeSaveButton');
+      const clazz = await saveButton.getProperty('className');
+      return clazz.indexOf('kuiLocalMenuItem-isDisabled') === -1;
+    }
 
     saveVisualization(vizName) {
       return testSubjects.click('visualizeSaveButton')

@@ -1,5 +1,5 @@
 import _ from 'lodash';
-import { SavedObjectNotFound, DuplicateField } from 'ui/errors';
+import { SavedObjectNotFound, DuplicateField, IndexPatternMissingIndices } from 'ui/errors';
 import angular from 'angular';
 import { getComputedFields } from 'ui/index_patterns/_get_computed_fields';
 import { formatHit } from 'ui/index_patterns/_format_hit';
@@ -95,9 +95,19 @@ export function IndexPatternProvider(Private, Notifier, config, kbnIndex, Promis
     return promise;
   }
 
-  function containsFieldCapabilities(fields) {
-    return _.any(fields, (field) => {
-      return _.has(field, 'aggregatable') && _.has(field, 'searchable');
+  function isFieldRefreshRequired(indexPattern) {
+    if (!indexPattern.fields) {
+      return true;
+    }
+
+    return indexPattern.fields.every(field => {
+      // See https://github.com/elastic/kibana/pull/8421
+      const hasFieldCaps = ('aggregatable' in field) && ('searchable' in field);
+
+      // See https://github.com/elastic/kibana/pull/11969
+      const hasDocValuesFlag = ('readFromDocValues' in field);
+
+      return !hasFieldCaps || !hasDocValuesFlag;
     });
   }
 
@@ -108,7 +118,7 @@ export function IndexPatternProvider(Private, Notifier, config, kbnIndex, Promis
       return promise;
     }
 
-    if (!indexPattern.fields || !containsFieldCapabilities(indexPattern.fields)) {
+    if (isFieldRefreshRequired(indexPattern)) {
       promise = indexPattern.refreshFields();
     }
     return promise.then(() => {initFields(indexPattern);});
@@ -366,6 +376,15 @@ export function IndexPatternProvider(Private, Notifier, config, kbnIndex, Promis
       .then(() => this.save())
       .catch((err) => {
         notify.error(err);
+        // https://github.com/elastic/kibana/issues/9224
+        // This call will attempt to remap fields from the matching
+        // ES index which may not actually exist. In that scenario,
+        // we still want to notify the user that there is a problem
+        // but we do not want to potentially make any pages unusable
+        // so do not rethrow the error here
+        if (err instanceof IndexPatternMissingIndices) {
+          return;
+        }
         return Promise.reject(err);
       });
     }
