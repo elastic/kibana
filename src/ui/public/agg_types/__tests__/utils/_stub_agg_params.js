@@ -1,5 +1,5 @@
 import _ from 'lodash';
-import sinon from 'auto-release-sinon';
+import sinon from 'sinon';
 import { AggTypesParamTypesBaseProvider } from 'ui/agg_types/param_types/base';
 import { AggTypesParamTypesFieldProvider } from 'ui/agg_types/param_types/field';
 import { AggTypesParamTypesOptionedProvider } from 'ui/agg_types/param_types/optioned';
