@@ -1,5 +1,5 @@
 import Boom from 'boom';
-import { get } from 'lodash';
+import { get, isString } from 'lodash';
 
 import {
   createFindQuery,
@@ -72,6 +72,44 @@ export class SavedObjectsClient {
       page
 
     };
+  }
+
+  /**
+   * Returns an array of objects by id
+   *
+   * @param {array} ids - an array ids, or an array of objects containing id and optionally type
+   * @param {string} type - applies type to each id
+   * @returns {promise} Returns promise containing array of documents
+   * @example
+   *
+   * // single type:
+   * bulkGet(['one', 'two', 'config'])
+   *
+   * // mixed types:
+   * bulkGet([
+   *   { id: 'one', type: 'config' },
+   *   { id: 'foo', type: 'index-pattern'
+   * ])
+   */
+  async bulkGet(ids = [], type) {
+    const docs = ids.map(doc => {
+      const id = isString(doc) ? doc : doc.id;
+      return { _type: get(doc, 'type', type), _id: id };
+    });
+
+    const response = await this._withKibanaIndex('mget', {
+      body: { docs },
+    });
+
+    // TODO: how to handle { found: false }
+    return get(response, 'docs', []).map(r => {
+      return {
+        id: r._id,
+        type: r._type,
+        version: r._version,
+        attributes: r._source
+      };
+    });
   }
 
   async get(type, id) {
