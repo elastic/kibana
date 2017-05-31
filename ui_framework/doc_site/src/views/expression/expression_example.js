@@ -9,6 +9,8 @@ import {
 } from '../../components';
 
 const expressionHtml = require('./expression.html');
+const expressionJs = require('raw!./expression.js');
+
 
 export default props => (
   <GuidePage title={props.route.name}>
@@ -25,6 +27,7 @@ export default props => (
 
       <GuideDemo
         html={expressionHtml}
+        js={expressionJs}
       />
     </GuideSection>
 

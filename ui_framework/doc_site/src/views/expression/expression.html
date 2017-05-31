@@ -1,15 +1,16 @@
 <div class="kuiExpression">
   <div class="kuiExpression__item">
-    <button class="kuiExpression__button">
-      <span class="kuiExpression_buttonDescription">when</span>
-      <span class="kuiExpression_buttonVlue">count()</span>
+    <button data-id="toggleExpressionButton" class="kuiExpression__button">
+      <span class="kuiExpression__buttonDescription">IS ABOVE</span>
+      <span class="kuiExpression_buttonValue">100</span>
     </button>
-    <div class="kuiExpression__popover">
+    <div  data-id="toggleExpressionPopover" class="kuiExpression__popover ng-hide">
       <div class="kuiExpression__popoverTitle">
-        When
+        Is above
       </div>
       <div class="kuiExpression__popoverContent">
         <select class="kuiSelect ng-pristine ng-valid ng-scope ng-touched" ng-model="testbed.aggType" ng-options="aggType.label for aggType in testbed.aggTypes"><option label="count()" value="object:81" selected="selected">count()</option><option label="average()" value="object:82">average()</option><option label="sum()" value="object:83">sum()</option><option label="median()" value="object:84">median()</option><option label="min()" value="object:85">min()</option><option label="max()" value="object:86">max()</option></select>
+        <input type="text" class="kuiTextInput" value="100" />
       </div>
     </div>
   </div>

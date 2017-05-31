@@ -13,6 +13,8 @@ $expressionColorHighlight: #00A69B;
     padding: 5px 0px;
     border: none;
     border-bottom: dotted 2px $globalBorderColor;
+    font-size: $globalFontSize;
+    cursor: pointer;
 
     .kuiExpression__buttonDescription {
       color: $expressionColorHighlight;
@@ -51,6 +53,30 @@ $expressionColorHighlight: #00A69B;
       opacity: 0;
       transform: translateY(0px) translateZ(0);
     }
+
+    &:before {
+      position: absolute;
+      content: "";
+      top: -8px;
+      left: 20px;
+      height: 0;
+      width: 0;
+      border-left: 8px solid transparent;
+      border-right: 8px solid transparent;
+      border-bottom: 8px solid $globalBorderColor;
+    }
+
+    &:after {
+      position: absolute;
+      content: "";
+      top: -7px;
+      left: 20px;
+      height: 0;
+      width: 0;
+      border-left: 8px solid transparent;
+      border-right: 8px solid transparent;
+      border-bottom: 8px solid lighten($globalBorderColor, 5%);
+    }
   }
 
   .kuiExpression__popoverTitle {
@@ -60,6 +86,7 @@ $expressionColorHighlight: #00A69B;
     border-radius: $globalBorderRadius $globalBorderRadius 0 0;
     color: $globalTextColor;
     padding: 5px 10px;
+    line-height: $globalLineHeight;
   }
 
   .kuiExpression__popoverContent {
