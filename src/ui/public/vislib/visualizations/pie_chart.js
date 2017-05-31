@@ -1,8 +1,10 @@
 import d3 from 'd3';
 import _ from 'lodash';
 import $ from 'jquery';
+import numeral from 'numeral';
 import { PieContainsAllZeros, ContainerTooSmall } from 'ui/errors';
 import { VislibVisualizationsChartProvider } from './_chart';
+import { truncateLabel } from '../components/labels/truncate_labels';
 
 export function VislibVisualizationsPieChartProvider(Private) {
 
@@ -111,25 +113,38 @@ export function VislibVisualizationsPieChartProvider(Private) {
       const tooltip = self.tooltip;
       const isTooltip = self._attr.addTooltip;
 
+      const arcs = svg.append('g').attr('class', 'arcs');
+      const labels = svg.append('g').attr('class', 'labels');
+
+      const showLabels = self._attr.labels.show;
+      const showValues = self._attr.labels.values;
+      const truncateLabelLength = self._attr.labels.truncate;
+      const showOnlyOnLastLevel = self._attr.labels.last_level;
+      const labelRadius = radius;
+
       const partition = d3.layout.partition()
         .sort(null)
         .value(function (d) {
           return d.percentOfParent * 100;
         });
-      const x = d3.scale.linear()
-        .range([0, 2 * Math.PI]);
-      const y = d3.scale.sqrt()
-        .range([0, radius]);
+
+      const x = d3.scale.linear().range([0, 2 * Math.PI]);
+      const y = d3.scale.sqrt().range([0, radius * 0.7]);
+
+      const startAngle = function (d) {
+        return Math.max(0, Math.min(2 * Math.PI, x(d.x)));
+      };
+
+      const endAngle = function (d) {
+        if (d.dx < 1e-8) return x(d.x);
+        return Math.max(0, Math.min(2 * Math.PI, x(d.x + d.dx)));
+      };
+
       const arc = d3.svg.arc()
-        .startAngle(function (d) {
-          return Math.max(0, Math.min(2 * Math.PI, x(d.x)));
-        })
-        .endAngle(function (d) {
-          if (d.dx < 1e-8) return x(d.x);
-          return Math.max(0, Math.min(2 * Math.PI, x(d.x + d.dx)));
-        })
+        .startAngle(startAngle)
+        .endAngle(endAngle)
         .innerRadius(function (d) {
-        // option for a single layer, i.e pie chart
+          // option for a single layer, i.e pie chart
           if (d.depth === 1 && !isDonut) {
           // return no inner radius
             return 0;
@@ -141,7 +156,14 @@ export function VislibVisualizationsPieChartProvider(Private) {
           return Math.max(0, y(d.y + d.dy));
         });
 
-      const path = svg
+      const outerArc = d3.svg.arc()
+        .startAngle(startAngle)
+        .endAngle(endAngle)
+        .innerRadius(radius * 0.8)
+        .outerRadius(radius * 0.8);
+
+      let maxDepth = 0;
+      const path = arcs
         .datum(slices)
         .selectAll('path')
         .data(partition.nodes)
@@ -152,6 +174,7 @@ export function VislibVisualizationsPieChartProvider(Private) {
           if (d.depth === 0) {
             return;
           }
+          if (d.depth > maxDepth) maxDepth = d.depth;
           return 'slice';
         })
         .call(self._addIdentifier, 'name')
@@ -161,6 +184,165 @@ export function VislibVisualizationsPieChartProvider(Private) {
           }
           return color(d.name);
         });
+
+      // add labels
+      if (showLabels) {
+        const labelGroups = labels
+          .datum(slices)
+          .selectAll('.label')
+          .data(partition.nodes);
+
+        // create an empty quadtree to hold label positions
+        const svgBBox = {
+          width: svg.node().parentElement.clientWidth,
+          height: svg.node().parentElement.clientHeight
+        };
+        const labelLayout = d3.geom.quadtree()
+          .extent([[-svgBBox.width,-svgBBox.height], [svgBBox.width, svgBBox.height] ])
+          .x(function (d) { return d.label.x; })
+          .y(function (d) { return d.label.y; })
+          ([]);
+        let maxLabelWidth = 0;
+        let maxLabelHeight = 0;
+        const lastLabelPosition = [];
+        labelGroups
+          .enter()
+          .append('g')
+          .attr('class', 'label')
+          .append('text')
+          .text(function (d) {
+            if (d.depth === 0) {
+              return;
+            }
+            if (showValues) {
+              const value = numeral(d.value / 100).format('0.[00]%');
+              return `${d.name} (${value})`;
+            }
+            return d.name;
+          }).text(function () {
+            return truncateLabel(this, truncateLabelLength);
+          }).attr('text-anchor', function (d) {
+            const centroid = arc.centroid(d);
+            const midAngle = Math.atan2(centroid[1], centroid[0]);
+            const x = Math.cos(midAngle) * labelRadius;
+            return (x > 0) ? 'start' : 'end';
+          })
+          .attr('class', 'label-text')
+          .each(function (d) {
+            if (d.depth === 0) return;
+
+            const parentElement = this.parentElement;
+            if (showOnlyOnLastLevel && maxDepth !== d.depth) {
+              parentElement.remove();
+              return;
+            }
+
+            if (!lastLabelPosition[d.depth]) lastLabelPosition[d.depth] = 0;
+
+            const bbox = this.getBBox();
+            const pos = outerArc.centroid(d);
+            const midAngle = startAngle(d) + (endAngle(d) - startAngle(d)) / 2;
+            pos[1] += 4;
+            pos[0] = (0.9 + d.depth / 5) * radius * (midAngle < Math.PI ? 1 : -1);
+            d.label = {
+              x: pos[0],
+              y: pos[1],
+              l: midAngle < Math.PI ? pos[0] : pos[0] - bbox.width,
+              r: midAngle > Math.PI ? pos[0] + bbox.width : pos[0],
+              b: pos[1] + 5,
+              t: pos[1] - bbox.height - 5,
+            };
+
+            const conflicts = [];
+            let conflictIterations = 0;
+            do {
+              conflictIterations++;
+              conflicts.length = 0;
+              labelLayout.visit(function (node) {
+                if (!node.point) return;
+
+                const point = node.point.label;
+                if (point) {
+                  const horizontalConflict = (point.l < 0 && d.label.l < 0) || (point.l > 0 && d.label.l > 0);
+
+                  const verticalConflict = (((point.t > d.label.t) && (point.t <= d.label.b))
+                  || ((point.b > d.label.t) && (point.b <= d.label.b))
+                  || ((point.t < d.label.t) && (point.b >= d.label.b)));
+
+                  if (horizontalConflict && verticalConflict) {
+                    point.point = node.point;
+                    conflicts.push(point);
+                  }
+                }
+              });
+
+              if (conflicts.length) {
+                if (conflictIterations > 3) {
+                  parentElement.remove();
+                  return;
+                }
+
+                if (d.label.x > 0) {
+                  const bottomEdge = d3.max(conflicts, function (d2) {
+                    return d2.b;
+                  });
+
+                  d.label.t = bottomEdge + 5;
+                  d.label.y = d.label.t + bbox.height / 2;
+                  d.label.b = d.label.t + bbox.height;
+                } else {
+                  const topEdge = d3.min(conflicts, function (d2) {
+                    return d2.t;
+                  });
+
+                  d.label.b = topEdge - 5;
+                  d.label.y = d.label.b - bbox.height / 2;
+                  d.label.t = d.label.b - bbox.height;
+                }
+              }
+            } while (conflicts.length);
+
+            lastLabelPosition[d.depth] = d.label.y;
+
+            if (svgBBox.width / 2 < Math.max(Math.abs(d.label.l), Math.abs(d.label.r))
+              || svgBBox.height / 2 < Math.max(Math.abs(d.label.t), Math.abs(d.label.b))) {
+              delete d.label;
+              parentElement.remove();
+              return;
+            }
+
+            labelLayout.add(d);
+            maxLabelWidth = Math.max(maxLabelWidth, bbox.width + 10);
+            maxLabelHeight = Math.max(maxLabelHeight, bbox.height + 10);
+          })
+          .attr('x', function (d) {
+            if (d.depth === 0 || !d.label) {
+              return;
+            }
+            return d.label.x;
+          })
+          .attr('y', function (d) {
+            if (d.depth === 0 || !d.label) {
+              return;
+            }
+            return d.label.y;
+          });
+
+        labelGroups
+          .append('polyline')
+          .attr('points', function (d) {
+            if (d.depth === 0 || !d.label) {
+              return;
+            }
+            const pos1 = outerArc.centroid(d);
+            const x2 = d.label.x > 0 ? d.label.x - 10 : d.label.x + 10;
+            const pos2 = [x2, d.label.y - 4];
+            pos1[1] = pos2[1];
+            return [arc.centroid(d), pos1, pos2];
+          })
+          .attr('class', 'label-line');
+
+      }
 
       if (isTooltip) {
         path.call(tooltip.render());
