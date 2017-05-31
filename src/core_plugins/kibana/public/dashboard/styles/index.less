@@ -79,6 +79,10 @@ dashboard-grid {
   flex-direction: column;
 }
 
+/**
+ * 1. Fix Firefox bug where a value of overflow: hidden will prevent scrolling in a panel where the spy panel does
+ * not have enough room.
+ */
 dashboard-panel {
   flex: 1;
   display: flex;
@@ -88,7 +92,7 @@ dashboard-panel {
   background: @dashboard-panel-bg;
   color: @dashboard-panel-color;
   padding: 0;
-  overflow: hidden;
+  overflow: auto; /* 1 */
   position: relative;
 
   .panel {

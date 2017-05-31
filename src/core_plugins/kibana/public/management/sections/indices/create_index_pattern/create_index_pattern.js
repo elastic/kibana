@@ -217,8 +217,19 @@ uiModules.get('apps/management')
     return loadingCount > 0;
   };
 
+  let activeRefreshTimeFieldOptionsCall;
   this.refreshTimeFieldOptions = () => {
-    const prevOption = this.formValues.timeFieldOption;
+    // if there is an active refreshTimeFieldOptions() call then we use
+    // their prevOption, allowing the previous selection to persist
+    // across simultaneous calls to refreshTimeFieldOptions()
+    const prevOption = activeRefreshTimeFieldOptionsCall
+      ? activeRefreshTimeFieldOptionsCall.prevOption
+      : this.formValues.timeFieldOption;
+
+    // `thisCall` is our unique "token" to verify that we are still the
+    // most recent call. When we are not the most recent call we don't
+    // modify the controller in any way to prevent race conditions
+    const thisCall = activeRefreshTimeFieldOptionsCall = { prevOption };
 
     loadingCount += 1;
     this.timeFieldOptions = [];
@@ -226,6 +237,8 @@ uiModules.get('apps/management')
     this.formValues.timeFieldOption = null;
     getTimeFieldOptions()
       .then(({ options, error }) => {
+        if (thisCall !== activeRefreshTimeFieldOptionsCall) return;
+
         this.timeFieldOptions = options;
         this.timeFieldOptionsError = error;
         if (!this.timeFieldOptions) {
@@ -240,6 +253,9 @@ uiModules.get('apps/management')
       .catch(notify.error)
       .finally(() => {
         loadingCount -= 1;
+        if (thisCall === activeRefreshTimeFieldOptionsCall) {
+          activeRefreshTimeFieldOptionsCall = null;
+        }
       });
   };
 
@@ -330,9 +346,6 @@ uiModules.get('apps/management')
     'controller.formValues.nameInterval'
   ], () => {
     resetIndex();
-    if (!this.formValues.nameInterval || !this.formValues.name) {
-      return;
-    }
 
     // track the latestUpdateSampleId at the time we started
     // so that we can avoid mutating the controller if the
