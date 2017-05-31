@@ -170,11 +170,6 @@ module.exports = () => Joi.object({
     })
   }).default(),
   tilemap: Joi.object({
-    manifestServiceUrl: Joi.when('$dev', {
-      is: true,
-      then: Joi.string().default('https://tiles-stage.elastic.co/v2/manifest'),
-      otherwise: Joi.string().default('https://tiles.elastic.co/v2/manifest')
-    }),
     url: Joi.string(),
     options: Joi.object({
       attribution: Joi.string(),

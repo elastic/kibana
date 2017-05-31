@@ -200,11 +200,11 @@ function makeChoroplethStyler(data, colorramp, joinField) {
   }
 
   const { min, max } = getMinMax(data);
-  data = data.slice();
+  const outstandingFeatures = data.slice();
   return {
     getLeafletStyleFunction: function (geojsonFeature) {
       let lastIndex = -1;
-      const match = data.find((bucket, index) => {
+      const match = outstandingFeatures.find((bucket, index) => {
         lastIndex = index;
         if (typeof bucket.term === 'string' && typeof geojsonFeature.properties[joinField] === 'string') {
           return normalizeString(bucket.term) === normalizeString(geojsonFeature.properties[joinField]);
@@ -217,7 +217,7 @@ function makeChoroplethStyler(data, colorramp, joinField) {
         return emptyStyle();
       }
 
-      data.splice(lastIndex, 1);
+      outstandingFeatures.splice(lastIndex, 1);
       return {
         fillColor: getChoroplethColor(match.value, min, max, colorramp),
         weight: 2,
@@ -227,11 +227,11 @@ function makeChoroplethStyler(data, colorramp, joinField) {
       };
     },
     /**
-     * should not be called until before getLeafletStyleFunction has been called
+     * should not be called until getLeafletStyleFunction has been called
      * @return {Array}
      */
     getMismatches: function () {
-      return data.map((bucket) => bucket.term);
+      return outstandingFeatures.map((bucket) => bucket.term);
     }
   };
 
