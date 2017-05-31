@@ -11,7 +11,7 @@ export function AngularVisTypeProvider(Private, $compile, $rootScope) {
       this.vis = vis;
     }
 
-    async render(esResponse) {
+    render(esResponse) {
 
       return new Promise((resolve, reject) => {
         const updateScope = () => {

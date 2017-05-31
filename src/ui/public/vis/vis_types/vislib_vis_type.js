@@ -19,7 +19,7 @@ export function VislibVisTypeProvider(Private) {
       this.vis = vis;
     }
 
-    async render(esResponse) {
+    render(esResponse) {
       if (this.vis.vislibVis) {
         this.destroy();
       } else {

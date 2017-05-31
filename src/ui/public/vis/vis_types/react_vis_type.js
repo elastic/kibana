@@ -11,8 +11,9 @@ export function ReactVisTypeProvider(Private) {
       this.vis = vis;
     }
 
-    async render(visData) {
+    render(visData) {
       this.visData = visData;
+
       return new Promise((resolve) => {
         const Component = this.vis.type.visConfig.component;
         render(<Component vis={this.vis} visData={visData} renderComplete={resolve} />, this.el);
