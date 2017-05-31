@@ -13,12 +13,7 @@ uiModules.get('kibana/region_map')
       template: regionMapVisParamsTemplate,
       link: function ($scope) {
 
-
-        console.log('calling the linker function...');
-
         $scope.onLayerChange = onLayerChange;
-
-
         serviceSettings.getFileLayers()
           .then(function (layersFromService) {
 
