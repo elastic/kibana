@@ -279,7 +279,7 @@ export function CommonPageProvider({ getService, getPageObjects, getPageObject }
       await retry.try(async () => {
         const isNavVisible = await this.isTopNavVisible();
         if (!isNavVisible) {
-          throw 'Local nav not visible yet';
+          throw new Error('Local nav not visible yet');
         }
       });
     }
