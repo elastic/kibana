@@ -1,6 +1,5 @@
 import _ from 'lodash';
 import moment from 'moment';
-import dateMath from '@elastic/datemath';
 import 'ui/field_format_editor/pattern/pattern';
 import { IndexPatternsFieldFormatProvider } from 'ui/index_patterns/_field_format/field_format';
 import { BoundToConfigObjProvider } from 'ui/bound_to_config_obj';
@@ -59,11 +58,12 @@ export function stringifyDate(Private) {
           return '-';
         }
 
-        let date = moment(val);
-        if (!date.isValid()) {
-          date = dateMath.parse(val);
+        const date = moment(val);
+        if (date.isValid()) {
+          return date.format(pattern);
+        } else {
+          return val;
         }
-        return date.format(pattern);
       });
     }
 
