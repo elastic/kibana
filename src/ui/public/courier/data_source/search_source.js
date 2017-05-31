@@ -100,6 +100,7 @@ export function SearchSourceProvider(Promise, Private, config) {
     'size',
     'source',
     'version',
+    'fields',
   ];
 
   SearchSource.prototype.index = function (indexPattern) {
@@ -268,6 +269,9 @@ export function SearchSourceProvider(Promise, Private, config) {
         val = normalizeSortRequest(val, this.get('index'));
         addToBody();
         break;
+      case 'fields':
+        state[key] = _.uniq([...(state[key] || []), ...val]);
+        break;
       default:
         addToBody();
     }
@@ -286,6 +290,20 @@ export function SearchSourceProvider(Promise, Private, config) {
         state.body[key] = val;
       }
     }
+  };
+
+  SearchSource.prototype.clone = function () {
+    const clone = new SearchSource(this.toString());
+    // when serializing the internal state with .toString() we lose the internal classes used in the index
+    // pattern, so we have to set it again to workaround this behavior
+    clone.set('index', this.get('index'));
+    clone.inherits(this.getParent());
+    return clone;
+  };
+
+  SearchSource.prototype.getSearchRequestBody = async function () {
+    const searchRequest = await this._flatten();
+    return searchRequest.body;
   };
 
   return SearchSource;
