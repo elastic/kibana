@@ -28,23 +28,6 @@ module.controller('KbnRegionMapController', function ($scope, $element, Private,
   let choroplethLayer = null;
   const kibanaMapReady = makeKibanaMap();
 
-  serviceSettings.getFileLayers()
-    .then(function (layersFromService) {
-      const newVectorLayers = $scope.vis.type.params.vectorLayers.slice();
-      for (let i = 0; i < layersFromService.length; i += 1) {
-        const layerFromService = layersFromService[i];
-        const alreadyAdded = newVectorLayers.some((layer) =>_.eq(layerFromService, layer));
-        if (!alreadyAdded) {
-          newVectorLayers.push(layerFromService);
-        }
-      }
-      $scope.vis.type.params.vectorLayers = newVectorLayers;
-      $scope.$apply();
-    })
-    .catch(function (error) {
-      notify.warning(error.message);
-    });
-
   $scope.$watch('esResponse', async function (response) {
     kibanaMapReady.then(() => {
       const metricsAgg = _.first($scope.vis.aggs.bySchemaName.metric);
