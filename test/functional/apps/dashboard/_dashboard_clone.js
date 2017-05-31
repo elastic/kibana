@@ -71,7 +71,7 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.header.waitUntilLoadingHasFinished();
 
       const countOfDashboards =
-        await PageObjects.dashboard.getDashboardCountWithName(dashboardName + ' copy');
+        await PageObjects.dashboard.getDashboardCountWithName(dashboardName + ' Copy');
       expect(countOfDashboards).to.equal(2);
     });
   });
