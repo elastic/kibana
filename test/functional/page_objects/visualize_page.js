@@ -50,6 +50,13 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
       .click();
     }
 
+    clickGauge() {
+      return remote
+        .setFindTimeout(defaultFindTimeout)
+        .findByPartialLinkText('Gauge')
+        .click();
+    }
+
     clickPieChart() {
       return remote
       .setFindTimeout(defaultFindTimeout)
@@ -165,6 +172,13 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
       .setFindTimeout(2000)
       .findByCssSelector('div[ng-controller="KbnMetricVisController"]')
       .getVisibleText();
+    }
+
+    getGaugeValue() {
+      return remote
+        .setFindTimeout(2000)
+        .findAllByCssSelector('visualize .chart svg')
+        .getVisibleText();
     }
 
     clickMetricEditor() {
