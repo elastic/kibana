@@ -13,8 +13,9 @@ function hydrateUserSettings(user) {
 function assertRequest(req) {
   if (
     !req ||
-    typeof req !== 'object' &&
-    typeof req.path !== 'string' &&
+    typeof req !== 'object' ||
+    typeof req.path !== 'string' ||
+    !req.headers ||
     typeof req.headers !== 'object'
   ) {
     throw new TypeError('all uiSettings methods must be passed a hapi.Request object');
