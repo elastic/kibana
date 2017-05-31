@@ -1,7 +1,6 @@
 import { resolve as resolveUrl, format as formatUrl } from 'url';
 
 import { pick, mapValues } from 'lodash';
-import 'whatwg-fetch';
 
 import { IndexPatternMissingIndices } from 'ui/errors';
 import { Notifier } from 'ui/notify';
