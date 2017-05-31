@@ -57,7 +57,10 @@
     </div>
   </div>
 
-  <div class="filter-link">
+  <div
+    class="filter-link"
+    ng-show="hasIndexPatterns()"
+  >
     <div class="filter-description small">
       <a ng-click="addFilter()">
         Add a filter
@@ -101,7 +104,7 @@
 
 <div
   class="filter-bar filter-bar-condensed"
-  ng-show="filters.length > 1 && showFilterActions"
+  ng-show="filters.length > 0 && showFilterActions"
 >
   <div class="filter-actions-all">
     <div class="filter-link">

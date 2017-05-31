@@ -49,6 +49,10 @@ module.directive('filterBar', function (Private, Promise, getAppState) {
 
       $scope.state = getAppState();
 
+      $scope.hasIndexPatterns = () => {
+        return _.compact($scope.indexPatterns).length > 0;
+      };
+
       $scope.applyFilters = function (filters) {
         addAndInvertFilters(filterAppliedAndUnwrap(filters));
         $scope.newFilters = [];
