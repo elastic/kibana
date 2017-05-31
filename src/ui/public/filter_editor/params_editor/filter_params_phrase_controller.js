@@ -1,4 +1,5 @@
 import _ from 'lodash';
+import chrome from 'ui/chrome';
 
 export function filterParamsPhraseController($http, $scope) {
   this.compactUnion = _.flow(_.union, _.compact);
@@ -22,7 +23,7 @@ export function filterParamsPhraseController($http, $scope) {
       field: field.name
     };
 
-    return $http.post(`../api/kibana/suggestions/values/${field.indexPattern.id}`, params)
+    return $http.post(chrome.addBasePath(`/api/kibana/suggestions/values/${field.indexPattern.id}`), params)
       .then(response => response.data);
   }
 
