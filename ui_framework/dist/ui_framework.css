@@ -2016,12 +2016,17 @@ body {
   font-size: 14px;
   font-weight: bold; }
 
+.kuiMenu {
+  padding-left: 0; }
+
 .kuiMenu--contained {
-  border: 1px solid #E4E4E4; }
+  border: 1px solid #E4E4E4;
+  padding-left: 0; }
   .kuiMenu--contained .kuiMenuItem {
     padding: 6px 10px; }
 
 .kuiMenuItem {
+  list-style: none;
   padding: 6px 0; }
   .kuiMenuItem + .kuiMenuItem {
     border-top: 1px solid #E4E4E4; }

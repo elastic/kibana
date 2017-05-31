@@ -13,14 +13,14 @@
   flex: 1 1 0%;
 }
 
-  .kuiEventBody__message {
-    font-size: $globalFontSize;
-    line-height: $globalLineHeight;
-    color: $globalFontColor;
-  }
+.kuiEventBody__message {
+  font-size: $globalFontSize;
+  line-height: $globalLineHeight;
+  color: $globalFontColor;
+}
 
-  .kuiEventBody__metadata {
-    font-size: $globalFontSize;
-    line-height: $globalLineHeight;
-    color: $globalSubduedTextColor;
-  }
+.kuiEventBody__metadata {
+  font-size: $globalFontSize;
+  line-height: $globalLineHeight;
+  color: $globalSubduedTextColor;
+}
