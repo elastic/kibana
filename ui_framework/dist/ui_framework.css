@@ -2017,24 +2017,21 @@ body {
   font-weight: bold; }
 
 /**
- * padding-left: 0 and list-style: none rules
- * are meant for ul.kuiMenu and li.kuiMenuItem
- * elements.
- *
- * kuiMenu and kuiMenuItems can classify both
- * nonsemantic divs as well as lists (ul, li).
+ * 1. Allow class to be applied to `ul` and `ol` elements
+ * 2. Allow class to be applied to `li` elements
  */
 .kuiMenu {
-  padding-left: 0; }
+  padding-left: 0;
+  /* 1 */ }
 
 .kuiMenu--contained {
-  border: 1px solid #E4E4E4;
-  padding-left: 0; }
+  border: 1px solid #E4E4E4; }
   .kuiMenu--contained .kuiMenuItem {
     padding: 6px 10px; }
 
 .kuiMenuItem {
   list-style: none;
+  /* 2 */
   padding: 6px 0; }
   .kuiMenuItem + .kuiMenuItem {
     border-top: 1px solid #E4E4E4; }
