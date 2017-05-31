@@ -21,8 +21,7 @@ export function injectVars(server) {
       deprecated: {
         isOverridden: isOverridden,
         config: tilemapConfig,
-      },
-      manifestServiceUrl: serverConfig.get('tilemap.manifestServiceUrl')
+      }
     }
   };
 }
