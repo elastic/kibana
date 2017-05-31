@@ -4,7 +4,7 @@ import _ from 'lodash';
 import $ from 'jquery';
 import moment from 'moment-timezone';
 import observeResize from 'plugins/timelion/lib/observe_resize';
-import calculateInterval from 'plugins/timelion/lib/calculate_interval';
+import { calculateInterval } from '../../../common/lib';
 
 const SET_LEGEND_NUMBERS_DELAY = 50;
 

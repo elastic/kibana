@@ -3,10 +3,10 @@ import _ from 'lodash';
 import Promise from 'bluebird';
 import parseSheet from './lib/parse_sheet.js';
 import parseDateMath from '../lib/date_math.js';
-import calculateInterval from '../../public/lib/calculate_interval.js';
 import repositionArguments from './lib/reposition_arguments.js';
 import indexArguments from './lib/index_arguments.js';
 import validateTime from './lib/validate_time.js';
+import { calculateInterval } from '../../common/lib';
 
 export default function chainRunner(tlConfig) {
   const preprocessChain = require('./lib/preprocess_chain')(tlConfig);
