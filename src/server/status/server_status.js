@@ -1,6 +1,6 @@
 import _ from 'lodash';
 
-import states from './states';
+import * as states from './states';
 import Status from './status';
 import { version } from '../../../package.json';
 

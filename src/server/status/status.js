@@ -1,4 +1,4 @@
-import states from './states';
+import * as states from './states';
 import { EventEmitter } from 'events';
 
 export default class Status extends EventEmitter {
