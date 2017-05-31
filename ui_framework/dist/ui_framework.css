@@ -765,7 +765,7 @@ body {
   transition: opacity 250ms cubic-bezier(0.34, 1.61, 0.7, 1), -webkit-transform 250ms cubic-bezier(0.34, 1.61, 0.7, 1);
   transition: transform 250ms cubic-bezier(0.34, 1.61, 0.7, 1), opacity 250ms cubic-bezier(0.34, 1.61, 0.7, 1);
   transition: transform 250ms cubic-bezier(0.34, 1.61, 0.7, 1), opacity 250ms cubic-bezier(0.34, 1.61, 0.7, 1), -webkit-transform 250ms cubic-bezier(0.34, 1.61, 0.7, 1); }
-  .kuiExpression .kuiExpression__popover.ng-hide {
+  .kuiExpression .kuiExpression__popover.ng-hide, .kuiExpression .kuiExpression__popover.kuiExpression__popover--hidden {
     display: block !important;
     visibility: hidden;
     opacity: 0;

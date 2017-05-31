@@ -47,7 +47,7 @@ $expressionColorHighlight: #00A69B;
     transition: transform $globalAnimSpeedNormal $globalAnimSlightBounce, opacity $globalAnimSpeedNormal $globalAnimSlightBounce;
 
     // Angular hide blocks animation.
-    &.ng-hide {
+    &.ng-hide, &.kuiExpression__popover--hidden {
       display: block !important;
       visibility: hidden;
       opacity: 0;
