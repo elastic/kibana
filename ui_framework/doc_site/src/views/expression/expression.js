@@ -4,14 +4,14 @@ let isPopoverCollapsed = true;
 const $toggleExpressionButton = $('[data-id="toggleExpressionButton"]');
 const $toggleExpressionPopover = $('[data-id="toggleExpressionPopover"]');
 
-$toggleExpressionButton.on('click', () => {
+$('[data-id="toggleExpressionButton"]').click(function() {
 
   if (isPopoverCollapsed) {
-    $toggleExpressionButton.addClass('kuiExpression__button--active');
-    $toggleExpressionPopover.removeClass('kuiExpression__popover--hidden');
+    $(this).addClass('kuiExpression__button--active')
+    $(this).parent( "div" ).find('[data-id="toggleExpressionPopover"]').removeClass('kuiExpression__popover--hidden');
   } else {
-    $toggleExpressionButton.removeClass('kuiExpression__button--active');
-    $toggleExpressionPopover.addClass('kuiExpression__popover--hidden');
+    $(this).removeClass('kuiExpression__button--active')
+    $(this).parent( "div" ).find('[data-id="toggleExpressionPopover"]').addClass('kuiExpression__popover--hidden');
   }
 
   isPopoverCollapsed = !isPopoverCollapsed;
@@ -24,4 +24,3 @@ $(document).mouseup(function(e) {
     isPopoverCollapsed = !isPopoverCollapsed;
   }
 });
-

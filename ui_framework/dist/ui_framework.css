@@ -791,6 +791,11 @@ body {
     border-left: 8px solid transparent;
     border-right: 8px solid transparent;
     border-bottom: 8px solid #f1f1f1; }
+  .kuiExpression .kuiExpression__popover.kuiExpression__popover--rightAligned {
+    right: 0; }
+    .kuiExpression .kuiExpression__popover.kuiExpression__popover--rightAligned:before, .kuiExpression .kuiExpression__popover.kuiExpression__popover--rightAligned:after {
+      left: auto;
+      right: 20px; }
 
 .kuiExpression .kuiExpression__popoverTitle {
   display: -webkit-box;

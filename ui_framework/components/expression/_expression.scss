@@ -57,7 +57,7 @@ $expressionColorHighlight: #00A69B;
     &:before {
       position: absolute;
       content: "";
-      top: -8px;
+      top: -($globalBorderRadius * 2);
       left: 20px;
       height: 0;
       width: 0;
@@ -69,13 +69,21 @@ $expressionColorHighlight: #00A69B;
     &:after {
       position: absolute;
       content: "";
-      top: -7px;
+      top: -($globalBorderRadius * 2) + 1;
       left: 20px;
       height: 0;
       width: 0;
-      border-left: 8px solid transparent;
-      border-right: 8px solid transparent;
-      border-bottom: 8px solid lighten($globalBorderColor, 5%);
+      border-left: $globalBorderRadius * 2 solid transparent;
+      border-right: $globalBorderRadius * 2 solid transparent;
+      border-bottom: $globalBorderRadius * 2 solid lighten($globalBorderColor, 5%);
+    }
+
+    &.kuiExpression__popover--rightAligned {
+      right: 0;
+      &:before, &:after {
+        left: auto;
+        right: 20px;
+      }
     }
   }
 
