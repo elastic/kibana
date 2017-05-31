@@ -5,6 +5,18 @@ import { uiSettingsMixin } from '../ui_settings_mixin';
 import { getDefaultSettings } from '../defaults';
 import { errors as esErrors } from 'elasticsearch';
 
+async function expectRejection(promise, errorMessageContain) {
+  if (!promise || typeof promise.then !== 'function') {
+    throw new Error('Expected function to return a promise');
+  }
+
+  try {
+    await promise;
+  } catch (err) {
+    expect(err.message).to.contain(errorMessageContain);
+  }
+}
+
 describe('ui settings', function () {
   describe('overview', function () {
     it('has expected api surface', function () {
@@ -18,6 +30,19 @@ describe('ui settings', function () {
       expect(typeof uiSettings.removeMany).to.equal('function');
       expect(typeof uiSettings.set).to.equal('function');
       expect(typeof uiSettings.setMany).to.equal('function');
+    });
+
+    it('throws if the first error is not a request', async () => {
+      const { uiSettings } = instantiate();
+      await expectRejection(uiSettings.get(null), 'hapi.Request');
+      await expectRejection(uiSettings.get(false), 'hapi.Request');
+      await expectRejection(uiSettings.get('key'), 'hapi.Request');
+      await expectRejection(uiSettings.get(/regex/), 'hapi.Request');
+      await expectRejection(uiSettings.get(new Date()), 'hapi.Request');
+      await expectRejection(uiSettings.get({}), 'hapi.Request');
+      await expectRejection(uiSettings.get({ path:'' }), 'hapi.Request');
+      await expectRejection(uiSettings.get({ path:'', headers:null }), 'hapi.Request');
+      await expectRejection(uiSettings.get({ headers:{} }), 'hapi.Request');
     });
   });
 
