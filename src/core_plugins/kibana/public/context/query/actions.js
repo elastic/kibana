@@ -26,12 +26,12 @@ export function QueryActionsProvider(courier, Notifier, Private, Promise) {
   );
 
   const fetchAnchorRow = (state) => () => {
-    const { queryParameters: { indexPatternId, anchorUid, sort } } = state;
+    const { queryParameters: { indexPatternId, anchorUid, sort, tieBreakerField } } = state;
 
     setLoadingStatus(state)('anchor', LOADING_STATUS.LOADING);
 
     return Promise.try(() => (
-      fetchAnchor(indexPatternId, anchorUid, _.zipObject([sort]))
+      fetchAnchor(indexPatternId, anchorUid, [_.zipObject([sort]), { [tieBreakerField]: 'asc' }])
     ))
       .then(
         (anchorDocument) => {
@@ -49,14 +49,14 @@ export function QueryActionsProvider(courier, Notifier, Private, Promise) {
 
   const fetchPredecessorRows = (state) => () => {
     const {
-      queryParameters: { indexPatternId, filters, predecessorCount, sort },
+      queryParameters: { indexPatternId, filters, predecessorCount, sort, tieBreakerField },
       rows: { anchor },
     } = state;
 
     setLoadingStatus(state)('predecessors', LOADING_STATUS.LOADING);
 
     return Promise.try(() => (
-      fetchPredecessors(indexPatternId, anchor, _.zipObject([sort]), predecessorCount, filters)
+      fetchPredecessors(indexPatternId, anchor, [_.zipObject([sort]), { [tieBreakerField]: 'asc' }], predecessorCount, filters)
     ))
       .then(
         (predecessorDocuments) => {
@@ -74,14 +74,14 @@ export function QueryActionsProvider(courier, Notifier, Private, Promise) {
 
   const fetchSuccessorRows = (state) => () => {
     const {
-      queryParameters: { indexPatternId, filters, sort, successorCount },
+      queryParameters: { indexPatternId, filters, sort, successorCount, tieBreakerField },
       rows: { anchor },
     } = state;
 
     setLoadingStatus(state)('successors', LOADING_STATUS.LOADING);
 
     return Promise.try(() => (
-      fetchSuccessors(indexPatternId, anchor, _.zipObject([sort]), successorCount, filters)
+      fetchSuccessors(indexPatternId, anchor, [_.zipObject([sort]), { [tieBreakerField]: 'asc' }], successorCount, filters)
     ))
       .then(
         (successorDocuments) => {
