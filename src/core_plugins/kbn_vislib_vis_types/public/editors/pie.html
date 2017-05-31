@@ -6,3 +6,51 @@
   </label>
   <vislib-basic-options></vislib-basic-options>
 </div>
+
+<!-- Labels -->
+<div class="kuiSideBarSection">
+  <h6 class="kuiSideBarFormSectionTitle">
+    Labels
+  </h6>
+
+  <div class="kuiSideBarFormRow">
+    <label class="kuiSideBarFormRow__label" for="showLabels">
+      Show Labels
+    </label>
+    <div class="kuiSideBarFormRow__control">
+      <input class="kuiCheckBox" id="showLabels" type="checkbox" ng-model="vis.params.labels.show">
+    </div>
+  </div>
+
+  <div class="kuiSideBarFormRow">
+    <label class="kuiSideBarFormRow__label" for="showLastLevel">
+      Show Only on Last Level
+    </label>
+    <div class="kuiSideBarFormRow__control">
+      <input class="kuiCheckBox" id="showLastLevel" type="checkbox" ng-model="vis.params.labels.last_level">
+    </div>
+  </div>
+
+  <div class="kuiSideBarFormRow">
+    <label class="kuiSideBarFormRow__label" for="showValues">
+      Show Values
+    </label>
+    <div class="kuiSideBarFormRow__control">
+      <input class="kuiCheckBox" id="showValues" type="checkbox" ng-model="vis.params.labels.values">
+    </div>
+  </div>
+
+  <div class="kuiSideBarFormRow">
+    <label class="kuiSideBarFormRow__label" for="truncateLabels">
+      Truncate
+    </label>
+    <div class="kuiSideBarFormRow__control">
+      <input
+        id="truncateLabels"
+        class="kuiInput kuiSideBarInput"
+        type="number"
+        ng-model="vis.params.labels.truncate"
+      >
+    </div>
+  </div>
+</div>

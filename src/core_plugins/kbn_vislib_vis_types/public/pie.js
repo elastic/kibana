@@ -20,7 +20,13 @@ export default function HistogramVisType(Private) {
         addTooltip: true,
         addLegend: true,
         legendPosition: 'right',
-        isDonut: true
+        isDonut: true,
+        labels: {
+          show: true,
+          values: false,
+          last_level: true,
+          truncate: 100
+        }
       },
     },
     editorConfig: {
