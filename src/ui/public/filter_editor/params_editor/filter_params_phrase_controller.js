@@ -24,7 +24,8 @@ export function filterParamsPhraseController($http, $scope) {
     };
 
     return $http.post(chrome.addBasePath(`/api/kibana/suggestions/values/${field.indexPattern.id}`), params)
-      .then(response => response.data);
+      .then(response => response.data)
+      .catch(() => []);
   }
 
   function getFieldQueryHash(field, query) {
