@@ -7,6 +7,7 @@ export const deps = {
 export default function collectDashboards(req, ids) {
   const { callWithRequest } = req.server.plugins.elasticsearch.getCluster('admin');
   const config = req.server.config();
+  if (ids.length === 0) return Promise.resolve([]);
   const params = {
     index: config.get('kibana.index'),
     type: 'dashboard',
