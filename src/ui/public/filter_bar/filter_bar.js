@@ -49,7 +49,7 @@ module.directive('filterBar', function (Private, Promise, getAppState) {
 
       $scope.state = getAppState();
 
-      $scope.hasIndexPatterns = () => {
+      $scope.showAddFilterButton = () => {
         return _.compact($scope.indexPatterns).length > 0;
       };
 

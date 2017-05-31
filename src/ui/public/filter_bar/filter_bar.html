@@ -22,7 +22,10 @@
   </form>
 </div>
 
-<div class="filter-bar">
+<div
+  class="filter-bar"
+  ng-show="filters.length || showAddFilterButton()"
+>
   <div
     class="filter"
     ng-class="{ negate: filter.meta.negate, disabled: filter.meta.disabled }"
@@ -59,7 +62,7 @@
 
   <div
     class="filter-link"
-    ng-show="hasIndexPatterns()"
+    ng-show="showAddFilterButton()"
   >
     <div class="filter-description small">
       <a ng-click="addFilter()">
@@ -71,7 +74,7 @@
 
   <div
     class="filter-link pull-right"
-    ng-show="filters.length > 1"
+    ng-show="filters.length"
   >
     <div class="filter-description small">
       <a ng-click="showFilterActions = !showFilterActions">
@@ -104,7 +107,7 @@
 
 <div
   class="filter-bar filter-bar-condensed"
-  ng-show="filters.length > 0 && showFilterActions"
+  ng-show="filters.length && showFilterActions"
 >
   <div class="filter-actions-all">
     <div class="filter-link">
