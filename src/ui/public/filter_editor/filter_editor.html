@@ -43,7 +43,7 @@
 
       <div class="kuiFieldGroupSection kuiColumn kuiColumn--4">
         <filter-operator-select
-          ng-show="filterEditor.field"
+          ng-if="filterEditor.field"
           field="filterEditor.field"
           operator="filterEditor.operator"
           on-select="filterEditor.onOperatorSelect(operator)"
@@ -52,7 +52,7 @@
 
       <div class="kuiFieldGroupSection kuiFieldGroupSection--wide kuiColumn kuiColumn--4">
         <filter-params-editor
-          ng-show="filterEditor.operator"
+          ng-if="filterEditor.field && filterEditor.operator"
           field="filterEditor.field"
           operator="filterEditor.operator"
           params="filterEditor.params"

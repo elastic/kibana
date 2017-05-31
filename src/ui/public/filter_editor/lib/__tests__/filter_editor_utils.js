@@ -1,6 +1,7 @@
 import expect from 'expect.js';
 import ngMock from 'ng_mock';
 import sinon from 'sinon';
+import Promise from 'bluebird';
 import {
   phraseFilter,
   scriptedPhraseFilter,
@@ -42,30 +43,19 @@ describe('FilterEditorUtils', function () {
   });
 
   describe('getFieldFromFilter', function () {
-    it('should return undefined if no index patterns are provided', function () {
-      const field = getFieldFromFilter(phraseFilter);
-      expect(field).to.not.be.ok();
+    let indexPatterns;
+    beforeEach(function () {
+      indexPatterns = {
+        get: sinon.stub().returns(Promise.resolve(indexPattern))
+      };
     });
 
-    it('should return undefined if no matching index patterns are provided', function () {
-      const index = phraseFilter.meta.index;
-      phraseFilter.meta.index = 'foo';
-      const field = getFieldFromFilter(phraseFilter, [indexPattern]);
-      expect(field).to.not.be.ok();
-      phraseFilter.meta.index = index;
-    });
-
-    it('should return undefined if no matching field is in the provided index pattern', function () {
-      const key = phraseFilter.meta.key;
-      phraseFilter.meta.key = 'foo';
-      const field = getFieldFromFilter(phraseFilter, [indexPattern]);
-      expect(field).to.not.be.ok();
-      phraseFilter.meta.key = key;
-    });
-
-    it('should return the field from the filter', function () {
-      const field = getFieldFromFilter(phraseFilter, [indexPattern]);
-      expect(field).to.be.ok();
+    it('should return the field from the filter', function (done) {
+      getFieldFromFilter(phraseFilter, indexPatterns)
+        .then((field) => {
+          expect(field).to.be.ok();
+          done();
+        });
     });
   });
 

@@ -19,7 +19,7 @@ import * as filterBuilder from '../filter_manager/lib';
 import { keyMap } from '../utils/key_map';
 
 const module = uiModules.get('kibana');
-module.directive('filterEditor', function ($timeout) {
+module.directive('filterEditor', function ($timeout, indexPatterns) {
   return {
     restrict: 'E',
     template,
@@ -39,11 +39,15 @@ module.directive('filterEditor', function ($timeout) {
         this.alias = filter.meta.alias;
         this.isEditingQueryDsl = false;
         this.queryDsl = getQueryDslFromFilter(filter);
-        this.setField(getFieldFromFilter(filter, this.indexPatterns));
-        this.setOperator(getOperatorFromFilter(filter));
-        this.params = getParamsFromFilter(filter);
         if (filter.meta.isNew) {
           this.setFocus('field');
+        } else {
+          getFieldFromFilter(filter, indexPatterns)
+            .then((field) => {
+              this.setField(field);
+              this.setOperator(getOperatorFromFilter(filter));
+              this.params = getParamsFromFilter(filter);
+            });
         }
       };
 

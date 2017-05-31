@@ -9,8 +9,8 @@ export function getQueryDslFromFilter(filter) {
 
 export function getFieldFromFilter(filter, indexPatterns) {
   const { index, key } = filter.meta;
-  const indexPattern = indexPatterns && indexPatterns.find(({ id }) => id === index);
-  return indexPattern && indexPattern.fields.byName[key];
+  return indexPatterns.get(index)
+    .then(indexPattern => indexPattern.id && indexPattern.fields.byName[key]);
 }
 
 export function getOperatorFromFilter(filter) {
