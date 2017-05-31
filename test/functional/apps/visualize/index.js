@@ -24,10 +24,10 @@ export default function ({ getService, loadTestFile }) {
 
     loadTestFile(require.resolve('./_editor'));
     loadTestFile(require.resolve('./_chart_types'));
+    loadTestFile(require.resolve('./_gauge_chart'));
     loadTestFile(require.resolve('./_area_chart'));
     loadTestFile(require.resolve('./_line_chart'));
     loadTestFile(require.resolve('./_data_table'));
-    loadTestFile(require.resolve('./_metric_chart'));
     loadTestFile(require.resolve('./_pie_chart'));
     loadTestFile(require.resolve('./_tag_cloud'));
     loadTestFile(require.resolve('./_tile_map'));

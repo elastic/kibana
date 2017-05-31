@@ -155,7 +155,78 @@ function discoverController($scope, config, courier, $route, $window, Notifier,
   const $appStatus = $scope.appStatus = this.appStatus = {
     dirty: !savedSearch.id
   };
+
   const $state = $scope.state = new AppState(getStateDefaults());
+
+  const getFieldCounts = async () => {
+    // the field counts aren't set until we have the data back,
+    // so we wait for the fetch to be done before proceeding
+    if (!$scope.fetchStatus) {
+      return $scope.fieldCounts;
+    }
+
+    return await new Promise(resolve => {
+      const unwatch = $scope.$watch('fetchStatus', (newValue) => {
+        if (newValue) {
+          return;
+        }
+
+        unwatch();
+        resolve($scope.fieldCounts);
+      });
+    });
+  };
+
+
+  const getSharingDataFields = async () => {
+    const selectedFields = $state.columns;
+    if (selectedFields.length === 1 && selectedFields[0] ===  '_source') {
+      const fieldCounts = await getFieldCounts();
+      return {
+        searchFields: null,
+        selectFields: _.keys(fieldCounts).sort()
+      };
+    }
+
+    const timeFieldName = $scope.indexPattern.timeFieldName;
+    const fields = timeFieldName ? [timeFieldName, ...selectedFields] : selectedFields;
+    return {
+      searchFields: fields,
+      selectFields: fields
+    };
+  };
+
+  this.getSharingData = async () => {
+    const searchSource = $scope.searchSource.clone();
+
+    const { searchFields, selectFields } = await getSharingDataFields();
+    searchSource.set('fields', searchFields);
+    searchSource.set('sort', getSort($state.sort, $scope.indexPattern));
+    searchSource.set('highlight', null);
+    searchSource.set('highlightAll', null);
+    searchSource.set('aggs', null);
+    searchSource.set('size', null);
+
+    const body = await searchSource.getSearchRequestBody();
+    return {
+      searchRequest: {
+        index: searchSource.get('index').id,
+        body
+      },
+      fields: selectFields,
+      metaFields: $scope.indexPattern.metaFields,
+      conflictedTypesFields: $scope.indexPattern.fields.filter(f => f.type === 'conflict').map(f => f.name),
+    };
+  };
+
+  this.getSharingType = () => {
+    return 'search';
+  };
+
+  this.getSharingTitle = () => {
+    return savedSearch.title;
+  };
+
   $scope.uiState = $state.makeStateful('uiState');
 
   function getStateDefaults() {

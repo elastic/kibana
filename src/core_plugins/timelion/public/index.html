@@ -15,49 +15,43 @@
           </span>
         </span>
       </div>
-
-      <!-- Search. -->
-      <form
-        data-transclude-slot="bottomRow"
-        class="fullWidth"
-        role="form"
-        ng-submit="search()"
-      >
-        <div class="kuiLocalSearch timelionLocalSearch">
-          <timelion-expression-input
-            sheet="state.sheet[state.selected]"
-          >
-            <input
-              data-timelion-expression-input
-              input-focus
-              ng-model="state.sheet[state.selected]"
-              placeholder="Expression..."
-              aria-label="Expression input"
-              type="text"
-              class="kuiLocalSearchInput"
-            >
-          </timelion-expression-input>
-
-          <timelion-interval
-            model="state.interval"
-            in-header="true"
-          ></timelion-interval>
-
-          <button
-            type="submit"
-            aria-label="Search"
-            class="kuiLocalSearchButton"
-          >
-            <span class="fa fa-play"></span>
-          </button>
-        </div>
-      </form>
     </div>
   </kbn-top-nav>
 
   <div class="timelion-container">
     <div class="timelion-container-sheet">
-      <div class="timelion-container-sheet-margin">
+      <!-- Search. -->
+      <form
+        role="form"
+        ng-submit="search()"
+        class="kuiFieldGroup kuiFieldGroup--alignTop kuiVerticalRhythm"
+      >
+        <div class="kuiFieldGroupSection kuiFieldGroupSection--wide">
+          <timelion-expression-input
+            sheet="state.sheet[state.selected]"
+            rows="1"
+            update-chart="search()"
+            should-popover-suggestions="true"
+          ></timelion-expression-input>
+        </div>
+
+        <div class="kuiFieldGroupSection">
+          <timelion-interval
+            class="kuiVerticalRhythmSmall"
+            model="state.interval"
+          ></timelion-interval>
+
+          <button
+            type="submit"
+            aria-label="Search"
+            class="kuiButton kuiButton--basic fullWidth kuiVerticalRhythmSmall"
+          >
+            <span aria-hidden="true" class="kuiButton__icon kuiIcon fa-play"></span>
+          </button>
+        </div>
+      </form>
+
+      <div class="timelion-container-sheet-margin kuiVerticalRhythm">
         <timelion-fullscreen
           ng-show="transient.fullscreen"
           transient="transient"
