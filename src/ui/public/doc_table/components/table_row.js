@@ -16,10 +16,6 @@ import { disableFilter } from 'ui/filter_bar';
 const module = uiModules.get('app/discover');
 
 
-
-// guesstimate at the minimum number of chars wide cells in the table should be
-const MIN_LINE_LENGTH = 20;
-
 /**
  * kbnTableRow directive
  *
@@ -28,7 +24,7 @@ const MIN_LINE_LENGTH = 20;
  * <tr ng-repeat="row in rows" kbn-table-row="row"></tr>
  * ```
  */
-module.directive('kbnTableRow', function ($compile, $httpParamSerializer, kbnUrl) {
+module.directive('kbnTableRow', function ($compile, $httpParamSerializer, config, kbnUrl) {
   const cellTemplate = _.template(noWhiteSpace(require('ui/doc_table/components/table_row/cell.html')));
   const truncateByHeightTemplate = _.template(noWhiteSpace(require('ui/partials/truncate_by_height.html')));
 
@@ -134,6 +130,7 @@ module.directive('kbnTableRow', function ($compile, $httpParamSerializer, kbnUrl
           }));
         }
 
+        const truncationLimit = parseInt(config.get('doc_table:truncationLimit'), 10);
         $scope.columns.forEach(function (column) {
           const isFilterable = $scope.flattenedRow[column] !== undefined
             && mapping[column]
@@ -143,7 +140,7 @@ module.directive('kbnTableRow', function ($compile, $httpParamSerializer, kbnUrl
           newHtmls.push(cellTemplate({
             timefield: false,
             sourcefield: (column === '_source'),
-            formatted: _displayField(row, column, true),
+            formatted: _displayField(row, column, truncationLimit),
             filterable: isFilterable,
             column
           }));
@@ -188,11 +185,11 @@ module.directive('kbnTableRow', function ($compile, $httpParamSerializer, kbnUrl
       /**
        * Fill an element with the value of a field
        */
-      function _displayField(row, fieldName, truncate) {
+      function _displayField(row, fieldName, truncationLimit = null) {
         const indexPattern = $scope.indexPattern;
         const text = indexPattern.formatField(row, fieldName);
 
-        if (truncate && text.length > MIN_LINE_LENGTH) {
+        if (_.isFinite(truncationLimit) && text.length > truncationLimit) {
           return truncateByHeightTemplate({
             body: text
           });
