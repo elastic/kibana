@@ -77,8 +77,19 @@ export class DashboardState {
     //in the 'lose changes' warning message.
     this.lastSavedDashboardFilters = this.getFilterState();
 
+    // A mapping of panel index to the index pattern it uses.
+    this.panelIndexPatternMapping = {};
+
     PanelUtils.initPanelIndexes(this.getPanels());
     this.createStateMonitor();
+  }
+
+  registerPanelIndexPatternMap(panelIndex, indexPattern) {
+    this.panelIndexPatternMapping[panelIndex] = indexPattern;
+  }
+
+  getPanelIndexPatterns() {
+    return _.uniq(Object.values(this.panelIndexPatternMapping));
   }
 
   /**
@@ -271,6 +282,7 @@ export class DashboardState {
     _.remove(this.getPanels(), (panel) => {
       if (panel.panelIndex === panelIndex) {
         this.uiState.removeChild(getPersistedStateId(panel));
+        delete this.panelIndexPatternMapping[panelIndex];
         return true;
       } else {
         return false;
