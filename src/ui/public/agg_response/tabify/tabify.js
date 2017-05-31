@@ -8,6 +8,11 @@ export function AggResponseTabifyProvider(Private, Notifier) {
   const notify = new Notifier({ location: 'agg_response/tabify' });
 
   function tabifyAggResponse(vis, esResponse, respOpts) {
+
+    if (!esResponse) {
+      return;
+    }
+
     const write = new TabbedAggResponseWriter(vis, respOpts);
 
     const topLevelBucket = _.assign({}, esResponse.aggregations, {

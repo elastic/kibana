@@ -9,7 +9,7 @@ export function AggResponseGetColumnsProvider(Private) {
 
     if (minimal == null) minimal = !vis.isHierarchical();
 
-    if (!vis.aggs.bySchemaGroup.metrics) {
+    if (!vis.aggs.bySchemaGroup.metrics && vis.type.schemas.metrics) {
       aggs.push(new AggConfig(vis, {
         type: 'count',
         schema: vis.type.schemas.metrics[0].name
