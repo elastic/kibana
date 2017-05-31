@@ -1,8 +1,10 @@
 .kuiMenu {
+  padding-left: 0;
 }
 
 .kuiMenu--contained {
   border: $tableRowBorder;
+  padding-left: 0;
 
   .kuiMenuItem {
     padding: 6px 10px;
@@ -10,6 +12,7 @@
 }
 
 .kuiMenuItem {
+  list-style: none;
   padding: 6px 0;
 
   & + & {
