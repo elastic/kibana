@@ -12,13 +12,16 @@ visualize {
     white-space: pre-line;
   }
 
+  /**
+   * 1. Expand to fill the container but don't get squeezed smaller by the spy.
+   */
   .vis-container {
+    flex: 1 0 auto; /* 1 */
     display: flex;
     flex-direction: row;
     overflow: auto;
     -webkit-transition: opacity 0.01s;
     transition: opacity 0.01s;
-    flex: 1 1 0;
 
     // IE11 Hack
     //
@@ -62,7 +65,11 @@ visualize {
   }
 }
 
+/**
+ * 1. Expand to fill the container but don't get squeezed smaller by the spy.
+ */
 .visualize-error {
+  flex: 1 0 auto; /* 1 */
   display: flex;
   align-items: center;
   justify-content: center;
