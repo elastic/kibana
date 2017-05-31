@@ -8,7 +8,11 @@ marked.setOptions({
 });
 
 uiModules.get('kibana')
-  .service('serviceSettings', function ($http, $sanitize, mapConfig, kbnVersion) {
+  .service('serviceSettings', function ($http, $sanitize, mapConfig, tilemapsConfig, kbnVersion) {
+
+
+    const attributionFromConfig = $sanitize(marked(tilemapsConfig.deprecated.config.options.attribution || ''));
+    const tmsOptionsFromConfig = _.assign({}, tilemapsConfig.deprecated.config.options, { attribution: attributionFromConfig });
 
     const extendUrl = (url, props) => (
       modifyUrl(url, parsed => _.merge(parsed, props))
@@ -71,6 +75,12 @@ uiModules.get('kibana')
 
         this._loadTMSServices = _.once(async() => {
 
+          if (tilemapsConfig.deprecated.isOverridden) {//use settings from yml (which are overridden)
+            const tmsService = _.cloneDeep(tmsOptionsFromConfig);
+            tmsService.url = tilemapsConfig.deprecated.config.url;
+            return tmsService;
+          }
+
           const catalogue = await this._loadCatalogue();
           const tmsService = catalogue.services.filter((service) => service.type === 'tms')[0];
           const manifest = await this._getManifest(tmsService.manifest, this._queryParams);
@@ -109,7 +119,9 @@ uiModules.get('kibana')
       }
 
       async getTMSService() {
+
         const tmsService = await this._loadTMSServices();
+
         return {
           getUrl: function () {
             return tmsService.url;
