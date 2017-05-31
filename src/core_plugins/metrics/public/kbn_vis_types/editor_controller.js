@@ -1,104 +1,30 @@
-import { uiModules } from 'ui/modules';
-import '../services/executor';
-import createNewPanel from '../lib/create_new_panel';
-import '../directives/vis_editor';
-import _ from 'lodash';
-import angular from 'angular';
-import { FilterBarQueryFilterProvider } from 'ui/filter_bar/query_filter';
+import React from 'react';
+import { render, unmountComponentAtNode } from 'react-dom';
 
-const app = uiModules.get('kibana/metrics_vis', ['kibana']);
-app.controller('MetricsEditorController', (
-  $location,
-  $element,
-  $scope,
-  Private,
-  timefilter,
-  metricsExecutor
-) => {
+class ReactEditorController {
+  constructor(el, vis) {
+    this.el = el;
+    this.vis = vis;
+  }
 
-  $scope.embedded = $location.search().embed === 'true';
-  const queryFilter = Private(FilterBarQueryFilterProvider);
-  const createFetch = Private(require('../lib/fetch'));
-  const fetch = () => {
-    const fn = createFetch($scope);
-    return fn().then((resp) => {
-      $element.trigger('renderComplete');
-      return resp;
+  render(visData) {
+    this.visData = visData;
+
+    return new Promise((resolve) => {
+      const Component = this.vis.type.visConfig.component;
+      render(<Component vis={this.vis} visData={visData} renderComplete={resolve} />, this.el);
     });
-  };
-  const fetchFields = Private(require('../lib/fetch_fields'));
+  }
 
-  const debouncedFetch = _.debounce(() => {
-    fetch();
-  }, 1000, {
-    leading: false,
-    trailing: true
-  });
-
-  const debouncedFetchFields = _.debounce(fetchFields($scope), 1000, {
-    leading: false,
-    trailing: true
-  });
-
-  // If the model doesn't exist we need to either intialize it with a copy from
-  // the $scope.vis._editableVis.params or create a new panel all together.
-  if (!$scope.model) {
-    if ($scope.vis._editableVis.params.type) {
-      $scope.model = _.assign({}, $scope.vis._editableVis.params);
-    } else {
-      $scope.model = createNewPanel();
-      angular.copy($scope.model, $scope.vis._editableVis.params);
+  resize() {
+    if (this.visData) {
+      this.render(this.vis, this.visData);
     }
   }
 
-  $scope.$watchCollection('model', newValue => {
-    angular.copy(newValue, $scope.vis._editableVis.params);
-    $scope.stageEditableVis();
-    debouncedFetch();
+  destroy() {
+    unmountComponentAtNode(this.el);
+  }
+}
 
-    const patternsToFetch = [];
-    // Fetch any missing index patterns
-    if (!$scope.fields[newValue.index_pattern]) {
-      patternsToFetch.push(newValue.index_pattern);
-    }
-
-    newValue.series.forEach(series => {
-      if (series.override_index_pattern &&
-        !$scope.fields[series.series_index_pattern]) {
-        patternsToFetch.push(series.series_index_pattern);
-      }
-    });
-
-    if (newValue.annotations) {
-      newValue.annotations.forEach(item => {
-        if (item.index_pattern &&
-          !$scope.fields[item.index_pattern]) {
-          patternsToFetch.push(item.index_pattern);
-        }
-      });
-    }
-
-    if(patternsToFetch.length) {
-      debouncedFetchFields(_.unique(patternsToFetch));
-    }
-  });
-
-  $scope.visData = {};
-  $scope.fields = {};
-  // All those need to be consolidated
-  $scope.$listen(queryFilter, 'fetch', fetch);
-  $scope.$on('fetch', fetch);
-
-  fetchFields($scope)($scope.model.index_pattern);
-
-  // Register fetch
-  metricsExecutor.register({ execute: fetch });
-
-  // Start the executor
-  metricsExecutor.start();
-
-  // Destory the executor
-  $scope.$on('$destroy', metricsExecutor.destroy);
-
-});
-
+export { ReactEditorController };
