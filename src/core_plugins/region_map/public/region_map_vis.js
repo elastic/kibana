@@ -9,13 +9,13 @@ import { VisTypesRegistryProvider } from 'ui/registry/vis_types';
 import { VisVisTypeProvider } from 'ui/vis/vis_type';
 import { truncatedColorMaps } from 'ui/vislib/components/color/truncated_colormaps';
 
-VisTypesRegistryProvider.register(function RegionMapProvider(Private, vectormapsConfig) {
+VisTypesRegistryProvider.register(function RegionMapProvider(Private, regionmapsConfig) {
 
   const VisType = Private(VisVisTypeProvider);
   const TemplateVisType = Private(TemplateVisTypeProvider);
   const Schemas = Private(VisSchemasProvider);
 
-  const vectorLayers = vectormapsConfig.layers.slice();
+  const vectorLayers = regionmapsConfig.layers.slice();
   const selectedLayer = vectorLayers[0];
   const selectedJoinField = selectedLayer ? vectorLayers[0].fields[0] : null;
 

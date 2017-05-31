@@ -9,15 +9,15 @@ export function injectVars(server) {
   const configuredUrl = server.config().get('tilemap.url');
   const isOverridden = typeof configuredUrl === 'string' && configuredUrl !== '';
   const tilemapConfig = _.cloneDeep(serverConfig.get('tilemap'));
-  const vectormapsConfig = _.cloneDeep(serverConfig.get('regionmap'));
+  const regionmapsConfig = _.cloneDeep(serverConfig.get('regionmap'));
   const mapConfig = _.cloneDeep(serverConfig.get('map'));
 
 
-  vectormapsConfig.layers =  (vectormapsConfig.layers) ? vectormapsConfig.layers : [];
+  regionmapsConfig.layers =  (regionmapsConfig.layers) ? regionmapsConfig.layers : [];
 
   return {
     kbnDefaultAppId: serverConfig.get('kibana.defaultAppId'),
-    vectormapsConfig: vectormapsConfig,
+    regionmapsConfig: regionmapsConfig,
     mapConfig: mapConfig,
     tilemapsConfig: {
       deprecated: {
