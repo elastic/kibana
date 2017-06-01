@@ -1,14 +1,15 @@
 @import (reference) "~ui/styles/mixins";
 
-.filterEditor.kuiModal {
+.filterEditor {
   position: absolute;
-  width: 500px;
+  width: 600px;
   z-index: 101;
 }
 
-.filterEditor.kuiModal .ui-select-choices {
-  width: auto;
-  max-height: 300px;
+.ui-select-choices--autoWidth {
+  width: auto !important;
+  min-width: 100% !important;
+  max-height: 300px !important;
 }
 
 .filterEditor .ui-select-match-text span {
