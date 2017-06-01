@@ -1,0 +1,104 @@
+.kuiExpressionItem {
+  display: inline-block;
+  position: relative;
+
+  & + & {
+    margin-left: 10px;
+  }
+}
+
+  .kuiExpressionItem__button {
+    background-color: transparent;
+    padding: 5px 0px;
+    border: none;
+    border-bottom: dotted 2px $globalBorderColor;
+    font-size: $globalFontSize;
+    cursor: pointer;
+  }
+
+  .kuiExpressionItem__buttonDescription {
+    color: $expressionColorHighlight;
+    text-transform: uppercase;
+  }
+
+  .kuiExpressionItem__buttonValue {
+    color: $globalTextColor;
+    text-transform: lowercase;
+  }
+
+
+  .kuiExpressionItem__button--isActive {
+    border-bottom: solid 2px $expressionColorHighlight;
+  }
+
+  .kuiExpressionItem__popover {
+    position: absolute;
+    top: calc(100% + 15px);
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 auto;
+    background-color: white;
+    border: 1px solid $globalBorderColor;
+    border-radius: 6px;
+    box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.1);
+    visibility: visible;
+    opacity: 1;
+    transform: translateY(-5px) translateZ(0);
+    transition: transform $globalAnimSpeedNormal $globalAnimSlightBounce, opacity $globalAnimSpeedNormal $globalAnimSlightBounce;
+
+    // 1. Angulars ng-hide uses display: none. To use animations we need to use visibility instead.
+    &.ng-hide,
+    &.kuiExpressionItem__popover--isHidden {
+      display: block !important; // 1
+      visibility: hidden;
+      opacity: 0;
+      transform: translateY(0px) translateZ(0);
+    }
+
+    &:before {
+      position: absolute;
+      content: "";
+      top: -($globalBorderRadius * 2);
+      left: 20px;
+      height: 0;
+      width: 0;
+      border-left: $globalBorderRadius * 2 solid transparent;
+      border-right: $globalBorderRadius * 2 solid transparent;
+      border-bottom: $globalBorderRadius * 2 solid $globalBorderColor;
+    }
+
+    &:after {
+      position: absolute;
+      content: "";
+      top: -($globalBorderRadius * 2) + 1;
+      left: 20px;
+      height: 0;
+      width: 0;
+      border-left: $globalBorderRadius * 2 solid transparent;
+      border-right: $globalBorderRadius * 2 solid transparent;
+      border-bottom: $globalBorderRadius * 2 solid lighten($globalBorderColor, 5%);
+    }
+
+    &.kuiExpressionItem__popover--alignRight {
+      right: 0;
+      &:before, &:after {
+        left: auto;
+        right: 20px;
+      }
+    }
+  }
+
+  .kuiExpressionItem__popoverTitle {
+    display: flex;
+    flex: 1 1 auto;
+    background-color: lighten($globalBorderColor, 5%);
+    border-radius: $globalBorderRadius $globalBorderRadius 0 0;
+    color: $globalTextColor;
+    padding: 5px 10px;
+    line-height: $globalLineHeight;
+  }
+
+  .kuiExpressionItem__popoverContent {
+    padding: 20px;
+    white-space: nowrap;
+  }
