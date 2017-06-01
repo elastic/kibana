@@ -4,7 +4,7 @@ import ngMock from 'ng_mock';
 import $ from 'jquery';
 import 'ui/directives/confirm_click';
 import 'plugins/kibana/discover/index';
-import sinon from 'auto-release-sinon';
+import sinon from 'sinon';
 
 let $window;
 
@@ -59,16 +59,14 @@ describe('confirmClick directive', function () {
       events = $._data($elem[0], 'events');
     });
 
-    it('should get a click handler', function (done) {
+    it('should get a click handler', function () {
       expect(events).to.be.a(Object);
       expect(events.click).to.be.a(Array);
-      done();
     });
 
-    it('should unbind click handlers when the scope is destroyed', function (done) {
+    it('should unbind click handlers when the scope is destroyed', function () {
       $scope.$destroy();
       expect(events.click).to.be(undefined);
-      done();
     });
 
   });
@@ -78,16 +76,14 @@ describe('confirmClick directive', function () {
   describe('confirmed', function () {
     beforeEach(() => init(true));
 
-    it('should trigger window.confirm when clicked', function (done) {
+    it('should trigger window.confirm when clicked', function () {
       $elem.click();
       expect($window.confirm.called).to.be(true);
-      done();
     });
 
-    it('should run the click function when positively confirmed', function (done) {
+    it('should run the click function when positively confirmed', function () {
       $elem.click();
       expect($scope.runThis.called).to.be(true);
-      done();
     });
 
   });
@@ -95,10 +91,9 @@ describe('confirmClick directive', function () {
   describe('not confirmed', function () {
     beforeEach(() => init(false));
 
-    it('should not run the click function when canceled', function (done) {
+    it('should not run the click function when canceled', function () {
       $elem.click();
       expect($scope.runThis.called).to.be(false);
-      done();
     });
 
   });

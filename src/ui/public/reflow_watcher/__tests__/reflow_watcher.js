@@ -2,11 +2,12 @@ import 'angular';
 import $ from 'jquery';
 import _ from 'lodash';
 import expect from 'expect.js';
-import sinon from 'auto-release-sinon';
+import sinon from 'sinon';
 import ngMock from 'ng_mock';
 import { EventsProvider } from 'ui/events';
 import { ReflowWatcherProvider } from 'ui/reflow_watcher';
 describe('Reflow watcher', function () {
+  const sandbox = sinon.sandbox.create();
 
   const $body = $(document.body);
   const $window = $(window);
@@ -20,11 +21,11 @@ describe('Reflow watcher', function () {
   let EventEmitter;
   let reflowWatcher;
   let $rootScope;
-  let $onStub;
 
   beforeEach(ngMock.module('kibana', function () {
-    // stub jQuery's $.on method while creating the reflowWatcher
-    $onStub = sinon.stub($.fn, 'on');
+    // Stub jQuery's $.on and $.off methods while creating the reflowWatcher.
+    sandbox.stub($.fn, 'on');
+    sandbox.stub($.fn, 'off');
   }));
   beforeEach(ngMock.inject(function (Private, $injector) {
     $rootScope = $injector.get('$rootScope');
@@ -34,7 +35,7 @@ describe('Reflow watcher', function () {
     $rootScope.$apply();
   }));
   afterEach(function () {
-    $onStub.restore();
+    sandbox.restore();
   });
 
   it('is an event emitter', function () {
@@ -43,29 +44,25 @@ describe('Reflow watcher', function () {
 
   describe('listens', function () {
     it('to "mouseup" on the body', function () {
-      expectStubbedEventAndEl($onStub, 'mouseup', $body);
+      expectStubbedEventAndEl($.fn.on, 'mouseup', $body);
     });
 
     it('to "resize" on the window', function () {
-      expectStubbedEventAndEl($onStub, 'resize', $window);
+      expectStubbedEventAndEl($.fn.on, 'resize', $window);
     });
   });
 
   describe('un-listens in #destroy()', function () {
-    let $offStub;
-
     beforeEach(function () {
-      $offStub = sinon.stub($.fn, 'off');
       reflowWatcher.destroy();
-      $offStub.restore();
     });
 
     it('to "mouseup" on the body', function () {
-      expectStubbedEventAndEl($offStub, 'mouseup', $body);
+      expectStubbedEventAndEl($.fn.off, 'mouseup', $body);
     });
 
     it('to "resize" on the window', function () {
-      expectStubbedEventAndEl($offStub, 'resize', $window);
+      expectStubbedEventAndEl($.fn.off, 'resize', $window);
     });
   });
 
@@ -74,8 +71,8 @@ describe('Reflow watcher', function () {
     reflowWatcher.on('reflow', stub);
     reflowWatcher.trigger();
 
-    expect(stub).to.have.property('callCount', 0);
+    sinon.assert.notCalled(stub);
     $rootScope.$apply();
-    expect(stub).to.have.property('callCount', 1);
+    sinon.assert.calledOnce(stub);
   });
 });

@@ -2,13 +2,13 @@ import $ from 'jquery';
 import _ from 'lodash';
 import ngMock from 'ng_mock';
 import expect from 'expect.js';
-import sinon from 'auto-release-sinon';
+import sinon from 'sinon';
 import { ResizeCheckerProvider } from 'ui/vislib/lib/resize_checker';
 import { EventsProvider } from 'ui/events';
 import { ReflowWatcherProvider } from 'ui/reflow_watcher';
 
 describe('Vislib Resize Checker', function () {
-
+  const sandbox = sinon.sandbox.create();
   require('test_utils/no_digest_promises').activateForSuite();
 
   let ResizeChecker;
@@ -37,6 +37,8 @@ describe('Vislib Resize Checker', function () {
   afterEach(function () {
     checker.$el.remove();
     checker.destroy();
+
+    sandbox.restore();
   });
 
   describe('basic functionality', function () {
@@ -127,7 +129,7 @@ describe('Vislib Resize Checker', function () {
 
       // we are going to fake the delay using the fake clock
       const msStep = Math.floor(ResizeChecker.MS_MAX_RESIZE_DELAY / (steps - 1));
-      const clock = sinon.useFakeTimers();
+      const clock = sandbox.useFakeTimers();
 
       _.times(steps, function step(i) {
         checker.$el.css('height', 100 + i);
@@ -153,7 +155,7 @@ describe('Vislib Resize Checker', function () {
     });
 
     it('clears the timeout', function () {
-      const spy = sinon.spy(window, 'clearTimeout');
+      const spy = sandbox.spy(window, 'clearTimeout');
       checker.destroy();
       expect(spy).to.have.property('callCount', 1);
     });
@@ -166,7 +168,7 @@ describe('Vislib Resize Checker', function () {
     beforeEach(function () {
       // prevent the checker from running automatically
       checker.destroy();
-      clock = sinon.useFakeTimers();
+      clock = sandbox.useFakeTimers();
 
       schedule = [];
       _.times(25, function () {
