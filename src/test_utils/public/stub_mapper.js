@@ -1,6 +1,6 @@
 import { IndexPatternsMapperProvider } from 'ui/index_patterns/_mapper';
 import stubbedLogstashFields from 'fixtures/logstash_fields';
-import sinon from 'auto-release-sinon';
+import sinon from 'sinon';
 
 export function stubMapper(Private, mockLogstashFields = Private(stubbedLogstashFields)) {
   const stubbedMapper = Private(IndexPatternsMapperProvider);
