@@ -111,7 +111,7 @@ describe('xsrf request filter', function () {
         });
 
         expect(resp.statusCode).to.be(400);
-        expect(resp.payload).to.match(/"Request must contain an kbn-xsrf header/);
+        expect(resp.payload).to.match(/"Request must contain an ${xsrfHeader} or ${versionHeader} header/);
       });
     });
   }
