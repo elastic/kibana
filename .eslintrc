@@ -1,2 +1,17 @@
 ---
 extends: '@elastic/kibana'
+
+settings:
+  import/resolver:
+    - "@elastic/eslint-import-resolver-kibana":
+        rootPackage: kibana
+
+rules:
+  import/no-unresolved: off
+  import/named: off
+  import/namespace: off
+  import/default: off
+  import/export: off
+  import/no-named-as-default: off
+  import/no-named-as-default-member: off
+  import/no-duplicates: off
