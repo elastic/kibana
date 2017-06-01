@@ -1,0 +1,17 @@
+[Unit]
+Description=Kibana4 ElasticSearch GUI
+Requires=network.target
+After=network.target
+
+[Service]
+Type=simple
+User=kibana
+Group=kibana
+ExecStart=/opt/kibana/current/bin/kibana
+SuccessExitStatus=143
+Restart=always
+StandardOutput=null
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target
