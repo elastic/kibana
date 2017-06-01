@@ -51,7 +51,7 @@
         <i ng-show="filter.meta.negate" class="fa fa-fw fa-search-plus negative"></i>
         <i ng-hide="filter.meta.negate" class="fa fa-fw fa-search-minus positive"></i>
       </a>
-      <a class="action filter-remove" ng-click="removeFilter(filter)">
+      <a class="action filter-remove" ng-click="deleteFilter(filter)">
         <i class="fa fa-fw fa-trash" data-test-subj="removeFilter-{{ filter.meta.key }}"></i>
       </a>
       <a class="action filter-edit" ng-click="editFilter(filter)">

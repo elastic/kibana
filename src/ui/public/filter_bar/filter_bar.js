@@ -71,7 +71,7 @@ module.directive('filterBar', function (Private, Promise, getAppState) {
 
       $scope.deleteFilter = (filter) => {
         $scope.removeFilter(filter);
-        $scope.cancelEdit();
+        if (filter === $scope.editingFilter) $scope.cancelEdit();
       };
 
       $scope.editFilter = (filter) => {
