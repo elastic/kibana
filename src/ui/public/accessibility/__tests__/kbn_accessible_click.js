@@ -1,5 +1,5 @@
 import angular from 'angular';
-import sinon from 'auto-release-sinon';
+import sinon from 'sinon';
 import expect from 'expect.js';
 import ngMock from 'ng_mock';
 import '../kbn_accessible_click';

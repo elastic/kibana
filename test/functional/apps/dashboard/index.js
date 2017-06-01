@@ -9,5 +9,6 @@ export default function ({ getService, loadTestFile }) {
     loadTestFile(require.resolve('./_dashboard_save'));
     loadTestFile(require.resolve('./_dashboard_time'));
     loadTestFile(require.resolve('./_dashboard_listing'));
+    loadTestFile(require.resolve('./_dashboard_clone'));
   });
 }

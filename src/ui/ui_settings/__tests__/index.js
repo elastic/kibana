@@ -1,9 +1,21 @@
 import { isEqual } from 'lodash';
 import sinon from 'sinon';
 import expect from 'expect.js';
-import init from '..';
-import defaultsProvider from '../defaults';
+import { uiSettingsMixin } from '../ui_settings_mixin';
+import { getDefaultSettings } from '../defaults';
 import { errors as esErrors } from 'elasticsearch';
+
+async function expectRejection(promise, errorMessageContain) {
+  if (!promise || typeof promise.then !== 'function') {
+    throw new Error('Expected function to return a promise');
+  }
+
+  try {
+    await promise;
+  } catch (err) {
+    expect(err.message).to.contain(errorMessageContain);
+  }
+}
 
 describe('ui settings', function () {
   describe('overview', function () {
@@ -18,6 +30,19 @@ describe('ui settings', function () {
       expect(typeof uiSettings.removeMany).to.equal('function');
       expect(typeof uiSettings.set).to.equal('function');
       expect(typeof uiSettings.setMany).to.equal('function');
+    });
+
+    it('throws if the first error is not a request', async () => {
+      const { uiSettings } = instantiate();
+      await expectRejection(uiSettings.get(null), 'hapi.Request');
+      await expectRejection(uiSettings.get(false), 'hapi.Request');
+      await expectRejection(uiSettings.get('key'), 'hapi.Request');
+      await expectRejection(uiSettings.get(/regex/), 'hapi.Request');
+      await expectRejection(uiSettings.get(new Date()), 'hapi.Request');
+      await expectRejection(uiSettings.get({}), 'hapi.Request');
+      await expectRejection(uiSettings.get({ path:'' }), 'hapi.Request');
+      await expectRejection(uiSettings.get({ path:'', headers:null }), 'hapi.Request');
+      await expectRejection(uiSettings.get({ headers:{} }), 'hapi.Request');
     });
   });
 
@@ -107,13 +132,13 @@ describe('ui settings', function () {
         uiSettings
       } = instantiate();
       const defaults = await uiSettings.getDefaults();
-      expect(isEqual(defaults, defaultsProvider())).to.equal(true);
+      expect(isEqual(defaults, getDefaultSettings())).to.equal(true);
     });
 
 
     describe('defaults for formatters', async function () {
 
-      const defaults = defaultsProvider();
+      const defaults = getDefaultSettings();
       const mapping = JSON.parse(defaults['format:defaultTypeMap'].value);
       const expected = {
         ip: { id: 'ip', params: {} },
@@ -252,7 +277,7 @@ describe('ui settings', function () {
         req
       } = instantiate({ getResult });
       const result = await uiSettings.getRaw(req);
-      expect(isEqual(result, defaultsProvider())).to.equal(true);
+      expect(isEqual(result, getDefaultSettings())).to.equal(true);
     });
 
     it(`user configuration gets merged with defaults`, async function () {
@@ -262,7 +287,7 @@ describe('ui settings', function () {
         req
       } = instantiate({ getResult });
       const result = await uiSettings.getRaw(req);
-      const merged = defaultsProvider();
+      const merged = getDefaultSettings();
       merged.foo = { userValue: 'bar' };
       expect(isEqual(result, merged)).to.equal(true);
     });
@@ -274,7 +299,7 @@ describe('ui settings', function () {
         req
       } = instantiate({ getResult });
       const result = await uiSettings.getRaw(req);
-      const merged = defaultsProvider();
+      const merged = getDefaultSettings();
       merged.dateFormat.userValue = 'YYYY-MM-DD';
       expect(isEqual(result, merged)).to.equal(true);
     });
@@ -295,7 +320,7 @@ describe('ui settings', function () {
         req
       } = instantiate({ getResult });
       const result = await uiSettings.getAll(req);
-      const defaults = defaultsProvider();
+      const defaults = getDefaultSettings();
       const expectation = {};
       Object.keys(defaults).forEach(key => {
         expectation[key] = defaults[key].value;
@@ -310,7 +335,7 @@ describe('ui settings', function () {
         req
       } = instantiate({ getResult });
       const result = await uiSettings.getAll(req);
-      const defaults = defaultsProvider();
+      const defaults = getDefaultSettings();
       const expectation = {};
       Object.keys(defaults).forEach(key => {
         expectation[key] = defaults[key].value;
@@ -326,7 +351,7 @@ describe('ui settings', function () {
         req
       } = instantiate({ getResult });
       const result = await uiSettings.getAll(req);
-      const defaults = defaultsProvider();
+      const defaults = getDefaultSettings();
       const expectation = {};
       Object.keys(defaults).forEach(key => {
         expectation[key] = defaults[key].value;
@@ -351,7 +376,7 @@ describe('ui settings', function () {
         req
       } = instantiate({ getResult });
       const result = await uiSettings.get(req, 'dateFormat');
-      const defaults = defaultsProvider();
+      const defaults = getDefaultSettings();
       expect(result).to.equal(defaults.dateFormat.value);
     });
 
@@ -449,14 +474,6 @@ function instantiate({ getResult, callWithRequest, settingsStatusOverrides } = {
   adminCluster.callWithInternalUser.withArgs('get', sinon.match.any).returns(Promise.resolve({ _source: getResult }));
   adminCluster.callWithInternalUser.withArgs('update', sinon.match.any).returns(Promise.resolve());
 
-  const server = {
-    decorate: (_, key, value) => server[key] = value,
-    plugins: {
-      elasticsearch: {
-        getCluster: sinon.stub().withArgs('admin').returns(adminCluster)
-      }
-    }
-  };
   const configGet = sinon.stub();
   configGet.withArgs('kibana.index').returns('.kibana');
   configGet.withArgs('pkg.version').returns('1.2.3-test');
@@ -464,7 +481,17 @@ function instantiate({ getResult, callWithRequest, settingsStatusOverrides } = {
   const config = {
     get: configGet
   };
-  init(kbnServer, server, config);
+
+  const server = {
+    config: () => config,
+    decorate: (_, key, value) => server[key] = value,
+    plugins: {
+      elasticsearch: {
+        getCluster: sinon.stub().withArgs('admin').returns(adminCluster)
+      }
+    }
+  };
+  uiSettingsMixin(kbnServer, server, config);
   const uiSettings = server.uiSettings();
   return { server, uiSettings, configGet, req };
 }

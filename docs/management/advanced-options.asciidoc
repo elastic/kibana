@@ -48,7 +48,7 @@ increase request processing time.
 when necessary.
 `visualization:tileMap:maxPrecision`:: The maximum geoHash precision displayed on tile maps: 7 is high, 10 is very high,
 12 is the maximum. {es-ref}search-aggregations-bucket-geohashgrid-aggregation.html#_cell_dimensions_at_the_equator[Explanation of cell dimensions].
-`visualization:tileMap:WMSdefaults`:: Default properties for the WMS map server support in the tile map.
+`visualization:tileMap:WMSdefaults`:: Default properties for the WMS map server support in the coordinate map.
 `visualization:colorMapping`:: Maps values to specified colors within visualizations.
 `visualization:loadingDelay`:: Time to wait before dimming visualizations during query.
 `visualization:dimmingOpacity`:: When part of a visualization is highlighted, by hovering over it for example, ths is the opacity applied to the other elements. A higher number means other elements will be less opaque.

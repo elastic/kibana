@@ -10,6 +10,8 @@ import UiBundleCollection from './ui_bundle_collection';
 import UiBundlerEnv from './ui_bundler_env';
 import { UiI18n } from './ui_i18n';
 
+export { uiSettingsMixin } from './ui_settings';
+
 export default async (kbnServer, server, config) => {
   const uiExports = kbnServer.uiExports = new UiExports({
     urlBasePath: config.get('server.basePath')

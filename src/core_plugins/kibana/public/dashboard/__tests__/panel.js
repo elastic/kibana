@@ -1,7 +1,7 @@
 import expect from 'expect.js';
 import ngMock from 'ng_mock';
 import Promise from 'bluebird';
-import sinon from 'auto-release-sinon';
+import sinon from 'sinon';
 import noDigestPromise from 'test_utils/no_digest_promises';
 import mockUiState from 'fixtures/mock_ui_state';
 
