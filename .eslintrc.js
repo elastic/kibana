@@ -1,10 +1,16 @@
 module.exports = {
   parser: 'babel-eslint',
-
+  
+  extends: [
+    'plugin:import/errors',
+    'plugin:import/warnings'
+  ],
+  
   plugins: [
     'mocha',
     'babel',
     'react',
+    'import'
   ],
 
   env: {
