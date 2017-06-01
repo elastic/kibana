@@ -17,7 +17,7 @@ import { UtilsBrushEventProvider } from 'ui/utils/brush_event';
 import { FilterBarQueryFilterProvider } from 'ui/filter_bar/query_filter';
 import { FilterBarClickHandlerProvider } from 'ui/filter_bar/filter_bar_click_handler';
 
-export function VisProvider(Private, timefilter, getAppState) {
+export function VisProvider(Private, indexPatterns, timefilter, getAppState) {
   const visTypes = Private(VisTypesRegistryProvider);
   const AggConfigs = Private(VisAggConfigsProvider);
   const brushEvent = Private(UtilsBrushEventProvider);
@@ -45,6 +45,7 @@ export function VisProvider(Private, timefilter, getAppState) {
       this.setUiState(uiState);
 
       this.API = {
+        indexPatterns: indexPatterns,
         timeFilter: timefilter,
         queryFilter: queryFilter,
         events: {
