@@ -84,6 +84,84 @@ describe('SavedObjectsClient', () => {
     });
   });
 
+  describe('#bulkCreate', () => {
+    it('formats Elasticsearch request', async () => {
+      await savedObjectsClient.bulkCreate([
+        { type: 'config', id: 'one', attributes: { title: 'Test One' } },
+        { type: 'index-pattern', id: 'two', attributes: { title: 'Test Two' } }
+      ]);
+
+      expect(callAdminCluster.calledOnce).to.be(true);
+
+      const args = callAdminCluster.getCall(0).args;
+
+      expect(args[0]).to.be('bulk');
+      expect(args[1].body).to.eql([
+        { create: { _type: 'config', _id: 'one' } },
+        { title: 'Test One' },
+        { create: { _type: 'index-pattern', _id: 'two' } },
+        { title: 'Test Two' }
+      ]);
+    });
+
+    it('should overwrite objects if force is truthy', async () => {
+      await savedObjectsClient.bulkCreate([
+        { type: 'config', id: 'one', attributes: { title: 'Test One' } },
+        { type: 'index-pattern', id: 'two', attributes: { title: 'Test Two' } }
+      ], { force: true });
+
+      expect(callAdminCluster.calledOnce).to.be(true);
+
+      const args = callAdminCluster.getCall(0).args;
+
+      expect(args[0]).to.be('bulk');
+      expect(args[1].body).to.eql([
+        { index: { _type: 'config', _id: 'one' } },
+        { title: 'Test One' },
+        { index: { _type: 'index-pattern', _id: 'two' } },
+        { title: 'Test Two' }
+      ]);
+    });
+
+    it('formats Elasticsearch response', async () => {
+      callAdminCluster.returns(Promise.resolve({
+        errors: false,
+        items: [{
+          create: {
+            _type: 'config',
+            _id: 'one',
+            _version: 2
+          }
+        }, {
+          create: {
+            _type: 'config',
+            _id: 'one',
+            _version: 2
+          }
+        }]
+      }));
+
+      const response = await savedObjectsClient.bulkCreate([
+        { type: 'config', id: 'one', attributes: { title: 'Test One' } },
+        { type: 'index-pattern', id: 'two', attributes: { title: 'Test Two' } }
+      ]);
+
+      expect(response).to.eql([
+        {
+          id: 'one',
+          type: 'config',
+          version: 2,
+          attributes: { title: 'Test One' }
+        }, {
+          id: 'one',
+          type: 'config',
+          version: 2,
+          attributes: { title: 'Test Two' }
+        }
+      ]);
+    });
+  });
+
   describe('#delete', () => {
     it('throws notFound when ES is unable to find the document', (done) => {
       callAdminCluster.returns(Promise.resolve({ found: false }));
@@ -169,6 +247,29 @@ describe('SavedObjectsClient', () => {
     });
   });
 
+  describe('#get', () => {
+    it('formats Elasticsearch response', async () => {
+      callAdminCluster.returns(Promise.resolve({
+        _id: 'logstash-*',
+        _type: 'index-pattern',
+        _version: 2,
+        _source: {
+          title: 'Testing'
+        }
+      }));
+
+      const response = await savedObjectsClient.get('index-pattern', 'logstash-*');
+      expect(response).to.eql({
+        id: 'logstash-*',
+        type: 'index-pattern',
+        version: 2,
+        attributes: {
+          title: 'Testing'
+        }
+      });
+    });
+  });
+
   describe('#bulkGet', () => {
     it('accepts an array of ids', async () => {
       await savedObjectsClient.bulkGet(['one', 'two'], 'index-pattern');
@@ -220,29 +321,6 @@ describe('SavedObjectsClient', () => {
         type: 'config',
         version: 2,
         attributes: { title: 'Test' }
-      });
-    });
-  });
-
-  describe('#get', () => {
-    it('formats Elasticsearch response', async () => {
-      callAdminCluster.returns(Promise.resolve({
-        _id: 'logstash-*',
-        _type: 'index-pattern',
-        _version: 2,
-        _source: {
-          title: 'Testing'
-        }
-      }));
-
-      const response = await savedObjectsClient.get('index-pattern', 'logstash-*');
-      expect(response).to.eql({
-        id: 'logstash-*',
-        type: 'index-pattern',
-        version: 2,
-        attributes: {
-          title: 'Testing'
-        }
       });
     });
   });

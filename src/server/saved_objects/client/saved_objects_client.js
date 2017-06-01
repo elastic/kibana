@@ -12,18 +12,45 @@ export class SavedObjectsClient {
     this._callAdminCluster = callAdminCluster;
   }
 
-  async create(type, body = {}) {
-    const response = await this._withKibanaIndex('index', {
-      type,
-      body
-    });
+  create(type, body = {}) {
+    return this._withKibanaIndex('index', { type, body })
+      .then((resp) => {
+        return {
+          id: resp._id,
+          type: resp._type,
+          version: resp._version,
+          attributes: body
+        };
+      });
+  }
 
-    return {
-      type: response._type,
-      id: response._id,
-      version: response._version,
-      attributes: body
-    };
+  /**
+   * Creates multiple documents at once
+   *
+   * @param {array} objects
+   * @param {object} options
+   * @param {boolean} options.force - overrides existing documents
+   * @returns {promise} Returns promise containing array of documents
+   */
+  async bulkCreate(objects, options = {}) {
+    const action = options.force === true ? 'index' : 'create';
+
+    const body = objects.reduce((acc, object) => {
+      acc.push({ [action]: { _type: object.type, _id: object.id } });
+      acc.push(object.attributes);
+
+      return acc;
+    }, []);
+
+    return this._withKibanaIndex('bulk', { body })
+      .then(resp => get(resp, 'items', []).map((resp, i) => {
+        return {
+          id: resp[action]._id,
+          type: resp[action]._type,
+          version: resp[action]._version,
+          attributes: objects[i].attributes
+        };
+      }));
   }
 
   async delete(type, id) {
