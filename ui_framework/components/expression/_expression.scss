@@ -61,9 +61,9 @@ $expressionColorHighlight: #00A69B;
       left: 20px;
       height: 0;
       width: 0;
-      border-left: 8px solid transparent;
-      border-right: 8px solid transparent;
-      border-bottom: 8px solid $globalBorderColor;
+      border-left: $globalBorderRadius * 2 solid transparent;
+      border-right: $globalBorderRadius * 2 solid transparent;
+      border-bottom: $globalBorderRadius * 2 solid $globalBorderColor;
     }
 
     &:after {
