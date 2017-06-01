@@ -1,7 +1,7 @@
 import 'ui/autoload/all';
 import { uiModules } from 'ui/modules';
 import uiRoutes from 'ui/routes';
-import template from 'plugins/canvas/index.html';
+import template from './index.html';
 import './state/store_service';
 import './directives/react';
 import './style/main.less';
