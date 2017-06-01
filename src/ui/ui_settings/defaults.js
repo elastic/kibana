@@ -1,6 +1,6 @@
 import moment from 'moment-timezone';
 
-export default function defaultSettingsProvider() {
+export function getDefaultSettings() {
   const weekdays = moment.weekdays().slice();
   const [defaultWeekday] = weekdays;
 
