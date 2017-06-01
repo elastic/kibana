@@ -4,7 +4,12 @@
   ui-select-focus-on="focus-params"
 >
   <ui-select-match placeholder="Values...">
-    <span tooltip="{{$select.selected}}">{{$select.selected}}</span>
+    <span
+      class="ui-select-match--ellipsis"
+      tooltip="{{$select.selected}}"
+    >
+      {{$select.selected}}
+    </span>
   </ui-select-match>
   <ui-select-choices
     class="ui-select-choices--autoWidth"

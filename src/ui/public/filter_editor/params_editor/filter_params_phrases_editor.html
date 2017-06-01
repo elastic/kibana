@@ -3,8 +3,14 @@
   multiple
   ui-select-focus-on="focus-params"
 >
-  <ui-select-match placeholder="Values...">
-    <span class="pillWithTooltip" tooltip="{{$item}}">
+  <ui-select-match
+    placeholder="Values..."
+    class="ui-select-match--restrictToParent"
+  >
+    <span
+      class="ui-select-match--pillWithTooltip"
+      tooltip="{{$item}}"
+    >
       {{$item}}
     </span>
   </ui-select-match>
