@@ -36,6 +36,19 @@ export class PanelUtils {
   }
 
   /**
+   * Ensures that the grid element matches the latest size/pos info in the panel element.
+   * @param {PanelState} panel
+   * @param {Element} panelElement - jQuery element representing the element in the UI
+   */
+  static refreshElementSizeAndPosition(panel, panelElement) {
+    const data = panelElement.coords().grid;
+    data.size_x = panel.size_x;
+    data.size_y = panel.size_y;
+    data.col = panel.col;
+    data.row = panel.row;
+  }
+
+  /**
    * Returns the panel with the given panelIndex from the panels array (*NOT* the panel at the given index).
    * @param panelIndex {number} - Note this is *NOT* the index of the panel in the panels array.
    * panelIndex is really a panelId, but is called panelIndex for BWC reasons.
