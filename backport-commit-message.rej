@@ -1,0 +1,10 @@
+Add percent visualization to known plugins docs
+
+Backports PR #10301
+
+**Commit 1:**
+Update known-plugins.asciidoc
+
+* Original sha: 27c4cbf6e4242ed4d3196f3fcc407cbd3de7380f
+* Authored by Adrien Mannocci <adrien.mannocci@gmail.com> on 2017-02-11T16:18:32Z
+* Committed by GitHub <noreply@github.com> on 2017-02-11T16:18:32Z
