@@ -48,7 +48,7 @@ export class TermsVisEditor extends Component {
   renderFields() {
     return this.props.visParams.fields.map((field, index) => {
       return (
-        <div key={index}>
+        <div key={index} className="field-section">
           <div className="kuiFieldGroup">
             <div className="kuiFieldGroupSection">
               <label>

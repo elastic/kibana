@@ -18,11 +18,12 @@ export class TermsVis extends Component {
 
   render() {
     return (
-      <div>
+      <div className="vertical-layout">
         {this.props.controls.map((control, index) =>
-          <div key={index}>
+          <div key={index} className="terms-field">
             <span>{control.label}</span>
             <Select
+              className="terms-select"
               placeholder="Select..."
               value={control.selected}
               options={control.terms}
