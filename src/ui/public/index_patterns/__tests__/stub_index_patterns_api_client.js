@@ -1,5 +1,5 @@
 import MockLogstashFieldsProvider from 'fixtures/logstash_fields';
-import sinon from 'auto-release-sinon';
+import sinon from 'sinon';
 
 import { IndexPatternsApiClientProvider } from '../index_patterns_api_client_provider';
 
