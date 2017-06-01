@@ -716,29 +716,32 @@ body {
   line-height: 1.5;
   color: #9fa3a7; }
 
-.kuiExpression .kuiExpression__item {
+.kuiExpressionItem {
   display: inline-block;
-  margin-right: 10px;
   position: relative; }
+  .kuiExpressionItem + .kuiExpressionItem {
+    margin-left: 10px; }
 
-.kuiExpression .kuiExpression__button {
+.kuiExpressionItem__button {
   background-color: transparent;
   padding: 5px 0px;
   border: none;
   border-bottom: dotted 2px #E4E4E4;
   font-size: 14px;
   cursor: pointer; }
-  .kuiExpression .kuiExpression__button .kuiExpression__buttonDescription {
-    color: #00A69B;
-    text-transform: uppercase; }
-  .kuiExpression .kuiExpression__button .kuiExpression__buttonValue {
-    color: #2d2d2d;
-    text-transform: lowercase; }
 
-.kuiExpression .kuiExpression__button--active {
+.kuiExpressionItem__buttonDescription {
+  color: #00A69B;
+  text-transform: uppercase; }
+
+.kuiExpressionItem__buttonValue {
+  color: #2d2d2d;
+  text-transform: lowercase; }
+
+.kuiExpressionItem__button--isActive {
   border-bottom: solid 2px #00A69B; }
 
-.kuiExpression .kuiExpression__popover {
+.kuiExpressionItem__popover {
   position: absolute;
   top: calc(100% + 15px);
   display: -webkit-box;
@@ -765,13 +768,13 @@ body {
   transition: opacity 250ms cubic-bezier(0.34, 1.61, 0.7, 1), -webkit-transform 250ms cubic-bezier(0.34, 1.61, 0.7, 1);
   transition: transform 250ms cubic-bezier(0.34, 1.61, 0.7, 1), opacity 250ms cubic-bezier(0.34, 1.61, 0.7, 1);
   transition: transform 250ms cubic-bezier(0.34, 1.61, 0.7, 1), opacity 250ms cubic-bezier(0.34, 1.61, 0.7, 1), -webkit-transform 250ms cubic-bezier(0.34, 1.61, 0.7, 1); }
-  .kuiExpression .kuiExpression__popover.ng-hide, .kuiExpression .kuiExpression__popover.kuiExpression__popover--hidden {
+  .kuiExpressionItem__popover.ng-hide, .kuiExpressionItem__popover.kuiExpressionItem__popover--isHidden {
     display: block !important;
     visibility: hidden;
     opacity: 0;
     -webkit-transform: translateY(0px) translateZ(0);
             transform: translateY(0px) translateZ(0); }
-  .kuiExpression .kuiExpression__popover:before {
+  .kuiExpressionItem__popover:before {
     position: absolute;
     content: "";
     top: -8px;
@@ -781,7 +784,7 @@ body {
     border-left: 8px solid transparent;
     border-right: 8px solid transparent;
     border-bottom: 8px solid #E4E4E4; }
-  .kuiExpression .kuiExpression__popover:after {
+  .kuiExpressionItem__popover:after {
     position: absolute;
     content: "";
     top: -7px;
@@ -791,13 +794,13 @@ body {
     border-left: 8px solid transparent;
     border-right: 8px solid transparent;
     border-bottom: 8px solid #f1f1f1; }
-  .kuiExpression .kuiExpression__popover.kuiExpression__popover--rightAligned {
+  .kuiExpressionItem__popover.kuiExpressionItem__popover--alignRight {
     right: 0; }
-    .kuiExpression .kuiExpression__popover.kuiExpression__popover--rightAligned:before, .kuiExpression .kuiExpression__popover.kuiExpression__popover--rightAligned:after {
+    .kuiExpressionItem__popover.kuiExpressionItem__popover--alignRight:before, .kuiExpressionItem__popover.kuiExpressionItem__popover--alignRight:after {
       left: auto;
       right: 20px; }
 
-.kuiExpression .kuiExpression__popoverTitle {
+.kuiExpressionItem__popoverTitle {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -812,7 +815,7 @@ body {
   padding: 5px 10px;
   line-height: 1.5; }
 
-.kuiExpression .kuiExpression__popoverContent {
+.kuiExpressionItem__popoverContent {
   padding: 20px;
   white-space: nowrap; }
 

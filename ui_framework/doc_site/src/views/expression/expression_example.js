@@ -19,6 +19,9 @@ export default props => (
       source={[{
         type: GuideSectionTypes.HTML,
         code: expressionHtml,
+      }, {
+        type: GuideSectionTypes.JS,
+        code: expressionJs,
       }]}
     >
       <GuideText>
