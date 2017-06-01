@@ -1,5 +1,5 @@
 import _ from 'lodash';
-import sinon from 'auto-release-sinon';
+import sinon from 'sinon';
 import MockState from 'fixtures/mock_state';
 import expect from 'expect.js';
 import ngMock from 'ng_mock';

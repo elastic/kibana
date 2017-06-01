@@ -1,4 +1,4 @@
-import sinon from 'auto-release-sinon';
+import sinon from 'sinon';
 import expect from 'expect.js';
 import ngMock from 'ng_mock';
 import 'ui/state_management/app_state';
