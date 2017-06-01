@@ -716,6 +716,109 @@ body {
   line-height: 1.5;
   color: #9fa3a7; }
 
+.kuiExpressionItem {
+  display: inline-block;
+  position: relative; }
+  .kuiExpressionItem + .kuiExpressionItem {
+    margin-left: 10px; }
+
+.kuiExpressionItem__button {
+  background-color: transparent;
+  padding: 5px 0px;
+  border: none;
+  border-bottom: dotted 2px #E4E4E4;
+  font-size: 14px;
+  cursor: pointer; }
+
+.kuiExpressionItem__buttonDescription {
+  color: #00A69B;
+  text-transform: uppercase; }
+
+.kuiExpressionItem__buttonValue {
+  color: #2d2d2d;
+  text-transform: lowercase; }
+
+.kuiExpressionItem__button--isActive {
+  border-bottom: solid 2px #00A69B; }
+
+.kuiExpressionItem__popover {
+  position: absolute;
+  top: calc(100% + 15px);
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-orient: vertical;
+  -webkit-box-direction: normal;
+  -webkit-flex-direction: column;
+      -ms-flex-direction: column;
+          flex-direction: column;
+  -webkit-box-flex: 1;
+  -webkit-flex: 1 1 auto;
+      -ms-flex: 1 1 auto;
+          flex: 1 1 auto;
+  background-color: white;
+  border: 1px solid #E4E4E4;
+  border-radius: 6px;
+  box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.1);
+  visibility: visible;
+  opacity: 1;
+  -webkit-transform: translateY(-5px) translateZ(0);
+          transform: translateY(-5px) translateZ(0);
+  transition: opacity 250ms cubic-bezier(0.34, 1.61, 0.7, 1), -webkit-transform 250ms cubic-bezier(0.34, 1.61, 0.7, 1);
+  transition: transform 250ms cubic-bezier(0.34, 1.61, 0.7, 1), opacity 250ms cubic-bezier(0.34, 1.61, 0.7, 1);
+  transition: transform 250ms cubic-bezier(0.34, 1.61, 0.7, 1), opacity 250ms cubic-bezier(0.34, 1.61, 0.7, 1), -webkit-transform 250ms cubic-bezier(0.34, 1.61, 0.7, 1); }
+  .kuiExpressionItem__popover.ng-hide, .kuiExpressionItem__popover.kuiExpressionItem__popover--isHidden {
+    display: block !important;
+    visibility: hidden;
+    opacity: 0;
+    -webkit-transform: translateY(0px) translateZ(0);
+            transform: translateY(0px) translateZ(0); }
+  .kuiExpressionItem__popover:before {
+    position: absolute;
+    content: "";
+    top: -8px;
+    left: 20px;
+    height: 0;
+    width: 0;
+    border-left: 8px solid transparent;
+    border-right: 8px solid transparent;
+    border-bottom: 8px solid #E4E4E4; }
+  .kuiExpressionItem__popover:after {
+    position: absolute;
+    content: "";
+    top: -7px;
+    left: 20px;
+    height: 0;
+    width: 0;
+    border-left: 8px solid transparent;
+    border-right: 8px solid transparent;
+    border-bottom: 8px solid #f1f1f1; }
+  .kuiExpressionItem__popover.kuiExpressionItem__popover--alignRight {
+    right: 0; }
+    .kuiExpressionItem__popover.kuiExpressionItem__popover--alignRight:before, .kuiExpressionItem__popover.kuiExpressionItem__popover--alignRight:after {
+      left: auto;
+      right: 20px; }
+
+.kuiExpressionItem__popoverTitle {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-flex: 1;
+  -webkit-flex: 1 1 auto;
+      -ms-flex: 1 1 auto;
+          flex: 1 1 auto;
+  background-color: #f1f1f1;
+  border-radius: 4px 4px 0 0;
+  color: #2d2d2d;
+  padding: 5px 10px;
+  line-height: 1.5; }
+
+.kuiExpressionItem__popoverContent {
+  padding: 20px;
+  white-space: nowrap; }
+
 /**
  * 1. Set inline-block so this wrapper shrinks to fit the input.
  */

@@ -30,6 +30,9 @@ import EventExample
 import EventsSandbox
   from '../../views/event/events_sandbox';
 
+import ExpressionExample
+  from '../../views/expression/expression_example';
+
 import FormExample
   from '../../views/form/form_example';
 
@@ -135,6 +138,9 @@ const components = [{
 }, {
   name: 'Event',
   component: EventExample,
+}, {
+  name: 'Expression',
+  component: ExpressionExample,
 }, {
   name: 'Form',
   component: FormExample,
