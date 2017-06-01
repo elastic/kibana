@@ -17,6 +17,8 @@ import {
   getFieldFromFilter,
   getOperatorFromFilter,
   getParamsFromFilter,
+  getFieldOptions,
+  getOperatorOptions,
   isFilterValid,
   buildFilter
 } from '../filter_editor_utils';
@@ -145,6 +147,47 @@ describe('FilterEditorUtils', function () {
     it('should return undefined for exists filter', function () {
       const params = getParamsFromFilter(existsFilter);
       expect(params.exists).to.not.be.ok();
+    });
+  });
+
+  describe('getFieldOptions', function () {
+    it('returns an empty array when no index patterns are provided', function () {
+      const fieldOptions = getFieldOptions();
+      expect(fieldOptions).to.eql([]);
+    });
+
+    it('returns the list of fields from the given index patterns', function () {
+      const fieldOptions = getFieldOptions([indexPattern]);
+      expect(fieldOptions).to.be.an('array');
+      expect(fieldOptions.length).to.be.greaterThan(0);
+    });
+
+    it('limits the fields to the filterable fields', function () {
+      const fieldOptions = getFieldOptions([indexPattern]);
+      const nonFilterableFields = fieldOptions.filter(field => !field.filterable);
+      expect(nonFilterableFields.length).to.be(0);
+    });
+  });
+
+  describe('getOperatorOptions', function () {
+    it('returns range for number fields', function () {
+      const field = fields.find(field => field.type === 'number');
+      const operatorOptions = getOperatorOptions(field);
+      const rangeOperator = operatorOptions.find(operator => operator.type === 'range');
+      expect(rangeOperator).to.be.ok();
+    });
+
+    it('does not return range for string fields', function () {
+      const field = fields.find(field => field.type === 'string');
+      const operatorOptions = getOperatorOptions(field);
+      const rangeOperator = operatorOptions.find(operator => operator.type === 'range');
+      expect(rangeOperator).to.not.be.ok();
+    });
+
+    it('returns operators without field type restrictions', function () {
+      const operatorOptions = getOperatorOptions();
+      const operatorsWithoutFieldTypes = FILTER_OPERATORS.filter(operator => !operator.fieldTypes);
+      expect(operatorOptions.length).to.be(operatorsWithoutFieldTypes.length);
     });
   });
 
