@@ -1,6 +1,6 @@
 import expect from 'expect.js';
 import ngMock from 'ng_mock';
-import sinon from 'auto-release-sinon';
+import sinon from 'sinon';
 import { parse as parseUrl } from 'url';
 
 import { StateProvider } from 'ui/state_management/state';
