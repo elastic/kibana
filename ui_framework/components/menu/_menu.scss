@@ -1,6 +1,5 @@
 /**
  * 1. Allow class to be applied to `ul` and `ol` elements
- * 2. Allow class to be applied to `li` elements
  */
 .kuiMenu {
   padding-left: 0; /* 1 */
@@ -14,8 +13,11 @@
   }
 }
 
+/**
+ * 1. Allow class to be applied to `li` elements
+ */
 .kuiMenuItem {
-  list-style: none; /* 2 */
+  list-style: none; /* 1 */
   padding: 6px 0;
 
   & + & {
