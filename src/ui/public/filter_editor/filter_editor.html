@@ -79,7 +79,10 @@
       </div>
     </div>
 
-    <div class="kuiHeaderBar kuiVerticalRhythm">
+    <div
+      class="kuiHeaderBar kuiVerticalRhythm"
+      ng-hide="filterEditor.showQueryDslEditor()"
+    >
       <div class="kuiHeaderBarSection">
         <h2 class="kuiSubTitle">
           More actions
@@ -87,45 +90,15 @@
       </div>
     </div>
 
-    <div class="kuiMenuButtonGroup kuiVerticalRhythm">
+    <div
+      class="kuiMenuButtonGroup kuiVerticalRhythm"
+      ng-hide="filterEditor.showQueryDslEditor()"
+    >
       <button
         class="kuiMenuButton kuiMenuButton--basic"
-        ng-hide="filterEditor.showQueryDslEditor()"
         ng-click="filterEditor.isEditingQueryDsl = true"
       >
         <span>Edit the query DSL</span>
-      </button>
-
-      <button
-        class="kuiMenuButton kuiMenuButton--basic"
-        ng-hide="filterEditor.isPinned"
-        ng-click="filterEditor.isPinned = true"
-      >
-        <span>Pin</span>
-      </button>
-
-      <button
-        class="kuiMenuButton kuiMenuButton--basic"
-        ng-show="filterEditor.isPinned"
-        ng-click="filterEditor.isPinned = false"
-      >
-        <span>Unpin</span>
-      </button>
-
-      <button
-        class="kuiMenuButton kuiMenuButton--basic"
-        ng-hide="filterEditor.isDisabled"
-        ng-click="filterEditor.isDisabled = true"
-      >
-        <span>Disable</span>
-      </button>
-
-      <button
-        class="kuiMenuButton kuiMenuButton--basic"
-        ng-show="filterEditor.isDisabled"
-        ng-click="filterEditor.isDisabled = false"
-      >
-        <span>Enable</span>
       </button>
     </div>
   </div>

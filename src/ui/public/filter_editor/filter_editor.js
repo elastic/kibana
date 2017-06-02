@@ -33,9 +33,8 @@ module.directive('filterEditor', function ($timeout, indexPatterns) {
     controllerAs: 'filterEditor',
     bindToController: true,
     controller: function ($scope, $element) {
-      this.init = (filter) => {
-        this.isPinned = _.get(filter, ['$state', 'store']) === 'globalState';
-        this.isDisabled = filter.meta.disabled;
+      this.init = () => {
+        const { filter } = this;
         this.alias = filter.meta.alias;
         this.isEditingQueryDsl = false;
         this.queryDsl = getQueryDslFromFilter(filter);
@@ -52,6 +51,7 @@ module.directive('filterEditor', function ($timeout, indexPatterns) {
       };
 
       $scope.$watch(() => this.filter, this.init);
+      $scope.$watchCollection(() => this.filter.meta, this.init);
 
       this.setQueryDsl = (queryDsl) => {
         this.queryDsl = queryDsl;
@@ -99,7 +99,7 @@ module.directive('filterEditor', function ($timeout, indexPatterns) {
       };
 
       this.save = () => {
-        const { filter, field, operator, params, isPinned, isDisabled, alias } = this;
+        const { filter, field, operator, params, alias } = this;
 
         let newFilter;
         if (this.showQueryDslEditor()) {
@@ -110,9 +110,10 @@ module.directive('filterEditor', function ($timeout, indexPatterns) {
           const indexPattern = field.indexPattern;
           newFilter = buildFilter({ indexPattern, field, operator, params, filterBuilder });
         }
-        newFilter.meta.disabled = isDisabled;
+        newFilter.meta.disabled = filter.meta.disabled;
         newFilter.meta.alias = alias;
 
+        const isPinned = _.get(filter, ['$state', 'store']) === 'globalState';
         return this.onSave({ filter, newFilter, isPinned });
       };
 
