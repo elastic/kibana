@@ -33,7 +33,7 @@
       class="kuiFieldGroup kuiVerticalRhythm kuiFieldGroup--alignTop"
       ng-hide="filterEditor.showQueryDslEditor()"
     >
-      <div class="kuiFieldGroupSection kuiColumn kuiColumn--4">
+      <div class="kuiFieldGroupSection">
         <filter-field-select
           index-patterns="filterEditor.indexPatterns"
           field="filterEditor.field"
@@ -41,7 +41,7 @@
         ></filter-field-select>
       </div>
 
-      <div class="kuiFieldGroupSection kuiColumn kuiColumn--4">
+      <div class="kuiFieldGroupSection">
         <filter-operator-select
           ng-if="filterEditor.field"
           field="filterEditor.field"
@@ -50,7 +50,7 @@
         ></filter-operator-select>
       </div>
 
-      <div class="kuiFieldGroupSection kuiFieldGroupSection--wide kuiColumn kuiColumn--4">
+      <div class="kuiFieldGroupSection kuiFieldGroupSection--wide filterEditor__wideField">
         <filter-params-editor
           ng-if="filterEditor.field && filterEditor.operator"
           field="filterEditor.field"
