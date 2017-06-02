@@ -65,7 +65,10 @@
     ng-show="showAddFilterButton()"
   >
     <div class="filter-description small">
-      <a ng-click="addFilter()">
+      <a
+        ng-click="addFilter()"
+        kbn-accessible-click
+      >
         Add a filter
         <span class="fa fa-plus"></span>
       </a>
