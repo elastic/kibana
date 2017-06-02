@@ -1,0 +1,151 @@
+<div>
+  <div class="kuiSideBarSection kuiSideBarSection__main">
+  <div class="kuiSideBarSectionTitle">
+    <div class="kuiSideBarSectionTitle__text">
+      Metrics
+    </div>
+  </div>
+
+  <div
+    ng-repeat="chart in vis.params.seriesParams track by $index"
+    class="kuiSideBarSection"
+  >
+    <div class="kuiSideBarCollapsibleTitle">
+      <div
+        ng-init="isSeriesOpen = ($index === 0)"
+        class="kuiSideBarCollapsibleTitle__label"
+        ng-click="isSeriesOpen = !isSeriesOpen"
+        kbn-accessible-click
+      >
+        <span
+          aria-hidden="true"
+          ng-class="{ 'fa-caret-down': isSeriesOpen, 'fa-caret-right': !isSeriesOpen }"
+          class="kuiIcon fa-caret-right kuiSideBarCollapsibleTitle__caret"
+        ></span>
+        <span class="kuiSideBarCollapsibleTitle__text">
+          {{chart.label}}
+        </span>
+      </div>
+    </div>
+
+    <div ng-show="isSeriesOpen" class="kuiSideBarCollapsibleSection">
+      <!-- General -->
+      <div class="kuiSideBarSection">
+
+        <div class="kuiSideBarFormRow">
+          <label class="kuiSideBarFormRow__label" for="{{ 'seriesType' + $index }}">
+            Chart Type
+          </label>
+          <div class="kuiSideBarFormRow__control">
+            <select
+              id="{{ 'seriesType' + $index }}"
+              class="kuiSelect kuiSideBarSelect"
+              ng-model="chart.type"
+              ng-options="mode for mode in vis.type.editorConfig.collections.chartTypes"
+            ></select>
+          </div>
+        </div>
+
+        <div class="kuiSideBarFormRow">
+          <label class="kuiSideBarFormRow__label" for="{{ 'innerRadius' + $index }}">
+            Inner Radius
+          </label>
+          <div class="kuiSideBarFormRow__control">
+            <input
+              id="{{ 'innerRadius' + $index }}"
+              class="kuiSideBarInput"
+              ng-model="chart.innerRadius"
+              type="number"
+              min="1"
+              max="10"
+            >
+          </div>
+        </div>
+
+        <div class="kuiSideBarFormRow">
+          <label class="kuiSideBarFormRow__label" for="{{ 'outerRadius' + $index }}">
+            Outer Radius
+          </label>
+          <div class="kuiSideBarFormRow__control">
+            <input
+              id="{{ 'outerRadius' + $index }}"
+              class="kuiSideBarInput"
+              ng-model="chart.outerRadius"
+              type="number"
+              min="1"
+              max="10"
+            >
+          </div>
+        </div>
+
+        <div class="kuiSideBarFormRow">
+          <label class="kuiSideBarFormRow__label" for="colorSchema">
+            Color Schema
+          </label>
+          <div class="kuiSideBarFormRow__control">
+            <select
+              id="colorSchema"
+              class="kuiSelect kuiSideBarSelect"
+              ng-model="chart.colorSchema"
+              ng-options="color for color in vis.type.editorConfig.collections.colorSchemas"
+            ></select>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div style="height: 10px"></div>
+  </div>
+  <div class="kuiSideBarSection kuiSideBarSection__main">
+    <div class="kuiSideBarSectionTitle">
+      <div class="kuiSideBarSectionTitle__text">
+        Style
+      </div>
+    </div>
+
+    <div class="kuiSideBarFormRow">
+      <label class="kuiSideBarFormRow__label" for="circleGap">
+        Gap
+      </label>
+      <div class="kuiSideBarFormRow__control">
+        <input
+          id="circleGap"
+          class="kuiSideBarInput"
+          ng-model="vis.params.layout.gap"
+          type="number"
+          step="0.01"
+          min="0"
+          max="1"
+        >
+      </div>
+    </div>
+
+    <div class="kuiSideBarFormRow">
+      <label class="kuiSideBarFormRow__label" for="showLabels">
+        Show Labels
+      </label>
+      <div class="kuiSideBarFormRow__control">
+        <input class="kuiCheckBox" id="showLabels" type="checkbox" ng-model="vis.params.layout.showLabels">
+      </div>
+    </div>
+
+    <div class="kuiSideBarFormRow">
+      <label class="kuiSideBarFormRow__label" for="offsetLabels">
+        Offset Labels
+      </label>
+      <div class="kuiSideBarFormRow__control">
+        <input
+          id="offsetLabels"
+          class="kuiSideBarInput"
+          ng-model="vis.params.layout.offsetLabels"
+          type="number"
+          step="5"
+          min="0"
+          max="200"
+        >
+      </div>
+    </div>
+
+  </div>
+</div>

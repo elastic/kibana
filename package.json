@@ -109,6 +109,7 @@
     "brace": "0.5.1",
     "bunyan": "1.7.1",
     "check-hash": "1.0.1",
+    "circos": "2.0.3",
     "color": "1.0.3",
     "commander": "2.8.1",
     "css-loader": "0.17.0",
