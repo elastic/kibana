@@ -5,6 +5,7 @@
   <input
     ng-switch-when="string"
     type="text"
+    placeholder="{{placeholder}}"
     class="kuiTextInput"
     ng-model="value"
     ng-change="onChange({ value: value })"
@@ -12,6 +13,7 @@
   <input
     ng-switch-when="number"
     type="number"
+    placeholder="{{placeholder}}"
     step="any"
     class="kuiTextInput"
     ng-model="value"
@@ -20,6 +22,7 @@
   <input
     ng-switch-when="date"
     type="text"
+    placeholder="{{placeholder}}"
     validate-date-math
     class="kuiTextInput"
     ng-model="value"
@@ -28,6 +31,7 @@
   <input
     ng-switch-when="ip"
     type="text"
+    placeholder="{{placeholder}}"
     validate-ip
     class="kuiTextInput"
     ng-model="value"

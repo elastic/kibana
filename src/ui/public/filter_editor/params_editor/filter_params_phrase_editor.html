@@ -23,6 +23,7 @@
 
 <filter-params-input-type
   ng-if="!(field.aggregatable && field.type === 'string')"
+  placeholder="Value..."
   type="field.type"
   value="params.phrase"
   on-change="params.phrase = value"
