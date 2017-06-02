@@ -1,0 +1,53 @@
+<div class="kuiExpressionItem">
+  <button
+    data-id="toggleExpressionButton"
+    class="kuiExpressionItem__button"
+  >
+    <span class="kuiExpressionItem__buttonDescription">WHEN</span>
+    <span class="kuiExpression_buttonValue">count()</span>
+  </button>
+  <div
+    data-id="toggleExpressionPopover"
+    class="kuiExpressionItem__popover kuiExpressionItem__popover--isHidden"
+  >
+    <div class="kuiExpressionItem__popoverTitle">
+      When
+    </div>
+    <div class="kuiExpressionItem__popoverContent">
+      <select class="kuiSelect">
+        <option label="count()" selected="selected">count()</option>
+        <option label="average()">average()</option>
+        <option label="sum()">sum()</option>
+        <option label="median()">median()</option>
+        <option label="min()">min()</option>
+        <option label="max()">max()</option>
+      </select>
+    </div>
+  </div>
+</div>
+<div class="kuiExpressionItem">
+  <button
+    data-id="toggleExpressionButton"
+    class="kuiExpressionItem__button"
+  >
+    <span class="kuiExpressionItem__buttonDescription">IS ABOVE</span>
+    <span class="kuiExpressionItem_buttonValue">100</span>
+  </button>
+  <div
+    data-id="toggleExpressionPopover"
+    class="kuiExpressionItem__popover kuiExpressionItem__popover--alignRight kuiExpressionItem__popover--isHidden"
+  >
+    <div class="kuiExpressionItem__popoverTitle">
+      Is above
+    </div>
+    <div class="kuiExpressionItem__popoverContent">
+      <select class="kuiSelect">
+        <option label="is above" selected="selected">is above</option>
+        <option label="is below">is below</option>
+        <option label="is exactly">is exactly</option>
+      </select>
+      <input type="text" class="kuiTextInput" value="100" />
+    </div>
+  </div>
+</div>
+
