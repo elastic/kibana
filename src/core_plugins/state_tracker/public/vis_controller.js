@@ -1,11 +1,12 @@
 
 class VisController {
-  constructor(el) {
+  constructor(el, vis) {
     this.el = el;
+    this._vis = vis;
     this._previousStates = [];
   }
 
-  render(vis, visData) {
+  render() {
 
     return new Promise(resolve => {
       const id = window.location.href;
@@ -14,7 +15,7 @@ class VisController {
       });
 
       if (!visited) {
-        const filters = vis.API.queryFilter.getFilters();
+        const filters = this._vis.API.queryFilter.getFilters();
         const display = JSON.stringify(filters);
         const state = {
           id: id,

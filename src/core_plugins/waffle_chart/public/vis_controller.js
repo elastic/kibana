@@ -1,8 +1,9 @@
 import d3 from 'd3';
 
 class VisController {
-  constructor(el) {
+  constructor(el, vis) {
     this._container = el;
+    this._vis = vis;
     this._waffleContainer = document.createElement('div');
     this._waffleContainer.setAttribute('class', 'waffle-waffle');
     this._legendContainer = document.createElement('div');
@@ -11,22 +12,16 @@ class VisController {
     this._container.appendChild(this._legendContainer);
   }
 
-  render(vis, visData) {
-
-    return new Promise((resolve) => {
-
+  async render(visData) {
+    try {
       this._clear();
-
-
-      try {
-        const label = vis.aggs[0].makeLabel() + ': ' +  vis.aggs[1].makeLabel();
-        const data = convertResponse(visData);
-        this._createWaffleVis(data, label);
-      } catch (e) {
-        //handle error
-      }
-      resolve(true);
-    });
+      const label = this._vis.aggs[0].makeLabel() + ': ' + this._vis.aggs[1].makeLabel();
+      const data = convertResponse(visData);
+      this._createWaffleVis(data, label);
+    } catch (e) {
+      //handle error
+      console.log(e);
+    }
   }
 
   _clear() {
@@ -99,7 +94,7 @@ class VisController {
       })
       .append('title')
       .text(function (d) {
-        return label +  ' ' + data[d.groupIndex].key + ' | ' + d.value + ' , ' + d.units + '%';
+        return label + ' ' + data[d.groupIndex].key + ' | ' + d.value + ' , ' + d.units + '%';
       });
 
     //add legend with categorical data
