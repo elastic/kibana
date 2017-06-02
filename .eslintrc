@@ -1,11 +1,6 @@
 ---
 extends: '@elastic/kibana'
 
-settings:
-  import/resolver:
-    - "@elastic/eslint-import-resolver-kibana":
-        rootPackage: kibana
-
 rules:
   import/no-unresolved: off
   import/named: off

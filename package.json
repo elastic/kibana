@@ -72,7 +72,6 @@
   "dependencies": {
     "@bigfunger/jsondiffpatch": "0.1.38-webpack",
     "@elastic/datemath": "2.3.0",
-    "@elastic/eslint-import-resolver-kibana": "0.5.0",
     "@elastic/httpolyglot": "0.1.2-elasticpatch1",
     "@elastic/webpack-directory-name-as-main": "2.0.2",
     "@spalger/filesaver": "1.1.2",
