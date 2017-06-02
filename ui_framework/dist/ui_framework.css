@@ -25,6 +25,9 @@
  * Nothing fancy, just the basics so we can use this for both regular and static controls.
  */
 /**
+ * 1. Prevent Firefox users from being able to resize textareas to smaller than the min-height.
+ */
+/**
  * 1. Angular will add an ng-untouched class to an input if it hasn't been touched yet.
  *    We only want invalid inputs to appear invalid after the user has had a chance to interact
  *    with it.
@@ -540,9 +543,9 @@ body {
    */
 .kuiCardGroup__card {
   -webkit-box-flex: 1;
-  -webkit-flex: 1 1 auto;
-      -ms-flex: 1 1 auto;
-          flex: 1 1 auto;
+  -webkit-flex: 1 1 0;
+      -ms-flex: 1 1 0px;
+          flex: 1 1 0;
   /* 1 */
   margin: 15px;
   /* 2 */ }
@@ -566,9 +569,9 @@ body {
   overflow: hidden; }
   .kuiCardGroup--united .kuiCardGroup__card {
     border: none;
-    border-radius: 0; }
+    border-radius: 0;
+    margin: 0; }
   .kuiCardGroup--united .kuiCardGroup__card + .kuiCardGroup__card {
-    margin: 0;
     border-left: 1px solid #E0E0E0; }
 
 .kuiCollapseButton {
@@ -713,6 +716,109 @@ body {
   line-height: 1.5;
   color: #9fa3a7; }
 
+.kuiExpressionItem {
+  display: inline-block;
+  position: relative; }
+  .kuiExpressionItem + .kuiExpressionItem {
+    margin-left: 10px; }
+
+.kuiExpressionItem__button {
+  background-color: transparent;
+  padding: 5px 0px;
+  border: none;
+  border-bottom: dotted 2px #E4E4E4;
+  font-size: 14px;
+  cursor: pointer; }
+
+.kuiExpressionItem__buttonDescription {
+  color: #00A69B;
+  text-transform: uppercase; }
+
+.kuiExpressionItem__buttonValue {
+  color: #2d2d2d;
+  text-transform: lowercase; }
+
+.kuiExpressionItem__button--isActive {
+  border-bottom: solid 2px #00A69B; }
+
+.kuiExpressionItem__popover {
+  position: absolute;
+  top: calc(100% + 15px);
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-orient: vertical;
+  -webkit-box-direction: normal;
+  -webkit-flex-direction: column;
+      -ms-flex-direction: column;
+          flex-direction: column;
+  -webkit-box-flex: 1;
+  -webkit-flex: 1 1 auto;
+      -ms-flex: 1 1 auto;
+          flex: 1 1 auto;
+  background-color: white;
+  border: 1px solid #E4E4E4;
+  border-radius: 6px;
+  box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.1);
+  visibility: visible;
+  opacity: 1;
+  -webkit-transform: translateY(-5px) translateZ(0);
+          transform: translateY(-5px) translateZ(0);
+  transition: opacity 250ms cubic-bezier(0.34, 1.61, 0.7, 1), -webkit-transform 250ms cubic-bezier(0.34, 1.61, 0.7, 1);
+  transition: transform 250ms cubic-bezier(0.34, 1.61, 0.7, 1), opacity 250ms cubic-bezier(0.34, 1.61, 0.7, 1);
+  transition: transform 250ms cubic-bezier(0.34, 1.61, 0.7, 1), opacity 250ms cubic-bezier(0.34, 1.61, 0.7, 1), -webkit-transform 250ms cubic-bezier(0.34, 1.61, 0.7, 1); }
+  .kuiExpressionItem__popover.ng-hide, .kuiExpressionItem__popover.kuiExpressionItem__popover--isHidden {
+    display: block !important;
+    visibility: hidden;
+    opacity: 0;
+    -webkit-transform: translateY(0px) translateZ(0);
+            transform: translateY(0px) translateZ(0); }
+  .kuiExpressionItem__popover:before {
+    position: absolute;
+    content: "";
+    top: -8px;
+    left: 20px;
+    height: 0;
+    width: 0;
+    border-left: 8px solid transparent;
+    border-right: 8px solid transparent;
+    border-bottom: 8px solid #E4E4E4; }
+  .kuiExpressionItem__popover:after {
+    position: absolute;
+    content: "";
+    top: -7px;
+    left: 20px;
+    height: 0;
+    width: 0;
+    border-left: 8px solid transparent;
+    border-right: 8px solid transparent;
+    border-bottom: 8px solid #f1f1f1; }
+  .kuiExpressionItem__popover.kuiExpressionItem__popover--alignRight {
+    right: 0; }
+    .kuiExpressionItem__popover.kuiExpressionItem__popover--alignRight:before, .kuiExpressionItem__popover.kuiExpressionItem__popover--alignRight:after {
+      left: auto;
+      right: 20px; }
+
+.kuiExpressionItem__popoverTitle {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-flex: 1;
+  -webkit-flex: 1 1 auto;
+      -ms-flex: 1 1 auto;
+          flex: 1 1 auto;
+  background-color: #f1f1f1;
+  border-radius: 4px 4px 0 0;
+  color: #2d2d2d;
+  padding: 5px 10px;
+  line-height: 1.5; }
+
+.kuiExpressionItem__popoverContent {
+  padding: 20px;
+  white-space: nowrap; }
+
 /**
  * 1. Set inline-block so this wrapper shrinks to fit the input.
  */
@@ -843,6 +949,8 @@ body {
   border: 1px solid #DEDEDE;
   border-radius: 4px;
   transition: border-color 0.1s linear;
+  min-height: 30px;
+  /* 1 */
   padding-left: 28px;
   /* 1 */
   width: 100%;
@@ -879,6 +987,8 @@ body {
   border: 1px solid #DEDEDE;
   border-radius: 4px;
   transition: border-color 0.1s linear;
+  min-height: 30px;
+  /* 1 */
   padding-right: 30px;
   /* 2 */
   background-image: url('data:image/svg+xml;utf8,<svg width="1792" height="1792" viewBox="0 0 1792 1792" xmlns="http://www.w3.org/2000/svg"><path d="M1408 704q0 26-19 45l-448 448q-19 19-45 19t-45-19l-448-448q-19-19-19-45t19-45 45-19h896q26 0 45 19t19 45z"/></svg>');
@@ -946,7 +1056,9 @@ body {
   background-color: #ffffff;
   border: 1px solid #DEDEDE;
   border-radius: 4px;
-  transition: border-color 0.1s linear; }
+  transition: border-color 0.1s linear;
+  min-height: 30px;
+  /* 1 */ }
   .theme-dark .kuiTextArea {
     color: #cecece; }
   .kuiTextArea:invalid:not(.ng-untouched) {
@@ -984,7 +1096,9 @@ body {
   background-color: #ffffff;
   border: 1px solid #DEDEDE;
   border-radius: 4px;
-  transition: border-color 0.1s linear; }
+  transition: border-color 0.1s linear;
+  min-height: 30px;
+  /* 1 */ }
   .theme-dark .kuiTextInput {
     color: #cecece; }
   .kuiTextInput:invalid:not(.ng-untouched) {
@@ -1028,8 +1142,16 @@ body {
           align-items: center;
   /* 1 */ }
 
-.kuiFieldGroupSection + .kuiFieldGroupSection {
-  margin-left: 10px; }
+.kuiFieldGroup--alignTop {
+  -webkit-box-align: start;
+  -webkit-align-items: flex-start;
+      -ms-flex-align: start;
+          align-items: flex-start; }
+
+.kuiFieldGroupSection {
+  line-height: 1.5; }
+  .kuiFieldGroupSection + .kuiFieldGroupSection {
+    margin-left: 10px; }
 
 .kuiFieldGroupSection--wide {
   -webkit-box-flex: 1;
@@ -1786,6 +1908,8 @@ body {
   border: 1px solid #DEDEDE;
   border-radius: 4px;
   transition: border-color 0.1s linear;
+  min-height: 30px;
+  /* 1 */
   -webkit-box-flex: 1;
   -webkit-flex: 1 1 100%;
       -ms-flex: 1 1 100%;
@@ -1863,6 +1987,8 @@ body {
   border: 1px solid #DEDEDE;
   border-radius: 4px;
   transition: border-color 0.1s linear;
+  min-height: 30px;
+  /* 1 */
   padding-right: 30px;
   /* 2 */
   background-image: url('data:image/svg+xml;utf8,<svg width="1792" height="1792" viewBox="0 0 1792 1792" xmlns="http://www.w3.org/2000/svg"><path d="M1408 704q0 26-19 45l-448 448q-19 19-45 19t-45-19l-448-448q-19-19-19-45t19-45 45-19h896q26 0 45 19t19 45z"/></svg>');
@@ -1993,12 +2119,24 @@ body {
   font-size: 14px;
   font-weight: bold; }
 
+/**
+ * 1. Allow class to be applied to `ul` and `ol` elements
+ */
+.kuiMenu {
+  padding-left: 0;
+  /* 1 */ }
+
 .kuiMenu--contained {
   border: 1px solid #E4E4E4; }
   .kuiMenu--contained .kuiMenuItem {
     padding: 6px 10px; }
 
+/**
+ * 1. Allow class to be applied to `li` elements
+ */
 .kuiMenuItem {
+  list-style: none;
+  /* 1 */
   padding: 6px 0; }
   .kuiMenuItem + .kuiMenuItem {
     border-top: 1px solid #E4E4E4; }
@@ -2232,6 +2370,29 @@ body {
   margin: 20px;
   background-color: #FFF;
   line-height: 1.5; }
+
+/**
+ * 1. Put 10px of space between each child.
+ */
+.kuiPager {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-align: center;
+  -webkit-align-items: center;
+      -ms-flex-align: center;
+          align-items: center; }
+  .kuiPager > * + * {
+    margin-left: 10px;
+    /* 1 */ }
+
+.kuiPagerText {
+  font-size: 14px;
+  line-height: 1.5;
+  color: #5A5A5A;
+  white-space: nowrap;
+  /* 1 */ }
 
 .kuiPanel {
   border: 2px solid #E4E4E4; }

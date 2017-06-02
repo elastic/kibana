@@ -140,12 +140,16 @@
   }
 }
 
+/**
+ * 1. Prevent Firefox users from being able to resize textareas to smaller than the min-height.
+ */
 @mixin formControl($borderRadius: $globalBorderRadius) {
   @include formControlBase;
   background-color: #ffffff;
   border: 1px solid $globalFormControlBorderColor;
   border-radius: $borderRadius;
   transition: border-color $globalInputTransitionTiming;
+  min-height: $globalFormInputHeight; /* 1 */
 
   &:invalid {
     @include formControlInvalid;

@@ -1,0 +1,18 @@
+/**
+ * 1. Put 10px of space between each child.
+ */
+.kuiPager {
+  display: flex;
+  align-items: center;
+
+  & > * + * {
+    margin-left: 10px; /* 1 */
+  }
+}
+
+.kuiPagerText {
+  font-size: $globalFontSize;
+  line-height: $globalLineHeight;
+  color: #5A5A5A;
+  white-space: nowrap; /* 1 */
+}
