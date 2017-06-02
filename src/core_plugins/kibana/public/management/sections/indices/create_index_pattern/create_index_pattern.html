@@ -2,6 +2,7 @@
   <kbn-management-indices>
     <div
       ng-controller="managementIndicesCreate as controller"
+      data-test-subj="createIndexPatternContainer"
       class="kuiViewContent"
     >
       <h1
@@ -128,6 +129,7 @@
               <input
                 class="kuiCheckBox"
                 type="checkbox"
+                data-test-subj="createIndexPatternEnableExpand"
                 ng-model="controller.formValues.expandWildcard"
               >
               <span
