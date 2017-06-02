@@ -23,9 +23,12 @@
       <div class="kuiLocalDropdownSection" ng-if="share.allowEmbed">
         <!-- Header -->
         <div class="kuiLocalDropdownHeader">
-          <div class="kuiLocalDropdownHeader__label">
+          <label
+            class="kuiLocalDropdownHeader__label"
+            for="originalIframeUrl"
+          >
             Embedded iframe
-          </div>
+          </label>
           <div class="kuiLocalDropdownHeader__actions">
             <a
               class="kuiLocalDropdownHeader__action"
@@ -56,9 +59,12 @@
       <div class="kuiLocalDropdownSection">
         <!-- Header -->
         <div class="kuiLocalDropdownHeader">
-          <div class="kuiLocalDropdownHeader__label">
+          <label
+            class="kuiLocalDropdownHeader__label"
+            for="originalUrl"
+          >
             Link
-          </div>
+          </label>
           <div class="kuiLocalDropdownHeader__actions">
             <a
               class="kuiLocalDropdownHeader__action"
@@ -98,9 +104,12 @@
     <div class="kuiLocalDropdownSection" ng-if="share.allowEmbed">
       <!-- Header -->
       <div class="kuiLocalDropdownHeader">
-        <div class="kuiLocalDropdownHeader__label">
+        <label
+          class="kuiLocalDropdownHeader__label"
+          for="snapshotIframeUrl"
+        >
           Embedded iframe
-        </div>
+        </label>
         <div class="kuiLocalDropdownHeader__actions">
           <a
             class="kuiLocalDropdownHeader__action"
@@ -149,9 +158,12 @@
     <div class="kuiLocalDropdownSection">
       <!-- Header -->
       <div class="kuiLocalDropdownHeader">
-        <div class="kuiLocalDropdownHeader__label">
+        <label
+          class="kuiLocalDropdownHeader__label"
+          for="snapshotUrl"
+        >
           Link
-        </div>
+        </label>
         <div class="kuiLocalDropdownHeader__actions">
           <a
             data-test-subj="sharedSnapshotShortUrlButton"
