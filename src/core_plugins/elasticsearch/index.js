@@ -9,7 +9,7 @@ import { clientLogger } from './lib/client_logger';
 import { createClusters } from './lib/create_clusters';
 import filterHeaders from './lib/filter_headers';
 
-import createProxy, { createPath } from './lib/create_proxy';
+import { createProxy, createPath } from './lib/create_proxy';
 
 const DEFAULT_REQUEST_HEADERS = [ 'authorization' ];
 
