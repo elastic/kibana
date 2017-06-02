@@ -106,7 +106,6 @@ ifeval::["{release-state}"!="unreleased"]
 
 The Debian package for Kibana v{version} can be downloaded from the website and installed as follows:
 
-*64 bit:*
 ["source","sh",subs="attributes"]
 --------------------------------------------
 wget https://artifacts.elastic.co/downloads/kibana/kibana-{version}-amd64.deb
@@ -115,16 +114,6 @@ sudo dpkg -i kibana-{version}-amd64.deb
 --------------------------------------------
 <1> Compare the SHA produced by `sha1sum` or `shasum` with the
     https://artifacts.elastic.co/downloads/kibana/kibana-{version}-amd64.deb.sha1[published SHA].
-
-*32 bit:*
-["source","sh",subs="attributes"]
---------------------------------------------
-wget https://artifacts.elastic.co/downloads/kibana/kibana-{version}-i386.deb
-sha1sum kibana-{version}-i386.deb <1>
-sudo dpkg -i kibana-{version}-i386.deb
---------------------------------------------
-<1> Compare the SHA produced by `sha1sum` or `shasum` with the
-    https://artifacts.elastic.co/downloads/kibana/kibana-{version}-i386.deb.sha1[published SHA].
 
 endif::[]
 

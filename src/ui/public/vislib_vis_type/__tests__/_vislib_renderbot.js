@@ -2,7 +2,7 @@ import _ from 'lodash';
 import $ from 'jquery';
 import ngMock from 'ng_mock';
 import expect from 'expect.js';
-import sinon from 'auto-release-sinon';
+import sinon from 'sinon';
 import VislibProvider from 'ui/vislib';
 import { VislibVisProvider } from 'ui/vislib/vis';
 import { VisRenderbotProvider } from 'ui/vis/renderbot';

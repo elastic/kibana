@@ -262,17 +262,6 @@ export class StackedBarChartConfig extends VislibError {
   }
 }
 
-/**
- * error thrown when user tries to render an chart with less
- * than the required number of data points
- * @param {String} message - the message to provide with the error
- */
-export class NotEnoughData extends VislibError {
-  constructor(message) {
-    super(message);
-  }
-}
-
 export class NoResults extends VislibError {
   constructor() {
     super('No results found');

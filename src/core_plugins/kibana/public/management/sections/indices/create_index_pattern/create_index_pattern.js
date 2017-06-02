@@ -20,7 +20,6 @@ uiModules.get('apps/management')
   const notify = new Notifier();
   const refreshKibanaIndex = Private(RefreshKibanaIndex);
   const intervals = indexPatterns.intervals;
-  let samplePromise;
   let loadingCount = 0;
 
   // Configure the new index pattern we're going to create.
@@ -29,37 +28,23 @@ uiModules.get('apps/management')
     nameIsPattern: false,
     expandable: false,
     nameInterval: _.find(intervals, { name: 'daily' }),
-    timeField: null,
+    timeFieldOption: null,
   };
 
   // UI state.
-  this.dateFields = null;
+  this.timeFieldOptions = [];
+  this.timeFieldOptionsError = null;
   this.sampleCount = 5;
   this.samples = null;
   this.existing = null;
   this.nameIntervalOptions = intervals;
   this.patternErrors = [];
-  this.fetchFieldsError = null;
 
-  const TIME_FILTER_FIELD_OPTIONS = {
-    NO_DATE_FIELD_DESIRED: {
-      name: $translate.instant('KIBANA-NO_DATE_FIELD_DESIRED')
-    },
-    NO_DATE_FIELDS_IN_INDICES: {
-      name: $translate.instant('KIBANA-NO_DATE_FIELDS_IN_INDICES')
-    }
-  };
-
-  const fetchFieldList = () => {
-    this.dateFields = null;
-    this.formValues.timeField = null;
-    let fetchFieldsError;
-    let dateFields;
-
+  const getTimeFieldOptions = () => {
     const missingPattern = !this.formValues.name;
     const missingInterval = this.formValues.nameIsPattern && !this.formValues.nameInterval;
     if (missingPattern || missingInterval)  {
-      return;
+      return Promise.resolve({ options: [] });
     }
 
     loadingCount += 1;
@@ -69,79 +54,82 @@ uiModules.get('apps/management')
 
       return indexPatterns.mapper.getFieldsForIndexPattern(pattern, {
         skipIndexPatternCache: true,
-      })
-      .catch((err) => {
-        // TODO: we should probably display a message of some kind
-        if (err instanceof IndexPatternMissingIndices) {
-          fetchFieldsError = $translate.instant('KIBANA-INDICES_MATCH_PATTERN');
-          return [];
-        }
-
-        throw err;
       });
     })
     .then(fields => {
-      if (fields.length > 0) {
-        fetchFieldsError = null;
-        dateFields = fields.filter(field => field.type === 'date');
+      const dateFields = fields.filter(field => field.type === 'date');
+
+      if (dateFields.length === 0) {
+        return {
+          options: [
+            {
+              display: $translate.instant('KIBANA-INDICES_DONT_CONTAIN_TIME_FIELDS')
+            }
+          ]
+        };
       }
 
       return {
-        fetchFieldsError,
-        dateFields,
+        options: [
+          {
+            display: $translate.instant('KIBANA-NO_DATE_FIELD_DESIRED')
+          },
+          ...dateFields.map(field => ({
+            display: field.name,
+            fieldName: field.name
+          })),
+        ]
       };
-    }, notify.fatal)
+    })
+    .catch(err => {
+      if (err instanceof IndexPatternMissingIndices) {
+        return {
+          error: $translate.instant('KIBANA-INDICES_MATCH_PATTERN')
+        };
+      }
+
+      throw err;
+    })
     .finally(() => {
       loadingCount -= 1;
     });
   };
 
-  const updateFieldList = results => {
-    this.fetchFieldsError = results.fetchFieldsError;
-    if (this.fetchFieldsError) {
-      return;
-    }
+  const findTimeFieldOption = match => {
+    if (!match) return;
 
-    this.dateFields = results.dateFields || [];
-    this.indexHasDateFields = this.dateFields.length > 0;
-    const moreThanOneDateField = this.dateFields.length > 1;
-    if (this.indexHasDateFields) {
-      this.dateFields.unshift(TIME_FILTER_FIELD_OPTIONS.NO_DATE_FIELD_DESIRED);
-    } else {
-      this.dateFields.unshift(TIME_FILTER_FIELD_OPTIONS.NO_DATE_FIELDS_IN_INDICES);
-    }
-
-    if (!moreThanOneDateField) {
-      // At this point the `dateFields` array contains the date fields and the "no selection"
-      // option. When we have less than two date fields we choose the last option, which will
-      // be the "no date fields available" option if there are zero date fields, or the only
-      // date field if there is one.
-      this.formValues.timeField = this.dateFields[this.dateFields.length - 1];
-    }
+    return this.timeFieldOptions.find(option => (
+      // comparison is not done with _.isEqual() because options get a unique
+      // `$$hashKey` tag attached to them by ng-repeat
+      option.fieldName === match.fieldName &&
+        option.display === match.display
+    ));
   };
 
-  const updateFieldListAndSetTimeField = (results, timeFieldName) => {
-    updateFieldList(results);
+  const pickDefaultTimeFieldOption = () => {
+    const noOptions = this.timeFieldOptions.length === 0;
+    // options that represent a time field
+    const fieldOptions = this.timeFieldOptions.filter(option => !!option.fieldName);
+    // options like "I don't want the time filter" or "There are no date fields"
+    const nonFieldOptions = this.timeFieldOptions.filter(option => !option.fieldName);
+    // if there are multiple field or non-field options then we can't select a default, the user must choose
+    const tooManyOptions = fieldOptions.length > 1 || nonFieldOptions.length > 1;
 
-    if (!results.dateFields.length) {
-      return;
+    if (noOptions || tooManyOptions) {
+      return null;
     }
 
-    const matchingTimeField = results.dateFields.find(field => field.name === timeFieldName);
-
-    //assign the field from the results-list
-    //angular recreates a new timefield instance, each time the list is refreshed.
-    //This ensures the selected field matches one of the instances in the list.
-    if (matchingTimeField) {
-      this.formValues.timeField = matchingTimeField;
+    if (fieldOptions.length === 1) {
+      return fieldOptions[0];
     }
+
+    return nonFieldOptions[0];
   };
 
   const resetIndex = () => {
     this.patternErrors = [];
     this.samples = null;
     this.existing = null;
-    this.fetchFieldsError = null;
   };
 
   function mockIndexPattern(index) {
@@ -197,47 +185,99 @@ uiModules.get('apps/management')
       });
   };
 
+  this.isTimeBased = () => {
+    if (!this.formValues.timeFieldOption) {
+      // if they haven't choosen a time field, assume they will
+      return true;
+    }
+
+    // if timeFieldOption has a fieldName it's a time field, otherwise
+    // it's a way to opt-out of the time field or an indication that there
+    // are no fields available
+    return Boolean(this.formValues.timeFieldOption.fieldName);
+  };
+
   this.canExpandIndices = () => {
-    // to maximize performance in the digest cycle, move from the least
-    // expensive operation to most
-    return !this.formValues.nameIsPattern && _.includes(this.formValues.name, '*');
+    return (
+      this.isTimeBased() &&
+        !this.formValues.nameIsPattern &&
+        _.includes(this.formValues.name, '*')
+    );
+  };
+
+  this.canUseTimePattern = () => {
+    return this.isTimeBased() && !this.formValues.expandable;
   };
 
   this.isLoading = () => {
     return loadingCount > 0;
   };
 
-  this.refreshFieldList = () => {
-    const timeField = this.formValues.timeField;
+  let activeRefreshTimeFieldOptionsCall;
+  this.refreshTimeFieldOptions = () => {
+    // if there is an active refreshTimeFieldOptions() call then we use
+    // their prevOption, allowing the previous selection to persist
+    // across simultaneous calls to refreshTimeFieldOptions()
+    const prevOption = activeRefreshTimeFieldOptionsCall
+      ? activeRefreshTimeFieldOptionsCall.prevOption
+      : this.formValues.timeFieldOption;
+
+    // `thisCall` is our unique "token" to verify that we are still the
+    // most recent call. When we are not the most recent call we don't
+    // modify the controller in any way to prevent race conditions
+    const thisCall = activeRefreshTimeFieldOptionsCall = { prevOption };
+
     loadingCount += 1;
-    fetchFieldList().then(results => {
-      if (timeField) {
-        updateFieldListAndSetTimeField(results, timeField.name);
-      } else {
-        updateFieldList(results);
-      }
-    }).finally(() => {
-      loadingCount -= 1;
-    });
+    this.timeFieldOptions = [];
+    this.timeFieldOptionsError = null;
+    this.formValues.timeFieldOption = null;
+    getTimeFieldOptions()
+      .then(({ options, error }) => {
+        if (thisCall !== activeRefreshTimeFieldOptionsCall) return;
+
+        this.timeFieldOptions = options;
+        this.timeFieldOptionsError = error;
+        if (!this.timeFieldOptions) {
+          return;
+        }
+
+        // Restore the preivously selected state, or select the default option in the UI
+        const restoredOption = findTimeFieldOption(prevOption);
+        const defaultOption = pickDefaultTimeFieldOption();
+        this.formValues.timeFieldOption = restoredOption || defaultOption;
+      })
+      .catch(notify.error)
+      .finally(() => {
+        loadingCount -= 1;
+        if (thisCall === activeRefreshTimeFieldOptionsCall) {
+          activeRefreshTimeFieldOptionsCall = null;
+        }
+      });
   };
 
   this.createIndexPattern = () => {
-    const id = this.formValues.name;
-    let timeFieldName;
-    if ((this.formValues.timeField !== TIME_FILTER_FIELD_OPTIONS.NO_DATE_FIELD_DESIRED)
-      && (this.formValues.timeField !== TIME_FILTER_FIELD_OPTIONS.NO_DATE_FIELDS_IN_INDICES)) {
-      timeFieldName = this.formValues.timeField.name;
-    }
+    const {
+      name,
+      timeFieldOption,
+      nameIsPattern,
+      nameInterval,
+      expandable
+    } = this.formValues;
 
-    // Only event-time-based index patterns set an intervalName.
-    const intervalName =
-      this.formValues.nameIsPattern
-      ? this.formValues.nameInterval.name
+    const id = name;
+
+    const timeFieldName = timeFieldOption
+      ? timeFieldOption.fieldName
       : undefined;
 
-    const notExpandable =
-      !this.formValues.expandable && this.canExpandIndices()
+    // this seems wrong, but it's the original logic... https://git.io/vHYFo
+    const notExpandable = (this.canExpandIndices() && !expandable)
       ? true
+      : undefined;
+
+    // Only event-time-based index patterns set an intervalName.
+    const intervalName = (this.canUseTimePattern() && nameIsPattern && nameInterval)
+      ? nameInterval.name
       : undefined;
 
     loadingCount += 1;
@@ -275,7 +315,7 @@ uiModules.get('apps/management')
 
   $scope.$watchMulti([
     'controller.formValues.nameIsPattern',
-    'controller.formValues.nameInterval.name'
+    'controller.formValues.nameInterval.name',
   ], (newVal, oldVal) => {
     const nameIsPattern = newVal[0];
     const newDefault = getDefaultPatternForInterval(newVal[1]);
@@ -287,7 +327,6 @@ uiModules.get('apps/management')
 
     if (!nameIsPattern) {
       delete this.formValues.nameInterval;
-      delete this.formValues.timeField;
     } else {
       this.formValues.nameInterval = this.formValues.nameInterval || intervals.byName.days;
       this.formValues.name = this.formValues.name || getDefaultPatternForInterval(this.formValues.nameInterval);
@@ -299,59 +338,49 @@ uiModules.get('apps/management')
     if (andUpdate) updateSamples();
   };
 
+  let latestUpdateSampleId = -1;
   $scope.$watchMulti([
     'controller.formValues.name',
     'controller.formValues.nameInterval'
-  ], (newVal, oldVal) => {
-    function promiseMatch(lastPromise, cb) {
-      if (lastPromise === samplePromise) {
-        cb();
-      } else if (samplePromise != null) {
-        // haven't hit the last promise yet, reset index params
-        resetIndex();
-      }
-    }
-
-    let lastPromise;
+  ], () => {
     resetIndex();
-    samplePromise = lastPromise = updateSamples()
-    .then(() => {
-      promiseMatch(lastPromise, () => {
-        this.samples = null;
-        this.patternErrors = [];
+
+    // track the latestUpdateSampleId at the time we started
+    // so that we can avoid mutating the controller if the
+    // watcher triggers again before we finish (which would
+    // cause latestUpdateSampleId to increment and the
+    // id === latestUpdateSampleId checks below to fail)
+    const id = (++latestUpdateSampleId);
+    updateSamples()
+      .then(() => {
+        if (latestUpdateSampleId === id) {
+          this.samples = null;
+          this.patternErrors = [];
+        }
+      })
+      .catch(errors => {
+        if (latestUpdateSampleId === id) {
+          this.existing = null;
+          this.patternErrors = errors;
+        }
+      })
+      .finally(() => {
+        this.refreshTimeFieldOptions();
       });
-    })
-    .catch(errors => {
-      promiseMatch(lastPromise, () => {
-        this.existing = null;
-        this.patternErrors = errors;
-      });
-    })
-    .finally(() => {
-      // prevent running when no change happened (ie, first watcher call)
-      if (!_.isEqual(newVal, oldVal)) {
-        fetchFieldList().then(results => {
-          if (lastPromise === samplePromise) {
-            updateFieldList(results);
-            samplePromise = null;
-          }
-        });
-      }
-    });
   });
 
   $scope.$watchMulti([
     'controller.sampleCount'
   ], () => {
-    this.refreshFieldList();
+    this.refreshTimeFieldOptions();
   });
 
   $scope.$watchMulti([
     'controller.isLoading()',
     'form.name.$error.indexNameInput',
-    'controller.formValues.timeField'
-  ], ([loading, invalidIndexName, timeField]) => {
-    const state = { loading, invalidIndexName, timeField };
+    'controller.formValues.timeFieldOption'
+  ], ([loading, invalidIndexName, timeFieldOption]) => {
+    const state = { loading, invalidIndexName, timeFieldOption };
     this.createButtonText = pickCreateButtonText($translate, state);
   });
 });

@@ -45,13 +45,14 @@ app.directive('discFieldChooser', function ($location, globalState, config, $rou
       const filter = $scope.filter = {
         props: [
           'type',
-          'indexed',
-          'analyzed',
+          'aggregatable',
+          'searchable',
           'missing',
           'name'
         ],
         defaults: {
-          missing: true
+          missing: true,
+          type: 'any'
         },
         boolOpts: [
           { label: 'any', value: undefined },
@@ -69,16 +70,16 @@ app.directive('discFieldChooser', function ($location, globalState, config, $rou
           return field.display;
         },
         isFieldFiltered: function (field) {
-          const matchFilter = (filter.vals.type == null || field.type === filter.vals.type);
-          const isAnalyzed = (filter.vals.analyzed == null || field.analyzed === filter.vals.analyzed);
-          const isIndexed = (filter.vals.indexed == null || field.indexed === filter.vals.indexed);
+          const matchFilter = (filter.vals.type === 'any' || field.type === filter.vals.type);
+          const isAggregatable = (filter.vals.aggregatable == null || field.aggregatable === filter.vals.aggregatable);
+          const isSearchable = (filter.vals.searchable == null || field.searchable === filter.vals.searchable);
           const scriptedOrMissing = (!filter.vals.missing || field.scripted || field.rowCount > 0);
           const matchName = (!filter.vals.name || field.name.indexOf(filter.vals.name) !== -1);
 
           return !field.display
             && matchFilter
-            && isAnalyzed
-            && isIndexed
+            && isAggregatable
+            && isSearchable
             && scriptedOrMissing
             && matchName
           ;
@@ -146,7 +147,7 @@ app.directive('discFieldChooser', function ($location, globalState, config, $rou
         .commit();
 
         // include undefined so the user can clear the filter
-        $scope.fieldTypes = _.union([undefined], _.pluck(fields, 'type'));
+        $scope.fieldTypes = _.union(['any'], _.pluck(fields, 'type'));
       });
 
       $scope.increaseFieldCounter = function (fieldName) {

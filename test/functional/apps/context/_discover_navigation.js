@@ -12,7 +12,7 @@ export default function ({ getService, getPageObjects }) {
   const PageObjects = getPageObjects(['common', 'header', 'discover']);
 
   describe('context link in discover', function contextSize() {
-    before(async function() {
+    before(async function () {
       await PageObjects.common.navigateToApp('discover');
       await PageObjects.header.setAbsoluteRange(TEST_DISCOVER_START_TIME, TEST_DISCOVER_END_TIME);
       await Promise.all(TEST_COLUMN_NAMES.map((columnName) => (

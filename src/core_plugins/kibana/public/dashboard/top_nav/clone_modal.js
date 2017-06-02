@@ -65,14 +65,14 @@ export class DashboardCloneModal extends React.Component {
 
           <KuiModalFooter>
             <KuiButton
-              type="hollow"
+              buttonType="hollow"
               data-test-subj="cloneCancelButton"
               onClick={ this.props.onClose }
             >
               Cancel
             </KuiButton>
             <KuiButton
-              type="primary"
+              buttonType="primary"
               data-test-subj="cloneConfirmButton"
               onClick={ this.cloneDashboard }
             >

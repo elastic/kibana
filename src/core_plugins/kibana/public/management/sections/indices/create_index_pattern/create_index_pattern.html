@@ -47,12 +47,12 @@
             <!-- Input error text -->
             <div
               class="kuiVerticalRhythm"
-              ng-if="controller.fetchFieldsError"
+              ng-if="controller.timeFieldOptionsError"
             >
               <p class="kuiText">
                 <span class="kuiStatusText kuiStatusText--error">
                   <span class="kuiStatusText__icon kuiIcon fa-warning"></span>
-                  {{controller.fetchFieldsError}}
+                  {{controller.timeFieldOptionsError}}
                 </span>
               </p>
             </div>
@@ -105,7 +105,7 @@
               <small>
                 <a
                   class="kuiLink"
-                  ng-click="controller.refreshFieldList();"
+                  ng-click="controller.refreshTimeFieldOptions();"
                   translate="KIBANA-REFRESH_FIELDS"
                 ></a>
               </small>
@@ -115,17 +115,11 @@
               <select
                 class="kuiSelect kuiSelect--large kuiVerticalRhythmSmall"
                 data-test-subj="createIndexPatternTimeFieldSelect"
-                ng-disabled="controller.fetchFieldsError || controller.dateFields.length === 1"
-                ng-required="!controller.fetchFieldsError"
-                ng-options="field.name for field in controller.dateFields"
-                ng-model="controller.formValues.timeField"
+                ng-disabled="controller.isLoading() || controller.timeFieldOptionsError || controller.timeFieldOptions.length === 1"
+                ng-required="controller.timeFieldOptions.length"
+                ng-options="option.display for option in controller.timeFieldOptions"
+                ng-model="controller.formValues.timeFieldOption"
               ></select>
-
-              <p
-                class="kuiSubText kuiVerticalRhythmSmall"
-                ng-if="!controller.fetchFieldsError && !controller.indexHasDateFields"
-                translate="KIBANA-INDICES_DONT_CONTAIN_TIME_FIELDS"
-              ></p>
             </div>
           </div>
 
@@ -166,7 +160,10 @@
           </div>
 
           <!-- Use event times checkbox -->
-          <div class="kuiVerticalRhythm">
+          <div
+            class="kuiVerticalRhythm"
+            ng-if="controller.canUseTimePattern()"
+          >
             <label class="kuiCheckBoxLabel">
               <input
                 class="kuiCheckBox"
@@ -184,7 +181,7 @@
 
           <div
             class="kuiVerticalRhythm"
-            ng-if="controller.formValues.nameIsPattern"
+            ng-if="controller.canUseTimePattern() && controller.formValues.nameIsPattern"
           >
             <!-- Time-interval deprecation warning -->
             <div class="kuiInfoPanel kuiInfoPanel--warning kuiVerticalRhythm">
@@ -347,7 +344,7 @@
           <!-- Form actions -->
           <button
             data-test-subj="createIndexPatternCreateButton"
-            ng-disabled="form.$invalid || controller.fetchFieldsError || controller.isLoading()"
+            ng-disabled="form.$invalid || controller.timeFieldOptionsError || controller.isLoading()"
             class="kuiButton kuiButton--primary kuiVerticalRhythm"
             type="submit"
           >
