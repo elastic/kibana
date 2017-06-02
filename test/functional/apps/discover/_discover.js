@@ -60,7 +60,7 @@ export default function ({ getService, getPageObjects }) {
       it('load query should show query name', async function () {
         await PageObjects.discover.loadSavedSearch(queryName1);
 
-        await retry.try(async function() {
+        await retry.try(async function () {
           expect(await PageObjects.discover.getCurrentQueryName()).to.be(queryName1);
         });
         await screenshots.take('Discover-load-query');
@@ -68,7 +68,7 @@ export default function ({ getService, getPageObjects }) {
 
       it('should show the correct hit count', async function () {
         const expectedHitCount = '14,004';
-        await retry.try(async function() {
+        await retry.try(async function () {
           expect(await PageObjects.discover.getHitCount()).to.be(expectedHitCount);
         });
       });
@@ -217,7 +217,7 @@ export default function ({ getService, getPageObjects }) {
         expect(isVisible).to.be(true);
       });
 
-      it('should have a link that opens and closes the time picker', async function() {
+      it('should have a link that opens and closes the time picker', async function () {
         const noResultsTimepickerLink = await PageObjects.discover.getNoResultsTimepicker();
         expect(await PageObjects.header.isTimepickerOpen()).to.be(false);
 
