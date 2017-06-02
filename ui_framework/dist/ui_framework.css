@@ -1994,8 +1994,7 @@ body {
   font-weight: bold; }
 
 /**
- * 1. Allow class to be applied to `ul` and `ol` elements
- * 2. Allow class to be applied to `li` elements
+ * 1. Allow this class to be applied to `ul` and `ol` elements
  */
 .kuiMenu {
   padding-left: 0;
@@ -2006,9 +2005,12 @@ body {
   .kuiMenu--contained .kuiMenuItem {
     padding: 6px 10px; }
 
+/**
+ * 1. Allow this class to be applied to `li` elements
+ */
 .kuiMenuItem {
   list-style: none;
-  /* 2 */
+  /* 1 */
   padding: 6px 0; }
   .kuiMenuItem + .kuiMenuItem {
     border-top: 1px solid #E4E4E4; }
