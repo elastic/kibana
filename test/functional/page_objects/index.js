@@ -9,4 +9,3 @@ export { VisualizePageProvider } from './visualize_page';
 export { SettingsPageProvider } from './settings_page';
 export { MonitoringPageProvider } from './monitoring_page';
 export { PointSeriesPageProvider } from './point_series_page';
-export { GettingStartedPageProvider } from './getting_started_page';
