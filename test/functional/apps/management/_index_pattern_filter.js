@@ -32,7 +32,7 @@ export default function ({ getService, getPageObjects }) {
 
       await PageObjects.settings.setFieldTypeFilter('string');
 
-      await retry.try(async function() {
+      await retry.try(async function () {
         const fieldTypes = await PageObjects.settings.getFieldTypes();
         expect(fieldTypes.length).to.be.above(0);
         for (const fieldType of fieldTypes) {
@@ -42,7 +42,7 @@ export default function ({ getService, getPageObjects }) {
 
       await PageObjects.settings.setFieldTypeFilter('number');
 
-      await retry.try(async function() {
+      await retry.try(async function () {
         const fieldTypes = await PageObjects.settings.getFieldTypes();
         expect(fieldTypes.length).to.be.above(0);
         for (const fieldType of fieldTypes) {
