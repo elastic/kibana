@@ -7,26 +7,18 @@ import { IndexPatternsApiClientProvider } from '../index_patterns_api_client_pro
 export function StubIndexPatternsApiClientModule(PrivateProvider) {
   PrivateProvider.swap(
     IndexPatternsApiClientProvider,
-    Private => {
+    (Private, Promise) => {
       let nonScriptedFields = Private(MockLogstashFieldsProvider).filter(field => (
         field.scripted !== true
       ));
 
       class StubIndexPatternsApiClient {
-        getFieldsForTimePattern = sinon.spy(async () => {
-          return nonScriptedFields;
-        })
-
-        getFieldsForWildcard = sinon.spy(async () => {
-          return nonScriptedFields;
-        })
-
-        testTimePattern = sinon.spy(async () => {
-          return {
-            all: [],
-            matches: []
-          };
-        })
+        getFieldsForTimePattern = sinon.spy(() => Promise.resolve(nonScriptedFields));
+        getFieldsForWildcard = sinon.spy(() => Promise.resolve(nonScriptedFields));
+        testTimePattern = sinon.spy(() => Promise.resolve({
+          all: [],
+          matches: []
+        }))
 
         swapStubNonScriptedFields = (newNonScriptedFields) => {
           nonScriptedFields = newNonScriptedFields;
