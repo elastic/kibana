@@ -84,6 +84,9 @@ import PagerExample
 import PanelExample
   from '../../views/panel/panel_example';
 
+import PromptForItemsExample
+  from '../../views/prompt_for_items/prompt_for_items_example';
+
 import StatusTextExample
   from '../../views/status_text/status_text_example';
 
@@ -190,6 +193,10 @@ const components = [{
 }, {
   name: 'Panel',
   component: PanelExample,
+}, {
+  name: 'Prompt for Items',
+  component: PromptForItemsExample,
+  hasReact: true,
 }, {
   name: 'StatusText',
   component: StatusTextExample,

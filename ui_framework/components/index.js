@@ -33,3 +33,8 @@ export {
   KuiPager,
   KuiPagerButtonGroup
 } from './pager';
+
+export {
+  KuiPromptForItems,
+  KuiPromptForItemsMessage,
+} from './prompt_for_items';

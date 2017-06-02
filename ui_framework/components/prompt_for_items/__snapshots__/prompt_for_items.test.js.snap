@@ -1,0 +1,37 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`renders KuiPromptForItems 1`] = `
+<div
+  aria-label="aria-label"
+  class="kuiPromptForItems testClass1 testClass2"
+  data-test-subj="test subject string"
+>
+  <div
+    class="kuiPromptForItems__message"
+  >
+    You have no dashboards, add one!
+  </div>
+  <div
+    class="kuiPromptForItems__actions"
+  >
+    <a
+      aria-label="Add a new dashboard"
+      class="kuiButton testClass1 testClass2 kuiButton--primary kuiButton--iconText"
+      data-test-subj="addNewPromptButton"
+      href="#"
+    >
+      <span
+        class="kuiButton__inner"
+      >
+        <span
+          aria-hidden="true"
+          class="kuiButton__icon kuiIcon fa-plus"
+        />
+        <span>
+          Add a new dashboard
+        </span>
+      </span>
+    </a>
+  </div>
+</div>
+`;
