@@ -543,9 +543,9 @@ body {
    */
 .kuiCardGroup__card {
   -webkit-box-flex: 1;
-  -webkit-flex: 1 1 auto;
-      -ms-flex: 1 1 auto;
-          flex: 1 1 auto;
+  -webkit-flex: 1 1 0;
+      -ms-flex: 1 1 0px;
+          flex: 1 1 0;
   /* 1 */
   margin: 15px;
   /* 2 */ }
@@ -569,9 +569,9 @@ body {
   overflow: hidden; }
   .kuiCardGroup--united .kuiCardGroup__card {
     border: none;
-    border-radius: 0; }
+    border-radius: 0;
+    margin: 0; }
   .kuiCardGroup--united .kuiCardGroup__card + .kuiCardGroup__card {
-    margin: 0;
     border-left: 1px solid #E0E0E0; }
 
 .kuiCollapseButton {
