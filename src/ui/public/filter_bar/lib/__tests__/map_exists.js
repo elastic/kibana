@@ -16,8 +16,8 @@ describe('Filter Bar Directive', function () {
     it('should return the key and value for matching filters', function (done) {
       const filter = { exists: { field: '_type' } };
       mapExists(filter).then(function (result) {
-        expect(result).to.have.property('key', 'exists');
-        expect(result).to.have.property('value', '_type');
+        expect(result).to.have.property('key', '_type');
+        expect(result).to.have.property('value', 'exists');
         done();
       });
       $rootScope.$apply();
