@@ -3,7 +3,6 @@ import ngMock from 'ng_mock';
 import './_get_filters';
 import './_add_filters';
 import './_remove_filters';
-import './_update_filters';
 import './_toggle_filters';
 import './_invert_filters';
 import './_pin_filters';
@@ -39,7 +38,6 @@ describe('Query Filter', function () {
         expect(queryFilter.toggleAll).to.be.a('function');
         expect(queryFilter.removeFilter).to.be.a('function');
         expect(queryFilter.removeAll).to.be.a('function');
-        expect(queryFilter.updateFilter).to.be.a('function');
         expect(queryFilter.invertFilter).to.be.a('function');
         expect(queryFilter.invertAll).to.be.a('function');
         expect(queryFilter.pinFilter).to.be.a('function');

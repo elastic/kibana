@@ -1,4 +1,5 @@
 import { DEFAULT_PANEL_WIDTH, DEFAULT_PANEL_HEIGHT } from 'plugins/kibana/dashboard/panel/panel_state';
+
 import _ from 'lodash';
 
 export class PanelUtils {
