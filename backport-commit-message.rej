@@ -1,0 +1,62 @@
+Dashboard landing page
+
+Backports PR #10003
+
+**Commit 1:**
+Introduce dashboard landing page
+
+Still TODO:
+ - Add clickable breadcrumbs
+ - Remove New and Open top nav options
+
+* Original sha: 416e618de74820fc3fa003f1896f051e8b94ba9e
+* Authored by Stacey Gammon <gammon@elastic.co> on 2017-01-23T14:40:14Z
+
+**Commit 2:**
+use clickable breadcrumbs instead of 'New' and 'Open' nav items
+
+* Original sha: 271dd35a9656f19f544d190cca0cbbbc1f496063
+* Authored by Stacey Gammon <gammon@elastic.co> on 2017-01-23T15:47:59Z
+
+**Commit 3:**
+code cleanup
+
+improve tests
+
+* Original sha: c6354b1d6d39e76a5d69b61b1d89d4f49bf2528e
+* Authored by Stacey Gammon <gammon@elastic.co> on 2017-01-23T15:53:53Z
+
+**Commit 4:**
+Add new empty dashboard styling
+
+* Original sha: 2641d8b7650f9bc596678b16b97cb14c0109c937
+* Authored by Stacey Gammon <gammon@elastic.co> on 2017-01-23T20:35:06Z
+
+**Commit 5:**
+Fix selenium tests
+
+* Original sha: a1b84ca0733d60c155d96370977fa32e75e0c395
+* Authored by Stacey Gammon <gammon@elastic.co> on 2017-01-23T21:50:37Z
+
+**Commit 6:**
+Address code review comments
+
+- rename bread_crumb_url => bread_crumb_urls
+- fix reporting link in dash (separate PR)
+- Use NoItems instead of PromptForItems when searching
+- Style fixes
+
+* Original sha: fd857dc15d6115602b25623246bc070622baa3b1
+* Authored by Stacey Gammon <gammon@elastic.co> on 2017-01-24T14:44:43Z
+
+**Commit 7:**
+Use a constant for the landing page url
+
+* Original sha: fbdaa844f949d7fbf8b034cc4772235779457de1
+* Authored by Stacey Gammon <gammon@elastic.co> on 2017-01-24T20:20:07Z
+
+**Commit 8:**
+Fix tests
+
+* Original sha: 33b4f246547b000bb3ffd0ccfabd3b8df6db8011
+* Authored by Stacey Gammon <gammon@elastic.co> on 2017-01-24T20:53:08Z
