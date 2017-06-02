@@ -17,7 +17,6 @@ describe('Filter Bar Directive', function () {
   let mapFilter;
   let $el;
   let $scope;
-  // require('test_utils/no_digest_promises').activateForSuite();
 
   beforeEach(ngMock.module('kibana/global_state', function ($provide) {
     $provide.service('getAppState', _.constant(_.constant(

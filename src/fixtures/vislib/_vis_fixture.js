@@ -40,8 +40,7 @@ module.exports = function VislibFixtures(Private) {
       defaultYExtents: false,
       setYExtents: false,
       yAxis: {},
-      type: 'histogram',
-      hasTimeField: true
+      type: 'histogram'
     }));
   };
 };
