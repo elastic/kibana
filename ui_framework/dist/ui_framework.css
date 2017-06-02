@@ -1075,8 +1075,7 @@ body {
     /* 1 */ }
   .theme-dark .kuiSelect {
     color: #cecece; }
-  .kuiSelect:invalid:not(.ng-untouched) {
-    /* 1 */
+  .kuiSelect:invalid {
     border-color: #D86051; }
   .kuiSelect:focus {
     outline: none;
@@ -1090,8 +1089,7 @@ body {
     .theme-dark .kuiSelect:focus {
       outline: none;
       border-color: #6EADC1; }
-  .kuiSelect.kuiSelect-isInvalid:not(.ng-untouched) {
-    /* 1 */
+  .kuiSelect.kuiSelect-isInvalid {
     border-color: #D86051; }
 
 .kuiSelect--large {
