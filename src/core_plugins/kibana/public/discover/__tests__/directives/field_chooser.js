@@ -1,7 +1,7 @@
 import angular from 'angular';
 import ngMock from 'ng_mock';
 import _ from 'lodash';
-import sinon from 'auto-release-sinon';
+import sinon from 'sinon';
 import expect from 'expect.js';
 import $ from 'jquery';
 import 'ui/private';
@@ -104,21 +104,19 @@ describe('discover field chooser directives', function () {
   };
 
   describe('Index list', function () {
-    it('should be in alphabetical order', function (done) {
+    it('should be in alphabetical order', function () {
       $elem.find('.ui-select-toggle').click();
       expect($elem.find('[role=option]').text().replace(/\W+/g, '')).to.be('abc');
-      done();
     });
   });
 
   describe('Field listing', function () {
-    it('should have Selected Fields, Fields and Popular Fields sections', function (done) {
+    it('should have Selected Fields, Fields and Popular Fields sections', function () {
       const headers = $elem.find('.sidebar-list-header');
       expect(headers.length).to.be(3);
-      done();
     });
 
-    it('should have 2 popular fields, 1 unpopular field and no selected fields', function (done) {
+    it('should have 2 popular fields, 1 unpopular field and no selected fields', function () {
       const section = getSections($elem);
       const popular = find('popular');
       const unpopular = find('unpopular');
@@ -132,7 +130,6 @@ describe('discover field chooser directives', function () {
       expect(unpopular).to.contain('extension');
       expect(unpopular).to.contain('machine.os');
       expect(unpopular).to.not.contain('ssl');
-      done();
 
       function find(popularity) {
         return section[popularity]
@@ -143,14 +140,13 @@ describe('discover field chooser directives', function () {
     });
 
 
-    it('should show the popular fields header if there are popular fields', function (done) {
+    it('should show the popular fields header if there are popular fields', function () {
       const section = getSections($elem);
       expect(section.popular.hasClass('ng-hide')).to.be(false);
       expect(section.popular.find('li:not(.sidebar-list-header)').length).to.be.above(0);
-      done();
     });
 
-    it('should not show the popular fields if there are not any', function (done) {
+    it('should not show the popular fields if there are not any', function () {
 
       // Re-init
       destroy();
@@ -169,10 +165,9 @@ describe('discover field chooser directives', function () {
       $scope.$digest();
       expect(section.popular.hasClass('ng-hide')).to.be(true);
       expect(section.popular.find('li:not(.sidebar-list-header)').length).to.be(0);
-      done();
     });
 
-    it('should move the field into selected when it is added to the columns array', function (done) {
+    it('should move the field into selected when it is added to the columns array', function () {
       const section = getSections($elem);
       $scope.columns.push('bytes');
       $scope.$digest();
@@ -186,8 +181,6 @@ describe('discover field chooser directives', function () {
       expect(section.unpopular.text()).to.not.contain('ip\n');
 
       expect(section.popular.text()).to.contain('ssl');
-
-      done();
     });
   });
 
