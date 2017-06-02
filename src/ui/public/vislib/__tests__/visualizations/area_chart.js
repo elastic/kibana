@@ -3,8 +3,6 @@ import expect from 'expect.js';
 import ngMock from 'ng_mock';
 import _ from 'lodash';
 
-import woahLotsOfVariables from 'fixtures/vislib/mock_data/date_histogram/_series';
-import notQuiteEnoughVariables from 'fixtures/vislib/mock_data/not_enough_data/_one_point';
 import $ from 'jquery';
 import FixturesVislibVisFixtureProvider from 'fixtures/vislib/_vis_fixture';
 import 'ui/persisted_state';
@@ -40,42 +38,6 @@ _.forOwn(dataTypesArray, function (dataType, dataTypeName) {
 
     afterEach(function () {
       vis.destroy();
-    });
-
-    describe('checkIfEnoughData method throws an error when not enough data', function () {
-      beforeEach(function () {
-        ngMock.inject(function () {
-          vis.render(notQuiteEnoughVariables, persistedState);
-        });
-      });
-
-      it('should throw a Not Enough Data Error', function () {
-        vis.handler.charts.forEach(function (chart) {
-          chart.series.forEach(function (series) {
-            expect(function () {
-              series.checkIfEnoughData();
-            }).to.throwError();
-          });
-        });
-      });
-    });
-
-    describe('checkIfEnoughData method should not throw an error when enough data', function () {
-      beforeEach(function () {
-        ngMock.inject(function () {
-          vis.render(woahLotsOfVariables, persistedState);
-        });
-      });
-
-      it('should not throw a Not Enough Data Error', function () {
-        vis.handler.charts.forEach(function (chart) {
-          chart.series.forEach(function (series) {
-            expect(function () {
-              series.checkIfEnoughData();
-            }).to.not.throwError();
-          });
-        });
-      });
     });
 
     describe('stackData method', function () {
