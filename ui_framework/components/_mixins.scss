@@ -174,15 +174,8 @@
   }
 }
 
-/**
- * 1. Angular will add an ng-untouched class to an input if it hasn't been touched yet.
- *    We only want invalid inputs to appear invalid after the user has had a chance to interact
- *    with it.
- */
 @mixin formControlInvalid {
-  &:not(.ng-untouched) { /* 1 */
-    border-color: $globalDangerBorderColor;
-  }
+  border-color: $globalDangerBorderColor;
 }
 
 /**
