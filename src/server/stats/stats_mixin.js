@@ -10,7 +10,8 @@ export function statsMixin(kbnServer, server) {
 
       const stats = await getStats(
         server.config().get('kibana.index'),
-        callAdminCluster);
+        callAdminCluster
+      );
 
       return reply(stats);
     }
