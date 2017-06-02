@@ -4,10 +4,15 @@
   on-select="onSelect({ field: field })"
 >
   <ui-select-match placeholder="Fields...">
-    <span tooltip="{{$select.selected.name}}">{{$select.selected.name}}</span>
+    <span
+      class="uiSelectMatch--ellipsis"
+      tooltip="{{$select.selected.name}}"
+    >
+      {{$select.selected.name}}
+    </span>
   </ui-select-match>
   <ui-select-choices
-    class="ui-select-choices--autoWidth"
+    class="uiSelectChoices--autoWidth"
     repeat="field in fieldOptions | filter:{ name: $select.search } | orderBy:'name' | sortPrefixFirst:$select.search:'name'"
     group-by="'indexPattern'"
   >

@@ -5,17 +5,17 @@
 >
   <ui-select-match
     placeholder="Values..."
-    class="ui-select-match--restrictToParent"
+    class="uiSelectMatch--restrictToParent"
   >
     <span
-      class="ui-select-match--pillWithTooltip"
+      class="uiSelectMatch--pillWithTooltip"
       tooltip="{{$item}}"
     >
       {{$item}}
     </span>
   </ui-select-match>
   <ui-select-choices
-    class="ui-select-choices--autoWidth"
+    class="uiSelectChoices--autoWidth"
     repeat="value in filterParamsPhrasesEditor.compactUnion([$select.search], valueSuggestions) | filter:$select.search | sortPrefixFirst:$select.search"
     refresh="filterParamsPhrasesEditor.refreshValueSuggestions($select.search)"
     refresh-delay="500"
