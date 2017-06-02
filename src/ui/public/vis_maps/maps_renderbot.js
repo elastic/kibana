@@ -213,10 +213,7 @@ module.exports = function MapsRenderbotFactory(Private, $injector, serviceSettin
       return _.assign(
         {},
         this.vis.type.params.defaults,
-        {
-          type: this.vis.type.name,
-          hasTimeField: this.vis.indexPattern && this.vis.indexPattern.hasTimeField()// Add attribute which determines whether an index is time based or not.
-        },
+        { type: this.vis.type.name },
         this.vis.params
       );
     }
