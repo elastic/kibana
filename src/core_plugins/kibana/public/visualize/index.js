@@ -9,6 +9,7 @@ import 'plugins/kibana/visualize/saved_visualizations/_saved_vis';
 import 'plugins/kibana/visualize/saved_visualizations/saved_visualizations';
 import 'ui/directives/scroll_bottom';
 import 'ui/filters/sort_prefix_first';
+
 import uiRoutes from 'ui/routes';
 import visualizeListingTemplate from './listing/visualize_listing.html';
 import { VisualizeListingController } from './listing/visualize_listing';
@@ -22,10 +23,11 @@ import { BasicResponseHandlerProvider } from 'ui/vis/response_handlers/basic';
 
 import { defaultEditor } from 'ui/vis/editors/default/default';
 
-
 import { RequestHandlersRegistryProvider } from 'ui/registry/request_handlers';
 import { ResponseHandlersRegistryProvider } from 'ui/registry/response_handlers';
 import { EditorTypesRegistryProvider } from 'ui/registry/editor_types';
+import { EmbeddableHandlersRegistryProvider } from 'ui/registry/embeddable_handlers';
+import { visualizeEmbeddableHandlerProvider } from './embeddable/visualize_embeddable_handler_provider';
 
 uiRoutes
 .defaults(/visualize/, {
@@ -39,9 +41,11 @@ uiRoutes
 
 // preloading
 SavedObjectRegistryProvider.register(savedVisualizationProvider);
+
 RequestHandlersRegistryProvider.register(CourierRequestHandlerProvider);
 RequestHandlersRegistryProvider.register(noneRequestHandlerProvider);
 ResponseHandlersRegistryProvider.register(noneResponseHandler);
 ResponseHandlersRegistryProvider.register(BasicResponseHandlerProvider);
 EditorTypesRegistryProvider.register(defaultEditor);
 
+EmbeddableHandlersRegistryProvider.register(visualizeEmbeddableHandlerProvider);

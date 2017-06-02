@@ -1,11 +1,11 @@
-<div class="panel panel-default" ng-class="{'panel--edit-mode': !isViewOnlyMode()}" ng-switch on="panel.type" ng-if="savedObj || error">
+<div class="panel panel-default" ng-class="{'panel--edit-mode': !isViewOnlyMode()}" ng-switch on="panel.type">
   <div class="panel-heading">
     <span
       data-test-subj="dashboardPanelTitle"
       class="panel-title"
-      aria-label="{{:: 'Dashboard panel: ' + savedObj.title }}"
+      aria-label="{{:: 'Dashboard panel: ' + title }}"
     >
-      {{::savedObj.title}}
+      {{::title}}
     </span>
     <div class="kuiMicroButtonGroup">
       <button
@@ -72,34 +72,5 @@
     <span ng-bind="error"></span>
   </div>
 
-  <visualize
-    ng-if="!error"
-    ng-switch-when="visualization"
-    show-spy-panel="!isFullScreenMode"
-    saved-obj="savedObj"
-    app-state="appState"
-    ui-state="uiState"
-    data-title="{{savedObj.title}}"
-    data-description="{{savedObj.description}}"
-    class="panel-content">
-  </visualize>
-
-  <doc-table
-    ng-if="!error"
-    ng-switch-when="search"
-    search-source="savedObj.searchSource"
-    sorting="panel.sort"
-    columns="panel.columns"
-    data-shared-item
-    data-title="{{savedObj.title}}"
-    data-description="{{savedObj.description}}"
-    render-counter
-    class="panel-content"
-    filter="filter"
-    on-add-column="addColumn"
-    on-change-sort-order="setSortOrder"
-    on-move-column="moveColumn"
-    on-remove-column="removeColumn"
-    >
-  </doc-table>
+  <div id="embeddableContent" class="panel-content"></div>
 </div>

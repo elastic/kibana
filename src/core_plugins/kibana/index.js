@@ -41,7 +41,8 @@ module.exports = function (kibana) {
           'navbarExtensions',
           'managementSections',
           'devTools',
-          'docViews'
+          'docViews',
+          'embeddableHandlers',
         ],
         injectVars: function (server) {
           const serverConfig = server.config();

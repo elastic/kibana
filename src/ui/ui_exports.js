@@ -89,6 +89,7 @@ class UiExports {
         };
 
       case 'visTypes':
+      case 'embeddableHandlers':
       case 'fieldFormats':
       case 'spyModes':
       case 'chromeNavControls':
