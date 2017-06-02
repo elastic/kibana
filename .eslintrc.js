@@ -1,11 +1,6 @@
 module.exports = {
   parser: 'babel-eslint',
-  
-  extends: [
-    'plugin:import/errors',
-    'plugin:import/warnings'
-  ],
-  
+
   plugins: [
     'mocha',
     'babel',
@@ -21,8 +16,13 @@ module.exports = {
     browser: true,
   },
 
+  parserOptions: {
+    sourceType: 'module',
+    ecmaVersion: 6,
+    ecmaFeatures: { experimentalObjectRestSpread: true },
+  },
+
   rules: {
-    'babel/object-curly-spacing': [ 'error', 'always' ],
     'block-scoped-var': 'error',
     camelcase: [ 'error', { properties: 'never' } ],
     'comma-dangle': 'off',
@@ -36,8 +36,6 @@ module.exports = {
     indent: [ 'error', 2, { SwitchCase: 1 } ],
     'key-spacing': [ 'off', { align: 'value' } ],
     'max-len': [ 'error', 140, 2, { ignoreComments: true, ignoreUrls: true } ],
-    'mocha/handle-done-callback': 'error',
-    'mocha/no-exclusive-tests': 'error',
     'new-cap': [ 'error', { capIsNewExceptions: [ 'Private' ] } ],
     'no-bitwise': 'off',
     'no-caller': 'error',
@@ -73,7 +71,6 @@ module.exports = {
     'no-use-before-define': [ 'error', 'nofunc' ],
     'no-var': 'error',
     'no-with': 'error',
-    'object-curly-spacing': 'off', // overriden with babel/object-curly-spacing
     'one-var': [ 'error', 'never' ],
     'prefer-const': 'error',
     quotes: [ 'error', 'single', { allowTemplateLiterals: true } ],
@@ -88,9 +85,25 @@ module.exports = {
     'valid-typeof': 'error',
     'wrap-iife': [ 'error', 'outside' ],
     yoda: 'off',
+
+    'object-curly-spacing': 'off', // overriden with babel/object-curly-spacing
+    'babel/object-curly-spacing': [ 'error', 'always' ],
+
     'react/jsx-uses-react': 'error',
     'react/jsx-uses-vars': 'error',
     'react/jsx-no-undef': 'error',
     'react/jsx-pascal-case': 'error',
+
+    'mocha/handle-done-callback': 'error',
+    'mocha/no-exclusive-tests': 'error',
+
+    'import/no-unresolved': 'error',
+    'import/named': 'error',
+    'import/namespace': 'error',
+    'import/default': 'error',
+    'import/export': 'error',
+    'import/no-named-as-default': 'error',
+    'import/no-named-as-default-member': 'error',
+    'import/no-duplicates': 'error',
   }
 }
