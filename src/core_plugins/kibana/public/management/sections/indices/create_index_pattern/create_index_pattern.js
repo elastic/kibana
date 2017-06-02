@@ -186,6 +186,7 @@ uiModules.get('apps/management')
   this.canEnableExpandWildcard = () => {
     return (
       this.isTimeBased() &&
+        !this.isCrossClusterName() &&
         !this.formValues.nameIsPattern &&
         _.includes(this.formValues.name, '*')
     );
