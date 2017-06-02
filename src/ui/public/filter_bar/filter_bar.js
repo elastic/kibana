@@ -1,6 +1,7 @@
 import _ from 'lodash';
 import template from 'ui/filter_bar/filter_bar.html';
 import 'ui/directives/json_input';
+import '../filter_editor';
 import { filterAppliedAndUnwrap } from 'ui/filter_bar/lib/filter_applied_and_unwrap';
 import { FilterBarLibMapAndFlattenFiltersProvider } from 'ui/filter_bar/lib/map_and_flatten_filters';
 import { FilterBarLibMapFlattenAndWrapFiltersProvider } from 'ui/filter_bar/lib/map_flatten_and_wrap_filters';
@@ -23,12 +24,13 @@ module.directive('filterBar', function (Private, Promise, getAppState) {
   const filterOutTimeBasedFilter = Private(FilterBarLibFilterOutTimeBasedFilterProvider);
   const changeTimeFilter = Private(FilterBarLibChangeTimeFilterProvider);
   const queryFilter = Private(FilterBarQueryFilterProvider);
-  const privateFilterFieldRegex = /(^\$|meta)/;
 
   return {
+    template,
     restrict: 'E',
-    template: template,
-    scope: {},
+    scope: {
+      indexPatterns: '='
+    },
     link: function ($scope) {
       // bind query filter actions to the scope
       [
@@ -40,19 +42,15 @@ module.directive('filterBar', function (Private, Promise, getAppState) {
         'invertFilter',
         'invertAll',
         'removeFilter',
-        'removeAll',
-        'updateFilter'
+        'removeAll'
       ].forEach(function (method) {
         $scope[method] = queryFilter[method];
       });
 
       $scope.state = getAppState();
 
-      $scope.aceLoaded = function (editor) {
-        editor.$blockScrolling = Infinity;
-        const session = editor.getSession();
-        session.setTabSize(2);
-        session.setUseSoftTabs(true);
+      $scope.showAddFilterButton = () => {
+        return _.compact($scope.indexPatterns).length > 0;
       };
 
       $scope.applyFilters = function (filters) {
@@ -65,24 +63,29 @@ module.directive('filterBar', function (Private, Promise, getAppState) {
         }
       };
 
-      $scope.startEditingFilter = function (source) {
-        return $scope.editingFilter = {
-          source: source,
-          type: _.findKey(source, function (val, key) {
-            return !key.match(privateFilterFieldRegex);
-          }),
-          model: convertToEditableFilter(source),
-          alias: source.meta.alias
+      $scope.addFilter = () => {
+        $scope.editingFilter = {
+          meta: { isNew: true }
         };
       };
 
-      $scope.stopEditingFilter = function () {
-        $scope.editingFilter = null;
+      $scope.deleteFilter = (filter) => {
+        $scope.removeFilter(filter);
+        if (filter === $scope.editingFilter) $scope.cancelEdit();
       };
 
-      $scope.editDone = function () {
-        $scope.updateFilter($scope.editingFilter);
-        $scope.stopEditingFilter();
+      $scope.editFilter = (filter) => {
+        $scope.editingFilter = filter;
+      };
+
+      $scope.cancelEdit = () => {
+        delete $scope.editingFilter;
+      };
+
+      $scope.saveEdit = (filter, newFilter, isPinned) => {
+        if (!filter.isNew) $scope.removeFilter(filter);
+        delete $scope.editingFilter;
+        $scope.addFilters([newFilter], isPinned);
       };
 
       $scope.clearFilterBar = function () {
@@ -92,7 +95,6 @@ module.directive('filterBar', function (Private, Promise, getAppState) {
 
       // update the scope filter list on filter changes
       $scope.$listen(queryFilter, 'update', function () {
-        $scope.stopEditingFilter();
         updateFilters();
       });
 
@@ -150,12 +152,6 @@ module.directive('filterBar', function (Private, Promise, getAppState) {
 
         _.forEach(inversionFilters, $scope.invertFilter);
         $scope.addFilters(newFilters);
-      }
-
-      function convertToEditableFilter(filter) {
-        return _.omit(_.cloneDeep(filter), function (val, key) {
-          return key.match(privateFilterFieldRegex);
-        });
       }
 
       function updateFilters() {
