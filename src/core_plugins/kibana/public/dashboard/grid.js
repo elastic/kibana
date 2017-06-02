@@ -39,16 +39,6 @@ app.directive('dashboardGrid', function ($compile, Notifier) {
        */
       panels: '=',
       /**
-       * Returns a click handler for a visualization.
-       * @type {function}
-       */
-      getVisClickHandler: '=',
-      /**
-       * Returns a brush event handler for a visualization.
-       * @type {function}
-       */
-      getVisBrushHandler: '=',
-      /**
        * Call when changes should be propagated to the url and thus saved in state.
        * @type {function}
        */
@@ -60,6 +50,10 @@ app.directive('dashboardGrid', function ($compile, Notifier) {
        * @type {function}
        */
       toggleExpand: '=',
+      /**
+       * @type {Object}
+       */
+      appState: '=',
     },
     link: function ($scope, $el) {
       const notify = new Notifier();
@@ -217,11 +211,10 @@ app.directive('dashboardGrid', function ($compile, Notifier) {
                   is-full-screen-mode="isFullScreenMode"
                   is-expanded="false"
                   dashboard-view-mode="dashboardViewMode"
-                  get-vis-click-handler="getVisClickHandler"
-                  get-vis-brush-handler="getVisBrushHandler"
                   save-state="saveState"
                   app-state="appState"
                   register-panel-index-pattern="registerPanelIndexPattern"
+                  app-state="appState"
                   toggle-expand="toggleExpand(${panel.panelIndex})"
                   create-child-ui-state="createChildUiState">
             </li>`;

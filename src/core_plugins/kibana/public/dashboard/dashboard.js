@@ -18,8 +18,6 @@ import { DocTitleProvider } from 'ui/doc_title';
 import { getTopNavConfig } from './top_nav/get_top_nav_config';
 import { DashboardConstants, createDashboardEditUrl } from './dashboard_constants';
 import { VisualizeConstants } from 'plugins/kibana/visualize/visualize_constants';
-import { UtilsBrushEventProvider } from 'ui/utils/brush_event';
-import { FilterBarClickHandlerProvider } from 'ui/filter_bar/filter_bar_click_handler';
 import { DashboardState } from './dashboard_state';
 import { notify } from 'ui/notify';
 import { documentationLinks } from 'ui/documentation_links/documentation_links';
@@ -81,8 +79,6 @@ app.directive('dashboardApp', function ($injector) {
   const kbnUrl = $injector.get('kbnUrl');
   const confirmModal = $injector.get('confirmModal');
   const Private = $injector.get('Private');
-  const brushEvent = Private(UtilsBrushEventProvider);
-  const filterBarClickHandler = Private(FilterBarClickHandlerProvider);
 
   return {
     restrict: 'E',
@@ -99,6 +95,7 @@ app.directive('dashboardApp', function ($injector) {
       }
 
       const dashboardState = new DashboardState(dash, AppState, dashboardConfig);
+      $scope.appState = dashboardState.getAppState();
 
       // The 'previouslyStored' check is so we only update the time filter on dashboard open, not during
       // normal cross app navigation.
@@ -149,8 +146,6 @@ app.directive('dashboardApp', function ($injector) {
       $scope.appState = dashboardState.getAppState();
 
       $scope.landingPageUrl = () => `#${DashboardConstants.LANDING_PAGE_PATH}`;
-      $scope.getBrushEvent = () => brushEvent(dashboardState.getAppState());
-      $scope.getFilterBarClickHandler = () => filterBarClickHandler(dashboardState.getAppState());
       $scope.hasExpandedPanel = () => $scope.expandedPanel !== null;
       $scope.getDashTitle = () => getDashboardTitle(
         dashboardState.getTitle(),

@@ -66,18 +66,12 @@ uiModules
        */
       isExpanded: '=',
       /**
-       * Returns a click handler for a visualization.
-       * @type {function}
-       */
-      getVisClickHandler: '=',
-      /**
-       * Returns a brush event handler for a visualization.
-       * @type {function}
-       */
-      getVisBrushHandler: '=',
-      /**
        * Call when changes should be propagated to the url and thus saved in state.
        * @type {function}
+       */
+      saveState: '=',
+      /**
+       * @type {Object}
        */
       saveState: '=',
       appState: '=',
@@ -94,11 +88,9 @@ uiModules
         return $scope.dashboardViewMode === DashboardViewMode.VIEW || $scope.isFullScreenMode;
       };
 
-      // TODO: vis actions should be generalized for use by all panel renderers, e.g. updateFilters, updateTimeRange.
       const containerAPI = {
-        getVisClickHandler: $scope.getVisClickHandler,
-        getVisBrushHandler: $scope.getVisBrushHandler,
         savePanelState,
+        getAppState: () => $scope.appState,
         getIsViewOnlyMode: $scope.isViewOnlyMode,
         createChildUiState: $scope.createChildUiState,
         registerPanelIndexPattern: $scope.registerPanelIndexPattern,
