@@ -168,13 +168,13 @@ export function FilterBarQueryFilterProvider(Private, $rootScope, getAppState, g
     if (!_.isArray(globalState.filters)) globalState.filters = [];
     if (!_.isArray(appState.filters)) appState.filters = [];
 
-    const appIndex = _.indexOf(appState.filters, filter);
+    const appIndex = _.findIndex(appState.filters, appFilter => _.isEqual(appFilter, filter));
 
     if (appIndex !== -1 && force !== false) {
       appState.filters.splice(appIndex, 1);
       globalState.filters.push(filter);
     } else {
-      const globalIndex = _.indexOf(globalState.filters, filter);
+      const globalIndex = _.findIndex(globalState.filters, globalFilter => _.isEqual(globalFilter, filter));
 
       if (globalIndex === -1 || force === true) return filter;
 
