@@ -1,5 +1,6 @@
 import {
   SupertestProvider,
+  ChanceProvider,
 } from './services';
 
 export default async function ({ readConfigFile }) {
@@ -13,6 +14,7 @@ export default async function ({ readConfigFile }) {
       es: commonConfig.get('services.es'),
       esArchiver: commonConfig.get('services.esArchiver'),
       supertest: SupertestProvider,
+      chance: ChanceProvider,
     },
     servers: commonConfig.get('servers'),
   };

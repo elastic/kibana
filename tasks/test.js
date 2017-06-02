@@ -88,7 +88,7 @@ module.exports = function (grunt) {
 
   grunt.registerTask('test:api:server', [
     'esvm:ui',
-    'run:apiTestServer:keepalive'
+    'run:devApiTestServer:keepalive'
   ]);
 
   grunt.registerTask('test:api:runner', () => {

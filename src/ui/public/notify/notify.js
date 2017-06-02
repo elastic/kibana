@@ -5,6 +5,7 @@ import { metadata } from 'ui/metadata';
 
 const module = uiModules.get('kibana/notify');
 export const notify = new Notifier();
+export { Notifier } from 'ui/notify/notifier';
 
 module.factory('createNotifier', function () {
   return function (opts) {
@@ -59,4 +60,3 @@ if (window.addEventListener) {
     notifier.log(`Detected an unhandled Promise rejection.\n${e.reason}`);
   });
 }
-
