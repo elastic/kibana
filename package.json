@@ -43,6 +43,7 @@
   },
   "devDependencies": {
     "@elastic/eslint-config-kibana": "^0.5.0",
+    "@elastic/eslint-import-resolver-kibana": "^0.7.0",
     "@elastic/eslint-plugin-kibana-custom": "^1.0.3",
     "@elastic/plugin-helpers": "^7.0.0",
     "babel-core": "^6.24.1",
@@ -52,7 +53,6 @@
     "babel-preset-react": "^6.24.1",
     "del": "^2.2.2",
     "eslint": "3.11.1",
-    "eslint-import-resolver-kibana": "^0.4.0",
     "eslint-plugin-babel": "4.0.0",
     "eslint-plugin-import": "^2.2.0",
     "eslint-plugin-mocha": "4.7.0",
