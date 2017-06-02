@@ -15,6 +15,7 @@ export function registerFieldCapabilities(server) {
         fields: '*',
         level: 'cluster',
         index: indices,
+        ignoreUnavailable: true,
         allowNoIndices: false
       })
       .then(
