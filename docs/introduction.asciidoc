@@ -10,3 +10,7 @@ create and share dynamic dashboards that display changes to Elasticsearch querie
 
 Setting up Kibana is a snap. You can install Kibana and start exploring your Elasticsearch indices in minutes -- no
 code, no additional infrastructure required.
+
+ifdef::include-xpack[]
+include::{xkb-repo-dir}/introduction.asciidoc[]
+endif::include-xpack[]
