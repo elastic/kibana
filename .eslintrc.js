@@ -97,7 +97,7 @@ module.exports = {
     'mocha/handle-done-callback': 'error',
     'mocha/no-exclusive-tests': 'error',
 
-    'import/no-unresolved': 'error',
+    'import/no-unresolved': [ 'error', { 'amd': true, 'commonjs': true } ],
     'import/named': 'error',
     'import/namespace': 'error',
     'import/default': 'error',
