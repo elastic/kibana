@@ -19,6 +19,7 @@ import MappingSetupProvider from 'ui/utils/mapping_setup';
 import { AdminDocSourceProvider } from '../data_source/admin_doc_source';
 import { SearchSourceProvider } from '../data_source/search_source';
 import { getTitleAlreadyExists } from './get_title_already_exists';
+import { MigrateSearchSourceProvider } from '../data_source/migration/migrate_search_source';
 
 /**
  * An error message to be used when the user rejects a confirm overwrite.
@@ -45,6 +46,7 @@ export function SavedObjectProvider(esAdmin, kbnIndex, Promise, Private, Notifie
   const DocSource = Private(AdminDocSourceProvider);
   const SearchSource = Private(SearchSourceProvider);
   const mappingSetup = Private(MappingSetupProvider);
+  const migrateSearchSource = Private(MigrateSearchSourceProvider);
 
   function SavedObject(config) {
     if (!_.isObject(config)) config = {};
@@ -240,13 +242,14 @@ export function SavedObjectProvider(esAdmin, kbnIndex, Promise, Private, Notifie
         parseSearchSource(meta.searchSourceJSON);
         return hydrateIndexPattern();
       })
-        .then(() => {
-          return Promise.cast(afterESResp.call(this, resp));
-        })
-        .then(() => {
-          // Any time obj is updated, re-call applyESResp
-          docSource.onUpdate().then(this.applyESResp, notify.fatal);
-        });
+      .then(() => migrateSearchSource(this.searchSource))
+      .then(() => {
+        return Promise.cast(afterESResp.call(this, resp));
+      })
+      .then(() => {
+        // Any time obj is updated, re-call applyESResp
+        docSource.onUpdate().then(this.applyESResp, notify.fatal);
+      });
     };
 
     /**

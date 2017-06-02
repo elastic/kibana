@@ -1,11 +1,15 @@
 import expect from 'expect.js';
 import ngMock from 'ng_mock';
 import { FilterBarLibMapRangeProvider } from 'ui/filter_bar/lib/map_range';
+import { buildRangeFilter } from 'ui/filter_manager/lib/range';
+import { StubbedLogstashIndexPattern } from 'fixtures/stubbed_logstash_index_pattern';
 
 describe('Filter Bar Directive', function () {
   describe('mapRange()', function () {
     let mapRange;
     let $rootScope;
+    let indexPattern;
+    let bytesField;
 
     beforeEach(ngMock.module(
       'kibana',
@@ -18,10 +22,17 @@ describe('Filter Bar Directive', function () {
     beforeEach(ngMock.inject(function (Private, _$rootScope_) {
       mapRange = Private(FilterBarLibMapRangeProvider);
       $rootScope = _$rootScope_;
+      indexPattern = Private(StubbedLogstashIndexPattern);
+      bytesField = indexPattern.fields.byName.bytes;
     }));
 
     it('should return the key and value for matching filters with gt/lt', function (done) {
-      const filter = { meta: { index: 'logstash-*' }, range: { bytes: { lt: 2048, gt: 1024 } } };
+      const params = {
+        lt: 2048,
+        gt: 1024,
+      };
+      const filter = buildRangeFilter(bytesField, params, indexPattern);
+
       mapRange(filter).then(function (result) {
         expect(result).to.have.property('key', 'bytes');
         expect(result).to.have.property('value', '1,024 to 2,048');
@@ -31,7 +42,11 @@ describe('Filter Bar Directive', function () {
     });
 
     it('should return the key and value for matching filters with gte/lte', function (done) {
-      const filter = { meta: { index: 'logstash-*' }, range: { bytes: { lte: 2048, gte: 1024 } } };
+      const params = {
+        lt: 2048,
+        gt: 1024,
+      };
+      const filter = buildRangeFilter(bytesField, params, indexPattern);
       mapRange(filter).then(function (result) {
         expect(result).to.have.property('key', 'bytes');
         expect(result).to.have.property('value', '1,024 to 2,048');

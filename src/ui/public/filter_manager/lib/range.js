@@ -1,8 +1,42 @@
 import _ from 'lodash';
 const OPERANDS_IN_RANGE = 2;
 
+/**
+ *
+ * @param { Object } field - a Field object
+ * @param { Object } params - any valid param for the ES range query
+ * @param { Object } indexPattern - an IndexPattern object
+ * @param { Function } formattedValue - a formatting function
+ *
+ * @return { Object } a filter object
+ */
 export function buildRangeFilter(field, params, indexPattern, formattedValue) {
-  const filter = { meta: { index: indexPattern.id } };
+  if (_.isUndefined(field)) {
+    throw new Error('field is a required argument');
+  }
+  if (_.isUndefined(params)) {
+    throw new Error('params is a required argument');
+  }
+  if (_.isUndefined(indexPattern)) {
+    throw new Error('indexPattern is a required argument');
+  }
+
+  const filterDelegate = {
+    needsGoodName: function () {
+      return {
+        index: this.meta.index,
+        field: this.meta.field,
+        type: this.meta.type,
+        params: this.meta.params,
+        disabled: this.meta.disabled,
+        negate: this.meta.negate,
+        alias: this.meta.alias
+      };
+    }
+  };
+
+  const filter = Object.assign(Object.create(filterDelegate), { meta: { index: indexPattern.id } });
+
   if (formattedValue) filter.meta.formattedValue = formattedValue;
 
   params = _.clone(params);
@@ -25,6 +59,7 @@ export function buildRangeFilter(field, params, indexPattern, formattedValue) {
   if (totalInfinite === OPERANDS_IN_RANGE) {
     filter.match_all = {};
     filter.meta.field = field.name;
+    filter.meta.type = 'matchAll';
   } else if (field.scripted) {
     const operators = {
       gt: '>',
@@ -62,9 +97,26 @@ export function buildRangeFilter(field, params, indexPattern, formattedValue) {
     _.set(filter, 'script.script', { inline: script, params: knownParams, lang: field.lang });
     filter.script.script.params.value = value;
     filter.meta.field = field.name;
+    filter.meta.type = 'script';
   } else {
     filter.range = {};
     filter.range[field.name] = params;
+    filter.meta.field = field.name;
+    filter.meta.type = 'range';
+    filter.meta.params = params;
+    filter.meta.key = filter.meta.field;
+    filter.meta.disabled = false;
+    filter.meta.negate = false;
+    filter.meta.alias = null;
+
+    const convert = indexPattern.fields.byName[field.name].format.getConverterFor('text');
+    let left = _.has(params, 'gte') ? params.gte : params.gt;
+    if (left == null) left = -Infinity;
+
+    let right = _.has(params, 'lte') ? params.lte : params.lt;
+    if (right == null) right = Infinity;
+    filter.meta.value = `${convert(left)} to ${convert(right)}`;
+
   }
 
   return filter;
