@@ -27,7 +27,7 @@
       </div>
 
       <div class="kuiFieldGroup kuiVerticalRhythmSmall">
-        <div class="kuiFieldGroupSection kuiFieldGroupSection--wide" ng-class="{ 'has-error': checkRelative() }">
+        <div class="kuiFieldGroupSection kuiFieldGroupSection--wide">
           <input
             required
             ng-model="relative.from.count"
@@ -35,27 +35,35 @@
             greater-than="-1"
             min="0"
             type="number"
-            class="form-control fullWidth">
+            ng-class="{ 'kuiTextInput-isInvalid' : checkRelative() }"
+            class="kuiTextInput fullWidth"
+          >
         </div>
 
-        <div class="kuiFieldGroupSection" ng-class="{ 'has-error': checkRelative() }">
+        <div class="kuiFieldGroupSection">
           <select
             ng-model="relative.from.unit"
             ng-options="opt.value as opt.text for opt in relativeOptions"
             ng-change="formatRelative({key:'from'})"
-            class="form-control fullWidth">
+            ng-class="{ 'kuiSelect-isInvalid': checkRelative() }"
+            class="kuiSelect fullWidth"
+          >
           </select>
         </div>
       </div>
 
       <div class="kuiVerticalRhythmSmall">
-        <label>
+        <label class="kuiCheckBoxLabel">
           <input
+            class="kuiCheckBox"
+            type="checkbox"
             ng-model="relative.from.round"
             ng-checked="relative.from.round"
             ng-change="formatRelative({key:'from'})"
-            type="checkbox">
-          round to the {{units[relative.from.unit.substring(0,1)]}}
+          >
+          <span class="kuiCheckBoxLabel__text">
+            round to the {{units[relative.from.unit.substring(0,1)]}}
+          </span>
         </label>
         <div
           ng-class="{ 'kbn-timepicker-error': checkRelative() }"
@@ -92,7 +100,7 @@
       </div>
 
       <div class="kuiFieldGroup kuiVerticalRhythmSmall">
-        <div class="kuiFieldGroupSection kuiFieldGroupSection--wide" ng-class="{ 'has-error': checkRelative() }">
+        <div class="kuiFieldGroupSection kuiFieldGroupSection--wide">
           <input
             required
             ng-model="relative.to.count"
@@ -100,27 +108,35 @@
             greater-than="-1"
             min="0"
             type="number"
-            class="form-control fullWidth">
+            ng-class="{ 'kuiTextInput-isInvalid': checkRelative() }"
+            class="kuiTextInput fullWidth"
+          >
         </div>
 
-        <div class="kuiFieldGroupSection" ng-class="{ 'has-error': checkRelative() }">
+        <div class="kuiFieldGroupSection">
           <select
             ng-model="relative.to.unit"
             ng-options="opt.value as opt.text for opt in relativeOptions"
             ng-change="formatRelative({key:'to'})"
-            class="form-control fullWidth">
+            ng-class="{ 'kuiSelect-isInvalid': checkRelative() }"
+            class="kuiSelect fullWidth"
+          >
           </select>
         </div>
       </div>
 
       <div class="kuiVerticalRhythmSmall">
-        <label>
+        <label class="kuiCheckBoxLabel">
           <input
+            class="kuiCheckBox"
+            type="checkbox"
             ng-model="relative.to.round"
             ng-checked="relative.to.round"
             ng-change="formatRelative({key:'to'})"
-            type="checkbox">
-          round to the {{units[relative.to.unit.substring(0,1)]}}
+          >
+          <span class="kuiCheckBoxLabel__text">
+            round to the {{units[relative.to.unit.substring(0,1)]}}
+          </span>
         </label>
       </div>
     </div>
