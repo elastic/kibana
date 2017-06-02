@@ -28,6 +28,10 @@
  * 1. Prevent Firefox users from being able to resize textareas to smaller than the min-height.
  */
 /**
+ * We specifically don't include Angular's ng-${state} classes here because we don't want to be tightly
+ * coupled with Angular.
+ */
+/**
  * 1. Embedded SVG of fa-caret-down (https://github.com/encharm/Font-Awesome-SVG-PNG/blob/master/black/svg/caret-down.svg).
  * 2. Make room on right side for the caret.
  * 3. Prevent Firefox from showing dotted line around text on focus.
