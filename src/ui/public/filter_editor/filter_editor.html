@@ -14,34 +14,32 @@
   </div>
 
   <div class="kuiModalBody">
-    <!-- DSL editor -->
-    <div ng-show="filterEditor.showQueryDslEditor()">
-      <filter-query-dsl-editor
-        filter="filterEditor.filter"
-        on-change="filterEditor.setQueryDsl(queryDsl)"
-      ></filter-query-dsl-editor>
-      <div
-        ng-show="filterEditor.isEditingQueryDsl"
-        ng-click="filterEditor.isEditingQueryDsl = false"
-      >
-        <button class="kuiMenuButton kuiMenuButton--basic">
-          <span
-            class="kuiMenuButton__icon kuiIcon fa-chevron-left"
-            aria-hidden="true"
-          ></span>
-          <span>Back</span>
-        </button>
-      </div>
-    </div>
-
     <!-- Filter definition -->
     <div class="kuiVerticalRhythm">
-      <div class="kuiVerticalRhythmSmall">
+      <div class="kuiVerticalRhythmSmall filterEditor__labelBar">
         <label class="kuiLabel">
           Filter
         </label>
+
+        <div>
+          <label
+            class="kuiCheckBoxLabel"
+            for="filterEditorEditQueryDslCheckBox"
+          >
+            <input
+              class="kuiCheckBox"
+              type="checkbox"
+              ng-model="filterEditor.isEditingQueryDsl"
+              id="filterEditorEditQueryDslCheckBox"
+            >
+            <span class="kuiCheckBoxLabel__text">
+              Edit Query DSL
+            </span>
+          </label>
+        </div>
       </div>
 
+      <!-- Filter dropdowns -->
       <div
         class="kuiFieldGroup kuiVerticalRhythmSmall kuiFieldGroup--alignTop"
         ng-hide="filterEditor.showQueryDslEditor()"
@@ -72,6 +70,14 @@
           ></filter-params-editor>
         </div>
       </div>
+
+      <!-- DSL editor -->
+      <div ng-show="filterEditor.showQueryDslEditor()">
+        <filter-query-dsl-editor
+          filter="filterEditor.filter"
+          on-change="filterEditor.setQueryDsl(queryDsl)"
+        ></filter-query-dsl-editor>
+      </div>
     </div>
 
     <!-- Label -->
@@ -92,30 +98,6 @@
         ng-model="filterEditor.alias"
         id="filterEditorLabelInput"
       />
-    </div>
-
-    <!-- Misc actions -->
-    <div
-      class="kuiVerticalRhythm"
-      ng-hide="filterEditor.showQueryDslEditor()"
-    >
-      <div class="kuiVerticalRhythmSmall">
-        <label class="kuiLabel">
-          More actions
-        </label>
-      </div>
-
-      <div
-        class="kuiMenuButtonGroup kuiVerticalRhythmSmall"
-        ng-hide="filterEditor.showQueryDslEditor()"
-      >
-        <button
-          class="kuiMenuButton kuiMenuButton--basic"
-          ng-click="filterEditor.isEditingQueryDsl = true"
-        >
-          <span>Edit the query DSL</span>
-        </button>
-      </div>
     </div>
   </div>
 
