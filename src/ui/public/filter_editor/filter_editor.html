@@ -22,27 +22,26 @@
         </label>
 
         <div>
-          <label
-            class="kuiCheckBoxLabel"
-            for="filterEditorEditQueryDslCheckBox"
+          <a
+            class="kuiLink"
+            ng-click="filterEditor.isEditingQueryDsl = !filterEditor.isEditingQueryDsl"
+            kbn-accessible-click
           >
-            <input
-              class="kuiCheckBox"
-              type="checkbox"
-              ng-model="filterEditor.isEditingQueryDsl"
-              id="filterEditorEditQueryDslCheckBox"
-            >
-            <span class="kuiCheckBoxLabel__text">
-              Edit Query DSL
+            <span ng-if="filterEditor.isEditingQueryDsl">
+              Search query values
             </span>
-          </label>
+
+            <span ng-if="!filterEditor.isEditingQueryDsl">
+              Edit query DSL
+            </span>
+          </a>
         </div>
       </div>
 
       <!-- Filter dropdowns -->
       <div
         class="kuiFieldGroup kuiVerticalRhythmSmall kuiFieldGroup--alignTop"
-        ng-hide="filterEditor.showQueryDslEditor()"
+        ng-if="!filterEditor.showQueryDslEditor()"
       >
         <div class="kuiFieldGroupSection">
           <filter-field-select
@@ -72,7 +71,10 @@
       </div>
 
       <!-- DSL editor -->
-      <div ng-show="filterEditor.showQueryDslEditor()">
+      <div
+        class="kuiVerticalRhythmSmall"
+        ng-if="filterEditor.showQueryDslEditor()"
+      >
         <filter-query-dsl-editor
           filter="filterEditor.filter"
           on-change="filterEditor.setQueryDsl(queryDsl)"
