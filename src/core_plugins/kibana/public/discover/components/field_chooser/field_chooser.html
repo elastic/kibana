@@ -16,12 +16,17 @@
   </div>
   <div ng-hide="indexPatternList.length > 1">
     <div class="index-pattern">
-      <h2 id="index_pattern_id" tabindex="0" css-truncate>{{ indexPattern.id }}</h2>
+      <h2
+        class="index-pattern-label"
+        id="index_pattern_id"
+        tabindex="0"
+        css-truncate
+      >{{ indexPattern.id }}</h2>
     </div>
   </div>
 
   <div class="sidebar-list-header">
-    <h3 id="selected_fields" tabindex="0">Selected Fields</h3>
+    <h3 class="sidebar-list-header-label" id="selected_fields" tabindex="0">Selected Fields</h3>
   </div>
   <ul class="list-unstyled discover-selected-fields" >
     <discover-field
@@ -36,7 +41,7 @@
   </ul>
 
   <div class="sidebar-list-header sidebar-item">
-    <h3 id="available_fields" tabindex="0">Available Fields
+    <h3 class="sidebar-list-header-label" id="available_fields" tabindex="0">Available Fields
       <span
         ng-class="{ 'fa-chevron-right': !showFields, 'fa-chevron-down': showFields }"
         ng-click="showFields = !showFields"
