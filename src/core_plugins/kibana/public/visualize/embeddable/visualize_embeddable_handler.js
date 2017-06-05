@@ -41,6 +41,8 @@ export class VisualizeEmbeddableHandler {
       visualizeScope.savedObj.vis.listeners.brush = this.brushEvent(container.getAppState());
       visualizeScope.isFullScreenMode = container.getIsViewOnlyMode();
 
+      container.registerPanelIndexPattern(panel.panelIndex, visualizeScope.savedObj.vis.indexPattern);
+
       const visualizationInstance = this.$compile(visualizationTemplate)(visualizeScope);
       const rootNode = angular.element(domNode);
       rootNode.append(visualizationInstance);

@@ -22,44 +22,45 @@ export class SearchEmbeddableHandler {
     return this.searchLoader.get(panel.id).then(savedObject => savedObject.title);
   }
 
-  render(domNode, panel, actions) {
+  render(domNode, panel, container) {
     return this.searchLoader.get(panel.id).then((savedObject) => {
       const editUrl = this.searchLoader.urlFor(panel.id);
       const searchScope = this.$rootScope.$new();
       searchScope.editUrl = editUrl;
       searchScope.savedObj = savedObject;
       searchScope.panel = panel;
+      container.registerPanelIndexPattern(panel.panelIndex, savedObject.searchSource.get('index'));
 
       // This causes changes to a saved search to be hidden, but also allows
       // the user to locally modify and save changes to a saved search only in a dashboard.
       // See https://github.com/elastic/kibana/issues/9523 for more details.
-      actions.savePanelState({
+      container.savePanelState({
         columns: searchScope.panel.columns || searchScope.savedObj.columns,
         sort: searchScope.panel.sort || searchScope.savedObj.sort
       });
 
       const uiState = savedObject.uiStateJSON ? JSON.parse(savedObject.uiStateJSON) : {};
-      searchScope.uiState = actions.createChildUiState(getPersistedStateId(panel), uiState);
+      searchScope.uiState = container.createChildUiState(getPersistedStateId(panel), uiState);
 
       searchScope.setSortOrder = function setSortOrder(columnName, direction) {
-        actions.savePanelState({ sort: [columnName, direction] });
+        container.savePanelState({ sort: [columnName, direction] });
       };
 
       searchScope.addColumn = function addColumn(columnName) {
         savedObject.searchSource.get('index').popularizeField(columnName, 1);
         columnActions.addColumn(searchScope.panel.columns, columnName);
-        actions.savePanelState({});  // sync to sharing url
+        container.savePanelState({});  // sync to sharing url
       };
 
       searchScope.removeColumn = function removeColumn(columnName) {
         savedObject.searchSource.get('index').popularizeField(columnName, 1);
         columnActions.removeColumn(searchScope.panel.columns, columnName);
-        actions.savePanelState({});  // sync to sharing url
+        container.savePanelState({});  // sync to sharing url
       };
 
       searchScope.moveColumn = function moveColumn(columnName, newIndex) {
         columnActions.moveColumn(searchScope.panel.columns, columnName, newIndex);
-        actions.savePanelState({});  // sync to sharing url
+        container.savePanelState({});  // sync to sharing url
       };
 
       searchScope.filter = function (field, value, operator) {
