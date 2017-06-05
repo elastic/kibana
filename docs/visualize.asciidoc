@@ -36,7 +36,7 @@ To create a visualization:
 <<metric-chart,Metric>>:: Display a single number.
 * *Maps*
 [horizontal]
-<<tilemap,Tile map>>:: Associate the results of an aggregation with geographic
+<<tilemap,Coordinate map>>:: Associate the results of an aggregation with geographic
 locations.
 * *Time Series*
 [horizontal]

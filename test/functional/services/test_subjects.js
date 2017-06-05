@@ -25,7 +25,9 @@ export function TestSubjectsProvider({ getService }) {
 
     async click(selector) {
       return await retry.try(async () => {
-        await this.find(selector).click();
+        const element = await this.find(selector);
+        await remote.moveMouseTo(element);
+        await element.click();
       });
     }
 

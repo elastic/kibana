@@ -22,6 +22,7 @@ import { UtilsBrushEventProvider } from 'ui/utils/brush_event';
 import { FilterBarClickHandlerProvider } from 'ui/filter_bar/filter_bar_click_handler';
 import { DashboardState } from './dashboard_state';
 import { notify } from 'ui/notify';
+import './panel/get_object_loaders_for_dashboard';
 import { documentationLinks } from 'ui/documentation_links/documentation_links';
 import { showCloneModal } from './top_nav/show_clone_modal';
 
@@ -80,14 +81,13 @@ app.directive('dashboardApp', function ($injector) {
   const kbnUrl = $injector.get('kbnUrl');
   const confirmModal = $injector.get('confirmModal');
   const Private = $injector.get('Private');
-
   const brushEvent = Private(UtilsBrushEventProvider);
   const filterBarClickHandler = Private(FilterBarClickHandlerProvider);
 
   return {
     restrict: 'E',
     controllerAs: 'dashboardApp',
-    controller: function ($scope, $rootScope, $route, $routeParams, $location, getAppState, $compile) {
+    controller: function ($scope, $rootScope, $route, $routeParams, $location, getAppState, $compile, dashboardConfig) {
       const filterBar = Private(FilterBarQueryFilterProvider);
       const docTitle = Private(DocTitleProvider);
       const notify = new Notifier({ location: 'Dashboard' });
@@ -98,7 +98,7 @@ app.directive('dashboardApp', function ($injector) {
         docTitle.change(dash.title);
       }
 
-      const dashboardState = new DashboardState(dash, AppState);
+      const dashboardState = new DashboardState(dash, AppState, dashboardConfig);
 
       // The 'previouslyStored' check is so we only update the time filter on dashboard open, not during
       // normal cross app navigation.
@@ -106,12 +106,26 @@ app.directive('dashboardApp', function ($injector) {
         dashboardState.syncTimefilterWithDashboard(timefilter, quickRanges);
       }
 
+      const updateState = () => {
+        // Following the "best practice" of always have a '.' in your ng-models –
+        // https://github.com/angular/angular.js/wiki/Understanding-Scopes
+        $scope.model = {
+          query: dashboardState.getQuery(),
+          darkTheme: dashboardState.getDarkTheme(),
+          timeRestore: dashboardState.getTimeRestore(),
+          title: dashboardState.getTitle(),
+          description: dashboardState.getDescription(),
+        };
+        $scope.panels = dashboardState.getPanels();
+      };
+
       // Part of the exposed plugin API - do not remove without careful consideration.
       this.appStatus = {
         dirty: !dash.id
       };
       dashboardState.stateMonitor.onChange(status => {
         this.appStatus.dirty = status.dirty || !dash.id;
+        updateState();
       });
 
       dashboardState.applyFilters(dashboardState.getQuery(), filterBar.getFilters());
@@ -122,17 +136,8 @@ app.directive('dashboardApp', function ($injector) {
       dash.searchSource.version(true);
       courier.setRootSearchSource(dash.searchSource);
 
-      // Following the "best practice" of always have a '.' in your ng-models –
-      // https://github.com/angular/angular.js/wiki/Understanding-Scopes
-      $scope.model = {
-        query: dashboardState.getQuery(),
-        darkTheme: dashboardState.getDarkTheme(),
-        timeRestore: dashboardState.getTimeRestore(),
-        title: dashboardState.getTitle(),
-        description: dashboardState.getDescription(),
-      };
+      updateState();
 
-      $scope.panels = dashboardState.getPanels();
       $scope.refresh = (...args) => {
         $rootScope.$broadcast('fetch');
         courier.fetch(...args);
@@ -151,8 +156,16 @@ app.directive('dashboardApp', function ($injector) {
         dashboardState.getIsDirty(timefilter));
       $scope.newDashboard = () => { kbnUrl.change(DashboardConstants.CREATE_NEW_DASHBOARD_URL, {}); };
       $scope.saveState = () => dashboardState.saveState();
-      $scope.getShouldShowEditHelp = () => !dashboardState.getPanels().length && dashboardState.getIsEditMode();
-      $scope.getShouldShowViewHelp = () => !dashboardState.getPanels().length && dashboardState.getIsViewMode();
+      $scope.getShouldShowEditHelp = () => (
+        !dashboardState.getPanels().length &&
+        dashboardState.getIsEditMode() &&
+        !dashboardConfig.getHideWriteControls()
+      );
+      $scope.getShouldShowViewHelp = () => (
+        !dashboardState.getPanels().length &&
+        dashboardState.getIsViewMode() &&
+        !dashboardConfig.getHideWriteControls()
+      );
 
       $scope.toggleExpandPanel = (panelIndex) => {
         if ($scope.expandedPanel && $scope.expandedPanel.panelIndex === panelIndex) {
@@ -194,8 +207,6 @@ app.directive('dashboardApp', function ($injector) {
         return dashboardState.uiState.createChild(path, uiState, true);
       };
 
-      $scope.onPanelRemoved = (panelIndex) => dashboardState.removePanel(panelIndex);
-
       $scope.$watch('model.darkTheme', () => {
         dashboardState.setDarkTheme($scope.model.darkTheme);
         updateTheme();
@@ -203,11 +214,22 @@ app.directive('dashboardApp', function ($injector) {
       $scope.$watch('model.description', () => dashboardState.setDescription($scope.model.description));
       $scope.$watch('model.title', () => dashboardState.setTitle($scope.model.title));
       $scope.$watch('model.timeRestore', () => dashboardState.setTimeRestore($scope.model.timeRestore));
+      $scope.indexPatterns = [];
+
+      $scope.registerPanelIndexPattern = (panelIndex, pattern) => {
+        dashboardState.registerPanelIndexPatternMap(panelIndex, pattern);
+        $scope.indexPatterns = dashboardState.getPanelIndexPatterns();
+      };
+
+      $scope.onPanelRemoved = (panelIndex) => {
+        dashboardState.removePanel(panelIndex);
+        $scope.indexPatterns = dashboardState.getPanelIndexPatterns();
+      };
 
       $scope.$listen(timefilter, 'fetch', $scope.refresh);
 
       function updateViewMode(newMode) {
-        $scope.topNavMenu = getTopNavConfig(newMode, navActions); // eslint-disable-line no-use-before-define
+        $scope.topNavMenu = dashboardConfig.getHideWriteControls() ? [] : getTopNavConfig(newMode, navActions); // eslint-disable-line no-use-before-define
         dashboardState.switchViewMode(newMode);
         $scope.dashboardViewMode = newMode;
       }

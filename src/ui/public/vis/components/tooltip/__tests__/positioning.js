@@ -1,11 +1,11 @@
 import expect from 'expect.js';
 import $ from 'jquery';
 import _ from 'lodash';
-import sinon from 'auto-release-sinon';
+import sinon from 'sinon';
 import { positionTooltip } from '../position_tooltip';
 
 describe('Tooltip Positioning', function () {
-
+  const sandbox = sinon.sandbox.create();
   const positions = ['north', 'south', 'east', 'west'];
   const bounds = ['top', 'left', 'bottom', 'right', 'area'];
   let $window;
@@ -51,6 +51,7 @@ describe('Tooltip Positioning', function () {
     $window.remove();
     $window = $chart = $tooltip = $sizer = null;
     positionTooltip.removeClone();
+    sandbox.restore();
   });
 
   function makeEvent(xPercent, yPercent) {
@@ -67,8 +68,8 @@ describe('Tooltip Positioning', function () {
 
   describe('getTtSize()', function () {
     it('should measure the outer-size of the tooltip using an un-obstructed clone', function () {
-      const w = sinon.spy($.fn, 'outerWidth');
-      const h = sinon.spy($.fn, 'outerHeight');
+      const w = sandbox.spy($.fn, 'outerWidth');
+      const h = sandbox.spy($.fn, 'outerHeight');
 
       positionTooltip.getTtSize($tooltip.html(), $sizer);
 

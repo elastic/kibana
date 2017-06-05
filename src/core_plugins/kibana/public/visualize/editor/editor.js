@@ -178,6 +178,7 @@ function VisEditor($rootScope, $scope, $route, timefilter, AppState, $window, kb
     $scope.editableVis = editableVis;
     $scope.state = $state;
     $scope.queryDocLinks = documentationLinks.query;
+    $scope.dateDocLinks = documentationLinks.date;
 
     // Create a PersistedState instance.
     $scope.uiState = $state.makeStateful('uiState');

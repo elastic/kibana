@@ -14,7 +14,7 @@ export default function ({ getService, getPageObjects }) {
   const PageObjects = getPageObjects(['context']);
 
   describe('context size', function contextSize() {
-    before(async function() {
+    before(async function () {
       await kibanaServer.uiSettings.update({
         'context:defaultSize': `${TEST_DEFAULT_CONTEXT_SIZE}`,
         'context:step': `${TEST_STEP_SIZE}`,
@@ -28,17 +28,17 @@ export default function ({ getService, getPageObjects }) {
       await retry.try(async function () {
         expect(await docTable.getBodyRows(table)).to.have.length(2 * TEST_DEFAULT_CONTEXT_SIZE + 1);
       });
-      await retry.try(async function() {
+      await retry.try(async function () {
         const predecessorCountPicker = await PageObjects.context.getPredecessorCountPicker();
         expect(await predecessorCountPicker.getProperty('value')).to.equal(`${TEST_DEFAULT_CONTEXT_SIZE}`);
       });
-      await retry.try(async function() {
+      await retry.try(async function () {
         const successorCountPicker = await PageObjects.context.getSuccessorCountPicker();
         expect(await successorCountPicker.getProperty('value')).to.equal(`${TEST_DEFAULT_CONTEXT_SIZE}`);
       });
     });
 
-    it('should increase according to the `context:step` setting when clicking the `load newer` button', async function() {
+    it('should increase according to the `context:step` setting when clicking the `load newer` button', async function () {
       await PageObjects.context.navigateTo(TEST_INDEX_PATTERN, TEST_ANCHOR_TYPE, TEST_ANCHOR_ID);
 
       const table = await docTable.getTable();
@@ -50,7 +50,7 @@ export default function ({ getService, getPageObjects }) {
       });
     });
 
-    it('should increase according to the `context:step` setting when clicking the `load older` button', async function() {
+    it('should increase according to the `context:step` setting when clicking the `load older` button', async function () {
       await PageObjects.context.navigateTo(TEST_INDEX_PATTERN, TEST_ANCHOR_TYPE, TEST_ANCHOR_ID);
 
       const table = await docTable.getTable();

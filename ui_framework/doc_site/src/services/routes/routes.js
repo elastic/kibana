@@ -30,6 +30,9 @@ import EventExample
 import EventsSandbox
   from '../../views/event/events_sandbox';
 
+import ExpressionExample
+  from '../../views/expression/expression_example';
+
 import FormExample
   from '../../views/form/form_example';
 
@@ -74,6 +77,9 @@ import ModalExample
 
 import NoticeSandbox
   from '../../views/notice/notice_sandbox';
+
+import PagerExample
+  from '../../views/pager/pager_example';
 
 import PanelExample
   from '../../views/panel/panel_example';
@@ -133,6 +139,9 @@ const components = [{
   name: 'Event',
   component: EventExample,
 }, {
+  name: 'Expression',
+  component: ExpressionExample,
+}, {
   name: 'Form',
   component: FormExample,
 }, {
@@ -173,6 +182,10 @@ const components = [{
 }, {
   name: 'Modal',
   component: ModalExample,
+  hasReact: true,
+}, {
+  name: 'Pager',
+  component: PagerExample,
   hasReact: true,
 }, {
   name: 'Panel',

@@ -4,6 +4,7 @@
 This section discusses the changes that you need to be aware of when migrating
 your application to Kibana 6.0.
 
+
 [float]
 === Removed option to use unsupported scripting languages
 *Details:* Kibana 5.x allowed users to create scripted fields using any scripting language enabled in Elasticsearch.
@@ -11,6 +12,7 @@ Kibana 6.0 will only support Painless and Lucene expression based scripts.
 
 
 *Impact:* You will need to migrate your groovy, python, javascript, etc. scripted fields to Painless or Lucene expressions.
+
 
 [float]
 === Changed response format of status API
@@ -22,10 +24,31 @@ the status API has changed:
 
 *Impact:* You will need to update anything using the status API and expecting the previous response format.
 
+
 [float]
 === Timelion requires comma to separate queries
-*Details:* Kibana 5.x allowed users to use spaces as a query separator in timelion `.es(400) .es(500)`. 
+*Details:* Kibana 5.x allowed users to use spaces as a query separator in timelion `.es(400) .es(500)`.
 This is no longer the case. Now, only commas are a valid query separator: e.g. `.es(400), .es(500)`
 
-
 *Impact:* You will need to migrate your stored timelion queries to the new syntax.
+
+
+[float]
+=== Requires 64 bit operating system
+*Details:* Kibana 6.0.0 and onward only support 64 bit operating systems.
+
+*Impact:* You will need to install Kibana 6.x on a 64 bit operating system. No extra data migration steps are necessary when moving from 32 bit to 64 bit.
+
+
+[float]
+=== NODE_ENV no longer has an impact on Kibana
+*Details:* Setting the NODE_ENV environment variable can break Kibana processes in unexpected ways, which is especially unfortunate since it is a common environment variable to have configured on a system, and you wouldn't expect it to break anything in Kibana. Kibana will now effectively ignore NODE_ENV entirely.
+
+*Impact:* If you're developing a custom plugin that depends on NODE_ENV, you will need to update it to use a different, custom environment variable.
+
+
+[float]
+=== Kibana 4.x configuration names using `_` instead of `.` have been removed
+*Details:* In Kibana 4.2, we renamed all configuration names in kibana.yml to use `.` as a separator instead of `_`, though the legacy configurations would still continue to work. In 5.0, we started logging deprecation notices whenever the legacy configurations were encountered. In 6.0 onward, legacy configuration names that use an underscore instead of a dot will no longer work.
+
+*Impact:* Any usages of underscore separated configuration names in kibana.yml need to be updated to their modern equivalents. See <<settings,Configuring Kibana>> for accepted configurations.

@@ -1,6 +1,6 @@
 import ngMock from 'ng_mock';
 import expect from 'expect.js';
-import sinon from 'auto-release-sinon';
+import sinon from 'sinon';
 
 import { RequestQueueProvider } from '../_request_queue';
 import { SearchStrategyProvider } from '../fetch/strategy/search';

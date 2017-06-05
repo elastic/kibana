@@ -9,7 +9,7 @@ import { stateMonitorFactory } from 'ui/state_management/state_monitor_factory';
 import { createPanelState } from 'plugins/kibana/dashboard/panel/panel_state';
 import { getPersistedStateId } from 'plugins/kibana/dashboard/panel/panel_state';
 
-function getStateDefaults(dashboard) {
+function getStateDefaults(dashboard, hideWriteControls) {
   return {
     title: dashboard.title,
     description: dashboard.description,
@@ -19,7 +19,7 @@ function getStateDefaults(dashboard) {
     uiState: dashboard.uiStateJSON ? JSON.parse(dashboard.uiStateJSON) : {},
     query: FilterUtils.getQueryFilterForDashboard(dashboard),
     filters: FilterUtils.getFilterBarsForDashboard(dashboard),
-    viewMode: dashboard.id ? DashboardViewMode.VIEW : DashboardViewMode.EDIT,
+    viewMode: dashboard.id || hideWriteControls ? DashboardViewMode.VIEW : DashboardViewMode.EDIT,
   };
 }
 
@@ -59,11 +59,13 @@ export class DashboardState {
    *
    * @param savedDashboard {SavedDashboard}
    * @param AppState {AppState}
+   * @param dashboardConfig {DashboardConfigProvider}
    */
-  constructor(savedDashboard, AppState) {
+  constructor(savedDashboard, AppState, dashboardConfig) {
     this.savedDashboard = savedDashboard;
+    this.dashboardConfig = dashboardConfig;
 
-    this.stateDefaults = getStateDefaults(this.savedDashboard);
+    this.stateDefaults = getStateDefaults(this.savedDashboard, this.dashboardConfig.getHideWriteControls());
 
     this.appState = new AppState(this.stateDefaults);
     this.uiState = this.appState.makeStateful('uiState');
@@ -75,8 +77,19 @@ export class DashboardState {
     //in the 'lose changes' warning message.
     this.lastSavedDashboardFilters = this.getFilterState();
 
+    // A mapping of panel index to the index pattern it uses.
+    this.panelIndexPatternMapping = {};
+
     PanelUtils.initPanelIndexes(this.getPanels());
     this.createStateMonitor();
+  }
+
+  registerPanelIndexPatternMap(panelIndex, indexPattern) {
+    this.panelIndexPatternMapping[panelIndex] = indexPattern;
+  }
+
+  getPanelIndexPatterns() {
+    return _.uniq(Object.values(this.panelIndexPatternMapping));
   }
 
   /**
@@ -93,7 +106,7 @@ export class DashboardState {
     // The right way to fix this might be to ensure the defaults object stored on state is a deep
     // clone, but given how much code uses the state object, I determined that to be too risky of a change for
     // now.  TODO: revisit this!
-    this.stateDefaults = getStateDefaults(this.savedDashboard);
+    this.stateDefaults = getStateDefaults(this.savedDashboard, this.dashboardConfig.getHideWriteControls());
     // The original query won't be restored by the above because the query on this.savedDashboard is applied
     // in place in order for it to affect the visualizations.
     this.stateDefaults.query = this.lastSavedDashboardFilters.query;
@@ -223,7 +236,7 @@ export class DashboardState {
    * @returns {DashboardViewMode}
    */
   getViewMode() {
-    return this.appState.viewMode;
+    return this.dashboardConfig.getHideWriteControls() ? DashboardViewMode.VIEW : this.appState.viewMode;
   }
 
   /**
@@ -269,6 +282,7 @@ export class DashboardState {
     _.remove(this.getPanels(), (panel) => {
       if (panel.panelIndex === panelIndex) {
         this.uiState.removeChild(getPersistedStateId(panel));
+        delete this.panelIndexPatternMapping[panelIndex];
         return true;
       } else {
         return false;

@@ -1,7 +1,7 @@
 import expect from 'expect.js';
 import ngMock from 'ng_mock';
 import Promise from 'bluebird';
-import sinon from 'auto-release-sinon';
+import sinon from 'sinon';
 import noDigestPromise from 'test_utils/no_digest_promises';
 import mockUiState from 'fixtures/mock_ui_state';
 
@@ -29,6 +29,7 @@ describe('dashboard panel', function () {
       parentScope.createChildUiState = sinon.stub().returns(mockUiState);
       parentScope.getVisClickHandler = sinon.stub();
       parentScope.getVisBrushHandler = sinon.stub();
+      parentScope.registerPanelIndexPattern = sinon.stub();
       parentScope.panel = {
         col: 3,
         id: 'foo1',
@@ -45,6 +46,7 @@ describe('dashboard panel', function () {
           get-vis-click-handler="getVisClickHandler"
           get-vis-brush-handler="getVisBrushHandler"
           save-state="saveState"
+          register-panel-index-pattern="registerPanelIndexPattern"
           create-child-ui-state="createChildUiState">
         </dashboard-panel>`)(parentScope);
       $scope = $el.isolateScope();
