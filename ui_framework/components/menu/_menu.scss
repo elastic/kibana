@@ -1,5 +1,18 @@
+/**
+ * padding-left: 0 and list-style: none rules
+ * are meant for ul.kuiMenu and li.kuiMenuItem
+ * elements.
+ *
+ * kuiMenu and kuiMenuItems can classify both
+ * nonsemantic divs as well as lists (ul, li).
+ */
+.kuiMenu {
+  padding-left: 0;
+}
+
 .kuiMenu--contained {
   border: $globalBorderThin;
+  padding-left: 0;
 
   .kuiMenuItem {
     padding: 6px 10px;
@@ -7,6 +20,7 @@
 }
 
 .kuiMenuItem {
+  list-style: none;
   padding: 6px 0;
 
   & + & {
