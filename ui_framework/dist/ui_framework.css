@@ -28,9 +28,8 @@
  * 1. Prevent Firefox users from being able to resize textareas to smaller than the min-height.
  */
 /**
- * 1. Angular will add an ng-untouched class to an input if it hasn't been touched yet.
- *    We only want invalid inputs to appear invalid after the user has had a chance to interact
- *    with it.
+ * We specifically don't include Angular's ng-${state} classes here because we don't want to be tightly
+ * coupled with Angular.
  */
 /**
  * 1. Embedded SVG of fa-caret-down (https://github.com/encharm/Font-Awesome-SVG-PNG/blob/master/black/svg/caret-down.svg).
@@ -920,8 +919,7 @@ body {
   position: relative;
   font-size: 14px;
   line-height: 1.5; }
-  .kuiSearchInput.kuiSearchInput-isInvalid .kuiSearchInput__input:not(.ng-untouched) {
-    /* 1 */
+  .kuiSearchInput.kuiSearchInput-isInvalid .kuiSearchInput__input {
     border-color: #D86051; }
 
 .kuiSearchInput__icon {
@@ -957,8 +955,7 @@ body {
   /* 2 */ }
   .theme-dark .kuiSearchInput__input {
     color: #cecece; }
-  .kuiSearchInput__input:invalid:not(.ng-untouched) {
-    /* 1 */
+  .kuiSearchInput__input:invalid {
     border-color: #D86051; }
   .kuiSearchInput__input:focus {
     outline: none;
@@ -999,8 +996,7 @@ body {
   /* 2 */ }
   .theme-dark .kuiSelect {
     color: #cecece; }
-  .kuiSelect:invalid:not(.ng-untouched) {
-    /* 1 */
+  .kuiSelect:invalid {
     border-color: #D86051; }
   .kuiSelect:focus {
     outline: none;
@@ -1061,8 +1057,7 @@ body {
   /* 1 */ }
   .theme-dark .kuiTextArea {
     color: #cecece; }
-  .kuiTextArea:invalid:not(.ng-untouched) {
-    /* 1 */
+  .kuiTextArea:invalid {
     border-color: #D86051; }
   .kuiTextArea:focus {
     outline: none;
@@ -1076,8 +1071,7 @@ body {
     .theme-dark .kuiTextArea:focus {
       outline: none;
       border-color: #6EADC1; }
-  .kuiTextArea.kuiTextArea-isInvalid:not(.ng-untouched) {
-    /* 1 */
+  .kuiTextArea.kuiTextArea-isInvalid {
     border-color: #D86051; }
 
 .kuiTextArea--nonResizable {
@@ -1101,8 +1095,7 @@ body {
   /* 1 */ }
   .theme-dark .kuiTextInput {
     color: #cecece; }
-  .kuiTextInput:invalid:not(.ng-untouched) {
-    /* 1 */
+  .kuiTextInput:invalid {
     border-color: #D86051; }
   .kuiTextInput:focus {
     outline: none;
@@ -1116,8 +1109,7 @@ body {
     .theme-dark .kuiTextInput:focus {
       outline: none;
       border-color: #6EADC1; }
-  .kuiTextInput.kuiTextInput-isInvalid:not(.ng-untouched) {
-    /* 1 */
+  .kuiTextInput.kuiTextInput-isInvalid {
     border-color: #D86051; }
 
 .kuiTextInput--small {
@@ -1920,8 +1912,7 @@ body {
   border-radius: 4px 0 0 4px; }
   .theme-dark .kuiLocalSearchInput {
     color: #cecece; }
-  .kuiLocalSearchInput:invalid:not(.ng-untouched) {
-    /* 1 */
+  .kuiLocalSearchInput:invalid {
     border-color: #D86051; }
   .kuiLocalSearchInput:focus {
     outline: none;
@@ -2002,8 +1993,7 @@ body {
   border-radius: 0; }
   .theme-dark .kuiLocalSearchSelect {
     color: #cecece; }
-  .kuiLocalSearchSelect:invalid:not(.ng-untouched) {
-    /* 1 */
+  .kuiLocalSearchSelect:invalid {
     border-color: #D86051; }
   .kuiLocalSearchSelect:focus {
     outline: none;

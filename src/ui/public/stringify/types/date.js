@@ -57,7 +57,13 @@ export function stringifyDate(Private) {
         if (val === null || val === undefined) {
           return '-';
         }
-        return moment(val).format(pattern);
+
+        const date = moment(val);
+        if (date.isValid()) {
+          return date.format(pattern);
+        } else {
+          return val;
+        }
       });
     }
 

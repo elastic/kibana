@@ -1,11 +1,11 @@
 import { castEsToKbnFieldTypeName } from '../utils';
-import { shouldReadFieldFromDocValues } from '../core_plugins/kibana/server/routes/api/ingest/should_read_field_from_doc_values';
+import { shouldReadFieldFromDocValues } from '../server/index_patterns/service/lib/field_capabilities/should_read_field_from_doc_values';
 
 function stubbedLogstashFields() {
   return [
     //                                  |aggregatable
     //                                  |      |searchable
-    // name               esType        |      |     |metadata
+    // name               esType        |      |      |metadata
     ['bytes',             'long',       true,  true,  { count: 10 } ],
     ['ssl',               'boolean',    true,  true,  { count: 20 } ],
     ['@timestamp',        'date',       true,  true,  { count: 30 } ],

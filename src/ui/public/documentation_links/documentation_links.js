@@ -35,6 +35,9 @@ export const documentationLinks = {
   query: {
     luceneQuerySyntax: `${baseUrl}guide/en/elasticsearch/reference/${urlVersion}/query-dsl-query-string-query.html#query-string-syntax`
   },
+  date: {
+    dateMath: `${baseUrl}guide/en/elasticsearch/reference/${urlVersion}/common-options.html#date-math`
+  },
   demoSite: 'http://demo.elastic.co',
   gettingStarted: `${baseUrl}products/kibana/getting-started-link`
 };

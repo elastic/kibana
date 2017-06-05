@@ -11,9 +11,11 @@ export function FilterBarLibMapDefaultProvider(Promise) {
     });
 
     if (key) {
+      const type = 'custom';
       const value = angular.toJson(filter[key]);
-      return Promise.resolve({ key: key, value: value });
+      return Promise.resolve({ type, key, value });
     }
+
     return Promise.reject(filter);
   };
 }
