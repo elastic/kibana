@@ -122,6 +122,7 @@ const components = [{
 }, {
   name: 'Bar',
   component: BarExample,
+  hasReact: true,
 }, {
   name: 'Button',
   component: ButtonExample,

@@ -1,4 +1,9 @@
 export {
+  KuiBar,
+  KuiBarSection,
+} from './bar';
+
+export {
   KuiKeyboardAccessible,
 } from './accessibility';
 
