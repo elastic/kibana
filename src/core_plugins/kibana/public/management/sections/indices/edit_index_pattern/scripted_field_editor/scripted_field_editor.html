@@ -1,0 +1,26 @@
+<kbn-management-app section="kibana">
+  <kbn-management-indices>
+    <div class="kuiViewContent">
+      <kbn-management-index-header
+        index-pattern="fieldSettings.indexPattern"
+      ></kbn-management-index-header>
+
+      <h2
+        ng-if="fieldSettings.mode === 'create'"
+        class="kuiSubTitle kuiVerticalRhythm"
+      >
+        Create {{ fieldSettings.field.scripted ? 'Scripted ' : '' }}Field
+      </h2>
+
+      <h2
+        ng-if="fieldSettings.mode === 'edit'"
+        class="kuiSubTitle kuiVerticalRhythm"
+      >
+        {{ fieldSettings.field.name }}
+      </h2>
+    </div>
+
+    <field-editor index-pattern="fieldSettings.indexPattern" field="fieldSettings.field"></field-editor>
+
+  </kbn-management-indices>
+</kbn-management-app>

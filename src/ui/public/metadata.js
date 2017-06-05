@@ -1,24 +1,26 @@
-// singleton for immutable copy of window.__KBN__
-define(function (require) {
-  const _ = require('lodash');
+import $ from 'jquery';
+import _ from 'lodash';
 
-  if (!_.has(window, '__KBN__')) {
-    throw new Error('window.__KBN__ must be set for metadata');
+export const metadata = deepFreeze(getState());
+
+function deepFreeze(object) {
+  // for any properties that reference an object, makes sure that object is
+  // recursively frozen as well
+  Object.keys(object).forEach(key => {
+    const value = object[key];
+    if (_.isObject(value)) {
+      deepFreeze(value);
+    }
+  });
+
+  return Object.freeze(object);
+}
+
+function getState() {
+  const stateKey = '__KBN__';
+  if (!(stateKey in window)) {
+    const state = $('kbn-initial-state').attr('data');
+    window[stateKey] = JSON.parse(state);
   }
-
-  const kbn = _.cloneDeep(window.__KBN__ || {});
-  return deepFreeze(kbn);
-
-  function deepFreeze(object) {
-    // for any properties that reference an object, makes sure that object is
-    // recursively frozen as well
-    Object.keys(object).forEach(key => {
-      const value = object[key];
-      if (_.isObject(value)) {
-        deepFreeze(value);
-      }
-    });
-
-    return Object.freeze(object);
-  }
-});
+  return window[stateKey];
+}

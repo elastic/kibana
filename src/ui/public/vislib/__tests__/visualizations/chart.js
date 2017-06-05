@@ -1,20 +1,19 @@
-var d3 = require('d3');
-var angular = require('angular');
-var expect = require('expect.js');
-var ngMock = require('ngMock');
+import d3 from 'd3';
+import expect from 'expect.js';
+import ngMock from 'ng_mock';
+import { VislibVisProvider } from 'ui/vislib/vis';
+import 'ui/persisted_state';
+import { VislibVisualizationsChartProvider } from 'ui/vislib/visualizations/_chart';
 
 describe('Vislib _chart Test Suite', function () {
-  var ColumnChart;
-  var Chart;
-  var Data;
-  var persistedState;
-  var Vis;
-  var chartData = {};
-  var vis;
-  var el;
-  var myChart;
-  var config;
-  var data = {
+  let Chart;
+  let persistedState;
+  let Vis;
+  let vis;
+  let el;
+  let myChart;
+  let config;
+  const data = {
     hits      : 621,
     label     : '',
     ordered   : {
@@ -80,31 +79,29 @@ describe('Vislib _chart Test Suite', function () {
   };
 
   beforeEach(ngMock.module('kibana'));
-  beforeEach(ngMock.inject(function (Private) {
-    Vis = Private(require('ui/vislib/vis'));
-    Data = Private(require('ui/vislib/lib/data'));
-    persistedState = new (Private(require('ui/persisted_state/persisted_state')))();
-    ColumnChart = Private(require('ui/vislib/visualizations/column_chart'));
-    Chart = Private(require('ui/vislib/visualizations/_chart'));
+  beforeEach(ngMock.inject(function (Private, $injector) {
+    Vis = Private(VislibVisProvider);
+    persistedState = new ($injector.get('PersistedState'))();
+    Chart = Private(VislibVisualizationsChartProvider);
 
     el = d3.select('body').append('div').attr('class', 'column-chart');
 
     config = {
       type: 'histogram',
-      shareYAxis: true,
       addTooltip: true,
       addLegend: true,
-      stack: d3.layout.stack(),
+      zeroFill: true
     };
 
     vis = new Vis(el[0][0], config);
-    vis.data = new Data(data, config, persistedState);
+    vis.render(data, persistedState);
 
-    myChart = new ColumnChart(vis, el, chartData);
+    myChart = vis.handler.charts[0];
   }));
 
   afterEach(function () {
     el.remove();
+    vis.destroy();
   });
 
   it('should be a constructor for visualization modules', function () {
@@ -120,8 +117,7 @@ describe('Vislib _chart Test Suite', function () {
     myChart.destroy();
 
     expect(function () {
-      myChart.draw();
+      myChart.render();
     }).to.throwError();
   });
-
 });

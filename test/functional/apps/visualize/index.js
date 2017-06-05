@@ -1,69 +1,40 @@
-define(function (require) {
-  var bdd = require('intern!bdd');
-  var expect = require('intern/dojo/node!expect.js');
-  var config = require('intern').config;
-  var url = require('intern/dojo/node!url');
-  var _ = require('intern/dojo/node!lodash');
-  var Common = require('../../../support/pages/Common');
-  var ScenarioManager = require('intern/dojo/node!../../../fixtures/scenarioManager');
-  var HeaderPage = require('../../../support/pages/HeaderPage');
-  var SettingsPage = require('../../../support/pages/settings_page');
+export default function ({ getService, loadTestFile }) {
+  const remote = getService('remote');
+  const log = getService('log');
+  const esArchiver = getService('esArchiver');
+  const kibanaServer = getService('kibanaServer');
 
-  var chartTypeTest = require('./_chart_types');
-  var areaChartTest = require('./_area_chart');
-  var lineChartTest = require('./_line_chart');
-  var dataTableTest = require('./_data_table');
-  var metricChartTest = require('./_metric_chart');
-  var pieChartTest = require('./_pie_chart');
-  var tileMapTest = require('./_tile_map');
-  var verticalBarChartTest = require('./_vertical_bar_chart');
+  describe('visualize app', function () {
+    before(function () {
+      remote.setWindowSize(1280,800);
 
-  bdd.describe('visualize app', function () {
-    var common;
-    var scenarioManager;
-    var remote;
-    var headerPage;
-    var settingsPage;
-    var scenarioManager = new ScenarioManager(url.format(config.servers.elasticsearch));
-    this.timeout = config.timeouts.default;
-
-    // on setup, we create an settingsPage instance
-    // that we will use for all the tests
-    bdd.before(function () {
-      common = new Common(this.remote);
-      remote = this.remote;
-      headerPage = new HeaderPage(this.remote);
-      settingsPage = new SettingsPage(this.remote);
+      log.debug('Starting visualize before method');
+      const logstash = esArchiver.loadIfNeeded('logstash_functional');
+      // delete .kibana index and update configDoc
+      return kibanaServer.uiSettings.replace({ 'dateFormat:tz':'UTC', 'defaultIndex':'logstash-*' })
+      .then(function loadkibanaIndexPattern() {
+        log.debug('load kibana index with default index pattern');
+        return esArchiver.load('visualize');
+      })
+      // wait for the logstash data load to finish if it hasn't already
+      .then(function () {
+        return logstash;
+      });
     });
 
-    bdd.before(function () {
-      var self = this;
-      remote.setWindowSize(1200,800);
-      // load a set of makelogs data
-      common.debug('loadIfEmpty logstashFunctional ' + self.timeout);
-      return scenarioManager.loadIfEmpty('logstashFunctional');
-    });
-
-
-    bdd.after(function unloadMakelogs() {
-      return scenarioManager.unload('logstashFunctional');
-    });
-
-    chartTypeTest(bdd, scenarioManager);
-
-    areaChartTest(bdd, scenarioManager);
-
-    lineChartTest(bdd, scenarioManager);
-
-    dataTableTest(bdd, scenarioManager);
-
-    metricChartTest(bdd, scenarioManager);
-
-    pieChartTest(bdd, scenarioManager);
-
-    tileMapTest(bdd, scenarioManager);
-
-    verticalBarChartTest(bdd, scenarioManager);
-
+    loadTestFile(require.resolve('./_editor'));
+    loadTestFile(require.resolve('./_chart_types'));
+    loadTestFile(require.resolve('./_gauge_chart'));
+    loadTestFile(require.resolve('./_area_chart'));
+    loadTestFile(require.resolve('./_line_chart'));
+    loadTestFile(require.resolve('./_data_table'));
+    loadTestFile(require.resolve('./_pie_chart'));
+    loadTestFile(require.resolve('./_tag_cloud'));
+    loadTestFile(require.resolve('./_tile_map'));
+    loadTestFile(require.resolve('./_region_map'));
+    loadTestFile(require.resolve('./_vertical_bar_chart'));
+    loadTestFile(require.resolve('./_heatmap_chart'));
+    loadTestFile(require.resolve('./_point_series_options'));
+    loadTestFile(require.resolve('./_shared_item'));
   });
-});
+}

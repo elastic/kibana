@@ -1,0 +1,25 @@
+<div class="dev-tools__app-container app-container">
+  <kbn-top-nav name="devtools" config="kbnDevToolsApp.topNavConfig">
+    <!-- Transcluded elements. -->
+    <div data-transclude-slots>
+      <!-- Breadcrumbs. -->
+      <bread-crumbs
+        data-transclude-slot="topLeftCorner"
+        omit-current-page="true"
+      ></bread-crumbs>
+
+      <!-- Tabs. -->
+      <div data-transclude-slot="bottomRow" class="kuiLocalTabs">
+        <a
+          ng-repeat="item in kbnDevToolsApp.devTools"
+          class="kuiLocalTab"
+          ng-class="{'kuiLocalTab-isSelected': kbnDevToolsApp.currentPath === item.url}"
+          kbn-href="{{::item.url}}"
+        >
+          {{::item.display}}
+        </a>
+      </div>
+    </div>
+  </kbn-top-nav>
+  <div role="main" class="dev-tools__container" ng-transclude></div>
+</div>

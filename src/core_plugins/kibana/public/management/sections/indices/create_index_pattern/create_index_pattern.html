@@ -1,0 +1,358 @@
+<kbn-management-app section="kibana">
+  <kbn-management-indices>
+    <div
+      ng-controller="managementIndicesCreate as controller"
+      data-test-subj="createIndexPatternContainer"
+      class="kuiViewContent"
+    >
+      <h1
+        class="kuiTitle kuiVerticalRhythm"
+        translate="KIBANA-CONFIGURE_INDEX_PATTERN"
+      ></h1>
+
+      <p
+        class="kuiText kuiVerticalRhythm"
+        translate="KIBANA-MUST_CONFIGURE_INDEX_PATTERN"
+      ></p>
+
+      <div class="kuiVerticalRhythm">
+        <!-- Form -->
+        <form
+          name="form"
+          role="form"
+          class="kuiVerticalRhythm"
+          ng-submit="controller.createIndexPattern()"
+        >
+          <!-- Index pattern input -->
+          <div class="kuiVerticalRhythm">
+            <label
+              class="kuiLabel kuiVerticalRhythmSmall"
+              translate="KIBANA-INDEX_NAME_OR_PATTERN"
+            ></label>
+
+            <div class="kuiVerticalRhythm kuiVerticalRhythmSmall">
+              <input
+                class="kuiTextInput kuiTextInput--large"
+                data-test-subj="createIndexPatternNameInput"
+                ng-model="controller.formValues.name"
+                ng-model-options="{ updateOn: 'default blur', debounce: {'default': 500, 'blur': 0} }"
+                validate-index-name
+                allow-wildcard
+                name="name"
+                required
+                type="text"
+              >
+            </div>
+
+            <!-- Input error text -->
+            <div
+              class="kuiVerticalRhythm"
+              ng-if="controller.timeFieldOptionsError"
+            >
+              <p class="kuiText">
+                <span class="kuiStatusText kuiStatusText--error">
+                  <span class="kuiStatusText__icon kuiIcon fa-warning"></span>
+                  {{controller.timeFieldOptionsError}}
+                </span>
+              </p>
+            </div>
+
+            <!-- Input help text -->
+            <div class="kuiVerticalRhythm">
+              <p
+                class="kuiSubText kuiVerticalRhythmSmall"
+                ng-if="!controller.formValues.nameIsPattern"
+                translate="KIBANA-WILDCARD_DYNAMIC_INDEX_PATTERNS"
+              ></p>
+
+              <p
+                class="kuiSubText kuiVerticalRhythmSmall"
+                ng-if="controller.formValues.nameIsPattern"
+              >
+                <span translate="KIBANA-STATIC_TEXT_IN_DYNAMIC_INDEX_PATTERNS"></span> &mdash;
+                <a
+                  class="kuiLink"
+                  href="http://momentjs.com/docs/#/displaying/format/"
+                  target="_blank"
+                  translate="KIBANA-DATE_FORMAT_DOCS"
+                ></a>
+              </p>
+
+              <p
+                class="kuiSubText kuiVerticalRhythmSmall"
+                ng-show="controller.formValues.nameInterval.name == 'weeks'"
+              >
+                <strong translate="KIBANA-NOTE_COLON"></strong>&nbsp;
+                <span translate="KIBANA-WEEKLY_ISO_NOTICE"></span>
+                <span translate="KIBANA-SEE"></span>
+                <a
+                  class="kuiLink"
+                  href="https://en.wikipedia.org/wiki/ISO_week_date"
+                  target="_blank"
+                  translate="KIBANA-WIKI_ISO_WEEK_DATE"
+                ></a>
+              </p>
+            </div>
+          </div>
+
+          <!-- Time field select -->
+          <div class="kuiVerticalRhythm">
+            <label class="kuiLabel kuiVerticalRhythmSmall">
+              <span translate="KIBANA-TIME_FILTER_FIELD_NAME"></span>
+              &nbsp;
+              <kbn-info info="{{ 'KIBANA-FIELD_FILTER_EVENTS_GLOBAL_TIME' | translate }}"></kbn-info>
+              &nbsp;
+              <small>
+                <a
+                  class="kuiLink"
+                  ng-click="controller.refreshTimeFieldOptions();"
+                  translate="KIBANA-REFRESH_FIELDS"
+                ></a>
+              </small>
+            </label>
+
+            <div class="kuiVerticalRhythmSmall">
+              <select
+                class="kuiSelect kuiSelect--large kuiVerticalRhythmSmall"
+                data-test-subj="createIndexPatternTimeFieldSelect"
+                ng-disabled="controller.isLoading() || controller.timeFieldOptionsError || controller.timeFieldOptions.length === 1"
+                ng-required="controller.timeFieldOptions.length"
+                ng-options="option.display for option in controller.timeFieldOptions"
+                ng-model="controller.formValues.timeFieldOption"
+              ></select>
+            </div>
+          </div>
+
+          <!-- Expand index pattern checkbox -->
+          <div class="kuiVerticalRhythm" ng-if="controller.canEnableExpandWildcard()">
+            <label class="kuiCheckBoxLabel kuiVerticalRhythm">
+              <input
+                class="kuiCheckBox"
+                type="checkbox"
+                data-test-subj="createIndexPatternEnableExpand"
+                ng-model="controller.formValues.expandWildcard"
+              >
+              <span class="kuiCheckBoxLabel__text">
+                <span translate="KIBANA-EXPAND_INDEX_PATTERN"></span>
+                <span translate="KIBANA-DEPRECATED"></span>
+              </span>
+            </label>
+
+            <!-- Checkbox help text -->
+            <div class="kuiVerticalRhythm">
+              <p
+                class="kuiSubText kuiVerticalRhythmSmall"
+                translate="KIBANA-WILDCARD_DEFAULT_EXPANDED_TO_CURRENT_TIME_RANGE"
+              ></p>
+
+              <p class="kuiSubText kuiVerticalRhythmSmall">
+                <span translate="KIBANA-SEARCH_AGAINST_INDEX_PATTERN"></span>
+                <em translate="KIBANA-LOGSTASH_WILDCARD"></em>
+                <span translate="KIBANA-ACTUALLY_QUERY"></span>
+                <em translate="KIBANA-EXAMPLE_TIME_RANGE"></em>
+                <span translate="KIBANA-FALL_WITHIN_CURRENT_TIME_RANGE"></span>
+              </p>
+
+              <p
+                class="kuiSubText kuiVerticalRhythmSmall"
+                translate="KIBANA-EXPAND_INDEX_PATTERN_DEPRECATION"
+              ></p>
+            </div>
+          </div>
+
+          <!-- Use event times checkbox -->
+          <div
+            class="kuiVerticalRhythm"
+            ng-if="controller.canUseTimePattern()"
+          >
+            <label class="kuiCheckBoxLabel">
+              <input
+                class="kuiCheckBox"
+                type="checkbox"
+                data-test-subj="createIndexPatternNameIsPatternCheckBox"
+                ng-model="controller.formValues.nameIsPattern"
+              >
+
+              <span class="kuiCheckBoxLabel__text">
+                <span translate="KIBANA-INDEX_NAME_CREATED_BY_EVENT_TIMES"></span>
+                <span translate="KIBANA-DEPRECATED"></span>
+              </span>
+            </label>
+          </div>
+
+          <div
+            class="kuiVerticalRhythm"
+            ng-if="controller.canUseTimePattern() && controller.formValues.nameIsPattern"
+          >
+            <!-- Time-interval deprecation warning -->
+            <div class="kuiInfoPanel kuiInfoPanel--warning kuiVerticalRhythm">
+              <div class="kuiInfoPanelHeader">
+                <span class="kuiInfoPanelHeader__icon kuiIcon kuiIcon--warning fa-bolt"></span>
+                <span
+                  class="kuiInfoPanelHeader__title"
+                  translate="KIBANA-ALERT_INDEX_PATTERN_DEPRECATED"
+                ></span>
+              </div>
+
+              <div class="kuiInfoPanelBody">
+                <div class="kuiInfoPanelBody__message">
+                  <span translate="KIBANA-WE"></span>
+                  <strong translate="KIBANA-STRONGLY_RECOMMEND"></strong>
+                  <span translate="KIBANA-WILD_CARD_PATTERN"></span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Index pattern interval select -->
+            <div class="kuiVerticalRhythm">
+              <label class="kuiLabel kuiVerticalRhythmSmall">
+                <span translate="KIBANA-INDEX_PATTERN_INTERVAL"></span>&nbsp;
+                <kbn-info info="{{ 'KIBANA-INTERVAL_INDEX_NAMES_ROTATE' | translate }}"></kbn-info>
+              </label>
+
+              <div class="kuiVerticalRhythmSmall">
+                <select
+                  class="kuiSelect"
+                  required
+                  ng-options="opt.display for opt in controller.nameIntervalOptions"
+                  ng-model="controller.formValues.nameInterval"
+                ></select>
+              </div>
+            </div>
+          </div>
+
+          <!-- Errors -->
+          <div class="kuiVerticalRhythm">
+            <div
+              class="kuiInfoPanel kuiInfoPanel--error kuiVerticalRhythmSmall"
+              ng-repeat="err in controller.patternErrors"
+            >
+              <div class="kuiInfoPanelHeader">
+                <span class="kuiInfoPanelHeader__icon kuiIcon kuiIcon--error fa-warning"></span>
+                <span class="kuiInfoPanelHeader__title">
+                  {{err}}
+                </span>
+              </div>
+            </div>
+
+            <div
+              class="kuiInfoPanel kuiInfoPanel--info kuiVerticalRhythmSmall"
+              ng-if="controller.samples"
+            >
+              <div class="kuiInfoPanelHeader">
+                <span class="kuiInfoPanelHeader__icon kuiIcon kuiIcon--info fa-info"></span>
+                <span
+                  class="kuiInfoPanelHeader__title"
+                  translate="KIBANA-SAMPLE_ALERT"
+                ></span>
+              </div>
+
+              <div class="kuiInfoPanelBody">
+                <div
+                  class="kuiInfoPanelBody__message"
+                  ng-repeat="sample in controller.samples"
+                >
+                  {{sample}}
+                </div>
+
+                <div class="kuiInfoPanelBody__message">
+                  <button
+                    type="button"
+                    ng-click="controller.moreSamples(true)"
+                    class="kuiButton kuiButton--basic"
+                  >
+                    <span translate="KIBANA-EXPAND_SEARCH"></span>
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Percentage of indices which match the index pattern -->
+            <div
+              class="kuiInfoPanel kuiVerticalRhythmSmall"
+              ng-class="controller.existing.matches.length ? 'kuiInfoPanel--success' : 'kuiInfoPanel--error'"
+              ng-if="controller.existing"
+            >
+              <div class="kuiInfoPanelHeader">
+                <span
+                  class="kuiInfoPanelHeader__icon kuiIcon"
+                  ng-class="controller.existing.matches.length ? 'kuiIcon--success fa-check' : 'kuiIcon--error fa-warning'"
+                ></span>
+                <span
+                  class="kuiInfoPanelHeader__title"
+                  translate="KIBANA-EXISTING_MATCH_PERCENT"
+                  translate-values="{ indexExistingMatchPercent: '{{controller.existing.matchPercent}}' }"
+                ></span>
+              </div>
+
+              <div
+                class="kuiInfoPanelBody"
+                ng-if="controller.existing.matches.length"
+              >
+                <div
+                  class="kuiInfoPanelBody__message"
+                  ng-repeat="match in controller.existing.matches | orderBy:'toString()'| limitTo: controller.sampleCount"
+                >
+                  {{match}}
+                </div>
+
+                <div class="kuiInfoPanelBody__message">
+                  <button
+                    ng-if="controller.sampleCount < controller.existing.matches.length"
+                    ng-click="controller.moreSamples()"
+                    type="button"
+                    class="kuiButton kuiButton--basic"
+                  >
+                    <span translate="KIBANA-EXPAND_SEARCH"></span>
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <div
+              class="kuiInfoPanel kuiInfoPanel--info kuiVerticalRhythmSmall"
+              ng-if="controller.existing.failures.length"
+            >
+              <div class="kuiInfoPanelHeader">
+                <span class="kuiInfoPanelHeader__icon kuiIcon kuiIcon--info fa-info"></span>
+                <span
+                  class="kuiInfoPanelHeader__title"
+                  translate="KIBANA-NON_MATCHING_INDICES_AND_ALIASES"
+                ></span>
+              </div>
+
+              <div class="kuiInfoPanelBody">
+                <div
+                  class="kuiInfoPanelBody__message"
+                  ng-repeat="match in controller.existing.failures | limitTo: controller.sampleCount"
+                >
+                  {{match}}
+                </div>
+              </div>
+
+              <div class="kuiInfoPanelBody__message">
+                <a
+                  class="kuiLink"
+                  ng-if="controller.sampleCount < controller.existing.matches.length"
+                  ng-click="controller.moreSamples()"
+                >
+                  <span translate="KIBANA-MORE"></span>
+                </a>
+              </div>
+            </div>
+          </div>
+
+          <!-- Form actions -->
+          <button
+            data-test-subj="createIndexPatternCreateButton"
+            ng-disabled="form.$invalid || controller.timeFieldOptionsError || controller.isLoading()"
+            class="kuiButton kuiButton--primary kuiVerticalRhythm"
+            type="submit"
+          >
+            {{controller.createButtonText}}
+          </button>
+        </form>
+      </div>
+    </div>
+  </kbn-management-indices>
+</kbn-management-app>

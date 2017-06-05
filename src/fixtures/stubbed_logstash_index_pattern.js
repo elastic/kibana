@@ -1,24 +1,29 @@
-define(function (require) {
-  return function stubbedLogstashIndexPatternService(Private) {
-    var StubIndexPattern = Private(require('testUtils/stub_index_pattern'));
-    var fieldTypes = Private(require('ui/index_patterns/_field_types'));
-    var mockLogstashFields = Private(require('fixtures/logstash_fields'));
+import TestUtilsStubIndexPatternProvider from 'test_utils/stub_index_pattern';
+import FixturesLogstashFieldsProvider from 'fixtures/logstash_fields';
+import { getKbnFieldType } from '../utils';
 
-    var _ = require('lodash');
+export default function stubbedLogstashIndexPatternService(Private) {
+  const StubIndexPattern = Private(TestUtilsStubIndexPatternProvider);
+  const mockLogstashFields = Private(FixturesLogstashFieldsProvider);
 
-    var fields = mockLogstashFields.map(function (field) {
-      field.displayName = field.name;
-      var type = fieldTypes.byName[field.type];
-      if (!type) throw new TypeError('unknown type ' + field.type);
-      if (!_.has(field, 'sortable')) field.sortable = type.sortable;
-      if (!_.has(field, 'filterable')) field.filterable = type.filterable;
-      return field;
-    });
+  const fields = mockLogstashFields.map(function (field) {
+    const kbnType = getKbnFieldType(field.type);
 
-    var indexPattern = new StubIndexPattern('logstash-*', 'time', fields);
-    indexPattern.id = 'logstash-*';
+    if (kbnType.name === 'unknown') {
+      throw new TypeError(`unknown type ${field.type}`);
+    }
 
-    return indexPattern;
+    return {
+      ...field,
+      sortable: ('sortable' in field) ? !!field.sortable : kbnType.sortable,
+      filterable: ('filterable' in field) ? !!field.filterable : kbnType.filterable,
+      displayName: field.name,
+    };
+  });
 
-  };
-});
+  const indexPattern = new StubIndexPattern('logstash-*', 'time', fields);
+  indexPattern.id = 'logstash-*';
+
+  return indexPattern;
+
+}

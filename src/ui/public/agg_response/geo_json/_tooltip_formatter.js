@@ -1,41 +1,42 @@
-define(function (require) {
-  return function TileMapTooltipFormatter($compile, $rootScope, Private) {
-    var $ = require('jquery');
-    var _ = require('lodash');
+import $ from 'jquery';
+import _ from 'lodash';
+import { RegistryFieldFormatsProvider } from 'ui/registry/field_formats';
 
-    var fieldFormats = Private(require('ui/registry/field_formats'));
-    var $tooltipScope = $rootScope.$new();
-    var $el = $('<div>').html(require('ui/agg_response/geo_json/_tooltip.html'));
-    $compile($el)($tooltipScope);
+export function TileMapTooltipFormatterProvider($compile, $rootScope, Private) {
 
-    return function tooltipFormatter(feature) {
-      if (!feature) return '';
+  const fieldFormats = Private(RegistryFieldFormatsProvider);
+  const $tooltipScope = $rootScope.$new();
+  const $el = $('<div>').html(require('ui/agg_response/geo_json/_tooltip.html'));
+  $compile($el)($tooltipScope);
 
-      var value = feature.properties.value;
-      var acr = feature.properties.aggConfigResult;
-      var vis = acr.aggConfig.vis;
+  return function tooltipFormatter(feature) {
+    if (!feature) return '';
 
-      var metricAgg = acr.aggConfig;
-      var geoFormat = _.get(vis.aggs, 'byTypeName.geohash_grid[0].format');
-      if (!geoFormat) geoFormat = fieldFormats.getDefaultInstance('geo_point');
+    const value = feature.properties.value;
+    const acr = feature.properties.aggConfigResult;
+    const vis = acr.aggConfig.vis;
 
-      $tooltipScope.details = [
-        {
-          label: metricAgg.makeLabel(),
-          value: metricAgg.fieldFormatter()(value)
-        },
-        {
-          label: 'Center',
-          value: geoFormat.convert({
-            lat: feature.geometry.coordinates[1],
-            lon: feature.geometry.coordinates[0]
-          })
-        }
-      ];
+    const metricAgg = acr.aggConfig;
+    let geoFormat = _.get(vis.aggs, 'byTypeName.geohash_grid[0].format');
+    if (!geoFormat) geoFormat = fieldFormats.getDefaultInstance('geo_point');
 
-      $tooltipScope.$apply();
+    $tooltipScope.details = [
+      {
+        label: metricAgg.makeLabel(),
+        value: metricAgg.fieldFormatter()(value)
+      },
+      {
+        label: 'Latitude',
+        value: feature.geometry.coordinates[1]
+      },
+      {
+        label: 'Longitude',
+        value: feature.geometry.coordinates[0]
+      }
+    ];
 
-      return $el.html();
-    };
+    $tooltipScope.$apply();
+
+    return $el.html();
   };
-});
+}

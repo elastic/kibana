@@ -1,0 +1,8 @@
+/**
+ * 1. Have the same spatial footprint as the regular input.
+ */
+.kuiStaticInput {
+  @include formControlBase;
+  border: 1px solid transparent; /* 1 */
+  background-color: transparent;
+}

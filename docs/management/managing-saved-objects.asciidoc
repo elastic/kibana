@@ -1,0 +1,58 @@
+[[managing-saved-objects]]
+== Managing Saved Searches, Visualizations, and Dashboards
+
+You can view, edit, and delete saved searches, visualizations, and dashboards from *Settings > Objects*. You can also
+export or import sets of searches, visualizations, and dashboards.
+
+Viewing a saved object displays the selected item in the *Discover*, *Visualize*, or *Dashboard* page. To view a saved
+object:
+
+. Go to *Settings > Objects*.
+. Select the object you want to view.
+. Click the *View* button.
+
+Editing a saved object enables you to directly modify the object definition. You can change the name of the object, add
+a description, and modify the JSON that defines the object's properties.
+
+If you attempt to access an object whose index has been deleted, Kibana displays its Edit Object page. You can:
+
+* Recreate the index so you can continue using the object.
+* Delete the object and recreate it using a different index.
+* Change the index name referenced in the object's `kibanaSavedObjectMeta.searchSourceJSON` to point to an existing
+index pattern. This is useful if the index you were working with has been renamed.
+
+WARNING: No validation is performed for object properties. Submitting invalid changes will render the object unusable.
+Generally, you should use the *Discover*, *Visualize*, or *Dashboard* pages to create new objects instead of directly
+editing existing ones.
+
+To edit a saved object:
+
+. Go to *Settings > Objects*.
+. Select the object you want to edit.
+. Click the *Edit* button.
+. Make your changes to the object definition.
+. Click the *Save Object* button.
+
+To delete a saved object:
+
+. Go to *Settings > Objects*.
+. Select the object you want to delete.
+. Click the *Delete* button.
+. Confirm that you really want to delete the object.
+
+To export a set of objects:
+
+. Go to *Settings > Objects*.
+. Select the type of object you want to export. You can export a set of dashboards, searches, or visualizations.
+. Click the selection box for the objects you want to export, or click the *Select All* box.
+. Click *Export* to select a location to write the exported JSON.
+
+WARNING: Exported dashboards do not include their associated index patterns. Re-create the index patterns manually before
+importing saved dashboards to a Kibana instance running on another Elasticsearch cluster.
+
+To import a set of objects:
+
+. Go to *Settings > Objects*.
+. Click *Import* to navigate to the JSON file representing the set of objects to import.
+. Click *Open* after selecting the JSON file.
+. If any objects in the set would overwrite objects already present in Kibana, confirm the overwrite.

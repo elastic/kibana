@@ -1,0 +1,40 @@
+<div class="form-group">
+  <label for="sort">
+    Sort On
+  </label>
+
+  <ui-select
+    name="field"
+    sortField
+    class="vis-editor-field-ui-select"
+    ng-show="sortFieldOptions.length"
+    ng-model="agg.params.sortField"
+    uis-open-close="limit = 100"
+    auto-select-if-only-one="sortFieldOptions"
+  >
+    <ui-select-match placeholder="Select a field">
+      {{$select.selected.displayName}}
+    </ui-select-match>
+    <ui-select-choices
+      group-by="'type'"
+      kbn-scroll-bottom="limit = limit + 100"
+      repeat="field in sortFieldOptions | filter: { displayName: $select.search } | sortPrefixFirst:$select.search:'name' | limitTo: limit"
+    >
+      <div ng-bind-html="field.displayName | highlight: $select.search"></div>
+    </ui-select-choices>
+  </ui-select>
+</div>
+
+<div class="form-group">
+  <label>
+    Order
+  </label>
+
+  <select
+     name="sortOrder"
+     ng-model="agg.params.sortOrder"
+     required
+     ng-options="opt as opt.display for opt in aggParam.options track by opt.val"
+     class="form-control">
+  </select>
+</div>

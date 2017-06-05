@@ -1,0 +1,24 @@
+<form
+  role="form"
+  ng-submit="opts.doSave()"
+>
+  <div class="kuiLocalDropdownTitle">Save Visualization</div>
+  <input
+    class="kuiLocalDropdownInput"
+    input-focus="select"
+    type="text"
+    name="visTitle"
+    ng-model="opts.savedVis.title"
+    required
+  >
+
+  <saved-object-save-as-check-box saved-object="opts.savedVis"></saved-object-save-as-check-box>
+
+  <button
+    data-test-subj="saveVisualizationButton"
+    type="submit"
+    class="kuiButton kuiButton--primary"
+  >
+    {{ opts.isAddToDashMode() ? 'Save and Add to Dashboard' : 'Save'}}
+  </button>
+</form>

@@ -1,26 +1,28 @@
-define(function (require) {
-  var _ = require('lodash');
-  var angular = require('angular');
-  var qs = require('ui/utils/query_string');
-  var rison = require('ui/utils/rison');
+import _ from 'lodash';
+import { QueryString } from 'ui/utils/query_string';
+import { StateProvider } from 'ui/state_management/state';
+import { uiModules } from 'ui/modules';
 
-  var module = require('ui/modules').get('kibana/global_state');
+const module = uiModules.get('kibana/global_state');
 
-  module.service('globalState', function (Private, $rootScope, $location) {
-    var State = Private(require('ui/state_management/state'));
+export function GlobalStateProvider(Private) {
+  const State = Private(StateProvider);
 
-    _.class(GlobalState).inherits(State);
-    function GlobalState(defaults) {
-      GlobalState.Super.call(this, '_g', defaults);
-    }
+  _.class(GlobalState).inherits(State);
+  function GlobalState(defaults) {
+    GlobalState.Super.call(this, '_g', defaults);
+  }
 
-    // if the url param is missing, write it back
-    GlobalState.prototype._persistAcrossApps = true;
+  // if the url param is missing, write it back
+  GlobalState.prototype._persistAcrossApps = true;
 
-    GlobalState.prototype.removeFromUrl = function (url) {
-      return qs.replaceParamInUrl(url, this._urlParam, null);
-    };
+  GlobalState.prototype.removeFromUrl = function (url) {
+    return QueryString.replaceParamInUrl(url, this._urlParam, null);
+  };
 
-    return new GlobalState();
-  });
+  return new GlobalState();
+}
+
+module.service('globalState', function (Private) {
+  return Private(GlobalStateProvider);
 });

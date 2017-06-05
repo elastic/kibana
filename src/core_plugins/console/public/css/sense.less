@@ -1,0 +1,203 @@
+@import (reference) "~ui/styles/variables";
+
+nav.navbar .logo.hidden-sm {
+  display: block !important;
+}
+
+sense-help-example,
+sense-history-viewer,
+#editor_output_container {
+  @import "./sense.light.less";
+}
+
+#editor_output_container {
+  display: flex;
+  flex: 1 1 auto;
+  position: relative;
+  padding: 10px;
+  font-size: 16px;
+
+  .ace-tm .ace_gutter {
+    background: @white;
+    color: #A0A0A0;
+  }
+
+  .ace-tm .ace_gutter-active-line {
+    background-color: #e6e6e8;
+  }
+
+  .ace-tm .ace_marker-layer .ace_active-line {
+    background-color: #dbdcdd;
+  }
+
+  .ace_snippet-marker {
+    background-color: #e8e8e8;
+    border: 0;
+  }
+}
+
+#editor_container {
+  display: flex;
+  flex: 0 0 auto;
+  width: 468px;
+  position: relative;
+
+  #autocomplete {
+    position: absolute;
+    left: -1000px;
+  }
+
+  #editor_actions {
+    position: absolute;
+  }
+
+  #editor {
+    flex: 1 1 1px;
+  }
+}
+
+#editor_resizer {
+  display: flex;
+  flex: 0 0 13px;
+  cursor: ew-resize;
+  background-color: #e4e4e4;
+  align-items: center;
+  margin: -10px 0;
+
+  &:hover {
+    background-color: darken(#e4e4e4, 10%);
+  }
+
+  &.active {
+    background-color: darken(#e4e4e4, 40%);;
+  }
+}
+
+#output_container {
+  display: flex;
+  flex: 1 1 1px;
+
+  #output {
+    flex: 1 1 1px;
+  }
+}
+
+#editor_actions {
+  position: absolute;
+  top: 0;
+  right: 0;
+  line-height: 1;
+  padding: 1px 3px 0 0;
+  /* by pass any other element in ace and resize bar, but not modal popups  */
+  z-index: 1005;
+
+  .editor_action {
+    padding: 2px 4px;
+    &:hover {
+      text-decoration: none;
+    }
+  }
+
+  .fa-wrench {
+    color: rgb(51, 51, 51);
+  }
+
+  .fa-play {
+    color: rgb(112, 186, 86);
+  }
+}
+
+#autocomplete {
+  visibility: hidden;
+  position: absolute;
+  /* by pass any other element in ace and resize bar, but not modal popups  */
+  z-index: 1003;
+  margin-top: 22px;
+  /*font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', 'Consolas', 'source-code-pro', monospace;*/
+  /*font-size: 12px;*/
+  /*max-height: 100px;*/
+  /*overflow-y: auto;*/
+  /* prevent horizontal scrollbar */
+  /*overflow-x: hidden;*/
+}
+
+.ui-state-focus {
+  margin: auto !important;
+}
+
+sense-help-example {
+  display: block;
+  height: 11em;
+  margin: 1em 0;
+}
+
+.history-body {
+  display: flex;
+  height: 300px;
+
+  .history-reqs,
+  .history-viewer {
+    flex: 0 0 50%;
+  }
+
+  .history-reqs {
+    overflow: auto;
+    margin: 0 25px 0 0;
+  }
+
+  .history-req {
+    display: flex;
+
+    &.selected {
+      background-color: #DCDCDC;
+    }
+
+    .history-req-icon {
+      flex: 1 0 auto;
+      text-align: right;
+      .fa-chevron-right {
+        opacity: .25;
+      }
+    }
+  }
+}
+
+.history-footer {
+  text-align: right;
+  padding-top: 10px;
+}
+
+.ui-autocomplete {
+  z-index: 400 !important;
+}
+
+.ace_editor {
+  line-height: normal;
+}
+
+.ace_layer.ace_marker-layer {
+  overflow: visible;
+}
+
+.ace_snippet-marker {
+  position: absolute;
+  width: 100% !important;
+}
+
+// .ui-resizable-e {
+//   cursor: ew-resize;
+//   width: 13px;
+//   right: -14px;
+//   top: -1px;
+//   bottom: -2px;
+//   background-color: transparent;
+//   position: absolute;
+// }
+//
+// .ui-resizable-e:hover {
+//   background-color: #DCDCDC;
+// }
+
+.ui-resizable-e.active {
+  background-color: rgba(194, 193, 208, 100);
+}

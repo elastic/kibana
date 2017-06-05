@@ -1,0 +1,55 @@
+<div>
+  <div class="vis-option-item" ng-show="vis.hasSchemaAgg('segment', 'date_histogram')">
+    <label>
+      <input type="checkbox" ng-model="vis.params.addTimeMarker" ng-checked="vis.params.addTimeMarker">
+      Current time marker
+    </label>
+  </div>
+  <div class="vis-option-item">
+    <label>
+      <input type="checkbox" ng-model="vis.params.setYExtents">
+      Set Y-Axis Extents
+    </label>
+    <div ng-if="vis.params.setYExtents">
+      <label>
+        y-max
+        <input name="yMax"
+               class="form-control"
+               type="number"
+               step="0.1"
+               greater-than="{{vis.params.yAxis.min}}"
+               ng-model="vis.params.yAxis.max"
+               ng-required="vis.params.setYExtents">
+      </label>
+      <div ng-show="vis.params.yAxis.min >= vis.params.yAxis.max">
+        <span class="text-danger">Max must be greater than min</span>
+      </div>
+      <label>
+        y-min
+        <input name="yMin"
+               class="form-control"
+               type="number"
+               step="0.1"
+               less-than="{{vis.params.yAxis.max}}"
+               greater-than="{{vis.params.scale === 'log' ? 0 : ''}}"
+               ng-model="vis.params.yAxis.min"
+               ng-required="vis.params.setYExtents">
+      </label>
+    </div>
+    <div ng-show="vis.params.setYExtents && vis.params.scale === 'log' && vis.params.yAxis.min <= 0">
+      <span class="text-danger">Min must exceed 0 when a log scale is selected</span>
+    </div>
+    <div class="vis-option-item">
+      <label>
+        <input type="checkbox" ng-model="vis.params.defaultYExtents" ng-disabled="vis.params.setYExtents">
+        Scale Y-Axis to Data Bounds
+      </label>
+    </div>
+    <div class="vis-option-item">
+      <label>
+        <input type="checkbox" ng-model="vis.params.orderBucketsBySum">
+        Order buckets by descending sum
+      </label>
+    </div>
+  </div>
+</div>

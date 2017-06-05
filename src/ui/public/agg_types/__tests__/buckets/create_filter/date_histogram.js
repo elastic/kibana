@@ -1,36 +1,37 @@
+import _ from 'lodash';
+import moment from 'moment';
+import aggResp from 'fixtures/agg_resp/date_histogram';
+import ngMock from 'ng_mock';
+import expect from 'expect.js';
+import { VisProvider } from 'ui/vis';
+import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
+import { AggTypesBucketsCreateFilterDateHistogramProvider } from 'ui/agg_types/buckets/create_filter/date_histogram';
+import { AggTypesBucketsIntervalOptionsProvider } from 'ui/agg_types/buckets/_interval_options';
+
 describe('AggConfig Filters', function () {
   describe('date_histogram', function () {
-    var _ = require('lodash');
-    var moment = require('moment');
-    var sinon = require('auto-release-sinon');
-    var aggResp = require('fixtures/agg_resp/date_histogram');
-    var ngMock = require('ngMock');
-    var expect = require('expect.js');
+    let vis;
+    let agg;
+    let field;
+    let filter;
+    let bucketKey;
+    let bucketStart;
+    let intervalOptions;
 
-    var vis;
-    var agg;
-    var field;
-    var filter;
-    var bucketKey;
-    var bucketStart;
-    var getIntervalStub;
-    var intervalOptions;
-
-    var init;
+    let init;
 
     beforeEach(ngMock.module('kibana'));
-    beforeEach(ngMock.inject(function (Private, $injector) {
-      var Vis = Private(require('ui/Vis'));
-      var indexPattern = Private(require('fixtures/stubbed_logstash_index_pattern'));
-      var createFilter = Private(require('ui/agg_types/buckets/create_filter/date_histogram'));
-      var TimeBuckets = Private(require('ui/time_buckets'));
-      intervalOptions = Private(require('ui/agg_types/buckets/_interval_options'));
+    beforeEach(ngMock.inject(function (Private) {
+      const Vis = Private(VisProvider);
+      const indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
+      const createFilter = Private(AggTypesBucketsCreateFilterDateHistogramProvider);
+      intervalOptions = Private(AggTypesBucketsIntervalOptionsProvider);
 
       init = function (interval, duration) {
         interval = interval || 'auto';
         if (interval === 'custom') interval = agg.params.customInterval;
         duration = duration || moment.duration(15, 'minutes');
-        field = _.sample(indexPattern.fields.byType.date);
+        field = _.sample(_.reject(indexPattern.fields.byType.date, 'scripted'));
         vis = new Vis(indexPattern, {
           type: 'histogram',
           aggs: [
@@ -46,7 +47,7 @@ describe('AggConfig Filters', function () {
         bucketKey = _.sample(aggResp.aggregations['1'].buckets).key;
         bucketStart = moment(bucketKey);
 
-        var timePad = moment.duration(duration / 2);
+        const timePad = moment.duration(duration / 2);
         agg.buckets.setBounds({
           min: bucketStart.clone().subtract(timePad),
           max: bucketStart.clone().add(timePad),
@@ -63,14 +64,17 @@ describe('AggConfig Filters', function () {
       expect(filter).to.have.property('range');
       expect(filter.range).to.have.property(field.name);
 
-      var fieldParams = filter.range[field.name];
+      const fieldParams = filter.range[field.name];
       expect(fieldParams).to.have.property('gte');
       expect(fieldParams.gte).to.be.a('number');
 
-      expect(fieldParams).to.have.property('lte');
-      expect(fieldParams.lte).to.be.a('number');
+      expect(fieldParams).to.have.property('lt');
+      expect(fieldParams.lt).to.be.a('number');
 
-      expect(fieldParams.gte).to.be.lessThan(fieldParams.lte);
+      expect(fieldParams).to.have.property('format');
+      expect(fieldParams.format).to.be('epoch_millis');
+
+      expect(fieldParams.gte).to.be.lessThan(fieldParams.lt);
 
       expect(filter).to.have.property('meta');
       expect(filter.meta).to.have.property('index', vis.indexPattern.id);
@@ -79,7 +83,7 @@ describe('AggConfig Filters', function () {
 
     it('extends the filter edge to 1ms before the next bucket for all interval options', function () {
       intervalOptions.forEach(function (option) {
-        var duration;
+        let duration;
         if (option.val !== 'custom' && moment(1, option.val).isValid()) {
           duration = moment.duration(10, option.val);
 
@@ -90,11 +94,11 @@ describe('AggConfig Filters', function () {
 
         init(option.val, duration);
 
-        var interval = agg.buckets.getInterval();
-        var params = filter.range[field.name];
+        const interval = agg.buckets.getInterval();
+        const params = filter.range[field.name];
 
         expect(params.gte).to.be(+bucketStart);
-        expect(params.lte).to.be(+bucketStart.clone().add(interval).subtract(1, 'ms'));
+        expect(params.lt).to.be(+bucketStart.clone().add(interval));
       });
     });
   });

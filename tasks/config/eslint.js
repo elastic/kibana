@@ -1,30 +1,36 @@
-var resolve = require('path').resolve;
+import { resolve } from 'path';
+export default grunt => ({
+  options: {
+    paths: [
+      'Gruntfile.js',
+      'bin',
+      'config',
+      'src',
+      'scripts',
+      'tasks',
+      'test',
+      'ui_framework/components',
+      'ui_framework/doc_site',
+      'utilities',
+    ],
+  },
 
-module.exports = function (grunt) {
-  return {
-    // just lint the source dir
-    source: {
-      options: {
-        cache: resolve(grunt.config.get('root'), '.eslint.fixSource.cache')
-      },
+  source: {
+    options: {
+      cache: resolve(grunt.config.get('root'), '.eslint.fixSource.cache')
+    }
+  },
 
-      files: {
-        src: '<%= lintThese %>'
-      }
-    },
+  fixSource: {
+    options: {
+      cache: resolve(grunt.config.get('root'), '.eslint.fixSource.cache'),
+      fix: true
+    }
+  },
 
-    // lint the source and fix any fixable errors
-    fixSource: {
-      options: {
-        cache: resolve(grunt.config.get('root'), '.eslint.fixSource.cache'),
-        fix: true
-      },
-
-      files: {
-        src: '<%= lintThese %>'
-      }
-    },
-
-    staged: {}
-  };
-};
+  staged: {
+    options: {
+      paths: null // overridden by lintStagedFiles task
+    }
+  }
+});

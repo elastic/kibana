@@ -1,14 +1,15 @@
+import expect from 'expect.js';
+import ngMock from 'ng_mock';
+import { AggTypesIndexProvider } from 'ui/agg_types/index';
+import AggParamWriterProvider from '../agg_param_writer';
 describe('Histogram Agg', function () {
-  var _ = require('lodash');
-  var expect = require('expect.js');
-  var ngMock = require('ngMock');
 
   describe('ordered', function () {
-    var histogram;
+    let histogram;
 
     beforeEach(ngMock.module('kibana'));
     beforeEach(ngMock.inject(function (Private) {
-      histogram = Private(require('ui/agg_types/index')).byName.histogram;
+      histogram = Private(AggTypesIndexProvider).byName.histogram;
     }));
 
     it('is ordered', function () {
@@ -22,37 +23,47 @@ describe('Histogram Agg', function () {
 
 
   describe('params', function () {
-    var paramWriter;
+    let paramWriter;
 
     beforeEach(ngMock.module('kibana'));
     beforeEach(ngMock.inject(function (Private) {
-      var AggParamWriter = Private(require('../AggParamWriter'));
+      const AggParamWriter = Private(AggParamWriterProvider);
       paramWriter = new AggParamWriter({ aggType: 'histogram' });
     }));
 
     describe('interval', function () {
       // reads aggConfig.params.interval, writes to dsl.interval
 
-      it('accepts a number', function () {
-        var output = paramWriter.write({ interval: 100 });
+      it('accepts a whole number', function () {
+        const output = paramWriter.write({ interval: 100 });
         expect(output.params).to.have.property('interval', 100);
       });
 
-      it('accepts a string', function () {
-        var output = paramWriter.write({ interval: '10' });
+      it('accepts a decimal number', function () {
+        const output = paramWriter.write({ interval: 0.1 });
+        expect(output.params).to.have.property('interval', 0.1);
+      });
+
+      it('accepts a decimal number string', function () {
+        const output = paramWriter.write({ interval: '0.1' });
+        expect(output.params).to.have.property('interval', 0.1);
+      });
+
+      it('accepts a whole number string', function () {
+        const output = paramWriter.write({ interval: '10' });
         expect(output.params).to.have.property('interval', 10);
       });
 
       it('fails on non-numeric values', function () {
         // template validation prevents this from users, not devs
-        var output = paramWriter.write({ interval: [] });
+        const output = paramWriter.write({ interval: [] });
         expect(isNaN(output.params.interval)).to.be.ok();
       });
     });
 
     describe('min_doc_count', function () {
       it('casts true values to 0', function () {
-        var output = paramWriter.write({ min_doc_count: true });
+        let output = paramWriter.write({ min_doc_count: true });
         expect(output.params).to.have.property('min_doc_count', 0);
 
         output = paramWriter.write({ min_doc_count: 'yes' });
@@ -65,21 +76,22 @@ describe('Histogram Agg', function () {
         expect(output.params).to.have.property('min_doc_count', 0);
       });
 
-      it('writes nothing for false values', function () {
-        var output = paramWriter.write({ min_doc_count: '' });
-        expect(output.params).to.not.have.property('min_doc_count');
+      it('writes 1 for falsey values', function () {
+        let output = paramWriter.write({ min_doc_count: '' });
+        expect(output.params).to.have.property('min_doc_count', 1);
 
         output = paramWriter.write({ min_doc_count: null });
-        expect(output.params).to.not.have.property('min_doc_count');
+        expect(output.params).to.have.property('min_doc_count', 1);
 
         output = paramWriter.write({ min_doc_count: undefined });
-        expect(output.params).to.not.have.property('min_doc_count');
+        expect(output.params).to.have.property('min_doc_count', 1);
       });
     });
 
     describe('extended_bounds', function () {
       it('writes when only eb.min is set', function () {
-        var output = paramWriter.write({
+        const output = paramWriter.write({
+          min_doc_count: true,
           extended_bounds: { min: 0 }
         });
         expect(output.params.extended_bounds).to.have.property('min', 0);
@@ -87,7 +99,8 @@ describe('Histogram Agg', function () {
       });
 
       it('writes when only eb.max is set', function () {
-        var output = paramWriter.write({
+        const output = paramWriter.write({
+          min_doc_count: true,
           extended_bounds: { max: 0 }
         });
         expect(output.params.extended_bounds).to.have.property('min', undefined);
@@ -95,7 +108,8 @@ describe('Histogram Agg', function () {
       });
 
       it('writes when both eb.min and eb.max are set', function () {
-        var output = paramWriter.write({
+        const output = paramWriter.write({
+          min_doc_count: true,
           extended_bounds: { min: 99, max: 100 }
         });
         expect(output.params.extended_bounds).to.have.property('min', 99);
@@ -103,8 +117,17 @@ describe('Histogram Agg', function () {
       });
 
       it('does not write when nothing is set', function () {
-        var output = paramWriter.write({
+        const output = paramWriter.write({
+          min_doc_count: true,
           extended_bounds: {}
+        });
+        expect(output.params).to.not.have.property('extended_bounds');
+      });
+
+      it('does not write when min_doc_count is false', function () {
+        const output = paramWriter.write({
+          min_doc_count: false,
+          extended_bounds: { min: 99, max: 100 }
         });
         expect(output.params).to.not.have.property('extended_bounds');
       });

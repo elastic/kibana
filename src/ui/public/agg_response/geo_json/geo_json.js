@@ -1,44 +1,46 @@
-define(function (require) {
-  return function TileMapConverterFn(Private, timefilter, $compile, $rootScope) {
-    var _ = require('lodash');
+import _ from 'lodash';
+import { convertRowsToFeatures } from 'ui/agg_response/geo_json/rows_to_features';
+import { TileMapTooltipFormatterProvider } from 'ui/agg_response/geo_json/_tooltip_formatter';
 
-    var rowsToFeatures = require('ui/agg_response/geo_json/rowsToFeatures');
-    var tooltipFormatter = Private(require('ui/agg_response/geo_json/_tooltip_formatter'));
+export function AggResponseGeoJsonProvider(Private) {
 
-    return function (vis, table) {
+  const tooltipFormatter = Private(TileMapTooltipFormatterProvider);
 
-      function columnIndex(schema) {
-        return _.findIndex(table.columns, function (col) {
-          return col.aggConfig.schema.name === schema;
-        });
-      }
+  return function (vis, table) {
 
-      var geoI = columnIndex('segment');
-      var metricI = columnIndex('metric');
-      var geoAgg = _.get(table.columns, [geoI, 'aggConfig']);
-      var metricAgg = _.get(table.columns, [metricI, 'aggConfig']);
-
-      var features = rowsToFeatures(table, geoI, metricI);
-      var values = features.map(function (feature) {
-        return feature.properties.value;
+    function columnIndex(schema) {
+      return _.findIndex(table.columns, function (col) {
+        return col.aggConfig.schema.name === schema;
       });
+    }
 
-      return {
-        title: table.title(),
-        valueFormatter: metricAgg && metricAgg.fieldFormatter(),
-        tooltipFormatter: tooltipFormatter,
-        geohashGridAgg: geoAgg,
-        geoJson: {
-          type: 'FeatureCollection',
-          features: features,
-          properties: {
-            min: _.min(values),
-            max: _.max(values),
-            zoom: _.get(geoAgg, 'params.mapZoom'),
-            center: _.get(geoAgg, 'params.mapCenter')
-          }
+    const geoI = columnIndex('segment');
+    const metricI = columnIndex('metric');
+    const centroidI = _.findIndex(table.columns, (col) => col.aggConfig.type.name === 'geo_centroid');
+
+    const geoAgg = _.get(table.columns, [geoI, 'aggConfig']);
+    const metricAgg = _.get(table.columns, [metricI, 'aggConfig']);
+
+    const features = convertRowsToFeatures(table, geoI, metricI, centroidI);
+    const values = features.map(function (feature) {
+      return feature.properties.value;
+    });
+
+    return {
+      title: table.title(),
+      valueFormatter: metricAgg && metricAgg.fieldFormatter(),
+      tooltipFormatter: tooltipFormatter,
+      geohashGridAgg: geoAgg,
+      geoJson: {
+        type: 'FeatureCollection',
+        features: features,
+        properties: {
+          min: _.min(values),
+          max: _.max(values),
+          zoom: geoAgg && geoAgg.vis.uiStateVal('mapZoom'),
+          center: geoAgg && geoAgg.vis.uiStateVal('mapCenter')
         }
-      };
+      }
     };
   };
-});
+}

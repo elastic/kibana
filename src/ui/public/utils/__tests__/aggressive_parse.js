@@ -1,8 +1,8 @@
+import _ from 'lodash';
+import expect from 'expect.js';
+import sinon from 'sinon';
+import * as aggressiveParse from 'ui/utils/aggressive_parse';
 describe('aggressiveParse', () => {
-  const _ = require('lodash');
-  const expect = require('expect.js');
-  const sinon = require('sinon');
-  const aggressiveParse = require('ui/utils/aggressive_parse');
 
   let object;
   let jsonFn;
@@ -37,7 +37,7 @@ describe('aggressiveParse', () => {
       expect(_.has(result, 'another.level.$deep')).to.be(false);
     });
 
-    context('with arity of 2', () => {
+    describe('with arity of 2', () => {
       beforeEach(() => {
         result = aggressiveParse.toJson(object, jsonFn);
         result = JSON.parse(result);
@@ -56,13 +56,13 @@ describe('aggressiveParse', () => {
       });
     });
 
-    context('with arity of 3', () => {
+    describe('with arity of 3', () => {
       beforeEach(() => {
-        result = aggressiveParse.toJson({foo: 'bar'}, undefined, 2);
+        result = aggressiveParse.toJson({ foo: 'bar' }, undefined, 2);
       });
 
       it('formats the json string with the number of spaces given', () => {
-        const formattedJson = JSON.stringify({foo: 'bar'}, null, 2);
+        const formattedJson = JSON.stringify({ foo: 'bar' }, null, 2);
         expect(result).to.be(formattedJson);
       });
     });

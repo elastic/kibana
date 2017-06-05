@@ -1,9 +1,9 @@
+import _ from 'lodash';
+import expect from 'expect.js';
 describe('_.move', function () {
-  var _ = require('lodash');
-  var expect = require('expect.js');
 
   it('accepts previous from->to syntax', function () {
-    var list = [
+    const list = [
       1,
       1,
       1,
@@ -27,7 +27,7 @@ describe('_.move', function () {
   });
 
   it('moves an object up based on a function callback', function () {
-    var list = [
+    const list = [
       1,
       1,
       1,
@@ -55,7 +55,7 @@ describe('_.move', function () {
   });
 
   it('moves an object down based on a function callback', function () {
-    var list = [
+    const list = [
       1,
       1,
       1,
@@ -83,7 +83,7 @@ describe('_.move', function () {
   });
 
   it('moves an object up based on a where callback', function () {
-    var list = [
+    const list = [
       { v: 1 },
       { v: 1 },
       { v: 1 },
@@ -110,7 +110,7 @@ describe('_.move', function () {
 
 
   it('moves an object up based on a where callback', function () {
-    var list = [
+    const list = [
       { v: 1 },
       { v: 1 },
       { v: 1 },
@@ -136,7 +136,7 @@ describe('_.move', function () {
   });
 
   it('moves an object down based on a pluck callback', function () {
-    var list = [
+    const list = [
       { id: 0, normal: true },
       { id: 1, normal: true },
       { id: 2, normal: true },

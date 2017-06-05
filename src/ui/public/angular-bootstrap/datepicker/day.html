@@ -1,0 +1,80 @@
+<table
+  class="kuiDatePicker"
+  role="grid"
+  aria-labelledby="{{uniqueId}}-title"
+  aria-activedescendant="{{activeDateId}}"
+>
+  <thead>
+    <tr>
+      <th
+        class="kuiDatePickerNavigationCell"
+        colspan="{{7 + showWeeks}}"
+      >
+        <div class="kuiDatePickerNavigation">
+          <button
+            type="button"
+            class="kuiDatePickerNavigationButton"
+            ng-click="move(-1)"
+          >
+            <span class="kuiIcon fa-chevron-left"></span>
+          </button>
+
+          <button
+            id="{{uniqueId}}-title"
+            role="heading"
+            aria-live="assertive"
+            aria-atomic="true"
+            type="button"
+            class="kuiDatePickerNavigationButton"
+            ng-click="toggleMode()"
+          >
+            <strong>{{title}}</strong>
+          </button>
+
+          <button
+            type="button"
+            class="kuiDatePickerNavigationButton"
+            ng-click="move(1)"
+          >
+            <span class="kuiIcon fa-chevron-right"></span>
+          </button>
+        </div>
+      </th>
+    </tr>
+    <tr>
+      <th ng-show="showWeeks" class="text-center"></th>
+      <th
+        ng-repeat="label in labels track by $index"
+        class="kuiDatePickerHeaderCell"
+      >
+        <small aria-label="{{label.full}}">{{label.abbr}}</small>
+      </th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr ng-repeat="row in rows track by $index">
+      <td ng-show="showWeeks">
+        <em>{{ weekNumbers[$index] }}</em>
+      </td>
+
+      <td
+        ng-repeat="dt in row track by dt.date"
+        class="kuiDatePickerRowCell"
+        ng-class="{'kuiDatePickerRowCell-isBlocked': dt.disabled && !dt.secondary}"
+        role="gridcell"
+        id="{{dt.uid}}"
+        aria-disabled="{{!!dt.disabled}}"
+      >
+        <button
+          type="button"
+          class="kuiDatePickerRowCellContent"
+          ng-class="{'kuiDatePickerRowCellContent-isSelected': dt.selected, 'kuiDatePickerRowCellContent-isCurrent': dt.current, 'kuiDatePickerRowCellContent-isOtherMonth': dt.secondary}"
+          ng-click="select(dt.date)"
+          ng-disabled="dt.disabled"
+        >
+          <span>{{dt.label}}</span>
+        </button>
+      </td>
+    </tr>
+  </tbody>
+</table>

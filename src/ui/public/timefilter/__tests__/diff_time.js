@@ -1,13 +1,14 @@
-var sinon = require('auto-release-sinon');
-var expect = require('expect.js');
-var ngMock = require('ngMock');
+import sinon from 'sinon';
+import expect from 'expect.js';
+import ngMock from 'ng_mock';
+import { TimefilterLibDiffTimeProvider } from 'ui/timefilter/lib/diff_time';
 
 describe('Timefilter service', function () {
   describe('time diff watcher', function () {
-    var fn;
-    var update;
-    var fetch;
-    var timefilter;
+    let fn;
+    let update;
+    let fetch;
+    let timefilter;
 
     beforeEach(ngMock.module('kibana'));
 
@@ -25,18 +26,18 @@ describe('Timefilter service', function () {
         }
       };
 
-      fn = Private(require('ui/timefilter/lib/diff_time'))(timefilter);
+      fn = Private(TimefilterLibDiffTimeProvider)(timefilter);
     }));
 
     it('not emit anything if the time has not changed', function () {
-      timefilter.time = {from: 0, to: 1};
+      timefilter.time = { from: 0, to: 1 };
       fn();
       expect(update.called).to.be(false);
       expect(fetch.called).to.be(false);
     });
 
     it('emit update and fetch if the time has changed', function () {
-      timefilter.time = {from: 5, to: 10};
+      timefilter.time = { from: 5, to: 10 };
       fn();
       expect(update.called).to.be(true);
       expect(fetch.called).to.be(true);

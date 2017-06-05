@@ -1,45 +1,50 @@
-define(function (require) {
-  return function FiltersAggDefinition(Private, Notifier) {
-    var _ = require('lodash');
-    var angular = require('angular');
-    var BucketAggType = Private(require('ui/agg_types/buckets/_bucket_agg_type'));
-    var createFilter = Private(require('ui/agg_types/buckets/create_filter/filters'));
-    var decorateQuery = Private(require('ui/courier/data_source/_decorate_query'));
-    var notif = new Notifier({ location: 'Filters Agg' });
+import _ from 'lodash';
+import angular from 'angular';
 
-    return new BucketAggType({
-      name: 'filters',
-      title: 'Filters',
-      createFilter: createFilter,
-      params: [
-        {
-          name: 'filters',
-          editor: require('ui/agg_types/controls/filters.html'),
-          default: [ {input: {}, label: ''} ],
-          write: function (aggConfig, output) {
-            var inFilters = aggConfig.params.filters;
-            if (!_.size(inFilters)) return;
+import { AggTypesBucketsBucketAggTypeProvider } from 'ui/agg_types/buckets/_bucket_agg_type';
+import { AggTypesBucketsCreateFilterFiltersProvider } from 'ui/agg_types/buckets/create_filter/filters';
+import { DecorateQueryProvider } from 'ui/courier/data_source/_decorate_query';
+import filtersTemplate from 'ui/agg_types/controls/filters.html';
 
-            var outFilters = _.transform(inFilters, function (filters, filter) {
-              var input = filter.input;
-              if (!input) return notif.log('malformed filter agg params, missing "input" query');
+export function AggTypesBucketsFiltersProvider(Private, Notifier) {
+  const BucketAggType = Private(AggTypesBucketsBucketAggTypeProvider);
+  const createFilter = Private(AggTypesBucketsCreateFilterFiltersProvider);
+  const decorateQuery = Private(DecorateQueryProvider);
+  const notif = new Notifier({ location: 'Filters Agg' });
 
-              var query = input.query;
-              if (!query) return notif.log('malformed filter agg params, missing "query" on input');
+  return new BucketAggType({
+    name: 'filters',
+    title: 'Filters',
+    createFilter: createFilter,
+    customLabels: false,
+    params: [
+      {
+        name: 'filters',
+        editor: filtersTemplate,
+        default: [ { input: {}, label: '' } ],
+        write: function (aggConfig, output) {
+          const inFilters = aggConfig.params.filters;
+          if (!_.size(inFilters)) return;
 
-              decorateQuery(query);
+          const outFilters = _.transform(inFilters, function (filters, filter) {
+            const input = filter.input;
+            if (!input) return notif.log('malformed filter agg params, missing "input" query');
 
-              var label = filter.label || _.get(query, 'query_string.query') || angular.toJson(query);
-              filters[label] = input;
-            }, {});
+            const query = input.query;
+            if (!query) return notif.log('malformed filter agg params, missing "query" on input');
 
-            if (!_.size(outFilters)) return;
+            decorateQuery(query);
 
-            var params = output.params || (output.params = {});
-            params.filters = outFilters;
-          }
+            const label = filter.label || _.get(query, 'query_string.query') || angular.toJson(query);
+            filters[label] = input;
+          }, {});
+
+          if (!_.size(outFilters)) return;
+
+          const params = output.params || (output.params = {});
+          params.filters = outFilters;
         }
-      ]
-    });
-  };
-});
+      }
+    ]
+  });
+}

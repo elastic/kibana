@@ -1,0 +1,58 @@
+/**
+ * 1. We want the bottom border on selected tabs to be flush with the bottom of the container.
+ */
+.kuiLocalTabs {
+  display: flex;
+  align-items: flex-end; // 1
+  height: 100%;
+}
+
+  /**
+   * 1. Make sure the bottom border is flush with the bottom of the LocalNav.
+   */
+  .kuiLocalTab {
+    padding: 5px 0 6px 0;
+    font-size: 18px;
+    line-height: 22px; /* 1 */
+    color: $localTabTextColor;
+    border-bottom: 2px solid transparent;
+    text-decoration: none;
+    cursor: pointer;
+
+    &:hover:not(.kuiLocalTab-isDisabled),
+    &:active:not(.kuiLocalTab-isDisabled) {
+      color: $localTabTextColor-isHover;
+
+      @include darkTheme {
+        color: $localTabTextColor-isHover--darkTheme;
+      }
+    }
+
+    &.kuiLocalTab-isSelected {
+      color: $localTabTextColor-isSelected;
+      border-bottom-color: $localTabTextColor-isSelected;
+      cursor: default;
+
+      @include darkTheme {
+        color: $localTabTextColor-isSelected--darkTheme;
+        border-bottom-color: $localTabTextColor-isSelected--darkTheme;
+      }
+    }
+
+    /**
+     * 1. We may want to show a tooltip to explain why the tab is disabled, so we will just show
+     *    a regular cursor instead of setting pointer-events: none.
+     */
+    &.kuiLocalTab-isDisabled {
+      opacity: 0.5;
+      cursor: default; /* 1 */
+    }
+
+    & + & {
+      margin-left: 15px;
+    }
+
+    @include darkTheme {
+      color: $localTabTextColor--darkTheme;
+    }
+  }

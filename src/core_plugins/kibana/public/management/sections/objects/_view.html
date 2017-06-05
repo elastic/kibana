@@ -1,0 +1,162 @@
+<kbn-management-app section="kibana" class="kuiView">
+  <kbn-management-objects-view class="kuiViewContent kuiViewContent--constrainedWidth">
+    <!-- Header -->
+    <div class="kuiViewContentItem kuiBar kuiVerticalRhythm">
+      <div class="kuiBarSection">
+        <h1 class="kuiTitle">
+          Edit {{ title }}
+        </h1>
+      </div>
+
+      <div class="kuiBarSection">
+        <a
+          class="kuiButton kuiButton--basic kuiButton--iconText"
+          href="{{ link }}"
+        >
+          <span class="kuiButton__inner">
+            <span class="kuiButton__icon kuiIcon fa-eye"></span>
+            <span>View {{ title }}</span>
+          </span>
+        </a>
+
+        <button
+          class="kuiButton kuiButton--danger kuiButton--iconText"
+          ng-click="delete()"
+        >
+          <span class="kuiButton__inner">
+            <span class="kuiButton__icon kuiIcon fa-trash-o"></span>
+            <span>Delete {{ title }}</span>
+          </span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Errors -->
+    <div
+      class="kuiViewContentItem kuiVerticalRhythm"
+      ng-if="notFound"
+    >
+      <div class="kuiInfoPanel kuiInfoPanel--error">
+        <div class="kuiInfoPanelHeader">
+          <span class="kuiInfoPanelHeader__icon kuiIcon kuiIcon--error fa-warning"></span>
+          <span class="kuiInfoPanelHeader__title">
+            There is a problem with this saved object
+          </span>
+        </div>
+
+        <div class="kuiInfoPanelBody">
+          <div
+            class="kuiInfoPanelBody__message"
+            ng-if="notFound === 'search'"
+          >
+            The saved search associated with this object no longer exists.
+          </div>
+
+          <div
+            class="kuiInfoPanelBody__message"
+            ng-if="notFound === 'index-pattern'"
+          >
+            The index pattern associated with this object no longer exists.
+          </div>
+
+          <div
+            class="kuiInfoPanelBody__message"
+            ng-if="notFound === 'index-pattern-field'"
+          >
+            A field associated with this object no longer exists in the index pattern.
+          </div>
+
+          <div class="kuiInfoPanelBody__message">
+            If you know what this error means, go ahead and fix it &mdash; otherwise click the delete button above.
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Intro -->
+    <div class="kuiViewContentItem kuiVerticalRhythm">
+      <div class="kuiInfoPanel kuiInfoPanel--warning">
+        <div class="kuiInfoPanelHeader">
+          <span class="kuiInfoPanelHeader__icon kuiIcon kuiIcon--warning fa-bolt"></span>
+          <span class="kuiInfoPanelHeader__title">
+            Proceed with caution!
+          </span>
+        </div>
+
+        <div class="kuiInfoPanelBody">
+          <div class="kuiInfoPanelBody__message">
+            Modifying objects is for advanced users only. Object properties are not validated and invalid objects could cause errors, data loss, or worse. Unless someone with intimate knowledge of the code told you to be in here, you probably shouldn&rsquo;t be.
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="kuiViewContentItem kuiVerticalRhythm">
+      <!-- Form -->
+      <form
+        role="form"
+        name="objectForm"
+        ng-submit="submit()"
+      >
+        <div class="kuiFormSection" ng-repeat="field in fields">
+          <label for="{{ field.name }}" class="kuiFormLabel">
+            {{ field.name }}
+          </label>
+
+          <input
+            id="{{ field.name }}"
+            ng-if="field.type === 'number'"
+            class="kuiTextInput"
+            type="number"
+            ng-model="field.value"
+          >
+
+          <textarea
+            id="{{ field.name }}"
+            ng-if="field.type === 'text'"
+            class="kuiTextArea"
+            rows="1"
+            msd-elastic=" "
+            ng-model="field.value"
+          ></textarea>
+
+          <input
+            ng-if="field.type === 'boolean'"
+            class="kuiCheckBox"
+            type="checkbox"
+            ng-model="field.value"
+            ng-checked="field.value"
+          >
+
+          <div
+            ng-if="field.type === 'json' || field.type === 'array'"
+            ui-ace="{ onLoad: aceLoaded, mode: 'json' }"
+            id="{{field.name}}"
+            ng-model="field.value"
+            class="form-control"
+          ></div>
+        </div>
+      </form>
+
+      <!-- Actions -->
+      <div class="kuiButtonGroup">
+        <button
+          class="kuiButton kuiButton--primary"
+          aria-label="Save {{ title }} Object"
+          ng-click="submit()"
+          ng-disabled="objectForm.$invalid || aceInvalidEditors.length !==0"
+        >
+          Save {{ title }} Object
+        </button>
+
+        <button
+          class="kuiButton kuiButton--basic"
+          aria-label="Cancel"
+          ng-click="cancel()"
+        >
+          Cancel
+        </button>
+      </div>
+    </div>
+  </kbn-management-objects-view>
+</kbn-management-app>

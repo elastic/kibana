@@ -1,0 +1,47 @@
+<div class="kuiSideBarSection">
+  <div class="kuiSideBarSectionTitle">
+    <div class="kuiSideBarSectionTitle__text">
+      Basic Settings
+    </div>
+  </div>
+
+  <div class="kuiSideBarFormRow">
+    <label class="kuiSideBarFormRow__label" for="addTooltip">
+      Show Tooltips
+    </label>
+    <div class="kuiSideBarFormRow__control">
+      <input class="kuiCheckBox" id="addTooltip" type="checkbox" ng-model="vis.params.addTooltip">
+    </div>
+  </div>
+
+  <div class="kuiSideBarFormRow">
+    <label class="kuiSideBarFormRow__label" for="enableHover">
+      Highlight
+    </label>
+    <div class="kuiSideBarFormRow__control">
+      <input class="kuiCheckBox" id="enableHover" type="checkbox" ng-model="vis.params.enableHover">
+    </div>
+  </div>
+
+  <div class="kuiSideBarFormRow" ng-show="vis.params.addLegend">
+    <label class="kuiSideBarFormRow__label" for="legendPosition">
+      Legend Position
+    </label>
+    <div class="kuiSideBarFormRow__control">
+      <select
+        id="legendPosition"
+        class="kuiSelect kuiSideBarSelect"
+        ng-model="vis.params.legendPosition"
+        ng-options="position.value as position.text for position in vis.type.params.legendPositions"
+      ></select>
+    </div>
+  </div>
+
+  <div class="kuiSideBarSectionTitle">
+    <div class="kuiSideBarSectionTitle__text">
+      Heatmap Settings
+    </div>
+  </div>
+
+  <heatmap-options></heatmap-options>
+</div>

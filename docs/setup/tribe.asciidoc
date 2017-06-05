@@ -1,0 +1,33 @@
+[[tribe]]
+== Using Kibana with Tribe nodes
+
+Kibana can be configured to connect to a {ref}/current/modules-tribe.html[tribe node] for data retrieval.  Because tribe nodes can't create indices, Kibana additionally
+requires a separate connection to a node to maintain state.  When configured, searches and visualizations will retrieve data using
+the tribe node and administrative actions (such as saving a dashboard) will be sent to non-tribe node.
+
+[float]
+[[tribe-configuration]]
+=== Configuring Kibana for tribe nodes
+
+Tribe nodes take all of the same configuration options used when configuring elasticsearch in `kibana.yml`.  Tribe options
+are prefixed with `elasticsearch.tribe` and at a minimum requires a url:
+[source,text]
+----
+elasticsearch.url: "<your_administration_node>"
+elasticsearch.tribe.url: "<your_tribe_node>"
+----
+
+When configured to use a tribe node, actions that modify Kibana's state will be sent to the node at `elasticsearch.url`.  Searches and visualizations
+will retrieve data from the node at `elasticsearch.tribe.url`.  It's acceptable to use a node for `elasticsearch.url` that is part of one of the clusters that
+a tribe node is pointing to.
+
+The full list of configurations can be found at <<settings>>.
+
+[float]
+[[tribe-limitations]]
+=== Limitations
+
+Due to the ambiguity of which cluster is being used, certain features are disabled in Kibana:
+
+* Console
+* Managing users and roles with the x-pack plugin

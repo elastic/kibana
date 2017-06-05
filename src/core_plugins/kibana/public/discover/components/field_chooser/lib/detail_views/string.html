@@ -1,0 +1,84 @@
+<div class="discover-field-details">
+  <div class="kuiVerticalRhythmSmall">
+    <h5 ng-show="!field.details.error">Quick Count <kbn-info info="Top 5 values based on documents in the table" placement="right"></kbn-info>
+      <span ng-if="!field.details.error" class="small discover-field-details-count">
+        (
+        <a
+          href=""
+          ng-show="!indexPattern.metaFields.includes(field.name)"
+          ng-click="onAddFilter('_exists_', field.name, '+')">
+          {{::field.details.exists}}
+        </a>
+        <span
+          ng-show="indexPattern.metaFields.includes(field.name)">
+          {{::field.details.exists}}
+        </span>
+        /{{::field.details.total}} records
+        )
+      </span>
+    </h5>
+
+    <div class="clearfix"></div>
+
+    <div ng-if="field.details.error" class="discover-field-details-error">{{field.details.error}}</div>
+
+    <div ng-if="!field.details.error">
+      <div ng-repeat="bucket in ::field.details.buckets" class="discover-field-details-item">
+        <div class="discover-field-details-item-title">
+          <!-- Field value -->
+          <div
+            css-truncate
+            css-truncate-expandable="true"
+            class="discover-field-details-value"
+            aria-label="Value: {{:: bucket.display === '' ? 'Empty string' : bucket.display }}"
+          >
+            {{::bucket.display}} <em ng-show="bucket.display === ''">Empty string</em>
+          </div>
+
+          <!-- Add/remove filter buttons -->
+          <div
+            class="discover-field-details-item-buttons"
+            ng-show="field.filterable"
+          >
+            <button
+              class="discover-field-details-item-button"
+              ng-click="onAddFilter(field, bucket.value, '+')"
+              data-test-subj="plus-{{::field.name}}-{{::bucket.display}}"
+            >
+              <span
+                aria-hidden="true"
+                class="kuiIcon fa-search-plus discover-field-details-filter"
+              ></span>
+            </button>
+
+            <button
+              class="discover-field-details-item-button"
+              ng-click="onAddFilter(field, bucket.value, '-')"
+              data-test-subj="minus-{{::field.name}}-{{::bucket.display}}"
+            >
+              <span
+                aria-hidden="true"
+                class="kuiIcon fa-search-minus discover-field-details-filter"
+              ></span>
+            </button>
+          </div>
+        </div>
+        <kbn-tooltip text="{{::bucket.count}}" placement="right" append-to-body="1">
+          <progressbar value="bucket.percent" max="100" animate="false"><span>{{bucket.percent}}%</span></progressbar>
+        </kbn-tooltip>
+      </div>
+    </div>
+  </div>
+
+  <a
+    ng-href="{{field.details.visualizeUrl}}"
+    ng-show="field.visualizable"
+    class="kuiButton kuiButton--primary kuiButton--small kuiButton--fullWidth kuiVerticalRhythmSmall"
+    data-test-subj="fieldVisualize-{{::field.name}}"
+  >
+    Visualize
+    <span class="discover-field-vis-warning" ng-show="warnings.length" tooltip="{{warnings.join(' ')}}">
+    ( {{::warnings.length}} <ng-pluralize count="warnings.length" when="{'1':'warning', 'other':'warnings'}"></ng-pluralize> <i aria-hidden="true" class="fa fa-warning"></i> )
+    </span>
+  </a>
+</div>

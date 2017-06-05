@@ -1,0 +1,55 @@
+.rhythm_top_n {
+  position: relative;
+  overflow: auto;
+  display: flex;
+  flex-direction: column;
+
+  tr:hover { td { background-color: rgba(0,0,0,0.1) } }
+}
+
+.rhythm_top_n__labels,
+.rhythm_top_n__values {
+  // flex: 0 0 auto;
+  text-align: right;
+}
+.rhythm_top_n__bars {
+  // flex: 1 0 auto;
+}
+
+.rhythm_top_n__label {
+  // margin: 4px 10px 4px 0;
+  color: @textColor;
+  white-space: nowrap;
+  text-align: right;
+  line-height: 0;
+  padding: 4px 0;
+  vertical-align: middle;
+  // height: 18px;
+}
+
+.rhythm_top_n__value {
+  // margin: 4px 0 4px 10px;
+  color: @valueColor;
+  text-align: right;
+  line-height: 0;
+  padding: 4px 4px 4px 0;
+  vertical-align: middle;
+  // height: 18px;
+}
+
+.rhythm_top_n__bar {
+  // height: 16px;
+  // margin: 4px 0;
+  padding: 4px 10px;
+  vertical-align: middle;
+}
+
+.rhythm_top_n__inner-bar {
+  min-height: 16px;
+}
+
+.rhythm_top_n.reversed {
+  tr:hover { td { background-color: rgba(255,255,255,0.1) } }
+  .rhythm_top_n__label { color: @textColorReversed; }
+  .rhythm_top_n__value { color: @valueColorReversed; }
+}

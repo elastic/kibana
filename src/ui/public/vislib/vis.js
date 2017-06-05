@@ -1,37 +1,33 @@
-define(function (require) {
-  return function VisFactory(Private) {
-    var _ = require('lodash');
-    var d3 = require('d3');
+import _ from 'lodash';
+import d3 from 'd3';
+import { Binder } from 'ui/binder';
+import { KbnError } from 'ui/errors';
+import { EventsProvider } from 'ui/events';
+import { ResizeCheckerProvider } from 'ui/resize_checker';
+import './styles/main.less';
+import { VislibVisConfigProvider } from './lib/vis_config';
+import { VisHandlerProvider } from './lib/handler';
 
-    var Binder = require('ui/Binder');
+export function VislibVisProvider(Private) {
+  const ResizeChecker = Private(ResizeCheckerProvider);
+  const Events = Private(EventsProvider);
+  const VisConfig = Private(VislibVisConfigProvider);
+  const Handler = Private(VisHandlerProvider);
 
-    var ResizeChecker = Private(require('ui/vislib/lib/resize_checker'));
-    var Events = Private(require('ui/events'));
-    var handlerTypes = Private(require('ui/vislib/lib/handler/handler_types'));
-    var chartTypes = Private(require('ui/vislib/visualizations/vis_types'));
-    var errors = require('ui/errors');
-    require('ui/vislib/styles/main.less');
-
-    /**
-     * Creates the visualizations.
-     *
-     * @class Vis
-     * @constructor
-     * @param $el {HTMLElement} jQuery selected HTML element
-     * @param config {Object} Parameters that define the chart type and chart options
-     */
-    _.class(Vis).inherits(Events);
-    function Vis($el, config) {
-      if (!(this instanceof Vis)) {
-        return new Vis($el, config);
-      }
-      Vis.Super.apply(this, arguments);
+  /**
+   * Creates the visualizations.
+   *
+   * @class Vis
+   * @constructor
+   * @param $el {HTMLElement} jQuery selected HTML element
+   * @param config {Object} Parameters that define the chart type and chart options
+   */
+  class Vis extends Events {
+    constructor($el, visConfigArgs) {
+      super(arguments);
       this.el = $el.get ? $el.get(0) : $el;
       this.binder = new Binder();
-      this.ChartClass = chartTypes[config.type];
-      this._attr = _.defaults({}, config || {}, {
-        legendOpen: true
-      });
+      this.visConfigArgs = _.cloneDeep(visConfigArgs);
 
       // bind the resize function so it can be used as an event handler
       this.resize = _.bind(this.resize, this);
@@ -39,15 +35,16 @@ define(function (require) {
       this.binder.on(this.resizeChecker, 'resize', this.resize);
     }
 
+    hasLegend() {
+      return this.visConfigArgs.addLegend;
+    }
     /**
      * Renders the visualization
      *
      * @method render
      * @param data {Object} Elasticsearch query results
      */
-    Vis.prototype.render = function (data, uiState) {
-      var chartType = this._attr.type;
-
+    render(data, uiState) {
       if (!data) {
         throw new Error('No valid data!');
       }
@@ -61,21 +58,35 @@ define(function (require) {
 
       if (!this.uiState) {
         this.uiState = uiState;
-        uiState.on('change', this._uiStateChangeHandler = () => this.render(this.data, this.uiState));
+        this._uiStateChangeHandler = () => {
+          if (document.body.contains(this.el)) {
+            this.render(this.data, this.uiState);
+          }
+        };
+        uiState.on('change', this._uiStateChangeHandler);
       }
 
-      this.handler = handlerTypes[chartType](this) || handlerTypes.column(this);
-      this._runOnHandler('render');
-    };
+      this.visConfig = new VisConfig(this.visConfigArgs, this.data, this.uiState, this.el);
+
+      this.handler = new Handler(this, this.visConfig);
+      this._runWithoutResizeChecker('render');
+    }
+
+    getLegendLabels() {
+      return this.visConfig ? this.visConfig.get('legend.labels', null) : null;
+    }
+
+    getLegendColors() {
+      return this.visConfig ? this.visConfig.get('legend.colors', null) : null;
+    }
 
     /**
      * Resizes the visualization
      *
      * @method resize
      */
-    Vis.prototype.resize = function () {
+    resize() {
       if (!this.data) {
-        // TODO: need to come up with a solution for resizing when no data is available
         return;
       }
 
@@ -84,27 +95,27 @@ define(function (require) {
       } else {
         this.render(this.data, this.uiState);
       }
-    };
+    }
 
-    Vis.prototype._runOnHandler = function (method) {
+    _runWithoutResizeChecker(method) {
+      this.resizeChecker.modifySizeWithoutTriggeringResize(() => {
+        this._runOnHandler(method);
+      });
+    }
+
+    _runOnHandler(method) {
       try {
         this.handler[method]();
       } catch (error) {
-        // If involving height and width of the container, log error to screen.
-        // Because we have to wait for the DOM element to initialize, we do not
-        // want to throw an error when the DOM `el` is zero
-        if (error instanceof errors.ContainerTooSmall ||
-          error instanceof errors.InvalidWiggleSelection ||
-          error instanceof errors.InvalidLogScaleValues ||
-          error instanceof errors.PieContainsAllZeros ||
-          error instanceof errors.NotEnoughData ||
-          error instanceof errors.NoResults) {
-          this.handler.error(error.message);
+
+        if (error instanceof KbnError) {
+          error.displayToScreen(this.handler);
         } else {
           throw error;
         }
+
       }
-    };
+    }
 
     /**
      * Destroys the visualization
@@ -114,8 +125,8 @@ define(function (require) {
      *
      * @method destroy
      */
-    Vis.prototype.destroy = function () {
-      var selection = d3.select(this.el).select('.vis-wrapper');
+    destroy() {
+      const selection = d3.select(this.el).select('.vis-wrapper');
 
       this.binder.destroy();
       this.resizeChecker.destroy();
@@ -123,8 +134,7 @@ define(function (require) {
       if (this.handler) this._runOnHandler('destroy');
 
       selection.remove();
-      selection = null;
-    };
+    }
 
     /**
      * Sets attributes on the visualization
@@ -133,10 +143,10 @@ define(function (require) {
      * @param name {String} An attribute name
      * @param val {*} Value to which the attribute name is set
      */
-    Vis.prototype.set = function (name, val) {
-      this._attr[name] = val;
+    set(name, val) {
+      this.visConfigArgs[name] = val;
       this.render(this.data, this.uiState);
-    };
+    }
 
     /**
      * Gets attributes from the visualization
@@ -145,9 +155,9 @@ define(function (require) {
      * @param name {String} An attribute name
      * @returns {*} The value of the attribute name
      */
-    Vis.prototype.get = function (name) {
-      return this._attr[name];
-    };
+    get(name) {
+      return this.visConfig.get(name);
+    }
 
     /**
      * Turns on event listeners.
@@ -156,17 +166,17 @@ define(function (require) {
      * @param listener{Function}
      * @returns {*}
      */
-    Vis.prototype.on = function (event, listener) {
-      var first = this.listenerCount(event) === 0;
-      var ret = Events.prototype.on.call(this, event, listener);
-      var added = this.listenerCount(event) > 0;
+    on(event, listener) {
+      const first = this.listenerCount(event) === 0;
+      const ret = Events.prototype.on.call(this, event, listener);
+      const added = this.listenerCount(event) > 0;
 
       // if this is the first listener added for the event
       // enable the event in the handler
       if (first && added && this.handler) this.handler.enable(event);
 
       return ret;
-    };
+    }
 
     /**
      * Turns off event listeners.
@@ -175,16 +185,16 @@ define(function (require) {
      * @param listener{Function}
      * @returns {*}
      */
-    Vis.prototype.off = function (event, listener) {
-      var last = this.listenerCount(event) === 1;
-      var ret = Events.prototype.off.call(this, event, listener);
-      var removed = this.listenerCount(event) === 0;
+    off(event, listener) {
+      const last = this.listenerCount(event) === 1;
+      const ret = Events.prototype.off.call(this, event, listener);
+      const removed = this.listenerCount(event) === 0;
 
       // Once all listeners are removed, disable the events in the handler
       if (last && removed && this.handler) this.handler.disable(event);
       return ret;
-    };
+    }
+  }
 
-    return Vis;
-  };
-});
+  return Vis;
+}

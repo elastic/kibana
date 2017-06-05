@@ -1,0 +1,8 @@
+$modalPadding: 10px;
+$modalBorderColor: #6EADC1;
+$modalBackgroundColor: #FFF;
+$modalOverlayBackground: rgba(#000000, 0.3);
+$globalModalDepth: 1000;
+
+@import "modal_overlay";
+@import "modal";

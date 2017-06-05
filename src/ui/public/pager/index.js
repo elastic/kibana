@@ -1,0 +1,1 @@
+import './pager_factory';

@@ -1,0 +1,23 @@
+<form
+  role="form"
+  ng-submit="opts.saveDataSource()"
+>
+  <div class="kuiLocalDropdownTitle">Save Search</div>
+  <input
+    class="kuiLocalDropdownInput"
+    id="SaveSearch"
+    ng-model="opts.savedSearch.title"
+    input-focus="select"
+    placeholder="Name this search..."
+  >
+
+  <saved-object-save-as-check-box saved-object="opts.savedSearch"></saved-object-save-as-check-box>
+  <button
+    ng-disabled="!opts.savedSearch.title"
+    data-test-subj="discoverSaveSearchButton"
+    type="submit"
+    class="kuiButton kuiButton--primary"
+  >
+    Save
+  </button>
+</form>

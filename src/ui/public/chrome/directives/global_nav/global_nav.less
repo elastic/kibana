@@ -1,0 +1,80 @@
+
+@import (reference) "~ui/styles/mixins";
+@import (reference) "~ui/styles/variables";
+
+@global-nav-logo-height: 70px;
+
+.global-nav {
+  width: @global-nav-closed-width;
+  position: fixed;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  z-index: 0;
+  background-color: @app-links-wrapper-background;
+  overflow: hidden;
+
+  &.is-global-nav-open {
+    width: @global-nav-open-width;
+
+    .app-title {
+      display: inline-block;
+    }
+
+    + .app-wrapper {
+      left: @global-nav-open-width;
+    }
+  }
+
+  .logo-small,
+  .logo {
+    height: @global-nav-logo-height;
+    width: @global-nav-open-width;
+    list-style-type: none;
+    &.kibana {
+      background-image: url("~ui/images/kibana.svg");
+      background-position: 6px 10px;
+      background-size: 140px 50px;
+      background-repeat: no-repeat;
+      background-color: #e8488b;
+    }
+  }
+}
+
+  /**
+   * 1. Push main apps to the top and bottom buttons to the bottom.
+   * 2. Fill height of global nav, but respect the height of the logo.
+   * 3. Allow user to scroll to see clipped nav items when the nav is too short.
+   * 4. Style the scrollbar to look good in Chrome and Safari.
+   */
+  .global-nav__links {
+    display: flex; /* 1 */
+    flex-direction: column; /* 1 */
+    justify-content: space-between; /* 1 */
+    height: ~"calc(100% - @{global-nav-logo-height})"; /* 2 */
+    overflow-x: hidden; /* 3 */
+    overflow-y: auto; /* 3 */
+
+    &::-webkit-scrollbar { /* 4 */
+      width: 16px;
+      height: 16px;
+    }
+
+    &::-webkit-scrollbar-thumb { /* 4 */
+      background-color: #2f99c1;
+      border: 6px solid transparent;
+      background-clip: content-box;
+    }
+
+    &::-webkit-scrollbar-track { /* 4 */
+      background-color: transparent;
+    }
+  }
+
+    /**
+     * 1. Prevent the top and bottom links from collapsing when the browser window is too short.
+     *    This problem is specific to Safari.
+     */
+    .global-nav__links-section {
+      flex: 0 0 auto; /* 1 */
+    }

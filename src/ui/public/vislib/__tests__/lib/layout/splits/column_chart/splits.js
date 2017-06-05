@@ -1,17 +1,20 @@
-var d3 = require('d3');
-var angular = require('angular');
-var $ = require('jquery');
-var ngMock = require('ngMock');
-var expect = require('expect.js');
+import d3 from 'd3';
+import ngMock from 'ng_mock';
+import expect from 'expect.js';
+import $ from 'jquery';
+import VislibLibLayoutSplitsColumnChartChartSplitProvider from 'ui/vislib/lib/layout/splits/column_chart/chart_split';
+import VislibLibLayoutSplitsColumnChartChartTitleSplitProvider from 'ui/vislib/lib/layout/splits/column_chart/chart_title_split';
+import VislibLibLayoutSplitsColumnChartXAxisSplitProvider from 'ui/vislib/lib/layout/splits/column_chart/x_axis_split';
+import VislibLibLayoutSplitsColumnChartYAxisSplitProvider from 'ui/vislib/lib/layout/splits/column_chart/y_axis_split';
 
 describe('Vislib Split Function Test Suite', function () {
   describe('Column Chart', function () {
-    var chartSplit;
-    var chartTitleSplit;
-    var xAxisSplit;
-    var yAxisSplit;
-    var el;
-    var data = {
+    let chartSplit;
+    let chartTitleSplit;
+    let xAxisSplit;
+    let yAxisSplit;
+    let el;
+    const data = {
       rows: [
         {
           hits      : 621,
@@ -134,10 +137,10 @@ describe('Vislib Split Function Test Suite', function () {
 
     beforeEach(ngMock.module('kibana'));
     beforeEach(ngMock.inject(function (Private) {
-      chartSplit = Private(require('ui/vislib/lib/layout/splits/column_chart/chart_split'));
-      chartTitleSplit = Private(require('ui/vislib/lib/layout/splits/column_chart/chart_title_split'));
-      xAxisSplit = Private(require('ui/vislib/lib/layout/splits/column_chart/x_axis_split'));
-      yAxisSplit = Private(require('ui/vislib/lib/layout/splits/column_chart/y_axis_split'));
+      chartSplit = Private(VislibLibLayoutSplitsColumnChartChartSplitProvider);
+      chartTitleSplit = Private(VislibLibLayoutSplitsColumnChartChartTitleSplitProvider);
+      xAxisSplit = Private(VislibLibLayoutSplitsColumnChartXAxisSplitProvider);
+      yAxisSplit = Private(VislibLibLayoutSplitsColumnChartYAxisSplitProvider);
 
       el = d3.select('body').append('div')
         .attr('class', 'visualization')
@@ -149,7 +152,7 @@ describe('Vislib Split Function Test Suite', function () {
     });
 
     describe('chart split function', function () {
-      var fixture;
+      let fixture;
 
       beforeEach(ngMock.inject(function () {
         fixture = d3.select('.visualization').call(chartSplit);
@@ -169,18 +172,20 @@ describe('Vislib Split Function Test Suite', function () {
     });
 
     describe('chart title split function', function () {
-      var newEl;
-      var fixture;
+      let visEl;
+      let newEl;
+      let fixture;
 
       beforeEach(ngMock.inject(function () {
-        el.append('div').attr('class', 'x-axis-chart-title');
-        el.append('div').attr('class', 'y-axis-chart-title');
-        d3.select('.x-axis-chart-title').call(chartTitleSplit);
-        d3.select('.y-axis-chart-title').call(chartTitleSplit);
+        visEl = el.append('div').attr('class', 'vis-wrapper');
+        visEl.append('div').attr('class', 'x-axis-chart-title');
+        visEl.append('div').attr('class', 'y-axis-chart-title');
+        visEl.select('.x-axis-chart-title').call(chartTitleSplit);
+        visEl.select('.y-axis-chart-title').call(chartTitleSplit);
 
         newEl = d3.select('body').append('div')
-          .attr('class', 'series')
-          .datum({ series: []});
+          .attr('class', 'vis-wrapper')
+          .datum({ series: [] });
 
         newEl.append('div').attr('class', 'x-axis-chart-title');
         newEl.append('div').attr('class', 'y-axis-chart-title');
@@ -209,8 +214,8 @@ describe('Vislib Split Function Test Suite', function () {
     });
 
     describe('x axis split function', function () {
-      var fixture;
-      var divs;
+      let fixture;
+      let divs;
 
       beforeEach(ngMock.inject(function () {
         fixture = d3.select('body').append('div')
@@ -231,8 +236,8 @@ describe('Vislib Split Function Test Suite', function () {
     });
 
     describe('y axis split function', function () {
-      var fixture;
-      var divs;
+      let fixture;
+      let divs;
 
       beforeEach(ngMock.inject(function () {
         fixture = d3.select('body').append('div')

@@ -1,7 +1,7 @@
-const expect = require('expect.js');
+import expect from 'expect.js';
 
-const setup = require('../apps');
-const TabFakeStore = require('../../__tests__/_TabFakeStore');
+import setup from '../apps';
+import StubBrowserStorage from 'test_utils/stub_browser_storage';
 
 describe('Chrome API :: apps', function () {
   describe('#get/setShowAppsLink()', function () {
@@ -86,11 +86,11 @@ describe('Chrome API :: apps', function () {
   describe('#getAppUrl()', function () {
     it('returns the resolved url of the current app', function () {
       const chrome = {};
-      const app = { url: '/foo' };
+      const app = { navLink: { url: '/foo' } };
       setup(chrome, { app });
 
       const a = document.createElement('a');
-      a.setAttribute('href', app.url);
+      a.setAttribute('href', app.navLink.url);
       expect(chrome.getAppUrl()).to.equal(a.href);
     });
 
@@ -147,13 +147,13 @@ describe('Chrome API :: apps', function () {
     describe('#get/setLastUrlFor()', function () {
       it('reads/writes last url from storage', function () {
         const chrome = {};
-        const store = new TabFakeStore();
+        const store = new StubBrowserStorage();
         setup(chrome, { appUrlStore: store });
-        expect(chrome.getLastUrlFor('app')).to.equal(undefined);
+        expect(chrome.getLastUrlFor('app')).to.equal(null);
         chrome.setLastUrlFor('app', 'url');
         expect(chrome.getLastUrlFor('app')).to.equal('url');
-        expect(store.getKeys().length).to.equal(1);
-        expect(store.getValues().shift()).to.equal('url');
+        expect(store.getStubbedKeys().length).to.equal(1);
+        expect(store.getStubbedValues().shift()).to.equal('url');
       });
     });
   });

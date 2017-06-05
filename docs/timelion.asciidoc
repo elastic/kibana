@@ -1,0 +1,29 @@
+[[timelion]]
+= Timelion
+
+[partintro]
+--
+Timelion is a time series data visualizer that enables you to combine totally
+independent data sources within a single visualization. It's driven by a simple
+expression language you use to retrieve time series data, perform calculations
+to tease out the answers to complex questions, and visualize the results.
+
+For example, Timelion enables you to easily get the answers to questions like:
+
+* How many pages does each unique user view over time?
+* What's the difference in traffic volume between this Friday and last Friday?
+* What percent of Japan's population came to my site today?
+* What's the 10-day moving average of the S&P 500?
+* What's the cumulative sum of all search requests received in the last 2 years?
+{nbsp}
+
+You might also be interested in these tutorial videos:
+
+* https://www.elastic.co/elasticon/conf/2017/sf/timelion-magic-math-and-everything-in-the-middle[Timelion: Magic, Math, and Everything in the Middle]
+* https://www.elastic.co/videos/timelion-plugin-for-kibana-enables-times-series-paris-meetup[Timelion Plugin for Kibana Enables Time Series]
+* https://www.elastic.co/videos/using-kibana-and-timelion-to-analyze-earthquake-data[Using Kibana and Timelion to Analyze Earthquake Data]
+--
+
+include::timelion/timelion-getting-started.asciidoc[]
+
+include::timelion/timelion-inline-help.asciidoc[]

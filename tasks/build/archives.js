@@ -1,37 +1,37 @@
-module.exports = function createPackages(grunt) {
-  let { config } = grunt;
-  let { resolve } = require('path');
-  let { execFile } = require('child_process');
-  let { all, fromNode } = require('bluebird');
+import { execFile } from 'child_process';
+import { all, fromNode } from 'bluebird';
 
-  let buildPath = resolve(config.get('root'), 'build');
-  let exec = async (cmd, args) => {
-    grunt.log.writeln(` > ${cmd} ${args.join(' ')}`);
-    await fromNode(cb => execFile(cmd, args, { cwd: buildPath }, cb));
-  };
+export default (grunt) => {
+  const { config, log } = grunt;
 
+  const cwd = config.get('buildDir');
+  const targetDir = config.get('target');
 
-  let archives = async (platform) => {
-    // kibana.tar.gz
-    await exec('tar', ['-zchf', platform.tarPath, platform.buildName]);
+  async function exec(cmd, args) {
+    log.writeln(` > ${cmd} ${args.join(' ')}`);
+    await fromNode(cb => execFile(cmd, args, { cwd }, cb));
+  }
 
-    // kibana.zip
-    if (/windows/.test(platform.name)) {
-      await exec('zip', ['-rq', '-ll', platform.zipPath, platform.buildName]);
+  async function archives({ name, buildName, zipPath, tarPath }) {
+    if (/windows/.test(name)) {
+      await exec('zip', ['-rq', '-ll', zipPath, buildName]);
     } else {
-      await exec('zip', ['-rq', platform.zipPath, platform.buildName]);
+      const tarArguments = ['-zchf', tarPath, buildName];
+
+      // Add a flag to handle filepaths with colons (i.e. C://...) on windows
+      if (/^win/.test(process.platform)) {
+        tarArguments.push('--force-local');
+      }
+
+      await exec('tar', tarArguments);
     }
-  };
+  }
 
   grunt.registerTask('_build:archives', function () {
+    grunt.file.mkdir(targetDir);
 
     all(
-      grunt.config.get('platforms')
-      .map(async platform => {
-
-        grunt.file.mkdir('target');
-        await archives(platform);
-      })
+      config.get('platforms').map(async platform => await archives(platform))
     )
     .nodeify(this.async());
 

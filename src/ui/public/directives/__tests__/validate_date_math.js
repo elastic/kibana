@@ -1,13 +1,12 @@
-var angular = require('angular');
-var expect = require('expect.js');
-var ngMock = require('ngMock');
+import expect from 'expect.js';
+import ngMock from 'ng_mock';
+import 'ui/directives/validate_date_math';
 
-require('ui/directives/validate_date_math');
 
 describe('Validate date math directive', function () {
-  var $compile;
-  var $rootScope;
-  var html = '<input type="text" ng-model="value" validate-date-math />';
+  let $compile;
+  let $rootScope;
+  const html = '<input type="text" ng-model="value" validate-date-math />';
 
   beforeEach(ngMock.module('kibana'));
 
@@ -17,7 +16,7 @@ describe('Validate date math directive', function () {
   }));
 
   it('should allow valid date math', function () {
-    var element = $compile(html)($rootScope);
+    const element = $compile(html)($rootScope);
 
     $rootScope.value = 'now';
     $rootScope.$digest();
@@ -41,7 +40,7 @@ describe('Validate date math directive', function () {
   });
 
   it('should disallow invalid date math', function () {
-    var element = $compile(html)($rootScope);
+    const element = $compile(html)($rootScope);
 
     $rootScope.value = 'hello, world';
     $rootScope.$digest();
@@ -61,7 +60,7 @@ describe('Validate date math directive', function () {
   });
 
   it('should allow empty values', function () {
-    var element = $compile(html)($rootScope);
+    const element = $compile(html)($rootScope);
 
     $rootScope.value = '';
     $rootScope.$digest();

@@ -1,21 +1,19 @@
-var d3 = require('d3');
-var angular = require('angular');
-var expect = require('expect.js');
-var ngMock = require('ngMock');
-var _ = require('lodash');
-var $ = require('jquery');
-var fixtures = require('fixtures/fake_hierarchical_data');
-var series = require('fixtures/vislib/mock_data/date_histogram/_series');
-var terms = require('fixtures/vislib/mock_data/terms/_columns');
+import d3 from 'd3';
+import expect from 'expect.js';
+import ngMock from 'ng_mock';
+import series from 'fixtures/vislib/mock_data/date_histogram/_series';
+import terms from 'fixtures/vislib/mock_data/terms/_columns';
+import $ from 'jquery';
+import { VislibVisualizationsTimeMarkerProvider } from 'ui/vislib/visualizations/time_marker';
 
 describe('Vislib Time Marker Test Suite', function () {
-  var height = 50;
-  var color = '#ff0000';
-  var opacity = 0.5;
-  var width = 3;
-  var customClass = 'custom-time-marker';
-  var dateMathTimes = ['now-1m', 'now-5m', 'now-15m'];
-  var myTimes = dateMathTimes.map(function (dateMathString) {
+  const height = 50;
+  const color = '#ff0000';
+  const opacity = 0.5;
+  const width = 3;
+  const customClass = 'custom-time-marker';
+  const dateMathTimes = ['now-1m', 'now-5m', 'now-15m'];
+  const myTimes = dateMathTimes.map(function (dateMathString) {
     return {
       time: dateMathString,
       class: customClass,
@@ -24,26 +22,26 @@ describe('Vislib Time Marker Test Suite', function () {
       width: width
     };
   });
-  var getExtent = function (dataArray, func) {
+  const getExtent = function (dataArray, func) {
     return func(dataArray, function (obj) {
       return func(obj.values, function (d) {
         return d.x;
       });
     });
   };
-  var times = [];
-  var TimeMarker;
-  var defaultMarker;
-  var customMarker;
-  var selection;
-  var xScale;
-  var minDomain;
-  var maxDomain;
-  var domain;
+  const times = [];
+  let TimeMarker;
+  let defaultMarker;
+  let customMarker;
+  let selection;
+  let xScale;
+  let minDomain;
+  let maxDomain;
+  let domain;
 
   beforeEach(ngMock.module('kibana'));
   beforeEach(ngMock.inject(function (Private) {
-    TimeMarker = Private(require('ui/vislib/visualizations/time_marker'));
+    TimeMarker = Private(VislibVisualizationsTimeMarkerProvider);
     minDomain = getExtent(series.series, d3.min);
     maxDomain = getExtent(series.series, d3.max);
     domain = [minDomain, maxDomain];
@@ -62,8 +60,8 @@ describe('Vislib Time Marker Test Suite', function () {
   });
 
   describe('_isTimeBaseChart method', function () {
-    var boolean;
-    var newSelection;
+    let boolean;
+    let newSelection;
 
     it('should return true when data is time based', function () {
       boolean = defaultMarker._isTimeBasedChart(selection);
@@ -78,7 +76,7 @@ describe('Vislib Time Marker Test Suite', function () {
   });
 
   describe('render method', function () {
-    var lineArray;
+    let lineArray;
 
     beforeEach(function () {
       defaultMarker.render(selection);

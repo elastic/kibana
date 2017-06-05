@@ -1,21 +1,24 @@
-var expect = require('expect.js');
-var ngMock = require('ngMock');
+import expect from 'expect.js';
+import ngMock from 'ng_mock';
+import './agg_type';
+import './agg_params';
+import './buckets/_histogram';
+import './buckets/_geo_hash';
+import './buckets/_range';
+import { AggTypesIndexProvider } from 'ui/agg_types/index';
+import { AggTypesBucketsBucketAggTypeProvider } from 'ui/agg_types/buckets/_bucket_agg_type';
+import { AggTypesMetricsMetricAggTypeProvider } from 'ui/agg_types/metrics/metric_agg_type';
 
 describe('AggTypesComponent', function () {
-  require('./AggType');
-  require('./AggParams');
-  require('./bucketCountBetween');
-  require('./buckets/_histogram');
-  require('./buckets/_range');
 
   describe('bucket aggs', function () {
-    var bucketAggs;
-    var BucketAggType;
+    let bucketAggs;
+    let BucketAggType;
 
     beforeEach(ngMock.module('kibana'));
     beforeEach(ngMock.inject(function (Private) {
-      bucketAggs = Private(require('ui/agg_types/index')).byType.buckets;
-      BucketAggType = Private(require('ui/agg_types/buckets/_bucket_agg_type'));
+      bucketAggs = Private(AggTypesIndexProvider).byType.buckets;
+      BucketAggType = Private(AggTypesBucketsBucketAggTypeProvider);
     }));
 
     it('all extend BucketAggType', function () {
@@ -26,13 +29,13 @@ describe('AggTypesComponent', function () {
   });
 
   describe('metric aggs', function () {
-    var metricAggs;
-    var MetricAggType;
+    let metricAggs;
+    let MetricAggType;
 
     beforeEach(ngMock.module('kibana'));
     beforeEach(ngMock.inject(function (Private) {
-      metricAggs = Private(require('ui/agg_types/index')).byType.metrics;
-      MetricAggType = Private(require('ui/agg_types/metrics/MetricAggType'));
+      metricAggs = Private(AggTypesIndexProvider).byType.metrics;
+      MetricAggType = Private(AggTypesMetricsMetricAggTypeProvider);
     }));
 
     it('all extend MetricAggType', function () {

@@ -1,6 +1,6 @@
+import d3 from 'd3';
 define(function () {
   return function YAxisSplitFactory() {
-    var d3 = require('d3');
 
     /*
      * Adds div DOM elements to the `.y-axis-div-wrapper` element based on the data layout.
@@ -9,40 +9,31 @@ define(function () {
      */
 
     // render and get bounding box width
-    return function (selection, parent, opts) {
-      var yAxis = opts && opts.yAxis;
+    return function (selection) {
 
       selection.each(function () {
-        var div = d3.select(this);
-
-        div.call(setWidth, yAxis);
+        const div = d3.select(this);
+        let rows;
 
         div.selectAll('.y-axis-div')
         .append('div')
         .data(function (d) {
+          rows = d.rows ? d.rows.length : 1;
           return d.rows ? d.rows : [d];
         })
         .enter()
           .append('div')
-          .attr('class', 'y-axis-div');
+          .attr('class', (d, i) => {
+            let divClass = '';
+            if (i === 0) {
+              divClass += ' chart-first';
+            }
+            if (i === rows - 1) {
+              divClass += ' chart-last';
+            }
+            return 'y-axis-div axis-div' + divClass;
+          });
       });
     };
-
-    function setWidth(el, yAxis) {
-      if (!yAxis) return;
-
-      var padding = 5;
-      var height = parseInt(el.node().clientHeight, 10);
-
-      // render svg and get the width of the bounding box
-      var svg = d3.select('body')
-      .append('svg')
-      .attr('style', 'position:absolute; top:-10000; left:-10000');
-      var width = svg.append('g')
-      .call(yAxis.getYAxis(height)).node().getBBox().width + padding;
-      svg.remove();
-
-      el.style('width', (width + padding) + 'px');
-    }
   };
 });

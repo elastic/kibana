@@ -1,0 +1,106 @@
+{
+  "fields": {
+    "_routing": {
+      "_routing": {
+        "type": "_routing",
+        "searchable": true,
+        "aggregatable": false
+      }
+    },
+    "_index": {
+      "_index": {
+        "type": "_index",
+        "searchable": true,
+        "aggregatable": true
+      }
+    },
+    "_type": {
+      "_type": {
+        "type": "_type",
+        "searchable": true,
+        "aggregatable": true
+      }
+    },
+    "_all": {
+      "_all": {
+        "type": "_all",
+        "searchable": true,
+        "aggregatable": false
+      }
+    },
+    "_seq_no": {
+      "_seq_no": {
+        "type": "_seq_no",
+        "searchable": true,
+        "aggregatable": true
+      }
+    },
+    "_parent": {
+      "_parent": {
+        "type": "_parent",
+        "searchable": false,
+        "aggregatable": true
+      }
+    },
+    "@timestamp": {
+      "date": {
+        "type": "date",
+        "searchable": true,
+        "aggregatable": true
+      }
+    },
+    "_field_names": {
+      "_field_names": {
+        "type": "_field_names",
+        "searchable": true,
+        "aggregatable": false
+      }
+    },
+    "success": {
+      "boolean": {
+        "type": "boolean",
+        "searchable": true,
+        "aggregatable": true,
+        "indices": [
+          "index1"
+        ]
+      },
+      "keyword": {
+        "type": "keyword",
+        "searchable": true,
+        "aggregatable": true,
+        "indices": [
+          "index2"
+        ]
+      }
+    },
+    "_source": {
+      "_source": {
+        "type": "_source",
+        "searchable": false,
+        "aggregatable": false
+      }
+    },
+    "_id": {
+      "_id": {
+        "type": "_id",
+        "searchable": true,
+        "aggregatable": true
+      }
+    },
+    "_version": {
+      "_version": {
+        "type": "_version",
+        "searchable": false,
+        "aggregatable": false
+      }
+    },
+    "_uid": {
+      "_uid": {
+        "type": "_uid",
+        "searchable": false,
+        "aggregatable": true
+      }
+    }
+  }
+}

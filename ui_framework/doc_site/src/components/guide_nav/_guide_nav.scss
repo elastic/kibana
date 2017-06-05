@@ -1,0 +1,183 @@
+.guideNav {
+  display: flex;
+  flex-direction: column;
+  position: fixed;
+  z-index: 10000;
+  top: 0;
+  left: 0;
+  right: 0;
+  min-width: $guideMinWidth;
+  height: $guideNavHeight;
+  border-bottom: 1px solid #CCCCCC;
+  color: $guideTextColor;
+  background-color: $guidePanelBackgroundColor;
+  transition: height 0.3s ease, box-shadow 0.3s linear;
+  overflow: hidden;
+  box-shadow: 0 0 0 rgba(black, 0.3);
+
+  &.is-guide-nav-open {
+    height: 100%;
+    box-shadow: 0 40px 200px rgba(black, 0.05);
+  }
+}
+
+  .guideNav__header {
+    position: relative;
+    flex: 0 0 auto;
+    display: flex;
+    align-items: center;
+    height: 60px;
+    padding: 0 20px;
+  }
+
+    .guideNav__menu {
+      cursor: pointer;
+      margin-right: 10px;
+      padding: 10px;
+      border-radius: 3px;
+
+      &.is-menu-button-pinned,
+      &:hover {
+        background-color: rgba(black, 0.05);
+      }
+
+      &:active {
+        background-color: rgba(black, 0.2);
+        box-shadow: inset 0 2px 8px rgba(black, 0.1);
+      }
+    }
+
+    .guideNav__title {
+      color: $guideTextColor;
+      text-decoration: none;
+      font-size: 18px;
+    }
+
+    .guideNav__version {
+      margin-left: 10px;
+      font-weight: 300;
+      font-size: 14px;
+    }
+
+    .guideNav__elasticLogo {
+      position: absolute;
+      background-image: url("images/elastic-logo.svg");
+      width: 106px;
+      height: 36px;
+      background-repeat: no-repeat;
+      background-size: contain;
+      left: 50%;
+      transform: translateX(-50%);
+    }
+
+.guideNavSearch {
+  margin: 0 20px;
+  width: 100%;
+  max-width: 400px;
+  font-size: 16px;
+  padding: 8px;
+  border: 1px solid rgba($guideTextColor, 0.2);
+
+  &:focus {
+    border-color: $guideLinkHoverColor;
+    outline: none;
+  }
+}
+
+/**
+ * 1. Height of the searchbox.
+ */
+.guideNavItemsContainer {
+  @include scrollbar;
+  display: flex;
+  overflow: auto;
+  min-height: calc(100vh - #{$guideNavHeight + 40px}); /* 1 */
+}
+
+.guideNavItems {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  align-content: flex-start;
+}
+
+.guideNavSectionTitle {
+  min-width: 200px;
+  padding: 8px 20px;
+  margin-left: 5px;
+  font-size: 14px;
+  line-height: 20px;
+  font-weight: 700;
+}
+
+.guideNavItem,
+.guideNavNoItems {
+  min-width: 200px;
+  font-size: 20px;
+  line-height: 20px;
+  padding: 8px 20px;
+  margin-left: 5px;
+}
+
+.guideNavItem {
+  display: flex;
+  align-items: center;
+}
+
+  .guideNavItem__link {
+    color: $guideTextColor;
+    text-decoration: none;
+
+    &:hover {
+      color: $guideLinkHoverColor;
+    }
+  }
+
+  .guideNavItem__reactLogo {
+    margin-left: 10px;
+    background-image: url("images/react-logo.svg");
+    width: 24px;
+    height: 22px;
+    background-repeat: no-repeat;
+    background-size: contain;
+  }
+
+.guideNavNoItems {
+  color: rgba($guideTextColor, 0.5);
+  margin-top: 0;
+  margin-bottom: 0;
+}
+
+.guideNavPaginationButtons {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+}
+
+.guideNavPaginationButton {
+  appearance: none;
+  border: none;
+  line-height: 10px;
+  padding: 4px 20px;
+  color: $guideLinkHoverColor;
+  background-color: #fff;
+  border: 1px solid $guideLinkHoverColor;
+  border-radius: 3px;
+  cursor: pointer;
+
+  &:hover,
+  &:active {
+    background-color: #e6f7fc;
+  }
+
+  &.guideNavPaginationButton-isDisabled {
+    pointer-events: none;
+    color: rgba($guideTextColor, 0.25);
+    border-color: rgba($guideTextColor, 0.25);
+  }
+
+  & + & {
+    margin-left: 10px;
+  }
+}

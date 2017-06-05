@@ -1,46 +1,45 @@
-define(function (require) {
-  return function HierarchicalTooltipFormaterProvider($rootScope, $compile, $sce) {
-    var _ = require('lodash');
-    var $ = require('jquery');
-    var $tooltip = $(require('ui/agg_response/hierarchical/_tooltip.html'));
-    var collectBranch = require('ui/agg_response/hierarchical/_collect_branch');
-    var $tooltipScope = $rootScope.$new();
-    var numeral = require('numeral');
+import _ from 'lodash';
+import $ from 'jquery';
+import collectBranch from 'ui/agg_response/hierarchical/_collect_branch';
+import numeral from 'numeral';
 
-    $compile($tooltip)($tooltipScope);
+export function HierarchicalTooltipFormatterProvider($rootScope, $compile, $sce) {
+  const $tooltip = $(require('ui/agg_response/hierarchical/_tooltip.html'));
+  const $tooltipScope = $rootScope.$new();
 
-    return function (columns) {
-      return function (event) {
-        var datum = event.datum;
+  $compile($tooltip)($tooltipScope);
 
-        // Collect the current leaf and parents into an array of values
-        $tooltipScope.rows = collectBranch(datum);
+  return function (columns) {
+    return function (event) {
+      const datum = event.datum;
 
-        var metricCol = $tooltipScope.metricCol = _.find(columns, { categoryName: 'metric' });
+      // Collect the current leaf and parents into an array of values
+      $tooltipScope.rows = collectBranch(datum);
 
-        // Map those values to what the tooltipSource.rows format.
-        _.forEachRight($tooltipScope.rows, function (row, i, rows) {
-          row.spacer = $sce.trustAsHtml(_.repeat('&nbsp;', row.depth));
+      const metricCol = $tooltipScope.metricCol = _.find(columns, { categoryName: 'metric' });
 
-          var percent;
-          if (row.item.percentOfGroup != null) {
-            percent = row.item.percentOfGroup;
-          }
+      // Map those values to what the tooltipSource.rows format.
+      _.forEachRight($tooltipScope.rows, function (row) {
+        row.spacer = $sce.trustAsHtml(_.repeat('&nbsp;', row.depth));
 
-          row.metric = metricCol.aggConfig.fieldFormatter()(row.metric);
+        let percent;
+        if (row.item.percentOfGroup != null) {
+          percent = row.item.percentOfGroup;
+        }
 
-          if (percent != null) {
-            row.metric += ' (' + numeral(percent).format('0.[00]%') + ')';
-          }
+        row.metric = metricCol.aggConfig.fieldFormatter()(row.metric);
 
-          return row;
-        });
+        if (percent != null) {
+          row.metric += ' (' + numeral(percent).format('0.[00]%') + ')';
+        }
 
-        $tooltipScope.$apply();
-        return $tooltip[0].outerHTML;
-      };
+        return row;
+      });
 
+      $tooltipScope.$apply();
+      return $tooltip[0].outerHTML;
     };
 
   };
-});
+
+}

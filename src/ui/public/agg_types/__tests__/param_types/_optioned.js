@@ -1,21 +1,23 @@
-describe('Optioned', function () {
-  var _ = require('lodash');
-  var expect = require('expect.js');
-  var ngMock = require('ngMock');
+import expect from 'expect.js';
+import ngMock from 'ng_mock';
+import { AggTypesParamTypesBaseProvider } from 'ui/agg_types/param_types/base';
+import { AggTypesParamTypesOptionedProvider } from 'ui/agg_types/param_types/optioned';
 
-  var BaseAggParam;
-  var OptionedAggParam;
+describe('Optioned', function () {
+
+  let BaseAggParam;
+  let OptionedAggParam;
 
   beforeEach(ngMock.module('kibana'));
   // fetch out deps
   beforeEach(ngMock.inject(function (Private) {
-    BaseAggParam = Private(require('ui/agg_types/param_types/base'));
-    OptionedAggParam = Private(require('ui/agg_types/param_types/optioned'));
+    BaseAggParam = Private(AggTypesParamTypesBaseProvider);
+    OptionedAggParam = Private(AggTypesParamTypesOptionedProvider);
   }));
 
   describe('constructor', function () {
     it('it is an instance of BaseAggParam', function () {
-      var aggParam = new OptionedAggParam({
+      const aggParam = new OptionedAggParam({
         name: 'some_param',
         type: 'optioned'
       });

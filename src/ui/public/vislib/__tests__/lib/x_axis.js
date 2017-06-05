@@ -1,21 +1,21 @@
-var d3 = require('d3');
-var angular = require('angular');
-var _ = require('lodash');
-var $ = require('jquery');
-var ngMock = require('ngMock');
-var expect = require('expect.js');
+import d3 from 'd3';
+import _ from 'lodash';
+import ngMock from 'ng_mock';
+import expect from 'expect.js';
+import $ from 'jquery';
+import 'ui/persisted_state';
+import { VislibLibAxisProvider } from 'ui/vislib/lib/axis';
+import { VislibVisConfigProvider } from 'ui/vislib/lib/vis_config';
 
 describe('Vislib xAxis Class Test Suite', function () {
-  var XAxis;
-  var Data;
-  var persistedState;
-  var xAxis;
-  var el;
-  var fixture;
-  var dataObj;
-  var data = {
+  let Axis;
+  let persistedState;
+  let xAxis;
+  let el;
+  let fixture;
+  let VisConfig;
+  const data = {
     hits: 621,
-    label: '',
     ordered: {
       date: true,
       interval: 30000,
@@ -24,6 +24,7 @@ describe('Vislib xAxis Class Test Suite', function () {
     },
     series: [
       {
+        label: 'Count',
         values: [
           {
             x: 1408734060000,
@@ -76,10 +77,10 @@ describe('Vislib xAxis Class Test Suite', function () {
   };
 
   beforeEach(ngMock.module('kibana'));
-  beforeEach(ngMock.inject(function (Private) {
-    Data = Private(require('ui/vislib/lib/data'));
-    persistedState = new (Private(require('ui/persisted_state/persisted_state')))();
-    XAxis = Private(require('ui/vislib/lib/x_axis'));
+  beforeEach(ngMock.inject(function (Private, $injector) {
+    persistedState = new ($injector.get('PersistedState'))();
+    Axis = Private(VislibLibAxisProvider);
+    VisConfig = Private(VislibVisConfigProvider);
 
     el = d3.select('body').append('div')
       .attr('class', 'x-axis-wrapper')
@@ -88,15 +89,12 @@ describe('Vislib xAxis Class Test Suite', function () {
     fixture = el.append('div')
       .attr('class', 'x-axis-div');
 
-    dataObj = new Data(data, {}, persistedState);
-    xAxis = new XAxis({
-      el: $('.x-axis-div')[0],
-      xValues: dataObj.xValues(),
-      ordered: dataObj.get('ordered'),
-      xAxisFormatter: dataObj.get('xAxisFormatter'),
-      _attr: {
-        margin: { top: 0, right: 0, bottom: 0, left: 0 }
-      }
+    const visConfig = new VisConfig({
+      type: 'histogram'
+    }, data, persistedState, $('.x-axis-div')[0]);
+    xAxis = new Axis(visConfig, {
+      type: 'category',
+      id: 'CategoryAxis-1'
     });
   }));
 
@@ -123,38 +121,50 @@ describe('Vislib xAxis Class Test Suite', function () {
     });
   });
 
-  describe('getScale, getDomain, getTimeDomain, getOrdinalDomain, and getRange Methods', function () {
-    var ordered;
-    var timeScale;
-    var timeDomain;
-    var ordinalScale;
-    var ordinalDomain;
-    var width;
-    var range;
+  describe('getScale, getDomain, getTimeDomain, and getRange Methods', function () {
+    let timeScale;
+    let width;
+    let range;
 
     beforeEach(function () {
-      timeScale = xAxis.getScale();
-      timeDomain = xAxis.getDomain(timeScale);
-      range = xAxis.getRange(timeDomain, width);
-      xAxis.ordered = {};
-      ordinalScale = xAxis.getScale();
-      ordinalDomain = ordinalScale.domain(['this', 'should', 'be', 'an', 'array']);
       width = $('.x-axis-div').width();
+      xAxis.getAxis(width);
+      timeScale = xAxis.getScale();
+      range = xAxis.axisScale.getRange(width);
     });
 
     it('should return a function', function () {
       expect(_.isFunction(timeScale)).to.be(true);
-      expect(_.isFunction(ordinalScale)).to.be(true);
     });
 
     it('should return the correct domain', function () {
-      expect(_.isDate(timeDomain.domain()[0])).to.be(true);
-      expect(_.isDate(timeDomain.domain()[1])).to.be(true);
+      expect(_.isDate(timeScale.domain()[0])).to.be(true);
+      expect(_.isDate(timeScale.domain()[1])).to.be(true);
     });
 
     it('should return the min and max dates', function () {
-      expect(timeDomain.domain()[0].toDateString()).to.be(new Date(1408734060000).toDateString());
-      expect(timeDomain.domain()[1].toDateString()).to.be(new Date(1408734330000).toDateString());
+      expect(timeScale.domain()[0].toDateString()).to.be(new Date(1408734060000).toDateString());
+      expect(timeScale.domain()[1].toDateString()).to.be(new Date(1408734330000).toDateString());
+    });
+
+    it('should return the correct range', function () {
+      expect(range[0]).to.be(0);
+      expect(range[1]).to.be(width);
+    });
+  });
+
+  describe('getOrdinalDomain Method', function () {
+    let ordinalScale;
+    let ordinalDomain;
+    let width;
+
+    beforeEach(function () {
+      width = $('.x-axis-div').width();
+      xAxis.ordered = null;
+      xAxis.axisConfig.ordered = null;
+      xAxis.getAxis(width);
+      ordinalScale = xAxis.getScale();
+      ordinalDomain = ordinalScale.domain(['this', 'should', 'be', 'an', 'array']);
     });
 
     it('should return an ordinal scale', function () {
@@ -165,20 +175,16 @@ describe('Vislib xAxis Class Test Suite', function () {
     it('should return an array of values', function () {
       expect(_.isArray(ordinalDomain.domain())).to.be(true);
     });
-
-    it('should return the correct range', function () {
-      expect(range.range()[0]).to.be(0);
-      expect(range.range()[1]).to.be(width);
-    });
   });
 
   describe('getXScale Method', function () {
-    var width;
-    var xScale;
+    let width;
+    let xScale;
 
     beforeEach(function () {
       width = $('.x-axis-div').width();
-      xScale = xAxis.getXScale(width);
+      xAxis.getAxis(width);
+      xScale = xAxis.getScale();
     });
 
     it('should return a function', function () {
@@ -197,24 +203,15 @@ describe('Vislib xAxis Class Test Suite', function () {
   });
 
   describe('getXAxis Method', function () {
-    var width;
-    var axis;
+    let width;
 
     beforeEach(function () {
       width = $('.x-axis-div').width();
-      xAxis.getXAxis(width);
+      xAxis.getAxis(width);
     });
 
-    it('should create an xAxis function on the xAxis class', function () {
-      expect(_.isFunction(xAxis.xAxis)).to.be(true);
-    });
-
-    it('should create an xScale function on the xAxis class', function () {
-      expect(_.isFunction(xAxis.xScale)).to.be(true);
-    });
-
-    it('should create an xAxisFormatter function on the xAxis class', function () {
-      expect(_.isFunction(xAxis.xAxisFormatter)).to.be(true);
+    it('should create an getScale function on the xAxis class', function () {
+      expect(_.isFunction(xAxis.getScale())).to.be(true);
     });
   });
 
@@ -223,5 +220,4 @@ describe('Vislib xAxis Class Test Suite', function () {
       expect(_.isFunction(xAxis.draw())).to.be(true);
     });
   });
-
 });

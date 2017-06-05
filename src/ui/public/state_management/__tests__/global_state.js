@@ -1,13 +1,11 @@
 
-var sinon = require('sinon');
-var expect = require('expect.js');
-var ngMock = require('ngMock');
-require('ui/state_management/global_state');
+import expect from 'expect.js';
+import ngMock from 'ng_mock';
+import 'ui/state_management/global_state';
 
 describe('State Management', function () {
-  var $rootScope;
-  var $location;
-  var state;
+  let $location;
+  let state;
 
   beforeEach(ngMock.module('kibana'));
   beforeEach(ngMock.inject(function (_$location_, globalState) {

@@ -1,42 +1,50 @@
-const cluster = require('cluster');
-const { join } = require('path');
-const { format: formatUrl } = require('url');
-const Hapi = require('hapi');
-const { debounce, compact, get, invoke, bindAll, once, sample } = require('lodash');
+import { resolve } from 'path';
+import { debounce, invoke, bindAll, once, uniq } from 'lodash';
 
-const Log = require('../Log');
-const Worker = require('./worker');
-const BasePathProxy = require('./base_path_proxy');
+import Log from '../log';
+import Worker from './worker';
+import BasePathProxy from './base_path_proxy';
 
 process.env.kbnWorkerType = 'managr';
 
 module.exports = class ClusterManager {
-  constructor(opts, settings) {
+  constructor(opts = {}, settings = {}) {
     this.log = new Log(opts.quiet, opts.silent);
     this.addedCount = 0;
 
-    this.basePathProxy = new BasePathProxy(this, settings);
+    const serverArgv = [];
+    const optimizerArgv = [
+      '--plugins.initialize=false',
+      '--uiSettings.enabled=false',
+      '--server.autoListen=false',
+    ];
+
+    if (opts.basePath) {
+      this.basePathProxy = new BasePathProxy(this, settings);
+
+      optimizerArgv.push(
+        `--server.basePath=${this.basePathProxy.basePath}`
+      );
+
+      serverArgv.push(
+        `--server.port=${this.basePathProxy.targetPort}`,
+        `--server.basePath=${this.basePathProxy.basePath}`
+      );
+    }
 
     this.workers = [
       this.optimizer = new Worker({
         type: 'optmzr',
         title: 'optimizer',
         log: this.log,
-        argv: compact([
-          '--plugins.initialize=false',
-          '--server.autoListen=false',
-          `--server.basePath=${this.basePathProxy.basePath}`
-        ]),
+        argv: optimizerArgv,
         watch: false
       }),
 
       this.server = new Worker({
         type: 'server',
         log: this.log,
-        argv: compact([
-          `--server.port=${this.basePathProxy.targetPort}`,
-          `--server.basePath=${this.basePathProxy.basePath}`
-        ])
+        argv: serverArgv
       })
     ];
 
@@ -53,31 +61,56 @@ module.exports = class ClusterManager {
 
     bindAll(this, 'onWatcherAdd', 'onWatcherError', 'onWatcherChange');
 
-    if (opts.watch) this.setupWatching();
+    if (opts.watch) {
+      const extraPaths = [
+        ...settings.plugins.paths,
+        ...settings.plugins.scanDirs,
+      ];
+
+      const extraIgnores = settings.plugins.scanDirs
+        .map(scanDir => resolve(scanDir, '*'))
+        .concat(settings.plugins.paths)
+        .reduce((acc, path) => acc.concat(
+          resolve(path, 'test'),
+          resolve(path, 'build'),
+          resolve(path, 'target'),
+          resolve(path, 'scripts'),
+          resolve(path, 'docs'),
+        ), []);
+
+      this.setupWatching(extraPaths, extraIgnores);
+    }
+
     else this.startCluster();
   }
 
   startCluster() {
     this.setupManualRestart();
     invoke(this.workers, 'start');
-    this.basePathProxy.listen();
+    if (this.basePathProxy) {
+      this.basePathProxy.listen();
+    }
   }
 
-  setupWatching() {
+  setupWatching(extraPaths, extraIgnores) {
     const chokidar = require('chokidar');
-    const utils = require('requirefrom')('src/utils');
-    const fromRoot = utils('fromRoot');
+    const { fromRoot } = require('../../utils');
 
-    this.watcher = chokidar.watch([
-      'src/plugins',
-      'src/server',
-      'src/ui',
-      'src/utils',
-      'config',
-      'installedPlugins'
-    ], {
+    const watchPaths = [
+      fromRoot('src/core_plugins'),
+      fromRoot('src/server'),
+      fromRoot('src/ui'),
+      fromRoot('src/utils'),
+      fromRoot('config'),
+      ...extraPaths
+    ].map(path => resolve(path));
+
+    this.watcher = chokidar.watch(uniq(watchPaths), {
       cwd: fromRoot('.'),
-      ignored: /[\\\/](\..*|node_modules|bower_components|public|__tests__)[\\\/]/
+      ignored: [
+        /[\\\/](\..*|node_modules|bower_components|public|__tests__|coverage)[\\\/]/,
+        ...extraIgnores
+      ]
     });
 
     this.watcher.on('add', this.onWatcherAdd);
@@ -104,7 +137,7 @@ module.exports = class ClusterManager {
     rl.setPrompt('');
     rl.prompt();
 
-    rl.on('line', line => {
+    rl.on('line', () => {
       nls = nls + 1;
 
       if (nls >= 2) {

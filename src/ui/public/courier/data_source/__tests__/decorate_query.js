@@ -1,23 +1,17 @@
-var moment = require('moment');
-var expect = require('expect.js');
-var ngMock = require('ngMock');
+import expect from 'expect.js';
+import ngMock from 'ng_mock';
+import { DecorateQueryProvider } from 'ui/courier/data_source/_decorate_query';
 
 describe('Query decorator', function () {
+  let config;
 
-  var _ = require('lodash');
-  var config;
-
-  var indexPattern;
-
-  var getComputedFields;
-
-  var fn;
+  let fn;
   beforeEach(ngMock.module(
     'kibana',
     function ($provide) {
       // Super simple config stub
       $provide.service('config', function () {
-        var keys = {};
+        const keys = {};
         return {
           get: function (key) { return keys[key]; },
           set: function (key, value) { keys[key] = value; }
@@ -28,7 +22,7 @@ describe('Query decorator', function () {
 
   beforeEach(ngMock.inject(function (Private, $injector, _config_) {
     config = _config_;
-    fn = Private(require('ui/courier/data_source/_decorate_query'));
+    fn = Private(DecorateQueryProvider);
   }));
 
   it('should be a function', function () {
@@ -36,8 +30,7 @@ describe('Query decorator', function () {
   });
 
   it('should merge in the query string options', function () {
-    config.set('query:queryString:options', {analyze_wildcard: true});
-    expect(fn({query_string: {query: '*'}})).to.eql({query_string: {query: '*', analyze_wildcard: true}});
+    config.set('query:queryString:options', { analyze_wildcard: true });
+    expect(fn({ query_string: { query: '*' } })).to.eql({ query_string: { query: '*', analyze_wildcard: true } });
   });
-
 });

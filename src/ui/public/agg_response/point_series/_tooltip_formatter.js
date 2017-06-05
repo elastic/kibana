@@ -1,45 +1,44 @@
-define(function (require) {
-  return function PointSeriesTooltipFormatter($compile, $rootScope) {
-    var $ = require('jquery');
+import $ from 'jquery';
 
-    var $tooltipScope = $rootScope.$new();
-    var $tooltip = $(require('ui/agg_response/point_series/_tooltip.html'));
-    $compile($tooltip)($tooltipScope);
+export function PointSeriesTooltipFormatter($compile, $rootScope) {
 
-    return function tooltipFormatter(event) {
-      var datum = event.datum;
-      if (!datum || !datum.aggConfigResult) return '';
+  const $tooltipScope = $rootScope.$new();
+  const $tooltip = $(require('ui/agg_response/point_series/_tooltip.html'));
+  $compile($tooltip)($tooltipScope);
 
-      var details = $tooltipScope.details = [];
-      var result = { $parent: datum.aggConfigResult };
+  return function tooltipFormatter(event) {
+    const datum = event.datum;
+    if (!datum || !datum.aggConfigResult) return '';
 
-      function addDetail(result) {
-        var agg = result.aggConfig;
-        var value = result.value;
+    const details = $tooltipScope.details = [];
+    let result = { $parent: datum.aggConfigResult };
 
-        var detail = {
-          value: agg.fieldFormatter()(value),
-          label: agg.makeLabel()
-        };
+    function addDetail(result) {
+      const agg = result.aggConfig;
+      const value = result.value;
 
-        if (agg === datum.aggConfigResult.aggConfig) {
-          detail.percent = event.percent;
-          if (datum.yScale != null) {
-            detail.value = agg.fieldFormatter()(value * datum.yScale);
-          }
+      const detail = {
+        value: agg.fieldFormatter()(value),
+        label: agg.makeLabel()
+      };
+
+      if (agg === datum.aggConfigResult.aggConfig) {
+        detail.percent = event.percent;
+        if (datum.yScale != null) {
+          detail.value = agg.fieldFormatter()(value * datum.yScale);
         }
-
-        details.push(detail);
       }
 
-      datum.extraMetrics.forEach(addDetail);
-      while ((result = result.$parent) && result.aggConfig) {
-        addDetail(result);
-      }
+      details.push(detail);
+    }
+
+    datum.extraMetrics.forEach(addDetail);
+    while ((result = result.$parent) && result.aggConfig) {
+      addDetail(result);
+    }
 
 
-      $tooltipScope.$apply();
-      return $tooltip[0].outerHTML;
-    };
+    $tooltipScope.$apply();
+    return $tooltip[0].outerHTML;
   };
-});
+}

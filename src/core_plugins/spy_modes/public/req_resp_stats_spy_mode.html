@@ -1,0 +1,34 @@
+<div ng-if="!req.stopped" class="visualize-spy-loading">
+  <div class="visualize-spy-loading-text">
+    Request in progress
+    &nbsp;
+    <div class="spinner"></div>
+  </div>
+</div>
+
+<div ng-if="req.stopped && req.success === false" ng-init="console.log(req)" class="alert alert-danger">
+  <i class="fa fa-danger"></i> Request Failed
+</div>
+
+<div ng-if="spy.mode.name === 'request'">
+  <label>
+    Elasticsearch request body &nbsp;
+  </label>
+  <pre>{{req.fetchParams.body | json}}</pre>
+</div>
+
+<div ng-if="spy.mode.name === 'response'">
+  <label>
+    Elasticsearch response body &nbsp;
+  </label>
+  <pre>{{req.resp | json}}</pre>
+</div>
+
+<div ng-if="spy.mode.name === 'stats'">
+  <table class="table">
+    <tr ng-repeat="pair in stats">
+      <td>{{pair[0]}}</td>
+      <td>{{pair[1]}}</td>
+    </tr>
+  </table>
+</div>

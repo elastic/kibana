@@ -1,24 +1,22 @@
-var angular = require('angular');
-var _ = require('lodash');
-var $ = require('jquery');
-var ngMock = require('ngMock');
-var expect = require('expect.js');
-var sinon = require('sinon');
+import _ from 'lodash';
+import ngMock from 'ng_mock';
+import expect from 'expect.js';
+import sinon from 'sinon';
 
-require('ui/filter_bar');
-var MockState = require('fixtures/mock_state');
+import MockState from 'fixtures/mock_state';
+import $ from 'jquery';
+import 'ui/filter_bar';
+import { FilterBarLibMapFilterProvider } from 'ui/filter_bar/lib/map_filter';
+import { FilterBarQueryFilterProvider } from 'ui/filter_bar/query_filter';
 
 describe('Filter Bar Directive', function () {
-  var $rootScope;
-  var $compile;
-  var $timeout;
-  var Promise;
-  var appState;
-  var queryFilter;
-  var mapFilter;
-  var $el;
-  var $scope;
-  // require('testUtils/noDigestPromises').activateForSuite();
+  let $rootScope;
+  let $compile;
+  let Promise;
+  let appState;
+  let mapFilter;
+  let $el;
+  let $scope;
 
   beforeEach(ngMock.module('kibana/global_state', function ($provide) {
     $provide.service('getAppState', _.constant(_.constant(
@@ -34,14 +32,13 @@ describe('Filter Bar Directive', function () {
       $provide.service('courier', require('fixtures/mock_courier'));
     });
 
-    ngMock.inject(function (Private, $injector, _$rootScope_, _$compile_, _$timeout_) {
+    ngMock.inject(function (Private, $injector, _$rootScope_, _$compile_) {
       $rootScope = _$rootScope_;
       $compile = _$compile_;
-      $timeout = _$timeout_;
       Promise = $injector.get('Promise');
-      mapFilter = Private(require('ui/filter_bar/lib/mapFilter'));
+      mapFilter = Private(FilterBarLibMapFilterProvider);
 
-      var queryFilter = Private(require('ui/filter_bar/query_filter'));
+      const queryFilter = Private(FilterBarQueryFilterProvider);
       queryFilter.getFilters = function () {
         return appState.filters;
       };
@@ -50,7 +47,7 @@ describe('Filter Bar Directive', function () {
 
   describe('Element rendering', function () {
     beforeEach(function (done) {
-      var filters = [
+      const filters = [
         { meta: { index: 'logstash-*' }, query: { match: { '_type': { query: 'apache' } } } },
         { meta: { index: 'logstash-*' }, query: { match: { '_type': { query: 'nginx' } } } },
         { meta: { index: 'logstash-*' }, exists: { field: '@timestamp' } },
@@ -64,7 +61,7 @@ describe('Filter Bar Directive', function () {
         $scope = $el.isolateScope();
       });
 
-      var off = $rootScope.$on('filterbar:updated', function () {
+      const off = $rootScope.$on('filterbar:updated', function () {
         off();
         // force a nextTick so it continues *after* the $digest loop completes
         setTimeout(done, 0);
@@ -75,26 +72,26 @@ describe('Filter Bar Directive', function () {
     });
 
     it('should render all the filters in state', function () {
-      var filters = $el.find('.filter');
+      const filters = $el.find('.filter');
       expect(filters).to.have.length(5);
       expect($(filters[0]).find('span')[0].innerHTML).to.equal('_type:');
       expect($(filters[0]).find('span')[1].innerHTML).to.equal('"apache"');
       expect($(filters[1]).find('span')[0].innerHTML).to.equal('_type:');
       expect($(filters[1]).find('span')[1].innerHTML).to.equal('"nginx"');
-      expect($(filters[2]).find('span')[0].innerHTML).to.equal('exists:');
-      expect($(filters[2]).find('span')[1].innerHTML).to.equal('"@timestamp"');
-      expect($(filters[3]).find('span')[0].innerHTML).to.equal('missing:');
-      expect($(filters[3]).find('span')[1].innerHTML).to.equal('"host"');
+      expect($(filters[2]).find('span')[0].innerHTML).to.equal('@timestamp:');
+      expect($(filters[2]).find('span')[1].innerHTML).to.equal('"exists"');
+      expect($(filters[3]).find('span')[0].innerHTML).to.equal('host:');
+      expect($(filters[3]).find('span')[1].innerHTML).to.equal('"missing"');
     });
 
     it('should be able to set an alias', function () {
-      var filter = $el.find('.filter')[4];
+      const filter = $el.find('.filter')[4];
       expect($(filter).find('span')[0].innerHTML).to.equal('foo');
     });
 
     describe('editing filters', function () {
       beforeEach(function () {
-        $scope.startEditingFilter(appState.filters[3]);
+        $scope.editFilter(appState.filters[3]);
         $scope.$digest();
       });
 
@@ -103,16 +100,18 @@ describe('Filter Bar Directive', function () {
       });
 
       it('should be able to stop editing a filter', function () {
-        $scope.stopEditingFilter();
+        $scope.cancelEdit();
         $scope.$digest();
         expect($el.find('.filter-edit-container').length).to.be(0);
       });
 
-      it('should merge changes after clicking done', function () {
-        sinon.spy($scope, 'updateFilter');
+      it('should remove old filter and add new filter when saving', function () {
+        sinon.spy($scope, 'removeFilter');
+        sinon.spy($scope, 'addFilters');
 
-        $scope.editDone();
-        expect($scope.updateFilter.called).to.be(true);
+        $scope.saveEdit(appState.filters[3], appState.filters[3], false);
+        expect($scope.removeFilter.called).to.be(true);
+        expect($scope.addFilters.called).to.be(true);
       });
     });
   });

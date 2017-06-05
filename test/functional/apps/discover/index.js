@@ -1,26 +1,20 @@
-define(function (require) {
-  var bdd = require('intern!bdd');
-  var config = require('intern').config;
-  var url = require('intern/dojo/node!url');
-  var ScenarioManager = require('intern/dojo/node!../../../fixtures/scenarioManager');
-  var discoverTest = require('./_discover');
+export default function ({ getService, loadTestFile }) {
+  const esArchiver = getService('esArchiver');
+  const remote = getService('remote');
 
-  bdd.describe('discover app', function () {
-    var scenarioManager;
-    var remote;
-    var scenarioManager = new ScenarioManager(url.format(config.servers.elasticsearch));
-    this.timeout = config.timeouts.default;
-
-    bdd.before(function () {
-      remote = this.remote;
+  describe('discover app', function () {
+    before(function () {
       return remote.setWindowSize(1200,800);
     });
 
-    bdd.after(function unloadMakelogs() {
-      return scenarioManager.unload('logstashFunctional');
+    after(function unloadMakelogs() {
+      return esArchiver.unload('logstash_functional');
     });
 
-    discoverTest(bdd, scenarioManager);
-
+    loadTestFile(require.resolve('./_discover'));
+    loadTestFile(require.resolve('./_field_data'));
+    loadTestFile(require.resolve('./_shared_links'));
+    loadTestFile(require.resolve('./_collapse_expand'));
+    loadTestFile(require.resolve('./_source_filters'));
   });
-});
+}

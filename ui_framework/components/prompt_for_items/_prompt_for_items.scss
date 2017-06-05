@@ -1,0 +1,16 @@
+.kuiPromptForItems {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 30px;
+}
+
+  .kuiPromptForItems__message {
+    font-size: $globalTitleFontSize;
+    color: $globalSubduedTextColor;
+    line-height: $globalLineHeight;
+  }
+
+  .kuiPromptForItems__actions {
+    margin-top: 10px;
+  }

@@ -1,6 +1,6 @@
+import d3 from 'd3';
 define(function () {
   return function XAxisSplitFactory() {
-    var d3 = require('d3');
 
     /*
      * Adds div DOM elements to the `.x-axis-div-wrapper` element based on the data layout.
@@ -10,16 +10,26 @@ define(function () {
 
     return function (selection) {
       selection.each(function () {
-        var div = d3.select(this);
-
+        const div = d3.select(this);
+        let columns;
         div.selectAll('.x-axis-div')
         .append('div')
         .data(function (d) {
+          columns = d.columns ? d.columns.length : 1;
           return d.columns ? d.columns : [d];
         })
         .enter()
           .append('div')
-          .attr('class', 'x-axis-div');
+          .attr('class', (d, i) => {
+            let divClass = '';
+            if (i === 0) {
+              divClass += ' chart-first';
+            }
+            if (i === columns - 1) {
+              divClass += ' chart-last';
+            }
+            return 'x-axis-div axis-div' + divClass;
+          });
       });
     };
   };

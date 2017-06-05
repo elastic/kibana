@@ -1,10 +1,12 @@
-describe('ui/courier/fetch/request/segmented', () => {
-  const sinon = require('auto-release-sinon');
-  const expect = require('expect.js');
-  const ngMock = require('ngMock');
+import sinon from 'sinon';
+import expect from 'expect.js';
+import ngMock from 'ng_mock';
 
+import { SegmentedRequestProvider } from '../segmented';
+import { SearchRequestProvider } from '../search';
+
+describe('SegmentedRequestProvider', () => {
   let Promise;
-  let $rootScope;
   let SegmentedReq;
   let segmentedReq;
   let searchReqStart;
@@ -13,9 +15,8 @@ describe('ui/courier/fetch/request/segmented', () => {
 
   beforeEach(ngMock.inject((Private, $injector) => {
     Promise = $injector.get('Promise');
-    $rootScope = $injector.get('$rootScope');
-    SegmentedReq = Private(require('ui/courier/fetch/request/segmented'));
-    searchReqStart = sinon.spy(Private(require('ui/courier/fetch/request/search')).prototype, 'start');
+    SegmentedReq = Private(SegmentedRequestProvider);
+    searchReqStart = sinon.spy(Private(SearchRequestProvider).prototype, 'start');
   }));
 
   describe('#start()', () => {
@@ -29,9 +30,7 @@ describe('ui/courier/fetch/request/segmented', () => {
       expect(returned.then).to.be.Function;
     });
 
-    it('does not call super.start() until promise is resolved', () => {
-      expect(searchReqStart.called).to.be(false);
-      $rootScope.$apply();
+    it('calls super.start() synchronously', () => {
       expect(searchReqStart.called).to.be(true);
     });
   });

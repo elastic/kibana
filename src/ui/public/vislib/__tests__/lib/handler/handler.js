@@ -1,21 +1,21 @@
-
-var angular = require('angular');
-var $ = require('jquery');
-var ngMock = require('ngMock');
-var expect = require('expect.js');
+import ngMock from 'ng_mock';
+import expect from 'expect.js';
 
 // Data
-var series = require('fixtures/vislib/mock_data/date_histogram/_series');
-var columns = require('fixtures/vislib/mock_data/date_histogram/_columns');
-var rows = require('fixtures/vislib/mock_data/date_histogram/_rows');
-var stackedSeries = require('fixtures/vislib/mock_data/date_histogram/_stacked_series');
-var dateHistogramArray = [
+import series from 'fixtures/vislib/mock_data/date_histogram/_series';
+import columns from 'fixtures/vislib/mock_data/date_histogram/_columns';
+import rows from 'fixtures/vislib/mock_data/date_histogram/_rows';
+import stackedSeries from 'fixtures/vislib/mock_data/date_histogram/_stacked_series';
+import $ from 'jquery';
+import FixturesVislibVisFixtureProvider from 'fixtures/vislib/_vis_fixture';
+import 'ui/persisted_state';
+const dateHistogramArray = [
   series,
   columns,
   rows,
   stackedSeries
 ];
-var names = [
+const names = [
   'series',
   'columns',
   'rows',
@@ -24,25 +24,22 @@ var names = [
 
 dateHistogramArray.forEach(function (data, i) {
   describe('Vislib Handler Test Suite for ' + names[i] + ' Data', function () {
-    var Handler;
-    var vis;
-    var persistedState;
-    var events = [
+    let vis;
+    let persistedState;
+    const events = [
       'click',
       'brush'
     ];
 
     beforeEach(ngMock.module('kibana'));
-    beforeEach(ngMock.inject(function (Private) {
-      Handler = Private(require('ui/vislib/lib/handler/handler'));
-      vis = Private(require('fixtures/vislib/_vis_fixture'))();
-      persistedState = new (Private(require('ui/persisted_state/persisted_state')))();
+    beforeEach(ngMock.inject(function (Private, $injector) {
+      vis = Private(FixturesVislibVisFixtureProvider)();
+      persistedState = new ($injector.get('PersistedState'))();
       vis.render(data, persistedState);
     }));
 
     afterEach(function () {
-      $(vis.el).remove();
-      vis = null;
+      vis.destroy();
     });
 
     describe('render Method', function () {
@@ -55,7 +52,7 @@ dateHistogramArray.forEach(function (data, i) {
     });
 
     describe('enable Method', function () {
-      var charts;
+      let charts;
 
       beforeEach(function () {
         charts = vis.handler.charts;
@@ -77,7 +74,7 @@ dateHistogramArray.forEach(function (data, i) {
     });
 
     describe('disable Method', function () {
-      var charts;
+      let charts;
 
       beforeEach(function () {
         charts = vis.handler.charts;
@@ -130,6 +127,27 @@ dateHistogramArray.forEach(function (data, i) {
       it('should destroy all the charts in the visualization', function () {
         expect(vis.handler.charts.length).to.be(0);
       });
+    });
+
+    describe('event proxying', function () {
+
+      it('should only pass the original event object to downstream handlers', function (done) {
+        const event = {};
+        const chart = vis.handler.charts[0];
+
+        const mockEmitter = function () {
+          const args = Array.from(arguments);
+          expect(args.length).to.be(2);
+          expect(args[0]).to.be('click');
+          expect(args[1]).to.be(event);
+          done();
+        };
+
+        vis.emit = mockEmitter;
+        vis.handler.enable('click', chart);
+        chart.events.emit('click', event);
+      });
+
     });
   });
 });

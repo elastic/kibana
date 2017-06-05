@@ -1,84 +1,91 @@
-
-var angular = require('angular');
-var expect = require('expect.js');
-var ngMock = require('ngMock');
-var _ = require('lodash');
-var $ = require('jquery');
-var d3 = require('d3');
+import expect from 'expect.js';
+import ngMock from 'ng_mock';
+import _ from 'lodash';
+import d3 from 'd3';
 
 // Data
-var series = require('fixtures/vislib/mock_data/date_histogram/_series');
-var seriesPosNeg = require('fixtures/vislib/mock_data/date_histogram/_series_pos_neg');
-var seriesNeg = require('fixtures/vislib/mock_data/date_histogram/_series_neg');
-var termsColumns = require('fixtures/vislib/mock_data/terms/_columns');
-//var histogramRows = require('fixtures/vislib/mock_data/histogram/_rows');
-var stackedSeries = require('fixtures/vislib/mock_data/date_histogram/_stacked_series');
+import series from 'fixtures/vislib/mock_data/date_histogram/_series';
+import seriesPosNeg from 'fixtures/vislib/mock_data/date_histogram/_series_pos_neg';
+import seriesNeg from 'fixtures/vislib/mock_data/date_histogram/_series_neg';
+import termsColumns from 'fixtures/vislib/mock_data/terms/_columns';
+import histogramRows from 'fixtures/vislib/mock_data/histogram/_rows';
+import stackedSeries from 'fixtures/vislib/mock_data/date_histogram/_stacked_series';
+import $ from 'jquery';
+import FixturesVislibVisFixtureProvider from 'fixtures/vislib/_vis_fixture';
+import 'ui/persisted_state';
 
 // tuple, with the format [description, mode, data]
-var dataTypesArray = [
+const dataTypesArray = [
   ['series', 'stacked', series],
   ['series with positive and negative values', 'stacked', seriesPosNeg],
   ['series with negative values', 'stacked', seriesNeg],
   ['terms columns', 'grouped', termsColumns],
-  // ['histogram rows', 'percentage', histogramRows],
+  ['histogram rows', 'percentage', histogramRows],
   ['stackedSeries', 'stacked', stackedSeries],
 ];
 
-dataTypesArray.forEach(function (dataType, i) {
-  var name = dataType[0];
-  var mode = dataType[1];
-  var data = dataType[2];
+dataTypesArray.forEach(function (dataType) {
+  const name = dataType[0];
+  const mode = dataType[1];
+  const data = dataType[2];
 
   describe('Vislib Column Chart Test Suite for ' + name + ' Data', function () {
-    var vis;
-    var persistedState;
-    var visLibParams = {
+    let vis;
+    let persistedState;
+    const visLibParams = {
       type: 'histogram',
-      hasTimeField: true,
       addLegend: true,
       addTooltip: true,
-      mode: mode
+      mode: mode,
+      zeroFill: true
     };
 
     beforeEach(ngMock.module('kibana'));
-    beforeEach(ngMock.inject(function (Private) {
-      vis = Private(require('fixtures/vislib/_vis_fixture'))(visLibParams);
-      persistedState = new (Private(require('ui/persisted_state/persisted_state')))();
+    beforeEach(ngMock.inject(function (Private, $injector) {
+      vis = Private(FixturesVislibVisFixtureProvider)(visLibParams);
+      persistedState = new ($injector.get('PersistedState'))();
       vis.on('brush', _.noop);
       vis.render(data, persistedState);
     }));
 
     afterEach(function () {
-      $(vis.el).remove();
-      vis = null;
+      vis.destroy();
     });
 
     describe('stackData method', function () {
-      var stackedData;
-      var isStacked;
+      let stackedData;
+      let isStacked;
 
       beforeEach(function () {
         vis.handler.charts.forEach(function (chart) {
-          stackedData = chart.stackData(chart.chartData);
+          stackedData = chart.chartData;
 
-          isStacked = stackedData.every(function (arr) {
-            return arr.every(function (d) {
+          isStacked = stackedData.series.every(function (arr) {
+            return arr.values.every(function (d) {
               return _.isNumber(d.y0);
             });
           });
         });
       });
 
-      it('should append a d.y0 key to the data object', function () {
-        expect(isStacked).to.be(true);
+      it('should stack values when mode is stacked', function () {
+        if (mode === 'stacked') {
+          expect(isStacked).to.be(true);
+        }
+      });
+
+      it('should stack values when mode is percentage', function () {
+        if (mode === 'percentage') {
+          expect(isStacked).to.be(true);
+        }
       });
     });
 
     describe('addBars method', function () {
       it('should append rects', function () {
-        var numOfSeries;
-        var numOfValues;
-        var product;
+        let numOfSeries;
+        let numOfValues;
+        let product;
 
         vis.handler.charts.forEach(function (chart) {
           numOfSeries = chart.chartData.series.length;
@@ -89,20 +96,9 @@ dataTypesArray.forEach(function (dataType, i) {
       });
     });
 
-    describe('updateBars method', function () {
-      beforeEach(function () {
-        vis.handler._attr.mode = 'grouped';
-        vis.render(vis.data, persistedState);
-      });
-
-      it('should returned grouped bars', function () {
-        vis.handler.charts.forEach(function (chart) {});
-      });
-    });
-
     describe('addBarEvents method', function () {
       function checkChart(chart) {
-        var rect = $(chart.chartEl).find('.series rect').get(0);
+        const rect = $(chart.chartEl).find('.series rect').get(0);
 
         // check for existance of stuff and things
         return {
@@ -117,25 +113,25 @@ dataTypesArray.forEach(function (dataType, i) {
         };
       }
 
-      it('should attach the brush if data is a set of ordered dates', function () {
+      it('should attach the brush if data is a set is ordered', function () {
         vis.handler.charts.forEach(function (chart) {
-          var has = checkChart(chart);
-          var ordered = vis.handler.data.get('ordered');
-          var date = Boolean(ordered && ordered.date);
-          expect(has.brush).to.be(date);
+          const has = checkChart(chart);
+          const ordered = vis.handler.data.get('ordered');
+          const allowBrushing = Boolean(ordered);
+          expect(has.brush).to.be(allowBrushing);
         });
       });
 
       it('should attach a click event', function () {
         vis.handler.charts.forEach(function (chart) {
-          var has = checkChart(chart);
+          const has = checkChart(chart);
           expect(has.click).to.be(true);
         });
       });
 
       it('should attach a hover event', function () {
         vis.handler.charts.forEach(function (chart) {
-          var has = checkChart(chart);
+          const has = checkChart(chart);
           expect(has.mouseOver).to.be(true);
         });
       });
@@ -150,16 +146,17 @@ dataTypesArray.forEach(function (dataType, i) {
 
       it('should return a yMin and yMax', function () {
         vis.handler.charts.forEach(function (chart) {
-          var yAxis = chart.handler.yAxis;
+          const yAxis = chart.handler.valueAxes[0];
+          const domain = yAxis.getScale().domain();
 
-          expect(yAxis.domain[0]).to.not.be(undefined);
-          expect(yAxis.domain[1]).to.not.be(undefined);
+          expect(domain[0]).to.not.be(undefined);
+          expect(domain[1]).to.not.be(undefined);
         });
       });
 
       it('should render a zero axis line', function () {
         vis.handler.charts.forEach(function (chart) {
-          var yAxis = chart.handler.yAxis;
+          const yAxis = chart.handler.valueAxes[0];
 
           if (yAxis.yMin < 0 && yAxis.yMax > 0) {
             expect($(chart.chartEl).find('line.zero-line').length).to.be(1);
@@ -185,18 +182,18 @@ dataTypesArray.forEach(function (dataType, i) {
 
     describe('defaultYExtents is true', function () {
       beforeEach(function () {
-        vis._attr.defaultYExtents = true;
+        vis.visConfigArgs.defaultYExtents = true;
         vis.render(data, persistedState);
       });
 
       it('should return yAxis extents equal to data extents', function () {
         vis.handler.charts.forEach(function (chart) {
-          var yAxis = chart.handler.yAxis;
-          var min = vis.handler.data.getYMin();
-          var max = vis.handler.data.getYMax();
-
-          expect(yAxis.domain[0]).to.equal(min);
-          expect(yAxis.domain[1]).to.equal(max);
+          const yAxis = chart.handler.valueAxes[0];
+          const min = vis.handler.valueAxes[0].axisScale.getYMin();
+          const max = vis.handler.valueAxes[0].axisScale.getYMax();
+          const domain = yAxis.getScale().domain();
+          expect(domain[0]).to.equal(min);
+          expect(domain[1]).to.equal(max);
         });
       });
     });

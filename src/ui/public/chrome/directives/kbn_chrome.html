@@ -1,0 +1,21 @@
+<div class="content" chrome-context data-test-subj="kibanaChrome">
+  <global-nav
+    chrome="chrome"
+    is-visible="chrome.getVisible()"
+    logo-brand="chrome.getBrand('logo')"
+    small-logo-brand="chrome.getBrand('smallLogo')"
+    app-title="chrome.getAppTitle()"
+  ></global-nav>
+
+  <div class="app-wrapper" ng-class="{ 'hidden-chrome': !chrome.getVisible() }">
+    <div class="app-wrapper-panel">
+      <kbn-notifications list="notifList"></kbn-notifications>
+      <kbn-loading-indicator></kbn-loading-indicator>
+      <div
+        class="application"
+        ng-class="'tab-' + chrome.getFirstPathSegment() + ' ' + chrome.getApplicationClasses()"
+        ng-view
+      ></div>
+    </div>
+  </div>
+</div>

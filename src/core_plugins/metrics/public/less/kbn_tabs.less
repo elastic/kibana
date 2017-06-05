@@ -1,0 +1,29 @@
+.kbnTabs {
+  display: flex;
+}
+
+.kbnTabs__tab {
+  margin: 0px 10px;
+  padding: 5px 0px;
+  color: @grayDark;
+  font-size: 18px;
+}
+
+.kbnTabs__tab-active {
+  .kbnTabs__tab;
+  color: @grayDarker;
+  border-bottom: 2px solid @grayDarker;
+}
+
+.kbnTabs__tab:hover {
+  .kbnTabs__tab-active;
+}
+
+.kbnTabs.sm {
+  .kbnTabs__tab-active,
+  .kbnTabs__tab {
+    font-size: 14px;
+    padding: 2px 0;
+  }
+}
+

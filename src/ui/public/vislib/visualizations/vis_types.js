@@ -1,20 +1,20 @@
-define(function (require) {
-  return function VisTypeFactory(Private) {
+import { VislibVisualizationsPointSeriesProvider } from './point_series';
+import { VislibVisualizationsPieChartProvider } from './pie_chart';
+import { GaugeChartProvider } from './gauge_chart';
 
-    /**
-     * Provides the visualizations for the vislib
-     *
-     * @module vislib
-     * @submodule VisTypeFactory
-     * @param Private {Object} Loads any function as an angular module
-     * @return {Function} Returns an Object of Visualization classes
-     */
-    return {
-      histogram: Private(require('ui/vislib/visualizations/column_chart')),
-      pie: Private(require('ui/vislib/visualizations/pie_chart')),
-      line: Private(require('ui/vislib/visualizations/line_chart')),
-      area: Private(require('ui/vislib/visualizations/area_chart')),
-      tile_map: Private(require('ui/vislib/visualizations/tile_map'))
-    };
+export function VislibVisualizationsVisTypesProvider(Private) {
+
+  /**
+   * Provides the visualizations for the vislib
+   *
+   * @module vislib
+   * @submodule VisTypeFactory
+   * @param Private {Object} Loads any function as an angular module
+   * @return {Function} Returns an Object of Visualization classes
+   */
+  return {
+    pie: Private(VislibVisualizationsPieChartProvider),
+    point_series: Private(VislibVisualizationsPointSeriesProvider),
+    gauge: Private(GaugeChartProvider)
   };
-});
+}

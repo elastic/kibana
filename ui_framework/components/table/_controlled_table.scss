@@ -1,0 +1,13 @@
+/**
+ * 1. Make seamless transition from ToolBar to Table header.
+ * 1. Make seamless transition from Table to ToolBarFooter header.
+ */
+.kuiControlledTable {
+  .kuiTable {
+    border-top: none; /* 1 */
+  }
+
+  .kuiToolBarFooter {
+    border-top: none; /* 2 */
+  }
+}

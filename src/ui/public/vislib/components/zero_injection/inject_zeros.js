@@ -1,49 +1,32 @@
-define(function (require) {
-  return function ZeroInjectionUtilService(Private) {
-    var _ = require('lodash');
+import { VislibComponentsZeroInjectionOrderedXKeysProvider } from './ordered_x_keys';
+import VislibComponentsZeroInjectionZeroFilledArrayProvider from './zero_filled_array';
+import { VislibComponentsZeroInjectionZeroFillDataArrayProvider } from './zero_fill_data_array';
 
-    var orderXValues = Private(require('ui/vislib/components/zero_injection/ordered_x_keys'));
-    var createZeroFilledArray = Private(require('ui/vislib/components/zero_injection/zero_filled_array'));
-    var zeroFillDataArray = Private(require('ui/vislib/components/zero_injection/zero_fill_data_array'));
+export function VislibComponentsZeroInjectionInjectZerosProvider(Private) {
 
-    /*
-     * A Kibana data object may have multiple series with different array lengths.
-     * This proves an impediment to stacking in the visualization library.
-     * Therefore, zero values must be injected wherever these arrays do not line up.
-     * That is, each array must have the same x values with zeros filled in where the
-     * x values were added.
-     *
-     * This function and its helper functions accepts a Kibana data object
-     * and injects zeros where needed.
-     */
+  const orderXValues = Private(VislibComponentsZeroInjectionOrderedXKeysProvider);
+  const createZeroFilledArray = Private(VislibComponentsZeroInjectionZeroFilledArrayProvider);
+  const zeroFillDataArray = Private(VislibComponentsZeroInjectionZeroFillDataArrayProvider);
 
-    function getDataArray(obj) {
-      if (obj.rows) {
-        return obj.rows;
-      } else if (obj.columns) {
-        return obj.columns;
-      } else if (obj.series) {
-        return [obj];
-      }
-    }
+  /*
+   * A Kibana data object may have multiple series with different array lengths.
+   * This proves an impediment to stacking in the visualization library.
+   * Therefore, zero values must be injected wherever these arrays do not line up.
+   * That is, each array must have the same x values with zeros filled in where the
+   * x values were added.
+   *
+   * This function and its helper functions accepts a Kibana data object
+   * and injects zeros where needed.
+   */
 
-    return function (obj) {
-      if (!_.isObject(obj) || !obj.rows && !obj.columns && !obj.series) {
-        throw new TypeError('ZeroInjectionUtilService expects an object with a series, rows, or columns key');
-      }
+  return function (obj, data, orderBucketsBySum = false) {
+    const keys = orderXValues(data, orderBucketsBySum);
 
-      var keys = orderXValues(obj);
-      var arr = getDataArray(obj);
+    obj.forEach(function (series) {
+      const zeroArray = createZeroFilledArray(keys, series.label);
+      series.values = zeroFillDataArray(zeroArray, series.values);
+    });
 
-      arr.forEach(function (object) {
-        object.series.forEach(function (series) {
-          var zeroArray = createZeroFilledArray(keys);
-
-          series.values = zeroFillDataArray(zeroArray, series.values);
-        });
-      });
-
-      return obj;
-    };
+    return obj;
   };
-});
+}

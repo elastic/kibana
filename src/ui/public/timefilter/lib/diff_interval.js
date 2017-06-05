@@ -1,21 +1,21 @@
-define(function (require) {
-  var _ = require('lodash');
-  return function diffTimeProvider(Private) {
-    var diff = Private(require('ui/utils/diff_time_picker_vals'));
+import _ from 'lodash';
+import { UtilsDiffTimePickerValsProvider } from 'ui/utils/diff_time_picker_vals';
 
-    return function (self) {
-      var oldRefreshInterval = _.clone(self.refreshInterval);
+export function TimefilterLibDiffIntervalProvider(Private) {
+  const diff = Private(UtilsDiffTimePickerValsProvider);
 
-      return function () {
-        if (diff(self.refreshInterval, oldRefreshInterval)) {
-          self.emit('update');
-          if (!self.refreshInterval.pause && self.refreshInterval.value !== 0) {
-            self.emit('fetch');
-          }
+  return function (self) {
+    let oldRefreshInterval = _.clone(self.refreshInterval);
+
+    return function () {
+      if (diff(self.refreshInterval, oldRefreshInterval)) {
+        self.emit('update');
+        if (!self.refreshInterval.pause && self.refreshInterval.value !== 0) {
+          self.emit('fetch');
         }
+      }
 
-        oldRefreshInterval = _.clone(self.refreshInterval);
-      };
+      oldRefreshInterval = _.clone(self.refreshInterval);
     };
   };
-});
+}

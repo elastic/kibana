@@ -1,28 +1,27 @@
-var angular = require('angular');
-var expect = require('expect.js');
-var _ = require('lodash');
-var ngMock = require('ngMock');
-require('plugins/kibana/discover/index');
-require('ui/filters/field_type');
+import expect from 'expect.js';
+import _ from 'lodash';
+import ngMock from 'ng_mock';
+import 'plugins/kibana/discover/index';
+import 'ui/filters/field_type';
 
-var filter;
+let filter;
 
-var types;
+let types;
 
-var init = function (expandable) {
+const init = function () {
   // Load the application
   ngMock.module('kibana');
 
   types = [
-    {name: 's1', type: 'string'},
-    {name: 's2', type: 'string'},
-    {name: 's3', type: 'string'},
+    { name: 's1', type: 'string' },
+    { name: 's2', type: 'string' },
+    { name: 's3', type: 'string' },
 
-    {name: 'n1', type: 'number'},
-    {name: 'n2', type: 'number'},
+    { name: 'n1', type: 'number' },
+    { name: 'n2', type: 'number' },
 
-    {name: 'i1', type: 'ip'},
-    {name: 'd1', type: 'date'},
+    { name: 'i1', type: 'ip' },
+    { name: 'd1', type: 'date' },
   ];
 
   // Create the scope
@@ -59,7 +58,7 @@ describe('fieldType array filter', function () {
   });
 
   it('should allow negation', function () {
-    var resultNames = _.pluck(filter(types, '!string'), 'name');
+    const resultNames = _.pluck(filter(types, '!string'), 'name');
     expect(resultNames).to.eql(['n1', 'n2', 'i1', 'd1']);
   });
 });

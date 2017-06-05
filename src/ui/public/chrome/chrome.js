@@ -1,17 +1,28 @@
-require('babel/polyfill');
+import _ from 'lodash';
+import angular from 'angular';
 
-var _ = require('lodash');
-var $ = require('jquery');
-var angular = require('angular');
+import { metadata } from 'ui/metadata';
+import 'babel-polyfill';
+import 'ui/timefilter';
+import 'ui/notify';
+import 'ui/private';
+import 'ui/promises';
+import 'ui/storage';
+import 'ui/directives/kbn_src';
+import 'ui/watch_multi';
+import './services';
 
-require('ui/timefilter');
-require('ui/private');
-require('ui/promises');
+import { initAngularApi } from './api/angular';
+import appsApi from './api/apps';
+import controlsApi from './api/controls';
+import { initChromeNavApi } from './api/nav';
+import templateApi from './api/template';
+import themeApi from './api/theme';
+import translationsApi from './api/translations';
+import { initChromeXsrfApi } from './api/xsrf';
 
-var metadata = require('ui/metadata');
-
-var chrome = {};
-var internals = _.defaults(
+const chrome = {};
+const internals = _.defaults(
   _.cloneDeep(metadata),
   {
     basePath: '',
@@ -19,25 +30,21 @@ var internals = _.defaults(
     rootTemplate: null,
     showAppsLink: null,
     xsrfToken: null,
+    devMode: true,
     brand: null,
     nav: [],
     applicationClasses: []
   }
 );
 
-$('<link>').attr({
-  href: require('ui/images/elk.ico'),
-  rel: 'shortcut icon'
-}).appendTo('head');
-
-require('./api/apps')(chrome, internals);
-require('./api/xsrf')(chrome, internals);
-require('./api/nav')(chrome, internals);
-require('./api/angular')(chrome, internals);
-require('./api/controls')(chrome, internals);
-require('./api/tabs')(chrome, internals);
-require('./api/template')(chrome, internals);
-require('./api/theme')(chrome, internals);
+appsApi(chrome, internals);
+initChromeXsrfApi(chrome, internals);
+initChromeNavApi(chrome, internals);
+initAngularApi(chrome, internals);
+controlsApi(chrome, internals);
+templateApi(chrome, internals);
+themeApi(chrome, internals);
+translationsApi(chrome, internals);
 
 chrome.bootstrap = function () {
   chrome.setupAngular();

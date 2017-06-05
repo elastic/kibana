@@ -1,19 +1,19 @@
-define(function (require) {
-  return function AggTypeMetricAvgProvider(Private) {
-    var MetricAggType = Private(require('ui/agg_types/metrics/MetricAggType'));
+import { AggTypesMetricsMetricAggTypeProvider } from 'ui/agg_types/metrics/metric_agg_type';
 
-    return new MetricAggType({
-      name: 'avg',
-      title: 'Average',
-      makeLabel: function (aggConfig) {
-        return 'Average ' + aggConfig.params.field.displayName;
-      },
-      params: [
-        {
-          name: 'field',
-          filterFieldTypes: 'number'
-        }
-      ]
-    });
-  };
-});
+export function AggTypesMetricsAvgProvider(Private) {
+  const MetricAggType = Private(AggTypesMetricsMetricAggTypeProvider);
+
+  return new MetricAggType({
+    name: 'avg',
+    title: 'Average',
+    makeLabel: function (aggConfig) {
+      return 'Average ' + aggConfig.getFieldDisplayName();
+    },
+    params: [
+      {
+        name: 'field',
+        filterFieldTypes: 'number'
+      }
+    ]
+  });
+}

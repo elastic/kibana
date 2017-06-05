@@ -1,14 +1,16 @@
 import { Server } from 'hapi';
 import { notFound } from 'boom';
-import { merge, sample } from 'lodash';
+import { map, sample } from 'lodash';
 import { format as formatUrl } from 'url';
-import { fromNode } from 'bluebird';
+import { map as promiseMap, fromNode } from 'bluebird';
 import { Agent as HttpsAgent } from 'https';
 import { readFileSync } from 'fs';
 
 import Config from '../../server/config/config';
 import setupConnection from '../../server/http/setup_connection';
+import registerHapiPlugins from '../../server/http/register_hapi_plugins';
 import setupLogging from '../../server/logging';
+import { transformDeprecations } from '../../server/config/transform_deprecations';
 
 const alphabet = 'abcdefghijklmnopqrztuvwxyz'.split('');
 
@@ -17,15 +19,20 @@ export default class BasePathProxy {
     this.clusterManager = clusterManager;
     this.server = new Server();
 
-    const config = Config.withDefaultSchema(userSettings);
+    const settings = transformDeprecations(userSettings);
+    const config = Config.withDefaultSchema(settings);
 
     this.targetPort = config.get('dev.basePathProxyTarget');
     this.basePath = config.get('server.basePath');
 
-    const { cert } = config.get('server.ssl');
-    if (cert) {
+    const sslEnabled = config.get('server.ssl.enabled');
+    if (sslEnabled) {
       this.proxyAgent = new HttpsAgent({
-        ca: readFileSync(cert)
+        key: readFileSync(config.get('server.ssl.key')),
+        passphrase: config.get('server.ssl.keyPassphrase'),
+        cert: readFileSync(config.get('server.ssl.certificate')),
+        ca: map(config.get('server.ssl.certificateAuthorities'), readFileSync),
+        rejectUnauthorized: false
       });
     }
 
@@ -34,13 +41,18 @@ export default class BasePathProxy {
       config.set('server.basePath', this.basePath);
     }
 
+    const ONE_GIGABYTE = 1024 * 1024 * 1024;
+    config.set('server.maxPayloadBytes', ONE_GIGABYTE);
+
     setupLogging(null, this.server, config);
     setupConnection(null, this.server, config);
+    registerHapiPlugins(null, this.server, config);
+
     this.setupRoutes();
   }
 
   setupRoutes() {
-    const { server, basePath, targetPort } = this;
+    const { clusterManager, server, basePath, targetPort } = this;
 
     server.route({
       method: 'GET',
@@ -53,6 +65,28 @@ export default class BasePathProxy {
     server.route({
       method: '*',
       path: `${basePath}/{kbnPath*}`,
+      config: {
+        pre: [
+          (req, reply) => {
+            promiseMap(clusterManager.workers, worker => {
+              if (worker.type === 'server' && !worker.listening && !worker.crashed) {
+                return fromNode(cb => {
+                  const done = () => {
+                    worker.removeListener('listening', done);
+                    worker.removeListener('crashed', done);
+                    cb();
+                  };
+
+                  worker.on('listening', done);
+                  worker.on('crashed', done);
+                });
+              }
+            })
+            .return(undefined)
+            .nodeify(reply);
+          }
+        ],
+      },
       handler: {
         proxy: {
           passThrough: true,
@@ -75,13 +109,14 @@ export default class BasePathProxy {
       method: '*',
       path: `/{oldBasePath}/{kbnPath*}`,
       handler(req, reply) {
-        const {oldBasePath, kbnPath = ''} = req.params;
+        const { oldBasePath, kbnPath = '' } = req.params;
 
         const isGet = req.method === 'get';
         const isBasePath = oldBasePath.length === 3;
-        const isApp = kbnPath.slice(0, 4) === 'app/';
+        const isApp = kbnPath.startsWith('app/');
+        const isKnownShortPath = ['login', 'logout', 'status'].includes(kbnPath);
 
-        if (isGet && isBasePath && isApp) {
+        if (isGet && isBasePath && (isApp || isKnownShortPath)) {
           return reply.redirect(`${basePath}/${kbnPath}`);
         }
 

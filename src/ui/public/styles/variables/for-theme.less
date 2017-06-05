@@ -26,17 +26,16 @@
 @sidebar-hover-color: @sidebar-color;
 @sidebar-hover-bg: darken(@sidebar-bg, 10%);
 
-@sidebar-active-color: @component-active-color;
-@sidebar-active-bg: @component-active-bg;
-@sidebar-active-hover-bg: @component-active-bg;
-@sidebar-active-hover-color: @component-active-color;
+@sidebar-active-color: @kibanaGray1;
+@sidebar-active-bg: @kibanaGray4;
+@sidebar-active-hover-bg: @kibanaGray4;
+@sidebar-active-hover-color: @kibanaGray1;
 
-@sidebar-index-pattern-selection-bg: @white;
+@sidebar-index-pattern-selection-bg: @kibanaGray5;
+@sidebar-index-pattern-selection-bg-hover: @kibanaGray4;
 
 
 // Discover ====================================================================
-@discover-info-bg: @well-bg;
-
 @discover-link-color: @link-color;
 @discover-link-btn-color: @text-color;
 
@@ -47,37 +46,34 @@
 @discover-shard-failures-bg: lighten(@discover-shard-failures-color, 40%);
 @discover-shard-failures-border: @brand-danger;
 
-@discover-field-toggle-color: @btn-success-color;
-@discover-field-details-border: @well-border;
-@discover-field-details-color: @text-color;
-@discover-field-details-bg: @body-bg;
-@discover-field-details-close-border: @well-border;
-@discover-field-details-close-bg: @well-bg;
-@discover-field-details-close-hover-bg: @sidebar-hover-bg;
-@discover-field-details-close-hover-color: @sidebar-hover-color;
+@discover-field-details-border: @kibanaGray4;
+@discover-field-details-color: @kibanaGray2;
+@discover-field-details-bg: @kibanaGray5;
 @discover-field-details-progress-bar-bg: @gray;
+
+@discover-table-highlight-bg: #faebcc;
 
 
 // Field name ==================================================================
-@field-name-color: @text-muted;
-@field-name-no-results-color: @text-muted;
+@field-name-color: @kibanaGray3;
+@field-name-no-results-color: @kibanaGray3;
 
 
 // Collapser ===================================================================
-@collapser-bg: @gray-lighter;
-@collapser-border: @collapser-bg;
-@collapser-color: @gray3;
+@collapser-bg: @kibanaGray7;
+@collapser-border: @kibanaGray7;
+@collapser-color: @kibanaGray2;
 
-@collapser-hover-bg: @gray-light;
+@collapser-hover-bg: @kibanaGray5;
 @collapser-hover-border: @collapser-hover-bg;
-@collapser-hover-color: @white;
+@collapser-hover-color: @kibanaGray7;
 
-@collapser-width: 12px;
+@collapser-width: 21px;
 
 
 // Dashboard ===================================================================
-@dashboard-bg: @gray-lighter;
-@dashboard-panel-bg: @panel-bg;
+@dashboard-bg: #fff;
+@dashboard-panel-bg: #fff;
 @dashboard-panel-color: @text-color;
 @dashboard-panel-heading-link-color: @text-color;
 @dashboard-panel-heading-link-hover-color: @link-hover-color;
@@ -85,7 +81,6 @@
 
 
 // table =======================================================================
-@table-dt-bg: @gray-lighter;
 @table-dt-color: @brand-primary;
 @table-cell-hover-bg: white;
 @table-cell-hover-hover-bg: @gray-lighter;
@@ -101,26 +96,44 @@
 
 // NavBar ======================================================================
 @navbar-button-border: @input-border;
-@navbar-button-color: @brand-primary;
-@navbar-button-bg: @input-group-addon-bg;
+@navbar-button-color: @kibanaGray7;
+@navbar-button-bg: @kibanaGray3;
 
 
 // AppSwitcher =================================================================
 @app-switcher-application-bg: @gray-lighter;
-@app-switcher-app-link-color: @white;
 @app-switcher-app-title-color: @text-color;
 @app-switcher-app-description-color: @gray;
 
 
-// Settings ====================================================================
-@settings-objects-list-border: @gray-lighter;
-@settings-objects-empty-color: @gray-light;
-@settings-objects-action-bar-bg: @gray-lighter;
+// Management ==================================================================
+@management-objects-list-border: @gray-lighter;
+@management-objects-empty-color: @gray-light;
 
-@settings-advanced-table-default-color: @input-color-placeholder;
+@management-advanced-table-default-color: @input-color-placeholder;
 
-@settings-indices-active-color: @btn-success-bg;
+@management-indices-active-color: @btn-success-bg;
 
+// Settings - Add Data Wizard
+@settings-add-data-wizard-step-heading-active-bg: @kibanaYellow2;
+@settings-add-data-wizard-step-heading-complete-bg: @kibanaBlue5;
+@settings-add-data-wizard-step-heading-incomplete-bg: @kibanaGray5;
+
+@settings-add-data-wizard-step-heading-active-color: @kibanaGray1;
+@settings-add-data-wizard-step-heading-complete-color: @kibanaBlue2;
+@settings-add-data-wizard-step-heading-incomplete-color: @kibanaGray2;
+
+@settings-add-data-wizard-form-control-bg: @kibanaBlue6;
+@settings-add-data-wizard-form-control-border: @kibanaBlue3;
+
+// Settings - Add Data Wizard - Pipeline Setup =================================
+@settings-filebeat-wizard-panel-bg: @kibanaGray6;
+@settings-filebeat-wizard-processor-select-bg: @kibanaBlue5;
+
+@settings-filebeat-wizard-processor-container-overlay-bg: fade(#000, 10%);
+
+// Settings - Add Data Wizard - Parse CSV
+@settings-add-data-wizard-parse-csv-container-border: @kibanaBlue3;
 
 // Visualize ===================================================================
 @visualize-show-spy-border: @gray-lighter;
@@ -141,8 +154,8 @@
 @vis-editor-navbar-error-state-color: @btn-danger-color;
 
 @vis-editor-navbar-modal-bg: @navbar-default-bg;
-@vis-editor-navbar-modal-color: @white;
-@vis-editor-navbar-modal-link-color: @white;
+@vis-editor-navbar-modal-color: @kibanaGray1;
+@vis-editor-navbar-modal-link-color: @kibanaGray1;
 
 @vis-editor-sidebar-bg: @body-bg;
 @vis-editor-sidebar-border: @sidebar-bg;
@@ -154,8 +167,6 @@
 
 @vis-editor-agg-error-color: @btn-danger-color;
 @vis-editor-agg-error-bg: @btn-danger-bg;
-
-@vis-editor-agg-editor-flags-color: @link-color;
 
 @vis-editor-agg-wide-btn-border: @gray-lighter;
 @vis-editor-agg-wide-btn-bg: @body-bg;
@@ -173,7 +184,7 @@
 @list-group-menu-item-color: @link-color;
 @list-group-menu-item-select-color: @link-color;
 @list-group-menu-item-active-bg: @well-bg;
-@list-group-menu-item-hover-bg: @well-bg;
+@list-group-menu-item-hover-bg: @kibanaGray5;
 
 
 // Hint Box ====================================================================
@@ -200,11 +211,9 @@
 
 // Config ======================================================================
 @config-border: darken(@body-bg, 10%);
-@config-bg: @body-bg;
+@config-bg: @kibanaGray6;
 
 @config-close-bg: @well-bg;
-
-@config-saved-object-finder-options-bg: @body-bg;
 
 
 // Hintbox =====================================================================
@@ -218,7 +227,7 @@
 
 
 // Paginate ====================================================================
-@paginate-page-link-active-color: @text-color;
+@paginate-page-link-active-color: @kibanaGray2;
 
 
 // Spinner =====================================================================
@@ -303,6 +312,8 @@
 @tooltip-color: @gray-lighter;
 
 @tooltip-table-border: @gray;
+@tooltip-bold: 600;
+
 
 
 // Svg =========================================================================
@@ -318,3 +329,11 @@
 // Saved Object Finder =========================================================
 @saved-object-finder-link-color: @link-color;
 @saved-object-finder-icon-color: darken(@saved-object-finder-link-color, 10%);
+
+// Global Nav ================================================================
+@global-nav-open-width: 180px;
+@global-nav-closed-width: 53px;
+@app-icon-height: 38px;
+@app-line-height: 24px;
+@app-links-wrapper-background: #3caed2;
+@app-links-active-background: #2f99c1;

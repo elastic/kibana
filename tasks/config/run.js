@@ -1,10 +1,32 @@
+import { format } from 'url';
+import { esTestServerUrlParts } from '../../test/es_test_server_url_parts';
+import { kibanaTestServerUrlParts } from '../../test/kibana_test_server_url_parts';
+
 module.exports = function (grunt) {
-  let platform = require('os').platform();
-  let {format} = require('url');
-  let {resolve} = require('path');
-  let root = p => resolve(__dirname, '../../', p);
-  let binScript =  /^win/.test(platform) ? '.\\bin\\kibana.bat' : './bin/kibana';
-  let uiConfig = require(root('test/serverConfig'));
+  const platform = require('os').platform();
+  const binScript =  /^win/.test(platform) ? '.\\bin\\kibana.bat' : './bin/kibana';
+  const buildScript =  /^win/.test(platform) ? '.\\build\\kibana\\bin\\kibana.bat' : './build/kibana/bin/kibana';
+  const pkgVersion = grunt.config.get('pkg.version');
+  const releaseBinScript = `./build/kibana-${pkgVersion}-linux-x86_64/bin/kibana`;
+
+  const stdDevArgs = [
+    '--env.name=development',
+    '--logging.json=false',
+  ];
+
+  const buildTestsArgs = [
+    ...stdDevArgs,
+    '--plugins.initialize=false',
+    '--optimize.bundleFilter=tests',
+  ];
+
+  const kbnServerFlags = grunt.option.flags().reduce(function (flags, flag) {
+    if (flag.startsWith('--kbnServer.')) {
+      flags.push(`--${flag.slice(12)}`);
+    }
+
+    return flags;
+  }, []);
 
   return {
     testServer: {
@@ -16,11 +38,9 @@ module.exports = function (grunt) {
       },
       cmd: binScript,
       args: [
+        ...buildTestsArgs,
         '--server.port=5610',
-        '--env.name=development',
-        '--logging.json=false',
-        '--optimize.bundleFilter=tests',
-        '--plugins.initialize=false'
+        ...kbnServerFlags,
       ]
     },
 
@@ -33,11 +53,33 @@ module.exports = function (grunt) {
       },
       cmd: binScript,
       args: [
-        '--server.port=' + uiConfig.servers.kibana.port,
-        '--server.xsrf.disableProtection=true',
+        ...stdDevArgs,
         '--optimize.enabled=false',
-        '--elasticsearch.url=' + format(uiConfig.servers.elasticsearch),
-        '--logging.json=false'
+        '--elasticsearch.url=' + format(esTestServerUrlParts),
+        '--server.port=' + kibanaTestServerUrlParts.port,
+        '--server.xsrf.disableProtection=true',
+        ...kbnServerFlags,
+      ]
+    },
+
+    devApiTestServer: {
+      options: {
+        wait: false,
+        ready: /Server running/,
+        quiet: false,
+        failOnError: false
+      },
+      cmd: binScript,
+      args: [
+        ...stdDevArgs,
+        '--dev',
+        '--no-base-path',
+        '--no-ssl',
+        '--optimize.enabled=false',
+        '--elasticsearch.url=' + format(esTestServerUrlParts),
+        '--server.port=' + kibanaTestServerUrlParts.port,
+        '--server.xsrf.disableProtection=true',
+        ...kbnServerFlags,
       ]
     },
 
@@ -50,10 +92,48 @@ module.exports = function (grunt) {
       },
       cmd: binScript,
       args: [
-        '--server.port=' + uiConfig.servers.kibana.port,
-        '--env.name=development',
-        '--elasticsearch.url=' + format(uiConfig.servers.elasticsearch),
-        '--logging.json=false'
+        ...stdDevArgs,
+        '--server.port=' + kibanaTestServerUrlParts.port,
+        '--elasticsearch.url=' + format(esTestServerUrlParts),
+        ...kbnServerFlags,
+      ]
+    },
+
+    testUIReleaseServer: {
+      options: {
+        wait: false,
+        ready: /Server running/,
+        quiet: false,
+        failOnError: false
+      },
+      cmd: releaseBinScript,
+      args: [
+        ...stdDevArgs,
+        '--server.port=' + kibanaTestServerUrlParts.port,
+        '--elasticsearch.url=' + format(esTestServerUrlParts),
+        ...kbnServerFlags,
+      ]
+    },
+
+    testUIDevServer: {
+      options: {
+        wait: false,
+        ready: /Server running/,
+        quiet: false,
+        failOnError: false
+      },
+      cmd: binScript,
+      args: [
+        ...stdDevArgs,
+        '--server.port=' + kibanaTestServerUrlParts.port,
+        '--elasticsearch.url=' + format(esTestServerUrlParts),
+        '--dev',
+        '--no-base-path',
+        '--no-ssl',
+        '--optimize.lazyPort=5611',
+        '--optimize.lazyPrebuild=true',
+        '--optimize.bundleDir=optimize/testUiServer',
+        ...kbnServerFlags,
       ]
     },
 
@@ -66,12 +146,10 @@ module.exports = function (grunt) {
       },
       cmd: binScript,
       args: [
+        ...buildTestsArgs,
         '--server.port=5610',
-        '--env.name=development',
-        '--logging.json=false',
-        '--optimize.bundleFilter=tests',
-        '--plugins.initialize=false',
-        '--testsBundle.instrument=true'
+        '--tests_bundle.instrument=true',
+        ...kbnServerFlags,
       ]
     },
 
@@ -84,46 +162,16 @@ module.exports = function (grunt) {
       },
       cmd: binScript,
       args: [
+        ...buildTestsArgs,
         '--dev',
         '--no-watch',
+        '--no-ssl',
+        '--no-base-path',
         '--server.port=5610',
         '--optimize.lazyPort=5611',
         '--optimize.lazyPrebuild=true',
-        '--logging.json=false',
-        '--optimize.bundleFilter=tests',
-        '--plugins.initialize=false'
-      ]
-    },
-
-    seleniumServer: {
-      options: {
-        wait: false,
-        ready: /Selenium Server is up and running/,
-        quiet: true,
-        failOnError: false
-      },
-      cmd: 'java',
-      args: [
-        '-jar',
-        'selenium/selenium-server-standalone-2.48.2.jar',
-        '-port',
-        uiConfig.servers.webdriver.port
-      ]
-    },
-
-    devSeleniumServer: {
-      options: {
-        wait: false,
-        ready: /Selenium Server is up and running/,
-        quiet: false,
-        failOnError: false
-      },
-      cmd: 'java',
-      args: [
-        '-jar',
-        'selenium/selenium-server-standalone-2.48.2.jar',
-        '-port',
-        uiConfig.servers.webdriver.port
+        '--optimize.bundleDir=optimize/testdev',
+        ...kbnServerFlags,
       ]
     },
 
@@ -133,14 +181,14 @@ module.exports = function (grunt) {
         ready: /Optimization .+ complete/,
         quiet: true
       },
-      cmd: './build/kibana/bin/kibana',
+      cmd: buildScript,
       args: [
         '--env.name=production',
         '--logging.json=false',
         '--plugins.initialize=false',
-        '--server.autoListen=false'
+        '--server.autoListen=false',
+        ...kbnServerFlags,
       ]
     }
   };
-
 };

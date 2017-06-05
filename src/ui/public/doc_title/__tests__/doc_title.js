@@ -1,14 +1,15 @@
+import _ from 'lodash';
+import sinon from 'sinon';
+import expect from 'expect.js';
+import ngMock from 'ng_mock';
+import { DocTitleProvider } from 'ui/doc_title';
 
 describe('docTitle Service', function () {
-  var _ = require('lodash');
-  var sinon = require('auto-release-sinon');
-  var expect = require('expect.js');
-  var ngMock = require('ngMock');
-  var initialDocTitle;
-  var MAIN_TITLE = 'Kibana 4';
+  let initialDocTitle;
+  const MAIN_TITLE = 'Kibana 4';
 
-  var docTitle;
-  var $rootScope;
+  let docTitle;
+  let $rootScope;
 
   beforeEach(function () {
     initialDocTitle = document.title;
@@ -27,7 +28,7 @@ describe('docTitle Service', function () {
     if (_.random(0, 1)) {
       docTitle = $injector.get('docTitle');
     } else {
-      docTitle = Private(require('ui/doc_title'));
+      docTitle = Private(DocTitleProvider);
     }
 
     $rootScope = $injector.get('$rootScope');
@@ -35,9 +36,9 @@ describe('docTitle Service', function () {
 
   describe('setup', function () {
     it('resets the title when a route change begins', function () {
-      var spy = $rootScope.$on;
+      const spy = $rootScope.$on;
 
-      var found = spy.args.some(function (args) {
+      const found = spy.args.some(function (args) {
         return args[0] === '$routeChangeStart' && args[1] === docTitle.reset;
       });
 
@@ -60,23 +61,10 @@ describe('docTitle Service', function () {
   });
 
   describe('#change', function () {
-    var getActiveTabStub;
-
-    beforeEach(function () {
-      getActiveTabStub = sinon.stub(require('ui/chrome'), 'getActiveTab');
-    });
-
     it('writes the first param to as the first part of the doc name', function () {
       expect(document.title).to.be(MAIN_TITLE);
       docTitle.change('some secondary title');
       expect(document.title).to.be('some secondary title - ' + MAIN_TITLE);
-    });
-
-    it('includes the title of the active tab if available', function () {
-      expect(document.title).to.be(MAIN_TITLE);
-      getActiveTabStub.returns({ title: 'fancy pants' });
-      docTitle.change('some secondary title');
-      expect(document.title).to.be('some secondary title - fancy pants - ' + MAIN_TITLE);
     });
 
     it('will write just the first param if the second param is true', function () {

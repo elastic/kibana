@@ -1,0 +1,44 @@
+.kuiPanel {
+  border: $globalBorderThick;
+}
+
+.kuiPanel--withHeader {
+  border-top: none;
+}
+
+.kuiPanel--centered {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.kuiPanelHeader {
+  @include bar;
+  @include buttonOnStandoutBackground;
+  @include selectOnStandoutBackground;
+
+  padding: $panelPadding;
+  height: $panelHeight;
+  background-color: $globalBorderColor;
+}
+
+  .kuiPanelHeader__title {
+    font-size: $globalTitleFontSize;
+    line-height: $globalLineHeight;
+  }
+
+/**
+ * 1. Undo what barSection mixin does.
+ */
+.kuiPanelHeaderSection {
+  @include barSection;
+
+  &:only-child {
+    margin-left: 0; /* 1 */
+    margin-right: auto; /* 1 */
+  }
+}
+
+.kuiPanelBody {
+  padding: $panelPadding;
+}

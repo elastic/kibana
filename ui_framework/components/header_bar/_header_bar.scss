@@ -1,0 +1,16 @@
+.kuiHeaderBar {
+  @include bar;
+
+  border-bottom: $globalBorderThick;
+}
+
+/**
+ * 1. Align a single section to the left by default.
+ */
+.kuiHeaderBarSection {
+  @include barSection;
+
+  &:only-child {
+    margin-left: 0; /* 1 */
+  }
+}

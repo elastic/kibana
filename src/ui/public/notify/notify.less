@@ -1,0 +1,119 @@
+@import "~ui/styles/mixins";
+
+.toaster-container {
+  visibility: visible;
+  width: 100%;
+
+  .toaster {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  /**
+   * 1. Shouldn't look like a button.
+   */
+  .toaster-countdown {
+    appearance: none;
+    background: none;
+    border: none;
+
+    .badge {
+      color: @white;
+    }
+
+    &:hover {
+      .badge {
+        font-size: 0;
+      }
+
+      .badge:after {
+        font-size: @font-size-small;
+        content: attr(hover-text);
+      }
+    }
+  }
+
+  .alert {
+    padding: 0 15px;
+    margin: 0;
+    border-radius: 0;
+    border: 0px;
+  }
+
+  .toast {
+    display: flex;
+    align-items: center;
+
+    > * {
+      flex: 0 0 auto;
+      &:not(:last-child) {
+        margin-right: 4px;
+      }
+    }
+  }
+
+  .toast-message {
+    flex: 1 1 auto;
+    margin-top: 10px;
+    .ellipsis();
+    line-height: normal;
+  }
+
+  .toast-stack {
+    padding-bottom: 10px;
+
+    pre {
+      display: inline-block;
+      width: 100%;
+      margin: 10px 0;
+      word-break: normal;
+      word-wrap: normal;
+      white-space: pre-wrap;
+    }
+  }
+
+  .toast-controls {
+    display: flex;
+  }
+
+  // add darkened background to the different badges
+  .alert-success .badge {
+    background: darken(@alert-success-bg, 25%);
+  }
+  .alert-info .badge {
+    background: darken(@alert-info-bg, 25%);
+  }
+  .alert-warning .badge {
+    background: darken(@alert-warning-bg, 25%);
+  }
+  .alert-danger .badge {
+    background: darken(@alert-danger-bg, 25%);
+  }
+  .alert-banner {
+    background-color: white;
+    padding: 10px 15px;
+
+    a {
+      color: #328caa;
+    }
+
+    .toaster-countdown {
+      background-color: white;
+    }
+
+    .badge {
+      background-color: #328caa;
+    }
+  }
+
+  .toast-message {
+    white-space: normal;
+  }
+}
+
+// toast message class for banner needs to be display:block because banner does
+// not have a flex layout, and the styled element could be any kind of element
+.toast-message-banner {
+  display: block;
+}

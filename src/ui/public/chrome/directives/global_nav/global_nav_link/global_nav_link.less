@@ -1,0 +1,93 @@
+@import (reference) "~ui/styles/variables";
+
+.global-nav-link {
+  position: relative;
+  width: @global-nav-closed-width;
+  height: @app-icon-height;
+  line-height: @app-line-height;
+
+  &.is-global-nav-link-disabled {
+    opacity: 0.5;
+
+    .global-nav-link__anchor {
+      cursor: default;
+    }
+  }
+
+  &:hover,
+  &.active {
+    background-color: @app-links-active-background;
+
+    .global-nav-link__anchor {
+      color: @white;
+      text-decoration: none;
+    }
+  }
+}
+
+.is-global-nav-open {
+  .global-nav-link {
+    width: @global-nav-open-width;
+  }
+}
+
+  .global-nav-link__anchor {
+    display: block;
+    height: 100%;
+    color: #ebf7fa;
+
+    &:focus {
+      color: @white;
+    }
+  }
+
+  .global-nav-link__icon {
+    display: inline-block;
+    width: @global-nav-closed-width;
+    height: @app-icon-height;
+    float: left;
+    text-align: center;
+    font-size: 1.7em;
+  }
+
+    /**
+     * This imgae is used to display the icon.
+     */
+    .global-nav-link__icon-image {
+      height: 18px;
+      margin-top: 8px;
+    }
+
+    /**
+     * This placeholder text gets shown if there is no specified icon.
+     */
+    .global-nav-link__icon-placeholder {
+      line-height: @app-icon-height;
+      background-position: center;
+      background-size: contain;
+      background-repeat: no-repeat;
+    }
+
+  .global-nav-link__title {
+    display: none;
+    width: calc(@global-nav-open-width - @global-nav-closed-width);
+    float: right;
+    font-size: 0.9em;
+    text-align: left;
+    padding-left: 3px;
+    line-height: @app-icon-height;
+    white-space: nowrap;
+
+    .is-global-nav-open & {
+      display: inline-block;
+    }
+  }
+
+.global-nav-link--close {
+  /**
+   * 1. Translation accounts for the icon image being slightly off-center.
+   */
+  .global-nav-link__icon {
+    transform: translateX(1px) scaleX(-1); /* 1 */
+  }
+}

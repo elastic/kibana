@@ -1,27 +1,26 @@
-define(function (require) {
-  return function DiffTimePickerValuesFn() {
-    var _ = require('lodash');
-    var angular = require('angular');
+import _ from 'lodash';
+import angular from 'angular';
 
-    var valueOf = function (o) {
-      if (o) return o.valueOf();
-    };
+export function UtilsDiffTimePickerValsProvider() {
 
-    return function (rangeA, rangeB) {
-      if (_.isObject(rangeA) && _.isObject(rangeB)) {
-        if (
-          valueOf(rangeA.to) !== valueOf(rangeB.to)
-          || valueOf(rangeA.from) !== valueOf(rangeB.from)
-          || valueOf(rangeA.value) !== valueOf(rangeB.value)
-          || valueOf(rangeA.pause) !== valueOf(rangeB.pause)
-        ) {
-          return true;
-        }
-      } else {
-        return !angular.equals(rangeA, rangeB);
-      }
-
-      return false;
-    };
+  const valueOf = function (o) {
+    if (o) return o.valueOf();
   };
-});
+
+  return function (rangeA, rangeB) {
+    if (_.isObject(rangeA) && _.isObject(rangeB)) {
+      if (
+        valueOf(rangeA.to) !== valueOf(rangeB.to)
+        || valueOf(rangeA.from) !== valueOf(rangeB.from)
+        || valueOf(rangeA.value) !== valueOf(rangeB.value)
+        || valueOf(rangeA.pause) !== valueOf(rangeB.pause)
+      ) {
+        return true;
+      }
+    } else {
+      return !angular.equals(rangeA, rangeB);
+    }
+
+    return false;
+  };
+}

@@ -1,0 +1,36 @@
+/**
+ * 1. Copied from FontAwesome's .fa class. We use a custom class to make it easier to migrate away
+ *    from FontAwesome someday. When we do migrate away, we can just update this definition.
+ */
+.kuiIcon {
+  display: inline-block; /* 1 */
+  font: normal normal normal 14px/1 FontAwesome; /* 1 */
+  font-size: inherit; /* 1 */
+  text-rendering: auto; /* 1 */
+  -webkit-font-smoothing: antialiased; /* 1 */
+  -moz-osx-font-smoothing: grayscale; /* 1 */
+}
+
+.kuiIcon--info {
+  color: $globalInfoColor;
+}
+
+.kuiIcon--success {
+  color: $globalSuccessColor;
+}
+
+.kuiIcon--warning {
+  color: $globalWarningColor;
+}
+
+.kuiIcon--error {
+  color: $globalDangerColor;
+}
+
+.kuiIcon--inactive {
+  color: $globalInactiveColor;
+}
+
+.kuiIcon--basic {
+  color: $iconBasicTextColor;
+}

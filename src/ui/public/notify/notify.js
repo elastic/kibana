@@ -1,45 +1,62 @@
-define(function (require) {
-  var _ = require('lodash');
-  var $ = require('jquery');
-  var modules = require('ui/modules');
-  var module = modules.get('kibana/notify');
-  var errors = require('ui/notify/errors');
-  var Notifier = require('ui/notify/notifier');
-  var rootNotifier = new Notifier();
+import { uiModules } from 'ui/modules';
+import { Notifier } from 'ui/notify/notifier';
+import 'ui/notify/directives';
+import { metadata } from 'ui/metadata';
 
-  require('ui/notify/directives');
+const module = uiModules.get('kibana/notify');
+export const notify = new Notifier();
+export { Notifier } from 'ui/notify/notifier';
 
-  module.factory('createNotifier', function () {
-    return function (opts) {
-      return new Notifier(opts);
-    };
-  });
-
-  module.factory('Notifier', function () {
-    return Notifier;
-  });
-
-  module.run(function ($timeout) {
-    // provide alternate methods for setting timeouts, which will properly trigger digest cycles
-    Notifier.setTimerFns($timeout, $timeout.cancel);
-  });
-
-  /**
-   * Global Angular exception handler (NOT JUST UNCAUGHT EXCEPTIONS)
-   */
-  // modules
-  //   .get('exceptionOverride')
-  //   .factory('$exceptionHandler', function () {
-  //     return function (exception, cause) {
-  //       rootNotifier.fatal(exception, cause);
-  //     };
-  //   });
-
-  window.onerror = function (err, url, line) {
-    rootNotifier.fatal(new Error(err + ' (' + url + ':' + line + ')'));
-    return true;
+module.factory('createNotifier', function () {
+  return function (opts) {
+    return new Notifier(opts);
   };
-
-  return rootNotifier;
-
 });
+
+module.factory('Notifier', function () {
+  return Notifier;
+});
+
+// teach Notifier how to use angular interval services
+module.run(function (config, $interval, $compile) {
+  Notifier.applyConfig({
+    setInterval: $interval,
+    clearInterval: $interval.cancel
+  });
+  applyConfig(config);
+  Notifier.$compile = $compile;
+});
+
+// if kibana is not included then the notify service can't
+// expect access to config (since it's dependent on kibana)
+if (!!metadata.kbnIndex) {
+  require('ui/config');
+  module.run(function (config) {
+    config.watchAll(() => applyConfig(config));
+  });
+}
+
+function applyConfig(config) {
+  Notifier.applyConfig({
+    bannerLifetime: config.get('notifications:lifetime:banner'),
+    errorLifetime: config.get('notifications:lifetime:error'),
+    warningLifetime: config.get('notifications:lifetime:warning'),
+    infoLifetime: config.get('notifications:lifetime:info')
+  });
+  notify.banner(config.get('notifications:banner'));
+}
+
+window.onerror = function (err, url, line) {
+  notify.fatal(new Error(err + ' (' + url + ':' + line + ')'));
+  return true;
+};
+
+if (window.addEventListener) {
+  const notifier = new Notifier({
+    location: 'Promise'
+  });
+
+  window.addEventListener('unhandledrejection', function (e) {
+    notifier.log(`Detected an unhandled Promise rejection.\n${e.reason}`);
+  });
+}

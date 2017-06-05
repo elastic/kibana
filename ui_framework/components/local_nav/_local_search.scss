@@ -1,0 +1,80 @@
+.kuiLocalSearch {
+  display: flex;
+  width: 100%;
+}
+
+.kuiLocalSearchInput {
+  @include formControl;
+  flex: 1 1 100%;
+  border-color: $localSearchBackgroundColor;
+  border-top-color: $localSearchBackgroundColor;
+  border-bottom-color: $localSearchBackgroundColor;
+  border-radius: $globalBorderRadius 0 0 $globalBorderRadius;
+
+  &.kuiLocalSearchInput-isInvalid {
+    border-color: $localSearchBorderColor-isInvalid;
+  }
+}
+
+.kuiLocalSearchInput--secondary {
+  height: $localSearchHeight;
+  flex: 0 0 auto;
+  border-radius: 0;
+  border-left-color: $globalFormControlBorderColor;
+
+  @include darkTheme {
+    border-left-color: $localNavBackgroundColor--darkTheme;
+    border-right-color: $localNavBackgroundColor--darkTheme;
+  }
+}
+
+.kuiLocalSearchAssistedInput {
+  display: flex;
+  flex: 1 1 100%;
+  position: relative;
+}
+
+  /**
+   * 1. Vertically center the assistance, regardless of its height.
+   */
+  .kuiLocalSearchAssistedInput__assistance {
+    position: absolute;
+    right: $globalFormControlHorizontalPadding;
+    top: 50%; /* 1 */
+    transform: translateY(-50%); /* 1 */
+  }
+
+.kuiLocalSearchSelect {
+  @include select;
+
+  border-color: $localSearchBackgroundColor;
+  border-left-color: $globalFormControlBorderColor;
+  border-radius: 0;
+}
+
+/**
+ * 1. Override inherited styles.
+ */
+.kuiLocalSearchButton {
+  width: 43px;
+  height: $localSearchHeight;
+  font-size: $globalFontSize;
+  line-height: 0; /* 1 */
+  color: $localSearchButtonTextColor;
+  background-color: $localSearchButtonBackgroundColor;
+  border: 0;
+  border-radius: 0 $globalBorderRadius $globalBorderRadius 0;
+
+  &:focus {
+    @include focus($globalFocusColor, $globalBorderColor);
+  }
+
+  @include darkTheme {
+    color: $localSearchButtonTextColor--darkTheme;
+    background-color: $localSearchButtonBackgroundColor--darkTheme;
+
+    &:focus {
+      @include focus($globalFocusColor, $localNavBackgroundColor--darkTheme);
+    }
+  }
+}

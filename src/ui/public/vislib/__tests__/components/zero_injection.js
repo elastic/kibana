@@ -1,316 +1,229 @@
 
-var angular = require('angular');
-var _ = require('lodash');
-var expect = require('expect.js');
-var ngMock = require('ngMock');
+import _ from 'lodash';
+import expect from 'expect.js';
+import ngMock from 'ng_mock';
+import { VislibComponentsZeroInjectionInjectZerosProvider } from 'ui/vislib/components/zero_injection/inject_zeros';
+import { VislibComponentsZeroInjectionOrderedXKeysProvider } from 'ui/vislib/components/zero_injection/ordered_x_keys';
+import { VislibComponentsZeroInjectionUniqKeysProvider } from 'ui/vislib/components/zero_injection/uniq_keys';
+import { VislibComponentsZeroInjectionFlattenDataProvider } from 'ui/vislib/components/zero_injection/flatten_data';
+import VislibComponentsZeroInjectionZeroFilledArrayProvider from 'ui/vislib/components/zero_injection/zero_filled_array';
+import { VislibComponentsZeroInjectionZeroFillDataArrayProvider } from 'ui/vislib/components/zero_injection/zero_fill_data_array';
 
 describe('Vislib Zero Injection Module Test Suite', function () {
-  var dateHistogramRows = {
-    'rows': [
+  const dateHistogramRows = [
+    {
+      'label': 'html',
+      'values': [
+        { 'x': 1418410560000, 'y': 2 },
+        { 'x': 1418410620000, 'y': 4 },
+        { 'x': 1418410680000, 'y': 1 },
+        { 'x': 1418410740000, 'y': 5 },
+        { 'x': 1418410800000, 'y': 2 },
+        { 'x': 1418410860000, 'y': 3 },
+        { 'x': 1418410920000, 'y': 2 }
+      ]
+    },
+    {
+      'label': 'css',
+      'values': [
+        { 'x': 1418410560000, 'y': 1 },
+        { 'x': 1418410620000, 'y': 3 },
+        { 'x': 1418410680000, 'y': 1 },
+        { 'x': 1418410740000, 'y': 4 },
+        { 'x': 1418410800000, 'y': 2 }
+      ]
+    }
+  ];
+
+  const dateHistogramRowsObj = {
+    series: [
       {
-        'label': 'Top 5 @tags: success',
-        'ordered': {
-          'date': true,
-          'interval': 60000,
-          'min': 1418410540548,
-          'max': 1418410936568
-        },
-        'series': [
-          {
-            'label': 'jpg',
-            'values': [
-              { 'x': 1418410560000, 'y': 2 },
-              { 'x': 1418410620000, 'y': 4 },
-              { 'x': 1418410680000, 'y': 1 },
-              { 'x': 1418410740000, 'y': 5 },
-              { 'x': 1418410800000, 'y': 2 },
-              { 'x': 1418410860000, 'y': 3 },
-              { 'x': 1418410920000, 'y': 2 }
-            ]
-          },
-          {
-            'label': 'css',
-            'values': [
-              { 'x': 1418410560000, 'y': 1 },
-              { 'x': 1418410620000, 'y': 3 },
-              { 'x': 1418410680000, 'y': 1 },
-              { 'x': 1418410740000, 'y': 4 },
-              { 'x': 1418410800000, 'y': 2 }
-            ]
-          },
-          {
-            'label': 'gif',
-            'values': [
-              { 'x': 1418410500000, 'y': 1 },
-              { 'x': 1418410680000, 'y': 3 },
-              { 'x': 1418410740000, 'y': 2 }
-            ]
-          }
+        'label': 'html',
+        'values': [
+          { 'x': 1418410560000, 'y': 2 },
+          { 'x': 1418410620000, 'y': 4 },
+          { 'x': 1418410680000, 'y': 1 },
+          { 'x': 1418410740000, 'y': 5 },
+          { 'x': 1418410800000, 'y': 2 },
+          { 'x': 1418410860000, 'y': 3 },
+          { 'x': 1418410920000, 'y': 2 }
         ]
       },
       {
-        'label': 'Top 5 @tags: info',
-        'ordered': {
-          'date': true,
-          'interval': 60000,
-          'min': 1418410540548,
-          'max': 1418410936568
-        },
-        'series': [
-          {
-            'label': 'jpg',
-            'values': [
-              { 'x': 1418410560000, 'y': 4 },
-              { 'x': 1418410620000, 'y': 2 },
-              { 'x': 1418410680000, 'y': 1 },
-              { 'x': 1418410740000, 'y': 5 },
-              { 'x': 1418410800000, 'y': 2 },
-              { 'x': 1418410860000, 'y': 3 },
-              { 'x': 1418410920000, 'y': 2 }
-            ]
-          },
-          {
-            'label': 'css',
-            'values': [
-              { 'x': 1418410620000, 'y': 3 },
-              { 'x': 1418410680000, 'y': 1 },
-              { 'x': 1418410740000, 'y': 4 },
-              { 'x': 1418410800000, 'y': 2 }
-            ]
-          },
-          {
-            'label': 'gif',
-            'values': [
-              { 'x': 1418410500000, 'y': 1 }
-            ]
-          }
-        ]
-      },
-      {
-        'label': 'Top 5 @tags: security',
-        'ordered': {
-          'date': true,
-          'interval': 60000,
-          'min': 1418410540548,
-          'max': 1418410936568
-        },
-        'series': [
-          {
-            'label': 'jpg',
-            'values': [
-              { 'x': 1418410560000, 'y': 1 },
-              { 'x': 1418410620000, 'y': 3 },
-              { 'x': 1418410920000, 'y': 2 }
-            ]
-          },
-          {
-            'label': 'gif',
-            'values': [
-              { 'x': 1418410680000, 'y': 3 },
-              { 'x': 1418410740000, 'y': 1 }
-            ]
-          }
-        ]
-      },
-      {
-        'label': 'Top 5 @tags: login',
-        'ordered': {
-          'date': true,
-          'interval': 60000,
-          'min': 1418410540548,
-          'max': 1418410936568
-        },
-        'series': [
-          {
-            'label': 'jpg',
-            'values': [
-              { 'x': 1418410740000, 'y': 1 }
-            ]
-          },
-          {
-            'label': 'css',
-            'values': [
-              { 'x': 1418410560000, 'y': 1 }
-            ]
-          }
-        ]
-      },
-      {
-        'label': 'Top 5 @tags: warning',
-        'ordered': {
-          'date': true,
-          'interval': 60000,
-          'min': 1418410540548,
-          'max': 1418410936568
-        },
-        'series': [
-          {
-            'label': 'jpg',
-            'values': [
-              { 'x': 1418410860000, 'y': 2 }
-            ]
-          }
+        'label': 'css',
+        'values': [
+          { 'x': 1418410560000, 'y': 1 },
+          { 'x': 1418410620000, 'y': 3 },
+          { 'x': 1418410680000, 'y': 1 },
+          { 'x': 1418410740000, 'y': 4 },
+          { 'x': 1418410800000, 'y': 2 }
         ]
       }
     ]
   };
 
-  var seriesData = {
+
+  const seriesData = [
+    {
+      label: '200',
+      values: [
+        { x: 'v1', y: 234 },
+        { x: 'v2', y: 34 },
+        { x: 'v3', y: 834 },
+        { x: 'v4', y: 1234 },
+        { x: 'v5', y: 4 }
+      ]
+    }
+  ];
+
+  const seriesDataObj = {
     series: [
       {
         label: '200',
         values: [
-          {x: 'v1', y: 234},
-          {x: 'v2', y: 34},
-          {x: 'v3', y: 834},
-          {x: 'v4', y: 1234},
-          {x: 'v5', y: 4}
+          { x: 'v1', y: 234 },
+          { x: 'v2', y: 34 },
+          { x: 'v3', y: 834 },
+          { x: 'v4', y: 1234 },
+          { x: 'v5', y: 4 }
         ]
       }
     ]
   };
 
-  var multiSeriesData = {
+  const multiSeriesData = [
+    {
+      label: '200',
+      values: [
+        { x: '1', y: 234 },
+        { x: '2', y: 34 },
+        { x: '3', y: 834 },
+        { x: '4', y: 1234 },
+        { x: '5', y: 4 }
+      ]
+    },
+    {
+      label: '404',
+      values: [
+        { x: '1', y: 1234 },
+        { x: '3', y: 234 },
+        { x: '5', y: 34 }
+      ]
+    },
+    {
+      label: '503',
+      values: [
+        { x: '3', y: 834 }
+      ]
+    }
+  ];
+
+  const multiSeriesDataObj = {
     series: [
       {
         label: '200',
         values: [
-          {x: '1', y: 234},
-          {x: '2', y: 34},
-          {x: '3', y: 834},
-          {x: '4', y: 1234},
-          {x: '5', y: 4}
+          { x: '1', y: 234 },
+          { x: '2', y: 34 },
+          { x: '3', y: 834 },
+          { x: '4', y: 1234 },
+          { x: '5', y: 4 }
         ]
       },
       {
         label: '404',
         values: [
-          {x: '1', y: 1234},
-          {x: '3', y: 234},
-          {x: '5', y: 34}
+          { x: '1', y: 1234 },
+          { x: '3', y: 234 },
+          { x: '5', y: 34 }
         ]
       },
       {
         label: '503',
         values: [
-          {x: '3', y: 834}
+          { x: '3', y: 834 }
         ]
       }
     ]
   };
 
-  var multiSeriesNumberedData = {
+  const multiSeriesNumberedData = [
+    {
+      label: '200',
+      values: [
+        { x: 1, y: 234 },
+        { x: 2, y: 34 },
+        { x: 3, y: 834 },
+        { x: 4, y: 1234 },
+        { x: 5, y: 4 }
+      ]
+    },
+    {
+      label: '404',
+      values: [
+        { x: 1, y: 1234 },
+        { x: 3, y: 234 },
+        { x: 5, y: 34 }
+      ]
+    },
+    {
+      label: '503',
+      values: [
+        { x: 3, y: 834 }
+      ]
+    }
+  ];
+
+  const multiSeriesNumberedDataObj = {
     series: [
       {
         label: '200',
         values: [
-          {x: 1, y: 234},
-          {x: 2, y: 34},
-          {x: 3, y: 834},
-          {x: 4, y: 1234},
-          {x: 5, y: 4}
+          { x: 1, y: 234 },
+          { x: 2, y: 34 },
+          { x: 3, y: 834 },
+          { x: 4, y: 1234 },
+          { x: 5, y: 4 }
         ]
       },
       {
         label: '404',
         values: [
-          {x: 1, y: 1234},
-          {x: 3, y: 234},
-          {x: 5, y: 34}
+          { x: 1, y: 1234 },
+          { x: 3, y: 234 },
+          { x: 5, y: 34 }
         ]
       },
       {
         label: '503',
         values: [
-          {x: 3, y: 834}
+          { x: 3, y: 834 }
         ]
       }
     ]
   };
 
-  var childrenObject = {
-    children: []
-  };
-  var seriesObject = {
-    series: []
-  };
-  var rowsObject = {
-    rows: []
-  };
-  var columnsObject = {
-    columns: []
-  };
-  var emptyObject = {};
-  var str = 'string';
-  var number = 24;
-  var boolean = false;
-  var nullValue = null;
-  var emptyArray = [];
-  var notAValue;
+  const emptyObject = {};
+  const str = 'string';
+  const number = 24;
+  const boolean = false;
+  const nullValue = null;
+  const emptyArray = [];
+  let notAValue;
 
   describe('Zero Injection (main)', function () {
-    var injectZeros;
-    var sample1;
-    var sample2;
-    var sample3;
+    let injectZeros;
+    let sample1;
+    let sample2;
+    let sample3;
 
     beforeEach(ngMock.module('kibana'));
     beforeEach(ngMock.inject(function (Private) {
-      injectZeros = Private(require('ui/vislib/components/zero_injection/inject_zeros'));
-      sample1 = injectZeros(seriesData);
-      sample2 = injectZeros(multiSeriesData);
-      sample3 = injectZeros(multiSeriesNumberedData);
+      injectZeros = Private(VislibComponentsZeroInjectionInjectZerosProvider);
+      sample1 = injectZeros(seriesData, seriesDataObj);
+      sample2 = injectZeros(multiSeriesData, multiSeriesDataObj);
+      sample3 = injectZeros(multiSeriesNumberedData, multiSeriesNumberedDataObj);
     }));
-
-    it('should throw an error if the input is not an object', function () {
-      expect(function () {
-        injectZeros(str);
-      }).to.throwError();
-
-      expect(function () {
-        injectZeros(number);
-      }).to.throwError();
-
-      expect(function () {
-        injectZeros(boolean);
-      }).to.throwError();
-
-      expect(function () {
-        injectZeros(emptyArray);
-      }).to.throwError();
-
-      expect(function () {
-        injectZeros(nullValue);
-      }).to.throwError();
-
-      expect(function () {
-        injectZeros(notAValue);
-      }).to.throwError();
-    });
-
-    it('should throw an error if property series, rows, or columns is not ' +
-    'present', function () {
-
-      expect(function () {
-        injectZeros(childrenObject);
-      }).to.throwError();
-    });
-
-    it('should not throw an error if object has property series, rows, or ' +
-    'columns', function () {
-
-      expect(function () {
-        injectZeros(seriesObject);
-      }).to.not.throwError();
-
-      expect(function () {
-        injectZeros(rowsObject);
-      }).to.not.throwError();
-
-      expect(function () {
-        injectZeros(columnsObject);
-      }).to.not.throwError();
-    });
 
     it('should be a function', function () {
       expect(_.isFunction(injectZeros)).to.be(true);
@@ -318,80 +231,54 @@ describe('Vislib Zero Injection Module Test Suite', function () {
 
     it('should return an object with series[0].values', function () {
       expect(_.isObject(sample1)).to.be(true);
-      expect(_.isObject(sample1.series[0].values)).to.be(true);
+      expect(_.isObject(sample1[0].values)).to.be(true);
     });
 
     it('should return the same array of objects when the length of the series array is 1', function () {
-      expect(sample1.series[0].values[0].x).to.be(seriesData.series[0].values[0].x);
-      expect(sample1.series[0].values[1].x).to.be(seriesData.series[0].values[1].x);
-      expect(sample1.series[0].values[2].x).to.be(seriesData.series[0].values[2].x);
-      expect(sample1.series[0].values[3].x).to.be(seriesData.series[0].values[3].x);
-      expect(sample1.series[0].values[4].x).to.be(seriesData.series[0].values[4].x);
+      expect(sample1[0].values[0].x).to.be(seriesData[0].values[0].x);
+      expect(sample1[0].values[1].x).to.be(seriesData[0].values[1].x);
+      expect(sample1[0].values[2].x).to.be(seriesData[0].values[2].x);
+      expect(sample1[0].values[3].x).to.be(seriesData[0].values[3].x);
+      expect(sample1[0].values[4].x).to.be(seriesData[0].values[4].x);
     });
 
     it('should inject zeros in the input array', function () {
-      expect(sample2.series[1].values[1].y).to.be(0);
-      expect(sample2.series[2].values[0].y).to.be(0);
-      expect(sample2.series[2].values[1].y).to.be(0);
-      expect(sample2.series[2].values[4].y).to.be(0);
-      expect(sample3.series[1].values[1].y).to.be(0);
-      expect(sample3.series[2].values[0].y).to.be(0);
-      expect(sample3.series[2].values[1].y).to.be(0);
-      expect(sample3.series[2].values[4].y).to.be(0);
+      expect(sample2[1].values[1].y).to.be(0);
+      expect(sample2[2].values[0].y).to.be(0);
+      expect(sample2[2].values[1].y).to.be(0);
+      expect(sample2[2].values[4].y).to.be(0);
+      expect(sample3[1].values[1].y).to.be(0);
+      expect(sample3[2].values[0].y).to.be(0);
+      expect(sample3[2].values[1].y).to.be(0);
+      expect(sample3[2].values[4].y).to.be(0);
     });
 
     it('should return values arrays with the same x values', function () {
-      expect(sample2.series[1].values[0].x).to.be(sample2.series[2].values[0].x);
-      expect(sample2.series[1].values[1].x).to.be(sample2.series[2].values[1].x);
-      expect(sample2.series[1].values[2].x).to.be(sample2.series[2].values[2].x);
-      expect(sample2.series[1].values[3].x).to.be(sample2.series[2].values[3].x);
-      expect(sample2.series[1].values[4].x).to.be(sample2.series[2].values[4].x);
+      expect(sample2[1].values[0].x).to.be(sample2[2].values[0].x);
+      expect(sample2[1].values[1].x).to.be(sample2[2].values[1].x);
+      expect(sample2[1].values[2].x).to.be(sample2[2].values[2].x);
+      expect(sample2[1].values[3].x).to.be(sample2[2].values[3].x);
+      expect(sample2[1].values[4].x).to.be(sample2[2].values[4].x);
     });
 
     it('should return values arrays of the same length', function () {
-      expect(sample2.series[0].values.length).to.be(sample2.series[1].values.length);
-      expect(sample2.series[0].values.length).to.be(sample2.series[2].values.length);
-      expect(sample2.series[1].values.length).to.be(sample2.series[2].values.length);
+      expect(sample2[0].values.length).to.be(sample2[1].values.length);
+      expect(sample2[0].values.length).to.be(sample2[2].values.length);
+      expect(sample2[1].values.length).to.be(sample2[2].values.length);
     });
   });
 
   describe('Order X Values', function () {
-    var orderXValues;
-    var results;
-    var numberedResults;
+    let orderXValues;
+    let results;
+    let numberedResults;
 
     beforeEach(ngMock.module('kibana'));
     beforeEach(ngMock.inject(function (Private) {
-      orderXValues = Private(require('ui/vislib/components/zero_injection/ordered_x_keys'));
-      results = orderXValues(multiSeriesData);
-      numberedResults = orderXValues(multiSeriesNumberedData);
+      orderXValues = Private(VislibComponentsZeroInjectionOrderedXKeysProvider);
+      results = orderXValues(multiSeriesDataObj);
+      numberedResults = orderXValues(multiSeriesNumberedDataObj);
     }));
-
-    it('should throw an error if input is not an object', function () {
-      expect(function () {
-        orderXValues(str);
-      }).to.throwError();
-
-      expect(function () {
-        orderXValues(number);
-      }).to.throwError();
-
-      expect(function () {
-        orderXValues(boolean);
-      }).to.throwError();
-
-      expect(function () {
-        orderXValues(nullValue);
-      }).to.throwError();
-
-      expect(function () {
-        orderXValues(emptyArray);
-      }).to.throwError();
-
-      expect(function () {
-        orderXValues(notAValue);
-      }).to.throwError();
-    });
 
     it('should return a function', function () {
       expect(_.isFunction(orderXValues)).to.be(true);
@@ -401,7 +288,7 @@ describe('Vislib Zero Injection Module Test Suite', function () {
       expect(_.isArray(results)).to.be(true);
     });
 
-    it('should return an array of values in the correct order', function () {
+    it('should return an array of values ordered by their index by default', function () {
       expect(results[0]).to.be('1');
       expect(results[1]).to.be('2');
       expect(results[2]).to.be('3');
@@ -413,16 +300,33 @@ describe('Vislib Zero Injection Module Test Suite', function () {
       expect(numberedResults[3]).to.be(4);
       expect(numberedResults[4]).to.be(5);
     });
+
+    it('should return an array of values ordered by their sum when orderBucketsBySum is true', function () {
+      const orderBucketsBySum = true;
+      results = orderXValues(multiSeriesDataObj, orderBucketsBySum);
+      numberedResults = orderXValues(multiSeriesNumberedDataObj, orderBucketsBySum);
+
+      expect(results[0]).to.be('3');
+      expect(results[1]).to.be('1');
+      expect(results[2]).to.be('4');
+      expect(results[3]).to.be('5');
+      expect(results[4]).to.be('2');
+      expect(numberedResults[0]).to.be(3);
+      expect(numberedResults[1]).to.be(1);
+      expect(numberedResults[2]).to.be(4);
+      expect(numberedResults[3]).to.be(5);
+      expect(numberedResults[4]).to.be(2);
+    });
   });
 
   describe('Unique Keys', function () {
-    var uniqueKeys;
-    var results;
+    let uniqueKeys;
+    let results;
 
     beforeEach(ngMock.module('kibana'));
     beforeEach(ngMock.inject(function (Private) {
-      uniqueKeys = Private(require('ui/vislib/components/zero_injection/uniq_keys'));
-      results = uniqueKeys(multiSeriesData);
+      uniqueKeys = Private(VislibComponentsZeroInjectionUniqKeysProvider);
+      results = uniqueKeys(multiSeriesDataObj);
     }));
 
     it('should throw an error if input is not an object', function () {
@@ -465,13 +369,13 @@ describe('Vislib Zero Injection Module Test Suite', function () {
   });
 
   describe('Flatten Data', function () {
-    var flattenData;
-    var results;
+    let flattenData;
+    let results;
 
     beforeEach(ngMock.module('kibana'));
     beforeEach(ngMock.inject(function (Private) {
-      flattenData = Private(require('ui/vislib/components/zero_injection/flatten_data'));
-      results = flattenData(multiSeriesData);
+      flattenData = Private(VislibComponentsZeroInjectionFlattenDataProvider);
+      results = flattenData(multiSeriesDataObj);
     }));
 
     it('should return a function', function () {
@@ -490,15 +394,15 @@ describe('Vislib Zero Injection Module Test Suite', function () {
   });
 
   describe('Zero Filled Array', function () {
-    var createZeroArray;
-    var arr1 = [1, 2, 3, 4, 5];
-    var arr2 = ['1', '2', '3', '4', '5'];
-    var results1;
-    var results2;
+    let createZeroArray;
+    const arr1 = [1, 2, 3, 4, 5];
+    const arr2 = ['1', '2', '3', '4', '5'];
+    let results1;
+    let results2;
 
     beforeEach(ngMock.module('kibana'));
     beforeEach(ngMock.inject(function (Private) {
-      createZeroArray = Private(require('ui/vislib/components/zero_injection/zero_filled_array'));
+      createZeroArray = Private(VislibComponentsZeroInjectionZeroFilledArrayProvider);
       results1 = createZeroArray(arr1);
       results2 = createZeroArray(arr2);
     }));
@@ -571,17 +475,17 @@ describe('Vislib Zero Injection Module Test Suite', function () {
   });
 
   describe('Zero Filled Data Array', function () {
-    var zeroFillArray;
-    var xValueArr = [1, 2, 3, 4, 5];
-    var createZeroArray;
-    var arr1;
-    var arr2 = [ {x: 3, y: 834} ];
-    var results;
+    let zeroFillArray;
+    const xValueArr = [1, 2, 3, 4, 5];
+    let createZeroArray;
+    let arr1;
+    const arr2 = [ { x: 3, y: 834 } ];
+    let results;
 
     beforeEach(ngMock.module('kibana'));
     beforeEach(ngMock.inject(function (Private) {
-      zeroFillArray = Private(require('ui/vislib/components/zero_injection/zero_fill_data_array'));
-      createZeroArray = Private(require('ui/vislib/components/zero_injection/zero_filled_array'));
+      zeroFillArray = Private(VislibComponentsZeroInjectionZeroFillDataArrayProvider);
+      createZeroArray = Private(VislibComponentsZeroInjectionZeroFilledArrayProvider);
       arr1 = createZeroArray(xValueArr);
 
       // Takes zero array as 1st arg and data array as 2nd arg
@@ -637,30 +541,29 @@ describe('Vislib Zero Injection Module Test Suite', function () {
   });
 
   describe('Injected Zero values return in the correct order', function () {
-    var injectZeros;
-    var results;
+    let injectZeros;
+    let results;
 
     beforeEach(ngMock.module('kibana'));
     beforeEach(ngMock.inject(function (Private) {
-      injectZeros = Private(require('ui/vislib/components/zero_injection/inject_zeros'));
-      results = injectZeros(dateHistogramRows);
+      injectZeros = Private(VislibComponentsZeroInjectionInjectZerosProvider);
+      results = injectZeros(dateHistogramRows, dateHistogramRowsObj);
     }));
 
     it('should return an array of objects', function () {
-      results.rows.forEach(function (row) {
-        expect(_.isArray(row.series[0].values)).to.be(true);
+      results.forEach(function (row) {
+        expect(_.isArray(row.values)).to.be(true);
       });
     });
 
     it('should return ordered x values', function () {
-      var values = results.rows[0].series[0].values;
+      const values = results[0].values;
       expect(values[0].x).to.be.lessThan(values[1].x);
       expect(values[1].x).to.be.lessThan(values[2].x);
       expect(values[2].x).to.be.lessThan(values[3].x);
       expect(values[3].x).to.be.lessThan(values[4].x);
       expect(values[4].x).to.be.lessThan(values[5].x);
       expect(values[5].x).to.be.lessThan(values[6].x);
-      expect(values[6].x).to.be.lessThan(values[7].x);
     });
   });
 });

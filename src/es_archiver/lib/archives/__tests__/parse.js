@@ -1,0 +1,174 @@
+import Stream, { PassThrough, Transform } from 'stream';
+import { createGzip } from 'zlib';
+
+import expect from 'expect.js';
+
+import {
+  createConcatStream,
+  createListStream,
+  createPromiseFromStreams,
+} from '../../../../utils';
+
+import { createParseArchiveStreams } from '../parse';
+
+describe('esArchiver createParseArchiveStreams', () => {
+  describe('{ gzip: false }', () => {
+    it('returns an array of streams', () => {
+      const streams = createParseArchiveStreams({ gzip: false });
+      expect(streams).to.be.an('array');
+      expect(streams.length).to.be.greaterThan(0);
+      streams.forEach(s => expect(s).to.be.a(Stream));
+    });
+
+    describe('streams', () => {
+      it('consume buffers of valid JSON', async () => {
+        const output = await createPromiseFromStreams([
+          createListStream([
+            Buffer.from('{'),
+            Buffer.from('"'),
+            Buffer.from('a":'),
+            Buffer.from('1}')
+          ]),
+          ...createParseArchiveStreams({ gzip: false })
+        ]);
+
+        expect(output).to.eql({ a: 1 });
+      });
+      it('consume buffers of valid JSON seperated by two newlines', async () => {
+        const output = await createPromiseFromStreams([
+          createListStream([
+            Buffer.from('{'),
+            Buffer.from('"'),
+            Buffer.from('a":'),
+            Buffer.from('1}'),
+            Buffer.from('\n'),
+            Buffer.from('\n'),
+            Buffer.from('1'),
+          ]),
+          ...createParseArchiveStreams({ gzip: false }),
+          createConcatStream([])
+        ]);
+
+        expect(output).to.eql([{ a: 1 }, 1]);
+      });
+
+      it('provides each JSON object as soon as it is parsed', async () => {
+        let onReceived;
+        const receivedPromise = new Promise(resolve => onReceived = resolve);
+        const input = new PassThrough();
+        const check = new Transform({
+          writableObjectMode: true,
+          readableObjectMode: true,
+          transform(chunk, env, callback) {
+            onReceived(chunk);
+            callback(null, chunk);
+          }
+        });
+
+        const finalPromise = createPromiseFromStreams([
+          input,
+          ...createParseArchiveStreams(),
+          check,
+          createConcatStream([])
+        ]);
+
+        input.write(Buffer.from('{"a": 1}\n\n'));
+        expect(await receivedPromise).to.eql({ a: 1 });
+        input.write(Buffer.from('{"a": 2}'));
+        input.end();
+        expect(await finalPromise).to.eql([{ a: 1 }, { a:2 }]);
+      });
+    });
+
+    describe('stream errors', () => {
+      it('stops when any document contains invalid json', async () => {
+        try {
+          await createPromiseFromStreams([
+            createListStream([
+              Buffer.from('{"a": 1}\n\n'),
+              Buffer.from('{1}\n\n'),
+              Buffer.from('{"a": 2}\n\n'),
+            ]),
+            ...createParseArchiveStreams({ gzip: false }),
+            createConcatStream()
+          ]);
+          throw new Error('should have failed');
+        } catch (err) {
+          expect(err.message).to.contain('Unexpected number');
+        }
+      });
+    });
+  });
+
+  describe('{ gzip: true }', () => {
+    it('returns an array of streams', () => {
+      const streams = createParseArchiveStreams({ gzip: true });
+      expect(streams).to.be.an('array');
+      expect(streams.length).to.be.greaterThan(0);
+      streams.forEach(s => expect(s).to.be.a(Stream));
+    });
+
+    describe('streams', () => {
+      it('consumes gzipped buffers of valid JSON', async () => {
+        const output = await createPromiseFromStreams([
+          createListStream([
+            Buffer.from('{'),
+            Buffer.from('"'),
+            Buffer.from('a":'),
+            Buffer.from('1}')
+          ]),
+          createGzip(),
+          ...createParseArchiveStreams({ gzip: true })
+        ]);
+
+        expect(output).to.eql({ a: 1 });
+      });
+
+      it('parses valid gzipped JSON strings seperated by two newlines', async () => {
+        const output = await createPromiseFromStreams([
+          createListStream([
+            '{\n',
+            '  "a": 1\n',
+            '}',
+            '\n\n',
+            '{"a":2}'
+          ]),
+          createGzip(),
+          ...createParseArchiveStreams({ gzip: true }),
+          createConcatStream([])
+        ]);
+
+        expect(output).to.eql([{ a: 1 }, { a: 2 }]);
+      });
+    });
+
+    describe('stream errors', () => {
+      it('stops when the input is not valid gzip archive', async () => {
+        try {
+          await createPromiseFromStreams([
+            createListStream([
+              Buffer.from('{"a": 1}'),
+            ]),
+            ...createParseArchiveStreams({ gzip: true }),
+            createConcatStream()
+          ]);
+          throw new Error('should have failed');
+        } catch (err) {
+          expect(err.message).to.contain('incorrect header check');
+        }
+      });
+    });
+  });
+
+  describe('defaults', () => {
+    it('does not try to gunzip the content', async () => {
+      const output = await createPromiseFromStreams([
+        createListStream([
+          Buffer.from('{"a": 1}'),
+        ]),
+        ...createParseArchiveStreams(),
+      ]);
+      expect(output).to.eql({ a: 1 });
+    });
+  });
+});

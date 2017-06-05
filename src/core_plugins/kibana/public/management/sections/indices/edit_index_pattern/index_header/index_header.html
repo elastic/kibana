@@ -1,0 +1,59 @@
+<div class="kuiBar kuiVerticalRhythm">
+  <div class="kuiBarSection">
+    <!-- Index pattern name -->
+    <h1
+      class="kuiTitle kuiVerticalRhythm"
+      css-truncate
+      data-test-subj="indexPatternTitle"
+    >
+      <span
+        aria-hidden="true"
+        ng-if="defaultIndex === indexPattern.id"
+        class="kuiIcon fa-star"
+      ></span>
+      {{indexPattern.id}}
+    </h1>
+  </div>
+
+  <div class="kuiBarSection">
+    <button
+      ng-if="setDefault"
+      ng-click="setDefault()"
+      tooltip="Set as default index"
+      class="kuiButton kuiButton--basic"
+      data-test-subj="setDefaultIndexPatternButton"
+    >
+      <span class="sr-only">Set as default index</span>
+      <ispan
+        aria-hidden="true"
+        class="kuiIcon fa-star"
+      ></span>
+    </button>
+    <button
+      ng-if="refreshFields"
+      ng-click="refreshFields()"
+      tooltip="Refresh field list"
+      class="kuiButton kuiButton--basic"
+    >
+      <span class="sr-only">Reload field list</span>
+      <span
+        aria-hidden="true"
+        class="kuiIcon fa-refresh"
+      ></span>
+    </button>
+    <button
+      ng-if="delete"
+      ng-click="delete()"
+      aria-label="Remove index pattern"
+      tooltip="Remove index pattern"
+      class="kuiButton kuiButton--danger"
+      data-test-subj="deleteIndexPatternButton"
+    >
+      <span class="sr-only">Remove index pattern</span>
+      <span
+        aria-hidden="true"
+        class="kuiIcon fa-trash"
+      ></span>
+    </button>
+  </div>
+</div>

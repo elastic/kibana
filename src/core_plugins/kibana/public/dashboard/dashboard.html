@@ -1,0 +1,130 @@
+<dashboard-app class="app-container dashboard-container">
+  <!-- Local nav. -->
+  <kbn-top-nav name="dashboard" config="topNavMenu">
+    <!-- Transcluded elements. -->
+    <div data-transclude-slots>
+      <!-- Title. -->
+      <div
+        data-transclude-slot="topLeftCorner"
+      >
+        <div class="kuiLocalBreadcrumbs" data-test-subj="breadcrumbs">
+          <div class="kuiLocalBreadcrumb">
+            <a class="kuiLocalBreadcrumb__link" href="{{landingPageUrl()}}">Dashboard</a>
+          </div>
+          <div class="kuiLocalBreadcrumb">
+            {{ getDashTitle() }}
+          </div>
+        </div>
+      </div>
+
+      <!-- Search. -->
+      <form
+        data-transclude-slot="bottomRow"
+        class="fullWidth"
+        ng-show="chrome.getVisible()"
+        role="form"
+        name="queryInput"
+        ng-submit="filterResults()"
+      >
+        <div class="typeahead" kbn-typeahead="dashboard" on-select="filterResults()">
+          <div class="kuiLocalSearch">
+            <div class="kuiLocalSearchAssistedInput">
+              <input
+                parse-query
+                input-focus
+                kbn-typeahead-input
+                ng-model="model.query"
+                placeholder="Search... (e.g. status:200 AND extension:PHP)"
+                aria-label="Enter query"
+                data-test-subj="dashboardQuery"
+                type="text"
+                class="kuiLocalSearchInput kuiLocalSearchInput--lucene"
+                ng-class="{'kuiLocalSearchInput-isInvalid': queryInput.$invalid}"
+              >
+              <div class="kuiLocalSearchAssistedInput__assistance">
+                <p class="kuiText">
+                  <a
+                    class="kuiLink"
+                    ng-href="{{queryDocLinks.luceneQuerySyntax}}"
+                    target="_blank"
+                  >
+                    Uses lucene query syntax
+                  </a>
+                </p>
+              </div>
+            </div>
+            <button
+              type="submit"
+              aria-label="Submit query"
+              class="kuiLocalSearchButton"
+              data-test-subj="dashboardQueryFilterButton"
+              ng-disabled="queryInput.$invalid"
+            >
+              <span class="kuiIcon fa-search" aria-hidden="true"></span>
+            </button>
+          </div>
+          <kbn-typeahead-items></kbn-typeahead-items>
+        </div>
+      </form>
+    </div>
+  </kbn-top-nav>
+
+  <!-- Filters. -->
+  <filter-bar
+    state="state"
+    index-patterns="indexPatterns"
+  ></filter-bar>
+
+  <div
+    ng-show="getShouldShowEditHelp()"
+    class="text-center start-screen"
+  >
+    <h2 class="kuiTitle kuiVerticalRhythm">
+      This dashboard is empty. Let&rsquo;s fill it up!
+    </h2>
+
+    <p class="kuiText kuiVerticalRhythm">
+      Click the <a class="kuiButton kuiButton--primary kuiButton--small" ng-click="kbnTopNav.open('add'); toggleAddVisualization = !toggleAddVisualization" aria-label="Add visualization">Add</a> button in the menu bar above to add a visualization to the dashboard. <br/>If you haven't set up any visualizations yet, <a class="kuiLink" href="#/visualize">visit the Visualize app</a> to create your first visualization.
+    </p>
+  </div>
+
+  <div ng-show="getShouldShowViewHelp()" class="text-center start-screen">
+    <h2 class="kuiTitle kuiVerticalRhythm">
+      This dashboard is empty. Let&rsquo;s fill it up!
+    </h2>
+
+    <p class="kuiText kuiVerticalRhythm">
+      Click the <a class="kuiButton kuiButton--primary kuiButton--small" ng-click="kbnTopNav.click('edit');">Edit</a> button in the menu bar above to start working on your new dashboard.
+    </p>
+  </div>
+
+  <dashboard-grid
+    ng-show="!hasExpandedPanel()"
+    on-panel-removed="onPanelRemoved"
+    dashboard-view-mode="dashboardViewMode"
+    panels="panels"
+    get-vis-click-handler="getFilterBarClickHandler"
+    get-vis-brush-handler="getBrushEvent"
+    save-state="saveState"
+    toggle-expand="toggleExpandPanel"
+    create-child-ui-state="createChildUiState"
+    toggle-expand="toggleExpandPanel"
+    register-panel-index-pattern="registerPanelIndexPattern"
+    data-shared-items-count="{{panels.length}}"
+  ></dashboard-grid>
+
+  <dashboard-panel
+    ng-if="hasExpandedPanel()"
+    panel="expandedPanel"
+    is-full-screen-mode="!chrome.getVisible()"
+    is-expanded="true"
+    dashboard-view-mode="dashboardViewMode"
+    get-vis-click-handler="getFilterBarClickHandler"
+    get-vis-brush-handler="getBrushEvent"
+    save-state="saveState"
+    register-panel-index-pattern="registerPanelIndexPattern"
+    create-child-ui-state="createChildUiState"
+    toggle-expand="toggleExpandPanel(expandedPanel.panelIndex)"
+  ></dashboard-panel>
+
+</dashboard-app>

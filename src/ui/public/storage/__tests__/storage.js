@@ -1,12 +1,12 @@
-var sinon = require('sinon');
-var expect = require('expect.js');
-var ngMock = require('ngMock');
+import sinon from 'sinon';
+import expect from 'expect.js';
+import ngMock from 'ng_mock';
+import 'ui/storage';
 
-var storage;
-var $window;
-var payload = { first: 'john', last: 'smith' };
+let storage;
+let $window;
+const payload = { first: 'john', last: 'smith' };
 
-require('ui/storage');
 
 function init() {
   ngMock.module('kibana/storage', function ($provide) {
@@ -69,21 +69,21 @@ describe('StorageService', function () {
 
   describe('json data', function () {
     it('should parse JSON when reading from the store', function () {
-      var getItem = $window.localStorage.getItem;
+      const getItem = $window.localStorage.getItem;
       getItem.returns(JSON.stringify(payload));
 
-      var data = storage.get('name');
+      const data = storage.get('name');
       expect(data).to.eql(payload);
     });
 
     it('should write JSON string to the store', function () {
-      var setItem = $window.localStorage.setItem;
-      var key = 'name';
-      var value = payload;
+      const setItem = $window.localStorage.setItem;
+      const key = 'name';
+      const value = payload;
 
       storage.set(key, value);
 
-      var call = setItem.getCall(0);
+      const call = setItem.getCall(0);
       expect(call.args[0]).to.equal(key);
       expect(call.args[1]).to.equal(JSON.stringify(value));
     });
@@ -91,15 +91,15 @@ describe('StorageService', function () {
 
   describe('expected responses', function () {
     it('should return null when not exists', function () {
-      var data = storage.get('notexists');
+      const data = storage.get('notexists');
       expect(data).to.equal(null);
     });
 
     it('should return null when invalid JSON', function () {
-      var getItem = $window.localStorage.getItem;
+      const getItem = $window.localStorage.getItem;
       getItem.returns('not: json');
 
-      var data = storage.get('name');
+      const data = storage.get('name');
       expect(data).to.equal(null);
     });
   });

@@ -1,6 +1,5 @@
 import SimpleGit from 'simple-git';
 import { promisify } from 'bluebird';
-import { includes } from 'lodash';
 
 export default function filesToCommit(path) {
   const simpleGit = new SimpleGit(path);
@@ -18,7 +17,7 @@ export default function filesToCommit(path) {
       return { status, name };
     });
   });
-};
+}
 
 export function getFilename(file) {
   return file.name;
@@ -26,7 +25,7 @@ export function getFilename(file) {
 
 export function isAdded(file) {
   return file.status === 'A';
-};
+}
 
 export function isDeleted(file) {
   return file.status === 'D';

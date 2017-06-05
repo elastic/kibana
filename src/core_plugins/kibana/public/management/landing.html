@@ -1,0 +1,65 @@
+<kbn-management-app>
+  <kbn-management-landing>
+    <!-- General info -->
+    <div class="page-row">
+      <div class="page-row-text">Version: {{::kbnVersion}}</div>
+    </div>
+
+    <!-- Management sections for the ES stack -->
+    <div
+      ng-if="section.visibleItems.length > 0"
+      ng-repeat="section in sections"
+      ng-class="{ 'management-section-info-expanded': section.showInfo }"
+      class="page-row"
+    >
+      <div class="kuiPanel kuiPanel--withHeader management-panel">
+        <div class="kuiPanelHeader">
+          <div class="kuiPanelHeaderSection">
+            <div
+              class="management-panel__heading-icon management-panel__heading-icon--{{::section.id}}"
+            ></div>
+            <div class="kuiPanelHeader__title">
+              {{::section.display}}
+            </div>
+          </div>
+
+          <div class="kuiPanelHeaderSection" ng-if="section.info">
+            <div class="kuiText">
+              <span
+                class="fa fa-info-circle management-panel__heading-icon--secondary"
+                ng-click="section.showInfo = !!!section.showInfo"
+              ></span>
+            </div>
+          </div>
+        </div>
+
+        <div class="kuiPanelBody management-panel__body">
+          <div class="row">
+            <ul class="list-unstyled">
+              <li
+                class="col-xs-4 col-md-3"
+                ng-repeat="item in section.visibleItems"
+              >
+                <a
+                  class="management-panel__link"
+                  ng-class="{ 'management-panel__link--disabled': item.disabled || !item.url }"
+                  kbn-href="{{::item.disabled ? '' : item.url}}"
+                  tooltip="{{::item.tooltip}}"
+                  tooltip-placement="bottom"
+                  tooltip-popup-delay="400"
+                  tooltip-append-to-body="1"
+                >
+                  {{::item.display}}
+                </a>
+              </li>
+            </ul>
+          </div>
+
+          <div class="management-section-info">
+            {{::section.info}}
+          </div>
+        </div>
+      </div>
+    </div>
+  </kbn-management-landing>
+</kbn-management-app>

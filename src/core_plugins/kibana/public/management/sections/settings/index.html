@@ -1,0 +1,69 @@
+<kbn-management-app section="kibana">
+  <kbn-management-advanced class="kuiViewContent kuiViewContent--constrainedWidth kuiViewContentItem">
+    <!-- Warning -->
+    <div class="kuiInfoPanel kuiInfoPanel--warning kuiVerticalRhythm">
+      <div class="kuiInfoPanelHeader">
+        <span class="kuiInfoPanelHeader__icon kuiIcon kuiIcon--warning fa-bolt"></span>
+        <span class="kuiInfoPanelHeader__title">
+          Caution: You can break stuff here
+        </span>
+      </div>
+
+      <div class="kuiInfoPanelBody">
+        <div class="kuiInfoPanelBody__message">
+          Be careful in here, these settings are for very advanced users only.
+          Tweaks you make here can break large portions of Kibana. Some of these
+          settings may be undocumented, unsupported or experimental. If a field has a default value,
+          blanking the field will reset it to its default which
+          may be unacceptable given other configuration directives. Deleting a
+          custom setting will permanently remove it from Kibana's config.
+        </div>
+      </div>
+    </div>
+
+    <!-- Search -->
+    <form
+      role="form"
+      class="kuiVerticalRhythm"
+    >
+      <div class="kuiSearchInput">
+        <div class="kuiSearchInput__icon kuiIcon fa-search"></div>
+        <input
+          class="kuiSearchInput__input"
+          aria-label="Filter"
+          ng-model="advancedFilter"
+          type="text"
+          placeholder="Filter..."
+        >
+      </div>
+    </form>
+
+    <!-- Settings table -->
+    <table class="kuiTable kuiVerticalRhythm">
+      <thead>
+        <tr>
+          <th class="kuiTableHeaderCell">
+            Name
+          </th>
+          <th class="kuiTableHeaderCell">
+            Value
+          </th>
+          <th
+            class="kuiTableHeaderCell kuiTableHeaderCell--alignRight"
+            style="width: 180px"
+          >
+            <!-- Actions -->
+          </th>
+        </tr>
+      </thead>
+
+      <tbody>
+        <tr
+          ng-repeat="conf in configs | filter:advancedFilter"
+          advanced-row="conf"
+          configs="configs"
+        ></tr>
+      </tbody>
+    </table>
+  </kbn-management-advanced>
+</kbn-management-app>

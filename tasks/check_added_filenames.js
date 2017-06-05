@@ -6,8 +6,9 @@ export default function registerCheckAddedFilenames(grunt) {
 
     const invalid = grunt.config
     .get('filesToCommit')
-    .filter(isAdded)
     .map(getFilename)
+    .filter(isAdded)
+    .filter(name => !name.match(/([\/\\]|^)(docs|tasks[\/\\]config|webpackShims)([\/\\]|$)/))
     .filter(name => name.match(/[A-Z \-]/))
     .reduce((all, name) => `${all}  ${name}\n`, '');
 

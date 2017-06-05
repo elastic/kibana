@@ -1,17 +1,23 @@
+import { format } from 'url';
+import { resolve } from 'path';
+import _ from 'lodash';
+import Boom from 'boom';
+import Hapi from 'hapi';
+import getDefaultRoute from './get_default_route';
+import versionCheckMixin from './version_check';
+import { handleShortUrlError } from './short_url_error';
+import { shortUrlAssertValid } from './short_url_assert_valid';
+import shortUrlLookupProvider from './short_url_lookup';
+import setupConnectionMixin from './setup_connection';
+import registerHapiPluginsMixin from './register_hapi_plugins';
+import xsrfMixin from './xsrf';
+
 module.exports = async function (kbnServer, server, config) {
-  let _ = require('lodash');
-  let fs = require('fs');
-  let Boom = require('boom');
-  let Hapi = require('hapi');
-  let parse = require('url').parse;
-  let format = require('url').format;
-
-  let getDefaultRoute = require('./getDefaultRoute');
-
   server = kbnServer.server = new Hapi.Server();
 
-  const shortUrlLookup = require('./short_url_lookup')(server);
-  await kbnServer.mixin(require('./setup_connection'));
+  const shortUrlLookup = shortUrlLookupProvider(server);
+  await kbnServer.mixin(setupConnectionMixin);
+  await kbnServer.mixin(registerHapiPluginsMixin);
 
   // provide a simple way to expose static directories
   server.decorate('server', 'exposeStaticDir', function (routePath, dirPath) {
@@ -21,11 +27,11 @@ module.exports = async function (kbnServer, server, config) {
       handler: {
         directory: {
           path: dirPath,
-          listing: true,
+          listing: false,
           lookupCompressed: true
         }
       },
-      config: {auth: false}
+      config: { auth: false }
     });
   });
 
@@ -37,7 +43,7 @@ module.exports = async function (kbnServer, server, config) {
       handler: {
         file: filePath
       },
-      config: {auth: false}
+      config: { auth: false }
     });
   });
 
@@ -65,7 +71,7 @@ module.exports = async function (kbnServer, server, config) {
 
   // attach the app name to the server, so we can be sure we are actually talking to kibana
   server.ext('onPreResponse', function (req, reply) {
-    let response = req.response;
+    const response = req.response;
 
     if (response.isBoom) {
       response.output.headers['kbn-name'] = kbnServer.name;
@@ -82,7 +88,7 @@ module.exports = async function (kbnServer, server, config) {
     path: '/',
     method: 'GET',
     handler: function (req, reply) {
-      return reply.view('rootRedirect', {
+      return reply.view('root_redirect', {
         hashRoute: `${config.get('server.basePath')}/app/kibana`,
         defaultRoute: getDefaultRoute(kbnServer),
       });
@@ -93,14 +99,14 @@ module.exports = async function (kbnServer, server, config) {
     method: 'GET',
     path: '/{p*}',
     handler: function (req, reply) {
-      let path = req.path;
+      const path = req.path;
       if (path === '/' || path.charAt(path.length - 1) !== '/') {
         return reply(Boom.notFound());
       }
-
+      const pathPrefix = config.get('server.basePath') ? `${config.get('server.basePath')}/` : '';
       return reply.redirect(format({
         search: req.url.search,
-        pathname: path.slice(0, -1),
+        pathname: pathPrefix + path.slice(0, -1),
       }))
       .permanent(true);
     }
@@ -110,8 +116,24 @@ module.exports = async function (kbnServer, server, config) {
     method: 'GET',
     path: '/goto/{urlId}',
     handler: async function (request, reply) {
-      const url = await shortUrlLookup.getUrl(request.params.urlId);
-      reply().redirect(url);
+      try {
+        const url = await shortUrlLookup.getUrl(request.params.urlId, request);
+        shortUrlAssertValid(url);
+
+        const uiSettings = server.uiSettings();
+        const stateStoreInSessionStorage = await uiSettings.get(request, 'state:storeInSessionStorage');
+        if (!stateStoreInSessionStorage) {
+          reply().redirect(config.get('server.basePath') + url);
+          return;
+        }
+
+        const app = kbnServer.uiExports.apps.byId.stateSessionStorageRedirect;
+        reply.renderApp(app, {
+          redirectUrl: url,
+        });
+      } catch (err) {
+        reply(handleShortUrlError(err));
+      }
     }
   });
 
@@ -119,10 +141,21 @@ module.exports = async function (kbnServer, server, config) {
     method: 'POST',
     path: '/shorten',
     handler: async function (request, reply) {
-      const urlId = await shortUrlLookup.generateUrlId(request.payload.url);
-      reply(urlId);
+      try {
+        shortUrlAssertValid(request.payload.url);
+        const urlId = await shortUrlLookup.generateUrlId(request.payload.url, request);
+        reply(urlId);
+      } catch (err) {
+        reply(handleShortUrlError(err));
+      }
     }
   });
 
-  return kbnServer.mixin(require('./xsrf'));
+  // Expose static assets (fonts, favicons).
+  server.exposeStaticDir('/ui/fonts/{path*}', resolve(__dirname, '../../ui/public/assets/fonts'));
+  server.exposeStaticDir('/ui/favicons/{path*}', resolve(__dirname, '../../ui/public/assets/favicons'));
+
+  kbnServer.mixin(versionCheckMixin);
+
+  return kbnServer.mixin(xsrfMixin);
 };

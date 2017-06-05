@@ -1,0 +1,52 @@
+<div class="list-group">
+  <a class="list-group-item" ng-click="section = 'sheet'">
+    <h4 class="list-group-item-heading">Save entire Timelion sheet</h4>
+    <p  class="list-group-item-text">
+      You want this option if you mostly use Timelion expressions from within the Timelion app and don't need to
+      add Timelion charts to Kibana dashboards. You may also want this if you make use of references to other
+      panels.
+    </p>
+  </a>
+
+  <div class="list-group-item" ng-show="section == 'sheet'">
+    <form role="form" class="container-fluid" ng-submit="opts.saveSheet()">
+      <div class="form-group">
+        <label for="savedSheet" class="control-label">Save sheet as</label>
+        <input id="savedSheet" ng-model="opts.savedSheet.title" input-focus="select" class="form-control" placeholder="Name this sheet...">
+      </div>
+
+      <saved-object-save-as-check-box saved-object="opts.savedSheet"></saved-object-save-as-check-box>
+      <div class="form-group">
+        <button ng-disabled="!opts.savedSheet.title" type="submit" class="kuiButton kuiButton--primary">
+          Save
+        </button>
+      </div>
+    </form>
+  </div>
+
+  <a class="list-group-item" ng-click="section = 'expression'">
+    <h4 class="list-group-item-heading">Save current expression as Kibana dashboard panel</h4>
+    <p class="list-group-item-text">
+      Need to add a chart to a Kibana dashboard? We can do that! This option will save your currently selected
+      expression as a panel that can be added to Kibana dashboards as you would add anything else. Note, if you
+      use references to other panels you will need to remove the refences by copying the referenced expression
+      directly into the expression you are saving. Click a chart to select a different expression to save.
+    </p>
+  </a>
+
+  <div class="list-group-item" ng-show="section == 'expression'">
+    <form role="form" class="container-fluid" ng-submit="opts.saveExpression(panelTitle)">
+      <div class="form-group">
+        <label class="control-label">Currently selected expression</label>
+        <code>{{opts.state.sheet[opts.state.selected]}}</code>
+      </div>
+      <div class="form-group">
+        <label for="savedExpression" class="control-label">Save expression as</label>
+        <input id="savedExpression" ng-model="panelTitle" input-focus="select" class="form-control" placeholder="Name this panel">
+      </div>
+      <div class="form-group">
+        <button ng-disabled="!panelTitle" type="submit" class="kuiButton kuiButton--primary">Save</button>
+      </div>
+    </form>
+  </div>
+</div>

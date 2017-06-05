@@ -1,0 +1,20 @@
+$menuButtonFontSize: 12px;
+
+$menuButtonBasicTextColor: #5a5a5a;
+$menuButtonBasicBackgroundColor: #ffffff;
+$menuButtonBasicHoverBackgroundColor: #F2F2F2;
+$menuButtonBasicDisabledTextColor: #9B9B9B;
+
+$menuButtonPrimaryTextColor: #ffffff;
+$menuButtonPrimaryBackgroundColor: #6EADC1;
+$menuButtonPrimaryHoverBackgroundColor: #006E8A;
+$menuButtonPrimaryDisabledBackgroundColor: #B6D6E0;
+
+$menuButtonDangerTextColor: #D76051;
+$menuButtonDangerBackgroundColor: #ffffff;
+$menuButtonDangerHoverTextColor: #FFFFFF;
+$menuButtonDangerHoverBackgroundColor: #D76051;
+$menuButtonDangerHoverDisabledTextColor: #9B9B9B;
+
+@import "menu_button";
+@import "menu_button_group";

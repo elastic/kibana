@@ -1,20 +1,21 @@
-var sinon = require('auto-release-sinon');
-var expect = require('expect.js');
-var ngMock = require('ngMock');
-require('ui/state_management/app_state');
+import sinon from 'sinon';
+import expect from 'expect.js';
+import ngMock from 'ng_mock';
+import 'ui/state_management/app_state';
+import { AppStateProvider } from 'ui/state_management/app_state';
 
 describe('State Management', function () {
-  var $rootScope;
-  var AppState;
+  let $rootScope;
+  let AppState;
 
   beforeEach(ngMock.module('kibana'));
   beforeEach(ngMock.inject(function (_$rootScope_, _$location_, Private) {
     $rootScope = _$rootScope_;
-    AppState = Private(require('ui/state_management/app_state'));
+    AppState = Private(AppStateProvider);
   }));
 
   describe('App State', function () {
-    var appState;
+    let appState;
 
     beforeEach(function () {
       appState = new AppState();
@@ -26,7 +27,7 @@ describe('State Management', function () {
     });
 
     it('should use passed in params', function () {
-      var params = {
+      const params = {
         test: true,
         mock: false
       };
@@ -45,8 +46,7 @@ describe('State Management', function () {
     });
 
     it('should be destroyed on $routeChangeStart', function () {
-      var destroySpy = sinon.spy(appState, 'destroy');
-      var url = '/test/path';
+      const destroySpy = sinon.spy(appState, 'destroy');
 
       $rootScope.$emit('$routeChangeStart');
 

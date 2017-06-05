@@ -1,0 +1,83 @@
+<!-- Local nav. -->
+<kbn-top-nav name="visualize">
+  <!-- Transcluded elements. -->
+  <div data-transclude-slots>
+    <!-- Breadcrumbs. -->
+    <bread-crumbs
+      data-transclude-slot="topLeftCorner"
+      use-links="true"
+      omit-current-page="true"
+      page-title="'New'"
+    ></bread-crumbs>
+  </div>
+</kbn-top-nav>
+
+<div class="kuiViewContent kuiViewContent--constrainedWidth">
+  <div class="kuiViewContentItem">
+    <!-- Header -->
+    <h1 class="kuiTitle kuiVerticalRhythm kuiVerticalRhythm--medium">
+      Select visualization type
+    </h1>
+
+    <!-- Search -->
+    <div class="kuiSearchInput kuiVerticalRhythm kuiVerticalRhythm--medium fullWidth">
+      <div class="kuiSearchInput__icon kuiIcon fa-search"></div>
+      <input
+        class="kuiSearchInput__input"
+        type="text"
+        placeholder="Search visualization types..."
+        ng-model="searchTerm"
+      >
+    </div>
+
+    <div
+      class="kuiVerticalRhythm kuiVerticalRhythm--medium"
+      ng-repeat="category in filteredVisTypeCategories"
+    >
+
+      <!-- Title for each category -->
+      <h2 class="kuiSubTitle kuiVerticalRhythm">
+        {{ category.label }}
+      </h2>
+
+      <!-- Gallery of buttons for each vis type -->
+      <div class="kuiGallery kuiVerticalRhythm">
+        <a
+          class="kuiGalleryButton"
+          ng-repeat="type in category.list"
+          ng-href="{{ getVisTypeUrl(type) }}"
+          tooltip="{{ getVisTypeTooltip(type) }}"
+          tooltip-placement="{{ getVisTypeTooltipPosition($parent.$index) }}"
+        >
+          <div class="kuiGalleryButton__image">
+            <img
+              ng-if="type.image"
+              aria-hidden="true"
+              ng-src="{{ type.image }}"
+            />
+
+            <!-- If there's no image, default to an icon, for BWC. -->
+            <span
+              ng-if="!type.image"
+              aria-hidden="true"
+              class="kuiIcon visualizeWizardVisTypeIcon"
+              ng-class="type.icon"
+            ></span>
+          </div>
+
+          <div
+            lass="kuiGalleryButton__label"
+            data-test-subj="visualizeWizardChartTypeTitle"
+          >
+            {{ type.title }}
+          </div>
+
+          <div
+            class="kuiGalleryButton__icon kuiIcon fa-flask"
+            ng-if="type.isExperimental"
+          ></div>
+        </a>
+      </div>
+    </div>
+  </div>
+</div>

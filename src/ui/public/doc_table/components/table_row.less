@@ -1,0 +1,19 @@
+@import (reference) "~ui/styles/variables";
+
+/**
+ * 1. Visually align the actions with the tabs. We can improve this by using flexbox instead, at a later point.
+ */
+.documentTableRow__actions {
+  float: right;
+  font-family: @font-family-base;
+  padding-top: 8px; /* 1 */
+}
+
+/**
+ * 1. Put some space between the actions.
+ */
+.documentTableRow__action {
+  & + & {
+    margin-left: 10px; /* 1 */
+  }
+}

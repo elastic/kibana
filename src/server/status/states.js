@@ -1,4 +1,4 @@
-let _ = require('lodash');
+import _ from 'lodash';
 
 exports.all = [
   {
@@ -45,7 +45,7 @@ exports.all = [
     severity: -1,
     icon: 'toggle-off',
     nicknames: [
-      'I\'m I even a thing?'
+      'Am I even a thing?'
     ]
   }
 ];

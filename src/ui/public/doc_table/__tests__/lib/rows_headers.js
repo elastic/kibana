@@ -1,33 +1,38 @@
-var angular = require('angular');
-var $ = require('jquery');
-var _ = require('lodash');
-var sinon = require('auto-release-sinon');
-var expect = require('expect.js');
-var ngMock = require('ngMock');
-var getFakeRow = require('fixtures/fake_row');
+import angular from 'angular';
+import _ from 'lodash';
+import sinon from 'sinon';
+import expect from 'expect.js';
+import ngMock from 'ng_mock';
+import getFakeRow from 'fixtures/fake_row';
+import $ from 'jquery';
+import 'plugins/kibana/discover/index';
+import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
+
+
+const SORTABLE_FIELDS = ['bytes', '@timestamp'];
+const UNSORTABLE_FIELDS = ['request_body'];
 
 describe('Doc Table', function () {
-  require('plugins/kibana/discover/index');
 
-  var $parentScope;
+  let $parentScope;
 
-  var $scope;
+  let $scope;
 
-  var config;
+  let config;
 
   // Stub out a minimal mapping of 4 fields
-  var mapping;
+  let mapping;
 
   beforeEach(ngMock.module('kibana', 'apps/discover'));
   beforeEach(ngMock.inject(function (_config_, $rootScope, Private) {
     config = _config_;
     $parentScope = $rootScope;
-    $parentScope.indexPattern = Private(require('fixtures/stubbed_logstash_index_pattern'));
+    $parentScope.indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
     mapping = $parentScope.indexPattern.fields.byName;
   }));
 
   // Sets up the directive, take an element, and a list of properties to attach to the parent scope.
-  var init = function ($elem, props) {
+  const init = function ($elem, props) {
     ngMock.inject(function ($compile) {
       _.assign($parentScope, props);
       $compile($elem)($parentScope);
@@ -36,23 +41,22 @@ describe('Doc Table', function () {
     });
   };
 
-  var destroy = function () {
+  const destroy = function () {
     $scope.$destroy();
     $parentScope.$destroy();
   };
 
   // For testing column removing/adding for the header and the rows
   //
-  var columnTests = function (elemType, parentElem) {
+  const columnTests = function (elemType, parentElem) {
 
-    it('should create a time column if the timefield is defined', function (done) {
-      var childElems = parentElem.find(elemType);
+    it('should create a time column if the timefield is defined', function () {
+      const childElems = parentElem.find(elemType);
       expect(childElems.length).to.be(2);
-      done();
     });
 
-    it('should be able to add and remove columns', function (done) {
-      var childElems;
+    it('should be able to add and remove columns', function () {
+      let childElems;
       // Should include a column for toggling and the time column by default
       $parentScope.columns = ['bytes'];
       parentElem.scope().$digest();
@@ -71,16 +75,14 @@ describe('Doc Table', function () {
       childElems = parentElem.find(elemType);
       expect(childElems.length).to.be(3);
       expect($(childElems[2]).text()).to.contain('request_body');
-      done();
     });
 
-    it('should create only the toggle column if there is no timeField', function (done) {
+    it('should create only the toggle column if there is no timeField', function () {
       delete parentElem.scope().indexPattern.timeFieldName;
       parentElem.scope().$digest();
 
-      var childElems = parentElem.find(elemType);
+      const childElems = parentElem.find(elemType);
       expect(childElems.length).to.be(1);
-      done();
     });
 
   };
@@ -88,16 +90,28 @@ describe('Doc Table', function () {
 
   describe('kbnTableHeader', function () {
 
-    var $elem = angular.element(
-      '<thead kbn-table-header columns="columns" index-pattern="indexPattern" sort="sort"></thead>'
-    );
+    const $elem = angular.element(`
+      <thead
+        kbn-table-header
+        columns="columns"
+        index-pattern="indexPattern"
+        sort-order="sortOrder"
+        on-change-sort-order="onChangeSortOrder"
+        on-move-column="moveColumn"
+        on-remove-column="removeColumn"
+      ></thead>
+    `);
 
     beforeEach(function () {
       init($elem, {
         columns: [],
-        sorting: [],
+        sortOrder: [],
+        onChangeSortOrder: sinon.stub(),
+        moveColumn: sinon.spy(),
+        removeColumn: sinon.spy(),
       });
     });
+
     afterEach(function () {
       destroy();
     });
@@ -106,57 +120,76 @@ describe('Doc Table', function () {
       columnTests('th', $elem);
     });
 
-
-    describe('sorting', function () {
-      it('should have a sort function that sets the elements of the sort array', function (done) {
-        expect($scope.sort).to.be.a(Function);
-        done();
+    describe('cycleSortOrder function', function () {
+      it('should exist', function () {
+        expect($scope.cycleSortOrder).to.be.a(Function);
       });
 
-      it('should have a headClasser function that determines the css classes of the sort icons', function (done) {
+      it('should call onChangeSortOrder with ascending order for a sortable field without sort order', function () {
+        $scope.sortOrder = [];
+        $scope.cycleSortOrder(SORTABLE_FIELDS[0]);
+        expect($scope.onChangeSortOrder.callCount).to.be(1);
+        expect($scope.onChangeSortOrder.firstCall.args).to.eql([SORTABLE_FIELDS[0], 'asc']);
+      });
+
+      it('should call onChangeSortOrder with ascending order for a sortable field already sorted by in descending order', function () {
+        $scope.sortOrder = [SORTABLE_FIELDS[0], 'desc'];
+        $scope.cycleSortOrder(SORTABLE_FIELDS[0]);
+        expect($scope.onChangeSortOrder.callCount).to.be(1);
+        expect($scope.onChangeSortOrder.firstCall.args).to.eql([SORTABLE_FIELDS[0], 'asc']);
+      });
+
+      it('should call onChangeSortOrder with ascending order for a sortable field when already sorted by an different field', function () {
+        $scope.sortOrder = [SORTABLE_FIELDS[1], 'asc'];
+        $scope.cycleSortOrder(SORTABLE_FIELDS[0]);
+        expect($scope.onChangeSortOrder.callCount).to.be(1);
+        expect($scope.onChangeSortOrder.firstCall.args).to.eql([SORTABLE_FIELDS[0], 'asc']);
+      });
+
+      it('should call onChangeSortOrder with descending order for a sortable field already sorted by in ascending order', function () {
+        $scope.sortOrder = [SORTABLE_FIELDS[0], 'asc'];
+        $scope.cycleSortOrder(SORTABLE_FIELDS[0]);
+        expect($scope.onChangeSortOrder.callCount).to.be(1);
+        expect($scope.onChangeSortOrder.firstCall.args).to.eql([SORTABLE_FIELDS[0], 'desc']);
+      });
+
+      it('should not call onChangeSortOrder for an unsortable field', function () {
+        $scope.sortOrder = [];
+        $scope.cycleSortOrder(UNSORTABLE_FIELDS[0]);
+        expect($scope.onChangeSortOrder.callCount).to.be(0);
+      });
+
+      it('should not try to call onChangeSortOrder when it is not defined', function () {
+        $scope.onChangeSortOrder = undefined;
+        expect(() => $scope.cycleSortOrder(SORTABLE_FIELDS[0])).to.not.throwException();
+      });
+    });
+
+    describe('headerClass function', function () {
+      it('should exist', function () {
         expect($scope.headerClass).to.be.a(Function);
-        done();
       });
 
-      it('should sort asc by default, then by desc if already sorting', function (done) {
-        var fields = ['bytes', '@timestamp'];
-
-        // Should not be sorted at first
-        expect($scope.sorting).to.eql(undefined);
-        expect($scope.headerClass(fields[0])).to.contain('fa-sort-up');
-
-        $scope.sort(fields[0]);
-        expect($scope.sorting).to.eql([fields[0], 'asc']);
-        expect($scope.headerClass(fields[0])).to.contain('fa-sort-up');
-
-        $scope.sort(fields[0]);
-        expect($scope.sorting).to.eql([fields[0], 'desc']);
-        expect($scope.headerClass(fields[0])).to.contain('fa-sort-down');
-
-        $scope.sort(fields[0]);
-        expect($scope.sorting).to.eql([fields[0], 'asc']);
-        expect($scope.headerClass(fields[0])).to.contain('fa-sort-up');
-
-        $scope.sort(fields[1]);
-        expect($scope.sorting).to.eql([fields[1], 'asc']);
-        expect($scope.headerClass(fields[1])).to.contain('fa-sort-up');
-
-        // Should show the default sort for any other fields[0]
-        expect($scope.headerClass(fields[0])).to.contain('fa-sort-up');
-
-        done();
+      it('should return list including table-header-sortchange for a sortable field not currently sorted by', function () {
+        expect($scope.headerClass(SORTABLE_FIELDS[0])).to.contain('table-header-sortchange');
       });
 
-      it('should NOT sort unindexed fields', function (done) {
-        $scope.sort('request_body');
-        expect($scope.sorting).to.be(undefined);
-        done();
+      it('should return undefined for an unsortable field', function () {
+        expect($scope.headerClass(UNSORTABLE_FIELDS[0])).to.be(undefined);
       });
 
-      it('should NOT sort geo_point fields', function (done) {
-        $scope.sort('point');
-        expect($scope.sorting).to.be(undefined);
-        done();
+      it('should return list including fa-sort-up for a sortable field not currently sorted by', function () {
+        expect($scope.headerClass(SORTABLE_FIELDS[0])).to.contain('fa-sort-up');
+      });
+
+      it('should return list including fa-sort-up for a sortable field currently sorted by in ascending order', function () {
+        $scope.sortOrder = [SORTABLE_FIELDS[0], 'asc'];
+        expect($scope.headerClass(SORTABLE_FIELDS[0])).to.contain('fa-sort-up');
+      });
+
+      it('should return list including fa-sort-down for a sortable field currently sorted by in descending order', function () {
+        $scope.sortOrder = [SORTABLE_FIELDS[0], 'desc'];
+        expect($scope.headerClass(SORTABLE_FIELDS[0])).to.contain('fa-sort-down');
       });
     });
 
@@ -167,40 +200,31 @@ describe('Doc Table', function () {
       });
 
       it('should move columns to the right', function () {
-
-        $scope.moveRight('bytes');
-        expect($scope.columns[1]).to.be('bytes');
-
-        $scope.moveRight('bytes');
-        expect($scope.columns[2]).to.be('bytes');
+        $scope.moveColumnRight('bytes');
+        expect($scope.onMoveColumn.callCount).to.be(1);
+        expect($scope.onMoveColumn.firstCall.args).to.eql(['bytes', 1]);
       });
 
       it('shouldnt move the last column to the right', function () {
-        expect($scope.columns[3]).to.be('point');
-
-        $scope.moveRight('point');
-        expect($scope.columns[3]).to.be('point');
+        $scope.moveColumnRight('point');
+        expect($scope.onMoveColumn.callCount).to.be(0);
       });
 
       it('should move columns to the left', function () {
-        $scope.moveLeft('@timestamp');
-        expect($scope.columns[1]).to.be('@timestamp');
-
-        $scope.moveLeft('request_body');
-        expect($scope.columns[1]).to.be('request_body');
+        $scope.moveColumnLeft('@timestamp');
+        expect($scope.onMoveColumn.callCount).to.be(1);
+        expect($scope.onMoveColumn.firstCall.args).to.eql(['@timestamp', 1]);
       });
 
       it('shouldnt move the first column to the left', function () {
-        expect($scope.columns[0]).to.be('bytes');
-
-        $scope.moveLeft('bytes');
-        expect($scope.columns[0]).to.be('bytes');
+        $scope.moveColumnLeft('bytes');
+        expect($scope.onMoveColumn.callCount).to.be(0);
       });
     });
   });
 
   describe('kbnTableRow', function () {
-    var $elem = angular.element(
+    const $elem = angular.element(
       '<tr kbn-table-row="row" ' +
       'columns="columns" ' +
       'sorting="sorting"' +
@@ -244,7 +268,7 @@ describe('Doc Table', function () {
       });
 
       describe('expanded', function () {
-        var $details;
+        let $details;
         beforeEach(function () {
           // Open the row
           $scope.toggleRow();
@@ -269,7 +293,7 @@ describe('Doc Table', function () {
 
   describe('kbnTableRow meta', function () {
 
-    var $elem = angular.element(
+    const $elem = angular.element(
         '<tr kbn-table-row="row" ' +
         'columns="columns" ' +
         'sorting="sorting"' +
@@ -277,11 +301,11 @@ describe('Doc Table', function () {
         'index-pattern="indexPattern"' +
         '></tr>'
     );
-    var $details;
+    let $details;
 
     beforeEach(function () {
-      var row = getFakeRow(0, mapping);
-      mapping._id = {indexed: true, type: 'string'};
+      const row = getFakeRow(0, mapping);
+      mapping._id = { indexed: true, type: 'string' };
       row._source._id = 'foo';
 
       init($elem, {
@@ -311,10 +335,10 @@ describe('Doc Table', function () {
   });
 
   describe('row diffing', function () {
-    var $row;
-    var $scope;
-    var $root;
-    var $before;
+    let $row;
+    let $scope;
+    let $root;
+    let $before;
 
     beforeEach(ngMock.inject(function ($rootScope, $compile, Private) {
       $root = $rootScope;
@@ -324,7 +348,7 @@ describe('Doc Table', function () {
       $root.filtering = sinon.spy();
       $root.maxLength = 50;
       $root.mapping = mapping;
-      $root.indexPattern = Private(require('fixtures/stubbed_logstash_index_pattern'));
+      $root.indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
 
       $row = $('<tr>')
       .attr({
@@ -353,7 +377,7 @@ describe('Doc Table', function () {
       $root.columns.push('bytes');
       $root.$apply();
 
-      var $after = $row.find('td');
+      const $after = $row.find('td');
       expect($after).to.have.length(4);
       expect($after[0]).to.be($before[0]);
       expect($after[1]).to.be($before[1]);
@@ -366,7 +390,7 @@ describe('Doc Table', function () {
       $root.columns.push('request_body');
       $root.$apply();
 
-      var $after = $row.find('td');
+      const $after = $row.find('td');
       expect($after).to.have.length(5);
       expect($after[0]).to.be($before[0]);
       expect($after[1]).to.be($before[1]);
@@ -384,7 +408,7 @@ describe('Doc Table', function () {
       ];
       $root.$apply();
 
-      var $after = $row.find('td');
+      const $after = $row.find('td');
       expect($after).to.have.length(6);
       expect($after[0]).to.be($before[0]);
       expect($after[1]).to.be($before[1]);
@@ -399,7 +423,7 @@ describe('Doc Table', function () {
       _.pull($root.columns, '_source');
       $root.$apply();
 
-      var $after = $row.find('td');
+      const $after = $row.find('td');
       expect($after).to.have.length(2);
       expect($after[0]).to.be($before[0]);
       expect($after[1]).to.be($before[1]);
@@ -410,14 +434,14 @@ describe('Doc Table', function () {
       $root.columns.push('@timestamp');
       $root.$apply();
 
-      var $mid = $row.find('td');
+      const $mid = $row.find('td');
       expect($mid).to.have.length(4);
 
       $root.columns.pop();
       $root.columns.pop();
       $root.$apply();
 
-      var $after = $row.find('td');
+      const $after = $row.find('td');
       expect($after).to.have.length(2);
       expect($after[0]).to.be($before[0]);
       expect($after[1]).to.be($before[1]);
@@ -428,7 +452,7 @@ describe('Doc Table', function () {
       $root.columns.push('@timestamp', 'bytes');
       $root.$apply();
 
-      var $mid = $row.find('td');
+      const $mid = $row.find('td');
       expect($mid).to.have.length(5);
 
       $root.columns[0] = false; // _source
@@ -436,7 +460,7 @@ describe('Doc Table', function () {
       $root.columns = $root.columns.filter(Boolean);
       $root.$apply();
 
-      var $after = $row.find('td');
+      const $after = $row.find('td');
       expect($after).to.have.length(3);
       expect($after[0]).to.be($before[0]);
       expect($after[1]).to.be($before[1]);
@@ -450,7 +474,7 @@ describe('Doc Table', function () {
       $root.columns.push('request_body');
       $root.$apply();
 
-      var $after = $row.find('td');
+      const $after = $row.find('td');
       expect($after).to.have.length(4);
       expect($after.eq(2).text().trim()).to.match(/^bytes_formatted/);
       expect($after.eq(3).text().trim()).to.match(/^bytes_formatted/);
@@ -460,13 +484,13 @@ describe('Doc Table', function () {
       $root.columns.push('bytes');
       $root.$apply();
 
-      var $mid = $row.find('td');
+      const $mid = $row.find('td');
       expect($mid).to.have.length(4);
 
       $root.columns.reverse();
       $root.$apply();
 
-      var $after = $row.find('td');
+      const $after = $row.find('td');
       expect($after).to.have.length(4);
       expect($after[0]).to.be($before[0]);
       expect($after[1]).to.be($before[1]);
@@ -478,13 +502,13 @@ describe('Doc Table', function () {
       $root.columns.push('bytes', 'response', '@timestamp');
       $root.$apply();
 
-      var $mid = $row.find('td');
+      const $mid = $row.find('td');
       expect($mid).to.have.length(6);
 
       $root.columns.reverse();
       $root.$apply();
 
-      var $after = $row.find('td');
+      const $after = $row.find('td');
       expect($after).to.have.length(6);
       expect($after[0]).to.be($before[0]);
       expect($after[1]).to.be($before[1]);
@@ -498,7 +522,7 @@ describe('Doc Table', function () {
       $root.columns.push('bytes', 'bytes', 'bytes');
       $root.$apply();
 
-      var $after = $row.find('td');
+      const $after = $row.find('td');
       expect($after).to.have.length(6);
       expect($after[0]).to.be($before[0]);
       expect($after[1]).to.be($before[1]);

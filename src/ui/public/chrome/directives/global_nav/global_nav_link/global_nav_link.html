@@ -1,0 +1,36 @@
+<div
+  class="global-nav-link {{classes}}"
+  ng-class="{ active: isActive, 'is-global-nav-link-disabled': isDisabled }"
+  tooltip="{{ tooltipContent }}"
+  tooltip-placement="right"
+  tooltip-popup-delay="0"
+  tooltip-append-to-body="1"
+>
+  <a
+    class="global-nav-link__anchor"
+    href="{{ getHref() }}"
+    ng-click="onClick({ $event: $event })"
+    data-test-subj="appLink"
+  >
+    <div class="global-nav-link__icon">
+      <img
+        ng-if="icon"
+        class="global-nav-link__icon-image"
+        kbn-src="{{ '/' + icon }}"
+        aria-hidden
+      >
+
+      <span
+        ng-if="!icon"
+        class="global-nav-link__icon-placeholder"
+        data-test-subj="appLinkIconPlaceholder"
+      >
+        {{ label[0] }}
+      </span>
+    </div>
+
+    <div class="global-nav-link__title">
+      {{ label }}
+    </div>
+  </a>
+</div>

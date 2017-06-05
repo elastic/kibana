@@ -1,17 +1,16 @@
-import ngMock from 'ngMock';
+import ngMock from 'ng_mock';
 import $ from 'jquery';
 import expect from 'expect.js';
 
-import uiModules from 'ui/modules';
-import chromeNavControlsRegistry from 'ui/registry/chrome_nav_controls';
-import Registry from 'ui/registry/_registry';
+import { chromeNavControlsRegistry } from 'ui/registry/chrome_nav_controls';
+import { uiRegistry } from 'ui/registry/_registry';
 
 describe('chrome nav controls', function () {
   let compile;
   let stubRegistry;
 
   beforeEach(ngMock.module('kibana', function (PrivateProvider) {
-    stubRegistry = new Registry({
+    stubRegistry = uiRegistry({
       order: ['order']
     });
 
@@ -36,7 +35,7 @@ describe('chrome nav controls', function () {
       };
     });
 
-    var $el = compile();
+    const $el = compile();
     expect($el.find('#testTemplateEl')).to.have.length(1);
   });
 
@@ -63,7 +62,7 @@ describe('chrome nav controls', function () {
       };
     });
 
-    var $el = compile();
+    const $el = compile();
     expect(
       $el.find('.testControl')
       .toArray()

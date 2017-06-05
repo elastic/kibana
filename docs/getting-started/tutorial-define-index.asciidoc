@@ -1,0 +1,22 @@
+[[tutorial-define-index]]
+== Defining Your Index Patterns
+
+Each set of data loaded to Elasticsearch has an index pattern. In the previous section, the
+Shakespeare data set has an index named `shakespeare`, and the accounts  data set has an index named `bank`. An _index
+pattern_ is a string with optional wildcards that can match multiple indices. For example, in the common logging use
+case, a typical index name contains the date in YYYY.MM.DD format, and an index pattern for May would look something
+like `logstash-2015.05*`.
+
+For this tutorial, any pattern that matches the name of an index we've loaded will work. Open a browser and
+navigate to `localhost:5601`. Click the *Management* tab, then the *Index Patterns* tab. Click *Add New* to define a new index
+pattern. Two of the sample data sets, the Shakespeare plays and the financial accounts, don't contain time-series data.
+Make sure the *Index contains time-based events* box is unchecked when you create index patterns for these data sets.
+Specify `shakes*`  as the index pattern for the Shakespeare data set and click *Create* to define the index pattern, then
+define a second index pattern named `ba*`.
+
+The Logstash data set does contain time-series data, so after clicking *Add New* to define the index for this data
+set, make sure the *Index contains time-based events* box is checked and select the `@timestamp` field from the
+*Time-field name* drop-down.
+
+NOTE: When you define an index pattern, indices that match that pattern must exist in Elasticsearch. Those indices must
+contain data.

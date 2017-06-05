@@ -1,0 +1,72 @@
+<div ng-show="timefilter.enabled" data-shared-timefilter="{{timefilter.enabled}}" class="kuiLocalMenu" data-test-subj="globalTimepicker">
+  <button
+    class="kuiLocalMenuItem"
+    aria-label="{{ timefilter.refreshInterval.pause ? 'Resume refreshing data' : 'Pause refreshing data' }}"
+    ng-click="toggleRefresh()"
+    ng-show="timefilter.refreshInterval.value > 0"
+  >
+    <span
+      class="kuiIcon"
+      aria-hidden="true"
+      ng-class="timefilter.refreshInterval.pause ? 'fa-play' : 'fa-pause'"
+    ></span>
+  </button>
+
+  <button
+    class="kuiLocalMenuItem navbar-timepicker-auto-refresh-desc"
+    ng-class="{'kuiLocalMenuItem-isSelected': kbnTopNav.isCurrent('interval') }"
+    ng-show="timefilter.refreshInterval.value > 0 || kbnTopNav.isCurrent('interval') || kbnTopNav.isCurrent('filter')"
+    ng-click="kbnTopNav.toggle('interval')"
+  >
+    <span ng-show="timefilter.refreshInterval.value === 0">
+      <span aria-hidden="true" class="kuiIcon fa-repeat"></span> Auto-refresh
+    </span>
+
+    <span
+      ng-show="timefilter.refreshInterval.value > 0"
+      aria-label="{{ 'Data will refresh every ' + timefilter.refreshInterval.display }}"
+    >
+      {{ timefilter.refreshInterval.display }}
+    </span>
+  </button>
+
+  <button
+    class="kuiLocalMenuItem"
+    ng-click="back()"
+    aria-label="Move backward in time"
+  >
+    <span
+      class="kuiIcon fa-chevron-left"
+      aria-hidden="true"
+      tooltip="Move backward in time"
+    ></span>
+  </button>
+
+  <button
+    data-test-subj="globalTimepickerButton"
+    class="kuiLocalMenuItem navbar-timepicker-time-desc"
+    ng-class="{'kuiLocalMenuItem-isSelected': kbnTopNav.isCurrent('filter')}"
+    ng-click="kbnTopNav.toggle('filter')"
+    aria-label="Open time range picker"
+    aria-haspopup="true"
+  >
+    <span aria-hidden="true" class="kuiIcon fa-clock-o"></span>
+    <pretty-duration
+      from="timefilter.time.from"
+      to="timefilter.time.to"
+      data-test-subj="globalTimepickerRange"
+    ></pretty-duration>
+  </button>
+
+  <button
+    class="kuiLocalMenuItem"
+    ng-click="forward()"
+    aria-label="Move forward in time"
+  >
+    <span
+      aria-hidden="true"
+      class="kuiIcon fa-chevron-right"
+      tooltip="Move forward in time"
+    ></span>
+  </button>
+</div>

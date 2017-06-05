@@ -1,10 +1,10 @@
+import angular from 'angular';
+import _ from 'lodash';
 define(function () {
-  return function MappingSetupService(kbnIndex, es) {
-    var angular = require('angular');
-    var _ = require('lodash');
-    var mappingSetup = this;
+  return function MappingSetupService(kbnIndex, esAdmin) {
+    const mappingSetup = this;
 
-    var json = {
+    const json = {
       _serialize: function (val) {
         if (val != null) return angular.toJson(val);
       },
@@ -16,34 +16,36 @@ define(function () {
     /**
      * Use to create the mappings, but that should only happen one at a time
      */
-    var activeTypeCreations = {};
+    const activeTypeCreations = {};
 
     /**
      * Get the list of type's mapped in elasticsearch
      * @return {[type]} [description]
      */
-    var getKnownKibanaTypes = _.once(function () {
-      var indexName = kbnIndex;
-      return es.indices.getFieldMapping({
+    const getKnownKibanaTypes = _.once(function () {
+      return esAdmin.indices.getFieldMapping({
         // only concerned with types in this kibana index
-        index: indexName,
+        index: kbnIndex,
         // check all types
         type: '*',
         // limit the response to just the _source field for each index
-        field: '_source'
+        fields: '_source'
       }).then(function (resp) {
-        return _.keys(resp[indexName].mappings);
+        // kbnIndex is not sufficient here, if the kibana indexed is aliased we need to use
+        // the root index name as key
+        const index = _.keys(resp)[0];
+        return _.keys(resp[index].mappings);
       });
     });
 
     mappingSetup.expandShorthand = function (sh) {
-      return _.mapValues(sh || {}, function (val, prop) {
+      return _.mapValues(sh || {}, function (val) {
         // allow shortcuts for the field types, by just setting the value
         // to the type name
         if (typeof val === 'string') val = { type: val };
 
         if (val.type === 'json') {
-          val.type = 'string';
+          val.type = 'text';
           val._serialize = json._serialize;
           val._deserialize = json._deserialize;
         }
@@ -70,22 +72,22 @@ define(function () {
         });
       }
 
-      var prom = getKnownKibanaTypes()
+      const prom = getKnownKibanaTypes()
       .then(function (knownTypes) {
         // if the type is in the knownTypes array already
         if (~knownTypes.indexOf(type)) return false;
 
         // we need to create the mapping
-        var body = {};
+        const body = {};
         body[type] = {
           properties: mapping
         };
 
-        return es.indices.putMapping({
+        return esAdmin.indices.putMapping({
           index: kbnIndex,
           type: type,
           body: body
-        }).then(function (resp) {
+        }).then(function () {
           // add this type to the list of knownTypes
           knownTypes.push(type);
 

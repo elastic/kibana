@@ -1,6 +1,6 @@
-const _ = require('lodash');
+import _ from 'lodash';
 
-let Scanner = function (client, {index, type} = {}) {
+export const Scanner = function (client, { index, type } = {}) {
   if (!index) throw new Error('Expected index');
   if (!type) throw new Error('Expected type');
   if (!client) throw new Error('Expected client');
@@ -13,7 +13,7 @@ let Scanner = function (client, {index, type} = {}) {
 Scanner.prototype.scanAndMap = function (searchString, options, mapFn) {
   let scrollId;
   let body;
-  let allResults = {
+  const allResults = {
     hits: [],
     total: 0
   };
@@ -33,11 +33,15 @@ Scanner.prototype.scanAndMap = function (searchString, options, mapFn) {
       }
     };
   } else {
-    body = { query: {match_all: {}}};
+    body = { query: { match_all: {} } };
   }
 
   return new Promise((resolve, reject) => {
     const getMoreUntilDone = (error, response) => {
+      if (error) {
+        reject(error);
+        return;
+      }
       const scanAllResults = opts.docCount === Infinity;
       allResults.total = scanAllResults ? response.hits.total : Math.min(response.hits.total, opts.docCount);
       scrollId = response._scroll_id || scrollId;
@@ -63,10 +67,9 @@ Scanner.prototype.scanAndMap = function (searchString, options, mapFn) {
       type: this.type,
       size: opts.pageSize,
       body,
-      searchType: 'scan',
-      scroll: '1m'
+      scroll: '1m',
+      sort: '_doc',
     }, getMoreUntilDone);
   });
 };
 
-export default Scanner;

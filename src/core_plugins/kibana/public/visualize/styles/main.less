@@ -1,0 +1,73 @@
+@import (reference) "~ui/styles/variables";
+@import (reference) "~ui/styles/bootstrap/list-group";
+@import (reference) "~ui/styles/list-group-menu";
+
+.wizard-sub-title {
+  margin-top: 0px;
+  margin-bottom: 8px;
+  padding: 0px 5px;
+}
+
+.wizard-type {
+  flex: 1;
+
+  // TODO: When we migrate off Bootstrap, we can eliminate these "mixins".
+  .list-group-item();
+  .list-group-menu .list-group-menu-item();
+
+  border: none;
+  border-radius: 0;
+  background-color: @kibanaGray6;
+}
+
+  .wizard-type-heading {
+    flex: 0 0 200px;
+    display: flex;
+    align-items: center;
+    font-size: 1.2em;
+  }
+
+    .wizard-type-heading-icon {
+      flex: 0 0 auto;
+      margin-right: @padding-base-horizontal;
+      font-size: 1.5em;
+      text-align: center;
+      color: @saved-object-finder-icon-color;
+    }
+
+    .wizard-type-heading-text {
+      flex: 1 0 auto;
+    }
+
+  .wizard-type-description {
+    flex: 1 1 auto;
+    color: @wizard-vis-type-description-color;
+  }
+
+@media (min-width: @screen-lg) {
+  .wizard {
+    display: flex;
+  }
+
+    .wizard-column {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      padding: 0px 2.5px;
+    }
+
+      .wizard-row {
+        flex: 1;
+        background-color: @kibanaGray6;
+      }
+
+    .wizard-column--small {
+      flex: 2;
+    }
+
+    .wizard-column--large {
+      flex: 3;
+    }
+}
+
+@import "../editor/styles/_editor.less";

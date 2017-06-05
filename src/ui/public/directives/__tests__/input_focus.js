@@ -1,18 +1,17 @@
-var angular = require('angular');
-var $ = require('jquery');
-var expect = require('expect.js');
-var ngMock = require('ngMock');
-require('ui/directives/input_focus');
+import expect from 'expect.js';
+import ngMock from 'ng_mock';
+import $ from 'jquery';
+import 'ui/directives/input_focus';
 
 describe('Input focus directive', function () {
-  var $compile;
-  var $rootScope;
-  var $timeout;
-  var element;
-  var $el;
-  var selectedEl;
-  var selectedText;
-  var inputValue = 'Input Text Value';
+  let $compile;
+  let $rootScope;
+  let $timeout;
+  let element;
+  let $el;
+  let selectedEl;
+  let selectedText;
+  const inputValue = 'Input Text Value';
 
   beforeEach(ngMock.module('kibana'));
   beforeEach(ngMock.inject(function (_$compile_, _$rootScope_, _$timeout_) {

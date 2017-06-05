@@ -1,55 +1,48 @@
-define(function (require) {
-  var Common = require('../../../support/pages/Common');
-  var SettingsPage = require('../../../support/pages/settings_page');
-  var VisualizePage = require('../../../support/pages/VisualizePage');
-  var expect = require('intern/dojo/node!expect.js');
+import expect from 'expect.js';
 
-  return function (bdd, scenarioManager) {
-    bdd.describe('visualize app', function describeIndexTests() {
-      var common;
-      var settingsPage;
-      var visualizePage;
+export default function ({ getService, getPageObjects }) {
+  const log = getService('log');
+  const screenshots = getService('screenshots');
+  const PageObjects = getPageObjects(['common', 'visualize']);
 
-      bdd.before(function () {
-        common = new Common(this.remote);
-        settingsPage = new SettingsPage(this.remote);
-        visualizePage = new VisualizePage(this.remote);
+  describe('visualize app', function describeIndexTests() {
 
-        return scenarioManager.reload('emptyKibana')
-        .then(function () {
-          common.debug('navigateTo');
-          return settingsPage.navigateTo();
-        })
-        .then(function () {
-          common.debug('createIndexPattern');
-          return settingsPage.createIndexPattern();
-        })
-        .then(function () {
-          common.debug('navigateToApp visualize');
-          return common.navigateToApp('visualize');
-        })
-        .catch(common.handleError(this));
-      });
+    before(function () {
+      log.debug('navigateToApp visualize');
+      return PageObjects.common.navigateToUrl('visualize', 'new');
+    });
 
 
-      bdd.describe('chart types', function indexPatternCreation() {
+    describe('chart types', function indexPatternCreation() {
+      it('should show the correct chart types', function () {
+        const expectedChartTypes = [
+          'Area',
+          'Heat Map',
+          'Horizontal Bar',
+          'Line',
+          'Pie',
+          'Vertical Bar',
+          'Data Table',
+          'Gauge',
+          'Goal',
+          'Metric',
+          'Coordinate Map',
+          'Region Map',
+          'Timelion',
+          'Visual Builder',
+          'Markdown',
+          'Tag Cloud',
+        ];
 
-        bdd.it('should show the correct chart types', function pageHeader() {
-
-          var expectedChartTypes = [
-            'Area chart', 'Data table', 'Line chart', 'Markdown widget',
-            'Metric', 'Pie chart', 'Tile map', 'Vertical bar chart'
-          ];
-          // find all the chart types and make sure there all there
-          return visualizePage.getChartTypes()
-          .then(function testChartTypes(chartTypes) {
-            common.debug('returned chart types = ' + chartTypes);
-            common.debug('expected chart types = ' + expectedChartTypes);
-            expect(chartTypes).to.eql(expectedChartTypes);
-          })
-          .catch(common.handleError(this));
+        // find all the chart types and make sure there all there
+        return PageObjects.visualize.getChartTypes()
+        .then(function testChartTypes(chartTypes) {
+          log.debug('returned chart types = ' + chartTypes);
+          log.debug('expected chart types = ' + expectedChartTypes);
+          screenshots.take('Visualize-chart-types');
+          expect(chartTypes).to.eql(expectedChartTypes);
         });
       });
     });
-  };
-});
+  });
+}

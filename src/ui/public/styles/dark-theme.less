@@ -1,11 +1,11 @@
 @import "~ui/styles/dark-variables.less";
-@import "~bootstrap/less/mixins.less";
+@import "~ui/styles/bootstrap/mixins.less";
 
 .tab-dashboard.theme-dark {
   color: @text-color;
   background-color: @dashboard-bg;
 
-// /node_modules/bootstrap/less/scaffolding.less
+// /src/ui/public/styles/bootstrap/scaffolding.less
   a {
     color: @link-color;
 
@@ -16,7 +16,7 @@
   }
 
 
-// /node_modules/bootstrap/less/forms.less
+// /src/ui/public/styles/bootstrap/forms.less
   .form-control {
     color: @input-color;
     background-color: @input-bg;
@@ -29,13 +29,13 @@
   }
 
 
-// /node_modules/bootstrap/less/panels.less
+// /src/ui/public/styles/bootstrap/panels.less
   .panel {
     background-color: @panel-bg;
   }
 
 
-// /node_modules/bootstrap/less/tables.less
+// /src/ui/public/styles/bootstrap/tables.less
   .table {
     // Cells
     > thead,
@@ -82,31 +82,13 @@
   }
 
 
-// /node_modules/bootstrap/less/buttons.less
-  .btn {
-    &:hover,
-    &:focus,
-    &.focus {
-      color: @btn-default-color;
-    }
-
-    .findme {
-      font-weight: bold;
-    }
-  }
-
-  .btn-default {
-    .button-variant(@btn-default-color; @btn-default-bg; @btn-default-border);
-  }
-  .btn-primary {
-    .button-variant(@btn-primary-color; @btn-primary-bg; @btn-primary-border);
-  }
-
-
-// /node_modules/bootstrap/less/list-group.less
+// /src/ui/public/styles/bootstrap/list-group.less
   .list-group-item {
     background-color: @list-group-bg;
-    border-color: @list-group-border;
+    border: 0 none transparent;
+    &:nth-child(even) {
+      background-color: @gray4;
+    }
   }
 
   a.list-group-item,
@@ -173,7 +155,7 @@
   }
 
 
-// /node_modules/bootstrap/less/navs.less
+// /src/ui/public/styles/bootstrap/navs.less
   .nav {
     > li {
       > a {
@@ -186,10 +168,11 @@
   }
 
 
-// /node_modules/bootstrap/less/navs.less
+// /src/ui/public/styles/bootstrap/navs.less
   .nav-tabs {
-    border-bottom: 1px solid @nav-tabs-border-color;
+    border-bottom: 1px solid @gray4;
     > li {
+      margin-bottom: -2px;
       > a {
         &:hover {
           border-color: @nav-tabs-link-hover-border-color @nav-tabs-link-hover-border-color @nav-tabs-border-color;
@@ -200,9 +183,9 @@
         &,
         &:hover,
         &:focus {
-          color: @nav-tabs-active-link-hover-color;
-          background-color: @nav-tabs-active-link-hover-bg;
-          border-color: @nav-tabs-active-link-hover-border-color;
+          color: @white;
+          background-color: @gray4;
+          border: 0 none transparent;
         }
       }
     }
@@ -214,6 +197,10 @@
     color: @navbar-default-color;
     background-color: @navbar-default-bg;
     border-color: @navbar-default-border;
+    button {
+      color: @white;
+      background-color: transparent;
+    }
   }
 
 
@@ -228,25 +215,14 @@
         color: @saved-object-finder-link-color !important;
       }
     }
-
-    .finder-options {
-      > li {
-        &.active {
-          background-color: @component-active-bg;
-          color: @component-active-color;
-          a {
-            color: @component-active-color;
-          }
-        }
-      }
-    }
   }
 
   .cell-hover {
     background-color: @table-cell-hover-bg;
-  }
-  .cell-hover:hover {
-    background-color: @table-cell-hover-hover-bg;
+
+    .table-cell-filter {
+      background-color: @table-cell-hover-bg;
+    }
   }
 
 
@@ -257,43 +233,28 @@
 
 
 // /src/ui/public/agg_table/agg_table.less
-  .agg-table {
+  .agg-table-paginated {
+    tr:hover td {
+      background-color: @table-row-hover-bg;
 
-    &-paginated {
-      tr:hover td {
+      .table-cell-filter {
         background-color: @table-row-hover-bg;
-      }
-
-      .cell-hover:hover {
-        background-color: @table-cell-hover-hover-bg;
       }
     }
   }
 
 
 // /src/ui/public/visualize/visualize.less
-  visualize-spy {
-    .visualize-show-spy {
-      border-top-color: @visualize-show-spy-border;
+  .visualize-show-spy {
+    border-top-color: @visualize-show-spy-border;
+  }
 
-      &-tab {
-        border-color: @visualize-show-spy-border;
-        background: @visualize-show-spy-bg;
-        color: @visualize-show-spy-color;
-
-        &:hover {
-          background-color: @visualize-show-spy-hover-bg;
-          color: @visualize-show-spy-hover-color;
-        }
-      }
-    }
-    .visualize-spy-container {
-      pre {
-        border-color: @visualize-show-spy-border;
-        color: @visualize-spy-container-pre-color;
-        opacity: 1;
-        background-color: @visualize-spy-container-pre-bg;
-      }
+  .visualize-spy-container {
+    pre {
+      border-color: @visualize-show-spy-border;
+      color: @visualize-spy-container-pre-color;
+      opacity: 1;
+      background-color: @visualize-spy-container-pre-bg;
     }
   }
 
@@ -309,6 +270,10 @@
     fill: @svg-tick-text-color;
   }
 
+  .chart-label {
+    fill: @svg-tick-text-color;
+  }
+
   .brush .extent {
     stroke: @svg-brush-color;
   }
@@ -320,16 +285,11 @@
 
 
 // /src/ui/public/vislib/styles/_legend.less
+  .legend {
+    background-color: @dashboard-panel-bg;
+  }
+
   .legend-col-wrapper {
-
-    .legend-toggle {
-      &:hover {
-        color: @sidebar-hover-color;
-        background-color: @sidebar-hover-bg;
-      }
-
-      background-color: @sidebar-bg;
-    }
 
     .legend-ul {
       border-left-color: @sidebar-bg;
@@ -338,30 +298,20 @@
 
   }
 
-  .legend-value {
-     &-title {
-      padding: 3px;
+  .legend-value-title {
+    padding: 3px;
 
-      &:hover {
-        background-color: @sidebar-hover-bg;
-      }
-    }
-
-    &-full {
+    &:hover {
       background-color: @sidebar-hover-bg;
     }
+  }
 
-    &-details {
-      border-bottom: 1px solid @sidebar-bg;
+  .legend-value-full {
+    background-color: @gray3;
+  }
 
-      .filter-button {
-        background-color: @sidebar-bg;
-
-        &:hover {
-          background-color: @sidebar-hover-bg;
-        }
-      }
-    }
+  .legend-value-details {
+    border-bottom: 1px solid @sidebar-bg;
   }
 
 
@@ -437,21 +387,19 @@
   }
 
   .leaflet-left {
-    .leaflet-control {
+    .leaflet-control,
+    .leaflet-draw-actions {
       a,
       a:hover {
-        color: @tilemap-leaflet-control-color;
+        color: @dark-button-font;
+        background-color: @dark-button-bg;
       }
-    }
-
-    .leaflet-draw-actions a {
-      background-color: @tilemap-leaflet-control-draw-action-bg;
     }
   }
 
 
 // /src/ui/public/filter_bar/filter_bar.less
-  filter-bar .confirm {
+  .filter-bar-confirm {
     background: @filter-bar-confirm-bg;
     border-bottom-color: @filter-bar-confirm-border;
 
@@ -461,13 +409,9 @@
     }
   }
 
-  filter-bar .bar {
+  .filter-bar {
     background: @filter-bar-bar-bg;
     border-bottom-color: @filter-bar-bar-border;
-
-    &-condensed {
-      background: @filter-bar-bar-condensed-bg;
-    }
 
     .filter {
       background-color: @filter-bar-bar-filter-bg;
@@ -483,10 +427,14 @@
     }
   }
 
+    .filter-bar-condensed {
+      background: @filter-bar-bar-condensed-bg;
+    }
+
 
 // /src/ui/public/styles/config.less
   .config {
-    border-bottom-color: @config-border;
+    border-bottom: 0 none transparent;
 
     .config-close {
       background-color: @config-close-bg;
@@ -511,7 +459,7 @@
         background-color: @list-group-menu-item-active-bg;
       }
       &:hover {
-        background-color: @list-group-menu-item-hover-bg;
+        background-color: @gray2;
       }
       li {
         color: @list-group-menu-item-color;
@@ -530,12 +478,14 @@
 // /src/ui/public/styles/pagination.less
   paginate {
     paginate-controls {
-      .pagination-other-pages {
-        &-list {
-          > li {
-            &.active a {
-              color: @paginate-page-link-active-color;
-            }
+      .pagination-other-pages-list {
+        > li {
+          a {
+            background-color: @dark-button-bg;
+            color: @white;
+          }
+          &.active a {
+            color: @paginate-page-link-active-color;
           }
         }
       }
@@ -543,42 +493,75 @@
   }
 
 
-// /src/plugins/kibana/public/dashboard/styles/main.less
+// /src/core_plugins/kibana/public/dashboard/styles/main.less
   .start-screen {
     background-color: @dashboard-bg;
   }
 
   .gridster {
     background-color: @dashboard-bg;
+  }
 
-    dashboard-panel {
-      background: @dashboard-panel-bg;
-      color: @dashboard-panel-color;
+  dashboard-panel {
+    background: @dashboard-panel-bg;
+    color: @dashboard-panel-color;
 
-      .panel {
-        .panel-heading {
-          a {
-            color: @dashboard-panel-heading-link-color;
-            &:hover {
-              color: @dashboard-panel-heading-link-hover-color;
-            }
-          }
-          span.panel-title {
-            color: @dashboard-panel-heading-link-color;
-          }
-          i {
-            color: @dashboard-panel-heading-link-color;
-            opacity: 1;
+    .panel {
+      .panel-heading {
+        a {
+          color: @dashboard-panel-heading-link-color;
+          &:hover {
+            color: @dashboard-panel-heading-link-hover-color;
           }
         }
+        span.panel-title {
+          color: @dashboard-panel-heading-link-color;
+        }
+        i {
+          color: @dashboard-panel-heading-link-color;
+          opacity: 1;
+        }
+      }
 
-        .load-error {
-          .fa-exclamation-triangle {
-            color: @dashboard-panel-load-error-color;
-          }
+      .load-error {
+        .fa-exclamation-triangle {
+          color: @dashboard-panel-load-error-color;
         }
       }
     }
   }
-}
 
+  saved-object-finder .form-group span {
+    background-color: @input-bg;
+    color: @dark-button-font;
+  }
+  saved-object-finder .paginate-heading {
+    color: @text-color;
+  }
+  .kibana-nav-actions .active {
+    background-color: @config-bg;
+    color: @dark-button-font;
+  }
+
+  .truncate-by-height:before {
+    background: linear-gradient(to bottom, transparent 0%, @dashboard-bg 100%) !important;
+  }
+
+  kbn-table, .kbn-table, tbody[kbn-rows] {
+    dl.source {
+      dt {
+        background: #5f5f5f;
+        color: #ffffff;
+      }
+    }
+  }
+
+// /src/ui/public/doc_table/doc_table.less
+  .discover-table-row {
+    td {
+      .table-cell-filter {
+        background-color: @panel-bg;
+      }
+    }
+  }
+}

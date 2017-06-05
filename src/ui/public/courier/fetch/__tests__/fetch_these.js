@@ -1,8 +1,13 @@
-describe('ui/courier/fetch/_fetch_these', () => {
-  const _ = require('lodash');
-  const sinon = require('auto-release-sinon');
-  const expect = require('expect.js');
-  const ngMock = require('ngMock');
+import sinon from 'sinon';
+import expect from 'expect.js';
+import ngMock from 'ng_mock';
+
+import { CallClientProvider } from 'ui/courier/fetch/call_client';
+import { CallResponseHandlersProvider } from 'ui/courier/fetch/call_response_handlers';
+import { ContinueIncompleteProvider } from 'ui/courier/fetch/continue_incomplete';
+import { FetchTheseProvider } from '../fetch_these';
+
+describe('FetchTheseProvider', () => {
 
   let Promise;
   let $rootScope;
@@ -21,20 +26,20 @@ describe('ui/courier/fetch/_fetch_these', () => {
       return fakeResponses;
     }
 
-    PrivateProvider.swap(require('ui/courier/fetch/_call_client'), FakeResponsesProvider);
-    PrivateProvider.swap(require('ui/courier/fetch/_call_response_handlers'), FakeResponsesProvider);
-    PrivateProvider.swap(require('ui/courier/fetch/_continue_incomplete'), FakeResponsesProvider);
+    PrivateProvider.swap(CallClientProvider, FakeResponsesProvider);
+    PrivateProvider.swap(CallResponseHandlersProvider, FakeResponsesProvider);
+    PrivateProvider.swap(ContinueIncompleteProvider, FakeResponsesProvider);
   }));
 
   beforeEach(ngMock.inject((Private, $injector) => {
     $rootScope = $injector.get('$rootScope');
     Promise = $injector.get('Promise');
-    fetchThese = Private(require('ui/courier/fetch/_fetch_these'));
+    fetchThese = Private(FetchTheseProvider);
     request = mockRequest();
     requests = [ request ];
   }));
 
-  context('when request has not started', () => {
+  describe('when request has not started', () => {
     beforeEach(() => requests.forEach(req => req.started = false));
 
     it('starts request', () => {
@@ -61,7 +66,7 @@ describe('ui/courier/fetch/_fetch_these', () => {
     });
   });
 
-  context('when request has already started', () => {
+  describe('when request has already started', () => {
     it('continues request', () => {
       fetchThese(requests);
       expect(request.start.called).to.be(false);

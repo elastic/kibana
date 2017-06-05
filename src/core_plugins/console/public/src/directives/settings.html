@@ -1,0 +1,74 @@
+<div class="kuiLocalDropdownTitle">Settings</div>
+
+<form class="form" name="settingsForm" ng-submit="settingsForm.$valid && settings.apply()">
+  <div class="form-group">
+    <div class="kuiLocalDropdownHeader">
+      <div class="kuiLocalDropdownHeader__label">Font Size</div>
+    </div>
+
+    <div>
+      <input
+        input-focus
+        ng-model="settings.vals.fontSize"
+        name="fontSize"
+        type="number"
+        required
+        class="form-control"
+        data-test-subj="setting-font-size-input"
+      >
+    </div>
+
+    <div class="checkbox">
+      <label>
+        <input type="checkbox" ng-model="settings.vals.wrapMode"/> Wrap long lines
+      </label>
+    </div>
+
+  </div>
+
+  <div class="form-group">
+    <div class="kuiLocalDropdownHeader">
+      <div class="kuiLocalDropdownHeader__label">Autocomplete</div>
+    </div>
+
+    <div class="checkbox">
+      <label>
+        <input
+          name="autocompleteFields"
+          type="checkbox"
+          ng-model="settings.vals.autocomplete.fields">
+          Fields
+        </input>
+      </label>
+    </div>
+
+    <div class="checkbox">
+      <label>
+        <input
+          name="autocompleteIndices"
+          type="checkbox"
+          ng-model="settings.vals.autocomplete.indices">
+          Indices &amp; Aliases
+        </input>
+      </label>
+    </div>
+
+  </div>
+
+  <div class="settings-footer">
+    <button
+      ng-click="kbnTopNav.close()"
+      class="kuiButton kuiButton--hollow"
+    >
+      Cancel
+    </button>
+    <button
+      type="submit"
+      ng-disabled="settingsForm.$invalid"
+      class="kuiButton kuiButton--primary"
+      data-test-subj="settings-save-button"
+    >
+      Save
+    </button>
+  </div>
+</form>

@@ -1,0 +1,81 @@
+<table class="table table-condensed">
+  <tbody>
+    <tr ng-repeat="field in fields" data-test-subj="tableDocViewRow-{{ field }}">
+      <td field-name="field"
+          field-type="mapping[field].type"
+          width="1%"
+          class="doc-viewer-field">
+      </td>
+      <td width="1%" class="doc-viewer-buttons" ng-if="filter">
+        <span ng-if="mapping[field].filterable">
+          <button
+            class="doc-viewer-button"
+            ng-click="filter(mapping[field], flattened[field], '+')"
+            data-test-subj="addInclusiveFilterButton"
+          >
+            <i
+              tooltip="Filter for value"
+              tooltip-append-to-body="1"
+              class="fa fa-search-plus"></i>
+          </button>
+
+          <button
+            class="doc-viewer-button"
+            ng-click="filter(mapping[field], flattened[field],'-')"
+          >
+            <i
+              tooltip="Filter out value"
+              tooltip-append-to-body="1"
+              class="fa fa-search-minus"></i>
+          </button>
+        </span>
+        <span ng-if="!mapping[field].filterable" tooltip="Unindexed fields can not be searched">
+          <i class="fa fa-search-plus text-muted"></i>
+          <i class="fa fa-search-minus text-muted"></i>
+        </span>
+        <span ng-if="canToggleColumns()">
+          <button
+            class="doc-viewer-button"
+            ng-click="toggleColumn(field)"
+          >
+            <i
+              class="fa fa-columns"
+              tooltip-append-to-body="1"
+              tooltip="Toggle column in table"
+            ></i>
+          </button>
+        </span>
+        <span ng-if="!indexPattern.metaFields.includes(field)">
+          <button
+            class="doc-viewer-button"
+            ng-click="filter('_exists_', field, '+')"
+          >
+            <i
+              tooltip="Filter for field present"
+              tooltip-append-to-body="1"
+              class="fa fa-asterisk"></i>
+          </button>
+        </span>
+        <span ng-if="indexPattern.metaFields.includes(field)" tooltip="Unable to filter for presence of meta fields">
+          <i class="fa fa-asterisk text-muted"></i>
+        </span>
+      </td>
+
+      <td>
+        <i ng-if="!mapping[field] && field[0] === '_'"
+          tooltip-placement="top"
+          tooltip="Field names beginning with _ are not supported"
+          class="fa fa-warning text-color-warning doc-viewer-underscore"></i>
+        <i ng-if="!mapping[field] && field[0] !== '_' && !showArrayInObjectsWarning(doc, field)"
+          tooltip-placement="top"
+          tooltip="No cached mapping for this field. Refresh field list from the Management > Index Patterns page"
+          class="fa fa-warning text-color-warning doc-viewer-no-mapping"></i>
+        <i ng-if="showArrayInObjectsWarning(doc, field)"
+          tooltip-placement="top"
+          tooltip="Objects in arrays are not well supported."
+          class="fa fa-warning text-color-warning doc-viewer-object-array"></i>
+        <div class="doc-viewer-value" ng-bind-html="typeof(formatted[field]) === 'undefined' ? hit[field] : formatted[field] | trustAsHtml"></div>
+      </td>
+    </tr>
+  </tbody>
+</table>

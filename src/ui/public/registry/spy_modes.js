@@ -1,7 +1,7 @@
-define(function (require) {
-  return require('ui/registry/_registry')({
-    name: 'spyModes',
-    index: ['name'],
-    order: ['order']
-  });
+import { uiRegistry } from 'ui/registry/_registry';
+
+export const SpyModesRegistryProvider = uiRegistry({
+  name: 'spyModes',
+  index: ['name'],
+  order: ['order']
 });

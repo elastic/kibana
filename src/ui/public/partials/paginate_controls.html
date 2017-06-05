@@ -1,3 +1,12 @@
+<a
+  class="kuiLink"
+  ng-if="linkToTop"
+  ng-click="paginate.goToTop()"
+  data-test-subj="paginateControlsLinkToTop"
+>
+  Scroll to top
+</a>
+
 <div class="pagination-other-pages">
   <ul class="pagination-other-pages-list pagination-sm" ng-if="page.count > 1">
     <li ng-style="{'visibility':'hidden'}" ng-if="page.first">
@@ -33,7 +42,11 @@
 <form class="form-inline pagination-size" ng-if="showSelector">
   <div class="form-group">
     <label>Page Size</label>
-    <select ng-model="paginate.perPage" ng-options="opt.value as opt.title for opt in paginate.sizeOptions">
+    <select
+      ng-model="paginate.perPage"
+      ng-options="opt.value as opt.title for opt in paginate.sizeOptions"
+      data-test-subj="paginateControlsPageSizeSelect"
+    >
     </select>
   </div>
 </form>

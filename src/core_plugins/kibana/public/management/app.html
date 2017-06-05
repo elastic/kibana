@@ -1,0 +1,38 @@
+<div class="app-container">
+  <!-- Local nav. -->
+  <kbn-top-nav name="management-subnav" data-test-subj="managementNav">
+    <!-- Transcluded elements. -->
+    <div data-transclude-slots>
+      <!-- Breadcrumbs. -->
+      <bread-crumbs
+        data-transclude-slot="topLeftCorner"
+        omit-current-page="true"
+        use-links="true"
+        omit-pages="omitPages"
+      ></bread-crumbs>
+
+      <!-- Tabs. -->
+      <div data-transclude-slot="bottomRow" class="kuiLocalTabs">
+        <span ng-if="!sectionName" class="kuiLocalTab">
+          {{::section.display}}
+        </span>
+        <a
+          ng-if="sectionName"
+          ng-repeat="item in section.visibleItems"
+          class="kuiLocalTab"
+          ng-class="{ 'kuiLocalTab-isSelected': item.active, 'kuiLocalTab-isDisabled': !item.active && (item.disabled || !item.url) }"
+          kbn-href="{{::item.disabled ? '' : item.url}}"
+          data-test-subj="{{::item.name}}"
+          tooltip="{{::item.tooltip}}"
+          tooltip-placement="bottom"
+          tooltip-popup-delay="400"
+          tooltip-append-to-body="1"
+        >
+          {{::item.display}}
+        </a>
+      </div>
+    </div>
+  </kbn-top-nav>
+
+  <div role="main" class="management-container" ng-transclude></div>
+</div>

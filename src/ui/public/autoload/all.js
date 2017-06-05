@@ -1,4 +1,4 @@
-require('./modules');
-require('./directives');
-require('./filters');
-require('./styles');
+import './modules';
+import './directives';
+import './filters';
+import './styles';

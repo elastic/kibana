@@ -1,0 +1,32 @@
+<div class="kuiLocalDropdownTitle">History</div>
+
+<div class="history-body">
+  <ul class="list-group history-reqs">
+    <li
+      ng-repeat="req in history.reqs"
+      ng-class="{ selected: history.viewingReq === req }"
+      ng-click="history.selectedReq = req; history.viewingReq = req"
+      ng-mouseenter="history.viewingReq = req"
+      ng-mouseleave="history.viewingReq = history.selectedReq"
+      ng-dblclick="history.restore(req)"
+      aria-label="{{:: 'Request: ' + history.describeReq(req) }}"
+      class="list-group-item history-req"
+    >
+      {{ history.describeReq(req) }}
+      <span class="history-req-icon"><i class="fa fa-chevron-right"></i></span>
+    </li>
+  </ul>
+
+  <sense-history-viewer class="history-viewer" req="history.viewingReq" />
+</div>
+
+<div class="history-footer">
+  <button class="kuiButton kuiButton--danger" ng-click="history.clear()">Clear</button>
+  <button
+    class="kuiButton kuiButton--primary"
+    ng-disabled="!history.selectedReq"
+    ng-click="history.restore()"
+  >
+    Apply
+  </button>
+</div>

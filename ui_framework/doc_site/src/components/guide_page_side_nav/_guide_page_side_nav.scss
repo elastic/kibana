@@ -1,0 +1,44 @@
+.guidePageSideNav {
+  position: fixed;
+  top: 70px;
+  left: 10px;
+  bottom: 10px;
+  width: $guideSideNavWidth;
+  overflow: auto;
+  z-index: 100;
+  padding: 12px 20px;
+
+  @include scrollbar;
+
+  @include whenNarrowerThan($guideNormalBreakpoint) {
+    width: $guideSideNavSmallWidth;
+  }
+}
+
+  .guidePageSideNav__title {
+    padding-bottom: 10px;
+    margin-bottom: 7px;
+    font-size: 22px;
+    line-height: $guideLineHeight;
+    opacity: 0.8;
+  }
+
+  .guidePageSideNavMenu {
+    line-height: $guideLineHeight;
+  }
+
+    .guidePageSideNavMenu__item {
+      & + & {
+        margin-top: 6px;
+      }
+    }
+
+      .guidePageSideNavMenu__itemLink {
+        cursor: pointer;
+        color: $guideTextColor;
+        text-decoration: none;
+
+        &:hover {
+          color: $guideLinkHoverColor;
+        }
+      }

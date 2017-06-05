@@ -1,11 +1,9 @@
-import $ from 'jquery';
+import { chromeNavControlsRegistry } from 'ui/registry/chrome_nav_controls';
+import { uiModules } from 'ui/modules';
 
-import chromeNavControlsRegistry from 'ui/registry/chrome_nav_controls';
-import UiModules from 'ui/modules';
+export function kbnAppendChromeNavControls() {
 
-export default function (chrome, internals) {
-
-  UiModules
+  uiModules
   .get('kibana')
   .directive('kbnChromeAppendNavControls', function (Private) {
     return {

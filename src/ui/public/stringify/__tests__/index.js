@@ -1,10 +1,12 @@
+import './_conformance';
+import './_ip';
+import './_source';
+import './_string';
+import './_url';
+import './_color';
+import './_date';
+import './_duration';
+import './_truncate';
+import './_boolean';
 describe('Stringify Component', function () {
-  require('./_conformance');
-  require('./_ip');
-  require('./_source');
-  require('./_string');
-  require('./_url');
-  require('./_color');
-  require('./_date');
-  require('./_truncate');
 });

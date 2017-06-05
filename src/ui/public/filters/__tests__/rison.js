@@ -1,14 +1,13 @@
-var angular = require('angular');
-var expect = require('expect.js');
-var ngMock = require('ngMock');
+import expect from 'expect.js';
+import ngMock from 'ng_mock';
+import 'plugins/kibana/discover/index';
 
 // Load kibana and its applications
-require('plugins/kibana/discover/index');
 
-var rison;
-var risonDecode;
+let rison;
+let risonDecode;
 
-var init = function (expandable) {
+const init = function () {
   // Load the application
   ngMock.module('kibana');
 
@@ -20,13 +19,13 @@ var init = function (expandable) {
 };
 
 describe('rison filters', function () {
-  var testObj = {
+  const testObj = {
     time: {
       from: 'now-15m',
       to: 'now'
     }
   };
-  var testRison = '(time:(from:now-15m,to:now))';
+  const testRison = '(time:(from:now-15m,to:now))';
 
   beforeEach(function () {
     init();

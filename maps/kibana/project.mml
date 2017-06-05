@@ -1,0 +1,120 @@
+{
+  "bounds": [
+    -180,
+    -85.0511,
+    180,
+    85.0511
+  ],
+  "center": [
+    0,
+    20,
+    3
+  ],
+  "format": "png8",
+  "interactivity": false,
+  "minzoom": 0,
+  "maxzoom": 8,
+  "srs": "+proj=merc +a=6378137 +b=6378137 +lat_ts=0.0 +lon_0=0.0 +x_0=0.0 +y_0=0.0 +k=1.0 +units=m +nadgrids=@null +wktext +no_defs +over",
+  "Stylesheet": [
+    "style.mss",
+    "labels.mss"
+  ],
+  "Layer": [
+    {
+      "id": "land",
+      "name": "land",
+      "srs": "",
+      "class": "",
+      "Datasource": {
+        "file": "https://s3.eu-central-1.amazonaws.com/tiles.elastic.co/natural-earth-1.4.0/physical/10m-land.zip"
+      },
+      "geometry": "polygon"
+    },
+    {
+      "id": "lakes",
+      "name": "lakes",
+      "srs": "",
+      "class": "water-poly",
+      "Datasource": {
+        "file": "https://s3.eu-central-1.amazonaws.com/tiles.elastic.co/natural-earth-1.4.0/physical/10m-lakes.zip"
+      },
+      "geometry": "polygon"
+    },
+    {
+      "id": "international_boundaries",
+      "name": "international_boundaries",
+      "srs": "",
+      "class": "",
+      "Datasource": {
+        "file": "https://s3.eu-central-1.amazonaws.com/tiles.elastic.co/natural-earth-1.4.0/cultural/10m-admin-0-boundary-lines-land.zip"
+      },
+      "geometry": "linestring"
+    },
+    {
+      "id": "map-units",
+      "name": "map-units",
+      "srs": "",
+      "class": "",
+      "Datasource": {
+        "file": "https://s3.eu-central-1.amazonaws.com/tiles.elastic.co/natural-earth-1.4.0/cultural/10m-admin-0-boundary-lines-map-units.zip"
+      },
+      "geometry": "polygon"
+    },
+    {
+      "id": "subnational_boundaries",
+      "name": "subnational_boundaries",
+      "srs": "",
+      "class": "",
+      "Datasource": {
+        "file": "https://s3.eu-central-1.amazonaws.com/tiles.elastic.co/natural-earth-1.4.0/cultural/10m-admin-1-states-provinces-lines.zip"
+      },
+      "geometry": "linestring"
+    },
+    {
+      "id": "country-labels",
+      "name": "country-labels",
+      "srs": "",
+      "class": "",
+      "geometry": "point",
+      "Datasource": {
+        "file": "https://s3.eu-central-1.amazonaws1.com/tiles.elastic.co/natural-earth-1.4.0/cultural/10m-admin-0-country-points.zip"
+      }
+    },
+    {
+      "id": "cities",
+      "name": "cities",
+      "srs": "",
+      "class": "",
+      "Datasource": {
+        "file": "https://s3.eu-central-1.amazonaws.com/tiles.elastic.co/natural-earth-1.4.0/cultural/10m-populated-places-simple.zip"
+      },
+      "geometry": "point"
+    },
+    {
+      "geometry": "linestring",
+      "extent": [
+        -164.90349121085066,
+        -52.157745049594396,
+        177.2111816409199,
+        75.79347565297897
+      ],
+      "id": "10mriverslakecenterl",
+      "class": "",
+      "Datasource": {
+        "file": "https://s3.eu-central-1.amazonaws.com/tiles.elastic.co/natural-earth-1.4.0/physical/10m-rivers-lake-centerlines.zip"
+      },
+      "layer": null,
+      "srs-name": "autodetect",
+      "srs": "",
+      "advanced": {},
+      "name": "10mriverslakecenterl",
+      "status": "off"
+    }
+  ],
+  "scale": 1,
+  "metatile": 2,
+  "name": "Kibana",
+  "description": "",
+  "attribution": "",
+  "legend": ""
+}

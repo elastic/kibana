@@ -1,0 +1,113 @@
+.guideCodeViewer {
+  position: fixed;
+  top: $guideNavHeight;
+  right: 0;
+  bottom: 0;
+  width: $guideCodeViewerWidth;
+  padding: 6px 0 40px;
+  background-color: white;
+  transform: translateX($guideCodeViewerWidth);
+  transition: transform $guideCodeViewerTransition;
+  overflow: auto;
+  border-left: 1px solid #d6d6d6;
+
+  @include scrollbar;
+
+  @include whenNarrowerThan($guideNormalBreakpoint) {
+    width: $guideCodeViewerSmallWidth;
+  }
+
+  &.is-code-viewer-open {
+    transform: translateX(0);
+  }
+}
+
+  .guideCodeViewer__header {
+    padding: 0 20px 6px;
+    line-height: $guideLineHeight;
+    border-bottom: 1px solid #d6d6d6;
+    font-size: 14px;
+    font-weight: 700;
+    margin-bottom: 10px;
+  }
+
+  .guideCodeViewer__closeButton {
+    position: absolute;
+    top: 0;
+    right: 10px;
+    cursor: pointer;
+    padding: 10px;
+    border-radius: 3px;
+    color: $guideTextColor;
+
+    &:hover {
+      color: $guideLinkHoverColor;
+    }
+  }
+
+  .guideCodeViewer__title {
+    padding: 0 20px 6px;
+    border-bottom: 1px solid #d6d6d6;
+    line-height: $guideLineHeight;
+    font-size: 14px;
+  }
+
+  .guideCodeViewer__content {
+    margin: 0 0 16px;
+  }
+
+// HLJS
+
+.hljs {
+  display: block;
+  padding: 15px 20px;
+  color: #637c84;
+  font-size: 14px;
+  line-height: 1.3;
+  font-family: 'Ubuntu Mono', monospace;
+}
+
+.hljs-keyword {
+  color: #b58900;
+}
+
+.hljs-function {
+  .hljs-keyword {
+    color: #268bd2;
+  }
+
+  .hljs-title {
+    color: #7441c6;
+  }
+}
+
+.hljs-built_in {
+  color: #268bd2;
+}
+
+.hljs-string {
+  color: #36958e;
+}
+
+.hljs-comment {
+  color: #9d9d9d;
+}
+
+.hljs-number,
+.hljs-literal {
+  color: #d84a7e;
+}
+
+.hljs-tag {
+  .hljs-name {
+    color: #63a35c;
+  }
+
+  .hljs-attr {
+    color: #795da3;
+  }
+
+  .hljs-string {
+    color: #df5000;
+  }
+}

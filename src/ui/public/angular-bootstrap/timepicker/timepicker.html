@@ -1,0 +1,26 @@
+<table>
+	<tbody>
+		<tr class="text-center">
+			<td><a ng-click="incrementHours()" class="kuiButton kuiButton--hollow"><span class="glyphicon glyphicon-chevron-up"></span></a></td>
+			<td>&nbsp;</td>
+			<td><a ng-click="incrementMinutes()" class="kuiButton kuiButton--hollow"><span class="glyphicon glyphicon-chevron-up"></span></a></td>
+			<td ng-show="showMeridian"></td>
+		</tr>
+		<tr>
+			<td style="width:50px;" class="form-group" ng-class="{'has-error': invalidHours}">
+				<input type="text" ng-model="hours" ng-change="updateHours()" class="form-control text-center" ng-mousewheel="incrementHours()" ng-readonly="readonlyInput" maxlength="2">
+			</td>
+			<td>:</td>
+			<td style="width:50px;" class="form-group" ng-class="{'has-error': invalidMinutes}">
+				<input type="text" ng-model="minutes" ng-change="updateMinutes()" class="form-control text-center" ng-readonly="readonlyInput" maxlength="2">
+			</td>
+			<td ng-show="showMeridian"><button type="button" class="kuiButton kuiButton--basic text-center" ng-click="toggleMeridian()">{{meridian}}</button></td>
+		</tr>
+		<tr class="text-center">
+			<td><a ng-click="decrementHours()" class="kuiButton kuiButton--hollow"><span class="glyphicon glyphicon-chevron-down"></span></a></td>
+			<td>&nbsp;</td>
+			<td><a ng-click="decrementMinutes()" class="kuiButton kuiButton--hollow"><span class="glyphicon glyphicon-chevron-down"></span></a></td>
+			<td ng-show="showMeridian"></td>
+		</tr>
+	</tbody>
+</table>

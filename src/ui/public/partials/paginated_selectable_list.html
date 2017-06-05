@@ -1,0 +1,57 @@
+<form
+  role="form"
+  class="kuiVerticalRhythm"
+>
+  <div class="kuiBar">
+    <div class="kuiBarSection">
+      <div class="kuiSearchInput fullWidth">
+        <div class="kuiSearchInput__icon kuiIcon fa-search"></div>
+        <input
+          class="kuiSearchInput__input"
+          input-focus
+          ng-model="query"
+          placeholder="Filter..."
+          class="form-control"
+          name="query"
+          type="text"
+          autocomplete="off"
+        >
+      </div>
+    </div>
+
+    <div class="kuiBarSection">
+      <p class="kuiText kuiSubduedText">
+        {{ (hits | filter: query).length }} of {{ hitCount }}
+      </p>
+    </div>
+  </div>
+</form>
+
+<paginate
+  list="hits | filter: query"
+  per-page="{{ perPage }}"
+  class="kuiVerticalRhythm"
+>
+  <ul class="li-striped list-group list-group-menu">
+    <li class="list-group-item" ng-click="sortHits(hits)">
+      <span class="paginate-heading">
+        Name
+        <i class="fa" ng-class="isAscending ? 'fa-caret-up' : 'fa-caret-down'"></i>
+      </span>
+    </li>
+
+    <li class="list-group-item list-group-menu-item" ng-repeat="hit in page">
+      <a ng-show="userMakeUrl" kbn-href="{{ makeUrl(hit) }}">
+        <span>{{ hit }}</span>
+      </a>
+
+      <div ng-show="userOnSelect" ng-click="onSelect(hit, $event)">
+        <span>{{ hit }}</span>
+      </div>
+    </li>
+
+    <li class="list-group-item list-group-no-results" ng-if="(hits | filter: query).length === 0">
+      <p>No matches found.</p>
+    </li>
+  </ul>
+</paginate>

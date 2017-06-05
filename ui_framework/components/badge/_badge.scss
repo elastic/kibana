@@ -1,0 +1,14 @@
+.kuiBadge {
+  display: inline-block;
+  margin-left: 0.5em;
+  padding: 0.1em 0.7em;
+  vertical-align: middle;
+  font-size: $badgeFontSize;
+  line-height: $globalLineHeight;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.kuiBadge--default {
+  background-color: rgba(0, 0, 0, 0.1);
+}

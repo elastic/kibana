@@ -1,0 +1,8 @@
+{
+  "author": "Boaz Leskes <boaz@elastic.co>",
+  "contributors": [
+    "Spencer Alger <spencer.alger@elastic.co>"
+  ],
+  "name": "console",
+  "version": "kibana"
+}

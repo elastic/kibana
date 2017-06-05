@@ -1,24 +1,25 @@
 
-var moment = require('moment');
-var ngMock = require('ngMock');
-var expect = require('expect.js');
+import moment from 'moment';
+import ngMock from 'ng_mock';
+import expect from 'expect.js';
+import { UtilsDiffTimePickerValsProvider } from 'ui/utils/diff_time_picker_vals';
 
 describe('Diff Time Picker Values', function () {
-  var diffTimePickerValues;
+  let diffTimePickerValues;
 
   beforeEach(ngMock.module('kibana'));
   beforeEach(ngMock.inject(function (Private) {
-    diffTimePickerValues = Private(require('ui/utils/diff_time_picker_vals'));
+    diffTimePickerValues = Private(UtilsDiffTimePickerValsProvider);
   }));
 
   it('accepts two undefined values', function () {
-    var diff = diffTimePickerValues(undefined, undefined);
+    const diff = diffTimePickerValues(undefined, undefined);
     expect(diff).to.be(false);
   });
 
   describe('dateMath ranges', function () {
     it('knows a match', function () {
-      var diff = diffTimePickerValues(
+      const diff = diffTimePickerValues(
         {
           to: 'now',
           from: 'now-7d'
@@ -32,7 +33,7 @@ describe('Diff Time Picker Values', function () {
       expect(diff).to.be(false);
     });
     it('knows a difference', function () {
-      var diff = diffTimePickerValues(
+      const diff = diffTimePickerValues(
         {
           to: 'now',
           from: 'now-7d'
@@ -49,7 +50,7 @@ describe('Diff Time Picker Values', function () {
 
   describe('a dateMath range, and a moment range', function () {
     it('is always different', function () {
-      var diff = diffTimePickerValues(
+      const diff = diffTimePickerValues(
         {
           to: moment(),
           from: moment()
@@ -66,10 +67,10 @@ describe('Diff Time Picker Values', function () {
 
   describe('moment ranges', function () {
     it('uses the time value of moments for comparison', function () {
-      var to = moment();
-      var from = moment().add(1, 'day');
+      const to = moment();
+      const from = moment().add(1, 'day');
 
-      var diff = diffTimePickerValues(
+      const diff = diffTimePickerValues(
         {
           to: to.clone(),
           from: from.clone()
@@ -84,11 +85,11 @@ describe('Diff Time Picker Values', function () {
     });
 
     it('fails if any to or from is different', function () {
-      var to = moment();
-      var from = moment().add(1, 'day');
-      var from2 = moment().add(2, 'day');
+      const to = moment();
+      const from = moment().add(1, 'day');
+      const from2 = moment().add(2, 'day');
 
-      var diff = diffTimePickerValues(
+      const diff = diffTimePickerValues(
         {
           to: to.clone(),
           from: from.clone()
@@ -104,7 +105,7 @@ describe('Diff Time Picker Values', function () {
   });
 
   it('does not fall apart with unusual values', function () {
-    var diff = diffTimePickerValues({}, {});
+    const diff = diffTimePickerValues({}, {});
     expect(diff).to.be(false);
   });
 });

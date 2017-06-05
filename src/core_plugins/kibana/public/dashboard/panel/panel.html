@@ -1,0 +1,111 @@
+<div class="panel panel-default" ng-class="{'panel--edit-mode': !isViewOnlyMode()}" ng-switch on="panel.type" ng-if="savedObj || error">
+  <div class="panel-heading">
+    <span
+      data-test-subj="dashboardPanelTitle"
+      class="panel-title"
+      aria-label="{{:: 'Dashboard panel: ' + savedObj.title }}"
+    >
+      {{::savedObj.title}}
+    </span>
+    <div class="kuiMicroButtonGroup">
+      <a
+        class="kuiMicroButton"
+        aria-label="Expand panel"
+        data-test-subj="dashboardPanelExpandIcon"
+        ng-click="toggleExpand()"
+        kbn-accessible-click
+      >
+        <span
+          aria-hidden="true"
+          class="kuiIcon"
+          ng-class="{'fa-expand': !isExpanded, 'fa-compress': isExpanded}"
+        ></span>
+      </a>
+
+      <a
+        class="kuiMicroButton"
+        aria-label="Edit panel contents"
+        data-test-subj="dashboardPanelEditLink"
+        ng-show="!isViewOnlyMode() && editUrl"
+        ng-href="{{::editUrl}}"
+      >
+        <span
+          aria-hidden="true"
+          class="kuiIcon fa-pencil"
+        ></span>
+      </a>
+
+      <!-- data-dashboard-panel-drag-handle works in Firefox when applied here -->
+      <a
+        data-dashboard-panel-drag-handle
+        tabindex="0"
+        role="button"
+        class="kuiMicroButton panel-move"
+        aria-label="Move panel"
+        data-test-subj="dashboardPanelMoveIcon"
+        ng-show="!isViewOnlyMode() && !isExpanded"
+      >
+        <!-- data-dashboard-panel-drag-handle works in Chrome when applied here -->
+        <span
+          aria-hidden="true"
+          class="kuiIcon fa-arrows"
+          data-dashboard-panel-drag-handle
+        ></span>
+      </a>
+
+      <a
+        type="button"
+        class="kuiMicroButton"
+        aria-label="Remove panel from dashboard"
+        data-test-subj="dashboardPanelRemoveIcon"
+        ng-show="!isViewOnlyMode() && !isExpanded"
+        ng-click="remove()"
+        kbn-accessible-click
+      >
+        <span
+          aria-hidden="true"
+          class="kuiIcon fa-times"
+        ></span>
+      </a>
+    </div>
+    <div class="clearfix"></div>
+  </div>
+
+  <div ng-if="error" class="load-error">
+    <span aria-hidden="true" class="kuiIcon fa-exclamation-triangle"></span>
+    <span ng-bind="error"></span>
+  </div>
+
+  <visualize
+    ng-if="!error"
+    ng-switch-when="visualization"
+    vis="savedObj.vis"
+    search-source="savedObj.searchSource"
+    show-spy-panel="!isFullScreenMode"
+    ui-state="uiState"
+    data-shared-item
+    data-title="{{savedObj.title}}"
+    data-description="{{savedObj.description}}"
+    render-counter
+    class="panel-content">
+  </visualize>
+
+  <doc-table
+    ng-if="!error"
+    ng-switch-when="search"
+    search-source="savedObj.searchSource"
+    sorting="panel.sort"
+    columns="panel.columns"
+    data-shared-item
+    data-title="{{savedObj.title}}"
+    data-description="{{savedObj.description}}"
+    render-counter
+    class="panel-content"
+    filter="filter"
+    on-add-column="addColumn"
+    on-change-sort-order="setSortOrder"
+    on-move-column="moveColumn"
+    on-remove-column="removeColumn"
+    >
+  </doc-table>
+</div>

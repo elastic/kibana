@@ -1,0 +1,15 @@
+  Examples:
+    Dump an index to disk:
+      Save all `logstash-*` indices from http://localhost:9200 to `snapshots/my_test_data` directory
+
+      WARNING: If the `my_test_data` snapshot exists it will be deleted!
+
+      $ node scripts/es_archiver save my_test_data logstash-* --dir snapshots
+
+    Load an index from disk
+      Load the `my_test_data` snapshot from the archive directory and elasticsearch instance defined
+      in the `test/functional/config.js` config file
+
+      WARNING: If the indices exist already they will be deleted!
+
+      $ node scripts/es_archiver load my_test_data --config test/functional/config.js

@@ -17,7 +17,7 @@ export function toJson(object, jsonFn, space) {
     object = JSON.parse(jsonFn(object));
   }
   return JSON.stringify(object, replacer, space);
-};
+}
 
 /**
  * Returns the given value if the key does not begin with a dollar sign ($)

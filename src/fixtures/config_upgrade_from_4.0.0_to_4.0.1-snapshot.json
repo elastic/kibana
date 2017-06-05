@@ -13,7 +13,7 @@
          {
             "_index": ".kibana",
             "_type": "config",
-            "_id": "4.0.1-snapshot",
+            "_id": "4.0.1-SNAPSHOT",
             "_score": 1,
             "_source": {
                "buildNum": 5921,

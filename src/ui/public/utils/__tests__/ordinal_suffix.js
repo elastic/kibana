@@ -1,9 +1,9 @@
-var _ = require('lodash');
-var addOrdinalSuffix = require('ui/utils/ordinal_suffix');
-var expect = require('expect.js');
+import _ from 'lodash';
+import { ordinalSuffix } from 'ui/utils/ordinal_suffix';
+import expect from 'expect.js';
 
 describe('ordinal suffix util', function () {
-  var checks = {
+  const checks = {
     1: 'st',
     2: 'nd',
     3: 'rd',
@@ -37,15 +37,15 @@ describe('ordinal suffix util', function () {
   };
 
   _.forOwn(checks, function (expected, num) {
-    var int = parseInt(num, 10);
-    var float = int + Math.random();
+    const int = parseInt(num, 10);
+    const float = int + Math.random();
 
     it('knowns ' + int, function () {
-      expect(addOrdinalSuffix(num)).to.be(num + '' + expected);
+      expect(ordinalSuffix(num)).to.be(num + '' + expected);
     });
 
     it('knows ' + float, function () {
-      expect(addOrdinalSuffix(num)).to.be(num + '' + expected);
+      expect(ordinalSuffix(num)).to.be(num + '' + expected);
     });
   });
 });

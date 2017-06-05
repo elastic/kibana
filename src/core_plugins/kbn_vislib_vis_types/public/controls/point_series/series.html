@@ -1,0 +1,134 @@
+<div class="kuiSideBarSection kuiSideBarSection__main">
+  <div class="kuiSideBarSectionTitle">
+    <div class="kuiSideBarSectionTitle__text">
+      Metrics
+    </div>
+  </div>
+
+  <div
+    ng-repeat="chart in vis.params.seriesParams track by $index"
+    class="kuiSideBarSection"
+  >
+    <div class="kuiSideBarCollapsibleTitle">
+      <div
+        ng-init="isSeriesOpen = ($index === 0)"
+        class="kuiSideBarCollapsibleTitle__label"
+        ng-click="isSeriesOpen = !isSeriesOpen"
+        kbn-accessible-click
+      >
+        <span
+          aria-hidden="true"
+          ng-class="{ 'fa-caret-down': isSeriesOpen, 'fa-caret-right': !isSeriesOpen }"
+          class="kuiIcon fa-caret-right kuiSideBarCollapsibleTitle__caret"
+        ></span>
+        <span class="kuiSideBarCollapsibleTitle__text">
+          {{chart.data.label}}
+        </span>
+      </div>
+    </div>
+
+    <div ng-show="isSeriesOpen" class="kuiSideBarCollapsibleSection">
+      <!-- General -->
+      <div class="kuiSideBarSection">
+
+        <div class="kuiSideBarFormRow">
+          <label class="kuiSideBarFormRow__label" for="{{ 'seriesType' + $index }}">
+            Chart Type
+          </label>
+          <div class="kuiSideBarFormRow__control">
+            <select
+              id="{{ 'seriesType' + $index }}"
+              class="kuiSelect kuiSideBarSelect"
+              ng-model="chart.type"
+              ng-options="mode.value as mode.text for mode in vis.type.params.chartTypes"
+            ></select>
+          </div>
+        </div>
+
+        <div class="kuiSideBarFormRow">
+          <label class="kuiSideBarFormRow__label" for="{{ 'seriesMode' + $index }}">
+            Mode
+          </label>
+          <div class="kuiSideBarFormRow__control">
+            <select
+              id="{{ 'seriesMode' + $index }}"
+              class="kuiSelect kuiSideBarSelect"
+              ng-model="chart.mode"
+              ng-options="mode for mode in vis.type.params.chartModes"
+            ></select>
+          </div>
+        </div>
+
+        <div class="kuiSideBarFormRow">
+          <label class="kuiSideBarFormRow__label" for="{{ 'seriesValueAxis' + $index }}">
+            Value Axis
+          </label>
+          <div class="kuiSideBarFormRow__control">
+            <select
+              id="{{ 'seriesValueAxis' + $index }}"
+              class="kuiSelect kuiSideBarSelect"
+              ng-model="chart.valueAxis"
+              ng-change="changeValueAxis($index)"
+            >
+              <option ng-repeat="axis in vis.params.valueAxes track by axis.id" value="{{axis.id}}">{{axis.name}}</option>
+              <option value="new">New Axis ...</option>
+            </select>
+          </div>
+        </div>
+
+        <div ng-show="chart.type == 'line' || chart.type == 'area'">
+          <div class="kuiSideBarFormRow">
+            <label class="kuiSideBarFormRow__label" for="{{ 'lineMode' + $index }}">
+              Line Mode
+            </label>
+            <div class="kuiSideBarFormRow__control">
+              <select
+                id="{{ 'lineMode' + $index }}"
+                class="kuiSelect kuiSideBarSelect"
+                ng-model="chart.interpolate"
+                ng-options="mode.value as mode.text for mode in vis.type.params.interpolationModes"
+              >
+              </select>
+            </div>
+          </div>
+        </div>
+        <div ng-show="chart.type == 'line'">
+          <div class="kuiSideBarFormRow">
+            <label class="kuiSideBarFormRow__label" for="{{ 'drawLines' + $index }}">
+              Show Line
+            </label>
+            <div class="kuiSideBarFormRow__control">
+              <input class="kuiCheckBox" id="{{ 'drawLines' + $index }}" type="checkbox" ng-model="chart.drawLinesBetweenPoints">
+            </div>
+          </div>
+
+          <div class="kuiSideBarFormRow">
+            <label class="kuiSideBarFormRow__label" for="{{ 'showCircles' + $index }}">
+              Show Circles
+            </label>
+            <div class="kuiSideBarFormRow__control">
+              <input class="kuiCheckBox" id="{{ 'showCircles' + $index }}" type="checkbox" ng-model="chart.showCircles">
+            </div>
+          </div>
+
+          <div class="kuiSideBarFormRow">
+            <label class="kuiSideBarFormRow__label">
+              Line Width
+            </label>
+            <div class="kuiSideBarFormRow__control">
+              <input name="lineWidth"
+                     class="kuiInput kuiSideBarInput"
+                     type="number"
+                     step="0.5"
+                     ng-model="chart.lineWidth"
+              >
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div style="height: 10px"></div>
+</div>

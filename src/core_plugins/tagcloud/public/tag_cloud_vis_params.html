@@ -1,0 +1,21 @@
+<div class="form-group">
+  <div class="form-group">
+    <label>Text Scale</label>
+    <select class="form-control" ng-model="vis.params.scale" ng-options="mode for mode in vis.type.params.scales"></select>
+  </div>
+  <div class="form-group">
+    <label>Orientations</label>
+    <select class="form-control" ng-model="vis.params.orientation" ng-options="mode for mode in vis.type.params.orientations"></select>
+  </div>
+  <div class="form-group">
+    <label>Font Size</label>
+    <div class="tag-cloud-fontsize-slider"></div>
+  </div>
+  <div>
+    <label>
+      <input type="checkbox" value="{{hideLabel}}" ng-model="vis.params.hideLabel" name="hideLabel"
+             ng-checked="vis.params.hideLabel">
+      Show Label
+    </label>
+  </div>
+</div>

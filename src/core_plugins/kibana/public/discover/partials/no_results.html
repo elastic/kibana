@@ -1,0 +1,61 @@
+<div>
+  <div class="col-md-10 col-md-offset-1" data-test-subj="discoverNoResults">
+
+    <h1>No results found <i aria-hidden="true" class="fa fa-meh-o"></i></h1>
+
+    <p>
+      Unfortunately I could not find any results matching your search. I tried really hard. I looked all over the place and frankly, I just couldn't find anything good. Help me, help you. Here are some ideas:
+    </p>
+
+    <div class="shard-failures" ng-show="failures">
+      <h3>Shard Failures</h3>
+      <p>The following shard failures ocurred:</p>
+      <ul>
+        <li ng-repeat="failure in failures | limitTo: failuresShown"><strong>Index:</strong> {{failure.index}} <strong>Shard:</strong> {{failure.shard}} <strong>Reason:</strong> {{failure.reason}} </li>
+      </ul>
+      <a
+        ng-click="showAllFailures()"
+        ng-if="failures.length > failuresShown"
+      >
+        Show More
+      </a>
+      <a
+        ng-click="showLessFailures()"
+        ng-if="failures.length === failuresShown && failures.length > 5"
+      >
+        Show Less
+      </a>
+    </div>
+
+    <div ng-show="opts.timefield">
+      <p>
+        <h3>Expand your time range</h3>
+        <p>I see you are looking at an index with a date field. It is possible your query does not match anything in the current time range, or that there is no data at all in the currently selected time range. Click the button below to open the time picker. For future reference you can open the time picker by clicking on the <a class="kuiButton kuiButton--primary kuiButton--small" ng-click="kbnTopNav.toggle('filter')" aria-expanded="kbnTopNav.is('filter')" aria-label="time picker" data-test-subj="discoverNoResultsTimefilter"><span aria-hidden="true" class="kuiIcon fa-clock-o"></span> time picker</a> button in the top right corner of your screen.
+      </p>
+    </div>
+
+    <h3>Refine your query</h3>
+    <p>
+      The search bar at the top uses Elasticsearch's support for Lucene <a class="kuiLink" ng-href="{{queryDocLinks.luceneQuerySyntax}}" target="_blank">Query String syntax</a>. Let's say we're searching web server logs that have been parsed into a few fields.
+    </p>
+
+    <p>
+      <h4>Examples:</h4>
+      Find requests that contain the number 200, in any field:
+      <pre>200</pre>
+
+      Or we can search in a specific field. Find 200 in the status field:
+      <pre>status:200</pre>
+
+      Find all status codes between 400-499:
+      <pre>status:[400 TO 499]</pre>
+
+      Find status codes 400-499 with the extension php:
+      <pre>status:[400 TO 499] AND extension:PHP</pre>
+
+      Or HTML
+      <pre>status:[400 TO 499] AND (extension:php OR extension:html)</pre>
+    </p>
+
+  </div>
+</div>

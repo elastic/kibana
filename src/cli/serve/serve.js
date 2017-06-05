@@ -1,10 +1,12 @@
-const _ = require('lodash');
-const { isWorker } = require('cluster');
-const { resolve } = require('path');
+import _ from 'lodash';
+import { statSync } from 'fs';
+import { isWorker } from 'cluster';
+import { resolve } from 'path';
+import { fromRoot } from '../../utils';
+import { getConfig } from '../../server/path';
+import readYamlConfig from './read_yaml_config';
 
-const cwd = process.cwd();
-const src = require('requirefrom')('src');
-const fromRoot = src('utils/fromRoot');
+import { DEV_SSL_CERT_PATH, DEV_SSL_KEY_PATH } from '../dev_ssl';
 
 let canCluster;
 try {
@@ -22,11 +24,11 @@ const pathCollector = function () {
   };
 };
 
+const configPathCollector = pathCollector();
 const pluginDirCollector = pathCollector();
 const pluginPathCollector = pathCollector();
 
-function initServerSettings(opts, extraCliOptions) {
-  const readYamlConfig = require('./read_yaml_config');
+function readServerSettings(opts, extraCliOptions) {
   const settings = readYamlConfig(opts.config);
   const set = _.partial(_.set, settings);
   const get = _.partial(_.get, settings);
@@ -34,17 +36,16 @@ function initServerSettings(opts, extraCliOptions) {
   const merge = _.partial(_.merge, settings);
 
   if (opts.dev) {
-    try { merge(readYamlConfig(fromRoot('config/kibana.dev.yml'))); }
-    catch (e) { null; }
-  }
-
-  if (opts.dev) {
     set('env', 'development');
     set('optimize.lazy', true);
-    if (opts.ssl && !has('server.ssl.cert') && !has('server.ssl.key')) {
-      set('server.host', 'localhost');
-      set('server.ssl.cert', fromRoot('test/dev_certs/server.crt'));
-      set('server.ssl.key', fromRoot('test/dev_certs/server.key'));
+
+    if (opts.ssl) {
+      set('server.ssl.enabled', true);
+    }
+
+    if (opts.ssl && !has('server.ssl.certificate') && !has('server.ssl.key')) {
+      set('server.ssl.certificate', DEV_SSL_CERT_PATH);
+      set('server.ssl.key', DEV_SSL_KEY_PATH);
     }
   }
 
@@ -61,7 +62,11 @@ function initServerSettings(opts, extraCliOptions) {
     opts.pluginDir
   )));
 
-  set('plugins.paths', [].concat(opts.pluginPath || []));
+  set('plugins.paths', _.compact([].concat(
+    get('plugins.paths'),
+    opts.pluginPath
+  )));
+
   merge(extraCliOptions);
 
   return settings;
@@ -76,8 +81,11 @@ module.exports = function (program) {
   .option('-e, --elasticsearch <uri>', 'Elasticsearch instance')
   .option(
     '-c, --config <path>',
-    'Path to the config file, can be changed with the CONFIG_PATH environment variable as well',
-    process.env.CONFIG_PATH || fromRoot('config/kibana.yml'))
+    'Path to the config file, can be changed with the CONFIG_PATH environment variable as well. ' +
+    'Use multiple --config args to include multiple config files.',
+    configPathCollector,
+    [ getConfig() ]
+  )
   .option('-p, --port <port>', 'The port to bind to', parseInt)
   .option('-q, --quiet', 'Prevent all logging except errors')
   .option('-Q, --silent', 'Prevent all logging')
@@ -90,8 +98,8 @@ module.exports = function (program) {
     'times to specify multiple directories',
     pluginDirCollector,
     [
-      fromRoot('installedPlugins'),
-      fromRoot('src/plugins')
+      fromRoot('plugins'),
+      fromRoot('src/core_plugins')
     ]
   )
   .option(
@@ -107,12 +115,25 @@ module.exports = function (program) {
     command
     .option('--dev', 'Run the server with development mode defaults')
     .option('--no-ssl', 'Don\'t run the dev server using HTTPS')
+    .option('--no-base-path', 'Don\'t put a proxy in front of the dev server, which adds a random basePath')
     .option('--no-watch', 'Prevents automatic restarts of the server in --dev mode');
   }
 
   command
   .action(async function (opts) {
-    const settings = initServerSettings(opts, this.getUnknownOptions());
+    if (opts.dev) {
+      try {
+        const kbnDevConfig = fromRoot('config/kibana.dev.yml');
+        if (statSync(kbnDevConfig).isFile()) {
+          opts.config.push(kbnDevConfig);
+        }
+      } catch (err) {
+        // ignore, kibana.dev.yml does not exist
+      }
+    }
+
+    const getCurrentSettings = () => readServerSettings(opts, this.getUnknownOptions());
+    const settings = getCurrentSettings();
 
     if (canCluster && opts.dev && !isWorker) {
       // stop processing the action and handoff to cluster manager
@@ -122,7 +143,7 @@ module.exports = function (program) {
     }
 
     let kbnServer = {};
-    const KbnServer = src('server/KbnServer');
+    const KbnServer = require('../../server/kbn_server');
     try {
       kbnServer = new KbnServer(settings);
       await kbnServer.ready();
@@ -130,13 +151,30 @@ module.exports = function (program) {
     catch (err) {
       const { server } = kbnServer;
 
-      if (server) server.log(['fatal'], err);
-      console.error('FATAL', err);
+      if (err.code === 'EADDRINUSE') {
+        logFatal(`Port ${err.port} is already in use. Another instance of Kibana may be running!`, server);
+      } else {
+        logFatal(err, server);
+      }
 
       kbnServer.close();
       process.exit(1); // eslint-disable-line no-process-exit
     }
 
+    process.on('SIGHUP', function reloadConfig() {
+      const settings = getCurrentSettings();
+      kbnServer.server.log(['info', 'config'], 'Reloading logging configuration due to SIGHUP.');
+      kbnServer.applyLoggingConfiguration(settings);
+      kbnServer.server.log(['info', 'config'], 'Reloaded logging configuration due to SIGHUP.');
+    });
+
     return kbnServer;
   });
 };
+
+function logFatal(message, server) {
+  if (server) {
+    server.log(['fatal'], message);
+  }
+  console.error('FATAL', message);
+}

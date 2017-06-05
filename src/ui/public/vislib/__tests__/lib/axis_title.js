@@ -1,22 +1,25 @@
-var d3 = require('d3');
-var angular = require('angular');
-var _ = require('lodash');
-var $ = require('jquery');
-var ngMock = require('ngMock');
-var expect = require('expect.js');
+import d3 from 'd3';
+import _ from 'lodash';
+import ngMock from 'ng_mock';
+import expect from 'expect.js';
+import { VislibLibAxisTitleProvider } from 'ui/vislib/lib/axis/axis_title';
+import { VislibLibAxisConfigProvider } from 'ui/vislib/lib/axis/axis_config';
+import { VislibVisConfigProvider } from 'ui/vislib/lib/vis_config';
+import { VislibLibDataProvider } from 'ui/vislib/lib/data';
+import 'ui/persisted_state';
 
 describe('Vislib AxisTitle Class Test Suite', function () {
-  var AxisTitle;
-  var Data;
-  var PersistedState;
-  var axisTitle;
-  var el;
-  var dataObj;
-  var xTitle;
-  var yTitle;
-  var data = {
+  let AxisTitle;
+  let AxisConfig;
+  let VisConfig;
+  let Data;
+  let PersistedState;
+  let el;
+  let dataObj;
+  let xTitle;
+  let yTitle;
+  const data = {
     hits: 621,
-    label: '',
     ordered: {
       date: true,
       interval: 30000,
@@ -25,6 +28,7 @@ describe('Vislib AxisTitle Class Test Suite', function () {
     },
     series: [
       {
+        label: 'Count',
         values: [
           {
             x: 1408734060000,
@@ -74,29 +78,49 @@ describe('Vislib AxisTitle Class Test Suite', function () {
   };
 
   beforeEach(ngMock.module('kibana'));
-  beforeEach(ngMock.inject(function (Private) {
-    AxisTitle = Private(require('ui/vislib/lib/axis_title'));
-    Data = Private(require('ui/vislib/lib/data'));
-    PersistedState = Private(require('ui/persisted_state/persisted_state'));
+  beforeEach(ngMock.inject(function (Private, $injector) {
+    AxisTitle = Private(VislibLibAxisTitleProvider);
+    AxisConfig = Private(VislibLibAxisConfigProvider);
+    VisConfig = Private(VislibVisConfigProvider);
+    Data = Private(VislibLibDataProvider);
+    PersistedState = $injector.get('PersistedState');
 
     el = d3.select('body').append('div')
       .attr('class', 'vis-wrapper');
 
     el.append('div')
-      .attr('class', 'y-axis-title')
-      .style('height', '20px')
-      .style('width', '20px');
+      .attr('class', 'axis-wrapper-bottom')
+      .append('div')
+        .attr('class', 'axis-title y-axis-title')
+        .style('height', '20px')
+        .style('width', '20px');
 
     el.append('div')
-      .attr('class', 'x-axis-title')
-      .style('height', '20px')
-      .style('width', '20px');
+      .attr('class', 'axis-wrapper-left')
+      .append('div')
+        .attr('class', 'axis-title x-axis-title')
+        .style('height', '20px')
+        .style('width', '20px');
 
 
-    dataObj = new Data(data, {}, new PersistedState());
-    xTitle = dataObj.get('xAxisLabel');
-    yTitle = dataObj.get('yAxisLabel');
-    axisTitle = new AxisTitle($('.vis-wrapper')[0], xTitle, yTitle);
+    dataObj = new Data(data, new PersistedState());
+    const visConfig = new VisConfig({
+      type: 'histogram'
+    }, data, new PersistedState(), el.node());
+    const xAxisConfig = new AxisConfig(visConfig, {
+      position: 'bottom',
+      title: {
+        text: dataObj.get('xAxisLabel')
+      }
+    });
+    const yAxisConfig = new AxisConfig(visConfig, {
+      position: 'left',
+      title: {
+        text: dataObj.get('yAxisLabel')
+      }
+    });
+    xTitle = new AxisTitle(xAxisConfig);
+    yTitle = new AxisTitle(yAxisConfig);
   }));
 
   afterEach(function () {
@@ -105,7 +129,8 @@ describe('Vislib AxisTitle Class Test Suite', function () {
 
   describe('render Method', function () {
     beforeEach(function () {
-      axisTitle.render();
+      xTitle.render();
+      yTitle.render();
     });
 
     it('should append an svg to div', function () {
@@ -126,8 +151,7 @@ describe('Vislib AxisTitle Class Test Suite', function () {
 
   describe('draw Method', function () {
     it('should be a function', function () {
-      expect(_.isFunction(axisTitle.draw())).to.be(true);
+      expect(_.isFunction(xTitle.draw())).to.be(true);
     });
   });
-
 });

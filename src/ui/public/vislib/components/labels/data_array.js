@@ -1,18 +1,18 @@
-define(function (require) {
-  return function GetArrayUtilService(Private) {
-    var _ = require('lodash');
-    var flattenSeries = Private(require('ui/vislib/components/labels/flatten_series'));
+import _ from 'lodash';
+import { VislibComponentsLabelsFlattenSeriesProvider } from './flatten_series';
 
-    /*
-     * Accepts a Kibana data object and returns an array of values objects.
-    */
-    return function (obj) {
-      if (!_.isObject(obj) || !obj.rows && !obj.columns && !obj.series) {
-        throw new TypeError('GetArrayUtilService expects an object with a series, rows, or columns key');
-      }
+export function VislibComponentsLabelsDataArrayProvider(Private) {
+  const flattenSeries = Private(VislibComponentsLabelsFlattenSeriesProvider);
 
-      if (!obj.series) return flattenSeries(obj);
-      return obj.series;
-    };
+  /*
+   * Accepts a Kibana data object and returns an array of values objects.
+  */
+  return function (obj) {
+    if (!_.isObject(obj) || !obj.rows && !obj.columns && !obj.series) {
+      throw new TypeError('GetArrayUtilService expects an object with a series, rows, or columns key');
+    }
+
+    if (!obj.series) return flattenSeries(obj);
+    return obj.series;
   };
-});
+}

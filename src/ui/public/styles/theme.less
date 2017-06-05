@@ -2,25 +2,18 @@
 // Bootswatch
 // -----------------------------------------------------
 
-//@import url("//fonts.googleapis.com/css?family=Lato:400,700,400italic");
-
 @import "~ui/styles/mixins";
 @import "~ui/styles/variables";
 @import "~ui/styles/theme/bootstrap";
 @import "~ui/styles/theme/font-awesome";
 
-
 // Navbar =====================================================================
 
 .navbar {
   border-width: 0;
+}
 
-  box-shadow: inset 0 -10px 10px -12px #333;
-  -moz-box-shadow: inset 0 -10px 10px -12px #333;
-  -webkit-box-shadow: inset 0 -10px 10px -12px #333;
-
-  &-btn-link {
-    height: @navbar-height;
+  .navbar-btn-link {
     margin: 0;
     border-radius: 0;
 
@@ -30,14 +23,14 @@
     }
   }
 
-  &-default {
+  .navbar-default {
     .badge {
       background-color: @navbar-default-badge-bg;
       color: @navbar-default-badge-color;
     }
   }
 
-  &-inverse {
+  .navbar-inverse {
     .logo {
       height: @navbar-height;
       width: 252px;
@@ -56,64 +49,25 @@
     }
   }
 
-  .navbar-nav > .active > a {
-    border-bottom-color: @navbar-nav-active-link-border;
-
-    // navbar active arrow base styles
-    &:before {
-      content: "";
-      display: inline-block;
-      position: absolute;
-      border: @navbar-arrow-size solid transparent;
-      border-bottom-color: inherit;
-      top: (@navbar-height - @navbar-arrow-size*2);
-      left: 0;
-      right: 0;
-      margin: 0 auto;
-      width: 0;
-      height: 0;
-    }
-
-    @media (max-width: @screen-sm-min) {
-      &:before {
-        display: none !important;
-      }
-    }
-  }
-
-  &-brand {
+  .navbar-brand {
     cursor: default;
     font-size: 1.8em;
-    background-color: @navbar-inverse-brand-bg;
     user-select: none;
   }
 
-  &-nav {
+  .navbar-nav {
     font-size: @font-size-small;
+
+    & > .active > a {
+      border-bottom-color: @kibanaGray2;
+      background-color: transparent;
+    }
   }
 
-  &-toggle {
+  .navbar-toggle {
     margin-top: 4px;
   }
-}
 
-// Buttons ====================================================================
-
-.btn:active {
-  .box-shadow(none);
-}
-
-.btn-group.open .dropdown-toggle {
-  .box-shadow(none);
-}
-
-/* Small devices (tablets, 768px and smaller) */
-@media (max-width: @screen-sm-min) {
-  .btn {
-    /* Fixes an issue with buttons not respecting the bounds of the screen */
-    white-space: normal;
-  }
-}
 
 // Typography =================================================================
 
@@ -161,25 +115,16 @@ table,
       color: @table-special-color;
     }
   }
+}
 
-  // > thead > tr > th,
-  // > tbody > tr > th,
-  // > tfoot > tr > th,
-  // > thead > tr > td,
-  // > tbody > tr > td,
-  // > tfoot > tr > td {
-  //   border: none;
-  // }
-
-  &-bordered > thead > tr > th,
-  &-bordered > tbody > tr > th,
-  &-bordered > tfoot > tr > th,
-  &-bordered > thead > tr > td,
-  &-bordered > tbody > tr > td,
-  &-bordered > tfoot > tr > td {
+  .table-bordered > thead > tr > th,
+  .table-bordered > tbody > tr > th,
+  .table-bordered > tfoot > tr > th,
+  .table-bordered > thead > tr > td,
+  .table-bordered > tbody > tr > td,
+  .table-bordered > tfoot > tr > td {
     border: 1px solid @table-border-color;
   }
-}
 
 // Forms ======================================================================
 

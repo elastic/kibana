@@ -1,22 +1,33 @@
-define(function (require) {
-  return function PointSeriesInitYAxis() {
-    var _ = require('lodash');
+import _ from 'lodash';
 
-    return function initYAxis(chart) {
-      var y = chart.aspects.y;
-      var x = chart.aspects.x;
+export function PointSeriesInitYAxisProvider() {
 
-      if (_.isArray(y)) {
-        // TODO: vis option should allow choosing this format
-        chart.yAxisFormatter = y[0].agg.fieldFormatter();
-        chart.yAxisLabel = ''; // use the legend
+  return function initYAxis(chart) {
+    const y = chart.aspects.y;
+    const x = chart.aspects.x;
+
+    if (_.isArray(y)) {
+      // TODO: vis option should allow choosing this format
+      chart.yAxisFormatter = y[0].agg.fieldFormatter();
+      chart.yAxisLabel = ''; // use the legend
+    } else {
+      chart.yAxisFormatter = y.agg.fieldFormatter();
+      chart.yAxisLabel = y.col.title;
+    }
+
+    const z = chart.aspects.series;
+    if (z) {
+      if (_.isArray(z)) {
+        chart.zAxisFormatter = z[0].agg.fieldFormatter();
+        chart.zAxisLabel = ''; // use the legend
       } else {
-        chart.yAxisFormatter = y.agg.fieldFormatter();
-        chart.yAxisLabel = y.col.title;
+        chart.zAxisFormatter = z.agg.fieldFormatter();
+        chart.zAxisLabel = z.col.title;
       }
+    }
 
-      var xAggOutput = x.agg.write();
-      chart.yScale = xAggOutput.metricScale || null;
-    };
+
+    const xAggOutput = x.agg.write();
+    chart.yScale = xAggOutput.metricScale || null;
   };
-});
+}

@@ -1,0 +1,12 @@
+<select ng-if="detectedType !== 'geo_point'" name="field_type" ng-model="field.type" ng-change="buildRows()">
+  <option value="string">string</option>
+  <option value="number">number</option>
+  <option value="boolean">boolean</option>
+  <option value="date">date</option>
+  <option value="geo_point">geo_point</option>
+  <option value="ip">ip</option>
+</select>
+
+<span ng-if="detectedType === 'geo_point'">
+  geo_point
+</span>

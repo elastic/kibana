@@ -1,22 +1,23 @@
-describe('ui/courier/fetch/request/segmented/_createQueue', () => {
-  const sinon = require('auto-release-sinon');
-  const expect = require('expect.js');
-  const ngMock = require('ngMock');
+import sinon from 'sinon';
+import expect from 'expect.js';
+import ngMock from 'ng_mock';
 
+import StubbedSearchSourceProvider from 'fixtures/stubbed_search_source';
+
+import { SegmentedRequestProvider } from '../segmented';
+
+describe('ui/courier/fetch/request/segmented/_createQueue', () => {
   let Promise;
-  let $rootScope;
   let SegmentedReq;
   let MockSource;
 
-  require('testUtils/noDigestPromises').activateForSuite();
+  require('test_utils/no_digest_promises').activateForSuite();
 
   beforeEach(ngMock.module('kibana'));
   beforeEach(ngMock.inject((Private, $injector) => {
     Promise = $injector.get('Promise');
-    $rootScope = $injector.get('$rootScope');
-    SegmentedReq = Private(require('ui/courier/fetch/request/segmented'));
+    SegmentedReq = Private(SegmentedRequestProvider);
 
-    const StubbedSearchSourceProvider = require('fixtures/stubbed_search_source');
     MockSource = class {
       constructor() {
         return $injector.invoke(StubbedSearchSourceProvider);
@@ -28,7 +29,7 @@ describe('ui/courier/fetch/request/segmented/_createQueue', () => {
     const req = new SegmentedReq(new MockSource());
     req._queueCreated = null;
 
-    var promise = req._createQueue();
+    const promise = req._createQueue();
     expect(req._queueCreated).to.be(false);
     await promise;
     expect(req._queueCreated).to.be(true);

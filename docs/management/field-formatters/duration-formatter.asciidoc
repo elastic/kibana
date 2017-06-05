@@ -1,0 +1,15 @@
+The `Duration` field formatter can display the numeric value of a field in the following increments:
+
+* Picoseconds
+* Nanoseconds
+* Microseconds
+* Milliseconds
+* Seconds
+* Minutes
+* Hours
+* Days
+* Weeks
+* Months
+* Years
+
+You can specify these increments with up to 20 decimal places for both input and output formats.

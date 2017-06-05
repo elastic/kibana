@@ -1,0 +1,17 @@
+.kuiTextInput {
+  @include formControl;
+
+  &.kuiTextInput-isInvalid {
+    @include formControlInvalid;
+  }
+}
+
+.kuiTextInput--small {
+  width: 100%;
+  max-width: 60px;
+}
+
+.kuiTextInput--large {
+  width: 100%;
+  max-width: 400px;
+}

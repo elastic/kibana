@@ -1,7 +1,7 @@
+import './_field';
+import './_optioned';
+import './_regex';
+import './_string';
+import './_raw_json';
 describe('ParamTypes', function () {
-  require('./_field');
-  require('./_optioned');
-  require('./_regex');
-  require('./_string');
-  require('./_raw_json');
 });

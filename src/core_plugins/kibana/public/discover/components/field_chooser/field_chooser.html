@@ -1,0 +1,147 @@
+<div class="sidebar-list">
+  <div ng-show="indexPatternList.length > 1">
+    <ui-select
+      class="index-pattern-selection"
+      ng-model="selectedIndexPattern"
+      on-select="setIndexPattern($item)"
+      ng-init="selectedIndexPattern = indexPattern.id"
+    >
+      <ui-select-match>
+        {{$select.selected}}
+      </ui-select-match>
+      <ui-select-choices repeat="id in indexPatternList | filter:$select.search | orderBy">
+        <div ng-bind-html="id | highlight: $select.search"></div>
+      </ui-select-choices>
+    </ui-select>
+  </div>
+  <div ng-hide="indexPatternList.length > 1">
+    <div class="index-pattern">
+      <div css-truncate>{{ indexPattern.id }}</div>
+    </div>
+  </div>
+
+  <div class="sidebar-list-header">
+    <h5>Selected Fields</h5>
+  </div>
+  <ul class="list-unstyled discover-selected-fields" >
+    <discover-field
+      ng-repeat="field in fields.raw|filter:{display:true}"
+      field="field"
+      on-add-field="onAddField"
+      on-add-filter="onAddFilter"
+      on-remove-field="onRemoveField"
+      on-show-details="computeDetails"
+    >
+    </discover-field>
+  </ul>
+
+  <div class="sidebar-list-header sidebar-item">
+    <h5>Available Fields
+      <span
+        ng-class="{ 'fa-chevron-right': !showFields, 'fa-chevron-down': showFields }"
+        ng-click="showFields = !showFields"
+        aria-hidden="true"
+        class="fa visible-xs visible-sm pull-right field-collapse-toggle"
+      ></span>
+
+      <button
+        type="button"
+        ng-class="{ 'kuiButton--basic': !filter.active, 'kuiButton--primary': filter.active, 'hidden-xs': !showFields, 'hidden-sm': !showFields }"
+        class="kuiButton kuiButton--small pull-right discover-field-filter-toggle"
+        ng-click="showFilter = !showFilter"
+        aria-label="Show field settings"
+        aria-haspopup="true"
+        aria-expanded="{{showFilter}}"
+      >
+        <span aria-hidden="true" class="kuiIcon fa-gear"></span>
+      </button>
+    </h5>
+  </div>
+
+  <div class="sidebar-item" ng-show="showFilter">
+    <form role="form" class="discover-field-details">
+      <div class="form-group">
+        <label>
+          Aggregatable
+        </label>
+        <select
+          ng-options="opt.value as opt.label for opt in filter.boolOpts"
+          ng-model="filter.vals.aggregatable"
+          class="form-control">
+        </select>
+      </div>
+      <div class="form-group">
+        <label>
+          Searchable
+        </label>
+        <select
+          ng-options="opt.value as opt.label for opt in filter.boolOpts"
+          ng-model="filter.vals.searchable"
+          class="form-control">
+        </select>
+      </div>
+      <div class="form-group">
+        <label>
+          Type
+        </label>
+        <select
+          ng-options="field as field for field in fieldTypes"
+          ng-model="filter.vals.type"
+          class="form-control">
+        </select>
+      </div>
+      <div class="form-group">
+        <label>
+          Field name
+        </label>
+        <input type="text" class="form-control" ng-model="filter.vals.name">
+      </div>
+      <div class="form-group">
+        <label>
+          <input type="checkbox" ng-model="filter.vals.missing">
+          Hide Missing Fields
+        </label>
+      </div>
+    </form>
+    <button
+      ng-click="filter.reset()"
+      ng-disabled="!filter.active"
+      class="kuiButton kuiButton--danger kuiButton--fullWidth"
+    >
+      Reset Filters
+    </button>
+  </div>
+
+  <ul
+    ng-show="(popularFields | filter:filter.isFieldFiltered).length > 0"
+    ng-class="{ 'hidden-sm': !showFields, 'hidden-xs': !showFields }"
+    class="list-unstyled sidebar-well discover-popular-fields">
+    <li class="sidebar-item sidebar-list-header">
+      <h6>Popular</h6>
+    </li>
+    <discover-field
+      ng-repeat="field in popularFields | filter:filter.isFieldFiltered"
+      field="field"
+      on-add-field="onAddField"
+      on-add-filter="onAddFilter"
+      on-remove-field="onRemoveField"
+      on-show-details="computeDetails"
+    >
+    </discover-field>
+  </ul>
+
+  <ul
+    ng-class="{ 'hidden-sm': !showFields, 'hidden-xs': !showFields  }"
+    class="list-unstyled discover-unpopular-fields">
+    <discover-field
+      ng-repeat="field in unpopularFields | filter:filter.isFieldFiltered"
+      field="field"
+      on-add-field="onAddField"
+      on-add-filter="onAddFilter"
+      on-remove-field="onRemoveField"
+      on-show-details="computeDetails"
+    >
+    </discover-field>
+  </ul>
+
+</div>

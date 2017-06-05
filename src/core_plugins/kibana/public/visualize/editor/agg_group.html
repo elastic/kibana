@@ -1,0 +1,15 @@
+<div class="sidebar-item">
+  <div class="sidebar-item-title">
+    {{ groupName }}
+  </div>
+
+  <div ng-class="groupName" draggable-container="group" class="vis-editor-agg-group">
+    <!-- wrapper needed for nesting-indicator -->
+    <div ng-repeat="agg in group" draggable-item="agg" class="vis-editor-agg-wrapper">
+      <!-- agg.html - controls for aggregation -->
+      <ng-form vis-editor-agg name="aggForm" class="vis-editor-agg"></ng-form>
+    </div>
+
+    <vis-editor-agg-add ng-if="stats.count === 0" class="vis-editor-agg-add"></vis-editor-agg-add>
+  </div>
+</div>

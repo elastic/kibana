@@ -1,0 +1,56 @@
+<div
+  class="kuiLocalNav"
+  ng-show="kbnTopNav.isVisible()"
+  data-test-subj="top-nav"
+>
+  <!-- Top row -->
+  <div class="kuiLocalNavRow">
+    <!-- Top left corner slot, e.g. breadcrumbs, title. -->
+    <div
+      class="kuiLocalNavRow__section"
+      data-transclude-slot="topLeftCorner"
+    ></div>
+
+    <!-- Right-side: menu -->
+    <div class="kuiLocalNavRow__section">
+      <div class="kuiLocalMenu">
+        <button
+          class="kuiLocalMenuItem"
+          ng-repeat="menuItem in kbnTopNav.menuItems"
+          aria-label="{{::menuItem.description}}"
+          aria-haspopup="{{!menuItem.hasFunction}}"
+          aria-expanded="{{kbnTopNav.isCurrent(menuItem.key)}}"
+          ng-class="{'kuiLocalMenuItem-isSelected': kbnTopNav.isCurrent(menuItem.key), 'kuiLocalMenuItem-isDisabled': menuItem.disableButton()}"
+          ng-click="kbnTopNav.handleClick(menuItem)"
+          ng-bind="menuItem.label"
+          tooltip="{{menuItem.tooltip()}}"
+          tooltip-placement="bottom"
+          tooltip-popup-delay="400"
+          tooltip-append-to-body="1"
+          data-test-subj="{{menuItem.testId}}"
+        ></button>
+
+        <!-- Time-picker "menu item" -->
+        <kbn-global-timepicker></kbn-global-timepicker>
+      </div>
+    </div>
+  </div>
+
+  <!-- Dropdown content, e.g. time-picker. -->
+  <div
+    class="kuiLocalDropdown"
+    ng-show="kbnTopNav.rendered"
+  >
+    <button class="kuiLocalDropdownCloseButton" ng-click="kbnTopNav.close()">
+      <span class="kuiIcon fa-chevron-circle-up"></span>
+    </button>
+    <div id="template_wrapper">
+      <!-- Content gets dynamically inserted here. -->
+    </div>
+  </div>
+
+  <div class="kuiLocalNavRow kuiLocalNavRow--secondary">
+    <!-- Bottom row slot, e.g. tabs. -->
+    <div data-transclude-slot="bottomRow"></div>
+  </div>
+</div>

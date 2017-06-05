@@ -1,36 +1,38 @@
-define(function (require) {
-  return function SignificantTermsAggDefinition(Private) {
-    var _ = require('lodash');
-    var BucketAggType = Private(require('ui/agg_types/buckets/_bucket_agg_type'));
-    var createFilter = Private(require('ui/agg_types/buckets/create_filter/terms'));
+import { AggTypesBucketsBucketAggTypeProvider } from 'ui/agg_types/buckets/_bucket_agg_type';
+import { AggTypesBucketsCreateFilterTermsProvider } from 'ui/agg_types/buckets/create_filter/terms';
+import orderAndSizeTemplate from 'ui/agg_types/controls/order_and_size.html';
 
-    return new BucketAggType({
-      name: 'significant_terms',
-      title: 'Significant Terms',
-      makeLabel: function (aggConfig) {
-        return 'Top ' + aggConfig.params.size + ' unusual terms in ' + aggConfig.params.field.displayName;
+export function AggTypesBucketsSignificantTermsProvider(Private) {
+  const BucketAggType = Private(AggTypesBucketsBucketAggTypeProvider);
+  const createFilter = Private(AggTypesBucketsCreateFilterTermsProvider);
+
+  return new BucketAggType({
+    name: 'significant_terms',
+    title: 'Significant Terms',
+    makeLabel: function (aggConfig) {
+      return 'Top ' + aggConfig.params.size + ' unusual terms in ' + aggConfig.getFieldDisplayName();
+    },
+    createFilter: createFilter,
+    params: [
+      {
+        name: 'field',
+        scriptable: false,
+        filterFieldTypes: 'string'
       },
-      createFilter: createFilter,
-      params: [
-        {
-          name: 'field',
-          filterFieldTypes: 'string'
-        },
-        {
-          name: 'size',
-          editor: require('ui/agg_types/controls/order_and_size.html'),
-        },
-        {
-          name: 'exclude',
-          type: 'regex',
-          advanced: true
-        },
-        {
-          name: 'include',
-          type: 'regex',
-          advanced: true
-        }
-      ]
-    });
-  };
-});
+      {
+        name: 'size',
+        editor: orderAndSizeTemplate,
+      },
+      {
+        name: 'exclude',
+        type: 'regex',
+        advanced: true
+      },
+      {
+        name: 'include',
+        type: 'regex',
+        advanced: true
+      }
+    ]
+  });
+}

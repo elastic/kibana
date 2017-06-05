@@ -1,0 +1,38 @@
+.ui-sortable {
+  display: block;
+  position: relative;
+  overflow: visible;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  user-select: none;
+}
+
+.ui-sortable:before,
+.ui-sortable:after{
+  content: " ";
+  display: table;
+}
+
+.ui-sortable:after{
+  clear: both;
+}
+
+.ui-sortable .ui-sortable-item {
+}
+
+.ui-sortable .ui-sortable-item.ui-sortable-dragging {
+  position: absolute;
+  z-index: 1688;
+}
+
+.ui-sortable .ui-sortable-placeholder {
+  display: none;
+}
+
+.ui-sortable .ui-sortable-placeholder.visible {
+  display: block;
+  opacity: 0.5;
+  z-index: -1;
+}
+
+

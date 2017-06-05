@@ -1,16 +1,18 @@
-describe('initXAxis', function () {
-  var _ = require('lodash');
-  var expect = require('expect.js');
-  var ngMock = require('ngMock');
+import _ from 'lodash';
+import expect from 'expect.js';
+import ngMock from 'ng_mock';
+import { PointSeriesInitXAxisProvider } from 'ui/agg_response/point_series/_init_x_axis';
 
-  var initXAxis;
+describe('initXAxis', function () {
+
+  let initXAxis;
 
   beforeEach(ngMock.module('kibana'));
   beforeEach(ngMock.inject(function (Private) {
-    initXAxis = Private(require('ui/agg_response/point_series/_init_x_axis'));
+    initXAxis = Private(PointSeriesInitXAxisProvider);
   }));
 
-  var baseChart = {
+  const baseChart = {
     aspects: {
       x: {
         agg: {
@@ -24,9 +26,11 @@ describe('initXAxis', function () {
       }
     }
   };
+  const field = {};
+  const indexPattern = {};
 
   it('sets the xAxisFormatter if the agg is not ordered', function () {
-    var chart = _.cloneDeep(baseChart);
+    const chart = _.cloneDeep(baseChart);
     initXAxis(chart);
     expect(chart)
       .to.have.property('xAxisLabel', 'label')
@@ -34,13 +38,21 @@ describe('initXAxis', function () {
   });
 
   it('makes the chart ordered if the agg is ordered', function () {
-    var chart = _.cloneDeep(baseChart);
+    const chart = _.cloneDeep(baseChart);
     chart.aspects.x.agg.type.ordered = true;
+    chart.aspects.x.agg.params = {
+      field: field
+    };
+    chart.aspects.x.agg.vis = {
+      indexPattern: indexPattern
+    };
 
     initXAxis(chart);
     expect(chart)
       .to.have.property('xAxisLabel', 'label')
       .and.have.property('xAxisFormatter', chart.aspects.x.agg.fieldFormatter())
+      .and.have.property('indexPattern', indexPattern)
+      .and.have.property('xAxisField', field)
       .and.have.property('ordered');
 
     expect(chart.ordered)
@@ -49,14 +61,22 @@ describe('initXAxis', function () {
   });
 
   it('reads the interval param from the x agg', function () {
-    var chart = _.cloneDeep(baseChart);
+    const chart = _.cloneDeep(baseChart);
     chart.aspects.x.agg.type.ordered = true;
     chart.aspects.x.agg.write = _.constant({ params: { interval: 10 } });
+    chart.aspects.x.agg.params = {
+      field: field
+    };
+    chart.aspects.x.agg.vis = {
+      indexPattern: indexPattern
+    };
 
     initXAxis(chart);
     expect(chart)
       .to.have.property('xAxisLabel', 'label')
       .and.have.property('xAxisFormatter', chart.aspects.x.agg.fieldFormatter())
+      .and.have.property('indexPattern', indexPattern)
+      .and.have.property('xAxisField', field)
       .and.have.property('ordered');
 
     expect(chart.ordered)

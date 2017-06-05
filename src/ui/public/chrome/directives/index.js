@@ -1,10 +1,11 @@
-import 'ui/directives/config';
 
-import './app_switcher';
-import kbnChromeProv from './kbn_chrome';
-import kbnChromeNavControlsProv from './append_nav_controls';
+import './global_nav';
 
-export default function (chrome, internals) {
-  kbnChromeProv(chrome, internals);
-  kbnChromeNavControlsProv(chrome, internals);
+import { kbnChromeProvider } from './kbn_chrome';
+import { kbnAppendChromeNavControls } from './append_nav_controls';
+import './loading_indicator/loading_indicator';
+
+export function directivesProvider(chrome, internals) {
+  kbnChromeProvider(chrome, internals);
+  kbnAppendChromeNavControls(chrome, internals);
 }

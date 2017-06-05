@@ -1,25 +1,25 @@
 
-var moment = require('moment');
-var expect = require('expect.js');
-var ngMock = require('ngMock');
+import expect from 'expect.js';
+import ngMock from 'ng_mock';
+import { VisProvider } from 'ui/vis';
+import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
+import { AggTypesBucketsCreateFilterDateRangeProvider } from 'ui/agg_types/buckets/create_filter/date_range';
 
 describe('AggConfig Filters', function () {
   describe('Date range', function () {
-    var AggConfig;
-    var indexPattern;
-    var Vis;
-    var createFilter;
+    let indexPattern;
+    let Vis;
+    let createFilter;
 
     beforeEach(ngMock.module('kibana'));
     beforeEach(ngMock.inject(function (Private) {
-      Vis = Private(require('ui/Vis'));
-      AggConfig = Private(require('ui/Vis/AggConfig'));
-      indexPattern = Private(require('fixtures/stubbed_logstash_index_pattern'));
-      createFilter = Private(require('ui/agg_types/buckets/create_filter/date_range'));
+      Vis = Private(VisProvider);
+      indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
+      createFilter = Private(AggTypesBucketsCreateFilterDateRangeProvider);
     }));
 
     it('should return a range filter for date_range agg', function () {
-      var vis = new Vis(indexPattern, {
+      const vis = new Vis(indexPattern, {
         type: 'histogram',
         aggs: [
           {
@@ -34,8 +34,8 @@ describe('AggConfig Filters', function () {
         ]
       });
 
-      var aggConfig = vis.aggs.byTypeName.date_range[0];
-      var filter = createFilter(aggConfig, 'February 1st, 2015 to February 7th, 2015');
+      const aggConfig = vis.aggs.byTypeName.date_range[0];
+      const filter = createFilter(aggConfig, 'February 1st, 2015 to February 7th, 2015');
       expect(filter).to.have.property('range');
       expect(filter).to.have.property('meta');
       expect(filter.meta).to.have.property('index', indexPattern.id);

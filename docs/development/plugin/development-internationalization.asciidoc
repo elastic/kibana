@@ -1,0 +1,186 @@
+[[translating-kibana]]
+Translating Kibana
+------------------
+
+[[background]]
+Background
+~~~~~~~~~
+
+Please see https://github.com/elastic/kibana/issues/6515[kibana#6515]
+for background discussion on the Kibana translation work.
+
+[[prerequisites]]
+Prerequisites
+~~~~~~~~~~~~
+
+Kibana must be installed and operational, see README.md
+
+[[audience]]
+Audience
+~~~~~~~
+
+There are three audiences for this document:
+
+* those that want to contribute language packs to Kibana
+* those that want to enable translations in existing Kibana plugins
+* those that want to create a new Kibana Plugin
+
+[[contributing-language-packs]]
+Contributing Language Packs
+~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+For this example, we will demonstrate translation into Maltese (Language
+code `mt`). Add-on functionality for Kibana is implemented with plug-in modules.
+Refer to
+<<kibana-plugins, Kibana Plugins>> for more details.
+
+* Fork the `kibana` source, and ensure you have an up to date copy of
+the source.
+* Ensure you have signed the agreement as in CONTRIBUTING.md
+* Choose the right link:[bcp47] language code for your work. In this
+example, we will use the `kibana` plugin for translating and `mt` for
+Maltese. Other examples might be `zh-Hans` for Chinese using Simplified
+characters, or `az-Cyrl` for Azerbaijani using Cyrillic characters. The
+following links can help:
+* https://en.wikipedia.org/wiki/List_of_ISO_639-1_codes[List of ISO
+639-1 codes]
+*
+http://cldr.unicode.org/index/cldr-spec/picking-the-right-language-code[“Picking
+the right language code”]
+* Create a new branch for your work:
++
+git checkout -b translate-mt
+* For each translation scope (see link:#Enabling%20Translations%20on%20Existing%20Plugins[Enabling Translations on Existing Plugins], below), generate a Kibana plugin with name _plugin_-_languagecode_ using the https://github.com/elastic/generator-kibana-plugin[Kibana Plugin Yeoman Generator]:
++
+* Replace the the `es.json` translation file with _languagecode_`.json`:
+`mv src/plugins/kibana-mt/translations/es.json src/plugins/kibana-mt/translations/mt.json`
+* Translate the `mt.json` file in a JSON editor
+* Edit index file (`kibana-mt/index.js`), updating the
+'translations' item in 'uiExports' as per your plugin translation file(s)
+* Copy translations plugin (`kibana-mt/`) to the Kibana plugins (`<kibana_root>/plugins`) directory
+* Start up Kibana and verify the translation works as expected
+* Ensure Kibana tests pass
+* Commit the `kibana-mt` directory and files, and push them to your own
+fork of `kibana`
+* Open a pull request titled `Translation: Maltese (mt)`
+
+[[enabling-ranslations-on-existing-plugins]]
+Enabling Translations on Existing Plugins
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Kibana translates according to plugin scope, so there is a `.json` file
+in `translations` subdirectory for each plugin.
+
+[[enabling-translation-of-an-angular-view]]
+Enabling Translation of an Angular view
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+* Determine which views share a plugin scope. In this example, `create`
+and `edit` will share scope.
+* If it does not already exist, Create the appropriate `translation`
+directory and the new translation file `en.json` inside it. In the above
+example, it would be: `src/core_plugins/kibana/translations/en.json`
+* If it does not exist add 'translations' item to the 'uiExports' in the plugin creation (`src/core_plugins/kibana/translations/en.json`) as follows:
+-------------------------------------------------------------------------
+uiExports {
+  translations: [ 
+    resolve(__dirname, './translations/en.json')
+  ], ….
+}
+-------------------------------------------------------------------------
+
+* In the view (HTML) file, such as
+`src/core_plugins/kibana/public/management/sections/indices/_create.html`
+Replace English text with translation keys, and copy the English text
+into the `en.json` file appropriately. Note that loose text was put into
+a `<p></p>` tag for translation purposes. Also note the prefix `KIBANA-`
+matching the plugin being translated.
+
+[[before]]
+Before
+++++++
+
+`_create.html`
+
+-----------------------------------------------------------------------------------------------------
+    <h1>Configure an index pattern</h1>
+    In order to use Kibana you must configure at least one index pattern…
+
+    <kbn-info info="This field will be used to filter events with the global time filter"></kbn-info> 
+-----------------------------------------------------------------------------------------------------
+
+[[after]]
+After
++++++
+
+`_create.html`
+
+-------------------------------------------------------------------------------------------
+    <h1 translate="KIBANA-CONFIGURE_INDEX_PATTERN"</h1>
+    <p translate="KIBANA-MUST_CONFIGURE_INDEX_PATTERN"</p>
+
+    <kbn-info info="{{ 'KIBANA-FIELD_FILTER_EVENTS_GLOBAL_TIME' | translate }}"></kbn-info>
+-------------------------------------------------------------------------------------------
+
+* In the view (JS) file, such as
+`src/core_plugins/kibana/public/management/sections/indices/_create.js`
+As above, replace English text with translation keys, and copy the English text
+into the `en.json` file appropriately. Note that some strings may not be user facing
+and do not need to be replaced then. Also note the prefix `KIBANA-` matching the plugin
+being translated.
+
+[[before]]
+Before
+++++++
+
+`_create.js`
+
+--------------------------------------------------------------------------------------------------------------
+    notify.error('Could not locate any indices matching that pattern. Please add the index to Elasticsearch');
+--------------------------------------------------------------------------------------------------------------
+
+[[after]]
+After
++++++
+
+`_create.js`
+
+-------------------------------------------------------------------------------------------
+    notify.error($translate.instant('KIBANA-NO_INDICES_MATCHING_PATTERN'));
+-------------------------------------------------------------------------------------------
+
+`en.json`
+
+-----------------------------------------------------------------------------------------------------------------------------------------
+    {
+       "KIBANA-CONFIGURE_INDEX_PATTERN": "Configure an index pattern",
+       "KIBANA-MUST_CONFIGURE_INDEX_PATTERN": "In order to use Kibana you must…",
+       "KIBANA-FIELD_FILTER_EVENTS_GLOBAL_TIME" : "This field will be used to filter events with the global time filter",
+       "KIBANA-NO_INDICES_MATCHING_PATTERN": "Could not locate any indices matching that pattern. Please add the index to Elasticsearch",
+    }
+-----------------------------------------------------------------------------------------------------------------------------------------
+
+* Refresh the Kibana page and verify the UI looks the same.
+* Refer to Kibana core plugin (`src/core_plugins/kibana/`) for examples.
+
+[[new-plugin-authors]]
+New Plugin Authors
+~~~~~~~~~~~~~~~~~
+
+Add-on functionality for Kibana is implemented with plug-in modules.
+Refer to
+<<kibana-plugins, Kibana
+Plugins>> for more details. It is recommended that when creating a plugin
+you enable translations (see link:#Enabling%20Translations%20on%20Existing%20Plugins[Enabling Translations on Existing Plugins], above).
+
+[[enabling-translation-in-a-plugin]]
+Enabling Translation in a New Plugin
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+* Generate a Kibana plugin using the https://github.com/elastic/generator-kibana-plugin[Kibana Plugin Yeoman Generator]. In this
+example, `plugin1`
+* Add the translation IDs to the views
+* Add the corresponding translation IDs and text to the default translation file (`translations/en.json`)
+* Refer to link:#Enabling%20Translations%20on%20Existing%20Plugins[Enabling Translations on Existing Plugins] for more
+details on enabling translation in your plugin views and refer to Kibana
+core plugin (`src/core_plugins/kibana/`) for an example.

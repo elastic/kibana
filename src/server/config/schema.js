@@ -1,15 +1,14 @@
-let get = require('lodash').get;
-let Joi = require('joi');
-let fs = require('fs');
-let path = require('path');
+import Joi from 'joi';
+import { constants as cryptoConstants } from 'crypto';
+import os from 'os';
 
-let utils = require('requirefrom')('src/utils');
-let fromRoot = utils('fromRoot');
-const randomBytes = require('crypto').randomBytes;
+import { fromRoot } from '../../utils';
+import { getData } from '../path';
 
 module.exports = () => Joi.object({
   pkg: Joi.object({
     version: Joi.string().default(Joi.ref('$version')),
+    branch: Joi.string().default(Joi.ref('$branch')),
     buildNum: Joi.number().default(Joi.ref('$buildNum')),
     buildSha: Joi.string().default(Joi.ref('$buildSha')),
   }).default(),
@@ -29,16 +28,45 @@ module.exports = () => Joi.object({
     exclusive: Joi.boolean().default(false)
   }).default(),
 
+  cpu: Joi.object({
+    cgroup: Joi.object({
+      path: Joi.object({
+        override: Joi.string().default()
+      })
+    })
+  }),
+
+  cpuacct: Joi.object({
+    cgroup: Joi.object({
+      path: Joi.object({
+        override: Joi.string().default()
+      })
+    })
+  }),
+
   server: Joi.object({
-    host: Joi.string().hostname().default('0.0.0.0'),
+    uuid: Joi.string().guid().default(),
+    name: Joi.string().default(os.hostname()),
+    host: Joi.string().hostname().default('localhost'),
     port: Joi.number().default(5601),
     maxPayloadBytes: Joi.number().default(1048576),
     autoListen: Joi.boolean().default(true),
-    defaultRoute: Joi.string(),
+    defaultRoute: Joi.string().default('/app/kibana').regex(/^\//, `start with a slash`),
     basePath: Joi.string().default('').allow('').regex(/(^$|^\/.*[^\/]$)/, `start with a slash, don't end with one`),
     ssl: Joi.object({
-      cert: Joi.string(),
-      key: Joi.string()
+      enabled: Joi.boolean().default(false),
+      certificate: Joi.string().when('enabled', {
+        is: true,
+        then: Joi.required(),
+      }),
+      key: Joi.string().when('enabled', {
+        is: true,
+        then: Joi.required()
+      }),
+      keyPassphrase: Joi.string(),
+      certificateAuthorities: Joi.array().single().items(Joi.string()),
+      supportedProtocols: Joi.array().items(Joi.string().valid('TLSv1', 'TLSv1.1', 'TLSv1.2')),
+      cipherSuites: Joi.array().items(Joi.string()).default(cryptoConstants.defaultCoreCipherList.split(':'))
     }).default(),
     cors: Joi.when('$dev', {
       is: true,
@@ -82,10 +110,18 @@ module.exports = () => Joi.object({
   })
   .default(),
 
+  ops: Joi.object({
+    interval: Joi.number().default(5000),
+  }).default(),
+
   plugins: Joi.object({
     paths: Joi.array().items(Joi.string()).default([]),
     scanDirs: Joi.array().items(Joi.string()).default([]),
     initialize: Joi.boolean().default(true)
+  }).default(),
+
+  path: Joi.object({
+    data: Joi.string().default(getData())
   }).default(),
 
   optimize: Joi.object({
@@ -99,21 +135,75 @@ module.exports = () => Joi.object({
     lazyPrebuild: Joi.boolean().default(false),
     lazyProxyTimeout: Joi.number().default(5 * 60000),
     useBundleCache: Joi.boolean().default(Joi.ref('$prod')),
-    unsafeCache: Joi
-      .alternatives()
-      .try(
-        Joi.boolean(),
-        Joi.string().regex(/^\/.+\/$/)
-      )
-      .default('/[\\/\\\\](node_modules|bower_components)[\\/\\\\]/'),
-    sourceMaps: Joi
-      .alternatives()
-      .try(
-        Joi.string().required(),
-        Joi.boolean()
-      )
-      .default(Joi.ref('$dev')),
+    unsafeCache: Joi.when('$prod', {
+      is: true,
+      then: Joi.boolean().valid(false),
+      otherwise: Joi
+        .alternatives()
+        .try(
+          Joi.boolean(),
+          Joi.string().regex(/^\/.+\/$/)
+        )
+        .default(true),
+    }),
+    sourceMaps: Joi.when('$prod', {
+      is: true,
+      then: Joi.boolean().valid(false),
+      otherwise: Joi
+        .alternatives()
+        .try(
+          Joi.string().required(),
+          Joi.boolean()
+        )
+        .default('#cheap-source-map'),
+    }),
     profile: Joi.boolean().default(false)
-  }).default()
+  }).default(),
+  status: Joi.object({
+    allowAnonymous: Joi.boolean().default(false)
+  }).default(),
+  map: Joi.object({
+    manifestServiceUrl: Joi.when('$dev', {
+      is: true,
+      then: Joi.string().default('https://geo.elastic.co/v1/manifest'),
+      otherwise: Joi.string().default('https://geo.elastic.co/v1/manifest')
+    })
+  }).default(),
+  tilemap: Joi.object({
+    url: Joi.string(),
+    options: Joi.object({
+      attribution: Joi.string(),
+      minZoom: Joi.number().min(0, 'Must be 0 or higher').default(0),
+      maxZoom: Joi.number().default(10),
+      tileSize: Joi.number(),
+      subdomains: Joi.array().items(Joi.string()).single(),
+      errorTileUrl: Joi.string().uri(),
+      tms: Joi.boolean(),
+      reuseTiles: Joi.boolean(),
+      bounds: Joi.array().items(Joi.array().items(Joi.number()).min(2).required()).min(2)
+    }).default()
+  }).default(),
+  regionmap: Joi.object({
+    layers: Joi.array().items(Joi.object({
+      url: Joi.string(),
+      type: Joi.string(),
+      name: Joi.string(),
+      fields: Joi.array().items(Joi.object({
+        name: Joi.string(),
+        description: Joi.string()
+      }))
+    }))
+  }).default(),
+  uiSettings: Joi.object({
+    // this is used to prevent the uiSettings from initializing. Since they
+    // require the elasticsearch plugin in order to function we need to turn
+    // them off when we turn off the elasticsearch plugin (like we do in the
+    // optimizer half of the dev server)
+    enabled: Joi.boolean().default(true)
+  }).default(),
+
+  i18n: Joi.object({
+    defaultLocale: Joi.string().default('en'),
+  }).default(),
 
 }).default();

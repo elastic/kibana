@@ -1,0 +1,223 @@
+<!-- Local nav. -->
+<kbn-top-nav name="visualize">
+  <!-- Transcluded elements. -->
+  <div data-transclude-slots>
+    <!-- Title. -->
+    <div
+      data-transclude-slot="topLeftCorner"
+      class="kuiLocalTitle"
+    >
+      Visualize
+    </div>
+  </div>
+</kbn-top-nav>
+
+<div class="kuiViewContent kuiViewContent--constrainedWidth">
+  <div class="kuiViewContentItem kuiVerticalRhythm" ng-if="listingController.showLimitError">
+    <div class="kuiInfoPanel kuiInfoPanel--warning">
+      <div class="kuiInfoPanelBody">
+        <div class="kuiInfoPanelBody__message">
+          You have {{ listingController.totalItems }} visualizations, but your "listingLimit" setting prevents the table below from displaying more than {{ listingController.listingLimit }}. You can change this setting under <a kbn-href="#/management/kibana/settings" class="kuiLink">Advanced Settings</a>.
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- ControlledTable -->
+  <div class="kuiViewContentItem kuiControlledTable kuiVerticalRhythm">
+    <!-- ToolBar -->
+    <div class="kuiToolBar">
+      <tool-bar-search-box
+        class="kuiToolBarSection"
+        filter="listingController.filter"
+        on-filter="listingController.onFilter"
+      ></tool-bar-search-box>
+
+      <div class="kuiToolBarSection">
+        <!-- Bulk delete button -->
+        <button
+          class="kuiButton kuiButton--danger"
+          aria-label="Delete selected objects"
+          ng-if="listingController.getSelectedItemsCount() > 0"
+          ng-click="listingController.deleteSelectedItems()"
+          tooltip="Delete selected visualizations"
+          tooltip-append-to-body="true"
+        >
+          <span aria-hidden="true" class="kuiButton__icon kuiIcon fa-trash"></span>
+        </button>
+
+        <!-- Create visualization button -->
+        <a
+          class="kuiButton kuiButton--primary"
+          href="#/visualize/new"
+          aria-label="Create new visualization"
+          ng-if="listingController.getSelectedItemsCount() === 0"
+          tooltip="Create new visualization"
+          tooltip-append-to-body="true"
+        >
+          <span aria-hidden="true" class="kuiButton__icon kuiIcon fa-plus"></span>
+        </a>
+      </div>
+
+      <div class="kuiToolBarSection">
+        <!-- Pagination -->
+        <tool-bar-pager-text
+          start-item="listingController.pager.startItem"
+          end-item="listingController.pager.endItem"
+          total-items="listingController.pager.totalItems"
+        ></tool-bar-pager-text>
+        <tool-bar-pager-buttons
+          has-previous-page="listingController.pager.hasPreviousPage"
+          has-next-page="listingController.pager.hasNextPage"
+          on-page-next="listingController.onPageNext"
+          on-page-previous="listingController.onPagePrevious"
+        ></tool-bar-pager-buttons>
+      </div>
+    </div>
+
+    <!-- TableInfo -->
+    <div
+      class="kuiPanel kuiPanel--centered kuiPanel--withHeader"
+      ng-if="!listingController.items.length && listingController.filter"
+    >
+      <div class="kuiTableInfo">
+        No visualizations matched your search.
+      </div>
+    </div>
+
+    <!-- PromptForItems -->
+    <div
+      class="kuiPanel kuiPanel--centered kuiPanel--withHeader"
+      ng-if="!listingController.isFetchingItems && !listingController.items.length && !listingController.filter"
+    >
+      <div class="kuiPromptForItems">
+        <div class="kuiPromptForItems__message">
+          Looks like you don&rsquo;t have any visualizations. Let&rsquo;s create some!
+        </div>
+
+        <div class="kuiPromptForItems__actions">
+          <a
+            class="kuiButton kuiButton--primary kuiButton--iconText"
+            href="#/visualize/new"
+          >
+            <span class="kuiButton__inner">
+              <span class="kuiButton__icon kuiIcon fa-plus"></span>
+              <span>Create a visualization</span>
+            </span>
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Table -->
+    <table class="kuiTable" ng-if="listingController.items.length">
+      <thead>
+        <tr>
+          <th class="kuiTableHeaderCell kuiTableHeaderCell--checkBox">
+            <input
+              type="checkbox"
+              class="kuiCheckBox"
+              ng-checked="listingController.areAllItemsChecked()"
+              ng-click="listingController.toggleAll()"
+            >
+          </th>
+
+          <th
+            class="kuiTableHeaderCell"
+            ng-click="listingController.sortOn('title')"
+          >
+            Name
+            <span
+              class="kuiIcon"
+              ng-show="listingController.getSortedProperty().name === 'title'"
+              ng-class="listingController.isAscending('title') ? 'fa-caret-up' : 'fa-caret-down'"
+            ></span>
+          </th>
+
+          <th
+            class="kuiTableHeaderCell"
+            ng-click="listingController.sortOn('type')"
+          >
+            Type
+            <span
+              class="kuiIcon"
+              ng-show="listingController.getSortedProperty().name === 'type'"
+              ng-class="listingController.isAscending('type') ? 'fa-caret-up' : 'fa-caret-down'"
+            ></span>
+          </th>
+        </tr>
+      </thead>
+
+      <tbody>
+        <tr
+          ng-repeat="item in listingController.pageOfItems track by item.id"
+          class="kuiTableRow"
+        >
+          <td class="kuiTableRowCell kuiTableRowCell--checkBox">
+            <div class="kuiTableRowCell__liner">
+              <input
+                type="checkbox"
+                class="kuiCheckBox"
+                ng-click="listingController.toggleItem(item)"
+                ng-checked="listingController.isItemChecked(item)"
+              >
+            </div>
+          </td>
+
+          <td class="kuiTableRowCell">
+            <div class="kuiTableRowCell__liner">
+              <a class="kuiLink" ng-href="{{ listingController.getUrlForItem(item) }}">
+                {{ item.title }}
+              </a>
+            </div>
+          </td>
+
+          <td class="kuiTableRowCell">
+            <div class="kuiTableRowCell__liner">
+              <span class="kuiStatusText">
+                <img
+                  class="kuiStatusText__icon kuiIcon"
+                  ng-if="item.type.image"
+                  aria-hidden="true"
+                  ng-src="{{ item.type.image }}"
+                />
+
+                <!-- If there's no image, default to an icon, for BWC. -->
+                <span
+                  class="kuiStatusText__icon kuiIcon {{ item.icon }}"
+                  ng-if="!item.type.image"
+                ></span>
+
+                {{ item.type.title }}
+              </span>
+            </div>
+          </td>
+        </tr>
+
+      </tbody>
+    </table>
+
+    <!-- ToolBarFooter -->
+    <div class="kuiToolBarFooter">
+      <div class="kuiToolBarFooterSection">
+        <div class="kuiToolBarText" ng-hide="listingController.getSelectedItemsCount() === 0">
+          {{ listingController.getSelectedItemsCount() }} selected
+        </div>
+      </div>
+
+      <div class="kuiToolBarFooterSection">
+        <!-- Pagination -->
+        <tool-bar-pager-text
+          start-item="listingController.pager.startItem"
+          end-item="listingController.pager.endItem"
+          total-items="listingController.pager.totalItems"
+        ></tool-bar-pager-text>
+        <tool-bar-pager-buttons
+          has-previous-page="listingController.pager.hasPreviousPage"
+          has-next-page="listingController.pager.hasNextPage"
+          on-page-next="listingController.onPageNext"
+          on-page-previous="listingController.onPagePrevious"
+        ></tool-bar-pager-buttons>
+      </div>
+    </div>
+  </div>
+</div>

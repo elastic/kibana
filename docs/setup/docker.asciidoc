@@ -1,0 +1,136 @@
+[[docker]]
+== Running Kibana on Docker
+Docker images for Kibana are available from the Elastic Docker registry.
+The images are shipped with https://www.elastic.co/products/x-pack[X-Pack]
+installed.
+
+NOTE: https://www.elastic.co/guide/en/x-pack/current/index.html[X-Pack] is
+pre-installed in this image. With X-Pack installed, Kibana expects to
+connect to an Elasticsearch cluster that is also runnning X-Pack.
+
+=== Pulling the image
+Obtaining Kibana for Docker is as simple as issuing a +docker pull+ command
+against the Elastic Docker registry.
+
+ifeval::["{release-state}"=="unreleased"]
+
+However, version {version} of Kibana has not yet been released, so no Docker
+image is currently available for this version.
+
+endif::[]
+
+ifeval::["{release-state}"!="unreleased"]
+
+The Docker image for Kibana {version} can be retrieved with the following
+command:
+
+["source","sh",subs="attributes"]
+--------------------------------------------
+docker pull {docker-image}
+--------------------------------------------
+
+endif::[]
+
+=== Configuring Kibana on Docker
+
+The Docker image provides several methods for configuring Kibana. The conventional
+approach is to provide a `kibana.yml` file as described in <<settings>>, but it's
+also possible to use environment variables to define settings.
+
+[[docker-bind-mount-config]]
+==== Bind-mounted configuration
+
+One way to configure Kibana on Docker is to provide `kibana.yml` via bind-mounting.
+With +docker-compose+, the bind-mount can be specified like this:
+
+["source","yaml",subs="attributes"]
+--------------------------------------------
+services:
+  kibana:
+    image: {docker-image}
+    volumes:
+      - ./kibana.yml:/usr/share/kibana/config/kibana.yml
+--------------------------------------------
+
+[[docker-env-config]]
+==== Environment variable configuration
+
+Under Docker, Kibana can be configured via environment variables. The following
+mappings are available:
+
+.Docker Environment Variables
+[horizontal]
+**Environment Variable**:: **Kibana Setting**
+`ELASTICSEARCH_CUSTOMHEADERS`:: `elasticsearch.customHeaders`
+`ELASTICSEARCH_PASSWORD`:: `elasticsearch.password`
+`ELASTICSEARCH_PINGTIMEOUT`:: `elasticsearch.pingTimeout`
+`ELASTICSEARCH_PRESERVEHOST`:: `elasticsearch.preserveHost`
+`ELASTICSEARCH_REQUESTHEADERSWHITELIST`:: `elasticsearch.requestHeadersWhitelist`
+`ELASTICSEARCH_REQUESTTIMEOUT`:: `elasticsearch.requestTimeout`
+`ELASTICSEARCH_SHARDTIMEOUT`:: `elasticsearch.shardTimeout`
+`ELASTICSEARCH_SSL_CA`:: `elasticsearch.ssl.ca`
+`ELASTICSEARCH_SSL_CERT`:: `elasticsearch.ssl.cert`
+`ELASTICSEARCH_SSL_KEY`:: `elasticsearch.ssl.key`
+`ELASTICSEARCH_SSL_VERIFY`:: `elasticsearch.ssl.verify`
+`ELASTICSEARCH_STARTUPTIMEOUT`:: `elasticsearch.startupTimeout`
+`ELASTICSEARCH_URL`:: `elasticsearch.url`
+`ELASTICSEARCH_USERNAME`:: `elasticsearch.username`
+`KIBANA_DEFAULTAPPID`:: `kibana.defaultAppId`
+`KIBANA_INDEX`:: `kibana.index`
+`LOGGING_DEST`:: `logging.dest`
+`LOGGING_QUIET`:: `logging.quiet`
+`LOGGING_SILENT`:: `logging.silent`
+`LOGGING_VERBOSE`:: `logging.verbose`
+`OPS_INTERVAL`:: `ops.interval`
+`PID_FILE`:: `pid.file`
+`SERVER_BASEPATH`:: `server.basePath`
+`SERVER_HOST`:: `server.host`
+`SERVER_MAXPAYLOADBYTES`:: `server.maxPayloadBytes`
+`SERVER_NAME`:: `server.name`
+`SERVER_PORT`:: `server.port`
+`SERVER_SSL_CERT`:: `server.ssl.cert`
+`SERVER_SSL_KEY`:: `server.ssl.key`
+`XPACK_MONITORING_ELASTICSEARCH_URL`:: `xpack.monitoring.elasticsearch.url`
+`XPACK_MONITORING_ELASTICSEARCH_USERNAME`:: `xpack.monitoring.elasticsearch.username`
+`XPACK_MONITORING_ELASTICSEARCH_PASSWORD`:: `xpack.monitoring.elasticsearch.password`
+`XPACK_MONITORING_ENABLED`:: `xpack.monitoring.enabled`
+`XPACK_MONITORING_MAX_BUCKET_SIZE`:: `xpack.monitoring.max_bucket_size`
+`XPACK_MONITORING_MIN_INTERVAL_SECONDS`:: `xpack.monitoring.min_interval_seconds`
+`XPACK_MONITORING_NODE_RESOLVER`:: `xpack.monitoring.node_resolver`
+`XPACK_MONITORING_REPORT_STATS`:: `xpack.monitoring.report_stats`
+`XPACK_MONITORING_KIBANA_COLLECTION_ENABLED`:: `xpack.monitoring.kibana.collection.enabled`
+`XPACK_MONITORING_KIBANA_COLLECTION_INTERVAL`:: `xpack.monitoring.kibana.collection.interval`
+`XPACK_MONITORING_UI_CONTAINER_ELASTICSEARCH_ENABLED`:: `xpack.monitoring.ui.container.elasticsearch.enabled`
+`XPACK_SECURITY_ENABLED`:: `xpack.security.enabled`
+`XPACK_SECURITY_COOKIENAME`:: `xpack.security.cookieName`
+`XPACK_SECURITY_ENCRYPTIONKEY`:: `xpack.security.encryptionKey`
+`XPACK_SECURITY_SECURECOOKIES`:: `xpack.security.secureCookies`
+`XPACK_SECURITY_SESSIONTIMEOUT`:: `xpack.security.sessionTimeout`
+
+These variables can be set with +docker-compose+ like this:
+
+["source","yaml",subs="attributes"]
+----------------------------------------------------------
+services:
+  kibana:
+    image: {docker-image}
+    environment:
+      SERVER_NAME: kibana.example.org
+      ELASTICSEARCH_URL: http://elasticsearch.example.org
+----------------------------------------------------------
+
+Environment variables take precedence over settings configured in `kibana.yml`.
+
+==== Docker defaults
+The following settings have different default values when using the Docker image:
+
+[horizontal]
+`server.host`:: `"0"`
+`elasticsearch.url`:: `http://elasticsearch:9200`
+`elasticsearch.username`:: `elastic`
+`elasticsearch.password`:: `changeme`
+`xpack.monitoring.ui.container.elasticsearch.enabled`:: `true`
+
+These settings are defined in the default `kibana.yml`. They can be overridden
+with a <<docker-bind-mount-config,custom `kibana.yml`>> or via
+<<docker-env-config,environment variables>>.

@@ -1,25 +1,26 @@
 
-var sinon = require('auto-release-sinon');
-var expect = require('expect.js');
-var ngMock = require('ngMock');
+import sinon from 'sinon';
+import expect from 'expect.js';
+import ngMock from 'ng_mock';
 
-var debounce;
-var $timeout;
-var $timeoutSpy;
+let debounce;
+let $timeout;
 
 function init() {
   ngMock.module('kibana');
 
   ngMock.inject(function ($injector, _$timeout_) {
     $timeout = _$timeout_;
-    $timeoutSpy = sinon.spy($timeout);
 
     debounce = $injector.get('debounce');
+
+    // ensure there is a clean slate before testing deferred tasks
+    $timeout.flush();
   });
 }
 
 describe('debounce service', function () {
-  var spy;
+  let spy;
   beforeEach(function () {
     spy = sinon.spy(function () {});
     init();
@@ -27,14 +28,14 @@ describe('debounce service', function () {
 
   describe('API', function () {
     it('should have a cancel method', function () {
-      var bouncer = debounce(function () {}, 100);
+      const bouncer = debounce(function () {}, 100);
       expect(bouncer).to.have.property('cancel');
     });
   });
 
   describe('delayed execution', function () {
     it('should delay execution', function () {
-      var bouncer = debounce(spy, 100);
+      const bouncer = debounce(spy, 100);
       bouncer();
       expect(spy.callCount).to.be(0);
       $timeout.flush();
@@ -42,7 +43,7 @@ describe('debounce service', function () {
     });
 
     it('should fire on leading edge', function () {
-      var bouncer = debounce(spy, 100, { leading: true });
+      const bouncer = debounce(spy, 100, { leading: true });
       bouncer();
       expect(spy.callCount).to.be(1);
       $timeout.flush();
@@ -50,7 +51,7 @@ describe('debounce service', function () {
     });
 
     it('should only fire on leading edge', function () {
-      var bouncer = debounce(spy, 100, { leading: true, trailing: false });
+      const bouncer = debounce(spy, 100, { leading: true, trailing: false });
       bouncer();
       expect(spy.callCount).to.be(1);
       $timeout.flush();
@@ -58,8 +59,8 @@ describe('debounce service', function () {
     });
 
     it('should reset delayed execution', function (done) {
-      var cancelSpy = sinon.spy($timeout, 'cancel');
-      var bouncer = debounce(spy, 100);
+      const cancelSpy = sinon.spy($timeout, 'cancel');
+      const bouncer = debounce(spy, 100);
       bouncer();
       setTimeout(function () {
         bouncer();
@@ -74,8 +75,8 @@ describe('debounce service', function () {
 
   describe('cancel', function () {
     it('should cancel the $timeout', function () {
-      var cancelSpy = sinon.spy($timeout, 'cancel');
-      var bouncer = debounce(spy, 100);
+      const cancelSpy = sinon.spy($timeout, 'cancel');
+      const bouncer = debounce(spy, 100);
       bouncer();
       bouncer.cancel();
       expect(cancelSpy.callCount).to.be(1);

@@ -1,29 +1,28 @@
-define(function (require) {
-  return function PointSeriesOrderedDateAxis(timefilter) {
-    var moment = require('moment');
+import moment from 'moment';
 
-    return function orderedDateAxis(vis, chart) {
-      var xAgg = chart.aspects.x.agg;
-      var buckets = xAgg.buckets;
-      var format = buckets.getScaledDateFormat();
+export function PointSeriesOrderedDateAxisProvider() {
 
-      chart.xAxisFormatter = function (val) {
-        return moment(val).format(format);
-      };
+  return function orderedDateAxis(vis, chart) {
+    const xAgg = chart.aspects.x.agg;
+    const buckets = xAgg.buckets;
+    const format = buckets.getScaledDateFormat();
 
-      chart.ordered = {
-        date: true,
-        interval: buckets.getInterval(),
-      };
-
-      var axisOnTimeField = xAgg.fieldIsTimeField();
-      var bounds = buckets.getBounds();
-      if (bounds && axisOnTimeField) {
-        chart.ordered.min = bounds.min;
-        chart.ordered.max = bounds.max;
-      } else {
-        chart.ordered.endzones = false;
-      }
+    chart.xAxisFormatter = function (val) {
+      return moment(val).format(format);
     };
+
+    chart.ordered = {
+      date: true,
+      interval: buckets.getInterval(),
+    };
+
+    const axisOnTimeField = xAgg.fieldIsTimeField();
+    const bounds = buckets.getBounds();
+    if (bounds && axisOnTimeField) {
+      chart.ordered.min = bounds.min;
+      chart.ordered.max = bounds.max;
+    } else {
+      chart.ordered.endzones = false;
+    }
   };
-});
+}

@@ -1,0 +1,21 @@
+<form role="form">
+  <div class="kuiLocalDropdownTitle">Sheet options</div>
+  <div>
+    <div class="form-group col-md-6">
+      <label>Columns <small>Column count must divide evenly into 12</small></label>
+      <select class="form-control"
+        ng-change="opts.search()"
+        ng-options="column for column in [1, 2, 3, 4, 6, 12]"
+        ng-model="opts.state.columns">
+      </select>
+    </div>
+    <div class="form-group col-md-6">
+      <label>Rows <small>This is a target based on the current window height</small></label>
+      <select class="form-control"
+        ng-change="opts.search()"
+        ng-options="row for row in [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]"
+        ng-model="opts.state.rows">
+      </select>
+    </div>
+  </div>
+</form>

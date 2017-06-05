@@ -1,0 +1,60 @@
+/**
+ * 1. Put 10px of space between each child.
+ */
+.kuiToolBarSearch {
+  display: flex;
+  align-items: center;
+  margin-left: $toolBarSectionSpacing * 0.5;
+  margin-right: $toolBarSectionSpacing * 0.5;
+
+  &:first-child {
+    margin-left: 0;
+  }
+
+  &:last-child {
+    margin-right: 0;
+  }
+
+  & > * + * {
+    margin-left: $toolBarItsemSpacing; /* 1 */
+  }
+
+  flex: 1 1 auto;
+  max-width: 800px;
+  line-height: $globalLineHeight;
+}
+
+.kuiToolBarSearchBox {
+  flex: 1 1 auto;
+  position: relative;
+  font-size: $globalFontSize;
+}
+
+  .kuiToolBarSearchBox__icon {
+    position: absolute;
+    top: 0.5em;
+    left: 0.7em;
+    font-size: 1em;
+    color: #ACACAC;
+  }
+
+  /**
+   * 1. Fix inherited styles (possibly from Bootstrap).
+   */
+  .kuiToolBarSearchBox__input {
+    width: 100%;
+    min-width: 200px;
+    padding: 4px 12px 5px 28px;
+    font-family: $globalFontFamily; /* 1 */
+    background-color: #FFFFFF;
+    color: $globalFontColor;
+    border-radius: $globalBorderRadius;
+    font-size: 1em;
+    border: 1px solid #ffffff;
+    line-height: normal; /* 1 */
+    transition: border-color $globalInputTransitionTiming;
+
+    &:focus {
+      @include formControlFocus;
+    }
+  }

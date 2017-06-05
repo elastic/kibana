@@ -1,137 +1,90 @@
-define(function (require) {
-  var Common = require('../../../support/pages/Common');
-  var HeaderPage = require('../../../support/pages/HeaderPage');
-  var SettingsPage = require('../../../support/pages/settings_page');
-  var DiscoverPage = require('../../../support/pages/DiscoverPage');
-  var VisualizePage = require('../../../support/pages/VisualizePage');
-  var expect = require('intern/dojo/node!expect.js');
+import expect from 'expect.js';
 
-  return function (bdd, scenarioManager) {
-    bdd.describe('visualize app', function describeIndexTests() {
-      var common;
-      var headerPage;
-      var settingsPage;
-      var discoverPage;
-      var visualizePage;
-      var remote;
-      var fromTime;
-      var toTime;
+export default function ({ getService, getPageObjects }) {
+  const log = getService('log');
+  const retry = getService('retry');
+  const screenshots = getService('screenshots');
+  const PageObjects = getPageObjects(['common', 'visualize', 'header']);
 
-      bdd.before(function () {
-        common = new Common(this.remote);
-        headerPage = new HeaderPage(this.remote);
-        settingsPage = new SettingsPage(this.remote);
-        discoverPage = new DiscoverPage(this.remote);
-        visualizePage = new VisualizePage(this.remote);
-        remote = this.remote;
-        fromTime = '2015-09-19 06:31:44.000';
-        toTime = '2015-09-23 18:31:44.000';
+  describe('visualize app', function describeIndexTests() {
+    const fromTime = '2015-09-19 06:31:44.000';
+    const toTime = '2015-09-23 18:31:44.000';
 
-
-        return scenarioManager.reload('emptyKibana')
-        .then(function () {
-          common.debug('navigateTo');
-          return settingsPage.navigateTo();
-        })
-        .then(function () {
-          common.debug('createIndexPattern');
-          return settingsPage.createIndexPattern();
-        })
-        .then(function () {
-          return settingsPage.clickAdvancedTab();
-        })
-        .then(function GetAdvancedSetting() {
-          common.debug('check for required UTC timezone');
-          return settingsPage.getAdvancedSettings('dateFormat:tz');
-        })
-        .then(function (advancedSetting) {
-          expect(advancedSetting).to.be('UTC');
-        })
-        .then(function () {
-          common.debug('navigateToApp visualize');
-          return common.navigateToApp('visualize');
-        })
-        .then(function () {
-          common.debug('clickDataTable');
-          return visualizePage.clickDataTable();
-        })
-        .then(function clickNewSearch() {
-          common.debug('clickNewSearch');
-          return visualizePage.clickNewSearch();
-        })
-        .then(function setAbsoluteRange() {
-          common.debug('Set absolute time range from \"' + fromTime + '\" to \"' + toTime + '\"');
-          return headerPage.setAbsoluteRange(fromTime, toTime);
-        })
-        .then(function clickBucket() {
-          common.debug('Bucket = Split Rows');
-          return visualizePage.clickBucket('Split Rows');
-        })
-        .then(function selectAggregation() {
-          common.debug('Aggregation = Histogram');
-          return visualizePage.selectAggregation('Histogram');
-        })
-        .then(function selectField() {
-          common.debug('Field = bytes');
-          return visualizePage.selectField('bytes');
-        })
-        .then(function setInterval() {
-          common.debug('Interval = 2000');
-          return visualizePage.setNumericInterval('2000');
-        })
-        .then(function clickGo() {
-          return visualizePage.clickGo();
-        })
-        .then(function () {
-          return headerPage.getSpinnerDone();
-        })
-        .catch(common.handleError(this));
-      });
-
-
-      bdd.describe('data table', function indexPatternCreation() {
-        var testSubName = 'DataTable';
-        var vizName1 = 'Visualization ' + testSubName;
-
-        bdd.it('should be able to save and load', function pageHeader() {
-          return visualizePage.saveVisualization(vizName1)
-          .then(function (message) {
-            common.debug('Saved viz message = ' + message);
-            expect(message).to.be('Visualization Editor: Saved Visualization \"' + vizName1 + '\"');
-          })
-          .then(function testVisualizeWaitForToastMessageGone() {
-            return visualizePage.waitForToastMessageGone();
-          })
-          .then(function () {
-            return visualizePage.loadSavedVisualization(vizName1);
-          })
-          .then(function () {
-            return visualizePage.waitForVisualization();
-          })
-          .catch(common.handleError(this));
-        });
-
-
-        bdd.it('should show correct data, take screenshot', function pageHeader() {
-          var chartHeight = 0;
-          var expectedChartData = [ '0 2,088', '2,000 2,748', '4,000 2,707', '6,000 2,876',
-          '8,000 2,863', '10,000 147', '12,000 148', '14,000 129', '16,000 161', '18,000 137'
-          ];
-
-          return visualizePage.getDataTableData()
-          .then(function showData(data) {
-            common.debug(data.split('\n'));
-            expect(data.split('\n')).to.eql(expectedChartData);
-          })
-          .then(function takeScreenshot() {
-            common.debug('Take screenshot');
-            common.saveScreenshot('./screenshot-' + testSubName + '.png');
-          })
-          .catch(common.handleError(this));
-        });
-
-
+    before(function () {
+      log.debug('navigateToApp visualize');
+      return PageObjects.common.navigateToUrl('visualize', 'new')
+      .then(function () {
+        log.debug('clickDataTable');
+        return PageObjects.visualize.clickDataTable();
+      })
+      .then(function clickNewSearch() {
+        log.debug('clickNewSearch');
+        return PageObjects.visualize.clickNewSearch();
+      })
+      .then(function setAbsoluteRange() {
+        log.debug('Set absolute time range from \"' + fromTime + '\" to \"' + toTime + '\"');
+        return PageObjects.header.setAbsoluteRange(fromTime, toTime);
+      })
+      .then(function clickBucket() {
+        log.debug('Bucket = Split Rows');
+        return PageObjects.visualize.clickBucket('Split Rows');
+      })
+      .then(function selectAggregation() {
+        log.debug('Aggregation = Histogram');
+        return PageObjects.visualize.selectAggregation('Histogram');
+      })
+      .then(function selectField() {
+        log.debug('Field = bytes');
+        return PageObjects.visualize.selectField('bytes');
+      })
+      .then(function setInterval() {
+        log.debug('Interval = 2000');
+        return PageObjects.visualize.setNumericInterval('2000');
+      })
+      .then(function clickGo() {
+        return PageObjects.visualize.clickGo();
+      })
+      .then(function () {
+        return PageObjects.header.waitUntilLoadingHasFinished();
       });
     });
-  };
-});
+
+    describe('data table', function indexPatternCreation() {
+      const vizName1 = 'Visualization DataTable';
+
+      it('should be able to save and load', function () {
+        return PageObjects.visualize.saveVisualization(vizName1)
+        .then(function (message) {
+          log.debug('Saved viz message = ' + message);
+          expect(message).to.be('Visualization Editor: Saved Visualization \"' + vizName1 + '\"');
+        })
+        .then(function testVisualizeWaitForToastMessageGone() {
+          return PageObjects.visualize.waitForToastMessageGone();
+        })
+        .then(function () {
+          return PageObjects.visualize.loadSavedVisualization(vizName1);
+        })
+        .then(function () {
+          return PageObjects.visualize.waitForVisualization();
+        });
+      });
+
+      it('should show correct data, take screenshot', function () {
+        const expectedChartData = [
+          '0', '2,088', '2,000', '2,748', '4,000', '2,707', '6,000', '2,876',
+          '8,000', '2,863', '10,000', '147', '12,000', '148', '14,000', '129', '16,000', '161', '18,000', '137'
+        ];
+
+        return retry.try(function () {
+          return PageObjects.visualize.getDataTableData()
+          .then(function showData(data) {
+            log.debug(data.split('\n'));
+            screenshots.take('Visualize-data-table');
+            expect(data.split('\n')).to.eql(expectedChartData);
+          });
+        });
+      });
+
+    });
+  });
+}

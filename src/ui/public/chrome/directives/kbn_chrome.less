@@ -1,0 +1,34 @@
+
+@import (reference) "~ui/styles/mixins";
+@import (reference) "~ui/styles/variables";
+
+body { overflow-x: hidden; }
+
+.app-wrapper {
+  .real-flex-parent();
+  position: absolute;
+  left: @global-nav-closed-width;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 1;
+  margin: 0 auto;
+  background-color: #fff;
+
+  /**
+   * 1. Dirty, but we need to override the .is-global-nav-open state
+   *    when we're looking at the log-in screen.
+   */
+  &.hidden-chrome {
+    left: 0 !important; /* 1 */
+  }
+
+  .navbar-right {
+    margin-right: 0;
+  }
+}
+
+  .app-wrapper-panel {
+    .flex-parent(@shrink: 0);
+    box-shadow: -4px 0px 3px rgba(0,0,0,0.2);
+  }

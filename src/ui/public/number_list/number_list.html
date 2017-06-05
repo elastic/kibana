@@ -1,20 +1,25 @@
 <div
   ng-repeat="value in numberListCntr.getList() track by $index"
-  class="form-group vis-editor-agg-form-row vis-editor-agg-form-row">
+  class="form-group kuiFieldGroup"
+>
+  <div class="kuiFieldGroupSection kuiFieldGroupSection--wide">
+    <input
+      ng-model="numberListCntr.getList()[$index]"
+      kbn-number-list-input
+      input-focus
+      class="form-control"
+    >
+  </div>
 
-  <input
-    ng-model="numberListCntr.getList()[$index]"
-    kbn-number-list-input
-    input-focus
-    class="form-control">
-
-  <button
-    ng-click="numberListCntr.remove($index, 1)"
-    class="btn btn-danger btn-xs"
-    type="button">
-    <i class="fa fa-times"></i>
-  </button>
-
+  <div class="kuiFieldGroupSection">
+    <button
+      ng-click="numberListCntr.remove($index, 1)"
+      class="kuiButton kuiButton--danger kuiButton--small"
+      type="button"
+    >
+      <span class="kuiIcon fa-times"></span>
+    </button>
+  </div>
 </div>
 
 <p ng-show="numberListCntr.invalidLength()" class="text-danger text-center">
@@ -29,6 +34,7 @@
 <button
   ng-click="numberListCntr.add()"
   type="button"
-  class="sidebar-item-button primary">
+  class="kuiButton kuiButton--primary kuiButton--fullWidth"
+>
   <i class="fa fa-plus"></i> Add {{numberListCntr.getUnitName()}}
 </button>

@@ -1,0 +1,116 @@
+@import "../../dist/ui_framework.css";
+@import "./variables";
+@import "./components/guide_components";
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  height: 100%;
+}
+
+/**
+ * 1. Insane line-height makes it easier to notice when components are relying
+ *    on styles inherited from body.
+ */
+body {
+  background-color: #000000;
+  line-height: 40px; /* 1 */
+  margin: 0;
+  min-width: $guideMinWidth;
+}
+
+/**
+ * 1. Expand container to fit the page if the content is shorter than the page, or expand with the
+ *    content if it's taller than the page.
+ */
+.guide {
+  display: flex;
+  min-height: 100%; /* 1 */
+}
+
+.guideContent {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+  padding-top: $guideNavHeight;
+  background-color: $guideBaseBackgroundColor;
+  transition:
+    padding-right $guideCodeViewerTransition,
+    opacity $guideCodeViewerTransition;
+
+  &.is-code-viewer-open {
+    padding-right: $guideCodeViewerWidth;
+
+    @include whenNarrowerThan($guideNormalBreakpoint) {
+      padding-right: $guideCodeViewerSmallWidth;
+    }
+  }
+
+  .is-guide-nav-open + & {
+    opacity: 0.7;
+  }
+}
+
+@media only screen and (max-width: 1300px) {
+  .guideHomePage {
+    justify-content: flex-start !important;
+
+    .guideContentPage__content {
+      margin-left: 250px;
+    }
+  }
+}
+
+.guideContentPage {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  flex: 1 0 auto;
+  background-color: #ffffff;
+}
+
+  .guideContentPage__hint {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    max-width: 260px;
+    max-height: 500px;
+    padding: 30px;
+    margin: 20px;
+    border-radius: 4px;
+    background-color: #e8e8e8;
+    line-height: $guideLineHeight;
+  }
+
+  .guideContentPage__content {
+    width: 100%;
+    max-width: 800px;
+    padding: 30px 60px;
+  }
+
+.guideHintArrow {
+  position: absolute;
+  top: -15px;
+  left: 12px;
+  background-image: url("images/hint-arrow.svg");
+  width: 26px;
+  height: 40px;
+  background-repeat: no-repeat;
+  background-size: contain;
+}
+
+.guideWarning {
+  border-left: 5px solid #e8488b;
+  margin-top: 19px;
+  padding: 0 14px;
+  line-height: 21px;
+  color: #e8488b;
+}
+
+.guideBreak {
+  border: none;
+}

@@ -1,9 +1,23 @@
-var $ = require('jquery');
-var _ = require('lodash');
+import _ from 'lodash';
+import $ from 'jquery';
+import { VislibVisProvider } from 'ui/vislib/vis';
 
-var $visCanvas = $('<div>').attr('id', 'vislib-vis-fixtures').appendTo('body');
-var count = 0;
-var visHeight = $visCanvas.height();
+const $visCanvas = $('<div>')
+  .attr('id', 'vislib-vis-fixtures')
+  .css({
+    height: '500px',
+    width: '1024px',
+    display: 'flex',
+    position: 'fixed',
+    top: '0px',
+    left: '0px',
+    overflow: 'hidden',
+    'pointer-events': 'none', // Prevent element from blocking you from clicking a test
+  })
+  .appendTo('body');
+
+let count = 0;
+const visHeight = $visCanvas.height();
 
 $visCanvas.new = function () {
   count += 1;
@@ -19,16 +33,14 @@ afterEach(function () {
 
 module.exports = function VislibFixtures(Private) {
   return function (visLibParams) {
-    var Vis = Private(require('ui/vislib/vis'));
+    const Vis = Private(VislibVisProvider);
     return new Vis($visCanvas.new(), _.defaults({}, visLibParams || {}, {
-      shareYAxis: true,
       addTooltip: true,
       addLegend: true,
       defaultYExtents: false,
       setYExtents: false,
       yAxis: {},
-      type: 'histogram',
-      hasTimeField: true
+      type: 'histogram'
     }));
   };
 };

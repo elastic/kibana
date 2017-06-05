@@ -1,27 +1,29 @@
+import $ from 'jquery';
+import ngMock from 'ng_mock';
+import expect from 'expect.js';
+import fixtures from 'fixtures/fake_hierarchical_data';
+import { AggResponseTabifyProvider } from 'ui/agg_response/tabify/tabify';
+import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
+import { VisProvider } from 'ui/vis';
 describe('AggTableGroup Directive', function () {
-  var _ = require('lodash');
-  var $ = require('jquery');
-  var ngMock = require('ngMock');
-  var expect = require('expect.js');
-  var fixtures = require('fixtures/fake_hierarchical_data');
 
-  var $rootScope;
-  var $compile;
-  var tabifyAggResponse;
-  var Vis;
-  var indexPattern;
+  let $rootScope;
+  let $compile;
+  let tabifyAggResponse;
+  let Vis;
+  let indexPattern;
 
   beforeEach(ngMock.module('kibana'));
   beforeEach(ngMock.inject(function ($injector, Private) {
-    tabifyAggResponse = Private(require('ui/agg_response/tabify/tabify'));
-    indexPattern = Private(require('fixtures/stubbed_logstash_index_pattern'));
-    Vis = Private(require('ui/Vis'));
+    tabifyAggResponse = Private(AggResponseTabifyProvider);
+    indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
+    Vis = Private(VisProvider);
 
     $rootScope = $injector.get('$rootScope');
     $compile = $injector.get('$compile');
   }));
 
-  var $scope;
+  let $scope;
   beforeEach(function () {
     $scope = $rootScope.$new();
   });
@@ -31,9 +33,13 @@ describe('AggTableGroup Directive', function () {
 
 
   it('renders a simple split response properly', function () {
-    var vis = new Vis(indexPattern, 'table');
+    const vis = new Vis(indexPattern, 'table');
     $scope.group = tabifyAggResponse(vis, fixtures.metricOnly);
-    var $el = $('<kbn-agg-table-group group="group"></kbn-agg-table-group>');
+    $scope.sort = {
+      columnIndex: null,
+      direction: null
+    };
+    const $el = $('<kbn-agg-table-group group="group"></kbn-agg-table-group>');
 
     $compile($el)($scope);
     $scope.$digest();
@@ -43,7 +49,7 @@ describe('AggTableGroup Directive', function () {
   });
 
   it('renders nothing if the table list is empty', function () {
-    var $el = $('<kbn-agg-table-group group="group"></kbn-agg-table-group>');
+    const $el = $('<kbn-agg-table-group group="group"></kbn-agg-table-group>');
 
     $scope.group = {
       tables: []
@@ -52,12 +58,12 @@ describe('AggTableGroup Directive', function () {
     $compile($el)($scope);
     $scope.$digest();
 
-    var $subTables = $el.find('kbn-agg-table');
+    const $subTables = $el.find('kbn-agg-table');
     expect($subTables.size()).to.be(0);
   });
 
   it('renders a complex response properly', function () {
-    var vis = new Vis(indexPattern, {
+    const vis = new Vis(indexPattern, {
       type: 'pie',
       aggs: [
         { type: 'avg', schema: 'metric', params: { field: 'bytes' } },
@@ -70,15 +76,15 @@ describe('AggTableGroup Directive', function () {
       agg.id = 'agg_' + (i + 1);
     });
 
-    var group = $scope.group = tabifyAggResponse(vis, fixtures.threeTermBuckets);
-    var $el = $('<kbn-agg-table-group group="group"></kbn-agg-table-group>');
+    const group = $scope.group = tabifyAggResponse(vis, fixtures.threeTermBuckets);
+    const $el = $('<kbn-agg-table-group group="group"></kbn-agg-table-group>');
     $compile($el)($scope);
     $scope.$digest();
 
-    var $subTables = $el.find('kbn-agg-table');
+    const $subTables = $el.find('kbn-agg-table');
     expect($subTables.size()).to.be(3);
 
-    var $subTableHeaders = $el.find('.agg-table-group-header');
+    const $subTableHeaders = $el.find('.agg-table-group-header');
     expect($subTableHeaders.size()).to.be(3);
 
     $subTableHeaders.each(function (i) {

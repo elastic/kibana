@@ -1,0 +1,16 @@
+.guideTitle {
+  font-weight: 700;
+  font-size: 22px;
+  line-height: 1.5;
+  margin: 0;
+}
+
+.guideText {
+  font-size: 14px;
+  line-height: 1.5;
+  margin: $guideVerticalRhythm 0 0;
+}
+
+.guideText--noMargin {
+  margin-top: 0;
+}

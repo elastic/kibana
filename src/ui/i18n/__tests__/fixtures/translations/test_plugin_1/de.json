@@ -1,0 +1,4 @@
+{
+  "test_plugin_1-NO_SSL": "Dont run the DE dev server using HTTPS",
+  "test_plugin_1-DEV": "Run the DE server with development mode defaults"
+}

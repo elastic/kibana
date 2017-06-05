@@ -1,25 +1,29 @@
-describe('Regex', function () {
-  var _ = require('lodash');
-  var expect = require('expect.js');
-  var ngMock = require('ngMock');
+import expect from 'expect.js';
+import ngMock from 'ng_mock';
+import { AggTypesParamTypesBaseProvider } from 'ui/agg_types/param_types/base';
+import { AggTypesParamTypesRegexProvider } from 'ui/agg_types/param_types/regex';
+import { VisProvider } from 'ui/vis';
+import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
 
-  var BaseAggParam;
-  var RegexAggParam;
-  var Vis;
-  var indexPattern;
+describe('Regex', function () {
+
+  let BaseAggParam;
+  let RegexAggParam;
+  let Vis;
+  let indexPattern;
 
   beforeEach(ngMock.module('kibana'));
   // fetch out deps
   beforeEach(ngMock.inject(function (Private) {
-    BaseAggParam = Private(require('ui/agg_types/param_types/base'));
-    RegexAggParam = Private(require('ui/agg_types/param_types/regex'));
-    Vis = Private(require('ui/Vis'));
-    indexPattern = Private(require('fixtures/stubbed_logstash_index_pattern'));
+    BaseAggParam = Private(AggTypesParamTypesBaseProvider);
+    RegexAggParam = Private(AggTypesParamTypesRegexProvider);
+    Vis = Private(VisProvider);
+    indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
   }));
 
   describe('constructor', function () {
     it('should be an instance of BaseAggParam', function () {
-      var aggParam = new RegexAggParam({
+      const aggParam = new RegexAggParam({
         name: 'some_param',
         type: 'regex'
       });
@@ -30,16 +34,16 @@ describe('Regex', function () {
   });
 
   describe('write results', function () {
-    var aggParam;
-    var aggConfig;
-    var output = { params: {} };
-    var paramName = 'exclude';
+    let aggParam;
+    let aggConfig;
+    const output = { params: {} };
+    const paramName = 'exclude';
 
     beforeEach(function () {
-      var vis = new Vis(indexPattern, {
+      const vis = new Vis(indexPattern, {
         type: 'pie',
         aggs: [
-          { type: 'terms', schema: 'split', params: { field: 'extension' }},
+          { type: 'terms', schema: 'split', params: { field: 'extension' } },
         ]
       });
       aggConfig = vis.aggs[0];
@@ -69,20 +73,6 @@ describe('Regex', function () {
       aggParam.write(aggConfig, output);
       expect(output.params).to.have.property(paramName);
       expect(output.params[paramName]).to.eql({ pattern: 'testing' });
-      expect(output.params[paramName]).not.to.have.property('flags');
-    });
-
-    it('should include flags', function () {
-      aggConfig.params[paramName] = {
-        pattern: 'testing',
-        flags: [ 'TEST1', 'TEST2', 'TEST_RED', 'TEST_BLUE' ]
-      };
-
-      aggParam.write(aggConfig, output);
-      expect(output.params).to.have.property(paramName);
-      expect(output.params[paramName]).to.have.property('flags');
-      expect(typeof output.params[paramName].flags).to.be('string');
-      expect(output.params[paramName].flags).to.be('TEST1|TEST2|TEST_RED|TEST_BLUE');
     });
   });
 });

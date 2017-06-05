@@ -1,5 +1,5 @@
+import './_route_manager';
+import './_work_queue';
+import './_wrap_route_with_prep';
 describe('Custom Route Management', function () {
-  require('./_RouteManager');
-  require('./_WorkQueue');
-  require('./_wrapRouteWithPrep');
 });

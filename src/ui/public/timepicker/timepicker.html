@@ -1,40 +1,38 @@
 <div class="kbn-timepicker">
-  <style>
-    .kbn-timepicker [kbn-time-input] {
-      text-align: center;
-    }
-    .kbn-timepicker-modes {
-      text-transform: capitalize;
-    }
-    .kbn-timepicker-section {
-      float: left;
-      padding: 0px 15px;
-    }
-    .kbn-refresh-section {
-      float: left;
-      padding: 0px 15px;
-    }
-    .kbn-timepicket-alert {
-      width: 100px;
-    }
-  </style>
 
   <div class="tab-content">
 
     <!-- Filters -->
     <div ng-show="activeTab === 'filter'" role="tabpanel" class="tab-pane active">
-      <br>
+      <div class="kuiLocalDropdownTitle">Time Range</div>
       <div class="row">
         <div class="col-md-2">
           <ul class="nav nav-pills nav-stacked kbn-timepicker-modes">
             <li ng-class="{active: mode === 'quick' }">
-              <a ng-click="setMode('quick')">quick</a>
+              <a
+                ng-click="setMode('quick')"
+                kbn-accessible-click
+              >
+                quick
+              </a>
             </li>
+
             <li ng-class="{active: mode === 'relative' }">
-              <a ng-click="setMode('relative')">relative</a>
+              <a
+                ng-click="setMode('relative')"
+                kbn-accessible-click
+              >
+                relative
+              </a>
             </li>
+
             <li ng-class="{active: mode === 'absolute' }">
-              <a ng-click="setMode('absolute')">absolute</a>
+              <a
+                ng-click="setMode('absolute')"
+                kbn-accessible-click
+              >
+                absolute
+              </a>
             </li>
           </ul>
         </div>
@@ -46,7 +44,11 @@
               <div ng-repeat="list in quickLists" class="kbn-timepicker-section">
                 <ul class="list-unstyled">
                   <li ng-repeat="option in list">
-                    <a ng-click="setQuick(option.from, option.to)" ng-bind="::option.display"></a>
+                    <a
+                      ng-click="setQuick(option.from, option.to)"
+                      ng-bind="::option.display"
+                      kbn-accessible-click
+                    ></a>
                   </li>
                 </ul>
               </div>
@@ -59,24 +61,32 @@
                 <div class="kbn-timepicker-section">
                   <label>
                     From:
-                    <span ng-show="relative.preview">{{relative.preview}}</span>
-                    <span ng-hide="relative.preview"><i>Invalid Expression</i></span>
+                    <span ng-show="relative.from.preview">{{relative.from.preview}}</span>
+                    <a
+                      class="label label-default"
+                      ng-click="setRelativeToNow('from')"
+                      kbn-accessible-click
+                    >
+                      Set To Now
+                    </a>
+                    <span ng-hide="relative.from.preview"><em>Invalid Expression</em></span>
                   </label>
                   <br>
-                  <div class="form-group">
+                  <div class="form-group" ng-class="{ 'has-error': checkRelative() }">
                     <input
                       required
-                      ng-model="relative.count"
-                      ng-change="formatRelative()"
+                      ng-model="relative.from.count"
+                      ng-change="formatRelative('from')"
                       greater-than="-1"
+                      min="0"
                       type="number"
                       class="form-control">
                   </div>
-                  <div class="form-group">
+                  <div class="form-group" ng-class="{ 'has-error': checkRelative() }">
                     <select
-                      ng-model="relative.unit"
+                      ng-model="relative.from.unit"
                       ng-options="opt.value as opt.text for opt in relativeOptions"
-                      ng-change="formatRelative()"
+                      ng-change="formatRelative('from')"
                       class="form-control col-xs-2">
                     </select>
                   </div>
@@ -84,22 +94,62 @@
                   <div class="small">
                     <label>
                       <input
-                        ng-model="relative.round"
-                        ng-checked="relative.round"
-                        ng-change="formatRelative()"
+                        ng-model="relative.from.round"
+                        ng-checked="relative.from.round"
+                        ng-change="formatRelative('from')"
                         type="checkbox">
-                      round to the {{units[relative.unit]}}
+                      round to the {{units[relative.from.unit.substring(0,1)]}}
                     </label>
+                    <div
+                      ng-class="{ 'kbn-timepicker-error': checkRelative() }"
+                      ng-show="checkRelative()">
+                      <strong>From</strong> must occur before <strong>To</strong>
+                    </div>
                   </div>
                 </div>
 
                 <div class="kbn-timepicker-section">
                   <label>
-                    To: Now
+                    To:
+                    <span ng-show="relative.to.preview">{{relative.to.preview}}</span>
+                    <a
+                      class="label label-default"
+                      ng-click="setRelativeToNow('to')"
+                      kbn-accessible-click
+                    >
+                      Set To Now
+                    </a>
+                    <span ng-hide="relative.to.preview"><em>Invalid Expression</em></span>
                   </label>
                   <br>
-                  <div class="form-group">
-                    <input type="text" disabled class="form-control" value="Now">
+                  <div class="form-group" ng-class="{ 'has-error': checkRelative() }">
+                    <input
+                      required
+                      ng-model="relative.to.count"
+                      ng-change="formatRelative('to')"
+                      greater-than="-1"
+                      min="0"
+                      type="number"
+                      class="form-control">
+                  </div>
+                  <div class="form-group" ng-class="{ 'has-error': checkRelative() }">
+                    <select
+                      ng-model="relative.to.unit"
+                      ng-options="opt.value as opt.text for opt in relativeOptions"
+                      ng-change="formatRelative('to')"
+                      class="form-control col-xs-2">
+                    </select>
+                  </div>
+                  <br>
+                  <div class="small">
+                    <label>
+                      <input
+                        ng-model="relative.to.round"
+                        ng-checked="relative.to.round"
+                        ng-change="formatRelative('to')"
+                        type="checkbox">
+                      round to the {{units[relative.to.unit.substring(0,1)]}}
+                    </label>
                   </div>
                 </div>
 
@@ -107,7 +157,12 @@
                   <label>&nbsp;</label>
                   <br>
                   <div class="form-group">
-                    <button type="submit" class="btn btn-primary kbn-timepicker-go" ng-disabled="!relative.preview">
+                    <button
+                      data-test-subj="timepickerGoButton"
+                      type="submit"
+                      class="kuiButton kuiButton--primary"
+                      ng-disabled="!(relative.from.preview && relative.to.preview) || checkRelative()"
+                    >
                       Go
                     </button>
                   </div>
@@ -119,32 +174,50 @@
               <form name="absoluteTime" ng-submit="applyAbsolute()">
                 <div class="kbn-timepicker-section">
                   <div>
-                    <label class="small">From: <span ng-show="!absolute.from"><i>Invalid Date</i></span>
+                    <label class="small">From: <span ng-show="!absolute.from"><em>Invalid Date</em></span>
+                      <a
+                        class="label label-default"
+                        ng-click="setToNow('from')"
+                        kbn-accessible-click
+                      >
+                        Set To Now
+                      </a>
                     </label>
                     <input type="text" required class="form-control" input-datetime="{{format}}" ng-model="absolute.from">
                   </div>
                   <div>
-                    <datepicker ng-model="absolute.from" max-date="absolute.to" show-weeks="false"></datepicker>
+                    <datepicker ng-model="pickFromDate" ng-model-options="{ getterSetter: true }" max-date="absolute.to" show-weeks="false"></datepicker>
                   </div>
                 </div>
 
                 <div class="kbn-timepicker-section">
                   <div>
                     <label class="small">To:
-                      <a class="label label-default" ng-click="setToNow()">Set To Now</a>
+                      <a
+                        class="label label-default"
+                        ng-click="setToNow('to')"
+                        kbn-accessible-click
+                      >
+                        Set To Now
+                      </a>
                     </label>
-                    <span ng-show="!absolute.to"><i>Invalid Date</i></span>
+                    <span ng-show="!absolute.to"><em>Invalid Date</em></span>
                     <input type="text" required class="form-control" input-datetime="{{format}}" ng-model="absolute.to">
                   </div>
                   <div>
-                    <datepicker ng-model="absolute.to" min-date="absolute.from" show-weeks="false"></datepicker>
+                    <datepicker ng-model="pickToDate" ng-model-options="{ getterSetter: true }" min-date="absolute.from" show-weeks="false"></datepicker>
                   </div>
                 </div>
 
                 <div class="kbn-timepicker-section kbn-timepicker-alert">
                   <label>&nbsp;</label>
                   <div class="form-group">
-                    <button class="btn btn-primary kbn-timepicker-go" ng-disabled="absolute.from > absolute.to || !absolute.from || !absolute.to" type="submit">
+                    <button
+                      data-test-subj="timepickerGoButton"
+                      class="kuiButton kuiButton--primary"
+                      ng-disabled="absolute.from > absolute.to || !absolute.from || !absolute.to"
+                      type="submit"
+                    >
                       Go
                     </button>
                     <span class="small" ng-show="absolute.from > absolute.to"><strong>From</strong> must occur before <strong>To</strong></span>
@@ -159,11 +232,16 @@
 
     <!-- Refresh Intervals -->
     <div ng-show="activeTab === 'interval'" role="tabpanel" class="tab-pane active">
-      <br>
+      <div class="kuiLocalDropdownTitle">Refresh Interval</div>
       <div ng-repeat="list in refreshLists" class="kbn-refresh-section">
         <ul class="list-unstyled">
           <li ng-repeat="inter in list">
-            <a class="refresh-interval" ng-class="{ 'refresh-interval-active': interval.value === inter.value }" ng-click="setRefreshInterval(inter)">
+            <a
+              class="refresh-interval"
+              ng-class="{ 'refresh-interval-active': interval.value === inter.value }"
+              ng-click="setRefreshInterval(inter)"
+              kbn-accessible-click
+            >
               {{inter.display}}
             </a>
           </li>

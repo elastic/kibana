@@ -1,25 +1,30 @@
-var angular = require('angular');
-var $ = require('jquery');
-var sinon = require('sinon');
-var expect = require('expect.js');
-var ngMock = require('ngMock');
+import angular from 'angular';
+import expect from 'expect.js';
+import ngMock from 'ng_mock';
+import $ from 'jquery';
+import 'ui/directives/confirm_click';
+import 'plugins/kibana/discover/index';
+import sinon from 'sinon';
 
-require('ui/directives/confirm_click');
-require('plugins/kibana/discover/index');
+let $window;
 
-var $parentScope;
+let $parentScope;
 
-var $scope;
+let $scope;
 
-var $elem;
+let $elem;
 
-var init = function (text) {
+const init = function (confirm) {
   // Load the application
-  ngMock.module('kibana');
+  ngMock.module('kibana', function ($provide) {
+    $window = {
+      confirm: sinon.stub().returns(confirm)
+    };
+    $provide.value('$window', $window);
+  });
 
   // Create the scope
   ngMock.inject(function ($rootScope, $compile) {
-
     // Give us a scope
     $parentScope = $rootScope;
 
@@ -47,23 +52,21 @@ describe('confirmClick directive', function () {
 
 
   describe('event handlers', function () {
-    var events;
+    let events;
 
     beforeEach(function () {
       init();
       events = $._data($elem[0], 'events');
     });
 
-    it('should get a click handler', function (done) {
+    it('should get a click handler', function () {
       expect(events).to.be.a(Object);
       expect(events.click).to.be.a(Array);
-      done();
     });
 
-    it('should unbind click handlers when the scope is destroyed', function (done) {
+    it('should unbind click handlers when the scope is destroyed', function () {
       $scope.$destroy();
       expect(events.click).to.be(undefined);
-      done();
     });
 
   });
@@ -71,49 +74,26 @@ describe('confirmClick directive', function () {
 
 
   describe('confirmed', function () {
-    var confirmed;
+    beforeEach(() => init(true));
 
-    beforeEach(function () {
-      init();
-      confirmed = sinon.stub(window, 'confirm');
-      confirmed.returns(true);
-    });
-
-    afterEach(function () {
-      window.confirm.restore();
-    });
-
-    it('should trigger window.confirm when clicked', function (done) {
+    it('should trigger window.confirm when clicked', function () {
       $elem.click();
-      expect(confirmed.called).to.be(true);
-      done();
+      expect($window.confirm.called).to.be(true);
     });
 
-    it('should run the click function when positively confirmed', function (done) {
+    it('should run the click function when positively confirmed', function () {
       $elem.click();
       expect($scope.runThis.called).to.be(true);
-      done();
     });
 
   });
 
   describe('not confirmed', function () {
-    var confirmed;
+    beforeEach(() => init(false));
 
-    beforeEach(function () {
-      init();
-      confirmed = sinon.stub(window, 'confirm');
-      confirmed.returns(false);
-    });
-
-    afterEach(function () {
-      window.confirm.restore();
-    });
-
-    it('should not run the click function when canceled', function (done) {
+    it('should not run the click function when canceled', function () {
       $elem.click();
       expect($scope.runThis.called).to.be(false);
-      done();
     });
 
   });

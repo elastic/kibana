@@ -1,0 +1,54 @@
+<nav
+  class="global-nav"
+  ng-class="{'is-global-nav-open': isGlobalNavOpen}"
+  ng-show="isVisible"
+>
+
+  <!-- Logo -->
+  <div class="global-nav__logo">
+    <li
+      ng-if="!logoBrand && !smallLogoBrand"
+      aria-label="{{ appTitle }} Logo"
+      class="logo kibana"
+    ></li>
+
+    <li
+      ng-if="logoBrand"
+      ng-style="{ 'background': logoBrand }"
+      aria-label="{{ appTitle }} Logo"
+      class="logo hidden-sm"
+    ></li>
+
+    <li
+      ng-if="smallLogoBrand"
+      ng-style="{ 'background': smallLogoBrand }"
+      aria-label="{{ appTitle }} Logo"
+      class="logo-small visible-sm hidden-xs"
+    ></li>
+  </div>
+
+  <!-- Links -->
+  <div class="global-nav__links">
+    <!-- Main apps -->
+    <div class="global-nav__links-section">
+      <app-switcher
+        chrome="chrome"
+      ></app-switcher>
+    </div>
+
+    <!-- Bottom button -->
+    <div class="global-nav__links-section">
+      <div class="chrome-actions" kbn-chrome-append-nav-controls></div>
+
+      <!-- Open/close sidebar -->
+      <global-nav-link
+        class="{{ globalNavToggleButton.classes }}"
+        tooltip-content="globalNavToggleButton.tooltipContent"
+        on-click="toggleGlobalNav($event)"
+        icon="'plugins/kibana/assets/play-circle.svg'"
+        label="globalNavToggleButton.title"
+      ></global-nav-link>
+    </div>
+  </div>
+
+</nav>

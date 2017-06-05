@@ -1,0 +1,43 @@
+.kuiModal {
+  line-height: $globalLineHeight;
+  background-color: $modalBackgroundColor;
+  border: 1px solid $modalBorderColor;
+  border-radius: $globalBorderRadius;
+  box-shadow: 0 5px 22px rgba(#000000, 0.25);
+  z-index: $globalModalDepth + 1;
+}
+
+.kuiModalHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: $modalPadding;
+  border-bottom: $globalBorderThick;
+}
+
+  .kuiModalHeader__title {
+    font-size: $globalTitleFontSize;
+  }
+
+.kuiModalHeaderCloseButton {
+  @include microButton;
+  font-size: $globalTitleFontSize;
+}
+
+.kuiModalBody {
+  padding: $modalPadding * 2 $modalPadding;
+}
+
+.kuiModalBodyText {
+  font-size: 14px;
+}
+
+.kuiModalFooter {
+  display: flex;
+  justify-content: flex-end;
+  padding: 0 $modalPadding $modalPadding;
+
+  > * + * {
+    margin-left: 5px;
+  }
+}

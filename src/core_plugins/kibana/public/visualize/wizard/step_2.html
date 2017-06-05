@@ -1,0 +1,43 @@
+<!-- Local nav. -->
+<kbn-top-nav name="visualize">
+  <!-- Transcluded elements. -->
+  <div data-transclude-slots>
+    <!-- Breadcrumbs. -->
+    <bread-crumbs
+      data-transclude-slot="topLeftCorner"
+      use-links="true"
+      omit-current-page="true"
+      page-title="'Choose search source'"
+    ></bread-crumbs>
+  </div>
+</kbn-top-nav>
+
+<div class="kuiViewContent kuiViewContent--constrainedWidth">
+  <div class="wizard kuiViewContentItem">
+    <div class="wizard-column wizard-column--small">
+      <h1 class="kuiTitle kuiVerticalRhythm">
+        From a New Search, Select Index
+      </h1>
+
+      <paginated-selectable-list
+        per-page="20"
+        list="indexPattern.list"
+        user-make-url="makeUrl"
+        class="wizard-row visualizeWizardPaginatedSelectableList kuiVerticalRhythm"
+      ></paginated-selectable-list>
+    </div>
+
+    <div class="wizard-column wizard-column--large">
+      <h2 class="kuiTitle kuiVerticalRhythm">
+        Or, From a Saved Search
+      </h2>
+
+      <!-- Saved searches -->
+      <saved-object-finder
+        type="searches"
+        class="wizard-row visualizeWizardSavedObjectFinder kuiVerticalRhythm"
+        make-url="step2WithSearchUrl"
+      ></saved-object-finder>
+    </div>
+  </div>
+</div>

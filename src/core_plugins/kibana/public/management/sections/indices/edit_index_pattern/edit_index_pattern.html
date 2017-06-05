@@ -1,0 +1,155 @@
+<kbn-management-app section="kibana" omit-breadcrumb-pages="['indices']">
+  <kbn-management-indices>
+    <div
+      ng-controller="managementIndicesEdit"
+      data-test-subj="editIndexPattern"
+      class="kuiViewContent"
+    >
+      <!-- Header -->
+      <kbn-management-index-header
+        index-pattern="indexPattern"
+        set-default="setDefaultPattern()"
+        refresh-fields="refreshFields()"
+        delete="removePattern()"
+      ></kbn-management-index-header>
+
+      <p ng-if="indexPattern.timeFieldName" class="kuiText kuiVerticalRhythm">
+        <span class="label label-success">
+          <i class="fa fa-clock-o"></i><span translate="KIBANA-TIME_FILTER_FIELD_NAME"></span>: {{indexPattern.timeFieldName}}
+        </span>
+      </p>
+
+      <p class="kuiText kuiVerticalRhythm">
+        This page lists every field in the <strong>{{::indexPattern.id}}</strong>
+        index and the field's associated core type as recorded by Elasticsearch.
+        While this list allows you to view the core type of each field, changing
+        field types must be done using Elasticsearch's
+        <a target="_window" href="http://www.elastic.co/guide/en/elasticsearch/reference/current/mapping.html">
+          Mapping API
+          <i aria-hidden="true" class="fa-link fa"></i>
+        </a>
+      </p>
+
+      <!-- Alerts -->
+      <div
+        ng-if="indexPattern.timeFieldName && indexPattern.intervalName"
+        class="kuiInfoPanel kuiInfoPanel--warning kuiVerticalRhythm"
+      >
+        <div class="kuiInfoPanelHeader">
+          <span class="kuiInfoPanelHeader__icon kuiIcon kuiIcon--warning fa-bolt"></span>
+          <span class="kuiInfoPanelHeader__title">
+            Repeating index pattern
+          </span>
+        </div>
+
+        <div class="kuiInfoPanelBody">
+          <div class="kuiInfoPanelBody__message">
+            This index uses a <strong>time-based index pattern</strong> which repeats <span ng-bind="::indexPattern.getInterval().display"></span>
+          </div>
+        </div>
+      </div>
+
+      <div
+        ng-if="conflictFields.length"
+        class="kuiInfoPanel kuiInfoPanel--warning kuiVerticalRhythm"
+      >
+        <div class="kuiInfoPanelHeader">
+          <span class="kuiInfoPanelHeader__icon kuiIcon kuiIcon--warning fa-bolt"></span>
+          <span class="kuiInfoPanelHeader__title">
+            Mapping conflict
+          </span>
+        </div>
+
+        <div class="kuiInfoPanelBody">
+          <div class="kuiInfoPanelBody__message">
+            {{conflictFields.length > 1 ? conflictFields.length : 'A'}} field{{conflictFields.length > 1 ? 's' : ''}} {{conflictFields.length > 1 ? 'are' : 'is'}} defined as several types (string, integer, etc) across the indices that match this pattern. You may still be able to use these conflict fields in parts of Kibana, but they will be unavailable for functions that require Kibana to know their type. Correcting this issue will require reindexing your data.
+          </div>
+        </div>
+      </div>
+
+      <!-- Tabs -->
+      <div class="kuiTabs kuiVerticalRhythm">
+        <button
+          class="kuiTab"
+          ng-repeat="editSection in editSections"
+          ng-class="{ 'kuiTab-isSelected': state.tab === editSection.index }"
+          ng-click="changeTab(editSection)"
+          data-test-subj="tab-{{ editSection.index }}"
+        >
+          {{ editSection.title }}
+          <span
+            data-test-subj="tab-count-{{ editSection.index }}"
+            aria-label="{{:: editSection.count + ' ' + editSection.title}}"
+          >
+            ({{ editSection.count }})
+          </span>
+        </button>
+      </div>
+
+      <!-- Field Filters -->
+      <form role="form" class="kuiFieldGroup kuiVerticalRhythm">
+        <div class="kuiFieldGroupSection kuiFieldGroupSection--wide">
+          <div class="kuiSearchInput">
+            <div class="kuiSearchInput__icon kuiIcon fa-search"></div>
+            <input
+              class="kuiSearchInput__input"
+              type="text"
+              aria-label="Filter"
+              ng-model="fieldFilter"
+              placeholder="Filter"
+            >
+          </div>
+        </div>
+
+        <div
+          class="kuiFieldGroupSection"
+          ng-if="state.tab == 'indexedFields' && indexedFieldTypes.length > 0"
+        >
+          <select
+            data-test-subj="indexedFieldTypeFilterDropdown"
+            class="kuiSelect"
+            ng-model="indexedFieldTypeFilter"
+            ng-change="changeFilter('indexedFieldTypeFilter', indexedFieldTypeFilter)"
+            ng-options="o for o in indexedFieldTypes"
+          >
+            <option value="">All field types</option>
+          </select>
+        </div>
+
+        <div
+          class="kuiFieldGroupSection"
+          ng-if="state.tab == 'scriptedFields' && scriptedFieldLanguages.length > 0"
+        >
+          <select
+            data-test-subj="scriptedFieldLanguageFilterDropdown"
+            class="kuiSelect"
+            ng-model="scriptedFieldLanguageFilter"
+            ng-change="changeFilter('scriptedFieldLanguageFilter', scriptedFieldLanguageFilter)"
+            ng-options="o for o in scriptedFieldLanguages"
+          >
+            <option value="">All languages</option>
+          </select>
+        </div>
+      </form>
+
+      <!-- Tab content -->
+      <div class="kuiVerticalRhythm">
+        <indexed-fields-table
+          ng-show="state.tab == 'indexedFields'"
+          class="fields indexed-fields"
+        ></indexed-fields-table>
+
+        <scripted-fields-table
+          ng-show="state.tab == 'scriptedFields'"
+          class="fields scripted-fields"
+        ></scripted-fields-table>
+
+        <source-filters-table
+          ng-show="state.tab == 'sourceFilters'"
+          index-pattern="indexPattern"
+          class="fields source-filters"
+        ></source-filters-table>
+      </div>
+    </div>
+  </kbn-management-indices>
+</kbn-management-app>

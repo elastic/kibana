@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="22px" height="24px" viewBox="0 0 22 24" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <!-- Generator: Sketch 42 (36781) - http://www.bohemiancoding.com/sketch -->
+    <title>icon-logstash</title>
+    <desc>Created with Sketch.</desc>
+    <defs></defs>
+    <g id="UI-KIT" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="QuickSummary" transform="translate(-289.000000, -3553.000000)" fill="#5A5A5A">
+            <g id="Basic-Panel" transform="translate(150.000000, 3540.000000)">
+                <g id="Header-bar">
+                    <g id="icon-logstash" transform="translate(139.000000, 13.000000)">
+                        <polygon id="Fill-4" points="12.0351304 23.6521739 21.0114783 23.6521739 21.0114783 12.6601739 12.0351304 12.6601739"></polygon>
+                        <path d="M10.9916522,23.6522783 L10.9916522,23.6522783 C4.9213913,23.6522783 0,18.7312348 0,12.6602783 L10.9916522,12.6602783 L10.9916522,23.6522783 Z" id="Fill-6"></path>
+                        <path d="M10.9916522,11.6169391 L10.9916522,7.67015652 C10.9916522,3.43398261 7.55756522,-0.000104347826 3.3213913,-0.000104347826 L0,-0.000104347826 L0,11.6169391 L10.9916522,11.6169391 Z" id="Fill-1"></path>
+                    </g>
+                </g>
+            </g>
+        </g>
+    </g>
+</svg>

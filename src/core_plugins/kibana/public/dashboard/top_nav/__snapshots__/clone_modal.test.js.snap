@@ -1,0 +1,69 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`renders DashboardCloneModal 1`] = `
+<div
+  class="kuiModalOverlay"
+>
+  <div
+    aria-label="Clone a dashboard"
+    class="kuiModal dashboardCloneModal"
+    data-tests-subj="dashboardCloneModal"
+  >
+    <div
+      class="kuiModalHeader"
+    >
+      <div
+        class="kuiModalHeader__title"
+      >
+        Clone Dashboard
+      </div>
+    </div>
+    <div
+      class="kuiModalBody"
+    >
+      <div
+        class="kuiModalBodyText kuiVerticalRhythm"
+      >
+        Please enter a new name for your dashboard.
+      </div>
+      <div
+        class="kuiModalBodyText kuiVerticalRhythm"
+      >
+        <input
+          class="kuiTextInput kuiTextInput--large"
+          data-test-subj="clonedDashboardTitle"
+          value="dash title"
+        />
+      </div>
+    </div>
+    <div
+      class="kuiModalFooter"
+    >
+      <button
+        class="kuiButton kuiButton--hollow"
+        data-test-subj="cloneCancelButton"
+      >
+        <span
+          class="kuiButton__inner"
+        >
+          <span>
+            Cancel
+          </span>
+        </span>
+      </button>
+      <button
+        class="kuiButton kuiButton--primary"
+        data-test-subj="cloneConfirmButton"
+      >
+        <span
+          class="kuiButton__inner"
+        >
+          <span>
+            Confirm Clone
+          </span>
+        </span>
+      </button>
+    </div>
+  </div>
+</div>
+`;

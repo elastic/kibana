@@ -1,10 +1,8 @@
-module.exports = function (grunt) {
-  let modules = Object.keys(grunt.config.get('deepModules'));
+module.exports = function () {
   return {
     build: 'build',
     target: 'target',
     testsFromModules: 'build/kibana/node_modules/**/{test,tests}/**',
-    deepModuleBins: 'build/kibana/node_modules/*/node_modules/**/.bin/{' + modules.join(',') + '}',
-    deepModules: 'build/kibana/node_modules/*/node_modules/**/{' + modules.join(',') + '}/',
+    devSourceForTestbed: 'build/kibana/src/core_plugins/testbed/',
   };
 };

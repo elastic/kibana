@@ -1,0 +1,50 @@
+<kbn-dev-tools-app data-test-subj="console" top-nav-config="topNavController">
+  <div id="editor_output_container">
+    <div id="editor_container">
+      <ul id="autocomplete"></ul>
+      <div id="editor_actions">
+        <kbn-tooltip text="click to send request">
+          <a
+            class="editor_action"
+            ng-click="sendSelected()"
+            data-test-subj="send-request-button">
+            <i class="fa fa-play"></i>
+          </a>
+        </kbn-tooltip>
+        <span dropdown>
+          <a
+            id="consoleRequestOptions"
+            class="editor_action"
+            dropdown-toggle href="#"
+            aria-label="Request options"
+          >
+            <span class="kuiIcon fa-wrench"></span>
+          </a>
+
+          <ul
+            class="dropdown-menu"
+            role="menu"
+            aria-labelledby="consoleRequestOptions"
+          >
+            <li role="menuitem">
+              <a class="link" id="copy_as_curl">Copy as cURL</a>
+            </li>
+            <li role="menuitem">
+              <a ng-click="autoIndent($event)">Auto indent</a>
+            </li>
+          </ul>
+        </span>
+      </div>
+
+      <div id="editor" data-test-subj="request-editor">GET _search
+  {
+    "query": { "match_all": {} }
+  }</div>
+
+    </div>
+    <div id="editor_resizer">&#xFE19;</div>
+    <div id="output_container" data-test-subj="response-editor">
+      <div id="output">{}</div>
+    </div>
+  </div>
+</kbn-dev-tools-app>

@@ -1,0 +1,59 @@
+.kuiTabs {
+  display: flex;
+  border-bottom: $globalBorderThick;
+}
+
+/**
+ * 1. Override button styles (some of which are from Bootstrap).
+ * 2. Adding a border shifts tabs right by 1px, so we need to shift them back.
+ * 3. Move the tab down so that its bottom border covers the container's bottom border.
+ * 4. When the tab is focused, its bottom border changes to be 1px, so we need to add 1px more
+ *    of padding to make sure the text doesn't shift down.
+ */
+.kuiTab {
+  appearance: none; /* 1 */
+  cursor: pointer;
+  padding: 10px 30px;
+  font-size: $globalFontSize;
+  color: $globalSubduedTextColor;
+  background-color: $tabBackgroundColor; /* 1 */
+  border: 1px solid $globalBorderColor;
+  border-bottom-width: 2px;
+  border-radius: 0; /* 1 */
+  margin-bottom: -2px; /* 3 */
+
+  & + & {
+    border-left: none;
+
+    &:focus:not(.kuiTab-isSelected):not(:active) {
+      margin-left: -1px; /* 2 */
+    }
+  }
+
+  &:active {
+    outline: none !important; /* 1 */
+    box-shadow: none; /* 1 */
+  }
+
+  &:focus {
+    outline: none; /* 1 */
+  }
+
+  &:focus:not(.kuiTab-isSelected):not(:active) {
+    z-index: 1;
+    color: $globalLinkColor;
+    border: 1px solid $globalSelectedBorderColor !important;
+    padding-bottom: 11px; /* 4 */
+  }
+
+  &:hover:not(.kuiTab-isSelected) {
+    color: $globalLinkHoverColor;
+    background-color: $tabHoverBackgroundColor;
+  }
+
+  &.kuiTab-isSelected {
+    cursor: default;
+    color: $globalFontColor;
+    border-bottom-color: $tabBackgroundColor;
+  }
+}

@@ -13,101 +13,25 @@
   }
 
   .sidebar-list {
+    .navbar-nav.navbar-right {
+      border-radius: 4px;
+      overflow:hidden;
+      margin-right: -13px;
+      margin-top: 2px;
+      .navbar-btn-link {
+        padding-left: 10px;
+        padding-right: 10px;
+      }
+    }
+
     ul {
       list-style: none;
       margin-bottom: 0px;
     }
 
-    &-header {
-      padding-left: 10px;
-      padding-right: 10px;
-      color: @sidebar-header-color;
-      border: 1px solid;
-      border-color: @sidebar-header-border;
-    }
-
     .sidebar-item {
       border-top-color: @sidebar-border;
       font-size: @sidebar-item-font-size;
-
-      a:not(.sidebar-item-button) {
-        color: @sidebar-item-color;
-
-        &:hover {
-          color: @sidebar-item-color;
-          text-decoration: none;
-        }
-      }
-
-      &-title,
-      &-text,
-      &-button {
-        margin: 0;
-        padding: 5px 10px;
-        text-align: center;
-        width: 100%;
-        border: none;
-        border-radius: 0;
-      }
-
-      &-title {
-        text-align: left;
-        white-space: nowrap;
-        .ellipsis();
-
-        &.full-title {
-          white-space: normal;
-        }
-
-        &:hover,
-        &:hover .text-muted {
-          color: @sidebar-hover-color;
-          background-color: @sidebar-hover-bg;
-        }
-      }
-
-      &-text {
-        background: @sidebar-item-text-bg;
-      }
-
-      &-button {
-        font-size: inherit;
-        display: block;
-
-        &[disabled] {
-          opacity: 0.65;
-          cursor: default;
-        }
-
-        &.primary {
-          background-color: @btn-primary-bg;
-          color: @btn-primary-color
-        }
-
-        &.info {
-          background-color: @btn-info-bg;
-          color: @btn-info-color
-        }
-
-        &.success {
-          background-color: @btn-success-bg;
-          color: @btn-success-color
-        }
-
-        &.warning {
-          background-color: @btn-warning-bg;
-          color: @btn-warning-color
-        }
-
-        &.danger {
-          background-color: @btn-danger-bg;
-          color: @btn-danger-color
-        }
-
-        &.default {
-          .button-variant(@btn-default-color; @btn-default-bg; @btn-default-border);
-        }
-      }
 
       .active {
         background-color: @sidebar-active-bg !important;
@@ -120,22 +44,64 @@
         }
       }
     }
+
+      .sidebar-item-title,
+      .sidebar-item-text {
+        margin: 0;
+        padding: 5px 10px;
+        text-align: center;
+        width: 100%;
+        border: none;
+        border-radius: 0;
+      }
+
+      .sidebar-item-title {
+        text-align: left;
+        white-space: nowrap;
+        .ellipsis();
+
+        &.full-title {
+          white-space: normal;
+        }
+      }
+
+      .sidebar-item-text {
+        background: @sidebar-item-text-bg;
+      }
   }
 
+    .sidebar-list-header {
+      padding-left: 10px;
+      padding-right: 10px;
+      color: @sidebar-header-color;
+      border: 1px solid;
+      border-color: @sidebar-header-border;
+    }
+
   .index-pattern {
-    background-color: @sidebar-active-bg;
     font-weight: bold;
     padding: 5px 10px;
-    color: @sidebar-active-color;
     display: flex;
     justify-content: space-between;
+    background-color: @kibanaGray4;
+    line-height: 28px;
 
     > * {
       flex: 0 1 auto;
+      align-self: center;
+    }
+    &.active {
+      background-color: @sidebar-active-bg;
+      color: @sidebar-active-color;
     }
   }
 
-  .index-pattern-selection .sidebar-item-title {
-    background-color: @sidebar-index-pattern-selection-bg;
+  .index-pattern-selection .ui-select-toggle {
+    border-radius: 0;
+  }
+
+  .index-pattern-selection .ui-select-choices {
+    width: auto;
+    max-height: 300px;
   }
 }

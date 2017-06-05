@@ -1,16 +1,16 @@
-var angular = require('angular');
-var expect = require('expect.js');
-var ngMock = require('ngMock');
-var _ = require('lodash');
+import expect from 'expect.js';
+import ngMock from 'ng_mock';
+import _ from 'lodash';
+import { VislibVisualizationsVisTypesProvider } from 'ui/vislib/visualizations/vis_types';
 
 describe('Vislib Vis Types Test Suite', function () {
-  var visTypes;
-  var visFunc;
+  let visTypes;
+  let visFunc;
 
   beforeEach(ngMock.module('kibana'));
   beforeEach(ngMock.inject(function (Private) {
-    visTypes = Private(require('ui/vislib/visualizations/vis_types'));
-    visFunc = visTypes.histogram;
+    visTypes = Private(VislibVisualizationsVisTypesProvider);
+    visFunc = visTypes.point_series;
   }));
 
   it('should be an object', function () {

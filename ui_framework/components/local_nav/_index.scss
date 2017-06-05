@@ -1,0 +1,66 @@
+// Normal colors
+$localNavTextColor: $globalTextColor;
+$localNavBackgroundColor: #e4e4e4;
+$localNavButtonTextColor: #5a5a5a;
+$localNavButtonTextColor-isHover: #000000;
+$localNavButtonBackgroundColor: transparent;
+$localNavButtonBackgroundColor-isHover: rgba(#000000, 0.1);
+$localNavButtonBackgroundColor-isSelected: #f6f6f6;
+$localNavBreadcrumbDelimiterColor: #5a5a5a;
+$localSearchBackgroundColor: #ffffff;
+$localSearchBorderColor-isInvalid: #e74C3c;
+$localDropdownBackgroundColor: $localNavButtonBackgroundColor-isSelected;
+$localDropdownFormNoteTextColor: #737373;
+$localTabTextColor: $localNavButtonTextColor;
+$localTabTextColor-isHover: $localNavButtonTextColor-isHover;
+$localTabTextColor-isSelected: $localNavButtonTextColor-isHover;
+$localBreadcrumbLinkColor: #328caa;
+$localSearchButtonBackgroundColor: #9c9c9c;
+$localSearchButtonTextColor: #ffffff;
+$localDatePickerButtonHoverBackgroundColor: $localNavButtonBackgroundColor-isHover;
+$localDatePickerCellSelectedBackgroundColor: #777777;
+$localDatePickerCellSelectedTextColor: #ffffff;
+
+// Dark theme colors
+$localNavTextColor--darkTheme: $globalTextColor--darkTheme;
+$localNavBackgroundColor--darkTheme: #333333;
+$localNavButtonTextColor--darkTheme: #dedede;
+$localNavButtonTextColor-isHover--darkTheme: #ffffff;
+$localNavButtonBackgroundColor-isHover--darkTheme: #000000;
+$localNavButtonBackgroundColor-isSelected--darkTheme: #525252;
+$localNavBreadcrumbDelimiterColor--darkTheme: #a5a5a5;
+$localSearchBackgroundColor--darkTheme: #4e4e4e;
+$localSearchBorderColor-isInvalid--darkTheme: #ff6758;
+$localDropdownBackgroundColor--darkTheme: $localNavButtonBackgroundColor-isSelected--darkTheme;
+$localDropdownFormNoteTextColor--darkTheme: #a2a2a2;
+$localDropdownWarningTextColor--darkTheme: $globalTextColor--darkTheme;
+$localDropdownWarningBackgroundColor--darkTheme: #636363;
+$localTabTextColor--darkTheme: $localNavButtonTextColor--darkTheme;
+$localTabTextColor-isHover--darkTheme: $localNavButtonTextColor-isHover--darkTheme;
+$localTabTextColor-isSelected--darkTheme: $localNavButtonTextColor-isHover--darkTheme;
+$localSearchButtonBackgroundColor--darkTheme: #777777;
+$localSearchButtonTextColor--darkTheme: #ffffff;
+$localDatePickerButtonHoverBackgroundColor--darkTheme: rgba(#000000, 0.4);
+$localDatePickerCellSelectedTextColor--darkTheme: #ffffff;
+
+// Spacing
+$localNavSideSpacing: 10px;
+$localSearchHeight: 30px;
+$localDatePickerBottomSpacing: 4px;
+$localDatePickerButtonPadding: 3px 6px;
+$localDatePickerCellPadding: 8px;
+// Match the height of body cells, but leave out side padding so content can expand without
+// affecting the cell's width.
+$localDatePickerHeaderCellPadding: #{$localDatePickerCellPadding + 1px} 0;
+$localDatePickerCellLineHeight: 1.2;
+
+// Fonts
+
+@import "local_breadcrumbs";
+@import "local_date_picker";
+@import "local_dropdown";
+@import "local_menu";
+@import "local_nav";
+@import "local_search";
+@import "local_tabs";
+@import "local_title";

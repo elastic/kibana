@@ -1,9 +1,9 @@
+import _ from 'lodash';
+import expect from 'expect.js';
 describe('_.organize', function () {
-  var _ = require('lodash');
-  var expect = require('expect.js');
 
   it('it works', function () {
-    var col = [
+    const col = [
       {
         name: 'one',
         roles: ['user', 'admin', 'owner']
@@ -22,7 +22,7 @@ describe('_.organize', function () {
       }
     ];
 
-    var resp = _.organizeBy(col, 'roles');
+    const resp = _.organizeBy(col, 'roles');
     expect(resp).to.have.property('user');
     expect(resp.user).to.have.length(4);
 
@@ -34,15 +34,15 @@ describe('_.organize', function () {
   });
 
   it('behaves just like groupBy in normal scenarios', function () {
-    var col = [
+    const col = [
       { name: 'one' },
       { name: 'two' },
       { name: 'three' },
       { name: 'four' }
     ];
 
-    var orgs = _.organizeBy(col, 'name');
-    var groups = _.groupBy(col, 'name');
+    const orgs = _.organizeBy(col, 'name');
+    const groups = _.groupBy(col, 'name');
     expect(orgs).to.eql(groups);
   });
 });

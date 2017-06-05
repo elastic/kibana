@@ -1,0 +1,60 @@
+.thorMarkdown {
+  display: flex;
+  flex-direction: column;
+  flex: 1 0 auto;
+  position: relative;
+}
+
+.thorMarkdown__content {
+  display: flex;
+  flex-direction: column;
+  flex: 1 0 auto;
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  overflow: hidden;
+  @import './type.less';
+  color: rgba(0,0,0,1);
+  pre, code, tt {
+    background-color: rgba(0,0,0,0.1);
+    color: red;
+    code {
+      color: rgba(0,0,0,1);
+      background-color: transparent;
+    }
+    border: none;
+  }
+  &.middle {
+    justify-content: center;
+  }
+  &.bottom {
+    justify-content: flex-end;
+  }
+  &.scrolling {
+    overflow: auto;
+  }
+}
+
+.thorMarkdown.reversed {
+  .thorMarkdown__content {
+    .table > thead > tr > th {
+      color: rgba(255,255,255,0.5);
+      border-bottom: 2px solid rgba(255,255,255,0.2);
+    }
+    .table > tbody > tr > td {
+      border-top: 1px solid rgba(255,255,255,0.2);
+    }
+    color: rgba(255,255,255,1);
+    pre, code, tt {
+      background-color: rgba(255,255,255,0.2);
+      color: #ffa5a8;
+      code {
+        color: rgba(255,255,255,1);
+        background-color: transparent;
+      }
+      border: none;
+    }
+  }
+}

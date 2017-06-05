@@ -1,7 +1,5 @@
-define(function (require) {
-  return {
-    meta: {
-      index: 'logstash-*'
-    }
-  };
-});
+export default {
+  meta: {
+    index: 'logstash-*'
+  }
+};

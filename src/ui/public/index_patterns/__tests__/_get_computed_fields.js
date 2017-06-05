@@ -1,20 +1,18 @@
+import expect from 'expect.js';
+import ngMock from 'ng_mock';
+import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
+import { getComputedFields } from 'ui/index_patterns/_get_computed_fields';
+
 describe('get computed fields', function () {
-  var _ = require('lodash');
-  var expect = require('expect.js');
-  var ngMock = require('ngMock');
 
-  var indexPattern;
+  let indexPattern;
+  let fn;
 
-  var getComputedFields;
-
-  var fn;
   beforeEach(ngMock.module('kibana'));
-  beforeEach(ngMock.inject(function (Private, $injector) {
-    indexPattern = Private(require('fixtures/stubbed_logstash_index_pattern'));
-    getComputedFields = require('ui/index_patterns/_get_computed_fields');
+  beforeEach(ngMock.inject(function (Private) {
+    indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
     indexPattern.getComputedFields = getComputedFields.bind(indexPattern);
     fn = indexPattern.getComputedFields;
-
   }));
 
   it('should be a function', function () {
@@ -22,17 +20,16 @@ describe('get computed fields', function () {
   });
 
   it('should request all stored fields', function () {
-    expect(fn().fields).to.contain('*');
+    expect(fn().storedFields).to.contain('*');
   });
 
-  it('should request _source seperately', function () {
-    expect(fn().fields).to.contain('_source');
+  it('should request date fields as docvalue_fields', function () {
+    expect(fn().docvalueFields).to.contain('@timestamp');
+    expect(fn().docvalueFields).to.not.contain('bytes');
   });
 
-  it('should request date fields as fielddata_fields', function () {
-    expect(fn().fielddataFields).to.contain('@timestamp');
-    expect(fn().fielddataFields).to.not.include.keys('bytes');
+  it('should not request scripted date fields as docvalue_fields', function () {
+    expect(fn().docvalueFields).to.not.contain('script date');
   });
-
 
 });

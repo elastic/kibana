@@ -1,0 +1,109 @@
+<div class="sidebar-container">
+  <form
+    class="sidebar-list"
+    ng-submit="visualizeEditor.$invalid ? stageEditableVis(false) : stageEditableVis()"
+    name="visualizeEditor"
+    novalidate
+  ><!-- see http://goo.gl/9kgz5w -->
+
+    <div
+      css-truncate
+      aria-label="{{:: 'Index pattern: ' + indexPattern.id}}"
+      ng-if="vis.type.requiresSearch"
+      class="index-pattern"
+    >
+      {{ indexPattern.id }}
+    </div>
+
+    <nav class="navbar navbar-default subnav">
+      <div class="container-fluid">
+
+        <!-- tabs -->
+        <ul class="nav navbar-nav">
+          <li ng-class="{active: sidebar.section == 'data'}" ng-show="sidebar.showData">
+            <a
+              class="vis-editor-subnav-link"
+              ng-class="{'is-vis-editor-sub-nav-link-selected': sidebar.section == 'data'}"
+              ng-click="sidebar.section='data'"
+              kbn-accessible-click
+            >
+              Data
+            </a>
+          </li>
+
+          <li ng-repeat="tab in vis.type.params.optionTabs" ng-class="{active: sidebar.section == tab.name}">
+            <a
+              class="vis-editor-subnav-link"
+              ng-class="{'is-vis-editor-sub-nav-link-selected': sidebar.section == tab.name}"
+              ng-click="sidebar.section=tab.name"
+              kbn-accessible-click
+            >
+              {{tab.title}}
+            </a>
+          </li>
+        </ul>
+
+        <!-- controls -->
+        <ul class="nav navbar-nav navbar-right">
+          <li
+            ng-if="visualizeEditor.softErrorCount() > 0"
+            disabled
+            tooltip="{{ visualizeEditor.describeErrors() }}"
+            tooltip-placement="bottom"
+            tooltip-popup-delay="400"
+            tooltip-append-to-body="1"
+          >
+            <a class="vis-editor-subnav-link vis-editor-subnav-link--danger">
+              <span class="kuiIcon fa-warning"></span>
+            </a>
+          </li>
+
+          <li
+            tooltip="Apply changes"
+            tooltip-placement="bottom"
+            tooltip-popup-delay="400" tooltip-append-to-body="1"
+          >
+            <button
+              data-test-subj="visualizeEditorRenderButton"
+              class="kuiButton kuiButton--primary navbar-btn-link"
+              type="submit"
+              ng-disabled="!vis.dirty || visualizeEditor.errorCount() > 0"
+              aria-label="Update the visualization with your changes"
+            >
+              <span aria-hidden="true" class="kuiIcon fa-play"></span>
+            </button>
+          </li>
+
+          <li
+            tooltip="Discard changes"
+            tooltip-placement="bottom"
+            tooltip-popup-delay="400"
+            tooltip-append-to-body="1"
+          >
+            <button
+              class="kuiButton kuiButton--basic navbar-btn-link"
+              ng-disabled="!vis.dirty"
+              ng-click="resetEditableVis()"
+              aria-label="Reset the visualization"
+            >
+              <span class="kuiIcon fa-close"></span>
+            </button>
+          </li>
+        </ul>
+      </div>
+    </nav>
+
+    <div class="vis-editor-config" ng-show="sidebar.section == 'data'">
+      <!-- metrics -->
+      <vis-editor-agg-group ng-if="vis.type.schemas.metrics" group-name="metrics"></vis-editor-agg-group>
+
+      <!-- buckets -->
+      <vis-editor-agg-group ng-if="vis.type.schemas.buckets" group-name="buckets"></vis-editor-agg-group>
+    </div>
+
+    <div class="vis-editor-config" ng-repeat="tab in vis.type.params.optionTabs" ng-show="sidebar.section == tab.name">
+      <vis-editor-vis-options vis="vis" saved-vis="savedVis" ui-state="uiState" editor="tab.editor"></vis-editor-vis-options>
+    </div>
+
+  </form>
+</div>
