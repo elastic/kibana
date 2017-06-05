@@ -2501,6 +2501,10 @@ body {
   border: 1px solid #E4E4E4;
   border-radius: 4px; }
 
+.kuiPanel--withHeader {
+  border-top: none;
+  border-radius: 0; }
+
 .kuiPanel--centered {
   display: -webkit-box;
   display: -webkit-flex;
