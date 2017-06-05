@@ -1,9 +1,24 @@
 import Boom from 'boom';
+import Joi from 'joi';
 import importDashboards from '../../../lib/import/import_dashboards';
+
 export default function importApi(server) {
   server.route({
     path: '/api/kibana/import/dashboards',
     method: ['POST'],
+    config: {
+      validate: {
+        payload: Joi.object().keys({
+          objects: Joi.array(),
+          version: Joi.string()
+        }),
+        query: Joi.object().keys({
+          force: Joi.boolean().default(false),
+          exclude: [Joi.string(), Joi.array().items(Joi.string())]
+        })
+      },
+    },
+
     handler: (req, reply) => {
       return importDashboards(req)
         .then((resp) => reply(resp))
