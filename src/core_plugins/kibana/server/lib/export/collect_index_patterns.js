@@ -5,6 +5,8 @@ export default function collectIndexPatterns(savedObjectsClient, panels) {
     if (kibanaSavedObjectMeta && !savedSearchId) {
       const searchSource = JSON.parse(kibanaSavedObjectMeta.searchSourceJSON);
 
+      if (!searchSource.index) return acc;
+
       if (!acc.find(s => s.id === searchSource.index)) {
         acc.push({ type: 'index-pattern', id: searchSource.index });
       }
