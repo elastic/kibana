@@ -32,4 +32,11 @@ describe('sortPrefixFirst', function () {
     expect(result).to.eql([{ name: 'bar' }, { name: 'baz' }, { name: 'foo' }, { name: 'qux' }, { name: 'quux' }]);
     expect(array).to.eql([{ name: 'foo' }, { name: 'bar' }, { name: 'baz' }, { name: 'qux' }, { name: 'quux' }]);
   });
+
+  it('should handle numbers', function () {
+    const array = [1, 50, 5];
+    const result = sortPrefixFirst(array, 5);
+    expect(result).to.not.be(array);
+    expect(result).to.eql([50, 5, 1]);
+  });
 });

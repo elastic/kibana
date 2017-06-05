@@ -90,7 +90,6 @@ describe('Vislib _chart Test Suite', function () {
       type: 'histogram',
       addTooltip: true,
       addLegend: true,
-      hasTimeField: true,
       zeroFill: true
     };
 

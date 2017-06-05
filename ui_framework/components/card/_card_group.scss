@@ -18,7 +18,7 @@
    * 2. Use an even margin all around the card so that the spacing is still even when wrapped.
    */
   .kuiCardGroup__card {
-    flex: 1 1 auto; /* 1 */
+    flex: 1 1 0; /* 1 */
     margin: $cardSpacing; /* 2 */
   }
 
@@ -38,10 +38,10 @@
   .kuiCardGroup__card {
     border: none;
     border-radius: 0;
+    margin: 0;
   }
 
   .kuiCardGroup__card + .kuiCardGroup__card {
-    margin: 0;
     border-left: 1px solid $cardBorderColor;
   }
 }
