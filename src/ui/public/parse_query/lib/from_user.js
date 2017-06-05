@@ -14,9 +14,9 @@ export function ParseQueryLibFromUserProvider(es, Private) {
       return decorateQuery({ query_string: { query: text } });
     }
 
-    const matchAll = getQueryStringQuery('*');
+    const matchAll = { match_all: {} };
 
-    // If we get an empty object, treat it as a *
+    // If we get an empty object, treat it as a match_all
     if (_.isObject(text)) {
       if (Object.keys(text).length) {
         return text;
