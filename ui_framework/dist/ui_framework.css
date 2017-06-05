@@ -1922,7 +1922,8 @@ body {
       color: #ffffff; }
     .theme-dark .kuiLocalMenuItem.kuiLocalMenuItem-isSelected {
       background-color: #525252;
-      border-color: #1a1a1a; }
+      border-color: #1a1a1a;
+      color: #ffffff; }
     .theme-dark .kuiLocalMenuItem.kuiLocalMenuItem-isDisabled:hover {
       background-color: transparent;
       color: #dedede; }

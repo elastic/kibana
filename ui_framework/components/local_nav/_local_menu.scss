@@ -55,6 +55,7 @@
     &.kuiLocalMenuItem-isSelected {
       background-color: $localNavButtonBackgroundColor-isSelected--darkTheme;
       border-color: darken($localNavBackgroundColor--darkTheme, 10%);
+      color: $localNavButtonTextColor-isHover--darkTheme;
     }
 
     &.kuiLocalMenuItem-isDisabled {
