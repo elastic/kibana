@@ -78,10 +78,10 @@ describe('Filter Bar Directive', function () {
       expect($(filters[0]).find('span')[1].innerHTML).to.equal('"apache"');
       expect($(filters[1]).find('span')[0].innerHTML).to.equal('_type:');
       expect($(filters[1]).find('span')[1].innerHTML).to.equal('"nginx"');
-      expect($(filters[2]).find('span')[0].innerHTML).to.equal('exists:');
-      expect($(filters[2]).find('span')[1].innerHTML).to.equal('"@timestamp"');
-      expect($(filters[3]).find('span')[0].innerHTML).to.equal('missing:');
-      expect($(filters[3]).find('span')[1].innerHTML).to.equal('"host"');
+      expect($(filters[2]).find('span')[0].innerHTML).to.equal('@timestamp:');
+      expect($(filters[2]).find('span')[1].innerHTML).to.equal('"exists"');
+      expect($(filters[3]).find('span')[0].innerHTML).to.equal('host:');
+      expect($(filters[3]).find('span')[1].innerHTML).to.equal('"missing"');
     });
 
     it('should be able to set an alias', function () {
@@ -91,7 +91,7 @@ describe('Filter Bar Directive', function () {
 
     describe('editing filters', function () {
       beforeEach(function () {
-        $scope.startEditingFilter(appState.filters[3]);
+        $scope.editFilter(appState.filters[3]);
         $scope.$digest();
       });
 
@@ -100,16 +100,18 @@ describe('Filter Bar Directive', function () {
       });
 
       it('should be able to stop editing a filter', function () {
-        $scope.stopEditingFilter();
+        $scope.cancelEdit();
         $scope.$digest();
         expect($el.find('.filter-edit-container').length).to.be(0);
       });
 
-      it('should merge changes after clicking done', function () {
-        sinon.spy($scope, 'updateFilter');
+      it('should remove old filter and add new filter when saving', function () {
+        sinon.spy($scope, 'removeFilter');
+        sinon.spy($scope, 'addFilters');
 
-        $scope.editDone();
-        expect($scope.updateFilter.called).to.be(true);
+        $scope.saveEdit(appState.filters[3], appState.filters[3], false);
+        expect($scope.removeFilter.called).to.be(true);
+        expect($scope.addFilters.called).to.be(true);
       });
     });
   });

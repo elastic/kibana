@@ -7,6 +7,7 @@ import manageUuid from './server/lib/manage_uuid';
 import search from './server/routes/api/search';
 import settings from './server/routes/api/settings';
 import scripts from './server/routes/api/scripts';
+import { registerSuggestionsApi } from './server/routes/api/suggestions';
 import * as systemApi from './server/lib/system_api';
 import mappings from './mappings.json';
 
@@ -149,6 +150,7 @@ module.exports = function (kibana) {
       search(server);
       settings(server);
       scripts(server);
+      registerSuggestionsApi(server);
       server.expose('systemApi', systemApi);
     }
   });
