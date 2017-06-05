@@ -24,6 +24,7 @@
         <!-- Header -->
         <div class="kuiLocalDropdownHeader">
           <label
+            id="originalIframeUrlLabel"
             class="kuiLocalDropdownHeader__label"
             for="originalIframeUrl"
           >
@@ -31,6 +32,7 @@
           </label>
           <div class="kuiLocalDropdownHeader__actions">
             <a
+              aria-describedby="originalIframeUrlLabel"
               class="kuiLocalDropdownHeader__action"
               ng-click="share.copyToClipboard('#originalIframeUrl')"
               kbn-accessible-click
@@ -43,6 +45,7 @@
         <!-- Input -->
         <input
           id="originalIframeUrl"
+          aria-describedby="originalIframeUrlHelpText"
           class="kuiLocalDropdownInput"
           type="text"
           readonly
@@ -50,7 +53,10 @@
         />
 
         <!-- Notes -->
-        <div class="kuiLocalDropdownFormNote">
+        <div
+          id="originalIframeUrlHelpText"
+          class="kuiLocalDropdownFormNote"
+        >
           Add to your HTML source. Note that all clients must be able to access Kibana.
         </div>
       </div>
@@ -60,6 +66,7 @@
         <!-- Header -->
         <div class="kuiLocalDropdownHeader">
           <label
+            id="originalUrlLabel"
             class="kuiLocalDropdownHeader__label"
             for="originalUrl"
           >
@@ -67,6 +74,7 @@
           </label>
           <div class="kuiLocalDropdownHeader__actions">
             <a
+              aria-describedby="originalUrlLabel"
               class="kuiLocalDropdownHeader__action"
               ng-click="share.copyToClipboard('#originalUrl')"
               kbn-accessible-click
@@ -105,6 +113,7 @@
       <!-- Header -->
       <div class="kuiLocalDropdownHeader">
         <label
+          id="snapshotIframeUrlLabel"
           class="kuiLocalDropdownHeader__label"
           for="snapshotIframeUrl"
         >
@@ -112,6 +121,7 @@
         </label>
         <div class="kuiLocalDropdownHeader__actions">
           <a
+            aria-describedby="snapshotIframeUrlLabel"
             class="kuiLocalDropdownHeader__action"
             ng-if="!share.urlFlags.shortSnapshotIframe"
             ng-click="share.toggleShortSnapshotIframeUrl()"
@@ -121,6 +131,7 @@
           </a>
 
           <a
+            aria-describedby="snapshotIframeUrlLabel"
             class="kuiLocalDropdownHeader__action"
             ng-if="share.urlFlags.shortSnapshotIframe"
             ng-click="share.toggleShortSnapshotIframeUrl()"
@@ -130,6 +141,7 @@
           </a>
 
           <a
+            aria-describedby="snapshotIframeUrlLabel"
             class="kuiLocalDropdownHeader__action"
             ng-click="share.copyToClipboard('#snapshotIframeUrl')"
             kbn-accessible-click
@@ -142,6 +154,7 @@
       <!-- Input -->
       <input
         id="snapshotIframeUrl"
+        aria-describedby="snapshotIframeUrlHelpText"
         class="kuiLocalDropdownInput"
         type="text"
         readonly
@@ -149,7 +162,10 @@
       />
 
       <!-- Notes -->
-      <div class="kuiLocalDropdownFormNote">
+      <div
+        id="snapshotIframeUrlHelpText"
+        class="kuiLocalDropdownFormNote"
+      >
         Add to your HTML source. Note that all clients must be able to access Kibana.
       </div>
     </div>
@@ -159,6 +175,7 @@
       <!-- Header -->
       <div class="kuiLocalDropdownHeader">
         <label
+          id="snapshotUrlLabel"
           class="kuiLocalDropdownHeader__label"
           for="snapshotUrl"
         >
@@ -166,6 +183,7 @@
         </label>
         <div class="kuiLocalDropdownHeader__actions">
           <a
+            aria-describedby="snapshotUrlLabel"
             data-test-subj="sharedSnapshotShortUrlButton"
             class="kuiLocalDropdownHeader__action"
             ng-if="!share.urlFlags.shortSnapshot"
@@ -176,6 +194,7 @@
           </a>
 
           <a
+            aria-describedby="snapshotUrlLabel"
             class="kuiLocalDropdownHeader__action"
             ng-if="share.urlFlags.shortSnapshot"
             ng-click="share.toggleShortSnapshotUrl()"
@@ -185,6 +204,7 @@
           </a>
 
           <a
+            aria-describedby="snapshotUrlLabel"
             data-test-subj="sharedSnapshotCopyButton"
             class="kuiLocalDropdownHeader__action"
             ng-click="share.copyToClipboard('#snapshotUrl')"
@@ -199,6 +219,7 @@
       <input
         data-test-subj="sharedSnapshotUrl"
         id="snapshotUrl"
+        aria-describedby="snapshotUrlHelpText"
         class="kuiLocalDropdownInput"
         type="text"
         readonly
@@ -206,7 +227,10 @@
       />
 
       <!-- Notes -->
-      <div class="kuiLocalDropdownFormNote">
+      <div
+        id="snapshotUrlHelpText"
+        class="kuiLocalDropdownFormNote"
+      >
         We recommend sharing shortened snapshot URLs for maximum compatibility. Internet Explorer has URL length restrictions, and some wiki and markup parsers don't do well with the full-length version of the snapshot URL, but the short URL should work great.
       </div>
     </div>
