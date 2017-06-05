@@ -1,5 +1,4 @@
 import _ from 'lodash';
-import { ContainerTooSmall } from 'ui/errors';
 import { VislibVisualizationsPointSeriesProvider } from './_point_series';
 
 export function VislibVisualizationsColumnChartProvider(Private) {
@@ -12,8 +11,6 @@ export function VislibVisualizationsColumnChartProvider(Private) {
     color: undefined,
     fillColor: undefined,
   };
-
-  const minBarWidth = 1;
 
   /**
    * Vertical Bar Chart Visualization: renders vertical and/or stacked bars
@@ -108,10 +105,6 @@ export function VislibVisualizationsColumnChartProvider(Private) {
         const groupSpacing = groupWidth * groupSpacingPercentage;
 
         barWidth = (groupWidth - groupSpacing) / groupCount;
-
-        if (barWidth < minBarWidth) {
-          throw new ContainerTooSmall();
-        }
       }
 
       function x(d) {
@@ -193,10 +186,6 @@ export function VislibVisualizationsColumnChartProvider(Private) {
       }
 
       function widthFunc() {
-        if (barWidth < minBarWidth) {
-          throw new ContainerTooSmall();
-        }
-
         if (isTimeScale) {
           return barWidth;
         }
