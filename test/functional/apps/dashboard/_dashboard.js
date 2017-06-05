@@ -133,6 +133,28 @@ export default function ({ getService, getPageObjects }) {
       });
     });
 
+    describe('Directly modifying url updates dashboard state', () => {
+      it('for query parameter', async function () {
+        const currentQuery = await PageObjects.dashboard.getQuery();
+        expect(currentQuery).to.equal('');
+        const currentUrl = await remote.getCurrentUrl();
+        const newUrl = currentUrl.replace('query:%27*%27', 'query:%27hi%27');
+        // Don't add the timestamp to the url or it will cause a hard refresh and we want to test a
+        // soft refresh.
+        await remote.get(newUrl.toString(), false);
+        const newQuery = await PageObjects.dashboard.getQuery();
+        expect(newQuery).to.equal('hi');
+      });
+
+      it('for panel size parameters', async function () {
+        const currentUrl = await remote.getCurrentUrl();
+        const newUrl = currentUrl.replace(`size_x:${DEFAULT_PANEL_WIDTH}`, `size_x:${DEFAULT_PANEL_WIDTH * 2}`);
+        await remote.get(newUrl.toString(), false);
+        const allPanelInfo = await PageObjects.dashboard.getPanelSizeData();
+        expect(allPanelInfo[0].dataSizeX).to.equal(`${DEFAULT_PANEL_WIDTH * 2}`);
+      });
+    });
+
     describe('add new visualization link', () => {
       it('adds a new visualization', async () => {
         await PageObjects.dashboard.clickAddVisualization();
@@ -155,28 +177,6 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.header.clickVisualize();
         const currentUrl = await remote.getCurrentUrl();
         expect(currentUrl).to.contain(VisualizeConstants.EDIT_PATH);
-      });
-    });
-
-    describe('Directly modifying url updates dashboard state', () => {
-      it('for query parameter', async function () {
-        const currentQuery = await PageObjects.dashboard.getQuery();
-        expect(currentQuery).to.equal('');
-        const currentUrl = await remote.getCurrentUrl();
-        const newUrl = currentUrl.replace('query:%27*%27', 'query:%27hi%27');
-        // Don't add the timestamp to the url or it will cause a hard refresh and we want to test a
-        // soft refresh.
-        await remote.get(newUrl.toString(), false);
-        const newQuery = await PageObjects.dashboard.getQuery();
-        expect(newQuery).to.equal('hi');
-      });
-
-      it('for panel size parameters', async function () {
-        const currentUrl = await remote.getCurrentUrl();
-        const newUrl = currentUrl.replace(`size_x:${DEFAULT_PANEL_WIDTH}`, `size_x:${DEFAULT_PANEL_WIDTH * 2}`);
-        await remote.get(newUrl.toString(), false);
-        const allPanelInfo = await PageObjects.dashboard.getPanelSizeData();
-        expect(allPanelInfo[0].dataSizeX).to.equal(`${DEFAULT_PANEL_WIDTH * 2}`);
       });
     });
   });
