@@ -4,8 +4,7 @@ import React, {
 
 import classNames from 'classnames';
 
-
-const KuiMenuItem = ({
+export const KuiMenuItem = ({
   className,
   children,
   ...rest
@@ -23,8 +22,4 @@ const KuiMenuItem = ({
 KuiMenuItem.propTypes = {
   className: React.PropTypes.string,
   children:  PropTypes.node
-};
-
-export {
-  KuiMenuItem
 };

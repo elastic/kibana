@@ -17,7 +17,6 @@ import MenuContained from './menu_contained';
 const menuContainedSource = require('!!raw!./menu_contained');
 const menuContainedHtml = renderToHtml(MenuContained);
 
-
 export default props => (
   <GuidePage title={props.route.name}>
     <GuideSection
@@ -33,7 +32,6 @@ export default props => (
       <GuideDemo>
         <Menu />
       </GuideDemo>
-
     </GuideSection>
 
     <GuideSection
@@ -49,9 +47,6 @@ export default props => (
       <GuideDemo>
         <MenuContained />
       </GuideDemo>
-
     </GuideSection>
-
-
   </GuidePage>
 );

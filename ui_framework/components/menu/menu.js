@@ -3,24 +3,19 @@ import React, {
 } from 'react';
 import classNames from 'classnames';
 
-const getClassName = ({ className, contained = false }) =>
-  classNames('kuiMenu', className, {
-    'kuiMenu--contained': contained
-  });
-
-
-const KuiMenu = ({
+export const KuiMenu = ({
   contained,
   className,
   children,
   ...rest
 }) => {
+  const classes = classNames('kuiMenu', className, {
+    'kuiMenu--contained': contained
+  });
+
   return (
     <ul
-      className={getClassName({
-        className,
-        contained,
-      })}
+      className={classes}
       {...rest}
     >
       {children}
@@ -30,10 +25,6 @@ const KuiMenu = ({
 
 KuiMenu.propTypes = {
   contained: PropTypes.bool,
-  className: React.PropTypes.string,
+  className: PropTypes.string,
   children:  PropTypes.node
-};
-
-export {
-  KuiMenu
 };

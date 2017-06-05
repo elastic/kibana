@@ -10,3 +10,8 @@ test('renders KuiMenu', () => {
   const component = <KuiMenu { ...requiredProps }>children</KuiMenu>;
   expect(render(component)).toMatchSnapshot();
 });
+
+test('contained prop', () => {
+  const component = <KuiMenu contained >children</KuiMenu>;
+  expect(render(component)).toMatchSnapshot();
+});
