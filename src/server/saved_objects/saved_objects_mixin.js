@@ -29,4 +29,22 @@ export function savedObjectsMixin(kbnServer, server) {
   server.route(createFindRoute(prereqs));
   server.route(createReadRoute(prereqs));
   server.route(createUpdateRoute(prereqs));
+
+  const savedObjectsClientCache = new WeakMap();
+  server.decorate('request', 'getSavedObjectsClient', function () {
+    const request = this;
+
+    if (savedObjectsClientCache.has(request)) {
+      return savedObjectsClientCache.get(request);
+    }
+
+    const { callWithRequest } = server.plugins.elasticsearch.getCluster('admin');
+    const callAdminCluster = (...args) => callWithRequest(request, ...args);
+    const savedObjectsClient = new SavedObjectsClient(
+          server.config().get('kibana.index'),
+          callAdminCluster
+    );
+    savedObjectsClientCache.set(request, savedObjectsClient);
+    return savedObjectsClient;
+  });
 }
