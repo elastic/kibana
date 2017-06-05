@@ -1346,7 +1346,7 @@ body {
           justify-content: space-between;
   min-height: 30px;
   /* 1 */
-  border-bottom: 2px solid #E4E4E4; }
+  border-bottom: 1px solid #E4E4E4; }
 
 /**
  * 1. Align a single section to the left by default.
@@ -2401,14 +2401,14 @@ body {
       -ms-flex-pack: center;
           justify-content: center;
   padding-bottom: 10vh;
-  background-color: rgba(0, 0, 0, 0.3); }
+  background-color: rgba(0, 0, 0, 0.5); }
 
 .kuiModal {
   line-height: 1.5;
   background-color: #FFF;
-  border: 1px solid #6EADC1;
+  border: 1px solid #D9D9D9;
   border-radius: 4px;
-  box-shadow: 0 5px 22px rgba(0, 0, 0, 0.25);
+  box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.1);
   z-index: 1001; }
 
 .kuiModalHeader {
@@ -2425,7 +2425,8 @@ body {
       -ms-flex-align: center;
           align-items: center;
   padding: 10px;
-  border-bottom: 2px solid #E4E4E4; }
+  padding-left: 20px;
+  border-bottom: 1px solid #E4E4E4; }
 
 .kuiModalHeader__title {
   font-size: 18px; }
@@ -2448,7 +2449,7 @@ body {
     color: #191E23; }
 
 .kuiModalBody {
-  padding: 20px 10px; }
+  padding: 20px; }
 
 .kuiModalBodyText {
   font-size: 14px; }
@@ -2462,7 +2463,8 @@ body {
   -webkit-justify-content: flex-end;
       -ms-flex-pack: end;
           justify-content: flex-end;
-  padding: 0 10px 10px; }
+  padding: 20px;
+  padding-top: 10px; }
   .kuiModalFooter > * + * {
     margin-left: 5px; }
 
