@@ -26,13 +26,6 @@
     transform: translateY(1px);
   }
 
-  &:focus {
-    outline: none; /* 2 */
-  }
-
-  @include kuiButtonFocus {
-    @include focus;
-  }
 }
 
   /**

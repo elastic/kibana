@@ -58,6 +58,14 @@
   *:before, *:after {
     box-sizing: border-box; }
 
+:focus {
+  z-index: 1;
+  /* 1 */
+  outline: none !important;
+  /* 2 */
+  box-shadow: 0 0 0 1px #ffffff, 0 0 0 2px #0079a5;
+  /* 3 */ }
+
 body {
   font-family: "Open Sans", Helvetica, Arial, sans-serif; }
 
@@ -180,24 +188,6 @@ body {
     /* 1 */
     -webkit-transform: translateY(1px);
             transform: translateY(1px); }
-  .kuiButton:focus {
-    outline: none;
-    /* 2 */ }
-  .kuiButton:not(a):enabled:focus {
-    z-index: 1;
-    /* 1 */
-    outline: none !important;
-    /* 2 */
-    box-shadow: 0 0 0 1px #ffffff, 0 0 0 2px #0079a5;
-    /* 3 */ }
-  a.kuiButton:not(.kuiButton-isDisabled):focus {
-    /* 1 */
-    z-index: 1;
-    /* 1 */
-    outline: none !important;
-    /* 2 */
-    box-shadow: 0 0 0 1px #ffffff, 0 0 0 2px #0079a5;
-    /* 3 */ }
 
 /**
    * 1. Solves whitespace problems introduced by inline elements.
@@ -1036,7 +1026,7 @@ body {
     border-color: #D86051; }
   .kuiSearchInput__input:focus {
     outline: none;
-    border-color: #6EADC1; }
+    border-color: #0079a5; }
   .kuiSearchInput__input:disabled {
     opacity: 0.4;
     cursor: not-allowed; }
@@ -1045,7 +1035,7 @@ body {
     border-color: #444444; }
     .theme-dark .kuiSearchInput__input:focus {
       outline: none;
-      border-color: #6EADC1; }
+      border-color: #0079a5; }
 
 .kuiSelect {
   -webkit-appearance: none;
@@ -1090,7 +1080,7 @@ body {
     border-color: #D86051; }
   .kuiSelect:focus {
     outline: none;
-    border-color: #6EADC1; }
+    border-color: #0079a5; }
   .kuiSelect:disabled {
     opacity: 0.4;
     cursor: not-allowed; }
@@ -1099,7 +1089,7 @@ body {
     border-color: #444444; }
     .theme-dark .kuiSelect:focus {
       outline: none;
-      border-color: #6EADC1; }
+      border-color: #0079a5; }
   .kuiSelect:-moz-focusring {
     text-shadow: 0 0 0;
     /* 3 */ }
@@ -1169,7 +1159,7 @@ body {
     border-color: #D86051; }
   .kuiTextArea:focus {
     outline: none;
-    border-color: #6EADC1; }
+    border-color: #0079a5; }
   .kuiTextArea:disabled {
     opacity: 0.4;
     cursor: not-allowed; }
@@ -1178,7 +1168,7 @@ body {
     border-color: #444444; }
     .theme-dark .kuiTextArea:focus {
       outline: none;
-      border-color: #6EADC1; }
+      border-color: #0079a5; }
   .kuiTextArea.kuiTextArea-isInvalid {
     border-color: #D86051; }
 
@@ -1207,7 +1197,7 @@ body {
     border-color: #D86051; }
   .kuiTextInput:focus {
     outline: none;
-    border-color: #6EADC1; }
+    border-color: #0079a5; }
   .kuiTextInput:disabled {
     opacity: 0.4;
     cursor: not-allowed; }
@@ -1216,7 +1206,7 @@ body {
     border-color: #444444; }
     .theme-dark .kuiTextInput:focus {
       outline: none;
-      border-color: #6EADC1; }
+      border-color: #0079a5; }
   .kuiTextInput.kuiTextInput-isInvalid {
     border-color: #D86051; }
 
@@ -1520,9 +1510,9 @@ body {
 
 .kuiLink {
   color: #0079a5;
-  text-decoration: none;
   cursor: pointer;
-  /* 1 */ }
+  /* 1 */
+  font-weight: 500; }
   .kuiLink:visited, .kuiLink:active {
     color: #0079a5; }
   .kuiLink:hover {
@@ -1572,9 +1562,9 @@ body {
  */
 .kuiLocalBreadcrumb__link {
   color: #0079a5;
-  text-decoration: none;
   cursor: pointer;
   /* 1 */
+  font-weight: 500;
   color: #0079a5;
   /* 1 */
   font-size: 14px; }
@@ -2042,7 +2032,7 @@ body {
     border-color: #D86051; }
   .kuiLocalSearchInput:focus {
     outline: none;
-    border-color: #6EADC1; }
+    border-color: #0079a5; }
   .kuiLocalSearchInput:disabled {
     opacity: 0.4;
     cursor: not-allowed; }
@@ -2051,7 +2041,7 @@ body {
     border-color: #444444; }
     .theme-dark .kuiLocalSearchInput:focus {
       outline: none;
-      border-color: #6EADC1; }
+      border-color: #0079a5; }
   .kuiLocalSearchInput.kuiLocalSearchInput-isInvalid {
     border-color: #e74C3c; }
 
@@ -2123,7 +2113,7 @@ body {
     border-color: #D86051; }
   .kuiLocalSearchSelect:focus {
     outline: none;
-    border-color: #6EADC1; }
+    border-color: #0079a5; }
   .kuiLocalSearchSelect:disabled {
     opacity: 0.4;
     cursor: not-allowed; }
@@ -2132,7 +2122,7 @@ body {
     border-color: #444444; }
     .theme-dark .kuiLocalSearchSelect:focus {
       outline: none;
-      border-color: #6EADC1; }
+      border-color: #0079a5; }
   .kuiLocalSearchSelect:-moz-focusring {
     text-shadow: 0 0 0;
     /* 3 */ }
@@ -2575,11 +2565,11 @@ body {
     border-color: #ffffff; }
     .kuiPanelHeader .kuiSelect:not(a):enabled:focus {
       outline: none;
-      border-color: #6EADC1; }
+      border-color: #0079a5; }
     a.kuiPanelHeader .kuiSelect:not(.kuiButton-isDisabled):focus {
       /* 1 */
       outline: none;
-      border-color: #6EADC1; }
+      border-color: #0079a5; }
 
 .kuiPanelHeader__title {
   font-size: 18px;
@@ -2884,7 +2874,7 @@ body {
   .kuiTab:focus:not(.kuiTab-isSelected):not(:active) {
     z-index: 1;
     color: #0079a5;
-    border: 1px solid #6EADC1 !important;
+    border: 1px solid #0079a5 !important;
     padding-bottom: 11px;
     /* 4 */ }
   .kuiTab:hover:not(.kuiTab-isSelected) {
@@ -2996,11 +2986,11 @@ body {
     border-color: #ffffff; }
     .kuiToolBar .kuiSelect:not(a):enabled:focus {
       outline: none;
-      border-color: #6EADC1; }
+      border-color: #0079a5; }
     a.kuiToolBar .kuiSelect:not(.kuiButton-isDisabled):focus {
       /* 1 */
       outline: none;
-      border-color: #6EADC1; }
+      border-color: #0079a5; }
 
 .kuiToolBarSection {
   display: -webkit-box;
@@ -3175,7 +3165,7 @@ body {
   transition: border-color 0.1s linear; }
   .kuiToolBarSearchBox__input:focus {
     outline: none;
-    border-color: #6EADC1; }
+    border-color: #0079a5; }
 
 /*
  * 1. We don't want the text to take up two lines and overflow the ToolBar.

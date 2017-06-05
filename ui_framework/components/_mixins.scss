@@ -9,8 +9,8 @@
  */
 @mixin link {
   color: $globalLinkColor;
-  text-decoration: none;
   cursor: pointer; /* 1 */
+  font-weight: 500;
 
   &:visited,
   &:active {
