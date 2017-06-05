@@ -17,7 +17,8 @@ export function VislibVisTypeVislibVisTypeProvider(Private) {
 
   // converts old config format (pre 5.2) to the new one
   const updateParams = function (params) {
-    if (!params.seriesParams || !params.seriesParams.length) return;
+    if (params.seriesParams && params.seriesParams.length) return;
+    params.seriesParams = [{}];
 
     const updateIfSet = (from, to, prop, func) => {
       if (from[prop]) {
@@ -53,7 +54,9 @@ export function VislibVisTypeVislibVisTypeProvider(Private) {
       delete params.scale;
     }
 
-    updateIfSet(params, params.categoryAxes[0], 'expandLastBucket');
+    if (params.categoryAxis && params.categoryAxis.length) {
+      updateIfSet(params, params.categoryAxes[0], 'expandLastBucket');
+    }
   };
 
   _.class(VislibVisType).inherits(VisType);
