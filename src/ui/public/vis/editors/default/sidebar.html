@@ -102,7 +102,13 @@
     </div>
 
     <div class="vis-editor-config" ng-repeat="tab in vis.type.editorConfig.optionTabs" ng-show="sidebar.section == tab.name">
-      <vis-editor-vis-options vis="vis" saved-vis="savedVis" ui-state="uiState" editor="tab.editor"></vis-editor-vis-options>
+      <vis-editor-vis-options
+        vis="vis"
+        vis-data="visData"
+        ui-state="uiState"
+        visualize-editor="visualizeEditor"
+        editor="tab.editor"
+      ></vis-editor-vis-options>
     </div>
 
   </form>

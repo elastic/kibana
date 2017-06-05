@@ -36,12 +36,6 @@ export function VisTypeProvider() {
 
       _.defaultsDeep(this, opts, _defaults);
 
-      if (!this.editorConfig.optionTabs && this.editorConfig.optionsTemplate) {
-        this.editorConfig.optionTabs = [
-          { name: 'options', title: 'Options', editor: this.editorConfig.optionsTemplate }
-        ];
-      }
-
       this.requiresSearch = !(this.requestHandler === 'none');
     }
   }

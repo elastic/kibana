@@ -14,6 +14,12 @@ const defaultEditor = function ($rootScope, $compile) {
     constructor(el, vis) {
       this.el = $(el);
       this.vis = vis;
+
+      if (!this.vis.type.editorConfig.optionTabs && this.vis.type.editorConfig.optionsTemplate) {
+        this.vis.type.editorConfig.optionTabs = [
+          { name: 'options', title: 'Options', editor: this.editorConfig.optionsTemplate }
+        ];
+      }
     }
 
     render(visData, searchSource) {

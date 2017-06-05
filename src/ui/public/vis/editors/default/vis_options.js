@@ -1,3 +1,5 @@
+import React from 'react';
+import { render, unmountComponentAtNode } from 'react-dom';
 import { uiModules } from 'ui/modules';
 import visOptionsTemplate from './vis_options.html';
 
@@ -15,20 +17,41 @@ uiModules
     template: visOptionsTemplate,
     scope: {
       vis: '=',
-      savedVis: '=',
+      visData: '=',
       uiState: '=',
       editor: '=',
-      stageEditableVis: '='
+      visualizeEditor: '='
     },
     link: function ($scope, $el) {
       const $optionContainer = $el.find('[data-visualization-options]');
 
+      const reactOptionsComponent = typeof $scope.editor !== 'string';
+      const renderReactComponent = () => {
+        const Component = $scope.editor;
+        render(<Component scope={$scope} />, $el);
+      };
       // Bind the `editor` template with the scope.
-      const $editor = $compile($scope.editor)($scope);
-      $optionContainer.append($editor);
+      if (reactOptionsComponent) {
+        renderReactComponent();
+      } else {
+        const $editor = $compile($scope.editor)($scope);
+        $optionContainer.append($editor);
+      }
+
+      $scope.$watchGroup(['visData', 'visualizeEditor'], () => {
+        if (reactOptionsComponent) {
+          renderReactComponent();
+        }
+      });
 
       $scope.$watch('vis.type.schemas.all.length', function (len) {
         $scope.alwaysShowOptions = len === 0;
+      });
+
+      $el.on('$destroy', () => {
+        if (reactOptionsComponent) {
+          unmountComponentAtNode($el);
+        }
       });
     }
   };
