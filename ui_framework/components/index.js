@@ -10,6 +10,16 @@ export {
   KuiSubmitButton,
 } from './button';
 
+export {
+  KuiCard,
+  KuiCardDescriptionText,
+  KuiCardDescriptionTitle,
+  KuiCardDescription,
+  KuiCardFooter,
+  KuiCardGroupContainer,
+  KuiCardGroup,
+} from './card';
+
 export { KuiInfoButton } from './info_button';
 
 export {
