@@ -27,7 +27,7 @@ Scanner.prototype.scanAndMap = function (searchString, options, mapFn) {
       query: {
         simple_query_string: {
           query: searchString + '*',
-          fields: ['title^3', 'description'],
+          fields: ['title^3', 'description', 'kibanaSavedObjectMeta.searchSourceJSON', 'visState'],
           default_operator: 'AND'
         }
       }
