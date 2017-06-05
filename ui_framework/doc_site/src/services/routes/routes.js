@@ -116,6 +116,7 @@ const components = [{
 }, {
   name: 'ActionItem',
   component: ActionItemExample,
+  hasReact: true,
 }, {
   name: 'Badge',
   component: BadgeExample,
