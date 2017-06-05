@@ -15,12 +15,13 @@ describe('service_settings (FKA tilemaptest)', function () {
   const manifestUrl2 = 'https://foobar/v1/manifest';
 
   const manifest = {
-    'services': [{
-      'id': 'tiles_v2',
-      'name': 'Elastic Tile Service',
-      'manifest': tmsManifestUrl,
-      'type': 'tms'
-    },
+    'services': [
+      {
+        'id': 'tiles_v2',
+        'name': 'Elastic Tile Service',
+        'manifest': tmsManifestUrl,
+        'type': 'tms'
+      },
       {
         'id': 'geo_layers',
         'name': 'Elastic Layer Service',
