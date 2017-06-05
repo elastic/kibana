@@ -159,6 +159,11 @@ module.directive('kbnTableRow', function ($compile, $httpParamSerializer, kbnUrl
           });
 
           const $target = reuse ? $(reuse).detach() : $(html);
+
+          if ($target.hasClass('discover-table-sourcefield')) {
+            truncateSourceSummary($target);
+          }
+
           $target.data('discover:html', html);
           const $before = $cells.eq(i - 1);
           if ($before.size()) {
@@ -199,6 +204,22 @@ module.directive('kbnTableRow', function ($compile, $httpParamSerializer, kbnUrl
         }
 
         return text;
+      }
+
+      function truncateSourceSummary(sourceElement) {
+        const sourceList = sourceElement.find('dl');
+        const listItems = sourceList.children();
+        const listPairs = _.chunk(listItems, 2);
+        sourceList.empty();
+
+        let length = 0;
+        _.forEach(listPairs, (listPair) => {
+          length += (listPair[0].textContent.length + listPair[1].textContent.length);
+          if (length < 500) {
+            sourceList.append(listPair);
+            sourceList.append(' ');
+          }
+        });
       }
     }
   };
