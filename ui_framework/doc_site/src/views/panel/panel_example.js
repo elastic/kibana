@@ -9,6 +9,7 @@ import {
 } from '../../components';
 
 const panelHtml = require('./panel.html');
+const panelWithToolbarHtml = require('./panel_with_toolbar.html');
 const panelWithHeaderHtml = require('./panel_with_header.html');
 const panelWithHeaderSectionsHtml = require('./panel_with_header_sections.html');
 
@@ -55,6 +56,22 @@ export default props => (
 
       <GuideDemo
         html={panelWithHeaderSectionsHtml}
+      />
+    </GuideSection>
+
+    <GuideSection
+      title="Panel with Toolbar"
+      source={[{
+        type: GuideSectionTypes.HTML,
+        code: panelWithToolbarHtml,
+      }]}
+    >
+      <GuideText>
+        Panels can live within toolbar sections. This is normally used as replacement for an empty table.
+      </GuideText>
+
+      <GuideDemo
+        html={panelWithToolbarHtml}
       />
     </GuideSection>
   </GuidePage>

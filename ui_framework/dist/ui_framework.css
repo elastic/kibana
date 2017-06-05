@@ -2501,7 +2501,7 @@ body {
   border: 1px solid #E4E4E4;
   border-radius: 4px; }
 
-.kuiPanel--withHeader {
+.kuiPanel--withToolbar {
   border-top: none;
   border-radius: 0; }
 

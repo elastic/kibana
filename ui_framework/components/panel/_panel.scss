@@ -4,9 +4,14 @@
 }
 
 .kuiPanel--withHeader {
+  // border-top: none;
+}
+
+.kuiPanel--withToolbar {
   border-top: none;
   border-radius: 0;
 }
+
 
 .kuiPanel--centered {
   display: flex;
