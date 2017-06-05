@@ -19,8 +19,11 @@ uiModules
   const responseHandlers = Private(ResponseHandlersRegistryProvider);
 
   function getHandler(from, name) {
-    if (typeof name === 'function') return name;
-    return from.find(handler => handler.name === name).handler;
+    if (typeof name === 'function') {
+      return name;
+    }
+    const foo = from.find(handler => handler.name === name)
+    return foo.handler;
   }
 
   return {

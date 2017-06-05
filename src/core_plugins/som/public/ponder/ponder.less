@@ -1,0 +1,758 @@
+/*****colors and niceties**************************************************/
+body {
+  //background-color: white;
+  //font-family: 'Gudea', sans-serif;
+  //color: #5b3b31;
+  //user-select: none;
+  //-webkit-touch-callout: none; /* iOS Safari */
+  //-webkit-user-select: none; /* Chrome/Safari/Opera */
+  //-moz-user-select: none; /* Firefox */
+  //-ms-user-select: none;
+}
+
+#dashboard {
+  user-select: none;
+  -webkit-touch-callout: none; /* iOS Safari */
+  -webkit-user-select: none; /* Chrome/Safari/Opera */
+  -moz-user-select: none; /* Firefox */
+  -ms-user-select: none;
+  overflow: hidden;
+}
+
+//a {
+//
+//  display: inline-block;
+//  text-decoration: none;
+//  color: #df723e;
+//}
+//
+//.stripSelected {
+//  border: 2px solid #df723e;
+//}
+//
+//a:hover {
+//  color: #DF723E;
+//}
+
+.header {
+  height: 60px;
+  text-align: center;
+}
+
+.header h1 {
+  font-weight: bold;
+}
+
+.header > div:nth-child(1) {
+  padding-top: 0em;
+  font-size: 2em;
+  text-transform: uppercase;
+  font-weight: bold;
+}
+
+.header > div:nth-child(2) {
+  font-size: 0.4em;
+  padding-left: 0.2em;
+}
+
+#feedback {
+  padding-top: 1em;
+  font-size: 0.55em;
+}
+
+#header > div:nth-child(1) {
+  padding-top: 0em;
+  font-size: 2em;
+  text-transform: uppercase;
+}
+
+#header > div:nth-child(2) {
+  font-size: 0.4em;
+  padding-left: 0.2em;
+}
+
+#mapToolContainer > div {
+  border-radius: 8px;
+  margin: 2px;
+  overflow: hidden;
+  background-color: rgb(255, 247, 229);
+
+}
+
+#mapToolContainer > div > div:nth-child(1) {
+  padding-top: 0.2em;
+  padding-left: 0.2em;
+  font-size: 0.8em;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+#mapToolContainer > div:nth-child(4) span {
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+#mapToolContainer > div select {
+  border-radius: 8px;
+  position: relative;
+  margin: 0 auto;
+  margin-top: 0.5em;
+  width: 95%;
+  display: flex;
+}
+
+#center {
+  box-sizing: border-box;
+  padding-top: 4px;
+  padding-left: 2px;
+  padding-right: 2px;
+  padding-bottom: 2px;
+  overflow: auto;
+}
+
+#center > div {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  padding-left: 3px;
+  padding-top: 3px;
+  padding-right: 3px;
+
+}
+
+#mapContainer {
+  box-sizing: border-box;
+  overflow: hidden;
+}
+
+
+
+#waiting {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  top: 0;
+  left: 0;
+  z-index: 1;
+}
+
+#map {
+  box-sizing: border-box;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+#selectionHistoryContainer > div {
+  padding-top: 3px;
+  padding-bottom: 3px;
+}
+
+#selectionHistoryContainer > div > div {
+  box-sizing: border-box;
+  border-radius: 4px;
+  overflow: hidden;
+  margin-left: 2px;
+  margin-right: 2px;
+  cursor: pointer;
+}
+
+#selectionHistoryContainer > div > div:hover {
+  border: 1px solid #df723e;
+}
+
+#selectionHistoryContainer > div > div:last-child:hover {
+  border: 3px solid #df723e;
+}
+
+#selectionHistoryContainer > div > div:last-child {
+  opacity: 0.4;
+  /*border: 2px solid #5b3b31;*/
+}
+
+#selector {
+  overflow: auto;
+}
+
+#selector > div:nth-child(2) {
+  overflow: auto;
+}
+
+#footer {
+  margin-top: 3em;
+  background-color: rgb(255, 247, 229);
+  border-radius: 2px;
+  font-size: 0.8em;
+  text-align: center;
+}
+
+#blurb {
+  display: flex;
+  flex-flow: column;
+  justify-content: center;
+}
+
+#workflow {
+  display: flex;
+  flex-flow: row nowrap;
+  justify-content: center;
+  padding: 0.6em;
+  background-color: #df723e;
+  opacity: 0.8;
+  margin-bottom: 1em;
+}
+
+#workflow img {
+  width: 64px;
+  height: auto;
+  border-radius: 8px;
+}
+
+#workflow h2 {
+  font-size: 1em;
+}
+
+#workflow table {
+  width: 100%;
+  color: ivory;
+}
+
+#workflow table td {
+  text-align: center;
+  font-weight: bold;
+}
+
+#uploadblurb {
+  background-color: rgb(255, 247, 229);
+  border-radius: 24px;
+  display: flex;
+}
+
+#uploadblurb input {
+  padding-left: 80px;
+}
+
+#uploadblurb > div:nth-child(1) {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.previewTable {
+}
+
+.previewTable > div > div:nth-child(1) {
+  padding-bottom: 1em;
+  padding-top: 1em;
+  font-weight: bold;
+  color: #df723e;
+}
+
+.previewTable input {
+  border-radius: 8px;
+  background-color: #df723e;
+  border-color: #df723e;
+  margin-left: 50%;
+  margin-right: 50%;
+  /*margin-top: 50px;*/
+  font-weight: bold;
+  color: #5b3b31;
+}
+
+.previewTable input:hover {
+  margin-top: 1px;
+}
+
+.previewTable table tr td:nth-child(4) {
+  border-right: 1px solid #5b3b31;
+}
+
+.previewTable table {
+  border-collapse: collapse;
+  width: 100%;
+}
+
+.previewTable th, td {
+  text-align: left;
+  padding: 8px;
+}
+
+.previewTable tr:nth-child(even) {
+  background-color: #f2f2f2;
+}
+
+#selector > div > div:nth-child(1) > div:nth-child(1) {
+  font-size: 1em;
+  padding-left: 0.2em;
+  padding-top: 0.2em;
+}
+
+#selector > div > div:nth-child(1) > div:nth-child(2) {
+  font-size: 0.6em;
+  padding-left: 0.2em;
+  padding-top: 0.2em;
+}
+
+#summary > div[data-plot-type="boxplot"] > div:nth-child(1) {
+  font-weight: bold;
+  font-size: 0.6em;
+  padding-right: 0.2em;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+}
+
+#summary > div[data-plot-type="histogram"] {
+  text-align: center;
+  padding-top: 0.3em;
+}
+
+#summary > div[data-plot-type="histogram"] > div:nth-child(1) {
+  font-size: 0.6em;
+  text-align: right;
+  padding-bottom: 0.3em;
+  font-weight: bold;
+  width: 40%;
+  display: flex;
+  align-items: baseline;
+  justify-content: flex-end;
+}
+
+#summary > div[data-plot-type="histogram"] > div:nth-child(2) > div {
+  padding-top: 0.1em;
+}
+
+#summary > div[data-plot-type="histogram"] > div:nth-child(2) > div > div:nth-child(2) > div {
+  background-color: #f2f2f2;
+}
+
+#summary > div[data-plot-type="histogram"] > div:nth-child(2) > div > div:nth-child(2) > div > div {
+  background-color: #df723e;
+}
+
+#summary > div[data-plot-type="histogram"] > div:nth-child(2) > div > div:nth-child(1) {
+  font-size: 0.6em;
+  text-align: right;
+  padding-right: 0.2em;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+}
+
+#toggle {
+  padding-bottom: 4px;
+}
+
+#toggle > div {
+  width: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+#toggle > div:hover {
+  margin: 4px;
+  background-color: #f2f2f2;
+}
+
+.selectedToggle {
+  background-color: #df723e;
+}
+
+/***PAGE LAYOUT****************************************************/
+//html {
+//  height: 100%
+//}
+//
+//body {
+//  height: 100%;
+//  overflow: hidden;
+//}
+
+#dashboard {
+  height: 100%;
+  width: 100%;
+}
+
+#left {
+  float: left;
+  width: 160px;
+  height: 100%;
+  overflow: auto;
+}
+
+#right {
+  position: relative;
+  margin-left: 160px;
+  height: 100%;
+}
+
+#top {
+  height: 60px;
+}
+
+#center {
+  position: absolute;
+  top: 60px;
+  bottom: 60px;
+  left: 0;
+  right: 0;
+  overflow: hidden;
+}
+
+#bottom {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  left: 0;
+  height: 60px;
+}
+
+/*****POSITIONING*************************************************************************************************************************/
+
+#header {
+  height: 60px;
+}
+
+#mapToolContainer {
+  box-sizing: border-box;
+  padding: 3px;
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  width: 100%;
+  height: 100%;
+}
+
+#mapToolContainer > div {
+  box-sizing: border-box;
+  top: 0;
+  width: 10%;
+  height: 100%;
+  position: relative;
+}
+
+#mapToolContainer > div:nth-child(4) {
+  width: 70%;
+}
+
+#mapToolContainer > div > canvas {
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+
+#title-blurb {
+  display: flex;
+  align-items:center;
+  justify-content: center;
+  color: #df723e;
+  font-size: 1.5em;font-size: 1vw;
+  font-weight: bold;
+}
+
+#mapContainer {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+#tableContainer {
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+
+#map {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  border-radius: 8px;
+  padding-left: 3px;
+  padding-right: 3px;
+  padding-bottom: 3px; }
+
+#map > canvas {
+  width: 100%;
+  height: 100%;
+
+}
+
+#selector {
+  position: relative;
+  margin: 0 auto;
+  width: 100%;
+  z-index: 1;
+}
+
+#welcome {
+  position: relative;
+  height: 100%;
+  background-color: rgb(255, 255, 255);
+  z-index: 1;
+  /*display: flex;*/
+  /*flex-flow: column;*/
+  /*align-content: space-around;*/
+  overflow: auto;
+  padding-left: 50px;
+  padding-right: 50px;
+}
+
+#welcome > div:nth-child(1) {
+  background-color: rgb(255, 247, 229);
+  border-radius: 24px;
+}
+
+#welcome > div {
+  padding: 0.3em;
+}
+
+#examples span {
+  font-size: 0.8em;
+}
+
+#examples img:hover {
+  transform: scale(0.98);
+}
+
+#examples {
+  /*display: flex;*/
+  /*flex-flow: row;*/
+}
+
+#examples > div {
+  /*display: flex;*/
+  /*flex-flow: column;*/
+}
+
+
+
+#examples > div > div {
+  /*display: flex;*/
+  /*flex-flow: row;*/
+  padding-top: 1em;
+  padding-bottom: 1em;
+  height: 100%;
+}
+
+#examples > div > div > div {
+  display: inline-block;
+  position: relative
+}
+
+#examples > div > div > div:nth-child(1) {
+  margin: 1em;
+  /*justify-content: flex-end;*/
+  width: 30%;
+  position: relative;
+  height: 100%;
+  top: 0;
+}
+
+#examples > div > div > div:nth-child(1) > a {
+  float:right
+}
+
+#examples > div > div > div:nth-child(1) > a > img {
+  width: 256px;
+  height: auto;
+  border-radius: 16px;
+}
+
+#examples > div > div > div:nth-child(2) {
+  margin: 1em;
+  /*justify-content: flex-end;*/
+  width: 60%;
+}
+
+#tutorial {
+  display: flex;
+  flex-flow: row wrap;
+}
+
+#tutorial > div {
+  min-width: 300px;
+}
+
+#toollist {
+  display: flex;
+  flex-flow: column wrap;
+}
+
+#toollist > div {
+  display: flex;
+  flex-flow: row;
+  align-items: center;
+}
+
+#toollist > div > div:nth-child(1) {
+  width: 30%;
+  display: flex;
+  justify-content: center;
+  background-color: rgba(255, 247, 229, 0.4);
+  margin: 2px;
+  border-radius: 16px;
+}
+
+#toollist > div > div:nth-child(1) img {
+  max-width: 100%;
+  height: auto;
+  max-height: 60px;
+  padding-top: 0.5em;
+  padding-right: 1em;
+  padding-bottom: 0.5em;
+  padding-left: 1em;
+}
+
+#toollist > div > div:nth-child(2) {
+  width: 70%;
+  display: flex;
+  justify-content: left;
+  align-content: center;
+}
+
+#toggle {
+  height: 30px;
+  width: 100%;
+  display: flex;
+  flex-flow: row;
+}
+
+#selectionHistoryContainer {
+  width: 100%;
+  height: 100%;
+}
+
+#selectionHistoryContainer > div {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+}
+
+#selectionHistoryContainer > div {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+#selectionHistoryContainer > div > div {
+  position: relative;
+  width: 60px;
+  height: 48px;
+}
+
+#selectionHistoryContainer > div > div > canvas {
+  width: 100%;
+  height: 100%;
+}
+
+#summary {
+  position: relative;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  flex-wrap: nowrap;
+}
+
+#summary > div[data-plot-type="boxplot"] {
+  position: relative;
+  height: 30px;
+  display: flex;
+  flex-direction: row;
+}
+
+#summary > div[data-plot-type="boxplot"] > div:nth-child(1) {
+  width: 40%;
+  height: 100%;
+}
+
+#summary > div[data-plot-type="boxplot"] > div:nth-child(2) {
+  width: 60%;
+  height: 100%;
+}
+
+#summary > div[data-plot-type="boxplot"] > div > canvas {
+  position: relative;
+  width: 100%;
+}
+
+body div[data-boxplot-readout="1"] {
+  margin-top: -15px;
+  padding-left: 2px;
+  font-weight: bold;
+  background-color: white;
+  opacity: 0.8;
+  border-radius: 4px;
+  padding: 2px;
+}
+
+#summary > div[data-plot-type="histogram"] > div:nth-child(2) > div {
+  display: flex;
+  flex-flow: row;
+  height: 30px;
+  width: 100%;
+}
+
+#summary > div[data-plot-type="histogram"] > div:nth-child(2) > div > div:nth-child(1) {
+  width: 40%;
+  height: 100%;
+}
+
+#summary > div[data-plot-type="histogram"] > div:nth-child(2) > div > div:nth-child(2) {
+  width: 60%;
+  height: 100%;
+}
+
+#summary > div[data-plot-type="histogram"] > div:nth-child(2) > div > div:nth-child(2) > div {
+  height: 100%;
+}
+
+div[data-ponder-type="balloon"] {
+  background-color: #FFFFFF;
+  opacity: 0.7;
+  padding: 4px;
+  border-radius: 8px;
+  border: 1px solid #df723e;
+}
+
+div[data-ponder-type="balloon"] > div > div {
+  margin-bottom: 1em;
+}
+
+div[data-ponder-type="balloon"] > div > div > div {
+  display: flex;
+  flex-flow: row;
+  position: relative;
+  justify-content: space-between;
+}
+
+div[data-ponder-type="balloon"] > div > div > div > span {
+  position: relative;
+}
+
+div[data-ponder-type="balloon"] > div > div > div > span:nth-child(1) {
+  font-weight: bold;
+  padding-right: 0.4em;
+}
+
+div[data-ponder-type="balloon"] > div > div > div > span:nth-child(2) {
+  text-align: right;
+}
+
+#center  div[data-ponder-type="progress_indicator"] {
+  position: absolute;
+  background-color: ivory;
+  border-radius: 8px;
+  text-align: center;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
