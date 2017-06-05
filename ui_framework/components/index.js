@@ -13,6 +13,16 @@ export {
 } from './button';
 
 export {
+  KuiCard,
+  KuiCardDescriptionText,
+  KuiCardDescriptionTitle,
+  KuiCardDescription,
+  KuiCardFooter,
+  KuiCardGroupContainer,
+  KuiCardGroup,
+} from './card';
+
+export {
   KuiCollapseButton
 } from './collapse_button';
 
