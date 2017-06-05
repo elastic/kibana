@@ -9,8 +9,6 @@ export const Expression = ({ expression, updateValue, setExpression, done }) => 
   return (
     <div className="canvas__expression">
       <FormGroup controlId="formControlsTextarea">
-
-
         <FormControl
           spellCheck={false}
           componentClass="textarea"

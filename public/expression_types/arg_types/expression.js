@@ -3,7 +3,7 @@ import { ArgType } from '../arg_type';
 
 const template = (props = {}) => {
   return (
-    <div>
+    <div className="canvas__argtype--expression">
       <div>expression args:</div>
       <div>
         <pre>{ JSON.stringify(props, null, 2) }</pre>

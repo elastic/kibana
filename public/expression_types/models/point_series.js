@@ -8,15 +8,15 @@ export const pointseries = () => new Model('pointseries', {
   args: [
     new Arg('x', {
       displayName: 'X-axis',
-      argType: 'dataframe_column',
+      argType: 'datacolumn',
     }),
     new Arg('y', {
       displayName: 'Y-axis',
-      argType: 'dataframe_column',
+      argType: 'datacolumn',
     }),
     new Arg('color', {
       displayName: 'Color',
-      argType: 'dataframe_column',
+      argType: 'datacolumn',
     }),
   ],
   resolve({ context }) {

@@ -1,7 +1,9 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { FormGroup, ControlLabel, FormControl } from 'react-bootstrap';
-import { ArgType } from '../arg_type';
+import { MathExpression } from './math_expression';
+import { ArgType } from '../../arg_type';
+import './datacolumn.less';
 
 const template = ({ data, typeInstance }) => {
   const { onValueChange, columns, argValue } = data;
@@ -14,7 +16,7 @@ const template = ({ data, typeInstance }) => {
         [name]: [{
           type: valueType,
           value: inputRefs.value.value,
-          function: inputRefs.function.value,
+          function: inputRefs.fn.value,
         }],
       });
     };
@@ -23,18 +25,12 @@ const template = ({ data, typeInstance }) => {
       case 'string':
       case 'math':
         return (
-          <div>
-            <FormControl
-              componentClass="select"
-              placeholder="raw"
+          <div className="canvas__argtype--datacolumn">
+            <MathExpression
               defaultValue={argVal.function}
-              inputRef={ref => inputRefs.function = ref}
+              inputRef={ref => inputRefs.fn = ref}
               onChange={updateValue(argVal.type)}
-            >
-              <option value="">value</option>
-              <option value="median">median</option>
-            </FormControl>
-
+            />
             <FormControl
               componentClass="select"
               placeholder="select"
@@ -50,7 +46,9 @@ const template = ({ data, typeInstance }) => {
 
       default:
         return (
-          <FormControl componentClass="textarea" placeholder="textarea" defaultValue={argVal.value} />
+          <div className="canvas__argtype--datacolumn">
+            <FormControl componentClass="textarea" placeholder="textarea" defaultValue={argVal.value} />
+          </div>
         );
     }
   };
@@ -68,7 +66,7 @@ template.propTypes = {
   typeInstance: PropTypes.object,
 };
 
-export const dataframeColumn = () => new ArgType('dataframe_column', {
+export const datacolumn = () => new ArgType('datacolumn', {
   displayName: 'Column',
   description: 'Select the data column',
   template,

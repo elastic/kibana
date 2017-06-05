@@ -8,7 +8,7 @@ export const sort = () => new Transform('sort', {
   args: [
     new Arg('_', {
       displayName: 'Sort Field',
-      argType: 'dataframe_column',
+      argType: 'datacolumn',
     }),
   ],
   resolve({ context }) {

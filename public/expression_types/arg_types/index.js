@@ -1,7 +1,7 @@
-import { dataframeColumn } from './dataframe_column';
+import { datacolumn } from './datacolumn';
 import { expression } from './expression';
 
 export default [
-  dataframeColumn,
+  datacolumn,
   expression,
 ];

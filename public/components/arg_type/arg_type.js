@@ -34,11 +34,9 @@ export const ArgType = compose(nullExpressionType, contextPending, contextError)
 
   const expressionProps = { args, context, nextExpressionType, onValueChange };
 
+  // TODO: I'm leaving the { name } thing here for you Joe, while you debug. Get rid of it before we ship.
   return (
-    <div>
-      {/*
-        TODO: I'm leaving the { name } thing here for you Joe, while you debug. Get rid of it before we ship.
-      */}
+    <div className="canvas__argtype">
       <Label className="pull-right">{ name }</Label><br/>
       { expressionType.render(expressionProps) }
     </div>
