@@ -18,9 +18,9 @@ export default function ({ getService, getPageObjects }) {
   const PageObjects = getPageObjects(['common', 'console']);
 
   describe('console app', function describeIndexTests() {
-    before(async function () {
+    before(function () {
       log.debug('navigateTo console');
-      await PageObjects.common.navigateToApp('console');
+      return PageObjects.common.navigateToApp('console');
     });
 
     it('should show the default request', function () {
