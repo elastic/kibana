@@ -1,10 +1,10 @@
-import { reduce, map, size } from 'lodash';
+import { reduce, size } from 'lodash';
 
 const getIndicesFromResponse = json => {
   return reduce(json, (list, { aliases }, indexName) => {
-    list.push(convertToMatchedIndex(indexName));
+    list.push(indexName);
     if (size(aliases) > 0) {
-      list.push(...map(Object.keys(aliases), convertToMatchedIndex));
+      list.push(...Object.keys(aliases));
     }
     return list;
   }, []);
@@ -15,8 +15,4 @@ export function IndexPatternsGetIndicesProvider(esAdmin) {
     const aliasesJson = await esAdmin.indices.getAlias();
     return getIndicesFromResponse(aliasesJson);
   };
-}
-
-export function convertToMatchedIndex(indexName, isFromTemplate = false) {
-  return { indexName, isFromTemplate };
 }

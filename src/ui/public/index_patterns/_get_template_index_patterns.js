@@ -1,8 +1,7 @@
-import { reduce, map, size, flatten, pluck, uniq, sortBy } from 'lodash';
-import { convertToMatchedIndex } from './_get_indices';
+import { map, flatten, pluck } from 'lodash';
 
 const getIndexPatternsFromResponse = json => {
-  return map(flatten(pluck(json, 'index_patterns')), pattern => convertToMatchedIndex(pattern, true));
+  return map(flatten(pluck(json, 'index_patterns')));
 };
 
 export function IndexPatternsGetTemplateIndexPatternsProvider(esAdmin) {
