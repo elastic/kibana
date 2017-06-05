@@ -28,11 +28,11 @@
             kbn-accessible-click
           >
             <span ng-if="filterEditor.isEditingQueryDsl">
-              Search query values
+              Search filter values
             </span>
 
             <span ng-if="!filterEditor.isEditingQueryDsl">
-              Edit raw query
+              Edit Query DSL
             </span>
           </a>
         </div>
@@ -41,7 +41,7 @@
       <!-- Filter dropdowns -->
       <div
         class="kuiFieldGroup kuiVerticalRhythmSmall kuiFieldGroup--alignTop"
-        ng-if="!filterEditor.showQueryDslEditor()"
+        ng-show="!filterEditor.showQueryDslEditor()"
       >
         <div class="kuiFieldGroupSection">
           <filter-field-select
@@ -73,12 +73,17 @@
       <!-- DSL editor -->
       <div
         class="kuiVerticalRhythmSmall"
-        ng-if="filterEditor.showQueryDslEditor()"
+        ng-show="filterEditor.showQueryDslEditor()"
       >
         <filter-query-dsl-editor
+          class="kuiVerticalRhythmSmall"
           filter="filterEditor.filter"
           on-change="filterEditor.setQueryDsl(queryDsl)"
         ></filter-query-dsl-editor>
+
+        <p class="kuiText kuiVerticalRhythmSmall">
+          Filters are built using the <a class="kuiLink" target="_blank" ng-href="{{ filterEditor.docLinks.query.queryDsl }}">Query DSL</a>, within the query context.
+        </p>
       </div>
     </div>
 
