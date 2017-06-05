@@ -1,3 +1,5 @@
+import { get } from 'lodash';
+
 import collectIndexPatterns from './collect_index_patterns';
 import collectSearchSources from './collect_search_sources';
 
@@ -6,25 +8,20 @@ export const deps = {
   collectIndexPatterns
 };
 
-export default function collectPanels(req, dashboard) {
-  const { callWithRequest } = req.server.plugins.elasticsearch.getCluster('admin');
-  const config = req.server.config();
-  const panels = JSON.parse(dashboard._source.panelsJSON);
-  const docs = panels.map(panel => {
-    return {
-      _index: config.get('kibana.index'),
-      _type: panel.type,
-      _id: panel.id
-    };
-  });
-  return callWithRequest(req, 'mget', { body: { docs } })
+export default function collectPanels(savedObjectsClient, dashboard) {
+  const panels = JSON.parse(get(dashboard, 'attributes.panelsJSON', '[]'));
+
+  if (!Array.isArray(panels)) {
+    Promise.resolve([].concat([dashboard]));
+  }
+
+  return savedObjectsClient.bulkGet(panels)
     .then(resp => {
-      const panelData = resp.docs;
       return Promise.all([
-        deps.collectIndexPatterns(req, panelData),
-        deps.collectSearchSources(req, panelData)
+        deps.collectIndexPatterns(savedObjectsClient, resp),
+        deps.collectSearchSources(savedObjectsClient, resp)
       ]).then(results => {
-        return panelData
+        return resp
           .concat(results[0])
           .concat(results[1])
           .concat([dashboard]);

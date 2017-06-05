@@ -1,37 +1,27 @@
 import collectIndexPatterns from './collect_index_patterns';
-export const deps = { collectIndexPatterns };
-export default function collectSearchSources(req, panels) {
-  const { callWithRequest } = req.server.plugins.elasticsearch.getCluster('admin');
-  const config = req.server.config();
 
-  const ids = panels.reduce((acc, panel) => {
-    const { savedSearchId } = panel._source;
+export const deps = { collectIndexPatterns };
+
+export default function collectSearchSources(savedObjectsClient, panels) {
+  const docs = panels.reduce((acc, panel) => {
+    const { savedSearchId } = panel.attributes;
     if (savedSearchId) {
-      if (!acc.find(s => s === savedSearchId) && !panels.find(p => p._id === savedSearchId)) {
-        acc.push(savedSearchId);
+      if (!acc.find(s => s.id === savedSearchId) && !panels.find(p => p.id === savedSearchId)) {
+        acc.push({ type: 'search', id: savedSearchId });
       }
     }
     return acc;
   }, []);
 
-  if (ids.length === 0) {
+  if (docs.length === 0) {
     return Promise.resolve([]);
   }
 
-  const params = {
-    index: config.get('kibana.index'),
-    type: 'search',
-    body: { ids }
-  };
-
-
-  return callWithRequest(req, 'mget', params)
-    .then(resp => resp.docs)
+  return savedObjectsClient.bulkGet(docs)
     .then(savedSearches => {
-      return deps.collectIndexPatterns(req, savedSearches)
+      return deps.collectIndexPatterns(savedObjectsClient, savedSearches)
         .then(resp => {
           return savedSearches.concat(resp);
         });
     });
-
 }
