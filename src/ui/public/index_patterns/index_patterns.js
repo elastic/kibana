@@ -3,6 +3,8 @@ import { IndexPatternMissingIndices } from 'ui/errors';
 import { IndexPatternProvider } from 'ui/index_patterns/_index_pattern';
 import { IndexPatternsPatternCacheProvider } from 'ui/index_patterns/_pattern_cache';
 import { IndexPatternsGetIdsProvider } from 'ui/index_patterns/_get_ids';
+import { IndexPatternsGetIndicesProvider } from 'ui/index_patterns/_get_indices';
+import { IndexPatternsGetTemplateIndexPatternsProvider } from 'ui/index_patterns/_get_template_index_patterns';
 import { IndexPatternsIntervalsProvider } from 'ui/index_patterns/_intervals';
 import { FieldsFetcherProvider } from './fields_fetcher_provider';
 import { RegistryFieldFormatsProvider } from 'ui/registry/field_formats';
@@ -44,6 +46,8 @@ export function IndexPatternsProvider(esAdmin, Notifier, Private, Promise, kbnIn
 
   self.cache = patternCache;
   self.getIds = Private(IndexPatternsGetIdsProvider);
+  self.getIndices = Private(IndexPatternsGetIndicesProvider);
+  self.getTemplateIndexPatterns = Private(IndexPatternsGetTemplateIndexPatternsProvider);
   self.intervals = Private(IndexPatternsIntervalsProvider);
   self.fieldsFetcher = Private(FieldsFetcherProvider);
   self.fieldFormats = Private(RegistryFieldFormatsProvider);
