@@ -1,10 +1,21 @@
 import exportDashboards from '../../../lib/export/export_dashboards';
 import Boom from 'boom';
+import Joi from 'joi';
 import moment from 'moment';
 export default function exportApi(server) {
   server.route({
-    path: '/api/kibana/export/dashboards',
-    method: ['POST', 'GET'],
+    path: '/api/kibana/dashboards/export',
+    config: {
+      validate: {
+        query: Joi.object().keys({
+          dashboard: Joi.alternatives().try(
+            Joi.string(),
+            Joi.array().items(Joi.string())
+          ).required()
+        })
+      },
+    },
+    method: ['GET'],
     handler: (req, reply) => {
       const currentDate = moment.utc();
       return exportDashboards(req)

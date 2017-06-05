@@ -11,7 +11,7 @@ const acceptableTypes = [
 export default function importDashboards(req) {
   const { payload } = req;
   const config = req.server.config();
-  const force = 'force' in req.query && req.query.force !== 'false';
+  const force = 'force' in req.query && req.query.force !== false;
   const exclude = flatten([req.query.exclude]);
 
   const { callWithRequest } = req.server.plugins.elasticsearch.getCluster('admin');

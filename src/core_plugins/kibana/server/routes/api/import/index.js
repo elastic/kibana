@@ -4,7 +4,7 @@ import importDashboards from '../../../lib/import/import_dashboards';
 
 export default function importApi(server) {
   server.route({
-    path: '/api/kibana/import/dashboards',
+    path: '/api/kibana/dashboards/import',
     method: ['POST'],
     config: {
       validate: {
