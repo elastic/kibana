@@ -55,11 +55,12 @@ describe('importDashboards(req)', () => {
       expect(requestStub.args[0][1]).to.equal('bulk');
       expect(requestStub.args[0][2]).to.eql({
         body: [
-          { create: { _index: '.kibana', _type: 'dashboard', _id: 'dashboard-01' } },
+          { create: { _type: 'dashboard', _id: 'dashboard-01' } },
           { panelJSON: '{}' },
-          { create: { _index: '.kibana', _type: 'visualization', _id: 'panel-01' } },
+          { create: { _type: 'visualization', _id: 'panel-01' } },
           { visState: '{}' }
-        ]
+        ],
+        index: '.kibana'
       });
     });
   });
@@ -71,11 +72,12 @@ describe('importDashboards(req)', () => {
       expect(requestStub.args[0][1]).to.equal('bulk');
       expect(requestStub.args[0][2]).to.eql({
         body: [
-          { index: { _index: '.kibana', _type: 'dashboard', _id: 'dashboard-01' } },
+          { index: { _type: 'dashboard', _id: 'dashboard-01' } },
           { panelJSON: '{}' },
-          { index: { _index: '.kibana', _type: 'visualization', _id: 'panel-01' } },
+          { index: { _type: 'visualization', _id: 'panel-01' } },
           { visState: '{}' }
-        ]
+        ],
+        index: '.kibana'
       });
     });
   });
@@ -87,9 +89,10 @@ describe('importDashboards(req)', () => {
       expect(requestStub.args[0][1]).to.equal('bulk');
       expect(requestStub.args[0][2]).to.eql({
         body: [
-          { create: { _index: '.kibana', _type: 'dashboard', _id: 'dashboard-01' } },
+          { create: { _type: 'dashboard', _id: 'dashboard-01' } },
           { panelJSON: '{}' }
-        ]
+        ],
+        index: '.kibana'
       });
     });
   });
