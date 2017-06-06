@@ -17,8 +17,7 @@ describe('importDashboards(req)', () => {
         version: '6.0.0',
         objects: [
           { id: 'dashboard-01', type: 'dashboard', attributes: { panelJSON: '{}' } },
-          { id: 'panel-01', type: 'visualization', attributes: { visState: '{}' } },
-          { id: 'bad-01', type: 'bad', attributes: { somethingJSON: '{}' } }
+          { id: 'panel-01', type: 'visualization', attributes: { visState: '{}' } }
         ]
       },
       server: {
