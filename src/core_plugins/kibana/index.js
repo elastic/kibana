@@ -143,7 +143,7 @@ export default function (kibana) {
         (settings, log) => {
           if (has(settings, 'defaultAppId')) {
             const newConfig = `server.defaultRoute: /app/kibana#/${get(settings, 'defaultAppId')}`;
-            log(`Config key "defaultAppId" will be deprecated. Use the equivalent "${newConfig}"`);
+            log(`Config key "defaultAppId" will be removed. Use the equivalent "${newConfig}"`);
           }
         }
       ];

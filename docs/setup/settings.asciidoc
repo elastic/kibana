@@ -21,7 +21,7 @@ the `server.host` setting. When the value of this setting is `false`, Kibana use
 to this Kibana instance.
 `kibana.index:`:: *Default: ".kibana"* Kibana uses an index in Elasticsearch to store saved searches, visualizations and
 dashboards. Kibana creates a new index if the index doesn’t already exist.
-`kibana.defaultAppId:`:: *Default: "discover"* The default application to load. Use `server.defaultRoute`, as this will be deprecated in future versions.
+`kibana.defaultAppId:`:: *Default: "discover"* The default application to load. Use `server.defaultRoute`, as this will be removed in future versions.
 [[tilemap-settings]]`tilemap.url:`:: The URL to the tile
 service that Kibana uses to display map tiles in tilemap visualizations. By default, Kibana reads this url from an external metadata service, but users can still override this parameter to use their own Tile Map Service. For example: `"https://tiles.elastic.co/v2/default/{z}/{x}/{y}.png?elastic_tile_service_tos=agree&my_app_name=kibana"`
 `tilemap.options.minZoom:`:: *Default: 1* The minimum zoom level.
