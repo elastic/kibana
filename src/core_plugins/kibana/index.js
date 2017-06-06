@@ -6,6 +6,8 @@ import { mkdirp as mkdirpNode } from 'mkdirp';
 import manageUuid from './server/lib/manage_uuid';
 import search from './server/routes/api/search';
 import settings from './server/routes/api/settings';
+import { importApi } from './server/routes/api/import';
+import { exportApi } from './server/routes/api/export';
 import scripts from './server/routes/api/scripts';
 import { registerSuggestionsApi } from './server/routes/api/suggestions';
 import * as systemApi from './server/lib/system_api';
@@ -126,6 +128,8 @@ export default function (kibana) {
       search(server);
       settings(server);
       scripts(server);
+      importApi(server);
+      exportApi(server);
       registerSuggestionsApi(server);
 
       server.expose('systemApi', systemApi);
