@@ -21,8 +21,7 @@ export const documentationLinks = {
     luceneExpressions: `${baseUrl}guide/en/elasticsearch/reference/${urlVersion}/modules-scripting-expression.html`
   },
   query: {
-    luceneQuerySyntax: `${baseUrl}guide/en/elasticsearch/reference/${urlVersion}/query-dsl-query-string-query.html#query-string-syntax`,
-    queryDsl: `${baseUrl}guide/en/elasticsearch/reference/${urlVersion}/query-dsl.html`,
+    luceneQuerySyntax: `${baseUrl}guide/en/elasticsearch/reference/${urlVersion}/query-dsl-query-string-query.html#query-string-syntax`
   },
   date: {
     dateMath: `${baseUrl}guide/en/elasticsearch/reference/${urlVersion}/common-options.html#date-math`

@@ -6,120 +6,110 @@
       filter
     </div>
 
-    <button
+    <div
       class="kuiModalHeaderCloseButton kuiIcon fa-times"
       ng-click="filterEditor.onCancel()"
-      aria-label="Close filter popover"
-    ></button>
+    ></div>
   </div>
 
   <div class="kuiModalBody">
-    <!-- Filter definition -->
-    <div class="kuiVerticalRhythm">
-      <div class="kuiVerticalRhythmSmall filterEditor__labelBar">
-        <label class="kuiLabel">
-          Filter
-        </label>
-
-        <div>
-          <a
-            class="kuiLink"
-            ng-click="filterEditor.isEditingQueryDsl = !filterEditor.isEditingQueryDsl"
-            kbn-accessible-click
-          >
-            <span ng-if="filterEditor.isEditingQueryDsl">
-              Search filter values
-            </span>
-
-            <span ng-if="!filterEditor.isEditingQueryDsl">
-              Edit Query DSL
-            </span>
-          </a>
-        </div>
-      </div>
-
-      <!-- Filter dropdowns -->
+    <div ng-show="filterEditor.showQueryDslEditor()">
+      <filter-query-dsl-editor
+        filter="filterEditor.filter"
+        on-change="filterEditor.setQueryDsl(queryDsl)"
+      ></filter-query-dsl-editor>
       <div
-        class="kuiFieldGroup kuiVerticalRhythmSmall kuiFieldGroup--alignTop"
-        ng-show="!filterEditor.showQueryDslEditor()"
+        ng-show="filterEditor.isEditingQueryDsl"
+        ng-click="filterEditor.isEditingQueryDsl = false"
       >
-        <div class="kuiFieldGroupSection">
-          <filter-field-select
-            index-patterns="filterEditor.indexPatterns"
-            field="filterEditor.field"
-            on-select="filterEditor.onFieldSelect(field)"
-          ></filter-field-select>
-        </div>
-
-        <div class="kuiFieldGroupSection">
-          <filter-operator-select
-            ng-if="filterEditor.field"
-            field="filterEditor.field"
-            operator="filterEditor.operator"
-            on-select="filterEditor.onOperatorSelect(operator)"
-          ></filter-operator-select>
-        </div>
-
-        <div class="kuiFieldGroupSection kuiFieldGroupSection--wide filterEditor__wideField">
-          <filter-params-editor
-            ng-if="filterEditor.field && filterEditor.operator"
-            field="filterEditor.field"
-            operator="filterEditor.operator"
-            params="filterEditor.params"
-          ></filter-params-editor>
-        </div>
-      </div>
-
-      <!-- DSL editor -->
-      <div
-        class="kuiVerticalRhythmSmall"
-        ng-show="filterEditor.showQueryDslEditor()"
-      >
-        <filter-query-dsl-editor
-          class="kuiVerticalRhythmSmall"
-          filter="filterEditor.filter"
-          on-change="filterEditor.setQueryDsl(queryDsl)"
-        ></filter-query-dsl-editor>
-
-        <p class="kuiText kuiVerticalRhythmSmall">
-          Filters are built using the <a class="kuiLink" target="_blank" ng-href="{{ filterEditor.docLinks.query.queryDsl }}">Elasticsearch Query DSL</a>.
-        </p>
+        <button class="kuiMenuButton kuiMenuButton--basic">
+          <span class="kuiMenuButton__icon kuiIcon fa-chevron-left"></span>
+          <span>Back</span>
+        </button>
       </div>
     </div>
 
-    <!-- Label -->
-    <div class="kuiVerticalRhythm">
-      <div class="kuiVerticalRhythmSmall">
-        <label
-          class="kuiLabel"
-          for="filterEditorLabelInput"
-        >
-          Label
-        </label>
+    <div
+      class="kuiFieldGroup kuiVerticalRhythm kuiFieldGroup--alignTop"
+      ng-hide="filterEditor.showQueryDslEditor()"
+    >
+      <div class="kuiFieldGroupSection">
+        <filter-field-select
+          index-patterns="filterEditor.indexPatterns"
+          field="filterEditor.field"
+          on-select="filterEditor.onFieldSelect(field)"
+        ></filter-field-select>
       </div>
 
-      <input
-        class="kuiTextInput kuiVerticalRhythmSmall"
-        placeholder="Optional"
-        type="text"
-        ng-model="filterEditor.alias"
-        id="filterEditorLabelInput"
-      />
+      <div class="kuiFieldGroupSection">
+        <filter-operator-select
+          ng-if="filterEditor.field"
+          field="filterEditor.field"
+          operator="filterEditor.operator"
+          on-select="filterEditor.onOperatorSelect(operator)"
+        ></filter-operator-select>
+      </div>
+
+      <div class="kuiFieldGroupSection kuiFieldGroupSection--wide filterEditor__wideField">
+        <filter-params-editor
+          ng-if="filterEditor.field && filterEditor.operator"
+          field="filterEditor.field"
+          operator="filterEditor.operator"
+          params="filterEditor.params"
+        ></filter-params-editor>
+      </div>
+    </div>
+
+    <div class="kuiHeaderBar kuiVerticalRhythm">
+      <div class="kuiHeaderBarSection">
+        <h2 class="kuiSubTitle">
+          Label
+        </h2>
+      </div>
+    </div>
+
+    <div class="kuiFieldGroup kuiVerticalRhythm">
+      <div class="kuiFieldGroupSection">
+        <input
+          class="kuiTextInput"
+          placeholder="Optional"
+          type="text"
+          ng-model="filterEditor.alias"
+        />
+      </div>
+    </div>
+
+    <div
+      class="kuiHeaderBar kuiVerticalRhythm"
+      ng-hide="filterEditor.showQueryDslEditor()"
+    >
+      <div class="kuiHeaderBarSection">
+        <h2 class="kuiSubTitle">
+          More actions
+        </h2>
+      </div>
+    </div>
+
+    <div
+      class="kuiMenuButtonGroup kuiVerticalRhythm"
+      ng-hide="filterEditor.showQueryDslEditor()"
+    >
+      <button
+        class="kuiMenuButton kuiMenuButton--basic"
+        ng-click="filterEditor.isEditingQueryDsl = true"
+      >
+        <span>Edit the query DSL</span>
+      </button>
     </div>
   </div>
 
-  <!-- Footer -->
   <div class="kuiModalFooter kuiBar">
     <div class="kuiBarSection" ng-hide="filterEditor.filter.meta.isNew">
       <button
         class="kuiButton kuiButton--danger"
         ng-click="filterEditor.onDelete()"
-        aria-label="Delete filter"
       >
-        <span
-          class="kuiIcon fa-trash"
-          aria-hidden="true"
-        ></span>
+        <span class="fa fa-trash"></span>
       </button>
     </div>
 
