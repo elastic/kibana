@@ -23,7 +23,7 @@ const vals = _.transform([
 // match any key from the vals object prececed by an optional number
 const parseRE = new RegExp('^(\\d+(?:\\.\\d*)?)?\\s*(' + _.keys(vals).join('|') + ')$');
 
-module.exports = function (expr) {
+export default function (expr) {
   const match = expr.match(parseRE);
   if (match) {
     if (match[2] === 'M' && match[1] !== '1') {
@@ -32,4 +32,4 @@ module.exports = function (expr) {
 
     return parseFloat(match[1] || 1) * vals[match[2]];
   }
-};
+}

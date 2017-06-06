@@ -16,7 +16,7 @@ const NO_INDEX = 'no_index';
 const INITIALIZING = 'initializing';
 const READY = 'ready';
 
-module.exports = function (plugin, server, { mappings }) {
+export default function (plugin, server, { mappings }) {
   const config = server.config();
   const callAdminAsKibanaUser = server.plugins.elasticsearch.getCluster('admin').callWithInternalUser;
   const callDataAsKibanaUser = server.plugins.elasticsearch.getCluster('data').callWithInternalUser;
@@ -146,4 +146,4 @@ module.exports = function (plugin, server, { mappings }) {
     isRunning: function () { return !!timeoutId; },
   };
 
-};
+}

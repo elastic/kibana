@@ -1,7 +1,7 @@
 import _ from 'lodash';
 
 // Applies to unresolved arguments in the AST
-module.exports = function repositionArguments(functionDef, unorderedArgs) {
+export default function repositionArguments(functionDef, unorderedArgs) {
   const args = [];
 
   _.each(unorderedArgs, function (unorderedArg, i) {
@@ -51,4 +51,4 @@ module.exports = function repositionArguments(functionDef, unorderedArgs) {
 
   return args;
 
-};
+}

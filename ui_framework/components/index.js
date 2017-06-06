@@ -33,3 +33,8 @@ export {
   KuiPager,
   KuiPagerButtonGroup
 } from './pager';
+
+export {
+  KuiMenu,
+  KuiMenuItem
+} from './menu';

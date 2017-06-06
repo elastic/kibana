@@ -1,0 +1,42 @@
+<ui-select
+  ng-if="field.aggregatable && field.type === 'string'"
+  ng-model="params.phrase"
+  ui-select-focus-on="focus-params"
+>
+  <ui-select-match placeholder="Values...">
+    <span
+      class="uiSelectMatch--ellipsis"
+      tooltip="{{$select.selected}}"
+    >
+      {{$select.selected}}
+    </span>
+  </ui-select-match>
+  <ui-select-choices
+    class="uiSelectChoices--autoWidth"
+    repeat="value in filterParamsPhraseEditor.compactUnion([$select.search, $select.selected], valueSuggestions) | filter:$select.search | sortPrefixFirst:$select.search"
+    refresh="filterParamsPhraseEditor.refreshValueSuggestions($select.search)"
+    refresh-delay="500"
+  >
+    <div ng-bind="value"></div>
+  </ui-select-choices>
+</ui-select>
+
+<filter-params-input-type
+  ng-if="!(field.aggregatable && field.type === 'string')"
+  placeholder="Value..."
+  type="field.type"
+  value="params.phrase"
+  on-change="params.phrase = value"
+  focus-on="focus-params"
+></filter-params-input-type>
+
+<small>
+  <a
+    ng-if="field.type === 'date'"
+    class="kuiLink"
+    ng-href="{{dateDocLinks.dateMath}}"
+    target="_blank"
+  >
+    Accepted date formats
+  </a>
+</small>

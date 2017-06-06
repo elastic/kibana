@@ -3,7 +3,7 @@ import Datasource from '../../lib/classes/datasource';
 import buildRequest from './lib/build_request';
 import toSeriesList from './lib/agg_response_to_series_list';
 
-module.exports = new Datasource('es', {
+export default new Datasource('es', {
   args: [
     {
       name: 'q',

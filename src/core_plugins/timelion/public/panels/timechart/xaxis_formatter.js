@@ -1,6 +1,6 @@
 import moment from 'moment';
 
-module.exports = function xaxisFormatterProvider(config) {
+export default function xaxisFormatterProvider(config) {
 
   function getFormat(esInterval) {
     const parts = esInterval.match(/(\d+)(ms|s|m|h|d|w|M|y|)/);
@@ -24,4 +24,4 @@ module.exports = function xaxisFormatterProvider(config) {
   return function (esInterval) {
     return getFormat(esInterval);
   };
-};
+}

@@ -1,4 +1,4 @@
-module.exports = function (api) {
+export default function (api) {
   api.addEndpointDescription('_count', {
       methods: ['GET', 'POST'],
       priority: 10, // collides with get doc by id
@@ -19,4 +19,4 @@ module.exports = function (api) {
         }
       }
   });
-};
+}
