@@ -1486,18 +1486,22 @@ body {
   padding-left: 10px;
   /* 1 */ }
 
-.kuiLocalBreadcrumb + .kuiLocalBreadcrumb {
-  margin-left: 6px; }
-  .kuiLocalBreadcrumb + .kuiLocalBreadcrumb:before {
-    content: '/';
-    -webkit-user-select: none;
-       -moz-user-select: none;
-        -ms-user-select: none;
-            user-select: none;
-    margin-right: 4px;
-    color: #5a5a5a; }
-    .theme-dark .kuiLocalBreadcrumb + .kuiLocalBreadcrumb:before {
-      color: #a5a5a5; }
+.kuiLocalBreadcrumb {
+  font-size: 14px;
+  margin: 0;
+  font-weight: normal; }
+  .kuiLocalBreadcrumb + .kuiLocalBreadcrumb {
+    margin-left: 6px; }
+    .kuiLocalBreadcrumb + .kuiLocalBreadcrumb:before {
+      content: '/';
+      -webkit-user-select: none;
+         -moz-user-select: none;
+          -ms-user-select: none;
+              user-select: none;
+      margin-right: 4px;
+      color: #5a5a5a; }
+      .theme-dark .kuiLocalBreadcrumb + .kuiLocalBreadcrumb:before {
+        color: #a5a5a5; }
 
 /**
  * 1. Make it a bit darker to contrast with the gray background.
