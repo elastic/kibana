@@ -2309,7 +2309,7 @@ body {
  */
 .kuiMenuButton--primary {
   color: #ffffff;
-  background-color: #6EADC1; }
+  background-color: #0079a5; }
   .kuiMenuButton--primary:focus {
     color: #ffffff !important;
     /* 1 */ }
@@ -2839,7 +2839,7 @@ body {
   display: -webkit-flex;
   display: -ms-flexbox;
   display: flex;
-  border-bottom: 2px solid #E4E4E4; }
+  border-bottom: 1px solid #E4E4E4; }
 
 /**
  * 1. Override button styles (some of which are from Bootstrap).
@@ -2860,10 +2860,10 @@ body {
   background-color: #FFF;
   /* 1 */
   border: 1px solid #E4E4E4;
-  border-bottom-width: 2px;
+  border-bottom-width: 1px;
   border-radius: 0;
   /* 1 */
-  margin-bottom: -2px;
+  margin-bottom: -1px;
   /* 3 */ }
   .kuiTab + .kuiTab {
     border-left: none; }
