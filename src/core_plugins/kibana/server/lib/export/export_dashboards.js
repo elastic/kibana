@@ -5,7 +5,7 @@ import { SavedObjectsClient } from '../../../../../server/saved_objects';
 export const deps = { collectDashboards };
 
 export default function exportDashboards(req) {
-  const ids = _.flatten([req.payload || req.query.dashboard]);
+  const ids = _.flatten([req.query.dashboard]);
   const config = req.server.config();
 
   const { callWithRequest } = req.server.plugins.elasticsearch.getCluster('admin');

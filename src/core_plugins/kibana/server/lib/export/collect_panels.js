@@ -9,10 +9,12 @@ export const deps = {
 };
 
 export default function collectPanels(savedObjectsClient, dashboard) {
-  const panels = JSON.parse(get(dashboard, 'attributes.panelsJSON', '[]'));
-
-  if (!Array.isArray(panels)) {
-    Promise.resolve([].concat([dashboard]));
+  let panels;
+  try {
+    panels = JSON.parse(get(dashboard, 'attributes.panelsJSON', '[]'));
+    if (!panels) throw new Error('No panels found');
+  } catch(err) {
+    return Promise.resolve([].concat([dashboard]));
   }
 
   return savedObjectsClient.bulkGet(panels)

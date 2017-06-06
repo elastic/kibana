@@ -1,13 +1,6 @@
 import { flatten } from 'lodash';
 import { SavedObjectsClient } from '../../../../../server/saved_objects';
 
-const acceptableTypes = [
-  'search',
-  'dashboard',
-  'visualization',
-  'index-pattern'
-];
-
 export default function importDashboards(req) {
   const { payload } = req;
   const config = req.server.config();
@@ -24,7 +17,7 @@ export default function importDashboards(req) {
   }
 
   const objects = payload.objects
-    .filter(item => !exclude.includes(item.type) && acceptableTypes.includes(item.type));
+    .filter(item => !exclude.includes(item.type));
 
   return savedObjectsClient.bulkCreate(objects, { force })
     .then(objects => {
