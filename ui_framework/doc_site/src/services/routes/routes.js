@@ -173,6 +173,7 @@ const components = [{
 }, {
   name: 'Menu',
   component: MenuExample,
+  hasReact: true,
 }, {
   name: 'MenuButton',
   component: MenuButtonExample,
