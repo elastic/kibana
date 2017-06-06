@@ -11,8 +11,15 @@ const getIndicesFromResponse = json => {
 };
 
 export function IndexPatternsGetIndicesProvider(esAdmin) {
-  return async function getIndices() {
-    const aliasesJson = await esAdmin.indices.getAlias();
-    return getIndicesFromResponse(aliasesJson);
+  return async function getIndices(query) {
+    try {
+      const aliasesJson = await esAdmin.indices.getAlias({ index: query });
+      return getIndicesFromResponse(aliasesJson);
+    } catch (e) {
+      if (e && e.status === 404) {
+        return [];
+      }
+      throw e;
+    }
   };
 }

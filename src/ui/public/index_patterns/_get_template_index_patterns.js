@@ -5,8 +5,15 @@ const getIndexPatternsFromResponse = json => {
 };
 
 export function IndexPatternsGetTemplateIndexPatternsProvider(esAdmin) {
-  return async function getTemplateIndexPatterns() {
-    const templatesJson = await esAdmin.indices.getTemplate();
-    return getIndexPatternsFromResponse(templatesJson);
+  return async function getTemplateIndexPatterns(query) {
+    try {
+      const templatesJson = await esAdmin.indices.getTemplate({ name: query });
+      return getIndexPatternsFromResponse(templatesJson);
+    } catch (e) {
+      if (e && e.status === 404) {
+        return [];
+      }
+      throw e;
+    }
   };
 }
