@@ -9,7 +9,7 @@ describe('exportDashboards(req)', () => {
 
   beforeEach(() => {
     req = {
-      payload: [ 'dasboard-01' ],
+      query: { dashboard: 'dashboard-01' },
       server: {
         config: () => ({ get: () => '6.0.0' }),
         plugins: {
