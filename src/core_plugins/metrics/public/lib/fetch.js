@@ -1,19 +1,20 @@
 import { validateInterval } from './validate_interval';
+import { dashboardContext } from './dashboard_context';
 export default (
   timefilter,
   Private,
   Notifier,
   $http,
-  config
+  config,
+  getAppState
 ) => {
-  const dashboardContext = Private(require('../../../timelion/public/services/dashboard_context'));
   const notify = new Notifier({ location: 'Metrics' });
   return $scope => () => {
     const panel = $scope.model;
     if (panel && panel.id) {
       const params = {
         timerange: timefilter.getBounds(),
-        filters: [dashboardContext()],
+        filters: [dashboardContext(Private, getAppState)],
         panels: [panel]
       };
 
