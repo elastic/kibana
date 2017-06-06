@@ -66,44 +66,51 @@
   <div class="sidebar-item" ng-show="showFilter">
     <form role="form" class="discover-field-details">
       <div class="form-group">
-        <label>
+        <label for="filter_vals_aggregatable">
           Aggregatable
         </label>
         <select
+          id="filter_vals_aggregatable"
           ng-options="opt.value as opt.label for opt in filter.boolOpts"
           ng-model="filter.vals.aggregatable"
           class="form-control">
         </select>
       </div>
       <div class="form-group">
-        <label>
+        <label id="filter_vals_searchable">
           Searchable
         </label>
         <select
+          id="filter_vals_searchable"
           ng-options="opt.value as opt.label for opt in filter.boolOpts"
           ng-model="filter.vals.searchable"
           class="form-control">
         </select>
       </div>
       <div class="form-group">
-        <label>
+        <label id="filter_vals_type">
           Type
         </label>
         <select
+          id="filter_vals_type"
           ng-options="field as field for field in fieldTypes"
           ng-model="filter.vals.type"
           class="form-control">
         </select>
       </div>
       <div class="form-group">
-        <label>
+        <label id="filter_vals_name">
           Field name
         </label>
-        <input type="text" class="form-control" ng-model="filter.vals.name">
+        <input
+          id="filter_vals_name"
+          type="text"
+          class="form-control"
+          ng-model="filter.vals.name">
       </div>
       <div class="form-group">
-        <label>
-          <input type="checkbox" ng-model="filter.vals.missing">
+        <label for="filter_vals_missing">
+          <input id="filter_vals_missing" type="checkbox" ng-model="filter.vals.missing">
           Hide Missing Fields
         </label>
       </div>
