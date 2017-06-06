@@ -171,7 +171,7 @@ describe('Notifier', function () {
 
     it('has css class helper functions', function () {
       expect(notify('warning').getIconClass()).to.equal('fa fa-warning');
-      expect(notify('warning').getButtonClass()).to.equal('kuiButton--danger');
+      expect(notify('warning').getButtonClass()).to.equal('kuiButton--warning');
       expect(notify('warning').getAlertClassStack()).to.equal('toast-stack alert alert-warning');
       expect(notify('warning').getAlertClass()).to.equal('toast alert alert-warning');
       expect(notify('warning').getButtonGroupClass()).to.equal('toast-controls');
