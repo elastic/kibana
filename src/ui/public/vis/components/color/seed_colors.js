@@ -1,5 +1,5 @@
 export const seedColors = [
-  '#6eadc1',
+  '#00A69B',
   '#57c17b',
   '#6f87d8',
   '#663db8',
