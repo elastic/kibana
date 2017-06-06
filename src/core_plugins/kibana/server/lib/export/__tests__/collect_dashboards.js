@@ -38,8 +38,13 @@ describe('collectDashboards(req, ids)', () => {
     expect(savedObjectsClient.bulkGet.calledOnce).to.equal(true);
 
     const args = savedObjectsClient.bulkGet.getCall(0).args;
-    expect(args[0]).to.equal(ids);
-    expect(args[1]).to.equal('dashboard');
+    expect(args[0]).to.eql([{
+      id: 'dashboard-01',
+      type: 'dashboard'
+    }, {
+      id: 'dashboard-02',
+      type: 'dashboard'
+    }]);
   });
 
   it('should call collectPanels with dashboard docs', async () => {
