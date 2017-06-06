@@ -13,7 +13,7 @@ import angular from 'angular';
 import _ from 'lodash';
 
 import { SavedObjectNotFound } from 'ui/errors';
-import uuid from 'node-uuid';
+import uuid from 'uuid';
 import MappingSetupProvider from 'ui/utils/mapping_setup';
 
 import { AdminDocSourceProvider } from '../data_source/admin_doc_source';

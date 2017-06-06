@@ -1,6 +1,6 @@
 import React, { Component, PropTypes } from 'react';
 import _ from 'lodash';
-import uuid from 'node-uuid';
+import uuid from 'uuid';
 import AggRow from './agg_row';
 import AggSelect from './agg_select';
 
