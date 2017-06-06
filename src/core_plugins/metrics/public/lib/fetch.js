@@ -6,15 +6,15 @@ export default (
   Notifier,
   $http,
   config,
-  getAppState
 ) => {
+  const context = Private(dashboardContext);
   const notify = new Notifier({ location: 'Metrics' });
   return $scope => () => {
     const panel = $scope.model;
     if (panel && panel.id) {
       const params = {
         timerange: timefilter.getBounds(),
-        filters: [dashboardContext(Private, getAppState)],
+        filters: [context()],
         panels: [panel]
       };
 
