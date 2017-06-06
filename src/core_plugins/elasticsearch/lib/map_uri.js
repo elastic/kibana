@@ -3,7 +3,7 @@ import { parse as parseUrl, format as formatUrl } from 'url';
 import filterHeaders from './filter_headers';
 import setHeaders from './set_headers';
 
-export default function mapUri(cluster, proxyPrefix) {
+export default function mapUri(cluster, prefixRegExp) {
   function joinPaths(pathA, pathB) {
     return trimRight(pathA, '/') + '/' + trimLeft(pathB, '/');
   }
@@ -29,7 +29,7 @@ export default function mapUri(cluster, proxyPrefix) {
     };
 
     // pathname
-    const reqSubPath = request.path.replace(proxyPrefix, '');
+    const reqSubPath = request.path.replace(prefixRegExp, '');
     mappedUrlComponents.pathname = joinPaths(esUrlBasePath, reqSubPath);
 
     // querystring

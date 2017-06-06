@@ -3,6 +3,8 @@ import mapUri from './map_uri';
 import { assign } from 'lodash';
 
 function createProxy(server, method, path, config) {
+  const serverPrefix = server.config().get('server.prefix');
+
   const proxies = new Map([
     ['/elasticsearch', server.plugins.elasticsearch.getCluster('data')],
     ['/es_admin', server.plugins.elasticsearch.getCluster('admin')]
@@ -33,7 +35,7 @@ function createProxy(server, method, path, config) {
       },
       handler: {
         proxy: {
-          mapUri: mapUri(cluster, proxyPrefix),
+          mapUri: mapUri(cluster, new RegExp(`^${serverPrefix}${proxyPrefix}`)),
           agent: createAgent({
             url: cluster.getUrl(),
             ssl: cluster.getSsl()
