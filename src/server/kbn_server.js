@@ -16,14 +16,15 @@ import pluginsCheckEnabledMixin from './plugins/check_enabled';
 import pluginsCheckVersionMixin from './plugins/check_version';
 import configCompleteMixin from './config/complete';
 import uiMixin from '../ui';
-import uiSettingsMixin from '../ui/settings';
+import { uiSettingsMixin } from '../ui';
 import optimizeMixin from '../optimize';
 import pluginsInitializeMixin from './plugins/initialize';
+import { indexPatternsMixin } from './index_patterns';
 import { savedObjectsMixin } from './saved_objects';
 
 const rootDir = fromRoot('.');
 
-module.exports = class KbnServer {
+export default class KbnServer {
   constructor(settings) {
     this.name = pkg.name;
     this.version = pkg.version;
@@ -57,6 +58,7 @@ module.exports = class KbnServer {
 
       // setup this.uiExports and this.bundles
       uiMixin,
+      indexPatternsMixin,
 
       // setup saved object routes
       savedObjectsMixin,
@@ -149,4 +151,4 @@ module.exports = class KbnServer {
     this.server.log(['info', 'config'], 'New logging configuration:\n' + plain);
     this.server.plugins['even-better'].monitor.reconfigure(loggingOptions);
   }
-};
+}

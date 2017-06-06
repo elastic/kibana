@@ -91,4 +91,4 @@ Command.prototype.action = _.wrap(Command.prototype.action, function (action, fn
   });
 });
 
-module.exports = Command;
+export default Command;

@@ -140,12 +140,16 @@
   }
 }
 
+/**
+ * 1. Prevent Firefox users from being able to resize textareas to smaller than the min-height.
+ */
 @mixin formControl($borderRadius: $globalBorderRadius) {
   @include formControlBase;
   background-color: #ffffff;
   border: 1px solid $globalFormControlBorderColor;
   border-radius: $borderRadius;
   transition: border-color $globalInputTransitionTiming;
+  min-height: $globalFormInputHeight; /* 1 */
 
   &:invalid {
     @include formControlInvalid;
@@ -171,14 +175,11 @@
 }
 
 /**
- * 1. Angular will add an ng-untouched class to an input if it hasn't been touched yet.
- *    We only want invalid inputs to appear invalid after the user has had a chance to interact
- *    with it.
+ * We specifically don't include Angular's ng-${state} classes here because we don't want to be tightly
+ * coupled with Angular.
  */
 @mixin formControlInvalid {
-  &:not(.ng-untouched) { /* 1 */
-    border-color: $globalDangerBorderColor;
-  }
+  border-color: $globalDangerBorderColor;
 }
 
 /**

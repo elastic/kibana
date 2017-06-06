@@ -1,13 +1,13 @@
 import ngMock from 'ng_mock';
 import expect from 'expect.js';
-import sinon from 'auto-release-sinon';
+import sinon from 'sinon';
 import BluebirdPromise from 'bluebird';
 
 import { SavedObjectProvider } from '../saved_object/saved_object';
 import { IndexPatternProvider } from 'ui/index_patterns/_index_pattern';
 import { AdminDocSourceProvider } from '../data_source/admin_doc_source';
-import { stubMapper } from 'test_utils/stub_mapper';
 
+import { StubIndexPatternsApiClientModule } from '../../index_patterns/__tests__/stub_index_patterns_api_client';
 
 describe('Saved Object', function () {
   require('test_utils/no_digest_promises').activateForSuite();
@@ -86,7 +86,9 @@ describe('Saved Object', function () {
     return savedObject.init();
   }
 
-  beforeEach(ngMock.module('kibana',
+  beforeEach(ngMock.module(
+    'kibana',
+    StubIndexPatternsApiClientModule,
     // Use the native window.confirm instead of our specialized version to make testing
     // this easier.
     function ($provide) {
@@ -104,7 +106,6 @@ describe('Saved Object', function () {
     window = $window;
 
     mockEsService();
-    stubMapper(Private);
   }));
 
   describe('save', function () {

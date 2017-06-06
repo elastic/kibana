@@ -11,20 +11,20 @@
 .kuiCardGroup {
   display: flex;
   flex-wrap: wrap; /* 1 */
-}
 
   /**
    * 1. Use the defined width of the card to determine when to wrap.
    * 2. Use an even margin all around the card so that the spacing is still even when wrapped.
    */
-  .kuiCardGroup__card {
-    flex: 1 1 auto; /* 1 */
+  .kuiCard {
+    flex: 1 1 0; /* 1 */
     margin: $cardSpacing; /* 2 */
-  }
 
-  .kuiCardGroup__cardDescription {
-    flex: 1 1 auto;
+    .kuiCard__description {
+      flex: 1 1 auto;
+    }
   }
+}
 
 /**
  * 1. There's no way to make this look good when wrapped.
@@ -35,13 +35,13 @@
   border-radius: $globalBorderRadius;
   overflow: hidden;
 
-  .kuiCardGroup__card {
+  .kuiCard {
     border: none;
     border-radius: 0;
+    margin: 0;
   }
 
-  .kuiCardGroup__card + .kuiCardGroup__card {
-    margin: 0;
+  .kuiCard + .kuiCard {
     border-left: 1px solid $cardBorderColor;
   }
 }

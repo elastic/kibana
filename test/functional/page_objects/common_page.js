@@ -2,7 +2,7 @@ import { delay } from 'bluebird';
 
 import getUrl from '../../../src/test_utils/get_url';
 
-export function CommonPageProvider({ getService, getPageObjects, getPageObject }) {
+export function CommonPageProvider({ getService, getPageObjects }) {
   const log = getService('log');
   const config = getService('config');
   const remote = getService('remote');
@@ -87,11 +87,6 @@ export function CommonPageProvider({ getService, getPageObjects, getPageObject }
 
             if (currentUrl.includes('app/kibana')) {
               await testSubjects.find('kibanaChrome');
-              const gettingStartedPage = getPageObject('gettingStarted');
-              if (await gettingStartedPage.doesContainerExist()) {
-                await gettingStartedPage.optOut();
-                throw new Error('Retrying after receiving Getting Started page');
-              }
             }
           })
           .then(async function () {
@@ -269,6 +264,15 @@ export function CommonPageProvider({ getService, getPageObjects, getPageObject }
 
     async isChromeVisible() {
       return await testSubjects.exists('kibanaChrome');
+    }
+
+    async waitForTopNavToBeVisible() {
+      await retry.try(async () => {
+        const isNavVisible = await testSubjects.exists('top-nav');
+        if (!isNavVisible) {
+          throw new Error('Local nav not visible yet');
+        }
+      });
     }
   }
 

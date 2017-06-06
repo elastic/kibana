@@ -1,0 +1,142 @@
+<div class="filterEditor kuiModal">
+  <div class="kuiModalHeader">
+    <div class="kuiModalHeader__title">
+      <span ng-show="filterEditor.filter.meta.isNew">Add</span>
+      <span ng-hide="filterEditor.filter.meta.isNew">Edit</span>
+      filter
+    </div>
+
+    <button
+      class="kuiModalHeaderCloseButton kuiIcon fa-times"
+      ng-click="filterEditor.onCancel()"
+      aria-label="Close filter popover"
+    ></button>
+  </div>
+
+  <div class="kuiModalBody">
+    <!-- Filter definition -->
+    <div class="kuiVerticalRhythm">
+      <div class="kuiVerticalRhythmSmall filterEditor__labelBar">
+        <label class="kuiLabel">
+          Filter
+        </label>
+
+        <div>
+          <a
+            class="kuiLink"
+            ng-click="filterEditor.isEditingQueryDsl = !filterEditor.isEditingQueryDsl"
+            kbn-accessible-click
+          >
+            <span ng-if="filterEditor.isEditingQueryDsl">
+              Search filter values
+            </span>
+
+            <span ng-if="!filterEditor.isEditingQueryDsl">
+              Edit Query DSL
+            </span>
+          </a>
+        </div>
+      </div>
+
+      <!-- Filter dropdowns -->
+      <div
+        class="kuiFieldGroup kuiVerticalRhythmSmall kuiFieldGroup--alignTop"
+        ng-show="!filterEditor.showQueryDslEditor()"
+      >
+        <div class="kuiFieldGroupSection">
+          <filter-field-select
+            index-patterns="filterEditor.indexPatterns"
+            field="filterEditor.field"
+            on-select="filterEditor.onFieldSelect(field)"
+          ></filter-field-select>
+        </div>
+
+        <div class="kuiFieldGroupSection">
+          <filter-operator-select
+            ng-if="filterEditor.field"
+            field="filterEditor.field"
+            operator="filterEditor.operator"
+            on-select="filterEditor.onOperatorSelect(operator)"
+          ></filter-operator-select>
+        </div>
+
+        <div class="kuiFieldGroupSection kuiFieldGroupSection--wide filterEditor__wideField">
+          <filter-params-editor
+            ng-if="filterEditor.field && filterEditor.operator"
+            field="filterEditor.field"
+            operator="filterEditor.operator"
+            params="filterEditor.params"
+          ></filter-params-editor>
+        </div>
+      </div>
+
+      <!-- DSL editor -->
+      <div
+        class="kuiVerticalRhythmSmall"
+        ng-show="filterEditor.showQueryDslEditor()"
+      >
+        <filter-query-dsl-editor
+          class="kuiVerticalRhythmSmall"
+          filter="filterEditor.filter"
+          on-change="filterEditor.setQueryDsl(queryDsl)"
+        ></filter-query-dsl-editor>
+
+        <p class="kuiText kuiVerticalRhythmSmall">
+          Filters are built using the <a class="kuiLink" target="_blank" ng-href="{{ filterEditor.docLinks.query.queryDsl }}">Elasticsearch Query DSL</a>.
+        </p>
+      </div>
+    </div>
+
+    <!-- Label -->
+    <div class="kuiVerticalRhythm">
+      <div class="kuiVerticalRhythmSmall">
+        <label
+          class="kuiLabel"
+          for="filterEditorLabelInput"
+        >
+          Label
+        </label>
+      </div>
+
+      <input
+        class="kuiTextInput kuiVerticalRhythmSmall"
+        placeholder="Optional"
+        type="text"
+        ng-model="filterEditor.alias"
+        id="filterEditorLabelInput"
+      />
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <div class="kuiModalFooter kuiBar">
+    <div class="kuiBarSection" ng-hide="filterEditor.filter.meta.isNew">
+      <button
+        class="kuiButton kuiButton--danger"
+        ng-click="filterEditor.onDelete()"
+        aria-label="Delete filter"
+      >
+        <span
+          class="kuiIcon fa-trash"
+          aria-hidden="true"
+        ></span>
+      </button>
+    </div>
+
+    <div class="kuiBarSection">
+      <button
+        class="kuiButton kuiButton--basic"
+        ng-click="filterEditor.onCancel()"
+      >
+        Cancel
+      </button>
+      <button
+        class="kuiButton kuiButton--primary"
+        ng-disabled="!filterEditor.isValid()"
+        ng-click="filterEditor.save()"
+      >
+        Save
+      </button>
+    </div>
+  </div>
+</div>

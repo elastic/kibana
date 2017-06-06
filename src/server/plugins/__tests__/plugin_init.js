@@ -1,6 +1,6 @@
 import { values } from 'lodash';
 import expect from 'expect.js';
-import sinon from 'auto-release-sinon';
+import sinon from 'sinon';
 import pluginInit from '../plugin_init';
 
 describe('Plugin init', () => {

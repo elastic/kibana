@@ -5,7 +5,7 @@ import './scripted_fields_table';
 import './scripted_field_editor';
 import './source_filters_table';
 import { RefreshKibanaIndex } from '../refresh_kibana_index';
-import UrlProvider from 'ui/url';
+import { KbnUrlProvider } from 'ui/url';
 import { IndicesEditSectionsProvider } from './edit_sections';
 import uiRoutes from 'ui/routes';
 import { uiModules } from 'ui/modules';
@@ -46,7 +46,7 @@ uiModules.get('apps/management')
   const $state = $scope.state = new AppState();
   const refreshKibanaIndex = Private(RefreshKibanaIndex);
 
-  $scope.kbnUrl = Private(UrlProvider);
+  $scope.kbnUrl = Private(KbnUrlProvider);
   $scope.indexPattern = $route.current.locals.indexPattern;
   docTitle.change($scope.indexPattern.id);
   const otherIds = _.without($route.current.locals.indexPatternIds, $scope.indexPattern.id);

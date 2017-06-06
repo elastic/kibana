@@ -3,7 +3,7 @@ import { includes } from 'lodash';
 
 const arr = v => [].concat(v || []);
 
-module.exports = class UiBundlerEnv {
+export default class UiBundlerEnv {
   constructor(workingDir) {
 
     // the location that bundle entry files and all compiles files will
@@ -81,4 +81,4 @@ module.exports = class UiBundlerEnv {
   addNoParse(regExp) {
     this.noParse.push(regExp);
   }
-};
+}

@@ -2,7 +2,7 @@ import { find } from 'lodash';
 import expect from 'expect.js';
 import sinon from 'sinon';
 
-import states from '../states';
+import * as states from '../states';
 import Status from '../status';
 import ServerStatus from '../server_status';
 

@@ -99,4 +99,3 @@ export function AggTypesIndexProvider(Private) {
     initialSet: aggs.metrics.concat(aggs.buckets)
   });
 }
-
