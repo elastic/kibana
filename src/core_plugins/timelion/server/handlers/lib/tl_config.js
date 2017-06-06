@@ -1,7 +1,7 @@
 import _ from 'lodash';
 import buildTarget from '../../lib/build_target.js';
 
-module.exports = function (setup) {
+export default function tlConfigFn(setup) {
   let targetSeries;
 
   let tlConfig = {
@@ -20,4 +20,4 @@ module.exports = function (setup) {
 
   tlConfig = _.extend(tlConfig, setup);
   return tlConfig;
-};
+}

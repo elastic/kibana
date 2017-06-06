@@ -24,7 +24,7 @@ import { savedObjectsMixin } from './saved_objects';
 
 const rootDir = fromRoot('.');
 
-module.exports = class KbnServer {
+export default class KbnServer {
   constructor(settings) {
     this.name = pkg.name;
     this.version = pkg.version;
@@ -151,4 +151,4 @@ module.exports = class KbnServer {
     this.server.log(['info', 'config'], 'New logging configuration:\n' + plain);
     this.server.plugins['even-better'].monitor.reconfigure(loggingOptions);
   }
-};
+}

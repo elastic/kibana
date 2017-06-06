@@ -29,7 +29,7 @@ uiModules
 function activate() { active = true; }
 function deactivate() { active = false; }
 
-module.exports = {
+export default {
   activate: activate,
   deactivate: deactivate,
   activateForSuite: function () {

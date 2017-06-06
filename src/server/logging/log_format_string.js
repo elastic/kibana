@@ -44,7 +44,7 @@ const type = _.memoize(function (t) {
 
 const workerType = process.env.kbnWorkerType ? `${type(process.env.kbnWorkerType)} ` : '';
 
-module.exports = class KbnLoggerJsonFormat extends LogFormat {
+export default class KbnLoggerJsonFormat extends LogFormat {
   format(data) {
     const time = color('time')(moment(data.timestamp).utc().format('HH:mm:ss.SSS'));
     const msg = data.error ? color('error')(data.error.stack) : color('message')(data.message);
@@ -61,4 +61,4 @@ module.exports = class KbnLoggerJsonFormat extends LogFormat {
 
     return `${workerType}${type(data.type)} [${time}] ${tags} ${msg}`;
   }
-};
+}

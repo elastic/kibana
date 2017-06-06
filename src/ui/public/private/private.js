@@ -10,40 +10,36 @@ import { uiModules } from 'ui/modules';
  *
  * ## Define a private module provider:
  * ```js
- * define(function (require) {
- *   return function PingProvider($http) {
- *     this.ping = function () {
- *       return $http.head('/health-check');
- *     };
+ * export default function PingProvider($http) {
+ *   this.ping = function () {
+ *     return $http.head('/health-check');
  *   };
- * });
+ * };
  * ```
  *
  * ## Require a private module:
  * ```js
- * define(function (require) {
- *   return function ServerHealthProvider(Private, Promise) {
- *     let ping = Private(require('ui/ping'));
- *     return {
- *       check: Promise.method(function () {
- *         let attempts = 0;
- *         return (function attempt() {
- *           attempts += 1;
- *           return ping.ping()
- *           .catch(function (err) {
- *             if (attempts < 3) return attempt();
- *           })
- *         }())
- *         .then(function () {
- *           return true;
+ * export default function ServerHealthProvider(Private, Promise) {
+ *   let ping = Private(require('ui/ping'));
+ *   return {
+ *     check: Promise.method(function () {
+ *       let attempts = 0;
+ *       return (function attempt() {
+ *         attempts += 1;
+ *         return ping.ping()
+ *         .catch(function (err) {
+ *           if (attempts < 3) return attempt();
  *         })
- *         .catch(function () {
- *           return false;
- *         });
+ *       }())
+ *       .then(function () {
+ *         return true;
  *       })
- *     }
- *   };
- * });
+ *       .catch(function () {
+ *         return false;
+ *       });
+ *     })
+ *   }
+ * };
  * ```
  *
  * # `Private.stub(provider, newInstance)`

@@ -47,7 +47,7 @@ function createInstance($el) {
   return editor;
 }
 
-function SenseEditor($el) {
+export default function SenseEditor($el) {
   var editor = createInstance($el);
   var CURRENT_REQ_RANGE = null;
 
@@ -632,5 +632,3 @@ function SenseEditor($el) {
 
   return editor;
 }
-
-module.exports = SenseEditor;

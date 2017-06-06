@@ -12,7 +12,7 @@ import Promise from 'bluebird';
  * @params {Function} fn - Function used to combine points at same index in each array of each series in the seriesList.
  * @return {seriesList}
  */
-module.exports = function reduce(args, fn) {
+export default function reduce(args, fn) {
   return Promise.all(args).then(function (args) {
 
     const seriesList = args.shift();
@@ -80,4 +80,4 @@ module.exports = function reduce(args, fn) {
   }).catch(function (e) {
     throw e;
   });
-};
+}

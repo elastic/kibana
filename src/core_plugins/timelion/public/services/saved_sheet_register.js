@@ -1,5 +1,3 @@
-define(function () {
-  return function savedSearchObjectFn(savedSheets) {
-    return savedSheets;
-  };
-});
+export default function savedSearchObjectFn(savedSheets) {
+  return savedSheets;
+}
