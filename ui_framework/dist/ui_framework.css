@@ -1488,7 +1488,8 @@ body {
 
 .kuiLocalBreadcrumb {
   font-size: 14px;
-  margin: 0; }
+  margin: 0;
+  font-weight: normal; }
   .kuiLocalBreadcrumb + .kuiLocalBreadcrumb {
     margin-left: 6px; }
     .kuiLocalBreadcrumb + .kuiLocalBreadcrumb:before {
