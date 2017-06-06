@@ -391,6 +391,52 @@ body {
 
 /**
  * 1. Override Bootstrap.
+ */
+.kuiButton--warning {
+  color: #FFF;
+  background-color: #f3bb57; }
+  .kuiButton--warning:not(a):enabled:focus {
+    z-index: 1;
+    /* 1 */
+    outline: none !important;
+    /* 2 */
+    box-shadow: 0 0 0 1px #ffffff, 0 0 0 2px #ffa500;
+    /* 3 */
+    color: #FFF; }
+  a.kuiButton--warning:not(.kuiButton-isDisabled):focus {
+    /* 1 */
+    z-index: 1;
+    /* 1 */
+    outline: none !important;
+    /* 2 */
+    box-shadow: 0 0 0 1px #ffffff, 0 0 0 2px #ffa500;
+    /* 3 */
+    color: #FFF; }
+  .kuiButton--warning:enabled:hover {
+    color: #FFF !important;
+    /* 1 */
+    background-color: #e69606; }
+  a.kuiButton--warning:not(.kuiButton-isDisabled):hover {
+    /* 1 */
+    color: #FFF !important;
+    /* 1 */
+    background-color: #e69606; }
+  .kuiButton--warning:enabled:active {
+    color: #FFF !important;
+    /* 1 */
+    background-color: #e69606; }
+  a.kuiButton--warning:not(.kuiButton-isDisabled):active {
+    /* 1 */
+    color: #FFF !important;
+    /* 1 */
+    background-color: #e69606; }
+  .kuiButton--warning:disabled {
+    background-color: #f4debc; }
+  a.kuiButton--warning.kuiButton-isDisabled {
+    background-color: #f4debc; }
+
+/**
+ * 1. Override Bootstrap.
  * 2. Override either Bootstrap or Timelion styles.
  */
 .kuiButton--hollow {
