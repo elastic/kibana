@@ -2,7 +2,13 @@ import expect from 'expect.js';
 import ngMock from 'ng_mock';
 import { IndexPatternsGetIndicesProvider } from 'ui/index_patterns/_get_indices';
 
+function NotFoundError() {
+  this.status = 404;
+}
+
 describe('GetIndices', function () {
+  let throwOther = false;
+  let throw404 = false;
   let response;
   let getIndices;
 
@@ -31,6 +37,12 @@ describe('GetIndices', function () {
       return {
         indices: {
           getAlias: async function () {
+            if (throw404) {
+              throw new NotFoundError();
+            }
+            if (throwOther) {
+              throw new Error();
+            }
             return response;
           }
         }
@@ -52,5 +64,25 @@ describe('GetIndices', function () {
       expect(indices).to.contain(index);
     });
     expect(indices).to.contain('.monitoring-es-active');
+  });
+
+  it('should suppress a 404 response', async function () {
+    throw404 = true;
+    const indices = await getIndices();
+    expect(indices.length).to.be(0);
+    throw404 = false;
+  });
+
+  it('should not suppress a non 404 response', async function () {
+    throwOther = true;
+
+    let errorThrown = false;
+    try {
+      await getIndices();
+    } catch (e) {
+      errorThrown = true;
+    }
+    expect(errorThrown).to.be(true);
+    throwOther = false;
   });
 });
