@@ -5,7 +5,8 @@ import {
   KuiCardDescription,
   KuiCardDescriptionTitle,
   KuiCardDescriptionText,
-  KuiCardFooter
+  KuiCardFooter,
+  KuiLinkButton
 } from '../../../../components';
 
 export default () => {
@@ -22,9 +23,12 @@ export default () => {
       </KuiCardDescription>
 
       <KuiCardFooter>
-        <a className="kuiButton kuiButton--basic" href="#">
+        <KuiLinkButton
+          buttonType="basic"
+          href="#"
+         >
           Banana!
-        </a>
+        </KuiLinkButton>
       </KuiCardFooter>
     </KuiCard>
   );

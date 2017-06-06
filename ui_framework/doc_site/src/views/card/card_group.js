@@ -7,7 +7,8 @@ import {
   KuiCardDescription,
   KuiCardDescriptionTitle,
   KuiCardDescriptionText,
-  KuiCardFooter
+  KuiCardFooter,
+  KuiLinkButton
 } from '../../../../components';
 
 export default () => {
@@ -19,8 +20,8 @@ export default () => {
     <div>
       <KuiCardGroupContainer>
         <KuiCardGroup>
-          <KuiCard className="kuiCardGroup__card" style={cardStyle}>
-            <KuiCardDescription className="kuiCardGroup__cardDescription">
+          <KuiCard style={cardStyle}>
+            <KuiCardDescription>
               <KuiCardDescriptionTitle>
                 Get a banana
               </KuiCardDescriptionTitle>
@@ -31,14 +32,17 @@ export default () => {
             </KuiCardDescription>
 
             <KuiCardFooter>
-              <a className="kuiButton kuiButton--basic" href="#">
+              <KuiLinkButton
+                buttonType="basic"
+                href="#"
+               >
                 Banana!
-              </a>
+              </KuiLinkButton>
             </KuiCardFooter>
           </KuiCard>
 
-          <KuiCard className="kuiCardGroup__card" style={cardStyle}>
-            <KuiCardDescription className="kuiCardGroup__cardDescription">
+          <KuiCard style={cardStyle}>
+            <KuiCardDescription>
               <KuiCardDescriptionTitle>
                 Get a pteradactyl
               </KuiCardDescriptionTitle>
@@ -49,13 +53,13 @@ export default () => {
             </KuiCardDescription>
 
             <KuiCardFooter>
-              <a
-                className="kuiButton kuiButton--primary"
+              <KuiLinkButton
+                buttonType="primary"
                 href="https://www.elastic.co/subscriptions/xpack"
                 target="_blank"
               >
                 Pteradactyl!
-              </a>
+              </KuiLinkButton>
             </KuiCardFooter>
           </KuiCard>
         </KuiCardGroup>
@@ -63,9 +67,9 @@ export default () => {
 
       <br className="guideBreak"/>
 
-      <KuiCardGroup united>
-        <KuiCard className="kuiCardGroup__card">
-          <KuiCardDescription className="kuiCardGroup__cardDescription">
+      <KuiCardGroup isUnited>
+        <KuiCard>
+          <KuiCardDescription>
             <KuiCardDescriptionTitle>
               Get a banana
             </KuiCardDescriptionTitle>
@@ -76,14 +80,17 @@ export default () => {
           </KuiCardDescription>
 
           <KuiCardFooter>
-            <a className="kuiButton kuiButton--basic" href="#">
+            <KuiLinkButton
+              buttonType="basic"
+              href="#"
+             >
               Banana!
-            </a>
+            </KuiLinkButton>
           </KuiCardFooter>
         </KuiCard>
 
-        <KuiCard className="kuiCardGroup__card">
-          <KuiCardDescription className="kuiCardGroup__cardDescription">
+        <KuiCard>
+          <KuiCardDescription>
             <KuiCardDescriptionTitle>
               Get a pteradactyl
             </KuiCardDescriptionTitle>
@@ -94,13 +101,13 @@ export default () => {
           </KuiCardDescription>
 
           <KuiCardFooter>
-            <a
-              className="kuiButton kuiButton--primary"
+            <KuiLinkButton
+              buttonType="primary"
               href="https://www.elastic.co/subscriptions/xpack"
               target="_blank"
             >
               Pteradactyl!
-            </a>
+            </KuiLinkButton>
           </KuiCardFooter>
         </KuiCard>
       </KuiCardGroup>

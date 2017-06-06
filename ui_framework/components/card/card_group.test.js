@@ -11,7 +11,7 @@ test('renders KuiCardGroup', () => {
   expect(render(component)).toMatchSnapshot();
 });
 
-test('renders KuiCardGroup united', () => {
-  const component = <KuiCardGroup united { ...requiredProps }>children</KuiCardGroup>;
+test('renders KuiCardGroup isUnited', () => {
+  const component = <KuiCardGroup isUnited { ...requiredProps }>children</KuiCardGroup>;
   expect(render(component)).toMatchSnapshot();
 });

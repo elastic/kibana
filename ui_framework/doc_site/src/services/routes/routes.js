@@ -133,6 +133,7 @@ const components = [{
 }, {
   name: 'Card',
   component: CardExample,
+  hasReact: true,
 }, {
   name: 'Column',
   component: ColumnExample,

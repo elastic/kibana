@@ -10,7 +10,7 @@ exports[`renders KuiCardGroup 1`] = `
 </div>
 `;
 
-exports[`renders KuiCardGroup united 1`] = `
+exports[`renders KuiCardGroup isUnited 1`] = `
 <div
   aria-label="aria-label"
   class="kuiCardGroup testClass1 testClass2 kuiCardGroup--united"
