@@ -1,12 +1,14 @@
 import React from 'react';
 
 import {
-  KuiActionItem
+  KuiActionItem,
+  KuiMenu,
+  KuiMenuItem
 } from '../../../../components';
 
 export default () => (
-<div className="kuiMenu kuiMenu--contained">
-  <div className="kuiMenuItem">
+<KuiMenu contained>
+  <KuiMenuItem>
     <KuiActionItem>
       <p className="kuiText">Item A</p>
       <div className="kuiMenuButtonGroup">
@@ -21,9 +23,9 @@ export default () => (
         </button>
       </div>
     </KuiActionItem>
-  </div>
+  </KuiMenuItem>
 
-  <div className="kuiMenuItem">
+  <KuiMenuItem>
     <KuiActionItem>
       <p className="kuiText">Item B</p>
       <div className="kuiMenuButtonGroup">
@@ -38,9 +40,9 @@ export default () => (
         </button>
       </div>
     </KuiActionItem>
-  </div>
+  </KuiMenuItem>
 
-  <div className="kuiMenuItem">
+  <KuiMenuItem>
     <KuiActionItem>
       <p className="kuiText">Item C</p>
       <div className="kuiMenuButtonGroup">
@@ -55,6 +57,6 @@ export default () => (
         </button>
       </div>
     </KuiActionItem>
-  </div>
-</div>
+  </KuiMenuItem>
+</KuiMenu>
 );
