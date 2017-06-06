@@ -10,6 +10,8 @@ export function IndexPatternsGetTemplateIndexPatternsProvider(esAdmin) {
       const templatesJson = await esAdmin.indices.getTemplate({ name: query });
       return getIndexPatternsFromResponse(templatesJson);
     } catch (e) {
+      // A 404 means the query did not find any indices
+      // That is not a failure scenario for this use case
       if (e && e.status === 404) {
         return [];
       }
