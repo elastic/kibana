@@ -1,37 +1,25 @@
 import React from 'react';
 import classnames from 'classnames';
 
-import { KuiButtonIcon, KuiLinkButton } from '../button';
 import { KuiEmptyTablePromptMessage } from  './empty_table_prompt_message';
+import { KuiEmptyTablePromptActions } from  './empty_table_prompt_actions';
 
-export function KuiEmptyTablePrompt({ itemType, promptMessage, promptButtonText, addHref, className, ...rest }) {
+export function KuiEmptyTablePrompt({ actions, message, className, ...rest }) {
   const classes = classnames('kuiEmptyTablePrompt', className);
   return (
     <div className={classes} {...rest} >
       <KuiEmptyTablePromptMessage>
-        {promptMessage}
+        { message }
       </KuiEmptyTablePromptMessage>
-
-      <div className="kuiEmptyTablePrompt__actions">
-        <KuiLinkButton
-          icon={<KuiButtonIcon type="create" />}
-          aria-label={`Add a new ${itemType}`}
-          className="testClass1 testClass2"
-          data-test-subj={`addNewPromptButton`}
-          buttonType="primary"
-          href={addHref}
-        >
-          {promptButtonText}
-        </KuiLinkButton>
-      </div>
+      <KuiEmptyTablePromptActions>
+        { actions }
+      </KuiEmptyTablePromptActions>
     </div>
   );
 }
 
 KuiEmptyTablePrompt.propTypes = {
-  itemType: React.PropTypes.string.isRequired,
-  promptMessage: React.PropTypes.string.isRequired,
-  promptButtonText: React.PropTypes.string.isRequired,
-  addHref: React.PropTypes.string.isRequired,
+  message: React.PropTypes.string.isRequired,
+  actions: React.PropTypes.node,
   className: React.PropTypes.string,
 };

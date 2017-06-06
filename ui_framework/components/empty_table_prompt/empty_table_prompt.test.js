@@ -6,12 +6,25 @@ import {
   KuiEmptyTablePrompt,
 } from './empty_table_prompt';
 
+import {
+  KuiButtonIcon,
+  KuiLinkButton,
+} from '../button';
+
 test('renders KuiEmptyTablePrompt', () => {
   const component = <KuiEmptyTablePrompt
-    itemType="dashboard"
-    promptMessage="You have no dashboards, add one!"
-    promptButtonText="Add a new dashboard"
-    addHref="#"
+    actions={
+      <KuiLinkButton
+        icon={<KuiButtonIcon type="create"/>}
+        aria-label="Add a new item"
+        data-test-subj="addNewPromptButton"
+        buttonType="primary"
+        href="#"
+      >
+        Add a new item
+      </KuiLinkButton>
+    }
+    message="Uh oh, You have no items!"
     { ...requiredProps }
   />;
   expect(render(component)).toMatchSnapshot();

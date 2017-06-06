@@ -6,6 +6,9 @@ import {
   KuiToolBar,
   KuiToolBarSearchBox,
   KuiPager,
+  KuiLinkButton,
+  KuiButtonIcon,
+  KuiButtonGroup,
 } from '../../../../components';
 
 export function ControlledTableWithEmptyPrompt() {
@@ -27,10 +30,30 @@ export function ControlledTableWithEmptyPrompt() {
       </KuiToolBar>
       <KuiEmptyTablePromptPanel>
         <KuiEmptyTablePrompt
-          addHref="#"
-          itemType="item"
-          promptButtonText="Add a new item"
-          promptMessage="Uh oh, You have no items!"
+          actions={
+            <KuiButtonGroup>
+              <KuiLinkButton
+                icon={<KuiButtonIcon type="create"/>}
+                aria-label="Add a new dashboard"
+                data-test-subj="addNewDashPromptButton"
+                buttonType="primary"
+                href="#"
+              >
+                Add a new dashboard
+              </KuiLinkButton>
+
+              <KuiLinkButton
+              icon={<KuiButtonIcon type="create"/>}
+              aria-label="Add a new visualization"
+              data-test-subj="addNewVizPromptButton"
+              buttonType="primary"
+              href="#"
+              >
+              Add a new visualization
+              </KuiLinkButton>
+            </KuiButtonGroup>
+          }
+          message="You have no items. Would you like to add one?"
         />
       </KuiEmptyTablePromptPanel>
     </div>
