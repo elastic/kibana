@@ -76,6 +76,10 @@
       color: @sidebar-header-color;
       border: 1px solid;
       border-color: @sidebar-header-border;
+
+      .sidebar-list-header-label {
+        font-size: 14px;
+      }
     }
 
   .index-pattern {
@@ -85,6 +89,13 @@
     justify-content: space-between;
     background-color: @kibanaGray4;
     line-height: 28px;
+
+    .index-pattern-label {
+      font-size: 14px;
+      font-weight: bold;
+      margin: 0;
+      line-height: 28px;
+    }
 
     > * {
       flex: 0 1 auto;
