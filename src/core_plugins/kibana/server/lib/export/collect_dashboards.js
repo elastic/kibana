@@ -1,8 +1,8 @@
 import { collectPanels } from './collect_panels';
 
-export function collectDashboards(savedObjectsClient, ids) {
+export async function collectDashboards(savedObjectsClient, ids) {
 
-  if (ids.length === 0) return Promise.resolve([]);
+  if (ids.length === 0) return [];
 
   const objects = ids.map(id => {
     return {
@@ -11,14 +11,14 @@ export function collectDashboards(savedObjectsClient, ids) {
     };
   });
 
-  return savedObjectsClient.bulkGet(objects)
-    .then(docs => Promise.all(docs.map(d => collectPanels(savedObjectsClient, d))))
-    .then(results => {
-      return results
-        .reduce((acc, result) => acc.concat(result), [])
-        .reduce((acc, obj) => {
-          if (!acc.find(o => o.id === obj.id))  acc.push(obj);
-          return acc;
-        }, []);
-    });
+  const docs = await savedObjectsClient.bulkGet(objects);
+  const results = await Promise.all(docs.map(d => collectPanels(savedObjectsClient, d)));
+
+  return results
+    .reduce((acc, result) => acc.concat(result), [])
+    .reduce((acc, obj) => {
+      if (!acc.find(o => o.id === obj.id))  acc.push(obj);
+      return acc;
+    }, []);
+
 }

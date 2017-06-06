@@ -3,7 +3,7 @@ import { collectDashboards } from './collect_dashboards';
 import { SavedObjectsClient } from '../../../../../server/saved_objects';
 
 
-export function exportDashboards(req) {
+export async function exportDashboards(req) {
   const ids = _.flatten([req.query.dashboard]);
   const config = req.server.config();
 
@@ -11,10 +11,10 @@ export function exportDashboards(req) {
   const callAdminCluster = (...args) => callWithRequest(req, ...args);
   const savedObjectsClient = new SavedObjectsClient(config.get('kibana.index'), callAdminCluster);
 
-  return collectDashboards(savedObjectsClient, ids).then(objects => {
-    return {
-      version: config.get('pkg.version'),
-      objects
-    };
-  });
+  const objects = await collectDashboards(savedObjectsClient, ids);
+  return {
+    version: config.get('pkg.version'),
+    objects
+  };
+
 }

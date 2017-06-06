@@ -1,4 +1,4 @@
-export function collectIndexPatterns(savedObjectsClient, panels) {
+export async function collectIndexPatterns(savedObjectsClient, panels) {
   const docs = panels.reduce((acc, panel) => {
     const { kibanaSavedObjectMeta, savedSearchId } = panel.attributes;
 
@@ -6,22 +6,20 @@ export function collectIndexPatterns(savedObjectsClient, panels) {
       let searchSource;
       try {
         searchSource = JSON.parse(kibanaSavedObjectMeta.searchSourceJSON);
-        if (!searchSource.index) throw new Error('Missing index pattern');
       } catch (err) {
         return acc;
       }
 
-      if (!acc.find(s => s.id === searchSource.index)) {
+      if (searchSource.index && !acc.find(s => s.id === searchSource.index)) {
         acc.push({ type: 'index-pattern', id: searchSource.index });
       }
     }
     return acc;
   }, []);
 
-  if (docs.length === 0) {
-    return Promise.resolve([]);
-  }
+  if (docs.length === 0) return [];
 
-  return savedObjectsClient.bulkGet(docs);
+  const response = await savedObjectsClient.bulkGet(docs);
+  return response;
 
 }

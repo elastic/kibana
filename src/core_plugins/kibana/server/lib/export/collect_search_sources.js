@@ -1,6 +1,6 @@
 import { collectIndexPatterns } from './collect_index_patterns';
 
-export function collectSearchSources(savedObjectsClient, panels) {
+export async function collectSearchSources(savedObjectsClient, panels) {
   const docs = panels.reduce((acc, panel) => {
     const { savedSearchId } = panel.attributes;
     if (savedSearchId) {
@@ -11,15 +11,10 @@ export function collectSearchSources(savedObjectsClient, panels) {
     return acc;
   }, []);
 
-  if (docs.length === 0) {
-    return Promise.resolve([]);
-  }
+  if (docs.length === 0) return [];
 
-  return savedObjectsClient.bulkGet(docs)
-    .then(savedSearches => {
-      return collectIndexPatterns(savedObjectsClient, savedSearches)
-        .then(resp => {
-          return savedSearches.concat(resp);
-        });
-    });
+  const savedSearches = await savedObjectsClient.bulkGet(docs);
+  const indexPatterns = await collectIndexPatterns(savedObjectsClient, savedSearches);
+
+  return savedSearches.concat(indexPatterns);
 }
