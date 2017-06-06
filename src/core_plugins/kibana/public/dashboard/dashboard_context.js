@@ -1,8 +1,9 @@
+// This file is used by Timelion and TSVB
 import _ from 'lodash';
 import { FilterBarQueryFilterProvider } from 'ui/filter_bar/query_filter';
 import 'ui/state_management/app_state';
 
-export function dashboardContext(Private, getAppState) {
+export function dashboardContextProvider(Private, getAppState) {
   return () => {
     const queryFilter = Private(FilterBarQueryFilterProvider);
     const bool = { must: [], must_not: [] };

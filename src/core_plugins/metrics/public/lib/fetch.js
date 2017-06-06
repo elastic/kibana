@@ -1,5 +1,5 @@
 import { validateInterval } from './validate_interval';
-import { dashboardContext } from './dashboard_context';
+import { dashboardContextProvider } from 'plugins/kibana/dashboard/dashboard_context';
 export default (
   timefilter,
   Private,
@@ -7,14 +7,14 @@ export default (
   $http,
   config,
 ) => {
-  const context = Private(dashboardContext);
+  const dashboardContext = Private(dashboardContextProvider);
   const notify = new Notifier({ location: 'Metrics' });
   return $scope => () => {
     const panel = $scope.model;
     if (panel && panel.id) {
       const params = {
         timerange: timefilter.getBounds(),
-        filters: [context()],
+        filters: [dashboardContext()],
         panels: [panel]
       };
 

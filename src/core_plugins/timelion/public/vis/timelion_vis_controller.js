@@ -2,7 +2,7 @@ import _ from 'lodash';
 import { FilterBarQueryFilterProvider } from 'ui/filter_bar/query_filter';
 import { uiModules } from 'ui/modules';
 import timezoneProvider from 'plugins/timelion/services/timezone';
-import { dashboardContextProvider } from 'plugins/timelion/services/dashboard_context';
+import { dashboardContextProvider } from 'plugins/kibana/dashboard/dashboard_context';
 import 'plugins/timelion/directives/chart/chart';
 import 'plugins/timelion/directives/timelion_interval/timelion_interval';
 import 'ui/state_management/app_state';
