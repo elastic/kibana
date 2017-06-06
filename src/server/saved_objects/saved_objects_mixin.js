@@ -35,8 +35,8 @@ export function savedObjectsMixin(kbnServer, server) {
     const { callWithRequest } = server.plugins.elasticsearch.getCluster('admin');
     const callAdminCluster = (...args) => callWithRequest(request, ...args);
     const savedObjectsClient = new SavedObjectsClient(
-          server.config().get('kibana.index'),
-          callAdminCluster
+      server.config().get('kibana.index'),
+      callAdminCluster
     );
     savedObjectsClientCache.set(request, savedObjectsClient);
     return savedObjectsClient;
