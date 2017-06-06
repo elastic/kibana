@@ -2,7 +2,7 @@ import { delay } from 'bluebird';
 
 import getUrl from '../../../src/test_utils/get_url';
 
-export function CommonPageProvider({ getService, getPageObjects }) {
+export function CommonPageProvider({ getService, getPageObjects, getPageObject }) {
   const log = getService('log');
   const config = getService('config');
   const remote = getService('remote');
@@ -87,6 +87,11 @@ export function CommonPageProvider({ getService, getPageObjects }) {
 
             if (currentUrl.includes('app/kibana')) {
               await testSubjects.find('kibanaChrome');
+              const gettingStartedPage = getPageObject('gettingStarted');
+              if (await gettingStartedPage.doesContainerExist()) {
+                await gettingStartedPage.optOut();
+                throw new Error('Retrying after receiving Getting Started page');
+              }
             }
           })
           .then(async function () {
