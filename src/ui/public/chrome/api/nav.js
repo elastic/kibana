@@ -123,7 +123,12 @@ export function initChromeNavApi(chrome, internals) {
   }
 
   /**
-   * Manually sets the last url for the given app.
+   * Manually sets the last url for the given app. The last url for a given app is updated automatically during
+   * normal page navigation, so this should only need to be called to insert a last url that was not actually
+   * navigated to. For instance, when saving an object and redirecting to another page, the last url of the app
+   * should be the saved instance, but because of the redirect to a different page (e.g. `Save and Add to Dashboard`
+   * on visualize tab), it won't be tracked automatically and will need to be inserted manually. See
+   * https://github.com/elastic/kibana/pull/11932 for more background on why this was added.
    * @param appId {String}
    * @param url {String} The relative url for the app. Should not include the base path portion.
    */
