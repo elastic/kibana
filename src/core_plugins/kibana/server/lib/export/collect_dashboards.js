@@ -8,7 +8,14 @@ export default function collectDashboards(savedObjectsClient, ids) {
 
   if (ids.length === 0) return Promise.resolve([]);
 
-  return savedObjectsClient.bulkGet(ids, 'dashboard')
+  const objects = ids.map(id => {
+    return {
+      type: 'dashboard',
+      id: id
+    };
+  });
+
+  return savedObjectsClient.bulkGet(objects)
     .then(docs => Promise.all(docs.map(d => deps.collectPanels(savedObjectsClient, d))))
     .then(results => {
       return results

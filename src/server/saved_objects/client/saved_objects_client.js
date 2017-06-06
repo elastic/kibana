@@ -1,5 +1,5 @@
 import Boom from 'boom';
-import { get, isString } from 'lodash';
+import { get } from 'lodash';
 
 import {
   createFindQuery,
@@ -12,16 +12,15 @@ export class SavedObjectsClient {
     this._callAdminCluster = callAdminCluster;
   }
 
-  create(type, body = {}) {
-    return this._withKibanaIndex('index', { type, body })
-      .then((resp) => {
-        return {
-          id: resp._id,
-          type: resp._type,
-          version: resp._version,
-          attributes: body
-        };
-      });
+  async create(type, body = {}) {
+    const response = await this._withKibanaIndex('index', { type, body });
+
+    return {
+      id: response._id,
+      type: response._type,
+      version: response._version,
+      attributes: body
+    };
   }
 
   /**
@@ -42,7 +41,7 @@ export class SavedObjectsClient {
       return acc;
     }, []);
 
-    return this._withKibanaIndex('bulk', { body })
+    return await this._withKibanaIndex('bulk', { body })
       .then(resp => get(resp, 'items', []).map((resp, i) => {
         return {
           id: resp[action]._id,
@@ -104,40 +103,35 @@ export class SavedObjectsClient {
   /**
    * Returns an array of objects by id
    *
-   * @param {array} ids - an array ids, or an array of objects containing id and optionally type
-   * @param {string} type - applies type to each id
+   * @param {array} objects - an array ids, or an array of objects containing id and optionally type
    * @returns {promise} Returns promise containing array of documents
    * @example
    *
-   * // single type:
-   * bulkGet(['one', 'two', 'config'])
-   *
-   * // mixed types:
    * bulkGet([
    *   { id: 'one', type: 'config' },
    *   { id: 'foo', type: 'index-pattern'
    * ])
    */
-  bulkGet(ids = [], type) {
-    if (!ids || ids.length === 0) {
-      return Promise.resolve([]);
+  async bulkGet(objects = []) {
+    if (objects.length === 0) {
+      return [];
     }
 
-    const docs = ids.map(doc => {
-      const id = isString(doc) ? doc : doc.id;
-      return { _type: get(doc, 'type', type), _id: id };
+    const docs = objects.map(doc => {
+      return { _type: get(doc, 'type'), _id: get(doc, 'id') };
     });
 
-    return this._withKibanaIndex('mget', { body: { docs } })
-      .then(resp => get(resp, 'docs', []).filter(resp => resp.found))
-      .then(resp => resp.map(r => {
-        return {
-          id: r._id,
-          type: r._type,
-          version: r._version,
-          attributes: r._source
-        };
-      }));
+    const response = await this._withKibanaIndex('mget', { body: { docs } })
+      .then(resp => get(resp, 'docs', []).filter(resp => resp.found));
+
+    return response.map(r => {
+      return {
+        id: r._id,
+        type: r._type,
+        version: r._version,
+        attributes: r._source
+      };
+    });
   }
 
   async get(type, id) {

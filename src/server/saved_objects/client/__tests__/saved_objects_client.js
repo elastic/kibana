@@ -271,23 +271,12 @@ describe('SavedObjectsClient', () => {
   });
 
   describe('#bulkGet', () => {
-    it('accepts an array of ids', async () => {
-      await savedObjectsClient.bulkGet(['one', 'two'], 'index-pattern');
-      expect(callAdminCluster.calledOnce).to.be(true);
-
-      const options = callAdminCluster.getCall(0).args[1];
-      expect(options.body.docs).to.eql([
-        { _type: 'index-pattern', _id: 'one' },
-        { _type: 'index-pattern', _id: 'two' }
-      ]);
-    });
-
     it('accepts a array of mixed type and ids', async () => {
       await savedObjectsClient.bulkGet([
         { id: 'one', type: 'config' },
         { id: 'two', type: 'index-pattern' },
         { id: 'three' }
-      ], 'foo');
+      ]);
 
       expect(callAdminCluster.calledOnce).to.be(true);
 
@@ -295,8 +284,15 @@ describe('SavedObjectsClient', () => {
       expect(options.body.docs).to.eql([
         { _type: 'config', _id: 'one' },
         { _type: 'index-pattern', _id: 'two' },
-        { _type: 'foo', _id: 'three' }
+        { _type: undefined, _id: 'three' }
       ]);
+    });
+
+    it('returns early for empty objects argument', async () => {
+      const response = await savedObjectsClient.bulkGet([]);
+
+      expect(response).to.have.length(0);
+      expect(callAdminCluster.notCalled).to.be(true);
     });
 
     it('omits missed objects', async () => {
