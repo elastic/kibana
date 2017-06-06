@@ -1,4 +1,6 @@
-import React from 'react';
+import React, {
+  PropTypes,
+} from 'react';
 import classNames from 'classnames';
 
 export const KuiActionItem = ({ children, className, ...rest }) => {
@@ -6,6 +8,6 @@ export const KuiActionItem = ({ children, className, ...rest }) => {
   return <div className={classes} {...rest} >{children}</div>;
 };
 KuiActionItem.propTypes = {
-  children: React.PropTypes.node,
-  className: React.PropTypes.string,
+  children: PropTypes.node,
+  className: PropTypes.string,
 };
