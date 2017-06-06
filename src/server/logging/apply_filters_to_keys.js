@@ -35,8 +35,8 @@ function apply(obj, key, action) {
   return obj;
 }
 
-module.exports = function (obj, actionsByKey) {
+export default function (obj, actionsByKey) {
   return Object.keys(actionsByKey).reduce((output, key) => {
     return apply(output, key, actionsByKey[key]);
   }, toPojo(obj));
-};
+}

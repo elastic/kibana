@@ -1,7 +1,7 @@
 import { get } from 'lodash';
 import upgrade from './upgrade_config';
 
-module.exports = function (server, { mappings }) {
+export default function (server, { mappings }) {
   const config = server.config();
   const { callWithInternalUser } = server.plugins.elasticsearch.getCluster('admin');
   const options =  {
@@ -21,4 +21,4 @@ module.exports = function (server, { mappings }) {
   };
 
   return callWithInternalUser('search', options).then(upgrade(server));
-};
+}

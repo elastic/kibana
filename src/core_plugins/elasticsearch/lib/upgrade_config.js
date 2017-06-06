@@ -2,7 +2,7 @@ import Promise from 'bluebird';
 import isUpgradeable from './is_upgradeable';
 import _ from 'lodash';
 
-module.exports = function (server) {
+export default function (server) {
   const { callWithInternalUser } = server.plugins.elasticsearch.getCluster('admin');
   const config = server.config();
 
@@ -54,4 +54,4 @@ module.exports = function (server) {
       id: config.get('pkg.version')
     });
   };
-};
+}

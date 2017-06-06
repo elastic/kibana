@@ -7,7 +7,7 @@ const validRegressions = {
   log: 'logarithmic',
 };
 
-module.exports = new Chainable('trend', {
+export default new Chainable('trend', {
   args: [
     {
       name: 'inputSeries',

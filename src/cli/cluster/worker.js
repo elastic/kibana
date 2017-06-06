@@ -17,7 +17,7 @@ const dead = fork => {
   return fork.isDead() || fork.killed;
 };
 
-module.exports = class Worker extends EventEmitter {
+export default class Worker extends EventEmitter {
   constructor(opts) {
     opts = opts || {};
     super();
@@ -162,4 +162,4 @@ module.exports = class Worker extends EventEmitter {
     // wait for the fork to report it is online before resolving
     await new Promise(cb => this.once('fork:online', cb));
   }
-};
+}

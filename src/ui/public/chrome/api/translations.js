@@ -1,4 +1,5 @@
-module.exports = function (chrome, internals) {
+// eslint-disable-next-line kibana-custom/no-default-export
+export default function (chrome, internals) {
   /**
    * ui/chrome Translations API
    *
@@ -12,4 +13,4 @@ module.exports = function (chrome, internals) {
   chrome.getTranslations = function () {
     return internals.translations || [];
   };
-};
+}

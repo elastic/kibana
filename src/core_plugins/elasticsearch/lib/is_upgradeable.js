@@ -1,7 +1,7 @@
 import semver from 'semver';
 const rcVersionRegex = /(\d+\.\d+\.\d+)\-rc(\d+)/i;
 
-module.exports = function (server, doc) {
+export default function (server, doc) {
   const config = server.config();
   if (/alpha|beta|snapshot/i.test(doc._id)) return false;
   if (!doc._id) return false;
@@ -30,4 +30,4 @@ module.exports = function (server, doc) {
     return false;
   }
   return true;
-};
+}

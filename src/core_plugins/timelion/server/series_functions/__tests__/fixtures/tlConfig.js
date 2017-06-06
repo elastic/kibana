@@ -3,7 +3,7 @@ import sinon from 'sinon';
 import timelionDefaults from '../../../lib/get_namespaced_settings';
 import esResponse from './es_response';
 
-module.exports = function () {
+export default function () {
 
   const functions = require('../../../lib/load_functions')('series_functions');
   const server = {
@@ -41,4 +41,4 @@ module.exports = function () {
   tlConfig.setTargetSeries();
 
   return tlConfig;
-};
+}

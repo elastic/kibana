@@ -1,5 +1,5 @@
 import _ from 'lodash';
 
-module.exports = function (points) {
+export default function (points) {
   return _.uniq(points).length;
-};
+}

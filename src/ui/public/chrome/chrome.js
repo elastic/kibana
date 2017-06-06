@@ -51,4 +51,5 @@ chrome.bootstrap = function () {
   angular.bootstrap(document, ['kibana']);
 };
 
-module.exports = chrome;
+// eslint-disable-next-line kibana-custom/no-default-export
+export default chrome;

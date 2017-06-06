@@ -11,7 +11,7 @@ import mapBucket from './map_bucket';
 import parseSettings from './parse_settings';
 import unitToSeconds from './unit_to_seconds';
 
-module.exports = {
+export default {
   bucketTransform,
   getAggValue,
   getBucketSize,

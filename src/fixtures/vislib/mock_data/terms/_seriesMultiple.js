@@ -1,6 +1,6 @@
 import _ from 'lodash';
 
-module.exports = {
+export default {
   'yAxisLabel': 'Count',
   'zAxisLabel': 'machine.os.raw: Descending',
   'yScale': null,

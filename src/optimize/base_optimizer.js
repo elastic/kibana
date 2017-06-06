@@ -17,7 +17,7 @@ import { setLoaderQueryParam, makeLoaderString } from './loaders';
 
 const babelExclude = [/[\/\\](webpackShims|node_modules|bower_components)[\/\\]/];
 
-class BaseOptimizer {
+export default class BaseOptimizer {
   constructor(opts) {
     this.env = opts.env;
     this.urlBasePath = opts.urlBasePath;
@@ -228,5 +228,3 @@ class BaseOptimizer {
     );
   }
 }
-
-module.exports = BaseOptimizer;

@@ -9,4 +9,4 @@ if (angular.mocks) {
   );
 }
 
-module.exports = angular.mock;
+export default angular.mock;

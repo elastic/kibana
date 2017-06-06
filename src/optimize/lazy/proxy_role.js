@@ -1,7 +1,7 @@
 import { fromNode } from 'bluebird';
 import { get, once } from 'lodash';
 
-module.exports = (kbnServer, server, config) => {
+export default (kbnServer, server, config) => {
 
   server.route({
     path: '/bundles/{path*}',
