@@ -28,7 +28,7 @@ uiModules
       const reactOptionsComponent = typeof $scope.editor !== 'string';
       const renderReactComponent = () => {
         const Component = $scope.editor;
-        render(<Component scope={$scope} />, $el);
+        render(<Component scope={$scope} />, $el[0]);
       };
       // Bind the `editor` template with the scope.
       if (reactOptionsComponent) {
@@ -50,7 +50,7 @@ uiModules
 
       $el.on('$destroy', () => {
         if (reactOptionsComponent) {
-          unmountComponentAtNode($el);
+          unmountComponentAtNode($el[0]);
         }
       });
     }

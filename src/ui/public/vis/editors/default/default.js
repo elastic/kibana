@@ -17,7 +17,7 @@ const defaultEditor = function ($rootScope, $compile) {
 
       if (!this.vis.type.editorConfig.optionTabs && this.vis.type.editorConfig.optionsTemplate) {
         this.vis.type.editorConfig.optionTabs = [
-          { name: 'options', title: 'Options', editor: this.editorConfig.optionsTemplate }
+          { name: 'options', title: 'Options', editor: this.vis.type.editorConfig.optionsTemplate }
         ];
       }
     }
