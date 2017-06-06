@@ -65,6 +65,16 @@ exports[`KuiLinkButton Props buttonType primary renders the primary class 1`] = 
 </a>
 `;
 
+exports[`KuiLinkButton Props buttonType warning renders the warning class 1`] = `
+<a
+  class="kuiButton kuiButton--warning"
+>
+  <span
+    class="kuiButton__inner"
+  />
+</a>
+`;
+
 exports[`KuiLinkButton Props children is rendered 1`] = `
 <a
   class="kuiButton"
