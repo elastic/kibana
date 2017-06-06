@@ -6,7 +6,7 @@ export default function collectIndexPatterns(savedObjectsClient, panels) {
       let searchSource;
       try {
         searchSource = JSON.parse(kibanaSavedObjectMeta.searchSourceJSON);
-        if (!searchSource.index) return acc;
+        if (!searchSource.index) throw new Error('Missing index pattern');
       } catch (err) {
         return acc;
       }
