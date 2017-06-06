@@ -13,17 +13,44 @@ export class SavedObjectsClient {
   }
 
   async create(type, body = {}) {
-    const response = await this._withKibanaIndex('index', {
-      type,
-      body
-    });
+    const response = await this._withKibanaIndex('index', { type, body });
 
     return {
-      type: response._type,
       id: response._id,
+      type: response._type,
       version: response._version,
       attributes: body
     };
+  }
+
+  /**
+   * Creates multiple documents at once
+   *
+   * @param {array} objects
+   * @param {object} options
+   * @param {boolean} options.force - overrides existing documents
+   * @returns {promise} Returns promise containing array of documents
+   */
+  async bulkCreate(objects, options = {}) {
+    const action = options.force === true ? 'index' : 'create';
+
+    const body = objects.reduce((acc, object) => {
+      acc.push({ [action]: { _type: object.type, _id: object.id } });
+      acc.push(object.attributes);
+
+      return acc;
+    }, []);
+
+    return await this._withKibanaIndex('bulk', { body })
+      .then(resp => get(resp, 'items', []).map((resp, i) => {
+        return {
+          id: resp[action]._id,
+          type: resp[action]._type,
+          version: resp[action]._version,
+          attributes: objects[i].attributes,
+          error: resp[action].error ? { message: get(resp[action], 'error.reason') } : undefined
+        };
+      }));
   }
 
   async delete(type, id) {
@@ -72,6 +99,40 @@ export class SavedObjectsClient {
       page
 
     };
+  }
+
+  /**
+   * Returns an array of objects by id
+   *
+   * @param {array} objects - an array ids, or an array of objects containing id and optionally type
+   * @returns {promise} Returns promise containing array of documents
+   * @example
+   *
+   * bulkGet([
+   *   { id: 'one', type: 'config' },
+   *   { id: 'foo', type: 'index-pattern'
+   * ])
+   */
+  async bulkGet(objects = []) {
+    if (objects.length === 0) {
+      return [];
+    }
+
+    const docs = objects.map(doc => {
+      return { _type: get(doc, 'type'), _id: get(doc, 'id') };
+    });
+
+    const response = await this._withKibanaIndex('mget', { body: { docs } })
+      .then(resp => get(resp, 'docs', []).filter(resp => resp.found));
+
+    return response.map(r => {
+      return {
+        id: r._id,
+        type: r._type,
+        version: r._version,
+        attributes: r._source
+      };
+    });
   }
 
   async get(type, id) {
