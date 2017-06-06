@@ -2,19 +2,20 @@ import React from 'react';
 
 import {
   KuiBar,
-  KuiBarSection
+  KuiBarSection,
+  KuiButton
 } from '../../../../components';
 
 export default () => (
  <KuiBar>
   <KuiBarSection>
     <div className="kuiButtonGroup">
-      <button className="kuiButton kuiButton--basic">
+      <KuiButton buttonType="basic">
         See previous 10 pages
-      </button>
-      <button className="kuiButton kuiButton--basic">
+      </KuiButton>
+      <KuiButton buttonType="basic">
         See next 10 pages
-      </button>
+      </KuiButton>
     </div>
   </KuiBarSection>
 </KuiBar>

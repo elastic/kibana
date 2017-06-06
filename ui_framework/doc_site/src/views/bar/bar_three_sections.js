@@ -2,7 +2,9 @@ import React from 'react';
 
 import {
   KuiBar,
-  KuiBarSection
+  KuiBarSection,
+  KuiButton,
+  KuiButtonGroup
 } from '../../../../components';
 
 export default () => (
@@ -14,14 +16,14 @@ export default () => (
   </KuiBarSection>
 
   <KuiBarSection>
-    <div className="kuiButtonGroup">
-      <button className="kuiButton kuiButton--basic">
+    <KuiButtonGroup>
+      <KuiButton buttonType="basic">
         Create new page
-      </button>
-      <button className="kuiButton kuiButton--danger">
+      </KuiButton>
+      <KuiButton buttonType="danger">
         Clear all pages
-      </button>
-    </div>
+      </KuiButton>
+    </KuiButtonGroup>
   </KuiBarSection>
 
   <KuiBarSection>
@@ -29,14 +31,14 @@ export default () => (
     <input className="kuiTextInput" size="2" value="10" readOnly/>
     <div>pages</div>
 
-    <div className="kuiButtonGroup">
-      <button className="kuiButton kuiButton--basic">
+    <KuiButtonGroup>
+      <KuiButton buttonType="basic">
         Undo
-      </button>
-      <button className="kuiButton kuiButton--basic">
+      </KuiButton>
+      <KuiButton buttonType="basic">
         Redo
-      </button>
-    </div>
+      </KuiButton>
+    </KuiButtonGroup>
   </KuiBarSection>
 </KuiBar>
 );
