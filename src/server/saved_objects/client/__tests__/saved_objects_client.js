@@ -123,6 +123,48 @@ describe('SavedObjectsClient', () => {
       ]);
     });
 
+    it('returns document errors', async () => {
+      callAdminCluster.returns(Promise.resolve({
+        errors: false,
+        items: [{
+          create: {
+            _type: 'foo',
+            _id: 'one',
+            error: {
+              reason: 'type[config] missing'
+            }
+          }
+        }, {
+          create: {
+            _type: 'config',
+            _id: 'one',
+            _version: 2
+          }
+        }]
+      }));
+
+      const response = await savedObjectsClient.bulkCreate([
+        { type: 'config', id: 'one', attributes: { title: 'Test One' } },
+        { type: 'index-pattern', id: 'two', attributes: { title: 'Test Two' } }
+      ]);
+
+      expect(response).to.eql([
+        {
+          id: 'one',
+          type: 'foo',
+          version: undefined,
+          attributes: { title: 'Test One' },
+          error: { message: 'type[config] missing' }
+        }, {
+          id: 'one',
+          type: 'config',
+          version: 2,
+          attributes: { title: 'Test Two' },
+          error: undefined
+        }
+      ]);
+    });
+
     it('formats Elasticsearch response', async () => {
       callAdminCluster.returns(Promise.resolve({
         errors: false,
@@ -151,12 +193,14 @@ describe('SavedObjectsClient', () => {
           id: 'one',
           type: 'config',
           version: 2,
-          attributes: { title: 'Test One' }
+          attributes: { title: 'Test One' },
+          error: undefined
         }, {
           id: 'one',
           type: 'config',
           version: 2,
-          attributes: { title: 'Test Two' }
+          attributes: { title: 'Test Two' },
+          error: undefined
         }
       ]);
     });

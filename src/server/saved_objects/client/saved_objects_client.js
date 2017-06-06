@@ -47,7 +47,8 @@ export class SavedObjectsClient {
           id: resp[action]._id,
           type: resp[action]._type,
           version: resp[action]._version,
-          attributes: objects[i].attributes
+          attributes: objects[i].attributes,
+          error: resp[action].error ? { message: get(resp[action], 'error.reason') } : undefined
         };
       }));
   }
