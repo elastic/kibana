@@ -3,12 +3,12 @@ import React, {
 } from 'react';
 import classNames from 'classnames';
 
-export const KuiCardGroup = ({ children, className, united, ...rest }) => {
-  const classes = classNames('kuiCardGroup', className, { 'kuiCardGroup--united': united });
+export const KuiCardGroup = ({ children, className, isUnited, ...rest }) => {
+  const classes = classNames('kuiCardGroup', className, { 'kuiCardGroup--united': isUnited });
   return <div className={classes} {...rest}>{children}</div>;
 };
 KuiCardGroup.propTypes = {
   children: PropTypes.node,
   className: PropTypes.string,
-  united: PropTypes.bool
+  isUnited: PropTypes.bool
 };
