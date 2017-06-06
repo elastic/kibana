@@ -1,4 +1,5 @@
-import exportDashboards, { deps } from '../export_dashboards';
+import * as deps from '../collect_dashboards';
+import { exportDashboards } from '../export_dashboards';
 import sinon from 'sinon';
 import { expect } from 'chai';
 

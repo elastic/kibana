@@ -1,4 +1,4 @@
-import importDashboards from '../import_dashboards';
+import { importDashboards } from '../import_dashboards';
 import sinon from 'sinon';
 import { expect } from 'chai';
 

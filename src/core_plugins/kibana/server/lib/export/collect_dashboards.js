@@ -1,10 +1,6 @@
-import collectPanels from './collect_panels';
+import { collectPanels } from './collect_panels';
 
-export const deps = {
-  collectPanels
-};
-
-export default function collectDashboards(savedObjectsClient, ids) {
+export function collectDashboards(savedObjectsClient, ids) {
 
   if (ids.length === 0) return Promise.resolve([]);
 
@@ -16,7 +12,7 @@ export default function collectDashboards(savedObjectsClient, ids) {
   });
 
   return savedObjectsClient.bulkGet(objects)
-    .then(docs => Promise.all(docs.map(d => deps.collectPanels(savedObjectsClient, d))))
+    .then(docs => Promise.all(docs.map(d => collectPanels(savedObjectsClient, d))))
     .then(results => {
       return results
         .reduce((acc, result) => acc.concat(result), [])

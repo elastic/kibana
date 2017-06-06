@@ -1,5 +1,6 @@
 import sinon from 'sinon';
-import collectSearchSources, { deps } from '../collect_search_sources';
+import * as deps from '../collect_index_patterns';
+import { collectSearchSources } from '../collect_search_sources';
 import { expect } from 'chai';
 describe('collectSearchSources(req, panels)', () => {
   const savedObjectsClient = { bulkGet: sinon.mock() };

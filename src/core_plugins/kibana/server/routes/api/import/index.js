@@ -1,8 +1,8 @@
 import Boom from 'boom';
 import Joi from 'joi';
-import importDashboards from '../../../lib/import/import_dashboards';
+import { importDashboards } from '../../../lib/import/import_dashboards';
 
-export default function importApi(server) {
+export function importApi(server) {
   server.route({
     path: '/api/kibana/dashboards/import',
     method: ['POST'],

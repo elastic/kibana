@@ -1,5 +1,5 @@
 import sinon from 'sinon';
-import collectIndexPatterns from '../collect_index_patterns';
+import { collectIndexPatterns } from '../collect_index_patterns';
 import { expect } from 'chai';
 
 describe('collectIndexPatterns(req, panels)', () => {

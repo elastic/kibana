@@ -1,7 +1,7 @@
 import { flatten } from 'lodash';
 import { SavedObjectsClient } from '../../../../../server/saved_objects';
 
-export default function importDashboards(req) {
+export function importDashboards(req) {
   const { payload } = req;
   const config = req.server.config();
   const force = 'force' in req.query && req.query.force !== false;

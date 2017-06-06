@@ -1,5 +1,6 @@
 import sinon from 'sinon';
-import collectDashboards, { deps } from '../collect_dashboards';
+import * as deps from '../collect_panels';
+import { collectDashboards } from '../collect_dashboards';
 import { expect } from 'chai';
 
 describe('collectDashboards(req, ids)', () => {

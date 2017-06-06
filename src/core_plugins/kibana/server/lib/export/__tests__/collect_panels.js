@@ -1,5 +1,7 @@
 import sinon from 'sinon';
-import collectPanels, { deps } from '../collect_panels';
+import * as collectIndexPatternsDep from '../collect_index_patterns';
+import * as collectSearchSourcesDep from '../collect_search_sources';
+import { collectPanels } from '../collect_panels';
 import { expect } from 'chai';
 
 describe('collectPanels(req, dashboard)', () => {
@@ -23,9 +25,9 @@ describe('collectPanels(req, dashboard)', () => {
       { id: 'panel-01' }, { id: 'panel-02' }
     ]));
 
-    collectIndexPatternsStub = sinon.stub(deps, 'collectIndexPatterns');
+    collectIndexPatternsStub = sinon.stub(collectIndexPatternsDep, 'collectIndexPatterns');
     collectIndexPatternsStub.returns([{ id: 'logstash-*' }]);
-    collectSearchSourcesStub = sinon.stub(deps, 'collectSearchSources');
+    collectSearchSourcesStub = sinon.stub(collectSearchSourcesDep, 'collectSearchSources');
     collectSearchSourcesStub.returns([ { id: 'search-01' }]);
   });
 

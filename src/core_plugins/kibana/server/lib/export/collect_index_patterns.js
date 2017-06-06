@@ -1,4 +1,4 @@
-export default function collectIndexPatterns(savedObjectsClient, panels) {
+export function collectIndexPatterns(savedObjectsClient, panels) {
   const docs = panels.reduce((acc, panel) => {
     const { kibanaSavedObjectMeta, savedSearchId } = panel.attributes;
 

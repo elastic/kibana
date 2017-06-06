@@ -1,8 +1,6 @@
-import collectIndexPatterns from './collect_index_patterns';
+import { collectIndexPatterns } from './collect_index_patterns';
 
-export const deps = { collectIndexPatterns };
-
-export default function collectSearchSources(savedObjectsClient, panels) {
+export function collectSearchSources(savedObjectsClient, panels) {
   const docs = panels.reduce((acc, panel) => {
     const { savedSearchId } = panel.attributes;
     if (savedSearchId) {
@@ -19,7 +17,7 @@ export default function collectSearchSources(savedObjectsClient, panels) {
 
   return savedObjectsClient.bulkGet(docs)
     .then(savedSearches => {
-      return deps.collectIndexPatterns(savedObjectsClient, savedSearches)
+      return collectIndexPatterns(savedObjectsClient, savedSearches)
         .then(resp => {
           return savedSearches.concat(resp);
         });

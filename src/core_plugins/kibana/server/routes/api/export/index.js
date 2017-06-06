@@ -1,8 +1,8 @@
-import exportDashboards from '../../../lib/export/export_dashboards';
+import { exportDashboards } from '../../../lib/export/export_dashboards';
 import Boom from 'boom';
 import Joi from 'joi';
 import moment from 'moment';
-export default function exportApi(server) {
+export function exportApi(server) {
   server.route({
     path: '/api/kibana/dashboards/export',
     config: {
