@@ -3,4 +3,5 @@ extends: '@elastic/kibana'
 
 settings:
   import/resolver:
-    - '@elastic/eslint-import-resolver-kibana': { rootPackageName: 'kibana' }
+    '@elastic/eslint-import-resolver-kibana':
+      rootPackageName: 'kibana'
