@@ -1,6 +1,8 @@
+/**
+ * Avoid setting a width here, so that the width of the options can dynamically set the width.
+ */
 .kuiSelect {
   @include select;
-  @include formControl;
 
   &.kuiSelect-isInvalid {
     @include formControlInvalid;
@@ -12,6 +14,14 @@
   }
 }
 
+.kuiSelect--small {
+  width: $globalFormFieldSmallWidth;
+}
+
+.kuiSelect--medium {
+  width: $globalFormFieldDefaultWidth;
+}
+
 .kuiSelect--large {
-  min-width: 400px;
+  width: $globalFormFieldLargeWidth;
 }
