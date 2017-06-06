@@ -13,6 +13,10 @@ import { EmptyTablePrompt } from './empty_table_prompt';
 const emptyTablePromptSource = require('!!raw!./empty_table_prompt');
 const emptyTablePromptHtml = renderToHtml(EmptyTablePrompt);
 
+import { ControlledTableWithEmptyPrompt } from './table_with_empty_prompt';
+const tableWithEmptyPromptSource = require('!!raw!./table_with_empty_prompt');
+const tableWithEmptyPromptHtml = renderToHtml(ControlledTableWithEmptyPrompt);
+
 export default props => (
   <GuidePage title={props.route.name}>
     <GuideSection
@@ -32,6 +36,25 @@ export default props => (
 
       <GuideDemo>
         <EmptyTablePrompt/>
+      </GuideDemo>
+    </GuideSection>
+
+    <GuideSection
+      title="Controlled table with empty table prompt"
+      source={[{
+        type: GuideSectionTypes.JS,
+        code: tableWithEmptyPromptSource,
+      }, {
+        type: GuideSectionTypes.HTML,
+        code: tableWithEmptyPromptHtml,
+      }]}
+    >
+      <GuideText>
+        Wrap in an EmptyTablePromptPanel when using with a controlled table.
+      </GuideText>
+
+      <GuideDemo>
+        <ControlledTableWithEmptyPrompt/>
       </GuideDemo>
     </GuideSection>
   </GuidePage>

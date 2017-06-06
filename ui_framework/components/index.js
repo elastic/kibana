@@ -37,4 +37,5 @@ export {
 export {
   KuiEmptyTablePrompt,
   KuiEmptyTablePromptMessage,
+  KuiEmptyTablePromptPanel,
 } from './empty_table_prompt';
