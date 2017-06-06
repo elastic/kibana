@@ -45,6 +45,13 @@ exports[`KuiSubmitButton Props buttonType primary renders the primary class 1`] 
 />
 `;
 
+exports[`KuiSubmitButton Props buttonType warning renders the warning class 1`] = `
+<input
+  class="kuiButton kuiButton--warning"
+  type="submit"
+/>
+`;
+
 exports[`KuiSubmitButton Props children is rendered as value 1`] = `
 <input
   class="kuiButton"
