@@ -142,7 +142,7 @@ export function getDefaultSettings() {
     'visualization:colorMapping': {
       type: 'json',
       value: JSON.stringify({
-        Count: '#0096CC'
+        Count: '#00A69B'
       }),
       description: 'Maps values to specified colors within visualizations'
     },
