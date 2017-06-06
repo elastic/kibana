@@ -4,7 +4,7 @@ import IndexPattern from '../index_pattern';
 import createTextHandler from '../lib/create_text_handler';
 import ColorRules from '../color_rules';
 import ColorPicker from '../color_picker';
-import uuid from 'node-uuid';
+import uuid from 'uuid';
 import YesNo from '../yes_no';
 
 class TopNPanelConfig extends Component {

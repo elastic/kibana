@@ -4,7 +4,7 @@ import collectionActions from './lib/collection_actions';
 import AddDeleteButtons from './add_delete_buttons';
 import ColorPicker from './color_picker';
 import FieldSelect from './aggs/field_select';
-import uuid from 'node-uuid';
+import uuid from 'uuid';
 import IconSelect from './icon_select';
 import YesNo from './yes_no';
 
