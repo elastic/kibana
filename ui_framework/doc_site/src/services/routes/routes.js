@@ -84,8 +84,8 @@ import PagerExample
 import PanelExample
   from '../../views/panel/panel_example';
 
-import PromptForItemsExample
-  from '../../views/prompt_for_items/prompt_for_items_example';
+import EmptyTablePromptExample
+  from '../../views/empty_table_prompt/empty_table_prompt_example';
 
 import StatusTextExample
   from '../../views/status_text/status_text_example';
@@ -138,6 +138,10 @@ const components = [{
 }, {
   name: 'CollapseButton',
   component: CollapseButtonExample,
+}, {
+  name: 'EmptyTablePrompt',
+  component: EmptyTablePromptExample,
+  hasReact: true,
 }, {
   name: 'Event',
   component: EventExample,
@@ -193,10 +197,6 @@ const components = [{
 }, {
   name: 'Panel',
   component: PanelExample,
-}, {
-  name: 'Prompt for Items',
-  component: PromptForItemsExample,
-  hasReact: true,
 }, {
   name: 'StatusText',
   component: StatusTextExample,

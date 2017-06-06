@@ -1,10 +1,10 @@
 import React from 'react';
 
-import { KuiPromptForItems } from '../../../../components';
+import { KuiEmptyTablePrompt } from '../../../../components';
 
-export function PromptForItems() {
+export function EmptyTablePrompt() {
   return (
-    <KuiPromptForItems
+    <KuiEmptyTablePrompt
       addHref="#"
       itemType="item"
       promptButtonText="Add a new item"

@@ -1,18 +1,18 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`renders KuiPromptForItems 1`] = `
+exports[`renders KuiEmptyTablePrompt 1`] = `
 <div
   aria-label="aria-label"
-  class="kuiPromptForItems testClass1 testClass2"
+  class="kuiEmptyTablePrompt testClass1 testClass2"
   data-test-subj="test subject string"
 >
   <div
-    class="kuiPromptForItems__message"
+    class="kuiEmptyTablePrompt__message"
   >
     You have no dashboards, add one!
   </div>
   <div
-    class="kuiPromptForItems__actions"
+    class="kuiEmptyTablePrompt__actions"
   >
     <a
       aria-label="Add a new dashboard"

@@ -9,28 +9,29 @@ import {
   GuideText,
 } from '../../components';
 
-import { PromptForItems } from './prompt_for_items';
-const promptForItemsSource = require('!!raw!./prompt_for_items');
-const promptForItemsHtml = renderToHtml(PromptForItems);
+import { EmptyTablePrompt } from './empty_table_prompt';
+const emptyTablePromptSource = require('!!raw!./empty_table_prompt');
+const emptyTablePromptHtml = renderToHtml(EmptyTablePrompt);
 
 export default props => (
   <GuidePage title={props.route.name}>
     <GuideSection
-      title="Prompt for Items"
+      title="Empty table prompt"
       source={[{
         type: GuideSectionTypes.JS,
-        code: promptForItemsSource,
+        code: emptyTablePromptSource,
       }, {
         type: GuideSectionTypes.HTML,
-        code: promptForItemsHtml,
+        code: emptyTablePromptHtml,
       }]}
     >
       <GuideText>
-        Use the prompt to create new items.
+        Use this prompt when a table has no results. It helps create space and provides a place to prompt the user
+        to follow some next actions, such as creating an item.
       </GuideText>
 
       <GuideDemo>
-        <PromptForItems/>
+        <EmptyTablePrompt/>
       </GuideDemo>
     </GuideSection>
   </GuidePage>

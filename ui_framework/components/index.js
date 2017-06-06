@@ -35,6 +35,6 @@ export {
 } from './pager';
 
 export {
-  KuiPromptForItems,
-  KuiPromptForItemsMessage,
-} from './prompt_for_items';
+  KuiEmptyTablePrompt,
+  KuiEmptyTablePromptMessage,
+} from './empty_table_prompt';

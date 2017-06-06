@@ -3,11 +3,11 @@ import { render } from 'enzyme';
 import { requiredProps } from '../../test/required_props';
 
 import {
-  KuiPromptForItems,
-} from './prompt_for_items';
+  KuiEmptyTablePrompt,
+} from './empty_table_prompt';
 
-test('renders KuiPromptForItems', () => {
-  const component = <KuiPromptForItems
+test('renders KuiEmptyTablePrompt', () => {
+  const component = <KuiEmptyTablePrompt
     itemType="dashboard"
     promptMessage="You have no dashboards, add one!"
     promptButtonText="Add a new dashboard"
