@@ -1,10 +1,10 @@
+// This file is used by Timelion and TSVB
 import _ from 'lodash';
 import { FilterBarQueryFilterProvider } from 'ui/filter_bar/query_filter';
-require('ui/state_management/app_state');
+import 'ui/state_management/app_state';
 
-
-module.exports = function dashboardContext(Private, getAppState) {
-  return function () {
+export function dashboardContextProvider(Private, getAppState) {
+  return () => {
     const queryFilter = Private(FilterBarQueryFilterProvider);
     const bool = { must: [], must_not: [] };
     const filterBarFilters = queryFilter.getFilters();
@@ -22,12 +22,14 @@ module.exports = function dashboardContext(Private, getAppState) {
 
       if (filter.meta.disabled) return;
       if (filter.meta.negate) {
+        bool.must_not = bool.must_not || [];
         bool.must_not.push(esFilter.query || esFilter);
       } else {
+        bool.must = bool.must || [];
         bool.must.push(esFilter.query || esFilter);
       }
     });
 
     return { bool: bool };
   };
-};
+}
