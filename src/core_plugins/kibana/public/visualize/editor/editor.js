@@ -1,9 +1,6 @@
 import _ from 'lodash';
 import 'plugins/kibana/visualize/saved_visualizations/saved_visualizations';
-
-// import 'plugins/kibana/visualize/editor/sidebar';
 import 'ui/vis/editors/default/sidebar';
-
 import 'plugins/kibana/visualize/editor/agg_filter';
 import 'ui/visualize';
 import 'ui/collapsible_sidebar';

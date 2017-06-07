@@ -8,7 +8,7 @@
         id="colorSchema"
         class="kuiSelect kuiSideBarSelect"
         ng-model="vis.params.colorSchema"
-        ng-options="mode for mode in vis.editorConfig.collections.colorSchemas"
+        ng-options="mode for mode in collections.colorSchemas"
       ></select>
     </div>
     <div
@@ -39,7 +39,7 @@
         id="axisScale"
         class="kuiSelect kuiSideBarSelect"
         ng-model="vis.params.valueAxes[0].scale.type"
-        ng-options="mode for mode in vis.type.params.scales"
+        ng-options="mode for mode in collections.scales"
       ></select>
     </div>
   </div>
@@ -141,7 +141,7 @@
                 ng-click="removeRange($index)"
                 class="kuiButton kuiButton--danger kuiButton--small"
               >
-                <span class="kuiIcon fa-times"><span>
+                <span class="kuiIcon fa-times"></span>
               </button>
             </td>
           </tr>
@@ -149,7 +149,7 @@
 
         <div class="hintbox" ng-show="!vis.params.colorsRange.length">
           <p>
-            <span class="kuiIcon fa-danger text-danger"><span>
+            <span class="kuiIcon fa-danger text-danger"></span>
             <strong>Required:</strong> You must specify at least one range.
           </p>
         </div>

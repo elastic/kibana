@@ -18,6 +18,7 @@ export default function GaugeVisType(Private) {
     category: CATEGORY.DATA,
     visConfig: {
       defaults: {
+        type:'gauge',
         addTooltip: true,
         addLegend: true,
 

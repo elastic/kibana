@@ -1,3 +1,4 @@
+import _ from 'lodash';
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { uiModules } from 'ui/modules';
@@ -26,9 +27,13 @@ uiModules
       const $optionContainer = $el.find('[data-visualization-options]');
 
       const reactOptionsComponent = typeof $scope.editor !== 'string';
+      const stageEditorParams = (params) => {
+        $scope.vis.params = _.cloneDeep(params);
+        $scope.$apply();
+      };
       const renderReactComponent = () => {
         const Component = $scope.editor;
-        render(<Component scope={$scope} />, $el[0]);
+        render(<Component scope={$scope} stageEditorParams={stageEditorParams} />, $el[0]);
       };
       // Bind the `editor` template with the scope.
       if (reactOptionsComponent) {
@@ -38,7 +43,7 @@ uiModules
         $optionContainer.append($editor);
       }
 
-      $scope.$watchGroup(['visData', 'visualizeEditor'], () => {
+      $scope.$watchGroup(['visData', 'visualizeEditor', 'vis.params'], () => {
         if (reactOptionsComponent) {
           renderReactComponent();
         }

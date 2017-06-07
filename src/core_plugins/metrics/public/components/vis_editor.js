@@ -9,20 +9,29 @@ class VisEditor extends Component {
 
   constructor(props) {
     super(props);
-    this.state = { model: props.vis.params };
+    this.state = { model: props.vis.params, dirty: false, autoApply: true };
     this.onBrush = brushHandler(props.vis.API.timeFilter);
   }
 
   render() {
     const handleChange = (part) => {
       const nextModel = { ...this.state.model, ...part };
-      this.setState({ model: nextModel });
-      if (this.props.onChange || true) {
-        console.log(nextModel);
-        this.props.vis.params = nextModel;
+
+      this.props.vis.params = nextModel;
+      if (this.state.autoApply) {
         this.props.vis.updateState();
-        //this.props.onChange(nextModel);
       }
+
+      this.setState({ model: nextModel, dirty: !this.state.autoApply });
+    };
+
+    const handleAutoApplyToggle = (part) => {
+      this.setState({ autoApply: part.target.checked });
+    };
+
+    const handleCommit = () => {
+      this.props.vis.updateState();
+      this.setState({ dirty: false });
     };
 
     if (!this.props.vis.isEditorMode()) {
@@ -44,13 +53,13 @@ class VisEditor extends Component {
             model={model}
             onChange={handleChange} />
           <VisEditorVisualization
-            dirty={this.props.dirty}
-            autoApply={this.props.autoApply}
+            dirty={this.state.dirty}
+            autoApply={this.state.autoApply}
             model={model}
             visData={this.props.visData}
             onBrush={this.onBrush}
-            onCommit={this.props.onCommit}
-            onToggleAutoApply={this.props.onToggleAutoApply}
+            onCommit={handleCommit}
+            onToggleAutoApply={handleAutoApplyToggle}
             onChange={handleChange} />
           <PanelConfig
             fields={this.props.vis.fields}
@@ -60,7 +69,12 @@ class VisEditor extends Component {
         </div>
       );
     }
+
     return null;
+  }
+
+  componentDidMount() {
+    this.props.renderComplete();
   }
 
 }

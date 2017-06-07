@@ -52,7 +52,10 @@ export function VisProvider(Private, indexPatterns, timefilter, getAppState) {
           filter: (event) => {
             const appState = getAppState();
             filterBarClickHandler(appState)(event);
-          }, brush: brushEvent(visState),
+          }, brush: (event) => {
+            const appState = getAppState();
+            brushEvent(appState)(event);
+          }
         }
       };
     }
@@ -127,7 +130,8 @@ export function VisProvider(Private, indexPatterns, timefilter, getAppState) {
 
     clone() {
       const uiJson = this.hasUiState() ? this.getUiState().toJSON() : {};
-      return new Vis(this.indexPattern, this.getState(), uiJson);
+      const uiState = new PersistedState(uiJson);
+      return new Vis(this.indexPattern, this.getState(), uiState);
     }
 
     requesting() {

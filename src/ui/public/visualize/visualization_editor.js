@@ -4,13 +4,13 @@ import 'ui/visualize/visualize.less';
 import 'ui/visualize/visualize_legend';
 import { uiModules } from 'ui/modules';
 import 'angular-sanitize';
-import { EditorTypesRegistryProvider } from 'ui/registry/editor_types';
+import { VisEditorTypesRegistryProvider } from 'ui/registry/vis_editor_types';
 import { ResizeCheckerProvider } from 'ui/resize_checker';
 
 uiModules
 .get('kibana/directive', ['ngSanitize'])
 .directive('visualizationEditor', function (Private) {
-  const editorTypes = Private(EditorTypesRegistryProvider);
+  const editorTypes = Private(VisEditorTypesRegistryProvider);
   const ResizeChecker = Private(ResizeCheckerProvider);
 
   return {

@@ -582,7 +582,7 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
       // 1). get the maximim chart Y-Axis marker value
       return remote
         .setFindTimeout(defaultFindTimeout)
-        .findByCssSelector(`div.y-axis-div-wrapper > div > svg > g.${axis} > g:last-of-type`)
+        .findByCssSelector(`div.y-axis-div-wrapper > div > svg:last-of-type > g.${axis} > g:last-of-type`)
         .getVisibleText()
         .then(function (yLabel) {
           yAxisLabel = yLabel.replace(/,/g, '');
@@ -791,7 +791,7 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
     waitForVisualization() {
       return remote
       .setFindTimeout(defaultFindTimeout)
-      .findByCssSelector('visualize-legend');
+      .findByCssSelector('visualization');
     }
 
     clickMapButton(zoomSelector) {
