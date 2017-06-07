@@ -12,6 +12,7 @@ import {
 } from './query_parameters';
 import {
   createInitialLoadingStatusState,
+  FAILURE_REASONS,
   LOADING_STATUS,
   QueryActionsProvider,
 } from './query';
@@ -64,6 +65,7 @@ function ContextAppController($scope, config, Private, timefilter) {
   ), (action) => (...args) => action(this.state)(...args));
 
   this.constants = {
+    FAILURE_REASONS,
     LOADING_STATUS,
   };
 
