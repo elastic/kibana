@@ -15,6 +15,7 @@ done
 
 DIR="$(dirname "${SCRIPT}")/.."
 NODE="${DIR}/node/bin/node"
+NODE_OPTIONS="$NODE_OPTIONS $(grep -v ^# < ${DIR}/config/node.options | xargs)"
 test -x "$NODE" || NODE=$(which node)
 if [ ! -x "$NODE" ]; then
   echo "unable to find usable node.js executable."

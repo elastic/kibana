@@ -23,6 +23,15 @@ If Not Exist "%NODE%" (
   )
 )
 
+for /F "eol=# tokens=*" %%i in (%DIR%\config\node.options) do (
+  If [%NODE_OPTIONS%]==[] (
+    set NODE_OPTIONS="%%i"
+  )
+  else (
+    set NODE_OPTIONS="%NODE_OPTIONS %%i"
+  )
+)
+
 TITLE Kibana Server
 "%NODE%" %NODE_OPTIONS% --no-warnings "%DIR%\src\cli_plugin" %*
 
