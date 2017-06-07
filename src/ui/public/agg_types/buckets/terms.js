@@ -1,7 +1,7 @@
 import _ from 'lodash';
 import { AggTypesBucketsBucketAggTypeProvider } from 'ui/agg_types/buckets/_bucket_agg_type';
 import { VisAggConfigProvider } from 'ui/vis/agg_config';
-import { VisSchemasProvider } from 'ui/vis/schemas';
+import { VisSchemasProvider } from 'ui/vis/editors/default/schemas';
 import { AggTypesBucketsCreateFilterTermsProvider } from 'ui/agg_types/buckets/create_filter/terms';
 import orderAggTemplate from 'ui/agg_types/controls/order_agg.html';
 import orderAndSizeTemplate from 'ui/agg_types/controls/order_and_size.html';
