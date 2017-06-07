@@ -8,79 +8,60 @@
  * Not to be confused with vislib/vis.js.
  */
 
+import { EventEmitter } from 'events';
 import _ from 'lodash';
-import { AggTypesIndexProvider } from 'ui/agg_types/index';
 import { VisTypesRegistryProvider } from 'ui/registry/vis_types';
 import { VisAggConfigsProvider } from 'ui/vis/agg_configs';
 import { PersistedState } from 'ui/persisted_state';
+import { UtilsBrushEventProvider } from 'ui/utils/brush_event';
+import { FilterBarQueryFilterProvider } from 'ui/filter_bar/query_filter';
+import { FilterBarClickHandlerProvider } from 'ui/filter_bar/filter_bar_click_handler';
 
-export function VisProvider(Notifier, Private) {
-  const aggTypes = Private(AggTypesIndexProvider);
+export function VisProvider(Private, indexPatterns, timefilter, getAppState) {
   const visTypes = Private(VisTypesRegistryProvider);
   const AggConfigs = Private(VisAggConfigsProvider);
+  const brushEvent = Private(UtilsBrushEventProvider);
+  const queryFilter = Private(FilterBarQueryFilterProvider);
+  const filterBarClickHandler = Private(FilterBarClickHandlerProvider);
 
-  const notify = new Notifier({
-    location: 'Vis'
-  });
+  class Vis extends EventEmitter {
+    constructor(indexPattern, visState, uiState) {
+      super();
+      visState = visState || {};
 
-  class Vis {
-    constructor(indexPattern, state, uiState) {
-      state = state || {};
-
-      if (_.isString(state)) {
-        state = {
-          type: state
+      if (_.isString(visState)) {
+        visState = {
+          type: visState
         };
       }
-
       this.indexPattern = indexPattern;
 
-      this.setState(state);
-      this.setUiState(uiState);
-    }
-
-    convertOldState(type, oldState) {
-      if (!type || _.isString(type)) {
-        type = visTypes.byName[type || 'histogram'];
+      if (!uiState) {
+        uiState = new PersistedState();
       }
 
-      const schemas = type.schemas;
+      this.setCurrentState(visState);
+      this.setState(this.getCurrentState(), false);
+      this.setUiState(uiState);
 
-      // This was put in place to do migrations at runtime. It's used to support people who had saved
-      // visualizations during the 4.0 betas.
-      const aggs = _.transform(oldState, function (newConfigs, oldConfigs, oldGroupName) {
-        const schema = schemas.all.byName[oldGroupName];
-
-        if (!schema) {
-          notify.log('unable to match old schema', oldGroupName, 'to a new schema');
-          return;
+      this.API = {
+        indexPatterns: indexPatterns,
+        timeFilter: timefilter,
+        queryFilter: queryFilter,
+        events: {
+          filter: (event) => {
+            const appState = getAppState();
+            filterBarClickHandler(appState)(event);
+          }, brush: brushEvent(visState),
         }
-
-        oldConfigs.forEach(function (oldConfig) {
-          const agg = {
-            schema: schema.name,
-            type: oldConfig.agg
-          };
-
-          const aggType = aggTypes.byName[agg.type];
-          if (!aggType) {
-            notify.log('unable to find an agg type for old confg', oldConfig);
-            return;
-          }
-
-          agg.params = _.pick(oldConfig, _.keys(aggType.params.byName));
-
-          newConfigs.push(agg);
-        });
-      }, []);
-
-      return {
-        type: type,
-        aggs: aggs
       };
     }
 
-    setState(state) {
+    isEditorMode() {
+      return this.editorMode || false;
+    }
+
+    setCurrentState(state) {
       this.title = state.title || '';
       const type = state.type || this.type;
       if (_.isString(type)) {
@@ -92,25 +73,47 @@ export function VisProvider(Notifier, Private) {
         this.type = type;
       }
 
-      this.listeners = _.assign({}, state.listeners, this.type.listeners);
       this.params = _.defaults({},
         _.cloneDeep(state.params || {}),
-        _.cloneDeep(this.type.params.defaults || {})
+        _.cloneDeep(this.type.visConfig.defaults || {})
       );
 
       this.aggs = new AggConfigs(this, state.aggs);
     }
 
-    getStateInternal(includeDisabled) {
+    setState(state, updateCurrentState = true) {
+      this._state = _.cloneDeep(state);
+      if (updateCurrentState) this.resetState();
+    }
+
+    updateState() {
+      this.setState(this.getCurrentState());
+      this.emit('update');
+    }
+
+    resetState() {
+      this.setCurrentState(this._state);
+    }
+
+    getCurrentState(includeDisabled) {
       return {
         title: this.title,
         type: this.type.name,
         params: this.params,
         aggs: this.aggs
-          .filter(agg => includeDisabled || agg.enabled)
           .map(agg => agg.toJSON())
-          .filter(Boolean),
-        listeners: this.listeners
+          .filter(agg => includeDisabled || agg.enabled)
+          .filter(Boolean)
+      };
+    }
+
+    getStateInternal(includeDisabled) {
+      return {
+        title: this._state.title,
+        type: this._state.type,
+        params: this._state.params,
+        aggs: this._state.aggs
+          .filter(agg => includeDisabled || agg.enabled)
       };
     }
 
@@ -120,14 +123,6 @@ export function VisProvider(Notifier, Private) {
 
     getState() {
       return this.getStateInternal(true);
-    }
-
-    createEditableVis() {
-      return this._editableVis || (this._editableVis = this.clone());
-    }
-
-    getEditableVis() {
-      return this._editableVis || undefined;
     }
 
     clone() {
@@ -168,10 +163,6 @@ export function VisProvider(Notifier, Private) {
 
     getUiState() {
       return this.__uiState;
-    }
-
-    implementsRenderComplete() {
-      return this.type.implementsRenderComplete;
     }
 
     /**
