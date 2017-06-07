@@ -1,3 +1,5 @@
+export { KuiActionItem } from './action_item';
+
 export {
   KuiKeyboardAccessible,
 } from './accessibility';
