@@ -344,7 +344,7 @@ export function getDefaultSettings() {
     },
     'context:tieBreakerFields': {
       value: ['_doc'],
-      description: 'A list of fields to use for tie-breaking between documents ' +
+      description: 'A comma-separated list of fields to use for tiebreaking between documents ' +
         'that have the same timestamp value. From this list the first field that ' +
         'is present and sortable in the current index pattern is used.',
     },
