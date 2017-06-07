@@ -1,0 +1,190 @@
+Add landing page with table to Visualize app.
+
+Backports PR #9605
+
+**Commit 1:**
+Refactor Visualize Wizard to use explicit controller names, instead of defining them dynamically.
+
+* Original sha: 5778951aa4637e0fc77d0ceb3c908eb88e6eab5f
+* Authored by CJ Cenizal <cj@cenizal.com> on 2016-12-21T20:58:55Z
+
+**Commit 2:**
+Add landing page with table to Visualize app.
+- Update Visualize wizard UI.
+- kbnTopNav directive supports no-menu-extensions attribute for excluding extensions, so you can hide the menu items entirely.
+
+* Original sha: 5a5eecbfc69585d573f1030db0dcdec438065096
+* Authored by CJ Cenizal <cj@cenizal.com> on 2016-12-22T00:08:06Z
+
+**Commit 3:**
+Add kuiIcon--basic and support icons in Table component. Display icons in Visualize landing page.
+
+* Original sha: 1dbffd1f9e9c165cd27d24f1ed43d779fa90e95f
+* Authored by CJ Cenizal <cj@cenizal.com> on 2016-12-22T01:38:35Z
+
+**Commit 4:**
+Fix bug with vertical alignment in Table cells.
+
+* Original sha: f69df4c4ba89a3fa62351d689928d85d21072b62
+* Authored by CJ Cenizal <cj@cenizal.com> on 2016-12-22T01:41:56Z
+
+**Commit 5:**
+Change Visualize menu items: New goes to landing page, Open goes to wizard.
+
+* Original sha: 8ca2faf4591d4a10b3d8ef30b2ba1b1f554ec06c
+* Authored by CJ Cenizal <cj@cenizal.com> on 2016-12-22T01:46:22Z
+
+**Commit 6:**
+Move visualize/landing route to live at visualize/ instead.
+
+* Original sha: e674f6c315849542fbd1c9f1deac37aa6422d22b
+* Authored by CJ Cenizal <cj@cenizal.com> on 2016-12-23T21:46:21Z
+
+**Commit 7:**
+Refactor Visualize Wizard templates to use import syntax.
+
+* Original sha: b129af5f0598fb1d435930d18d3f7d9718d45671
+* Authored by CJ Cenizal <cj@cenizal.com> on 2016-12-23T21:48:11Z
+
+**Commit 8:**
+Set kuiViewContent width to 100% to avoid it shrink wrapping its content.
+
+* Original sha: 94afb6f3d41ba53304a64ed92c65a1eb6ea6022a
+* Authored by CJ Cenizal <cj@cenizal.com> on 2016-12-23T22:00:36Z
+
+**Commit 9:**
+Move ToolBar buttons to the right side. Remove labels and add tooltips.
+
+* Original sha: 6a66f6f5c986ee5ecb9e0b95db28b5cc221c3f7e
+* Authored by CJ Cenizal <cj@cenizal.com> on 2016-12-23T22:04:49Z
+
+**Commit 10:**
+Fix functional tests for Visualize, to work with new landing page.
+
+* Original sha: 5a720c9fc9838136b0b1c6ecd9dadc6a6264f08c
+* Authored by CJ Cenizal <cj@cenizal.com> on 2016-12-23T23:47:52Z
+
+**Commit 11:**
+Remove unused Visualize load menu template.
+
+* Original sha: b01048892599359220b473521481b88993f97928
+* Authored by CJ Cenizal <cj@cenizal.com> on 2016-12-23T23:52:24Z
+
+**Commit 12:**
+Remove Edit link from Visualization listing.
+
+* Original sha: a1f737fcf3ce56875fb76abc97d26c3b277fe238
+* Authored by CJ Cenizal <cj@cenizal.com> on 2017-01-03T19:41:50Z
+
+**Commit 13:**
+Disable timepicker in Visualization listing.
+
+* Original sha: ca4adc36bd5b7d0994622de247428cfdfaa7c27b
+* Authored by CJ Cenizal <cj@cenizal.com> on 2017-01-05T00:18:35Z
+
+**Commit 14:**
+Add basic Icon example. Fix Visualize Wizard titles and layout.
+
+* Original sha: 50e2da76d3c1005a71012773867bdbf5bd0ab26d
+* Authored by CJ Cenizal <cj@cenizal.com> on 2017-01-17T16:57:31Z
+
+**Commit 15:**
+Remove icon cells from Table component. Fix Visualize landing table header bug and type icon position.
+
+* Original sha: 56252644f221d5dfce1208a167c0fe2bc06cdc7b
+* Authored by CJ Cenizal <cj@cenizal.com> on 2017-02-01T18:19:49Z
+
+**Commit 16:**
+Change Visualize route names. Add omitPages attribute to breadcrumbs directive. Make Visualize breadcrumbs into links.
+
+* Original sha: 93c9533beb393f9a2e23f4e8a5aab839986a6a22
+* Authored by CJ Cenizal <cj@cenizal.com> on 2017-02-02T00:41:07Z
+
+**Commit 17:**
+Remove Open and New menu buttons from Visualize.
+
+* Original sha: f243762d8f9a31054eb45977ec735b428c65aefd
+* Authored by CJ Cenizal <cj@cenizal.com> on 2017-02-02T01:07:55Z
+
+**Commit 18:**
+Add ConfirmationModal for deleting visualizations.
+
+* Original sha: d0325baa9bdb5cce4e067eef55d14c04594ce02d
+* Authored by CJ Cenizal <cj@cenizal.com> on 2017-02-02T01:14:34Z
+
+**Commit 19:**
+Implement sorting for name and type columns in Visualize listing.
+
+* Original sha: 39ed4248561e6609b5d26e3a7bfb61bdfa8811b3
+* Authored by CJ Cenizal <cj@cenizal.com> on 2017-02-02T01:21:57Z
+
+**Commit 20:**
+Refactor Visualize routes into VisualizeConstants file. Fix functional tests.
+
+* Original sha: 43ceb6e0e184c378fd3409f4700a67b0848c4000
+* Authored by CJ Cenizal <cj@cenizal.com> on 2017-02-02T18:45:17Z
+
+**Commit 21:**
+Add pager_controls directive and pager service. Add pagination to Dashboard and Visualize landing pages. Change Dashboard listing to use hrefs for each dashboard.
+
+* Original sha: d1d3da7741fb32cc4536ce9c769da528cadf80d2
+* Authored by CJ Cenizal <cj@cenizal.com> on 2017-02-04T00:37:28Z
+
+**Commit 22:**
+Add Basic Icon example.
+
+* Original sha: 880b7b42f0fd9fd8c058e07e559ec71a24486e64
+* Authored by CJ Cenizal <cj@cenizal.com> on 2017-02-04T00:41:59Z
+
+**Commit 23:**
+Use ng-if instead of ng-hide to hide/reveal Table action buttons in Dashboard listing.
+
+* Original sha: 668d598082fd3101ea824dedc0f6d65ef6f2c367
+* Authored by CJ Cenizal <cj@cenizal.com> on 2017-02-04T00:44:06Z
+
+**Commit 24:**
+Redirect from old Visualize wizard routes to new ones.
+
+* Original sha: 99525ac45dbe4025d86920c61e60e2423286a8e6
+* Authored by CJ Cenizal <cj@cenizal.com> on 2017-02-06T18:37:05Z
+
+**Commit 25:**
+Use ViewContent and Title components in Visualize wizard.
+
+* Original sha: 734c85b5abaed82ccae15340e7d8f32fca9a1b0f
+* Authored by CJ Cenizal <cj@cenizal.com> on 2017-02-06T18:46:50Z
+
+**Commit 26:**
+Fix Visualize and Dashboard listing table logic so that selection only applies to the current page of items.
+- Paging clears the selection.
+- Searching clears the selection.
+- Sorting clears the selection.
+
+* Original sha: de4f7b43e2f8d89e593e58877ee05e3891efc433
+* Authored by CJ Cenizal <cj@cenizal.com> on 2017-02-06T19:05:16Z
+
+**Commit 27:**
+- Fix Visualize wizard breadcrumbs.
+- Use consistent "Create" terminology in both Visualize and Dashboard for creating new items.
+- Use NoItems and PromptForItems components in Visualize listing view.
+
+* Original sha: 10dbff66cc817ba869d8ab3d6a4ff4d9b81f390f
+* Authored by CJ Cenizal <cj@cenizal.com> on 2017-02-06T19:22:09Z
+
+**Commit 28:**
+Rename pagerService factory to pagerFactory.
+
+* Original sha: 6eeeab6833e69ac843bf491f74a92cf14f7c7a89
+* Authored by CJ Cenizal <cj@cenizal.com> on 2017-02-06T19:29:36Z
+
+**Commit 29:**
+Minor code style improvements.
+
+* Original sha: 438f5c44688e44a80fbb31f6eebf4828844580ee
+* Authored by CJ Cenizal <cj@cenizal.com> on 2017-02-06T19:36:17Z
+
+**Commit 30:**
+Use  inject dependencies in Visualize and Dashboard listing.
+
+* Original sha: 794b18cc8c5c74ac0fff46f2abbe4e63e2f5ddd9
+* Authored by CJ Cenizal <cj@cenizal.com> on 2017-02-06T19:45:00Z
