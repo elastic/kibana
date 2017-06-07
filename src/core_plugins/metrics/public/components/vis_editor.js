@@ -60,7 +60,12 @@ class VisEditor extends Component {
         </div>
       );
     }
+
     return null;
+  }
+
+  componentDidMount() {
+    this.props.renderComplete();
   }
 
 }

@@ -1,6 +1,6 @@
 import expect from 'expect.js';
-import { KibanaMap } from 'ui/vis_maps/kibana_map';
-import { GeohashLayer } from 'ui/vis_maps/geohash_layer';
+import { KibanaMap } from '../kibana_map';
+import { GeohashLayer } from '../geohash_layer';
 import { GeoHashSampleData } from './geohash_sample_data';
 
 describe('kibana_map tests', function () {

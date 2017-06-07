@@ -15,9 +15,9 @@
         id="regionMap"
         class="kuiSelect kuiSideBarSelect"
         ng-model="vis.params.selectedLayer"
-        ng-options="layer.name for layer in vis.type.params.vectorLayers"
+        ng-options="layer.name for layer in collections.vectorLayers"
         ng-change="onLayerChange()"
-        ng-init="vis.params.selectedLayer=vis.type.params.vectorLayers[0]"
+        ng-init="vis.params.selectedLayer=collections.vectorLayers[0]"
       ></select>
     </div>
   </div>
@@ -51,7 +51,7 @@
         id="colorSchema"
         class="kuiSelect kuiSideBarSelect"
         ng-model="vis.params.colorSchema"
-        ng-options="mode for mode in vis.type.params.colorSchemas"
+        ng-options="mode for mode in collections.colorSchemas"
       ></select>
     </div>
   </div>

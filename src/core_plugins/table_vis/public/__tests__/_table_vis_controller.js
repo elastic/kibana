@@ -58,6 +58,7 @@ describe('Controller', function () {
 
     $rootScope.vis = vis;
     $rootScope.uiState = new AppState({ uiState: {} }).makeStateful('uiState');
+    $rootScope.renderComplete = () => {};
     $rootScope.newScope = function (scope) { $scope = scope; };
 
     $el = $('<div>')

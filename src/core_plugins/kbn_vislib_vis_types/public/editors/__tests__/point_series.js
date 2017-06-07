@@ -20,7 +20,7 @@ describe('point series editor', function () {
   function makeConfig() {
     return {
       type: 'line',
-      params: lineVisType.params.defaults,
+      params: lineVisType.visConfig.defaults,
       aggs: [
         { type: 'count', schema: 'metric', params: { field: 'bytes' } },
         { type: 'terms', schema: 'segment', params: { field: 'machine.os' } },

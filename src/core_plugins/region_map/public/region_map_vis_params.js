@@ -13,11 +13,13 @@ uiModules.get('kibana/region_map')
       template: regionMapVisParamsTemplate,
       link: function ($scope) {
 
+        $scope.collections = $scope.vis.type.editorConfig.collections;
+
         $scope.onLayerChange = onLayerChange;
         serviceSettings.getFileLayers()
           .then(function (layersFromService) {
 
-            const newVectorLayers = $scope.vis.type.params.vectorLayers.slice();
+            const newVectorLayers = $scope.collections.vectorLayers.slice();
             for (let i = 0; i < layersFromService.length; i += 1) {
               const layerFromService = layersFromService[i];
               const alreadyAdded = newVectorLayers.some((layer) =>_.eq(layerFromService, layer));
@@ -26,10 +28,10 @@ uiModules.get('kibana/region_map')
               }
             }
 
-            $scope.vis.type.params.vectorLayers = newVectorLayers;
+            $scope.collections.vectorLayers = newVectorLayers;
 
-            if ($scope.vis.type.params.vectorLayers[0] && !$scope.vis.params.selectedLayer) {
-              $scope.vis.params.selectedLayer = $scope.vis.type.params.vectorLayers[0];
+            if ($scope.collections.vectorLayers[0] && !$scope.vis.params.selectedLayer) {
+              $scope.vis.params.selectedLayer = $scope.collections.vectorLayers[0];
               onLayerChange();
             }
 

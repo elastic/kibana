@@ -127,7 +127,8 @@ export function VisProvider(Private, indexPatterns, timefilter, getAppState) {
 
     clone() {
       const uiJson = this.hasUiState() ? this.getUiState().toJSON() : {};
-      return new Vis(this.indexPattern, this.getState(), uiJson);
+      const uiState = new PersistedState(uiJson);
+      return new Vis(this.indexPattern, this.getState(), uiState);
     }
 
     requesting() {

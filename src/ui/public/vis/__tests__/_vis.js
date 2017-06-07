@@ -40,10 +40,6 @@ describe('Vis Class', function () {
     expect(vis).to.have.property('type');
     expect(vis.type).to.eql(visTypes.byName.pie);
 
-    expect(vis).to.have.property('listeners');
-    expect(vis.listeners).to.have.property('click');
-    expect(vis.listeners.click).to.eql(_.noop);
-
     expect(vis).to.have.property('params');
     expect(vis.params).to.have.property('isDonut', true);
     expect(vis).to.have.property('indexPattern', indexPattern);
@@ -62,10 +58,6 @@ describe('Vis Class', function () {
 
       expect(state).to.have.property('params');
       expect(state.params).to.have.property('isDonut', true);
-
-      expect(state).to.have.property('listeners');
-      expect(state.listeners).to.have.property('click');
-      expect(state.listeners.click).to.eql(_.noop);
 
       expect(state).to.have.property('aggs');
       expect(state.aggs).to.have.length(3);
@@ -86,8 +78,6 @@ describe('Vis Class', function () {
       expect(vis.type).to.eql(visTypes.byName.histogram);
       expect(vis).to.have.property('aggs');
       expect(vis.aggs).to.have.length(1);
-      expect(vis).to.have.property('listeners');
-      expect(vis.listeners).to.eql({});
       expect(vis).to.have.property('params');
       expect(vis.params).to.have.property('addLegend', true);
       expect(vis.params).to.have.property('addTooltip', true);
