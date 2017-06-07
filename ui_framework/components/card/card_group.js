@@ -7,6 +7,11 @@ export const KuiCardGroup = ({ children, className, isUnited, ...rest }) => {
   const classes = classNames('kuiCardGroup', className, { 'kuiCardGroup--united': isUnited });
   return <div className={classes} {...rest}>{children}</div>;
 };
+
+KuiCardGroup.defaultProps = {
+  isUnited: false
+};
+
 KuiCardGroup.propTypes = {
   children: PropTypes.node,
   className: PropTypes.string,

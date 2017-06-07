@@ -12,6 +12,10 @@ import {
 } from '../../../../components';
 
 export default () => {
+  /**
+   * These styles are just for demonstration purposes. It is recommended use
+   * properly named classes to set the width in production code.
+   */
   const cardStyle = {
     width: '400px'
   };
