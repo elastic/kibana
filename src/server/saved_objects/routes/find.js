@@ -16,7 +16,8 @@ export const createFindRoute = (prereqs) => ({
         type: Joi.string(),
         search: Joi.string().allow('').optional(),
         search_fields: [Joi.string(), Joi.array().items(Joi.string())],
-        fields: [Joi.string(), Joi.array().items(Joi.string())]
+        fields: [Joi.string(), Joi.array().items(Joi.string())],
+        ids: [Joi.string(), Joi.array().items(Joi.string())]
       })
     },
     handler(request, reply) {

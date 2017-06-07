@@ -2,7 +2,7 @@ import Boom from 'boom';
 import { get } from 'lodash';
 
 import {
-  createFindQuery,
+  createSearchQuery,
   handleEsError,
 } from './lib';
 
@@ -71,16 +71,22 @@ export class SavedObjectsClient {
       searchFields,
       type,
       fields,
+      ids,
       perPage = 20,
       page = 1,
     } = options;
+
+    const query = createSearchQuery({ search, searchFields, type, ids });
 
     const esOptions = {
       type,
       _source: fields,
       size: perPage,
       from: perPage * (page - 1),
-      body: createFindQuery({ search, searchFields, type })
+      body: {
+        version: true,
+        query
+      }
     };
 
     const response = await this._withKibanaIndex('search', esOptions);
