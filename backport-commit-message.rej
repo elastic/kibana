@@ -1,0 +1,187 @@
+add top_hit metric
+
+Backports PR #7302
+
+**Commit 1:**
+add top_hits aggregation
+
+* Original sha: 22bab6246e21820094aacc5c17c2db191235fe97
+* Authored by Stéphane Campinas <stephane.campinas@gmail.com> on 2016-05-26T22:02:08Z
+
+**Commit 2:**
+support nested fields
+
+* Original sha: 8aef2b8f42d8b9be916b793c90468b08e0aaa3bc
+* Authored by Stéphane Campinas <stephane.campinas@gmail.com> on 2016-06-11T14:57:35Z
+
+**Commit 3:**
+added choice of the order and select by default the index pattern associated time field
+
+* Original sha: 9791ac50e4a4822b4ac30ac424bec9f61ec65e0a
+* Authored by Stéphane Campinas <stephane.campinas@gmail.com> on 2016-06-14T21:08:00Z
+
+**Commit 4:**
+improved parameters name and changed aggregation from latest to top to better reflect what this aggregation may accomplish
+
+* Original sha: 692f41cc6f0a01597f86f31a7837a522e19f7e07
+* Authored by Stéphane Campinas <stephane.campinas@gmail.com> on 2016-06-22T20:32:12Z
+
+**Commit 5:**
+made variable a constant
+
+* Original sha: 39cddab05c43a1d740495d743ef0b7627516416d
+* Authored by Stéphane Campinas <stephane.campinas@gmail.com> on 2016-07-01T22:42:13Z
+
+**Commit 6:**
+use shorter name for variable
+
+* Original sha: c6494ccc9c178b4539fda26a0634cdf8873b1102
+* Authored by Stéphane Campinas <stephane.campinas@gmail.com> on 2016-07-27T08:50:44Z
+
+**Commit 7:**
+prevent to sort terms on top_hits
+
+* Original sha: b365ddc7977531f6f277ff0c2dadf68f9837f922
+* Authored by Stéphane Campinas <stephane.campinas@gmail.com> on 2016-08-28T09:47:47Z
+
+**Commit 8:**
+Added the top_hits agg to line/pie/tile vis. Added support for function in prop_filter to allow more flexibility when filtering the list of values. The _term order is now the default ordering instead of _custom.
+
+* Original sha: be44e905af4ac6217fcab1dc63d6f002cd5ef762
+* Authored by Stéphane Campinas <stephane.campinas@gmail.com> on 2016-09-19T14:53:48Z
+
+**Commit 9:**
+simplified tests
+
+* Original sha: 43767f09290a6d46edbb0e87a1dcadf69045809f
+* Authored by Stéphane Campinas <stephane.campinas@gmail.com> on 2016-10-11T09:29:11Z
+
+**Commit 10:**
+changed as per code review
+
+* Original sha: 53469d51a62372774e7be098b989b1b798be7171
+* Authored by Stéphane Campinas <stephane.campinas@gmail.com> on 2016-10-11T21:49:36Z
+
+**Commit 11:**
+Top Hit should support all field types on the metric vis
+
+* Original sha: 20be95006f07473a1b4cd6515135fa26daf3baa0
+* Authored by Stéphane Campinas <stephane.campinas@gmail.com> on 2016-10-17T21:18:31Z
+
+**Commit 12:**
+renamed metric to top hit
+
+* Original sha: 20cbb12e678edf1b17ecc3bc8f453b768f7a9d9f
+* Authored by Stéphane Campinas <stephane.campinas@gmail.com> on 2016-10-17T21:28:30Z
+
+**Commit 13:**
+check if there is any result from buckets
+
+* Original sha: b99d6c76dd1bb4b8290f708cf9fd02a5f77df818
+* Authored by Stéphane Campinas <stephane.campinas@gmail.com> on 2016-10-18T09:13:19Z
+
+**Commit 14:**
+support scripted fields
+
+* Original sha: f79cdc153149a8feea157b68db5a945d5e7796a2
+* Authored by Stéphane Campinas <stephane.campinas@gmail.com> on 2016-10-23T20:58:55Z
+
+**Commit 15:**
+Merge branch 'master' of github.com:elastic/kibana into latest-value
+
+* Original sha: 82060ce91f436005bfa81ac0742f2b2e7f29650b
+* Authored by Stéphane Campinas <stephane.campinas@gmail.com> on 2016-11-01T09:47:19Z
+
+**Commit 16:**
+Merge branch 'master' of github.com:elastic/kibana into latest-value
+
+* Original sha: 257729868c57e67df1b44b561d57f8387685452e
+* Authored by Stéphane Campinas <stephane.campinas@gmail.com> on 2016-11-12T11:30:42Z
+
+**Commit 17:**
+- added logic for trying to get the field value from the source or from a
+  doc_values field.
+- added onlyAggregatable option for a field agg param to decide whether
+  or not to retain only aggregatable fields.
+
+* Original sha: 6a2bc0188c70e9a9a944fb5f931e47690591b9d5
+* Authored by Stéphane Campinas <stephane.campinas@gmail.com> on 2016-11-13T12:34:10Z
+
+**Commit 18:**
+improved loops in getValuesAtPath method
+
+* Original sha: 991864cdd3c792c3be33e9acc7b342bbfe98385e
+* Authored by Stéphane Campinas <stephane.campinas@gmail.com> on 2016-11-16T10:10:28Z
+
+**Commit 19:**
+Merge branch 'master' of github.com:elastic/kibana into latest-value
+
+* Original sha: bc1c90ac066225cc5c5cf35637030ac483bbb7b7
+* Authored by Stéphane Campinas <stephane.campinas@gmail.com> on 2016-11-17T23:51:13Z
+
+**Commit 20:**
+do not try to get the doc_values field of an IP field
+
+* Original sha: d697f11ca1c08de8204ee0f64c766a15fcf6eee2
+* Authored by Stéphane Campinas <stephane.campinas@gmail.com> on 2016-11-18T00:49:34Z
+
+**Commit 21:**
+improved field tests on the onlyAggregatable option
+
+* Original sha: c2249e525f4e09bf428be73c0299e5f13c308d15
+* Authored by Stéphane Campinas <stephane.campinas@gmail.com> on 2016-11-18T01:08:34Z
+
+**Commit 22:**
+use indexPattern.formatField to get all the values at a given path
+
+* Original sha: f4200e1bc09724fb9b7e89488006ca4d1fb503b6
+* Authored by Stéphane Campinas <stephane.campinas@gmail.com> on 2016-11-19T23:02:18Z
+
+**Commit 23:**
+do not show the analyzed warning
+
+* Original sha: 2dda53dfb71f1ed006824500bb6321ec790b76b8
+* Authored by Stéphane Campinas <stephane.campinas@gmail.com> on 2016-11-19T23:30:59Z
+
+**Commit 24:**
+support to sort on scripted field
+
+* Original sha: eda9610fa2c74a9db80796e7310720d6681492e6
+* Authored by Stéphane Campinas <stephane.campinas@gmail.com> on 2016-11-19T23:52:15Z
+
+**Commit 25:**
+corrected tests and rely on the field's formatter instead of trying to return a nice string
+
+* Original sha: b465438176cd7e0f3ab2b012a00235ecbba1302e
+* Authored by Stéphane Campinas <stephane.campinas@gmail.com> on 2016-11-20T14:40:43Z
+
+**Commit 26:**
+do not rely on init_default_field_props to set the doc_values property
+
+* Original sha: 19e2104745e7d2eb8a315c8607a6f3217b444d54
+* Authored by Stéphane Campinas <stephane.campinas@gmail.com> on 2016-11-21T23:11:29Z
+
+**Commit 27:**
+added test for the doc_values property
+
+* Original sha: fd323f3c2a8979912806dd120ca0176a833a9627
+* Authored by Stéphane Campinas <stephane.campinas@gmail.com> on 2016-11-23T10:04:16Z
+
+**Commit 28:**
+Merge branch 'master' of github.com:elastic/kibana into latest-value
+
+* Original sha: cfed72ec950e16513bc6a62291ecba07c148aa71
+* Authored by Stéphane Campinas <stephane.campinas@gmail.com> on 2016-12-05T15:47:45Z
+
+**Commit 29:**
+- corrected source formatter
+- add option to show/hide analyzed warning of a field
+
+* Original sha: 30901820de5533b5a68ec3ced0607a4f4f8f015d
+* Authored by Stéphane Campinas <stephane.campinas@gmail.com> on 2016-12-05T22:40:14Z
+
+**Commit 30:**
+set the default value of the showAnalyzedWarning in fieldparam
+
+* Original sha: 0d924fc73d6ebc907ce3ff6a73b2b5950a1ca9ec
+* Authored by Stéphane Campinas <stephane.campinas@gmail.com> on 2016-12-08T16:29:46Z
