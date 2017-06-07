@@ -39,8 +39,10 @@ module.directive('kbnRows', function ($compile, $rootScope, getAppState, Private
         let $cell;
         let $cellContent;
 
+        //debugger;
+
         if (contents instanceof AggConfigResult) {
-          const field = contents.aggConfig.getField();
+          const field = contents.aggConfig.getField(); //getField() is undefined in karma?
           const isCellContentFilterable =
             contents.aggConfig.isFilterable()
             && (!field || field.filterable);
@@ -110,6 +112,8 @@ module.directive('kbnRows', function ($compile, $rootScope, getAppState, Private
       }
 
       function maxRowSize(max, row) {
+        //debugger;
+        //row is expected to be an Array with length. I'm incorrectly passing an AggConfigResult... was supposed to be recieving an Array containing two AggConfigResult objects!
         return Math.max(max, row.length);
       }
 
@@ -119,11 +123,12 @@ module.directive('kbnRows', function ($compile, $rootScope, getAppState, Private
       ], function (vals) {
         let rows = vals[0];
         const min = vals[1];
-
+        //debugger;
         $el.empty();
 
         if (!_.isArray(rows)) rows = [];
         const width = rows.reduce(maxRowSize, 0);
+        //debugger;
 
         if (isFinite(min) && rows.length < min) {
           // clone the rows so that we can add elements to it without upsetting the original
@@ -136,10 +141,11 @@ module.directive('kbnRows', function ($compile, $rootScope, getAppState, Private
           _.times(min - rows.length, function () { rows.push(emptyRow); });
         }
 
+        //debugger;
         rows.forEach(function (row) {
           const $tr = $(document.createElement('tr')).appendTo($el);
           row.forEach(function (cell) {
-            addCell($tr, cell);
+            addCell($tr, cell); //cell is an AggConfigResult
           });
         });
       });
