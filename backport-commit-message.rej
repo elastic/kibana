@@ -1,0 +1,125 @@
+View edit 5
+
+Backports PR #10585
+
+**Commit 1:**
+Start at view/edit mode 4
+
+* Original sha: a89ce34dc31da045889f98c140bbb25f98b60c0c
+* Authored by Stacey Gammon <gammon@elastic.co> on 2017-02-25T17:24:02Z
+
+**Commit 2:**
+Revert back to save panel
+
+- Get rid of `clone`
+- Get rid of rename
+
+* Original sha: cfb337209fe4acfe38a6923af6af4048b04fb997
+* Authored by Stacey Gammon <gammon@elastic.co> on 2017-02-25T17:35:05Z
+
+**Commit 3:**
+Move order of top nav component around so no chance of hitting Edit -> Cancel
+
+* Original sha: 000e857f56058bc14bc8c917d2c83679dc2eb927
+* Authored by Stacey Gammon <gammon@elastic.co> on 2017-02-25T17:43:07Z
+
+**Commit 4:**
+Update "lose changes" confirmation dialog
+
+- Change the string and button text
+- Set default focus on the cancel button.
+
+* Original sha: 542e7bff4d67525ea188c2fd827d15b2b5038921
+* Authored by Stacey Gammon <gammon@elastic.co> on 2017-02-28T16:03:39Z
+
+**Commit 5:**
+Remove DashboardViewMode
+
+It was previously used when viewMode wasn’t stored in appState, in
+order to keep an unsaved dashboard, that was just saved, in Edit mode.
+This is unnecessary in the latest iteration.
+
+* Original sha: 39ba9e300029104046e7031c9f794bd6cbfdaf26
+* Authored by Stacey Gammon <gammon@elastic.co> on 2017-03-01T21:51:09Z
+
+**Commit 6:**
+Pull time filter out of dashboard_state
+
+* Original sha: 787554710021d5edc385cabb91f04585ad6bf434
+* Authored by Stacey Gammon <gammon@elastic.co> on 2017-03-02T16:01:16Z
+
+**Commit 7:**
+Fix edit controls bug, add more tests, make other tests more stable.
+
+* Original sha: 774267cd82ad463df2f793990b36356d240e1402
+* Authored by Stacey Gammon <gammon@elastic.co> on 2017-03-03T14:26:33Z
+
+**Commit 8:**
+Remove unnecessary logic, unapplied query bug fix, code clean up
+
+* Original sha: 9cf402a783a3d8f64d4688fb30510af4554567e8
+* Authored by Stacey Gammon <gammon@elastic.co> on 2017-03-03T18:19:15Z
+
+**Commit 9:**
+Fix bug on filter reloading, add tests & clean up
+
+* Original sha: 97c3054af7ee4b7dbcdcda82b27243c46564ff2c
+* Authored by Stacey Gammon <gammon@elastic.co> on 2017-03-03T20:30:11Z
+
+**Commit 10:**
+Fix issue with move and remove icons showing up in expanded panel mode
+
+and add tests to catch it.
+
+* Original sha: b8195c421d6d2868fbb56e3034605c4e2d113a6b
+* Authored by Stacey Gammon <gammon@elastic.co> on 2017-03-17T17:30:06Z
+
+**Commit 11:**
+Fix issue with lose changes not resetting panel state
+
+and add tests.
+
+* Original sha: f92d8f6066aff003043f1fe22909630571bd9dbe
+* Authored by Stacey Gammon <gammon@elastic.co> on 2017-03-17T20:15:12Z
+
+**Commit 12:**
+General Clean Up
+
+- Merge function only used in one spot inline.
+
+Add comments
+
+* Original sha: badf3369c04a5d550a7e7a990fd2a6ae9289d672
+* Authored by Stacey Gammon <gammon@elastic.co> on 2017-03-17T20:50:55Z
+
+**Commit 13:**
+address code review comments
+
+* Original sha: 0c61fc71a533a0aabd92d157558abff4d5907f1b
+* Authored by Stacey Gammon <gammon@elastic.co> on 2017-03-21T14:11:41Z
+
+**Commit 14:**
+Stop using static + class to namespace functions
+
+Instead, export each function individually.
+
+* Original sha: b0745aa2c17dbc6bf5e82e1b3cdaf1084dd992ad
+* Authored by Stacey Gammon <gammon@elastic.co> on 2017-03-22T13:18:27Z
+
+**Commit 15:**
+Show dashed border on maximized panels in edit mode.
+
+* Original sha: ec5393be4ff2daacef4aa3958b7b2f5dc1606a7d
+* Authored by Stacey Gammon <gammon@elastic.co> on 2017-03-22T14:09:01Z
+
+**Commit 16:**
+Be more methodical about ensuring the modal dialog hides before continuing.
+
+* Original sha: 07a031f958cdafa98dc225971911b00f278e6b67
+* Authored by Stacey Gammon <gammon@elastic.co> on 2017-03-22T14:26:56Z
+
+**Commit 17:**
+abide by new no unused vars rule
+
+* Original sha: 5e76980690509f616cd14a35f6b0be5c7126f82f
+* Authored by Stacey Gammon <gammon@elastic.co> on 2017-03-22T16:32:30Z
