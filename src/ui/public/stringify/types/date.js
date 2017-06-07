@@ -1,12 +1,11 @@
 import _ from 'lodash';
 import moment from 'moment';
 import 'ui/field_format_editor/pattern/pattern';
-import { IndexPatternsFieldFormatProvider } from 'ui/index_patterns/_field_format/field_format';
+import { FieldFormat } from 'ui/index_patterns/_field_format/field_format';
 import { BoundToConfigObjProvider } from 'ui/bound_to_config_obj';
 import dateTemplate from 'ui/stringify/editors/date.html';
 
 export function stringifyDate(Private) {
-  const FieldFormat = Private(IndexPatternsFieldFormatProvider);
   const BoundToConfigObj = Private(BoundToConfigObjProvider);
 
 

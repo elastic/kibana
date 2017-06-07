@@ -1,11 +1,10 @@
 import 'ui/stringify/editors/color.less';
 import _ from 'lodash';
-import { IndexPatternsFieldFormatProvider } from 'ui/index_patterns/_field_format/field_format';
+import { FieldFormat } from 'ui/index_patterns/_field_format/field_format';
 import colorTemplate from 'ui/stringify/editors/color.html';
 
-export function stringifyColor(Private) {
+export function stringifyColor() {
 
-  const FieldFormat = Private(IndexPatternsFieldFormatProvider);
   const convertTemplate = _.template('<span style="<%- style %>"><%- val %></span>');
   const DEFAULT_COLOR = {
     range: `${Number.NEGATIVE_INFINITY}:${Number.POSITIVE_INFINITY}`,
