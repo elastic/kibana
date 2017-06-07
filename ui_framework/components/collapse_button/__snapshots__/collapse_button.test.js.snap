@@ -1,0 +1,53 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`KuiCollapseButton Props direction down down 1`] = `
+<button
+  aria-label="aria-label"
+  class="kuiCollapseButton testClass1 testClass2"
+  data-test-subj="test subject string"
+  type="button"
+>
+  <div
+    class="kuiIcon fa-chevron-circle-down"
+  />
+</button>
+`;
+
+exports[`KuiCollapseButton Props direction left left 1`] = `
+<button
+  aria-label="aria-label"
+  class="kuiCollapseButton testClass1 testClass2"
+  data-test-subj="test subject string"
+  type="button"
+>
+  <div
+    class="kuiIcon fa-chevron-circle-left"
+  />
+</button>
+`;
+
+exports[`KuiCollapseButton Props direction right right 1`] = `
+<button
+  aria-label="aria-label"
+  class="kuiCollapseButton testClass1 testClass2"
+  data-test-subj="test subject string"
+  type="button"
+>
+  <div
+    class="kuiIcon fa-chevron-circle-right"
+  />
+</button>
+`;
+
+exports[`KuiCollapseButton Props direction up up 1`] = `
+<button
+  aria-label="aria-label"
+  class="kuiCollapseButton testClass1 testClass2"
+  data-test-subj="test subject string"
+  type="button"
+>
+  <div
+    class="kuiIcon fa-chevron-circle-up"
+  />
+</button>
+`;

@@ -10,6 +10,10 @@ export {
   KuiSubmitButton,
 } from './button';
 
+export {
+  KuiCollapseButton
+} from './collapse_button';
+
 export { KuiInfoButton } from './info_button';
 
 export {
