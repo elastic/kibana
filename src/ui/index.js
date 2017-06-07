@@ -74,6 +74,7 @@ export default async (kbnServer, server, config) => {
       app: app,
       nav: uiExports.navLinks.inOrder,
       version: kbnServer.version,
+      bundleHash: bundles.getHash(),
       branch: config.get('pkg.branch'),
       buildNum: config.get('pkg.buildNum'),
       buildSha: config.get('pkg.buildSha'),

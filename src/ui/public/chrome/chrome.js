@@ -19,6 +19,7 @@ import { initChromeNavApi } from './api/nav';
 import templateApi from './api/template';
 import themeApi from './api/theme';
 import translationsApi from './api/translations';
+import { initBundleApi } from './api/bundle';
 import { initChromeXsrfApi } from './api/xsrf';
 
 const chrome = {};
@@ -37,6 +38,7 @@ const internals = _.defaults(
   }
 );
 
+initBundleApi(chrome, internals);
 appsApi(chrome, internals);
 initChromeXsrfApi(chrome, internals);
 initChromeNavApi(chrome, internals);
