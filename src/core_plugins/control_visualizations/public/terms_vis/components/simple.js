@@ -1,3 +1,4 @@
+import _ from 'lodash';
 import React, { Component } from 'react';
 
 export class Simple extends Component {
@@ -6,7 +7,7 @@ export class Simple extends Component {
     super(props);
 
     this.state = {
-      params: props.scope.vis.params
+      params: _.cloneDeep(props.scope.vis.getCurrentState().params)
     };
 
     this.handleParam1Change = this.handleParam1Change.bind(this);
