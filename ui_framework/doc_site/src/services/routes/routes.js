@@ -138,6 +138,7 @@ const components = [{
 }, {
   name: 'Event',
   component: EventExample,
+  hasReact: true,
 }, {
   name: 'Expression',
   component: ExpressionExample,
