@@ -3,7 +3,7 @@ import { uiModules } from 'ui/modules';
 import timezoneProvider from 'plugins/timelion/services/timezone';
 import { dashboardContextProvider } from 'plugins/kibana/dashboard/dashboard_context';
 import 'plugins/timelion/directives/chart/chart';
-import 'plugins/timelion/directives/timelion_interval/timelion_interval';
+import 'plugins/timelion/directives/interval/interval';
 import 'ui/state_management/app_state';
 
 define(function (require) {
