@@ -10,6 +10,14 @@ export {
   KuiSubmitButton,
 } from './button';
 
+export {
+  KuiEvent,
+  KuiEventSymbol,
+  KuiEventBody,
+  KuiEventBodyMessage,
+  KuiEventBodyMetadata,
+} from './event';
+
 export { KuiInfoButton } from './info_button';
 
 export {
