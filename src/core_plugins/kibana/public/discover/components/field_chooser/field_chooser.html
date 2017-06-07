@@ -66,44 +66,52 @@
   <div class="sidebar-item" ng-show="showFilter">
     <form role="form" class="discover-field-details">
       <div class="form-group">
-        <label>
+        <label for="discoverFieldChooserFilterAggregatable">
           Aggregatable
         </label>
         <select
+          id="discoverFieldChooserFilterAggregatable"
           ng-options="opt.value as opt.label for opt in filter.boolOpts"
           ng-model="filter.vals.aggregatable"
           class="form-control">
         </select>
       </div>
       <div class="form-group">
-        <label>
+        <label for="discoverFieldChooserFilterSearchable">
           Searchable
         </label>
         <select
+          id="discoverFieldChooserFilterSearchable"
           ng-options="opt.value as opt.label for opt in filter.boolOpts"
           ng-model="filter.vals.searchable"
           class="form-control">
         </select>
       </div>
       <div class="form-group">
-        <label>
+        <label for="discoverFieldChooserFilterType">
           Type
         </label>
         <select
+          id="discoverFieldChooserFilterType"
           ng-options="field as field for field in fieldTypes"
           ng-model="filter.vals.type"
           class="form-control">
         </select>
       </div>
       <div class="form-group">
-        <label>
+        <label for="discoverFieldChooserFilterFieldName">
           Field name
         </label>
-        <input type="text" class="form-control" ng-model="filter.vals.name">
+        <input
+          id="discoverFieldChooserFilterFieldName"
+          type="text"
+          class="form-control"
+          ng-model="filter.vals.name"
+        >
       </div>
       <div class="form-group">
-        <label>
-          <input type="checkbox" ng-model="filter.vals.missing">
+        <label for="discoverFieldChooserHideMissingFields">
+          <input id="discoverFieldChooserHideMissingFields" type="checkbox" ng-model="filter.vals.missing">
           Hide Missing Fields
         </label>
       </div>
