@@ -5,11 +5,11 @@ import { RegistryFieldFormatsProvider } from 'ui/registry/field_formats';
 import { AdminDocSourceProvider } from 'ui/courier/data_source/admin_doc_source';
 import UtilsMappingSetupProvider from 'ui/utils/mapping_setup';
 import { Notifier } from 'ui/notify';
+import { timePatternToWildcard } from '../../../utils';
 
 import { getComputedFields } from './_get_computed_fields';
 import { formatHit } from './_format_hit';
 import { IndexPatternsGetIdsProvider } from './_get_ids';
-import { IndexPatternsIntervalsProvider } from './_intervals';
 import { IndexPatternsFieldListProvider } from './_field_list';
 import { IndexPatternsFlattenHitProvider } from './_flatten_hit';
 import { IndexPatternsCalculateIndicesProvider } from './_calculate_indices';
@@ -20,7 +20,6 @@ export function IndexPatternProvider(Private, $http, config, kbnIndex, Promise, 
   const fieldformats = Private(RegistryFieldFormatsProvider);
   const getIds = Private(IndexPatternsGetIdsProvider);
   const fieldsFetcher = Private(FieldsFetcherProvider);
-  const intervals = Private(IndexPatternsIntervalsProvider);
   const DocSource = Private(AdminDocSourceProvider);
   const mappingSetup = Private(UtilsMappingSetupProvider);
   const FieldList = Private(IndexPatternsFieldListProvider);
@@ -43,7 +42,6 @@ export function IndexPatternProvider(Private, $http, config, kbnIndex, Promise, 
     title: 'text',
     timeFieldName: 'keyword',
     notExpandable: 'boolean',
-    intervalName: 'keyword',
     fields: 'json',
     sourceFilters: 'json',
     fieldFormatMap: {
@@ -82,6 +80,16 @@ export function IndexPatternProvider(Private, $http, config, kbnIndex, Promise, 
         response._source[name], response, name, fieldMapping
       );
     });
+
+    if (response._source.intervalName) {
+      indexPattern._isUnsupportedTimePattern = true;
+      delete response._source.intervalName;
+      notify.error(
+        'Support for time-pattern based index patterns has been remove as of ' +
+        'Kibana 6.0.0. Please migrate saved objects using index pattern ' +
+        `"${indexPattern.id}" to a wildcard pattern instead.`
+      );
+    }
 
     // give index pattern all of the values in _source
     _.assign(indexPattern, response._source);
@@ -268,10 +276,6 @@ export function IndexPatternProvider(Private, $http, config, kbnIndex, Promise, 
       return _.where(this.fields, { scripted: true });
     }
 
-    getInterval() {
-      return this.intervalName && _.find(intervals, { name: this.intervalName });
-    }
-
     toIndexList(start, stop, sortDirection) {
       return this
         .toDetailedIndexList(start, stop, sortDirection)
@@ -285,10 +289,14 @@ export function IndexPatternProvider(Private, $http, config, kbnIndex, Promise, 
 
     toDetailedIndexList(start, stop, sortDirection) {
       return Promise.resolve().then(() => {
-        if (this.isTimeBasedInterval()) {
-          return intervals.toIndexList(
-            this.id, this.getInterval(), start, stop, sortDirection
-          );
+        if (this.isUnsupportedTimePattern()) {
+          return [
+            {
+              index: this.getUnsupportedTimePatternAsWildcard(),
+              min: -Infinity,
+              max: Infinity
+            }
+          ];
         }
 
         if (this.isTimeBasedWildcard() && this.isIndexExpansionEnabled()) {
@@ -315,8 +323,8 @@ export function IndexPatternProvider(Private, $http, config, kbnIndex, Promise, 
       return !!this.timeFieldName && (!this.fields || !!this.getTimeField());
     }
 
-    isTimeBasedInterval() {
-      return this.isTimeBased() && !!this.getInterval();
+    isUnsupportedTimePattern() {
+      return !!this._isUnsupportedTimePattern;
     }
 
     isTimeBasedWildcard() {
@@ -326,6 +334,10 @@ export function IndexPatternProvider(Private, $http, config, kbnIndex, Promise, 
     getTimeField() {
       if (!this.timeFieldName || !this.fields || !this.fields.byName) return;
       return this.fields.byName[this.timeFieldName];
+    }
+
+    getUnsupportedTimePatternAsWildcard() {
+      return timePatternToWildcard(this.id);
     }
 
     isWildcard() {

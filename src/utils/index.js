@@ -7,6 +7,7 @@ export { unset } from './unset';
 export { encodeQueryComponent } from './encode_query_component';
 export { modifyUrl } from './modify_url';
 export { createToolingLog } from './tooling_log';
+export { timePatternToWildcard } from './time_pattern_to_wildcard';
 
 export {
   getKbnTypeNames,

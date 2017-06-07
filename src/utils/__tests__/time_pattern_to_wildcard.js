@@ -1,6 +1,6 @@
 import { timePatternToWildcard } from '../time_pattern_to_wildcard';
 
-describe('server/index_patterns/service/lib/time_pattern_to_wildcard', () => {
+describe('utils/time_pattern_to_wildcard', () => {
   const tests = [
     ['[logstash-]YYYY.MM.DD', 'logstash-*'],
     ['YYYY[-department-].w', '*-department-*'],

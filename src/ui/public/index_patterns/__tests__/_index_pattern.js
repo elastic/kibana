@@ -9,7 +9,6 @@ import FixturesLogstashFieldsProvider from 'fixtures/logstash_fields';
 import FixturesStubbedDocSourceResponseProvider from 'fixtures/stubbed_doc_source_response';
 import { AdminDocSourceProvider } from 'ui/courier/data_source/admin_doc_source';
 import UtilsMappingSetupProvider from 'ui/utils/mapping_setup';
-import { IndexPatternsIntervalsProvider } from 'ui/index_patterns/_intervals';
 import { IndexPatternProvider } from 'ui/index_patterns/_index_pattern';
 import NoDigestPromises from 'test_utils/no_digest_promises';
 
@@ -30,7 +29,6 @@ describe('index pattern', function () {
   const indexPatternId = 'test-pattern';
   let indexPattern;
   let calculateIndices;
-  let intervals;
   let indexPatternsApiClient;
   let defaultTimeField;
 
@@ -62,13 +60,6 @@ describe('index pattern', function () {
     sinon.stub(mappingSetup, 'isDefined', function () {
       return Promise.resolve(true);
     });
-
-    // spy on intervals
-    intervals = Private(IndexPatternsIntervalsProvider);
-    sinon.stub(intervals, 'toIndexList').returns([
-      { index: 'foo', max: Infinity, min: -Infinity },
-      { index: 'bar', max: Infinity, min: -Infinity }
-    ]);
 
     IndexPattern = Private(IndexPatternProvider);
     fieldsFetcher = Private(FieldsFetcherProvider);
@@ -103,7 +94,6 @@ describe('index pattern', function () {
         expect(indexPattern).to.have.property('popularizeField');
         expect(indexPattern).to.have.property('getScriptedFields');
         expect(indexPattern).to.have.property('getNonScriptedFields');
-        expect(indexPattern).to.have.property('getInterval');
         expect(indexPattern).to.have.property('addScriptedField');
         expect(indexPattern).to.have.property('removeScriptedField');
         expect(indexPattern).to.have.property('toString');
@@ -275,39 +265,10 @@ describe('index pattern', function () {
   });
 
   describe('#toDetailedIndexList', function () {
-    describe('when index pattern is an interval', function () {
-      let interval;
-      beforeEach(function () {
-        interval = 'result:getInterval';
-        sinon.stub(indexPattern, 'getInterval').returns(interval);
-        sinon.stub(indexPattern, 'isTimeBasedInterval').returns(true);
-      });
-
-      it('invokes interval toDetailedIndexList with given start/stop times', async function () {
-        await indexPattern.toDetailedIndexList(1, 2);
-        const id = indexPattern.id;
-        sinon.assert.calledWith(intervals.toIndexList, id, interval, 1, 2);
-      });
-
-      it('is fulfilled by the result of interval toDetailedIndexList', async function () {
-        const indexList = await indexPattern.toDetailedIndexList();
-        expect(indexList.map(i => i.index)).to.eql(['foo', 'bar']);
-      });
-
-      describe('with sort order', function () {
-        it('passes the sort order to the intervals module', async function () {
-          await indexPattern.toDetailedIndexList(1, 2, 'SORT_DIRECTION');
-          sinon.assert.calledOnce(intervals.toIndexList);
-          expect(intervals.toIndexList.getCall(0).args[4]).to.be('SORT_DIRECTION');
-        });
-      });
-    });
-
     describe('when index pattern is a time-base wildcard', function () {
       beforeEach(function () {
         indexPattern.id = 'logstash-*';
         indexPattern.timeFieldName = defaultTimeField.name;
-        indexPattern.intervalName = null;
         indexPattern.notExpandable = false;
       });
 
@@ -329,7 +290,6 @@ describe('index pattern', function () {
       beforeEach(function () {
         indexPattern.id = 'logstash-*';
         indexPattern.timeFieldName = defaultTimeField.name;
-        indexPattern.intervalName = null;
         indexPattern.notExpandable = true;
       });
 
@@ -343,7 +303,6 @@ describe('index pattern', function () {
       beforeEach(function () {
         indexPattern.id = 'logstash-0';
         indexPattern.timeFieldName = null;
-        indexPattern.intervalName = null;
         indexPattern.notExpandable = true;
       });
 
@@ -355,45 +314,10 @@ describe('index pattern', function () {
   });
 
   describe('#toIndexList', function () {
-    describe('when index pattern is an interval', function () {
-
-      let interval;
-      beforeEach(function () {
-        indexPattern.id = '[logstash-]YYYY';
-        indexPattern.timeFieldName = defaultTimeField.name;
-        interval = intervals.byName.years;
-        indexPattern.intervalName = interval.name;
-        indexPattern.notExpandable = true;
-      });
-
-      it('invokes interval toIndexList with given start/stop times', async function () {
-        await indexPattern.toIndexList(1, 2);
-        const id = indexPattern.id;
-        sinon.assert.calledWith(intervals.toIndexList, id, interval, 1, 2);
-      });
-
-      it('is fulfilled by the result of interval toIndexList', async function () {
-        const indexList = await indexPattern.toIndexList();
-        expect(indexList[0]).to.equal('foo');
-        expect(indexList[1]).to.equal('bar');
-      });
-
-      describe('with sort order', function () {
-        it('passes the sort order to the intervals module', function () {
-          return indexPattern.toIndexList(1, 2, 'SORT_DIRECTION')
-          .then(function () {
-            expect(intervals.toIndexList.callCount).to.be(1);
-            expect(intervals.toIndexList.getCall(0).args[4]).to.be('SORT_DIRECTION');
-          });
-        });
-      });
-    });
-
     describe('when index pattern is a time-base wildcard', function () {
       beforeEach(function () {
         indexPattern.id = 'logstash-*';
         indexPattern.timeFieldName = defaultTimeField.name;
-        indexPattern.intervalName = null;
         indexPattern.notExpandable = false;
       });
 
@@ -415,7 +339,6 @@ describe('index pattern', function () {
       beforeEach(function () {
         indexPattern.id = 'logstash-*';
         indexPattern.timeFieldName = defaultTimeField.name;
-        indexPattern.intervalName = null;
         indexPattern.notExpandable = true;
       });
 
@@ -429,7 +352,6 @@ describe('index pattern', function () {
       beforeEach(function () {
         indexPattern.id = 'logstash-0';
         indexPattern.timeFieldName = null;
-        indexPattern.intervalName = null;
         indexPattern.notExpandable = true;
       });
 

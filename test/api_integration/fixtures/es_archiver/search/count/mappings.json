@@ -1,6 +1,34 @@
 {
   "type": "index",
   "value": {
+    "index": "foo-1",
+    "settings": {
+      "index": {
+        "number_of_shards": "5",
+        "number_of_replicas": "1"
+      }
+    },
+    "mappings": {
+      "bar": {
+        "properties": {
+          "foo": {
+            "type": "text",
+            "fields": {
+              "keyword": {
+                "type": "keyword",
+                "ignore_above": 256
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+{
+  "type": "index",
+  "value": {
     "index": ".kibana",
     "settings": {
       "index": {
@@ -15,109 +43,26 @@
       }
     },
     "mappings": {
-      "url": {
+      "index-pattern": {
         "dynamic": "strict",
         "properties": {
-          "accessCount": {
-            "type": "long"
-          },
-          "accessDate": {
-            "type": "date"
-          },
-          "createDate": {
-            "type": "date"
-          },
-          "url": {
-            "type": "text",
-            "fields": {
-              "keyword": {
-                "type": "keyword",
-                "ignore_above": 2048
-              }
-            }
-          }
-        }
-      },
-      "timelion-sheet": {
-        "dynamic": "strict",
-        "properties": {
-          "description": {
+          "fieldFormatMap": {
             "type": "text"
           },
-          "hits": {
-            "type": "integer"
-          },
-          "kibanaSavedObjectMeta": {
-            "properties": {
-              "searchSourceJSON": {
-                "type": "text"
-              }
-            }
-          },
-          "timelion_chart_height": {
-            "type": "integer"
-          },
-          "timelion_columns": {
-            "type": "integer"
-          },
-          "timelion_interval": {
-            "type": "keyword"
-          },
-          "timelion_other_interval": {
-            "type": "keyword"
-          },
-          "timelion_rows": {
-            "type": "integer"
-          },
-          "timelion_sheet": {
+          "fields": {
             "type": "text"
           },
-          "title": {
+          "notExpandable": {
+            "type": "boolean"
+          },
+          "sourceFilters": {
             "type": "text"
           },
-          "version": {
-            "type": "integer"
-          }
-        }
-      },
-      "_default_": {
-        "dynamic": "strict"
-      },
-      "visualization": {
-        "dynamic": "strict",
-        "properties": {
-          "description": {
-            "type": "text"
-          },
-          "kibanaSavedObjectMeta": {
-            "properties": {
-              "searchSourceJSON": {
-                "type": "text"
-              }
-            }
-          },
-          "savedSearchId": {
+          "timeFieldName": {
             "type": "keyword"
           },
           "title": {
             "type": "text"
-          },
-          "uiStateJSON": {
-            "type": "text"
-          },
-          "version": {
-            "type": "integer"
-          },
-          "visState": {
-            "type": "text"
-          }
-        }
-      },
-      "config": {
-        "dynamic": "true",
-        "properties": {
-          "buildNum": {
-            "type": "keyword"
           }
         }
       },
@@ -151,28 +96,32 @@
           }
         }
       },
-      "index-pattern": {
+      "visualization": {
         "dynamic": "strict",
         "properties": {
-          "fieldFormatMap": {
+          "description": {
             "type": "text"
           },
-          "fields": {
-            "type": "text"
+          "kibanaSavedObjectMeta": {
+            "properties": {
+              "searchSourceJSON": {
+                "type": "text"
+              }
+            }
           },
-          "intervalName": {
-            "type": "keyword"
-          },
-          "notExpandable": {
-            "type": "boolean"
-          },
-          "sourceFilters": {
-            "type": "text"
-          },
-          "timeFieldName": {
+          "savedSearchId": {
             "type": "keyword"
           },
           "title": {
+            "type": "text"
+          },
+          "uiStateJSON": {
+            "type": "text"
+          },
+          "version": {
+            "type": "integer"
+          },
+          "visState": {
             "type": "text"
           }
         }
@@ -235,6 +184,71 @@
           }
         }
       },
+      "timelion-sheet": {
+        "dynamic": "strict",
+        "properties": {
+          "description": {
+            "type": "text"
+          },
+          "hits": {
+            "type": "integer"
+          },
+          "kibanaSavedObjectMeta": {
+            "properties": {
+              "searchSourceJSON": {
+                "type": "text"
+              }
+            }
+          },
+          "timelion_chart_height": {
+            "type": "integer"
+          },
+          "timelion_columns": {
+            "type": "integer"
+          },
+          "timelion_interval": {
+            "type": "keyword"
+          },
+          "timelion_other_interval": {
+            "type": "keyword"
+          },
+          "timelion_rows": {
+            "type": "integer"
+          },
+          "timelion_sheet": {
+            "type": "text"
+          },
+          "title": {
+            "type": "text"
+          },
+          "version": {
+            "type": "integer"
+          }
+        }
+      },
+      "url": {
+        "dynamic": "strict",
+        "properties": {
+          "accessCount": {
+            "type": "long"
+          },
+          "accessDate": {
+            "type": "date"
+          },
+          "createDate": {
+            "type": "date"
+          },
+          "url": {
+            "type": "text",
+            "fields": {
+              "keyword": {
+                "type": "keyword",
+                "ignore_above": 2048
+              }
+            }
+          }
+        }
+      },
       "server": {
         "dynamic": "strict",
         "properties": {
@@ -242,6 +256,17 @@
             "type": "keyword"
           }
         }
+      },
+      "config": {
+        "dynamic": "true",
+        "properties": {
+          "buildNum": {
+            "type": "keyword"
+          }
+        }
+      },
+      "_default_": {
+        "dynamic": "strict"
       }
     }
   }
@@ -251,34 +276,6 @@
   "type": "index",
   "value": {
     "index": "foo-2",
-    "settings": {
-      "index": {
-        "number_of_shards": "5",
-        "number_of_replicas": "1"
-      }
-    },
-    "mappings": {
-      "bar": {
-        "properties": {
-          "foo": {
-            "type": "text",
-            "fields": {
-              "keyword": {
-                "type": "keyword",
-                "ignore_above": 256
-              }
-            }
-          }
-        }
-      }
-    }
-  }
-}
-
-{
-  "type": "index",
-  "value": {
-    "index": "foo-1",
     "settings": {
       "index": {
         "number_of_shards": "5",

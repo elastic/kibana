@@ -105,7 +105,7 @@ describe('plugins/elasticsearch', function () {
       headers: {
         'content-type': 'application/json'
       },
-      payload: { docs: [{ _index: '.kibana', _type: 'index-pattern', _id: '[logstash-]YYYY.MM.DD' }] }
+      payload: { docs: [{ _index: '.kibana', _type: 'index-pattern', _id: 'logstash-*' }] }
     });
 
     testRoute({

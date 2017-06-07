@@ -7,9 +7,6 @@
       "fields": {
         "type": "text"
       },
-      "intervalName": {
-        "type": "keyword"
-      },
       "notExpandable": {
         "type": "boolean"
       },

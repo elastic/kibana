@@ -48,24 +48,6 @@ export function createIndexPatternsApiClient($http, basePath) {
   }
 
   class IndexPatternsApiClient {
-    getFieldsForTimePattern(options = {}) {
-      const {
-        pattern,
-        lookBack,
-        metaFields,
-      } = options;
-
-      const url = getUrl(['_fields_for_time_pattern'], {
-        pattern,
-        look_back: lookBack,
-        meta_fields: metaFields,
-      });
-
-      return notify.event(`getFieldsForTimePattern(${pattern})`, () => (
-        request('GET', url).then(resp => resp.fields)
-      ));
-    }
-
     getFieldsForWildcard(options = {}) {
       const {
         pattern,
@@ -79,20 +61,6 @@ export function createIndexPatternsApiClient($http, basePath) {
 
       return notify.event(`getFieldsForWildcard(${pattern})`, () => (
         request('GET', url).then(resp => resp.fields)
-      ));
-    }
-
-    testTimePattern(options = {}) {
-      const {
-        pattern
-      } = options;
-
-      const url = getUrl(['_test_time_pattern'], {
-        pattern,
-      });
-
-      return notify.event(`testTimePattern(${pattern})`, () => (
-        request('GET', url)
       ));
     }
   }

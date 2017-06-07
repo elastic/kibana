@@ -1,7 +1,6 @@
 export function sendCreateIndexPatternRequest(indexPatterns, {
   id,
   timeFieldName,
-  intervalName,
   notExpandable,
 }) {
   // get an empty indexPattern to start
@@ -12,7 +11,6 @@ export function sendCreateIndexPatternRequest(indexPatterns, {
 
       Object.assign(indexPattern, {
         timeFieldName,
-        intervalName,
         notExpandable,
       });
 
