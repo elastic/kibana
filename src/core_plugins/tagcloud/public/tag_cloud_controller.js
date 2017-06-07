@@ -47,7 +47,7 @@ module.controller('KbnTagCloudController', function ($scope, $element, Private, 
     }
 
 
-    $element.trigger('renderComplete');
+    $scope.renderComplete();
   });
 
   $scope.$watch('esResponse', async function (response) {

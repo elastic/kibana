@@ -1,35 +1,48 @@
-import { VisVisTypeProvider } from 'ui/vis/vis_type';
+import { VisFactoryProvider } from 'ui/vis/vis_factory';
+import { CATEGORY } from 'ui/vis/vis_category';
 import image from '../images/icon-timelion.svg';
 import { VisTypesRegistryProvider } from 'ui/registry/vis_types';
-import { TemplateVisTypeProvider } from 'ui/template_vis_type';
-import template from 'plugins/timelion/vis/timelion_vis.html';
-import editorTemplate from 'plugins/timelion/vis/timelion_vis_params.html';
-import 'plugins/timelion/vis/timelion_vis_controller';
-import 'plugins/timelion/vis/timelion_vis_params_controller';
-import 'plugins/timelion/vis/timelion_vis.less';
+import { RequestHandlersRegistryProvider } from 'ui/registry/request_handlers';
+import { TimelionRequestHandlerProvider } from './timelion_request_handler';
 
-// export the provider so that the visType can be required with Private()
-export default function TimelionVisProvider(Private) {
-  const VisType = Private(VisVisTypeProvider);
-  const TemplateVisType = Private(TemplateVisTypeProvider);
+define(function (require) {
+  // we also need to load the controller and used by the template
+  require('plugins/timelion/vis/timelion_vis_controller');
+  require('plugins/timelion/directives/timelion_expression_input');
 
-  // return the visType object, which kibana will use to display and configure new
-  // Vis object of this type.
-  return new TemplateVisType({
-    name: 'timelion',
-    title: 'Timelion',
-    image,
-    description: 'Build time-series using functional expressions',
-    category: VisType.CATEGORY.TIME,
-    template,
-    params: {
-      editor: editorTemplate,
-    },
-    requiresSearch: false,
-    requiresTimePicker: true,
-    implementsRenderComplete: true,
-  });
-}
+  // Stylin
+  require('plugins/timelion/vis/timelion_vis.less');
 
-// register the provider with the visTypes registry so that other know it exists
-VisTypesRegistryProvider.register(TimelionVisProvider);
+  // register the provider with the visTypes registry so that other know it exists
+  VisTypesRegistryProvider.register(TimelionVisProvider);
+  RequestHandlersRegistryProvider.register(TimelionRequestHandlerProvider);
+
+  function TimelionVisProvider(Private) {
+    const VisFactory = Private(VisFactoryProvider);
+
+    // return the visType object, which kibana will use to display and configure new
+    // Vis object of this type.
+    return VisFactory.createAngularVisualization({
+      name: 'timelion',
+      title: 'Timelion',
+      image,
+      description: 'Build time-series using functional expressions',
+      category: CATEGORY.TIME,
+      visConfig: {
+        defaults: {
+          expression: '.es(*)',
+          interval: '1m'
+        },
+        template: require('plugins/timelion/vis/timelion_vis.html'),
+      },
+      editorConfig: {
+        optionsTemplate: require('plugins/timelion/vis/timelion_vis_params.html')
+      },
+      requestHandler: 'timelion',
+      responseHandler: 'none',
+    });
+  }
+
+  // export the provider so that the visType can be required with Private()
+  return TimelionVisProvider;
+});
