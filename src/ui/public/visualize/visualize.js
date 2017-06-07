@@ -13,7 +13,7 @@ import {
 
 uiModules
 .get('kibana/directive', ['ngSanitize'])
-.directive('visualize', function (Notifier, Private, timefilter) {
+.directive('visualize', function (Notifier, Private, timefilter, getAppState) {
   const notify = new Notifier({ location: 'Visualize' });
   const requestHandlers = Private(RequestHandlersRegistryProvider);
   const responseHandlers = Private(ResponseHandlersRegistryProvider);
@@ -38,6 +38,8 @@ uiModules
       $scope.editorMode = $scope.editorMode || false;
       $scope.vis.showSpyPanel = $scope.showSpyPanel || false;
       $scope.vis.editorMode = $scope.editorMode;
+
+      if (!$scope.appState) $scope.appState = getAppState();
 
       const requestHandler = getHandler(requestHandlers, $scope.vis.type.requestHandler);
       const responseHandler = getHandler(responseHandlers, $scope.vis.type.responseHandler);
@@ -79,7 +81,7 @@ uiModules
       if ($scope.vis.type.requiresSearch) {
         stateMonitor.onChange((status, type, keys) => {
           if (['query', 'filters', 'vis'].includes(keys[0])) {
-            $scope.vis.setState($scope.appState.vis);
+            if ($scope.appState.vis) $scope.vis.setState($scope.appState.vis);
             $scope.fetch();
           }
         });
