@@ -15,6 +15,7 @@ import { IndexPatternsFlattenHitProvider } from './_flatten_hit';
 import { IndexPatternsCalculateIndicesProvider } from './_calculate_indices';
 import { IndexPatternsPatternCacheProvider } from './_pattern_cache';
 import { FieldsFetcherProvider } from './fields_fetcher_provider';
+import { UnsupportedTimePatternsProvider } from './unsupported_time_patterns';
 
 export function IndexPatternProvider(Private, $http, config, kbnIndex, Promise, confirmModalPromise) {
   const fieldformats = Private(RegistryFieldFormatsProvider);
@@ -27,6 +28,8 @@ export function IndexPatternProvider(Private, $http, config, kbnIndex, Promise, 
   const flattenHit = Private(IndexPatternsFlattenHitProvider);
   const calculateIndices = Private(IndexPatternsCalculateIndicesProvider);
   const patternCache = Private(IndexPatternsPatternCacheProvider);
+  const warnAboutUnsupportedTimePattern = Private(UnsupportedTimePatternsProvider);
+
   const type = 'index-pattern';
   const notify = new Notifier();
   const configWatchers = new WeakMap();
@@ -85,6 +88,10 @@ export function IndexPatternProvider(Private, $http, config, kbnIndex, Promise, 
 
     // give index pattern all of the values in _source
     _.assign(indexPattern, response._source);
+
+    if (indexPattern.isUnsupportedTimePattern()) {
+      warnAboutUnsupportedTimePattern(indexPattern);
+    }
 
     const promise = indexFields(indexPattern);
 
@@ -317,6 +324,10 @@ export function IndexPatternProvider(Private, $http, config, kbnIndex, Promise, 
 
     isTimeBasedInterval() {
       return this.isTimeBased() && !!this.getInterval();
+    }
+
+    isUnsupportedTimePattern() {
+      return !!this.intervalName;
     }
 
     isTimeBasedWildcard() {
