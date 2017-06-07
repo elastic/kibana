@@ -2,7 +2,7 @@ import { uiModules } from 'ui/modules';
 import 'plugins/kbn_vislib_vis_types/controls/vislib_basic_options';
 import _ from 'lodash';
 import AggConfigResult from 'ui/vis/agg_config_result';
-import { KibanaMap } from 'ui/vis_maps/kibana_map';
+import { KibanaMap } from '../../tile_map/public/kibana_map';
 import ChoroplethLayer from './choropleth_layer';
 import { truncatedColorMaps }  from 'ui/vislib/components/color/truncated_colormaps';
 import AggResponsePointSeriesTooltipFormatterProvider from './tooltip_formatter';

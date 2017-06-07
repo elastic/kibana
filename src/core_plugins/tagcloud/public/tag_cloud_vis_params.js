@@ -13,6 +13,7 @@ uiModules.get('kibana/table_vis')
       link: function ($scope, $element) {
         const sliderContainer = $element[0];
         const slider = sliderContainer.querySelector('.tag-cloud-fontsize-slider');
+        $scope.config = $scope.vis.type.editorConfig;
         noUiSlider.create(slider, {
           start: [$scope.vis.params.minFontSize, $scope.vis.params.maxFontSize],
           connect: true,
@@ -25,7 +26,9 @@ uiModules.get('kibana/table_vis')
           const fontSize = slider.noUiSlider.get();
           $scope.vis.params.minFontSize = parseInt(fontSize[0], 10);
           $scope.vis.params.maxFontSize = parseInt(fontSize[1], 10);
+          $scope.vis.updateState();
           $scope.$apply();
+
         });
       }
     };

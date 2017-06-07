@@ -9,11 +9,11 @@ marked.setOptions({
 
 
 const module = uiModules.get('kibana/markdown_vis', ['kibana', 'ngSanitize']);
-module.controller('KbnMarkdownVisController', function ($scope, $element) {
+module.controller('KbnMarkdownVisController', function ($scope) {
   $scope.$watch('vis.params.markdown', function (html) {
     if (html) {
       $scope.html = marked(html);
     }
-    $element.trigger('renderComplete');
+    $scope.renderComplete();
   });
 });

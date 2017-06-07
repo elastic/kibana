@@ -3,28 +3,33 @@ import VisEditorVisualization from './vis_editor_visualization';
 import Visualization from './visualization';
 import VisPicker from './vis_picker';
 import PanelConfig from './panel_config';
+import brushHandler from '../lib/create_brush_handler';
 
 class VisEditor extends Component {
 
   constructor(props) {
     super(props);
-    this.state = { model: props.model };
+    this.state = { model: props.vis.params };
+    this.onBrush = brushHandler(props.vis.API.timeFilter);
   }
 
   render() {
     const handleChange = (part) => {
       const nextModel = { ...this.state.model, ...part };
       this.setState({ model: nextModel });
-      if (this.props.onChange) {
-        this.props.onChange(nextModel);
+      if (this.props.onChange || true) {
+        console.log(nextModel);
+        this.props.vis.params = nextModel;
+        this.props.vis.updateState();
+        //this.props.onChange(nextModel);
       }
     };
 
-    if (this.props.embedded) {
+    if (!this.props.vis.isEditorMode()) {
       return (
         <Visualization
-          fields={this.props.fields}
-          model={this.props.model}
+          fields={this.props.vis.fields}
+          model={this.props.vis.params}
           visData={this.props.visData} />
       );
     }
@@ -43,12 +48,12 @@ class VisEditor extends Component {
             autoApply={this.props.autoApply}
             model={model}
             visData={this.props.visData}
-            onBrush={this.props.onBrush}
+            onBrush={this.onBrush}
             onCommit={this.props.onCommit}
             onToggleAutoApply={this.props.onToggleAutoApply}
             onChange={handleChange} />
           <PanelConfig
-            fields={this.props.fields}
+            fields={this.props.vis.fields}
             model={model}
             visData={this.props.visData}
             onChange={handleChange} />
