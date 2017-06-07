@@ -73,6 +73,10 @@ uiModules
     ], diffInterval);
   }
 
+  Timefilter.prototype.update = function () {
+    $rootScope.$apply();
+  };
+
   Timefilter.prototype.get = function (indexPattern) {
     let filter;
     const timefield = indexPattern.timeFieldName && _.find(indexPattern.fields, { name: indexPattern.timeFieldName });
