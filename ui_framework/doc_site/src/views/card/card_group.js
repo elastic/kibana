@@ -66,6 +66,28 @@ export default () => {
               </KuiLinkButton>
             </KuiCardFooter>
           </KuiCard>
+
+          <KuiCard style={cardStyle}>
+            <KuiCardDescription>
+              <KuiCardDescriptionTitle>
+                Get a magnolia tree
+              </KuiCardDescriptionTitle>
+
+              <KuiCardDescriptionText>
+                Magnolia trees have broad, waxy leaves which they shed year-round.
+              </KuiCardDescriptionText>
+            </KuiCardDescription>
+
+            <KuiCardFooter>
+              <KuiLinkButton
+                buttonType="basic"
+                href="https://www.elastic.co/subscriptions/xpack"
+                target="_blank"
+              >
+                Magnolia!
+              </KuiLinkButton>
+            </KuiCardFooter>
+          </KuiCard>
         </KuiCardGroup>
       </KuiCardGroupContainer>
 
@@ -111,6 +133,28 @@ export default () => {
               target="_blank"
             >
               Pteradactyl!
+            </KuiLinkButton>
+          </KuiCardFooter>
+        </KuiCard>
+
+        <KuiCard style={cardStyle}>
+          <KuiCardDescription>
+            <KuiCardDescriptionTitle>
+              Get a magnolia tree
+            </KuiCardDescriptionTitle>
+
+            <KuiCardDescriptionText>
+              Magnolia trees have broad, waxy leaves which they shed year-round.
+            </KuiCardDescriptionText>
+          </KuiCardDescription>
+
+          <KuiCardFooter>
+            <KuiLinkButton
+              buttonType="basic"
+              href="https://www.elastic.co/subscriptions/xpack"
+              target="_blank"
+            >
+              Magnolia!
             </KuiLinkButton>
           </KuiCardFooter>
         </KuiCard>
