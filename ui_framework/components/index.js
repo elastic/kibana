@@ -18,7 +18,6 @@ export {
   KuiCardDescriptionTitle,
   KuiCardDescription,
   KuiCardFooter,
-  KuiCardGroupContainer,
   KuiCardGroup,
 } from './card';
 

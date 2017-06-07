@@ -1,7 +1,6 @@
 import React from 'react';
 
 import {
-  KuiCardGroupContainer,
   KuiCardGroup,
   KuiCard,
   KuiCardDescription,
@@ -22,7 +21,6 @@ export default () => {
 
   return (
     <div>
-      <KuiCardGroupContainer>
         <KuiCardGroup>
           <KuiCard style={cardStyle}>
             <KuiCardDescription>
@@ -89,7 +87,6 @@ export default () => {
             </KuiCardFooter>
           </KuiCard>
         </KuiCardGroup>
-      </KuiCardGroupContainer>
 
       <br className="guideBreak"/>
 
