@@ -94,8 +94,18 @@ module.directive('kbnTableHeader', function (shortDotsFilter) {
           : 'asc'
         );
 
+        $scope.sortText = (
+          (columnName === currentColumnName && currentDirection === 'asc')
+          ? 'Button: Sort time ascending'
+          : 'Button: Sort time descending'
+        );
+
         $scope.onChangeSortOrder(columnName, newDirection);
       };
+
+      $scope.sortText = $scope.sortOrder[1] === 'asc'
+        ? 'Button: Sort time descending'
+        : 'Button: Sort time ascending';
     }
   };
 });
