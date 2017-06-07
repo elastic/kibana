@@ -3,6 +3,7 @@ import 'plugins/kbn_vislib_vis_types/controls/vislib_basic_options';
 import 'plugins/kbn_vislib_vis_types/controls/point_series_options';
 import 'plugins/kbn_vislib_vis_types/controls/line_interpolation_option';
 import 'plugins/kbn_vislib_vis_types/controls/heatmap_options';
+import 'plugins/kbn_vislib_vis_types/controls/gauge_options';
 import 'plugins/kbn_vislib_vis_types/controls/point_series';
 import { VisTypeProvider } from './base_vis_type';
 import { AggResponsePointSeriesProvider } from 'ui/agg_response/point_series/point_series';
@@ -20,6 +21,8 @@ export function VislibVisTypeProvider(Private) {
     }
 
     render(esResponse) {
+      if (!esResponse) return;
+      this._response = esResponse;
       if (this.vis.vislibVis) {
         this.destroy();
       } else {
@@ -37,11 +40,11 @@ export function VislibVisTypeProvider(Private) {
     }
 
     resize() {
-      return;
+      this.render(this._response);
     }
 
     destroy() {
-      if (this.vislibVis) {
+      if (this.vis.vislibVis) {
         this.vis.vislibVis.off('brush', this.vis.API.events.brush);
         this.vis.vislibVis.off('click', this.vis.API.events.filter);
         this.vis.vislibVis.destroy();

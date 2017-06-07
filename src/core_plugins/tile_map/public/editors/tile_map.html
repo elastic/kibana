@@ -4,8 +4,8 @@
     <select name="agg"
     class="form-control"
     ng-model="vis.params.mapType"
-    ng-init="vis.params.mapType || vis.type.params.mapTypes[0]"
-    ng-options="mapType as mapType for mapType in vis.type.params.mapTypes"
+    ng-init="vis.params.mapType || vis.type.editorConfig.collections.mapTypes[0]"
+    ng-options="mapType as mapType for mapType in vis.type.editorConfig.collections.mapTypes"
     >
   </select>
 </div>

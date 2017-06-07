@@ -53,9 +53,12 @@
             tooltip-popup-delay="400"
             tooltip-append-to-body="1"
           >
-            <a class="vis-editor-subnav-link vis-editor-subnav-link--danger">
-              <span class="kuiIcon fa-warning"></span>
-            </a>
+            <div
+              class="kuiButton kuiButton--danger navbar-btn-link sidebar-controls-error"
+              aria-label="{{ visualizeEditor.describeErrors() }}"
+            >
+              <span aria-hidden="true" class="kuiIcon kuiIcon--error fa-warning"></span>
+            </div>
           </li>
 
           <li

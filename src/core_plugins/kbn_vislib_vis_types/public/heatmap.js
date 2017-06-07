@@ -46,7 +46,7 @@ export default function HeatmapVisType(Private) {
       },
     },
     editorConfig: {
-      collectons: {
+      collections: {
         legendPositions: [{
           value: 'left',
           text: 'left',

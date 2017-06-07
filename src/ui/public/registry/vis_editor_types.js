@@ -1,7 +1,7 @@
 import { uiRegistry } from 'ui/registry/_registry';
 
-export const EditorTypesRegistryProvider = uiRegistry({
-  name: 'editorTypes',
+export const VisEditorTypesRegistryProvider = uiRegistry({
+  name: 'visEditorTypes',
   index: ['name'],
   order: ['title']
 });

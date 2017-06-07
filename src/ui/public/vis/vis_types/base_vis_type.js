@@ -20,7 +20,7 @@ export function VisTypeProvider() {
           defaults: {},            // default configuration
         },
         requestHandler: 'courier',    // select one from registry or pass a function
-        responseHandler: 'tabify',
+        responseHandler: 'none',
         editor: 'default',
         editorConfig: {
           collections: {},         // collections used for configuration (list of positions, ...)

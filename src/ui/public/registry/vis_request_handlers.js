@@ -1,6 +1,6 @@
 import { uiRegistry } from 'ui/registry/_registry';
-export const ResponseHandlersRegistryProvider = uiRegistry({
-  name: 'responseHandlers',
+export const VisRequestHandlersRegistryProvider = uiRegistry({
+  name: 'visRequestHandlers',
   index: ['name'],
   order: ['title']
 });

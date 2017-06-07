@@ -23,9 +23,9 @@ import { BasicResponseHandlerProvider } from 'ui/vis/response_handlers/basic';
 import { defaultEditor } from 'ui/vis/editors/default/default';
 
 
-import { RequestHandlersRegistryProvider } from 'ui/registry/request_handlers';
-import { ResponseHandlersRegistryProvider } from 'ui/registry/response_handlers';
-import { EditorTypesRegistryProvider } from 'ui/registry/editor_types';
+import { VisRequestHandlersRegistryProvider } from 'ui/registry/vis_request_handlers';
+import { VisResponseHandlersRegistryProvider } from 'ui/registry/vis_response_handlers';
+import { VisEditorTypesRegistryProvider } from 'ui/registry/vis_editor_types';
 
 uiRoutes
 .defaults(/visualize/, {
@@ -39,9 +39,9 @@ uiRoutes
 
 // preloading
 SavedObjectRegistryProvider.register(savedVisualizationProvider);
-RequestHandlersRegistryProvider.register(CourierRequestHandlerProvider);
-RequestHandlersRegistryProvider.register(noneRequestHandlerProvider);
-ResponseHandlersRegistryProvider.register(noneResponseHandler);
-ResponseHandlersRegistryProvider.register(BasicResponseHandlerProvider);
-EditorTypesRegistryProvider.register(defaultEditor);
+VisRequestHandlersRegistryProvider.register(CourierRequestHandlerProvider);
+VisRequestHandlersRegistryProvider.register(noneRequestHandlerProvider);
+VisResponseHandlersRegistryProvider.register(noneResponseHandler);
+VisResponseHandlersRegistryProvider.register(BasicResponseHandlerProvider);
+VisEditorTypesRegistryProvider.register(defaultEditor);
 

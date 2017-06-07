@@ -9,7 +9,7 @@ module.directive('gaugeOptions', function () {
     template: gaugeOptionsTemplate,
     replace: true,
     link: function ($scope) {
-
+      $scope.collections = $scope.vis.type.editorConfig.collections;
       $scope.showColorRange = true;
 
       $scope.$watch('vis.params.gauge.gaugeType', type => {

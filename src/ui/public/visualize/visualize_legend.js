@@ -6,7 +6,7 @@ import { uiModules } from 'ui/modules';
 
 
 uiModules.get('kibana')
-.directive('visualizeLegend', function (Private, getAppState) {
+.directive('visualizeLegend', function (Private, getAppState, $timeout) {
   const Data = Private(VislibLibDataProvider);
   const filterBarClickHandler = Private(FilterBarClickHandlerProvider);
 
@@ -62,7 +62,10 @@ uiModules.get('kibana')
         const bwcAddLegend = $scope.vis.params.addLegend;
         const bwcLegendStateDefault = bwcAddLegend == null ? true : bwcAddLegend;
         $scope.open = !$scope.uiState.get('vis.legendOpen', bwcLegendStateDefault);
-        $scope.uiState.set('vis.legendOpen', $scope.open);
+        // open should be applied on template before we update uiState
+        $timeout(() => {
+          $scope.uiState.set('vis.legendOpen', $scope.open);
+        });
       };
 
       $scope.getToggleLegendClasses = function () {

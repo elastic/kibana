@@ -16,6 +16,7 @@ export function AngularVisTypeProvider(Private, $compile, $rootScope) {
       return new Promise((resolve, reject) => {
         const updateScope = () => {
           this.$scope.vis = this.vis.clone();
+          this.$scope.vis.setUiState(this.vis.getUiState());
           this.$scope.esResponse = esResponse;
           this.$scope.renderComplete = resolve;
           this.$scope.renderFailed = reject;
