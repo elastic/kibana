@@ -32,22 +32,19 @@
 
       <!-- Alerts -->
       <div
-        ng-if="indexPattern.isUnsupportedTimePattern()"
-        class="kuiInfoPanel kuiInfoPanel--error kuiVerticalRhythm"
+        ng-if="indexPattern.timeFieldName && indexPattern.intervalName"
+        class="kuiInfoPanel kuiInfoPanel--warning kuiVerticalRhythm"
       >
         <div class="kuiInfoPanelHeader">
-          <span class="kuiInfoPanelHeader__icon kuiIcon kuiIcon--error fa-warning"></span>
+          <span class="kuiInfoPanelHeader__icon kuiIcon kuiIcon--warning fa-bolt"></span>
           <span class="kuiInfoPanelHeader__title">
-            Support for repeating index patterns removed
+            Repeating index pattern
           </span>
         </div>
 
         <div class="kuiInfoPanelBody">
           <div class="kuiInfoPanelBody__message">
-            Support for time-interval based index patterns has been removed! Migrate
-            saved objects that use this index pattern to a wildcard pattern and delete
-            this one. In the meantime requests made with this index pattern will be
-            sent as "{{::indexPattern.getUnsupportedTimePatternAsWildcard()}}".
+            This index uses a <strong>time-based index pattern</strong> which repeats <span ng-bind="::indexPattern.getInterval().display"></span>
           </div>
         </div>
       </div>

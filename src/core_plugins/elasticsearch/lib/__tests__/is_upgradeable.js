@@ -49,7 +49,7 @@ describe('plugins/elasticsearch', function () {
         '_score': 1,
         '_source': {
           'buildNum': 1.7976931348623157e+308,
-          'defaultIndex': 'logstash-*'
+          'defaultIndex': '[logstash-]YYYY.MM.DD'
         }
       };
 
@@ -64,7 +64,7 @@ describe('plugins/elasticsearch', function () {
         '_score': 1,
         '_source': {
           'buildNum': 1.7976931348623157e+308,
-          'defaultIndex': 'logstash-*'
+          'defaultIndex': '[logstash-]YYYY.MM.DD'
         }
       };
       expect(isUpgradeable(server, doc)).to.be(false);

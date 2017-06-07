@@ -17,6 +17,13 @@ export default function ({ getService, getPageObjects }) {
       });
     });
 
+    it('should load with name pattern unchecked', function () {
+      return PageObjects.settings.getTimeBasedIndexPatternCheckbox().isSelected()
+      .then(function (selected) {
+        expect(selected).to.not.be.ok();
+      });
+    });
+
     it('should contain default index pattern', function () {
       const defaultPattern = 'logstash-*';
 

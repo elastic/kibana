@@ -28,6 +28,7 @@ describe('createIndexPattern UI', () => {
   beforeEach(ngMock.inject(($injector) => {
     setup = function () {
       const Private = $injector.get('Private');
+      const Promise = $injector.get('Promise');
       const $compile = $injector.get('$compile');
       const $rootScope = $injector.get('$rootScope');
 
@@ -37,6 +38,12 @@ describe('createIndexPattern UI', () => {
       const $view = jQuery($compile(angular.element('<div>').html(createIndexPatternTemplate))($scope));
       trash.push(() => $scope.$destroy());
       $scope.$apply();
+
+      // prevents errors when switching to time pattern
+      indexPatternsApiClient.testTimePattern = sinon.spy(() => Promise.resolve({
+        all: ['logstash-0', 'logstash-2017.01.01'],
+        matches: ['logstash-2017.01.01'],
+      }));
 
       const setNameTo = (name) => {
         $view.findTestSubject('createIndexPatternNameInput')
@@ -115,6 +122,13 @@ describe('createIndexPattern UI', () => {
       expect($enableExpand).to.have.length(1);
       expect($enableExpand.is(':checked')).to.be(false);
     });
+
+    it('displays the option (off) to use time patterns', () => {
+      const { $view } = setup();
+      const $enableTimePattern = $view.findTestSubject('createIndexPatternNameIsPatternCheckBox');
+      expect($enableTimePattern).to.have.length(1);
+      expect($enableTimePattern.is(':checked')).to.be(false);
+    });
   });
 
   describe('cross cluster pattern', () => {
@@ -131,6 +145,44 @@ describe('createIndexPattern UI', () => {
     it('removes the option to expand wildcards', () => {
       const { $view, setNameTo } = setup();
       setNameTo('cluster2:logstash-*');
+
+      const $enableExpand = $view.findTestSubject('createIndexPatternEnableExpand');
+      expect($enableExpand).to.have.length(0);
+    });
+
+    it('removes the option to use time patterns', () => {
+      const { $view, setNameTo } = setup();
+      setNameTo('cluster2:logstash-*');
+
+      const $enableTimePattern = $view.findTestSubject('createIndexPatternNameIsPatternCheckBox');
+      expect($enableTimePattern).to.have.length(0);
+    });
+  });
+
+  describe('expand selected', () => {
+    it('removes the option to use time patterns', () => {
+      const { $view } = setup();
+
+      const { controller } = $view.findTestSubject('createIndexPatternContainer').scope();
+      const $enableExpand = $view.findTestSubject('createIndexPatternEnableExpand');
+      expect($enableExpand).to.have.length(1);
+      $enableExpand.click();
+      expect(controller.isExpandWildcardEnabled()).to.be(true);
+
+      const $enableTimePattern = $view.findTestSubject('createIndexPatternNameIsPatternCheckBox');
+      expect($enableTimePattern).to.have.length(0);
+    });
+  });
+
+  describe('time pattern selected', () => {
+    it('removes the option to use wildcard expansion', () => {
+      const { $view } = setup();
+
+      const { controller } = $view.findTestSubject('createIndexPatternContainer').scope();
+      const $enableTimePattern = $view.findTestSubject('createIndexPatternNameIsPatternCheckBox');
+      expect($enableTimePattern).to.have.length(1);
+      $enableTimePattern.click();
+      expect(controller.formValues.nameIsPattern).to.be(true);
 
       const $enableExpand = $view.findTestSubject('createIndexPatternEnableExpand');
       expect($enableExpand).to.have.length(0);

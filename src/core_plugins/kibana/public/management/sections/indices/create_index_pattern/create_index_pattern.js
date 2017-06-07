@@ -6,6 +6,7 @@ import { RefreshKibanaIndex } from '../refresh_kibana_index';
 import uiRoutes from 'ui/routes';
 import { uiModules } from 'ui/modules';
 import template from './create_index_pattern.html';
+import { getDefaultPatternForInterval } from './get_default_pattern_for_interval';
 import { sendCreateIndexPatternRequest } from './send_create_index_pattern_request';
 import { pickCreateButtonText } from './pick_create_button_text';
 
@@ -18,27 +19,41 @@ uiModules.get('apps/management')
 .controller('managementIndicesCreate', function ($scope, kbnUrl, Private, Notifier, indexPatterns, es, config, Promise, $translate) {
   const notify = new Notifier();
   const refreshKibanaIndex = Private(RefreshKibanaIndex);
+  const intervals = indexPatterns.intervals;
   let loadingCount = 0;
 
   // Configure the new index pattern we're going to create.
   this.formValues = {
     name: config.get('indexPattern:placeholder'),
+    nameIsPattern: false,
     expandWildcard: false,
+    nameInterval: _.find(intervals, { name: 'daily' }),
     timeFieldOption: null,
   };
 
   // UI state.
   this.timeFieldOptions = [];
   this.timeFieldOptionsError = null;
+  this.sampleCount = 5;
+  this.samples = null;
+  this.existing = null;
+  this.nameIntervalOptions = intervals;
+  this.patternErrors = [];
 
   const getTimeFieldOptions = () => {
     loadingCount += 1;
     return Promise.resolve()
     .then(() => {
-      const { name } = this.formValues;
+      const { nameIsPattern, name } = this.formValues;
+
       if (!name) {
         return [];
       }
+
+      if (nameIsPattern) {
+        return indexPatterns.fieldsFetcher.fetchForTimePattern(name);
+      }
+
       return indexPatterns.fieldsFetcher.fetchForWildcard(name);
     })
     .then(fields => {
@@ -111,6 +126,51 @@ uiModules.get('apps/management')
     return nonFieldOptions[0];
   };
 
+  const resetIndex = () => {
+    this.patternErrors = [];
+    this.samples = null;
+    this.existing = null;
+  };
+
+  const updateSamples = () => {
+    const patternErrors = [];
+
+    if (!this.formValues.nameInterval || !this.formValues.name) {
+      return Promise.resolve();
+    }
+
+    loadingCount += 1;
+    return indexPatterns.fieldsFetcher.testTimePattern(this.formValues.name)
+      .then(existing => {
+        const all = _.get(existing, 'all', []);
+        const matches = _.get(existing, 'matches', []);
+
+        if (all.length) {
+          return this.existing = {
+            all,
+            matches,
+            matchPercent: Math.round((matches.length / all.length) * 100) + '%',
+            failures: _.difference(all, matches)
+          };
+        }
+
+        patternErrors.push($translate.instant('KIBANA-PATTERN_DOES_NOT_MATCH_EXIST_INDICES'));
+        const radius = Math.round(this.sampleCount / 2);
+        const samples = intervals.toIndexList(this.formValues.name, this.formValues.nameInterval, -radius, radius);
+
+        if (_.uniq(samples).length !== samples.length) {
+          patternErrors.push($translate.instant('KIBANA-INVALID_NON_UNIQUE_INDEX_NAME_CREATED'));
+        } else {
+          this.samples = samples;
+        }
+
+        throw patternErrors;
+      })
+      .finally(() => {
+        loadingCount -= 1;
+      });
+  };
+
   this.isTimeBased = () => {
     if (!this.formValues.timeFieldOption) {
       // if they haven't choosen a time field, assume they will
@@ -127,6 +187,7 @@ uiModules.get('apps/management')
     return (
       this.isTimeBased() &&
         !this.isCrossClusterName() &&
+        !this.formValues.nameIsPattern &&
         _.includes(this.formValues.name, '*')
     );
   };
@@ -135,6 +196,14 @@ uiModules.get('apps/management')
     return (
       this.canEnableExpandWildcard() &&
         !!this.formValues.expandWildcard
+    );
+  };
+
+  this.canUseTimePattern = () => {
+    return (
+      this.isTimeBased() &&
+        !this.isExpandWildcardEnabled() &&
+        !this.isCrossClusterName()
     );
   };
 
@@ -195,6 +264,8 @@ uiModules.get('apps/management')
     const {
       name,
       timeFieldOption,
+      nameIsPattern,
+      nameInterval,
     } = this.formValues;
 
     const id = name;
@@ -207,10 +278,16 @@ uiModules.get('apps/management')
       ? undefined
       : true;
 
+    // Only event-time-based index patterns set an intervalName.
+    const intervalName = (this.canUseTimePattern() && nameIsPattern && nameInterval)
+      ? nameInterval.name
+      : undefined;
+
     loadingCount += 1;
     sendCreateIndexPatternRequest(indexPatterns, {
       id,
       timeFieldName,
+      intervalName,
       notExpandable,
     }).then(createdId => {
       if (!createdId) {
@@ -239,7 +316,65 @@ uiModules.get('apps/management')
     });
   };
 
-  $scope.$watch('controller.formValues.name', () => {
+  $scope.$watchMulti([
+    'controller.formValues.nameIsPattern',
+    'controller.formValues.nameInterval.name',
+  ], (newVal, oldVal) => {
+    const nameIsPattern = newVal[0];
+    const newDefault = getDefaultPatternForInterval(newVal[1]);
+    const oldDefault = getDefaultPatternForInterval(oldVal[1]);
+
+    if (this.formValues.name === oldDefault) {
+      this.formValues.name = newDefault;
+    }
+
+    if (!nameIsPattern) {
+      delete this.formValues.nameInterval;
+    } else {
+      this.formValues.nameInterval = this.formValues.nameInterval || intervals.byName.days;
+      this.formValues.name = this.formValues.name || getDefaultPatternForInterval(this.formValues.nameInterval);
+    }
+  });
+
+  this.moreSamples = andUpdate => {
+    this.sampleCount += 5;
+    if (andUpdate) updateSamples();
+  };
+
+  let latestUpdateSampleId = -1;
+  $scope.$watchMulti([
+    'controller.formValues.name',
+    'controller.formValues.nameInterval'
+  ], () => {
+    resetIndex();
+
+    // track the latestUpdateSampleId at the time we started
+    // so that we can avoid mutating the controller if the
+    // watcher triggers again before we finish (which would
+    // cause latestUpdateSampleId to increment and the
+    // id === latestUpdateSampleId checks below to fail)
+    const id = (++latestUpdateSampleId);
+    updateSamples()
+      .then(() => {
+        if (latestUpdateSampleId === id) {
+          this.samples = null;
+          this.patternErrors = [];
+        }
+      })
+      .catch(errors => {
+        if (latestUpdateSampleId === id) {
+          this.existing = null;
+          this.patternErrors = errors;
+        }
+      })
+      .finally(() => {
+        this.refreshTimeFieldOptions();
+      });
+  });
+
+  $scope.$watchMulti([
+    'controller.sampleCount'
+  ], () => {
     this.refreshTimeFieldOptions();
   });
 

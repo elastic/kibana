@@ -1,7 +1,9 @@
 import { IndexPatternsService } from './service';
 
 import {
+  createTestTimePatternRoute,
   createFieldsForWildcardRoute,
+  createFieldsForTimePatternRoute,
 } from './routes';
 
 export function indexPatternsMixin(kbnServer, server) {
@@ -23,5 +25,7 @@ export function indexPatternsMixin(kbnServer, server) {
     }
   };
 
+  server.route(createTestTimePatternRoute(pre));
   server.route(createFieldsForWildcardRoute(pre));
+  server.route(createFieldsForTimePatternRoute(pre));
 }
