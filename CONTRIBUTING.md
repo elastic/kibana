@@ -61,6 +61,12 @@ We enjoy working with contributors to get their code accepted. There are many ap
 
 ## How We Use Git and GitHub
 
+### Forking
+
+We follow the [GitHub forking model](https://help.github.com/articles/fork-a-repo/) for collaborating
+on Kibana code. This model assumes that you have a remote called `upstream` which points to the
+official Kibana repo, which we'll refer to in later code snippets.
+
 ### Branching
 
 * All work on the next major release goes into master.
