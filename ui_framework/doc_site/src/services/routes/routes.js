@@ -116,6 +116,7 @@ const components = [{
 }, {
   name: 'ActionItem',
   component: ActionItemExample,
+  hasReact: true,
 }, {
   name: 'Badge',
   component: BadgeExample,
@@ -139,6 +140,7 @@ const components = [{
 }, {
   name: 'Event',
   component: EventExample,
+  hasReact: true,
 }, {
   name: 'Expression',
   component: ExpressionExample,

@@ -1,3 +1,5 @@
+export { KuiActionItem } from './action_item';
+
 export {
   KuiKeyboardAccessible,
 } from './accessibility';
@@ -13,6 +15,14 @@ export {
 export {
   KuiCollapseButton
 } from './collapse_button';
+
+export {
+  KuiEvent,
+  KuiEventSymbol,
+  KuiEventBody,
+  KuiEventBodyMessage,
+  KuiEventBodyMetadata,
+} from './event';
 
 export { KuiInfoButton } from './info_button';
 
