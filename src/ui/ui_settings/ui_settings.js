@@ -1,31 +1,31 @@
-import { defaultsDeep } from 'lodash';
+import { defaultsDeep, noop } from 'lodash';
 import Bluebird from 'bluebird';
+import { errors as esErrors } from 'elasticsearch';
 
 import { getDefaultSettings } from './defaults';
 
-function hydrateUserSettings(user) {
-  return Object.keys(user)
-    .map(key => ({ key, userValue: user[key] }))
+function hydrateUserSettings(userSettings) {
+  return Object.keys(userSettings)
+    .map(key => ({ key, userValue: userSettings[key] }))
     .filter(({ userValue }) => userValue !== null)
     .reduce((acc, { key, userValue }) => ({ ...acc, [key]: { userValue } }), {});
 }
 
-function assertRequest(req) {
-  if (
-    !req ||
-    typeof req !== 'object' ||
-    typeof req.path !== 'string' ||
-    !req.headers ||
-    typeof req.headers !== 'object'
-  ) {
-    throw new TypeError('all uiSettings methods must be passed a hapi.Request object');
-  }
-}
+export class UiSettingsService {
+  constructor(options = {}) {
+    const {
+      index,
+      type,
+      id,
+      callCluster,
+      readInterceptor = noop,
+    } = options;
 
-export class UiSettings {
-  constructor(server, status) {
-    this._server = server;
-    this._status = status;
+    this._callCluster = callCluster;
+    this._readInterceptor = readInterceptor;
+    this._index = index;
+    this._type = type;
+    this._id = id;
   }
 
   getDefaults() {
@@ -33,15 +33,13 @@ export class UiSettings {
   }
 
   // returns a Promise for the value of the requested setting
-  async get(req, key) {
-    assertRequest(req);
-    return this.getAll(req)
+  get(key) {
+    return this.getAll()
       .then(all => all[key]);
   }
 
-  async getAll(req) {
-    assertRequest(req);
-    return this.getRaw(req)
+  getAll() {
+    return this.getRaw()
       .then(raw => Object.keys(raw)
         .reduce((all, key) => {
           const item = raw[key];
@@ -52,69 +50,73 @@ export class UiSettings {
       );
   }
 
-  async getRaw(req) {
-    assertRequest(req);
-    return this.getUserProvided(req)
+  getRaw() {
+    return this.getUserProvided()
       .then(user => defaultsDeep(user, this.getDefaults()));
   }
 
-  async getUserProvided(req, { ignore401Errors = false } = {}) {
-    assertRequest(req);
-    const { callWithRequest, errors } = this._server.plugins.elasticsearch.getCluster('admin');
-
-    // If the ui settings status isn't green, we shouldn't be attempting to get
-    // user settings, since we can't be sure that all the necessary conditions
-    // (e.g. elasticsearch being available) are met.
-    if (this._status.state !== 'green') {
-      return hydrateUserSettings({});
-    }
-
-    const params = this._getClientSettings();
-    const allowedErrors = [errors[404], errors[403], errors.NoConnections];
-    if (ignore401Errors) allowedErrors.push(errors[401]);
-
-    return Bluebird
-      .resolve(callWithRequest(req, 'get', params, { wrap401Errors: !ignore401Errors }))
-      .catch(...allowedErrors, () => ({}))
-      .then(resp => resp._source || {})
-      .then(source => hydrateUserSettings(source));
+  async getUserProvided(options) {
+    return hydrateUserSettings(this._read(options));
   }
 
-  async setMany(req, changes) {
-    assertRequest(req);
-    const { callWithRequest } = this._server.plugins.elasticsearch.getCluster('admin');
+  async _read(options = {}) {
+    const interceptValue = await this._readInterceptor(options);
+    if (interceptValue != null) {
+      return interceptValue;
+    }
+
+    const {
+      ignore401Errors = false
+    } = options;
+
+    const params = this._getClientSettings();
+    const allowedErrors = [
+      esErrors[404],
+      esErrors[403],
+      esErrors.NoConnections
+    ];
+
+    if (ignore401Errors) {
+      allowedErrors.push(esErrors[401]);
+    }
+
+    return Bluebird
+      .resolve(this._callCluster('get', params, { wrap401Errors: !ignore401Errors }))
+      .catch(...allowedErrors, () => ({}))
+      .then(resp => resp._source || {});
+  }
+
+  setMany(changes) {
     const clientParams = {
       ...this._getClientSettings(),
       body: { doc: changes }
     };
-    return callWithRequest(req, 'update', clientParams)
+
+    return this._callCluster('update', clientParams)
       .then(() => ({}));
   }
 
-  async set(req, key, value) {
-    assertRequest(req);
-    return this.setMany(req, { [key]: value });
+  set(key, value) {
+    return this.setMany({ [key]: value });
   }
 
-  async remove(req, key) {
-    assertRequest(req);
-    return this.set(req, key, null);
+  remove(key) {
+    return this.set(key, null);
   }
 
-  async removeMany(req, keys) {
-    assertRequest(req);
+  removeMany(keys) {
     const changes = {};
     keys.forEach(key => {
       changes[key] = null;
     });
-    return this.setMany(req, changes);
+    return this.setMany(changes);
   }
 
   _getClientSettings() {
-    const config = this._server.config();
-    const index = config.get('kibana.index');
-    const id = config.get('pkg.version');
-    const type = 'config';
-    return { index, type, id };
+    return {
+      index: this._index,
+      type: this._type,
+      id: this._id
+    };
   }
 }
