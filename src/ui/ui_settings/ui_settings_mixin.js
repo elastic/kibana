@@ -38,8 +38,7 @@ export function uiSettingsMixin(kbnServer, server, config) {
 
   server.decorate('server', 'uiSettings', () => {
     throw new Error(`
-      server.uiSettings has been removed, use \`request.getUiSettingsService()\`
-      or \`server.uiSettingsServiceFactory(options)\` instead.
+      server.uiSettings has been removed, see https://github.com/elastic/kibana/pull/12243.
     `);
   });
 }
