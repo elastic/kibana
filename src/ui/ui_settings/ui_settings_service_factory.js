@@ -1,4 +1,4 @@
-import { UiSettingsService } from './ui_settings';
+import { UiSettingsService } from './ui_settings_service';
 
 /**
  *  Create an instance of UiSettingsService that will use the

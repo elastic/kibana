@@ -1,4 +1,4 @@
-import { uiSettingsServiceFactory } from './ui_settings_factory';
+import { uiSettingsServiceFactory } from './ui_settings_service_factory';
 
 const BY_REQUEST_CACHE = new WeakMap();
 

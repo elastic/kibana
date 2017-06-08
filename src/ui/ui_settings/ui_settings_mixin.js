@@ -1,5 +1,5 @@
-import { uiSettingsServiceFactory } from './ui_settings_factory';
-import { getUiSettingsServiceForRequest } from './ui_settings_for_request';
+import { uiSettingsServiceFactory } from './ui_settings_service_factory';
+import { getUiSettingsServiceForRequest } from './ui_settings_service_for_request';
 import { mirrorStatus } from './mirror_status';
 
 export function uiSettingsMixin(kbnServer, server, config) {
