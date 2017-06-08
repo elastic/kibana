@@ -2,6 +2,7 @@ import _ from 'lodash';
 import { SavedObjectNotFound, DuplicateField, IndexPatternMissingIndices } from 'ui/errors';
 import angular from 'angular';
 import { RegistryFieldFormatsProvider } from 'ui/registry/field_formats';
+import { ConfigProvider } from 'ui/config/config_provider';
 import { AdminDocSourceProvider } from 'ui/courier/data_source/admin_doc_source';
 import UtilsMappingSetupProvider from 'ui/utils/mapping_setup';
 import { Notifier } from 'ui/notify';
@@ -18,6 +19,7 @@ import { FieldsFetcherProvider } from './fields_fetcher_provider';
 
 export function IndexPatternProvider(Private, $http, config, kbnIndex, Promise, confirmModalPromise) {
   const fieldformats = Private(RegistryFieldFormatsProvider);
+  const getConfig = Private(ConfigProvider).getConfig;
   const getIds = Private(IndexPatternsGetIdsProvider);
   const fieldsFetcher = Private(FieldsFetcherProvider);
   const intervals = Private(IndexPatternsIntervalsProvider);
@@ -66,7 +68,7 @@ export function IndexPatternProvider(Private, $http, config, kbnIndex, Promise, 
 
   function deserializeFieldFormatMap(mapping) {
     const FieldFormat = fieldformats.byId[mapping.id];
-    return FieldFormat && new FieldFormat(mapping.params);
+    return FieldFormat && new FieldFormat(mapping.params, getConfig);
   }
 
   function updateFromElasticSearch(indexPattern, response) {

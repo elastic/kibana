@@ -2,26 +2,22 @@ import _ from 'lodash';
 import moment from 'moment';
 import 'ui/field_format_editor/pattern/pattern';
 import { FieldFormat } from 'ui/index_patterns/_field_format/field_format';
-import { BoundToConfigObjProvider } from 'ui/bound_to_config_obj';
 import dateTemplate from 'ui/stringify/editors/date.html';
 
-export function stringifyDate(Private) {
-  const BoundToConfigObj = Private(BoundToConfigObjProvider);
-
+export function stringifyDate() {
 
   _.class(DateTime).inherits(FieldFormat);
-  function DateTime(params) {
+  function DateTime(params, getConfig) {
     DateTime.Super.call(this, params);
+    DateTime.paramDefaults = {
+      pattern: getConfig('dateFormat'),
+      timezone: getConfig('dateFormat:tz')
+    };
   }
 
   DateTime.id = 'date';
   DateTime.title = 'Date';
   DateTime.fieldType = 'date';
-
-  DateTime.paramDefaults = new BoundToConfigObj({
-    pattern: '=dateFormat',
-    timezone: '=dateFormat:tz'
-  });
 
   DateTime.editor = {
     template: dateTemplate,

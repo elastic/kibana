@@ -53,9 +53,9 @@ export const RegistryFieldFormatsProvider = uiRegistry({
      * @param  {String} formatId
      * @return {FieldFormat}
      */
-    self.getInstance = _.memoize(function (formatId) {
+    self.getInstance = _.memoize(function (formatId, getConfig) {
       const FieldFormat = self.byId[formatId];
-      return new FieldFormat();
+      return new FieldFormat(null, getConfig);
     });
 
     /**
@@ -64,10 +64,10 @@ export const RegistryFieldFormatsProvider = uiRegistry({
      * @param  {String} fieldType
      * @return {FieldFormat}
      */
-    self.getDefaultInstance = _.memoize(function (fieldType) {
+    self.getDefaultInstance = _.memoize(function (fieldType, getConfig) {
       const conf = self.getDefaultConfig(fieldType);
       const FieldFormat = self.byId[conf.id];
-      return new FieldFormat(conf.params);
+      return new FieldFormat(conf.params, getConfig);
     });
 
 

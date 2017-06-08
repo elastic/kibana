@@ -1,11 +1,13 @@
 import { ObjDefine } from 'ui/utils/obj_define';
 import { FieldFormat } from 'ui/index_patterns/_field_format/field_format';
 import { RegistryFieldFormatsProvider } from 'ui/registry/field_formats';
+import { ConfigProvider } from 'ui/config/config_provider';
 import { getKbnFieldType } from '../../../utils';
 
 export function IndexPatternsFieldProvider(Private, shortDotsFilter, $rootScope, Notifier) {
   const notify = new Notifier({ location: 'IndexPattern Field' });
   const fieldFormats = Private(RegistryFieldFormatsProvider);
+  const getConfig = Private(ConfigProvider).getConfig;
 
   function Field(indexPattern, spec) {
     // unwrap old instances of Field
@@ -34,7 +36,7 @@ export function IndexPatternsFieldProvider(Private, shortDotsFilter, $rootScope,
 
     let format = spec.format;
     if (!format || !(format instanceof FieldFormat)) {
-      format = indexPattern.fieldFormatMap[spec.name] || fieldFormats.getDefaultInstance(spec.type);
+      format = indexPattern.fieldFormatMap[spec.name] || fieldFormats.getDefaultInstance(spec.type, getConfig);
     }
 
     const indexed = !!spec.indexed;
