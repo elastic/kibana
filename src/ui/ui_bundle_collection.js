@@ -1,3 +1,4 @@
+import { createHash } from 'crypto';
 import UiBundle from './ui_bundle';
 import appEntryTemplate from './app_entry_template';
 import { transform, pluck } from 'lodash';
@@ -25,6 +26,8 @@ export default class UiBundleCollection {
     if (this.filter.test(bundle.id)) {
       this.each.push(bundle);
     }
+
+    this._cachedHash = null;
   }
 
   addApp(app) {
@@ -85,6 +88,16 @@ export default class UiBundleCollection {
     return transform(this.each, function (entries, bundle) {
       entries[bundle.id] = bundle.entryPath;
     }, {});
+  }
+
+  getHash() {
+    if (!this._cachedHash) {
+      const hash = createHash('sha1');
+      this.each.forEach(bundle => hash.update(bundle.renderContent()));
+      this._cachedHash = hash.digest('hex');
+    }
+
+    return this._cachedHash;
   }
 
   getIds() {
