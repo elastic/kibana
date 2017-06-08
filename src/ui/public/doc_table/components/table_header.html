@@ -4,7 +4,7 @@
     <span>Time <button
       id="sort_by_time"
       tabindex="0"
-      aria-label="{{sortText}}"
+      aria-label="{{ getAriaLabelForColumn(indexPattern.timeFieldName) }}"
       ng-class="headerClass(indexPattern.timeFieldName)"
       role="button"
       ng-click="cycleSortOrder(indexPattern.timeFieldName)"
