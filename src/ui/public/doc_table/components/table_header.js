@@ -53,13 +53,13 @@ module.directive('kbnTableHeader', function (shortDotsFilter) {
       };
 
       $scope.headerClass = function (column) {
-        if (!isSortableColumn(column)) return;
+        if (!isSortableColumn(column)) return ['docTableHeaderButton'];
 
         const sortOrder = $scope.sortOrder;
-        const defaultClass = ['fa', 'fa-sort-up', 'table-header-sortchange'];
+        const defaultClass = ['fa', 'fa-sort-up', 'table-header-sortchange', 'docTableHeaderButton'];
 
         if (!sortOrder || column !== sortOrder[0]) return defaultClass;
-        return ['fa', sortOrder[1] === 'asc' ? 'fa-sort-up' : 'fa-sort-down'];
+        return ['fa', 'docTableHeaderButton', sortOrder[1] === 'asc' ? 'fa-sort-up' : 'fa-sort-down'];
       };
 
       $scope.moveColumnLeft = function moveLeft(columnName) {
@@ -98,13 +98,15 @@ module.directive('kbnTableHeader', function (shortDotsFilter) {
       };
 
       $scope.getAriaLabelForColumn = function getAriaLabelForColumn(name) {
+        if (!isSortableColumn(name)) return null;
+
         const [currentColumnName, currentDirection = 'asc'] = $scope.sortOrder;
         if(name === currentColumnName && currentDirection === 'asc') {
           return `Sort ${name} descending`;
         }
 
         return `Sort ${name} ascending`;
-      }
+      };
     }
   };
 });
