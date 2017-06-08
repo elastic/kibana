@@ -26,6 +26,13 @@ hyphens as delimiters:
 </button>
 ```
 
+## Capitalization in HTML and CSS should always match
+
+It's important that when you write CSS selectors using classes, IDs, and attributes
+(keeping in mind that we should _never_ use IDs and attributes in our selectors), that the
+capitalization in the CSS matches that used in the HTML. [HTML and CSS follow different case sensitivity rules](http://reference.sitepoint.com/css/casesensitivity), and we can avoid subtle gotchas by ensuring we use the
+same capitalization in both of them.
+
 ## Multiple attribute values
 
 When an element has multiple attributes, each attribute including the first should be on its own line with a single indent.
