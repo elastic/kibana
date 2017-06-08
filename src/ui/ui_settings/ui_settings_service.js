@@ -1,5 +1,4 @@
 import { defaultsDeep, noop } from 'lodash';
-import Bluebird from 'bluebird';
 import { errors as esErrors } from 'elasticsearch';
 
 import { getDefaultSettings } from './defaults';
@@ -33,30 +32,61 @@ export class UiSettingsService {
   }
 
   // returns a Promise for the value of the requested setting
-  get(key) {
-    return this.getAll()
-      .then(all => all[key]);
+  async get(key) {
+    const all = await this.getAll();
+    return all[key];
   }
 
-  getAll() {
-    return this.getRaw()
-      .then(raw => Object.keys(raw)
-        .reduce((all, key) => {
-          const item = raw[key];
-          const hasUserValue = 'userValue' in item;
-          all[key] = hasUserValue ? item.userValue : item.value;
-          return all;
-        }, {})
-      );
+  async getAll() {
+    const raw = await this.getRaw();
+
+    return Object.keys(raw)
+      .reduce((all, key) => {
+        const item = raw[key];
+        const hasUserValue = 'userValue' in item;
+        all[key] = hasUserValue ? item.userValue : item.value;
+        return all;
+      }, {});
   }
 
-  getRaw() {
-    return this.getUserProvided()
-      .then(user => defaultsDeep(user, this.getDefaults()));
+  async getRaw() {
+    const userProvided = await this.getUserProvided();
+    return defaultsDeep(userProvided, this.getDefaults());
   }
 
   async getUserProvided(options) {
     return hydrateUserSettings(await this._read(options));
+  }
+
+  async setMany(changes) {
+    await this._write(changes);
+  }
+
+  async set(key, value) {
+    await this.setMany({ [key]: value });
+  }
+
+  async remove(key) {
+    await this.set(key, null);
+  }
+
+  async removeMany(keys) {
+    const changes = {};
+    keys.forEach(key => {
+      changes[key] = null;
+    });
+    await this.setMany(changes);
+  }
+
+  async _write(changes) {
+    await this._callCluster('update', {
+      index: this._index,
+      type: this._type,
+      id: this._id,
+      body: {
+        doc: changes
+      }
+    });
   }
 
   async _read(options = {}) {
@@ -69,54 +99,32 @@ export class UiSettingsService {
       ignore401Errors = false
     } = options;
 
-    const params = this._getClientSettings();
-    const allowedErrors = [
-      esErrors[404],
-      esErrors[403],
-      esErrors.NoConnections
-    ];
+    const isIgnorableError = error => (
+      error instanceof esErrors[404] ||
+      error instanceof esErrors[403] ||
+      error instanceof esErrors.NoConnections ||
+      (ignore401Errors && error instanceof esErrors[401])
+    );
 
-    if (ignore401Errors) {
-      allowedErrors.push(esErrors[401]);
+    try {
+      const clientParams = {
+        index: this._index,
+        type: this._type,
+        id: this._id,
+      };
+
+      const callOptions = {
+        wrap401Errors: !ignore401Errors
+      };
+
+      const resp = await this._callCluster('get', clientParams, callOptions);
+      return resp._source;
+    } catch (error) {
+      if (isIgnorableError(error)) {
+        return {};
+      }
+
+      throw error;
     }
-
-    return Bluebird
-      .resolve(this._callCluster('get', params, { wrap401Errors: !ignore401Errors }))
-      .catch(...allowedErrors, () => ({}))
-      .then(resp => resp._source || {});
-  }
-
-  setMany(changes) {
-    const clientParams = {
-      ...this._getClientSettings(),
-      body: { doc: changes }
-    };
-
-    return this._callCluster('update', clientParams)
-      .then(() => ({}));
-  }
-
-  set(key, value) {
-    return this.setMany({ [key]: value });
-  }
-
-  remove(key) {
-    return this.set(key, null);
-  }
-
-  removeMany(keys) {
-    const changes = {};
-    keys.forEach(key => {
-      changes[key] = null;
-    });
-    return this.setMany(changes);
-  }
-
-  _getClientSettings() {
-    return {
-      index: this._index,
-      type: this._type,
-      id: this._id
-    };
   }
 }
