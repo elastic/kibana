@@ -53,13 +53,13 @@ module.directive('kbnTableHeader', function (shortDotsFilter) {
       };
 
       $scope.headerClass = function (column) {
-        if (!isSortableColumn(column)) return ['docTableHeaderButton'];
+        if (!isSortableColumn(column)) return;
 
         const sortOrder = $scope.sortOrder;
-        const defaultClass = ['fa', 'fa-sort-up', 'table-header-sortchange', 'docTableHeaderButton'];
+        const defaultClass = ['fa', 'fa-sort-up', 'table-header-sortchange'];
 
         if (!sortOrder || column !== sortOrder[0]) return defaultClass;
-        return ['fa', 'docTableHeaderButton', sortOrder[1] === 'asc' ? 'fa-sort-up' : 'fa-sort-down'];
+        return ['fa', sortOrder[1] === 'asc' ? 'fa-sort-up' : 'fa-sort-down'];
       };
 
       $scope.moveColumnLeft = function moveLeft(columnName) {
