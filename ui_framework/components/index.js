@@ -45,6 +45,12 @@ export {
 } from './pager';
 
 export {
+  KuiEmptyTablePrompt,
+  KuiEmptyTablePromptMessage,
+  KuiEmptyTablePromptPanel,
+} from './empty_table_prompt';
+
+export {
   KuiMenu,
   KuiMenuItem
 } from './menu';

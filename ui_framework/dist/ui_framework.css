@@ -2576,7 +2576,7 @@ body {
 .kuiPanelBody {
   padding: 10px; }
 
-.kuiPromptForItems {
+.kuiEmptyTablePrompt {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -2592,12 +2592,12 @@ body {
           align-items: center;
   padding: 30px; }
 
-.kuiPromptForItems__message {
+.kuiEmptyTablePrompt__message {
   font-size: 18px;
   color: #9fa3a7;
   line-height: 1.5; }
 
-.kuiPromptForItems__actions {
+.kuiEmptyTablePrompt__actions {
   margin-top: 10px; }
 
 .kuiStatusText {

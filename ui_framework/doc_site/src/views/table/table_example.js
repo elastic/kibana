@@ -15,7 +15,7 @@ const tableWithMenuButtonsHtml = require('./table_with_menu_buttons.html');
 const controlledTableHtml = require('./controlled_table.html');
 const controlledTableWithLoadingItemsHtml = require('./controlled_table_loading_items.html');
 const controlledTableWithNoItemsHtml = require('./controlled_table_no_items.html');
-const controlledTableWithPromptForItemsHtml = require('./controlled_table_prompt_for_items.html');
+const controlledTableWithEmptyTablePromptHtml = require('./controlled_table_empty_table_prompt.html');
 
 export default props => (
   <GuidePage title={props.route.name}>
@@ -104,14 +104,14 @@ export default props => (
     </GuideSection>
 
     <GuideSection
-      title="ControlledTable with PromptForItems"
+      title="ControlledTable with EmptyTablePrompt"
       source={[{
         type: GuideSectionTypes.HTML,
-        code: controlledTableWithPromptForItemsHtml,
+        code: controlledTableWithEmptyTablePromptHtml,
       }]}
     >
       <GuideDemo
-        html={controlledTableWithPromptForItemsHtml}
+        html={controlledTableWithEmptyTablePromptHtml}
       />
     </GuideSection>
   </GuidePage>

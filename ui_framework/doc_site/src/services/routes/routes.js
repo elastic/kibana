@@ -84,6 +84,9 @@ import PagerExample
 import PanelExample
   from '../../views/panel/panel_example';
 
+import EmptyTablePromptExample
+  from '../../views/empty_table_prompt/empty_table_prompt_example';
+
 import StatusTextExample
   from '../../views/status_text/status_text_example';
 
@@ -136,6 +139,10 @@ const components = [{
 }, {
   name: 'CollapseButton',
   component: CollapseButtonExample,
+}, {
+  name: 'EmptyTablePrompt',
+  component: EmptyTablePromptExample,
+  hasReact: true,
 }, {
   name: 'Event',
   component: EventExample,
