@@ -56,7 +56,7 @@ export class UiSettingsService {
   }
 
   async getUserProvided(options) {
-    return hydrateUserSettings(this._read(options));
+    return hydrateUserSettings(await this._read(options));
   }
 
   async _read(options = {}) {
