@@ -17,6 +17,16 @@ import { IndexPatternsPatternCacheProvider } from './_pattern_cache';
 import { FieldsFetcherProvider } from './fields_fetcher_provider';
 import { UnsupportedTimePatternsProvider } from './unsupported_time_patterns';
 
+export function getRoutes() {
+  return {
+    edit: '/management/kibana/indices/{{id}}',
+    addField: '/management/kibana/indices/{{id}}/create-field',
+    indexedFields: '/management/kibana/indices/{{id}}?_a=(tab:indexedFields)',
+    scriptedFields: '/management/kibana/indices/{{id}}?_a=(tab:scriptedFields)',
+    sourceFilters: '/management/kibana/indices/{{id}}?_a=(tab:sourceFilters)'
+  };
+}
+
 export function IndexPatternProvider(Private, $http, config, kbnIndex, Promise, confirmModalPromise) {
   const fieldformats = Private(RegistryFieldFormatsProvider);
   const getIds = Private(IndexPatternsGetIdsProvider);
@@ -34,13 +44,6 @@ export function IndexPatternProvider(Private, $http, config, kbnIndex, Promise, 
   const notify = new Notifier();
   const configWatchers = new WeakMap();
   const docSources = new WeakMap();
-  const getRoutes = () => ({
-    edit: '/management/kibana/indices/{{id}}',
-    addField: '/management/kibana/indices/{{id}}/create-field',
-    indexedFields: '/management/kibana/indices/{{id}}?_a=(tab:indexedFields)',
-    scriptedFields: '/management/kibana/indices/{{id}}?_a=(tab:scriptedFields)',
-    sourceFilters: '/management/kibana/indices/{{id}}?_a=(tab:sourceFilters)'
-  });
 
   const mapping = mappingSetup.expandShorthand({
     title: 'text',
