@@ -40,6 +40,7 @@
     position: absolute;
     right: $globalFormControlHorizontalPadding;
     top: 50%; /* 1 */
+    z-index: 2;
     transform: translateY(-50%); /* 1 */
   }
 

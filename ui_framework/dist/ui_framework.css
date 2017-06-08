@@ -2077,6 +2077,7 @@ body {
   right: 12px;
   top: 50%;
   /* 1 */
+  z-index: 2;
   -webkit-transform: translateY(-50%);
           transform: translateY(-50%);
   /* 1 */ }
