@@ -19,7 +19,7 @@ function fetchAnchorProvider(courier, Private) {
           _uid: [uid],
         },
       })
-      .set('sort', [sort, { _uid: 'asc' }]);
+      .set('sort', sort);
 
     const response = await searchSource.fetch();
 
