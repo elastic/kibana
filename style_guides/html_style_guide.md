@@ -9,7 +9,7 @@ This makes the attributes easier to scan and compare across similar elements.
 The closing bracket should be on its own line. This allows attributes to be shuffled and edited without having to move the bracket around. It also makes it easier to scan vertically and match opening and closing brackets. This format
 is inspired by the positioning of the opening and closing parentheses in [Pug/Jade](https://pugjs.org/language/attributes.html#multiline-attributes).
 
-```
+```html
 <div
   attribute1="value1"
   attribute2="value2"
@@ -21,7 +21,7 @@ is inspired by the positioning of the opening and closing parentheses in [Pug/Ja
 
 If the element doesn't have children, add the closing tag on the same line as the opening tag's closing bracket.
 
-```
+```html
 <div
   attribute1="value1"
   attribute2="value2"
@@ -63,3 +63,12 @@ described element can point to with the `aria-describedby` attribute. For exampl
  Visualizations
 </button>
 ```
+
+### Prefer `button` and `a` when making interactive elements keyboard-accessible
+
+If something is meant to be clickable, favor using a `button` or `a` tag before over the `kui-accessible-click` directive or `KuiKeyboardAccessible` component. These tools are useful as they augment non-clickable elements with `onkeypress` and `onkeyup` handlers, allowing non-clickable elements to become keyboard accessible. However, `button` and `a` tags provide this functionality natively.
+
+### Use `tabindex` to make elements tabbable
+
+When added to the tab order, elements become focusable via non-sticky-mode keyboard navigation.
+To add an element to the tab order, you must add an `id` attribute as well as a `tabindex` attribute. If you don't know which number to use for the tab index, or if you simply want to add it to the general flow of the document, use `tabindex="0"`.
