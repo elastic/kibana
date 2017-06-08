@@ -4,15 +4,16 @@ import { requiredProps } from '../../test/required_props';
 import sinon from 'sinon';
 
 import {
+  DIRECTIONS,
   KuiCollapseButton,
 } from './collapse_button';
 
 describe('KuiCollapseButton', () => {
   describe('Props', () => {
     describe('direction', () => {
-      ['up','down','left','right'].forEach(direction => {
+      DIRECTIONS.forEach(direction => {
         describe(direction, () => {
-          test(direction, () => {
+          test(`renders the ${direction} class`, () => {
             const component = <KuiCollapseButton direction={direction} { ...requiredProps }/>;
             expect(render(component)).toMatchSnapshot();
           });

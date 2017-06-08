@@ -10,9 +10,16 @@ const DIRECTIONS = [
   'right'
 ];
 
-export const KuiCollapseButton = ({ className, direction, ...rest }) => {
+const directionToClassNameMap = {
+  down: 'fa-chevron-circle-down',
+  up: 'fa-chevron-circle-up',
+  left: 'fa-chevron-circle-left',
+  right: 'fa-chevron-circle-right',
+};
+
+const KuiCollapseButton = ({ className, direction, ...rest }) => {
   const classes = classNames('kuiCollapseButton', className);
-  const childClasses = classNames('kuiIcon', `fa-chevron-circle-${direction}`);
+  const childClasses = classNames('kuiIcon', directionToClassNameMap[direction]);
 
   return (<button
             type="button"
@@ -26,4 +33,9 @@ export const KuiCollapseButton = ({ className, direction, ...rest }) => {
 KuiCollapseButton.propTypes = {
   className: PropTypes.string,
   direction: PropTypes.oneOf(DIRECTIONS).isRequired
+};
+
+export {
+  DIRECTIONS,
+  KuiCollapseButton
 };
