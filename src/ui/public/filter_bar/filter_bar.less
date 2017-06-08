@@ -35,8 +35,7 @@ filter-bar {
     // Number of filter icons multiplied by icon width
     // Escaped to prevent less math
     min-width: ~"calc(5*(1.414em + 13px))";
-
-
+    vertical-align: middle;
     font-size: @font-size-small;
     background-color: @filter-bar-confirm-filter-bg;
     color: @filter-bar-confirm-filter-color;
@@ -51,7 +50,7 @@ filter-bar {
 }
 
 .filter-bar {
-  padding: 6px 10px 2px 10px;
+  padding: 6px 10px 1px 10px;
   background: @filter-bar-bar-bg;
   border-bottom: solid 1px @globalColorLightGray;
 
@@ -72,8 +71,8 @@ filter-bar {
 
   .filter-description {
     white-space: nowrap;
-    overflow: hidden;
     text-overflow: ellipsis;
+    vertical-align: middle;
   }
 
   .filter {
@@ -89,6 +88,7 @@ filter-bar {
     margin-right: 4px;
     margin-bottom: 4px;
     max-width: 100%;
+    vertical-align: middle;
 
     // Replace padding with border so absolute controls position correctly
     padding: 4px 8px;
