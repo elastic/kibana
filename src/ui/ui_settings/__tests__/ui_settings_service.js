@@ -17,6 +17,7 @@ const ID = 'kibana-version';
 
 function setup(options = {}) {
   const {
+    readInterceptor,
     esDocSource = {},
     callCluster = createCallClusterStub(INDEX, TYPE, ID, esDocSource)
   } = options;
@@ -25,6 +26,7 @@ function setup(options = {}) {
     index: INDEX,
     type: TYPE,
     id: ID,
+    readInterceptor,
     callCluster,
   });
 
@@ -360,4 +362,49 @@ describe('ui settings', function () {
       expect(result).to.equal('YYYY-MM-DD');
     });
   });
+
+  describe('readInterceptor() argument', () => {
+    describe('#getUserProvided()', () => {
+      it('returns a promise when interceptValue doesn\'t', () => {
+        const { uiSettings } = setup({ readInterceptor: () => ({}) });
+        assertPromise(uiSettings.getUserProvided());
+      });
+
+      it('returns intercept values', async () => {
+        const { uiSettings } = setup({
+          readInterceptor: () => ({
+            foo: 'bar'
+          })
+        });
+
+        expect(await uiSettings.getUserProvided()).to.eql({
+          foo: {
+            userValue: 'bar'
+          }
+        });
+      });
+    });
+
+    describe('#getAll()', () => {
+      it('merges intercept value with defaults', async () => {
+        const { uiSettings } = setup({
+          readInterceptor: () => ({
+            foo: 'not foo'
+          }),
+        });
+
+        const defaults = getDefaultSettings();
+        const defaultValues = Object.keys(defaults).reduce((acc, key) => ({
+          ...acc,
+          [key]: defaults[key].value,
+        }), {});
+
+        expect(await uiSettings.getAll()).to.eql({
+          ...defaultValues,
+          foo: 'not foo',
+        });
+      });
+    });
+  });
+
 });
