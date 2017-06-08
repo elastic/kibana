@@ -267,6 +267,7 @@ export function CommonPageProvider({ getService, getPageObjects }) {
     }
 
     async waitForTopNavToBeVisible() {
+      log.debug('waitForTopNavToBeVisible');
       await retry.try(async () => {
         const isNavVisible = await testSubjects.exists('top-nav');
         if (!isNavVisible) {
