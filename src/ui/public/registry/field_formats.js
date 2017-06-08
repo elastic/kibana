@@ -1,12 +1,14 @@
 import _ from 'lodash';
 import { uiRegistry } from 'ui/registry/_registry';
+import { ConfigProvider } from 'ui/config/config_provider';
 
 export const RegistryFieldFormatsProvider = uiRegistry({
   name: 'fieldFormats',
   index: ['id'],
   group: ['fieldType'],
 
-  constructor: function (config) {
+  constructor: function (config, Private) {
+    const getConfig = Private(ConfigProvider).getConfig;
     const self = this;
     let defaultMap;
 
@@ -53,7 +55,7 @@ export const RegistryFieldFormatsProvider = uiRegistry({
      * @param  {String} formatId
      * @return {FieldFormat}
      */
-    self.getInstance = _.memoize(function (formatId, getConfig) {
+    self.getInstance = _.memoize(function (formatId) {
       const FieldFormat = self.byId[formatId];
       return new FieldFormat(null, getConfig);
     });
@@ -64,7 +66,7 @@ export const RegistryFieldFormatsProvider = uiRegistry({
      * @param  {String} fieldType
      * @return {FieldFormat}
      */
-    self.getDefaultInstance = _.memoize(function (fieldType, getConfig) {
+    self.getDefaultInstance = _.memoize(function (fieldType) {
       const conf = self.getDefaultConfig(fieldType);
       const FieldFormat = self.byId[conf.id];
       return new FieldFormat(conf.params, getConfig);
