@@ -9,6 +9,8 @@ import {
   GuideText,
 } from '../../components';
 
+import { renderToHtml } from '../../services';
+
 const textInputHtml = require('./text_input.html');
 const labelHtml = require('./label.html');
 const assistedInputHtml = require('./assisted_input.html');
@@ -18,6 +20,10 @@ const textAreaHtml = require('./text_area.html');
 const textAreaNonResizableHtml = require('./text_area_non_resizable.html');
 const checkBoxHtml = require('./check_box.html');
 const selectHtml = require('./select.html');
+
+import { ColorPicker } from './color_picker';
+const colorPickerSource = require('!!raw!./color_picker');
+const colorPickerHtml = renderToHtml(ColorPicker);
 
 export default props => (
   <GuidePage title={props.route.name}>
@@ -163,6 +169,21 @@ export default props => (
         html={selectHtml}
         isDarkTheme={true}
       />
+    </GuideSection>
+
+    <GuideSection
+      title="Color Picker"
+      source={[{
+        type: GuideSectionTypes.JS,
+        code: colorPickerSource,
+      }, {
+        type: GuideSectionTypes.HTML,
+        code: colorPickerHtml,
+      }]}
+    >
+      <GuideDemo>
+        <ColorPicker />
+      </GuideDemo>
     </GuideSection>
   </GuidePage>
 );

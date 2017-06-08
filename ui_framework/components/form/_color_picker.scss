@@ -1,0 +1,29 @@
+.kuiColorSwatch {
+  width: 19px;
+  height: 19px;
+  border-radius: 3px;
+  border: 1px solid black;
+  display: inline-block;
+  vertical-align: middle;
+}
+
+.kuiColorPickerCover {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+}
+
+.kuiColorPickerPopUp {
+  position: absolute;
+  z-index: 10;
+}
+
+.kuiColorLabel {
+  font-size: 16px;
+  line-height: $globalLineHeight;
+  margin-left: 10px;
+  display: inline-block;
+  vertical-align: middle;
+}
