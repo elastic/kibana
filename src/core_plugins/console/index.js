@@ -1,5 +1,5 @@
 import Boom from 'boom';
-import apiServer from './api_server/server';
+import { resolveApi } from './api_server/server';
 import { existsSync } from 'fs';
 import { resolve, join, sep } from 'path';
 import { has, isEmpty } from 'lodash';
@@ -109,7 +109,7 @@ export default function (kibana) {
             return;
           }
 
-          return apiServer.resolveApi(sense_version, apis.split(','), reply);
+          return resolveApi(sense_version, apis.split(','), reply);
         }
       });
 

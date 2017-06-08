@@ -4,7 +4,7 @@ import moment from 'moment';
 import Datasource from '../lib/classes/datasource';
 
 
-module.exports = new Datasource ('graphite', {
+export default new Datasource ('graphite', {
   args: [
     {
       name: 'metric', // _test-data.users.*.data

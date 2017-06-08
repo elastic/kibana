@@ -1,0 +1,21 @@
+<ui-select
+  ng-model="field"
+  ui-select-focus-on="focus-field"
+  on-select="onSelect({ field: field })"
+>
+  <ui-select-match placeholder="Fields...">
+    <span
+      class="uiSelectMatch--ellipsis"
+      tooltip="{{$select.selected.name}}"
+    >
+      {{$select.selected.name}}
+    </span>
+  </ui-select-match>
+  <ui-select-choices
+    class="uiSelectChoices--autoWidth"
+    repeat="field in fieldOptions | filter:{ name: $select.search } | orderBy:'name' | sortPrefixFirst:$select.search:'name'"
+    group-by="'indexPattern'"
+  >
+    <div ng-bind-html="field.name | highlight: $select.search"></div>
+  </ui-select-choices>
+</ui-select>

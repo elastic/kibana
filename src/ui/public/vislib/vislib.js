@@ -6,6 +6,7 @@ import './lib/data';
 import './visualizations/vis_types';
 import './styles/main.less';
 import { VislibVisProvider } from './vis';
+
 // prefetched for faster optimization runs
 // end prefetching
 
@@ -16,10 +17,10 @@ import { VislibVisProvider } from './vis';
  * @main vislib
  * @return {Object} Contains the version number and the Vis Class for creating visualizations
  */
-module.exports = function VislibProvider(Private) {
-
+// eslint-disable-next-line kibana-custom/no-default-export
+export default function VislibProvider(Private) {
   return {
     version: '0.0.0',
     Vis: Private(VislibVisProvider)
   };
-};
+}

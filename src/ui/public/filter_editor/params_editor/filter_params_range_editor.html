@@ -1,0 +1,29 @@
+<div class="kuiVerticalRhythm">
+  <filter-params-input-type
+    placeholder="From..."
+    type="field.type"
+    value="params.range.from"
+    on-change="params.range.from = value"
+    focus-on="focus-params"
+  ></filter-params-input-type>
+</div>
+
+<div class="kuiVerticalRhythm">
+  <filter-params-input-type
+    placeholder="To..."
+    type="field.type"
+    value="params.range.to"
+    on-change="params.range.to = value"
+  ></filter-params-input-type>
+</div>
+
+<small>
+  <a
+    ng-if="field.type === 'date'"
+    class="kuiLink"
+    ng-href="{{dateDocLinks.dateMath}}"
+    target="_blank"
+  >
+    Accepted date formats
+  </a>
+</small>

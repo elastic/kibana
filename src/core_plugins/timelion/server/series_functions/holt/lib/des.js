@@ -1,6 +1,6 @@
 import _ from 'lodash';
 
-module.exports = function des(points, alpha, beta) {
+export default function des(points, alpha, beta) {
   let level;
   let prevLevel;
   let trend;
@@ -37,4 +37,4 @@ module.exports = function des(points, alpha, beta) {
   }, []);
 
   return smoothedPoints;
-};
+}

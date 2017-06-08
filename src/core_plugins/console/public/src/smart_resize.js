@@ -1,6 +1,6 @@
 import { throttle } from 'lodash';
 
-module.exports = function (editor) {
+export default function (editor) {
   const resize = editor.resize;
   return throttle(() => resize.call(editor), 35)
-};
+}

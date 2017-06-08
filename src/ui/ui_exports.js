@@ -5,7 +5,7 @@ import UiAppCollection from './ui_app_collection';
 import UiNavLinkCollection from './ui_nav_link_collection';
 import { MappingsCollection } from './ui_mappings';
 
-class UiExports {
+export default class UiExports {
   constructor({ urlBasePath }) {
     this.navLinks = new UiNavLinkCollection(this);
     this.apps = new UiAppCollection(this);
@@ -171,5 +171,3 @@ class UiExports {
     return this.bundleProviders;
   }
 }
-
-module.exports = UiExports;

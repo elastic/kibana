@@ -341,6 +341,12 @@ export function getDefaultSettings() {
     'context:step': {
       value: 5,
       description: 'The step size to increment or decrement the context size by',
-    }
+    },
+    'context:tieBreakerFields': {
+      value: ['_doc'],
+      description: 'A comma-separated list of fields to use for tiebreaking between documents ' +
+        'that have the same timestamp value. From this list the first field that ' +
+        'is present and sortable in the current index pattern is used.',
+    },
   };
 }

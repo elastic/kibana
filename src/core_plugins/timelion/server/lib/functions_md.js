@@ -3,7 +3,7 @@ const functions  = loadFunctions('series_functions/');
 import _ from 'lodash';
 
 
-module.exports = (function () {
+export default (function () {
   const functionArray = _.map(functions, function (val, key) {
     // TODO: This won't work on frozen objects, it should be removed when everything is converted to datasources and chainables
     return _.extend({}, val, { name: key });

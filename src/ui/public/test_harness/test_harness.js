@@ -26,6 +26,6 @@ beforeEach(function () {
 });
 
 // Kick off mocha, called at the end of test entry files
-exports.bootstrap = () => {
+export function bootstrap() {
   chrome.setupAngular();
-};
+}

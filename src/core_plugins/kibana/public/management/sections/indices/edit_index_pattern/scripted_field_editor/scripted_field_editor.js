@@ -1,6 +1,6 @@
 import 'ui/field_editor';
 import { IndexPatternsFieldProvider } from 'ui/index_patterns/_field';
-import UrlProvider from 'ui/url';
+import { KbnUrlProvider } from 'ui/url';
 import uiRoutes from 'ui/routes';
 import template from './scripted_field_editor.html';
 
@@ -19,7 +19,7 @@ uiRoutes
   controller: function FieldEditorPageController($route, Private, Notifier, docTitle) {
     const Field = Private(IndexPatternsFieldProvider);
     const notify = new Notifier({ location: 'Field Editor' });
-    const kbnUrl = Private(UrlProvider);
+    const kbnUrl = Private(KbnUrlProvider);
 
     this.mode = $route.current.mode;
     this.indexPattern = $route.current.locals.indexPattern;

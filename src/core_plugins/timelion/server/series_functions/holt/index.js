@@ -5,7 +5,7 @@ import des from './lib/des';
 import tes from './lib/tes';
 import toMilliseconds from '../../lib/to_milliseconds';
 
-module.exports = new Chainable('holt', {
+export default new Chainable('holt', {
   args: [
     {
       name: 'inputSeries',

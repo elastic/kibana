@@ -4,18 +4,6 @@ const urlVersion = metadata.branch;
 const baseUrl = 'https://www.elastic.co/';
 
 export const documentationLinks = {
-  elasticsearch: {
-    docs: `${baseUrl}guide/en/elasticsearch/reference/current`
-  },
-  beats: {
-    docs: `${baseUrl}guide/en/beats/libbeat/current`
-  },
-  logstash: {
-    docs: `${baseUrl}guide/en/logstash/current`
-  },
-  kibana: {
-    docs: `${baseUrl}guide/en/kibana/current`
-  },
   filebeat: {
     installation: `${baseUrl}guide/en/beats/filebeat/${urlVersion}/filebeat-installation.html`,
     configuration: `${baseUrl}guide/en/beats/filebeat/${urlVersion}/filebeat-configuration.html`,
@@ -33,8 +21,10 @@ export const documentationLinks = {
     luceneExpressions: `${baseUrl}guide/en/elasticsearch/reference/${urlVersion}/modules-scripting-expression.html`
   },
   query: {
-    luceneQuerySyntax: `${baseUrl}guide/en/elasticsearch/reference/${urlVersion}/query-dsl-query-string-query.html#query-string-syntax`
+    luceneQuerySyntax: `${baseUrl}guide/en/elasticsearch/reference/${urlVersion}/query-dsl-query-string-query.html#query-string-syntax`,
+    queryDsl: `${baseUrl}guide/en/elasticsearch/reference/${urlVersion}/query-dsl.html`,
   },
-  demoSite: 'http://demo.elastic.co',
-  gettingStarted: `${baseUrl}products/kibana/getting-started-link`
+  date: {
+    dateMath: `${baseUrl}guide/en/elasticsearch/reference/${urlVersion}/common-options.html#date-math`
+  },
 };

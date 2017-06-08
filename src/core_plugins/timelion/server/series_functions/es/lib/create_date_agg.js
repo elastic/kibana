@@ -1,6 +1,6 @@
 import _ from 'lodash';
 
-module.exports = function createDateAgg(config, tlConfig) {
+export default function createDateAgg(config, tlConfig) {
   const dateAgg = {
     time_buckets: {
       meta: { type: 'time_buckets' },
@@ -39,4 +39,4 @@ module.exports = function createDateAgg(config, tlConfig) {
   });
 
   return dateAgg;
-};
+}

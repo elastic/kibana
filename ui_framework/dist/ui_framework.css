@@ -28,9 +28,8 @@
  * 1. Prevent Firefox users from being able to resize textareas to smaller than the min-height.
  */
 /**
- * 1. Angular will add an ng-untouched class to an input if it hasn't been touched yet.
- *    We only want invalid inputs to appear invalid after the user has had a chance to interact
- *    with it.
+ * We specifically don't include Angular's ng-${state} classes here because we don't want to be tightly
+ * coupled with Angular.
  */
 /**
  * 1. Embedded SVG of fa-caret-down (https://github.com/encharm/Font-Awesome-SVG-PNG/blob/master/black/svg/caret-down.svg).
@@ -392,6 +391,52 @@ body {
 
 /**
  * 1. Override Bootstrap.
+ */
+.kuiButton--warning {
+  color: #FFF;
+  background-color: #f3bb57; }
+  .kuiButton--warning:not(a):enabled:focus {
+    z-index: 1;
+    /* 1 */
+    outline: none !important;
+    /* 2 */
+    box-shadow: 0 0 0 1px #ffffff, 0 0 0 2px #ffa500;
+    /* 3 */
+    color: #FFF; }
+  a.kuiButton--warning:not(.kuiButton-isDisabled):focus {
+    /* 1 */
+    z-index: 1;
+    /* 1 */
+    outline: none !important;
+    /* 2 */
+    box-shadow: 0 0 0 1px #ffffff, 0 0 0 2px #ffa500;
+    /* 3 */
+    color: #FFF; }
+  .kuiButton--warning:enabled:hover {
+    color: #FFF !important;
+    /* 1 */
+    background-color: #e69606; }
+  a.kuiButton--warning:not(.kuiButton-isDisabled):hover {
+    /* 1 */
+    color: #FFF !important;
+    /* 1 */
+    background-color: #e69606; }
+  .kuiButton--warning:enabled:active {
+    color: #FFF !important;
+    /* 1 */
+    background-color: #e69606; }
+  a.kuiButton--warning:not(.kuiButton-isDisabled):active {
+    /* 1 */
+    color: #FFF !important;
+    /* 1 */
+    background-color: #e69606; }
+  .kuiButton--warning:disabled {
+    background-color: #f4debc; }
+  a.kuiButton--warning.kuiButton-isDisabled {
+    background-color: #f4debc; }
+
+/**
+ * 1. Override Bootstrap.
  * 2. Override either Bootstrap or Timelion styles.
  */
 .kuiButton--hollow {
@@ -535,26 +580,24 @@ body {
   -webkit-flex-wrap: wrap;
       -ms-flex-wrap: wrap;
           flex-wrap: wrap;
-  /* 1 */ }
-
-/**
+  /* 1 */
+  /**
    * 1. Use the defined width of the card to determine when to wrap.
    * 2. Use an even margin all around the card so that the spacing is still even when wrapped.
-   */
-.kuiCardGroup__card {
-  -webkit-box-flex: 1;
-  -webkit-flex: 1 1 0;
-      -ms-flex: 1 1 0px;
-          flex: 1 1 0;
-  /* 1 */
-  margin: 15px;
-  /* 2 */ }
-
-.kuiCardGroup__cardDescription {
-  -webkit-box-flex: 1;
-  -webkit-flex: 1 1 auto;
-      -ms-flex: 1 1 auto;
-          flex: 1 1 auto; }
+   */ }
+  .kuiCardGroup .kuiCard {
+    -webkit-box-flex: 1;
+    -webkit-flex: 1 1 0;
+        -ms-flex: 1 1 0px;
+            flex: 1 1 0;
+    /* 1 */
+    margin: 15px;
+    /* 2 */ }
+    .kuiCardGroup .kuiCard .kuiCard__description {
+      -webkit-box-flex: 1;
+      -webkit-flex: 1 1 auto;
+          -ms-flex: 1 1 auto;
+              flex: 1 1 auto; }
 
 /**
  * 1. There's no way to make this look good when wrapped.
@@ -567,11 +610,11 @@ body {
   border: 1px solid #E0E0E0;
   border-radius: 4px;
   overflow: hidden; }
-  .kuiCardGroup--united .kuiCardGroup__card {
+  .kuiCardGroup--united .kuiCard {
     border: none;
     border-radius: 0;
     margin: 0; }
-  .kuiCardGroup--united .kuiCardGroup__card + .kuiCardGroup__card {
+  .kuiCardGroup--united .kuiCard + .kuiCard {
     border-left: 1px solid #E0E0E0; }
 
 .kuiCollapseButton {
@@ -920,8 +963,7 @@ body {
   position: relative;
   font-size: 14px;
   line-height: 1.5; }
-  .kuiSearchInput.kuiSearchInput-isInvalid .kuiSearchInput__input:not(.ng-untouched) {
-    /* 1 */
+  .kuiSearchInput.kuiSearchInput-isInvalid .kuiSearchInput__input {
     border-color: #D86051; }
 
 .kuiSearchInput__icon {
@@ -957,8 +999,7 @@ body {
   /* 2 */ }
   .theme-dark .kuiSearchInput__input {
     color: #cecece; }
-  .kuiSearchInput__input:invalid:not(.ng-untouched) {
-    /* 1 */
+  .kuiSearchInput__input:invalid {
     border-color: #D86051; }
   .kuiSearchInput__input:focus {
     outline: none;
@@ -999,8 +1040,7 @@ body {
   /* 2 */ }
   .theme-dark .kuiSelect {
     color: #cecece; }
-  .kuiSelect:invalid:not(.ng-untouched) {
-    /* 1 */
+  .kuiSelect:invalid {
     border-color: #D86051; }
   .kuiSelect:focus {
     outline: none;
@@ -1061,8 +1101,7 @@ body {
   /* 1 */ }
   .theme-dark .kuiTextArea {
     color: #cecece; }
-  .kuiTextArea:invalid:not(.ng-untouched) {
-    /* 1 */
+  .kuiTextArea:invalid {
     border-color: #D86051; }
   .kuiTextArea:focus {
     outline: none;
@@ -1076,8 +1115,7 @@ body {
     .theme-dark .kuiTextArea:focus {
       outline: none;
       border-color: #6EADC1; }
-  .kuiTextArea.kuiTextArea-isInvalid:not(.ng-untouched) {
-    /* 1 */
+  .kuiTextArea.kuiTextArea-isInvalid {
     border-color: #D86051; }
 
 .kuiTextArea--nonResizable {
@@ -1101,8 +1139,7 @@ body {
   /* 1 */ }
   .theme-dark .kuiTextInput {
     color: #cecece; }
-  .kuiTextInput:invalid:not(.ng-untouched) {
-    /* 1 */
+  .kuiTextInput:invalid {
     border-color: #D86051; }
   .kuiTextInput:focus {
     outline: none;
@@ -1116,8 +1153,7 @@ body {
     .theme-dark .kuiTextInput:focus {
       outline: none;
       border-color: #6EADC1; }
-  .kuiTextInput.kuiTextInput-isInvalid:not(.ng-untouched) {
-    /* 1 */
+  .kuiTextInput.kuiTextInput-isInvalid {
     border-color: #D86051; }
 
 .kuiTextInput--small {
@@ -1450,18 +1486,22 @@ body {
   padding-left: 10px;
   /* 1 */ }
 
-.kuiLocalBreadcrumb + .kuiLocalBreadcrumb {
-  margin-left: 6px; }
-  .kuiLocalBreadcrumb + .kuiLocalBreadcrumb:before {
-    content: '/';
-    -webkit-user-select: none;
-       -moz-user-select: none;
-        -ms-user-select: none;
-            user-select: none;
-    margin-right: 4px;
-    color: #5a5a5a; }
-    .theme-dark .kuiLocalBreadcrumb + .kuiLocalBreadcrumb:before {
-      color: #a5a5a5; }
+.kuiLocalBreadcrumb {
+  font-size: 14px;
+  margin: 0;
+  font-weight: normal; }
+  .kuiLocalBreadcrumb + .kuiLocalBreadcrumb {
+    margin-left: 6px; }
+    .kuiLocalBreadcrumb + .kuiLocalBreadcrumb:before {
+      content: '/';
+      -webkit-user-select: none;
+         -moz-user-select: none;
+          -ms-user-select: none;
+              user-select: none;
+      margin-right: 4px;
+      color: #5a5a5a; }
+      .theme-dark .kuiLocalBreadcrumb + .kuiLocalBreadcrumb:before {
+        color: #a5a5a5; }
 
 /**
  * 1. Make it a bit darker to contrast with the gray background.
@@ -1920,8 +1960,7 @@ body {
   border-radius: 4px 0 0 4px; }
   .theme-dark .kuiLocalSearchInput {
     color: #cecece; }
-  .kuiLocalSearchInput:invalid:not(.ng-untouched) {
-    /* 1 */
+  .kuiLocalSearchInput:invalid {
     border-color: #D86051; }
   .kuiLocalSearchInput:focus {
     outline: none;
@@ -2002,8 +2041,7 @@ body {
   border-radius: 0; }
   .theme-dark .kuiLocalSearchSelect {
     color: #cecece; }
-  .kuiLocalSearchSelect:invalid:not(.ng-untouched) {
-    /* 1 */
+  .kuiLocalSearchSelect:invalid {
     border-color: #D86051; }
   .kuiLocalSearchSelect:focus {
     outline: none;

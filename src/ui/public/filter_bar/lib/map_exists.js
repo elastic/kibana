@@ -1,11 +1,10 @@
 export function FilterBarLibMapExistsProvider(Promise) {
   return function (filter) {
-    let key;
-    let value;
     if (filter.exists) {
-      key = 'exists';
-      value = filter.exists.field;
-      return Promise.resolve({ key: key, value: value });
+      const type = 'exists';
+      const key = filter.exists.field;
+      const value = type;
+      return Promise.resolve({ type, key, value });
     }
     return Promise.reject(filter);
   };

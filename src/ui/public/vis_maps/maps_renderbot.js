@@ -9,8 +9,8 @@ import './lib/service_settings';
 import './styles/_tilemap.less';
 import { ResizeCheckerProvider } from 'ui/resize_checker';
 
-
-module.exports = function MapsRenderbotFactory(Private, $injector, serviceSettings, Notifier, courier, getAppState) {
+// eslint-disable-next-line kibana-custom/no-default-export
+export default function MapsRenderbotFactory(Private, $injector, serviceSettings, Notifier, courier, getAppState) {
 
   const ResizeChecker = Private(ResizeCheckerProvider);
   const Renderbot = Private(VisRenderbotProvider);
@@ -213,10 +213,7 @@ module.exports = function MapsRenderbotFactory(Private, $injector, serviceSettin
       return _.assign(
         {},
         this.vis.type.params.defaults,
-        {
-          type: this.vis.type.name,
-          hasTimeField: this.vis.indexPattern && this.vis.indexPattern.hasTimeField()// Add attribute which determines whether an index is time based or not.
-        },
+        { type: this.vis.type.name },
         this.vis.params
       );
     }
@@ -262,4 +259,4 @@ module.exports = function MapsRenderbotFactory(Private, $injector, serviceSettin
 
 
   return MapsRenderbot;
-};
+}

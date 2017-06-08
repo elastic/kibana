@@ -1,0 +1,52 @@
+[[release-notes-6.0.0-alpha2]]
+== 6.0.0-alpha2 Release Notes
+
+Also see <<breaking-changes-6.0>>.
+
+
+[float]
+[[breaking-6.0.0-alpha2]]
+=== Breaking changes
+Core::
+* Remove legacy pre-4.2 configurations {pull}12013[#12013]
+* NODE_ENV no longer has an impact on Kibana {pull}12010[#12010]
+* Only support 64 bit operating systems {pull}11941[#11941]
+
+
+[float]
+[[feature-6.0.0-alpha2]]
+=== New features
+Core::
+* Getting started page {pull}11805[#11805]
+Dashboard::
+* Clone dashboard from view mode {pull}10925[#10925]
+Visualize::
+* Region map {pull}10937[#10937]
+* Gauge chart {pull}10336[#10336]
+
+
+[float]
+[[enhancement-6.0.0-alpha2]]
+=== Enhancements
+Core::
+* Add new UI setting to control the amount of items in listing pages {pull}11674[#11674]
+Discover::
+* Apply filters to the event context view {pull}11466[#11466]
+Timelion::
+* Support multiline Timelion queries {pull}11972[#11972]
+Time series visual builder::
+* Help text for writing painless scripts {pull}11936[#11936]
+* Toggle for automatically applying changes to visualization {pull}11460[#11460]
+Timepicker::
+* Improve accessibility of the datepicker {pull}11753[#11753]
+
+
+[float]
+[[bug-6.0.0-alpha2]]
+=== Bug fixes
+Timelion::
+* Timelion tutorial now persists until you close it {pull}11962[#11962]
+Time series visual builder::
+* No longer trigger error in certain circumstances when using using percentiles {pull}11772[#11772]
+Visualize::
+* Disable save button if visualization is dirty {pull}11576[#11576]

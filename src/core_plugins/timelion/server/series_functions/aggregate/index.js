@@ -12,7 +12,7 @@ const functions = {
   sum: require('./sum')
 };
 
-module.exports = new Chainable('aggregate', {
+export default new Chainable('aggregate', {
   args: [
     {
       name: 'inputSeries',

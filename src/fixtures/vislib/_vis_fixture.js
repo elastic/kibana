@@ -31,7 +31,7 @@ afterEach(function () {
   count = 0;
 });
 
-module.exports = function VislibFixtures(Private) {
+export default function VislibFixtures(Private) {
   return function (visLibParams) {
     const Vis = Private(VislibVisProvider);
     return new Vis($visCanvas.new(), _.defaults({}, visLibParams || {}, {
@@ -40,8 +40,7 @@ module.exports = function VislibFixtures(Private) {
       defaultYExtents: false,
       setYExtents: false,
       yAxis: {},
-      type: 'histogram',
-      hasTimeField: true
+      type: 'histogram'
     }));
   };
-};
+}

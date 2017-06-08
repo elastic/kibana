@@ -21,7 +21,7 @@ function unflatten(data) {
   return result[''] || result;
 }
 
-module.exports = new Chainable('props', {
+export default new Chainable('props', {
   args: [
     {
       name: 'inputSeries',

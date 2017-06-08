@@ -62,6 +62,27 @@ module.exports = function (grunt) {
       ]
     },
 
+    devApiTestServer: {
+      options: {
+        wait: false,
+        ready: /Server running/,
+        quiet: false,
+        failOnError: false
+      },
+      cmd: binScript,
+      args: [
+        ...stdDevArgs,
+        '--dev',
+        '--no-base-path',
+        '--no-ssl',
+        '--optimize.enabled=false',
+        '--elasticsearch.url=' + format(esTestServerUrlParts),
+        '--server.port=' + kibanaTestServerUrlParts.port,
+        '--server.xsrf.disableProtection=true',
+        ...kbnServerFlags,
+      ]
+    },
+
     testUIServer: {
       options: {
         wait: false,

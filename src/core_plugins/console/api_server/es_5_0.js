@@ -53,4 +53,6 @@ ES_5_0.prototype = _.create(Api.prototype, { 'constructor': ES_5_0 });
   };
 })(ES_5_0.prototype);
 
-module.exports = new ES_5_0();
+const instance = new ES_5_0();
+
+export default instance;

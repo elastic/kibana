@@ -4,7 +4,7 @@
       class="kuiLink documentTableRow__action"
       data-test-subj="docTableRowAction"
       ng-href="{{ getContextAppHref() }}"
-      ng-if="indexPattern.hasTimeField()"
+      ng-if="indexPattern.isTimeBased()"
     >
       View surrounding documents
     </a>
