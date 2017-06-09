@@ -1102,7 +1102,7 @@ body {
     border-color: #D86051; }
   .kuiSelect:focus {
     outline: none;
-    border-color: #6EADC1; }
+    border-color: #0079a5; }
   .kuiSelect:disabled {
     opacity: 0.4;
     cursor: not-allowed; }
@@ -1111,9 +1111,13 @@ body {
     border-color: #444444; }
     .theme-dark .kuiSelect:focus {
       outline: none;
-      border-color: #6EADC1; }
+      border-color: #0079a5; }
   .kuiSelect.kuiSelect-isInvalid {
     border-color: #D86051; }
+  .kuiSelect:focus {
+    box-shadow: none;
+    outline: none;
+    border-color: #0079a5; }
 
 .kuiSelect--large {
   min-width: 400px; }
@@ -1169,6 +1173,10 @@ body {
     .theme-dark .kuiTextArea:focus {
       outline: none;
       border-color: #0079a5; }
+  .kuiTextArea:focus {
+    box-shadow: none;
+    outline: none;
+    border-color: #0079a5; }
   .kuiTextArea.kuiTextArea-isInvalid {
     border-color: #D86051; }
 
