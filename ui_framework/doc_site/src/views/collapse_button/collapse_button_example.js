@@ -1,4 +1,5 @@
 import React from 'react';
+import { renderToHtml } from '../../services';
 
 import {
   GuideDemo,
@@ -8,13 +9,18 @@ import {
   GuideText,
 } from '../../components';
 
-const collapseButtonHtml = require('./collapse_button.html');
+import CollapseButton from './collapse_button';
+const collapseButtonSource = require('!!raw!./collapse_button');
+const collapseButtonHtml = renderToHtml(CollapseButton);
 
 export default props => (
   <GuidePage title={props.route.name}>
     <GuideSection
       title="CollapseButton"
       source={[{
+        type: GuideSectionTypes.JS,
+        code: collapseButtonSource,
+      }, {
         type: GuideSectionTypes.HTML,
         code: collapseButtonHtml,
       }]}
@@ -24,9 +30,9 @@ export default props => (
         containers.
       </GuideText>
 
-      <GuideDemo
-        html={collapseButtonHtml}
-      />
+      <GuideDemo>
+        <CollapseButton />
+      </GuideDemo>
     </GuideSection>
   </GuidePage>
 );
