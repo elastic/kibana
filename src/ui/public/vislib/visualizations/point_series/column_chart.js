@@ -93,18 +93,19 @@ export function VislibVisualizationsColumnChartProvider(Private) {
       const isHorizontal = this.getCategoryAxis().axisConfig.isHorizontal();
       const isTimeScale = this.getCategoryAxis().axisConfig.isTimeDomain();
       const yMin = yScale.domain()[0];
-      const groupSpacingPercentage = 0.15;
+      const gutterSpacingPercentage = 0.15;
       const groupCount = this.getGroupedCount();
       const groupNum = this.getGroupedNum(this.chartData);
 
       let barWidth;
+      let gutterWidth;
       if (isTimeScale) {
         const { min, interval } = this.handler.data.get('ordered');
-        let groupWidth = xScale(min + interval) - xScale(min);
-        groupWidth = Math.abs(groupWidth);
-        const groupSpacing = groupWidth * groupSpacingPercentage;
+        let intervalWidth = xScale(min + interval) - xScale(min);
+        intervalWidth = Math.abs(intervalWidth);
 
-        barWidth = (groupWidth - groupSpacing) / groupCount;
+        gutterWidth = intervalWidth * gutterSpacingPercentage;
+        barWidth = (intervalWidth - gutterWidth) / groupCount;
       }
 
       function x(d) {
@@ -119,8 +120,19 @@ export function VislibVisualizationsColumnChartProvider(Private) {
         return yScale(d.y0 + d.y);
       }
 
-      function widthFunc() {
-        return isTimeScale ? barWidth : xScale.rangeBand() / groupCount;
+      function widthFunc(d, i) {
+        if (isTimeScale) {
+          //Time intervals are not always equal widths: Jan has 31 days and Feb has 28 days
+          //It is more visually appealing to vary bar width so that gutter width is constant.
+          let datumWidth = barWidth;
+          const nextDatum = bars.data()[i + 1];
+          if (nextDatum) {
+            datumWidth = (xScale(nextDatum.x) - xScale(d.x)) - gutterWidth;
+          }
+          return datumWidth;
+        } else {
+          return xScale.rangeBand() / groupCount;
+        }
       }
 
       function heightFunc(d) {
