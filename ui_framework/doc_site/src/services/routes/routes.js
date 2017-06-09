@@ -139,6 +139,7 @@ const components = [{
 }, {
   name: 'CollapseButton',
   component: CollapseButtonExample,
+  hasReact: true,
 }, {
   name: 'EmptyTablePrompt',
   component: EmptyTablePromptExample,
