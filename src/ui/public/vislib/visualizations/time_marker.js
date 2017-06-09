@@ -54,7 +54,19 @@ export function VislibVisualizationsTimeMarkerProvider() {
           return d.width;
         })
         .attr('stroke-opacity', function (d) {
-          return d.opacity;
+          let opacity = d.opacity;
+          // hide marker when time extends significantly past scale domain
+          if (self.xScale.clamp()) {
+            const domainStart = self.xScale.domain()[0];
+            const domainEnd = self.xScale.domain()[1];
+            const domainSpan = domainEnd.getTime() - domainStart.getTime();
+            // can not use exact times since domain could be rounded with nice
+            const slop = domainSpan * 0.025;
+            if (d.time > domainEnd.getTime() + slop) {
+              opacity = 0;
+            }
+          }
+          return opacity;
         })
         .attr('x1', function (d) {
           return self.xScale(d.time);
