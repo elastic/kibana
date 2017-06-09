@@ -44,7 +44,6 @@
     z-index: 1;
     color: $globalLinkColor;
     border: 1px solid $globalSelectedBorderColor !important;
-    padding-bottom: 11px; /* 4 */
   }
 
   &:hover:not(.kuiTab-isSelected) {

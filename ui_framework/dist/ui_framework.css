@@ -2882,9 +2882,7 @@ body {
   .kuiTab:focus:not(.kuiTab-isSelected):not(:active) {
     z-index: 1;
     color: #0079a5;
-    border: 1px solid #0079a5 !important;
-    padding-bottom: 11px;
-    /* 4 */ }
+    border: 1px solid #0079a5 !important; }
   .kuiTab:hover:not(.kuiTab-isSelected) {
     color: #006E8A;
     background-color: #F2F2F2; }
