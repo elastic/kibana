@@ -11,7 +11,8 @@ export function KuiButton({ onClick, isDisabled }) {
 Bad:
 ```
 export class KuiButton extends React.Component {
-  render({ onClick, isDisabled }) {
+  render() {
+    const { onClick, isDisabled } = this.props;
     return <button className="kuiButton" onClick={onClick} isDisabled={isDisabled}/>
   }
 }
@@ -21,17 +22,15 @@ export class KuiButton extends React.Component {
 Good:
 ```
 export class ClickCounter extends React.Component {
-  constructor() {
-    this.state = {
-      clickCount: 0
-    };
+  state = { clickCount: 0 };
+
+  onClick = () => {
+    this.setState(prevState => ({
+      clickCount: prevState.clickCount + 1
+    }));
   }
 
-  onClick() {
-    this.setState({ clickCount: this.state.clickCount++ });
-  }
-
-  render({ onClick }) {
+  render() {
     return <button className="kuiButton" onClick={this.onClick}/>
   }
 }
@@ -45,12 +44,29 @@ Bad:
     };
   },
   onClick() {
-    this.setState({ clickCount: this.state.clickCount++ });
+    this.setState(prevState => ({
+      clickCount: prevState.clickCount + 1
+    }));
   },
-  render({ onClick }) {
+  render() {
     return <button className="kuiButton" onClick={this.onClick}/>
   }
 });
+```
+
+### When a state change only involves the previous state, pass setState a function instead of an object.
+https://facebook.github.io/react/docs/react-component.html#setstate
+
+Good:
+```
+ this.setState(prevState => ({
+   clickCount: prevState.clickCount + 1
+ }));
+```
+
+Bad:
+```
+  this.setState({ clickCount: this.state.clickCount++ });
 ```
 
 ### Prefer reactDirective over react-component
@@ -77,12 +93,13 @@ Bad:
 ```
 button.js:
 export class Button extends React.Component {
-  render({ onClick, isDisabled }) {
+  render() {
+    const { onClick, isDisabled } = this.props;
     return <button className="kuiButton" onClick={onClick} isDisabled={isDisabled}/>
   }
 }
 ```
-The filenames leave it off because snake casing already increases file name length. The prefix is left on for the components to avoid any naming collisions.
+The filenames leave it off because snake casing already increases file name length.
 
 ### Action function names and prop function names
 
@@ -96,17 +113,15 @@ Name action functions in the form of a strong verb and passed properties in the 
 Best (relies on [stage 2 proposal](https://github.com/tc39/proposal-class-public-fields)):
 ```
 export class ClickCounter extends React.Component {
-  constructor() {
-    this.state = { clickCount: 0 };
-  }
+  state = { clickCount: 0 };
 
   // This syntax ensures `this` is bound within handleClick
   onClick = () => {
-    this.setState({ clickCount: this.state.clickCount++ });
+    this.setState(prevState => { clickCount: prevState.clickCount + 1 });
   }
 
-  render({ onClick }) {
-    return <button className="kuiButton" onClick={this.onClick}/>
+  render() {
+    return <button className="kuiButton" onClick={this.onClick} />
   }
 }
 ```
@@ -119,42 +134,25 @@ export class ClickCounter extends React.Component {
   }
 
   onClick() {
-    this.setState({ clickCount: this.state.clickCount++ });
+    this.setState(prevState => { clickCount: prevState.clickCount + 1 });
   }
 
-  render({ onClick }) {
+  render() {
     return <button className="kuiButton" onClick={this.onClick}/>
   }
 }
 ```
-Okay:
-```
-export class ClickCounter extends React.Component {
-  constructor() {
-    this.state = { clickCount: 0 };
-  }
 
-  onClick() {
-    this.setState({ clickCount: this.state.clickCount++ });
-  }
-
-  render({ onClick }) {
-    return <button className="kuiButton" onClick={this.onClick.bind(this)}/>
-  }
-}
-```
 Bad:
 ```
 export class ClickCounter extends React.Component {
-  constructor() {
-    this.state = { clickCount: 0 };
-  }
+  state = { clickCount: 0 };
 
   onClick() {
-    this.setState({ clickCount: this.state.clickCount++ });
+    this.setState(prevState => { clickCount: prevState.clickCount + 1 });
   }
 
-  render({ onClick }) {
+  render() {
     return <button className="kuiButton" onClick={() => this.onClick()}/>
   }
 }
@@ -165,7 +163,7 @@ There is also an eslint rule we should be able to turn on for this.
 ### Never mutate state directly
 Good:
 ```
-this.setState({ clickCount: this.state.clickCount + 1 });
+this.setState(prevState => { clickCount: prevState.clickCount + 1 });
 ```
 Bad:
 ```
@@ -181,7 +179,7 @@ this.setState({
 });
 ```
 
-Bad:
+Discouraged:
 ```
 this.setState({
   pager: new Pager(),
@@ -191,4 +189,4 @@ this.setState({
 
 ## General Guidelines
 ### Prefer pure functions when possible
-Pure functions are easier to understand. I don't want to have to think about side effects or mutated state. When invoking a pure function, all I have to think about is what goes in and what comes out.
+Pure functions are easier to understand. We don't want to have to think about side effects or mutated state. When invoking a pure function, all we have to think about is what goes in and what comes out.
