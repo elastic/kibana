@@ -1,69 +1,69 @@
+import _ from 'lodash';
 import { FilterBarQueryFilterProvider } from 'ui/filter_bar/query_filter';
+import { uiModules } from 'ui/modules';
+import timezoneProvider from 'plugins/timelion/services/timezone';
+import { dashboardContextProvider } from 'plugins/kibana/dashboard/dashboard_context';
+import 'plugins/timelion/directives/chart/chart';
+import 'plugins/timelion/directives/timelion_interval/timelion_interval';
+import 'ui/state_management/app_state';
 
-define(function (require) {
-  require('plugins/timelion/directives/chart/chart');
-  require('plugins/timelion/directives/timelion_interval/timelion_interval');
-  require('ui/state_management/app_state');
+const module = uiModules.get('kibana/timelion_vis', ['kibana']);
 
-  const _ = require('lodash');
-  const module = require('ui/modules').get('kibana/timelion_vis', ['kibana']);
-  module.controller('TimelionVisController', function ($scope, $element, Private, Notifier, $http, $rootScope, timefilter) {
-    const queryFilter = Private(FilterBarQueryFilterProvider);
-    const timezone = Private(require('plugins/timelion/services/timezone'))();
-    const dashboardContext = Private(require('plugins/timelion/services/dashboard_context'));
+module.controller('TimelionVisController', function ($scope, $element, Private, Notifier, $http, $rootScope, timefilter) {
+  const queryFilter = Private(FilterBarQueryFilterProvider);
+  const timezone = Private(timezoneProvider)();
+  const dashboardContext = Private(dashboardContextProvider);
 
-    const notify = new Notifier({
-      location: 'Timelion'
+  const notify = new Notifier({
+    location: 'Timelion'
+  });
+
+  $scope.search = function run() {
+    const expression = $scope.vis.params.expression;
+    if (!expression) return;
+
+    $http.post('../api/timelion/run', {
+      sheet: [expression],
+      extended: {
+        es: {
+          filter: dashboardContext()
+        }
+      },
+      time: _.extend(timefilter.time, {
+        interval: $scope.vis.params.interval,
+        timezone: timezone
+      }),
+    })
+    // data, status, headers, config
+    .success(function (resp) {
+      $scope.sheet = resp.sheet;
+    })
+    .error(function (resp) {
+      $scope.sheet = [];
+      const err = new Error(resp.message);
+      err.stack = resp.stack;
+      notify.error(err);
     });
+  };
 
-    $scope.search = function run() {
-      const expression = $scope.vis.params.expression;
-      if (!expression) return;
+  // This is bad, there should be a single event that triggers a refresh of data.
 
-      $http.post('../api/timelion/run', {
-        sheet: [expression],
-        extended: {
-          es: {
-            filter: dashboardContext()
-          }
-        },
-        time: _.extend(timefilter.time, {
-          interval: $scope.vis.params.interval,
-          timezone: timezone
-        }),
-      })
-      // data, status, headers, config
-      .success(function (resp) {
-        $scope.sheet = resp.sheet;
-      })
-      .error(function (resp) {
-        $scope.sheet = [];
-        const err = new Error(resp.message);
-        err.stack = resp.stack;
-        notify.error(err);
-      });
-    };
+  // When the expression updates
+  $scope.$watchMulti(['vis.params.expression', 'vis.params.interval'], $scope.search);
 
-    // This is bad, there should be a single event that triggers a refresh of data.
+  // When the time filter changes
+  $scope.$listen(timefilter, 'fetch', $scope.search);
 
-    // When the expression updates
-    $scope.$watchMulti(['vis.params.expression', 'vis.params.interval'], $scope.search);
+  // When a filter is added to the filter bar?
+  $scope.$listen(queryFilter, 'fetch', $scope.search);
 
-    // When the time filter changes
-    $scope.$listen(timefilter, 'fetch', $scope.search);
+  // When auto refresh happens
+  $scope.$on('courier:searchRefresh', $scope.search);
 
-    // When a filter is added to the filter bar?
-    $scope.$listen(queryFilter, 'fetch', $scope.search);
+  $scope.$on('fetch', $scope.search);
 
-    // When auto refresh happens
-    $scope.$on('courier:searchRefresh', $scope.search);
-
-    $scope.$on('fetch', $scope.search);
-
-    $scope.$on('renderComplete', event => {
-      event.stopPropagation();
-      $element.trigger('renderComplete');
-    });
-
+  $scope.$on('renderComplete', event => {
+    event.stopPropagation();
+    $element.trigger('renderComplete');
   });
 });

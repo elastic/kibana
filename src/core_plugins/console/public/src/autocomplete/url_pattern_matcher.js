@@ -1,8 +1,7 @@
 let _ = require('lodash');
 let engine = require('./engine');
 
-module.exports.URL_PATH_END_MARKER = "__url_path_end__";
-
+export const URL_PATH_END_MARKER = "__url_path_end__";
 
 function AcceptEndpointComponent(endpoint, parent) {
   engine.SharedComponent.call(this, endpoint.id, parent);
@@ -14,7 +13,7 @@ AcceptEndpointComponent.prototype = _.create(engine.SharedComponent.prototype, {
 (function (cls) {
 
   cls.match = function (token, context, editor) {
-    if (token !== module.exports.URL_PATH_END_MARKER) {
+    if (token !== URL_PATH_END_MARKER) {
       return null;
     }
     if (this.endpoint.methods && -1 === _.indexOf(this.endpoint.methods, context.method)) {
@@ -41,7 +40,7 @@ AcceptEndpointComponent.prototype = _.create(engine.SharedComponent.prototype, {
    * }
  * @constructor
  */
-function UrlPatternMatcher(parametrizedComponentFactories) {
+export function UrlPatternMatcher(parametrizedComponentFactories) {
   // This is not really a component, just a handy container to make iteration logic simpler
   this.rootComponent = new engine.SharedComponent("ROOT");
   this.parametrizedComponentFactories = parametrizedComponentFactories || {};
@@ -120,5 +119,3 @@ function UrlPatternMatcher(parametrizedComponentFactories) {
   }
 
 })(UrlPatternMatcher.prototype);
-
-module.exports.UrlPatternMatcher = UrlPatternMatcher;

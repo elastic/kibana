@@ -24,6 +24,12 @@ app.directive('dashboardGrid', function ($compile, Notifier) {
        */
       createChildUiState: '=',
       /**
+       * Registers an index pattern with the dashboard app used by each panel. The index patterns are used by the
+       * filter bar for generating field suggestions.
+       * @type {function(IndexPattern)}
+       */
+      registerPanelIndexPattern: '=',
+      /**
        * Trigger after a panel has been removed from the grid.
        */
       onPanelRemoved: '=',
@@ -135,11 +141,27 @@ app.directive('dashboardGrid', function ($compile, Notifier) {
 
         $scope.$watchCollection('panels', function (panels) {
           const currentPanels = gridster.$widgets.toArray().map(
-            el => PanelUtils.findPanelByPanelIndex(el.panelIndex, $scope.panels)
+            el => {
+              const panel = PanelUtils.findPanelByPanelIndex(el.panelIndex, $scope.panels);
+              if (panel) {
+                // A panel may have had its state updated, refresh gridster with the latest values.
+                const panelElement = panelElementMapping[panel.panelIndex];
+                PanelUtils.refreshElementSizeAndPosition(panel, panelElement);
+                return panel;
+              } else {
+                return { panelIndex: el.panelIndex };
+              }
+            }
           );
 
-          // panels that have been added
+          // Panels in the grid that are missing from the panels array. This can happen if the url is modified, and a
+          // panel is manually removed.
+          const removed = _.difference(currentPanels, panels);
+          // Panels that have been added.
           const added = _.difference(panels, currentPanels);
+
+          removed.forEach(panel => $scope.removePanel(panel.panelIndex));
+
           if (added.length) {
             // See issue https://github.com/elastic/kibana/issues/2138 and the
             // subsequent fix for why we need to sort here. Short story is that
@@ -157,9 +179,10 @@ app.directive('dashboardGrid', function ($compile, Notifier) {
             added.forEach(addPanel);
           }
 
-          if (added.length) {
+          if (added.length || removed.length) {
             $scope.saveState();
           }
+          layout();
         });
 
         $scope.$on('$destroy', function () {
@@ -195,6 +218,7 @@ app.directive('dashboardGrid', function ($compile, Notifier) {
                   get-vis-click-handler="getVisClickHandler"
                   get-vis-brush-handler="getVisBrushHandler"
                   save-state="saveState"
+                  register-panel-index-pattern="registerPanelIndexPattern"
                   toggle-expand="toggleExpand(${panel.panelIndex})"
                   create-child-ui-state="createChildUiState">
             </li>`;

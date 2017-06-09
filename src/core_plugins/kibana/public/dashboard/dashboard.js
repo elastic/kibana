@@ -22,6 +22,7 @@ import { UtilsBrushEventProvider } from 'ui/utils/brush_event';
 import { FilterBarClickHandlerProvider } from 'ui/filter_bar/filter_bar_click_handler';
 import { DashboardState } from './dashboard_state';
 import { notify } from 'ui/notify';
+import './panel/get_object_loaders_for_dashboard';
 import { documentationLinks } from 'ui/documentation_links/documentation_links';
 import { showCloneModal } from './top_nav/show_clone_modal';
 
@@ -105,12 +106,26 @@ app.directive('dashboardApp', function ($injector) {
         dashboardState.syncTimefilterWithDashboard(timefilter, quickRanges);
       }
 
+      const updateState = () => {
+        // Following the "best practice" of always have a '.' in your ng-models –
+        // https://github.com/angular/angular.js/wiki/Understanding-Scopes
+        $scope.model = {
+          query: dashboardState.getQuery(),
+          darkTheme: dashboardState.getDarkTheme(),
+          timeRestore: dashboardState.getTimeRestore(),
+          title: dashboardState.getTitle(),
+          description: dashboardState.getDescription(),
+        };
+        $scope.panels = dashboardState.getPanels();
+      };
+
       // Part of the exposed plugin API - do not remove without careful consideration.
       this.appStatus = {
         dirty: !dash.id
       };
       dashboardState.stateMonitor.onChange(status => {
         this.appStatus.dirty = status.dirty || !dash.id;
+        updateState();
       });
 
       dashboardState.applyFilters(dashboardState.getQuery(), filterBar.getFilters());
@@ -121,17 +136,8 @@ app.directive('dashboardApp', function ($injector) {
       dash.searchSource.version(true);
       courier.setRootSearchSource(dash.searchSource);
 
-      // Following the "best practice" of always have a '.' in your ng-models –
-      // https://github.com/angular/angular.js/wiki/Understanding-Scopes
-      $scope.model = {
-        query: dashboardState.getQuery(),
-        darkTheme: dashboardState.getDarkTheme(),
-        timeRestore: dashboardState.getTimeRestore(),
-        title: dashboardState.getTitle(),
-        description: dashboardState.getDescription(),
-      };
+      updateState();
 
-      $scope.panels = dashboardState.getPanels();
       $scope.refresh = (...args) => {
         $rootScope.$broadcast('fetch');
         courier.fetch(...args);
@@ -201,8 +207,6 @@ app.directive('dashboardApp', function ($injector) {
         return dashboardState.uiState.createChild(path, uiState, true);
       };
 
-      $scope.onPanelRemoved = (panelIndex) => dashboardState.removePanel(panelIndex);
-
       $scope.$watch('model.darkTheme', () => {
         dashboardState.setDarkTheme($scope.model.darkTheme);
         updateTheme();
@@ -210,6 +214,17 @@ app.directive('dashboardApp', function ($injector) {
       $scope.$watch('model.description', () => dashboardState.setDescription($scope.model.description));
       $scope.$watch('model.title', () => dashboardState.setTitle($scope.model.title));
       $scope.$watch('model.timeRestore', () => dashboardState.setTimeRestore($scope.model.timeRestore));
+      $scope.indexPatterns = [];
+
+      $scope.registerPanelIndexPattern = (panelIndex, pattern) => {
+        dashboardState.registerPanelIndexPatternMap(panelIndex, pattern);
+        $scope.indexPatterns = dashboardState.getPanelIndexPatterns();
+      };
+
+      $scope.onPanelRemoved = (panelIndex) => {
+        dashboardState.removePanel(panelIndex);
+        $scope.indexPatterns = dashboardState.getPanelIndexPatterns();
+      };
 
       $scope.$listen(timefilter, 'fetch', $scope.refresh);
 

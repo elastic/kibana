@@ -12,8 +12,8 @@ export function HeaderPageProvider({ getService, getPageObjects }) {
   class HeaderPage {
 
     async clickSelector(selector) {
-      remote.setFindTimeout(defaultFindTimeout);
-      await remote.findByCssSelector(selector).click();
+      log.debug(`clickSelector(${selector})`);
+      await retry.try(async () => await remote.findByCssSelector(selector).click());
     }
 
     async clickDiscover() {

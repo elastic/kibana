@@ -28,9 +28,8 @@
  * 1. Prevent Firefox users from being able to resize textareas to smaller than the min-height.
  */
 /**
- * 1. Angular will add an ng-untouched class to an input if it hasn't been touched yet.
- *    We only want invalid inputs to appear invalid after the user has had a chance to interact
- *    with it.
+ * We specifically don't include Angular's ng-${state} classes here because we don't want to be tightly
+ * coupled with Angular.
  */
 /**
  * 1. Embedded SVG of fa-caret-down (https://github.com/encharm/Font-Awesome-SVG-PNG/blob/master/black/svg/caret-down.svg).
@@ -392,6 +391,52 @@ body {
 
 /**
  * 1. Override Bootstrap.
+ */
+.kuiButton--warning {
+  color: #FFF;
+  background-color: #f3bb57; }
+  .kuiButton--warning:not(a):enabled:focus {
+    z-index: 1;
+    /* 1 */
+    outline: none !important;
+    /* 2 */
+    box-shadow: 0 0 0 1px #ffffff, 0 0 0 2px #ffa500;
+    /* 3 */
+    color: #FFF; }
+  a.kuiButton--warning:not(.kuiButton-isDisabled):focus {
+    /* 1 */
+    z-index: 1;
+    /* 1 */
+    outline: none !important;
+    /* 2 */
+    box-shadow: 0 0 0 1px #ffffff, 0 0 0 2px #ffa500;
+    /* 3 */
+    color: #FFF; }
+  .kuiButton--warning:enabled:hover {
+    color: #FFF !important;
+    /* 1 */
+    background-color: #e69606; }
+  a.kuiButton--warning:not(.kuiButton-isDisabled):hover {
+    /* 1 */
+    color: #FFF !important;
+    /* 1 */
+    background-color: #e69606; }
+  .kuiButton--warning:enabled:active {
+    color: #FFF !important;
+    /* 1 */
+    background-color: #e69606; }
+  a.kuiButton--warning:not(.kuiButton-isDisabled):active {
+    /* 1 */
+    color: #FFF !important;
+    /* 1 */
+    background-color: #e69606; }
+  .kuiButton--warning:disabled {
+    background-color: #f4debc; }
+  a.kuiButton--warning.kuiButton-isDisabled {
+    background-color: #f4debc; }
+
+/**
+ * 1. Override Bootstrap.
  * 2. Override either Bootstrap or Timelion styles.
  */
 .kuiButton--hollow {
@@ -535,26 +580,24 @@ body {
   -webkit-flex-wrap: wrap;
       -ms-flex-wrap: wrap;
           flex-wrap: wrap;
-  /* 1 */ }
-
-/**
+  /* 1 */
+  /**
    * 1. Use the defined width of the card to determine when to wrap.
    * 2. Use an even margin all around the card so that the spacing is still even when wrapped.
-   */
-.kuiCardGroup__card {
-  -webkit-box-flex: 1;
-  -webkit-flex: 1 1 auto;
-      -ms-flex: 1 1 auto;
-          flex: 1 1 auto;
-  /* 1 */
-  margin: 15px;
-  /* 2 */ }
-
-.kuiCardGroup__cardDescription {
-  -webkit-box-flex: 1;
-  -webkit-flex: 1 1 auto;
-      -ms-flex: 1 1 auto;
-          flex: 1 1 auto; }
+   */ }
+  .kuiCardGroup .kuiCard {
+    -webkit-box-flex: 1;
+    -webkit-flex: 1 1 0;
+        -ms-flex: 1 1 0px;
+            flex: 1 1 0;
+    /* 1 */
+    margin: 15px;
+    /* 2 */ }
+    .kuiCardGroup .kuiCard .kuiCard__description {
+      -webkit-box-flex: 1;
+      -webkit-flex: 1 1 auto;
+          -ms-flex: 1 1 auto;
+              flex: 1 1 auto; }
 
 /**
  * 1. There's no way to make this look good when wrapped.
@@ -567,11 +610,11 @@ body {
   border: 1px solid #E0E0E0;
   border-radius: 4px;
   overflow: hidden; }
-  .kuiCardGroup--united .kuiCardGroup__card {
+  .kuiCardGroup--united .kuiCard {
     border: none;
-    border-radius: 0; }
-  .kuiCardGroup--united .kuiCardGroup__card + .kuiCardGroup__card {
-    margin: 0;
+    border-radius: 0;
+    margin: 0; }
+  .kuiCardGroup--united .kuiCard + .kuiCard {
     border-left: 1px solid #E0E0E0; }
 
 .kuiCollapseButton {
@@ -716,6 +759,109 @@ body {
   line-height: 1.5;
   color: #9fa3a7; }
 
+.kuiExpressionItem {
+  display: inline-block;
+  position: relative; }
+  .kuiExpressionItem + .kuiExpressionItem {
+    margin-left: 10px; }
+
+.kuiExpressionItem__button {
+  background-color: transparent;
+  padding: 5px 0px;
+  border: none;
+  border-bottom: dotted 2px #E4E4E4;
+  font-size: 14px;
+  cursor: pointer; }
+
+.kuiExpressionItem__buttonDescription {
+  color: #00A69B;
+  text-transform: uppercase; }
+
+.kuiExpressionItem__buttonValue {
+  color: #2d2d2d;
+  text-transform: lowercase; }
+
+.kuiExpressionItem__button--isActive {
+  border-bottom: solid 2px #00A69B; }
+
+.kuiExpressionItem__popover {
+  position: absolute;
+  top: calc(100% + 15px);
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-orient: vertical;
+  -webkit-box-direction: normal;
+  -webkit-flex-direction: column;
+      -ms-flex-direction: column;
+          flex-direction: column;
+  -webkit-box-flex: 1;
+  -webkit-flex: 1 1 auto;
+      -ms-flex: 1 1 auto;
+          flex: 1 1 auto;
+  background-color: white;
+  border: 1px solid #E4E4E4;
+  border-radius: 6px;
+  box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.1);
+  visibility: visible;
+  opacity: 1;
+  -webkit-transform: translateY(-5px) translateZ(0);
+          transform: translateY(-5px) translateZ(0);
+  transition: opacity 250ms cubic-bezier(0.34, 1.61, 0.7, 1), -webkit-transform 250ms cubic-bezier(0.34, 1.61, 0.7, 1);
+  transition: transform 250ms cubic-bezier(0.34, 1.61, 0.7, 1), opacity 250ms cubic-bezier(0.34, 1.61, 0.7, 1);
+  transition: transform 250ms cubic-bezier(0.34, 1.61, 0.7, 1), opacity 250ms cubic-bezier(0.34, 1.61, 0.7, 1), -webkit-transform 250ms cubic-bezier(0.34, 1.61, 0.7, 1); }
+  .kuiExpressionItem__popover.ng-hide, .kuiExpressionItem__popover.kuiExpressionItem__popover--isHidden {
+    display: block !important;
+    visibility: hidden;
+    opacity: 0;
+    -webkit-transform: translateY(0px) translateZ(0);
+            transform: translateY(0px) translateZ(0); }
+  .kuiExpressionItem__popover:before {
+    position: absolute;
+    content: "";
+    top: -8px;
+    left: 20px;
+    height: 0;
+    width: 0;
+    border-left: 8px solid transparent;
+    border-right: 8px solid transparent;
+    border-bottom: 8px solid #E4E4E4; }
+  .kuiExpressionItem__popover:after {
+    position: absolute;
+    content: "";
+    top: -7px;
+    left: 20px;
+    height: 0;
+    width: 0;
+    border-left: 8px solid transparent;
+    border-right: 8px solid transparent;
+    border-bottom: 8px solid #f1f1f1; }
+  .kuiExpressionItem__popover.kuiExpressionItem__popover--alignRight {
+    right: 0; }
+    .kuiExpressionItem__popover.kuiExpressionItem__popover--alignRight:before, .kuiExpressionItem__popover.kuiExpressionItem__popover--alignRight:after {
+      left: auto;
+      right: 20px; }
+
+.kuiExpressionItem__popoverTitle {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-flex: 1;
+  -webkit-flex: 1 1 auto;
+      -ms-flex: 1 1 auto;
+          flex: 1 1 auto;
+  background-color: #f1f1f1;
+  border-radius: 4px 4px 0 0;
+  color: #2d2d2d;
+  padding: 5px 10px;
+  line-height: 1.5; }
+
+.kuiExpressionItem__popoverContent {
+  padding: 20px;
+  white-space: nowrap; }
+
 /**
  * 1. Set inline-block so this wrapper shrinks to fit the input.
  */
@@ -817,8 +963,7 @@ body {
   position: relative;
   font-size: 14px;
   line-height: 1.5; }
-  .kuiSearchInput.kuiSearchInput-isInvalid .kuiSearchInput__input:not(.ng-untouched) {
-    /* 1 */
+  .kuiSearchInput.kuiSearchInput-isInvalid .kuiSearchInput__input {
     border-color: #D86051; }
 
 .kuiSearchInput__icon {
@@ -854,8 +999,7 @@ body {
   /* 2 */ }
   .theme-dark .kuiSearchInput__input {
     color: #cecece; }
-  .kuiSearchInput__input:invalid:not(.ng-untouched) {
-    /* 1 */
+  .kuiSearchInput__input:invalid {
     border-color: #D86051; }
   .kuiSearchInput__input:focus {
     outline: none;
@@ -893,11 +1037,23 @@ body {
   background-size: 14px;
   background-repeat: no-repeat;
   background-position: calc(100% - 8px);
-  /* 2 */ }
+  /* 2 */
+  appearance: none;
+  font-family: "Open Sans", Helvetica, Arial, sans-serif;
+  padding: 3px 12px 4px;
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 1.5;
+  color: #191E23;
+  background-color: #ffffff;
+  border: 1px solid #DEDEDE;
+  border-radius: 4px;
+  transition: border-color 0.1s linear;
+  min-height: 30px;
+  /* 1 */ }
   .theme-dark .kuiSelect {
     color: #cecece; }
-  .kuiSelect:invalid:not(.ng-untouched) {
-    /* 1 */
+  .kuiSelect:invalid {
     border-color: #D86051; }
   .kuiSelect:focus {
     outline: none;
@@ -917,6 +1073,24 @@ body {
   .theme-dark .kuiSelect {
     background-image: url('data:image/svg+xml;utf8,<svg width="1792" height="1792" viewBox="0 0 1792 1792" xmlns="http://www.w3.org/2000/svg"><path d="M1408 704q0 26-19 45l-448 448q-19 19-45 19t-45-19l-448-448q-19-19-19-45t19-45 45-19h896q26 0 45 19t19 45z" fill="#CECECE"/></svg>');
     /* 1 */ }
+  .theme-dark .kuiSelect {
+    color: #cecece; }
+  .kuiSelect:invalid {
+    border-color: #D86051; }
+  .kuiSelect:focus {
+    outline: none;
+    border-color: #6EADC1; }
+  .kuiSelect:disabled {
+    opacity: 0.4;
+    cursor: not-allowed; }
+  .theme-dark .kuiSelect {
+    background-color: #444444;
+    border-color: #444444; }
+    .theme-dark .kuiSelect:focus {
+      outline: none;
+      border-color: #6EADC1; }
+  .kuiSelect.kuiSelect-isInvalid {
+    border-color: #D86051; }
 
 .kuiSelect--large {
   min-width: 400px; }
@@ -958,8 +1132,7 @@ body {
   /* 1 */ }
   .theme-dark .kuiTextArea {
     color: #cecece; }
-  .kuiTextArea:invalid:not(.ng-untouched) {
-    /* 1 */
+  .kuiTextArea:invalid {
     border-color: #D86051; }
   .kuiTextArea:focus {
     outline: none;
@@ -973,8 +1146,7 @@ body {
     .theme-dark .kuiTextArea:focus {
       outline: none;
       border-color: #6EADC1; }
-  .kuiTextArea.kuiTextArea-isInvalid:not(.ng-untouched) {
-    /* 1 */
+  .kuiTextArea.kuiTextArea-isInvalid {
     border-color: #D86051; }
 
 .kuiTextArea--nonResizable {
@@ -998,8 +1170,7 @@ body {
   /* 1 */ }
   .theme-dark .kuiTextInput {
     color: #cecece; }
-  .kuiTextInput:invalid:not(.ng-untouched) {
-    /* 1 */
+  .kuiTextInput:invalid {
     border-color: #D86051; }
   .kuiTextInput:focus {
     outline: none;
@@ -1013,8 +1184,7 @@ body {
     .theme-dark .kuiTextInput:focus {
       outline: none;
       border-color: #6EADC1; }
-  .kuiTextInput.kuiTextInput-isInvalid:not(.ng-untouched) {
-    /* 1 */
+  .kuiTextInput.kuiTextInput-isInvalid {
     border-color: #D86051; }
 
 .kuiTextInput--small {
@@ -1347,18 +1517,22 @@ body {
   padding-left: 10px;
   /* 1 */ }
 
-.kuiLocalBreadcrumb + .kuiLocalBreadcrumb {
-  margin-left: 6px; }
-  .kuiLocalBreadcrumb + .kuiLocalBreadcrumb:before {
-    content: '/';
-    -webkit-user-select: none;
-       -moz-user-select: none;
-        -ms-user-select: none;
-            user-select: none;
-    margin-right: 4px;
-    color: #5a5a5a; }
-    .theme-dark .kuiLocalBreadcrumb + .kuiLocalBreadcrumb:before {
-      color: #a5a5a5; }
+.kuiLocalBreadcrumb {
+  font-size: 14px;
+  margin: 0;
+  font-weight: normal; }
+  .kuiLocalBreadcrumb + .kuiLocalBreadcrumb {
+    margin-left: 6px; }
+    .kuiLocalBreadcrumb + .kuiLocalBreadcrumb:before {
+      content: '/';
+      -webkit-user-select: none;
+         -moz-user-select: none;
+          -ms-user-select: none;
+              user-select: none;
+      margin-right: 4px;
+      color: #5a5a5a; }
+      .theme-dark .kuiLocalBreadcrumb + .kuiLocalBreadcrumb:before {
+        color: #a5a5a5; }
 
 /**
  * 1. Make it a bit darker to contrast with the gray background.
@@ -1817,8 +1991,7 @@ body {
   border-radius: 4px 0 0 4px; }
   .theme-dark .kuiLocalSearchInput {
     color: #cecece; }
-  .kuiLocalSearchInput:invalid:not(.ng-untouched) {
-    /* 1 */
+  .kuiLocalSearchInput:invalid {
     border-color: #D86051; }
   .kuiLocalSearchInput:focus {
     outline: none;
@@ -1899,8 +2072,7 @@ body {
   border-radius: 0; }
   .theme-dark .kuiLocalSearchSelect {
     color: #cecece; }
-  .kuiLocalSearchSelect:invalid:not(.ng-untouched) {
-    /* 1 */
+  .kuiLocalSearchSelect:invalid {
     border-color: #D86051; }
   .kuiLocalSearchSelect:focus {
     outline: none;
@@ -2016,12 +2188,24 @@ body {
   font-size: 14px;
   font-weight: bold; }
 
+/**
+ * 1. Allow class to be applied to `ul` and `ol` elements
+ */
+.kuiMenu {
+  padding-left: 0;
+  /* 1 */ }
+
 .kuiMenu--contained {
   border: 1px solid #E4E4E4; }
   .kuiMenu--contained .kuiMenuItem {
     padding: 6px 10px; }
 
+/**
+ * 1. Allow class to be applied to `li` elements
+ */
 .kuiMenuItem {
+  list-style: none;
+  /* 1 */
   padding: 6px 0; }
   .kuiMenuItem + .kuiMenuItem {
     border-top: 1px solid #E4E4E4; }
@@ -2423,7 +2607,7 @@ body {
 .kuiPanelBody {
   padding: 10px; }
 
-.kuiPromptForItems {
+.kuiEmptyTablePrompt {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -2439,12 +2623,12 @@ body {
           align-items: center;
   padding: 30px; }
 
-.kuiPromptForItems__message {
+.kuiEmptyTablePrompt__message {
   font-size: 18px;
   color: #9fa3a7;
   line-height: 1.5; }
 
-.kuiPromptForItems__actions {
+.kuiEmptyTablePrompt__actions {
   margin-top: 10px; }
 
 .kuiStatusText {

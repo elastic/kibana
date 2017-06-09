@@ -52,7 +52,7 @@ export default function ({ getService, getPageObjects }) {
           .addScriptedField(scriptedExpressionFieldName,
             'expression', 'number', null, '1', 'doc[\'machine.ram\'].value / (1024 * 1024 * 1024)'
           );
-        await retry.try(async function() {
+        await retry.try(async function () {
           expect(parseInt(await PageObjects.settings.getScriptedFieldsTabCount())).to.be(startingCount + 1);
         });
       });
@@ -66,12 +66,12 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.visualize.waitForVisualization();
         await PageObjects.discover.clickFieldListItem(scriptedExpressionFieldName);
-        await retry.try(async function() {
+        await retry.try(async function () {
           await PageObjects.discover.clickFieldListItemAdd(scriptedExpressionFieldName);
         });
         await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.visualize.waitForVisualization();
-        await retry.try(async function() {
+        await retry.try(async function () {
           const rowData = await PageObjects.discover.getDocTableIndex(1);
           expect(rowData).to.be('September 18th 2015, 18:20:57.916\n18');
         });
@@ -83,7 +83,7 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.discover.clickFieldListPlusFilter(scriptedExpressionFieldName, '14');
         await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.visualize.waitForVisualization();
-        await retry.try(async function() {
+        await retry.try(async function () {
           expect(await PageObjects.discover.getHitCount()).to.be('31');
         });
       });
@@ -119,7 +119,7 @@ export default function ({ getService, getPageObjects }) {
         await log.debug('add scripted field');
         const script = 'doc[\'machine.ram\'].value / (1024 * 1024 * 1024)';
         await PageObjects.settings.addScriptedField(scriptedPainlessFieldName, 'painless', 'number', null, '1', script);
-        await retry.try(async function() {
+        await retry.try(async function () {
           expect(parseInt(await PageObjects.settings.getScriptedFieldsTabCount())).to.be(startingCount + 1);
         });
       });
@@ -133,12 +133,12 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.visualize.waitForVisualization();
         await PageObjects.discover.clickFieldListItem(scriptedPainlessFieldName);
-        await retry.try(async function() {
+        await retry.try(async function () {
           await PageObjects.discover.clickFieldListItemAdd(scriptedPainlessFieldName);
         });
         await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.visualize.waitForVisualization();
-        await retry.try(async function() {
+        await retry.try(async function () {
           const rowData = await PageObjects.discover.getDocTableIndex(1);
           expect(rowData).to.be('September 18th 2015, 18:20:57.916\n18');
         });
@@ -150,7 +150,7 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.discover.clickFieldListPlusFilter(scriptedPainlessFieldName, '14');
         await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.visualize.waitForVisualization();
-        await retry.try(async function() {
+        await retry.try(async function () {
           expect(await PageObjects.discover.getHitCount()).to.be('31');
         });
       });
@@ -187,7 +187,7 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.settings
           .addScriptedField(scriptedPainlessFieldName2, 'painless', 'string', null, '1',
           'if (doc[\'response.raw\'].value == \'200\') { return \'good\'} else { return \'bad\'}');
-        await retry.try(async function() {
+        await retry.try(async function () {
           expect(parseInt(await PageObjects.settings.getScriptedFieldsTabCount())).to.be(startingCount + 1);
         });
       });
@@ -201,12 +201,12 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.visualize.waitForVisualization();
         await PageObjects.discover.clickFieldListItem(scriptedPainlessFieldName2);
-        await retry.try(async function() {
+        await retry.try(async function () {
           await PageObjects.discover.clickFieldListItemAdd(scriptedPainlessFieldName2);
         });
         await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.visualize.waitForVisualization();
-        await retry.try(async function() {
+        await retry.try(async function () {
           const rowData = await PageObjects.discover.getDocTableIndex(1);
           expect(rowData).to.be('September 18th 2015, 18:20:57.916\ngood');
 
@@ -219,7 +219,7 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.discover.clickFieldListPlusFilter(scriptedPainlessFieldName2, 'bad');
         await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.visualize.waitForVisualization();
-        await retry.try(async function() {
+        await retry.try(async function () {
           expect(await PageObjects.discover.getHitCount()).to.be('27');
         });
         await PageObjects.discover.removeAllFilters();
@@ -251,7 +251,7 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.settings
           .addScriptedField(scriptedPainlessFieldName2, 'painless', 'boolean', null, '1',
           'doc[\'response.raw\'].value == \'200\'');
-        await retry.try(async function() {
+        await retry.try(async function () {
           expect(parseInt(await PageObjects.settings.getScriptedFieldsTabCount())).to.be(startingCount + 1);
         });
       });
@@ -265,12 +265,12 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.visualize.waitForVisualization();
         await PageObjects.discover.clickFieldListItem(scriptedPainlessFieldName2);
-        await retry.try(async function() {
+        await retry.try(async function () {
           await PageObjects.discover.clickFieldListItemAdd(scriptedPainlessFieldName2);
         });
         await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.visualize.waitForVisualization();
-        await retry.try(async function() {
+        await retry.try(async function () {
           const rowData = await PageObjects.discover.getDocTableIndex(1);
           expect(rowData).to.be('September 18th 2015, 18:20:57.916\ntrue');
 
@@ -283,7 +283,7 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.discover.clickFieldListPlusFilter(scriptedPainlessFieldName2, 'true');
         await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.visualize.waitForVisualization();
-        await retry.try(async function() {
+        await retry.try(async function () {
           expect(await PageObjects.discover.getHitCount()).to.be('359');
         });
         await PageObjects.discover.removeAllFilters();
@@ -316,7 +316,7 @@ export default function ({ getService, getPageObjects }) {
           .addScriptedField(scriptedPainlessFieldName2, 'painless', 'date',
           { format: 'Date', datePattern: 'YYYY-MM-DD HH:00' }, '1',
           'doc[\'utc_time\'].value.getMillis() + (1000) * 60 * 60');
-        await retry.try(async function() {
+        await retry.try(async function () {
           expect(parseInt(await PageObjects.settings.getScriptedFieldsTabCount())).to.be(startingCount + 1);
         });
       });
@@ -330,12 +330,12 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.visualize.waitForVisualization();
         await PageObjects.discover.clickFieldListItem(scriptedPainlessFieldName2);
-        await retry.try(async function() {
+        await retry.try(async function () {
           await PageObjects.discover.clickFieldListItemAdd(scriptedPainlessFieldName2);
         });
         await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.visualize.waitForVisualization();
-        await retry.try(async function() {
+        await retry.try(async function () {
           const rowData = await PageObjects.discover.getDocTableIndex(1);
           expect(rowData).to.be('September 18th 2015, 06:52:55.953\n2015-09-18 07:00');
         });
@@ -347,7 +347,7 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.discover.clickFieldListPlusFilter(scriptedPainlessFieldName2, '2015-09-17 23:00');
         await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.visualize.waitForVisualization();
-        await retry.try(async function() {
+        await retry.try(async function () {
           expect(await PageObjects.discover.getHitCount()).to.be('1');
         });
         await PageObjects.discover.removeAllFilters();

@@ -1,4 +1,4 @@
-import uuid from 'node-uuid';
+import uuid from 'uuid';
 import _ from 'lodash';
 import newMetricAggFn from './new_metric_agg_fn';
 export default (obj = {}) => {

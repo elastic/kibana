@@ -1,4 +1,5 @@
 import { DEFAULT_PANEL_WIDTH, DEFAULT_PANEL_HEIGHT } from 'plugins/kibana/dashboard/panel/panel_state';
+
 import _ from 'lodash';
 
 export class PanelUtils {
@@ -33,6 +34,19 @@ export class PanelUtils {
     panel.size_y = data.size_y;
     panel.col = data.col;
     panel.row = data.row;
+  }
+
+  /**
+   * Ensures that the grid element matches the latest size/pos info in the panel element.
+   * @param {PanelState} panel
+   * @param {Element} panelElement - jQuery element representing the element in the UI
+   */
+  static refreshElementSizeAndPosition(panel, panelElement) {
+    const data = panelElement.coords().grid;
+    data.size_x = panel.size_x;
+    data.size_y = panel.size_y;
+    data.col = panel.col;
+    data.row = panel.row;
   }
 
   /**

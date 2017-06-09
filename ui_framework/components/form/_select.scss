@@ -1,5 +1,11 @@
 .kuiSelect {
   @include select;
+
+  @include formControl;
+
+  &.kuiSelect-isInvalid {
+    @include formControlInvalid;
+  }
 }
 
 .kuiSelect--large {

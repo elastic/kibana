@@ -1,4 +1,4 @@
-module.exports = function (api) {
+export default function (api) {
   api.addEndpointDescription('_refresh', {
     methods: ['POST'],
     patterns: [
@@ -231,4 +231,4 @@ module.exports = function (api) {
       "{indices}/_open"
     ]
   });
-};
+}

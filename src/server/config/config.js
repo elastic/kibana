@@ -2,14 +2,13 @@ import Joi from 'joi';
 import _ from 'lodash';
 import override from './override';
 import createDefaultSchema from './schema';
-import { pkg, unset } from '../../utils';
-import { deepCloneWithBuffers as clone } from '../../utils';
+import { pkg, unset, deepCloneWithBuffers as clone } from '../../utils';
 
 const schema = Symbol('Joi Schema');
 const schemaExts = Symbol('Schema Extensions');
 const vals = Symbol('config values');
 
-module.exports = class Config {
+export default class Config {
   static withDefaultSchema(settings = {}) {
     return new Config(createDefaultSchema(), settings);
   }
@@ -175,4 +174,4 @@ module.exports = class Config {
 
     return this[schema];
   }
-};
+}

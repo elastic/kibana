@@ -46,6 +46,7 @@ describe('Validate index name directive', function () {
     'foo',
     'foo.bar',
     '[foo-]YYYY-MM-DD',
+    'foo:bar',
   ];
 
   const wildcardPatterns = [

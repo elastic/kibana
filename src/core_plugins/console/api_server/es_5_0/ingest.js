@@ -329,7 +329,7 @@ const simulateUrlParamsDefinition = {
   "verbose": "__flag__"
 };
 
-module.exports = function (api) {
+export default function (api) {
 
   // Note: this isn't an actual API endpoint. It exists so the forEach processor's "processor" field
   // may recursively use the autocomplete rules for any processor.
@@ -383,4 +383,4 @@ module.exports = function (api) {
       ]
     }
   });
-};
+}

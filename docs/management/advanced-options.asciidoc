@@ -48,7 +48,7 @@ increase request processing time.
 when necessary.
 `visualization:tileMap:maxPrecision`:: The maximum geoHash precision displayed on tile maps: 7 is high, 10 is very high,
 12 is the maximum. {es-ref}search-aggregations-bucket-geohashgrid-aggregation.html#_cell_dimensions_at_the_equator[Explanation of cell dimensions].
-`visualization:tileMap:WMSdefaults`:: Default properties for the WMS map server support in the tile map.
+`visualization:tileMap:WMSdefaults`:: Default properties for the WMS map server support in the coordinate map.
 `visualization:colorMapping`:: Maps values to specified colors within visualizations.
 `visualization:loadingDelay`:: Time to wait before dimming visualizations during query.
 `visualization:dimmingOpacity`:: When part of a visualization is highlighted, by hovering over it for example, ths is the opacity applied to the other elements. A higher number means other elements will be less opaque.
@@ -92,3 +92,4 @@ Markdown.
 `state:storeInSessionStorage`:: [experimental] Kibana tracks UI state in the URL, which can lead to problems when there is a lot of information there and the URL gets very long. Enabling this will store parts of the state in your browser session instead, to keep the URL shorter.
 `context:defaultSize`:: Specifies the initial number of surrounding entries to display in the context view. The default value is 5.
 `context:step`:: Specifies the number to increment or decrement the context size by when using the buttons in the context view. The default value is 5.
+`context:tieBreakerFields`:: A comma-separated list of fields to use for tiebreaking between documents that have the same timestamp value. From this list the first field that is present and sortable in the current index pattern is used.

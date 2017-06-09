@@ -87,7 +87,7 @@ function restartNotifTimer(notif, cb) {
 
 const typeToButtonClassMap = {
   danger: 'kuiButton--danger', // NOTE: `error` type is internally named as `danger`
-  warning: 'kuiButton--danger',
+  warning: 'kuiButton--warning',
   info: 'kuiButton--primary',
   banner: 'kuiButton--basic'
 };
@@ -230,8 +230,8 @@ Notifier.config = {
   errorLifetime: 300000,
   warningLifetime: 10000,
   infoLifetime: 5000,
-  setInterval: window.setInterval.bind(window),
-  clearInterval: window.clearInterval.bind(window)
+  setInterval: window.setInterval,
+  clearInterval: window.clearInterval
 };
 
 Notifier.applyConfig = function (config) {

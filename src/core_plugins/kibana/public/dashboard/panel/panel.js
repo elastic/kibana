@@ -46,6 +46,12 @@ uiModules
        */
       createChildUiState: '=',
       /**
+       * Registers an index pattern with the dashboard app used by this panel. Used by the filter bar for
+       * generating field suggestions.
+       * @type {function(IndexPattern)}
+       */
+      registerPanelIndexPattern: '=',
+      /**
        * Contains information about this panel.
        * @type {PanelState}
        */
@@ -105,7 +111,11 @@ uiModules
           $scope.savedObj.vis.setUiState($scope.uiState);
           $scope.savedObj.vis.listeners.click = $scope.getVisClickHandler();
           $scope.savedObj.vis.listeners.brush = $scope.getVisBrushHandler();
+          $scope.registerPanelIndexPattern($scope.panel.panelIndex, $scope.savedObj.vis.indexPattern);
         } else if ($scope.panel.type === savedSearches.type) {
+          if ($scope.savedObj.searchSource) {
+            $scope.registerPanelIndexPattern($scope.panel.panelIndex, $scope.savedObj.searchSource.get('index'));
+          }
           // This causes changes to a saved search to be hidden, but also allows
           // the user to locally modify and save changes to a saved search only in a dashboard.
           // See https://github.com/elastic/kibana/issues/9523 for more details.

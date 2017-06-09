@@ -2,7 +2,7 @@ import alter from '../lib/alter.js';
 import Chainable from '../lib/classes/chainable';
 import tinygradient from 'tinygradient';
 
-module.exports = new Chainable('color', {
+export default new Chainable('color', {
   args: [
     {
       name: 'inputSeries',

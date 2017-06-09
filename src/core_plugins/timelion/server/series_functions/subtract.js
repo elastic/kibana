@@ -1,6 +1,7 @@
 import reduce from '../lib/reduce.js';
 import Chainable from '../lib/classes/chainable';
-module.exports = new Chainable('subtract', {
+
+export default new Chainable('subtract', {
   args: [
     {
       name: 'inputSeries',

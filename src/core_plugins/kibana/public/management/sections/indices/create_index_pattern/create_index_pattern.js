@@ -26,7 +26,7 @@ uiModules.get('apps/management')
   this.formValues = {
     name: config.get('indexPattern:placeholder'),
     nameIsPattern: false,
-    expandable: false,
+    expandWildcard: false,
     nameInterval: _.find(intervals, { name: 'daily' }),
     timeFieldOption: null,
   };
@@ -41,20 +41,20 @@ uiModules.get('apps/management')
   this.patternErrors = [];
 
   const getTimeFieldOptions = () => {
-    const missingPattern = !this.formValues.name;
-    const missingInterval = this.formValues.nameIsPattern && !this.formValues.nameInterval;
-    if (missingPattern || missingInterval)  {
-      return Promise.resolve({ options: [] });
-    }
-
     loadingCount += 1;
-    return indexPatterns.mapper.clearCache(this.formValues.name)
+    return Promise.resolve()
     .then(() => {
-      const pattern = mockIndexPattern(this.formValues);
+      const { nameIsPattern, name } = this.formValues;
 
-      return indexPatterns.mapper.getFieldsForIndexPattern(pattern, {
-        skipIndexPatternCache: true,
-      });
+      if (!name) {
+        return [];
+      }
+
+      if (nameIsPattern) {
+        return indexPatterns.fieldsFetcher.fetchForTimePattern(name);
+      }
+
+      return indexPatterns.fieldsFetcher.fetchForWildcard(name);
     })
     .then(fields => {
       const dateFields = fields.filter(field => field.type === 'date');
@@ -132,14 +132,6 @@ uiModules.get('apps/management')
     this.existing = null;
   };
 
-  function mockIndexPattern(index) {
-    // trick the mapper into thinking this is an indexPattern
-    return {
-      id: index.name,
-      intervalName: index.nameInterval
-    };
-  }
-
   const updateSamples = () => {
     const patternErrors = [];
 
@@ -147,14 +139,8 @@ uiModules.get('apps/management')
       return Promise.resolve();
     }
 
-    const pattern = mockIndexPattern(this.formValues);
-
     loadingCount += 1;
-    return indexPatterns.mapper.getIndicesForIndexPattern(pattern)
-      .catch(err => {
-        if (err instanceof IndexPatternMissingIndices) return;
-        notify.error(err);
-      })
+    return indexPatterns.fieldsFetcher.testTimePattern(this.formValues.name)
       .then(existing => {
         const all = _.get(existing, 'all', []);
         const matches = _.get(existing, 'matches', []);
@@ -197,16 +183,35 @@ uiModules.get('apps/management')
     return Boolean(this.formValues.timeFieldOption.fieldName);
   };
 
-  this.canExpandIndices = () => {
+  this.canEnableExpandWildcard = () => {
     return (
       this.isTimeBased() &&
+        !this.isCrossClusterName() &&
         !this.formValues.nameIsPattern &&
         _.includes(this.formValues.name, '*')
     );
   };
 
+  this.isExpandWildcardEnabled = () => {
+    return (
+      this.canEnableExpandWildcard() &&
+        !!this.formValues.expandWildcard
+    );
+  };
+
   this.canUseTimePattern = () => {
-    return this.isTimeBased() && !this.formValues.expandable;
+    return (
+      this.isTimeBased() &&
+        !this.isExpandWildcardEnabled() &&
+        !this.isCrossClusterName()
+    );
+  };
+
+  this.isCrossClusterName = () => {
+    return (
+      this.formValues.name &&
+        this.formValues.name.includes(':')
+    );
   };
 
   this.isLoading = () => {
@@ -261,7 +266,6 @@ uiModules.get('apps/management')
       timeFieldOption,
       nameIsPattern,
       nameInterval,
-      expandable
     } = this.formValues;
 
     const id = name;
@@ -270,10 +274,9 @@ uiModules.get('apps/management')
       ? timeFieldOption.fieldName
       : undefined;
 
-    // this seems wrong, but it's the original logic... https://git.io/vHYFo
-    const notExpandable = (this.canExpandIndices() && !expandable)
-      ? true
-      : undefined;
+    const notExpandable = this.isExpandWildcardEnabled()
+      ? undefined
+      : true;
 
     // Only event-time-based index patterns set an intervalName.
     const intervalName = (this.canUseTimePattern() && nameIsPattern && nameInterval)
@@ -344,9 +347,6 @@ uiModules.get('apps/management')
     'controller.formValues.nameInterval'
   ], () => {
     resetIndex();
-    if (!this.formValues.nameInterval || !this.formValues.name) {
-      return;
-    }
 
     // track the latestUpdateSampleId at the time we started
     // so that we can avoid mutating the controller if the

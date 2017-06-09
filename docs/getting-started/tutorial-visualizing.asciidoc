@@ -129,10 +129,10 @@ make the differences stand out, starting the Y-axis at a value closer to the min
 
 Save this chart with the name _Bar Example_.
 
-Next, we're going to use a tile map chart to visualize geographic information in our log file sample data. 
+Next, we're going to use a coordinate map chart to visualize geographic information in our log file sample data. 
 
 . Click *New*.
-. Select  *Tile map*. 
+. Select  *Coordinate map*. 
 . Select the `logstash-*` index pattern. 
 . Set the time window for the events we're exploring:
 . Click the time picker in the Kibana toolbar.

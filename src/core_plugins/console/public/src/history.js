@@ -1,7 +1,7 @@
 const $ = require('jquery');
 const storage = require('./storage');
 
-const history = module.exports = {
+const history = {
   restoreFromHistory() {
     // default method for history.restoreFromHistory
     // replace externally to do something when the user chooses
@@ -60,3 +60,5 @@ const history = module.exports = {
       .forEach(key => storage.delete(key));
   }
 };
+
+export default history;

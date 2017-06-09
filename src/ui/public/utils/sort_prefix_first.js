@@ -3,8 +3,8 @@ export function sortPrefixFirst(array, prefix, property) {
   return [...array].sort(sortPrefixFirstComparator);
 
   function sortPrefixFirstComparator(a, b) {
-    const aValue = property ? a[property] : a;
-    const bValue = property ? b[property] : b;
+    const aValue = '' + (property ? a[property] : a);
+    const bValue = '' + (property ? b[property] : b);
 
     const bothStartWith = aValue.startsWith(prefix) && bValue.startsWith(prefix);
     const neitherStartWith = !aValue.startsWith(prefix) && !bValue.startsWith(prefix);

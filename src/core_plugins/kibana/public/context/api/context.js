@@ -14,11 +14,10 @@ function fetchContextProvider(courier, Private) {
   };
 
   async function fetchSuccessors(indexPatternId, anchorDocument, contextSort, size, filters) {
-    const successorsSort = [contextSort, { _uid: 'asc' }];
     const successorsSearchSource = await createSearchSource(
       indexPatternId,
       anchorDocument,
-      successorsSort,
+      contextSort,
       size,
       filters,
     );
@@ -27,7 +26,7 @@ function fetchContextProvider(courier, Private) {
   }
 
   async function fetchPredecessors(indexPatternId, anchorDocument, contextSort, size, filters) {
-    const predecessorsSort = [reverseSortDirective(contextSort), { _uid: 'desc' }];
+    const predecessorsSort = contextSort.map(reverseSortDirective);
     const predecessorsSearchSource = await createSearchSource(
       indexPatternId,
       anchorDocument,

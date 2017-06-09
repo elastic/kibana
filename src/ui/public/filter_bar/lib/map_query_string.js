@@ -1,11 +1,10 @@
 export function FilterBarLibMapQueryStringProvider(Promise) {
   return function (filter) {
-    let key;
-    let value;
     if (filter.query && filter.query.query_string) {
-      key = 'query';
-      value = filter.query.query_string.query;
-      return Promise.resolve({ key: key, value: value });
+      const type = 'query_string';
+      const key = 'query';
+      const value = filter.query.query_string.query;
+      return Promise.resolve({ type, key, value });
     }
     return Promise.reject(filter);
   };

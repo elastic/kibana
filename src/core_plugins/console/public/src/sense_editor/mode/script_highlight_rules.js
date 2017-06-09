@@ -7,7 +7,7 @@ let painlessKeywords = (
   "def|int|long|byte|String|float|double|char|null|if|else|while|do|for|continue|break|new|try|catch|throw|this|instanceof|return|ctx"
 );
 
-export var ScriptHighlightRules = function () {
+export function ScriptHighlightRules() {
     this.name = "ScriptHighlightRules";
     this.$rules = {
       "start": [
@@ -61,5 +61,6 @@ export var ScriptHighlightRules = function () {
             }
         ]
   }
-};
+}
+
 oop.inherits(ScriptHighlightRules, TextHighlightRules);

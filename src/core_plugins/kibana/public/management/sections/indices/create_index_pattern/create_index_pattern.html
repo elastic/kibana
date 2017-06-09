@@ -2,6 +2,7 @@
   <kbn-management-indices>
     <div
       ng-controller="managementIndicesCreate as controller"
+      data-test-subj="createIndexPatternContainer"
       class="kuiViewContent"
     >
       <h1
@@ -34,8 +35,7 @@
                 class="kuiTextInput kuiTextInput--large"
                 data-test-subj="createIndexPatternNameInput"
                 ng-model="controller.formValues.name"
-                ng-attr-placeholder="{{controller.formValues.defaultName}}"
-                ng-model-options="{ updateOn: 'default blur', debounce: {'default': 2500, 'blur': 0} }"
+                ng-model-options="{ updateOn: 'default blur', debounce: {'default': 500, 'blur': 0} }"
                 validate-index-name
                 allow-wildcard
                 name="name"
@@ -124,17 +124,18 @@
           </div>
 
           <!-- Expand index pattern checkbox -->
-          <div class="kuiVerticalRhythm" ng-if="controller.canExpandIndices()">
+          <div class="kuiVerticalRhythm" ng-if="controller.canEnableExpandWildcard()">
             <label class="kuiCheckBoxLabel kuiVerticalRhythm">
               <input
                 class="kuiCheckBox"
                 type="checkbox"
-                ng-model="controller.formValues.expandable"
+                data-test-subj="createIndexPatternEnableExpand"
+                ng-model="controller.formValues.expandWildcard"
               >
-              <span
-                class="kuiCheckBoxLabel__text"
-                translate="KIBANA-EXPAND_INDEX_PATTERN"
-              ></span>
+              <span class="kuiCheckBoxLabel__text">
+                <span translate="KIBANA-EXPAND_INDEX_PATTERN"></span>
+                <span translate="KIBANA-DEPRECATED"></span>
+              </span>
             </label>
 
             <!-- Checkbox help text -->

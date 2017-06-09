@@ -5,9 +5,14 @@ import {
   DEFAULT_PANEL_HEIGHT,
 } from '../../../../src/core_plugins/kibana/public/dashboard/panel/panel_state';
 
+import {
+  VisualizeConstants
+} from '../../../../src/core_plugins/kibana/public/visualize/visualize_constants';
+
 export default function ({ getService, getPageObjects }) {
   const retry = getService('retry');
   const log = getService('log');
+  const remote = getService('remote');
   const screenshots = getService('screenshots');
   const PageObjects = getPageObjects(['common', 'dashboard', 'header', 'visualize']);
 
@@ -117,7 +122,7 @@ export default function ({ getService, getPageObjects }) {
       });
     });
 
-    it('should have panels with expected data-shared-item title and description', function checkTitles() {
+    it('should have panels with expected data-shared-item title and description', function () {
       const visualizations = PageObjects.dashboard.getTestVisualizations();
       return retry.tryForTime(10000, function () {
         return PageObjects.dashboard.getPanelSharedItemData()
@@ -128,20 +133,50 @@ export default function ({ getService, getPageObjects }) {
       });
     });
 
-    it('add new visualization link', async function checkTitles() {
-      await PageObjects.dashboard.clickAddVisualization();
-      await PageObjects.dashboard.clickAddNewVisualizationLink();
-      await PageObjects.visualize.clickAreaChart();
-      await PageObjects.visualize.clickNewSearch();
-      await PageObjects.visualize.saveVisualization('visualization from add new link');
-      await PageObjects.header.clickToastOK();
+    describe('Directly modifying url updates dashboard state', () => {
+      it('for query parameter', async function () {
+        const currentQuery = await PageObjects.dashboard.getQuery();
+        expect(currentQuery).to.equal('');
+        const currentUrl = await remote.getCurrentUrl();
+        const newUrl = currentUrl.replace('query:%27*%27', 'query:%27hi%27');
+        // Don't add the timestamp to the url or it will cause a hard refresh and we want to test a
+        // soft refresh.
+        await remote.get(newUrl.toString(), false);
+        const newQuery = await PageObjects.dashboard.getQuery();
+        expect(newQuery).to.equal('hi');
+      });
 
-      const visualizations = PageObjects.dashboard.getTestVisualizations();
-      return retry.tryForTime(10000, async function () {
-        const panelTitles = await PageObjects.dashboard.getPanelSizeData();
-        log.info('visualization titles = ' + panelTitles.map(item => item.title));
-        screenshots.take('Dashboard-visualization-sizes');
-        expect(panelTitles.length).to.eql(visualizations.length + 1);
+      it('for panel size parameters', async function () {
+        const currentUrl = await remote.getCurrentUrl();
+        const newUrl = currentUrl.replace(`size_x:${DEFAULT_PANEL_WIDTH}`, `size_x:${DEFAULT_PANEL_WIDTH * 2}`);
+        await remote.get(newUrl.toString(), false);
+        const allPanelInfo = await PageObjects.dashboard.getPanelSizeData();
+        expect(allPanelInfo[0].dataSizeX).to.equal(`${DEFAULT_PANEL_WIDTH * 2}`);
+      });
+    });
+
+    describe('add new visualization link', () => {
+      it('adds a new visualization', async () => {
+        await PageObjects.dashboard.clickAddVisualization();
+        await PageObjects.dashboard.clickAddNewVisualizationLink();
+        await PageObjects.visualize.clickAreaChart();
+        await PageObjects.visualize.clickNewSearch();
+        await PageObjects.visualize.saveVisualization('visualization from add new link');
+        await PageObjects.header.clickToastOK();
+
+        const visualizations = PageObjects.dashboard.getTestVisualizations();
+        return retry.tryForTime(10000, async function () {
+          const panelTitles = await PageObjects.dashboard.getPanelSizeData();
+          log.info('visualization titles = ' + panelTitles.map(item => item.title));
+          screenshots.take('Dashboard-visualization-sizes');
+          expect(panelTitles.length).to.eql(visualizations.length + 1);
+        });
+      });
+
+      it('saves the saved visualization url to the app link', async () => {
+        await PageObjects.header.clickVisualize();
+        const currentUrl = await remote.getCurrentUrl();
+        expect(currentUrl).to.contain(VisualizeConstants.EDIT_PATH);
       });
     });
   });

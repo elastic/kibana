@@ -3,7 +3,7 @@ import _ from 'lodash';
 // Upsampling and downsampling of non-cummulative sets
 // Good: average, min, max
 // Bad: sum, count
-module.exports = function (dataTuples, targetTuples) {
+export default function nearest(dataTuples, targetTuples) {
   return _.map(targetTuples, function (bucket) {
     const time = bucket[0];
     let i = 0;
@@ -24,4 +24,4 @@ module.exports = function (dataTuples, targetTuples) {
 
     return [bucket[0], closest[1]];
   });
-};
+}
