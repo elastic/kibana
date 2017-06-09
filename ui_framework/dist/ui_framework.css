@@ -633,6 +633,43 @@ body {
   .kuiCollapseButton:hover {
     opacity: 1; }
 
+.kuiColorPicker {
+  cursor: pointer; }
+
+.kuiColorPicker__preview {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-align: center;
+  -webkit-align-items: center;
+      -ms-flex-align: center;
+          align-items: center; }
+
+.kuiColorPicker__swatch {
+  width: 20px;
+  height: 20px;
+  border-radius: 4px;
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.2); }
+
+.kuiColorPicker__label {
+  font-size: 14px;
+  line-height: 1.5;
+  margin-left: 10px;
+  display: inline-block;
+  vertical-align: middle; }
+
+.kuiColorPickerPopUp {
+  position: absolute;
+  z-index: 10; }
+
+.kuiColorPickerPopUpOverlay {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0; }
+
 /**
  * 1. If we use margins instead, columns get pushed to the next line.
  */
@@ -1163,32 +1200,6 @@ body {
 .kuiTextInput--large {
   width: 100%;
   max-width: 400px; }
-
-.kuiColorSwatch {
-  width: 19px;
-  height: 19px;
-  border-radius: 3px;
-  border: 1px solid black;
-  display: inline-block;
-  vertical-align: middle; }
-
-.kuiColorPickerCover {
-  position: fixed;
-  top: 0;
-  right: 0;
-  bottom: 0;
-  left: 0; }
-
-.kuiColorPickerPopUp {
-  position: absolute;
-  z-index: 10; }
-
-.kuiColorLabel {
-  font-size: 16px;
-  line-height: 1.5;
-  margin-left: 10px;
-  display: inline-block;
-  vertical-align: middle; }
 
 /**
  * 1. We may want to put elements in here which have different heights.

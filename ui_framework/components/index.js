@@ -57,4 +57,4 @@ export {
 
 export {
   KuiColorPicker
-} from './form';
+} from './color_picker';

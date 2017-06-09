@@ -21,6 +21,9 @@ import CardExample
 import CollapseButtonExample
   from '../../views/collapse_button/collapse_button_example';
 
+import ColorPickerExample
+  from '../../views/color_picker/color_picker_example';
+
 import ColumnExample
   from '../../views/column/column_example';
 
@@ -134,6 +137,10 @@ const components = [{
   name: 'Card',
   component: CardExample,
 }, {
+  name: 'Color Picker',
+  component: ColorPickerExample,
+  hasReact: true,
+}, {
   name: 'Column',
   component: ColumnExample,
 }, {
@@ -153,7 +160,6 @@ const components = [{
 }, {
   name: 'Form',
   component: FormExample,
-  hasReact: true,
 }, {
   name: 'FormLayout',
   component: FormLayoutExample,

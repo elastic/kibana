@@ -1,5 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
+import classNames from 'classnames';
 
 import { ChromePicker } from 'react-color';
 
@@ -25,23 +26,34 @@ export class KuiColorPicker extends React.Component {
 
   render() {
     const color = this.props.color || '#ffffff';
+    const classes = classNames('kuiColorPicker', this.props.className);
     return (
       <div
-        className={ this.props.className }
+        className={ classes }
         aria-label={ this.props['aria-label'] }
         data-test-subj={ this.props['data-test-subj'] }
       >
         <div
-          className="kuiColorSwatch"
-          aria-label="Select a color"
-          data-test-subj="colorSwatch"
-          style={{ background: this.props.color }}
+          className="kuiColorPicker__preview"
           onClick={ this.toggleColorSelector }
-        />
+        >
+          <div
+            className="kuiColorPicker__swatch"
+            aria-label="Select a color"
+            data-test-subj="colorSwatch"
+            style={{ background: this.props.color }}
+          />
+          <div
+            className="kuiColorPicker__label"
+            aria-label={`Color selection is ${color}`}
+          >
+            { color }
+          </div>
+        </div>
         {
           this.state.showColorSelector ?
             <div className="kuiColorPickerPopUp" data-test-subj="colorPickerPopup">
-              <div className="kuiColorPickerCover" onClick={ this.closeColorSelector } />
+              <div className="kuiColorPickerPopUpOverlay" onClick={ this.closeColorSelector } />
               <ChromePicker
                 color={ color }
                 disableAlpha={ true }
@@ -50,12 +62,6 @@ export class KuiColorPicker extends React.Component {
             </div>
             : null
         }
-        <div
-          className="kuiColorLabel"
-          aria-label={`Color selection is ${color}`}
-        >
-          { color }
-        </div>
       </div>
     );
   }
