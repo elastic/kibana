@@ -1,7 +1,7 @@
 import React, { Component, PropTypes } from 'react';
 import _ from 'lodash';
 import AddDeleteButtons from '../add_delete_buttons';
-import collectionActions from '../lib/collection_actions';
+import * as collectionActions from '../lib/collection_actions';
 import MetricSelect from './metric_select';
 
 class CalculationVars extends Component {

@@ -1,6 +1,6 @@
 import _ from 'lodash';
 import Chainable from '../../lib/classes/chainable';
-import * as regress from './lib/regress';
+import { linear, log } from './lib/regress';
 
 const validRegressions = {
   linear: 'linear',
@@ -44,7 +44,7 @@ export default new Chainable('trend', {
 
       const subset = series.data.slice(start, end);
 
-      const result = regress[args.byName.mode || 'linear'](subset);
+      const result = (args.byName.mode === 'log') ? log(subset) : linear(subset);
 
       _.each(series.data, function (point) {
         point[1] = null;
