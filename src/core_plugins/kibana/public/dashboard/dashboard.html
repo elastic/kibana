@@ -1,4 +1,14 @@
 <dashboard-app class="app-container dashboard-container">
+  <div class="fullScreenModePlaceholder">
+    <div
+      ng-if="fullScreenMode"
+      class="kuiButton exitFullScreenMode"
+      ng-click="exitFullScreenMode()"
+    >
+      <div class="kuiIcon fa fa-angle-double-up"></div>
+      Exit Full Screen Mode
+    </div>
+  </div>
   <!-- Local nav. -->
   <kbn-top-nav name="dashboard" config="topNavMenu">
     <!-- Transcluded elements. -->
@@ -68,9 +78,11 @@
       </form>
     </div>
   </kbn-top-nav>
+  </div>
 
   <!-- Filters. -->
   <filter-bar
+    ng-show="showFilterBar()"
     state="state"
     index-patterns="indexPatterns"
   ></filter-bar>

@@ -286,7 +286,23 @@ app.directive('dashboardApp', function ($injector) {
         }).catch(notify.fatal);
       };
 
+      $scope.showFilterBar = () => filterBar.getFilters().length > 0 || !$scope.fullScreenMode;
+      let onRouteChange;
+      const setFullScreenMode = (fullScreenMode) => {
+        $scope.fullScreenMode = fullScreenMode;
+        dashboardState.setFullScreenMode(fullScreenMode);
+        chrome.setVisible(!fullScreenMode);
+        if (fullScreenMode) {
+          onRouteChange = $scope.$on('$routeChangeStart', () => chrome.setVisible(true));
+        } else if (onRouteChange) {
+          onRouteChange();
+        }
+      };
+      setFullScreenMode(dashboardState.getFullScreenMode());
+
+      $scope.exitFullScreenMode = () => setFullScreenMode(false);
       const navActions = {};
+      navActions[TopNavIds.FULL_SCREEN] = () => setFullScreenMode(true);
       navActions[TopNavIds.EXIT_EDIT_MODE] = () => onChangeViewMode(DashboardViewMode.VIEW);
       navActions[TopNavIds.ENTER_EDIT_MODE] = () => onChangeViewMode(DashboardViewMode.EDIT);
       navActions[TopNavIds.CLONE] = () => {

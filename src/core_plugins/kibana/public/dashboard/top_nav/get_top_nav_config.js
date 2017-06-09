@@ -12,11 +12,13 @@ export function getTopNavConfig(dashboardMode, actions) {
   switch (dashboardMode) {
     case DashboardViewMode.VIEW:
       return [
+        getFullScreenConfig(actions[TopNavIds.FULL_SCREEN]),
         getShareConfig(),
         getCloneConfig(actions[TopNavIds.CLONE]),
         getEditConfig(actions[TopNavIds.ENTER_EDIT_MODE])];
     case DashboardViewMode.EDIT:
       return [
+        getFullScreenConfig(actions[TopNavIds.FULL_SCREEN]),
         getSaveConfig(),
         getViewConfig(actions[TopNavIds.EXIT_EDIT_MODE]),
         getAddConfig(),
@@ -25,6 +27,15 @@ export function getTopNavConfig(dashboardMode, actions) {
     default:
       return [];
   }
+}
+
+function getFullScreenConfig(action) {
+  return {
+    key: 'full screen',
+    description: 'Full Screen Mode',
+    testId: 'dashboardFullScreenMode',
+    run: action
+  };
 }
 
 /**

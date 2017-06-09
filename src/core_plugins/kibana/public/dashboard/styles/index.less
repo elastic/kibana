@@ -2,6 +2,44 @@
 @import (reference) "~ui/styles/mixins";
 @import "~ui/styles/local_search.less";
 
+.fullScreenModePlaceholder {
+  text-align: center;
+  width: 100%;
+  z-index: 50;
+  height: 0;
+  bottom: 0;
+  position: absolute;
+}
+
+.exitFullScreenMode {
+  background-color: @kibanaGray4;
+  border-top-left-radius: 5px;
+  border-top-right-radius: 5px;
+  border-bottom-left-radius: 0;
+  border-bottom-right-radius: 0;
+  width: 200px;
+  height: 40px;
+  left: 0;
+  right: 0;
+  margin-left: auto;
+  margin-right: auto;
+  padding-top: 0;
+
+  position: fixed;
+  bottom: -28px;
+  z-index: 50;
+  display: block;
+
+  .kuiIcon {
+    display: block;
+  }
+}
+
+.exitFullScreenMode:hover {
+  bottom: 0px;
+  transition: all .5s ease;
+}
+
 .tab-dashboard {
   background-color: @dashboard-bg;
 }

@@ -11,6 +11,7 @@ import { getPersistedStateId } from 'plugins/kibana/dashboard/panel/panel_state'
 
 function getStateDefaults(dashboard, hideWriteControls) {
   return {
+    fullScreenMode: false,
     title: dashboard.title,
     description: dashboard.description,
     timeRestore: dashboard.timeRestore,
@@ -82,6 +83,15 @@ export class DashboardState {
 
     PanelUtils.initPanelIndexes(this.getPanels());
     this.createStateMonitor();
+  }
+
+  getFullScreenMode() {
+    return this.appState.fullScreenMode;
+  }
+
+  setFullScreenMode(fullScreenMode) {
+    this.appState.fullScreenMode = fullScreenMode;
+    this.saveState();
   }
 
   registerPanelIndexPatternMap(panelIndex, indexPattern) {
