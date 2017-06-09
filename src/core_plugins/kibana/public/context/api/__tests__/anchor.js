@@ -10,7 +10,7 @@ describe('context app', function () {
       const indexPatternStub = createIndexPatternStub('index1');
       const esStub = createEsStub(['hit1']);
 
-      return fetchAnchor(esStub, indexPatternStub, 'UID', { '@timestamp': 'desc' })
+      return fetchAnchor(esStub, indexPatternStub, 'UID', [{ '@timestamp': 'desc' }, { '_doc': 'asc' }])
         .then(() => {
           expect(esStub.search.calledOnce).to.be(true);
           expect(esStub.search.firstCall.args[0]).to.have.property('index', 'index1');
@@ -21,7 +21,7 @@ describe('context app', function () {
       const indexPatternStub = createIndexPatternStub('index1');
       const esStub = createEsStub(['hit1']);
 
-      return fetchAnchor(esStub, indexPatternStub, 'UID', { '@timestamp': 'desc' })
+      return fetchAnchor(esStub, indexPatternStub, 'UID', [{ '@timestamp': 'desc' }, { '_doc': 'asc' }])
         .then(() => {
           expect(esStub.search.calledOnce).to.be(true);
           expect(esStub.search.firstCall.args[0].body).to.have.keys([
@@ -33,7 +33,7 @@ describe('context app', function () {
       const indexPatternStub = createIndexPatternStub('index1');
       const esStub = createEsStub([]);
 
-      return fetchAnchor(esStub, indexPatternStub, 'UID', { '@timestamp': 'desc' })
+      return fetchAnchor(esStub, indexPatternStub, 'UID', [{ '@timestamp': 'desc' }, { '_doc': 'asc' }])
         .then(
           () => {
             expect().fail('expected the promise to be rejected');
@@ -48,7 +48,7 @@ describe('context app', function () {
       const indexPatternStub = createIndexPatternStub('index1');
       const esStub = createEsStub([{ property1: 'value1' }, {}]);
 
-      return fetchAnchor(esStub, indexPatternStub, 'UID', { '@timestamp': 'desc' })
+      return fetchAnchor(esStub, indexPatternStub, 'UID', [{ '@timestamp': 'desc' }, { '_doc': 'asc' }])
         .then((anchorDocument) => {
           expect(anchorDocument).to.have.property('property1', 'value1');
           expect(anchorDocument).to.have.property('$$_isAnchor', true);
