@@ -16,7 +16,11 @@
   }
   .kbn-timepicker-section {
     float: left;
-    padding-right: 15px;
+    width: 25%;
+
+    & + .kbn-timepicker-section {
+      padding-left: 15px;
+    }
   }
   .kbn-timepicker-body {
     display: flex;
@@ -59,7 +63,7 @@
     display: flex;
     align-items: center;
   }
-  .nav > li > a {
+  .kbn-timerpicker-nav-button {
     padding: 3px 10px;
     font-size: 14px;
   }
