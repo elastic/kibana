@@ -1839,12 +1839,16 @@ body {
   font-size: 14px;
   color: #2d2d2d;
   background-color: #FFF;
-  border: 2px solid #FFF;
+  border: 1px solid #D9D9D9;
   border-radius: 4px; }
+  .kuiLocalDropdownInput:focus {
+    border-color: #0079a5; }
   .theme-dark .kuiLocalDropdownInput {
     color: #cecece;
     background-color: #444444;
     border-color: #444444; }
+    .theme-dark .kuiLocalDropdownInput:focus {
+      border-color: #0079a5; }
 
 .kuiLocalDropdownFormNote {
   font-size: 14px;

@@ -113,13 +113,21 @@
   font-size: 14px;
   color: $globalInputTextColor;
   background-color: $globalInputBackgroundColor;
-  border: 2px solid $globalInputBorderColor;
+  border: 1px solid $globalInputBorderColor;
   border-radius: 4px;
+
+  &:focus {
+    border-color: $globalFocusColor;
+  }
 
   @include darkTheme {
     color: $globalInputTextColor--darkTheme;
     background-color: $globalInputBackgroundColor--darkTheme;
     border-color: $globalInputBorderColor--darkTheme;
+
+    &:focus {
+      border-color: $globalFocusColor;
+    }
   }
 }
 
