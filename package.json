@@ -24,6 +24,7 @@
     "elasticsearch": "^13.0.0",
     "jquery": "^3.2.1",
     "lodash": "^4.17.4",
+    "lz-string": "^1.4.4",
     "mathjs": "^3.12.3",
     "moment": "^2.18.1",
     "object-path-immutable": "^0.5.1",
@@ -68,6 +69,7 @@
     "proxyquire": "1.7.11",
     "semver": "^5.3.0",
     "simple-git": "^1.70.0",
+    "sinon": "^2.3.2",
     "through2": "^2.0.3",
     "yargs": "7.1.0"
   }

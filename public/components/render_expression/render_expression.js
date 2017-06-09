@@ -22,7 +22,6 @@ export class RenderExpression extends React.PureComponent {
 }
 
 RenderExpression.propTypes = {
-  expressionOutput: PropTypes.object,
   expressionType: PropTypes.string,
   renderFn: PropTypes.func,
   destroyFn: PropTypes.func,

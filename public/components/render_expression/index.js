@@ -42,7 +42,6 @@ function mergeProps(stateProps, dispatchProps, ownProps) {
   }
 
   return Object.assign({}, stateProps, dispatchProps, ownProps, {
-    element,
     expressionType: getType(getValue(renderable)),
     renderFn(domNode) {
       cleanupFn = element.render(domNode, getValue(renderable).value, done || noop);

@@ -27,14 +27,14 @@ const template = ({ data, typeInstance }) => {
         return (
           <div className="canvas__argtype--datacolumn">
             <MathExpression
-              defaultValue={argVal.function}
+              value={argVal.function}
               inputRef={ref => inputRefs.fn = ref}
               onChange={updateValue(argVal.type)}
             />
             <FormControl
               componentClass="select"
               placeholder="select"
-              defaultValue={argVal.value}
+              value={argVal.value}
               inputRef={ref => inputRefs.value = ref}
               onChange={updateValue(argVal.type)}
             >
