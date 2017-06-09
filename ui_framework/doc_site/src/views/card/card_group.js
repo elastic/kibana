@@ -12,7 +12,7 @@ import {
 
 export default () => {
   /**
-   * These styles are just for demonstration purposes. It is recommended use
+   * These styles are just for demonstration purposes. It is recommended to use
    * properly named classes to set the width in production code.
    */
   const cardStyle = {
