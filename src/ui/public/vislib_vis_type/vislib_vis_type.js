@@ -71,7 +71,7 @@ export function VislibVisTypeVislibVisTypeProvider(Private) {
   }
 
   VislibVisType.prototype.createRenderbot = function (vis, $el, uiState) {
-    updateParams(vis.params);
+    if (vis.type.name !== 'pie') updateParams(vis.params);
     return new VislibRenderbot(vis, $el, uiState);
   };
 
