@@ -515,7 +515,7 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
     async filterOnPieSlice() {
       log.debug('Filtering on a pie slice');
       await retry.try(async () => {
-        const slices = await find.allByCssSelector('svg > g > path.slice');
+        const slices = await find.allByCssSelector('svg > g > g.arcs > path.slice');
         log.debug('Slices found:' + slices.length);
         return slices[0].click();
       });
