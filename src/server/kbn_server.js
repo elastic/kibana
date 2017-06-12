@@ -20,6 +20,7 @@ import optimizeMixin from '../optimize';
 import pluginsInitializeMixin from './plugins/initialize';
 import { indexPatternsMixin } from './index_patterns';
 import { savedObjectsMixin } from './saved_objects';
+import { statsMixin } from './stats';
 
 const rootDir = fromRoot('.');
 
@@ -39,6 +40,9 @@ export default class KbnServer {
       loggingMixin,
       warningsMixin,
       statusMixin,
+
+      // set up stats route
+      statsMixin,
 
       // writes pid file
       pidMixin,
