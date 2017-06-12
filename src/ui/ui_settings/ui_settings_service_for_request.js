@@ -8,13 +8,13 @@ export function getUiSettingsServiceForRequest(server, request, readInterceptor)
   }
 
   const adminCluster = server.plugins.elasticsearch.getCluster('admin');
-  const uiSettingsServices = uiSettingsServiceFactory(server, {
+  const uiSettingsService = uiSettingsServiceFactory(server, {
     readInterceptor,
     callCluster(...args) {
       return adminCluster.callWithRequest(request, ...args);
     }
   });
 
-  BY_REQUEST_CACHE.set(request, uiSettingsServices);
-  return uiSettingsServices;
+  BY_REQUEST_CACHE.set(request, uiSettingsService);
+  return uiSettingsService;
 }
