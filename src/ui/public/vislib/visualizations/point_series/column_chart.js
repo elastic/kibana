@@ -94,22 +94,34 @@ export function VislibVisualizationsColumnChartProvider(Private) {
       const isTimeScale = this.getCategoryAxis().axisConfig.isTimeDomain();
       const yMin = yScale.domain()[0];
       const gutterSpacingPercentage = 0.15;
-      const groupCount = this.getGroupedCount();
       const groupNum = this.getGroupedNum(this.chartData);
-
       let barWidth;
       let gutterWidth;
+
       if (isTimeScale) {
         const { min, interval } = this.handler.data.get('ordered');
         let intervalWidth = xScale(min + interval) - xScale(min);
         intervalWidth = Math.abs(intervalWidth);
 
         gutterWidth = intervalWidth * gutterSpacingPercentage;
-        barWidth = (intervalWidth - gutterWidth) / groupCount;
+        barWidth = intervalWidth - gutterWidth;
+      }
+
+      /**
+       * Histogram intervals are not always equal widths, e.g, monthly time intervals.
+       * It is more visually appealing to vary bar width so that gutter width is constant.
+       */
+      function datumWidth(d, i) {
+        let datumWidth = barWidth;
+        const nextDatum = bars.data()[i + 1];
+        if (nextDatum) {
+          datumWidth = (xScale(nextDatum.x) - xScale(d.x)) - gutterWidth;
+        }
+        return datumWidth;
       }
 
       function x(d) {
-        const groupPosition = isTimeScale ? barWidth * groupNum : xScale.rangeBand() / groupCount * groupNum;
+        const groupPosition = isTimeScale ? barWidth * groupNum : xScale.rangeBand() / groupNum;
         return xScale(d.x) + groupPosition;
       }
 
@@ -122,17 +134,9 @@ export function VislibVisualizationsColumnChartProvider(Private) {
 
       function widthFunc(d, i) {
         if (isTimeScale) {
-          //Time intervals are not always equal widths: Jan has 31 days and Feb has 28 days
-          //It is more visually appealing to vary bar width so that gutter width is constant.
-          let datumWidth = barWidth;
-          const nextDatum = bars.data()[i + 1];
-          if (nextDatum) {
-            datumWidth = (xScale(nextDatum.x) - xScale(d.x)) - gutterWidth;
-          }
-          return datumWidth;
-        } else {
-          return xScale.rangeBand() / groupCount;
+          return datumWidth(d, i);
         }
+        return xScale.rangeBand();
       }
 
       function heightFunc(d) {
@@ -167,24 +171,38 @@ export function VislibVisualizationsColumnChartProvider(Private) {
       const yScale = this.getValueAxis().getScale();
       const groupCount = this.getGroupedCount();
       const groupNum = this.getGroupedNum(this.chartData);
-      const groupSpacingPercentage = 0.15;
+      const gutterSpacingPercentage = 0.15;
       const isTimeScale = this.getCategoryAxis().axisConfig.isTimeDomain();
       const isHorizontal = this.getCategoryAxis().axisConfig.isHorizontal();
       const isLogScale = this.getValueAxis().axisConfig.isLogScale();
       let barWidth;
+      let gutterWidth;
 
       if (isTimeScale) {
         const { min, interval } = this.handler.data.get('ordered');
-        let groupWidth = xScale(min + interval) - xScale(min);
-        groupWidth = Math.abs(groupWidth);
-        const groupSpacing = groupWidth * groupSpacingPercentage;
+        let intervalWidth = xScale(min + interval) - xScale(min);
+        intervalWidth = Math.abs(intervalWidth);
 
-        barWidth = (groupWidth - groupSpacing) / groupCount;
+        gutterWidth = intervalWidth * gutterSpacingPercentage;
+        barWidth = (intervalWidth - gutterWidth) / groupCount;
       }
 
-      function x(d) {
+      /**
+       * Histogram intervals are not always equal widths, e.g, monthly time intervals.
+       * It is more visually appealing to vary bar width so that gutter width is constant.
+       */
+      function datumWidth(d, i) {
+        let datumWidth = barWidth;
+        const nextDatum = bars.data()[i + 1];
+        if (nextDatum) {
+          datumWidth = ((xScale(nextDatum.x) - xScale(d.x)) - gutterWidth) / groupCount;
+        }
+        return datumWidth;
+      }
+
+      function x(d, i) {
         if (isTimeScale) {
-          return xScale(d.x) + barWidth * groupNum;
+          return xScale(d.x) + datumWidth(d, i) * groupNum;
         }
         return xScale(d.x) + xScale.rangeBand() / groupCount * groupNum;
       }
@@ -197,9 +215,13 @@ export function VislibVisualizationsColumnChartProvider(Private) {
         return yScale(d.y);
       }
 
-      function widthFunc() {
+      function widthFunc(d, i) {
+        if (barWidth < minWidth) {
+          throw new ContainerTooSmall();
+        }
+
         if (isTimeScale) {
-          return barWidth;
+          return datumWidth(d, i);
         }
         return xScale.rangeBand() / groupCount;
       }
