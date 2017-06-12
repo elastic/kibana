@@ -8,11 +8,12 @@ export function stringifyDate() {
 
   _.class(DateTime).inherits(FieldFormat);
   function DateTime(params, getConfig) {
-    DateTime.Super.call(this, params);
     DateTime.paramDefaults = {
       pattern: getConfig('dateFormat'),
       timezone: getConfig('dateFormat:tz')
     };
+
+    DateTime.Super.call(this, params);
   }
 
   DateTime.id = 'date';
