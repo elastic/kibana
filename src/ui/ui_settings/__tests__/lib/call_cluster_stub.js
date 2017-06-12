@@ -1,10 +1,7 @@
 import sinon from 'sinon';
 import expect from 'expect.js';
-import { merge } from 'lodash';
 
 export function createCallClusterStub(index, type, id, esDocSource) {
-  const currentEsDocValue = merge({}, esDocSource);
-
   const callCluster = sinon.spy(async (method, params) => {
     expect(params)
       .to.have.property('index', index)
@@ -13,12 +10,11 @@ export function createCallClusterStub(index, type, id, esDocSource) {
 
     switch (method) {
       case 'get':
-        return { _source: merge({}, currentEsDocValue) };
+        return { _source: { ...esDocSource } };
 
       case 'update':
         expect(params).to.have.property('body');
         expect(params.body).to.have.property('doc');
-        merge(currentEsDocValue, params.body.doc);
         return {};
 
       default:
