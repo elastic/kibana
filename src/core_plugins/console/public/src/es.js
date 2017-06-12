@@ -7,6 +7,26 @@ export function getVersion() {
   return esVersion;
 }
 
+export function getContentType(body) {
+  if (!body) return;
+
+  let contentType;
+  try {
+    // there is more than one line
+    const lines = body.split('\n').filter(Boolean);
+
+    if (lines.length < 2) throw new Error('not multiline json')
+
+    // each line must be valid json
+    lines.forEach(line => JSON.parse(line));
+    contentType = 'application/x-ndjson';
+  }
+  catch (e) {
+    contentType = 'application/json';
+  }
+  return contentType;
+}
+
 export function send(method, path, data) {
   var wrappedDfd = $.Deferred();
 
@@ -15,29 +35,12 @@ export function send(method, path, data) {
     method = "POST";
   }
 
-  let contentType;
-  if (data) {
-    try {
-      JSON.parse(data);
-      contentType = 'application/json';
-    }
-    catch (e) {
-      try {
-        data.split('\n').forEach(line => {
-          if (!line) return;
-          JSON.parse(line);
-        });
-        contentType = 'application/x-ndjson';
-      } catch (e){
-        contentType = 'text/plain';
-      }
-    }
-  }
+
 
   var options = {
     url: '../api/console/proxy?' + formatQueryString({ path, method }),
     data,
-    contentType,
+    contentType: getContentType(data),
     cache: false,
     crossDomain: true,
     type: 'POST',
