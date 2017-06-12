@@ -66,7 +66,7 @@ export default async (kbnServer, server, config) => {
   });
 
   async function getKibanaPayload({ app, request, includeUserProvidedConfig, injectedVarsOverrides }) {
-    const uiSettings = server.uiSettings();
+    const uiSettings = request.getUiSettingsService();
     const translations = await uiI18n.getTranslationsForRequest(request);
 
     return {
@@ -82,7 +82,7 @@ export default async (kbnServer, server, config) => {
       translations: translations,
       uiSettings: await props({
         defaults: uiSettings.getDefaults(),
-        user: includeUserProvidedConfig && uiSettings.getUserProvided(request)
+        user: includeUserProvidedConfig && uiSettings.getUserProvided()
       }),
       vars: await reduceAsync(
         uiExports.injectedVarsReplacers,
