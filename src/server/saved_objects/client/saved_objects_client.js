@@ -150,15 +150,39 @@ export class SavedObjectsClient {
   }
 
   async update(type, id, attributes, options = {}) {
-    const response = await this._withKibanaIndex('update', {
-      type,
+    const baseParams = {
+      index: this._kibanaIndex,
       id,
       version: get(options, 'version'),
-      body: {
-        doc: attributes
-      },
       refresh: 'wait_for'
-    });
+    };
+
+    let response;
+    try {
+      const v6Params = Object.assign({}, baseParams, {
+        type: 'doc',
+        body: {
+          doc: {
+            [type]: attributes
+          }
+        },
+      });
+      response = await this._callAdminCluster('update', v6Params);
+    } catch (err) {
+      if (err.status === 404) {
+        const v5Params = Object.assign({}, baseParams, {
+          type,
+          body: {
+            doc: attributes
+          }
+        });
+
+        response = await this._withKibanaIndex('update', v5Params);
+      }
+      else {
+        throw handleEsError(err);
+      }
+    }
 
     return {
       id: id,
