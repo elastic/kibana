@@ -7,21 +7,21 @@ import {
 
 export default () => {
   return (
-   <KuiHeaderBar>
-    <KuiHeaderBarSection>
-      <h2 className="kuiSubTitle">
-        Cluster Alerts
-      </h2>
-    </KuiHeaderBarSection>
+    <KuiHeaderBar>
+      <KuiHeaderBarSection>
+        <h2 className="kuiSubTitle">
+          Cluster Alerts
+        </h2>
+      </KuiHeaderBarSection>
 
-    <KuiHeaderBarSection>
-      <span className="kuiText">
-        <span className="kuiStatusText kuiStatusText--error">
-          <span className="kuiStatusText__icon kuiIcon fa-warning"></span>
-          Red health
+      <KuiHeaderBarSection>
+        <span className="kuiText">
+          <span className="kuiStatusText kuiStatusText--error">
+            <span className="kuiStatusText__icon kuiIcon fa-warning"></span>
+            Red health
+          </span>
         </span>
-      </span>
-    </KuiHeaderBarSection>
-  </KuiHeaderBar>
+      </KuiHeaderBarSection>
+    </KuiHeaderBar>
   );
 };
