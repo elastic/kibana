@@ -1,4 +1,7 @@
 import html from 'ui/timepicker/timepicker.html';
+import './quick_panel';
+import './relative_panel';
+import './absolute_panel';
 import _ from 'lodash';
 import { relativeOptions } from './relative_options';
 import { parseRelativeParts } from './parse_relative_parts';
@@ -18,7 +21,7 @@ const notify = new Notifier({
   location: 'timepicker',
 });
 
-module.directive('kbnTimepicker', function (quickRanges, timeUnits, refreshIntervals) {
+module.directive('kbnTimepicker', function (timeUnits, refreshIntervals) {
   return {
     restrict: 'E',
     scope: {
@@ -38,7 +41,6 @@ module.directive('kbnTimepicker', function (quickRanges, timeUnits, refreshInter
 
       if (_.isUndefined($scope.mode)) $scope.mode = 'quick';
 
-      $scope.quickLists = _(quickRanges).groupBy('section').values().value();
       $scope.refreshLists = _(refreshIntervals).groupBy('section').values().value();
 
       $scope.relative = {

@@ -1,3 +1,4 @@
+/* eslint import/no-duplicates: 0 */
 import { cloneDeep } from 'lodash';
 import expect from 'expect.js';
 import sinon from 'sinon';

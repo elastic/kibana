@@ -1,7 +1,6 @@
 import { defaults, _ } from 'lodash';
-import { props } from 'bluebird';
+import { props, reduce as reduceAsync } from 'bluebird';
 import Boom from 'boom';
-import { reduce as reduceAsync } from 'bluebird';
 import { resolve } from 'path';
 
 import UiExports from './ui_exports';

@@ -15,12 +15,12 @@ import pluginsScanMixin from './plugins/scan';
 import pluginsCheckEnabledMixin from './plugins/check_enabled';
 import pluginsCheckVersionMixin from './plugins/check_version';
 import configCompleteMixin from './config/complete';
-import uiMixin from '../ui';
-import { uiSettingsMixin } from '../ui';
+import uiMixin, { uiSettingsMixin } from '../ui';
 import optimizeMixin from '../optimize';
 import pluginsInitializeMixin from './plugins/initialize';
 import { indexPatternsMixin } from './index_patterns';
 import { savedObjectsMixin } from './saved_objects';
+import { statsMixin } from './stats';
 
 const rootDir = fromRoot('.');
 
@@ -40,6 +40,9 @@ export default class KbnServer {
       loggingMixin,
       warningsMixin,
       statusMixin,
+
+      // set up stats route
+      statsMixin,
 
       // writes pid file
       pidMixin,

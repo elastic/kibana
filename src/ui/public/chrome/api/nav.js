@@ -1,6 +1,5 @@
-import { remove } from 'lodash';
+import { remove, isString } from 'lodash';
 import { parse, format } from 'url';
-import { isString } from 'lodash';
 
 export function initChromeNavApi(chrome, internals) {
   chrome.getNavLinks = function () {
