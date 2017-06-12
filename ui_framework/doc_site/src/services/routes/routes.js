@@ -163,6 +163,7 @@ const components = [{
 }, {
   name: 'HeaderBar',
   component: HeaderBarExample,
+  hasReact: true,
 }, {
   name: 'Icon',
   component: IconExample,

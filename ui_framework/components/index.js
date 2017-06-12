@@ -24,6 +24,11 @@ export {
   KuiEventBodyMetadata,
 } from './event';
 
+export {
+  KuiHeaderBar,
+  KuiHeaderBarSection,
+} from './header_bar';
+
 export { KuiInfoButton } from './info_button';
 
 export {
