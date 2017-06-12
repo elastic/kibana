@@ -40,7 +40,7 @@ describe('UiExports', function () {
 
       await kbnServer.ready();
       kbnServer.status.get('ui settings').state = 'green';
-      kbnServer.server.decorate('server', 'uiSettings', () => {
+      kbnServer.server.decorate('request', 'getUiSettingsService', () => {
         return { getDefaults: noop, getUserProvided: noop };
       });
     });
