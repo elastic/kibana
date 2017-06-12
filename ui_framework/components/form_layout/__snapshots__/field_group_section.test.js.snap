@@ -1,0 +1,21 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`renders KuiFieldGroupSection 1`] = `
+<div
+  aria-label="aria-label"
+  class="kuiFieldGroupSection testClass1 testClass2"
+  data-test-subj="test subject string"
+>
+  children
+</div>
+`;
+
+exports[`renders KuiFieldGroupSection isWide 1`] = `
+<div
+  aria-label="aria-label"
+  class="kuiFieldGroupSection testClass1 testClass2 kuiFieldGroupSection--wide"
+  data-test-subj="test subject string"
+>
+  children
+</div>
+`;
