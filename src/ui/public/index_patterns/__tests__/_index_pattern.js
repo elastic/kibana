@@ -499,14 +499,14 @@ describe('index pattern', function () {
     });
   });
 
-  describe('#isUnsupportedTimePatterns()', () => {
+  describe('#isUnsupportedTimePattern()', () => {
     it('returns true when intervalName is set', () => {
       indexPattern.intervalName = 'something';
-      expect(indexPattern.isUnsupportedTimePatterns()).to.be(true);
+      expect(indexPattern.isUnsupportedTimePattern()).to.be(true);
     });
     it('returns false otherwise', () => {
       delete indexPattern.intervalName;
-      expect(indexPattern.isUnsupportedTimePatterns()).to.be(false);
+      expect(indexPattern.isUnsupportedTimePattern()).to.be(false);
     });
   });
 
