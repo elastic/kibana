@@ -5,7 +5,7 @@ export async function ping(url) {
   try {
     await Promise.race([
       fcb(cb => request(url, cb)),
-      new Promise(reject => {
+      new Promise((resolve, reject) => {
         setTimeout(() => reject(new Error('timeout')), 1000);
       })
     ]);
