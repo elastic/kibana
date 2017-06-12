@@ -1,9 +1,14 @@
 import { uiSettingsServiceFactory } from './ui_settings_service_factory';
 import { getUiSettingsServiceForRequest } from './ui_settings_service_for_request';
 import { mirrorStatus } from './mirror_status';
+import { UiExportsConsumer } from './ui_exports_consumer';
 
 export function uiSettingsMixin(kbnServer, server, config) {
   const status = kbnServer.status.create('ui settings');
+
+  // reads the "uiSettingDefaults" from uiExports
+  const uiExportsConsumer = new UiExportsConsumer();
+  kbnServer.uiExports.addConsumer(uiExportsConsumer);
 
   if (!config.get('uiSettings.enabled')) {
     status.disabled('uiSettings.enabled config is set to `false`');
@@ -17,23 +22,33 @@ export function uiSettingsMixin(kbnServer, server, config) {
   // If the ui settings status isn't green we shouldn't be attempting to get
   // user settings, since we can't be sure that all the necessary conditions
   // (e.g. elasticsearch being available) are met.
-  const readUiSettingsInterceptor = () => {
+  const readInterceptor = () => {
     if (status.state !== 'green') {
       return {};
     }
   };
+
+  const getDefaults = () => (
+    uiExportsConsumer.getUiSettingDefaults()
+  );
 
   // don't return, just let it happen when the plugins are ready
   kbnServer.ready().then(() => {
     mirrorStatus(status, kbnServer.status.getForPluginId('elasticsearch'));
   });
 
-  server.decorate('server', 'uiSettingsServiceFactory', function (options) {
-    return uiSettingsServiceFactory(server, options);
+  server.decorate('server', 'uiSettingsServiceFactory', (options = {}) => {
+    return uiSettingsServiceFactory(server, {
+      getDefaults,
+      ...options
+    });
   });
 
   server.decorate('request', 'getUiSettingsService', function () {
-    return getUiSettingsServiceForRequest(server, this, readUiSettingsInterceptor);
+    return getUiSettingsServiceForRequest(server, this, {
+      getDefaults,
+      readInterceptor,
+    });
   });
 
   server.decorate('server', 'uiSettings', () => {

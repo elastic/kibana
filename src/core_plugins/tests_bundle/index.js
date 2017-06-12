@@ -1,5 +1,4 @@
 import { union } from 'lodash';
-import { getDefaultSettings } from '../../ui/ui_settings/defaults';
 import findSourceFiles from './find_source_files';
 import { fromRoot } from '../../utils';
 
@@ -57,7 +56,9 @@ export default (kibana) => {
           });
         }
 
-        env.defaultUiSettings = getDefaultSettings();
+        env.defaultUiSettings = plugins.kbnServer.uiExports.consumers
+          .find(consumer => consumer.getUiSettingDefaults)
+          .getUiSettingDefaults();
 
         return new UiBundle({
           id: 'tests',
