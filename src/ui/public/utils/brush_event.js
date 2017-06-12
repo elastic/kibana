@@ -3,14 +3,22 @@ import moment from 'moment';
 import { buildRangeFilter } from 'ui/filter_manager/lib/range';
 
 export function UtilsBrushEventProvider(timefilter) {
+  const RANGE_FILTER = 'range';
+  const TIME_FILTER = 'timefilter';
   return $state => {
     return event => {
       if (!event.data.xAxisField) {
         return;
       }
 
-      switch (event.data.xAxisField.type) {
-        case 'date':
+      let filterType = RANGE_FILTER;
+      if (event.data.xAxisField.type === 'date' &&
+        event.data.xAxisField.name === event.data.indexPattern.timeFieldName) {
+        filterType = TIME_FILTER;
+      }
+
+      switch (filterType) {
+        case TIME_FILTER:
           const from = moment(event.range[0]);
           const to = moment(event.range[1]);
 
@@ -21,7 +29,7 @@ export function UtilsBrushEventProvider(timefilter) {
           timefilter.time.mode = 'absolute';
           break;
 
-        case 'number':
+        case RANGE_FILTER:
           if (event.range.length <= 1) return;
 
           const existingFilter = $state.filters.find(filter => (
