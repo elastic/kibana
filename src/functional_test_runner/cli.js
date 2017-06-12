@@ -44,9 +44,9 @@ async function run() {
     const failureCount = await functionalTestRunner.run();
     process.exitCode = failureCount ? 1 : 0;
   } catch (err) {
-    // await teardown(err);
+    await teardown(err);
   } finally {
-    // await teardown();
+    await teardown();
   }
 }
 
