@@ -402,12 +402,6 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
     }
 
 
-    async isSaveButtonEnabled() {
-      const saveButton = await testSubjects.find('visualizeSaveButton');
-      const clazz = await saveButton.getProperty('className');
-      return clazz.indexOf('kuiLocalMenuItem-isDisabled') === -1;
-    }
-
     saveVisualization(vizName) {
       return testSubjects.click('visualizeSaveButton')
       .then(() => {
