@@ -10,8 +10,22 @@ function hydrateUserSettings(userSettings) {
     .reduce((acc, { key, userValue }) => ({ ...acc, [key]: { userValue } }), {});
 }
 
+/**
+ *  Service that provides access to the UiSettings stored in elasticsearch.
+ *
+ *  @class UiSettingsService
+ *  @param {Object} options
+ *  @property {string} options.index Elasticsearch index name where settings are stored
+ *  @property {string} options.type type of ui settings Elasticsearch doc
+ *  @property {string} options.id id of ui settings Elasticsearch doc
+ *  @property {AsyncFunction} options.callCluster function that accepts a method name and
+ *                            param object which causes a request via some elasticsearch client
+ *  @property {AsyncFunction} [options.readInterceptor] async function that is called when the
+ *                            UiSettingsService does a read() an has an oportunity to intercept the
+ *                            request and return an alternate `_source` value to use.
+ */
 export class UiSettingsService {
-  constructor(options = {}) {
+  constructor(options) {
     const {
       index,
       type,
