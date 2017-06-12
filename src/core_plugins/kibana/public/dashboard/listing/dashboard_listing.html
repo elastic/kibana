@@ -97,17 +97,17 @@
       </div>
     </div>
 
-    <!-- PromptForItems -->
+    <!-- EmptyTablePrompt -->
     <div
       class="kuiPanel kuiPanel--centered kuiPanel--withHeader"
       ng-if="!listingController.isFetchingItems && !listingController.items.length && !listingController.filter"
     >
-      <div class="kuiPromptForItems">
-        <div class="kuiPromptForItems__message">
+      <div class="kuiEmptyTablePrompt">
+        <div class="kuiEmptyTablePrompt__message">
           Looks like you don&rsquo;t have any dashboards. <span ng-if="!listingController.hideWriteControls">Let&rsquo;s create some!</span>
         </div>
 
-        <div class="kuiPromptForItems__actions" ng-if="!listingController.hideWriteControls">
+        <div class="kuiEmptyTablePrompt__actions" ng-if="!listingController.hideWriteControls">
           <a
             class="kuiButton kuiButton--primary kuiButton--iconText"
             data-test-subj="createDashboardPromptButton"

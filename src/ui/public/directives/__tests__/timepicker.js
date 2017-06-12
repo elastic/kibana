@@ -172,11 +172,11 @@ describe('timepicker directive', function () {
 
     it('has a preview of the "from" input', function () {
       const preview = $elem.find('.kbn-timepicker-section span[ng-show="relative.from.preview"]');
-      expect(preview.text()).to.be(moment().subtract(15, 'minutes').format($scope.format));
+      expect(preview.text().trim()).to.be(moment().subtract(15, 'minutes').format($scope.format));
     });
 
     it('has a disabled "to" field that contains "Now"', function () {
-      expect($elem.find('.kbn-timepicker-section span[ng-show="relative.to.preview"]').text()).to.be('Now');
+      expect($elem.find('.kbn-timepicker-section span[ng-show="relative.to.preview"]').text().trim()).to.be('Now');
     });
 
     it('has a submit handler', function () {

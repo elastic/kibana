@@ -7,7 +7,8 @@ const notify = new Notifier({
   location: 'Index Patterns'
 });
 
-module.exports = function (opts) {
+// eslint-disable-next-line kibana-custom/no-default-export
+export default function (opts) {
   opts = opts || {};
   const whenMissingRedirectTo = opts.whenMissingRedirectTo || null;
   let defaultRequiredToasts = null;
@@ -53,6 +54,4 @@ module.exports = function (opts) {
       else defaultRequiredToasts.push(notify.error(err));
     }
   );
-
-
-};
+}
