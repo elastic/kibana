@@ -1,7 +1,7 @@
 import Plugin from './plugin';
 import { join } from 'path';
 
-module.exports = class PluginApi {
+export default class PluginApi {
   constructor(kibana, pluginPath) {
     this.config = kibana.config;
     this.rootDir = kibana.rootDir;
@@ -27,4 +27,4 @@ module.exports = class PluginApi {
       require: []
     };
   }
-};
+}

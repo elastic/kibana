@@ -22,7 +22,10 @@
   </form>
 </div>
 
-<div class="filter-bar" ng-show="filters.length">
+<div
+  class="filter-bar"
+  ng-show="filters.length || showAddFilterButton()"
+>
   <div
     class="filter"
     ng-class="{ negate: filter.meta.negate, disabled: filter.meta.disabled }"
@@ -48,78 +51,74 @@
         <i ng-show="filter.meta.negate" class="fa fa-fw fa-search-plus negative"></i>
         <i ng-hide="filter.meta.negate" class="fa fa-fw fa-search-minus positive"></i>
       </a>
-      <a class="action filter-remove" ng-click="removeFilter(filter)">
+      <a class="action filter-remove" ng-click="deleteFilter(filter)">
         <i class="fa fa-fw fa-trash" data-test-subj="removeFilter-{{ filter.meta.key }}"></i>
       </a>
-      <a class="action filter-edit" ng-click="startEditingFilter(filter)">
+      <a class="action filter-edit" ng-click="editFilter(filter)">
         <i class="fa fa-fw fa-edit"></i>
       </a>
     </div>
   </div>
 
-  <div class="filter-edit-container" ng-if="editingFilter">
-    <form role="form" name="editFilterForm" ng-submit="editDone()">
-      <div class="form-group filter-edit-alias">
-        <label>Filter Alias
-          <small>(optional)</small>
-        </label>
-        <input
-          ng-model="editingFilter.alias"
-          type="text"
-          class="form-control">
-      </div>
-      <div
-        json-input
-        require-keys="true"
-        ui-ace="{
-          mode: 'json',
-          onLoad: aceLoaded
-        }"
-        ng-model="editingFilter.model"
-      ></div>
-
-      <div class="form-group">
-        <button
-          class="kuiButton kuiButton--hollow"
-          ng-click="stopEditingFilter()"
-        >
-          Cancel
-        </button>
-
-        <button
-          type="submit"
-          class="kuiButton kuiButton--primary"
-          ng-disabled="editFilterForm.$invalid"
-        >
-          Done
-        </button>
-
-        <small ng-show="editFilterForm.$invalid">
-          Could not parse JSON input
-        </small>
-      </div>
-    </form>
-  </div>
-
-  <div class="filter-link">
+  <div
+    class="filter-link"
+    ng-show="showAddFilterButton()"
+  >
     <div class="filter-description small">
-      <a ng-click="showFilterActions = !showFilterActions">
-        Actions
-        <i class="fa"
-        ng-class="{'fa-caret-down': showFilterActions, 'fa-caret-right': !showFilterActions}" data-test-subj="showFilterActions"></i>
+      <a
+        ng-click="addFilter()"
+        kbn-accessible-click
+      >
+        Add a filter
+        <span class="fa fa-plus"></span>
       </a>
     </div>
   </div>
+
+  <div
+    class="filter-link pull-right"
+    ng-show="filters.length"
+  >
+    <div class="filter-description small">
+      <a ng-click="showFilterActions = !showFilterActions">
+        Actions
+        <span
+          class="fa"
+          ng-class="{
+            'fa-caret-down': showFilterActions,
+            'fa-caret-right': !showFilterActions
+          }"
+          data-test-subj="showFilterActions"
+        ></span>
+      </a>
+    </div>
+  </div>
+
+  <div
+    class="filter-edit-container"
+    ng-if="editingFilter"
+  >
+    <filter-editor
+      filter="editingFilter"
+      index-patterns="indexPatterns"
+      on-delete="deleteFilter(editingFilter)"
+      on-save="saveEdit(filter, newFilter, isPinned)"
+      on-cancel="cancelEdit()"
+    ></filter-editor>
+  </div>
 </div>
 
-<div class="filter-bar filter-bar-condensed" ng-show="filters.length && showFilterActions">
+<div
+  class="filter-bar filter-bar-condensed"
+  ng-show="filters.length && showFilterActions"
+>
   <div class="filter-actions-all">
     <div class="filter-link">
       <div class="filter-description"><strong>All filters:</strong></div>
     </div>
-    <div class="filter-link">
-      <div class="filter-description"><a ng-click="toggleAll(false)">Enable</a></div>
-    </div>
+      <div class="filter-link">
+        <div class="filter-description"><a ng-click="toggleAll(false)">Enable</a></div>
+      </div>
     <div class="filter-link">
       <div class="filter-description"><a ng-click="toggleAll(true)">Disable</a></div>
     </div>

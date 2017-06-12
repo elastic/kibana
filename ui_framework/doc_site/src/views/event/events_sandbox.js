@@ -1,4 +1,5 @@
 import React from 'react';
+import { renderToHtml } from '../../services';
 
 import {
   GuideDemo,
@@ -7,19 +8,24 @@ import {
   GuideSectionTypes,
 } from '../../components';
 
-const html = require('./events_sandbox.html');
+import EventsSandboxContent from './events_sandbox_content';
+const eventsSandboxContentSource = require('!!raw!./events_sandbox_content');
+const eventsSandboxContentHtml = renderToHtml(EventsSandboxContent);
 
 export default props => (
   <GuideSandbox>
     <GuideDemo
       isFullScreen={true}
-      html={html}
+      html={eventsSandboxContentHtml}
     />
 
     <GuideSandboxCodeToggle
       source={[{
+        type: GuideSectionTypes.JS,
+        code: eventsSandboxContentSource,
+      }, {
         type: GuideSectionTypes.HTML,
-        code: html,
+        code: eventsSandboxContentHtml,
       }]}
       title={props.route.name}
     />

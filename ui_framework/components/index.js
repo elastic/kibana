@@ -1,3 +1,5 @@
+export { KuiActionItem } from './action_item';
+
 export {
   KuiKeyboardAccessible,
 } from './accessibility';
@@ -9,6 +11,18 @@ export {
   KuiLinkButton,
   KuiSubmitButton,
 } from './button';
+
+export {
+  KuiCollapseButton
+} from './collapse_button';
+
+export {
+  KuiEvent,
+  KuiEventSymbol,
+  KuiEventBody,
+  KuiEventBodyMessage,
+  KuiEventBodyMetadata,
+} from './event';
 
 export { KuiInfoButton } from './info_button';
 
@@ -33,3 +47,14 @@ export {
   KuiPager,
   KuiPagerButtonGroup
 } from './pager';
+
+export {
+  KuiEmptyTablePrompt,
+  KuiEmptyTablePromptMessage,
+  KuiEmptyTablePromptPanel,
+} from './empty_table_prompt';
+
+export {
+  KuiMenu,
+  KuiMenuItem
+} from './menu';

@@ -3,7 +3,7 @@ import _ from 'lodash';
 import Chainable from '../lib/classes/chainable';
 import argType from '../handlers/lib/arg_type.js';
 
-module.exports = new Chainable('condition', {
+export default new Chainable('condition', {
   args: [
     {
       name: 'inputSeries',

@@ -1,7 +1,7 @@
 import _ from 'lodash';
 import processFunctionDefinition from './server/lib/process_function_definition';
 
-module.exports = function (server) {
+export default function (server) {
   //var config = server.config();
   require('./server/routes/run.js')(server);
   require('./server/routes/functions.js')(server);
@@ -25,4 +25,4 @@ module.exports = function (server) {
   };
 
 
-};
+}

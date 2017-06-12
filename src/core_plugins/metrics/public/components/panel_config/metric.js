@@ -4,7 +4,7 @@ import IndexPattern from '../index_pattern';
 import createTextHandler from '../lib/create_text_handler';
 import ColorRules from '../color_rules';
 import YesNo from '../yes_no';
-import uuid from 'node-uuid';
+import uuid from 'uuid';
 
 class MetricPanelConfig extends Component {
 

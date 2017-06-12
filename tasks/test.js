@@ -1,6 +1,6 @@
 import _, { keys } from 'lodash';
 
-import visualRegression from '../utilities/visual_regression';
+import { run } from '../utilities/visual_regression';
 
 module.exports = function (grunt) {
   grunt.registerTask(
@@ -8,7 +8,7 @@ module.exports = function (grunt) {
     'Compare screenshots and generate diff images.',
     function () {
       const done = this.async();
-      visualRegression.run(done);
+      run(done);
     }
   );
 
@@ -88,7 +88,7 @@ module.exports = function (grunt) {
 
   grunt.registerTask('test:api:server', [
     'esvm:ui',
-    'run:apiTestServer:keepalive'
+    'run:devApiTestServer:keepalive'
   ]);
 
   grunt.registerTask('test:api:runner', () => {

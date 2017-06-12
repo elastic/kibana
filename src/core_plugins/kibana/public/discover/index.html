@@ -5,14 +5,14 @@
     <div data-transclude-slots>
       <!-- Breadcrumbs. -->
       <div data-transclude-slot="topLeftCorner" class="kuiLocalBreadcrumbs">
-        <div class="kuiLocalBreadcrumb">
+        <h1 tabindex="0" id="kui_local_breadcrumb" class="kuiLocalBreadcrumb">
           <span ng-show="opts.savedSearch.id" class="kuiLocalBreadcrumb__emphasis">
             <span data-test-subj="discoverCurrentQuery" ng-bind="opts.savedSearch.lastSavedTitle"></span>
-            <i aria-label="Reload Saved Search" tooltip="Reload Saved Search" ng-click="resetQuery();" class="fa fa-undo small"></i>&nbsp;
+            <i id="reload_saved_search" tabindex="0" aria-label="Reload Saved Search" tooltip="Reload Saved Search" ng-click="resetQuery();" class="fa fa-undo small"></i>&nbsp;
           </span>
           <span data-test-subj="discoverQueryHits" class="kuiLocalBreadcrumb__emphasis">{{(hits || 0) | number:0}}</span>
           <ng-pluralize count="hits" when="{'1':'hit', 'other':'hits'}"></ng-pluralize>
-        </div>
+        </h1>
       </div>
 
       <!-- Search. -->
@@ -66,7 +66,10 @@
 
   <div class="container-fluid" role="main">
     <div class="row">
-      <filter-bar state="state"></filter-bar>
+      <filter-bar
+        state="state"
+        index-patterns="[indexPattern]"
+      ></filter-bar>
     </div>
     <div class="row">
       <div class="col-md-2 sidebar-container collapsible-sidebar">

@@ -1,7 +1,7 @@
 import ngMock from 'ng_mock';
 import expect from 'expect.js';
 import _ from 'lodash';
-import sinon from 'auto-release-sinon';
+import sinon from 'sinon';
 
 describe('pattern checker', function () {
   let $httpBackend;

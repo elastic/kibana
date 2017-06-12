@@ -1,7 +1,7 @@
 import $ from 'jquery';
 import { delay } from 'bluebird';
 import expect from 'expect.js';
-import sinon from 'auto-release-sinon';
+import sinon from 'sinon';
 
 import ngMock from 'ng_mock';
 import { EventsProvider } from 'ui/events';

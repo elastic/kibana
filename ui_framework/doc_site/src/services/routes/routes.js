@@ -30,6 +30,9 @@ import EventExample
 import EventsSandbox
   from '../../views/event/events_sandbox';
 
+import ExpressionExample
+  from '../../views/expression/expression_example';
+
 import FormExample
   from '../../views/form/form_example';
 
@@ -81,6 +84,9 @@ import PagerExample
 import PanelExample
   from '../../views/panel/panel_example';
 
+import EmptyTablePromptExample
+  from '../../views/empty_table_prompt/empty_table_prompt_example';
+
 import StatusTextExample
   from '../../views/status_text/status_text_example';
 
@@ -113,6 +119,7 @@ const components = [{
 }, {
   name: 'ActionItem',
   component: ActionItemExample,
+  hasReact: true,
 }, {
   name: 'Badge',
   component: BadgeExample,
@@ -132,9 +139,18 @@ const components = [{
 }, {
   name: 'CollapseButton',
   component: CollapseButtonExample,
+  hasReact: true,
+}, {
+  name: 'EmptyTablePrompt',
+  component: EmptyTablePromptExample,
+  hasReact: true,
 }, {
   name: 'Event',
   component: EventExample,
+  hasReact: true,
+}, {
+  name: 'Expression',
+  component: ExpressionExample,
 }, {
   name: 'Form',
   component: FormExample,
@@ -167,6 +183,7 @@ const components = [{
 }, {
   name: 'Menu',
   component: MenuExample,
+  hasReact: true,
 }, {
   name: 'MenuButton',
   component: MenuButtonExample,

@@ -1,5 +1,6 @@
 import FsOptimizer from './fs_optimizer';
-module.exports = async (kbnServer, server, config) => {
+
+export default async (kbnServer, server, config) => {
   if (!config.get('optimize.enabled')) return;
 
   // the lazy optimizer sets up two threads, one is the server listening

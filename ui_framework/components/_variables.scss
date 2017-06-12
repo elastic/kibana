@@ -15,6 +15,18 @@ $globalInputTextColor: $globalTextColor;
 $globalInputBackgroundColor: #ffffff;
 $globalInputBorderColor: $globalInputBackgroundColor;
 
+
+// Animations
+
+$globalAnimSlightBounce: cubic-bezier(0.34,1.61,0.7,1);
+$globalAnimSlightResistance: cubic-bezier(0.694, 0.0482, 0.335, 1);
+$globalAnimSpeedVeryFast: 90ms;
+$globalAnimSpeedFast: 150ms;
+$globalAnimSpeedNormal: 250ms;
+$globalAnimSpeedSlow: 350ms;
+$globalAnimSpeedVerySlow: 500ms;
+
+
 // Dark theme colors
 $globalTextColor--darkTheme: #cecece;
 $globalBackgroundColor--darkTheme: #777777;
@@ -41,6 +53,7 @@ $globalWarningColor: #ec9800;
 $globalDangerColor: #D86051;
 $globalFocusColor: #6EADC1;
 $globalFocusDangerColor: #ff523c;
+$globalFocusWarningColor: #ffa500;
 $globalFocusBackgroundColor: #ffffff;
 $globalFontColor: #191E23;
 $globalSubduedTextColor: #9fa3a7;

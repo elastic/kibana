@@ -1,7 +1,6 @@
 import { defaults, _ } from 'lodash';
-import { props } from 'bluebird';
+import { props, reduce as reduceAsync } from 'bluebird';
 import Boom from 'boom';
-import { reduce as reduceAsync } from 'bluebird';
 import { resolve } from 'path';
 
 import UiExports from './ui_exports';
@@ -9,6 +8,8 @@ import UiBundle from './ui_bundle';
 import UiBundleCollection from './ui_bundle_collection';
 import UiBundlerEnv from './ui_bundler_env';
 import { UiI18n } from './ui_i18n';
+
+export { uiSettingsMixin } from './ui_settings';
 
 export default async (kbnServer, server, config) => {
   const uiExports = kbnServer.uiExports = new UiExports({

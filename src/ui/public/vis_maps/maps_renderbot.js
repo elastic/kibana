@@ -5,17 +5,17 @@ import { VislibVisTypeBuildChartDataProvider } from 'ui/vislib_vis_type/build_ch
 import { FilterBarPushFilterProvider } from 'ui/filter_bar/push_filter';
 import { KibanaMap } from './kibana_map';
 import { GeohashLayer } from './geohash_layer';
-import './lib/tilemap_settings';
+import './lib/service_settings';
 import './styles/_tilemap.less';
 import { ResizeCheckerProvider } from 'ui/resize_checker';
 
-
-module.exports = function MapsRenderbotFactory(Private, $injector, tilemapSettings, Notifier, courier, getAppState) {
+// eslint-disable-next-line kibana-custom/no-default-export
+export default function MapsRenderbotFactory(Private, $injector, serviceSettings, Notifier, courier, getAppState) {
 
   const ResizeChecker = Private(ResizeCheckerProvider);
   const Renderbot = Private(VisRenderbotProvider);
   const buildChartData = Private(VislibVisTypeBuildChartDataProvider);
-  const notify = new Notifier({ location: 'Tilemap' });
+  const notify = new Notifier({ location: 'Coordinate Map' });
 
   class MapsRenderbot extends Renderbot {
 
@@ -26,12 +26,9 @@ module.exports = function MapsRenderbotFactory(Private, $injector, tilemapSettin
       this._kibanaMap = null;
       this._$container = $el;
       this._kibanaMapReady = this._makeKibanaMap($el);
-
       this._baseLayerDirty = true;
       this._dataDirty = true;
       this._paramsDirty = true;
-
-
       this._resizeChecker = new ResizeChecker($el);
       this._resizeChecker.on('resize', () => {
         if (this._kibanaMap) {
@@ -42,19 +39,19 @@ module.exports = function MapsRenderbotFactory(Private, $injector, tilemapSettin
 
     async _makeKibanaMap() {
 
-      if (!tilemapSettings.isInitialized()) {
-        await tilemapSettings.loadSettings();
-      }
-
-      if (tilemapSettings.getError()) {
-        //Still allow the visualization to be built, but show a toast that there was a problem retrieving map settings
-        //Even though the basemap will not display, the user will at least still see the overlay data
-        notify.warning(tilemapSettings.getError().message);
+      try {
+        this._tmsService = await serviceSettings.getTMSService();
+        this._tmsError = null;
+      } catch (e) {
+        this._tmsService = null;
+        this._tmsError = e;
+        notify.warning(e.message);
       }
 
       if (this._kibanaMap) {
         this._kibanaMap.destroy();
       }
+
       const containerElement = $(this._$container)[0];
       const options = _.clone(this._getMinMaxZoom());
       const uiState = this.vis.getUiState();
@@ -110,7 +107,11 @@ module.exports = function MapsRenderbotFactory(Private, $injector, tilemapSettin
 
     _getMinMaxZoom() {
       const mapParams = this._getMapsParams();
-      return tilemapSettings.getMinMaxZoom(mapParams.wms.enabled);
+      if (this._tmsError) {
+        return serviceSettings.getFallbackZoomSettings(mapParams.wms.enabled);
+      } else {
+        return this._tmsService.getMinMaxZoom(mapParams.wms.enabled);
+      }
     }
 
     _recreateGeohashLayer() {
@@ -183,9 +184,9 @@ module.exports = function MapsRenderbotFactory(Private, $injector, tilemapSettin
             this._kibanaMap.setZoomLevel(maxZoom);
           }
 
-          if (!tilemapSettings.hasError()) {
-            const url = tilemapSettings.getUrl();
-            const options = tilemapSettings.getTMSOptions();
+          if (!this._tmsError) {
+            const url = this._tmsService.getUrl();
+            const options = this._tmsService.getTMSOptions();
             this._kibanaMap.setBaseLayer({
               baseLayerType: 'tms',
               options: { url, ...options }
@@ -212,10 +213,7 @@ module.exports = function MapsRenderbotFactory(Private, $injector, tilemapSettin
       return _.assign(
         {},
         this.vis.type.params.defaults,
-        {
-          type: this.vis.type.name,
-          hasTimeField: this.vis.indexPattern && this.vis.indexPattern.hasTimeField()// Add attribute which determines whether an index is time based or not.
-        },
+        { type: this.vis.type.name },
         this.vis.params
       );
     }
@@ -261,4 +259,4 @@ module.exports = function MapsRenderbotFactory(Private, $injector, tilemapSettin
 
 
   return MapsRenderbot;
-};
+}

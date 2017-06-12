@@ -1,4 +1,4 @@
-module.exports = function (api) {
+export default function (api) {
 
   api.addEndpointDescription('_get_settings', {
     patterns: [
@@ -83,4 +83,4 @@ module.exports = function (api) {
       }
     }
   });
-};
+}
