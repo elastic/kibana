@@ -40,7 +40,6 @@ doc-table {
 
       .table-cell-filter {
         position: absolute;
-        background-color: @panel-bg;
         white-space: nowrap;
         right: 0;
       }
@@ -50,6 +49,13 @@ doc-table {
           opacity: 1;
         }
       }
+    }
+  }
+
+  .discover-table-row--highlight {
+    td,
+    .docTableRowFilterButton {
+      background-color: #E2F1F6;
     }
   }
 
@@ -74,17 +80,13 @@ doc-table {
  */
 .docTableRowFilterButton {
   appearance: none;
-  background-color: transparent;
+  background-color: @panel-bg;
   border: none;
-  padding: 0;
+  padding: 0 3px;
   font-size: 14px;
   line-height: 1; /* 1 */
   display: inline-block;
   opacity: 0; /* 2 */
-
-  & + & {
-    margin-left: 5px;
-  }
 
   &:focus {
     opacity: 1; /* 3 */

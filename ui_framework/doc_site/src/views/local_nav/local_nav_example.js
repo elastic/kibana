@@ -1,3 +1,4 @@
+/* eslint import/no-duplicates: 0, import/default: 0 */
 import React from 'react';
 
 import { renderToHtml } from '../../services';
