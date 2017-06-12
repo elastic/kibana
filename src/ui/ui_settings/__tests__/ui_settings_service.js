@@ -5,11 +5,7 @@ import { errors as esErrors } from 'elasticsearch';
 import { getDefaultSettings } from '../defaults';
 import { UiSettingsService } from '../ui_settings_service';
 
-import {
-  assertPromise,
-  assertRejection,
-  createCallClusterStub,
-} from './lib';
+import { createCallClusterStub } from './lib';
 
 const INDEX = '.kibana';
 const TYPE = 'config';
@@ -41,35 +37,22 @@ describe('ui settings', function () {
   describe('overview', function () {
     it('has expected api surface', function () {
       const { uiSettings } = setup();
-      expect(typeof uiSettings.get).to.equal('function');
-      expect(typeof uiSettings.getAll).to.equal('function');
-      expect(typeof uiSettings.getDefaults).to.equal('function');
-      expect(typeof uiSettings.getRaw).to.equal('function');
-      expect(typeof uiSettings.getUserProvided).to.equal('function');
-      expect(typeof uiSettings.remove).to.equal('function');
-      expect(typeof uiSettings.removeMany).to.equal('function');
-      expect(typeof uiSettings.set).to.equal('function');
-      expect(typeof uiSettings.setMany).to.equal('function');
-    });
-
-    it('throws if the first error is not a request', async () => {
-      const { uiSettings } = setup();
-      await assertRejection(uiSettings.get(null), 'hapi.Request');
-      await assertRejection(uiSettings.get(false), 'hapi.Request');
-      await assertRejection(uiSettings.get('key'), 'hapi.Request');
-      await assertRejection(uiSettings.get(/regex/), 'hapi.Request');
-      await assertRejection(uiSettings.get(new Date()), 'hapi.Request');
-      await assertRejection(uiSettings.get({}), 'hapi.Request');
-      await assertRejection(uiSettings.get({ path:'' }), 'hapi.Request');
-      await assertRejection(uiSettings.get({ path:'', headers:null }), 'hapi.Request');
-      await assertRejection(uiSettings.get({ headers:{} }), 'hapi.Request');
+      expect(uiSettings).to.have.property('get').a('function');
+      expect(uiSettings).to.have.property('getAll').a('function');
+      expect(uiSettings).to.have.property('getDefaults').a('function');
+      expect(uiSettings).to.have.property('getRaw').a('function');
+      expect(uiSettings).to.have.property('getUserProvided').a('function');
+      expect(uiSettings).to.have.property('remove').a('function');
+      expect(uiSettings).to.have.property('removeMany').a('function');
+      expect(uiSettings).to.have.property('set').a('function');
+      expect(uiSettings).to.have.property('setMany').a('function');
     });
   });
 
   describe('#setMany()', function () {
     it('returns a promise', () => {
       const { uiSettings } = setup();
-      assertPromise(uiSettings.setMany({ a: 'b' }));
+      expect(uiSettings.setMany({ a: 'b' })).to.be.a(Promise);
     });
 
     it('updates a single value in one operation', async function () {
@@ -88,7 +71,7 @@ describe('ui settings', function () {
   describe('#set()', function () {
     it('returns a promise', () => {
       const { uiSettings } = setup();
-      assertPromise(uiSettings.set('a', 'b'));
+      expect(uiSettings.set('a', 'b')).to.be.a(Promise);
     });
 
     it('updates single values by (key, value)', async function () {
@@ -101,7 +84,7 @@ describe('ui settings', function () {
   describe('#remove()', function () {
     it('returns a promise', () => {
       const { uiSettings } = setup();
-      assertPromise(uiSettings.remove('one'));
+      expect(uiSettings.remove('one')).to.be.a(Promise);
     });
 
     it('removes single values by key', async function () {
@@ -114,7 +97,7 @@ describe('ui settings', function () {
   describe('#removeMany()', function () {
     it('returns a promise', () => {
       const { uiSettings } = setup();
-      assertPromise(uiSettings.removeMany(['one']));
+      expect(uiSettings.removeMany(['one'])).to.be.a(Promise);
     });
 
     it('removes a single value', async function () {
@@ -367,7 +350,7 @@ describe('ui settings', function () {
     describe('#getUserProvided()', () => {
       it('returns a promise when interceptValue doesn\'t', () => {
         const { uiSettings } = setup({ readInterceptor: () => ({}) });
-        assertPromise(uiSettings.getUserProvided());
+        expect(uiSettings.getUserProvided()).to.be.a(Promise);
       });
 
       it('returns intercept values', async () => {
