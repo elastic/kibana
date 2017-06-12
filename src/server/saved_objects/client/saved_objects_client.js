@@ -9,6 +9,10 @@ import {
 
 const V6_TYPE = 'doc';
 
+function boomIsNotFound(err) {
+  return err.isBoom && err.output.statusCode === 404;
+}
+
 export class SavedObjectsClient {
   constructor(kibanaIndex, callAdminCluster) {
     this._kibanaIndex = kibanaIndex;
@@ -18,19 +22,15 @@ export class SavedObjectsClient {
   async create(type, body = {}) {
     let response;
     try {
-      response = await this._callAdminCluster('index', {
-        index: this._kibanaIndex,
+      response = await this._withKibanaIndex('index', {
         type: V6_TYPE,
         body: {
           [type]: body
         }
       });
-    } catch(e) {
-      if(e.status === 404) {
-        response = await this._withKibanaIndex('index', { type, body });
-      } else {
-        throw handleEsError(e);
-      }
+    } catch(err) {
+      if (!boomIsNotFound(err)) throw err;
+      response = await this._withKibanaIndex('index', { type, body });
     }
 
     return {
@@ -156,9 +156,9 @@ export class SavedObjectsClient {
 
   async get(type, id) {
     const response = await this._withKibanaIndex('search', { body: createIdQuery(type, id) });
-
     const hit = get(response, 'hits.hits.0');
     const attributes =  get(hit, `_source.${type}`) || get(hit, '_source');
+
     return {
       id: hit._id,
       type: hit._type,
@@ -169,7 +169,6 @@ export class SavedObjectsClient {
 
   async update(type, id, attributes, options = {}) {
     const baseParams = {
-      index: this._kibanaIndex,
       id,
       version: get(options, 'version'),
       refresh: 'wait_for'
@@ -185,21 +184,16 @@ export class SavedObjectsClient {
           }
         },
       });
-      response = await this._callAdminCluster('update', v6Params);
+      response = await this._withKibanaIndex('update', v6Params);
     } catch (err) {
-      if (err.status === 404) {
-        const v5Params = Object.assign({}, baseParams, {
-          type,
-          body: {
-            doc: attributes
-          }
-        });
-
-        response = await this._withKibanaIndex('update', v5Params);
-      }
-      else {
-        throw handleEsError(err);
-      }
+      if (!boomIsNotFound(err)) throw err;
+      const v5Params = Object.assign({}, baseParams, {
+        type,
+        body: {
+          doc: attributes
+        }
+      });
+      response = await this._withKibanaIndex('update', v5Params);
     }
 
     return {
