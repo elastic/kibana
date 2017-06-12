@@ -6,8 +6,7 @@ import { PanelUtils } from './panel/panel_utils';
 import moment from 'moment';
 
 import { stateMonitorFactory } from 'ui/state_management/state_monitor_factory';
-import { createPanelState } from 'plugins/kibana/dashboard/panel/panel_state';
-import { getPersistedStateId } from 'plugins/kibana/dashboard/panel/panel_state';
+import { createPanelState, getPersistedStateId } from 'plugins/kibana/dashboard/panel/panel_state';
 
 function getStateDefaults(dashboard, hideWriteControls) {
   return {

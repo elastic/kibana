@@ -1,3 +1,4 @@
+/* eslint import/no-duplicates: 0 */
 import sinon from 'sinon';
 import expect from 'expect.js';
 import { identity, shuffle, sortBy } from 'lodash';

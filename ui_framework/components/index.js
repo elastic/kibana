@@ -13,6 +13,10 @@ export {
 } from './button';
 
 export {
+  KuiCollapseButton
+} from './collapse_button';
+
+export {
   KuiEvent,
   KuiEventSymbol,
   KuiEventBody,
