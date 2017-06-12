@@ -157,6 +157,7 @@ const components = [{
 }, {
   name: 'FormLayout',
   component: FormLayoutExample,
+  hasReact: true,
 }, {
   name: 'Gallery',
   component: GalleryExample,

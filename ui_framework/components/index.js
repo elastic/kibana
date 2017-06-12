@@ -24,6 +24,11 @@ export {
   KuiEventBodyMetadata,
 } from './event';
 
+export {
+  KuiFieldGroup,
+  KuiFieldGroupSection,
+} from './form_layout';
+
 export { KuiInfoButton } from './info_button';
 
 export {
