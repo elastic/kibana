@@ -107,7 +107,7 @@ describe('uiSettingsMixin()', () => {
 
 
         const states = chance.shuffle(['red', 'green', 'yellow']);
-        states.forEach(state => {
+        states.forEach((state) => {
           esStatus[state]();
           expect(esStatus).to.have.property('state', state);
           expect(status).to.have.property('state', state);
