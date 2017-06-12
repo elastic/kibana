@@ -11,9 +11,14 @@ export const KuiFieldGroupSection = ({
   const classes = classNames('kuiFieldGroupSection', className, {
     'kuiFieldGroupSection--wide': isWide
   });
-  return (<div className={classes} {...rest} >
-            {children}
-          </div>);
+  return (
+    <div
+      className={classes}
+      {...rest}
+    >
+      {children}
+    </div>
+  );
 };
 
 KuiFieldGroupSection.defaultProps = {

@@ -11,9 +11,14 @@ export const KuiFieldGroup = ({
   const classes = classNames('kuiFieldGroup', className, {
     'kuiFieldGroup--alignTop': isAlignedTop
   });
-  return (<div className={classes} {...rest} >
-            {children}
-          </div>);
+  return (
+    <div
+      className={classes}
+      {...rest}
+    >
+      {children}
+    </div>
+  );
 };
 
 KuiFieldGroup.defaultProps = {
