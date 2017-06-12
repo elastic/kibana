@@ -6,6 +6,8 @@ import {
   handleEsError,
 } from './lib';
 
+const V6_TYPE = 'doc';
+
 export class SavedObjectsClient {
   constructor(kibanaIndex, callAdminCluster) {
     this._kibanaIndex = kibanaIndex;
@@ -13,7 +15,22 @@ export class SavedObjectsClient {
   }
 
   async create(type, body = {}) {
-    const response = await this._withKibanaIndex('index', { type, body });
+    let response;
+    try {
+      response = await this._callAdminCluster('index', {
+        index: this._kibanaIndex,
+        type: V6_TYPE,
+        body: {
+          [type]: body
+        }
+      });
+    } catch(e) {
+      if(e.status === 404) {
+        response = await this._withKibanaIndex('index', { type, body });
+      } else {
+        throw handleEsError(e);
+      }
+    }
 
     return {
       id: response._id,
@@ -160,7 +177,7 @@ export class SavedObjectsClient {
     let response;
     try {
       const v6Params = Object.assign({}, baseParams, {
-        type: 'doc',
+        type: V6_TYPE,
         body: {
           doc: {
             [type]: attributes
@@ -227,7 +244,7 @@ export class SavedObjectsClient {
                   },
                   {
                     type: {
-                      value: 'doc'
+                      value: V6_TYPE
                     }
                   }
                 ]
