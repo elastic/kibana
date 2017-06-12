@@ -239,10 +239,12 @@ export function VislibVisualizationsPointSeriesProvider(Private) {
             self.series.push(series);
           });
 
-          const toTime = new Date(xScale.domain()[1].getTime() + 60000);
-          const currentTime = new Date();
-          if (addTimeMarker && toTime > currentTime) {
-            new TimeMarker(times, xScale, height).render(svg);
+          if (addTimeMarker) {
+            const toTime = new Date(xScale.domain()[1].getTime() + 60000);
+            const currentTime = new Date();
+            if (toTime > currentTime) {
+              new TimeMarker(times, xScale, height).render(svg);
+            }
           }
 
           return svg;
