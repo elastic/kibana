@@ -33,9 +33,9 @@ function setup(options = {}) {
   };
 }
 
-describe('ui settings', function () {
-  describe('overview', function () {
-    it('has expected api surface', function () {
+describe('ui settings', () => {
+  describe('overview', () => {
+    it('has expected api surface', () => {
       const { uiSettings } = setup();
       expect(uiSettings).to.have.property('get').a('function');
       expect(uiSettings).to.have.property('getAll').a('function');
@@ -49,72 +49,72 @@ describe('ui settings', function () {
     });
   });
 
-  describe('#setMany()', function () {
+  describe('#setMany()', () => {
     it('returns a promise', () => {
       const { uiSettings } = setup();
       expect(uiSettings.setMany({ a: 'b' })).to.be.a(Promise);
     });
 
-    it('updates a single value in one operation', async function () {
+    it('updates a single value in one operation', async () => {
       const { uiSettings, assertUpdateQuery } = setup();
       await uiSettings.setMany({ one: 'value' });
       assertUpdateQuery({ one: 'value' });
     });
 
-    it('updates several values in one operation', async function () {
+    it('updates several values in one operation', async () => {
       const { uiSettings, assertUpdateQuery } = setup();
       await uiSettings.setMany({ one: 'value', another: 'val' });
       assertUpdateQuery({ one: 'value', another: 'val' });
     });
   });
 
-  describe('#set()', function () {
+  describe('#set()', () => {
     it('returns a promise', () => {
       const { uiSettings } = setup();
       expect(uiSettings.set('a', 'b')).to.be.a(Promise);
     });
 
-    it('updates single values by (key, value)', async function () {
+    it('updates single values by (key, value)', async () => {
       const { uiSettings, assertUpdateQuery } = setup();
       await uiSettings.set('one', 'value');
       assertUpdateQuery({ one: 'value' });
     });
   });
 
-  describe('#remove()', function () {
+  describe('#remove()', () => {
     it('returns a promise', () => {
       const { uiSettings } = setup();
       expect(uiSettings.remove('one')).to.be.a(Promise);
     });
 
-    it('removes single values by key', async function () {
+    it('removes single values by key', async () => {
       const { uiSettings, assertUpdateQuery } = setup();
       await uiSettings.remove('one');
       assertUpdateQuery({ one: null });
     });
   });
 
-  describe('#removeMany()', function () {
+  describe('#removeMany()', () => {
     it('returns a promise', () => {
       const { uiSettings } = setup();
       expect(uiSettings.removeMany(['one'])).to.be.a(Promise);
     });
 
-    it('removes a single value', async function () {
+    it('removes a single value', async () => {
       const { uiSettings, assertUpdateQuery } = setup();
       await uiSettings.removeMany(['one']);
       assertUpdateQuery({ one: null });
     });
 
-    it('updates several values in one operation', async function () {
+    it('updates several values in one operation', async () => {
       const { uiSettings, assertUpdateQuery } = setup();
       await uiSettings.removeMany(['one', 'two', 'three']);
       assertUpdateQuery({ one: null, two: null, three: null });
     });
   });
 
-  describe('#getDefaults()', function () {
-    it('is promised the default values', async function () {
+  describe('#getDefaults()', () => {
+    it('is promised the default values', async () => {
       const {
         uiSettings
       } = setup();
@@ -123,7 +123,7 @@ describe('ui settings', function () {
     });
 
 
-    describe('defaults for formatters', async function () {
+    describe('defaults for formatters', async () => {
 
       const defaults = getDefaultSettings();
       const mapping = JSON.parse(defaults['format:defaultTypeMap'].value);
@@ -136,8 +136,8 @@ describe('ui settings', function () {
         _default_: { id: 'string', params: {} }
       };
 
-      Object.keys(mapping).forEach(function (dataType) {
-        it(`should configure ${dataType}`, function () {
+      Object.keys(mapping).forEach((dataType) => {
+        it(`should configure ${dataType}`, () => {
           expect(expected.hasOwnProperty(dataType)).to.equal(true);
           expect(mapping[dataType].id).to.equal(expected[dataType].id);
           expect(JSON.stringify(mapping[dataType].params)).to.equal(JSON.stringify(expected[dataType].params));
@@ -146,14 +146,14 @@ describe('ui settings', function () {
     });
   });
 
-  describe('#getUserProvided()', function () {
-    it('pulls user configuration from ES', async function () {
+  describe('#getUserProvided()', () => {
+    it('pulls user configuration from ES', async () => {
       const { uiSettings, assertGetQuery } = setup();
       await uiSettings.getUserProvided();
       assertGetQuery();
     });
 
-    it('returns user configuration', async function () {
+    it('returns user configuration', async () => {
       const esDocSource = { user: 'customized' };
       const { uiSettings } = setup({ esDocSource });
       const result = await uiSettings.getUserProvided();
@@ -162,7 +162,7 @@ describe('ui settings', function () {
       })).to.equal(true);
     });
 
-    it('ignores null user configuration (because default values)', async function () {
+    it('ignores null user configuration (because default values)', async () => {
       const esDocSource = { user: 'customized', usingDefault: null, something: 'else' };
       const { uiSettings } = setup({ esDocSource });
       const result = await uiSettings.getUserProvided();
@@ -171,7 +171,7 @@ describe('ui settings', function () {
       })).to.equal(true);
     });
 
-    it('returns an empty object on 404 responses', async function () {
+    it('returns an empty object on 404 responses', async () => {
       const { uiSettings } = setup({
         async callCluster() {
           throw new esErrors[404]();
@@ -181,7 +181,7 @@ describe('ui settings', function () {
       expect(await uiSettings.getUserProvided()).to.eql({});
     });
 
-    it('returns an empty object on 403 responses', async function () {
+    it('returns an empty object on 403 responses', async () => {
       const { uiSettings } = setup({
         async callCluster() {
           throw new esErrors[403]();
@@ -191,7 +191,7 @@ describe('ui settings', function () {
       expect(await uiSettings.getUserProvided()).to.eql({});
     });
 
-    it('returns an empty object on NoConnections responses', async function () {
+    it('returns an empty object on NoConnections responses', async () => {
       const { uiSettings } = setup({
         async callCluster() {
           throw new esErrors.NoConnections();
@@ -201,7 +201,7 @@ describe('ui settings', function () {
       expect(await uiSettings.getUserProvided()).to.eql({});
     });
 
-    it('throws 401 errors', async function () {
+    it('throws 401 errors', async () => {
       const { uiSettings } = setup({
         async callCluster() {
           throw new esErrors[401]();
@@ -216,7 +216,7 @@ describe('ui settings', function () {
       }
     });
 
-    it('throw when callCluster fails in some unexpected way', async function () {
+    it('throw when callCluster fails in some unexpected way', async () => {
       const expectedUnexpectedError = new Error('unexpected');
 
       const { uiSettings } = setup({
@@ -234,22 +234,22 @@ describe('ui settings', function () {
     });
   });
 
-  describe('#getRaw()', function () {
-    it('pulls user configuration from ES', async function () {
+  describe('#getRaw()', () => {
+    it('pulls user configuration from ES', async () => {
       const esDocSource = {};
       const { uiSettings, assertGetQuery } = setup({ esDocSource });
       await uiSettings.getRaw();
       assertGetQuery();
     });
 
-    it(`without user configuration it's equal to the defaults`, async function () {
+    it(`without user configuration it's equal to the defaults`, async () => {
       const esDocSource = {};
       const { uiSettings } = setup({ esDocSource });
       const result = await uiSettings.getRaw();
       expect(isEqual(result, getDefaultSettings())).to.equal(true);
     });
 
-    it(`user configuration gets merged with defaults`, async function () {
+    it(`user configuration gets merged with defaults`, async () => {
       const esDocSource = { foo: 'bar' };
       const { uiSettings } = setup({ esDocSource });
       const result = await uiSettings.getRaw();
@@ -258,7 +258,7 @@ describe('ui settings', function () {
       expect(isEqual(result, merged)).to.equal(true);
     });
 
-    it(`user configuration gets merged into defaults`, async function () {
+    it(`user configuration gets merged into defaults`, async () => {
       const esDocSource = { dateFormat: 'YYYY-MM-DD' };
       const { uiSettings } = setup({ esDocSource });
       const result = await uiSettings.getRaw();
@@ -268,46 +268,46 @@ describe('ui settings', function () {
     });
   });
 
-  describe('#getAll()', function () {
-    it('pulls user configuration from ES', async function () {
+  describe('#getAll()', () => {
+    it('pulls user configuration from ES', async () => {
       const esDocSource = {};
       const { uiSettings, assertGetQuery } = setup({ esDocSource });
       await uiSettings.getAll();
       assertGetQuery();
     });
 
-    it(`returns key value pairs`, async function () {
+    it(`returns key value pairs`, async () => {
       const esDocSource = {};
       const { uiSettings } = setup({ esDocSource });
       const result = await uiSettings.getAll();
       const defaults = getDefaultSettings();
       const expectation = {};
-      Object.keys(defaults).forEach(key => {
+      Object.keys(defaults).forEach((key) => {
         expectation[key] = defaults[key].value;
       });
       expect(isEqual(result, expectation)).to.equal(true);
     });
 
-    it(`returns key value pairs including user configuration`, async function () {
+    it(`returns key value pairs including user configuration`, async () => {
       const esDocSource = { something: 'user-provided' };
       const { uiSettings } = setup({ esDocSource });
       const result = await uiSettings.getAll();
       const defaults = getDefaultSettings();
       const expectation = {};
-      Object.keys(defaults).forEach(key => {
+      Object.keys(defaults).forEach((key) => {
         expectation[key] = defaults[key].value;
       });
       expectation.something = 'user-provided';
       expect(isEqual(result, expectation)).to.equal(true);
     });
 
-    it(`returns key value pairs including user configuration for existing settings`, async function () {
+    it(`returns key value pairs including user configuration for existing settings`, async () => {
       const esDocSource = { dateFormat: 'YYYY-MM-DD' };
       const { uiSettings } = setup({ esDocSource });
       const result = await uiSettings.getAll();
       const defaults = getDefaultSettings();
       const expectation = {};
-      Object.keys(defaults).forEach(key => {
+      Object.keys(defaults).forEach((key) => {
         expectation[key] = defaults[key].value;
       });
       expectation.dateFormat = 'YYYY-MM-DD';
@@ -315,15 +315,15 @@ describe('ui settings', function () {
     });
   });
 
-  describe('#get()', function () {
-    it('pulls user configuration from ES', async function () {
+  describe('#get()', () => {
+    it('pulls user configuration from ES', async () => {
       const esDocSource = {};
       const { uiSettings, assertGetQuery } = setup({ esDocSource });
       await uiSettings.get();
       assertGetQuery();
     });
 
-    it(`returns the promised value for a key`, async function () {
+    it(`returns the promised value for a key`, async () => {
       const esDocSource = {};
       const { uiSettings } = setup({ esDocSource });
       const result = await uiSettings.get('dateFormat');
@@ -331,14 +331,14 @@ describe('ui settings', function () {
       expect(result).to.equal(defaults.dateFormat.value);
     });
 
-    it(`returns the user-configured value for a custom key`, async function () {
+    it(`returns the user-configured value for a custom key`, async () => {
       const esDocSource = { custom: 'value' };
       const { uiSettings } = setup({ esDocSource });
       const result = await uiSettings.get('custom');
       expect(result).to.equal('value');
     });
 
-    it(`returns the user-configured value for a modified key`, async function () {
+    it(`returns the user-configured value for a modified key`, async () => {
       const esDocSource = { dateFormat: 'YYYY-MM-DD' };
       const { uiSettings } = setup({ esDocSource });
       const result = await uiSettings.get('dateFormat');
