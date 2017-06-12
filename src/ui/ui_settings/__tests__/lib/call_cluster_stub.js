@@ -29,15 +29,12 @@ export function createCallClusterStub(index, type, id, esDocSource) {
 
   callCluster.assertUpdateQuery = doc => {
     sinon.assert.calledOnce(callCluster);
-    expect(callCluster.firstCall.args).to.eql([
-      'update',
-      {
-        index,
-        type,
-        id,
-        body: { doc },
-      }
-    ]);
+    sinon.assert.calledWithExactly(callCluster, 'update', {
+      index,
+      type,
+      id,
+      body: { doc }
+    });
   };
 
   return callCluster;
