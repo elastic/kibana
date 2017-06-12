@@ -5,10 +5,13 @@ import Chance from 'chance';
 import ServerStatus from '../../../server/status/server_status';
 import Config from '../../../server/config/config';
 
+/* eslint-disable import/no-duplicates */
 import * as uiSettingsServiceFactoryNS from '../ui_settings_service_factory';
 import { uiSettingsServiceFactory } from '../ui_settings_service_factory';
 import * as getUiSettingsServiceForRequestNS from '../ui_settings_service_for_request';
 import { getUiSettingsServiceForRequest } from '../ui_settings_service_for_request';
+/* eslint-enable import/no-duplicates */
+
 import { uiSettingsMixin } from '../ui_settings_mixin';
 
 const chance = new Chance();
