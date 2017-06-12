@@ -9,7 +9,7 @@ import {
 } from '../../components';
 
 const panelHtml = require('./panel.html');
-const panelWithToolbarHtml = require('./panel_with_toolbar.html');
+const panelWithToolBarHtml = require('./panel_with_toolbar.html');
 const panelWithHeaderHtml = require('./panel_with_header.html');
 const panelWithHeaderSectionsHtml = require('./panel_with_header_sections.html');
 
@@ -63,7 +63,7 @@ export default props => (
       title="Panel with Toolbar"
       source={[{
         type: GuideSectionTypes.HTML,
-        code: panelWithToolbarHtml,
+        code: panelWithToolBarHtml,
       }]}
     >
       <GuideText>
@@ -71,7 +71,7 @@ export default props => (
       </GuideText>
 
       <GuideDemo
-        html={panelWithToolbarHtml}
+        html={panelWithToolBarHtml}
       />
     </GuideSection>
   </GuidePage>

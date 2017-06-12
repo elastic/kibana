@@ -11,6 +11,7 @@ const BUTTON_TYPES = [
   'danger',
   'warning',
   'primary',
+  'secondary',
 ];
 
 const ICON_POSITIONS = [

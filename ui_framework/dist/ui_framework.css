@@ -792,7 +792,7 @@ body {
   background-color: transparent;
   padding: 5px 0px;
   border: none;
-  border-bottom: dotted 2px #E4E4E4;
+  border-bottom: dotted 2px #D9D9D9;
   font-size: 14px;
   cursor: pointer; }
 
@@ -824,7 +824,7 @@ body {
       -ms-flex: 1 1 auto;
           flex: 1 1 auto;
   background-color: white;
-  border: 1px solid #E4E4E4;
+  border: 1px solid #D9D9D9;
   border-radius: 6px;
   box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.1);
   visibility: visible;
@@ -849,7 +849,7 @@ body {
     width: 0;
     border-left: 8px solid transparent;
     border-right: 8px solid transparent;
-    border-bottom: 8px solid #E4E4E4; }
+    border-bottom: 8px solid #D9D9D9; }
   .kuiExpressionItem__popover:after {
     position: absolute;
     content: "";
@@ -859,7 +859,7 @@ body {
     width: 0;
     border-left: 8px solid transparent;
     border-right: 8px solid transparent;
-    border-bottom: 8px solid #f1f1f1; }
+    border-bottom: 8px solid #e6e6e6; }
   .kuiExpressionItem__popover.kuiExpressionItem__popover--alignRight {
     right: 0; }
     .kuiExpressionItem__popover.kuiExpressionItem__popover--alignRight:before, .kuiExpressionItem__popover.kuiExpressionItem__popover--alignRight:after {
@@ -875,7 +875,7 @@ body {
   -webkit-flex: 1 1 auto;
       -ms-flex: 1 1 auto;
           flex: 1 1 auto;
-  background-color: #f1f1f1;
+  background-color: #e6e6e6;
   border-radius: 4px 4px 0 0;
   color: #2d2d2d;
   padding: 5px 10px;
@@ -1354,7 +1354,7 @@ body {
           justify-content: space-between;
   min-height: 30px;
   /* 1 */
-  border-bottom: 1px solid #E4E4E4; }
+  border-bottom: 1px solid #D9D9D9; }
 
 /**
  * 1. Align a single section to the left by default.
@@ -2162,7 +2162,7 @@ body {
     /* 1 */
     outline: none !important;
     /* 2 */
-    box-shadow: 0 0 0 1px #E4E4E4, 0 0 0 2px #0079a5;
+    box-shadow: 0 0 0 1px #D9D9D9, 0 0 0 2px #0079a5;
     /* 3 */ }
   .theme-dark .kuiLocalSearchButton {
     color: #ffffff;
@@ -2242,7 +2242,7 @@ body {
   /* 1 */ }
 
 .kuiMenu--contained {
-  border: 1px solid #E4E4E4; }
+  border: 1px solid #D9D9D9; }
   .kuiMenu--contained .kuiMenuItem {
     padding: 6px 10px; }
 
@@ -2254,7 +2254,7 @@ body {
   /* 1 */
   padding: 6px 0; }
   .kuiMenuItem + .kuiMenuItem {
-    border-top: 1px solid #E4E4E4; }
+    border-top: 1px solid #D9D9D9; }
 
 /**
  * 1. Setting to inline-block guarantees the same height when applied to both
@@ -2440,7 +2440,7 @@ body {
           align-items: center;
   padding: 10px;
   padding-left: 20px;
-  border-bottom: 1px solid #E4E4E4; }
+  border-bottom: 1px solid #D9D9D9; }
 
 .kuiModalHeader__title {
   font-size: 18px; }
@@ -2512,10 +2512,10 @@ body {
   /* 1 */ }
 
 .kuiPanel {
-  border: 1px solid #E4E4E4;
+  border: 1px solid #D9D9D9;
   border-radius: 4px; }
 
-.kuiPanel--withToolbar {
+.kuiPanel--withToolBar {
   border-top: none;
   border-radius: 0; }
 
@@ -2550,13 +2550,13 @@ body {
   /* 1 */
   padding: 10px;
   height: 50px;
-  border-bottom: 1px solid #E4E4E4; }
+  border-bottom: 1px solid #D9D9D9; }
   .kuiPanelHeader .kuiButton:not(a):enabled:focus {
     z-index: 1;
     /* 1 */
     outline: none !important;
     /* 2 */
-    box-shadow: 0 0 0 1px #E4E4E4, 0 0 0 2px #0079a5;
+    box-shadow: 0 0 0 1px #D9D9D9, 0 0 0 2px #0079a5;
     /* 3 */ }
   a.kuiPanelHeader .kuiButton:not(.kuiButton-isDisabled):focus {
     /* 1 */
@@ -2564,14 +2564,14 @@ body {
     /* 1 */
     outline: none !important;
     /* 2 */
-    box-shadow: 0 0 0 1px #E4E4E4, 0 0 0 2px #0079a5;
+    box-shadow: 0 0 0 1px #D9D9D9, 0 0 0 2px #0079a5;
     /* 3 */ }
   .kuiPanelHeader .kuiButton--danger:not(a):enabled:focus {
     z-index: 1;
     /* 1 */
     outline: none !important;
     /* 2 */
-    box-shadow: 0 0 0 1px #E4E4E4, 0 0 0 2px #ff523c;
+    box-shadow: 0 0 0 1px #D9D9D9, 0 0 0 2px #ff523c;
     /* 3 */ }
   a.kuiPanelHeader .kuiButton--danger:not(.kuiButton-isDisabled):focus {
     /* 1 */
@@ -2579,7 +2579,7 @@ body {
     /* 1 */
     outline: none !important;
     /* 2 */
-    box-shadow: 0 0 0 1px #E4E4E4, 0 0 0 2px #ff523c;
+    box-shadow: 0 0 0 1px #D9D9D9, 0 0 0 2px #ff523c;
     /* 3 */ }
   .kuiPanelHeader .kuiSelect {
     border-color: #ffffff; }
@@ -2726,7 +2726,7 @@ body {
  */
 .kuiTable {
   width: 100%;
-  border: 1px solid #E4E4E4;
+  border: 1px solid #D9D9D9;
   border-collapse: collapse;
   background-color: #FFF; }
 
@@ -2786,7 +2786,7 @@ body {
   max-width: 20px;
   /* 1 */
   color: #191E23;
-  border-top: 1px solid #E4E4E4; }
+  border-top: 1px solid #D9D9D9; }
 
 .kuiTableRowCell--wrap .kuiTableRowCell__liner {
   white-space: normal; }
@@ -2852,7 +2852,7 @@ body {
   display: -webkit-flex;
   display: -ms-flexbox;
   display: flex;
-  border-bottom: 1px solid #E4E4E4; }
+  border-bottom: 1px solid #D9D9D9; }
 
 /**
  * 1. Override button styles (some of which are from Bootstrap).
@@ -2872,7 +2872,7 @@ body {
   color: #666;
   background-color: #FFF;
   /* 1 */
-  border: 1px solid #E4E4E4;
+  border: 1px solid #D9D9D9;
   border-bottom-width: 1px;
   border-radius: 0;
   /* 1 */
@@ -2941,7 +2941,7 @@ body {
 .kuiTogglePanelHeader {
   padding-bottom: 4px;
   margin-bottom: 15px;
-  border-bottom: 1px solid #E4E4E4;
+  border-bottom: 1px solid #D9D9D9;
   /**
    * 1. Allow the user to click anywhere on the header, not just on the button text.
    */ }
@@ -2975,7 +2975,7 @@ body {
     /* 1 */
     outline: none !important;
     /* 2 */
-    box-shadow: 0 0 0 1px #E4E4E4, 0 0 0 2px #0079a5;
+    box-shadow: 0 0 0 1px #D9D9D9, 0 0 0 2px #0079a5;
     /* 3 */ }
   a.kuiToolBar .kuiButton:not(.kuiButton-isDisabled):focus {
     /* 1 */
@@ -2983,14 +2983,14 @@ body {
     /* 1 */
     outline: none !important;
     /* 2 */
-    box-shadow: 0 0 0 1px #E4E4E4, 0 0 0 2px #0079a5;
+    box-shadow: 0 0 0 1px #D9D9D9, 0 0 0 2px #0079a5;
     /* 3 */ }
   .kuiToolBar .kuiButton--danger:not(a):enabled:focus {
     z-index: 1;
     /* 1 */
     outline: none !important;
     /* 2 */
-    box-shadow: 0 0 0 1px #E4E4E4, 0 0 0 2px #ff523c;
+    box-shadow: 0 0 0 1px #D9D9D9, 0 0 0 2px #ff523c;
     /* 3 */ }
   a.kuiToolBar .kuiButton--danger:not(.kuiButton-isDisabled):focus {
     /* 1 */
@@ -2998,7 +2998,7 @@ body {
     /* 1 */
     outline: none !important;
     /* 2 */
-    box-shadow: 0 0 0 1px #E4E4E4, 0 0 0 2px #ff523c;
+    box-shadow: 0 0 0 1px #D9D9D9, 0 0 0 2px #ff523c;
     /* 3 */ }
   .kuiToolBar .kuiSelect {
     border-color: #ffffff; }
@@ -3077,7 +3077,7 @@ body {
   padding: 10px;
   height: 40px;
   background-color: #ffffff;
-  border: 1px solid #E4E4E4; }
+  border: 1px solid #D9D9D9; }
 
 .kuiToolBarFooterSection {
   display: -webkit-box;

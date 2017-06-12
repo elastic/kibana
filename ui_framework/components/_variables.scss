@@ -77,7 +77,7 @@ $globalDangerBorderColor: $globalDangerColor;
 $globalFormControlBorderColor: #DEDEDE;
 
 // Borders
-$globalBorderColor: #E4E4E4;
+$globalBorderColor: $globalColorLightGray;
 $globalBorderRadius: 4px;
 $globalBorderThick: 2px solid $globalBorderColor;
 $globalBorderThin: 1px solid $globalBorderColor;
