@@ -15,7 +15,7 @@ import { IndexPatternsFlattenHitProvider } from './_flatten_hit';
 import { IndexPatternsCalculateIndicesProvider } from './_calculate_indices';
 import { IndexPatternsPatternCacheProvider } from './_pattern_cache';
 import { FieldsFetcherProvider } from './fields_fetcher_provider';
-import { UnsupportedTimePatternsProvider } from './unsupported_time_patterns';
+import { IsUserAwareOfUnsupportedTimePatternProvider } from './unsupported_time_patterns';
 
 export function getRoutes() {
   return {
@@ -27,7 +27,7 @@ export function getRoutes() {
   };
 }
 
-export function IndexPatternProvider(Private, $http, config, kbnIndex, Promise, confirmModalPromise) {
+export function IndexPatternProvider(Private, $http, config, kbnIndex, Promise, confirmModalPromise, kbnUrl) {
   const fieldformats = Private(RegistryFieldFormatsProvider);
   const getIds = Private(IndexPatternsGetIdsProvider);
   const fieldsFetcher = Private(FieldsFetcherProvider);
@@ -38,7 +38,7 @@ export function IndexPatternProvider(Private, $http, config, kbnIndex, Promise, 
   const flattenHit = Private(IndexPatternsFlattenHitProvider);
   const calculateIndices = Private(IndexPatternsCalculateIndicesProvider);
   const patternCache = Private(IndexPatternsPatternCacheProvider);
-  const warnAboutUnsupportedTimePattern = Private(UnsupportedTimePatternsProvider);
+  const isUserAwareOfUnsupportedTimePattern = Private(IsUserAwareOfUnsupportedTimePatternProvider);
 
   const type = 'index-pattern';
   const notify = new Notifier();
@@ -93,7 +93,14 @@ export function IndexPatternProvider(Private, $http, config, kbnIndex, Promise, 
     _.assign(indexPattern, response._source);
 
     if (indexPattern.isUnsupportedTimePattern()) {
-      warnAboutUnsupportedTimePattern(indexPattern);
+      if (!isUserAwareOfUnsupportedTimePattern(indexPattern)) {
+        notify.warning(
+          'Support for time-intervals has been removed. ' +
+          `View the ["${indexPattern.id}" index pattern in management](` +
+          kbnUrl.getRouteHref(indexPattern, 'edit') +
+          ') for more information.'
+        );
+      }
     }
 
     const promise = indexFields(indexPattern);

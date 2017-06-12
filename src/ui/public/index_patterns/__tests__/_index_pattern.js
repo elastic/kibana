@@ -12,11 +12,15 @@ import UtilsMappingSetupProvider from 'ui/utils/mapping_setup';
 import { IndexPatternsIntervalsProvider } from 'ui/index_patterns/_intervals';
 import { IndexPatternProvider } from 'ui/index_patterns/_index_pattern';
 import NoDigestPromises from 'test_utils/no_digest_promises';
+import { Notifier } from 'ui/notify';
 
 import { FieldsFetcherProvider } from '../fields_fetcher_provider';
 import { StubIndexPatternsApiClientModule } from './stub_index_patterns_api_client';
 import { IndexPatternsApiClientProvider } from '../index_patterns_api_client_provider';
 import { IndexPatternsCalculateIndicesProvider } from '../_calculate_indices';
+import { IsUserAwareOfUnsupportedTimePatternProvider } from '../unsupported_time_patterns';
+
+const MARKDOWN_LINK_RE = /\[(.+?)\]\((.+?)\)/;
 
 describe('index pattern', function () {
   NoDigestPromises.activateForSuite();
@@ -33,6 +37,7 @@ describe('index pattern', function () {
   let intervals;
   let indexPatternsApiClient;
   let defaultTimeField;
+  let isUserAwareOfUnsupportedTimePattern;
 
   beforeEach(ngMock.module('kibana', StubIndexPatternsApiClientModule, (PrivateProvider) => {
     PrivateProvider.swap(IndexPatternsCalculateIndicesProvider, () => {
@@ -45,6 +50,11 @@ describe('index pattern', function () {
       });
 
       return calculateIndices;
+    });
+
+    isUserAwareOfUnsupportedTimePattern = sinon.stub().returns(false);
+    PrivateProvider.swap(IsUserAwareOfUnsupportedTimePatternProvider, () => {
+      return isUserAwareOfUnsupportedTimePattern;
     });
   }));
 
@@ -486,6 +496,48 @@ describe('index pattern', function () {
     it('returns false if id has no *', function () {
       indexPattern.id = 'foo';
       expect(indexPattern.isWildcard()).to.be(false);
+    });
+  });
+
+  describe('#isUnsupportedTimePatterns()', () => {
+    it('returns true when intervalName is set', () => {
+      indexPattern.intervalName = 'something';
+      expect(indexPattern.isUnsupportedTimePatterns()).to.be(true);
+    });
+    it('returns false otherwise', () => {
+      delete indexPattern.intervalName;
+      expect(indexPattern.isUnsupportedTimePatterns()).to.be(false);
+    });
+  });
+
+  describe('unsupported time pattern warning', () => {
+    async function createUnsupportedTimePattern() {
+      return await create('pattern-id', {
+        _source: {
+          timeFieldName: '@timestamp',
+          intervalName: 'days',
+          fields: '[]'
+        }
+      });
+    }
+
+    it('logs a warning when the index pattern source includes `intervalName`', async () => {
+      const indexPattern = await createUnsupportedTimePattern();
+      expect(Notifier.prototype._notifs).to.have.length(1);
+      const notif = Notifier.prototype._notifs.shift();
+
+      expect(notif).to.have.property('type', 'warning');
+      expect(notif.content).to.match(MARKDOWN_LINK_RE);
+      const [,text,url] = notif.content.match(MARKDOWN_LINK_RE);
+      expect(text).to.contain(indexPattern.id);
+      expect(url).to.contain(indexPattern.id);
+      expect(url).to.contain('management/kibana/indices');
+    });
+
+    it('does not notify if isUserAwareOfUnsupportedTimePattern() returns true', async () => {
+      isUserAwareOfUnsupportedTimePattern.returns(true);
+      await createUnsupportedTimePattern();
+      expect(Notifier.prototype._notifs).to.have.length(0);
     });
   });
 });
