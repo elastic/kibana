@@ -13,6 +13,7 @@ import { registerSuggestionsApi } from './server/routes/api/suggestions';
 import * as systemApi from './server/lib/system_api';
 import handleEsError from './server/lib/handle_es_error';
 import mappings from './mappings.json';
+import { getUiSettingDefaults } from './ui_setting_defaults';
 
 import { injectVars } from './inject_vars';
 
@@ -106,7 +107,9 @@ export default function (kibana) {
       translations: [
         resolve(__dirname, './translations/en.json')
       ],
-      mappings
+
+      mappings,
+      uiSettingDefaults: getUiSettingDefaults(),
     },
 
     preInit: async function (server) {

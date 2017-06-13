@@ -8,6 +8,8 @@ import { UiSettingsService } from './ui_settings_service';
  *  @param {Object} options
  *  @property {AsyncFunction} options.callCluster function that accepts a method name and
  *                            param object which causes a request via some elasticsearch client
+ *  @property {AsyncFunction} [options.getDefaults] async function that returns defaults/details about
+ *                            the uiSettings.
  *  @property {AsyncFunction} [options.readInterceptor] async function that is called when the
  *                            UiSettingsService does a read() an has an oportunity to intercept the
  *                            request and return an alternate `_source` value to use.
@@ -18,7 +20,8 @@ export function uiSettingsServiceFactory(server, options) {
 
   const {
     callCluster,
-    readInterceptor
+    readInterceptor,
+    getDefaults,
   } = options;
 
   return new UiSettingsService({
@@ -27,5 +30,6 @@ export function uiSettingsServiceFactory(server, options) {
     id: config.get('pkg.version'),
     callCluster,
     readInterceptor,
+    getDefaults,
   });
 }

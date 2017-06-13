@@ -1,8 +1,6 @@
 import { defaultsDeep, noop } from 'lodash';
 import { errors as esErrors } from 'elasticsearch';
 
-import { getDefaultSettings } from './defaults';
-
 function hydrateUserSettings(userSettings) {
   return Object.keys(userSettings)
     .map(key => ({ key, userValue: userSettings[key] }))
@@ -32,17 +30,21 @@ export class UiSettingsService {
       id,
       callCluster,
       readInterceptor = noop,
+      // we use a function for getDefaults() so that defaults can be different in
+      // different scenarios, and so they can change over time
+      getDefaults = () => ({}),
     } = options;
 
     this._callCluster = callCluster;
+    this._getDefaults = getDefaults;
     this._readInterceptor = readInterceptor;
     this._index = index;
     this._type = type;
     this._id = id;
   }
 
-  getDefaults() {
-    return getDefaultSettings();
+  async getDefaults() {
+    return await this._getDefaults();
   }
 
   // returns a Promise for the value of the requested setting
@@ -65,7 +67,7 @@ export class UiSettingsService {
 
   async getRaw() {
     const userProvided = await this.getUserProvided();
-    return defaultsDeep(userProvided, this.getDefaults());
+    return defaultsDeep(userProvided, await this.getDefaults());
   }
 
   async getUserProvided(options) {
