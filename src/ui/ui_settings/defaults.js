@@ -183,7 +183,7 @@ export function getDefaultSettings() {
         'patterns from which to query the field mapping'
     },
     'indexPatterns:warnAboutUnsupportedTimePatterns': {
-      value: true,
+      value: false,
       description: 'When an index pattern is using the now unsupported "time pattern" format, a warning will ' +
         'be displayed once per session that is using this pattern. Set this to false to disable that warning.'
     },
