@@ -30,8 +30,11 @@ describe('isUserAwareOfUnsupportedTimePattern()', () => {
       const StubIndexPattern = Private(StubIndexPatternProvider);
       const isUserAwareOfUnsupportedTimePattern = Private(IsUserAwareOfUnsupportedTimePatternProvider);
 
+      const config = $injector.get('config');
+      config.set(CONFIG_KEY, true); // enable warnings
+
       return {
-        config: $injector.get('config'),
+        config,
         createIndexPattern: () => new StubIndexPattern(chance.word(), null, []),
         isUserAwareOfUnsupportedTimePattern,
       };
