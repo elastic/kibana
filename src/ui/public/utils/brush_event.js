@@ -3,57 +3,46 @@ import moment from 'moment';
 import { buildRangeFilter } from 'ui/filter_manager/lib/range';
 
 export function UtilsBrushEventProvider(timefilter) {
-  const RANGE_FILTER = 'range';
-  const TIME_FILTER = 'timefilter';
   return $state => {
     return event => {
       if (!event.data.xAxisField) {
         return;
       }
 
-      let filterType = RANGE_FILTER;
       if (event.data.xAxisField.type === 'date' &&
         event.data.xAxisField.name === event.data.indexPattern.timeFieldName) {
-        filterType = TIME_FILTER;
-      }
+        const from = moment(event.range[0]);
+        const to = moment(event.range[1]);
 
-      switch (filterType) {
-        case TIME_FILTER:
-          const from = moment(event.range[0]);
-          const to = moment(event.range[1]);
+        if (to - from === 0) return;
 
-          if (to - from === 0) return;
+        timefilter.time.from = from;
+        timefilter.time.to = to;
+        timefilter.time.mode = 'absolute';
+      } else if (event.data.xAxisField.type === 'date' || event.data.xAxisField.type === 'number') {
+        if (event.range.length <= 1) return;
 
-          timefilter.time.from = from;
-          timefilter.time.to = to;
-          timefilter.time.mode = 'absolute';
-          break;
+        const existingFilter = $state.filters.find(filter => (
+          filter.meta && filter.meta.key === event.data.xAxisField.name
+        ));
 
-        case RANGE_FILTER:
-          if (event.range.length <= 1) return;
-
-          const existingFilter = $state.filters.find(filter => (
-            filter.meta && filter.meta.key === event.data.xAxisField.name
-          ));
-
-          const min = event.range[0];
-          const max = event.range[event.range.length - 1];
-          const range = { gte: min, lt: max };
-          if (_.has(existingFilter, 'range')) {
-            existingFilter.range[event.data.xAxisField.name] = range;
-          } else if (_.has(existingFilter, 'script.script.params.gte')
-            && _.has(existingFilter, 'script.script.params.lt')) {
-            existingFilter.script.script.params.gte = min;
-            existingFilter.script.script.params.lt = max;
-          } else {
-            const newFilter = buildRangeFilter(
-              event.data.xAxisField,
-              range,
-              event.data.indexPattern,
-              event.data.xAxisFormatter);
-            $state.$newFilters = [newFilter];
-          }
-          break;
+        const min = event.range[0];
+        const max = event.range[event.range.length - 1];
+        const range = { gte: min, lt: max };
+        if (_.has(existingFilter, 'range')) {
+          existingFilter.range[event.data.xAxisField.name] = range;
+        } else if (_.has(existingFilter, 'script.script.params.gte')
+          && _.has(existingFilter, 'script.script.params.lt')) {
+          existingFilter.script.script.params.gte = min;
+          existingFilter.script.script.params.lt = max;
+        } else {
+          const newFilter = buildRangeFilter(
+            event.data.xAxisField,
+            range,
+            event.data.indexPattern,
+            event.data.xAxisFormatter);
+          $state.$newFilters = [newFilter];
+        }
       }
     };
   };
