@@ -82,15 +82,21 @@ export {
   KuiMenuItem,
 } from './menu';
 
-export * from './modal';
-
 export {
-  KuiPager,
-  KuiPagerButtonGroup,
-} from './pager';
+  KuiTabsCompact,
+  KuiTabs,
+  KuiTab
+} from './tabs';
 
 export {
   KuiToolBarSearchBox,
   KuiToolBar,
   KuiToolBarFooter,
 } from './tool_bar';
+
+export * from './modal';
+
+export {
+  KuiPager,
+  KuiPagerButtonGroup,
+} from './pager';
