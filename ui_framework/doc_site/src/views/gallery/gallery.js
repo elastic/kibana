@@ -20,9 +20,9 @@ export default () => {
   return (
     <div>
       <div className="kuiVerticalRhythm">
-        <div className="kuiSubTitle">
+        <h2 className="kuiSubTitle">
           Some items
-        </div>
+        </h2>
 
         <KuiGallery>
           <KuiGalleryButton href="#">

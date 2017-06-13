@@ -4,12 +4,14 @@ import classNames from 'classnames';
 
 export const KuiGalleryButtonIcon = ({ children, className, ...rest }) => {
   const classes = classNames('kuiGalleryButton__icon','kuiIcon', className);
-  return (<div
-            className={classes}
-            {...rest}
-          >
-            {children}
-          </div>);
+  return (
+    <div
+      className={classes}
+      {...rest}
+    >
+      {children}
+    </div>
+  );
 };
 KuiGalleryButtonIcon.propTypes = {
   children: PropTypes.node,
