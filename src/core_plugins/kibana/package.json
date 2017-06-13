@@ -1,4 +1,9 @@
 {
   "name": "kibana",
-  "version": "kibana"
+  "version": "kibana",
+  "config": {
+    "@elastic/eslint-import-resolver-kibana": {
+      "projectRoot": false
+    }
+  }
 }

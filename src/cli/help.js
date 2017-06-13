@@ -1,6 +1,6 @@
 import _ from 'lodash';
 
-module.exports = function (command, spaces) {
+export default function help(command, spaces) {
   if (!_.size(command.commands)) {
     return command.outputHelp();
   }
@@ -24,7 +24,7 @@ ${indent(commandsSummary(command), 2)}
 ${cmdHelp(defCmd)}
 `
   ).trim().replace(/^/gm, spaces || '');
-};
+}
 
 function indent(str, n) {
   return String(str || '').trim().replace(/^/gm, _.repeat(' ', n));

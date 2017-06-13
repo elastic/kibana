@@ -1,4 +1,4 @@
-import calculateIndices from './calculate_indices';
+import { calculateIndices } from './calculate_indices';
 import buildRequestBody from './build_request_body';
 import getIntervalAndTimefield from './get_interval_and_timefield';
 

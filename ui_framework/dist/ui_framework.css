@@ -563,14 +563,8 @@ body {
   padding: 0 15px 20px; }
 
 /**
- * 1. Use this container to offset the spacing between wrapped cards.
- */
-.kuiCardGroupContainer {
-  margin: -15px;
-  /* 1 */ }
-
-/**
  * 1. Wrap cards when necessary.
+ * 2. Offset the spacing between wrapped cards.
  */
 .kuiCardGroup {
   display: -webkit-box;
@@ -581,15 +575,17 @@ body {
       -ms-flex-wrap: wrap;
           flex-wrap: wrap;
   /* 1 */
+  margin: -15px;
+  /* 2 */
   /**
    * 1. Use the defined width of the card to determine when to wrap.
    * 2. Use an even margin all around the card so that the spacing is still even when wrapped.
    */ }
   .kuiCardGroup .kuiCard {
     -webkit-box-flex: 1;
-    -webkit-flex: 1 1 0;
-        -ms-flex: 1 1 0px;
-            flex: 1 1 0;
+    -webkit-flex: 1 1 auto;
+        -ms-flex: 1 1 auto;
+            flex: 1 1 auto;
     /* 1 */
     margin: 15px;
     /* 2 */ }
@@ -601,6 +597,7 @@ body {
 
 /**
  * 1. There's no way to make this look good when wrapped.
+ * 2. Undo the default styles.
  */
 .kuiCardGroup--united {
   -webkit-flex-wrap: nowrap;
@@ -609,11 +606,24 @@ body {
   /* 1 */
   border: 1px solid #E0E0E0;
   border-radius: 4px;
-  overflow: hidden; }
+  overflow: hidden;
+  margin: 0;
+  /* 2 */
+  /**
+   * 1. Force all cards to be the same size.
+   * 2. Undo the default styles.
+   */ }
   .kuiCardGroup--united .kuiCard {
+    -webkit-flex-basis: 0;
+        -ms-flex-preferred-size: 0;
+            flex-basis: 0;
+    /* 1 */
     border: none;
+    /* 2 */
     border-radius: 0;
-    margin: 0; }
+    /* 2 */
+    margin: 0;
+    /* 2 */ }
   .kuiCardGroup--united .kuiCard + .kuiCard {
     border-left: 1px solid #E0E0E0; }
 
@@ -1037,7 +1047,20 @@ body {
   background-size: 14px;
   background-repeat: no-repeat;
   background-position: calc(100% - 8px);
-  /* 2 */ }
+  /* 2 */
+  appearance: none;
+  font-family: "Open Sans", Helvetica, Arial, sans-serif;
+  padding: 3px 12px 4px;
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 1.5;
+  color: #191E23;
+  background-color: #ffffff;
+  border: 1px solid #DEDEDE;
+  border-radius: 4px;
+  transition: border-color 0.1s linear;
+  min-height: 30px;
+  /* 1 */ }
   .theme-dark .kuiSelect {
     color: #cecece; }
   .kuiSelect:invalid {
@@ -1060,6 +1083,24 @@ body {
   .theme-dark .kuiSelect {
     background-image: url('data:image/svg+xml;utf8,<svg width="1792" height="1792" viewBox="0 0 1792 1792" xmlns="http://www.w3.org/2000/svg"><path d="M1408 704q0 26-19 45l-448 448q-19 19-45 19t-45-19l-448-448q-19-19-19-45t19-45 45-19h896q26 0 45 19t19 45z" fill="#CECECE"/></svg>');
     /* 1 */ }
+  .theme-dark .kuiSelect {
+    color: #cecece; }
+  .kuiSelect:invalid {
+    border-color: #D86051; }
+  .kuiSelect:focus {
+    outline: none;
+    border-color: #6EADC1; }
+  .kuiSelect:disabled {
+    opacity: 0.4;
+    cursor: not-allowed; }
+  .theme-dark .kuiSelect {
+    background-color: #444444;
+    border-color: #444444; }
+    .theme-dark .kuiSelect:focus {
+      outline: none;
+      border-color: #6EADC1; }
+  .kuiSelect.kuiSelect-isInvalid {
+    border-color: #D86051; }
 
 .kuiSelect--large {
   min-width: 400px; }

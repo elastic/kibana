@@ -113,14 +113,6 @@ function VisEditor($rootScope, $scope, $route, timefilter, AppState, $window, kb
     description: 'Save Visualization',
     template: require('plugins/kibana/visualize/editor/panels/save.html'),
     testId: 'visualizeSaveButton',
-    disableButton() {
-      return Boolean(editableVis.dirty);
-    },
-    tooltip() {
-      if (editableVis.dirty) {
-        return 'Apply or Discard your changes before saving';
-      }
-    }
   }, {
     key: 'share',
     description: 'Share Visualization',

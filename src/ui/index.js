@@ -1,7 +1,6 @@
 import { defaults, _ } from 'lodash';
-import { props } from 'bluebird';
+import { props, reduce as reduceAsync } from 'bluebird';
 import Boom from 'boom';
-import { reduce as reduceAsync } from 'bluebird';
 import { resolve } from 'path';
 
 import UiExports from './ui_exports';
@@ -67,7 +66,7 @@ export default async (kbnServer, server, config) => {
   });
 
   async function getKibanaPayload({ app, request, includeUserProvidedConfig, injectedVarsOverrides }) {
-    const uiSettings = server.uiSettings();
+    const uiSettings = request.getUiSettingsService();
     const translations = await uiI18n.getTranslationsForRequest(request);
 
     return {
@@ -83,7 +82,7 @@ export default async (kbnServer, server, config) => {
       translations: translations,
       uiSettings: await props({
         defaults: uiSettings.getDefaults(),
-        user: includeUserProvidedConfig && uiSettings.getUserProvided(request)
+        user: includeUserProvidedConfig && uiSettings.getUserProvided()
       }),
       vars: await reduceAsync(
         uiExports.injectedVarsReplacers,
