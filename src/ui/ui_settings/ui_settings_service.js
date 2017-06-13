@@ -30,6 +30,8 @@ export class UiSettingsService {
       id,
       callCluster,
       readInterceptor = noop,
+      // we use a function for getDefaults() so that defaults can be different in
+      // different scenarios, and so they can change over time
       getDefaults = () => ({}),
     } = options;
 
