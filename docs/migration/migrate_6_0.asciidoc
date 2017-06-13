@@ -55,6 +55,6 @@ This is no longer the case. Now, only commas are a valid query separator: e.g. `
 
 [float]
 === Time-interval based index patterns are no longer supported
-*Details:*  Starting in Kibana 6.0.0 we removed the ability to create index patterns define a specific date-pattern and interval for identifying Elasticsearch indices. Index patterns must now use wildcards, which are more performant in most cases.
+*Details:*  Starting in Kibana 6.0.0 we removed the ability to create index patterns that use a date-pattern and interval to identify Elasticsearch indices. Index patterns must now use wildcards which are more performant in most cases.
 
 *Impact:* Existing index patterns and saved objects will continue to function without issue, and in a subsequent release we will provide utilities to migrate your index patterns/saved objects.
