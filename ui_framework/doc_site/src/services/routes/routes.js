@@ -126,6 +126,7 @@ const components = [{
 }, {
   name: 'Bar',
   component: BarExample,
+  hasReact: true,
 }, {
   name: 'Button',
   component: ButtonExample,
@@ -133,6 +134,7 @@ const components = [{
 }, {
   name: 'Card',
   component: CardExample,
+  hasReact: true,
 }, {
   name: 'Column',
   component: ColumnExample,
@@ -157,6 +159,7 @@ const components = [{
 }, {
   name: 'FormLayout',
   component: FormLayoutExample,
+  hasReact: true,
 }, {
   name: 'Gallery',
   component: GalleryExample,
