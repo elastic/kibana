@@ -196,7 +196,7 @@ export function SimpleGaugeProvider() {
       }
 
       if (hiddenLabels) {
-        this.gaugeChart.handler.alerts.show('Some labels were hidden due to size constrains');
+        this.gaugeChart.handler.alerts.show('Some labels were hidden due to size constraints');
       }
 
       return series;
