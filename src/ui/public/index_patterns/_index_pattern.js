@@ -94,12 +94,13 @@ export function IndexPatternProvider(Private, $http, config, kbnIndex, Promise, 
 
     if (indexPattern.isUnsupportedTimePattern()) {
       if (!isUserAwareOfUnsupportedTimePattern(indexPattern)) {
-        notify.warning(
+        const warning = (
           'Support for time-intervals has been removed. ' +
           `View the ["${indexPattern.id}" index pattern in management](` +
           kbnUrl.getRouteHref(indexPattern, 'edit') +
           ') for more information.'
         );
+        notify.warning(warning, { lifetime: Infinity });
       }
     }
 
