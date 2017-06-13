@@ -1,8 +1,5 @@
 <tr>
-  <th width="1%"></th>
-  <th ng-if="indexPattern.timeFieldName" data-test-subj="docTableHeaderField">
-    <span>Time <i ng-class="headerClass(indexPattern.timeFieldName)" ng-click="cycleSortOrder(indexPattern.timeFieldName)" tooltip="Sort by time"></i></span>
-  </th>
+  <th class="docTableColumn__expandToggle"></th>
   <th ng-repeat="name in columns" data-test-subj="docTableHeaderField">
     <span class="table-header-name">
       {{name | shortDots}} <i ng-class="headerClass(name)" ng-click="cycleSortOrder(name)" tooltip="{{tooltip(name)}}" tooltip-append-to-body="1"></i>

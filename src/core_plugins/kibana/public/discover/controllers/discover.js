@@ -230,10 +230,16 @@ function discoverController($scope, config, courier, $route, $window, Notifier,
   $scope.uiState = $state.makeStateful('uiState');
 
   function getStateDefaults() {
+    const defaultColumns = config.get('defaultColumns').slice();
+
+    const timeFieldName = $scope.indexPattern.timeFieldName;
+    if (timeFieldName) {
+      defaultColumns.unshift(timeFieldName);
+    }
     return {
       query: $scope.searchSource.get('query') || '',
       sort: getSort.array(savedSearch.sort, $scope.indexPattern),
-      columns: savedSearch.columns.length > 0 ? savedSearch.columns : config.get('defaultColumns').slice(),
+      columns: savedSearch.columns.length > 0 ? savedSearch.columns : defaultColumns,
       index: $scope.indexPattern.id,
       interval: 'auto',
       filters: _.cloneDeep($scope.searchSource.getOwn('filter'))
@@ -509,6 +515,13 @@ function discoverController($scope, config, courier, $route, $window, Notifier,
           if (!sortFn) hit.$$_counted = true;
 
           const fields = _.keys(indexPattern.flattenHit(hit));
+
+          // since flattenHit removed the _source field, but we want user's to be able to select it,
+          // we're manually adding it back
+          if (hit._source) {
+            fields.push('_source');
+          }
+
           let n = fields.length;
           let field;
           while (field = fields[--n]) {
