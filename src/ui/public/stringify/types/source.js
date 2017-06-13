@@ -3,12 +3,14 @@ import { noWhiteSpace } from 'ui/utils/no_white_space';
 import angular from 'angular';
 import { FieldFormat } from 'ui/index_patterns/_field_format/field_format';
 
-export function stringifySource(shortDotsFilter) {
+export function stringifySource() {
   const template = _.template(noWhiteSpace(require('ui/stringify/types/_source.html')));
 
   _.class(Source).inherits(FieldFormat);
-  function Source(params) {
+  function Source(params, getConfig) {
     Source.Super.call(this, params);
+
+    this.getConfig = getConfig;
   }
 
   Source.id = '_source';
@@ -25,9 +27,10 @@ export function stringifySource(shortDotsFilter) {
       const highlightPairs = [];
       const sourcePairs = [];
 
-      _.keys(formatted).forEach(function (key) {
+      const isShortDots = this.getConfig('shortDots:enable');
+      _.keys(formatted).forEach((key) => {
         const pairs = highlights[key] ? highlightPairs : sourcePairs;
-        const field = shortDotsFilter(key);
+        const field = isShortDots ? _.shortenDottedString(key) : key;
         const val = formatted[key];
         pairs.push([field, val]);
       }, []);
