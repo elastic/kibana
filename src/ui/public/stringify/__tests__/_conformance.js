@@ -2,10 +2,9 @@ import _ from 'lodash';
 import expect from 'expect.js';
 import ngMock from 'ng_mock';
 import { RegistryFieldFormatsProvider } from 'ui/registry/field_formats';
-import { IndexPatternsFieldFormatProvider } from 'ui/index_patterns/_field_format/field_format';
+import { FieldFormat } from 'ui/index_patterns/_field_format/field_format';
 
 let fieldFormats;
-let FieldFormat;
 let config;
 
 const formatIds = [
@@ -29,7 +28,6 @@ export default describe('conformance', function () {
   beforeEach(ngMock.module('kibana'));
   beforeEach(ngMock.inject(function (Private, $injector) {
     fieldFormats = Private(RegistryFieldFormatsProvider);
-    FieldFormat = Private(IndexPatternsFieldFormatProvider);
     config = $injector.get('config');
   }));
 

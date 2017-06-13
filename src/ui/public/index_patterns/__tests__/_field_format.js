@@ -1,16 +1,14 @@
 import _ from 'lodash';
 import expect from 'expect.js';
 import ngMock from 'ng_mock';
-import { IndexPatternsFieldFormatProvider } from 'ui/index_patterns/_field_format/field_format';
+import { FieldFormat } from 'ui/index_patterns/_field_format/field_format';
 
 describe('FieldFormat class', function () {
 
-  let FieldFormat;
   let TestFormat;
 
   beforeEach(ngMock.module('kibana'));
-  beforeEach(ngMock.inject(function (Private) {
-    FieldFormat = Private(IndexPatternsFieldFormatProvider);
+  beforeEach(ngMock.inject(function () {
 
     TestFormat = function (params) {
       TestFormat.Super.call(this, params);
@@ -53,7 +51,9 @@ describe('FieldFormat class', function () {
     });
 
     it('removes param values that match the defaults', function () {
-      TestFormat.paramDefaults = { foo: 'bar' };
+      TestFormat.prototype.getParamDefaults = function () {
+        return { foo: 'bar' };
+      };
 
       const f = new TestFormat({ foo: 'bar', baz: 'bar' });
       const ser = JSON.parse(JSON.stringify(f));

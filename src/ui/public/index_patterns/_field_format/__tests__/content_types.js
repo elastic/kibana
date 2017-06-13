@@ -5,7 +5,7 @@ import sinon from 'sinon';
 import expect from 'expect.js';
 import { escape } from 'lodash';
 
-import { IndexPatternsFieldFormatContentTypesProvider } from '../content_types';
+import { contentTypes } from '../content_types';
 
 describe('index_patterns/_field_format/content_types', () => {
 
@@ -27,7 +27,6 @@ describe('index_patterns/_field_format/content_types', () => {
 
   beforeEach(ngMock.module('testApp'));
   beforeEach(ngMock.inject(($injector) => {
-    const contentTypes = new IndexPatternsFieldFormatContentTypesProvider();
     const $rootScope = $injector.get('$rootScope');
     const $compile = $injector.get('$compile');
 
