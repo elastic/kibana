@@ -43,6 +43,14 @@ export {
   KuiFieldGroupSection,
 } from './form_layout';
 
+export {
+  KuiGallery,
+  KuiGalleryButton,
+  KuiGalleryButtonIcon,
+  KuiGalleryButtonImage,
+  KuiGalleryButtonLabel
+} from './gallery';
+
 export { KuiInfoButton } from './info_button';
 
 export {
