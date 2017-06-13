@@ -28,23 +28,6 @@ export default function (kbnServer, server, config) {
       req.headers[contentTypeHeader].split(';')[0]
     );
 
-    if (hasXsrfHeader) {
-      let xsrfHeaderDeprecationMessage =
-        `The ${xsrfHeader} header is deprecated and will be removed in a future version of Kibana.`;
-      if (!hasAllowedMediaType) {
-        xsrfHeaderDeprecationMessage +=
-          ` Specify a ${contentTypeHeader} header of either application/json or application/x-ndjson instead.`;
-      }
-
-      server.log(['warning', 'deprecation'], xsrfHeaderDeprecationMessage);
-    } else if (!hasAllowedMediaType && hasVersionHeader) {
-      server.log(
-        ['warning', 'deprecation'],
-        `The ${versionHeader} header will no longer be accepted for CSRF protection in a future version of Kibana.` +
-        ` Specify a ${contentTypeHeader} header of either application/json or application/x-ndjson instead.`
-      );
-    }
-
     if (!hasAllowedMediaType && !hasVersionHeader && !hasXsrfHeader) {
       return reply(badRequest(
         `Request must contain a ${contentTypeHeader} header of either application/json or application/x-ndjson.` +
