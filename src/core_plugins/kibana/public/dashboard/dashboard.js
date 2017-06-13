@@ -292,6 +292,7 @@ app.directive('dashboardApp', function ($injector) {
         $scope.fullScreenMode = fullScreenMode;
         dashboardState.setFullScreenMode(fullScreenMode);
         chrome.setVisible(!fullScreenMode);
+        $scope.$root.$broadcast('globalNav:update');
         if (fullScreenMode) {
           onRouteChange = $scope.$on('$routeChangeStart', () => chrome.setVisible(true));
         } else if (onRouteChange) {
