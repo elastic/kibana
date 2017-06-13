@@ -7,32 +7,32 @@ import { NavbarButton } from '../navbar_button';
 import { Expression } from '../expression';
 import { ElementTypes } from './element_types';
 
-
 import './toolbar.less';
 
 export const Toolbar = ({ editing, tray, setTray }) => {
   const done = () => setTray(null);
+  const showHideTray = (exp) => {
+    if (tray && tray.type === exp.type) return setTray(null);
+    setTray(exp);
+  };
 
-  const ExpressionTray = (<Expression done={done} />);
   const ElementsTray = (<ElementTypes done={done} onClick={alert} />);
+  const ExpressionTray = (<Expression done={done} />);
 
-
-  const toolbar = editing ? (
+  return !editing ? null : (
     <div className="canvas__toolbar">
       {tray ? (<Tray>{ tray }</Tray>) : null }
       <Navbar>
-        <NavbarButton onClick={() => setTray(ElementsTray)}><i className="fa fa-plus" /> Add an element</NavbarButton>
+        <NavbarButton onClick={() => showHideTray(ElementsTray)}><i className="fa fa-plus" /> Add an element</NavbarButton>
         <NavbarButton><i className="fa fa-plus-square" /> Add a page</NavbarButton>
-        <NavbarButton onClick={() => setTray(ExpressionTray)}><i className="fa fa-terminal" /> Code</NavbarButton>
+        <NavbarButton onClick={() => showHideTray(ExpressionTray)}><i className="fa fa-terminal" /> Code</NavbarButton>
       </Navbar>
     </div>
-
-  ) : null;
-
-  return toolbar;
+  );
 };
 
 Toolbar.propTypes = {
   editing: PropTypes.bool,
   tray: PropTypes.node,
+  setTray: PropTypes.func,
 };

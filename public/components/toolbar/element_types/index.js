@@ -5,4 +5,7 @@ console.log(elements);
 
 import { ElementTypes as Component } from './element_types';
 
-export const ElementTypes = compose(withProps(() => ({ elements: elements.toJS() })))(pure(Component));
+export const ElementTypes = compose(
+  pure,
+  withProps(() => ({ elements: elements.toJS() }))
+)(Component);

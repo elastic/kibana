@@ -8,7 +8,7 @@ import { elements } from '../../lib/elements';
 import { getState, getValue, getError } from '../../lib/resolved_arg';
 import { getType } from '../../../common/types/get_type';
 import { fetchRenderable } from '../../state/actions/elements';
-import { getSelectedResolvedArgs } from '../../state/selectors/workpad';
+import { getResolvedArgs } from '../../state/selectors/workpad';
 
 const renderLoading = branch(
   props => [null, 'pending'].includes(getState(props.renderable)),
@@ -20,9 +20,9 @@ const renderInvalidExpression = branch(
   renderComponent(InvalidExpression)
 );
 
-function mapStateToProps(state) {
+function mapStateToProps(state, ownProps) {
   return {
-    renderable: getSelectedResolvedArgs(state, 'expressionRenderable'),
+    renderable: getResolvedArgs(state, ownProps.element.id, 'expressionRenderable'),
   };
 }
 

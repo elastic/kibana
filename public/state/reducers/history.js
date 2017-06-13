@@ -1,6 +1,6 @@
 import { handleActions } from 'redux-actions';
-import { setStateFromHistory } from '../actions/history';
+import { restoreHistory } from '../actions/history';
 
 export default handleActions({
-  [setStateFromHistory]: (persistedState, { payload }) => payload,
+  [restoreHistory]: (persistedState, { payload }) => payload,
 }, {});

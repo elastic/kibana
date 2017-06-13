@@ -1,7 +1,7 @@
 import { connect } from 'react-redux';
 
 import { getEditing } from '../../state/selectors/app';
-import { toggleEditing } from '../../state/actions/app';
+import { setEditing } from '../../state/actions/transient';
 
 import { App as Component } from './app';
 
@@ -10,7 +10,13 @@ const mapStateToProps = (state) => ({
 });
 
 const mapDispatchToProps = ({
-  toggleEditing,
+  setEditing,
 });
 
-export const App = connect(mapStateToProps, mapDispatchToProps)(Component);
+const mergeProps = (stateProps, dispatchProps, ownProps) => {
+  return Object.assign({}, stateProps, dispatchProps, ownProps, {
+    toggleEditing: () => dispatchProps.setEditing(!stateProps.editing),
+  });
+};
+
+export const App = connect(mapStateToProps, mapDispatchToProps, mergeProps)(Component);

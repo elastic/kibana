@@ -29,35 +29,54 @@ describe('historyProvider', () => {
     state = createState();
   });
 
-  beforeEach(() => {
-    history.push(state);
-  });
-
-  describe('push', () => {
-    it('should push state into window history', () => {
-      expect(win.history.pushState.calledOnce).to.be(true);
+  describe('push updates', () => {
+    beforeEach(() => {
+      history.push(state);
     });
 
-    it('should push compressed state into history', () => {
-      const { args } = win.history.pushState.firstCall;
-      expect(args[0]).to.equal(lzString.compress(JSON.stringify(state)));
+    describe('push', () => {
+      it('should push state into window history', () => {
+        expect(win.history.pushState.calledOnce).to.be(true);
+      });
+
+      it('should push compressed state into history', () => {
+        const { args } = win.history.pushState.firstCall;
+        expect(args[0]).to.equal(lzString.compress(JSON.stringify(state)));
+      });
+    });
+
+    describe('undo', () => {
+      it('should move history back', () => {
+        expect(win.history._getIndex()).to.equal(0);
+        history.undo();
+        expect(win.history._getIndex()).to.equal(-1);
+      });
+    });
+
+    describe('redo', () => {
+      it('should move history forward', () => {
+        history.undo();
+        expect(win.history._getIndex()).to.equal(-1);
+        history.redo();
+        expect(win.history._getIndex()).to.equal(0);
+      });
     });
   });
 
-  describe('undo', () => {
-    it('should move history back', () => {
-      expect(win.history._getIndex()).to.equal(0);
-      history.undo();
-      expect(win.history._getIndex()).to.equal(-1);
+  describe('replace updates', () => {
+    beforeEach(() => {
+      history.replace(state);
     });
-  });
 
-  describe('redo', () => {
-    it('should move history forward', () => {
-      history.undo();
-      expect(win.history._getIndex()).to.equal(-1);
-      history.redo();
-      expect(win.history._getIndex()).to.equal(0);
+    describe('replace', () => {
+      it('should replace state in window history', () => {
+        expect(win.history.replaceState.calledOnce).to.be(true);
+      });
+
+      it('should replace compressed state into history', () => {
+        const { args } = win.history.replaceState.firstCall;
+        expect(args[0]).to.equal(lzString.compress(JSON.stringify(state)));
+      });
     });
   });
 
@@ -70,8 +89,10 @@ describe('historyProvider', () => {
     });
 
     it('should pass decompress state to handler', (done) => {
-      const handler = (state) => {
-        expect(state).to.eql(state);
+      history.push(state);
+
+      const handler = (curState) => {
+        expect(curState).to.eql(state);
         done();
       };
 
@@ -93,7 +114,10 @@ describe('historyProvider', () => {
 
   describe('parse', () => {
     it('returns the decompressed object', () => {
+      history.push(state);
+
       const historyState = win.history._getHistory().state;
+
       expect(historyState).to.be.a('string');
       expect(history.parse(historyState)).to.eql(state);
     });
@@ -102,4 +126,16 @@ describe('historyProvider', () => {
       expect(history.parse('hello')).to.be(null);
     });
   });
+
+  describe('encode', () => {
+    it('returns the compressed string', () => {
+      history.push(state);
+
+      const historyState = win.history._getHistory().state;
+
+      expect(historyState).to.be.a('string');
+      expect(history.encode(state)).to.eql(historyState);
+    });
+  });
+
 });

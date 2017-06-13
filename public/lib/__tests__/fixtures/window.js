@@ -25,6 +25,11 @@ export function createWindow() {
       historyItems.push({ state, title, url });
       historyIndex += 1;
     },
+    replaceState(state, title = '', url = '') {
+      const index = this._getIndex();
+      if (index >= 0) historyItems[index] = { state, title, url };
+      else this.pushState(state, title, url);
+    },
     _reset() {
       historyIndex = -1;
       historyItems = [];
@@ -46,6 +51,7 @@ export function createWindow() {
       back: sinon.spy(history.back),
       forward: sinon.spy(history.forward),
       pushState: sinon.spy(history.pushState),
+      replaceState: sinon.spy(history.replaceState),
     },
     set onpopstate(fn) {
       onpopstate = (typeof fn === 'function') ? sinon.spy(fn) : null;

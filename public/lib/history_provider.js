@@ -21,10 +21,17 @@ export const historyProvider = (win) => {
       }
     },
 
-    push(state) {
+    encode(state) {
       const stateJSON = JSON.stringify(state);
-      const payload = lzString.compress(stateJSON);
-      wh.pushState(payload, '');
+      return lzString.compress(stateJSON);
+    },
+
+    push(state) {
+      wh.pushState(this.encode(state), '');
+    },
+
+    replace(state) {
+      wh.replaceState(this.encode(state), '');
     },
 
     setOnChange(fn) {

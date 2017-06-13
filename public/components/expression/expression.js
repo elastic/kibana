@@ -1,9 +1,13 @@
 import React from 'react';
 import PropTypes from 'prop-types';
+import { compose, branch, renderComponent } from 'recompose';
 import { FormGroup, ControlLabel, FormControl, Button, ButtonToolbar } from 'react-bootstrap';
+import { ElementNotSelected } from './element_not_selected';
 import './expression.less';
 
-export const Expression = ({ expression, updateValue, setExpression, done }) => {
+const noSelected = branch(props => !props.element, renderComponent(ElementNotSelected));
+
+const Component = ({ expression, updateValue, setExpression, done }) => {
   let input;
 
   return (
@@ -31,9 +35,11 @@ export const Expression = ({ expression, updateValue, setExpression, done }) => 
   );
 };
 
-Expression.propTypes = {
-  expression: PropTypes.string,
+Component.propTypes = {
+  expression: PropTypes.string.isRequired,
   updateValue: PropTypes.func,
   setExpression: PropTypes.func,
   done: PropTypes.func,
 };
+
+export const Expression = compose(noSelected)(Component);

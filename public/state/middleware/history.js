@@ -7,7 +7,7 @@ export const historyMiddleware = (win) => {
 
   return ({ dispatch, getState }) => {
     history.setOnChange((historyState) => {
-      if (historyState) return dispatch(historyActions.restoreHistory({ historyState }));
+      if (historyState) return dispatch(historyActions.restoreHistory(historyState));
     });
 
     return next => (action) => {
@@ -17,8 +17,8 @@ export const historyMiddleware = (win) => {
       if (action.type === 'HISTORY_UNDO') return history.undo();
       if (action.type === 'HISTORY_REDO') return history.redo();
 
-      for (const action in historyActions) {
-        if (action.toString() === action.type) {
+      for (const historyAction in historyActions) {
+        if (historyAction.toString() === action.type) {
           return next(action);
         }
       }
