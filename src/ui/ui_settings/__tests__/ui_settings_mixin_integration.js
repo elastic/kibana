@@ -138,9 +138,10 @@ describe('uiSettingsMixin()', () => {
         foo: 'bar'
       });
       sinon.assert.calledOnce(uiSettingsServiceFactory);
-      const { args } = uiSettingsServiceFactory.firstCall;
-      expect(args[0]).to.be(server);
-      expect(args[1]).to.have.property('foo', 'bar');
+      sinon.assert.calledWithExactly(uiSettingsServiceFactory, server, {
+        foo: 'bar',
+        getDefaults: sinon.match.func,
+      });
     });
   });
 
