@@ -19,5 +19,8 @@ app.service('$store', (kbnVersion, basePath) => {
   const history = historyProvider(window);
   history.replace(persistent);
 
+  // debugging
+  window.store = store;
+
   return store;
 });
