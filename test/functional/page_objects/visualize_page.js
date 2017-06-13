@@ -671,8 +671,8 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
             return chart
             .getAttribute('fill')
             .then(function (fillColor) {
-              // we're only getting the Green Bars
-              if (fillColor === '#6eadc1') {
+              // we're getting the default count color from defaults.js
+              if (fillColor === '#00a69b') {
                 return chart
                 .getAttribute('height')
                 .then(function (barHeight) {

@@ -7,6 +7,11 @@
   }
 }
 
+// Removes outline, but still provides a two color box shadow that works anywhere.
+:focus {
+  @include focus;
+}
+
 body {
   font-family: $globalFontFamily;
 }

@@ -7,13 +7,27 @@
 // variables should be declared at the top of those documents prefixed with $componentName.
 
 
+// True colors
+
+$globalColorBlue: #0079a5;
+$globalColorTeal: #00A69B;
+$globalColorRed: #A30000;
+$globalColorLightestGray: #F5F5F5;
+$globalColorLightGray: #D9D9D9;
+$globalColorMediumGray: #999;
+$globalColorDarkGray: #666;
+$globalColorDarkestGray: #3F3F3F;
+$globalColorBlack: #000;
+$globalColorWhite: #FFF;
+
+
 // Normal colors
 $globalTextColor: #2d2d2d;
-$globalLinkColor: #3CAED2;
-$globalLinkColor-isHover: #105A73;
+$globalLinkColor: $globalColorBlue;
+$globalLinkColor-isHover: darken($globalLinkColor, 10%);
 $globalInputTextColor: $globalTextColor;
-$globalInputBackgroundColor: #ffffff;
-$globalInputBorderColor: $globalInputBackgroundColor;
+$globalInputBackgroundColor: $globalColorWhite;
+$globalInputBorderColor: $globalColorLightGray;
 
 
 // Animations
@@ -51,19 +65,19 @@ $globalInactiveColor: #c3c3c3;
 $globalSuccessColor: #417505;
 $globalWarningColor: #ec9800;
 $globalDangerColor: #D86051;
-$globalFocusColor: #6EADC1;
+$globalFocusColor: $globalColorBlue;
 $globalFocusDangerColor: #ff523c;
 $globalFocusWarningColor: #ffa500;
 $globalFocusBackgroundColor: #ffffff;
 $globalFontColor: #191E23;
-$globalSubduedTextColor: #9fa3a7;
+$globalSubduedTextColor: $globalColorDarkGray;
 $globalLinkHoverColor: #006E8A;
-$globalSelectedBorderColor: #6EADC1;
+$globalSelectedBorderColor: $globalColorBlue;
 $globalDangerBorderColor: $globalDangerColor;
 $globalFormControlBorderColor: #DEDEDE;
 
 // Borders
-$globalBorderColor: #E4E4E4;
+$globalBorderColor: $globalColorLightGray;
 $globalBorderRadius: 4px;
 $globalBorderThick: 2px solid $globalBorderColor;
 $globalBorderThin: 1px solid $globalBorderColor;
