@@ -53,20 +53,27 @@ Bad:
 });
 ```
 
-### When a state change involves the previous state, pass setState a function instead of an object.
+### When a state change involves the previous state or props, pass setState a function instead of an object.
 https://facebook.github.io/react/docs/react-component.html#setstate
 
 Good:
 ```
- this.setState(prevState => ({
-   clickCount: prevState.clickCount + 1
+ this.setState((prevState, props) => ({
+   clickCount: prevState.clickCount + props.incrementValue
  }));
 ```
 
 Bad:
 ```
-  this.setState({ clickCount: this.state.clickCount++ });
+  this.setState({ clickCount: this.state.clickCount + this.props.incrementValue });
 ```
+
+Because this.props and this.state may be updated asynchronously, you should not rely on their values for calculating the next state.
+ - https://facebook.github.io/react/docs/state-and-lifecycle.html#state-updates-may-be-asynchronous
+
+This will be even more important when the fibers-based implementation is released:
+ - https://github.com/acdlite/react-fiber-architecture
+ - https://www.youtube.com/watch?v=ZCuYPiUIONs
 
 ### Prefer reactDirective over react-component
 reactDirective and react-component are two different ways of embedding react in angular. Using `react-component` means adding a bunch of components into angular, while `reactDirective` keeps them isolated, and is also a more succinct syntax.
@@ -184,18 +191,16 @@ this.setState({
 ```
 
 ### Favor spread operators
-Good:
 ```
 render() {
   return <button className="kuiButton" { ...this.props } />
 }
 ```
-
-Bad:
 ```
-render() {
-  return <button className="kuiButton" onClick={ this.props.onClick } isDisable={ this.props.isDisabled } />
-}
+export function Button({ className, ...rest }) {
+  const classNames = classNames('KuiButton', className);
+  return <button className={ classNames } { ...rest } />
+};
 ```
 
 ## General Guidelines
