@@ -240,6 +240,8 @@ export function VislibVisualizationsPointSeriesProvider(Private) {
           });
 
           if (addTimeMarker) {
+            //Domain end of 'now' will be milliseconds behind current time
+            //Extend toTime by 1 minute to ensure those cases have a TimeMarker
             const toTime = new Date(xScale.domain()[1].getTime() + 60000);
             const currentTime = new Date();
             if (toTime > currentTime) {
