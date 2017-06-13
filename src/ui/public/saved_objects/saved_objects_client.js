@@ -3,13 +3,14 @@ import { pick, get } from 'lodash';
 import { keysToSnakeCaseShallow, keysToCamelCaseShallow } from '../../../utils/case_conversion';
 
 import { SavedObject } from './saved_object';
+import chrome from 'ui/chrome';
 
 const join = (...uriComponents) => (
   uriComponents.filter(Boolean).map(encodeURIComponent).join('/')
 );
 
 export class SavedObjectsClient {
-  constructor($http, basePath, PromiseCtor = Promise) {
+  constructor($http, basePath = chrome.getBasePath(), PromiseCtor = Promise) {
     this._$http = $http;
     this._apiBaseUrl = `${basePath}/api/saved_objects/`;
     this._PromiseCtor = PromiseCtor;
