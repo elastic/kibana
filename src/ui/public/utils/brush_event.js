@@ -11,6 +11,12 @@ export function UtilsBrushEventProvider(timefilter) {
 
       if (event.data.xAxisField.type === 'date' &&
         event.data.xAxisField.name === event.data.indexPattern.timeFieldName) {
+        setTimefilter();
+      } else if (event.data.xAxisField.type === 'date' || event.data.xAxisField.type === 'number') {
+        setRange();
+      }
+
+      function setTimefilter() {
         const from = moment(event.range[0]);
         const to = moment(event.range[1]);
 
@@ -19,7 +25,9 @@ export function UtilsBrushEventProvider(timefilter) {
         timefilter.time.from = from;
         timefilter.time.to = to;
         timefilter.time.mode = 'absolute';
-      } else if (event.data.xAxisField.type === 'date' || event.data.xAxisField.type === 'number') {
+      }
+
+      function setRange() {
         if (event.range.length <= 1) return;
 
         const existingFilter = $state.filters.find(filter => (
