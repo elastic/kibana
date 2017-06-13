@@ -12,6 +12,7 @@ import scripts from './server/routes/api/scripts';
 import { registerSuggestionsApi } from './server/routes/api/suggestions';
 import * as systemApi from './server/lib/system_api';
 import mappings from './mappings.json';
+import { getUiSettingDefaults } from './ui_setting_defaults';
 
 const mkdirp = Promise.promisify(mkdirpNode);
 
@@ -130,7 +131,9 @@ module.exports = function (kibana) {
       translations: [
         resolve(__dirname, './translations/en.json')
       ],
-      mappings
+
+      mappings,
+      uiSettingDefaults: getUiSettingDefaults(),
     },
 
     preInit: async function (server) {

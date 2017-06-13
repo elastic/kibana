@@ -1,8 +1,8 @@
 import { isEqual } from 'lodash';
 import expect from 'expect.js';
 import { errors as esErrors } from 'elasticsearch';
+import Chance from 'chance';
 
-import { getDefaultSettings } from '../defaults';
 import { UiSettingsService } from '../ui_settings_service';
 
 import { createCallClusterStub } from './lib';
@@ -10,10 +10,13 @@ import { createCallClusterStub } from './lib';
 const INDEX = '.kibana';
 const TYPE = 'config';
 const ID = 'kibana-version';
+const chance = new Chance();
 
 function setup(options = {}) {
   const {
     readInterceptor,
+    getDefaults,
+    defaults = {},
     esDocSource = {},
     callCluster = createCallClusterStub(INDEX, TYPE, ID, esDocSource)
   } = options;
@@ -22,6 +25,7 @@ function setup(options = {}) {
     index: INDEX,
     type: TYPE,
     id: ID,
+    getDefaults: getDefaults || (() => defaults),
     readInterceptor,
     callCluster,
   });
@@ -114,34 +118,26 @@ describe('ui settings', () => {
   });
 
   describe('#getDefaults()', () => {
-    it('is promised the default values', async () => {
-      const {
-        uiSettings
-      } = setup();
-      const defaults = await uiSettings.getDefaults();
-      expect(isEqual(defaults, getDefaultSettings())).to.equal(true);
+    it('returns a promise for the defaults', async () => {
+      const { uiSettings } = setup();
+      const promise = uiSettings.getDefaults();
+      expect(promise).to.be.a(Promise);
+      expect(await promise).to.eql({});
+    });
+  });
+
+  describe('getDefaults() argument', () => {
+    it('casts sync `getDefaults()` to promise', () => {
+      const getDefaults = () => ({ key: { value: chance.word() } });
+      const { uiSettings } = setup({ getDefaults });
+      expect(uiSettings.getDefaults()).to.be.a(Promise);
     });
 
-
-    describe('defaults for formatters', async () => {
-
-      const defaults = getDefaultSettings();
-      const mapping = JSON.parse(defaults['format:defaultTypeMap'].value);
-      const expected = {
-        ip: { id: 'ip', params: {} },
-        date: { id: 'date', params: {} },
-        number: { id: 'number', params: {} },
-        boolean: { id: 'boolean', params: {} },
-        _source: { id: '_source', params: {} },
-        _default_: { id: 'string', params: {} }
-      };
-
-      Object.keys(mapping).forEach((dataType) => {
-        it(`should configure ${dataType}`, () => {
-          expect(expected.hasOwnProperty(dataType)).to.equal(true);
-          expect(mapping[dataType].id).to.equal(expected[dataType].id);
-          expect(JSON.stringify(mapping[dataType].params)).to.equal(JSON.stringify(expected[dataType].params));
-        });
+    it('returns the defaults returned by getDefaults() argument', async () => {
+      const value = chance.word();
+      const { uiSettings } = setup({ defaults: { key: { value } } });
+      expect(await uiSettings.getDefaults()).to.eql({
+        key: { value }
       });
     });
   });
@@ -244,27 +240,26 @@ describe('ui settings', () => {
 
     it(`without user configuration it's equal to the defaults`, async () => {
       const esDocSource = {};
-      const { uiSettings } = setup({ esDocSource });
+      const defaults = { key: { value: chance.word() } };
+      const { uiSettings } = setup({ esDocSource, defaults });
       const result = await uiSettings.getRaw();
-      expect(isEqual(result, getDefaultSettings())).to.equal(true);
+      expect(result).to.eql(defaults);
     });
 
     it(`user configuration gets merged with defaults`, async () => {
       const esDocSource = { foo: 'bar' };
-      const { uiSettings } = setup({ esDocSource });
+      const defaults = { key: { value: chance.word() } };
+      const { uiSettings } = setup({ esDocSource, defaults });
       const result = await uiSettings.getRaw();
-      const merged = getDefaultSettings();
-      merged.foo = { userValue: 'bar' };
-      expect(isEqual(result, merged)).to.equal(true);
-    });
 
-    it(`user configuration gets merged into defaults`, async () => {
-      const esDocSource = { dateFormat: 'YYYY-MM-DD' };
-      const { uiSettings } = setup({ esDocSource });
-      const result = await uiSettings.getRaw();
-      const merged = getDefaultSettings();
-      merged.dateFormat.userValue = 'YYYY-MM-DD';
-      expect(isEqual(result, merged)).to.equal(true);
+      expect(result).to.eql({
+        foo: {
+          userValue: 'bar',
+        },
+        key: {
+          value: defaults.key.value,
+        },
+      });
     });
   });
 
@@ -276,42 +271,32 @@ describe('ui settings', () => {
       assertGetQuery();
     });
 
-    it(`returns key value pairs`, async () => {
-      const esDocSource = {};
-      const { uiSettings } = setup({ esDocSource });
-      const result = await uiSettings.getAll();
-      const defaults = getDefaultSettings();
-      const expectation = {};
-      Object.keys(defaults).forEach((key) => {
-        expectation[key] = defaults[key].value;
+    it(`returns defaults when es doc is empty`, async () => {
+      const esDocSource = { };
+      const defaults = { foo: { value: 'bar' } };
+      const { uiSettings } = setup({ esDocSource, defaults });
+      expect(await uiSettings.getAll()).to.eql({
+        foo: 'bar'
       });
-      expect(isEqual(result, expectation)).to.equal(true);
     });
 
-    it(`returns key value pairs including user configuration`, async () => {
-      const esDocSource = { something: 'user-provided' };
-      const { uiSettings } = setup({ esDocSource });
-      const result = await uiSettings.getAll();
-      const defaults = getDefaultSettings();
-      const expectation = {};
-      Object.keys(defaults).forEach((key) => {
-        expectation[key] = defaults[key].value;
-      });
-      expectation.something = 'user-provided';
-      expect(isEqual(result, expectation)).to.equal(true);
-    });
+    it(`merges user values, including ones without defaults, into key value pairs`, async () => {
+      const esDocSource = {
+        foo: 'user-override',
+        bar: 'user-provided',
+      };
 
-    it(`returns key value pairs including user configuration for existing settings`, async () => {
-      const esDocSource = { dateFormat: 'YYYY-MM-DD' };
-      const { uiSettings } = setup({ esDocSource });
-      const result = await uiSettings.getAll();
-      const defaults = getDefaultSettings();
-      const expectation = {};
-      Object.keys(defaults).forEach((key) => {
-        expectation[key] = defaults[key].value;
+      const defaults = {
+        foo: {
+          value: 'default'
+        },
+      };
+
+      const { uiSettings } = setup({ esDocSource, defaults });
+      expect(await uiSettings.getAll()).to.eql({
+        foo: 'user-override',
+        bar: 'user-provided',
       });
-      expectation.dateFormat = 'YYYY-MM-DD';
-      expect(isEqual(result, expectation)).to.equal(true);
     });
   });
 
@@ -325,9 +310,9 @@ describe('ui settings', () => {
 
     it(`returns the promised value for a key`, async () => {
       const esDocSource = {};
-      const { uiSettings } = setup({ esDocSource });
+      const defaults = { dateFormat: { value: chance.word() } };
+      const { uiSettings } = setup({ esDocSource, defaults });
       const result = await uiSettings.get('dateFormat');
-      const defaults = getDefaultSettings();
       expect(result).to.equal(defaults.dateFormat.value);
     });
 
@@ -371,23 +356,21 @@ describe('ui settings', () => {
     describe('#getAll()', () => {
       it('merges intercept value with defaults', async () => {
         const { uiSettings } = setup({
+          defaults: {
+            foo: { value: 'foo' },
+            bar: { value: 'bar' },
+          },
+
           readInterceptor: () => ({
             foo: 'not foo'
           }),
         });
 
-        const defaults = getDefaultSettings();
-        const defaultValues = Object.keys(defaults).reduce((acc, key) => ({
-          ...acc,
-          [key]: defaults[key].value,
-        }), {});
-
         expect(await uiSettings.getAll()).to.eql({
-          ...defaultValues,
           foo: 'not foo',
+          bar: 'bar'
         });
       });
     });
   });
-
 });

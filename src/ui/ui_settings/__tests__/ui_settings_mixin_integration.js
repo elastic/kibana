@@ -51,6 +51,7 @@ describe('uiSettingsMixin()', () => {
     const kbnServer = {
       server,
       config,
+      uiExports: { addConsumer: sinon.stub() },
       status: new ServerStatus(server),
       ready: sinon.stub().returns(readyPromise),
     };
@@ -133,9 +134,14 @@ describe('uiSettingsMixin()', () => {
 
       sandbox.stub(uiSettingsServiceFactoryNS, 'uiSettingsServiceFactory');
       sinon.assert.notCalled(uiSettingsServiceFactory);
-      const football = {};
-      decorations.server.uiSettingsServiceFactory(football);
-      sinon.assert.calledWith(uiSettingsServiceFactory, server, football);
+      decorations.server.uiSettingsServiceFactory({
+        foo: 'bar'
+      });
+      sinon.assert.calledOnce(uiSettingsServiceFactory);
+      sinon.assert.calledWithExactly(uiSettingsServiceFactory, server, {
+        foo: 'bar',
+        getDefaults: sinon.match.func,
+      });
     });
   });
 
@@ -168,7 +174,10 @@ describe('uiSettingsMixin()', () => {
       sandbox.stub(getUiSettingsServiceForRequestNS, 'getUiSettingsServiceForRequest');
       decorations.request.getUiSettingsService();
 
-      const readInterceptor = getUiSettingsServiceForRequest.firstCall.args[2];
+      const options = getUiSettingsServiceForRequest.firstCall.args[2];
+      expect(options).to.have.property('readInterceptor');
+
+      const { readInterceptor } = options;
       expect(readInterceptor).to.be.a('function');
 
       status.green();
