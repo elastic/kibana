@@ -60,7 +60,7 @@ export default function ({ getService, getPageObjects }) {
         // sleep a bit before trying to get the chart data
         return PageObjects.common.sleep(3000)
         .then(function () {
-          return PageObjects.visualize.getLineChartData('fill="#6eadc1"')
+          return PageObjects.visualize.getLineChartData('fill="#00a69b"')
           .then(function showData(data) {
             log.debug('data=' + data);
             screenshots.take('Visualize-line-chart');
@@ -90,7 +90,7 @@ export default function ({ getService, getPageObjects }) {
         })
         .then(function () {
           return retry.try(function () {
-            return PageObjects.visualize.getLineChartData('fill="#6eadc1"')
+            return PageObjects.visualize.getLineChartData('fill="#00a69b"')
             .then(function showData(data) {
               log.debug('data=' + data);
               screenshots.take('Visualize-line-chart');

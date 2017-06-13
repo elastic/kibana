@@ -50,7 +50,7 @@
     color: $globalFontColor;
     border-radius: $globalBorderRadius;
     font-size: 1em;
-    border: 1px solid #ffffff;
+    border: 1px solid $globalColorLightGray;
     line-height: normal; /* 1 */
     transition: border-color $globalInputTransitionTiming;
 
