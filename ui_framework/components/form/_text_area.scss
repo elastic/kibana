@@ -1,6 +1,11 @@
 .kuiTextArea {
   @include formControl;
 
+  &:focus {
+    box-shadow: none;
+    @include formControlFocus;
+  }
+
   &.kuiTextArea-isInvalid {
     @include formControlInvalid;
   }

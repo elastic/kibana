@@ -1,6 +1,11 @@
 export { KuiActionItem } from './action_item';
 
 export {
+  KuiBar,
+  KuiBarSection,
+} from './bar';
+
+export {
   KuiKeyboardAccessible,
 } from './accessibility';
 
@@ -11,6 +16,15 @@ export {
   KuiLinkButton,
   KuiSubmitButton,
 } from './button';
+
+export {
+  KuiCard,
+  KuiCardDescriptionText,
+  KuiCardDescriptionTitle,
+  KuiCardDescription,
+  KuiCardFooter,
+  KuiCardGroup,
+} from './card';
 
 export {
   KuiCollapseButton

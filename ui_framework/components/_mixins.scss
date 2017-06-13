@@ -9,8 +9,8 @@
  */
 @mixin link {
   color: $globalLinkColor;
-  text-decoration: none;
   cursor: pointer; /* 1 */
+  font-weight: 500;
 
   &:visited,
   &:active {
@@ -283,16 +283,6 @@
   .kuiButton--danger {
     @include kuiButtonFocus {
       @include focus($globalFocusDangerColor, $globalBorderColor);
-    }
-  }
-
-  .kuiButton--basic {
-    color: #5a5a5a;
-    background-color: #FFFFFF;
-
-    @include kuiButtonDisabled {
-      color: #a7a7a7;
-      background-color: #F3F3F3;
     }
   }
 }

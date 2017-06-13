@@ -21,7 +21,7 @@
   <div ng-if="!add.form">
     <button
       data-test-subj="visualizeEditorAddAggregationButton"
-      class="kuiButton kuiButton--primary kuiButton--small"
+      class="kuiButton kuiButton--secondary kuiButton--small"
       ng-if="groupName !== 'buckets' || !stats.count && !stats.deprecate"
     >
       Add {{ groupName }}
@@ -29,7 +29,7 @@
 
     <button
       data-test-subj="visualizeEditorAddAggregationButton"
-      class="kuiButton kuiButton--primary kuiButton--small"
+      class="kuiButton kuiButton--secondary kuiButton--small"
       ng-if="groupName === 'buckets' && stats.count > 0 && !stats.deprecate"
     >
       Add sub-{{ groupName }}
@@ -37,7 +37,7 @@
   </div>
 
   <button
-    class="kuiButton kuiButton--primary kuiButton--small"
+    class="kuiButton kuiButton--danger kuiButton--small"
     ng-if="add.form"
   >
     Cancel
