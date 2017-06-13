@@ -4,12 +4,14 @@ import classNames from 'classnames';
 
 export const KuiHeaderBar = ({ children, className, ...rest }) => {
   const classes = classNames('kuiHeaderBar', className);
-  return (<div
-            className={classes}
-            {...rest}
-          >
-            {children}
-          </div>);
+  return (
+    <div
+      className={classes}
+      {...rest}
+    >
+      {children}
+    </div>
+  );
 };
 KuiHeaderBar.propTypes = {
   children: PropTypes.node,
