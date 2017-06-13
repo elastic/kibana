@@ -1,6 +1,11 @@
 export { KuiActionItem } from './action_item';
 
 export {
+  KuiBar,
+  KuiBarSection,
+} from './bar';
+
+export {
   KuiKeyboardAccessible,
 } from './accessibility';
 
