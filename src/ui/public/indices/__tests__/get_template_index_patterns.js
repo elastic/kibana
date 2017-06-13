@@ -56,13 +56,13 @@ describe('GetTemplateIndexPatterns', function () {
     expect(getTemplateIndexPatterns).to.be.a(Function);
   });
 
-  it('should get all indices', async function () {
+  it('should get all index patterns', async function () {
     const indices = await getTemplateIndexPatterns();
     expect(indices).to.contain('.ml-state');
     expect(indices).to.contain('.watches*');
   });
 
-  it('should prevent duplicates', async function() {
+  it('should prevent duplicates', async function () {
     const indices = await getTemplateIndexPatterns();
     expect(indices).to.contain('.watches*');
     expect(indices.length).to.be(2);
