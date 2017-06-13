@@ -52,3 +52,9 @@ This is no longer the case. Now, only commas are a valid query separator: e.g. `
 *Details:* In Kibana 4.2, we renamed all configuration names in kibana.yml to use `.` as a separator instead of `_`, though the legacy configurations would still continue to work. In 5.0, we started logging deprecation notices whenever the legacy configurations were encountered. In 6.0 onward, legacy configuration names that use an underscore instead of a dot will no longer work.
 
 *Impact:* Any usages of underscore separated configuration names in kibana.yml need to be updated to their modern equivalents. See <<settings,Configuring Kibana>> for accepted configurations.
+
+[float]
+=== Time-interval based index patterns are no longer supported
+*Details:*  Starting in Kibana 6.0.0 we removed the ability to create index patterns define a specific date-pattern and interval for identifying Elasticsearch indices. Index patterns must now use wildcards, which are more performant in most cases.
+
+*Impact:* Existing index patterns and saved objects will continue to function without issue, and in a subsequent release we will provide utilities to migrate your index patterns/saved objects.
