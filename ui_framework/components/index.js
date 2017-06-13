@@ -1,6 +1,11 @@
 export { KuiActionItem } from './action_item';
 
 export {
+  KuiBar,
+  KuiBarSection,
+} from './bar';
+
+export {
   KuiKeyboardAccessible,
 } from './accessibility';
 
@@ -13,6 +18,15 @@ export {
 } from './button';
 
 export {
+  KuiCard,
+  KuiCardDescriptionText,
+  KuiCardDescriptionTitle,
+  KuiCardDescription,
+  KuiCardFooter,
+  KuiCardGroup,
+} from './card';
+
+export {
   KuiCollapseButton
 } from './collapse_button';
 
@@ -23,6 +37,11 @@ export {
   KuiEventBodyMessage,
   KuiEventBodyMetadata,
 } from './event';
+
+export {
+  KuiFieldGroup,
+  KuiFieldGroupSection,
+} from './form_layout';
 
 export {
   KuiHeaderBar,

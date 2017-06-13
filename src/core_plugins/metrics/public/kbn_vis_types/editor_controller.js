@@ -67,7 +67,7 @@ app.controller('MetricsEditorController', (
   $scope.$watchCollection('model', (newValue, oldValue) => {
     angular.copy(newValue, $scope.vis._editableVis.params);
     $scope.stageEditableVis();
-    $scope.dirty = !_.isEqual(newValue.series, oldValue.series);
+    $scope.dirty = !_.isEqual(newValue, oldValue);
 
     if ($scope.dirty && $scope.autoApply) {
       debouncedFetch();

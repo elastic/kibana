@@ -5,9 +5,9 @@ export default function registerGet(server) {
     path: '/api/kibana/settings',
     method: 'GET',
     handler: function (req, reply) {
-      server
-        .uiSettings()
-        .getUserProvided(req)
+      req
+        .getUiSettingsService()
+        .getUserProvided()
         .then(settings => reply({ settings }).type('application/json'))
         .catch(err => reply(Boom.wrap(err, err.statusCode)));
     }
