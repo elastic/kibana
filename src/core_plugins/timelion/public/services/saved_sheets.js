@@ -6,7 +6,6 @@ define(function (require) {
   // bring in the factory
   require('./_saved_sheet.js');
 
-
   // Register this service with the saved object registry so it can be
   // edited by the object editor.
   savedObjectManagementRegistry.register({
@@ -15,11 +14,12 @@ define(function (require) {
   });
 
   // This is the only thing that gets injected into controllers
-  module.service('savedSheets', function (Promise, SavedSheet, kbnIndex, esAdmin, kbnUrl) {
-    const savedSheetLoader = new SavedObjectLoader(SavedSheet, kbnIndex, esAdmin, kbnUrl);
+  module.service('savedSheets', function (Promise, SavedSheet, kbnIndex, esAdmin, kbnUrl, $http) {
+    const savedSheetLoader = new SavedObjectLoader(SavedSheet, kbnIndex, esAdmin, kbnUrl, $http);
     savedSheetLoader.urlFor = function (id) {
       return kbnUrl.eval('#/{{id}}', { id: id });
     };
+
     savedSheetLoader.loaderProperties = {
       name: 'timelion-sheet',
       noun: 'Saved Sheets',
