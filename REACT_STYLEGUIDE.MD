@@ -4,16 +4,15 @@
 Stateless function components are more concise, and there are plans for react to increase performance of them.
 Good:
 ```
-export function KuiButton({ onClick, isDisabled }) {
-  return <button className="kuiButton" onClick={onClick} isDisabled={isDisabled}/>
+export function KuiButton(props) {
+  return <button className="kuiButton" { ...props } />
 };
 ```
 Bad:
 ```
 export class KuiButton extends React.Component {
   render() {
-    const { onClick, isDisabled } = this.props;
-    return <button className="kuiButton" onClick={onClick} isDisabled={isDisabled}/>
+    return <button className="kuiButton" { ...this.props } />
   }
 }
 ```
@@ -31,7 +30,7 @@ export class ClickCounter extends React.Component {
   }
 
   render() {
-    return <button className="kuiButton" onClick={this.onClick}/>
+    return <button className="kuiButton" onClick={ this.onClick } />
   }
 }
 ```
@@ -49,12 +48,12 @@ Bad:
     }));
   },
   render() {
-    return <button className="kuiButton" onClick={this.onClick}/>
+    return <button className="kuiButton" onClick={ this.onClick } />
   }
 });
 ```
 
-### When a state change only involves the previous state, pass setState a function instead of an object.
+### When a state change involves the previous state, pass setState a function instead of an object.
 https://facebook.github.io/react/docs/react-component.html#setstate
 
 Good:
@@ -70,7 +69,7 @@ Bad:
 ```
 
 ### Prefer reactDirective over react-component
-reactDirective and react-component are two different ways of embedding react in angular. Using `react-component` means adding a bunch of components into angular, while `reactDirective` keeps them isolated, and is also a more sucinct syntax.
+reactDirective and react-component are two different ways of embedding react in angular. Using `react-component` means adding a bunch of components into angular, while `reactDirective` keeps them isolated, and is also a more succinct syntax.
 
 Good:
 ```
@@ -78,26 +77,23 @@ Good:
 ```
 Bad:
 ```
-<react-component name="HelloComponent" props="person" watch-depth="reference"/>
+<react-component name="HelloComponent" props="person" watch-depth="reference" />
 ```
 
 ### Prefix ui_framework elements with kui, but not their file names.
 Good:
 ```
 button.js:
-export function KuiButton({ onClick, isDisabled }) {
-  return <button className="kuiButton" onClick={onClick} isDisabled={isDisabled}/>
+export function KuiButton(props) {
+  return <button className="kuiButton" { ...props } />
 };
 ```
 Bad:
 ```
 button.js:
-export class Button extends React.Component {
-  render() {
-    const { onClick, isDisabled } = this.props;
-    return <button className="kuiButton" onClick={onClick} isDisabled={isDisabled}/>
-  }
-}
+export function Button(props) {
+  return <button className="kuiButton" { ...props } />
+};
 ```
 The filenames leave it off because snake casing already increases file name length.
 
@@ -105,8 +101,8 @@ The filenames leave it off because snake casing already increases file name leng
 
 Name action functions in the form of a strong verb and passed properties in the form of on<Subject><Change>. E.g:
 ```
-<sort-button onClick={action.sort}/>
-<pagerButton onPageNext={action.turnToNextPage} />
+<sort-button onClick={ action.sort }/>
+<pagerButton onPageNext={ action.turnToNextPage } />
 ```
 
 ### Avoid creating a function and passing that as a property, in render functions.
@@ -121,7 +117,7 @@ export class ClickCounter extends React.Component {
   }
 
   render() {
-    return <button className="kuiButton" onClick={this.onClick} />
+    return <button className="kuiButton" onClick={ this.onClick } />
   }
 }
 ```
@@ -138,7 +134,7 @@ export class ClickCounter extends React.Component {
   }
 
   render() {
-    return <button className="kuiButton" onClick={this.onClick}/>
+    return <button className="kuiButton" onClick={ this.onClick } />
   }
 }
 ```
@@ -153,7 +149,7 @@ export class ClickCounter extends React.Component {
   }
 
   render() {
-    return <button className="kuiButton" onClick={() => this.onClick()}/>
+    return <button className="kuiButton" onClick={ () => this.onClick() } />
   }
 }
 ```
@@ -185,6 +181,21 @@ this.setState({
   pager: new Pager(),
   selectedIds: new SelectedIds()
 });
+```
+
+### Favor spread operators
+Good:
+```
+render() {
+  return <button className="kuiButton" { ...this.props } />
+}
+```
+
+Bad:
+```
+render() {
+  return <button className="kuiButton" onClick={ this.props.onClick } isDisable={ this.props.isDisabled } />
+}
 ```
 
 ## General Guidelines
