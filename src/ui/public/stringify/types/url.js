@@ -46,10 +46,13 @@ export function stringifyUrl() {
   };
 
   Url.templateMatchRE = /{{([\s\S]+?)}}/g;
-  Url.paramDefaults = {
-    type: 'a',
-    urlTemplate: null,
-    labelTemplate: null
+
+  Url.prototype.getParamDefaults = function () {
+    return {
+      type: 'a',
+      urlTemplate: null,
+      labelTemplate: null
+    };
   };
 
   Url.urlTypes = [

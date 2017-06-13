@@ -43,9 +43,11 @@ export function stringifyColor() {
   };
 
 
-  _Color.paramDefaults = {
-    fieldType: null, // populated by editor, see controller below
-    colors: [_.cloneDeep(DEFAULT_COLOR)]
+  _Color.prototype.getParamDefaults = function () {
+    return {
+      fieldType: null, // populated by editor, see controller below
+      colors: [_.cloneDeep(DEFAULT_COLOR)]
+    };
   };
 
   _Color.prototype.findColorRuleForVal = function (val) {

@@ -27,16 +27,13 @@ Numeral.factory = function (opts) {
   _.class(Class).inherits(Numeral);
   function Class(params, getConfig) {
     Class.Super.call(this, params);
-    if (_.has(opts, 'patternFormatKey')) {
-      Class.paramDefaults.pattern = getConfig(opts.patternFormatKey);
-    }
+
+    this.getConfig = getConfig;
   }
 
   Class.id = opts.id;
   Class.title = opts.title;
   Class.fieldType = 'number';
-
-  Class.paramDefaults = _.get(opts, 'paramDefaults', {});
 
   Class.editor = {
     template: opts.editorTemplate || require('ui/field_format_editor/numeral/numeral.html'),
@@ -44,6 +41,14 @@ Numeral.factory = function (opts) {
     controller: opts.controller || function () {
       this.sampleInputs = opts.sampleInputs;
     }
+  };
+
+  Class.prototype.getParamDefaults = function () {
+    const paramDefaults = _.get(opts, 'paramDefaults', {});
+    if (_.has(opts, 'defaultPatternConfigKey')) {
+      paramDefaults.pattern = this.getConfig(opts.defaultPatternConfigKey);
+    }
+    return paramDefaults;
   };
 
   if (opts.prototype) {

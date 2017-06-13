@@ -8,12 +8,9 @@ export function stringifyDate() {
 
   _.class(DateTime).inherits(FieldFormat);
   function DateTime(params, getConfig) {
-    DateTime.paramDefaults = {
-      pattern: getConfig('dateFormat'),
-      timezone: getConfig('dateFormat:tz')
-    };
-
     DateTime.Super.call(this, params);
+
+    this.getConfig = getConfig;
   }
 
   DateTime.id = 'date';
@@ -35,6 +32,13 @@ export function stringifyDate() {
         self.sampleInputs[0] = Date.now();
       }, 1000));
     }
+  };
+
+  DateTime.prototype.getParamDefaults = function () {
+    return {
+      pattern: this.getConfig('dateFormat'),
+      timezone: this.getConfig('dateFormat:tz')
+    };
   };
 
   DateTime.prototype._convert = function (val) {

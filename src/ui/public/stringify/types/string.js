@@ -24,8 +24,10 @@ export function stringifyString() {
     'conflict'
   ];
 
-  _String.paramDefaults = {
-    transform: false
+  _String.prototype.getParamDefaults = function () {
+    return {
+      transform: false
+    };
   };
 
   _String.editor = require('ui/stringify/editors/string.html');

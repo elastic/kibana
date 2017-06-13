@@ -9,7 +9,6 @@ export function FieldFormat(params) {
 
   // keep the params and defaults seperate
   self._params = params || {};
-  self._paramDefaults = self.type.paramDefaults || {};
 
   // one content type, so assume text
   if (_.isFunction(self._convert)) {
@@ -51,6 +50,15 @@ FieldFormat.prototype.getConverterFor = function (contentType) {
 };
 
 /**
+ * Get parameter defaults
+ * @param  {string} [contentType=text]
+ * @return {object} - parameter defaults
+ */
+FieldFormat.prototype.getParamDefaults = function () {
+  return {};
+};
+
+/**
  * Get the value of a param. This value may be a default value.
  *
  * @param  {string} name - the param name to fetch
@@ -64,7 +72,7 @@ FieldFormat.prototype.param = function (name) {
     return val;
   }
 
-  return this._paramDefaults[name];
+  return this.getParamDefaults()[name];
 };
 
 /**
@@ -72,7 +80,7 @@ FieldFormat.prototype.param = function (name) {
  * @return {object}
  */
 FieldFormat.prototype.params = function () {
-  return _.cloneDeep(_.defaults({}, this._params, this._paramDefaults));
+  return _.cloneDeep(_.defaults({}, this._params, this.getParamDefaults()));
 };
 
 /**
@@ -83,7 +91,7 @@ FieldFormat.prototype.params = function () {
  */
 FieldFormat.prototype.toJSON = function () {
   const type = this.type;
-  const defaults = this._paramDefaults;
+  const defaults = this.getParamDefaults();
 
   let params = _.transform(this._params, function (uniqParams, val, param) {
     if (val !== defaults[param]) {

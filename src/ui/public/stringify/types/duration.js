@@ -80,10 +80,12 @@ export function stringifyDuration() {
     }
   };
 
-  Duration.paramDefaults = {
-    inputFormat: DEFAULT_INPUT_FORMAT.kind,
-    outputFormat: DEFAULT_OUTPUT_FORMAT.method,
-    outputPrecision: DEFAULT_OUTPUT_PRECISION
+  Duration.prototype.getParamDefaults = function () {
+    return {
+      inputFormat: DEFAULT_INPUT_FORMAT.kind,
+      outputFormat: DEFAULT_OUTPUT_FORMAT.method,
+      outputPrecision: DEFAULT_OUTPUT_PRECISION
+    };
   };
 
   return Duration;
