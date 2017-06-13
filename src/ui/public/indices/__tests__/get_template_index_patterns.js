@@ -1,42 +1,40 @@
 import expect from 'expect.js';
 import ngMock from 'ng_mock';
-import { IndexPatternsGetIndicesProvider } from 'ui/index_patterns/_get_indices';
+import { IndicesGetTemplateIndexPatternsProvider } from 'ui/indices/get_template_index_patterns';
 
 function NotFoundError() {
   this.status = 404;
 }
 
-describe('GetIndices', function () {
-  let throwOther = false;
+describe('GetTemplateIndexPatterns', function () {
   let throw404 = false;
+  let throwOther = false;
   let response;
-  let getIndices;
+  let getTemplateIndexPatterns;
 
   beforeEach(ngMock.module('kibana', ($provide) => {
     response = {
-      '.monitoring-es-2': {
-        aliases: {},
+      '.ml-state': {
+        'index_patterns': [
+          '.ml-state'
+        ]
       },
-      '.monitoring-es-3': {
-        aliases: {
-          '.monitoring-es-active' : { }
-        },
+      '.watches': {
+        'index_patterns': [
+          '.watches*'
+        ]
       },
-      '.monitoring-es-4': {
-        aliases: {},
+      '.watches2': {
+        'index_patterns': [
+          '.watches*'
+        ]
       },
-      '.monitoring-es-5': {
-        aliases: {},
-      },
-      '.kibana': {
-        aliases: {},
-      }
     };
 
     $provide.service('esAdmin', function () {
       return {
         indices: {
-          getAlias: async function () {
+          getTemplate: async function () {
             if (throw404) {
               throw new NotFoundError();
             }
@@ -51,24 +49,28 @@ describe('GetIndices', function () {
   }));
 
   beforeEach(ngMock.inject((Private) => {
-    getIndices = Private(IndexPatternsGetIndicesProvider);
+    getTemplateIndexPatterns = Private(IndicesGetTemplateIndexPatternsProvider);
   }));
 
   it('should be a function', function () {
-    expect(getIndices).to.be.a(Function);
+    expect(getTemplateIndexPatterns).to.be.a(Function);
   });
 
   it('should get all indices', async function () {
-    const indices = await getIndices();
-    Object.keys(response).forEach(index => {
-      expect(indices).to.contain(index);
-    });
-    expect(indices).to.contain('.monitoring-es-active');
+    const indices = await getTemplateIndexPatterns();
+    expect(indices).to.contain('.ml-state');
+    expect(indices).to.contain('.watches*');
+  });
+
+  it('should prevent duplicates', async function() {
+    const indices = await getTemplateIndexPatterns();
+    expect(indices).to.contain('.watches*');
+    expect(indices.length).to.be(2);
   });
 
   it('should suppress a 404 response', async function () {
     throw404 = true;
-    const indices = await getIndices();
+    const indices = await getTemplateIndexPatterns();
     expect(indices.length).to.be(0);
     throw404 = false;
   });
@@ -78,7 +80,7 @@ describe('GetIndices', function () {
 
     let errorThrown = false;
     try {
-      await getIndices();
+      await getTemplateIndexPatterns();
     } catch (e) {
       errorThrown = true;
     }

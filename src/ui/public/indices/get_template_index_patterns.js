@@ -1,10 +1,10 @@
-import { map, flatten, pluck } from 'lodash';
+import { flatten, pluck, uniq } from 'lodash';
 
 const getIndexPatternsFromResponse = json => {
-  return map(flatten(pluck(json, 'index_patterns')));
+  return uniq(flatten(pluck(json, 'index_patterns')));
 };
 
-export function IndexPatternsGetTemplateIndexPatternsProvider(esAdmin) {
+export function IndicesGetTemplateIndexPatternsProvider(esAdmin) {
   return async function getTemplateIndexPatterns(query) {
     try {
       const templatesJson = await esAdmin.indices.getTemplate({ name: query });

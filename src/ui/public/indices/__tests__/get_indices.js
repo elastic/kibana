@@ -1,35 +1,42 @@
 import expect from 'expect.js';
 import ngMock from 'ng_mock';
-import { IndexPatternsGetTemplateIndexPatternsProvider } from 'ui/index_patterns/_get_template_index_patterns';
+import { IndicesGetIndicesProvider } from 'ui/indices/get_indices';
 
 function NotFoundError() {
   this.status = 404;
 }
 
-describe('GetTemplateIndexPatterns', function () {
-  let throw404 = false;
+describe('GetIndices', function () {
   let throwOther = false;
+  let throw404 = false;
   let response;
-  let getTemplateIndexPatterns;
+  let getIndices;
 
   beforeEach(ngMock.module('kibana', ($provide) => {
     response = {
-      '.ml-state': {
-        'index_patterns': [
-          '.ml-state'
-        ]
+      '.monitoring-es-2': {
+        aliases: {},
       },
-      '.watches': {
-        'index_patterns': [
-          '.watches*'
-        ]
+      '.monitoring-es-3': {
+        aliases: {
+          '.monitoring-es-active' : { }
+        },
       },
+      '.monitoring-es-4': {
+        aliases: {},
+      },
+      '.monitoring-es-5': {
+        aliases: {},
+      },
+      '.kibana': {
+        aliases: {},
+      }
     };
 
     $provide.service('esAdmin', function () {
       return {
         indices: {
-          getTemplate: async function () {
+          getAlias: async function () {
             if (throw404) {
               throw new NotFoundError();
             }
@@ -44,22 +51,24 @@ describe('GetTemplateIndexPatterns', function () {
   }));
 
   beforeEach(ngMock.inject((Private) => {
-    getTemplateIndexPatterns = Private(IndexPatternsGetTemplateIndexPatternsProvider);
+    getIndices = Private(IndicesGetIndicesProvider);
   }));
 
   it('should be a function', function () {
-    expect(getTemplateIndexPatterns).to.be.a(Function);
+    expect(getIndices).to.be.a(Function);
   });
 
   it('should get all indices', async function () {
-    const indices = await getTemplateIndexPatterns();
-    expect(indices).to.contain('.ml-state');
-    expect(indices).to.contain('.watches*');
+    const indices = await getIndices();
+    Object.keys(response).forEach(index => {
+      expect(indices).to.contain(index);
+    });
+    expect(indices).to.contain('.monitoring-es-active');
   });
 
   it('should suppress a 404 response', async function () {
     throw404 = true;
-    const indices = await getTemplateIndexPatterns();
+    const indices = await getIndices();
     expect(indices.length).to.be(0);
     throw404 = false;
   });
@@ -69,7 +78,7 @@ describe('GetTemplateIndexPatterns', function () {
 
     let errorThrown = false;
     try {
-      await getTemplateIndexPatterns();
+      await getIndices();
     } catch (e) {
       errorThrown = true;
     }

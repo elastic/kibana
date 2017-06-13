@@ -10,7 +10,7 @@ const getIndicesFromResponse = json => {
   }, []);
 };
 
-export function IndexPatternsGetIndicesProvider(esAdmin) {
+export function IndicesGetIndicesProvider(esAdmin) {
   return async function getIndices(query) {
     try {
       const aliasesJson = await esAdmin.indices.getAlias({ index: query });
