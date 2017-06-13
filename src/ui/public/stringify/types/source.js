@@ -1,6 +1,6 @@
 import _ from 'lodash';
 import { noWhiteSpace } from 'ui/utils/no_white_space';
-import angular from 'angular';
+import { toJson } from 'ui/utils/aggressive_parse';
 import { FieldFormat } from 'ui/index_patterns/_field_format/field_format';
 
 export function stringifySource() {
@@ -18,7 +18,7 @@ export function stringifySource() {
   Source.fieldType = '_source';
 
   Source.prototype._convert = {
-    text: angular.toJson,
+    text: toJson,
     html: function sourceToHtml(source, field, hit) {
       if (!field) return this.getConverterFor('text')(source, field, hit);
 
