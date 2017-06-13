@@ -3,9 +3,11 @@ import expect from 'expect.js';
 import ngMock from 'ng_mock';
 import { RegistryFieldFormatsProvider } from 'ui/registry/field_formats';
 import { FieldFormat } from 'ui/index_patterns/_field_format/field_format';
+import { ConfigProvider } from 'ui/config/config_provider';
 
 let fieldFormats;
 let config;
+let getConfig;
 
 const formatIds = [
   'bytes',
@@ -28,6 +30,7 @@ export default describe('conformance', function () {
   beforeEach(ngMock.module('kibana'));
   beforeEach(ngMock.inject(function (Private, $injector) {
     fieldFormats = Private(RegistryFieldFormatsProvider);
+    getConfig = Private(ConfigProvider).getConfig;
     config = $injector.get('config');
   }));
 
@@ -74,7 +77,7 @@ export default describe('conformance', function () {
     basicPatternTests('number', require('numeral'))();
 
     it('tries to parse strings', function () {
-      const number = new (fieldFormats.getType('number'))({ pattern: '0.0b' });
+      const number = new (fieldFormats.getType('number'))({ pattern: '0.0b' }, getConfig);
       expect(number.convert(123.456)).to.be('123.5B');
       expect(number.convert('123.456')).to.be('123.5B');
     });
@@ -112,7 +115,7 @@ export default describe('conformance', function () {
         const defInst = fieldFormats.getInstance(id);
 
         const Type = fieldFormats.getType(id);
-        const customInst = new Type({ pattern: customFormat });
+        const customInst = new Type({ pattern: customFormat }, getConfig);
 
         expect(defInst.convert(num)).to.not.be(customInst.convert(num));
         expect(defInst.convert(num)).to.be(lib(num).format(defFormat));
