@@ -14,19 +14,29 @@
   color: $localNavButtonTextColor;
   border: 0;
   cursor: pointer;
+  border-right: solid 1px transparent;
+  border-left: solid 1px transparent;
 
-  &:hover {
+  &:hover, &:focus {
     background-color: $localNavButtonBackgroundColor-isHover;
     color: $localNavButtonTextColor-isHover;
   }
 
   &.kuiLocalMenuItem-isSelected {
     background-color: $localNavButtonBackgroundColor-isSelected;
+    border-color: $globalColorLightGray;
+    height: calc(100% + 1px); // Cheat the border when opened
+    z-index: 2;
+    color: $globalColorBlue;
+
+    &:hover, &:focus {
+      color: $globalColorBlue;
+    }
   }
 
   &.kuiLocalMenuItem-isDisabled {
     opacity: 0.5;
-    cursor: default;
+    cursor: not-allowed;
 
     &:hover {
       background-color: $localNavButtonBackgroundColor;
@@ -44,6 +54,8 @@
 
     &.kuiLocalMenuItem-isSelected {
       background-color: $localNavButtonBackgroundColor-isSelected--darkTheme;
+      border-color: darken($localNavBackgroundColor--darkTheme, 10%);
+      color: $localNavButtonTextColor-isHover--darkTheme;
     }
 
     &.kuiLocalMenuItem-isDisabled {

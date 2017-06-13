@@ -63,8 +63,8 @@
     </h3>
   </div>
 
-  <div class="sidebar-item" ng-show="showFilter">
-    <form role="form" class="discover-field-details">
+  <div class="sidebar-item discover-field-details" ng-show="showFilter">
+    <form role="form">
       <div class="form-group">
         <label for="discoverFieldChooserFilterAggregatable">
           Aggregatable
@@ -115,14 +115,14 @@
           Hide Missing Fields
         </label>
       </div>
+      <button
+        ng-click="filter.reset()"
+        ng-disabled="!filter.active"
+        class="kuiButton kuiButton--danger kuiButton--fullWidth"
+      >
+        Reset Filters
+      </button>
     </form>
-    <button
-      ng-click="filter.reset()"
-      ng-disabled="!filter.active"
-      class="kuiButton kuiButton--danger kuiButton--fullWidth"
-    >
-      Reset Filters
-    </button>
   </div>
 
   <ul

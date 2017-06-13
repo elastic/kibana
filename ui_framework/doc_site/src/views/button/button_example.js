@@ -22,6 +22,10 @@ import Primary from './button_primary';
 const primarySource = require('!!raw!./button_primary');
 const primaryHtml = renderToHtml(Primary);
 
+import Secondary from './button_secondary';
+const secondarySource = require('!!raw!./button_secondary');
+const secondaryHtml = renderToHtml(Secondary);
+
 import Danger from './button_danger';
 const dangerSource = require('!!raw!./button_danger');
 const dangerHtml = renderToHtml(Danger);
@@ -69,7 +73,7 @@ export default props => (
       }]}
     >
       <GuideText>
-        Use the basic Button in most situations.
+        Use the basic button for navigation elements or controls that are not the primary focus of the page (ex: pagination, toggles...etc).
       </GuideText>
 
       <GuideDemo>
@@ -117,6 +121,25 @@ export default props => (
 
       <GuideDemo>
         <Primary />
+      </GuideDemo>
+    </GuideSection>
+
+    <GuideSection
+      title="Secondary Button"
+      source={[{
+        type: GuideSectionTypes.JS,
+        code: secondarySource,
+      }, {
+        type: GuideSectionTypes.HTML,
+        code: secondaryHtml,
+      }]}
+    >
+      <GuideText>
+        Secondary buttons are usually used for actions ("do this") that are optional actions on a page.
+      </GuideText>
+
+      <GuideDemo>
+        <Secondary />
       </GuideDemo>
     </GuideSection>
 
