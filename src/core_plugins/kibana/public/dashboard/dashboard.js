@@ -301,6 +301,18 @@ app.directive('dashboardApp', function ($injector) {
       setFullScreenMode(dashboardState.getFullScreenMode());
 
       $scope.exitFullScreenMode = () => setFullScreenMode(false);
+      $scope.showAddPanel = () => {
+        if ($scope.fullScreenMode) {
+          $scope.exitFullScreenMode();
+        }
+        $scope.kbnTopNav.open('add');
+      };
+      $scope.enterEditMode = () => {
+        if ($scope.fullScreenMode) {
+          $scope.exitFullScreenMode();
+        }
+        $scope.kbnTopNav.click('edit');
+      };
       const navActions = {};
       navActions[TopNavIds.FULL_SCREEN] = () => setFullScreenMode(true);
       navActions[TopNavIds.EXIT_EDIT_MODE] = () => onChangeViewMode(DashboardViewMode.VIEW);
