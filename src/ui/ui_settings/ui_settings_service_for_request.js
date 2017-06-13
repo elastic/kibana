@@ -14,7 +14,7 @@ const BY_REQUEST_CACHE = new WeakMap();
  *  @property {AsyncFunction} [options.getDefaults] async function that returns defaults/details about
  *                            the uiSettings.
  *  @property {AsyncFunction} [options.readInterceptor] async function that is called when the
- *                            UiSettingsService does a read() an has an oportunity to intercept the
+ *                            UiSettingsService does a read() and has an oportunity to intercept the
  *                            request and return an alternate `_source` value to use.
  *  @return {UiSettingsService}
  */
