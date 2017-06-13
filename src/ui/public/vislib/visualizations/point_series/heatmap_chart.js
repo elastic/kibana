@@ -243,7 +243,7 @@ export function VislibVisualizationsHeatmapChartProvider(Private) {
             return `rotate(${rotate},${horizontalCenter},${verticalCenter})`;
           });
         if (hiddenLabels) {
-          this.baseChart.handler.alerts.show('Some labels were hidden due to size constrains');
+          this.baseChart.handler.alerts.show('Some labels were hidden due to size constraints');
         }
       }
 
