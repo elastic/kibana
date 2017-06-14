@@ -134,7 +134,7 @@ image:./tutorials/queries_filters/comedyoferrors.png[image]
 "But where" you say?
 
 The answer lies in that little white star that appeared on the filtering
-tab. Give the tab a click and we can see that a filter has added to the
+tab. Give the tab a click and we can see that a filter has been added to the
 _filtering_ panel. From the _filtering_ panel filters can be added,
 edited, toggled and removed. Many panels have the ability to add
 filters, including the table, histogram, map and others.
