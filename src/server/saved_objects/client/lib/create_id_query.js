@@ -3,7 +3,7 @@
  * @param type The documents type
  * @param id The documents id or legacy id
 **/
-export function createIdQuery(type, id) {
+export function createIdQuery({ type, id }) {
   return {
     version: true,
     query: {

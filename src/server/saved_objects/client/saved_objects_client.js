@@ -73,7 +73,7 @@ export class SavedObjectsClient {
 
   async delete(type, id) {
     const response = await this._withKibanaIndex('deleteByQuery', {
-      body: createIdQuery(type, id),
+      body: createIdQuery({ type, id }),
       refresh: 'wait_for'
     });
 
@@ -155,7 +155,7 @@ export class SavedObjectsClient {
   }
 
   async get(type, id) {
-    const response = await this._withKibanaIndex('search', { body: createIdQuery(type, id) });
+    const response = await this._withKibanaIndex('search', { body: createIdQuery({ type, id }) });
     const hit = get(response, 'hits.hits.0');
     const attributes =  get(hit, `_source.${type}`) || get(hit, '_source');
 
