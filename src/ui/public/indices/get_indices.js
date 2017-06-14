@@ -11,17 +11,8 @@ const getIndicesFromResponse = json => {
 };
 
 export function IndicesGetIndicesProvider(esAdmin) {
-  return async function getIndices(query, allowNoIndices = true) {
-    try {
-      const aliasesJson = await esAdmin.indices.getAlias({ index: query });
-      return getIndicesFromResponse(aliasesJson);
-    } catch (e) {
-      // A 404 means the query did not find any indices
-      // which by default is not an error scenario
-      if (allowNoIndices && e && e.status === 404) {
-        return [];
-      }
-      throw e;
-    }
+  return async function getIndices(query) {
+    const aliasesJson = await esAdmin.indices.getAlias({ index: query, allowNoIndices: true });
+    return getIndicesFromResponse(aliasesJson);
   };
 }

@@ -5,17 +5,8 @@ const getIndexPatternsFromResponse = json => {
 };
 
 export function IndicesGetTemplateIndexPatternsProvider(esAdmin) {
-  return async function getTemplateIndexPatterns(query, allowNoIndices = true) {
-    try {
-      const templatesJson = await esAdmin.indices.getTemplate({ name: query });
-      return getIndexPatternsFromResponse(templatesJson);
-    } catch (e) {
-      // A 404 means the query did not find any indices
-      // which by default is not an error scenario
-      if (allowNoIndices && e && e.status === 404) {
-        return [];
-      }
-      throw e;
-    }
+  return async function getTemplateIndexPatterns(query) {
+    const templatesJson = await esAdmin.indices.getTemplate({ name: query, ignore: 404 });
+    return getIndexPatternsFromResponse(templatesJson);
   };
 }
