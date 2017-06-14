@@ -1,14 +1,13 @@
 import _ from 'lodash';
 import { uiRegistry } from 'ui/registry/_registry';
-import { ConfigProvider } from 'ui/config/config_provider';
 
 export const RegistryFieldFormatsProvider = uiRegistry({
   name: 'fieldFormats',
   index: ['id'],
   group: ['fieldType'],
 
-  constructor: function (config, Private) {
-    const getConfig = Private(ConfigProvider).getConfig;
+  constructor: function (config) {
+    const getConfig = (...args) => config.get(...args);
     const self = this;
     let defaultMap;
 

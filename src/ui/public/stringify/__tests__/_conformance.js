@@ -3,7 +3,6 @@ import expect from 'expect.js';
 import ngMock from 'ng_mock';
 import { RegistryFieldFormatsProvider } from 'ui/registry/field_formats';
 import { FieldFormat } from 'ui/index_patterns/_field_format/field_format';
-import { ConfigProvider } from 'ui/config/config_provider';
 
 let fieldFormats;
 let config;
@@ -30,8 +29,8 @@ export default describe('conformance', function () {
   beforeEach(ngMock.module('kibana'));
   beforeEach(ngMock.inject(function (Private, $injector) {
     fieldFormats = Private(RegistryFieldFormatsProvider);
-    getConfig = Private(ConfigProvider).getConfig;
     config = $injector.get('config');
+    getConfig = (...args) => config.get(...args);
   }));
 
   formatIds.forEach(function (id) {

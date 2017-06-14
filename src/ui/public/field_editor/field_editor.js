@@ -3,7 +3,6 @@ import 'angular-bootstrap-colorpicker';
 import 'angular-bootstrap-colorpicker/css/colorpicker.css';
 import _ from 'lodash';
 import { RegistryFieldFormatsProvider } from 'ui/registry/field_formats';
-import { ConfigProvider } from 'ui/config/config_provider';
 import { IndexPatternsFieldProvider } from 'ui/index_patterns/_field';
 import { uiModules } from 'ui/modules';
 import fieldEditorTemplate from 'ui/field_editor/field_editor.html';
@@ -14,8 +13,8 @@ import { getKbnTypeNames } from '../../../utils';
 
 uiModules
 .get('kibana', ['colorpicker.module'])
-.directive('fieldEditor', function (Private, $sce, confirmModal) {
-  const configUtils = Private(ConfigProvider);
+.directive('fieldEditor', function (Private, $sce, confirmModal, config) {
+  const getConfig = (...args) => config.get(...args);
   const fieldFormats = Private(RegistryFieldFormatsProvider);
   const Field = Private(IndexPatternsFieldProvider);
   const getEnabledScriptingLanguages = Private(GetEnabledScriptingLanguagesProvider);
@@ -118,7 +117,7 @@ uiModules
 
       $scope.$watch('editor.formatParams', function () {
         const FieldFormat = getFieldFormatType();
-        self.field.format = new FieldFormat(self.formatParams, configUtils.getConfig);
+        self.field.format = new FieldFormat(self.formatParams, getConfig);
       }, true);
 
       $scope.$watch('editor.field.type', function (newValue) {
