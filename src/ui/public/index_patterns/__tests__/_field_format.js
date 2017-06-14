@@ -152,6 +152,11 @@ describe('FieldFormat class', function () {
         const f = new TestFormat();
         expect(f.convert()).to.be(' - ');
       });
+
+      it('formats a list of values as text', function () {
+        const f = new TestFormat();
+        expect(f.convert(['one', 'two', 'three'])).to.be('["one","two","three"]');
+      });
     });
 
   });

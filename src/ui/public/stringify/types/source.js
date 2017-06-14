@@ -18,7 +18,9 @@ export function stringifySource() {
   Source.fieldType = '_source';
 
   Source.prototype._convert = {
-    text: toJson,
+    text: (value) => {
+      return toJson(value);
+    },
     html: function sourceToHtml(source, field, hit) {
       if (!field) return this.getConverterFor('text')(source, field, hit);
 

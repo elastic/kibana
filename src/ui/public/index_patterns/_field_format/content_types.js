@@ -1,5 +1,4 @@
 import _ from 'lodash';
-import { toJson } from 'ui/utils/aggressive_parse';
 import { getHighlightHtml } from 'ui/highlight';
 
 const types = {
@@ -35,7 +34,7 @@ const types = {
       }
 
       // format a list of values. In text contexts we just use JSON encoding
-      return toJson(value.map(recurse), true);
+      return JSON.stringify(value.map(recurse));
     };
   }
 };
