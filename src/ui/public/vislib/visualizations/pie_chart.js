@@ -120,7 +120,6 @@ export function VislibVisualizationsPieChartProvider(Private) {
       const showValues = self._attr.labels.values;
       const truncateLabelLength = self._attr.labels.truncate;
       const showOnlyOnLastLevel = self._attr.labels.last_level;
-      const labelRadius = radius;
 
       const partition = d3.layout.partition()
       .sort(null)
@@ -222,10 +221,8 @@ export function VislibVisualizationsPieChartProvider(Private) {
           }).text(function () {
             return truncateLabel(this, truncateLabelLength);
           }).attr('text-anchor', function (d) {
-            const centroid = arc.centroid(d);
-            const midAngle = Math.atan2(centroid[1], centroid[0]);
-            const x = Math.cos(midAngle) * labelRadius;
-            return (x > 0) ? 'start' : 'end';
+            const midAngle = startAngle(d) + (endAngle(d) - startAngle(d)) / 2;
+            return (midAngle < Math.PI) ? 'start' : 'end';
           })
           .attr('class', 'label-text')
           .each(function (d) {
@@ -243,7 +240,7 @@ export function VislibVisualizationsPieChartProvider(Private) {
             const pos = outerArc.centroid(d);
             const midAngle = startAngle(d) + (endAngle(d) - startAngle(d)) / 2;
             pos[1] += 4;
-            pos[0] = (0.9 + d.depth / 5) * radius * (midAngle < Math.PI ? 1 : -1);
+            pos[0] = (0.7 + d.depth / 10) * radius * (midAngle < Math.PI ? 1 : -1);
             d.label = {
               x: pos[0],
               y: pos[1],
