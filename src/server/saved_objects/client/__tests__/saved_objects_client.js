@@ -224,12 +224,43 @@ describe('SavedObjectsClient', () => {
       expect(callAdminCluster.calledOnce).to.be(true);
 
       const args = callAdminCluster.getCall(0).args;
-      expect(args[0]).to.be('delete');
+      expect(args[0]).to.be('deleteByQuery');
       expect(args[1]).to.eql({
-        type: 'index-pattern',
-        id: 'logstash-*',
         refresh: 'wait_for',
-        index: '.kibana-test'
+        index: '.kibana-test',
+        body: {
+          version: true,
+          query: {
+            bool: {
+              should: [
+                {
+                  ids: {
+                    type: 'index-pattern',
+                    values: 'logstash-*'
+                  }
+                },
+                {
+                  bool: {
+                    must: [
+                      {
+                        term: {
+                          id: {
+                            value: 'logstash-*'
+                          }
+                        }
+                      },
+                      {
+                        type: {
+                          value: 'doc'
+                        }
+                      }
+                    ]
+                  }
+                }
+              ]
+            }
+          }
+        }
       });
     });
   });
@@ -272,7 +303,23 @@ describe('SavedObjectsClient', () => {
       const expectedQuery = {
         bool: {
           must: [{ match_all: {} }],
-          filter: [{ term: { _type: 'index-pattern' } }]
+          filter: [
+            {
+              bool: {
+                should: [
+                  {
+                    term: {
+                      _type: 'index-pattern'
+                    }
+                  }, {
+                    term: {
+                      type: 'index-pattern'
+                    }
+                  }
+                ]
+              }
+            }
+          ]
         }
       };
 
@@ -294,11 +341,17 @@ describe('SavedObjectsClient', () => {
   describe('#get', () => {
     it('formats Elasticsearch response', async () => {
       callAdminCluster.returns(Promise.resolve({
-        _id: 'logstash-*',
-        _type: 'index-pattern',
-        _version: 2,
-        _source: {
-          title: 'Testing'
+        hits: {
+          hits: [
+            {
+              _id: 'logstash-*',
+              _type: 'index-pattern',
+              _version: 2,
+              _source: {
+                title: 'Testing'
+              }
+            }
+          ]
         }
       }));
 
@@ -412,10 +465,10 @@ describe('SavedObjectsClient', () => {
 
       expect(args[0]).to.be('update');
       expect(args[1]).to.eql({
-        type: 'index-pattern',
+        type: 'doc',
         id: 'logstash-*',
         version: undefined,
-        body: { doc: { title: 'Testing' } },
+        body: { doc: { 'index-pattern': { title: 'Testing' } } },
         refresh: 'wait_for',
         index: '.kibana-test'
       });
