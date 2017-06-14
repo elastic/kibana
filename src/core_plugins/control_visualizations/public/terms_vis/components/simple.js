@@ -5,7 +5,6 @@ export class Simple extends Component {
 
   constructor(props) {
     super(props);
-
     this.state = {
       params: _.cloneDeep(props.scope.vis.getCurrentState().params)
     };
@@ -14,14 +13,9 @@ export class Simple extends Component {
   }
 
   handleParam1Change(evt) {
-    const param1 = evt.target.value;
-    this.setState((prevState) => {
-      prevState.params.param1 = param1;
-      return prevState;
-    },
-    () => {
-      this.props.stageEditorParams(_.cloneDeep(this.state.params));
-    });
+    const params = _.cloneDeep(this.props.scope.vis.getCurrentState().params);
+    params.param1 = evt.target.value;
+    this.props.stageEditorParams(params);
   }
 
   render() {
@@ -37,7 +31,7 @@ export class Simple extends Component {
             <input
               className="kuiTextInput"
               type="text"
-              value={this.state.params.param1}
+              value={this.props.scope.vis.params.param1}
               onChange={this.handleParam1Change} />
           </div>
         </div>
