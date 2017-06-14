@@ -13,23 +13,28 @@ $buttonSmallHeight: 22px;
 $buttonDefaultTextColor: #FFF;
 
 // Basic
-$buttonBasicTextColor: #5a5a5a;
-$buttonBasicBackgroundColor: #F2F2F2;
-$buttonBasicHoverBackgroundColor: #9B9B9B;
-$buttonBasicDisabledTextColor: #9B9B9B;
+$buttonBasicTextColor: $globalTextColor;
+$buttonBasicBackgroundColor: $globalColorLightestGray;
+$buttonBasicHoverBackgroundColor: darken($globalColorLightestGray, 10%);
+$buttonBasicDisabledTextColor: $globalTextColor;
 $buttonBasicTextColor--darkTheme: #FFF;
 $buttonBasicBackgroundColor--darkTheme: #9c9c9c;
 $buttonBasicHoverBackgroundColor--darkTheme: darken($buttonBasicBackgroundColor--darkTheme, 20%);
 
 // Primary
-$buttonPrimaryBackgroundColor: #6EADC1;
-$buttonPrimaryHoverBackgroundColor: #006E8A;
-$buttonPrimaryDisabledBackgroundColor: #B6D6E0;
+$buttonPrimaryBackgroundColor: $globalLinkColor;
+$buttonPrimaryHoverBackgroundColor: $globalLinkColor-isHover;
+$buttonPrimaryDisabledBackgroundColor: desaturate($globalLinkColor, 70%);
+
+// Success
+$buttonSuccessBackgroundColor: $globalColorTeal;
+$buttonSuccessHoverBackgroundColor: darken($globalColorTeal, 10%);
+$buttonSuccessDisabledBackgroundColor: desaturate($globalColorTeal, 70%);
 
 // Danger
-$buttonDangerBackgroundColor: #D76051;
-$buttonDangerHoverBackgroundColor: #A52E1F;
-$buttonDangerDisabledBackgroundColor: #efc0ba;
+$buttonDangerBackgroundColor: $globalColorRed;
+$buttonDangerHoverBackgroundColor: darken($globalColorRed, 10%);
+$buttonDangerDisabledBackgroundColor: lighten($buttonDangerBackgroundColor, 50%);
 
 // Warning
 $buttonWarningBackgroundColor: #f3bb57;

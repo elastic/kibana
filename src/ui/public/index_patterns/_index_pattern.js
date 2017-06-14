@@ -15,8 +15,19 @@ import { IndexPatternsFlattenHitProvider } from './_flatten_hit';
 import { IndexPatternsCalculateIndicesProvider } from './_calculate_indices';
 import { IndexPatternsPatternCacheProvider } from './_pattern_cache';
 import { FieldsFetcherProvider } from './fields_fetcher_provider';
+import { IsUserAwareOfUnsupportedTimePatternProvider } from './unsupported_time_patterns';
 
-export function IndexPatternProvider(Private, $http, config, kbnIndex, Promise, confirmModalPromise) {
+export function getRoutes() {
+  return {
+    edit: '/management/kibana/indices/{{id}}',
+    addField: '/management/kibana/indices/{{id}}/create-field',
+    indexedFields: '/management/kibana/indices/{{id}}?_a=(tab:indexedFields)',
+    scriptedFields: '/management/kibana/indices/{{id}}?_a=(tab:scriptedFields)',
+    sourceFilters: '/management/kibana/indices/{{id}}?_a=(tab:sourceFilters)'
+  };
+}
+
+export function IndexPatternProvider(Private, $http, config, kbnIndex, Promise, confirmModalPromise, kbnUrl) {
   const fieldformats = Private(RegistryFieldFormatsProvider);
   const getIds = Private(IndexPatternsGetIdsProvider);
   const fieldsFetcher = Private(FieldsFetcherProvider);
@@ -27,17 +38,12 @@ export function IndexPatternProvider(Private, $http, config, kbnIndex, Promise, 
   const flattenHit = Private(IndexPatternsFlattenHitProvider);
   const calculateIndices = Private(IndexPatternsCalculateIndicesProvider);
   const patternCache = Private(IndexPatternsPatternCacheProvider);
+  const isUserAwareOfUnsupportedTimePattern = Private(IsUserAwareOfUnsupportedTimePatternProvider);
+
   const type = 'index-pattern';
   const notify = new Notifier();
   const configWatchers = new WeakMap();
   const docSources = new WeakMap();
-  const getRoutes = () => ({
-    edit: '/management/kibana/indices/{{id}}',
-    addField: '/management/kibana/indices/{{id}}/create-field',
-    indexedFields: '/management/kibana/indices/{{id}}?_a=(tab:indexedFields)',
-    scriptedFields: '/management/kibana/indices/{{id}}?_a=(tab:scriptedFields)',
-    sourceFilters: '/management/kibana/indices/{{id}}?_a=(tab:sourceFilters)'
-  });
 
   const mapping = mappingSetup.expandShorthand({
     title: 'text',
@@ -85,6 +91,18 @@ export function IndexPatternProvider(Private, $http, config, kbnIndex, Promise, 
 
     // give index pattern all of the values in _source
     _.assign(indexPattern, response._source);
+
+    if (indexPattern.isUnsupportedTimePattern()) {
+      if (!isUserAwareOfUnsupportedTimePattern(indexPattern)) {
+        const warning = (
+          'Support for time-intervals has been removed. ' +
+          `View the ["${indexPattern.id}" index pattern in management](` +
+          kbnUrl.getRouteHref(indexPattern, 'edit') +
+          ') for more information.'
+        );
+        notify.warning(warning, { lifetime: Infinity });
+      }
+    }
 
     const promise = indexFields(indexPattern);
 
@@ -317,6 +335,10 @@ export function IndexPatternProvider(Private, $http, config, kbnIndex, Promise, 
 
     isTimeBasedInterval() {
       return this.isTimeBased() && !!this.getInterval();
+    }
+
+    isUnsupportedTimePattern() {
+      return !!this.intervalName;
     }
 
     isTimeBasedWildcard() {

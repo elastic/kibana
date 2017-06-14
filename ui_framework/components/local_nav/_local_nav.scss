@@ -7,14 +7,16 @@
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  min-height: 70px; /* 1 */
+  min-height: 69px; /* 1 */
   color: $localNavTextColor;
   background-color: $localNavBackgroundColor;
   line-height: $globalLineHeight;
+  border-bottom: solid 1px $globalColorLightGray;
 
   @include darkTheme {
     color: $localNavTextColor--darkTheme;
     background-color: $localNavBackgroundColor--darkTheme;
+    border-color: darken($localNavBackgroundColor--darkTheme, 10%);
   }
 }
 
@@ -22,7 +24,7 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  height: 32px;
+  height: 29px;
 }
 
 .kuiLocalNavRow__section {
@@ -37,7 +39,7 @@
  *    of this container using padding.
  */
 .kuiLocalNavRow--secondary {
-  height: 38px; /* 1 */
-  padding: 4px $localNavSideSpacing 0; /* 1 */
+  height: 40px; /* 1 */
+  padding: 0 $localNavSideSpacing 0; /* 1 */
   align-items: flex-start; /* 1 */
 }

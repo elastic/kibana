@@ -205,7 +205,6 @@ export function VislibVisualizationsPointSeriesProvider(Private) {
       const minHeight = 50;
       const addTimeMarker = this.chartConfig.addTimeMarker;
       const times = this.chartConfig.times || [];
-      let timeMarker;
       let div;
       let svg;
 
@@ -215,10 +214,6 @@ export function VislibVisualizationsPointSeriesProvider(Private) {
 
           if (width < minWidth || height < minHeight) {
             throw new ContainerTooSmall();
-          }
-
-          if (addTimeMarker) {
-            timeMarker = new TimeMarker(times, xScale, height);
           }
 
           div = d3.select(el);
@@ -245,7 +240,13 @@ export function VislibVisualizationsPointSeriesProvider(Private) {
           });
 
           if (addTimeMarker) {
-            timeMarker.render(svg);
+            //Domain end of 'now' will be milliseconds behind current time
+            //Extend toTime by 1 minute to ensure those cases have a TimeMarker
+            const toTime = new Date(xScale.domain()[1].getTime() + 60000);
+            const currentTime = new Date();
+            if (toTime > currentTime) {
+              new TimeMarker(times, xScale, height).render(svg);
+            }
           }
 
           return svg;
