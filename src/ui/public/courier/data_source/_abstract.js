@@ -190,6 +190,31 @@ export function AbstractDataSourceProvider(Private, Promise, PromiseEmitter) {
   };
 
   /**
+   * Fetch this source and reject the returned Promise on error
+   *
+   * Otherwise behaves like #fetch()
+   *
+   * @async
+   */
+  SourceAbstract.prototype.fetchAsRejectablePromise = function () {
+    const self = this;
+    let req = _.first(self._myStartableQueued());
+
+    if (!req) {
+      req = self._createRequest();
+    }
+
+    req.setErrorHandler((request, error) => {
+      request.defer.reject(error);
+      request.abort();
+    });
+
+    courierFetch.these([req]);
+
+    return req.getCompletePromise();
+  };
+
+  /**
    * Fetch all pending requests for this source ASAP
    * @async
    */
