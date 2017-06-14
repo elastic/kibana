@@ -44,6 +44,14 @@ export {
 } from './form_layout';
 
 export {
+  KuiGallery,
+  KuiGalleryButton,
+  KuiGalleryButtonIcon,
+  KuiGalleryButtonImage,
+  KuiGalleryButtonLabel
+} from './gallery';
+
+export {
   KuiHeaderBar,
   KuiHeaderBarSection,
 } from './header_bar';

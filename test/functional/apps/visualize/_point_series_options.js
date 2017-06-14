@@ -97,7 +97,7 @@ export default function ({ getService, getPageObjects }) {
         // try sleeping a bit before getting that data
         return PageObjects.common.sleep(2000)
           .then(function () {
-            return PageObjects.visualize.getLineChartData('fill="#6eadc1"');
+            return PageObjects.visualize.getLineChartData('fill="#00a69b"');
           })
           .then(function showData(data) {
             log.debug('count data=' + data);

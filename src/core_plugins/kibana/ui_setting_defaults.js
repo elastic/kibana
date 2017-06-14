@@ -1,6 +1,6 @@
 import moment from 'moment-timezone';
 
-export function getDefaultSettings() {
+export function getUiSettingDefaults() {
   const weekdays = moment.weekdays().slice();
   const [defaultWeekday] = weekdays;
 
@@ -142,7 +142,7 @@ export function getDefaultSettings() {
     'visualization:colorMapping': {
       type: 'json',
       value: JSON.stringify({
-        Count: '#6eadc1'
+        Count: '#00A69B'
       }),
       description: 'Maps values to specified colors within visualizations'
     },
@@ -181,6 +181,11 @@ export function getDefaultSettings() {
       value: 5,
       description: 'For index patterns containing timestamps in their names, look for this many recent matching ' +
         'patterns from which to query the field mapping'
+    },
+    'indexPatterns:warnAboutUnsupportedTimePatterns': {
+      value: false,
+      description: 'When an index pattern is using the now unsupported "time pattern" format, a warning will ' +
+        'be displayed once per session that is using this pattern. Set this to false to disable that warning.'
     },
     'format:defaultTypeMap': {
       type: 'json',
@@ -282,47 +287,6 @@ export function getDefaultSettings() {
     'metrics:max_buckets': {
       value: 2000,
       description: 'The maximum number of buckets a single datasource can return'
-    },
-    // Timelion stuff
-    'timelion:showTutorial': {
-      value: false,
-      description: 'Should I show the tutorial by default when entering the timelion app?'
-    },
-    'timelion:es.timefield': {
-      value: '@timestamp',
-      description: 'Default field containing a timestamp when using .es()'
-    },
-    'timelion:es.default_index': {
-      value: '_all',
-      description: 'Default elasticsearch index to search with .es()'
-    },
-    'timelion:target_buckets': {
-      value: 200,
-      description: 'The number of buckets to shoot for when using auto intervals'
-    },
-    'timelion:max_buckets': {
-      value: 2000,
-      description: 'The maximum number of buckets a single datasource can return'
-    },
-    'timelion:default_columns': {
-      value: 2,
-      description: 'Number of columns on a timelion sheet by default'
-    },
-    'timelion:default_rows': {
-      value: 2,
-      description: 'Number of rows on a timelion sheet by default'
-    },
-    'timelion:min_interval': {
-      value: '1ms',
-      description: 'The smallest interval that will be calculated when using "auto"'
-    },
-    'timelion:graphite.url': {
-      value: 'https://www.hostedgraphite.com/UID/ACCESS_KEY/graphite',
-      description: '<em>[experimental]</em> The URL of your graphite host'
-    },
-    'timelion:quandl.key': {
-      value: 'someKeyHere',
-      description: '<em>[experimental]</em> Your API key from www.quandl.com'
     },
     'state:storeInSessionStorage': {
       value: false,

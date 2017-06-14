@@ -79,8 +79,8 @@
 @line-height-small:         1.5;
 
 @border-radius-base:        4px;
-@border-radius-large:       6px;
-@border-radius-small:       3px;
+@border-radius-large:       4px;
+@border-radius-small:       4px;
 
 //** Width of the `border` for generating carets that indicator dropdowns.
 @caret-width-base:          4px;
@@ -117,12 +117,12 @@
 //## For each of Bootstrap's buttons, define text, background and border color.
 
 @btn-default-color:         @white;
-@btn-default-bg:            @gray;
-@btn-default-border:        @btn-default-bg;
+@btn-default-bg:            @globalColorBlue;
+@btn-default-border:        @globalColorBlue;
 
-@btn-primary-color:         @kibanaGray6;
-@btn-primary-bg:            @kibanaBlue3;
-@btn-primary-border:        transparent;
+@btn-primary-color:         @white;
+@btn-primary-bg:            @globalColorBlue;
+@btn-primary-border:        @globalColorBlue;
 
 @btn-success-color:         @btn-default-color;
 @btn-success-bg:            @kibanaBlue3;
@@ -177,7 +177,7 @@
 //** `<input>` border color
 @input-border:                    @gray-lighter;
 //** Border color for inputs on focus
-@input-border-focus:              @gray-light;
+@input-border-focus:              @globalColorBlue;
 
 @legend-color:                    @text-color;
 @legend-border-color:             transparent;
@@ -195,7 +195,7 @@
 //** Background for the dropdown menu.
 @dropdown-bg:                   @white;
 //** Dropdown menu `border-color`.
-@dropdown-border:               rgba(0,0,0,.15);
+@dropdown-border:               @globalColorLightGray;
 //** Dropdown menu `border-color` **for IE8**.
 @dropdown-fallback-border:      @gray13;
 
@@ -400,18 +400,18 @@
 
 
 //== Tabs
-@nav-tabs-border-color:                           @gray-lighter;
-@nav-tabs-link-hover-border-color:                @gray-lighter;
-@nav-tabs-active-link-hover-bg:                   @body-bg;
+@nav-tabs-border-color:                           @globalColorLightGray;
+@nav-tabs-link-hover-border-color:                @globalColorWhite;
+@nav-tabs-active-link-hover-bg:                   @globalColorWhite;
 @nav-tabs-active-link-hover-color:                @brand-primary;
-@nav-tabs-active-link-hover-border-color:         @gray-lighter;
-@nav-tabs-justified-link-border-color:            @gray-lighter;
+@nav-tabs-active-link-hover-border-color:         @globalColorWhite;
+@nav-tabs-justified-link-border-color:            @globalColorWhite;
 @nav-tabs-justified-active-link-border-color:     @body-bg;
 
 
 //== Pills
-@nav-pills-active-link-hover-bg:                  @kibanaYellow1;
-@nav-pills-active-link-hover-color:               @kibanaGray1;
+@nav-pills-active-link-hover-bg:                  @globalColorBlue;
+@nav-pills-active-link-hover-color:               @globalColorWhite;
 @nav-pills-border-radius:                   @border-radius-base;
 
 //== Pagination
@@ -485,7 +485,7 @@
 //** Tooltip text color
 @tooltip-color:                         @white;
 //** Tooltip background color
-@tooltip-bg:                            rgba(0,0,0,.8);
+@tooltip-bg:                            @globalColorBlue;
 @tooltip-opacity:                       .8;
 //** Tooltip arrow color
 @tooltip-arrow-color:                   @tooltip-bg;
@@ -506,9 +506,9 @@
 //** Popover body background color
 @popover-bg:                            @white;
 //** Popover border color
-@popover-border-color:                  rgba(0,0,0,.2);
+@popover-border-color:                  @globalColorLightGray;
 //** Popover fallback border color
-@popover-fallback-border-color:         @gray12;
+@popover-fallback-border-color:         @globalColorLightGray;
 //** Popover title background color
 @popover-title-bg:                      darken(@popover-bg, 3%);
 //** Popover arrow color
@@ -610,7 +610,7 @@
 //** Progress bar text color
 @progress-bar-color:                    @white;
 //** Default progress bar color
-@progress-bar-bg:                       @kibanaPink1;
+@progress-bar-bg:                       @globalColorTeal;
 //** Success progress bar color
 @progress-bar-success-bg:               @brand-success;
 //** Warning progress bar color
@@ -761,9 +761,9 @@
 @code-bg:                               #f9f2f4;
 @kbd-color:                             @white;
 @kbd-bg:                                @gray3;
-@pre-bg:                                @gray-lighter;
-@pre-color:                             @gray-dark;
-@pre-border-color:                      @gray12;
+@pre-bg:                                @globalColorLightestGray;
+@pre-color:                             @globalColorDarkestGray;
+@pre-border-color:                      @globalColorLightGray;
 @pre-scrollable-max-height:             340px;
 
 

@@ -28,7 +28,7 @@
         ng-repeat="pattern in indexPatternList | orderBy:['-default','id'] track by pattern.id "
         class="sidebar-item"
       >
-        <a href="{{::pattern.url}}">
+        <a href="{{::pattern.url}}" class="show">
           <div class="{{::pattern.class}}">
             <i aria-hidden="true" ng-if="pattern.default" class="fa fa-star"></i>
             <span ng-bind="::pattern.id"></span>
