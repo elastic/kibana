@@ -27,7 +27,9 @@ export class KuiColorPicker extends React.Component {
   onClickRootElement = e => {
     // This prevents clicking on the element from closing it, due to the event handler on the
     // document object.
-    e.nativeEvent.stopImmediatePropagation();
+    if (e.nativeEvent.stopImmediatePropagation) {  // Not available in headless browsers (e.g. jenkins ci build).
+      e.nativeEvent.stopImmediatePropagation();
+    }
   };
 
   componentDidMount() {
