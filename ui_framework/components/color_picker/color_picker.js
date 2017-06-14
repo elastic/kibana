@@ -90,6 +90,5 @@ KuiColorPicker.propTypes = {
 };
 
 KuiColorPicker.defaultProps = {
-  color: '#ffffff',
   'aria-label': 'Select a color'
 };
