@@ -5,9 +5,11 @@ export function stringifyPercent() {
   return Numeral.factory({
     id: 'percent',
     title: 'Percentage',
-    defaultPatternConfigKey: 'format:percent:defaultPattern',
-    paramDefaults: {
-      fractional: true
+    getParamDefaults: (getConfig) => {
+      return {
+        pattern: getConfig('format:percent:defaultPattern'),
+        fractional: true
+      };
     },
     sampleInputs: [
       0.10, 0.99999, 1, 100, 1000

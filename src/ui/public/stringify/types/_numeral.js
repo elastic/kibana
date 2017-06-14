@@ -44,11 +44,13 @@ Numeral.factory = function (opts) {
   };
 
   Class.prototype.getParamDefaults = function () {
-    const paramDefaults = _.get(opts, 'paramDefaults', {});
-    if (_.has(opts, 'defaultPatternConfigKey')) {
-      paramDefaults.pattern = this.getConfig(opts.defaultPatternConfigKey);
+    if (_.has(opts, 'getParamDefaults')) {
+      return opts.getParamDefaults(this.getConfig);
     }
-    return paramDefaults;
+
+    return {
+      pattern: this.getConfig(`format:${opts.id}:defaultPattern`)
+    };
   };
 
   if (opts.prototype) {
