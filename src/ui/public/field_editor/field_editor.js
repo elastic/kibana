@@ -112,7 +112,9 @@ uiModules
         if (!changedFormat || !missingFormat) return;
 
         // reset to the defaults, but make sure it's an object
-        self.formatParams = _.assign({}, _.cloneDeep(getFieldFormatType().paramDefaults));
+        const FieldFormat = getFieldFormatType();
+        const paramDefaults = new FieldFormat({}, getConfig).getParamDefaults();
+        self.formatParams = _.assign({}, _.cloneDeep(paramDefaults));
       });
 
       $scope.$watch('editor.formatParams', function () {
