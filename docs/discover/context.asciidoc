@@ -19,16 +19,23 @@ same set of columns as the Discover view the context was opened from. If there
 are multiple documents with the same time field value, the internal document
 order is used as a secondary sorting criterion by default.
 
-NOTE: The field used for tiebreaking in case of equal time field values can be
+[NOTE]
+--
+The field used for tiebreaking in case of equal time field values can be
 configured using the advanced setting `context:tieBreakerFields` in
 <<advanced-options, *Management > Advanced Settings*>>, which defaults to the
 `_doc` field. The value of this setting can be a comma-separated list of field
 names, which will be checked in sequence for suitability when a context is
 about to be displayed. The first suitable field is then used as the tiebreaking
 field. A field is suitable if the field exists and is sortable in the index
-pattern the context is based on. Examples for common suitable fields include
-log line numbers, monotonically increasing counters and high-precision
-timestamps.
+pattern the context is based on.
+
+While not required, it is recommended to only 
+use fields which have {es-ref}doc-values.html[doc values] enabled to achieve 
+good performance and avoid unnecessary {es-ref}modules-fielddata.html[field 
+data] usage. Common examples for suitable fields include log line numbers, 
+monotonically increasing counters and high-precision timestamps.
+--
 
 image::images/Discover-ContextView.png[Context View]
 
