@@ -663,13 +663,6 @@ body {
   position: absolute;
   z-index: 10; }
 
-.kuiColorPickerPopUpOverlay {
-  position: fixed;
-  top: 0;
-  right: 0;
-  bottom: 0;
-  left: 0; }
-
 /**
  * 1. If we use margins instead, columns get pushed to the next line.
  */

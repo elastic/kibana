@@ -137,7 +137,7 @@ const components = [{
   name: 'Card',
   component: CardExample,
 }, {
-  name: 'Color Picker',
+  name: 'ColorPicker',
   component: ColorPickerExample,
   hasReact: true,
 }, {

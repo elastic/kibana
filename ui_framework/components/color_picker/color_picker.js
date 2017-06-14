@@ -24,6 +24,21 @@ export class KuiColorPicker extends React.Component {
     this.props.onChange(color.hex);
   };
 
+  onClickRootElement = e => {
+    // This prevents clicking on the element from closing it, due to the event handler on the
+    // document object.
+    e.nativeEvent.stopImmediatePropagation();
+  };
+
+  componentDidMount() {
+    // When the user clicks somewhere outside of the color picker, we will dismiss it.
+    document.addEventListener('click', this.closeColorSelector);
+  }
+
+  componentWillUnmount() {
+    document.removeEventListener('click', this.closeColorSelector);
+  }
+
   render() {
     const color = this.props.color || '#ffffff';
     const classes = classNames('kuiColorPicker', this.props.className);
@@ -32,6 +47,7 @@ export class KuiColorPicker extends React.Component {
         className={ classes }
         aria-label={ this.props['aria-label'] }
         data-test-subj={ this.props['data-test-subj'] }
+        onClick={ this.onClickRootElement }
       >
         <div
           className="kuiColorPicker__preview"
@@ -41,7 +57,7 @@ export class KuiColorPicker extends React.Component {
             className="kuiColorPicker__swatch"
             aria-label="Select a color"
             data-test-subj="colorSwatch"
-            style={{ background: this.props.color }}
+            style={{ background: color }}
           />
           <div
             className="kuiColorPicker__label"
@@ -53,7 +69,6 @@ export class KuiColorPicker extends React.Component {
         {
           this.state.showColorSelector ?
             <div className="kuiColorPickerPopUp" data-test-subj="colorPickerPopup">
-              <div className="kuiColorPickerPopUpOverlay" onClick={ this.closeColorSelector } />
               <ChromePicker
                 color={ color }
                 disableAlpha={ true }
@@ -74,5 +89,6 @@ KuiColorPicker.propTypes = {
 };
 
 KuiColorPicker.defaultProps = {
-  color: '#ffffff'
+  color: '#ffffff',
+  'aria-label': 'Select a color'
 };
