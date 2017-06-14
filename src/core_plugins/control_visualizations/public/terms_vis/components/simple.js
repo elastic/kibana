@@ -18,6 +18,9 @@ export class Simple extends Component {
     this.setState((prevState) => {
       prevState.params.param1 = param1;
       return prevState;
+    },
+    () => {
+      this.props.stageEditorParams(_.cloneDeep(this.state.params));
     });
   }
 
