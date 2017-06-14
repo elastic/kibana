@@ -47,7 +47,6 @@ export class KuiColorPicker extends React.Component {
     return (
       <div
         className={ classes }
-        aria-label={ this.props['aria-label'] }
         data-test-subj={ this.props['data-test-subj'] }
         onClick={ this.onClickRootElement }
       >
@@ -57,7 +56,7 @@ export class KuiColorPicker extends React.Component {
         >
           <div
             className="kuiColorPicker__swatch"
-            aria-label="Select a color"
+            aria-label={ this.props['aria-label'] }
             data-test-subj="colorSwatch"
             style={{ background: color }}
           />
