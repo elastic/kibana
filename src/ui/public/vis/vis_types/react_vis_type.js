@@ -22,7 +22,7 @@ export function ReactVisTypeProvider(Private) {
 
     resize() {
       if (this.visData) {
-        this.render(this.vis, this.visData);
+        this.render(this.visData);
       }
     }
 
