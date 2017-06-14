@@ -21,7 +21,7 @@ function fetchAnchorProvider(courier, Private) {
       })
       .set('sort', sort);
 
-    const response = await searchSource.fetch();
+    const response = await searchSource.fetchAsRejectablePromise();
 
     if (_.get(response, ['hits', 'total'], 0) < 1) {
       throw new Error('Failed to load anchor document.');
