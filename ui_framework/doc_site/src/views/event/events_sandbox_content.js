@@ -8,6 +8,8 @@ import {
   KuiEventBodyMetadata,
   KuiMenu,
   KuiMenuItem,
+  KuiHeaderBar,
+  KuiHeaderBarSection
 } from '../../../../components';
 
 export default () => (
@@ -16,19 +18,19 @@ export default () => (
     <div className="kuiViewContent kuiViewContent--constrainedWidth">
       <div className="kuiViewContentItem">
 
-        <div className="kuiHeaderBar">
-          <div className="kuiHeaderBarSection">
+        <KuiHeaderBar>
+          <KuiHeaderBarSection>
             <h2 className="kuiSubTitle">
               Cluster of Almonds
             </h2>
-          </div>
+          </KuiHeaderBarSection>
 
-          <div className="kuiHeaderBarSection">
+          <KuiHeaderBarSection>
             <div className="kuiText">
               <a className="kuiLink" href="#">View all 21 almonds</a>
             </div>
-          </div>
-        </div>
+          </KuiHeaderBarSection>
+        </KuiHeaderBar>
 
         <KuiMenu className="kuiVerticalRhythm">
           <KuiMenuItem>
