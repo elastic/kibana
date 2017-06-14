@@ -393,7 +393,7 @@ body {
  */
 .kuiButton--warning {
   color: #FFF;
-  background-color: #f3bb57; }
+  background-color: #f98100; }
   .kuiButton--warning:not(a):enabled:focus {
     z-index: 1;
     /* 1 */
@@ -414,25 +414,25 @@ body {
   .kuiButton--warning:enabled:hover {
     color: #FFF !important;
     /* 1 */
-    background-color: #e69606; }
+    background-color: #c66700; }
   a.kuiButton--warning:not(.kuiButton-isDisabled):hover {
     /* 1 */
     color: #FFF !important;
     /* 1 */
-    background-color: #e69606; }
+    background-color: #c66700; }
   .kuiButton--warning:enabled:active {
     color: #FFF !important;
     /* 1 */
-    background-color: #e69606; }
+    background-color: #c66700; }
   a.kuiButton--warning:not(.kuiButton-isDisabled):active {
     /* 1 */
     color: #FFF !important;
     /* 1 */
-    background-color: #e69606; }
+    background-color: #c66700; }
   .kuiButton--warning:disabled {
-    background-color: #f4debc; }
+    background-color: #ff9a2d; }
   a.kuiButton--warning.kuiButton-isDisabled {
-    background-color: #f4debc; }
+    background-color: #ff9a2d; }
 
 /**
  * 1. Override Bootstrap.
