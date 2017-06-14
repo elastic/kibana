@@ -73,6 +73,20 @@ describe('GetIndices', function () {
     throw404 = false;
   });
 
+  it('should not suppress a 404 response if told not to', async function () {
+    throw404 = true;
+
+    let errorThrown = false;
+    try {
+      await getIndices(null, false);
+    } catch (e) {
+      errorThrown = true;
+    }
+    expect(errorThrown).to.be(true);
+
+    throw404 = false;
+  });
+
   it('should not suppress a non 404 response', async function () {
     throwOther = true;
 
