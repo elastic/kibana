@@ -1,14 +1,12 @@
 import _ from 'lodash';
 import expect from 'expect.js';
-import ngMock from 'ng_mock';
 import { FieldFormat } from 'ui/index_patterns/_field_format/field_format';
 
 describe('FieldFormat class', function () {
 
   let TestFormat;
 
-  beforeEach(ngMock.module('kibana'));
-  beforeEach(ngMock.inject(function () {
+  beforeEach(function () {
 
     TestFormat = function (params) {
       TestFormat.Super.call(this, params);
@@ -19,7 +17,7 @@ describe('FieldFormat class', function () {
     TestFormat.prototype._convert = _.asPrettyString;
 
     _.class(TestFormat).inherits(FieldFormat);
-  }));
+  });
 
   describe('params', function () {
     it('accepts its params via the constructor', function () {
