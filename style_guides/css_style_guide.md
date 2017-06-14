@@ -566,6 +566,14 @@ selector if:
 
 #### Exception: Normalization/Reset
 
-When working with the browser default styles or third-party stylesheets the 
-selectors are sometimes overly broad so that they have to be re-used in order 
-to integrate the styles into the project.
+We can not control the selectors introduced by third-party stylesheets and 
+these selectors may not adhere to our styleguide, e.g. `a` or 
+`input[type="text"]`.  In these cases, we are forced to duplicate these 
+selectors within our own stylesheets and override those styles to control their 
+look and feel.
+
+When this happens, it is important to add comments that make it clear why these 
+selectors exist and which third-party dependencies they override. We should 
+also define these selectors in files which refer back to the dependency, e.g. a 
+file named `ui_select_overrides.less` will contain styles overriding those 
+introduced by the `ui-select` dependency.
