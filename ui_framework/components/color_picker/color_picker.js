@@ -42,8 +42,8 @@ export class KuiColorPicker extends React.Component {
   }
 
   render() {
-    const color = this.props.color || '#ffffff';
-    const classes = classNames('kuiColorPicker', this.props.className);
+    const { color, className } = this.props;
+    const classes = classNames('kuiColorPicker', className);
     return (
       <div
         className={ classes }
@@ -85,7 +85,7 @@ export class KuiColorPicker extends React.Component {
 
 KuiColorPicker.propTypes = {
   className: PropTypes.string,
-  color: PropTypes.string,
+  color: PropTypes.string.isRequired,
   onChange: PropTypes.func.isRequired,
 };
 
