@@ -32,19 +32,21 @@
 
       <!-- Alerts -->
       <div
-        ng-if="indexPattern.timeFieldName && indexPattern.intervalName"
-        class="kuiInfoPanel kuiInfoPanel--warning kuiVerticalRhythm"
+        ng-if="indexPattern.isUnsupportedTimePattern()"
+        class="kuiInfoPanel kuiInfoPanel--error kuiVerticalRhythm"
       >
         <div class="kuiInfoPanelHeader">
-          <span class="kuiInfoPanelHeader__icon kuiIcon kuiIcon--warning fa-bolt"></span>
+          <span class="kuiInfoPanelHeader__icon kuiIcon kuiIcon--error fa-warning"></span>
           <span class="kuiInfoPanelHeader__title">
-            Repeating index pattern
+            Support for repeating index patterns removed
           </span>
         </div>
 
         <div class="kuiInfoPanelBody">
           <div class="kuiInfoPanelBody__message">
-            This index uses a <strong>time-based index pattern</strong> which repeats <span ng-bind="::indexPattern.getInterval().display"></span>
+            Support for time-interval based index patterns has been removed! In the next major
+            version of Kibana this index patterns will stop working. Migrate saved objects that
+            use this index pattern to a wildcard pattern and delete this one.
           </div>
         </div>
       </div>

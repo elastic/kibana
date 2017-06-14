@@ -2,10 +2,14 @@
   position: relative;
   padding: 10px $localNavSideSpacing 14px;
   background-color: $localDropdownBackgroundColor;
+  border-bottom: solid 1px $globalColorLightGray;
+  border-top: solid 1px $globalColorLightGray;
+  margin-bottom: 10px;
   line-height: 20px;
 
   @include darkTheme {
     background-color: $localDropdownBackgroundColor--darkTheme;
+    border-color: darken($localNavBackgroundColor--darkTheme, 10%);
   }
 }
 
@@ -109,13 +113,21 @@
   font-size: 14px;
   color: $globalInputTextColor;
   background-color: $globalInputBackgroundColor;
-  border: 2px solid $globalInputBorderColor;
+  border: 1px solid $globalInputBorderColor;
   border-radius: 4px;
+
+  &:focus {
+    border-color: $globalFocusColor;
+  }
 
   @include darkTheme {
     color: $globalInputTextColor--darkTheme;
     background-color: $globalInputBackgroundColor--darkTheme;
     border-color: $globalInputBorderColor--darkTheme;
+
+    &:focus {
+      border-color: $globalFocusColor;
+    }
   }
 }
 

@@ -9,12 +9,6 @@ export function createFieldsFetcher(apiClient, config) {
       return this.fetchForWildcard(indexPattern.id);
     }
 
-    testTimePattern(indexPatternId) {
-      return apiClient.testTimePattern({
-        pattern: indexPatternId
-      });
-    }
-
     fetchForTimePattern(indexPatternId) {
       return apiClient.getFieldsForTimePattern({
         pattern: indexPatternId,

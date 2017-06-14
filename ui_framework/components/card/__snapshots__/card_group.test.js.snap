@@ -1,0 +1,21 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`renders KuiCardGroup 1`] = `
+<div
+  aria-label="aria-label"
+  class="kuiCardGroup testClass1 testClass2"
+  data-test-subj="test subject string"
+>
+  children
+</div>
+`;
+
+exports[`renders KuiCardGroup isUnited 1`] = `
+<div
+  aria-label="aria-label"
+  class="kuiCardGroup testClass1 testClass2 kuiCardGroup--united"
+  data-test-subj="test subject string"
+>
+  children
+</div>
+`;

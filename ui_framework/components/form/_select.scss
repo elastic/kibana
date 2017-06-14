@@ -1,5 +1,15 @@
 .kuiSelect {
   @include select;
+  @include formControl;
+
+  &.kuiSelect-isInvalid {
+    @include formControlInvalid;
+  }
+
+  &:focus {
+    box-shadow: none;
+    @include formControlFocus;
+  }
 }
 
 .kuiSelect--large {

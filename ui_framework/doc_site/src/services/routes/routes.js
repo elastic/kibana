@@ -129,6 +129,7 @@ const components = [{
 }, {
   name: 'Bar',
   component: BarExample,
+  hasReact: true,
 }, {
   name: 'Button',
   component: ButtonExample,
@@ -136,6 +137,7 @@ const components = [{
 }, {
   name: 'Card',
   component: CardExample,
+  hasReact: true,
 }, {
   name: 'ColorPicker',
   component: ColorPickerExample,
@@ -146,6 +148,7 @@ const components = [{
 }, {
   name: 'CollapseButton',
   component: CollapseButtonExample,
+  hasReact: true,
 }, {
   name: 'EmptyTablePrompt',
   component: EmptyTablePromptExample,
@@ -163,12 +166,15 @@ const components = [{
 }, {
   name: 'FormLayout',
   component: FormLayoutExample,
+  hasReact: true,
 }, {
   name: 'Gallery',
   component: GalleryExample,
+  hasReact: true,
 }, {
   name: 'HeaderBar',
   component: HeaderBarExample,
+  hasReact: true,
 }, {
   name: 'Icon',
   component: IconExample,

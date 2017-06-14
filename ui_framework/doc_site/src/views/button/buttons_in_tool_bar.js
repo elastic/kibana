@@ -28,6 +28,17 @@ export default () => (
       Primary button, disabled
     </KuiButton>
 
+    <KuiButton buttonType="secondary">
+      Secondary button
+    </KuiButton>
+
+    <KuiButton
+      buttonType="secondary"
+      disabled
+    >
+      Secondary button, disabled
+    </KuiButton>
+
     <KuiButton buttonType="danger">
       Danger button
     </KuiButton>
@@ -39,12 +50,12 @@ export default () => (
       Danger button, disabled
     </KuiButton>
 
-    <KuiButton type="warning">
+    <KuiButton buttonType="warning">
       Warning button
     </KuiButton>
 
     <KuiButton
-      type="warning"
+      buttonType="warning"
       disabled
     >
       Warning button, disabled

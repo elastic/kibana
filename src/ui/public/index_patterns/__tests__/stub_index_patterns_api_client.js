@@ -15,10 +15,6 @@ export function StubIndexPatternsApiClientModule(PrivateProvider) {
       class StubIndexPatternsApiClient {
         getFieldsForTimePattern = sinon.spy(() => Promise.resolve(nonScriptedFields));
         getFieldsForWildcard = sinon.spy(() => Promise.resolve(nonScriptedFields));
-        testTimePattern = sinon.spy(() => Promise.resolve({
-          all: [],
-          matches: []
-        }))
 
         swapStubNonScriptedFields = (newNonScriptedFields) => {
           nonScriptedFields = newNonScriptedFields;

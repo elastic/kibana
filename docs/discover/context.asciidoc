@@ -45,3 +45,22 @@ image::images/Discover-ContextView-SizePicker-Older.png[]
 NOTE: The default number of documents loaded with each button click can be
 configured via the `context:step` setting in <<advanced-options, *Management >
 Advanced Options*>>.
+
+=== Filtering the Context
+
+Depending on how the documents are partitioned into index patterns, the context
+view might contain a large number of documents not related to the event under
+investigation. In order to adapt the focus of the context view to the task at
+hand, you can use filters to restrict the documents considered by Kibana for
+display in the context view.
+
+When switching from the discover view to the context view, the previously
+applied filters are carried over. Pinned filters remain active while normal
+filters are copied in a disabled state. You can selectively re-enabled them to
+refine your context view.
+
+New filters can be added via the *Add a filter* link in the filter bar, by
+clicking the filter icons appearing when hovering a field, or by expanding
+documents and clicking the filter icons in the table.
+
+image::images/Discover-ContextView-FilterMontage.png[]

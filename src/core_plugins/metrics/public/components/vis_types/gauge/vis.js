@@ -1,7 +1,8 @@
 import React, { PropTypes } from 'react';
 import tickFormatter from '../../lib/tick_formatter';
 import _ from 'lodash';
-import { Gauge, getLastValue } from 'plugins/metrics/visualizations';
+import Gauge from 'plugins/metrics/visualizations/components/gauge';
+import getLastValue from 'plugins/metrics/visualizations/lib/get_last_value';
 import color from 'color';
 
 function getColors(props) {

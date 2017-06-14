@@ -19,14 +19,21 @@
     display: block;
     position: relative;
 
+    .series > rect {
+      fill-opacity: 0.5;
+      stroke-width: 1;
+    }
+
     header {
       min-height: @input-height-base + 8px;
       padding: 4px 0;
     }
 
     visualize {
-      height: 200px;
-      max-height: 600px;
+
+      .vis-container {
+        height: 200px;
+      }
 
       .loading {
         opacity: 1 !important;
@@ -119,8 +126,8 @@
       background-color: transparent;
       padding: 0;
       border: none;
-      width: 7px; /* 1 */
-      height: 7px;
+      width: 14px; /* 1 */
+      height: 14px;
     }
 
     .discover-field-filter {
@@ -130,10 +137,6 @@
       .form-group {
         margin-bottom: 0px;
       }
-    }
-
-    .discover-table-row--highlight td {
-      background-color: #E2F1F6;
     }
 
 .shard-failures {
@@ -188,9 +191,7 @@
   }
 
 .discover-field-details {
-  border-top: 1px solid;
-  border-top-color: @discover-field-details-border;
-  padding: 5px 10px;
+  padding: 10px;
   background-color: @discover-field-details-bg;
   color: @discover-field-details-color;
 }
@@ -236,17 +237,18 @@
  */
 .discover-field-details {
   .progress {
+    background-color: darken(@globalColorLightGray, 5%);
     margin-bottom: 0px;
+    border-radius: 0px;
 
     .progress-bar {
       padding-left: 10px;
       text-align: right;
-      line-height: 18px;
+      line-height: 20px;
       max-width: 100%;
-      border-radius: 4px;
 
       span {
-        background-color: @discover-field-details-progress-bar-bg;
+        background-color: rgba(0,0,0,.8);
         padding: 3px;
         border-radius: 4px;
         margin-left: 3px;
@@ -273,8 +275,9 @@ field-name,
 
 disc-field-chooser {
   .sidebar-item.active .sidebar-item-title {
-    background-color: @sidebar-active-bg;
-    color: @sidebar-active-color;
+    background: @discover-field-details-bg;
+    color: @globalColorBlack;
+    font-weight: bold;
   }
   .sidebar-item-title {
     position: relative;
