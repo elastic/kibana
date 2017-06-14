@@ -2,7 +2,6 @@
 
 exports[`renders KuiColorPicker 1`] = `
 <div
-  aria-label="aria-label"
   class="kuiColorPicker testClass1 testClass2"
   data-test-subj="test subject string"
 >
@@ -10,7 +9,7 @@ exports[`renders KuiColorPicker 1`] = `
     class="kuiColorPicker__preview"
   >
     <div
-      aria-label="Select a color"
+      aria-label="aria-label"
       class="kuiColorPicker__swatch"
       data-test-subj="colorSwatch"
       style="background:#ffeedd;"
