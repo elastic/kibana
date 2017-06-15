@@ -48,10 +48,6 @@ the patch version.
 
 include::setup/install.asciidoc[]
 
-ifdef::include-xpack[]
-include::{xkb-repo-dir}/installing.asciidoc[]
-endif::include-xpack[]
-
 include::setup/settings.asciidoc[]
 
 include::setup/docker.asciidoc[]
