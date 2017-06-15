@@ -1,4 +1,3 @@
-import _ from 'lodash';
 import 'ui/visualize';
 import 'ui/doc_table';
 import 'plugins/kibana/visualize/saved_visualizations';
@@ -112,7 +111,7 @@ uiModules
 
         const type = $scope.panel.type;
         const id = $scope.panel.id;
-        const service = _.find(services, { type: type });
+        const service = services.find(service => service.type === type);
         if (!service) return;
 
         $scope.editUrl = '#management/kibana/objects/' + service.name + '/' + id + '?notFound=' + error.savedObjectType;
