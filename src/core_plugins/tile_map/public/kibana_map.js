@@ -164,7 +164,7 @@ export class KibanaMap extends EventEmitter {
           }
         });
       } else if (drawType === 'polygon') {
-        const latLongs = event.layer.getLatLngs();
+        const latLongs = event.layer.getLatLngs()[0];
         this.emit('drawCreated:polygon', {
           points: latLongs.map(leafletLatLng => {
             return {
