@@ -548,7 +548,7 @@ To avoid the combinatorial explosion of classes with such groupings and its
 modifiers, it is permissible to nest a block's selector under another block's 
 selector if:
 
-* The relationship is a if a very narrow `element` to `elementGroup` kind that 
+* The relationship is of a very narrow "`element` to `elementGroup`" kind that 
   is apparent from the block names.
 * The rulesets are colocated in the same component directory.
 
