@@ -43,7 +43,7 @@ uiModules
         $optionContainer.append($editor);
       }
 
-      $scope.$watchGroup(['visData', 'visualizeEditor'], () => {
+      $scope.$watchGroup(['visData', 'visualizeEditor', 'vis.params'], () => {
         if (reactOptionsComponent) {
           renderReactComponent();
         }
