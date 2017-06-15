@@ -566,11 +566,10 @@ selector if:
 
 #### Exception: Normalization/Reset
 
-We can not control the selectors introduced by third-party stylesheets and 
-these selectors may not adhere to our styleguide, e.g. `a` or 
-`input[type="text"]`.  In these cases, we are forced to duplicate these 
-selectors within our own stylesheets and override those styles to control their 
-look and feel.
+We cannot control the selectors introduced by third-party stylesheets and these 
+selectors may not adhere to our styleguide, e.g. `a` or `input[type="text"]`. 
+In these cases, we are forced to duplicate these selectors within our own 
+stylesheets and override those styles to control their look and feel.
 
 When this happens, it is important to add comments that make it clear why these 
 selectors exist and which third-party dependencies they override. We should 
