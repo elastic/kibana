@@ -251,9 +251,7 @@ export function VislibVisualizationsPieChartProvider(Private) {
             };
 
             const conflicts = [];
-            let conflictIterations = 0;
             do {
-              conflictIterations++;
               conflicts.length = 0;
               labelLayout.visit(function (node) {
                 if (!node.point) return;
@@ -274,28 +272,8 @@ export function VislibVisualizationsPieChartProvider(Private) {
               });
 
               if (conflicts.length) {
-                if (conflictIterations > 3) {
-                  parentElement.remove();
-                  return;
-                }
-
-                if (d.label.x > 0) {
-                  const bottomEdge = d3.max(conflicts, function (d2) {
-                    return d2.b;
-                  });
-
-                  d.label.t = bottomEdge + 5;
-                  d.label.y = d.label.t + bbox.height / 2;
-                  d.label.b = d.label.t + bbox.height;
-                } else {
-                  const topEdge = d3.min(conflicts, function (d2) {
-                    return d2.t;
-                  });
-
-                  d.label.b = topEdge - 5;
-                  d.label.y = d.label.b - bbox.height / 2;
-                  d.label.t = d.label.b - bbox.height;
-                }
+                parentElement.remove();
+                return;
               }
             } while (conflicts.length);
 
