@@ -544,7 +544,7 @@ e.g.:
 </div>
 ```
 
-To avoid the combinatorial explosion of classes with such groupings and its 
+To avoid the combinatorial explosion of classes with such groupings and thier 
 modifiers, it is permissible to nest a block's selector under another block's 
 selector if:
 
