@@ -7,13 +7,11 @@ import { AggTypesBucketsBucketAggTypeProvider } from 'ui/agg_types/buckets/_buck
 import { TimeBucketsProvider } from 'ui/time_buckets';
 import { AggTypesBucketsCreateFilterDateHistogramProvider } from 'ui/agg_types/buckets/create_filter/date_histogram';
 import { AggTypesBucketsIntervalOptionsProvider } from 'ui/agg_types/buckets/_interval_options';
-import { RegistryFieldFormatsProvider } from 'ui/registry/field_formats';
 import intervalTemplate from 'ui/agg_types/controls/interval.html';
 
 export function AggTypesBucketsDateHistogramProvider(timefilter, config, Private) {
   const BucketAggType = Private(AggTypesBucketsBucketAggTypeProvider);
   const TimeBuckets = Private(TimeBucketsProvider);
-  const fieldFormats = Private(RegistryFieldFormatsProvider);
   const createFilter = Private(AggTypesBucketsCreateFilterDateHistogramProvider);
   const intervalOptions = Private(AggTypesBucketsIntervalOptionsProvider);
 
@@ -59,18 +57,13 @@ export function AggTypesBucketsDateHistogramProvider(timefilter, config, Private
             buckets.setInterval(getInterval(this));
             setBounds(this);
 
-            const DateFieldFormat = fieldFormats.getType('date');
-            buckets.dateFieldFormat = new DateFieldFormat({
-              pattern: buckets.getScaledDateFormat()
-            });
-
             return buckets;
           }
         }
       };
     },
     getFormat: function (agg) {
-      return agg.buckets.dateFieldFormat;
+      return agg.buckets.getScaledDateFormatter();
     },
     params: [
       {
