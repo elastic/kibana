@@ -188,6 +188,26 @@ describe('State Management', function () {
       expect(stateObj).to.eql({});
     });
 
+    it('should clear state when it is invalid', function () {
+      let stateObj;
+      const { state } = setup();
+
+      $location.search({ _s: '' });
+      state.fetch();
+      stateObj = state.toObject();
+      expect(stateObj).to.eql({});
+
+      $location.search({ _s: '!n' });
+      state.fetch();
+      stateObj = state.toObject();
+      expect(stateObj).to.eql({});
+
+      $location.search({ _s: 'alert(1)' });
+      state.fetch();
+      stateObj = state.toObject();
+      expect(stateObj).to.eql({});
+    });
+
     it('does not replace the state value on read', () => {
       const { state } = setup();
       sinon.stub($location, 'search', (newSearch) => {
@@ -258,6 +278,21 @@ describe('State Management', function () {
         sinon.assert.calledOnce(fatalStub);
         expect(fatalStub.firstCall.args[0]).to.be.an(Error);
         expect(fatalStub.firstCall.args[0].message).to.match(/github\.com/);
+      });
+
+      it('translateHashToRison should gracefully fallback if parameter can not be parsed', () => {
+        const { state, hashedItemStore } = setup({ storeInHash: false });
+
+        expect(state.translateHashToRison('(a:b)')).to.be('(a:b)');
+        expect(state.translateHashToRison('')).to.be('');
+
+        const existingHash = createStateHash('{"a": "b"}', () => null);
+        hashedItemStore.setItem(existingHash, '{"a": "b"}');
+
+        const nonExistingHash = createStateHash('{"b": "c"}', () => null);
+
+        expect(state.translateHashToRison(existingHash)).to.be('(a:b)');
+        expect(state.translateHashToRison(nonExistingHash)).to.be('!n');
       });
     });
   });
