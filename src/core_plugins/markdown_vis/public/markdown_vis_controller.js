@@ -1,6 +1,7 @@
 import marked from 'marked';
 import { uiModules } from 'ui/modules';
 import 'angular-sanitize';
+import 'github-markdown-css/github-markdown.css';
 
 marked.setOptions({
   gfm: true, // Github-flavored markdown
