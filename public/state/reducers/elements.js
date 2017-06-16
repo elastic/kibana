@@ -1,10 +1,16 @@
-import { handleActions } from 'redux-actions';
+import { handleActions, combineActions } from 'redux-actions';
 import { get, findIndex } from 'lodash';
 import { assign } from 'object-path-immutable';
 import * as actions from '../actions/elements';
 
+const expressionActions = combineActions(
+  actions.setAst,
+  actions.setExpression,
+  actions.setArgumentAtIndex
+);
+
 export default handleActions({
-  [actions.setElementExpression]: (workpadState, { payload }) => {
+  [expressionActions]: (workpadState, { payload }) => {
     const { expression, pageId, element } = payload;
     const pageIndex = findIndex(get(workpadState, 'pages'), { id: pageId });
     const elementsPath = ['pages', pageIndex, 'elements'];

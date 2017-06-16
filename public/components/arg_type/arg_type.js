@@ -1,10 +1,10 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { compose, branch, renderComponent } from 'recompose';
-import { Label } from 'react-bootstrap';
+import { compose, withProps, branch, renderComponent, lifecycle, setPropTypes } from 'recompose';
 import { ArgTypeUnknown } from './arg_type_unknown';
 import { ArgTypeContextPending } from './arg_type_context_pending';
 import { ArgTypeContextError } from './arg_type_context_error';
+import { findExpressionType } from '../../lib/find_expression_type';
 
 // helper to check the state of the passed in expression type
 function checkState(state) {
@@ -14,40 +14,57 @@ function checkState(state) {
   };
 }
 
+// resolve the expressionType from the argType
+const addProps = compose(
+  setPropTypes({
+    argType: PropTypes.string,
+  }),
+  withProps((props) => ({
+    expressionType: findExpressionType(props.argType),
+  }))
+);
+
 // if no expressionType was provided, render the ArgTypeUnknown component
-const nullExpressionType = branch(props => !props.expressionType, renderComponent(ArgTypeUnknown));
+const noExpressionType = branch(props => !props.expressionType, renderComponent(ArgTypeUnknown));
 // if the expressionType is in a pending state, render ArgTypeContextPending
 const contextPending = branch(checkState('pending'), renderComponent(ArgTypeContextPending));
 // if the expressionType is in an error state, render ArgTypeContextError
 const contextError = branch(checkState('error'), renderComponent(ArgTypeContextError));
 
-// compose the above branch components, to short-circuit rending this ArgType component
-export const ArgType = compose(nullExpressionType, contextPending, contextError)((props) => {
-  const {
-    name,
-    args,
-    context,
-    expressionType,
-    nextExpressionType,
-    onValueChange,
-  } = props;
+// dispatch context update if none is provided
+const contextLifecycle = lifecycle({
+  componentWillMount() {
+    const { expressionType, context, updateContext } = this.props;
 
-  const expressionProps = { args, context, nextExpressionType, onValueChange };
-
-  // TODO: I'm leaving the { name } thing here for you Joe, while you debug. Get rid of it before we ship.
-  return (
-    <div className="canvas__argtype">
-      <Label className="pull-right">{ name }</Label><br/>
-      { expressionType.render(expressionProps) }
-    </div>
-  );
+    if (context == null && Boolean(expressionType && expressionType.requiresContext)) {
+      updateContext();
+    }
+  },
 });
 
-ArgType.propTypes = {
-  name: PropTypes.string.isRequired,
+// compose the above branch components, to short-circuit rending this ArgType component
+const ArgTypeComponent = ({ args, context, onValueChange, nextArgType, expressionType }) => {
+  const nextExpressionType = nextArgType ? findExpressionType(nextArgType) : nextArgType;
+
+  return (
+    <div className="canvas__argtype">
+      { expressionType.render({ args, context, nextExpressionType, onValueChange }) }
+    </div>
+  );
+};
+
+ArgTypeComponent.propTypes = {
   args: PropTypes.object.isRequired,
-  context: PropTypes.object,
   expressionType: PropTypes.object.isRequired,
-  nextExpressionType: PropTypes.object,
+  nextArgType: PropTypes.string,
+  context: PropTypes.object,
   onValueChange: PropTypes.func,
 };
+
+export const ArgType = compose(
+  addProps,
+  contextLifecycle,
+  noExpressionType,
+  contextPending,
+  contextError
+)(ArgTypeComponent);

@@ -8,7 +8,8 @@ import { elements } from '../../lib/elements';
 import { getState, getValue, getError } from '../../lib/resolved_arg';
 import { getType } from '../../../common/types/get_type';
 import { fetchRenderable } from '../../state/actions/elements';
-import { getResolvedArgs } from '../../state/selectors/workpad';
+import { selectElement } from '../../state/actions/transient';
+import { getSelectedElementId, getResolvedArgs } from '../../state/selectors/workpad';
 
 const renderLoading = branch(
   props => [null, 'pending'].includes(getState(props.renderable)),
@@ -23,11 +24,18 @@ const renderInvalidExpression = branch(
 function mapStateToProps(state, ownProps) {
   return {
     renderable: getResolvedArgs(state, ownProps.element.id, 'expressionRenderable'),
+    selectedElement: getSelectedElementId(state),
   };
 }
 
-const mapDispatchToProps = {
-  fetchRenderable,
+const mapDispatchToProps = (dispatch, ownProps) => {
+  return {
+    fetchRenderable: () => dispatch(fetchRenderable(ownProps.element.id)),
+    selectElement(ev) {
+      ev && ev.stopPropagation();
+      dispatch(selectElement(ownProps.element.id));
+    },
+  };
 };
 
 let cleanupFn;

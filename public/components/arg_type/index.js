@@ -1,7 +1,6 @@
 import { connect } from 'react-redux';
 import { get } from 'lodash';
 import { ArgType as Component } from './arg_type';
-import { findExpressionType } from '../../lib/find_expression_type';
 import { toAstValue } from '../../lib/map_arg_value';
 import { fetchContext, setArgumentAtIndex } from '../../state/actions/elements';
 import {
@@ -20,41 +19,27 @@ const mapStateToProps = (state, { expressionIndex }) => {
   };
 };
 
-const mapDispatchToProps = ({
-  fetchContext,
-  setArgumentAtIndex,
+const mapDispatchToProps = (dispatch, { expressionIndex }) => ({
+  setArgument: (props) => dispatch(setArgumentAtIndex({ index: expressionIndex, ...props })),
+  updateContext: () => dispatch(fetchContext({ index: expressionIndex })),
 });
 
 const mergeProps = (stateProps, dispatchProps, ownProps) => {
-  const { context, element, pageId } = stateProps;
-  const { expressionIndex, argType, nextArgType } = ownProps;
-  const expressionType = findExpressionType(argType);
-  const nextExpressionType = nextArgType ? findExpressionType(nextArgType) : nextArgType;
+  const { element, pageId } = stateProps;
 
-  const props = Object.assign({}, stateProps, dispatchProps, ownProps, {
-    expressionType,
-    nextExpressionType,
-    name: get(expressionType, 'displayName', argType),
-    updateContext: () => dispatchProps.fetchContext({ index: expressionIndex }),
+  return Object.assign({}, stateProps, dispatchProps, ownProps, {
     onValueChange: (arg) => {
       const mappedArg = Object.keys(arg).reduce((acc, argName) => Object.assign(acc, {
         [argName]: toAstValue(arg[argName]),
       }), {});
 
-      return dispatchProps.setArgumentAtIndex({
+      return dispatchProps.setArgument({
         arg: mappedArg,
         element,
         pageId,
-        index: expressionIndex,
       });
     },
   });
-
-  if (context == null && Boolean(expressionType && expressionType.requiresContext)) {
-    props.updateContext();
-  }
-
-  return props;
 };
 
 export const ArgType = connect(mapStateToProps, mapDispatchToProps, mergeProps)(Component);

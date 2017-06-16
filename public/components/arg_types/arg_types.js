@@ -22,14 +22,16 @@ const Component = ({ argTypeChain }) => {
       const nextArg = astChain[i + 1] || null;
 
       // wrap each part of the chain in ArgType, passing in the previous context
-      acc.components.push(<ArgType
-        key={i}
-        argType={chain.function}
-        args={chain.arguments}
-        nextArgType={nextArg && nextArg.function}
-        expression={wrapExpression(prevContext)}
-        expressionIndex={i} />
+      const component = (
+        <ArgType
+          key={i}
+          argType={chain.function}
+          args={chain.arguments}
+          nextArgType={nextArg && nextArg.function}
+          expression={wrapExpression(prevContext)}
+          expressionIndex={i} />
       );
+      acc.components.push(component);
       acc.context = acc.context.concat(chain);
 
       return acc;

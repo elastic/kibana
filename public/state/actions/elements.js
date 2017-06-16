@@ -1,15 +1,33 @@
 import { createAction } from 'redux-actions';
-import { get, isEqual } from 'lodash';
+import { get } from 'lodash';
 import { assign } from 'object-path-immutable';
 import { notify } from '../../lib/notify';
-import { getSelectedElement } from '../selectors/workpad';
+import { getSelectedElement, getElementById } from '../selectors/workpad';
 import { interpretAst } from '../../lib/interpreter';
 import { getType } from '../../../common/types/get_type';
 import { fromExpression, toExpression } from '../../../common/lib/ast';
 import * as args from './resolved_args';
 
 // exported actions, used by reducers
-export const setElementExpression = createAction('setElementExpression');
+// export const setElementExpression = createAction('setElementExpression');
+
+function astToExpression({ ast, element, pageId }) {
+  try {
+    return { expression: toExpression(ast), pageId, element };
+  } catch (e) {
+    notify.error(e);
+    return { expression: element.expression, pageId, element };
+  }
+}
+
+export const setExpression = createAction('setExpression');
+
+export const setAst = createAction('setAst', astToExpression);
+
+export const setArgumentAtIndex = createAction('setArgumentAtIndex', ({ index, arg, element, pageId }) => {
+  const newElement = assign(element, ['ast', 'chain', index, 'arguments'], arg);
+  return astToExpression({ ast: get(newElement, 'ast'), element, pageId });
+});
 
 export const fetchContext = ({ index }) => (dispatch, getState) => {
   const element = getSelectedElement(getState());
@@ -39,9 +57,10 @@ export const fetchContext = ({ index }) => (dispatch, getState) => {
     }));
   });
 };
+fetchContext.toString = () => 'fetchContext'; // createAction name proxy
 
-export const fetchRenderable = () => (dispatch, getState) => {
-  const element = getSelectedElement(getState());
+export const fetchRenderable = (elementId, pageId) => (dispatch, getState) => {
+  const element = getElementById(getState(), elementId, pageId);
   const argumentPath = [element.id, 'expressionRenderable'];
   const { ast } = element;
 
@@ -70,40 +89,4 @@ export const fetchRenderable = () => (dispatch, getState) => {
     }));
   });
 };
-
-// actions without a reducer, typically used to dispatch other actions
-export const setAst = ({ ast, element, pageId }) => (dispatch) => {
-  try {
-    // short-circuit ast updates if nothing changed
-    const currentAst = fromExpression(element.expression);
-    if (!isEqual(currentAst, ast)) {
-      const expression = toExpression(ast);
-      dispatch(setElementExpression({ expression, element, pageId }));
-    }
-
-    dispatch(fetchRenderable());
-  } catch (e) {
-    notify.error(e);
-  }
-};
-
-export const setArgumentAtIndex = ({ arg, element, pageId, index }) => {
-  const newElement = assign(element, ['ast', 'chain', index, 'arguments'], arg);
-  return setAst({ ast: get(newElement, 'ast'), element, pageId });
-};
-
-export const setExpression = ({ expression, element, pageId }) => (dispatch) => {
-  try {
-    const ast = fromExpression(expression);
-
-    // if ast is unchanged, short circuit state update
-    if (!isEqual(element.ast, ast)) {
-      dispatch(args.clear({ path: [ element.id, 'expressionContext' ] }));
-      dispatch(setElementExpression({ expression, element, pageId }));
-    }
-
-    dispatch(fetchRenderable());
-  } catch (e) {
-    notify.error(e);
-  }
-};
+fetchRenderable.toString = () => 'fetchRenderable'; // createAction name proxy

@@ -15,7 +15,7 @@ function _getValue(hasError, value, oldVal) {
   return value;
 }
 
-function getContext(value, loading, oldVal = null) {
+function getContext(value, loading = false, oldVal = null) {
   const hasError = value instanceof Error;
   return {
     state: _getState(hasError, loading),
@@ -31,7 +31,7 @@ function getFullPath(path) {
   return prepend(path, 'resolvedArgs');
 }
 
-const resolvedArgs = handleActions({
+export default handleActions({
   [actions.setLoading]: (transientState, { payload }) => {
     const { path, loading = true } = payload;
     return set(transientState, getFullPath(path), getContext(null, loading));
@@ -39,8 +39,9 @@ const resolvedArgs = handleActions({
 
   [actions.setValue]: (transientState, { payload }) => {
     const { path, value } = payload;
-    const oldVal = get(transientState, getFullPath(path), null);
-    return set(transientState, getFullPath(path), getContext(value, false, oldVal));
+    const fullPath = getFullPath(path);
+    const oldVal = get(transientState, fullPath, null);
+    return set(transientState, fullPath, getContext(value, false, oldVal));
   },
 
   [actions.clear]: (transientState, { payload }) => {
@@ -48,5 +49,3 @@ const resolvedArgs = handleActions({
     return del(transientState, getFullPath(path));
   },
 }, {});
-
-export default resolvedArgs;

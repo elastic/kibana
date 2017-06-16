@@ -23,13 +23,13 @@ export function getSelectedElement(state) {
   return getElementById(state, getSelectedElementId(state));
 }
 
-export function getElements(state, pageId = null) {
+export function getElements(state, pageId) {
   const id = pageId || getSelectedPage(state);
-  if (!id) return;
+  if (!id) return [];
 
   const page = getPageById(state, id);
   const elements = get(page, 'elements');
-  if (!elements) return elements;
+  if (!elements) return [];
 
   return elements.map(element => ({
     ...element,
@@ -37,8 +37,8 @@ export function getElements(state, pageId = null) {
   }));
 }
 
-export function getElementById(state, id) {
-  return find(getElements(state), { id });
+export function getElementById(state, id, pageId) {
+  return find(getElements(state, pageId), { id });
 }
 
 export function getResolvedArgs(state, elementId, path) {

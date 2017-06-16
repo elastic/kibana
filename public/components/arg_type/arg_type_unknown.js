@@ -1,13 +1,10 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { Panel } from 'react-bootstrap';
 
-export const ArgTypeUnknown = ({ name }) => (
-  <Panel header={ name } bsStyle="warning">
-    <div>Unknown expression type</div>
-  </Panel>
+export const ArgTypeUnknown = ({ argType }) => (
+  <div>Unknown expression type "{argType}"</div>
 );
 
 ArgTypeUnknown.propTypes = {
-  name: PropTypes.string.isRequired,
+  argType: PropTypes.string,
 };
