@@ -33,12 +33,14 @@ function TimeseriesVisualization(props) {
   const seriesModel = model.series.map(s => _.cloneDeep(s));
   const firstSeries = seriesModel.find(s => s.formatter && !s.seperate_axis);
   const formatter = tickFormatter(_.get(firstSeries, 'formatter'), _.get(firstSeries, 'value_template'));
+  formatter.key = _.get(firstSeries, 'formatter') + _.get(firstSeries, 'value_template');
 
   const mainAxis = {
     position: model.axis_position,
     tickFormatter: formatter,
     axis_formatter: _.get(firstSeries, 'formatter', 'number'),
   };
+
 
   if (model.axis_min) mainAxis.min = model.axis_min;
   if (model.axis_max) mainAxis.max = model.axis_max;
@@ -89,6 +91,7 @@ function TimeseriesVisualization(props) {
         axisCount++;
 
         const formatter = tickFormatter(row.formatter, row.value_template);
+        formatter.key = row.formatter + row.value_template;
 
         const yaxis = {
           alignTicksWithAxis: 1,
@@ -96,6 +99,8 @@ function TimeseriesVisualization(props) {
           tickFormatter: formatter,
           axis_formatter: row.axis_formatter
         };
+
+
 
         if (row.axis_min != null) yaxis.min = row.axis_min;
         if (row.axis_max != null) yaxis.max = row.axis_max;

@@ -25,7 +25,8 @@ class FlotChart extends Component {
         if (this.props.yaxes[i]) {
           return axis.position !== this.props.yaxes[i].position ||
           axis.max !== this.props.yaxes[i].max ||
-          axis.min !== this.props.yaxes[i].min;
+          axis.min !== this.props.yaxes[i].min ||
+          axis.tickFormatter.key !== this.props.yaxes[i].tickFormatter.key;
         }
       });
       if (props.yaxes.length !== this.props.yaxes.length || valuesChanged) {
