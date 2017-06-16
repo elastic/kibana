@@ -191,6 +191,7 @@ class TimeseriesChart extends Component {
       reversed: this.props.reversed,
       series: this.props.series,
       annotations: this.props.annotations,
+      showGrid: this.props.showGrid,
       show: this.props.show,
       tickFormatter: this.props.tickFormatter,
       yaxes: this.props.yaxes
@@ -215,6 +216,10 @@ class TimeseriesChart extends Component {
 
 }
 
+TimeseriesChart.defaultProps = {
+  showGrid: true
+};
+
 TimeseriesChart.propTypes = {
   crosshair: PropTypes.bool,
   onBrush: PropTypes.func,
@@ -226,6 +231,7 @@ TimeseriesChart.propTypes = {
   show: PropTypes.array,
   tickFormatter: PropTypes.func,
   yaxes: PropTypes.array,
+  showGrid: PropTypes.bool,
   xaxisLabel: PropTypes.string
 };
 
