@@ -1,38 +1,30 @@
 import expect from 'expect.js';
 import ngMock from 'ng_mock';
+import { pluck } from 'lodash';
 import { IndicesGetIndicesProvider } from 'ui/indices/get_indices';
 
 describe('GetIndices', function () {
-  let response;
+  let indicesResponse;
+  let aliasesResponse;
   let getIndices;
 
   beforeEach(ngMock.module('kibana', ($provide) => {
-    response = {
-      '.monitoring-es-2': {
-        aliases: {},
-      },
-      '.monitoring-es-3': {
-        aliases: {
-          '.monitoring-es-active' : { }
-        },
-      },
-      '.monitoring-es-4': {
-        aliases: {},
-      },
-      '.monitoring-es-5': {
-        aliases: {},
-      },
-      '.kibana': {
-        aliases: {},
-      }
-    };
+    indicesResponse = [
+      { index: '.kibana' },
+      { index: '.monitoring-es-2' },
+      { index: '.monitoring-es-3' },
+      { index: '.monitoring-es-4' },
+      { index: '.monitoring-es-5' }
+    ];
+    aliasesResponse = [
+      { index: '.monitoring-es-active' }
+    ];
 
     $provide.service('esAdmin', function () {
       return {
-        indices: {
-          getAlias: async function () {
-            return response;
-          }
+        cat: {
+          indices: async () => indicesResponse,
+          aliases: async () => aliasesResponse
         }
       };
     });
@@ -48,9 +40,19 @@ describe('GetIndices', function () {
 
   it('should get all indices', async function () {
     const indices = await getIndices();
-    Object.keys(response).forEach(index => {
-      expect(indices).to.contain(index);
+    const expected = [...pluck(indicesResponse, 'index'), ...pluck(aliasesResponse, 'index')];
+
+    expected.forEach((value, index) => {
+      expect(value).to.be(indices[index]);
     });
     expect(indices).to.contain('.monitoring-es-active');
+  });
+
+  it('should handle no aliases', async function () {
+    const aliasesResponseCopy = aliasesResponse.slice(0);
+    aliasesResponse = {};
+    const indices = await getIndices();
+    expect(indices).to.not.contain('.monitoring-es-active');
+    aliasesResponse = aliasesResponseCopy;
   });
 });

@@ -1,18 +1,14 @@
-import { reduce, size } from 'lodash';
-
-const getIndicesFromResponse = json => {
-  return reduce(json, (list, { aliases }, indexName) => {
-    list.push(indexName);
-    if (size(aliases) > 0) {
-      list.push(...Object.keys(aliases));
-    }
-    return list;
-  }, []);
-};
+import { pluck } from 'lodash';
 
 export function IndicesGetIndicesProvider(esAdmin) {
   return async function getIndices(query) {
-    const aliasesJson = await esAdmin.indices.getAlias({ index: query, allowNoIndices: true });
-    return getIndicesFromResponse(aliasesJson);
+    const catIndices = await esAdmin.cat.indices({ index: query, format: 'json', ignore: 404 });
+    const catAliases = await esAdmin.cat.aliases({ name: query, format: 'json', ignore: 404 });
+
+    const indices = pluck(catIndices, 'index');
+    if (Array.isArray(catAliases)) {
+      indices.push(...pluck(catAliases, 'index'));
+    }
+    return indices;
   };
 }
