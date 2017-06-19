@@ -1,11 +1,8 @@
 import _ from 'lodash';
 import 'ui/field_format_editor/samples/samples';
-import { IndexPatternsFieldFormatProvider } from 'ui/index_patterns/_field_format/field_format';
+import { FieldFormat } from 'ui/index_patterns/_field_format/field_format';
 
-export function stringifyString(Private) {
-  const FieldFormat = Private(IndexPatternsFieldFormatProvider);
-
-
+export function stringifyString() {
   _.class(_String).inherits(FieldFormat);
   function _String(params) {
     _String.Super.call(this, params);
@@ -27,8 +24,10 @@ export function stringifyString(Private) {
     'conflict'
   ];
 
-  _String.paramDefaults = {
-    transform: false
+  _String.prototype.getParamDefaults = function () {
+    return {
+      transform: false
+    };
   };
 
   _String.editor = require('ui/stringify/editors/string.html');

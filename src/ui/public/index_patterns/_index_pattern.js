@@ -29,6 +29,7 @@ export function getRoutes() {
 
 export function IndexPatternProvider(Private, $http, config, kbnIndex, Promise, confirmModalPromise, kbnUrl) {
   const fieldformats = Private(RegistryFieldFormatsProvider);
+  const getConfig = (...args) => config.get(...args);
   const getIds = Private(IndexPatternsGetIdsProvider);
   const fieldsFetcher = Private(FieldsFetcherProvider);
   const intervals = Private(IndexPatternsIntervalsProvider);
@@ -72,7 +73,7 @@ export function IndexPatternProvider(Private, $http, config, kbnIndex, Promise, 
 
   function deserializeFieldFormatMap(mapping) {
     const FieldFormat = fieldformats.byId[mapping.id];
-    return FieldFormat && new FieldFormat(mapping.params);
+    return FieldFormat && new FieldFormat(mapping.params, getConfig);
   }
 
   function updateFromElasticSearch(indexPattern, response) {

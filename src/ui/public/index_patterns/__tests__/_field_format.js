@@ -1,16 +1,12 @@
 import _ from 'lodash';
 import expect from 'expect.js';
-import ngMock from 'ng_mock';
-import { IndexPatternsFieldFormatProvider } from 'ui/index_patterns/_field_format/field_format';
+import { FieldFormat } from 'ui/index_patterns/_field_format/field_format';
 
 describe('FieldFormat class', function () {
 
-  let FieldFormat;
   let TestFormat;
 
-  beforeEach(ngMock.module('kibana'));
-  beforeEach(ngMock.inject(function (Private) {
-    FieldFormat = Private(IndexPatternsFieldFormatProvider);
+  beforeEach(function () {
 
     TestFormat = function (params) {
       TestFormat.Super.call(this, params);
@@ -21,7 +17,7 @@ describe('FieldFormat class', function () {
     TestFormat.prototype._convert = _.asPrettyString;
 
     _.class(TestFormat).inherits(FieldFormat);
-  }));
+  });
 
   describe('params', function () {
     it('accepts its params via the constructor', function () {
@@ -53,7 +49,9 @@ describe('FieldFormat class', function () {
     });
 
     it('removes param values that match the defaults', function () {
-      TestFormat.paramDefaults = { foo: 'bar' };
+      TestFormat.prototype.getParamDefaults = function () {
+        return { foo: 'bar' };
+      };
 
       const f = new TestFormat({ foo: 'bar', baz: 'bar' });
       const ser = JSON.parse(JSON.stringify(f));
@@ -153,6 +151,11 @@ describe('FieldFormat class', function () {
       it('formats a value as " - " when no value is specified', function () {
         const f = new TestFormat();
         expect(f.convert()).to.be(' - ');
+      });
+
+      it('formats a list of values as text', function () {
+        const f = new TestFormat();
+        expect(f.convert(['one', 'two', 'three'])).to.be('["one","two","three"]');
       });
     });
 

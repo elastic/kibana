@@ -1,9 +1,7 @@
-import { IndexPatternsFieldFormatProvider } from 'ui/index_patterns/_field_format/field_format';
+import { FieldFormat } from 'ui/index_patterns/_field_format/field_format';
 import _ from 'lodash';
 
-export function stringifyBoolean(Private) {
-
-  const FieldFormat = Private(IndexPatternsFieldFormatProvider);
+export function stringifyBoolean() {
 
   class Bool extends FieldFormat {
 
