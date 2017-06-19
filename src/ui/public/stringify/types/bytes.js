@@ -1,7 +1,6 @@
-import { StringifyTypesNumeralProvider } from 'ui/stringify/types/_numeral';
+import { Numeral } from 'ui/stringify/types/_numeral';
 
-export function stringifyBytes(Private) {
-  const Numeral = Private(StringifyTypesNumeralProvider);
+export function stringifyBytes() {
   return Numeral.factory({
     id: 'bytes',
     title: 'Bytes',
