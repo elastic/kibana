@@ -1,12 +1,12 @@
 import crypto from 'crypto';
 
 export default function (server) {
-  async function updateMetadata(urlId, urlDoc, req) {
-    const { callWithRequest } = server.plugins.elasticsearch.getCluster('admin');
+  async function updateMetadata(urlId, urlDoc) {
+    const { callWithInternalUser } = server.plugins.elasticsearch.getCluster('admin');
     const kibanaIndex = server.config().get('kibana.index');
 
     try {
-      await callWithRequest(req, 'update', {
+      await callWithInternalUser('update', {
         index: kibanaIndex,
         type: 'url',
         id: urlId,
@@ -44,12 +44,12 @@ export default function (server) {
     return urlDoc;
   }
 
-  async function createUrlDoc(url, urlId, req) {
+  async function createUrlDoc(url, urlId) {
     const newUrlId = await new Promise((resolve, reject) => {
-      const { callWithRequest } = server.plugins.elasticsearch.getCluster('admin');
+      const { callWithInternalUser } = server.plugins.elasticsearch.getCluster('admin');
       const kibanaIndex = server.config().get('kibana.index');
 
-      callWithRequest(req, 'index', {
+      callWithInternalUser('index', {
         index: kibanaIndex,
         type: 'url',
         id: urlId,
@@ -85,14 +85,14 @@ export default function (server) {
       const urlDoc = await getUrlDoc(urlId, req);
       if (urlDoc) return urlId;
 
-      return createUrlDoc(url, urlId, req);
+      return createUrlDoc(url, urlId);
     },
     async getUrl(urlId, req) {
       try {
         const urlDoc = await getUrlDoc(urlId, req);
         if (!urlDoc) throw new Error('Requested shortened url does not exist in kibana index');
 
-        updateMetadata(urlId, urlDoc, req);
+        updateMetadata(urlId, urlDoc);
 
         return urlDoc._source.url;
       } catch (err) {
