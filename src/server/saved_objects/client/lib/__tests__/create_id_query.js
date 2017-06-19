@@ -1,9 +1,9 @@
 import expect from 'expect.js';
-import { createFindQuery } from '../create_id_query';
+import { createIdQuery } from '../create_id_query';
 
 describe('createIdQuery', () => {
   it('takes an id and type', () => {
-    const query = createFindQuery({
+    const query = createIdQuery({
       id: 'foo',
       type: 'bar'
     });
