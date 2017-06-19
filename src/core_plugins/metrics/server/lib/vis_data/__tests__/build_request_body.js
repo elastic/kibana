@@ -72,7 +72,7 @@ describe('buildRequestBody(req)', () => {
               'range': {
                 '@timestamp': {
                   'gte': 1485463055881,
-                  'lte': 1485463945881,
+                  'lte': 1485463955881,
                   'format': 'epoch_millis'
                 }
               }
@@ -106,7 +106,7 @@ describe('buildRequestBody(req)', () => {
                 'min_doc_count': 0,
                 'extended_bounds': {
                   'min': 1485463055881,
-                  'max': 1485463945881
+                  'max': 1485463955881
                 }
               },
               'aggs': {
