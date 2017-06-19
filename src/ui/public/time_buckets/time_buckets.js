@@ -9,6 +9,7 @@ export function TimeBucketsProvider(Private, timefilter, config) {
   const calcAuto = Private(TimeBucketsCalcAutoIntervalProvider);
   const calcEsInterval = Private(TimeBucketsCalcEsIntervalProvider);
   const fieldFormats = Private(RegistryFieldFormatsProvider);
+  const getConfig = (...args) => config.get(...args);
 
   function isValidMoment(m) {
     return m && ('isValid' in m) && m.isValid();
@@ -280,7 +281,7 @@ export function TimeBucketsProvider(Private, timefilter, config) {
     const DateFieldFormat = fieldFormats.getType('date');
     return new DateFieldFormat({
       pattern: this.getScaledDateFormat()
-    });
+    }, getConfig);
   };
 
 
