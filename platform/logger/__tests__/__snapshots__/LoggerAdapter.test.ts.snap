@@ -1,0 +1,3 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`throws if logger or level is not specified 1`] = `"Both logger and level must be specified. Logger was [undefined]. Log level was [undefined]."`;

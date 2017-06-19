@@ -2,9 +2,12 @@
   "rootDir": "../../",
   "roots": [
     "<rootDir>/src/core_plugins/kibana/public/dashboard",
-    "<rootDir>/ui_framework/"
+    "<rootDir>/ui_framework/",
+    "<rootDir>/platform/"
   ],
   "collectCoverageFrom": [
+    "platform/**/*.ts",
+    "!platform/plugins/**/*.ts",
     "ui_framework/services/**/*.js",
     "!ui_framework/services/index.js",
     "!ui_framework/services/**/*/index.js",
@@ -19,18 +22,27 @@
   "coverageReporters": [
     "html"
   ],
+  "globals": {
+    "__TS_CONFIG__": {
+      "target": "es6"
+    }
+  },
+  "mapCoverage": true,
   "moduleFileExtensions": [
+    "ts",
     "js",
     "json"
   ],
   "testMatch": [
-    "**/*.test.js"
+    "**/*.test.js",
+    "**/*.test.ts"
   ],
   "testPathIgnorePatterns": [
     "<rootDir>[/\\\\]ui_framework[/\\\\](dist|doc_site|jest)[/\\\\]"
   ],
   "transform": {
-    "^.+\\.js$": "<rootDir>/src/jest/babelTransform.js"
+    "^.+\\.js$": "<rootDir>/src/jest/babelTransform.js",
+    "^.+\\.ts$": "<rootDir>/node_modules/ts-jest/preprocessor.js"
   },
   "transformIgnorePatterns": [
     "[/\\\\]node_modules[/\\\\].+\\.js$"

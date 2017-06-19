@@ -1,0 +1,1 @@
+export { ConfigService } from './ConfigService';
