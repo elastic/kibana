@@ -667,7 +667,8 @@ body {
     opacity: 1; }
 
 .kuiColorPicker {
-  cursor: pointer; }
+  cursor: pointer;
+  display: inline-block; }
 
 .kuiColorPicker__preview {
   display: -webkit-box;
