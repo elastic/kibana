@@ -2,20 +2,18 @@ import _ from 'lodash';
 import { contentTypes } from 'ui/index_patterns/_field_format/content_types';
 
 export function FieldFormat(params) {
-  const self = this;
-
   // give the constructor a more appropriate name
-  self.type = self.constructor;
+  this.type = this.constructor;
 
   // keep the params and defaults seperate
-  self._params = params || {};
+  this._params = params || {};
 
   // one content type, so assume text
-  if (_.isFunction(self._convert)) {
-    self._convert = { text: self._convert };
+  if (_.isFunction(this._convert)) {
+    this._convert = { text: this._convert };
   }
 
-  contentTypes.setup(self);
+  contentTypes.setup(this);
 }
 
 FieldFormat.from = function (converter) {
