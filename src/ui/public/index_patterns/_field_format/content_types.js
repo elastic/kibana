@@ -12,10 +12,10 @@ const types = {
         return convert.call(format, value, field, hit);
       }
 
-      const subVals = value.map(function (v) {
+      const subVals = value.map(v => {
         return recurse(v, field, hit);
       });
-      const useMultiLine = subVals.some(function (sub) {
+      const useMultiLine = subVals.some(sub => {
         return sub.indexOf('\n') > -1;
       });
 
