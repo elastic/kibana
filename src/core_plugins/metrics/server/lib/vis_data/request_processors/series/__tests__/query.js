@@ -42,7 +42,7 @@ describe('query(req, panel, series)', () => {
               range: {
                 timestamp: {
                   gte: 1483228800000,
-                  lte: 1483232390000,
+                  lte: 1483232400000,
                   format: 'epoch_millis'
                 }
               }
@@ -66,7 +66,7 @@ describe('query(req, panel, series)', () => {
               range: {
                 timestamp: {
                   gte: 1483225200000,
-                  lte: 1483228790000,
+                  lte: 1483228800000,
                   format: 'epoch_millis'
                 }
               }
@@ -102,7 +102,7 @@ describe('query(req, panel, series)', () => {
               range: {
                 timestamp: {
                   gte: 1483228800000,
-                  lte: 1483232390000,
+                  lte: 1483232400000,
                   format: 'epoch_millis'
                 }
               }
@@ -150,7 +150,7 @@ describe('query(req, panel, series)', () => {
               range: {
                 timestamp: {
                   gte: 1483228800000,
-                  lte: 1483232390000,
+                  lte: 1483232400000,
                   format: 'epoch_millis'
                 }
               }
@@ -205,7 +205,7 @@ describe('query(req, panel, series)', () => {
               range: {
                 timestamp: {
                   gte: 1483228800000,
-                  lte: 1483232390000,
+                  lte: 1483232400000,
                   format: 'epoch_millis'
                 }
               }

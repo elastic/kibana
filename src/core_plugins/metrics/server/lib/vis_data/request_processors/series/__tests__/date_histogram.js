@@ -44,7 +44,7 @@ describe('dateHistogram(req, panel, series)', () => {
                 min_doc_count: 0,
                 extended_bounds: {
                   min: 1483228800000,
-                  max: 1483232390000
+                  max: 1483232400000
                 }
               }
             }
@@ -69,7 +69,7 @@ describe('dateHistogram(req, panel, series)', () => {
                 min_doc_count: 0,
                 extended_bounds: {
                   min: 1483225200000,
-                  max: 1483228790000
+                  max: 1483228800000
                 }
               }
             }
@@ -97,7 +97,7 @@ describe('dateHistogram(req, panel, series)', () => {
                 min_doc_count: 0,
                 extended_bounds: {
                   min: 1483228800000,
-                  max: 1483232380000
+                  max: 1483232400000
                 }
               }
             }
