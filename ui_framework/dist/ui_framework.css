@@ -666,6 +666,37 @@ body {
   .kuiCollapseButton:hover {
     opacity: 1; }
 
+.kuiColorPicker {
+  cursor: pointer;
+  display: inline-block; }
+
+.kuiColorPicker__preview {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-align: center;
+  -webkit-align-items: center;
+      -ms-flex-align: center;
+          align-items: center; }
+
+.kuiColorPicker__swatch {
+  width: 20px;
+  height: 20px;
+  border-radius: 4px;
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.2); }
+
+.kuiColorPicker__label {
+  font-size: 14px;
+  line-height: 1.5;
+  margin-left: 10px;
+  display: inline-block;
+  vertical-align: middle; }
+
+.kuiColorPickerPopUp {
+  position: absolute;
+  z-index: 10; }
+
 /**
  * 1. If we use margins instead, columns get pushed to the next line.
  */

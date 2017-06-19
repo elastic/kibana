@@ -90,3 +90,7 @@ export {
   KuiMenu,
   KuiMenuItem
 } from './menu';
+
+export {
+  KuiColorPicker
+} from './color_picker';
