@@ -1,0 +1,25 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`renders KuiColorPicker 1`] = `
+<div
+  class="kuiColorPicker testClass1 testClass2"
+  data-test-subj="test subject string"
+>
+  <div
+    class="kuiColorPicker__preview"
+  >
+    <div
+      aria-label="aria-label"
+      class="kuiColorPicker__swatch"
+      data-test-subj="colorSwatch"
+      style="background:#ffeedd;"
+    />
+    <div
+      aria-label="Color selection is #ffeedd"
+      class="kuiColorPicker__label"
+    >
+      #ffeedd
+    </div>
+  </div>
+</div>
+`;
