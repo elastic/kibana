@@ -5,7 +5,7 @@ import sinon from 'sinon';
 import expect from 'expect.js';
 import { escape } from 'lodash';
 
-import { contentTypes } from '../content_types';
+import { contentTypesSetup } from '../content_types';
 
 describe('index_patterns/_field_format/content_types', () => {
 
@@ -34,7 +34,7 @@ describe('index_patterns/_field_format/content_types', () => {
 
     render = (convert) => {
       const $el = $('<div>');
-      const { html } = contentTypes.setup({ _convert: { html: convert } });
+      const { html } = contentTypesSetup({ _convert: { html: convert } });
       $compile($el.html(html(`
         <!-- directive: test-directive -->
         <div></div>

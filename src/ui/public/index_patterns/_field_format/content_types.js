@@ -53,7 +53,7 @@ function fallbackHtml(value, field, hit) {
   }
 }
 
-function setup(format) {
+export function contentTypesSetup(format) {
   const src = format._convert || {};
   const converters = format._convert = {};
 
@@ -62,8 +62,3 @@ function setup(format) {
 
   return format._convert;
 }
-
-export const contentTypes = {
-  types: types,
-  setup: setup
-};

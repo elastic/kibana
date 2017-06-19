@@ -1,5 +1,5 @@
 import _ from 'lodash';
-import { contentTypes } from 'ui/index_patterns/_field_format/content_types';
+import { contentTypesSetup } from 'ui/index_patterns/_field_format/content_types';
 
 export function FieldFormat(params) {
   // give the constructor a more appropriate name
@@ -13,7 +13,7 @@ export function FieldFormat(params) {
     this._convert = { text: this._convert };
   }
 
-  contentTypes.setup(this);
+  contentTypesSetup(this);
 }
 
 FieldFormat.from = function (converter) {
@@ -49,7 +49,6 @@ FieldFormat.prototype.getConverterFor = function (contentType) {
 
 /**
  * Get parameter defaults
- * @param  {string} [contentType=text]
  * @return {object} - parameter defaults
  */
 FieldFormat.prototype.getParamDefaults = function () {
