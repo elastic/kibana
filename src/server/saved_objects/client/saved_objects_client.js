@@ -5,6 +5,7 @@ import {
   createFindQuery,
   createIdQuery,
   handleEsError,
+  getDocType
 } from './lib';
 
 const V6_TYPE = 'doc';
@@ -103,7 +104,7 @@ export class SavedObjectsClient {
 
     return {
       saved_objects: get(response, 'hits.hits', []).map(r => {
-        const docType =  get(r, '_source.type') || r._type;
+        const docType =  getDocType(r);
         return {
           id: r._id,
           type: docType,
