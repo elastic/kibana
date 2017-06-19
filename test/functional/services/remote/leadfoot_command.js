@@ -59,7 +59,7 @@ export async function initLeadfootCommand({ log, chromedriverApi }) {
       while (true) {
         const command = await Promise.race([
           delay(30 * SECOND),
-          attemptToCreateCommand(server, chromedriverApi)
+          attemptToCreateCommand(log, server, chromedriverApi)
         ]);
 
         if (!command) {
