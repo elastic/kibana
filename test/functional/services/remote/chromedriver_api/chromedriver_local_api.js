@@ -41,12 +41,14 @@ export function createLocalChromedriverApi(log, url) {
       while (true) {
         log.debug('[chromedriver:ping] attempting to reach chromedriver at %j', url);
         if (await ping(url)) {
-          // chromedriver is running and accepting connections
+          log.debug('[chromedriver:ping] success');
           break;
+        } else {
+          log.debug('[chromedriver:ping] failure');
         }
 
         if ((Date.now() - pingsStartedAt) < START_TIMEOUT) {
-          // chromedriver did not respond, wait for PING_INTERVAL and then try again
+          log.debug('[chromedriver:ping] waiting for %d before next ping', PING_INTERVAL);
           await delay(PING_INTERVAL);
           continue;
         }

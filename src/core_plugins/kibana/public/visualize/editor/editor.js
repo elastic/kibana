@@ -336,7 +336,7 @@ function VisEditor($rootScope, $scope, $route, timefilter, AppState, $window, kb
           kbnUrl.change(`${VisualizeConstants.EDIT_PATH}/{{id}}`, { id: savedVis.id });
         }
       }
-    }, notify.fatal);
+    }, notify.error);
   };
 
   $scope.unlink = function () {

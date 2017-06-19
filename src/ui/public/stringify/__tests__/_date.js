@@ -15,8 +15,9 @@ describe('Date Format', function () {
     settings = config;
 
     fieldFormats = Private(RegistryFieldFormatsProvider);
+    const getConfig = (...args) => config.get(...args);
     const DateFormat = fieldFormats.getType('date');
-    const date = new DateFormat();
+    const date = new DateFormat({}, getConfig);
 
     convert = date.convert.bind(date);
   }));

@@ -283,7 +283,7 @@ app.directive('dashboardApp', function ($injector) {
             }
           }
           return id;
-        }).catch(notify.fatal);
+        }).catch(notify.error);
       };
 
       const navActions = {};
