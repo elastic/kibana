@@ -414,21 +414,9 @@ describe('AggConfig', function () {
     });
   });
 
-  describe('#fieldFormatter', function () {
-    it('returns the fields format unless the agg type has a custom getFormat handler', function () {
-      let vis = new Vis(indexPattern, {
-        type: 'histogram',
-        aggs: [
-          {
-            type: 'date_histogram',
-            schema: 'segment',
-            params: { field: '@timestamp' }
-          }
-        ]
-      });
-      expect(vis.aggs[0].fieldFormatter()).to.be(vis.aggs[0].getField().format.getConverterFor());
-
-      vis = new Vis(indexPattern, {
+  describe('#fieldFormatter - custom getFormat handler', function () {
+    it('returns formatter from getFormat handler', function () {
+      const vis = new Vis(indexPattern, {
         type: 'metric',
         aggs: [
           {
@@ -440,53 +428,43 @@ describe('AggConfig', function () {
       });
       expect(vis.aggs[0].fieldFormatter()).to.be(fieldFormat.getDefaultInstance('number').getConverterFor());
     });
+  });
+
+  describe('#fieldFormatter - no custom getFormat handler', function () {
+
+    const visStateAggWithoutCustomGetFormat = {
+      type: 'table',
+      aggs: [
+        {
+          type: 'terms',
+          schema: 'bucket',
+          params: { field: 'bytes' }
+        }
+      ]
+    };
+    let vis;
+
+    beforeEach(function () {
+      vis = new Vis(indexPattern, visStateAggWithoutCustomGetFormat);
+    });
+
+    it('returns the field\'s formatter', function () {
+      expect(vis.aggs[0].fieldFormatter()).to.be(vis.aggs[0].getField().format.getConverterFor());
+    });
 
     it('returns the string format if the field does not have a format', function () {
-      const vis = new Vis(indexPattern, {
-        type: 'histogram',
-        aggs: [
-          {
-            type: 'date_histogram',
-            schema: 'segment',
-            params: { field: '@timestamp' }
-          }
-        ]
-      });
-
       const agg = vis.aggs[0];
-      agg.params.field = { type: 'date', format: null };
+      agg.params.field = { type: 'number', format: null };
       expect(agg.fieldFormatter()).to.be(fieldFormat.getDefaultInstance('string').getConverterFor());
     });
 
     it('returns the string format if their is no field', function () {
-      const vis = new Vis(indexPattern, {
-        type: 'histogram',
-        aggs: [
-          {
-            type: 'date_histogram',
-            schema: 'segment',
-            params: { field: '@timestamp' }
-          }
-        ]
-      });
-
       const agg = vis.aggs[0];
       delete agg.params.field;
       expect(agg.fieldFormatter()).to.be(fieldFormat.getDefaultInstance('string').getConverterFor());
     });
 
     it('returns the html converter if "html" is passed in', function () {
-      const vis = new Vis(indexPattern, {
-        type: 'histogram',
-        aggs: [
-          {
-            type: 'avg',
-            schema: 'metric',
-            params: { field: 'bytes' }
-          }
-        ]
-      });
-
       const field = indexPattern.fields.byName.bytes;
       expect(vis.aggs[0].fieldFormatter('html')).to.be(field.format.getConverterFor('html'));
     });
