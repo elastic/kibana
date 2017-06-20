@@ -83,7 +83,6 @@ export {
 } from './menu';
 
 export {
-  KuiTabsCompact,
   KuiTabs,
   KuiTab
 } from './tabs';
