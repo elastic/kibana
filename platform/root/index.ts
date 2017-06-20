@@ -50,7 +50,8 @@ export class Root {
     this.configService.reloadConfig();
   }
 
-  // TODO Accept `string | Error` reason for shutdown?
+  // TODO Accept optional `Error` reason for shutdown? Then we can `exit(1)`
+  // instead of `exit(0)` if it's because of a failure.
   shutdown() {
     this.log.info('stopping Kibana');
     if (this.server !== undefined) {
