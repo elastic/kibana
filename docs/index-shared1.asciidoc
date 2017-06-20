@@ -16,3 +16,8 @@ release-state can be: released | prerelease | unreleased
 :commit:          {repo}commit/
 :blob:            {repo}blob/{branch}/
 :security-ref:    https://www.elastic.co/community/security/
+
+
+include::introduction.asciidoc[]
+
+include::setup.asciidoc[]

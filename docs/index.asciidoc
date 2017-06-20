@@ -1,5 +1,7 @@
 [[kibana-guide]]
 = Kibana User Guide
 
-include::Versions.asciidoc[]
-include::index-shared.asciidoc[]
+include::index-shared1.asciidoc[]
+include::index-shared2.asciidoc[]
+include::index-shared3.asciidoc[]
+include::index-shared4.asciidoc[]
