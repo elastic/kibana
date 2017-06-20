@@ -136,7 +136,7 @@ export class ConfigService {
 
   async getUnusedPaths(): Promise<string[]> {
     const config = await this.config$.first().toPromise();
-    const flatConfigPaths: string[] = [...flattenObject(config)].map(obj => obj.key);
+    const flatConfigPaths = [...flattenObject(config)].map(obj => obj.key);
     const handledPaths = this.handledPaths.map(pathToString);
 
     return flatConfigPaths.filter(path =>
@@ -157,12 +157,15 @@ const pathToString = (path: ConfigPath) =>
 const isPathHandled = (path: string, handledPaths: string[]) =>
   handledPaths.some(handledPath => path.startsWith(handledPath));
 
-function* flattenObject(obj: { [key: string]: any }, accKey?: string): any {
+function* flattenObject(
+  obj: { [key: string]: any },
+  accKey: string = ''
+): IterableIterator<{ key: string, value: any }> {
   if (typeof obj !== 'object') {
     yield { key: accKey, value: obj };
   } else {
     for (const key in obj) {
-      yield *flattenObject(obj[key], (accKey ? accKey + '.' : '') + key);
+      yield* flattenObject(obj[key], (accKey !== '' ? accKey + '.' : '') + key);
     }
   }
 }
