@@ -1,6 +1,7 @@
 $searchInputTextColor: #ACACAC;
 
 .kuiSearchInput {
+  width: $globalFormFieldDefaultWidth;
   display: inline-block;
   position: relative;
   font-size: $globalFontSize;
@@ -30,3 +31,11 @@ $searchInputTextColor: #ACACAC;
     padding-left: 28px; /* 1 */
     width: 100%; /* 2 */
   }
+
+.kuiSearchInput--small {
+  width: $globalFormFieldSmallWidth;
+}
+
+.kuiSearchInput--large {
+  width: $globalFormFieldLargeWidth;
+}
