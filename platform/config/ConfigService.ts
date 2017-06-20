@@ -1,7 +1,7 @@
 import { BehaviorSubject, Observable } from 'rxjs';
 import { get, isEqual } from 'lodash';
 
-import { getRawConfig } from './readConfig';
+import { getConfigFromFile } from './readConfig';
 import { applyArgv } from './applyArgv';
 import { Env } from './Env';
 import { Logger, LoggerFactory } from '../logger';
@@ -15,19 +15,23 @@ interface RawConfig {
 type ConfigPath = string | string[];
 
 export class ConfigService {
-  // We rely on a BehaviorSubject as we want every subscriber to immediately
-  // receive the current config when subscribing, aka we have a notion of a
-  // _current_ config.
+  /**
+   * The stream of configs read from the config file. Will only be `undefined`
+   * before the config is initially read. This is the _raw_ config before any
+   * argv or similar is applied.
+   *
+   * As we have a notion of a _current_ config we rely on a BehaviorSubject so
+   * every new subscription will immediately receive the current config.
+   */
   private readonly rawConfigFromFile$: BehaviorSubject<RawConfig | void> =
     new BehaviorSubject(undefined)
 
-  private readonly rawConfig$: Observable<RawConfig>;
+  private readonly config$: Observable<RawConfig>;
   private readonly log: Logger;
 
   /**
-   * Whenever a config if read at a path, we mark that path as handled. We can
-   * then notify about unhandled config paths when the entire startup process
-   * is completed.
+   * Whenever a config if read at a path, we mark that path as 'handled'. We can
+   * then list all unhandled config paths when the startup process is completed.
    */
   private readonly handledPaths: ConfigPath[] = [];
 
@@ -38,26 +42,26 @@ export class ConfigService {
   ) {
     this.log = logger.get('config');
 
-    this.rawConfig$ = this.rawConfigFromFile$
+    this.config$ = this.rawConfigFromFile$
       .filter(rawConfig => rawConfig !== undefined)
-      // We _know_ `RawConfig` can no longer be `undefined`, but it can't be
-      // expressed with TS types yet, so below we just _tell_ TS that it is
+      // Now we _know_ `RawConfig` can no longer be `undefined`, but we can't
+      // express that with TS types yet, so below we just _tell_ TS that it is
       // guaranteed to no longer be `undefined`.
       .map<RawConfig | void, RawConfig>(rawConfig => rawConfig!)
-      .map(rawConfig => applyArgv(argv, rawConfig))
-      // we only care about reloading the config if there are changes
-      .distinctUntilChanged((prev, next) => isEqual(prev, next));
+      // We only want to update the config if there are changes to it
+      .distinctUntilChanged((current, next) => isEqual(current, next))
+      .map(rawConfig => applyArgv(argv, rawConfig));
   }
 
   /**
-   * Reads the initial Kibana config.
+   * Read the initial Kibana config.
    */
   start() {
     this.loadConfig();
   }
 
   /**
-   * Re-reads the Kibana config.
+   * Re-read the Kibana config.
    */
   reloadConfig() {
     this.log.info('reloading config');
@@ -66,10 +70,10 @@ export class ConfigService {
   }
 
   /**
-   * Loads the config by reading the raw config from the file system.
+   * Load the config by reading the raw config from the file system.
    */
   private loadConfig() {
-    const config = getRawConfig(this.argv.config, this.env.getDefaultConfigFile());
+    const config = getConfigFromFile(this.argv.config, this.env.getDefaultConfigFile());
     this.rawConfigFromFile$.next(config);
   }
 
@@ -93,38 +97,45 @@ export class ConfigService {
     ConfigClass: ConfigWithSchema<Schema, Config>
   ) {
     return this.getDistinctRawConfig(path)
-      .map(value => {
-        const config = ConfigClass.createSchema(schema).validate(value);
-        return new ConfigClass(config, this.env);
-      });
+      .map(rawConfig => this.createConfig(rawConfig, ConfigClass));
   }
 
+  /**
+   * Same as `atPath`, but returns `undefined` if there is no config at the
+   * specified path.
+   *
+   * @see atPath
+   */
   optionalAtPath<Schema extends schema.Any, Config>(
     path: ConfigPath,
     ConfigClass: ConfigWithSchema<Schema, Config>
   ) {
     return this.getDistinctRawConfig(path)
-      .map(value => {
-        const config = schema.maybe(ConfigClass.createSchema(schema)).validate(value);
+      .map(rawConfig =>
+        rawConfig === undefined
+          ? undefined
+          : this.createConfig(rawConfig, ConfigClass)
+      );
+  }
 
-        if (config === undefined) {
-          return undefined;
-        }
-
-        return new ConfigClass(config, this.env);
-      });
+  private createConfig<Schema extends schema.Any, Config>(
+    rawConfig: {},
+    ConfigClass: ConfigWithSchema<Schema, Config>
+  ) {
+    const config = ConfigClass.createSchema(schema).validate(rawConfig);
+    return new ConfigClass(config, this.env);
   }
 
   private getDistinctRawConfig(path: ConfigPath) {
     this.handledPaths.push(path);
 
-    return this.rawConfig$
+    return this.config$
       .map(config => get(config, path))
       .distinctUntilChanged((prev, next) => isEqual(prev, next))
   }
 
   async getUnusedPaths(): Promise<string[]> {
-    const config = await this.rawConfig$.first().toPromise();
+    const config = await this.config$.first().toPromise();
     const flatConfigPaths: string[] = [...flattenObject(config)].map(obj => obj.key);
     const handledPaths = this.handledPaths.map(pathToString);
 
@@ -139,6 +150,10 @@ const pathToString = (path: ConfigPath) =>
     ? path.join('.')
     : path;
 
+/**
+ * A path is considered 'handled' if it is a subset of any of the already
+ * handled paths.
+ */
 const isPathHandled = (path: string, handledPaths: string[]) =>
   handledPaths.some(handledPath => path.startsWith(handledPath));
 

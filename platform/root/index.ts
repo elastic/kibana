@@ -2,14 +2,14 @@ import { Server } from '../server';
 import { ConfigService, Env } from '../config';
 import { LoggerService, Logger, LoggerFactory, LoggerConfig, MutableLoggerFactory } from '../logger';
 
-// Top-level entry point to kick off the app
-
+/**
+ * Top-level entry point to kick off the app and start the Kibana server.
+ */
 export class Root {
   configService: ConfigService;
   server?: Server;
   log: Logger;
   logger: LoggerFactory;
-
   loggerService: LoggerService;
 
   constructor(
