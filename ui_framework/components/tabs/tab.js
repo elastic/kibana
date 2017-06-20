@@ -2,8 +2,8 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
 
-export const KuiTab = ({ isSelected, onClick, children, ...rest }) => {
-  const classes = classNames('kuiTab', {
+export const KuiTab = ({ isSelected, onClick, children, className, ...rest }) => {
+  const classes = classNames('kuiTab', className, {
     'kuiTab-isSelected': isSelected
   });
 
@@ -22,4 +22,5 @@ KuiTab.propTypes = {
   isSelected: PropTypes.bool,
   onClick: PropTypes.func,
   children: PropTypes.node,
+  className: React.PropTypes.string
 };
