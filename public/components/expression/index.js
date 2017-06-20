@@ -17,9 +17,7 @@ const mapDispatchToProps = ({
 const mergeProps = (stateProps, dispatchProps, ownProps) => {
   const { element, pageId } = stateProps;
 
-  if (!element) {
-    return Object.assign({}, ownProps, stateProps, dispatchProps);
-  }
+  if (!element) return Object.assign({}, ownProps, stateProps, dispatchProps);
 
   const { expression } = element;
 

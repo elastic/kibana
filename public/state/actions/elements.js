@@ -8,8 +8,6 @@ import { getType } from '../../../common/types/get_type';
 import { fromExpression, toExpression } from '../../../common/lib/ast';
 import * as args from './resolved_args';
 
-// exported actions, used by reducers
-// export const setElementExpression = createAction('setElementExpression');
 
 function astToExpression({ ast, element, pageId }) {
   try {
@@ -19,6 +17,10 @@ function astToExpression({ ast, element, pageId }) {
     return { expression: element.expression, pageId, element };
   }
 }
+
+export const addElement = createAction('addElement', (expression, pageId) => ({ pageId, expression }));
+
+export const removeElement = createAction('removeElement', (elementId, pageId) => ({ pageId, elementId }));
 
 export const setExpression = createAction('setExpression');
 

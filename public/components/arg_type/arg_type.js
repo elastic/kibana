@@ -32,13 +32,19 @@ const contextPending = branch(checkState('pending'), renderComponent(ArgTypeCont
 const contextError = branch(checkState('error'), renderComponent(ArgTypeContextError));
 
 // dispatch context update if none is provided
+const fetchContext = (props) => {
+  const { expressionType, context, updateContext } = props;
+  if (context == null && Boolean(expressionType && expressionType.requiresContext)) {
+    updateContext();
+  }
+};
+
 const contextLifecycle = lifecycle({
   componentWillMount() {
-    const { expressionType, context, updateContext } = this.props;
-
-    if (context == null && Boolean(expressionType && expressionType.requiresContext)) {
-      updateContext();
-    }
+    fetchContext(this.props);
+  },
+  componentWillReceiveProps(newProps) {
+    fetchContext(newProps);
   },
 });
 

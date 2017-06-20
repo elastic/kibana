@@ -9,14 +9,27 @@ import { ElementTypes } from './element_types';
 
 import './toolbar.less';
 
-export const Toolbar = ({ editing, tray, setTray }) => {
+export const Toolbar = ({ editing, tray, setTray, addElement }) => {
   const done = () => setTray(null);
   const showHideTray = (exp) => {
-    if (tray && tray.type === exp.type) return setTray(null);
+    if (tray && tray.type === exp.type) return done();
     setTray(exp);
   };
 
-  const ElementsTray = (<ElementTypes done={done} onClick={alert} />);
+  const createElement = (name) => {
+    const table = 'demodata().pointseries(y="median(cost)", x=time, color="project")';
+
+    if (name === 'table') {
+      addElement(table);
+    } else {
+      addElement(`${table}.plot(defaultStyle=seriesStyle(bars=0, lines=1, weight=0, points=0))`);
+    }
+
+    // clonse the tray
+    done();
+  };
+
+  const ElementsTray = (<ElementTypes done={done} onClick={createElement} />);
   const ExpressionTray = (<Expression done={done} />);
 
   return !editing ? null : (
@@ -35,4 +48,5 @@ Toolbar.propTypes = {
   editing: PropTypes.bool,
   tray: PropTypes.node,
   setTray: PropTypes.func,
+  addElement: PropTypes.func,
 };

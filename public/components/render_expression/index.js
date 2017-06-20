@@ -1,67 +1,51 @@
 import { connect } from 'react-redux';
-import { renderComponent, branch } from 'recompose';
-import { get, flowRight } from 'lodash';
+import { get } from 'lodash';
 import { RenderExpression as Component } from './render_expression';
-import { InvalidExpression } from './invalid_element';
-import { Loading } from '../loading';
-import { elements } from '../../lib/elements';
-import { getState, getValue, getError } from '../../lib/resolved_arg';
+import { elements as elementsRegistry } from '../../lib/elements';
+import { getValue } from '../../lib/resolved_arg';
 import { getType } from '../../../common/types/get_type';
-import { fetchRenderable } from '../../state/actions/elements';
+import { fetchRenderable, removeElement } from '../../state/actions/elements';
 import { selectElement } from '../../state/actions/transient';
-import { getSelectedElementId, getResolvedArgs } from '../../state/selectors/workpad';
+import { getSelectedElementId, getResolvedArgs, getSelectedPage } from '../../state/selectors/workpad';
 
-const renderLoading = branch(
-  props => [null, 'pending'].includes(getState(props.renderable)),
-  renderComponent(Loading)
-);
+const mapStateToProps = (state, { element }) => ({
+  renderable: getResolvedArgs(state, element.id, 'expressionRenderable'),
+  selectedElement: getSelectedElementId(state),
+  selectedPage: getSelectedPage(state),
+});
 
-const renderInvalidExpression = branch(
-  props => !props.expressionType || getError(props.renderable) !== null,
-  renderComponent(InvalidExpression)
-);
-
-function mapStateToProps(state, ownProps) {
-  return {
-    renderable: getResolvedArgs(state, ownProps.element.id, 'expressionRenderable'),
-    selectedElement: getSelectedElementId(state),
-  };
-}
-
-const mapDispatchToProps = (dispatch, ownProps) => {
-  return {
-    fetchRenderable: () => dispatch(fetchRenderable(ownProps.element.id)),
-    selectElement(ev) {
-      ev && ev.stopPropagation();
-      dispatch(selectElement(ownProps.element.id));
-    },
-  };
-};
+const mapDispatchToProps = (dispatch, { element }) => ({
+  fetchRenderable: () => dispatch(fetchRenderable(element.id)),
+  selectElement(ev) {
+    ev && ev.stopPropagation();
+    dispatch(selectElement(element.id));
+  },
+  removeElementFromPage: (pageId) => (ev) => {
+    ev && ev.stopPropagation();
+    dispatch(removeElement(element.id, pageId));
+  },
+});
 
 let cleanupFn;
-function mergeProps(stateProps, dispatchProps, ownProps) {
+const mergeProps = (stateProps, dispatchProps, ownProps) => {
   const noop = () => {};
   const { renderable } = stateProps;
   const { done } = ownProps;
-  const element = elements.get(get(getValue(renderable), 'as'));
-
-  if (getState(renderable) === null) {
-    dispatchProps.fetchRenderable();
-  }
+  const element = elementsRegistry.get(get(getValue(renderable), 'as'));
 
   return Object.assign({}, stateProps, dispatchProps, ownProps, {
     expressionType: getType(getValue(renderable)),
+    removeElement: dispatchProps.removeElementFromPage(stateProps.selectedPage),
     renderFn(domNode) {
       cleanupFn = element.render(domNode, getValue(renderable).value, done || noop);
     },
-    destroyFn: (element) => {
-      if (cleanupFn) element.destroy(cleanupFn);
+    destroyFn: () => {
+      if (cleanupFn) {
+        element.destroy(cleanupFn);
+        cleanupFn = null;
+      }
     },
   });
-}
+};
 
-export const RenderExpression = flowRight([
-  connect(mapStateToProps, mapDispatchToProps, mergeProps),
-  renderLoading,
-  renderInvalidExpression,
-])(Component);
+export const RenderExpression = connect(mapStateToProps, mapDispatchToProps, mergeProps)(Component);

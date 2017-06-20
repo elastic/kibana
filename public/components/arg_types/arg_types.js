@@ -15,9 +15,9 @@ function wrapExpression(chain) {
 
 const noSelected = branch(props => !props.argTypeChain, renderComponent(ElementNotSelected));
 
-const Component = ({ argTypeChain }) => {
+const ArgTypesComponent = ({ argTypeChain }) => {
   function renderArguments(astChain) {
-    return astChain.reduce((acc, chain, i) => {
+    const argTypeItems = astChain.reduce((acc, chain, i) => {
       const prevContext = acc.context;
       const nextArg = astChain[i + 1] || null;
 
@@ -35,7 +35,9 @@ const Component = ({ argTypeChain }) => {
       acc.context = acc.context.concat(chain);
 
       return acc;
-    }, { components: [], context: [] }).components;
+    }, { components: [], context: [] });
+
+    return argTypeItems.components;
   }
 
   return (
@@ -45,8 +47,8 @@ const Component = ({ argTypeChain }) => {
   );
 };
 
-Component.propTypes = {
+ArgTypesComponent.propTypes = {
   argTypeChain: PropTypes.array.isRequired,
 };
 
-export const ArgTypes = compose(noSelected)(Component);
+export const ArgTypes = compose(noSelected)(ArgTypesComponent);
