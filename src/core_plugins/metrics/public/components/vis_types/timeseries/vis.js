@@ -46,6 +46,10 @@ function TimeseriesVisualization(props) {
   const yaxes = [mainAxis];
 
 
+  let percentAxis = false;
+  let percentAxisCount;
+  const percentSums = [];
+
   seriesModel.forEach(s => {
     series
       .filter(r => _.startsWith(r.id, s.id))
@@ -57,8 +61,9 @@ function TimeseriesVisualization(props) {
         .forEach(r => delete r.label);
     }
     if (s.stacked === 'percent') {
+      percentAxis = true;
       s.seperate_axis = true;
-      s.axis_formatter = 'percent';
+      s.formatter = 'percent';
       s.axis_min = 0;
       s.axis_max = 1;
       s.axis_position = model.axis_position;
@@ -69,13 +74,27 @@ function TimeseriesVisualization(props) {
           const rowSum = seriesData.reduce((acc, item) => {
             return item.data[index][1] + acc;
           }, 0);
-          seriesData.forEach(item => {
-            item.data[index][1] = rowSum && item.data[index][1] / rowSum || 0;
-          });
+          percentSums[index] = percentSums[index] && percentSums[index] + rowSum || rowSum;
         });
       }
     }
   });
+
+  if (percentAxis) {
+    seriesModel
+      .filter(s => s.stacked === 'percent')
+      .forEach(s => {
+        const seriesData = series.filter(r => _.startsWith(r.id, s.id));
+        seriesData.forEach((item) => {
+          item.tickFormatter = tickFormatter('percent');
+          item.data = item.data.map((val, index) => {
+            const [date, value] = val;
+            const rowSum = percentSums[index];
+            return [date, rowSum && value / rowSum || 0];
+          });
+        });
+      });
+  }
 
   const interval = series.reduce((currentInterval, item) => {
     const seriesInterval = item.data[1][0] - item.data[0][0];
@@ -83,10 +102,16 @@ function TimeseriesVisualization(props) {
   }, 0);
 
   let axisCount = 1;
+  if (seriesModel.every(hasSeperateAxis)) {
+    yaxes.shift();
+    axisCount = 0;
+  }
   if (seriesModel.some(hasSeperateAxis)) {
     seriesModel.forEach((row) => {
       if (row.seperate_axis) {
-        axisCount++;
+        if (row.stacked === 'percent' && percentAxisCount) return;
+        if (row.stacked !== 'percent') axisCount++;
+        if (row.stacked === 'percent' && !percentAxisCount) percentAxisCount = ++axisCount;
 
         const formatter = tickFormatter(row.formatter, row.value_template);
 
@@ -106,11 +131,17 @@ function TimeseriesVisualization(props) {
         series
           .filter(r => _.startsWith(r.id, row.id))
           .forEach(r => {
-            r.yaxis = axisCount;
+            if (row.stacked === 'percent') {
+              r.yaxis = percentAxisCount;
+            } else {
+              r.yaxis = axisCount;
+            }
           });
       }
     });
   }
+
+
 
   const params = {
     crosshair: true,
