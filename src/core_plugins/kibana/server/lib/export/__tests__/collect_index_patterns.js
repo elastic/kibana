@@ -35,9 +35,11 @@ describe('collectIndexPatterns(req, panels)', () => {
   const savedObjectsClient = { bulkGet: sinon.mock() };
 
   beforeEach(() => {
-    savedObjectsClient.bulkGet.returns(Promise.resolve([
-      { id: 'index-*' }, { id: 'logstash-*' }
-    ]));
+    savedObjectsClient.bulkGet.returns(Promise.resolve({
+      saved_objects: [
+        { id: 'index-*' }, { id: 'logstash-*' }
+      ]
+    }));
   });
 
   afterEach(() => {

@@ -26,6 +26,27 @@ export class SavedObjectsClient {
     });
   }
 
+  /**
+   * Returns an array of objects by id
+   *
+   * @param {array} objects - an array ids, or an array of objects containing id and optionally type
+   * @returns {promise} Returns promise containing array of documents
+   * @example
+   *
+   * bulkGet([
+   *   { id: 'one', type: 'config' },
+   *   { id: 'foo', type: 'index-pattern'
+   * ])
+   */
+  bulkGet(objects = []) {
+    const url = this._getUrl(['bulk_get']);
+
+    return this._request('POST', url, objects).then(resp => {
+      resp.saved_objects = resp.saved_objects.map(d => this.createSavedObject(d));
+      return keysToCamelCaseShallow(resp);
+    });
+  }
+
   delete(type, id) {
     if (!type || !id) {
       return this._PromiseCtor.reject(new Error('requires type and id'));
@@ -47,16 +68,30 @@ export class SavedObjectsClient {
     return this._request('PUT', this._getUrl([type, id]), body);
   }
 
-  create(type, body) {
-    if (!type || !body) {
-      return this._PromiseCtor.reject(new Error('requires type and body'));
+  /**
+   * @param {string} type
+   * @param {object} attributes
+   * @returns {promise}
+  */
+  create(type, attributes) {
+    if (!type || !attributes) {
+      return this._PromiseCtor.reject(new Error('requires type and attributes'));
     }
 
     const url = this._getUrl([type]);
 
-    return this._request('POST', url, body);
+    return this._request('POST', url, { attributes });
   }
 
+  /**
+   * @param {object} options
+   * @param {string} options.type
+   * @param {string} options.search
+   * @param {integer} options.page
+   * @param {integer} options.perPage
+   * @param {array} option.fields
+   * @returns {promise}
+   */
   find(options = {}) {
     const url = this._getUrl([options.type], keysToSnakeCaseShallow(options));
 

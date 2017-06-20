@@ -11,8 +11,8 @@ export async function collectDashboards(savedObjectsClient, ids) {
     };
   });
 
-  const docs = await savedObjectsClient.bulkGet(objects);
-  const results = await Promise.all(docs.map(d => collectPanels(savedObjectsClient, d)));
+  const { saved_objects } = await savedObjectsClient.bulkGet(objects);
+  const results = await Promise.all(saved_objects.map(d => collectPanels(savedObjectsClient, d)));
 
   return results
     .reduce((acc, result) => acc.concat(result), [])

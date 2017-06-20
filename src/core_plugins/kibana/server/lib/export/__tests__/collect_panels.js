@@ -21,9 +21,11 @@ describe('collectPanels(req, dashboard)', () => {
       }
     };
 
-    savedObjectsClient.bulkGet.returns(Promise.resolve([
-      { id: 'panel-01' }, { id: 'panel-02' }
-    ]));
+    savedObjectsClient.bulkGet.returns(Promise.resolve({
+      saved_objects: [
+        { id: 'panel-01' }, { id: 'panel-02' }
+      ]
+    }));
 
     collectIndexPatternsStub = sinon.stub(collectIndexPatternsDep, 'collectIndexPatterns');
     collectIndexPatternsStub.returns([{ id: 'logstash-*' }]);
