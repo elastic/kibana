@@ -224,7 +224,6 @@
     "event-stream": "3.3.2",
     "expect.js": "0.3.1",
     "faker": "1.1.0",
-    "github-markdown-css": "2.8.0",
     "grunt": "1.0.1",
     "grunt-angular-translate": "0.3.0",
     "grunt-aws-s3": "0.14.5",
