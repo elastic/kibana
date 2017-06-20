@@ -24,6 +24,9 @@
   margin-top: 2px !important;
 }
 
+/**
+ * 1. Fix appearance of ui-select in the Filtering UI.
+ */
 .btn-default .ui-select-placeholder {
-  color: @input-color-placeholder;
+  color: tint(@globalColorBlue, 70%); /* 1 */
 }
