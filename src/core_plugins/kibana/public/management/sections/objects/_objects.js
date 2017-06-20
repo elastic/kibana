@@ -1,5 +1,5 @@
 import { saveAs } from '@spalger/filesaver';
-import { extend, find, flattenDeep, partialRight, pick, pluck, sortBy } from 'lodash';
+import { extend, find, flattenDeep, pluck, sortBy } from 'lodash';
 import angular from 'angular';
 import { savedObjectManagementRegistry } from 'plugins/kibana/management/saved_object_registry';
 import objectIndexHTML from 'plugins/kibana/management/sections/objects/_objects.html';
@@ -18,7 +18,7 @@ uiRoutes
 });
 
 uiModules.get('apps/management')
-.directive('kbnManagementObjects', function (kbnIndex, Notifier, Private, kbnUrl, Promise, confirmModal) {
+.directive('kbnManagementObjects', function (kbnIndex, Notifier, Private, kbnUrl, Promise, confirmModal, savedObjectsClient) {
   return {
     restrict: 'E',
     controllerAs: 'managementObjectsController',
@@ -123,7 +123,10 @@ uiModules.get('apps/management')
 
       // TODO: Migrate all scope methods to the controller.
       $scope.bulkExport = function () {
-        const objs = $scope.selectedItems.map(partialRight(extend, { type: $scope.currentTab.type }));
+        const objs = $scope.selectedItems.map(item => {
+          return { type: $scope.currentTab.type, id: item.id };
+        });
+
         retrieveAndExportDocs(objs);
       };
 
@@ -138,18 +141,17 @@ uiModules.get('apps/management')
 
       function retrieveAndExportDocs(objs) {
         if (!objs.length) return notify.error('No saved objects to export.');
-        esAdmin.mget({
-          index: kbnIndex,
-          body: { docs: objs.map(transformToMget) }
-        })
-        .then(function (response) {
-          saveToFile(response.docs.map(partialRight(pick, '_id', '_type', '_source')));
-        });
-      }
 
-      // Takes an object and returns the associated data needed for an mget API request
-      function transformToMget(obj) {
-        return { _id: obj.id, _type: obj.type };
+        savedObjectsClient.bulkGet(objs)
+          .then(function (response) {
+            saveToFile(response.savedObjects.map(obj => {
+              return {
+                _id: obj.id,
+                _type: obj.type,
+                _source: obj._attributes
+              };
+            }));
+          });
       }
 
       function saveToFile(results) {

@@ -21,6 +21,7 @@ import 'ui/persisted_log';
 import 'ui/private';
 import 'ui/promises';
 import 'ui/modals';
+import 'ui/saved_objects/angular_service';
 import 'ui/state_management/app_state';
 import 'ui/state_management/global_state';
 import 'ui/storage';
