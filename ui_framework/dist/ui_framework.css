@@ -1023,6 +1023,7 @@ body {
   /* 1 */ }
 
 .kuiSearchInput {
+  width: 180px;
   display: inline-block;
   position: relative;
   font-size: 14px;
@@ -1078,6 +1079,15 @@ body {
       outline: none;
       border-color: #0079a5; }
 
+.kuiSearchInput--small {
+  width: 60px; }
+
+.kuiSearchInput--large {
+  width: 400px; }
+
+/**
+ * Avoid setting a width here, so that the width of the options can dynamically set the width.
+ */
 .kuiSelect {
   -webkit-appearance: none;
      -moz-appearance: none;
@@ -1101,20 +1111,7 @@ body {
   background-size: 14px;
   background-repeat: no-repeat;
   background-position: calc(100% - 8px);
-  /* 2 */
-  appearance: none;
-  font-family: "Open Sans", Helvetica, Arial, sans-serif;
-  padding: 3px 12px 4px;
-  font-size: 14px;
-  font-weight: 400;
-  line-height: 1.5;
-  color: #191E23;
-  background-color: #ffffff;
-  border: 1px solid #DEDEDE;
-  border-radius: 4px;
-  transition: border-color 0.1s linear;
-  min-height: 30px;
-  /* 1 */ }
+  /* 2 */ }
   .theme-dark .kuiSelect {
     color: #cecece; }
   .kuiSelect:invalid {
@@ -1137,22 +1134,6 @@ body {
   .theme-dark .kuiSelect {
     background-image: url('data:image/svg+xml;utf8,<svg width="1792" height="1792" viewBox="0 0 1792 1792" xmlns="http://www.w3.org/2000/svg"><path d="M1408 704q0 26-19 45l-448 448q-19 19-45 19t-45-19l-448-448q-19-19-19-45t19-45 45-19h896q26 0 45 19t19 45z" fill="#CECECE"/></svg>');
     /* 1 */ }
-  .theme-dark .kuiSelect {
-    color: #cecece; }
-  .kuiSelect:invalid {
-    border-color: #D86051; }
-  .kuiSelect:focus {
-    outline: none;
-    border-color: #0079a5; }
-  .kuiSelect:disabled {
-    opacity: 0.4;
-    cursor: not-allowed; }
-  .theme-dark .kuiSelect {
-    background-color: #444444;
-    border-color: #444444; }
-    .theme-dark .kuiSelect:focus {
-      outline: none;
-      border-color: #0079a5; }
   .kuiSelect.kuiSelect-isInvalid {
     border-color: #D86051; }
   .kuiSelect:focus {
@@ -1160,13 +1141,20 @@ body {
     outline: none;
     border-color: #0079a5; }
 
+.kuiSelect--small {
+  width: 60px; }
+
+.kuiSelect--medium {
+  width: 180px; }
+
 .kuiSelect--large {
-  min-width: 400px; }
+  width: 400px; }
 
 /**
  * 1. Have the same spatial footprint as the regular input.
  */
 .kuiStaticInput {
+  width: 180px;
   -webkit-appearance: none;
      -moz-appearance: none;
           appearance: none;
@@ -1183,6 +1171,7 @@ body {
     color: #cecece; }
 
 .kuiTextArea {
+  width: 180px;
   -webkit-appearance: none;
      -moz-appearance: none;
           appearance: none;
@@ -1224,7 +1213,14 @@ body {
 .kuiTextArea--nonResizable {
   resize: none; }
 
+.kuiTextArea--small {
+  width: 60px; }
+
+.kuiTextArea--large {
+  width: 400px; }
+
 .kuiTextInput {
+  width: 180px;
   -webkit-appearance: none;
      -moz-appearance: none;
           appearance: none;
@@ -1260,12 +1256,10 @@ body {
     border-color: #D86051; }
 
 .kuiTextInput--small {
-  width: 100%;
-  max-width: 60px; }
+  width: 60px; }
 
 .kuiTextInput--large {
-  width: 100%;
-  max-width: 400px; }
+  width: 400px; }
 
 /**
  * 1. We may want to put elements in here which have different heights.
