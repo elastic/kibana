@@ -1,8 +1,7 @@
 import { ElasticsearchConfig } from './ElasticsearchConfig';
 import { createElasticsearchSchema, ElasticsearchConfigsSchema } from './schema';
 import { ElasticsearchClusterType } from '../../types';
-
-import { Env } from '../../env';
+import { Env } from '../../config';
 
 export class ElasticsearchConfigs {
   static createSchema = createElasticsearchSchema;

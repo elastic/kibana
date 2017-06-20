@@ -1,6 +1,5 @@
 import { Server } from '../server';
-import { Env } from '../env';
-import { ConfigService } from '../config';
+import { ConfigService, Env } from '../config';
 import { LoggerService, Logger, LoggerFactory, LoggerConfig, MutableLoggerFactory } from '../logger';
 
 // Top-level entry point to kick off the app

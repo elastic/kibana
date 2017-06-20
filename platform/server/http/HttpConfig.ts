@@ -1,5 +1,5 @@
 import { SslConfig } from './SslConfig';
-import { Env } from '../../env';
+import { Env } from '../../config';
 import { ByteSizeValue } from '../../lib/ByteSizeValue';
 import { Schema, typeOfSchema } from '../../types';
 

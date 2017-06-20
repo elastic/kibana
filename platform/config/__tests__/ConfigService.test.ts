@@ -5,7 +5,7 @@ jest.mock('../readConfig', () => ({
 }));
 
 import { ConfigService } from '../ConfigService';
-import { Env } from '../../env';
+import { Env } from '../Env';
 import { logger } from '../../logger/__mocks__'
 import { Schema } from '../../types';
 

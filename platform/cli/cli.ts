@@ -3,7 +3,7 @@ const yargs = require('yargs');
 
 import * as args from './args';
 import { version } from './version';
-import { Env } from '../env';
+import { Env } from '../config';
 import { Root } from '../root';
 
 export const parseArgv = (argv: Array<string>) =>

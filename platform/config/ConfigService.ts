@@ -3,7 +3,7 @@ import { get, isEqual, omit } from 'lodash';
 
 import { getRawConfig } from './readConfig';
 import { applyArgv } from './applyArgv';
-import { Env } from '../env';
+import { Env } from './Env';
 import { Logger, LoggerFactory } from '../logger';
 import * as schema from '../lib/schema';
 import { ConfigWithSchema } from '../types';

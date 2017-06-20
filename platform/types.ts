@@ -2,7 +2,7 @@ import { Observable } from 'rxjs';
 
 // TODO inline all of these
 import * as schema from './lib/schema';
-import { ConfigService } from './config';
+import { ConfigService, Env } from './config';
 import { Router, RouterOptions, HttpModule } from './server/http';
 import { KibanaConfig, KibanaModule } from './server/kibana';
 import {
@@ -10,7 +10,6 @@ import {
   ElasticsearchConfigs,
   ElasticsearchModule
 } from './server/elasticsearch';
-import { Env } from './env';
 import { LoggerFactory } from './logger';
 
 export type ElasticsearchClusterType = 'data' | 'admin';
