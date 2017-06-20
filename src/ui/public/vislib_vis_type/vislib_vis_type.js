@@ -46,8 +46,10 @@ export function VislibVisTypeVislibVisTypeProvider(Private) {
       delete params.smoothLines;
     }
 
-    updateIfSet(params, params.valueAxes[0].scale, 'setYExtents');
-    updateIfSet(params, params.valueAxes[0].scale, 'defaultYExtents');
+    if (params.valueAxes) {
+      updateIfSet(params, params.valueAxes[0].scale, 'setYExtents');
+      updateIfSet(params, params.valueAxes[0].scale, 'defaultYExtents');
+    }
 
     if (params.scale) {
       params.valueAxes[0].scale.type = params.scale;
