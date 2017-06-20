@@ -18,7 +18,6 @@ export function getTopNavConfig(dashboardMode, actions) {
         getEditConfig(actions[TopNavIds.ENTER_EDIT_MODE])];
     case DashboardViewMode.EDIT:
       return [
-        getFullScreenConfig(actions[TopNavIds.FULL_SCREEN]),
         getSaveConfig(),
         getViewConfig(actions[TopNavIds.EXIT_EDIT_MODE]),
         getAddConfig(),
