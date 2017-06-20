@@ -1029,7 +1029,7 @@ body {
   font-size: 14px;
   line-height: 1.5; }
   .kuiSearchInput.kuiSearchInput-isInvalid .kuiSearchInput__input {
-    border-color: #D86051; }
+    border-color: #A30000; }
 
 .kuiSearchInput__icon {
   position: absolute;
@@ -1065,7 +1065,7 @@ body {
   .theme-dark .kuiSearchInput__input {
     color: #cecece; }
   .kuiSearchInput__input:invalid {
-    border-color: #D86051; }
+    border-color: #A30000; }
   .kuiSearchInput__input:focus {
     outline: none;
     border-color: #0079a5; }
@@ -1115,7 +1115,7 @@ body {
   .theme-dark .kuiSelect {
     color: #cecece; }
   .kuiSelect:invalid {
-    border-color: #D86051; }
+    border-color: #A30000; }
   .kuiSelect:focus {
     outline: none;
     border-color: #0079a5; }
@@ -1135,7 +1135,7 @@ body {
     background-image: url('data:image/svg+xml;utf8,<svg width="1792" height="1792" viewBox="0 0 1792 1792" xmlns="http://www.w3.org/2000/svg"><path d="M1408 704q0 26-19 45l-448 448q-19 19-45 19t-45-19l-448-448q-19-19-19-45t19-45 45-19h896q26 0 45 19t19 45z" fill="#CECECE"/></svg>');
     /* 1 */ }
   .kuiSelect.kuiSelect-isInvalid {
-    border-color: #D86051; }
+    border-color: #A30000; }
   .kuiSelect:focus {
     box-shadow: none;
     outline: none;
@@ -1190,7 +1190,7 @@ body {
   .theme-dark .kuiTextArea {
     color: #cecece; }
   .kuiTextArea:invalid {
-    border-color: #D86051; }
+    border-color: #A30000; }
   .kuiTextArea:focus {
     outline: none;
     border-color: #0079a5; }
@@ -1208,7 +1208,7 @@ body {
     outline: none;
     border-color: #0079a5; }
   .kuiTextArea.kuiTextArea-isInvalid {
-    border-color: #D86051; }
+    border-color: #A30000; }
 
 .kuiTextArea--nonResizable {
   resize: none; }
@@ -1239,7 +1239,7 @@ body {
   .theme-dark .kuiTextInput {
     color: #cecece; }
   .kuiTextInput:invalid {
-    border-color: #D86051; }
+    border-color: #A30000; }
   .kuiTextInput:focus {
     outline: none;
     border-color: #0079a5; }
@@ -1253,7 +1253,7 @@ body {
       outline: none;
       border-color: #0079a5; }
   .kuiTextInput.kuiTextInput-isInvalid {
-    border-color: #D86051; }
+    border-color: #A30000; }
 
 .kuiTextInput--small {
   width: 60px; }
@@ -1477,7 +1477,7 @@ body {
   color: #ec9800; }
 
 .kuiIcon--error {
-  color: #D86051; }
+  color: #A30000; }
 
 .kuiIcon--inactive {
   color: #c3c3c3; }
@@ -1515,7 +1515,7 @@ body {
  * 1. TODO: Pick a hex value instead of making these colors translucent.
  */
 .kuiInfoPanel--error {
-  border-color: rgba(216, 96, 81, 0.25);
+  border-color: rgba(163, 0, 0, 0.25);
   /* 1 */ }
 
 /**
@@ -2077,7 +2077,7 @@ body {
   .theme-dark .kuiLocalSearchInput {
     color: #cecece; }
   .kuiLocalSearchInput:invalid {
-    border-color: #D86051; }
+    border-color: #A30000; }
   .kuiLocalSearchInput:focus {
     outline: none;
     border-color: #0079a5; }
@@ -2159,7 +2159,7 @@ body {
   .theme-dark .kuiLocalSearchSelect {
     color: #cecece; }
   .kuiLocalSearchSelect:invalid {
-    border-color: #D86051; }
+    border-color: #A30000; }
   .kuiLocalSearchSelect:focus {
     outline: none;
     border-color: #0079a5; }
@@ -2727,7 +2727,7 @@ body {
   color: #ec9800; }
 
 .kuiStatusText--error {
-  color: #D86051; }
+  color: #A30000; }
 
 /**
  * 1. Set the image to be the same size as a font icon at 14px.
