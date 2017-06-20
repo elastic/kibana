@@ -1,6 +1,6 @@
 import expect from 'expect.js';
 import sinon from 'sinon';
-import { createReadRoute } from '../read';
+import { createGetRoute } from '../get';
 import { MockServer } from './mock_server';
 
 describe('GET /api/saved_objects/{type}/{id}', () => {
@@ -19,7 +19,7 @@ describe('GET /api/saved_objects/{type}/{id}', () => {
       },
     };
 
-    server.route(createReadRoute(prereqs));
+    server.route(createGetRoute(prereqs));
   });
 
   afterEach(() => {

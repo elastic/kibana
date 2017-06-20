@@ -231,7 +231,7 @@ describe('SavedObjectsClient', () => {
   });
 
   describe('#create', () => {
-    const requireMessage = 'requires type and body';
+    const requireMessage = 'requires type and attributes';
 
     beforeEach(() => {
       $http.withArgs({
@@ -264,11 +264,11 @@ describe('SavedObjectsClient', () => {
     });
 
     it('makes HTTP call', () => {
-      const body = { foo: 'Foo', bar: 'Bar', id: 'logstash-*' };
-      savedObjectsClient.create('index-pattern', body);
+      const attributes = { foo: 'Foo', bar: 'Bar', id: 'logstash-*' };
+      savedObjectsClient.create('index-pattern', attributes);
 
       sinon.assert.calledOnce($http);
-      expect($http.getCall(0).args[0].data).to.eql(body);
+      expect($http.getCall(0).args[0].data.attributes).to.eql(attributes);
     });
   });
 
