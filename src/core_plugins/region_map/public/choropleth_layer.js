@@ -206,11 +206,7 @@ function makeChoroplethStyler(data, colorramp, joinField) {
       let lastIndex = -1;
       const match = outstandingFeatures.find((bucket, index) => {
         lastIndex = index;
-        if (typeof bucket.term === 'string' && typeof geojsonFeature.properties[joinField] === 'string') {
-          return normalizeString(bucket.term) === normalizeString(geojsonFeature.properties[joinField]);
-        } else {
-          return bucket.term === geojsonFeature.properties[joinField];
-        }
+        return bucket.term === geojsonFeature.properties[joinField];
       });
 
       if (!match) {
@@ -237,12 +233,6 @@ function makeChoroplethStyler(data, colorramp, joinField) {
 
 
 }
-
-
-function normalizeString(string) {
-  return string.trim().toLowerCase();
-}
-
 
 function getLegendColors(colorRamp) {
   const colors = [];
