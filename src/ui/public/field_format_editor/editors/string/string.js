@@ -2,7 +2,7 @@ import stringTemplate from './string.html';
 
 export function stringEditor() {
   return {
-    formats: ['string'],
+    formatId: 'string',
     editor: {
       template: stringTemplate,
       controllerAs: 'cntrl',

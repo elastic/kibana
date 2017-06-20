@@ -3,7 +3,7 @@ import moment from 'moment';
 
 export function dateEditor() {
   return {
-    formats: ['date'],
+    formatId: 'date',
     editor: {
       template: dateTemplate,
       controllerAs: 'cntrl',

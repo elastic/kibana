@@ -1,15 +1,10 @@
 import _ from 'lodash';
+import { DEFAULT_COLOR } from './color_default';
 import { FieldFormat } from 'ui/index_patterns/_field_format/field_format';
 
 export function stringifyColor() {
 
   const convertTemplate = _.template('<span style="<%- style %>"><%- val %></span>');
-  const DEFAULT_COLOR = {
-    range: `${Number.NEGATIVE_INFINITY}:${Number.POSITIVE_INFINITY}`,
-    regex: '<insert regex>',
-    text: '#000000',
-    background: '#ffffff'
-  };
 
   _.class(_Color).inherits(FieldFormat);
   function _Color(params) {

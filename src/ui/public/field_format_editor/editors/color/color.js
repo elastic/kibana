@@ -1,18 +1,11 @@
 import './color.less';
 import colorTemplate from './color.html';
 import _ from 'lodash';
+import { DEFAULT_COLOR } from 'ui/stringify/types/color_default';
 
 export function colorEditor() {
-
-  const DEFAULT_COLOR = {
-    range: `${Number.NEGATIVE_INFINITY}:${Number.POSITIVE_INFINITY}`,
-    regex: '<insert regex>',
-    text: '#000000',
-    background: '#ffffff'
-  };
-
   return {
-    formats: ['color'],
+    formatId: 'color',
     editor: {
       template: colorTemplate,
       controller($scope) {

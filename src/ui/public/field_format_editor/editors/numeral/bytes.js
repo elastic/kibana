@@ -3,7 +3,7 @@ import numeralTemplate from './numeral.html';
 export function bytesEditor() {
 
   return {
-    formats: ['bytes'],
+    formatId: 'bytes',
     editor: {
       template: numeralTemplate,
       controllerAs: 'cntrl',

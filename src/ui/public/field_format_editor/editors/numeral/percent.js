@@ -2,7 +2,7 @@ import numeralTemplate from './numeral.html';
 
 export function percentEditor() {
   return {
-    formats: ['percent'],
+    formatId: 'percent',
     editor: {
       template: numeralTemplate,
       controllerAs: 'cntrl',

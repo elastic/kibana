@@ -3,7 +3,7 @@ import durationTemplate from './duration.html';
 
 export function durationEditor() {
   return {
-    formats: ['duration'],
+    formatId: 'duration',
     editor: {
       template: durationTemplate,
       controllerAs: 'cntrl',

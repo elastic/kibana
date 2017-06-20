@@ -3,7 +3,7 @@ import './icons';
 
 export function urlEditor() {
   return {
-    formats: ['url'],
+    formatId: 'url',
     editor: {
       template: urlTemplate,
       controllerAs: 'url',

@@ -3,7 +3,7 @@ import numeralTemplate from './numeral.html';
 export function numberEditor() {
 
   return {
-    formats: ['number'],
+    formatId: 'number',
     editor: {
       template: numeralTemplate,
       controllerAs: 'cntrl',
