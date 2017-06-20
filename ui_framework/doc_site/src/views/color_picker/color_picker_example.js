@@ -13,6 +13,10 @@ import { ColorPicker } from './color_picker';
 const colorPickerSource = require('!!raw!./color_picker');
 const colorPickerHtml = renderToHtml(ColorPicker);
 
+import { ColorPickerLabelAndClear } from './color_picker_clear';
+const colorPickerClearSource = require('!!raw!./color_picker_clear');
+const colorPickerClearHtml = renderToHtml(ColorPickerLabelAndClear);
+
 export default props => (
   <GuidePage title={props.route.name}>
     <GuideSection
@@ -27,6 +31,20 @@ export default props => (
     >
       <GuideDemo>
         <ColorPicker />
+      </GuideDemo>
+    </GuideSection>
+    <GuideSection
+      title="Color Picker with a clear link, custom label, and no color label"
+      source={[{
+        type: GuideSectionTypes.JS,
+        code: colorPickerClearSource,
+      }, {
+        type: GuideSectionTypes.HTML,
+        code: colorPickerClearHtml,
+      }]}
+    >
+      <GuideDemo>
+        <ColorPickerLabelAndClear />
       </GuideDemo>
     </GuideSection>
   </GuidePage>
