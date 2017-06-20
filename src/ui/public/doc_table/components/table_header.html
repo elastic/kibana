@@ -33,6 +33,7 @@
       ng-if="canRemoveColumn(name)"
       tooltip-append-to-body="1"
       tooltip="Remove column"
+      aria-label="Remove {{name}} column"
     ></button>
     <button
       class="fa fa-angle-double-left table-header-move"
@@ -40,6 +41,7 @@
       ng-if="canMoveColumnLeft(name)"
       tooltip-append-to-body="1"
       tooltip="Move column to the left"
+      aria-label="Move {{name}} column to the left"
     ></button>
     <button
       class="fa fa-angle-double-right table-header-move"
@@ -47,6 +49,7 @@
       ng-if="canMoveColumnRight(name)"
       tooltip-append-to-body="1"
       tooltip="Move column to the right"
+      aria-label="Move {{name}} column to the left"
     ></button>
   </th>
 </tr>
