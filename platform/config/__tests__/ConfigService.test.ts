@@ -1,7 +1,7 @@
-const mockGetRawConfig = jest.fn();
+const mockGetConfigFromFile = jest.fn();
 
 jest.mock('../readConfig', () => ({
-  getRawConfig: mockGetRawConfig
+  getConfigFromFile: mockGetConfigFromFile
 }));
 
 import { ConfigService } from '../ConfigService';
@@ -11,8 +11,8 @@ import { Schema } from '../../types';
 import * as schemaLib from '../../lib/schema'
 
 beforeEach(() => {
-  mockGetRawConfig.mockReset();
-  mockGetRawConfig.mockImplementation(() => ({}));
+  mockGetConfigFromFile.mockReset();
+  mockGetConfigFromFile.mockImplementation(() => ({}));
 });
 
 test('loads raw config when started', () => {
@@ -22,8 +22,8 @@ test('loads raw config when started', () => {
 
   configService.start();
 
-  expect(mockGetRawConfig).toHaveBeenCalledTimes(1);
-  expect(mockGetRawConfig).toHaveBeenLastCalledWith(undefined, '/kibana/config/kibana.yml');
+  expect(mockGetConfigFromFile).toHaveBeenCalledTimes(1);
+  expect(mockGetConfigFromFile).toHaveBeenLastCalledWith(undefined, '/kibana/config/kibana.yml');
 });
 
 test('specifies additional config files if in argv when started', () => {
@@ -35,8 +35,8 @@ test('specifies additional config files if in argv when started', () => {
 
   configService.start();
 
-  expect(mockGetRawConfig).toHaveBeenCalledTimes(1);
-  expect(mockGetRawConfig).toHaveBeenLastCalledWith(
+  expect(mockGetConfigFromFile).toHaveBeenCalledTimes(1);
+  expect(mockGetConfigFromFile).toHaveBeenLastCalledWith(
     '/my/special/kibana/config.yml',
     '/kibana/config/kibana.yml'
   );
@@ -51,20 +51,20 @@ test('re-reads the config when reloading', () => {
 
   configService.start();
 
-  mockGetRawConfig.mockClear();
-  mockGetRawConfig.mockImplementation(() => ({ foo: 'bar' }));
+  mockGetConfigFromFile.mockClear();
+  mockGetConfigFromFile.mockImplementation(() => ({ foo: 'bar' }));
 
   configService.reloadConfig();
 
-  expect(mockGetRawConfig).toHaveBeenCalledTimes(1);
-  expect(mockGetRawConfig).toHaveBeenLastCalledWith(
+  expect(mockGetConfigFromFile).toHaveBeenCalledTimes(1);
+  expect(mockGetConfigFromFile).toHaveBeenLastCalledWith(
     '/my/special/kibana/config.yml',
     '/kibana/config/kibana.yml'
   );
 });
 
 test('returns config at path as observable', async () => {
-  mockGetRawConfig.mockImplementation(() => ({ key: 'value' }));
+  mockGetConfigFromFile.mockImplementation(() => ({ key: 'value' }));
 
   const argv = {};
   const env = new Env('/kibana');
@@ -82,7 +82,7 @@ test('returns config at path as observable', async () => {
 test('throws if config at path does not match schema', async () => {
   expect.assertions(1);
 
-  mockGetRawConfig.mockImplementation(() => ({ key: 123 }));
+  mockGetConfigFromFile.mockImplementation(() => ({ key: 123 }));
 
   const argv = {};
   const env = new Env('/kibana');
@@ -100,7 +100,7 @@ test('throws if config at path does not match schema', async () => {
 });
 
 test("returns undefined if fetching optional config at a path that doesn't exist", async () => {
-  mockGetRawConfig.mockImplementation(() => ({ foo: 'bar' }));
+  mockGetConfigFromFile.mockImplementation(() => ({ foo: 'bar' }));
 
   const argv = {};
   const env = new Env('/kibana');
@@ -116,7 +116,7 @@ test("returns undefined if fetching optional config at a path that doesn't exist
 });
 
 test("returns observable config at optional path if it exists", async () => {
-  mockGetRawConfig.mockImplementation(() => ({ value: 'bar' }));
+  mockGetConfigFromFile.mockImplementation(() => ({ value: 'bar' }));
 
   const argv = {};
   const env = new Env('/kibana');
@@ -133,7 +133,7 @@ test("returns observable config at optional path if it exists", async () => {
 });
 
 test("does not push new configs when reloading if config at path hasn't changed", async () => {
-  mockGetRawConfig.mockImplementation(() => ({ key: 'value' }));
+  mockGetConfigFromFile.mockImplementation(() => ({ key: 'value' }));
 
   const argv = {};
   const env = new Env('/kibana');
@@ -147,8 +147,8 @@ test("does not push new configs when reloading if config at path hasn't changed"
       valuesReceived.push(config.value);
     });
 
-  mockGetRawConfig.mockClear();
-  mockGetRawConfig.mockImplementation(() => ({ key: 'value' }));
+  mockGetConfigFromFile.mockClear();
+  mockGetConfigFromFile.mockImplementation(() => ({ key: 'value' }));
 
   configService.reloadConfig();
 
@@ -156,7 +156,7 @@ test("does not push new configs when reloading if config at path hasn't changed"
 });
 
 test("pushes new config when reloading and config at path has changed", async () => {
-  mockGetRawConfig.mockImplementation(() => ({ key: 'value' }));
+  mockGetConfigFromFile.mockImplementation(() => ({ key: 'value' }));
 
   const argv = {};
   const env = new Env('/kibana');
@@ -170,8 +170,8 @@ test("pushes new config when reloading and config at path has changed", async ()
       valuesReceived.push(config.value);
     });
 
-  mockGetRawConfig.mockClear();
-  mockGetRawConfig.mockImplementation(() => ({ key: 'new value' }));
+  mockGetConfigFromFile.mockClear();
+  mockGetConfigFromFile.mockImplementation(() => ({ key: 'new value' }));
 
   configService.reloadConfig();
 
@@ -202,7 +202,7 @@ test("throws error if config class does not implement 'createSchema'", async () 
 test('completes config observables when stopped', (done) => {
   expect.assertions(0);
 
-  mockGetRawConfig.mockImplementation(() => ({ key: 'value' }));
+  mockGetConfigFromFile.mockImplementation(() => ({ key: 'value' }));
 
   const argv = {};
   const env = new Env('/kibana');
@@ -219,7 +219,7 @@ test('completes config observables when stopped', (done) => {
 });
 
 test("tracks unhandled paths", async () => {
-  mockGetRawConfig.mockImplementation(() => ({
+  mockGetConfigFromFile.mockImplementation(() => ({
     foo: 'value',
     bar: {
       deep1: {
