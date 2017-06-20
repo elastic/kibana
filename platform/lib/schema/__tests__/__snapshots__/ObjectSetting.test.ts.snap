@@ -1,0 +1,16 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`called with wrong type 1`] = `"expected a plain object value, but found [string] instead."`;
+
+exports[`called with wrong type 2`] = `"expected a plain object value, but found [number] instead."`;
+
+exports[`fails if key does not exist in schema 1`] = `"missing definitions in schema for keys [bar]"`;
+
+exports[`fails if missing string 1`] = `"[name]: expected value of type [string] but got [undefined]"`;
+
+exports[`handles oneOf 1`] = `
+"[key]: settings that failed validation:
+- [key.0]: expected value of type [string] but got [number]"
+`;
+
+exports[`object within object with required 1`] = `"[foo.bar]: expected value of type [string] but got [undefined]"`;

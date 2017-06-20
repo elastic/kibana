@@ -1,0 +1,22 @@
+{
+  "compileOnSave": true,
+  "compilerOptions": {
+    "forceConsistentCasingInFileNames": true,
+    "lib": ["dom", "es2017"],
+    "module": "commonjs",
+    "strict": true,
+    "moduleResolution": "node",
+    "noImplicitReturns": false,
+    "noUnusedLocals": true,
+    "outDir": "./ts-tmp",
+    "sourceMap": true,
+    "target": "esnext"
+  },
+  "include": [
+    "platform/**/*",
+    "types/index.d.ts"
+  ],
+  "exclude": [
+    "node_modules"
+  ]
+}

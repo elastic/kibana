@@ -1,0 +1,15 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`#defaultValue can be a moment.Duration 1`] = `"PT1H"`;
+
+exports[`#defaultValue can be a string 1`] = `"PT1H"`;
+
+exports[`is required by default 1`] = `"expected value of type [moment.Duration] but got [undefined]"`;
+
+exports[`returns error when not string 1`] = `"expected value of type [moment.Duration] but got [number]"`;
+
+exports[`returns error when not string 2`] = `"expected value of type [moment.Duration] but got [Array]"`;
+
+exports[`returns error when not string 3`] = `"expected value of type [moment.Duration] but got [RegExp]"`;
+
+exports[`returns value by default 1`] = `"PT2M3S"`;

@@ -1,0 +1,17 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`starts plugins 1`] = `
+Object {
+  "dependencies": Array [],
+  "name": "foo",
+}
+`;
+
+exports[`starts plugins 2`] = `
+Object {
+  "dependencies": Array [
+    "foo",
+  ],
+  "name": "bar",
+}
+`;

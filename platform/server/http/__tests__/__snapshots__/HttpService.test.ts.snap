@@ -1,0 +1,49 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`logs error is already started 1`] = `
+Object {
+  "debug": Array [],
+  "error": Array [
+    Array [
+      "Received new HTTP config after server was started. Config will **not** be applied.",
+    ],
+  ],
+  "info": Array [],
+}
+`;
+
+exports[`register route handler 1`] = `
+Object {
+  "debug": Array [],
+  "error": Array [],
+  "info": Array [
+    Array [
+      "registering route handler for [/foo]",
+    ],
+  ],
+}
+`;
+
+exports[`starts http server 1`] = `
+Object {
+  "debug": Array [],
+  "error": Array [],
+  "info": Array [
+    Array [
+      "starting http server [example.org:1234]",
+    ],
+  ],
+}
+`;
+
+exports[`throws if registering route handler after http server is started 1`] = `
+Object {
+  "debug": Array [],
+  "error": Array [
+    Array [
+      "Received new router [/foo] after server was started. Router will **not** be applied.",
+    ],
+  ],
+  "info": Array [],
+}
+`;

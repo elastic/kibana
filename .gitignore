@@ -36,3 +36,5 @@ selenium
 ui_framework/doc_site/build
 !ui_framework/doc_site/build/index.html
 yarn.lock
+.vscode/
+ts-tmp/

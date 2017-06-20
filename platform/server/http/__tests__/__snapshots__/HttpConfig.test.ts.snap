@@ -1,0 +1,49 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`has defaults for config 1`] = `
+Object {
+  "basePath": undefined,
+  "host": "localhost",
+  "maxPayload": ByteSizeValue {
+    "valueInBytes": 1048576,
+  },
+  "port": 5601,
+  "ssl": Object {
+    "certificate": undefined,
+    "certificateAuthorities": undefined,
+    "cipherSuites": Array [
+      "ECDHE-RSA-AES128-GCM-SHA256",
+      "ECDHE-ECDSA-AES128-GCM-SHA256",
+      "ECDHE-RSA-AES256-GCM-SHA384",
+      "ECDHE-ECDSA-AES256-GCM-SHA384",
+      "DHE-RSA-AES128-GCM-SHA256",
+      "ECDHE-RSA-AES128-SHA256",
+      "DHE-RSA-AES128-SHA256",
+      "ECDHE-RSA-AES256-SHA384",
+      "DHE-RSA-AES256-SHA384",
+      "ECDHE-RSA-AES256-SHA256",
+      "DHE-RSA-AES256-SHA256",
+      "HIGH",
+      "!aNULL",
+      "!eNULL",
+      "!EXPORT",
+      "!DES",
+      "!RC4",
+      "!MD5",
+      "!PSK",
+      "!SRP",
+      "!CAMELLIA",
+    ],
+    "enabled": false,
+    "key": undefined,
+    "keyPassphrase": undefined,
+    "supportedProtocols": undefined,
+  },
+}
+`;
+
+exports[`throws if invalid hostname 1`] = `"[host]: must be a valid hostname"`;
+
+exports[`throws is basepath appends a slash 1`] = `"[basePath]: must start with a slash, don't end with one"`;
+
+exports[`throws is basepath is missing prepended slash 1`] = `"[basePath]: must start with a slash, don't end with one"`;
