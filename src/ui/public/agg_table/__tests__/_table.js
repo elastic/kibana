@@ -164,7 +164,7 @@ describe('AggTable Directive', function () {
     it('as min', function () {
       totalsRowTest('min', [
         '',
-        'September 28th 2014, 00:00:00.000',
+        '2014-09-28',
         '9,283',
         'September 28th 2014, 00:00:00.000',
         '1',
@@ -174,7 +174,7 @@ describe('AggTable Directive', function () {
     it('as max', function () {
       totalsRowTest('max', [
         '',
-        'October 3rd 2014, 00:00:00.000',
+        '2014-10-03',
         '220,943',
         'October 3rd 2014, 00:00:00.000',
         '239',

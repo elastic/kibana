@@ -62,6 +62,9 @@ export function AggTypesBucketsDateHistogramProvider(timefilter, config, Private
         }
       };
     },
+    getFormat: function (agg) {
+      return agg.buckets.getScaledDateFormatter();
+    },
     params: [
       {
         name: 'field',
