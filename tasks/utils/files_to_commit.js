@@ -17,7 +17,8 @@ export default function filesToCommit(path) {
       // 3 elements. But in both cases, the last element is the current name of the file.
       const name = parts[parts.length - 1];
       return { status, name };
-    }).filter(file => file.status !== 'D'); // Ignore deleted files
+    })
+    .filter(file => file.status !== 'D'); // Ignore deleted files
   });
 }
 
