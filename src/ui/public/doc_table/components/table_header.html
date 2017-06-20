@@ -27,28 +27,26 @@
         tooltip-append-to-body="1"
       ></button>
     </span>
-    <span class="table-header-move">
-      <i
-        class="fa fa-remove"
-        ng-click="onRemoveColumn(name)"
-        ng-if="canRemoveColumn(name)"
-        tooltip-append-to-body="1"
-        tooltip="Remove column"
-      ></i>
-      <i
-        class="fa fa-angle-double-left"
-        ng-click="moveColumnLeft(name)"
-        ng-if="canMoveColumnLeft(name)"
-        tooltip-append-to-body="1"
-        tooltip="Move column to the left"
-      ></i>
-      <i
-        class="fa fa-angle-double-right"
-        ng-click="moveColumnRight(name)"
-        ng-if="canMoveColumnRight(name)"
-        tooltip-append-to-body="1"
-        tooltip="Move column to the right"
-      ></i>
-    </span>
+    <button
+      class="fa fa-remove table-header-move"
+      ng-click="onRemoveColumn(name)"
+      ng-if="canRemoveColumn(name)"
+      tooltip-append-to-body="1"
+      tooltip="Remove column"
+    ></button>
+    <button
+      class="fa fa-angle-double-left table-header-move"
+      ng-click="moveColumnLeft(name)"
+      ng-if="canMoveColumnLeft(name)"
+      tooltip-append-to-body="1"
+      tooltip="Move column to the left"
+    ></button>
+    <button
+      class="fa fa-angle-double-right table-header-move"
+      ng-click="moveColumnRight(name)"
+      ng-if="canMoveColumnRight(name)"
+      tooltip-append-to-body="1"
+      tooltip="Move column to the right"
+    ></button>
   </th>
 </tr>
