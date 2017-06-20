@@ -25,6 +25,7 @@ import { notify } from 'ui/notify';
 import './panel/get_object_loaders_for_dashboard';
 import { documentationLinks } from 'ui/documentation_links/documentation_links';
 import { showCloneModal } from './top_nav/show_clone_modal';
+import { ESC_KEY_CODE } from 'ui_framework/services';
 
 const app = uiModules.get('app/dashboard', [
   'elasticsearch',
@@ -302,6 +303,13 @@ app.directive('dashboardApp', function ($injector) {
       setFullScreenMode(dashboardState.getFullScreenMode());
 
       $scope.exitFullScreenMode = () => setFullScreenMode(false);
+
+      document.addEventListener('keydown', (e) => {
+        if (e.keyCode === ESC_KEY_CODE) {
+          setFullScreenMode(false);
+        }
+      }, false);
+
       $scope.showAddPanel = () => {
         if ($scope.fullScreenMode) {
           $scope.exitFullScreenMode();
