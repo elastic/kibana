@@ -4,6 +4,8 @@ import classNames from 'classnames';
 
 import { ChromePicker } from 'react-color';
 
+import { KuiColorPickerSwatch } from './color_picker_swatch';
+
 export class KuiColorPicker extends React.Component {
   constructor(props) {
     super(props);
@@ -41,8 +43,21 @@ export class KuiColorPicker extends React.Component {
     document.removeEventListener('click', this.closeColorSelector);
   }
 
+  getColorLabel() {
+    const { color } = this.props;
+    const colorValue = color === null ? '(transparent)' : color;
+    return (
+      <div
+        className="kuiColorPicker__label"
+        aria-label={`Color selection is ${ colorValue }`}
+      >
+        { colorValue }
+      </div>
+    );
+  }
+
   render() {
-    const { color, className } = this.props;
+    const { color, className, showColorLabel } = this.props;
     const classes = classNames('kuiColorPicker', className);
     return (
       <div
@@ -54,24 +69,14 @@ export class KuiColorPicker extends React.Component {
           className="kuiColorPicker__preview"
           onClick={ this.toggleColorSelector }
         >
-          <div
-            className="kuiColorPicker__swatch"
-            aria-label={ this.props['aria-label'] }
-            data-test-subj="colorSwatch"
-            style={{ background: color }}
-          />
-          <div
-            className="kuiColorPicker__label"
-            aria-label={`Color selection is ${color}`}
-          >
-            { color }
-          </div>
+          <KuiColorPickerSwatch color={ color } aria-label={ this.props['aria-label'] } />
+          { showColorLabel ? this.getColorLabel() : null }
         </div>
         {
           this.state.showColorSelector ?
             <div className="kuiColorPickerPopUp" data-test-subj="colorPickerPopup">
               <ChromePicker
-                color={ color }
+                color={ color ? color : '#ffffff' }
                 disableAlpha={ true }
                 onChange={ this.handleColorSelection }
               />
@@ -85,10 +90,12 @@ export class KuiColorPicker extends React.Component {
 
 KuiColorPicker.propTypes = {
   className: PropTypes.string,
-  color: PropTypes.string.isRequired,
+  color: PropTypes.string,
   onChange: PropTypes.func.isRequired,
+  showColorLabel: PropTypes.bool,
 };
 
 KuiColorPicker.defaultProps = {
-  'aria-label': 'Select a color'
+  'aria-label': 'Select a color',
+  showColorLabel: true,
 };
