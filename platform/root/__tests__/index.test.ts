@@ -39,7 +39,7 @@ jest.mock('../../logger', () => ({
 }));
 
 import { Root } from '../';
-import { Env } from '../../config';
+import { Env } from '../../config/Env';
 
 let oldExit = process.exit;
 

@@ -1,5 +1,5 @@
 import { BehaviorSubject, Observable } from 'rxjs';
-import { get, isEqual, omit } from 'lodash';
+import { get, isEqual } from 'lodash';
 
 import { getRawConfig } from './readConfig';
 import { applyArgv } from './applyArgv';
@@ -11,6 +11,8 @@ import { ConfigWithSchema } from '../types';
 interface RawConfig {
   [key: string]: any
 };
+
+type ConfigPath = string | string[];
 
 export class ConfigService {
   // We rely on a BehaviorSubject as we want every subscriber to immediately
@@ -27,7 +29,7 @@ export class ConfigService {
    * then notify about unhandled config paths when the entire startup process
    * is completed.
    */
-  private readonly handledPaths: (string|string[])[] = [];
+  private readonly handledPaths: ConfigPath[] = [];
 
   constructor(
     private readonly argv: {[key: string]: any},
@@ -87,7 +89,7 @@ export class ConfigService {
    *                    against.
    */
   atPath<Schema extends schema.Any, Config>(
-    path: string | string[],
+    path: ConfigPath,
     ConfigClass: ConfigWithSchema<Schema, Config>
   ) {
     return this.getDistinctRawConfig(path)
@@ -98,7 +100,7 @@ export class ConfigService {
   }
 
   optionalAtPath<Schema extends schema.Any, Config>(
-    path: string | string[],
+    path: ConfigPath,
     ConfigClass: ConfigWithSchema<Schema, Config>
   ) {
     return this.getDistinctRawConfig(path)
@@ -113,7 +115,7 @@ export class ConfigService {
       });
   }
 
-  private getDistinctRawConfig(path: string | string[]) {
+  private getDistinctRawConfig(path: ConfigPath) {
     this.handledPaths.push(path);
 
     return this.rawConfig$
@@ -123,10 +125,22 @@ export class ConfigService {
 
   async getUnusedPaths(): Promise<string[]> {
     const config = await this.rawConfig$.first().toPromise();
-    const unhandledConfigValues = omit(config, this.handledPaths);
-    return [...flattenObject(unhandledConfigValues)].map(obj => obj.key);
+    const flatConfigPaths: string[] = [...flattenObject(config)].map(obj => obj.key);
+    const handledPaths = this.handledPaths.map(pathToString);
+
+    return flatConfigPaths.filter(path =>
+      !isPathHandled(path, handledPaths)
+    );
   }
 }
+
+const pathToString = (path: ConfigPath) =>
+  Array.isArray(path)
+    ? path.join('.')
+    : path;
+
+const isPathHandled = (path: string, handledPaths: string[]) =>
+  handledPaths.some(handledPath => path.startsWith(handledPath));
 
 function* flattenObject(obj: { [key: string]: any }, accKey?: string): any {
   if (typeof obj !== 'object') {

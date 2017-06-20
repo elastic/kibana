@@ -1,3 +1,5 @@
+// Test helpers to simplify mocking logs and collecting all their outputs
+
 const _log = {
   debug: jest.fn(),
   info: jest.fn(),

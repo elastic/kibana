@@ -35,7 +35,7 @@ export class ElasticsearchService {
           const clusters = {
             data: new Cluster(configs.forType('data'), logger),
             admin: new Cluster(configs.forType('admin'), logger)
-          }
+          };
 
           observer.next(clusters);
 
@@ -44,7 +44,7 @@ export class ElasticsearchService {
 
             clusters.data.close();
             clusters.admin.close();
-          }
+          };
         })
       )
       // We only want a single subscription of this as we only want to create a

@@ -8,6 +8,7 @@ import { ConfigService } from '../ConfigService';
 import { Env } from '../Env';
 import { logger } from '../../logger/__mocks__'
 import { Schema } from '../../types';
+import * as schemaLib from '../../lib/schema'
 
 beforeEach(() => {
   mockGetRawConfig.mockReset();
@@ -216,6 +217,54 @@ test('completes config observables when stopped', (done) => {
 
   configService.stop();
 });
+
+test("tracks unhandled paths", async () => {
+  mockGetRawConfig.mockImplementation(() => ({
+    foo: 'value',
+    bar: {
+      deep1: {
+        key: '123'
+      },
+      deep2: {
+        key: '321'
+      }
+    },
+    quux: {
+      deep1: {
+        key: 'hello'
+      },
+      deep2: {
+        key: 'world'
+      }
+    }
+  }));
+
+  const argv = {};
+  const env = new Env('/kibana');
+  const configService = new ConfigService(argv, env, logger);
+
+  configService.start();
+
+  configService.atPath('foo', createClassWithSchema(schemaLib.string()));
+  configService.atPath(['bar', 'deep2'], createClassWithSchema(schemaLib.object({
+    key: schemaLib.string()
+  })));
+
+  const unused = await configService.getUnusedPaths();
+
+  expect(unused).toEqual(["bar.deep1.key", "quux.deep1.key", "quux.deep2.key"]);
+});
+
+function createClassWithSchema(schema: schemaLib.Any) {
+  return class ExampleClassWithSchema {
+    static createSchema = () => {
+      return schema;
+    }
+
+    constructor(readonly value: schemaLib.TypeOf<typeof schema>) {
+    }
+  }
+}
 
 class ExampleClassWithStringSchema {
   static createSchema = (schema: Schema) => {
