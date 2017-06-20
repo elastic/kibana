@@ -90,6 +90,7 @@ export default class UiExports {
 
       case 'visTypes':
       case 'fieldFormats':
+      case 'fieldFormatEditors':
       case 'spyModes':
       case 'chromeNavControls':
       case 'navbarExtensions':

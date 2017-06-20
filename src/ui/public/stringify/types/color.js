@@ -1,7 +1,5 @@
-import 'ui/stringify/editors/color.less';
 import _ from 'lodash';
 import { FieldFormat } from 'ui/index_patterns/_field_format/field_format';
-import colorTemplate from 'ui/stringify/editors/color.html';
 
 export function stringifyColor() {
 
@@ -24,24 +22,6 @@ export function stringifyColor() {
     'number',
     'string'
   ];
-
-  _Color.editor = {
-    template: colorTemplate,
-    controller($scope) {
-      $scope.$watch('editor.field.type', type => {
-        $scope.editor.formatParams.fieldType = type;
-      });
-
-      $scope.addColor = function () {
-        $scope.editor.formatParams.colors.push(_.cloneDeep(DEFAULT_COLOR));
-      };
-
-      $scope.removeColor = function (index) {
-        $scope.editor.formatParams.colors.splice(index, 1);
-      };
-    }
-  };
-
 
   _Color.prototype.getParamDefaults = function () {
     return {

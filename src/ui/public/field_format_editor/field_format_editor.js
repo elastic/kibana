@@ -1,10 +1,15 @@
+import 'ui/field_format_editor/pattern/pattern';
+import 'ui/field_format_editor/samples/samples';
 import _ from 'lodash';
 import $ from 'jquery';
 import { uiModules } from 'ui/modules';
+import { RegistryFieldFormatEditorsProvider } from 'ui/registry/field_format_editors';
 
 uiModules
 .get('app/management')
 .directive('fieldFormatEditor', function (Private, $compile) {
+  const fieldFormatEditors = Private(RegistryFieldFormatEditorsProvider);
+
   return {
     restrict: 'A',
     scope: {
@@ -40,28 +45,28 @@ uiModules
        * @return {undefined}
        */
       $scope.$watch('editor.field.format.type', function (FieldFormat) {
-        const opts = FieldFormat && FieldFormat.editor;
+        const fieldFormatEditor = FieldFormat && fieldFormatEditors.getEditor(FieldFormat.id);
 
-        if (!opts) {
+        if (!fieldFormatEditor) {
           delete self.$$pseudoDirective;
           return;
         }
 
-        if (typeof opts === 'string') {
+        if (typeof fieldFormatEditor.editor === 'string') {
           self.$$pseudoDirective = {
-            template: opts
+            template: fieldFormatEditor.editor
           };
           return;
         }
 
         self.$$pseudoDirective = {
-          template: opts.template,
-          compile: opts.compile || function () {
-            return opts.link;
+          template: fieldFormatEditor.editor.template,
+          compile: fieldFormatEditor.editor.compile || function () {
+            return fieldFormatEditor.editor.link;
           },
-          scope: opts.scope || false,
-          controller: opts.controller,
-          controllerAs: opts.controllerAs
+          scope: fieldFormatEditor.editor.scope || false,
+          controller: fieldFormatEditor.editor.controller,
+          controllerAs: fieldFormatEditor.editor.controllerAs
         };
       });
 

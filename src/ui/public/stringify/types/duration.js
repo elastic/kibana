@@ -1,7 +1,5 @@
-import 'ui/stringify/editors/duration.less';
 import moment from 'moment';
 import { FieldFormat } from 'ui/index_patterns/_field_format/field_format';
-import durationTemplate from 'ui/stringify/editors/duration.html';
 
 export function stringifyDuration() {
   const ratioToSeconds = {
@@ -61,24 +59,6 @@ export function stringifyDuration() {
 
   Duration.inputFormats = inputFormats;
   Duration.outputFormats = outputFormats;
-
-  Duration.editor = {
-    template: durationTemplate,
-    controllerAs: 'cntrl',
-    controller() {
-      this.sampleInputs = [
-        -123,
-        1,
-        12,
-        123,
-        658,
-        1988,
-        3857,
-        123292,
-        923528271
-      ];
-    }
-  };
 
   Duration.prototype.getParamDefaults = function () {
     return {
