@@ -35,7 +35,7 @@ export class SavedObjectsClient {
    *
    * bulkGet([
    *   { id: 'one', type: 'config' },
-   *   { id: 'foo', type: 'index-pattern'
+   *   { id: 'foo', type: 'index-pattern' }
    * ])
    */
   bulkGet(objects = []) {
