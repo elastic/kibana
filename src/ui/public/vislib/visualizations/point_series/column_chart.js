@@ -202,10 +202,6 @@ export function VislibVisualizationsColumnChartProvider(Private) {
       }
 
       function widthFunc(d, i) {
-        if (barWidth < minWidth) {
-          throw new ContainerTooSmall();
-        }
-
         if (isTimeScale) {
           return datumWidth(barWidth, d, bars.data()[i + 1], xScale, gutterWidth, groupCount);
         }
