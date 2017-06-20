@@ -4,14 +4,13 @@ import {
   KuiColorPicker,
   KuiFieldGroup,
   KuiFieldGroupSection,
-  KuiKeyboardAccessible,
 } from '../../../../components/index';
 
-export class ColorPickerLabelAndClear extends React.Component {
+export class ColorPickerNoColorLabel extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      color: null
+      color: '#00FFFF'
     };
   }
 
@@ -19,16 +18,12 @@ export class ColorPickerLabelAndClear extends React.Component {
     this.setState({ color: value });
   };
 
-  resetColor = () => {
-    this.setState({ color: null });
-  };
-
   render() {
     return (
       <KuiFieldGroup>
         <KuiFieldGroupSection>
           <label className="kuiLabel">
-            Background color
+            Foreground color
           </label>
         </KuiFieldGroupSection>
 
@@ -36,17 +31,8 @@ export class ColorPickerLabelAndClear extends React.Component {
           <KuiColorPicker
             onChange={ this.handleChange }
             color={ this.state.color }
+            showColorLabel={ false }
           />
-        </KuiFieldGroupSection>
-
-        <KuiFieldGroupSection>
-          <p className="kuiText">
-            <KuiKeyboardAccessible>
-              <a className="kuiLink" onClick={ this.resetColor }>
-                Reset
-              </a>
-            </KuiKeyboardAccessible>
-          </p>
         </KuiFieldGroupSection>
       </KuiFieldGroup>
     );
