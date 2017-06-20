@@ -14,10 +14,11 @@ export async function collectPanels(savedObjectsClient, dashboard) {
 
   if (panels.length === 0) return [].concat([dashboard]);
 
-  const docs = await savedObjectsClient.bulkGet(panels);
+  const { saved_objects: savedObjects } = await savedObjectsClient.bulkGet(panels);
   const [ indexPatterns, searchSources ] = await Promise.all([
-    collectIndexPatterns(savedObjectsClient, docs),
-    collectSearchSources(savedObjectsClient, docs)
+    collectIndexPatterns(savedObjectsClient, savedObjects),
+    collectSearchSources(savedObjectsClient, savedObjects)
   ]);
-  return docs.concat(indexPatterns).concat(searchSources).concat([dashboard]);
+
+  return savedObjects.concat(indexPatterns).concat(searchSources).concat([dashboard]);
 }

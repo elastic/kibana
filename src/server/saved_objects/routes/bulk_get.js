@@ -1,21 +1,20 @@
 import Joi from 'joi';
 
-export const createReadRoute = (prereqs) => ({
-  path: '/api/saved_objects/{type}/{id}',
-  method: 'GET',
+export const createBulkGetRoute = (prereqs) => ({
+  path: '/api/saved_objects/bulk_get',
+  method: 'POST',
   config: {
     pre: [prereqs.getSavedObjectsClient],
     validate: {
-      params: Joi.object().keys({
+      payload: Joi.array().items(Joi.object({
         type: Joi.string().required(),
         id: Joi.string().required(),
-      }).required()
+      }).required())
     },
     handler(request, reply) {
       const { savedObjectsClient } = request.pre;
-      const { type, id } = request.params;
 
-      reply(savedObjectsClient.get(type, id));
+      reply(savedObjectsClient.bulkGet(request.payload));
     }
   }
 });

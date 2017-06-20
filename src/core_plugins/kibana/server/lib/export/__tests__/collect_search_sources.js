@@ -17,9 +17,11 @@ describe('collectSearchSources(req, panels)', () => {
     collectIndexPatternsStub = sinon.stub(deps, 'collectIndexPatterns');
     collectIndexPatternsStub.returns(Promise.resolve([{ id: 'logstash-*' }]));
 
-    savedObjectsClient.bulkGet.returns(Promise.resolve([
-      { id: 1 }, { id: 2 }
-    ]));
+    savedObjectsClient.bulkGet.returns(Promise.resolve({
+      saved_objects: [
+        { id: 1 }, { id: 2 }
+      ]
+    }));
   });
 
   afterEach(() => {

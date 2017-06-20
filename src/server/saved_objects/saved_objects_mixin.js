@@ -1,10 +1,11 @@
 import { SavedObjectsClient } from './client';
 
 import {
+  createBulkGetRoute,
   createCreateRoute,
   createDeleteRoute,
   createFindRoute,
-  createReadRoute,
+  createGetRoute,
   createUpdateRoute
 } from './routes';
 
@@ -24,9 +25,10 @@ export function savedObjectsMixin(kbnServer, server) {
     },
   };
 
+  server.route(createBulkGetRoute(prereqs));
   server.route(createCreateRoute(prereqs));
   server.route(createDeleteRoute(prereqs));
   server.route(createFindRoute(prereqs));
-  server.route(createReadRoute(prereqs));
+  server.route(createGetRoute(prereqs));
   server.route(createUpdateRoute(prereqs));
 }
