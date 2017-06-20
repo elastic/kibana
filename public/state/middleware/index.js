@@ -8,7 +8,8 @@ const storageKey = 'canvas';
 const middlewares = [
   applyMiddleware(thunkMiddleware, historyMiddleware(window)),
   persistState('persistent', { key: storageKey }),
-  window.__REDUX_DEVTOOLS_EXTENSION__ && window.__REDUX_DEVTOOLS_EXTENSION__(),
 ];
+
+if (window.__REDUX_DEVTOOLS_EXTENSION__) middlewares.push(window.__REDUX_DEVTOOLS_EXTENSION__());
 
 export default compose(...middlewares);
