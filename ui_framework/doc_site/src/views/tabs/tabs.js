@@ -1,23 +1,43 @@
-/* eslint-disable */
+import React from 'react';
 
-const $tabs = $('.kuiTab');
-let $selectedTab = undefined;
+import {
+  KuiTabs
+} from '../../../../components';
 
-if (!$tabs.length) {
-  throw new Error('$tabs missing');
-}
+class KuiTabsExample extends React.Component {
+  constructor(props) {
+    super(props);
 
-function selectTab(tab) {
-  if ($selectedTab) {
-    $selectedTab.removeClass('kuiTab-isSelected');
+    this.tabs = [
+      'Cobalt',
+      'Dextrose',
+      'Helium-3',
+      'Monosodium Glutamate',
+    ];
+
+    this.state = {
+      selectedTabIndex: 0,
+    };
+
+    this.onSelectedTabChanged = this.onSelectedTabChanged.bind(this);
   }
 
-  $selectedTab = $(tab);
-  $selectedTab.addClass('kuiTab-isSelected');
+  onSelectedTabChanged(index) {
+    this.setState({
+      selectedTabIndex: index,
+    });
+  }
+
+  render() {
+    return (
+      <KuiTabs
+        selectedTabIndex={this.state.selectedTabIndex}
+        onSelectedTabChanged={this.onSelectedTabChanged}
+      >
+        {this.tabs}
+      </KuiTabs>
+    );
+  }
 }
 
-$tabs.on('click', event => {
-  selectTab(event.target);
-});
-
-selectTab($tabs[0]);
+export default KuiTabsExample;
