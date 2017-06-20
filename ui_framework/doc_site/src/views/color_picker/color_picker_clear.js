@@ -1,6 +1,11 @@
 import React from 'react';
 
-import { KuiColorPicker } from '../../../../components/index';
+import {
+  KuiColorPicker,
+  KuiFieldGroup,
+  KuiFieldGroupSection,
+  KuiKeyboardAccessible,
+} from '../../../../components/index';
 
 export class ColorPickerLabelAndClear extends React.Component {
   constructor(props) {
@@ -14,15 +19,37 @@ export class ColorPickerLabelAndClear extends React.Component {
     this.setState({ color: value });
   };
 
+  resetColor = () => {
+    this.setState({ color: null });
+  };
+
   render() {
     return (
-      <KuiColorPicker
-        onChange={ this.handleChange }
-        color={ this.state.color }
-        label="Background Color"
-        showClearLink={ true }
-        showColorLabel={ false }
-      />
+      <KuiFieldGroup>
+        <KuiFieldGroupSection>
+          <label className="kuiLabel">
+            Background color
+          </label>
+        </KuiFieldGroupSection>
+
+        <KuiFieldGroupSection>
+          <KuiColorPicker
+            onChange={ this.handleChange }
+            color={ this.state.color }
+            showColorLabel={ false }
+          />
+        </KuiFieldGroupSection>
+
+        <KuiFieldGroupSection>
+          <p className="kuiText">
+            <KuiKeyboardAccessible>
+              <a className="kuiLink" onClick={ this.resetColor }>
+                Reset
+              </a>
+            </KuiKeyboardAccessible>
+          </p>
+        </KuiFieldGroupSection>
+      </KuiFieldGroup>
     );
   }
 }

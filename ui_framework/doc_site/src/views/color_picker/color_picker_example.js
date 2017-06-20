@@ -34,7 +34,7 @@ export default props => (
       </GuideDemo>
     </GuideSection>
     <GuideSection
-      title="Color Picker with a clear link, custom label, and no color label"
+      title="Color Picker with a label, reset link, and no color label"
       source={[{
         type: GuideSectionTypes.JS,
         code: colorPickerClearSource,

@@ -6,10 +6,14 @@ import { KuiColorPickerEmptySwatch } from './color_picker_empty_swatch';
 
 export function KuiColorPickerSwatch(props) {
   const { color, className } = props;
-  const classes = classNames('kuiColorPicker__swatch', className);
+  const isClear = !color;
+  const classes = classNames('kuiColorPicker__swatch', className, {
+    'kuiColorPicker__emptySwatch': isClear,
+  });
+  let children;
 
-  if (!color) {
-    return <KuiColorPickerEmptySwatch aria-label={ props['aria-label'] } />;
+  if (isClear) {
+    children = <KuiColorPickerEmptySwatch />;
   }
 
   return (
@@ -17,8 +21,10 @@ export function KuiColorPickerSwatch(props) {
       className={ classes }
       aria-label={ props['aria-label'] }
       data-test-subj="colorSwatch"
-      style={{ background: color }}
-    />
+      style={{ background: color ? color : '' }}
+    >
+      {children}
+    </div>
   );
 }
 

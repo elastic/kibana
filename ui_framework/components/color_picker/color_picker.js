@@ -34,12 +34,6 @@ export class KuiColorPicker extends React.Component {
     }
   };
 
-  onClearColor = (event) => {
-    this.props.onChange(null);
-    event.stopPropagation();
-    this.closeColorSelector();
-  };
-
   componentDidMount() {
     // When the user clicks somewhere outside of the color picker, we will dismiss it.
     document.addEventListener('click', this.closeColorSelector);
@@ -51,24 +45,19 @@ export class KuiColorPicker extends React.Component {
 
   getColorLabel() {
     const { color } = this.props;
+    const colorValue = color === null ? '(transparent)' : color;
     return (
       <div
         className="kuiColorPicker__label"
-        aria-label={`Color selection is ${ color }`}
+        aria-label={`Color selection is ${ colorValue }`}
       >
-        { color }
+        { colorValue }
       </div>
     );
   }
 
-  getClearLink() {
-    return (
-      <a className="kuiLink kuiColorPicker__label" onClick={ this.onClearColor }>clear</a>
-    );
-  }
-
   render() {
-    const { color, className, label, showColorLabel, showClearLink } = this.props;
+    const { color, className, showColorLabel } = this.props;
     const classes = classNames('kuiColorPicker', className);
     return (
       <div
@@ -80,12 +69,8 @@ export class KuiColorPicker extends React.Component {
           className="kuiColorPicker__preview"
           onClick={ this.toggleColorSelector }
         >
-          <label className="kuiLabel kuiColorPicker__label">
-            { label }
-          </label>
           <KuiColorPickerSwatch color={ color } aria-label={ this.props['aria-label'] } />
           { showColorLabel ? this.getColorLabel() : null }
-          { showClearLink ? this.getClearLink() : null }
         </div>
         {
           this.state.showColorSelector ?
@@ -108,12 +93,9 @@ KuiColorPicker.propTypes = {
   color: PropTypes.string,
   onChange: PropTypes.func.isRequired,
   showColorLabel: PropTypes.bool,
-  showClearLink: PropTypes.bool,
-  label: PropTypes.string,
 };
 
 KuiColorPicker.defaultProps = {
   'aria-label': 'Select a color',
   showColorLabel: true,
-  showClearLink: false
 };
