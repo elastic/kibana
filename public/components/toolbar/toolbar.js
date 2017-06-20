@@ -9,10 +9,10 @@ import { ElementTypes } from './element_types';
 
 import './toolbar.less';
 
-export const Toolbar = ({ editing, tray, setTray, addElement }) => {
+export const Toolbar = ({ editing, tray, setTray, addElement, elementIsSelected }) => {
   const done = () => setTray(null);
   const showHideTray = (exp) => {
-    if (tray && tray.type === exp.type) return done();
+    if (tray && tray === exp) return done();
     setTray(exp);
   };
 
@@ -29,16 +29,22 @@ export const Toolbar = ({ editing, tray, setTray, addElement }) => {
     done();
   };
 
-  const ElementsTray = (<ElementTypes done={done} onClick={createElement} />);
-  const ExpressionTray = (<Expression done={done} />);
+  const trays = {
+    elements: (<ElementTypes done={done} onClick={createElement} />),
+    expression: !elementIsSelected ? null : (<Expression done={done} />),
+  };
 
   return !editing ? null : (
     <div className="canvas__toolbar">
-      {tray ? (<Tray>{ tray }</Tray>) : null }
+      {!trays[tray] ? null :
+        (<Tray>{ trays[tray] }</Tray>)
+      }
       <Navbar>
-        <NavbarButton onClick={() => showHideTray(ElementsTray)}><i className="fa fa-plus" /> Add an element</NavbarButton>
+        <NavbarButton onClick={() => showHideTray('elements')}><i className="fa fa-plus" /> Add an element</NavbarButton>
         <NavbarButton><i className="fa fa-plus-square" /> Add a page</NavbarButton>
-        <NavbarButton onClick={() => showHideTray(ExpressionTray)}><i className="fa fa-terminal" /> Code</NavbarButton>
+        { !elementIsSelected ? null :
+          (<NavbarButton onClick={() => showHideTray('expression')}><i className="fa fa-terminal" /> Code</NavbarButton>)
+        }
       </Navbar>
     </div>
   );
@@ -49,4 +55,5 @@ Toolbar.propTypes = {
   tray: PropTypes.node,
   setTray: PropTypes.func,
   addElement: PropTypes.func,
+  elementIsSelected: PropTypes.bool,
 };

@@ -2,7 +2,7 @@ import { connect } from 'react-redux';
 import { compose, withState } from 'recompose';
 
 import { getEditing } from '../../state/selectors/app';
-import { getSelectedPage } from '../../state/selectors/workpad';
+import { getSelectedPage, getSelectedElement } from '../../state/selectors/workpad';
 import { addElement } from '../../state/actions/elements';
 
 import { Toolbar as Component } from './toolbar';
@@ -10,6 +10,7 @@ import { Toolbar as Component } from './toolbar';
 const mapStateToProps = (state) => ({
   editing: getEditing(state),
   selectedPage: getSelectedPage(state),
+  elementIsSelected: getSelectedElement(state) ? true : false,
 });
 
 const mapDispatchToProps = (dispatch) => ({
