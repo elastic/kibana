@@ -1,6 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { lifecycle, compose } from 'recompose';
+import { lifecycle, compose, branch, renderComponent } from 'recompose';
 import { getState, getError, getValue } from '../../lib/resolved_arg';
 import { InvalidExpression } from './invalid_element';
 import { RenderElement } from '../render_element';
@@ -16,7 +16,9 @@ const fetchRenderable = (props) => {
   if (getState(props.renderable) === null) props.fetchRenderable();
 };
 
-// add lifecycle hooks to component
+/*
+  Lifecycles methods
+*/
 const renderableLifecycle = lifecycle({
   componentWillMount() {
     fetchRenderable(this.props);
@@ -27,30 +29,38 @@ const renderableLifecycle = lifecycle({
   },
 });
 
+/*
+  Branches
+  Short circut rendering of the element if the element isn't ready or isn't valid.
+*/
+const loadingBranch = branch(({ renderable }) => !renderable || getState(renderable) === 'pending', renderComponent(Loading));
+const errorBranch =  branch(({ renderable }) => {
+  const renderableConfig = getValue(renderable);
+
+  // Show an error if...
+  return (
+    getError(renderable) !== null || // The renderable has an error property that is not null
+    renderableConfig.type !== 'render' || // The renderable isn't, well, renderable
+    !elementsRegistry.get(get(getValue(renderable), 'as')) // We can't find an element in the registry for this
+  );
+}, renderComponent(InvalidExpression));
+
+
 const ElementWrapperComponent = (props) => {
   const { element, selectedElement, selectElement, removeElement, renderable } = props;
 
   // TODO: pass in render element dimensions
   const selectedClassName = element.id === selectedElement ? 'selected' : '';
 
-  function getElement() {
-    if (!renderable || getState(renderable) === 'pending') return (<Loading/>); // No renderable? We haven't completed the first load yet.
-
-    const renderableConfig = getValue(renderable);
-    if (getError(renderable) !== null || renderableConfig.type == null) return (<InvalidExpression/>);
-
-    const elementDef = elementsRegistry.get(get(getValue(renderable), 'as'));
-    if (!elementDef) return (<InvalidExpression/>);
-
-    return (<RenderElement renderFn={elementDef.render} destroyFn={elementDef.destroy} config={renderableConfig.value} done={() => {}}/>);
-  }
+  const renderableConfig = getValue(renderable);
+  const elementDef = elementsRegistry.get(get(getValue(renderable), 'as'));
 
   return (
     <div className={`canvas__workpad--element ${selectedClassName}`} onClick={selectElement}>
       <div style={{ textAlign: 'right' }}>
-        <span style={{ cursor: 'crosshair' }} onClick={removeElement}>[X]</span>
+        <i className="fa fa-times-circle" style={{ cursor: 'pointer' }} onClick={removeElement}/>
       </div>
-      {getElement()}
+      <RenderElement renderFn={elementDef.render} destroyFn={elementDef.destroy} config={renderableConfig.value} done={() => {}}/>
     </div>
   );
 };
@@ -65,4 +75,6 @@ ElementWrapperComponent.propTypes = {
 
 export const ElementWrapper = compose(
   renderableLifecycle,
+  loadingBranch,
+  errorBranch,
 )(ElementWrapperComponent);
