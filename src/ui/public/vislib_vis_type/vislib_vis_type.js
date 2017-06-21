@@ -33,6 +33,10 @@ export function VislibVisTypeVislibVisTypeProvider(Private) {
     updateIfSet(params, params.seriesParams[0], 'interpolate');
     updateIfSet(params, params.seriesParams[0], 'type');
 
+    if (params.gauge) {
+      updateIfSet(params, params.gauge.style, 'fontSize');
+    }
+
     if (params.mode) {
       const stacked = ['stacked', 'percentage', 'wiggle', 'silhouette'].includes(params.mode);
       params.seriesParams[0].mode = stacked ? 'stacked' : 'normal';
