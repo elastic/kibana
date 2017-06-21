@@ -1,4 +1,4 @@
-import { convertEsIndexNotFoundError } from './errors';
+import { convertEsError } from './errors';
 
 /**
  *  Call the index.getAlias API for a list of indices.
@@ -22,7 +22,7 @@ export async function callIndexAliasApi(callCluster, indices) {
       allowNoIndices: false
     });
   } catch (error) {
-    throw convertEsIndexNotFoundError(indices, error);
+    throw convertEsError(indices, error);
   }
 }
 
@@ -46,6 +46,6 @@ export async function callFieldCapsApi(callCluster, indices) {
       allowNoIndices: false
     });
   } catch (error) {
-    throw convertEsIndexNotFoundError(indices, error);
+    throw convertEsError(indices, error);
   }
 }
