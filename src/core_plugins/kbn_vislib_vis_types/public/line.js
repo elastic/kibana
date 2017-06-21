@@ -60,22 +60,30 @@ export default function PointSeriesVisType(Private) {
               filter: false,
               truncate: 100
             },
-            title: {}
+            title: {
+              text: 'Count'
+            }
           }
         ],
-        seriesParams: [],
+        seriesParams: [
+          {
+            show: 'true',
+            type: 'line',
+            mode: 'normal',
+            data: {
+              label: 'Count',
+              id: '1'
+            },
+            valueAxis: 'ValueAxis-1',
+            drawLinesBetweenPoints: true,
+            showCircles: true
+          }
+        ],
         addTooltip: true,
         addLegend: true,
         legendPosition: 'right',
-        showCircles: true,
-        interpolate: 'linear',
-        scale: 'linear',
-        drawLinesBetweenPoints: true,
-        radiusRatio: 9,
         times: [],
         addTimeMarker: false,
-        defaultYExtents: false,
-        setYExtents: false
       },
       positions: ['top', 'left', 'right', 'bottom'],
       chartTypes: [{

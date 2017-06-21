@@ -60,7 +60,9 @@ export default function PointSeriesVisType(Private) {
               filter: false,
               truncate: 100
             },
-            title: {}
+            title: {
+              text: 'Count'
+            }
           }
         ],
         seriesParams: [{
@@ -79,15 +81,8 @@ export default function PointSeriesVisType(Private) {
         addTooltip: true,
         addLegend: true,
         legendPosition: 'right',
-        showCircles: true,
-        interpolate: 'linear',
-        scale: 'linear',
-        drawLinesBetweenPoints: true,
-        radiusRatio: 9,
         times: [],
         addTimeMarker: false,
-        defaultYExtents: false,
-        setYExtents: false
       },
       positions: ['top', 'left', 'right', 'bottom'],
       chartTypes: [{
