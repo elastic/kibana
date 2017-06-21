@@ -18,6 +18,7 @@ export function VislibTypesProvider(Private) {
     area: pointSeries.area,
     point_series: pointSeries.line,
     heatmap: pointSeries.heatmap,
-    gauge: Private(vislibGaugeProvider)
+    gauge: Private(vislibGaugeProvider),
+    metric: Private(vislibGaugeProvider)
   };
 }
