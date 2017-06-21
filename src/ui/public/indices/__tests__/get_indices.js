@@ -1,6 +1,5 @@
 import expect from 'expect.js';
 import ngMock from 'ng_mock';
-import { pluck } from 'lodash';
 import { IndicesGetIndicesProvider } from 'ui/indices/get_indices';
 
 describe('GetIndices', function () {
@@ -16,15 +15,21 @@ describe('GetIndices', function () {
       { index: '.monitoring-es-4' },
       { index: '.monitoring-es-5' }
     ];
-    aliasesResponse = [
-      { index: '.monitoring-es-active' }
-    ];
+    aliasesResponse = {
+      '.monitoring-es-1': {
+        aliases: {
+          '.monitoring-es-active': {}
+        }
+      }
+    };
 
     $provide.service('esAdmin', function () {
       return {
         cat: {
-          indices: async () => indicesResponse,
-          aliases: async () => aliasesResponse
+          indices: async () => indicesResponse
+        },
+        indices: {
+          getAlias: async () => aliasesResponse
         }
       };
     });
@@ -38,21 +43,21 @@ describe('GetIndices', function () {
     expect(getIndices).to.be.a(Function);
   });
 
-  it('should get all indices', async function () {
+  it('should rely on the alias endpoint if it returns a non 404', async function () {
     const indices = await getIndices();
-    const expected = [...pluck(indicesResponse, 'index'), ...pluck(aliasesResponse, 'index')];
-
-    expected.forEach((value, index) => {
-      expect(value).to.be(indices[index]);
-    });
-    expect(indices).to.contain('.monitoring-es-active');
+    expect(indices.length).to.be(2);
+    expect(indices[0]).to.be('.monitoring-es-1');
+    expect(indices[1]).to.be('.monitoring-es-active');
   });
 
-  it('should handle no aliases', async function () {
-    const aliasesResponseCopy = aliasesResponse.slice(0);
-    aliasesResponse = {};
+  it('should fallback to the cat indices endpoint if there are no aliases', async function () {
+    const aliasesResponseCopy = Object.assign({}, aliasesResponse);
+    aliasesResponse = { status: 404 };
     const indices = await getIndices();
-    expect(indices).to.not.contain('.monitoring-es-active');
+    expect(indices.length).to.be(indicesResponse.length);
+    indicesResponse.forEach((indexObj, idx) => {
+      expect(indices[idx]).to.be(indexObj.index);
+    });
     aliasesResponse = aliasesResponseCopy;
   });
 });
