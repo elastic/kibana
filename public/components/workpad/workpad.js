@@ -1,13 +1,13 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { RenderExpression } from '../render_expression';
+import { ElementWrapper } from '../element_wrapper';
 
 import './workpad.less';
 
 export const Workpad = ({ elements, deselectElement }) => {
   return (
     <div className="canvas__workpad" onClick={deselectElement}>
-      { elements.map(element => (<RenderExpression key={element.id} element={element} />)) }
+      { elements.map(element => (<ElementWrapper key={element.id} element={element} />)) }
     </div>
   );
 };
