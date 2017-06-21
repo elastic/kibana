@@ -15,6 +15,7 @@ export function VislibVisualizationsVisTypesProvider(Private) {
   return {
     pie: Private(VislibVisualizationsPieChartProvider),
     point_series: Private(VislibVisualizationsPointSeriesProvider),
-    gauge: Private(GaugeChartProvider)
+    gauge: Private(GaugeChartProvider),
+    metric: Private(GaugeChartProvider),
   };
 }
