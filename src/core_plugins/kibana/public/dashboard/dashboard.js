@@ -88,7 +88,7 @@ app.directive('dashboardApp', function ($injector) {
   return {
     restrict: 'E',
     controllerAs: 'dashboardApp',
-    controller: function ($scope, $rootScope, $route, $routeParams, $location, getAppState, $compile, dashboardConfig) {
+    controller: function ($scope, $rootScope, $route, $routeParams, $location, getAppState, $compile, dashboardConfig, $window) {
       const filterBar = Private(FilterBarQueryFilterProvider);
       const docTitle = Private(DocTitleProvider);
       const notify = new Notifier({ location: 'Dashboard' });
@@ -118,6 +118,7 @@ app.directive('dashboardApp', function ($injector) {
           description: dashboardState.getDescription(),
         };
         $scope.panels = dashboardState.getPanels();
+        $scope.fullScreenMode = dashboardState.getFullScreenMode();
       };
 
       // Part of the exposed plugin API - do not remove without careful consideration.
@@ -293,14 +294,18 @@ app.directive('dashboardApp', function ($injector) {
         $scope.fullScreenMode = fullScreenMode;
         dashboardState.setFullScreenMode(fullScreenMode);
         chrome.setVisible(!fullScreenMode);
-        $scope.$root.$broadcast('globalNav:update');
+        $window.dispatchEvent(new Event('resize'));
+
+        // Make sure that if we exit the dashboard app, the chrome becomes visible again
+        // (e.g. if the user clicks the back button).
         if (fullScreenMode) {
           onRouteChange = $scope.$on('$routeChangeStart', () => chrome.setVisible(true));
         } else if (onRouteChange) {
           onRouteChange();
         }
       };
-      setFullScreenMode(dashboardState.getFullScreenMode());
+
+      $scope.$watch('fullScreenMode', () => setFullScreenMode(dashboardState.getFullScreenMode()));
 
       $scope.exitFullScreenMode = () => setFullScreenMode(false);
 
