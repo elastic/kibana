@@ -1,0 +1,2 @@
+
+include::kibana/configuration/config.js.asciidoc[]

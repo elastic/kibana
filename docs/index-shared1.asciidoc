@@ -1,0 +1,12 @@
+
+== Introduction
+
+Kibana is an open source (Apache Licensed), browser based analytics and search dashboard for
+ElasticSearch. Kibana is a snap to setup and start using. Written entirely in HTML and Javascript
+it requires only a plain webserver, Kibana requires no fancy server side components.
+Kibana strives to be easy to get started with, while also being flexible and powerful, just like
+Elasticsearch.
+
+NOTE: Kibana 3 depends on the https://www.elastic.co/guide/en/elasticsearch/reference/current/search-facets.html[_facets_]
+feature. Facets were removed in the 2.0 release of Elasticsearch. Kibana 3 does not support Elasticsearch versions greater
+than 1.7.
