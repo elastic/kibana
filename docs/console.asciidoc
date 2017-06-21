@@ -1,8 +1,6 @@
 [[console-kibana]]
-= Console
+== Console
 
-[partintro]
---
 The Console plugin provides a UI to interact with the REST API of Elasticsearch. Console has two main areas: the *editor*,
 where you compose requests to Elasticsearch, and the *response* pane, which displays the responses to the request.
 Enter the address of your Elasticsearch server in the text box on the top of screen. The default value of this address
@@ -61,11 +59,11 @@ image::images/introduction_output.png[Screenshot]
 
 [float]
 [[console-ui]]
-== The Console UI
+=== The Console UI
 
 In this section you will find a more detailed description of UI of Console. The basic aspects of the UI are explained
 in the <<console-kibana>> section.
---
+
 
 include::console/multi-requests.asciidoc[]
 

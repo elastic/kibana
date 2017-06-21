@@ -1,5 +1,5 @@
 [[configuring-console]]
-== Configuring Console
+=== Configuring Console
 
 You can add the following options in the `config/kibana.yml` file:
 
