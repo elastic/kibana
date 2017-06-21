@@ -9,7 +9,11 @@ import {
 } from './lib';
 
 const V6_TYPE = 'doc';
+const TYPE_MISSING_EXCEPTION = 'type_missing_exception';
 
+function isTypeMissing(item, action) {
+  return get(item, `${action}.error.type`) === TYPE_MISSING_EXCEPTION;
+}
 function boomIsNotFound(err) {
   return err.isBoom && err.output.statusCode === 404;
 }
@@ -52,24 +56,36 @@ export class SavedObjectsClient {
    */
   async bulkCreate(objects, options = {}) {
     const action = options.force === true ? 'index' : 'create';
-
-    const body = objects.reduce((acc, object) => {
-      acc.push({ [action]: { _type: object.type, _id: object.id } });
-      acc.push(object.attributes);
-
+    let response;
+    const v6Body = objects.reduce((acc, object) => {
+      acc.push({ [action]: { _type: 'doc', _id: object.id } });
+      acc.push(Object.assign({}, {
+        type: object.type
+      }, { [object.type]: object.attributes }));
       return acc;
     }, []);
+    response = await this._withKibanaIndex('bulk', { body: v6Body });
+    const missingErrors = response.items.filter(isTypeMissing, action).length;
+    const usesV5Index = response.items.length === missingErrors;
 
-    return await this._withKibanaIndex('bulk', { body })
-      .then(resp => get(resp, 'items', []).map((resp, i) => {
-        return {
-          id: resp[action]._id,
-          type: resp[action]._type,
-          version: resp[action]._version,
-          attributes: objects[i].attributes,
-          error: resp[action].error ? { message: get(resp[action], 'error.reason') } : undefined
-        };
-      }));
+    if (usesV5Index) {
+      const v5Body = objects.reduce((acc, object) => {
+        acc.push({ [action]: { _type: object.type, _id: object.id } });
+        acc.push(object.attributes);
+        return acc;
+      }, []);
+      response = await this._withKibanaIndex('bulk', { body: v5Body });
+    }
+
+    return get(response, 'items', []).map((resp, i) => {
+      return {
+        id: resp[action]._id,
+        type: resp[action]._type,
+        version: resp[action]._version,
+        attributes: objects[i].attributes,
+        error: resp[action].error ? { message: get(resp[action], 'error.reason') } : undefined
+      };
+    });
   }
 
   async delete(type, id) {
@@ -153,11 +169,13 @@ export class SavedObjectsClient {
 
     return {
       saved_objects: response.map(r => {
+        const docType =  getDocType(r);
+
         return {
           id: r._id,
-          type: r._type,
+          type: docType,
           version: r._version,
-          attributes: r._source
+          attributes: get(r, `_source.${docType}`) || r._source
         };
       })
     };
