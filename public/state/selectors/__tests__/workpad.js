@@ -61,7 +61,6 @@ describe('workpad selectors', () => {
       expect(selector.getPageById({}, 'page-1')).to.be(undefined);
       expect(selector.getSelectedElement({})).to.be(undefined);
       expect(selector.getSelectedElementId({})).to.be(undefined);
-      expect(selector.getElements({})).to.be(undefined);
       expect(selector.getElementById({}, 'element-1')).to.be(undefined);
       expect(selector.getResolvedArgs({}, 'element-1')).to.be(undefined);
       expect(selector.getSelectedResolvedArgs({})).to.be(undefined);
@@ -103,6 +102,10 @@ describe('workpad selectors', () => {
   });
 
   describe('getElements', () => {
+    it('is an empty array with no state', () => {
+      expect(selector.getElements({})).to.eql([]);
+    });
+
     it('returns all elements on the page', () => {
       const { elements } = state.persistent.workpad.pages[0];
       const expected = elements.map(element => ({

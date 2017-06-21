@@ -5,7 +5,9 @@ import actionCreator from './fixtures/action_creator';
 
 const reducer = proxyquire('../elements', {
   '../actions/elements': {
-    setElementExpression: 'setElementExpression',
+    setExpression: 'setExpression',
+    setAst: 'setAst',
+    setArgumentAtIndex: 'setArgumentAtIndex',
     '@noCallThru': true,
   },
 }).default;
@@ -29,17 +31,17 @@ describe('elements reducer', () => {
     };
   });
 
-  it('updates element expression and ast by id', () => {
+  it('expressionActions update element expression by id', () => {
     const expression = 'test expression';
-    const action = actionCreator('setElementExpression')({
-      expression,
-      pageId: 'page-1',
-      element: { id: 'element-1' },
-    });
     const expected = {
       id: 'element-1',
       expression,
     };
+    const action = actionCreator('setExpression')({
+      expression,
+      pageId: 'page-1',
+      element: { id: 'element-1' },
+    });
 
     const newState = reducer(state, action);
     const newElement = get(newState, ['pages', 0, 'elements', 1]);

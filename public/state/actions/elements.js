@@ -8,7 +8,6 @@ import { getType } from '../../../common/types/get_type';
 import { fromExpression, toExpression } from '../../../common/lib/ast';
 import * as args from './resolved_args';
 
-
 function astToExpression({ ast, element, pageId }) {
   try {
     return { expression: toExpression(ast), pageId, element };

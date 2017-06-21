@@ -17,7 +17,9 @@
     "test:server": "gulp test:server",
     "test:browser": "gulp test:browser",
     "test:dev": "gulp test:dev",
-    "precommit": "gulp lint-staged"
+    "test:debug": "mocha --debug-brk --inspect --compilers js:babel-core/register",
+    "precommit": "gulp lint-staged",
+    "prepush": "gulp test"
   },
   "dependencies": {
     "axios": "^0.16.1",
