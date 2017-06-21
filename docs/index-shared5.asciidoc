@@ -1,0 +1,2 @@
+
+include::whats-new.asciidoc[]
