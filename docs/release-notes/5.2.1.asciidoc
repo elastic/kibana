@@ -10,7 +10,7 @@ When previous versions of Kibana 5 are configured for SSL client access, file
 descriptors will fail to be cleaned up after certain requests and will
 accumulate over time until the process crashes. Requests that are canceled
 before data is sent can also crash the process. +
-{security}[ESA-2017-02] ({pull}10225[#10225])
+{security-ref}[ESA-2017-02] ({pull}10225[#10225])
 
 [float]
 [[bug-5.2.1]]
