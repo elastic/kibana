@@ -1,10 +1,10 @@
 [[keyboard-shortcuts]]
-== Keyboard shortcuts
+=== Keyboard shortcuts
 
 Console comes with a set of nifty keyboard shortcuts making working with it even more efficient. Here is an overview:
 
 [float]
-=== General editing
+==== General editing
 
 Ctrl/Cmd + I:: Auto indent current request.
 Ctrl + Space:: Open Auto complete (even if not typing).
@@ -14,7 +14,7 @@ Ctrl/Cmd + Alt + L:: Collapse/expand current scope.
 Ctrl/Cmd + Option + 0:: Collapse all scopes but the current one. Expand by adding a shift.
 
 [float]
-=== When auto-complete is visible
+==== When auto-complete is visible
 
 Down arrow:: Switch focus to auto-complete menu. Use arrows to further select a term.
 Enter/Tab::  Select the currently selected or the top most term in auto-complete menu.

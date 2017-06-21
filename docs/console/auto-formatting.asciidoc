@@ -1,5 +1,5 @@
 [[auto-formatting]]
-== Auto Formatting
+=== Auto Formatting
 
 Console allows you to auto format messy requests. To do so, position the cursor on the request you would like to format
 and select Auto Indent from the action menu:

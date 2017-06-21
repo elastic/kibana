@@ -1,5 +1,5 @@
 [[history]]
-== History
+=== History
 
 Console maintains a list of the last 500 requests that were successfully executed by Elasticsearch. The history
 is available by clicking the clock icon on the top right side of the window. The icons opens the history panel
