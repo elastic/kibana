@@ -2,9 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { lifecycle, compose } from 'recompose';
 
-
 export const RenderElementComponent = ({ renderFn }) => {
-
   const renderElement = (domNode) => {
     if (domNode) renderFn(domNode);
   };
@@ -23,7 +21,6 @@ const RenderElementLifecycle = lifecycle({
     this.props.destroyFn();
   },
 });
-
 
 RenderElementComponent.propTypes = {
   renderFn: PropTypes.func,

@@ -7,8 +7,6 @@ import { RenderElement } from '../render_element';
 import { get } from 'lodash';
 import { Loading } from '../loading';
 import { elements as elementsRegistry } from '../../lib/elements';
-
-
 import './element_wrapper.less';
 
 // dispatch renderable fetch if renderable isn't provided
