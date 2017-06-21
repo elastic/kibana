@@ -1,0 +1,7 @@
+
+:ref: http://www.elastic.co/guide/en/elasticsearch/reference/1.7
+:shield: https://www.elastic.co/guide/en/shield/shield-1.3
+
+include::introduction.asciidoc[]
+
+include::setup.asciidoc[]
