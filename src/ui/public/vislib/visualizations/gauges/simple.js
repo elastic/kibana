@@ -104,7 +104,21 @@ export function SimpleGaugeProvider() {
       const tooltip = this.gaugeChart.tooltip;
       const isTooltip = this.gaugeChart.handler.visConfig.get('addTooltip');
       const yFieldFormatter = this.gaugeChart.handler.data.get('yAxisFormatter');
-      const fontSize = this.gaugeChart.handler.visConfig.get('gauge.style.fontSize');
+
+      let fontSize;
+      let deprecatedFontSize;
+      try {
+        deprecatedFontSize = this.gaugeChart.handler.visConfig.get('fontSize');
+        if (!isNaN(parseInt(this.gaugeChart.handler.visConfig.get('fontSize')))) {
+          fontSize = deprecatedFontSize;
+        } else {
+          fontSize = this.gaugeChart.handler.visConfig.get('gauge.style.fontSize');
+        }
+      } catch (e) {
+        fontSize = this.gaugeChart.handler.visConfig.get('gauge.style.fontSize');
+      }
+
+      // console.log('drawing fontSize', fontSize);
 
       const labelColor = this.gaugeConfig.style.labelColor;
       const bgColor = this.gaugeConfig.style.bgColor;
