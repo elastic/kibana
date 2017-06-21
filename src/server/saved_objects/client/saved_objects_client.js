@@ -136,12 +136,20 @@ export class SavedObjectsClient {
       return { saved_objects: [] };
     }
 
-    const docs = objects.map(doc => {
-      return { _type: get(doc, 'type'), _id: get(doc, 'id') };
-    });
+    const docs = objects.reduce((acc, { type, id }) => {
+      acc.push({}, createIdQuery({ type, id }));
+      return acc;
+    }, []);
 
-    const response = await this._withKibanaIndex('mget', { body: { docs } })
-      .then(resp => get(resp, 'docs', []).filter(resp => resp.found));
+
+    const response = await this._withKibanaIndex('msearch', { body: docs })
+    .then(resp => {
+      let results = [];
+      resp.responses.forEach(r => {
+        results = results.concat(get(r, 'hits.hits'));
+      });
+      return results;
+    });
 
     return {
       saved_objects: response.map(r => {
