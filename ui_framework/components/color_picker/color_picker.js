@@ -12,9 +12,16 @@ export class KuiColorPicker extends React.Component {
     this.state = {
       showColorSelector: false,
     };
+    // Use this variable to differentiate between clicks on the element that should not cause the pop up
+    // to close, and external clicks that should cause the pop up to close.
+    this.clickedMyself = false;
   }
 
   closeColorSelector = () => {
+    if (this.clickedMyself) {
+      this.clickedMyself = false;
+      return;
+    }
     this.setState({ showColorSelector: false });
   };
 
@@ -26,12 +33,10 @@ export class KuiColorPicker extends React.Component {
     this.props.onChange(color.hex);
   };
 
-  onClickRootElement = e => {
+  onClickRootElement = () => {
     // This prevents clicking on the element from closing it, due to the event handler on the
     // document object.
-    if (e.nativeEvent.stopImmediatePropagation) {  // Not available in headless browsers (e.g. jenkins ci build).
-      e.nativeEvent.stopImmediatePropagation();
-    }
+    this.clickedMyself = true;
   };
 
   componentDidMount() {
