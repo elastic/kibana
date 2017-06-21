@@ -7,6 +7,7 @@ import {
   GuideSection,
   GuideSectionTypes,
   GuideText,
+  GuideCode
 } from '../../components';
 
 import Tabs from './tabs';
@@ -26,7 +27,8 @@ export default props => (
       }]}
     >
       <GuideText>
-        The children of the KuiTabs can be anything that can be rendered: they will be wrapped into KuiTab components.
+        The <GuideCode>KuiTabs</GuideCode> component accepts nodes as children.
+        Each child will be wrapped within a <GuideCode>KuiTab</GuideCode> component.
       </GuideText>
 
       <GuideDemo>
