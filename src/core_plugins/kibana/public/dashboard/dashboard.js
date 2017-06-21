@@ -299,7 +299,10 @@ app.directive('dashboardApp', function ($injector) {
         // Make sure that if we exit the dashboard app, the chrome becomes visible again
         // (e.g. if the user clicks the back button).
         if (fullScreenMode) {
-          onRouteChange = $scope.$on('$routeChangeStart', () => chrome.setVisible(true));
+          onRouteChange = $scope.$on('$routeChangeStart', () => {
+            chrome.setVisible(true);
+            onRouteChange();
+          });
         } else if (onRouteChange) {
           onRouteChange();
         }
