@@ -1,8 +1,8 @@
 import sinon from 'sinon';
 import expect from 'expect.js';
 
-import { convertEsIndexNotFoundError } from '../errors';
-import * as convertEsIndexNotFoundErrorNS from '../errors';
+import { convertEsError } from '../errors';
+import * as convertEsErrorNS from '../errors';
 
 import { callIndexAliasApi, callFieldCapsApi } from '../es_api';
 
@@ -45,21 +45,21 @@ describe('server/index_patterns/service/lib/es_api', () => {
       expect(passedOpts).to.have.property('allowNoIndices', false);
     });
 
-    it('handles errors with convertEsIndexNotFoundError()', async () => {
+    it('handles errors with convertEsError()', async () => {
       const indices = [];
       const esError = new Error('esError');
       const convertedError = new Error('convertedError');
 
-      sandbox.stub(convertEsIndexNotFoundErrorNS, 'convertEsIndexNotFoundError', () => { throw convertedError; });
+      sandbox.stub(convertEsErrorNS, 'convertEsError', () => { throw convertedError; });
       const callCluster = sinon.spy(async () => { throw esError; });
       try {
         await callIndexAliasApi(callCluster, indices);
         throw new Error('expected callIndexAliasApi() to throw');
       } catch (error) {
         expect(error).to.be(convertedError);
-        sinon.assert.calledOnce(convertEsIndexNotFoundError);
-        expect(convertEsIndexNotFoundError.args[0][0]).to.be(indices);
-        expect(convertEsIndexNotFoundError.args[0][1]).to.be(esError);
+        sinon.assert.calledOnce(convertEsError);
+        expect(convertEsError.args[0][0]).to.be(indices);
+        expect(convertEsError.args[0][1]).to.be(esError);
       }
     });
   });
@@ -103,21 +103,21 @@ describe('server/index_patterns/service/lib/es_api', () => {
       expect(passedOpts).to.have.property('allowNoIndices', false);
     });
 
-    it('handles errors with convertEsIndexNotFoundError()', async () => {
+    it('handles errors with convertEsError()', async () => {
       const indices = [];
       const esError = new Error('esError');
       const convertedError = new Error('convertedError');
 
-      sandbox.stub(convertEsIndexNotFoundErrorNS, 'convertEsIndexNotFoundError', () => { throw convertedError; });
+      sandbox.stub(convertEsErrorNS, 'convertEsError', () => { throw convertedError; });
       const callCluster = sinon.spy(async () => { throw esError; });
       try {
         await callFieldCapsApi(callCluster, indices);
         throw new Error('expected callFieldCapsApi() to throw');
       } catch (error) {
         expect(error).to.be(convertedError);
-        sinon.assert.calledOnce(convertEsIndexNotFoundError);
-        expect(convertEsIndexNotFoundError.args[0][0]).to.be(indices);
-        expect(convertEsIndexNotFoundError.args[0][1]).to.be(esError);
+        sinon.assert.calledOnce(convertEsError);
+        expect(convertEsError.args[0][0]).to.be(indices);
+        expect(convertEsError.args[0][1]).to.be(esError);
       }
     });
   });
