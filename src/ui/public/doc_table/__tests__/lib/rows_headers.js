@@ -52,7 +52,7 @@ describe('Doc Table', function () {
 
     it('should create a time column if the timefield is defined', function () {
       const childElems = parentElem.find(elemType);
-      expect(childElems.length).to.be(2);
+      expect(childElems.length).to.be(1);
     });
 
     it('should be able to add and remove columns', function () {
@@ -61,20 +61,20 @@ describe('Doc Table', function () {
       $parentScope.columns = ['bytes'];
       parentElem.scope().$digest();
       childElems = parentElem.find(elemType);
-      expect(childElems.length).to.be(3);
-      expect($(childElems[2]).text()).to.contain('bytes');
+      expect(childElems.length).to.be(2);
+      expect($(childElems[1]).text()).to.contain('bytes');
 
       $parentScope.columns = ['bytes', 'request_body'];
       parentElem.scope().$digest();
       childElems = parentElem.find(elemType);
-      expect(childElems.length).to.be(4);
-      expect($(childElems[3]).text()).to.contain('request_body');
+      expect(childElems.length).to.be(3);
+      expect($(childElems[2]).text()).to.contain('request_body');
 
       $parentScope.columns = ['request_body'];
       parentElem.scope().$digest();
       childElems = parentElem.find(elemType);
-      expect(childElems.length).to.be(3);
-      expect($(childElems[2]).text()).to.contain('request_body');
+      expect(childElems.length).to.be(2);
+      expect($(childElems[1]).text()).to.contain('request_body');
     });
 
     it('should create only the toggle column if there is no timeField', function () {
@@ -82,7 +82,7 @@ describe('Doc Table', function () {
       parentElem.scope().$digest();
 
       const childElems = parentElem.find(elemType);
-      expect(childElems.length).to.be(1);
+      expect(childElems.length).to.be(0);
     });
 
   };
@@ -117,7 +117,7 @@ describe('Doc Table', function () {
     });
 
     describe('adding and removing columns', function () {
-      columnTests('th', $elem);
+      columnTests('[data-test-subj~="docTableHeaderField"]', $elem);
     });
 
     describe('cycleSortOrder function', function () {
@@ -252,7 +252,7 @@ describe('Doc Table', function () {
     });
 
     describe('adding and removing columns', function () {
-      columnTests('td', $elem);
+      columnTests('[data-test-subj~="docTableField"]', $elem);
     });
 
     describe('details row', function () {

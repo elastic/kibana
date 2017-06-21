@@ -1,6 +1,10 @@
 <tr>
-  <th width="1%"></th>
-  <th ng-if="indexPattern.timeFieldName" data-test-subj="docTableHeaderField">
+  <td width="1%"></td>
+  <th
+    ng-if="indexPattern.timeFieldName"
+    data-test-subj="docTableHeaderField"
+    scope="col"
+  >
     <span>Time <button
       id="docTableHeaderFieldSort{{indexPattern.timeFieldName}}"
       tabindex="0"
@@ -13,7 +17,11 @@
     ></button>
     </span>
   </th>
-  <th ng-repeat="name in columns" data-test-subj="docTableHeaderField">
+  <th
+    ng-repeat="name in columns"
+    data-test-subj="docTableHeaderField"
+    scope="col"
+  >
     <span class="table-header-name">
       {{name | shortDots}}
       <button
