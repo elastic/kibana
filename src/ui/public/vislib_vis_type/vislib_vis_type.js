@@ -15,12 +15,15 @@ export function VislibVisTypeVislibVisTypeProvider(Private) {
   const pointSeries = Private(AggResponsePointSeriesProvider);
   const VislibRenderbot = Private(VislibVisTypeVislibRenderbotProvider);
 
+  // converts old config format (pre 5.2) to the new one
   const updateParams = function (params) {
-    if (!params.seriesParams || !params.seriesParams.length) return;
+    if (params.seriesParams && params.seriesParams.length) return;
+    params.seriesParams = [{}];
 
     const updateIfSet = (from, to, prop, func) => {
       if (from[prop]) {
         to[prop] = func ? func(from[prop]) : from[prop];
+        delete from[prop];
       }
     };
 
@@ -29,6 +32,10 @@ export function VislibVisTypeVislibVisTypeProvider(Private) {
     updateIfSet(params, params.seriesParams[0], 'radiusRatio');
     updateIfSet(params, params.seriesParams[0], 'interpolate');
     updateIfSet(params, params.seriesParams[0], 'type');
+
+    if (params.gauge) {
+      updateIfSet(params, params.gauge.style, 'fontSize');
+    }
 
     if (params.mode) {
       const stacked = ['stacked', 'percentage', 'wiggle', 'silhouette'].includes(params.mode);
@@ -43,15 +50,19 @@ export function VislibVisTypeVislibVisTypeProvider(Private) {
       delete params.smoothLines;
     }
 
-    updateIfSet(params, params.valueAxes[0].scale, 'setYExtents');
-    updateIfSet(params, params.valueAxes[0].scale, 'defaultYExtents');
+    if (params.valueAxes) {
+      updateIfSet(params, params.valueAxes[0].scale, 'setYExtents');
+      updateIfSet(params, params.valueAxes[0].scale, 'defaultYExtents');
+    }
 
     if (params.scale) {
       params.valueAxes[0].scale.type = params.scale;
       delete params.scale;
     }
 
-    updateIfSet(params, params.categoryAxes[0], 'expandLastBucket');
+    if (params.categoryAxis && params.categoryAxis.length) {
+      updateIfSet(params, params.categoryAxes[0], 'expandLastBucket');
+    }
   };
 
   _.class(VislibVisType).inherits(VisType);
@@ -66,7 +77,7 @@ export function VislibVisTypeVislibVisTypeProvider(Private) {
   }
 
   VislibVisType.prototype.createRenderbot = function (vis, $el, uiState) {
-    updateParams(vis.params);
+    if (vis.type.name !== 'pie') updateParams(vis.params);
     return new VislibRenderbot(vis, $el, uiState);
   };
 
