@@ -65,8 +65,10 @@ export class SavedObjectsClient {
       return acc;
     }, []);
     response = await this._withKibanaIndex('bulk', { body: v6Body });
-    const missingErrors = response.items.filter(isTypeMissing, action).length;
-    const usesV5Index = response.items.length === missingErrors;
+
+    const items = get(response, 'items', []);
+    const missingErrors = items.filter(isTypeMissing, action).length;
+    const usesV5Index = items.length && items.length === missingErrors;
 
     if (usesV5Index) {
       const v5Body = objects.reduce((acc, object) => {
@@ -161,7 +163,8 @@ export class SavedObjectsClient {
     const response = await this._withKibanaIndex('msearch', { body: docs })
     .then(resp => {
       let results = [];
-      resp.responses.forEach(r => {
+      const responses = get(resp, 'responses', []);
+      responses.forEach(r => {
         results = results.concat(get(r, 'hits.hits'));
       });
       return results;
