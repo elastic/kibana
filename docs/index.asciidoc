@@ -35,7 +35,7 @@ include::dashboard.asciidoc[]
 
 include::timelion.asciidoc[]
 
-include::console.asciidoc[]
+include::index-shared3.asciidoc[]
 
 include::management.asciidoc[]
 
