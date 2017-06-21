@@ -4,6 +4,24 @@ import { set, del } from 'object-path-immutable';
 import { prepend } from '../../lib/modify_path';
 import * as actions from '../actions/resolved_args';
 
+/*
+  Resolved args are a way to handle async values. They track the status, value, and error
+  state thgouh the lifecycle of the request, and are an object that looks like this:
+
+  {
+    status: 'pending',
+    value: null,
+    error: null,
+  }
+
+  Here, the request is in flight, and the application is waiting for a value. Valid statuses
+  are `initializing`, `pending`, `ready`, and `error`.
+
+  When status is `ready`, the value will be whatever came back in the response.
+
+  When status is `error`, the value will be the error object, and the error property will be true.
+*/
+
 function _getState(hasError, loading) {
   if (hasError) return 'error';
   if (Boolean(loading)) return 'pending';

@@ -8,6 +8,11 @@ export default (path) => {
       selectedPage: 'page-f3ce-4bb7-86c8-0417606d6592',
       selectedElement: null,
       resolvedArgs: {},
+      // values in resolvedArgs should live under a unique index so they can be looked up.
+      // The ID of the element is a great example.
+      // In there will live an object with a status (string), value (any), and error (bool) property.
+      // If the error proprty is true, the value will be the error object.
+      // See the resolved_args reducer for more information.
     },
     persistent: {
       schemaVersion: 0,
