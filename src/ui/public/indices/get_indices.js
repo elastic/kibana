@@ -12,7 +12,7 @@ const getIndicesFromResponse = json => {
 
 export function IndicesGetIndicesProvider(esAdmin) {
   return async function getIndices(query) {
-    const aliases = await esAdmin.indices.getAlias({ index: query, format: 'json', allowNoIndices: true, ignore: 404 });
+    const aliases = await esAdmin.indices.getAlias({ index: query, allowNoIndices: true, ignore: 404 });
 
     if (aliases.status === 404) {
       const indices = await esAdmin.cat.indices({ index: query, format: 'json', ignore: 404 });
