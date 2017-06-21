@@ -302,7 +302,12 @@ export function VislibLibDispatchProvider(Private, config) {
     }
 
 
-
+    /**
+     * Find Element by data-label
+     * @param eventElement
+     * @param name
+     * @param dataObject
+     */
     findElementByLabel(eventElement, name, dataObject) {
       const rects = $(d3.select(eventElement)).parent().find('[data-label="' + name + '"]');
       rects.each(function () {
