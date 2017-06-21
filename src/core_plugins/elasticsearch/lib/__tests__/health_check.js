@@ -9,6 +9,8 @@ import mappings from './fixtures/mappings';
 import healthCheck from '../health_check';
 import kibanaVersion from '../kibana_version';
 import { esTestServerUrlParts } from '../../../../../test/es_test_server_url_parts';
+import * as determineEnabledScriptingLangsNS from '../determine_enabled_scripting_langs';
+import { determineEnabledScriptingLangs } from '../determine_enabled_scripting_langs';
 
 const esPort = esTestServerUrlParts.port;
 const esUrl = url.format(esTestServerUrlParts);
@@ -20,6 +22,7 @@ describe('plugins/elasticsearch', () => {
     let health;
     let plugin;
     let cluster;
+    let server;
 
     beforeEach(() => {
       const COMPATIBLE_VERSION_NUMBER = '5.0.0';
@@ -52,6 +55,8 @@ describe('plugins/elasticsearch', () => {
         }
       }));
 
+      sinon.stub(determineEnabledScriptingLangsNS, 'determineEnabledScriptingLangs').returns(Promise.resolve([]));
+
       // setup the config().get()/.set() stubs
       const get = sinon.stub();
       get.withArgs('elasticsearch.url').returns(esUrl);
@@ -60,10 +65,11 @@ describe('plugins/elasticsearch', () => {
       const set = sinon.stub();
 
       // Setup the server mock
-      const server = {
+      server = {
         log: sinon.stub(),
         info: { port: 5601 },
         config: function () { return { get, set }; },
+        expose: sinon.stub(),
         plugins: {
           elasticsearch: {
             getCluster: sinon.stub().returns(cluster)
@@ -76,6 +82,7 @@ describe('plugins/elasticsearch', () => {
 
     afterEach(() => {
       kibanaVersion.get.restore();
+      determineEnabledScriptingLangs.restore();
     });
 
     it('should set the cluster green if everything is ready', function () {
@@ -168,6 +175,33 @@ describe('plugins/elasticsearch', () => {
           sinon.assert.calledTwice(cluster.callWithInternalUser.withArgs('nodes.info', sinon.match.any));
           sinon.assert.calledTwice(clusterHealth);
         });
+    });
+
+    describe('latestHealthCheckResults', () => {
+      it('exports an object when the health check completes', () => {
+        cluster.callWithInternalUser.withArgs('ping').returns(Promise.resolve());
+        cluster.callWithInternalUser.withArgs('cluster.health', sinon.match.any).returns(
+          Promise.resolve({ timed_out: false, status: 'green' })
+        );
+        determineEnabledScriptingLangs.returns(Promise.resolve([
+          'foo',
+          'bar'
+        ]));
+
+        return health.run()
+          .then(function () {
+            sinon.assert.calledOnce(server.expose);
+            expect(server.expose.firstCall.args).to.eql([
+              'latestHealthCheckResults',
+              {
+                enabledScriptingLangs: [
+                  'foo',
+                  'bar'
+                ]
+              }
+            ]);
+          });
+      });
     });
 
     describe('#waitUntilReady', function () {
