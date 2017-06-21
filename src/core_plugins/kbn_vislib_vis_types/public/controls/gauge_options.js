@@ -10,6 +10,13 @@ module.directive('gaugeOptions', function () {
     replace: true,
     link: function ($scope) {
 
+
+      if (!isNaN(parseInt($scope.vis.params.fontSize))) {
+        //versions before 5.4<= stored fontSize here
+        $scope.vis.params.gauge.style.fontSize = $scope.vis.params.fontSize;
+      }
+
+
       $scope.showColorRange = true;
 
       $scope.$watch('vis.params.gauge.gaugeType', type => {
