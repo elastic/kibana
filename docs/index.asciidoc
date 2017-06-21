@@ -1,34 +1,8 @@
 [[kibana-guide]]
 = Kibana User Guide
 
-:ref: http://www.elastic.co/guide/en/elasticsearch/reference/2.4/
-:shield: https://www.elastic.co/guide/en/shield/2.4/
-:k4issue: https://github.com/elastic/kibana/issues/
-:k4pull: https://github.com/elastic/kibana/pull/
-:version: 4.6
-:esversion: 2.4
-
-:repo: https://github.com/elastic/kibana/
-:branch: 4.6
-
-include::introduction.asciidoc[]
-
-include::setup.asciidoc[]
-
-include::getting-started.asciidoc[]
-
-include::plugins.asciidoc[]
-
-include::access.asciidoc[]
-
-include::discover.asciidoc[]
-
-include::visualize.asciidoc[]
-
-include::dashboard.asciidoc[]
-
-include::settings.asciidoc[]
-
-include::production.asciidoc[]
-
-include::releasenotes.asciidoc[]
+include::index-shared1.asciidoc[]
+include::index-shared2.asciidoc[]
+include::index-shared3.asciidoc[]
+include::index-shared4.asciidoc[]
+include::index-shared5.asciidoc[]
