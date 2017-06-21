@@ -32,7 +32,7 @@
 
             <div class="kuiVerticalRhythm kuiVerticalRhythmSmall">
               <input
-                class="kuiTextInput kuiTextInput--large"
+                class="kuiTextInput kuiTextInput--large kuiVerticalRhythm"
                 data-test-subj="createIndexPatternNameInput"
                 ng-model="controller.formValues.name"
                 ng-model-options="{ updateOn: 'default blur', debounce: {'default': 500, 'blur': 0} }"
@@ -42,6 +42,106 @@
                 required
                 type="text"
               >
+
+              <!-- Nothing at all matches the user's input. -->
+              <div
+                class="kuiVerticalRhythm"
+                ng-if="!controller.hasInput() || controller.hasNoSimilarMatches()"
+              >
+                <div class="kuiVerticalRhythm">
+                  <p class="kuiSubText kuiSubduedText kuiVerticalRhythmSmall">
+                    <span ng-if="controller.hasInput()">Sorry, there are no indices or template index
+                    patterns which match or look similar to this index pattern.</span>
+                    Here's a list of all indices and template index patterns
+                    available to you.
+                  </p>
+                </div>
+
+                <div class="kuiVerticalRhythm">
+                  <p class="kuiSubText kuiSubduedText kuiVerticalRhythmSmall">
+                    All indices
+                  </p>
+
+                  <p
+                    class="kuiSubText"
+                    ng-repeat="index in controller.allIndices"
+                    ng-click="controller.setIndexPattern(index)"
+                  >
+                    {{index}}
+                  </p>
+                </div>
+
+                <div class="kuiVerticalRhythm">
+                  <p class="kuiSubText kuiSubduedText kuiVerticalRhythmSmall">
+                    All template index patterns
+                  </p>
+
+                  <p
+                    class="kuiSubText"
+                    ng-repeat="indexPattern in controller.allTemplateIndexPatterns"
+                    ng-click="controller.setIndexPattern(indexPattern)"
+                  >
+                    {{indexPattern}}
+                  </p>
+                </div>
+              </div>
+
+              <!-- No matches for the pattern, but some indices and patterns look relevant. -->
+              <div
+                class="kuiVerticalRhythm"
+                ng-if="controller.hasInput() && controller.hasSimilarMatches()"
+              >
+                <div class="kuiVerticalRhythm">
+                  <p class="kuiSubText kuiSubduedText kuiVerticalRhythmSmall">
+                    No indices match this pattern but there are <strong>{{controller.partialMatchingIndices.length}}</strong>
+                    indices with similar names
+                  </p>
+
+                  <p
+                    class="kuiSubText"
+                    ng-repeat="index in controller.partialMatchingIndices"
+                    ng-click="controller.setIndexPattern(index)"
+                  >
+                    {{index}}
+                  </p>
+                </div>
+
+                <div class="kuiVerticalRhythm">
+                  <p class="kuiSubText kuiSubduedText kuiVerticalRhythmSmall">
+                    <strong>{{controller.partialMatchingTemplateIndexPatterns.length}}</strong>
+                    template index patterns with similar names
+                  </p>
+
+                  <p
+                    class="kuiSubText"
+                    ng-repeat="indexPattern in controller.partialMatchingTemplateIndexPatterns"
+                    ng-click="controller.setIndexPattern(indexPattern)"
+                  >
+                    {{indexPattern}}
+                  </p>
+                </div>
+              </div>
+
+              <!-- This pattern has matches! -->
+              <div
+                class="kuiVerticalRhythm"
+                ng-if="controller.hasInput() && controller.hasExactMatches()"
+              >
+                <div class="kuiVerticalRhythm">
+                  <p class="kuiSubText kuiSubduedText kuiVerticalRhythmSmall">
+                    <strong>{{controller.partialMatchingIndices.length}}</strong>
+                    indices match this pattern
+                  </p>
+
+                  <p
+                    class="kuiSubText"
+                    ng-repeat="index in controller.partialMatchingIndices"
+                    ng-click="controller.setIndexPattern(index)"
+                  >
+                    {{index}}
+                  </p>
+                </div>
+              </div>
             </div>
 
             <!-- Input error text -->
