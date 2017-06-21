@@ -205,10 +205,10 @@ class TagCloud extends EventEmitter {
       const self = this;
       enteringTags.on({
         click: function (event) {
-          if(d3.select(this).style('font-weight') === 'bold') {
+          if (d3.select(this).style('font-weight') === 'bold') {
             d3.select(this).style('font-weight', 'normal');
           }
-          else{
+          else {
             d3.select(this).style('font-weight', 'bold');
           }
 
