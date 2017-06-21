@@ -29,7 +29,15 @@ module.directive('kbnRows', function ($compile, $rootScope, getAppState, Private
             if ($(event.target).is('a')) {
               return;
             }
-
+            if (event.ctrlKey) {
+              const tdElements = $(event.target).closest('tr').children('td');
+              if (tdElements.hasClass('table-highlight')) {
+                tdElements.removeClass('table-highlight');
+              }
+              else {
+                tdElements.addClass('table-highlight');
+              }
+            }
             addFilter({ point: { aggConfigResult: aggConfigResult }, negate });
           };
 

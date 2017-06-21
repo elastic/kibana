@@ -63,7 +63,17 @@ describe('add filters', function () {
       expect(appState.filters.length).to.be(3);
       expect(globalState.filters.length).to.be(0);
     });
+    it('should not add filters to appState because ctrl key pressed', function () {
+      const evt = document.createEvent('MouseEvents');
+      evt.initMouseEvent('mousedown', true, true, window, 0, 0, 0, 80, 20, true, false, false, false, 0, null);
+      document.body.dispatchEvent(evt);
+      $rootScope.$digest();
 
+      queryFilter.addFilters(filters);
+      $rootScope.$digest();
+
+      expect(appState.filters.length).to.be(0);
+    });
     it('should add filters to globalState', function () {
       $rootScope.$digest();
 
