@@ -27,9 +27,5 @@ export function stringifyTruncate() {
     return val;
   };
 
-  Truncate.editor = require('ui/stringify/editors/truncate.html');
-
-  Truncate.sampleInput = [ require('ui/stringify/samples/large.html') ];
-
   return Truncate;
 }
