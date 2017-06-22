@@ -14,7 +14,9 @@ describe('dashboard panel', function () {
 
   function init(mockDocResponse) {
     ngMock.module('kibana');
-    ngMock.inject(($rootScope, $compile, esAdmin) => {
+    ngMock.inject(($rootScope, $compile, esAdmin, savedObjectsClient) => {
+      sinon.stub(savedObjectsClient, 'get').returns(Promise.resolve(mockDocResponse));
+
       sinon.stub(esAdmin, 'mget').returns(Promise.resolve({ docs: [ mockDocResponse ] }));
       sinon.stub(esAdmin.indices, 'getFieldMapping').returns(Promise.resolve({
         '.kibana': {
@@ -70,7 +72,7 @@ describe('dashboard panel', function () {
   });
 
   it('should try to visualize the visualization if found', function () {
-    init({ found: true, _source: {} });
+    init({ id: 'foo1', type: 'visualization', _version: 2, _attributes: {} });
     return $scope.loadedPanel.then(() => {
       expect($scope.error).not.to.be.ok();
       parentScope.$digest();

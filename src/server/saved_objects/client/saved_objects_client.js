@@ -12,8 +12,23 @@ export class SavedObjectsClient {
     this._callAdminCluster = callAdminCluster;
   }
 
-  async create(type, body = {}) {
-    const response = await this._withKibanaIndex('index', { type, body });
+  /**
+   * Persists an object
+   *
+   * @param {string} type
+   * @param {object} body - { attributes: {}, id: myId }
+   * @param {object} options
+   * @param {boolean} options.overwrite - defaults to false
+   * @returns {promise}
+  */
+  async create(type, body = {}, options = {}) {
+    const method = get(options, 'overwrite', false) ? 'index' : 'create';
+    const response = await this._withKibanaIndex(method, {
+      type,
+      id: body.id,
+      body: body.attributes,
+      refresh: 'wait_for'
+    });
 
     return {
       id: response._id,
@@ -28,11 +43,11 @@ export class SavedObjectsClient {
    *
    * @param {array} objects
    * @param {object} options
-   * @param {boolean} options.force - overrides existing documents
+   * @param {boolean} options.overwrite - overrides existing documents
    * @returns {promise} Returns promise containing array of documents
    */
   async bulkCreate(objects, options = {}) {
-    const action = options.force === true ? 'index' : 'create';
+    const action = options.overwrite === true ? 'index' : 'create';
 
     const body = objects.reduce((acc, object) => {
       acc.push({ [action]: { _type: object.type, _id: object.id } });
@@ -41,7 +56,7 @@ export class SavedObjectsClient {
       return acc;
     }, []);
 
-    return await this._withKibanaIndex('bulk', { body })
+    return await this._withKibanaIndex('bulk', { body, refresh: 'wait_for' })
       .then(resp => get(resp, 'items', []).map((resp, i) => {
         return {
           id: resp[action]._id,
@@ -53,6 +68,13 @@ export class SavedObjectsClient {
       }));
   }
 
+  /**
+   * Deletes an object
+   *
+   * @param {string} type
+   * @param {string} id
+   * @returns {promise}
+   */
   async delete(type, id) {
     const response = await this._withKibanaIndex('delete', {
       type,
@@ -65,14 +87,25 @@ export class SavedObjectsClient {
     }
   }
 
+  /**
+   * @param {object} options
+   * @param {string} options.type
+   * @param {string} options.search
+   * @param {string} options.searchFields - see Elasticsearch Simple Query String
+   *                                        Query field argument for more information
+   * @param {integer} options.page - defaults to 1
+   * @param {integer} options.perPage - defaults to 20
+   * @param {array} option.fields - fields to be returned. Returns all unless defined
+   * @returns {promise}
+   */
   async find(options = {}) {
     const {
+      type,
       search,
       searchFields,
-      type,
-      fields,
-      perPage = 20,
       page = 1,
+      perPage = 20,
+      fields
     } = options;
 
     const esOptions = {
@@ -102,6 +135,27 @@ export class SavedObjectsClient {
   }
 
   /**
+   * Gets a single object
+   *
+   * @param {string} type
+   * @param {string} id
+   * @returns {promise}
+   */
+  async get(type, id) {
+    const response = await this._withKibanaIndex('get', {
+      type,
+      id,
+    });
+
+    return {
+      id: response._id,
+      type: response._type,
+      version: response._version,
+      attributes: response._source
+    };
+  }
+
+  /**
    * Returns an array of objects by id
    *
    * @param {array} objects - an array ids, or an array of objects containing id and optionally type
@@ -110,7 +164,7 @@ export class SavedObjectsClient {
    *
    * bulkGet([
    *   { id: 'one', type: 'config' },
-   *   { id: 'foo', type: 'index-pattern'
+   *   { id: 'foo', type: 'index-pattern' }
    * ])
    */
   async bulkGet(objects = []) {
@@ -137,25 +191,20 @@ export class SavedObjectsClient {
     };
   }
 
-  async get(type, id) {
-    const response = await this._withKibanaIndex('get', {
-      type,
-      id,
-    });
-
-    return {
-      id: response._id,
-      type: response._type,
-      version: response._version,
-      attributes: response._source
-    };
-  }
-
-  async update(type, id, attributes, options = {}) {
+  /**
+   * Updates an object
+   *
+   * @param {string} type
+   * @param {string} id
+   * @param {object} options
+   * @param {integer} options.version - ensures version matches that of persisted object
+   * @returns {promise}
+   */
+  async update(type, id, attributes, { version } = {}) {
     const response = await this._withKibanaIndex('update', {
       type,
       id,
-      version: get(options, 'version'),
+      version,
       body: {
         doc: attributes
       },

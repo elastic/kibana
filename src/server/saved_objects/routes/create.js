@@ -7,19 +7,22 @@ export const createCreateRoute = (prereqs) => {
     config: {
       pre: [prereqs.getSavedObjectsClient],
       validate: {
+        query: Joi.object().keys({
+          overwrite: Joi.boolean().default(false)
+        }),
         params: Joi.object().keys({
           type: Joi.string().required()
         }).required(),
         payload: Joi.object({
-          attributes: Joi.object().required()
+          attributes: Joi.object().required(),
+          id: Joi.string()
         }).required()
       },
       handler(request, reply) {
         const { savedObjectsClient } = request.pre;
         const { type } = request.params;
-        const { attributes } = request.payload;
 
-        reply(savedObjectsClient.create(type, attributes));
+        reply(savedObjectsClient.create(type, request.payload, request.query));
       }
     }
   };

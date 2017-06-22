@@ -80,6 +80,20 @@ describe('SavedObjectsClient', () => {
       expect(callAdminCluster.calledOnce).to.be(true);
 
       const args = callAdminCluster.getCall(0).args;
+      expect(args[0]).to.be('create');
+    });
+
+    it('should overwrite objects if overwrite is truthy', async () => {
+      callAdminCluster.returns({ _type: 'index-pattern', _id: 'logstash-*', _version: 2 });
+
+      await savedObjectsClient.create('index-pattern', {
+        id: 'logstash-*',
+        title: 'Logstash'
+      }, { overwrite: true });
+
+      expect(callAdminCluster.calledOnce).to.be(true);
+
+      const args = callAdminCluster.getCall(0).args;
       expect(args[0]).to.be('index');
     });
   });
@@ -104,11 +118,11 @@ describe('SavedObjectsClient', () => {
       ]);
     });
 
-    it('should overwrite objects if force is truthy', async () => {
+    it('should overwrite objects if overwrite is truthy', async () => {
       await savedObjectsClient.bulkCreate([
         { type: 'config', id: 'one', attributes: { title: 'Test One' } },
         { type: 'index-pattern', id: 'two', attributes: { title: 'Test Two' } }
-      ], { force: true });
+      ], { overwrite: true });
 
       expect(callAdminCluster.calledOnce).to.be(true);
 

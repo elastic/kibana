@@ -1,5 +1,5 @@
 import { resolve as resolveUrl, format as formatUrl } from 'url';
-import { pick, get } from 'lodash';
+import { pick, get, cloneDeep, throttle } from 'lodash';
 import { keysToSnakeCaseShallow, keysToCamelCaseShallow } from '../../../utils/case_conversion';
 
 import { SavedObject } from './saved_object';
@@ -9,20 +9,91 @@ const join = (...uriComponents) => (
   uriComponents.filter(Boolean).map(encodeURIComponent).join('/')
 );
 
+/**
+ * Interval that requests are batched for
+ * @type {integer}
+ */
+const BATCH_INTERVAL = 100;
+
 export class SavedObjectsClient {
   constructor($http, basePath = chrome.getBasePath(), PromiseCtor = Promise) {
     this._$http = $http;
     this._apiBaseUrl = `${basePath}/api/saved_objects/`;
     this._PromiseCtor = PromiseCtor;
+    this.batchQueue = [];
   }
 
+  /**
+  * Persists an object
+  *
+  * @param {string} type
+  * @param {object} body - { attributes: {}, id: myId }
+  * @param {object} options
+  * @param {boolean} options.overwrite - defaults to false
+  * @returns {promise}
+  */
+  create(type, body = {}, options = {}) {
+    if (!type || !body.attributes) {
+      return this._PromiseCtor.reject(new Error('requires type and attributes'));
+    }
+
+    const url = this._getUrl([type], options);
+
+    return this._request('POST', url, body);
+  }
+
+  /**
+   * Deletes an object
+   *
+   * @param {string} type
+   * @param {string} id
+   * @returns {promise}
+   */
+  delete(type, id) {
+    if (!type || !id) {
+      return this._PromiseCtor.reject(new Error('requires type and id'));
+    }
+
+    return this._request('DELETE', this._getUrl([type, id]));
+  }
+
+  /**
+   * Search for objects
+   *
+   * @param {object} options
+   * @param {string} options.type
+   * @param {string} options.search
+   * @param {string} options.searchFields - see Elasticsearch Simple Query String
+   *                                        Query field argument for more information
+   * @param {integer} options.page - defaults to 1
+   * @param {integer} options.perPage - defaults to 20
+   * @param {array} option.fields - fields to be returned. Returns all unless defined
+   * @returns {promise}
+   */
+  find(options = {}) {
+    const url = this._getUrl([options.type], keysToSnakeCaseShallow(options));
+
+    return this._request('GET', url).then(resp => {
+      resp.saved_objects = resp.saved_objects.map(d => this.createSavedObject(d));
+      return keysToCamelCaseShallow(resp);
+    });
+  }
+
+  /**
+   * Fetches a single object
+   *
+   * @param {string} type
+   * @param {string} id
+   * @returns {promise}
+   */
   get(type, id) {
     if (!type || !id) {
       return this._PromiseCtor.reject(new Error('requires type and id'));
     }
 
-    return this._request('GET', this._getUrl([type, id])).then(resp => {
-      return this.createSavedObject(resp);
+    return new this._PromiseCtor((resolve, reject) => {
+      this.batchQueue.push({ type, id, resolve, reject });
+      this.processBatchQueue();
     });
   }
 
@@ -47,14 +118,15 @@ export class SavedObjectsClient {
     });
   }
 
-  delete(type, id) {
-    if (!type || !id) {
-      return this._PromiseCtor.reject(new Error('requires type and id'));
-    }
-
-    return this._request('DELETE', this._getUrl([type, id]));
-  }
-
+  /**
+   * Updates an object
+   *
+   * @param {string} type
+   * @param {string} id
+   * @param {object} options
+   * @param {integer} options.version - ensures version matches that of persisted object
+   * @returns {promise}
+   */
   update(type, id, attributes, { version } = {}) {
     if (!type || !id || !attributes) {
       return this._PromiseCtor.reject(new Error('requires type, id and attributes'));
@@ -69,37 +141,27 @@ export class SavedObjectsClient {
   }
 
   /**
-   * @param {string} type
-   * @param {object} attributes
-   * @returns {promise}
-  */
-  create(type, attributes) {
-    if (!type || !attributes) {
-      return this._PromiseCtor.reject(new Error('requires type and attributes'));
-    }
-
-    const url = this._getUrl([type]);
-
-    return this._request('POST', url, { attributes });
-  }
-
-  /**
-   * @param {object} options
-   * @param {string} options.type
-   * @param {string} options.search
-   * @param {integer} options.page
-   * @param {integer} options.perPage
-   * @param {array} option.fields
-   * @returns {promise}
+   * Throttled processing of get requests into bulk requests at 100ms interval
    */
-  find(options = {}) {
-    const url = this._getUrl([options.type], keysToSnakeCaseShallow(options));
+  processBatchQueue = throttle(() => {
+    const queue = cloneDeep(this.batchQueue);
+    this.batchQueue = [];
 
-    return this._request('GET', url).then(resp => {
-      resp.saved_objects = resp.saved_objects.map(d => this.createSavedObject(d));
-      return keysToCamelCaseShallow(resp);
+    this.bulkGet(queue).then(({ savedObjects }) => {
+      queue.forEach((queueItem) => {
+        const foundObject = savedObjects.find(savedObject => {
+          return savedObject.id === queueItem.id & savedObject.type === queueItem.type;
+        });
+
+        if (!foundObject) {
+          return queueItem.resolve(this.createSavedObject(pick(queueItem, ['id', 'type'])));
+        }
+
+        queueItem.resolve(foundObject);
+      });
     });
-  }
+
+  }, BATCH_INTERVAL, { leading: false })
 
   createSavedObject(options) {
     return new SavedObject(this, options);
@@ -126,10 +188,10 @@ export class SavedObjectsClient {
     return this._$http(options)
       .then(resp => get(resp, 'data'))
       .catch(resp => {
-        const respBody = resp.data || {};
+        const respBody = get(resp, 'data', {});
         const err = new Error(respBody.message || respBody.error || `${resp.status} Response`);
 
-        err.status = resp.status;
+        err.statusCode = respBody.statusCode || resp.status;
         err.body = respBody;
 
         throw err;

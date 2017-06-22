@@ -82,6 +82,9 @@ describe('POST /api/saved_objects/{type}', () => {
     expect(savedObjectsClient.create.calledOnce).to.be(true);
 
     const args = savedObjectsClient.create.getCall(0).args;
-    expect(args).to.eql(['index-pattern', { title: 'Testing' }]);
+    const options = { overwrite: false };
+    const body = { attributes: { title: 'Testing' } };
+
+    expect(args).to.eql(['index-pattern', body, options]);
   });
 });

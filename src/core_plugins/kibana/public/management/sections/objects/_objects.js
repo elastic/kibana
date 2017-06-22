@@ -22,7 +22,7 @@ uiModules.get('apps/management')
   return {
     restrict: 'E',
     controllerAs: 'managementObjectsController',
-    controller: function ($scope, $injector, $q, AppState, esAdmin) {
+    controller: function ($scope, $injector, $q, AppState) {
       const notify = new Notifier({ location: 'Saved Objects' });
 
       // TODO: Migrate all scope variables to the controller.
@@ -237,17 +237,10 @@ uiModules.get('apps/management')
 
             return Promise.map(docTypes.searches, importDocument)
               .then(() => Promise.map(docTypes.other, importDocument))
-              .then(refreshIndex)
               .then(refreshData)
               .catch(notify.error);
           });
       };
-
-      function refreshIndex() {
-        return esAdmin.indices.refresh({
-          index: kbnIndex
-        });
-      }
 
       // TODO: Migrate all scope methods to the controller.
       $scope.changeTab = function (tab) {

@@ -61,11 +61,12 @@ describe('Saved Object', function () {
    * @param {Object} mockDocResponse
    */
   function stubESResponse(mockDocResponse) {
-    sinon.stub(esDataStub, 'mget').returns(BluebirdPromise.resolve({ docs: [mockDocResponse] }));
-    sinon.stub(esDataStub, 'index').returns(BluebirdPromise.resolve(mockDocResponse));
+    sinon.stub(esAdminStub, 'mget').returns(BluebirdPromise.resolve({ docs: [mockDocResponse] }));
+    sinon.stub(esAdminStub, 'index').returns(BluebirdPromise.resolve(mockDocResponse));
 
     // Stub out search for duplicate title:
     sinon.stub(savedObjectsClientStub, 'get').returns(BluebirdPromise.resolve(mockDocResponse));
+
     sinon.stub(savedObjectsClientStub, 'find').returns(BluebirdPromise.resolve({ savedObjects: [], total: 0 }));
     sinon.stub(savedObjectsClientStub, 'bulkGet').returns(BluebirdPromise.resolve({ savedObjects: [mockDocResponse] }));
   }
@@ -107,6 +108,90 @@ describe('Saved Object', function () {
   }));
 
   describe('save', function () {
+    describe('with confirmOverwrite', function () {
+      function stubConfirmOverwrite() {
+        window.confirm = sinon.stub().returns(true);
+
+        sinon.stub(esAdminStub, 'create').returns(BluebirdPromise.reject({ status : 409 }));
+        sinon.stub(esDataStub, 'create').returns(BluebirdPromise.reject({ status : 409 }));
+      }
+
+      describe('when true', function () {
+        it('requests confirmation and updates on yes response', function () {
+          stubESResponse(getMockedDocResponse('myId'));
+          return createInitializedSavedObject({ type: 'dashboard', id: 'myId' }).then(savedObject => {
+            const createStub = sinon.stub(savedObjectsClientStub, 'create');
+            createStub.onFirstCall().returns(BluebirdPromise.reject({ statusCode: 409 }));
+            createStub.onSecondCall().returns(BluebirdPromise.resolve({ id: 'myId' }));
+
+            stubConfirmOverwrite();
+
+            savedObject.lastSavedTitle = 'original title';
+            savedObject.title = 'new title';
+            return savedObject.save({ confirmOverwrite : true })
+              .then(() => {
+                expect(window.confirm.called).to.be(true);
+                expect(savedObject.id).to.be('myId');
+                expect(savedObject.isSaving).to.be(false);
+                expect(savedObject.lastSavedTitle).to.be('new title');
+                expect(savedObject.title).to.be('new title');
+              });
+          });
+        });
+
+        it('does not update on no response', function () {
+          stubESResponse(getMockedDocResponse('HI'));
+          return createInitializedSavedObject({ type: 'dashboard', id: 'HI' }).then(savedObject => {
+            window.confirm = sinon.stub().returns(false);
+
+            sinon.stub(savedObjectsClientStub, 'create').returns(BluebirdPromise.reject({ statusCode: 409 }));
+
+            savedObject.lastSavedTitle = 'original title';
+            savedObject.title = 'new title';
+            return savedObject.save({ confirmOverwrite : true })
+              .then(() => {
+                expect(savedObject.id).to.be('HI');
+                expect(savedObject.isSaving).to.be(false);
+                expect(savedObject.lastSavedTitle).to.be('original title');
+                expect(savedObject.title).to.be('new title');
+              });
+          });
+        });
+
+        it('handles create failures', function () {
+          stubESResponse(getMockedDocResponse('myId'));
+          return createInitializedSavedObject({ type: 'dashboard', id: 'myId' }).then(savedObject => {
+            stubConfirmOverwrite();
+
+            sinon.stub(savedObjectsClientStub, 'create').returns(BluebirdPromise.reject({ statusCode: 409 }));
+
+            return savedObject.save({ confirmOverwrite: true })
+              .then(() => {
+                expect(true).to.be(false); // Force failure, the save should not succeed.
+              })
+              .catch(() => {
+                expect(window.confirm.called).to.be(true);
+              });
+          });
+        });
+      });
+
+      it('when false does not request overwrite', function () {
+        const mockDocResponse = getMockedDocResponse('myId');
+        stubESResponse(mockDocResponse);
+
+        return createInitializedSavedObject({ type: 'dashboard', id: 'myId' }).then(savedObject => {
+          stubConfirmOverwrite();
+
+          sinon.stub(savedObjectsClientStub, 'create').returns(BluebirdPromise.resolve({ id: 'myId' }));
+
+          return savedObject.save({ confirmOverwrite : false }).then(() => {
+            expect(window.confirm.called).to.be(false);
+          });
+        });
+      });
+    });
+
     describe('with copyOnSave', function () {
       it('as true creates a copy on save success', function () {
         const mockDocResponse = getMockedDocResponse('myId');
@@ -146,7 +231,7 @@ describe('Saved Object', function () {
         stubESResponse(mockDocResponse);
 
         return createInitializedSavedObject({ type: 'dashboard', id: id }).then(savedObject => {
-          sinon.stub(savedObjectsClientStub, 'update', function () {
+          sinon.stub(savedObjectsClientStub, 'create', function () {
             expect(savedObject.id).to.be(id);
             return BluebirdPromise.resolve(id);
           });
@@ -178,7 +263,7 @@ describe('Saved Object', function () {
         stubESResponse(getMockedDocResponse(id));
 
         return createInitializedSavedObject({ type: 'dashboard', id: id }).then(savedObject => {
-          sinon.stub(savedObjectsClientStub, 'update', () => {
+          sinon.stub(savedObjectsClientStub, 'create', () => {
             expect(savedObject.isSaving).to.be(true);
             return BluebirdPromise.resolve({
               type: 'dashboard', id, version: 2
@@ -238,7 +323,7 @@ describe('Saved Object', function () {
       return savedObject.init()
         .then(() => {
           expect(savedObject._source.preserveMe).to.equal(preserveMeValue);
-          const response = { _version: 2, _attributes: {} };
+          const response = { found: true, _source: {} };
           return savedObject.applyESResp(response);
         }).then(() => {
           expect(savedObject._source.preserveMe).to.equal(preserveMeValue);
@@ -263,8 +348,8 @@ describe('Saved Object', function () {
         .then(() => {
           expect(savedObject._source.flower).to.equal('rose');
           const response = {
-            _version: 2,
-            _attributes: {
+            found: true,
+            _source: {
               flower: 'orchid'
             }
           };
@@ -295,8 +380,8 @@ describe('Saved Object', function () {
       return savedObject.init()
         .then(() => {
           const response = {
-            _version: 2,
-            _attributes: { dinosaurs: { tRex: 'has big teeth' } }
+            found: true,
+            _source: { dinosaurs: { tRex: 'has big teeth' } }
           };
 
           return savedObject.applyESResp(response);
@@ -347,15 +432,12 @@ describe('Saved Object', function () {
           indexPattern: indexPatternId
         };
 
-        const response = {
-          _type: 'dashboard',
+        stubESResponse({
           _id: indexPatternId,
-          found: true,
-          _source: {}
-        };
-
-        sinon.stub(esAdminStub, 'mget').returns(BluebirdPromise.resolve({ docs: [response] }));
-        sinon.stub(esAdminStub, 'index').returns(BluebirdPromise.resolve(response));
+          _type: 'dashboard',
+          _source: {},
+          found: true
+        });
 
         const savedObject = new SavedObject(config);
         expect(!!savedObject.searchSource.get('index')).to.be(false);
