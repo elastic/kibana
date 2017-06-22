@@ -5,32 +5,18 @@ import { ElasticsearchService } from '../../server/elasticsearch/ElasticsearchSe
 import { KibanaConfig } from '../../server/kibana';
 import { KibanaRequest } from '../../server/http';
 
-type FindOptions = {
-  perPage?: number,
-  page?: number,
-  type?: string
-}
-
-// Just a helper to extract the latest values from observables
-function latestValues<A>(a: Observable<A>): Promise<[A]>;
-function latestValues<A, B>(a: Observable<A>, b: Observable<B>): Promise<[A, B]>;
-function latestValues<A, B, C>(a: Observable<A>, b: Observable<B>, c: Observable<C>): Promise<[A, B, C]>;
-function latestValues<A, B, C, D>(a: Observable<A>, b: Observable<B>, c: Observable<C>, d: Observable<D>): Promise<[A, B, C, D]>;
-function latestValues(...values: Observable<any>[]) {
-  return Observable.combineLatest(values).first().toPromise();
-}
-
-export class SavedObjectsFacade {
-
+export class SavedObjectsService {
   constructor(
     private readonly req: KibanaRequest,
     private readonly kibanaConfig$: Observable<KibanaConfig>,
     private readonly elasticsearchService: ElasticsearchService
   ) {}
 
-  async find(
-    options: FindOptions = {}
-  ) {
+  async find(options: {
+    type: string,
+    page?: number,
+    perPage?: number
+  }) {
     const {
       page = 1,
       perPage = 20,
@@ -72,4 +58,13 @@ export class SavedObjectsFacade {
       page: page
     };
   }
+}
+
+// Just a helper to extract the latest values from observables
+function latestValues<A>(a: Observable<A>): Promise<[A]>;
+function latestValues<A, B>(a: Observable<A>, b: Observable<B>): Promise<[A, B]>;
+function latestValues<A, B, C>(a: Observable<A>, b: Observable<B>, c: Observable<C>): Promise<[A, B, C]>;
+function latestValues<A, B, C, D>(a: Observable<A>, b: Observable<B>, c: Observable<C>, d: Observable<D>): Promise<[A, B, C, D]>;
+function latestValues(...values: Observable<any>[]) {
+  return Observable.combineLatest(values).first().toPromise();
 }

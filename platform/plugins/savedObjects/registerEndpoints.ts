@@ -1,19 +1,19 @@
 import { Router } from '../../server/http';
 import { LoggerFactory } from '../../logger'
 import { Schema } from '../../types';
-import { SavedObjectsFacade } from './SavedObjectsFacade';
+import { SavedObjectsService } from './SavedObjectsService';
 
 export function registerEndpoints(
-  router: Router<SavedObjectsFacade>,
+  router: Router<SavedObjectsService>,
   logger: LoggerFactory,
   schema: Schema
 ) {
-  const { object, string, number, oneOf, arrayOf, maybe } = schema;
+  const { object, string, number, maybe } = schema;
   const log = logger.get('routes');
 
   router.get({
     path: '/fail'
-  }, async (savedObjectsFacade, req, res) => {
+  }, async (savedObjectsService, req, res) => {
     log.info(`GET should fail`);
 
     return res.badRequest(new Error('nope'));
@@ -26,38 +26,21 @@ export function registerEndpoints(
         type: string()
       }),
       query: object({
-        per_page: maybe(number({
-          min: 0,
-          defaultValue: 20
-        })),
         page: maybe(number({
-          min: 0,
-          defaultValue: 1
+          min: 1
         })),
-        search: maybe(string()),
-        search_fields: maybe(
-          oneOf([
-            string(),
-            arrayOf(string())
-          ])
-        ),
-        fields: maybe(
-          oneOf([
-            string(),
-            arrayOf(string())
-          ])
-        )
+        per_page: maybe(number({
+          min: 1
+        }))
       })
     }
-  }, async (savedObjectsFacade, req, res) => {
+  }, async (savedObjectsService, req, res) => {
     const { params, query } = req;
 
-    log.info(`[GET] request received on [saved_objects] with type [${params.type}]`);
-
-    const savedObjects = await savedObjectsFacade.find({
-      perPage: query.per_page,
+    const savedObjects = await savedObjectsService.find({
+      type: params.type,
       page: query.page,
-      type: params.type
+      perPage: query.per_page
     });
 
     return res.ok(savedObjects);
