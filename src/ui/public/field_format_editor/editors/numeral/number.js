@@ -4,14 +4,12 @@ export function numberEditor() {
 
   return {
     formatId: 'number',
-    editor: {
-      template: numeralTemplate,
-      controllerAs: 'cntrl',
-      controller: function () {
-        this.sampleInputs = [
-          10000, 12.345678, -1, -999, 0.52
-        ];
-      }
+    template: numeralTemplate,
+    controllerAs: 'cntrl',
+    controller: function () {
+      this.sampleInputs = [
+        10000, 12.345678, -1, -999, 0.52
+      ];
     }
   };
 }

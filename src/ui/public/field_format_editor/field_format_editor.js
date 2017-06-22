@@ -52,21 +52,14 @@ uiModules
           return;
         }
 
-        if (typeof fieldFormatEditor.editor === 'string') {
-          self.$$pseudoDirective = {
-            template: fieldFormatEditor.editor
-          };
-          return;
-        }
-
         self.$$pseudoDirective = {
-          template: fieldFormatEditor.editor.template,
-          compile: fieldFormatEditor.editor.compile || function () {
-            return fieldFormatEditor.editor.link;
+          template: fieldFormatEditor.template,
+          compile: fieldFormatEditor.compile || function () {
+            return fieldFormatEditor.link;
           },
-          scope: fieldFormatEditor.editor.scope || false,
-          controller: fieldFormatEditor.editor.controller,
-          controllerAs: fieldFormatEditor.editor.controllerAs
+          scope: fieldFormatEditor.scope || false,
+          controller: fieldFormatEditor.controller,
+          controllerAs: fieldFormatEditor.controllerAs
         };
       });
 

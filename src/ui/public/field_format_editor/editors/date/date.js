@@ -4,23 +4,21 @@ import moment from 'moment';
 export function dateEditor() {
   return {
     formatId: 'date',
-    editor: {
-      template: dateTemplate,
-      controllerAs: 'cntrl',
-      controller: function ($interval, $scope) {
-        this.sampleInputs = [
-          Date.now(),
-          moment().startOf('year').valueOf(),
-          moment().endOf('year').valueOf()
-        ];
+    template: dateTemplate,
+    controllerAs: 'cntrl',
+    controller: function ($interval, $scope) {
+      this.sampleInputs = [
+        Date.now(),
+        moment().startOf('year').valueOf(),
+        moment().endOf('year').valueOf()
+      ];
 
-        const stop = $interval(() => {
-          this.sampleInputs[0] = Date.now();
-        }, 1000);
-        $scope.$on('$destroy', () => {
-          $interval.cancel(stop);
-        });
-      }
+      const stop = $interval(() => {
+        this.sampleInputs[0] = Date.now();
+      }, 1000);
+      $scope.$on('$destroy', () => {
+        $interval.cancel(stop);
+      });
     }
   };
 }
