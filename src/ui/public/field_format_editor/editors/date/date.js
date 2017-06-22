@@ -8,16 +8,18 @@ export function dateEditor() {
       template: dateTemplate,
       controllerAs: 'cntrl',
       controller: function ($interval, $scope) {
-        const self = this;
-        self.sampleInputs = [
+        this.sampleInputs = [
           Date.now(),
-          +moment().startOf('year'),
-          +moment().endOf('year')
+          moment().startOf('year').valueOf(),
+          moment().endOf('year').valueOf()
         ];
 
-        $scope.$on('$destroy', $interval(function () {
-          self.sampleInputs[0] = Date.now();
-        }, 1000));
+        const stop = $interval(() => {
+          this.sampleInputs[0] = Date.now();
+        }, 1000);
+        $scope.$on('$destroy', () => {
+          $interval.cancel(stop);
+        });
       }
     }
   };
