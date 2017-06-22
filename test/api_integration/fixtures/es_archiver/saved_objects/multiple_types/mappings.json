@@ -11,7 +11,6 @@
         "mapper": {
           "dynamic": "false"
         },
-        "creation_date": "1498145249315",
         "number_of_replicas": "1"
       }
     },
