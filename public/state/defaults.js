@@ -4,6 +4,24 @@ function getID(type) {
   return `${type}-${uuid()}`;
 }
 
+export const getDefaultElement = () => {
+  return {
+    id: getID('element'),
+    position: {
+      top: 20,
+      left: 20,
+      height: 500,
+      width: 700,
+      rotation: 0,
+    },
+    expression: `
+      demodata()
+      .pointseries(y="median(cost)", x=time, color="project")
+      .plot(defaultStyle=seriesStyle(lines=1))
+    `,
+  };
+};
+
 export const getDefaultPage = () => {
   return {
     id: getID('page'),

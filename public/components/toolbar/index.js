@@ -14,7 +14,7 @@ const mapStateToProps = (state) => ({
 });
 
 const mapDispatchToProps = (dispatch) => ({
-  addElement: pageId => expression => dispatch(addElement(expression, pageId)),
+  addElement: pageId => expression => dispatch(addElement({ expression }, pageId)),
 });
 
 const mergeProps = (stateProps, dispatchProps, ownProps) => {

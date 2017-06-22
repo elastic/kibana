@@ -1,8 +1,9 @@
 import { createAction } from 'redux-actions';
-import { get } from 'lodash';
+import { get, omit } from 'lodash';
 import { assign } from 'object-path-immutable';
 import { notify } from '../../lib/notify';
 import { getSelectedElement, getElementById, getPages } from '../selectors/workpad';
+import { getDefaultElement } from '../defaults';
 import { interpretAst } from '../../lib/interpreter';
 import { getType } from '../../../common/types/get_type';
 import { fromExpression, toExpression } from '../../../common/lib/ast';
@@ -16,8 +17,6 @@ function astToExpression({ ast, element, pageId }) {
     return { expression: element.expression, pageId, element };
   }
 }
-
-export const addElement = createAction('addElement', (expression, pageId) => ({ pageId, expression }));
 
 export const removeElement = createAction('removeElement', (elementId, pageId) => ({ pageId, elementId }));
 
@@ -106,3 +105,14 @@ export const setArgumentAtIndex = ({ index, arg, element, pageId }) => dispatch 
   const newElement = assign(element, ['ast', 'chain', index, 'arguments'], arg);
   dispatch(setExpression(astToExpression({ ast: get(newElement, 'ast'), element, pageId })));
 };
+
+/*
+  payload: element defaults. Eg {expression: 'foo()'}
+*/
+export const addElement = (element, pageId) => dispatch => {
+  const newElement = Object.assign({}, getDefaultElement(), omit(element, 'id'));
+  const _addElement = createAction('addElement', () => ({ pageId, element: newElement }));
+  dispatch(_addElement());
+  dispatch(fetchRenderable(newElement.id, pageId));
+};
+addElement.toString = () => 'addElement';

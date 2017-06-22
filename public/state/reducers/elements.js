@@ -1,6 +1,5 @@
 import { handleActions } from 'redux-actions';
 import { get, findIndex } from 'lodash';
-import uuid from 'uuid/v4';
 import { assign, push, del } from 'object-path-immutable';
 import * as actions from '../actions/elements';
 
@@ -14,24 +13,7 @@ export default handleActions({
     if (pageIndex === -1 || elementIndex === -1) return workpadState;
     return assign(workpadState, elementsPath.concat(elementIndex), { expression });
   },
-  [actions.addElement]: (workpadState, { payload: { pageId, expression } }) => {
-    const elementId = `element-${uuid()}`;
-    const element = Object.assign({
-      id: elementId,
-      position: {
-        top: 20,
-        left: 20,
-        height: 500,
-        width: 700,
-        rotation: 0,
-      },
-      expression: `
-        demodata()
-        .pointseries(y="median(cost)", x=time, color="project")
-        .plot(defaultStyle=seriesStyle(lines=1))
-      `,
-    }, { expression: expression });
-
+  [actions.addElement]: (workpadState, { payload: { pageId, element } }) => {
     // find the index of the given pageId
     const pageIndex = workpadState.pages.findIndex(page => page.id === pageId);
 
