@@ -8,6 +8,7 @@ import { uiModules } from 'ui/modules';
 import template from './create_index_pattern.html';
 import { sendCreateIndexPatternRequest } from './send_create_index_pattern_request';
 import { pickCreateButtonText } from './pick_create_button_text';
+import './index_pattern_combo_box_directive';
 import 'ui/indices';
 
 uiRoutes
@@ -124,6 +125,7 @@ uiModules.get('apps/management')
     return nonFieldOptions[0];
   };
 
+  this.isDropdownVisible = false;
   this.matchingIndices = [];
   this.matchingTemplateIndexPatterns = [];
   this.partialMatchingIndices = [];
@@ -165,12 +167,12 @@ uiModules.get('apps/management')
       allIndices,
       allTemplateIndexPatterns,
     ]) => {
-      this.matchingIndices = matchingIndices;
-      this.matchingTemplateIndexPatterns = matchingTemplateIndexPatterns;
-      this.partialMatchingIndices = partialMatchingIndices;
-      this.partialMatchingTemplateIndexPatterns = partialMatchingTemplateIndexPatterns;
-      this.allIndices = allIndices;
-      this.allTemplateIndexPatterns = allTemplateIndexPatterns;
+      this.matchingIndices = matchingIndices.sort();
+      this.matchingTemplateIndexPatterns = matchingTemplateIndexPatterns.sort();
+      this.partialMatchingIndices = partialMatchingIndices.sort();
+      this.partialMatchingTemplateIndexPatterns = partialMatchingTemplateIndexPatterns.sort();
+      this.allIndices = allIndices.sort();
+      this.allTemplateIndexPatterns = allTemplateIndexPatterns.sort();
     });
   };
 
