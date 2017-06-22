@@ -20,7 +20,6 @@ describe('workpad selectors', () => {
 
     state = {
       transient: {
-        selectedPage: 'page-1',
         selectedElement: 'element-1',
         resolvedArgs: {
           'element-0': 'test resolved arg, el 0',
@@ -39,6 +38,7 @@ describe('workpad selectors', () => {
       persistent: {
         workpad: {
           id: 'workpad-1',
+          page: 0,
           pages: [{
             id: 'page-1',
             elements: [{
