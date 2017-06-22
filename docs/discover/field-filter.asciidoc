@@ -49,13 +49,19 @@ image::images/add_filter.png[]
 index pattern you are currently querying against.
 +
 image::images/add_filter_field.png[]
-. Choose an operation for your filter. You may filter where a field matches a
-particular value by selecting *is*, where a filter doesn't match a particular
-value by selecting *is not*, where a field is present (*exists*), or where a
-value for a field is within a range (*is between*). In addition, you can filter
-where a field *is one of* a particular list of values.
+. Choose an operation for your filter.
 +
 image::images/add_filter_operator.png[]
+The following operators can be selected:
+[horizontal]
+`is`:: Filter where the value for the field matches the given value.
+`is not`:: Filter where the value for the field does not match the given value.
+`is one of`:: Filter where the value for the field matches one of the specified values.
+`is not one of`:: Filter where the value for the field does not match any of the specified values.
+`is between`:: Filter where the value for the field is in the given range.
+`is not between`:: Filter where the value for the field is not in the given range.
+`exists`:: Filter where any value is present for the field.
+`does not exist`:: Filter where no value is present for the field.
 . Choose the value(s) for your filter. Values from your indices may be suggested
 as selections if you are filtering against an aggregatable field.
 +
