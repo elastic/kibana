@@ -1,6 +1,6 @@
-import { KibanaPluginFeatures } from '../../types';
+import { KibanaPluginFeatures, As } from '../../types';
 
-export type PluginName = string;
+export type PluginName = string & As<'PluginName'>;
 
 export interface BasePluginsType {
   [key: string]: any;

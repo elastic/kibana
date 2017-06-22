@@ -11,7 +11,7 @@ const toTuple = <A, B>(a: A, b: B): [A, B] => [a, b];
 function toSortable(plugins: Map<PluginName, Plugin<any, any>>) {
   const dependenciesByPlugin = [...plugins.entries()]
     .map(([name, plugin]) => toTuple(name, plugin.dependencies || []));
-  return new Map<string, string[]>(dependenciesByPlugin);
+  return new Map(dependenciesByPlugin);
 }
 
 function getSortedPluginNames(plugins: Map<PluginName, Plugin<any, any>>) {

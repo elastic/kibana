@@ -1,7 +1,8 @@
 import {
   BasePluginsType,
   KibanaFunctionalPlugin,
-  KibanaPluginStatic
+  KibanaPluginStatic,
+  PluginName
 } from './types';
 import { Logger, LoggerFactory } from '../../logger';
 import { createKibanaValuesForPlugin } from './KibanaPluginValues';
@@ -42,6 +43,9 @@ function isKibanaFunctionalPlugin<
 }
 
 export class Plugin<DependenciesType extends BasePluginsType, ExposableType> {
+  readonly name: PluginName;
+  readonly dependencies: PluginName[];
+
   private stopCallbacks: LifecycleCallback[] = [];
   private exposedValues?: ExposableType;
   private log: Logger;
@@ -52,13 +56,15 @@ export class Plugin<DependenciesType extends BasePluginsType, ExposableType> {
   // below , we can check them against `DependenciesType` and `ExposableType`),
   // See `git show 7e41eec17:platform/server/plugins/Plugin.ts`
   constructor(
-    readonly name: string,
-    readonly dependencies: string[],
+    name: string,
+    dependencies: string[],
     private readonly run:
       | KibanaFunctionalPlugin<DependenciesType, ExposableType>
       | KibanaPluginStatic<DependenciesType, ExposableType>,
     logger: LoggerFactory
   ) {
+    this.name = name as PluginName;
+    this.dependencies = dependencies as PluginName[];
     this.log = logger.get('plugins', name);
   }
 
