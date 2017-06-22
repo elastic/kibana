@@ -52,7 +52,9 @@ function getFullPath(path) {
 export default handleActions({
   [actions.setLoading]: (transientState, { payload }) => {
     const { path, loading = true } = payload;
-    return set(transientState, getFullPath(path), getContext(null, loading));
+    const fullPath = getFullPath(path);
+    const oldVal = get(transientState, fullPath, null);
+    return set(transientState, fullPath, getContext(get(oldVal, 'value', null), loading));
   },
 
   [actions.setValue]: (transientState, { payload }) => {

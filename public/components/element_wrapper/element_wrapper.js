@@ -31,7 +31,7 @@ const renderableLifecycle = lifecycle({
   Branches
   Short circut rendering of the element if the element isn't ready or isn't valid.
 */
-const loadingBranch = branch(({ renderable }) => !renderable || getState(renderable) === 'pending', renderComponent(Loading));
+const loadingBranch = branch(({ renderable }) => !renderable || !getValue(renderable), renderComponent(Loading));
 const errorBranch =  branch(({ renderable }) => {
   const renderableConfig = getValue(renderable);
 

@@ -21,15 +21,6 @@ export const addElement = createAction('addElement', (expression, pageId) => ({ 
 
 export const removeElement = createAction('removeElement', (elementId, pageId) => ({ pageId, elementId }));
 
-export const setExpression = createAction('setExpression');
-
-export const setAst = createAction('setAst', astToExpression);
-
-export const setArgumentAtIndex = createAction('setArgumentAtIndex', ({ index, arg, element, pageId }) => {
-  const newElement = assign(element, ['ast', 'chain', index, 'arguments'], arg);
-  return astToExpression({ ast: get(newElement, 'ast'), element, pageId });
-});
-
 export const fetchContext = ({ index }) => (dispatch, getState) => {
   const element = getSelectedElement(getState());
   const chain = get(element, ['ast', 'chain']);
@@ -91,3 +82,19 @@ export const fetchRenderable = (elementId, pageId) => (dispatch, getState) => {
   });
 };
 fetchRenderable.toString = () => 'fetchRenderable'; // createAction name proxy
+
+export const setExpression = payload => dispatch => {
+  const _setExpression = createAction('setExpression');
+  dispatch(_setExpression(payload));
+  dispatch(fetchRenderable(payload.element.id, payload.pageId));
+};
+setExpression.toString = () => 'setExpression';
+
+export const setAst = payload => dispatch => {
+  dispatch(setExpression(astToExpression(payload)));
+};
+
+export const setArgumentAtIndex = ({ index, arg, element, pageId }) => dispatch => {
+  const newElement = assign(element, ['ast', 'chain', index, 'arguments'], arg);
+  dispatch(setExpression(astToExpression({ ast: get(newElement, 'ast'), element, pageId })));
+};
