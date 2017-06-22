@@ -3,36 +3,33 @@ import ngMock from 'ng_mock';
 import { IndicesGetIndicesProvider } from 'ui/indices/get_indices';
 
 describe('GetIndices', function () {
-  let response;
+  let indicesResponse;
+  let aliasesResponse;
   let getIndices;
 
   beforeEach(ngMock.module('kibana', ($provide) => {
-    response = {
-      '.monitoring-es-2': {
-        aliases: {},
-      },
-      '.monitoring-es-3': {
+    indicesResponse = [
+      { index: '.kibana' },
+      { index: '.monitoring-es-2' },
+      { index: '.monitoring-es-3' },
+      { index: '.monitoring-es-4' },
+      { index: '.monitoring-es-5' }
+    ];
+    aliasesResponse = {
+      '.monitoring-es-1': {
         aliases: {
-          '.monitoring-es-active' : { }
-        },
-      },
-      '.monitoring-es-4': {
-        aliases: {},
-      },
-      '.monitoring-es-5': {
-        aliases: {},
-      },
-      '.kibana': {
-        aliases: {},
+          '.monitoring-es-active': {}
+        }
       }
     };
 
     $provide.service('esAdmin', function () {
       return {
+        cat: {
+          indices: async () => indicesResponse
+        },
         indices: {
-          getAlias: async function () {
-            return response;
-          }
+          getAlias: async () => aliasesResponse
         }
       };
     });
@@ -46,11 +43,21 @@ describe('GetIndices', function () {
     expect(getIndices).to.be.a(Function);
   });
 
-  it('should get all indices', async function () {
+  it('should rely on the alias endpoint if it returns a non 404', async function () {
     const indices = await getIndices();
-    Object.keys(response).forEach(index => {
-      expect(indices).to.contain(index);
+    expect(indices.length).to.be(2);
+    expect(indices[0]).to.be('.monitoring-es-1');
+    expect(indices[1]).to.be('.monitoring-es-active');
+  });
+
+  it('should fallback to the cat indices endpoint if there are no aliases', async function () {
+    const aliasesResponseCopy = Object.assign({}, aliasesResponse);
+    aliasesResponse = { status: 404 };
+    const indices = await getIndices();
+    expect(indices.length).to.be(indicesResponse.length);
+    indicesResponse.forEach((indexObj, idx) => {
+      expect(indices[idx]).to.be(indexObj.index);
     });
-    expect(indices).to.contain('.monitoring-es-active');
+    aliasesResponse = aliasesResponseCopy;
   });
 });
