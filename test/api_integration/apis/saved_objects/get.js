@@ -5,12 +5,21 @@ export default function ({ getService }) {
   const esArchiver = getService('esArchiver');
   const supertest = getService('supertest');
 
-  describe('Get API', function postIngest() {
+  describe('Get API', () => {
 
     describe(('multiple _types'), () => {
       before(() => esArchiver.load('saved_objects/multiple_types'));
       after(() => esArchiver.unload('saved_objects/multiple_types'));
+      runTests();
+    });
 
+    describe(('single _type'), () => {
+      before(() => esArchiver.load('saved_objects/single_type'));
+      after(() => esArchiver.unload('saved_objects/single_type'));
+      runTests();
+    });
+
+    function runTests() {
       it('should return a saved object by id', () => (
         supertest
           .get('/api/saved_objects/index-pattern/.kibana')
@@ -19,7 +28,7 @@ export default function ({ getService }) {
             expect(get(response, 'body.attributes.title')).to.be('.kibana');
           })
       ));
-    });
+    }
 
   });
 }
