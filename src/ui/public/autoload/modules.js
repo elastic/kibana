@@ -11,7 +11,6 @@ import 'ui/elastic_textarea';
 import 'ui/es';
 import 'ui/events';
 import 'ui/fancy_forms';
-import 'ui/field_format_editor/register';
 import 'ui/filter_bar';
 import 'ui/filter_manager';
 import 'ui/index_patterns';
