@@ -2,6 +2,10 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
 
+import {
+  KuiKeyboardAccessible,
+} from '../../index';
+
 export const KuiComboBoxOption = ({
   children,
   className,
@@ -13,14 +17,25 @@ export const KuiComboBoxOption = ({
     'kuiComboBoxOption-isDisabled': isDisabled,
   });
 
-  return (
-    <button
+  const option = (
+    <div
       className={classes}
-      onMouseDown={onClick}
+      onClick={onClick}
       {...rest}
     >
       {children}
-    </button>
+    </div>
+  );
+
+  if (!onClick) {
+    return option;
+  }
+
+  // KuiKeyboardAccessible complains if there's no onClick assigned.
+  return (
+    <KuiKeyboardAccessible>
+      {option}
+    </KuiKeyboardAccessible>
   );
 };
 

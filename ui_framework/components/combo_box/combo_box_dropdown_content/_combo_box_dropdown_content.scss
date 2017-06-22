@@ -10,12 +10,10 @@
  * 1. Allow focus state z-index to elevate this above other buttons.
  */
 .kuiComboBoxOption {
-  appearance: none;
-  display: block;
-  width: 100%;
-  text-align: left;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
   padding: 6px 10px;
-  border: none;
   background-color: #ffffff;
   cursor: pointer;
   font-size: $globalSubTextFontSize;
@@ -34,6 +32,10 @@
     opacity: 0.5;
   }
 }
+
+  .kuiComboBoxOption__type {
+    color: $globalSubduedTextColor;
+  }
 
 .kuiComboBoxTitle {
   margin-bottom: 5px;

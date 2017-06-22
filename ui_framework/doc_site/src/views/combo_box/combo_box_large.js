@@ -6,6 +6,7 @@ import {
   KuiComboBox,
   KuiComboBoxOption,
   KuiComboBoxOptions,
+  KuiComboBoxOptionType,
   KuiComboBoxSection,
   KuiComboBoxText,
   KuiComboBoxTitle,
@@ -17,14 +18,25 @@ export default class extends Component {
 
     this.state = {
       input: '',
-      options: [
-        'Apple',
-        'Banana',
-        'Cucumber',
-        'Dandelion',
-        'Eggplant',
-        'Fungus',
-      ],
+      options: [{
+        name: 'Apple',
+        type: 'fruit',
+      }, {
+        name: 'Banana',
+        type: 'fruit',
+      }, {
+        name: 'Cucumber',
+        type: 'veggie',
+      }, {
+        name: 'Dandelion',
+        type: 'flower',
+      }, {
+        name: 'Eggplant',
+        type: 'veggie',
+      }, {
+        name: 'Fungus',
+        type: 'other',
+      }],
     };
 
     this.onInputChange = this.onInputChange.bind(this);
@@ -39,7 +51,7 @@ export default class extends Component {
 
   onOptionClick(option) {
     this.setState({
-      input: option,
+      input: option.name,
     });
   }
 
@@ -47,8 +59,12 @@ export default class extends Component {
     const normalizedInput = this.state.input.toLowerCase().trim();
 
     const matchingOptions = this.state.options.filter(option => {
-      const normalizedOption = option.toLowerCase().trim();
-      return normalizedOption.indexOf(normalizedInput) > -1;
+      const normalizedOptionName = option.name.toLowerCase().trim();
+      const normalizedOptionType = option.type.toLowerCase().trim();
+      return (
+        normalizedOptionName.indexOf(normalizedInput) > -1
+        || normalizedOptionType.indexOf(normalizedInput) > -1
+      );
     });
 
     let options;
@@ -59,7 +75,10 @@ export default class extends Component {
           key={index}
           onClick={() => this.onOptionClick(option)}
         >
-          {option}
+          {option.name}
+          <KuiComboBoxOptionType>
+            {option.type}
+          </KuiComboBoxOptionType>
         </KuiComboBoxOption>
       ));
 
@@ -111,14 +130,26 @@ export default class extends Component {
             <KuiComboBoxOptions>
               <KuiComboBoxOption isDisabled>
                 Allosaurus
+
+                <KuiComboBoxOptionType>
+                  carnivore
+                </KuiComboBoxOptionType>
               </KuiComboBoxOption>
 
               <KuiComboBoxOption isDisabled>
                 Ankylosaurus
+
+                <KuiComboBoxOptionType>
+                  herbivore
+                </KuiComboBoxOptionType>
               </KuiComboBoxOption>
 
               <KuiComboBoxOption isDisabled>
                 Dimetrodron
+
+                <KuiComboBoxOptionType>
+                  scavenger
+                </KuiComboBoxOptionType>
               </KuiComboBoxOption>
             </KuiComboBoxOptions>
           </KuiComboBoxSection>

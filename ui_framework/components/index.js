@@ -38,6 +38,7 @@ export {
   KuiComboBox,
   KuiComboBoxOption,
   KuiComboBoxOptions,
+  KuiComboBoxOptionType,
   KuiComboBoxSection,
   KuiComboBoxText,
   KuiComboBoxTitle,
