@@ -4,6 +4,7 @@ import getInitialState from './initial_state';
 import middleware from './middleware';
 import getRootReducer from './reducers';
 import { historyProvider } from '../lib/history_provider';
+import { onStart } from './on_start';
 
 const app = uiModules.get('apps/canvas');
 
@@ -21,6 +22,7 @@ app.service('$store', (kbnVersion, basePath) => {
 
   // debugging
   window.store = store;
+  onStart(store);
 
   return store;
 });

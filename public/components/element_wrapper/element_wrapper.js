@@ -1,31 +1,13 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { lifecycle, compose, branch, renderComponent } from 'recompose';
-import { getState, getError, getValue } from '../../lib/resolved_arg';
+import { compose, branch, renderComponent } from 'recompose';
+import { getError, getValue } from '../../lib/resolved_arg';
 import { InvalidExpression } from './invalid_element';
 import { RenderElement } from '../render_element';
 import { get } from 'lodash';
 import { Loading } from '../loading';
 import { elements as elementsRegistry } from '../../lib/elements';
 import './element_wrapper.less';
-
-// dispatch renderable fetch if renderable isn't provided
-const fetchRenderable = (props) => {
-  if (getState(props.renderable) === null) props.fetchRenderable();
-};
-
-/*
-  Lifecycles methods
-*/
-const renderableLifecycle = lifecycle({
-  componentWillMount() {
-    fetchRenderable(this.props);
-  },
-
-  componentWillReceiveProps(newProps) {
-    fetchRenderable(newProps);
-  },
-});
 
 /*
   Branches
@@ -72,7 +54,6 @@ ElementWrapperComponent.propTypes = {
 };
 
 export const ElementWrapper = compose(
-  renderableLifecycle,
   loadingBranch,
   errorBranch,
 )(ElementWrapperComponent);
