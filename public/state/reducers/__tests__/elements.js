@@ -6,8 +6,6 @@ import actionCreator from './fixtures/action_creator';
 const reducer = proxyquire('../elements', {
   '../actions/elements': {
     setExpression: 'setExpression',
-    setAst: 'setAst',
-    setArgumentAtIndex: 'setArgumentAtIndex',
     '@noCallThru': true,
   },
 }).default;
