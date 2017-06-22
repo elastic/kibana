@@ -43,6 +43,7 @@ export default function (kibana) {
           'visTypes',
           'spyModes',
           'fieldFormats',
+          'fieldFormatEditors',
           'navbarExtensions',
           'managementSections',
           'devTools',

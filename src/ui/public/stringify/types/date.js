@@ -1,8 +1,6 @@
 import _ from 'lodash';
 import moment from 'moment';
-import 'ui/field_format_editor/pattern/pattern';
 import { FieldFormat } from 'ui/index_patterns/_field_format/field_format';
-import dateTemplate from 'ui/stringify/editors/date.html';
 
 export function stringifyDate() {
 
@@ -16,23 +14,6 @@ export function stringifyDate() {
   DateTime.id = 'date';
   DateTime.title = 'Date';
   DateTime.fieldType = 'date';
-
-  DateTime.editor = {
-    template: dateTemplate,
-    controllerAs: 'cntrl',
-    controller: function ($interval, $scope) {
-      const self = this;
-      self.sampleInputs = [
-        Date.now(),
-        +moment().startOf('year'),
-        +moment().endOf('year')
-      ];
-
-      $scope.$on('$destroy', $interval(function () {
-        self.sampleInputs[0] = Date.now();
-      }, 1000));
-    }
-  };
 
   DateTime.prototype.getParamDefaults = function () {
     return {
