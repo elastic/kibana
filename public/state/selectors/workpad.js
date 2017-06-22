@@ -3,7 +3,8 @@ import { fromExpression } from '../../../common/lib/ast';
 
 // page getters
 export function getSelectedPage(state) {
-  return get(state, 'transient.selectedPage');
+  const pageIndex =  get(state, 'persistent.workpad.page');
+  return get(state, `persistent.workpad.pages[${pageIndex}].id`);
 }
 
 export function getPages(state) {
