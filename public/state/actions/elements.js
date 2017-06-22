@@ -2,7 +2,7 @@ import { createAction } from 'redux-actions';
 import { get } from 'lodash';
 import { assign } from 'object-path-immutable';
 import { notify } from '../../lib/notify';
-import { getSelectedElement, getElementById } from '../selectors/workpad';
+import { getSelectedElement, getElementById, getPages } from '../selectors/workpad';
 import { interpretAst } from '../../lib/interpreter';
 import { getType } from '../../../common/types/get_type';
 import { fromExpression, toExpression } from '../../../common/lib/ast';
@@ -81,7 +81,15 @@ export const fetchRenderable = (elementId, pageId) => (dispatch, getState) => {
     }));
   });
 };
-fetchRenderable.toString = () => 'fetchRenderable'; // createAction name proxy
+
+export const fetchAllRenderables = () => (dispatch, getState) => {
+  const pages = getPages(getState());
+  pages.forEach(page => {
+    page.elements.forEach(element => {
+      dispatch(fetchRenderable(element.id, page.id));
+    });
+  });
+};
 
 export const setExpression = payload => dispatch => {
   const _setExpression = createAction('setExpression');
