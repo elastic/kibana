@@ -88,7 +88,7 @@ app.directive('dashboardApp', function ($injector) {
   return {
     restrict: 'E',
     controllerAs: 'dashboardApp',
-    controller: function ($scope, $rootScope, $route, $routeParams, $location, getAppState, $compile, dashboardConfig, $window) {
+    controller: function ($scope, $rootScope, $route, $routeParams, $location, getAppState, $compile, dashboardConfig) {
       const filterBar = Private(FilterBarQueryFilterProvider);
       const docTitle = Private(DocTitleProvider);
       const notify = new Notifier({ location: 'Dashboard' });
@@ -294,7 +294,7 @@ app.directive('dashboardApp', function ($injector) {
         $scope.fullScreenMode = fullScreenMode;
         dashboardState.setFullScreenMode(fullScreenMode);
         chrome.setVisible(!fullScreenMode);
-        $window.dispatchEvent(new Event('resize'));
+        $scope.$broadcast('reLayout');
 
         // Make sure that if we exit the dashboard app, the chrome becomes visible again
         // (e.g. if the user clicks the back button).
