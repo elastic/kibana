@@ -26,21 +26,17 @@ uiModules
       $scope.$bind('editor.formatParams', 'getFormatParams()', $scope);
 
       /**
-       * Read the FieldFormat's editor property and convert it into
+       * Retrieve editor directive def object from registry and convert it into
        * a "pseudoDirective". For clarity I'm reusing the directive def
        * object api, but for simplicity not implementing the entire thing.
        *
-       * possible configs:
-       *   string:
-       *     - used as an angular template
-       *   directive def object, with support for the following opts:
-       *     - template
-       *     - compile or link
-       *     - scope (creates isolate, reads from parent scope, not attributes)
-       *     - controller
-       *     - controllerAs
+       * directive def object, with support for the following opts:
+       *   - template
+       *   - compile or link
+       *   - scope (creates isolate, reads from parent scope, not attributes)
+       *   - controller
+       *   - controllerAs
        *
-       * @param  {angular.element} $el - template
        * @param  {object} directiveDef - the directive definition object
        * @return {undefined}
        */
