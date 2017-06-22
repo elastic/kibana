@@ -21,12 +21,12 @@ describe('service_settings (FKA tilemaptest)', function () {
       'manifest': tmsManifestUrl,
       'type': 'tms'
     },
-      {
-        'id': 'geo_layers',
-        'name': 'Elastic Layer Service',
-        'manifest': vectorManifestUrl,
-        'type': 'file'
-      }
+    {
+      'id': 'geo_layers',
+      'name': 'Elastic Layer Service',
+      'manifest': vectorManifestUrl,
+      'type': 'file'
+    }
     ]
   };
 
