@@ -38,13 +38,14 @@ const createSslSchema = (schema: Schema) => {
 }
 
 const sslConfigType = typeOfSchema(createSslSchema);
+type SslConfigType = typeof sslConfigType;
 
 export class SslConfig {
   static createSchema = createSslSchema;
 
   enabled: boolean;
 
-  constructor(config: typeof sslConfigType) {
+  constructor(config: SslConfigType) {
     this.enabled = config.enabled;
   }
 }

@@ -36,6 +36,7 @@ const createHttpSchema = (schema: Schema) => {
 }
 
 const httpConfigType = typeOfSchema(createHttpSchema);
+type HttpConfigType = typeof httpConfigType;
 
 export class HttpConfig {
   static createSchema = createHttpSchema;
@@ -47,7 +48,7 @@ export class HttpConfig {
   publicDir: string;
   ssl: SslConfig;
 
-  constructor(config: typeof httpConfigType, env: Env) {
+  constructor(config: HttpConfigType, env: Env) {
     this.host = config.host;
     this.port = config.port;
     this.maxPayload = config.maxPayload;

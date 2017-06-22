@@ -6,13 +6,14 @@ const createKibanaSchema = (schema: Schema) =>
   });
 
 const kibanaConfigType = typeOfSchema(createKibanaSchema);
+type KibanaConfigType = typeof kibanaConfigType;
 
 export class KibanaConfig {
   static createSchema = createKibanaSchema;
 
   readonly index: string;
 
-  constructor(config: typeof kibanaConfigType) {
+  constructor(config: KibanaConfigType) {
     this.index = config.index;
   }
 }
