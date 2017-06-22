@@ -187,6 +187,8 @@ export class SavedObjectsClient {
   async get(type, id) {
     const response = await this._withKibanaIndex('search', { body: createIdQuery({ type, id }) });
     const hit = get(response, 'hits.hits.0');
+    if (!hit) throw Boom.notFound();
+
     const attributes =  get(hit, `_source.${type}`) || get(hit, '_source');
 
     return {

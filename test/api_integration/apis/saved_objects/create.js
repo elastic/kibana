@@ -5,7 +5,7 @@ export default function ({ getService }) {
   const esArchiver = getService('esArchiver');
   const supertest = getService('supertest');
 
-  describe('Get API', () => {
+  describe('Create API', () => {
 
     describe(('multiple _types'), () => {
       before(() => esArchiver.load('saved_objects/multiple_types'));
@@ -20,21 +20,15 @@ export default function ({ getService }) {
     });
 
     function runTests() {
-      it('should return a saved object by id', () => {
+      it('should be able to create objects', () => {
         supertest
-          .get('/api/saved_objects/index-pattern/.kibana')
+          .post('/api/saved_objects/index-pattern')
+          .send({ attributes: { title: 'Test pattern' } })
           .expect(200)
           .then((response) => {
-            expect(get(response, 'body.attributes.title')).to.be('.kibana');
+            expect(get(response, 'body.attributes.title')).to.be('Test pattern');
           });
       });
-
-      it('should 404 if no saved objects are found', () => {
-        supertest
-          .get('/api/saved_objects/index-pattern/does_not_exist')
-          .expect(404);
-      });
     }
-
   });
 }
