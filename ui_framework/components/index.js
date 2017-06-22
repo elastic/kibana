@@ -35,6 +35,15 @@ export {
 } from './collapse_button';
 
 export {
+  KuiComboBox,
+  KuiComboBoxOption,
+  KuiComboBoxOptions,
+  KuiComboBoxSection,
+  KuiComboBoxText,
+  KuiComboBoxTitle,
+} from './combo_box';
+
+export {
   KuiEmptyTablePrompt,
   KuiEmptyTablePromptMessage,
   KuiEmptyTablePromptPanel,

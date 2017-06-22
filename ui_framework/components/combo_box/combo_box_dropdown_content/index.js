@@ -1,0 +1,5 @@
+export { KuiComboBoxOption } from './combo_box_option';
+export { KuiComboBoxOptions } from './combo_box_options';
+export { KuiComboBoxSection } from './combo_box_section';
+export { KuiComboBoxText } from './combo_box_text';
+export { KuiComboBoxTitle } from './combo_box_title';

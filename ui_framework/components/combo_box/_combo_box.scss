@@ -1,0 +1,13 @@
+.kuiComboBox {
+  position: relative;
+  width: $globalFormFieldDefaultWidth;
+  line-height: $globalLineHeight;
+}
+
+.kuiComboBox--small {
+  width: $globalFormFieldSmallWidth;
+}
+
+.kuiComboBox--large {
+  width: $globalFormFieldLargeWidth;
+}
