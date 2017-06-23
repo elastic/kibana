@@ -2,5 +2,6 @@ export default function ({ loadTestFile }) {
   describe('scripts', () => {
     loadTestFile(require.resolve('./get'));
     loadTestFile(require.resolve('./create'));
+    loadTestFile(require.resolve('./delete'));
   });
 }

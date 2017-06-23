@@ -96,7 +96,7 @@ export class SavedObjectsClient {
       refresh: 'wait_for'
     });
 
-    if (get(response, 'found') === false) {
+    if (get(response, 'deleted') === 0) {
       throw Boom.notFound();
     }
   }
