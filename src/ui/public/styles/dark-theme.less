@@ -572,3 +572,37 @@
     }
   }
 }
+
+.theme-dark {
+  .markdown-body {
+    color: @text-color;
+  }
+
+  .markdown-body code {
+    color: #ffffff;
+    background-color: #5f5f5f;
+  }
+
+  .markdown-body pre {
+    background-color: #5f5f5f;
+    border: none;
+  }
+
+  .markdown-body table {
+    border-left: 1px solid @table-border-color;
+  }
+
+  .markdown-body table th,
+  .markdown-body table td {
+    border-top: 1px solid @table-border-color;
+    border-bottom: 1px solid @table-border-color;
+
+    &:last-child {
+      border-right: 1px solid @table-border-color;
+    }
+  }
+
+  .markdown-body table tr {
+    border-top: 1px solid @table-border-color;
+  }
+}
