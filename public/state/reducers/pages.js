@@ -1,13 +1,24 @@
-import { set, push } from 'object-path-immutable';
+import { push, set } from 'object-path-immutable';
+import { getDefaultPage } from '../defaults';
+
 
 export default function pagesReducer(workpadState = {}, { type, payload }) {
-  if (type === 'PAGE_ADD') {
-    return push(workpadState, 'pages', payload);
+  function setPageIndex(index) {
+    if (index < 0 || !workpadState.pages[index]) return workpadState;
+    return set(workpadState, 'page', index);
   }
 
-  if (type === 'PAGE_SET_NAME') {
-    const { pageId, name } = payload;
-    return set(workpadState, ['pages', pageId, 'name'], name);
+  if (type === 'addPage') {
+    return push(workpadState, 'pages', payload || getDefaultPage());
+  }
+
+  if (type === 'nextPage') {
+    return setPageIndex(workpadState.page + 1);
+  }
+
+  if (type === 'previousPage') {
+    return setPageIndex(workpadState.page - 1);
+
   }
 
   return workpadState;
