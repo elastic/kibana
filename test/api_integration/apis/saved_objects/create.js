@@ -21,7 +21,7 @@ export default function ({ getService }) {
 
     function runTests() {
       it('should be able to create objects', () => {
-        supertest
+        return supertest
           .post('/api/saved_objects/index-pattern')
           .send({ attributes: { title: 'Test pattern' } })
           .expect(200)

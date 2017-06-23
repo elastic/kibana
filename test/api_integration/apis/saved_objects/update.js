@@ -5,7 +5,7 @@ export default function ({ getService }) {
   const esArchiver = getService('esArchiver');
   const supertest = getService('supertest');
 
-  describe('Get API', () => {
+  describe('Update API', () => {
 
     describe(('multiple _types'), () => {
       before(() => esArchiver.load('saved_objects/multiple_types'));
@@ -20,21 +20,22 @@ export default function ({ getService }) {
     });
 
     function runTests() {
-      it('should return a saved object by id', () => {
+      it('should be able to update objects', () => {
         return supertest
-          .get('/api/saved_objects/index-pattern/.kibana')
+          .post('/api/saved_objects/index-pattern')
+          .send({ attributes: { title: 'Test title' } })
           .expect(200)
           .then((response) => {
-            expect(get(response, 'body.attributes.title')).to.be('.kibana');
-          });
-      });
-
-      it('should 404 if no saved objects are found', () => {
-        return supertest
-          .get('/api/saved_objects/index-pattern/does_not_exist')
-          .expect(404);
+            const id = get(response, 'body.id');
+            return supertest
+              .post('/api/saved_objects/index-pattern')
+              .send({ attributes: { title: 'Updated title' } })
+              .expect(200)
+          })
+          .then((response) => {
+            expect(get(response, 'body.attributes.title')).to.be('Updated title');
+          })
       });
     }
-
   });
 }

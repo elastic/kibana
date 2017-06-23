@@ -19,13 +19,13 @@ export default function ({ getService }) {
 
     function runTests() {
       it('should be able to delete objects', () => {
-        supertest
+        return supertest
           .delete('/api/saved_objects/index-pattern/.kibana')
           .expect(200);
       });
 
       it('should 404 if the object does not exist', () => {
-        supertest
+        return supertest
           .delete('/api/saved_objects/index-pattern/hello')
           .expect(404);
       });
