@@ -2,9 +2,14 @@ import { get, find } from 'lodash';
 import { fromExpression } from '../../../common/lib/ast';
 
 // page getters
+export function getSelectedPageIndex(state) {
+  return get(state, 'persistent.workpad.page');
+}
+
 export function getSelectedPage(state) {
-  const pageIndex =  get(state, 'persistent.workpad.page');
-  return get(state, `persistent.workpad.pages[${pageIndex}].id`);
+  const pageIndex =  getSelectedPageIndex(state);
+  const pages = getPages(state);
+  return get(pages, `[${pageIndex}].id`);
 }
 
 export function getPages(state) {

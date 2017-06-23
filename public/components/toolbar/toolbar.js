@@ -9,7 +9,7 @@ import { ElementTypes } from './element_types';
 
 import './toolbar.less';
 
-export const Toolbar = ({ editing, tray, setTray, addElement, elementIsSelected }) => {
+export const Toolbar = ({ editing, tray, setTray, addElement, elementIsSelected, selectedPageNumber }) => {
   const done = () => setTray(null);
   const showHideTray = (exp) => {
     if (tray && tray === exp) return done();
@@ -40,6 +40,10 @@ export const Toolbar = ({ editing, tray, setTray, addElement, elementIsSelected 
         (<Tray>{ trays[tray] }</Tray>)
       }
       <Navbar>
+        <NavbarButton><i className="fa fa-chevron-left"/></NavbarButton>
+        { selectedPageNumber }
+        <NavbarButton><i className="fa fa-chevron-right"/></NavbarButton>
+
         <NavbarButton onClick={() => showHideTray('elements')}><i className="fa fa-plus" /> Add an element</NavbarButton>
         <NavbarButton><i className="fa fa-plus-square" /> Add a page</NavbarButton>
         { !elementIsSelected ? null :
@@ -55,5 +59,6 @@ Toolbar.propTypes = {
   tray: PropTypes.node,
   setTray: PropTypes.func,
   addElement: PropTypes.func,
+  selectedPageNumber: PropTypes.number,
   elementIsSelected: PropTypes.bool,
 };
