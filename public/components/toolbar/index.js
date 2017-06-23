@@ -4,6 +4,8 @@ import { compose, withState } from 'recompose';
 import { getEditing } from '../../state/selectors/app';
 import { getSelectedPage, getSelectedElement, getSelectedPageIndex } from '../../state/selectors/workpad';
 import { addElement } from '../../state/actions/elements';
+import { addPage, nextPage, previousPage } from '../../state/actions/pages';
+
 
 import { Toolbar as Component } from './toolbar';
 
@@ -16,6 +18,9 @@ const mapStateToProps = (state) => ({
 
 const mapDispatchToProps = (dispatch) => ({
   addElement: pageId => expression => dispatch(addElement({ expression }, pageId)),
+  addPage: () => dispatch(addPage()),
+  nextPage: () => dispatch(nextPage()),
+  previousPage: () => dispatch(previousPage()),
 });
 
 const mergeProps = (stateProps, dispatchProps, ownProps) => {

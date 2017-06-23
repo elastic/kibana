@@ -9,7 +9,7 @@ import { ElementTypes } from './element_types';
 
 import './toolbar.less';
 
-export const Toolbar = ({ editing, tray, setTray, addElement, elementIsSelected, selectedPageNumber }) => {
+export const Toolbar = ({ editing, tray, setTray, addElement, addPage, previousPage, nextPage, elementIsSelected, selectedPageNumber }) => {
   const done = () => setTray(null);
   const showHideTray = (exp) => {
     if (tray && tray === exp) return done();
@@ -40,12 +40,14 @@ export const Toolbar = ({ editing, tray, setTray, addElement, elementIsSelected,
         (<Tray>{ trays[tray] }</Tray>)
       }
       <Navbar>
-        <NavbarButton><i className="fa fa-chevron-left"/></NavbarButton>
+        <NavbarButton onClick={ previousPage }><i className="fa fa-chevron-left"/></NavbarButton>
         { selectedPageNumber }
-        <NavbarButton><i className="fa fa-chevron-right"/></NavbarButton>
+        <NavbarButton onClick={ nextPage }><i className="fa fa-chevron-right"/></NavbarButton>
 
         <NavbarButton onClick={() => showHideTray('elements')}><i className="fa fa-plus" /> Add an element</NavbarButton>
-        <NavbarButton><i className="fa fa-plus-square" /> Add a page</NavbarButton>
+
+        <NavbarButton onClick={ addPage }><i className="fa fa-plus-square" /> Add a page</NavbarButton>
+
         { !elementIsSelected ? null :
           (<NavbarButton onClick={() => showHideTray('expression')}><i className="fa fa-terminal" /> Code</NavbarButton>)
         }
@@ -59,6 +61,9 @@ Toolbar.propTypes = {
   tray: PropTypes.node,
   setTray: PropTypes.func,
   addElement: PropTypes.func,
+  addPage: PropTypes.func,
+  nextPage: PropTypes.func,
+  previousPage: PropTypes.func,
   selectedPageNumber: PropTypes.number,
   elementIsSelected: PropTypes.bool,
 };
