@@ -3,9 +3,10 @@ import { get } from 'lodash';
 
 export default function ({ getService }) {
   const esArchiver = getService('esArchiver');
+  const es = getService('es');
   const supertest = getService('supertest');
 
-  describe('Update API', () => {
+  describe('Find API', () => {
 
     describe(('multiple _types'), () => {
       before(() => esArchiver.load('saved_objects/multiple_types'));
@@ -20,21 +21,18 @@ export default function ({ getService }) {
     });
 
     function runTests() {
-      it('should be able to update objects', () => {
-        return supertest
-          .post('/api/saved_objects/index-pattern')
-          .send({ attributes: { title: 'Test title' } })
-          .expect(200)
-          .then((response) => {
-            const id = get(response, 'body.id');
-            return supertest
-              .put(`/api/saved_objects/index-pattern/${id}`)
-              .send({ attributes: { title: 'Updated title' } })
-              .expect(200);
-          })
-          .then((response) => {
-            expect(get(response, 'body.attributes.title')).to.be('Updated title');
+      it('should be able to search', async () => {
+        const visualization = await supertest
+          .post('/api/saved_objects/visualization')
+          .send({ attributes: { title: 'Test visualization' } });
+
+        const response = await supertest
+          .get('/api/saved_objects')
+          .query({
+            search: 'test'
           });
+        expect(get(response, 'body.saved_objects.0.id')).to.be(get(visualization, 'body.id'));
+        expect(get(response, 'body.total')).to.be(1);
       });
     }
   });

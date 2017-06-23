@@ -31,11 +31,16 @@ export class SavedObjectsClient {
         type: V6_TYPE,
         body: {
           [type]: body
-        }
+        },
+        refresh: 'wait_for'
       });
     } catch(err) {
       if (!boomIsNotFound(err)) throw err;
-      response = await this._withKibanaIndex('index', { type, body });
+      response = await this._withKibanaIndex('index', {
+        type,
+        body,
+        refresh: 'wait_for'
+      });
     }
 
     return {
