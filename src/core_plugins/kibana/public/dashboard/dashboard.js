@@ -25,6 +25,7 @@ import { notify } from 'ui/notify';
 import './panel/get_object_loaders_for_dashboard';
 import { documentationLinks } from 'ui/documentation_links/documentation_links';
 import { showCloneModal } from './top_nav/show_clone_modal';
+import { ESC_KEY_CODE } from 'ui_framework/services';
 
 const app = uiModules.get('app/dashboard', [
   'elasticsearch',
@@ -117,6 +118,7 @@ app.directive('dashboardApp', function ($injector) {
           description: dashboardState.getDescription(),
         };
         $scope.panels = dashboardState.getPanels();
+        $scope.fullScreenMode = dashboardState.getFullScreenMode();
       };
 
       // Part of the exposed plugin API - do not remove without careful consideration.
@@ -286,7 +288,50 @@ app.directive('dashboardApp', function ($injector) {
         }).catch(notify.error);
       };
 
+      $scope.showFilterBar = () => filterBar.getFilters().length > 0 || !$scope.fullScreenMode;
+      let onRouteChange;
+      const setFullScreenMode = (fullScreenMode) => {
+        $scope.fullScreenMode = fullScreenMode;
+        dashboardState.setFullScreenMode(fullScreenMode);
+        chrome.setVisible(!fullScreenMode);
+        $scope.$broadcast('reLayout');
+
+        // Make sure that if we exit the dashboard app, the chrome becomes visible again
+        // (e.g. if the user clicks the back button).
+        if (fullScreenMode) {
+          onRouteChange = $scope.$on('$routeChangeStart', () => {
+            chrome.setVisible(true);
+            onRouteChange();
+          });
+        } else if (onRouteChange) {
+          onRouteChange();
+        }
+      };
+
+      $scope.$watch('fullScreenMode', () => setFullScreenMode(dashboardState.getFullScreenMode()));
+
+      $scope.exitFullScreenMode = () => setFullScreenMode(false);
+
+      document.addEventListener('keydown', (e) => {
+        if (e.keyCode === ESC_KEY_CODE) {
+          setFullScreenMode(false);
+        }
+      }, false);
+
+      $scope.showAddPanel = () => {
+        if ($scope.fullScreenMode) {
+          $scope.exitFullScreenMode();
+        }
+        $scope.kbnTopNav.open('add');
+      };
+      $scope.enterEditMode = () => {
+        if ($scope.fullScreenMode) {
+          $scope.exitFullScreenMode();
+        }
+        $scope.kbnTopNav.click('edit');
+      };
       const navActions = {};
+      navActions[TopNavIds.FULL_SCREEN] = () => setFullScreenMode(true);
       navActions[TopNavIds.EXIT_EDIT_MODE] = () => onChangeViewMode(DashboardViewMode.VIEW);
       navActions[TopNavIds.ENTER_EDIT_MODE] = () => onChangeViewMode(DashboardViewMode.EDIT);
       navActions[TopNavIds.CLONE] = () => {
