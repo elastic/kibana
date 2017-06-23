@@ -12,10 +12,6 @@ export async function importDashboards(req) {
   const savedObjectsClient = new SavedObjectsClient(config.get('kibana.index'), callAdminCluster);
 
 
-  if (payload.version !== config.get('pkg.version')) {
-    throw new Error(`Version ${payload.version} does not match ${config.get('pkg.version')}.`);
-  }
-
   const docs = payload.objects
     .filter(item => !exclude.includes(item.type));
 
