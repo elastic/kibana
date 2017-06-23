@@ -1,10 +1,11 @@
 import expect from 'expect.js';
+import { errors as esErrors } from 'elasticsearch';
 
 import {
   isEsIndexNotFoundError,
   createNoMatchingIndicesError,
   isNoMatchingIndicesError,
-  convertEsIndexNotFoundError
+  convertEsError
 } from '../../../../../src/server/index_patterns/service/lib/errors';
 
 import {
@@ -76,25 +77,34 @@ export default function ({ getService }) {
       });
     });
 
-    describe('convertEsIndexNotFoundError()', () => {
+    describe('convertEsError()', () => {
       const indices = ['foo', 'bar'];
 
       it('converts indexNotFoundErrors into NoMatchingIndices errors', async () => {
-        const converted = convertEsIndexNotFoundError(indices, indexNotFoundError);
+        const converted = convertEsError(indices, indexNotFoundError);
         if (!isNoMatchingIndicesError(converted)) {
-          throw new Error('expected convertEsIndexNotFoundError(indexNotFoundError) to return NoMatchingIndices error');
+          throw new Error('expected convertEsError(indexNotFoundError) to return NoMatchingIndices error');
         }
       });
 
-      it('returns other errors', async () => {
-        const originals = [docNotFoundError, '', 1, /foo/, new Date(), new Error(), function () {}];
-
-        originals.forEach(orig => {
-          const converted = convertEsIndexNotFoundError(indices, orig);
-          if (converted !== orig) {
-            throw new Error(`expected convertEsIndexNotFoundError(${orig}) to return original error`);
-          }
+      it('wraps other errors in Boom', async () => {
+        const error = new esErrors.AuthenticationException({
+          root_cause: [
+            {
+              type: 'security_exception',
+              reason: 'action [indices:data/read/field_caps] is unauthorized for user [standard]'
+            }
+          ],
+          type: 'security_exception',
+          reason: 'action [indices:data/read/field_caps] is unauthorized for user [standard]'
+        }, {
+          statusCode: 403
         });
+
+        expect(error).to.not.have.property('isBoom');
+        const converted = convertEsError(indices, error);
+        expect(converted).to.have.property('isBoom');
+        expect(converted.output.statusCode).to.be(403);
       });
     });
   });

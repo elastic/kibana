@@ -42,10 +42,12 @@ export function isNoMatchingIndicesError(err) {
  *  @param  {[type]} indices [description]
  *  @return {[type]}         [description]
  */
-export function convertEsIndexNotFoundError(indices, error) {
+export function convertEsError(indices, error) {
   if (isEsIndexNotFoundError(error)) {
     return createNoMatchingIndicesError(indices);
   }
 
-  return error;
+  const statusCode = error.statusCode;
+  const message = error.body ? error.body.error : undefined;
+  return Boom.wrap(error, statusCode, message);
 }

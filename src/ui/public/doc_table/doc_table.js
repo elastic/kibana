@@ -29,7 +29,7 @@ uiModules.get('kibana')
       onMoveColumn: '=?',
       onRemoveColumn: '=?',
     },
-    link: function ($scope) {
+    link: function ($scope, $el) {
       const notify = new Notifier();
       $scope.limit = 50;
       $scope.persist = {
@@ -114,6 +114,9 @@ uiModules.get('kibana')
           if ($scope.searchSource !== $scope.searchSource) return;
 
           $scope.hits = resp.hits.hits;
+          if ($scope.hits.length === 0) {
+            $el.trigger('renderComplete');
+          }
           // We limit the number of returned results, but we want to show the actual number of hits, not
           // just how many we retrieved.
           $scope.totalHitCount = resp.hits.total;

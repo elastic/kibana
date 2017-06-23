@@ -17,7 +17,6 @@ import 'ui/vislib';
 import 'ui/agg_response';
 import 'ui/agg_types';
 import 'ui/timepicker';
-import 'ui/react_components';
 import { Notifier } from 'ui/notify/notifier';
 import 'leaflet';
 import { KibanaRootController } from './kibana_root_controller';

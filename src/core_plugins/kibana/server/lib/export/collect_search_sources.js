@@ -13,8 +13,8 @@ export async function collectSearchSources(savedObjectsClient, panels) {
 
   if (docs.length === 0) return [];
 
-  const savedSearches = await savedObjectsClient.bulkGet(docs);
-  const indexPatterns = await collectIndexPatterns(savedObjectsClient, savedSearches);
+  const { saved_objects: savedObjects } = await savedObjectsClient.bulkGet(docs);
+  const indexPatterns = await collectIndexPatterns(savedObjectsClient, savedObjects);
 
-  return savedSearches.concat(indexPatterns);
+  return savedObjects.concat(indexPatterns);
 }

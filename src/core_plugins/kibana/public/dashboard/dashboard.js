@@ -285,7 +285,7 @@ app.directive('dashboardApp', function ($injector) {
             }
           }
           return id;
-        }).catch(notify.fatal);
+        }).catch(notify.error);
       };
 
       $scope.showFilterBar = () => filterBar.getFilters().length > 0 || !$scope.fullScreenMode;

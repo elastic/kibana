@@ -23,9 +23,11 @@ describe('collectDashboards(req, ids)', () => {
       { id: 'index-*' }
     ]));
 
-    savedObjectsClient.bulkGet.returns(Promise.resolve([
-      { id: 'dashboard-01' }, { id: 'dashboard-02' }
-    ]));
+    savedObjectsClient.bulkGet.returns(Promise.resolve({
+      saved_objects: [
+        { id: 'dashboard-01' }, { id: 'dashboard-02' }
+      ]
+    }));
   });
 
   afterEach(() => {

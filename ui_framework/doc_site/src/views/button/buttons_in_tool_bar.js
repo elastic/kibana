@@ -50,12 +50,12 @@ export default () => (
       Danger button, disabled
     </KuiButton>
 
-    <KuiButton type="warning">
+    <KuiButton buttonType="warning">
       Warning button
     </KuiButton>
 
     <KuiButton
-      type="warning"
+      buttonType="warning"
       disabled
     >
       Warning button, disabled

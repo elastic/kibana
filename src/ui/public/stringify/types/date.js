@@ -1,44 +1,25 @@
 import _ from 'lodash';
 import moment from 'moment';
-import 'ui/field_format_editor/pattern/pattern';
-import { IndexPatternsFieldFormatProvider } from 'ui/index_patterns/_field_format/field_format';
-import { BoundToConfigObjProvider } from 'ui/bound_to_config_obj';
-import dateTemplate from 'ui/stringify/editors/date.html';
+import { FieldFormat } from 'ui/index_patterns/_field_format/field_format';
 
-export function stringifyDate(Private) {
-  const FieldFormat = Private(IndexPatternsFieldFormatProvider);
-  const BoundToConfigObj = Private(BoundToConfigObjProvider);
-
+export function stringifyDate() {
 
   _.class(DateTime).inherits(FieldFormat);
-  function DateTime(params) {
+  function DateTime(params, getConfig) {
     DateTime.Super.call(this, params);
+
+    this.getConfig = getConfig;
   }
 
   DateTime.id = 'date';
   DateTime.title = 'Date';
   DateTime.fieldType = 'date';
 
-  DateTime.paramDefaults = new BoundToConfigObj({
-    pattern: '=dateFormat',
-    timezone: '=dateFormat:tz'
-  });
-
-  DateTime.editor = {
-    template: dateTemplate,
-    controllerAs: 'cntrl',
-    controller: function ($interval, $scope) {
-      const self = this;
-      self.sampleInputs = [
-        Date.now(),
-        +moment().startOf('year'),
-        +moment().endOf('year')
-      ];
-
-      $scope.$on('$destroy', $interval(function () {
-        self.sampleInputs[0] = Date.now();
-      }, 1000));
-    }
+  DateTime.prototype.getParamDefaults = function () {
+    return {
+      pattern: this.getConfig('dateFormat'),
+      timezone: this.getConfig('dateFormat:tz')
+    };
   };
 
   DateTime.prototype._convert = function (val) {

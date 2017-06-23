@@ -37,9 +37,9 @@ $buttonDangerHoverBackgroundColor: darken($globalColorRed, 10%);
 $buttonDangerDisabledBackgroundColor: lighten($buttonDangerBackgroundColor, 50%);
 
 // Warning
-$buttonWarningBackgroundColor: #f3bb57;
-$buttonWarningHoverBackgroundColor: #e69606;
-$buttonWarningDisabledBackgroundColor: #f4debc;
+$buttonWarningBackgroundColor: #f98100;
+$buttonWarningHoverBackgroundColor: darken($buttonWarningBackgroundColor, 10%);
+$buttonWarningDisabledBackgroundColor: lighten($buttonWarningBackgroundColor, 10%);
 
 // Hollow
 $buttonHollowDiabledTextColor: #dddddd;

@@ -293,9 +293,13 @@
   .vis-editor-field-ui-select {
     .ui-select-match {
       .btn {
-        border: 2px solid #ecf0f1; /* 1 */
-        background-color: white; /* 1 */
-        color: black; /* 1 */
+        border: 1px solid @globalColorLightGray; /* 1 */
+        background-color: @white; /* 1 */
+        color: @kibanaGray1; /* 1 */
+
+        .ui-select-placeholder {
+          color: @input-color-placeholder; /* 1 */
+        }
       }
     }
 
@@ -303,7 +307,7 @@
     &.ng-invalid.ng-touched {
       .ui-select-match {
         .btn {
-          border-color: red; /* 2 */
+          border-color: @globalColorRed; /* 2 */
         }
       }
     }

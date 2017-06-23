@@ -9,7 +9,9 @@ export default class UiExports {
   constructor({ urlBasePath }) {
     this.navLinks = new UiNavLinkCollection(this);
     this.apps = new UiAppCollection(this);
-    this.aliases = {};
+    this.aliases = {
+      fieldFormatEditors: ['ui/field_format_editor/register']
+    };
     this.urlBasePath = urlBasePath;
     this.exportConsumer = _.memoize(this.exportConsumer);
     this.consumers = [];
@@ -90,6 +92,7 @@ export default class UiExports {
 
       case 'visTypes':
       case 'fieldFormats':
+      case 'fieldFormatEditors':
       case 'spyModes':
       case 'chromeNavControls':
       case 'navbarExtensions':

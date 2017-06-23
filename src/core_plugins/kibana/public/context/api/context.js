@@ -57,7 +57,7 @@ function fetchContextProvider(courier, Private) {
   }
 
   async function performQuery(searchSource) {
-    const response = await searchSource.fetch();
+    const response = await searchSource.fetchAsRejectablePromise();
 
     return _.get(response, ['hits', 'hits'], []);
   }

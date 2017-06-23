@@ -51,6 +51,11 @@ export {
   KuiGalleryButtonLabel
 } from './gallery';
 
+export {
+  KuiHeaderBar,
+  KuiHeaderBarSection,
+} from './header_bar';
+
 export { KuiInfoButton } from './info_button';
 
 export {
@@ -85,3 +90,7 @@ export {
   KuiMenu,
   KuiMenuItem
 } from './menu';
+
+export {
+  KuiColorPicker
+} from './color_picker';
