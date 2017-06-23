@@ -1,6 +1,7 @@
 import { parse, format } from 'url';
 
 import { prependPath } from './prepend_path';
+import { modifyUrl } from '../../../utils';
 
 /**
  * Represents the pieces that make up a url in Kibana, offering some helpful functionality for
@@ -52,6 +53,10 @@ export class KibanaParsedUrl {
       pathname: parsedUrl.pathname,
       query: query,
     });
+  }
+
+  addQueryParameter(name, val) {
+    this.appPath = modifyUrl(this.appPath, parsed => { parsed.query[name] = val; });
   }
 
   getHashedAppPath() {

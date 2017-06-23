@@ -336,9 +336,8 @@ function VisEditor($rootScope, $scope, $route, timefilter, AppState, $window, kb
 
           const lastDashboardAbsoluteUrl = chrome.getNavLinkById('kibana:dashboard').lastSubUrl;
           const dashboardParsedUrl = absoluteToParsedUrl(lastDashboardAbsoluteUrl, chrome.getBasePath());
-          const appPathWithNewQuery = `${dashboardParsedUrl.appPath}&${DashboardConstants.NEW_VISUALIZATION_ID_PARAM}={{id}}`;
-          kbnUrl.change(appPathWithNewQuery, { id: savedVis.id });
-
+          dashboardParsedUrl.addQueryParameter(DashboardConstants.NEW_VISUALIZATION_ID_PARAM, savedVis.id);
+          kbnUrl.change(dashboardParsedUrl.appPath);
         } else if (savedVis.id === $route.current.params.id) {
           docTitle.change(savedVis.lastSavedTitle);
         } else {
