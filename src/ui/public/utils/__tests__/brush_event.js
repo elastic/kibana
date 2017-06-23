@@ -104,7 +104,7 @@ describe('brushEvent', function () {
           dateEvent.data.xAxisField = dateField;
         }));
 
-        it('by creating a new filter', function () {
+        it('creates a new range filter', function () {
           const event = _.cloneDeep(dateEvent);
           const rangeBegin = JAN_01_2014;
           const rangeEnd = rangeBegin + DAY_IN_MS;
@@ -120,6 +120,26 @@ describe('brushEvent', function () {
            .to.equal(rangeBegin);
           expect($state.$newFilters[0].range.anotherTimeField.lt)
            .to.equal(rangeEnd);
+        });
+
+        it('converts Date fields to milliseconds', function () {
+          const event = _.cloneDeep(dateEvent);
+          const rangeBeginMs = JAN_01_2014;
+          const rangeEndMs = rangeBeginMs + DAY_IN_MS;
+          const rangeBegin = new Date(rangeBeginMs);
+          const rangeEnd = new Date(rangeEndMs);
+          event.range = [rangeBegin, rangeEnd];
+          brushEvent(event);
+          expect($state)
+            .to.have.property('$newFilters');
+          expect($state.filters.length)
+           .to.equal(0);
+          expect($state.$newFilters.length)
+           .to.equal(1);
+          expect($state.$newFilters[0].range.anotherTimeField.gte)
+           .to.equal(rangeBeginMs);
+          expect($state.$newFilters[0].range.anotherTimeField.lt)
+           .to.equal(rangeEndMs);
         });
       });
     });

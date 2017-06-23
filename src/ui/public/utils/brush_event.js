@@ -34,8 +34,15 @@ export function UtilsBrushEventProvider(timefilter) {
           filter.meta && filter.meta.key === event.data.xAxisField.name
         ));
 
-        const min = event.range[0];
-        const max = event.range[event.range.length - 1];
+        let min = event.range[0];
+        let max = event.range[event.range.length - 1];
+        // Convert Dates to MS to avoid ES "parse date field" errors
+        if (min instanceof Date) {
+          min = min.getTime();
+        }
+        if (max instanceof Date) {
+          max = max.getTime();
+        }
         const range = { gte: min, lt: max };
         if (_.has(existingFilter, 'range')) {
           existingFilter.range[event.data.xAxisField.name] = range;
