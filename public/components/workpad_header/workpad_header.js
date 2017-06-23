@@ -1,14 +1,24 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { Toggle } from '../toggle';
-
+import { Popover, OverlayTrigger } from 'react-bootstrap';
+import { PageConfig } from '../page_config';
 import './workpad_header.less';
 
 export const WorkpadHeader = ({ workpadName, editing, toggleEditing }) => {
+  const pageConfigPopover = (
+    <Popover id="popover-trigger-click">
+      <PageConfig/>
+    </Popover>
+  );
+
   return (
-    <div className="canvas__workpad_header--title">
+    <div className="canvas__workpad_header">
       <h2>
         { workpadName }
+        <OverlayTrigger trigger="click" rootClose placement="bottom" overlay={pageConfigPopover}>
+          <i className="fa fa-gear"/>
+        </OverlayTrigger>
         <span className="canvas__workpad_header--editToggle">
           <Toggle value={editing} onChange={toggleEditing} />
         </span>
@@ -19,6 +29,6 @@ export const WorkpadHeader = ({ workpadName, editing, toggleEditing }) => {
 
 WorkpadHeader.propTypes = {
   workpadName: PropTypes.string,
-  editing: PropTypes.boolean,
+  editing: PropTypes.bool,
   toggleEditing: PropTypes.func,
 };

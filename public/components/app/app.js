@@ -5,20 +5,16 @@ import { Sidebar } from '../sidebar';
 import { Toolbar } from '../toolbar';
 
 import { Workpad } from '../workpad';
-import { ToggleEditing } from './toggle_editing';
+import { WorkpadHeader } from '../workpad_header';
+
 
 import './app.less';
 
-export const App = ({ editing, toggleEditing }) => (
+export const App = ({ editing }) => (
   <div className="canvas">
     <div className="canvas__main">
       <div className="canvas__app--workspace">
-        <div className="canvas__app--title">
-          <h2>
-            Canvas
-            <ToggleEditing value={editing} toggle={toggleEditing} />
-          </h2>
-        </div>
+        <WorkpadHeader />
         <div className="canvas__app--workpad">
           <Workpad />
         </div>
@@ -38,5 +34,4 @@ export const App = ({ editing, toggleEditing }) => (
 
 App.propTypes = {
   editing: PropTypes.bool,
-  toggleEditing: PropTypes.func,
 };
