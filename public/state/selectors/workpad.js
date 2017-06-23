@@ -1,4 +1,4 @@
-import { get, find } from 'lodash';
+import { get, find, findIndex } from 'lodash';
 import { fromExpression } from '../../../common/lib/ast';
 
 // page getters
@@ -18,6 +18,14 @@ export function getPages(state) {
 
 export function getPageById(state, id) {
   return find(getPages(state), { id });
+}
+
+export function getPageIndexById(state, id) {
+  return findIndex(getPages(state), { id });
+}
+
+export function getWorkpadName(state) {
+  return get(state, 'persistent.workpad.name');
 }
 
 // element getters

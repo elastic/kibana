@@ -26,7 +26,7 @@ export const getDefaultPage = () => {
   return {
     id: getID('page'),
     style: {
-      backgroundColor: '#fff',
+      background: '#fff',
     },
     elements: [],
   };

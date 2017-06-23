@@ -1,4 +1,5 @@
 import { push, set } from 'object-path-immutable';
+import { findIndex } from 'lodash';
 import { getDefaultPage } from '../defaults';
 
 
@@ -18,7 +19,11 @@ export default function pagesReducer(workpadState = {}, { type, payload }) {
 
   if (type === 'previousPage') {
     return setPageIndex(workpadState.page - 1);
+  }
 
+  if (type === 'stylePage') {
+    const pageIndex = findIndex(workpadState.pages, { id: payload.pageId });
+    return set(workpadState, ['pages', pageIndex, 'style'], payload.style);
   }
 
   return workpadState;
