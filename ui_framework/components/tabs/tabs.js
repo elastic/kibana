@@ -57,5 +57,5 @@ KuiTabs.propTypes = {
   children: PropTypes.node,
   selectedTabIndex: selectedTabIndexCheck,
   onSelectedTabChanged: PropTypes.func.isRequired,
-  className: React.PropTypes.string
+  className: PropTypes.string
 };

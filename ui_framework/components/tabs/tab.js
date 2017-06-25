@@ -22,5 +22,5 @@ KuiTab.propTypes = {
   isSelected: PropTypes.bool,
   onClick: PropTypes.func,
   children: PropTypes.node,
-  className: React.PropTypes.string
+  className: PropTypes.string
 };
