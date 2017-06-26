@@ -51,7 +51,7 @@ export default function ({ getService }) {
           ])
           .expect(200)
           .then((response) => {
-            expect(get(response, 'body.saved_objects').length).to.be(0)
+            expect(get(response, 'body.saved_objects').length).to.be(0);
           });
       });
 
@@ -63,7 +63,7 @@ export default function ({ getService }) {
               type: 'config'
             }
           ])
-          .expect(400)
+          .expect(400);
       });
 
       it('should should error id is missing', () => {
@@ -74,7 +74,7 @@ export default function ({ getService }) {
               id: 'foo'
             }
           ])
-          .expect(400)
+          .expect(400);
       });
 
     }

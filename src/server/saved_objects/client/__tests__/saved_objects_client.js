@@ -208,7 +208,9 @@ describe('SavedObjectsClient', () => {
 
   describe('#delete', () => {
     it('throws notFound when ES is unable to find the document', (done) => {
-      callAdminCluster.returns(Promise.resolve({ found: false }));
+      callAdminCluster.returns(Promise.resolve({
+        deleted: 0
+      }));
 
       savedObjectsClient.delete('index-pattern', 'logstash-*').then(() => {
         done('failed');
