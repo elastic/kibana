@@ -1,10 +1,10 @@
 import _ from 'lodash';
 import ngMock from 'ng_mock';
 import expect from 'expect.js';
-import sinon from 'auto-release-sinon';
+import sinon from 'sinon';
 import { AggResponseTabifyTableProvider } from 'ui/agg_response/tabify/_table';
 import { AggResponseIndexProvider } from 'ui/agg_response/index';
-import { VislibVisTypeBuildChartDataProvider } from 'ui/vislib_vis_type/build_chart_data';
+import { BasicResponseHandlerProvider } from 'ui/vis//response_handlers/basic';
 
 describe('renderbot#buildChartData', function () {
   let buildChartData;
@@ -15,7 +15,7 @@ describe('renderbot#buildChartData', function () {
   beforeEach(ngMock.inject(function (Private) {
     Table = Private(AggResponseTabifyTableProvider);
     aggResponse = Private(AggResponseIndexProvider);
-    buildChartData = Private(VislibVisTypeBuildChartDataProvider);
+    buildChartData = Private(BasicResponseHandlerProvider).handler;
   }));
 
   describe('for hierarchical vis', function () {
