@@ -151,7 +151,7 @@ describe('chrome nav apis', function () {
 
       const kibanaParsedUrl = new KibanaParsedUrl({ basePath, appId, appPath, host, protocol });
       chrome.trackSubUrlForApp('kibana:visualize', kibanaParsedUrl);
-      expect(internals.nav[0].lastSubUrl).to.be('https://localhost:9200/app/kibana#visualize/1234?_g=globalstate');
+      expect(internals.nav[0].lastSubUrl).to.be('https://localhost:9200/xyz/app/kibana#visualize/1234?_g=globalstate');
     });
   });
 });

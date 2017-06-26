@@ -1,4 +1,4 @@
-import { parse, format } from 'url';
+import { parse } from 'url';
 
 import { prependPath } from './prepend_path';
 import { modifyUrl } from '../../../utils';
@@ -30,7 +30,7 @@ export class KibanaParsedUrl {
   constructor({ appId, basePath = '', appPath, host, protocol }) {
     this.basePath = basePath;
     this.appId = appId;
-    this.appPath = appPath;
+    this.appPath = appPath || '';
     this.host = host;
     this.protocol = protocol;
   }
@@ -41,17 +41,15 @@ export class KibanaParsedUrl {
     }
     const parsedUrl = parse(this.appPath, true);
     const query = parsedUrl.query || {};
-    return query._g;
+    return query._g || '';
   }
 
   setGlobalState(newGlobalState) {
-    const parsedUrl = parse(this.appPath, true);
-    const query = parsedUrl.query || {};
-    query._g = newGlobalState;
+    if (!this.appPath) { return; }
 
-    this.appPath = format({
-      pathname: parsedUrl.pathname,
-      query: query,
+    this.appPath = modifyUrl(this.appPath, parsed => {
+      parsed.query = parsed.query || {};
+      parsed.query._g = newGlobalState;
     });
   }
 
@@ -76,13 +74,9 @@ export class KibanaParsedUrl {
   }
 
   getAbsoluteUrl() {
-    const parsedUrl = parse(this.getRootRelativePath());
-    return format({
-      protocol: this.protocol,
-      host: this.host,
-      pathname: parsedUrl.pathname,
-      query: parsedUrl.query,
-      hash: parsedUrl.hash,
+    return modifyUrl(this.getRootRelativePath(), parsed => {
+      parsed.protocol = this.protocol;
+      parsed.host = this.host;
     });
   }
 }
