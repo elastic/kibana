@@ -1,4 +1,5 @@
 import _ from 'lodash';
+import { asPrettyString } from 'ui/utils/as_pretty_string';
 import { DEFAULT_COLOR } from './color_default';
 import { FieldFormat } from 'ui/index_patterns/_field_format/field_format';
 
@@ -47,7 +48,7 @@ export function stringifyColor() {
   _Color.prototype._convert = {
     html(val) {
       const color = this.findColorRuleForVal(val);
-      if (!color) return _.asPrettyString(val);
+      if (!color) return asPrettyString(val);
 
       let style = '';
       if (color.text) style += `color: ${color.text};`;

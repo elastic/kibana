@@ -1,5 +1,5 @@
+import { asPrettyString } from 'ui/utils/as_pretty_string';
 import { FieldFormat } from 'ui/index_patterns/_field_format/field_format';
-import _ from 'lodash';
 
 export function stringifyBoolean() {
 
@@ -27,7 +27,7 @@ export function stringifyBoolean() {
         case 'yes':
           return 'true';
         default:
-          return _.asPrettyString(value);
+          return asPrettyString(value);
       }
     }
   }

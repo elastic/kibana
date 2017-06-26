@@ -1,4 +1,5 @@
 import _ from 'lodash';
+import { asPrettyString } from 'ui/utils/as_pretty_string';
 import { FieldFormat } from 'ui/index_patterns/_field_format/field_format';
 
 export function stringifyString() {
@@ -33,7 +34,7 @@ export function stringifyString() {
     try {
       return window.atob(val);
     } catch (e) {
-      return _.asPrettyString(val);
+      return asPrettyString(val);
     }
   };
 
@@ -48,7 +49,7 @@ export function stringifyString() {
       case 'title': return this._toTitleCase(val);
       case 'short': return _.shortenDottedString(val);
       case 'base64': return this._base64Decode(val);
-      default: return _.asPrettyString(val);
+      default: return asPrettyString(val);
     }
   };
 

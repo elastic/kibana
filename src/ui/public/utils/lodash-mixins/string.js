@@ -5,20 +5,6 @@ export function lodashStringMixin(_) {
   _.mixin({
 
     /**
-     * Convert a value to a presentable string
-     * @param  {any} val - the value to transform
-     * @return {string}
-     */
-    asPrettyString: function (val) {
-      if (val === null || val === undefined) return ' - ';
-      switch (typeof val) {
-        case 'string': return val;
-        case 'object': return JSON.stringify(val, null, '  ');
-        default: return '' + val;
-      }
-    },
-
-    /**
      * Convert a dot.notated.string into a short
      * version (d.n.string)
      *
