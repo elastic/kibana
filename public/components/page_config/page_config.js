@@ -1,12 +1,13 @@
 import React from 'react';
 import PropTypes from 'prop-types';
+import { ColorPicker } from '../color_picker';
 
 export const PageConfig = ({ setBackground, background }) => {
 
   return (
     <div className="canvas__page_config">
       <h5>Page Settings</h5>
-      <a onClick={() => setBackground('#000')}>{ background }</a>
+      <ColorPicker onChange={setBackground} value={background}/>
     </div>
   );
 };
