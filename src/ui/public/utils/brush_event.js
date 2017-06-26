@@ -9,10 +9,13 @@ export function UtilsBrushEventProvider(timefilter) {
         return;
       }
 
-      if (event.data.xAxisField.type === 'date' &&
+      const isDate = event.data.xAxisField.type === 'date';
+      const isNumber = event.data.xAxisField.type === 'number';
+
+      if (isDate &&
         event.data.xAxisField.name === event.data.indexPattern.timeFieldName) {
         setTimefilter();
-      } else if (event.data.xAxisField.type === 'date' || event.data.xAxisField.type === 'number') {
+      } else if (isDate || isNumber) {
         setRange();
       }
 
@@ -34,16 +37,22 @@ export function UtilsBrushEventProvider(timefilter) {
           filter.meta && filter.meta.key === event.data.xAxisField.name
         ));
 
-        let min = event.range[0];
-        let max = event.range[event.range.length - 1];
-        // Convert Dates to MS to avoid ES "parse date field" errors
-        if (min instanceof Date) {
-          min = min.getTime();
+        const min = event.range[0];
+        const max = event.range[event.range.length - 1];
+        let range;
+        if (isDate) {
+          range = {
+            gte: moment(min).valueOf(),
+            lt: moment(max).valueOf(),
+            format: 'epoch_millis'
+          };
+        } else {
+          range = {
+            gte: min,
+            lt: max
+          };
         }
-        if (max instanceof Date) {
-          max = max.getTime();
-        }
-        const range = { gte: min, lt: max };
+
         if (_.has(existingFilter, 'range')) {
           existingFilter.range[event.data.xAxisField.name] = range;
         } else if (_.has(existingFilter, 'script.script.params.gte')

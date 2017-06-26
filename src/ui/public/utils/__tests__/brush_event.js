@@ -120,6 +120,9 @@ describe('brushEvent', function () {
            .to.equal(rangeBegin);
           expect($state.$newFilters[0].range.anotherTimeField.lt)
            .to.equal(rangeEnd);
+          expect($state.$newFilters[0].range.anotherTimeField).to.have.property('format');
+          expect($state.$newFilters[0].range.anotherTimeField.format)
+           .to.equal('epoch_millis');
         });
 
         it('converts Date fields to milliseconds', function () {
@@ -178,6 +181,7 @@ describe('brushEvent', function () {
          .to.equal(1);
         expect($state.$newFilters[0].range.numberField.lt)
          .to.equal(4);
+        expect($state.$newFilters[0].range.numberField).not.to.have.property('format');
       });
 
       it('by updating the existing range filter', function () {
