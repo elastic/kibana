@@ -134,7 +134,7 @@ uiModules
         const range = numberListCntr.range;
         if (!range.within(num)) return INVALID;
 
-        if ($scope.$index > 0) {
+        if (numberListCntr.validateOrder && $scope.$index > 0) {
           const i = $scope.$index - 1;
           const list = numberListCntr.getList();
           const prev = list[i];

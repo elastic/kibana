@@ -26,6 +26,7 @@ uiModules
         self.getUnitName = _.partial($parse($attrs.unit), $scope);
 
         const defaultRange = self.range = parseRange('[0,Infinity)');
+        self.validateOrder = $attrs.validateOrder ? $parse($attrs.validateOrder)($scope) : true;
 
         $scope.$watch(function () {
           return $attrs.range;
