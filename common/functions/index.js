@@ -11,4 +11,5 @@ export const commonFunctions = [
   require('./pointseries/pointseries'),
   require('./replace/replace'),
   require('./droprows/droprows'),
+  require('./image/image'),
 ];

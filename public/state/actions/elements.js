@@ -59,13 +59,13 @@ export const fetchRenderable = (elementId, pageId) => (dispatch, getState) => {
     path: argumentPath,
   }));
 
-  function run(ast, context) {
+  function run(ast, context, retry = false) {
     return interpretAst(ast, context)
     .then((renderable) => {
       if (getType(renderable) === 'render') {
         return renderable;
-      } else if (!context) {
-        return run(fromExpression('render()'), renderable);
+      } else if (!context && !retry) {
+        return run(fromExpression('render()'), renderable, true);
       }
 
       return new Error(`Ack! I don't know how to render a '${getType(renderable)}'`);

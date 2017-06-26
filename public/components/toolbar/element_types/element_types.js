@@ -6,7 +6,7 @@ import { map } from 'lodash';
 
 export const ElementTypes = ({ elements, onClick }) => {
   const elementList = map(elements, (val, name) => {
-    const whenClicked = () => onClick(name);
+    const whenClicked = () => onClick(elements[name].expression);
     return (<Button key={name} onClick={whenClicked}>{name}</Button>);
   });
 

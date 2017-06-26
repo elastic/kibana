@@ -1,8 +1,11 @@
 import { connect } from 'react-redux';
+import { get } from 'lodash';
 import { ElementWrapper as Component } from './element_wrapper';
 import { fetchRenderable, removeElement } from '../../state/actions/elements';
 import { selectElement } from '../../state/actions/transient';
 import { getSelectedElementId, getResolvedArgs, getSelectedPage } from '../../state/selectors/workpad';
+import { getState, getValue } from '../../lib/resolved_arg';
+import { elements as elementsRegistry } from '../../lib/elements';
 
 const mapStateToProps = (state, { element }) => ({
   renderable: getResolvedArgs(state, element.id, 'expressionRenderable'),
@@ -23,8 +26,13 @@ const mapDispatchToProps = (dispatch, { element }) => ({
 });
 
 const mergeProps = (stateProps, dispatchProps, ownProps) => {
+  const renderableValue = getValue(stateProps.renderable);
+
   return Object.assign({}, stateProps, dispatchProps, ownProps, {
     removeElement: dispatchProps.removeElementFromPage(stateProps.selectedPage),
+    renderableValue,
+    renderableState: getState(stateProps.renderable),
+    renderableElement: elementsRegistry.get(get(renderableValue, 'as')),
   });
 };
 

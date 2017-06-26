@@ -3,4 +3,6 @@ export const typeSpecs = [
   require('./pointseries'),
   require('./number'),
   require('./string'),
+  require('./dataurl'),
+  require('./image'),
 ];

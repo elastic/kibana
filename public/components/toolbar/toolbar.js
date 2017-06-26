@@ -16,16 +16,10 @@ export const Toolbar = ({ editing, tray, setTray, addElement, addPage, previousP
     setTray(exp);
   };
 
-  const createElement = (name) => {
-    const table = 'demodata().pointseries(y="median(cost)", x=time, color="project")';
+  const createElement = (expression) => {
+    addElement(expression);
 
-    if (name === 'table') {
-      addElement(table);
-    } else {
-      addElement(`${table}.plot(defaultStyle=seriesStyle(bars=0, lines=1, weight=0, points=0))`);
-    }
-
-    // clonse the tray
+    // close the tray
     done();
   };
 
