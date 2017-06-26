@@ -31,8 +31,11 @@ export function GaugeChartProvider(Private) {
       return function (selection) {
         selection.each(function (data) {
           const div = d3.select(this);
-          const width = verticalSplit ? $(this).width() : $(this).width() / data.series.length;
-          const height = (verticalSplit ? $(this).height() / data.series.length : $(this).height()) - 25;
+          const containerMargin = 5;
+          const containerWidth = $(this).width() - containerMargin;
+          const containerHeight = $(this).height() - containerMargin;
+          const width = Math.floor(verticalSplit ? $(this).width() : containerWidth / data.series.length);
+          const height = Math.floor((verticalSplit ? containerHeight / data.series.length : $(this).height()) - 25);
           const transformX = width / 2;
           const transformY = self.gaugeConfig.gaugeType === 'Meter' ? height / 1.5 : height / 2;
 
