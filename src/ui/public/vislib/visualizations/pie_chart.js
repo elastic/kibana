@@ -251,37 +251,25 @@ export function VislibVisualizationsPieChartProvider(Private) {
             };
 
             const conflicts = [];
-            do {
-              conflicts.length = 0;
-              labelLayout.visit(function (node) {
-                if (!node.point) return;
+            labelLayout.visit(function (node) {
+              if (!node.point) return;
 
-                const point = node.point.label;
-                if (point) {
-                  const horizontalConflict = (point.l < 0 && d.label.l < 0) || (point.l > 0 && d.label.l > 0);
+              const point = node.point.label;
+              if (point) {
+                const horizontalConflict = (point.l < 0 && d.label.l < 0) || (point.l > 0 && d.label.l > 0);
 
-                  const verticalConflict = (((point.t > d.label.t) && (point.t <= d.label.b))
-                  || ((point.b > d.label.t) && (point.b <= d.label.b))
-                  || ((point.t < d.label.t) && (point.b >= d.label.b)));
+                const verticalConflict = (((point.t > d.label.t) && (point.t <= d.label.b))
+                || ((point.b > d.label.t) && (point.b <= d.label.b))
+                || ((point.t < d.label.t) && (point.b >= d.label.b)));
 
-                  if (horizontalConflict && verticalConflict) {
-                    point.point = node.point;
-                    conflicts.push(point);
-                  }
+                if (horizontalConflict && verticalConflict) {
+                  point.point = node.point;
+                  conflicts.push(point);
                 }
-              });
-
-              if (conflicts.length) {
-                parentElement.remove();
-                return;
               }
-            } while (conflicts.length);
+            });
 
-            lastLabelPosition[d.depth] = d.label.y;
-
-            if (svgBBox.width / 2 < Math.max(Math.abs(d.label.l), Math.abs(d.label.r))
-              || svgBBox.height / 2 < Math.max(Math.abs(d.label.t), Math.abs(d.label.b))) {
-              delete d.label;
+            if (conflicts.length) {
               parentElement.remove();
               return;
             }
