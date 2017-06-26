@@ -14,6 +14,6 @@ export const Workpad = ({ elements, deselectElement, style }) => {
 
 Workpad.propTypes = {
   elements: PropTypes.array,
-  style: PropTypes.string,
+  style: PropTypes.object,
   deselectElement: PropTypes.func,
 };
