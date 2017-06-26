@@ -43,7 +43,7 @@ describe('Saved Object', function () {
    * that can be used to stub es calls.
    * @param indexPatternId
    * @param additionalOptions - object that will be assigned to the mocked doc response.
-   * @returns {{_attributes: {}, type: string, id: *, _version: integer}}
+   * @returns {{attributes: {}, type: string, id: *, _version: integer}}
    */
   function getMockedDocResponse(indexPatternId, additionalOptions = {}) {
     return Object.assign(
@@ -51,7 +51,7 @@ describe('Saved Object', function () {
         type: 'dashboard',
         id: indexPatternId,
         _version: 2,
-        _attributes: {}
+        attributes: {}
       },
       additionalOptions);
   }
@@ -373,7 +373,7 @@ describe('Saved Object', function () {
 
       const mockDocResponse = getMockedDocResponse(
         id,
-        { _attributes: { dinosaurs: { tRex: 'is not so bad' }, } });
+        { attributes: { dinosaurs: { tRex: 'is not so bad' }, } });
       stubESResponse(mockDocResponse);
 
       const savedObject = new SavedObject(config);
@@ -556,7 +556,7 @@ describe('Saved Object', function () {
 
         const mockDocResponse = getMockedDocResponse(
           myId,
-          { _attributes: { overwriteMe: serverValue } });
+          { attributes: { overwriteMe: serverValue } });
 
         stubESResponse(mockDocResponse);
 

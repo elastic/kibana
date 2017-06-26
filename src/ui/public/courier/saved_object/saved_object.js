@@ -189,7 +189,7 @@ export function SavedObjectProvider(esAdmin, kbnIndex, Promise, Private, Notifie
               return {
                 _id: resp.id,
                 _type: resp.type,
-                _source: _.cloneDeep(resp._attributes),
+                _source: _.cloneDeep(resp.attributes),
                 found: resp._version ? true : false
               };
             })

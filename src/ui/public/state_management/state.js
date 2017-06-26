@@ -174,7 +174,7 @@ export function StateProvider(Private, $rootScope, $location, config, kbnUrl) {
    */
   State.prototype.reset = function () {
     kbnUrl.removeParam(this.getQueryParamName());
-    // apply diff to _attributes from defaults, this is side effecting so
+    // apply diff to attributes from defaults, this is side effecting so
     // it will change the state in place.
     const diffResults = applyDiff(this, this._defaults);
     if (diffResults.keys.length) {

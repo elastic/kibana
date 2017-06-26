@@ -5,27 +5,27 @@ export class SavedObject {
     this._client = client;
     this.id = id;
     this.type = type;
-    this._attributes = attributes || {};
+    this.attributes = attributes || {};
     this._version = version;
   }
 
   get(key) {
-    return _.get(this._attributes, key);
+    return _.get(this.attributes, key);
   }
 
   set(key, value) {
-    return _.set(this._attributes, key, value);
+    return _.set(this.attributes, key, value);
   }
 
   has(key) {
-    return _.has(this._attributes, key);
+    return _.has(this.attributes, key);
   }
 
   save() {
     if (this.id) {
-      return this._client.update(this.type, this.id, this._attributes);
+      return this._client.update(this.type, this.id, this.attributes);
     } else {
-      return this._client.create(this.type, this._attributes);
+      return this._client.create(this.type, this.attributes);
     }
   }
 

@@ -148,7 +148,7 @@ uiModules.get('apps/management')
               return {
                 _id: obj.id,
                 _type: obj.type,
-                _source: obj._attributes
+                _source: obj.attributes
               };
             }));
           });
