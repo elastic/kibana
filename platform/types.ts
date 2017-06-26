@@ -60,7 +60,7 @@ export declare class As<S extends string> {
 }
 
 // TODO inline all of these
-import * as schema from './lib/schema';
+import * as schemaLib from './lib/schema';
 import { ConfigService, Env } from './config';
 import { Router, RouterOptions, HttpModule } from './server/http';
 import { KibanaConfig, KibanaModule } from './server/kibana';
@@ -73,7 +73,7 @@ import { LoggerFactory } from './logger';
 
 export type ElasticsearchClusterType = 'data' | 'admin';
 
-export type Schema = typeof schema;
+export type Schema = typeof schemaLib;
 
 // TODO
 // This _can't_ be part of the types, as it has to be available at runtime.
@@ -82,9 +82,9 @@ export type Schema = typeof schema;
 // this at the type level:
 // https://github.com/Microsoft/TypeScript/issues/6606
 // https://github.com/Microsoft/TypeScript/issues/14400
-export function typeOfSchema<RT extends schema.Any>(
+export function typeOfSchema<RT extends schemaLib.Any>(
   fn: (...rest: any[]) => RT
-): schema.TypeOf<RT> {
+): schemaLib.TypeOf<RT> {
   return undefined;
 }
 
@@ -97,10 +97,21 @@ export interface KibanaCoreModules {
 }
 
 export interface KibanaPluginFeatures {
+  /**
+   * Plugin-scoped logger
+   */
   logger: LoggerFactory;
+
+  /**
+   * Core Kibana utilities
+   */
   util: {
     schema: Schema;
   };
+
+  /**
+   * Core Elasticsearch functionality
+   */
   elasticsearch: {
     service: ElasticsearchService;
     config$: Observable<ElasticsearchConfigs>;
@@ -108,27 +119,70 @@ export interface KibanaPluginFeatures {
   kibana: {
     config$: Observable<KibanaConfig>;
   };
+
+  /**
+   * Core HTTP functionality
+   */
   http: {
+    /**
+     * Create and register a router at the specified path.
+     *
+     * The return value of the `onRequest` router option will be injected as the
+     * first param in any route handler registered on the router.
+     */
     createAndRegisterRouter: <T>(
       path: string,
       options: RouterOptions<T>
     ) => Router<T>;
   };
+
+  /**
+   * Core configuration functionality, enables fetching a subset of the config.
+   */
   config: {
-    atPath: <Schema extends schema.Any, Config>(
+    /**
+     * Reads the subset of the config at the specified `path` and validates it
+     * against the schema created by calling the static `createSchema` on the
+     * specified `ConfigClass`.
+     *
+     * @param path The path to the desired subset of the config.
+     * @param ConfigClass A class (not an instance of a class) that contains a
+     * static `createSchema` that will be called to create a schema that we
+     * validate the config at the given `path` against.
+     */
+    atPath: <Schema extends schemaLib.Any, Config>(
       path: string | string[],
       ConfigClass: ConfigWithSchema<Schema, Config>
     ) => Observable<Config>;
-    optionalAtPath: <Schema extends schema.Any, Config>(
+    optionalAtPath: <Schema extends schemaLib.Any, Config>(
       path: string | string[],
       ConfigClass: ConfigWithSchema<Schema, Config>
     ) => Observable<Config | undefined>;
   };
 }
 
-export interface ConfigWithSchema<Schema extends schema.Any, Config> {
-  createSchema: (s: typeof schema) => Schema;
+/**
+ * Interface that defines the static side of a config class.
+ *
+ * (Remember that a class has two types: the type of the static side and the
+ * type of the instance side, see https://www.typescriptlang.org/docs/handbook/interfaces.html#difference-between-the-static-and-instance-sides-of-classes)
+ *
+ * This can't be used to define the config class because of how interfaces work
+ * in TypeScript, but it can be used to ensure we have a config class that
+ * matches whenever it's used.
+ */
+export interface ConfigWithSchema<S extends schemaLib.Any, Config> {
+  /**
+   * Any config class must define a schema that validates the config, based on
+   * the injected `schema` helper.
+   */
+  createSchema: (schema: Schema) => S;
 
-  // require that the constructor matches the schema
-  new (val: schema.TypeOf<Schema>, env: Env): Config;
+  /**
+   * @param validatedConfig The result from calling the static `createSchema`
+   * above. This config is validated before the config class is instantiated.
+   * @param env An instance of the `Env` class that defines environment specific
+   * variables.
+   */
+  new (validatedConfig: schemaLib.TypeOf<S>, env: Env): Config;
 }

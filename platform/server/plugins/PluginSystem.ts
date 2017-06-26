@@ -14,6 +14,9 @@ function toSortable(plugins: Map<PluginName, Plugin<any, any>>) {
   return new Map(dependenciesByPlugin);
 }
 
+/**
+ * Sorts plugins in topological order based on dependencies
+ */
 function getSortedPluginNames(plugins: Map<PluginName, Plugin<any, any>>) {
   const sorted = topologicalSort(toSortable(plugins));
   return [...sorted];
