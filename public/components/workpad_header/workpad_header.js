@@ -3,12 +3,18 @@ import PropTypes from 'prop-types';
 import { Toggle } from '../toggle';
 import { Popover, OverlayTrigger } from 'react-bootstrap';
 import { PageConfig } from '../page_config';
+import { WorkpadConfig } from '../workpad_config';
+
 import './workpad_header.less';
 
 export const WorkpadHeader = ({ workpadName, editing, toggleEditing }) => {
   const pageConfigPopover = (
     <Popover id="popover-trigger-click">
-      <PageConfig/>
+      <div className="canvas">
+        <PageConfig/>
+
+        <WorkpadConfig/>
+      </div>
     </Popover>
   );
 
