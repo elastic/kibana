@@ -4,9 +4,9 @@ import { ElementWrapper } from '../element_wrapper';
 
 import './workpad.less';
 
-export const Workpad = ({ elements, deselectElement }) => {
+export const Workpad = ({ elements, deselectElement, style }) => {
   return (
-    <div className="canvas__workpad" onClick={deselectElement}>
+    <div className="canvas__workpad" onClick={deselectElement} style={style}>
       { elements.map(element => (<ElementWrapper key={element.id} element={element} />)) }
     </div>
   );
@@ -14,5 +14,6 @@ export const Workpad = ({ elements, deselectElement }) => {
 
 Workpad.propTypes = {
   elements: PropTypes.array,
+  style: PropTypes.string,
   deselectElement: PropTypes.func,
 };
