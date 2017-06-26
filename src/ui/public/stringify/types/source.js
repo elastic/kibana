@@ -7,18 +7,19 @@ import { shortenDottedString } from 'ui/utils/shorten_dotted_string';
 export function stringifySource() {
   const template = _.template(noWhiteSpace(require('ui/stringify/types/_source.html')));
 
-  _.class(Source).inherits(FieldFormat);
-  function Source(params, getConfig) {
-    Source.Super.call(this, params);
+  class SourceFormat extends FieldFormat {
+    constructor(params, getConfig) {
+      super(params);
 
-    this.getConfig = getConfig;
+      this.getConfig = getConfig;
+    }
   }
 
-  Source.id = '_source';
-  Source.title = '_source';
-  Source.fieldType = '_source';
+  SourceFormat.id = '_source';
+  SourceFormat.title = '_source';
+  SourceFormat.fieldType = '_source';
 
-  Source.prototype._convert = {
+  SourceFormat.prototype._convert = {
     text: (value) => toJson(value),
     html: function sourceToHtml(source, field, hit) {
       if (!field) return this.getConverterFor('text')(source, field, hit);
@@ -40,5 +41,5 @@ export function stringifySource() {
     }
   };
 
-  return Source;
+  return SourceFormat;
 }

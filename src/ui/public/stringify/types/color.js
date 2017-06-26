@@ -7,45 +7,46 @@ export function stringifyColor() {
 
   const convertTemplate = _.template('<span style="<%- style %>"><%- val %></span>');
 
-  _.class(_Color).inherits(FieldFormat);
-  function _Color(params) {
-    _Color.Super.call(this, params);
+  class ColorFormat extends FieldFormat {
+    constructor(params) {
+      super(params);
+    }
+
+    getParamDefaults() {
+      return {
+        fieldType: null, // populated by editor, see controller below
+        colors: [_.cloneDeep(DEFAULT_COLOR)]
+      };
+    }
+
+    findColorRuleForVal(val) {
+      switch (this.param('fieldType')) {
+        case 'string':
+          return _.findLast(this.param('colors'), (colorParam) => {
+            return new RegExp(colorParam.regex).test(val);
+          });
+
+        case 'number':
+          return _.findLast(this.param('colors'), ({ range }) => {
+            if (!range) return;
+            const [start, end] = range.split(':');
+            return val >= Number(start) && val <= Number(end);
+          });
+
+        default:
+          return null;
+      }
+    }
   }
 
-  _Color.id = 'color';
-  _Color.title = 'Color';
-  _Color.fieldType = [
+  ColorFormat.id = 'color';
+  ColorFormat.title = 'Color';
+  ColorFormat.fieldType = [
     'number',
     'string'
   ];
 
-  _Color.prototype.getParamDefaults = function () {
-    return {
-      fieldType: null, // populated by editor, see controller below
-      colors: [_.cloneDeep(DEFAULT_COLOR)]
-    };
-  };
-
-  _Color.prototype.findColorRuleForVal = function (val) {
-    switch (this.param('fieldType')) {
-      case 'string':
-        return _.findLast(this.param('colors'), (colorParam) => {
-          return new RegExp(colorParam.regex).test(val);
-        });
-
-      case 'number':
-        return _.findLast(this.param('colors'), ({ range }) => {
-          if (!range) return;
-          const [start, end] = range.split(':');
-          return val >= Number(start) && val <= Number(end);
-        });
-
-      default:
-        return null;
-    }
-  };
-
-  _Color.prototype._convert = {
+  ColorFormat.prototype._convert = {
     html(val) {
       const color = this.findColorRuleForVal(val);
       if (!color) return asPrettyString(val);
@@ -57,6 +58,5 @@ export function stringifyColor() {
     }
   };
 
-
-  return _Color;
+  return ColorFormat;
 }

@@ -5,27 +5,27 @@ import { FieldFormat } from 'ui/index_patterns/_field_format/field_format';
 export function stringifyTruncate() {
   const omission = '...';
 
-  _.class(Truncate).inherits(FieldFormat);
-
-  function Truncate(params) {
-    Truncate.Super.call(this, params);
-  }
-
-  Truncate.id = 'truncate';
-  Truncate.title = 'Truncated String';
-  Truncate.fieldType = ['string'];
-
-  Truncate.prototype._convert = function (val) {
-    const length = this.param('fieldLength');
-    if (length > 0) {
-      return _.trunc(val, {
-        'length': length + omission.length,
-        'omission': omission
-      });
+  class TruncateFormat extends FieldFormat {
+    constructor(params) {
+      super(params);
     }
 
-    return val;
-  };
+    _convert(val) {
+      const length = this.param('fieldLength');
+      if (length > 0) {
+        return _.trunc(val, {
+          'length': length + omission.length,
+          'omission': omission
+        });
+      }
 
-  return Truncate;
+      return val;
+    }
+  }
+
+  TruncateFormat.id = 'truncate';
+  TruncateFormat.title = 'Truncated String';
+  TruncateFormat.fieldType = ['string'];
+
+  return TruncateFormat;
 }
