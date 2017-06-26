@@ -1,19 +1,5 @@
 export function lodashStringMixin(_) {
-
-  const DOT_PREFIX_RE = /(.).+?\./g;
-
   _.mixin({
-
-    /**
-     * Convert a dot.notated.string into a short
-     * version (d.n.string)
-     *
-     * @param {string} str - the long string to convert
-     * @return {string}
-     */
-    shortenDottedString: function (input) {
-      return typeof input !== 'string' ? input : input.replace(DOT_PREFIX_RE, '$1.');
-    },
 
     /**
      * Parse a comma-seperated list into an array

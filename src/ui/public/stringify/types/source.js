@@ -2,6 +2,7 @@ import _ from 'lodash';
 import { noWhiteSpace } from 'ui/utils/no_white_space';
 import { toJson } from 'ui/utils/aggressive_parse';
 import { FieldFormat } from 'ui/index_patterns/_field_format/field_format';
+import { shortenDottedString } from 'ui/utils/shorten_dotted_string';
 
 export function stringifySource() {
   const template = _.template(noWhiteSpace(require('ui/stringify/types/_source.html')));
@@ -30,7 +31,7 @@ export function stringifySource() {
       const isShortDots = this.getConfig('shortDots:enable');
       _.keys(formatted).forEach((key) => {
         const pairs = highlights[key] ? highlightPairs : sourcePairs;
-        const field = isShortDots ? _.shortenDottedString(key) : key;
+        const field = isShortDots ? shortenDottedString(key) : key;
         const val = formatted[key];
         pairs.push([field, val]);
       }, []);
