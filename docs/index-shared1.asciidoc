@@ -43,8 +43,6 @@ The following attributes are synchronized across multiple books
 :dfeed-cap:       Datafeed
 :dfeeds-cap:      Datafeeds
 
-include::{docdir}/../../../docs/sharedattributes.asciidoc[]
-
 include::introduction.asciidoc[]
 
 include::setup.asciidoc[]
