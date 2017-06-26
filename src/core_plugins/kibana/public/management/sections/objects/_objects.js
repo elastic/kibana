@@ -5,6 +5,7 @@ import { savedObjectManagementRegistry } from 'plugins/kibana/management/saved_o
 import objectIndexHTML from 'plugins/kibana/management/sections/objects/_objects.html';
 import 'ui/directives/file_upload';
 import uiRoutes from 'ui/routes';
+import { SavedObjectsClientProvider } from 'ui/saved_objects';
 import { uiModules } from 'ui/modules';
 
 uiRoutes
@@ -18,7 +19,9 @@ uiRoutes
 });
 
 uiModules.get('apps/management')
-.directive('kbnManagementObjects', function (kbnIndex, Notifier, Private, kbnUrl, Promise, confirmModal, savedObjectsClient) {
+.directive('kbnManagementObjects', function (kbnIndex, Notifier, Private, kbnUrl, Promise, confirmModal) {
+  const savedObjectsClient = Private(SavedObjectsClientProvider);
+
   return {
     restrict: 'E',
     controllerAs: 'managementObjectsController',

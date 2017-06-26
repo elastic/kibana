@@ -5,6 +5,7 @@ import BluebirdPromise from 'bluebird';
 
 import { SavedObjectProvider } from '../saved_object/saved_object';
 import { IndexPatternProvider } from 'ui/index_patterns/_index_pattern';
+import { SavedObjectsClientProvider } from 'ui/saved_objects';
 
 import { StubIndexPatternsApiClientModule } from '../../index_patterns/__tests__/stub_index_patterns_api_client';
 
@@ -96,12 +97,12 @@ describe('Saved Object', function () {
     })
   );
 
-  beforeEach(ngMock.inject(function (savedObjectsClient, es, esAdmin, Private, $window) {
+  beforeEach(ngMock.inject(function (es, esAdmin, Private, $window) {
     SavedObject = Private(SavedObjectProvider);
     IndexPattern = Private(IndexPatternProvider);
     esAdminStub = esAdmin;
     esDataStub = es;
-    savedObjectsClientStub = savedObjectsClient;
+    savedObjectsClientStub = Private(SavedObjectsClientProvider);
     window = $window;
 
     mockEsService();

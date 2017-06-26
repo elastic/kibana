@@ -17,6 +17,7 @@ import MappingSetupProvider from 'ui/utils/mapping_setup';
 
 import { SearchSourceProvider } from '../data_source/search_source';
 import { getTitleAlreadyExists } from './get_title_already_exists';
+import { SavedObjectsClientProvider } from 'ui/saved_objects';
 
 /**
  * An error message to be used when the user rejects a confirm overwrite.
@@ -39,8 +40,8 @@ function isErrorNonFatal(error) {
   return error.message === OVERWRITE_REJECTED || error.message === SAVE_DUPLICATE_REJECTED;
 }
 
-export function SavedObjectProvider(esAdmin, kbnIndex, Promise, Private, Notifier, confirmModalPromise, indexPatterns, savedObjectsClient) {
-
+export function SavedObjectProvider(esAdmin, kbnIndex, Promise, Private, Notifier, confirmModalPromise, indexPatterns) {
+  const savedObjectsClient = Private(SavedObjectsClientProvider);
   const SearchSource = Private(SearchSourceProvider);
   const mappingSetup = Private(MappingSetupProvider);
 

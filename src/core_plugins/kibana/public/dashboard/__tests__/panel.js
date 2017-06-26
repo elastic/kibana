@@ -4,6 +4,7 @@ import Promise from 'bluebird';
 import sinon from 'sinon';
 import noDigestPromise from 'test_utils/no_digest_promises';
 import mockUiState from 'fixtures/mock_ui_state';
+import { SavedObjectsClientProvider } from 'ui/saved_objects';
 
 describe('dashboard panel', function () {
   let $scope;
@@ -14,8 +15,12 @@ describe('dashboard panel', function () {
 
   function init(mockDocResponse) {
     ngMock.module('kibana');
-    ngMock.inject(($rootScope, $compile, esAdmin, savedObjectsClient) => {
-      sinon.stub(savedObjectsClient, 'get').returns(Promise.resolve(mockDocResponse));
+    ngMock.inject(($rootScope, $compile, Private, esAdmin) => {
+      Private.swap(SavedObjectsClientProvider, () => {
+        return {
+          get: sinon.stub().returns(Promise.resolve(mockDocResponse))
+        };
+      });
 
       sinon.stub(esAdmin, 'mget').returns(Promise.resolve({ docs: [ mockDocResponse ] }));
       sinon.stub(esAdmin.indices, 'getFieldMapping').returns(Promise.resolve({
