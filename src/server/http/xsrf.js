@@ -30,7 +30,7 @@ export default function (kbnServer, server, config) {
 
     if (hasXsrfHeader) {
       let xsrfHeaderDeprecationMessage =
-        `Received request ${req.method} ${req.url.path}. ` +
+        `Received request [${req.method.toUpperCase()} ${req.url.path}]. ` +
         `The ${xsrfHeader} header is deprecated and will be removed in a future version of Kibana.`;
       if (!hasAllowedMediaType) {
         xsrfHeaderDeprecationMessage +=
@@ -41,7 +41,7 @@ export default function (kbnServer, server, config) {
     } else if (!hasAllowedMediaType && hasVersionHeader) {
       server.log(
         ['warning', 'deprecation'],
-        `Received request ${req.method} ${req.url.path}. ` +
+        `Received request [${req.method.toUpperCase()} ${req.url.path}]. ` +
         `The ${versionHeader} header will no longer be accepted for CSRF protection in a future version of Kibana.` +
         ` Specify a ${contentTypeHeader} header of either application/json or application/x-ndjson instead.`
       );
