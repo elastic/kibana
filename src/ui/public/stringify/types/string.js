@@ -1,5 +1,4 @@
 import _ from 'lodash';
-import 'ui/field_format_editor/samples/samples';
 import { FieldFormat } from 'ui/index_patterns/_field_format/field_format';
 
 export function stringifyString() {
@@ -29,25 +28,6 @@ export function stringifyString() {
       transform: false
     };
   };
-
-  _String.editor = require('ui/stringify/editors/string.html');
-
-  _String.transformOpts = [
-    { id: false, name: '- none -' },
-    { id: 'lower', name: 'Lower Case' },
-    { id: 'upper', name: 'Upper Case' },
-    { id: 'title', name: 'Title Case' },
-    { id: 'short', name: 'Short Dots' },
-    { id: 'base64', name: 'Base64 Decode' }
-  ];
-
-  _String.sampleInputs = [
-    'A Quick Brown Fox.',
-    'STAY CALM!',
-    'com.organizations.project.ClassName',
-    'hostname.net',
-    'SGVsbG8gd29ybGQ='
-  ];
 
   _String.prototype._base64Decode = function (val) {
     try {

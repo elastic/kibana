@@ -1,6 +1,5 @@
 import _ from 'lodash';
 import numeral from 'numeral';
-import 'ui/field_format_editor/numeral/numeral';
 import { FieldFormat } from 'ui/index_patterns/_field_format/field_format';
 
 const numeralInst = numeral();
@@ -34,14 +33,6 @@ Numeral.factory = function (opts) {
   Class.id = opts.id;
   Class.title = opts.title;
   Class.fieldType = 'number';
-
-  Class.editor = {
-    template: opts.editorTemplate || require('ui/field_format_editor/numeral/numeral.html'),
-    controllerAs: 'cntrl',
-    controller: opts.controller || function () {
-      this.sampleInputs = opts.sampleInputs;
-    }
-  };
 
   Class.prototype.getParamDefaults = function () {
     if (_.has(opts, 'getParamDefaults')) {

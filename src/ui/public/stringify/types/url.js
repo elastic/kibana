@@ -1,8 +1,5 @@
 import _ from 'lodash';
-import 'ui/field_format_editor/pattern/pattern';
-import 'ui/stringify/icons';
 import { FieldFormat } from 'ui/index_patterns/_field_format/field_format';
-import urlTemplate from 'ui/stringify/editors/url.html';
 import { getHighlightHtml } from 'ui/highlight';
 
 export function stringifyUrl() {
@@ -25,26 +22,6 @@ export function stringifyUrl() {
     'conflict'
   ];
 
-  Url.editor = {
-    template: urlTemplate,
-    controllerAs: 'url',
-    controller: function ($scope, chrome) {
-      const iconPattern = `${chrome.getBasePath()}/bundles/src/ui/public/stringify/icons/{{value}}.png`;
-
-      this.samples = {
-        a: [ 'john', '/some/pathname/asset.png', 1234 ],
-        img: [ 'go', 'stop', ['de', 'ne', 'us', 'ni'], 'cv' ]
-      };
-
-      $scope.$watch('editor.formatParams.type', function (type, prev) {
-        const params = $scope.editor.formatParams;
-        if (type === 'img' && type !== prev && !params.urlTemplate) {
-          params.urlTemplate = iconPattern;
-        }
-      });
-    }
-  };
-
   Url.templateMatchRE = /{{([\s\S]+?)}}/g;
 
   Url.prototype.getParamDefaults = function () {
@@ -54,11 +31,6 @@ export function stringifyUrl() {
       labelTemplate: null
     };
   };
-
-  Url.urlTypes = [
-    { id: 'a', name: 'Link' },
-    { id: 'img', name: 'Image' }
-  ];
 
   Url.prototype._formatUrl = function (value) {
     const template = this.param('urlTemplate');

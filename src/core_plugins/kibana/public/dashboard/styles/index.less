@@ -2,6 +2,51 @@
 @import (reference) "~ui/styles/mixins";
 @import "~ui/styles/local_search.less";
 
+.fullScreenModePlaceholder {
+  text-align: center;
+  width: 100%;
+  z-index: 50;
+  height: 0;
+  bottom: 0;
+  position: absolute;
+}
+
+.exitFullScreenMode {
+  background-color: @globalColorLightestGray;
+  border-top-left-radius: 4px;
+  border-top-right-radius: 4px;
+  border-bottom-left-radius: 0;
+  border-bottom-right-radius: 0;
+  width: 200px;
+  height: 40px;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  margin-left: auto;
+  margin-right: auto;
+  padding-bottom: 0;
+  position: fixed;
+  transform: translateY(22px);
+  z-index: 50;
+  display: block;
+  transition: transform .2s ease-in-out;
+  border: solid 1px @globalColorLightGray;
+  border-bottom: 0;
+
+  .kuiIcon {
+    display: block;
+  }
+
+  &:hover {
+    transform: translateY(0px);
+  }
+}
+
+.exitFullScreenMode:hover {
+  bottom: 0px;
+  transition: all .5s ease;
+}
+
 .tab-dashboard {
   background-color: @dashboard-bg;
 }
@@ -13,13 +58,12 @@
 dashboard-grid {
   display: block;
   margin: 0;
-  padding: 5px;
+  padding: 20px;
 }
 
 .start-screen {
   margin: 20px auto;
   background-color: @dashboard-bg;
-  padding: 20px;
   max-width: 800px;
   background: tint(@globalColorBlue, 90%);
   padding: 40px;
