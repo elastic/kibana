@@ -82,9 +82,30 @@ describe('POST /api/saved_objects/{type}', () => {
     expect(savedObjectsClient.create.calledOnce).to.be(true);
 
     const args = savedObjectsClient.create.getCall(0).args;
-    const options = { overwrite: false };
-    const body = { attributes: { title: 'Testing' } };
+    const options = { overwrite: false, id: undefined };
+    const attributes = { title: 'Testing' };
 
-    expect(args).to.eql(['index-pattern', body, options]);
+    expect(args).to.eql(['index-pattern', attributes, options]);
+  });
+
+  it('can specify an id', async () => {
+    const request = {
+      method: 'POST',
+      url: '/api/saved_objects/index-pattern/logstash-*',
+      payload: {
+        attributes: {
+          title: 'Testing'
+        }
+      }
+    };
+
+    await server.inject(request);
+    expect(savedObjectsClient.create.calledOnce).to.be(true);
+
+    const args = savedObjectsClient.create.getCall(0).args;
+    const options = { overwrite: false, id: 'logstash-*' };
+    const attributes = { title: 'Testing' };
+
+    expect(args).to.eql(['index-pattern', attributes, options]);
   });
 });

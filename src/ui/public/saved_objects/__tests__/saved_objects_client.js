@@ -256,18 +256,24 @@ describe('SavedObjectsClient', () => {
       }
     });
 
-    it('requires body', async () => {
-      try {
-        await savedObjectsClient.create('index-pattern');
-        expect().throw('should have error');
-      } catch (e) {
-        expect(e.message).to.be(requireMessage);
-      }
+    it('allows for id to be provided', () => {
+      const attributes = { foo: 'Foo', bar: 'Bar' };
+      const url = `${basePath}/api/saved_objects/index-pattern/myId`;
+      $http.withArgs({
+        method: 'POST',
+        url,
+        data: sinon.match.any
+      }).returns(Promise.resolve({ data: 'api-response' }));
+
+      savedObjectsClient.create('index-pattern', attributes, { id: 'myId' });
+
+      sinon.assert.calledOnce($http);
+      expect($http.getCall(0).args[0].url).to.eql(url);
     });
 
     it('makes HTTP call', () => {
-      const attributes = { foo: 'Foo', bar: 'Bar', id: 'logstash-*' };
-      savedObjectsClient.create('index-pattern', { attributes });
+      const attributes = { foo: 'Foo', bar: 'Bar' };
+      savedObjectsClient.create('index-pattern', attributes);
 
       sinon.assert.calledOnce($http);
       expect($http.getCall(0).args[0].data.attributes).to.eql(attributes);

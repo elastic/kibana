@@ -16,17 +16,18 @@ export class SavedObjectsClient {
    * Persists an object
    *
    * @param {string} type
-   * @param {object} body - { attributes: {}, id: myId }
-   * @param {object} options
-   * @param {boolean} options.overwrite - defaults to false
-   * @returns {promise}
+   * @param {object} attributes
+   * @param {object} [options={}]
+   * @property {string} [options.id] - force id on creation, not recommended
+   * @property {boolean} [options.overwrite=false]
+   * @returns {promise} - { id, type, version, attributes }
   */
-  async create(type, body = {}, options = {}) {
-    const method = get(options, 'overwrite', false) ? 'index' : 'create';
+  async create(type, attributes = {}, options = {}) {
+    const method = options.overwrite ? 'index' : 'create';
     const response = await this._withKibanaIndex(method, {
       type,
-      id: body.id,
-      body: body.attributes,
+      id: options.id,
+      body: attributes,
       refresh: 'wait_for'
     });
 
@@ -34,20 +35,20 @@ export class SavedObjectsClient {
       id: response._id,
       type: response._type,
       version: response._version,
-      attributes: body
+      attributes
     };
   }
 
   /**
    * Creates multiple documents at once
    *
-   * @param {array} objects
-   * @param {object} options
-   * @param {boolean} options.overwrite - overrides existing documents
-   * @returns {promise} Returns promise containing array of documents
+   * @param {array} objects - [{ type, id, attributes }]
+   * @param {object} [options={}]
+   * @property {boolean} [options.overwrite=false] - overrides existing documents
+   * @returns {promise} - [{ id, type, version, attributes, error: { message } }]
    */
   async bulkCreate(objects, options = {}) {
-    const action = options.overwrite === true ? 'index' : 'create';
+    const action = options.overwrite ? 'index' : 'create';
 
     const body = objects.reduce((acc, object) => {
       acc.push({ [action]: { _type: object.type, _id: object.id } });
@@ -88,15 +89,15 @@ export class SavedObjectsClient {
   }
 
   /**
-   * @param {object} options
-   * @param {string} options.type
-   * @param {string} options.search
-   * @param {string} options.searchFields - see Elasticsearch Simple Query String
+   * @param {object} [options={}]
+   * @property {string} options.type
+   * @property {string} options.search
+   * @property {string} options.searchFields - see Elasticsearch Simple Query String
    *                                        Query field argument for more information
-   * @param {integer} options.page - defaults to 1
-   * @param {integer} options.perPage - defaults to 20
-   * @param {array} option.fields - fields to be returned. Returns all unless defined
-   * @returns {promise}
+   * @property {integer} [options.page=1]
+   * @property {integer} [options.perPage=20]
+   * @property {array} options.fields
+   * @returns {promise} - { saved_objects: [{ id, type, version, attributes }], total, per_page, page }
    */
   async find(options = {}) {
     const {
@@ -139,7 +140,7 @@ export class SavedObjectsClient {
    *
    * @param {string} type
    * @param {string} id
-   * @returns {promise}
+   * @returns {promise} - { id, type, version, attributes }
    */
   async get(type, id) {
     const response = await this._withKibanaIndex('get', {
@@ -159,7 +160,7 @@ export class SavedObjectsClient {
    * Returns an array of objects by id
    *
    * @param {array} objects - an array ids, or an array of objects containing id and optionally type
-   * @returns {promise} Returns promise containing array of documents
+   * @returns {promise} - { saved_objects: [{ id, type, version, attributes }] }
    * @example
    *
    * bulkGet([

@@ -2,7 +2,7 @@ import Joi from 'joi';
 
 export const createCreateRoute = (prereqs) => {
   return {
-    path: '/api/saved_objects/{type}',
+    path: '/api/saved_objects/{type}/{id?}',
     method: 'POST',
     config: {
       pre: [prereqs.getSavedObjectsClient],
@@ -11,18 +11,20 @@ export const createCreateRoute = (prereqs) => {
           overwrite: Joi.boolean().default(false)
         }),
         params: Joi.object().keys({
-          type: Joi.string().required()
+          type: Joi.string().required(),
+          id: Joi.string()
         }).required(),
         payload: Joi.object({
-          attributes: Joi.object().required(),
-          id: Joi.string().allow(null)
+          attributes: Joi.object().required()
         }).required()
       },
       handler(request, reply) {
         const { savedObjectsClient } = request.pre;
-        const { type } = request.params;
+        const { type, id } = request.params;
+        const { overwrite } = request.query;
+        const options = { id, overwrite };
 
-        reply(savedObjectsClient.create(type, request.payload, request.query));
+        reply(savedObjectsClient.create(type, request.payload.attributes, options));
       }
     }
   };

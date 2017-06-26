@@ -1,5 +1,5 @@
 import { resolve as resolveUrl, format as formatUrl } from 'url';
-import { pick, get, cloneDeep, throttle } from 'lodash';
+import _ from 'lodash';
 import { keysToSnakeCaseShallow, keysToCamelCaseShallow } from '../../../utils/case_conversion';
 
 import { SavedObject } from './saved_object';
@@ -27,19 +27,22 @@ export class SavedObjectsClient {
   * Persists an object
   *
   * @param {string} type
-  * @param {object} body - { attributes: {}, id: myId }
-  * @param {object} options
-  * @param {boolean} options.overwrite - defaults to false
-  * @returns {promise}
+  * @param {object} [attributes={}]
+  * @param {object} [options={}]
+  * @property {string} [options.id] - force id on creation, not recommended
+  * @property {boolean} [options.overwrite=false]
+  * @returns {promise} - SavedObject({ id, type, version, attributes })
   */
-  create(type, body = {}, options = {}) {
-    if (!type || !body.attributes) {
+  create(type, attributes = {}, options = {}) {
+    if (!type || !attributes) {
       return this._PromiseCtor.reject(new Error('requires type and attributes'));
     }
 
-    const url = this._getUrl([type], options);
+    const url = this._getUrl([type, options.id], _.pick(options, ['overwrite']));
 
-    return this._request('POST', url, body);
+    return this._request('POST', url, { attributes }).then(resp => {
+      return this.createSavedObject(resp);
+    });
   }
 
   /**
@@ -60,15 +63,15 @@ export class SavedObjectsClient {
   /**
    * Search for objects
    *
-   * @param {object} options
-   * @param {string} options.type
-   * @param {string} options.search
-   * @param {string} options.searchFields - see Elasticsearch Simple Query String
+   * @param {object} [options={}]
+   * @property {string} options.type
+   * @property {string} options.search
+   * @property {string} options.searchFields - see Elasticsearch Simple Query String
    *                                        Query field argument for more information
-   * @param {integer} options.page - defaults to 1
-   * @param {integer} options.perPage - defaults to 20
-   * @param {array} option.fields - fields to be returned. Returns all unless defined
-   * @returns {promise}
+   * @property {integer} [options.page=1]
+   * @property {integer} [options.perPage=20]
+   * @property {array} options.fields
+   * @returns {promise} - { savedObjects: [ SavedObject({ id, type, version, attributes }) ]}
    */
   find(options = {}) {
     const url = this._getUrl([options.type], keysToSnakeCaseShallow(options));
@@ -84,7 +87,7 @@ export class SavedObjectsClient {
    *
    * @param {string} type
    * @param {string} id
-   * @returns {promise}
+   * @returns {promise} - SavedObject({ id, type, version, attributes })
    */
   get(type, id) {
     if (!type || !id) {
@@ -101,7 +104,7 @@ export class SavedObjectsClient {
    * Returns an array of objects by id
    *
    * @param {array} objects - an array ids, or an array of objects containing id and optionally type
-   * @returns {promise} Returns promise containing array of documents
+   * @returns {promise} - { savedObjects: [ SavedObject({ id, type, version, attributes }) ] }
    * @example
    *
    * bulkGet([
@@ -137,14 +140,16 @@ export class SavedObjectsClient {
       version
     };
 
-    return this._request('PUT', this._getUrl([type, id]), body);
+    return this._request('PUT', this._getUrl([type, id]), body).then(resp => {
+      return this.createSavedObject(resp);
+    });
   }
 
   /**
    * Throttled processing of get requests into bulk requests at 100ms interval
    */
-  processBatchQueue = throttle(() => {
-    const queue = cloneDeep(this.batchQueue);
+  processBatchQueue = _.throttle(() => {
+    const queue = _.cloneDeep(this.batchQueue);
     this.batchQueue = [];
 
     this.bulkGet(queue).then(({ savedObjects }) => {
@@ -154,14 +159,14 @@ export class SavedObjectsClient {
         });
 
         if (!foundObject) {
-          return queueItem.resolve(this.createSavedObject(pick(queueItem, ['id', 'type'])));
+          return queueItem.resolve(this.createSavedObject(_.pick(queueItem, ['id', 'type'])));
         }
 
         queueItem.resolve(foundObject);
       });
     });
 
-  }, BATCH_INTERVAL, { leading: false })
+  }, BATCH_INTERVAL, { leading: false });
 
   createSavedObject(options) {
     return new SavedObject(this, options);
@@ -174,7 +179,7 @@ export class SavedObjectsClient {
 
     return resolveUrl(this._apiBaseUrl, formatUrl({
       pathname: join(...path),
-      query: pick(query, value => value != null)
+      query: _.pick(query, value => value != null)
     }));
   }
 
@@ -186,9 +191,9 @@ export class SavedObjectsClient {
     }
 
     return this._$http(options)
-      .then(resp => get(resp, 'data'))
+      .then(resp => _.get(resp, 'data'))
       .catch(resp => {
-        const respBody = get(resp, 'data', {});
+        const respBody = _.get(resp, 'data', {});
         const err = new Error(respBody.message || respBody.error || `${resp.status} Response`);
 
         err.statusCode = respBody.statusCode || resp.status;

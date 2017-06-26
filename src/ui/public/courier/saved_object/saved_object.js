@@ -286,14 +286,14 @@ export function SavedObjectProvider(esAdmin, kbnIndex, Promise, Private, Notifie
      * @resolved {String} - The id of the doc
      */
     const createSource = (source) => {
-      return savedObjectsClient.create(esType, { id: this.id, attributes: source })
+      return savedObjectsClient.create(esType, source, { id: this.id })
         .catch(err => {
           // record exists, confirm overwriting
           if (_.get(err, 'statusCode') === 409) {
             const confirmMessage = `Are you sure you want to overwrite ${this.title}?`;
 
             return confirmModalPromise(confirmMessage, { confirmButtonText: `Overwrite ${this.getDisplayName()}` })
-              .then(() => savedObjectsClient.create(esType, { id: this.id, attributes: source }, { overwrite: true }))
+              .then(() => savedObjectsClient.create(esType, source, { id: this.id, overwrite: true }))
               .catch(() => Promise.reject(new Error(OVERWRITE_REJECTED)));
           }
           return Promise.reject(err);
@@ -352,7 +352,7 @@ export function SavedObjectProvider(esAdmin, kbnIndex, Promise, Private, Notifie
           if (confirmOverwrite) {
             return createSource(source);
           } else {
-            return savedObjectsClient.create(esType, { id: this.id, attributes: source }, { overwrite: true });
+            return savedObjectsClient.create(esType, source, { id: this.id, overwrite: true });
           }
         })
         .then((resp) => {

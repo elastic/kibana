@@ -96,6 +96,20 @@ describe('SavedObjectsClient', () => {
       const args = callAdminCluster.getCall(0).args;
       expect(args[0]).to.be('index');
     });
+
+    it('allows for id to be provided', async () => {
+      callAdminCluster.returns({ _type: 'index-pattern', _id: 'logstash-*', _version: 2 });
+
+      await savedObjectsClient.create('index-pattern', {
+        id: 'logstash-*',
+        title: 'Logstash'
+      }, { id: 'myId' });
+
+      expect(callAdminCluster.calledOnce).to.be(true);
+
+      const args = callAdminCluster.getCall(0).args;
+      expect(args[1].id).to.be('myId');
+    });
   });
 
   describe('#bulkCreate', () => {
