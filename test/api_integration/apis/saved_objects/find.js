@@ -3,7 +3,6 @@ import { get } from 'lodash';
 
 export default function ({ getService }) {
   const esArchiver = getService('esArchiver');
-  const es = getService('es');
   const supertest = getService('supertest');
 
   describe('Find API', () => {
