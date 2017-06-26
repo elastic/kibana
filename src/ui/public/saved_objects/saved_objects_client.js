@@ -1,9 +1,9 @@
-import { resolve as resolveUrl, format as formatUrl } from 'url';
 import _ from 'lodash';
-import { keysToSnakeCaseShallow, keysToCamelCaseShallow } from '../../../utils/case_conversion';
-
-import { SavedObject } from './saved_object';
 import chrome from 'ui/chrome';
+
+import { resolve as resolveUrl, format as formatUrl } from 'url';
+import { keysToSnakeCaseShallow, keysToCamelCaseShallow } from '../../../utils/case_conversion';
+import { SavedObject } from './saved_object';
 
 const join = (...uriComponents) => (
   uriComponents.filter(Boolean).map(encodeURIComponent).join('/')
@@ -114,8 +114,9 @@ export class SavedObjectsClient {
    */
   bulkGet(objects = []) {
     const url = this._getUrl(['bulk_get']);
+    const filteredObjects = objects.map(obj => _.pick(obj, ['id', 'type']));
 
-    return this._request('POST', url, objects).then(resp => {
+    return this._request('POST', url, filteredObjects).then(resp => {
       resp.saved_objects = resp.saved_objects.map(d => this.createSavedObject(d));
       return keysToCamelCaseShallow(resp);
     });
