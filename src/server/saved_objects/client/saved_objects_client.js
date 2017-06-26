@@ -197,15 +197,15 @@ export class SavedObjectsClient {
    *
    * @param {string} type
    * @param {string} id
-   * @param {object} options
-   * @param {integer} options.version - ensures version matches that of persisted object
+   * @param {object} [options={}]
+   * @property {integer} options.version - ensures version matches that of persisted object
    * @returns {promise}
    */
-  async update(type, id, attributes, { version } = {}) {
+  async update(type, id, attributes, options = {}) {
     const response = await this._withKibanaIndex('update', {
       type,
       id,
-      version,
+      version: options.version,
       body: {
         doc: attributes
       },
