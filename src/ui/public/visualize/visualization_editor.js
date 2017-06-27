@@ -37,6 +37,12 @@ uiModules
         });
       }, 200);
 
+      let resizeInit = false;
+      const resizeFunction = _.debounce(() => {
+        if (!resizeInit) return resizeInit = true;
+        editor.resize();
+      }, 200);
+
       $scope.$on('render', () => {
         if (!$scope.vis) {
           return;
@@ -44,9 +50,7 @@ uiModules
         renderFunction();
       });
 
-      resizeChecker.on('resize', () => {
-        editor.resize();
-      });
+      resizeChecker.on('resize', resizeFunction);
 
       $scope.$on('$destroy', () => {
         editor.destroy();

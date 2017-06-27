@@ -73,7 +73,9 @@ const defaultEditor = function ($rootScope, $compile) {
 
         $scope.$broadcast('render');
 
-        resolve(true);
+        $scope.$on('renderComplete', () => {
+          resolve(true);
+        });
       });
     }
 

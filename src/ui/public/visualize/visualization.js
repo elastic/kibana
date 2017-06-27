@@ -112,6 +112,12 @@ uiModules
         $scope.$apply();
       }, 200);
 
+      let resizeInit = false;
+      const resizeFunction = _.debounce(() => {
+        if (!resizeInit) return resizeInit = true;
+        visualization.resize();
+      }, 200);
+
       $scope.$on('render', () => {
         if (!$scope.vis || ($scope.vis.type.requiresSearch && !$scope.visData)) {
           return;
@@ -123,9 +129,7 @@ uiModules
         visualization.destroy();
       });
 
-      resizeChecker.on('resize', () => {
-        visualization.resize();
-      });
+      resizeChecker.on('resize',  resizeFunction);
 
       $scope.$watch('visData', () => {
         $scope.$broadcast('render');
