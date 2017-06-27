@@ -33,12 +33,12 @@ function TimeseriesVisualization(props) {
   const seriesModel = model.series.map(s => _.cloneDeep(s));
   const firstSeries = seriesModel.find(s => s.formatter && !s.seperate_axis);
   const formatter = tickFormatter(_.get(firstSeries, 'formatter'), _.get(firstSeries, 'value_template'));
-  formatter.key = _.get(firstSeries, 'formatter') + _.get(firstSeries, 'value_template');
 
   const mainAxis = {
     position: model.axis_position,
     tickFormatter: formatter,
-    axis_formatter: _.get(firstSeries, 'formatter', 'number'),
+    axisFormatter: _.get(firstSeries, 'formatter', 'number'),
+    axisFormatterTemplate: _.get(firstSeries, 'value_template')
   };
 
 
@@ -60,7 +60,7 @@ function TimeseriesVisualization(props) {
     }
     if (s.stacked === 'percent') {
       s.seperate_axis = true;
-      s.axis_formatter = 'percent';
+      s.axisFormatter = 'percent';
       s.axis_min = 0;
       s.axis_max = 1;
       s.axis_position = model.axis_position;
@@ -91,13 +91,13 @@ function TimeseriesVisualization(props) {
         axisCount++;
 
         const formatter = tickFormatter(row.formatter, row.value_template);
-        formatter.key = row.formatter + row.value_template;
 
         const yaxis = {
           alignTicksWithAxis: 1,
           position: row.axis_position,
           tickFormatter: formatter,
-          axis_formatter: row.axis_formatter
+          axisFormatter: row.axis_formatter,
+          axisFormatterTemplate: row.value_template
         };
 
 
