@@ -25,10 +25,11 @@ const mapDispatchToProps = (dispatch, { element }) => ({
   },
 });
 
-const mergeProps = (stateProps, dispatchProps) => {
+const mergeProps = (stateProps, dispatchProps, { element }) => {
   const renderable = getValue(stateProps.resolvedArg);
 
   return {
+    position: element.position,
     select: dispatchProps.select,
     remove: dispatchProps.removeElementFromPage(stateProps.selectedPage),
     isSelected: stateProps.isSelected,

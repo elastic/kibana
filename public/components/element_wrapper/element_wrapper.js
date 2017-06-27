@@ -5,6 +5,7 @@ import { InvalidExpression } from './invalid_expression';
 import { InvalidElementType } from './invalid_element_type';
 import { RenderElement } from '../render_element';
 import { Loading } from '../loading';
+import { omit } from 'lodash';
 import './element_wrapper.less';
 
 /*
@@ -38,13 +39,19 @@ const ElementWrapperComponent = (props) => {
     isSelected,
     elementTypeDefintion,
     renderable,
+    position,
   } = props;
 
   // TODO: pass in render element dimensions
   const selectedClassName = isSelected ? 'selected' : '';
 
+  const style = Object.assign({ position: 'absolute' }, omit(position, 'rotation'));
+
   return (
-    <div className={`canvas__workpad--element ${selectedClassName}`} onClick={select}>
+    <div
+      style={style}
+      className={`canvas__workpad--element ${selectedClassName}`}
+      onClick={select}>
       <div style={{ textAlign: 'right' }}>
         <i className="fa fa-times-circle" style={{ cursor: 'pointer' }} onClick={remove}/>
       </div>
@@ -66,6 +73,7 @@ ElementWrapperComponent.propTypes = {
   state: PropTypes.string,
   error: PropTypes.object,
   renderable: PropTypes.object,
+  position: PropTypes.object,
 };
 
 export const ElementWrapper = compose(
