@@ -165,6 +165,7 @@ describe('xsrf request filter', function () {
         sinon.assert.calledWith(
           kbnServer.server.log,
           ['warning', 'deprecation'],
+          `Received request [${method.toUpperCase()} ${testPath}]. ` +
           `The ${xsrfHeader} header is deprecated and will be removed in a future version of Kibana.` +
           ` Specify a ${contentTypeHeader} header of either application/json or application/x-ndjson instead.`
         );
@@ -187,6 +188,7 @@ describe('xsrf request filter', function () {
         sinon.assert.calledWith(
           kbnServer.server.log,
           ['warning', 'deprecation'],
+          `Received request [${method.toUpperCase()} ${testPath}]. ` +
           `The ${versionHeader} header will no longer be accepted for CSRF protection in a future version of Kibana.` +
           ` Specify a ${contentTypeHeader} header of either application/json or application/x-ndjson instead.`
         );
@@ -240,6 +242,7 @@ describe('xsrf request filter', function () {
           sinon.assert.calledWith(
             kbnServer.server.log,
             ['warning', 'deprecation'],
+            `Received request [${method.toUpperCase()} ${testPath}]. ` +
             `The ${xsrfHeader} header is deprecated and will be removed in a future version of Kibana.`
           );
 
@@ -265,6 +268,7 @@ describe('xsrf request filter', function () {
         sinon.assert.calledWith(
           kbnServer.server.log,
           ['warning', 'deprecation'],
+          `Received request [${method.toUpperCase()} ${testPath}]. ` +
           `The ${xsrfHeader} header is deprecated and will be removed in a future version of Kibana.` +
           ` Specify a ${contentTypeHeader} header of either application/json or application/x-ndjson instead.`
         );
