@@ -40,7 +40,7 @@
     background-color: white;
     border: 1px solid $globalBorderColor;
     border-radius: 6px;
-    box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.1);
+    box-shadow: $globalBoxShadow;
     visibility: visible;
     opacity: 1;
     transform: translateY(-5px) translateZ(0);
