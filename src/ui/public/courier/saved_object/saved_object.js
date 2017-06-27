@@ -284,7 +284,7 @@ export function SavedObjectProvider(esAdmin, kbnIndex, Promise, Private, Notifie
      * successfully indexed. If the overwrite confirmation was rejected, an error is thrown with
      * a confirmRejected = true parameter so that case can be handled differently than
      * a create or index error.
-     * @resolved {String} - The id of the doc
+     * @resolved {SavedObject}
      */
     const createSource = (source) => {
       return savedObjectsClient.create(esType, source, { id: this.id })
@@ -327,7 +327,9 @@ export function SavedObjectProvider(esAdmin, kbnIndex, Promise, Private, Notifie
     /**
      * Saves this object.
      *
-     * @param {SaveOptions} saveOptions?
+     * @param {object} [options={}]
+     * @property {boolean} [options.confirmOverwrite=false] - If true, attempts to create the source so it
+     * can confirm an overwrite if a document with the id already exists.
      * @return {Promise}
      * @resolved {String} - The id of the doc
      */
