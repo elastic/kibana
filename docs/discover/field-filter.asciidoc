@@ -116,7 +116,7 @@ image::images/edit_filter_query.png[]
 image::images/edit_filter_query_json.png[]
 
 For example, you could use a
-{es-ref}/query-dsl-bool-query.html[bool query] to create a filter for the
+{ref}/query-dsl-bool-query.html[bool query] to create a filter for the
 sample log data that displays the hits that originated from Canada or China that resulted in a 404 error:
 
 ==========
