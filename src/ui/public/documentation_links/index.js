@@ -1,1 +1,1 @@
-export { ELASTIC_WEBSITE_HOST, DOC_LINK_VERSION, documentationLinks } from './documentation_links';
+export { ELASTIC_WEBSITE_URL, DOC_LINK_VERSION, documentationLinks } from './documentation_links';
