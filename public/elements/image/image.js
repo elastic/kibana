@@ -9,7 +9,7 @@ module.exports = new Element({
   icon: null,
   expression: 'image()',
   render(domNode, config, done) {
-    ReactDOM.render(<Image src={config} responsive />, domNode);
+    ReactDOM.render(<Image src={config.dataurl} responsive />, domNode);
     done();
   },
 });

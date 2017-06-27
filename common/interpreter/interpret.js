@@ -1,6 +1,7 @@
 import { clone, each, keys, last, map, mapValues, values, zipObject } from 'lodash';
 import { castProvider } from './cast';
 import { getType } from '../types/get_type';
+import { typeSpecs } from '../types/index';
 
 export function interpretProvider(config) {
   const cast = castProvider(config.types);
@@ -8,21 +9,18 @@ export function interpretProvider(config) {
   const onFunctionNotFound = config.onFunctionNotFound;
 
   function interpret(node, context = null) {
-    switch (getType(node)) {
-      case 'partial':
-        return (partialContext) => invokeChain(node.chain, partialContext);
-      case 'expression':
-        return invokeChain(node.chain, context);
-      case 'function':
-        return node;
-      case 'string':
-      case 'number':
-      case 'null':
-      case 'boolean':
-        return Promise.resolve(node.value);
-      default:
-        throw new Error(`Unknown AST object: ${JSON.stringify(node)}`);
-    }
+    const nodeType = getType(node);
+
+    // special handling of specific types
+    if (nodeType === 'partial') return (partialContext) => invokeChain(node.chain, partialContext);
+    if (nodeType === 'expression') return invokeChain(node.chain, context);
+    if (nodeType === 'function') return node;
+
+    // if the type exists, resolve the value
+    if (typeSpecs.some(spec => spec.name === nodeType)) return Promise.resolve(node.value);
+
+    // unknown type, throw error
+    throw new Error(`Unknown AST object: ${JSON.stringify(node)}`);
   }
 
   function invokeChain(chainArr, context) {

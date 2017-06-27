@@ -6,9 +6,9 @@ module.exports = function Fn(config) {
   this.name = config.name; // Name of function
   this.type = config.type; // Return type of function
   this.aliases = config.aliases || [];
-  this.fn = (...args) => {
-    return Promise.resolve(config.fn(...args));
-  }; // Function to run function (context, args)
+
+  // Function to run function (context, args)
+  this.fn = (...args) => Promise.resolve(config.fn(...args));
 
   // Optional
   this.help = config.help || ''; // A short help text

@@ -3,6 +3,31 @@ import fetch from 'axios';
 import elasticLogo from './elastic_logo';
 import { encode, imageTypes } from '../../lib/dataurl';
 
+function wrapDataurlType(dataurl) {
+  return {
+    type: 'dataurl',
+    dataurl,
+  };
+}
+
+const fetchImage = (url) => {
+  const responseType = (FileReader) ? 'blob' : 'arraybuffer';
+
+  return fetch(url, {
+    method: 'GET',
+    responseType,
+  })
+  .then((res) => {
+    const type = res.headers['content-type'];
+
+    if (imageTypes.indexOf(type) < 0) {
+      return Promise.reject(new Error(`Invalid image type: ${type}`));
+    }
+
+    return encode(res.data, type);
+  });
+};
+
 module.exports = new Fn({
   name: 'image',
   aliases: [],
@@ -11,7 +36,7 @@ module.exports = new Fn({
   context: {},
   args: {
     dataurl: {
-      types: ['dataurl', 'null'],
+      types: ['dataurl', 'string', 'null'],
       help: 'Base64 encoded image',
       aliases: ['_'],
       default: elasticLogo,
@@ -22,36 +47,12 @@ module.exports = new Fn({
     },
   },
   fn: (context, args) => {
-    // return base64 data
+    // return dataurl object
     // TODO: validate data type
     if (args.url) {
-      // fetch image from URL
-      const fetchImage = (type = 'blob') => {
-        return fetch(args.url, {
-          method: 'GET',
-          responseType: type,
-        })
-        .then((res) => {
-          const type = res.headers['content-type'];
-
-          if (imageTypes.indexOf(type) < 0) {
-            return Promise.reject(new Error(`Invalid image type: ${type}`));
-          }
-
-          return { data: res.data, type };
-        });
-      };
-
-      // use FileReader if it's available, like in the browser
-      if (FileReader) {
-        return fetchImage().then(({ data }) => encode(data));
-      }
-
-      // otherwise fall back to fromByteArray
-      // note: Buffer doesn't seem to correctly base64 encode binary data
-      return fetchImage('arraybuffer').then(({ data, type }) => encode(data, type));
+      return fetchImage(args.url).then(dataurl => wrapDataurlType(dataurl));
     }
 
-    return args.dataurl;
+    return wrapDataurlType(args.dataurl);
   },
 });

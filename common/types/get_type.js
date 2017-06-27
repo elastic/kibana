@@ -1,4 +1,4 @@
-import { isValid } from '../lib/dataurl';
+import { isValid as isValidDataurl } from '../lib/dataurl';
 
 export function getType(node) {
   if (node == null) return 'null';
@@ -11,7 +11,7 @@ export function getType(node) {
 
   // check for dataurl encoding
   if (type === 'string') {
-    if (isValid(node)) return 'dataurl';
+    if (isValidDataurl(node)) return 'dataurl';
   }
 
   return typeof node;
