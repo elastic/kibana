@@ -12,10 +12,10 @@ Reindexing is the process of creating a new index with updated syntax and
 mappings directly from an existing index. While it is possible to do this
 manually, we recommend using the Elasticsearch Migration Plugin as described
 in the Elasticsearch
-{es-ref}reindex-upgrade.html#reindex-upgrade[Reindex to upgrade] guide.
+{ref}/reindex-upgrade.html#reindex-upgrade[Reindex to upgrade] guide.
 
 NOTE: The Elasticsearch Migration Plugin creates a versioned `.kibana` index
-as well as an {es-ref}indices-aliases.html[index alias] that points to it.
+as well as an {ref}/indices-aliases.html[index alias] that points to it.
 Kibana 5.0 supports this index alias, but if you want to run Kibana 4.x while
 this Elastic stack upgrade is underway, you'll need to configure your Kibana
 4.x install to point to the versioned index using the `kibana.index`

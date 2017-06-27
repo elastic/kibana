@@ -8,7 +8,7 @@ Before upgrading Kibana:
 * Consult the <<breaking-changes,breaking changes>> docs.
 * Test upgrades in a dev environment before upgrading your production servers.
 * Backup your data using the Elasticsearch
-  {es-ref}modules-snapshots.html[snapshots] feature.
+  {ref}/modules-snapshots.html[snapshots] feature.
   You **cannot roll back** to an earlier version unless you have a backup of
   your data.
 * If you are using custom plugins, check that a compatible version is
