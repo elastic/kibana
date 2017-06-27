@@ -19,7 +19,7 @@ import * as actions from '../actions/resolved_args';
 
   When status is `ready`, the value will be whatever came back in the response.
 
-  When status is `error`, the value will be the error object, and the error property will be true.
+  When status is `error`, the value will not change, and the error property will be the error.
 */
 
 function _getState(hasError, loading) {
