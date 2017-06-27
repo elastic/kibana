@@ -48,7 +48,6 @@ export class KibanaParsedUrl {
     if (!this.appPath) { return; }
 
     this.appPath = modifyUrl(this.appPath, parsed => {
-      parsed.query = parsed.query || {};
       parsed.query._g = newGlobalState;
     });
   }
