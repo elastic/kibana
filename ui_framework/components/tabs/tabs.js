@@ -11,7 +11,7 @@ export const KuiTabs = ({
   ...rest
 }) => {
   const classes = classNames('kuiTabs', className);
-  const tabs = children.map((child,index)=>(
+  const tabs = children.map((child, index)=>(
     <KuiTab
       key={index}
       onClick={() => onSelectedTabChanged(index)}
@@ -40,6 +40,10 @@ const selectedTabIndexCheck = (props, propName, componentName) => {
     return;
   }
 
+  if (!Number.isInteger(selectedTabIndex)) {
+    throw new Error(`${componentName}'s selectedTabIndex must be an integer.`);
+  }
+
   if (childrenLength === 0) {
     throw new Error(`${componentName}'s selectedTabIndex must be undefined if there is no tab to select.`);
   }
@@ -57,5 +61,5 @@ KuiTabs.propTypes = {
   children: PropTypes.node,
   selectedTabIndex: selectedTabIndexCheck,
   onSelectedTabChanged: PropTypes.func.isRequired,
-  className: PropTypes.string
+  className: PropTypes.string,
 };

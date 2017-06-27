@@ -44,6 +44,22 @@ describe('KuiTabs', () => {
       );
     });
 
+    test(`when selectedTabIndex is not an integer`, () => {
+      const component = ( // eslint-disable-line no-unused-vars
+        <KuiTabs
+          selectedTabIndex={-0.1}
+          onSelectedTabChanged={()=>{}}
+        >
+          {tabs}
+        </KuiTabs>
+      );
+
+      expect(consoleStub.calledOnce).toBe(true);
+      expect(consoleStub.getCall(0).args[0]).toContain(
+        `selectedTabIndex must be an integer.`
+      );
+    });
+
     test(`when selectedTabIndex is negative`, () => {
       const component = ( // eslint-disable-line no-unused-vars
         <KuiTabs
@@ -60,7 +76,7 @@ describe('KuiTabs', () => {
       );
     });
 
-    test(`when selectedTabIndex is greater then the upper limit defined by the number of tabs`, () => {
+    test(`when selectedTabIndex is greater than the upper limit defined by the number of tabs`, () => {
       const component = ( // eslint-disable-line no-unused-vars
         <KuiTabs
           selectedTabIndex={tabs.length}
@@ -128,21 +144,6 @@ describe('KuiTabs', () => {
 
   describe('Props', () => {
     describe('onSelectedTabChanged', () => {
-      test(`isn't called upon instantiation`, () => {
-        const onSelectedTabChangedHandler = sinon.spy();
-
-        shallow(
-          <KuiTabs
-             selectedTabIndex={0}
-             onSelectedTabChanged={onSelectedTabChangedHandler}
-          >
-            {tabs}
-          </KuiTabs>
-        );
-
-        sinon.assert.notCalled(onSelectedTabChangedHandler);
-      });
-
       test('is called when the button is clicked', () => {
         const onSelectedTabChangedHandler = sinon.spy();
 

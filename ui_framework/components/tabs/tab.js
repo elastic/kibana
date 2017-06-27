@@ -18,9 +18,13 @@ export const KuiTab = ({ isSelected, onClick, children, className, ...rest }) =>
   );
 };
 
+KuiTab.defaultProps = {
+  isSelected: false,
+};
+
 KuiTab.propTypes = {
   isSelected: PropTypes.bool,
-  onClick: PropTypes.func,
+  onClick: PropTypes.func.isRequired,
   children: PropTypes.node,
-  className: PropTypes.string
+  className: PropTypes.string,
 };

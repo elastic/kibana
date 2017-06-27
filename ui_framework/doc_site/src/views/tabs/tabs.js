@@ -18,11 +18,9 @@ class KuiTabsExample extends React.Component {
     this.state = {
       selectedTabIndex: 0,
     };
-
-    this.onSelectedTabChanged = this.onSelectedTabChanged.bind(this);
   }
 
-  onSelectedTabChanged(index) {
+  onSelectedTabChanged = (index) => {
     this.setState({
       selectedTabIndex: index,
     });

@@ -9,27 +9,17 @@ import {
 
 describe('KuiTab', () => {
   test('renders', () => {
-    const component = <KuiTab { ...requiredProps }>children</KuiTab>;
+    const component = <KuiTab onClick={()=>{}} { ...requiredProps }>children</KuiTab>;
     expect(render(component)).toMatchSnapshot();
   });
 
   test('renders isSelected', () => {
-    const component = <KuiTab isSelected { ...requiredProps }>children</KuiTab>;
+    const component = <KuiTab onClick={()=>{}} isSelected { ...requiredProps }>children</KuiTab>;
     expect(render(component)).toMatchSnapshot();
   });
 
   describe('Props', () => {
     describe('onClick', () => {
-      test(`isn't called upon instantiation`, () => {
-        const onClickHandler = sinon.stub();
-
-        shallow(
-          <KuiTab onClick={onClickHandler} />
-        );
-
-        sinon.assert.notCalled(onClickHandler);
-      });
-
       test('is called when the button is clicked', () => {
         const onClickHandler = sinon.stub();
 
