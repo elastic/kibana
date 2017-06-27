@@ -9,7 +9,7 @@ upgrade is supported for your version of Kibana.
 
 NOTE: If you've saved and/or exported objects in Kibana that rely on the
 <<search,Elasticsearch Query DSL>>, make sure to check the Elasticsearch
-{es-ref}breaking-changes.html[breaking changes] documentation and take the
+{ref}/breaking-changes.html[breaking changes] documentation and take the
 necessary remediation steps as per those instructions.
 
 [float]
@@ -52,4 +52,3 @@ otherwise Kibana will fail to start.
   <<kibana-plugins,plugins>> documentation for more information.
 . Stop the old Kibana process.
 . Start the new Kibana process.
-

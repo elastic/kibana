@@ -54,7 +54,7 @@ The schema for the logs data set has dozens of different fields, but the notable
     "@timestamp": "date"
 }
 
-Before we load the Shakespeare and logs data sets, we need to set up {es-ref}mapping.html[_mappings_] for the fields.
+Before we load the Shakespeare and logs data sets, we need to set up {ref}/mapping.html[_mappings_] for the fields.
 Mapping divides the documents in the index into logical groups and specifies a field's characteristics, such as the
 field's searchability or whether or not it's _tokenized_, or broken up into separate words.
 
@@ -148,7 +148,7 @@ PUT /logstash-2015.05.20
 //CONSOLE
 
 The accounts data set doesn't require any mappings, so at this point we're ready to use the Elasticsearch
-{es-ref}docs-bulk.html[`bulk`] API to load the data sets with the following commands:
+{ref}/docs-bulk.html[`bulk`] API to load the data sets with the following commands:
 
 [source,shell]
 curl -H 'Content-Type: application/x-ndjson' -XPOST 'localhost:9200/bank/account/_bulk?pretty' --data-binary @accounts.json

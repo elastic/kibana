@@ -22,7 +22,7 @@ compatible with other configuration settings. Deleting a custom setting removes 
 .Kibana Settings Reference
 [horizontal]
 `query:queryString:options`:: Options for the Lucene query string parser.
-`sort:options`:: Options for the Elasticsearch {es-ref}search-request-sort.html[sort] parameter.
+`sort:options`:: Options for the Elasticsearch {ref}/search-request-sort.html[sort] parameter.
 `dateFormat`:: The format to use for displaying pretty-formatted dates.
 `dateFormat:tz`:: The timezone that Kibana uses. The default value of `Browser` uses the timezone detected by the browser.
 `dateFormat:scaled`:: These values define the format used to render ordered time-based data. Formatted timestamps must
@@ -33,7 +33,7 @@ adapt to the interval between measurements. Keys are http://en.wikipedia.org/wik
 `metaFields`:: An array of fields outside of `_source`. Kibana merges these fields into the document when displaying the
 document.
 `discover:sampleSize`:: The number of rows to show in the Discover table.
-`discover:aggs:terms:size`:: Determines how many terms will be visualized when clicking the "visualize" button, in the field drop downs, in the discover sidebar. The default value is `20`. 
+`discover:aggs:terms:size`:: Determines how many terms will be visualized when clicking the "visualize" button, in the field drop downs, in the discover sidebar. The default value is `20`.
 `doc_table:highlight`:: Highlight results in Discover and Saved Searches Dashboard. Highlighting makes request slow when
 working on big documents. Set this property to `false` to disable highlighting.
 `doc_table:highlight:all_fields`:: Improves highlighting by using a separate `highlight_query` that uses `all_fields` mode on
@@ -47,7 +47,7 @@ increase request processing time.
 `histogram:maxBars`:: Date histograms are not generated with more bars than the value of this property, scaling values
 when necessary.
 `visualization:tileMap:maxPrecision`:: The maximum geoHash precision displayed on tile maps: 7 is high, 10 is very high,
-12 is the maximum. {es-ref}search-aggregations-bucket-geohashgrid-aggregation.html#_cell_dimensions_at_the_equator[Explanation of cell dimensions].
+12 is the maximum. {ref}/search-aggregations-bucket-geohashgrid-aggregation.html#_cell_dimensions_at_the_equator[Explanation of cell dimensions].
 `visualization:tileMap:WMSdefaults`:: Default properties for the WMS map server support in the coordinate map.
 `visualization:colorMapping`:: Maps values to specified colors within visualizations.
 `visualization:loadingDelay`:: Time to wait before dimming visualizations during query.
