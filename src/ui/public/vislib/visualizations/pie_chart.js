@@ -196,14 +196,13 @@ export function VislibVisualizationsPieChartProvider(Private) {
           width: svg.node().parentElement.clientWidth,
           height: svg.node().parentElement.clientHeight
         };
+
         const labelLayout = d3.geom.quadtree()
           .extent([[-svgBBox.width,-svgBBox.height], [svgBBox.width, svgBBox.height] ])
-          .x(function (d) { return d.label.x; })
-          .y(function (d) { return d.label.y; })
+          .x(function (d) { return d.position.x; })
+          .y(function (d) { return d.position.y; })
           ([]);
-        let maxLabelWidth = 0;
-        let maxLabelHeight = 0;
-        const lastLabelPosition = [];
+
         labelGroups
           .enter()
           .append('g')
@@ -225,7 +224,7 @@ export function VislibVisualizationsPieChartProvider(Private) {
             return (midAngle < Math.PI) ? 'start' : 'end';
           })
           .attr('class', 'label-text')
-          .each(function (d) {
+          .each(function resolveConflicts(d) {
             if (d.depth === 0) return;
 
             const parentElement = this.parentElement;
@@ -234,38 +233,38 @@ export function VislibVisualizationsPieChartProvider(Private) {
               return;
             }
 
-            if (!lastLabelPosition[d.depth]) lastLabelPosition[d.depth] = 0;
-
             const bbox = this.getBBox();
             const pos = outerArc.centroid(d);
             const midAngle = startAngle(d) + (endAngle(d) - startAngle(d)) / 2;
             pos[1] += 4;
             pos[0] = (0.7 + d.depth / 10) * radius * (midAngle < Math.PI ? 1 : -1);
-            d.label = {
+            d.position = {
               x: pos[0],
               y: pos[1],
-              l: midAngle < Math.PI ? pos[0] : pos[0] - bbox.width,
-              r: midAngle > Math.PI ? pos[0] + bbox.width : pos[0],
-              b: pos[1] + 5,
-              t: pos[1] - bbox.height - 5,
+              left: midAngle < Math.PI ? pos[0] : pos[0] - bbox.width,
+              right: midAngle > Math.PI ? pos[0] + bbox.width : pos[0],
+              bottom: pos[1] + 5,
+              top: pos[1] - bbox.height - 5,
             };
 
             const conflicts = [];
             labelLayout.visit(function (node) {
               if (!node.point) return;
+              if (conflicts.length) return true;
 
-              const point = node.point.label;
+              const point = node.point.position;
+              const current = d.position;
               if (point) {
-                const horizontalConflict = (point.l < 0 && d.label.l < 0) || (point.l > 0 && d.label.l > 0);
-
-                const verticalConflict = (((point.t > d.label.t) && (point.t <= d.label.b))
-                || ((point.b > d.label.t) && (point.b <= d.label.b))
-                || ((point.t < d.label.t) && (point.b >= d.label.b)));
+                const horizontalConflict = (point.left < 0 && current.left < 0) || (point.left > 0 && current.left > 0);
+                const verticalConflict = (point.top > current.top && point.top <= current.bottom) ||
+                                          (point.top < current.top && point.bottom >= current.top);
 
                 if (horizontalConflict && verticalConflict) {
                   point.point = node.point;
                   conflicts.push(point);
                 }
+
+                return true;
               }
             });
 
@@ -275,31 +274,29 @@ export function VislibVisualizationsPieChartProvider(Private) {
             }
 
             labelLayout.add(d);
-            maxLabelWidth = Math.max(maxLabelWidth, bbox.width + 10);
-            maxLabelHeight = Math.max(maxLabelHeight, bbox.height + 10);
           })
           .attr('x', function (d) {
-            if (d.depth === 0 || !d.label) {
+            if (d.depth === 0 || !d.position) {
               return;
             }
-            return d.label.x;
+            return d.position.x;
           })
           .attr('y', function (d) {
-            if (d.depth === 0 || !d.label) {
+            if (d.depth === 0 || !d.position) {
               return;
             }
-            return d.label.y;
+            return d.position.y;
           });
 
         labelGroups
           .append('polyline')
           .attr('points', function (d) {
-            if (d.depth === 0 || !d.label) {
+            if (d.depth === 0 || !d.position) {
               return;
             }
             const pos1 = outerArc.centroid(d);
-            const x2 = d.label.x > 0 ? d.label.x - 10 : d.label.x + 10;
-            const pos2 = [x2, d.label.y - 4];
+            const x2 = d.position.x > 0 ? d.position.x - 10 : d.position.x + 10;
+            const pos2 = [x2, d.position.y - 4];
             pos1[1] = pos2[1];
             return [arc.centroid(d), pos1, pos2];
           })
