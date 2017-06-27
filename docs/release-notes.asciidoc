@@ -5,6 +5,12 @@
 --
 This section summarizes the changes in each release.
 
+<<<<<<< HEAD
+=======
+* <<release-notes-5.5.0>>
+* <<release-notes-5.4.3>>
+* <<release-notes-5.4.2>>
+>>>>>>> 90cab8a... docs: release notes for version 5.5.0
 * <<release-notes-5.4.1>>
 * <<release-notes-5.4.0>>
 * <<release-notes-5.3.3>>
@@ -22,6 +28,12 @@ This section summarizes the changes in each release.
 * <<release-notes-5.0.0>>
 
 --
+<<<<<<< HEAD
+=======
+include::release-notes/5.5.0.asciidoc[]
+include::release-notes/5.4.3.asciidoc[]
+include::release-notes/5.4.2.asciidoc[]
+>>>>>>> 90cab8a... docs: release notes for version 5.5.0
 include::release-notes/5.4.1.asciidoc[]
 include::release-notes/5.4.0.asciidoc[]
 include::release-notes/5.3.3.asciidoc[]
