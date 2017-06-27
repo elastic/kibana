@@ -18,12 +18,10 @@ function getProxyAgent(sourceUrl) {
 
     if (shouldProxy) {
       return new HttpProxyAgent(httpProxy);
-    } else {
-      return false;
     }
-  } else {
-    return false;
   }
+
+  return false;
 }
 
 function sendRequest({ sourceUrl, timeout }) {
