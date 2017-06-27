@@ -11,45 +11,47 @@ import './element_wrapper.less';
   Branches
   Short circut rendering of the element if the element isn't ready or isn't valid.
 */
-const loadingBranch = branch(({ renderable, renderableValue }) => {
+const loadingBranch = branch(({ state, renderable }) => {
   // no renderable or renderable config value
-  return !renderable || !renderableValue;
+  return !state || !renderable;
 }, renderComponent(Loading));
-const invalidRenderTypeBranch = branch(({ renderableValue, renderableElement }) => {
+
+const invalidRenderTypeBranch = branch(({ renderable, elementTypeDefintion }) => {
   // renderable is available, but no matching element is found
-  return (renderableValue && renderableValue.type !== 'render' && !renderableElement);
+  return (renderable && renderable.type !== 'render' && !elementTypeDefintion);
 }, renderComponent(InvalidElementType));
+
 const invalidExpressionBranch =  branch((props) => {
-  const { renderableValue, renderableState, renderableElement } = props;
+  const { renderable, state, elementTypeDefintion } = props;
   // Show an error if...
   return (
-    renderableState === 'error' || // The renderable has an error
-    renderableValue.type !== 'render' || // The renderable isn't, well, renderable
-    !renderableElement // We can't find an element in the registry for this
+    state === 'error' || // The renderable has an error
+    renderable.type !== 'render' || // The renderable isn't, well, renderable
+    !elementTypeDefintion // We can't find an element in the registry for this
   );
 }, renderComponent(InvalidExpression));
 
 const ElementWrapperComponent = (props) => {
-  const { element,
-    selectedElement,
-    selectElement,
-    removeElement,
-    renderableValue,
-    renderableElement,
+  const {
+    select,
+    remove,
+    isSelected,
+    elementTypeDefintion,
+    renderable,
   } = props;
 
   // TODO: pass in render element dimensions
-  const selectedClassName = element.id === selectedElement ? 'selected' : '';
+  const selectedClassName = isSelected ? 'selected' : '';
 
   return (
-    <div className={`canvas__workpad--element ${selectedClassName}`} onClick={selectElement}>
+    <div className={`canvas__workpad--element ${selectedClassName}`} onClick={select}>
       <div style={{ textAlign: 'right' }}>
-        <i className="fa fa-times-circle" style={{ cursor: 'pointer' }} onClick={removeElement}/>
+        <i className="fa fa-times-circle" style={{ cursor: 'pointer' }} onClick={remove}/>
       </div>
       <RenderElement
-        renderFn={renderableElement.render}
-        destroyFn={renderableElement.destroy}
-        config={renderableValue.value}
+        renderFn={elementTypeDefintion.render}
+        destroyFn={elementTypeDefintion.destroy}
+        config={renderable.value}
         done={() => {}}
       />
     </div>
@@ -57,13 +59,13 @@ const ElementWrapperComponent = (props) => {
 };
 
 ElementWrapperComponent.propTypes = {
-  element: PropTypes.object.isRequired,
-  renderableValue: PropTypes.object,
-  renderableState: PropTypes.string,
-  renderableElement: PropTypes.object,
-  selectedElement: PropTypes.string,
-  selectElement: PropTypes.func,
-  removeElement: PropTypes.func,
+  select: PropTypes.func,
+  remove: PropTypes.func,
+  isSelected: PropTypes.bool,
+  elementTypeDefintion: PropTypes.object,
+  state: PropTypes.string,
+  error: PropTypes.object,
+  renderable: PropTypes.object,
 };
 
 export const ElementWrapper = compose(

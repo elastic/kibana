@@ -4,18 +4,18 @@ import { ElementWrapper as Component } from './element_wrapper';
 import { fetchRenderable, removeElement } from '../../state/actions/elements';
 import { selectElement } from '../../state/actions/transient';
 import { getSelectedElementId, getResolvedArgs, getSelectedPage } from '../../state/selectors/workpad';
-import { getState, getValue } from '../../lib/resolved_arg';
+import { getState, getValue, getError } from '../../lib/resolved_arg';
 import { elements as elementsRegistry } from '../../lib/elements';
 
 const mapStateToProps = (state, { element }) => ({
-  renderable: getResolvedArgs(state, element.id, 'expressionRenderable'),
-  selectedElement: getSelectedElementId(state),
+  resolvedArg: getResolvedArgs(state, element.id, 'expressionRenderable'),
+  isSelected: element.id === getSelectedElementId(state),
   selectedPage: getSelectedPage(state),
 });
 
 const mapDispatchToProps = (dispatch, { element }) => ({
   fetchRenderable: () => dispatch(fetchRenderable(element.id)),
-  selectElement(ev) {
+  select(ev) {
     ev && ev.stopPropagation();
     dispatch(selectElement(element.id));
   },
@@ -25,15 +25,18 @@ const mapDispatchToProps = (dispatch, { element }) => ({
   },
 });
 
-const mergeProps = (stateProps, dispatchProps, ownProps) => {
-  const renderableValue = getValue(stateProps.renderable);
+const mergeProps = (stateProps, dispatchProps) => {
+  const renderable = getValue(stateProps.resolvedArg);
 
-  return Object.assign({}, stateProps, dispatchProps, ownProps, {
-    removeElement: dispatchProps.removeElementFromPage(stateProps.selectedPage),
-    renderableValue,
-    renderableState: getState(stateProps.renderable),
-    renderableElement: elementsRegistry.get(get(renderableValue, 'as')),
-  });
+  return {
+    select: dispatchProps.select,
+    remove: dispatchProps.removeElementFromPage(stateProps.selectedPage),
+    isSelected: stateProps.isSelected,
+    elementTypeDefintion: elementsRegistry.get(get(renderable, 'as')),
+    state: getState(stateProps.resolvedArg),
+    error: getError(stateProps.resolvedArg),
+    renderable,
+  };
 };
 
 export const ElementWrapper = connect(mapStateToProps, mapDispatchToProps, mergeProps)(Component);
