@@ -32,7 +32,7 @@ sophisticated date parsing APIs that Kibana uses to determine date information, 
 specify dates in the index pattern name.
 +
 . Click *Create* to add the index pattern. This first pattern is automatically configured as the default.
-When you have more than one index pattern, you can designate which one to use as the default by clicking 
+When you have more than one index pattern, you can designate which one to use as the default by clicking
 on the star icon above the index pattern title from *Management > Index Patterns*.
 
 All done! Kibana is now connected to your Elasticsearch data. Kibana displays a read-only list of fields
@@ -58,7 +58,7 @@ Getting Started>> tutorial.
 [float]
 [[kibana-dynamic-mapping]]
 === Kibana and Elasticsearch Dynamic Mapping
-By default, Elasticsearch enables {es-ref}dynamic-mapping.html[dynamic mapping] for fields. Kibana needs
+By default, Elasticsearch enables {ref}/dynamic-mapping.html[dynamic mapping] for fields. Kibana needs
 dynamic mapping to use fields in visualizations correctly, as well as to manage the `.kibana` index
 where saved searches, visualizations, and dashboards are stored.
 
