@@ -3,23 +3,26 @@ import angular from 'angular';
 import * as columnActions from 'ui/doc_table/actions/columns';
 import { getPersistedStateId } from 'plugins/kibana/dashboard/panel/panel_state';
 import { FilterManagerProvider } from 'ui/filter_manager';
+import { EmbeddableHandler } from 'ui/embeddable';
 
-export class SearchEmbeddableHandler {
+
+export class SearchEmbeddableHandler extends EmbeddableHandler {
+
   constructor($compile, $rootScope, searchLoader, Private) {
+    super();
     this.$compile = $compile;
     this.searchLoader = searchLoader;
     this.filterManager = Private(FilterManagerProvider);
     this.$rootScope = $rootScope;
     this.name = 'search';
-    this.title = 'Saved Searches';
   }
 
-  getEditPath(panel) {
-    return this.searchLoader.urlFor(panel.id);
+  getEditPath(panelId) {
+    return this.searchLoader.urlFor(panelId);
   }
 
-  getTitleFor(panel) {
-    return this.searchLoader.get(panel.id).then(savedObject => savedObject.title);
+  getTitleFor(panelId) {
+    return this.searchLoader.get(panelId).then(savedObject => savedObject.title);
   }
 
   render(domNode, panel, container) {

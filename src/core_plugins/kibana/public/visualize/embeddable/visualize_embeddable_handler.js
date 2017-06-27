@@ -4,25 +4,26 @@ import visualizationTemplate from './visualize_template.html';
 import { getPersistedStateId } from 'plugins/kibana/dashboard/panel/panel_state';
 import { UtilsBrushEventProvider as utilsBrushEventProvider } from 'ui/utils/brush_event';
 import { FilterBarClickHandlerProvider as filterBarClickHandlerProvider } from 'ui/filter_bar/filter_bar_click_handler';
+import { EmbeddableHandler } from 'ui/embeddable';
 
-export class VisualizeEmbeddableHandler {
+export class VisualizeEmbeddableHandler extends EmbeddableHandler {
   constructor($compile, $rootScope, visualizeLoader, timefilter, Notifier) {
+    super();
     this.$compile = $compile;
     this.visualizeLoader = visualizeLoader;
     this.$rootScope = $rootScope;
     this.name = 'visualization';
-    this.title = 'Visualizations';
 
     this.brushEvent = utilsBrushEventProvider(timefilter);
     this.filterBarClickHandler = filterBarClickHandlerProvider(Notifier);
   }
 
-  getEditPath(panel) {
-    return this.visualizeLoader.urlFor(panel.id);
+  getEditPath(panelId) {
+    return this.visualizeLoader.urlFor(panelId);
   }
 
-  getTitleFor(panel) {
-    return this.visualizeLoader.get(panel.id).then(savedObject => savedObject.title);
+  getTitleFor(panelId) {
+    return this.visualizeLoader.get(panelId).then(savedObject => savedObject.title);
   }
 
   render(domNode, panel, container) {

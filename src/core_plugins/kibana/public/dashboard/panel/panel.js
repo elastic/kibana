@@ -6,7 +6,7 @@ import { uiModules } from 'ui/modules';
 import panelTemplate from 'plugins/kibana/dashboard/panel/panel.html';
 import { savedObjectManagementRegistry } from 'plugins/kibana/management/saved_object_registry';
 import { DashboardViewMode } from '../dashboard_view_mode';
-import { EmbeddableHandlersRegistryProvider } from 'ui/registry/embeddable_handlers';
+import { EmbeddableHandlersRegistryProvider } from 'ui/embeddable/embeddable_handlers_registry';
 
 uiModules
 .get('app/dashboard')
@@ -95,6 +95,7 @@ uiModules
         registerPanelIndexPattern: $scope.registerPanelIndexPattern,
       };
 
+      const panelId = $scope.panel.id;
       const handleError = (error) => {
         $scope.error = error.message;
 
@@ -110,11 +111,10 @@ uiModules
         if (objectItselfDeleted) return;
 
         const type = $scope.panel.type;
-        const id = $scope.panel.id;
         const service = services.find(service => service.type === type);
         if (!service) return;
 
-        $scope.editUrl = '#management/kibana/objects/' + service.name + '/' + id + '?notFound=' + error.savedObjectType;
+        $scope.editUrl = '#management/kibana/objects/' + service.name + '/' + panelId + '?notFound=' + error.savedObjectType;
       };
 
       const embeddableHandlers = Private(EmbeddableHandlersRegistryProvider);
@@ -123,8 +123,8 @@ uiModules
         handleError(`No embeddable handler for panel type ${$scope.panel.type} was found.`);
         return;
       }
-      $scope.editUrl = embeddableHandler.getEditPath($scope.panel);
-      embeddableHandler.getTitleFor($scope.panel).then(title => {
+      $scope.editUrl = embeddableHandler.getEditPath(panelId);
+      embeddableHandler.getTitleFor(panelId).then(title => {
         $scope.title = title;
       });
       $scope.loadedPanel =
