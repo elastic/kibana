@@ -13,6 +13,7 @@
     },
     "mappings": {
       "doc": {
+        "dynamic": "strict",
         "properties": {
           "config": {
             "properties": {
@@ -250,6 +251,9 @@
             }
           }
         }
+      },
+      "_default_": {
+        "dynamic": "strict"
       }
     }
   }
