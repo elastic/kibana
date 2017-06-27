@@ -45,7 +45,10 @@ const ElementWrapperComponent = (props) => {
   // TODO: pass in render element dimensions
   const selectedClassName = isSelected ? 'selected' : '';
 
-  const style = Object.assign({ position: 'absolute' }, omit(position, 'rotation'));
+  const style = Object.assign({
+    position: 'absolute',
+    transform: `rotate(${position.rotation}deg)`,
+  }, omit(position, 'rotation'));
 
   return (
     <div
@@ -60,6 +63,7 @@ const ElementWrapperComponent = (props) => {
         destroyFn={elementTypeDefintion.destroy}
         config={renderable.value}
         done={() => {}}
+        size={{ width: position.width, height: position.height }}
       />
     </div>
   );

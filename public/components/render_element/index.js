@@ -5,13 +5,14 @@ import PropTypes from 'prop-types';
 let cleanupContext;
 export const RenderElement = compose(
   pure,
-  withProps(({ renderFn, destroyFn, done, config }) => ({
+  withProps(({ renderFn, destroyFn, done, config, size }) => ({
     renderFn: (domNode) => {
       cleanupContext = renderFn(domNode, config, done || (() => {}));
     },
     destroyFn: () => {
       if (destroyFn) destroyFn(cleanupContext);
     },
+    size,
   }))
 )(Component);
 
@@ -20,4 +21,5 @@ RenderElement.propTypes = {
   destroyFn: PropTypes.func,
   done: PropTypes.func,
   config: PropTypes.object,
+  size: PropTypes.object,
 };

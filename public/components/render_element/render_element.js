@@ -2,16 +2,14 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { lifecycle, compose } from 'recompose';
 
-export const RenderElementComponent = ({ renderFn }) => {
+export const RenderElementComponent = ({ renderFn, size }) => {
   const renderElement = (domNode) => {
     if (domNode) renderFn(domNode);
   };
 
-  const style = { height: '500px', width: '700px' };
-
   return (
-    <div className="canvas__workpad--element_render" style={style}>
-      <div style={style} ref={renderElement} />
+    <div className="canvas__workpad--element_render">
+      <div style={size} ref={renderElement} />
     </div>
   );
 };
@@ -25,6 +23,7 @@ const RenderElementLifecycle = lifecycle({
 RenderElementComponent.propTypes = {
   renderFn: PropTypes.func,
   destroyFn: PropTypes.func,
+  size: PropTypes.object,
 };
 
 export const RenderElement = compose(
