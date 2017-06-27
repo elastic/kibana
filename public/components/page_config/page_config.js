@@ -6,8 +6,9 @@ export const PageConfig = ({ setBackground, background }) => {
 
   return (
     <div className="canvas__page_config">
-      <h5>Page Settings</h5>
+      <h4>Page</h4>
       <ColorPicker onChange={setBackground} value={background}/>
+      <label>Background Color</label>
     </div>
   );
 };

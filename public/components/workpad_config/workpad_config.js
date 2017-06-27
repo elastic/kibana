@@ -7,7 +7,7 @@ export const WorkpadConfig = ({ setSize, size }) => {
 
   return (
     <div className="canvas__workpad_config">
-      <h5>Workpad Settings</h5>
+      <h4>Workpad</h4>
           <FormControl
             spellCheck={false}
             componentClass="input"
