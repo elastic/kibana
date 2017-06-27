@@ -72,7 +72,7 @@ export class SavedObjectsClient {
     response = await this._withKibanaIndex('bulk', { body: v6Body });
 
     const items = get(response, 'items', []);
-    const missingErrors = items.filter(isTypeMissing, action).length;
+    const missingErrors = items.filter(item => isTypeMissing(item, action)).length;
     const usesV5Index = items.length && items.length === missingErrors;
 
     if (usesV5Index) {
