@@ -37,7 +37,7 @@ export default props => (
       </GuideDemo>
     </GuideSection>
 
-    <GuideSection
+    {/*<GuideSection
       title="ComboBox, small"
       source={[{
         type: GuideSectionTypes.JS,
@@ -65,6 +65,6 @@ export default props => (
       <GuideDemo>
         <ComboBoxLarge />
       </GuideDemo>
-    </GuideSection>
+    </GuideSection>*/}
   </GuidePage>
 );
