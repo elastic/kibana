@@ -115,7 +115,7 @@ export class SavedObjectsClient {
    */
   async bulkGet(objects = []) {
     if (objects.length === 0) {
-      return [];
+      return { saved_objects: [] };
     }
 
     const docs = objects.map(doc => {
@@ -125,14 +125,16 @@ export class SavedObjectsClient {
     const response = await this._withKibanaIndex('mget', { body: { docs } })
       .then(resp => get(resp, 'docs', []).filter(resp => resp.found));
 
-    return response.map(r => {
-      return {
-        id: r._id,
-        type: r._type,
-        version: r._version,
-        attributes: r._source
-      };
-    });
+    return {
+      saved_objects: response.map(r => {
+        return {
+          id: r._id,
+          type: r._type,
+          version: r._version,
+          attributes: r._source
+        };
+      })
+    };
   }
 
   async get(type, id) {

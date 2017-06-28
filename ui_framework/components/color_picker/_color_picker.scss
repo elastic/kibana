@@ -1,6 +1,5 @@
 .kuiColorPicker {
   cursor: pointer;
-  display: inline-block
 }
 
   .kuiColorPicker__preview {
@@ -13,6 +12,20 @@
     height: $colorPickerSize;
     border-radius: $globalBorderRadius;
     box-shadow: inset 0 0 0 1px rgba(#000, 0.2);
+    display: inline-block;
+  }
+
+  .kuiColorPicker__emptySwatch {
+    svg {
+      position: absolute;
+      width: $colorPickerSize;
+      height: $colorPickerSize;
+    }
+
+    svg line {
+      stroke: rgb(255, 0, 0);
+      stroke-width: 2;
+    }
   }
 
   .kuiColorPicker__label {

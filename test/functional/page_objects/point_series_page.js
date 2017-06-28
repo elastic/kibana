@@ -85,7 +85,7 @@ export function PointSeriesPageProvider({ getService }) {
     setGridValueAxis(axis) {
       return remote
         .setFindTimeout(defaultFindTimeout)
-        .findByCssSelector(`select#gridAxis option[value="string:${axis}"]`)
+        .findByCssSelector(`select#gridAxis option[value="${axis}"]`)
         .click();
     }
 

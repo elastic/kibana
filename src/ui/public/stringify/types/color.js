@@ -1,17 +1,10 @@
-import 'ui/stringify/editors/color.less';
 import _ from 'lodash';
+import { DEFAULT_COLOR } from './color_default';
 import { FieldFormat } from 'ui/index_patterns/_field_format/field_format';
-import colorTemplate from 'ui/stringify/editors/color.html';
 
 export function stringifyColor() {
 
   const convertTemplate = _.template('<span style="<%- style %>"><%- val %></span>');
-  const DEFAULT_COLOR = {
-    range: `${Number.NEGATIVE_INFINITY}:${Number.POSITIVE_INFINITY}`,
-    regex: '<insert regex>',
-    text: '#000000',
-    background: '#ffffff'
-  };
 
   _.class(_Color).inherits(FieldFormat);
   function _Color(params) {
@@ -24,24 +17,6 @@ export function stringifyColor() {
     'number',
     'string'
   ];
-
-  _Color.editor = {
-    template: colorTemplate,
-    controller($scope) {
-      $scope.$watch('editor.field.type', type => {
-        $scope.editor.formatParams.fieldType = type;
-      });
-
-      $scope.addColor = function () {
-        $scope.editor.formatParams.colors.push(_.cloneDeep(DEFAULT_COLOR));
-      };
-
-      $scope.removeColor = function (index) {
-        $scope.editor.formatParams.colors.splice(index, 1);
-      };
-    }
-  };
-
 
   _Color.prototype.getParamDefaults = function () {
     return {

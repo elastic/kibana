@@ -165,8 +165,8 @@ export default () => Joi.object({
   map: Joi.object({
     manifestServiceUrl: Joi.when('$dev', {
       is: true,
-      then: Joi.string().default('https://geo.elastic.co/v1/manifest'),
-      otherwise: Joi.string().default('https://geo.elastic.co/v1/manifest')
+      then: Joi.string().default('https://catalogue.maps.elastic.co/v1/manifest'),
+      otherwise: Joi.string().default('https://catalogue.maps.elastic.co/v1/manifest')
     })
   }).default(),
   tilemap: Joi.object({

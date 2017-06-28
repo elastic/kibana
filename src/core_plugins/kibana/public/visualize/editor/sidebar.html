@@ -44,7 +44,7 @@
         </ul>
 
         <!-- controls -->
-        <ul class="nav navbar-nav navbar-right">
+        <ul class="nav navbar-nav navbar-right sidebar-controls">
           <li
             ng-if="visualizeEditor.softErrorCount() > 0"
             disabled
@@ -53,9 +53,12 @@
             tooltip-popup-delay="400"
             tooltip-append-to-body="1"
           >
-            <a class="kuiButton kuiButton--danger navbar-btn-link">
-              <span class="fa fa-warning"></span>
-            </a>
+            <div
+              class="kuiButton kuiButton--danger navbar-btn-link sidebar-controls-error"
+              aria-label="{{ visualizeEditor.describeErrors() }}"
+            >
+              <span aria-hidden="true" class="kuiIcon kuiIcon--error fa-warning"></span>
+            </div>
           </li>
 
           <li

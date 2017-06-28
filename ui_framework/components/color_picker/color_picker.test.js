@@ -24,6 +24,29 @@ test('renders KuiColorPicker', () => {
   expect(colorPicker).toMatchSnapshot();
 });
 
+test('renders KuiColorPicker with an empty swatch when color is null', () => {
+  const colorPicker = render(
+    <KuiColorPicker
+      onChange={ onChange }
+      color={ null }
+      { ...requiredProps }
+    />
+  );
+  expect(colorPicker).toMatchSnapshot();
+});
+
+test('renders KuiColorPicker without a color label when showColorLabel is false', () => {
+  const colorPicker = render(
+    <KuiColorPicker
+      onChange={ onChange }
+      color={ '#ffffff' }
+      showColorLabel={ false }
+      { ...requiredProps }
+    />
+  );
+  expect(colorPicker).toMatchSnapshot();
+});
+
 test('pop up color selector is not shown by default', () => {
   const colorPicker = mount(
     <KuiColorPicker
