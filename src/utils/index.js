@@ -27,5 +27,6 @@ export {
 } from './streams';
 
 export {
-  parseCommaSeparatedList
+  parseCommaSeparatedList,
+  formatListAsProse,
 } from './strings';

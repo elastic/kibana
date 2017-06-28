@@ -1,7 +1,9 @@
-import _ from 'lodash';
 import { uiModules } from 'ui/modules';
 
-import { parseCommaSeparatedList } from '../../../utils';
+import {
+  parseCommaSeparatedList,
+  formatListAsProse,
+} from '../../../utils';
 
 uiModules
 .get('kibana')
@@ -14,14 +16,7 @@ uiModules
    * @param {Boolean} inclusive - Should the list be joined with an "and"?
    * @return {String}
    */
-  return function (input, inclusive) {
-    const list = parseCommaSeparatedList(input);
-    if (list.length < 2) {
-      return list.join('');
-    }
-
-    const conj = inclusive ? ' and ' : ' or ';
-    return list.slice(0, -1).join(', ') + conj + _.last(list);
-
+  return function (input, inclusive = false) {
+    return formatListAsProse(parseCommaSeparatedList(input), { inclusive });
   };
 });
