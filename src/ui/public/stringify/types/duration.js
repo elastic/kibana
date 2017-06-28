@@ -51,14 +51,14 @@ export function stringifyDuration() {
       const precise = human ? formatted : formatted.toFixed(outputPrecision);
       return prefix + precise;
     }
+
+    static id = 'duration';
+    static title = 'Duration';
+    static fieldType = 'number';
+
+    static inputFormats = inputFormats;
+    static outputFormats = outputFormats;
   }
-
-  Duration.id = 'duration';
-  Duration.title = 'Duration';
-  Duration.fieldType = 'number';
-
-  Duration.inputFormats = inputFormats;
-  Duration.outputFormats = outputFormats;
 
   Duration.prototype.getParamDefaults = function () {
     return {
