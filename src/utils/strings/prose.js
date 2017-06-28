@@ -7,10 +7,6 @@ export function formatListAsProse(list, options = {}) {
     return String(list);
   }
 
-  if (list.length < 2) {
-    return list.join('');
-  }
-
   const count = list.length;
   const lastI = count - 1;
   const conjunction = inclusive ? 'and' : 'or';
