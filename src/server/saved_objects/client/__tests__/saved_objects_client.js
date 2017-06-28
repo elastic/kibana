@@ -69,7 +69,7 @@ describe('SavedObjectsClient', () => {
       });
     });
 
-    it('should use ES create action', async () => {
+    it('should use ES index action', async () => {
       callAdminCluster.returns({ _type: 'index-pattern', _id: 'logstash-*', _version: 2 });
 
       await savedObjectsClient.create('index-pattern', {
@@ -80,21 +80,22 @@ describe('SavedObjectsClient', () => {
       expect(callAdminCluster.calledOnce).to.be(true);
 
       const args = callAdminCluster.getCall(0).args;
-      expect(args[0]).to.be('create');
+      expect(args[0]).to.be('index');
     });
 
-    it('should overwrite objects if overwrite is truthy', async () => {
+    it('should use create action if ID defined and overwrite=false', async () => {
       callAdminCluster.returns({ _type: 'index-pattern', _id: 'logstash-*', _version: 2 });
 
       await savedObjectsClient.create('index-pattern', {
-        id: 'logstash-*',
         title: 'Logstash'
-      }, { overwrite: true });
+      }, {
+        id: 'logstash-*',
+      });
 
       expect(callAdminCluster.calledOnce).to.be(true);
 
       const args = callAdminCluster.getCall(0).args;
-      expect(args[0]).to.be('index');
+      expect(args[0]).to.be('create');
     });
 
     it('allows for id to be provided', async () => {

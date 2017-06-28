@@ -23,7 +23,7 @@ export class SavedObjectsClient {
    * @returns {promise} - { id, type, version, attributes }
   */
   async create(type, attributes = {}, options = {}) {
-    const method = options.overwrite ? 'index' : 'create';
+    const method = get(options, 'overwrite', false) === false && options.id ? 'create' : 'index';
     const response = await this._withKibanaIndex(method, {
       type,
       id: options.id,
@@ -48,10 +48,10 @@ export class SavedObjectsClient {
    * @returns {promise} - [{ id, type, version, attributes, error: { message } }]
    */
   async bulkCreate(objects, options = {}) {
-    const action = options.overwrite ? 'index' : 'create';
-
     const body = objects.reduce((acc, object) => {
-      acc.push({ [action]: { _type: object.type, _id: object.id } });
+      const method = get(options, 'overwrite', false) === false && object.id ? 'create' : 'index';
+
+      acc.push({ [method]: { _type: object.type, _id: object.id } });
       acc.push(object.attributes);
 
       return acc;
@@ -59,12 +59,14 @@ export class SavedObjectsClient {
 
     return await this._withKibanaIndex('bulk', { body, refresh: 'wait_for' })
       .then(resp => get(resp, 'items', []).map((resp, i) => {
+        const method = Object.keys(resp)[0];
+
         return {
-          id: resp[action]._id,
-          type: resp[action]._type,
-          version: resp[action]._version,
+          id: resp[method]._id,
+          type: resp[method]._type,
+          version: resp[method]._version,
           attributes: objects[i].attributes,
-          error: resp[action].error ? { message: get(resp[action], 'error.reason') } : undefined
+          error: resp[method].error ? { message: get(resp[method], 'error.reason') } : undefined
         };
       }));
   }
