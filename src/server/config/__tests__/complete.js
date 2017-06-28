@@ -28,68 +28,78 @@ describe('server/config completeMixin()', function () {
     return { server, callCompleteMixin };
   };
 
-  it(`should call server.log when there's an unused setting`, function () {
-    const { server, callCompleteMixin } = setup({
-      settings: {
-        unused: true
-      },
-      configValues: {
-        used: true
-      }
+  describe('all settings used', () => {
+    it(`shouldn't call server.log`, function () {
+      const { server, callCompleteMixin } = setup({
+        settings: {
+          used: true
+        },
+        configValues: {
+          used: true
+        },
+      });
+
+      callCompleteMixin();
+      expect(server.log.called).to.be(false);
     });
 
-    callCompleteMixin();
-    expect(server.log.calledOnce).to.be(true);
-  });
+    describe('more config values than settings', () => {
+      it(`shouldn't call server.log`, function () {
+        const { server, callCompleteMixin } = setup({
+          settings: {
+            used: true
+          },
+          configValues: {
+            used: true,
+            foo: 'bar'
+          }
+        });
 
-  it(`shouldn't call server.log when there isn't an unused setting`, function () {
-    const { server, callCompleteMixin } = setup({
-      settings: {
-        used: true
-      },
-      configValues: {
-        used: true
-      },
+        callCompleteMixin();
+        expect(server.log.called).to.be(false);
+      });
     });
-
-    callCompleteMixin();
-    expect(server.log.called).to.be(false);
   });
 
-  it(`shouldn't call server.log when there are more config values than settings`, function () {
-    const { server, callCompleteMixin } = setup({
-      settings: {
-        used: true
-      },
-      configValues: {
-        used: true,
-        foo: 'bar'
-      }
+
+  describe('some settings unused', () => {
+    it(`should call server.log`, function () {
+      const { server, callCompleteMixin } = setup({
+        settings: {
+          unused: true
+        },
+        configValues: {
+          used: true
+        }
+      });
+
+      callCompleteMixin();
+      expect(server.log.calledOnce).to.be(true);
     });
-
-    callCompleteMixin();
-    expect(server.log.called).to.be(false);
   });
 
-  it('should transform server.ssl.cert to server.ssl.certificate', function () {
-    const { server, callCompleteMixin } = setup({
-      settings: {
-        server: {
-          ssl: {
-            cert: 'path/to/cert'
+
+  describe('deprecation support', () => {
+    it('should transform server.ssl.cert to server.ssl.certificate', function () {
+      const { server, callCompleteMixin } = setup({
+        settings: {
+          server: {
+            ssl: {
+              cert: 'path/to/cert'
+            }
+          }
+        },
+        configValues: {
+          server: {
+            ssl: {
+              certificate: 'path/to/cert'
+            }
           }
         }
-      },
-      configValues: {
-        server: {
-          ssl: {
-            certificate: 'path/to/cert'
-          }
-        }
-      }
-    });
+      });
 
-    callCompleteMixin();
-    expect(server.log.called).to.be(false);
+      callCompleteMixin();
+      expect(server.log.called).to.be(false);
+    });
   });
 });
