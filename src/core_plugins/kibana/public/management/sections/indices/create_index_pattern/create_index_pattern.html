@@ -10,19 +10,34 @@
         translate="KIBANA-CONFIGURE_INDEX_PATTERN"
       ></h1>
 
-      <p
-        class="kuiText kuiVerticalRhythm"
-        translate="KIBANA-MUST_CONFIGURE_INDEX_PATTERN"
-      ></p>
+      <!-- Form -->
+      <form
+        name="form"
+        role="form"
+        class="kuiVerticalRhythm"
+        ng-submit="controller.createIndexPattern()"
+      >
+        <!-- Specify index pattern -->
+        <div class="kuiVerticalRhythm">
+          <h2
+            class="kuiSubTitle kuiVerticalRhythm"
+            translate="KIBANA-SPECIFY_INDEX_PATTERN"
+          ></h2>
 
-      <div class="kuiVerticalRhythm">
-        <!-- Form -->
-        <form
-          name="form"
-          role="form"
-          class="kuiVerticalRhythm"
-          ng-submit="controller.createIndexPattern()"
-        >
+          <p
+            class="kuiText kuiVerticalRhythm"
+            translate="KIBANA-INDEX_PATTERN_EXPLANATION_1"
+          ></p>
+
+          <p class="kuiText kuiVerticalRhythm">
+            <span translate="KIBANA-INDEX_PATTERN_EXPLANATION_2"></span>
+            <a
+              class="kuiLink"
+              ng-href="{{ controller.documentationLinks.indexPatterns.introduction }}"
+              translate="KIBANA-INDEX_PATTERN_EXPLANATION_3"
+            ></a>
+          </p>
+
           <!-- Index pattern input -->
           <div class="kuiVerticalRhythm">
             <label
@@ -56,15 +71,45 @@
                 </span>
               </p>
             </div>
-
-            <!-- Input help text -->
-            <div class="kuiVerticalRhythm">
-              <p
-                class="kuiSubText kuiVerticalRhythmSmall"
-                translate="KIBANA-WILDCARD_DYNAMIC_INDEX_PATTERNS"
-              ></p>
-            </div>
           </div>
+
+          <!-- List of matching indices -->
+          <div
+            class="kuiVerticalRhythm"
+            ng-switch="controller.matchingIndicesListType"
+          >
+            <matching-indices-list
+              ng-switch-when="noMatches"
+              indices="controller.allIndices"
+              template-index-patterns="controller.allTemplateIndexPatterns"
+            ></matching-indices-list>
+
+            <matching-indices-list
+              ng-switch-when="partialMatches"
+              indices="controller.partialMatchingIndices"
+              template-index-patterns="controller.partialMatchingTemplateIndexPatterns"
+            ></matching-indices-list>
+
+            <matching-indices-list
+              ng-switch-when="exactMatches"
+              indices="controller.matchingIndices"
+              template-index-patterns="controller.matchingTemplateIndexPatterns"
+            ></matching-indices-list>
+          </div>
+          </div>
+        </div>
+
+        <!-- Time field -->
+        <div class="kuiVerticalRhythm">
+          <h2
+            class="kuiSubTitle kuiVerticalRhythm"
+            translate="KIBANA-SPECIFY_TIME_FIELD"
+          ></h2>
+
+          <p
+            class="kuiText kuiVerticalRhythm"
+            translate="KIBANA-TIME_FIELD_EXPLANATION"
+          ></p>
 
           <!-- Time field select -->
           <div class="kuiVerticalRhythm">
@@ -137,11 +182,10 @@
             ng-disabled="form.$invalid || controller.timeFieldOptionsError || controller.isLoading()"
             class="kuiButton kuiButton--primary kuiVerticalRhythm"
             type="submit"
-          >
-            {{controller.createButtonText}}
-          </button>
-        </form>
-      </div>
+            translate="KIBANA-CREATE"
+          ></button>
+        </div>
+      </form>
     </div>
   </kbn-management-indices>
 </kbn-management-app>
