@@ -7,11 +7,12 @@ export default function registerSet(server) {
     handler: function (req, reply) {
       const { key } = req.params;
       const { value } = req.payload;
-      const uiSettings = server.uiSettings();
+      const uiSettings = req.getUiSettingsService();
+
       uiSettings
-        .set(req, key, value)
+        .set(key, value)
         .then(() => uiSettings
-          .getUserProvided(req)
+          .getUserProvided()
           .then(settings => reply({ settings }).type('application/json'))
         )
         .catch(err => reply(Boom.wrap(err, err.statusCode)));
