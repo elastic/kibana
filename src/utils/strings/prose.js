@@ -1,5 +1,3 @@
-import _ from 'lodash';
-
 export function formatListAsProse(list, options = {}) {
   const {
     inclusive = true
@@ -13,6 +11,22 @@ export function formatListAsProse(list, options = {}) {
     return list.join('');
   }
 
-  const conj = inclusive ? ' and ' : ' or ';
-  return list.slice(0, -1).join(', ') + conj + _.last(list);
+  const count = list.length;
+  const lastI = count - 1;
+  const conjunction = inclusive ? 'and' : 'or';
+  return list.reduce((acc, item, i) => {
+    if (i === 0) {
+      return item;
+    }
+
+    if (i === lastI && count >= 3) {
+      return `${acc}, ${conjunction} ${item}`;
+    }
+
+    if (i === lastI) {
+      return `${acc} ${conjunction} ${item}`;
+    }
+
+    return `${acc}, ${item}`;
+  }, '');
 }
