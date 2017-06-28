@@ -147,14 +147,21 @@ export default function (program) {
     try {
       kbnServer = new KbnServer(settings);
       await kbnServer.ready();
-    }
-    catch (err) {
+    } catch (error) {
       const { server } = kbnServer;
 
-      if (err.code === 'EADDRINUSE') {
-        logFatal(`Port ${err.port} is already in use. Another instance of Kibana may be running!`, server);
-      } else {
-        logFatal(err, server);
+      switch (error.code) {
+        case 'EADDRINUSE':
+          logFatal(`Port ${error.port} is already in use. Another instance of Kibana may be running!`, server);
+          break;
+
+        case 'InvalidConfig':
+          logFatal(error.message, server);
+          break;
+
+        default:
+          logFatal(error, server);
+          break;
       }
 
       kbnServer.close();
@@ -175,6 +182,7 @@ export default function (program) {
 function logFatal(message, server) {
   if (server) {
     server.log(['fatal'], message);
+  } else {
+    console.error('FATAL', message);
   }
-  console.error('FATAL', message);
 }
