@@ -222,10 +222,7 @@ describe('xsrf request filter', function () {
         });
 
         expect(resp.statusCode).to.be(400);
-        expect(resp.result.message).to.be(
-          'Request must contain a content-type header of either application/json or application/x-ndjson.' +
-          ` The content-type header for current request is undefined.`
-        );
+        expect(resp.result.message).to.be('Request must contain a kbn-xsrf header.');
       });
 
       it('rejects requests with content-type that is not allowed', async function () {
@@ -246,10 +243,7 @@ describe('xsrf request filter', function () {
           });
 
           expect(resp.statusCode).to.be(400);
-          expect(resp.result.message).to.be(
-            'Request must contain a content-type header of either application/json or application/x-ndjson.' +
-            ` The content-type header for current request is ${contentType}.`
-          );
+          expect(resp.result.message).to.be('Request must contain a kbn-xsrf header.');
         }
       });
     });
