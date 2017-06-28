@@ -1,5 +1,5 @@
 import _ from 'lodash';
-import { shortenDottedString } from 'ui/utils/shorten_dotted_string';
+import { shortenDottedString } from '../../../core_plugins/kibana/common/utils/shorten_dotted_string';
 import { uiModules } from 'ui/modules';
 // Shorts dot notated strings
 // eg: foo.bar.baz becomes f.b.baz
