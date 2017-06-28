@@ -5,26 +5,5 @@ exports[`KuiTabs renders 1`] = `
   aria-label="aria-label"
   class="kuiTabs testClass1 testClass2"
   data-test-subj="test subject string"
->
-  <button
-    class="kuiTab kuiTab-isSelected"
-  >
-    Cobalt
-  </button>
-  <button
-    class="kuiTab"
-  >
-    Dextrose
-  </button>
-  <button
-    class="kuiTab"
-  >
-    Helium-3
-  </button>
-  <button
-    class="kuiTab"
-  >
-    Monosodium Glutamate
-  </button>
-</div>
+/>
 `;

@@ -1,38 +1,55 @@
 import React from 'react';
 
 import {
-  KuiTabs
+  KuiTabs,
+  KuiTab,
 } from '../../../../components';
 
 class KuiTabsExample extends React.Component {
   constructor(props) {
     super(props);
 
-    this.tabs = [
-      'Cobalt',
-      'Dextrose',
-      'Helium-3',
-      'Monosodium Glutamate',
-    ];
+    this.tabs = [{
+      id: 'cobalt',
+      name: 'Cobalt',
+    }, {
+      id: 'dextrose',
+      name: 'Dextrose',
+    }, {
+      id: 'helium_3',
+      name: 'Helium-3',
+    }, {
+      id: 'monosodium_glutammate',
+      name: 'Monosodium Glutamate',
+    }];
 
     this.state = {
-      selectedTabIndex: 0,
+      selectedTabId: 'cobalt',
     };
   }
 
-  onSelectedTabChanged = (index) => {
+  onSelectedTabChanged = id => {
     this.setState({
-      selectedTabIndex: index,
+      selectedTabId: id,
     });
+  }
+
+  renderTabs() {
+    return this.tabs.map((tab,index) => (
+      <KuiTab
+        onClick={() => this.onSelectedTabChanged(tab.id)}
+        isSelected={tab.id === this.state.selectedTabId}
+        key={index}
+      >
+        {tab.name}
+      </KuiTab>
+    ));
   }
 
   render() {
     return (
-      <KuiTabs
-        selectedTabIndex={this.state.selectedTabIndex}
-        onSelectedTabChanged={this.onSelectedTabChanged}
-      >
-        {this.tabs}
+      <KuiTabs>
+        {this.renderTabs()}
       </KuiTabs>
     );
   }
