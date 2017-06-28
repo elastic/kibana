@@ -185,7 +185,7 @@ locations for a Debian-based system:
 
 | config
   | Configuration files including `kibana.yml`
-  | /etc/kibana
+  | /etc/kibana/config
  d|
 
 | data
@@ -201,7 +201,7 @@ locations for a Debian-based system:
 
 | plugins
   | Plugin files location. Each plugin will be contained in a subdirectory.
-  | /usr/share/kibana/plugins
+  | /usr/share/kibana/installedPlugins
  d|
 
 |=======================================================================
