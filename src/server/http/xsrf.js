@@ -29,10 +29,7 @@ export default function (kbnServer, server, config) {
     );
 
     if (!hasAllowedMediaType && !hasVersionHeader && !hasXsrfHeader) {
-      return reply(badRequest(
-        `Request must contain a ${contentTypeHeader} header of either application/json or application/x-ndjson.` +
-        ` The ${contentTypeHeader} header for current request is ${req.headers[contentTypeHeader]}.`
-      ));
+      return reply(badRequest(`Request must contain a ${xsrfHeader} header.`));
     }
 
     return reply.continue();
