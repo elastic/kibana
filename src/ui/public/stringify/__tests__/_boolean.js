@@ -55,4 +55,9 @@ describe('Boolean Format', function () {
     });
   });
 
+  it('does not convert non-boolean values, instead returning original value', ()=> {
+    const s = 'non-boolean value!!';
+    expect(boolean.convert(s)).to.be(s);
+  });
+
 });

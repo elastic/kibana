@@ -1,23 +1,20 @@
-import _ from 'lodash';
 import { FieldFormat } from 'ui/index_patterns/_field_format/field_format';
 
 export function stringifyIp() {
-  _.class(Ip).inherits(FieldFormat);
-  function Ip(params) {
-    Ip.Super.call(this, params);
+
+  class IpFormat extends FieldFormat {
+    _convert(val) {
+      if (val === undefined || val === null) return '-';
+      if (!isFinite(val)) return val;
+
+      // shazzam!
+      return [val >>> 24, val >>> 16 & 0xFF, val >>> 8 & 0xFF, val & 0xFF].join('.');
+    }
+
+    static id = 'ip';
+    static title = 'IP Address';
+    static fieldType = 'ip';
   }
 
-  Ip.id = 'ip';
-  Ip.title = 'IP Address';
-  Ip.fieldType = 'ip';
-
-  Ip.prototype._convert = function (val) {
-    if (val === undefined || val === null) return '-';
-    if (!isFinite(val)) return val;
-
-    // shazzam!
-    return [val >>> 24, val >>> 16 & 0xFF, val >>> 8 & 0xFF, val & 0xFF].join('.');
-  };
-
-  return Ip;
+  return IpFormat;
 }
