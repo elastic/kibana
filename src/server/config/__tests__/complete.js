@@ -1,6 +1,5 @@
 import completeMixin from '../complete';
 import expect from 'expect.js';
-import { noop } from 'lodash';
 import sinon from 'sinon';
 
 /* eslint-disable import/no-duplicates */
@@ -13,24 +12,40 @@ describe('server/config completeMixin()', function () {
   afterEach(() => sandbox.restore());
 
   const setup = ({ settings, configValues }) => {
-    const kbnServer = {
-      settings,
-    };
-
     const server = {
-      decorate: noop,
+      decorate: sinon.stub()
     };
 
     const config = {
       get: sinon.stub().returns(configValues)
     };
 
+    const kbnServer = {
+      settings,
+      server,
+      config
+    };
+
     const callCompleteMixin = () => {
       completeMixin(kbnServer, server, config);
     };
 
-    return { callCompleteMixin };
+    return { config, callCompleteMixin, server };
   };
+
+  describe('server decoration', () => {
+    it('adds a config() function to the server', () => {
+      const { config, callCompleteMixin, server } = setup({
+        settings: {},
+        configValues: {}
+      });
+
+      callCompleteMixin();
+      sinon.assert.calledOnce(server.decorate);
+      sinon.assert.calledWith(server.decorate, 'server', 'config', sinon.match.func);
+      expect(server.decorate.firstCall.args[2]()).to.be(config);
+    });
+  });
 
   describe('all settings used', () => {
     it('should not throw', function () {
