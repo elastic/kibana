@@ -55,6 +55,14 @@ This is no longer the case. Now, only commas are a valid query separator: e.g. `
 
 [float]
 === Time-interval based index patterns are no longer supported
-*Details:*  Starting in Kibana 6.0.0 we removed the ability to create index patterns that use a date-pattern and interval to identify Elasticsearch indices. Index patterns must now use wildcards which are more performant in most cases.
+*Details:* Starting in Kibana 6.0.0 we removed the ability to create index patterns that use a date-pattern and interval to identify Elasticsearch indices. Index patterns must now use wildcards which are more performant in most cases.
 
 *Impact:* Existing index patterns and saved objects will continue to function without issue, and in a subsequent release we will provide utilities to migrate your index patterns/saved objects.
+
+
+[float]
+=== CSRF protection requires `kbn-xsrf` HTTP header to be presented in every DELETE/POST/PUT request
+*Details:* Kibana 5.5 started to consider DELETE/POST/PUT requests with `content-type` header of either `application/json` or `application/x-ndjson` as CSRF-safe even if `kbn-xsrf` header wasn't presented.
+Kibana 6.0 will switch back to pre-5.5 behaviour and require `kbn-xsrf` header for aforementioned requests.
+
+*Impact:* DELETE/POST/PUT requests that are solely relying on proper `content-type` header and don't include `kbn-xsrf` header will be rejected by CSRF protection.
