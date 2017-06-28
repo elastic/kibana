@@ -16,32 +16,32 @@ import { Router, RouterOptions } from '../http';
  * We should aim to be restrictive and specific in the apis that we expose.
  *
  * @param pluginName The name of the plugin we're building these values for
- * @param kibana The core Kibana features
+ * @param core The core Kibana features
  */
 export function createKibanaValuesForPlugin(
   pluginName: string,
-  kibana: KibanaCoreModules
+  core: KibanaCoreModules
 ): KibanaPluginFeatures {
   return {
     logger: {
       get: (...namespace) => {
-        return kibana.logger.get('plugins', pluginName, ...namespace);
+        return core.logger.get('plugins', pluginName, ...namespace);
       }
     },
     util: {
       schema
     },
     elasticsearch: {
-      service: kibana.elasticsearch.service,
-      config$: kibana.elasticsearch.config$
+      service: core.elasticsearch.service,
+      config$: core.elasticsearch.config$
     },
     kibana: {
-      config$: kibana.kibana.config$
+      config$: core.kibana.config$
     },
     http: {
       createAndRegisterRouter: <T>(path: string, options: RouterOptions<T>) => {
         const router = new Router(path, options);
-        kibana.http.service.registerRouter(router);
+        core.http.service.registerRouter(router);
         return router;
       }
     },
@@ -49,11 +49,11 @@ export function createKibanaValuesForPlugin(
       atPath: <Schema extends schema.Any, Config>(
         path: string | string[],
         ConfigClass: ConfigWithSchema<Schema, Config>
-      ) => kibana.configService.atPath(path, ConfigClass),
+      ) => core.configService.atPath(path, ConfigClass),
       optionalAtPath: <Schema extends schema.Any, Config>(
         path: string | string[],
         ConfigClass: ConfigWithSchema<Schema, Config>
-      ) => kibana.configService.optionalAtPath(path, ConfigClass)
+      ) => core.configService.optionalAtPath(path, ConfigClass)
     }
   };
 }
