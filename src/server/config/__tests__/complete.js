@@ -3,6 +3,11 @@ import expect from 'expect.js';
 import { noop } from 'lodash';
 import sinon from 'sinon';
 
+/* eslint-disable import/no-duplicates */
+import * as transformDeprecationsNS from '../transform_deprecations';
+import { transformDeprecations } from '../transform_deprecations';
+/* eslint-enable import/no-duplicates */
+
 describe('server/config completeMixin()', function () {
   const sandbox = sinon.sandbox.create();
   afterEach(() => sandbox.restore());
@@ -75,25 +80,43 @@ describe('server/config completeMixin()', function () {
 
 
   describe('deprecation support', () => {
-    it('should transform server.ssl.cert to server.ssl.certificate', function () {
-      const { server, callCompleteMixin } = setup({
-        settings: {
-          server: {
-            ssl: {
-              cert: 'path/to/cert'
-            }
-          }
-        },
+    it('should transform settings when determining what is unused', function () {
+      sandbox.spy(transformDeprecationsNS, 'transformDeprecations');
+
+      const settings = {
+        foo: 1
+      };
+
+      const { callCompleteMixin } = setup({
+        settings,
         configValues: {
-          server: {
-            ssl: {
-              certificate: 'path/to/cert'
-            }
-          }
+          ...settings
         }
       });
 
       callCompleteMixin();
+      sinon.assert.calledOnce(transformDeprecations);
+      expect(transformDeprecations.firstCall.args[0]).to.be(settings);
+    });
+
+    it('should use transformed settings when considering what is used', function () {
+      sandbox.stub(transformDeprecationsNS, 'transformDeprecations', (settings) => {
+        settings.bar = settings.foo;
+        delete settings.foo;
+        return settings;
+      });
+
+      const { callCompleteMixin } = setup({
+        settings: {
+          foo: 1
+        },
+        configValues: {
+          bar: 1
+        }
+      });
+
+      callCompleteMixin();
+      sinon.assert.calledOnce(transformDeprecations);
     });
   });
 });
