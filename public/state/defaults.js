@@ -12,7 +12,7 @@ export const getDefaultElement = () => {
       left: 20,
       height: 500,
       width: 700,
-      rotation: 0,
+      angle: 0,
     },
     expression: `
       demodata()

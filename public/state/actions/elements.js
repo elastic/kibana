@@ -19,6 +19,8 @@ function astToExpression({ ast, element, pageId }) {
 }
 
 export const removeElement = createAction('removeElement', (elementId, pageId) => ({ pageId, elementId }));
+export const setPosition = createAction('setPosition', (elementId, pageId, position) => ({ pageId, elementId, position }));
+
 
 export const fetchContext = ({ index }) => (dispatch, getState) => {
   const element = getSelectedElement(getState());

@@ -4,6 +4,7 @@ import { assign, push, del } from 'object-path-immutable';
 import * as actions from '../actions/elements';
 
 export default handleActions({
+  // TODO: This takes the entire element, which is not neccesary, it could just take the id.
   [actions.setExpression]: (workpadState, { payload }) => {
     const { expression, pageId, element } = payload;
     const pageIndex = findIndex(get(workpadState, 'pages'), { id: pageId });
@@ -12,6 +13,16 @@ export default handleActions({
 
     if (pageIndex === -1 || elementIndex === -1) return workpadState;
     return assign(workpadState, elementsPath.concat(elementIndex), { expression });
+  },
+  // This take elementId, not the full element, otherwise it is 80% the same as the above reducer
+  [actions.setPosition]: (workpadState, { payload }) => {
+    const { position, pageId, elementId } = payload;
+    const pageIndex = findIndex(get(workpadState, 'pages'), { id: pageId });
+    const elementsPath = ['pages', pageIndex, 'elements'];
+    const elementIndex = findIndex(get(workpadState, elementsPath), { id: elementId });
+
+    if (pageIndex === -1 || elementIndex === -1) return workpadState;
+    return assign(workpadState, elementsPath.concat(elementIndex), { position });
   },
   [actions.addElement]: (workpadState, { payload: { pageId, element } }) => {
     // find the index of the given pageId
