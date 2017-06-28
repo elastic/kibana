@@ -44,6 +44,7 @@ uiModules.get('apps/management')
   // UI state.
   this.timeFieldOptions = [];
   this.timeFieldOptionsError = null;
+  this.wizardStep = 'indexPattern';
   this.matchingIndicesListType = 'noMatches';
   this.documentationLinks = documentationLinks;
 
@@ -177,8 +178,20 @@ uiModules.get('apps/management')
     });
   };
 
+  this.goToIndexPatternStep = () => {
+    this.wizardStep = 'indexPattern';
+  };
+
+  this.goToTimeFieldStep = () => {
+    this.wizardStep = 'timeField';
+  };
+
   this.setIndexPattern = indexPattern => {
     this.formValues.name = indexPattern;
+  };
+
+  this.hasIndices = () => {
+    return this.allIndices.length || this.allTemplateIndexPatterns.length;
   };
 
   this.hasInput = () => {

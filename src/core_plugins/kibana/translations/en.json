@@ -2,7 +2,7 @@
   "UI-WELCOME_MESSAGE": "Loading Kibana",
   "UI-WELCOME_ERROR": "Kibana did not load properly. Check the server output for more information.",
   "KIBANA-CONFIGURE_INDEX_PATTERN": "Configure an index pattern",
-  "KIBANA-SPECIFY_INDEX_PATTERN": "Specify an index pattern which matches your indices",
+  "KIBANA-SPECIFY_INDEX_PATTERN": "Step 1: Specify an index pattern which matches your indices",
   "KIBANA-INDEX_PATTERN_EXPLANATION_1": "Kibana uses index patterns to decide which Elasticsearch indices to run search and analytics against. Kibana also uses index patterns to configure fields.",
   "KIBANA-INDEX_PATTERN_EXPLANATION_2": "You can use a * as a wildcard in your index pattern. For example, \"logstash-*\" will match all indices that begin with \"logstash-\".",
   "KIBANA-INDEX_PATTERN_EXPLANATION_3": "Learn more about index patterns.",
@@ -31,7 +31,7 @@
   "KIBANA-EXISTING_MATCH_PERCENT": "Pattern matches {{indexExistingMatchPercent}} of existing indices and aliases",
   "KIBANA-NON_MATCHING_INDICES_AND_ALIASES": "Indices and aliases that were found, but did not match the pattern:",
   "KIBANA-MORE": "more",
-  "KIBANA-SPECIFY_TIME_FIELD": "Specify an optional time field",
+  "KIBANA-SPECIFY_TIME_FIELD": "Step 2: Specify an optional time field for {{indexPatternName}}",
   "KIBANA-TIME_FIELD_EXPLANATION": "Specifying a time field will allow you to filter your data by time.",
   "KIBANA-TIME_FILTER_FIELD_NAME": "Time Filter field name",
   "KIBANA-NO_DATE_FIELD_DESIRED": "I don't want to use the Time Filter",
@@ -51,6 +51,6 @@
   "KIBANA-INDICES_MATCH_PATTERN" : "Unable to fetch mapping. Do you have indices matching the pattern?",
   "KIBANA-ADD_NEW" : "Create Index Pattern",
   "KIBANA-SEE" : "See",
-  "KIBANA-CREATE" : "Create",
+  "KIBANA-CREATE" : "Create index pattern",
   "KIBANA-FIELD_IS_REQUIRED": "{{fieldName}} is required"
 }
