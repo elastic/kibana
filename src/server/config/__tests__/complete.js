@@ -14,7 +14,6 @@ describe('server/config completeMixin()', function () {
 
     const server = {
       decorate: noop,
-      log: sinon.spy()
     };
 
     const config = {
@@ -25,12 +24,12 @@ describe('server/config completeMixin()', function () {
       completeMixin(kbnServer, server, config);
     };
 
-    return { server, callCompleteMixin };
+    return { callCompleteMixin };
   };
 
   describe('all settings used', () => {
-    it(`shouldn't call server.log`, function () {
-      const { server, callCompleteMixin } = setup({
+    it('should not throw', function () {
+      const { callCompleteMixin } = setup({
         settings: {
           used: true
         },
@@ -40,12 +39,11 @@ describe('server/config completeMixin()', function () {
       });
 
       callCompleteMixin();
-      expect(server.log.called).to.be(false);
     });
 
     describe('more config values than settings', () => {
-      it(`shouldn't call server.log`, function () {
-        const { server, callCompleteMixin } = setup({
+      it('should not throw', function () {
+        const { callCompleteMixin } = setup({
           settings: {
             used: true
           },
@@ -56,15 +54,13 @@ describe('server/config completeMixin()', function () {
         });
 
         callCompleteMixin();
-        expect(server.log.called).to.be(false);
       });
     });
   });
 
-
   describe('some settings unused', () => {
-    it(`should call server.log`, function () {
-      const { server, callCompleteMixin } = setup({
+    it('should throw an error', function () {
+      const { callCompleteMixin } = setup({
         settings: {
           unused: true
         },
@@ -73,8 +69,7 @@ describe('server/config completeMixin()', function () {
         }
       });
 
-      callCompleteMixin();
-      expect(server.log.calledOnce).to.be(true);
+      expect(callCompleteMixin).to.throwError('"unused" not applied');
     });
   });
 
@@ -99,7 +94,6 @@ describe('server/config completeMixin()', function () {
       });
 
       callCompleteMixin();
-      expect(server.log.called).to.be(false);
     });
   });
 });
