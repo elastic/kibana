@@ -1,3 +1,4 @@
+import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import { get } from 'lodash';
 import { ElementWrapper as Component } from './element_wrapper';
@@ -41,3 +42,7 @@ const mergeProps = (stateProps, dispatchProps, { element }) => {
 };
 
 export const ElementWrapper = connect(mapStateToProps, mapDispatchToProps, mergeProps)(Component);
+
+ElementWrapper.propTypes = {
+  element: PropTypes.object,
+};

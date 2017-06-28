@@ -1,54 +1,12 @@
-import React from 'react';
-import PropTypes from 'prop-types';
 import { compose, branch, renderComponent } from 'recompose';
-import { ArgType } from '../arg_type';
+import { ArgTypesComponent } from './arg_types_component';
 import { ElementNotSelected } from './element_not_selected';
 
-function wrapExpression(chain) {
-  if (!Array.isArray(chain) || !chain.length) return null;
+const branches = [
+  // rendered when no arg chain is provided
+  branch(props => !props.argTypeChain, renderComponent(ElementNotSelected)),
+];
 
-  return {
-    type: 'expression',
-    chain,
-  };
-}
-
-const noSelected = branch(props => !props.argTypeChain, renderComponent(ElementNotSelected));
-
-const ArgTypesComponent = ({ argTypeChain }) => {
-  function renderArguments(astChain) {
-    const argTypeItems = astChain.reduce((acc, chain, i) => {
-      const prevContext = acc.context;
-      const nextArg = astChain[i + 1] || null;
-
-      // wrap each part of the chain in ArgType, passing in the previous context
-      const component = (
-        <ArgType
-          key={i}
-          argType={chain.function}
-          args={chain.arguments}
-          nextArgType={nextArg && nextArg.function}
-          expression={wrapExpression(prevContext)}
-          expressionIndex={i} />
-      );
-      acc.components.push(component);
-      acc.context = acc.context.concat(chain);
-
-      return acc;
-    }, { components: [], context: [] });
-
-    return argTypeItems.components;
-  }
-
-  return (
-    <div>
-      {renderArguments(argTypeChain)}
-    </div>
-  );
-};
-
-ArgTypesComponent.propTypes = {
-  argTypeChain: PropTypes.array.isRequired,
-};
-
-export const ArgTypes = compose(noSelected)(ArgTypesComponent);
+export const ArgTypes = compose(
+  ...branches
+)(ArgTypesComponent);

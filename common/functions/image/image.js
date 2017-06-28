@@ -1,7 +1,6 @@
 import Fn from '../fn.js';
-import fetch from 'axios';
 import elasticLogo from './elastic_logo';
-import { encode, imageTypes } from '../../lib/dataurl';
+import { fetchImage } from '../../lib/fetch_image';
 
 function wrapDataurlType(dataurl) {
   return {
@@ -9,24 +8,6 @@ function wrapDataurlType(dataurl) {
     dataurl,
   };
 }
-
-const fetchImage = (url) => {
-  const responseType = (FileReader) ? 'blob' : 'arraybuffer';
-
-  return fetch(url, {
-    method: 'GET',
-    responseType,
-  })
-  .then((res) => {
-    const type = res.headers['content-type'];
-
-    if (imageTypes.indexOf(type) < 0) {
-      return Promise.reject(new Error(`Invalid image type: ${type}`));
-    }
-
-    return encode(res.data, type);
-  });
-};
 
 module.exports = new Fn({
   name: 'image',

@@ -1,10 +1,11 @@
+import { createElement } from 'react';
 import { pick } from 'lodash';
 import { argTypeRegistry } from './arg_type';
 import { toInterfaceValue } from '../lib/map_arg_value';
 
 export class Arg {
   constructor(name, props) {
-    const propNames = ['displayName', 'description', 'multiVal', 'types'];
+    const propNames = ['displayName', 'description', 'multiVal', 'types', 'resolve'];
     const argType = argTypeRegistry.get(props.argType);
     if (!argType) throw new Error(`Invalid arg type: ${props.argType}`);
 
@@ -23,8 +24,9 @@ export class Arg {
     });
   }
 
-  render({ data, resolvedData }) {
-    return this.argType.template({
+  render({ key, data, resolvedData }) {
+    return createElement(this.argType.template, {
+      key,
       data: {
         ...data,
         ...resolvedData,

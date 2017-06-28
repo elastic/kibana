@@ -72,11 +72,16 @@ export function toInterfaceValue(argValue, multiVal = false) {
       });
     }
 
-    // check if the value is a math expression, and set its type if it is
-    const mathObj = parse(val.value);
-    if (mathObj.type !== 'SymbolNode') {
-      // SymbolNode is just a string, anything else must be a math expression
-      return acc.concat(mapToMathValue(mathObj, val));
+    // check math expression, if not an excluded type
+    try {
+      // check if the value is a math expression, and set its type if it is
+      const mathObj = parse(val.value);
+      if (mathObj.type !== 'SymbolNode') {
+        // SymbolNode is just a string, anything else must be a math expression
+        return acc.concat(mapToMathValue(mathObj, val));
+      }
+    } catch (e) {
+      // math.js throws on crazy values, errors can be swallowed here
     }
 
     return acc.concat({

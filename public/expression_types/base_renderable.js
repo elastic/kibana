@@ -20,6 +20,7 @@ export class BaseRenderable {
 
   renderArg({ data, resolvedData, typeInstance }, arg) {
     return arg.render({
+      key: `${typeInstance.name}-${arg.name}`,
       data: {
         ...data,
         argValue: data.args[arg.name],
