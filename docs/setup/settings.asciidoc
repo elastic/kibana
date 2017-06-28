@@ -29,6 +29,7 @@ service that Kibana uses to display map tiles in tilemap visualizations. By defa
 `tilemap.options.attribution:`:: *Default: `"© [Elastic Tile Service](https://www.elastic.co/elastic-tile-service)"`* The map attribution string.
 `tilemap.options.subdomains:`:: An array of subdomains used by the tile service.
 Specify the position of the subdomain the URL with the token `{s}`.
+[[regionmap-settings]] `regionmap`:: configuration section to include additional vector layers that can be used in the Region Map visualization. 
 `elasticsearch.username:` and `elasticsearch.password:`:: If your Elasticsearch is protected with basic authentication,
 these settings provide the username and password that the Kibana server uses to perform maintenance on the Kibana index at
 startup. Your Kibana users still need to authenticate with Elasticsearch, which is proxied through the Kibana server.

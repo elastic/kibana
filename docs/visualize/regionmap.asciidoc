@@ -1,0 +1,38 @@
+[[regionmap]]
+== Region Maps
+
+Region maps are thematic maps in which boundary vector shapes are colored using a gradient, with higher intensity colors indicating larger values and lower intensity colors indicating smaller values. 
+These are also known as choropleth maps. 
+
+image::images/regionmap.png[]
+
+
+=== Configuration
+
+To create such a map, you will need to configure a so-called "inner join", that will join the result of
+a terms-aggregation search-response from Elasticsearch to a reference vector file, based on a shared key.
+
+==== Data
+
+===== Metrics
+
+Select any of the supported _Metric_ or _Sibling Pipeline Aggregations_.
+
+===== Buckets 
+
+Configure a _Terms_ aggregation. The term is the "key" that will be used to join the results to the vector data on the map.
+
+==== Options
+
+===== Layer Settings
+- *Vector map*: select from a list of vector maps. This list includes the maps that are hosted by the Elastic Maps Service,
+as well as your `self-hosted` layers that are configured in the *config/kibana.yml* file. To learn more about how to configure Kibana
+to make self-hosted layers available, see the <<regionmap-settings,regionmap settings>> documentation.
+- *Join on field*: this is the property from the selected vector map that will be used to join on the terms of your terms-aggregation.
+
+===== Style Settings
+- *Color Schema*: the color range used to color the shapes.
+
+===== Basic Settings
+- *Legend Position*: where on the screen should the legend be positioned
+- *Show Tooltip*: whether a tooltip should be shown when hovering the mouse over one of the shapes  
