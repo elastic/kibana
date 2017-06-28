@@ -13,7 +13,7 @@ module.exports = new Element({
   icon: null,
   expression: 'demodata().pointseries(x="time", y="sum(price)", color="state").plot(defaultStyle=seriesStyle(lines="2"))',
   destroy(/*args*/) {
-    plot.destroy();
+    //plot.destroy();
     //console.log('destroy plot', args);
   },
   render(domNode, config, done) {
