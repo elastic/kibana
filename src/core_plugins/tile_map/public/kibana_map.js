@@ -535,12 +535,13 @@ export class KibanaMap extends EventEmitter {
       const uiState = visualization.getUiState();
       const centerFromUIState = uiState.get('mapCenter');
       const zoomFromUiState = parseInt(uiState.get('mapZoom'));
+      console.log('setting new params');
       if (isNaN(zoomFromUiState) || this.getZoomLevel() !== zoomFromUiState) {
-        uiState.set('mapZoom', this.getZoomLevel());
+        visualization.uiStateVal('mapZoom', this.getZoomLevel());
       }
       const centerFromMap = this.getCenter();
       if (!centerFromUIState || centerFromMap.lon !== centerFromUIState[1] || centerFromMap.lat !== centerFromUIState[0]) {
-        uiState.set('mapCenter', [centerFromMap.lat, centerFromMap.lon]);
+        visualization.uiStateVal('mapCenter', [centerFromMap.lat, centerFromMap.lon]);
       }
     }
 

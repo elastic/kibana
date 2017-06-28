@@ -9,7 +9,7 @@ import './lib/service_settings';
 import './styles/_tilemap.less';
 
 
-export function MapsVisualizationProvider(Private, $injector, serviceSettings, Notifier, courier, getAppState) {
+export function MapsVisualizationProvider(Private, serviceSettings, Notifier, courier, getAppState) {
 
   const notify = new Notifier({ location: 'Coordinate Map' });
 
@@ -29,6 +29,7 @@ export function MapsVisualizationProvider(Private, $injector, serviceSettings, N
       this._dataDirty = true;
       this._paramsDirty = true;
       this._currentParams = null;
+      this._updateParams();
     }
 
     destroy() {
@@ -40,7 +41,7 @@ export function MapsVisualizationProvider(Private, $injector, serviceSettings, N
     async render(esResponse) {
 
       if (esResponse && typeof esResponse.geohashGridAgg === 'undefined') {
-        this.updateParams();
+        this._updateParams();
         return;
       }
 
@@ -108,7 +109,10 @@ export function MapsVisualizationProvider(Private, $injector, serviceSettings, N
 
         this._dataDirty = true;
         if (precisionChange) {
-          courier.fetch();
+          //todo: cannot really force new request
+          // courier.fetch();
+          // this.vis.updateState();
+          // this.vis.dirty = false;
         } else {
           this._recreateGeohashLayer();
           this._dataDirty = false;
@@ -157,9 +161,10 @@ export function MapsVisualizationProvider(Private, $injector, serviceSettings, N
     /**
      * called on options change (vis.params change)
      */
-    async updateParams() {
+    async _updateParams() {
 
 
+      console.log('update params');
       this._paramsDirty = true;
       await this._kibanaMapReady;
 
@@ -238,6 +243,7 @@ export function MapsVisualizationProvider(Private, $injector, serviceSettings, N
 
     _doRenderComplete() {
 
+      //todo
       return;
 
       if (this._paramsDirty || this._dataDirty || this._baseLayerDirty) {
