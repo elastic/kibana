@@ -19,7 +19,6 @@ import { initChromeNavApi } from './api/nav';
 import templateApi from './api/template';
 import themeApi from './api/theme';
 import translationsApi from './api/translations';
-import { initChromeXsrfApi } from './api/xsrf';
 
 const chrome = {};
 const internals = _.defaults(
@@ -29,7 +28,6 @@ const internals = _.defaults(
     rootController: null,
     rootTemplate: null,
     showAppsLink: null,
-    xsrfToken: null,
     devMode: true,
     brand: null,
     nav: [],
@@ -38,7 +36,6 @@ const internals = _.defaults(
 );
 
 appsApi(chrome, internals);
-initChromeXsrfApi(chrome, internals);
 initChromeNavApi(chrome, internals);
 initAngularApi(chrome, internals);
 controlsApi(chrome, internals);

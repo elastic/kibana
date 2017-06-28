@@ -15,11 +15,11 @@ export function send(method, path, data) {
     method = "POST";
   }
 
-  let contentType;
+  // even body-less requests will be sent with JSON as the content-type to appease Kibana
+  let contentType = 'application/json';
   if (data) {
     try {
       JSON.parse(data);
-      contentType = 'application/json';
     }
     catch (e) {
       try {
@@ -29,7 +29,7 @@ export function send(method, path, data) {
         });
         contentType = 'application/x-ndjson';
       } catch (e){
-        contentType = 'text/plain';
+        // ignored (default stays the same)
       }
     }
   }
