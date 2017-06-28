@@ -99,6 +99,7 @@ export function MapsVisualizationProvider(Private, serviceSettings, Notifier, co
       this._kibanaMap.on('zoomchange', () => {
         precisionChange = (previousPrecision !== this._kibanaMap.getAutoPrecision());
         previousPrecision = this._kibanaMap.getAutoPrecision();
+        this.vis.aggs[1].params.precision = previousPrecision;
       });
       this._kibanaMap.on('zoomend', () => {
 
@@ -109,10 +110,7 @@ export function MapsVisualizationProvider(Private, serviceSettings, Notifier, co
 
         this._dataDirty = true;
         if (precisionChange) {
-          //todo: cannot really force new request
-          // courier.fetch();
-          // this.vis.updateState();
-          // this.vis.dirty = false;
+          this.vis.updateState();
         } else {
           this._recreateGeohashLayer();
           this._dataDirty = false;
@@ -162,9 +160,6 @@ export function MapsVisualizationProvider(Private, serviceSettings, Notifier, co
      * called on options change (vis.params change)
      */
     async _updateParams() {
-
-
-      console.log('update params');
       this._paramsDirty = true;
       await this._kibanaMapReady;
 
