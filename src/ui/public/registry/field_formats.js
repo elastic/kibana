@@ -7,6 +7,7 @@ export const RegistryFieldFormatsProvider = uiRegistry({
   group: ['fieldType'],
 
   constructor: function (config) {
+    const getConfig = (...args) => config.get(...args);
     const self = this;
     let defaultMap;
 
@@ -55,7 +56,7 @@ export const RegistryFieldFormatsProvider = uiRegistry({
      */
     self.getInstance = _.memoize(function (formatId) {
       const FieldFormat = self.byId[formatId];
-      return new FieldFormat();
+      return new FieldFormat(null, getConfig);
     });
 
     /**
@@ -67,7 +68,7 @@ export const RegistryFieldFormatsProvider = uiRegistry({
     self.getDefaultInstance = _.memoize(function (fieldType) {
       const conf = self.getDefaultConfig(fieldType);
       const FieldFormat = self.byId[conf.id];
-      return new FieldFormat(conf.params);
+      return new FieldFormat(conf.params, getConfig);
     });
 
 

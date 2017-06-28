@@ -1,9 +1,8 @@
 import _ from 'lodash';
 
-import { IndexPatternsFieldFormatProvider } from 'ui/index_patterns/_field_format/field_format';
+import { FieldFormat } from 'ui/index_patterns/_field_format/field_format';
 
-export function stringifyTruncate(Private) {
-  const FieldFormat = Private(IndexPatternsFieldFormatProvider);
+export function stringifyTruncate() {
   const omission = '...';
 
   _.class(Truncate).inherits(FieldFormat);
@@ -27,10 +26,6 @@ export function stringifyTruncate(Private) {
 
     return val;
   };
-
-  Truncate.editor = require('ui/stringify/editors/truncate.html');
-
-  Truncate.sampleInput = [ require('ui/stringify/samples/large.html') ];
 
   return Truncate;
 }

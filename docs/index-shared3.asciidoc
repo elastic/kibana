@@ -1,0 +1,11 @@
+
+[[devtools-kibana]]
+= Dev Tools
+
+[partintro]
+--
+The *Dev Tools* page contains development tools that you can use to interact
+with your data in Kibana.
+--
+
+include::console.asciidoc[]

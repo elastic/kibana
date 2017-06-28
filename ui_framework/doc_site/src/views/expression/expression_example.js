@@ -11,11 +11,10 @@ import {
 const expressionHtml = require('./expression.html');
 const expressionJs = require('raw!./expression.js');
 
-
 export default props => (
   <GuidePage title={props.route.name}>
     <GuideSection
-      title="Expression builder"
+      title="ExpressionItem"
       source={[{
         type: GuideSectionTypes.HTML,
         code: expressionHtml,
@@ -25,7 +24,7 @@ export default props => (
       }]}
     >
       <GuideText>
-        Expressions allow you to compress a complicated form into a small space.
+        ExpressionItems allow you to compress a complicated form into a small space.
         Left aligned to the button by default. Can be optionally right aligned (as in the last example).
       </GuideText>
 
@@ -37,4 +36,3 @@ export default props => (
 
   </GuidePage>
 );
-

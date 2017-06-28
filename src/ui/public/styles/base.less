@@ -207,8 +207,18 @@ kbn-table, .kbn-table {
     white-space: nowrap;
     padding-right: 10px;
 
+    .table-header-move {
+      border: none;
+      background: none;
+      padding: 0;
+    }
+
     .table-header-move, .table-header-sortchange {
-      visibility: hidden;
+      opacity: 0;
+
+      &:focus {
+        opacity: 1;
+      }
     }
 
     .fa {
@@ -219,7 +229,7 @@ kbn-table, .kbn-table {
 
   th:hover {
     .table-header-move, .table-header-sortchange {
-      visibility: visible;
+      opacity: 1;
     }
   }
 }

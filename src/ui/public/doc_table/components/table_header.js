@@ -96,6 +96,17 @@ module.directive('kbnTableHeader', function (shortDotsFilter) {
 
         $scope.onChangeSortOrder(columnName, newDirection);
       };
+
+      $scope.getAriaLabelForColumn = function getAriaLabelForColumn(name) {
+        if (!isSortableColumn(name)) return null;
+
+        const [currentColumnName, currentDirection = 'asc'] = $scope.sortOrder;
+        if(name === currentColumnName && currentDirection === 'asc') {
+          return `Sort ${name} descending`;
+        }
+
+        return `Sort ${name} ascending`;
+      };
     }
   };
 });

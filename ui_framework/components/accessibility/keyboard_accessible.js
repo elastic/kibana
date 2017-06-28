@@ -5,8 +5,9 @@
  * <input type="button">, or <button>). Note that links should be used when navigating and buttons
  * should be used when performing an action on the page.
  *
- * If you need to use a <div>, <p>, or <a> without the href attribute, then you need to allow
- * them to receive focus and to respond to keyboard input. The workaround is to:
+ * If, however, you need to use elements that aren't natively keyboard accessible (for example, <div>,
+ * <p>, or <a> without the href attribute), then you need to allow them to receive focus and to
+ * respond to keyboard input. The workaround is to:
  *
  *   - Give the element tabindex="0" so that it can receive keyboard focus.
  *   - Add a JavaScript onkeyup event handler that triggers element functionality if the Enter key
@@ -15,7 +16,8 @@
  *   - If the item is meant to function as a button, the onkeyup event handler should also detect the
  *     Spacebar in addition to the Enter key, and the element should be given role="button".
  *
- * Wrap any of these elements in this component to automatically do the above.
+ * Wrap any such elements that aren't natively keyboard accessible in this component to automatically
+ * apply the above workaround to them.
  */
 
 import {

@@ -202,6 +202,7 @@ app.directive('dashboardGrid', function ($compile, Notifier) {
         $window.on('resize', safeLayout);
         $scope.$on('ready:vis', safeLayout);
         $scope.$on('globalNav:update', safeLayout);
+        $scope.$on('reLayout', safeLayout);
       }
 
       // tell gridster to add the panel, and create additional meatadata like $scope

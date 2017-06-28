@@ -1,5 +1,5 @@
 [[multi-requests]]
-== Multiple Requests Support
+=== Multiple Requests Support
 
 The Console editor allows writing multiple requests below each other. As shown in the <<console-kibana>> section, you
 can submit a request to Elasticsearch by positioning the cursor and using the <<action_menu,Action Menu>>. Similarly

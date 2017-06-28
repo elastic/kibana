@@ -13,7 +13,8 @@ import { getKbnTypeNames } from '../../../utils';
 
 uiModules
 .get('kibana', ['colorpicker.module'])
-.directive('fieldEditor', function (Private, $sce, confirmModal) {
+.directive('fieldEditor', function (Private, $sce, confirmModal, config) {
+  const getConfig = (...args) => config.get(...args);
   const fieldFormats = Private(RegistryFieldFormatsProvider);
   const Field = Private(IndexPatternsFieldProvider);
   const getEnabledScriptingLanguages = Private(GetEnabledScriptingLanguagesProvider);
@@ -111,12 +112,14 @@ uiModules
         if (!changedFormat || !missingFormat) return;
 
         // reset to the defaults, but make sure it's an object
-        self.formatParams = _.assign({}, _.cloneDeep(getFieldFormatType().paramDefaults));
+        const FieldFormat = getFieldFormatType();
+        const paramDefaults = new FieldFormat({}, getConfig).getParamDefaults();
+        self.formatParams = _.assign({}, _.cloneDeep(paramDefaults));
       });
 
       $scope.$watch('editor.formatParams', function () {
         const FieldFormat = getFieldFormatType();
-        self.field.format = new FieldFormat(self.formatParams);
+        self.field.format = new FieldFormat(self.formatParams, getConfig);
       }, true);
 
       $scope.$watch('editor.field.type', function (newValue) {

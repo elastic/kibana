@@ -1,15 +1,12 @@
-import 'ui/stringify/editors/duration.less';
 import moment from 'moment';
-import { IndexPatternsFieldFormatProvider } from 'ui/index_patterns/_field_format/field_format';
-import durationTemplate from 'ui/stringify/editors/duration.html';
+import { FieldFormat } from 'ui/index_patterns/_field_format/field_format';
 
-export function stringifyDuration(Private) {
+export function stringifyDuration() {
   const ratioToSeconds = {
     picoseconds: 0.000000000001,
     nanoseconds: 0.000000001,
     microseconds: 0.000001
   };
-  const FieldFormat = Private(IndexPatternsFieldFormatProvider);
   const HUMAN_FRIENDLY = 'humanize';
   const DEFAULT_OUTPUT_PRECISION = 2;
   const DEFAULT_INPUT_FORMAT = { text: 'Seconds', kind: 'seconds' };
@@ -63,28 +60,12 @@ export function stringifyDuration(Private) {
   Duration.inputFormats = inputFormats;
   Duration.outputFormats = outputFormats;
 
-  Duration.editor = {
-    template: durationTemplate,
-    controllerAs: 'cntrl',
-    controller() {
-      this.sampleInputs = [
-        -123,
-        1,
-        12,
-        123,
-        658,
-        1988,
-        3857,
-        123292,
-        923528271
-      ];
-    }
-  };
-
-  Duration.paramDefaults = {
-    inputFormat: DEFAULT_INPUT_FORMAT.kind,
-    outputFormat: DEFAULT_OUTPUT_FORMAT.method,
-    outputPrecision: DEFAULT_OUTPUT_PRECISION
+  Duration.prototype.getParamDefaults = function () {
+    return {
+      inputFormat: DEFAULT_INPUT_FORMAT.kind,
+      outputFormat: DEFAULT_OUTPUT_FORMAT.method,
+      outputPrecision: DEFAULT_OUTPUT_PRECISION
+    };
   };
 
   return Duration;

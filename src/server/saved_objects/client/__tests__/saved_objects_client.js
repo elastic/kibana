@@ -335,7 +335,7 @@ describe('SavedObjectsClient', () => {
     it('returns early for empty objects argument', async () => {
       const response = await savedObjectsClient.bulkGet([]);
 
-      expect(response).to.have.length(0);
+      expect(response.saved_objects).to.have.length(0);
       expect(callAdminCluster.notCalled).to.be(true);
     });
 
@@ -354,9 +354,12 @@ describe('SavedObjectsClient', () => {
         }]
       }));
 
-      const response = await savedObjectsClient.bulkGet(['good', 'bad', 'config']);
-      expect(response).to.have.length(1);
-      expect(response[0]).to.eql({
+      const { saved_objects: savedObjects } = await savedObjectsClient.bulkGet(
+        ['good', 'bad', 'config']
+      );
+
+      expect(savedObjects).to.have.length(1);
+      expect(savedObjects[0]).to.eql({
         id: 'good',
         type: 'config',
         version: 2,
