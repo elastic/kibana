@@ -1,0 +1,22 @@
+/**
+ * 1. Break really long words if they're longer than the width of the dropdown.
+ */
+.kuiComboBoxDropdown {
+  @include scrollBar;
+
+  width: 100%;
+  max-height: $comboBoxHeight;
+  position: absolute;
+  top: calc(100% + 2px);
+  z-index: 1000;
+  overflow: auto;
+  border: $globalBorderThin;
+  border-top: none;
+  background-color: white;
+  box-shadow: $globalBoxShadow;
+  word-wrap: break-word; /* 1 */
+}
+
+  .kuiComboBoxDropdown__content {
+    padding: 10px 0;
+  }

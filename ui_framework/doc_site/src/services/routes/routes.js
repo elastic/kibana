@@ -27,6 +27,9 @@ import ColorPickerExample
 import ColumnExample
   from '../../views/column/column_example';
 
+import ComboBoxExample
+  from '../../views/combo_box/combo_box_example';
+
 import EventExample
   from '../../views/event/event_example';
 
@@ -148,6 +151,10 @@ const components = [{
 }, {
   name: 'CollapseButton',
   component: CollapseButtonExample,
+  hasReact: true,
+}, {
+  name: 'ComboBox',
+  component: ComboBoxExample,
   hasReact: true,
 }, {
   name: 'EmptyTablePrompt',

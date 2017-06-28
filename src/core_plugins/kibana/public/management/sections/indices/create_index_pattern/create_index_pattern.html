@@ -30,18 +30,17 @@
               translate="KIBANA-INDEX_NAME_OR_PATTERN"
             ></label>
 
-            <div class="kuiVerticalRhythm kuiVerticalRhythmSmall">
-              <input
-                class="kuiTextInput kuiTextInput--large"
-                data-test-subj="createIndexPatternNameInput"
-                ng-model="controller.formValues.name"
-                ng-model-options="{ updateOn: 'default blur', debounce: {'default': 500, 'blur': 0} }"
-                validate-index-name
-                allow-wildcard
-                name="name"
-                required
-                type="text"
-              >
+            <div class="kuiVerticalRhythmSmall kuiVerticalRhythm">
+              <index-pattern-combo-box
+                index-pattern="controller.formValues.name"
+                set-index-pattern="controller.setIndexPattern"
+                matching-indices="controller.matchingIndices"
+                matching-template-index-patterns="controller.matchingTemplateIndexPatterns"
+                partial-matching-indices="controller.partialMatchingIndices"
+                partial-matching-template-index-patterns="controller.partialMatchingTemplateIndexPatterns"
+                all-indices="controller.allIndices"
+                all-template-index-patterns="controller.allTemplateIndexPatterns"
+              ></index-pattern-combo-box>
             </div>
 
             <!-- Input error text -->

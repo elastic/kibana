@@ -1,0 +1,53 @@
+.kuiComboBoxSection {
+  & + & {
+    margin-top: 10px;
+    border-top: $globalBorderThin;
+    padding-top: 10px;
+  }
+}
+
+/**
+ * 1. Allow focus state z-index to elevate this above other buttons.
+ */
+.kuiComboBoxOption {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 6px 10px;
+  background-color: #ffffff;
+  cursor: pointer;
+  font-size: $globalSubTextFontSize;
+  color: $globalFontColor;
+
+  &:focus {
+    position: relative; /* 1 */
+  }
+
+  &:hover:not(.kuiComboBoxOption-isDisabled) {
+    background-color: $globalHoverBackgroundColor;
+  }
+
+  &.kuiComboBoxOption-isDisabled {
+    cursor: not-allowed;
+    opacity: 0.5;
+  }
+}
+
+  .kuiComboBoxOption__type {
+    color: $globalSubduedTextColor;
+  }
+
+.kuiComboBoxTitle {
+  margin-bottom: 5px;
+  padding: 0 10px;
+  font-size: $globalSubTextFontSize;
+  color: $globalFontColor;
+  font-weight: $globalFontWeightBold;
+}
+
+.kuiComboBoxText {
+  margin-bottom: 5px;
+  padding: 0 10px;
+  font-size: $globalSubTextFontSize;
+  color: $globalSubduedTextColor;
+}

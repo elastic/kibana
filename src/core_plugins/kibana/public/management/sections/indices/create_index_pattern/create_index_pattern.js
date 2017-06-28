@@ -8,6 +8,8 @@ import { uiModules } from 'ui/modules';
 import template from './create_index_pattern.html';
 import { sendCreateIndexPatternRequest } from './send_create_index_pattern_request';
 import { pickCreateButtonText } from './pick_create_button_text';
+import './index_pattern_combo_box_directive';
+import 'ui/indices';
 
 uiRoutes
 .when('/management/kibana/index', {
@@ -15,7 +17,19 @@ uiRoutes
 });
 
 uiModules.get('apps/management')
-.controller('managementIndicesCreate', function ($scope, kbnUrl, Private, Notifier, indexPatterns, es, config, Promise, $translate) {
+.controller('managementIndicesCreate', function (
+  $injector,
+  $scope,
+  $translate,
+  config,
+  es,
+  indexPatterns,
+  kbnUrl,
+  Notifier,
+  Private,
+  Promise
+) {
+  const indicesService = $injector.get('indices');
   const notify = new Notifier();
   const refreshKibanaIndex = Private(RefreshKibanaIndex);
   let loadingCount = 0;
@@ -109,6 +123,86 @@ uiModules.get('apps/management')
     }
 
     return nonFieldOptions[0];
+  };
+
+  this.isDropdownVisible = false;
+  this.matchingIndices = [];
+  this.matchingTemplateIndexPatterns = [];
+  this.partialMatchingIndices = [];
+  this.partialMatchingTemplateIndexPatterns = [];
+  this.allIndices = [];
+  this.allTemplateIndexPatterns = [];
+
+  /**
+   * This powers the `refresh` within ui-select which is called
+   * as a way to async fetch results based on the typed in query
+   *
+   * @param {string} searchQuery
+   */
+  this.fetchMatches = () => {
+    // Default to searching for all indices.
+    const exactSearchQuery = this.formValues.name;
+    let partialSearchQuery = this.formValues.name;
+
+    if (!_.endsWith(partialSearchQuery, '*')) {
+      partialSearchQuery = `${partialSearchQuery}*`;
+    }
+    if (!_.startsWith(partialSearchQuery, '*')) {
+      partialSearchQuery = `*${partialSearchQuery}`;
+    }
+
+    Promise.all([
+      indicesService.getIndices(exactSearchQuery),
+      indicesService.getTemplateIndexPatterns(exactSearchQuery),
+      indicesService.getIndices(partialSearchQuery),
+      indicesService.getTemplateIndexPatterns(partialSearchQuery),
+      indicesService.getIndices('*'),
+      indicesService.getTemplateIndexPatterns('*'),
+    ])
+    .then(([
+      matchingIndices,
+      matchingTemplateIndexPatterns,
+      partialMatchingIndices,
+      partialMatchingTemplateIndexPatterns,
+      allIndices,
+      allTemplateIndexPatterns,
+    ]) => {
+      this.matchingIndices = matchingIndices.sort();
+      this.matchingTemplateIndexPatterns = matchingTemplateIndexPatterns.sort();
+      this.partialMatchingIndices = partialMatchingIndices.sort();
+      this.partialMatchingTemplateIndexPatterns = partialMatchingTemplateIndexPatterns.sort();
+      this.allIndices = allIndices.sort();
+      this.allTemplateIndexPatterns = allTemplateIndexPatterns.sort();
+    });
+  };
+
+  this.setIndexPattern = indexPattern => {
+    this.formValues.name = indexPattern;
+  };
+
+  this.hasInput = () => {
+    return Boolean(this.formValues.name);
+  };
+
+  this.hasNoSimilarMatches = () => {
+    return (
+      !this.matchingIndices.length
+      && !this.matchingTemplateIndexPatterns.length
+      && !this.partialMatchingIndices.length
+      && !this.partialMatchingTemplateIndexPatterns.length
+    );
+  };
+
+  this.hasSimilarMatches = () => {
+    if (!this.matchingIndices.length && !this.matchingTemplateIndexPatterns.length) {
+      return this.partialMatchingIndices.length || this.partialMatchingTemplateIndexPatterns.length;
+    }
+
+    return false;
+  };
+
+  this.hasExactMatches = () => {
+    return this.matchingIndices.length;
   };
 
   this.isTimeBased = () => {
@@ -241,6 +335,7 @@ uiModules.get('apps/management')
 
   $scope.$watch('controller.formValues.name', () => {
     this.refreshTimeFieldOptions();
+    this.fetchMatches();
   });
 
   $scope.$watchMulti([
@@ -251,4 +346,6 @@ uiModules.get('apps/management')
     const state = { loading, invalidIndexName, timeFieldOption };
     this.createButtonText = pickCreateButtonText($translate, state);
   });
+
+  this.fetchMatches();
 });
