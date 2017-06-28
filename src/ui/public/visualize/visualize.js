@@ -68,7 +68,6 @@ uiModules
       };
 
       $scope.vis.on('update', () => {
-        console.log('on update');
         if ($scope.editorMode) {
           const visState = $scope.vis.getState();
           $scope.appState.vis = visState;
