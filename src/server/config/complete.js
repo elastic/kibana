@@ -1,8 +1,12 @@
 import { difference, keys } from 'lodash';
 import { transformDeprecations } from './transform_deprecations';
+import flattenWith from './flatten_with';
+import { formatListAsProse } from '../../utils';
 
-const getUnusedSettings = (settings, configValues) => {
-  return difference(keys(transformDeprecations(settings)), keys(configValues));
+const getUnusedConfigKeys = (settings, configValues) => {
+  const inputKeys = keys(flattenWith('.', transformDeprecations(settings)));
+  const appliedKeys = keys(flattenWith('.', configValues));
+  return difference(inputKeys, appliedKeys);
 };
 
 export default function (kbnServer, server, config) {
@@ -11,7 +15,22 @@ export default function (kbnServer, server, config) {
     return kbnServer.config;
   });
 
-  for (const key of getUnusedSettings(kbnServer.settings, config.get())) {
-    server.log(['warning', 'config'], `Settings for "${key}" were not applied, check for spelling errors and ensure the plugin is loaded.`);
+  const unusedKeys = getUnusedConfigKeys(kbnServer.settings, config.get())
+    .map(key => `"${key}"`);
+
+  if (!unusedKeys.length) {
+    return;
   }
+
+  const noun = unusedKeys.length === 1 ? 'setting' : 'settings';
+  const verb = unusedKeys.length === 1 ? 'was' : 'were';
+  const error = new Error(
+    `${formatListAsProse(unusedKeys)} ${noun} ${verb} not applied. ` +
+    'Check for spelling errors and ensure that expected ' +
+    'plugins are installed and enabled.'
+  );
+
+  error.code = 'InvalidConfig';
+  error.processExitCode = 64;
+  throw error;
 }
