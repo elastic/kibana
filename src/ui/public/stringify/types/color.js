@@ -8,10 +8,6 @@ export function stringifyColor() {
   const convertTemplate = _.template('<span style="<%- style %>"><%- val %></span>');
 
   class ColorFormat extends FieldFormat {
-    constructor(params) {
-      super(params);
-    }
-
     getParamDefaults() {
       return {
         fieldType: null, // populated by editor, see controller below
@@ -37,14 +33,16 @@ export function stringifyColor() {
           return null;
       }
     }
+
+    static id = 'color';
+    static title = 'Color';
+    static fieldType = [
+      'number',
+      'string'
+    ];
   }
 
-  ColorFormat.id = 'color';
-  ColorFormat.title = 'Color';
-  ColorFormat.fieldType = [
-    'number',
-    'string'
-  ];
+
 
   ColorFormat.prototype._convert = {
     html(val) {

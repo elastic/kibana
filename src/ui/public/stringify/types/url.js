@@ -65,20 +65,20 @@ export function stringifyUrl() {
         return output;
       };
     }
-  }
 
-  UrlFormat.id = 'url';
-  UrlFormat.title = 'Url';
-  UrlFormat.fieldType = [
-    'number',
-    'boolean',
-    'date',
-    'ip',
-    'string',
-    'murmur3',
-    'unknown',
-    'conflict'
-  ];
+    static id = 'url';
+    static title = 'Url';
+    static fieldType = [
+      'number',
+      'boolean',
+      'date',
+      'ip',
+      'string',
+      'murmur3',
+      'unknown',
+      'conflict'
+    ];
+  }
 
   UrlFormat.prototype._convert = {
     text: function (value) {

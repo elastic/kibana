@@ -5,12 +5,7 @@ export function stringifyBoolean() {
 
   class Bool extends FieldFormat {
 
-    constructor(params) {
-      super(params);
-    }
-
     _convert(value) {
-
       if (typeof value === 'string') {
         value = value.trim().toLowerCase();
       }
@@ -30,11 +25,11 @@ export function stringifyBoolean() {
           return asPrettyString(value);
       }
     }
-  }
 
-  Bool.id = 'boolean';
-  Bool.title = 'Boolean';
-  Bool.fieldType = ['boolean', 'number', 'string'];
+    static id = 'boolean';
+    static title = 'Boolean';
+    static fieldType = ['boolean', 'number', 'string'];
+  }
 
   return Bool;
 }

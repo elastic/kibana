@@ -5,10 +5,6 @@ import { shortenDottedString } from 'ui/utils/shorten_dotted_string';
 export function stringifyString() {
 
   class StringFormat extends FieldFormat {
-    constructor(params) {
-      super(params);
-    }
-
     getParamDefaults() {
       return {
         transform: false
@@ -37,23 +33,23 @@ export function stringifyString() {
         default: return asPrettyString(val);
       }
     }
-  }
 
-  StringFormat.id = 'string';
-  StringFormat.title = 'String';
-  StringFormat.fieldType = [
-    'number',
-    'boolean',
-    'date',
-    'ip',
-    'attachment',
-    'geo_point',
-    'geo_shape',
-    'string',
-    'murmur3',
-    'unknown',
-    'conflict'
-  ];
+    static id = 'string';
+    static title = 'String';
+    static fieldType = [
+      'number',
+      'boolean',
+      'date',
+      'ip',
+      'attachment',
+      'geo_point',
+      'geo_shape',
+      'string',
+      'murmur3',
+      'unknown',
+      'conflict'
+    ];
+  }
 
   return StringFormat;
 }

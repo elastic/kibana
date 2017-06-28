@@ -5,10 +5,6 @@ import { FieldFormat } from 'ui/index_patterns/_field_format/field_format';
 const numeralInst = numeral();
 
 export class Numeral extends FieldFormat {
-  constructor(params) {
-    super(params);
-  }
-
   _convert(val) {
     if (val === -Infinity) return '-∞';
     if (val === +Infinity) return '+∞';
@@ -20,34 +16,34 @@ export class Numeral extends FieldFormat {
 
     return numeralInst.set(val).format(this.param('pattern'));
   }
-}
 
-Numeral.factory = function (opts) {
-  class Class extends Numeral {
-    constructor(params, getConfig) {
-      super(params);
+  static factory(opts) {
+    class Class extends Numeral {
+      constructor(params, getConfig) {
+        super(params);
 
-      this.getConfig = getConfig;
-    }
-
-    getParamDefaults = function () {
-      if (_.has(opts, 'getParamDefaults')) {
-        return opts.getParamDefaults(this.getConfig);
+        this.getConfig = getConfig;
       }
 
-      return {
-        pattern: this.getConfig(`format:${opts.id}:defaultPattern`)
-      };
+      getParamDefaults = function () {
+        if (_.has(opts, 'getParamDefaults')) {
+          return opts.getParamDefaults(this.getConfig);
+        }
+
+        return {
+          pattern: this.getConfig(`format:${opts.id}:defaultPattern`)
+        };
+      }
+
+      static id = opts.id;
+      static title = opts.title;
+      static fieldType = 'number';
     }
+
+    if (opts.prototype) {
+      _.assign(Class.prototype, opts.prototype);
+    }
+
+    return Class;
   }
-
-  Class.id = opts.id;
-  Class.title = opts.title;
-  Class.fieldType = 'number';
-
-  if (opts.prototype) {
-    _.assign(Class.prototype, opts.prototype);
-  }
-
-  return Class;
-};
+}

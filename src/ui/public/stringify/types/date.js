@@ -46,11 +46,11 @@ export function stringifyDate() {
 
       return this._memoizedConverter(val);
     }
-  }
 
-  DateFormat.id = 'date';
-  DateFormat.title = 'Date';
-  DateFormat.fieldType = 'date';
+    static id = 'date';
+    static title = 'Date';
+    static fieldType = 'date';
+  }
 
   return DateFormat;
 }

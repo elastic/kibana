@@ -13,11 +13,11 @@ export function stringifySource() {
 
       this.getConfig = getConfig;
     }
-  }
 
-  SourceFormat.id = '_source';
-  SourceFormat.title = '_source';
-  SourceFormat.fieldType = '_source';
+    static id = '_source';
+    static title = '_source';
+    static fieldType = '_source';
+  }
 
   SourceFormat.prototype._convert = {
     text: (value) => toJson(value),

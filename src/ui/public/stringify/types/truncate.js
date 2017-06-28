@@ -6,10 +6,6 @@ export function stringifyTruncate() {
   const omission = '...';
 
   class TruncateFormat extends FieldFormat {
-    constructor(params) {
-      super(params);
-    }
-
     _convert(val) {
       const length = this.param('fieldLength');
       if (length > 0) {
@@ -21,11 +17,11 @@ export function stringifyTruncate() {
 
       return val;
     }
-  }
 
-  TruncateFormat.id = 'truncate';
-  TruncateFormat.title = 'Truncated String';
-  TruncateFormat.fieldType = ['string'];
+    static id = 'truncate';
+    static title = 'Truncated String';
+    static fieldType = ['string'];
+  }
 
   return TruncateFormat;
 }
