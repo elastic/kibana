@@ -27,8 +27,8 @@ export default props => (
       }]}
     >
       <GuideText>
-        The <GuideCode>KuiTabs</GuideCode> component accepts nodes as children.
-        Each child will be wrapped within a <GuideCode>KuiTab</GuideCode> component.
+        The <GuideCode>KuiTabs</GuideCode> component should have
+        <GuideCode>KuiTab</GuideCode> components as children.
       </GuideText>
 
       <GuideDemo>
