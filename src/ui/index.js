@@ -10,12 +10,14 @@ import UiBundleCollection from './ui_bundle_collection';
 import UiBundlerEnv from './ui_bundler_env';
 import { UiI18n } from './ui_i18n';
 
-export { uiSettingsMixin } from './ui_settings';
+import { uiSettingsMixin } from './ui_settings';
 
 export default async (kbnServer, server, config) => {
   const uiExports = kbnServer.uiExports = new UiExports({
     urlBasePath: config.get('server.basePath')
   });
+
+  await kbnServer.mixin(uiSettingsMixin);
 
   const uiI18n = kbnServer.uiI18n = new UiI18n(config.get('i18n.defaultLocale'));
   uiI18n.addUiExportConsumer(uiExports);
@@ -67,7 +69,7 @@ export default async (kbnServer, server, config) => {
   });
 
   async function getKibanaPayload({ app, request, includeUserProvidedConfig, injectedVarsOverrides }) {
-    const uiSettings = server.uiSettings();
+    const uiSettings = request.getUiSettingsService();
     const translations = await uiI18n.getTranslationsForRequest(request);
 
     return {
@@ -83,7 +85,7 @@ export default async (kbnServer, server, config) => {
       translations: translations,
       uiSettings: await props({
         defaults: uiSettings.getDefaults(),
-        user: includeUserProvidedConfig && uiSettings.getUserProvided(request)
+        user: includeUserProvidedConfig && uiSettings.getUserProvided()
       }),
       vars: await reduceAsync(
         uiExports.injectedVarsReplacers,
