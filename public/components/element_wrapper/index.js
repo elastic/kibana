@@ -2,7 +2,7 @@ import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import { get } from 'lodash';
 import { ElementWrapper as Component } from './element_wrapper';
-import { fetchRenderable, removeElement } from '../../state/actions/elements';
+import { fetchRenderable, removeElement, setPosition } from '../../state/actions/elements';
 import { selectElement } from '../../state/actions/transient';
 import { getSelectedElementId, getResolvedArgs, getSelectedPage } from '../../state/selectors/workpad';
 import { getState, getValue, getError } from '../../lib/resolved_arg';
@@ -24,6 +24,9 @@ const mapDispatchToProps = (dispatch, { element }) => ({
     ev && ev.stopPropagation();
     dispatch(removeElement(element.id, pageId));
   },
+  setPosition: (pageId) => (position) => {
+    dispatch(setPosition(element.id, pageId, position));
+  },
 });
 
 const mergeProps = (stateProps, dispatchProps, { element }) => {
@@ -31,6 +34,7 @@ const mergeProps = (stateProps, dispatchProps, { element }) => {
 
   return {
     position: element.position,
+    setPosition: dispatchProps.setPosition(stateProps.selectedPage),
     select: dispatchProps.select,
     remove: dispatchProps.removeElementFromPage(stateProps.selectedPage),
     isSelected: stateProps.isSelected,

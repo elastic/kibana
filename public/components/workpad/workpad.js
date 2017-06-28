@@ -9,8 +9,11 @@ export const Workpad = ({ elements, deselectElement, style, workpad }) => {
   const itsTheNewStyle = Object.assign({}, style, { height, width });
 
   return (
-    <div className="canvas__workpad" onClick={deselectElement} style={itsTheNewStyle}>
-      { elements.map(element => (<ElementWrapper key={element.id} element={element} />)) }
+    <div className="canvas__workpad" onMouseDown={deselectElement} style={itsTheNewStyle}>
+      { elements.map(element => (
+          <ElementWrapper key={element.id} element={element} />
+      ))
+      }
     </div>
   );
 };

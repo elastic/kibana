@@ -5,7 +5,7 @@ import { InvalidExpression } from './invalid_expression';
 import { InvalidElementType } from './invalid_element_type';
 import { RenderElement } from '../render_element';
 import { Loading } from '../loading';
-import { omit } from 'lodash';
+import { Positionable } from '../positionable';
 import './element_wrapper.less';
 
 /*
@@ -40,32 +40,31 @@ const ElementWrapperComponent = (props) => {
     elementTypeDefintion,
     renderable,
     position,
+    setPosition,
   } = props;
 
   // TODO: pass in render element dimensions
   const selectedClassName = isSelected ? 'selected' : '';
 
-  const style = Object.assign({
-    position: 'absolute',
-    transform: `rotate(${position.rotation}deg)`,
-  }, omit(position, 'rotation'));
-
   return (
-    <div
-      style={style}
-      className={`canvas__workpad--element ${selectedClassName}`}
-      onClick={select}>
-      <div style={{ textAlign: 'right' }}>
-        <i className="fa fa-times-circle" style={{ cursor: 'pointer' }} onClick={remove}/>
+    <Positionable position={position} onChange={setPosition} interact={isSelected}>
+      <div
+        className={`canvas__workpad--element ${selectedClassName}`}
+        onClick={select}>
+        <div style={{ pointerEvents: 'none' }}>
+          <RenderElement
+            renderFn={elementTypeDefintion.render}
+            destroyFn={elementTypeDefintion.destroy}
+            config={renderable.value}
+            done={() => {}}
+            size={{ width: position.width, height: position.height }}
+          />
+        </div>
+        {!isSelected ? null :
+          (<i className="fa fa-times-circle canvas__workpad--element-remove" style={{ cursor: 'pointer' }} onClick={remove}/>)
+        }
       </div>
-      <RenderElement
-        renderFn={elementTypeDefintion.render}
-        destroyFn={elementTypeDefintion.destroy}
-        config={renderable.value}
-        done={() => {}}
-        size={{ width: position.width, height: position.height }}
-      />
-    </div>
+    </Positionable>
   );
 };
 
@@ -78,6 +77,7 @@ ElementWrapperComponent.propTypes = {
   error: PropTypes.object,
   renderable: PropTypes.object,
   position: PropTypes.object,
+  setPosition: PropTypes.func,
 };
 
 export const ElementWrapper = compose(
