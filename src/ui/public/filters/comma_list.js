@@ -1,6 +1,8 @@
 import _ from 'lodash';
 import { uiModules } from 'ui/modules';
 
+import { parseCommaSeparatedList } from '../../../utils';
+
 uiModules
 .get('kibana')
 .filter('commaList', function () {
@@ -13,7 +15,7 @@ uiModules
    * @return {String}
    */
   return function (input, inclusive) {
-    const list = _.commaSeperatedList(input);
+    const list = parseCommaSeparatedList(input);
     if (list.length < 2) {
       return list.join('');
     }
