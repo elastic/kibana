@@ -325,8 +325,11 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
       });
     }
 
+    async getDashboardPanels() {
+      return await testSubjects.findAll('dashboardPanel');
+    }
+
     getPanelSizeData() {
-      log.debug('in getPanelSizeData');
       return getRemote()
       .findAllByCssSelector('li.gs-w') // These are gridster-defined elements and classes
       .then(function (titleObjects) {
