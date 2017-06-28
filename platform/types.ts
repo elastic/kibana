@@ -186,3 +186,8 @@ export interface ConfigWithSchema<S extends schemaLib.Any, Config> {
    */
   new (validatedConfig: schemaLib.TypeOf<S>, env: Env): Config;
 }
+
+export interface CoreService {
+  start(): Promise<void>;
+  stop(): Promise<void>;
+}

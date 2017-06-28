@@ -22,10 +22,10 @@ beforeEach(() => {
   };
 });
 
-test('starts plugins', () => {
+test('starts plugins', async () => {
   const pluginsService = new PluginsService(examplesPluginsDir, mockPluginSystem, logger);
 
-  pluginsService.start();
+  await pluginsService.start();
 
   expect(mockPluginSystem.addPlugin).toHaveBeenCalledTimes(2);
   expect(mockPluginSystem.startPlugins).toHaveBeenCalledTimes(1);
@@ -39,10 +39,10 @@ test('starts plugins', () => {
   expect(bar).toMatchSnapshot();
 });
 
-test('stops plugins', () => {
+test('stops plugins', async () => {
   const pluginsService = new PluginsService(examplesPluginsDir, mockPluginSystem, logger);
 
-  pluginsService.start();
+  await pluginsService.start();
   pluginsService.stop();
 
   expect(mockPluginSystem.stopPlugins).toHaveBeenCalledTimes(1);

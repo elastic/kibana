@@ -4,8 +4,9 @@ import { HttpServer } from './HttpServer';
 import { HttpConfig } from './HttpConfig';
 import { Logger, LoggerFactory } from '../../logger';
 import { Router } from './Router';
+import { CoreService } from '../../types'
 
-export class HttpService {
+export class HttpService implements CoreService {
   private readonly httpServer: HttpServer;
   private configSubscription?: Subscription;
 
@@ -19,7 +20,7 @@ export class HttpService {
     this.httpServer = new HttpServer();
   }
 
-  start() {
+  async start() {
     this.configSubscription = this.config$
       .filter(config => {
         if (this.httpServer.isListening()) {
@@ -47,7 +48,7 @@ export class HttpService {
       .subscribe()
   }
 
-  stop(): void {
+  async stop() {
     if (this.configSubscription !== undefined) {
       this.configSubscription.unsubscribe();
     }

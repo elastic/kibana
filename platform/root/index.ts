@@ -25,7 +25,7 @@ export class Root {
   }
 
   async start() {
-    this.configService.start();
+    await this.configService.start();
 
     const loggingConfig$ = this.configService.atPath(
       'logging',
@@ -52,12 +52,12 @@ export class Root {
 
   // TODO Accept optional `Error` reason for shutdown? Then we can `exit(1)`
   // instead of `exit(0)` if it's because of a failure.
-  shutdown() {
+  async shutdown() {
     this.log.info('stopping Kibana');
     if (this.server !== undefined) {
-      this.server.stop();
+      await this.server.stop();
     }
-    this.configService.stop();
+    await this.configService.stop();
     this.loggerService.stop();
 
     // TODO Should this be moved to cli?

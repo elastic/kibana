@@ -64,11 +64,11 @@ export class Server {
     }
   }
 
-  stop() {
+  async stop() {
     this.log.debug('stopping server');
 
-    this.http.service.stop();
-    this.plugins.stop();
-    this.elasticsearch.service.stop();
+    await this.http.service.stop();
+    await this.plugins.stop();
+    await this.elasticsearch.service.stop();
   }
 }

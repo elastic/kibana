@@ -3,13 +3,13 @@ import { Observable, Subscription } from 'rxjs';
 import { ElasticsearchConfigs } from './ElasticsearchConfigs';
 import { Cluster } from './Cluster';
 import { LoggerFactory } from '../../logger';
-import { ElasticsearchClusterType } from '../../types';
+import { ElasticsearchClusterType, CoreService } from '../../types';
 
 type Clusters = {
   [type in ElasticsearchClusterType]: Cluster
 }
 
-export class ElasticsearchService {
+export class ElasticsearchService implements CoreService {
   private clusters$: Observable<Clusters>;
   private subscription: Subscription;
 
@@ -53,13 +53,13 @@ export class ElasticsearchService {
       .shareReplay(1);
   }
 
-  start() {
+  async start() {
     // ensure that we don't unnecessarily re-create clusters by always having
     // at least one current connection
     this.subscription = this.clusters$.subscribe();
   }
 
-  stop() {
+  async stop() {
     this.subscription.unsubscribe();
   }
 

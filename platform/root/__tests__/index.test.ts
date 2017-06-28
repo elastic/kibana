@@ -51,7 +51,7 @@ afterEach(() => {
   process.exit = oldExit;
 });
 
-test('starts services on "start"', () => {
+test('starts services on "start"', async () => {
   const env = new Env('.');
   const root = new Root({}, env);
 
@@ -59,7 +59,7 @@ test('starts services on "start"', () => {
   expect(loggerService.upgrade).toHaveBeenCalledTimes(0);
   expect(server.start).toHaveBeenCalledTimes(0);
 
-  root.start();
+  await root.start();
 
   expect(configService.start).toHaveBeenCalledTimes(1);
   expect(loggerService.upgrade).toHaveBeenCalledTimes(1);
@@ -78,32 +78,32 @@ test('reloads config', () => {
   expect(configService.reloadConfig).toHaveBeenCalledTimes(1);
 });
 
-test('stops services on "shutdown"', () => {
+test('stops services on "shutdown"', async () => {
   const env = new Env('.');
   const root = new Root({}, env);
 
-  root.start();
+  await root.start();
 
   expect(configService.stop).toHaveBeenCalledTimes(0);
   expect(loggerService.stop).toHaveBeenCalledTimes(0);
   expect(server.stop).toHaveBeenCalledTimes(0);
 
-  root.shutdown();
+  await root.shutdown();
 
   expect(configService.stop).toHaveBeenCalledTimes(1);
   expect(loggerService.stop).toHaveBeenCalledTimes(1);
   expect(server.stop).toHaveBeenCalledTimes(1);
 });
 
-test('exits process on "shutdown"', () => {
+test('exits process on "shutdown"', async () => {
   const env = new Env('.');
   const root = new Root({}, env);
 
-  root.start();
+  await root.start();
 
   expect(process.exit).toHaveBeenCalledTimes(0);
 
-  root.shutdown();
+  await root.shutdown();
 
   expect(process.exit).toHaveBeenCalledTimes(1);
 });

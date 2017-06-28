@@ -6,7 +6,7 @@ import { applyArgv } from './applyArgv';
 import { Env } from './Env';
 import { Logger, LoggerFactory } from '../logger';
 import * as schema from '../lib/schema';
-import { ConfigWithSchema } from '../types';
+import { ConfigWithSchema, CoreService } from '../types';
 
 interface RawConfig {
   [key: string]: any
@@ -14,7 +14,7 @@ interface RawConfig {
 
 type ConfigPath = string | string[];
 
-export class ConfigService {
+export class ConfigService implements CoreService {
   /**
    * The stream of configs read from the config file. Will only be `undefined`
    * before the config is initially read. This is the _raw_ config before any
@@ -56,7 +56,7 @@ export class ConfigService {
   /**
    * Read the initial Kibana config.
    */
-  start() {
+  async start() {
     this.loadConfig();
   }
 
@@ -77,7 +77,7 @@ export class ConfigService {
     this.rawConfigFromFile$.next(config);
   }
 
-  stop() {
+  async stop() {
     this.rawConfigFromFile$.complete();
   }
 

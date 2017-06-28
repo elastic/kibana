@@ -4,10 +4,11 @@ import { Observable } from 'rxjs';
 import { Plugin } from './Plugin';
 import { PluginSystem } from './PluginSystem';
 import { Logger, LoggerFactory } from '../../logger';
+import { CoreService } from '../../types';
 
 const readDirAsObservable = Observable.bindNodeCallback(readdir);
 
-export class PluginsService {
+export class PluginsService implements CoreService {
   private readonly log: Logger;
 
   constructor(
@@ -18,18 +19,17 @@ export class PluginsService {
     this.log = this.logger.get('plugins');
   }
 
-  start() {
-    this.readPlugins().subscribe({
-      next: plugin => {
+  async start() {
+    await this.readPlugins()
+      .do(plugin => {
         this.pluginSystem.addPlugin(plugin);
-      },
-      complete: () => {
-        this.pluginSystem.startPlugins();
-      }
-    });
+      })
+      .toPromise();
+
+    this.pluginSystem.startPlugins();
   }
 
-  stop() {
+  async stop() {
     this.pluginSystem.stopPlugins();
   }
 
