@@ -27,7 +27,7 @@ export default function init(input, output, sourceLocation = 'stored') {
       }
     }
     else if (/^https?:\/\//.test(sourceLocation)) {
-      var loadFrom = { url: sourceLocation, dataType: "text", kbnXsrfToken: false };
+      var loadFrom = { url: sourceLocation, dataType: "text" };
       if (/https?:\/\/api.github.com/.test(sourceLocation)) {
         loadFrom.headers = { Accept: "application/vnd.github.v3.raw" };
       }

@@ -38,7 +38,6 @@ export function initAngularApi(chrome, internals) {
       a.href = chrome.addBasePath('/es_admin');
       return a.href;
     }()))
-    .config(chrome.$setupXsrfRequestInterceptor)
     .config(['$compileProvider', function ($compileProvider) {
       if (!internals.devMode) {
         $compileProvider.debugInfoEnabled(false);
