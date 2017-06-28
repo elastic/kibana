@@ -10,6 +10,3 @@ KuiTableHeaderCell.propTypes = {
   children: PropTypes.node,
   className: PropTypes.string,
 };
-
-
-

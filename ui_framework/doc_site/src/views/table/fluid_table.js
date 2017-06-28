@@ -10,7 +10,7 @@ import {
 
 export function FluidTable() {
   return (
-     <KuiTable className="kuiTable--fluid">
+     <KuiTable shrinkToContent={ true }>
         <thead>
           <tr>
             <KuiTableHeaderCell>

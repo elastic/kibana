@@ -10,6 +10,3 @@ KuiTableRowCellLiner.propTypes = {
   children: PropTypes.node,
   className: PropTypes.string,
 };
-
-
-

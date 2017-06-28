@@ -10,6 +10,3 @@ KuiControlledTable.propTypes = {
   children: PropTypes.node,
   className: PropTypes.string,
 };
-
-
-

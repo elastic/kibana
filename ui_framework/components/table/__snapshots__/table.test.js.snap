@@ -6,23 +6,39 @@ exports[`renders KuiTable 1`] = `
   class="kuiTable testClass1 testClass2"
   data-test-subj="test subject string"
 >
-  <tr
-    class="kuiTableRow"
-  >
-    <td
-      class="kuiTableRowCell"
+  <thead>
+    <tr>
+      <th
+        class="kuiTableHeaderCell"
+      >
+        Hi Title
+      </th>
+      <th
+        class="kuiTableHeaderCell"
+      >
+        Bye Title
+      </th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr
+      class="kuiTableRow"
     >
-      Hi
-    </td>
-  </tr>
-  <tr
-    class="kuiTableRow"
-  >
-    <td
-      class="kuiTableRowCell"
+      <td
+        class="kuiTableRowCell"
+      >
+        Hi
+      </td>
+    </tr>
+    <tr
+      class="kuiTableRow"
     >
-      Bye
-    </td>
-  </tr>
+      <td
+        class="kuiTableRowCell"
+      >
+        Bye
+      </td>
+    </tr>
+  </tbody>
 </table>
 `;

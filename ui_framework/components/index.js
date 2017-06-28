@@ -103,6 +103,10 @@ export {
   KuiTableRowCell,
   KuiTableRowCellLiner,
   KuiTableInfo,
+  KuiTableRowCheckBoxCell,
+  KuiTableHeaderCheckBoxCell,
+  KuiTableHeader,
+  KuiTableBody,
 } from './table';
 
 export {
