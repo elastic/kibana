@@ -165,7 +165,9 @@ export default function (program) {
       }
 
       kbnServer.close();
-      process.exit(1); // eslint-disable-line no-process-exit
+      const exitCode = error.processExitCode == null ? 1 : error.processExitCode;
+      // eslint-disable-next-line no-process-exit
+      process.exit(exitCode);
     }
 
     process.on('SIGHUP', function reloadConfig() {
