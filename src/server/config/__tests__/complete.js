@@ -11,7 +11,12 @@ describe('server/config completeMixin()', function () {
   const sandbox = sinon.sandbox.create();
   afterEach(() => sandbox.restore());
 
-  const setup = ({ settings, configValues }) => {
+  const setup = (options = {}) => {
+    const {
+      settings = {},
+      configValues = {}
+    } = options;
+
     const server = {
       decorate: sinon.stub()
     };
@@ -91,8 +96,31 @@ describe('server/config completeMixin()', function () {
 
       expect(callCompleteMixin).to.throwError('"unused" not applied');
     });
-  });
 
+    describe('error thrown', () => {
+      it('has correct code, processExitCode, and message', () => {
+        const { callCompleteMixin } = setup({
+          settings: {
+            unused: true,
+            foo: 'bar',
+            namespace: {
+              with: {
+                sub: {
+                  keys: true
+                }
+              }
+            }
+          }
+        });
+
+        expect(callCompleteMixin).to.throwError((error) => {
+          expect(error).to.have.property('code', 'InvalidConfig');
+          expect(error).to.have.property('processExitCode', 64);
+          expect(error.message).to.contain('"unused", "foo", and "namespace.with.sub.keys"');
+        });
+      });
+    });
+  });
 
   describe('deprecation support', () => {
     it('should transform settings when determining what is unused', function () {
