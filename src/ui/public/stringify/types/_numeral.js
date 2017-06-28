@@ -25,7 +25,7 @@ export class Numeral extends FieldFormat {
         this.getConfig = getConfig;
       }
 
-      getParamDefaults = function () {
+      getParamDefaults() {
         if (_.has(opts, 'getParamDefaults')) {
           return opts.getParamDefaults(this.getConfig);
         }
