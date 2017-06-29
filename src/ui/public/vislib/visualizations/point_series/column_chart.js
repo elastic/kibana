@@ -106,6 +106,7 @@ export function VislibVisualizationsColumnChartProvider(Private) {
       const isTimeScale = this.getCategoryAxis().axisConfig.isTimeDomain();
       const yMin = yScale.domain()[0];
       const gutterSpacingPercentage = 0.15;
+      const groupCount = this.getGroupedCount();
       const groupNum = this.getGroupedNum(this.chartData);
       let barWidth;
       let gutterWidth;
@@ -116,12 +117,14 @@ export function VislibVisualizationsColumnChartProvider(Private) {
         intervalWidth = Math.abs(intervalWidth);
 
         gutterWidth = intervalWidth * gutterSpacingPercentage;
-        barWidth = intervalWidth - gutterWidth;
+        barWidth = (intervalWidth - gutterWidth) / groupCount;
       }
 
-      function x(d) {
-        const groupPosition = isTimeScale ? barWidth * groupNum : xScale.rangeBand() / groupNum;
-        return xScale(d.x) + groupPosition;
+      function x(d, i) {
+        if (isTimeScale) {
+          return xScale(d.x) + datumWidth(barWidth, d, bars.data()[i + 1], xScale, gutterWidth, groupCount) * groupNum;
+        }
+        return xScale(d.x) + xScale.rangeBand() / groupCount * groupNum;
       }
 
       function y(d) {
@@ -133,9 +136,9 @@ export function VislibVisualizationsColumnChartProvider(Private) {
 
       function widthFunc(d, i) {
         if (isTimeScale) {
-          return datumWidth(barWidth, d, bars.data()[i + 1], xScale, gutterWidth);
+          return datumWidth(barWidth, d, bars.data()[i + 1], xScale, gutterWidth, groupCount);
         }
-        return xScale.rangeBand();
+        return xScale.rangeBand() / groupCount;
       }
 
       function heightFunc(d) {
