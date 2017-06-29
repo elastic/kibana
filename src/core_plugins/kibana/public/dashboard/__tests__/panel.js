@@ -22,7 +22,6 @@ describe('dashboard panel', function () {
         };
       });
 
-      sinon.stub(esAdmin, 'mget').returns(Promise.resolve({ docs: [ mockDocResponse ] }));
       sinon.stub(esAdmin.indices, 'getFieldMapping').returns(Promise.resolve({
         '.kibana': {
           mappings: {
