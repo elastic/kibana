@@ -6,6 +6,8 @@ import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logsta
 import { UtilsBrushEventProvider } from 'ui/utils/brush_event';
 
 describe('brushEvent', function () {
+  const DAY_IN_MS = 24 * 60 * 60 * 1000;
+  const JAN_01_2014 = 1388559600000;
   let brushEventFn;
   let timefilter;
 
@@ -51,42 +53,97 @@ describe('brushEvent', function () {
         .not.have.property('$newFilters');
     });
 
-    describe('handles an event when the x-axis field is a date', function () {
-      let dateEvent;
-      const dateField = {
-        name: 'dateField',
-        type: 'date'
-      };
+    describe('handles an event when the x-axis field is a date field', function () {
+      describe('date field is index pattern timefield', function () {
+        let dateEvent;
+        const dateField = {
+          name: 'time',
+          type: 'date'
+        };
 
-      beforeEach(ngMock.inject(function () {
-        dateEvent = _.cloneDeep(baseEvent);
-        dateEvent.data.xAxisField = dateField;
-      }));
+        beforeEach(ngMock.inject(function () {
+          dateEvent = _.cloneDeep(baseEvent);
+          dateEvent.data.xAxisField = dateField;
+        }));
 
-      it('by ignoring the event when range spans zero time', function () {
-        const event = _.cloneDeep(dateEvent);
-        event.range = [1388559600000, 1388559600000];
-        brushEvent(event);
-        expect($state)
-          .not.have.property('$newFilters');
+        it('by ignoring the event when range spans zero time', function () {
+          const event = _.cloneDeep(dateEvent);
+          event.range = [JAN_01_2014, JAN_01_2014];
+          brushEvent(event);
+          expect($state)
+            .not.have.property('$newFilters');
+        });
+
+        it('by updating the timefilter', function () {
+          const event = _.cloneDeep(dateEvent);
+          event.range = [JAN_01_2014, JAN_01_2014 + DAY_IN_MS];
+          brushEvent(event);
+          expect(timefilter.time.mode).to.be('absolute');
+          expect(moment.isMoment(timefilter.time.from))
+            .to.be(true);
+          // Set to a baseline timezone for comparison.
+          expect(timefilter.time.from.utcOffset(0).format('YYYY-MM-DD'))
+            .to.equal('2014-01-01');
+          expect(moment.isMoment(timefilter.time.to))
+            .to.be(true);
+          // Set to a baseline timezone for comparison.
+          expect(timefilter.time.to.utcOffset(0).format('YYYY-MM-DD'))
+            .to.equal('2014-01-02');
+        });
       });
 
-      it('by updating the timefilter', function () {
-        const event = _.cloneDeep(dateEvent);
-        const DAY_IN_MS = 24 * 60 * 60 * 1000;
-        event.range = [1388559600000, 1388559600000 + DAY_IN_MS];
-        brushEvent(event);
-        expect(timefilter.time.mode).to.be('absolute');
-        expect(moment.isMoment(timefilter.time.from))
-          .to.be(true);
-        // Set to a baseline timezone for comparison.
-        expect(timefilter.time.from.utcOffset(0).format('YYYY-MM-DD'))
-          .to.equal('2014-01-01');
-        expect(moment.isMoment(timefilter.time.to))
-          .to.be(true);
-        // Set to a baseline timezone for comparison.
-        expect(timefilter.time.to.utcOffset(0).format('YYYY-MM-DD'))
-          .to.equal('2014-01-02');
+      describe('date field is not index pattern timefield', function () {
+        let dateEvent;
+        const dateField = {
+          name: 'anotherTimeField',
+          type: 'date'
+        };
+
+        beforeEach(ngMock.inject(function () {
+          dateEvent = _.cloneDeep(baseEvent);
+          dateEvent.data.xAxisField = dateField;
+        }));
+
+        it('creates a new range filter', function () {
+          const event = _.cloneDeep(dateEvent);
+          const rangeBegin = JAN_01_2014;
+          const rangeEnd = rangeBegin + DAY_IN_MS;
+          event.range = [rangeBegin, rangeEnd];
+          brushEvent(event);
+          expect($state)
+            .to.have.property('$newFilters');
+          expect($state.filters.length)
+           .to.equal(0);
+          expect($state.$newFilters.length)
+           .to.equal(1);
+          expect($state.$newFilters[0].range.anotherTimeField.gte)
+           .to.equal(rangeBegin);
+          expect($state.$newFilters[0].range.anotherTimeField.lt)
+           .to.equal(rangeEnd);
+          expect($state.$newFilters[0].range.anotherTimeField).to.have.property('format');
+          expect($state.$newFilters[0].range.anotherTimeField.format)
+           .to.equal('epoch_millis');
+        });
+
+        it('converts Date fields to milliseconds', function () {
+          const event = _.cloneDeep(dateEvent);
+          const rangeBeginMs = JAN_01_2014;
+          const rangeEndMs = rangeBeginMs + DAY_IN_MS;
+          const rangeBegin = new Date(rangeBeginMs);
+          const rangeEnd = new Date(rangeEndMs);
+          event.range = [rangeBegin, rangeEnd];
+          brushEvent(event);
+          expect($state)
+            .to.have.property('$newFilters');
+          expect($state.filters.length)
+           .to.equal(0);
+          expect($state.$newFilters.length)
+           .to.equal(1);
+          expect($state.$newFilters[0].range.anotherTimeField.gte)
+           .to.equal(rangeBeginMs);
+          expect($state.$newFilters[0].range.anotherTimeField.lt)
+           .to.equal(rangeEndMs);
+        });
       });
     });
 
@@ -124,6 +181,7 @@ describe('brushEvent', function () {
          .to.equal(1);
         expect($state.$newFilters[0].range.numberField.lt)
          .to.equal(4);
+        expect($state.$newFilters[0].range.numberField).not.to.have.property('format');
       });
 
       it('by updating the existing range filter', function () {
