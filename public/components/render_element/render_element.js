@@ -1,6 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { lifecycle, compose } from 'recompose';
+import { isEqual } from 'lodash';
 
 export const RenderElementComponent = ({ renderFn, size }) => {
   const renderElement = (domNode) => {
@@ -15,6 +16,12 @@ export const RenderElementComponent = ({ renderFn, size }) => {
 };
 
 const RenderElementLifecycle = lifecycle({
+  shouldComponentUpdate(nextProps) {
+    // TODO: What a shitty hack. None of these props should update when you move the element.
+    // This should be fixed at a higher level.
+    return !isEqual(this.props.config, nextProps.config) || !isEqual(this.props.size, nextProps.size);
+  },
+
   componentWillUnmount() {
     this.props.destroyFn();
   },

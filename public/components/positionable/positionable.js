@@ -86,6 +86,7 @@ const PositionableComponent = ({ position, children, interact  }) => {
 
   // This could probably be made nicer by having just one child
   const wrappedChildren = React.Children.map(children, (child) => {
+    // TODO: Throw if there is more thean one child
     const newStyle = {
       position: 'absolute',
       transform: `rotate(${angle}deg)`,// translate(${position.left}px, ${position.top}px)`,
