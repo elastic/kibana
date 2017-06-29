@@ -7,8 +7,8 @@ import uiRoutes from 'ui/routes';
 import { uiModules } from 'ui/modules';
 import template from './create_index_pattern.html';
 import { sendCreateIndexPatternRequest } from './send_create_index_pattern_request';
-import './step_index_pattern/create_index_pattern_wizard_step_index_pattern';
-import './step_time_field/create_index_pattern_wizard_step_time_field';
+import './step_index_pattern';
+import './step_time_field';
 import './matching_indices_list';
 import 'ui/indices';
 
