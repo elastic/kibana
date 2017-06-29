@@ -50,11 +50,18 @@ export class PluginsService implements CoreService {
           );
         }
 
-        // TODO validate these values
-        const plugin = json.plugin;
-        const dependencies = json.dependencies || [];
+        if (!('dependencies' in json)) {
+          throw new Error(
+            `'dependencies' missing in plugin [${pluginPath}], must be '[]' if no dependencies`
+          );
+        }
 
-        return new Plugin(name, dependencies, plugin, this.logger);
+        // TODO validate these values
+
+        const run = json.plugin;
+        const dependencies = json.dependencies;
+
+        return new Plugin({ name, dependencies, run }, this.logger);
       });
   }
 }

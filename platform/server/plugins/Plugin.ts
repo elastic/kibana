@@ -42,29 +42,32 @@ function isKibanaFunctionalPlugin<
   return !isClass(val);
 }
 
+interface PluginDefinition<DependenciesType, ExposableType> {
+  name: string,
+  dependencies: string[],
+  run:
+    | KibanaFunctionalPlugin<DependenciesType, ExposableType>
+    | KibanaPluginStatic<DependenciesType, ExposableType>
+}
+
 export class Plugin<DependenciesType extends BasePluginsType, ExposableType> {
   readonly name: PluginName;
   readonly dependencies: PluginName[];
+  private readonly run:
+    | KibanaFunctionalPlugin<DependenciesType, ExposableType>
+    | KibanaPluginStatic<DependenciesType, ExposableType>
 
   private stopCallbacks: LifecycleCallback[] = [];
   private exposedValues?: ExposableType;
   private log: Logger;
 
-  // TODO If we end up not being super-dynamic about using `readdir` for reading
-  // plugins in all locations we could consider making some of the types below
-  // stricter (e.g. instead of typing `name` and `dependencies` as `string`
-  // below , we can check them against `DependenciesType` and `ExposableType`),
-  // See `git show 7e41eec17:platform/server/plugins/Plugin.ts`
   constructor(
-    name: string,
-    dependencies: string[],
-    private readonly run:
-      | KibanaFunctionalPlugin<DependenciesType, ExposableType>
-      | KibanaPluginStatic<DependenciesType, ExposableType>,
+    pluginDefinition: PluginDefinition<DependenciesType, ExposableType>,
     logger: LoggerFactory
   ) {
-    this.name = name as PluginName;
-    this.dependencies = dependencies as PluginName[];
+    this.name = pluginDefinition.name as PluginName;
+    this.dependencies = pluginDefinition.dependencies as PluginName[];
+    this.run = pluginDefinition.run;
     this.log = logger.get('plugins', name);
   }
 
