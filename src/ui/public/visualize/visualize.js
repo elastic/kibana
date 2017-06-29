@@ -1,8 +1,10 @@
+import _ from 'lodash';
 import { uiModules } from 'ui/modules';
 import { stateMonitorFactory } from 'ui/state_management/state_monitor_factory';
 import visualizeTemplate from 'ui/visualize/visualize.html';
 import { VisRequestHandlersRegistryProvider } from 'ui/registry/vis_request_handlers';
 import { VisResponseHandlersRegistryProvider } from 'ui/registry/vis_response_handlers';
+import { ResizeCheckerProvider } from 'ui/resize_checker';
 import 'angular-sanitize';
 import './visualization';
 import './visualization_editor';
@@ -13,10 +15,11 @@ import {
 
 uiModules
 .get('kibana/directive', ['ngSanitize'])
-.directive('visualize', function (Notifier, Private, timefilter, getAppState) {
+.directive('visualize', function (Notifier, Private, timefilter, getAppState, $timeout) {
   const notify = new Notifier({ location: 'Visualize' });
   const requestHandlers = Private(VisRequestHandlersRegistryProvider);
   const responseHandlers = Private(VisResponseHandlersRegistryProvider);
+  const ResizeChecker = Private(ResizeCheckerProvider);
 
   function getHandler(from, name) {
     if (typeof name === 'function') return name;
@@ -34,10 +37,13 @@ uiModules
     },
     template: visualizeTemplate,
     link: function ($scope, $el) {
+      const resizeChecker = new ResizeChecker($el);
+
       $scope.vis = $scope.savedObj.vis;
       $scope.editorMode = $scope.editorMode || false;
       $scope.vis.showSpyPanel = $scope.showSpyPanel || false;
       $scope.vis.editorMode = $scope.editorMode;
+      $scope.vis.visualizeScope = true;
 
       if (!$scope.appState) $scope.appState = getAppState();
 
@@ -78,6 +84,7 @@ uiModules
       });
 
       if ($scope.appState) {
+        let oldUiState;
         const stateMonitor = stateMonitorFactory.create($scope.appState);
         stateMonitor.onChange((status, type, keys) => {
           if (keys[0] === 'vis') {
@@ -87,8 +94,25 @@ uiModules
           if ($scope.vis.type.requiresSearch && ['query', 'filters'].includes(keys[0])) {
             $scope.fetch();
           }
+          if (keys[0] === 'uiState') {
+            // uiState can be changed by other visualizations on dashboard. this makes sure this fires only if
+            // current visualizations uiState changed.
+            if (!oldUiState || oldUiState !== JSON.stringify($scope.uiState.toJSON())) {
+              oldUiState = JSON.stringify($scope.uiState.toJSON());
+              $timeout(() => {
+                $scope.$broadcast('render');
+              });
+            }
+          }
         });
       }
+
+      let resizeInit = false;
+      const resizeFunc = _.debounce(() => {
+        if (!resizeInit) return resizeInit = true;
+        $scope.$broadcast('render');
+      }, 200);
+      resizeChecker.on('resize',  resizeFunc);
 
       // visualize needs to know about timeFilter
       $scope.$listen(timefilter, 'fetch', $scope.fetch);
