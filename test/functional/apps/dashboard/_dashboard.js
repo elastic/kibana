@@ -24,13 +24,7 @@ export default function ({ getService, getPageObjects }) {
     it('should be able to add visualizations to dashboard', async function addVisualizations() {
       await screenshots.take('Dashboard-no-visualizations');
 
-      // This flip between apps fixes the url so state is preserved when switching apps in test mode.
-      // Without this flip the url in test mode looks something like
-      // "http://localhost:5620/app/kibana?_t=1486069030837#/dashboard?_g=...."
-      // after the initial flip, the url will look like this: "http://localhost:5620/app/kibana#/dashboard?_g=...."
-      await PageObjects.header.clickVisualize();
-      await PageObjects.header.clickDashboard();
-
+      await PageObjects.dashboard.retainStateAcrossApps();
       await PageObjects.dashboard.clickNewDashboard();
       await PageObjects.dashboard.addVisualizations(PageObjects.dashboard.getTestVisualizationNames());
 
@@ -138,7 +132,7 @@ export default function ({ getService, getPageObjects }) {
         const currentQuery = await PageObjects.dashboard.getQuery();
         expect(currentQuery).to.equal('');
         const currentUrl = await remote.getCurrentUrl();
-        const newUrl = currentUrl.replace('query:%27*%27', 'query:%27hi%27');
+        const newUrl = currentUrl.replace('query:%27%27', 'query:%27hi%27');
         // Don't add the timestamp to the url or it will cause a hard refresh and we want to test a
         // soft refresh.
         await remote.get(newUrl.toString(), false);

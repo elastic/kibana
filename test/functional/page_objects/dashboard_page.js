@@ -33,6 +33,15 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
       return logstash;
     }
 
+    async retainStateAcrossApps() {
+      // This flip between apps fixes the url so state is preserved when switching apps in test mode.
+      // Without this flip the url in test mode looks something like
+      // "http://localhost:5620/app/kibana?_t=1486069030837#/dashboard?_g=...."
+      // after the initial flip, the url will look like this: "http://localhost:5620/app/kibana#/dashboard?_g=...."
+      await PageObjects.header.clickVisualize();
+      await PageObjects.header.clickDashboard();
+    }
+
     /**
      * Returns true if already on the dashboard landing page (that page doesn't have a link to itself).
      * @returns {Promise<boolean>}
@@ -60,18 +69,18 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
     }
 
     async getQuery() {
-      const queryObject = await testSubjects.find('dashboardQuery');
+      const queryObject = await testSubjects.find('queryInput');
       return await queryObject.getProperty('value');
     }
 
     appendQuery(query) {
       log.debug('Appending query');
-      return retry.try(() => testSubjects.find('dashboardQuery').type(query));
+      return retry.try(() => testSubjects.find('queryInput').type(query));
     }
 
     clickFilterButton() {
       log.debug('Clicking filter button');
-      return testSubjects.click('dashboardQueryFilterButton');
+      return testSubjects.click('querySubmitButton');
     }
 
     async clickClone() {
@@ -435,12 +444,15 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
       return _.map(filters, async (filter) => await filter.getVisibleText());
     }
 
-    async filterOnPieSlice() {
+    async getAllPieSlices() {
+      return await find.allByCssSelector('svg > g > path.slice');
+    }
+
+    async filterOnPieSlice(sliceIndex = 0) {
       log.debug('Filtering on a pie slice');
       await retry.try(async () => {
-        const slices = await find.allByCssSelector('svg > g > path.slice');
-        log.debug('Slices found:' + slices.length);
-        return slices[0].click();
+        const slices = await this.getAllPieSlices();
+        return slices[sliceIndex].click();
       });
     }
 

@@ -15,6 +15,7 @@ import 'ui/index_patterns';
 import 'ui/state_management/app_state';
 import 'ui/timefilter';
 import 'ui/share';
+import 'ui/query_bar';
 import { VisProvider } from 'ui/vis';
 import { DocTitleProvider } from 'ui/doc_title';
 import { UtilsBrushEventProvider } from 'ui/utils/brush_event';
@@ -27,7 +28,9 @@ import uiRoutes from 'ui/routes';
 import { uiModules } from 'ui/modules';
 import indexTemplate from 'plugins/kibana/discover/index.html';
 import { StateProvider } from 'ui/state_management/state';
+import { addNode, toKueryExpression, fromKueryExpression, nodeTypes } from 'ui/kuery';
 import { documentationLinks } from 'ui/documentation_links/documentation_links';
+import { migrateLegacyQuery } from 'ui/utils/migrateLegacyQuery';
 
 const app = uiModules.get('apps/discover', [
   'kibana/notify',
@@ -231,7 +234,7 @@ function discoverController($scope, config, courier, $route, $window, Notifier,
 
   function getStateDefaults() {
     return {
-      query: $scope.searchSource.get('query') || '',
+      query: $scope.searchSource.get('query') || { query: '', language: config.get('search:queryLanguage') },
       sort: getSort.array(savedSearch.sort, $scope.indexPattern),
       columns: savedSearch.columns.length > 0 ? savedSearch.columns : config.get('defaultColumns').slice(),
       index: $scope.indexPattern.id,
@@ -322,6 +325,10 @@ function discoverController($scope, config, courier, $route, $window, Notifier,
         if (buckets && buckets.length === 1) {
           $scope.bucketInterval = buckets[0].buckets.getInterval();
         }
+      });
+
+      $scope.$watch('state.query', (newQuery) => {
+        $state.query = migrateLegacyQuery(newQuery);
       });
 
       $scope.$watchMulti([
@@ -424,6 +431,16 @@ function discoverController($scope, config, courier, $route, $window, Notifier,
       return courier.fetch();
     })
     .catch(notify.error);
+  };
+
+  $scope.fetchWithNewQuery = function (query) {
+    // reset state if language changes
+    if ($state.query.language && $state.query.language !== query.language) {
+      $state.filters = [];
+    }
+
+    $state.query = query;
+    $scope.fetch();
   };
 
   $scope.searchSource.onBeginSegmentedFetch(function (segmented) {
@@ -558,7 +575,19 @@ function discoverController($scope, config, courier, $route, $window, Notifier,
   // TODO: On array fields, negating does not negate the combination, rather all terms
   $scope.filterQuery = function (field, values, operation) {
     $scope.indexPattern.popularizeField(field, 1);
-    filterManager.add(field, values, operation, $state.index);
+
+    if ($state.query.language === 'lucene') {
+      filterManager.add(field, values, operation, $state.index);
+    }
+
+    if ($state.query.language === 'kuery') {
+      const kueryAST = fromKueryExpression($state.query.query);
+      const newAST = addNode(
+        kueryAST,
+        nodeTypes.match.buildNode({ field: field.name, values, operation })
+      );
+      $scope.fetchWithNewQuery({ query: toKueryExpression(newAST), language: 'kuery' });
+    }
   };
 
   $scope.addColumn = function addColumn(columnName) {
