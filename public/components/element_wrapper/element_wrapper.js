@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import { compose, branch, renderComponent } from 'recompose';
 import { InvalidExpression } from './invalid_expression';
 import { InvalidElementType } from './invalid_element_type';
-import { RenderElement } from '../render_element';
+import { PositionableChild } from './positionable_child';
 import { Loading } from '../loading';
 import { Positionable } from '../positionable';
 import './element_wrapper.less';
@@ -43,27 +43,20 @@ const ElementWrapperComponent = (props) => {
     setPosition,
   } = props;
 
-  // TODO: pass in render element dimensions
-  const selectedClassName = isSelected ? 'selected' : '';
-
   return (
     <Positionable position={position} onChange={setPosition} interact={isSelected}>
-      <div
-        className={`canvas__workpad--element ${selectedClassName}`}
-        onClick={select}>
-        <div style={{ pointerEvents: 'none' }}>
-          <RenderElement
-            renderFn={elementTypeDefintion.render}
-            destroyFn={elementTypeDefintion.destroy}
-            config={renderable.value}
-            done={() => {}}
-            size={{ width: position.width, height: position.height }}
-          />
-        </div>
-        {!isSelected ? null :
-          (<i className="fa fa-times-circle canvas__workpad--element-remove" style={{ cursor: 'pointer' }} onClick={remove}/>)
-        }
-      </div>
+      {/*
+        Size will be passed to PositionableChild by Positionable
+        size={{ width: position.width, height: position.height }}
+      */}
+      <PositionableChild
+        select={select}
+        remove={remove}
+        isSelected={isSelected}
+        elementTypeDefintion={elementTypeDefintion}
+        renderable={renderable}
+      />
+      { /* size= will get passed to the children, but not all the way to RenderElement. F me. */ }
     </Positionable>
   );
 };
