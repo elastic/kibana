@@ -9,8 +9,19 @@ export function createFindQuery(options = {}) {
 
   if (type) {
     bool.filter.push({
-      term: {
-        _type: type
+      bool: {
+        should: [
+          {
+            term: {
+              _type: type
+            }
+          },
+          {
+            term: {
+              type
+            }
+          }
+        ]
       }
     });
   }

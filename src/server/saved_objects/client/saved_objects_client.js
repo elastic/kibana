@@ -3,8 +3,20 @@ import { get } from 'lodash';
 
 import {
   createFindQuery,
+  createIdQuery,
   handleEsError,
+  getDocType
 } from './lib';
+
+const V6_TYPE = 'doc';
+const TYPE_MISSING_EXCEPTION = 'type_missing_exception';
+
+function isTypeMissing(item, action) {
+  return get(item, `${action}.error.type`) === TYPE_MISSING_EXCEPTION;
+}
+function boomIsNotFound(err) {
+  return err.isBoom && err.output.statusCode === 404;
+}
 
 export class SavedObjectsClient {
   constructor(kibanaIndex, callAdminCluster) {
@@ -13,7 +25,23 @@ export class SavedObjectsClient {
   }
 
   async create(type, body = {}) {
-    const response = await this._withKibanaIndex('index', { type, body });
+    let response;
+    try {
+      response = await this._withKibanaIndex('index', {
+        type: V6_TYPE,
+        body: {
+          [type]: body
+        },
+        refresh: 'wait_for'
+      });
+    } catch(err) {
+      if (!boomIsNotFound(err)) throw err;
+      response = await this._withKibanaIndex('index', {
+        type,
+        body,
+        refresh: 'wait_for'
+      });
+    }
 
     return {
       id: response._id,
@@ -33,34 +61,47 @@ export class SavedObjectsClient {
    */
   async bulkCreate(objects, options = {}) {
     const action = options.force === true ? 'index' : 'create';
-
-    const body = objects.reduce((acc, object) => {
-      acc.push({ [action]: { _type: object.type, _id: object.id } });
-      acc.push(object.attributes);
-
+    let response;
+    const v6Body = objects.reduce((acc, object) => {
+      acc.push({ [action]: { _type: 'doc', _id: object.id } });
+      acc.push(Object.assign({}, {
+        type: object.type
+      }, { [object.type]: object.attributes }));
       return acc;
     }, []);
+    response = await this._withKibanaIndex('bulk', { body: v6Body });
 
-    return await this._withKibanaIndex('bulk', { body })
-      .then(resp => get(resp, 'items', []).map((resp, i) => {
-        return {
-          id: resp[action]._id,
-          type: resp[action]._type,
-          version: resp[action]._version,
-          attributes: objects[i].attributes,
-          error: resp[action].error ? { message: get(resp[action], 'error.reason') } : undefined
-        };
-      }));
+    const items = get(response, 'items', []);
+    const missingErrors = items.filter(item => isTypeMissing(item, action)).length;
+    const usesV5Index = items.length && items.length === missingErrors;
+
+    if (usesV5Index) {
+      const v5Body = objects.reduce((acc, object) => {
+        acc.push({ [action]: { _type: object.type, _id: object.id } });
+        acc.push(object.attributes);
+        return acc;
+      }, []);
+      response = await this._withKibanaIndex('bulk', { body: v5Body });
+    }
+
+    return get(response, 'items', []).map((resp, i) => {
+      return {
+        id: resp[action]._id,
+        type: resp[action]._type,
+        version: resp[action]._version,
+        attributes: objects[i].attributes,
+        error: resp[action].error ? { message: get(resp[action], 'error.reason') } : undefined
+      };
+    });
   }
 
   async delete(type, id) {
-    const response = await this._withKibanaIndex('delete', {
-      type,
-      id,
+    const response = await this._withKibanaIndex('deleteByQuery', {
+      body: createIdQuery({ type, id }),
       refresh: 'wait_for'
     });
 
-    if (get(response, 'found') === false) {
+    if (get(response, 'deleted') === 0) {
       throw Boom.notFound();
     }
   }
@@ -76,7 +117,6 @@ export class SavedObjectsClient {
     } = options;
 
     const esOptions = {
-      type,
       _source: fields,
       size: perPage,
       from: perPage * (page - 1),
@@ -87,11 +127,12 @@ export class SavedObjectsClient {
 
     return {
       saved_objects: get(response, 'hits.hits', []).map(r => {
+        const docType =  getDocType(r);
         return {
           id: r._id,
-          type: r._type,
+          type: docType,
           version: r._version,
-          attributes: r._source
+          attributes: get(r, `_source.${docType}`) || r._source
         };
       }),
       total: get(response, 'hits.total', 0),
@@ -118,49 +159,79 @@ export class SavedObjectsClient {
       return { saved_objects: [] };
     }
 
-    const docs = objects.map(doc => {
-      return { _type: get(doc, 'type'), _id: get(doc, 'id') };
-    });
+    const docs = objects.reduce((acc, { type, id }) => {
+      acc.push({}, createIdQuery({ type, id }));
+      return acc;
+    }, []);
 
-    const response = await this._withKibanaIndex('mget', { body: { docs } })
-      .then(resp => get(resp, 'docs', []).filter(resp => resp.found));
+
+    const response = await this._withKibanaIndex('msearch', { body: docs })
+    .then(resp => {
+      let results = [];
+      const responses = get(resp, 'responses', []);
+      responses.forEach(r => {
+        results = results.concat(get(r, 'hits.hits'));
+      });
+      return results;
+    });
 
     return {
       saved_objects: response.map(r => {
+        const docType =  getDocType(r);
+
         return {
           id: r._id,
-          type: r._type,
+          type: docType,
           version: r._version,
-          attributes: r._source
+          attributes: get(r, `_source.${docType}`) || r._source
         };
       })
     };
   }
 
   async get(type, id) {
-    const response = await this._withKibanaIndex('get', {
-      type,
-      id,
-    });
+    const response = await this._withKibanaIndex('search', { body: createIdQuery({ type, id }) });
+    const hit = get(response, 'hits.hits.0');
+    if (!hit) throw Boom.notFound();
+
+    const attributes =  get(hit, `_source.${type}`) || get(hit, '_source');
 
     return {
-      id: response._id,
-      type: response._type,
-      version: response._version,
-      attributes: response._source
+      id: hit._id,
+      type: hit._type,
+      version: hit._version,
+      attributes
     };
   }
 
   async update(type, id, attributes, options = {}) {
-    const response = await this._withKibanaIndex('update', {
-      type,
+    const baseParams = {
       id,
       version: get(options, 'version'),
-      body: {
-        doc: attributes
-      },
       refresh: 'wait_for'
-    });
+    };
+
+    let response;
+    try {
+      const v6Params = Object.assign({}, baseParams, {
+        type: V6_TYPE,
+        body: {
+          doc: {
+            [type]: attributes
+          }
+        },
+      });
+      response = await this._withKibanaIndex('update', v6Params);
+    } catch (err) {
+      if (!boomIsNotFound(err)) throw err;
+      const v5Params = Object.assign({}, baseParams, {
+        type,
+        body: {
+          doc: attributes
+        }
+      });
+      response = await this._withKibanaIndex('update', v5Params);
+    }
 
     return {
       id: id,
