@@ -10,7 +10,6 @@ export default class UiExports {
     this.navLinks = new UiNavLinkCollection(this);
     this.apps = new UiAppCollection(this);
     this.aliases = {
-      fieldFormats: ['ui/field_format/register'],
       fieldFormatEditors: ['ui/field_format_editor/register']
     };
     this.urlBasePath = urlBasePath;

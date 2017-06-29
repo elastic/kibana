@@ -1,5 +1,5 @@
 import _ from 'lodash';
-import numeral from 'numeral';
+import numeral from '@spalger/numeral';
 import { FieldFormat } from '../field_format';
 
 const numeralInst = numeral();
