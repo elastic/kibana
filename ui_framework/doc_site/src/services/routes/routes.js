@@ -222,6 +222,7 @@ const components = [{
 }, {
   name: 'Tabs',
   component: TabsExample,
+  hasReact: true,
 }, {
   name: 'ToggleButton',
   component: ToggleButtonExample,
