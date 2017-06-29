@@ -29,7 +29,27 @@ service that Kibana uses to display map tiles in tilemap visualizations. By defa
 `tilemap.options.attribution:`:: *Default: `"© [Elastic Tile Service](https://www.elastic.co/elastic-tile-service)"`* The map attribution string.
 `tilemap.options.subdomains:`:: An array of subdomains used by the tile service.
 Specify the position of the subdomain the URL with the token `{s}`.
-[[regionmap-settings]] `regionmap`:: configuration section to include additional vector layers that can be used in the Region Map visualization. 
+
+[[regionmap-settings]] `regionmap`:: configuration object to include additional vector layers for use in the <<regionmap,Region Map visualization>>.
+It consists of one or more _layer_ objects, each representing a pointer to an external vector file in the _geojson_ format. The file must be in the WGS84 coordinate reference, and only include polygons. 
+If the file is hosted on a domain different from Kibana, it needs to be CORS-enabled so the Kibana-application can download the file. The _url_ field also serves as a unique identifier of the file.
+Each layer can have multiple fields, which indicate what properties from the geojson-features you would like to expose. 
+The _field.description_ is the human readable text that will be shown in the field-selection of the Region Map visualization. An example of a valid configuration is shown below.
+
+    
+    regionmap:
+      layers: 
+         - name: "Departments of France"
+           url: "http://my.cors.enabled.server.org/france_departements.geojson"
+           fields:
+              - name: "department"
+                description: "Full department name"
+              - name: "INSEE"
+                description: "INSEE numeric identifier"         
+    
+    
+    
+ 
 `elasticsearch.username:` and `elasticsearch.password:`:: If your Elasticsearch is protected with basic authentication,
 these settings provide the username and password that the Kibana server uses to perform maintenance on the Kibana index at
 startup. Your Kibana users still need to authenticate with Elasticsearch, which is proxied through the Kibana server.
