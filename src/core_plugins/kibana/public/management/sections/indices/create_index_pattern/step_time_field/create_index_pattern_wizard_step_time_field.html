@@ -1,0 +1,112 @@
+<form
+  role="form"
+  ng-submit="createIndexPattern()"
+  class="kuiPanel"
+>
+  <div class="kuiPanelHeader">
+    <div class="kuiPanelHeaderSection">
+      <h2
+        class="kuiPanelHeader__title"
+        translate="KIBANA-SPECIFY_TIME_FIELD"
+        translate-values="{ indexPatternName: indexPatternName }"
+      ></h2>
+    </div>
+  </div>
+
+  <div class="kuiPanelBody">
+    <p
+      class="kuiText kuiVerticalRhythm"
+      translate="KIBANA-TIME_FIELD_EXPLANATION"
+    ></p>
+
+    <!-- Time field select -->
+    <div class="kuiVerticalRhythm">
+      <label class="kuiLabel kuiVerticalRhythmSmall">
+        <span translate="KIBANA-TIME_FILTER_FIELD_NAME"></span>
+        &nbsp;
+        <kbn-info info="{{ 'KIBANA-FIELD_FILTER_EVENTS_GLOBAL_TIME' | translate }}"></kbn-info>
+        &nbsp;
+        <small>
+          <a
+            class="kuiLink"
+            ng-click="refreshTimeFieldOptions();"
+            translate="KIBANA-REFRESH_FIELDS"
+          ></a>
+        </small>
+      </label>
+
+      <div class="kuiVerticalRhythmSmall">
+        <select
+          class="kuiSelect kuiSelect--large kuiVerticalRhythmSmall"
+          data-test-subj="createIndexPatternTimeFieldSelect"
+          ng-disabled="isTimeFieldSelectDisabled()"
+          ng-required="timeFieldOptions.length"
+          ng-options="option.display for option in timeFieldOptions"
+          ng-model="selectedTimeFieldOption"
+        ></select>
+      </div>
+    </div>
+
+    <!-- Expand index pattern checkbox -->
+    <div class="kuiVerticalRhythm" ng-if="canEnableExpandWildcard()">
+      <label class="kuiCheckBoxLabel kuiVerticalRhythm">
+        <input
+          class="kuiCheckBox"
+          type="checkbox"
+          data-test-subj="createIndexPatternEnableExpand"
+          ng-model="expandWildcard"
+        >
+        <span class="kuiCheckBoxLabel__text">
+          <span translate="KIBANA-EXPAND_INDEX_PATTERN"></span>
+          <span translate="KIBANA-DEPRECATED"></span>
+        </span>
+      </label>
+
+      <!-- Checkbox help text -->
+      <div class="kuiVerticalRhythm">
+        <p
+          class="kuiSubText kuiVerticalRhythmSmall"
+          translate="KIBANA-WILDCARD_DEFAULT_EXPANDED_TO_CURRENT_TIME_RANGE"
+        ></p>
+
+        <p class="kuiSubText kuiVerticalRhythmSmall">
+          <span translate="KIBANA-SEARCH_AGAINST_INDEX_PATTERN"></span>
+          <em translate="KIBANA-LOGSTASH_WILDCARD"></em>
+          <span translate="KIBANA-ACTUALLY_QUERY"></span>
+          <em translate="KIBANA-EXAMPLE_TIME_RANGE"></em>
+          <span translate="KIBANA-FALL_WITHIN_CURRENT_TIME_RANGE"></span>
+        </p>
+
+        <p
+          class="kuiSubText kuiVerticalRhythmSmall"
+          translate="KIBANA-EXPAND_INDEX_PATTERN_DEPRECATION"
+        ></p>
+      </div>
+    </div>
+
+    <!-- Actions -->
+    <div class="kuiBar kuiVerticalRhythm">
+      <div class="kuiBarSection">
+        <div class="kuiButtonGroup">
+          <button
+            class="kuiButton kuiButton--secondary kuiButton--iconText"
+            ng-click="goToPreviousStep()"
+          >
+            <span class="kuiButton__inner">
+              <span aria-hidden="true" class="kuiButton__icon kuiIcon fa-chevron-left"></span>
+              <span>Back</span>
+            </span>
+          </button>
+
+          <button
+            data-test-subj="createIndexPatternCreateButton"
+            ng-disabled="form.$invalid || !canCreateIndexPattern()"
+            class="kuiButton kuiButton--primary"
+            type="submit"
+            translate="KIBANA-CREATE"
+          ></button>
+        </div>
+      </div>
+    </div>
+  </div>
+</form>

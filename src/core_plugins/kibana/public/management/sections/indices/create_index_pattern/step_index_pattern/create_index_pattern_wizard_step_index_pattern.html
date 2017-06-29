@@ -1,0 +1,88 @@
+<form
+  role="form"
+  ng-submit="goToNextStep()"
+  class="kuiPanel"
+>
+  <div class="kuiPanelHeader">
+    <div class="kuiPanelHeaderSection">
+      <h2
+        class="kuiPanelHeader__title"
+        translate="KIBANA-SPECIFY_INDEX_PATTERN"
+      ></h2>
+    </div>
+  </div>
+
+  <div class="kuiPanelBody">
+    <p class="kuiText kuiVerticalRhythm">
+      <span translate="KIBANA-INDEX_PATTERN_EXPLANATION_2"></span>
+      <a
+        class="kuiLink"
+        ng-href="{{ documentationLinks.indexPatterns.introduction }}"
+        translate="KIBANA-INDEX_PATTERN_EXPLANATION_3"
+      ></a>
+    </p>
+
+    <!-- Index pattern input -->
+    <div class="kuiVerticalRhythm">
+      <label
+        class="kuiLabel kuiVerticalRhythmSmall"
+        translate="KIBANA-INDEX_NAME_OR_PATTERN"
+      ></label>
+
+      <div class="kuiVerticalRhythm kuiVerticalRhythmSmall">
+        <input
+          class="kuiTextInput kuiTextInput--large"
+          data-test-subj="createIndexPatternNameInput"
+          ng-model="indexPatternName"
+          ng-model-options="{ updateOn: 'default blur', debounce: {'default': 500, 'blur': 0} }"
+          validate-index-name
+          allow-wildcard
+          name="name"
+          required
+          type="text"
+        ></div>
+    </div>
+
+    <!-- List of matching indices -->
+    <div
+      class="kuiVerticalRhythm"
+      ng-switch="matchingIndicesListType"
+    >
+      <matching-indices-list
+        ng-switch-when="noMatches"
+        indices="allIndices"
+        template-index-patterns="allTemplateIndexPatterns"
+      ></matching-indices-list>
+
+      <matching-indices-list
+        ng-switch-when="partialMatches"
+        indices="partialMatchingIndices"
+        template-index-patterns="partialMatchingTemplateIndexPatterns"
+      ></matching-indices-list>
+
+      <matching-indices-list
+        ng-switch-when="exactMatches"
+        indices="matchingIndices"
+        template-index-patterns="matchingTemplateIndexPatterns"
+      ></matching-indices-list>
+    </div>
+
+    <!-- Actions -->
+    <div class="kuiBar">
+      <div class="kuiBarSection">
+        <div class="kuiButtonGroup">
+          <button
+            data-test-subj="createIndexPatternCreateButton"
+            class="kuiButton kuiButton--primary kuiButton--iconText"
+            ng-click="goToNextStep()"
+          >
+            <span class="kuiButton__inner">
+              <span>Next: Specify an optional time field</span>
+              <span aria-hidden="true" class="kuiButton__icon kuiIcon fa-chevron-right"></span>
+            </span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</form>

@@ -5,9 +5,10 @@ import 'ui/directives/auto_select_if_only_one';
 import { RefreshKibanaIndex } from '../refresh_kibana_index';
 import uiRoutes from 'ui/routes';
 import { uiModules } from 'ui/modules';
-import { documentationLinks } from 'ui/documentation_links/documentation_links';
 import template from './create_index_pattern.html';
 import { sendCreateIndexPatternRequest } from './send_create_index_pattern_request';
+import './step_index_pattern/create_index_pattern_wizard_step_index_pattern';
+import './step_time_field/create_index_pattern_wizard_step_time_field';
 import './matching_indices_list';
 import 'ui/indices';
 
@@ -45,11 +46,15 @@ uiModules.get('apps/management')
   this.timeFieldOptions = [];
   this.timeFieldOptionsError = null;
   this.wizardStep = 'indexPattern';
-  this.matchingIndicesListType = 'noMatches';
-  this.documentationLinks = documentationLinks;
+  this.isLoading = false;
+
+  const updateLoadingState = increment => {
+    loadingCount += increment;
+    this.isLoading = loadingCount > 0;
+  };
 
   const getTimeFieldOptions = () => {
-    loadingCount += 1;
+    updateLoadingState(1);
     return Promise.resolve()
     .then(() => {
       const { name } = this.formValues;
@@ -93,7 +98,7 @@ uiModules.get('apps/management')
       throw err;
     })
     .finally(() => {
-      loadingCount -= 1;
+      updateLoadingState(-1);
     });
   };
 
@@ -253,10 +258,6 @@ uiModules.get('apps/management')
     );
   };
 
-  this.isLoading = () => {
-    return loadingCount > 0;
-  };
-
   let activeRefreshTimeFieldOptionsCall;
   this.refreshTimeFieldOptions = () => {
     // if there is an active refreshTimeFieldOptions() call then we use
@@ -271,7 +272,7 @@ uiModules.get('apps/management')
     // modify the controller in any way to prevent race conditions
     const thisCall = activeRefreshTimeFieldOptionsCall = { prevOption };
 
-    loadingCount += 1;
+    updateLoadingState(1);
     this.timeFieldOptions = [];
     this.timeFieldOptionsError = null;
     this.formValues.timeFieldOption = null;
@@ -292,7 +293,7 @@ uiModules.get('apps/management')
       })
       .catch(notify.error)
       .finally(() => {
-        loadingCount -= 1;
+        updateLoadingState(-1);
         if (thisCall === activeRefreshTimeFieldOptionsCall) {
           activeRefreshTimeFieldOptionsCall = null;
         }
@@ -316,6 +317,7 @@ uiModules.get('apps/management')
       : true;
 
     loadingCount += 1;
+    updateLoadingState(1);
     sendCreateIndexPatternRequest(indexPatterns, {
       id,
       timeFieldName,
@@ -333,8 +335,8 @@ uiModules.get('apps/management')
         indexPatterns.cache.clear(id);
         kbnUrl.change(`/management/kibana/indices/${id}`);
 
-        // force loading while kbnUrl.change takes effect
-        loadingCount = Infinity;
+        // force loading while kbnUrl.change takes effect.
+        updateLoadingState(Infinity);
       });
     }).catch(err => {
       if (err instanceof IndexPatternMissingIndices) {
@@ -343,7 +345,7 @@ uiModules.get('apps/management')
 
       notify.fatal(err);
     }).finally(() => {
-      loadingCount -= 1;
+      updateLoadingState(-1);
     });
   };
 
