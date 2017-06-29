@@ -1,3 +1,12 @@
+/**
+ *  Converts an array of items into a sentence-ready string.
+ *
+ *  @param {Array<any>} list
+ *  @param {Object} [options={}]
+ *  @property {Boolean} [options.inclusive=true] Creates an inclusive list using "and"
+ *                                               when `true` (default), otherwise uses "or"
+ *  @return {String}
+ */
 export function formatListAsProse(list, options = {}) {
   const {
     inclusive = true
@@ -8,21 +17,14 @@ export function formatListAsProse(list, options = {}) {
   }
 
   const count = list.length;
-  const lastI = count - 1;
   const conjunction = inclusive ? 'and' : 'or';
-  return list.reduce((acc, item, i) => {
-    if (i === 0) {
-      return item;
-    }
 
-    if (i === lastI && count >= 3) {
-      return `${acc}, ${conjunction} ${item}`;
-    }
+  if (count <= 2) {
+    return list.join(` ${conjunction} `);
+  }
 
-    if (i === lastI) {
-      return `${acc} ${conjunction} ${item}`;
-    }
-
-    return `${acc}, ${item}`;
-  }, '');
+  return list
+    .slice(0, -1)
+    .concat(`${conjunction} ${list[count - 1]}`)
+    .join(', ');
 }
