@@ -1,0 +1,34 @@
+@import (reference) "../../style/main";
+
+.canvas__media_card {
+  height: 200px;
+  width: 200px;
+  border: @borderStyle;
+  border-radius: @borderRadius;
+  display: inline-table;
+  margin: @spacingS;
+  background-color: darken(@darkestGrey, 5%);
+  border-color: lighten(@darkestGrey, 10%);
+}
+
+.canvas__media_card_clickable:hover {
+  cursor: pointer;
+  border-color: @blue;
+}
+
+.canvas__media_card-image {
+  height: 80px;
+  background-position: center center;
+  background-size: cover;
+  background-repeat: no-repeat;
+}
+
+.canvas__media_card-content {
+  font-size: @textXSmall;
+  padding: @spacingM;
+}
+
+.canvas__media_card-title {
+  text-transform: capitalize;
+  margin-top: 0px;
+}

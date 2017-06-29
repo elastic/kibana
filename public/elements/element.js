@@ -6,8 +6,12 @@ export function Element(config) {
   // Use this to set a more friendly name
   this.displayName = config.displayName || config.name;
 
-  // An svg icon to use for representing this thing
-  this.icon = config.icon;
+  // An image to use in the element type selector
+  this.image = config.image;
+
+  // A sentence or few about what this element does
+  this.description = config.description;
+
 
   if (!config.expression) throw new Error('Element types must have a default expression');
   this.expression = config.expression;

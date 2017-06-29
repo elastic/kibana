@@ -1,11 +1,13 @@
 import { Element } from '../element';
 import ReactDOM from 'react-dom';
 import React from 'react';
+import header from './header.png';
 
 module.exports = new Element({
   name: 'image',
   displayName: 'Image',
-  icon: null,
+  description: 'A static image.',
+  image: header,
   expression: 'image()',
   render(domNode, config, done) {
     ReactDOM.render(<div style={{

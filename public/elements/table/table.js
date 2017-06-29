@@ -2,11 +2,14 @@ import { Element } from '../element';
 import ReactDOM from 'react-dom';
 import React from 'react';
 import { Table } from 'react-bootstrap';
+import header from './header.png';
+
 
 module.exports = new Element({
   name: 'table',
-  displayName: 'Line Chart',
-  icon: null,
+  displayName: 'Data Table',
+  description: 'A scrollable grid for displaying data in a tabluar format',
+  image: header,
   expression: 'demodata()',
   destroy(args) {
     console.log('destory table', args);
