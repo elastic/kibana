@@ -108,15 +108,12 @@ uiModules
           .then(() => {
             // renderComplete
             $scope.$emit('renderComplete');
+            if (!$scope.vis.visualizeScope) {
+              $el.trigger('renderComplete');
+            }
           });
         $scope.$apply();
-      }, 200);
-
-      let resizeInit = false;
-      const resizeFunction = _.debounce(() => {
-        if (!resizeInit) return resizeInit = true;
-        visualization.resize();
-      }, 200);
+      }, 100);
 
       $scope.$on('render', () => {
         if (!$scope.vis || ($scope.vis.type.requiresSearch && !$scope.visData)) {
@@ -130,12 +127,17 @@ uiModules
       });
 
       if (!$scope.vis.visualizeScope) {
-        $scope.$watch('visData', () => {
+        $scope.$watchGroup(['visData', 'vis.params'], () => {
           $scope.$emit('render');
         });
-      }
 
-      resizeChecker.on('resize',  resizeFunction);
+        let resizeInit = false;
+        const resizeFunc = _.debounce(() => {
+          if (!resizeInit) return resizeInit = true;
+          $scope.$emit('render');
+        }, 200);
+        resizeChecker.on('resize',  resizeFunc);
+      }
 
       function jQueryGetter(selector) {
         return function () {

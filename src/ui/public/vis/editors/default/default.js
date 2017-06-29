@@ -39,6 +39,14 @@ const defaultEditor = function ($rootScope, $compile) {
 
           updateScope();
 
+          $scope.toggleSidebar = () => {
+            $scope.$broadcast('render');
+          };
+
+          $scope.$on('renderComplete', () => {
+            $scope.renderComplete();
+          });
+
           // track state of editable vis vs. "actual" vis
           $scope.stageEditableVis = () => {
             $scope.vis.updateState();
@@ -72,11 +80,8 @@ const defaultEditor = function ($rootScope, $compile) {
           updateScope();
         }
 
+        $scope.renderComplete = resolve;
         $scope.$broadcast('render');
-
-        $scope.$on('renderComplete', () => {
-          resolve(true);
-        });
       });
     }
 

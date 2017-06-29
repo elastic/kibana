@@ -14,16 +14,11 @@ export function ReactVisTypeProvider(Private) {
     render(visData) {
       this.visData = visData;
 
-      return new Promise((resolve) => {
+      return new Promise((resolve, reject) => {
+        if (!this.visData) return reject();
         const Component = this.vis.type.visConfig.component;
         render(<Component vis={this.vis} visData={visData} renderComplete={resolve} />, this.el);
       });
-    }
-
-    resize() {
-      if (this.visData) {
-        this.render(this.visData);
-      }
     }
 
     destroy() {

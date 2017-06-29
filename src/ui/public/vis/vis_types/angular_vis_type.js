@@ -20,6 +20,8 @@ export function AngularVisTypeProvider(Private, $compile, $rootScope) {
           this.$scope.esResponse = esResponse;
           this.$scope.renderComplete = resolve;
           this.$scope.renderFailed = reject;
+          this.$scope.resize = Date.now();
+          this.$scope.$apply();
         };
 
         if (!this.$scope) {
@@ -31,12 +33,6 @@ export function AngularVisTypeProvider(Private, $compile, $rootScope) {
           updateScope();
         }
       });
-    }
-
-    resize() {
-      if (this.$scope) {
-        this.$scope.$emit('resize');
-      }
     }
 
     destroy() {

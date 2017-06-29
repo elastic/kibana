@@ -20,7 +20,6 @@ export function VislibVisTypeProvider(Private) {
     }
 
     render(esResponse) {
-      if (!esResponse) return;
       this._response = esResponse;
       if (this.vis.vislibVis) {
         this.destroy();
@@ -28,7 +27,8 @@ export function VislibVisTypeProvider(Private) {
         this.vis.refreshLegend = 0;
       }
 
-      return new Promise(resolve => {
+      return new Promise((resolve, reject) => {
+        if (!this._response) return reject();
         this.vis.vislibVis = new vislib.Vis(this.el, this.vis.params);
         this.vis.vislibVis.on('brush', this.vis.API.events.brush);
         this.vis.vislibVis.on('click', this.vis.API.events.filter);
@@ -36,10 +36,6 @@ export function VislibVisTypeProvider(Private) {
         this.vis.vislibVis.render(esResponse, this.vis.getUiState());
         this.vis.refreshLegend++;
       });
-    }
-
-    resize() {
-      return this.render(this._response);
     }
 
     destroy() {
