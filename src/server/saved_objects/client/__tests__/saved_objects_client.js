@@ -1,6 +1,7 @@
 import expect from 'expect.js';
 import sinon from 'sinon';
 import { SavedObjectsClient } from '../saved_objects_client';
+import { createIdQuery } from '../lib/create_id_query';
 
 describe('SavedObjectsClient', () => {
   let callAdminCluster;
@@ -126,10 +127,10 @@ describe('SavedObjectsClient', () => {
 
       expect(args[0]).to.be('bulk');
       expect(args[1].body).to.eql([
-        { create: { _type: 'doc', _id: 'one' } },
-        { config: { title: 'Test One' }, type: 'config' },
-        { create: { _type: 'doc', _id: 'two' } },
-        { 'index-pattern': { title: 'Test Two' }, type: 'index-pattern' }
+        { create: { _type: 'config', _id: 'one' } },
+        { title: 'Test One' },
+        { create: { _type: 'index-pattern', _id: 'two' } },
+        { title: 'Test Two' }
       ]);
     });
 
@@ -145,10 +146,10 @@ describe('SavedObjectsClient', () => {
 
       expect(args[0]).to.be('bulk');
       expect(args[1].body).to.eql([
-        { index: { _type: 'doc', _id: 'one' } },
-        { config: { title: 'Test One' }, type: 'config' },
-        { index: { _type: 'doc', _id: 'two' } },
-        { 'index-pattern': { title: 'Test Two' }, type: 'index-pattern' }
+        { index: { _type: 'config', _id: 'one' } },
+        { title: 'Test One' },
+        { index: { _type: 'index-pattern', _id: 'two' } },
+        { title: 'Test Two' }
       ]);
     });
 
@@ -257,41 +258,9 @@ describe('SavedObjectsClient', () => {
       const args = callAdminCluster.getCall(0).args;
       expect(args[0]).to.be('deleteByQuery');
       expect(args[1]).to.eql({
+        body: createIdQuery({ type: 'index-pattern', id: 'logstash-*' }),
         refresh: 'wait_for',
-        index: '.kibana-test',
-        body: {
-          version: true,
-          query: {
-            bool: {
-              should: [
-                {
-                  ids: {
-                    type: 'index-pattern',
-                    values: 'logstash-*'
-                  }
-                },
-                {
-                  bool: {
-                    must: [
-                      {
-                        term: {
-                          id: {
-                            value: 'logstash-*'
-                          }
-                        }
-                      },
-                      {
-                        type: {
-                          value: 'doc'
-                        }
-                      }
-                    ]
-                  }
-                }
-              ]
-            }
-          }
-        }
+        index: '.kibana-test'
       });
     });
   });
@@ -399,11 +368,10 @@ describe('SavedObjectsClient', () => {
   });
 
   describe('#bulkGet', () => {
-    it('accepts a array of mixed type and ids', async () => {
+    it('accepts an array of mixed type and ids', async () => {
       await savedObjectsClient.bulkGet([
         { id: 'one', type: 'config' },
-        { id: 'two', type: 'index-pattern' },
-        { id: 'three' }
+        { id: 'two', type: 'index-pattern' }
       ]);
 
       expect(callAdminCluster.calledOnce).to.be(true);
@@ -411,11 +379,9 @@ describe('SavedObjectsClient', () => {
       const options = callAdminCluster.getCall(0).args[1];
       expect(options.body).to.eql([
         {},
-        { version: true, query: { bool: { should: [{ ids: { values: 'one', type: 'config' } }, { bool: { must: [{ term: { id: { value: 'one' } } }, { type: { value: 'doc' } }] } }] } } }, //eslint-disable-line max-len
+        createIdQuery({ type: 'config', id: 'one' }),
         {},
-        { version: true, query: { bool: { should: [{ ids: { values: 'two', type: 'index-pattern' } }, { bool: { must: [{ term: { id: { value: 'two' } } }, { type: { value: 'doc' } }] } }] } } }, //eslint-disable-line max-len
-        {},
-        { version: true, query: { bool: { should: [{ ids: { values: 'three' } }, { bool: { must: [{ term: { id: { value: 'three' } } }, { type: { value: 'doc' } }] } }] } } } //eslint-disable-line max-len
+        createIdQuery({ type: 'index-pattern', id: 'two' })
       ]);
     });
 
@@ -507,10 +473,10 @@ describe('SavedObjectsClient', () => {
 
       expect(args[0]).to.be('update');
       expect(args[1]).to.eql({
-        type: 'doc',
+        type: 'index-pattern',
         id: 'logstash-*',
         version: undefined,
-        body: { doc: { 'index-pattern': { title: 'Testing' } } },
+        body: { doc: { title: 'Testing' } },
         refresh: 'wait_for',
         index: '.kibana-test'
       });

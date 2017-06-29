@@ -1,40 +1,42 @@
 /**
- * Finds a document by either its v6 or v5 format
+ * Finds a document by either its v5 or v6 format
+ *
  * @param type The documents type
  * @param id The documents id or legacy id
 **/
 export function createIdQuery({ type, id }) {
-  const ids = {
-    values: id
-  };
-
-  if (type) ids.type = type;
   return {
     version: true,
     query: {
       bool: {
         should: [
-          {
-            ids
-          },
+          // v5 document
           {
             bool: {
               must: [
-                {
-                  term: {
-                    id: {
-                      value: id
-                    }
-                  }
-                },
-                {
-                  type: {
-                    value: 'doc'
-                  }
-                }
+                { term: { _id: id } },
+                { term: { _type: type } }
               ]
             }
-          }
+          },
+          // migrated v5 document
+          {
+            bool: {
+              must: [
+                { term: { legacyId: id } },
+                { term: { type: type } }
+              ]
+            }
+          },
+          // v6 document
+          {
+            bool: {
+              must: [
+                { term: { _id: id } },
+                { term: { type: type } }
+              ]
+            }
+          },
         ]
       }
     }
