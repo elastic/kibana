@@ -46,6 +46,14 @@ export function HeaderPageProvider({ getService, getPageObjects }) {
       await testSubjects.click('globalTimepickerButton');
     }
 
+    async clickQueryBarLanguageSelector() {
+      await testSubjects.click('queryBarLanguageSelector');
+    }
+
+    async findQueryBarLanguageSelector() {
+      return await testSubjects.find('queryBarLanguageSelector');
+    }
+
     async clickQuickButton() {
       await retry.try(async () => {
         remote.setFindTimeout(defaultFindTimeout);

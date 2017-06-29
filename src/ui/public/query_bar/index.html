@@ -49,6 +49,7 @@
 
       <select
         class="kuiLocalSearchSelect"
+        data-test-subj="queryBarLanguageSelector"
         ng-options="option for option in queryBar.availableQueryLanguages"
         ng-model="queryBar.localQuery.language"
         ng-change="queryBar.selectLanguage()"

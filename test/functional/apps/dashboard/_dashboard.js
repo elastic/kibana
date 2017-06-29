@@ -24,13 +24,7 @@ export default function ({ getService, getPageObjects }) {
     it('should be able to add visualizations to dashboard', async function addVisualizations() {
       await screenshots.take('Dashboard-no-visualizations');
 
-      // This flip between apps fixes the url so state is preserved when switching apps in test mode.
-      // Without this flip the url in test mode looks something like
-      // "http://localhost:5620/app/kibana?_t=1486069030837#/dashboard?_g=...."
-      // after the initial flip, the url will look like this: "http://localhost:5620/app/kibana#/dashboard?_g=...."
-      await PageObjects.header.clickVisualize();
-      await PageObjects.header.clickDashboard();
-
+      await PageObjects.dashboard.retainStateAcrossApps();
       await PageObjects.dashboard.clickNewDashboard();
       await PageObjects.dashboard.addVisualizations(PageObjects.dashboard.getTestVisualizationNames());
 
