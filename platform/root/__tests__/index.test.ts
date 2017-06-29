@@ -38,6 +38,8 @@ jest.mock('../../logger', () => ({
   MutableLoggerFactory: mockMutableLoggerFactory
 }));
 
+import { noop } from 'lodash';
+
 import { Root } from '../';
 import { Env } from '../../config/Env';
 
@@ -53,7 +55,7 @@ afterEach(() => {
 
 test('starts services on "start"', async () => {
   const env = new Env('.', {});
-  const root = new Root({}, env);
+  const root = new Root({}, env, noop);
 
   expect(configService.start).toHaveBeenCalledTimes(0);
   expect(loggerService.upgrade).toHaveBeenCalledTimes(0);
@@ -69,7 +71,7 @@ test('starts services on "start"', async () => {
 
 test('reloads config', () => {
   const env = new Env('.', {});
-  const root = new Root({}, env);
+  const root = new Root({}, env, noop);
 
   expect(configService.reloadConfig).toHaveBeenCalledTimes(0);
 
@@ -80,7 +82,7 @@ test('reloads config', () => {
 
 test('stops services on "shutdown"', async () => {
   const env = new Env('.', {});
-  const root = new Root({}, env);
+  const root = new Root({}, env, noop);
 
   await root.start();
 
@@ -95,15 +97,20 @@ test('stops services on "shutdown"', async () => {
   expect(server.stop).toHaveBeenCalledTimes(1);
 });
 
-test('exits process on "shutdown"', async () => {
+test('calls onShutdown param on "shutdown"', async () => {
+  const onShutdown = jest.fn();
+
   const env = new Env('.', {});
-  const root = new Root({}, env);
+  const root = new Root({}, env, onShutdown);
 
   await root.start();
 
-  expect(process.exit).toHaveBeenCalledTimes(0);
+  expect(onShutdown).toHaveBeenCalledTimes(0);
 
-  await root.shutdown();
+  const err = new Error('shutdown');
 
-  expect(process.exit).toHaveBeenCalledTimes(1);
+  await root.shutdown(err);
+
+  expect(onShutdown).toHaveBeenCalledTimes(1);
+  expect(onShutdown).toHaveBeenLastCalledWith(err);
 });

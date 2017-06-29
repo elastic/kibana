@@ -4,7 +4,7 @@ const yargs = require('yargs');
 import * as args from './args';
 import { version } from './version';
 import { Env } from '../config';
-import { Root } from '../root';
+import { Root, OnShutdown } from '../root';
 import { argvToConfigOverrides } from './argvToConfig';
 
 export const parseArgv = (argv: Array<string>) =>
@@ -28,7 +28,11 @@ const run = (argv: {[key: string]: any}) => {
   const env = Env.createDefault(argv);
   const configOverrides = argvToConfigOverrides(argv);
 
-  const root = new Root(configOverrides, env);
+  const onShutdown: OnShutdown = reason => {
+    process.exit(reason === undefined ? 0 : 1);
+  }
+
+  const root = new Root(configOverrides, env, onShutdown);
   root.start();
 
   process.on('SIGHUP', () => root.reloadConfig());

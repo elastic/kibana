@@ -2,6 +2,8 @@ import { Server } from '../server';
 import { ConfigService, Env } from '../config';
 import { LoggerService, Logger, LoggerFactory, LoggerConfig, MutableLoggerFactory } from '../logger';
 
+export type OnShutdown = (reason?: Error) => void;
+
 /**
  * Top-level entry point to kick off the app and start the Kibana server.
  */
@@ -14,7 +16,8 @@ export class Root {
 
   constructor(
     configOverrides: {[key: string]: any},
-    env: Env
+    env: Env,
+    private readonly onShutdown: OnShutdown
   ) {
     const loggerFactory = new MutableLoggerFactory();
     this.loggerService = new LoggerService(loggerFactory);
@@ -42,7 +45,7 @@ export class Root {
       await this.server.start();
     } catch(e) {
       this.log.error(e);
-      this.shutdown();
+      this.shutdown(e);
     }
   }
 
@@ -50,9 +53,7 @@ export class Root {
     this.configService.reloadConfig();
   }
 
-  // TODO Accept optional `Error` reason for shutdown? Then we can `exit(1)`
-  // instead of `exit(0)` if it's because of a failure.
-  async shutdown() {
+  async shutdown(reason?: Error) {
     this.log.info('stopping Kibana');
     if (this.server !== undefined) {
       await this.server.stop();
@@ -60,7 +61,6 @@ export class Root {
     await this.configService.stop();
     this.loggerService.stop();
 
-    // TODO Should this be moved to cli?
-    process.exit(0);
+    this.onShutdown(reason);
   }
 }
