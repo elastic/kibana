@@ -58,14 +58,8 @@ export function MapsVisualizationProvider(Private, serviceSettings, Notifier, co
       });
     }
 
-    resize() {
-      if (this._kibanaMap) {
-        this._kibanaMap.resize();
-      }
-    }
 
     //**********************************************************************************************************
-
     async _makeKibanaMap() {
 
       try {
@@ -248,7 +242,6 @@ export function MapsVisualizationProvider(Private, serviceSettings, Notifier, co
 
 
         // this._doRenderComplete();
-
         return;
       }
       resolve('renderComplete');
