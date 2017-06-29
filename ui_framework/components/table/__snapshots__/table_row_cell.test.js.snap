@@ -5,5 +5,9 @@ exports[`renders KuiTableRowCell 1`] = `
   aria-label="aria-label"
   class="kuiTableRowCell testClass1 testClass2"
   data-test-subj="test subject string"
-/>
+>
+  <div
+    class="'kuiTableRowCell__liner"
+  />
+</td>
 `;

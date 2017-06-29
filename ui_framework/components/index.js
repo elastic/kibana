@@ -101,7 +101,6 @@ export {
   KuiTableHeaderCell,
   KuiTableRow,
   KuiTableRowCell,
-  KuiTableRowCellLiner,
   KuiTableInfo,
   KuiTableRowCheckBoxCell,
   KuiTableHeaderCheckBoxCell,

@@ -12,7 +12,13 @@ export const KuiTableRowCell = ({ children, align, className, ...rest }) => {
   const classes = classNames('kuiTableRowCell', className, {
     'kuiTableRowCell--alignRight': align === RIGHT_ALIGNMENT,
   });
-  return <td className={classes} {...rest} >{children}</td>;
+  return (
+    <td className={classes} {...rest} >
+      <div className="'kuiTableRowCell__liner">
+        {children}
+      </div>
+    </td>
+  );
 };
 KuiTableRowCell.propTypes = {
   align: PropTypes.oneOf(ALIGNMENT),

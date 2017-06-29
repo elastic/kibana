@@ -27,7 +27,11 @@ exports[`renders KuiTable 1`] = `
       <td
         class="kuiTableRowCell"
       >
-        Hi
+        <div
+          class="'kuiTableRowCell__liner"
+        >
+          Hi
+        </div>
       </td>
     </tr>
     <tr
@@ -36,7 +40,11 @@ exports[`renders KuiTable 1`] = `
       <td
         class="kuiTableRowCell"
       >
-        Bye
+        <div
+          class="'kuiTableRowCell__liner"
+        >
+          Bye
+        </div>
       </td>
     </tr>
   </tbody>

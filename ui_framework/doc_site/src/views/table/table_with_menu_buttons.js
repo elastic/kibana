@@ -2,11 +2,14 @@ import React from 'react';
 
 import {
   KuiTable,
-  KuiTableRowCellLiner,
   KuiTableRow,
   KuiTableRowCell,
   KuiTableHeaderCell,
 } from '../../../../components';
+
+import {
+  RIGHT_ALIGNMENT
+} from '../../../../services';
 
 export function TableWithMenuButtons() {
   return (
@@ -34,77 +37,57 @@ export function TableWithMenuButtons() {
         <tbody>
           <KuiTableRow>
             <KuiTableRowCell>
-              <KuiTableRowCellLiner>
-                Core temperature critical
-              </KuiTableRowCellLiner>
+              Core temperature critical
             </KuiTableRowCell>
             <KuiTableRowCell>
-              <KuiTableRowCellLiner>
-                A
-              </KuiTableRowCellLiner>
+              A
             </KuiTableRowCell>
             <KuiTableRowCell>
-              <KuiTableRowCellLiner>
-                B
-              </KuiTableRowCellLiner>
+              B
             </KuiTableRowCell>
             <KuiTableRowCell>
-              <KuiTableRowCellLiner>
-                C
-              </KuiTableRowCellLiner>
+              C
             </KuiTableRowCell>
-            <KuiTableRowCell className="kuiTableRowCell--alignRight">
-              <KuiTableRowCellLiner>
-                <div className="kuiMenuButtonGroup kuiMenuButtonGroup--alignRight">
-                  <button className="kuiMenuButton kuiMenuButton--basic">
-                    Acknowledge
-                  </button>
-                  <button className="kuiMenuButton kuiMenuButton--basic">
-                    Silence
-                  </button>
-                  <button className="kuiMenuButton kuiMenuButton--danger">
-                    Delete
-                  </button>
-                </div>
-              </KuiTableRowCellLiner>
+            <KuiTableRowCell align={ RIGHT_ALIGNMENT }>
+              <div className="kuiMenuButtonGroup kuiMenuButtonGroup--alignRight">
+                <button className="kuiMenuButton kuiMenuButton--basic">
+                  Acknowledge
+                </button>
+                <button className="kuiMenuButton kuiMenuButton--basic">
+                  Silence
+                </button>
+                <button className="kuiMenuButton kuiMenuButton--danger">
+                  Delete
+                </button>
+              </div>
             </KuiTableRowCell>
           </KuiTableRow>
 
           <KuiTableRow>
             <KuiTableRowCell>
-              <KuiTableRowCellLiner>
-                Time for your snack
-              </KuiTableRowCellLiner>
+              Time for your snack
             </KuiTableRowCell>
             <KuiTableRowCell>
-              <KuiTableRowCellLiner>
-                A
-              </KuiTableRowCellLiner>
+              A
             </KuiTableRowCell>
             <KuiTableRowCell>
-              <KuiTableRowCellLiner>
-                B
-              </KuiTableRowCellLiner>
+              B
             </KuiTableRowCell>
             <KuiTableRowCell>
-              <KuiTableRowCellLiner>
-                C
-              </KuiTableRowCellLiner>
+              C
             </KuiTableRowCell>
-            <KuiTableRowCell className="kuiTableRowCell--alignRight">
-              <KuiTableRowCellLiner>
-                <div className="kuiMenuButtonGroup kuiMenuButtonGroup--alignRight">
-                  <button className="kuiMenuButton kuiMenuButton--basic">
-                    Acknowledge
-                  </button>
-                  <button className="kuiMenuButton kuiMenuButton--basic">
-                    Silence
-                  </button>
-                  <button className="kuiMenuButton kuiMenuButton--danger">
-                    Delete
-                  </button>
-                </div>
-              </KuiTableRowCellLiner>
+            <KuiTableRowCell align={ RIGHT_ALIGNMENT }>
+              <div className="kuiMenuButtonGroup kuiMenuButtonGroup--alignRight">
+                <button className="kuiMenuButton kuiMenuButton--basic">
+                  Acknowledge
+                </button>
+                <button className="kuiMenuButton kuiMenuButton--basic">
+                  Silence
+                </button>
+                <button className="kuiMenuButton kuiMenuButton--danger">
+                  Delete
+                </button>
+              </div>
             </KuiTableRowCell>
           </KuiTableRow>
         </tbody>

@@ -9,7 +9,11 @@ exports[`renders KuiTableRow 1`] = `
   <td
     class="kuiTableRowCell"
   >
-    hi
+    <div
+      class="'kuiTableRowCell__liner"
+    >
+      hi
+    </div>
   </td>
 </tr>
 `;

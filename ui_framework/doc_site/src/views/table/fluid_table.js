@@ -2,7 +2,6 @@ import React from 'react';
 
 import {
   KuiTable,
-  KuiTableRowCellLiner,
   KuiTableRow,
   KuiTableRowCell,
   KuiTableHeaderCell,
@@ -25,52 +24,40 @@ export function FluidTable() {
         <tbody>
           <KuiTableRow>
             <KuiTableRowCell>
-              <KuiTableRowCellLiner>
-                Cryogenics
-              </KuiTableRowCellLiner>
+              Cryogenics
             </KuiTableRowCell>
             <KuiTableRowCell>
-              <KuiTableRowCellLiner>
-                <select className="kuiSelect" defaultValue="on">
-                  <option value="on">On</option>
-                  <option value="off">Off</option>
-                  <option value="selfDestruct">Self-destruct</option>
-                </select>
-              </KuiTableRowCellLiner>
+              <select className="kuiSelect" defaultValue="on">
+                <option value="on">On</option>
+                <option value="off">Off</option>
+                <option value="selfDestruct">Self-destruct</option>
+              </select>
             </KuiTableRowCell>
           </KuiTableRow>
 
           <KuiTableRow>
             <KuiTableRowCell>
-              <KuiTableRowCellLiner>
-                Propellant
-              </KuiTableRowCellLiner>
+              Propellant
             </KuiTableRowCell>
             <KuiTableRowCell>
-              <KuiTableRowCellLiner>
-                <select className="kuiSelect" defaultValue="on">
-                  <option value="on">On</option>
-                  <option value="off">Off</option>
-                  <option value="selfDestruct">Self-destruct</option>
-                </select>
-              </KuiTableRowCellLiner>
+              <select className="kuiSelect" defaultValue="on">
+                <option value="on">On</option>
+                <option value="off">Off</option>
+                <option value="selfDestruct">Self-destruct</option>
+              </select>
             </KuiTableRowCell>
           </KuiTableRow>
 
           <KuiTableRow>
             <KuiTableRowCell>
-              <KuiTableRowCellLiner>
-                Rockets
-              </KuiTableRowCellLiner>
+              Rockets
             </KuiTableRowCell>
             <KuiTableRowCell>
-              <KuiTableRowCellLiner>
-                <select className="kuiSelect" defaultValue="off">
-                  <option value="on">On</option>
-                  <option value="off">Off</option>
-                  <option value="selfDestruct">Self-destruct</option>
-                </select>
-              </KuiTableRowCellLiner>
+              <select className="kuiSelect" defaultValue="off">
+                <option value="on">On</option>
+                <option value="off">Off</option>
+                <option value="selfDestruct">Self-destruct</option>
+              </select>
             </KuiTableRowCell>
           </KuiTableRow>
         </tbody>

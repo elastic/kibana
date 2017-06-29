@@ -9,7 +9,6 @@ import {
   KuiTable,
   KuiToolBarText,
   KuiControlledTable,
-  KuiTableRowCellLiner,
   KuiPager,
   KuiTableRow,
   KuiTableRowCell,
@@ -127,15 +126,16 @@ export class ControlledTable extends React.Component {
     return this.rows.map(rowData => {
       return (
         <KuiTableRow>
-          <KuiTableRowCheckBoxCell isChecked={ this.isItemChecked(rowData) } onChange={ () => this.toggleItem(rowData) }/>
+          <KuiTableRowCheckBoxCell
+            isChecked={ this.isItemChecked(rowData) }
+            onChange={ () => this.toggleItem(rowData) }
+          />
           {
             rowData.map((cellData, index) => {
               const align = index === rowData.length - 1 ? RIGHT_ALIGNMENT : LEFT_ALIGNMENT;
               return (
                 <KuiTableRowCell align={ align }>
-                  <KuiTableRowCellLiner>
-                    { cellData }
-                  </KuiTableRowCellLiner>
+                  { cellData }
                 </KuiTableRowCell>
               );
             })

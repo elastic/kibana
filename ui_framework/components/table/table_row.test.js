@@ -11,6 +11,10 @@ import {
 } from './table_row_cell';
 
 test('renders KuiTableRow', () => {
-  const component = <KuiTableRow { ...requiredProps }><KuiTableRowCell>hi</KuiTableRowCell></KuiTableRow>;
+  const component = (
+    <KuiTableRow { ...requiredProps }>
+      <KuiTableRowCell>hi</KuiTableRowCell>
+    </KuiTableRow>
+  );
   expect(render(component)).toMatchSnapshot();
 });
