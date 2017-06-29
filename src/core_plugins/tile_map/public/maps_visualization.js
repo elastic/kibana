@@ -20,8 +20,6 @@ export function MapsVisualizationProvider(Private, serviceSettings, Notifier, co
       this.vis = vis;
       this.$el = $(element);
       this._$container = this.$el;
-
-
       this._geohashLayer = null;
       this._kibanaMap = null;
       this._kibanaMapReady = this._makeKibanaMap();
@@ -29,7 +27,6 @@ export function MapsVisualizationProvider(Private, serviceSettings, Notifier, co
       this._dataDirty = true;
       this._paramsDirty = true;
       this._currentParams = null;
-      this._updateParams();
     }
 
     destroy() {
@@ -41,21 +38,22 @@ export function MapsVisualizationProvider(Private, serviceSettings, Notifier, co
     async render(esResponse) {
 
       return new Promise((resolve) => {
-        if (esResponse && typeof esResponse.geohashGridAgg === 'undefined') {
-          this._updateParams();
-          return resolve();
-        }
+        this._updateParams().then(() => {
+          if (esResponse && typeof esResponse.geohashGridAgg === 'undefined') {
+            return resolve();
+          }
 
-        //todo: do render complete!
-        this._dataDirty = true;
-        this._kibanaMapReady.then(() => {
-          this._chartData = esResponse;
-          this._geohashGeoJson = this._chartData.geoJson;
-          this._recreateGeohashLayer();
-          this._kibanaMap.useUiStateFromVisualization(this.vis);
-          this._kibanaMap.resize();
-          this._dataDirty = false;
-          this._doRenderComplete(resolve);
+          this._dataDirty = true;
+
+          this._kibanaMapReady.then(() => {
+            this._chartData = esResponse;
+            this._geohashGeoJson = this._chartData.geoJson;
+            this._recreateGeohashLayer();
+            this._kibanaMap.useUiStateFromVisualization(this.vis);
+            this._kibanaMap.resize();
+            this._dataDirty = false;
+            this._doRenderComplete(resolve);
+          });
         });
       });
     }
@@ -169,7 +167,7 @@ export function MapsVisualizationProvider(Private, serviceSettings, Notifier, co
         return;
       }
 
-      this._currentParams = mapParams;
+      this._currentParams = _.cloneDeep(mapParams);
       const { minZoom, maxZoom } = this._getMinMaxZoom();
 
       if (mapParams.wms.enabled) {
