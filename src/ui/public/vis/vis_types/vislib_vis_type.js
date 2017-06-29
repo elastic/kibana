@@ -39,7 +39,7 @@ export function VislibVisTypeProvider(Private) {
     }
 
     resize() {
-      this.render(this._response);
+      return this.render(this._response);
     }
 
     destroy() {

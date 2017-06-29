@@ -131,11 +131,6 @@ uiModules
 
       resizeChecker.on('resize',  resizeFunction);
 
-      $scope.$watch('visData', () => {
-        $scope.$broadcast('render');
-      });
-
-
       function jQueryGetter(selector) {
         return function () {
           const $sel = $el.find(selector);

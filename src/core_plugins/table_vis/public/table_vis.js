@@ -76,7 +76,6 @@ function TableVisTypeProvider(Private) {
         }
       ])
     },
-    implementsRenderComplete: true,
     hierarchicalData: function (vis) {
       return Boolean(vis.params.showPartialRows || vis.params.showMeticsAtAllLevels);
     }

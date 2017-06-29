@@ -30,6 +30,7 @@ const defaultEditor = function ($rootScope, $compile) {
         $scope.visData = visData;
         $scope.uiState = this.vis.getUiState();
         $scope.searchSource = searchSource;
+        $scope.$apply();
       };
 
       return new Promise(resolve => {
