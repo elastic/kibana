@@ -106,7 +106,7 @@ export function VislibVisualizationsColumnChartProvider(Private) {
       const isTimeScale = this.getCategoryAxis().axisConfig.isTimeDomain();
       const yMin = yScale.domain()[0];
       const gutterSpacingPercentage = 0.15;
-      const groupNum = this.getGroupedNum(this.chartData);
+      const groupNum = this.getGroupedNum(this.chartData) + 1;
       let barWidth;
       let gutterWidth;
 
@@ -120,7 +120,7 @@ export function VislibVisualizationsColumnChartProvider(Private) {
       }
 
       function x(d) {
-        const groupPosition = isTimeScale ? barWidth * groupNum : xScale.rangeBand() / groupNum;
+        const groupPosition = isTimeScale ? barWidth * groupNum : xScale.rangeBand() * (1 / groupNum - 1);
         return xScale(d.x) + groupPosition;
       }
 
