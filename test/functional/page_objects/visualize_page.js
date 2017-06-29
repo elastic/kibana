@@ -205,7 +205,7 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
       return await testSubjects.exists('spyToggleButton');
     }
 
-    toggleSpyPane() {
+    toggleSpyPanel() {
       return testSubjects.click('spyToggleButton');
     }
 
