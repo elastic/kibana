@@ -1,10 +1,10 @@
 import { uiModules } from 'ui/modules';
-import template from './create_index_pattern_wizard_step_time_field.html';
+import template from './step_time_field.html';
 import { documentationLinks } from 'ui/documentation_links/documentation_links';
 
 const module = uiModules.get('apps/management');
 
-module.directive('createIndexPatternWizardStepTimeField', function () {
+module.directive('stepTimeField', function () {
   return {
     restrict: 'E',
     template,

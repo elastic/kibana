@@ -1,11 +1,11 @@
 import { uiModules } from 'ui/modules';
-import './create_index_pattern_wizard_step_index_pattern.less';
-import template from './create_index_pattern_wizard_step_index_pattern.html';
+import './step_index_pattern.less';
+import template from './step_index_pattern.html';
 import { documentationLinks } from 'ui/documentation_links/documentation_links';
 
 const module = uiModules.get('apps/management');
 
-module.directive('createIndexPatternWizardStepIndexPattern', function () {
+module.directive('stepIndexPattern', function () {
   return {
     restrict: 'E',
     template,

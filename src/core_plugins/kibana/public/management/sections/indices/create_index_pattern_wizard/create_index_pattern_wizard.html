@@ -50,7 +50,7 @@
         class="kuiVerticalRhythm"
       >
         <!-- Specify index pattern -->
-        <create-index-pattern-wizard-step-index-pattern
+        <step-index-pattern
           ng-switch-when="indexPattern"
           index-pattern-name="controller.formValues.name"
           all-indices="controller.allIndices"
@@ -60,10 +60,10 @@
           matching-indices="controller.matchingIndices"
           matching-template-index-patterns="controller.matchingTemplateIndexPatterns"
           go-to-next-step="controller.goToTimeFieldStep()"
-        ></create-index-pattern-wizard-step-index-pattern>
+        ></step-index-pattern>
 
         <!-- Specify optional time field -->
-        <create-index-pattern-wizard-step-time-field
+        <step-time-field
           ng-switch-when="timeField"
           index-pattern-name="controller.formValues.name"
           expand-wildcard="controller.formValues.expandWildcard"
@@ -75,7 +75,7 @@
           is-fetching-time-field-options="controller.isLoading"
           go-to-previous-step="controller.goToIndexPatternStep()"
           create-index-pattern="controller.createIndexPattern()"
-        ></create-index-pattern-wizard-step-time-field>
+        ></step-time-field>
       </div>
 
 
