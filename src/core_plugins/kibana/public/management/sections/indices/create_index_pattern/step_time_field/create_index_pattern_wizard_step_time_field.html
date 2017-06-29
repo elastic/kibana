@@ -7,17 +7,29 @@
     <div class="kuiPanelHeaderSection">
       <h2
         class="kuiPanelHeader__title"
-        translate="KIBANA-SPECIFY_TIME_FIELD"
-        translate-values="{ indexPatternName: indexPatternName }"
+        translate="KIBANA-CREATE_INDEX_PATTERN_STEP_2_TITLE"
       ></h2>
     </div>
   </div>
 
   <div class="kuiPanelBody">
-    <p
-      class="kuiText kuiVerticalRhythm"
-      translate="KIBANA-TIME_FIELD_EXPLANATION"
-    ></p>
+    <div class="kuiInfoPanel kuiInfoPanel--info kuiVerticalRhythm">
+      <div class="kuiInfoPanelHeader">
+        <span class="kuiInfoPanelHeader__icon kuiIcon kuiIcon--info fa-info"></span>
+        <span
+          class="kuiInfoPanelHeader__title"
+          translate="KIBANA-CREATE_INDEX_PATTERN_STEP_2_INFO_TITLE"
+          translate-values="{ indexPatternName: indexPatternName }"
+        ></span>
+      </div>
+
+      <div class="kuiInfoPanelBody">
+        <div
+          class="kuiInfoPanelBody__message"
+          translate="KIBANA-CREATE_INDEX_PATTERN_STEP_2_INFO_BODY"
+        ></div>
+      </div>
+    </div>
 
     <!-- Time field select -->
     <div class="kuiVerticalRhythm">
@@ -49,7 +61,11 @@
 
     <!-- Expand index pattern checkbox -->
     <div class="kuiVerticalRhythm" ng-if="canEnableExpandWildcard()">
-      <label class="kuiCheckBoxLabel kuiVerticalRhythm">
+      <label class="kuiLabel kuiVerticalRhythmSmall">
+        Expand index pattern
+      </label>
+
+      <label class="kuiCheckBoxLabel kuiVerticalRhythmSmall kuiVerticalRhythm">
         <input
           class="kuiCheckBox"
           type="checkbox"
@@ -65,11 +81,11 @@
       <!-- Checkbox help text -->
       <div class="kuiVerticalRhythm">
         <p
-          class="kuiSubText kuiVerticalRhythmSmall"
+          class="kuiText kuiSubduedText kuiVerticalRhythmSmall"
           translate="KIBANA-WILDCARD_DEFAULT_EXPANDED_TO_CURRENT_TIME_RANGE"
         ></p>
 
-        <p class="kuiSubText kuiVerticalRhythmSmall">
+        <p class="kuiText kuiSubduedText kuiVerticalRhythmSmall">
           <span translate="KIBANA-SEARCH_AGAINST_INDEX_PATTERN"></span>
           <em translate="KIBANA-LOGSTASH_WILDCARD"></em>
           <span translate="KIBANA-ACTUALLY_QUERY"></span>
@@ -78,7 +94,7 @@
         </p>
 
         <p
-          class="kuiSubText kuiVerticalRhythmSmall"
+          class="kuiText kuiSubduedText kuiVerticalRhythmSmall"
           translate="KIBANA-EXPAND_INDEX_PATTERN_DEPRECATION"
         ></p>
       </div>

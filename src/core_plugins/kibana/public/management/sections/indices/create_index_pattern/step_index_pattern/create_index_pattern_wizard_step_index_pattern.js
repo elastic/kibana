@@ -1,4 +1,5 @@
 import { uiModules } from 'ui/modules';
+import './create_index_pattern_wizard_step_index_pattern.less';
 import template from './create_index_pattern_wizard_step_index_pattern.html';
 import { documentationLinks } from 'ui/documentation_links/documentation_links';
 
