@@ -23,7 +23,7 @@ export class SavedObjectsClient {
    * @returns {promise} - { id, type, version, attributes }
   */
   async create(type, attributes = {}, options = {}) {
-    const method = get(options, 'overwrite', false) === false && options.id ? 'create' : 'index';
+    const method = options.id && !options.overwrite ? 'create' : 'index';
     const response = await this._withKibanaIndex(method, {
       type,
       id: options.id,
