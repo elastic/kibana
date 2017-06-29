@@ -5,6 +5,12 @@ import { formatListAsProse } from '../../utils';
 
 const getUnusedConfigKeys = (settings, configValues) => {
   const inputKeys = keys(flattenWith('.', transformDeprecations(settings)));
+  if (inputKeys.includes('env')) {
+    // env is a special case key, see https://github.com/elastic/kibana/blob/848bf17b/src/server/config/config.js#L74
+    // where it is deleted from the settings before being injected into the schema via context and
+    // then renamed to `env.name` https://github.com/elastic/kibana/blob/848bf17/src/server/config/schema.js#L17
+    inputKeys[inputKeys.indexOf('env')] = 'env.name';
+  }
   const appliedKeys = keys(flattenWith('.', configValues));
   return difference(inputKeys, appliedKeys);
 };
