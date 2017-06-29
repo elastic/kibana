@@ -3,17 +3,21 @@ import expect from 'expect.js';
 import { formatListAsProse } from '../prose';
 
 describe('utils formatListAsProse()', () => {
-  it('converts non array arguments to string', () => {
-    expect(formatListAsProse(0)).to.eql('0');
-    expect(formatListAsProse(1)).to.eql('1');
-    expect(formatListAsProse({})).to.eql('[object Object]');
-    expect(formatListAsProse(() => {})).to.eql('() => {}');
-    expect(formatListAsProse((a, b) => b)).to.eql('(a, b) => b');
-    expect(formatListAsProse(/foo/)).to.eql('/foo/');
-    expect(formatListAsProse(null)).to.eql('null');
-    expect(formatListAsProse(undefined)).to.eql('undefined');
-    expect(formatListAsProse(false)).to.eql('false');
-    expect(formatListAsProse(true)).to.eql('true');
+  it('throw TypeError for non array arguments', () => {
+    const assertTypeError = error => {
+      expect(error).to.be.a(TypeError);
+    };
+
+    expect(() => formatListAsProse(0)).to.throwError(assertTypeError);
+    expect(() => formatListAsProse(1)).to.throwError(assertTypeError);
+    expect(() => formatListAsProse({})).to.throwError(assertTypeError);
+    expect(() => formatListAsProse(() => {})).to.throwError(assertTypeError);
+    expect(() => formatListAsProse((a, b) => b)).to.throwError(assertTypeError);
+    expect(() => formatListAsProse(/foo/)).to.throwError(assertTypeError);
+    expect(() => formatListAsProse(null)).to.throwError(assertTypeError);
+    expect(() => formatListAsProse(undefined)).to.throwError(assertTypeError);
+    expect(() => formatListAsProse(false)).to.throwError(assertTypeError);
+    expect(() => formatListAsProse(true)).to.throwError(assertTypeError);
   });
 
   describe('defaults', () => {

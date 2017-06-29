@@ -13,7 +13,7 @@ export function formatListAsProse(list, options = {}) {
   } = options;
 
   if (!Array.isArray(list)) {
-    return String(list);
+    throw new TypeError('formatListAsProse() requires an array');
   }
 
   const count = list.length;
