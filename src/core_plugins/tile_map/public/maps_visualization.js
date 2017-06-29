@@ -40,21 +40,23 @@ export function MapsVisualizationProvider(Private, serviceSettings, Notifier, co
 
     async render(esResponse) {
 
-      if (esResponse && typeof esResponse.geohashGridAgg === 'undefined') {
-        this._updateParams();
-        return;
-      }
+      return new Promise((resolve) => {
+        if (esResponse && typeof esResponse.geohashGridAgg === 'undefined') {
+          this._updateParams();
+          return resolve();
+        }
 
-      //todo: do render complete!
-      this._dataDirty = true;
-      this._kibanaMapReady.then(() => {
-        this._chartData = esResponse;
-        this._geohashGeoJson = this._chartData.geoJson;
-        this._recreateGeohashLayer();
-        this._kibanaMap.useUiStateFromVisualization(this.vis);
-        this._kibanaMap.resize();
-        this._dataDirty = false;
-        this._doRenderComplete();
+        //todo: do render complete!
+        this._dataDirty = true;
+        this._kibanaMapReady.then(() => {
+          this._chartData = esResponse;
+          this._geohashGeoJson = this._chartData.geoJson;
+          this._recreateGeohashLayer();
+          this._kibanaMap.useUiStateFromVisualization(this.vis);
+          this._kibanaMap.resize();
+          this._dataDirty = false;
+          this._doRenderComplete(resolve);
+        });
       });
     }
 
@@ -114,7 +116,6 @@ export function MapsVisualizationProvider(Private, serviceSettings, Notifier, co
         } else {
           this._recreateGeohashLayer();
           this._dataDirty = false;
-          this._doRenderComplete();
         }
       });
 
@@ -127,7 +128,6 @@ export function MapsVisualizationProvider(Private, serviceSettings, Notifier, co
       });
       this._kibanaMap.on('baseLayer:loaded', () => {
         this._baseLayerDirty = false;
-        this._doRenderComplete();
       });
       this._kibanaMap.on('baseLayer:loading', () => {
         this._baseLayerDirty = true;
@@ -236,10 +236,7 @@ export function MapsVisualizationProvider(Private, serviceSettings, Notifier, co
       };
     }
 
-    _doRenderComplete() {
-
-      //todo
-      return;
+    _doRenderComplete(resolve) {
 
       if (this._paramsDirty || this._dataDirty || this._baseLayerDirty) {
         const mapParams = this._getMapsParams();
@@ -256,7 +253,7 @@ export function MapsVisualizationProvider(Private, serviceSettings, Notifier, co
 
         return;
       }
-      this.$el.trigger('renderComplete');
+      resolve('renderComplete');
     }
 
   }
