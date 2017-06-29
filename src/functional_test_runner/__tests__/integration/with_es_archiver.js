@@ -10,7 +10,7 @@ const SCRIPT = resolve(__dirname, '../../../../scripts/functional_test_runner.js
 const CONFIG = resolve(__dirname, '../fixtures/with_es_archiver/config.js');
 
 describe('single test that uses esArchiver', function () {
-  this.timeout(60 * 1000);
+  this.timeout(3 * 60 * 1000);
 
   let log;
   const cleanupWork = [];
