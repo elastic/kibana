@@ -90,6 +90,11 @@ export {
 } from './pager';
 
 export {
+  KuiTabs,
+  KuiTab
+} from './tabs';
+
+export {
   KuiToolBarSearchBox,
   KuiToolBar,
   KuiToolBarFooter,
