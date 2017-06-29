@@ -96,12 +96,14 @@ const PositionableComponent = ({ position, children, interact  }) => {
       left: left,
     };
 
+    const stepChild = React.cloneElement(child, { size: { height, width } });
+
     if (!interact) {
       return (
         <div className="rework--positionable"
           ref={setWrapperNode}
           style={newStyle}>
-          {child}
+          {stepChild}
         </div>
       );
     } else {
@@ -117,7 +119,7 @@ const PositionableComponent = ({ position, children, interact  }) => {
 
           <div className="rework--interactable-meta"/>
 
-          {child}
+          {stepChild}
 
           <div className="rework--interactable-resize rework--interactable-resize-nw"/>
           <div className="rework--interactable-resize rework--interactable-resize-ne"/>
