@@ -59,7 +59,8 @@ describe('importDashboards(req)', () => {
           { create: { _type: 'visualization', _id: 'panel-01' } },
           { visState: '{}' }
         ],
-        index: '.kibana'
+        index: '.kibana',
+        refresh: 'wait_for'
       });
     });
   });
@@ -76,7 +77,8 @@ describe('importDashboards(req)', () => {
           { index: { _type: 'visualization', _id: 'panel-01' } },
           { visState: '{}' }
         ],
-        index: '.kibana'
+        index: '.kibana',
+        refresh: 'wait_for'
       });
     });
   });
@@ -91,7 +93,8 @@ describe('importDashboards(req)', () => {
           { create: { _type: 'dashboard', _id: 'dashboard-01' } },
           { panelJSON: '{}' }
         ],
-        index: '.kibana'
+        index: '.kibana',
+        refresh: 'wait_for'
       });
     });
   });

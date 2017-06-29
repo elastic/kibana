@@ -20,7 +20,7 @@ describe('SavedObject', () => {
     const client = sinon.stub();
     const savedObject = new SavedObject(client, { attributes });
 
-    expect(savedObject._attributes).to.be(attributes);
+    expect(savedObject.attributes).to.be(attributes);
   });
 
   it('persists version', () => {
