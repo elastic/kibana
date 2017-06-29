@@ -10,35 +10,36 @@ import { logger } from '../../logger/__mocks__'
 import { Schema } from '../../types';
 import * as schemaLib from '../../lib/schema'
 
+const emptyArgv = {};
+const noOverrides = {};
+
 beforeEach(() => {
   mockGetConfigFromFile.mockReset();
   mockGetConfigFromFile.mockImplementation(() => ({}));
 });
 
 test('loads raw config when started', () => {
-  const argv = {};
-  const env = new Env('/kibana');
-  const configService = new ConfigService(argv, env, logger);
+  const env = new Env('/kibana', emptyArgv);
+  const configService = new ConfigService(noOverrides, env, logger);
 
   configService.start();
 
   expect(mockGetConfigFromFile).toHaveBeenCalledTimes(1);
-  expect(mockGetConfigFromFile).toHaveBeenLastCalledWith(undefined, '/kibana/config/kibana.yml');
+  expect(mockGetConfigFromFile).toHaveBeenLastCalledWith('/kibana/config/kibana.yml');
 });
 
 test('specifies additional config files if in argv when started', () => {
   const argv = {
     config: '/my/special/kibana/config.yml'
   };
-  const env = new Env('/kibana');
-  const configService = new ConfigService(argv, env, logger);
+  const env = new Env('/kibana', argv);
+  const configService = new ConfigService(noOverrides, env, logger);
 
   configService.start();
 
   expect(mockGetConfigFromFile).toHaveBeenCalledTimes(1);
   expect(mockGetConfigFromFile).toHaveBeenLastCalledWith(
-    '/my/special/kibana/config.yml',
-    '/kibana/config/kibana.yml'
+    '/my/special/kibana/config.yml'
   );
 });
 
@@ -46,8 +47,8 @@ test('re-reads the config when reloading', () => {
   const argv = {
     config: '/my/special/kibana/config.yml'
   };
-  const env = new Env('/kibana');
-  const configService = new ConfigService(argv, env, logger);
+  const env = new Env('/kibana', argv);
+  const configService = new ConfigService(noOverrides, env, logger);
 
   configService.start();
 
@@ -58,17 +59,15 @@ test('re-reads the config when reloading', () => {
 
   expect(mockGetConfigFromFile).toHaveBeenCalledTimes(1);
   expect(mockGetConfigFromFile).toHaveBeenLastCalledWith(
-    '/my/special/kibana/config.yml',
-    '/kibana/config/kibana.yml'
+    '/my/special/kibana/config.yml'
   );
 });
 
 test('returns config at path as observable', async () => {
   mockGetConfigFromFile.mockImplementation(() => ({ key: 'value' }));
 
-  const argv = {};
-  const env = new Env('/kibana');
-  const configService = new ConfigService(argv, env, logger);
+  const env = new Env('/kibana', emptyArgv);
+  const configService = new ConfigService(noOverrides, env, logger);
 
   configService.start();
 
@@ -79,14 +78,31 @@ test('returns config at path as observable', async () => {
   expect(exampleConfig.value).toBe('value');
 });
 
+test('can specify config overrides', async () => {
+  mockGetConfigFromFile.mockImplementation(() => ({ key: 'value' }));
+
+  const env = new Env('/kibana', emptyArgv);
+  const overrides = {
+    key: 'override!'
+  }
+  const configService = new ConfigService(overrides, env, logger);
+
+  configService.start();
+
+  const configs = configService.atPath('key', ExampleClassWithStringSchema);
+
+  const exampleConfig = await configs.first().toPromise();
+
+  expect(exampleConfig.value).toBe('override!');
+});
+
 test('throws if config at path does not match schema', async () => {
   expect.assertions(1);
 
   mockGetConfigFromFile.mockImplementation(() => ({ key: 123 }));
 
-  const argv = {};
-  const env = new Env('/kibana');
-  const configService = new ConfigService(argv, env, logger);
+  const env = new Env('/kibana', emptyArgv);
+  const configService = new ConfigService(noOverrides, env, logger);
 
   configService.start();
 
@@ -102,9 +118,8 @@ test('throws if config at path does not match schema', async () => {
 test("returns undefined if fetching optional config at a path that doesn't exist", async () => {
   mockGetConfigFromFile.mockImplementation(() => ({ foo: 'bar' }));
 
-  const argv = {};
-  const env = new Env('/kibana');
-  const configService = new ConfigService(argv, env, logger);
+  const env = new Env('/kibana', emptyArgv);
+  const configService = new ConfigService(noOverrides, env, logger);
 
   configService.start();
 
@@ -118,9 +133,8 @@ test("returns undefined if fetching optional config at a path that doesn't exist
 test("returns observable config at optional path if it exists", async () => {
   mockGetConfigFromFile.mockImplementation(() => ({ value: 'bar' }));
 
-  const argv = {};
-  const env = new Env('/kibana');
-  const configService = new ConfigService(argv, env, logger);
+  const env = new Env('/kibana', emptyArgv);
+  const configService = new ConfigService(noOverrides, env, logger);
 
   configService.start();
 
@@ -135,9 +149,8 @@ test("returns observable config at optional path if it exists", async () => {
 test("does not push new configs when reloading if config at path hasn't changed", async () => {
   mockGetConfigFromFile.mockImplementation(() => ({ key: 'value' }));
 
-  const argv = {};
-  const env = new Env('/kibana');
-  const configService = new ConfigService(argv, env, logger);
+  const env = new Env('/kibana', emptyArgv);
+  const configService = new ConfigService(noOverrides, env, logger);
 
   configService.start();
 
@@ -158,9 +171,8 @@ test("does not push new configs when reloading if config at path hasn't changed"
 test("pushes new config when reloading and config at path has changed", async () => {
   mockGetConfigFromFile.mockImplementation(() => ({ key: 'value' }));
 
-  const argv = {};
-  const env = new Env('/kibana');
-  const configService = new ConfigService(argv, env, logger);
+  const env = new Env('/kibana', emptyArgv);
+  const configService = new ConfigService(noOverrides, env, logger);
 
   configService.start();
 
@@ -184,9 +196,8 @@ test("throws error if config class does not implement 'createSchema'", async () 
   class ExampleClass {
   }
 
-  const argv = {};
-  const env = new Env('/kibana');
-  const configService = new ConfigService(argv, env, logger);
+  const env = new Env('/kibana', emptyArgv);
+  const configService = new ConfigService(noOverrides, env, logger);
 
   configService.start();
 
@@ -204,9 +215,8 @@ test('completes config observables when stopped', (done) => {
 
   mockGetConfigFromFile.mockImplementation(() => ({ key: 'value' }));
 
-  const argv = {};
-  const env = new Env('/kibana');
-  const configService = new ConfigService(argv, env, logger);
+  const env = new Env('/kibana', emptyArgv);
+  const configService = new ConfigService(noOverrides, env, logger);
 
   configService.start();
 
@@ -239,9 +249,8 @@ test("tracks unhandled paths", async () => {
     }
   }));
 
-  const argv = {};
-  const env = new Env('/kibana');
-  const configService = new ConfigService(argv, env, logger);
+  const env = new Env('/kibana', emptyArgv);
+  const configService = new ConfigService(noOverrides, env, logger);
 
   configService.start();
 

@@ -5,6 +5,7 @@ import * as args from './args';
 import { version } from './version';
 import { Env } from '../config';
 import { Root } from '../root';
+import { argvToConfigOverrides } from './argvToConfig';
 
 export const parseArgv = (argv: Array<string>) =>
   yargs(argv)
@@ -24,9 +25,10 @@ const run = (argv: {[key: string]: any}) => {
     return;
   }
 
-  const env = Env.createDefault();
+  const env = Env.createDefault(argv);
+  const configOverrides = argvToConfigOverrides(argv);
 
-  const root = new Root(argv, env);
+  const root = new Root(configOverrides, env);
   root.start();
 
   process.on('SIGHUP', () => root.reloadConfig());

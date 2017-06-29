@@ -13,7 +13,7 @@ export class Root {
   loggerService: LoggerService;
 
   constructor(
-    argv: {[key: string]: any},
+    configOverrides: {[key: string]: any},
     env: Env
   ) {
     const loggerFactory = new MutableLoggerFactory();
@@ -21,7 +21,7 @@ export class Root {
     this.logger = loggerFactory;
 
     this.log = this.logger.get('root');
-    this.configService = new ConfigService(argv, env, this.logger);
+    this.configService = new ConfigService(configOverrides, env, this.logger);
   }
 
   async start() {

@@ -1,39 +1,33 @@
-import { applyArgv } from '../applyArgv';
+import { argvToConfigOverrides } from '../../cli/argvToConfig';
 
-test('can override port', () => {
+test('port', () => {
   const argv = {
     port: 123
   };
-  const config = {
-    server: {
-      port: 5601,
-      host: 'localhost'
-    }
-  }
 
-  expect(applyArgv(argv, config)).toEqual({
+  expect(argvToConfigOverrides(argv)).toEqual({
     server: {
-      port: 123,
-      host: 'localhost'
+      port: 123
     }
   });
 });
 
-test('can override host', () => {
+test('host', () => {
   const argv = {
     host: 'example.org'
   };
-  const config = {
-    server: {
-      port: 5601,
-      host: 'localhost'
-    }
-  }
 
-  expect(applyArgv(argv, config)).toEqual({
+  expect(argvToConfigOverrides(argv)).toEqual({
     server: {
-      port: 5601,
       host: 'example.org'
     }
   });
+});
+
+test('ignores unknown', () => {
+  const argv = {
+    unknown: 'some value'
+  };
+
+  expect(argvToConfigOverrides(argv)).toEqual({});
 });

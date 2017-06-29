@@ -52,7 +52,7 @@ afterEach(() => {
 });
 
 test('starts services on "start"', async () => {
-  const env = new Env('.');
+  const env = new Env('.', {});
   const root = new Root({}, env);
 
   expect(configService.start).toHaveBeenCalledTimes(0);
@@ -68,7 +68,7 @@ test('starts services on "start"', async () => {
 });
 
 test('reloads config', () => {
-  const env = new Env('.');
+  const env = new Env('.', {});
   const root = new Root({}, env);
 
   expect(configService.reloadConfig).toHaveBeenCalledTimes(0);
@@ -79,7 +79,7 @@ test('reloads config', () => {
 });
 
 test('stops services on "shutdown"', async () => {
-  const env = new Env('.');
+  const env = new Env('.', {});
   const root = new Root({}, env);
 
   await root.start();
@@ -96,7 +96,7 @@ test('stops services on "shutdown"', async () => {
 });
 
 test('exits process on "shutdown"', async () => {
-  const env = new Env('.');
+  const env = new Env('.', {});
   const root = new Root({}, env);
 
   await root.start();

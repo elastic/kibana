@@ -1,32 +1,33 @@
 import { BehaviorSubject, Observable } from 'rxjs';
-import { get, isEqual } from 'lodash';
+import { get, isEqual, merge, isPlainObject } from 'lodash';
+import typeDetect from 'type-detect';
 
 import { getConfigFromFile } from './readConfig';
-import { applyArgv } from './applyArgv';
 import { Env } from './Env';
 import { Logger, LoggerFactory } from '../logger';
 import * as schema from '../lib/schema';
 import { ConfigWithSchema, CoreService } from '../types';
 
-interface RawConfig {
-  [key: string]: any
-};
-
 type ConfigPath = string | string[];
+
+// Used to indicate that no config has been received yet
+const notRead = Symbol('config not yet read');
 
 export class ConfigService implements CoreService {
   /**
-   * The stream of configs read from the config file. Will only be `undefined`
-   * before the config is initially read. This is the _raw_ config before any
-   * argv or similar is applied.
+   * The stream of configs read from the config file. Will be the symbol
+   * `notRead` before the config is initially read, and after that it can
+   * potentially be `null` for an empty yaml file.
+   *
+   * This is the _raw_ config before any overrides are applied.
    *
    * As we have a notion of a _current_ config we rely on a BehaviorSubject so
    * every new subscription will immediately receive the current config.
    */
-  private readonly rawConfigFromFile$: BehaviorSubject<RawConfig | void> =
-    new BehaviorSubject(undefined)
+  private readonly rawConfigFromFile$: BehaviorSubject<any> =
+    new BehaviorSubject(notRead)
 
-  private readonly config$: Observable<RawConfig>;
+  private readonly config$: Observable<{ [key: string]: any }>;
   private readonly log: Logger;
 
   /**
@@ -36,21 +37,32 @@ export class ConfigService implements CoreService {
   private readonly handledPaths: ConfigPath[] = [];
 
   constructor(
-    private readonly argv: {[key: string]: any},
+    overrides: {[key: string]: any},
     readonly env: Env,
     logger: LoggerFactory
   ) {
     this.log = logger.get('config');
 
     this.config$ = this.rawConfigFromFile$
-      .filter(rawConfig => rawConfig !== undefined)
-      // Now we _know_ `RawConfig` can no longer be `undefined`, but we can't
-      // express that with TS types yet, so below we just _tell_ TS that it is
-      // guaranteed to no longer be `undefined`.
-      .map<RawConfig | void, RawConfig>(rawConfig => rawConfig!)
+      .asObservable()
+      .filter(rawConfig => rawConfig !== notRead)
+      .map(rawConfig => {
+        // If the raw config is null, e.g. if empty config file, we default to
+        // an empty config
+        if (rawConfig == null) {
+          return {};
+        }
+
+        if (isPlainObject(rawConfig)) {
+          return rawConfig;
+        }
+
+        throw new Error(`the raw config must be an object, got [${typeDetect(rawConfig)}]`)
+      })
+      // Apply overrides to config
+      .map(rawConfig => merge(rawConfig, overrides))
       // We only want to update the config if there are changes to it
-      .distinctUntilChanged((current, next) => isEqual(current, next))
-      .map(rawConfig => applyArgv(argv, rawConfig));
+      .distinctUntilChanged((current, next) => isEqual(current, next));
   }
 
   /**
@@ -73,7 +85,7 @@ export class ConfigService implements CoreService {
    * Load the config by reading the raw config from the file system.
    */
   private loadConfig() {
-    const config = getConfigFromFile(this.argv.config, this.env.getDefaultConfigFile());
+    const config = getConfigFromFile(this.env.getConfigFile());
     this.rawConfigFromFile$.next(config);
   }
 
