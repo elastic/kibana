@@ -1,9 +1,9 @@
 [[tilemap]]
-== Tile Maps
+== Coordinate Maps
 
 A coordinate map displays a geographic area overlaid with circles keyed to the data determined by the buckets you specify.
 
-NOTE: By default, Kibana uses the https://www.elastic.co/elastic-tile-service[Elastic Tile Service]
+NOTE: By default, Kibana uses the https://www.elastic.co/elastic-tile-service[Elastic Maps Service]
 to display map tiles. To use other tile service providers, configure the <<tilemap-settings,tilemap settings>>
 in `kibana.yml`.
 
@@ -33,9 +33,8 @@ Enter a string in the *Custom Label* field to change the display label.
 
 ===== Buckets
 
-
-Tile maps uses the {ref}/search-aggregations-bucket-geohashgrid-aggregation.html[_geohash_] aggregation. Select a field, typically coordinates, from the
-drop-down.
+Coordinate maps use the {es-ref}search-aggregations-bucket-geohashgrid-aggregation.html[_geohash_] aggregation. Select a field, typically coordinates, from the
+drop-down. 
 
 - The_Change precision on map zoom_ box is checked by default. Uncheck the box to disable this behavior.
 The _Precision_ slider determines the granularity of the results displayed on the map. See the documentation
