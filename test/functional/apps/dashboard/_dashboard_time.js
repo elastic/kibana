@@ -29,7 +29,7 @@ export default function ({ getPageObjects }) {
         await PageObjects.header.clickToastOK();
       });
 
-      it('Does not set the time picker on open', async function () {
+      it.skip('Does not set the time picker on open', async function () {
         await PageObjects.header.setAbsoluteRange(fromTime, toTime);
 
         await PageObjects.dashboard.loadSavedDashboard(dashboardName);
@@ -81,7 +81,7 @@ export default function ({ getPageObjects }) {
     // when it's opened. However, if the user then changes the time, navigates to visualize, then navigates
     // back to dashboard, the overridden time should be preserved. The time is *only* reset on open, not
     // during navigation or page refreshes.
-    describe('time changes', function () {
+    describe.skip('time changes', function () {
       it('preserved during navigation', async function () {
         await PageObjects.header.setQuickTime('Today');
         await PageObjects.header.clickVisualize();
