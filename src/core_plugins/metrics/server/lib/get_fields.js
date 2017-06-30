@@ -1,32 +1,9 @@
 import { sortBy, uniq } from 'lodash';
 
-export function getParams(req) {
+export async function getFields(req) {
+  const { indexPatternsService } = req.pre;
   const index = req.query.index || '*';
-  return {
-    index,
-    fields: ['*'],
-    ignoreUnavailable: false,
-    allowNoIndices: false,
-  };
+  const resp = await indexPatternsService.getFieldsForWildcard({ pattern: index });
+  const fields = resp.filter(field => field.aggregatable);
+  return sortBy(uniq(fields, field => field.name), 'name');
 }
-
-export function handleResponse(resp) {
-  const fields = Object.keys(resp.fields)
-    .map(name => {
-      const def = resp.fields[name];
-      const type = Object.keys(def)[0];
-      const { aggregatable } = def[type];
-      return { name, type, aggregatable };
-    })
-    .filter(field => field.aggregatable);
-  return uniq(sortBy(fields));
-}
-
-function getFields(req) {
-  const { callWithRequest } = req.server.plugins.elasticsearch.getCluster('data');
-  const params = getParams(req);
-  return callWithRequest(req, 'fieldCaps', params).then(handleResponse);
-}
-
-export default getFields;
-
