@@ -27,7 +27,9 @@ export function formatMsg(err, from) {
     // is an Angular $http "error object"
     if (err.status === -1) {
       // status = -1 indicates that the request was failed to reach the server
-      rtn += 'Connection failed! Is Kibana running?';
+      rtn += 'An HTTP request has failed to connect. ' +
+             'Please check if the Kibana server is running and that your browser has a working connection, ' +
+             'or contact your system administrator.';
     } else {
       rtn += 'Error ' + err.status + ' ' + err.statusText + ': ' + err.data.message;
     }
