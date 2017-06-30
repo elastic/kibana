@@ -1,11 +1,10 @@
 import expect from 'expect.js';
-import { stringifyBoolean } from '../boolean';
+import { BoolFormat } from '../boolean';
 
 describe('Boolean Format', function () {
 
   let boolean;
   beforeEach(() => {
-    const BoolFormat = stringifyBoolean();
     boolean = new BoolFormat();
   });
 

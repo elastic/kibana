@@ -1,12 +1,7 @@
 import expect from 'expect.js';
-import { stringifyDuration } from '../duration';
+import { DurationFormat } from '../duration';
 
 describe('Duration Format', function () {
-  let DurationFormat;
-
-  beforeEach(function () {
-    DurationFormat = stringifyDuration();
-  });
 
   test({ inputFormat: 'seconds', outputFormat: 'humanize' })
     (-60, 'minus a minute')

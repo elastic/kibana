@@ -1,12 +1,7 @@
 import expect from 'expect.js';
-import { stringifyColor } from '../color';
+import { ColorFormat } from '../color';
 
 describe('Color Format', function () {
-  let ColorFormat;
-
-  beforeEach(() => {
-    ColorFormat = stringifyColor();
-  });
 
   describe('field is a number', () => {
     it('should add colors if the value is in range', function () {

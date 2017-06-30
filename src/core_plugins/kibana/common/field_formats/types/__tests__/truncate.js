@@ -1,33 +1,28 @@
 import expect from 'expect.js';
-import { stringifyTruncate } from '../truncate';
+import { TruncateFormat } from '../truncate';
 
-describe('String Truncate Format', function () {
-  let Truncate;
-
-  beforeEach(function () {
-    Truncate = stringifyTruncate();
-  });
+describe('String TruncateFormat', function () {
 
   it('truncate large string', function () {
-    const truncate = new Truncate({ fieldLength: 4 });
+    const truncate = new TruncateFormat({ fieldLength: 4 });
 
     expect(truncate.convert('This is some text')).to.be('This...');
   });
 
   it('does not truncate large string when field length is not a string', function () {
-    const truncate = new Truncate({ fieldLength: 'not number' });
+    const truncate = new TruncateFormat({ fieldLength: 'not number' });
 
     expect(truncate.convert('This is some text')).to.be('This is some text');
   });
 
   it('does not truncate large string when field length is null', function () {
-    const truncate = new Truncate({ fieldLength: null });
+    const truncate = new TruncateFormat({ fieldLength: null });
 
     expect(truncate.convert('This is some text')).to.be('This is some text');
   });
 
   it('does not truncate large string when field length larger than the text', function () {
-    const truncate = new Truncate({ fieldLength: 100000 });
+    const truncate = new TruncateFormat({ fieldLength: 100000 });
 
     expect(truncate.convert('This is some text')).to.be('This is some text');
   });

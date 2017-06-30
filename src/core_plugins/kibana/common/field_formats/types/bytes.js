@@ -1,8 +1,6 @@
 import { Numeral } from './_numeral';
 
-export function stringifyBytes() {
-  return Numeral.factory({
-    id: 'bytes',
-    title: 'Bytes'
-  });
-}
+export const BytesFormat = Numeral.factory({
+  id: 'bytes',
+  title: 'Bytes'
+});

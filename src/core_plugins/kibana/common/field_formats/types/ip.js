@@ -1,20 +1,15 @@
 import { FieldFormat } from '../field_format';
 
-export function stringifyIp() {
+export class IpFormat extends FieldFormat {
+  _convert(val) {
+    if (val === undefined || val === null) return '-';
+    if (!isFinite(val)) return val;
 
-  class IpFormat extends FieldFormat {
-    _convert(val) {
-      if (val === undefined || val === null) return '-';
-      if (!isFinite(val)) return val;
-
-      // shazzam!
-      return [val >>> 24, val >>> 16 & 0xFF, val >>> 8 & 0xFF, val & 0xFF].join('.');
-    }
-
-    static id = 'ip';
-    static title = 'IP Address';
-    static fieldType = 'ip';
+    // shazzam!
+    return [val >>> 24, val >>> 16 & 0xFF, val >>> 8 & 0xFF, val & 0xFF].join('.');
   }
 
-  return IpFormat;
+  static id = 'ip';
+  static title = 'IP Address';
+  static fieldType = 'ip';
 }

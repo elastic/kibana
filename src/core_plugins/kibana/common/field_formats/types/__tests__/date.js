@@ -1,6 +1,6 @@
 import expect from 'expect.js';
 import moment from 'moment-timezone';
-import { stringifyDate } from '../date';
+import { DateFormat } from '../date';
 
 describe('Date Format', function () {
   let convert;
@@ -12,7 +12,6 @@ describe('Date Format', function () {
     mockConfig['dateFormat:tz'] = 'Browser';
     const getConfig = (key) => mockConfig[key];
 
-    const DateFormat = stringifyDate();
     const date = new DateFormat({}, getConfig);
 
     convert = date.convert.bind(date);

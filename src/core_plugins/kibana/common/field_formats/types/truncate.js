@@ -1,26 +1,22 @@
 import _ from 'lodash';
 import { FieldFormat } from '../field_format';
 
-export function stringifyTruncate() {
-  const omission = '...';
+const omission = '...';
 
-  class TruncateFormat extends FieldFormat {
-    _convert(val) {
-      const length = this.param('fieldLength');
-      if (length > 0) {
-        return _.trunc(val, {
-          'length': length + omission.length,
-          'omission': omission
-        });
-      }
-
-      return val;
+export class TruncateFormat extends FieldFormat {
+  _convert(val) {
+    const length = this.param('fieldLength');
+    if (length > 0) {
+      return _.trunc(val, {
+        'length': length + omission.length,
+        'omission': omission
+      });
     }
 
-    static id = 'truncate';
-    static title = 'Truncated String';
-    static fieldType = ['string'];
+    return val;
   }
 
-  return TruncateFormat;
+  static id = 'truncate';
+  static title = 'Truncated String';
+  static fieldType = ['string'];
 }

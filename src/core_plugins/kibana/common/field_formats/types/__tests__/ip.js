@@ -1,10 +1,9 @@
 import expect from 'expect.js';
-import { stringifyIp } from '../ip';
+import { IpFormat } from '../ip';
 
 describe('IP Address Format', function () {
   let ip;
   beforeEach(function () {
-    const IpFormat = stringifyIp();
     ip = new IpFormat();
   });
 

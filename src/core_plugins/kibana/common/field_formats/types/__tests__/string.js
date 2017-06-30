@@ -1,13 +1,7 @@
 import expect from 'expect.js';
-import { stringifyString } from '../string';
+import { StringFormat } from '../string';
 
 describe('String Format', function () {
-
-  let StringFormat;
-
-  beforeEach(function () {
-    StringFormat = stringifyString();
-  });
 
   it('convert a string to lower case', function () {
     const string = new StringFormat({

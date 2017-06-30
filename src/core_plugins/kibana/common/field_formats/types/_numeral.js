@@ -14,7 +14,9 @@ export class Numeral extends FieldFormat {
 
     if (isNaN(val)) return '';
 
-    return numeralInst.set(val).format(this.param('pattern'));
+    const formatted = numeralInst.set(val).format(this.param('pattern'));
+
+    return formatted;
   }
 
   static factory(opts) {
