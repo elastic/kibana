@@ -37,8 +37,10 @@ function TimeseriesVisualization(props) {
   const mainAxis = {
     position: model.axis_position,
     tickFormatter: formatter,
-    axis_formatter: _.get(firstSeries, 'formatter', 'number'),
+    axisFormatter: _.get(firstSeries, 'formatter', 'number'),
+    axisFormatterTemplate: _.get(firstSeries, 'value_template')
   };
+
 
   if (model.axis_min) mainAxis.min = model.axis_min;
   if (model.axis_max) mainAxis.max = model.axis_max;
@@ -58,7 +60,7 @@ function TimeseriesVisualization(props) {
     }
     if (s.stacked === 'percent') {
       s.seperate_axis = true;
-      s.axis_formatter = 'percent';
+      s.axisFormatter = 'percent';
       s.axis_min = 0;
       s.axis_max = 1;
       s.axis_position = model.axis_position;
@@ -94,8 +96,11 @@ function TimeseriesVisualization(props) {
           alignTicksWithAxis: 1,
           position: row.axis_position,
           tickFormatter: formatter,
-          axis_formatter: row.axis_formatter
+          axisFormatter: row.axis_formatter,
+          axisFormatterTemplate: row.value_template
         };
+
+
 
         if (row.axis_min != null) yaxis.min = row.axis_min;
         if (row.axis_max != null) yaxis.max = row.axis_max;
