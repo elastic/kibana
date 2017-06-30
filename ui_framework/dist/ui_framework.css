@@ -2587,6 +2587,9 @@ body {
     padding: 30px;
     max-width: 500px; }
 
+.kuiPanel--noBorder {
+  border: none; }
+
 .kuiPanel--withToolBar {
   border-top: none;
   border-radius: 0; }

@@ -10,19 +10,58 @@ module.directive('stepIndexPattern', function () {
     restrict: 'E',
     template,
     replace: true,
+    controllerAs: 'stepIndexPattern',
+    bindToController: true,
     scope: {
+      isFetchingExistingIndices: '=',
+      isFetchingMatchingIndices: '=',
+      fetchExistingIndices: '&',
+      hasIndices: '&',
       indexPatternName: '=',
       allIndices: '=',
-      allTemplateIndexPatterns: '=',
       partialMatchingIndices: '=',
-      partialMatchingTemplateIndexPatterns: '=',
       matchingIndices: '=',
-      matchingTemplateIndexPatterns: '=',
       goToNextStep: '&',
     },
     link: function (scope) {
-      scope.matchingIndicesListType = 'noMatches';
-      scope.documentationLinks = documentationLinks;
+      scope.$watch('stepIndexPattern.allIndices', scope.stepIndexPattern.updateList);
+      scope.$watch('stepIndexPattern.matchingIndices', scope.stepIndexPattern.updateList);
+    },
+    controller: function () {
+      this.matchingIndicesListType = 'noMatches';
+      this.documentationLinks = documentationLinks;
+
+      const hasNoInput = () => {
+        return !this.indexPatternName.trim();
+      };
+
+      const hasSimilarMatches = () => {
+        if (!this.matchingIndices.length) {
+          return this.partialMatchingIndices.length;
+        }
+
+        return false;
+      };
+
+      this.hasExactMatches = () => {
+        return this.matchingIndices.length;
+      };
+
+      this.updateList = () => {
+        if (hasNoInput()) {
+          return this.matchingIndicesListType = 'noInput';
+        }
+
+        if (this.hasExactMatches()) {
+          return this.matchingIndicesListType = 'exactMatches';
+        }
+
+        if (hasSimilarMatches()) {
+          return this.matchingIndicesListType = 'partialMatches';
+        }
+
+        this.matchingIndicesListType = 'noMatches';
+      };
     },
   };
 });

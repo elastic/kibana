@@ -17,11 +17,14 @@
   }
 }
 
+.kuiPanel--noBorder {
+  border: none;
+}
+
 .kuiPanel--withToolBar {
   border-top: none;
   border-radius: 0;
 }
-
 
 .kuiPanel--centered {
   display: flex;

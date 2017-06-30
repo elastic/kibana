@@ -22,7 +22,7 @@ export const documentationLinks = {
     luceneExpressions: `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/reference/${DOC_LINK_VERSION}/modules-scripting-expression.html`
   },
   indexPatterns: {
-    introduction: `${baseUrl}guide/en/kibana/${urlVersion}/search-request-script-fields.html`,
+    introduction: `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/search-request-script-fields.html`,
   },
   query: {
     luceneQuerySyntax:

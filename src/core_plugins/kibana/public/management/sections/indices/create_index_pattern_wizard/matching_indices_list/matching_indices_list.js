@@ -1,4 +1,5 @@
 import { uiModules } from 'ui/modules';
+import './matching_indices_list.less';
 import template from './matching_indices_list.html';
 
 const module = uiModules.get('apps/management');
@@ -8,9 +9,10 @@ module.directive('matchingIndicesList', function () {
     restrict: 'E',
     replace: true,
     template,
+    transclude: true,
     scope: {
       indices: '=',
-      templateIndexPatterns: '=',
+      isLoading: '=',
     },
     link: function () {
 

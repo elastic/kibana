@@ -21,6 +21,7 @@ uiModules.get('apps/management')
 .controller('managementIndicesCreate', function (
   $injector,
   $scope,
+  $timeout,
   $translate,
   config,
   es,
@@ -44,9 +45,14 @@ uiModules.get('apps/management')
 
   // UI state.
   this.timeFieldOptions = [];
-  this.timeFieldOptionsError = null;
   this.wizardStep = 'indexPattern';
+  this.isFetchingExistingIndices = true;
+  this.isFetchingMatchingIndices = false;
   this.isLoading = false;
+  this.allIndices = [];
+  this.allTemplateIndexPatterns = [];
+  this.matchingIndices = [];
+  this.partialMatchingIndices = [];
 
   const updateLoadingState = increment => {
     loadingCount += increment;
@@ -133,12 +139,23 @@ uiModules.get('apps/management')
     return nonFieldOptions[0];
   };
 
-  this.matchingIndices = [];
-  this.matchingTemplateIndexPatterns = [];
-  this.partialMatchingIndices = [];
-  this.partialMatchingTemplateIndexPatterns = [];
-  this.allIndices = [];
-  this.allTemplateIndexPatterns = [];
+  function whiteListIndices(indices, blacklist = []) {
+    return indices.filter(index => (
+      // The majority of users won't want to create an index pattern for the .kibana index.
+      index !== '.kibana'
+      && !blacklist.includes(index)
+    ));
+  }
+
+  function createReasonableWait() {
+    return new Promise(resolve => {
+      // Make every fetch take a set amount of time so the user gets some feedback that something
+      // is happening.
+      $timeout(() => {
+        resolve();
+      }, 1000);
+    });
+  }
 
   /**
    * This powers the `refresh` within ui-select which is called
@@ -146,7 +163,9 @@ uiModules.get('apps/management')
    *
    * @param {string} searchQuery
    */
-  this.fetchMatches = () => {
+  const fetchMatchingIndices = () => {
+    this.isFetchingMatchingIndices = true;
+
     // Default to searching for all indices.
     const exactSearchQuery = this.formValues.name;
     let partialSearchQuery = this.formValues.name;
@@ -160,26 +179,31 @@ uiModules.get('apps/management')
 
     Promise.all([
       indicesService.getIndices(exactSearchQuery),
-      indicesService.getTemplateIndexPatterns(exactSearchQuery),
       indicesService.getIndices(partialSearchQuery),
-      indicesService.getTemplateIndexPatterns(partialSearchQuery),
-      indicesService.getIndices('*'),
-      indicesService.getTemplateIndexPatterns('*'),
+      createReasonableWait(),
     ])
     .then(([
       matchingIndices,
-      matchingTemplateIndexPatterns,
       partialMatchingIndices,
-      partialMatchingTemplateIndexPatterns,
-      allIndices,
-      allTemplateIndexPatterns,
     ]) => {
-      this.matchingIndices = matchingIndices.sort();
-      this.matchingTemplateIndexPatterns = matchingTemplateIndexPatterns.sort();
-      this.partialMatchingIndices = partialMatchingIndices.sort();
-      this.partialMatchingTemplateIndexPatterns = partialMatchingTemplateIndexPatterns.sort();
-      this.allIndices = allIndices.sort();
-      this.allTemplateIndexPatterns = allTemplateIndexPatterns.sort();
+      // Blacklist the search query, because getIndices will include it in the results for some reason.
+      // It also includes `undefined`.
+      this.matchingIndices = whiteListIndices(matchingIndices, [exactSearchQuery, undefined]).sort();
+      this.partialMatchingIndices = whiteListIndices(partialMatchingIndices).sort();
+      this.isFetchingMatchingIndices = false;
+    });
+  };
+
+  this.fetchExistingIndices = () => {
+    this.isFetchingExistingIndices = true;
+    Promise.all([
+      indicesService.getIndices('*'),
+      createReasonableWait(),
+    ])
+    .then(([allIndices]) => {
+      // Cache all indices.
+      this.allIndices = whiteListIndices(allIndices).sort();
+      this.isFetchingExistingIndices = false;
     });
   };
 
@@ -196,32 +220,7 @@ uiModules.get('apps/management')
   };
 
   this.hasIndices = () => {
-    return this.allIndices.length || this.allTemplateIndexPatterns.length;
-  };
-
-  this.hasInput = () => {
-    return Boolean(this.formValues.name);
-  };
-
-  this.hasNoSimilarMatches = () => {
-    return (
-      !this.matchingIndices.length
-      && !this.matchingTemplateIndexPatterns.length
-      && !this.partialMatchingIndices.length
-      && !this.partialMatchingTemplateIndexPatterns.length
-    );
-  };
-
-  this.hasSimilarMatches = () => {
-    if (!this.matchingIndices.length && !this.matchingTemplateIndexPatterns.length) {
-      return this.partialMatchingIndices.length || this.partialMatchingTemplateIndexPatterns.length;
-    }
-
-    return false;
-  };
-
-  this.hasExactMatches = () => {
-    return this.matchingIndices.length;
+    return this.allIndices.length;
   };
 
   this.isTimeBased = () => {
@@ -274,14 +273,12 @@ uiModules.get('apps/management')
 
     updateLoadingState(1);
     this.timeFieldOptions = [];
-    this.timeFieldOptionsError = null;
     this.formValues.timeFieldOption = null;
     getTimeFieldOptions()
-      .then(({ options, error }) => {
+      .then(({ options }) => {
         if (thisCall !== activeRefreshTimeFieldOptionsCall) return;
 
         this.timeFieldOptions = options;
-        this.timeFieldOptionsError = error;
         if (!this.timeFieldOptions) {
           return;
         }
@@ -351,8 +348,8 @@ uiModules.get('apps/management')
 
   $scope.$watch('controller.formValues.name', () => {
     this.refreshTimeFieldOptions();
-    this.fetchMatches();
+    fetchMatchingIndices();
   });
 
-  this.fetchMatches();
+  this.fetchExistingIndices();
 });

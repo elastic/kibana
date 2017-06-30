@@ -5,60 +5,18 @@
       data-test-subj="createIndexPatternContainer"
       class="kuiViewContent"
     >
-      <!--
-      <h1
-        class="kuiTitle kuiVerticalRhythm"
-        translate="KIBANA-CONFIGURE_INDEX_PATTERN"
-      ></h1>-->
-
-      <!-- User has no data -->
-      <div
-        ng-if="!controller.hasIndices()"
-        class="kuiPanel kuiPanel--prompt kuiVerticalRhythm"
-      >
-        <div class="kuiPanelBody">
-          <h2 class="kuiSubTitle kuiSubduedText kuiVerticalRhythm">
-            Missing Elasticsearch data
-          </h2>
-
-          <div class="kuiVerticalRhythm">
-            <p class="kuiText kuiSubduedText kuiVerticalRhythmSmall">
-              You'll need to index some data into Elasticsearch before you can create an index pattern.
-              <a
-                href="#"
-                class="kuiLink"
-                aria-label="Learn how to index data into Elasticsearch"
-              >
-                Learn how.
-              </a>
-            </p>
-          </div>
-
-          <button class="kuiButton kuiButton--secondary kuiButton--iconText kuiVerticalRhythm">
-            <span class="kuiButton__inner">
-              <span aria-hidden="true" class="kuiButton__icon kuiIcon fa-refresh"></span>
-              <span>Check for new data</span>
-            </span>
-          </button>
-        </div>
-      </div>
-
-      <!-- User has data -->
-      <div
-        ng-if="controller.hasIndices()"
-        ng-switch="controller.wizardStep"
-        class="kuiVerticalRhythm"
-      >
+      <div ng-switch="controller.wizardStep">
         <!-- Specify index pattern -->
         <step-index-pattern
           ng-switch-when="indexPattern"
+          fetch-existing-indices="controller.fetchExistingIndices()"
+          is-fetching-existing-indices="controller.isFetchingExistingIndices"
+          is-fetching-matching-indices="controller.isFetchingMatchingIndices"
+          has-indices="controller.hasIndices()"
           index-pattern-name="controller.formValues.name"
           all-indices="controller.allIndices"
-          all-template-index-patterns="controller.allTemplateIndexPatterns"
           partial-matching-indices="controller.partialMatchingIndices"
-          partial-matching-template-index-patterns="controller.partialMatchingTemplateIndexPatterns"
           matching-indices="controller.matchingIndices"
-          matching-template-index-patterns="controller.matchingTemplateIndexPatterns"
           go-to-next-step="controller.goToTimeFieldStep()"
         ></step-index-pattern>
 
@@ -77,24 +35,6 @@
           create-index-pattern="controller.createIndexPattern()"
         ></step-time-field>
       </div>
-
-
-
-      <!-- Input error text -->
-      <div
-        class="kuiVerticalRhythm"
-        ng-if="controller.timeFieldOptionsError"
-      >
-        <p class="kuiText">
-          <span class="kuiStatusText kuiStatusText--error">
-            <span class="kuiStatusText__icon kuiIcon fa-warning"></span>
-            {{controller.timeFieldOptionsError}}
-          </span>
-        </p>
-      </div>
-
-
-
     </div>
   </kbn-management-indices>
 </kbn-management-app>
