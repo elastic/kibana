@@ -12,7 +12,7 @@ export default function ({ getService }) {
         })
     ));
 
-    it('should only return langs enabled for inline scripting', () => (
+    it.skip('should only return langs enabled for inline scripting', () => (
       supertest.get('/api/kibana/scripts/languages')
         .expect(200)
         .then((response) => {
