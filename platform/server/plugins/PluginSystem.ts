@@ -25,6 +25,7 @@ function getSortedPluginNames(plugins: Map<PluginName, Plugin<any, any>>) {
 export class PluginSystem {
   private readonly plugins = new Map<PluginName, Plugin<any, any>>();
   private readonly log: Logger;
+  private startedPlugins: PluginName[] = [];
 
   constructor(
     private readonly kibanaModules: KibanaCoreModules,
@@ -70,18 +71,21 @@ export class PluginSystem {
     }
 
     plugin.start(this.kibanaModules, dependenciesValues);
+    this.startedPlugins.push(plugin.name);
   }
 
   /**
    * Stop all plugins in the reverse order of when they were started
    */
   stopPlugins() {
-    getSortedPluginNames(this.plugins)
+    this.startedPlugins
       .map(pluginName => this.plugins.get(pluginName)!)
       .reverse()
       .forEach(plugin => {
         plugin.stop();
         this.plugins.delete(plugin.name);
       });
+
+    this.startedPlugins = [];
   }
 }
