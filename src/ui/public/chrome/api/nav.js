@@ -1,5 +1,4 @@
 import { remove } from 'lodash';
-import { getProtocolAndHost } from 'ui/url/get_protocol_and_host';
 import { prependPath } from 'ui/url/prepend_path';
 import { relativeToAbsolute } from 'ui/url/relative_to_absolute';
 import { absoluteToParsedUrl } from 'ui/url/absolute_to_parsed_url';
@@ -72,7 +71,7 @@ export function initChromeNavApi(chrome, internals) {
 
     kibanaParsedUrl.setGlobalState(newGlobalState);
 
-    link.lastSubUrl = kibanaParsedUrl.getAbsoluteUrl(getProtocolAndHost());
+    link.lastSubUrl = kibanaParsedUrl.getAbsoluteUrl();
   }
 
   /**
@@ -88,7 +87,7 @@ export function initChromeNavApi(chrome, internals) {
   chrome.trackSubUrlForApp = (linkId, kibanaParsedUrl) => {
     for (const link of internals.nav) {
       if (link.id === linkId) {
-        const absoluteUrl = kibanaParsedUrl.getAbsoluteUrl(getProtocolAndHost());
+        const absoluteUrl = kibanaParsedUrl.getAbsoluteUrl();
         setLastUrl(link, absoluteUrl);
         return;
       }
