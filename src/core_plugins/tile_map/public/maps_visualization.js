@@ -44,15 +44,11 @@ export function MapsVisualizationProvider(Private, serviceSettings, Notifier, ge
           return resolve();
         }
 
-
         this._recreateGeohashLayer(esResponse);
-
-
-
         this._kibanaMap.useUiStateFromVisualization(this.vis);
-
-        this._doRenderComplete(resolve);
         this._kibanaMap.resize();
+        this._doRenderComplete(resolve);
+
       });
     }
 
@@ -232,7 +228,6 @@ export function MapsVisualizationProvider(Private, serviceSettings, Notifier, ge
     }
 
     _doRenderComplete(resolve) {
-
       if (this._baseLayerDirty) {//as long as the baselayer is dirty, we cannot fire the render complete event
         setTimeout(() => {
           this._doRenderComplete(resolve);
@@ -240,7 +235,6 @@ export function MapsVisualizationProvider(Private, serviceSettings, Notifier, ge
       } else {
         resolve();
       }
-
     }
 
   }
