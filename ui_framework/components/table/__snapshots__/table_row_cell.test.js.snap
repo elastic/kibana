@@ -7,7 +7,7 @@ exports[`renders KuiTableRowCell 1`] = `
   data-test-subj="test subject string"
 >
   <div
-    class="'kuiTableRowCell__liner"
+    class="kuiTableRowCell__liner"
   />
 </td>
 `;

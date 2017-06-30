@@ -26,14 +26,11 @@ import {
   RIGHT_ALIGNMENT
 } from '../../../../services';
 
-// Arbitrarily use the 3rd index in the sample data as the unique identifier for handling checkbox toggling.
-const CELL_ID_INDEX = 3;
-
 export class ControlledTable extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      selectedItems: []
+      rowToSelectedStateMap: new Map()
     };
 
     this.rows = [
@@ -78,50 +75,18 @@ export class ControlledTable extends React.Component {
     );
   }
 
-  deselectAll = () => {
-    this.setState({ selectedItems: [] });
-  };
-
-  selectAll = () => {
-    this.setState({ selectedItems: this.rows.map(item => item[CELL_ID_INDEX]) });
-  };
-
-  toggleAll = () => {
-    if (this.areAllItemsChecked()) {
-      this.deselectAll();
-    } else {
-      this.selectAll();
-    }
-  };
-
   toggleItem = (item) => {
-    if (this.isItemChecked(item)) {
-      const index = this.state.selectedItems.indexOf(item[CELL_ID_INDEX]);
-      this.setState((prevState) => {
-        const arrayCopy = prevState.selectedItems.slice(0);
-        arrayCopy.splice(index, 1);
-        return {
-          selectedItems: arrayCopy
-        };
-      });
-    } else {
-      this.setState((prevState) => ({
-        selectedItems: prevState.selectedItems.concat([item[CELL_ID_INDEX]])
-      }));
-    }
+    this.setState(previousState => {
+      const rowToSelectedStateMap = new Map(previousState.rowToSelectedStateMap);
+      rowToSelectedStateMap.set(item, !rowToSelectedStateMap.get(item));
+      return { rowToSelectedStateMap };
+    });
   };
 
   isItemChecked = (item) => {
-    return this.state.selectedItems.indexOf(item[CELL_ID_INDEX]) !== -1;
+    return this.state.rowToSelectedStateMap.get(item);
   };
 
-  areAllItemsChecked = () => {
-    return this.getSelectedItemsCount() === this.rows.length;
-  };
-
-  getSelectedItemsCount = () => {
-    return this.state.selectedItems.length;
-  };
   renderTableRows() {
     return this.rows.map(rowData => {
       return (
@@ -172,7 +137,7 @@ export class ControlledTable extends React.Component {
 
         <KuiTable>
           <KuiTableHeader>
-            <KuiTableHeaderCheckBoxCell isChecked={ this.areAllItemsChecked() } onChange={ this.toggleAll }/>
+            <KuiTableHeaderCheckBoxCell isChecked={ false } onChange={ () => {} }/>
             <KuiTableHeaderCell>
               Title
             </KuiTableHeaderCell>

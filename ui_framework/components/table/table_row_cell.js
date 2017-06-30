@@ -14,7 +14,7 @@ export const KuiTableRowCell = ({ children, align, className, ...rest }) => {
   });
   return (
     <td className={classes} {...rest} >
-      <div className="'kuiTableRowCell__liner">
+      <div className="kuiTableRowCell__liner">
         {children}
       </div>
     </td>
