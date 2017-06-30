@@ -102,7 +102,7 @@ export default function ({ getService, getPageObjects }) {
           '18,253,611,008', '679'
         ];
 
-        return PageObjects.visualize.collapseChart()
+        return PageObjects.visualize.toggleSpyPanel()
           .then(function () {
             return PageObjects.settings.setPageSize('All');
           })
