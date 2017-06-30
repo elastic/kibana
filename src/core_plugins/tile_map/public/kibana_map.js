@@ -189,8 +189,6 @@ export class KibanaMap extends EventEmitter {
   addLayer(kibanaLayer) {
 
 
-    this.emit('layers:invalidate');
-
     const onshowTooltip = (event) => {
 
       if (!this._showTooltip) {

@@ -13,7 +13,6 @@ export class ScaledCirclesMarkers extends EventEmitter {
 
     this._valueFormatter = options.valueFormatter;
     this._tooltipFormatter = options.tooltipFormatter;
-    this._map = options.map;
 
     this._legendColors = null;
     this._legendQuantizer = null;
