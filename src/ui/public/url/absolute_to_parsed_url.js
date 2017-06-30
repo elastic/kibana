@@ -12,6 +12,6 @@ import { parse } from 'url';
  */
 export function absoluteToParsedUrl(absoluteUrl, basePath = '') {
   const { appPath, appId } = extractAppPathAndId(absoluteUrl, basePath);
-  const { host, protocol } = parse(absoluteUrl);
-  return new KibanaParsedUrl({ basePath, appId, appPath, host, protocol });
+  const { hostname, port, protocol } = parse(absoluteUrl);
+  return new KibanaParsedUrl({ basePath, appId, appPath, hostname, port, protocol });
 }
