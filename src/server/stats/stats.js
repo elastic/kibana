@@ -1,4 +1,5 @@
 import { SavedObjectsClient } from '../saved_objects/client';
+import { snakeCase } from 'lodash';
 
 async function getStatsForType(savedObjectsClient, type) {
   const { total } = await savedObjectsClient.find({ type, perPage: 0 });
@@ -13,7 +14,7 @@ export async function getStats(kibanaIndex, callAdminCluster) {
   const stats = {};
 
   results.forEach((statsForType, index) => {
-    stats[types[index]] = statsForType;
+    stats[snakeCase(types[index])] = statsForType;
   });
 
   stats.index = kibanaIndex;

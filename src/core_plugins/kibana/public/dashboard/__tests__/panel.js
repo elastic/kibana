@@ -4,6 +4,7 @@ import Promise from 'bluebird';
 import sinon from 'sinon';
 import noDigestPromise from 'test_utils/no_digest_promises';
 import mockUiState from 'fixtures/mock_ui_state';
+import { SavedObjectsClientProvider } from 'ui/saved_objects';
 
 describe('dashboard panel', function () {
   let $scope;
@@ -14,8 +15,13 @@ describe('dashboard panel', function () {
 
   function init(mockDocResponse) {
     ngMock.module('kibana');
-    ngMock.inject(($rootScope, $compile, esAdmin) => {
-      sinon.stub(esAdmin, 'mget').returns(Promise.resolve({ docs: [ mockDocResponse ] }));
+    ngMock.inject(($rootScope, $compile, Private, esAdmin) => {
+      Private.swap(SavedObjectsClientProvider, () => {
+        return {
+          get: sinon.stub().returns(Promise.resolve(mockDocResponse))
+        };
+      });
+
       sinon.stub(esAdmin.indices, 'getFieldMapping').returns(Promise.resolve({
         '.kibana': {
           mappings: {
@@ -70,7 +76,7 @@ describe('dashboard panel', function () {
   });
 
   it('should try to visualize the visualization if found', function () {
-    init({ found: true, _source: {} });
+    init({ id: 'foo1', type: 'visualization', _version: 2, attributes: {} });
     return $scope.loadedPanel.then(() => {
       expect($scope.error).not.to.be.ok();
       parentScope.$digest();

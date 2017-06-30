@@ -8,9 +8,6 @@ release-state can be: released | prerelease | unreleased
 :branch:         master
 
 :docker-image:   docker.elastic.co/kibana/kibana:{version}
-:es-ref:         https://www.elastic.co/guide/en/elasticsearch/reference/{branch}/
-:xpack-ref:      https://www.elastic.co/guide/en/x-pack/{branch}/
-:logstash-ref:   http://www.elastic.co/guide/en/logstash/{branch}
 :repo:           https://github.com/elastic/kibana/
 :issue:          {repo}issues/
 :pull:           {repo}pull/
@@ -18,6 +15,7 @@ release-state can be: released | prerelease | unreleased
 :blob:           {repo}blob/{branch}/
 :security-ref:   https://www.elastic.co/community/security/
 
+include::{docs-dir}/shared/attributes.asciidoc[]
 
 include::introduction.asciidoc[]
 

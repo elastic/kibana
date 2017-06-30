@@ -5,5 +5,6 @@ export const TopNavIds = {
   SAVE: 'save',
   EXIT_EDIT_MODE: 'exitEditMode',
   ENTER_EDIT_MODE: 'enterEditMode',
-  CLONE: 'clone'
+  CLONE: 'clone',
+  FULL_SCREEN: 'fullScreenMode',
 };

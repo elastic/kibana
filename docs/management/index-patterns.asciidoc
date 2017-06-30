@@ -43,68 +43,6 @@ selected time range. Click *Do not expand index pattern when search* to disable 
 . To designate the new pattern as the default pattern to load when you view the Discover tab, click the *favorite*
 button.
 
-NOTE: When you define an index pattern, indices that match that pattern must exist in Elasticsearch. Those indices must
-contain data.
-
-To use an event time in an index name, enclose the static text in the pattern and specify the date format using the
-tokens described in the following table.
-
-For example, `[logstash-]YYYY.MM.DD` matches all indices whose names have a timestamp of the form `YYYY.MM.DD` appended
-to the prefix `logstash-`, such as `logstash-2015.01.31` and `logstash-2015-02-01`.
-
-[float]
-[[date-format-tokens]]
-.Date Format Tokens
-[horizontal]
-`M`:: Month - cardinal: 1 2 3 ... 12
-`Mo`:: Month - ordinal: 1st 2nd 3rd ... 12th
-`MM`:: Month - two digit:   01 02 03 ... 12
-`MMM`:: Month - abbreviation: Jan Feb Mar ... Dec
-`MMMM`:: Month - full: January February March ... December
-`Q`:: Quarter: 1 2 3 4
-`D`:: Day of Month - cardinal: 1 2 3 ... 31
-`Do`:: Day of Month - ordinal: 1st 2nd 3rd ... 31st
-`DD`:: Day of Month - two digit:  01 02 03 ... 31
-`DDD`:: Day of Year - cardinal: 1 2 3 ... 365
-`DDDo`:: Day of Year - ordinal: 1st 2nd 3rd ... 365th
-`DDDD`:: Day of Year - three digit: 001 002 ... 364 365
-`d`:: Day of Week - cardinal: 0 1 3 ... 6
-`do`:: Day of Week - ordinal: 0th 1st 2nd ... 6th
-`dd`:: Day of Week - 2-letter abbreviation: Su Mo Tu ... Sa
-`ddd`:: Day of Week - 3-letter abbreviation: Sun Mon Tue ... Sat
-`dddd`:: Day of Week - full: Sunday Monday Tuesday ... Saturday
-`e`:: Day of Week (locale): 0 1 2 ... 6
-`E`:: Day of Week (ISO): 1 2 3 ... 7
-`w`:: Week of Year - cardinal (locale): 1 2 3 ... 53
-`wo`:: Week of Year - ordinal (locale): 1st 2nd 3rd ... 53rd
-`ww`:: Week of Year - 2-digit (locale): 01 02 03 ... 53
-`W`:: Week of Year - cardinal (ISO): 1 2 3 ... 53
-`Wo`:: Week of Year - ordinal (ISO): 1st 2nd 3rd ... 53rd
-`WW`:: Week of Year - two-digit (ISO): 01 02 03 ... 53
-`YY`:: Year - two digit:  70 71 72 ... 30
-`YYYY`:: Year - four digit: 1970 1971 1972 ... 2030
-`gg`:: Week Year - two digit (locale):  70 71 72 ... 30
-`gggg`:: Week Year - four digit (locale): 1970 1971 1972 ... 2030
-`GG`:: Week Year - two digit (ISO): 70 71 72 ... 30
-`GGGG`::  Week Year - four digit (ISO): 1970 1971 1972 ... 2030
-`A`:: AM/PM: AM PM
-`a`:: am/pm: am pm
-`H`:: Hour: 0 1 2 ... 23
-`HH`:: Hour - two digit: 00 01 02 ... 23
-`h`:: Hour - 12-hour clock: 1 2 3 ... 12
-`hh`:: Hour - 12-hour clock, 2 digit: 01 02 03 ... 12
-`m`:: Minute: 0 1 2 ... 59
-`mm`:: Minute - two-digit:  00 01 02 ... 59
-`s`:: Second: 0 1 2 ...  59
-`ss`:: Second - two-digit: 00 01 02 ... 59
-`S`:: Fractional Second - 10ths: 0 1 2 ... 9
-`SS`:: Fractional Second - 100ths:  0 1 ... 98 99
-`SSS`:: Fractional Seconds - 1000ths: 0 1 ... 998 999
-`Z`:: Timezone - zero UTC offset (hh:mm format): -07:00 -06:00 -05:00 .. +07:00
-`ZZ`:: Timezone - zero UTC offset (hhmm format):  -0700 -0600 -0500 ... +0700
-`X`:: Unix Timestamp: 1360013296
-`x`:: Unix Millisecond Timestamp: 1360013296123
-
 [float]
 [[set-default-pattern]]
 == Setting the Default Index Pattern

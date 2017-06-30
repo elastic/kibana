@@ -12,6 +12,9 @@ uiModules
     template: numberListTemplate,
     controllerAs: 'numberListCntr',
     require: 'ngModel',
+    scope: {
+      validateAscendingOrder: '=?',
+    },
     controller: function ($scope, $attrs, $parse) {
       const self = this;
 
@@ -26,6 +29,7 @@ uiModules
         self.getUnitName = _.partial($parse($attrs.unit), $scope);
 
         const defaultRange = self.range = parseRange('[0,Infinity)');
+        self.validateAscOrder = _.isUndefined($scope.validateAscendingOrder) ? true : $scope.validateAscendingOrder;
 
         $scope.$watch(function () {
           return $attrs.range;

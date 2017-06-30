@@ -12,47 +12,72 @@ export class SavedObjectsClient {
     this._callAdminCluster = callAdminCluster;
   }
 
-  async create(type, body = {}) {
-    const response = await this._withKibanaIndex('index', { type, body });
+  /**
+   * Persists an object
+   *
+   * @param {string} type
+   * @param {object} attributes
+   * @param {object} [options={}]
+   * @property {string} [options.id] - force id on creation, not recommended
+   * @property {boolean} [options.overwrite=false]
+   * @returns {promise} - { id, type, version, attributes }
+  */
+  async create(type, attributes = {}, options = {}) {
+    const method = options.id && !options.overwrite ? 'create' : 'index';
+    const response = await this._withKibanaIndex(method, {
+      type,
+      id: options.id,
+      body: attributes,
+      refresh: 'wait_for'
+    });
 
     return {
       id: response._id,
       type: response._type,
       version: response._version,
-      attributes: body
+      attributes
     };
   }
 
   /**
    * Creates multiple documents at once
    *
-   * @param {array} objects
-   * @param {object} options
-   * @param {boolean} options.force - overrides existing documents
-   * @returns {promise} Returns promise containing array of documents
+   * @param {array} objects - [{ type, id, attributes }]
+   * @param {object} [options={}]
+   * @property {boolean} [options.overwrite=false] - overrides existing documents
+   * @returns {promise} - [{ id, type, version, attributes, error: { message } }]
    */
   async bulkCreate(objects, options = {}) {
-    const action = options.force === true ? 'index' : 'create';
-
     const body = objects.reduce((acc, object) => {
-      acc.push({ [action]: { _type: object.type, _id: object.id } });
+      const method = get(options, 'overwrite', false) === false && object.id ? 'create' : 'index';
+
+      acc.push({ [method]: { _type: object.type, _id: object.id } });
       acc.push(object.attributes);
 
       return acc;
     }, []);
 
-    return await this._withKibanaIndex('bulk', { body })
+    return await this._withKibanaIndex('bulk', { body, refresh: 'wait_for' })
       .then(resp => get(resp, 'items', []).map((resp, i) => {
+        const method = Object.keys(resp)[0];
+
         return {
-          id: resp[action]._id,
-          type: resp[action]._type,
-          version: resp[action]._version,
+          id: resp[method]._id,
+          type: resp[method]._type,
+          version: resp[method]._version,
           attributes: objects[i].attributes,
-          error: resp[action].error ? { message: get(resp[action], 'error.reason') } : undefined
+          error: resp[method].error ? { message: get(resp[method], 'error.reason') } : undefined
         };
       }));
   }
 
+  /**
+   * Deletes an object
+   *
+   * @param {string} type
+   * @param {string} id
+   * @returns {promise}
+   */
   async delete(type, id) {
     const response = await this._withKibanaIndex('delete', {
       type,
@@ -65,14 +90,25 @@ export class SavedObjectsClient {
     }
   }
 
+  /**
+   * @param {object} [options={}]
+   * @property {string} options.type
+   * @property {string} options.search
+   * @property {string} options.searchFields - see Elasticsearch Simple Query String
+   *                                        Query field argument for more information
+   * @property {integer} [options.page=1]
+   * @property {integer} [options.perPage=20]
+   * @property {array} options.fields
+   * @returns {promise} - { saved_objects: [{ id, type, version, attributes }], total, per_page, page }
+   */
   async find(options = {}) {
     const {
+      type,
       search,
       searchFields,
-      type,
-      fields,
-      perPage = 20,
       page = 1,
+      perPage = 20,
+      fields
     } = options;
 
     const esOptions = {
@@ -102,15 +138,36 @@ export class SavedObjectsClient {
   }
 
   /**
+   * Gets a single object
+   *
+   * @param {string} type
+   * @param {string} id
+   * @returns {promise} - { id, type, version, attributes }
+   */
+  async get(type, id) {
+    const response = await this._withKibanaIndex('get', {
+      type,
+      id,
+    });
+
+    return {
+      id: response._id,
+      type: response._type,
+      version: response._version,
+      attributes: response._source
+    };
+  }
+
+  /**
    * Returns an array of objects by id
    *
    * @param {array} objects - an array ids, or an array of objects containing id and optionally type
-   * @returns {promise} Returns promise containing array of documents
+   * @returns {promise} - { saved_objects: [{ id, type, version, attributes }] }
    * @example
    *
    * bulkGet([
    *   { id: 'one', type: 'config' },
-   *   { id: 'foo', type: 'index-pattern'
+   *   { id: 'foo', type: 'index-pattern' }
    * ])
    */
   async bulkGet(objects = []) {
@@ -137,25 +194,20 @@ export class SavedObjectsClient {
     };
   }
 
-  async get(type, id) {
-    const response = await this._withKibanaIndex('get', {
-      type,
-      id,
-    });
-
-    return {
-      id: response._id,
-      type: response._type,
-      version: response._version,
-      attributes: response._source
-    };
-  }
-
+  /**
+   * Updates an object
+   *
+   * @param {string} type
+   * @param {string} id
+   * @param {object} [options={}]
+   * @property {integer} options.version - ensures version matches that of persisted object
+   * @returns {promise}
+   */
   async update(type, id, attributes, options = {}) {
     const response = await this._withKibanaIndex('update', {
       type,
       id,
-      version: get(options, 'version'),
+      version: options.version,
       body: {
         doc: attributes
       },

@@ -25,3 +25,8 @@ export {
   createSplitStream,
   createMapStream,
 } from './streams';
+
+export {
+  parseCommaSeparatedList,
+  formatListAsProse,
+} from './strings';
