@@ -33,15 +33,17 @@ describe('KibanaParsedUrl', function () {
 
     describe('getAbsolutePath', function () {
       const protocol = 'http';
-      const host = 'www.test.com';
+      const hostname = 'www.test.com';
+      const port = '5601';
 
       it('returns the absolute url when there is a port', function () {
         const kibanaParsedUrl = new KibanaParsedUrl({
           basePath: '/base',
           appId: 'appId',
           appPath: 'visualize?hi=there&bye',
-          host: `${host}:5601`,
+          hostname,
           protocol,
+          port,
         });
         expect(kibanaParsedUrl.getAbsoluteUrl()).to.be(
           'http://www.test.com:5601/base/app/appId#visualize?hi=there&bye');
@@ -52,7 +54,7 @@ describe('KibanaParsedUrl', function () {
           basePath: '/base',
           appId: 'appId',
           appPath: 'visualize',
-          host,
+          hostname,
           protocol,
         });
         expect(kibanaParsedUrl.getAbsoluteUrl()).to.be(
@@ -64,7 +66,7 @@ describe('KibanaParsedUrl', function () {
           basePath: '/base',
           appId: 'appId',
           appPath: 'visualize?hi=bye&tata',
-          host,
+          hostname,
           protocol,
         });
         expect(kibanaParsedUrl.getAbsoluteUrl()).to.be(
@@ -84,14 +86,16 @@ describe('KibanaParsedUrl', function () {
 
     describe('getAbsolutePath', function () {
       const protocol = 'http';
-      const host = 'www.test.com';
+      const hostname = 'www.test.com';
+      const port = '5601';
 
       it('returns the absolute url when there is a port', function () {
         const kibanaParsedUrl = new KibanaParsedUrl({
           appId: 'appId',
           appPath: 'visualize?hi=there&bye',
-          host: `${host}:5601`,
+          hostname,
           protocol,
+          port
         });
         expect(kibanaParsedUrl.getAbsoluteUrl()).to.be(
           'http://www.test.com:5601/app/appId#visualize?hi=there&bye');
@@ -101,7 +105,7 @@ describe('KibanaParsedUrl', function () {
         const kibanaParsedUrl = new KibanaParsedUrl({
           appId: 'appId',
           appPath: 'visualize',
-          host,
+          hostname,
           protocol,
         });
         expect(kibanaParsedUrl.getAbsoluteUrl()).to.be('http://www.test.com/app/appId#visualize');
@@ -111,7 +115,7 @@ describe('KibanaParsedUrl', function () {
         const kibanaParsedUrl = new KibanaParsedUrl({
           appId: 'appId',
           appPath: 'visualize?hi=bye&tata',
-          host,
+          hostname,
           protocol,
         });
         expect(kibanaParsedUrl.getAbsoluteUrl()).to.be('http://www.test.com/app/appId#visualize?hi=bye&tata');

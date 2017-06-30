@@ -16,23 +16,36 @@ import { modifyUrl } from '../../../utils';
  */
 export class KibanaParsedUrl {
   /**
-   *
-   * @param basePath - An optional base path for kibana. If supplied, should start with a "/".
+   * @param {Object} options
+   * @property {string} options.basePath - An optional base path for kibana. If supplied, should start with a "/".
    * e.g. in https://localhost:5601/gra/app/kibana#/visualize/edit/viz_id the basePath is
    * "/gra".
-   * @param appId - the app id.
+   * @property {string} options.appId - the app id.
    * e.g. in https://localhost:5601/gra/app/kibana#/visualize/edit/viz_id the app id is "kibana".
-   * @param appPath - the path for a page in the the app. Should start with a "/". Don't include the hash sign. Can
+   * @property {string} options.appPath - the path for a page in the the app. Should start with a "/". Don't include the hash sign. Can
    * include all query parameters.
    * e.g. in https://localhost:5601/gra/app/kibana#/visualize/edit/viz_id?g=state the appPath is
    * "/visualize/edit/viz_id?g=state"
+   * @property {string} options.hostname - Optional hostname. Uses current window location's hostname if not supplied.
+   * @property {string} options.port - Optional port. Uses current window location's port if not supplied.
+   * @property {string} options.protocol - Optional protocol. Uses current window location's protocol if not supplied.
    */
-  constructor({ appId, basePath = '', appPath, host, protocol }) {
+  constructor(options) {
+    const {
+      appId,
+      basePath = '',
+      appPath = '',
+      hostname = window.location.hostname,
+      protocol = window.location.protocol,
+      port = window.location.port
+    } = options;
+
     this.basePath = basePath;
     this.appId = appId;
-    this.appPath = appPath || '';
-    this.host = host;
+    this.appPath = appPath;
+    this.hostname = hostname;
     this.protocol = protocol;
+    this.port = port;
   }
 
   getGlobalState() {
@@ -75,7 +88,8 @@ export class KibanaParsedUrl {
   getAbsoluteUrl() {
     return modifyUrl(this.getRootRelativePath(), parsed => {
       parsed.protocol = this.protocol;
-      parsed.host = this.host;
+      parsed.port = this.port;
+      parsed.hostname = this.hostname;
     });
   }
 }

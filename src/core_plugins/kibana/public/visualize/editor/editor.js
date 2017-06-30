@@ -22,7 +22,6 @@ import { VisualizeConstants } from '../visualize_constants';
 import { documentationLinks } from 'ui/documentation_links/documentation_links';
 import { KibanaParsedUrl } from 'ui/url/kibana_parsed_url';
 import { absoluteToParsedUrl } from 'ui/url/absolute_to_parsed_url';
-import { getProtocolAndHost } from 'ui/url/get_protocol_and_host';
 
 uiRoutes
 .when(VisualizeConstants.CREATE_PATH, {
@@ -319,13 +318,10 @@ function VisEditor($rootScope, $scope, $route, timefilter, AppState, $window, kb
       if (id) {
         notify.info('Saved Visualization "' + savedVis.title + '"');
         if ($scope.isAddToDashMode()) {
-          const { host, protocol } = getProtocolAndHost();
           const savedVisualizationParsedUrl = new KibanaParsedUrl({
             basePath: chrome.getBasePath(),
             appId: kbnBaseUrl.slice('/app/'.length),
             appPath: kbnUrl.eval(`${VisualizeConstants.EDIT_PATH}/{{id}}`, { id: savedVis.id }),
-            host,
-            protocol,
           });
           // Manually insert a new url so the back button will open the saved visualization.
           $window.history.pushState({}, '', savedVisualizationParsedUrl.getRootRelativePath());
