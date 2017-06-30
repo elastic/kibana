@@ -15,6 +15,7 @@ export function VislibLibLayoutLayoutTypesProvider(Private) {
   return {
     pie: Private(VislibLibLayoutTypesPieLayoutProvider),
     gauge: Private(GaugeLayoutProvider),
+    goal: Private(GaugeLayoutProvider),
     metric: Private(GaugeLayoutProvider),
     point_series: Private(VislibLibLayoutTypesColumnLayoutProvider)
   };
