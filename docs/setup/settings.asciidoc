@@ -49,7 +49,6 @@ The following example shows a valid regionmap configuration.
               - name: "INSEE"
                 description: "INSEE numeric identifier"         
     
-    N
 `elasticsearch.username:` and `elasticsearch.password:`:: If your Elasticsearch is protected with basic authentication,
 these settings provide the username and password that the Kibana server uses to perform maintenance on the Kibana index at
 startup. Your Kibana users still need to authenticate with Elasticsearch, which is proxied through the Kibana server.
