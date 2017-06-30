@@ -35,12 +35,15 @@ Core::
 * [IndexPatterns] Support cross cluster search {pull}11114[#11114]
   - Index Patterns can now point to indices from remote clusters when using Elasticsearch's cross cluster search feature. After setting it up in elasticsearch, just mention the remote cluster alias in the index name like so: remoteCluster:indexName.
 <<<<<<< HEAD
+<<<<<<< HEAD
 * Import / Export API for Dashboards {pull}10858[#10858]
 * Disable dynamic/Implement static mappings {pull}10638[#10638]
 * Adds an API for managing saved objects {pull}11632[#11632]
 * Rely on `kbn-xsrf` header for CSRF protection {pull}12547[#12547]
 =======
 * Use proper Content-Type request header instead of kbn-version and kbnx-srf for server CSRF check. {pull}12019[#12019]
+=======
+>>>>>>> 36e56ce... Remove reverted change in release notes
 * Import / Export API for Dashboards {pull}10858[#10858]
 * Disable dynamic/Implement static mappings {pull}10638[#10638]
 * Adds an API for managing saved objects {pull}11632[#11632]
