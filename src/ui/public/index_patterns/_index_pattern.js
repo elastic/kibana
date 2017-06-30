@@ -78,9 +78,7 @@ export function IndexPatternProvider(Private, $http, config, kbnIndex, Promise, 
       if (!fieldMapping._deserialize) {
         return;
       }
-      response._source[name] = fieldMapping._deserialize(
-        response._source[name], response, name, fieldMapping
-      );
+      response._source[name] = fieldMapping._deserialize(response._source[name]);
     });
 
     // give index pattern all of the values in _source
@@ -123,7 +121,10 @@ export function IndexPatternProvider(Private, $http, config, kbnIndex, Promise, 
     if (isFieldRefreshRequired(indexPattern)) {
       promise = indexPattern.refreshFields();
     }
-    return promise.then(() => {initFields(indexPattern);});
+
+    return promise.then(() => {
+      initFields(indexPattern);
+    });
   }
 
   function setId(indexPattern, id) {
@@ -205,8 +206,7 @@ export function IndexPatternProvider(Private, $http, config, kbnIndex, Promise, 
         if (!this.id) {
           return; // no id === no elasticsearch document
         }
-        return docSources.get(this)
-        .fetch()
+        return docSources.get(this).fetch()
         .then(response => updateFromElasticSearch(this, response));
       })
       .then(() => this);
