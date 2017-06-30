@@ -16,7 +16,8 @@ describe('single test that uses esArchiver', function () {
   const cleanupWork = [];
 
   before(async () => {
-    log = createToolingLog('verbose', process.stdout);
+    log = createToolingLog('debug');
+    log.pipe(process.stdout);
     log.indent(6);
 
     const config = await readConfigFile(log, CONFIG);
@@ -38,8 +39,8 @@ describe('single test that uses esArchiver', function () {
     });
     log.indent(-2);
 
-    cleanupWork.push(() => es.shutdown());
     cleanupWork.push(() => kibana.close());
+    cleanupWork.push(() => es.shutdown());
   });
 
   it('test', async () => {
@@ -65,7 +66,9 @@ describe('single test that uses esArchiver', function () {
     log.debug(stdout.toString('utf8'));
   });
 
-  after(() => {
-    return Promise.all(cleanupWork.splice(0).map(fn => fn()));
+  after(async () => {
+    for (const work of cleanupWork.splice(0)) {
+      await work();
+    }
   });
 });
