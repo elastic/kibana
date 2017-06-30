@@ -12,9 +12,7 @@ export function VislibVisualizationsPieChartProvider(Private) {
     isDonut: false,
     showTooltip: true,
     color: undefined,
-    fillColor: undefined,
-    xValue: d => d.x,
-    yValue: d => d.y
+    fillColor: undefined
   };
   /**
    * Pie Chart Visualization
