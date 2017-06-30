@@ -92,7 +92,7 @@ export default function ({ getPageObjects }) {
         expect(countOfDashboards).to.equal(1);
       });
 
-      it('Does not match mid word', async function () {
+      it('does not match mid word', async function () {
         await PageObjects.dashboard.searchForDashboardWithName('ords');
         const countOfDashboards = await PageObjects.dashboard.getCountOfDashboardsInListingTable();
         expect(countOfDashboards).to.equal(0);
