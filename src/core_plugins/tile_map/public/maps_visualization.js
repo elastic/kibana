@@ -24,8 +24,6 @@ export function MapsVisualizationProvider(Private, serviceSettings, Notifier, ge
       this._kibanaMap = null;
       this._kibanaMapReady = this._makeKibanaMap();
       this._baseLayerDirty = true;
-      this._dataDirty = true;
-      this._paramsDirty = true;
       this._currentParams = null;
     }
 
@@ -45,18 +43,12 @@ export function MapsVisualizationProvider(Private, serviceSettings, Notifier, ge
           return resolve();
         }
 
-        this._dataDirty = true;
         await this._kibanaMapReady;
-        this._chartData = esResponse;
-
-
-        this._recreateGeohashLayer();
-
-
-
-        this._kibanaMap.useUiStateFromVisualization(this.vis);
         this._kibanaMap.resize();
-        this._dataDirty = false;
+        this._chartData = esResponse;
+        this._recreateGeohashLayer();
+        this._kibanaMap.useUiStateFromVisualization(this.vis);
+
         this._doRenderComplete(resolve);
       });
     }
@@ -110,7 +102,6 @@ export function MapsVisualizationProvider(Private, serviceSettings, Notifier, ge
           this.vis.updateState();
         } else {
           this._recreateGeohashLayer();
-          this._dataDirty = false;
         }
       });
 
@@ -158,13 +149,10 @@ export function MapsVisualizationProvider(Private, serviceSettings, Notifier, ge
      */
     async _updateParams() {
 
-      this._paramsDirty = true;
-
       await this._kibanaMapReady;
 
       const mapParams = this._getMapsParams();
       if (_.eq(this._currentParams, mapParams)) {
-        this._paramsDirty = false;
         return;
       }
 
@@ -237,21 +225,19 @@ export function MapsVisualizationProvider(Private, serviceSettings, Notifier, ge
 
     _doRenderComplete(resolve) {
 
-      if (this._paramsDirty || this._dataDirty || this._baseLayerDirty) {
+      if (this._baseLayerDirty) {//as long as the baselayer is dirty, we cannot fire the render complete event
+
         const mapParams = this._getMapsParams();
         this._kibanaMap.setDesaturateBaseLayer(mapParams.isDesaturated);
         this._kibanaMap.setShowTooltip(mapParams.addTooltip);
         this._kibanaMap.setLegendPosition(mapParams.legendPosition);
-
         this._kibanaMap.useUiStateFromVisualization(this.vis);
-        this._kibanaMap.resize();
-        this._paramsDirty = false;
 
-
-        // this._doRenderComplete();
         return;
+      } else {
+        resolve();
       }
-      resolve();
+
     }
 
   }
