@@ -9,7 +9,7 @@ import './lib/service_settings';
 import './styles/_tilemap.less';
 
 
-export function MapsVisualizationProvider(Private, serviceSettings, Notifier, courier, getAppState) {
+export function MapsVisualizationProvider(Private, serviceSettings, Notifier, getAppState) {
 
   const notify = new Notifier({ location: 'Coordinate Map' });
 
@@ -37,24 +37,27 @@ export function MapsVisualizationProvider(Private, serviceSettings, Notifier, co
 
     async render(esResponse) {
 
-      return new Promise((resolve) => {
-        this._updateParams().then(() => {
-          if (esResponse && typeof esResponse.geohashGridAgg === 'undefined') {
-            return resolve();
-          }
+      return new Promise(async(resolve) => {
 
-          this._dataDirty = true;
+        await this._updateParams();
 
-          this._kibanaMapReady.then(() => {
-            this._chartData = esResponse;
-            this._geohashGeoJson = this._chartData.geoJson;
-            this._recreateGeohashLayer();
-            this._kibanaMap.useUiStateFromVisualization(this.vis);
-            this._kibanaMap.resize();
-            this._dataDirty = false;
-            this._doRenderComplete(resolve);
-          });
-        });
+        if (esResponse && typeof esResponse.geohashGridAgg === 'undefined') {
+          return resolve();
+        }
+
+        this._dataDirty = true;
+        await this._kibanaMapReady;
+        this._chartData = esResponse;
+
+
+        this._recreateGeohashLayer();
+
+
+
+        this._kibanaMap.useUiStateFromVisualization(this.vis);
+        this._kibanaMap.resize();
+        this._dataDirty = false;
+        this._doRenderComplete(resolve);
       });
     }
 
@@ -136,12 +139,14 @@ export function MapsVisualizationProvider(Private, serviceSettings, Notifier, co
     }
 
     _recreateGeohashLayer() {
+
       if (this._geohashLayer) {
         this._kibanaMap.removeLayer(this._geohashLayer);
       }
-      if (!this._geohashGeoJson) {
+      if (!this._chartData || !this._chartData.geoJson) {
         return;
       }
+
       const geohashOptions = this._getGeohashOptions();
       this._geohashLayer = new GeohashLayer(this._chartData.geoJson, geohashOptions, this._kibanaMap.getZoomLevel(), this._kibanaMap);
       this._kibanaMap.addLayer(this._geohashLayer);
@@ -152,7 +157,9 @@ export function MapsVisualizationProvider(Private, serviceSettings, Notifier, co
      * called on options change (vis.params change)
      */
     async _updateParams() {
+
       this._paramsDirty = true;
+
       await this._kibanaMapReady;
 
       const mapParams = this._getMapsParams();
@@ -244,7 +251,7 @@ export function MapsVisualizationProvider(Private, serviceSettings, Notifier, co
         // this._doRenderComplete();
         return;
       }
-      resolve('renderComplete');
+      resolve();
     }
 
   }
