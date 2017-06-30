@@ -37,19 +37,22 @@ export function MapsVisualizationProvider(Private, serviceSettings, Notifier, ge
 
       return new Promise(async(resolve) => {
 
+        await this._kibanaMapReady;
         await this._updateParams();
 
         if (esResponse && typeof esResponse.geohashGridAgg === 'undefined') {
           return resolve();
         }
 
-        await this._kibanaMapReady;
-        this._kibanaMap.resize();
-        this._chartData = esResponse;
-        this._recreateGeohashLayer();
+
+        this._recreateGeohashLayer(esResponse);
+
+
+
         this._kibanaMap.useUiStateFromVisualization(this.vis);
 
         this._doRenderComplete(resolve);
+        this._kibanaMap.resize();
       });
     }
 
@@ -97,11 +100,10 @@ export function MapsVisualizationProvider(Private, serviceSettings, Notifier, ge
           return;
         }
 
-        this._dataDirty = true;
         if (precisionChange) {
           this.vis.updateState();
         } else {
-          this._recreateGeohashLayer();
+          this._recreateGeohashLayer(this._chartData);
         }
       });
 
@@ -129,7 +131,13 @@ export function MapsVisualizationProvider(Private, serviceSettings, Notifier, ge
       }
     }
 
-    _recreateGeohashLayer() {
+    _recreateGeohashLayer(esResponse) {
+
+      if (esResponse === this._chartData) {
+        return;
+      }
+
+      this._chartData = esResponse;
 
       if (this._geohashLayer) {
         this._kibanaMap.removeLayer(this._geohashLayer);
@@ -148,8 +156,6 @@ export function MapsVisualizationProvider(Private, serviceSettings, Notifier, ge
      * called on options change (vis.params change)
      */
     async _updateParams() {
-
-      await this._kibanaMapReady;
 
       const mapParams = this._getMapsParams();
       if (_.eq(this._currentParams, mapParams)) {
@@ -192,7 +198,7 @@ export function MapsVisualizationProvider(Private, serviceSettings, Notifier, ge
       }
       const geohashOptions = this._getGeohashOptions();
       if (!this._geohashLayer || !this._geohashLayer.isReusable(geohashOptions)) {
-        this._recreateGeohashLayer();
+        this._recreateGeohashLayer(this._chartData);
       }
       this._kibanaMap.setLegendPosition(mapParams.legendPosition);
       this._kibanaMap.setDesaturateBaseLayer(mapParams.isDesaturated);
