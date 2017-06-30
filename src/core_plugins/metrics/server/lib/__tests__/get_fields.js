@@ -21,62 +21,41 @@ describe('getFields', () => {
   describe('handleResponse', () => {
     it('returns a valid response', () => {
       const resp = {
-        'foo': {
-          'mappings': {
-            'bar': {
-              '@timestamp': {
-                'full_name': '@timestamp',
-                'mapping': {
-                  '@timestamp': {
-                    'type': 'date'
-                  }
-                }
-              }
+        fields: {
+          '@timestamp': {
+            'date': {
+              'type': 'date',
+              'searchable': true,
+              'aggregatable': true
             }
-          }
-        },
-        'twitter': {
-          'mappings': {
-            'tweet': {
-              'message': {
-                'full_name': 'message',
-                'mapping': {
-                  'message': {
-                    'type': 'text',
-                    'fields': {
-                      'keyword': {
-                        'type': 'keyword',
-                        'ignore_above': 256
-                      }
-                    }
-                  }
-                }
-              },
-              '@timestamp': {
-                'full_name': '@timestamp',
-                'mapping': {
-                  '@timestamp': {
-                    'type': 'date'
-                  }
-                }
-              },
-              'id.keyword': {
-                'full_name': 'id.keyword',
-                'mapping': {
-                  'keyword': {
-                    'type': 'keyword',
-                    'ignore_above': 256
-                  }
-                }
-              }
+          },
+          'id.keyword': {
+            'keyword': {
+              'type': 'keyword',
+              'searchable': true,
+              'aggregatable': true
+            }
+          },
+          'message': {
+            'text': {
+              'type': 'text',
+              'searchable': true,
+              'aggregatable': false
+            }
+          },
+          'beat.hostname': {
+            'keyword': {
+              'type': 'keyword',
+              'searchable': true,
+              'aggregatable': true
             }
           }
         }
       };
       expect(handleResponse(resp)).to.eql([
-        { name: '@timestamp', type: 'date' },
-        { name: 'id.keyword', type: 'keyword' },
-        { name: 'message', type: 'text' }
+        { name: '@timestamp', type: 'date', aggregatable: true },
+        { name: 'id.keyword', type: 'keyword', aggregatable: true },
+        { name: 'beat.hostname', type: 'keyword', aggregatable: true }
       ]);
     });
   });
