@@ -160,7 +160,6 @@ export function MapsVisualizationProvider(Private, serviceSettings, Notifier, ge
       const { minZoom, maxZoom } = this._getMinMaxZoom();
 
       if (mapParams.wms.enabled) {
-
         if (maxZoom > this._kibanaMap.getMaxZoomLevel()) {
           this._geohashLayer = null;
           this._kibanaMapReady = this._makeKibanaMap();
@@ -176,7 +175,6 @@ export function MapsVisualizationProvider(Private, serviceSettings, Notifier, ge
           }
         });
       } else {
-
         if (maxZoom < this._kibanaMap.getMaxZoomLevel()) {
           this._geohashLayer = null;
           this._kibanaMapReady = this._makeKibanaMap();
@@ -196,6 +194,10 @@ export function MapsVisualizationProvider(Private, serviceSettings, Notifier, ge
       if (!this._geohashLayer || !this._geohashLayer.isReusable(geohashOptions)) {
         this._recreateGeohashLayer();
       }
+      this._kibanaMap.setLegendPosition(mapParams.legendPosition);
+      this._kibanaMap.setDesaturateBaseLayer(mapParams.isDesaturated);
+      this._kibanaMap.setShowTooltip(mapParams.addTooltip);
+      this._kibanaMap.useUiStateFromVisualization(this.vis);
 
     }
 
@@ -226,14 +228,9 @@ export function MapsVisualizationProvider(Private, serviceSettings, Notifier, ge
     _doRenderComplete(resolve) {
 
       if (this._baseLayerDirty) {//as long as the baselayer is dirty, we cannot fire the render complete event
-
-        const mapParams = this._getMapsParams();
-        this._kibanaMap.setDesaturateBaseLayer(mapParams.isDesaturated);
-        this._kibanaMap.setShowTooltip(mapParams.addTooltip);
-        this._kibanaMap.setLegendPosition(mapParams.legendPosition);
-        this._kibanaMap.useUiStateFromVisualization(this.vis);
-
-        return;
+        setTimeout(() => {
+          this._doRenderComplete(resolve);
+        }, 10);
       } else {
         resolve();
       }
