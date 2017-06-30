@@ -2017,6 +2017,9 @@ body {
     background-color: #333333;
     border-color: #1a1a1a; }
 
+/**
+ * 1. Allow row to expand if the content is so long that it wraps.
+ */
 .kuiLocalNavRow {
   display: -webkit-box;
   display: -webkit-flex;
@@ -2030,7 +2033,8 @@ body {
   -webkit-justify-content: space-between;
       -ms-flex-pack: justify;
           justify-content: space-between;
-  height: 29px; }
+  min-height: 29px;
+  /* 1 */ }
 
 .kuiLocalNavRow__section {
   height: 100%; }
