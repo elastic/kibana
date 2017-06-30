@@ -36,8 +36,8 @@ To create a visualization:
 <<metric-chart,Metric>>:: Display a single number.
 * *Maps*
 [horizontal]
-<<tilemap,Coordinate map>>:: Associate the results of an aggregation with geographic
-<<regionmap,Region map>>:: Thematic maps where color intensity of a shape indicates corresponds to a metric's value
+<<tilemap,Coordinate map>>:: Associate the results of an aggregation with geographic locations.
+<<regionmap,Region map>>:: Thematic maps where a shape's color intensity corresponds to a metric's value.
 locations.
 * *Time Series*
 [horizontal]
