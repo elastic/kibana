@@ -146,10 +146,11 @@ describe('chrome nav apis', function () {
       const basePath = '/xyz';
       const appId = 'kibana';
       const appPath = 'visualize/1234?_g=globalstate';
-      const host = 'localhost:9200';
+      const hostname = 'localhost';
+      const port = '9200';
       const protocol = 'https';
 
-      const kibanaParsedUrl = new KibanaParsedUrl({ basePath, appId, appPath, host, protocol });
+      const kibanaParsedUrl = new KibanaParsedUrl({ basePath, appId, appPath, hostname, port, protocol });
       chrome.trackSubUrlForApp('kibana:visualize', kibanaParsedUrl);
       expect(internals.nav[0].lastSubUrl).to.be('https://localhost:9200/xyz/app/kibana#visualize/1234?_g=globalstate');
     });
