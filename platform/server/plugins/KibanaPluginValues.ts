@@ -20,6 +20,7 @@ import { Router, RouterOptions } from '../http';
  */
 export function createKibanaValuesForPlugin(
   pluginName: string,
+  configPath: undefined | string | string[],
   core: KibanaCoreModules
 ): KibanaPluginFeatures {
   return {
@@ -46,14 +47,22 @@ export function createKibanaValuesForPlugin(
       }
     },
     config: {
-      atPath: <Schema extends schema.Any, Config>(
-        path: string | string[],
+      create: <Schema extends schema.Any, Config>(
         ConfigClass: ConfigWithSchema<Schema, Config>
-      ) => core.configService.atPath(path, ConfigClass),
-      optionalAtPath: <Schema extends schema.Any, Config>(
-        path: string | string[],
+      ) => {
+        if (configPath === undefined) {
+          throw new Error('config path not defined');
+        }
+        return core.configService.atPath(configPath, ConfigClass)
+      },
+      createIfExists: <Schema extends schema.Any, Config>(
         ConfigClass: ConfigWithSchema<Schema, Config>
-      ) => core.configService.optionalAtPath(path, ConfigClass)
+      ) => {
+        if (configPath === undefined) {
+          throw new Error('config path not defined');
+        }
+        return core.configService.optionalAtPath(configPath, ConfigClass)
+      }
     }
   };
 }

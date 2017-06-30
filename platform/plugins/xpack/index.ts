@@ -3,6 +3,8 @@ import { Observable } from 'rxjs';
 import { KibanaFunctionalPlugin } from '../../server/plugins/types';
 import { XPackConfig } from './XPackConfig';
 
+export const configPath = ['xpack', 'xpack_main'];
+
 export const dependencies = [];
 
 interface XPackExports {
@@ -18,7 +20,7 @@ export const plugin: KibanaFunctionalPlugin<{}, XPackExports> = kibana => {
 
   log.info('xpack is running');
 
-  const config$ = kibana.config.atPath(['xpack', 'xpack_main'], XPackConfig);
+  const config$ = kibana.config.create(XPackConfig);
 
   return {
     config$

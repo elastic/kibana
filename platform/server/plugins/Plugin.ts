@@ -47,7 +47,8 @@ interface PluginDefinition<DependenciesType, ExposableType> {
   dependencies: string[],
   run:
     | KibanaFunctionalPlugin<DependenciesType, ExposableType>
-    | KibanaPluginStatic<DependenciesType, ExposableType>
+    | KibanaPluginStatic<DependenciesType, ExposableType>,
+  configPath?: string | string []
 }
 
 export class Plugin<DependenciesType extends BasePluginsType, ExposableType> {
@@ -55,7 +56,8 @@ export class Plugin<DependenciesType extends BasePluginsType, ExposableType> {
   readonly dependencies: PluginName[];
   private readonly run:
     | KibanaFunctionalPlugin<DependenciesType, ExposableType>
-    | KibanaPluginStatic<DependenciesType, ExposableType>
+    | KibanaPluginStatic<DependenciesType, ExposableType>;
+  readonly configPath: string | string[] | undefined;
 
   private stopCallbacks: LifecycleCallback[] = [];
   private exposedValues?: ExposableType;
@@ -68,7 +70,8 @@ export class Plugin<DependenciesType extends BasePluginsType, ExposableType> {
     this.name = pluginDefinition.name as PluginName;
     this.dependencies = pluginDefinition.dependencies as PluginName[];
     this.run = pluginDefinition.run;
-    this.log = logger.get('plugins', name);
+    this.configPath = pluginDefinition.configPath;
+    this.log = logger.get('plugins', pluginDefinition.name);
   }
 
   getExposedValues(): ExposableType {
@@ -87,6 +90,7 @@ export class Plugin<DependenciesType extends BasePluginsType, ExposableType> {
   ) {
     const kibanaValues = createKibanaValuesForPlugin(
       this.name,
+      this.configPath,
       kibanaModules
     );
 

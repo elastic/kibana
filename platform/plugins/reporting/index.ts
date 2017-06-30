@@ -2,6 +2,8 @@ import { KibanaFunctionalPlugin } from '../../server/plugins/types';
 import { XPackPluginType } from '../xpack';
 import { ReportingConfig } from './ReportingConfig';
 
+export const configPath = ['xpack', 'reporting'];
+
 export const dependencies = ['xpack'];
 
 export const plugin: KibanaFunctionalPlugin<XPackPluginType> = (kibana, dependencies) => {
@@ -9,7 +11,7 @@ export const plugin: KibanaFunctionalPlugin<XPackPluginType> = (kibana, dependen
 
   const log = kibana.logger.get();
 
-  const config$ = kibana.config.optionalAtPath(['xpack', 'reporting'], ReportingConfig);
+  const config$ = kibana.config.createIfExists(ReportingConfig);
 
   // just an example
   const isEnabled$ = config$

@@ -10,6 +10,8 @@ export interface TimelionPluginBType {
   timelionPluginB: TimelionPluginBExports
 };
 
+export const configPath = undefined;
+
 export const dependencies = ['timelion'];
 
 export const plugin: KibanaFunctionalPlugin<TimelionPluginType, TimelionPluginBExports> = (kibana, dependencies) => {

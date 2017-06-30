@@ -5,6 +5,8 @@ import { Logger } from '../../logger'
 import { PidConfig } from './PidConfig';
 import { PidService } from './PidService';
 
+export const configPath = 'pid';
+
 export const dependencies = [];
 
 export const plugin = class implements KibanaPlugin<void> {
@@ -14,7 +16,7 @@ export const plugin = class implements KibanaPlugin<void> {
   constructor(kibana: KibanaPluginFeatures) {
     this.log = kibana.logger.get();
 
-    const config$ = kibana.config.optionalAtPath('pid', PidConfig);
+    const config$ = kibana.config.createIfExists(PidConfig);
     this.pidService = new PidService(config$, kibana.logger);
   }
 

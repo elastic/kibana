@@ -1,6 +1,8 @@
 import { KibanaFunctionalPlugin } from '../../../../../server/plugins/types';
 import { FooPluginType } from '../foo';
 
+export const configPath = undefined;
+
 export const dependencies = ['foo'];
 
 interface BarExports {

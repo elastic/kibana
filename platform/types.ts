@@ -150,12 +150,10 @@ export interface KibanaPluginFeatures {
      * static `createSchema` that will be called to create a schema that we
      * validate the config at the given `path` against.
      */
-    atPath: <Schema extends schemaLib.Any, Config>(
-      path: string | string[],
+    create: <Schema extends schemaLib.Any, Config>(
       ConfigClass: ConfigWithSchema<Schema, Config>
     ) => Observable<Config>;
-    optionalAtPath: <Schema extends schemaLib.Any, Config>(
-      path: string | string[],
+    createIfExists: <Schema extends schemaLib.Any, Config>(
       ConfigClass: ConfigWithSchema<Schema, Config>
     ) => Observable<Config | undefined>;
   };

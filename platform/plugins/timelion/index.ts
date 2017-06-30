@@ -1,6 +1,8 @@
 import { KibanaFunctionalPlugin } from '../../server/plugins/types';
 import { XPackPluginType } from '../xpack';
 
+export const configPath = undefined;
+
 export const dependencies = ['xpack'];
 
 type TimelionFunction = () => void;

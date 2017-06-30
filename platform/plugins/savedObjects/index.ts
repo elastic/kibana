@@ -2,6 +2,8 @@ import { KibanaFunctionalPlugin } from '../../server/plugins/types';
 import { SavedObjectsService } from './SavedObjectsService';
 import { registerEndpoints } from './registerEndpoints';
 
+export const configPath = undefined;
+
 export const dependencies = [];
 
 export const plugin: KibanaFunctionalPlugin<{}> = kibana => {

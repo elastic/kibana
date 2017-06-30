@@ -56,12 +56,19 @@ export class PluginsService implements CoreService {
           );
         }
 
+        if (!('configPath' in json)) {
+          throw new Error(
+            `'configPath' missing in plugin [${pluginPath}], must be set to 'undefined' if no config`
+          );
+        }
+
         // TODO validate these values
 
         const run = json.plugin;
         const dependencies = json.dependencies;
+        const configPath = json.configPath;
 
-        return new Plugin({ name, dependencies, run }, this.logger);
+        return new Plugin({ name, dependencies, run, configPath }, this.logger);
       });
   }
 }

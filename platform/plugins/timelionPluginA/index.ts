@@ -2,6 +2,8 @@ import { KibanaFunctionalPlugin } from '../../server/plugins/types';
 import { TimelionPluginType } from '../timelion'
 import { TimelionPluginBType } from '../timelionPluginB'
 
+export const configPath = undefined;
+
 export const dependencies = ['timelion', 'timelionPluginB'];
 
 export const plugin: KibanaFunctionalPlugin<TimelionPluginType & TimelionPluginBType> = (kibana, dependencies) => {
