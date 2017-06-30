@@ -42,6 +42,6 @@ export function assertLicensesValid(options = {}) {
     .map(describeInvalidLicenses(getInvalid));
 
   if (invalidMsgs.length) {
-    throw new Error(`Non-confirming licenses: ${invalidMsgs.join('')}`);
+    throw new Error(`Non-conforming licenses: ${invalidMsgs.join('')}`);
   }
 }
