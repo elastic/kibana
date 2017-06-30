@@ -18,14 +18,12 @@ describe('String Format', function () {
   });
 
 // TODO fix base64 encoded to not use window.atob
-/*
   it('decode a base64 string', function () {
     const string = new StringFormat({
       transform: 'base64'
     });
     expect(string.convert('Zm9vYmFy')).to.be('foobar');
   });
-*/
 
   it('convert a string to title case', function () {
     const string = new StringFormat({

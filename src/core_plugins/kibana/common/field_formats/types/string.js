@@ -11,7 +11,7 @@ export class StringFormat extends FieldFormat {
 
   _base64Decode(val) {
     try {
-      return window.atob(val);
+      return Buffer.from(val, 'base64').toString('utf8');
     } catch (e) {
       return asPrettyString(val);
     }
