@@ -26,26 +26,32 @@ export class KibanaParsedUrl {
    * include all query parameters.
    * e.g. in https://localhost:5601/gra/app/kibana#/visualize/edit/viz_id?g=state the appPath is
    * "/visualize/edit/viz_id?g=state"
-   * @property {string} options.hostname - Optional hostname. Uses current window location's hostname if not supplied.
-   * @property {string} options.port - Optional port. Uses current window location's port if not supplied.
-   * @property {string} options.protocol - Optional protocol. Uses current window location's protocol if not supplied.
+   * @property {string} options.hostname - Optional hostname. Uses current window location's hostname if no host or
+   * protocol information is supplied.
+   * @property {string} options.port - Optional port. Uses current window location's port if no host or protocol
+   * information is supplied.
+   * @property {string} options.protocol - Optional protocol. Uses current window location's protocol if no host or
+   * protocol information is supplied.
    */
   constructor(options) {
     const {
       appId,
       basePath = '',
       appPath = '',
-      hostname = window.location.hostname,
-      protocol = window.location.protocol,
-      port = window.location.port
+      hostname,
+      protocol,
+      port
     } = options;
+
+    // We'll use window defaults
+    const hostOrProtocolSpecified = hostname || protocol || port;
 
     this.basePath = basePath;
     this.appId = appId;
     this.appPath = appPath;
-    this.hostname = hostname;
-    this.protocol = protocol;
-    this.port = port;
+    this.hostname = hostOrProtocolSpecified ? hostname : window.location.hostname;
+    this.port = hostOrProtocolSpecified ? port : window.location.port;
+    this.protocol = hostOrProtocolSpecified ? protocol : window.location.protocol;
   }
 
   getGlobalState() {
