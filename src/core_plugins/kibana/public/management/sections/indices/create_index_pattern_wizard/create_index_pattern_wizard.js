@@ -76,12 +76,6 @@ uiModules.get('apps/management')
     });
   }
 
-  /**
-   * This powers the `refresh` within ui-select which is called
-   * as a way to async fetch results based on the typed in query
-   *
-   * @param {string} searchQuery
-   */
   let mostRecentFetchMatchingIndicesRequest;
 
   this.fetchMatchingIndices = () => {
@@ -138,6 +132,8 @@ uiModules.get('apps/management')
   };
 
   this.goToTimeFieldStep = () => {
+    // Re-initialize this step.
+    this.formValues.timeFieldOption = noTimeFieldOption;
     this.fetchTimeFieldOptions();
     this.wizardStep = 'timeField';
   };
