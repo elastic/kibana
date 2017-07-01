@@ -1,6 +1,6 @@
 <div>
   <div
-    ng-if="isLoading"
+    ng-if="matchingIndicesList.isLoading"
     class="kuiPanel kuiPanel--prompt kuiVerticalRhythm matchingIndicesListLoadingPrompt"
   >
     <div class="kuiPanelBody">
@@ -17,7 +17,7 @@
   </div>
 
   <div
-    ng-if="!isLoading"
+    ng-if="!matchingIndicesList.isLoading"
     class="kuiControlledTable"
   >
     <!-- ToolBar -->
@@ -29,25 +29,26 @@
       </div>
 
       <div class="kuiToolBarSection">
-        <div class="kuiToolBarText">
-          1 &ndash; 20 of 33
-        </div>
-
-        <div class="kuiButtonGroup kuiButtonGroup--united">
-          <button class="kuiButton kuiButton--basic kuiButton--icon">
-            <span class="kuiButton__icon kuiIcon fa-chevron-left"></span>
-          </button>
-          <button class="kuiButton kuiButton--basic kuiButton--icon">
-            <span class="kuiButton__icon kuiIcon fa-chevron-right"></span>
-          </button>
-        </div>
+        <!-- Pagination -->
+        <tool-bar-pager-text
+          start-item="matchingIndicesList.pager.startItem"
+          end-item="matchingIndicesList.pager.endItem"
+          total-items="matchingIndicesList.pager.totalItems"
+        ></tool-bar-pager-text>
+        <tool-bar-pager-buttons
+          has-previous-page="matchingIndicesList.pager.hasPreviousPage"
+          has-next-page="matchingIndicesList.pager.hasNextPage"
+          on-page-next="matchingIndicesList.onPageNext"
+          on-page-previous="matchingIndicesList.onPagePrevious"
+        ></tool-bar-pager-buttons>
       </div>
     </div>
 
+    <!-- Indices list -->
     <ul class="kuiMenu kuiMenu--contained">
       <li
         class="kuiMenuItem"
-        ng-repeat="index in indices"
+        ng-repeat="index in matchingIndicesList.pageOfIndices"
       >
         <p class="kuiText">
           {{index}}
