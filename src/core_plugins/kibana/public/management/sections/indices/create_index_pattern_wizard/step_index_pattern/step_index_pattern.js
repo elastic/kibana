@@ -51,7 +51,7 @@ module.directive('stepIndexPattern', function () {
         // Remove the custom index pattern previously entered by the user.
         const list = $select.items.filter(indexPattern => indexPattern !== previousCustomIndexPattern);
 
-        if (!customIndexPattern) {
+        if (!customIndexPattern || list.includes(customIndexPattern)) {
           $select.items = list;
         } else {
           // If the user has entered as custom index pattern, add it to the list.
