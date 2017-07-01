@@ -24,7 +24,7 @@
       <div class="kuiVerticalRhythmSmall timeFieldNameLabel">
         <label
           id="timeFilterFieldSelectLabel"
-          class="kuiLabel "
+          class="kuiLabel"
           for="timeFilterFieldSelect"
           translate="KIBANA-CREATE_INDEX_PATTERN_STEP_2_TIME_FIELD_LABEL"
         ></label>
@@ -41,8 +41,13 @@
         <p
           ng-if="stepTimeField.isFetchingTimeFieldOptions"
           class="kuiText kuiSubduedText"
+          aria-label="Please wait while we fetch your time field options"
+          aria-describedby="timeFilterFieldSelectLabel"
         >
-          <span class="kuiIcon fa-spinner fa-spin"></span>
+          <span
+            aria-hidden="true"
+            class="kuiIcon fa-spinner fa-spin"
+          ></span>
         </p>
       </div>
 
