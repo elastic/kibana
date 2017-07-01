@@ -1,6 +1,6 @@
 <form
   role="form"
-  ng-submit="createIndexPattern()"
+  ng-submit="stepTimeField.createIndexPattern()"
   class="kuiPanel"
 >
   <div class="kuiPanelHeader">
@@ -13,89 +13,103 @@
   </div>
 
   <div class="kuiPanelBody">
-    <div class="kuiInfoPanel kuiInfoPanel--info kuiVerticalRhythm">
-      <div class="kuiInfoPanelHeader">
-        <span class="kuiInfoPanelHeader__icon kuiIcon kuiIcon--info fa-info"></span>
-        <span
-          class="kuiInfoPanelHeader__title"
-          translate="KIBANA-CREATE_INDEX_PATTERN_STEP_2_INFO_TITLE"
-          translate-values="{ indexPatternName: indexPatternName }"
-        ></span>
-      </div>
-
-      <div class="kuiInfoPanelBody">
-        <div
-          class="kuiInfoPanelBody__message"
-          translate="KIBANA-CREATE_INDEX_PATTERN_STEP_2_INFO_BODY"
-        ></div>
-      </div>
-    </div>
+    <h2
+      class="kuiSubTitle kuiVerticalRhythm"
+      translate="KIBANA-CREATE_INDEX_PATTERN_STEP_2_SUB_TITLE"
+      translate-values="{ indexPatternName: stepTimeField.indexPatternName }"
+    ></h2>
 
     <!-- Time field select -->
     <div class="kuiVerticalRhythm">
-      <label class="kuiLabel kuiVerticalRhythmSmall">
-        <span translate="KIBANA-TIME_FILTER_FIELD_NAME"></span>
-        &nbsp;
-        <kbn-info info="{{ 'KIBANA-FIELD_FILTER_EVENTS_GLOBAL_TIME' | translate }}"></kbn-info>
-        &nbsp;
-        <small>
-          <a
-            class="kuiLink"
-            ng-click="refreshTimeFieldOptions();"
-            translate="KIBANA-REFRESH_FIELDS"
-          ></a>
-        </small>
-      </label>
+      <div class="kuiVerticalRhythmSmall timeFieldNameLabel">
+        <label
+          id="timeFilterFieldSelectLabel"
+          class="kuiLabel "
+          for="timeFilterFieldSelect"
+          translate="KIBANA-CREATE_INDEX_PATTERN_STEP_2_TIME_FIELD_LABEL"
+        ></label>
 
-      <div class="kuiVerticalRhythmSmall">
+        <a
+          ng-if="!stepTimeField.isFetchingTimeFieldOptions"
+          class="kuiLink kuiSubText"
+          ng-click="stepTimeField.fetchTimeFieldOptions()"
+          kbn-accessible-click
+          translate="KIBANA-REFRESH_FIELDS"
+          aria-describedby="timeFilterFieldSelectLabel"
+        ></a>
+
+        <p
+          ng-if="stepTimeField.isFetchingTimeFieldOptions"
+          class="kuiText kuiSubduedText"
+        >
+          <span class="kuiIcon fa-spinner fa-spin"></span>
+        </p>
+      </div>
+
+      <div class="kuiVerticalRhythmSmall kuiVerticalRhythm">
         <select
-          class="kuiSelect kuiSelect--large kuiVerticalRhythmSmall"
+          id="timeFilterFieldSelect"
+          aria-describedby="timeFilterFieldSelectHelpText"
+          class="kuiSelect kuiSelect--large"
           data-test-subj="createIndexPatternTimeFieldSelect"
-          ng-disabled="isTimeFieldSelectDisabled()"
-          ng-required="timeFieldOptions.length"
-          ng-options="option.display for option in timeFieldOptions"
-          ng-model="selectedTimeFieldOption"
+          ng-disabled="stepTimeField.isTimeFieldSelectDisabled()"
+          ng-required="stepTimeField.timeFieldOptions.length"
+          ng-options="option.display for option in stepTimeField.timeFieldOptions"
+          ng-model="stepTimeField.selectedTimeFieldOption"
         ></select>
       </div>
+
+      <p
+        id="timeFilterFieldSelectHelpText"
+        class="kuiText kuiSubduedText kuiVerticalRhythm"
+        translate="KIBANA-CREATE_INDEX_PATTERN_STEP_2_TIME_FIELD_HELP"
+      ></p>
     </div>
 
     <!-- Expand index pattern checkbox -->
-    <div class="kuiVerticalRhythm" ng-if="canEnableExpandWildcard()">
-      <label class="kuiLabel kuiVerticalRhythmSmall">
-        Expand index pattern
+    <div
+      class="kuiVerticalRhythm"
+      ng-if="stepTimeField.canEnableExpandWildcard()"
+    >
+      <label
+        class="kuiLabel kuiVerticalRhythmSmall"
+        for="expandIndexPatternCheckBox"
+      >
+        Expand index pattern (DEPRECATED)
       </label>
 
       <label class="kuiCheckBoxLabel kuiVerticalRhythmSmall kuiVerticalRhythm">
         <input
+          id="expandIndexPatternCheckBox"
+          aria-describedby="expandIndexPatternCheckBoxHelpText"
           class="kuiCheckBox"
           type="checkbox"
           data-test-subj="createIndexPatternEnableExpand"
-          ng-model="expandWildcard"
+          ng-model="stepTimeField.expandWildcard"
         >
         <span class="kuiCheckBoxLabel__text">
           <span translate="KIBANA-EXPAND_INDEX_PATTERN"></span>
-          <span translate="KIBANA-DEPRECATED"></span>
         </span>
       </label>
 
       <!-- Checkbox help text -->
-      <div class="kuiVerticalRhythm">
+      <div
+        id="expandIndexPatternCheckBoxHelpText"
+        class="kuiVerticalRhythm"
+      >
         <p
           class="kuiText kuiSubduedText kuiVerticalRhythmSmall"
-          translate="KIBANA-WILDCARD_DEFAULT_EXPANDED_TO_CURRENT_TIME_RANGE"
+          translate="KIBANA-EXPAND_INDEX_PATTERN_HELP_1"
         ></p>
 
-        <p class="kuiText kuiSubduedText kuiVerticalRhythmSmall">
-          <span translate="KIBANA-SEARCH_AGAINST_INDEX_PATTERN"></span>
-          <em translate="KIBANA-LOGSTASH_WILDCARD"></em>
-          <span translate="KIBANA-ACTUALLY_QUERY"></span>
-          <em translate="KIBANA-EXAMPLE_TIME_RANGE"></em>
-          <span translate="KIBANA-FALL_WITHIN_CURRENT_TIME_RANGE"></span>
-        </p>
+        <p
+          class="kuiText kuiSubduedText kuiVerticalRhythmSmall"
+          translate="KIBANA-EXPAND_INDEX_PATTERN_HELP_2"
+        ></p>
 
         <p
           class="kuiText kuiSubduedText kuiVerticalRhythmSmall"
-          translate="KIBANA-EXPAND_INDEX_PATTERN_DEPRECATION"
+          translate="KIBANA-EXPAND_INDEX_PATTERN_HELP_3"
         ></p>
       </div>
     </div>
@@ -106,7 +120,7 @@
         <div class="kuiButtonGroup">
           <button
             class="kuiButton kuiButton--secondary kuiButton--iconText"
-            ng-click="goToPreviousStep()"
+            ng-click="stepTimeField.goToPreviousStep()"
           >
             <span class="kuiButton__inner">
               <span aria-hidden="true" class="kuiButton__icon kuiIcon fa-chevron-left"></span>
@@ -116,10 +130,10 @@
 
           <button
             data-test-subj="createIndexPatternCreateButton"
-            ng-disabled="form.$invalid || !canCreateIndexPattern()"
+            ng-disabled="!stepTimeField.canCreateIndexPattern()"
             class="kuiButton kuiButton--primary"
             type="submit"
-            translate="KIBANA-CREATE"
+            translate="KIBANA-CREATE_INDEX_PATTERN_STEP_2_SUBMIT_BUTTON"
           ></button>
         </div>
       </div>

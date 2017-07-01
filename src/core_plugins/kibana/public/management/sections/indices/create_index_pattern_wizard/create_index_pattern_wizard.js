@@ -34,110 +34,29 @@ uiModules.get('apps/management')
   const indicesService = $injector.get('indices');
   const notify = new Notifier();
   const refreshKibanaIndex = Private(RefreshKibanaIndex);
-  let loadingCount = 0;
+  const noTimeFieldOption = {
+    display: $translate.instant('KIBANA-NO_DATE_FIELD_DESIRED')
+  };
 
   // Configure the new index pattern we're going to create.
   this.formValues = {
     name: '',
     expandWildcard: false,
-    timeFieldOption: null,
+    timeFieldOption: noTimeFieldOption,
   };
 
   // UI state.
-  this.timeFieldOptions = [];
+  this.timeFieldOptions = [noTimeFieldOption];
   this.wizardStep = 'indexPattern';
   this.isFetchingExistingIndices = true;
   this.isFetchingMatchingIndices = false;
-  this.isLoading = false;
+  this.isFetchingTimeFieldOptions = false;
+  this.isCreatingIndexPattern = false;
+  this.timeFieldError = undefined;
   this.allIndices = [];
   this.allTemplateIndexPatterns = [];
   this.matchingIndices = [];
   this.partialMatchingIndices = [];
-
-  const updateLoadingState = increment => {
-    loadingCount += increment;
-    this.isLoading = loadingCount > 0;
-  };
-
-  const getTimeFieldOptions = () => {
-    updateLoadingState(1);
-    return Promise.resolve()
-    .then(() => {
-      const { name } = this.formValues;
-      if (!name) {
-        return [];
-      }
-      return indexPatterns.fieldsFetcher.fetchForWildcard(name);
-    })
-    .then(fields => {
-      const dateFields = fields.filter(field => field.type === 'date');
-
-      if (dateFields.length === 0) {
-        return {
-          options: [
-            {
-              display: $translate.instant('KIBANA-INDICES_DONT_CONTAIN_TIME_FIELDS')
-            }
-          ]
-        };
-      }
-
-      return {
-        options: [
-          {
-            display: $translate.instant('KIBANA-NO_DATE_FIELD_DESIRED')
-          },
-          ...dateFields.map(field => ({
-            display: field.name,
-            fieldName: field.name
-          })),
-        ]
-      };
-    })
-    .catch(err => {
-      if (err instanceof IndexPatternMissingIndices) {
-        return {
-          error: $translate.instant('KIBANA-INDICES_MATCH_PATTERN')
-        };
-      }
-
-      throw err;
-    })
-    .finally(() => {
-      updateLoadingState(-1);
-    });
-  };
-
-  const findTimeFieldOption = match => {
-    if (!match) return;
-
-    return this.timeFieldOptions.find(option => (
-      // comparison is not done with _.isEqual() because options get a unique
-      // `$$hashKey` tag attached to them by ng-repeat
-      option.fieldName === match.fieldName &&
-        option.display === match.display
-    ));
-  };
-
-  const pickDefaultTimeFieldOption = () => {
-    const noOptions = this.timeFieldOptions.length === 0;
-    // options that represent a time field
-    const fieldOptions = this.timeFieldOptions.filter(option => !!option.fieldName);
-    // options like "I don't want the time filter" or "There are no date fields"
-    const nonFieldOptions = this.timeFieldOptions.filter(option => !option.fieldName);
-    // if there are multiple field or non-field options then we can't select a default, the user must choose
-    const tooManyOptions = fieldOptions.length > 1 || nonFieldOptions.length > 1;
-
-    if (noOptions || tooManyOptions) {
-      return null;
-    }
-
-    if (fieldOptions.length === 1) {
-      return fieldOptions[0];
-    }
-
-    return nonFieldOptions[0];
-  };
 
   function whiteListIndices(indices, blacklist = []) {
     return indices.filter(index => (
@@ -163,6 +82,8 @@ uiModules.get('apps/management')
    *
    * @param {string} searchQuery
    */
+  let mostRecentFetchMatchingIndicesRequest;
+
   const fetchMatchingIndices = () => {
     this.isFetchingMatchingIndices = true;
 
@@ -177,7 +98,7 @@ uiModules.get('apps/management')
       partialSearchQuery = `*${partialSearchQuery}`;
     }
 
-    Promise.all([
+    const thisFetchMatchingIndicesRequest = mostRecentFetchMatchingIndicesRequest = Promise.all([
       indicesService.getIndices(exactSearchQuery),
       indicesService.getIndices(partialSearchQuery),
       createReasonableWait(),
@@ -190,7 +111,10 @@ uiModules.get('apps/management')
       // It also includes `undefined`.
       this.matchingIndices = whiteListIndices(matchingIndices, [exactSearchQuery, undefined]).sort();
       this.partialMatchingIndices = whiteListIndices(partialMatchingIndices).sort();
-      this.isFetchingMatchingIndices = false;
+
+      if (thisFetchMatchingIndicesRequest === mostRecentFetchMatchingIndicesRequest) {
+        this.isFetchingMatchingIndices = false;
+      }
     });
   };
 
@@ -212,6 +136,7 @@ uiModules.get('apps/management')
   };
 
   this.goToTimeFieldStep = () => {
+    this.fetchTimeFieldOptions();
     this.wizardStep = 'timeField';
   };
 
@@ -235,69 +160,72 @@ uiModules.get('apps/management')
     return Boolean(this.formValues.timeFieldOption.fieldName);
   };
 
+  const isExpandWildcardEnabled = () => {
+    return (
+      this.canEnableExpandWildcard()
+      && !!this.formValues.expandWildcard
+    );
+  };
+
+  const isCrossClusterName = () => {
+    return (
+      this.formValues.name
+      && this.formValues.name.includes(':')
+    );
+  };
+
   this.canEnableExpandWildcard = () => {
     return (
-      this.isTimeBased() &&
-        !this.isCrossClusterName() &&
-        _.includes(this.formValues.name, '*')
+      this.isTimeBased()
+      && !isCrossClusterName()
+      && _.includes(this.formValues.name, '*')
     );
   };
 
-  this.isExpandWildcardEnabled = () => {
-    return (
-      this.canEnableExpandWildcard() &&
-        !!this.formValues.expandWildcard
-    );
+  const extractTimeFieldsFromFields = fields => {
+    const dateFields = fields.filter(field => field.type === 'date');
+
+    if (dateFields.length === 0) {
+      return [{
+        display: $translate.instant('KIBANA-INDICES_DONT_CONTAIN_TIME_FIELDS')
+      }];
+    }
+
+    return [
+      noTimeFieldOption,
+      ...dateFields.map(field => ({
+        display: field.name,
+        fieldName: field.name
+      })),
+    ];
   };
 
-  this.isCrossClusterName = () => {
-    return (
-      this.formValues.name &&
-        this.formValues.name.includes(':')
-    );
-  };
+  this.fetchTimeFieldOptions = () => {
+    this.isFetchingTimeFieldOptions = true;
 
-  let activeRefreshTimeFieldOptionsCall;
-  this.refreshTimeFieldOptions = () => {
-    // if there is an active refreshTimeFieldOptions() call then we use
-    // their prevOption, allowing the previous selection to persist
-    // across simultaneous calls to refreshTimeFieldOptions()
-    const prevOption = activeRefreshTimeFieldOptionsCall
-      ? activeRefreshTimeFieldOptionsCall.prevOption
-      : this.formValues.timeFieldOption;
+    Promise.all([
+      indexPatterns.fieldsFetcher.fetchForWildcard(this.formValues.name),
+      createReasonableWait(),
+    ])
+    .then(([fields]) => {
+      this.timeFieldOptions = extractTimeFieldsFromFields(fields);
+      this.formValues.timeFieldOption = this.timeFieldOptions.length ? this.timeFieldOptions[0] : undefined;
+    })
+    .catch(err => {
+      if (err instanceof IndexPatternMissingIndices) {
+        this.timeFieldError = $translate.instant('KIBANA-INDICES_MATCH_PATTERN');
+      }
 
-    // `thisCall` is our unique "token" to verify that we are still the
-    // most recent call. When we are not the most recent call we don't
-    // modify the controller in any way to prevent race conditions
-    const thisCall = activeRefreshTimeFieldOptionsCall = { prevOption };
-
-    updateLoadingState(1);
-    this.timeFieldOptions = [];
-    this.formValues.timeFieldOption = null;
-    getTimeFieldOptions()
-      .then(({ options }) => {
-        if (thisCall !== activeRefreshTimeFieldOptionsCall) return;
-
-        this.timeFieldOptions = options;
-        if (!this.timeFieldOptions) {
-          return;
-        }
-
-        // Restore the preivously selected state, or select the default option in the UI
-        const restoredOption = findTimeFieldOption(prevOption);
-        const defaultOption = pickDefaultTimeFieldOption();
-        this.formValues.timeFieldOption = restoredOption || defaultOption;
-      })
-      .catch(notify.error)
-      .finally(() => {
-        updateLoadingState(-1);
-        if (thisCall === activeRefreshTimeFieldOptionsCall) {
-          activeRefreshTimeFieldOptionsCall = null;
-        }
-      });
+      notify.error(err);
+    })
+    .finally(() => {
+      this.isFetchingTimeFieldOptions = false;
+    });
   };
 
   this.createIndexPattern = () => {
+    this.isCreatingIndexPattern = true;
+
     const {
       name,
       timeFieldOption,
@@ -309,12 +237,10 @@ uiModules.get('apps/management')
       ? timeFieldOption.fieldName
       : undefined;
 
-    const notExpandable = this.isExpandWildcardEnabled()
+    const notExpandable = isExpandWildcardEnabled()
       ? undefined
       : true;
 
-    loadingCount += 1;
-    updateLoadingState(1);
     sendCreateIndexPatternRequest(indexPatterns, {
       id,
       timeFieldName,
@@ -331,9 +257,6 @@ uiModules.get('apps/management')
 
         indexPatterns.cache.clear(id);
         kbnUrl.change(`/management/kibana/indices/${id}`);
-
-        // force loading while kbnUrl.change takes effect.
-        updateLoadingState(Infinity);
       });
     }).catch(err => {
       if (err instanceof IndexPatternMissingIndices) {
@@ -342,12 +265,11 @@ uiModules.get('apps/management')
 
       notify.fatal(err);
     }).finally(() => {
-      updateLoadingState(-1);
+      this.isCreatingIndexPattern = false;
     });
   };
 
   $scope.$watch('controller.formValues.name', () => {
-    this.refreshTimeFieldOptions();
     fetchMatchingIndices();
   });
 

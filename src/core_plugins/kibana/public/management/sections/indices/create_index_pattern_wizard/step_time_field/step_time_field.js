@@ -1,4 +1,5 @@
 import { uiModules } from 'ui/modules';
+import './step_time_field.less';
 import template from './step_time_field.html';
 import { documentationLinks } from 'ui/documentation_links/documentation_links';
 
@@ -9,6 +10,8 @@ module.directive('stepTimeField', function () {
     restrict: 'E',
     template,
     replace: true,
+    controllerAs: 'stepTimeField',
+    bindToController: true,
     scope: {
       indexPatternName: '=',
       expandWildcard: '=',
@@ -16,27 +19,27 @@ module.directive('stepTimeField', function () {
       timeFieldOptions: '=',
       timeFieldOptionsError: '=',
       selectedTimeFieldOption: '=',
-      refreshTimeFieldOptions: '&',
+      fetchTimeFieldOptions: '&',
       isFetchingTimeFieldOptions: '=',
       goToPreviousStep: '&',
       createIndexPattern: '&',
     },
-    link: function (scope) {
-      scope.matchingIndicesListType = 'noMatches';
-      scope.documentationLinks = documentationLinks;
+    controller: function () {
+      this.matchingIndicesListType = 'noMatches';
+      this.documentationLinks = documentationLinks;
 
-      scope.isTimeFieldSelectDisabled = () => {
+      this.isTimeFieldSelectDisabled = () => {
         return (
-          scope.isFetchingTimeFieldOptions
-          || scope.timeFieldOptionsError
-          || scope.timeFieldOptions.length === 1
+          this.isFetchingTimeFieldOptions
+          || this.timeFieldOptionsError
+          || this.timeFieldOptions.length === 1
         );
       };
 
-      scope.canCreateIndexPattern = () => {
+      this.canCreateIndexPattern = () => {
         return (
-          scope.timeFieldOptionsError
-          || scope.isFetchingTimeFieldOptions
+          !this.timeFieldOptionsError
+          && !this.isFetchingTimeFieldOptions
         );
       };
     },
