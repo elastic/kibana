@@ -10,10 +10,10 @@ import { WorkpadHeader } from '../workpad_header';
 
 import './app.less';
 
-export const App = ({ editing }) => (
+export const App = ({ editing, deselectElement }) => (
   <div className="canvas">
     <div className="canvas__main">
-      <div className="canvas__app--workspace">
+      <div className="canvas__app--workspace" onMouseDown={deselectElement}>
         <WorkpadHeader />
         <div className="canvas__app--workpad">
           <Workpad />
@@ -34,4 +34,5 @@ export const App = ({ editing }) => (
 
 App.propTypes = {
   editing: PropTypes.bool,
+  deselectElement: PropTypes.func,
 };

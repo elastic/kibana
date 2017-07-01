@@ -4,12 +4,12 @@ import { ElementWrapper } from '../element_wrapper';
 
 import './workpad.less';
 
-export const Workpad = ({ elements, deselectElement, style, workpad }) => {
+export const Workpad = ({ elements, style, workpad }) => {
   const { height, width } = workpad;
   const itsTheNewStyle = Object.assign({}, style, { height, width });
 
   return (
-    <div className="canvas__workpad" onMouseDown={deselectElement} style={itsTheNewStyle}>
+    <div className="canvas__workpad" style={itsTheNewStyle}>
       { elements.map(element => (
           <ElementWrapper key={element.id} element={element} />
       ))
@@ -21,6 +21,5 @@ export const Workpad = ({ elements, deselectElement, style, workpad }) => {
 Workpad.propTypes = {
   elements: PropTypes.array,
   style: PropTypes.object,
-  deselectElement: PropTypes.func,
   workpad: PropTypes.object,
 };

@@ -2,7 +2,6 @@ import { connect } from 'react-redux';
 import { get } from 'lodash';
 import { Workpad as Component } from './workpad';
 import { getElements, getPageById, getSelectedPage, getWorkpad } from '../../state/selectors/workpad';
-import { selectElement } from '../../state/actions/transient';
 
 
 const mapStateToProps = (state) => {
@@ -13,13 +12,4 @@ const mapStateToProps = (state) => {
   };
 };
 
-const mapDispatchToProps = (dispatch) => {
-  return {
-    deselectElement(ev) {
-      ev && ev.stopPropagation();
-      dispatch(selectElement(null));
-    },
-  };
-};
-
-export const Workpad = connect(mapStateToProps, mapDispatchToProps)(Component);
+export const Workpad = connect(mapStateToProps)(Component);
