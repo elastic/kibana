@@ -20,6 +20,7 @@ module.directive('stepIndexPattern', function () {
       hasIndices: '&',
       indexPatternName: '=',
       allIndices: '=',
+      allTemplateIndexPatterns: '=',
       partialMatchingIndices: '=',
       matchingIndices: '=',
       goToNextStep: '&',
@@ -41,11 +42,30 @@ module.directive('stepIndexPattern', function () {
       this.matchingIndicesListType = 'noMatches';
       this.documentationLinks = documentationLinks;
 
-      const hasInvalidInput = () => {
-        if (this.indexPatternNameForm && this.indexPatternNameForm.$invalid) {
-          return true;
-        }
+      let previousCustomIndexPattern;
 
+      // Hack ui-select to allow the user to enter an index pattern which doesn't exist as a
+      // template index pattern.
+      this.refreshResults = $select => {
+        const customIndexPattern = $select.search;
+        // Remove the custom index pattern previously entered by the user.
+        const list = $select.items.filter(indexPattern => indexPattern !== previousCustomIndexPattern);
+
+        if (!customIndexPattern) {
+          $select.items = list;
+        } else {
+          // If the user has entered as custom index pattern, add it to the list.
+          previousCustomIndexPattern = customIndexPattern;
+          $select.items = list.concat(customIndexPattern).sort();
+          $select.selected = customIndexPattern;
+        }
+      };
+
+      const hasInvalidInput = () => {
+        return this.indexPatternNameForm && this.indexPatternNameForm.$invalid;
+      };
+
+      const hasNoInput = () => {
         return !this.indexPatternName || !this.indexPatternName.trim();
       };
 
@@ -63,6 +83,10 @@ module.directive('stepIndexPattern', function () {
 
       this.updateList = () => {
         if (hasInvalidInput()) {
+          return this.matchingIndicesListType = 'invalidIndexPattern';
+        }
+
+        if (hasNoInput()) {
           return this.matchingIndicesListType = 'noInput';
         }
 

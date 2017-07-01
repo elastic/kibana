@@ -122,11 +122,13 @@ uiModules.get('apps/management')
     this.isFetchingExistingIndices = true;
     Promise.all([
       indicesService.getIndices('*'),
+      indicesService.getTemplateIndexPatterns('*'),
       createReasonableWait(),
     ])
-    .then(([allIndices]) => {
+    .then(([allIndices, allTemplateIndexPatterns]) => {
       // Cache all indices.
       this.allIndices = whiteListIndices(allIndices).sort();
+      this.allTemplateIndexPatterns = allTemplateIndexPatterns.sort();
       this.isFetchingExistingIndices = false;
     });
   };

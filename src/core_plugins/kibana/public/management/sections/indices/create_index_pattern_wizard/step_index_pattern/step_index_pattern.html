@@ -112,20 +112,34 @@
             ></label>
 
             <div class="kuiVerticalRhythmSmall kuiVerticalRhythm">
-              <input
-                id="indexPatternNameField"
-                class="kuiTextInput kuiTextInput--large"
+              <ui-select
                 data-test-subj="createIndexPatternNameInput"
                 ng-model="stepIndexPattern.indexPatternName"
                 ng-model-options="{ updateOn: 'default blur', debounce: {'default': 300, 'blur': 0} }"
-                placeholder="index-name-*"
                 validate-index-name
                 validate-index-name-allow-wildcard
                 name="name"
                 required
-                type="text"
                 aria-describedby="indexPatternNameFieldHelp"
-              ></input>
+                reset-search-input="false"
+              >
+                <ui-select-match
+                  id="indexPatternNameField"
+                  placeholder="index-name-*"
+                >
+                  {{$select.selected}}
+                </ui-select-match>
+
+                <ui-select-choices
+                  refresh="stepIndexPattern.refreshResults($select)"
+                  refresh-delay="0"
+                  repeat="index in stepIndexPattern.allTemplateIndexPatterns | filter:$select.search"
+                >
+                  <div
+                    ng-bind-html="index | highlight: $select.search"
+                  ></div>
+                </ui-select-choices>
+              </ui-select>
             </div>
 
             <p
@@ -155,7 +169,23 @@
           class="kuiVerticalRhythm"
           ng-switch="stepIndexPattern.matchingIndicesListType"
         >
-          <div ng-switch-when="noInput">
+          <div ng-switch-when="invalidIndexPattern">
+            <matching-indices-list
+              is-loading="stepIndexPattern.isFetchingMatchingIndices"
+              indices="stepIndexPattern.allIndices"
+            >
+             <span class="kuiStatusText kuiStatusText--error">
+                <span
+                  aria-hidden="true"
+                  class="kuiStatusText__icon kuiIcon fa-hand-stop-o"
+                ></span>
+                <span>
+                  You've entered an invalid index pattern. Please adjust it to match any of your <strong>{{stepIndexPattern.allIndices.length}} indices</strong>, below.
+                </span>
+              </span>
+            </matching-indices-list>
+          </div><div ng-switch-when="noInput">
+
             <matching-indices-list
               is-loading="stepIndexPattern.isFetchingMatchingIndices"
               indices="stepIndexPattern.allIndices"
@@ -194,7 +224,10 @@
               indices="stepIndexPattern.matchingIndices"
             >
               <span class="kuiStatusText kuiStatusText--success">
-                <span class="kuiStatusText__icon kuiIcon fa-check"></span>
+                <span
+                  aria-hidden="true"
+                  class="kuiStatusText__icon kuiIcon fa-check"
+                ></span>
                 <span>
                   <strong>Success!</strong> Your index pattern matches <strong>{{stepIndexPattern.matchingIndices.length}} indices</strong>.
                 </span>
