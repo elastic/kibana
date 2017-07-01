@@ -17,7 +17,6 @@ describe('String Format', function () {
     expect(string.convert('Kibana')).to.be('KIBANA');
   });
 
-// TODO fix base64 encoded to not use window.atob
   it('decode a base64 string', function () {
     const string = new StringFormat({
       transform: 'base64'
