@@ -1,10 +1,9 @@
 import expect from 'expect.js';
 import { FieldFormatsService } from '../field_formats';
-import { stringifyNumber } from '../types/number';
+import { NumberFormat } from '../types/number';
 
 describe('FieldFormatsService', function () {
 
-  const NumberFormat = stringifyNumber();
   const config = {};
   config['format:defaultTypeMap'] = {
     'ip': { 'id': 'ip', 'params': {} },
