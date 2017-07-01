@@ -61,7 +61,7 @@ module.directive('stepIndexPattern', function () {
         }
       };
 
-      const hasInvalidInput = () => {
+      this.hasInvalidInput = () => {
         return this.indexPatternNameForm && this.indexPatternNameForm.$invalid;
       };
 
@@ -82,7 +82,7 @@ module.directive('stepIndexPattern', function () {
       };
 
       this.updateList = () => {
-        if (hasInvalidInput()) {
+        if (this.hasInvalidInput()) {
           return this.matchingIndicesListType = 'invalidIndexPattern';
         }
 
