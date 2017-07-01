@@ -8,7 +8,7 @@ describe('Validate index name directive', function () {
   let $compile;
   let $rootScope;
   const noWildcardHtml = '<input type="text" ng-model="indexName" validate-index-name />';
-  const allowWildcardHtml = '<input type="text" ng-model="indexName" allow-wildcard validate-index-name />';
+  const allowWildcardHtml = '<input type="text" ng-model="indexName" validate-index-name validate-index-name-allow-wildcard />';
 
   beforeEach(ngMock.module('kibana'));
 

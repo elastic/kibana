@@ -84,7 +84,7 @@ uiModules.get('apps/management')
    */
   let mostRecentFetchMatchingIndicesRequest;
 
-  const fetchMatchingIndices = () => {
+  this.fetchMatchingIndices = () => {
     this.isFetchingMatchingIndices = true;
 
     // Default to searching for all indices.
@@ -138,10 +138,6 @@ uiModules.get('apps/management')
   this.goToTimeFieldStep = () => {
     this.fetchTimeFieldOptions();
     this.wizardStep = 'timeField';
-  };
-
-  this.setIndexPattern = indexPattern => {
-    this.formValues.name = indexPattern;
   };
 
   this.hasIndices = () => {
@@ -268,10 +264,6 @@ uiModules.get('apps/management')
       this.isCreatingIndexPattern = false;
     });
   };
-
-  $scope.$watch('controller.formValues.name', () => {
-    fetchMatchingIndices();
-  });
 
   this.fetchExistingIndices();
 });

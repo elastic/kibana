@@ -68,6 +68,7 @@
 
       <!-- User has data -->
       <form
+        name="stepIndexPattern.indexPatternNameForm"
         role="form"
         ng-submit="stepIndexPattern.goToNextStep()"
         ng-if="stepIndexPattern.hasIndices()"
@@ -105,24 +106,34 @@
           <!-- Index pattern input -->
           <div>
             <label
+              for="indexPatternNameField"
               class="kuiLabel kuiVerticalRhythmSmall"
               translate="KIBANA-CREATE_INDEX_PATTERN_STEP_1_INDEX_PATTERN_LABEL"
             ></label>
 
-            <div class="kuiVerticalRhythmSmall">
+            <div class="kuiVerticalRhythmSmall kuiVerticalRhythm">
               <input
+                id="indexPatternNameField"
                 class="kuiTextInput kuiTextInput--large"
                 data-test-subj="createIndexPatternNameInput"
                 ng-model="stepIndexPattern.indexPatternName"
                 ng-model-options="{ updateOn: 'default blur', debounce: {'default': 300, 'blur': 0} }"
                 placeholder="index-name-*"
                 validate-index-name
-                allow-wildcard
+                validate-index-name-allow-wildcard
                 name="name"
                 required
                 type="text"
+                aria-describedby="indexPatternNameFieldHelp"
               ></input>
             </div>
+
+            <p
+              id="indexPatternNameFieldHelp"
+              class="kuiText kuiSubduedText kuiVerticalRhythm"
+            >
+              Can't contain empty spaces or the characters \ / ? " < > , |
+            </p>
           </div>
 
           <!-- Action -->

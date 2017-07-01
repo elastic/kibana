@@ -13,9 +13,10 @@ module.directive('stepIndexPattern', function () {
     controllerAs: 'stepIndexPattern',
     bindToController: true,
     scope: {
-      isFetchingExistingIndices: '=',
-      isFetchingMatchingIndices: '=',
       fetchExistingIndices: '&',
+      isFetchingExistingIndices: '=',
+      fetchMatchingIndices: '&',
+      isFetchingMatchingIndices: '=',
       hasIndices: '&',
       indexPatternName: '=',
       allIndices: '=',
@@ -26,13 +27,26 @@ module.directive('stepIndexPattern', function () {
     link: function (scope) {
       scope.$watch('stepIndexPattern.allIndices', scope.stepIndexPattern.updateList);
       scope.$watch('stepIndexPattern.matchingIndices', scope.stepIndexPattern.updateList);
+      scope.$watch('stepIndexPattern.indexPatternName', () => {
+        // Only send the request if there's valid input.
+        if (scope.stepIndexPattern.indexPatternNameForm && scope.stepIndexPattern.indexPatternNameForm.$valid) {
+          scope.stepIndexPattern.fetchMatchingIndices();
+        }
+
+        // If the index pattern name is invalid, we should reflect that state in the list.
+        scope.stepIndexPattern.updateList();
+      });
     },
     controller: function () {
       this.matchingIndicesListType = 'noMatches';
       this.documentationLinks = documentationLinks;
 
-      const hasNoInput = () => {
-        return !this.indexPatternName.trim();
+      const hasInvalidInput = () => {
+        if (this.indexPatternNameForm && this.indexPatternNameForm.$invalid) {
+          return true;
+        }
+
+        return !this.indexPatternName || !this.indexPatternName.trim();
       };
 
       const hasSimilarMatches = () => {
@@ -48,7 +62,7 @@ module.directive('stepIndexPattern', function () {
       };
 
       this.updateList = () => {
-        if (hasNoInput()) {
+        if (hasInvalidInput()) {
           return this.matchingIndicesListType = 'noInput';
         }
 

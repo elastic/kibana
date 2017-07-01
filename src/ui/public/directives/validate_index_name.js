@@ -10,7 +10,11 @@ uiModules
       require: 'ngModel',
       link: function ($scope, elem, attr, ngModel) {
         const illegalCharacters = ['\\', '/', '?', '"', '<', '>', '|', ' ', ','];
-        const allowWildcard = !_.isUndefined(attr.allowWildcard) && attr.allowWildcard !== 'false';
+
+        const allowWildcard =
+          !_.isUndefined(attr.validateIndexNameAllowWildcard)
+          && attr.validateIndexNameAllowWildcard !== 'false';
+
         if (!allowWildcard) {
           illegalCharacters.push('*');
         }
