@@ -1450,6 +1450,7 @@ body {
 
 .kuiInfoButton {
   font-size: 16px;
+  line-height: 0;
   background-color: transparent;
   color: #0079a5;
   cursor: pointer;
