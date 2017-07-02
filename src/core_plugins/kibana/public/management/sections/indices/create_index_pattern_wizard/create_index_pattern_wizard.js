@@ -58,11 +58,10 @@ uiModules.get('apps/management')
   this.matchingIndices = [];
   this.partialMatchingIndices = [];
 
-  function whiteListIndices(indices, blacklist = []) {
+  function whiteListIndices(indices) {
     return indices.filter(index => (
       // The majority of users won't want to create an index pattern for the .kibana index.
       index !== '.kibana'
-      && !blacklist.includes(index)
     ));
   }
 
@@ -101,12 +100,9 @@ uiModules.get('apps/management')
       matchingIndices,
       partialMatchingIndices,
     ]) => {
-      // Blacklist the search query, because getIndices will include it in the results for some reason.
-      // It also includes `undefined`.
-      this.matchingIndices = whiteListIndices(matchingIndices, [exactSearchQuery, undefined]).sort();
-      this.partialMatchingIndices = whiteListIndices(partialMatchingIndices).sort();
-
       if (thisFetchMatchingIndicesRequest === mostRecentFetchMatchingIndicesRequest) {
+        this.matchingIndices = whiteListIndices(matchingIndices).sort();
+        this.partialMatchingIndices = whiteListIndices(partialMatchingIndices).sort();
         this.isFetchingMatchingIndices = false;
       }
     });

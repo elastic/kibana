@@ -21,10 +21,6 @@ export function IndicesGetIndicesProvider(esAdmin) {
   };
 
   return async function getIndices(query) {
-    if (typeof query !== 'string' || !query.trim()) {
-      return [];
-    }
-
     const aliases = await esAdmin.indices.getAlias({ index: query, allowNoIndices: true, ignore: 404 });
 
     // If aliases return 200, they'll include matching indices, too.
