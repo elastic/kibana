@@ -34,12 +34,15 @@
           start-item="matchingIndicesList.pager.startItem"
           end-item="matchingIndicesList.pager.endItem"
           total-items="matchingIndicesList.pager.totalItems"
+          ng-if="matchingIndicesList.hasMultiplePages()"
         ></tool-bar-pager-text>
+
         <tool-bar-pager-buttons
           has-previous-page="matchingIndicesList.pager.hasPreviousPage"
           has-next-page="matchingIndicesList.pager.hasNextPage"
           on-page-next="matchingIndicesList.onPageNext"
           on-page-previous="matchingIndicesList.onPagePrevious"
+          ng-if="matchingIndicesList.hasMultiplePages()"
         ></tool-bar-pager-buttons>
       </div>
     </div>

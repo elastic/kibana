@@ -34,6 +34,10 @@ module.directive('matchingIndicesList', function ($filter, pagerFactory) {
 
       this.pager = pagerFactory.create(this.indices.length, 10, 1);
 
+      this.hasMultiplePages = () => {
+        return this.indices.length > this.pager.pageSize;
+      };
+
       this.onPageNext = () => {
         this.pager.nextPage();
         this.calculateItemsOnPage();
