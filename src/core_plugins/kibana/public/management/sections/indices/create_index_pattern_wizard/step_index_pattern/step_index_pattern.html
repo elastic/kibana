@@ -226,7 +226,7 @@
               is-loading="stepIndexPattern.isFetchingMatchingIndices"
               indices="stepIndexPattern.partialMatchingIndices"
             >
-              Your index pattern doesn't match any indices, but you have <strong>{{stepIndexPattern.partialMatchingIndices.length}} indices</strong> which look similar.
+              Your index pattern doesn't match any indices, but you have <strong>{{stepIndexPattern.partialMatchingIndices.length}} {{stepIndexPattern.partialMatchingIndices.length > 1 ? 'indices' : 'index'}}</strong> which {{stepIndexPattern.partialMatchingIndices.length > 1 ? 'look' : 'looks'}} similar.
             </matching-indices-list>
           </div>
 
@@ -241,7 +241,7 @@
                   class="kuiStatusText__icon kuiIcon fa-check"
                 ></span>
                 <span>
-                  <strong>Success!</strong> Your index pattern matches <strong>{{stepIndexPattern.matchingIndices.length}} indices</strong>.
+                  <strong>Success!</strong> Your index pattern matches <strong>{{stepIndexPattern.matchingIndices.length}} {{stepIndexPattern.matchingIndices.length > 1 ? 'indices' : 'index'}}</strong>.
                 </span>
               </span>
             </matching-indices-list>
