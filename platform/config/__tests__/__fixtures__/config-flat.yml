@@ -1,0 +1,2 @@
+pid.enabled: true
+pid.file: '/var/run/kibana.pid'

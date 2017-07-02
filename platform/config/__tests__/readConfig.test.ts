@@ -1,25 +1,25 @@
-const mockReadFileSync = jest.fn();
-
-jest.mock('fs', () => ({
-  readFileSync: mockReadFileSync
-}));
-
 import { getConfigFromFile } from '../readConfig';
 
-test('reads yaml from file system and parses to json', () => {
-  const yaml = 'key: value';
-  mockReadFileSync.mockImplementation(() => yaml);
+const fixtureFile = (name: string) => `${__dirname}/__fixtures__/${name}`
 
-  expect(getConfigFromFile('./config.yml')).toEqual({
-    key: 'value'
+test('reads yaml from file system and parses to json', () => {
+  const config = getConfigFromFile(fixtureFile('config.yml'));
+
+  expect(config).toEqual({
+    pid: {
+      enabled: true,
+      file: '/var/run/kibana.pid'
+    }
   });
 });
 
-test('reads from specified config file if given', () => {
-  const yaml = '';
-  mockReadFileSync.mockImplementation(() => yaml);
+test('returns a deep object', () => {
+  const config = getConfigFromFile(fixtureFile('/config-flat.yml'));
 
-  getConfigFromFile('./some-other-config-file.yml');
-
-  expect(mockReadFileSync).toHaveBeenLastCalledWith('./some-other-config-file.yml', 'utf8');
+  expect(config).toEqual({
+    pid: {
+      enabled: true,
+      file: '/var/run/kibana.pid'
+    }
+  });
 });
