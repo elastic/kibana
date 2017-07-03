@@ -146,43 +146,31 @@ uiModules.get('apps/management')
     this.wizardStep = 'timeField';
   };
 
-  this.hasIndices = () => {
-    return this.allIndices.length;
-  };
+  this.hasIndices = () => (
+    this.allIndices.length
+  );
 
-  this.isTimeBased = () => {
-    if (!this.formValues.timeFieldOption) {
-      // if they haven't choosen a time field, assume they will
-      return true;
-    }
+  this.isTimeBased = () => (
+    this.formValues.timeFieldOption
+    && this.formValues.timeFieldOption !== noTimeFieldOption
+    && this.formValues.timeFieldOption !== loadingOption
+  );
 
-    // if timeFieldOption has a fieldName it's a time field, otherwise
-    // it's a way to opt-out of the time field or an indication that there
-    // are no fields available
-    return Boolean(this.formValues.timeFieldOption.fieldName);
-  };
+  const isExpandWildcardEnabled = () => (
+    this.canEnableExpandWildcard()
+    && !!this.formValues.expandWildcard
+  );
 
-  const isExpandWildcardEnabled = () => {
-    return (
-      this.canEnableExpandWildcard()
-      && !!this.formValues.expandWildcard
-    );
-  };
+  const isCrossClusterName = () => (
+    this.formValues.name
+    && this.formValues.name.includes(':')
+  );
 
-  const isCrossClusterName = () => {
-    return (
-      this.formValues.name
-      && this.formValues.name.includes(':')
-    );
-  };
-
-  this.canEnableExpandWildcard = () => {
-    return (
-      this.isTimeBased()
-      && !isCrossClusterName()
-      && _.includes(this.formValues.name, '*')
-    );
-  };
+  this.canEnableExpandWildcard = () => (
+    this.isTimeBased()
+    && !isCrossClusterName()
+    && _.includes(this.formValues.name, '*')
+  );
 
   const extractTimeFieldsFromFields = fields => {
     const dateFields = fields.filter(field => field.type === 'date');
