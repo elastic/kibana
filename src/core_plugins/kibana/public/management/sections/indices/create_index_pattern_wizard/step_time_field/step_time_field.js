@@ -1,3 +1,4 @@
+import 'ui/toggle_panel';
 import { uiModules } from 'ui/modules';
 import './step_time_field.less';
 import template from './step_time_field.html';
@@ -24,9 +25,21 @@ module.directive('stepTimeField', function () {
       goToPreviousStep: '&',
       createIndexPattern: '&',
     },
+    link: function (scope) {
+      scope.$watch('stepTimeField.canEnableExpandWildcard()', canEnableExpandWildcard => {
+        if (!canEnableExpandWildcard) {
+          scope.stepTimeField.isAdvancedOptionsVisible = false;
+        }
+      });
+    },
     controller: function () {
+      this.isAdvancedOptionsVisible = false;
       this.matchingIndicesListType = 'noMatches';
       this.documentationLinks = documentationLinks;
+
+      this.onToggleAdvancedOptions = () => {
+        this.isAdvancedOptionsVisible = !this.isAdvancedOptionsVisible;
+      };
 
       this.isTimeFieldSelectDisabled = () => (
         this.isFetchingTimeFieldOptions

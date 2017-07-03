@@ -71,11 +71,14 @@
       ></p>
     </div>
 
-    <!-- Expand index pattern checkbox -->
-    <div
+    <toggle-panel
       class="kuiVerticalRhythm"
-      ng-if="stepTimeField.canEnableExpandWildcard()"
+      is-disabled="!stepTimeField.canEnableExpandWildcard()"
+      is-collapsed="!stepTimeField.isAdvancedOptionsVisible"
+      on-toggle="stepTimeField.onToggleAdvancedOptions"
+      text="Advanced Time Field filter options"
     >
+      <!-- Expand index pattern checkbox -->
       <label
         class="kuiLabel kuiVerticalRhythmSmall"
         for="expandIndexPatternCheckBox"
@@ -117,7 +120,7 @@
           translate="KIBANA-EXPAND_INDEX_PATTERN_HELP_3"
         ></p>
       </div>
-    </div>
+    </toggle-panel>
 
     <!-- Actions -->
     <div class="kuiBar kuiVerticalRhythm">

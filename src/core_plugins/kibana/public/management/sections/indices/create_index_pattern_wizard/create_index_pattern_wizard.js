@@ -151,7 +151,7 @@ uiModules.get('apps/management')
   );
 
   this.isTimeBased = () => (
-    this.formValues.timeFieldOption
+    this.formValues.timeFieldOption !== undefined
     && this.formValues.timeFieldOption !== noTimeFieldOption
     && this.formValues.timeFieldOption !== loadingOption
   );
