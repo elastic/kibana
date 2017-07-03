@@ -5,19 +5,19 @@
 >
   <div class="kuiPanelHeader">
     <div class="kuiPanelHeaderSection">
-      <h1
+      <h2
         class="kuiPanelHeader__title"
         translate="KIBANA-CREATE_INDEX_PATTERN_STEP_2_TITLE"
-      ></h1>
+      ></h2>
     </div>
   </div>
 
   <div class="kuiPanelBody">
-    <h2
-      class="kuiSubTitle kuiVerticalRhythm"
+    <p
+      class="kuiText kuiSubduedText kuiVerticalRhythm"
       translate="KIBANA-CREATE_INDEX_PATTERN_STEP_2_SUB_TITLE"
       translate-values="{ indexPatternName: stepTimeField.indexPatternName }"
-    ></h2>
+    ></p>
 
     <!-- Time field select -->
     <div class="kuiVerticalRhythm">
@@ -59,7 +59,7 @@
           data-test-subj="createIndexPatternTimeFieldSelect"
           ng-disabled="stepTimeField.isTimeFieldSelectDisabled()"
           ng-required="stepTimeField.timeFieldOptions.length"
-          ng-options="option.display for option in stepTimeField.timeFieldOptions"
+          ng-options="option as option.display disable when option.isDisabled for option in stepTimeField.timeFieldOptions"
           ng-model="stepTimeField.selectedTimeFieldOption"
         ></select>
       </div>

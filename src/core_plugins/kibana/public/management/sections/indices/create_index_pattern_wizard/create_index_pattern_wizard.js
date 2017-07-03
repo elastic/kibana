@@ -35,6 +35,13 @@ uiModules.get('apps/management')
   const indicesService = $injector.get('indices');
   const notify = new Notifier();
   const refreshKibanaIndex = Private(RefreshKibanaIndex);
+  const loadingOption = {
+    display: 'Loading...',
+  };
+  const disabledDividerOption = {
+    isDisabled: true,
+    display: '───',
+  };
   const noTimeFieldOption = {
     display: $translate.instant('KIBANA-NO_DATE_FIELD_DESIRED')
   };
@@ -45,11 +52,13 @@ uiModules.get('apps/management')
   this.formValues = {
     name: '',
     expandWildcard: false,
-    timeFieldOption: noTimeFieldOption,
+    timeFieldOption: loadingOption,
   };
 
   // UI state.
-  this.timeFieldOptions = [noTimeFieldOption];
+  this.timeFieldOptions = [
+    loadingOption,
+  ];
   this.wizardStep = 'indexPattern';
   this.isFetchingExistingIndices = true;
   this.isFetchingMatchingIndices = false;
@@ -132,7 +141,7 @@ uiModules.get('apps/management')
 
   this.goToTimeFieldStep = () => {
     // Re-initialize this step.
-    this.formValues.timeFieldOption = noTimeFieldOption;
+    this.formValues.timeFieldOption = undefined;
     this.fetchTimeFieldOptions();
     this.wizardStep = 'timeField';
   };
@@ -185,16 +194,19 @@ uiModules.get('apps/management')
     }
 
     return [
-      noTimeFieldOption,
       ...dateFields.map(field => ({
         display: field.name,
         fieldName: field.name
       })),
+      disabledDividerOption,
+      noTimeFieldOption,
     ];
   };
 
   this.fetchTimeFieldOptions = () => {
     this.isFetchingTimeFieldOptions = true;
+    this.formValues.timeFieldOption = loadingOption;
+    this.timeFieldOptions = [loadingOption];
 
     Promise.all([
       indexPatterns.fieldsFetcher.fetchForWildcard(this.formValues.name),
@@ -202,7 +214,6 @@ uiModules.get('apps/management')
     ])
     .then(([fields]) => {
       this.timeFieldOptions = extractTimeFieldsFromFields(fields);
-      this.formValues.timeFieldOption = this.timeFieldOptions.length ? this.timeFieldOptions[0] : undefined;
     })
     .catch(err => {
       if (err instanceof IndexPatternMissingIndices) {
