@@ -13,6 +13,7 @@ app.directive('togglePanel', function () {
     scope: {
       togglePanelId: '@',
       text: '@',
+      isDisabled: '=',
       isCollapsed: '=',
       onToggle: '='
     },
