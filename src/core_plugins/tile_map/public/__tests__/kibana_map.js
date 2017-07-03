@@ -67,7 +67,26 @@ describe('kibana_map tests', function () {
 
     });
 
+    it('should update attributions', function () {
+
+
+      kibanaMap.updateAttributions('foo|bar');
+      expect(domNode.querySelectorAll('.leaflet-control-attribution')[0].innerHTML).to.equal('foo, bar');
+
+      kibanaMap.updateAttributions('bar');
+      expect(domNode.querySelectorAll('.leaflet-control-attribution')[0].innerHTML).to.equal('foo, bar');
+
+      kibanaMap.updateAttributions('bar,stool');
+      expect(domNode.querySelectorAll('.leaflet-control-attribution')[0].innerHTML).to.equal('foo, bar, stool');
+
+    });
+
+
   });
+
+
+
+
 
 
   describe('KibanaMap - baseLayer', function () {
