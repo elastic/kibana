@@ -10,8 +10,9 @@ app.directive('toggleButton', function () {
     template: template,
     scope: {
       text: '@',
+      isDisabled: '=',
       isCollapsed: '=',
-      onClick: '='
+      onClick: '=',
     },
     controllerAs: 'toggleButton',
     bindToController: true,
