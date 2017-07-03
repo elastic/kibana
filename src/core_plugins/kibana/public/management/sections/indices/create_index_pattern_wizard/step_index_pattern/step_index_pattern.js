@@ -42,6 +42,12 @@ module.directive('stepIndexPattern', function () {
       this.matchingIndicesListType = 'noMatches';
       this.documentationLinks = documentationLinks;
 
+      this.canGoToNextStep = () => (
+        !this.isFetchingMatchingIndices
+        && !this.hasInvalidInput()
+        && this.hasExactMatches()
+      );
+
       this.hasInvalidInput = () => {
         return this.indexPatternNameForm && this.indexPatternNameForm.$invalid;
       };

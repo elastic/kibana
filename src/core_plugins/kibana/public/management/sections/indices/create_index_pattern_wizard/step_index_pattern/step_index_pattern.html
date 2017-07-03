@@ -153,7 +153,7 @@
               data-test-subj="createIndexPatternCreateButton"
               class="kuiButton kuiButton--primary kuiButton--iconText kuiVerticalRhythmSmall"
               ng-click="stepIndexPattern.goToNextStep()"
-              ng-disabled="!stepIndexPattern.hasExactMatches() || stepIndexPattern.hasInvalidInput()"
+              ng-disabled="!stepIndexPattern.canGoToNextStep()"
             >
               <span class="kuiButton__inner">
                 <span>Next</span>
