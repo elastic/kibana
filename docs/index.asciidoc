@@ -1,8 +1,6 @@
 [[kibana-guide]]
 = Kibana User Guide
 
-:docs-dir:  {docdir}/../../docs
-
 include::index-shared1.asciidoc[]
 include::index-shared2.asciidoc[]
 include::index-shared3.asciidoc[]
