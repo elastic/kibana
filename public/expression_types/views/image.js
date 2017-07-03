@@ -21,6 +21,20 @@ export const image = () => new View('image', {
         return wrap(elasticLogo);
       },
     }),
+    new Arg('mode', {
+      displayName: 'Fill mode',
+      argType: 'select',
+      resolve({ args }) {
+        console.log('args', args);
+        return 'contain';
+      },
+      options: {
+        choices: [
+          { value: 'contain', name: 'Contain' },
+          { value: 'cover', name: 'Cover' },
+        ],
+      },
+    }),
     // TODO: add the url input and handling
     // new Arg('url', {
     //   displayName: 'Image URL',
