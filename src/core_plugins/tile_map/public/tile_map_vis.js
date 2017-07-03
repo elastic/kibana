@@ -24,6 +24,7 @@ VisTypesRegistryProvider.register(function TileMapVisType(Private, getAppState, 
     description: 'Plot latitude and longitude coordinates on a map',
     category: CATEGORY.MAP,
     visConfig: {
+      canDesaturate: true,
       defaults: {
         mapType: 'Scaled Circle Markers',
         isDesaturated: true,
