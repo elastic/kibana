@@ -44,13 +44,14 @@ module.directive('stepIndexPattern', function () {
 
       this.canGoToNextStep = () => (
         !this.isFetchingMatchingIndices
-        && !this.hasInvalidInput()
+        && !this.indexPatternNameForm.$invalid
         && this.hasExactMatches()
       );
 
-      this.hasInvalidInput = () => (
+      const hasInvalidIndexPattern = () => (
         this.indexPatternNameForm
-        && this.indexPatternNameForm.$invalid
+        && !this.indexPatternNameForm.$error.required
+        && this.indexPatternNameForm.$error.indexPattern
       );
 
       const hasNoInput = () => (
@@ -58,17 +59,17 @@ module.directive('stepIndexPattern', function () {
         || !this.indexPatternName.trim()
       );
 
-      const hasSimilarMatches = () => (
-        !this.matchingIndices.length
-        && this.partialMatchingIndices.length
-      );
-
       this.hasExactMatches = () => (
         this.matchingIndices.length
       );
 
+      const hasPartialMatches = () => (
+        !this.matchingIndices.length
+        && this.partialMatchingIndices.length
+      );
+
       this.updateList = () => {
-        if (this.hasInvalidInput()) {
+        if (hasInvalidIndexPattern()) {
           return this.matchingIndicesListType = 'invalidIndexPattern';
         }
 
@@ -80,7 +81,7 @@ module.directive('stepIndexPattern', function () {
           return this.matchingIndicesListType = 'exactMatches';
         }
 
-        if (hasSimilarMatches()) {
+        if (hasPartialMatches()) {
           return this.matchingIndicesListType = 'partialMatches';
         }
 

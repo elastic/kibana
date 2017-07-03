@@ -1,6 +1,6 @@
 import _ from 'lodash';
 import { IndexPatternMissingIndices } from 'ui/errors';
-import 'ui/directives/validate_index_name';
+import 'ui/directives/validate_index_pattern';
 import 'ui/directives/auto_select_if_only_one';
 import { RefreshKibanaIndex } from '../refresh_kibana_index';
 import { documentationLinks } from 'ui/documentation_links/documentation_links';

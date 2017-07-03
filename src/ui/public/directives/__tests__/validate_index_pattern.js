@@ -1,14 +1,14 @@
 import expect from 'expect.js';
 import ngMock from 'ng_mock';
-import 'ui/directives/validate_index_name';
+import 'ui/directives/validate_index_pattern';
 
 // Load the kibana app dependencies.
 
-describe('Validate index name directive', function () {
+describe('Validate index pattern directive', function () {
   let $compile;
   let $rootScope;
-  const noWildcardHtml = '<input type="text" ng-model="indexName" validate-index-name />';
-  const allowWildcardHtml = '<input type="text" ng-model="indexName" validate-index-name validate-index-name-allow-wildcard />';
+  const noWildcardHtml = '<input type="text" ng-model="indexName" validate-index-pattern />';
+  const allowWildcardHtml = '<input type="text" ng-model="indexName" validate-index-pattern validate-index-pattern-allow-wildcard />';
 
   beforeEach(ngMock.module('kibana'));
 

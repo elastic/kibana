@@ -4,7 +4,7 @@ import { uiModules } from 'ui/modules';
 
 uiModules
   .get('kibana')
-  .directive('validateIndexName', function () {
+  .directive('validateIndexPattern', function () {
     return {
       restrict: 'A',
       require: 'ngModel',
@@ -12,8 +12,8 @@ uiModules
         const illegalCharacters = ['\\', '/', '?', '"', '<', '>', '|', ' ', ','];
 
         const allowWildcard =
-          !_.isUndefined(attr.validateIndexNameAllowWildcard)
-          && attr.validateIndexNameAllowWildcard !== 'false';
+          !_.isUndefined(attr.validateIndexPatternAllowWildcard)
+          && attr.validateIndexPatternAllowWildcard !== 'false';
 
         if (!allowWildcard) {
           illegalCharacters.push('*');
@@ -28,7 +28,7 @@ uiModules
           return !match;
         };
 
-        ngModel.$validators.indexNameInput = function (modelValue, viewValue) {
+        ngModel.$validators.indexPattern = function (modelValue, viewValue) {
           return isValid(viewValue);
         };
       }
