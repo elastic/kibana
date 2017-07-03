@@ -10,7 +10,6 @@ export default class ChoroplethLayer extends KibanaMapLayer {
   constructor(geojsonUrl) {
     super();
 
-
     this._metrics = null;
     this._joinField = null;
     this._colorRamp = truncatedColorMaps[Object.keys(truncatedColorMaps)[0]];
@@ -59,6 +58,8 @@ export default class ChoroplethLayer extends KibanaMapLayer {
         this._error = true;
       }
     });
+
+
   }
 
   _setStyle() {
@@ -132,6 +133,7 @@ export default class ChoroplethLayer extends KibanaMapLayer {
     return this._geojsonUrl === geojsonUrl;
   }
 
+
   appendLegendContents(jqueryDiv) {
 
 
@@ -164,6 +166,7 @@ export default class ChoroplethLayer extends KibanaMapLayer {
     });
 
   }
+
 
 }
 

@@ -105,6 +105,7 @@ export class KibanaMap extends EventEmitter {
     };
 
     this._leafletMap = L.map(containerNode, leafletOptions);
+    this._leafletMap.attributionControl.setPrefix('');
     this._leafletMap.scrollWheelZoom.disable();
     const worldBounds = L.latLngBounds(L.latLng(-90, -180), L.latLng(90, 180));
     this._leafletMap.setMaxBounds(worldBounds);
@@ -246,6 +247,18 @@ export class KibanaMap extends EventEmitter {
       if (listener.layer === layer) {
         listener.layer.removeListener(listener.name, listener.handle);
       }
+    });
+  }
+
+  updateAttributions(attributionString) {
+    attributionString = attributionString || '';
+    let attributions = attributionString.split('|');
+    if (attributions.length === 1) {//temp work-around due to inconsistency in manifests
+      attributions = attributions[0].split(',');
+    }
+    attributions.forEach((attribution) => {
+      this._leafletMap.attributionControl.removeAttribution(attribution);//this ensures we do not add duplicates
+      this._leafletMap.attributionControl.addAttribution(attribution);
     });
   }
 
@@ -461,6 +474,7 @@ export class KibanaMap extends EventEmitter {
       if (settings.options.minZoom > this._leafletMap.getZoom()) {
         this._leafletMap.setZoom(settings.options.minZoom);
       }
+      this.updateAttributions(settings.options.attribution);
       this.resize();
     }
 
@@ -496,14 +510,15 @@ export class KibanaMap extends EventEmitter {
     return L.tileLayer(options.url, {
       minZoom: options.minZoom,
       maxZoom: options.maxZoom,
-      subdomains: options.subdomains || [],
-      attribution: options.attribution
+      subdomains: options.subdomains || []
+      //,
+      // attribution: options.attribution
     });
   }
 
   _getWMSBaseLayer(options) {
     const wmsOptions = {
-      attribution: options.attribution || '',
+      // attribution: options.attribution || '',
       format: options.format || '',
       layers: options.layers || '',
       minZoom: options.minZoom,
