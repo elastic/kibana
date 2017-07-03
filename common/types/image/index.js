@@ -1,7 +1,7 @@
 const Type = require('../type');
 
 module.exports = new Type({
-  name: 'dataurl',
+  name: 'image',
   to: {
     render: (input) => {
       return {

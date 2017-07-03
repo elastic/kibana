@@ -1,23 +1,19 @@
 import Fn from '../fn.js';
 import elasticLogo from './elastic_logo';
 import { fetchImage } from '../../lib/fetch_image';
+import { includes } from 'lodash';
 
-function wrapDataurlType(dataurl) {
-  return {
-    type: 'dataurl',
-    dataurl,
-  };
-}
 
 module.exports = new Fn({
   name: 'image',
   aliases: [],
-  type: 'dataurl',
-  help: 'Render an image',
+  type: 'image',
+  help: 'Create a base64 encoded image',
   context: {},
   args: {
     dataurl: {
-      types: ['dataurl', 'string', 'null'],
+      // This was accepting dataurl, but there was no facility in fn for checking type and handling a dataurl type.
+      types: ['string', 'null'],
       help: 'Base64 encoded image',
       aliases: ['_'],
       default: elasticLogo,
@@ -26,14 +22,28 @@ module.exports = new Fn({
       types: ['string', 'null'],
       help: 'URL to an image',
     },
+    mode: {
+      types: ['string', 'null'],
+      help: `"contain" will show the entire image, scaled to fit.
+"cover" will fill the container with the image, cropping from the sides or bottom as needed.`,
+    },
   },
   fn: (context, args) => {
-    // return dataurl object
-    // TODO: validate data type
-    if (args.url) {
-      return fetchImage(args.url).then(dataurl => wrapDataurlType(dataurl));
+    function wrapImage(dataurl) {
+      return {
+        type: 'image',
+        mode: args.mode,
+        dataurl,
+      };
     }
 
-    return wrapDataurlType(args.dataurl);
+    if (!includes(['contain', 'cover'], args.mode)) throw '"mode" must be "contain" or "cover"';
+    // return image object
+    // TODO: validate data type
+    if (args.url) {
+      return fetchImage(args.url).then(wrapImage);
+    }
+
+    return wrapImage(args.dataurl);
   },
 });

@@ -8,14 +8,15 @@ module.exports = new Element({
   displayName: 'Image',
   description: 'A static image.',
   image: header,
-  expression: 'image()',
+  expression: 'image(mode="contain")',
   render(domNode, config, done) {
+    console.log(config);
     ReactDOM.render(<div style={{
       height: '100%',
       backgroundImage: `url(${config.dataurl})`,
       backgroundRepeat: 'no-repeat',
       backgroundPosition: 'center center',
-      backgroundSize: 'contain',
+      backgroundSize: config.mode,
     }} />, domNode);
     done();
   },
