@@ -48,25 +48,24 @@ module.directive('stepIndexPattern', function () {
         && this.hasExactMatches()
       );
 
-      this.hasInvalidInput = () => {
-        return this.indexPatternNameForm && this.indexPatternNameForm.$invalid;
-      };
+      this.hasInvalidInput = () => (
+        this.indexPatternNameForm
+        && this.indexPatternNameForm.$invalid
+      );
 
-      const hasNoInput = () => {
-        return !this.indexPatternName || !this.indexPatternName.trim();
-      };
+      const hasNoInput = () => (
+        !this.indexPatternName
+        || !this.indexPatternName.trim()
+      );
 
-      const hasSimilarMatches = () => {
-        if (!this.matchingIndices.length) {
-          return this.partialMatchingIndices.length;
-        }
+      const hasSimilarMatches = () => (
+        !this.matchingIndices.length
+        && this.partialMatchingIndices.length
+      );
 
-        return false;
-      };
-
-      this.hasExactMatches = () => {
-        return this.matchingIndices.length;
-      };
+      this.hasExactMatches = () => (
+        this.matchingIndices.length
+      );
 
       this.updateList = () => {
         if (this.hasInvalidInput()) {

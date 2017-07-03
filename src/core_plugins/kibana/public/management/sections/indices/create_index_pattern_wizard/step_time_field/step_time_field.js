@@ -28,20 +28,16 @@ module.directive('stepTimeField', function () {
       this.matchingIndicesListType = 'noMatches';
       this.documentationLinks = documentationLinks;
 
-      this.isTimeFieldSelectDisabled = () => {
-        return (
-          this.isFetchingTimeFieldOptions
-          || this.timeFieldOptionsError
-          || this.timeFieldOptions.length === 1
-        );
-      };
+      this.isTimeFieldSelectDisabled = () => (
+        this.isFetchingTimeFieldOptions
+        || this.timeFieldOptionsError
+        || this.timeFieldOptions.length === 1
+      );
 
-      this.canCreateIndexPattern = () => {
-        return (
-          !this.timeFieldOptionsError
-          && !this.isFetchingTimeFieldOptions
-        );
-      };
+      this.canCreateIndexPattern = () => (
+        !this.timeFieldOptionsError
+        && !this.isFetchingTimeFieldOptions
+      );
     },
   };
 });
