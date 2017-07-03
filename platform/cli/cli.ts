@@ -1,9 +1,10 @@
 // TODO Fix build system so we can switch these to `import`s
 const yargs = require('yargs');
+import { merge } from 'lodash';
 
 import * as args from './args';
 import { version } from './version';
-import { Env } from '../config';
+import { Env, RawConfigService } from '../config';
 import { Root, OnShutdown } from '../root';
 import { argvToConfigOverrides } from './argvToConfig';
 
@@ -26,18 +27,28 @@ const run = (argv: {[key: string]: any}) => {
   }
 
   const env = Env.createDefault(argv);
+  const rawConfigService = new RawConfigService(env.getConfigFile());
   const configOverrides = argvToConfigOverrides(argv);
 
   const onShutdown: OnShutdown = reason => {
     process.exit(reason === undefined ? 0 : 1);
   }
 
-  const root = new Root(configOverrides, env, onShutdown);
-  root.start();
+  const rawConfig$ = rawConfigService.getConfig$()
+    .map(rawConfig => merge({}, rawConfig, configOverrides));
 
-  process.on('SIGHUP', () => root.reloadConfig());
-  process.on('SIGINT', () => root.shutdown());
-  process.on('SIGTERM', () => root.shutdown());
+  const root = new Root(rawConfig$, env, onShutdown);
+  root.start();
+  rawConfigService.loadConfig();
+
+  process.on('SIGHUP', () => rawConfigService.reloadConfig());
+  process.on('SIGINT', () => shutdown());
+  process.on('SIGTERM', () => shutdown());
+
+  function shutdown() {
+    rawConfigService.stop();
+    root.shutdown();
+  }
 };
 
 export default (argv: Array<string>) => run(parseArgv(argv));

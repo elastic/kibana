@@ -1,3 +1,5 @@
+import { Observable } from 'rxjs';
+
 import { Server } from '../server';
 import { ConfigService, Env } from '../config';
 import { LoggerService, Logger, LoggerFactory, LoggerConfig, MutableLoggerFactory } from '../logger';
@@ -15,7 +17,7 @@ export class Root {
   loggerService: LoggerService;
 
   constructor(
-    configOverrides: {[key: string]: any},
+    rawConfig$: Observable<{[key: string]: any}>,
     env: Env,
     private readonly onShutdown: OnShutdown
   ) {
@@ -24,12 +26,10 @@ export class Root {
     this.logger = loggerFactory;
 
     this.log = this.logger.get('root');
-    this.configService = new ConfigService(configOverrides, env, this.logger);
+    this.configService = new ConfigService(rawConfig$, env, this.logger);
   }
 
   async start() {
-    await this.configService.start();
-
     const loggingConfig$ = this.configService.atPath(
       'logging',
       LoggerConfig
@@ -49,16 +49,11 @@ export class Root {
     }
   }
 
-  reloadConfig() {
-    this.configService.reloadConfig();
-  }
-
   async shutdown(reason?: Error) {
     this.log.info('stopping Kibana');
     if (this.server !== undefined) {
       await this.server.stop();
     }
-    await this.configService.stop();
     this.loggerService.stop();
 
     this.onShutdown(reason);

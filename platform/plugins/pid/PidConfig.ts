@@ -2,6 +2,10 @@ import { Schema, typeOfSchema } from '../../types';
 
 const createPidSchema = (schema: Schema) =>
   schema.object({
+    enabled: schema.boolean({
+      defaultValue: true
+    }),
+
     file: schema.string(),
 
     // whether or not we should fail if pid file already exists

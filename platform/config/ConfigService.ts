@@ -1,33 +1,14 @@
-import { BehaviorSubject, Observable } from 'rxjs';
-import { get, isEqual, merge, isPlainObject } from 'lodash';
-import typeDetect from 'type-detect';
+import { Observable } from 'rxjs';
+import { get, isEqual } from 'lodash';
 
-import { getConfigFromFile } from './readConfig';
 import { Env } from './Env';
 import { Logger, LoggerFactory } from '../logger';
 import * as schema from '../lib/schema';
-import { ConfigWithSchema, CoreService } from '../types';
+import { ConfigWithSchema } from '../types';
 
 type ConfigPath = string | string[];
 
-// Used to indicate that no config has been received yet
-const notRead = Symbol('config not yet read');
-
-export class ConfigService implements CoreService {
-  /**
-   * The stream of configs read from the config file. Will be the symbol
-   * `notRead` before the config is initially read, and after that it can
-   * potentially be `null` for an empty yaml file.
-   *
-   * This is the _raw_ config before any overrides are applied.
-   *
-   * As we have a notion of a _current_ config we rely on a BehaviorSubject so
-   * every new subscription will immediately receive the current config.
-   */
-  private readonly rawConfigFromFile$: BehaviorSubject<any> =
-    new BehaviorSubject(notRead)
-
-  private readonly config$: Observable<{ [key: string]: any }>;
+export class ConfigService {
   private readonly log: Logger;
 
   /**
@@ -37,60 +18,19 @@ export class ConfigService implements CoreService {
   private readonly handledPaths: ConfigPath[] = [];
 
   constructor(
-    overrides: {[key: string]: any},
+    private readonly config$: Observable<{[key: string]: any}>,
     readonly env: Env,
     logger: LoggerFactory
   ) {
     this.log = logger.get('config');
-
-    this.config$ = this.rawConfigFromFile$
-      .asObservable()
-      .filter(rawConfig => rawConfig !== notRead)
-      .map(rawConfig => {
-        // If the raw config is null, e.g. if empty config file, we default to
-        // an empty config
-        if (rawConfig == null) {
-          return {};
-        }
-
-        if (isPlainObject(rawConfig)) {
-          return rawConfig;
-        }
-
-        throw new Error(`the raw config must be an object, got [${typeDetect(rawConfig)}]`)
-      })
-      // Apply overrides to config
-      .map(rawConfig => merge(rawConfig, overrides))
-      // We only want to update the config if there are changes to it
-      .distinctUntilChanged((current, next) => isEqual(current, next));
   }
 
   /**
-   * Read the initial Kibana config.
+   * Returns the full config object observable. This is not intended for
+   * "normal use", but for features that _need_ access to the full object.
    */
-  async start() {
-    this.loadConfig();
-  }
-
-  /**
-   * Re-read the Kibana config.
-   */
-  reloadConfig() {
-    this.log.info('reloading config');
-    this.loadConfig();
-    this.log.info('reloading config done');
-  }
-
-  /**
-   * Load the config by reading the raw config from the file system.
-   */
-  private loadConfig() {
-    const config = getConfigFromFile(this.env.getConfigFile());
-    this.rawConfigFromFile$.next(config);
-  }
-
-  async stop() {
-    this.rawConfigFromFile$.complete();
+  getConfig$() {
+    return this.config$;
   }
 
   /**

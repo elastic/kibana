@@ -1,9 +1,6 @@
 const loggerConfig = {};
 
 const configService = {
-  start: jest.fn(),
-  stop: jest.fn(),
-  reloadConfig: jest.fn(),
   atPath: jest.fn(() => loggerConfig)
 };
 
@@ -31,6 +28,8 @@ const mockMutableLoggerFactory = jest.fn(() => logger);
 
 const mockLoggerService = jest.fn(() => loggerService);
 
+import { BehaviorSubject } from 'rxjs';
+
 jest.mock('../../config', () => ({ ConfigService: mockConfigService }));
 jest.mock('../../server', () => ({ Server: mockServer }));
 jest.mock('../../logger', () => ({
@@ -43,6 +42,9 @@ import { noop } from 'lodash';
 import { Root } from '../';
 import { Env } from '../../config/Env';
 
+const env = new Env('.', {});
+const config$ = new BehaviorSubject({});
+
 let oldExit = process.exit;
 
 beforeEach(() => {
@@ -54,45 +56,28 @@ afterEach(() => {
 });
 
 test('starts services on "start"', async () => {
-  const env = new Env('.', {});
-  const root = new Root({}, env, noop);
+  const root = new Root(config$, env, noop);
 
-  expect(configService.start).toHaveBeenCalledTimes(0);
   expect(loggerService.upgrade).toHaveBeenCalledTimes(0);
   expect(server.start).toHaveBeenCalledTimes(0);
 
   await root.start();
 
-  expect(configService.start).toHaveBeenCalledTimes(1);
   expect(loggerService.upgrade).toHaveBeenCalledTimes(1);
   expect(loggerService.upgrade).toHaveBeenLastCalledWith(loggerConfig);
   expect(server.start).toHaveBeenCalledTimes(1);
 });
 
-test('reloads config', () => {
-  const env = new Env('.', {});
-  const root = new Root({}, env, noop);
-
-  expect(configService.reloadConfig).toHaveBeenCalledTimes(0);
-
-  root.reloadConfig();
-
-  expect(configService.reloadConfig).toHaveBeenCalledTimes(1);
-});
-
 test('stops services on "shutdown"', async () => {
-  const env = new Env('.', {});
-  const root = new Root({}, env, noop);
+  const root = new Root(config$, env, noop);
 
   await root.start();
 
-  expect(configService.stop).toHaveBeenCalledTimes(0);
   expect(loggerService.stop).toHaveBeenCalledTimes(0);
   expect(server.stop).toHaveBeenCalledTimes(0);
 
   await root.shutdown();
 
-  expect(configService.stop).toHaveBeenCalledTimes(1);
   expect(loggerService.stop).toHaveBeenCalledTimes(1);
   expect(server.stop).toHaveBeenCalledTimes(1);
 });
@@ -100,8 +85,7 @@ test('stops services on "shutdown"', async () => {
 test('calls onShutdown param on "shutdown"', async () => {
   const onShutdown = jest.fn();
 
-  const env = new Env('.', {});
-  const root = new Root({}, env, onShutdown);
+  const root = new Root(config$, env, onShutdown);
 
   await root.start();
 
