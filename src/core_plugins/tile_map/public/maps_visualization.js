@@ -2,14 +2,13 @@ import 'ui/vislib';
 import 'plugins/kbn_vislib_vis_types/controls/vislib_basic_options';
 import $ from 'jquery';
 import _ from 'lodash';
-import { FilterBarPushFilterProvider } from 'ui/filter_bar/push_filter';
 import { KibanaMap } from './kibana_map';
 import { GeohashLayer } from './geohash_layer';
 import './lib/service_settings';
 import './styles/_tilemap.less';
 
 
-export function MapsVisualizationProvider(Private, serviceSettings, Notifier, getAppState) {
+export function MapsVisualizationProvider(serviceSettings, Notifier, getAppState) {
 
   const notify = new Notifier({ location: 'Coordinate Map' });
 
@@ -105,10 +104,10 @@ export function MapsVisualizationProvider(Private, serviceSettings, Notifier, ge
 
 
       this._kibanaMap.on('drawCreated:rectangle', event => {
-        addSpatialFilter(_.get(this._chartData, 'geohashGridAgg'), 'geo_bounding_box', event.bounds);
+        this.addSpatialFilter(_.get(this._chartData, 'geohashGridAgg'), 'geo_bounding_box', event.bounds);
       });
       this._kibanaMap.on('drawCreated:polygon', event => {
-        addSpatialFilter(_.get(this._chartData, 'geohashGridAgg'), 'geo_polygon', { points: event.points });
+        this.addSpatialFilter(_.get(this._chartData, 'geohashGridAgg'), 'geo_polygon', { points: event.points });
       });
       this._kibanaMap.on('baseLayer:loaded', () => {
         this._baseLayerDirty = false;
@@ -237,22 +236,23 @@ export function MapsVisualizationProvider(Private, serviceSettings, Notifier, ge
       }
     }
 
-  }
+    addSpatialFilter(agg, filterName, filterData) {
+      if (!agg) {
+        return;
+      }
 
-  function addSpatialFilter(agg, filterName, filterData) {
-    if (!agg) {
-      return;
+      const indexPatternName = agg.vis.indexPattern.id;
+      const field = agg.fieldName();
+      const filter = { meta: { negate: false, index: indexPatternName } };
+      filter[filterName] = { ignore_unmapped: true };
+      filter[filterName][field] = filterData;
+      getAppState().filters.push(filter);
+      this.vis.updateState();
     }
 
-    const indexPatternName = agg.vis.indexPattern.id;
-    const field = agg.fieldName();
-    const filter = {};
-    filter[filterName] = { ignore_unmapped: true };
-    filter[filterName][field] = filterData;
-
-    const putFilter = Private(FilterBarPushFilterProvider)(getAppState());
-    return putFilter(filter, false, indexPatternName);
   }
+
+
 
 
   return MapsVisualization;

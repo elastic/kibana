@@ -50,7 +50,7 @@ uiModules
       const requestHandler = getHandler(requestHandlers, $scope.vis.type.requestHandler);
       const responseHandler = getHandler(responseHandlers, $scope.vis.type.responseHandler);
 
-      $scope.fetch = function () {
+      $scope.fetch = _.debounce(function () {
         // searchSource is only there for courier request handler
         requestHandler($scope.vis, $scope.appState, $scope.uiState, $scope.savedObj.searchSource)
           .then(resp => responseHandler($scope.vis, resp), e => {
@@ -71,7 +71,7 @@ uiModules
             $scope.$broadcast('render');
             return resp;
           });
-      };
+      }, 100);
 
       $scope.vis.on('update', () => {
         if ($scope.editorMode) {
