@@ -1,6 +1,6 @@
 import { KibanaFunctionalPlugin } from '../../../../../server/plugins/types';
 
-export const configPath = undefined;
+export const configPath = 'foo';
 
 export const dependencies = [];
 

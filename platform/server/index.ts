@@ -41,6 +41,7 @@ export class Server {
     this.plugins = new PluginsService(
       configService.env.pluginsDir,
       new PluginSystem(core, logger),
+      configService,
       logger
     );
   }

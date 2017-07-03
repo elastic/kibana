@@ -12,7 +12,8 @@ import { logger } from '../../../logger/__mocks__';
 
 const examplesPluginsDir = resolve(__dirname, './examplePlugins');
 
-let mockPluginSystem: any = {};
+let mockConfigService: any = jest.genMockFromModule('../../../config/ConfigService');
+let mockPluginSystem: any = jest.genMockFromModule('../PluginSystem');
 
 beforeEach(() => {
   mockPluginSystem = {
@@ -20,10 +21,12 @@ beforeEach(() => {
     startPlugins: jest.fn(),
     stopPlugins: jest.fn()
   };
+
+  mockConfigService.isEnabledAtPath = jest.fn(() => Promise.resolve(true));
 });
 
 test('starts plugins', async () => {
-  const pluginsService = new PluginsService(examplesPluginsDir, mockPluginSystem, logger);
+  const pluginsService = new PluginsService(examplesPluginsDir, mockPluginSystem, mockConfigService, logger);
 
   await pluginsService.start();
 
@@ -40,10 +43,31 @@ test('starts plugins', async () => {
 });
 
 test('stops plugins', async () => {
-  const pluginsService = new PluginsService(examplesPluginsDir, mockPluginSystem, logger);
+  const pluginsService = new PluginsService(examplesPluginsDir, mockPluginSystem, mockConfigService, logger);
 
   await pluginsService.start();
   pluginsService.stop();
 
   expect(mockPluginSystem.stopPlugins).toHaveBeenCalledTimes(1);
+});
+
+test('does not start plugin if disabled', async () => {
+  mockConfigService.isEnabledAtPath = jest.fn(configPath => {
+    if (configPath === 'bar') {
+      return Promise.resolve(false);
+    }
+    return Promise.resolve(true);
+  });
+
+  const pluginsService = new PluginsService(examplesPluginsDir, mockPluginSystem, mockConfigService, logger);
+
+  await pluginsService.start();
+
+  expect(mockPluginSystem.addPlugin).toHaveBeenCalledTimes(1);
+  expect(mockPluginSystem.startPlugins).toHaveBeenCalledTimes(1);
+
+  const pluginsAdded = mockPluginSystem.addPlugin.mock.calls;
+
+  expect(pluginsAdded[0][0].name).toBe('foo');
+  expect(logger._collect()).toMatchSnapshot();
 });

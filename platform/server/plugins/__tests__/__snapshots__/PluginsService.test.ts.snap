@@ -1,5 +1,18 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`does not start plugin if disabled 1`] = `
+Object {
+  "debug": Array [],
+  "error": Array [],
+  "info": Array [],
+  "warn": Array [
+    Array [
+      "Plugin [bar] is disabled and will not be started",
+    ],
+  ],
+}
+`;
+
 exports[`starts plugins 1`] = `
 Object {
   "dependencies": Array [],

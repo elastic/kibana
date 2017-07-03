@@ -9,6 +9,7 @@ Object {
     ],
   ],
   "info": Array [],
+  "warn": Array [],
 }
 `;
 
@@ -21,6 +22,7 @@ Object {
       "registering route handler for [/foo]",
     ],
   ],
+  "warn": Array [],
 }
 `;
 
@@ -33,6 +35,7 @@ Object {
       "starting http server [example.org:1234]",
     ],
   ],
+  "warn": Array [],
 }
 `;
 
@@ -45,5 +48,6 @@ Object {
     ],
   ],
   "info": Array [],
+  "warn": Array [],
 }
 `;

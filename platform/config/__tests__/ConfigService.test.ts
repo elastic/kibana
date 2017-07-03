@@ -264,6 +264,66 @@ test("tracks unhandled paths", async () => {
   expect(unused).toEqual(["bar.deep1.key", "quux.deep1.key", "quux.deep2.key"]);
 });
 
+test('handles enabled path, but only marks the enabled path as used', async () => {
+  mockGetConfigFromFile.mockImplementation(() => ({
+    pid: {
+      enabled: true,
+      file: '/some/file.pid'
+    }
+  }));
+
+  const env = new Env('/kibana', emptyArgv);
+  const configService = new ConfigService(noOverrides, env, logger);
+
+  configService.start();
+
+  const isEnabled = await configService.isEnabledAtPath('pid');
+  expect(isEnabled).toBe(true);
+
+  const unusedPaths = await configService.getUnusedPaths();
+  expect(unusedPaths).toEqual(['pid.file']);
+});
+
+test('handles enabled path when path is array', async () => {
+  mockGetConfigFromFile.mockImplementation(() => ({
+    pid: {
+      enabled: true,
+      file: '/some/file.pid'
+    }
+  }));
+
+  const env = new Env('/kibana', emptyArgv);
+  const configService = new ConfigService(noOverrides, env, logger);
+
+  configService.start();
+
+  const isEnabled = await configService.isEnabledAtPath(['pid']);
+  expect(isEnabled).toBe(true);
+
+  const unusedPaths = await configService.getUnusedPaths();
+  expect(unusedPaths).toEqual(['pid.file']);
+});
+
+test('handles disabled path and marks config as used', async () => {
+  mockGetConfigFromFile.mockImplementation(() => ({
+    pid: {
+      enabled: false,
+      file: '/some/file.pid'
+    }
+  }));
+
+  const env = new Env('/kibana', emptyArgv);
+  const configService = new ConfigService(noOverrides, env, logger);
+
+  configService.start();
+
+  const isEnabled = await configService.isEnabledAtPath('pid');
+  expect(isEnabled).toBe(false);
+
+  const unusedPaths = await configService.getUnusedPaths();
+  expect(unusedPaths).toEqual([]);
+});
+
 function createClassWithSchema(schema: schemaLib.Any) {
   return class ExampleClassWithSchema {
     static createSchema = () => {

@@ -130,6 +130,28 @@ export class ConfigService implements CoreService {
       );
   }
 
+  async isEnabledAtPath(path: ConfigPath) {
+    const enabledPath = createPluginEnabledPath(path);
+
+    const isEnabled = await this.config$
+      .map(config => get(config, enabledPath))
+      .first()
+      .toPromise();
+
+    if (isEnabled === false) {
+      // If the plugin is _not_ enabled, we mark the entire plugin path as
+      // handled, as it's expected that it won't be used.
+      this.markAsHandled(path);
+      return false;
+    }
+
+    // If plugin enabled we mark the enabled path as handled, as we for example
+    // can have plugins that don't have _any_ config except for this field, and
+    // therefore have no reason to try to get the config.
+    this.markAsHandled(enabledPath);
+    return true;
+  }
+
   private createConfig<Schema extends schema.Any, Config>(
     rawConfig: {},
     ConfigClass: ConfigWithSchema<Schema, Config>
@@ -139,11 +161,15 @@ export class ConfigService implements CoreService {
   }
 
   private getDistinctRawConfig(path: ConfigPath) {
-    this.handledPaths.push(path);
+    this.markAsHandled(path);
 
     return this.config$
       .map(config => get(config, path))
       .distinctUntilChanged((prev, next) => isEqual(prev, next))
+  }
+
+  private markAsHandled(path: ConfigPath) {
+    this.handledPaths.push(path);
   }
 
   async getUnusedPaths(): Promise<string[]> {
@@ -155,6 +181,13 @@ export class ConfigService implements CoreService {
       !isPathHandled(path, handledPaths)
     );
   }
+}
+
+const createPluginEnabledPath = (configPath: string | string[]) => {
+  if (Array.isArray(configPath)) {
+    return configPath.concat('enabled');
+  }
+  return `${configPath}.enabled`;
 }
 
 const pathToString = (path: ConfigPath) =>
