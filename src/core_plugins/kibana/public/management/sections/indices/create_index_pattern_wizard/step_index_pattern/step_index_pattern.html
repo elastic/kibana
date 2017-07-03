@@ -73,108 +73,110 @@
       </div>
 
       <!-- User has data -->
-      <form
-        name="stepIndexPattern.indexPatternNameForm"
-        role="form"
-        ng-submit="stepIndexPattern.goToNextStep()"
-        ng-if="stepIndexPattern.hasIndices()"
-      >
-        <div class="kuiInfoPanel kuiInfoPanel--info kuiVerticalRhythm">
-          <div class="kuiInfoPanelHeader">
-            <span
-              aria-hidden="true"
-              class="kuiInfoPanelHeader__icon kuiIcon kuiIcon--info fa-info"
-            ></span>
-            <span
-              class="kuiInfoPanelHeader__title"
-              translate="KIBANA-CREATE_INDEX_PATTERN_STEP_1_INFO_TITLE"
-            ></span>
-          </div>
-
-          <div class="kuiInfoPanelBody">
-            <div
-              class="kuiInfoPanelBody__message"
-              translate="KIBANA-CREATE_INDEX_PATTERN_STEP_1_INFO_BODY_1"
-            ></div>
-
-            <div class="kuiInfoPanelBody__message">
-              <span translate="KIBANA-CREATE_INDEX_PATTERN_STEP_1_INFO_BODY_2"></span>
-            </div>
-
-            <div class="kuiInfoPanelBody__message">
-              <a
-                class="kuiLink"
-                ng-href="{{ stepIndexPattern.documentationLinks.indexPatterns.introduction }}"
-                translate="KIBANA-CREATE_INDEX_PATTERN_STEP_1_INFO_BODY_3"
-              ></a>
-            </div>
-          </div>
-        </div>
-
-        <div class="createIndexPatternInputContainer kuiVerticalRhythm">
-          <!-- Index pattern input -->
-          <div>
-            <label
-              for="indexPatternNameField"
-              class="kuiLabel kuiVerticalRhythmSmall"
-              translate="KIBANA-CREATE_INDEX_PATTERN_STEP_1_INDEX_PATTERN_LABEL"
-            ></label>
-
-            <div class="kuiVerticalRhythmSmall kuiVerticalRhythm">
-              <ui-select
-                data-test-subj="createIndexPatternNameInput"
-                ng-model="stepIndexPattern.indexPatternName"
-                ng-model-options="{ updateOn: 'default blur', debounce: {'default': 300, 'blur': 0} }"
-                validate-index-name
-                validate-index-name-allow-wildcard
-                name="name"
-                required
-                aria-describedby="indexPatternNameFieldHelp"
-                reset-search-input="false"
-              >
-                <ui-select-match
-                  id="indexPatternNameField"
-                  placeholder="index-name-*"
-                >
-                  {{$select.selected}}
-                </ui-select-match>
-
-                <ui-select-choices
-                  refresh="stepIndexPattern.refreshResults($select)"
-                  refresh-delay="0"
-                  repeat="index in stepIndexPattern.allTemplateIndexPatterns | filter:$select.search"
-                >
-                  <div
-                    ng-bind-html="index | highlight: $select.search"
-                  ></div>
-                </ui-select-choices>
-              </ui-select>
-            </div>
-
-            <p
-              id="indexPatternNameFieldHelp"
-              class="kuiText kuiSubduedText kuiVerticalRhythm"
-            >
-              Can't contain empty spaces or the characters \ / ? " < > , |
-            </p>
-          </div>
-
-          <!-- Action -->
-          <button
-            data-test-subj="createIndexPatternCreateButton"
-            class="kuiButton kuiButton--primary kuiButton--iconText kuiVerticalRhythmSmall"
-            ng-click="stepIndexPattern.goToNextStep()"
-            ng-disabled="!stepIndexPattern.hasExactMatches() || stepIndexPattern.hasInvalidInput()"
-          >
-            <span class="kuiButton__inner">
-              <span>Next</span>
+      <div ng-if="stepIndexPattern.hasIndices()">
+        <form
+          name="stepIndexPattern.indexPatternNameForm"
+          role="form"
+          ng-submit="stepIndexPattern.goToNextStep()"
+          class="kuiVerticalRhythm"
+        >
+          <div class="kuiInfoPanel kuiInfoPanel--info kuiVerticalRhythm">
+            <div class="kuiInfoPanelHeader">
               <span
                 aria-hidden="true"
-                class="kuiButton__icon kuiIcon fa-chevron-right"
+                class="kuiInfoPanelHeader__icon kuiIcon kuiIcon--info fa-info"
               ></span>
-            </span>
-          </button>
-        </div>
+              <span
+                class="kuiInfoPanelHeader__title"
+                translate="KIBANA-CREATE_INDEX_PATTERN_STEP_1_INFO_TITLE"
+              ></span>
+            </div>
+
+            <div class="kuiInfoPanelBody">
+              <div
+                class="kuiInfoPanelBody__message"
+                translate="KIBANA-CREATE_INDEX_PATTERN_STEP_1_INFO_BODY_1"
+              ></div>
+
+              <div class="kuiInfoPanelBody__message">
+                <span translate="KIBANA-CREATE_INDEX_PATTERN_STEP_1_INFO_BODY_2"></span>
+              </div>
+
+              <div class="kuiInfoPanelBody__message">
+                <a
+                  class="kuiLink"
+                  ng-href="{{ stepIndexPattern.documentationLinks.indexPatterns.introduction }}"
+                  translate="KIBANA-CREATE_INDEX_PATTERN_STEP_1_INFO_BODY_3"
+                ></a>
+              </div>
+            </div>
+          </div>
+
+          <div class="createIndexPatternInputContainer kuiVerticalRhythm">
+            <!-- Index pattern input -->
+            <div>
+              <label
+                for="indexPatternNameField"
+                class="kuiLabel kuiVerticalRhythmSmall"
+                translate="KIBANA-CREATE_INDEX_PATTERN_STEP_1_INDEX_PATTERN_LABEL"
+              ></label>
+
+              <div class="kuiVerticalRhythmSmall kuiVerticalRhythm">
+                <ui-select
+                  data-test-subj="createIndexPatternNameInput"
+                  ng-model="stepIndexPattern.indexPatternName"
+                  ng-model-options="{ updateOn: 'default blur', debounce: {'default': 300, 'blur': 0} }"
+                  validate-index-name
+                  validate-index-name-allow-wildcard
+                  name="name"
+                  required
+                  aria-describedby="indexPatternNameFieldHelp"
+                  reset-search-input="false"
+                >
+                  <ui-select-match
+                    id="indexPatternNameField"
+                    placeholder="index-name-*"
+                  >
+                    {{$select.selected}}
+                  </ui-select-match>
+
+                  <ui-select-choices
+                    refresh="stepIndexPattern.refreshResults($select)"
+                    refresh-delay="0"
+                    repeat="index in stepIndexPattern.allTemplateIndexPatterns | filter:$select.search"
+                  >
+                    <div
+                      ng-bind-html="index | highlight: $select.search"
+                    ></div>
+                  </ui-select-choices>
+                </ui-select>
+              </div>
+
+              <p
+                id="indexPatternNameFieldHelp"
+                class="kuiText kuiSubduedText kuiVerticalRhythm"
+              >
+                Can't contain empty spaces or the characters \ / ? " < > , |
+              </p>
+            </div>
+
+            <!-- Action -->
+            <button
+              data-test-subj="createIndexPatternCreateButton"
+              class="kuiButton kuiButton--primary kuiButton--iconText kuiVerticalRhythmSmall"
+              ng-click="stepIndexPattern.goToNextStep()"
+              ng-disabled="!stepIndexPattern.hasExactMatches() || stepIndexPattern.hasInvalidInput()"
+            >
+              <span class="kuiButton__inner">
+                <span>Next</span>
+                <span
+                  aria-hidden="true"
+                  class="kuiButton__icon kuiIcon fa-chevron-right"
+                ></span>
+              </span>
+            </button>
+          </div>
+        </form>
 
         <!-- List of matching indices -->
         <div
@@ -247,7 +249,7 @@
             </matching-indices-list>
           </div>
         </div>
-      </form>
+      </div>
     </div>
   </div>
 </div>
