@@ -42,25 +42,6 @@ module.directive('stepIndexPattern', function () {
       this.matchingIndicesListType = 'noMatches';
       this.documentationLinks = documentationLinks;
 
-      let previousCustomIndexPattern;
-
-      // Hack ui-select to allow the user to enter an index pattern which doesn't exist as a
-      // template index pattern.
-      this.refreshResults = $select => {
-        const customIndexPattern = $select.search;
-        // Remove the custom index pattern previously entered by the user.
-        const list = $select.items.filter(indexPattern => indexPattern !== previousCustomIndexPattern);
-
-        if (!customIndexPattern || list.includes(customIndexPattern)) {
-          $select.items = list;
-        } else {
-          // If the user has entered as custom index pattern, add it to the list.
-          previousCustomIndexPattern = customIndexPattern;
-          $select.items = list.concat(customIndexPattern).sort();
-          $select.selected = customIndexPattern;
-        }
-      };
-
       this.hasInvalidInput = () => {
         return this.indexPatternNameForm && this.indexPatternNameForm.$invalid;
       };

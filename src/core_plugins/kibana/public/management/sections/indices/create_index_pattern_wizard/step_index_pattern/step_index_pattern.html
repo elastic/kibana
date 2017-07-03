@@ -124,34 +124,20 @@
               ></label>
 
               <div class="kuiVerticalRhythmSmall kuiVerticalRhythm">
-                <ui-select
+                <input
+                  id="indexPatternNameField"
+                  class="kuiTextInput kuiTextInput--large"
                   data-test-subj="createIndexPatternNameInput"
                   ng-model="stepIndexPattern.indexPatternName"
                   ng-model-options="{ updateOn: 'default blur', debounce: {'default': 300, 'blur': 0} }"
+                  placeholder="index-name-*"
                   validate-index-name
                   validate-index-name-allow-wildcard
                   name="name"
                   required
+                  type="text"
                   aria-describedby="indexPatternNameFieldHelp"
-                  reset-search-input="false"
                 >
-                  <ui-select-match
-                    id="indexPatternNameField"
-                    placeholder="index-name-*"
-                  >
-                    {{$select.selected}}
-                  </ui-select-match>
-
-                  <ui-select-choices
-                    refresh="stepIndexPattern.refreshResults($select)"
-                    refresh-delay="0"
-                    repeat="index in stepIndexPattern.allTemplateIndexPatterns | filter:$select.search"
-                  >
-                    <div
-                      ng-bind-html="index | highlight: $select.search"
-                    ></div>
-                  </ui-select-choices>
-                </ui-select>
               </div>
 
               <p
