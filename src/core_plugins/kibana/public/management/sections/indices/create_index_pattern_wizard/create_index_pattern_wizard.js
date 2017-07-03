@@ -3,6 +3,7 @@ import { IndexPatternMissingIndices } from 'ui/errors';
 import 'ui/directives/validate_index_name';
 import 'ui/directives/auto_select_if_only_one';
 import { RefreshKibanaIndex } from '../refresh_kibana_index';
+import { documentationLinks } from 'ui/documentation_links/documentation_links';
 import uiRoutes from 'ui/routes';
 import { uiModules } from 'ui/modules';
 import template from './create_index_pattern_wizard.html';
@@ -37,6 +38,8 @@ uiModules.get('apps/management')
   const noTimeFieldOption = {
     display: $translate.instant('KIBANA-NO_DATE_FIELD_DESIRED')
   };
+
+  this.documentationLinks = documentationLinks;
 
   // Configure the new index pattern we're going to create.
   this.formValues = {

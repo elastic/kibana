@@ -1,10 +1,10 @@
 {
   "UI-WELCOME_MESSAGE": "Loading Kibana",
   "UI-WELCOME_ERROR": "Kibana did not load properly. Check the server output for more information.",
-  "KIBANA-CREATE_INDEX_PATTERN_STEP_1_TITLE": "Create an index pattern: Step 1",
+  "KIBANA-CREATE_INDEX_PATTERN_STEP_1_TITLE": "Step 1 of 2: Define index pattern",
   "KIBANA-CREATE_INDEX_PATTERN_STEP_1_INFO_TITLE": "Index patterns are used to match indices",
   "KIBANA-CREATE_INDEX_PATTERN_STEP_1_INFO_BODY_1": "Kibana uses index patterns to decide which Elasticsearch indices to run search and analytics against. Kibana also uses index patterns to configure fields.",
-  "KIBANA-CREATE_INDEX_PATTERN_STEP_1_INFO_BODY_2": "You can use a * as a wildcard in your index pattern. For example, \"logstash-*\" will match all indices that begin with \"logstash-\".",
+  "KIBANA-CREATE_INDEX_PATTERN_STEP_1_INFO_BODY_2": " For example, \"logstash-*\" will match all indices that begin with \"logstash-\".",
   "KIBANA-CREATE_INDEX_PATTERN_STEP_1_INFO_BODY_3": "Learn more about index patterns.",
   "KIBANA-CREATE_INDEX_PATTERN_STEP_1_INDEX_PATTERN_LABEL": "Index pattern",
   "KIBANA-EXPAND_INDEX_PATTERN": "Expand index pattern when searching",

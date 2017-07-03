@@ -5,7 +5,90 @@
       data-test-subj="createIndexPatternContainer"
       class="kuiViewContent"
     >
-      <div ng-switch="controller.wizardStep">
+      <h1 class="kuiTitle kuiVerticalRhythm">
+        Create index pattern
+      </h1>
+
+      <p class="kuiText kuiSubduedText kuiVerticalRhythm">
+        Kibana uses index patterns to retrieve data from Elasticsearch, for things like visualizations.
+      </p>
+
+      <!-- User has no data -->
+      <div
+        class="kuiPanel kuiVerticalRhythm"
+        ng-if="!controller.hasIndices()"
+      >
+        <div class="kuiPanelBody">
+          <!-- Fetching state -->
+          <div
+            ng-if="controller.isFetchingExistingIndices"
+            class="kuiPanel kuiPanel--prompt kuiPanel--noBorder kuiVerticalRhythm"
+          >
+            <div class="kuiPanelBody">
+              <h2 class="kuiSubTitle kuiSubduedText kuiVerticalRhythm">
+                Checking for Elasticsearch data
+              </h2>
+
+              <div class="kuiVerticalRhythm">
+                <p class="kuiText kuiSubduedText kuiVerticalRhythmSmall">
+                  <span class="kuiStatusText">
+                    <span
+                      aria-hidden="true"
+                      class="kuiStatusText__icon kuiIcon fa-spinner fa-spin"
+                    ></span>
+                    Reticulating splines...
+                  </span>
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Empty state -->
+          <div ng-if="!controller.isFetchingExistingIndices">
+            <div class="kuiPanel kuiPanel--prompt kuiPanel--noBorder kuiVerticalRhythm">
+              <div class="kuiPanelBody">
+                <h1 class="kuiSubTitle kuiSubduedText kuiVerticalRhythm">
+                  Couldn't find any Elasticsearch data
+                </h1>
+
+                <div class="kuiVerticalRhythm">
+                  <p class="kuiText kuiSubduedText kuiVerticalRhythmSmall">
+                    You'll need to index some data into Elasticsearch before you can create an index pattern.
+                    <a
+                      class="kuiLink"
+                      ng-href="{{ controller.documentationLinks.indexPatterns.loadingData }}"
+                      aria-label="Learn how to index data into Elasticsearch"
+                      target="_blank"
+                    >
+                      Learn how.
+                    </a>
+                  </p>
+                </div>
+
+                <button
+                  class="kuiButton kuiButton--secondary kuiButton--iconText kuiVerticalRhythm"
+                  ng-click="controller.fetchExistingIndices()"
+                >
+                  <span class="kuiButton__inner">
+                    <span
+                      aria-hidden="true"
+                      class="kuiButton__icon kuiIcon fa-refresh"
+                    ></span>
+                    <span>Check for new data</span>
+                  </span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- User has data -->
+      <div
+        class="kuiVerticalRhythm"
+        ng-if="controller.hasIndices()"
+        ng-switch="controller.wizardStep"
+      >
         <!-- Specify index pattern -->
         <step-index-pattern
           ng-switch-when="indexPattern"
