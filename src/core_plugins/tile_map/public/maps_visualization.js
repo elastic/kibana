@@ -32,20 +32,20 @@ export function MapsVisualizationProvider(serviceSettings, Notifier, getAppState
       }
     }
 
-    async render(esResponse) {
+    async render(esResponse, status) {
 
       return new Promise(async(resolve) => {
 
         await this._kibanaMapReady;
-        await this._updateParams();
+        if (status.params || status.aggs) await this._updateParams();
 
         if (esResponse && typeof esResponse.geohashGridAgg === 'undefined') {
           return resolve();
         }
 
-        this._recreateGeohashLayer(esResponse);
-        this._kibanaMap.useUiStateFromVisualization(this.vis);
-        this._kibanaMap.resize();
+        if (status.data) this._recreateGeohashLayer(esResponse);
+        if (status.uiState) this._kibanaMap.useUiStateFromVisualization(this.vis);
+        if (status.resize) this._kibanaMap.resize();
         this._doRenderComplete(resolve);
 
       });
