@@ -43,7 +43,7 @@ uiModules.get('apps/management')
     display: '───',
   };
   const noTimeFieldOption = {
-    display: $translate.instant('KIBANA-NO_DATE_FIELD_DESIRED')
+    display: $translate.instant('KIBANA-CREATE_INDEX_PATTERN_STEP_2_NO_DATE_FIELD_OPTION')
   };
 
   this.documentationLinks = documentationLinks;
@@ -177,7 +177,7 @@ uiModules.get('apps/management')
 
     if (dateFields.length === 0) {
       return [{
-        display: $translate.instant('KIBANA-INDICES_DONT_CONTAIN_TIME_FIELDS')
+        display: $translate.instant('KIBANA-CREATE_INDEX_PATTERN_STEP_2_NO_TIME_FIELDS')
       }];
     }
 
@@ -205,7 +205,7 @@ uiModules.get('apps/management')
     })
     .catch(err => {
       if (err instanceof IndexPatternMissingIndices) {
-        this.timeFieldError = $translate.instant('KIBANA-INDICES_MATCH_PATTERN');
+        this.timeFieldError = $translate.instant('KIBANA-CREATE_INDEX_PATTERN_STEP_2_NO_MAPPING_ERROR');
       }
 
       notify.error(err);
@@ -252,7 +252,7 @@ uiModules.get('apps/management')
       });
     }).catch(err => {
       if (err instanceof IndexPatternMissingIndices) {
-        return notify.error($translate.instant('KIBANA-NO_INDICES_MATCHING_PATTERN'));
+        return notify.error($translate.instant('KIBANA-CREATE_INDEX_PATTERN_STEP_2_INDICES_DONT_MATCH_PATTERN'));
       }
 
       notify.fatal(err);

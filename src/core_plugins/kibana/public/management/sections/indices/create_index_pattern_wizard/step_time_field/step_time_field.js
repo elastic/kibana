@@ -6,7 +6,7 @@ import { documentationLinks } from 'ui/documentation_links/documentation_links';
 
 const module = uiModules.get('apps/management');
 
-module.directive('stepTimeField', function () {
+module.directive('stepTimeField', function ($translate) {
   return {
     restrict: 'E',
     template,
@@ -36,6 +36,10 @@ module.directive('stepTimeField', function () {
       this.isAdvancedOptionsVisible = false;
       this.matchingIndicesListType = 'noMatches';
       this.documentationLinks = documentationLinks;
+
+      this.getAdvancedOptionsButtonLabel = () => {
+        return $translate.instant('KIBANA-CREATE_INDEX_PATTERN_STEP_2_ADVANCED_OPTIONS_BUTTON');
+      };
 
       this.onToggleAdvancedOptions = () => {
         this.isAdvancedOptionsVisible = !this.isAdvancedOptionsVisible;

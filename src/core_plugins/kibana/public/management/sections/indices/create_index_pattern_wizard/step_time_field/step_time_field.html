@@ -34,7 +34,7 @@
           class="kuiLink kuiSubText"
           ng-click="stepTimeField.fetchTimeFieldOptions()"
           kbn-accessible-click
-          translate="KIBANA-REFRESH_FIELDS"
+          translate="KIBANA-CREATE_INDEX_PATTERN_STEP_2_REFRESH_FIELDS_BUTTON"
           aria-describedby="timeFilterFieldSelectLabel"
         ></a>
 
@@ -76,15 +76,14 @@
       is-disabled="!stepTimeField.canEnableExpandWildcard()"
       is-collapsed="!stepTimeField.isAdvancedOptionsVisible"
       on-toggle="stepTimeField.onToggleAdvancedOptions"
-      text="Advanced Time Field filter options"
+      toggle-button-label="stepTimeField.getAdvancedOptionsButtonLabel()"
     >
       <!-- Expand index pattern checkbox -->
       <label
         class="kuiLabel kuiVerticalRhythmSmall"
         for="expandIndexPatternCheckBox"
-      >
-        Expand index pattern (DEPRECATED)
-      </label>
+        translate="KIBANA-CREATE_INDEX_PATTERN_STEP_2_EXPAND_LABEL"
+      ></label>
 
       <label class="kuiCheckBoxLabel kuiVerticalRhythmSmall kuiVerticalRhythm">
         <input
@@ -96,7 +95,7 @@
           ng-model="stepTimeField.expandWildcard"
         >
         <span class="kuiCheckBoxLabel__text">
-          <span translate="KIBANA-EXPAND_INDEX_PATTERN"></span>
+          <span translate="KIBANA-CREATE_INDEX_PATTERN_STEP_2_EXPAND_CHECKBOX_LABEL"></span>
         </span>
       </label>
 
@@ -107,17 +106,17 @@
       >
         <p
           class="kuiText kuiSubduedText kuiVerticalRhythmSmall"
-          translate="KIBANA-EXPAND_INDEX_PATTERN_HELP_1"
+          translate="KIBANA-CREATE_INDEX_PATTERN_STEP_2_EXPAND_HELP_1"
         ></p>
 
         <p
           class="kuiText kuiSubduedText kuiVerticalRhythmSmall"
-          translate="KIBANA-EXPAND_INDEX_PATTERN_HELP_2"
+          translate="KIBANA-CREATE_INDEX_PATTERN_STEP_2_EXPAND_HELP_2"
         ></p>
 
         <p
           class="kuiText kuiSubduedText kuiVerticalRhythmSmall"
-          translate="KIBANA-EXPAND_INDEX_PATTERN_HELP_3"
+          translate="KIBANA-CREATE_INDEX_PATTERN_STEP_2_EXPAND_HELP_3"
         ></p>
       </div>
     </toggle-panel>
@@ -132,7 +131,7 @@
           >
             <span class="kuiButton__inner">
               <span aria-hidden="true" class="kuiButton__icon kuiIcon fa-chevron-left"></span>
-              <span>Back</span>
+              <span translate="KIBANA-CREATE_INDEX_PATTERN_STEP_2_BACK_BUTTON"></span>
             </span>
           </button>
 

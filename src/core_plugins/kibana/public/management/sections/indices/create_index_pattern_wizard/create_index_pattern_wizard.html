@@ -5,13 +5,15 @@
       data-test-subj="createIndexPatternContainer"
       class="kuiViewContent"
     >
-      <h1 class="kuiTitle kuiVerticalRhythm">
-        Create index pattern
-      </h1>
+      <h1
+        class="kuiTitle kuiVerticalRhythm"
+        translate="KIBANA-CREATE_INDEX_PATTERN_TITLE"
+      ></h1>
 
-      <p class="kuiText kuiSubduedText kuiVerticalRhythm">
-        Kibana uses index patterns to retrieve data from Elasticsearch, for things like visualizations.
-      </p>
+      <p
+        class="kuiText kuiSubduedText kuiVerticalRhythm"
+        translate="KIBANA-CREATE_INDEX_PATTERN_INTRO"
+      ></p>
 
       <!-- User has no data -->
       <div
@@ -25,9 +27,10 @@
             class="kuiPanel kuiPanel--prompt kuiPanel--noBorder kuiVerticalRhythm"
           >
             <div class="kuiPanelBody">
-              <h2 class="kuiSubTitle kuiSubduedText kuiVerticalRhythm">
-                Checking for Elasticsearch data
-              </h2>
+              <h2
+                class="kuiSubTitle kuiSubduedText kuiVerticalRhythm"
+                translate="KIBANA-CREATE_INDEX_PATTERN_LOADING_DATA_TITLE"
+              ></h2>
 
               <div class="kuiVerticalRhythm">
                 <p class="kuiText kuiSubduedText kuiVerticalRhythmSmall">
@@ -36,7 +39,7 @@
                       aria-hidden="true"
                       class="kuiStatusText__icon kuiIcon fa-spinner fa-spin"
                     ></span>
-                    Reticulating splines...
+                    <span translate="KIBANA-CREATE_INDEX_PATTERN_LOADING_DATA_BODY"></span>
                   </span>
                 </p>
               </div>
@@ -47,21 +50,21 @@
           <div ng-if="!controller.isFetchingExistingIndices">
             <div class="kuiPanel kuiPanel--prompt kuiPanel--noBorder kuiVerticalRhythm">
               <div class="kuiPanelBody">
-                <h1 class="kuiSubTitle kuiSubduedText kuiVerticalRhythm">
-                  Couldn't find any Elasticsearch data
-                </h1>
+                <h1
+                  class="kuiSubTitle kuiSubduedText kuiVerticalRhythm"
+                  translate="KIBANA-CREATE_INDEX_PATTERN_NO_DATA_TITLE"
+                ></h1>
 
                 <div class="kuiVerticalRhythm">
                   <p class="kuiText kuiSubduedText kuiVerticalRhythmSmall">
-                    You'll need to index some data into Elasticsearch before you can create an index pattern.
+                    <span translate="KIBANA-CREATE_INDEX_PATTERN_NO_DATA_BODY"></span>
                     <a
                       class="kuiLink"
                       ng-href="{{ controller.documentationLinks.indexPatterns.loadingData }}"
                       aria-label="Learn how to index data into Elasticsearch"
                       target="_blank"
-                    >
-                      Learn how.
-                    </a>
+                      translate="KIBANA-CREATE_INDEX_PATTERN_NO_DATA_LEARN_LINK"
+                    ></a>
                   </p>
                 </div>
 
@@ -74,7 +77,7 @@
                       aria-hidden="true"
                       class="kuiButton__icon kuiIcon fa-refresh"
                     ></span>
-                    <span>Check for new data</span>
+                    <span translate="KIBANA-CREATE_INDEX_PATTERN_NO_DATA_RELOAD_BUTTON"></span>
                   </span>
                 </button>
               </div>
