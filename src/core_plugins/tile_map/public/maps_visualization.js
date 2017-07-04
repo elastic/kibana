@@ -161,9 +161,12 @@ export function MapsVisualizationProvider(serviceSettings, Notifier, getAppState
       const { minZoom, maxZoom } = this._getMinMaxZoom();
 
       if (mapParams.wms.enabled) {
+        //Switch to WMS
         if (maxZoom > this._kibanaMap.getMaxZoomLevel()) {
+          //need to recreate the map with less restrictive zoom
           this._geohashLayer = null;
           this._kibanaMapReady = this._makeKibanaMap();
+          await this._kibanaMapReady;
         }
 
         this._kibanaMap.setBaseLayer({
@@ -176,10 +179,17 @@ export function MapsVisualizationProvider(serviceSettings, Notifier, getAppState
           }
         });
       } else {
+
+        //switch to regular
         if (maxZoom < this._kibanaMap.getMaxZoomLevel()) {
+          //need to recreate the map with more restrictive zoom level
           this._geohashLayer = null;
           this._kibanaMapReady = this._makeKibanaMap();
-          this._kibanaMap.setZoomLevel(maxZoom);
+          await this._kibanaMapReady;
+
+          if (this._kibanaMap.getZoomLevel() > maxZoom) {
+            this._kibanaMap.setZoomLevel(maxZoom);
+          }
         }
 
         if (!this._tmsError) {
