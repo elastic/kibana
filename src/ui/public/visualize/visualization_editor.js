@@ -4,6 +4,7 @@ import 'ui/visualize/visualize_legend';
 import { uiModules } from 'ui/modules';
 import 'angular-sanitize';
 import { VisEditorTypesRegistryProvider } from 'ui/registry/vis_editor_types';
+import { getUpdateStatus } from 'ui/vis/update_status';
 
 uiModules
 .get('kibana/directive', ['ngSanitize'])
@@ -28,7 +29,7 @@ uiModules
 
       const renderFunction = () => {
         if (!$scope.vis) return;
-        editor.render($scope.visData, $scope.searchSource).then(() => {
+        editor.render($scope.visData, $scope.searchSource, getUpdateStatus($scope)).then(() => {
           $scope.$emit('renderComplete');
         });
       };
