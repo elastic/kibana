@@ -3,6 +3,7 @@
   "UI-WELCOME_ERROR": "Kibana did not load properly. Check the server output for more information.",
   "KIBANA-CREATE_INDEX_PATTERN_TITLE": "Create index pattern",
   "KIBANA-CREATE_INDEX_PATTERN_INTRO": "Kibana uses index patterns to retrieve data from Elasticsearch, for things like visualizations.",
+  "KIBANA-CREATE_INDEX_PATTERN_INCLUDE_SYSTEM_INDICES_CHECKBOX_LABEL": "Include system indices",
   "KIBANA-CREATE_INDEX_PATTERN_LOADING_DATA_TITLE": "Checking for Elasticsearch data",
   "KIBANA-CREATE_INDEX_PATTERN_LOADING_DATA_BODY": "Reticulating splines...",
   "KIBANA-CREATE_INDEX_PATTERN_NO_DATA_TITLE": "Couldn't find any Elasticsearch data",

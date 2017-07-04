@@ -64,18 +64,14 @@ uiModules.get('apps/management')
   this.isFetchingMatchingIndices = false;
   this.isFetchingTimeFieldOptions = false;
   this.isCreatingIndexPattern = false;
+  this.doesIncludeSystemIndices = false;
   this.timeFieldError = undefined;
+  let allIndices = [];
+  let matchingIndices = [];
+  let partialMatchingIndices = [];
   this.allIndices = [];
-  this.allTemplateIndexPatterns = [];
   this.matchingIndices = [];
   this.partialMatchingIndices = [];
-
-  function whiteListIndices(indices) {
-    return indices.filter(index => (
-      // The majority of users won't want to create an index pattern for the .kibana index.
-      index !== '.kibana'
-    ));
-  }
 
   function createReasonableWait() {
     return new Promise(resolve => {
@@ -86,6 +82,31 @@ uiModules.get('apps/management')
       }, 1000);
     });
   }
+
+  const whiteListIndices = indices => {
+    if (!indices) {
+      return indices;
+    }
+
+    if (this.doesIncludeSystemIndices) {
+      return indices;
+    }
+
+    // All system indices begin with a period.
+    return indices.filter(index => (
+      index.indexOf('.') !== 0
+    ));
+  };
+
+  const updateWhiteListedIndices = () => {
+    this.allIndices = whiteListIndices(allIndices);
+    this.matchingIndices = whiteListIndices(matchingIndices);
+    this.partialMatchingIndices = whiteListIndices(partialMatchingIndices);
+  };
+
+  this.onIncludeSystemIndicesChange = () => {
+    updateWhiteListedIndices();
+  };
 
   let mostRecentFetchMatchingIndicesRequest;
 
@@ -109,12 +130,13 @@ uiModules.get('apps/management')
       createReasonableWait(),
     ])
     .then(([
-      matchingIndices,
-      partialMatchingIndices,
+      matchingIndicesResponse,
+      partialMatchingIndicesResponse,
     ]) => {
       if (thisFetchMatchingIndicesRequest === mostRecentFetchMatchingIndicesRequest) {
-        this.matchingIndices = whiteListIndices(matchingIndices).sort();
-        this.partialMatchingIndices = whiteListIndices(partialMatchingIndices).sort();
+        matchingIndices = matchingIndicesResponse.sort();
+        partialMatchingIndices = partialMatchingIndicesResponse.sort();
+        updateWhiteListedIndices();
         this.isFetchingMatchingIndices = false;
       }
     });
@@ -124,13 +146,12 @@ uiModules.get('apps/management')
     this.isFetchingExistingIndices = true;
     Promise.all([
       indicesService.getIndices('*'),
-      indicesService.getTemplateIndexPatterns('*'),
       createReasonableWait(),
     ])
-    .then(([allIndices, allTemplateIndexPatterns]) => {
+    .then(([allIndicesResponse]) => {
       // Cache all indices.
-      this.allIndices = whiteListIndices(allIndices).sort();
-      this.allTemplateIndexPatterns = allTemplateIndexPatterns.sort();
+      allIndices = allIndicesResponse.sort();
+      updateWhiteListedIndices();
       this.isFetchingExistingIndices = false;
     });
   };
