@@ -8,5 +8,5 @@
     ng-class="{'fa-caret-down': !toggleButton.isCollapsed, 'fa-caret-right': toggleButton.isCollapsed}"
     class="kuiToggleButton__icon kuiIcon"
   ></span>
-  {{ toggleButton.text }}
+  <span ng-transclude></span>
 </button>
