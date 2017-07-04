@@ -6,16 +6,12 @@ import { LoggerConfig } from '../LoggerConfig';
 
 const config = new LoggerConfig({
   dest: 'test',
-  silent: false,
-  quiet: false,
-  verbose: false
+  level: 'info'
 });
 
 const config2 = new LoggerConfig({
   dest: 'test2',
-  silent: true,
-  quiet: false,
-  verbose: false
+  level: 'error'
 });
 
 test('updates mutable logger when receiving new logger configs', () => {

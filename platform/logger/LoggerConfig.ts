@@ -1,21 +1,25 @@
-import { Level } from './Level';
+import { Level, LogLevelId } from './Level';
 import { Schema, typeOfSchema } from '../types';
 
-const createLoggerSchema = (schema: Schema) =>
-  schema.object({
-    dest: schema.string({
+const createLoggerSchema = (schema: Schema) => {
+  const { object, string, oneOf, literal } = schema;
+
+  return object({
+    dest: string({
       defaultValue: 'stdout'
     }),
-    silent: schema.boolean({
-      defaultValue: false
-    }),
-    quiet: schema.boolean({
-      defaultValue: false
-    }),
-    verbose: schema.boolean({
-      defaultValue: false
+    level: oneOf([
+      literal('fatal'),
+      literal('error'),
+      literal('warn'),
+      literal('info'),
+      literal('debug'),
+      literal('trace')
+    ], {
+      defaultValue: 'info'
     })
   });
+}
 
 const loggingConfigType = typeOfSchema(createLoggerSchema);
 type HttpConfigType = typeof loggingConfigType;
@@ -24,16 +28,14 @@ export class LoggerConfig {
   static createSchema = createLoggerSchema;
 
   readonly dest: string;
-  private readonly silent: boolean;
-  private readonly quiet: boolean;
-  private readonly verbose: boolean;
+  private readonly level: LogLevelId;
 
   constructor(config: HttpConfigType) {
     this.dest = config.dest;
 
-    // TODO: Feels like we should clean these up and move to
-    // specifying a `level` instead.
-    // To enable more control it's also possible to do a:
+    // TODO: To enable more control we could explore the same direction as ES,
+    // with something like:
+    //
     // ```
     // logging: {
     //   levels: {
@@ -43,14 +45,12 @@ export class LoggerConfig {
     //   }
     // }
     // ```
+    //
     // and then log based on the `namespace`.
-    // ^ is what ES does, right?
-    this.silent = config.silent;
-    this.quiet = config.quiet;
-    this.verbose = config.verbose;
+    this.level = config.level;
   }
 
   getLevel(): Level {
-    return Level.Debug;
+    return Level.fromId(this.level);
   }
 }
