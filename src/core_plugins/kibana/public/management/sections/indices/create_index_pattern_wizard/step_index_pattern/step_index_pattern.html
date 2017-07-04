@@ -98,23 +98,24 @@
             </span>
           </matching-indices-list>
         </div><div ng-switch-when="noInput">
-
           <matching-indices-list
             is-loading="stepIndexPattern.isFetchingMatchingIndices"
             indices="stepIndexPattern.allIndices"
           >
-            <span
-              ng-if="!stepIndexPattern.allIndices.length"
-              translate="KIBANA-CREATE_INDEX_PATTERN_STEP_1_SEARCH_SINGLE_INDEX"
-              translate-compile
-            ></span>
+            <span class="kuiStatusText kuiStatusText--info">
+              <span
+                ng-if="!stepIndexPattern.allIndices.length"
+                translate="KIBANA-CREATE_INDEX_PATTERN_STEP_1_SEARCH_SINGLE_INDEX"
+                translate-compile
+              ></span>
 
-            <span
-              ng-if="stepIndexPattern.allIndices.length"
-              translate="KIBANA-CREATE_INDEX_PATTERN_STEP_1_SEARCH_MANY_INDICES"
-              translate-values="{ indicesLength: stepIndexPattern.allIndices.length }"
-              translate-compile
-            ></span>
+              <span
+                ng-if="stepIndexPattern.allIndices.length"
+                translate="KIBANA-CREATE_INDEX_PATTERN_STEP_1_SEARCH_MANY_INDICES"
+                translate-values="{ indicesLength: stepIndexPattern.allIndices.length }"
+                translate-compile
+              ></span>
+            </span>
           </matching-indices-list>
         </div>
 
@@ -123,11 +124,13 @@
             is-loading="stepIndexPattern.isFetchingMatchingIndices"
             indices="stepIndexPattern.allIndices"
           >
-            <span
-              translate="KIBANA-CREATE_INDEX_PATTERN_STEP_1_SEARCH_NO_MATCHES"
-              translate-values="{ indicesLength: stepIndexPattern.allIndices.length }"
-              translate-compile
-            ></span>
+            <span class="kuiStatusText kuiStatusText--info">
+              <span
+                translate="KIBANA-CREATE_INDEX_PATTERN_STEP_1_SEARCH_NO_MATCHES"
+                translate-values="{ indicesLength: stepIndexPattern.allIndices.length }"
+                translate-compile
+              ></span>
+            </span>
           </matching-indices-list>
         </div>
 
@@ -136,11 +139,13 @@
             is-loading="stepIndexPattern.isFetchingMatchingIndices"
             indices="stepIndexPattern.partialMatchingIndices"
           >
-            <span
-              translate="KIBANA-CREATE_INDEX_PATTERN_STEP_1_SEARCH_PARTIAL_MATCHES"
-              translate-values="{ indicesLength: stepIndexPattern.partialMatchingIndices.length }"
-              translate-compile
-            ></span>
+            <span class="kuiStatusText kuiStatusText--info">
+              <span
+                translate="KIBANA-CREATE_INDEX_PATTERN_STEP_1_SEARCH_PARTIAL_MATCHES"
+                translate-values="{ indicesLength: stepIndexPattern.partialMatchingIndices.length }"
+                translate-compile
+              ></span>
+            </span>
           </matching-indices-list>
         </div>
 
