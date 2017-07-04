@@ -3,57 +3,84 @@ import { FieldFormat } from 'ui/index_patterns/_field_format/field_format';
 import { getHighlightHtml } from 'ui/highlight';
 
 export function stringifyUrl() {
-  _.class(Url).inherits(FieldFormat);
-  function Url(params) {
-    Url.Super.call(this, params);
-    this._compileTemplate = _.memoize(this._compileTemplate);
+
+  const templateMatchRE = /{{([\s\S]+?)}}/g;
+
+  class UrlFormat extends FieldFormat {
+    constructor(params) {
+      super(params);
+      this._compileTemplate = _.memoize(this._compileTemplate);
+    }
+
+    getParamDefaults() {
+      return {
+        type: 'a',
+        urlTemplate: null,
+        labelTemplate: null
+      };
+    }
+
+    _formatLabel(value, url) {
+      const template = this.param('labelTemplate');
+      if (url == null) url = this._formatUrl(value);
+      if (!template) return url;
+
+      return this._compileTemplate(template)({
+        value: value,
+        url: url
+      });
+    }
+
+    _formatUrl(value) {
+      const template = this.param('urlTemplate');
+      if (!template) return value;
+
+      return this._compileTemplate(template)({
+        value: encodeURIComponent(value),
+        rawValue: value
+      });
+    }
+
+    _compileTemplate(template) {
+      const parts = template.split(templateMatchRE).map(function (part, i) {
+        // trim all the odd bits, the variable names
+        return (i % 2) ? part.trim() : part;
+      });
+
+      return function (locals) {
+        // replace all the odd bits with their local var
+        let output = '';
+        let i = -1;
+        while (++i < parts.length) {
+          if (i % 2) {
+            if (locals.hasOwnProperty(parts[i])) {
+              const local = locals[parts[i]];
+              output += local == null ? '' : local;
+            }
+          } else {
+            output += parts[i];
+          }
+        }
+
+        return output;
+      };
+    }
+
+    static id = 'url';
+    static title = 'Url';
+    static fieldType = [
+      'number',
+      'boolean',
+      'date',
+      'ip',
+      'string',
+      'murmur3',
+      'unknown',
+      'conflict'
+    ];
   }
 
-  Url.id = 'url';
-  Url.title = 'Url';
-  Url.fieldType = [
-    'number',
-    'boolean',
-    'date',
-    'ip',
-    'string',
-    'murmur3',
-    'unknown',
-    'conflict'
-  ];
-
-  Url.templateMatchRE = /{{([\s\S]+?)}}/g;
-
-  Url.prototype.getParamDefaults = function () {
-    return {
-      type: 'a',
-      urlTemplate: null,
-      labelTemplate: null
-    };
-  };
-
-  Url.prototype._formatUrl = function (value) {
-    const template = this.param('urlTemplate');
-    if (!template) return value;
-
-    return this._compileTemplate(template)({
-      value: encodeURIComponent(value),
-      rawValue: value
-    });
-  };
-
-  Url.prototype._formatLabel = function (value, url) {
-    const template = this.param('labelTemplate');
-    if (url == null) url = this._formatUrl(value);
-    if (!template) return url;
-
-    return this._compileTemplate(template)({
-      value: value,
-      url: url
-    });
-  };
-
-  Url.prototype._convert = {
+  UrlFormat.prototype._convert = {
     text: function (value) {
       return this._formatLabel(value);
     },
@@ -86,30 +113,5 @@ export function stringifyUrl() {
     }
   };
 
-  Url.prototype._compileTemplate = function (template) {
-    const parts = template.split(Url.templateMatchRE).map(function (part, i) {
-      // trim all the odd bits, the variable names
-      return (i % 2) ? part.trim() : part;
-    });
-
-    return function (locals) {
-      // replace all the odd bits with their local var
-      let output = '';
-      let i = -1;
-      while (++i < parts.length) {
-        if (i % 2) {
-          if (locals.hasOwnProperty(parts[i])) {
-            const local = locals[parts[i]];
-            output += local == null ? '' : local;
-          }
-        } else {
-          output += parts[i];
-        }
-      }
-
-      return output;
-    };
-  };
-
-  return Url;
+  return UrlFormat;
 }

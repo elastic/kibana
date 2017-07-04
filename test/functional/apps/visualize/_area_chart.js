@@ -167,7 +167,7 @@ export default function ({ getService, getPageObjects }) {
           '2015-09-22 21:00', '29'
         ];
 
-        return PageObjects.visualize.collapseChart()
+        return PageObjects.visualize.toggleSpyPanel()
         .then(function setPageSize() {
           return PageObjects.settings.setPageSize('All');
         })

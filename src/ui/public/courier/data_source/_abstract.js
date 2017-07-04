@@ -8,15 +8,15 @@ import { ErrorHandlersProvider } from '../_error_handlers';
 import { FetchProvider } from '../fetch';
 import { DecorateQueryProvider } from './_decorate_query';
 import { FieldWildcardProvider } from '../../field_wildcard';
-import { getHighlightRequestProvider } from '../../highlight';
+import { getHighlightRequest } from '../../highlight';
 import { migrateFilter } from './_migrate_filter';
 
-export function AbstractDataSourceProvider(Private, Promise, PromiseEmitter) {
+export function AbstractDataSourceProvider(Private, Promise, PromiseEmitter, config) {
   const requestQueue = Private(RequestQueueProvider);
   const errorHandlers = Private(ErrorHandlersProvider);
   const courierFetch = Private(FetchProvider);
   const { fieldWildcardFilter } = Private(FieldWildcardProvider);
-  const getHighlightRequest = Private(getHighlightRequestProvider);
+  const getConfig = (...args) => config.get(...args);
 
   function SourceAbstract(initialState, strategy) {
     const self = this;
@@ -414,7 +414,7 @@ export function AbstractDataSourceProvider(Private, Promise, PromiseEmitter) {
 
         if (flatState.highlightAll != null) {
           if (flatState.highlightAll && flatState.body.query) {
-            flatState.body.highlight = getHighlightRequest(flatState.body.query);
+            flatState.body.highlight = getHighlightRequest(flatState.body.query, getConfig);
           }
           delete flatState.highlightAll;
         }

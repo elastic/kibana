@@ -26,21 +26,19 @@ function getHighlightQuery(query) {
   return clone;
 }
 
-export function getHighlightRequestProvider(config) {
-  return function getHighlightRequest(query) {
-    if (!config.get('doc_table:highlight')) return;
+export function getHighlightRequest(query, getConfig) {
+  if (!getConfig('doc_table:highlight')) return;
 
-    const fieldsParams = config.get('doc_table:highlight:all_fields')
-      ? { highlight_query: getHighlightQuery(query) }
-      : {};
+  const fieldsParams = getConfig('doc_table:highlight:all_fields')
+    ? { highlight_query: getHighlightQuery(query) }
+    : {};
 
-    return {
-      pre_tags: [highlightTags.pre],
-      post_tags: [highlightTags.post],
-      fields: {
-        '*': fieldsParams
-      },
-      fragment_size: FRAGMENT_SIZE
-    };
+  return {
+    pre_tags: [highlightTags.pre],
+    post_tags: [highlightTags.post],
+    fields: {
+      '*': fieldsParams
+    },
+    fragment_size: FRAGMENT_SIZE
   };
 }

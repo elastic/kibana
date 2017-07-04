@@ -20,6 +20,8 @@ import editorTemplate from 'plugins/kibana/visualize/editor/editor.html';
 import { DashboardConstants } from 'plugins/kibana/dashboard/dashboard_constants';
 import { VisualizeConstants } from '../visualize_constants';
 import { documentationLinks } from 'ui/documentation_links/documentation_links';
+import { KibanaParsedUrl } from 'ui/url/kibana_parsed_url';
+import { absoluteToParsedUrl } from 'ui/url/absolute_to_parsed_url';
 
 uiRoutes
 .when(VisualizeConstants.CREATE_PATH, {
@@ -316,20 +318,22 @@ function VisEditor($rootScope, $scope, $route, timefilter, AppState, $window, kb
       if (id) {
         notify.info('Saved Visualization "' + savedVis.title + '"');
         if ($scope.isAddToDashMode()) {
-          const savedVisualizationUrl =
-            kbnUrl.eval(`${kbnBaseUrl}#${VisualizeConstants.EDIT_PATH}/{{id}}`, { id: savedVis.id });
-
+          const savedVisualizationParsedUrl = new KibanaParsedUrl({
+            basePath: chrome.getBasePath(),
+            appId: kbnBaseUrl.slice('/app/'.length),
+            appPath: kbnUrl.eval(`${VisualizeConstants.EDIT_PATH}/{{id}}`, { id: savedVis.id }),
+          });
           // Manually insert a new url so the back button will open the saved visualization.
-          $window.history.pushState({}, '', `${chrome.getBasePath()}${savedVisualizationUrl}`);
+          $window.history.pushState({}, '', savedVisualizationParsedUrl.getRootRelativePath());
           // Since we aren't reloading the page, only inserting a new browser history item, we need to manually update
           // the last url for this app, so directly clicking on the Visualize tab will also bring the user to the saved
           // url, not the unsaved one.
-          chrome.trackSubUrlForApp('kibana:visualize', savedVisualizationUrl);
+          chrome.trackSubUrlForApp('kibana:visualize', savedVisualizationParsedUrl);
 
-          const dashboardBaseUrl = chrome.getNavLinkById('kibana:dashboard');
-          const dashUrlPieces = dashboardBaseUrl.lastSubUrl.match(/(.*)kibana#(.*)/);
-          const dashSubUrl = `${dashUrlPieces[2]}&${DashboardConstants.NEW_VISUALIZATION_ID_PARAM}={{id}}`;
-          kbnUrl.change(dashSubUrl, { id: savedVis.id });
+          const lastDashboardAbsoluteUrl = chrome.getNavLinkById('kibana:dashboard').lastSubUrl;
+          const dashboardParsedUrl = absoluteToParsedUrl(lastDashboardAbsoluteUrl, chrome.getBasePath());
+          dashboardParsedUrl.addQueryParameter(DashboardConstants.NEW_VISUALIZATION_ID_PARAM, savedVis.id);
+          kbnUrl.change(dashboardParsedUrl.appPath);
         } else if (savedVis.id === $route.current.params.id) {
           docTitle.change(savedVis.lastSavedTitle);
         } else {

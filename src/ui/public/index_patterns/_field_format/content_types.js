@@ -1,11 +1,12 @@
 import _ from 'lodash';
+import { asPrettyString } from 'ui/utils/as_pretty_string';
 import { getHighlightHtml } from 'ui/highlight';
 
 const types = {
   html: function (format, convert) {
     function recurse(value, field, hit) {
       if (value == null) {
-        return _.asPrettyString(value);
+        return asPrettyString(value);
       }
 
       if (!value || typeof value.map !== 'function') {
@@ -40,7 +41,7 @@ const types = {
 };
 
 function fallbackText(value) {
-  return _.asPrettyString(value);
+  return asPrettyString(value);
 }
 
 function fallbackHtml(value, field, hit) {

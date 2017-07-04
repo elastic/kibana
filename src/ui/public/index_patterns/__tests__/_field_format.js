@@ -1,5 +1,6 @@
 import _ from 'lodash';
 import expect from 'expect.js';
+import { asPrettyString } from 'ui/utils/as_pretty_string';
 import { FieldFormat } from 'ui/index_patterns/_field_format/field_format';
 
 describe('FieldFormat class', function () {
@@ -14,7 +15,7 @@ describe('FieldFormat class', function () {
 
     TestFormat.id = 'test-format';
     TestFormat.title = 'Test Format';
-    TestFormat.prototype._convert = _.asPrettyString;
+    TestFormat.prototype._convert = asPrettyString;
 
     _.class(TestFormat).inherits(FieldFormat);
   });

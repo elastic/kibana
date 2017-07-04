@@ -201,7 +201,11 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
       return testSubjects.click('timepickerGoButton');
     }
 
-    collapseChart() {
+    async getSpyToggleExists() {
+      return await testSubjects.exists('spyToggleButton');
+    }
+
+    toggleSpyPanel() {
       return testSubjects.click('spyToggleButton');
     }
 
