@@ -20,7 +20,6 @@ module.directive('stepIndexPattern', function () {
       hasIndices: '&',
       indexPatternName: '=',
       allIndices: '=',
-      allTemplateIndexPatterns: '=',
       partialMatchingIndices: '=',
       matchingIndices: '=',
       goToNextStep: '&',
