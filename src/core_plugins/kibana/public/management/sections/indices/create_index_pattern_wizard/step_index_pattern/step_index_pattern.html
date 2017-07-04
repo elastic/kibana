@@ -44,14 +44,16 @@
             <p
               id="indexPatternNameFieldHelp1"
               class="kuiText kuiSubduedText kuiVerticalRhythm"
-            >
-              You can use a <strong>*</strong> as a wildcard in your index pattern.
+              translate="KIBANA-CREATE_INDEX_PATTERN_STEP_1_INDEX_PATTERN_HELP_TEXT_1"
+              translate-compile
+            ></p>
+
             <p
               id="indexPatternNameFieldHelp2"
               class="kuiText kuiSubduedText"
-            >
-              You can't use empty spaces or the characters <strong>\ / ? " < > , |</strong>.
-            </p>
+              translate="KIBANA-CREATE_INDEX_PATTERN_STEP_1_INDEX_PATTERN_HELP_TEXT_2"
+              translate-compile
+            ></p>
           </div>
 
           <!-- Action -->
@@ -62,7 +64,7 @@
             ng-disabled="!stepIndexPattern.canGoToNextStep()"
           >
             <span class="kuiButton__inner">
-              <span>Next</span>
+              <span translate="KIBANA-CREATE_INDEX_PATTERN_STEP_1_SUBMIT_BUTTON"></span>
               <span
                 aria-hidden="true"
                 class="kuiButton__icon kuiIcon fa-chevron-right"
@@ -87,9 +89,12 @@
                 aria-hidden="true"
                 class="kuiStatusText__icon kuiIcon fa-hand-stop-o"
               ></span>
-              <span>
-                You've entered an invalid index pattern. Please adjust it to match any of your <strong>{{stepIndexPattern.allIndices.length}} indices</strong>, below.
-              </span>
+
+              <span
+                translate="KIBANA-CREATE_INDEX_PATTERN_STEP_1_SEARCH_INVALID_PATTERN"
+                translate-values="{ indicesLength: stepIndexPattern.allIndices.length }"
+                translate-compile
+              ></span>
             </span>
           </matching-indices-list>
         </div><div ng-switch-when="noInput">
@@ -98,13 +103,18 @@
             is-loading="stepIndexPattern.isFetchingMatchingIndices"
             indices="stepIndexPattern.allIndices"
           >
-            <span ng-if="!stepIndexPattern.allIndices.length">
-              You only have a single index. You can create an index pattern to match it.
-            </span>
+            <span
+              ng-if="!stepIndexPattern.allIndices.length"
+              translate="KIBANA-CREATE_INDEX_PATTERN_STEP_1_SEARCH_SINGLE_INDEX"
+              translate-compile
+            ></span>
 
-            <span ng-if="stepIndexPattern.allIndices.length">
-              Your index pattern can match any of your <strong>{{stepIndexPattern.allIndices.length}} indices</strong>, below.
-            </span>
+            <span
+              ng-if="stepIndexPattern.allIndices.length"
+              translate="KIBANA-CREATE_INDEX_PATTERN_STEP_1_SEARCH_MANY_INDICES"
+              translate-values="{ indicesLength: stepIndexPattern.allIndices.length }"
+              translate-compile
+            ></span>
           </matching-indices-list>
         </div>
 
@@ -113,7 +123,11 @@
             is-loading="stepIndexPattern.isFetchingMatchingIndices"
             indices="stepIndexPattern.allIndices"
           >
-            The index pattern you've entered doesn't match any indices. You can match any of your <strong>{{stepIndexPattern.allIndices.length}} indices</strong>, below.
+            <span
+              translate="KIBANA-CREATE_INDEX_PATTERN_STEP_1_SEARCH_NO_MATCHES"
+              translate-values="{ indicesLength: stepIndexPattern.allIndices.length }"
+              translate-compile
+            ></span>
           </matching-indices-list>
         </div>
 
@@ -122,7 +136,11 @@
             is-loading="stepIndexPattern.isFetchingMatchingIndices"
             indices="stepIndexPattern.partialMatchingIndices"
           >
-            Your index pattern doesn't match any indices, but you have <strong>{{stepIndexPattern.partialMatchingIndices.length}} {{stepIndexPattern.partialMatchingIndices.length > 1 ? 'indices' : 'index'}}</strong> which {{stepIndexPattern.partialMatchingIndices.length > 1 ? 'look' : 'looks'}} similar.
+            <span
+              translate="KIBANA-CREATE_INDEX_PATTERN_STEP_1_SEARCH_PARTIAL_MATCHES"
+              translate-values="{ indicesLength: stepIndexPattern.partialMatchingIndices.length }"
+              translate-compile
+            ></span>
           </matching-indices-list>
         </div>
 
@@ -136,9 +154,12 @@
                 aria-hidden="true"
                 class="kuiStatusText__icon kuiIcon fa-check"
               ></span>
-              <span>
-                <strong>Success!</strong> Your index pattern matches <strong>{{stepIndexPattern.matchingIndices.length}} {{stepIndexPattern.matchingIndices.length > 1 ? 'indices' : 'index'}}</strong>.
-              </span>
+
+              <span
+                translate="KIBANA-CREATE_INDEX_PATTERN_STEP_1_SEARCH_EXACT_MATCHES"
+                translate-values="{ indicesLength: stepIndexPattern.matchingIndices.length }"
+                translate-compile
+              ></span>
             </span>
           </matching-indices-list>
         </div>
