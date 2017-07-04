@@ -5,34 +5,37 @@
       data-test-subj="createIndexPatternContainer"
       class="kuiViewContent"
     >
-      <div class="kuiBar">
-        <h1
-          class="kuiTitle kuiVerticalRhythm"
-          translate="KIBANA-CREATE_INDEX_PATTERN_TITLE"
-        ></h1>
+      <!-- Intro -->
+      <div class="kuiVerticalRhythm">
+        <div class="kuiBar">
+          <h1
+            class="kuiTitle"
+            translate="KIBANA-CREATE_INDEX_PATTERN_TITLE"
+          ></h1>
 
-        <div class="kuiBarSection">
-          <!-- Include system indices -->
-          <label class="kuiCheckBoxLabel">
-            <input
-              type="checkbox"
-              class="kuiCheckBox"
-              ng-model="controller.doesIncludeSystemIndices"
-              ng-change="controller.onIncludeSystemIndicesChange()"
-            >
+          <div class="kuiBarSection">
+            <!-- Include system indices -->
+            <label class="kuiCheckBoxLabel">
+              <input
+                type="checkbox"
+                class="kuiCheckBox"
+                ng-model="controller.doesIncludeSystemIndices"
+                ng-change="controller.onIncludeSystemIndicesChange()"
+              >
 
-            <span
-              class="kuiCheckBoxLabel__text"
-              translate="KIBANA-CREATE_INDEX_PATTERN_INCLUDE_SYSTEM_INDICES_CHECKBOX_LABEL"
-            ></span>
-          </label>
+              <span
+                class="kuiCheckBoxLabel__text"
+                translate="KIBANA-CREATE_INDEX_PATTERN_INCLUDE_SYSTEM_INDICES_CHECKBOX_LABEL"
+              ></span>
+            </label>
+          </div>
         </div>
-      </div>
 
-      <p
-        class="kuiText kuiSubduedText kuiVerticalRhythm"
-        translate="KIBANA-CREATE_INDEX_PATTERN_INTRO"
-      ></p>
+        <p
+          class="kuiText kuiSubduedText"
+          translate="KIBANA-CREATE_INDEX_PATTERN_INTRO"
+        ></p>
+      </div>
 
       <!-- User has no data -->
       <div
