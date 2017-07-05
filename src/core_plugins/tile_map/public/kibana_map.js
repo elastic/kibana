@@ -235,22 +235,45 @@ export class KibanaMap extends EventEmitter {
     this._layers.push(kibanaLayer);
     kibanaLayer.addToLeafletMap(this._leafletMap);
     this.emit('layers:update');
+
+
+    this.addAttributions(kibanaLayer.getAttributions());
+
+
   }
 
-  removeLayer(layer) {
-    const index = this._layers.indexOf(layer);
+  removeLayer(kibanaLayer) {
+    this.removeAttributions(kibanaLayer.getAttributions());
+    const index = this._layers.indexOf(kibanaLayer);
     if (index >= 0) {
       this._layers.splice(index, 1);
-      layer.removeFromLeafletMap(this._leafletMap);
+      kibanaLayer.removeFromLeafletMap(this._leafletMap);
     }
     this._listeners.forEach(listener => {
-      if (listener.layer === layer) {
+      if (listener.layer === kibanaLayer) {
         listener.layer.removeListener(listener.name, listener.handle);
       }
     });
   }
 
+
+  addAttributions(attribution) {
+    const attributions = getAttributionArray(attribution);
+    attributions.forEach((attribution) => {
+      this._leafletMap.attributionControl.removeAttribution(attribution);//this ensures we do not add duplicates
+      this._leafletMap.attributionControl.addAttribution(attribution);
+    });
+  }
+
+  removeAttributions(attribution) {
+    const attributions = getAttributionArray(attribution);
+    attributions.forEach((attribution) => {
+      this._leafletMap.attributionControl.removeAttribution(attribution);//this ensures we do not add duplicates
+    });
+  }
+
   updateAttributions(attributionString) {
+    console.log('upd', attributionString);
     attributionString = attributionString || '';
     let attributions = attributionString.split('|');
     if (attributions.length === 1) {//temp work-around due to inconsistency in manifests
@@ -438,15 +461,18 @@ export class KibanaMap extends EventEmitter {
       return;
     }
 
-    this._baseLayerSettings = settings;
+
     if (settings === null) {
       if (this._leafletBaseLayer && this._leafletMap) {
+        this.removeAttributions(this._baseLayerSettings.options.attribution);
         this._leafletMap.removeLayer(this._leafletBaseLayer);
         this._leafletBaseLayer = null;
+        this._baseLayerSettings = null;
       }
       return;
     }
 
+    this._baseLayerSettings = settings;
     if (this._leafletBaseLayer) {
       this._leafletMap.removeLayer(this._leafletBaseLayer);
       this._leafletBaseLayer = null;
@@ -474,7 +500,7 @@ export class KibanaMap extends EventEmitter {
       if (settings.options.minZoom > this._leafletMap.getZoom()) {
         this._leafletMap.setZoom(settings.options.minZoom);
       }
-      this.updateAttributions(settings.options.attribution);
+      this.addAttributions(settings.options.attribution);
       this.resize();
     }
 
@@ -576,4 +602,13 @@ export class KibanaMap extends EventEmitter {
   }
 }
 
+
+function getAttributionArray(attribution) {
+  const attributionString = attribution || '';
+  let attributions = attributionString.split('|');
+  if (attributions.length === 1) {//temp work-around due to inconsistency in manifests of how attributions are delimited
+    attributions = attributions[0].split(',');
+  }
+  return attributions;
+}
 

@@ -139,7 +139,7 @@ module.controller('KbnRegionMapController', function ($scope, $element, Private,
       }
     });
     kibanaMap.addLayer(choroplethLayer);
-    kibanaMap.updateAttributions(attribution);
+    // kibanaMap.updateAttributions(attribution);
   }
 
 
