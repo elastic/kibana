@@ -6,11 +6,7 @@ describe('FieldFormatsService', function () {
 
   const config = {};
   config['format:defaultTypeMap'] = {
-    'ip': { 'id': 'ip', 'params': {} },
-    'date': { 'id': 'date', 'params': {} },
     'number': { 'id': 'number', 'params': {} },
-    'boolean': { 'id': 'boolean', 'params': {} },
-    '_source': { 'id': '_source', 'params': {} },
     '_default_': { 'id': 'string', 'params': {} }
   };
   config['format:number:defaultPattern'] = '0,0.[000]';
@@ -18,7 +14,7 @@ describe('FieldFormatsService', function () {
 
   let fieldFormats;
   beforeEach(function () {
-    fieldFormats = new FieldFormatsService;
+    fieldFormats = new FieldFormatsService();
   });
 
   it('registered FieldFormats are accessible via getType method', function () {
