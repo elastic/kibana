@@ -89,15 +89,6 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
         .findDisplayedByCssSelector('option[label="' + selection + '"]');
     }
 
-    getCreateIndexPatternButton() {
-      return testSubjects.find('createIndexPatternCreateButton');
-    }
-
-    getCreateButton() {
-      return remote.setFindTimeout(defaultFindTimeout)
-        .findDisplayedByCssSelector('[type="submit"]');
-    }
-
     async clickDefaultIndexButton() {
       await testSubjects.find('setDefaultIndexPatternButton').click();
       await PageObjects.header.waitUntilLoadingHasFinished();
@@ -272,13 +263,16 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
       await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
-    async createIndexPattern(indexPatternName = 'logstash-*', timefield = '@timestamp') {
+    async createIndexPattern(indexPatternName, timefield = '@timestamp') {
       await retry.try(async () => {
         await this.navigateTo();
         await this.clickKibanaIndices();
         await this.setIndexPatternField(indexPatternName);
+        await PageObjects.common.sleep(2000);
+        await this.getCreateIndexPatternGoToStep2Button().click();
+        await PageObjects.common.sleep(2000);
         await this.selectTimeFieldOption(timefield);
-        await this.getCreateButton().click();
+        await this.getCreateIndexPatternCreateButton().click();
       });
       await PageObjects.header.waitUntilLoadingHasFinished();
       await retry.try(async () => {
@@ -292,12 +286,19 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
       });
     }
 
-    async setIndexPatternField(pattern) {
-      log.debug(`setIndexPatternField(${pattern})`);
-      return testSubjects.find('createIndexPatternNameInput')
-        .clearValue().type(pattern);
+    async setIndexPatternField(indexPatternName = 'logstash-*') {
+      log.debug(`setIndexPatternField(${indexPatternName})`);
+      return this.getIndexPatternField()
+        .clearValue().type(indexPatternName);
     }
 
+    getCreateIndexPatternGoToStep2Button() {
+      return testSubjects.find('createIndexPatternGoToStep2Button');
+    }
+
+    getCreateIndexPatternCreateButton() {
+      return testSubjects.find('createIndexPatternCreateButton');
+    }
 
     async removeIndexPattern() {
       let alertText;

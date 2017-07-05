@@ -21,6 +21,10 @@ export const documentationLinks = {
     painlessSyntax: `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/reference/${DOC_LINK_VERSION}/modules-scripting-painless-syntax.html`,
     luceneExpressions: `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/reference/${DOC_LINK_VERSION}/modules-scripting-expression.html`
   },
+  indexPatterns: {
+    loadingData: `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/tutorial-load-dataset.html`,
+    introduction: `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/index-patterns.html`,
+  },
   query: {
     luceneQuerySyntax:
       `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/reference/${DOC_LINK_VERSION}/query-dsl-query-string-query.html#query-string-syntax`,

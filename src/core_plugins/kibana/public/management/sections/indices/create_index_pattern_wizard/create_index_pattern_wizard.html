@@ -1,0 +1,149 @@
+<kbn-management-app section="kibana">
+  <kbn-management-indices>
+    <div
+      ng-controller="managementIndicesCreate as controller"
+      data-test-subj="createIndexPatternContainer"
+      class="kuiViewContent"
+    >
+      <!-- Intro -->
+      <div class="kuiVerticalRhythm">
+        <div class="kuiBar">
+          <h1
+            class="kuiTitle"
+            translate="KIBANA-CREATE_INDEX_PATTERN_TITLE"
+          ></h1>
+
+          <div class="kuiBarSection">
+            <!-- Include system indices -->
+            <label class="kuiCheckBoxLabel">
+              <input
+                type="checkbox"
+                class="kuiCheckBox"
+                ng-model="controller.doesIncludeSystemIndices"
+                ng-change="controller.onIncludeSystemIndicesChange()"
+              >
+
+              <span
+                class="kuiCheckBoxLabel__text"
+                translate="KIBANA-CREATE_INDEX_PATTERN_INCLUDE_SYSTEM_INDICES_CHECKBOX_LABEL"
+              ></span>
+            </label>
+          </div>
+        </div>
+
+        <p
+          class="kuiText kuiSubduedText"
+          translate="KIBANA-CREATE_INDEX_PATTERN_INTRO"
+        ></p>
+      </div>
+
+      <!-- User has no data -->
+      <div
+        class="kuiPanel kuiVerticalRhythm"
+        ng-if="!controller.hasIndices()"
+      >
+        <div class="kuiPanelBody">
+          <!-- Fetching state -->
+          <div
+            ng-if="controller.isFetchingExistingIndices"
+            class="kuiPanel kuiPanel--prompt kuiPanel--noBorder kuiVerticalRhythm"
+          >
+            <div class="kuiPanelBody">
+              <h2
+                class="kuiSubTitle kuiSubduedText kuiVerticalRhythm"
+                translate="KIBANA-CREATE_INDEX_PATTERN_LOADING_DATA_TITLE"
+              ></h2>
+
+              <div class="kuiVerticalRhythm">
+                <p class="kuiText kuiSubduedText kuiVerticalRhythmSmall">
+                  <span class="kuiStatusText">
+                    <span
+                      aria-hidden="true"
+                      class="kuiStatusText__icon kuiIcon fa-spinner fa-spin"
+                    ></span>
+                    <span translate="KIBANA-CREATE_INDEX_PATTERN_LOADING_DATA_BODY"></span>
+                  </span>
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Empty state -->
+          <div ng-if="!controller.isFetchingExistingIndices">
+            <div class="kuiPanel kuiPanel--prompt kuiPanel--noBorder kuiVerticalRhythm">
+              <div class="kuiPanelBody">
+                <h1
+                  class="kuiSubTitle kuiSubduedText kuiVerticalRhythm"
+                  translate="KIBANA-CREATE_INDEX_PATTERN_NO_DATA_TITLE"
+                ></h1>
+
+                <div class="kuiVerticalRhythm">
+                  <p class="kuiText kuiSubduedText kuiVerticalRhythmSmall">
+                    <span translate="KIBANA-CREATE_INDEX_PATTERN_NO_DATA_BODY"></span>
+                    <a
+                      class="kuiLink"
+                      ng-href="{{ controller.documentationLinks.indexPatterns.loadingData }}"
+                      translate-attr="{ 'aria-label': 'KIBANA-CREATE_INDEX_PATTERN_NO_DATA_LEARN_LINK_ALT' }"
+                      target="_blank"
+                      translate="KIBANA-CREATE_INDEX_PATTERN_NO_DATA_LEARN_LINK"
+                    ></a>
+                  </p>
+                </div>
+
+                <button
+                  class="kuiButton kuiButton--secondary kuiButton--iconText kuiVerticalRhythm"
+                  ng-click="controller.fetchExistingIndices()"
+                >
+                  <span class="kuiButton__inner">
+                    <span
+                      aria-hidden="true"
+                      class="kuiButton__icon kuiIcon fa-refresh"
+                    ></span>
+                    <span translate="KIBANA-CREATE_INDEX_PATTERN_NO_DATA_RELOAD_BUTTON"></span>
+                  </span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- User has data -->
+      <div
+        class="kuiVerticalRhythm"
+        ng-if="controller.hasIndices()"
+        ng-switch="controller.wizardStep"
+      >
+        <!-- Specify index pattern -->
+        <step-index-pattern
+          ng-switch-when="indexPattern"
+          fetch-existing-indices="controller.fetchExistingIndices()"
+          is-fetching-existing-indices="controller.isFetchingExistingIndices"
+          fetch-matching-indices="controller.fetchMatchingIndices()"
+          is-fetching-matching-indices="controller.isFetchingMatchingIndices"
+          has-indices="controller.hasIndices()"
+          index-pattern-name="controller.formValues.name"
+          all-indices="controller.allIndices"
+          partial-matching-indices="controller.partialMatchingIndices"
+          matching-indices="controller.matchingIndices"
+          go-to-next-step="controller.goToTimeFieldStep()"
+        ></step-index-pattern>
+
+        <!-- Specify optional time field -->
+        <step-time-field
+          ng-switch-when="timeField"
+          index-pattern-name="controller.formValues.name"
+          expand-wildcard="controller.formValues.expandWildcard"
+          can-enable-expand-wildcard="controller.canEnableExpandWildcard()"
+          time-field-options="controller.timeFieldOptions"
+          time-field-options-error="controller.timeFieldOptionsError"
+          selected-time-field-option="controller.formValues.timeFieldOption"
+          fetch-time-field-options="controller.fetchTimeFieldOptions()"
+          is-fetching-time-field-options="controller.isFetchingTimeFieldOptions"
+          go-to-previous-step="controller.goToIndexPatternStep()"
+          create-index-pattern="controller.createIndexPattern()"
+        ></step-time-field>
+      </div>
+    </div>
+  </kbn-management-indices>
+</kbn-management-app>

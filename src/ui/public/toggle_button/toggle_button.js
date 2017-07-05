@@ -7,11 +7,13 @@ app.directive('toggleButton', function () {
   return {
     restrict: 'E',
     replace: true,
+    transclude: true,
     template: template,
     scope: {
       text: '@',
+      isDisabled: '=',
       isCollapsed: '=',
-      onClick: '='
+      onClick: '=',
     },
     controllerAs: 'toggleButton',
     bindToController: true,
