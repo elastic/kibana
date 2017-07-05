@@ -62,8 +62,6 @@ Style all the Y-axes of the chart.
 *Custom Extents*:::: You can define custom minimum and maximum for each axis
 
 ==== X-Axis
-By default one X-axis is defined on a chart, but you can add as much as you need. Clicking on the + sign to create a new
-X-axis.
 
 *Position*:: position of the X-Axis (*left* or *right* for horizontal charts, and *top* or *bottom* for vertical charts).
 *Advanced Options*::

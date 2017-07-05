@@ -20,11 +20,14 @@
   }
 }
 
+/**
+ * 1. Allow row to expand if the content is so long that it wraps.
+ */
 .kuiLocalNavRow {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  height: 29px;
+  min-height: 29px; /* 1 */
 }
 
 .kuiLocalNavRow__section {

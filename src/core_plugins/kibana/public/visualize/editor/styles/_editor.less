@@ -287,27 +287,14 @@
     }
 
   /**
-  * 1. Make ui-select input match other inputs.
-  * 2. Show invalid state if the user has interacted with the input without selecting an option.
+  * 1. Show invalid state if the user has interacted with the input without selecting an option.
   */
   .vis-editor-field-ui-select {
-    .ui-select-match {
-      .btn {
-        border: 1px solid @globalColorLightGray; /* 1 */
-        background-color: @white; /* 1 */
-        color: @kibanaGray1; /* 1 */
-
-        .ui-select-placeholder {
-          color: @input-color-placeholder; /* 1 */
-        }
-      }
-    }
-
     &.ng-invalid.ng-dirty,
     &.ng-invalid.ng-touched {
       .ui-select-match {
         .btn {
-          border-color: @globalColorRed; /* 2 */
+          border-color: @globalColorRed; /* 1 */
         }
       }
     }

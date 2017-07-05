@@ -155,6 +155,41 @@ export default function ({ getService, getPageObjects }) {
       });
     });
 
+    describe('expanding a panel', () => {
+      it('hides other panels', async () => {
+        await PageObjects.dashboard.toggleExpandPanel();
+        await retry.try(async () => {
+          const panels = await PageObjects.dashboard.getDashboardPanels();
+          expect(panels.length).to.eql(1);
+        });
+      });
+
+      it('does not show the spy pane toggle if mouse is not hovering', async () => {
+        // move mouse off the panel.
+        await PageObjects.header.clickTimepicker();
+        await PageObjects.header.clickTimepicker();
+
+        // no spy pane without hover
+        const spyToggleExists = await PageObjects.visualize.getSpyToggleExists();
+        expect(spyToggleExists).to.be(false);
+      });
+
+      it('shows the spy pane toggle on hover', async () => {
+        const panels = await PageObjects.dashboard.getDashboardPanels();
+        // Simulate hover
+        await remote.moveMouseTo(panels[0]);
+        const spyToggleExists = await PageObjects.visualize.getSpyToggleExists();
+        expect(spyToggleExists).to.be(true);
+      });
+
+      it('shows other panels after being minimized', async () => {
+        await PageObjects.dashboard.toggleExpandPanel();
+        const panels = await PageObjects.dashboard.getDashboardPanels();
+        const visualizations = PageObjects.dashboard.getTestVisualizations();
+        expect(panels.length).to.eql(visualizations.length);
+      });
+    });
+
     describe('add new visualization link', () => {
       it('adds a new visualization', async () => {
         await PageObjects.dashboard.clickAddVisualization();
