@@ -83,6 +83,23 @@ describe('server/config completeMixin()', function () {
     });
   });
 
+  describe('env setting specified', () => {
+    it('should not throw', () => {
+      const { callCompleteMixin } = setup({
+        settings: {
+          env: 'development'
+        },
+        configValues: {
+          env: {
+            name: 'development'
+          }
+        }
+      });
+
+      callCompleteMixin();
+    });
+  });
+
   describe('settings include non-default array settings', () => {
     it('should not throw', () => {
       const { callCompleteMixin } = setup({
