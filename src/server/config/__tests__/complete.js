@@ -83,6 +83,24 @@ describe('server/config completeMixin()', function () {
     });
   });
 
+  describe('settings include non-default array settings', () => {
+    it('should not throw', () => {
+      const { callCompleteMixin } = setup({
+        settings: {
+          foo: [
+            'a',
+            'b'
+          ]
+        },
+        configValues: {
+          foo: []
+        }
+      });
+
+      callCompleteMixin();
+    });
+  });
+
   describe('some settings unused', () => {
     it('should throw an error', function () {
       const { callCompleteMixin } = setup({
