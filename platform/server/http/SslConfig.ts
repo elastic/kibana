@@ -21,7 +21,6 @@ const createSslSchema = (schema: Schema) => {
         )
       ),
       cipherSuites: arrayOf(string(), {
-        // $ExpextError: 'constants' is currently missing in built-in types
         defaultValue: crypto.constants.defaultCoreCipherList.split(':')
       })
     },
