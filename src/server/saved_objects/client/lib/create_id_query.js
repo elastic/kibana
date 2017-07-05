@@ -7,6 +7,7 @@
 export function createIdQuery({ type, id }) {
   return {
     version: true,
+    size: 1,
     query: {
       bool: {
         should: [
