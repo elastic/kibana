@@ -1,4 +1,4 @@
-import { pluck, reduce, size, uniq } from 'lodash';
+import { pluck, reduce, size } from 'lodash';
 
 const getIndexNamesFromAliasesResponse = json => {
   if (json.status === 404) {
@@ -24,17 +24,14 @@ const getIndexNamesFromIndicesResponse = json => {
 
 export function IndicesGetIndicesProvider(esAdmin) {
   return async function getIndices(query) {
-    if (typeof query !== 'string' || !query.trim()) {
-      return [];
+    const aliases = await esAdmin.indices.getAlias({ index: query, allowNoIndices: true, ignore: 404 });
+
+    // If aliases return 200, they'll include matching indices, too.
+    if (aliases.status === 404) {
+      const indices = await esAdmin.cat.indices({ index: query, format: 'json', ignore: 404 });
+      return getIndexNamesFromIndicesResponse(indices);
     }
 
-    const aliases = await esAdmin.indices.getAlias({ index: query, allowNoIndices: true, ignore: 404 });
-    const aliasNames = getIndexNamesFromAliasesResponse(aliases);
-
-    const indices = await esAdmin.cat.indices({ index: query, format: 'json', ignore: 404 });
-    const indexNames = getIndexNamesFromIndicesResponse(indices);
-
-    const uniqueIndices = uniq([...aliasNames, ...indexNames]);
-    return uniqueIndices;
+    return getIndexNamesFromAliasesResponse(aliases);
   };
 }
