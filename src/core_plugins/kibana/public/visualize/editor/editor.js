@@ -28,7 +28,9 @@ uiRoutes
     savedVis: function (savedVisualizations, courier, $route, Private) {
       const visTypes = Private(VisTypesRegistryProvider);
       const visType = _.find(visTypes, { name: $route.current.params.type });
-      if (visType.requiresSearch && !$route.current.params.indexPattern && !$route.current.params.savedSearchId) {
+      const shouldHaveIndex = visType.requiresSearch && visType.options.showIndexSelection;
+      const hasIndex = $route.current.params.indexPattern || $route.current.params.savedSearchId;
+      if (shouldHaveIndex && !hasIndex) {
         throw new Error('You must provide either an indexPattern or a savedSearchId');
       }
 
