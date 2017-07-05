@@ -1,28 +1,25 @@
 import { pluck, reduce, size } from 'lodash';
 
-const getIndexNamesFromAliasesResponse = json => {
-  if (json.status === 404) {
-    return [];
-  }
-
-  return reduce(json, (list, { aliases }, indexName) => {
-    list.push(indexName);
-    if (size(aliases) > 0) {
-      list.push(...Object.keys(aliases));
-    }
-    return list;
-  }, []);
-};
-
-const getIndexNamesFromIndicesResponse = json => {
-  if (json.status === 404) {
-    return [];
-  }
-
-  return pluck(json, 'index');
-};
-
 export function IndicesGetIndicesProvider(esAdmin) {
+  const getIndexNamesFromAliasesResponse = json => {
+    // Assume this function won't be called in the event of a 404.
+    return reduce(json, (list, { aliases }, indexName) => {
+      list.push(indexName);
+      if (size(aliases) > 0) {
+        list.push(...Object.keys(aliases));
+      }
+      return list;
+    }, []);
+  };
+
+  const getIndexNamesFromIndicesResponse = json => {
+    if (json.status === 404) {
+      return [];
+    }
+
+    return pluck(json, 'index');
+  };
+
   return async function getIndices(query) {
     const aliases = await esAdmin.indices.getAlias({ index: query, allowNoIndices: true, ignore: 404 });
 
