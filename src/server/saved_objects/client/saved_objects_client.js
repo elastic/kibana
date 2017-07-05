@@ -181,26 +181,19 @@ export class SavedObjectsClient {
       return [...acc, {}, createIdQuery({ type, id })];
     }, []);
 
-
-    const response = await this._withKibanaIndex('msearch', { body: docs })
-    .then(resp => {
-      let results = [];
-      const responses = get(resp, 'responses', []);
-      responses.forEach(r => {
-        results = results.concat(get(r, 'hits.hits'));
-      });
-      return results;
-    });
+    const response = await this._withKibanaIndex('msearch', { body: docs });
+    const responses = get(response, 'responses', []);
 
     return {
-      saved_objects: response.map(r => {
-        const docType =  getDocType(r);
+      saved_objects: responses.map(r => {
+        const [hit] = get(r, 'hits.hits', []);
+        const docType =  getDocType(hit);
 
         return {
-          id: r._id,
+          id: hit._id,
           type: docType,
-          version: r._version,
-          attributes: get(r, `_source.${docType}`) || r._source
+          version: hit._version,
+          attributes: get(hit, `_source.${docType}`) || hit._source
         };
       })
     };
