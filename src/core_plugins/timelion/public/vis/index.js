@@ -40,6 +40,9 @@ define(function (require) {
       },
       requestHandler: 'timelion',
       responseHandler: 'none',
+      options: {
+        showIndexSelection: false
+      }
     });
   }
 

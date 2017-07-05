@@ -29,6 +29,7 @@ export function VisTypeProvider() {
           showTimePicker: true,
           showQueryBar: true,
           showFilterBar: true,
+          showIndexSelection: true,
           hierarchicalData: false  // we should get rid of this i guess ?
         },
         isExperimental: false
