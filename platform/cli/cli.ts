@@ -30,6 +30,8 @@ const run = (argv: {[key: string]: any}) => {
   const rawConfigService = new RawConfigService(env.getConfigFile());
   const configOverrides = argvToConfigOverrides(argv);
 
+  rawConfigService.loadConfig();
+
   const onShutdown: OnShutdown = reason => {
     process.exit(reason === undefined ? 0 : 1);
   }
@@ -39,7 +41,6 @@ const run = (argv: {[key: string]: any}) => {
 
   const root = new Root(rawConfig$, env, onShutdown);
   root.start();
-  rawConfigService.loadConfig();
 
   process.on('SIGHUP', () => rawConfigService.reloadConfig());
   process.on('SIGINT', () => shutdown());
