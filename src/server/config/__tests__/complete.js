@@ -174,7 +174,7 @@ describe('server/config completeMixin()', function () {
 
       callCompleteMixin();
       sinon.assert.calledOnce(transformDeprecations);
-      expect(transformDeprecations.firstCall.args[0]).to.be(settings);
+      sinon.assert.calledWithExactly(transformDeprecations, settings);
     });
 
     it('should use transformed settings when considering what is used', function () {
