@@ -106,7 +106,7 @@ export default function ({ getService, getPageObjects }) {
           '2015-09-21 03:00', '202'
         ];
 
-        return PageObjects.visualize.collapseChart()
+        return PageObjects.visualize.toggleSpyPanel()
         .then(function showData() {
           return PageObjects.visualize.getDataTableData();
         })

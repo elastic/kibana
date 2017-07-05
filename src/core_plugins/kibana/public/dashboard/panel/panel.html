@@ -1,4 +1,4 @@
-<div class="panel panel-default" ng-class="{'panel--edit-mode': !isViewOnlyMode()}" ng-switch on="panel.type" ng-if="savedObj || error">
+<div class="panel panel-default" data-test-subj="dashboardPanel" ng-class="{'panel--edit-mode': !isViewOnlyMode()}" ng-switch on="panel.type" ng-if="savedObj || error">
   <div class="panel-heading">
     <span
       data-test-subj="dashboardPanelTitle"

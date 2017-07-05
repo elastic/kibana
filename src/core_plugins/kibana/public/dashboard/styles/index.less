@@ -58,7 +58,7 @@
 dashboard-grid {
   display: block;
   margin: 0;
-  padding: 20px;
+  padding: 5px;
 }
 
 .start-screen {
@@ -84,25 +84,6 @@ dashboard-grid {
     padding: 4px;
     height: 25px;
     width: 25px;
-  }
-
-  .gs-w {
-
-    &:hover {
-
-      dashboard-panel {
-        .visualize-show-spy {
-          visibility: visible;
-        }
-      }
-
-    }
-    .panel--edit-mode {
-      border-color: @kibanaGray4;
-      .visualize-show-spy {
-        visibility: visible;
-      }
-    }
   }
 
   i.remove {
@@ -188,6 +169,12 @@ dashboard-panel {
 
     .visualize-show-spy {
       visibility: hidden;
+    }
+
+    &:hover {
+      .visualize-show-spy {
+        visibility: visible;
+      }
     }
 
     .load-error {
