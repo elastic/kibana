@@ -12,7 +12,7 @@ app.directive('togglePanel', function () {
     template: template,
     scope: {
       togglePanelId: '@',
-      toggleButtonLabel: '=',
+      toggleButtonLabel: '@',
       isDisabled: '=',
       isCollapsed: '=',
       onToggle: '='

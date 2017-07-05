@@ -10,7 +10,6 @@ app.directive('toggleButton', function () {
     transclude: true,
     template: template,
     scope: {
-      text: '@',
       isDisabled: '=',
       isCollapsed: '=',
       onClick: '=',
