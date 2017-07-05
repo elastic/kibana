@@ -266,18 +266,10 @@ export class SavedObjectsClient {
       'update': ['document_missing_exception']
     };
 
-    return new Promise((resolve, reject) => {
-      this._withKibanaIndex(method, params)
-        .then(resolve)
-        .catch(err => {
-          if (get(fallbacks, method, []).includes(get(err, 'data.type'))) {
-            this._withKibanaIndex(method, Object.assign({}, params, fallbackParams))
-              .then(resolve)
-              .catch(reject);
-          } else {
-            reject(err);
-          }
-        });
+    return this._withKibanaIndex(method, params).catch(err => {
+      if (get(fallbacks, method, []).includes(get(err, 'data.type'))) {
+        return this._withKibanaIndex(method, Object.assign({}, params, fallbackParams));
+      }
     });
   }
 
