@@ -392,7 +392,7 @@ describe('SavedObjectsClient', () => {
       expect(callAdminCluster.notCalled).to.be(true);
     });
 
-    it('omits missed objects', async () => {
+    it('reports error on missed objects', async () => {
       callAdminCluster.returns(Promise.resolve({
         responses: [
           {
@@ -416,7 +416,7 @@ describe('SavedObjectsClient', () => {
       }));
 
       const { saved_objects: savedObjects } = await savedObjectsClient.bulkGet(
-        ['good', 'bad', 'config']
+        [{ id: 'good', type: 'config' }, { id: 'bad', type: 'config' }]
       );
 
       expect(savedObjects).to.have.length(1);

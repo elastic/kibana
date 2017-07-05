@@ -185,16 +185,20 @@ export class SavedObjectsClient {
     const responses = get(response, 'responses', []);
 
     return {
-      saved_objects: responses.map(r => {
+      saved_objects: responses.map((r, i) => {
         const [hit] = get(r, 'hits.hits', []);
         const docType =  getDocType(hit);
 
-        return {
-          id: hit._id,
-          type: docType,
+        if (!hit) {
+          return Object.assign({}, objects[i], {
+            error: { statusCode: 404, message: 'Not found' }
+          });
+        }
+
+        return Object.assign({}, objects[i], {
           version: hit._version,
-          attributes: get(hit, `_source.${docType}`) || hit._source
-        };
+          attributes: get(hit, `_source.${docType}`, hit._source)
+        });
       })
     };
   }
@@ -270,6 +274,8 @@ export class SavedObjectsClient {
       if (get(fallbacks, method, []).includes(get(err, 'data.type'))) {
         return this._withKibanaIndex(method, Object.assign({}, params, fallbackParams));
       }
+
+      return err;
     });
   }
 
