@@ -48,7 +48,7 @@ export function createServer(settings = {}) {
 }
 
 /**
- *  Cerates an instance of KbnServer, including all of the core plugins,
+ *  Creates an instance of KbnServer, including all of the core plugins,
  *  with default configuration tailored for unit tests
  *
  *  @param  {Object} [settings={}]
