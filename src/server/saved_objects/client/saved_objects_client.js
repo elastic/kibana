@@ -31,7 +31,6 @@ export class SavedObjectsClient {
   */
   async create(type, attributes = {}, options = {}) {
     const method = options.id && !options.overwrite ? 'create' : 'index';
-    console.log('create> ', method, type, attributes, options);
     const response = await this._withKibanaIndexAndMappingFallback(method, {
       type,
       id: options.id,
@@ -47,7 +46,7 @@ export class SavedObjectsClient {
 
     return {
       id: response._id,
-      type: type,
+      type,
       version: response._version,
       attributes
     };
@@ -179,8 +178,7 @@ export class SavedObjectsClient {
     }
 
     const docs = objects.reduce((acc, { type, id }) => {
-      acc.push({}, createIdQuery({ type, id }));
-      return acc;
+      return [...acc, {}, createIdQuery({ type, id })];
     }, []);
 
 
@@ -217,7 +215,7 @@ export class SavedObjectsClient {
    */
   async get(type, id) {
     const response = await this._withKibanaIndex('search', { body: createIdQuery({ type, id }) });
-    const [hit,] = get(response, 'hits.hits', []);
+    const [hit] = get(response, 'hits.hits', []);
 
     if (!hit) {
       throw Boom.notFound();
@@ -227,7 +225,7 @@ export class SavedObjectsClient {
 
     return {
       id: hit._id,
-      type: type,
+      type,
       version: hit._version,
       attributes
     };
@@ -279,7 +277,6 @@ export class SavedObjectsClient {
       this._withKibanaIndex(method, params)
         .then(resolve)
         .catch(err => {
-          console.log('err', err);
           if (get(fallbacks, method, []).includes(get(err, 'data.type'))) {
             this._withKibanaIndex(method, Object.assign({}, params, fallbackParams))
               .then(resolve)
