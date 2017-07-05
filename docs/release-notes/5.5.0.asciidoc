@@ -1,0 +1,167 @@
+[[release-notes-5.5.0]]
+== 5.5.0 Release Notes
+
+Also see <<breaking-changes-5.0>>.
+
+[float]
+[[enhancement-5.5.0]]
+=== Enhancements
+Design::
+* Adding a warning button and making the notifier use it for warnings {pull}11829[#11829]
+* [UI Framework] Apply elastic.co look and feel to UI Framework docs site. {pull}11174[#11174]
+* [UI Framework] Add support for selects and secondary inputs to LocalNavSearch component of UI Framework. {pull}11287[#11287]
+* [UI Framework] Add example of disabled kuiSelect. {pull}11345[#11345]
+* [UI Framework] Add support for dark theme links. {pull}11344[#11344]
+* [UI Framework] Add AssistedInput. {pull}11343[#11343]
+* [UI Framework] Add kuiButton--fullWidth kuiButton--small, and kuiButtonGroup--fullWidth modifiers. {pull}11365[#11365]
+* [UI Framework] Vertical align children in a FieldGroup. {pull}11374[#11374]
+* [UI Framework] Make CardGroup split apart by default. Add kuiCardGroup--united modifier. {pull}11580[#11580]
+* [UI Framework] Add Elastic logo to UI Framework doc site. {pull}11686[#11686]
+* [UI Framework] Improve UI Framework Home Page and 404 Page. {pull}11715[#11715]
+* [UI Framework] Display React logo next to React components in the nav. {pull}11746[#11746]
+* [UI Framework] Wrap Cards within a non-united CardGroup. {pull}11704[#11704]
+* [UI Framework] Update CardGroup component example to exhibit stacking on smaller screens. {pull}11751[#11751]
+* [UI Framework] Add KuiKeyboardAccessible component to UI Framework. {pull}11743[#11743]
+* [UI Framework] Add isInvalid states for TextInput, TextArea, and SearchInput components. {pull}11995[#11995]
+* Add small text input to UI framework {pull}11354[#11354]
+* Adding table_info component {pull}11778[#11778]
+* [UI Framework] Add KuiInfoButton component {pull}11811[#11811]
+* [UI Framework] Allow kuiLocalNavRow to expand vertically if the content wraps. {pull}12606[#12606]
+
+Core::
+* [IndexPatterns] Support cross cluster search {pull}11114[#11114]
+  - Index Patterns can now point to indices from remote clusters when using Elasticsearch's cross cluster search feature. After setting it up in elasticsearch, just mention the remote cluster alias in the index name like so: remoteCluster:indexName.
+* Import / Export API for Dashboards {pull}10858[#10858]
+* Disable dynamic/Implement static mappings {pull}10638[#10638]
+* Adds an API for managing saved objects {pull}11632[#11632]
+* Rely on `kbn-xsrf` header for CSRF protection {pull}12547[#12547]
+
+Dev Tools::
+* Improve Console screen-reader accessibility. {pull}11602[#11602]
+* Adding autocomplete rules for reindex API to Console {pull}10150[#10150]
+
+Dashboard::
+* Introduce Clone feature in view mode {pull}10925[#10925]
+  - Introducing the ability to easily clone dashboards in view mode.  Just click the new button in the top navigation, and enter in a new dashboard name.
+* Update angular-bootstrap DatePicker with UI Framework classes. {pull}11378[#11378]
+* Improve Dashboard screen-reader accessibility. {pull}11600[#11600]
+* Improve accessibility of the Datepicker. {pull}11753[#11753]
+* Add back dashboard descriptions {pull}11552[#11552]
+  - In pre 5.0 versions of Kibana, we showed dashboard descriptions in theOpen listing, but the only place to edit or set them was in Saved Object Management. When we first introduced the new listing pages, we took out the dashboard description portion since the UI was pretty poor.  We've now added it back in, along with a more convenient place to add and edit the description for each dashboard.
+* Hide the second toast when adding a new visualization straight from dashboard {pull}11621[#11621]
+  - Previously using the Add new visualization button straight from dashboard caused two notifications to appear - one for successfully saving the visualization and one for successfully adding the visualization to the dashboard.  Two were unnecessary and since our notifications move elements around, we will now only show the notification about successfully saving the visualization.
+* In case of a save error, use notify.error, not a full screen fatal page {pull}12381[#12381]
+
+Discover::
+* [context view] Apply filters to the context query {pull}11466[#11466]
+  - This adds the ability to display a filter bar in the Context view and to apply those filters to the queries. It also modifies the link from the Discover view to the Context view to copy the currently defined filters when switching. New filters can be added from within the Context view using the icons in the expanded detail rows.
+* Filter editors {pull}11375[#11375]
+  - We've added more helpful input controls for editing filters. When you edit a filter, you'll get drop-downs and text boxes with suggestions from your data instead of just a JSON editor. We've also added the ability to add custom filters without having to click on a visualization.
+* Improve Discover screen-reader accessibility: {pull}11598[#11598]
+* Make Discover field chooser items keyboard accessible. {pull}11591[#11591]
+* Make Discover table keyboard accessible. {pull}11604[#11604]
+* Improve Filter Editor UI {pull}12161[#12161]
+* Add Lucene query syntax help {pull}10928[#10928]
+* 11851 a11y discover field chooser headers (rebased version) {pull}12211[#12211]
+
+Management::
+* Update Settings page with UI Framework components. {pull}11272[#11272]
+* Improve Management screen-reader accessibility. {pull}11601[#11601]
+* [Index pattern creation] Move the error message to below the input field {pull}11801[#11801]
+* Removes the "Index contains time-based events" checkbox {pull}11409[#11409]
+
+Visualize::
+* Gauge Chart {pull}10336[#10336]
+  - The gauge and goals charts are two new visualization types that allow people to track a metric and display the in context of a set of reference values. Gauges are useful to indicate how a metric compares to a range of threshold values, for example, to show whether a server load is within a normal range or instead has reach critical capacity. Goal visualizations are similar, but are primarily used to indicate how far a metric is removed from a certain target value.
+* Region Map {pull}10937[#10937]
+  - Kibana now has the Region Map Visualization. These are thematic maps in which boundary vector shapes are colored using a gradient, with higher intensity colors indicating larger values and lower intensity colors indicating smaller values. These are also known as choropleth maps. In order to color these layers, users specify a terms aggregation that matches a field in the vector layer. Kibana offers two vector layers by default; one for countries of the world and one for US Shapes. Users can also bring in their own vector layers by configuring the Kibana-configuration file to point to any GeoJson file that is hosted on a CORS-enabled server.
+* Update illegible vis type icons with legible ones. {pull}11317[#11317]
+* Improve Visualize screen-reader accessibility. {pull}11599[#11599]
+* Improve Visualize sidebar accessibility. {pull}11754[#11754]
+* [Fix for #11415] Add new config option to control the amount of items in listing pages {pull}11674[#11674]
+* Adding label templates to legend keys for TSVB {pull}11266[#11266]
+* Static Series for Time Series Visual Builder {pull}11496[#11496]
+* Show bucket size for Time Series Visual Builder on X-Axis {pull}11639[#11639]
+* Removing the auto-apply feature from Time Series Visual Builder {pull}11460[#11460]
+* Add Help Text to Painless Script for Time Series Visual Builder {pull}11936[#11936]
+* using ui-select for field selection in visualize {pull}10998[#10998]
+* Add support for timelion:min_interval {pull}11476[#11476]
+* Add .aggregate() function to timelion {pull}11556[#11556]
+* Add support for date math in Timelion's .movingaverage() {pull}11555[#11555]
+* Call out latitude/longitue in map tooltip {pull}11718[#11718]
+
+[float]
+[[bug-5.5.0]]
+=== Bug fixes
+Design::
+* [UI Framework] Fix appearance of some form components in Firefox {pull}11589[#11589]
+* [UI Framework] Fix some flexbox errors with the UI Framework docs. {pull}11719[#11719]
+* [UI Framework] Update Notice sandbox to use correct classes. {pull}11869[#11869]
+* [UI Framework] Fix bug with UI Framework background height not expanding to fit content. {pull}11880[#11880]
+* [UI Framework] Fix appearance of united CardGroup. {pull}12132[#12132]
+* Fix visualize sort icon bug {pull}11568[#11568]
+  - A recent refactor cause the sort icons in the visualize landing page to disappear.
+* [UI Framework] Fix React Warning in Demo Site {pull}11822[#11822]
+
+Dashboard::
+* [Fix for #10128] Adding an app for redirects when storing state in session storage {pull}10822[#10822]
+* [Fix for #9747] Don't kill an entire dashboard because of one bad request {pull}11337[#11337]
+  - Previously if a visualization caused a request error to be thrown, the entire dashboard would fail to load. We changed that so now the rest of the visualizations will continue to load successfully, helping you narrow down which visualizations the errors are coming from.
+* [Fix for #11090] Fix bug in dashboard Add panel pager where it always said `x of x` {pull}11617[#11617]
+  - There were a few places where the pager text would always say 'x of x' - the first number was always equal to the second. This fixes that and uses a style closer to the listing page pager style.
+* [Fix for #11681] Fix modals in react {pull}11714[#11714]
+* [Fix for #10588] Fix firefox scroll issue {pull}12031[#12031]
+  - We fixed an issue that prevented scrolling inside panels that are too long, when using the Firefox browser.
+* [Fix for #11078] Preserve the saved vis url when using the add new vis link from dashboard {pull}11932[#11932]
+  - Previously using the Add new visualization link failed to set the correct last visited link for the app, so that navigating back to visualize would show you the same visualization, with the same title, but in an unsaved state. This could lead to confusion, as the only way to tell that you aren't modifying the visualization you just created is by looking at the url.  If you attempted to modify and save, you would get a duplicate title warning.  Now, you will correctly modify the existing visualization and the save will work seamlessly.
+* [Fix for #12177] Remove encoding dashboard listing links {pull}12195[#12195]
+
+Dev Tools::
+* minimum_number_should_match was deprecated {pull}11316[#11316]
+
+Discover::
+* Create CollapseButton component class to standardize appearance of this button. {pull}11462[#11462]
+* [Fix for #12061] [Discover] Hide the whole filter div instead of just the icons {pull}11819[#11819]
+* [Fix for #12124] [context view] Fix courier exception handling {pull}12144[#12144]
+* [Fix for #11483] Remove the _source field toggle button which was accidentally reinstated {pull}11485[#11485]
+* [Fix for #10653] Migrate deprecated match query syntax {pull}11554[#11554]
+* [Fix for #12248] Fix filter bar appearing above other elements {pull}12480[#12480]
+
+Management::
+* [Fix for #12308] Adding an explicit larger max-width for advanced settings actions {pull}12311[#12311]
+* Fix documentation links on scripted field creation page {pull}11912[#11912]
+* [Fix for #11663] Fix default time field selection {pull}11664[#11664]
+* [indexPatterns] update field in place {pull}11966[#11966]
+
+Visualize::
+* Discover and visualization set appStatus.dirty before saving new {pull}11156[#11156]
+* Fix suggestions in Timelion Visualization. {pull}11638[#11638]
+* Refine behavior of spy panel in Discover, Visualize, and Dashboard {pull}12353[#12353]
+* Fixing the fields for the numbers for percentile aggs for Time Series Visual Builder {pull}11169[#11169]
+* [Fix for #11289] Fixes #11289 - Change top_n to not use split colors for TSVB {pull}11342[#11342]
+* [Fix for #11232] Fixes #11232 - Add option for panel and global filters to annotations for TSVB {pull}11260[#11260]
+* [Fix for #11763] Fixes error in Percentile for Time Series Visual Builder {pull}11772[#11772]
+* Fix dirty checking for changes to Time Series Visual Builder {pull}12114[#12114]
+* [Fix for #8678] Don't prevent filterable rows from being filterable {pull}11628[#11628]
+  - Data tables using the "Filters" aggregation now allow you to click on a row to create a filter.
+* [Fix for #11488] Tooltip gets cutoff when tooltip is larger than chart container {pull}11769[#11769]
+* [Fix for #10473] area chart should render even with single data point {pull}12057[#12057]
+* [Fix for #10328] vislib container too small error message {pull}11951[#11951]
+* [Fix for #11874] Fix timelion doc page persistence {pull}11962[#11962]
+* [metricVis] Add support for html field formatters {pull}11008[#11008]
+* [Fix for #11947] Fix tag cloud resize issue when panel is minimized from full screen mode {pull}12002[#12002]
+  - Fixes a bug when using panel full screen mode with a tag cloud. Upon minimization, the tag cloud was not resized correctly.
+* [Fix for #11575] disable save button if visualization is dirty {pull}11576[#11576]
+* heatNormalizeData is true/false, not a float {pull}11799[#11799]
+* [Fix for #9343] [discover/aggSize] define config in defaults {pull}11818[#11818]
+* fix typo {pull}12297[#12297]
+* [Fix for #8341] Ensure no scroll-bar pops up inside timelion viz {pull}12298[#12298]
+* [Fix for #12187] Do not normalize keys when joining results to region map {pull}12371[#12371]
+* change manifest service url to new production server url {pull}12383[#12383]
+* [Fix for #11954] removing old point series defaults {pull}11958[#11958]
+* [Fix for #12082] Revert "disable save button if visualization is dirty (#11576)" {pull}12152[#12152]
+* [Fix for #12490] fixes gauge chart width calculation {pull}12499[#12499]
+* [Fix for #12535] fixing labels in heatmap {pull}12537[#12537]
+* [Fix for #12601] goal-type should be discoverable {pull}12603[#12603]
+
+
