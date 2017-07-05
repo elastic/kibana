@@ -36,6 +36,11 @@ module.directive('stepIndexPattern', function () {
         // If the index pattern name is invalid, we should reflect that state in the list.
         scope.stepIndexPattern.updateList();
       });
+      scope.$watch('stepIndexPattern.indexPatternNameForm.$error', () => {
+        // If we immediately replace the input with an invalid string, then only the form state
+        // changes, but not the `indexPatternName` value, so we need to watch both.
+        scope.stepIndexPattern.updateList();
+      });
     },
     controller: function () {
       this.matchingIndicesListType = 'noMatches';
