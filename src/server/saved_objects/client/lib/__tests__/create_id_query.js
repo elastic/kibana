@@ -7,6 +7,7 @@ describe('createIdQuery', () => {
 
     const expectedQuery = {
       version: true,
+      size: 1,
       query: {
         bool: {
           should: [
