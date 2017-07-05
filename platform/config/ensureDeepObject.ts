@@ -6,7 +6,7 @@ const separator = '.';
  * @param obj Object to traverse through.
  * @returns Same object instance with expanded properties.
  */
-export function ensureDeepObject(obj: any) {
+export function ensureDeepObject(obj: any): any {
   if (obj == null || typeof obj !== 'object') {
     return obj;
   }
@@ -24,7 +24,7 @@ export function ensureDeepObject(obj: any) {
     }
 
     return fullObject;
-  }, {});
+  }, {} as any);
 }
 
 function walk(obj: any, keys: string[], value: any) {
