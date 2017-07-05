@@ -1,3 +1,5 @@
+import { V6_TYPE } from '../saved_objects_client';
+
 /**
  * @param {array} objects - [{ type, id, attributes }]
  * @param {object} [options={}]
@@ -25,7 +27,7 @@ export function v6BulkCreate(objects, options = {}) {
   return objects.reduce((acc, object) => {
     const method = object.id && !options.overwrite ? 'create' : 'index';
 
-    acc.push({ [method]: { _type: 'doc', _id: object.id } });
+    acc.push({ [method]: { _type: V6_TYPE, _id: object.id } });
     acc.push(Object.assign({},
       { type: object.type },
       { [object.type]: object.attributes }

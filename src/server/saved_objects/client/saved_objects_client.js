@@ -11,7 +11,7 @@ import {
   v6BulkCreate
 } from './lib';
 
-const V6_TYPE = 'doc';
+export const V6_TYPE = 'doc';
 
 export class SavedObjectsClient {
   constructor(kibanaIndex, callAdminCluster) {
