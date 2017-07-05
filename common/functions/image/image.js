@@ -30,14 +30,15 @@ module.exports = new Fn({
   },
   fn: (context, args) => {
     function wrapImage(dataurl) {
+      const mode = args.mode === 'stretch' ? '100% 100%' : args.mode;
       return {
         type: 'image',
-        mode: args.mode,
+        mode: mode,
         dataurl,
       };
     }
 
-    if (!includes(['contain', 'cover'], args.mode)) throw '"mode" must be "contain" or "cover"';
+    if (!includes(['contain', 'cover', 'stretch'], args.mode)) throw '"mode" must be "contain", "cover", or "stretch"';
     // return image object
     // TODO: validate data type
     if (args.url) {
