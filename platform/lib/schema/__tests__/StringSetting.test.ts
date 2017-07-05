@@ -15,7 +15,8 @@ describe('#minLength', () => {
 
   test('returns error when shorter string', () => {
     expect(() =>
-      string({ minLength: 4 }).validate('foo')).toThrowErrorMatchingSnapshot();
+      string({ minLength: 4 }).validate('foo')
+    ).toThrowErrorMatchingSnapshot();
   });
 });
 
@@ -26,7 +27,8 @@ describe('#maxLength', () => {
 
   test('returns error when longer string', () => {
     expect(() =>
-      string({ maxLength: 2 }).validate('foo')).toThrowErrorMatchingSnapshot();
+      string({ maxLength: 2 }).validate('foo')
+    ).toThrowErrorMatchingSnapshot();
   });
 });
 
@@ -69,7 +71,8 @@ describe('#validate', () => {
     const validate = () => 'validator failure';
 
     expect(() =>
-      string({ validate }).validate('foo')).toThrowErrorMatchingSnapshot();
+      string({ validate }).validate('foo')
+    ).toThrowErrorMatchingSnapshot();
   });
 });
 

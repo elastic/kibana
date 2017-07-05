@@ -60,10 +60,7 @@ test('handles object with wrong type', () => {
 });
 
 test('handles multiple objects with same key', () => {
-  const setting = oneOf([
-    object({ age: string() }),
-    object({ age: number() })
-  ]);
+  const setting = oneOf([object({ age: string() }), object({ age: number() })]);
 
   expect(setting.validate({ age: 'foo' })).toEqual({ age: 'foo' });
 });
@@ -73,7 +70,7 @@ test('handles multiple types', () => {
 
   expect(setting.validate('test')).toBe('test');
   expect(setting.validate(123)).toBe(123);
-})
+});
 
 test('handles maybe', () => {
   const setting = oneOf([maybe(string())]);
@@ -87,16 +84,16 @@ test('fails if not matching type', () => {
 
   expect(() => setting.validate(false)).toThrowErrorMatchingSnapshot();
   expect(() => setting.validate(123)).toThrowErrorMatchingSnapshot();
-})
+});
 
 test('fails if not matching multiple types', () => {
   const setting = oneOf([string(), number()]);
 
   expect(() => setting.validate(false)).toThrowErrorMatchingSnapshot();
-})
+});
 
 test('fails if not matching literal', () => {
   const setting = oneOf([literal('foo')]);
 
   expect(() => setting.validate('bar')).toThrowErrorMatchingSnapshot();
-})
+});

@@ -1,7 +1,11 @@
 import { Level } from './Level';
 import { LoggerConfig } from './LoggerConfig';
 import { Logger, LoggerAdapter } from './LoggerAdapter';
-import { createLoggerFromConfig, defaultLogger, EventLogger } from './EventLogger/index';
+import {
+  createLoggerFromConfig,
+  defaultLogger,
+  EventLogger
+} from './EventLogger/index';
 
 export interface LoggerFactory {
   get(...namespace: string[]): Logger;
@@ -26,27 +30,30 @@ export interface MutableLogger {
 // it can be `import`-ed anywhere in the app instead of being injected everywhere.
 
 export class MutableLoggerFactory implements MutableLogger, LoggerFactory {
-
   private logger: EventLogger = defaultLogger;
   private level: Level = Level.Debug;
 
   // The cache of namespaced `LoggerAdapter`s
   private readonly loggerByContext: {
-    [namespace: string]: LoggerAdapter
+    [namespace: string]: LoggerAdapter;
   } = {};
 
   get(...namespace: string[]): Logger {
     const context = namespace.join('.');
 
     if (this.loggerByContext[context] === undefined) {
-      this.loggerByContext[context] = new LoggerAdapter(namespace, this.logger, this.level);
+      this.loggerByContext[context] = new LoggerAdapter(
+        namespace,
+        this.logger,
+        this.level
+      );
     }
 
     return this.loggerByContext[context];
   }
 
   updateLogger(config: LoggerConfig) {
-    const logger = this.createOrUpdateLogger(config)
+    const logger = this.createOrUpdateLogger(config);
     const level = config.getLevel();
 
     this.level = level;
@@ -54,7 +61,7 @@ export class MutableLoggerFactory implements MutableLogger, LoggerFactory {
 
     Object.values(this.loggerByContext).forEach(loggerAdapter => {
       loggerAdapter.update(logger, level);
-    })
+    });
   }
 
   private createOrUpdateLogger(config: LoggerConfig) {

@@ -7,7 +7,6 @@ interface WithConfig {
 }
 
 export class Env {
-
   readonly configDir: string;
   readonly pluginsDir: string;
   readonly binDir: string;

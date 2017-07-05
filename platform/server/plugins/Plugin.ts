@@ -24,10 +24,8 @@ function fnBody(fn: any) {
 function isClass(fn: any) {
   return (
     typeof fn === 'function' &&
-    (
-      /^class\s/.test(fnToString.call(fn)) ||
-      /^.*classCallCheck\(/.test(fnBody(fn)) // babel.js
-    )
+    (/^class\s/.test(fnToString.call(fn)) ||
+      /^.*classCallCheck\(/.test(fnBody(fn))) // babel.js
   );
 }
 
@@ -43,12 +41,12 @@ function isKibanaFunctionalPlugin<
 }
 
 interface PluginDefinition<DependenciesType, ExposableType> {
-  name: string,
-  dependencies: string[],
+  name: string;
+  dependencies: string[];
   run:
     | KibanaFunctionalPlugin<DependenciesType, ExposableType>
-    | KibanaPluginStatic<DependenciesType, ExposableType>,
-  configPath?: string | string []
+    | KibanaPluginStatic<DependenciesType, ExposableType>;
+  configPath?: string | string[];
 }
 
 export class Plugin<DependenciesType extends BasePluginsType, ExposableType> {
@@ -113,9 +111,8 @@ export class Plugin<DependenciesType extends BasePluginsType, ExposableType> {
     //   throw new Error('plugin cannot return a promise')
     // }
 
-    this.exposedValues = typeof value === 'undefined'
-      ? {} as ExposableType
-      : value;
+    this.exposedValues =
+      typeof value === 'undefined' ? {} as ExposableType : value;
   }
 
   private onStop(cb: LifecycleCallback) {

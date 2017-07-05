@@ -12,10 +12,7 @@ export { HttpConfig };
 export class HttpModule {
   readonly service: HttpService;
 
-  constructor(
-    readonly config$: Observable<HttpConfig>,
-    logger: LoggerFactory
-  ) {
+  constructor(readonly config$: Observable<HttpConfig>, logger: LoggerFactory) {
     this.service = new HttpService(this.config$, logger);
   }
 }

@@ -22,7 +22,9 @@ test('fails if port is not a number', () => {
 });
 
 test('fails if config file does not exist', () => {
-  expect(captureTerminal(parseArgv, ['--config', '/some-folder/kibana/config.yml'])).toMatchSnapshot();
+  expect(
+    captureTerminal(parseArgv, ['--config', '/some-folder/kibana/config.yml'])
+  ).toMatchSnapshot();
 });
 
 test('handles args with dashes', () => {

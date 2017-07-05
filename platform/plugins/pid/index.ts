@@ -1,6 +1,6 @@
 import { KibanaPlugin } from '../../server/plugins/types';
 import { KibanaPluginFeatures } from '../../types';
-import { Logger } from '../../logger'
+import { Logger } from '../../logger';
 
 import { PidConfig } from './PidConfig';
 import { PidService } from './PidService';
@@ -29,4 +29,4 @@ export const plugin = class implements KibanaPlugin<void> {
     this.log.info('stopping PidService');
     this.pidService.stop();
   }
-}
+};

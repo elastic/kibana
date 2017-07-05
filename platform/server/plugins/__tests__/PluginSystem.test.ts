@@ -1,13 +1,13 @@
 jest.mock('../KibanaPluginValues', () => {
   return {
     createKibanaValuesForPlugin: () => ({})
-  }
-})
+  };
+});
 
 import { Plugin } from '../Plugin';
 import { PluginSystem } from '../PluginSystem';
 import { KibanaCoreModules } from '../../../types';
-import { logger } from '../../../logger/__mocks__'
+import { logger } from '../../../logger/__mocks__';
 
 // To make typings work in the tests
 const coreValues = {} as KibanaCoreModules;
@@ -17,27 +17,33 @@ test('can register value', () => {
 
   type Foo = {
     foo: {
-      value: string
-    }
-  }
+      value: string;
+    };
+  };
 
-  const foo = new Plugin<{}, Foo['foo']>({
-    name: 'foo',
-    dependencies: [],
-    run: config => {
-      return {
-        value: 'my-value'
+  const foo = new Plugin<{}, Foo['foo']>(
+    {
+      name: 'foo',
+      dependencies: [],
+      run: config => {
+        return {
+          value: 'my-value'
+        };
       }
-    }
-  }, logger);
+    },
+    logger
+  );
 
-  const bar = new Plugin<Foo, void>({
-    name: 'bar',
-    dependencies: ['foo'],
-    run: (kibana, deps) => {
-      expect(deps.foo).toEqual({ value: 'my-value' });
-    }
-  }, logger);
+  const bar = new Plugin<Foo, void>(
+    {
+      name: 'bar',
+      dependencies: ['foo'],
+      run: (kibana, deps) => {
+        expect(deps.foo).toEqual({ value: 'my-value' });
+      }
+    },
+    logger
+  );
 
   const plugins = new PluginSystem(coreValues, logger);
   plugins.addPlugin(foo);
@@ -50,26 +56,32 @@ test('can register function', () => {
 
   type Foo = {
     foo: {
-      fn: (val: string) => string
-    }
-  }
+      fn: (val: string) => string;
+    };
+  };
 
-  const foo = new Plugin<{}, Foo['foo']>({
-    name: 'foo',
-    dependencies: [],
-    run: config => ({
-      fn: val => `test-${val}`
-    })
-  }, logger);
+  const foo = new Plugin<{}, Foo['foo']>(
+    {
+      name: 'foo',
+      dependencies: [],
+      run: config => ({
+        fn: val => `test-${val}`
+      })
+    },
+    logger
+  );
 
-  const bar = new Plugin<Foo, void>({
-    name: 'bar',
-    dependencies: ['foo'],
-    run: (kibana, deps) => {
-      expect(deps.foo).toBeDefined();
-      expect(deps.foo.fn('some-value')).toBe('test-some-value');
-    }
-  }, logger);
+  const bar = new Plugin<Foo, void>(
+    {
+      name: 'bar',
+      dependencies: ['foo'],
+      run: (kibana, deps) => {
+        expect(deps.foo).toBeDefined();
+        expect(deps.foo.fn('some-value')).toBe('test-some-value');
+      }
+    },
+    logger
+  );
 
   const plugins = new PluginSystem(coreValues, logger);
   plugins.addPlugin(foo);
@@ -82,40 +94,49 @@ test('can register value with same name across plugins', () => {
 
   type Foo = {
     foo: {
-      value: string
-    }
-  }
+      value: string;
+    };
+  };
 
   type Bar = {
     bar: {
-      value: string
-    }
-  }
+      value: string;
+    };
+  };
 
-  const foo = new Plugin<{}, Foo['foo']>({
-    name: 'foo',
-    dependencies: [],
-    run: kibana => ({
-      value: 'value-foo'
-    })
-  }, logger);
+  const foo = new Plugin<{}, Foo['foo']>(
+    {
+      name: 'foo',
+      dependencies: [],
+      run: kibana => ({
+        value: 'value-foo'
+      })
+    },
+    logger
+  );
 
-  const bar = new Plugin<{}, Bar['bar']>({
-    name: 'bar',
-    dependencies: [],
-    run: kibana => ({
-      value: 'value-bar'
-    })
-  }, logger);
+  const bar = new Plugin<{}, Bar['bar']>(
+    {
+      name: 'bar',
+      dependencies: [],
+      run: kibana => ({
+        value: 'value-bar'
+      })
+    },
+    logger
+  );
 
-  const quux = new Plugin<Foo & Bar, void>({
-    name: 'quux',
-    dependencies: ['foo', 'bar'],
-    run: (kibana, deps) => {
-      expect(deps.foo).toEqual({ value: 'value-foo' });
-      expect(deps.bar).toEqual({ value: 'value-bar' });
-    }
-  }, logger);
+  const quux = new Plugin<Foo & Bar, void>(
+    {
+      name: 'quux',
+      dependencies: ['foo', 'bar'],
+      run: (kibana, deps) => {
+        expect(deps.foo).toEqual({ value: 'value-foo' });
+        expect(deps.bar).toEqual({ value: 'value-bar' });
+      }
+    },
+    logger
+  );
 
   const plugins = new PluginSystem(coreValues, logger);
   plugins.addPlugin(foo);
@@ -129,44 +150,53 @@ test('receives values from dependencies but not transitive dependencies', () => 
 
   type Grandchild = {
     grandchild: {
-      value: string
-    }
-  }
+      value: string;
+    };
+  };
 
-  const grandchild = new Plugin<{}, Grandchild['grandchild']>({
-    name: 'grandchild',
-    dependencies: [],
-    run: kibana => ({
-      value: 'grandchild'
-    })
-  }, logger);
+  const grandchild = new Plugin<{}, Grandchild['grandchild']>(
+    {
+      name: 'grandchild',
+      dependencies: [],
+      run: kibana => ({
+        value: 'grandchild'
+      })
+    },
+    logger
+  );
 
   type Child = {
     child: {
-      value: string
-    }
-  }
+      value: string;
+    };
+  };
 
-  const child = new Plugin<Grandchild, Child['child']>({
-    name: 'child',
-    dependencies: ['grandchild'],
-    run: (kibana, deps) => {
-      expect(deps.grandchild).toEqual({ value: 'grandchild' });
+  const child = new Plugin<Grandchild, Child['child']>(
+    {
+      name: 'child',
+      dependencies: ['grandchild'],
+      run: (kibana, deps) => {
+        expect(deps.grandchild).toEqual({ value: 'grandchild' });
 
-      return {
-        value: 'child'
+        return {
+          value: 'child'
+        };
       }
-    }
-  }, logger);
+    },
+    logger
+  );
 
-  const parent = new Plugin<Grandchild & Child, void>({
-    name: 'parent',
-    dependencies: ['child'],
-    run: (kibana, deps) => {
-      expect(deps.child).toEqual({ value: 'child' });
-      expect(deps.grandchild).toBeUndefined();
-    }
-  }, logger);
+  const parent = new Plugin<Grandchild & Child, void>(
+    {
+      name: 'parent',
+      dependencies: ['child'],
+      run: (kibana, deps) => {
+        expect(deps.child).toEqual({ value: 'child' });
+        expect(deps.grandchild).toBeUndefined();
+      }
+    },
+    logger
+  );
 
   const plugins = new PluginSystem(coreValues, logger);
   plugins.addPlugin(grandchild);
@@ -180,27 +210,33 @@ test('keeps ref on registered value', () => {
 
   type Child = {
     child: {
-      value: {}
-    }
-  }
+      value: {};
+    };
+  };
 
   const myRef = {};
 
-  const child = new Plugin<{}, Child['child']>({
-    name: 'child',
-    dependencies: [],
-    run: kibana => ({
-      value: myRef
-    })
-  }, logger);
+  const child = new Plugin<{}, Child['child']>(
+    {
+      name: 'child',
+      dependencies: [],
+      run: kibana => ({
+        value: myRef
+      })
+    },
+    logger
+  );
 
-  const parent = new Plugin<Child, void>({
-    name: 'parent',
-    dependencies: ['child'],
-    run: (kibana, deps) => {
-      expect(deps.child.value).toBe(myRef);
-    }
-  }, logger);
+  const parent = new Plugin<Child, void>(
+    {
+      name: 'parent',
+      dependencies: ['child'],
+      run: (kibana, deps) => {
+        expect(deps.child.value).toBe(myRef);
+      }
+    },
+    logger
+  );
 
   const plugins = new PluginSystem(coreValues, logger);
   plugins.addPlugin(child);
@@ -213,30 +249,36 @@ test('can register multiple values in single plugin', () => {
 
   type Child = {
     child: {
-      value1: number,
-      value2: number
-    }
-  }
+      value1: number;
+      value2: number;
+    };
+  };
 
-  const child = new Plugin<{}, Child['child']>({
-    name: 'child',
-    dependencies: [],
-    run: kibana => ({
-      value1: 1,
-      value2: 2
-    })
-  }, logger);
-
-  const parent = new Plugin<Child, void>({
-    name: 'parent',
-    dependencies: ['child'],
-    run: (kibana, deps) => {
-      expect(deps.child).toEqual({
+  const child = new Plugin<{}, Child['child']>(
+    {
+      name: 'child',
+      dependencies: [],
+      run: kibana => ({
         value1: 1,
         value2: 2
-      });
-    }
-  }, logger);
+      })
+    },
+    logger
+  );
+
+  const parent = new Plugin<Child, void>(
+    {
+      name: 'parent',
+      dependencies: ['child'],
+      run: (kibana, deps) => {
+        expect(deps.child).toEqual({
+          value1: 1,
+          value2: 2
+        });
+      }
+    },
+    logger
+  );
 
   const plugins = new PluginSystem(coreValues, logger);
   plugins.addPlugin(child);
@@ -249,51 +291,60 @@ test('plugins can be typed', () => {
 
   type Foo = {
     foo: {
-      value1: number,
-      value2: number
+      value1: number;
+      value2: number;
     };
-  }
+  };
 
-  const foo = new Plugin<{}, Foo['foo']>({
-    name: 'foo',
-    dependencies: [],
-    run: kibana => ({
-      value1: 1,
-      value2: 2
-    })
-  }, logger);
+  const foo = new Plugin<{}, Foo['foo']>(
+    {
+      name: 'foo',
+      dependencies: [],
+      run: kibana => ({
+        value1: 1,
+        value2: 2
+      })
+    },
+    logger
+  );
 
   type Bar = {
     bar: {
-      value1: string,
-      value2: boolean
-    }
-  }
+      value1: string;
+      value2: boolean;
+    };
+  };
 
-  const bar = new Plugin<Foo, Bar['bar']>({
-    name: 'bar',
-    dependencies: ['foo'],
-    run: (kibana, deps) => {
-      expect(deps.foo.value1).toBe(1);
+  const bar = new Plugin<Foo, Bar['bar']>(
+    {
+      name: 'bar',
+      dependencies: ['foo'],
+      run: (kibana, deps) => {
+        expect(deps.foo.value1).toBe(1);
 
-      return {
-        value1: 'test',
-        value2: false
+        return {
+          value1: 'test',
+          value2: false
+        };
       }
-    }
-  }, logger);
+    },
+    logger
+  );
 
-  const quux = new Plugin<Foo & Bar, void>({
-    name: 'quux',
-    dependencies: ['foo', 'bar'],
-    run: (kibana, deps) => {
-      expect(deps.foo.value1).toBe(1);
-      expect(deps.foo.value2).toBe(2);
+  const quux = new Plugin<Foo & Bar, void>(
+    {
+      name: 'quux',
+      dependencies: ['foo', 'bar'],
+      run: (kibana, deps) => {
+        expect(deps.foo.value1).toBe(1);
+        expect(deps.foo.value2).toBe(2);
 
-      expect(deps.bar.value1).toBe('test');
-      expect(deps.bar.value2).toBe(false);
-    }
-  }, logger);
+        expect(deps.bar.value1).toBe('test');
+        expect(deps.bar.value2).toBe(false);
+      }
+    },
+    logger
+  );
 
   const plugins = new PluginSystem(coreValues, logger);
   plugins.addPlugin(foo);
@@ -305,26 +356,31 @@ test('plugins can be typed', () => {
 test('ensure `this` is not specified when starting a plugin', () => {
   expect.assertions(1);
 
-  const foo = new Plugin<{}, void>({
-    name: 'foo',
-    dependencies: [],
-    run: function(this: any, config) {
-      expect(this).toBeNull();
-    }
-  }, logger);
+  const foo = new Plugin<{}, void>(
+    {
+      name: 'foo',
+      dependencies: [],
+      run: function(this: any, config) {
+        expect(this).toBeNull();
+      }
+    },
+    logger
+  );
 
   const plugins = new PluginSystem(coreValues, logger);
   plugins.addPlugin(foo);
   plugins.startPlugins();
 });
 
-
 test("throws if starting a plugin that depends on a plugin that's not yet started", () => {
-  const foo = new Plugin<{}, void>({
-    name: 'foo',
-    dependencies: ['does-not-exist'],
-    run: () => {}
-  }, logger);
+  const foo = new Plugin<{}, void>(
+    {
+      name: 'foo',
+      dependencies: ['does-not-exist'],
+      run: () => {}
+    },
+    logger
+  );
 
   const plugins = new PluginSystem(coreValues, logger);
 
@@ -336,11 +392,14 @@ test("throws if starting a plugin that depends on a plugin that's not yet starte
 });
 
 test("throws if adding a plugin that's already added", () => {
-  const foo = new Plugin<{}, void>({
-    name: 'foo',
-    dependencies: [],
-    run: () => {}
-  }, logger);
+  const foo = new Plugin<{}, void>(
+    {
+      name: 'foo',
+      dependencies: [],
+      run: () => {}
+    },
+    logger
+  );
 
   const plugins = new PluginSystem(coreValues, logger);
 
@@ -364,23 +423,29 @@ test('stops plugins in reverse order of started order', () => {
 
   class BarPlugin {
     start() {
-      events.push('start bar')
+      events.push('start bar');
     }
     stop() {
       events.push('stop bar');
     }
   }
 
-  const foo = new Plugin<{}, void>({
-    name: 'foo',
-    dependencies: [],
-    run: FooPlugin
-  }, logger);
-  const bar = new Plugin<{}, void>({
-    name: 'bar',
-    dependencies: [],
-    run: BarPlugin
-  }, logger);
+  const foo = new Plugin<{}, void>(
+    {
+      name: 'foo',
+      dependencies: [],
+      run: FooPlugin
+    },
+    logger
+  );
+  const bar = new Plugin<{}, void>(
+    {
+      name: 'bar',
+      dependencies: [],
+      run: BarPlugin
+    },
+    logger
+  );
 
   const plugins = new PluginSystem(coreValues, logger);
 
@@ -398,21 +463,27 @@ test('can add plugins before adding its dependencies', () => {
 
   type Foo = {
     foo: string;
-  }
+  };
 
-  const foo = new Plugin<{}, Foo['foo']>({
-    name: 'foo',
-    dependencies: [],
-    run: kibana => 'value'
-  }, logger);
+  const foo = new Plugin<{}, Foo['foo']>(
+    {
+      name: 'foo',
+      dependencies: [],
+      run: kibana => 'value'
+    },
+    logger
+  );
 
-  const bar = new Plugin<Foo, void>({
-    name: 'bar',
-    dependencies: ['foo'],
-    run: (kibana, deps) => {
-      expect(deps.foo).toBe('value');
-    }
-  }, logger);
+  const bar = new Plugin<Foo, void>(
+    {
+      name: 'bar',
+      dependencies: ['foo'],
+      run: (kibana, deps) => {
+        expect(deps.foo).toBe('value');
+      }
+    },
+    logger
+  );
 
   const plugins = new PluginSystem(coreValues, logger);
   // `bar` depends on `foo`, but we add it first

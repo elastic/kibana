@@ -65,7 +65,8 @@
     "uiFramework:start": "grunt uiFramework:start",
     "uiFramework:build": "grunt uiFramework:build",
     "ts:build": "tsc",
-    "ts:start": "tsc --watch"
+    "ts:start": "tsc --watch",
+    "prettier": "prettier --single-quote --write './platform/**/*.ts'"
   },
   "repository": {
     "type": "git",
@@ -284,6 +285,7 @@
     "nock": "8.0.0",
     "node-sass": "3.8.0",
     "portscanner": "1.0.0",
+    "prettier": "^1.5.2",
     "proxyquire": "1.7.10",
     "sass-loader": "4.0.0",
     "simple-git": "1.37.0",

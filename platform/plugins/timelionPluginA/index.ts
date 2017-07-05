@@ -1,12 +1,14 @@
 import { KibanaFunctionalPlugin } from '../../server/plugins/types';
-import { TimelionPluginType } from '../timelion'
-import { TimelionPluginBType } from '../timelionPluginB'
+import { TimelionPluginType } from '../timelion';
+import { TimelionPluginBType } from '../timelionPluginB';
 
 export const configPath = undefined;
 
 export const dependencies = ['timelion', 'timelionPluginB'];
 
-export const plugin: KibanaFunctionalPlugin<TimelionPluginType & TimelionPluginBType> = (kibana, dependencies) => {
+export const plugin: KibanaFunctionalPlugin<
+  TimelionPluginType & TimelionPluginBType
+> = (kibana, dependencies) => {
   const { timelion, timelionPluginB } = dependencies;
 
   const log = kibana.logger.get();
@@ -17,4 +19,4 @@ export const plugin: KibanaFunctionalPlugin<TimelionPluginType & TimelionPluginB
 
   log.debug(`timelionPluginB.myValue: ${timelionPluginB.myValue}`);
   log.debug(`timelionPluginB.myFunc(): ${timelionPluginB.myFunc()}`);
-}
+};

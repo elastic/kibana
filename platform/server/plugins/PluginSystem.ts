@@ -9,8 +9,9 @@ import { topologicalSort } from '../../lib/topologicalSort';
 const toTuple = <A, B>(a: A, b: B): [A, B] => [a, b];
 
 function toSortable(plugins: Map<PluginName, Plugin<any, any>>) {
-  const dependenciesByPlugin = [...plugins.entries()]
-    .map(([name, plugin]) => toTuple(name, plugin.dependencies || []));
+  const dependenciesByPlugin = [...plugins.entries()].map(([name, plugin]) =>
+    toTuple(name, plugin.dependencies || [])
+  );
   return new Map(dependenciesByPlugin);
 }
 
@@ -34,10 +35,9 @@ export class PluginSystem {
     this.log = logger.get('pluginsystem');
   }
 
-  addPlugin<
-    DependenciesType extends BasePluginsType,
-    ExposableType = void
-  >(plugin: Plugin<DependenciesType, ExposableType>) {
+  addPlugin<DependenciesType extends BasePluginsType, ExposableType = void>(
+    plugin: Plugin<DependenciesType, ExposableType>
+  ) {
     if (this.plugins.has(plugin.name)) {
       throw new Error(`a plugin named [${plugin.name}] has already been added`);
     }
@@ -67,7 +67,9 @@ export class PluginSystem {
     const dependenciesValues = {} as DependenciesType;
 
     for (const dependency of plugin.dependencies) {
-      dependenciesValues[dependency] = this.plugins.get(dependency)!.getExposedValues();
+      dependenciesValues[dependency] = this.plugins.get(
+        dependency
+      )!.getExposedValues();
     }
 
     plugin.start(this.kibanaModules, dependenciesValues);

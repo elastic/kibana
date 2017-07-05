@@ -49,7 +49,7 @@ test('calls the updated logger', () => {
     log: jest.fn(),
     update: jest.fn(),
     close: jest.fn()
-  }
+  };
 
   loggerAdapter.update(newLogger, Level.Info);
 

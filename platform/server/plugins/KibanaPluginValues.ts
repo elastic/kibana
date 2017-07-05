@@ -53,7 +53,7 @@ export function createKibanaValuesForPlugin(
         if (configPath === undefined) {
           throw new Error('config path not defined');
         }
-        return core.configService.atPath(configPath, ConfigClass)
+        return core.configService.atPath(configPath, ConfigClass);
       },
       createIfExists: <Schema extends schema.Any, Config>(
         ConfigClass: ConfigWithSchema<Schema, Config>
@@ -61,7 +61,7 @@ export function createKibanaValuesForPlugin(
         if (configPath === undefined) {
           throw new Error('config path not defined');
         }
-        return core.configService.optionalAtPath(configPath, ConfigClass)
+        return core.configService.optionalAtPath(configPath, ConfigClass);
       }
     }
   };

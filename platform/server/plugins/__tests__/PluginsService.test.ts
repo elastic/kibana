@@ -12,7 +12,9 @@ import { logger } from '../../../logger/__mocks__';
 
 const examplesPluginsDir = resolve(__dirname, './examplePlugins');
 
-let mockConfigService: any = jest.genMockFromModule('../../../config/ConfigService');
+let mockConfigService: any = jest.genMockFromModule(
+  '../../../config/ConfigService'
+);
 let mockPluginSystem: any = jest.genMockFromModule('../PluginSystem');
 
 beforeEach(() => {
@@ -26,7 +28,12 @@ beforeEach(() => {
 });
 
 test('starts plugins', async () => {
-  const pluginsService = new PluginsService(examplesPluginsDir, mockPluginSystem, mockConfigService, logger);
+  const pluginsService = new PluginsService(
+    examplesPluginsDir,
+    mockPluginSystem,
+    mockConfigService,
+    logger
+  );
 
   await pluginsService.start();
 
@@ -43,7 +50,12 @@ test('starts plugins', async () => {
 });
 
 test('stops plugins', async () => {
-  const pluginsService = new PluginsService(examplesPluginsDir, mockPluginSystem, mockConfigService, logger);
+  const pluginsService = new PluginsService(
+    examplesPluginsDir,
+    mockPluginSystem,
+    mockConfigService,
+    logger
+  );
 
   await pluginsService.start();
   pluginsService.stop();
@@ -59,7 +71,12 @@ test('does not start plugin if disabled', async () => {
     return Promise.resolve(true);
   });
 
-  const pluginsService = new PluginsService(examplesPluginsDir, mockPluginSystem, mockConfigService, logger);
+  const pluginsService = new PluginsService(
+    examplesPluginsDir,
+    mockPluginSystem,
+    mockConfigService,
+    logger
+  );
 
   await pluginsService.start();
 

@@ -5,9 +5,7 @@ import { set } from 'lodash';
  *
  * @param argv Argv object with key/value pairs
  */
-export function argvToConfigOverrides(
-  argv: { [key: string]: any }
-) {
+export function argvToConfigOverrides(argv: { [key: string]: any }) {
   const config = {};
 
   if (argv.port != null) {

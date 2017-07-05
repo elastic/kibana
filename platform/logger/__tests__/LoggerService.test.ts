@@ -18,7 +18,7 @@ test('updates mutable logger when receiving new logger configs', () => {
   const mutableLogger: MutableLogger = {
     updateLogger: jest.fn(),
     close: jest.fn()
-  }
+  };
 
   const config$ = new BehaviorSubject(config);
 
@@ -39,7 +39,7 @@ test('closes mutable logger when stopped', () => {
   const mutableLogger: MutableLogger = {
     updateLogger: jest.fn(),
     close: jest.fn()
-  }
+  };
 
   const config$ = new BehaviorSubject(config);
 
@@ -55,7 +55,7 @@ test('does not update mutable logger after stopped', () => {
   const mutableLogger: MutableLogger = {
     updateLogger: jest.fn(),
     close: jest.fn()
-  }
+  };
 
   const config$ = new BehaviorSubject(config);
 

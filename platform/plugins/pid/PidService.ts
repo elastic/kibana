@@ -58,9 +58,11 @@ export class PidService {
 
   constructor(pidConfig$: Observable<PidConfig | void>, logger: LoggerFactory) {
     this.pid$ = pidConfig$
-      .map(config => config !== undefined
-        ? new PidFile(process.pid, config, logger)
-        : undefined
+      .map(
+        config =>
+          config !== undefined
+            ? new PidFile(process.pid, config, logger)
+            : undefined
       )
       .switchMap(pid => {
         // We specifically handle `undefined` to make sure the previous pid
@@ -75,9 +77,9 @@ export class PidService {
 
           return () => {
             pid.deleteFile();
-          }
-        })
-      })
+          };
+        });
+      });
   }
 
   start() {

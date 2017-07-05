@@ -9,20 +9,17 @@ import { LoggerConfig } from './LoggerConfig';
 export class LoggerService {
   private readonly stop$ = new Subject();
 
-  constructor(private readonly mutableLogger: MutableLogger) {
-  }
+  constructor(private readonly mutableLogger: MutableLogger) {}
 
   upgrade(config$: Observable<LoggerConfig>) {
-    config$
-      .takeUntil(this.stop$)
-      .subscribe({
-        next: config => {
-          this.mutableLogger.updateLogger(config);
-        },
-        complete: () => {
-          this.mutableLogger.close();
-        }
-      });
+    config$.takeUntil(this.stop$).subscribe({
+      next: config => {
+        this.mutableLogger.updateLogger(config);
+      },
+      complete: () => {
+        this.mutableLogger.close();
+      }
+    });
   }
 
   stop() {

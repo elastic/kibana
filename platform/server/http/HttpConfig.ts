@@ -6,8 +6,8 @@ import { Schema, typeOfSchema } from '../../types';
 const validHostnameRegex = /^(([A-Z0-9]|[A-Z0-9][A-Z0-9\-]*[A-Z0-9])\.)*([A-Z0-9]|[A-Z0-9][A-Z0-9\-]*[A-Z0-9])$/i;
 const validBasePathRegex = /(^$|^\/.*[^\/]$)/;
 
-const match = (regex: RegExp, errorMsg: string) =>
-  (str: string) => regex.test(str) ? undefined : errorMsg;
+const match = (regex: RegExp, errorMsg: string) => (str: string) =>
+  regex.test(str) ? undefined : errorMsg;
 
 const createHttpSchema = (schema: Schema) => {
   const { object, string, number, byteSize, maybe } = schema;
@@ -27,13 +27,13 @@ const createHttpSchema = (schema: Schema) => {
       string({
         validate: match(
           validBasePathRegex,
-          'must start with a slash, don\'t end with one'
+          "must start with a slash, don't end with one"
         )
       })
     ),
     ssl: SslConfig.createSchema(schema)
   });
-}
+};
 
 const httpConfigType = typeOfSchema(createHttpSchema);
 type HttpConfigType = typeof httpConfigType;

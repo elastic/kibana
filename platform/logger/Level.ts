@@ -1,9 +1,14 @@
 import { assertNever } from '../lib/utils';
 
-export type LogLevelId = 'fatal' | 'error' | 'warn' | 'info' | 'debug' | 'trace';
+export type LogLevelId =
+  | 'fatal'
+  | 'error'
+  | 'warn'
+  | 'info'
+  | 'debug'
+  | 'trace';
 
 export class Level {
-
   static Fatal = new Level('fatal', 1, 'red');
   static Error = new Level('error', 2, 'red');
   static Warn = new Level('warn', 3, 'yellow');
@@ -22,14 +27,21 @@ export class Level {
   }
 
   static fromId(level: LogLevelId) {
-    switch(level) {
-      case 'fatal': return Level.Fatal;
-      case 'error': return Level.Error;
-      case 'warn': return Level.Warn;
-      case 'info': return Level.Info;
-      case 'debug': return Level.Debug;
-      case 'trace': return Level.Trace;
-      default: return assertNever(level);
+    switch (level) {
+      case 'fatal':
+        return Level.Fatal;
+      case 'error':
+        return Level.Error;
+      case 'warn':
+        return Level.Warn;
+      case 'info':
+        return Level.Info;
+      case 'debug':
+        return Level.Debug;
+      case 'trace':
+        return Level.Trace;
+      default:
+        return assertNever(level);
     }
   }
 }

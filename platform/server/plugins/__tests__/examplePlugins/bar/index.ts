@@ -14,9 +14,12 @@ export interface BarPluginType {
   bar: BarExports;
 }
 
-export const plugin: KibanaFunctionalPlugin<FooPluginType, BarExports> = (kibana, deps) => {
+export const plugin: KibanaFunctionalPlugin<FooPluginType, BarExports> = (
+  kibana,
+  deps
+) => {
   return {
     fromFoo: deps.foo.value,
     value: 'bar'
-  }
-}
+  };
+};

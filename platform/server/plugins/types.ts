@@ -9,10 +9,7 @@ export interface BasePluginsType {
 export type KibanaFunctionalPlugin<
   DependenciesType extends BasePluginsType,
   ExposableType = void
-> = (
-  kibana: KibanaPluginFeatures,
-  plugins: DependenciesType
-) => ExposableType;
+> = (kibana: KibanaPluginFeatures, plugins: DependenciesType) => ExposableType;
 
 // TODO We can't type the constructor, so we have no way of typing
 // the `DependenciesType` in the same way as we do for `KibanaFunctionalPlugin`.
@@ -31,10 +28,9 @@ export interface KibanaPluginStatic<
   DependenciesType extends BasePluginsType,
   ExposableType = void
 > {
-  new (
-    kibana: KibanaPluginFeatures,
-    plugins: DependenciesType
-  ): KibanaPlugin<ExposableType>
+  new (kibana: KibanaPluginFeatures, plugins: DependenciesType): KibanaPlugin<
+    ExposableType
+  >;
 }
 
 export interface KibanaPlugin<ExposableType> {
