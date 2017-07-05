@@ -33,10 +33,12 @@ export default function (kbnServer, server, config) {
     return;
   }
 
-  const noun = unusedKeys.length === 1 ? 'setting' : 'settings';
-  const verb = unusedKeys.length === 1 ? 'was' : 'were';
+  const desc = unusedKeys.length === 1
+    ? 'setting was'
+    : 'settings were';
+
   const error = new Error(
-    `${formatListAsProse(unusedKeys)} ${noun} ${verb} not applied. ` +
+    `${formatListAsProse(unusedKeys)} ${desc} not applied. ` +
     'Check for spelling errors and ensure that expected ' +
     'plugins are installed and enabled.'
   );
