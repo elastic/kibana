@@ -3,7 +3,7 @@ import { transformDeprecations } from './transform_deprecations';
 import { formatListAsProse, getFlattenedObject } from '../../utils';
 
 const getFlattenedKeys = object => (
-  Object.keys(getFlattenedObject(object, { traverseArrays: false }))
+  Object.keys(getFlattenedObject(object))
 );
 
 const getUnusedConfigKeys = (settings, configValues) => {
