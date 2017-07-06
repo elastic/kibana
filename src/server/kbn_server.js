@@ -21,6 +21,7 @@ import pluginsInitializeMixin from './plugins/initialize';
 import { indexPatternsMixin } from './index_patterns';
 import { savedObjectsMixin } from './saved_objects';
 import { statsMixin } from './stats';
+import { serverExtensionsMixin } from './server_extensions';
 
 const rootDir = fromRoot('.');
 
@@ -37,6 +38,8 @@ export default class KbnServer {
       configSetupMixin,
       // sets this.server
       httpMixin,
+      // adds methods for extending this.server
+      serverExtensionsMixin,
       loggingMixin,
       warningsMixin,
       statusMixin,
