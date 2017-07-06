@@ -29,8 +29,8 @@ export class PidService {
         }
 
         // Otherwise we return an observable that writes the pid when
-        // subscribed to, and deletes it when unsubscribed (e.g. if new config
-        // is received of if `stop` is called below.)
+        // subscribed to and deletes it when unsubscribed (e.g. if new config
+        // is received or if `stop` is called below.)
 
         return new Observable<PidFile | void>(observable => {
           pid.writeFile();
