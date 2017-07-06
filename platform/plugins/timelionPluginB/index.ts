@@ -26,10 +26,7 @@ export const plugin: KibanaFunctionalPlugin<
     log.info('called by timelion');
   });
 
-  log.warn(
-    `intentionally no access to xpack even if transitive dep: ${(dependencies as any)
-      .xpack}`
-  );
+  // log.warn(`no access to xpack, even if transitive dep: ${dependencies.xpack}`);
 
   return {
     myValue: 'test',
