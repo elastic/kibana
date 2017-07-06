@@ -107,16 +107,16 @@
         id="expandIndexPatternCheckBoxHelpText"
         class="kuiVerticalRhythm"
       >
+        <p class="kuiText kuiStatusText kuiStatusText--error kuiVerticalRhythmSmall">
+          Recent changes to Elasticsearch have made this option largerly unnecessary. It will likely be removed in a future version of Kibana.
+        </p>
+
         <p class="kuiText kuiSubduedText kuiVerticalRhythmSmall">
           With this option selected, searches against any time-based index pattern which contains a wildcard will automatically expand to query only the indices which contain data within the currently selected time range.
         </p>
 
         <p class="kuiText kuiSubduedText kuiVerticalRhythmSmall">
           Searching against the index pattern 'logstash-*' will actually query Elasticsearch for the specific matching indices (e.g. 'logstash-2015.12.21') that fall within the current time range.
-        </p>
-
-        <p class="kuiText kuiSubduedText kuiVerticalRhythmSmall">
-          With recent changes to Elasticsearch, this option should no longer be necessary and will likely be removed in future versions of Kibana.
         </p>
       </div>
     </toggle-panel>
