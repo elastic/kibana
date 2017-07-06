@@ -18,10 +18,12 @@ export class PidService {
             : undefined
       )
       // Explanation of `switchMap`:
-      // Each time a new observable is produced, we’ll throw out the previous
-      // one and never see its values again. It allows us to map and flatten
-      // like `flatMap`, but it "switches" to each new observable and forgets
-      // whatever came before it.
+      // It's kinda like a normal `flatMap`, except it's producing observables
+      // and you _only_ care about the latest observable it produced. It's
+      // usually used if you need to control what happens both when you create
+      // and when you're done with an observable, like here where we want to
+      // write the pid file we receive a pid config, and delete it when we
+      // receive new config values (or when we stop the pid service).
       .switchMap(pid => {
         if (pid === undefined) {
           // If pid is not specified, we return an observable that does nothing
