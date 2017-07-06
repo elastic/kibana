@@ -28,7 +28,7 @@
   "KIBANA-CREATE_INDEX_PATTERN_STEP_2_EXPAND_HELP_2": "Searching against the index pattern 'logstash-*' will actually query Elasticsearch for the specific matching indices (e.g. 'logstash-2015.12.21') that fall within the current time range.",
   "KIBANA-CREATE_INDEX_PATTERN_STEP_2_EXPAND_HELP_3": "With recent changes to Elasticsearch, this option should no longer be necessary and will likely be removed in future versions of Kibana.",
   "KIBANA-CREATE_INDEX_PATTERN_STEP_2_NO_DATE_FIELD_OPTION": "I don't want to use the Time Filter",
-  "KIBANA-CREATE_INDEX_PATTERN_STEP_2_REFRESH_FIELDS_BUTTON": "refresh fields",
+  "KIBANA-CREATE_INDEX_PATTERN_STEP_2_REFRESH_FIELDS_BUTTON": "Refresh",
   "KIBANA-CREATE_INDEX_PATTERN_STEP_2_NO_TIME_FIELDS": "The indices which match this index pattern don't contain any time fields.",
   "KIBANA-CREATE_INDEX_PATTERN_STEP_2_INDICES_DONT_MATCH_PATTERN": "Could not locate any indices matching that pattern. Please add the index to Elasticsearch",
   "KIBANA-CREATE_INDEX_PATTERN_STEP_2_BACK_BUTTON" : "Back",
