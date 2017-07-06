@@ -1,5 +1,4 @@
 const Fn = require('../fn.js');
-const _ = require('lodash');
 
 module.exports = new Fn({
   name: 'mapColumn',
@@ -29,11 +28,13 @@ module.exports = new Fn({
       args.dest = args.column;
     }
 
-    const rowPromises = _.map(context.rows, row => {
+    const rowPromises = context.rows.map(row => {
       return args.function(row[args.column])
-        .then(val => _.assign(row, { [args.dest]: val }));
+        .then(val => {
+          return Object.assign({}, row, { [args.dest]: val });
+        });
     });
 
-    return Promise.all(rowPromises).then(rows => _.assign(context, { rows: rows }));
+    return Promise.all(rowPromises).then(rows => Object.assign({}, context, { rows: rows }));
   },
 });
