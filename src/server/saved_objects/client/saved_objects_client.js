@@ -98,6 +98,7 @@ export class SavedObjectsClient {
    *                                        Query field argument for more information
    * @property {integer} [options.page=1]
    * @property {integer} [options.perPage=20]
+   * @property {array} options.sort
    * @property {array} options.fields
    * @returns {promise} - { saved_objects: [{ id, type, version, attributes }], total, per_page, page }
    */
@@ -108,7 +109,8 @@ export class SavedObjectsClient {
       searchFields,
       page = 1,
       perPage = 20,
-      fields
+      sort,
+      fields,
     } = options;
 
     const esOptions = {
@@ -116,7 +118,7 @@ export class SavedObjectsClient {
       _source: fields,
       size: perPage,
       from: perPage * (page - 1),
-      body: createFindQuery({ search, searchFields, type })
+      body: createFindQuery({ search, searchFields, type, sort })
     };
 
     const response = await this._withKibanaIndex('search', esOptions);
