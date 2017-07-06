@@ -25,8 +25,7 @@ export const image = () => new View('image', {
       displayName: 'Fill mode',
       description: 'Note: Stretched fill may not work with vector images',
       argType: 'select',
-      resolve({ args }) {
-        console.log('args', args);
+      resolve() {
         return 'contain';
       },
       options: {

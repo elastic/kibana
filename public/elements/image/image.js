@@ -10,7 +10,6 @@ module.exports = new Element({
   image: header,
   expression: 'image(mode="contain")',
   render(domNode, config, done) {
-    console.log(config);
     ReactDOM.render(<div style={{
       height: '100%',
       backgroundImage: `url(${config.dataurl})`,

@@ -9,12 +9,6 @@ const template = ({ typeInstance, data }) => {
   const choices = typeInstance.options.choices;
   const { onValueChange, argValue } = data;
 
-  console.log('data', data);
-  console.log('typeInstance', typeInstance);
-
-  //const { name } = typeInstance;
-  //const { onValueChange } = data;
-
   function handleChange(ev) {
     onValueChange({
       [name]: [{
