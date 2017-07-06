@@ -1,11 +1,12 @@
 import url from 'url';
+import { resolve } from 'path';
 import { defaultsDeep, set } from 'lodash';
 import { header as basicAuthHeader } from './base_auth';
 import { kibanaUser, kibanaServer } from '../../test/shield';
 import { esTestServerUrlParts } from '../../test/es_test_server_url_parts';
 import KbnServer from '../../src/server/kbn_server';
 
-const SERVER_DEFAULTS = {
+const DEFAULTS_SETTINGS = {
   server: {
     autoListen: false,
     xsrf: {
@@ -19,6 +20,14 @@ const SERVER_DEFAULTS = {
   optimize: {
     enabled: false
   },
+};
+
+const DEFAULT_SETTINGS_WITH_CORE_PLUGINS = {
+  plugins: {
+    scanDirs: [
+      resolve(__dirname, '../core_plugins'),
+    ],
+  },
   elasticsearch: {
     url: url.format(esTestServerUrlParts),
     username: kibanaServer.username,
@@ -26,15 +35,27 @@ const SERVER_DEFAULTS = {
   }
 };
 
+
 /**
  * Creates an instance of KbnServer with default configuration
  * tailored for unit tests
  *
- * @param {object} params Any config overrides for this instance
+ * @param {Object} [settings={}] Any config overrides for this instance
+ * @return {KbnServer}
  */
-export function createServer(params = {}) {
-  params = defaultsDeep({}, params, SERVER_DEFAULTS);
-  return new KbnServer(params);
+export function createServer(settings = {}) {
+  return new KbnServer(defaultsDeep({}, settings, DEFAULTS_SETTINGS));
+}
+
+/**
+ *  Creates an instance of KbnServer, including all of the core plugins,
+ *  with default configuration tailored for unit tests
+ *
+ *  @param  {Object} [settings={}]
+ *  @return {KbnServer}
+ */
+export function createServerWithCorePlugins(settings = {}) {
+  return new KbnServer(defaultsDeep({}, settings, DEFAULT_SETTINGS_WITH_CORE_PLUGINS, DEFAULTS_SETTINGS));
 }
 
 /**

@@ -1,7 +1,6 @@
 import { format } from 'util';
 
 import * as kbnTestServer from '../../../../test_utils/kbn_server';
-import { fromRoot } from '../../../../utils';
 
 describe('plugins/elasticsearch', function () {
   describe('routes', function () {
@@ -13,13 +12,7 @@ describe('plugins/elasticsearch', function () {
       // context, not to the parent context.
       this.timeout(60000);
 
-      kbnServer = kbnTestServer.createServer({
-        plugins: {
-          scanDirs: [
-            fromRoot('src/core_plugins')
-          ]
-        },
-      });
+      kbnServer = kbnTestServer.createServerWithCorePlugins();
 
       await kbnServer.ready();
       await kbnServer.server.plugins.elasticsearch.waitUntilReady();
