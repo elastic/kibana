@@ -83,7 +83,9 @@ export class DashboardState {
   }
 
   registerPanelIndexPatternMap(panelIndex, indexPattern) {
-    this.panelIndexPatternMapping[panelIndex] = indexPattern;
+    if (indexPattern) {
+      this.panelIndexPatternMapping[panelIndex] = indexPattern;
+    }
   }
 
   getPanelIndexPatterns() {
