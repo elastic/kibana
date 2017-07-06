@@ -37,7 +37,7 @@ describe('service_settings (FKA tilemaptest)', function () {
       'url': 'https://tiles.elastic.co/v2/default/{z}/{x}/{y}.png?elastic_tile_service_tos=agree&my_app_name=kibana',
       'minZoom': 0,
       'maxZoom': 10,
-      'attribution': '© [OpenStreetMap](http://www.openstreetmap.org/copyright) © [Elastic Tile Service](https://www.elastic.co/elastic-maps-service)'
+      'attribution': '© [OpenStreetMap](http://www.openstreetmap.org/copyright) © [Elastic Maps Service](https://www.elastic.co/elastic-maps-service)'
     }]
   };
 
