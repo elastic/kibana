@@ -26,7 +26,6 @@ export class Cluster {
   }
 
   close() {
-    // TODO The elasticsearch.js typings are buggy and are missing `close`
     this.client.close();
     this.noAuthClient.close();
 
