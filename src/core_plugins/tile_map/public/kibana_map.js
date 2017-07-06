@@ -236,10 +236,7 @@ export class KibanaMap extends EventEmitter {
     kibanaLayer.addToLeafletMap(this._leafletMap);
     this.emit('layers:update');
 
-
     this._addAttributions(kibanaLayer.getAttributions());
-
-
   }
 
   removeLayer(kibanaLayer) {
@@ -280,18 +277,6 @@ export class KibanaMap extends EventEmitter {
     const attributions = getAttributionArray(attribution);
     attributions.forEach((attribution) => {
       this._leafletMap.attributionControl.removeAttribution(attribution);//this ensures we do not add duplicates
-    });
-  }
-
-  updateAttributions(attributionString) {
-    attributionString = attributionString || '';
-    let attributions = attributionString.split('|');
-    if (attributions.length === 1) {//temp work-around due to inconsistency in manifests
-      attributions = attributions[0].split(',');
-    }
-    attributions.forEach((attribution) => {
-      this._leafletMap.attributionControl.removeAttribution(attribution);//this ensures we do not add duplicates
-      this._leafletMap.attributionControl.addAttribution(attribution);
     });
   }
 

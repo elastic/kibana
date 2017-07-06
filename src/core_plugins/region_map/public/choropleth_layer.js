@@ -59,8 +59,6 @@ export default class ChoroplethLayer extends KibanaMapLayer {
         this._error = true;
       }
     });
-
-
   }
 
   _setStyle() {
@@ -133,7 +131,6 @@ export default class ChoroplethLayer extends KibanaMapLayer {
   equalsGeoJsonUrl(geojsonUrl) {
     return this._geojsonUrl === geojsonUrl;
   }
-
 
   appendLegendContents(jqueryDiv) {
 
