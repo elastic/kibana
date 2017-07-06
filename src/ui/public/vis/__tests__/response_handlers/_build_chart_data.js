@@ -4,7 +4,7 @@ import expect from 'expect.js';
 import sinon from 'sinon';
 import { AggResponseTabifyTableProvider } from 'ui/agg_response/tabify/_table';
 import { AggResponseIndexProvider } from 'ui/agg_response/index';
-import { BasicResponseHandlerProvider } from 'ui/vis//response_handlers/basic';
+import { BasicResponseHandlerProvider } from 'ui/vis/response_handlers/basic';
 
 describe('renderbot#buildChartData', function () {
   let buildChartData;
