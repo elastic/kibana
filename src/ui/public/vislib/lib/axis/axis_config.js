@@ -77,6 +77,7 @@ export function VislibLibAxisConfigProvider() {
       const typeDefaults = axisConfigArgs.type === 'category' ? categoryDefaults : valueDefaults;
       // _.defaultsDeep mutates axisConfigArgs nested values so we clone it first
       const axisConfigArgsClone = _.cloneDeep(axisConfigArgs);
+      axisConfigArgsClone.values = axisConfigArgs.values;
       const isCategoryAxis = axisConfigArgsClone.type === 'category';
       const isHorizontal = axisConfigArgsClone.position && ['top', 'bottom'].includes(axisConfigArgsClone.position);
 

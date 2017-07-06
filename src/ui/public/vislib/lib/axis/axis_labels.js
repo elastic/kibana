@@ -123,10 +123,11 @@ export function VislibAxisLabelsProvider() {
       return function (selection) {
         selection.each(function () {
           selection.selectAll('text')
-          .attr('style', function () {
-            const currentStyle = d3.select(this).attr('style');
-            return `${currentStyle} font-size: ${config.get('labels.fontSize')};`;
-          });
+            .attr('style', function () {
+              const currentStyle = d3.select(this).attr('style');
+              return `${currentStyle} font-size: ${config.get('labels.fontSize')};`;
+            });
+
           if (!config.get('labels.show')) selection.selectAll('text').attr('style', 'display: none;');
 
           selection.call(self.truncateLabels());
