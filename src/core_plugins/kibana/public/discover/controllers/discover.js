@@ -90,7 +90,7 @@ app.directive('discoverApp', function () {
 });
 
 function discoverController(
-  $document,
+  $element,
   $route,
   $scope,
   $timeout,
@@ -596,7 +596,7 @@ function discoverController(
   $scope.scrollToBottom = function () {
     // delay scrolling to after the rows have been rendered
     $timeout(() => {
-      $document.find('#discoverBottomMarker').focus();
+      $element.find('#discoverBottomMarker').focus();
     }, 0);
   };
 
