@@ -79,7 +79,7 @@ uiModules.get('apps/management')
       // is happening.
       $timeout(() => {
         resolve();
-      }, 1000);
+      }, 500);
     });
   }
 
