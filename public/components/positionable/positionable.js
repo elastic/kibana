@@ -60,17 +60,17 @@ const PositionableLifecycle = lifecycle({
     rotate(elem, {
       on: (e) => stateRotate(e),
       onEnd: () => onChange(this.props.position),
-      handle: '.rework--interactable-rotate-handle',
+      handle: '.canvas--interactable-rotate-handle',
     });
 
     resize(elem, {
       on: (e) => stateMoveOrResize(e),
       onEnd: () => onChange(this.props.position),
       sides: {
-        left:   '.rework--interactable-resize-nw, .rework--interactable-resize-sw, .rework--interactable-resize-w',
-        top:    '.rework--interactable-resize-nw, .rework--interactable-resize-ne, .rework--interactable-resize-n',
-        right:  '.rework--interactable-resize-ne, .rework--interactable-resize-se, .rework--interactable-resize-e',
-        bottom: '.rework--interactable-resize-sw, .rework--interactable-resize-se, .rework--interactable-resize-s',
+        left:   '.canvas--interactable-resize-nw, .canvas--interactable-resize-sw, .canvas--interactable-resize-w',
+        top:    '.canvas--interactable-resize-nw, .canvas--interactable-resize-ne, .canvas--interactable-resize-n',
+        right:  '.canvas--interactable-resize-ne, .canvas--interactable-resize-se, .canvas--interactable-resize-e',
+        bottom: '.canvas--interactable-resize-sw, .canvas--interactable-resize-se, .canvas--interactable-resize-s',
       },
     });
   },
@@ -100,7 +100,7 @@ const PositionableComponent = ({ position, children, interact  }) => {
 
     if (!interact) {
       return (
-        <div className="rework--positionable"
+        <div className="canvas--positionable"
           ref={setWrapperNode}
           style={newStyle}>
           {stepChild}
@@ -108,27 +108,27 @@ const PositionableComponent = ({ position, children, interact  }) => {
       );
     } else {
       return (
-        <div className="rework--positionable rework--interactable"
+        <div className="canvas--positionable canvas--interactable"
           ref={setWrapperNode}
           style={newStyle}>
-          <div className="rework--interactable-actions">
-            <div className="rework--interactable-action rework--interactable-rotate-handle">
-              <i className="fa fa-undo rework--interactable-rotate-handle"/>
+          <div className="canvas--interactable-actions">
+            <div className="canvas--interactable-action canvas--interactable-rotate-handle">
+              <i className="fa fa-undo canvas--interactable-rotate-handle"/>
             </div>
           </div>
 
-          <div className="rework--interactable-meta"/>
+          <div className="canvas--interactable-meta"/>
 
           {stepChild}
 
-          <div className="rework--interactable-resize rework--interactable-resize-nw"/>
-          <div className="rework--interactable-resize rework--interactable-resize-ne"/>
-          <div className="rework--interactable-resize rework--interactable-resize-se"/>
-          <div className="rework--interactable-resize rework--interactable-resize-sw"/>
-          <div className="rework--interactable-resize rework--interactable-resize-n"/>
-          <div className="rework--interactable-resize rework--interactable-resize-e"/>
-          <div className="rework--interactable-resize rework--interactable-resize-s"/>
-          <div className="rework--interactable-resize rework--interactable-resize-w"/>
+          <div className="canvas--interactable-resize canvas--interactable-resize-nw"/>
+          <div className="canvas--interactable-resize canvas--interactable-resize-ne"/>
+          <div className="canvas--interactable-resize canvas--interactable-resize-se"/>
+          <div className="canvas--interactable-resize canvas--interactable-resize-sw"/>
+          <div className="canvas--interactable-resize canvas--interactable-resize-n"/>
+          <div className="canvas--interactable-resize canvas--interactable-resize-e"/>
+          <div className="canvas--interactable-resize canvas--interactable-resize-s"/>
+          <div className="canvas--interactable-resize canvas--interactable-resize-w"/>
         </div>
       );
     }
