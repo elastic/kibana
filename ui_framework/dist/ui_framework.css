@@ -2973,10 +2973,13 @@ body {
   .kuiToggleButton:active {
     color: #0079a5 !important;
     /* 2 */ }
-  .kuiToggleButton:hover {
+  .kuiToggleButton:hover:not(:disabled) {
     color: #006E8A !important;
     /* 2 */
     text-decoration: underline; }
+  .kuiToggleButton:disabled {
+    cursor: not-allowed;
+    opacity: .5; }
 
 /**
    * 1. Make icon a consistent width so the text doesn't get pushed around as the icon changes
