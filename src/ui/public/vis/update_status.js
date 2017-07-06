@@ -27,9 +27,9 @@ const hasChanged = (name, value) => {
   const currentValue = JSON.stringify(value, serializer());
   if (currentValue !== oldValues[name]) {
     oldValues[name] = currentValue;
-    return false;
+    return true;
   }
-  return true;
+  return false;
 };
 
 const getUpdateStatus = ($scope) => {
