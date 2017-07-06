@@ -2,7 +2,6 @@ import { VisFactoryProvider } from 'ui/vis/vis_factory';
 import { CATEGORY } from 'ui/vis/vis_category';
 import image from '../images/icon-timelion.svg';
 import { VisTypesRegistryProvider } from 'ui/registry/vis_types';
-import { VisRequestHandlersRegistryProvider } from 'ui/registry/vis_request_handlers';
 import { TimelionRequestHandlerProvider } from './timelion_request_handler';
 
 define(function (require) {
@@ -15,10 +14,11 @@ define(function (require) {
 
   // register the provider with the visTypes registry so that other know it exists
   VisTypesRegistryProvider.register(TimelionVisProvider);
-  VisRequestHandlersRegistryProvider.register(TimelionRequestHandlerProvider);
+
 
   function TimelionVisProvider(Private) {
     const VisFactory = Private(VisFactoryProvider);
+    const timelionRequestHandler = Private(TimelionRequestHandlerProvider);
 
     // return the visType object, which kibana will use to display and configure new
     // Vis object of this type.
@@ -31,14 +31,14 @@ define(function (require) {
       visConfig: {
         defaults: {
           expression: '.es(*)',
-          interval: '1m'
+          interval: 'auto'
         },
         template: require('plugins/timelion/vis/timelion_vis.html'),
       },
       editorConfig: {
         optionsTemplate: require('plugins/timelion/vis/timelion_vis_params.html')
       },
-      requestHandler: 'timelion',
+      requestHandler: timelionRequestHandler.handler,
       responseHandler: 'none',
       options: {
         showIndexSelection: false
