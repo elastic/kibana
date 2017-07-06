@@ -125,7 +125,7 @@ export default class UiExports {
       case 'injectDefaultVars':
         return (plugin, injector) => {
           plugin.extendInit(async (server, options) => {
-            _.merge(this.defaultInjectedVars, await injector.call(plugin, server, options));
+            _.defaults(this.defaultInjectedVars, await injector.call(plugin, server, options));
           });
         };
 
