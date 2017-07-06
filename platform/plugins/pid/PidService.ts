@@ -1,56 +1,9 @@
-import { writeFileSync, unlinkSync } from 'fs';
 import { Observable, Subscription } from 'rxjs';
+import { noop } from 'lodash';
 
 import { PidConfig } from './PidConfig';
-import { LoggerFactory, Logger } from '../../logger';
-import { KibanaError } from '../../lib/Errors';
-
-const FILE_ALREADY_EXISTS = 'EEXIST';
-
-const noop = () => {};
-
-class PidFile {
-  log: Logger;
-
-  constructor(
-    private readonly pid: number,
-    private readonly pidConfig: PidConfig,
-    logger: LoggerFactory
-  ) {
-    this.log = logger.get('pidfile');
-  }
-
-  writeFile() {
-    const pid = String(this.pid);
-    const path = this.pidConfig.file;
-
-    try {
-      writeFileSync(path, pid, { flag: 'wx' });
-    } catch (err) {
-      if (err.code !== FILE_ALREADY_EXISTS) {
-        throw err;
-      }
-
-      const message = `pid file already exists at [${path}]`;
-
-      if (this.pidConfig.failIfPidFileAlreadyExists) {
-        throw new KibanaError(message, err);
-      }
-
-      this.log.warn(message, { path, pid });
-
-      writeFileSync(path, pid);
-    }
-
-    this.log.debug(`wrote pid file [${path}]`);
-  }
-
-  deleteFile() {
-    const path = this.pidConfig.file;
-    this.log.debug(`deleting pid file [${path}]`);
-    unlinkSync(path);
-  }
-}
+import { PidFile } from './PidFile';
+import { LoggerFactory } from '../../logger';
 
 export class PidService {
   private readonly pid$: Observable<PidFile | void>;
@@ -64,18 +17,25 @@ export class PidService {
             ? new PidFile(process.pid, config, logger)
             : undefined
       )
+      // Explanation of `switchMap`:
+      // Each time a new observable is produced, we’ll throw out the previous
+      // one and never see its values again. It allows us to map and flatten
+      // like `flatMap`, but it "switches" to each new observable and forgets
+      // whatever came before it.
       .switchMap(pid => {
-        // We specifically handle `undefined` to make sure the previous pid
-        // will be deleted.
         if (pid === undefined) {
+          // If pid is not specified, we return an observable that does nothing
           return new Observable<PidFile | void>(noop);
         }
 
+        // Otherwise we return an observable that writes the pid when
+        // subscribed to, and deletes it when unsubscribed (e.g. if new config
+        // is received of if `stop` is called below.)
+
         return new Observable<PidFile | void>(observable => {
           pid.writeFile();
-          observable.next(pid);
 
-          return () => {
+          return function unsubscribe() {
             pid.deleteFile();
           };
         });
