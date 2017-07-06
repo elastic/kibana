@@ -26,35 +26,15 @@ Design::
 * Add small text input to UI framework {pull}11354[#11354]
 * Adding table_info component {pull}11778[#11778]
 * [UI Framework] Add KuiInfoButton component {pull}11811[#11811]
-<<<<<<< HEAD
-<<<<<<< HEAD
 * [UI Framework] Allow kuiLocalNavRow to expand vertically if the content wraps. {pull}12606[#12606]
-=======
->>>>>>> 90cab8a... docs: release notes for version 5.5.0
-=======
-* [UI Framework] Allow kuiLocalNavRow to expand vertically if the content wraps. {pull}12606[#12606]
->>>>>>> 23fb570... docs: updates to the 5.5.0 release notes
 
 Core::
 * [IndexPatterns] Support cross cluster search {pull}11114[#11114]
   - Index Patterns can now point to indices from remote clusters when using Elasticsearch's cross cluster search feature. After setting it up in elasticsearch, just mention the remote cluster alias in the index name like so: remoteCluster:indexName.
-<<<<<<< HEAD
-<<<<<<< HEAD
 * Import / Export API for Dashboards {pull}10858[#10858]
 * Disable dynamic/Implement static mappings {pull}10638[#10638]
 * Adds an API for managing saved objects {pull}11632[#11632]
 * Rely on `kbn-xsrf` header for CSRF protection {pull}12547[#12547]
-<<<<<<< HEAD
-=======
-* Use proper Content-Type request header instead of kbn-version and kbnx-srf for server CSRF check. {pull}12019[#12019]
-=======
->>>>>>> 36e56ce... Remove reverted change in release notes
-* Import / Export API for Dashboards {pull}10858[#10858]
-* Disable dynamic/Implement static mappings {pull}10638[#10638]
-* Adds an API for managing saved objects {pull}11632[#11632]
->>>>>>> 90cab8a... docs: release notes for version 5.5.0
-=======
->>>>>>> 23fb570... docs: updates to the 5.5.0 release notes
 
 Dev Tools::
 * Improve Console screen-reader accessibility. {pull}11602[#11602]
@@ -70,14 +50,7 @@ Dashboard::
   - In pre 5.0 versions of Kibana, we showed dashboard descriptions in theOpen listing, but the only place to edit or set them was in Saved Object Management. When we first introduced the new listing pages, we took out the dashboard description portion since the UI was pretty poor.  We've now added it back in, along with a more convenient place to add and edit the description for each dashboard.
 * Hide the second toast when adding a new visualization straight from dashboard {pull}11621[#11621]
   - Previously using the Add new visualization button straight from dashboard caused two notifications to appear - one for successfully saving the visualization and one for successfully adding the visualization to the dashboard.  Two were unnecessary and since our notifications move elements around, we will now only show the notification about successfully saving the visualization.
-<<<<<<< HEAD
-<<<<<<< HEAD
 * In case of a save error, use notify.error, not a full screen fatal page {pull}12381[#12381]
-=======
->>>>>>> 90cab8a... docs: release notes for version 5.5.0
-=======
-* In case of a save error, use notify.error, not a full screen fatal page {pull}12381[#12381]
->>>>>>> 23fb570... docs: updates to the 5.5.0 release notes
 
 Discover::
 * [context view] Apply filters to the context query {pull}11466[#11466]
@@ -152,14 +125,7 @@ Discover::
 * [Fix for #12124] [context view] Fix courier exception handling {pull}12144[#12144]
 * [Fix for #11483] Remove the _source field toggle button which was accidentally reinstated {pull}11485[#11485]
 * [Fix for #10653] Migrate deprecated match query syntax {pull}11554[#11554]
-<<<<<<< HEAD
-<<<<<<< HEAD
 * [Fix for #12248] Fix filter bar appearing above other elements {pull}12480[#12480]
-=======
->>>>>>> 90cab8a... docs: release notes for version 5.5.0
-=======
-* [Fix for #12248] Fix filter bar appearing above other elements {pull}12480[#12480]
->>>>>>> 23fb570... docs: updates to the 5.5.0 release notes
 
 Management::
 * [Fix for #12308] Adding an explicit larger max-width for advanced settings actions {pull}12311[#12311]
@@ -193,18 +159,7 @@ Visualize::
 * [Fix for #12187] Do not normalize keys when joining results to region map {pull}12371[#12371]
 * change manifest service url to new production server url {pull}12383[#12383]
 * [Fix for #11954] removing old point series defaults {pull}11958[#11958]
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
->>>>>>> 23fb570... docs: updates to the 5.5.0 release notes
 * [Fix for #12082] Revert "disable save button if visualization is dirty (#11576)" {pull}12152[#12152]
 * [Fix for #12490] fixes gauge chart width calculation {pull}12499[#12499]
 * [Fix for #12535] fixing labels in heatmap {pull}12537[#12537]
 * [Fix for #12601] goal-type should be discoverable {pull}12603[#12603]
-
-
-<<<<<<< HEAD
-=======
->>>>>>> 90cab8a... docs: release notes for version 5.5.0
-=======
->>>>>>> 23fb570... docs: updates to the 5.5.0 release notes
