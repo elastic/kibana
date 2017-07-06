@@ -62,6 +62,6 @@ This is no longer the case. Now, only commas are a valid query separator: e.g. `
 
 [float]
 === Removed same port http to https redirect behavior
-*Details:* Kibana 5.x redirected requests from http to https on the same port if TLS was configured.  This was removed.
+*Details:* Kibana 5.x redirected requests from http to https on the same port if TLS was configured. Starting in Kibana 6.0.0, Kibana no longer redirects basic http traffic to https.
 
-*Impact:* You may need to add a redirect on a different port if a redirect is expected.
+*Impact:* With the new configuration setting `ssl.redirectHttpFromPort` you can specify a port that will redirect from http to https. This cannot be the same port as the https port.
