@@ -1,10 +1,9 @@
 <div class="kuiPanel">
   <div class="kuiPanelHeader">
     <div class="kuiPanelHeaderSection">
-      <h2
-        class="kuiPanelHeader__title"
-        translate="KIBANA-CREATE_INDEX_PATTERN_STEP_1_TITLE"
-      ></h2>
+      <h2 class="kuiPanelHeader__title">
+        Step 1 of 2: Define index pattern
+      </h2>
     </div>
   </div>
 
@@ -22,8 +21,9 @@
             <label
               for="indexPatternNameField"
               class="kuiLabel kuiVerticalRhythmSmall"
-              translate="KIBANA-CREATE_INDEX_PATTERN_STEP_1_INDEX_PATTERN_LABEL"
-            ></label>
+            >
+              Index pattern
+            </label>
 
             <div class="kuiVerticalRhythmSmall kuiVerticalRhythm">
               <input
@@ -64,7 +64,9 @@
             ng-disabled="!stepIndexPattern.canGoToNextStep()"
           >
             <span class="kuiButton__inner">
-              <span translate="KIBANA-CREATE_INDEX_PATTERN_STEP_1_SUBMIT_BUTTON"></span>
+              <span>
+                Next step
+              </span>
               <span
                 aria-hidden="true"
                 class="kuiButton__icon kuiIcon fa-chevron-right"
@@ -101,11 +103,9 @@
             indices="stepIndexPattern.allIndices"
           >
             <span class="kuiStatusText kuiStatusText--info">
-              <span
-                ng-if="!stepIndexPattern.allIndices.length"
-                translate="KIBANA-CREATE_INDEX_PATTERN_STEP_1_SEARCH_SINGLE_INDEX"
-                translate-compile
-              ></span>
+              <span ng-if="!stepIndexPattern.allIndices.length">
+                You only have a single index. You can create an index pattern to match it.
+              </span>
 
               <span ng-if="stepIndexPattern.allIndices.length">
                 Your index pattern can match any of your <strong>{{stepIndexPattern.allIndices.length}} indices</strong>, below.

@@ -23,7 +23,6 @@ uiModules.get('apps/management')
   $injector,
   $scope,
   $timeout,
-  $translate,
   config,
   es,
   indexPatterns,
@@ -43,7 +42,7 @@ uiModules.get('apps/management')
     display: '───',
   };
   const noTimeFieldOption = {
-    display: $translate.instant('KIBANA-CREATE_INDEX_PATTERN_STEP_2_NO_DATE_FIELD_OPTION')
+    display: `I don't want to use the Time Filter`,
   };
 
   this.documentationLinks = documentationLinks;
@@ -202,7 +201,7 @@ uiModules.get('apps/management')
 
     if (dateFields.length === 0) {
       return [{
-        display: $translate.instant('KIBANA-CREATE_INDEX_PATTERN_STEP_2_NO_TIME_FIELDS')
+        display: `The indices which match this index pattern don't contain any time fields.`,
       }];
     }
 
@@ -230,7 +229,7 @@ uiModules.get('apps/management')
     })
     .catch(err => {
       if (err instanceof IndexPatternMissingIndices) {
-        this.timeFieldError = $translate.instant('KIBANA-CREATE_INDEX_PATTERN_STEP_2_NO_MAPPING_ERROR');
+        this.timeFieldError = 'Unable to fetch mapping. Do you have indices matching the pattern?';
       }
 
       notify.error(err);
@@ -277,7 +276,7 @@ uiModules.get('apps/management')
       });
     }).catch(err => {
       if (err instanceof IndexPatternMissingIndices) {
-        return notify.error($translate.instant('KIBANA-CREATE_INDEX_PATTERN_STEP_2_INDICES_DONT_MATCH_PATTERN'));
+        return notify.error(`Couldn't locate any indices matching that pattern. Please add the index to Elasticsearch`);
       }
 
       notify.fatal(err);

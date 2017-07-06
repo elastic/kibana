@@ -8,10 +8,9 @@
       <!-- Intro -->
       <div class="kuiVerticalRhythm">
         <div class="kuiBar">
-          <h1
-            class="kuiTitle"
-            translate="KIBANA-CREATE_INDEX_PATTERN_TITLE"
-          ></h1>
+          <h1 class="kuiTitle">
+            Create index pattern
+          </h1>
 
           <div class="kuiBarSection">
             <!-- Include system indices -->
@@ -26,18 +25,16 @@
                 ng-change="controller.onIncludeSystemIndicesChange()"
               >
 
-              <span
-                class="kuiCheckBoxLabel__text"
-                translate="KIBANA-CREATE_INDEX_PATTERN_INCLUDE_SYSTEM_INDICES_CHECKBOX_LABEL"
-              ></span>
+              <span class="kuiCheckBoxLabel__text">
+                Include system indices
+              </span>
             </label>
           </div>
         </div>
 
-        <p
-          class="kuiText kuiSubduedText"
-          translate="KIBANA-CREATE_INDEX_PATTERN_INTRO"
-        ></p>
+        <p class="kuiText kuiSubduedText">
+          Kibana uses index patterns to retrieve data from Elasticsearch, for things like visualizations.
+        </p>
       </div>
 
       <!-- User has no data -->
@@ -52,10 +49,9 @@
             class="kuiPanel kuiPanel--prompt kuiPanel--noBorder kuiVerticalRhythm"
           >
             <div class="kuiPanelBody">
-              <h2
-                class="kuiSubTitle kuiSubduedText kuiVerticalRhythm"
-                translate="KIBANA-CREATE_INDEX_PATTERN_LOADING_DATA_TITLE"
-              ></h2>
+              <h2 class="kuiSubTitle kuiSubduedText kuiVerticalRhythm">
+                Checking for Elasticsearch data
+              </h2>
 
               <div class="kuiVerticalRhythm">
                 <p class="kuiText kuiSubduedText kuiVerticalRhythmSmall">
@@ -64,7 +60,9 @@
                       aria-hidden="true"
                       class="kuiStatusText__icon kuiIcon fa-spinner fa-spin"
                     ></span>
-                    <span translate="KIBANA-CREATE_INDEX_PATTERN_LOADING_DATA_BODY"></span>
+                    <span>
+                      Reticulating splines...
+                    </span>
                   </span>
                 </p>
               </div>
@@ -75,21 +73,23 @@
           <div ng-if="!controller.isFetchingExistingIndices">
             <div class="kuiPanel kuiPanel--prompt kuiPanel--noBorder kuiVerticalRhythm">
               <div class="kuiPanelBody">
-                <h1
-                  class="kuiSubTitle kuiSubduedText kuiVerticalRhythm"
-                  translate="KIBANA-CREATE_INDEX_PATTERN_NO_DATA_TITLE"
-                ></h1>
+                <h1 class="kuiSubTitle kuiSubduedText kuiVerticalRhythm">
+                  Couldn't find any Elasticsearch data
+                </h1>
 
                 <div class="kuiVerticalRhythm">
                   <p class="kuiText kuiSubduedText kuiVerticalRhythmSmall">
-                    <span translate="KIBANA-CREATE_INDEX_PATTERN_NO_DATA_BODY"></span>
+                    <span>
+                      You'll need to index some data into Elasticsearch before you can create an index pattern.
+                    </span>
                     <a
                       class="kuiLink"
+                      aria-label="Learn how to index data into Elasticsearch"
                       ng-href="{{ controller.documentationLinks.indexPatterns.loadingData }}"
-                      translate-attr="{ 'aria-label': 'KIBANA-CREATE_INDEX_PATTERN_NO_DATA_LEARN_LINK_ALT' }"
                       target="_blank"
-                      translate="KIBANA-CREATE_INDEX_PATTERN_NO_DATA_LEARN_LINK"
-                    ></a>
+                    >
+                      Learn how.
+                    </a>
                   </p>
                 </div>
 
@@ -102,7 +102,9 @@
                       aria-hidden="true"
                       class="kuiButton__icon kuiIcon fa-refresh"
                     ></span>
-                    <span translate="KIBANA-CREATE_INDEX_PATTERN_NO_DATA_RELOAD_BUTTON"></span>
+                    <span>
+                      Check for new data
+                    </span>
                   </span>
                 </button>
               </div>
