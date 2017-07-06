@@ -33,7 +33,7 @@ export const PositionableChild = pure((props) => {
     <div
       className={`canvas__workpad--element ${selectedClassName}`}
       onClick={select}>
-      <div style={{ pointerEvents: 'none' }}>
+      <div>
         <RenderElement
           renderFn={elementTypeDefintion.render}
           destroyFn={elementTypeDefintion.destroy}
@@ -43,7 +43,10 @@ export const PositionableChild = pure((props) => {
         />
       </div>
       {!isSelected ? null :
-        (<i className="fa fa-times-circle canvas__workpad--element-remove" style={{ cursor: 'pointer' }} onClick={remove}/>)
+        (<i
+          className="fa fa-times-circle canvas__workpad--element-remove"
+          style={{ cursor: 'pointer' }}
+          onClick={remove}/>)
       }
     </div>
   );
