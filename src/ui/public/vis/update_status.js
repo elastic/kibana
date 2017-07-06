@@ -1,5 +1,3 @@
-const oldValues = [];
-
 // adapted from https://github.com/isaacs/json-stringify-safe/blob/02cfafd45f06d076ac4bf0dd28be6738a07a72f9/stringify.js
 function serializer() {
   const stack = [];
@@ -23,16 +21,18 @@ function serializer() {
   };
 }
 
-const hasChanged = (name, value) => {
-  const currentValue = JSON.stringify(value, serializer());
-  if (currentValue !== oldValues[name]) {
-    oldValues[name] = currentValue;
-    return true;
-  }
-  return false;
-};
-
 const getUpdateStatus = ($scope) => {
+  if (!$scope._oldStatus) $scope._oldStatus = [];
+
+  const hasChanged = (name, value) => {
+    const currentValue = JSON.stringify(value, serializer());
+    if (currentValue !== $scope._oldStatus[name]) {
+      $scope._oldStatus[name] = currentValue;
+      return true;
+    }
+    return false;
+  };
+
   const status = {
     aggs: hasChanged('aggs', $scope.vis.aggs),
     data: hasChanged('data', $scope.visData),
