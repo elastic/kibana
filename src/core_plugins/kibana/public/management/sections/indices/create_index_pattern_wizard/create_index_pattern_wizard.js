@@ -156,6 +156,10 @@ uiModules.get('apps/management')
     });
   };
 
+  this.isSystemIndicesCheckBoxVisible = () => (
+    this.wizardStep === 'indexPattern'
+  );
+
   this.goToIndexPatternStep = () => {
     this.wizardStep = 'indexPattern';
   };

@@ -15,7 +15,10 @@
 
           <div class="kuiBarSection">
             <!-- Include system indices -->
-            <label class="kuiCheckBoxLabel">
+            <label
+              ng-if="controller.isSystemIndicesCheckBoxVisible()"
+              class="kuiCheckBoxLabel"
+            >
               <input
                 type="checkbox"
                 class="kuiCheckBox"
