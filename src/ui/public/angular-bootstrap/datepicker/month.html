@@ -50,7 +50,6 @@
         ng-repeat="dt in row track by dt.date"
         class="kuiDatePickerRowCell"
         ng-class="{'kuiDatePickerRowCell-isBlocked': dt.disabled && !dt.secondary}"
-        role="gridcell"
         id="{{dt.uid}}"
         aria-disabled="{{!!dt.disabled}}"
       >
