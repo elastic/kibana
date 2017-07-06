@@ -64,7 +64,6 @@ uiModules.get('apps/management')
   this.isFetchingTimeFieldOptions = false;
   this.isCreatingIndexPattern = false;
   this.doesIncludeSystemIndices = false;
-  this.timeFieldError = undefined;
   let allIndices = [];
   let matchingIndices = [];
   let partialMatchingIndices = [];
@@ -228,10 +227,6 @@ uiModules.get('apps/management')
       this.timeFieldOptions = extractTimeFieldsFromFields(fields);
     })
     .catch(err => {
-      if (err instanceof IndexPatternMissingIndices) {
-        this.timeFieldError = 'Unable to fetch mapping. Do you have indices matching the pattern?';
-      }
-
       notify.error(err);
     })
     .finally(() => {
