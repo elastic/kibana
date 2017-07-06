@@ -33,6 +33,7 @@
                 ng-model="state.query"
                 placeholder="Search... (e.g. status:200 AND extension:PHP)"
                 aria-label="Search input"
+                aria-describedby="discover-lucene-syntax-hint"
                 type="text"
                 class="kuiLocalSearchInput kuiLocalSearchInput--lucene"
                 ng-class="{'kuiLocalSearchInput-isInvalid': discoverSearch.$invalid}"
@@ -40,6 +41,7 @@
               <div class="kuiLocalSearchAssistedInput__assistance">
                 <p class="kuiText">
                   <a
+                    id="discover-lucene-syntax-hint"
                     class="kuiLink"
                     ng-href="{{queryDocLinks.luceneQuerySyntax}}"
                     target="_blank"
