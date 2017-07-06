@@ -98,6 +98,7 @@ const PositionableComponent = ({ position, children, interact  }) => {
 
     const stepChild = React.cloneElement(child, { size: { height, width } });
 
+    /*
     if (!interact) {
       return (
         <div className="canvas--positionable"
@@ -107,31 +108,36 @@ const PositionableComponent = ({ position, children, interact  }) => {
         </div>
       );
     } else {
-      return (
-        <div className="canvas--positionable canvas--interactable"
-          ref={setWrapperNode}
-          style={newStyle}>
-          <div className="canvas--interactable-actions">
-            <div className="canvas--interactable-action canvas--interactable-rotate-handle">
-              <i className="fa fa-undo canvas--interactable-rotate-handle"/>
+    */
+    return (
+      <div className="canvas--positionable canvas--interactable"
+        ref={setWrapperNode}
+        style={newStyle}>
+
+        {stepChild}
+
+        {!interact ? null : (
+          <div>
+            <div className="canvas--interactable-actions">
+              <div className="canvas--interactable-action canvas--interactable-rotate-handle">
+                <i className="fa fa-undo canvas--interactable-rotate-handle"/>
+              </div>
             </div>
+
+            <div className="canvas--interactable-meta"/>
+
+            <div className="canvas--interactable-resize canvas--interactable-resize-nw"/>
+            <div className="canvas--interactable-resize canvas--interactable-resize-ne"/>
+            <div className="canvas--interactable-resize canvas--interactable-resize-se"/>
+            <div className="canvas--interactable-resize canvas--interactable-resize-sw"/>
+            <div className="canvas--interactable-resize canvas--interactable-resize-n"/>
+            <div className="canvas--interactable-resize canvas--interactable-resize-e"/>
+            <div className="canvas--interactable-resize canvas--interactable-resize-s"/>
+            <div className="canvas--interactable-resize canvas--interactable-resize-w"/>
           </div>
-
-          <div className="canvas--interactable-meta"/>
-
-          {stepChild}
-
-          <div className="canvas--interactable-resize canvas--interactable-resize-nw"/>
-          <div className="canvas--interactable-resize canvas--interactable-resize-ne"/>
-          <div className="canvas--interactable-resize canvas--interactable-resize-se"/>
-          <div className="canvas--interactable-resize canvas--interactable-resize-sw"/>
-          <div className="canvas--interactable-resize canvas--interactable-resize-n"/>
-          <div className="canvas--interactable-resize canvas--interactable-resize-e"/>
-          <div className="canvas--interactable-resize canvas--interactable-resize-s"/>
-          <div className="canvas--interactable-resize canvas--interactable-resize-w"/>
-        </div>
-      );
-    }
+        )}
+      </div>
+    );
   });
 
   return (
