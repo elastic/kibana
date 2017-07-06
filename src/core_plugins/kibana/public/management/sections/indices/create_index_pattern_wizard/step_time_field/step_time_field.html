@@ -69,9 +69,10 @@
       ></p>
     </div>
 
+    <!-- Advanced options -->
     <toggle-panel
       class="kuiVerticalRhythm"
-      is-disabled="!stepTimeField.canEnableExpandWildcard()"
+      ng-if="stepTimeField.canEnableExpandWildcard()"
       is-collapsed="!stepTimeField.isAdvancedOptionsVisible"
       on-toggle="stepTimeField.onToggleAdvancedOptions"
       toggle-button-label="{{stepTimeField.getAdvancedOptionsButtonLabel()}}"
