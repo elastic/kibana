@@ -1,0 +1,18 @@
+[[release-notes-5.4.2]]
+== 5.4.2 Release Notes
+
+Also see <<breaking-changes-5.0>>.
+
+[float]
+[[bug-5.4.2]]
+=== Bug fixes
+Dashboard::
+* [Fix for #12121] Update dashboard based on url changes {pull}12123[#12123]
+  - We fixed a bug where certain modifications made directly to the dashboard url, such as changing panel sizes and modifying the query, failed to update dashboard without a hard refresh.
+Discover::
+* [Fix for #11925] [context view] Use _doc for tie-breaking instead of _uid {pull}12096[#12096]
+  - To avoid filling up Elasticsearch's fielddata cache by sorting on the _uid field in the context view, the field _doc is now used as a tiebreaker by default. The field to be used can now be configured using the context:tieBreakingFields advanced setting.
+Visualize::
+* [Fix for #11982] Fixed point series label ids {pull}12065[#12065]
+* [Fix for #12000] Hid the last bucket error when switching from parent pipeline agg {pull}12066[#12066]
+
