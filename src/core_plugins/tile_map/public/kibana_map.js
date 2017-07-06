@@ -237,13 +237,18 @@ export class KibanaMap extends EventEmitter {
     this.emit('layers:update');
 
 
-    this.addAttributions(kibanaLayer.getAttributions());
+    this._addAttributions(kibanaLayer.getAttributions());
 
 
   }
 
   removeLayer(kibanaLayer) {
-    this.removeAttributions(kibanaLayer.getAttributions());
+
+    if (!kibanaLayer) {
+      return;
+    }
+
+    this._removeAttributions(kibanaLayer.getAttributions());
     const index = this._layers.indexOf(kibanaLayer);
     if (index >= 0) {
       this._layers.splice(index, 1);
@@ -254,10 +259,16 @@ export class KibanaMap extends EventEmitter {
         listener.layer.removeListener(listener.name, listener.handle);
       }
     });
+
+    //must readd all attributions, because we might have removed dupes
+    this._layers.forEach((layer) => this._addAttributions(layer.getAttributions()));
+    if (this._baseLayerSettings) {
+      this._addAttributions(this._baseLayerSettings.options.attribution);
+    }
   }
 
 
-  addAttributions(attribution) {
+  _addAttributions(attribution) {
     const attributions = getAttributionArray(attribution);
     attributions.forEach((attribution) => {
       this._leafletMap.attributionControl.removeAttribution(attribution);//this ensures we do not add duplicates
@@ -265,7 +276,7 @@ export class KibanaMap extends EventEmitter {
     });
   }
 
-  removeAttributions(attribution) {
+  _removeAttributions(attribution) {
     const attributions = getAttributionArray(attribution);
     attributions.forEach((attribution) => {
       this._leafletMap.attributionControl.removeAttribution(attribution);//this ensures we do not add duplicates
@@ -273,7 +284,6 @@ export class KibanaMap extends EventEmitter {
   }
 
   updateAttributions(attributionString) {
-    console.log('upd', attributionString);
     attributionString = attributionString || '';
     let attributions = attributionString.split('|');
     if (attributions.length === 1) {//temp work-around due to inconsistency in manifests
@@ -464,7 +474,7 @@ export class KibanaMap extends EventEmitter {
 
     if (settings === null) {
       if (this._leafletBaseLayer && this._leafletMap) {
-        this.removeAttributions(this._baseLayerSettings.options.attribution);
+        this._removeAttributions(this._baseLayerSettings.options.attribution);
         this._leafletMap.removeLayer(this._leafletBaseLayer);
         this._leafletBaseLayer = null;
         this._baseLayerSettings = null;
@@ -500,7 +510,7 @@ export class KibanaMap extends EventEmitter {
       if (settings.options.minZoom > this._leafletMap.getZoom()) {
         this._leafletMap.setZoom(settings.options.minZoom);
       }
-      this.addAttributions(settings.options.attribution);
+      this._addAttributions(settings.options.attribution);
       this.resize();
     }
 

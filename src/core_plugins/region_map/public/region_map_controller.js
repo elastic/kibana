@@ -54,7 +54,6 @@ module.controller('KbnRegionMapController', function ($scope, $element, Private,
         return;
       }
 
-      console.log($scope.vis.params.selectedLayer);
       updateChoroplethLayer($scope.vis.params.selectedLayer.url, $scope.vis.params.selectedLayer.attribution);
       choroplethLayer.setMetrics(results, metricsAgg);
       setTooltipFormatter();
@@ -120,7 +119,7 @@ module.controller('KbnRegionMapController', function ($scope, $element, Private,
 
     const previousMetrics = choroplethLayer ? choroplethLayer.getMetrics() : null;
     const previousMetricsAgg = choroplethLayer ? choroplethLayer.getMetricsAgg() : null;
-    choroplethLayer = new ChoroplethLayer(url);
+    choroplethLayer = new ChoroplethLayer(url, attribution);
     if (previousMetrics && previousMetricsAgg) {
       choroplethLayer.setMetrics(previousMetrics, previousMetricsAgg);
     }
@@ -139,7 +138,6 @@ module.controller('KbnRegionMapController', function ($scope, $element, Private,
       }
     });
     kibanaMap.addLayer(choroplethLayer);
-    // kibanaMap.updateAttributions(attribution);
   }
 
 
