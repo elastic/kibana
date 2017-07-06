@@ -7,11 +7,11 @@ interface Route<
   Params extends ObjectSetting<{}>,
   Query extends ObjectSetting<{}>
 > {
-  path: string,
+  path: string;
   validate?: {
-    params?: Params,
-    query?: Query
-  }
+    params?: Params;
+    query?: Query;
+  };
 }
 
 type Obj<T> = { [key: string]: T };
@@ -20,21 +20,18 @@ interface ResponseFactory {
   ok<T extends Obj<any>>(payload: T): KibanaResponse<T>;
   accepted<T extends Obj<any>>(payload: T): KibanaResponse<T>;
   noContent(): KibanaResponse<void>;
-  badRequest<T extends Error>(err: T): KibanaResponse<T>
+  badRequest<T extends Error>(err: T): KibanaResponse<T>;
 }
 
 const responseFactory: ResponseFactory = {
   ok: <T extends Obj<any>>(payload: T) => new KibanaResponse(200, payload),
-  accepted: <T extends Obj<any>>(payload: T) => new KibanaResponse(202, payload),
+  accepted: <T extends Obj<any>>(payload: T) =>
+    new KibanaResponse(202, payload),
   noContent: () => new KibanaResponse<void>(204),
   badRequest: <T extends Error>(err: T) => new KibanaResponse(400, err)
 };
 
-type RequestHandler<
-  RequestValue,
-  Params extends Any,
-  Query extends Any
-> = (
+type RequestHandler<RequestValue, Params extends Any, Query extends Any> = (
   onRequestValue: RequestValue,
   req: KibanaRequest<TypeOf<Params>, TypeOf<Query>>,
   createResponse: ResponseFactory
@@ -44,10 +41,7 @@ type RequestHandler<
 type StatusCode = 200 | 202 | 204 | 400;
 
 class KibanaResponse<T> {
-  constructor(
-    readonly status: StatusCode,
-    readonly payload?: T
-  ) {}
+  constructor(readonly status: StatusCode, readonly payload?: T) {}
 }
 
 // TODO Explore validating headers too (can't validate _all_, but you only
@@ -58,13 +52,10 @@ export class KibanaRequest<
 > {
   readonly headers: Headers;
 
-  static validate<
-    Params extends Props = {},
-    Query extends Props = {}
-  >(
+  static validate<Params extends Props = {}, Query extends Props = {}>(
     route: Route<ObjectSetting<Params>, ObjectSetting<Query>>,
     req: express.Request
-  ): { params: Params, query: Query } {
+  ): { params: Params; query: Query } {
     let params: Params;
     let query: Query;
 
@@ -102,28 +93,25 @@ export class KibanaRequest<
 }
 
 export interface RouterOptions<T> {
-  onRequest?: (req: KibanaRequest) => T
+  onRequest?: (req: KibanaRequest) => T;
 }
 
 export class Router<V> {
   readonly router = express.Router();
 
-  constructor(
-    readonly path: string,
-    readonly options: RouterOptions<V> = {}
-  ) {}
+  constructor(readonly path: string, readonly options: RouterOptions<V> = {}) {}
 
   get<P extends ObjectSetting<any>, Q extends ObjectSetting<any>>(
     route: Route<P, Q>,
     handler: RequestHandler<V, P, Q>
   ) {
     this.router.get(route.path, async (req, res) => {
-      let valid: { params: TypeOf<P>, query: TypeOf<P> };
+      let valid: { params: TypeOf<P>; query: TypeOf<P> };
 
       // TODO Change this so we can get failures per type
       try {
         valid = KibanaRequest.validate(route, req);
-      } catch(e) {
+      } catch (e) {
         res.status(400);
         res.json({ error: e.message });
         return;
@@ -131,16 +119,13 @@ export class Router<V> {
 
       const kibanaRequest = new KibanaRequest(req, valid.params, valid.query);
 
-      const value = this.options.onRequest !== undefined
-        ? this.options.onRequest(kibanaRequest)
-        : {} as V;
+      const value =
+        this.options.onRequest !== undefined
+          ? this.options.onRequest(kibanaRequest)
+          : {} as V;
 
       try {
-        const response = await handler(
-          value,
-          kibanaRequest,
-          responseFactory
-        );
+        const response = await handler(value, kibanaRequest, responseFactory);
 
         if (response instanceof KibanaResponse) {
           res.status(response.status);

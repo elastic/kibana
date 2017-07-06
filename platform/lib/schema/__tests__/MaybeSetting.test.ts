@@ -11,9 +11,11 @@ test('returns undefined if undefined', () => {
 });
 
 test('returns undefined even if contained setting has a default value', () => {
-  const setting = maybe(string({
-    defaultValue: 'abc'
-  }));
+  const setting = maybe(
+    string({
+      defaultValue: 'abc'
+    })
+  );
 
   expect(setting.validate(undefined)).toEqual(undefined);
 });
@@ -21,9 +23,11 @@ test('returns undefined even if contained setting has a default value', () => {
 test('calls validate on contained setting', () => {
   const spy = jest.fn();
 
-  const setting = maybe(string({
-    validate: spy
-  }));
+  const setting = maybe(
+    string({
+      validate: spy
+    })
+  );
 
   setting.validate('foo');
 

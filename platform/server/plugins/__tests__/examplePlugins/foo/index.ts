@@ -5,15 +5,15 @@ export const configPath = 'foo';
 export const dependencies = [];
 
 interface FooExports {
-  value: string
+  value: string;
 }
 
 export interface FooPluginType {
-  foo: FooExports
+  foo: FooExports;
 }
 
 export const plugin: KibanaFunctionalPlugin<{}, FooExports> = kibana => {
   return {
     value: 'foo'
-  }
-}
+  };
+};

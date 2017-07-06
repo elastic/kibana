@@ -12,10 +12,13 @@ interface TimelionExports {
 }
 
 export interface TimelionPluginType {
-  timelion: TimelionExports
+  timelion: TimelionExports;
 }
 
-export const plugin: KibanaFunctionalPlugin<XPackPluginType, TimelionExports> = (kibana, dependencies) => {
+export const plugin: KibanaFunctionalPlugin<
+  XPackPluginType,
+  TimelionExports
+> = (kibana, dependencies) => {
   const { xpack } = dependencies;
 
   const log = kibana.logger.get();
@@ -24,12 +27,15 @@ export const plugin: KibanaFunctionalPlugin<XPackPluginType, TimelionExports> = 
     log.debug(`polling frequency: ${config.pollingFrequencyInMillis}`);
   });
 
-  const registerFunction = (pluginName: string, timelionFunction: TimelionFunction) => {
+  const registerFunction = (
+    pluginName: string,
+    timelionFunction: TimelionFunction
+  ) => {
     log.info(`received function from: ${pluginName}`);
     timelionFunction();
-  }
+  };
 
   return {
     registerFunction
-  }
-}
+  };
+};

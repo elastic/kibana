@@ -11,7 +11,7 @@ test('flat object', () => {
       a: 1,
       b: 2
     }
-  })
+  });
 });
 
 test('deep object', () => {
@@ -27,7 +27,7 @@ test('deep object', () => {
       a: 1,
       b: 2
     }
-  })
+  });
 });
 
 test('flat within deep object', () => {
@@ -45,7 +45,7 @@ test('flat within deep object', () => {
       },
       b: 2
     }
-  })
+  });
 });
 
 test('flat then flat object', () => {
@@ -65,7 +65,7 @@ test('flat then flat object', () => {
         b: 2
       }
     }
-  })
+  });
 });
 
 test('full with empty array', () => {
@@ -77,7 +77,7 @@ test('full with empty array', () => {
   expect(ensureDeepObject(obj)).toEqual({
     a: 1,
     b: []
-  })
+  });
 });
 
 test('full with array of primitive values', () => {
@@ -89,7 +89,7 @@ test('full with array of primitive values', () => {
   expect(ensureDeepObject(obj)).toEqual({
     a: 1,
     b: [1, 2, 3]
-  })
+  });
 });
 
 test('full with array of full objects', () => {
@@ -101,7 +101,7 @@ test('full with array of full objects', () => {
   expect(ensureDeepObject(obj)).toEqual({
     a: 1,
     b: [{ c: 2 }, { d: 3 }]
-  })
+  });
 });
 
 test('full with array of flat objects', () => {
@@ -113,7 +113,7 @@ test('full with array of flat objects', () => {
   expect(ensureDeepObject(obj)).toEqual({
     a: 1,
     b: [{ c: { d: 2 } }, { e: { f: 3 } }]
-  })
+  });
 });
 
 test('flat with flat and array of flat objects', () => {
@@ -127,13 +127,11 @@ test('flat with flat and array of flat objects', () => {
     a: 1,
     b: { c: 2 },
     d: [3, { e: { f: 4 } }, { g: { h: 5 } }]
-  })
+  });
 });
 
 test('array composed of flat objects', () => {
   const arr = [{ 'c.d': 2 }, { 'e.f': 3 }];
 
-  expect(ensureDeepObject(arr)).toEqual([
-    { c: { d: 2 } }, { e: { f: 3 } }
-  ])
+  expect(ensureDeepObject(arr)).toEqual([{ c: { d: 2 } }, { e: { f: 3 } }]);
 });

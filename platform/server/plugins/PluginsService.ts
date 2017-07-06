@@ -32,7 +32,9 @@ export class PluginsService implements CoreService {
           return true;
         }
 
-        this.log.warn(`Plugin [${plugin.plugin.name}] is disabled and will not be started`);
+        this.log.warn(
+          `Plugin [${plugin.plugin.name}] is disabled and will not be started`
+        );
         return false;
       })
       .do(plugin => {

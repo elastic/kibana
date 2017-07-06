@@ -18,10 +18,9 @@ export const parseArgv = (argv: Array<string>) =>
     .alias('version', 'v')
     .options(args.options)
     .epilogue(args.docs)
-    .check(args.check(args.options))
-    .argv;
+    .check(args.check(args.options)).argv;
 
-const run = (argv: {[key: string]: any}) => {
+const run = (argv: { [key: string]: any }) => {
   if (argv.help) {
     return;
   }
@@ -34,9 +33,10 @@ const run = (argv: {[key: string]: any}) => {
 
   const onShutdown: OnShutdown = reason => {
     process.exit(reason === undefined ? 0 : 1);
-  }
+  };
 
-  const rawConfig$ = rawConfigService.getConfig$()
+  const rawConfig$ = rawConfigService
+    .getConfig$()
     .map(rawConfig => merge({}, rawConfig, configOverrides));
 
   const root = new Root(rawConfig$, env, onShutdown);

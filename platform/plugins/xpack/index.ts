@@ -8,11 +8,11 @@ export const configPath = ['xpack', 'xpack_main'];
 export const dependencies = [];
 
 interface XPackExports {
-  config$: Observable<XPackConfig>
+  config$: Observable<XPackConfig>;
 }
 
 export interface XPackPluginType {
-  xpack: XPackExports
+  xpack: XPackExports;
 }
 
 export const plugin: KibanaFunctionalPlugin<{}, XPackExports> = kibana => {
@@ -24,5 +24,5 @@ export const plugin: KibanaFunctionalPlugin<{}, XPackExports> = kibana => {
 
   return {
     config$
-  }
-}
+  };
+};

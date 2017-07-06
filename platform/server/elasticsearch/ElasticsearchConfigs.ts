@@ -1,5 +1,8 @@
 import { ElasticsearchConfig } from './ElasticsearchConfig';
-import { createElasticsearchSchema, ElasticsearchConfigsSchema } from './schema';
+import {
+  createElasticsearchSchema,
+  ElasticsearchConfigsSchema
+} from './schema';
 import { ElasticsearchClusterType } from '../../types';
 import { Env } from '../../config';
 
@@ -8,15 +11,16 @@ export class ElasticsearchConfigs {
 
   private readonly configs: {
     [type in ElasticsearchClusterType]: ElasticsearchConfig
-  }
+  };
 
   constructor(config: ElasticsearchConfigsSchema, env: Env) {
     this.configs = {
-      data: config.tribe !== undefined
-        ? new ElasticsearchConfig('data', config.tribe)
-        : new ElasticsearchConfig('data', config),
+      data:
+        config.tribe !== undefined
+          ? new ElasticsearchConfig('data', config.tribe)
+          : new ElasticsearchConfig('data', config),
       admin: new ElasticsearchConfig('admin', config)
-    }
+    };
   }
 
   forType(type: ElasticsearchClusterType) {

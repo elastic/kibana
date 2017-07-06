@@ -2,9 +2,9 @@ import { BehaviorSubject } from 'rxjs';
 
 import { ConfigService } from '../ConfigService';
 import { Env } from '../Env';
-import { logger } from '../../logger/__mocks__'
+import { logger } from '../../logger/__mocks__';
 import { Schema } from '../../types';
-import * as schemaLib from '../../lib/schema'
+import * as schemaLib from '../../lib/schema';
 
 const emptyArgv = {};
 const defaultEnv = new Env('/kibana', emptyArgv);
@@ -38,17 +38,23 @@ test("returns undefined if fetching optional config at a path that doesn't exist
   const config$ = new BehaviorSubject({ foo: 'bar' });
   const configService = new ConfigService(config$, defaultEnv, logger);
 
-  const configs = configService.optionalAtPath('unique-name', ExampleClassWithStringSchema);
+  const configs = configService.optionalAtPath(
+    'unique-name',
+    ExampleClassWithStringSchema
+  );
   const exampleConfig = await configs.first().toPromise();
 
   expect(exampleConfig).toBeUndefined();
 });
 
-test("returns observable config at optional path if it exists", async () => {
+test('returns observable config at optional path if it exists', async () => {
   const config$ = new BehaviorSubject({ value: 'bar' });
   const configService = new ConfigService(config$, defaultEnv, logger);
 
-  const configs = configService.optionalAtPath('value', ExampleClassWithStringSchema);
+  const configs = configService.optionalAtPath(
+    'value',
+    ExampleClassWithStringSchema
+  );
   const exampleConfig: any = await configs.first().toPromise();
 
   expect(exampleConfig).toBeDefined();
@@ -60,7 +66,8 @@ test("does not push new configs when reloading if config at path hasn't changed"
   const configService = new ConfigService(config$, defaultEnv, logger);
 
   const valuesReceived: any[] = [];
-  configService.atPath('key', ExampleClassWithStringSchema)
+  configService
+    .atPath('key', ExampleClassWithStringSchema)
     .subscribe(config => {
       valuesReceived.push(config.value);
     });
@@ -70,12 +77,13 @@ test("does not push new configs when reloading if config at path hasn't changed"
   expect(valuesReceived).toEqual(['value']);
 });
 
-test("pushes new config when reloading and config at path has changed", async () => {
+test('pushes new config when reloading and config at path has changed', async () => {
   const config$ = new BehaviorSubject({ key: 'value' });
   const configService = new ConfigService(config$, defaultEnv, logger);
 
   const valuesReceived: any[] = [];
-  configService.atPath('key', ExampleClassWithStringSchema)
+  configService
+    .atPath('key', ExampleClassWithStringSchema)
     .subscribe(config => {
       valuesReceived.push(config.value);
     });
@@ -97,12 +105,12 @@ test("throws error if config class does not implement 'createSchema'", async () 
 
   try {
     await configs.first().toPromise();
-  } catch(e) {
+  } catch (e) {
     expect(e).toMatchSnapshot();
   }
 });
 
-test("tracks unhandled paths", async () => {
+test('tracks unhandled paths', async () => {
   const initialConfig = {
     foo: 'value',
     bar: {
@@ -127,13 +135,18 @@ test("tracks unhandled paths", async () => {
   const configService = new ConfigService(config$, defaultEnv, logger);
 
   configService.atPath('foo', createClassWithSchema(schemaLib.string()));
-  configService.atPath(['bar', 'deep2'], createClassWithSchema(schemaLib.object({
-    key: schemaLib.string()
-  })));
+  configService.atPath(
+    ['bar', 'deep2'],
+    createClassWithSchema(
+      schemaLib.object({
+        key: schemaLib.string()
+      })
+    )
+  );
 
   const unused = await configService.getUnusedPaths();
 
-  expect(unused).toEqual(["bar.deep1.key", "quux.deep1.key", "quux.deep2.key"]);
+  expect(unused).toEqual(['bar.deep1.key', 'quux.deep1.key', 'quux.deep2.key']);
 });
 
 test('handles enabled path, but only marks the enabled path as used', async () => {
@@ -194,18 +207,16 @@ function createClassWithSchema(schema: schemaLib.Any) {
   return class ExampleClassWithSchema {
     static createSchema = () => {
       return schema;
-    }
+    };
 
-    constructor(readonly value: schemaLib.TypeOf<typeof schema>) {
-    }
-  }
+    constructor(readonly value: schemaLib.TypeOf<typeof schema>) {}
+  };
 }
 
 class ExampleClassWithStringSchema {
   static createSchema = (schema: Schema) => {
     return schema.string();
-  }
+  };
 
-  constructor(readonly value: string) {
-  }
+  constructor(readonly value: string) {}
 }

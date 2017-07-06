@@ -14,8 +14,9 @@ export const plugin: KibanaFunctionalPlugin<{}> = kibana => {
   log.info('creating savedObjects plugin');
 
   const router = http.createAndRegisterRouter('/api/saved_objects', {
-    onRequest: req => new SavedObjectsService(req, _kibana.config$, elasticsearch.service)
+    onRequest: req =>
+      new SavedObjectsService(req, _kibana.config$, elasticsearch.service)
   });
 
   registerEndpoints(router, logger, util.schema);
-}
+};

@@ -6,7 +6,7 @@ const obj = {
     quux: 123
   },
   'dotted.value': 'dots'
-}
+};
 
 test('get with string', () => {
   const value = get(obj, 'foo');

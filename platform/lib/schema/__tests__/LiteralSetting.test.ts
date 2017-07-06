@@ -17,7 +17,9 @@ test('returns error when not corrent', () => {
 
   expect(() => literal(true).validate(false)).toThrowErrorMatchingSnapshot();
 
-  expect(() => literal('test').validate([1, 2, 3])).toThrowErrorMatchingSnapshot();
+  expect(() =>
+    literal('test').validate([1, 2, 3])
+  ).toThrowErrorMatchingSnapshot();
 
   expect(() => literal(123).validate('abc')).toThrowErrorMatchingSnapshot();
 });

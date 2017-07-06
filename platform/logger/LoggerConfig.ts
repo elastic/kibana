@@ -8,18 +8,21 @@ const createLoggerSchema = (schema: Schema) => {
     dest: string({
       defaultValue: 'stdout'
     }),
-    level: oneOf([
-      literal('fatal'),
-      literal('error'),
-      literal('warn'),
-      literal('info'),
-      literal('debug'),
-      literal('trace')
-    ], {
-      defaultValue: 'info'
-    })
+    level: oneOf(
+      [
+        literal('fatal'),
+        literal('error'),
+        literal('warn'),
+        literal('info'),
+        literal('debug'),
+        literal('trace')
+      ],
+      {
+        defaultValue: 'info'
+      }
+    )
   });
-}
+};
 
 const loggingConfigType = typeOfSchema(createLoggerSchema);
 type HttpConfigType = typeof loggingConfigType;

@@ -10,8 +10,11 @@ import { ElasticsearchClusterType } from '../../types';
 export class ElasticsearchConfig {
   requestHeadersWhitelist: string[];
 
-  constructor(readonly clusterType: ElasticsearchClusterType, private readonly config: ClusterSchema) {
-    this.requestHeadersWhitelist = config.requestHeadersWhitelist
+  constructor(
+    readonly clusterType: ElasticsearchClusterType,
+    private readonly config: ClusterSchema
+  ) {
+    this.requestHeadersWhitelist = config.requestHeadersWhitelist;
   }
 
   /**
@@ -26,8 +29,11 @@ export class ElasticsearchConfig {
    *                   authenticated using the config, but from each request.
    */
   toElasticsearchClientConfig({ shouldAuth = true } = {}): ConfigOptions {
-    const config: ConfigOptions = pick(this.config,
-      ['apiVersion', 'username', 'logQueries']);
+    const config: ConfigOptions = pick(this.config, [
+      'apiVersion',
+      'username',
+      'logQueries'
+    ]);
 
     config.pingTimeout = this.config.pingTimeout.asMilliseconds();
     config.requestTimeout = this.config.requestTimeout.asMilliseconds();
@@ -43,7 +49,7 @@ export class ElasticsearchConfig {
       path: uri.pathname,
       query: uri.query,
       headers: this.config.customHeaders
-    }
+    };
 
     if (
       shouldAuth &&

@@ -1,6 +1,6 @@
 type ByteSizeValueUnit = 'b' | 'kb' | 'mb' | 'gb';
 
-const unitMultiplier: {[unit: string]: number} = {
+const unitMultiplier: { [unit: string]: number } = {
   b: 1024 ** 0,
   kb: 1024 ** 1,
   mb: 1024 ** 2,
@@ -13,10 +13,7 @@ function renderUnit(value: number, unit: string) {
 }
 
 export class ByteSizeValue {
-
-  constructor(
-    private readonly valueInBytes: number
-  ) {}
+  constructor(private readonly valueInBytes: number) {}
 
   isGreaterThan(other: ByteSizeValue): boolean {
     return this.valueInBytes > other.valueInBytes;

@@ -13,7 +13,7 @@ const _clear = () => {
   _log.info.mockClear();
   _log.warn.mockClear();
   _log.error.mockClear();
-}
+};
 
 const _collect = () => ({
   debug: _log.debug.mock.calls,

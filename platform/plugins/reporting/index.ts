@@ -6,7 +6,10 @@ export const configPath = ['xpack', 'reporting'];
 
 export const dependencies = ['xpack'];
 
-export const plugin: KibanaFunctionalPlugin<XPackPluginType> = (kibana, dependencies) => {
+export const plugin: KibanaFunctionalPlugin<XPackPluginType> = (
+  kibana,
+  dependencies
+) => {
   const { xpack } = dependencies;
 
   const log = kibana.logger.get();
@@ -14,14 +17,15 @@ export const plugin: KibanaFunctionalPlugin<XPackPluginType> = (kibana, dependen
   const config$ = kibana.config.createIfExists(ReportingConfig);
 
   // just an example
-  const isEnabled$ = config$
-    .map(config => config && config.enabled);
+  const isEnabled$ = config$.map(config => config && config.enabled);
 
   isEnabled$.subscribe(isEnabled => {
     log.info(`reporting enabled? [${isEnabled}]`);
   });
 
   xpack.config$.subscribe(xpackConfig => {
-    log.info(`xpack polling frequency: [${xpackConfig.pollingFrequencyInMillis}]`);
+    log.info(
+      `xpack polling frequency: [${xpackConfig.pollingFrequencyInMillis}]`
+    );
   });
-}
+};

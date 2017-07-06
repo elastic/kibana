@@ -29,8 +29,12 @@ export class SettingsError extends KibanaError {
     );
   }
 
-  static extractMessages(error: Array<Error>, heading: string, context?: string) {
-    const messages = `- ${error.map(e => e.message).join('\n- ')}`
+  static extractMessages(
+    error: Array<Error>,
+    heading: string,
+    context?: string
+  ) {
+    const messages = `- ${error.map(e => e.message).join('\n- ')}`;
 
     if (context == null) {
       return `${heading}:\n${messages}`;
@@ -39,8 +43,6 @@ export class SettingsError extends KibanaError {
   }
 
   static extractFirstCause(error: Array<Error>): Error | undefined {
-    return error.length > 0
-      ? error[0]
-      : undefined;
+    return error.length > 0 ? error[0] : undefined;
   }
 }

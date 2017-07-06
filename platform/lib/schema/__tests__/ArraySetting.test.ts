@@ -22,7 +22,8 @@ test('fails if wrong type of content in array', () => {
 test('fails if mixed types of content in array', () => {
   const setting = arrayOf(string());
   expect(() =>
-    setting.validate(['foo', 'bar', true, {}])).toThrowErrorMatchingSnapshot();
+    setting.validate(['foo', 'bar', true, {}])
+  ).toThrowErrorMatchingSnapshot();
 });
 
 test('returns empty array if input is empty but setting has default value', () => {
@@ -96,9 +97,8 @@ describe('#minSize', () => {
 
   test('returns error when fewer items', () => {
     expect(() =>
-      arrayOf(string(), { minSize: 2 }).validate([
-        'foo'
-      ])).toThrowErrorMatchingSnapshot();
+      arrayOf(string(), { minSize: 2 }).validate(['foo'])
+    ).toThrowErrorMatchingSnapshot();
   });
 });
 
@@ -111,9 +111,7 @@ describe('#maxSize', () => {
 
   test('returns error when more items', () => {
     expect(() =>
-      arrayOf(string(), { maxSize: 1 }).validate([
-        'foo',
-        'bar'
-      ])).toThrowErrorMatchingSnapshot();
+      arrayOf(string(), { maxSize: 1 }).validate(['foo', 'bar'])
+    ).toThrowErrorMatchingSnapshot();
   });
 });

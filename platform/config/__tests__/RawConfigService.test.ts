@@ -33,9 +33,7 @@ test('re-reads the config when reloading', () => {
   configService.reloadConfig();
 
   expect(mockGetConfigFromFile).toHaveBeenCalledTimes(1);
-  expect(mockGetConfigFromFile).toHaveBeenLastCalledWith(
-    configFile
-  );
+  expect(mockGetConfigFromFile).toHaveBeenLastCalledWith(configFile);
 });
 
 test('returns config at path as observable', async () => {
@@ -45,9 +43,7 @@ test('returns config at path as observable', async () => {
 
   configService.loadConfig();
 
-  const exampleConfig = await configService.getConfig$()
-    .first()
-    .toPromise();
+  const exampleConfig = await configService.getConfig$().first().toPromise();
 
   expect(exampleConfig).toEqual({ key: 'value' });
 });
@@ -60,10 +56,9 @@ test("does not push new configs when reloading if config at path hasn't changed"
   configService.loadConfig();
 
   const valuesReceived: any[] = [];
-  configService.getConfig$()
-    .subscribe(config => {
-      valuesReceived.push(config);
-    });
+  configService.getConfig$().subscribe(config => {
+    valuesReceived.push(config);
+  });
 
   mockGetConfigFromFile.mockClear();
   mockGetConfigFromFile.mockImplementation(() => ({ key: 'value' }));
@@ -73,7 +68,7 @@ test("does not push new configs when reloading if config at path hasn't changed"
   expect(valuesReceived).toEqual([{ key: 'value' }]);
 });
 
-test("pushes new config when reloading and config at path has changed", async () => {
+test('pushes new config when reloading and config at path has changed', async () => {
   mockGetConfigFromFile.mockImplementation(() => ({ key: 'value' }));
 
   const configService = new RawConfigService(configFile);
@@ -81,23 +76,19 @@ test("pushes new config when reloading and config at path has changed", async ()
   configService.loadConfig();
 
   const valuesReceived: any[] = [];
-  configService.getConfig$()
-    .subscribe(config => {
-      valuesReceived.push(config);
-    });
+  configService.getConfig$().subscribe(config => {
+    valuesReceived.push(config);
+  });
 
   mockGetConfigFromFile.mockClear();
   mockGetConfigFromFile.mockImplementation(() => ({ key: 'new value' }));
 
   configService.reloadConfig();
 
-  expect(valuesReceived).toEqual([
-    { key: 'value' },
-    { key: 'new value'}
-  ]);
+  expect(valuesReceived).toEqual([{ key: 'value' }, { key: 'new value' }]);
 });
 
-test('completes config observables when stopped', (done) => {
+test('completes config observables when stopped', done => {
   expect.assertions(0);
 
   mockGetConfigFromFile.mockImplementation(() => ({ key: 'value' }));
@@ -106,10 +97,9 @@ test('completes config observables when stopped', (done) => {
 
   configService.loadConfig();
 
-  configService.getConfig$()
-    .subscribe({
-      complete: () => done()
-    });
+  configService.getConfig$().subscribe({
+    complete: () => done()
+  });
 
   configService.stop();
 });

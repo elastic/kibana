@@ -18,7 +18,7 @@ export class ConfigService {
   private readonly handledPaths: ConfigPath[] = [];
 
   constructor(
-    private readonly config$: Observable<{[key: string]: any}>,
+    private readonly config$: Observable<{ [key: string]: any }>,
     readonly env: Env,
     logger: LoggerFactory
   ) {
@@ -48,8 +48,9 @@ export class ConfigService {
     path: ConfigPath,
     ConfigClass: ConfigWithSchema<Schema, Config>
   ) {
-    return this.getDistinctRawConfig(path)
-      .map(rawConfig => this.createConfig(rawConfig, ConfigClass));
+    return this.getDistinctRawConfig(path).map(rawConfig =>
+      this.createConfig(rawConfig, ConfigClass)
+    );
   }
 
   /**
@@ -62,12 +63,12 @@ export class ConfigService {
     path: ConfigPath,
     ConfigClass: ConfigWithSchema<Schema, Config>
   ) {
-    return this.getDistinctRawConfig(path)
-      .map(rawConfig =>
+    return this.getDistinctRawConfig(path).map(
+      rawConfig =>
         rawConfig === undefined
           ? undefined
           : this.createConfig(rawConfig, ConfigClass)
-      );
+    );
   }
 
   async isEnabledAtPath(path: ConfigPath) {
@@ -105,7 +106,7 @@ export class ConfigService {
 
     return this.config$
       .map(config => get(config, path))
-      .distinctUntilChanged((prev, next) => isEqual(prev, next))
+      .distinctUntilChanged((prev, next) => isEqual(prev, next));
   }
 
   private markAsHandled(path: ConfigPath) {
@@ -117,9 +118,7 @@ export class ConfigService {
     const flatConfigPaths = [...flattenObject(config)].map(obj => obj.key);
     const handledPaths = this.handledPaths.map(pathToString);
 
-    return flatConfigPaths.filter(path =>
-      !isPathHandled(path, handledPaths)
-    );
+    return flatConfigPaths.filter(path => !isPathHandled(path, handledPaths));
   }
 }
 
@@ -128,12 +127,10 @@ const createPluginEnabledPath = (configPath: string | string[]) => {
     return configPath.concat('enabled');
   }
   return `${configPath}.enabled`;
-}
+};
 
 const pathToString = (path: ConfigPath) =>
-  Array.isArray(path)
-    ? path.join('.')
-    : path;
+  Array.isArray(path) ? path.join('.') : path;
 
 /**
  * A path is considered 'handled' if it is a subset of any of the already
@@ -145,7 +142,7 @@ const isPathHandled = (path: string, handledPaths: string[]) =>
 function* flattenObject(
   obj: { [key: string]: any },
   accKey: string = ''
-): IterableIterator<{ key: string, value: any }> {
+): IterableIterator<{ key: string; value: any }> {
   if (typeof obj !== 'object') {
     yield { key: accKey, value: obj };
   } else {

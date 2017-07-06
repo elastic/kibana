@@ -2,7 +2,7 @@ const mockLoggerAdapter = jest.fn();
 
 jest.mock('../LoggerAdapter', () => ({
   LoggerAdapter: mockLoggerAdapter
-}))
+}));
 
 import { MutableLoggerFactory } from '../LoggerFactory';
 

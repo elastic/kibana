@@ -1,4 +1,3 @@
-
 /**
  * A topological ordering is possible if and only if the graph has no directed
  * cycles, that is, if it is a directed acyclic graph (DAG). If the input cannot
@@ -23,11 +22,10 @@ export function topologicalSort<T>(graph: Map<T, T[]>) {
 
   // First, find a list of "start nodes" which have no outgoing edges. At least
   // one such node must exist in a non-empty acyclic graph.
-  const nodesWithNoEdges = [...clonedGraph.keys()]
-    .filter(name => {
-      const edges = clonedGraph.get(name) as T[];
-      return edges.length === 0;
-    });
+  const nodesWithNoEdges = [...clonedGraph.keys()].filter(name => {
+    const edges = clonedGraph.get(name) as T[];
+    return edges.length === 0;
+  });
 
   while (nodesWithNoEdges.length > 0) {
     const processingNode = nodesWithNoEdges.pop() as T;
@@ -52,7 +50,9 @@ export function topologicalSort<T>(graph: Map<T, T[]>) {
 
   if (clonedGraph.size > 0) {
     const edgesLeft = JSON.stringify([...clonedGraph.entries()]);
-    throw new Error(`Topological ordering did not complete, these edges could not be ordered: ${edgesLeft}`);
+    throw new Error(
+      `Topological ordering did not complete, these edges could not be ordered: ${edgesLeft}`
+    );
   }
 
   return sorted;

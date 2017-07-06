@@ -56,7 +56,7 @@ import { Observable } from 'rxjs';
  * > have something of the right type. [...] At runtime they have zero cost.
  */
 export declare class As<S extends string> {
-   private as: S;
+  private as: S;
 }
 
 // TODO inline all of these

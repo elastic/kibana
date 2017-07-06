@@ -13,7 +13,7 @@ export const createSslSchema = (schema: Schema) =>
     certificate: schema.string(),
     key: schema.string(),
     keyPassphrase: schema.string()
-  })
+  });
 
 const DEFAULT_REQUEST_HEADERS = ['authorization'];
 
@@ -33,12 +33,12 @@ const createSharedFields = (schema: Schema) => ({
   logQueries: schema.boolean({ defaultValue: false }),
   apiVersion: schema.string({ defaultValue: 'master' }),
   ssl: schema.maybe(createSslSchema(schema))
-})
+});
 
 const clusterSchema = (schema: Schema) =>
   schema.object({
     ...createSharedFields(schema)
-  })
+  });
 
 export const createTribeSchema = (schema: Schema) =>
   schema.object({

@@ -7,7 +7,11 @@ import { Router } from '../http';
 import { ElasticsearchConfigs } from './ElasticsearchConfigs';
 import { LoggerFactory } from '../../logger';
 
-export { ElasticsearchService, ElasticsearchRequestHelpers, ElasticsearchConfigs };
+export {
+  ElasticsearchService,
+  ElasticsearchRequestHelpers,
+  ElasticsearchConfigs
+};
 
 export class ElasticsearchModule {
   readonly service: ElasticsearchService;

@@ -4,7 +4,7 @@ import { HttpServer } from './HttpServer';
 import { HttpConfig } from './HttpConfig';
 import { Logger, LoggerFactory } from '../../logger';
 import { Router } from './Router';
-import { CoreService } from '../../types'
+import { CoreService } from '../../types';
 
 export class HttpService implements CoreService {
   private readonly httpServer: HttpServer;
@@ -28,24 +28,25 @@ export class HttpService implements CoreService {
           // to it, so we warn and don't allow the config to pass through.
           this.log.error(
             'Received new HTTP config after server was started. ' +
-            'Config will **not** be applied.'
-          )
+              'Config will **not** be applied.'
+          );
           return false;
         }
 
         return true;
       })
-      .switchMap(config =>
-        new Observable<void>(() => {
-          this.startHttpServer(config);
+      .switchMap(
+        config =>
+          new Observable<void>(() => {
+            this.startHttpServer(config);
 
-          return () => {
-            // TODO: This is async! :/
-            this.stopHttpServer()
-          }
-        })
+            return () => {
+              // TODO: This is async! :/
+              this.stopHttpServer();
+            };
+          })
       )
-      .subscribe()
+      .subscribe();
   }
 
   async stop() {
@@ -61,8 +62,8 @@ export class HttpService implements CoreService {
       // TODO Should we throw instead?
       this.log.error(
         `Received new router [${router.path}] after server was started. ` +
-        'Router will **not** be applied.'
-      )
+          'Router will **not** be applied.'
+      );
     } else {
       this.log.info(`registering route handler for [${router.path}]`);
       this.httpServer.registerRouter(router);

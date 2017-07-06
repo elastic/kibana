@@ -52,7 +52,8 @@ describe('#max', () => {
 
   test('returns error when larger', () => {
     expect(() =>
-      byteSize({ max: '1kb' }).validate('1mb')).toThrowErrorMatchingSnapshot();
+      byteSize({ max: '1kb' }).validate('1mb')
+    ).toThrowErrorMatchingSnapshot();
   });
 });
 

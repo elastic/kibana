@@ -5,9 +5,7 @@ import { Cluster } from './Cluster';
 import { LoggerFactory } from '../../logger';
 import { ElasticsearchClusterType, CoreService } from '../../types';
 
-type Clusters = {
-  [type in ElasticsearchClusterType]: Cluster
-}
+type Clusters = { [type in ElasticsearchClusterType]: Cluster };
 
 export class ElasticsearchService implements CoreService {
   private clusters$: Observable<Clusters>;
@@ -22,30 +20,31 @@ export class ElasticsearchService implements CoreService {
     this.clusters$ = config$
       .filter(() => {
         if (this.subscription !== undefined) {
-          log.error('clusters cannot be changed after they are created')
+          log.error('clusters cannot be changed after they are created');
           return false;
         }
 
         return true;
       })
-      .switchMap(configs =>
-        new Observable<Clusters>(observer => {
-          log.info('creating Elasticsearch clusters');
+      .switchMap(
+        configs =>
+          new Observable<Clusters>(observer => {
+            log.info('creating Elasticsearch clusters');
 
-          const clusters = {
-            data: new Cluster(configs.forType('data'), logger),
-            admin: new Cluster(configs.forType('admin'), logger)
-          };
+            const clusters = {
+              data: new Cluster(configs.forType('data'), logger),
+              admin: new Cluster(configs.forType('admin'), logger)
+            };
 
-          observer.next(clusters);
+            observer.next(clusters);
 
-          return () => {
-            log.info('closing Elasticsearch clusters');
+            return () => {
+              log.info('closing Elasticsearch clusters');
 
-            clusters.data.close();
-            clusters.admin.close();
-          };
-        })
+              clusters.data.close();
+              clusters.admin.close();
+            };
+          })
       )
       // We only want a single subscription of this as we only want to create a
       // single set of clusters at a time. We therefore share these, plus we
@@ -64,7 +63,6 @@ export class ElasticsearchService implements CoreService {
   }
 
   getClusterOfType$(type: ElasticsearchClusterType) {
-    return this.clusters$
-      .map(clusters => clusters[type])
+    return this.clusters$.map(clusters => clusters[type]);
   }
 }

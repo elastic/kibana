@@ -16,9 +16,11 @@ export class Cluster {
     this.log = logger.get('elasticsearch', 'client', config.clusterType);
 
     this.client = new Client(config.toElasticsearchClientConfig());
-    this.noAuthClient = new Client(config.toElasticsearchClientConfig({
-      shouldAuth: false
-    }));
+    this.noAuthClient = new Client(
+      config.toElasticsearchClientConfig({
+        shouldAuth: false
+      })
+    );
 
     this.log.info('clients created');
   }
@@ -39,7 +41,7 @@ export class Cluster {
     req: KibanaRequest,
     cb: (client: Client, headers: { [key: string]: any }) => T,
     options: {
-      wrap401Errors: boolean
+      wrap401Errors: boolean;
     } = {
       wrap401Errors: false
     }
@@ -52,7 +54,7 @@ export class Cluster {
       // instanceof err check?
 
       if (options.wrap401Errors && err.statusCode === 401) {
-        console.log('401 + wrap', err)
+        console.log('401 + wrap', err);
         throw err;
 
         // From current Kibana:

@@ -1,6 +1,6 @@
 import { getConfigFromFile } from '../readConfig';
 
-const fixtureFile = (name: string) => `${__dirname}/__fixtures__/${name}`
+const fixtureFile = (name: string) => `${__dirname}/__fixtures__/${name}`;
 
 test('reads yaml from file system and parses to json', () => {
   const config = getConfigFromFile(fixtureFile('config.yml'));
