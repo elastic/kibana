@@ -3,7 +3,7 @@ import moment from 'moment';
 
 module.exports = new Fn({
   name: 'rounddate',
-  type: 'number',
+  type: 'string',
   help: 'Round dates using a moment formatting string',
   context: {
     types: ['string'],
@@ -15,6 +15,6 @@ module.exports = new Fn({
     },
   },
   fn: (context, args) => {
-    return moment(moment(context).format(args.format), args.format).valueOf();
+    return moment(moment(context).format(args.format), args.format).format();
   },
 });
