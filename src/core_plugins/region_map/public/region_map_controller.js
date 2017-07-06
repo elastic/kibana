@@ -91,7 +91,6 @@ module.controller('KbnRegionMapController', function ($scope, $element, Private,
     const tmsSettings = await serviceSettings.getTMSService();
     const minMaxZoom = tmsSettings.getMinMaxZoom(false);
     kibanaMap = new KibanaMap($element[0], minMaxZoom);
-    window._kibanaMap = kibanaMap;
     const url = tmsSettings.getUrl();
     const options = tmsSettings.getTMSOptions();
     kibanaMap.setBaseLayer({ baseLayerType: 'tms', options: { url, ...options } });

@@ -165,10 +165,7 @@ export default class ChoroplethLayer extends KibanaMapLayer {
 
       jqueryDiv.append(label);
     });
-
   }
-
-
 }
 
 

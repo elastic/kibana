@@ -547,14 +547,11 @@ export class KibanaMap extends EventEmitter {
       minZoom: options.minZoom,
       maxZoom: options.maxZoom,
       subdomains: options.subdomains || []
-      //,
-      // attribution: options.attribution
     });
   }
 
   _getWMSBaseLayer(options) {
     const wmsOptions = {
-      // attribution: options.attribution || '',
       format: options.format || '',
       layers: options.layers || '',
       minZoom: options.minZoom,
