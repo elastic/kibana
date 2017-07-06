@@ -4,12 +4,14 @@ import _ from 'lodash';
 import timeseries from './vis_types/timeseries/series';
 import metric from './vis_types/metric/series';
 import topN from './vis_types/top_n/series';
+import table from './vis_types/table/series';
 import gauge from './vis_types/gauge/series';
 import markdown from './vis_types/markdown/series';
 import { sortable } from 'react-anything-sortable';
 
 const lookup = {
   top_n: topN,
+  table,
   metric,
   timeseries,
   gauge,

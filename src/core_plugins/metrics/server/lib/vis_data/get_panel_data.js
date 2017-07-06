@@ -27,6 +27,10 @@ export default function getPanelData(req) {
           return resp;
         });
       })
+      .then(resp => {
+        resp.type = panel.type;
+        return resp;
+      })
       .catch(handleErrorResponse(panel));
   };
 }
