@@ -27,7 +27,11 @@ export function v6BulkCreate(objects, options = {}) {
   return objects.reduce((acc, object) => {
     const method = object.id && !options.overwrite ? 'create' : 'index';
 
-    acc.push({ [method]: { _type: V6_TYPE, _id: object.id } });
+    acc.push({ [method]: {
+      _type: V6_TYPE,
+      _id: object.id ? `${object.type}:${object.id}` : undefined
+    } });
+
     acc.push(Object.assign({},
       { type: object.type },
       { [object.type]: object.attributes }

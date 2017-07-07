@@ -33,9 +33,9 @@ describe('compatibility', () => {
     it('handles default options', () => {
       const objects = v6BulkCreate(testObjects);
       expect(objects).to.eql([
-        { create: { _type: 'doc', _id: 'one' } },
+        { create: { _type: 'doc', _id: 'index-pattern:one' } },
         { type: 'index-pattern', 'index-pattern': { title: 'Test Index Pattern' } },
-        { create: { _type: 'doc', _id: 'two' } },
+        { create: { _type: 'doc', _id: 'config:two' } },
         { type: 'config', config: { title: 'Test Config Value' } }
       ]);
     });
@@ -43,9 +43,9 @@ describe('compatibility', () => {
     it('uses index action for options.overwrite=true', () => {
       const objects = v6BulkCreate(testObjects, { overwrite: true });
       expect(objects).to.eql([
-        { index: { _type: 'doc', _id: 'one' } },
+        { index: { _type: 'doc', _id: 'index-pattern:one' } },
         { type: 'index-pattern', 'index-pattern': { title: 'Test Index Pattern' } },
-        { index: { _type: 'doc', _id: 'two' } },
+        { index: { _type: 'doc', _id: 'config:two' } },
         { type: 'config', config: { title: 'Test Config Value' } }
       ]);
     });
