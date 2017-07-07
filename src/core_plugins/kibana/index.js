@@ -2,6 +2,7 @@ import { resolve } from 'path';
 
 import Promise from 'bluebird';
 import { mkdirp as mkdirpNode } from 'mkdirp';
+import { has, get } from 'lodash';
 
 import manageUuid from './server/lib/manage_uuid';
 import search from './server/routes/api/search';
@@ -139,6 +140,17 @@ export default function (kibana) {
       server.expose('systemApi', systemApi);
       server.expose('handleEsError', handleEsError);
       server.expose('injectVars', injectVars);
-    }
+    },
+
+    deprecations: function () {
+      return [
+        (settings, log) => {
+          if (has(settings, 'defaultAppId')) {
+            const newConfig = `server.defaultRoute: /app/kibana#/${get(settings, 'defaultAppId')}`;
+            log(`Config key "defaultAppId" will be removed. Use the equivalent "${newConfig}"`);
+          }
+        }
+      ];
+    },
   });
 }
