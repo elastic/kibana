@@ -5,6 +5,7 @@ import { isEqual } from 'lodash';
 
 export const RenderElementComponent = ({ renderFn, size }) => {
   const renderElement = (domNode) => {
+    console.log('rendering');
     if (domNode) renderFn(domNode);
   };
 
@@ -16,10 +17,14 @@ export const RenderElementComponent = ({ renderFn, size }) => {
 };
 
 const RenderElementLifecycle = lifecycle({
+  componentDidMount() {
+    console.log('mounty!');
+  },
+
   shouldComponentUpdate(nextProps) {
     // TODO: What a shitty hack. None of these props should update when you move the element.
     // This should be fixed at a higher level.
-    return !isEqual(this.props.config, nextProps.config) || !isEqual(this.props.size, nextProps.size);
+    return !isEqual(this.props.config, nextProps.config); //|| !isEqual(this.props.size, nextProps.size);
   },
 
   componentWillUnmount() {
