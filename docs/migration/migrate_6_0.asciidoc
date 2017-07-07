@@ -58,3 +58,10 @@ This is no longer the case. Now, only commas are a valid query separator: e.g. `
 *Details:*  Starting in Kibana 6.0.0 we removed the ability to create index patterns that use a date-pattern and interval to identify Elasticsearch indices. Index patterns must now use wildcards which are more performant in most cases.
 
 *Impact:* Existing index patterns and saved objects will continue to function without issue, and in a subsequent release we will provide utilities to migrate your index patterns/saved objects.
+
+
+[float]
+=== Removed same port http to https redirect behavior
+*Details:* Kibana 5.x redirected requests from http to https on the same port if TLS was configured. Starting in Kibana 6.0.0, Kibana no longer redirects basic http traffic to https.
+
+*Impact:* With the new configuration setting `server.ssl.redirectHttpFromPort` you can specify a port that will redirect from http to https. This cannot be the same port as the https port.

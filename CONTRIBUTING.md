@@ -202,19 +202,7 @@ In development mode, Kibana runs a customized version of [Webpack](http://webpac
 
 #### Setting Up SSL
 
-When Kibana runs in development mode it will automatically use bundled SSL certificates. These certificates won't be trusted by your OS by default which will likely cause your browser to complain about the certificate.
-
-If you run into this issue, visit the development server and configure your OS to trust the certificate.
-
-- OSX: https://www.accuweaver.com/2014/09/19/make-chrome-accept-a-self-signed-certificate-on-osx/
-- Windows: http://stackoverflow.com/a/1412118
-- Linux: http://unix.stackexchange.com/a/90607
-
-There are a handful of other options, although we enthusiastically recommend that you trust our development certificate.
-
-- Click through the warning and accept future warnings
-- Supply your own certificate using the `config/kibana.dev.yml` file
-- Disable SSL in Kibana by starting the application with `npm start -- --no-ssl`
+Kibana includes a self-signed certificate that can be used for development purposes: `npm start -- --ssl`.
 
 ### Linting
 
@@ -307,7 +295,7 @@ npm run test:browser -- --dev # remove the --dev flag to run them once and close
 * Open VMWare and go to Window > Virtual Machine Library. Unzip the virtual machine and drag the .vmx file into your Virtual Machine Library.
 * Right-click on the virtual machine you just added to your library and select "Snapshots...", and then click the "Take" button in the modal that opens. You can roll back to this snapshot when the VM expires in 90 days.
 * In System Preferences > Sharing, change your computer name to be something simple, e.g. "computer".
-* Run Kibana with `npm start -- --no-ssl --host=computer.local` (substituting your computer name).
+* Run Kibana with `npm start -- --host=computer.local` (substituting your computer name).
 * Now you can run your VM, open the browser, and navigate to `http://computer.local:5601` to test Kibana.
 
 #### Running Browser Automation Tests
