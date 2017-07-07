@@ -12,16 +12,16 @@ import { TruncateFormat } from '../../common/field_formats/types/truncate';
 import { BoolFormat } from '../../common/field_formats/types/boolean';
 
 export function registerFieldFormats(server) {
-  server.fieldFormats.register(UrlFormat);
-  server.fieldFormats.register(BytesFormat);
-  server.fieldFormats.register(DateFormat);
-  server.fieldFormats.register(DurationFormat);
-  server.fieldFormats.register(IpFormat);
-  server.fieldFormats.register(NumberFormat);
-  server.fieldFormats.register(PercentFormat);
-  server.fieldFormats.register(StringFormat);
-  server.fieldFormats.register(SourceFormat);
-  server.fieldFormats.register(ColorFormat);
-  server.fieldFormats.register(TruncateFormat);
-  server.fieldFormats.register(BoolFormat);
+  server.registerFieldFormatClass(UrlFormat);
+  server.registerFieldFormatClass(BytesFormat);
+  server.registerFieldFormatClass(DateFormat);
+  server.registerFieldFormatClass(DurationFormat);
+  server.registerFieldFormatClass(IpFormat);
+  server.registerFieldFormatClass(NumberFormat);
+  server.registerFieldFormatClass(PercentFormat);
+  server.registerFieldFormatClass(StringFormat);
+  server.registerFieldFormatClass(SourceFormat);
+  server.registerFieldFormatClass(ColorFormat);
+  server.registerFieldFormatClass(TruncateFormat);
+  server.registerFieldFormatClass(BoolFormat);
 }

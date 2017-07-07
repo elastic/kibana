@@ -1,6 +1,9 @@
+import _ from 'lodash';
+
 export class FieldFormatsService {
-  constructor() {
-    this._fieldFormats = new Map();
+  constructor(fieldFormatClasses, getConfig) {
+    this._fieldFormats = _.indexBy(fieldFormatClasses, 'id');
+    this.getConfig = getConfig;
   }
 
   /**
@@ -8,11 +11,10 @@ export class FieldFormatsService {
    * using the format:defaultTypeMap config map
    *
    * @param  {String} fieldType - the field type
-   * @param  {Func} getConfig
    * @return {String}
    */
-  getDefaultConfig(fieldType, getConfig) {
-    const defaultMap = getConfig('format:defaultTypeMap');
+  getDefaultConfig(fieldType) {
+    const defaultMap = this.getConfig('format:defaultTypeMap');
     return defaultMap[fieldType] || defaultMap._default_;
   }
 
@@ -20,13 +22,12 @@ export class FieldFormatsService {
    * Get the default fieldFormat instance for a field type.
    *
    * @param  {String} fieldType
-   * @param  {Func} getConfig
    * @return {FieldFormat}
    */
-  getDefaultInstance(fieldType, getConfig) {
-    const conf = this.getDefaultConfig(fieldType, getConfig);
-    const FieldFormat = this._fieldFormats.get(conf.id);
-    return new FieldFormat(conf.params, getConfig);
+  getDefaultInstance(fieldType) {
+    const conf = this.getDefaultConfig(fieldType);
+    const FieldFormat = this._fieldFormats[conf.id];
+    return new FieldFormat(conf.params, this.getConfig);
   }
 
   /**
@@ -36,10 +37,6 @@ export class FieldFormatsService {
    * @return {FieldFormat}
    */
   getType(fieldFormatId) {
-    return this._fieldFormats.get(fieldFormatId);
-  }
-
-  register(FieldFormat) {
-    this._fieldFormats.set(FieldFormat.id, FieldFormat);
+    return this._fieldFormats[fieldFormatId];
   }
 }
