@@ -1,6 +1,6 @@
 export class FieldFormatsService {
   constructor() {
-    this.fieldFormats = new Map();
+    this._fieldFormats = new Map();
   }
 
   /**
@@ -25,7 +25,7 @@ export class FieldFormatsService {
    */
   getDefaultInstance(fieldType, getConfig) {
     const conf = this.getDefaultConfig(fieldType, getConfig);
-    const FieldFormat = this.fieldFormats.get(conf.id);
+    const FieldFormat = this._fieldFormats.get(conf.id);
     return new FieldFormat(conf.params, getConfig);
   }
 
@@ -36,10 +36,10 @@ export class FieldFormatsService {
    * @return {FieldFormat}
    */
   getType(fieldFormatId) {
-    return this.fieldFormats.get(fieldFormatId);
+    return this._fieldFormats.get(fieldFormatId);
   }
 
   register(FieldFormat) {
-    this.fieldFormats.set(FieldFormat.id, FieldFormat);
+    this._fieldFormats.set(FieldFormat.id, FieldFormat);
   }
 }
