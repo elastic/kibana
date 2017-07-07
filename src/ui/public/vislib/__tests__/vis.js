@@ -66,25 +66,6 @@ dataArray.forEach(function (data, i) {
 
     });
 
-    describe('resize Method', function () {
-      beforeEach(function () {
-        vis.render(data, persistedState);
-        vis.resize();
-        numberOfCharts = vis.handler.charts.length;
-      });
-
-      it('should throw an error', function () {
-        expect(function () {
-          vis.data = undefined;
-          vis.render();
-        }).to.throwError();
-      });
-
-      it('should resize the visualization', function () {
-        expect(vis.handler.charts.length).to.be(numberOfCharts);
-      });
-    });
-
     describe('destroy Method', function () {
       beforeEach(function () {
         vis.render(data, persistedState);

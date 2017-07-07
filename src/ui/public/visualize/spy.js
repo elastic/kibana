@@ -34,6 +34,7 @@ uiModules
         function setSpyMode(modeName) {
           if (!_.isString(modeName)) modeName = null;
           $scope.spy.mode = getSpyObject(modeName);
+          $scope.$emit('render');
         }
 
         const renderSpy = function (spyName) {

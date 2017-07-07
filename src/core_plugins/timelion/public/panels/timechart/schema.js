@@ -97,7 +97,7 @@ export default function timechartFn(Private, config, $rootScope, timefilter, $co
           timefilter.time.from = moment(ranges.xaxis.from);
           timefilter.time.to = moment(ranges.xaxis.to);
           timefilter.time.mode = 'absolute';
-          $scope.search();
+          $scope.$apply();
         });
 
         $elem.on('mouseleave', function () {
