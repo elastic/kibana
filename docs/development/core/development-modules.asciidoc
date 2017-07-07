@@ -62,17 +62,14 @@ Here is how import/require statements are resolved to a file:
   * the first of the following paths that resolves to a **file** is our match
     ** path + '.js'
     ** path + '.json'
-    ** path + '.jsx'
     ** path + '.less'
     ** path
     ** path/${basename(path)} + '.js'
     ** path/${basename(path)} + '.json'
-    ** path/${basename(path)} + '.jsx'
     ** path/${basename(path)} + '.less'
     ** path/${basename(path)}
     ** path/index + '.js'
     ** path/index + '.json'
-    ** path/index + '.jsx'
     ** path/index + '.less'
     ** path/index
   * if none of the above paths matches then an error is thrown
