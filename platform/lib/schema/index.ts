@@ -436,6 +436,55 @@ export class ObjectSetting<P extends Props> extends Setting<
   }
 }
 
+function isMap<K, V>(o: any): o is Map<K, V> {
+  return o instanceof Map;
+}
+
+type MapOfOptions<K, V> = SettingOptions<Map<K, V>>;
+
+export class MapOfSetting<K, V> extends Setting<Map<K, V>> {
+  constructor(
+    private readonly keySetting: Setting<K>,
+    private readonly valueSetting: Setting<V>,
+    options: MapOfOptions<K, V> = {}
+  ) {
+    super(options);
+  }
+
+  process(obj: any, context?: string): Map<K, V> {
+    if (isPlainObject(obj)) {
+      const entries = Object.keys(obj).map(key => [key, obj[key]]);
+      return this.processEntries(entries);
+    }
+
+    if (isMap(obj)) {
+      return this.processEntries([...obj.entries()]);
+    }
+
+    throw new SettingError(
+      `expected value of type [Map] or [object] but got [${typeDetect(obj)}]`,
+      context
+    );
+  }
+
+  processEntries(entries: any[][], context?: string) {
+    const res = entries.map(([key, value]) => {
+      const validatedKey = this.keySetting.validate(
+        key,
+        toContext(context, String(key))
+      );
+      const validatedValue = this.valueSetting.validate(
+        value,
+        toContext(context, String(key))
+      );
+
+      return [validatedKey, validatedValue] as [K, V];
+    });
+
+    return new Map(res);
+  }
+}
+
 export function boolean(options?: SettingOptions<boolean>): Setting<boolean> {
   return new BooleanSetting(options);
 }
@@ -481,6 +530,14 @@ export function arrayOf<T>(
   options?: ArrayOptions<T>
 ): Setting<Array<T>> {
   return new ArraySetting(itemSetting, options);
+}
+
+export function mapOf<K, V>(
+  keySetting: Setting<K>,
+  valueSetting: Setting<V>,
+  options?: MapOfOptions<K, V>
+): Setting<Map<K, V>> {
+  return new MapOfSetting(keySetting, valueSetting, options);
 }
 
 export function oneOf<A, B, C, D>(
