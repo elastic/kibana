@@ -24,8 +24,6 @@ export const plugin: KibanaFunctionalPlugin<XPackPluginType> = (
   });
 
   xpack.config$.subscribe(xpackConfig => {
-    log.info(
-      `xpack polling frequency: [${xpackConfig.pollingFrequency}]`
-    );
+    log.info(`xpack polling frequency: [${xpackConfig.pollingFrequency}]`);
   });
 };
