@@ -457,10 +457,16 @@ export class MapOfSetting<K, V> extends Setting<Map<K, V>> {
 
   process(obj: any, context?: string): Map<K, V> {
     if (isPlainObject(obj)) {
-      const res = Object.keys(obj).map(k => {
-        const key = this.keySetting.validate(k, toContext(context, k));
-        const val = this.valueSetting.validate(obj[k], toContext(context, k));
-        return toTuple(key, val);
+      const res = Object.keys(obj).map(key => {
+        const validatedKey = this.keySetting.validate(
+          key,
+          toContext(context, key)
+        );
+        const validatedValue = this.valueSetting.validate(
+          obj[key],
+          toContext(context, key)
+        );
+        return toTuple(validatedKey, validatedValue);
       });
 
       return new Map(res);
