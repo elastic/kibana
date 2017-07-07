@@ -31,6 +31,17 @@ export class FieldFormatsService {
   }
 
   /**
+   * Get the fieldFormat instance for a field format configuration.
+   *
+   * @param  {Object} conf:id, conf:params
+   * @return {FieldFormat}
+   */
+  getInstance(conf) {
+    const FieldFormat = this._fieldFormats[conf.id];
+    return new FieldFormat(conf.params, this.getConfig);
+  }
+
+  /**
    * Get a FieldFormat type (class) by it's id.
    *
    * @param  {String} fieldFormatId - the FieldFormat id
