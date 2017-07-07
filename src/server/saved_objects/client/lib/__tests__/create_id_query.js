@@ -11,11 +11,33 @@ describe('createIdQuery', () => {
       query: {
         bool: {
           should: [
-            // v5/v6 document
-            { term: { _id: 'foo' } },
-
+            // v5 document
+            {
+              bool: {
+                must: [
+                  { term: { _id: 'foo' } },
+                  { term: { _type: 'bar' } }
+                ]
+              }
+            },
             // migrated v5 document
-            { term: { _id: 'bar:foo' } }
+            {
+              bool: {
+                must: [
+                  { term: { _id: 'bar:foo' } },
+                  { term: { type: 'bar' } }
+                ]
+              }
+            },
+            // v6 document
+            {
+              bool: {
+                must: [
+                  { term: { _id: 'foo' } },
+                  { term: { type: 'bar' } }
+                ]
+              }
+            },
           ]
         }
       }
