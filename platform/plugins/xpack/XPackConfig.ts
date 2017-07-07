@@ -7,21 +7,22 @@ const createXPackConfig = (schema: Schema) =>
     enabled: schema.boolean({
       defaultValue: true
     }),
-    xpack_api_polling_frequency_millis: schema.duration({
+    api_polling_frequency: schema.duration({
       defaultValue: '30001ms'
     })
   });
 
 const xpackConfigType = typeOfSchema(createXPackConfig);
+type XPackConfigType = typeof xpackConfigType;
 
 export class XPackConfig {
   static createSchema = createXPackConfig;
 
   enabled: boolean;
-  pollingFrequencyInMillis: Duration;
+  pollingFrequency: Duration;
 
-  constructor(config: typeof xpackConfigType) {
+  constructor(config: XPackConfigType) {
     this.enabled = config.enabled;
-    this.pollingFrequencyInMillis = config.xpack_api_polling_frequency_millis;
+    this.pollingFrequency = config.api_polling_frequency;
   }
 }

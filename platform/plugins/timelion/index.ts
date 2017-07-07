@@ -24,7 +24,7 @@ export const plugin: KibanaFunctionalPlugin<
   const log = kibana.logger.get();
 
   xpack.config$.subscribe(config => {
-    log.debug(`polling frequency: ${config.pollingFrequencyInMillis}`);
+    log.debug(`polling frequency: ${config.pollingFrequency}`);
   });
 
   const registerFunction = (
