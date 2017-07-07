@@ -15,6 +15,14 @@ export default function (kbnServer, server, config) {
   const host = config.get('server.host');
   const sslPort = config.get('server.port');
 
+  if (portToRedirectFrom === sslPort) {
+    throw new Error(
+      'Kibana does not accept http traffic to `server.port` when ssl is ' +
+      'enabled (only https is allowed), so `server.ssl.redirectHttpFromPort` ' +
+      `cannot be configured to the same value. Both are [${sslPort}].`
+    );
+  }
+
   const redirectServer = new Hapi.Server();
 
   redirectServer.connection({
