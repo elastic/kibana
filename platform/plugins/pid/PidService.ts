@@ -31,7 +31,7 @@ export class PidService {
         // subscribed to and deletes it when unsubscribed (e.g. if new config
         // is received or if `stop` is called below.)
 
-        return new Observable(observable => {
+        return new Observable(() => {
           const pid = new PidFile(process.pid, config, logger);
 
           pid.writeFile();
