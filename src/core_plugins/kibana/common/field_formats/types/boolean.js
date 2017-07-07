@@ -1,5 +1,5 @@
 import { asPrettyString } from '../../utils/as_pretty_string';
-import { FieldFormat } from '../field_format';
+import { FieldFormat } from '../../../../../ui/field_formats/field_format';
 
 export class BoolFormat extends FieldFormat {
   _convert(value) {

@@ -1,6 +1,6 @@
 import _ from 'lodash';
 import moment from 'moment';
-import { FieldFormat } from '../field_format';
+import { FieldFormat } from '../../../../../ui/field_formats/field_format';
 
 export class DateFormat extends FieldFormat {
   constructor(params, getConfig) {

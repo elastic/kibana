@@ -2,7 +2,7 @@ import _ from 'lodash';
 import expect from 'expect.js';
 import ngMock from 'ng_mock';
 import { RegistryFieldFormatsProvider } from 'ui/registry/field_formats';
-import { FieldFormat } from '../../../common/field_formats/field_format';
+import { FieldFormat } from '../../../../../ui/field_formats/field_format';
 
 let fieldFormats;
 let config;

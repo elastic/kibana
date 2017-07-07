@@ -1,5 +1,5 @@
 import _ from 'lodash';
-import { FieldFormat } from '../field_format';
+import { FieldFormat } from '../../../../../ui/field_formats/field_format';
 import { getHighlightHtml } from '../../highlight/highlight_html';
 
 const templateMatchRE = /{{([\s\S]+?)}}/g;

@@ -1,7 +1,7 @@
 import _ from 'lodash';
 import { asPrettyString } from '../../utils/as_pretty_string';
 import { DEFAULT_COLOR } from './color_default';
-import { FieldFormat } from '../field_format';
+import { FieldFormat } from '../../../../../ui/field_formats/field_format';
 
 const convertTemplate = _.template('<span style="<%- style %>"><%- val %></span>');
 

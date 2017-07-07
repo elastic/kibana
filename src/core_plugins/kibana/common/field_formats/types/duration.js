@@ -1,5 +1,5 @@
 import moment from 'moment';
-import { FieldFormat } from '../field_format';
+import { FieldFormat } from '../../../../../ui/field_formats/field_format';
 
 const ratioToSeconds = {
   picoseconds: 0.000000000001,

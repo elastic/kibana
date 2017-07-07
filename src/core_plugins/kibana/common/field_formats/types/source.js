@@ -1,7 +1,7 @@
 import _ from 'lodash';
 import { noWhiteSpace } from '../../utils/no_white_space';
 import { toJson } from '../../utils/aggressive_parse';
-import { FieldFormat } from '../field_format';
+import { FieldFormat } from '../../../../../ui/field_formats/field_format';
 import { shortenDottedString } from '../../utils/shorten_dotted_string';
 
 const templateHtml = `

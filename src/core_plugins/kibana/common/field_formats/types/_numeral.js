@@ -1,6 +1,6 @@
 import _ from 'lodash';
 import numeral from '@spalger/numeral';
-import { FieldFormat } from '../field_format';
+import { FieldFormat } from '../../../../../ui/field_formats/field_format';
 
 const numeralInst = numeral();
 
