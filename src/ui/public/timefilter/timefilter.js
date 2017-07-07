@@ -78,6 +78,12 @@ uiModules
   };
 
   Timefilter.prototype.get = function (indexPattern) {
+
+    if (!indexPattern) {
+      //in CI, we sometimes seem to fail here.
+      return;
+    }
+
     let filter;
     const timefield = indexPattern.timeFieldName && _.find(indexPattern.fields, { name: indexPattern.timeFieldName });
 
