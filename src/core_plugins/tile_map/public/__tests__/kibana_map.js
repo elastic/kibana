@@ -94,7 +94,7 @@ describe('kibana_map tests', function () {
         'url': 'https://tiles-stage.elastic.co/v2/default/{z}/{x}/{y}.png?elastic_tile_service_tos=agree&my_app_name=kibana',
         'minZoom': 0,
         'maxZoom': 12,
-        'attribution': '© [Elastic Tile Service](https://www.elastic.co/elastic-tile-service)'
+        'attribution': '© [Elastic Maps Service](https://www.elastic.co/elastic-maps-service)'
       };
 
 
