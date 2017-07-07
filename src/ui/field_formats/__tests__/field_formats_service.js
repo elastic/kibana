@@ -1,6 +1,6 @@
 import expect from 'expect.js';
-import { FieldFormatsService } from '../field_formats';
-import { NumberFormat } from '../types/number';
+import { FieldFormatsService } from '../field_formats_service';
+import { NumberFormat } from '../../../core_plugins/kibana/common/field_formats/types/number';
 
 describe('FieldFormatsService', function () {
 
