@@ -134,7 +134,7 @@ export default class BaseOptimizer {
           { test: /\.(woff|woff2|ttf|eot|svg|ico)(\?|$)/, loader: 'file-loader' },
           { test: /[\/\\]src[\/\\](core_plugins|ui)[\/\\].+\.js$/, loader: loaderWithSourceMaps('rjs-repack-loader') },
           {
-            test: /\.jsx?$/,
+            test: /\.js$/,
             exclude: babelExclude.concat(this.env.noParse),
             loader: 'babel-loader',
             query: babelOptions.webpack
@@ -145,7 +145,7 @@ export default class BaseOptimizer {
       },
 
       resolve: {
-        extensions: ['.js', '.json', '.jsx', '.less', ''],
+        extensions: ['.js', '.json', '.less', ''],
         postfixes: [''],
         modulesDirectories: ['webpackShims', 'node_modules'],
         fallback: [fromRoot('webpackShims'), fromRoot('node_modules')],
