@@ -331,7 +331,7 @@ describe('SavedObjectsClient', () => {
       });
     });
 
-    it('accepts single sort with type', async () => {
+    it('accepts sort with type', async () => {
       await savedObjectsClient.find({
         type: 'index-pattern',
         sortField: 'someField',
