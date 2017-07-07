@@ -36,3 +36,21 @@
   </label>
 </div>
 
+<div class="vis-option-item indented">
+  <label>
+    <input type="checkbox"
+           name="useFilter"
+           ng-model="agg.params.useFilter">
+    Enable collar (geo_bounding_box filter)
+  </label>
+</div>
+<div class="vis-option-item indented" ng-if="agg.params.useFilter">
+  <div class="form-group">
+    <label>
+      Collar Scale <kbn-info info="Set the size of the geo_bounding_box filter applied to the map bounds. Small values could result in excessive fetches during map panning. Large values could result in trimmed results."></kbn-info>
+    </label>
+    <input type="number" class="form-control"
+      name="collarScale"
+      ng-model="agg.params.collarScale">
+  </div>
+</div>

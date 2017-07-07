@@ -6,6 +6,7 @@ import { KibanaMap } from './kibana_map';
 import { GeohashLayer } from './geohash_layer';
 // import './lib/service_settings';
 import 'ui/vis/map/service_settings';
+import { geoContains, scaleBounds } from './lib/geo_utils';
 import './styles/_tilemap.less';
 
 
@@ -52,6 +53,7 @@ export function MapsVisualizationProvider(serviceSettings, Notifier, getAppState
         if (status.resize) {
           this._kibanaMap.resize();
         }
+        this._previouslyFetchedMapCollar = scaleBounds(this._kibanaMap.getBounds(), 1.5);
         this._doRenderComplete(resolve);
 
       });
@@ -82,6 +84,8 @@ export function MapsVisualizationProvider(serviceSettings, Notifier, getAppState
       options.center = centerFromUIState ? centerFromUIState : this.vis.type.visConfig.defaults.mapCenter;
 
       this._kibanaMap = new KibanaMap(containerElement, options);
+      this._previouslyFetchedMapCollar = scaleBounds(this._kibanaMap.getBounds(), 1.5);
+      uiState.set('mapCollar', this._previouslyFetchMapCollar);
       this._kibanaMap.addDrawControl();
       this._kibanaMap.addFitControl();
       this._kibanaMap.addLegendControl();
@@ -94,6 +98,11 @@ export function MapsVisualizationProvider(serviceSettings, Notifier, getAppState
         previousPrecision = this._kibanaMap.getAutoPrecision();
         this.vis.aggs[1].params.precision = previousPrecision;
       });
+      this._kibanaMap.on('dragend', () => {
+        if (!geoContains(this._previouslyFetchedMapCollar, this._kibanaMap.getBounds())) {
+          this.vis.updateState();
+        }
+      });
       this._kibanaMap.on('zoomend', () => {
 
         const isAutoPrecision = _.get(this._chartData, 'geohashGridAgg.params.autoPrecision', true);
@@ -101,7 +110,7 @@ export function MapsVisualizationProvider(serviceSettings, Notifier, getAppState
           return;
         }
 
-        if (precisionChange) {
+        if (precisionChange || !geoContains(this._previouslyFetchedMapCollar, this._kibanaMap.getBounds())) {
           this.vis.updateState();
         } else {
           this._recreateGeohashLayer(this._chartData);

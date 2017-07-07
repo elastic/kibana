@@ -58,6 +58,16 @@ export function AggTypesBucketsGeoHashProvider(Private, config) {
         write: _.noop
       },
       {
+        name: 'collarScale',
+        default: 1.5,
+        write: _.noop
+      },
+      {
+        name: 'useFilter',
+        default: true,
+        write: _.noop
+      },
+      {
         name: 'useGeocentroid',
         default: true,
         write: _.noop
@@ -89,21 +99,45 @@ export function AggTypesBucketsGeoHashProvider(Private, config) {
       }
     ],
     getRequestAggs: function (agg) {
-      if (!agg.params.useGeocentroid) {
-        return agg;
+      const aggs = [];
+
+      if (agg.params.useFilter) {
+        const vis = agg.vis;
+        let mapCollar;
+        if (vis.hasUiState()) {
+          mapCollar = vis.uiStateVal('mapCollar');
+        }
+        if (mapCollar) {
+          const boundingBox = {};
+          boundingBox[agg.getField().name] = mapCollar;
+          aggs.push(new AggConfig(agg.vis, {
+            type: 'filter',
+            id: 'filter_agg',
+            enabled:true,
+            params: {
+              geo_bounding_box: boundingBox
+            },
+            schema: {
+              group: 'buckets'
+            }
+          }));
+        }
       }
 
-      /**
-       * By default, add the geo_centroid aggregation
-       */
-      return [agg, new AggConfig(agg.vis, {
-        type: 'geo_centroid',
-        enabled:true,
-        params: {
-          field: agg.getField()
-        },
-        schema: 'metric'
-      })];
+      aggs.push(agg);
+
+      if (agg.params.useGeocentroid) {
+        aggs.push(new AggConfig(agg.vis, {
+          type: 'geo_centroid',
+          enabled:true,
+          params: {
+            field: agg.getField()
+          },
+          schema: 'metric'
+        }));
+      }
+
+      return aggs;
     }
   });
 }

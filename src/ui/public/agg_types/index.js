@@ -22,6 +22,7 @@ import { AggTypesBucketsRangeProvider } from 'ui/agg_types/buckets/range';
 import { AggTypesBucketsDateRangeProvider } from 'ui/agg_types/buckets/date_range';
 import { AggTypesBucketsIpRangeProvider } from 'ui/agg_types/buckets/ip_range';
 import { AggTypesBucketsTermsProvider } from 'ui/agg_types/buckets/terms';
+import { AggTypesBucketsFilterProvider } from 'ui/agg_types/buckets/filter';
 import { AggTypesBucketsFiltersProvider } from 'ui/agg_types/buckets/filters';
 import { AggTypesBucketsSignificantTermsProvider } from 'ui/agg_types/buckets/significant_terms';
 import { AggTypesBucketsGeoHashProvider } from 'ui/agg_types/buckets/geo_hash';
@@ -63,6 +64,7 @@ export function AggTypesIndexProvider(Private) {
       Private(AggTypesBucketsDateRangeProvider),
       Private(AggTypesBucketsIpRangeProvider),
       Private(AggTypesBucketsTermsProvider),
+      Private(AggTypesBucketsFilterProvider),
       Private(AggTypesBucketsFiltersProvider),
       Private(AggTypesBucketsSignificantTermsProvider),
       Private(AggTypesBucketsGeoHashProvider),

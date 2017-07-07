@@ -3,6 +3,7 @@ import L from 'leaflet';
 import $ from 'jquery';
 import _ from 'lodash';
 import { zoomToPrecision } from 'ui/utils/zoom_to_precision';
+import { scaleBounds } from './lib/geo_utils';
 
 function makeFitControl(fitContainer, kibanaMap) {
 
@@ -582,6 +583,7 @@ export class KibanaMap extends EventEmitter {
       if (!centerFromUIState || centerFromMap.lon !== centerFromUIState[1] || centerFromMap.lat !== centerFromUIState[0]) {
         visualization.uiStateVal('mapCenter', [centerFromMap.lat, centerFromMap.lon]);
       }
+      uiState.set('mapCollar', scaleBounds(this.getBounds(), 1.5));
     }
 
     this.on('dragend', persistMapStateInUiState);
