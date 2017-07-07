@@ -130,14 +130,13 @@
 
               </header>
 
-              <visualization
+              <visualize
                  ng-if="vis && rows.length != 0"
                  vis="vis"
                  ui-state="uiState"
-                 vis-data="visData"
-                 style="height: 200px"
-                >
-              </visualization>
+                 es-resp="mergedEsResp"
+                 search-source="searchSource">
+               </visualize>
             </div>
 
             <div class="discover-table" fixed-scroll>

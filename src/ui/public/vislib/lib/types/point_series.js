@@ -180,7 +180,7 @@ export function VislibTypesPointSeries() {
       const defaults = create()(cfg, data);
       const seriesLimit = 25;
       const hasCharts = defaults.charts.length;
-      const tooManySeries = defaults.charts.length && defaults.charts[0].series.length > seriesLimit;
+      const tooManySeries = defaults.charts[0].series.length > seriesLimit;
       if (hasCharts && tooManySeries) {
         defaults.error = 'There are too many series defined.';
       }

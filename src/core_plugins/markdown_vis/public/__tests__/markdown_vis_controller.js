@@ -8,7 +8,6 @@ describe('markdown vis controller', function () {
   beforeEach(ngMock.module('kibana/markdown_vis'));
   beforeEach(ngMock.inject(function ($rootScope, $controller) {
     $scope = $rootScope.$new();
-    $scope.renderComplete = () => {};
     const $element = $('<div>');
     $controller('KbnMarkdownVisController', { $scope, $element });
     $scope.$digest();
