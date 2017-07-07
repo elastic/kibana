@@ -1,7 +1,7 @@
 import 'plugins/markdown_vis/markdown_vis.less';
 import 'plugins/markdown_vis/markdown_vis_controller';
-import { VisFactoryProvider } from 'ui/vis/vis_factory';
-import { CATEGORY } from 'ui/vis/vis_category';
+import { VisVisTypeProvider } from 'ui/vis/vis_type';
+import { TemplateVisTypeProvider } from 'ui/template_vis_type/template_vis_type';
 import markdownVisTemplate from 'plugins/markdown_vis/markdown_vis.html';
 import markdownVisParamsTemplate from 'plugins/markdown_vis/markdown_vis_params.html';
 import { VisTypesRegistryProvider } from 'ui/registry/vis_types';
@@ -14,23 +14,22 @@ import image from './images/icon-markdown.svg';
 VisTypesRegistryProvider.register(MarkdownVisProvider);
 
 function MarkdownVisProvider(Private) {
-  const VisFactory = Private(VisFactoryProvider);
+  const VisType = Private(VisVisTypeProvider);
+  const TemplateVisType = Private(TemplateVisTypeProvider);
 
   // return the visType object, which kibana will use to display and configure new
   // Vis object of this type.
-  return VisFactory.createAngularVisualization({
+  return new TemplateVisType({
     name: 'markdown',
     title: 'Markdown',
     image,
     description: 'Create a document using markdown syntax',
-    category: CATEGORY.OTHER,
-    visConfig: {
-      template: markdownVisTemplate,
+    category: VisType.CATEGORY.OTHER,
+    template: markdownVisTemplate,
+    params: {
+      editor: markdownVisParamsTemplate
     },
-    editorConfig: {
-      optionsTemplate: markdownVisParamsTemplate
-    },
-    requestHandler: 'none',
+    requiresSearch: false,
     implementsRenderComplete: true,
   });
 }

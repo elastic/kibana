@@ -1,12 +1,15 @@
 import _ from 'lodash';
 import d3 from 'd3';
+import { Binder } from 'ui/binder';
 import { KbnError } from 'ui/errors';
 import { EventsProvider } from 'ui/events';
+import { ResizeCheckerProvider } from 'ui/resize_checker';
 import './styles/main.less';
 import { VislibVisConfigProvider } from './lib/vis_config';
 import { VisHandlerProvider } from './lib/handler';
 
 export function VislibVisProvider(Private) {
+  const ResizeChecker = Private(ResizeCheckerProvider);
   const Events = Private(EventsProvider);
   const VisConfig = Private(VislibVisConfigProvider);
   const Handler = Private(VisHandlerProvider);
@@ -23,7 +26,13 @@ export function VislibVisProvider(Private) {
     constructor($el, visConfigArgs) {
       super(arguments);
       this.el = $el.get ? $el.get(0) : $el;
+      this.binder = new Binder();
       this.visConfigArgs = _.cloneDeep(visConfigArgs);
+
+      // bind the resize function so it can be used as an event handler
+      this.resize = _.bind(this.resize, this);
+      this.resizeChecker = new ResizeChecker(this.el);
+      this.binder.on(this.resizeChecker, 'resize', this.resize);
     }
 
     hasLegend() {
@@ -60,7 +69,7 @@ export function VislibVisProvider(Private) {
       this.visConfig = new VisConfig(this.visConfigArgs, this.data, this.uiState, this.el);
 
       this.handler = new Handler(this, this.visConfig);
-      this._runOnHandler('render');
+      this._runWithoutResizeChecker('render');
     }
 
     getLegendLabels() {
@@ -69,6 +78,29 @@ export function VislibVisProvider(Private) {
 
     getLegendColors() {
       return this.visConfig ? this.visConfig.get('legend.colors', null) : null;
+    }
+
+    /**
+     * Resizes the visualization
+     *
+     * @method resize
+     */
+    resize() {
+      if (!this.data) {
+        return;
+      }
+
+      if (this.handler && _.isFunction(this.handler.resize)) {
+        this._runOnHandler('resize');
+      } else {
+        this.render(this.data, this.uiState);
+      }
+    }
+
+    _runWithoutResizeChecker(method) {
+      this.resizeChecker.modifySizeWithoutTriggeringResize(() => {
+        this._runOnHandler(method);
+      });
     }
 
     _runOnHandler(method) {
@@ -96,6 +128,8 @@ export function VislibVisProvider(Private) {
     destroy() {
       const selection = d3.select(this.el).select('.vis-wrapper');
 
+      this.binder.destroy();
+      this.resizeChecker.destroy();
       if (this.uiState) this.uiState.off('change', this._uiStateChangeHandler);
       if (this.handler) this._runOnHandler('destroy');
 

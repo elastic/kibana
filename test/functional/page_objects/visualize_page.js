@@ -791,7 +791,7 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
     waitForVisualization() {
       return remote
       .setFindTimeout(defaultFindTimeout)
-      .findByCssSelector('visualization');
+      .findByCssSelector('visualize-legend');
     }
 
     clickMapButton(zoomSelector) {
