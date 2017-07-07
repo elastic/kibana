@@ -55,6 +55,7 @@ export default () => Joi.object({
     basePath: Joi.string().default('').allow('').regex(/(^$|^\/.*[^\/]$)/, `start with a slash, don't end with one`),
     ssl: Joi.object({
       enabled: Joi.boolean().default(false),
+      redirectHttpFromPort: Joi.number(),
       certificate: Joi.string().when('enabled', {
         is: true,
         then: Joi.required(),

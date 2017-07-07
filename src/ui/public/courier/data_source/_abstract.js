@@ -8,7 +8,7 @@ import { ErrorHandlersProvider } from '../_error_handlers';
 import { FetchProvider } from '../fetch';
 import { DecorateQueryProvider } from './_decorate_query';
 import { FieldWildcardProvider } from '../../field_wildcard';
-import { getHighlightRequest } from '../../highlight';
+import { getHighlightRequest } from '../../../../core_plugins/kibana/common/highlight';
 import { migrateFilter } from './_migrate_filter';
 
 export function AbstractDataSourceProvider(Private, Promise, PromiseEmitter, config) {

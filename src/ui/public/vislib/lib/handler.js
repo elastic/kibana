@@ -145,7 +145,7 @@ export function VisHandlerProvider(Private) {
           loadedCount++;
           if (loadedCount === chartSelection.length) {
             // events from all charts are propagated to vis, we only need to fire renderComplete once they all finish
-            $(self.el).trigger('renderComplete');
+            self.vis.emit('renderComplete');
           }
         });
 
