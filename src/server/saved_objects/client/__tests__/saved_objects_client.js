@@ -42,7 +42,13 @@ describe('SavedObjectsClient', () => {
   };
 
   const mappings = {
-
+    'index-pattern': {
+      properties: {
+        someField: {
+          type: 'keyword'
+        }
+      }
+    }
   };
 
   beforeEach(() => {
@@ -314,9 +320,9 @@ describe('SavedObjectsClient', () => {
       });
     });
 
-    it.skip('throws error when providing sort but no type', (done) => {
+    it('throws error when providing sortField but no type', (done) => {
       savedObjectsClient.find({
-        sort: [{}]
+        sortField: 'someField'
       }).then(() => {
         done('failed');
       }).catch(e => {
@@ -325,15 +331,11 @@ describe('SavedObjectsClient', () => {
       });
     });
 
-    it.skip('accepts single sort with type', async () => {
+    it('accepts single sort with type', async () => {
       await savedObjectsClient.find({
         type: 'index-pattern',
-        sort: {
-          someField: {
-            order: 'desc',
-            unmapped_type: 'keyword'
-          },
-        }
+        sortField: 'someField',
+        sortOrder: 'desc',
       });
 
       expect(callAdminCluster.calledOnce).to.be(true);
@@ -355,56 +357,6 @@ describe('SavedObjectsClient', () => {
 
       expect(options.body.sort).to.eql(expectedQuerySort);
     });
-
-    it.skip('accepts multiple sorts in Array with type', async () => {
-      await savedObjectsClient.find({
-        type: 'index-pattern',
-        sort: [
-          {
-            someField: {
-              order: 'desc',
-              unmapped_type: 'keyword'
-            }
-          },
-          {
-            someOtherField: {
-              order: 'asc',
-              unmapped_type: 'keyword'
-            }
-          }
-        ]
-      });
-
-      expect(callAdminCluster.calledOnce).to.be(true);
-
-      const options = callAdminCluster.getCall(0).args[1];
-      const expectedQuerySort = [
-        {
-          someField: {
-            order: 'desc',
-            unmapped_type: 'keyword'
-          },
-        }, {
-          'index-pattern.someField': {
-            order: 'desc',
-            unmapped_type: 'keyword'
-          },
-        }, {
-          someOtherField: {
-            order: 'asc',
-            unmapped_type: 'keyword'
-          },
-        }, {
-          'index-pattern.someOtherField': {
-            order: 'asc',
-            unmapped_type: 'keyword'
-          },
-        }
-      ];
-
-      expect(options.body.sort).to.eql(expectedQuerySort);
-    });
-
 
     it('can filter by fields', async () => {
       await savedObjectsClient.find({ fields: 'title' });
