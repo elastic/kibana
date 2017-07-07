@@ -3,9 +3,9 @@ import 'plugins/table_vis/table_vis_controller';
 import 'plugins/table_vis/table_vis_params';
 import 'ui/agg_table';
 import 'ui/agg_table/agg_table_group';
-import { VisFactoryProvider } from 'ui/vis/vis_factory';
-import { CATEGORY } from 'ui/vis/vis_category';
-import { VisSchemasProvider } from 'ui/vis/editors/default/schemas';
+import { VisVisTypeProvider } from 'ui/vis/vis_type';
+import { TemplateVisTypeProvider } from 'ui/template_vis_type/template_vis_type';
+import { VisSchemasProvider } from 'ui/vis/schemas';
 import tableVisTemplate from 'plugins/table_vis/table_vis.html';
 import { VisTypesRegistryProvider } from 'ui/registry/vis_types';
 import image from './images/icon-table.svg';
@@ -22,7 +22,8 @@ VisTypesRegistryProvider.register(TableVisTypeProvider);
 
 // define the TableVisType
 function TableVisTypeProvider(Private) {
-  const VisFactory = Private(VisFactoryProvider);
+  const VisType = Private(VisVisTypeProvider);
+  const TemplateVisType = Private(TemplateVisTypeProvider);
   const Schemas = Private(VisSchemasProvider);
 
   // define the TableVisController which is used in the template
@@ -30,14 +31,14 @@ function TableVisTypeProvider(Private) {
 
   // return the visType object, which kibana will use to display and configure new
   // Vis object of this type.
-  return VisFactory.createAngularVisualization({
-    type: 'table',
+  return new TemplateVisType({
     name: 'table',
     title: 'Data Table',
     image,
     description: 'Display values in a table',
-    category: CATEGORY.DATA,
-    visConfig: {
+    category: VisType.CATEGORY.DATA,
+    template: tableVisTemplate,
+    params: {
       defaults: {
         perPage: 10,
         showPartialRows: false,
@@ -49,36 +50,34 @@ function TableVisTypeProvider(Private) {
         showTotal: false,
         totalFunc: 'sum'
       },
-      template: tableVisTemplate,
+      editor: '<table-vis-params></table-vis-params>'
     },
-    editorConfig: {
-      optionsTemplate: '<table-vis-params></table-vis-params>',
-      schemas: new Schemas([
-        {
-          group: 'metrics',
-          name: 'metric',
-          title: 'Metric',
-          aggFilter: '!geo_centroid',
-          min: 1,
-          defaults: [
-            { type: 'count', schema: 'metric' }
-          ]
-        },
-        {
-          group: 'buckets',
-          name: 'bucket',
-          title: 'Split Rows'
-        },
-        {
-          group: 'buckets',
-          name: 'split',
-          title: 'Split Table'
-        }
-      ])
-    },
+    implementsRenderComplete: true,
     hierarchicalData: function (vis) {
       return Boolean(vis.params.showPartialRows || vis.params.showMeticsAtAllLevels);
-    }
+    },
+    schemas: new Schemas([
+      {
+        group: 'metrics',
+        name: 'metric',
+        title: 'Metric',
+        aggFilter: '!geo_centroid',
+        min: 1,
+        defaults: [
+          { type: 'count', schema: 'metric' }
+        ]
+      },
+      {
+        group: 'buckets',
+        name: 'bucket',
+        title: 'Split Rows'
+      },
+      {
+        group: 'buckets',
+        name: 'split',
+        title: 'Split Table'
+      }
+    ])
   });
 }
 

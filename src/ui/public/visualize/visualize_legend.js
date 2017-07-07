@@ -6,7 +6,7 @@ import { uiModules } from 'ui/modules';
 
 
 uiModules.get('kibana')
-.directive('visualizeLegend', function (Private, getAppState, $timeout) {
+.directive('visualizeLegend', function (Private, getAppState) {
   const Data = Private(VislibLibDataProvider);
   const filterBarClickHandler = Private(FilterBarClickHandlerProvider);
 
@@ -18,18 +18,18 @@ uiModules.get('kibana')
       const clickHandler = filterBarClickHandler($state);
       $scope.open = $scope.uiState.get('vis.legendOpen', true);
 
-      $scope.$watch('visData', function (data) {
+      $scope.$watch('renderbot.chartData', function (data) {
         if (!data) return;
         $scope.data = data;
       });
 
-      $scope.$watch('vis.refreshLegend', () => {
+      $scope.$watch('renderbot.refreshLegend', () => {
         refresh();
       });
 
       $scope.highlight = function (event) {
         const el = event.currentTarget;
-        const handler = $scope.vis.vislibVis.handler;
+        const handler = $scope.renderbot.vislibVis.handler;
 
         //there is no guarantee that a Chart will set the highlight-function on its handler
         if (!handler || typeof handler.highlight !== 'function') {
@@ -40,7 +40,7 @@ uiModules.get('kibana')
 
       $scope.unhighlight = function (event) {
         const el = event.currentTarget;
-        const handler = $scope.vis.vislibVis.handler;
+        const handler = $scope.renderbot.vislibVis.handler;
         //there is no guarantee that a Chart will set the unhighlight-function on its handler
         if (!handler || typeof handler.unHighlight !== 'function') {
           return;
@@ -62,10 +62,7 @@ uiModules.get('kibana')
         const bwcAddLegend = $scope.vis.params.addLegend;
         const bwcLegendStateDefault = bwcAddLegend == null ? true : bwcAddLegend;
         $scope.open = !$scope.uiState.get('vis.legendOpen', bwcLegendStateDefault);
-        // open should be applied on template before we update uiState
-        $timeout(() => {
-          $scope.uiState.set('vis.legendOpen', $scope.open);
-        });
+        $scope.uiState.set('vis.legendOpen', $scope.open);
       };
 
       $scope.getToggleLegendClasses = function () {
@@ -105,8 +102,9 @@ uiModules.get('kibana')
       ];
 
       function refresh() {
-        const vislibVis = $scope.vis.vislibVis;
-        if (!vislibVis || !vislibVis.visConfig) {
+        if (!$scope.renderbot) return;
+        const vislibVis = $scope.renderbot.vislibVis;
+        if (!vislibVis.visConfig) {
           $scope.labels = [{ label: 'loading ...' }];
           return;
         }  // make sure vislib is defined at this point

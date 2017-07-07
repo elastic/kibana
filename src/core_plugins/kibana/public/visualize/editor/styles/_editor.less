@@ -47,11 +47,7 @@
     .flex-parent(0, 1, auto);
   }
 
-  > visualize {
-    height: 100%;
-    flex: 1 1 auto;
-    display: flex;
-  }
+
 }
 
 
@@ -61,7 +57,6 @@
 
   .vis-editor-content {
     .flex-parent();
-    width: 100%;
     z-index: 0;
 
     // overrides for tablet and desktop
@@ -306,8 +301,9 @@
   }
 
   .vis-editor-canvas {
+    flex: 1 0 (@screen-md-min - @vis-editor-sidebar-basis);
     display: flex;
-    flex-direction: row;
+    flex-direction: column;
     overflow: auto;
     padding-left: @collapser-width;
 

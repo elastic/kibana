@@ -20,9 +20,8 @@ before(() => {
 
 beforeEach(function () {
   if (Notifier.prototype._notifs.length) {
-    const notifs = JSON.stringify(Notifier.prototype._notifs);
     Notifier.prototype._notifs.length = 0;
-    throw new Error('notifications were left in the notifier: ' + notifs);
+    throw new Error('notifications were left in the notifier');
   }
 });
 

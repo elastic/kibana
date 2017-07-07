@@ -20,7 +20,6 @@ module.controller('KbnTagCloudController', function ($scope, $element, Private, 
     const aggConfigResult = new AggConfigResult(aggs[0], false, event, event);
     clickHandler({ point: { aggConfigResult: aggConfigResult } });
   });
-
   tagCloud.on('renderComplete', () => {
 
     const truncatedMessage = containerNode.querySelector('.tagcloud-truncated-message');
@@ -34,9 +33,13 @@ module.controller('KbnTagCloudController', function ($scope, $element, Private, 
 
     const bucketName = containerNode.querySelector('.tagcloud-custom-label');
     bucketName.innerHTML = `${$scope.vis.aggs[0].makeLabel()} - ${$scope.vis.aggs[1].makeLabel()}`;
+
+
     truncatedMessage.style.display = truncated ? 'block' : 'none';
 
+
     const status = tagCloud.getStatus();
+
     if (TagCloud.STATUS.COMPLETE === status) {
       incompleteMessage.style.display = 'none';
     } else if (TagCloud.STATUS.INCOMPLETE === status) {
@@ -44,7 +47,7 @@ module.controller('KbnTagCloudController', function ($scope, $element, Private, 
     }
 
 
-    $scope.renderComplete();
+    $element.trigger('renderComplete');
   });
 
   $scope.$watch('esResponse', async function (response) {
@@ -84,9 +87,14 @@ module.controller('KbnTagCloudController', function ($scope, $element, Private, 
 
   $scope.$watch('vis.params', (options) => tagCloud.setOptions(options));
 
-  $scope.$watch('resize', () => {
+  $scope.$watch(getContainerSize, _.debounce(() => {
     tagCloud.resize();
-  });
+  }, 1000, { trailing: true }), true);
+
+
+  function getContainerSize() {
+    return { width: $element.width(), height: $element.height() };
+  }
 
   function getValue(metricsAgg, bucket) {
     let size = metricsAgg.getValue(bucket);

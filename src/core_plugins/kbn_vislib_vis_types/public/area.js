@@ -1,22 +1,22 @@
-import { VisFactoryProvider } from 'ui/vis/vis_factory';
-import { VisSchemasProvider } from 'ui/vis/editors/default/schemas';
-import { CATEGORY } from 'ui/vis/vis_category';
+import { VisVisTypeProvider } from 'ui/vis/vis_type';
+import { VislibVisTypeVislibVisTypeProvider } from 'ui/vislib_vis_type/vislib_vis_type';
+import { VisSchemasProvider } from 'ui/vis/schemas';
 import pointSeriesTemplate from 'plugins/kbn_vislib_vis_types/editors/point_series.html';
 import image from './images/icon-area.svg';
 
 export default function PointSeriesVisType(Private) {
-  const VisFactory = Private(VisFactoryProvider);
+  const VisType = Private(VisVisTypeProvider);
+  const VislibVisType = Private(VislibVisTypeVislibVisTypeProvider);
   const Schemas = Private(VisSchemasProvider);
 
-  return VisFactory.createVislibVisualization({
+  return new VislibVisType({
     name: 'area',
     title: 'Area',
     image,
     description: 'Emphasize the quantity beneath a line chart',
-    category: CATEGORY.BASIC,
-    visConfig: {
+    category: VisType.CATEGORY.BASIC,
+    params: {
       defaults: {
-        type: 'area',
         grid: {
           categoryLines: false,
           style: {
@@ -29,7 +29,8 @@ export default function PointSeriesVisType(Private) {
             type: 'category',
             position: 'bottom',
             show: true,
-            style: {},
+            style: {
+            },
             scale: {
               type: 'linear'
             },
@@ -47,7 +48,8 @@ export default function PointSeriesVisType(Private) {
             type: 'value',
             position: 'left',
             show: true,
-            style: {},
+            style: {
+            },
             scale: {
               type: 'linear',
               mode: 'normal'
@@ -82,34 +84,31 @@ export default function PointSeriesVisType(Private) {
         times: [],
         addTimeMarker: false,
       },
-    },
-    editorConfig: {
-      collections: {
-        positions: ['top', 'left', 'right', 'bottom'],
-        chartTypes: [{
-          value: 'line',
-          text: 'line'
-        }, {
-          value: 'area',
-          text: 'area'
-        }, {
-          value: 'histogram',
-          text: 'bar'
-        }],
-        axisModes: ['normal', 'percentage', 'wiggle', 'silhouette'],
-        scaleTypes: ['linear', 'log', 'square root'],
-        chartModes: ['normal', 'stacked'],
-        interpolationModes: [{
-          value: 'linear',
-          text: 'straight',
-        }, {
-          value: 'cardinal',
-          text: 'smoothed',
-        }, {
-          value: 'step-after',
-          text: 'stepped',
-        }],
-      },
+      positions: ['top', 'left', 'right', 'bottom'],
+      chartTypes: [{
+        value: 'line',
+        text: 'line'
+      }, {
+        value: 'area',
+        text: 'area'
+      }, {
+        value: 'histogram',
+        text: 'bar'
+      }],
+      axisModes: ['normal', 'percentage', 'wiggle', 'silhouette'],
+      scaleTypes: ['linear', 'log', 'square root'],
+      chartModes: ['normal', 'stacked'],
+      interpolationModes: [{
+        value: 'linear',
+        text: 'straight',
+      }, {
+        value: 'cardinal',
+        text: 'smoothed',
+      }, {
+        value: 'step-after',
+        text: 'stepped',
+      }],
+      editor: pointSeriesTemplate,
       optionTabs: [
         {
           name: 'advanced',
@@ -119,50 +118,50 @@ export default function PointSeriesVisType(Private) {
         },
         { name: 'options', title: 'Panel Settings', editor: pointSeriesTemplate },
       ],
-      schemas: new Schemas([
-        {
-          group: 'metrics',
-          name: 'metric',
-          title: 'Y-Axis',
-          aggFilter: ['!geo_centroid'],
-          min: 1,
-          defaults: [
-            { schema: 'metric', type: 'count' }
-          ]
-        },
-        {
-          group: 'metrics',
-          name: 'radius',
-          title: 'Dot Size',
-          min: 0,
-          max: 1,
-          aggFilter: ['count', 'avg', 'sum', 'min', 'max', 'cardinality']
-        },
-        {
-          group: 'buckets',
-          name: 'segment',
-          title: 'X-Axis',
-          min: 0,
-          max: 1,
-          aggFilter: '!geohash_grid'
-        },
-        {
-          group: 'buckets',
-          name: 'group',
-          title: 'Split Series',
-          min: 0,
-          max: 1,
-          aggFilter: '!geohash_grid'
-        },
-        {
-          group: 'buckets',
-          name: 'split',
-          title: 'Split Chart',
-          min: 0,
-          max: 1,
-          aggFilter: '!geohash_grid'
-        }
-      ])
-    }
+    },
+    schemas: new Schemas([
+      {
+        group: 'metrics',
+        name: 'metric',
+        title: 'Y-Axis',
+        aggFilter: ['!geo_centroid'],
+        min: 1,
+        defaults: [
+          { schema: 'metric', type: 'count' }
+        ]
+      },
+      {
+        group: 'metrics',
+        name: 'radius',
+        title: 'Dot Size',
+        min: 0,
+        max: 1,
+        aggFilter: ['count', 'avg', 'sum', 'min', 'max', 'cardinality']
+      },
+      {
+        group: 'buckets',
+        name: 'segment',
+        title: 'X-Axis',
+        min: 0,
+        max: 1,
+        aggFilter: '!geohash_grid'
+      },
+      {
+        group: 'buckets',
+        name: 'group',
+        title: 'Split Series',
+        min: 0,
+        max: 1,
+        aggFilter: '!geohash_grid'
+      },
+      {
+        group: 'buckets',
+        name: 'split',
+        title: 'Split Chart',
+        min: 0,
+        max: 1,
+        aggFilter: '!geohash_grid'
+      }
+    ])
   });
 }

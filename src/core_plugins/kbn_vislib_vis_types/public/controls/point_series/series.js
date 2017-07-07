@@ -61,7 +61,7 @@ module.directive('vislibSeries', function () {
         return $scope.vis.params.seriesParams.map(series => series.type).join();
       }, () => {
         const types = _.uniq(_.map($scope.vis.params.seriesParams, 'type'));
-        $scope.vis.type.type = types.length === 1 ? types[0] : 'histogram';
+        $scope.savedVis.type = types.length === 1 ? types[0] : 'histogram';
       });
 
       $scope.$watch('vis.params.valueAxes.length', () => {

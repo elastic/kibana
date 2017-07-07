@@ -49,8 +49,6 @@ uiModules
         if (hasSingleSibling) {
           $siblings.toggleClass(siblingsClass + ' col-md-12');
         }
-
-        if ($scope.toggleSidebar) $scope.toggleSidebar();
       });
 
       $collapser.appendTo($elem);
