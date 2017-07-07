@@ -437,12 +437,8 @@ export class ObjectSetting<P extends Props> extends Setting<
 }
 
 function isMap<K, V>(o: any): o is Map<K, V> {
-  return Object.prototype.toString.call(o) === '[object Map]';
+  return o instanceof Map;
 }
-
-// We need this helper for the types to be correct
-// (otherwise it assumes an array of A|B instead of a tuple [A,B])
-const toTuple = <A, B>(a: A, b: B): [A, B] => [a, b];
 
 type MapOfOptions<K, V> = SettingOptions<Map<K, V>>;
 
@@ -457,41 +453,35 @@ export class MapOfSetting<K, V> extends Setting<Map<K, V>> {
 
   process(obj: any, context?: string): Map<K, V> {
     if (isPlainObject(obj)) {
-      const res = Object.keys(obj).map(key => {
-        const validatedKey = this.keySetting.validate(
-          key,
-          toContext(context, key)
-        );
-        const validatedValue = this.valueSetting.validate(
-          obj[key],
-          toContext(context, key)
-        );
-        return toTuple(validatedKey, validatedValue);
-      });
-
-      return new Map(res);
+      const entries = Object.keys(obj).map(key => [key, obj[key]]);
+      return this.processEntries(entries);
     }
 
     if (isMap(obj)) {
-      const res = [...obj.entries()].map(([key, value]) => {
-        const validatedKey = this.keySetting.validate(
-          key,
-          toContext(context, String(key))
-        );
-        const validatedValue = this.valueSetting.validate(
-          value,
-          toContext(context, String(key))
-        );
-        return toTuple(validatedKey, validatedValue);
-      });
-
-      return new Map(res);
+      return this.processEntries([...obj.entries()]);
     }
 
     throw new SettingError(
       `expected value of type [Map] or [object] but got [${typeDetect(obj)}]`,
       context
     );
+  }
+
+  processEntries(entries: any[][], context?: string) {
+    const res = entries.map(([key, value]) => {
+      const validatedKey = this.keySetting.validate(
+        key,
+        toContext(context, String(key))
+      );
+      const validatedValue = this.valueSetting.validate(
+        value,
+        toContext(context, String(key))
+      );
+
+      return [validatedKey, validatedValue] as [K, V];
+    });
+
+    return new Map(res);
   }
 }
 
