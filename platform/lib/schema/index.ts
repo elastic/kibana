@@ -436,6 +436,59 @@ export class ObjectSetting<P extends Props> extends Setting<
   }
 }
 
+function isMap<K, V>(o: any): o is Map<K, V> {
+  return Object.prototype.toString.call(o) === '[object Map]';
+}
+
+// We need this helper for the types to be correct
+// (otherwise it assumes an array of A|B instead of a tuple [A,B])
+const toTuple = <A, B>(a: A, b: B): [A, B] => [a, b];
+
+type MapOfOptions<K, V> = SettingOptions<Map<K, V>>;
+
+export class MapOfSetting<K, V> extends Setting<Map<K, V>> {
+  constructor(
+    private readonly keySetting: Setting<K>,
+    private readonly valueSetting: Setting<V>,
+    options: MapOfOptions<K, V> = {}
+  ) {
+    super(options);
+  }
+
+  process(obj: any, context?: string): Map<K, V> {
+    if (isPlainObject(obj)) {
+      const res = Object.keys(obj).map(k => {
+        const key = this.keySetting.validate(k, toContext(context, k));
+        const val = this.valueSetting.validate(obj[k], toContext(context, k));
+        return toTuple(key, val);
+      });
+
+      return new Map(res);
+    }
+
+    if (isMap(obj)) {
+      const res = [...obj.entries()].map(([key, value]) => {
+        const validatedKey = this.keySetting.validate(
+          key,
+          toContext(context, String(key))
+        );
+        const validatedValue = this.valueSetting.validate(
+          value,
+          toContext(context, String(key))
+        );
+        return toTuple(validatedKey, validatedValue);
+      });
+
+      return new Map(res);
+    }
+
+    throw new SettingError(
+      `expected value of type [Map] or [object] but got [${typeDetect(obj)}]`,
+      context
+    );
+  }
+}
+
 export function boolean(options?: SettingOptions<boolean>): Setting<boolean> {
   return new BooleanSetting(options);
 }
@@ -481,6 +534,14 @@ export function arrayOf<T>(
   options?: ArrayOptions<T>
 ): Setting<Array<T>> {
   return new ArraySetting(itemSetting, options);
+}
+
+export function mapOf<K, V>(
+  keySetting: Setting<K>,
+  valueSetting: Setting<V>,
+  options?: MapOfOptions<K, V>
+): Setting<Map<K, V>> {
+  return new MapOfSetting(keySetting, valueSetting, options);
 }
 
 export function oneOf<A, B, C, D>(
