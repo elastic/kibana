@@ -39,6 +39,13 @@ export class DurationFormat extends FieldFormat {
   isHuman() {
     return this.param('outputFormat') === HUMAN_FRIENDLY;
   }
+  getParamDefaults() {
+    return {
+      inputFormat: DEFAULT_INPUT_FORMAT.kind,
+      outputFormat: DEFAULT_OUTPUT_FORMAT.method,
+      outputPrecision: DEFAULT_OUTPUT_PRECISION
+    };
+  }
   _convert(val) {
     const inputFormat = this.param('inputFormat');
     const outputFormat = this.param('outputFormat');
@@ -58,14 +65,6 @@ export class DurationFormat extends FieldFormat {
   static inputFormats = inputFormats;
   static outputFormats = outputFormats;
 }
-
-DurationFormat.prototype.getParamDefaults = function () {
-  return {
-    inputFormat: DEFAULT_INPUT_FORMAT.kind,
-    outputFormat: DEFAULT_OUTPUT_FORMAT.method,
-    outputPrecision: DEFAULT_OUTPUT_PRECISION
-  };
-};
 
 function parseInputAsDuration(val, inputFormat) {
   const ratio = ratioToSeconds[inputFormat] || 1;
