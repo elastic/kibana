@@ -158,7 +158,7 @@ describe('SavedObjectsClient', () => {
         errors: false,
         items: [{
           create: {
-            _type: 'foo',
+            _type: 'config',
             _id: 'one',
             error: {
               reason: 'type[config] missing'
@@ -166,8 +166,8 @@ describe('SavedObjectsClient', () => {
           }
         }, {
           create: {
-            _type: 'config',
-            _id: 'one',
+            _type: 'index-pattern',
+            _id: 'two',
             _version: 2
           }
         }]
@@ -181,13 +181,13 @@ describe('SavedObjectsClient', () => {
       expect(response).to.eql([
         {
           id: 'one',
-          type: 'foo',
+          type: 'config',
           version: undefined,
           attributes: { title: 'Test One' },
           error: { message: 'type[config] missing' }
         }, {
-          id: 'one',
-          type: 'config',
+          id: 'two',
+          type: 'index-pattern',
           version: 2,
           attributes: { title: 'Test Two' },
           error: undefined
@@ -206,8 +206,8 @@ describe('SavedObjectsClient', () => {
           }
         }, {
           create: {
-            _type: 'config',
-            _id: 'one',
+            _type: 'index-pattern',
+            _id: 'two',
             _version: 2
           }
         }]
@@ -226,8 +226,8 @@ describe('SavedObjectsClient', () => {
           attributes: { title: 'Test One' },
           error: undefined
         }, {
-          id: 'one',
-          type: 'config',
+          id: 'two',
+          type: 'index-pattern',
           version: 2,
           attributes: { title: 'Test Two' },
           error: undefined

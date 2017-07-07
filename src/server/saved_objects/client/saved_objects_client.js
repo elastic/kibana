@@ -6,9 +6,9 @@ import {
   createIdQuery,
   handleEsError,
   isSingleTypeError,
-  getDocType,
   v5BulkCreate,
-  v6BulkCreate
+  v6BulkCreate,
+  parseEsDoc
 } from './lib';
 
 export const V6_TYPE = 'doc';
@@ -45,12 +45,7 @@ export class SavedObjectsClient {
       }
     });
 
-    return {
-      id: response._id,
-      type,
-      version: response._version,
-      attributes
-    };
+    return parseEsDoc(response, { type, attributes });
   }
 
   /**
@@ -85,14 +80,14 @@ export class SavedObjectsClient {
 
     return get(response, 'items', []).map((resp, i) => {
       const method = Object.keys(resp)[0];
+      const { id, type, attributes } = objects[i];
 
-      return {
-        id: resp[method]._id,
-        type: resp[method]._type,
-        version: resp[method]._version,
-        attributes: objects[i].attributes,
+      return parseEsDoc(resp[method], {
+        id,
+        type,
+        attributes,
         error: resp[method].error ? { message: get(resp[method], 'error.reason') } : undefined
-      };
+      });
     });
   }
 
@@ -145,14 +140,8 @@ export class SavedObjectsClient {
     const response = await this._withKibanaIndex('search', esOptions);
 
     return {
-      saved_objects: get(response, 'hits.hits', []).map(r => {
-        const docType =  getDocType(r);
-        return {
-          id: r._id,
-          type: docType,
-          version: r._version,
-          attributes: get(r, `_source.${docType}`) || r._source
-        };
+      saved_objects: get(response, 'hits.hits', []).map(hit => {
+        return parseEsDoc(hit);
       }),
       total: get(response, 'hits.total', 0),
       per_page: perPage,
@@ -188,7 +177,6 @@ export class SavedObjectsClient {
     return {
       saved_objects: responses.map((r, i) => {
         const [hit] = get(r, 'hits.hits', []);
-        const docType =  getDocType(hit);
 
         if (!hit) {
           return Object.assign({}, objects[i], {
@@ -196,10 +184,7 @@ export class SavedObjectsClient {
           });
         }
 
-        return Object.assign({}, objects[i], {
-          version: hit._version,
-          attributes: get(hit, `_source.${docType}`, hit._source)
-        });
+        return parseEsDoc(hit, objects[i]);
       })
     };
   }
@@ -219,14 +204,7 @@ export class SavedObjectsClient {
       throw Boom.notFound();
     }
 
-    const attributes =  get(hit, `_source.${type}`) || hit._source;
-
-    return {
-      id: hit._id,
-      type,
-      version: hit._version,
-      attributes
-    };
+    return parseEsDoc(hit);
   }
 
   /**
@@ -256,12 +234,7 @@ export class SavedObjectsClient {
       }
     });
 
-    return {
-      id: id,
-      type: type,
-      version: get(response, '_version'),
-      attributes: attributes
-    };
+    return parseEsDoc(response, { id, type, attributes });
   }
 
   _withKibanaIndexAndMappingFallback(method, params, fallbackParams) {
