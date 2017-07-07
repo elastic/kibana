@@ -1,13 +1,15 @@
 import React, { Component, PropTypes } from 'react';
+import FieldSelect from '../aggs/field_select';
 import SeriesEditor from '../series_editor';
 import IndexPattern from '../index_pattern';
 import createTextHandler from '../lib/create_text_handler';
+import createSelectHandler from '../lib/create_select_handler';
 import ColorRules from '../color_rules';
 import ColorPicker from '../color_picker';
 import uuid from 'uuid';
 import YesNo from '../yes_no';
 
-class TopNPanelConfig extends Component {
+class TablePanelConfig extends Component {
 
   constructor(props) {
     super(props);
@@ -29,18 +31,59 @@ class TopNPanelConfig extends Component {
 
   render() {
     const { selectedTab } = this.state;
-    const defaults = { drilldown_url: '', filter: '' };
+    const defaults = { drilldown_url: '', filter: '', pivot_lable: '', pivot_rows: 10 };
     const model = { ...defaults, ...this.props.model };
+    const handleSelectChange = createSelectHandler(this.props.onChange);
     const handleTextChange = createTextHandler(this.props.onChange);
     let view;
     if (selectedTab === 'data') {
       view = (
-        <SeriesEditor
-          colorPicker={false}
-          fields={this.props.fields}
-          model={this.props.model}
-          name={this.props.name}
-          onChange={this.props.onChange} />
+        <div>
+          <div className="vis_editor__table-pivot-fields">
+            <div className="vis_editor__container">
+              <div className="vis_ediotr__vis_config-row">
+                <p>For the table visualization you need to define an ID field to
+                  pivot on using a terms aggregation. You can also define a display
+                  field which will be pulled using a top hits aggregation from a sample document.</p>
+              </div>
+              <div className="vis_editor__vis_config-row">
+                <div className="vis_editor__label">ID Field</div>
+                <div className="vis_editor__row_item">
+                  <FieldSelect
+                    fields={this.props.fields}
+                    value={model.pivot_id}
+                    indexPattern={model.index_pattern}
+                    onChange={handleSelectChange('pivot_id')} />
+                </div>
+                <div className="vis_editor__label">Display Field</div>
+                <div className="vis_editor__row_item">
+                  <FieldSelect
+                    fields={this.props.fields}
+                    value={model.pivot_display}
+                    indexPattern={model.index_pattern}
+                    onChange={handleSelectChange('pivot_display')} />
+                </div>
+                <div className="vis_editor__label">Column Label</div>
+                <input
+                  className="vis_editor__input-grows"
+                  type="text"
+                  onChange={handleTextChange('pivot_label')}
+                  value={model.pivot_label}/>
+                <div className="vis_editor__label">Rows</div>
+                <input
+                  className="vis_editor__input-number"
+                  type="number"
+                  onChange={handleTextChange('pivot_rows')}
+                  value={model.pivot_rows}/>
+              </div>
+            </div>
+          </div>
+          <SeriesEditor
+            fields={this.props.fields}
+            model={this.props.model}
+            name={this.props.name}
+            onChange={this.props.onChange} />
+        </div>
       );
     } else {
       view = (
@@ -94,7 +137,7 @@ class TopNPanelConfig extends Component {
       <div>
         <div className="kbnTabs">
           <div className={`kbnTabs__tab${selectedTab === 'data' && '-active' || ''}`}
-            onClick={() => this.switchTab('data')}>Data</div>
+            onClick={() => this.switchTab('data')}>Columns</div>
           <div className={`kbnTabs__tab${selectedTab === 'options' && '-active' || ''}`}
             onClick={() => this.switchTab('options')}>Panel Options</div>
         </div>
@@ -105,12 +148,12 @@ class TopNPanelConfig extends Component {
 
 }
 
-TopNPanelConfig.propTypes = {
+TablePanelConfig.propTypes = {
   fields: PropTypes.object,
   model: PropTypes.object,
   onChange: PropTypes.func,
   visData: PropTypes.object,
 };
 
-export default TopNPanelConfig;
+export default TablePanelConfig;
 

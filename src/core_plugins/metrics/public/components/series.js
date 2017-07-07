@@ -54,7 +54,6 @@ class Series extends Component {
     if (Component) {
       const params = {
         className: this.props.className,
-        colorPicker: this.props.colorPicker,
         disableAdd: this.props.disableAdd,
         disableDelete: this.props.disableDelete,
         fields: this.props.fields,
@@ -89,7 +88,6 @@ Series.defaultProps = {
 
 Series.propTypes = {
   className: PropTypes.string,
-  colorPicker: PropTypes.bool,
   disableAdd: PropTypes.bool,
   disableDelete: PropTypes.bool,
   fields: PropTypes.object,

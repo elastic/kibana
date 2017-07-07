@@ -1,18 +1,14 @@
 import React, { PropTypes } from 'react';
-import ColorPicker from '../../color_picker';
 import AddDeleteButtons from '../../add_delete_buttons';
-import SeriesConfig from '../../series_config';
+import SeriesConfig from './config';
 import Sortable from 'react-anything-sortable';
-import Split from '../../split';
 import Tooltip from '../../tooltip';
 import createTextHandler from '../../lib/create_text_handler';
 import createAggRowRender from '../../lib/create_agg_row_render';
 
 function TopNSeries(props) {
   const {
-    panel,
     model,
-    fields,
     onAdd,
     onChange,
     onDelete,
@@ -50,15 +46,6 @@ function TopNSeries(props) {
             sortHandle="vis_editor__agg_sort">
             { aggs }
           </Sortable>
-          <div className="vis_editor__series_row">
-            <div className="vis_editor__series_row-item">
-              <Split
-                onChange={props.onChange}
-                fields={fields}
-                panel={panel}
-                model={model}/>
-            </div>
-          </div>
         </div>
       );
     } else {
@@ -82,14 +69,6 @@ function TopNSeries(props) {
     );
   }
 
-  const colorPicker = (
-    <ColorPicker
-      disableTrash={true}
-      onChange={props.onChange}
-      name="color"
-      value={model.color}/>
-  );
-
   let dragHandle;
   if (!props.disableDelete) {
     dragHandle = (
@@ -110,7 +89,6 @@ function TopNSeries(props) {
       <div className="vis_editor__container">
         <div className="vis_editor__series-details">
           <div onClick={ props.toggleVisible }><i className={ caretClassName }/></div>
-          { colorPicker }
           <div className="vis_editor__row vis_editor__row_item">
             <input
               className="vis_editor__input-grows"
@@ -137,7 +115,6 @@ function TopNSeries(props) {
 
 TopNSeries.propTypes = {
   className: PropTypes.string,
-  colorPicker: PropTypes.bool,
   disableAdd: PropTypes.bool,
   disableDelete: PropTypes.bool,
   fields: PropTypes.object,
