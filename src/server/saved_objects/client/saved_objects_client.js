@@ -38,6 +38,7 @@ export class SavedObjectsClient {
       refresh: 'wait_for'
     }, {
       type: V6_TYPE,
+      id: options.id ? `${type}:${options.id}` : undefined,
       body: {
         type,
         [type]: attributes
@@ -275,7 +276,7 @@ export class SavedObjectsClient {
         return this._withKibanaIndex(method, Object.assign({}, params, fallbackParams));
       }
 
-      return err;
+      throw err;
     });
   }
 
