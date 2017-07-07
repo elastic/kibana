@@ -37,7 +37,7 @@ describe('service_settings (FKA tilemaptest)', function () {
       'url': 'https://tiles.elastic.co/v2/default/{z}/{x}/{y}.png?elastic_tile_service_tos=agree&my_app_name=kibana',
       'minZoom': 0,
       'maxZoom': 10,
-      'attribution': '© [OpenStreetMap](http://www.openstreetmap.org/copyright) © [Elastic Tile Service](https://www.elastic.co/elastic-tile-service)'
+      'attribution': '© [OpenStreetMap](http://www.openstreetmap.org/copyright) © [Elastic Maps Service](https://www.elastic.co/elastic-maps-service)'
     }]
   };
 
@@ -54,7 +54,7 @@ describe('service_settings (FKA tilemaptest)', function () {
       'created_at': '2017-04-26T19:45:22.377820',
       'id': 5086441721823232
     }, {
-      'attribution': 'Â© [Elastic Tile Service](https://www.elastic.co/elastic-tile-service)',
+      'attribution': 'Â© [Elastic Tile Service](https://www.elastic.co/elastic-maps-service)',
       'name': 'World Countries',
       'format': 'geojson',
       'url': 'https://storage.googleapis.com/elastic-layer.appspot.com/L2FwcGhvc3RpbmdfcHJvZC9ibG9icy9BRW5CMlVwWTZTWnhRRzNmUk9HUE93TENjLXNVd2IwdVNpc09SRXRyRzBVWWdqOU5qY2hldGJLOFNZSFpUMmZmZWdNZGx0NWprT1R1ZkZ0U1JEdFBtRnkwUWo0S0JuLTVYY1I5RFdSMVZ5alBIZkZuME1qVS04TS5oQTRNTl9yRUJCWk9tMk03?elastic_tile_service_tos=agree',
