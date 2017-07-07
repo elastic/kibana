@@ -68,4 +68,22 @@ describe('parseEsDoc', () => {
       error: 'An error!'
     });
   });
+
+  it('handles already prefixed ids with the type', () => {
+    const doc = {
+      _type: 'doc',
+      _id: 'test:test:foo',
+      _version: 2,
+      _source: { type: 'test', test: { title: 'test' } }
+    };
+    const overrides = { error: 'An error!' };
+
+    expect(parseEsDoc(doc, overrides)).to.eql({
+      id: 'test:foo',
+      type: 'test',
+      version: 2,
+      attributes: { title: 'test' },
+      error: 'An error!'
+    });
+  });
 });

@@ -11,11 +11,33 @@ export function createIdQuery({ type, id }) {
     query: {
       bool: {
         should: [
-          // v5/v6 document
-          { term: { _id: id } },
-
+          // v5 document
+          {
+            bool: {
+              must: [
+                { term: { _id: id } },
+                { term: { _type: type } }
+              ]
+            }
+          },
           // migrated v5 document
-          { term: { _id: `${type}:${id}` } }
+          {
+            bool: {
+              must: [
+                { term: { _id: `${type}:${id}` } },
+                { term: { type: type } }
+              ]
+            }
+          },
+          // v6 document
+          {
+            bool: {
+              must: [
+                { term: { _id: id } },
+                { term: { type: type } }
+              ]
+            }
+          },
         ]
       }
     }
