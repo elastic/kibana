@@ -6,8 +6,8 @@ async function getStatsForType(savedObjectsClient, type) {
   return { total };
 }
 
-export async function getStats(kibanaIndex, callAdminCluster) {
-  const savedObjectsClient = new SavedObjectsClient(kibanaIndex, callAdminCluster);
+export async function getStats(kibanaIndex, mappings, callAdminCluster) {
+  const savedObjectsClient = new SavedObjectsClient(kibanaIndex, mappings, callAdminCluster);
   const types = ['dashboard', 'visualization', 'search', 'index-pattern'];
   const requests = types.map(type => getStatsForType(savedObjectsClient, type));
   const results = await Promise.all(requests);

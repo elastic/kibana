@@ -1,7 +1,8 @@
-export function createFindQuery(options = {}) {
-  const { type, search, searchFields, sort } = options;
+import { get } from 'lodash';
+export function createFindQuery(mappings, options = {}) {
+  const { type, search, searchFields, sortField, sortOrder } = options;
 
-  if (!type && sort) {
+  if (!type && sortField) {
     throw new Error('Cannot sort without knowing the type');
   }
 
@@ -41,17 +42,17 @@ export function createFindQuery(options = {}) {
 
   const query = { version: true, query: { bool } };
 
-  if (sort) {
-    const sortArray = Array.isArray(sort) ? sort : [sort];
-    query.sort = sortArray.reduce((acc, item) => {
-      acc.push(item);
-      const transformed = Object.keys(item).reduce((itemAcc, key) => {
-        itemAcc[`${type}.${key}`] = item[key];
-        return itemAcc;
-      }, {});
-      acc.push(transformed);
-      return acc;
-    }, []);
+  if (sortField) {
+    const value = {
+      order: sortOrder,
+      unmapped_type: get(mappings, `${type}.properties.${sortField}.type`)
+    };
+
+    query.sort = [{
+      [sortField]: value
+    }, {
+      [`${type}.${sortField}`]: value
+    }];
   }
 
   return query;

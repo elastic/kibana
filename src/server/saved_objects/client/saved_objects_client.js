@@ -7,8 +7,9 @@ import {
 } from './lib';
 
 export class SavedObjectsClient {
-  constructor(kibanaIndex, callAdminCluster) {
+  constructor(kibanaIndex, mappings, callAdminCluster) {
     this._kibanaIndex = kibanaIndex;
+    this._mappings = mappings;
     this._callAdminCluster = callAdminCluster;
   }
 
@@ -109,7 +110,8 @@ export class SavedObjectsClient {
       searchFields,
       page = 1,
       perPage = 20,
-      sort,
+      sortField,
+      sortOrder,
       fields,
     } = options;
 
@@ -118,7 +120,7 @@ export class SavedObjectsClient {
       _source: fields,
       size: perPage,
       from: perPage * (page - 1),
-      body: createFindQuery({ search, searchFields, type, sort })
+      body: createFindQuery(this._mappings, { search, searchFields, type, sortField, sortOrder })
     };
 
     const response = await this._withKibanaIndex('search', esOptions);
