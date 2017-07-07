@@ -53,7 +53,6 @@ app.directive('dashboardGrid', function ($compile, Notifier) {
        * @type {function}
        */
       saveState: '=',
-      appState: '=',
       /**
        * Expand or collapse a panel, so it either takes up the whole screen or goes back to its
        * natural size.
@@ -220,7 +219,6 @@ app.directive('dashboardGrid', function ($compile, Notifier) {
                   get-vis-click-handler="getVisClickHandler"
                   get-vis-brush-handler="getVisBrushHandler"
                   save-state="saveState"
-                  app-state="appState"
                   register-panel-index-pattern="registerPanelIndexPattern"
                   toggle-expand="toggleExpand(${panel.panelIndex})"
                   create-child-ui-state="createChildUiState">

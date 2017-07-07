@@ -74,9 +74,6 @@ export default function ({ getService, getPageObjects }) {
             return PageObjects.visualize.clickGo();
           })
           .then(function () {
-            return PageObjects.header.waitUntilLoadingHasFinished();
-          })
-          .then(function () {
             //this should visualize right away, without re-requesting data
             return PageObjects.visualize.getVectorMapData();
           })

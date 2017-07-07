@@ -1,24 +1,24 @@
-import { VisFactoryProvider } from 'ui/vis/vis_factory';
-import { VisSchemasProvider } from 'ui/vis/editors/default/schemas';
-import { CATEGORY } from 'ui/vis/vis_category';
+import { VisVisTypeProvider } from 'ui/vis/vis_type';
+import { VislibVisTypeVislibVisTypeProvider } from 'ui/vislib_vis_type/vislib_vis_type';
+import { VisSchemasProvider } from 'ui/vis/schemas';
 import gaugeTemplate from 'plugins/kbn_vislib_vis_types/editors/gauge.html';
 import { vislibColorMaps } from 'ui/vislib/components/color/colormaps';
 import image from './images/icon-gauge.svg';
 
 export default function GaugeVisType(Private) {
-  const VisFactory = Private(VisFactoryProvider);
+  const VisType = Private(VisVisTypeProvider);
+  const VislibVisType = Private(VislibVisTypeVislibVisTypeProvider);
   const Schemas = Private(VisSchemasProvider);
 
-  return VisFactory.createVislibVisualization({
+  return new VislibVisType({
     name: 'gauge',
     title: 'Gauge',
     image,
     description: `Gauges indicate the status of a metric. Use it to show how a metric's value relates 
       to reference threshold values.`,
-    category: CATEGORY.DATA,
-    visConfig: {
+    category: VisType.CATEGORY.DATA,
+    params: {
       defaults: {
-        type:'gauge',
         addTooltip: true,
         addLegend: true,
 
@@ -61,37 +61,35 @@ export default function GaugeVisType(Private) {
           }
         }
       },
+      gaugeTypes: ['Arc', 'Circle', 'Metric'],
+      gaugeColorMode: ['None', 'Labels', 'Background'],
+      gaugeStyles: ['Full', 'Bars', 'Lines'],
+      scales: ['linear', 'log', 'square root'],
+      colorSchemas: Object.keys(vislibColorMaps),
+      editor: gaugeTemplate
     },
-    editorConfig: {
-      collections: {
-        gaugeTypes: ['Arc', 'Circle', 'Metric'],
-        gaugeColorMode: ['None', 'Labels', 'Background'],
-        scales: ['linear', 'log', 'square root'],
-        colorSchemas: Object.keys(vislibColorMaps),
+    implementsRenderComplete: true,
+    schemas: new Schemas([
+      {
+        group: 'metrics',
+        name: 'metric',
+        title: 'Metric',
+        min: 1,
+        aggFilter: [
+          '!std_dev', '!geo_centroid', '!percentiles', '!percentile_ranks',
+          '!derivative', '!serial_diff', '!moving_avg', '!cumulative_sum'],
+        defaults: [
+          { schema: 'metric', type: 'count' }
+        ]
       },
-      optionsTemplate: gaugeTemplate,
-      schemas: new Schemas([
-        {
-          group: 'metrics',
-          name: 'metric',
-          title: 'Metric',
-          min: 1,
-          aggFilter: [
-            '!std_dev', '!geo_centroid', '!percentiles', '!percentile_ranks',
-            '!derivative', '!serial_diff', '!moving_avg', '!cumulative_sum'],
-          defaults: [
-            { schema: 'metric', type: 'count' }
-          ]
-        },
-        {
-          group: 'buckets',
-          name: 'group',
-          title: 'Split Group',
-          min: 0,
-          max: 1,
-          aggFilter: '!geohash_grid'
-        }
-      ])
-    }
+      {
+        group: 'buckets',
+        name: 'group',
+        title: 'Split Group',
+        min: 0,
+        max: 1,
+        aggFilter: '!geohash_grid'
+      }
+    ])
   });
 }
