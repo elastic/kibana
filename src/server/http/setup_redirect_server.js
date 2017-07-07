@@ -1,9 +1,10 @@
 import { format as formatUrl } from 'url';
+import { fromNode } from 'bluebird';
 import Hapi from 'hapi';
 
 // If a redirect port is specified, we start an http server at this port and
 // redirect all requests to the ssl port.
-export default function (kbnServer, server, config) {
+export default async function (kbnServer, server, config) {
   const isSslEnabled = config.get('server.ssl.enabled');
   const portToRedirectFrom = config.get('server.ssl.redirectHttpFromPort');
 
@@ -40,9 +41,17 @@ export default function (kbnServer, server, config) {
     }));
   });
 
-  redirectServer.start((err) => {
-    if (err) {
+  try {
+    await fromNode(cb => redirectServer.start(cb));
+  } catch (err) {
+    if (err.code === 'EADDRINUSE') {
+      throw new Error(
+        'The redirect server failed to start up because port ' +
+        `${portToRedirectFrom} is already in use. Ensure the port specified ` +
+        'in `server.ssl.redirectHttpFromPort` is available.'
+      );
+    } else {
       throw err;
     }
-  });
+  }
 }
