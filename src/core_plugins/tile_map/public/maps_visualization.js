@@ -4,7 +4,8 @@ import $ from 'jquery';
 import _ from 'lodash';
 import { KibanaMap } from './kibana_map';
 import { GeohashLayer } from './geohash_layer';
-import './lib/service_settings';
+// import './lib/service_settings';
+import 'ui/vis/map/service_settings';
 import './styles/_tilemap.less';
 
 

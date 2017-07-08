@@ -6,7 +6,8 @@ import { KibanaMap } from '../../tile_map/public/kibana_map';
 import ChoroplethLayer from './choropleth_layer';
 import { truncatedColorMaps }  from 'ui/vislib/components/color/truncated_colormaps';
 import AggResponsePointSeriesTooltipFormatterProvider from './tooltip_formatter';
-import '../../tile_map/public/lib/service_settings';
+// import '../../tile_map/public/lib/service_settings';
+import 'ui/vis/map/service_settings';
 
 
 const module = uiModules.get('kibana/region_map', ['kibana']);
