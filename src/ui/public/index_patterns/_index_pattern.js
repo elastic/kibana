@@ -2,7 +2,6 @@ import _ from 'lodash';
 import { SavedObjectNotFound, DuplicateField, IndexPatternMissingIndices } from 'ui/errors';
 import angular from 'angular';
 import { RegistryFieldFormatsProvider } from 'ui/registry/field_formats';
-import { AdminDocSourceProvider } from 'ui/courier/data_source/admin_doc_source';
 import UtilsMappingSetupProvider from 'ui/utils/mapping_setup';
 import { Notifier } from 'ui/notify';
 
@@ -16,6 +15,7 @@ import { IndexPatternsCalculateIndicesProvider } from './_calculate_indices';
 import { IndexPatternsPatternCacheProvider } from './_pattern_cache';
 import { FieldsFetcherProvider } from './fields_fetcher_provider';
 import { IsUserAwareOfUnsupportedTimePatternProvider } from './unsupported_time_patterns';
+import { SavedObjectsClientProvider } from 'ui/saved_objects';
 
 export function getRoutes() {
   return {
@@ -33,18 +33,17 @@ export function IndexPatternProvider(Private, $http, config, kbnIndex, Promise, 
   const getIds = Private(IndexPatternsGetIdsProvider);
   const fieldsFetcher = Private(FieldsFetcherProvider);
   const intervals = Private(IndexPatternsIntervalsProvider);
-  const DocSource = Private(AdminDocSourceProvider);
   const mappingSetup = Private(UtilsMappingSetupProvider);
   const FieldList = Private(IndexPatternsFieldListProvider);
   const flattenHit = Private(IndexPatternsFlattenHitProvider);
   const calculateIndices = Private(IndexPatternsCalculateIndicesProvider);
   const patternCache = Private(IndexPatternsPatternCacheProvider);
   const isUserAwareOfUnsupportedTimePattern = Private(IsUserAwareOfUnsupportedTimePatternProvider);
+  const savedObjectsClient = Private(SavedObjectsClientProvider);
 
   const type = 'index-pattern';
   const notify = new Notifier();
   const configWatchers = new WeakMap();
-  const docSources = new WeakMap();
 
   const mapping = mappingSetup.expandShorthand({
     title: 'text',
@@ -78,7 +77,10 @@ export function IndexPatternProvider(Private, $http, config, kbnIndex, Promise, 
 
   function updateFromElasticSearch(indexPattern, response) {
     if (!response.found) {
-      throw new SavedObjectNotFound(type, indexPattern.id);
+      throw new SavedObjectNotFound(
+        type,
+        indexPattern.id,
+        `<a href="#/management/kibana/index?id=${indexPattern.id}&name=">click here to create it</a>`);
     }
 
     _.forOwn(mapping, (fieldMapping, name) => {
@@ -103,15 +105,7 @@ export function IndexPatternProvider(Private, $http, config, kbnIndex, Promise, 
       }
     }
 
-    const promise = indexFields(indexPattern);
-
-    // any time index pattern in ES is updated, update index pattern object
-    docSources
-    .get(indexPattern)
-    .onUpdate()
-    .then(response => updateFromElasticSearch(indexPattern, response), notify.fatal);
-
-    return promise;
+    return indexFields(indexPattern);
   }
 
   function isFieldRefreshRequired(indexPattern) {
@@ -190,8 +184,6 @@ export function IndexPatternProvider(Private, $http, config, kbnIndex, Promise, 
   class IndexPattern {
     constructor(id) {
       setId(this, id);
-      docSources.set(this, new DocSource());
-
       this.metaFields = config.get('metaFields');
       this.getComputedFields = getComputedFields.bind(this);
 
@@ -205,12 +197,6 @@ export function IndexPatternProvider(Private, $http, config, kbnIndex, Promise, 
     }
 
     init() {
-      docSources
-      .get(this)
-      .index(kbnIndex)
-      .type(type)
-      .id(this.id);
-
       watch(this);
 
       return mappingSetup
@@ -225,8 +211,20 @@ export function IndexPatternProvider(Private, $http, config, kbnIndex, Promise, 
         if (!this.id) {
           return; // no id === no elasticsearch document
         }
-        return docSources.get(this).fetch()
-        .then(response => updateFromElasticSearch(this, response));
+
+        return savedObjectsClient.get(type, this.id)
+          .then(resp => {
+            // temporary compatability for savedObjectsClient
+
+            return {
+              _id: resp.id,
+              _type: resp.type,
+              _source: _.cloneDeep(resp.attributes),
+              found: resp._version ? true : false
+            };
+          })
+          .then(response => updateFromElasticSearch(this, response))
+          .catch(response => updateFromElasticSearch(this, response));
       })
       .then(() => this);
     }
@@ -306,19 +304,19 @@ export function IndexPatternProvider(Private, $http, config, kbnIndex, Promise, 
       return Promise.resolve().then(() => {
         if (this.isTimeBasedInterval()) {
           return intervals.toIndexList(
-            this.id, this.getInterval(), start, stop, sortDirection
+            this.title, this.getInterval(), start, stop, sortDirection
           );
         }
 
         if (this.isTimeBasedWildcard() && this.isIndexExpansionEnabled()) {
           return calculateIndices(
-            this.id, this.timeFieldName, start, stop, sortDirection
+            this.title, this.timeFieldName, start, stop, sortDirection
           );
         }
 
         return [
           {
-            index: this.id,
+            index: this.title,
             min: -Infinity,
             max: Infinity
           }
@@ -352,7 +350,7 @@ export function IndexPatternProvider(Private, $http, config, kbnIndex, Promise, 
     }
 
     isWildcard() {
-      return _.includes(this.id, '*');
+      return _.includes(this.title, '*');
     }
 
     prepBody() {
@@ -367,9 +365,6 @@ export function IndexPatternProvider(Private, $http, config, kbnIndex, Promise, 
         }
       });
 
-      // ensure that the docSource has the current this.id
-      docSources.get(this).id(this.id);
-
       // clear the indexPattern list cache
       getIds.clearCache();
       return body;
@@ -377,35 +372,33 @@ export function IndexPatternProvider(Private, $http, config, kbnIndex, Promise, 
 
     create() {
       const body = this.prepBody();
-      return docSources.get(this)
-      .doCreate(body)
-      .then(id => setId(this, id))
-      .catch(err => {
-        if (_.get(err, 'origError.status') !== 409) {
-          return Promise.resolve(false);
-        }
-        const confirmMessage = 'Are you sure you want to overwrite this?';
 
-        return confirmModalPromise(confirmMessage, { confirmButtonText: 'Overwrite' })
-        .then(() => Promise
-          .try(() => {
-            const cached = patternCache.get(this.id);
-            if (cached) {
-              return cached.then(pattern => pattern.destroy());
-            }
-          })
-          .then(() => docSources.get(this).doIndex(body))
-          .then(id => setId(this, id)),
-          _.constant(false) // if the user doesn't overwrite, resolve with false
-        );
-      });
+      return savedObjectsClient.create(type, body, { id: this.id })
+        .then(({ id }) => setId(this, id))
+        .catch(err => {
+          if (_.get(err, 'origError.status') !== 409) {
+            return Promise.resolve(false);
+          }
+          const confirmMessage = 'Are you sure you want to overwrite this?';
+
+          return confirmModalPromise(confirmMessage, { confirmButtonText: 'Overwrite' })
+          .then(() => Promise
+            .try(() => {
+              const cached = patternCache.get(this.id);
+              if (cached) {
+                return cached.then(pattern => pattern.destroy());
+              }
+            })
+            .then(() => savedObjectsClient.create(type, body, { id: this.id, overwrite: true }))
+            .then(({ id }) => setId(this, id)),
+            _.constant(false) // if the user doesn't overwrite, resolve with false
+          );
+        });
     }
 
     save() {
-      const body = this.prepBody();
-      return docSources.get(this)
-      .doIndex(body)
-      .then(id => setId(this, id));
+      return savedObjectsClient.update(type, this.id, this.prepBody())
+        .then(({ id }) => setId(this, id));
     }
 
     refreshFields() {
@@ -428,7 +421,7 @@ export function IndexPatternProvider(Private, $http, config, kbnIndex, Promise, 
     }
 
     toJSON() {
-      return this.id;
+      return this.title;
     }
 
     toString() {
@@ -438,8 +431,7 @@ export function IndexPatternProvider(Private, $http, config, kbnIndex, Promise, 
     destroy() {
       unwatch(this);
       patternCache.clear(this.id);
-      docSources.get(this).destroy();
-      docSources.delete(this);
+      savedObjectsClient.delete(type, this.id);
     }
   }
 

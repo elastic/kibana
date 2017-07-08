@@ -5,9 +5,11 @@ import 'ui/directives/validate_index_name';
 // Load the kibana app dependencies.
 
 describe('Validate index name directive', function () {
+  // Fox
   let $compile;
   let $rootScope;
   const noWildcardHtml = '<input type="text" ng-model="indexName" validate-index-name />';
+  const requiredHtml = '<input type="text" ng-model="indexName" validate-index-name required />';
   const allowWildcardHtml = '<input type="text" ng-model="indexName" allow-wildcard validate-index-name />';
 
   beforeEach(ngMock.module('kibana'));
@@ -24,10 +26,13 @@ describe('Validate index name directive', function () {
     return element;
   }
 
-  const badPatterns = [
-    null,
+  const emptyPatterns = [
     undefined,
-    '',
+    null,
+    ''
+  ];
+
+  const badPatterns = [
     '.',
     '..',
     'foo\\bar',
@@ -68,6 +73,14 @@ describe('Validate index name directive', function () {
       const element = checkPattern(pattern, noWildcardHtml);
       expect(element.hasClass('ng-invalid')).to.not.be(true);
       expect(element.hasClass('ng-valid')).to.be(true);
+    });
+  });
+
+  emptyPatterns.forEach(function (pattern) {
+    it('should not accept index pattern: ' + pattern, function () {
+      const element = checkPattern(pattern, requiredHtml);
+      expect(element.hasClass('ng-invalid')).to.be(true);
+      expect(element.hasClass('ng-valid')).to.not.be(true);
     });
   });
 
