@@ -1,7 +1,7 @@
 import metricAggTemplate from 'ui/agg_types/controls/sub_agg.html';
 import _ from 'lodash';
 import { VisAggConfigProvider } from 'ui/vis/agg_config';
-import { VisSchemasProvider } from 'ui/vis/schemas';
+import { VisSchemasProvider } from 'ui/vis/editors/default/schemas';
 import { parentPipelineAggController } from './parent_pipeline_agg_controller';
 import { parentPipelineAggWritter } from './parent_pipeline_agg_writter';
 
