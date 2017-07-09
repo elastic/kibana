@@ -145,7 +145,7 @@ export default class BaseOptimizer {
       },
 
       resolve: {
-        extensions: ['.js', '.json', '.less', ''],
+        extensions: ['.js', '.json', ''],
         postfixes: [''],
         modulesDirectories: ['webpackShims', 'node_modules'],
         fallback: [fromRoot('webpackShims'), fromRoot('node_modules')],
