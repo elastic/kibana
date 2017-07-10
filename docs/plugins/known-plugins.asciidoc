@@ -41,6 +41,7 @@ This list of plugins is not guaranteed to work on your version of Kibana. Instea
 * https://github.com/amannocci/kibana-plugin-metric-percent[Percent] (amannocci)
 * https://github.com/outbrain/ob-kb-funnel[Funnel Visualization] (roybass)
 * https://github.com/PhaedrusTheGreek/transform_vis[Transform Visualization] (PhaedrusTheGreek)
+* https://github.com/dlumbrer/kbn_searchtables[Search-Tables] (dlumbrer)
 
 [float]
 === Other
