@@ -40,6 +40,7 @@ class CalculationAgg extends Component {
           <div>
             <div className="vis_editor__label">Aggregation</div>
             <AggSelect
+              panelType={this.props.panel.type}
               siblings={this.props.siblings}
               value={model.type}
               onChange={handleSelectChange('type')}/>

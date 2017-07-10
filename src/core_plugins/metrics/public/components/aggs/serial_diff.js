@@ -27,6 +27,7 @@ class SerialDiffAgg extends Component {
         <div className="vis_editor__row_item">
           <div className="vis_editor__label">Aggregation</div>
           <AggSelect
+            panelType={this.props.panel.type}
             siblings={this.props.siblings}
             value={model.type}
             onChange={handleSelectChange('type')}/>

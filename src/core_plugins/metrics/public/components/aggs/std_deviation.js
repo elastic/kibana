@@ -17,9 +17,12 @@ class StandardDeviationAgg extends Component {
     const modeOptions = [
       { label: 'Raw', value: 'raw' },
       { label: 'Upper Bound', value: 'upper' },
-      { label: 'Lower Bound', value: 'lower' },
-      { label: 'Bounds Band', value: 'band' }
+      { label: 'Lower Bound', value: 'lower' }
     ];
+
+    if (panel.type !== 'table') {
+      modeOptions.push({ label: 'Bounds Band', value: 'band' });
+    }
 
     const handleChange = createChangeHandler(this.props.onChange, model);
     const handleSelectChange = createSelectHandler(handleChange);
@@ -37,6 +40,7 @@ class StandardDeviationAgg extends Component {
         <div className="vis_editor__row_item">
           <div className="vis_editor__label">Aggregation</div>
           <AggSelect
+            panelType={this.props.panel.type}
             siblings={this.props.siblings}
             value={model.type}
             onChange={handleSelectChange('type')}/>

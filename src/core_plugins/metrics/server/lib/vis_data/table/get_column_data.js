@@ -1,7 +1,7 @@
 import getRequestParams from './get_request_params';
 import handleResponseBody from './handle_response_body';
 import handleErrorResponse from './handle_error_response';
-import getLastValue from '../../../common/get_last_value';
+import getLastValue from '../../../../common/get_last_value';
 import _ from 'lodash';
 import regression from 'regression';
 export function getColumnData(req, panel, entities, client) {
