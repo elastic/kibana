@@ -87,7 +87,7 @@ class MovingAverageAgg extends Component {
           </div>
           <div className="vis_editor__agg_row-item">
             <div className="vis_editor__row_item">
-              <div className="vis_editor__label">Settings (<code>Key=Value</code> space seperated)</div>
+              <div className="vis_editor__label">Settings (<code>Key=Value</code> space-delimited)</div>
               <input
                 className="vis_editor__input-grows-100"
                 type="text"
