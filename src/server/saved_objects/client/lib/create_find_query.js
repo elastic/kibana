@@ -54,9 +54,13 @@ export function createFindQuery(mappings, options = {}) {
   const query = { version: true, query: { bool } };
 
   if (sortField) {
+    const v5MappingType = get(mappings, `${type}.properties.${sortField}.type`);
+    const v6MappingType = get(mappings, `doc.properties.${type}.properties.${sortField}.type`);
+    const mappingType = v5MappingType || v6MappingType;
+
     const value = {
       order: sortOrder,
-      unmapped_type: get(mappings, `${type}.properties.${sortField}.type`)
+      unmapped_type: mappingType
     };
 
     query.sort = [{

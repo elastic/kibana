@@ -8,7 +8,8 @@ import {
   isSingleTypeError,
   v5BulkCreate,
   v6BulkCreate,
-  parseEsDoc
+  parseEsDoc,
+  includedFields,
 } from './lib';
 
 export const V6_TYPE = 'doc';
@@ -32,18 +33,14 @@ export class SavedObjectsClient {
   */
   async create(type, attributes = {}, options = {}) {
     const method = options.id && !options.overwrite ? 'create' : 'index';
-    const response = await this._withKibanaIndexAndMappingFallback(method, {
-      type,
-      id: options.id,
-      body: attributes,
-      refresh: 'wait_for'
-    }, {
+    const response = await this._withKibanaIndex(method, {
       type: V6_TYPE,
       id: options.id ? `${type}:${options.id}` : undefined,
       body: {
         type,
         [type]: attributes
-      }
+      },
+      refresh: 'wait_for'
     });
 
     return parseEsDoc(response, { type, attributes });
@@ -119,7 +116,7 @@ export class SavedObjectsClient {
    * @property {integer} [options.page=1]
    * @property {integer} [options.perPage=20]
    * @property {array} options.sort
-   * @property {array} options.fields
+   * @property {array|string} options.fields
    * @returns {promise} - { saved_objects: [{ id, type, version, attributes }], total, per_page, page }
    */
   async find(options = {}) {
@@ -135,7 +132,7 @@ export class SavedObjectsClient {
     } = options;
 
     const esOptions = {
-      _source: fields,
+      _source: includedFields(fields),
       size: perPage,
       from: perPage * (page - 1),
       body: createFindQuery(this._mappings, { search, searchFields, type, sortField, sortOrder })
@@ -221,16 +218,11 @@ export class SavedObjectsClient {
    * @returns {promise}
    */
   async update(type, id, attributes, options = {}) {
-    const response = await this._withKibanaIndexAndMappingFallback('update', {
+    const response = await this._withKibanaIndex('update', {
       id,
-      type,
+      type: V6_TYPE,
       version: options.version,
       refresh: 'wait_for',
-      body: {
-        doc: attributes
-      }
-    }, {
-      type: V6_TYPE,
       body: {
         doc: {
           [type]: attributes
@@ -239,22 +231,6 @@ export class SavedObjectsClient {
     });
 
     return parseEsDoc(response, { id, type, attributes });
-  }
-
-  _withKibanaIndexAndMappingFallback(method, params, fallbackParams) {
-    const fallbacks = {
-      'create': ['is_single_type'],
-      'index': ['is_single_type'],
-      'update': ['document_missing_exception']
-    };
-
-    return this._withKibanaIndex(method, params).catch(err => {
-      if (get(fallbacks, method, []).includes(get(err, 'data.type'))) {
-        return this._withKibanaIndex(method, Object.assign({}, params, fallbackParams));
-      }
-
-      throw err;
-    });
   }
 
   async _withKibanaIndex(method, params) {

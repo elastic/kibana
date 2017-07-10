@@ -26,7 +26,8 @@ export function handleEsError(error) {
   }
 
   const { reason, type } = get(error, 'body.error', {});
-  const details = { type };
+  const message = error.message || reason;
+  const details = { type, reason };
 
   if (
     error instanceof ConnectionFault ||
@@ -38,15 +39,15 @@ export function handleEsError(error) {
   }
 
   if (error instanceof Conflict) {
-    throw Boom.conflict(reason, details);
+    throw Boom.conflict(message, details);
   }
 
   if (error instanceof Forbidden) {
-    throw Boom.forbidden(reason, details);
+    throw Boom.forbidden(message, details);
   }
 
   if (error instanceof NotFound) {
-    throw Boom.notFound(reason, details);
+    throw Boom.notFound(message, details);
   }
 
   if (error instanceof BadRequest) {
@@ -54,7 +55,7 @@ export function handleEsError(error) {
       details.type = 'is_single_type';
     }
 
-    throw Boom.badRequest(reason, details);
+    throw Boom.badRequest(message, details);
   }
 
   throw error;
