@@ -125,6 +125,7 @@ function TimeseriesVisualization(props) {
     annotations,
     yaxes,
     reversed: props.reversed,
+    showGrid: Boolean(model.show_grid),
     legend: Boolean(model.show_legend),
     onBrush: (ranges) => {
       if (props.onBrush) props.onBrush(ranges);
