@@ -488,9 +488,13 @@ function discoverController($scope, config, courier, $route, $window, Notifier,
 
     segmented.on('mergedSegment', function (merged) {
       $scope.mergedEsResp = merged;
-      responseHandler($scope.vis, merged).then(resp => {
-        $scope.visData = resp;
-      });
+
+      if ($scope.opts.timefield) {
+        responseHandler($scope.vis, merged).then(resp => {
+          $scope.visData = resp;
+        });
+      }
+
       $scope.hits = merged.hits.total;
 
       const indexPattern = $scope.searchSource.get('index');
