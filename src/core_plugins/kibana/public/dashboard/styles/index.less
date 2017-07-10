@@ -12,10 +12,13 @@
 
 .exitFullScreenMode {
   height: 40px;
-  left: 20px;
+  left: 0px;
   bottom: 0px;
   position: fixed;
   display: block;
+  padding: 0;
+  border: none;
+  background: none;
 }
 
 
@@ -27,7 +30,7 @@
     visibility: visible;
     opacity: 1;
     transition: all .2s ease;
-    left: 100%;
+    transform: translateX(-14px);
   }
 }
 
@@ -49,14 +52,15 @@
   display: inline-block;
   height: 40px;
   position: absolute;
-  left: 0;
+  left: calc(100% + 14px);
   top: 0px;
   bottom: 0px;
   white-space: nowrap;
-  padding: 0px 10px;
-  visibility: hidden;
-  opacity: 0;
+  padding: 0px 4px 0px 10px;
+  // visibility: hidden;
+  // opacity: 0;
   transition: all .2s ease;
+  transform: translateX(-100%);
   z-index: -1;
 }
 
