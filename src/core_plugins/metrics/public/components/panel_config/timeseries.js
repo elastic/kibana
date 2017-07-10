@@ -24,7 +24,8 @@ class TimeseriesPanelConfig extends Component {
       filter: '',
       axis_max: '',
       axis_min: '',
-      legend_position: 'right'
+      legend_position: 'right',
+      show_grid: 1
     };
     const model = { ...defaults, ...this.props.model };
     const { selectedTab } = this.state;
@@ -105,6 +106,11 @@ class TimeseriesPanelConfig extends Component {
                 value={model.legend_position}
                 onChange={handleSelectChange('legend_position')}/>
             </div>
+            <div className="vis_editor__label">Display Grid</div>
+            <YesNo
+              value={model.show_grid}
+              name="show_grid"
+              onChange={this.props.onChange}/>
           </div>
           <div className="vis_editor__vis_config-row">
             <div className="vis_editor__label">Panel Filter</div>

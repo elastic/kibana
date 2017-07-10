@@ -15,16 +15,16 @@ function VisSpyTableProvider(Notifier, $filter, $rootScope, config, Private) {
     link: function tableLinkFn($scope) {
       $rootScope.$watchMulti.call($scope, [
         'vis',
-        'esResp'
+        'visData'
       ], function () {
-        if (!$scope.vis || !$scope.esResp) {
+        if (!$scope.vis || !$scope.visData) {
           $scope.table = null;
         } else {
           if (!$scope.spy.params.spyPerPage) {
             $scope.spy.params.spyPerPage = PER_PAGE_DEFAULT;
           }
 
-          $scope.table = tabifyAggResponse($scope.vis, $scope.esResp, {
+          $scope.table = tabifyAggResponse($scope.vis, $scope.searchSource.rawResponse, {
             canSplit: false,
             asAggConfigResults: true,
             partialRows: true
