@@ -1,18 +1,9 @@
-/*
-  This feels like a crummy hack but I need a way to make sure that Positionable is able to pass the
-  size property all the way down to RenderElement.
-
-  Positionable keeps size as local state because constantly pushing it through redux is too expensive,
-  thus size is coming in via a child clone in Positionable. Gross right?
-*/
-
 import React from 'react';
-import { pure } from 'recompose';
 import PropTypes from 'prop-types';
-import { RenderElement } from '../render_element';
+import { ElementContent } from './element_content';
+import { pure } from 'recompose';
 
-
-export const PositionableChild = pure((props) => {
+export const ElementControls = pure((props) => {
   const {
     select,
     remove,
@@ -23,6 +14,7 @@ export const PositionableChild = pure((props) => {
     // annoying to test and read
     elementTypeDefintion,
     renderable,
+    state,
     size,
   } = props;
 
@@ -33,14 +25,12 @@ export const PositionableChild = pure((props) => {
     <div
       className={`canvas__workpad--element ${selectedClassName}`}
       onClick={select}>
-      <div>
-        <RenderElement
-          renderFn={elementTypeDefintion.render}
-          config={renderable.value}
-          done={() => {}}
-          size={size}
-        />
-      </div>
+      <ElementContent
+         state={state}
+         renderable={renderable}
+         elementTypeDefintion={elementTypeDefintion}
+         size={size}/>
+
       {!isSelected ? null :
         (<i
           className="fa fa-times-circle canvas__workpad--element-remove"
@@ -51,11 +41,12 @@ export const PositionableChild = pure((props) => {
   );
 });
 
-PositionableChild.propTypes = {
+ElementControls.propTypes = {
   select: PropTypes.func,
   remove: PropTypes.func,
   isSelected: PropTypes.bool,
   elementTypeDefintion: PropTypes.object,
   renderable: PropTypes.object,
   size: PropTypes.object,
+  state: PropTypes.string,
 };
