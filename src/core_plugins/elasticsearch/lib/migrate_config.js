@@ -14,5 +14,5 @@ export default async function (server, { mappings }) {
     sortOrder: 'desc'
   });
 
-  return await upgrade(server, mappings)(configSavedObjects);
+  return await upgrade(server, savedObjectsClient)(configSavedObjects);
 }

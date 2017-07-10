@@ -1,12 +1,9 @@
 import Promise from 'bluebird';
 import isUpgradeable from './is_upgradeable';
 import _ from 'lodash';
-import { SavedObjectsClient } from '../../../server/saved_objects';
 
-export default function (server, mappings) {
-  const { callWithInternalUser } = server.plugins.elasticsearch.getCluster('admin');
+export default function (server, savedObjectsClient) {
   const config = server.config();
-  const savedObjectsClient = new SavedObjectsClient(config.get('kibana.index'), mappings, callWithInternalUser);
 
   function createNewConfig() {
     return savedObjectsClient.create('config', {
