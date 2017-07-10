@@ -1,7 +1,7 @@
 import expect from 'expect.js';
-import { parseEsDoc } from '../parse_es_doc';
+import { normalizeEsDoc } from '../normalize_es_doc';
 
-describe('parseEsDoc', () => {
+describe('normalizeEsDoc', () => {
   it('handle legacy doc types', () => {
     const doc = {
       _id: 'foo',
@@ -10,7 +10,7 @@ describe('parseEsDoc', () => {
       _source: { title: 'test' }
     };
 
-    expect(parseEsDoc(doc)).to.eql({
+    expect(normalizeEsDoc(doc)).to.eql({
       id: 'foo',
       type: 'test',
       version: 2,
@@ -26,7 +26,7 @@ describe('parseEsDoc', () => {
       _source: { type: 'test', test: { title: 'test' } }
     };
 
-    expect(parseEsDoc(doc)).to.eql({
+    expect(normalizeEsDoc(doc)).to.eql({
       id: 'foo',
       type: 'test',
       version: 2,
@@ -43,7 +43,7 @@ describe('parseEsDoc', () => {
     };
     const overrides = { type: 'test' };
 
-    expect(parseEsDoc(doc, overrides)).to.eql({
+    expect(normalizeEsDoc(doc, overrides)).to.eql({
       id: 'foo',
       type: 'test',
       version: 2,
@@ -60,7 +60,7 @@ describe('parseEsDoc', () => {
     };
     const overrides = { error: 'An error!' };
 
-    expect(parseEsDoc(doc, overrides)).to.eql({
+    expect(normalizeEsDoc(doc, overrides)).to.eql({
       id: 'foo',
       type: 'test',
       version: 2,
@@ -78,7 +78,7 @@ describe('parseEsDoc', () => {
     };
     const overrides = { error: 'An error!' };
 
-    expect(parseEsDoc(doc, overrides)).to.eql({
+    expect(normalizeEsDoc(doc, overrides)).to.eql({
       id: 'test:foo',
       type: 'test',
       version: 2,

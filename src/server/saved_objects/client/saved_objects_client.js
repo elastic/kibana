@@ -8,7 +8,7 @@ import {
   isSingleTypeError,
   v5BulkCreate,
   v6BulkCreate,
-  parseEsDoc
+  normalizeEsDoc
 } from './lib';
 
 export const V6_TYPE = 'doc';
@@ -45,7 +45,7 @@ export class SavedObjectsClient {
       }
     });
 
-    return parseEsDoc(response, { type, attributes });
+    return normalizeEsDoc(response, { type, attributes });
   }
 
   /**
@@ -82,7 +82,7 @@ export class SavedObjectsClient {
       const method = Object.keys(resp)[0];
       const { id, type, attributes } = objects[i];
 
-      return parseEsDoc(resp[method], {
+      return normalizeEsDoc(resp[method], {
         id,
         type,
         attributes,
@@ -141,7 +141,7 @@ export class SavedObjectsClient {
 
     return {
       saved_objects: get(response, 'hits.hits', []).map(hit => {
-        return parseEsDoc(hit);
+        return normalizeEsDoc(hit);
       }),
       total: get(response, 'hits.total', 0),
       per_page: perPage,
@@ -184,7 +184,7 @@ export class SavedObjectsClient {
           });
         }
 
-        return parseEsDoc(hit, objects[i]);
+        return normalizeEsDoc(hit, objects[i]);
       })
     };
   }
@@ -204,7 +204,7 @@ export class SavedObjectsClient {
       throw Boom.notFound();
     }
 
-    return parseEsDoc(hit);
+    return normalizeEsDoc(hit);
   }
 
   /**
@@ -234,7 +234,7 @@ export class SavedObjectsClient {
       }
     });
 
-    return parseEsDoc(response, { id, type, attributes });
+    return normalizeEsDoc(response, { id, type, attributes });
   }
 
   _withKibanaIndexAndMappingFallback(method, params, fallbackParams) {

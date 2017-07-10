@@ -1,6 +1,6 @@
 import { get } from 'lodash';
 
-export function parseEsDoc(doc, overrides = {}) {
+export function normalizeEsDoc(doc, overrides = {}) {
   if (!doc) return {};
 
   const type = overrides.type || get(doc, '_source.type', doc._type);
