@@ -36,7 +36,6 @@ export const PositionableChild = pure((props) => {
       <div>
         <RenderElement
           renderFn={elementTypeDefintion.render}
-          destroyFn={elementTypeDefintion.destroy}
           config={renderable.value}
           done={() => {}}
           size={size}

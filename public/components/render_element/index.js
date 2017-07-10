@@ -1,19 +1,22 @@
-import { pure, compose, withProps } from 'recompose';
+import { pure, compose, withProps, withState } from 'recompose';
 import { RenderElement as Component } from './render_element';
 import PropTypes from 'prop-types';
+import { Events } from '../../lib/events';
 
-let cleanupContext;
+const events = new Events();
 export const RenderElement = compose(
   pure,
-  withProps(({ renderFn, destroyFn, done, config, size }) => ({
+  withProps(({ renderFn, done, config, size }) => ({
     renderFn: (domNode) => {
-      cleanupContext = renderFn(domNode, config, done || (() => {}));
+      renderFn(domNode, config, done || (() => {}), events);
     },
     destroyFn: () => {
-      if (destroyFn) destroyFn(cleanupContext);
+      events.emit('destroy');
     },
+    events: events,
     size,
-  }))
+  })),
+  withState('domNode', 'setDomNode'),
 )(Component);
 
 RenderElement.propTypes = {
