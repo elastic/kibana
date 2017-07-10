@@ -3,25 +3,37 @@ import './flot';
 import './plot.less';
 import { size } from './plugins/size';
 import header from './header.png';
+import { debounce } from 'lodash';
 
 
 const $ = window.$;
 $.plot.plugins.push(size);
 
-let plot;
 module.exports = new Element({
   name: 'plot',
   displayName: 'Coordinate plot',
   description: 'An customizable XY plot for making line, bar or dot charts from your data',
   image: header,
   expression: 'demodata().pointseries(x="time", y="sum(price)", color="state").plot(defaultStyle=seriesStyle(lines="2"))',
-  destroy(/*args*/) {
-    //plot.destroy();
-    //console.log('destroy plot', args);
-  },
-  render(domNode, config, done) {
+  render(domNode, config, done, events) {
+
     config.options.legend.labelBoxBorderColor = 'transparent';
-    plot = $.plot($(domNode), config.data, config.options);
+    const plot = $.plot($(domNode), config.data, config.options);
+
+    function resize() {
+      plot.resize();
+      plot.setupGrid();
+      plot.draw();
+    }
+
+    function destroy() {
+      console.log('destroying');
+      plot.destroy();
+    }
+
+    events.on('destroy', destroy);
+    events.on('resize', debounce(resize, 100, { maxWait: 100 }));
+
     return done(plot);
   },
 });
