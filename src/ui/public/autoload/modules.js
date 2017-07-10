@@ -24,7 +24,6 @@ import 'ui/modals';
 import 'ui/state_management/app_state';
 import 'ui/state_management/global_state';
 import 'ui/storage';
-import 'ui/stringify/register';
 import 'ui/style_compile';
 import 'ui/timefilter';
 import 'ui/timepicker';

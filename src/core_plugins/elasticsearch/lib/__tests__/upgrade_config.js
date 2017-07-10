@@ -8,7 +8,7 @@ describe('plugins/elasticsearch', function () {
   describe('lib/upgrade_config', function () {
     let get;
     let server;
-    let callWithInternalUser;
+    let savedObjectsClient;
     let upgrade;
 
     beforeEach(function () {
@@ -17,7 +17,9 @@ describe('plugins/elasticsearch', function () {
       get.withArgs('pkg.version').returns('4.0.1');
       get.withArgs('pkg.buildNum').returns(Math.random());
 
-      callWithInternalUser = sinon.stub();
+      savedObjectsClient = {
+        create: sinon.stub()
+      };
 
       server = {
         log: sinon.stub(),
@@ -26,22 +28,15 @@ describe('plugins/elasticsearch', function () {
             get: get
           };
         },
-        plugins: {
-          elasticsearch: {
-            getCluster: sinon.stub().withArgs('admin').returns({
-              callWithInternalUser: callWithInternalUser
-            })
-          }
-        }
       };
-      upgrade = upgradeConfig(server);
+      upgrade = upgradeConfig(server, savedObjectsClient);
     });
 
     describe('nothing is found', function () {
-      const response = { hits: { hits:[] } };
+      const configSavedObjects = { hits: { hits:[] } };
 
       beforeEach(function () {
-        callWithInternalUser.withArgs('create', sinon.match.any).returns(Promise.resolve());
+        savedObjectsClient.create.returns(Promise.resolve({ id: 1, version: 1 }));
       });
 
       describe('production', function () {
@@ -52,17 +47,17 @@ describe('plugins/elasticsearch', function () {
         });
 
         it('should resolve buildNum to pkg.buildNum config', function () {
-          return upgrade(response).then(function () {
-            sinon.assert.calledOnce(callWithInternalUser);
-            const params = callWithInternalUser.args[0][1];
-            expect(params.body).to.have.property('buildNum', get('pkg.buildNum'));
+          return upgrade(configSavedObjects).then(function () {
+            sinon.assert.calledOnce(savedObjectsClient.create);
+            const attributes = savedObjectsClient.create.args[0][1];
+            expect(attributes).to.have.property('buildNum', get('pkg.buildNum'));
           });
         });
 
         it('should resolve version to pkg.version config', function () {
-          return upgrade(response).then(function () {
-            const params = callWithInternalUser.args[0][1];
-            expect(params).to.have.property('id', get('pkg.version'));
+          return upgrade(configSavedObjects).then(function () {
+            const options = savedObjectsClient.create.args[0][2];
+            expect(options).to.have.property('id', get('pkg.version'));
           });
         });
       });
@@ -75,68 +70,68 @@ describe('plugins/elasticsearch', function () {
         });
 
         it('should resolve buildNum to pkg.buildNum config', function () {
-          return upgrade(response).then(function () {
-            const params = callWithInternalUser.args[0][1];
-            expect(params.body).to.have.property('buildNum', get('pkg.buildNum'));
+          return upgrade(configSavedObjects).then(function () {
+            const attributes = savedObjectsClient.create.args[0][1];
+            expect(attributes).to.have.property('buildNum', get('pkg.buildNum'));
           });
         });
 
         it('should resolve version to pkg.version config', function () {
-          return upgrade(response).then(function () {
-            const params = callWithInternalUser.args[0][1];
-            expect(params).to.have.property('id', get('pkg.version'));
+          return upgrade(configSavedObjects).then(function () {
+            const options = savedObjectsClient.create.args[0][2];
+            expect(options).to.have.property('id', get('pkg.version'));
           });
         });
       });
     });
 
     it('should resolve with undefined if the current version is found', function () {
-      const response = { hits: { hits: [ { _id: '4.0.1' } ] } };
-      return upgrade(response).then(function (resp) {
+      const configSavedObjects = [ { id: '4.0.1' } ];
+      return upgrade(configSavedObjects).then(function (resp) {
         expect(resp).to.be(undefined);
       });
     });
 
     it('should create new config if the nothing is upgradeable', function () {
       get.withArgs('pkg.buildNum').returns(9833);
-      callWithInternalUser.withArgs('create', sinon.match.any).returns(Promise.resolve());
+      savedObjectsClient.create.returns(Promise.resolve({ id: 1, version: 1 }));
 
-      const response = { hits: { hits: [ { _id: '4.0.1-alpha3' }, { _id: '4.0.1-beta1' }, { _id: '4.0.0-SNAPSHOT1' } ] } };
-      return upgrade(response).then(function () {
-        sinon.assert.calledOnce(callWithInternalUser);
-        const params = callWithInternalUser.args[0][1];
-        expect(params).to.have.property('body');
-        expect(params.body).to.have.property('buildNum', 9833);
-        expect(params).to.have.property('index', '.my-kibana');
-        expect(params).to.have.property('type', 'config');
-        expect(params).to.have.property('id', '4.0.1');
+      const configSavedObjects = [ { id: '4.0.1-alpha3' }, { id: '4.0.1-beta1' }, { id: '4.0.0-SNAPSHOT1' } ];
+      return upgrade(configSavedObjects).then(function () {
+        sinon.assert.calledOnce(savedObjectsClient.create);
+        const savedObjectType = savedObjectsClient.create.args[0][0];
+        expect(savedObjectType).to.eql('config');
+        const attributes = savedObjectsClient.create.args[0][1];
+        expect(attributes).to.have.property('buildNum', 9833);
+        const options = savedObjectsClient.create.args[0][2];
+        expect(options).to.have.property('id', '4.0.1');
       });
     });
 
     it('should update the build number on the new config', function () {
       get.withArgs('pkg.buildNum').returns(5801);
-      callWithInternalUser.withArgs('create', sinon.match.any).returns(Promise.resolve());
+      savedObjectsClient.create.returns(Promise.resolve({ id: 1, version: 1 }));
 
-      const response = { hits: { hits: [ { _id: '4.0.0', _source: { buildNum: 1 } } ] } };
+      const configSavedObjects = [ { id: '4.0.0', attributes: { buildNum: 1 } } ];
 
-      return upgrade(response).then(function () {
-        sinon.assert.calledOnce(callWithInternalUser);
-        const params = callWithInternalUser.args[0][1];
-        expect(params).to.have.property('body');
-        expect(params.body).to.have.property('buildNum', 5801);
-        expect(params).to.have.property('index', '.my-kibana');
-        expect(params).to.have.property('type', 'config');
-        expect(params).to.have.property('id', '4.0.1');
+      return upgrade(configSavedObjects).then(function () {
+        sinon.assert.calledOnce(savedObjectsClient.create);
+        const attributes = savedObjectsClient.create.args[0][1];
+        expect(attributes).to.have.property('buildNum', 5801);
+        const savedObjectType = savedObjectsClient.create.args[0][0];
+        expect(savedObjectType).to.eql('config');
+        const options = savedObjectsClient.create.args[0][2];
+        expect(options).to.have.property('id', '4.0.1');
       });
     });
 
     it('should log a message for upgrades', function () {
       get.withArgs('pkg.buildNum').returns(5801);
-      callWithInternalUser.withArgs('create', sinon.match.any).returns(Promise.resolve());
+      savedObjectsClient.create.returns(Promise.resolve({ id: 1, version: 1 }));
 
-      const response = { hits: { hits: [ { _id: '4.0.0', _source: { buildNum: 1 } } ] } };
+      const configSavedObjects = [ { id: '4.0.0', attributes: { buildNum: 1 } } ];
 
-      return upgrade(response).then(function () {
+      return upgrade(configSavedObjects).then(function () {
         sinon.assert.calledOnce(server.log);
         expect(server.log.args[0][0]).to.eql(['plugin', 'elasticsearch']);
         const msg = server.log.args[0][1];
@@ -148,15 +143,14 @@ describe('plugins/elasticsearch', function () {
 
     it('should copy attributes from old config', function () {
       get.withArgs('pkg.buildNum').returns(5801);
-      callWithInternalUser.withArgs('create', sinon.match.any).returns(Promise.resolve());
+      savedObjectsClient.create.returns(Promise.resolve({ id: 1, version: 1 }));
 
-      const response = { hits: { hits: [ { _id: '4.0.0', _source: { buildNum: 1, defaultIndex: 'logstash-*' } } ] } };
+      const configSavedObjects = [ { id: '4.0.0', attributes: { buildNum: 1, defaultIndex: 'logstash-*' } } ];
 
-      return upgrade(response).then(function () {
-        sinon.assert.calledOnce(callWithInternalUser);
-        const params = callWithInternalUser.args[0][1];
-        expect(params).to.have.property('body');
-        expect(params.body).to.have.property('defaultIndex', 'logstash-*');
+      return upgrade(configSavedObjects).then(function () {
+        sinon.assert.calledOnce(savedObjectsClient.create);
+        const attributes = savedObjectsClient.create.args[0][1];
+        expect(attributes).to.have.property('defaultIndex', 'logstash-*');
       });
     });
   });

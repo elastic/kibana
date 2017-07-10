@@ -1,5 +1,10 @@
-export function createFindQuery(options = {}) {
-  const { type, search, searchFields } = options;
+import { get } from 'lodash';
+export function createFindQuery(mappings, options = {}) {
+  const { type, search, searchFields, sortField, sortOrder } = options;
+
+  if (!type && sortField) {
+    throw new Error('Cannot sort without knowing the type');
+  }
 
   if (!type && !search) {
     return { version: true, query: { match_all: {} } };
@@ -35,5 +40,20 @@ export function createFindQuery(options = {}) {
     });
   }
 
-  return { version: true, query: { bool } };
+  const query = { version: true, query: { bool } };
+
+  if (sortField) {
+    const value = {
+      order: sortOrder,
+      unmapped_type: get(mappings, [type, 'properties', sortField, 'type'])
+    };
+
+    query.sort = [{
+      [sortField]: value
+    }, {
+      [`${type}.${sortField}`]: value
+    }];
+  }
+
+  return query;
 }

@@ -9,6 +9,7 @@ import { handleShortUrlError } from './short_url_error';
 import { shortUrlAssertValid } from './short_url_assert_valid';
 import shortUrlLookupProvider from './short_url_lookup';
 import setupConnectionMixin from './setup_connection';
+import setupRedirectMixin from './setup_redirect_server';
 import registerHapiPluginsMixin from './register_hapi_plugins';
 import xsrfMixin from './xsrf';
 
@@ -17,6 +18,7 @@ export default async function (kbnServer, server, config) {
 
   const shortUrlLookup = shortUrlLookupProvider(server);
   await kbnServer.mixin(setupConnectionMixin);
+  await kbnServer.mixin(setupRedirectMixin);
   await kbnServer.mixin(registerHapiPluginsMixin);
 
   // provide a simple way to expose static directories
