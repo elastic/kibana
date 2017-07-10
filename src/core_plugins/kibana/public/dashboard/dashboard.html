@@ -2,11 +2,13 @@
   <div class="fullScreenModePlaceholder">
     <div
       ng-if="fullScreenMode"
-      class="kuiButton exitFullScreenMode"
+      class="exitFullScreenMode"
       ng-click="exitFullScreenMode()"
+      tabindex="0"
+      aria-label="Exit fullscreen"
     >
-      <div class="kuiIcon fa fa-angle-double-up"></div>
-      Exit Full Screen Mode
+      <div class="exitFullScreenModeLogo"></div>
+      <div class="exitFullScreenModeText">Exit fullscreen</div>
     </div>
   </div>
   <!-- Local nav. -->

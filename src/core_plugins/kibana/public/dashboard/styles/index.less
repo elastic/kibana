@@ -5,46 +5,59 @@
 .fullScreenModePlaceholder {
   text-align: center;
   width: 100%;
-  z-index: 50;
   height: 0;
   bottom: 0;
   position: absolute;
 }
 
 .exitFullScreenMode {
-  background-color: @globalColorLightestGray;
-  border-top-left-radius: 4px;
-  border-top-right-radius: 4px;
-  border-bottom-left-radius: 0;
-  border-bottom-right-radius: 0;
-  width: 200px;
   height: 40px;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  margin-left: auto;
-  margin-right: auto;
-  padding-bottom: 0;
+  left: 20px;
+  bottom: 0px;
   position: fixed;
-  transform: translateY(22px);
-  z-index: 50;
   display: block;
-  transition: transform .2s ease-in-out;
-  border: solid 1px @globalColorLightGray;
-  border-bottom: 0;
+}
 
-  .kuiIcon {
-    display: block;
-  }
 
-  &:hover {
-    transform: translateY(0px);
+.exitFullScreenMode:hover,
+.exitFullScreenMode:focus {
+  transition: all .5s ease;
+
+  .exitFullScreenModeText {
+    visibility: visible;
+    opacity: 1;
+    transition: all .2s ease;
+    left: 100%;
   }
 }
 
-.exitFullScreenMode:hover {
+.exitFullScreenModeLogo {
+  background-color: #005571;
+  width: 92px;
+  height: 40px;
+  background-image: url("~ui/images/kibana.svg");
+  background-position: 8px 5px;
+  background-size: 72px 30px;
+  background-repeat: no-repeat;
+  z-index: 50;
+}
+
+.exitFullScreenModeText {
+  background: @globalColorBlue;
+  color: tint(@globalColorBlue, 70%);
+  line-height: 40px;
+  display: inline-block;
+  height: 40px;
+  position: absolute;
+  left: 0;
+  top: 0px;
   bottom: 0px;
-  transition: all .5s ease;
+  white-space: nowrap;
+  padding: 0px 10px;
+  visibility: hidden;
+  opacity: 0;
+  transition: all .2s ease;
+  z-index: -1;
 }
 
 .tab-dashboard {
