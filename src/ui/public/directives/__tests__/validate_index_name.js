@@ -5,7 +5,6 @@ import 'ui/directives/validate_index_name';
 // Load the kibana app dependencies.
 
 describe('Validate index name directive', function () {
-  // Fox
   let $compile;
   let $rootScope;
   const noWildcardHtml = '<input type="text" ng-model="indexName" validate-index-name />';

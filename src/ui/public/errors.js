@@ -162,6 +162,18 @@ export class DuplicateField extends KbnError {
 }
 
 /**
+ * when a mapping already exists for a field the user is attempting to add
+ * @param {String} name - the field name
+ */
+export class IndexPatternAlreadyExists extends KbnError {
+  constructor(name) {
+    super(
+      `An index pattern of "${name}" already exists`,
+      IndexPatternAlreadyExists);
+  }
+}
+
+/**
  * A saved object was not found
  */
 export class SavedObjectNotFound extends KbnError {

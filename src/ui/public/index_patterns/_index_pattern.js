@@ -1,5 +1,5 @@
 import _ from 'lodash';
-import { SavedObjectNotFound, DuplicateField, IndexPatternMissingIndices } from 'ui/errors';
+import { SavedObjectNotFound, DuplicateField, IndexPatternAlreadyExists, IndexPatternMissingIndices } from 'ui/errors';
 import angular from 'angular';
 import { RegistryFieldFormatsProvider } from 'ui/registry/field_formats';
 import UtilsMappingSetupProvider from 'ui/utils/mapping_setup';
@@ -15,7 +15,7 @@ import { IndexPatternsCalculateIndicesProvider } from './_calculate_indices';
 import { IndexPatternsPatternCacheProvider } from './_pattern_cache';
 import { FieldsFetcherProvider } from './fields_fetcher_provider';
 import { IsUserAwareOfUnsupportedTimePatternProvider } from './unsupported_time_patterns';
-import { SavedObjectsClientProvider } from 'ui/saved_objects';
+import { SavedObjectsClientProvider, findObjectByTitle } from 'ui/saved_objects';
 
 export function getRoutes() {
   return {
@@ -370,33 +370,61 @@ export function IndexPatternProvider(Private, $http, config, kbnIndex, Promise, 
       return body;
     }
 
-    create() {
-      const body = this.prepBody();
+    /**
+     * Returns a promise that resolves to true if either the title is unique, or if the user confirmed they
+     * wished to save the duplicate title.  Promise is rejected if the user rejects the confirmation.
+     */
+    warnIfDuplicateTitle() {
+      return findObjectByTitle(savedObjectsClient, type, this.title)
+        .then(duplicate => {
+          if (!duplicate) return true;
+          if (duplicate.id === this.id) return true;
 
-      return savedObjectsClient.create(type, body, { id: this.id })
-        .then(({ id }) => setId(this, id))
-        .catch(err => {
-          if (_.get(err, 'origError.status') !== 409) {
-            return Promise.resolve(false);
-          }
-          const confirmMessage = 'Are you sure you want to overwrite this?';
+          const confirmMessage =
+            `An index pattern with the title '${this.title}' already exists.`;
 
-          return confirmModalPromise(confirmMessage, { confirmButtonText: 'Overwrite' })
-          .then(() => Promise
-            .try(() => {
-              const cached = patternCache.get(this.id);
-              if (cached) {
-                return cached.then(pattern => pattern.destroy());
-              }
+          return confirmModalPromise(confirmMessage, { confirmButtonText: 'Edit existing pattern' })
+            .then(() => {
+              kbnUrl.change('/management/kibana/indices/{{id}}', { id: duplicate.id });
+              return true;
             })
-            .then(() => savedObjectsClient.create(type, body, { id: this.id, overwrite: true }))
-            .then(({ id }) => setId(this, id)),
-            _.constant(false) // if the user doesn't overwrite, resolve with false
-          );
+            .catch(() => {
+              throw new IndexPatternAlreadyExists(this.title);
+            });
         });
     }
 
-    save() {
+    create() {
+      this.warnIfDuplicateTitle().then(() => {
+        const body = this.prepBody();
+
+        savedObjectsClient.create(type, body, { id: this.id })
+          .then(response => {
+            setId(this, response.id);
+          })
+          .catch(err => {
+            if (_.get(err, 'origError.status') !== 409) {
+              return Promise.resolve(false);
+            }
+            const confirmMessage = 'Are you sure you want to overwrite this?';
+
+            return confirmModalPromise(confirmMessage, { confirmButtonText: 'Overwrite' })
+            .then(() => Promise
+              .try(() => {
+                const cached = patternCache.get(this.id);
+                if (cached) {
+                  return cached.then(pattern => pattern.destroy());
+                }
+              })
+              .then(() => savedObjectsClient.create(type, body, { id: this.id, overwrite: true }))
+              .then(({ id }) => setId(this, id)),
+              _.constant(false) // if the user doesn't overwrite, resolve with false
+            );
+          });
+      });
+    }
+
+    async save() {
       return savedObjectsClient.update(type, this.id, this.prepBody())
         .then(({ id }) => setId(this, id));
     }
