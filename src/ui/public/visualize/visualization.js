@@ -142,6 +142,10 @@ uiModules
         resizeChecker.on('resize',  resizeFunc);
       }
 
+      $scope.$on('$destroy', () => {
+        resizeChecker.off('resize');
+      });
+
       function jQueryGetter(selector) {
         return function () {
           const $sel = $el.find(selector);
