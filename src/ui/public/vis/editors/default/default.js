@@ -57,22 +57,24 @@ const defaultEditor = function ($rootScope, $compile) {
             $scope.vis.dirty = false;
           };
 
-          $scope.$watch(function () {
-            return $scope.vis.getCurrentState(false);
-          }, function (newState) {
-            $scope.vis.dirty = !angular.equals(newState, $scope.vis.getEnabledState());
+          if (!this._cancelVisStateWatch) {
+            this._cancelVisStateWatch = $scope.$watch(function () {
+              return $scope.vis.getCurrentState(false);
+            }, function (newState) {
+              $scope.vis.dirty = !angular.equals(newState, $scope.vis.getEnabledState());
 
-            $scope.responseValueAggs = null;
-            try {
-              $scope.responseValueAggs = $scope.vis.aggs.getResponseAggs().filter(function (agg) {
-                return _.get(agg, 'schema.group') === 'metrics';
-              });
-            }
-              // this can fail when the agg.type is changed but the
-              // params have not been set yet. watcher will trigger again
-              // when the params update
-            catch (e) {} // eslint-disable-line no-empty
-          }, true);
+              $scope.responseValueAggs = null;
+              try {
+                $scope.responseValueAggs = $scope.vis.aggs.getResponseAggs().filter(function (agg) {
+                  return _.get(agg, 'schema.group') === 'metrics';
+                });
+              }
+                // this can fail when the agg.type is changed but the
+                // params have not been set yet. watcher will trigger again
+                // when the params update
+              catch (e) {} // eslint-disable-line no-empty
+            }, true);
+          }
 
           this.el.html($compile(defaultEditorTemplate)($scope));
         } else {
@@ -90,12 +92,14 @@ const defaultEditor = function ($rootScope, $compile) {
     }
 
     destroy() {
+      if (this._cancelVisStateWatch) {
+        this._cancelVisStateWatch();
+      }
       if (this.$scope) {
         this.$scope.$destroy();
         this.$scope = null;
       }
     }
-    resize() {}
   };
 };
 
