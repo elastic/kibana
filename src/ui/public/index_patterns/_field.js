@@ -1,5 +1,5 @@
 import { ObjDefine } from 'ui/utils/obj_define';
-import { FieldFormat } from 'ui/index_patterns/_field_format/field_format';
+import { FieldFormat } from '../../field_formats/field_format';
 import { RegistryFieldFormatsProvider } from 'ui/registry/field_formats';
 import { getKbnFieldType } from '../../../utils';
 

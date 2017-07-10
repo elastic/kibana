@@ -50,7 +50,7 @@ export default (kibana) => {
 
         if (config.get('tests_bundle.instrument')) {
           env.addPostLoader({
-            test: /\.jsx?$/,
+            test: /\.js$/,
             exclude: /[\/\\](__tests__|node_modules|bower_components|webpackShims)[\/\\]/,
             loader: 'istanbul-instrumenter'
           });

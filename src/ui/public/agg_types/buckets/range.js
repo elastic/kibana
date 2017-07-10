@@ -1,6 +1,6 @@
 import { AggTypesBucketsBucketAggTypeProvider } from 'ui/agg_types/buckets/_bucket_agg_type';
 import { AggTypesBucketsCreateFilterRangeProvider } from 'ui/agg_types/buckets/create_filter/range';
-import { FieldFormat } from 'ui/index_patterns/_field_format/field_format';
+import { FieldFormat } from '../../../field_formats/field_format';
 import { RangeKeyProvider } from './range_key';
 import rangesTemplate from 'ui/agg_types/controls/ranges.html';
 

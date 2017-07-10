@@ -117,9 +117,9 @@ export default class Plugin {
     const asyncRegister = async (server, options) => {
       this.server = server;
 
-      await Promise.all(this[extendInitFns].map(async fn => {
+      for (const fn of this[extendInitFns]) {
         await fn.call(this, server, options);
-      }));
+      }
 
       server.log(['plugins', 'debug'], {
         tmpl: 'Initializing plugin <%= plugin.toString() %>',
