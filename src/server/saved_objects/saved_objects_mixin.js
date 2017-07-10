@@ -38,6 +38,7 @@ export function savedObjectsMixin(kbnServer, server) {
     const callAdminCluster = (...args) => callWithRequest(request, ...args);
     const savedObjectsClient = new SavedObjectsClient(
       server.config().get('kibana.index'),
+      kbnServer.uiExports.mappings.getCombined(),
       callAdminCluster
     );
     savedObjectsClientCache.set(request, savedObjectsClient);
