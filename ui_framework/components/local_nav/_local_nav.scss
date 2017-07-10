@@ -23,13 +23,14 @@
  */
 .kuiLocalNavRow {
   display: flex;
-  align-items: center;
+  align-items: stretch;
   justify-content: space-between;
   min-height: 32px; /* 1 */
 }
 
 .kuiLocalNavRow__section {
-  height: 100%;
+  display: flex;
+  align-items: stretch;
 }
 
 /**
