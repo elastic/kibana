@@ -7,7 +7,7 @@ const events = new Events();
 export const RenderElement = compose(
   pure,
   withProps(({ renderFn, done, config, size }) => ({
-    renderFn: (domNode) => {
+    renderFn: (domNode, events) => {
       renderFn(domNode, config, done || (() => {}), events);
     },
     destroyFn: () => {
@@ -17,6 +17,7 @@ export const RenderElement = compose(
     size,
   })),
   withState('domNode', 'setDomNode'),
+  withState('events', 'setEventEmitter'),
 )(Component);
 
 RenderElement.propTypes = {

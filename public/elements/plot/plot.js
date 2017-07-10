@@ -27,7 +27,6 @@ module.exports = new Element({
     }
 
     function destroy() {
-      console.log('destroying');
       plot.destroy();
     }
 

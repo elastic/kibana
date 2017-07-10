@@ -2,13 +2,21 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { lifecycle, compose } from 'recompose';
 import { isEqual } from 'lodash';
+import { Events } from '../../lib/events';
 
-export const RenderElementComponent = ({ renderFn, size, domNode, setDomNode }) => {
+
+export const RenderElementComponent = ({ renderFn, size, domNode, setDomNode, setEventEmitter }) => {
   const renderElement = (refNode) => {
-    // Initialize the domNode property. This should only happen once, even if config changes.
     if (refNode && !domNode) {
+
+      // TODO: OMG this is so gross, but it works. I tried passing it in from the container,
+      // but it kept getting recreated and would get out of sync with what the render function had subscribed to.
+      const _events = new Events();
+      setEventEmitter(_events);
+
+      // Initialize the domNode property. This should only happen once, even if config changes.
       setDomNode(refNode);
-      renderFn(refNode);
+      renderFn(refNode, _events);
     }
   };
 
@@ -20,15 +28,12 @@ export const RenderElementComponent = ({ renderFn, size, domNode, setDomNode }) 
 };
 
 const RenderElementLifecycle = lifecycle({
-  componentDidMount() {
-    console.log('mounty!');
-  },
 
   componentDidUpdate(prevProps) {
     const { events, config, domNode, size } = this.props;
     if (!isEqual(config, prevProps.config)) {
       this.destroy();
-      return this.props.renderFn(domNode);
+      return this.props.renderFn(domNode, events);
     }
 
     if (!isEqual(size, prevProps.size)) return events.emit('resize', size);
@@ -60,6 +65,8 @@ RenderElementComponent.propTypes = {
   domNode: PropTypes.object,
   setDomNode: PropTypes.func,
   size: PropTypes.object,
+  events: PropTypes.object,
+  setEventEmitter: PropTypes.func,
 };
 
 export const RenderElement = compose(

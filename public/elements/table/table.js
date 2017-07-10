@@ -11,9 +11,6 @@ module.exports = new Element({
   description: 'A scrollable grid for displaying data in a tabluar format',
   image: header,
   expression: 'demodata()',
-  destroy(args) {
-    console.log('destory table', args);
-  },
   render(domNode, config, done) {
     const table = (
       <Table striped bordered condensed>
