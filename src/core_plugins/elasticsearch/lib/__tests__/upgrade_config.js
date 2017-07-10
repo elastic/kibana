@@ -38,10 +38,10 @@ describe('plugins/elasticsearch', function () {
     });
 
     describe('nothing is found', function () {
-      const response = { hits: { hits:[] } };
+      const configSavedObjects = { hits: { hits:[] } };
 
       beforeEach(function () {
-        callWithInternalUser.withArgs('create', sinon.match.any).returns(Promise.resolve());
+        callWithInternalUser.withArgs('create', sinon.match.any).returns(Promise.resolve({ _id: 1, _version: 1 }));
       });
 
       describe('production', function () {
@@ -52,7 +52,7 @@ describe('plugins/elasticsearch', function () {
         });
 
         it('should resolve buildNum to pkg.buildNum config', function () {
-          return upgrade(response).then(function () {
+          return upgrade(configSavedObjects).then(function () {
             sinon.assert.calledOnce(callWithInternalUser);
             const params = callWithInternalUser.args[0][1];
             expect(params.body).to.have.property('buildNum', get('pkg.buildNum'));
@@ -60,7 +60,7 @@ describe('plugins/elasticsearch', function () {
         });
 
         it('should resolve version to pkg.version config', function () {
-          return upgrade(response).then(function () {
+          return upgrade(configSavedObjects).then(function () {
             const params = callWithInternalUser.args[0][1];
             expect(params).to.have.property('id', get('pkg.version'));
           });
@@ -75,14 +75,14 @@ describe('plugins/elasticsearch', function () {
         });
 
         it('should resolve buildNum to pkg.buildNum config', function () {
-          return upgrade(response).then(function () {
+          return upgrade(configSavedObjects).then(function () {
             const params = callWithInternalUser.args[0][1];
             expect(params.body).to.have.property('buildNum', get('pkg.buildNum'));
           });
         });
 
         it('should resolve version to pkg.version config', function () {
-          return upgrade(response).then(function () {
+          return upgrade(configSavedObjects).then(function () {
             const params = callWithInternalUser.args[0][1];
             expect(params).to.have.property('id', get('pkg.version'));
           });
@@ -91,18 +91,18 @@ describe('plugins/elasticsearch', function () {
     });
 
     it('should resolve with undefined if the current version is found', function () {
-      const response = { hits: { hits: [ { _id: '4.0.1' } ] } };
-      return upgrade(response).then(function (resp) {
+      const configSavedObjects = [ { id: '4.0.1' } ];
+      return upgrade(configSavedObjects).then(function (resp) {
         expect(resp).to.be(undefined);
       });
     });
 
     it('should create new config if the nothing is upgradeable', function () {
       get.withArgs('pkg.buildNum').returns(9833);
-      callWithInternalUser.withArgs('create', sinon.match.any).returns(Promise.resolve());
+      callWithInternalUser.withArgs('create', sinon.match.any).returns(Promise.resolve({ _id: 1, _version: 1 }));
 
-      const response = { hits: { hits: [ { _id: '4.0.1-alpha3' }, { _id: '4.0.1-beta1' }, { _id: '4.0.0-SNAPSHOT1' } ] } };
-      return upgrade(response).then(function () {
+      const configSavedObjects = [ { id: '4.0.1-alpha3' }, { id: '4.0.1-beta1' }, { id: '4.0.0-SNAPSHOT1' } ];
+      return upgrade(configSavedObjects).then(function () {
         sinon.assert.calledOnce(callWithInternalUser);
         const params = callWithInternalUser.args[0][1];
         expect(params).to.have.property('body');
@@ -115,11 +115,11 @@ describe('plugins/elasticsearch', function () {
 
     it('should update the build number on the new config', function () {
       get.withArgs('pkg.buildNum').returns(5801);
-      callWithInternalUser.withArgs('create', sinon.match.any).returns(Promise.resolve());
+      callWithInternalUser.withArgs('create', sinon.match.any).returns(Promise.resolve({ _id: 1, _version: 1 }));
 
-      const response = { hits: { hits: [ { _id: '4.0.0', _source: { buildNum: 1 } } ] } };
+      const configSavedObjects = [ { id: '4.0.0', attributes: { buildNum: 1 } } ];
 
-      return upgrade(response).then(function () {
+      return upgrade(configSavedObjects).then(function () {
         sinon.assert.calledOnce(callWithInternalUser);
         const params = callWithInternalUser.args[0][1];
         expect(params).to.have.property('body');
@@ -132,11 +132,11 @@ describe('plugins/elasticsearch', function () {
 
     it('should log a message for upgrades', function () {
       get.withArgs('pkg.buildNum').returns(5801);
-      callWithInternalUser.withArgs('create', sinon.match.any).returns(Promise.resolve());
+      callWithInternalUser.withArgs('create', sinon.match.any).returns(Promise.resolve({ _id: 1, _version: 1 }));
 
-      const response = { hits: { hits: [ { _id: '4.0.0', _source: { buildNum: 1 } } ] } };
+      const configSavedObjects = [ { id: '4.0.0', attributes: { buildNum: 1 } } ];
 
-      return upgrade(response).then(function () {
+      return upgrade(configSavedObjects).then(function () {
         sinon.assert.calledOnce(server.log);
         expect(server.log.args[0][0]).to.eql(['plugin', 'elasticsearch']);
         const msg = server.log.args[0][1];
@@ -148,11 +148,11 @@ describe('plugins/elasticsearch', function () {
 
     it('should copy attributes from old config', function () {
       get.withArgs('pkg.buildNum').returns(5801);
-      callWithInternalUser.withArgs('create', sinon.match.any).returns(Promise.resolve());
+      callWithInternalUser.withArgs('create', sinon.match.any).returns(Promise.resolve({ _id: 1, _version: 1 }));
 
-      const response = { hits: { hits: [ { _id: '4.0.0', _source: { buildNum: 1, defaultIndex: 'logstash-*' } } ] } };
+      const configSavedObjects = [ { id: '4.0.0', attributes: { buildNum: 1, defaultIndex: 'logstash-*' } } ];
 
-      return upgrade(response).then(function () {
+      return upgrade(configSavedObjects).then(function () {
         sinon.assert.calledOnce(callWithInternalUser);
         const params = callWithInternalUser.args[0][1];
         expect(params).to.have.property('body');

@@ -20,6 +20,7 @@ export default function (plugin, server, { mappings }) {
   const config = server.config();
   const callAdminAsKibanaUser = server.plugins.elasticsearch.getCluster('admin').callWithInternalUser;
   const callDataAsKibanaUser = server.plugins.elasticsearch.getCluster('data').callWithInternalUser;
+
   const REQUEST_DELAY = config.get('elasticsearch.healthCheck.delay');
 
   plugin.status.yellow('Waiting for Elasticsearch');
@@ -96,8 +97,8 @@ export default function (plugin, server, { mappings }) {
       waitForPong(callAdminAsKibanaUser, config.get('elasticsearch.url'))
       .then(waitForEsVersion)
       .then(() => ensureNotTribe(callAdminAsKibanaUser))
-      .then(() => ensureAllowExplicitIndex(callAdminAsKibanaUser, config))
       .then(waitForShards)
+      .then(() => ensureAllowExplicitIndex(callAdminAsKibanaUser, config))
       .then(_.partial(migrateConfig, server, { mappings }))
       .then(() => {
         const tribeUrl = config.get('elasticsearch.tribe.url');

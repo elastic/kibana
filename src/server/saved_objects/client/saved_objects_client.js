@@ -3,12 +3,21 @@ import { get } from 'lodash';
 
 import {
   createFindQuery,
+  createIdQuery,
   handleEsError,
+  isSingleTypeError,
+  v5BulkCreate,
+  v6BulkCreate,
+  parseEsDoc,
+  includedFields,
 } from './lib';
 
+export const V6_TYPE = 'doc';
+
 export class SavedObjectsClient {
-  constructor(kibanaIndex, callAdminCluster) {
+  constructor(kibanaIndex, mappings, callAdminCluster) {
     this._kibanaIndex = kibanaIndex;
+    this._mappings = mappings;
     this._callAdminCluster = callAdminCluster;
   }
 
@@ -25,18 +34,16 @@ export class SavedObjectsClient {
   async create(type, attributes = {}, options = {}) {
     const method = options.id && !options.overwrite ? 'create' : 'index';
     const response = await this._withKibanaIndex(method, {
-      type,
-      id: options.id,
-      body: attributes,
+      type: V6_TYPE,
+      id: options.id ? `${type}:${options.id}` : undefined,
+      body: {
+        type,
+        [type]: attributes
+      },
       refresh: 'wait_for'
     });
 
-    return {
-      id: response._id,
-      type: response._type,
-      version: response._version,
-      attributes
-    };
+    return parseEsDoc(response, { type, attributes });
   }
 
   /**
@@ -44,31 +51,42 @@ export class SavedObjectsClient {
    *
    * @param {array} objects - [{ type, id, attributes }]
    * @param {object} [options={}]
-   * @property {boolean} [options.overwrite=false] - overrides existing documents
+   * @property {boolean} [options.force=false] - overrides existing documents
+   * @property {string} [options.format=v5]
    * @returns {promise} - [{ id, type, version, attributes, error: { message } }]
    */
   async bulkCreate(objects, options = {}) {
-    const body = objects.reduce((acc, object) => {
-      const method = get(options, 'overwrite', false) === false && object.id ? 'create' : 'index';
+    const { format = 'v5' } = options;
 
-      acc.push({ [method]: { _type: object.type, _id: object.id } });
-      acc.push(object.attributes);
+    const bulkCreate = format === 'v5' ? v5BulkCreate : v6BulkCreate;
+    const response = await this._withKibanaIndex('bulk', {
+      body: bulkCreate(objects, options),
+      refresh: 'wait_for'
+    });
 
-      return acc;
-    }, []);
+    const items = get(response, 'items', []);
+    const missingTypesCount = items.filter(item => {
+      const method = Object.keys(item)[0];
+      return isSingleTypeError(get(item, `${method}.error`));
+    }).length;
 
-    return await this._withKibanaIndex('bulk', { body, refresh: 'wait_for' })
-      .then(resp => get(resp, 'items', []).map((resp, i) => {
-        const method = Object.keys(resp)[0];
+    const formatFallback = format === 'v5' && items.length > 0 && items.length === missingTypesCount;
 
-        return {
-          id: resp[method]._id,
-          type: resp[method]._type,
-          version: resp[method]._version,
-          attributes: objects[i].attributes,
-          error: resp[method].error ? { message: get(resp[method], 'error.reason') } : undefined
-        };
-      }));
+    if (formatFallback) {
+      return this.bulkCreate(objects, Object.assign({}, options, { format: 'v6' }));
+    }
+
+    return get(response, 'items', []).map((resp, i) => {
+      const method = Object.keys(resp)[0];
+      const { id, type, attributes } = objects[i];
+
+      return parseEsDoc(resp[method], {
+        id,
+        type,
+        attributes,
+        error: resp[method].error ? { message: get(resp[method], 'error.reason') } : undefined
+      });
+    });
   }
 
   /**
@@ -79,13 +97,12 @@ export class SavedObjectsClient {
    * @returns {promise}
    */
   async delete(type, id) {
-    const response = await this._withKibanaIndex('delete', {
-      type,
-      id,
+    const response = await this._withKibanaIndex('deleteByQuery', {
+      body: createIdQuery({ type, id }),
       refresh: 'wait_for'
     });
 
-    if (get(response, 'found') === false) {
+    if (get(response, 'deleted') === 0) {
       throw Boom.notFound();
     }
   }
@@ -98,7 +115,8 @@ export class SavedObjectsClient {
    *                                        Query field argument for more information
    * @property {integer} [options.page=1]
    * @property {integer} [options.perPage=20]
-   * @property {array} options.fields
+   * @property {array} options.sort
+   * @property {array|string} options.fields
    * @returns {promise} - { saved_objects: [{ id, type, version, attributes }], total, per_page, page }
    */
   async find(options = {}) {
@@ -108,53 +126,28 @@ export class SavedObjectsClient {
       searchFields,
       page = 1,
       perPage = 20,
-      fields
+      sortField,
+      sortOrder,
+      fields,
     } = options;
 
     const esOptions = {
-      type,
-      _source: fields,
+      _source: includedFields(fields),
       size: perPage,
       from: perPage * (page - 1),
-      body: createFindQuery({ search, searchFields, type })
+      body: createFindQuery(this._mappings, { search, searchFields, type, sortField, sortOrder })
     };
 
     const response = await this._withKibanaIndex('search', esOptions);
 
     return {
-      saved_objects: get(response, 'hits.hits', []).map(r => {
-        return {
-          id: r._id,
-          type: r._type,
-          version: r._version,
-          attributes: r._source
-        };
+      saved_objects: get(response, 'hits.hits', []).map(hit => {
+        return parseEsDoc(hit);
       }),
       total: get(response, 'hits.total', 0),
       per_page: perPage,
       page
 
-    };
-  }
-
-  /**
-   * Gets a single object
-   *
-   * @param {string} type
-   * @param {string} id
-   * @returns {promise} - { id, type, version, attributes }
-   */
-  async get(type, id) {
-    const response = await this._withKibanaIndex('get', {
-      type,
-      id,
-    });
-
-    return {
-      id: response._id,
-      type: response._type,
-      version: response._version,
-      attributes: response._source
     };
   }
 
@@ -175,23 +168,44 @@ export class SavedObjectsClient {
       return { saved_objects: [] };
     }
 
-    const docs = objects.map(doc => {
-      return { _type: get(doc, 'type'), _id: get(doc, 'id') };
-    });
+    const docs = objects.reduce((acc, { type, id }) => {
+      return [...acc, {}, createIdQuery({ type, id })];
+    }, []);
 
-    const response = await this._withKibanaIndex('mget', { body: { docs } })
-      .then(resp => get(resp, 'docs', []).filter(resp => resp.found));
+    const response = await this._withKibanaIndex('msearch', { body: docs });
+    const responses = get(response, 'responses', []);
 
     return {
-      saved_objects: response.map(r => {
-        return {
-          id: r._id,
-          type: r._type,
-          version: r._version,
-          attributes: r._source
-        };
+      saved_objects: responses.map((r, i) => {
+        const [hit] = get(r, 'hits.hits', []);
+
+        if (!hit) {
+          return Object.assign({}, objects[i], {
+            error: { statusCode: 404, message: 'Not found' }
+          });
+        }
+
+        return parseEsDoc(hit, objects[i]);
       })
     };
+  }
+
+  /**
+   * Gets a single object
+   *
+   * @param {string} type
+   * @param {string} id
+   * @returns {promise} - { id, type, version, attributes }
+   */
+  async get(type, id) {
+    const response = await this._withKibanaIndex('search', { body: createIdQuery({ type, id }) });
+    const [hit] = get(response, 'hits.hits', []);
+
+    if (!hit) {
+      throw Boom.notFound();
+    }
+
+    return parseEsDoc(hit);
   }
 
   /**
@@ -205,21 +219,18 @@ export class SavedObjectsClient {
    */
   async update(type, id, attributes, options = {}) {
     const response = await this._withKibanaIndex('update', {
-      type,
       id,
+      type: V6_TYPE,
       version: options.version,
+      refresh: 'wait_for',
       body: {
-        doc: attributes
-      },
-      refresh: 'wait_for'
+        doc: {
+          [type]: attributes
+        }
+      }
     });
 
-    return {
-      id: id,
-      type: type,
-      version: get(response, '_version'),
-      attributes: attributes
-    };
+    return parseEsDoc(response, { id, type, attributes });
   }
 
   async _withKibanaIndex(method, params) {

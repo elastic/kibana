@@ -13,12 +13,21 @@ const {
   BadRequest
 } = elasticsearch.errors;
 
+export function isSingleTypeError(error) {
+  if (!error) return;
+
+  return error.type === 'illegal_argument_exception' &&
+    error.reason.match(/the final mapping would have more than 1 type/);
+}
+
 export function handleEsError(error) {
   if (!(error instanceof Error)) {
     throw new Error('Expected an instance of Error');
   }
 
-  const reason = get(error, 'body.error.reason');
+  const { reason, type } = get(error, 'body.error', {});
+  const message = error.message || reason;
+  const details = { type, reason };
 
   if (
     error instanceof ConnectionFault ||
@@ -30,19 +39,23 @@ export function handleEsError(error) {
   }
 
   if (error instanceof Conflict) {
-    throw Boom.conflict(reason);
+    throw Boom.conflict(message, details);
   }
 
   if (error instanceof Forbidden) {
-    throw Boom.forbidden(reason);
+    throw Boom.forbidden(message, details);
   }
 
   if (error instanceof NotFound) {
-    throw Boom.notFound(reason);
+    throw Boom.notFound(message, details);
   }
 
   if (error instanceof BadRequest) {
-    throw Boom.badRequest(reason);
+    if (isSingleTypeError(get(error, 'body.error'))) {
+      details.type = 'is_single_type';
+    }
+
+    throw Boom.badRequest(message, details);
   }
 
   throw error;

@@ -4,13 +4,13 @@
       class="index-pattern-selection"
       ng-model="selectedIndexPattern"
       on-select="setIndexPattern($item)"
-      ng-init="selectedIndexPattern = indexPattern.id"
+      ng-init="selectedIndexPattern = indexPattern"
     >
       <ui-select-match>
-        {{$select.selected}}
+        {{$select.selected.title}}
       </ui-select-match>
-      <ui-select-choices repeat="id in indexPatternList | filter:$select.search | orderBy">
-        <div ng-bind-html="id | highlight: $select.search"></div>
+      <ui-select-choices repeat="pattern in indexPatternList | filter:$select.search">
+        <div ng-bind-html="pattern.get('title') | highlight: $select.search"></div>
       </ui-select-choices>
     </ui-select>
   </div>
@@ -20,8 +20,9 @@
         class="index-pattern-label"
         id="index_pattern_id"
         tabindex="0"
-        css-truncate
-      >{{ indexPattern.id }}</h2>
+        css-truncate>
+
+        {{ indexPattern.title }}</h2>
     </div>
   </div>
 

@@ -25,13 +25,13 @@
       </li>
 
       <li
-        ng-repeat="pattern in indexPatternList | orderBy:['-default','id'] track by pattern.id "
+        ng-repeat="pattern in indexPatternList | orderBy:['-default','title'] track by pattern.id"
         class="sidebar-item"
       >
         <a href="{{::pattern.url}}" class="show">
           <div class="{{::pattern.class}}">
             <i aria-hidden="true" ng-if="pattern.default" class="fa fa-star"></i>
-            <span ng-bind="::pattern.id"></span>
+            <span ng-bind="::pattern.title"></span>
           </div>
         </a>
       </li>

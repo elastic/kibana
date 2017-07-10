@@ -6,14 +6,13 @@ export default function (server, mappings) {
     body: {
       settings: {
         number_of_shards: 1,
-        'index.mapper.dynamic': false,
-        'index.mapping.single_type': false
+        'index.mapper.dynamic': false
       },
       mappings
     }
   })
-  .catch(() => {
-    throw new Error(`Unable to create Kibana index "${index}"`);
+  .catch(err => {
+    throw new Error(`Unable to create Kibana index "${index}"`, err.message);
   })
   .then(function () {
     return callWithInternalUser('cluster.health', {
