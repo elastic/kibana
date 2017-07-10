@@ -45,6 +45,10 @@
   z-index: 50;
 }
 
+/**
+ * 1. Calc made to allow caret in text to peek out / animate.
+ */
+
 .exitFullScreenModeText {
   background: @globalColorBlue;
   color: tint(@globalColorBlue, 70%);
@@ -52,13 +56,11 @@
   display: inline-block;
   height: 40px;
   position: absolute;
-  left: calc(100% + 14px);
+  left: calc(100% + 14px);  // 1
   top: 0px;
   bottom: 0px;
   white-space: nowrap;
   padding: 0px 4px 0px 10px;
-  // visibility: hidden;
-  // opacity: 0;
   transition: all .2s ease;
   transform: translateX(-100%);
   z-index: -1;
