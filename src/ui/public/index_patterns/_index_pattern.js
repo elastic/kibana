@@ -411,7 +411,7 @@ export function IndexPatternProvider(Private, $http, config, kbnIndex, Promise, 
         return savedObjectsClient.create(type, body, { id: this.id })
           .then(response => setId(this, response.id))
           .catch(err => {
-            if (_.get(err, 'origError.status') !== 409) {
+            if (err.statusCode !== 409) {
               return Promise.resolve(false);
             }
             const confirmMessage = 'Are you sure you want to overwrite this?';
