@@ -126,6 +126,7 @@ uiModules
       });
 
       $scope.$on('$destroy', () => {
+        resizeChecker.off('resize');
         visualization.destroy();
       });
 
@@ -141,10 +142,6 @@ uiModules
         }, 200);
         resizeChecker.on('resize',  resizeFunc);
       }
-
-      $scope.$on('$destroy', () => {
-        resizeChecker.off('resize');
-      });
 
       function jQueryGetter(selector) {
         return function () {
