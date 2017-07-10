@@ -16,7 +16,5 @@ export function Element(config) {
   if (!config.expression) throw new Error('Element types must have a default expression');
   this.expression = config.expression;
 
-  this.destroy = config.destroy || function destroy(/*renderFnReturnValue*/) {};
-
   this.render = config.render || function render(domNode, data, done) {done();};
 }
