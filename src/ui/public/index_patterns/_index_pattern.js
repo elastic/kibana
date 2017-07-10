@@ -77,10 +77,20 @@ export function IndexPatternProvider(Private, $http, config, kbnIndex, Promise, 
 
   function updateFromElasticSearch(indexPattern, response) {
     if (!response.found) {
-      throw new SavedObjectNotFound(
-        type,
-        indexPattern.id,
-        `<a href="#/management/kibana/index?id=${indexPattern.id}&name=">click here to create it</a>`);
+      // custom notification provides link to create index pattern with missing id
+      const notificationMessage = `Could not locate that index-pattern (id: ${indexPattern.id})`;
+      const actions = [{
+        text: 'OK',
+        dataTestSubj: 'reportCompleteOkToastButton'
+      }, {
+        text: 'Create',
+        callback: () => {
+          kbnUrl.change('/management/kibana/index?id={{id}}&name=', { id: indexPattern.id });
+        }
+      }];
+
+      notify.custom(notificationMessage, { type: 'error', lifetime: 0, actions });
+      throw new SavedObjectNotFound(type, indexPattern.id);
     }
 
     _.forOwn(mapping, (fieldMapping, name) => {
@@ -395,13 +405,11 @@ export function IndexPatternProvider(Private, $http, config, kbnIndex, Promise, 
     }
 
     create() {
-      this.warnIfDuplicateTitle().then(() => {
+      return this.warnIfDuplicateTitle().then(() => {
         const body = this.prepBody();
 
-        savedObjectsClient.create(type, body, { id: this.id })
-          .then(response => {
-            setId(this, response.id);
-          })
+        return savedObjectsClient.create(type, body, { id: this.id })
+          .then(response => setId(this, response.id))
           .catch(err => {
             if (_.get(err, 'origError.status') !== 409) {
               return Promise.resolve(false);
@@ -417,7 +425,7 @@ export function IndexPatternProvider(Private, $http, config, kbnIndex, Promise, 
                 }
               })
               .then(() => savedObjectsClient.create(type, body, { id: this.id, overwrite: true }))
-              .then(({ id }) => setId(this, id)),
+              .then(response => setId(this, response.id)),
               _.constant(false) // if the user doesn't overwrite, resolve with false
             );
           });

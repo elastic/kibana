@@ -14,7 +14,7 @@ describe('findObjectByTitle', () => {
   afterEach(() => sandbox.restore());
 
   it('returns undefined if title is not provided', async () => {
-    const match = findObjectByTitle(savedObjectsClient, 'index-pattern');
+    const match = await findObjectByTitle(savedObjectsClient, 'index-pattern');
     expect(match).to.be(undefined);
   });
 

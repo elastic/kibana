@@ -177,15 +177,11 @@ export class IndexPatternAlreadyExists extends KbnError {
  * A saved object was not found
  */
 export class SavedObjectNotFound extends KbnError {
-  constructor(type, id, additionalMessage) {
+  constructor(type, id) {
     const idMsg = id ? ` (id: ${id})` : '';
-    let message = `Could not locate that ${type}${idMsg}`;
-
-    if (additionalMessage) {
-      message += `<br />${additionalMessage}`;
-    }
-
-    super(message, SavedObjectNotFound);
+    super(
+      `Could not locate that ${type}${idMsg}`,
+      SavedObjectNotFound);
 
     this.savedObjectType = type;
     this.savedObjectId = id;

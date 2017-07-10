@@ -9,7 +9,7 @@ import { find } from 'lodash';
  * @returns {Promise<SavedObject|undefined>}
  */
 export function findObjectByTitle(savedObjectsClient, type, title) {
-  if (!title) return;
+  if (!title) return Promise.resolve();
 
   // Elastic search will return the most relevant results first, which means exact matches should come
   // first, and so we shouldn't need to request everything. Using 10 just to be on the safe side.
