@@ -242,7 +242,7 @@ function discoverController($scope, config, courier, $route, $window, Notifier,
       query: $scope.searchSource.get('query') || '',
       sort: getSort.array(savedSearch.sort, $scope.indexPattern),
       columns: savedSearch.columns.length > 0 ? savedSearch.columns : config.get('defaultColumns').slice(),
-      index: $scope.indexPattern.title,
+      index: $scope.indexPattern.id,
       interval: 'auto',
       filters: _.cloneDeep($scope.searchSource.getOwn('filter'))
     };
@@ -258,8 +258,6 @@ function discoverController($scope, config, courier, $route, $window, Notifier,
   $scope.opts = {
     // number of records to fetch, then paginate through
     sampleSize: config.get('discover:sampleSize'),
-    // Index to match
-    index: $scope.indexPattern.title,
     timefield: $scope.indexPattern.timeFieldName,
     savedSearch: savedSearch,
     indexPatternList: $route.current.locals.ip.list,

@@ -449,7 +449,7 @@ export function IndexPatternProvider(Private, $http, config, kbnIndex, Promise, 
     }
 
     toJSON() {
-      return this.title;
+      return this.id;
     }
 
     toString() {
