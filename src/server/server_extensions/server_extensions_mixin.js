@@ -34,11 +34,13 @@ export function serverExtensionsMixin(kbnServer, server) {
 
     const requestCache = new WeakMap();
     server.decorate('request', methodName, function () {
-      if (!requestCache.has(this)) {
-        requestCache.set(this, factory(this));
+      const request = this;
+
+      if (!requestCache.has(request)) {
+        requestCache.set(request, factory(request));
       }
 
-      return requestCache.get(this);
+      return requestCache.get(request);
     });
   });
 }
