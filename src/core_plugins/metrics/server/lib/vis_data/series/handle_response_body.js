@@ -1,5 +1,5 @@
-import buildProcessorFunction from './build_processor_function';
-import processors from './response_processors/series';
+import buildProcessorFunction from '../build_processor_function';
+import processors from '../response_processors/series';
 
 export default function handleResponseBody(panel) {
   return resp => {

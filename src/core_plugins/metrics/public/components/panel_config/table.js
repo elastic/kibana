@@ -4,7 +4,6 @@ import SeriesEditor from '../series_editor';
 import IndexPattern from '../index_pattern';
 import createTextHandler from '../lib/create_text_handler';
 import createSelectHandler from '../lib/create_select_handler';
-import ColorRules from '../color_rules';
 import ColorPicker from '../color_picker';
 import uuid from 'uuid';
 import YesNo from '../yes_no';
@@ -117,18 +116,6 @@ class TablePanelConfig extends Component {
               value={model.ignore_global_filter}
               name="ignore_global_filter"
               onChange={this.props.onChange}/>
-          </div>
-          <div>
-            <div className="vis_editor__label">Color Rules</div>
-          </div>
-          <div className="vis_editor__vis_config-row">
-            <ColorRules
-              model={model}
-              primaryVarName="bar_color"
-              primaryName="bar"
-              hideSecondary={true}
-              onChange={this.props.onChange}
-              name="bar_color_rules"/>
           </div>
         </div>
       );

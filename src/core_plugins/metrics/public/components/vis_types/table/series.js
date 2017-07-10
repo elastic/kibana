@@ -51,6 +51,7 @@ function TopNSeries(props) {
     } else {
       seriesBody = (
         <SeriesConfig
+          panel={props.panel}
           fields={props.fields}
           model={props.model}
           onChange={props.onChange} />

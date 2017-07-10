@@ -1,5 +1,5 @@
-import getRequestParams from './get_request_params';
-import handleResponseBody from './handle_response_body';
+import getRequestParams from './series/get_request_params';
+import handleResponseBody from './series/handle_response_body';
 import handleErrorResponse from './handle_error_response';
 import getAnnotations from './get_annotations';
 export function getSeriesData(req, panel) {
