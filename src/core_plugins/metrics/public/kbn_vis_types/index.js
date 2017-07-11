@@ -59,6 +59,9 @@ export default function MetricsVisProvider(Private) {
     editorConfig: {
       component: require('../components/vis_editor')
     },
+    options: {
+      showIndexSelection: false
+    },
     requestHandler: metricsRequestHandler,
     responseHandler: 'none'
   });
