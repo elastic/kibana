@@ -6,7 +6,6 @@ import chrome from 'ui/chrome';
 
 import 'plugins/kibana/dashboard/grid';
 import 'plugins/kibana/dashboard/panel/panel';
-import 'plugins/kibana/visualize';
 
 import { SavedObjectNotFound } from 'ui/errors';
 import { getDashboardTitle, getUnsavedChangesWarningMessage } from './dashboard_strings';
