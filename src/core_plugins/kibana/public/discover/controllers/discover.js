@@ -90,8 +90,21 @@ app.directive('discoverApp', function () {
   };
 });
 
-function discoverController($scope, config, courier, $route, $window, Notifier,
-  AppState, timefilter, Promise, Private, kbnUrl) {
+function discoverController(
+  $element,
+  $route,
+  $scope,
+  $timeout,
+  $window,
+  AppState,
+  Notifier,
+  Private,
+  Promise,
+  config,
+  courier,
+  kbnUrl,
+  timefilter,
+) {
 
   const Vis = Private(VisProvider);
   const docTitle = Private(DocTitleProvider);
@@ -107,6 +120,7 @@ function discoverController($scope, config, courier, $route, $window, Notifier,
   $scope.queryDocLinks = documentationLinks.query;
   $scope.intervalOptions = Private(AggTypesBucketsIntervalOptionsProvider);
   $scope.showInterval = false;
+  $scope.minimumVisibleRows = 50;
 
   $scope.intervalEnabled = function (interval) {
     return interval.val !== 'custom';
@@ -579,8 +593,19 @@ function discoverController($scope, config, courier, $route, $window, Notifier,
     columnActions.moveColumn($scope.state.columns, columnName, newIndex);
   };
 
-  $scope.toTop = function () {
+  $scope.scrollToTop = function () {
     $window.scrollTo(0, 0);
+  };
+
+  $scope.scrollToBottom = function () {
+    // delay scrolling to after the rows have been rendered
+    $timeout(() => {
+      $element.find('#discoverBottomMarker').focus();
+    }, 0);
+  };
+
+  $scope.showAllRows = function () {
+    $scope.minimumVisibleRows = $scope.hits;
   };
 
   let loadingVis;
