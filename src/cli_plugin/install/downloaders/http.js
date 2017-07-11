@@ -12,25 +12,27 @@ function getEnv(name) {
 function getProxyAgent(sourceUrl, logger) {
   const httpProxy = getEnv('http_proxy') || '';
   // we have a proxy detected, lets use it
-  if (httpProxy) {
-    logger.log(`Picked up proxy ${httpProxy} from http_proxy environment variable.`);
-    // get the hostname of the sourceUrl
-    const { hostname } = URL.parse(sourceUrl);
-    const noProxy = getEnv('no_proxy') || '';
-    const excludedHosts = noProxy.split(',');
+  if (!httpProxy) {
+    return null;
+  }
 
-    // proxy if the hostname is not in noProxy
-    const shouldProxy = !excludedHosts.includes(hostname);
+  logger.log(`Picked up proxy ${httpProxy} from http_proxy environment variable.`);
+  // get the hostname of the sourceUrl
+  const { hostname } = URL.parse(sourceUrl);
+  const noProxy = getEnv('no_proxy') || '';
+  const excludedHosts = noProxy.split(',');
 
-    if (shouldProxy) {
-      logger.log(`Using proxy to download plugin.`);
-      logger.log(`Hint: you can add ${hostname} to the no_proxy environment variable, `
-        + `to exclude that host from proxying.`);
-      return new HttpProxyAgent(httpProxy);
-    } else {
-      logger.log(`Found exception for host ${hostname} in no_proxy environment variable. `
-        + `Skipping proxy.`);
-    }
+  // proxy if the hostname is not in noProxy
+  const shouldProxy = !excludedHosts.includes(hostname);
+
+  if (shouldProxy) {
+    logger.log(`Using proxy to download plugin.`);
+    logger.log(`Hint: you can add ${hostname} to the no_proxy environment variable, `
+      + `to exclude that host from proxying.`);
+    return new HttpProxyAgent(httpProxy);
+  } else {
+    logger.log(`Found exception for host ${hostname} in no_proxy environment variable. `
+      + `Skipping proxy.`);
   }
 
   return null;
