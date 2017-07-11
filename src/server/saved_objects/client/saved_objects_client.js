@@ -5,9 +5,6 @@ import {
   createFindQuery,
   createIdQuery,
   handleEsError,
-  isSingleTypeError,
-  v5BulkCreate,
-  v6BulkCreate,
   normalizeEsDoc,
   includedFields
 } from './lib';
@@ -33,18 +30,14 @@ export class SavedObjectsClient {
   */
   async create(type, attributes = {}, options = {}) {
     const method = options.id && !options.overwrite ? 'create' : 'index';
-    const response = await this._withKibanaIndexAndMappingFallback(method, {
-      type,
-      id: options.id,
-      body: attributes,
-      refresh: 'wait_for'
-    }, {
+    const response = await this._withKibanaIndex(method, {
       type: V6_TYPE,
       id: options.id ? `${type}:${options.id}` : undefined,
       body: {
         type,
         [type]: attributes
-      }
+      },
+      refresh: 'wait_for'
     });
 
     return normalizeEsDoc(response, { type, attributes });
@@ -56,29 +49,29 @@ export class SavedObjectsClient {
    * @param {array} objects - [{ type, id, attributes }]
    * @param {object} [options={}]
    * @property {boolean} [options.force=false] - overrides existing documents
-   * @property {string} [options.format=v5]
    * @returns {promise} - [{ id, type, version, attributes, error: { message } }]
    */
   async bulkCreate(objects, options = {}) {
-    const { format = 'v5' } = options;
+    const body = objects.reduce((acc, object) => {
+      const method = object.id && !options.overwrite ? 'create' : 'index';
 
-    const bulkCreate = format === 'v5' ? v5BulkCreate : v6BulkCreate;
+      acc.push({ [method]: {
+        _type: V6_TYPE,
+        _id: object.id ? `${object.type}:${object.id}` : undefined
+      } });
+
+      acc.push(Object.assign({},
+        { type: object.type },
+        { [object.type]: object.attributes }
+      ));
+
+      return acc;
+    }, []);
+
     const response = await this._withKibanaIndex('bulk', {
-      body: bulkCreate(objects, options),
+      body,
       refresh: 'wait_for'
     });
-
-    const items = get(response, 'items', []);
-    const missingTypesCount = items.filter(item => {
-      const method = Object.keys(item)[0];
-      return isSingleTypeError(get(item, `${method}.error`));
-    }).length;
-
-    const formatFallback = format === 'v5' && items.length > 0 && items.length === missingTypesCount;
-
-    if (formatFallback) {
-      return this.bulkCreate(objects, Object.assign({}, options, { format: 'v6' }));
-    }
 
     return get(response, 'items', []).map((resp, i) => {
       const method = Object.keys(resp)[0];
@@ -223,16 +216,11 @@ export class SavedObjectsClient {
    * @returns {promise}
    */
   async update(type, id, attributes, options = {}) {
-    const response = await this._withKibanaIndexAndMappingFallback('update', {
+    const response = await this._withKibanaIndex('update', {
       id,
-      type,
+      type: V6_TYPE,
       version: options.version,
       refresh: 'wait_for',
-      body: {
-        doc: attributes
-      }
-    }, {
-      type: V6_TYPE,
       body: {
         doc: {
           [type]: attributes
@@ -241,22 +229,6 @@ export class SavedObjectsClient {
     });
 
     return normalizeEsDoc(response, { id, type, attributes });
-  }
-
-  _withKibanaIndexAndMappingFallback(method, params, fallbackParams) {
-    const fallbacks = {
-      'create': ['is_single_type'],
-      'index': ['is_single_type'],
-      'update': ['document_missing_exception']
-    };
-
-    return this._withKibanaIndex(method, params).catch(err => {
-      if (get(fallbacks, method, []).includes(get(err, 'data.type'))) {
-        return this._withKibanaIndex(method, Object.assign({}, params, fallbackParams));
-      }
-
-      throw err;
-    });
   }
 
   async _withKibanaIndex(method, params) {

@@ -86,8 +86,10 @@ export default  function MappingSetupService(kbnIndex, esAdmin) {
 
       return esAdmin.indices.putMapping({
         index: kbnIndex,
-        type: type,
-        body: body
+        type: 'doc',
+        body: {
+          properties: body
+        }
       }).then(function () {
         // add this type to the list of knownTypes
         knownTypes.push(type);
