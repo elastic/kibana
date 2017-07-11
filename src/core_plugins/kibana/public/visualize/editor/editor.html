@@ -33,7 +33,7 @@
 
         <!-- Allow searching if there is no linked Saved Search. -->
         <form
-          ng-if="vis.type.requiresSearch && !$state.linked"
+          ng-if="vis.type.requiresSearch && !$state.linked && vis.type.options.showQueryBar"
           name="queryInput"
           ng-submit="fetch()"
           class="fullWidth"
@@ -81,6 +81,7 @@
 
   <!-- Filters. -->
   <filter-bar
+    ng-if="vis.type.options.showFilterBar"
     state="state"
     index-patterns="[indexPattern]"
   ></filter-bar>
