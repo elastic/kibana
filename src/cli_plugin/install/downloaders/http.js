@@ -5,14 +5,18 @@ import { createWriteStream } from 'fs';
 import HttpProxyAgent from 'http-proxy-agent';
 import URL from 'url';
 
+function getEnv(name) {
+  return process.env[name.toLowerCase()] || process.env[name.toUpperCase()];
+}
+
 function getProxyAgent(sourceUrl, logger) {
-  const httpProxy = process.env.http_proxy || process.env.HTTP_PROXY;
+  const httpProxy = getEnv('http_proxy') || '';
   // we have a proxy detected, lets use it
   if (httpProxy) {
     logger.log(`Picked up proxy ${httpProxy} from http_proxy environment variable.`);
     // get the hostname of the sourceUrl
-    const hostname = URL.parse(sourceUrl).hostname;
-    const noProxy = process.env.no_proxy || process.env.NO_PROXY || '';
+    const { hostname } = URL.parse(sourceUrl);
+    const noProxy = getEnv('no_proxy') || '';
     const excludedHosts = noProxy.split(',');
 
     // proxy if the hostname is not in noProxy
