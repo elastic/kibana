@@ -30,6 +30,9 @@ export function VislibLibDispatchProvider(Private, config) {
      * e: (d3.event|*), handler: (Object|*)}} Event response object
      */
     eventResponse(d, i) {
+
+      // console.log('event response', arguments);
+
       const datum = d._input || d;
       const data = d3.event.target.nearestViewportElement ?
         d3.event.target.nearestViewportElement.__data__ : d3.event.target.__data__;
@@ -40,7 +43,6 @@ export function VislibLibDispatchProvider(Private, config) {
       const slices = isSlices ? data.slices : undefined;
       const handler = this.handler;
       const color = _.get(handler, 'data.color');
-      const isPercentage = (handler && handler.visConfig.get('mode', 'normal') === 'percentage');
 
       const eventData = {
         value: d.y,
@@ -63,7 +65,7 @@ export function VislibLibDispatchProvider(Private, config) {
         if (object) {
           eventData.value = +object.values[i].y;
 
-          if (isPercentage) {
+          if (d.aggConfig ? d.aggConfig.isPercentage() : false) {
             // Add the formatted percentage to the point object
             eventData.percent = (100 * d.y).toFixed(1) + '%';
           }
