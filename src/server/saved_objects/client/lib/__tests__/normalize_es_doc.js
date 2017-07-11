@@ -86,4 +86,20 @@ describe('normalizeEsDoc', () => {
       error: 'An error!'
     });
   });
+
+  it('handles legacy doc having an attribute the same as type', () => {
+    const doc = {
+      _id: 'foo',
+      _type: 'test',
+      _version: 2,
+      _source: { test: 'test' }
+    };
+
+    expect(normalizeEsDoc(doc)).to.eql({
+      id: 'foo',
+      type: 'test',
+      version: 2,
+      attributes: { test: 'test' }
+    });
+  });
 });
