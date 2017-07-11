@@ -31,7 +31,7 @@ module.exports = new Element({
     }
 
     events.on('destroy', destroy);
-    events.on('resize', debounce(resize, 100, { maxWait: 100 }));
+    events.on('resize', debounce(resize, 40, { maxWait: 40 })); // 1000 / 40 = 25fps
 
     return done(plot);
   },
