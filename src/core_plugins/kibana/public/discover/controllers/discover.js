@@ -666,7 +666,7 @@ function discoverController($scope, config, courier, $route, $window, Notifier,
 
     if (own && !stateVal) return own;
     if (stateVal && !stateValFound) {
-      const err = '"' + stateVal + '" is not a configured pattern. ';
+      const err = '"' + stateVal + '" is not a configured pattern ID. ';
       if (own) {
         notify.warning(err + ' Using the saved index pattern: "' + own.id + '"');
         return own;
