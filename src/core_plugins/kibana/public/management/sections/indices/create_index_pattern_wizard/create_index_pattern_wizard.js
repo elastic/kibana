@@ -31,6 +31,7 @@ uiModules.get('apps/management')
   Private,
   Promise
 ) {
+  const MAX_NUMBER_OF_MATCHING_INDICES = 3;
   const indicesService = $injector.get('indices');
   const notify = new Notifier();
   const refreshKibanaIndex = Private(RefreshKibanaIndex);
@@ -92,7 +93,7 @@ uiModules.get('apps/management')
 
     // All system indices begin with a period.
     return indices.filter(index => (
-      index.indexOf('.') !== 0
+      index.name.indexOf('.') !== 0
     ));
   };
 
@@ -123,8 +124,8 @@ uiModules.get('apps/management')
     }
 
     const thisFetchMatchingIndicesRequest = mostRecentFetchMatchingIndicesRequest = Promise.all([
-      indicesService.getIndices(exactSearchQuery),
-      indicesService.getIndices(partialSearchQuery),
+      indicesService.getIndices(exactSearchQuery, MAX_NUMBER_OF_MATCHING_INDICES),
+      indicesService.getIndices(partialSearchQuery, MAX_NUMBER_OF_MATCHING_INDICES),
       createReasonableWait(),
     ])
     .then(([
@@ -137,13 +138,17 @@ uiModules.get('apps/management')
         updateWhiteListedIndices();
         this.isFetchingMatchingIndices = false;
       }
+    }).catch(error => {
+      notify.error(error);
     });
   };
 
   this.fetchExistingIndices = () => {
     this.isFetchingExistingIndices = true;
+    const allExistingLocalAndRemoteIndicesPattern = '*,*:*';
+
     Promise.all([
-      indicesService.getIndices('*'),
+      indicesService.getIndices(allExistingLocalAndRemoteIndicesPattern, MAX_NUMBER_OF_MATCHING_INDICES),
       createReasonableWait(),
     ])
     .then(([allIndicesResponse]) => {
@@ -151,6 +156,8 @@ uiModules.get('apps/management')
       allIndices = allIndicesResponse.sort();
       updateWhiteListedIndices();
       this.isFetchingExistingIndices = false;
+    }).catch(error => {
+      notify.error(error);
     });
   };
 
@@ -226,8 +233,8 @@ uiModules.get('apps/management')
     .then(([fields]) => {
       this.timeFieldOptions = extractTimeFieldsFromFields(fields);
     })
-    .catch(err => {
-      notify.error(err);
+    .catch(error => {
+      notify.error(error);
     })
     .finally(() => {
       this.isFetchingTimeFieldOptions = false;
