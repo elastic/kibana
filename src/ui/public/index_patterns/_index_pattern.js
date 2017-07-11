@@ -77,20 +77,13 @@ export function IndexPatternProvider(Private, $http, config, kbnIndex, Promise, 
 
   function updateFromElasticSearch(indexPattern, response) {
     if (!response.found) {
-      // custom notification provides link to create index pattern with missing id
-      const notificationMessage = `Could not locate that index-pattern (id: ${indexPattern.id})`;
-      const actions = [{
-        text: 'OK',
-        dataTestSubj: 'reportCompleteOkToastButton'
-      }, {
-        text: 'Create',
-        callback: () => {
-          kbnUrl.change('/management/kibana/index?id={{id}}&name=', { id: indexPattern.id });
-        }
-      }];
+      const markdownSaveId = indexPattern.id.replace('*', '%2A');
 
-      notify.custom(notificationMessage, { type: 'error', icon: 'warning', lifetime: 0, actions });
-      throw new SavedObjectNotFound(type, indexPattern.id);
+      throw new SavedObjectNotFound(
+        type,
+        indexPattern.id,
+        kbnUrl.eval('#/management/kibana/index?id={{id}}&name=', { id: markdownSaveId })
+      );
     }
 
     _.forOwn(mapping, (fieldMapping, name) => {

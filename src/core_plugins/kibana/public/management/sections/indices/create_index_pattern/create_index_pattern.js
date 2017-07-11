@@ -31,7 +31,7 @@ uiModules.get('apps/management')
 
   // Configure the new index pattern we're going to create.
   this.formValues = {
-    id: $routeParams.id,
+    id: $routeParams.id ? decodeURIComponent($routeParams.id) : undefined,
     name: config.get('indexPattern:placeholder'),
     expandWildcard: false,
     timeFieldOption: null,
