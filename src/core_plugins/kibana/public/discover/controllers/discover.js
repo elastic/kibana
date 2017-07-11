@@ -231,6 +231,7 @@ function discoverController(
       fields: selectFields,
       metaFields: $scope.indexPattern.metaFields,
       conflictedTypesFields: $scope.indexPattern.fields.filter(f => f.type === 'conflict').map(f => f.name),
+      indexPatternId: searchSource.get('index').id
     };
   };
 
