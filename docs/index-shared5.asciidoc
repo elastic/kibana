@@ -1,0 +1,6 @@
+
+include::plugins.asciidoc[]
+
+include::development.asciidoc[]
+
+include::release-notes.asciidoc[]

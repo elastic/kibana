@@ -1,0 +1,24 @@
+[[release-notes-5.3.3]]
+== 5.3.3 Release Notes
+
+Also see <<breaking-changes-5.0>>.
+
+[float]
+[[security-5.3.3]]
+=== Security fix
+Beginning in Kibana 5.3.0, the discovery app in Kibana is vulnerable to an
+cross-site scripting attack (XSS) that would allow an attacker to inject
+JavaScript into other user's browsers via Elasticsearch documents. This was
+made possible by the field formatters plugin API and how it handled
+compiling of template values in the discover doc table.
+Versions 5.3.3 and 5.4.1 include a fix for this vulnerability
+by changing the binding and compilation behavior for field formatters.
+Thanks to Thomas Gøytil for reporting this issue. +
+{security}[ESA-2017-08] ({pull}11911[#11911])
+
+
+[float]
+[[bug-5.3.3]]
+=== Bug fixes
+Core::
+* Formatted output is now non-bindable {pull}11911[#11911]

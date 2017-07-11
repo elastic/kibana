@@ -12,7 +12,7 @@ means that being authenticated at all was sufficient to have both read and
 write access to the advanced settings and short URLs. +
 Kibana 5.0.2 now authenticates requests for each service on behalf of the
 current user. +
-{security}[ESA-2016-10] ({pull}9214[#9214])
+{security-ref}[ESA-2016-10] ({pull}9214[#9214])
 
 [float]
 [[bug-5.0.2]]

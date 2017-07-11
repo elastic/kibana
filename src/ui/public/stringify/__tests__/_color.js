@@ -21,10 +21,14 @@ describe('Color Format', function () {
           background: 'yellow'
         }]
       });
-      expect(colorer.convert(99, 'html')).to.eql('99');
-      expect(colorer.convert(100, 'html')).to.eql('<span style="color: blue;background-color: yellow;">100</span>');
-      expect(colorer.convert(150, 'html')).to.eql('<span style="color: blue;background-color: yellow;">150</span>');
-      expect(colorer.convert(151, 'html')).to.eql('151');
+      expect(colorer.convert(99, 'html')).to.eql('<span ng-non-bindable>99</span>');
+      expect(colorer.convert(100, 'html')).to.eql(
+        '<span ng-non-bindable><span style="color: blue;background-color: yellow;">100</span></span>'
+      );
+      expect(colorer.convert(150, 'html')).to.eql(
+        '<span ng-non-bindable><span style="color: blue;background-color: yellow;">150</span></span>'
+      );
+      expect(colorer.convert(151, 'html')).to.eql('<span ng-non-bindable>151</span>');
     });
 
     it('should not convert invalid ranges', function () {
@@ -36,7 +40,7 @@ describe('Color Format', function () {
           background: 'yellow'
         }]
       });
-      expect(colorer.convert(99, 'html')).to.eql('99');
+      expect(colorer.convert(99, 'html')).to.eql('<span ng-non-bindable>99</span>');
     });
   });
 
@@ -52,15 +56,23 @@ describe('Color Format', function () {
       });
 
       const converter = colorer.getConverterFor('html');
-      expect(converter('B', 'html')).to.eql('B');
-      expect(converter('AAA', 'html')).to.eql('<span style="color: blue;background-color: yellow;">AAA</span>');
-      expect(converter('AB', 'html')).to.eql('<span style="color: blue;background-color: yellow;">AB</span>');
-      expect(converter('a', 'html')).to.eql('a');
+      expect(converter('B', 'html')).to.eql('<span ng-non-bindable>B</span>');
+      expect(converter('AAA', 'html')).to.eql(
+        '<span ng-non-bindable><span style="color: blue;background-color: yellow;">AAA</span></span>'
+      );
+      expect(converter('AB', 'html')).to.eql(
+        '<span ng-non-bindable><span style="color: blue;background-color: yellow;">AB</span></span>'
+      );
+      expect(converter('a', 'html')).to.eql('<span ng-non-bindable>a</span>');
 
-      expect(converter('B', 'html')).to.eql('B');
-      expect(converter('AAA', 'html')).to.eql('<span style="color: blue;background-color: yellow;">AAA</span>');
-      expect(converter('AB', 'html')).to.eql('<span style="color: blue;background-color: yellow;">AB</span>');
-      expect(converter('a', 'html')).to.eql('a');
+      expect(converter('B', 'html')).to.eql('<span ng-non-bindable>B</span>');
+      expect(converter('AAA', 'html')).to.eql(
+        '<span ng-non-bindable><span style="color: blue;background-color: yellow;">AAA</span></span>'
+      );
+      expect(converter('AB', 'html')).to.eql(
+        '<span ng-non-bindable><span style="color: blue;background-color: yellow;">AB</span></span>'
+      );
+      expect(converter('a', 'html')).to.eql('<span ng-non-bindable>a</span>');
     });
   });
 });

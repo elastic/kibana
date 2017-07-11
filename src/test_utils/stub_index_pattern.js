@@ -1,19 +1,17 @@
 import _ from 'lodash';
 import sinon from 'sinon';
 import Promise from 'bluebird';
-import IndexedArray from 'ui/indexed_array';
 import IndexPattern from 'ui/index_patterns/_index_pattern';
 import formatHit from 'ui/index_patterns/_format_hit';
 import getComputedFields from 'ui/index_patterns/_get_computed_fields';
 import RegistryFieldFormatsProvider from 'ui/registry/field_formats';
 import IndexPatternsFlattenHitProvider from 'ui/index_patterns/_flatten_hit';
-import IndexPatternsFieldProvider from 'ui/index_patterns/_field';
+import IndexPatternsFieldListProvider from 'ui/index_patterns/_field_list';
 
 export default function (Private) {
   const fieldFormats = Private(RegistryFieldFormatsProvider);
   const flattenHit = Private(IndexPatternsFlattenHitProvider);
-
-  const Field = Private(IndexPatternsFieldProvider);
+  const FieldList = Private(IndexPatternsFieldListProvider);
 
   function StubIndexPattern(pattern, timeField, fields) {
     this.id = pattern;
@@ -39,17 +37,17 @@ export default function (Private) {
     this.formatHit = formatHit(this, fieldFormats.getDefaultInstance('string'));
     this.formatField = this.formatHit.formatField;
 
-    this._indexFields = function () {
-      this.fields = new IndexedArray({
-        index: ['name'],
-        group: ['type'],
-        initialSet: fields.map(function (field) {
-          return new Field(this, field);
-        }, this)
-      });
+    this._reindexFields = function () {
+      this.fields = new FieldList(this, this.fields || fields);
     };
 
-    this._indexFields();
+    this.stubSetFieldFormat = function (fieldName, id, params) {
+      const FieldFormat = fieldFormats.byId[id];
+      this.fieldFormatMap[fieldName] = new FieldFormat(params);
+      this._reindexFields();
+    };
+
+    this._reindexFields();
   }
 
   return StubIndexPattern;

@@ -7,7 +7,7 @@ function createAnchorQueryBody(uid, contextSort) {
         _uid: [uid],
       },
     },
-    sort: [ contextSort, { _uid: 'asc' } ],
+    sort: contextSort,
   };
 }
 
@@ -19,7 +19,7 @@ function createSuccessorsQueryBody(anchorSortValues, contextSort, size) {
       match_all: {},
     },
     size,
-    sort: [ contextSort, { _uid: 'asc' } ],
+    sort: contextSort,
     search_after: anchorSortValues,
   };
 }

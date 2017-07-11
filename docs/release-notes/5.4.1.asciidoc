@@ -1,0 +1,60 @@
+[[release-notes-5.4.1]]
+== 5.4.1 Release Notes
+
+Also see <<breaking-changes-5.0>>.
+
+[float]
+[[security-5.4.1]]
+=== Security fix
+The time series visual builder that was released in 5.4.0 is vulnerable to
+a cross-site scripting attack (XSS), where a malicious user could embed
+HTML into markdown documents that could result in JavaScript being
+executed in other users' browsers. This could be abused to steal sensitive
+information or to perform destructive actions on behalf of other users.
+5.4.1 fixes this vulnerability by no longer allowing HTML in markdown documents. +
+{security}[ESA-2017-07] ({pull}11770[#11770])
+
+Beginning in Kibana 5.3.0, the discovery app in Kibana is vulnerable to an
+cross-site scripting attack (XSS) that would allow an attacker to inject
+JavaScript into other user's browsers via Elasticsearch documents. This was
+made possible by the field formatters plugin API and how it handled
+compiling of template values in the discover doc table.
+Versions 5.3.3 and 5.4.1 include a fix for this vulnerability
+by changing the binding and compilation behavior for field formatters.
+Thanks to Thomas Gøytil for reporting this issue. +
+{security}[ESA-2017-08] ({pull}11911[#11911])
+
+
+[float]
+[[bug-5.4.1]]
+=== Bug fixes
+Core::
+* Formatted output is now non-bindable {pull}11911[#11911]
+Dev Tools::
+* [console] Properly check for existence of deprecated console configs {pull}11670[#11670]
+* [console] If using an https agent, set rejectUnauthorized in the agent {pull}11700[#11700]
+Dashboard::
+* Fix a bug that prevented the dashboard from loading if any visualizations on the dashboard could not be found {pull}11324[#11324]
+  - A bug was introduced in 5.2 where if a visualization on a dashboard could not be found, it would throw an error and prevent the entire dashboard from loading. We've fixed this so the rest of your dashboard will continue to load and function properly.
+Discover::
+* Show long index pattern names in selector {pull}11907[#11907]
+* Add ignore_unmapped to geo filters to prevent exceptions {pull}11461[#11461]
+* Only use day, month, year provided by datepicker {pull}11773[#11773]
+Management::
+* Report shard failures in the field_capabilities response {pull}11450[#11450]
+  - The Kibana field_capabilities API will now include any shard failures in its response so that the user is notified when an error has occurred while creating an index pattern or refreshing a pattern's fields.
+* Prevent refresh fields error from breaking index patterns management page {pull}11885[#11885]
+Visualize::
+* Fix spelling in time series visual builder {pull}11212[#11212]
+* Fix missing icons in Visualize listing. {pull}11243[#11243]
+  - When we implemented the new Visualization Wizard UI, we switched from using font icons to SVG images to represent each visualization type. However, we forgot to update the Visualize landing page table to use these SVG images.
+* Fix missing border of PaginatedTable rows in Firefox {pull}11452[#11452]
+  - When we added the ability to select filters from within a table, we applied relative positioning to the table rows. This isn't supported in Firefox, and had some odd visual results.
+* Return Boom errors directly to the browser for Time Series Visual Builder {pull}11656[#11656]
+* Fixing heatmap black squares {pull}11489[#11489]
+* Fix duplicate chart title {pull}11594[#11594]
+* Should not throw error when fitting on empty data. {pull}11620[#11620]
+* fix zoom settings {pull}11707[#11707]
+* geo_centroid should not be available as a metric {pull}11630[#11630]
+* Disable scroll zooming on the map. {pull}11825[#11825]
+* Remove HTML support from Markdown for Time Series Visual Builder {pull}11770[#11770]

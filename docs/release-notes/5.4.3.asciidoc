@@ -1,0 +1,18 @@
+[[release-notes-5.4.3]]
+== 5.4.3 Release Notes
+
+Also see <<breaking-changes-5.0>>.
+
+[float]
+[[enhancement-5.4.3]]
+=== Enhancements
+Core::
+* [licenses] Bump ua-parser-js override {pull}12474[#12474]
+
+[float]
+[[bug-5.4.3]]
+=== Bug fixes
+Visualize::
+* [Fix for #10328] vislib container too small error message {pull}11951[#11951]
+* [Fix for #8341] Ensure no scroll-bar pops up inside timelion viz {pull}12298[#12298]
+* [Fix for #11954] removing old point series defaults {pull}11958[#11958]

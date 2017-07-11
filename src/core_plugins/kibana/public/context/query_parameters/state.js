@@ -1,4 +1,4 @@
-export function createInitialQueryParametersState(defaultStepSize) {
+export function createInitialQueryParametersState(defaultStepSize, tieBreakerField) {
   return {
     anchorUid: null,
     columns: [],
@@ -7,5 +7,6 @@ export function createInitialQueryParametersState(defaultStepSize) {
     predecessorCount: 0,
     successorCount: 0,
     sort: [],
+    tieBreakerField,
   };
 }

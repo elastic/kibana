@@ -11,7 +11,7 @@
     "dashboarding"
   ],
   "private": false,
-  "version": "5.4.1",
+  "version": "5.4.4",
   "build": {
     "number": 8467,
     "sha": "6cb7fec4e154faa0a4a3fee4b33dfef91b9870d9"
@@ -112,7 +112,7 @@
     "check-hash": "1.0.1",
     "color": "1.0.3",
     "commander": "2.8.1",
-    "css-loader": "0.17.0",
+    "css-loader": "0.28.1",
     "d3": "3.5.6",
     "d3-cloud": "1.2.1",
     "dragula": "3.7.0",
@@ -263,7 +263,6 @@
     "ncp": "2.0.0",
     "nock": "8.0.0",
     "node-sass": "3.8.0",
-    "npm": "3.10.10",
     "portscanner": "1.0.0",
     "proxyquire": "1.7.10",
     "sass-loader": "4.0.0",

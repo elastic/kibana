@@ -2,14 +2,13 @@ import $ from 'jquery';
 import ngMock from 'ng_mock';
 import expect from 'expect.js';
 import IndexPatternsFieldProvider from 'ui/index_patterns/_field';
-import RegistryFieldFormatsProvider from 'ui/registry/field_formats';
+
 import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
 import _ from 'lodash';
 
 describe('FieldEditor directive', function () {
 
   let Field;
-  let StringFormat;
   let $rootScope;
 
   let compile;
@@ -27,12 +26,9 @@ describe('FieldEditor directive', function () {
 
     $rootScope = $injector.get('$rootScope');
     Field = Private(IndexPatternsFieldProvider);
-    StringFormat = Private(RegistryFieldFormatsProvider).getType('string');
 
     $rootScope.indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
-    // set the field format for this field
-    $rootScope.indexPattern.fieldFormatMap.time = new StringFormat({ foo: 1, bar: 2 });
-    $rootScope.indexPattern._indexFields();
+    $rootScope.indexPattern.stubSetFieldFormat('time', 'string', { foo: 1, bar: 2 });
     $rootScope.field = $rootScope.indexPattern.fields.byName.time;
 
     compile = function () {

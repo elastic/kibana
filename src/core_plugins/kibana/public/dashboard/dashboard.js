@@ -94,12 +94,25 @@ app.directive('dashboardApp', function (Notifier, courier, AppState, timefilter,
         dashboardState.syncTimefilterWithDashboard(timefilter, quickRanges);
       }
 
+      const updateState = () => {
+        // Following the "best practice" of always have a '.' in your ng-models –
+        // https://github.com/angular/angular.js/wiki/Understanding-Scopes
+        $scope.model = {
+          query: dashboardState.getQuery(),
+          darkTheme: dashboardState.getDarkTheme(),
+          timeRestore: dashboardState.getTimeRestore(),
+          title: dashboardState.getTitle(),
+        };
+        $scope.panels = dashboardState.getPanels();
+      };
+
       // Part of the exposed plugin API - do not remove without careful consideration.
       this.appStatus = {
         dirty: !dash.id
       };
       dashboardState.stateMonitor.onChange(status => {
         this.appStatus.dirty = status.dirty || !dash.id;
+        updateState();
       });
 
       dashboardState.applyFilters(dashboardState.getQuery(), filterBar.getFilters());
@@ -110,16 +123,8 @@ app.directive('dashboardApp', function (Notifier, courier, AppState, timefilter,
       dash.searchSource.version(true);
       courier.setRootSearchSource(dash.searchSource);
 
-      // Following the "best practice" of always have a '.' in your ng-models –
-      // https://github.com/angular/angular.js/wiki/Understanding-Scopes
-      $scope.model = {
-        query: dashboardState.getQuery(),
-        darkTheme: dashboardState.getDarkTheme(),
-        timeRestore: dashboardState.getTimeRestore(),
-        title: dashboardState.getTitle()
-      };
+      updateState();
 
-      $scope.panels = dashboardState.getPanels();
       $scope.refresh = (...args) => {
         $rootScope.$broadcast('fetch');
         courier.fetch(...args);
