@@ -1,0 +1,28 @@
+{
+  "name": "@elastic/eslint-config-kibana",
+  "version": "0.7.0",
+  "description": "The eslint config used by the kibana team",
+  "main": ".eslintrc.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/elastic/eslint-config-kibana.git"
+  },
+  "keywords": [],
+  "author": "Spencer Alger <email@spalger.com>",
+  "license": "Apache-2.0",
+  "bugs": {
+    "url": "https://github.com/elastic/eslint-config-kibana/issues"
+  },
+  "homepage": "https://github.com/elastic/eslint-config-kibana#readme",
+  "peerDependencies": {
+    "babel-eslint": "^7.2.3",
+    "eslint": "^4.1.0",
+    "eslint-plugin-babel": "^4.1.1",
+    "eslint-plugin-import": "^2.6.0",
+    "eslint-plugin-mocha": "^4.9.0",
+    "eslint-plugin-react": "^7.0.1"
+  }
+}
