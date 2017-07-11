@@ -63,10 +63,45 @@ describe('kibana_map tests', function () {
 
       expect(kibanaMap.getCenter().lon).to.equal(0);
       expect(kibanaMap.getCenter().lat).to.equal(0);
+    });
+
+  });
+
+  describe('KibanaMap - getBounds', function () {
+
+    beforeEach(async function () {
+      setupDOM();
+      domNode.style.width = '1600px';
+      domNode.style.height = '1024px';
+      kibanaMap = new KibanaMap(domNode, {
+        minZoom: 1,
+        maxZoom: 10,
+        center: [0,0],
+        zoom: 2
+      });
+    });
+
+    afterEach(function () {
+      kibanaMap.destroy();
+      teardownDOM();
+    });
+
+    it('should get trimmed bounds when isTrimmed is true', function () {
+      const bounds = kibanaMap.getBounds(true);
+      expect(bounds.bottom_right.lon).to.equal(180);
+      expect(bounds.top_left.lon).to.equal(-180);
+    });
+
+    it('should get trimmed bounds by default', function () {
       const bounds = kibanaMap.getBounds();
       expect(bounds.bottom_right.lon).to.equal(180);
       expect(bounds.top_left.lon).to.equal(-180);
+    });
 
+    it('should get extended bounds when isTrimmed is false', function () {
+      const bounds = kibanaMap.getBounds(false);
+      expect(bounds.bottom_right.lon).to.equal(281.25);
+      expect(bounds.top_left.lon).to.equal(-281.25);
     });
   });
 
