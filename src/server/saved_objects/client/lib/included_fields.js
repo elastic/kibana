@@ -10,8 +10,9 @@ export function includedFields(type, fields) {
 
   // convert to an array
   const sourceFields = typeof fields === 'string' ? [fields] : fields;
+  const sourceType = type || '*';
 
-  return sourceFields.map(f => `${type}.${f}`)
+  return sourceFields.map(f => `${sourceType}.${f}`)
     .concat('type')
     .concat(fields); // v5 compatibility
 }

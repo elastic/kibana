@@ -16,7 +16,7 @@ describe('SavedObjectsClient', () => {
   describe('mapping', () => {
     beforeEach(() => {
       callAdminCluster = sinon.stub();
-      savedObjectsClient = new SavedObjectsClient('.kibana-test', callAdminCluster);
+      savedObjectsClient = new SavedObjectsClient('.kibana-test', {}, callAdminCluster);
     });
 
     afterEach(() => {

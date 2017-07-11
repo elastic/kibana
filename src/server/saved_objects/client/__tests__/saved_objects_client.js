@@ -382,7 +382,9 @@ describe('SavedObjectsClient', () => {
       expect(callAdminCluster.calledOnce).to.be(true);
 
       const options = callAdminCluster.getCall(0).args[1];
-      expect(options._source).to.eql('title');
+      expect(options._source).to.eql([
+        '*.title', 'type', 'title'
+      ]);
     });
   });
 

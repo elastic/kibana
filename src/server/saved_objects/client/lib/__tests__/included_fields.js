@@ -26,6 +26,12 @@ describe('includedFields', () => {
     expect(fields).to.contain('config.bar');
   });
 
+  it('uses wildcard when type is not provided', () => {
+    const fields = includedFields(undefined, 'foo');
+    expect(fields).to.have.length(3);
+    expect(fields).to.contain('*.foo');
+  });
+
   describe('v5 compatibility', () => {
     it('includes legacy field path', () => {
       const fields = includedFields('config', ['foo', 'bar']);
