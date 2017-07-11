@@ -290,6 +290,17 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
           log.debug('Index pattern created: ' + currentUrl);
         }
       });
+
+      return await this.getIndexPatternIdFromUrl();
+    }
+
+    async getIndexPatternIdFromUrl() {
+      const currentUrl = await remote.getCurrentUrl();
+      const indexPatternId = currentUrl.match(/.*\/(.*)/)[1];
+
+      log.debug('index pattern ID: ', indexPatternId);
+
+      return indexPatternId;
     }
 
     async setIndexPatternField(pattern) {
