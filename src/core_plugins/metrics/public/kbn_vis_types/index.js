@@ -51,7 +51,8 @@ export default function MetricsVisProvider(Private) {
         interval: 'auto',
         axis_position: 'left',
         axis_formatter: 'number',
-        show_legend:1
+        show_legend:1,
+        show_grid: 1
       },
       component: require('../components/vis_editor')
     },
