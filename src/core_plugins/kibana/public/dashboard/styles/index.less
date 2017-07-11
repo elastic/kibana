@@ -5,46 +5,67 @@
 .fullScreenModePlaceholder {
   text-align: center;
   width: 100%;
-  z-index: 50;
   height: 0;
   bottom: 0;
   position: absolute;
 }
 
 .exitFullScreenMode {
-  background-color: @globalColorLightestGray;
-  border-top-left-radius: 4px;
-  border-top-right-radius: 4px;
-  border-bottom-left-radius: 0;
-  border-bottom-right-radius: 0;
-  width: 200px;
   height: 40px;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  margin-left: auto;
-  margin-right: auto;
-  padding-bottom: 0;
+  left: 0px;
+  bottom: 0px;
   position: fixed;
-  transform: translateY(22px);
-  z-index: 50;
   display: block;
-  transition: transform .2s ease-in-out;
-  border: solid 1px @globalColorLightGray;
-  border-bottom: 0;
+  padding: 0;
+  border: none;
+  background: none;
+}
 
-  .kuiIcon {
-    display: block;
-  }
 
-  &:hover {
-    transform: translateY(0px);
+.exitFullScreenMode:hover,
+.exitFullScreenMode:focus {
+  transition: all .5s ease;
+
+  .exitFullScreenModeText {
+    visibility: visible;
+    opacity: 1;
+    transition: all .2s ease;
+    transform: translateX(-14px);
   }
 }
 
-.exitFullScreenMode:hover {
+.exitFullScreenModeLogo {
+  display: block;
+  background-color: #005571;
+  width: 92px;
+  height: 40px;
+  background-image: url("~ui/images/kibana.svg");
+  background-position: 8px 5px;
+  background-size: 72px 30px;
+  background-repeat: no-repeat;
+  z-index: 50;
+}
+
+/**
+ * 1. Calc made to allow caret in text to peek out / animate.
+ */
+
+.exitFullScreenModeText {
+  display: block;
+  background: @globalColorBlue;
+  color: tint(@globalColorBlue, 70%);
+  line-height: 40px;
+  display: inline-block;
+  height: 40px;
+  position: absolute;
+  left: calc(100% + 14px);  // 1
+  top: 0px;
   bottom: 0px;
-  transition: all .5s ease;
+  white-space: nowrap;
+  padding: 0px 4px 0px 10px;
+  transition: all .2s ease;
+  transform: translateX(-100%);
+  z-index: -1;
 }
 
 .tab-dashboard {
