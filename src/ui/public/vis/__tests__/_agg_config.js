@@ -398,13 +398,6 @@ describe('AggConfig', function () {
       const label = aggConfig.makeLabel();
       expect(label).to.be('Count');
     });
-    it('default label should be "Percentage of Count" when Vis is in percentage mode', function () {
-      const vis = new Vis(indexPattern, {});
-      const aggConfig = vis.aggs[0];
-      aggConfig.vis.params.mode = 'percentage';
-      const label = aggConfig.makeLabel();
-      expect(label).to.be('Percentage of Count');
-    });
     it('empty label if the Vis type is not defined', function () {
       const vis = new Vis(indexPattern, {});
       const aggConfig = vis.aggs[0];
@@ -412,7 +405,249 @@ describe('AggConfig', function () {
       const label = aggConfig.makeLabel();
       expect(label).to.be('');
     });
+    describe('format percentage', function () {
+
+      it('pointseries - default label should be "Percentage of Count" when Vis is in percentage mode', function () {
+        const vis = new Vis(indexPattern, {});
+        const aggConfig = vis.aggs[0];
+        aggConfig.vis.params = JSON.parse(`{
+        "addLegend": true,
+        "addTimeMarker": false,
+        "addTooltip": true,
+        "categoryAxes": [
+          {
+            "id": "CategoryAxis-1",
+            "labels": {
+              "show": true,
+              "truncate": 100
+            },
+            "position": "bottom",
+            "scale": {
+              "type": "linear"
+            },
+            "show": true,
+            "style": {},
+            "title": {
+              "text": "@timestamp per 30 minutes"
+            },
+            "type": "category"
+          }
+        ],
+        "grid": {
+          "categoryLines": false,
+          "style": {
+            "color": "#eee"
+          }
+        },
+        "legendPosition": "right",
+        "seriesParams": [
+          {
+            "data": {
+              "id": "1",
+              "label": "Percentage of Count"
+            },
+            "drawLinesBetweenPoints": true,
+            "interpolate": "linear",
+            "mode": "stacked",
+            "show": "true",
+            "showCircles": true,
+            "type": "histogram",
+            "valueAxis": "ValueAxis-1"
+          },
+          {
+            "data": {
+              "id": "3",
+              "label": "Average bytes"
+            },
+            "drawLinesBetweenPoints": true,
+            "interpolate": "linear",
+            "lineWidth": 2,
+            "mode": "stacked",
+            "show": true,
+            "showCircles": true,
+            "type": "histogram",
+            "valueAxis": "ValueAxis-2"
+          }
+        ],
+        "times": [],
+        "type": "area",
+        "valueAxes": [
+          {
+            "id": "ValueAxis-1",
+            "labels": {
+              "filter": false,
+              "rotate": 0,
+              "show": true,
+              "truncate": 100
+            },
+            "name": "LeftAxis-1",
+            "position": "left",
+            "scale": {
+              "mode": "percentage",
+              "type": "linear"
+            },
+            "show": true,
+            "style": {},
+            "title": {
+              "text": "Percentage of Count"
+            },
+            "type": "value"
+          },
+          {
+            "id": "ValueAxis-2",
+            "labels": {
+              "filter": false,
+              "rotate": 0,
+              "show": true,
+              "truncate": 100
+            },
+            "name": "RightAxis-1",
+            "position": "right",
+            "scale": {
+              "mode": "normal",
+              "type": "linear"
+            },
+            "show": true,
+            "style": {},
+            "title": {
+              "text": "Average bytes"
+            },
+            "type": "value"
+          }
+        ]
+      }`);
+        const label = aggConfig.makeLabel();
+        expect(label).to.be('Percentage of Count');
+      });
+
+
+      it('pointseries - should not be percentage when different axis is percentage', function () {
+
+        const vis = new Vis(indexPattern, {});
+        const aggConfig = vis.aggs[0];
+        aggConfig.vis.params = JSON.parse(`{
+        "addLegend": true,
+        "addTimeMarker": false,
+        "addTooltip": true,
+        "categoryAxes": [
+          {
+            "id": "CategoryAxis-1",
+            "labels": {
+              "show": true,
+              "truncate": 100
+            },
+            "position": "bottom",
+            "scale": {
+              "type": "linear"
+            },
+            "show": true,
+            "style": {},
+            "title": {
+              "text": "@timestamp per 30 minutes"
+            },
+            "type": "category"
+          }
+        ],
+        "grid": {
+          "categoryLines": false,
+          "style": {
+            "color": "#eee"
+          }
+        },
+        "legendPosition": "right",
+        "seriesParams": [
+          {
+            "data": {
+              "id": "1",
+              "label": "Percentage of Count"
+            },
+            "drawLinesBetweenPoints": true,
+            "interpolate": "linear",
+            "mode": "stacked",
+            "show": "true",
+            "showCircles": true,
+            "type": "histogram",
+            "valueAxis": "ValueAxis-1"
+          },
+          {
+            "data": {
+              "id": "3",
+              "label": "Average bytes"
+            },
+            "drawLinesBetweenPoints": true,
+            "interpolate": "linear",
+            "lineWidth": 2,
+            "mode": "stacked",
+            "show": true,
+            "showCircles": true,
+            "type": "histogram",
+            "valueAxis": "ValueAxis-2"
+          }
+        ],
+        "times": [],
+        "type": "area",
+        "valueAxes": [
+          {
+            "id": "ValueAxis-1",
+            "labels": {
+              "filter": false,
+              "rotate": 0,
+              "show": true,
+              "truncate": 100
+            },
+            "name": "LeftAxis-1",
+            "position": "left",
+            "scale": {
+              "mode": "normal",
+              "type": "linear"
+            },
+            "show": true,
+            "style": {},
+            "title": {
+              "text": "Percentage of Count"
+            },
+            "type": "value"
+          },
+          {
+            "id": "ValueAxis-2",
+            "labels": {
+              "filter": false,
+              "rotate": 0,
+              "show": true,
+              "truncate": 100
+            },
+            "name": "RightAxis-1",
+            "position": "right",
+            "scale": {
+              "mode": "percentage",
+              "type": "linear"
+            },
+            "show": true,
+            "style": {},
+            "title": {
+              "text": "Average bytes"
+            },
+            "type": "value"
+          }
+        ]
+      }`);
+        const label = aggConfig.makeLabel();
+        expect(label).to.be('Count');
+      });
+
+      it('should not be percentage when parameter-shape does not match pointseries', function () {
+        const vis = new Vis(indexPattern, {});
+        const aggConfig = vis.aggs[0];
+        aggConfig.vis.params = 'foobar';
+        const label = aggConfig.makeLabel();
+        expect(label).to.be('Count');
+      });
+
+    });
+
+
   });
+
 
   describe('#fieldFormatter - custom getFormat handler', function () {
     it('returns formatter from getFormat handler', function () {
