@@ -67,24 +67,25 @@ class TableVis extends Component {
   }
 
   renderHeader() {
-    const { model, sort, onSort } = this.props;
+    const { model, uiState, onUiState } = this.props;
+    const sort = uiState.get('sort', {
+      column: '_default_',
+      order: 'asc'
+    });
     const columns  = model.series.map(item => {
       const metric = _.last(item.metrics);
       const label = item.label || calculateLabel(metric, item.metrics);
-      const field = `data.${item.id}.last`;
       const handleClick = () => {
-        if (model.indexing) {
-          let order;
-          if (sort.field === field) {
-            order = sort.order === 'asc' ? 'desc' : 'asc';
-          } else {
-            order = 'asc';
-          }
-          onSort({ field, order });
+        let order;
+        if (sort.column === item.id) {
+          order = sort.order === 'asc' ? 'desc' : 'asc';
+        } else {
+          order = 'asc';
         }
+        onUiState('sort', { column: item.id, order });
       };
       let sortComponent;
-      if (model.indexing && sort.field === field) {
+      if (sort.column === item.id) {
         const sortIcon = sort.order === 'asc' ? 'sort-amount-asc' : 'sort-amount-desc';
         sortComponent = (
           <i className={`fa fa-${sortIcon}`}></i>
@@ -100,19 +101,19 @@ class TableVis extends Component {
     const label = model.pivot_label || model.pivot_field || model.pivot_id;
     const sortIcon = sort.order === 'asc' ? 'sort-amount-asc' : 'sort-amount-desc';
     let sortComponent;
-    if (!sort.field) {
+    if (sort.column === '_default_') {
       sortComponent = (
         <i className={`fa fa-${sortIcon}`}></i>
       );
     }
     const handleSortClick = () => {
       let order;
-      if (!sort.field) {
+      if (sort.column === '_default_') {
         order = sort.order === 'asc' ? 'desc' : 'asc';
       } else {
         order = 'asc';
       }
-      onSort({ field: null, order });
+      onUiState('sort', { column: '_default_', order });
     };
     return (
       <tr>
@@ -168,8 +169,8 @@ TableVis.propTypes = {
   model: PropTypes.object,
   backgroundColor: PropTypes.string,
   onPaginate: PropTypes.func,
-  sort: PropTypes.object,
-  onSort: PropTypes.func,
+  onUiState: PropTypes.func,
+  uiState: PropTypes.object,
   pageNumber: PropTypes.number,
   reversed: PropTypes.bool
 };

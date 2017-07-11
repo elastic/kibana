@@ -37,6 +37,8 @@ function Visualization(props) {
       model: props.model,
       onBrush: props.onBrush,
       onChange: props.onChange,
+      onUiState: props.onUiState,
+      uiState: props.uiState,
       visData: visData.type === model.type ? visData : {}
     });
   }
@@ -53,6 +55,8 @@ Visualization.propTypes = {
   model: PropTypes.object,
   onBrush: PropTypes.func,
   onChange: PropTypes.func,
+  onUiState: PropTypes.func,
+  uiState: PropTypes.object,
   reversed: PropTypes.bool,
   visData: PropTypes.object
 };

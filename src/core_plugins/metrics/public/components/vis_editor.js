@@ -11,6 +11,11 @@ class VisEditor extends Component {
     super(props);
     this.state = { model: props.vis.params, dirty: false, autoApply: true };
     this.onBrush = brushHandler(props.vis.API.timeFilter);
+    this.handleUiState = this.handleUiState.bind(this, props.vis);
+  }
+
+  handleUiState(vis, ...args) {
+    vis.uiStateVal(...args);
   }
 
   render() {
@@ -37,6 +42,9 @@ class VisEditor extends Component {
     if (!this.props.vis.isEditorMode()) {
       return (
         <Visualization
+          onBrush={this.onBrush}
+          onUiState={this.handleUiState}
+          uiState={this.props.vis.getUiState()}
           fields={this.props.vis.fields}
           model={this.props.vis.params}
           visData={this.props.visData} />
@@ -57,6 +65,8 @@ class VisEditor extends Component {
             autoApply={this.state.autoApply}
             model={model}
             visData={this.props.visData}
+            onUiState={this.handleUiState}
+            uiState={this.props.vis.getUiState()}
             onBrush={this.onBrush}
             onCommit={handleCommit}
             onToggleAutoApply={handleAutoApplyToggle}
