@@ -44,6 +44,7 @@ export function MapsVisualizationProvider(serviceSettings, Notifier, getAppState
         if (esResponse && typeof esResponse.geohashGridAgg === 'undefined') {
           return resolve();
         }
+
         if (status.data) {
           this._recreateGeohashLayer(esResponse);
         }
@@ -53,7 +54,8 @@ export function MapsVisualizationProvider(serviceSettings, Notifier, getAppState
         if (status.resize) {
           this._kibanaMap.resize();
         }
-        this._previouslyFetchedMapCollar = scaleBounds(this._kibanaMap.getBounds(), 1.5);
+        this._lastFetchedMapCollar = scaleBounds(this._kibanaMap.getBounds(), this._getCollarScale());
+
         this._doRenderComplete(resolve);
 
       });
@@ -84,8 +86,8 @@ export function MapsVisualizationProvider(serviceSettings, Notifier, getAppState
       options.center = centerFromUIState ? centerFromUIState : this.vis.type.visConfig.defaults.mapCenter;
 
       this._kibanaMap = new KibanaMap(containerElement, options);
-      this._previouslyFetchedMapCollar = scaleBounds(this._kibanaMap.getBounds(), 1.5);
-      uiState.set('mapCollar', this._previouslyFetchMapCollar);
+      this._lastFetchedMapCollar = scaleBounds(this._kibanaMap.getBounds(), this._getCollarScale());
+      uiState.set('mapCollar', this._lastFetchedMapCollar);
       this._kibanaMap.addDrawControl();
       this._kibanaMap.addFitControl();
       this._kibanaMap.addLegendControl();
@@ -99,7 +101,7 @@ export function MapsVisualizationProvider(serviceSettings, Notifier, getAppState
         this.vis.aggs[1].params.precision = previousPrecision;
       });
       this._kibanaMap.on('dragend', () => {
-        if (!geoContains(this._previouslyFetchedMapCollar, this._kibanaMap.getBounds())) {
+        if (this._isViewOutsideCollar()) {
           this.vis.updateState();
         }
       });
@@ -110,7 +112,7 @@ export function MapsVisualizationProvider(serviceSettings, Notifier, getAppState
           return;
         }
 
-        if (precisionChange || !geoContains(this._previouslyFetchedMapCollar, this._kibanaMap.getBounds())) {
+        if (precisionChange || this._isViewOutsideCollar()) {
           this.vis.updateState();
         } else {
           this._recreateGeohashLayer(this._chartData);
@@ -275,10 +277,42 @@ export function MapsVisualizationProvider(serviceSettings, Notifier, getAppState
       this.vis.updateState();
     }
 
+    _getGeoHashAgg() {
+      return this.vis.aggs.filter((agg) => {
+        return agg.type.dslName === 'geohash_grid';
+      });
+    }
+
+    _getCollarScale() {
+      const DEFAULT_SCALE = 1.5;
+
+      const agg = this._getGeoHashAgg();
+      if (agg.length > 0) {
+        return _.get(agg[0], 'params.collarScale', DEFAULT_SCALE);
+      } else {
+        return DEFAULT_SCALE;
+      }
+    }
+
+    _isFilteredByCollar() {
+      const DEFAULT_USE_FILTER = false;
+
+      const agg = this._getGeoHashAgg();
+      if (agg.length > 0) {
+        return _.get(agg[0], 'params.useFilter', DEFAULT_USE_FILTER);
+      } else {
+        return DEFAULT_USE_FILTER;
+      }
+    }
+
+    _isViewOutsideCollar() {
+      const bounds = this._kibanaMap.getBounds();
+      return this._isFilteredByCollar()
+        && bounds
+        && this._lastFetchedMapCollar
+        && !geoContains(this._lastFetchedMapCollar, bounds);
+    }
   }
-
-
-
 
   return MapsVisualization;
 }

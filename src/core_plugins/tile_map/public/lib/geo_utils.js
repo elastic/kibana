@@ -16,6 +16,8 @@ export function geoContains(collar, bounds) {
 }
 
 export function scaleBounds(bounds, scale) {
+  if (!bounds) return;
+
   let safeScale = scale;
   if(safeScale < 1) scale = 1;
   if(safeScale > 5) scale = 5;
