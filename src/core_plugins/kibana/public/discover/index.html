@@ -101,6 +101,16 @@
 
           <!-- result -->
           <div class="results" ng-show="resultState === 'ready'">
+            <button
+              class="kuiButton kuiButton--basic kuiButton--iconText discover-skip-button"
+              ng-click="showAllRows(); scrollToBottom()"
+            >
+              <span class="kuiButton__inner">
+                <span aria-hidden="true" class="kuiButton__icon kuiIcon fa-chevron-down"></span>
+                <span>Skip to bottom</span>
+              </span>
+            </button>
+
             <div class="discover-timechart" ng-if="opts.timefield">
               <header>
                 <center class="small">
@@ -152,6 +162,7 @@
                 data-shared-item
                 data-title="{{opts.savedSearch.lastSavedTitle}}"
                 data-description="{{opts.savedSearch.description}}"
+                minimum-visible-rows="minimumVisibleRows"
                 render-counter
                 on-add-column="addColumn"
                 on-change-sort-order="setSortOrder"
@@ -159,10 +170,12 @@
                 on-remove-column="removeColumn"
               ></doc-table>
 
+              <a tabindex="0" id="discoverBottomMarker"></a>
+
               <div ng-if="rows.length == opts.sampleSize" class="discover-table-footer">
                 These are the first {{opts.sampleSize}} documents matching
                 your search, refine your search to see others.
-                <a ng-click="toTop()">Back to top.</a>
+                <a kbn-accessible-click ng-click="scrollToTop()">Back to top.</a>
               </div>
             </div>
           </div>

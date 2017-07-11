@@ -121,6 +121,10 @@ uiModules
         $el.trigger('renderComplete');
       });
 
+      $scope.$on('$destroy', () => {
+        resizeChecker.destroy();
+      });
+
       $scope.fetch();
     }
   };

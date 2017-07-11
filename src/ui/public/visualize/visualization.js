@@ -126,6 +126,7 @@ uiModules
       });
 
       $scope.$on('$destroy', () => {
+        resizeChecker.destroy();
         visualization.destroy();
       });
 

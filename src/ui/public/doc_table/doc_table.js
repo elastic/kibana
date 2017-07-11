@@ -24,6 +24,7 @@ uiModules.get('kibana')
       infiniteScroll: '=?',
       filter: '=?',
       filters: '=?',
+      minimumVisibleRows: '=?',
       onAddColumn: '=?',
       onChangeSortOrder: '=?',
       onMoveColumn: '=?',
@@ -31,7 +32,11 @@ uiModules.get('kibana')
     },
     link: function ($scope, $el) {
       const notify = new Notifier();
-      $scope.limit = 50;
+
+      $scope.$watch('minimumVisibleRows', (minimumVisibleRows) => {
+        $scope.limit = Math.max(minimumVisibleRows || 50, $scope.limit || 50);
+      });
+
       $scope.persist = {
         sorting: $scope.sorting,
         columns: $scope.columns
