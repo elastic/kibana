@@ -98,7 +98,10 @@ export function MapsVisualizationProvider(serviceSettings, Notifier, getAppState
       this._kibanaMap.on('zoomchange', () => {
         precisionChange = (previousPrecision !== this._kibanaMap.getAutoPrecision());
         previousPrecision = this._kibanaMap.getAutoPrecision();
-        this.vis.aggs[1].params.precision = previousPrecision;
+        const agg = this._getGeoHashAgg();
+        if (agg) {
+          agg.params.precision = previousPrecision;
+        }
       });
       this._kibanaMap.on('dragend', () => {
         if (this._isViewOutsideCollar()) {
@@ -278,17 +281,23 @@ export function MapsVisualizationProvider(serviceSettings, Notifier, getAppState
     }
 
     _getGeoHashAgg() {
-      return this.vis.aggs.filter((agg) => {
+      const geoHashAggs = this.vis.aggs.filter((agg) => {
         return agg.type.dslName === 'geohash_grid';
       });
+
+      if (geoHashAggs.length > 0) {
+        return geoHashAggs[0];
+      } else {
+        return undefined;
+      }
     }
 
     _getCollarScale() {
       const DEFAULT_SCALE = 1.5;
 
       const agg = this._getGeoHashAgg();
-      if (agg.length > 0) {
-        return _.get(agg[0], 'params.collarScale', DEFAULT_SCALE);
+      if (agg) {
+        return _.get(agg, 'params.collarScale', DEFAULT_SCALE);
       } else {
         return DEFAULT_SCALE;
       }
@@ -298,8 +307,8 @@ export function MapsVisualizationProvider(serviceSettings, Notifier, getAppState
       const DEFAULT_USE_FILTER = false;
 
       const agg = this._getGeoHashAgg();
-      if (agg.length > 0) {
-        return _.get(agg[0], 'params.useFilter', DEFAULT_USE_FILTER);
+      if (agg) {
+        return _.get(agg, 'params.useFilter', DEFAULT_USE_FILTER);
       } else {
         return DEFAULT_USE_FILTER;
       }
