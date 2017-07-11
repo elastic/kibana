@@ -1,73 +1,177 @@
-import tickFormatter from '../../lib/tick_formatter';
 import _ from 'lodash';
-import TopN from 'plugins/metrics/visualizations/components/top_n';
-import getLastValue from 'plugins/metrics/visualizations/lib/get_last_value';
+import React, { Component, PropTypes } from 'react';
+import ticFormatter from '../../lib/tick_formatter';
+import calculateLabel from '../../../../common/calculate_label';
 
-import color from 'color';
-import replaceVars from '../../lib/replace_vars';
-
-import React, { PropTypes } from 'react';
-function TopNVisualization(props) {
-  const { backgroundColor, model, visData } = props;
-
-  const series = _.get(visData, `${model.id}.series`, [])
-    .map(item => {
-      const id = _.first(item.id.split(/:/));
-      const seriesConfig = model.series.find(s => s.id === id);
-      if (seriesConfig) {
-        const formatter = tickFormatter(seriesConfig.formatter, seriesConfig.value_template);
-        const value = getLastValue(item.data, item.data.length);
-        let color = item.color || seriesConfig.color;
-        if (model.bar_color_rules) {
-          model.bar_color_rules.forEach(rule => {
-            if (rule.opperator && rule.value != null && rule.bar_color) {
-              if (_[rule.opperator](value, rule.value)) {
-                color = rule.bar_color;
-              }
-            }
-          });
+function getColor(rules, colorKey, value) {
+  let color;
+  if (rules) {
+    rules.forEach((rule) => {
+      if (rule.opperator && rule.value != null) {
+        if (_[rule.opperator](value, rule.value)) {
+          color = rule[colorKey];
         }
-        return _.assign({}, item, {
-          color,
-          tickFormatter: formatter
-        });
       }
-      return item;
     });
+  }
+  return color;
+}
 
-  const params = {
-    series: series,
-    reversed: props.reversed
-  };
-  const panelBackgroundColor = model.background_color || backgroundColor;
+class TableVis extends Component {
 
-  if (panelBackgroundColor && panelBackgroundColor !== 'inherit') {
-    params.reversed = color(panelBackgroundColor).luminosity() < 0.45;
+  constructor(props) {
+    super(props);
+    this.renderRow = this.renderRow.bind(this);
   }
 
-  if (model.drilldown_url) {
-    params.onClick = (item) => {
-      window.location = replaceVars(model.drilldown_url, {}, { key: item.label });
+  renderRow(row) {
+    const { model } = this.props;
+    const rowId = row.key;
+    let rowDisplay = rowId;
+    if (model.display_field) {
+      rowDisplay = _.get(row, `${model.display_field}`, rowId);
+    }
+    // if (model.drilldown_dashboard) {
+    //   let url = `#/dashboard/${model.drilldown_dashboard}`;
+    //   url += `?_a=(query:(query_string:(query:'${model.id_field}:${rowId}')))`;
+    //   rowDisplay = (<a href={url}>{rowDisplay}</a>);
+    // }
+    const columns = row.series.map(item => {
+      const column = model.series.find(c => c.id === item.id);
+      if (!column) return null;
+      const formatter = ticFormatter(column.formatter, column.value_template);
+      const value = formatter(item.last);
+      let trend;
+      if (column.trend_arrows) {
+        const trendClass = item.slope > 0 ? 'fa-long-arrow-up' : 'fa-long-arrow-down';
+        trend = (
+          <span className="summarize__trend">
+            <i className={`fa ${trendClass}`}></i>
+          </span>
+        );
+      }
+      const style = { color: getColor(column.color_rules, 'text', item.last) };
+      return (
+        <td key={`${rowId}-${item.id}`} className="summarize__value" style={style}>
+          <span className="summarize__value-display">{ value }</span>
+          {trend}
+        </td>
+      );
+    });
+    return (
+      <tr key={rowId}>
+        <td className="summarize__fieldName">{rowDisplay}</td>
+        {columns}
+      </tr>
+    );
+  }
+
+  renderHeader() {
+    const { model, sort, onSort } = this.props;
+    const columns  = model.series.map(item => {
+      const metric = _.last(item.metrics);
+      const label = item.label || calculateLabel(metric, item.metrics);
+      const field = `data.${item.id}.last`;
+      const handleClick = () => {
+        if (model.indexing) {
+          let order;
+          if (sort.field === field) {
+            order = sort.order === 'asc' ? 'desc' : 'asc';
+          } else {
+            order = 'asc';
+          }
+          onSort({ field, order });
+        }
+      };
+      let sortComponent;
+      if (model.indexing && sort.field === field) {
+        const sortIcon = sort.order === 'asc' ? 'sort-amount-asc' : 'sort-amount-desc';
+        sortComponent = (
+          <i className={`fa fa-${sortIcon}`}></i>
+        );
+      }
+      return (
+        <th
+          className="summarize__columnName"
+          onClick={handleClick}
+          key={item.id}>{label} {sortComponent}</th>
+      );
+    });
+    const label = model.pivot_label || model.pivot_field || model.pivot_id;
+    const sortIcon = sort.order === 'asc' ? 'sort-amount-asc' : 'sort-amount-desc';
+    let sortComponent;
+    if (!sort.field) {
+      sortComponent = (
+        <i className={`fa fa-${sortIcon}`}></i>
+      );
+    }
+    const handleSortClick = () => {
+      let order;
+      if (!sort.field) {
+        order = sort.order === 'asc' ? 'desc' : 'asc';
+      } else {
+        order = 'asc';
+      }
+      onSort({ field: null, order });
     };
+    return (
+      <tr>
+        <th onClick={handleSortClick}>{label} {sortComponent}</th>
+        { columns }
+      </tr>
+    );
   }
-  const style = { backgroundColor: panelBackgroundColor };
-  return (
-    <div className="dashboard__visualization" style={style}>
-      <TopN {...params}/>
-    </div>
-  );
+
+  render() {
+    const { visData, model } = this.props;
+    const header = this.renderHeader();
+    let rows;
+    let reversedClass = '';
+
+    if (this.props.reversed) {
+      reversedClass = 'reversed';
+    }
+
+    if (_.isArray(visData.series)) {
+      rows = visData.series.map(this.renderRow);
+    } else {
+      rows = (
+        <tr>
+          <td
+            className="summarize__noResults"
+            colSpan={model.series.length + 1}>No results available</td>
+        </tr>
+      );
+    }
+    return(
+      <div className={`dashboard__visualization ${reversedClass}`}>
+        <table className="table">
+          <thead>
+            {header}
+          </thead>
+          <tbody>
+            {rows}
+          </tbody>
+        </table>
+      </div>
+    );
+  }
 
 }
 
-TopNVisualization.propTypes = {
-  backgroundColor: PropTypes.string,
-  className: PropTypes.string,
-  model: PropTypes.object,
-  onBrush: PropTypes.func,
-  onChange: PropTypes.func,
-  reversed: PropTypes.bool,
-  visData: PropTypes.object
+TableVis.defaultProps = {
+  sort: {}
 };
 
-export default TopNVisualization;
+TableVis.propTypes = {
+  visData: PropTypes.object,
+  model: PropTypes.object,
+  backgroundColor: PropTypes.string,
+  onPaginate: PropTypes.func,
+  sort: PropTypes.object,
+  onSort: PropTypes.func,
+  pageNumber: PropTypes.number,
+  reversed: PropTypes.bool
+};
 
+export default TableVis;

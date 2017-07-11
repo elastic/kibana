@@ -15,5 +15,5 @@ export async function getTableData(req, panel) {
     throw err;
   }
   const buckets = get(resp, 'aggregations.pivot.buckets', []);
-  return buckets.map(processBucket(panel));
+  return { type: 'table', series: buckets.map(processBucket(panel)) };
 }
