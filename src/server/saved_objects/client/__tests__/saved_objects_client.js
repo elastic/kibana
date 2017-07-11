@@ -41,9 +41,19 @@ describe('SavedObjectsClient', () => {
     }
   };
 
+  const mappings = {
+    'index-pattern': {
+      properties: {
+        someField: {
+          type: 'keyword'
+        }
+      }
+    }
+  };
+
   beforeEach(() => {
     callAdminCluster = sinon.mock();
-    savedObjectsClient = new SavedObjectsClient('.kibana-test', callAdminCluster);
+    savedObjectsClient = new SavedObjectsClient('.kibana-test', mappings, callAdminCluster);
   });
 
   afterEach(() => {
@@ -308,6 +318,44 @@ describe('SavedObjectsClient', () => {
       expect(options.body).to.eql({
         query: expectedQuery, version: true
       });
+    });
+
+    it('throws error when providing sortField but no type', (done) => {
+      savedObjectsClient.find({
+        sortField: 'someField'
+      }).then(() => {
+        done('failed');
+      }).catch(e => {
+        expect(e).to.be.an(Error);
+        done();
+      });
+    });
+
+    it('accepts sort with type', async () => {
+      await savedObjectsClient.find({
+        type: 'index-pattern',
+        sortField: 'someField',
+        sortOrder: 'desc',
+      });
+
+      expect(callAdminCluster.calledOnce).to.be(true);
+
+      const options = callAdminCluster.getCall(0).args[1];
+      const expectedQuerySort = [
+        {
+          someField: {
+            order: 'desc',
+            unmapped_type: 'keyword'
+          },
+        }, {
+          'index-pattern.someField': {
+            order: 'desc',
+            unmapped_type: 'keyword'
+          },
+        },
+      ];
+
+      expect(options.body.sort).to.eql(expectedQuerySort);
     });
 
     it('can filter by fields', async () => {
