@@ -5,6 +5,7 @@ import stdDeviationSibling from './std_deviation_sibling';
 import stdMetric from './std_metric';
 import stdSibling from './std_sibling';
 import timeShift from './time_shift';
+import { dropLastBucket } from './drop_last_bucket';
 
 export default [
   percentile,
@@ -13,6 +14,7 @@ export default [
   stdMetric,
   stdSibling,
   seriesAgg,
-  timeShift
+  timeShift,
+  dropLastBucket
 ];
 
