@@ -25,20 +25,18 @@ function hydrateUserSettings(userSettings) {
 export class UiSettingsService {
   constructor(options) {
     const {
-      index,
       type,
       id,
-      callCluster,
+      savedObjectsClient,
       readInterceptor = noop,
       // we use a function for getDefaults() so that defaults can be different in
       // different scenarios, and so they can change over time
       getDefaults = () => ({}),
     } = options;
 
-    this._callCluster = callCluster;
+    this._savedObjectsClient = savedObjectsClient;
     this._getDefaults = getDefaults;
     this._readInterceptor = readInterceptor;
-    this._index = index;
     this._type = type;
     this._id = id;
   }
@@ -95,14 +93,7 @@ export class UiSettingsService {
   }
 
   async _write(changes) {
-    await this._callCluster('update', {
-      index: this._index,
-      type: this._type,
-      id: this._id,
-      body: {
-        doc: changes
-      }
-    });
+    await this._savedObjectsClient.update(this._type, this._id, changes);
   }
 
   async _read(options = {}) {
@@ -123,18 +114,8 @@ export class UiSettingsService {
     );
 
     try {
-      const clientParams = {
-        index: this._index,
-        type: this._type,
-        id: this._id,
-      };
-
-      const callOptions = {
-        wrap401Errors: !ignore401Errors
-      };
-
-      const resp = await this._callCluster('get', clientParams, callOptions);
-      return resp._source;
+      const resp = await this._savedObjectsClient.get(this._type, this._id);
+      return resp.attributes;
     } catch (error) {
       if (isIgnorableError(error)) {
         return {};
