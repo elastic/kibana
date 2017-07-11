@@ -13,7 +13,8 @@ export function registerValueSuggestions(server) {
       const body = getBody({
         field,
         include,
-        shard_size: 10
+        shard_size: 10,
+        size: 10
       });
 
       return callWithRequest(req, 'search', { index, body })
