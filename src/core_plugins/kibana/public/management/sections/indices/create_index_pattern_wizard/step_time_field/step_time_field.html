@@ -1,0 +1,150 @@
+<form
+  role="form"
+  ng-submit="stepTimeField.createIndexPattern()"
+  class="kuiPanel"
+>
+  <div class="kuiPanelHeader">
+    <div class="kuiPanelHeaderSection">
+      <h2 class="kuiPanelHeader__title">
+        Step 2 of 2: Optional settings
+      </h2>
+    </div>
+  </div>
+
+  <div class="kuiPanelBody">
+    <p class="kuiText kuiSubduedText kuiVerticalRhythm">
+      You've defined <strong>{{stepTimeField.indexPatternName}}</strong> as your index pattern. Now you can specify some optional settings before we create it.
+    </p>
+
+    <!-- Time field select -->
+    <div class="kuiVerticalRhythm">
+      <div class="kuiVerticalRhythmSmall timeFieldNameLabel">
+        <label
+          id="timeFilterFieldSelectLabel"
+          class="kuiLabel"
+          for="timeFilterFieldSelect"
+        >
+          Choose optional Time Filter field name
+        </label>
+
+        <a
+          ng-if="!stepTimeField.isFetchingTimeFieldOptions"
+          class="kuiLink kuiSubText"
+          ng-click="stepTimeField.fetchTimeFieldOptions()"
+          kbn-accessible-click
+          aria-describedby="timeFilterFieldSelectLabel"
+        >
+          Refresh
+        </a>
+
+        <p
+          ng-if="stepTimeField.isFetchingTimeFieldOptions"
+          class="kuiText kuiSubduedText"
+          aria-label="Please wait while we fetch your time field options"
+          aria-describedby="timeFilterFieldSelectLabel"
+        >
+          <span
+            aria-hidden="true"
+            class="kuiIcon fa-spinner fa-spin"
+          ></span>
+        </p>
+      </div>
+
+      <div class="kuiVerticalRhythmSmall kuiVerticalRhythm">
+        <select
+          id="timeFilterFieldSelect"
+          aria-describedby="timeFilterFieldSelectHelpText"
+          class="kuiSelect kuiSelect--large"
+          data-test-subj="createIndexPatternTimeFieldSelect"
+          ng-disabled="stepTimeField.isTimeFieldSelectDisabled()"
+          ng-required="stepTimeField.timeFieldOptions.length"
+          ng-options="option as option.display disable when option.isDisabled for option in stepTimeField.timeFieldOptions"
+          ng-model="stepTimeField.selectedTimeFieldOption"
+        ></select>
+      </div>
+
+      <p
+        id="timeFilterFieldSelectHelpText"
+        class="kuiText kuiSubduedText kuiVerticalRhythm"
+      >
+        The Time Filter will use this field to filter your data by time.
+      </p>
+    </div>
+
+    <!-- Advanced options -->
+    <toggle-panel
+      class="kuiVerticalRhythm"
+      ng-if="stepTimeField.canEnableExpandWildcard()"
+      is-collapsed="!stepTimeField.isAdvancedOptionsVisible"
+      on-toggle="stepTimeField.onToggleAdvancedOptions"
+      button-text="{{stepTimeField.getAdvancedOptionsButtonLabel()}}"
+      button-text="Advanced Time Field filter options"
+    >
+      <!-- Expand index pattern checkbox -->
+      <label
+        class="kuiLabel kuiVerticalRhythmSmall"
+        for="expandIndexPatternCheckBox"
+      >
+        Expand index pattern (DEPRECATED)
+      </label>
+
+      <label class="kuiCheckBoxLabel kuiVerticalRhythmSmall kuiVerticalRhythm">
+        <input
+          id="expandIndexPatternCheckBox"
+          aria-describedby="expandIndexPatternCheckBoxHelpText"
+          class="kuiCheckBox"
+          type="checkbox"
+          data-test-subj="createIndexPatternEnableExpand"
+          ng-model="stepTimeField.expandWildcard"
+        >
+        <span class="kuiCheckBoxLabel__text">
+          Expand index pattern when searching
+        </span>
+      </label>
+
+      <!-- Checkbox help text -->
+      <div
+        id="expandIndexPatternCheckBoxHelpText"
+        class="kuiVerticalRhythm"
+      >
+        <p class="kuiText kuiStatusText kuiStatusText--error kuiVerticalRhythmSmall">
+          Recent changes to Elasticsearch have made this option largerly unnecessary. It will likely be removed in a future version of Kibana.
+        </p>
+
+        <p class="kuiText kuiSubduedText kuiVerticalRhythmSmall">
+          With this option selected, searches against any time-based index pattern which contains a wildcard will automatically expand to query only the indices which contain data within the currently selected time range.
+        </p>
+
+        <p class="kuiText kuiSubduedText kuiVerticalRhythmSmall">
+          Searching against the index pattern 'logstash-*' will actually query Elasticsearch for the specific matching indices (e.g. 'logstash-2015.12.21') that fall within the current time range.
+        </p>
+      </div>
+    </toggle-panel>
+
+    <!-- Actions -->
+    <div class="kuiBar kuiVerticalRhythm">
+      <div class="kuiBarSection">
+        <div class="kuiButtonGroup">
+          <button
+            class="kuiButton kuiButton--secondary kuiButton--iconText"
+            ng-click="stepTimeField.goToPreviousStep()"
+          >
+            <span class="kuiButton__inner">
+              <span aria-hidden="true" class="kuiButton__icon kuiIcon fa-chevron-left"></span>
+              <span>Back</span>
+            </span>
+          </button>
+
+          <button
+            data-test-subj="createIndexPatternCreateButton"
+            ng-disabled="!stepTimeField.canCreateIndexPattern()"
+            class="kuiButton kuiButton--primary"
+            type="submit"
+          >
+            Create index pattern
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</form>
