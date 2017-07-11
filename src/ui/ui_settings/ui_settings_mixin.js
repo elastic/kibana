@@ -44,8 +44,8 @@ export function uiSettingsMixin(kbnServer, server, config) {
     });
   });
 
-  server.decorate('request', 'getUiSettingsService', function () {
-    return getUiSettingsServiceForRequest(server, this, {
+  server.addMemoizedFactoryToRequest('getUiSettingsService', request => {
+    return getUiSettingsServiceForRequest(server, request, {
       getDefaults,
       readInterceptor,
     });

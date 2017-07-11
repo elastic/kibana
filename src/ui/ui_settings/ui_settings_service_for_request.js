@@ -1,7 +1,5 @@
 import { uiSettingsServiceFactory } from './ui_settings_service_factory';
 
-const BY_REQUEST_CACHE = new WeakMap();
-
 /**
  *  Get/create an instance of UiSettingsService bound to a specific request.
  *  Each call is cached (keyed on the request object itself) and subsequent
@@ -19,10 +17,6 @@ const BY_REQUEST_CACHE = new WeakMap();
  *  @return {UiSettingsService}
  */
 export function getUiSettingsServiceForRequest(server, request, options = {}) {
-  if (BY_REQUEST_CACHE.has(request)) {
-    return BY_REQUEST_CACHE.get(request);
-  }
-
   const {
     readInterceptor,
     getDefaults
@@ -34,6 +28,5 @@ export function getUiSettingsServiceForRequest(server, request, options = {}) {
     savedObjectsClient: request.getSavedObjectsClient()
   });
 
-  BY_REQUEST_CACHE.set(request, uiSettingsService);
   return uiSettingsService;
 }
