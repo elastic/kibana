@@ -95,7 +95,6 @@ const defaultEditor = function ($rootScope, $compile) {
         this.$scope = null;
       }
     }
-    resize() {}
   };
 };
 
