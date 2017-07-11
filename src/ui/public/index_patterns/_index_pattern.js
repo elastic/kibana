@@ -387,8 +387,8 @@ export function IndexPatternProvider(Private, $http, config, kbnIndex, Promise, 
     warnIfDuplicateTitle() {
       return findObjectByTitle(savedObjectsClient, type, this.title)
         .then(duplicate => {
-          if (!duplicate) return true;
-          if (duplicate.id === this.id) return true;
+          if (!duplicate) return false;
+          if (duplicate.id === this.id) return false;
 
           const confirmMessage =
             `An index pattern with the title '${this.title}' already exists.`;
@@ -405,7 +405,9 @@ export function IndexPatternProvider(Private, $http, config, kbnIndex, Promise, 
     }
 
     create() {
-      return this.warnIfDuplicateTitle().then(() => {
+      return this.warnIfDuplicateTitle().then((duplicate) => {
+        if (duplicate) return;
+
         const body = this.prepBody();
 
         return savedObjectsClient.create(type, body, { id: this.id })
