@@ -2,6 +2,7 @@ import _ from 'lodash';
 import React, { Component, PropTypes } from 'react';
 import ticFormatter from '../../lib/tick_formatter';
 import calculateLabel from '../../../../common/calculate_label';
+import { isSortable } from './is_sortable';
 
 function getColor(rules, colorKey, value) {
   let color;
@@ -68,7 +69,8 @@ class TableVis extends Component {
 
   renderHeader() {
     const { model, uiState, onUiState } = this.props;
-    const sort = uiState.get('sort', {
+    const stateKey = `${model.type}.sort`;
+    const sort = uiState.get(stateKey, {
       column: '_default_',
       order: 'asc'
     });
@@ -76,16 +78,17 @@ class TableVis extends Component {
       const metric = _.last(item.metrics);
       const label = item.label || calculateLabel(metric, item.metrics);
       const handleClick = () => {
+        if (!isSortable(metric)) return;
         let order;
         if (sort.column === item.id) {
           order = sort.order === 'asc' ? 'desc' : 'asc';
         } else {
           order = 'asc';
         }
-        onUiState('sort', { column: item.id, order });
+        onUiState(stateKey, { column: item.id, order });
       };
       let sortComponent;
-      if (sort.column === item.id) {
+      if (isSortable(metric) && sort.column === item.id) {
         const sortIcon = sort.order === 'asc' ? 'sort-amount-asc' : 'sort-amount-desc';
         sortComponent = (
           <i className={`fa fa-${sortIcon}`}></i>
@@ -113,7 +116,7 @@ class TableVis extends Component {
       } else {
         order = 'asc';
       }
-      onUiState('sort', { column: '_default_', order });
+      onUiState(stateKey, { column: '_default_', order });
     };
     return (
       <tr>
