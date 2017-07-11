@@ -15,8 +15,20 @@ describe('createFindQuery', () => {
       query: {
         bool: {
           filter: [{
-            term: {
-              _type: 'index-pattern'
+            bool: {
+              should: [
+                {
+                  term: {
+                    _type: 'index-pattern'
+                  }
+                },
+                {
+                  term: {
+                    type: 'index-pattern'
+                  }
+                }
+              ]
+
             }
           }],
           must: [{
