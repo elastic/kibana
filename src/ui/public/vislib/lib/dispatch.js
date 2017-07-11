@@ -31,8 +31,6 @@ export function VislibLibDispatchProvider(Private, config) {
      */
     eventResponse(d, i) {
 
-      // console.log('event response', arguments);
-
       const datum = d._input || d;
       const data = d3.event.target.nearestViewportElement ?
         d3.event.target.nearestViewportElement.__data__ : d3.event.target.__data__;
