@@ -10,7 +10,7 @@ const CourierRequestHandlerProvider = function (Private, courier, timefilter) {
       }
 
       const shouldQuery = () => {
-        if (!searchSource.lastQuery) return true;
+        if (!searchSource.lastQuery || vis.reload) return true;
         if (!_.isEqual(_.cloneDeep(searchSource.get('filter')), searchSource.lastQuery.filter)) return true;
         if (!_.isEqual(_.cloneDeep(searchSource.get('query')), searchSource.lastQuery.query)) return true;
         if (!_.isEqual(_.cloneDeep(searchSource.get('aggs')()), searchSource.lastQuery.aggs)) return true;
@@ -21,6 +21,7 @@ const CourierRequestHandlerProvider = function (Private, courier, timefilter) {
 
       return new Promise((resolve, reject) => {
         if (shouldQuery()) {
+          delete vis.reload;
           searchSource.onResults().then(resp => {
             searchSource.lastQuery = {
               filter: _.cloneDeep(searchSource.get('filter')),

@@ -83,6 +83,13 @@ uiModules
         }
       });
 
+      const reload = () => {
+        $scope.vis.reload = true;
+        $scope.fetch();
+      };
+      $scope.vis.on('reload', reload);
+      $scope.$on('courier:searchRefresh', reload);
+
       if ($scope.appState) {
         let oldUiState;
         const stateMonitor = stateMonitorFactory.create($scope.appState);
