@@ -1,6 +1,7 @@
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { FetchFieldsProvider } from '../lib/fetch_fields';
+import { extractIndexPatterns } from '../lib/extract_index_patterns';
 const AUTO_APPLY_KEY = 'metrics_autoApply';
 
 function ReactEditorControllerProvider(Private, localStorage) {
@@ -10,6 +11,7 @@ function ReactEditorControllerProvider(Private, localStorage) {
     constructor(el, vis) {
       this.el = el;
       this.vis = vis;
+      this.vis.fields = {};
 
       const autoApply = localStorage.get(AUTO_APPLY_KEY);
       vis.autoApply = autoApply != null ? autoApply : true;
@@ -17,10 +19,10 @@ function ReactEditorControllerProvider(Private, localStorage) {
 
     render(visData) {
       this.visData = visData;
-
+      const indexPatterns = extractIndexPatterns(this.vis);
       return new Promise((resolve) => {
-        fetchFields(this.vis.params.index_pattern).then(fields => {
-          this.vis.fields = fields;
+        fetchFields(indexPatterns).then(fields => {
+          this.vis.fields = { ...fields, ...this.vis.fields };
           const Component = this.vis.type.editorConfig.component;
           render(<Component vis={this.vis} visData={visData} renderComplete={resolve}/>, this.el);
         });
