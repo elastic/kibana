@@ -33,7 +33,7 @@ uiModules
     scope: {
       sectionName: '@section',
       omitPages: '@omitBreadcrumbPages',
-      breadcrumbPageTitle: '='
+      pageTitle: '='
     },
 
     link: function ($scope) {
