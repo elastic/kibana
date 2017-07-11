@@ -122,7 +122,7 @@ uiModules
       });
 
       $scope.$on('$destroy', () => {
-        resizeChecker.off('resize');
+        resizeChecker.destroy();
       });
 
       $scope.fetch();
