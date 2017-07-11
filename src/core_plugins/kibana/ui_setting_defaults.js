@@ -259,6 +259,11 @@ export function getUiSettingDefaults() {
       value: false,
       description: 'Whether the filters should have a global state (be pinned) by default'
     },
+    'filterEditor:suggestValues': {
+      value: false,
+      description: 'Set this property to `true` to have the filter editor suggest values for fields, ' +
+        'instead of just providing a text input. This may result in heavy queries to Elasticsearch.'
+    },
     'notifications:banner': {
       type: 'markdown',
       description: 'A custom banner intended for temporary notices to all users. <a href="https://help.github.com/articles/basic-writing-and-formatting-syntax/" target="_blank">Markdown supported</a>.',
