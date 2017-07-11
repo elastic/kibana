@@ -19,7 +19,7 @@ function getProxyAgent(sourceUrl, logger) {
     const shouldProxy = !excludedHosts.includes(hostname);
 
     if (shouldProxy) {
-      logger.log(`Use proxy to download plugin.`);
+      logger.log(`Using proxy to download plugin.`);
       logger.log(`Hint: you can add ${hostname} to the no_proxy environment variable, `
         + `to exclude that host from proxying.`);
       return new HttpProxyAgent(httpProxy);
