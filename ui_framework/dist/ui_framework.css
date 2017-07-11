@@ -69,6 +69,13 @@
 body {
   font-family: "Open Sans", Helvetica, Arial, sans-serif; }
 
+/**
+ * 1. Required for IE11.
+ */
+main {
+  display: block;
+  /* 1 */ }
+
 .kuiActionItem {
   display: -webkit-box;
   display: -webkit-flex;
