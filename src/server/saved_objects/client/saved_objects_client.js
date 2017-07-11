@@ -8,7 +8,8 @@ import {
   isSingleTypeError,
   v5BulkCreate,
   v6BulkCreate,
-  normalizeEsDoc
+  normalizeEsDoc,
+  includedFields
 } from './lib';
 
 export const V6_TYPE = 'doc';
@@ -117,7 +118,7 @@ export class SavedObjectsClient {
    *                                        Query field argument for more information
    * @property {integer} [options.page=1]
    * @property {integer} [options.perPage=20]
-   * @property {array} options.fields
+   * @property {array|string} options.fields
    * @returns {promise} - { saved_objects: [{ id, type, version, attributes }], total, per_page, page }
    */
   async find(options = {}) {
@@ -131,7 +132,7 @@ export class SavedObjectsClient {
     } = options;
 
     const esOptions = {
-      _source: fields,
+      _source: includedFields(type, fields),
       size: perPage,
       from: perPage * (page - 1),
       body: createFindQuery({ search, searchFields, type })
