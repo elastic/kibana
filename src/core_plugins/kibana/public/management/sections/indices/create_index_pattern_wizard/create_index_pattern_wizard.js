@@ -92,9 +92,7 @@ uiModules.get('apps/management')
     }
 
     // All system indices begin with a period.
-    return indices.filter(index => (
-      index.name.indexOf('.') !== 0
-    ));
+    return indices.filter(index => !index.name.startsWith('.'));
   };
 
   const updateWhiteListedIndices = () => {
