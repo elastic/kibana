@@ -89,7 +89,7 @@ export function IndexPatternProvider(Private, $http, config, kbnIndex, Promise, 
         }
       }];
 
-      notify.custom(notificationMessage, { type: 'error', lifetime: 0, actions });
+      notify.custom(notificationMessage, { type: 'error', icon: 'warning', lifetime: 0, actions });
       throw new SavedObjectNotFound(type, indexPattern.id);
     }
 
@@ -233,8 +233,7 @@ export function IndexPatternProvider(Private, $http, config, kbnIndex, Promise, 
               found: resp._version ? true : false
             };
           })
-          .then(response => updateFromElasticSearch(this, response))
-          .catch(response => updateFromElasticSearch(this, response));
+          .then(response => updateFromElasticSearch(this, response));
       })
       .then(() => this);
     }
