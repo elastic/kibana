@@ -23,12 +23,20 @@
           class="kuiVerticalRhythm"
           ng-submit="controller.createIndexPattern()"
         >
+
           <!-- Index pattern input -->
           <div class="kuiVerticalRhythm">
-            <label
-              class="kuiLabel kuiVerticalRhythmSmall"
-              translate="KIBANA-INDEX_NAME_OR_PATTERN"
-            ></label>
+            <label class="kuiLabel kuiVerticalRhythmSmall">
+              <span translate="KIBANA-INDEX_PATTERN"></span>
+
+              <small>
+                <a
+                  class="kuiLink"
+                  ng-click="controller.toggleAdvancedIndexOptions();"
+                  translate="KIBANA-ADVANCED_OPTIONS"
+                ></a>
+              </small>
+            </label>
 
             <div class="kuiVerticalRhythm kuiVerticalRhythmSmall">
               <input
@@ -62,6 +70,35 @@
               <p
                 class="kuiSubText kuiVerticalRhythmSmall"
                 translate="KIBANA-WILDCARD_DYNAMIC_INDEX_PATTERNS"
+              ></p>
+            </div>
+          </div>
+
+          <!-- Index pattern id input -->
+          <div class="kuiVerticalRhythm" ng-if="controller.showAdvancedOptions">
+            <label
+              class="kuiLabel kuiVerticalRhythmSmall"
+              translate="KIBANA-INDEX_PATTERN_ID">
+            </label>
+
+            <div class="kuiVerticalRhythm kuiVerticalRhythmSmall">
+              <input
+                class="kuiTextInput kuiTextInput--large"
+                data-test-subj="createIndexPatternIdInput"
+                ng-model="controller.formValues.id"
+                ng-model-options="{ updateOn: 'default blur', debounce: {'default': 500, 'blur': 0} }"
+                validate-index-name
+                allow-wildcard
+                name="id"
+                type="text"
+              >
+            </div>
+
+            <!-- ID help text -->
+            <div class="kuiVerticalRhythm">
+              <p
+                class="kuiSubText kuiVerticalRhythmSmall"
+                translate="KIBANA-INDEX_PATTERN_SPECIFY_ID"
               ></p>
             </div>
           </div>

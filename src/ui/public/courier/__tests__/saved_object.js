@@ -36,7 +36,6 @@ describe('Saved Object', function () {
 
     // Necessary to avoid a timeout condition.
     sinon.stub(esAdminStub.indices, 'putMapping').returns(BluebirdPromise.resolve());
-    sinon.stub(esAdminStub.indices, 'refresh').returns(BluebirdPromise.resolve());
   }
 
   /**
@@ -62,11 +61,9 @@ describe('Saved Object', function () {
    * @param {Object} mockDocResponse
    */
   function stubESResponse(mockDocResponse) {
-    sinon.stub(esAdminStub, 'mget').returns(BluebirdPromise.resolve({ docs: [mockDocResponse] }));
-    sinon.stub(esAdminStub, 'index').returns(BluebirdPromise.resolve(mockDocResponse));
-
     // Stub out search for duplicate title:
     sinon.stub(savedObjectsClientStub, 'get').returns(BluebirdPromise.resolve(mockDocResponse));
+    sinon.stub(savedObjectsClientStub, 'update').returns(BluebirdPromise.resolve(mockDocResponse));
 
     sinon.stub(savedObjectsClientStub, 'find').returns(BluebirdPromise.resolve({ savedObjects: [], total: 0 }));
     sinon.stub(savedObjectsClientStub, 'bulkGet').returns(BluebirdPromise.resolve({ savedObjects: [mockDocResponse] }));
@@ -112,8 +109,6 @@ describe('Saved Object', function () {
     describe('with confirmOverwrite', function () {
       function stubConfirmOverwrite() {
         window.confirm = sinon.stub().returns(true);
-
-        sinon.stub(esAdminStub, 'create').returns(BluebirdPromise.reject({ status : 409 }));
         sinon.stub(esDataStub, 'create').returns(BluebirdPromise.reject({ status : 409 }));
       }
 
@@ -421,7 +416,6 @@ describe('Saved Object', function () {
     });
 
     describe('searchSource', function () {
-
       it('when true, creates index', function () {
         const indexPatternId = 'testIndexPattern';
         const afterESRespCallback = sinon.spy();
@@ -434,10 +428,12 @@ describe('Saved Object', function () {
         };
 
         stubESResponse({
-          _id: indexPatternId,
-          _type: 'dashboard',
-          _source: {},
-          found: true
+          id: indexPatternId,
+          type: 'dashboard',
+          attributes: {
+            title: 'testIndexPattern'
+          },
+          _version: 2
         });
 
         const savedObject = new SavedObject(config);

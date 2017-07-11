@@ -10,7 +10,8 @@ import { uiModules } from 'ui/modules';
 const module = uiModules.get('kibana/index_patterns');
 
 export { IndexPatternsApiClientProvider } from './index_patterns_api_client_provider';
-export function IndexPatternsProvider(esAdmin, Notifier, Private, Promise, kbnIndex) {
+
+export function IndexPatternsProvider(Notifier, Private) {
   const self = this;
 
   const IndexPattern = Private(IndexPatternProvider);
@@ -29,13 +30,7 @@ export function IndexPatternsProvider(esAdmin, Notifier, Private, Promise, kbnIn
 
   self.delete = function (pattern) {
     self.getIds.clearCache();
-    pattern.destroy();
-
-    return esAdmin.delete({
-      index: kbnIndex,
-      type: 'index-pattern',
-      id: pattern.id
-    });
+    return pattern.destroy();
   };
 
   self.errors = {
