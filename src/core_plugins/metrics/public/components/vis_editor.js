@@ -37,6 +37,7 @@ class VisEditor extends Component {
     if (!this.props.vis.isEditorMode()) {
       return (
         <Visualization
+          onBrush={this.onBrush}
           fields={this.props.vis.fields}
           model={this.props.vis.params}
           visData={this.props.visData} />
