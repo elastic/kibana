@@ -5,30 +5,38 @@ import { createWriteStream } from 'fs';
 import HttpProxyAgent from 'http-proxy-agent';
 import URL from 'url';
 
-function getProxyAgent(sourceUrl) {
-  const httpProxy = process.env.HTTP_PROXY;
+function getProxyAgent(sourceUrl, logger) {
+  const httpProxy = process.env.http_proxy || process.env.HTTP_PROXY;
   // we have a proxy detected, lets use it
-  if (httpProxy && httpProxy !== '') {
+  if (httpProxy) {
+    logger.log(`Picked up proxy ${httpProxy} from http_proxy environment variable.`);
     // get the hostname of the sourceUrl
     const hostname = URL.parse(sourceUrl).hostname;
-    const noProxy = process.env.NO_PROXY || '';
+    const noProxy = process.env.no_proxy || process.env.NO_PROXY || '';
+    const excludedHosts = noProxy.split(',');
 
     // proxy if the hostname is not in noProxy
-    const shouldProxy = (noProxy.indexOf(hostname) === -1);
+    const shouldProxy = (excludedHosts.indexOf(hostname) === -1);
 
     if (shouldProxy) {
+      logger.log(`Use proxy to download plugin.`);
+      logger.log(`Hint: you can add ${hostname} to the no_proxy environment variable, `
+        + `to exclude that host from proxying.`);
       return new HttpProxyAgent(httpProxy);
+    } else {
+      logger.log(`Found exception for host ${hostname} in no_proxy environment variable. `
+        + `Skipping proxy.`);
     }
   }
 
-  return false;
+  return null;
 }
 
-function sendRequest({ sourceUrl, timeout }) {
+function sendRequest({ sourceUrl, timeout }, logger) {
   const maxRedirects = 11; //Because this one goes to 11.
   return fn(cb => {
     const reqOptions = { timeout, redirects: maxRedirects };
-    const proxyAgent = getProxyAgent(sourceUrl);
+    const proxyAgent = getProxyAgent(sourceUrl, logger);
 
     if (proxyAgent) {
       reqOptions.agent = proxyAgent;
@@ -78,7 +86,7 @@ Responsible for managing http transfers
 */
 export default async function downloadUrl(logger, sourceUrl, targetPath, timeout) {
   try {
-    const { req, resp } = await sendRequest({ sourceUrl, timeout });
+    const { req, resp } = await sendRequest({ sourceUrl, timeout }, logger);
 
     try {
       const totalSize = parseFloat(resp.headers['content-length']) || 0;
