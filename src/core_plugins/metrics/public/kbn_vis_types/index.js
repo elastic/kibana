@@ -60,6 +60,8 @@ export default function MetricsVisProvider(Private) {
       component: require('../components/vis_editor')
     },
     options: {
+      showQueryBar: false,
+      showFilterBar: false,
       showIndexSelection: false
     },
     requestHandler: metricsRequestHandler,
