@@ -6,7 +6,6 @@ import { IndexPatternsGetIdsProvider } from 'ui/index_patterns/_get_ids';
 import { IndexPatternsIntervalsProvider } from 'ui/index_patterns/_intervals';
 import { FieldsFetcherProvider } from './fields_fetcher_provider';
 import { RegistryFieldFormatsProvider } from 'ui/registry/field_formats';
-import { SavedObjectsClientProvider } from 'ui/saved_objects';
 import { uiModules } from 'ui/modules';
 const module = uiModules.get('kibana/index_patterns');
 
@@ -17,7 +16,6 @@ export function IndexPatternsProvider(Notifier, Private) {
 
   const IndexPattern = Private(IndexPatternProvider);
   const patternCache = Private(IndexPatternsPatternCacheProvider);
-  const savedObjectsClient = Private(SavedObjectsClientProvider);
 
   self.get = function (id) {
     if (!id) return self.make();
@@ -32,9 +30,7 @@ export function IndexPatternsProvider(Notifier, Private) {
 
   self.delete = function (pattern) {
     self.getIds.clearCache();
-    pattern.destroy();
-
-    return savedObjectsClient.delete('index-pattern', pattern.id);
+    return pattern.destroy();
   };
 
   self.errors = {

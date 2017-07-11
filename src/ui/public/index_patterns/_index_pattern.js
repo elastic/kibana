@@ -468,7 +468,7 @@ export function IndexPatternProvider(Private, $http, config, kbnIndex, Promise, 
     destroy() {
       unwatch(this);
       patternCache.clear(this.id);
-      savedObjectsClient.delete(type, this.id);
+      return savedObjectsClient.delete(type, this.id);
     }
   }
 

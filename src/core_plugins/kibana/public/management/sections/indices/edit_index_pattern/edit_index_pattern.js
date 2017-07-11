@@ -9,7 +9,6 @@ import { IndicesEditSectionsProvider } from './edit_sections';
 import uiRoutes from 'ui/routes';
 import { uiModules } from 'ui/modules';
 import template from './edit_index_pattern.html';
-import { SavedObjectsClientProvider } from 'ui/saved_objects';
 
 uiRoutes
 .when('/management/kibana/indices/:indexPatternId', {
@@ -44,7 +43,6 @@ uiModules.get('apps/management')
     $scope, $location, $route, config, courier, Notifier, Private, AppState, docTitle, confirmModal) {
   const notify = new Notifier();
   const $state = $scope.state = new AppState();
-  const savedObjectsClient = Private(SavedObjectsClientProvider);
 
   $scope.kbnUrl = Private(KbnUrlProvider);
   $scope.indexPattern = $route.current.locals.indexPattern;
@@ -113,7 +111,7 @@ uiModules.get('apps/management')
         }
       }
 
-      savedObjectsClient.delete('index-pattern', $scope.indexPattern.id)
+      courier.indexPatterns.delete($scope.indexPattern)
         .then(function () {
           $location.url('/management/kibana/index');
         })
