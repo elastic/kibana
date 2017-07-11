@@ -16,7 +16,7 @@ function getProxyAgent(sourceUrl, logger) {
     const excludedHosts = noProxy.split(',');
 
     // proxy if the hostname is not in noProxy
-    const shouldProxy = (excludedHosts.indexOf(hostname) === -1);
+    const shouldProxy = !excludedHosts.includes(hostname);
 
     if (shouldProxy) {
       logger.log(`Use proxy to download plugin.`);
