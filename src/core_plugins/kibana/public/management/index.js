@@ -32,7 +32,8 @@ uiModules
     transclude: true,
     scope: {
       sectionName: '@section',
-      omitPages: '@omitBreadcrumbPages'
+      omitPages: '@omitBreadcrumbPages',
+      breadcrumbPageTitle: '='
     },
 
     link: function ($scope) {
