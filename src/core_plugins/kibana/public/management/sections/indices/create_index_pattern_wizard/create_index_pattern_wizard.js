@@ -31,7 +31,7 @@ uiModules.get('apps/management')
   Private,
   Promise
 ) {
-  const MAX_NUMBER_OF_MATCHING_INDICES = 3;
+  const MAX_NUMBER_OF_MATCHING_INDICES = 20;
   const indicesService = $injector.get('indices');
   const notify = new Notifier();
   const refreshKibanaIndex = Private(RefreshKibanaIndex);
