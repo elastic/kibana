@@ -42,7 +42,7 @@ export function AggTypesBucketsDateHistogramProvider(timefilter, config, Private
     makeLabel: function (agg) {
       const output = this.params.write(agg);
       const field = agg.getFieldDisplayName();
-      return field + ' per ' + (output.metricScaleText || output.bucketInterval.description);
+      return field + ' per ' + output.bucketInterval.description;
     },
     createFilter: createFilter,
     decorateAggConfig: function () {
@@ -111,17 +111,6 @@ export function AggTypesBucketsDateHistogramProvider(timefilter, config, Private
             output.params.time_zone = detectedTimezone || tzOffset;
           } else {
             output.params.time_zone = config.get('dateFormat:tz');
-          }
-
-          const scaleMetrics = interval.scaled && interval.scale < 1;
-          if (scaleMetrics) {
-            const all = _.every(agg.vis.aggs.bySchemaGroup.metrics, function (agg) {
-              return agg.type && (agg.type.name === 'count' || agg.type.name === 'sum');
-            });
-            if (all) {
-              output.metricScale = interval.scale;
-              output.metricScaleText = interval.preScaled.description;
-            }
           }
         }
       },
