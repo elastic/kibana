@@ -2125,8 +2125,9 @@ main {
       -ms-flex: 0 0 auto;
           flex: 0 0 auto;
   border-radius: 0;
-  border-left-color: #DEDEDE; }
+  border-left-width: 0; }
   .theme-dark .kuiLocalSearchInput--secondary {
+    border-left-width: 1px;
     border-left-color: #333333;
     border-right-color: #333333; }
 
@@ -2178,8 +2179,7 @@ main {
   background-repeat: no-repeat;
   background-position: calc(100% - 8px);
   /* 2 */
-  border-color: #ffffff;
-  border-left-color: #DEDEDE;
+  border-left-width: 0;
   border-radius: 0; }
   .theme-dark .kuiLocalSearchSelect {
     color: #cecece; }
