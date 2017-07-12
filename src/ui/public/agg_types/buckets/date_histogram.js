@@ -112,6 +112,16 @@ export function AggTypesBucketsDateHistogramProvider(timefilter, config, Private
           } else {
             output.params.time_zone = config.get('dateFormat:tz');
           }
+
+          const scaleMetrics = interval.scaled && interval.scale < 1;
+          if (scaleMetrics) {
+            const all = _.every(agg.vis.aggs.bySchemaGroup.metrics, function (agg) {
+              return agg.type && (agg.type.name === 'count' || agg.type.name === 'sum');
+            });
+            if (all) {
+              output.metricScale = interval.scale;
+            }
+          }
         }
       },
 

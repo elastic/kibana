@@ -63,12 +63,14 @@ describe('params', function () {
       setTimeBounds(30, 'm');
       const output = writeInterval('s');
       expect(output.params.interval).to.be('10s');
+      expect(output.metricScale).to.be(0.1);
     });
 
     it('does not scale down the interval', function () {
       setTimeBounds(1, 'm');
       const output = writeInterval('h');
       expect(output.params.interval).to.be('1h');
+      expect(output.metricScale).to.be(undefined);
     });
 
     describe('only scales when all metrics are sum or count', function () {
@@ -102,6 +104,9 @@ describe('params', function () {
               schema: 'metric'
             }));
           });
+
+          const output = histoConfig.write();
+          expect(_.has(output, 'metricScale')).to.be(should);
         });
       });
     });
