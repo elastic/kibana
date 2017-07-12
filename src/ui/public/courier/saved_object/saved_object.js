@@ -39,7 +39,7 @@ function isErrorNonFatal(error) {
   return error.message === OVERWRITE_REJECTED || error.message === SAVE_DUPLICATE_REJECTED;
 }
 
-export function SavedObjectProvider(esAdmin, kbnIndex, Promise, Private, Notifier, confirmModalPromise, indexPatterns) {
+export function SavedObjectProvider(Promise, Private, Notifier, confirmModalPromise, indexPatterns) {
   const savedObjectsClient = Private(SavedObjectsClientProvider);
   const SearchSource = Private(SearchSourceProvider);
   const mappingSetup = Private(MappingSetupProvider);
@@ -53,7 +53,6 @@ export function SavedObjectProvider(esAdmin, kbnIndex, Promise, Private, Notifie
 
     // type name for this object, used as the ES-type
     const esType = config.type;
-    this.index = kbnIndex;
 
     this.getDisplayName = function () {
       return esType;

@@ -76,6 +76,7 @@ export default  function MappingSetupService(kbnIndex, esAdmin) {
     const prom = getKnownKibanaTypes()
     .then(function (knownTypes) {
       // if the type is in the knownTypes array already
+      return false;
       if (~knownTypes.indexOf(type)) return false;
 
       // we need to create the mapping
