@@ -125,7 +125,7 @@ module.controller('KbnRegionMapController', function ($scope, $element, Private,
     choroplethLayer.on('select', function (event) {
       const aggs = $scope.vis.aggs.getResponseAggs();
       const aggConfigResult = new AggConfigResult(aggs[0], false, event, event);
-      $scope.vis.listeners.click({ point: { aggConfigResult: aggConfigResult } });
+      $scope.vis.API.events.filter({ point: { aggConfigResult: aggConfigResult } });
     });
     choroplethLayer.on('styleChanged', function (event) {
       if (event.mismatches.length > 0 && config.get('visualization:regionmap:showWarnings')) {
