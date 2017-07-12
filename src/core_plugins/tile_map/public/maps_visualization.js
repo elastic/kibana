@@ -105,7 +105,7 @@ export function MapsVisualizationProvider(serviceSettings, Notifier, getAppState
       });
       this._kibanaMap.on('dragend', () => {
         if (this._isViewOutsideCollar()) {
-          this.vis.updateState();
+          this.vis.forceReload();
         }
       });
       this._kibanaMap.on('zoomend', () => {
@@ -115,8 +115,8 @@ export function MapsVisualizationProvider(serviceSettings, Notifier, getAppState
           return;
         }
 
-        if (precisionChange || this._isViewOutsideCollar()) {
-          this.vis.updateState();
+        if (precisionChange || this._isFilteredByCollar()) {
+          this.vis.forceReload();
         } else {
           this._recreateGeohashLayer(this._chartData);
         }
@@ -281,15 +281,9 @@ export function MapsVisualizationProvider(serviceSettings, Notifier, getAppState
     }
 
     _getGeoHashAgg() {
-      const geoHashAggs = this.vis.aggs.filter((agg) => {
+      return this.vis.aggs.find((agg) => {
         return agg.type.dslName === 'geohash_grid';
       });
-
-      if (geoHashAggs.length > 0) {
-        return geoHashAggs[0];
-      } else {
-        return undefined;
-      }
     }
 
     _getCollarScale() {
