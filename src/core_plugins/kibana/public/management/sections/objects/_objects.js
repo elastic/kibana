@@ -1,5 +1,5 @@
 import { saveAs } from '@spalger/filesaver';
-import { extend, find, flattenDeep, pluck, sortBy } from 'lodash';
+import { find, flattenDeep, pluck, sortBy } from 'lodash';
 import angular from 'angular';
 import { savedObjectManagementRegistry } from 'plugins/kibana/management/saved_object_registry';
 import objectIndexHTML from 'plugins/kibana/management/sections/objects/_objects.html';
@@ -137,9 +137,9 @@ uiModules.get('apps/management')
       $scope.exportAll = () => Promise
         .map($scope.services, service => service.service
           .scanAll('')
-          .then(result => result.hits.map(hit => extend(hit, { type: service.type })))
+          .then(result => result.hits)
         )
-        .then(results => retrieveAndExportDocs(flattenDeep(results)))
+        .then(results => saveToFile(flattenDeep(results)))
         .catch(error => notify.error(error));
 
       function retrieveAndExportDocs(objs) {
