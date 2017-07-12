@@ -29,12 +29,6 @@ function ReactEditorControllerProvider(Private, localStorage) {
       });
     }
 
-    resize() {
-      if (this.visData) {
-        this.render(this.visData);
-      }
-    }
-
     destroy() {
       unmountComponentAtNode(this.el);
     }

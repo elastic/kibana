@@ -81,15 +81,9 @@ class VisEditor extends Component {
 }
 
 VisEditor.propTypes = {
-  fields: PropTypes.object,
-  model: PropTypes.object,
-  onBrush: PropTypes.func,
-  onChange: PropTypes.func,
-  onCommit: PropTypes.func,
-  onToggleAutoApply: PropTypes.func,
+  renderComplete: PropTypes.func,
   visData: PropTypes.object,
-  dirty: PropTypes.bool,
-  autoApply: PropTypes.bool
+  vis: PropTypes.object
 };
 
 export default VisEditor;
