@@ -89,8 +89,6 @@ uiModules
       };
       $scope.vis.on('reload', reload);
       $scope.$on('courier:searchRefresh', reload);
-      // dashboard will trigger this event when refreshing
-      $scope.$on('fetch', reload);
 
       if ($scope.appState) {
         let oldUiState;
@@ -130,8 +128,6 @@ uiModules
       $scope.$listen(timefilter, 'fetch', $scope.fetch);
       $scope.$on('renderComplete', () => {
         $el.trigger('renderComplete');
-        // dashboard still depends on this (not on render complete as reporting)
-        $scope.$root.$broadcast('ready:vis');
       });
 
       $scope.$on('$destroy', () => {
