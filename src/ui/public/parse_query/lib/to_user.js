@@ -7,13 +7,10 @@ import angular from 'angular';
  * @returns {string}
  */
 export function toUser(text) {
-  if (text == null) return '';
+  if (text == null || text === '*' || _.has(text, 'match_all')) return '';
   if (_.isObject(text)) {
     if (text.query_string) return toUser(text.query_string.query);
     return angular.toJson(text);
-  }
-  if (text === '*') {
-    return '';
   }
   return '' + text;
 }
