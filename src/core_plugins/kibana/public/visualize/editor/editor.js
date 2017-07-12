@@ -106,7 +106,7 @@ function VisEditor($scope, $route, timefilter, AppState, $window, kbnUrl, courie
     key: 'refresh',
     description: 'Refresh',
     run: function () {
-      vis.emit('reload');
+      vis.forceReload();
     },
     testId: 'visualizeRefreshButton',
   }];
