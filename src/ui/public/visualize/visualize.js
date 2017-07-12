@@ -88,7 +88,8 @@ uiModules
         $scope.fetch();
       };
       $scope.vis.on('reload', reload);
-      $scope.$on('courier:searchRefresh', reload);
+      // dashboard will fire fetch event when it wants to refresh
+      $scope.$on('fetch', reload);
 
       if ($scope.appState) {
         let oldUiState;
@@ -135,6 +136,7 @@ uiModules
       });
 
       $scope.fetch();
+      $scope.$root.$broadcast('ready:vis');
     }
   };
 });
