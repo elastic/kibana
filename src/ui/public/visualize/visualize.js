@@ -89,6 +89,8 @@ uiModules
       };
       $scope.vis.on('reload', reload);
       $scope.$on('courier:searchRefresh', reload);
+      // dashboard will trigger this event when refreshing
+      $scope.$on('fetch', reload);
 
       if ($scope.appState) {
         let oldUiState;
