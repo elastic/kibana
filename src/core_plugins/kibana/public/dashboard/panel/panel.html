@@ -73,7 +73,7 @@
 
   <div ng-if="error" class="load-error">
     <span aria-hidden="true" class="kuiIcon fa-exclamation-triangle"></span>
-    <span ng-bind="error"></span>
+    <span ng-bind-html="error | markdown"></span>
   </div>
 
   <visualize
