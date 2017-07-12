@@ -112,6 +112,10 @@ uiModules
             }
           }
         });
+
+        $scope.$on('$destroy', () => {
+          stateMonitor.destroy();
+        });
       }
 
       let resizeInit = false;
