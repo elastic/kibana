@@ -42,12 +42,7 @@ class TableVis extends Component {
       const value = formatter(item.last);
       let trend;
       if (column.trend_arrows) {
-        let trendClass;
-        if (item.slope > -0.01 || item.slope < 0.01) {
-          trendClass = 'fa-arrows-v';
-        } else {
-          trendClass = item.slope > 0 ? 'fa-long-arrow-up' : 'fa-long-arrow-down';
-        }
+        const trendClass = item.slope > 0 ? 'fa-long-arrow-up' : 'fa-long-arrow-down';
         trend = (
           <span className="tsvb-table__trend">
             <i className={`fa ${trendClass}`}></i>
