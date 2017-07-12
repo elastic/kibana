@@ -42,6 +42,7 @@
             <button
               class="discover-field-details-item-button"
               ng-click="onAddFilter(field, bucket.value, '+')"
+              aria-label="Filter for this value"
               data-test-subj="plus-{{::field.name}}-{{::bucket.display}}"
             >
               <span
@@ -53,6 +54,7 @@
             <button
               class="discover-field-details-item-button"
               ng-click="onAddFilter(field, bucket.value, '-')"
+              aria-label="Filter out this value"
               data-test-subj="minus-{{::field.name}}-{{::bucket.display}}"
             >
               <span
