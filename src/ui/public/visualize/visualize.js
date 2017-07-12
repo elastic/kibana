@@ -15,7 +15,7 @@ import {
 
 uiModules
 .get('kibana/directive', ['ngSanitize'])
-.directive('visualize', function (Notifier, Private, timefilter, getAppState, $timeout) {
+.directive('visualize', function (Notifier, Private, timefilter, getAppState) {
   const notify = new Notifier({ location: 'Visualize' });
   const requestHandlers = Private(VisRequestHandlersRegistryProvider);
   const responseHandlers = Private(VisResponseHandlersRegistryProvider);
@@ -83,6 +83,15 @@ uiModules
         }
       });
 
+      const reload = () => {
+        $scope.vis.reload = true;
+        $scope.fetch();
+      };
+      $scope.vis.on('reload', reload);
+      $scope.$on('courier:searchRefresh', reload);
+      // dashboard will trigger this event when refreshing
+      $scope.$on('fetch', reload);
+
       if ($scope.appState) {
         let oldUiState;
         const stateMonitor = stateMonitorFactory.create($scope.appState);
@@ -99,11 +108,13 @@ uiModules
             // current visualizations uiState changed.
             if (!oldUiState || oldUiState !== JSON.stringify($scope.uiState.toJSON())) {
               oldUiState = JSON.stringify($scope.uiState.toJSON());
-              $timeout(() => {
-                $scope.$broadcast('render');
-              });
+              $scope.fetch();
             }
           }
+        });
+
+        $scope.$on('$destroy', () => {
+          stateMonitor.destroy();
         });
       }
 
