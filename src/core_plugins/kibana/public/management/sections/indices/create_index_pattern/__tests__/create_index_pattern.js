@@ -19,7 +19,7 @@ describe('createIndexPattern UI', () => {
       current: {
         params: {},
         locals: {
-          indexPatternIds: []
+          indexPatterns: []
         }
       }
     });
