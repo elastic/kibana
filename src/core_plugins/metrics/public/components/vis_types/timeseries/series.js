@@ -84,16 +84,13 @@ function TimeseriesSeries(props) {
     );
   }
 
-  let colorPicker;
-  if (props.colorPicker) {
-    colorPicker = (
-      <ColorPicker
-        disableTrash={true}
-        onChange={props.onChange}
-        name="color"
-        value={model.color}/>
-    );
-  }
+  const colorPicker = (
+    <ColorPicker
+      disableTrash={true}
+      onChange={props.onChange}
+      name="color"
+      value={model.color}/>
+  );
 
   let dragHandle;
   if (!props.disableDelete) {

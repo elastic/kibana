@@ -42,24 +42,29 @@ class TableVis extends Component {
       const value = formatter(item.last);
       let trend;
       if (column.trend_arrows) {
-        const trendClass = item.slope > 0 ? 'fa-long-arrow-up' : 'fa-long-arrow-down';
+        let trendClass;
+        if (item.slope > -0.01 || item.slope < 0.01) {
+          trendClass = 'fa-arrows-v';
+        } else {
+          trendClass = item.slope > 0 ? 'fa-long-arrow-up' : 'fa-long-arrow-down';
+        }
         trend = (
-          <span className="summarize__trend">
+          <span className="tsvb-table__trend">
             <i className={`fa ${trendClass}`}></i>
           </span>
         );
       }
       const style = { color: getColor(column.color_rules, 'text', item.last) };
       return (
-        <td key={`${rowId}-${item.id}`} className="summarize__value" style={style}>
-          <span className="summarize__value-display">{ value }</span>
+        <td key={`${rowId}-${item.id}`} className="tsvb-table__value" style={style}>
+          <span className="tsvb-table__value-display">{ value }</span>
           {trend}
         </td>
       );
     });
     return (
       <tr key={rowId}>
-        <td className="summarize__fieldName">{rowDisplay}</td>
+        <td className="tsvb-table__fieldName">{rowDisplay}</td>
         {columns}
       </tr>
     );
@@ -103,7 +108,7 @@ class TableVis extends Component {
 
       return (
         <th
-          className="summarize__columnName"
+          className="tsvb-table__columnName"
           onClick={handleClick}
           key={item.id}>{headerContent}</th>
       );
@@ -143,14 +148,18 @@ class TableVis extends Component {
       reversedClass = 'reversed';
     }
 
-    if (_.isArray(visData.series)) {
+    if (_.isArray(visData.series) && visData.series.length) {
       rows = visData.series.map(this.renderRow);
     } else {
+      let message = 'No results available.';
+      if (!model.pivot_id) {
+        message += ' You must choose an ID field for this visualization.';
+      }
       rows = (
         <tr>
           <td
-            className="summarize__noResults"
-            colSpan={model.series.length + 1}>No results available</td>
+            className="tsvb-table__noResults"
+            colSpan={model.series.length + 1}>{message}</td>
         </tr>
       );
     }
