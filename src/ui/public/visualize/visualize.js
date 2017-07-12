@@ -128,8 +128,6 @@ uiModules
       $scope.$listen(timefilter, 'fetch', $scope.fetch);
       $scope.$on('renderComplete', () => {
         $el.trigger('renderComplete');
-        // dashboard still depends on this (not on render complete as reporting)
-        $scope.$root.$broadcast('ready:vis');
       });
 
       $scope.$on('$destroy', () => {
