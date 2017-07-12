@@ -2,13 +2,11 @@ import { Observable } from 'rxjs';
 
 import { Server } from '../server';
 import { ConfigService, Env } from '../config';
-import {
-  LoggerService,
-  Logger,
-  LoggerFactory,
-  LoggerConfig,
-  MutableLoggerFactory
-} from '../logger';
+
+import { Logger } from '../logging/Logger';
+import { LoggerService } from '../logging/LoggerService';
+import { LoggerFactory, MutableLoggerFactory } from '../logging/LoggerFactory';
+import { LoggingConfig } from '../logging/LoggingConfig';
 
 export type OnShutdown = (reason?: Error) => void;
 
@@ -18,9 +16,9 @@ export type OnShutdown = (reason?: Error) => void;
 export class Root {
   configService: ConfigService;
   server?: Server;
-  log: Logger;
-  logger: LoggerFactory;
-  loggerService: LoggerService;
+  readonly log: Logger;
+  readonly logger: LoggerFactory;
+  private readonly loggerService: LoggerService;
 
   constructor(
     rawConfig$: Observable<{ [key: string]: any }>,
@@ -37,7 +35,7 @@ export class Root {
 
   async start() {
     try {
-      const loggingConfig$ = this.configService.atPath('logging', LoggerConfig);
+      const loggingConfig$ = this.configService.atPath('logging', LoggingConfig);
       this.loggerService.upgrade(loggingConfig$);
     } catch (e) {
       // This specifically console.logs because we were not able to configure
@@ -63,6 +61,7 @@ export class Root {
     if (this.server !== undefined) {
       await this.server.stop();
     }
+
     this.loggerService.stop();
 
     this.onShutdown(reason);
