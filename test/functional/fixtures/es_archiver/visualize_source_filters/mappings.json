@@ -5,12 +5,105 @@
     "settings": {
       "index": {
         "number_of_shards": "1",
-        "number_of_replicas": "0"
+        "mapper": {
+          "dynamic": "false"
+        },
+        "number_of_replicas": "1"
       }
     },
     "mappings": {
-      "config": {
+      "visualization": {
+        "dynamic": "strict",
         "properties": {
+          "description": {
+            "type": "text"
+          },
+          "kibanaSavedObjectMeta": {
+            "properties": {
+              "searchSourceJSON": {
+                "type": "text"
+              }
+            }
+          },
+          "savedSearchId": {
+            "type": "keyword"
+          },
+          "title": {
+            "type": "text"
+          },
+          "uiStateJSON": {
+            "type": "text"
+          },
+          "version": {
+            "type": "integer"
+          },
+          "visState": {
+            "type": "text"
+          }
+        }
+      },
+      "search": {
+        "dynamic": "strict",
+        "properties": {
+          "columns": {
+            "type": "keyword"
+          },
+          "description": {
+            "type": "text"
+          },
+          "hits": {
+            "type": "integer"
+          },
+          "kibanaSavedObjectMeta": {
+            "properties": {
+              "searchSourceJSON": {
+                "type": "text"
+              }
+            }
+          },
+          "sort": {
+            "type": "keyword"
+          },
+          "title": {
+            "type": "text"
+          },
+          "version": {
+            "type": "integer"
+          }
+        }
+      },
+      "index-pattern": {
+        "dynamic": "strict",
+        "properties": {
+          "fieldFormatMap": {
+            "type": "text"
+          },
+          "fields": {
+            "type": "text"
+          },
+          "intervalName": {
+            "type": "keyword"
+          },
+          "notExpandable": {
+            "type": "boolean"
+          },
+          "sourceFilters": {
+            "type": "text"
+          },
+          "timeFieldName": {
+            "type": "keyword"
+          },
+          "title": {
+            "type": "text"
+          }
+        }
+      },
+      "config": {
+        "dynamic": "true",
+        "properties": {
+          "buildNum": {
+            "type": "keyword"
+          },
           "dateFormat:tz": {
             "type": "text",
             "fields": {
@@ -31,43 +124,137 @@
           }
         }
       },
-      "index-pattern": {
+      "server": {
+        "dynamic": "strict",
         "properties": {
-          "fields": {
-            "type": "text",
-            "fields": {
-              "keyword": {
-                "type": "keyword",
-                "ignore_above": 256
+          "uuid": {
+            "type": "keyword"
+          }
+        }
+      },
+      "_default_": {
+        "dynamic": "strict"
+      },
+      "dashboard": {
+        "dynamic": "strict",
+        "properties": {
+          "description": {
+            "type": "text"
+          },
+          "hits": {
+            "type": "integer"
+          },
+          "kibanaSavedObjectMeta": {
+            "properties": {
+              "searchSourceJSON": {
+                "type": "text"
               }
             }
           },
-          "sourceFilters": {
-            "type": "text",
-            "fields": {
-              "keyword": {
-                "type": "keyword",
-                "ignore_above": 256
+          "optionsJSON": {
+            "type": "text"
+          },
+          "panelsJSON": {
+            "type": "text"
+          },
+          "refreshInterval": {
+            "properties": {
+              "display": {
+                "type": "keyword"
+              },
+              "pause": {
+                "type": "boolean"
+              },
+              "section": {
+                "type": "integer"
+              },
+              "value": {
+                "type": "integer"
               }
             }
           },
-          "timeFieldName": {
-            "type": "text",
-            "fields": {
-              "keyword": {
-                "type": "keyword",
-                "ignore_above": 256
-              }
-            }
+          "timeFrom": {
+            "type": "keyword"
+          },
+          "timeRestore": {
+            "type": "boolean"
+          },
+          "timeTo": {
+            "type": "keyword"
           },
           "title": {
+            "type": "text"
+          },
+          "uiStateJSON": {
+            "type": "text"
+          },
+          "version": {
+            "type": "integer"
+          }
+        }
+      },
+      "url": {
+        "dynamic": "strict",
+        "properties": {
+          "accessCount": {
+            "type": "long"
+          },
+          "accessDate": {
+            "type": "date"
+          },
+          "createDate": {
+            "type": "date"
+          },
+          "url": {
             "type": "text",
             "fields": {
               "keyword": {
                 "type": "keyword",
-                "ignore_above": 256
+                "ignore_above": 2048
               }
             }
+          }
+        }
+      },
+      "timelion-sheet": {
+        "dynamic": "strict",
+        "properties": {
+          "description": {
+            "type": "text"
+          },
+          "hits": {
+            "type": "integer"
+          },
+          "kibanaSavedObjectMeta": {
+            "properties": {
+              "searchSourceJSON": {
+                "type": "text"
+              }
+            }
+          },
+          "timelion_chart_height": {
+            "type": "integer"
+          },
+          "timelion_columns": {
+            "type": "integer"
+          },
+          "timelion_interval": {
+            "type": "keyword"
+          },
+          "timelion_other_interval": {
+            "type": "keyword"
+          },
+          "timelion_rows": {
+            "type": "integer"
+          },
+          "timelion_sheet": {
+            "type": "text"
+          },
+          "title": {
+            "type": "text"
+          },
+          "version": {
+            "type": "integer"
           }
         }
       }

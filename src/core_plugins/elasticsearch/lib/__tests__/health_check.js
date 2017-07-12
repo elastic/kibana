@@ -11,6 +11,7 @@ import kibanaVersion from '../kibana_version';
 import { esTestServerUrlParts } from '../../../../../test/es_test_server_url_parts';
 import * as determineEnabledScriptingLangsNS from '../determine_enabled_scripting_langs';
 import { determineEnabledScriptingLangs } from '../determine_enabled_scripting_langs';
+import * as ensureTypesExistNS from '../ensure_types_exist';
 
 const esPort = esTestServerUrlParts.port;
 const esUrl = url.format(esTestServerUrlParts);
@@ -29,6 +30,7 @@ describe('plugins/elasticsearch', () => {
 
       // Stub the Kibana version instead of drawing from package.json.
       sinon.stub(kibanaVersion, 'get').returns(COMPATIBLE_VERSION_NUMBER);
+      sinon.stub(ensureTypesExistNS, 'ensureTypesExist');
 
       // setup the plugin stub
       plugin = {
@@ -85,6 +87,7 @@ describe('plugins/elasticsearch', () => {
     afterEach(() => {
       kibanaVersion.get.restore();
       determineEnabledScriptingLangs.restore();
+      ensureTypesExistNS.ensureTypesExist.restore();
     });
 
     it('should set the cluster green if everything is ready', function () {
