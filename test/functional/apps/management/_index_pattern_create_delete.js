@@ -21,8 +21,11 @@ export default function ({ getService, getPageObjects }) {
     });
 
     describe('index pattern creation', function indexPatternCreation() {
+      let indexPatternId;
+
       before(function () {
-        return PageObjects.settings.createIndexPattern();
+        return PageObjects.settings.createIndexPattern()
+          .then(id => indexPatternId = id);
       });
 
       it('should have index pattern in page header', function () {
@@ -37,7 +40,7 @@ export default function ({ getService, getPageObjects }) {
         return retry.try(function tryingForTime() {
           return remote.getCurrentUrl()
           .then(function (currentUrl) {
-            expect(currentUrl).to.contain('logstash-*');
+            expect(currentUrl).to.contain(indexPatternId);
           });
         });
       });

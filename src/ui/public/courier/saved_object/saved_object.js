@@ -16,8 +16,7 @@ import { SavedObjectNotFound } from 'ui/errors';
 import MappingSetupProvider from 'ui/utils/mapping_setup';
 
 import { SearchSourceProvider } from '../data_source/search_source';
-import { getTitleAlreadyExists } from './get_title_already_exists';
-import { SavedObjectsClientProvider } from 'ui/saved_objects';
+import { SavedObjectsClientProvider, findObjectByTitle } from 'ui/saved_objects';
 
 /**
  * An error message to be used when the user rejects a confirm overwrite.
@@ -312,12 +311,13 @@ export function SavedObjectProvider(esAdmin, kbnIndex, Promise, Private, Notifie
         return Promise.resolve();
       }
 
-      return getTitleAlreadyExists(this, savedObjectsClient)
-        .then(duplicateTitle => {
-          if (!duplicateTitle) return true;
+      return findObjectByTitle(savedObjectsClient, this.getEsType(), this.title)
+        .then(duplicate => {
+          if (!duplicate) return true;
+          if (duplicate.id === this.id) return true;
 
           const confirmMessage =
-            `A ${this.getDisplayName()} with the title '${duplicateTitle}' already exists. Would you like to save anyway?`;
+            `A ${this.getDisplayName()} with the title '${this.title}' already exists. Would you like to save anyway?`;
 
           return confirmModalPromise(confirmMessage, { confirmButtonText: `Save ${this.getDisplayName()}` })
             .catch(() => Promise.reject(new Error(SAVE_DUPLICATE_REJECTED)));

@@ -12,8 +12,6 @@ import { uiModules } from 'ui/modules';
 import fieldChooserTemplate from 'plugins/kibana/discover/components/field_chooser/field_chooser.html';
 const app = uiModules.get('apps/discover');
 
-
-
 app.directive('discFieldChooser', function ($location, globalState, config, $route, Private) {
   const FieldList = Private(IndexPatternsFieldListProvider);
 
@@ -32,8 +30,9 @@ app.directive('discFieldChooser', function ($location, globalState, config, $rou
     },
     template: fieldChooserTemplate,
     link: function ($scope) {
-      $scope.setIndexPattern = function (id) {
-        $scope.state.index = id;
+      $scope.indexPatternList = _.sortBy($scope.indexPatternList, o => o.get('title'));
+      $scope.setIndexPattern = function (pattern) {
+        $scope.state.index = pattern.id;
         $scope.state.save();
       };
 
