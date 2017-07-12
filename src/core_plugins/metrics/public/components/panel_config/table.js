@@ -42,8 +42,7 @@ class TablePanelConfig extends Component {
             <div className="vis_editor__container">
               <div className="vis_ediotr__vis_config-row">
                 <p>For the table visualization you need to define an ID field to
-                  pivot on using a terms aggregation. You can also define a display
-                  field which will be pulled using a top hits aggregation from a sample document.</p>
+                  pivot on using a terms aggregation.</p>
               </div>
               <div className="vis_editor__vis_config-row">
                 <div className="vis_editor__label">ID Field</div>
@@ -53,14 +52,6 @@ class TablePanelConfig extends Component {
                     value={model.pivot_id}
                     indexPattern={model.index_pattern}
                     onChange={handleSelectChange('pivot_id')} />
-                </div>
-                <div className="vis_editor__label">Display Field</div>
-                <div className="vis_editor__row_item">
-                  <FieldSelect
-                    fields={this.props.fields}
-                    value={model.pivot_display}
-                    indexPattern={model.index_pattern}
-                    onChange={handleSelectChange('pivot_display')} />
                 </div>
                 <div className="vis_editor__label">Column Label</div>
                 <input

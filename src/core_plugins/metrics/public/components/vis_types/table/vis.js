@@ -3,6 +3,8 @@ import React, { Component, PropTypes } from 'react';
 import ticFormatter from '../../lib/tick_formatter';
 import calculateLabel from '../../../../common/calculate_label';
 import { isSortable } from './is_sortable';
+import Tooltip from '../../tooltip';
+import replaceVars from '../../lib/replace_vars';
 
 function getColor(rules, colorKey, value) {
   let color;
@@ -29,14 +31,10 @@ class TableVis extends Component {
     const { model } = this.props;
     const rowId = row.key;
     let rowDisplay = rowId;
-    if (model.display_field) {
-      rowDisplay = _.get(row, `${model.display_field}`, rowId);
+    if (model.drilldown_url) {
+      const url = replaceVars(model.drilldown_url, {}, { key: row.key });
+      rowDisplay = (<a href={url}>{rowDisplay}</a>);
     }
-    // if (model.drilldown_dashboard) {
-    //   let url = `#/dashboard/${model.drilldown_dashboard}`;
-    //   url += `?_a=(query:(query_string:(query:'${model.id_field}:${rowId}')))`;
-    //   rowDisplay = (<a href={url}>{rowDisplay}</a>);
-    // }
     const columns = row.series.map(item => {
       const column = model.series.find(c => c.id === item.id);
       if (!column) return null;
@@ -94,11 +92,20 @@ class TableVis extends Component {
           <i className={`fa fa-${sortIcon}`}></i>
         );
       }
+      let headerContent = (
+        <span>{label} {sortComponent}</span>
+      );
+      if (!isSortable(metric)) {
+        headerContent = (
+          <Tooltip text="This Column is Not Sortable">{headerContent}</Tooltip>
+        );
+      }
+
       return (
         <th
           className="summarize__columnName"
           onClick={handleClick}
-          key={item.id}>{label} {sortComponent}</th>
+          key={item.id}>{headerContent}</th>
       );
     });
     const label = model.pivot_label || model.pivot_field || model.pivot_id;
