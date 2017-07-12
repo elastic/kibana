@@ -4,7 +4,6 @@ import SeriesEditor from '../series_editor';
 import IndexPattern from '../index_pattern';
 import createTextHandler from '../lib/create_text_handler';
 import createSelectHandler from '../lib/create_select_handler';
-import ColorPicker from '../color_picker';
 import uuid from 'uuid';
 import YesNo from '../yes_no';
 
@@ -91,11 +90,6 @@ class TablePanelConfig extends Component {
             model={this.props.model}
             onChange={this.props.onChange}/>
           <div className="vis_editor__vis_config-row">
-            <div className="vis_editor__label">Background Color</div>
-            <ColorPicker
-              onChange={this.props.onChange}
-              name="background_color"
-              value={model.background_color}/>
             <div className="vis_editor__label">Panel Filter</div>
             <input
               className="vis_editor__input-grows"
