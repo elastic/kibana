@@ -1,13 +1,18 @@
 import { connect } from 'react-redux';
 
-import { getEditing } from '../../state/selectors/app';
 import { setEditing, selectElement } from '../../state/actions/transient';
+import { getEditing, getAppReady } from '../../state/selectors/app';
 
 import { App as Component } from './app';
 
-const mapStateToProps = (state) => ({
-  editing: getEditing(state),
-});
+const mapStateToProps = (state) => {
+  const appReady = getAppReady(state);
+
+  return {
+    editing: getEditing(state),
+    appReady: (typeof appReady === 'object') ? appReady : { ready: appReady },
+  };
+};
 
 const mapDispatchToProps = (dispatch) => ({
   setEditing,

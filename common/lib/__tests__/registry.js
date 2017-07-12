@@ -24,6 +24,13 @@ function validateRegistry(registry, elements) {
     expect(regAsJs.__test1).to.not.equal(elements[0]);
   });
 
+  it('returns shallow clone array via toArray', () => {
+    const regAsArray = registry.toArray();
+    expect(regAsArray).to.be.an(Array);
+    expect(regAsArray[0]).to.eql(elements[0]);
+    expect(regAsArray[0]).to.not.equal(elements[0]);
+  });
+
   it('resets the registry', () => {
     expect(registry.get('__test2')).to.eql(elements[1]);
     registry.reset();
@@ -48,6 +55,10 @@ describe('Registry', () => {
 
     validateRegistry(registry, elements);
 
+    it('has a prop of name', () => {
+      expect(registry.getProp()).to.equal('name');
+    });
+
     it('throws when object is missing the lookup prop', () => {
       const check = () => registry.register({ hello: 'world' });
       expect(check).to.throwException(/requires an object with a name property/i);
@@ -69,6 +80,10 @@ describe('Registry', () => {
     registry.register(elements[1]);
 
     validateRegistry(registry, elements);
+
+    it('has a prop of type', () => {
+      expect(registry.getProp()).to.equal('type');
+    });
 
     it('throws when object is missing the lookup prop', () => {
       const check = () => registry.register({ hello: 'world' });

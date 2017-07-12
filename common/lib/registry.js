@@ -18,9 +18,13 @@ export function Registry(prop = 'name') {
     }, {});
   };
 
+  this.toArray = () => Object.keys(_indexed).map((key) => this.get(key));
+
   this.get = (name) => {
     return _indexed[name] ? clone(_indexed[name]) : null;
   };
+
+  this.getProp = () => prop;
 
   this.reset = () => {
     _indexed = new Object();

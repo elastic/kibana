@@ -1,6 +1,9 @@
-import { translate } from './translate';
 import { socketApi } from './socket';
+import { translate } from './translate';
+import { functions } from './functions';
+
 export function routes(server) {
-  translate(server);
   socketApi(server);
+  translate(server);
+  functions(server);
 }

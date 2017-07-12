@@ -10,7 +10,13 @@ const app = uiModules.get('apps/canvas');
 
 app.service('$store', (kbnVersion, basePath) => {
   const initialState = getInitialState();
-  initialState.app = { kbnVersion, basePath }; // Set the defaults from Kibana plugin
+
+  // Set the defaults from Kibana plugin
+  initialState.app = {
+    kbnVersion,
+    basePath,
+    ready: false,
+  };
 
   const rootReducer = getRootReducer(initialState);
   const store = createStore(rootReducer, initialState, middleware);

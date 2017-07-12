@@ -1,38 +1,18 @@
-import React from 'react';
 import PropTypes from 'prop-types';
+import { compose, branch, renderComponent, renderNothing } from 'recompose';
+import { AppError } from './app_error';
+// import { AppLoading } from './app_loading';
+import { AppComponent as Component } from './app_component';
 
-import { Sidebar } from '../sidebar';
-import { Toolbar } from '../toolbar';
+const branches = [
+  branch(({ appReady }) => appReady instanceof Error, renderComponent(AppError)),
+  branch(({ appReady }) => appReady.ready === false, renderNothing),
+];
 
-import { Workpad } from '../workpad';
-import { WorkpadHeader } from '../workpad_header';
-
-
-import './app.less';
-
-export const App = ({ editing, deselectElement }) => (
-  <div className="canvas">
-    <div className="canvas__main">
-      <div className="canvas__app--workspace" onMouseDown={deselectElement}>
-        <WorkpadHeader />
-        <div className="canvas__app--workpad">
-          <Workpad />
-        </div>
-      </div>
-      { editing ? (
-        <div className="canvas__app--sidebar">
-          <Sidebar />
-        </div>
-      ) : null }
-    </div>
-    { editing ? (
-      <Toolbar />
-    ) : null }
-
-  </div>
-);
+export const App = compose(
+  ...branches
+)(Component);
 
 App.propTypes = {
-  editing: PropTypes.bool,
-  deselectElement: PropTypes.func,
+  appReady: PropTypes.object.isRequired,
 };
