@@ -98,6 +98,10 @@ export function VisProvider(Private, indexPatterns, timefilter, getAppState) {
       this.setCurrentState(this._state);
     }
 
+    forceReload() {
+      this.emit('reload');
+    }
+
     getCurrentState(includeDisabled) {
       return {
         title: this.title,
