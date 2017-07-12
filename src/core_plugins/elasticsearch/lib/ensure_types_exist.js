@@ -7,7 +7,7 @@
  *  @property {Function} options.log a method for writing log messages
  *  @property {string} options.indexName name of the index in elasticsearch
  *  @property {Function} options.callCluster a function for executing client requests
- *  @param  {Array<Object>} options.types an array of objects with `name` and `mapping` properties
+ *  @property {Array<Object>} options.types an array of objects with `name` and `mapping` properties
  *                                        describing the types that should be in the index
  *  @return {Promise<undefined>}
  */
