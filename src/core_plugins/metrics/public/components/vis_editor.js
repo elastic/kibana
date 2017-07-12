@@ -19,8 +19,10 @@ class VisEditor extends Component {
 
   componentWillMount() {
     const { appState } = this.props;
-    this.appState = appState;
-    this.appState.on('save_with_changes', this.handleAppStateChange);
+    if (appState) {
+      this.appState = appState;
+      this.appState.on('save_with_changes', this.handleAppStateChange);
+    }
   }
 
   handleAppStateChange() {
@@ -29,7 +31,9 @@ class VisEditor extends Component {
   }
 
   componentWillUnmount() {
-    this.appState.off('save_with_changes', this.handleAppStateChange);
+    if (this.appState) {
+      this.appState.off('save_with_changes', this.handleAppStateChange);
+    }
   }
 
   render() {
