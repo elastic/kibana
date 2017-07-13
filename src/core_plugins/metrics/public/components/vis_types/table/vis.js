@@ -148,7 +148,7 @@ class TableVis extends Component {
     } else {
       let message = 'No results available.';
       if (!model.pivot_id) {
-        message += ' You must choose an ID field for this visualization.';
+        message += ' You must choose a group by field for this visualization.';
       }
       rows = (
         <tr>
