@@ -4,11 +4,12 @@ import { AggTypesBucketsGeoHashProvider } from 'ui/agg_types/buckets/geo_hash';
 describe('Geohash Agg', function () {
 
 
-  describe('write', function () {
+  describe('precision parameter', function () {
 
-    const paramWriter = new AggTypesBucketsGeoHashProvider(function PrivateMock() {
+    const precisionParam = new AggTypesBucketsGeoHashProvider(function PrivateMock() {
+      const PRECISION_PARAM_INDEX = 6;
       return function BucketMock(geohashProvider) {
-        return geohashProvider.params[5];
+        return geohashProvider.params[PRECISION_PARAM_INDEX];
       };
     }, {
       get: function () {
@@ -16,7 +17,11 @@ describe('Geohash Agg', function () {
       }
     });
 
-    describe('geohash', function () {
+    it('should select precision parameter', () => {
+      expect(precisionParam.name).to.equal('precision');
+    });
+
+    describe('precision parameter write', function () {
 
       const zoomToGeoHashPrecision = {
         0: 1,
@@ -46,7 +51,7 @@ describe('Geohash Agg', function () {
       Object.keys(zoomToGeoHashPrecision).forEach((zoomLevel) => {
         it(`zoom level ${zoomLevel} should correspond to correct geohash-precision`, () => {
           const output = { params: {} };
-          paramWriter.write({
+          precisionParam.write({
             vis: {
               hasUiState: () => true,
               uiStateVal: () => zoomLevel
