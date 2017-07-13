@@ -23,7 +23,7 @@
         name="discoverSearch"
         ng-submit="fetch()"
       >
-        <div class="typeahead" kbn-typeahead="discover" on-select="fetch()">
+        <div class="typeahead" kbn-typeahead="discover" on-select="fetch()" role="search">
           <div class="kuiLocalSearch">
             <div class="kuiLocalSearchAssistedInput">
               <input
@@ -33,6 +33,7 @@
                 ng-model="state.query"
                 placeholder="Search... (e.g. status:200 AND extension:PHP)"
                 aria-label="Search input"
+                aria-describedby="discover-lucene-syntax-hint"
                 type="text"
                 class="kuiLocalSearchInput kuiLocalSearchInput--lucene"
                 ng-class="{'kuiLocalSearchInput-isInvalid': discoverSearch.$invalid}"
@@ -40,6 +41,7 @@
               <div class="kuiLocalSearchAssistedInput__assistance">
                 <p class="kuiText">
                   <a
+                    id="discover-lucene-syntax-hint"
                     class="kuiLink"
                     ng-href="{{queryDocLinks.luceneQuerySyntax}}"
                     target="_blank"
@@ -64,7 +66,7 @@
     </div>
   </kbn-top-nav>
 
-  <div class="container-fluid" role="main">
+  <main class="container-fluid">
     <div class="row">
       <filter-bar
         state="state"
@@ -72,7 +74,7 @@
       ></filter-bar>
     </div>
     <div class="row">
-      <div class="col-md-2 sidebar-container collapsible-sidebar">
+      <div class="col-md-2 sidebar-container collapsible-sidebar" id="discover-sidebar">
         <disc-field-chooser
           columns="state.columns"
           hits="rows"
@@ -101,6 +103,16 @@
 
           <!-- result -->
           <div class="results" ng-show="resultState === 'ready'">
+            <button
+              class="kuiButton kuiButton--basic kuiButton--iconText discover-skip-button"
+              ng-click="showAllRows(); scrollToBottom()"
+            >
+              <span class="kuiButton__inner">
+                <span aria-hidden="true" class="kuiButton__icon kuiIcon fa-chevron-down"></span>
+                <span>Skip to bottom</span>
+              </span>
+            </button>
+
             <div class="discover-timechart" ng-if="opts.timefield">
               <header>
                 <center class="small">
@@ -152,6 +164,7 @@
                 data-shared-item
                 data-title="{{opts.savedSearch.lastSavedTitle}}"
                 data-description="{{opts.savedSearch.description}}"
+                minimum-visible-rows="minimumVisibleRows"
                 render-counter
                 on-add-column="addColumn"
                 on-change-sort-order="setSortOrder"
@@ -159,15 +172,17 @@
                 on-remove-column="removeColumn"
               ></doc-table>
 
+              <a tabindex="0" id="discoverBottomMarker"></a>
+
               <div ng-if="rows.length == opts.sampleSize" class="discover-table-footer">
                 These are the first {{opts.sampleSize}} documents matching
                 your search, refine your search to see others.
-                <a ng-click="toTop()">Back to top.</a>
+                <a kbn-accessible-click ng-click="scrollToTop()">Back to top.</a>
               </div>
             </div>
           </div>
         </div>
       </div>
     </div>
-  </div>
+  </main>
 </discover-app>

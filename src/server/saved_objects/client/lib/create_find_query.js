@@ -14,8 +14,19 @@ export function createFindQuery(mappings, options = {}) {
 
   if (type) {
     bool.filter.push({
-      term: {
-        _type: type
+      bool: {
+        should: [
+          {
+            term: {
+              _type: type
+            }
+          },
+          {
+            term: {
+              type
+            }
+          }
+        ]
       }
     });
   }

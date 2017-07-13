@@ -29,6 +29,7 @@ import { uiModules } from 'ui/modules';
 import indexTemplate from 'plugins/kibana/discover/index.html';
 import { StateProvider } from 'ui/state_management/state';
 import { documentationLinks } from 'ui/documentation_links/documentation_links';
+import { SavedObjectsClientProvider } from 'ui/saved_objects';
 
 const app = uiModules.get('apps/discover', [
   'kibana/notify',
@@ -46,8 +47,14 @@ uiRoutes
   resolve: {
     ip: function (Promise, courier, config, $location, Private) {
       const State = Private(StateProvider);
-      return courier.indexPatterns.getIds()
-      .then(function (list) {
+      const savedObjectsClient = Private(SavedObjectsClientProvider);
+
+      return savedObjectsClient.find({
+        type: 'index-pattern',
+        fields: ['title'],
+        perPage: 10000
+      })
+      .then(({ savedObjects }) => {
         /**
          *  In making the indexPattern modifiable it was placed in appState. Unfortunately,
          *  the load order of AppState conflicts with the load order of many other things
@@ -60,12 +67,12 @@ uiRoutes
         const state = new State('_a', {});
 
         const specified = !!state.index;
-        const exists = _.contains(list, state.index);
+        const exists = _.findIndex(savedObjects, o => o.id === state.index) > -1;
         const id = exists ? state.index : config.get('defaultIndex');
         state.destroy();
 
         return Promise.props({
-          list: list,
+          list: savedObjects,
           loaded: courier.indexPatterns.get(id),
           stateVal: state.index,
           stateValFound: specified && exists
@@ -90,8 +97,21 @@ app.directive('discoverApp', function () {
   };
 });
 
-function discoverController($scope, config, courier, $route, $window, Notifier,
-  AppState, timefilter, Promise, Private, kbnUrl) {
+function discoverController(
+  $element,
+  $route,
+  $scope,
+  $timeout,
+  $window,
+  AppState,
+  Notifier,
+  Private,
+  Promise,
+  config,
+  courier,
+  kbnUrl,
+  timefilter,
+) {
 
   const Vis = Private(VisProvider);
   const docTitle = Private(DocTitleProvider);
@@ -107,6 +127,7 @@ function discoverController($scope, config, courier, $route, $window, Notifier,
   $scope.queryDocLinks = documentationLinks.query;
   $scope.intervalOptions = Private(AggTypesBucketsIntervalOptionsProvider);
   $scope.showInterval = false;
+  $scope.minimumVisibleRows = 50;
 
   $scope.intervalEnabled = function (interval) {
     return interval.val !== 'custom';
@@ -211,12 +232,13 @@ function discoverController($scope, config, courier, $route, $window, Notifier,
     const body = await searchSource.getSearchRequestBody();
     return {
       searchRequest: {
-        index: searchSource.get('index').id,
+        index: searchSource.get('index').title,
         body
       },
       fields: selectFields,
       metaFields: $scope.indexPattern.metaFields,
       conflictedTypesFields: $scope.indexPattern.fields.filter(f => f.type === 'conflict').map(f => f.name),
+      indexPatternId: searchSource.get('index').id
     };
   };
 
@@ -251,8 +273,6 @@ function discoverController($scope, config, courier, $route, $window, Notifier,
   $scope.opts = {
     // number of records to fetch, then paginate through
     sampleSize: config.get('discover:sampleSize'),
-    // Index to match
-    index: $scope.indexPattern.id,
     timefield: $scope.indexPattern.timeFieldName,
     savedSearch: savedSearch,
     indexPatternList: $route.current.locals.ip.list,
@@ -488,9 +508,13 @@ function discoverController($scope, config, courier, $route, $window, Notifier,
 
     segmented.on('mergedSegment', function (merged) {
       $scope.mergedEsResp = merged;
-      responseHandler($scope.vis, merged).then(resp => {
-        $scope.visData = resp;
-      });
+
+      if ($scope.opts.timefield) {
+        responseHandler($scope.vis, merged).then(resp => {
+          $scope.visData = resp;
+        });
+      }
+
       $scope.hits = merged.hits.total;
 
       const indexPattern = $scope.searchSource.get('index');
@@ -579,8 +603,19 @@ function discoverController($scope, config, courier, $route, $window, Notifier,
     columnActions.moveColumn($scope.state.columns, columnName, newIndex);
   };
 
-  $scope.toTop = function () {
+  $scope.scrollToTop = function () {
     $window.scrollTo(0, 0);
+  };
+
+  $scope.scrollToBottom = function () {
+    // delay scrolling to after the rows have been rendered
+    $timeout(() => {
+      $element.find('#discoverBottomMarker').focus();
+    }, 0);
+  };
+
+  $scope.showAllRows = function () {
+    $scope.minimumVisibleRows = $scope.hits;
   };
 
   let loadingVis;
@@ -661,7 +696,7 @@ function discoverController($scope, config, courier, $route, $window, Notifier,
 
     if (own && !stateVal) return own;
     if (stateVal && !stateValFound) {
-      const err = '"' + stateVal + '" is not a configured pattern. ';
+      const err = '"' + stateVal + '" is not a configured pattern ID. ';
       if (own) {
         notify.warning(err + ' Using the saved index pattern: "' + own.id + '"');
         return own;

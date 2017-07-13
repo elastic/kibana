@@ -301,3 +301,19 @@ disc-field-chooser {
       width: auto;
     }
   }
+
+.discover-skip-button {
+  position: absolute;
+  left: -10000px;
+  top: 4px;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+
+  &:focus {
+    left: initial;
+    right: 15px;
+    width: auto;
+    height: auto;
+  }
+}

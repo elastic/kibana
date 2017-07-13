@@ -7,8 +7,8 @@ export default function ({ getService, getPageObjects }) {
   const PageObjects = getPageObjects(['common']);
 
   describe('status page', function () {
-    before(function () {
-      return PageObjects.common.navigateToApp('status_page');
+    beforeEach(async () => {
+      await PageObjects.common.navigateToApp('status_page');
     });
 
     it('should show the kibana plugin as ready', function () {

@@ -22,34 +22,7 @@ const MetricsRequestHandlerProvider = function (Private, Notifier, config, timef
             const maxBuckets = config.get('metrics:max_buckets');
             validateInterval(timefilter, panel, maxBuckets);
             return $http.post('../api/metrics/vis/data', params)
-              .success(resp => {
-
-                const patternsToFetch = [];
-                // Fetch any missing index patterns
-                if (!vis.fields) vis.fields = {};
-
-                if (!vis.fields[vis.params.index_pattern]) {
-                  patternsToFetch.push(vis.params.index_pattern);
-                }
-
-                vis.params.series.forEach(series => {
-                  if (series.override_index_pattern &&
-                    !vis.fields[series.series_index_pattern]) {
-                    patternsToFetch.push(series.series_index_pattern);
-                  }
-                });
-
-                if (vis.params.annotations) {
-                  vis.params.annotations.forEach(item => {
-                    if (item.index_pattern &&
-                      !vis.fields[item.index_pattern]) {
-                      patternsToFetch.push(item.index_pattern);
-                    }
-                  });
-                }
-
-                resolve(resp);
-              })
+              .success(resolve)
               .error(resp => {
                 resolve({});
                 const err = new Error(resp.message);

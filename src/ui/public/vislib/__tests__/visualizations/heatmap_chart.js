@@ -150,7 +150,7 @@ describe('Vislib Heatmap Chart Test Suite', function () {
       });
 
       it('should show correcy Y axis title', function () {
-        expect(vis.handler.valueAxes[1].axisConfig.get('title.text')).to.equal('');
+        expect(vis.handler.categoryAxes[1].axisConfig.get('title.text')).to.equal('');
       });
     });
   });
