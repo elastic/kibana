@@ -216,8 +216,16 @@ export class SavedObjectsClient {
    * @returns {promise}
    */
   async update(type, id, attributes, options = {}) {
+    // handles documents with an _id of `${type}:${id}`
+    const docResponse = await this._withKibanaIndex('search', { body: createIdQuery({ type, id }) });
+    const [hit] = get(docResponse, 'hits.hits', []);
+
+    if (!hit) {
+      throw Boom.notFound();
+    }
+
     const response = await this._withKibanaIndex('update', {
-      id,
+      id: hit._id,
       type: V6_TYPE,
       version: options.version,
       refresh: 'wait_for',
