@@ -2,10 +2,11 @@ import './sidebar';
 import './vis_options';
 import $ from 'jquery';
 
-
 import _ from 'lodash';
 import angular from 'angular';
 import defaultEditorTemplate from './default.html';
+
+import { VisEditorTypesRegistryProvider } from 'ui/registry/vis_editor_types';
 
 const defaultEditor = function ($rootScope, $compile) {
   return class DefaultEditor {
@@ -97,5 +98,7 @@ const defaultEditor = function ($rootScope, $compile) {
     }
   };
 };
+
+VisEditorTypesRegistryProvider.register(defaultEditor);
 
 export { defaultEditor };

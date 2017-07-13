@@ -1,5 +1,7 @@
 import _ from 'lodash';
 
+import { VisRequestHandlersRegistryProvider } from 'ui/registry/vis_request_handlers';
+
 const CourierRequestHandlerProvider = function (Private, courier, timefilter) {
   return {
     name: 'courier',
@@ -48,5 +50,7 @@ const CourierRequestHandlerProvider = function (Private, courier, timefilter) {
     }
   };
 };
+
+VisRequestHandlersRegistryProvider.register(CourierRequestHandlerProvider);
 
 export { CourierRequestHandlerProvider };
