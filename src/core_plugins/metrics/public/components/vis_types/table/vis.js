@@ -86,8 +86,13 @@ class TableVis extends Component {
         onUiState(stateKey, { column: item.id, order });
       };
       let sortComponent;
-      if (isSortable(metric) && sort.column === item.id) {
-        const sortIcon = sort.order === 'asc' ? 'sort-amount-asc' : 'sort-amount-desc';
+      if (isSortable(metric)) {
+        let sortIcon;
+        if (sort.column === item.id) {
+          sortIcon = sort.order === 'asc' ? 'sort-asc' : 'sort-desc';
+        } else {
+          sortIcon = 'sort';
+        }
         sortComponent = (
           <i className={`fa fa-${sortIcon}`}></i>
         );
@@ -109,13 +114,15 @@ class TableVis extends Component {
       );
     });
     const label = model.pivot_label || model.pivot_field || model.pivot_id;
-    const sortIcon = sort.order === 'asc' ? 'sort-amount-asc' : 'sort-amount-desc';
-    let sortComponent;
+    let sortIcon;
     if (sort.column === '_default_') {
-      sortComponent = (
-        <i className={`fa fa-${sortIcon}`}></i>
-      );
+      sortIcon = sort.order === 'asc' ? 'sort-asc' : 'sort-desc';
+    } else {
+      sortIcon = 'sort';
     }
+    const sortComponent = (
+      <i className={`fa fa-${sortIcon}`}></i>
+    );
     const handleSortClick = () => {
       let order;
       if (sort.column === '_default_') {
