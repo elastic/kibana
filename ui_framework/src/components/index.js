@@ -6,3 +6,7 @@ export {
 export {
   KuiOutsideClickDetector,
 } from './outside_click_detector';
+
+export {
+  KuiPopover,
+} from './popover';
