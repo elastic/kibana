@@ -7,14 +7,14 @@ import { truncatedColorMaps } from 'ui/vislib/components/color/truncated_colorma
 
 export default class ChoroplethLayer extends KibanaMapLayer {
 
-  constructor(geojsonUrl) {
+  constructor(geojsonUrl, attribution) {
     super();
-
 
     this._metrics = null;
     this._joinField = null;
     this._colorRamp = truncatedColorMaps[Object.keys(truncatedColorMaps)[0]];
     this._tooltipFormatter = () => '';
+    this._attribution = attribution;
 
     this._geojsonUrl = geojsonUrl;
     this._leafletLayer = L.geoJson(null, {
@@ -162,9 +162,7 @@ export default class ChoroplethLayer extends KibanaMapLayer {
 
       jqueryDiv.append(label);
     });
-
   }
-
 }
 
 

@@ -188,6 +188,7 @@ export default () => Joi.object({
     layers: Joi.array().items(Joi.object({
       url: Joi.string(),
       type: Joi.string(),
+      attribution: Joi.string(),
       name: Joi.string(),
       fields: Joi.array().items(Joi.object({
         name: Joi.string(),

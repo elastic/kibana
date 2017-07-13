@@ -1,5 +1,7 @@
 import expect from 'expect.js';
 import { KibanaMap } from '../kibana_map';
+import { KibanaMapLayer } from '../kibana_map_layer';
+import L from 'leaflet';
 
 describe('kibana_map tests', function () {
 
@@ -66,9 +68,52 @@ describe('kibana_map tests', function () {
       expect(bounds.top_left.lon).to.equal(-180);
 
     });
-
   });
 
+
+  describe('KibanaMap - attributions', function () {
+
+
+    beforeEach(async function () {
+      setupDOM();
+      kibanaMap = new KibanaMap(domNode, {
+        minZoom: 1,
+        maxZoom: 10,
+        center: [0, 0],
+        zoom: 0
+      });
+    });
+
+    afterEach(function () {
+      kibanaMap.destroy();
+      teardownDOM();
+    });
+
+    function makeMockLayer(attribution) {
+      const layer = new KibanaMapLayer();
+      layer._attribution = attribution;
+      layer._leafletLayer = L.geoJson(null);
+      return layer;
+    }
+
+    it('should update attributions correctly', function () {
+      kibanaMap.addLayer(makeMockLayer('foo|bar'));
+      expect(domNode.querySelectorAll('.leaflet-control-attribution')[0].innerHTML).to.equal('foo, bar');
+
+      kibanaMap.addLayer(makeMockLayer('bar'));
+      expect(domNode.querySelectorAll('.leaflet-control-attribution')[0].innerHTML).to.equal('foo, bar');
+
+      const layer = makeMockLayer('bar,stool');
+      kibanaMap.addLayer(layer);
+      expect(domNode.querySelectorAll('.leaflet-control-attribution')[0].innerHTML).to.equal('foo, bar, stool');
+
+      kibanaMap.removeLayer(layer);
+      expect(domNode.querySelectorAll('.leaflet-control-attribution')[0].innerHTML).to.equal('foo, bar');
+
+
+    });
+
+  });
 
   describe('KibanaMap - baseLayer', function () {
 

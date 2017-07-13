@@ -27,6 +27,10 @@ export class KibanaMapLayer extends EventEmitter {
 
   movePointer() {
   }
+
+  getAttributions() {
+    return this._attribution;
+  }
 }
 
 
