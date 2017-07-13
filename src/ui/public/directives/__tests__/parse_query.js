@@ -113,6 +113,10 @@ describe('parse-query directive', function () {
       expect(toUser({ query_string: {} })).to.be('');
     });
 
+    it('should present match_all queries as an empty string', function () {
+      expect(toUser({ match_all: {} })).to.be('');
+    });
+
     it('should present string as strings', function () {
       expect(toUser('foo')).to.be('foo');
     });
