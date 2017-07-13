@@ -88,6 +88,8 @@ uiModules
         $scope.fetch();
       };
       $scope.vis.on('reload', reload);
+      // auto reload will trigger this event
+      $scope.$on('courier:searchRefresh', reload);
       // dashboard will fire fetch event when it wants to refresh
       $scope.$on('fetch', reload);
 
