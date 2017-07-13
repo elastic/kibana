@@ -12,7 +12,7 @@ take a look at using <visualization> directive.
 
 Once <visualize> is done rendering the element will emit `renderComplete` event.
 
-`<visualize saved-vis='savedVis' app-state='appState' ui-state='uiState' ></visualize>` where
+`<visualize saved-obj='savedVis' app-state='appState' ui-state='uiState' editor-mode='false'></visualize>` where
 
 `savedVis` is an instance of savedVisualization object, which can be retrieved using `savedVisualizations` service.
 
@@ -25,11 +25,13 @@ if not provided <visualize> will still work, just without monitoring the AppStat
 
 `uiState` should be an instance of `PersistedState`. if not provided visualize will generate one, but you will have no access to it.
 
+`editor-mode` sets wether <visualize> should render in editor or in view mode.
+
 *code example: showing saved visualization, without linking to querybar or filterbar*
 ["source","html"]
 -----------
 <div ng-controller="KbnTestController" class="test_vis">
-  <visualize saved-vis='savedVis'></visualize>
+  <visualize saved-obj='savedVis'></visualize>
 </div>
 -----------
 ["source","js"]
@@ -39,9 +41,12 @@ import { uiModules } from 'ui/modules';
 uiModules.get('kibana')
 .controller('KbnTestController', function ($scope, AppState, savedVisualizations) {
   const visId = 'enter_your_vis_id';
-  savedVisualizations.get(visId).then(savedVis => $scope.savedVis = savedVis);
+  savedVisualizations.get(visId).then(savedVis => $scope.savedObj = savedVis);
 });
 -----------
+
+When <visualize> is ready it will emmit `ready:vis` event on the root scope.
+When <visualize> is done rendering it will emit `renderComplete` event on the element.
 
 ==== `<visualization>` directive
 `<visualization>` directive takes visualization config and data and renders the appropriate visualization.
@@ -79,3 +84,5 @@ uiModules.get('kibana')
   $scope.visData = [{ name: 'Count', value: '543534' }]; // this won't yet work as metric vis still accepts data as aggresponse object
 });
 -----------
+
+<visualization> will trigger `renderComplete` event on the element once its done rendering.

@@ -4,18 +4,6 @@
 This is a short description of functions and interfaces provided. For more information you should check the kibana
 source code and the existing visualizations provided with it.
 
-tell more about the flow of execution here 
-add some images to support that
-how render method gets executed etc (data where it comes from etc)
-and how visualization updates back and sends render complete
-
-link to generator and short description of it
-
-add link to video once available
-
-- <<development-visualization-factory>>
-* <<development-base-visualization-type>>
-* <<development-angular-visualization-type>>
 * <<development-react-visualization-type>>
 * <<development-vislib-visualization-type>>
 - <<development-vis-editors>>
@@ -45,7 +33,7 @@ import { VisFactoryProvider } from 'ui/vis/vis_factory';
 export default function MyNewVisType(Private) {
   const VisFactory = Private(VisFactoryProvider);
 
-  return  VisFactory.createAngularVisualization({
+  return  VisFactory.createBaseVisualization({
     name: 'my_new_vis',
     title: 'My New Vis',
     icon: 'my_icon',
@@ -71,8 +59,9 @@ The list of common parameters:
 - *editor*: <string> one of the available editors or Editor class for custom one
 - *editorConfig*: object holding editor parameters
 - *options.showTimePicker*: <bool> show or hide time picker (defaults to true)
-- *options.showQueryBar*: <bool> show or hide query bar (defaults to true) [not implemented]
-- *options.showFilterBar*: <bool> show or hide filter bar (defaults to true) [not implemented]
+- *options.showQueryBar*: <bool> show or hide query bar (defaults to true)
+- *options.showFilterBar*: <bool> show or hide filter bar (defaults to true)
+- *options.showIndexSelection*: <bool> show or hide index selection (defaults to true)
 - *options.hierarchicalData*: <bool> use hierarchical data (defaults to false) [BWC]
 - *isExperimental*: <bool> mark visualization as experimental (defaults to false)
 
@@ -82,13 +71,16 @@ Each of the factories have some of the custom parameters, which will be describe
 [[development-base-visualization-type]]
 ==== Base Visualization Type
 The base visualization type does not make any assumptions about the rendering technology you are going to use and
-works with pure javascript. 
+works with pure javascript. Its the visualization type we recommend to use.
 
-You need to provide an object with render function which will be called every time options 
+You need to provide an object with constructor, render function which will be called every time options 
 or data change and destroy function which will be called to cleanup.
  
 The render function receives the data object and status object which tells what actually changed.
 Render function needs to return a promise, which should be resolved once the visualization is done rendering.
+
+image::images/visualize-flow.png[Main Flow]
+
 
 ["source","js"]
 -----------
