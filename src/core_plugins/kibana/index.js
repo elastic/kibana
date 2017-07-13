@@ -35,6 +35,11 @@ export default function (kibana) {
     uiExports: {
       hacks: ['plugins/kibana/dev_tools/hacks/hide_empty_tools'],
       fieldFormats: ['plugins/kibana/field_formats/register'],
+      savedObjectTypes: [
+        'plugins/kibana/visualize/saved_visualizations/saved_visualization_register',
+        'plugins/kibana/discover/saved_searches/saved_search_register',
+        'plugins/kibana/dashboard/saved_dashboard/saved_dashboard_register',
+      ],
       app: {
         id: 'kibana',
         title: 'Kibana',
@@ -43,6 +48,10 @@ export default function (kibana) {
         main: 'plugins/kibana/kibana',
         uses: [
           'visTypes',
+          'visResponseHandlers',
+          'visRequestHandlers',
+          'visEditorTypes',
+          'savedObjectTypes',
           'spyModes',
           'fieldFormats',
           'fieldFormatEditors',

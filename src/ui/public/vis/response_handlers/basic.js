@@ -1,6 +1,7 @@
 import { AggResponseIndexProvider } from 'ui/agg_response/index';
 import { AggResponseTabifyTableProvider } from 'ui/agg_response/tabify/_table';
 
+import { VisResponseHandlersRegistryProvider } from 'ui/registry/vis_response_handlers';
 
 const BasicResponseHandlerProvider = function (Private) {
   const aggResponse = Private(AggResponseIndexProvider);
@@ -71,5 +72,7 @@ const BasicResponseHandlerProvider = function (Private) {
     }
   };
 };
+
+VisResponseHandlersRegistryProvider.register(BasicResponseHandlerProvider);
 
 export { BasicResponseHandlerProvider };
