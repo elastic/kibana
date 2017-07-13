@@ -4,7 +4,7 @@ const CourierRequestHandlerProvider = function (Private, courier, timefilter) {
   return {
     name: 'courier',
     handler: function (vis, appState, uiState, searchSource) {
-      if (appState) {
+      if (appState && vis.editorMode) {
         searchSource.set('filter', appState.filters);
         if (!appState.linked) searchSource.set('query', appState.query);
       }
