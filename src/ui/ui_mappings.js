@@ -20,10 +20,8 @@ class MappingsCollection {
 
   getCombined = () => {
     return {
-      '_default_': {
-        'dynamic': 'strict'
-      },
       doc: {
+        dynamic: false,
         properties: this._currentMappings,
       },
     };
