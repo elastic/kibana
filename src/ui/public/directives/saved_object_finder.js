@@ -9,8 +9,7 @@ const module = uiModules.get('kibana');
 
 module.directive('savedObjectFinder', function ($location, $injector, kbnUrl, Private, config) {
 
-  const provider = Private(SavedObjectRegistryProvider);
-  const services = provider.byLoaderPropertiesName;
+  const services = Private(SavedObjectRegistryProvider).byLoaderPropertiesName;
 
   return {
     restrict: 'E',
