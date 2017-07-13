@@ -54,7 +54,7 @@ module.controller('KbnRegionMapController', function ($scope, $element, Private,
         return;
       }
 
-      updateChoroplethLayer($scope.vis.params.selectedLayer.url);
+      updateChoroplethLayer($scope.vis.params.selectedLayer.url, $scope.vis.params.selectedLayer.attribution);
       choroplethLayer.setMetrics(results, metricsAgg);
       setTooltipFormatter();
 
@@ -74,7 +74,7 @@ module.controller('KbnRegionMapController', function ($scope, $element, Private,
         return;
       }
 
-      updateChoroplethLayer(visParams.selectedLayer.url);
+      updateChoroplethLayer(visParams.selectedLayer.url, visParams.selectedLayer.attribution);
       choroplethLayer.setJoinField(visParams.selectedJoinField.name);
       choroplethLayer.setColorRamp(truncatedColorMaps[visParams.colorSchema]);
       setTooltipFormatter();
@@ -109,7 +109,7 @@ module.controller('KbnRegionMapController', function ($scope, $element, Private,
     }
   }
 
-  function updateChoroplethLayer(url) {
+  function updateChoroplethLayer(url, attribution) {
 
     if (choroplethLayer && choroplethLayer.equalsGeoJsonUrl(url)) {//no need to recreate the layer
       return;
@@ -118,7 +118,7 @@ module.controller('KbnRegionMapController', function ($scope, $element, Private,
 
     const previousMetrics = choroplethLayer ? choroplethLayer.getMetrics() : null;
     const previousMetricsAgg = choroplethLayer ? choroplethLayer.getMetricsAgg() : null;
-    choroplethLayer = new ChoroplethLayer(url);
+    choroplethLayer = new ChoroplethLayer(url, attribution);
     if (previousMetrics && previousMetricsAgg) {
       choroplethLayer.setMetrics(previousMetrics, previousMetricsAgg);
     }

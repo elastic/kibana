@@ -69,6 +69,7 @@ uiModules.get('kibana')
           const layers = manifest.data.layers.filter(layer => layer.format === 'geojson');
           layers.forEach((layer) => {
             layer.url = this._extendUrlWithParams(layer.url);
+            layer.attribution = $sanitize(marked(layer.attribution));
           });
           return layers;
         });
