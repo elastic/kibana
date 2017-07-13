@@ -199,33 +199,23 @@ export function IndexPatternProvider(Private, $http, config, kbnIndex, Promise, 
     init() {
       watch(this);
 
-      return mappingSetup
-      .isDefined(type)
-      .then(defined => {
-        if (defined) {
-          return true;
-        }
-        return mappingSetup.setup(type, mapping);
-      })
-      .then(() => {
-        if (!this.id) {
-          return; // no id === no elasticsearch document
-        }
+      if (!this.id) {
+        return Promise.resolve(this); // no id === no elasticsearch document
+      }
 
-        return savedObjectsClient.get(type, this.id)
-          .then(resp => {
-            // temporary compatability for savedObjectsClient
+      return savedObjectsClient.get(type, this.id)
+        .then(resp => {
+          // temporary compatability for savedObjectsClient
 
-            return {
-              _id: resp.id,
-              _type: resp.type,
-              _source: _.cloneDeep(resp.attributes),
-              found: resp._version ? true : false
-            };
-          })
-          .then(response => updateFromElasticSearch(this, response));
-      })
-      .then(() => this);
+          return {
+            _id: resp.id,
+            _type: resp.type,
+            _source: _.cloneDeep(resp.attributes),
+            found: resp._version ? true : false
+          };
+        })
+        .then(response => updateFromElasticSearch(this, response))
+        .then(() => this);
     }
 
     // Get the source filtering configuration for that index.
