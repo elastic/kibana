@@ -3,19 +3,30 @@ import { AggTypesBucketsGeoHashProvider } from 'ui/agg_types/buckets/geo_hash';
 
 describe('Geohash Agg', function () {
 
+  // Mock BucketAggType that does not create an AggType, but instead returns the AggType parameters
+  const BucketAggTypeMock = (aggOptions) => {
+    return aggOptions.params;
+  };
+  const PrivateMock = (provider) => {
+    switch (provider.name) {
+      case 'AggTypesBucketsBucketAggTypeProvider':
+        return BucketAggTypeMock;
+        break;
+      default:
+        return () => {};
+    }
+  };
+  const configMock = {
+    get: () => {
+      return 7;//"visualization:tileMap:maxPrecision"
+    }
+  };
+  const params = AggTypesBucketsGeoHashProvider(PrivateMock, configMock); // eslint-disable-line new-cap
 
   describe('precision parameter', function () {
 
-    const precisionParam = new AggTypesBucketsGeoHashProvider(function PrivateMock() {
-      const PRECISION_PARAM_INDEX = 6;
-      return function BucketMock(geohashProvider) {
-        return geohashProvider.params[PRECISION_PARAM_INDEX];
-      };
-    }, {
-      get: function () {
-        return 7;//"visualization:tileMap:maxPrecision"
-      }
-    });
+    const PRECISION_PARAM_INDEX = 6;
+    const precisionParam = params[PRECISION_PARAM_INDEX];
 
     it('should select precision parameter', () => {
       expect(precisionParam.name).to.equal('precision');
