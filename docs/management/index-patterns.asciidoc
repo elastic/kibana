@@ -35,9 +35,6 @@ list.
 contains time-based events* option and select the index field that contains the timestamp. Kibana reads the index
 mapping to list all of the fields that contain a timestamp.
 
-. By default, Kibana restricts wildcard expansion of time-based index patterns to indices with data within the currently
-selected time range. Click *Do not expand index pattern when search* to disable this behavior.
-
 . Click *Create* to add the index pattern.
 
 . To designate the new pattern as the default pattern to load when you view the Discover tab, click the *favorite*

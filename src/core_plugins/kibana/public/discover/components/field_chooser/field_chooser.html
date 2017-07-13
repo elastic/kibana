@@ -55,16 +55,16 @@
         ng-class="{ 'kuiButton--basic': !filter.active, 'kuiButton--primary': filter.active, 'hidden-xs': !showFields, 'hidden-sm': !showFields }"
         class="kuiButton kuiButton--small pull-right discover-field-filter-toggle"
         ng-click="showFilter = !showFilter"
-        aria-label="Show field settings"
-        aria-haspopup="true"
-        aria-expanded="{{showFilter}}"
+        aria-label="{{showFilter ? 'Hide' : 'Show'}} field settings"
+        aria-expanded="{{!!showFilter}}"
+        aria-controls="discoverFieldFilter"
       >
         <span aria-hidden="true" class="kuiIcon fa-gear"></span>
       </button>
     </h3>
   </div>
 
-  <div class="sidebar-item discover-field-details" ng-show="showFilter">
+  <div class="sidebar-item discover-field-details" ng-show="showFilter" id="discoverFieldFilter">
     <form role="form">
       <div class="form-group">
         <label for="discoverFieldChooserFilterAggregatable">

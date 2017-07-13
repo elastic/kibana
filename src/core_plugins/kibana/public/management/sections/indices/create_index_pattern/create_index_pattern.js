@@ -1,4 +1,3 @@
-import _ from 'lodash';
 import { IndexPatternMissingIndices } from 'ui/errors';
 import 'ui/directives/validate_index_name';
 import 'ui/directives/auto_select_if_only_one';
@@ -33,7 +32,6 @@ uiModules.get('apps/management')
   this.formValues = {
     id: $routeParams.id ? decodeURIComponent($routeParams.id) : undefined,
     name: config.get('indexPattern:placeholder'),
-    expandWildcard: false,
     timeFieldOption: null,
   };
 
@@ -134,21 +132,6 @@ uiModules.get('apps/management')
     return Boolean(this.formValues.timeFieldOption.fieldName);
   };
 
-  this.canEnableExpandWildcard = () => {
-    return (
-      this.isTimeBased() &&
-        !this.isCrossClusterName() &&
-        _.includes(this.formValues.name, '*')
-    );
-  };
-
-  this.isExpandWildcardEnabled = () => {
-    return (
-      this.canEnableExpandWildcard() &&
-        !!this.formValues.expandWildcard
-    );
-  };
-
   this.isCrossClusterName = () => {
     return (
       this.formValues.name &&
@@ -217,16 +200,11 @@ uiModules.get('apps/management')
       ? timeFieldOption.fieldName
       : undefined;
 
-    const notExpandable = this.isExpandWildcardEnabled()
-      ? undefined
-      : true;
-
     loadingCount += 1;
     sendCreateIndexPatternRequest(indexPatterns, {
       id,
       name,
       timeFieldName,
-      notExpandable,
     }).then(createdId => {
       if (!createdId) {
         return;
