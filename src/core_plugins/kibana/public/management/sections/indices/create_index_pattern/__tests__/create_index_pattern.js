@@ -108,13 +108,6 @@ describe('createIndexPattern UI', () => {
         }
       });
     });
-
-    it('displays the option (off) to expand wildcards', () => {
-      const { $view } = setup();
-      const $enableExpand = $view.findTestSubject('createIndexPatternEnableExpand');
-      expect($enableExpand).to.have.length(1);
-      expect($enableExpand.is(':checked')).to.be(false);
-    });
   });
 
   describe('cross cluster pattern', () => {
@@ -126,14 +119,6 @@ describe('createIndexPattern UI', () => {
       const classes = [...$name.get(0).classList];
       expect(classes).to.contain('ng-valid');
       expect(classes).to.not.contain('ng-invalid');
-    });
-
-    it('removes the option to expand wildcards', () => {
-      const { $view, setNameTo } = setup();
-      setNameTo('cluster2:logstash-*');
-
-      const $enableExpand = $view.findTestSubject('createIndexPatternEnableExpand');
-      expect($enableExpand).to.have.length(0);
     });
   });
 });
