@@ -10,7 +10,18 @@ export default class UiExports {
     this.navLinks = new UiNavLinkCollection(this);
     this.apps = new UiAppCollection(this);
     this.aliases = {
-      fieldFormatEditors: ['ui/field_format_editor/register']
+      fieldFormatEditors: ['ui/field_format_editor/register'],
+      visRequestHandlers: [
+        'ui/vis/request_handlers/courier',
+        'ui/vis/request_handlers/none'
+      ],
+      visResponseHandlers: [
+        'ui/vis/response_handlers/basic',
+        'ui/vis/response_handlers/none'
+      ],
+      visEditorTypes: [
+        'ui/vis/editors/default/default',
+      ],
     };
     this.urlBasePath = urlBasePath;
     this.exportConsumer = _.memoize(this.exportConsumer);
@@ -91,6 +102,10 @@ export default class UiExports {
         };
 
       case 'visTypes':
+      case 'visResponseHandlers':
+      case 'visRequestHandlers':
+      case 'visEditorTypes':
+      case 'savedObjectTypes':
       case 'fieldFormats':
       case 'fieldFormatEditors':
       case 'spyModes':
