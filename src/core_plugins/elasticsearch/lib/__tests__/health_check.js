@@ -9,6 +9,7 @@ import mappings from './fixtures/mappings';
 import healthCheck from '../health_check';
 import kibanaVersion from '../kibana_version';
 import { esTestServerUrlParts } from '../../../../../test/es_test_server_url_parts';
+import * as ensureTypesExistNS from '../ensure_types_exist';
 
 const esPort = esTestServerUrlParts.port;
 const esUrl = url.format(esTestServerUrlParts);
@@ -26,6 +27,7 @@ describe('plugins/elasticsearch', () => {
 
       // Stub the Kibana version instead of drawing from package.json.
       sinon.stub(kibanaVersion, 'get').returns(COMPATIBLE_VERSION_NUMBER);
+      sinon.stub(ensureTypesExistNS, 'ensureTypesExist');
 
       // setup the plugin stub
       plugin = {
@@ -78,6 +80,7 @@ describe('plugins/elasticsearch', () => {
 
     afterEach(() => {
       kibanaVersion.get.restore();
+      ensureTypesExistNS.ensureTypesExist.restore();
     });
 
     it('should set the cluster green if everything is ready', function () {
