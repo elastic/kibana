@@ -16,7 +16,6 @@ import { Notifier } from 'ui/notify';
 import { FieldsFetcherProvider } from '../fields_fetcher_provider';
 import { StubIndexPatternsApiClientModule } from './stub_index_patterns_api_client';
 import { IndexPatternsApiClientProvider } from '../index_patterns_api_client_provider';
-import { IndexPatternsCalculateIndicesProvider } from '../_calculate_indices';
 import { IsUserAwareOfUnsupportedTimePatternProvider } from '../unsupported_time_patterns';
 import { SavedObjectsClientProvider } from 'ui/saved_objects';
 
@@ -33,25 +32,12 @@ describe('index pattern', function () {
   let savedObjectsResponse;
   const indexPatternId = 'test-pattern';
   let indexPattern;
-  let calculateIndices;
   let intervals;
   let indexPatternsApiClient;
   let defaultTimeField;
   let isUserAwareOfUnsupportedTimePattern;
 
   beforeEach(ngMock.module('kibana', StubIndexPatternsApiClientModule, (PrivateProvider) => {
-    PrivateProvider.swap(IndexPatternsCalculateIndicesProvider, () => {
-      // stub calculateIndices
-      calculateIndices = sinon.spy(function () {
-        return Promise.resolve([
-          { index: 'foo', max: Infinity, min: -Infinity },
-          { index: 'bar', max: Infinity, min: -Infinity }
-        ]);
-      });
-
-      return calculateIndices;
-    });
-
     isUserAwareOfUnsupportedTimePattern = sinon.stub().returns(false);
     PrivateProvider.swap(IsUserAwareOfUnsupportedTimePatternProvider, () => {
       return isUserAwareOfUnsupportedTimePattern;
@@ -322,33 +308,6 @@ describe('index pattern', function () {
         indexPattern.title = 'logstash-*';
         indexPattern.timeFieldName = defaultTimeField.name;
         indexPattern.intervalName = null;
-        indexPattern.notExpandable = false;
-      });
-
-      it('invokes calculateIndices with given start/stop times and sortOrder', async function () {
-        await indexPattern.toDetailedIndexList(1, 2, 'sortOrder');
-
-        const { title, timeFieldName } = indexPattern;
-
-        sinon.assert.calledOnce(calculateIndices);
-        expect(calculateIndices.getCall(0).args).to.eql([
-          title, timeFieldName, 1, 2, 'sortOrder'
-        ]);
-      });
-
-      it('is fulfilled by the result of calculateIndices', async function () {
-        const indexList = await indexPattern.toDetailedIndexList();
-        expect(indexList[0].index).to.equal('foo');
-        expect(indexList[1].index).to.equal('bar');
-      });
-    });
-
-    describe('when index pattern is a time-base wildcard that is configured not to expand', function () {
-      beforeEach(function () {
-        indexPattern.id = 'randomID';
-        indexPattern.title = 'logstash-*';
-        indexPattern.timeFieldName = defaultTimeField.name;
-        indexPattern.intervalName = null;
         indexPattern.notExpandable = true;
       });
 
@@ -416,28 +375,6 @@ describe('index pattern', function () {
         indexPattern.title = 'logstash-*';
         indexPattern.timeFieldName = defaultTimeField.name;
         indexPattern.intervalName = null;
-        indexPattern.notExpandable = false;
-      });
-
-      it('invokes calculateIndices with given start/stop times and sortOrder', async function () {
-        await indexPattern.toIndexList(1, 2, 'sortOrder');
-        const { title, timeFieldName } = indexPattern;
-        expect(calculateIndices.calledWith(title, timeFieldName, 1, 2, 'sortOrder')).to.be(true);
-      });
-
-      it('is fulfilled by the result of calculateIndices', async function () {
-        const indexList = await indexPattern.toIndexList();
-        expect(indexList[0]).to.equal('foo');
-        expect(indexList[1]).to.equal('bar');
-      });
-    });
-
-    describe('when index pattern is a time-base wildcard that is configured not to expand', function () {
-      beforeEach(function () {
-        indexPattern.id = 'randomID';
-        indexPattern.title = 'logstash-*';
-        indexPattern.timeFieldName = defaultTimeField.name;
-        indexPattern.intervalName = null;
         indexPattern.notExpandable = true;
       });
 
@@ -460,21 +397,6 @@ describe('index pattern', function () {
         const indexList = await indexPattern.toIndexList();
         expect(indexList).to.eql([indexPattern.title]);
       });
-    });
-  });
-
-  describe('#isIndexExpansionEnabled()', function () {
-    it('returns true if notExpandable is false', function () {
-      indexPattern.notExpandable = false;
-      expect(indexPattern.isIndexExpansionEnabled()).to.be(true);
-    });
-    it('returns true if notExpandable is not defined', function () {
-      delete indexPattern.notExpandable;
-      expect(indexPattern.isIndexExpansionEnabled()).to.be(true);
-    });
-    it('returns false if notExpandable is true', function () {
-      indexPattern.notExpandable = true;
-      expect(indexPattern.isIndexExpansionEnabled()).to.be(false);
     });
   });
 

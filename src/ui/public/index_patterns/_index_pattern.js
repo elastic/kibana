@@ -11,7 +11,6 @@ import { IndexPatternsGetIdsProvider } from './_get_ids';
 import { IndexPatternsIntervalsProvider } from './_intervals';
 import { IndexPatternsFieldListProvider } from './_field_list';
 import { IndexPatternsFlattenHitProvider } from './_flatten_hit';
-import { IndexPatternsCalculateIndicesProvider } from './_calculate_indices';
 import { IndexPatternsPatternCacheProvider } from './_pattern_cache';
 import { FieldsFetcherProvider } from './fields_fetcher_provider';
 import { IsUserAwareOfUnsupportedTimePatternProvider } from './unsupported_time_patterns';
@@ -36,7 +35,6 @@ export function IndexPatternProvider(Private, $http, config, kbnIndex, Promise, 
   const mappingSetup = Private(UtilsMappingSetupProvider);
   const FieldList = Private(IndexPatternsFieldListProvider);
   const flattenHit = Private(IndexPatternsFlattenHitProvider);
-  const calculateIndices = Private(IndexPatternsCalculateIndicesProvider);
   const patternCache = Private(IndexPatternsPatternCacheProvider);
   const isUserAwareOfUnsupportedTimePattern = Private(IsUserAwareOfUnsupportedTimePatternProvider);
   const savedObjectsClient = Private(SavedObjectsClientProvider);
@@ -48,7 +46,6 @@ export function IndexPatternProvider(Private, $http, config, kbnIndex, Promise, 
   const mapping = mappingSetup.expandShorthand({
     title: 'text',
     timeFieldName: 'keyword',
-    notExpandable: 'boolean',
     intervalName: 'keyword',
     fields: 'json',
     sourceFilters: 'json',
@@ -310,12 +307,6 @@ export function IndexPatternProvider(Private, $http, config, kbnIndex, Promise, 
           );
         }
 
-        if (this.isTimeBasedWildcard() && this.isIndexExpansionEnabled()) {
-          return calculateIndices(
-            this.title, this.timeFieldName, start, stop, sortDirection
-          );
-        }
-
         return [
           {
             index: this.title,
@@ -324,10 +315,6 @@ export function IndexPatternProvider(Private, $http, config, kbnIndex, Promise, 
           }
         ];
       });
-    }
-
-    isIndexExpansionEnabled() {
-      return !this.notExpandable;
     }
 
     isTimeBased() {

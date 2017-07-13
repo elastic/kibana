@@ -234,7 +234,7 @@ export default function ({ getService, getPageObjects }) {
         })
         .then(function (toastMessage) {
           screenshots.take('Discover-syntax-error-toast');
-          expect(toastMessage).to.be(expectedError);
+          expect(toastMessage).to.contain(expectedError);
         })
         .then(function () {
           return PageObjects.header.clickToastOK();
