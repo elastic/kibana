@@ -11,7 +11,6 @@ import { IndexPatternsGetIdsProvider } from './_get_ids';
 import { IndexPatternsIntervalsProvider } from './_intervals';
 import { IndexPatternsFieldListProvider } from './_field_list';
 import { IndexPatternsFlattenHitProvider } from './_flatten_hit';
-import { IndexPatternsCalculateIndicesProvider } from './_calculate_indices';
 import { IndexPatternsPatternCacheProvider } from './_pattern_cache';
 import { FieldsFetcherProvider } from './fields_fetcher_provider';
 import { IsUserAwareOfUnsupportedTimePatternProvider } from './unsupported_time_patterns';
@@ -36,7 +35,6 @@ export function IndexPatternProvider(Private, $http, config, kbnIndex, Promise, 
   const mappingSetup = Private(UtilsMappingSetupProvider);
   const FieldList = Private(IndexPatternsFieldListProvider);
   const flattenHit = Private(IndexPatternsFlattenHitProvider);
-  const calculateIndices = Private(IndexPatternsCalculateIndicesProvider);
   const patternCache = Private(IndexPatternsPatternCacheProvider);
   const isUserAwareOfUnsupportedTimePattern = Private(IsUserAwareOfUnsupportedTimePatternProvider);
   const savedObjectsClient = Private(SavedObjectsClientProvider);
@@ -48,7 +46,6 @@ export function IndexPatternProvider(Private, $http, config, kbnIndex, Promise, 
   const mapping = mappingSetup.expandShorthand({
     title: 'text',
     timeFieldName: 'keyword',
-    notExpandable: 'boolean',
     intervalName: 'keyword',
     fields: 'json',
     sourceFilters: 'json',
@@ -202,33 +199,23 @@ export function IndexPatternProvider(Private, $http, config, kbnIndex, Promise, 
     init() {
       watch(this);
 
-      return mappingSetup
-      .isDefined(type)
-      .then(defined => {
-        if (defined) {
-          return true;
-        }
-        return mappingSetup.setup(type, mapping);
-      })
-      .then(() => {
-        if (!this.id) {
-          return; // no id === no elasticsearch document
-        }
+      if (!this.id) {
+        return Promise.resolve(this); // no id === no elasticsearch document
+      }
 
-        return savedObjectsClient.get(type, this.id)
-          .then(resp => {
-            // temporary compatability for savedObjectsClient
+      return savedObjectsClient.get(type, this.id)
+        .then(resp => {
+          // temporary compatability for savedObjectsClient
 
-            return {
-              _id: resp.id,
-              _type: resp.type,
-              _source: _.cloneDeep(resp.attributes),
-              found: resp._version ? true : false
-            };
-          })
-          .then(response => updateFromElasticSearch(this, response));
-      })
-      .then(() => this);
+          return {
+            _id: resp.id,
+            _type: resp.type,
+            _source: _.cloneDeep(resp.attributes),
+            found: resp._version ? true : false
+          };
+        })
+        .then(response => updateFromElasticSearch(this, response))
+        .then(() => this);
     }
 
     // Get the source filtering configuration for that index.
@@ -310,12 +297,6 @@ export function IndexPatternProvider(Private, $http, config, kbnIndex, Promise, 
           );
         }
 
-        if (this.isTimeBasedWildcard() && this.isIndexExpansionEnabled()) {
-          return calculateIndices(
-            this.title, this.timeFieldName, start, stop, sortDirection
-          );
-        }
-
         return [
           {
             index: this.title,
@@ -324,10 +305,6 @@ export function IndexPatternProvider(Private, $http, config, kbnIndex, Promise, 
           }
         ];
       });
-    }
-
-    isIndexExpansionEnabled() {
-      return !this.notExpandable;
     }
 
     isTimeBased() {
