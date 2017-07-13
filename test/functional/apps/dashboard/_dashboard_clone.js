@@ -4,7 +4,7 @@ export default function ({ getService, getPageObjects }) {
   const retry = getService('retry');
   const PageObjects = getPageObjects(['dashboard', 'header', 'common']);
 
-  describe('dashboard save', function describeIndexTests() {
+  describe('dashboard clone', function describeIndexTests() {
     const dashboardName = 'Dashboard Clone Test';
     const clonedDashboardName = dashboardName + ' Copy';
 
