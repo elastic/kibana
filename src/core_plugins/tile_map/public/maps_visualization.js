@@ -317,12 +317,8 @@ export function MapsVisualizationProvider(serviceSettings, Notifier, getAppState
     _getCollarScale() {
       const DEFAULT_SCALE = 1.5;
 
-      const agg = this._getGeoHashAgg();
-      if (agg) {
-        return _.get(agg, 'params.collarScale', DEFAULT_SCALE);
-      } else {
-        return DEFAULT_SCALE;
-      }
+      // This value may become configurable in future releases
+      return DEFAULT_SCALE;
     }
 
     _isFilteredByCollar() {

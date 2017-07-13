@@ -58,11 +58,6 @@ export function AggTypesBucketsGeoHashProvider(Private, config) {
         write: _.noop
       },
       {
-        name: 'collarScale',
-        default: 1.5,
-        write: _.noop
-      },
-      {
         name: 'useFilter',
         default: true,
         write: _.noop
