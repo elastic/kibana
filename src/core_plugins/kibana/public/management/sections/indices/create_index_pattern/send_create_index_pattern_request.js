@@ -2,7 +2,6 @@ export function sendCreateIndexPatternRequest(indexPatterns, {
   id,
   name,
   timeFieldName,
-  notExpandable,
 }) {
   // get an empty indexPattern to start
   return indexPatterns.get()
@@ -11,7 +10,6 @@ export function sendCreateIndexPatternRequest(indexPatterns, {
         id,
         title: name,
         timeFieldName,
-        notExpandable,
       });
 
       // fetch the fields
