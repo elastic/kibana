@@ -29,7 +29,7 @@ class TablePanelConfig extends Component {
 
   render() {
     const { selectedTab } = this.state;
-    const defaults = { drilldown_url: '', filter: '', pivot_lable: '', pivot_rows: 10 };
+    const defaults = { drilldown_url: '', filter: '', pivot_label: '', pivot_rows: 10 };
     const model = { ...defaults, ...this.props.model };
     const handleSelectChange = createSelectHandler(this.props.onChange);
     const handleTextChange = createTextHandler(this.props.onChange);
@@ -40,11 +40,11 @@ class TablePanelConfig extends Component {
           <div className="vis_editor__table-pivot-fields">
             <div className="vis_editor__container">
               <div className="vis_ediotr__vis_config-row">
-                <p>For the table visualization you need to define an ID field to
-                  pivot on using a terms aggregation.</p>
+                <p>For the table visualization you need to define a field to
+                  group by using a terms aggregation.</p>
               </div>
               <div className="vis_editor__vis_config-row">
-                <div className="vis_editor__label">ID Field</div>
+                <div className="vis_editor__label">Group By Field</div>
                 <div className="vis_editor__row_item">
                   <FieldSelect
                     fields={this.props.fields}
