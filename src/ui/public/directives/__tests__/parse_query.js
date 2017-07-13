@@ -67,17 +67,16 @@ describe('parse-query directive', function () {
     });
 
     it('unless the object is empty, that implies a *', function () {
-      expect(fromUser({})).to.eql({ query_string: { query: '*' } });
+      expect(fromUser({})).to.eql({ match_all: {} });
     });
 
     it('should treat an empty string as a *', function () {
-      expect(fromUser('')).to.eql({ query_string: { query: '*' } });
+      expect(fromUser('')).to.eql({ match_all: {} });
     });
 
     it('should merge in the query string options', function () {
       config.set('query:queryString:options', { analyze_wildcard: true });
       expect(fromUser('foo')).to.eql({ query_string: { query: 'foo', analyze_wildcard: true } });
-      expect(fromUser('')).to.eql({ query_string: { query: '*', analyze_wildcard: true } });
     });
 
     it('should treat input that does not start with { as a query string', function () {
