@@ -2,21 +2,17 @@
 
 ## Dev setup
 
+Make sure you're running Node 8 and at least npm 5.2. If you're using `nvm` to
+install Node, afterwards run `npm i -g npm@latest`.
+
+## TypeScript
+
 ```
 npm run ts:start
 ```
 
-This builds the code into `./ts-tmp/` for now.
-
-**NB** This will show a couple type errors, e.g. something like:
-
-```
-platform/server/elasticsearch/Cluster.ts(28,17): error TS2339: Property 'close' does not exist on type 'Client'.
-platform/server/elasticsearch/Cluster.ts(29,23): error TS2339: Property 'close' does not exist on type 'Client'.
-platform/server/http/SslConfig.ts(28,28): error TS2339: Property 'constants' does not exist on type 'typeof "crypto"'.
-```
-
-This is expected (for now), and it's related to some third-party types.
+This builds the code into `./ts-tmp/` for now. If you get into a weird state you
+might clean the `ts-tmp` directory.
 
 ## VSCode
 
