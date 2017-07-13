@@ -42,7 +42,16 @@ describe('Scanner', function () {
     let scroll;
     let scanner;
     const mockSearch = { '_scroll_id':'abc','took':1,'timed_out':false,'_shards':{ 'total':1,'successful':1,'failed':0 },'hits':{ 'total':2,'max_score':0.0,'hits':[] } }; // eslint-disable-line max-len
-    const mockScroll = { 'took':1,'timed_out':false,'_shards':{ 'total':1,'successful':1,'failed':0 },'hits':{ 'total':2,'max_score':0.0,'hits':['one', 'two'] } }; // eslint-disable-line max-len
+    const hits = [{
+      _id: 'one',
+      _type: 'config',
+      _source: { title: 'First title' }
+    }, {
+      _id: 'two',
+      _type: 'config',
+      _source: { title: 'Second title' }
+    }];
+    const mockScroll = { 'took':1,'timed_out':false,'_shards':{ 'total':1,'successful':1,'failed':0 },'hits':{ 'total':2,'max_score':0.0,'hits':hits } }; // eslint-disable-line max-len
 
     beforeEach(function () {
       scanner = new Scanner(es, {
@@ -75,7 +84,7 @@ describe('Scanner', function () {
 
     it('should map results if a function is provided', function () {
       return scanner.scanAndMap(null, null, function (hit) {
-        return hit.toUpperCase();
+        return hit._id.toUpperCase();
       })
       .then(function (response) {
         expect(response.hits[0]).to.be('ONE');
@@ -85,7 +94,7 @@ describe('Scanner', function () {
 
     it('should only return the requested number of documents', function () {
       return scanner.scanAndMap(null, { docCount: 1 }, function (hit) {
-        return hit.toUpperCase();
+        return hit._id.toUpperCase();
       })
       .then(function (response) {
         expect(response.hits[0]).to.be('ONE');
