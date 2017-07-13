@@ -32,7 +32,7 @@ export class SavedObjectsClient {
     const method = options.id && !options.overwrite ? 'create' : 'index';
     const response = await this._withKibanaIndex(method, {
       type: V6_TYPE,
-      id: this.generateEsId(type, options.id),
+      id: this._generateEsId(type, options.id),
       body: {
         type,
         [type]: attributes
@@ -57,7 +57,7 @@ export class SavedObjectsClient {
 
       acc.push({ [method]: {
         _type: V6_TYPE,
-        _id: this.generateEsId(object.type, object.id)
+        _id: this._generateEsId(object.type, object.id)
       } });
 
       acc.push(Object.assign({},
@@ -96,7 +96,7 @@ export class SavedObjectsClient {
   async delete(type, id) {
     const response = await this._withKibanaIndex('delete', {
       type: V6_TYPE,
-      id: `${type}:${id}`,
+      id: this._generateEsId(type, id),
       refresh: 'wait_for'
     });
 
@@ -168,7 +168,7 @@ export class SavedObjectsClient {
     }
 
     const docs = objects.map(doc => {
-      return { _type: V6_TYPE, _id: `${doc.type}:${doc.id}` };
+      return { _type: V6_TYPE, _id: this._generateEsId(doc.type, doc.id) };
     });
 
     const response = await this._withKibanaIndex('mget', { body: { docs } })
@@ -197,7 +197,7 @@ export class SavedObjectsClient {
   async get(type, id) {
     const response = await this._withKibanaIndex('get', {
       type: V6_TYPE,
-      id: `${type}:${id}`
+      id: this._generateEsId(type, id)
     });
 
     return normalizeEsDoc(response);
@@ -215,7 +215,7 @@ export class SavedObjectsClient {
   async update(type, id, attributes, options = {}) {
     const response = await this._withKibanaIndex('update', {
       type: V6_TYPE,
-      id: `${type}:${id}`,
+      id: this._generateEsId(type, id),
       version: options.version,
       body: {
         doc: {
@@ -239,7 +239,7 @@ export class SavedObjectsClient {
     }
   }
 
-  generateEsId(type, id) {
+  _generateEsId(type, id) {
     return `${type}:${id || uuid.v1()}`;
   }
 }
