@@ -105,16 +105,24 @@ export function decorateMochaUi(lifecycle, context) {
       return value;
     }
 
+    value = createAssignmentProxy(value, (subProperty, subValue) => {
+      return assignmentInterceptor(`${property}.${subProperty}`, subValue);
+    });
+
     switch (property) {
       case 'describe':
+      case 'describe.only':
       case 'xdescribe':
       case 'context':
+      case 'context.only':
       case 'xcontext':
         return wrapSuiteFunction(property, value);
 
       case 'it':
+      case 'it.only':
       case 'xit':
       case 'specify':
+      case 'specify.only':
       case 'xspecify':
         return wrapTestFunction(property, value);
 
