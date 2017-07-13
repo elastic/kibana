@@ -1,9 +1,9 @@
 import Boom from 'boom';
+import uuid from 'uuid';
 import { get } from 'lodash';
 
 import {
   createFindQuery,
-  createIdQuery,
   handleEsError,
   normalizeEsDoc,
   includedFields
@@ -32,7 +32,7 @@ export class SavedObjectsClient {
     const method = options.id && !options.overwrite ? 'create' : 'index';
     const response = await this._withKibanaIndex(method, {
       type: V6_TYPE,
-      id: options.id ? `${type}:${options.id}` : undefined,
+      id: this.generateEsId(type, options.id),
       body: {
         type,
         [type]: attributes
@@ -57,7 +57,7 @@ export class SavedObjectsClient {
 
       acc.push({ [method]: {
         _type: V6_TYPE,
-        _id: object.id ? `${object.type}:${object.id}` : undefined
+        _id: this.generateEsId(object.type, object.id)
       } });
 
       acc.push(Object.assign({},
@@ -94,12 +94,13 @@ export class SavedObjectsClient {
    * @returns {promise}
    */
   async delete(type, id) {
-    const response = await this._withKibanaIndex('deleteByQuery', {
-      body: createIdQuery({ type, id }),
+    const response = await this._withKibanaIndex('delete', {
+      type: V6_TYPE,
+      id: `${type}:${id}`,
       refresh: 'wait_for'
     });
 
-    if (get(response, 'deleted') === 0) {
+    if (get(response, 'found') === false) {
       throw Boom.notFound();
     }
   }
@@ -166,24 +167,22 @@ export class SavedObjectsClient {
       return { saved_objects: [] };
     }
 
-    const docs = objects.reduce((acc, { type, id }) => {
-      return [...acc, {}, createIdQuery({ type, id })];
-    }, []);
+    const docs = objects.map(doc => {
+      return { _type: V6_TYPE, _id: `${doc.type}:${doc.id}` };
+    });
 
-    const response = await this._withKibanaIndex('msearch', { body: docs });
-    const responses = get(response, 'responses', []);
+    const response = await this._withKibanaIndex('mget', { body: { docs } })
+      .then(resp => get(resp, 'docs', []));
 
     return {
-      saved_objects: responses.map((r, i) => {
-        const [hit] = get(r, 'hits.hits', []);
-
-        if (!hit) {
+      saved_objects: response.map((r, i) => {
+        if (r.found === false) {
           return Object.assign({}, objects[i], {
             error: { statusCode: 404, message: 'Not found' }
           });
         }
 
-        return normalizeEsDoc(hit, objects[i]);
+        return normalizeEsDoc(r, objects[i]);
       })
     };
   }
@@ -196,14 +195,12 @@ export class SavedObjectsClient {
    * @returns {promise} - { id, type, version, attributes }
    */
   async get(type, id) {
-    const response = await this._withKibanaIndex('search', { body: createIdQuery({ type, id }) });
-    const [hit] = get(response, 'hits.hits', []);
+    const response = await this._withKibanaIndex('get', {
+      type: V6_TYPE,
+      id: `${type}:${id}`
+    });
 
-    if (!hit) {
-      throw Boom.notFound();
-    }
-
-    return normalizeEsDoc(hit);
+    return normalizeEsDoc(response);
   }
 
   /**
@@ -216,27 +213,19 @@ export class SavedObjectsClient {
    * @returns {promise}
    */
   async update(type, id, attributes, options = {}) {
-    // handles documents with an _id of `${type}:${id}`
-    const docResponse = await this._withKibanaIndex('search', { body: createIdQuery({ type, id }) });
-    const [hit] = get(docResponse, 'hits.hits', []);
-
-    if (!hit) {
-      throw Boom.notFound();
-    }
-
     const response = await this._withKibanaIndex('update', {
-      id: hit._id,
       type: V6_TYPE,
+      id: `${type}:${id}`,
       version: options.version,
-      refresh: 'wait_for',
       body: {
         doc: {
           [type]: attributes
         }
-      }
+      },
+      refresh: 'wait_for'
     });
 
-    return normalizeEsDoc(response, { id, type, attributes });
+    return normalizeEsDoc(response, { type, id, attributes });
   }
 
   async _withKibanaIndex(method, params) {
@@ -248,5 +237,9 @@ export class SavedObjectsClient {
     } catch (err) {
       throw handleEsError(err);
     }
+  }
+
+  generateEsId(type, id) {
+    return `${type}:${id || uuid.v1()}`;
   }
 }
