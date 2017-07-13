@@ -7,7 +7,6 @@ import { DuplicateField } from 'ui/errors';
 import { IndexedArray } from 'ui/indexed_array';
 import FixturesLogstashFieldsProvider from 'fixtures/logstash_fields';
 import { FixturesStubbedSavedObjectIndexPatternProvider } from 'fixtures/stubbed_saved_object_index_pattern';
-import UtilsMappingSetupProvider from 'ui/utils/mapping_setup';
 import { IndexPatternsIntervalsProvider } from 'ui/index_patterns/_intervals';
 import { IndexPatternProvider } from 'ui/index_patterns/_index_pattern';
 import NoDigestPromises from 'test_utils/no_digest_promises';
@@ -26,7 +25,6 @@ describe('index pattern', function () {
 
   let IndexPattern;
   let fieldsFetcher;
-  let mappingSetup;
   let mockLogstashFields;
   let savedObjectsClient;
   let savedObjectsResponse;
@@ -53,12 +51,6 @@ describe('index pattern', function () {
     sinon.stub(savedObjectsClient, 'create');
     sinon.stub(savedObjectsClient, 'get');
     sinon.stub(savedObjectsClient, 'update');
-
-    // stub mappingSetup
-    mappingSetup = Private(UtilsMappingSetupProvider);
-    sinon.stub(mappingSetup, 'isDefined', function () {
-      return Promise.resolve(true);
-    });
 
     // spy on intervals
     intervals = Private(IndexPatternsIntervalsProvider);

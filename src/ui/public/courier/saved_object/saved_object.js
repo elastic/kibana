@@ -152,24 +152,7 @@ export function SavedObjectProvider(Promise, Private, Notifier, confirmModalProm
       // ensure that the esType is defined
       if (!esType) throw new Error('You must define a type name to use SavedObject objects.');
 
-      // check that the mapping for this esType is defined
-      return mappingSetup.isDefined(esType)
-        .then(function (defined) {
-          // if it is already defined skip this step
-          if (defined) return true;
-
-          mapping.kibanaSavedObjectMeta = {
-            properties: {
-              // setup the searchSource mapping, even if it is not used but this type yet
-              searchSourceJSON: {
-                type: 'text'
-              }
-            }
-          };
-
-          // tell mappingSetup to set esType
-          return mappingSetup.setup(esType, mapping);
-        })
+      return Promise.resolve()
         .then(() => {
           // If there is not id, then there is no document to fetch from elasticsearch
           if (!this.id) {
@@ -194,16 +177,11 @@ export function SavedObjectProvider(Promise, Private, Notifier, confirmModalProm
             })
             .then(this.applyESResp)
             .catch(this.applyEsResp);
-
         })
-        .then(() => {
-          return customInit.call(this);
-        })
-        .then(() => {
-          // return our obj as the result of init()
-          return this;
-        });
+        .then(() => customInit.call(this))
+        .then(() => this);
     });
+
 
     this.applyESResp = (resp) => {
       this._source = _.cloneDeep(resp._source);
