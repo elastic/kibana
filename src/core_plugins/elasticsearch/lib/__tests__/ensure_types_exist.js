@@ -7,7 +7,7 @@ import { ensureTypesExist } from '../ensure_types_exist';
 
 const chance = new Chance();
 
-function createRandomTypes(n = chance.integer({ min: 3, max: 20 })) {
+function createRandomTypes(n = chance.integer({ min: 10, max: 20 })) {
   return chance.n(
     () => ({
       name: chance.word(),
@@ -97,7 +97,7 @@ describe('es/healthCheck/ensureTypesExist()', () => {
 
     it('adds types that are not in index', async () => {
       const indexTypes = createRandomTypes();
-      const missingTypes = createRandomTypes();
+      const missingTypes = indexTypes.splice(-5);
 
       const indexName = chance.word();
       const callCluster = createCallCluster(createV5Index(indexName, indexTypes));
@@ -124,7 +124,7 @@ describe('es/healthCheck/ensureTypesExist()', () => {
 
     it('ignores extra types in index', async () => {
       const indexTypes = createRandomTypes();
-      const missingTypes = createRandomTypes();
+      const missingTypes = indexTypes.splice(-5);
 
       const indexName = chance.word();
       const callCluster = createCallCluster(createV5Index(indexName, indexTypes));
@@ -165,7 +165,7 @@ describe('es/healthCheck/ensureTypesExist()', () => {
 
     it('adds types that are not in index', async () => {
       const indexTypes = createRandomTypes();
-      const missingTypes = createRandomTypes();
+      const missingTypes = indexTypes.splice(-5);
 
       const indexName = chance.word();
       const callCluster = createCallCluster(createV6Index(indexName, indexTypes));
@@ -196,7 +196,7 @@ describe('es/healthCheck/ensureTypesExist()', () => {
 
     it('ignores extra types in index', async () => {
       const indexTypes = createRandomTypes();
-      const missingTypes = createRandomTypes();
+      const missingTypes = indexTypes.splice(-5);
 
       const indexName = chance.word();
       const callCluster = createCallCluster(createV6Index(indexName, indexTypes));
