@@ -10,6 +10,7 @@ import { AggTypesMetricsTopHitProvider } from 'ui/agg_types/metrics/top_hit';
 import { AggTypesMetricsStdDeviationProvider } from 'ui/agg_types/metrics/std_deviation';
 import { AggTypesMetricsCardinalityProvider } from 'ui/agg_types/metrics/cardinality';
 import { AggTypesMetricsPercentilesProvider } from 'ui/agg_types/metrics/percentiles';
+import { AggTypesMetricsGeoBoundsProvider } from 'ui/agg_types/metrics/geo_bounds';
 import { AggTypesMetricsGeoCentroidProvider } from 'ui/agg_types/metrics/geo_centroid';
 import { AggTypesMetricsPercentileRanksProvider } from 'ui/agg_types/metrics/percentile_ranks';
 import { AggTypesMetricsDerivativeProvider } from 'ui/agg_types/metrics/derivative';
@@ -55,6 +56,7 @@ export function AggTypesIndexProvider(Private) {
       Private(AggTypesMetricsBucketSumProvider),
       Private(AggTypesMetricsBucketMinProvider),
       Private(AggTypesMetricsBucketMaxProvider),
+      Private(AggTypesMetricsGeoBoundsProvider),
       Private(AggTypesMetricsGeoCentroidProvider)
     ],
     buckets: [

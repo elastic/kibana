@@ -409,7 +409,7 @@ export class KibanaMap extends EventEmitter {
     this._leafletMap.addControl(this._leafletDrawControl);
   }
 
-  addFitControl() {
+  addFitControl(getBoundsFunc) {
 
     if (this._leafletFitControl || !this._leafletMap) {
       return;
@@ -418,6 +418,7 @@ export class KibanaMap extends EventEmitter {
     const fitContainer = L.DomUtil.create('div', 'leaflet-control leaflet-bar leaflet-control-fit');
     this._leafletFitControl = makeFitControl(fitContainer, this);
     this._leafletMap.addControl(this._leafletFitControl);
+    this._getGeoHashBounds = getBoundsFunc;
   }
 
   addLegendControl() {
@@ -515,24 +516,21 @@ export class KibanaMap extends EventEmitter {
     return mapBounds.intersects(bucketRectBounds);
   }
 
-  fitToData() {
+  async fitToData() {
 
     if (!this._leafletMap) {
       return;
     }
 
-    let bounds = null;
-    this._layers.forEach(layer => {
-      const b = layer.getBounds();
-      if (bounds) {
-        bounds.extend(b);
-      } else {
-        bounds = b;
-      }
-    });
+    const geoHashBounds = await this._getGeoHashBounds();
 
-    if (bounds && bounds.isValid()) {
-      this._leafletMap.fitBounds(bounds);
+    if (geoHashBounds) {
+      const northEast = L.latLng(geoHashBounds.top_left.lat, geoHashBounds.bottom_right.lon);
+      const southWest = L.latLng(geoHashBounds.bottom_right.lat, geoHashBounds.top_left.lon);
+      const leaftetBounds = L.latLngBounds(southWest, northEast);
+      if (leaftetBounds.isValid()) {
+        this._leafletMap.fitBounds(leaftetBounds);
+      }
     }
   }
 

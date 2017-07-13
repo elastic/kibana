@@ -4,15 +4,19 @@ import $ from 'jquery';
 import _ from 'lodash';
 import { KibanaMap } from './kibana_map';
 import { GeohashLayer } from './geohash_layer';
+import { SearchSourceProvider } from 'ui/courier/data_source/search_source';
+import { VisAggConfigProvider } from 'ui/vis/agg_config';
 // import './lib/service_settings';
 import 'ui/vis/map/service_settings';
 import { geoContains, scaleBounds } from './lib/geo_utils';
 import './styles/_tilemap.less';
 
 
-export function MapsVisualizationProvider(serviceSettings, Notifier, getAppState) {
+export function MapsVisualizationProvider(serviceSettings, Notifier, getAppState, Private) {
 
+  const AggConfig = Private(VisAggConfigProvider);
   const notify = new Notifier({ location: 'Coordinate Map' });
+  const SearchSource = Private(SearchSourceProvider);
 
   class MapsVisualization {
 
@@ -89,7 +93,7 @@ export function MapsVisualizationProvider(serviceSettings, Notifier, getAppState
       this._lastFetchedMapCollar = scaleBounds(this._kibanaMap.getBounds(), this._getCollarScale());
       uiState.set('mapCollar', this._lastFetchedMapCollar);
       this._kibanaMap.addDrawControl();
-      this._kibanaMap.addFitControl();
+      this._kibanaMap.addFitControl(this.getGeohashBounds.bind(this));
       this._kibanaMap.addLegendControl();
       this._kibanaMap.persistUiStateForVisualization(this.vis);
 
@@ -278,6 +282,30 @@ export function MapsVisualizationProvider(serviceSettings, Notifier, getAppState
       filter[filterName][field] = filterData;
       getAppState().filters.push(filter);
       this.vis.updateState();
+    }
+
+    async getGeohashBounds() {
+      const agg = this._getGeoHashAgg();
+      if (agg) {
+        const searchSource = new SearchSource();
+        searchSource.index(this.vis.indexPattern);
+        searchSource.size(0);
+        searchSource.aggs(function () {
+          const geoBoundsAgg = new AggConfig(agg.vis, {
+            type: 'geo_bounds',
+            enabled:true,
+            params: {
+              field: agg.getField()
+            },
+            schema: 'metric'
+          });
+          return {
+            '1': geoBoundsAgg.toDsl()
+          };
+        });
+        const esResp = await searchSource.fetch();
+        return _.get(esResp, 'aggregations.1.bounds');
+      }
     }
 
     _getGeoHashAgg() {
