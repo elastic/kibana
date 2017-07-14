@@ -38,12 +38,6 @@ describe('importDashboards(req)', () => {
 
   });
 
-  it('should throw an error if the version doesn\'t match', () => {
-    req.payload.version = '5.5.0';
-    return importDashboards(req).catch((err) => {
-      expect(err).to.have.property('message', 'Version 5.5.0 does not match 6.0.0.');
-    });
-  });
 
   it('should call bulkCreate with each asset', () => {
     return importDashboards(req).then(() => {
