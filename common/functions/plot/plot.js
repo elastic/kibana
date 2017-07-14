@@ -141,7 +141,7 @@ module.exports = new Fn({
       type: 'render',
       as: 'plot',
       value: {
-        data: data,
+        data: sortBy(data, 'label'),
         options: {
           colors: args.palette.colors,
           legend: {
