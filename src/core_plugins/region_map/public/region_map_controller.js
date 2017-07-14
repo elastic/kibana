@@ -91,46 +91,29 @@ module.controller('KbnRegionMapController', function ($scope, $element, Private,
     const tmsSettings = await serviceSettings.getTMSService();
     const minMaxZoom = tmsSettings.getMinMaxZoom(false);
 
-    const options = {...minMaxZoom};
-
-    console.log('saved options');
-    console.log($scope.vis.params.mapZoom);
-    console.log($scope.vis.params.mapCenter);
-
+    const options = { ...minMaxZoom };
     const uiState = $scope.vis.getUiState();
     const zoomFromUiState = parseInt(uiState.get('mapZoom'));
-    const zoomFromSaved = $scope.vis.params.mapZoom;
-    if (!isNaN(zoomFromUiState)) {
-      options.zoom = zoomFromUiState;
-    } else {
-      options.zoom = $scope.vis.type.visConfig.defaults.mapZoom;
-    }
     const centerFromUIState = uiState.get('mapCenter');
-    const centerFromSaved = $scope.vis.params.mapCenter;
-    if (centerFromUIState && _.isArray(centerFromUIState) && centerFromUIState.length === 2) {
-      options.center = centerFromUIState;
-    } else {
-      options.center = $scope.vis.type.visConfig.defaults.mapCenter;
-    }
-
-    console.log('options', options);
+    options.zoom = !isNaN(zoomFromUiState) ? zoomFromUiState : $scope.vis.type.visConfig.defaults.mapZoom;
+    options.center = centerFromUIState ? centerFromUIState : $scope.vis.type.visConfig.defaults.mapCenter;
     kibanaMap = new KibanaMap($element[0], options);
 
 
     const tmsUrl = tmsSettings.getUrl();
     const tmsOptions = tmsSettings.getTMSOptions();
-    kibanaMap.setBaseLayer({baseLayerType: 'tms', options: {tmsUrl, ...tmsOptions}});
+    kibanaMap.setBaseLayer({ baseLayerType: 'tms', options: { tmsUrl, ...tmsOptions } });
     kibanaMap.addLegendControl();
     kibanaMap.addFitControl();
     kibanaMap.persistUiStateForVisualization($scope.vis);
 
 
-    function saveCurrentLocation() {
-      console.log('save da vis....');
+    const saveCurrentLocation = () => {
+      //to ensure we dirty the state of the viz. (not sure why this is required. Tilemap visualization does not require it)
       $scope.vis.params.mapZoom = kibanaMap.getZoomLevel();
       $scope.vis.params.mapCenter = kibanaMap.getCenter();
       $scope.$apply();
-    }
+    };
 
     kibanaMap.on('dragend', saveCurrentLocation);
     kibanaMap.on('zoomend', saveCurrentLocation);
