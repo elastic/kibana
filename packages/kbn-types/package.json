@@ -1,0 +1,5 @@
+{
+  "name": "kbn-types",
+  "version": "0.0.1",
+  "types": "./types/packages/kbn-types/index.d.ts"
+}
