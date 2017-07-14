@@ -9,8 +9,7 @@ import { debounce } from 'lodash';
 const $ = window.$;
 $.plot.plugins.push(size);
 
-module.exports = new Element({
-  name: 'plot',
+module.exports = new Element('plot', {
   displayName: 'Coordinate plot',
   description: 'An customizable XY plot for making line, bar or dot charts from your data',
   image: header,

@@ -1,4 +1,4 @@
-import { addElement } from './add_element';
+import { elements as elementsRegistry } from './elements';
 import { elementSpecs } from '../elements';
 
-elementSpecs.forEach(addElement);
+elementSpecs.forEach(elDef => elementsRegistry.register(elDef));

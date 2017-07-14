@@ -103,6 +103,8 @@ export const setAst = payload => dispatch => {
   dispatch(setExpression(astToExpression(payload)));
 };
 
+// index here is the top-level argument in the expression. for example in the expression
+// demodata().pointseries().plot(), demodata is 0, pointseries is 1, and plot is 2
 export const setArgumentAtIndex = ({ index, arg, element, pageId }) => dispatch => {
   const newElement = assign(element, ['ast', 'chain', index, 'arguments'], arg);
   dispatch(setExpression(astToExpression({ ast: get(newElement, 'ast'), element, pageId })));

@@ -5,6 +5,7 @@ import { Navbar } from '../navbar';
 import { Tray } from './tray';
 import { NavbarButton } from '../navbar_button';
 import { Expression } from '../expression';
+import { Datasource } from '../datasource';
 import { ElementTypes } from './element_types';
 
 import './toolbar.less';
@@ -26,6 +27,7 @@ export const Toolbar = ({ editing, tray, setTray, addElement, addPage, previousP
   const trays = {
     elements: (<ElementTypes done={done} onClick={createElement} />),
     expression: !elementIsSelected ? null : (<Expression done={done} />),
+    datasource: !elementIsSelected ? null : (<Datasource done={done} />),
   };
 
   return !editing ? null : (
@@ -42,9 +44,13 @@ export const Toolbar = ({ editing, tray, setTray, addElement, addPage, previousP
 
         <NavbarButton onClick={ addPage }><i className="fa fa-plus-square" /> Add a page</NavbarButton>
 
-        { !elementIsSelected ? null :
-          (<NavbarButton onClick={() => showHideTray('expression')}><i className="fa fa-terminal" /> Code</NavbarButton>)
-        }
+        { !elementIsSelected ? null : (
+          <NavbarButton onClick={() => showHideTray('expression')}><i className="fa fa-terminal" /> Code</NavbarButton>
+        ) }
+
+        { !elementIsSelected ? null : (
+            <NavbarButton onClick={() => showHideTray('datasource')}><i className="fa fa-database" /> Datasource</NavbarButton>
+        ) }
       </Navbar>
     </div>
   );

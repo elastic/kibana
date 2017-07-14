@@ -5,8 +5,7 @@ import { Table } from 'react-bootstrap';
 import header from './header.png';
 
 
-module.exports = new Element({
-  name: 'table',
+module.exports = new Element('table', {
   displayName: 'Data Table',
   description: 'A scrollable grid for displaying data in a tabluar format',
   image: header,

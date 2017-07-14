@@ -1,4 +1,4 @@
-import { addType } from './add_type';
+import { types as typesRegistry } from './types';
 import { typeSpecs } from '../../common/types';
 
-typeSpecs.forEach(addType);
+typeSpecs.forEach(typeDef => typesRegistry.register(typeDef));

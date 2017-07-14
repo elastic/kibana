@@ -5,6 +5,44 @@ import moment from 'moment';
 import { groupBy, zipObject, uniqBy, omit, pickBy, find, uniq, map, mapValues } from 'lodash';
 import { getMathjsScope } from '../math/get_mathjs_scope';
 
+function isColumnReference(mathExpression) {
+  const parsedMath = math.parse(mathExpression);
+  if (parsedMath.type === 'SymbolNode') return true;
+}
+
+function isMeasure(mathScope, mathExpression) {
+  if (isColumnReference(mathExpression)) return false;
+
+  const parsedMath = math.parse(mathExpression);
+
+  if (parsedMath.type !== 'FunctionNode' && parsedMath.type !== 'ConstantNode') {
+    throw new Error ('Expressions must be wrapped in a function such as sum()');
+  }
+
+  if (parsedMath.type !== 'ConstantNode') return true;
+
+  // This will throw if the field isn't found on scope.
+  // Must be a function node!
+  const evaluated = math.eval(mathExpression, mathScope);
+  if (typeof evaluated !== 'number') return false;
+
+  return true;
+}
+
+function getFieldType(columns, field) {
+  if (!field) return 'null';
+  return find(columns, { name: field }).type;
+}
+
+function getType(columns, mathExpression) {
+  if (isColumnReference(mathExpression)) return getFieldType(columns, mathExpression);
+
+  const parsedMath = math.parse(mathExpression);
+  const symbolNames = map(findInObject(parsedMath, (val, name) => val.type === 'SymbolNode' && name !== 'fn'), 'name');
+  const symbolTypes = uniq(symbolNames.map(field => getFieldType(columns, field)));
+  return (symbolTypes.length === 1) ? symbolTypes[0] : 'string';
+}
+
 module.exports = new Fn({
   name: 'pointseries',
   type: 'pointseries',
@@ -38,54 +76,16 @@ module.exports = new Fn({
   },
   fn: (context, args) => {
     const mathScope = getMathjsScope(context);
-
-    function getFieldType(field) {
-      if (!field) return 'null';
-      return find(context.columns, { name: field }).type;
-    }
-
-    function getType(mathExpression) {
-      if (isColumnReference(mathExpression)) return getFieldType(mathExpression);
-
-      const parsedMath = math.parse(mathExpression);
-      const symbolNames = map(findInObject(parsedMath, (val, name) => val.type === 'SymbolNode' && name !== 'fn'), 'name');
-      const symbolTypes = uniq(symbolNames.map(getFieldType));
-      return (symbolTypes.length === 1) ? symbolTypes[0] : 'string';
-    }
-
-    function isColumnReference(mathExpression) {
-      const parsedMath = math.parse(mathExpression);
-      if (parsedMath.type === 'SymbolNode') return true;
-    }
-
-    function isMeasure(mathExpression) {
-      if (isColumnReference(mathExpression)) return false;
-      const parsedMath = math.parse(mathExpression);
-
-      if (parsedMath.type !== 'FunctionNode' && parsedMath.type !== 'ConstantNode') {
-        throw new Error ('Expressions must be wrapped in a function such as sum()');
-      }
-
-      if (parsedMath.type !== 'ConstantNode') return true;
-
-      // This will throw if the field isn't found on scope.
-      // Must be a function node!
-      const evaluated = math.eval(mathExpression, mathScope);
-      if (typeof evaluated !== 'number') return false;
-
-      return true;
-    }
-
-    const dimensionNames = Object.keys(pickBy(args, val => !isMeasure(val))).filter(arg => args[arg] != null);
-    const measureNames = Object.keys(pickBy(args, val => isMeasure(val)));
+    const dimensionNames = Object.keys(pickBy(args, val => !isMeasure(mathScope, val))).filter(arg => args[arg] != null);
+    const measureNames = Object.keys(pickBy(args, val => isMeasure(mathScope, val)));
     const columns = mapValues(args, arg => {
       if (!arg) return;
       // TODO: We're setting the measure/dimension break down here, but it should probably come from the datatable right?
-      return { type: getType(arg), role: isMeasure(arg) ? 'measure' : 'dimension' };
+      return { type: getType(context.columns, arg), role: isMeasure(mathScope, arg) ? 'measure' : 'dimension' };
     });
 
     function normalizeValue(expression, value) {
-      switch (getType(expression)) {
+      switch (getType(context.columns, expression)) {
         case 'string':
           return String(value);
         case 'number':
@@ -97,14 +97,20 @@ module.exports = new Fn({
       }
     }
 
-    // Dimensions. There's probably a better way todo this
-    // const dimensionNames = Object.keys(pickBy(args, val => typeof val === 'string'));
-    const result = context.rows.map((row, i) => {
-      const newRow = { _rowId: row._rowId };
-      dimensionNames.forEach(dimension =>
-        newRow[dimension] = args[dimension] ? normalizeValue(args[dimension], math.eval(args[dimension], mathScope)[i]) : '_all');
-      return newRow;
-    });
+    // Dimensions
+    // Group rows by their dimension values, using the argument values and preserving the _rowId
+    // There's probably a better way to do this
+    const results = context.rows.reduce((acc, row, i) => {
+      const newRow = dimensionNames.reduce((acc, dimension) => {
+        const val = args[dimension];
+        acc[dimension] = val ? normalizeValue(val, math.eval(val, mathScope)[i]) : '_all';
+        return acc;
+      }, { _rowId: row._rowId });
+
+      return Object.assign(acc, { [row._rowId]: newRow });
+      // acc[row._rowId] = newRow;
+      // return acc;
+    }, {});
 
     // Measures
     // First group up all of the distinct dimensioned bits. Each of these will be reduced to just 1 value
@@ -121,12 +127,12 @@ module.exports = new Fn({
       const measureValues = measureNames.map(measure => math.eval(args[measure], subScope));
 
       rows.forEach(row => {
-        Object.assign(result[row._rowId], zipObject(measureNames, measureValues));
+        Object.assign(results[row._rowId], zipObject(measureNames, measureValues));
       });
     });
 
     // It only makes sense to uniq the rows in a point series as 2 values can not exist in the exact same place at the same time.
-    const rows = uniqBy(result, row => JSON.stringify(omit(row, '_rowId')));
+    const rows = uniqBy(Object.values(results), row => JSON.stringify(omit(row, '_rowId')));
 
     return {
       type: 'pointseries',

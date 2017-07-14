@@ -3,8 +3,7 @@ import ReactDOM from 'react-dom';
 import React from 'react';
 import header from './header.png';
 
-module.exports = new Element({
-  name: 'image',
+module.exports = new Element('image', {
   displayName: 'Image',
   description: 'A static image.',
   image: header,
