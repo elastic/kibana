@@ -59,7 +59,7 @@ describe('createFindQuery', () => {
   });
 
   it('can search a single field', () => {
-    const query = createFindQuery(mappings, { search: 'foo', searchFields: 'title' });
+    const query = createFindQuery(mappings, { search: 'foo', searchFields: ['title'] });
     expect(query).to.eql({
       query: {
         bool: {

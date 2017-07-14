@@ -311,6 +311,24 @@ describe('SavedObjectsClient', () => {
       callAdminCluster.returns(searchResults);
     });
 
+    it('requires fields be an array if defined', async () => {
+      try {
+        await savedObjectsClient.find({ fields: 'string' });
+        throw new Error('expected find() to reject');
+      } catch (error) {
+        expect(error).to.have.property('message').contain('must be an array');
+      }
+    });
+
+    it('requires searchFields be an array if defined', async () => {
+      try {
+        await savedObjectsClient.find({ searchFields: 'string' });
+        throw new Error('expected find() to reject');
+      } catch (error) {
+        expect(error).to.have.property('message').contain('must be an array');
+      }
+    });
+
     it('formats Elasticsearch response', async () => {
       const count = searchResults.hits.hits.length;
 
@@ -412,7 +430,7 @@ describe('SavedObjectsClient', () => {
     });
 
     it('can filter by fields', async () => {
-      await savedObjectsClient.find({ fields: 'title' });
+      await savedObjectsClient.find({ fields: ['title'] });
 
       expect(callAdminCluster.calledOnce).to.be(true);
 

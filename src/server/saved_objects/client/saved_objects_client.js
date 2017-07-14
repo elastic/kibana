@@ -143,15 +143,15 @@ export class SavedObjectsClient {
 
   /**
    * @param {object} [options={}]
-   * @property {string} options.type
-   * @property {string} options.search
-   * @property {string} options.searchFields - see Elasticsearch Simple Query String
+   * @property {string} [options.type]
+   * @property {string} [options.search]
+   * @property {Array<string>} [options.searchFields] - see Elasticsearch Simple Query String
    *                                        Query field argument for more information
    * @property {integer} [options.page=1]
    * @property {integer} [options.perPage=20]
-   * @property {string} options.sortField
-   * @property {string} options.sortOrder
-   * @property {array|string} options.fields
+   * @property {string} [options.sortField]
+   * @property {string} [options.sortOrder]
+   * @property {Array<string>} [options.fields]
    * @returns {promise} - { saved_objects: [{ id, type, version, attributes }], total, per_page, page }
    */
   async find(options = {}) {
@@ -165,6 +165,14 @@ export class SavedObjectsClient {
       sortOrder,
       fields,
     } = options;
+
+    if (searchFields && !Array.isArray(searchFields)) {
+      throw new TypeError('options.searchFields must be an array');
+    }
+
+    if (fields && !Array.isArray(fields)) {
+      throw new TypeError('options.searchFields must be an array');
+    }
 
     const esOptions = {
       size: perPage,
