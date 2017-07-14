@@ -1,16 +1,71 @@
-// Font
-
-$kuiFontFamily: Roboto, Helvetica, Arial, sans-serif;
+// Families
+$kuiFontFamily: "Roboto", Helvetica, Arial, sans-serif;
 $kuiCodeFontFamily: "Roboto Mono", monospace;
 
-$kuiLineHeight: 1.5;
-
+// Font sizes
 $kuiFontSize:       $kuiSize;
-$kuiFontSizeXS:     $kuiSize;
-$kuiFontSizeS:      $kuiSize;
-$kuiFontSizeM:      $kuiSize;
-$kuiFontSizeL:      $kuiSize;
-$kuiFontSizeXL:     $kuiSize;
-$kuiFontSizeXXL:    $kuiSize;
 
+$kuiFontSizeXS:     12px;
+$kuiFontSizeS:      14px;
+$kuiFontSizeM:      $kuiFontSize;
+$kuiFontSizeL:      24px;
+$kuiFontSizeXL:     32px;
+$kuiFontSizeXXL:    48px;
 
+// Line height
+
+$kuiLineHeight: 1.5 * $kuiFontSize;
+
+// Font weights
+
+$kuiFontWeightLight:    300;
+$kuiFontWeightRegular:  400;
+$kuiFontWeightMedium:   500;
+
+// Our base fonts
+
+%kuiFont {
+  font-family: $kuiFontFamily;
+  font-weight: $kuiFontWeightRegular;
+}
+
+%kuiCodeFont {
+  font-family: $kuiCodeFontFamily;
+}
+
+// Font sizing extends, using rem mixin
+
+%kuiFontSize {
+  font-size: rem($kuiFontSize);
+  line-height: $kuiLineHeight;
+}
+
+%kuiFontSizeXS {
+  font-size: rem($kuiFontSizeXS);
+  line-height: $kuiLineHeight;
+}
+
+%kuiFontSizeS {
+  font-size: rem($kuiFontSizeS);
+  line-height: $kuiLineHeight;
+}
+
+%kuiFontSizeM {
+  font-size: rem($kuiFontSizeM);
+  line-height: $kuiLineHeight;
+}
+
+%kuiFontSizeL {
+  font-size: rem($kuiFontSizeL);
+  line-height: $kuiLineHeight * 1.5;
+}
+
+%kuiFontSizeXL {
+  font-size: rem($kuiFontSizeXL);
+  line-height: $kuiLineHeight * 2;
+}
+
+%kuiFontSizeXXL {
+  font-size: rem($kuiFontSizeXXL);
+  line-height: $kuiLineHeight * 3;
+}

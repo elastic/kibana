@@ -1,6 +1,5 @@
 // Z-Index
 
-
 $kuiZLevel0:          0;
 $kuiZLevel1:          1000;
 $kuiZLevel2:          2000;
@@ -12,10 +11,8 @@ $kuiZLevel7:          7000;
 $kuiZLevel8:          8000;
 $kuiZLevel9:          9000;
 
-
-
-$kuiZContent:         0;
-$kuiZContentMenu:     2000;
-$kuiZNavigation:      4000;
-$kuiZMask:            6000;
-$kuiZModal:           8000;
+$kuiZContent:         $kuiZLevel0;
+$kuiZContentMenu:     $kuiZLevel2;
+$kuiZNavigation:      $kuiZLevel4;
+$kuiZMask:            $kuiZLevel6;
+$kuiZModal:           $kuiZLevel8;
