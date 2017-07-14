@@ -20,19 +20,19 @@ export async function ensureTypesExist({ log, indexName, callCluster, types }) {
   // could be different if aliases were resolved by `indices.get`
   const resolvedName = Object.keys(index)[0];
   const mappings = index[resolvedName].mappings;
-  const literalTypes = Object.keys(mappings);
-  const v6Index = literalTypes.length === 1 && literalTypes[0] === 'doc';
+  const esTypes = Object.keys(mappings);
 
-  // our types aren't really es types, at least not in v6
-  const typesDefined = Object.keys(
-    v6Index
-      ? mappings.doc.properties
-      : mappings
-  );
+  const isV5Index = esTypes.length > 1 || esTypes[0] !== 'doc';
+  if (isV5Index) {
+    throw new Error(
+      'Support for Kibana index format v5 has been removed, reset your ' +
+      `Kibana index or use the X-Pack Upgrade Assitant to upgrade "${indexName}"`
+    );
+  }
 
+  const typesDefined = Object.keys(mappings.doc.properties);
   for (const type of types) {
-    if (v6Index && type.name === '_default_') {
-      // v6 indices don't get _default_ types
+    if (type.name === '_default_') {
       continue;
     }
 
@@ -47,22 +47,14 @@ export async function ensureTypesExist({ log, indexName, callCluster, types }) {
       typeMapping: type.mapping
     });
 
-    if (v6Index) {
-      await callCluster('indices.putMapping', {
-        index: indexName,
-        type: 'doc',
-        body: {
-          properties: {
-            [type.name]: type.mapping
-          }
+    await callCluster('indices.putMapping', {
+      index: indexName,
+      type: 'doc',
+      body: {
+        properties: {
+          [type.name]: type.mapping
         }
-      });
-    } else {
-      await callCluster('indices.putMapping', {
-        index: indexName,
-        type: type.name,
-        body: type.mapping
-      });
-    }
+      }
+    });
   }
 }
