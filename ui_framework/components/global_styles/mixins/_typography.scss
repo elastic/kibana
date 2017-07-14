@@ -9,7 +9,7 @@
   @return #{$size / $kuiFontSize}rem;
 }
 
-// Spit out rem and px
+// Spit out rem and px. This helps out people who might be on older versions of IE (<11).
 
 @mixin fontSize($size: $kuiFontSize) {
   font-size: $size;
