@@ -3,6 +3,7 @@ import {
   loadAction,
   unloadAction,
   rebuildAllAction,
+  reindexAction,
 } from './actions';
 
 export class EsArchiver {
@@ -88,5 +89,13 @@ export class EsArchiver {
    */
   async loadIfNeeded(name) {
     return this.load(name, { skipExisting: true });
+  }
+
+  async reindex(indices) {
+    return reindexAction({
+      indices,
+      client: this.client,
+      log: this.log
+    });
   }
 }
