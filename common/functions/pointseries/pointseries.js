@@ -53,27 +53,28 @@ module.exports = new Fn({
     types: ['datatable'],
   },
   args: {
-    // Dimensions
     x: {
       types: ['string', 'null'],
-      help: 'A mathmatic expression that returns the values for a dimension or measure',
+      help: 'The values along the X-axis',
+    },
+    y: {
+      types: ['string', 'null'],
+      help: 'The values along the y-axis',
     },
     color: {
       types: ['string', 'null'],
-      help: 'A string representing the column name or a function that returns a number', // If you need categorization, transform the field.
+      help: 'An expression to use in determining the mark\'s color', // If you need categorization, transform the field.
     },
-    // Metrics
-    y: {
-      types: ['string', 'null'],
-      help: 'A static number, or a function (starts with a .) to use to aggregate when there are ' +
-      'several points for the same x-axis value',
-    },
-    // Size only makes sense as a number
     size: {
-      types: ['string', 'null'], // pointseries(size=.sum(profit))
-      help: 'For use in charts that support it, a function that returns a number, eg .math() to use for calculating size',
+      types: ['string', 'null'],
+      help: 'For elements that support it, the size of the marks',
+    },
+    text: {
+      types: ['string', 'null'],
+      help: 'For use in charts that support it, the text to show in the mark',
     },
     // In the future it may make sense to add things like shape, or tooltip values, but I think what we have is good for now
+    // The way the function below is written you can add as many arbitrary named args as you want.
   },
   fn: (context, args) => {
     const mathScope = getMathjsScope(context);
@@ -82,7 +83,7 @@ module.exports = new Fn({
     const columns = mapValues(args, arg => {
       if (!arg) return;
       // TODO: We're setting the measure/dimension break down here, but it should probably come from the datatable right?
-      return { type: getType(context.columns, arg), role: isMeasure(mathScope, arg) ? 'measure' : 'dimension' };
+      return { type: getType(context.columns, arg), role: isMeasure(mathScope, arg) ? 'measure' : 'dimension', expression: arg };
     });
 
     function normalizeValue(expression, value) {
