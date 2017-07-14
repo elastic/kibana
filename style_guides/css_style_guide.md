@@ -1,6 +1,22 @@
 
 # CSS Style Guide
 
+## Original style guide
+
+Our style guide is an extension of [CSS Guidelines by Harry Roberts](https://cssguidelin.es/). The rules we especially focus on are:
+
+* [Multiple files](https://cssguidelin.es/#multiple-files)
+* [Indenting](https://cssguidelin.es/#indenting)
+* [Commenting](https://cssguidelin.es/#commenting)
+* [Naming conventions](https://cssguidelin.es/#naming-conventions) (see "Naming convention", below, for exceptions)
+* [CSS selectors](https://cssguidelin.es/#css-selectors)
+* [Specificity](https://cssguidelin.es/#specificity)
+* [Architectural principles](https://cssguidelin.es/#architectural-principles)
+
+Please see the [SCSS Style Guide](scss_style_guide.md) for additional rules pertaining to SCSS.
+
+## Contents
+
 - [CSS Style Guide](#css-style-guide)
   - [Selecting elements](#selecting-elements)
   - [Using the preprocessor](#using-the-preprocessor)
