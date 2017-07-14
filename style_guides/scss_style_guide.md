@@ -14,3 +14,7 @@ Our style guide is an extension of [Sass Guidelines by Hugo Giraudel](https://sa
 
 The Sass Guidelines site recommends using RBG and HSL values to format colors, but we're using
 hex values.
+
+## Dealing with extends
+
+You should try never to use the extends functionality in sass. The one exception is when you are extending placeholders to help control maintainabilty. General rule: if it creates an additive selector, it's usually a bad usage of extends.
