@@ -7,7 +7,7 @@ describe('SavedObjectsClient', () => {
 
   let callAdminCluster;
   let savedObjectsClient;
-  const docs = {
+  const searchResults = {
     hits: {
       total: 3,
       hits: [{
@@ -150,6 +150,8 @@ describe('SavedObjectsClient', () => {
 
   describe('#bulkCreate', () => {
     it('formats Elasticsearch request', async () => {
+      callAdminCluster.returns({ items: [] });
+
       await savedObjectsClient.bulkCreate([
         { type: 'config', id: 'one', attributes: { title: 'Test One' } },
         { type: 'index-pattern', id: 'two', attributes: { title: 'Test Two' } }
@@ -169,6 +171,8 @@ describe('SavedObjectsClient', () => {
     });
 
     it('should overwrite objects if overwrite is truthy', async () => {
+      callAdminCluster.returns({ items: [] });
+
       await savedObjectsClient.bulkCreate([{ type: 'foo', id: 'bar', attributes: {} }], { overwrite: false });
       sinon.assert.calledOnce(callAdminCluster);
       sinon.assert.calledWithExactly(callAdminCluster, 'bulk', sinon.match({
@@ -223,15 +227,12 @@ describe('SavedObjectsClient', () => {
         {
           id: 'one',
           type: 'config',
-          version: undefined,
-          attributes: { title: 'Test One' },
           error: { message: 'type[config] missing' }
         }, {
           id: 'two',
           type: 'index-pattern',
           version: 2,
           attributes: { title: 'Test Two' },
-          error: undefined
         }
       ]);
     });
@@ -265,13 +266,11 @@ describe('SavedObjectsClient', () => {
           type: 'config',
           version: 2,
           attributes: { title: 'Test One' },
-          error: undefined
         }, {
           id: 'two',
           type: 'index-pattern',
           version: 2,
           attributes: { title: 'Test Two' },
-          error: undefined
         }
       ]);
     });
@@ -291,6 +290,7 @@ describe('SavedObjectsClient', () => {
     });
 
     it('passes the parameters to callAdminCluster', async () => {
+      callAdminCluster.returns({});
       await savedObjectsClient.delete('index-pattern', 'logstash-*');
 
       expect(callAdminCluster.calledOnce).to.be(true);
@@ -307,16 +307,19 @@ describe('SavedObjectsClient', () => {
   });
 
   describe('#find', () => {
-    it('formats Elasticsearch response', async () => {
-      const count = docs.hits.hits.length;
+    beforeEach(() => {
+      callAdminCluster.returns(searchResults);
+    });
 
-      callAdminCluster.returns(Promise.resolve(docs));
+    it('formats Elasticsearch response', async () => {
+      const count = searchResults.hits.hits.length;
+
       const response = await savedObjectsClient.find();
 
       expect(response.total).to.be(count);
       expect(response.saved_objects).to.have.length(count);
 
-      docs.hits.hits.forEach((doc, i) => {
+      searchResults.hits.hits.forEach((doc, i) => {
         expect(response.saved_objects[i]).to.eql({
           id: doc._id.replace(/(index-pattern|config)\:/, ''),
           type: doc._source.type,
@@ -421,7 +424,7 @@ describe('SavedObjectsClient', () => {
   });
 
   describe('#get', () => {
-    it('formats Elasticsearch response', async () => {
+    beforeEach(() => {
       callAdminCluster.returns(Promise.resolve({
         _id: 'index-pattern:logstash-*',
         _type: 'doc',
@@ -433,7 +436,9 @@ describe('SavedObjectsClient', () => {
           }
         }
       }));
+    });
 
+    it('formats Elasticsearch response', async () => {
       const response = await savedObjectsClient.get('index-pattern', 'logstash-*');
       expect(response).to.eql({
         id: 'logstash-*',
@@ -446,7 +451,6 @@ describe('SavedObjectsClient', () => {
     });
 
     it('prepends type to the id', async () => {
-      callAdminCluster.returns(Promise.resolve({}));
       await savedObjectsClient.get('index-pattern', 'logstash-*');
 
       const [, args] = callAdminCluster.getCall(0).args;
@@ -457,6 +461,8 @@ describe('SavedObjectsClient', () => {
 
   describe('#bulkGet', () => {
     it('accepts a array of mixed type and ids', async () => {
+      callAdminCluster.returns({ docs: [] });
+
       await savedObjectsClient.bulkGet([
         { id: 'one', type: 'config' },
         { id: 'two', type: 'index-pattern' }
@@ -472,6 +478,8 @@ describe('SavedObjectsClient', () => {
     });
 
     it('returns early for empty objects argument', async () => {
+      callAdminCluster.returns({ docs: [] });
+
       const response = await savedObjectsClient.bulkGet([]);
 
       expect(response.saved_objects).to.have.length(0);
@@ -513,38 +521,40 @@ describe('SavedObjectsClient', () => {
   });
 
   describe('#update', () => {
-    it('returns current ES document version', async () => {
-      const id = 'logstash-*';
-      const type = 'index-pattern';
-      const version = 2;
-      const attributes = { title: 'Testing' };
+    const id = 'logstash-*';
+    const type = 'index-pattern';
+    const newVersion = 2;
+    const attributes = { title: 'Testing' };
 
+    beforeEach(() => {
       callAdminCluster.returns(Promise.resolve({
         _id: `${type}:${id}`,
         _type: 'doc',
-        _version: version,
+        _version: newVersion,
         result: 'updated'
       }));
+    });
 
+    it('returns current ES document version', async () => {
       const response = await savedObjectsClient.update('index-pattern', 'logstash-*', attributes);
       expect(response).to.eql({
         id,
         type,
-        version,
+        version: newVersion,
         attributes
       });
     });
 
     it('accepts version', async () => {
       await savedObjectsClient.update(
-        'index-pattern',
-        'logstash-*',
+        type,
+        id,
         { title: 'Testing' },
-        { version: 1 }
+        { version: newVersion - 1 }
       );
 
       const esParams = callAdminCluster.getCall(0).args[1];
-      expect(esParams.version).to.be(1);
+      expect(esParams.version).to.be(newVersion - 1);
     });
 
     it('passes the parameters to callAdminCluster', async () => {

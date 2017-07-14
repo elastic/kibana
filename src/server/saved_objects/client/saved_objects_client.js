@@ -1,11 +1,10 @@
 import Boom from 'boom';
 import uuid from 'uuid';
-import { get } from 'lodash';
 
 import {
   createFindQuery,
   handleEsError,
-  normalizeEsDoc,
+  trimIdPrefix,
   includedFields
 } from './lib';
 
@@ -29,10 +28,15 @@ export class SavedObjectsClient {
    * @returns {promise} - { id, type, version, attributes }
   */
   async create(type, attributes = {}, options = {}) {
-    const method = options.id && !options.overwrite ? 'create' : 'index';
+    const {
+      id,
+      overwrite = false
+    } = options;
+
+    const method = id && !overwrite ? 'create' : 'index';
     const response = await this._withKibanaIndex(method, {
       type: V6_TYPE,
-      id: this._generateEsId(type, options.id),
+      id: this._generateEsId(type, id),
       body: {
         type,
         [type]: attributes
@@ -40,7 +44,12 @@ export class SavedObjectsClient {
       refresh: 'wait_for'
     });
 
-    return normalizeEsDoc(response, { type, attributes });
+    return {
+      id: trimIdPrefix(response._id, type),
+      type,
+      version: response._version,
+      attributes
+    };
   }
 
   /**
@@ -78,17 +87,35 @@ export class SavedObjectsClient {
       body: objects.reduce((acc, object) => acc.concat(objectToBulkRequest(object)), []),
     });
 
-    return items.map((itemWrapper, i) => {
-      const method = Object.keys(itemWrapper)[0];
-      const item = itemWrapper[method];
+    return items.map((response, i) => {
+      const {
+        error,
+        _id: responseId,
+        _version: version,
+      } = Object.values(response)[0];
 
-      const { id, type, attributes } = objects[i];
-      return normalizeEsDoc(item, {
-        id,
+      const {
+        id = responseId,
         type,
         attributes,
-        error: item.error ? { message: item.error.reason } : undefined
-      });
+      } = objects[i];
+
+      if (error) {
+        return {
+          id,
+          type,
+          error: {
+            message: error.reason || JSON.stringify(error)
+          }
+        };
+      }
+
+      return {
+        id,
+        type,
+        version,
+        attributes
+      };
     });
   }
 
@@ -106,7 +133,7 @@ export class SavedObjectsClient {
       refresh: 'wait_for'
     });
 
-    if (get(response, 'found') === false) {
+    if (response.found === false) {
       throw Boom.notFound();
     }
   }
@@ -146,13 +173,19 @@ export class SavedObjectsClient {
     const response = await this._withKibanaIndex('search', esOptions);
 
     return {
-      saved_objects: get(response, 'hits.hits', []).map(hit => {
-        return normalizeEsDoc(hit);
-      }),
-      total: get(response, 'hits.total', 0),
+      page,
       per_page: perPage,
-      page
+      total: response.hits.total,
+      saved_objects: response.hits.hits.map(hit => {
+        const type = hit._source.type;
 
+        return {
+          id: trimIdPrefix(hit._id, type),
+          type,
+          version: hit._version,
+          attributes: hit._source[type],
+        };
+      }),
     };
   }
 
@@ -173,22 +206,33 @@ export class SavedObjectsClient {
       return { saved_objects: [] };
     }
 
-    const docs = objects.map(doc => {
-      return { _type: V6_TYPE, _id: this._generateEsId(doc.type, doc.id) };
+    const response = await this._withKibanaIndex('mget', {
+      body: {
+        docs: objects.map(object => ({
+          _type: V6_TYPE,
+          _id: this._generateEsId(object.type, object.id)
+        }))
+      }
     });
 
-    const response = await this._withKibanaIndex('mget', { body: { docs } })
-      .then(resp => get(resp, 'docs', []));
-
     return {
-      saved_objects: response.map((r, i) => {
-        if (r.found === false) {
-          return Object.assign({}, objects[i], {
+      saved_objects: response.docs.map((doc, i) => {
+        const { id, type } = objects[i];
+
+        if (doc.found === false) {
+          return {
+            id,
+            type,
             error: { statusCode: 404, message: 'Not found' }
-          });
+          };
         }
 
-        return normalizeEsDoc(r, objects[i]);
+        return {
+          id,
+          type,
+          version: doc._version,
+          attributes: doc._source[type]
+        };
       })
     };
   }
@@ -206,7 +250,12 @@ export class SavedObjectsClient {
       id: this._generateEsId(type, id)
     });
 
-    return normalizeEsDoc(response);
+    return {
+      id,
+      type,
+      version: response._version,
+      attributes: response._source[type]
+    };
   }
 
   /**
@@ -223,15 +272,20 @@ export class SavedObjectsClient {
       type: V6_TYPE,
       id: this._generateEsId(type, id),
       version: options.version,
+      refresh: 'wait_for',
       body: {
         doc: {
           [type]: attributes
         }
       },
-      refresh: 'wait_for'
     });
 
-    return normalizeEsDoc(response, { type, id, attributes });
+    return {
+      id,
+      type,
+      version: response._version,
+      attributes
+    };
   }
 
   async _withKibanaIndex(method, params) {
