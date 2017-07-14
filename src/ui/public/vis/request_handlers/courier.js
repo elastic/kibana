@@ -1,10 +1,12 @@
 import _ from 'lodash';
 
+import { VisRequestHandlersRegistryProvider } from 'ui/registry/vis_request_handlers';
+
 const CourierRequestHandlerProvider = function (Private, courier, timefilter) {
   return {
     name: 'courier',
     handler: function (vis, appState, uiState, searchSource) {
-      if (appState) {
+      if (appState && vis.editorMode) {
         searchSource.set('filter', appState.filters);
         if (!appState.linked) searchSource.set('query', appState.query);
       }
@@ -48,5 +50,7 @@ const CourierRequestHandlerProvider = function (Private, courier, timefilter) {
     }
   };
 };
+
+VisRequestHandlersRegistryProvider.register(CourierRequestHandlerProvider);
 
 export { CourierRequestHandlerProvider };

@@ -36,13 +36,15 @@ The file must use the WGS84 coordinate reference system and only include polygon
 If the file is hosted on a separate domain from Kibana, the server needs to be CORS-enabled so Kibana can download the file. 
 The url field also serves as a unique identifier for the file. 
 Each layer can contain multiple fields to indicate what properties from the geojson features you want to expose. 
-The field.description is the human readable text that is shown in the Region Map visualization's field menu. 
+The field.description is the human readable text that is shown in the Region Map visualization's field menu.
+An optional attribution value can be added as well.
 The following example shows a valid regionmap configuration.
 
     regionmap:
       layers: 
          - name: "Departments of France"
            url: "http://my.cors.enabled.server.org/france_departements.geojson"
+           attribution: "INRAP"
            fields:
               - name: "department"
                 description: "Full department name"

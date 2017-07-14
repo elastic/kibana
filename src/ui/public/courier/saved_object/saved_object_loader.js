@@ -64,21 +64,11 @@ export class SavedObjectLoader {
     return source;
   }
 
-  /**
-   * Updates hit._source to contain an id and url field, and returns the updated
-   * source object.
-   * @param hit
-   * @returns {hit._source} The modified hit._source object, with an id and url field.
-   */
-  mapHits(hit) {
-    return this.mapHitSource(hit._source, hit._id);
-  }
-
   scanAll(queryString, pageSize = 1000) {
     return this.scanner.scanAndMap(queryString, {
       pageSize,
       docCount: Infinity
-    }, (hit) => this.mapHits(hit));
+    });
   }
 
   /**
