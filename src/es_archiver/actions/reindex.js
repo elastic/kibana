@@ -4,7 +4,7 @@ import del from 'del';
 import { saveAction } from './save';
 import { loadAction } from './load';
 
-export async function reindexAction({ indices, client, log }) {
+export async function reindexAction({ indices, client, log, convertToV6 }) {
   const tmpDir = tmp.dirSync();
   const name = 'reindex';
 
@@ -21,6 +21,7 @@ export async function reindexAction({ indices, client, log }) {
     log.info('Loading indices from %j', tmpDir.name);
     await loadAction({
       name,
+      convertToV6,
       skipExisting: false,
       client,
       dataDir: tmpDir.name,

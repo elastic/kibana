@@ -16,7 +16,7 @@ import {
   createConvertToV6Stream,
 } from '../lib';
 
-export async function loadAction({ name, skipExisting, client, dataDir, log }) {
+export async function loadAction({ name, skipExisting, client, dataDir, log, convertToV6 }) {
   const inputDir = resolve(dataDir, name);
   const stats = createStats(name, log);
 
@@ -27,7 +27,7 @@ export async function loadAction({ name, skipExisting, client, dataDir, log }) {
     await createPromiseFromStreams([
       createReadStream(resolve(inputDir, filename)),
       ...createParseArchiveStreams({ gzip: isGzip(filename) }),
-      createConvertToV6Stream(),
+      ...(convertToV6 ? [createConvertToV6Stream()] : []),
       createCreateIndexStream({ client, stats, skipExisting }),
       createIndexDocRecordsStream(client, stats),
     ]);

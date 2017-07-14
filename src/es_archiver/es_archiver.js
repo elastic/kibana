@@ -41,11 +41,15 @@ export class EsArchiver {
    *  @return Promise<Stats>
    */
   async load(name, options = {}) {
-    const { skipExisting } = options;
+    const {
+      skipExisting = false,
+      convertToV6 = false
+    } = options;
 
     return await loadAction({
       name,
-      skipExisting: !!skipExisting,
+      convertToV6,
+      skipExisting,
       client: this.client,
       dataDir: this.dataDir,
       log: this.log,
@@ -73,11 +77,16 @@ export class EsArchiver {
    *
    *  @return Promise<Stats>
    */
-  async rebuildAll() {
+  async rebuildAll(options = {}) {
+    const {
+      convertToV6 = true
+    } = options;
+
     return rebuildAllAction({
+      convertToV6,
       client: this.client,
       dataDir: this.dataDir,
-      log: this.log
+      log: this.log,
     });
   }
 
@@ -91,9 +100,14 @@ export class EsArchiver {
     return this.load(name, { skipExisting: true });
   }
 
-  async reindex(indices) {
+  async reindex(indices, options = {}) {
+    const {
+      convertToV6 = true
+    } = options;
+
     return reindexAction({
       indices,
+      convertToV6,
       client: this.client,
       log: this.log
     });

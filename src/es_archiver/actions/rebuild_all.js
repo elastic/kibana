@@ -21,7 +21,7 @@ import {
   createConvertToV6Stream,
 } from '../lib';
 
-export async function rebuildAllAction({ dataDir, log }) {
+export async function rebuildAllAction({ dataDir, log, convertToV6 }) {
   const archiveNames = await findArchiveNames(dataDir);
 
   for (const name of archiveNames) {
@@ -37,7 +37,7 @@ export async function rebuildAllAction({ dataDir, log }) {
       await createPromiseFromStreams([
         createReadStream(path),
         ...createParseArchiveStreams({ gzip }),
-        createConvertToV6Stream(),
+        ...(convertToV6 ? [createConvertToV6Stream()] : []),
         ...createFormatArchiveStreams({ gzip }),
         createWriteStream(tempFile),
       ]);
