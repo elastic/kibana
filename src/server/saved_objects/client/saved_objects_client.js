@@ -35,13 +35,13 @@ export class SavedObjectsClient {
 
     const method = id && !overwrite ? 'create' : 'index';
     const response = await this._withKibanaIndex(method, {
-      type: V6_TYPE,
       id: this._generateEsId(type, id),
+      type: V6_TYPE,
+      refresh: 'wait_for',
       body: {
         type,
         [type]: attributes
       },
-      refresh: 'wait_for'
     });
 
     return {
@@ -71,8 +71,8 @@ export class SavedObjectsClient {
       return [
         {
           [method]: {
+            _id: this._generateEsId(object.type, object.id),
             _type: V6_TYPE,
-            _id: this._generateEsId(object.type, object.id)
           }
         },
         {
@@ -84,7 +84,10 @@ export class SavedObjectsClient {
 
     const { items } = await this._withKibanaIndex('bulk', {
       refresh: 'wait_for',
-      body: objects.reduce((acc, object) => acc.concat(objectToBulkRequest(object)), []),
+      body: objects.reduce((acc, object) => ([
+        ...acc,
+        ...objectToBulkRequest(object)
+      ]), []),
     });
 
     return items.map((response, i) => {
@@ -128,9 +131,9 @@ export class SavedObjectsClient {
    */
   async delete(type, id) {
     const response = await this._withKibanaIndex('delete', {
-      type: V6_TYPE,
       id: this._generateEsId(type, id),
-      refresh: 'wait_for'
+      type: V6_TYPE,
+      refresh: 'wait_for',
     });
 
     if (response.found === false) {
@@ -164,10 +167,16 @@ export class SavedObjectsClient {
     } = options;
 
     const esOptions = {
-      _source: includedFields(type, fields),
       size: perPage,
       from: perPage * (page - 1),
-      body: createFindQuery(this._mappings, { search, searchFields, type, sortField, sortOrder })
+      _source: includedFields(type, fields),
+      body: createFindQuery(this._mappings, {
+        search,
+        searchFields,
+        type,
+        sortField,
+        sortOrder
+      })
     };
 
     const response = await this._withKibanaIndex('search', esOptions);
@@ -209,8 +218,8 @@ export class SavedObjectsClient {
     const response = await this._withKibanaIndex('mget', {
       body: {
         docs: objects.map(object => ({
+          _id: this._generateEsId(object.type, object.id),
           _type: V6_TYPE,
-          _id: this._generateEsId(object.type, object.id)
         }))
       }
     });
@@ -246,8 +255,8 @@ export class SavedObjectsClient {
    */
   async get(type, id) {
     const response = await this._withKibanaIndex('get', {
+      id: this._generateEsId(type, id),
       type: V6_TYPE,
-      id: this._generateEsId(type, id)
     });
 
     return {
@@ -269,8 +278,8 @@ export class SavedObjectsClient {
    */
   async update(type, id, attributes, options = {}) {
     const response = await this._withKibanaIndex('update', {
-      type: V6_TYPE,
       id: this._generateEsId(type, id),
+      type: V6_TYPE,
       version: options.version,
       refresh: 'wait_for',
       body: {
