@@ -6,7 +6,7 @@ import { Events } from '../../lib/events';
 const events = new Events();
 export const RenderElement = compose(
   pure,
-  withProps(({ renderFn, done, config, size }) => ({
+  withProps(({ renderFn, done, config, size, css }) => ({
     renderFn: (domNode, events) => {
       renderFn(domNode, config, done || (() => {}), events);
     },
@@ -15,6 +15,7 @@ export const RenderElement = compose(
     },
     events: events,
     size,
+    css,
   })),
   withState('domNode', 'setDomNode'),
   withState('events', 'setEventEmitter'),
@@ -26,4 +27,5 @@ RenderElement.propTypes = {
   done: PropTypes.func,
   config: PropTypes.object,
   size: PropTypes.object,
+  css: PropTypes.string,
 };

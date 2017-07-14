@@ -3,9 +3,9 @@ import PropTypes from 'prop-types';
 import { lifecycle, compose } from 'recompose';
 import { isEqual } from 'lodash';
 import { Events } from '../../lib/events';
+import Style from 'style-it';
 
-
-export const RenderElementComponent = ({ renderFn, size, domNode, setDomNode, setEventEmitter }) => {
+export const RenderElementComponent = ({ renderFn, size, domNode, setDomNode, setEventEmitter, css }) => {
   const renderElement = (refNode) => {
     if (refNode && !domNode) {
 
@@ -20,8 +20,10 @@ export const RenderElementComponent = ({ renderFn, size, domNode, setDomNode, se
     }
   };
 
-  return (
-    <div className="canvas__workpad--element_render">
+  const style = (css == null || css.length === 0) ? 'div {}' : css;
+
+  return Style.it(style,
+    <div className="canvas__workpad--element_render canvas__element">
       <div style={size} ref={renderElement} />
     </div>
   );
@@ -31,18 +33,26 @@ const RenderElementLifecycle = lifecycle({
 
   componentDidUpdate(prevProps) {
     const { events, config, domNode, size } = this.props;
+
+    // Config changes
     if (!isEqual(config, prevProps.config)) {
       this.destroy();
       return this.props.renderFn(domNode, events);
     }
 
+    // Size changes
     if (!isEqual(size, prevProps.size)) return events.emit('resize', size);
+
+    // CSS changes, don't do squat. React's job.
   },
 
   shouldComponentUpdate(nextProps) {
     // TODO: What a shitty hack. None of these props should update when you move the element.
     // This should be fixed at a higher level.
-    return !isEqual(this.props.config, nextProps.config) || !isEqual(this.props.size, nextProps.size);
+    return !isEqual(this.props.config, nextProps.config) ||
+      !isEqual(this.props.size, nextProps.size) ||
+      !isEqual(this.props.css, nextProps.css);
+
   },
 
   componentWillUnmount() {
@@ -67,6 +77,7 @@ RenderElementComponent.propTypes = {
   size: PropTypes.object,
   events: PropTypes.object,
   setEventEmitter: PropTypes.func,
+  css: PropTypes.string,
 };
 
 export const RenderElement = compose(

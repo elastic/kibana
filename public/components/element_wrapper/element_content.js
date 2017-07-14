@@ -47,6 +47,7 @@ export const ElementContent = compose(
     <RenderElement
       renderFn={elementTypeDefintion.render}
       config={renderable.value}
+      css={renderable.css} // This is an actual CSS stylesheet string, it will be scoped by RenderElement
       done={() => {}}
       size={size}
     />

@@ -10,6 +10,14 @@ module.exports = new Fn({
       'render',
     ],
   },
-  args: {},
-  fn: (context) => context,
+  args: {
+    css: {
+      types: ['string', 'null'],
+      help: 'Any block of custom CSS to be scoped to this element.',
+    },
+  },
+  fn: (context, args) => {
+    context.css = args.css;
+    return context;
+  },
 });
