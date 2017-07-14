@@ -11,25 +11,29 @@ module.exports = new Element('table', {
   image: header,
   expression: 'demodata()',
   render(domNode, config, done) {
+    console.log(config.type);
+
     const table = (
-      <Table striped bordered condensed>
-        <thead>
-          <tr>
-            {config.columns.map(col => (
-              <th key={`header-${col.name}`}>{col.name}</th>
-            ))}
-          </tr>
-        </thead>
-        <tbody>
-          {config.rows.map(row => (
-            <tr key={`row-${row._rowId}`}>
+      <div style={{ height: '100%', overflow: 'auto' }}>
+        <Table condensed>
+          <thead>
+            <tr>
               {config.columns.map(col => (
-                <td key={`row-${row._rowId}-${col.name}`}>{row[col.name]}</td>
+                <th key={`header-${col.name}`}>{col.name}</th>
               ))}
             </tr>
-          ))}
-        </tbody>
-      </Table>
+          </thead>
+          <tbody>
+            {config.rows.map(row => (
+              <tr key={`row-${row._rowId}`}>
+                {config.columns.map(col => (
+                  <td key={`row-${row._rowId}-${col.name}`}>{row[col.name]}</td>
+                ))}
+              </tr>
+            ))}
+          </tbody>
+        </Table>
+      </div>
     );
 
     ReactDOM.render(table, domNode);
