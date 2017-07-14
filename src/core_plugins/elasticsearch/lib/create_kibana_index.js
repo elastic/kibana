@@ -6,8 +6,7 @@ export default function (server, mappings) {
     body: {
       settings: {
         number_of_shards: 1,
-        'index.mapper.dynamic': false,
-        'index.mapping.single_type': false
+        'index.mapper.dynamic': false
       },
       mappings
     }

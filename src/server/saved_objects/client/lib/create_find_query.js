@@ -1,4 +1,6 @@
 import { get } from 'lodash';
+import { V6_TYPE } from '../saved_objects_client';
+
 export function createFindQuery(mappings, options = {}) {
   const { type, search, searchFields, sortField, sortOrder } = options;
 
@@ -56,7 +58,7 @@ export function createFindQuery(mappings, options = {}) {
   if (sortField) {
     const value = {
       order: sortOrder,
-      unmapped_type: get(mappings, [type, 'properties', sortField, 'type'])
+      unmapped_type: get(mappings, [V6_TYPE, 'properties', type, 'properties', sortField, 'type'])
     };
 
     query.sort = [{

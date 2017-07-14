@@ -26,7 +26,7 @@ describe('UiExports', function () {
       });
 
       const mappings = mappingsCollection.getCombined();
-      expect(has(mappings, 'foo.properties.bar')).to.be(true);
+      expect(has(mappings, 'doc.properties.foo.properties.bar')).to.be(true);
     });
 
     it('throws and includes the plugin id in the mapping conflict message', () => {

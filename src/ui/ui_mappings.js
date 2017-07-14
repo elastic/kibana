@@ -3,8 +3,8 @@ import _ from 'lodash';
 class MappingsCollection {
   constructor() {
     this._defaultMappings = {
-      '_default_': {
-        'dynamic': 'strict'
+      type: {
+        type: 'keyword'
       },
       config: {
         dynamic: true,
@@ -19,7 +19,12 @@ class MappingsCollection {
   }
 
   getCombined = () => {
-    return this._currentMappings;
+    return {
+      doc: {
+        dynamic: false,
+        properties: this._currentMappings,
+      },
+    };
   }
 
   register = (newMappings, options = {}) => {

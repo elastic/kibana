@@ -1,9 +1,10 @@
 import expect from 'expect.js';
 import sinon from 'sinon';
 import { SavedObjectsClient } from '../saved_objects_client';
-import { createIdQuery } from '../lib/create_id_query';
 
 describe('SavedObjectsClient', () => {
+  const sandbox = sinon.sandbox.create();
+
   let callAdminCluster;
   let savedObjectsClient;
   const docs = {
@@ -11,61 +12,80 @@ describe('SavedObjectsClient', () => {
       total: 3,
       hits: [{
         _index: '.kibana',
-        _type: 'index-pattern',
-        _id: 'logstash-*',
+        _type: 'doc',
+        _id: 'index-pattern:logstash-*',
         _score: 1,
         _source: {
-          title: 'logstash-*',
-          timeFieldName: '@timestamp',
-          notExpandable: true
+          type: 'index-pattern',
+          'index-pattern': {
+            title: 'logstash-*',
+            timeFieldName: '@timestamp',
+            notExpandable: true
+          }
         }
       }, {
         _index: '.kibana',
-        _type: 'config',
-        _id: '6.0.0-alpha1',
+        _type: 'doc',
+        _id: 'config:6.0.0-alpha1',
         _score: 1,
         _source: {
-          buildNum: 8467,
-          defaultIndex: 'logstash-*'
+          type: 'config',
+          config: {
+            buildNum: 8467,
+            defaultIndex: 'logstash-*'
+          }
         }
       }, {
         _index: '.kibana',
-        _type: 'index-pattern',
-        _id: 'stocks-*',
+        _type: 'doc',
+        _id: 'index-pattern:stocks-*',
         _score: 1,
         _source: {
-          title: 'stocks-*',
-          timeFieldName: '@timestamp',
-          notExpandable: true
+          type: 'index-pattern',
+          'index-pattern': {
+            title: 'stocks-*',
+            timeFieldName: '@timestamp',
+            notExpandable: true
+          }
         }
       }]
     }
   };
 
   const mappings = {
-    'index-pattern': {
+    doc: {
       properties: {
-        someField: {
-          type: 'keyword'
+        'index-pattern': {
+          properties: {
+            someField: {
+              type: 'keyword'
+            }
+          }
         }
       }
     }
   };
 
   beforeEach(() => {
-    callAdminCluster = sinon.mock();
+    callAdminCluster = sandbox.stub();
     savedObjectsClient = new SavedObjectsClient('.kibana-test', mappings, callAdminCluster);
   });
 
   afterEach(() => {
-    callAdminCluster.reset();
+    sandbox.restore();
   });
 
 
   describe('#create', () => {
-    it('formats Elasticsearch response', async () => {
-      callAdminCluster.returns({ _type: 'index-pattern', _id: 'logstash-*', _version: 2 });
+    beforeEach(() => {
+      callAdminCluster.returns(Promise.resolve({
+        _type: 'doc',
+        _id: 'index-pattern:logstash-*',
+        _version: 2
+      }));
+    });
 
+    it('formats Elasticsearch response', async () => {
       const response = await savedObjectsClient.create('index-pattern', {
         title: 'Logstash'
       });
@@ -81,8 +101,6 @@ describe('SavedObjectsClient', () => {
     });
 
     it('should use ES index action', async () => {
-      callAdminCluster.returns({ _type: 'index-pattern', _id: 'logstash-*', _version: 2 });
-
       await savedObjectsClient.create('index-pattern', {
         id: 'logstash-*',
         title: 'Logstash'
@@ -95,8 +113,6 @@ describe('SavedObjectsClient', () => {
     });
 
     it('should use create action if ID defined and overwrite=false', async () => {
-      callAdminCluster.returns({ _type: 'index-pattern', _id: 'logstash-*', _version: 2 });
-
       await savedObjectsClient.create('index-pattern', {
         title: 'Logstash'
       }, {
@@ -110,17 +126,25 @@ describe('SavedObjectsClient', () => {
     });
 
     it('allows for id to be provided', async () => {
-      callAdminCluster.returns({ _type: 'index-pattern', _id: 'logstash-*', _version: 2 });
-
       await savedObjectsClient.create('index-pattern', {
-        id: 'logstash-*',
         title: 'Logstash'
-      }, { id: 'myId' });
+      }, { id: 'logstash-*' });
 
       expect(callAdminCluster.calledOnce).to.be(true);
 
       const args = callAdminCluster.getCall(0).args;
-      expect(args[1].id).to.be('myId');
+      expect(args[1].id).to.be('index-pattern:logstash-*');
+    });
+
+    it('self-generates an ID', async () => {
+      await savedObjectsClient.create('index-pattern', {
+        title: 'Logstash'
+      });
+
+      expect(callAdminCluster.calledOnce).to.be(true);
+
+      const args = callAdminCluster.getCall(0).args;
+      expect(args[1].id).to.match(/index-pattern:[0-9a-f]{8}-([0-9a-f]{4}-){3}[0-9a-f]{12}/);
     });
   });
 
@@ -137,10 +161,10 @@ describe('SavedObjectsClient', () => {
 
       expect(args[0]).to.be('bulk');
       expect(args[1].body).to.eql([
-        { create: { _type: 'config', _id: 'one' } },
-        { title: 'Test One' },
-        { create: { _type: 'index-pattern', _id: 'two' } },
-        { title: 'Test Two' }
+        { create: { _type: 'doc', _id: 'config:one' } },
+        { type: 'config', config: { title: 'Test One' } },
+        { create: { _type: 'doc', _id: 'index-pattern:two' } },
+        { type: 'index-pattern', 'index-pattern': { title: 'Test Two' } }
       ]);
     });
 
@@ -156,10 +180,10 @@ describe('SavedObjectsClient', () => {
 
       expect(args[0]).to.be('bulk');
       expect(args[1].body).to.eql([
-        { index: { _type: 'config', _id: 'one' } },
-        { title: 'Test One' },
-        { index: { _type: 'index-pattern', _id: 'two' } },
-        { title: 'Test Two' }
+        { index: { _type: 'doc', _id: 'config:one' } },
+        { type: 'config', 'config': { title: 'Test One' } },
+        { index: { _type: 'doc', _id: 'index-pattern:two' } },
+        { type: 'index-pattern', 'index-pattern': { title: 'Test Two' } }
       ]);
     });
 
@@ -168,16 +192,16 @@ describe('SavedObjectsClient', () => {
         errors: false,
         items: [{
           create: {
-            _type: 'config',
-            _id: 'one',
+            _type: 'doc',
+            _id: 'config:one',
             error: {
               reason: 'type[config] missing'
             }
           }
         }, {
           create: {
-            _type: 'index-pattern',
-            _id: 'two',
+            _type: 'doc',
+            _id: 'index-pattern:two',
             _version: 2
           }
         }]
@@ -210,14 +234,14 @@ describe('SavedObjectsClient', () => {
         errors: false,
         items: [{
           create: {
-            _type: 'config',
-            _id: 'one',
+            _type: 'doc',
+            _id: 'config:one',
             _version: 2
           }
         }, {
           create: {
-            _type: 'index-pattern',
-            _id: 'two',
+            _type: 'doc',
+            _id: 'index-pattern:two',
             _version: 2
           }
         }]
@@ -247,17 +271,16 @@ describe('SavedObjectsClient', () => {
   });
 
   describe('#delete', () => {
-    it('throws notFound when ES is unable to find the document', (done) => {
-      callAdminCluster.returns(Promise.resolve({
-        deleted: 0
-      }));
+    it('throws notFound when ES is unable to find the document',  async () => {
+      callAdminCluster.returns(Promise.resolve({ found: false }));
 
-      savedObjectsClient.delete('index-pattern', 'logstash-*').then(() => {
-        done('failed');
-      }).catch(e => {
-        expect(e.output.statusCode).to.be(404);
-        done();
-      });
+      try {
+        await savedObjectsClient.delete('index-pattern', 'logstash-*');
+        expect().fail('should throw error');
+      } catch(e) {
+        expect(e.output.statusCode).to.eql(404);
+      }
+
     });
 
     it('passes the parameters to callAdminCluster', async () => {
@@ -265,10 +288,11 @@ describe('SavedObjectsClient', () => {
 
       expect(callAdminCluster.calledOnce).to.be(true);
 
-      const args = callAdminCluster.getCall(0).args;
-      expect(args[0]).to.be('deleteByQuery');
-      expect(args[1]).to.eql({
-        body: createIdQuery({ type: 'index-pattern', id: 'logstash-*' }),
+      const [method, args] = callAdminCluster.getCall(0).args;
+      expect(method).to.be('delete');
+      expect(args).to.eql({
+        type: 'doc',
+        id: 'index-pattern:logstash-*',
         refresh: 'wait_for',
         index: '.kibana-test'
       });
@@ -284,12 +308,13 @@ describe('SavedObjectsClient', () => {
 
       expect(response.total).to.be(count);
       expect(response.saved_objects).to.have.length(count);
+
       docs.hits.hits.forEach((doc, i) => {
         expect(response.saved_objects[i]).to.eql({
-          id: doc._id,
-          type: doc._type,
+          id: doc._id.replace(/(index-pattern|config)\:/, ''),
+          type: doc._source.type,
           version: doc._version,
-          attributes: doc._source
+          attributes: doc._source[doc._source.type]
         });
       });
     });
@@ -391,17 +416,14 @@ describe('SavedObjectsClient', () => {
   describe('#get', () => {
     it('formats Elasticsearch response', async () => {
       callAdminCluster.returns(Promise.resolve({
-        hits: {
-          hits: [
-            {
-              _id: 'logstash-*',
-              _type: 'index-pattern',
-              _version: 2,
-              _source: {
-                title: 'Testing'
-              }
-            }
-          ]
+        _id: 'index-pattern:logstash-*',
+        _type: 'doc',
+        _version: 2,
+        _source: {
+          type: 'index-pattern',
+          'index-pattern': {
+            title: 'Testing'
+          }
         }
       }));
 
@@ -415,10 +437,19 @@ describe('SavedObjectsClient', () => {
         }
       });
     });
+
+    it('prepends type to the id', async () => {
+      callAdminCluster.returns(Promise.resolve({}));
+      await savedObjectsClient.get('index-pattern', 'logstash-*');
+
+      const [, args] = callAdminCluster.getCall(0).args;
+      expect(args.id).to.eql('index-pattern:logstash-*');
+      expect(args.type).to.eql('doc');
+    });
   });
 
   describe('#bulkGet', () => {
-    it('accepts an array of mixed type and ids', async () => {
+    it('accepts a array of mixed type and ids', async () => {
       await savedObjectsClient.bulkGet([
         { id: 'one', type: 'config' },
         { id: 'two', type: 'index-pattern' }
@@ -427,11 +458,9 @@ describe('SavedObjectsClient', () => {
       expect(callAdminCluster.calledOnce).to.be(true);
 
       const options = callAdminCluster.getCall(0).args[1];
-      expect(options.body).to.eql([
-        {},
-        createIdQuery({ type: 'config', id: 'one' }),
-        {},
-        createIdQuery({ type: 'index-pattern', id: 'two' })
+      expect(options.body.docs).to.eql([
+        { _type: 'doc', _id: 'config:one' },
+        { _type: 'doc', _id: 'index-pattern:two' }
       ]);
     });
 
@@ -444,37 +473,34 @@ describe('SavedObjectsClient', () => {
 
     it('reports error on missed objects', async () => {
       callAdminCluster.returns(Promise.resolve({
-        responses: [
-          {
-            hits: {
-              hits: [
-                {
-                  _id: 'good',
-                  _type: 'doc',
-                  _version: 2,
-                  _source: {
-                    type: 'config',
-                    config: {
-                      title: 'Test'
-                    }
-                  }
-                }
-              ]
-            }
-          }
-        ]
+        docs:[{
+          _type: 'doc',
+          _id: 'config:good',
+          found: true,
+          _version: 2,
+          _source: { config: { title: 'Test' } }
+        }, {
+          _type: 'doc',
+          _id: 'config:bad',
+          found: false
+        }]
       }));
 
       const { saved_objects: savedObjects } = await savedObjectsClient.bulkGet(
         [{ id: 'good', type: 'config' }, { id: 'bad', type: 'config' }]
       );
 
-      expect(savedObjects).to.have.length(1);
+      expect(savedObjects).to.have.length(2);
       expect(savedObjects[0]).to.eql({
         id: 'good',
         type: 'config',
         version: 2,
         attributes: { title: 'Test' }
+      });
+      expect(savedObjects[1]).to.eql({
+        id: 'bad',
+        type: 'config',
+        error: { statusCode: 404, message: 'Not found' }
       });
     });
   });
@@ -487,8 +513,8 @@ describe('SavedObjectsClient', () => {
       const attributes = { title: 'Testing' };
 
       callAdminCluster.returns(Promise.resolve({
-        _id: id,
-        _type: type,
+        _id: `${type}:${id}`,
+        _type: 'doc',
         _version: version,
         result: 'updated'
       }));
@@ -523,10 +549,10 @@ describe('SavedObjectsClient', () => {
 
       expect(args[0]).to.be('update');
       expect(args[1]).to.eql({
-        type: 'index-pattern',
-        id: 'logstash-*',
+        type: 'doc',
+        id: 'index-pattern:logstash-*',
         version: undefined,
-        body: { doc: { title: 'Testing' } },
+        body: { doc: { 'index-pattern': { title: 'Testing' } } },
         refresh: 'wait_for',
         index: '.kibana-test'
       });

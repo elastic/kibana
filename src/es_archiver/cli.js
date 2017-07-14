@@ -25,6 +25,7 @@ cmd
   .option('--es-url [url]', 'url for elasticsearch')
   .option(`--dir [path]`, 'where archives are stored')
   .option('--verbose', 'turn on verbose logging')
+  .option('--convert-to-v6', 'turn on automatic v6 conversion (true by default in `reindex` and `rebuild-all`)')
   .option('--config [path]', 'path to a functional test config file to use for default values', resolveConfigPath, defaultConfigPath)
   .on('--help', () => {
     console.log(readFileSync(resolve(__dirname, './cli_help.txt'), 'utf8'));
@@ -36,7 +37,7 @@ cmd.command('save <name> <indices...>')
 
 cmd.command('load <name>')
   .description('load the archive in --dir with <name>')
-  .action(name => execute('load', name));
+  .action(name => execute('load', name, { convertToV6: cmd.convertToV6 }));
 
 cmd.command('unload <name>')
   .description('remove indices created by the archive in --dir with <name>')
@@ -44,7 +45,11 @@ cmd.command('unload <name>')
 
 cmd.command('rebuild-all')
   .description('[internal] read and write all archives in --dir to remove any inconsistencies')
-  .action(() => execute('rebuildAll'));
+  .action(() => execute('rebuildAll', { convertToV6: cmd.convertToV6 }));
+
+cmd.command('reindex <indices...>')
+  .description('load the archive in --dir with <name>')
+  .action(indices => execute('reindex', indices, { convertToV6: cmd.convertToV6 }));
 
 cmd.parse(process.argv);
 

@@ -1,13 +1,10 @@
 import Boom from 'boom';
+import uuid from 'uuid';
 import { get } from 'lodash';
 
 import {
   createFindQuery,
-  createIdQuery,
   handleEsError,
-  isSingleTypeError,
-  v5BulkCreate,
-  v6BulkCreate,
   normalizeEsDoc,
   includedFields
 } from './lib';
@@ -33,18 +30,14 @@ export class SavedObjectsClient {
   */
   async create(type, attributes = {}, options = {}) {
     const method = options.id && !options.overwrite ? 'create' : 'index';
-    const response = await this._withKibanaIndexAndMappingFallback(method, {
-      type,
-      id: options.id,
-      body: attributes,
-      refresh: 'wait_for'
-    }, {
+    const response = await this._withKibanaIndex(method, {
       type: V6_TYPE,
-      id: options.id ? `${type}:${options.id}` : undefined,
+      id: this._generateEsId(type, options.id),
       body: {
         type,
         [type]: attributes
-      }
+      },
+      refresh: 'wait_for'
     });
 
     return normalizeEsDoc(response, { type, attributes });
@@ -56,29 +49,29 @@ export class SavedObjectsClient {
    * @param {array} objects - [{ type, id, attributes }]
    * @param {object} [options={}]
    * @property {boolean} [options.force=false] - overrides existing documents
-   * @property {string} [options.format=v5]
    * @returns {promise} - [{ id, type, version, attributes, error: { message } }]
    */
   async bulkCreate(objects, options = {}) {
-    const { format = 'v5' } = options;
+    const body = objects.reduce((acc, object) => {
+      const method = object.id && !options.overwrite ? 'create' : 'index';
 
-    const bulkCreate = format === 'v5' ? v5BulkCreate : v6BulkCreate;
+      acc.push({ [method]: {
+        _type: V6_TYPE,
+        _id: this._generateEsId(object.type, object.id)
+      } });
+
+      acc.push(Object.assign({},
+        { type: object.type },
+        { [object.type]: object.attributes }
+      ));
+
+      return acc;
+    }, []);
+
     const response = await this._withKibanaIndex('bulk', {
-      body: bulkCreate(objects, options),
+      body,
       refresh: 'wait_for'
     });
-
-    const items = get(response, 'items', []);
-    const missingTypesCount = items.filter(item => {
-      const method = Object.keys(item)[0];
-      return isSingleTypeError(get(item, `${method}.error`));
-    }).length;
-
-    const formatFallback = format === 'v5' && items.length > 0 && items.length === missingTypesCount;
-
-    if (formatFallback) {
-      return this.bulkCreate(objects, Object.assign({}, options, { format: 'v6' }));
-    }
 
     return get(response, 'items', []).map((resp, i) => {
       const method = Object.keys(resp)[0];
@@ -101,12 +94,13 @@ export class SavedObjectsClient {
    * @returns {promise}
    */
   async delete(type, id) {
-    const response = await this._withKibanaIndex('deleteByQuery', {
-      body: createIdQuery({ type, id }),
+    const response = await this._withKibanaIndex('delete', {
+      type: V6_TYPE,
+      id: this._generateEsId(type, id),
       refresh: 'wait_for'
     });
 
-    if (get(response, 'deleted') === 0) {
+    if (get(response, 'found') === false) {
       throw Boom.notFound();
     }
   }
@@ -173,24 +167,22 @@ export class SavedObjectsClient {
       return { saved_objects: [] };
     }
 
-    const docs = objects.reduce((acc, { type, id }) => {
-      return [...acc, {}, createIdQuery({ type, id })];
-    }, []);
+    const docs = objects.map(doc => {
+      return { _type: V6_TYPE, _id: this._generateEsId(doc.type, doc.id) };
+    });
 
-    const response = await this._withKibanaIndex('msearch', { body: docs });
-    const responses = get(response, 'responses', []);
+    const response = await this._withKibanaIndex('mget', { body: { docs } })
+      .then(resp => get(resp, 'docs', []));
 
     return {
-      saved_objects: responses.map((r, i) => {
-        const [hit] = get(r, 'hits.hits', []);
-
-        if (!hit) {
+      saved_objects: response.map((r, i) => {
+        if (r.found === false) {
           return Object.assign({}, objects[i], {
             error: { statusCode: 404, message: 'Not found' }
           });
         }
 
-        return normalizeEsDoc(hit, objects[i]);
+        return normalizeEsDoc(r, objects[i]);
       })
     };
   }
@@ -203,14 +195,12 @@ export class SavedObjectsClient {
    * @returns {promise} - { id, type, version, attributes }
    */
   async get(type, id) {
-    const response = await this._withKibanaIndex('search', { body: createIdQuery({ type, id }) });
-    const [hit] = get(response, 'hits.hits', []);
+    const response = await this._withKibanaIndex('get', {
+      type: V6_TYPE,
+      id: this._generateEsId(type, id)
+    });
 
-    if (!hit) {
-      throw Boom.notFound();
-    }
-
-    return normalizeEsDoc(hit);
+    return normalizeEsDoc(response);
   }
 
   /**
@@ -223,40 +213,19 @@ export class SavedObjectsClient {
    * @returns {promise}
    */
   async update(type, id, attributes, options = {}) {
-    const response = await this._withKibanaIndexAndMappingFallback('update', {
-      id,
-      type,
-      version: options.version,
-      refresh: 'wait_for',
-      body: {
-        doc: attributes
-      }
-    }, {
+    const response = await this._withKibanaIndex('update', {
       type: V6_TYPE,
+      id: this._generateEsId(type, id),
+      version: options.version,
       body: {
         doc: {
           [type]: attributes
         }
-      }
+      },
+      refresh: 'wait_for'
     });
 
-    return normalizeEsDoc(response, { id, type, attributes });
-  }
-
-  _withKibanaIndexAndMappingFallback(method, params, fallbackParams) {
-    const fallbacks = {
-      'create': ['is_single_type'],
-      'index': ['is_single_type'],
-      'update': ['document_missing_exception']
-    };
-
-    return this._withKibanaIndex(method, params).catch(err => {
-      if (get(fallbacks, method, []).includes(get(err, 'data.type'))) {
-        return this._withKibanaIndex(method, Object.assign({}, params, fallbackParams));
-      }
-
-      throw err;
-    });
+    return normalizeEsDoc(response, { type, id, attributes });
   }
 
   async _withKibanaIndex(method, params) {
@@ -268,5 +237,9 @@ export class SavedObjectsClient {
     } catch (err) {
       throw handleEsError(err);
     }
+  }
+
+  _generateEsId(type, id) {
+    return `${type}:${id || uuid.v1()}`;
   }
 }

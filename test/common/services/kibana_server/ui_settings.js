@@ -11,8 +11,8 @@ export class KibanaServerUiSettings {
     const { kibanaVersion } = this;
     return {
       index: '.kibana',
-      type: 'config',
-      id: await kibanaVersion.get()
+      type: 'doc',
+      id: `config:${await kibanaVersion.get()}`
     };
   }
 

@@ -25,5 +25,10 @@ export {
 } from './archives';
 
 export {
-  readDirectory
+  readDirectory,
+  findArchiveNames,
 } from './directory';
+
+export {
+  createConvertToV6Stream,
+} from './convert';
