@@ -32,12 +32,12 @@ export const RenderElementComponent = ({ renderFn, size, domNode, setDomNode, se
 const RenderElementLifecycle = lifecycle({
 
   componentDidUpdate(prevProps) {
-    const { events, config, domNode, size } = this.props;
+    const { events, config, domNode, size, renderFn } = this.props;
 
     // Config changes
-    if (!isEqual(config, prevProps.config)) {
+    if (!isEqual(config, prevProps.config) || !isEqual(renderFn, prevProps.renderFn)) {
       this.destroy();
-      return this.props.renderFn(domNode, events);
+      return renderFn(domNode, events);
     }
 
     // Size changes
@@ -51,8 +51,8 @@ const RenderElementLifecycle = lifecycle({
     // This should be fixed at a higher level.
     return !isEqual(this.props.config, nextProps.config) ||
       !isEqual(this.props.size, nextProps.size) ||
+      !isEqual(this.props.renderFn, nextProps.renderFn) ||
       !isEqual(this.props.css, nextProps.css);
-
   },
 
   componentWillUnmount() {
