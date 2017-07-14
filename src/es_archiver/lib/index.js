@@ -25,10 +25,5 @@ export {
 } from './archives';
 
 export {
-  readDirectory,
-  findArchiveNames,
+  readDirectory
 } from './directory';
-
-export {
-  createConvertToV6Stream,
-} from './convert';

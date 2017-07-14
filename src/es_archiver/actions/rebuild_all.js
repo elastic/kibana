@@ -14,15 +14,13 @@ import {
 import {
   prioritizeMappings,
   readDirectory,
-  findArchiveNames,
   isGzip,
   createParseArchiveStreams,
   createFormatArchiveStreams,
-  createConvertToV6Stream,
 } from '../lib';
 
 export async function rebuildAllAction({ dataDir, log }) {
-  const archiveNames = await findArchiveNames(dataDir);
+  const archiveNames = await readDirectory(dataDir);
 
   for (const name of archiveNames) {
     const inputDir = resolve(dataDir, name);
@@ -37,7 +35,6 @@ export async function rebuildAllAction({ dataDir, log }) {
       await createPromiseFromStreams([
         createReadStream(path),
         ...createParseArchiveStreams({ gzip }),
-        createConvertToV6Stream(),
         ...createFormatArchiveStreams({ gzip }),
         createWriteStream(tempFile),
       ]);

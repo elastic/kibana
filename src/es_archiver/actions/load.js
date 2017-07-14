@@ -2,7 +2,7 @@ import { resolve } from 'path';
 import { createReadStream } from 'fs';
 
 import {
-  createPromiseFromStreams,
+  createPromiseFromStreams
 } from '../../utils';
 
 import {
@@ -13,7 +13,6 @@ import {
   createParseArchiveStreams,
   createCreateIndexStream,
   createIndexDocRecordsStream,
-  createConvertToV6Stream,
 } from '../lib';
 
 export async function loadAction({ name, skipExisting, client, dataDir, log }) {
@@ -27,7 +26,6 @@ export async function loadAction({ name, skipExisting, client, dataDir, log }) {
     await createPromiseFromStreams([
       createReadStream(resolve(inputDir, filename)),
       ...createParseArchiveStreams({ gzip: isGzip(filename) }),
-      createConvertToV6Stream(),
       createCreateIndexStream({ client, stats, skipExisting }),
       createIndexDocRecordsStream(client, stats),
     ]);
