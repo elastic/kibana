@@ -46,6 +46,10 @@ cmd.command('rebuild-all')
   .description('[internal] read and write all archives in --dir to remove any inconsistencies')
   .action(() => execute('rebuildAll'));
 
+cmd.command('reindex <indices...>')
+  .description('load the archive in --dir with <name>')
+  .action(indices => execute('reindex', indices));
+
 cmd.parse(process.argv);
 
 const missingCommand = cmd.args.every(a => !(a instanceof Command));
