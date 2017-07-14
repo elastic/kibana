@@ -339,7 +339,7 @@ export class KibanaMap extends EventEmitter {
     return this._leafletMap.getBounds();
   }
 
-  getBounds(isTrimmed = true) {
+  getBounds() {
 
     const bounds = this._leafletMap.getBounds();
     if (!bounds) {
@@ -348,17 +348,8 @@ export class KibanaMap extends EventEmitter {
 
     const southEast = bounds.getSouthEast();
     const northWest = bounds.getNorthWest();
-    let southEastLng = southEast.lng;
-    let northWestLng = northWest.lng;
-    if (isTrimmed) {
-      if (southEastLng > 180) {
-        southEastLng = 180;
-      }
-      if (northWestLng < -180) {
-        northWestLng = -180;
-      }
-    }
-
+    const southEastLng = southEast.lng;
+    const northWestLng = northWest.lng;
     const southEastLat = southEast.lat;
     const northWestLat = northWest.lat;
 

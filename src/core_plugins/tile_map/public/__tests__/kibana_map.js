@@ -86,19 +86,7 @@ describe('kibana_map tests', function () {
       teardownDOM();
     });
 
-    it('should get trimmed bounds when isTrimmed is true', function () {
-      const bounds = kibanaMap.getBounds(true);
-      expect(bounds.bottom_right.lon).to.equal(180);
-      expect(bounds.top_left.lon).to.equal(-180);
-    });
-
-    it('should get trimmed bounds by default', function () {
-      const bounds = kibanaMap.getBounds();
-      expect(bounds.bottom_right.lon).to.equal(180);
-      expect(bounds.top_left.lon).to.equal(-180);
-    });
-
-    it('should get extended bounds when isTrimmed is false', function () {
+    it('should get map bounds', function () {
       const bounds = kibanaMap.getBounds(false);
       expect(bounds.bottom_right.lon).to.equal(281.25);
       expect(bounds.top_left.lon).to.equal(-281.25);
