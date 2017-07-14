@@ -1,5 +1,3 @@
-import { isString } from 'lodash';
-
 export class KibanaServerVersion {
   constructor(kibanaStatus) {
     this.kibanaStatus = kibanaStatus;
@@ -12,7 +10,7 @@ export class KibanaServerVersion {
     }
 
     const status = await this.kibanaStatus.get();
-    if (status && status.version && isString(status.version)) {
+    if (status && status.version && typeof status.version === 'string') {
       this._cachedVersionNumber = status.version;
       return this._cachedVersionNumber;
     }
