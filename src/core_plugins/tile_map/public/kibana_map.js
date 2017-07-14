@@ -102,6 +102,7 @@ export class KibanaMap extends EventEmitter {
       center: options.center ? options.center : [0, 0],
       zoom: options.zoom ? options.zoom : 2
     };
+    console.log('leaflet option', leafletOptions);
 
     this._leafletMap = L.map(containerNode, leafletOptions);
     this._leafletMap.attributionControl.setPrefix('');
