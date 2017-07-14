@@ -73,6 +73,9 @@ import { LoggerFactory } from './logger';
 
 export type ElasticsearchClusterType = 'data' | 'admin';
 
+// TODO This seems to create problems. Not sure about the "recommended
+// approach", though. Maybe it can just be an `interface` with `boolean`,
+// `object`, et al?
 export type Schema = typeof schemaLib;
 
 // TODO
