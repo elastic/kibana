@@ -22,8 +22,11 @@ module.exports = new Fn({
     },
   },
   fn: (context, args) => {
+    if (args.css.length === 0) args.css = '* > * {}';
     context.css = args.css;
+
     if (args.as) context.as = args.as;
+
     return context;
   },
 });

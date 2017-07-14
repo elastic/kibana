@@ -20,9 +20,7 @@ export const RenderElementComponent = ({ renderFn, size, domNode, setDomNode, se
     }
   };
 
-  const style = (css == null || css.length === 0) ? 'div {}' : css;
-
-  return Style.it(style,
+  return Style.it(css,
     <div className="canvas__workpad--element_render canvas__element">
       <div style={size} ref={renderElement} />
     </div>
