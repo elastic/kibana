@@ -8,10 +8,7 @@ const { BadRequest } = elasticsearch.errors;
 describe('SavedObjectsClient', () => {
   let callAdminCluster;
   let savedObjectsClient;
-  const illegalArgumentException = {
-    type: 'illegal_argument_exception',
-    reason: 'Rejecting mapping update to [.kibana-v6] as the final mapping would have more than 1 type: [doc, foo]'
-  };
+  const illegalArgumentException = { type: 'type_missing_exception' };
 
   describe('mapping', () => {
     beforeEach(() => {
@@ -25,7 +22,7 @@ describe('SavedObjectsClient', () => {
 
 
     describe('#create', () => {
-      it('falls back to v6 mapping', async () => {
+      it('falls back to single-type mapping', async () => {
         const error = new BadRequest('[illegal_argument_exception] Rejecting mapping update to [.kibana-v6]', {
           body: {
             error: illegalArgumentException
@@ -49,48 +46,66 @@ describe('SavedObjectsClient', () => {
           }
         });
       });
+
+      it('prepends id for single-type', async () => {
+        const id = 'foo';
+        const error = new BadRequest('[illegal_argument_exception] Rejecting mapping update to [.kibana-v6]', {
+          body: {
+            error: illegalArgumentException
+          }
+        });
+
+        callAdminCluster
+          .onFirstCall().throws(error)
+          .onSecondCall().returns(Promise.resolve());
+
+        await savedObjectsClient.create('index-pattern', {}, { id });
+
+        const [, args] = callAdminCluster.getCall(1).args;
+        expect(args.id).to.eql('index-pattern:foo');
+      });
     });
 
     describe('#bulkCreate', () => {
-      it('falls back to v6 mappings', async () => {
-        const firstResponse = {
-          errors: true,
-          items: [{
-            create: {
-              _type: 'config',
-              _id: 'one',
-              _version: 2,
-              status: 400,
-              error: illegalArgumentException
-            }
-          }, {
-            create: {
-              _type: 'index-pattern',
-              _id: 'two',
-              _version: 2,
-              status: 400,
-              error: illegalArgumentException
-            }
-          }]
-        };
+      const firstResponse = {
+        errors: true,
+        items: [{
+          create: {
+            _type: 'config',
+            _id: 'one',
+            _version: 2,
+            status: 400,
+            error: illegalArgumentException
+          }
+        }, {
+          create: {
+            _type: 'index-pattern',
+            _id: 'two',
+            _version: 2,
+            status: 400,
+            error: illegalArgumentException
+          }
+        }]
+      };
 
-        const secondResponse = {
-          errors: false,
-          items: [{
-            create: {
-              _type: 'config',
-              _id: 'one',
-              _version: 2
-            }
-          }, {
-            create: {
-              _type: 'index-pattern',
-              _id: 'two',
-              _version: 2
-            }
-          }]
-        };
+      const secondResponse = {
+        errors: false,
+        items: [{
+          create: {
+            _type: 'config',
+            _id: 'one',
+            _version: 2
+          }
+        }, {
+          create: {
+            _type: 'index-pattern',
+            _id: 'two',
+            _version: 2
+          }
+        }]
+      };
 
+      it('falls back to single-type mappings', async () => {
         callAdminCluster
           .onFirstCall().returns(Promise.resolve(firstResponse))
           .onSecondCall().returns(Promise.resolve(secondResponse));
@@ -116,23 +131,38 @@ describe('SavedObjectsClient', () => {
           }
         ]);
       });
+
+      it('prepends id for single-type', async () => {
+        callAdminCluster
+          .onFirstCall().returns(Promise.resolve(firstResponse))
+          .onSecondCall().returns(Promise.resolve(secondResponse));
+
+        await savedObjectsClient.bulkCreate([
+          { type: 'config', id: 'one', attributes: { title: 'Test One' } },
+          { type: 'index-pattern', id: 'two', attributes: { title: 'Test Two' } }
+        ]);
+
+        const [, { body }] = callAdminCluster.getCall(1).args;
+        expect(body[0].create._id).to.eql('config:one');
+        expect(body[2].create._id).to.eql('index-pattern:two');
+        // expect(args.id).to.eql('index-pattern:foo');
+      });
     });
 
     describe('update', () => {
-      it('falls back to v6 mappings', async () => {
-        const id = 'logstash-*';
-        const type = 'index-pattern';
-        const version = 2;
-        const attributes = { title: 'Testing' };
-
-        const error = new BadRequest('[document_missing_exception] [config][logstash-*]: document missing', {
-          body: {
-            error: {
-              type: 'document_missing_exception'
-            }
+      const id = 'logstash-*';
+      const type = 'index-pattern';
+      const version = 2;
+      const attributes = { title: 'Testing' };
+      const error = new BadRequest('[document_missing_exception] [config][logstash-*]: document missing', {
+        body: {
+          error: {
+            type: 'document_missing_exception'
           }
-        });
+        }
+      });
 
+      beforeEach(() => {
         callAdminCluster
           .onFirstCall().throws(error)
           .onSecondCall().returns(Promise.resolve({
@@ -141,7 +171,10 @@ describe('SavedObjectsClient', () => {
             _version: version,
             result: 'updated'
           }));
+      });
 
+
+      it('falls back to single-type mappings', async () => {
         const response = await savedObjectsClient.update('index-pattern', 'logstash-*', attributes);
         expect(response).to.eql({
           id,
@@ -149,6 +182,13 @@ describe('SavedObjectsClient', () => {
           version,
           attributes
         });
+      });
+
+      it('prepends id for single-type', async () => {
+        await savedObjectsClient.update('index-pattern', 'logstash-*', attributes);
+
+        const [, args] = callAdminCluster.getCall(1).args;
+        expect(args.id).to.eql('index-pattern:logstash-*');
       });
     });
   });

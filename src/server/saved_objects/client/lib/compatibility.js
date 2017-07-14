@@ -1,3 +1,4 @@
+import uuid from 'uuid';
 import { V6_TYPE } from '../saved_objects_client';
 
 /**
@@ -29,7 +30,7 @@ export function v6BulkCreate(objects, options = {}) {
 
     acc.push({ [method]: {
       _type: V6_TYPE,
-      _id: object.id ? `${object.type}:${object.id}` : undefined
+      _id: `${object.type}:${object.id || uuid.v1()}`,
     } });
 
     acc.push(Object.assign({},
