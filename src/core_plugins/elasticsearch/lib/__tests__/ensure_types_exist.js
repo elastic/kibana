@@ -1,22 +1,29 @@
 import expect from 'expect.js';
 import sinon from 'sinon';
-import { cloneDeep } from 'lodash';
+import { times, cloneDeep } from 'lodash';
 import Chance from 'chance';
 
 import { ensureTypesExist } from '../ensure_types_exist';
+import { getTypesFromMappings } from '../get_types_from_mappings';
+import { MappingsCollection } from '../../../../ui/ui_mappings';
 
 const chance = new Chance();
 
 function createRandomTypes(n = chance.integer({ min: 10, max: 20 })) {
-  return chance.n(
-    () => ({
-      name: chance.word(),
-      mapping: {
+  // using the actual MappingsCollection so that we can be sure that
+  // we're testing the actual data that will come from it. Not doing
+  // this caused a bug, so jsut trying to cover my butt
+  const uiMappings = new MappingsCollection();
+
+  times(n, () => {
+    uiMappings.register({
+      [chance.word()]: {
         type: chance.pickone(['keyword', 'text', 'integer', 'boolean'])
-      }
-    }),
-    n
-  );
+      },
+    });
+  });
+
+  return getTypesFromMappings(uiMappings.getCombined());
 }
 
 function typesToMapping(types) {

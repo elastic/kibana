@@ -8,6 +8,7 @@ import { ensureEsVersion } from './ensure_es_version';
 import { ensureNotTribe } from './ensure_not_tribe';
 import { ensureAllowExplicitIndex } from './ensure_allow_explicit_index';
 import { ensureTypesExist } from './ensure_types_exist';
+import { getTypesFromMappings } from './get_types_from_mappings';
 
 const NoConnections = elasticsearch.errors.NoConnections;
 import util from 'util';
@@ -103,7 +104,7 @@ export default function (plugin, server, { mappings }) {
         callCluster: callAdminAsKibanaUser,
         log: (...args) => server.log(...args),
         indexName: config.get('kibana.index'),
-        types: Object.keys(mappings).map(name => ({ name, mapping: mappings[name] }))
+        types: getTypesFromMappings(mappings)
       }))
       .then(_.partial(migrateConfig, server, { mappings }))
       .then(() => {
