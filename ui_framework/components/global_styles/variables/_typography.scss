@@ -1,0 +1,25 @@
+// Font
+
+// Families
+$kuiFontFamily: "Roboto", Helvetica, Arial, sans-serif;
+$kuiCodeFontFamily: "Roboto Mono", monospace;
+
+// Font sizes
+$kuiFontSize:       $kuiSize;
+
+$kuiFontSizeXS:     12px;
+$kuiFontSizeS:      14px;
+$kuiFontSizeM:      $kuiFontSize;
+$kuiFontSizeL:      24px;
+$kuiFontSizeXL:     32px;
+$kuiFontSizeXXL:    48px;
+
+// Line height
+
+$kuiLineHeight: 1.5 * $kuiFontSize;
+
+// Font weights
+
+$kuiFontWeightLight:    300;
+$kuiFontWeightRegular:  400;
+$kuiFontWeightMedium:   500;
