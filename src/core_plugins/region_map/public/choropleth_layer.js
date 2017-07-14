@@ -15,6 +15,7 @@ export default class ChoroplethLayer extends KibanaMapLayer {
     this._colorRamp = truncatedColorMaps[Object.keys(truncatedColorMaps)[0]];
     this._tooltipFormatter = () => '';
     this._attribution = attribution;
+    this._boundsOfData = null;
 
     this._geojsonUrl = geojsonUrl;
     this._leafletLayer = L.geoJson(null, {
@@ -75,6 +76,8 @@ export default class ChoroplethLayer extends KibanaMapLayer {
       const quantizeDomain = (min !== max) ? [min, max] : d3.scale.quantize().domain();
       this._legendQuantizer = d3.scale.quantize().domain(quantizeDomain).range(this._legendColors);
     }
+
+    this._boundsOfData = styler.getLeafletBounds();
     this.emit('styleChanged', {
       mismatches: styler.getMismatches()
     });
@@ -130,6 +133,11 @@ export default class ChoroplethLayer extends KibanaMapLayer {
 
   equalsGeoJsonUrl(geojsonUrl) {
     return this._geojsonUrl === geojsonUrl;
+  }
+
+  getBounds() {
+    const bounds = super.getBounds();
+    return (this._boundsOfData) ? this._boundsOfData  : bounds;
   }
 
   appendLegendContents(jqueryDiv) {
@@ -193,12 +201,18 @@ function makeChoroplethStyler(data, colorramp, joinField) {
       },
       getMismatches: function () {
         return [];
+      },
+      getLeafletBounds: function () {
+        return null;
       }
     };
   }
 
   const { min, max } = getMinMax(data);
   const outstandingFeatures = data.slice();
+
+
+  const joinedShapes = [];
   return {
     getLeafletStyleFunction: function (geojsonFeature) {
       let lastIndex = -1;
@@ -212,6 +226,7 @@ function makeChoroplethStyler(data, colorramp, joinField) {
       }
 
       outstandingFeatures.splice(lastIndex, 1);
+      joinedShapes.push(geojsonFeature);
       return {
         fillColor: getChoroplethColor(match.value, min, max, colorramp),
         weight: 2,
@@ -226,6 +241,21 @@ function makeChoroplethStyler(data, colorramp, joinField) {
      */
     getMismatches: function () {
       return outstandingFeatures.map((bucket) => bucket.term);
+    },
+    getLeafletBounds: function () {
+
+      if (!joinedShapes.length) {
+        return null;
+      }
+
+      const bounds = L.geoJson(joinedShapes[0]).getBounds();
+      for (let i = 1; i <  joinedShapes.length; i++) {
+        const otherBounds = L.geoJson(joinedShapes[i]).getBounds();
+        bounds.extend(otherBounds);
+      }
+      return bounds;
+
+
     }
   };
 
