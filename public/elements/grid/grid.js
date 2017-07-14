@@ -6,8 +6,7 @@ import header from './header.png';
 import { min, max, get } from 'lodash';
 import chroma from 'chroma-js';
 
-module.exports = new Element({
-  name: 'grid',
+module.exports = new Element('grid', {
   displayName: 'Grid',
   description: 'A colorable, sizable, grid for displaying a point series',
   image: header,

@@ -3,7 +3,7 @@ export function Element(name, config) {
   this.name = name;
 
   // Use this to set a more friendly name
-  this.displayName = config.displayName || config.name;
+  this.displayName = config.displayName || name;
 
   // An image to use in the element type selector
   this.image = config.image;
