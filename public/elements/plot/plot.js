@@ -26,7 +26,7 @@ module.exports = new Element('plot', {
     }
 
     function destroy() {
-      plot.destroy();
+      plot.shutdown();
     }
 
     events.on('destroy', destroy);
