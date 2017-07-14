@@ -105,6 +105,7 @@ export class KibanaMap extends EventEmitter {
     };
 
     this._leafletMap = L.map(containerNode, leafletOptions);
+    this._leafletMap.attributionControl.setPrefix('');
     this._leafletMap.scrollWheelZoom.disable();
     const worldBounds = L.latLngBounds(L.latLng(-90, -180), L.latLng(90, 180));
     this._leafletMap.setMaxBounds(worldBounds);
@@ -234,18 +235,48 @@ export class KibanaMap extends EventEmitter {
     this._layers.push(kibanaLayer);
     kibanaLayer.addToLeafletMap(this._leafletMap);
     this.emit('layers:update');
+
+    this._addAttributions(kibanaLayer.getAttributions());
   }
 
-  removeLayer(layer) {
-    const index = this._layers.indexOf(layer);
+  removeLayer(kibanaLayer) {
+
+    if (!kibanaLayer) {
+      return;
+    }
+
+    this._removeAttributions(kibanaLayer.getAttributions());
+    const index = this._layers.indexOf(kibanaLayer);
     if (index >= 0) {
       this._layers.splice(index, 1);
-      layer.removeFromLeafletMap(this._leafletMap);
+      kibanaLayer.removeFromLeafletMap(this._leafletMap);
     }
     this._listeners.forEach(listener => {
-      if (listener.layer === layer) {
+      if (listener.layer === kibanaLayer) {
         listener.layer.removeListener(listener.name, listener.handle);
       }
+    });
+
+    //must readd all attributions, because we might have removed dupes
+    this._layers.forEach((layer) => this._addAttributions(layer.getAttributions()));
+    if (this._baseLayerSettings) {
+      this._addAttributions(this._baseLayerSettings.options.attribution);
+    }
+  }
+
+
+  _addAttributions(attribution) {
+    const attributions = getAttributionArray(attribution);
+    attributions.forEach((attribution) => {
+      this._leafletMap.attributionControl.removeAttribution(attribution);//this ensures we do not add duplicates
+      this._leafletMap.attributionControl.addAttribution(attribution);
+    });
+  }
+
+  _removeAttributions(attribution) {
+    const attributions = getAttributionArray(attribution);
+    attributions.forEach((attribution) => {
+      this._leafletMap.attributionControl.removeAttribution(attribution);//this ensures we do not add duplicates
     });
   }
 
@@ -425,15 +456,18 @@ export class KibanaMap extends EventEmitter {
       return;
     }
 
-    this._baseLayerSettings = settings;
+
     if (settings === null) {
       if (this._leafletBaseLayer && this._leafletMap) {
+        this._removeAttributions(this._baseLayerSettings.options.attribution);
         this._leafletMap.removeLayer(this._leafletBaseLayer);
         this._leafletBaseLayer = null;
+        this._baseLayerSettings = null;
       }
       return;
     }
 
+    this._baseLayerSettings = settings;
     if (this._leafletBaseLayer) {
       this._leafletMap.removeLayer(this._leafletBaseLayer);
       this._leafletBaseLayer = null;
@@ -461,6 +495,7 @@ export class KibanaMap extends EventEmitter {
       if (settings.options.minZoom > this._leafletMap.getZoom()) {
         this._leafletMap.setZoom(settings.options.minZoom);
       }
+      this._addAttributions(settings.options.attribution);
       this.resize();
     }
 
@@ -496,14 +531,12 @@ export class KibanaMap extends EventEmitter {
     return L.tileLayer(options.url, {
       minZoom: options.minZoom,
       maxZoom: options.maxZoom,
-      subdomains: options.subdomains || [],
-      attribution: options.attribution
+      subdomains: options.subdomains || []
     });
   }
 
   _getWMSBaseLayer(options) {
     const wmsOptions = {
-      attribution: options.attribution || '',
       format: options.format || '',
       layers: options.layers || '',
       minZoom: options.minZoom,
@@ -561,4 +594,13 @@ export class KibanaMap extends EventEmitter {
   }
 }
 
+
+function getAttributionArray(attribution) {
+  const attributionString = attribution || '';
+  let attributions = attributionString.split('|');
+  if (attributions.length === 1) {//temp work-around due to inconsistency in manifests of how attributions are delimited
+    attributions = attributions[0].split(',');
+  }
+  return attributions;
+}
 
