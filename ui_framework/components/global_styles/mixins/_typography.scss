@@ -1,3 +1,8 @@
+// Some mixins that help us deal with browser scaling of text more consistantly.
+// Essentially, fonts across kui should scale agains the root html element, not
+// against parent inheritance.
+
+
 // Typography mixins
 
 @function convertToRem($size) {
