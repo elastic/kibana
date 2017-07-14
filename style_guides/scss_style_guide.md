@@ -14,3 +14,7 @@ Our style guide is an extension of [Sass Guidelines by Hugo Giraudel](https://sa
 
 The Sass Guidelines site recommends using RBG and HSL values to format colors, but we're using
 hex values.
+
+## Dealing with extends
+
+Don't extend classes. The only time use should use an extend is when you are extending a placeholder. Even then, do it rarely and only for code maintainability.
