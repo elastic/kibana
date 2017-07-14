@@ -49,7 +49,7 @@ const RenderElementLifecycle = lifecycle({
     // This should be fixed at a higher level.
     return !isEqual(this.props.config, nextProps.config) ||
       !isEqual(this.props.size, nextProps.size) ||
-      !isEqual(this.props.renderFn, nextProps.renderFn) ||
+      !isEqual(this.props.renderFn.toString(), nextProps.renderFn.toString()) ||
       !isEqual(this.props.css, nextProps.css);
   },
 
