@@ -24,7 +24,6 @@ module.exports = new Fn({
   fn: (context, args) => {
     context.css = args.css;
     if (args.as) context.as = args.as;
-    console.log(context);
     return context;
   },
 });
