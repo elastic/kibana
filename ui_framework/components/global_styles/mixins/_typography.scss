@@ -1,7 +1,7 @@
 // Typography mixins
 
 @function convertToRem($size) {
-  @return #{$size / $default-font-size}rem;
+  @return #{$size / $kuiFontSize}rem;
 }
 
 // Spit out rem and px
