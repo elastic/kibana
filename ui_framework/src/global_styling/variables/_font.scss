@@ -1,9 +1,16 @@
 // Font
 
-$globalFontFamily: "Open Sans", Helvetica, Arial, sans-serif;
-$globalFontSize: 14px;
-$globalLineHeight: 1.5;
-$globalSubTextFontSize: 12px;
-$globalTitleFontSize: 18px;
-$globalFontWeightRegular: 400;
-$globalFontWeightBold: 700;
+$kuiFontFamily: Roboto, Helvetica, Arial, sans-serif;
+$kuiCodeFontFamily: "Roboto Mono", monospace;
+
+$kuiLineHeight: 1.5;
+
+$kuiFontSize:       $kuiSize;
+$kuiFontSizeXS:     $kuiSize;
+$kuiFontSizeS:      $kuiSize;
+$kuiFontSizeM:      $kuiSize;
+$kuiFontSizeL:      $kuiSize;
+$kuiFontSizeXL:     $kuiSize;
+$kuiFontSizeXXL:    $kuiSize;
+
+
