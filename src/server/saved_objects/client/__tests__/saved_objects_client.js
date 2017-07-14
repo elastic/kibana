@@ -169,22 +169,29 @@ describe('SavedObjectsClient', () => {
     });
 
     it('should overwrite objects if overwrite is truthy', async () => {
-      await savedObjectsClient.bulkCreate([
-        { type: 'config', id: 'one', attributes: { title: 'Test One' } },
-        { type: 'index-pattern', id: 'two', attributes: { title: 'Test Two' } }
-      ], { overwrite: true });
+      await savedObjectsClient.bulkCreate([{ type: 'foo', id: 'bar', attributes: {} }], { overwrite: false });
+      sinon.assert.calledOnce(callAdminCluster);
+      sinon.assert.calledWithExactly(callAdminCluster, 'bulk', sinon.match({
+        body: [
+          // uses create because overwriting is not allowed
+          { create: { _type: 'doc', _id: 'foo:bar' } },
+          { type: 'foo', 'foo': {} },
+        ]
+      }));
 
-      expect(callAdminCluster.calledOnce).to.be(true);
+      callAdminCluster.reset();
 
-      const args = callAdminCluster.getCall(0).args;
+      await savedObjectsClient.bulkCreate([{ type: 'foo', id: 'bar', attributes: {} }], { overwrite: true });
+      sinon.assert.calledOnce(callAdminCluster);
+      sinon.assert.calledWithExactly(callAdminCluster, 'bulk', sinon.match({
+        body: [
+          // uses index because overwriting is allowed
+          { index: { _type: 'doc', _id: 'foo:bar' } },
+          { type: 'foo', 'foo': {} },
+        ]
+      }));
 
-      expect(args[0]).to.be('bulk');
-      expect(args[1].body).to.eql([
-        { index: { _type: 'doc', _id: 'config:one' } },
-        { type: 'config', 'config': { title: 'Test One' } },
-        { index: { _type: 'doc', _id: 'index-pattern:two' } },
-        { type: 'index-pattern', 'index-pattern': { title: 'Test Two' } }
-      ]);
+
     });
 
     it('returns document errors', async () => {

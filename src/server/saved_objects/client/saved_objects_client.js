@@ -48,40 +48,46 @@ export class SavedObjectsClient {
    *
    * @param {array} objects - [{ type, id, attributes }]
    * @param {object} [options={}]
-   * @property {boolean} [options.force=false] - overrides existing documents
+   * @property {boolean} [options.overwrite=false] - overwrites existing documents
    * @returns {promise} - [{ id, type, version, attributes, error: { message } }]
    */
   async bulkCreate(objects, options = {}) {
-    const body = objects.reduce((acc, object) => {
-      const method = object.id && !options.overwrite ? 'create' : 'index';
+    const {
+      overwrite = false
+    } = options;
 
-      acc.push({ [method]: {
-        _type: V6_TYPE,
-        _id: this._generateEsId(object.type, object.id)
-      } });
+    const objectToBulkRequest = (object) => {
+      const method = object.id && !overwrite ? 'create' : 'index';
 
-      acc.push(Object.assign({},
-        { type: object.type },
-        { [object.type]: object.attributes }
-      ));
+      return [
+        {
+          [method]: {
+            _type: V6_TYPE,
+            _id: this._generateEsId(object.type, object.id)
+          }
+        },
+        {
+          type: object.type,
+          [object.type]: object.attributes
+        }
+      ];
+    };
 
-      return acc;
-    }, []);
-
-    const response = await this._withKibanaIndex('bulk', {
-      body,
-      refresh: 'wait_for'
+    const { items } = await this._withKibanaIndex('bulk', {
+      refresh: 'wait_for',
+      body: objects.reduce((acc, object) => acc.concat(objectToBulkRequest(object)), []),
     });
 
-    return get(response, 'items', []).map((resp, i) => {
-      const method = Object.keys(resp)[0];
-      const { id, type, attributes } = objects[i];
+    return items.map((itemWrapper, i) => {
+      const method = Object.keys(itemWrapper)[0];
+      const item = itemWrapper[method];
 
-      return normalizeEsDoc(resp[method], {
+      const { id, type, attributes } = objects[i];
+      return normalizeEsDoc(item, {
         id,
         type,
         attributes,
-        error: resp[method].error ? { message: get(resp[method], 'error.reason') } : undefined
+        error: item.error ? { message: item.error.reason } : undefined
       });
     });
   }
