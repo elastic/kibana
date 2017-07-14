@@ -17,4 +17,4 @@ hex values.
 
 ## Dealing with extends
 
-You should try never to use the extends functionality in sass. The one exception is when you are extending placeholders to help control maintainabilty. General rule: if it creates an additive selector, it's usually a bad usage of extends.
+Don't extend classes. The only time use should use an extend is when you are extending a placeholder. Even then, do it rarely and only for code maintainability.
