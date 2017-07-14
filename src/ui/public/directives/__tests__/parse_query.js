@@ -66,11 +66,11 @@ describe('parse-query directive', function () {
       expect(fromUser({ foo: 'bar' })).to.eql({ foo: 'bar' });
     });
 
-    it('unless the object is empty, that implies a *', function () {
+    it('should treat an empty object as matching all documents', function () {
       expect(fromUser({})).to.eql({ match_all: {} });
     });
 
-    it('should treat an empty string as a *', function () {
+    it('should treat an empty string as matching all documents', function () {
       expect(fromUser('')).to.eql({ match_all: {} });
     });
 
