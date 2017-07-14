@@ -87,6 +87,22 @@ describe('normalizeEsDoc', () => {
     });
   });
 
+  it('handles unprefixes ids with prefix somewhere inside', () => {
+    const doc = {
+      _type: 'doc',
+      _id: 'group foo: bar',
+      _version: 2,
+      _source: { type: 'foo', foo: { name: 'group foo: bar' } }
+    };
+
+    expect(normalizeEsDoc(doc)).to.eql({
+      id: 'group foo: bar',
+      type: 'foo',
+      version: 2,
+      attributes: { name: 'group foo: bar' }
+    });
+  });
+
   it('handles legacy doc having an attribute the same as type', () => {
     const doc = {
       _id: 'foo',

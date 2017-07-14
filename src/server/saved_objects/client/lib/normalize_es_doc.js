@@ -1,29 +1,34 @@
-import { get } from 'lodash';
 import { V6_TYPE } from '../saved_objects_client';
 
-export function normalizeEsDoc(doc, overrides = {}) {
-  if (!doc) return {};
-
-  let type;
-  let id =  doc._id;
-  let attributes;
-
-  if (doc._type === V6_TYPE) {
-    type = overrides.type || get(doc, '_source.type');
-    attributes = get(doc, `_source.${type}`);
-
-    // migrated v5 indices and objects created with a specified ID
-    // have the type prefixed to the id.
-    id = doc._id.replace(`${type}:`, '');
+function removeFromStart(string, value) {
+  if (string.startsWith(value)) {
+    return string.slice(value.length);
   } else {
-    type = overrides.type || doc._type;
-    attributes = doc._source;
+    return string;
+  }
+}
+
+export function normalizeEsDoc(doc, overrides = {}) {
+  if (!doc) {
+    return {};
   }
 
-  return Object.assign({}, {
-    id,
-    type,
+  if (doc._type === V6_TYPE) {
+    const type = doc._source.type;
+    return {
+      id: removeFromStart(doc._id, `${type}:`),
+      type: type,
+      version: doc._version,
+      attributes: doc._source[type],
+      ...overrides
+    };
+  }
+
+  return {
+    id: doc._id,
+    type: doc._type,
     version: doc._version,
-    attributes
-  }, overrides);
+    attributes: doc._source,
+    ...overrides
+  };
 }
