@@ -1,11 +1,11 @@
 import Boom from 'boom';
+import uuid from 'uuid';
 import { get } from 'lodash';
 
 import {
   createFindQuery,
   createIdQuery,
   handleEsError,
-  isSingleTypeError,
   v5BulkCreate,
   v6BulkCreate,
   normalizeEsDoc,
@@ -40,7 +40,7 @@ export class SavedObjectsClient {
       refresh: 'wait_for'
     }, {
       type: V6_TYPE,
-      id: options.id ? `${type}:${options.id}` : undefined,
+      id: `${type}:${options.id || uuid.v1()}`,
       body: {
         type,
         [type]: attributes
@@ -71,7 +71,7 @@ export class SavedObjectsClient {
     const items = get(response, 'items', []);
     const missingTypesCount = items.filter(item => {
       const method = Object.keys(item)[0];
-      return isSingleTypeError(get(item, `${method}.error`));
+      return get(item, `${method}.error.type`) === 'type_missing_exception';
     }).length;
 
     const formatFallback = format === 'v5' && items.length > 0 && items.length === missingTypesCount;
@@ -82,10 +82,10 @@ export class SavedObjectsClient {
 
     return get(response, 'items', []).map((resp, i) => {
       const method = Object.keys(resp)[0];
-      const { id, type, attributes } = objects[i];
+      const { type, attributes } = objects[i];
 
       return normalizeEsDoc(resp[method], {
-        id,
+        id: resp[method]._id,
         type,
         attributes,
         error: resp[method].error ? { message: get(resp[method], 'error.reason') } : undefined
@@ -233,6 +233,7 @@ export class SavedObjectsClient {
       }
     }, {
       type: V6_TYPE,
+      id: `${type}:${id}`,
       body: {
         doc: {
           [type]: attributes
@@ -245,8 +246,8 @@ export class SavedObjectsClient {
 
   _withKibanaIndexAndMappingFallback(method, params, fallbackParams) {
     const fallbacks = {
-      'create': ['is_single_type'],
-      'index': ['is_single_type'],
+      'create': ['type_missing_exception'],
+      'index': ['type_missing_exception'],
       'update': ['document_missing_exception']
     };
 
