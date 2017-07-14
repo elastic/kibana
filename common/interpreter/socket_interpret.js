@@ -13,9 +13,7 @@ import { interpretProvider } from './interpret';
   socket: the socket to communicate over
 */
 
-export function socketInterpreterProvider(config) {
-  const { types, functions, referableFunctions, socket } = config;
-
+export function socketInterpreterProvider({ types, functions, referableFunctions, socket }) {
   // Return the interpet() function
   return interpretProvider({
     types: types,
@@ -33,26 +31,28 @@ export function socketInterpreterProvider(config) {
         // resolving multiple expressions
         const id = uuid();
 
-        // Go run the remaining AST and context somewhere else, meaning either the browser or the server, depending on
-        // where this file was loaded
-        socket.emit('run', { ast: chain, context: context, id: id });
-
         return new Promise((resolve, reject) => {
-          const listener = resp => {
-
+          const listener = (resp) => {
             // Resolve or reject the promise once we get our ID back
             if (resp.id === id) {
               socket.removeListener('resp', listener);
 
-              if (resp.value) {
-                resolve(resp.value);
+              if (resp.error) {
+                // cast error strings back into error instances
+                const err = (resp.error instanceof Error) ? resp.error : new Error(resp.error);
+                if (resp.stack) err.stack = resp.stack;
+                reject(err);
               } else {
-                reject(resp.error);
+                resolve(resp.value);
               }
             }
           };
 
           socket.on('resp', listener);
+
+          // Go run the remaining AST and context somewhere else, meaning either the browser or the server, depending on
+          // where this file was loaded
+          socket.emit('run', { ast: chain, context: context, id: id });
         });
       });
     },

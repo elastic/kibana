@@ -4,9 +4,9 @@ import { FormGroup, ControlLabel, FormControl } from 'react-bootstrap';
 import { get } from 'lodash';
 import { Datasource } from '../datasource';
 
-const template = ({ args, onUpdate }) => {
+const template = ({ args, updateArgs }) => {
   const updateBucket = ({ target }) => {
-    onUpdate({
+    updateArgs && updateArgs({
       ...args,
       bucket: [{
         type: 'string',
@@ -37,7 +37,7 @@ const template = ({ args, onUpdate }) => {
 
 template.propTypes = {
   args: PropTypes.object.isRequired,
-  onUpdate: PropTypes.func.isRequired,
+  updateArgs: PropTypes.func,
 };
 
 export const demoprices = () => new Datasource('demoprices', {

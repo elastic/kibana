@@ -1,6 +1,6 @@
 import { createAction } from 'redux-actions';
 import { get, omit } from 'lodash';
-import { assign } from 'object-path-immutable';
+import { assign, set } from 'object-path-immutable';
 import { notify } from '../../lib/notify';
 import { getSelectedElement, getElementById, getPages } from '../selectors/workpad';
 import { getDefaultElement } from '../defaults';
@@ -20,7 +20,6 @@ function astToExpression({ ast, element, pageId }) {
 
 export const removeElement = createAction('removeElement', (elementId, pageId) => ({ pageId, elementId }));
 export const setPosition = createAction('setPosition', (elementId, pageId, position) => ({ pageId, elementId, position }));
-
 
 export const fetchContext = ({ index }) => (dispatch, getState) => {
   const element = getSelectedElement(getState());
@@ -80,6 +79,13 @@ export const fetchRenderable = (elementId, pageId) => (dispatch, getState) => {
       path: argumentPath,
       value: renderable,
     }));
+  })
+  .catch((err) => {
+    notify.error(err);
+    dispatch(args.setValue({
+      path: argumentPath,
+      value: err,
+    }));
   });
 };
 
@@ -92,20 +98,27 @@ export const fetchAllRenderables = () => (dispatch, getState) => {
   });
 };
 
-export const setExpression = payload => dispatch => {
+export const setExpression = payload => (dispatch) => {
   const _setExpression = createAction('setExpression');
   dispatch(_setExpression(payload));
   dispatch(fetchRenderable(payload.element.id, payload.pageId));
 };
 setExpression.toString = () => 'setExpression';
 
-export const setAst = payload => dispatch => {
+export const setAst = payload => (dispatch) => {
   dispatch(setExpression(astToExpression(payload)));
 };
 
 // index here is the top-level argument in the expression. for example in the expression
 // demodata().pointseries().plot(), demodata is 0, pointseries is 1, and plot is 2
-export const setArgumentAtIndex = ({ index, arg, element, pageId }) => dispatch => {
+export const setAstAtIndex = ({ index, ast, element, pageId }) => (dispatch) => {
+  const newElement = set(element, ['ast', 'chain', index], ast);
+  dispatch(setExpression(astToExpression({ ast: get(newElement, 'ast'), element, pageId })));
+};
+
+// index here is the top-level argument in the expression. for example in the expression
+// demodata().pointseries().plot(), demodata is 0, pointseries is 1, and plot is 2
+export const setArgumentAtIndex = ({ index, arg, element, pageId }) => (dispatch) => {
   const newElement = assign(element, ['ast', 'chain', index, 'arguments'], arg);
   dispatch(setExpression(astToExpression({ ast: get(newElement, 'ast'), element, pageId })));
 };
@@ -113,7 +126,7 @@ export const setArgumentAtIndex = ({ index, arg, element, pageId }) => dispatch 
 /*
   payload: element defaults. Eg {expression: 'foo()'}
 */
-export const addElement = (element, pageId) => dispatch => {
+export const addElement = (element, pageId) => (dispatch) => {
   const newElement = Object.assign({}, getDefaultElement(), omit(element, 'id'));
   const _addElement = createAction('addElement', () => ({ pageId, element: newElement }));
   dispatch(_addElement());

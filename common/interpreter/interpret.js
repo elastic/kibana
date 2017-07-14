@@ -8,6 +8,8 @@ export function interpretProvider(config) {
   const functions = config.functions;
   const onFunctionNotFound = config.onFunctionNotFound;
 
+  return interpret;
+
   function interpret(node, context = null) {
     const nodeType = getType(node);
 
@@ -42,9 +44,15 @@ export function interpretProvider(config) {
     .then((resolvedArgs) => {
       return invokeFunction(name, context, resolvedArgs) // Then invoke function with resolved arguments
       .then(newContext => invokeChain(chain, newContext)) // Continue re-invoking chain until its empty
-      .catch(e => console.log('Function rejected', e));
+      .catch(e => {
+        console.log('Function rejected');
+        throw e;
+      });
     })
-    .catch(e => console.log('Args rejected', e));
+    .catch(e => {
+      console.log('Args rejected', e);
+      throw e;
+    });
   }
 
   function invokeFunction(name, context, args) {
@@ -113,6 +121,4 @@ export function interpretProvider(config) {
       });
     });
   }
-
-  return interpret;
 }

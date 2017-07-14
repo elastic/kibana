@@ -27,10 +27,17 @@ export function socketApi(server) {
 
         return interpret(msg.ast, msg.context)
         .then(resp => {
-          socket.emit('resp', { value: resp, id: msg.id });
+          socket.emit('resp', {
+            id: msg.id,
+            value: resp,
+          });
         })
         .catch(e => {
-          socket.emit('resp', { error: e, id: msg.id });
+          socket.emit('resp', {
+            id: msg.id,
+            error: e.message,
+            stack: e.stack,
+          });
         });
       });
     };

@@ -5,11 +5,15 @@ import { ArgTypeUnknown } from './arg_type_unknown';
 import { ArgTypeContextPending } from './arg_type_context_pending';
 import { ArgTypeContextError } from './arg_type_context_error';
 
+function requiresContext(expressionType) {
+  return Boolean(expressionType && expressionType.requiresContext);
+}
+
 // helper to check the state of the passed in expression type
 function checkState(state) {
   return ({ context, expressionType }) => {
     const matchState = (!context || context.state === state);
-    return Boolean(expressionType && expressionType.requiresContext) && matchState;
+    return requiresContext(expressionType) && matchState;
   };
 }
 
@@ -23,9 +27,9 @@ const branches = [
 ];
 
 // dispatch context update if none is provided
-const fetchContext = (props) => {
+const fetchContext = (props, force = false) => {
   const { expressionType, context, updateContext } = props;
-  if (context == null && Boolean(expressionType && expressionType.requiresContext)) {
+  if (force || (context == null && requiresContext(expressionType))) {
     updateContext();
   }
 };
@@ -35,7 +39,9 @@ const contextLifecycle = lifecycle({
     fetchContext(this.props);
   },
   componentWillReceiveProps(newProps) {
-    fetchContext(newProps);
+    const oldContext = this.props.contextExpression;
+    const newContext = newProps.contextExpression;
+    fetchContext(newProps, oldContext !== newContext);
   },
 });
 
@@ -47,5 +53,6 @@ export const ArgType = compose(
 ArgType.propTypes = {
   expressionType: PropTypes.object,
   context: PropTypes.object,
+  contextExpression: PropTypes.object,
   updateContext: PropTypes.func,
 };

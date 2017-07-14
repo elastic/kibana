@@ -3,14 +3,15 @@ import { get } from 'lodash';
 import { ArgTypes as Component } from './arg_types';
 import { modelRegistry, viewRegistry } from '../../expression_types';
 import { getSelectedElement } from '../../state/selectors/workpad';
+import { toExpression } from '../../../common/lib/ast';
 
-function wrapExpression(chain) {
+function getExpression(chain) {
   if (!Array.isArray(chain) || !chain.length) return null;
 
-  return {
+  return toExpression({
     type: 'expression',
     chain,
-  };
+  });
 }
 
 const mapStateToProps = (state) => {
@@ -30,8 +31,8 @@ const mapStateToProps = (state) => {
         args: argType.arguments,
         argType: argType.function,
         nextArgType: nextArg && nextArg.function,
-        expression: wrapExpression(prevContext),
-        expressionIndex: i,
+        contextExpression: getExpression(prevContext),
+        expressionIndex: i, // preserve the index in the AST
       };
 
       acc.mapped.push(component);

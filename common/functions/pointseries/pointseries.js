@@ -31,7 +31,8 @@ function isMeasure(mathScope, mathExpression) {
 
 function getFieldType(columns, field) {
   if (!field) return 'null';
-  return find(columns, { name: field }).type;
+  const column = find(columns, { name: field });
+  return column ? column.type : 'null';
 }
 
 function getType(columns, mathExpression) {
@@ -102,8 +103,13 @@ module.exports = new Fn({
     // There's probably a better way to do this
     const results = context.rows.reduce((acc, row, i) => {
       const newRow = dimensionNames.reduce((acc, dimension) => {
-        const val = args[dimension];
-        acc[dimension] = val ? normalizeValue(val, math.eval(val, mathScope)[i]) : '_all';
+        const colName = args[dimension];
+        try {
+          acc[dimension] = colName ? normalizeValue(colName, math.eval(colName, mathScope)[i]) : '_all';
+        } catch (e) {
+          // TODO: handle invalid column names...
+          acc[dimension] = '_all';
+        }
         return acc;
       }, { _rowId: row._rowId });
 

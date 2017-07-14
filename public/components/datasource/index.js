@@ -1,11 +1,12 @@
+import { PropTypes } from 'prop-types';
 import { connect } from 'react-redux';
-import { withState, compose } from 'recompose';
+import { withState, withHandlers, compose } from 'recompose';
 import { get } from 'lodash';
 import { Datasource as Component } from './datasource';
 import { datasourceRegistry } from '../../expression_types';
 import { getSelectedElement, getSelectedPage } from '../../state/selectors/workpad';
 import { getServerFunctions } from '../../state/selectors/app';
-import { setArgumentAtIndex } from '../../state/actions/elements';
+import { setArgumentAtIndex, setAstAtIndex } from '../../state/actions/elements';
 
 const mapStateToProps = (state) => ({
   element: getSelectedElement(state),
@@ -14,12 +15,13 @@ const mapStateToProps = (state) => ({
 });
 
 const mapDispatchToProps = (dispatch) => ({
-  setArgumentAtIndex: props => arg => dispatch(setArgumentAtIndex({ ...props, arg })),
+  dispatchArgumentAtIndex: props => arg => dispatch(setArgumentAtIndex({ ...props, arg })),
+  dispatchAstAtIndex: props => ast => dispatch(setAstAtIndex({ ...props, ast })),
 });
 
 const mergeProps = (stateProps, dispatchProps, ownProps) => {
   const { element, pageId, serverFunctions } = stateProps;
-  const { setArgumentAtIndex } = dispatchProps;
+  const { dispatchArgumentAtIndex, dispatchAstAtIndex } = dispatchProps;
 
   // find the matching datasource from the expression AST
   const datasourceAst = get(element, 'ast.chain', []).map((astDef, i) => {
@@ -48,7 +50,12 @@ const mergeProps = (stateProps, dispatchProps, ownProps) => {
   return Object.assign({}, ownProps, stateProps, dispatchProps, {
     ...datasourceAst,
     datasources: datasourceRegistry.toArray(),
-    setDatasourceArgs: setArgumentAtIndex({
+    setDatasourceAst: dispatchAstAtIndex({
+      pageId,
+      element,
+      index: datasourceAst && datasourceAst.expressionIndex,
+    }),
+    setDatasourceArgs: dispatchArgumentAtIndex({
       pageId,
       element,
       index: datasourceAst && datasourceAst.expressionIndex,
@@ -58,5 +65,13 @@ const mergeProps = (stateProps, dispatchProps, ownProps) => {
 
 export const Datasource = compose(
   connect(mapStateToProps, mapDispatchToProps, mergeProps),
-  withState('stateArgs', 'setAstArgs', ({ args }) => args)
+  withState('stateArgs', 'updateArgs', ({ args }) => args),
+  withState('stateDatasource', 'selectDatasource', ({ datasource }) => datasource),
+  withHandlers({
+    resetArgs: ({ updateArgs, args }) => () => updateArgs(args),
+  })
 )(Component);
+
+Datasource.propTypes = {
+  done: PropTypes.func,
+};
