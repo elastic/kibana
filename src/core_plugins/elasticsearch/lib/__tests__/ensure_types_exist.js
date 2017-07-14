@@ -64,7 +64,7 @@ describe('es/healthCheck/ensureTypesExist()', () => {
   describe('general', () => {
     it('reads the _mappings feature of the indexName', async () => {
       const indexName = chance.word();
-      const callCluster = createCallCluster(createV5Index(indexName, []));
+      const callCluster = createCallCluster(createV6Index(indexName, []));
       await ensureTypesExist({
         callCluster,
         indexName,
@@ -80,70 +80,23 @@ describe('es/healthCheck/ensureTypesExist()', () => {
   });
 
   describe('v5 index', () => {
-    it('does nothing if mappings match elasticsearch', async () => {
-      const types = createRandomTypes();
-      const indexName = chance.word();
-      const callCluster = createCallCluster(createV5Index(indexName, types));
-      await ensureTypesExist({
-        indexName,
-        callCluster,
-        types,
-        log: sinon.stub()
-      });
-
-      sinon.assert.calledOnce(callCluster);
-      sinon.assert.calledWith(callCluster, 'indices.get', sinon.match({ index: indexName }));
-    });
-
-    it('adds types that are not in index', async () => {
-      const indexTypes = createRandomTypes();
-      const missingTypes = indexTypes.splice(-5);
-
-      const indexName = chance.word();
-      const callCluster = createCallCluster(createV5Index(indexName, indexTypes));
-      await ensureTypesExist({
-        indexName,
-        callCluster,
-        types: [
-          ...indexTypes,
-          ...missingTypes,
-        ],
-        log: sinon.stub()
-      });
-
-      sinon.assert.callCount(callCluster, 1 + missingTypes.length);
-      sinon.assert.calledWith(callCluster, 'indices.get', sinon.match({ index: indexName }));
-      missingTypes.forEach(type => {
-        sinon.assert.calledWith(callCluster, 'indices.putMapping', sinon.match({
-          index: indexName,
-          type: type.name,
-          body: type.mapping
-        }));
-      });
-    });
-
-    it('ignores extra types in index', async () => {
-      const indexTypes = createRandomTypes();
-      const missingTypes = indexTypes.splice(-5);
-
-      const indexName = chance.word();
-      const callCluster = createCallCluster(createV5Index(indexName, indexTypes));
-      await ensureTypesExist({
-        indexName,
-        callCluster,
-        types: missingTypes,
-        log: sinon.stub()
-      });
-
-      sinon.assert.callCount(callCluster, 1 + missingTypes.length);
-      sinon.assert.calledWith(callCluster, 'indices.get', sinon.match({ index: indexName }));
-      missingTypes.forEach(type => {
-        sinon.assert.calledWith(callCluster, 'indices.putMapping', sinon.match({
-          index: indexName,
-          type: type.name,
-          body: type.mapping
-        }));
-      });
+    it('rejects', async () => {
+      try {
+        const types = createRandomTypes();
+        const indexName = chance.word();
+        const callCluster = createCallCluster(createV5Index(indexName, types));
+        await ensureTypesExist({
+          indexName,
+          callCluster,
+          types,
+          log: sinon.stub()
+        });
+        throw new Error('expected ensureTypesExist() to throw an error');
+      } catch (error) {
+        expect(error)
+          .to.have.property('message')
+            .contain('Support for Kibana index format v5 has been removed');
+      }
     });
   });
 
