@@ -13,13 +13,6 @@ const {
   BadRequest
 } = elasticsearch.errors;
 
-export function isSingleTypeError(error) {
-  if (!error) return;
-
-  return error.type === 'illegal_argument_exception' &&
-    error.reason.match(/the final mapping would have more than 1 type/);
-}
-
 export function handleEsError(error) {
   if (!(error instanceof Error)) {
     throw new Error('Expected an instance of Error');
@@ -50,10 +43,6 @@ export function handleEsError(error) {
   }
 
   if (error instanceof BadRequest) {
-    if (isSingleTypeError(get(error, 'body.error'))) {
-      details.type = 'is_single_type';
-    }
-
     throw Boom.badRequest(reason, details);
   }
 
