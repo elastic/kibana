@@ -13,5 +13,5 @@ export const commonFunctions = [
   require('./droprows/droprows'),
   require('./image/image'),
   require('./rounddate/rounddate'),
-
+  require('./grid/grid'),
 ];
