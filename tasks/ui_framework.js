@@ -78,14 +78,14 @@ module.exports = function (grunt) {
 
   function uiFrameworkCompile() {
     sass.render({
-      file: 'ui_framework/components/index.scss'
+      file: 'ui_framework/src/index.scss'
     }, function (error, result) {
       if (error) {
         grunt.log.error(error);
       }
 
       postcss([postcssConfig])
-        .process(result.css, { from: 'ui_framework/components/index.scss', to: 'ui_framework/dist/ui_framework.css' })
+        .process(result.css, { from: 'ui_framework/src/index.scss', to: 'ui_framework/dist/ui_framework.css' })
         .then(result => {
           grunt.file.write('ui_framework/dist/ui_framework.css', result.css);
 
@@ -102,7 +102,7 @@ module.exports = function (grunt) {
     return new Promise(() => {
       debouncedCompile();
 
-      chokidar.watch('ui_framework/components', { ignoreInitial: true }).on('all', (event, path) => {
+      chokidar.watch('ui_framework/src', { ignoreInitial: true }).on('all', (event, path) => {
         grunt.log.writeln(event, path);
         debouncedCompile();
       });
