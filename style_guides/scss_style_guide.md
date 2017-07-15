@@ -19,6 +19,40 @@ hex values.
 
 We use the [bemify](https://github.com/franzheidl/bemify) for namespacing the sass into a BEM format. We use `component`, `child`, `modifier` and `state` as our mixin names. We've adjusted the plugin's state mixin so that you need to write out the full selector (`@include state('is-happening')`).
 
+#### Example
+
+```
+// Generates .kuiBtn
+@include component('kuiBtn') {
+  color: white;
+  background: gray;
+  padding: 20px;
+
+  // Generates .kuiBtn__icon
+  @include child('icon') {
+    display: inline-block;
+    margin-right: 4px;
+    color: white;
+
+    // Generates .kuiBtn_icon--danger
+    @include modifier('danger') {
+      color: red;
+    }
+  }
+
+  // Generates .kuiBtn--primary
+  @include modifier('primary') {
+    background: blue;
+  }
+
+  // Generates .kuiBtn.is-loading
+  @include state('is-loading') {
+    opacity: .5;
+    cursor: not-allowed;
+  }
+}
+```
+
 ## Dealing with extends
 
 Don't extend classes. The only time use should use an extend is when you are extending a placeholder. Even then, do it rarely and only for code maintainability.
