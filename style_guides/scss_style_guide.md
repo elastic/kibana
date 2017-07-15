@@ -34,7 +34,7 @@ We use the [bemify](https://github.com/franzheidl/bemify) for namespacing the sa
     margin-right: 4px;
     color: white;
 
-    // Generates .kuiBtn_icon--danger
+    // Generates .kuiBtn__icon--danger
     @include modifier('danger') {
       color: red;
     }
