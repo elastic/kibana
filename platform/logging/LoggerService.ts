@@ -17,10 +17,10 @@ export class LoggerService {
     });
   }
 
-  stop() {
+  async stop() {
     this.stop$.next(true);
     this.stop$.complete();
 
-    this.loggingFactory.close();
+    await this.loggingFactory.close();
   }
 }

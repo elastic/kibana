@@ -18,7 +18,7 @@ export abstract class BaseAppender implements Appender {
     }
   }
 
-  close() {
+  async close() {
     this.isClosed = true;
   }
 }

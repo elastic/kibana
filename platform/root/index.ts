@@ -62,7 +62,7 @@ export class Root {
       await this.server.stop();
     }
 
-    this.loggerService.stop();
+    await this.loggerService.stop();
 
     this.onShutdown(reason);
   }

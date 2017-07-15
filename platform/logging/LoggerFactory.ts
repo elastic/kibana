@@ -66,9 +66,9 @@ export class MutableLoggerFactory implements LoggerFactory {
     }
   }
 
-  close(): void {
+  async close() {
     for (const appender of this.appenders.values()) {
-      appender.close();
+      await appender.close();
     }
 
     this.appenders.clear();
