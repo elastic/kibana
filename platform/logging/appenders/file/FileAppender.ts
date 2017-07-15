@@ -18,13 +18,7 @@ export class FileAppender extends BaseAppender {
   append(record: LogRecord) {
     super.append(record);
 
-    this.outputStream!.write(
-      `${this.config.pattern
-        .replace('{timestamp}', record.timestamp.toISOString())
-        .replace('{level}', record.level.id.toUpperCase())
-        .replace('{context}', record.context)
-        .replace('{message}', record.message)}\n`
-    );
+    this.outputStream!.write(`${this.logRecordToFormattedString(record)}\n`);
   }
 
   async close() {

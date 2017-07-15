@@ -9,13 +9,6 @@ export class ConsoleAppender extends BaseAppender {
 
   append(record: LogRecord) {
     super.append(record);
-
-    console.log(
-      this.config.pattern
-        .replace('{timestamp}', record.timestamp.toISOString())
-        .replace('{level}', record.level.id.toUpperCase())
-        .replace('{context}', record.context)
-        .replace('{message}', record.message)
-    );
+    console.log(this.logRecordToFormattedString(record));
   }
 }
