@@ -46,7 +46,7 @@ uiRoutes
       throw new Error('unknown fieldSettings mode ' + this.mode);
     }
 
-    docTitle.change([this.field.name || 'New Scripted Field', this.indexPattern.id]);
+    docTitle.change([this.field.name || 'New Scripted Field', this.indexPattern.title]);
     this.goBack = function () {
       kbnUrl.changeToRoute(this.indexPattern, 'edit');
     };

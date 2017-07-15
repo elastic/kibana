@@ -93,11 +93,15 @@ export function IndexPatternProvider(Private, $http, config, kbnIndex, Promise, 
     // give index pattern all of the values in _source
     _.assign(indexPattern, response._source);
 
+    if (!indexPattern.title) {
+      indexPattern.title = indexPattern.id;
+    }
+
     if (indexPattern.isUnsupportedTimePattern()) {
       if (!isUserAwareOfUnsupportedTimePattern(indexPattern)) {
         const warning = (
           'Support for time-intervals has been removed. ' +
-          `View the ["${indexPattern.id}" index pattern in management](` +
+          `View the ["${indexPattern.title}" index pattern in management](` +
           kbnUrl.getRouteHref(indexPattern, 'edit') +
           ') for more information.'
         );
