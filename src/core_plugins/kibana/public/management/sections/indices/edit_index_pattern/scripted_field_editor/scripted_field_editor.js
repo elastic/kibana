@@ -9,6 +9,19 @@ uiRoutes
 .when('/management/kibana/indices/:indexPatternId/create-field/', { mode: 'create' })
 .defaults(/management\/kibana\/indices\/[^\/]+\/(field|create-field)(\/|$)/, {
   template,
+  mapBreadcrumbs($route, breadcrumbs) {
+    const { indexPattern } = $route.current.locals;
+    return breadcrumbs.map(crumb => {
+      if (crumb.id !== indexPattern.id) {
+        return crumb;
+      }
+
+      return {
+        ...crumb,
+        display: indexPattern.title
+      };
+    });
+  },
   resolve: {
     indexPattern: function ($route, courier) {
       return courier.indexPatterns.get($route.current.params.indexPatternId)
