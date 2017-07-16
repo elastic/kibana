@@ -17,36 +17,36 @@ hex values.
 
 ### Bemify for namespacing
 
-We use the [bemify](https://github.com/franzheidl/bemify) for namespacing the sass into a BEM format. We use `component`, `child`, `modifier` and `state` as our mixin names. We've adjusted the plugin's state mixin so that you need to write out the full selector (`@include state('is-happening')`).
+We use [bemify](https://github.com/franzheidl/bemify) for namespacing the sass into a BEM format. We use `component`, `child`, `modifier` and `state` as our mixin names. We've adjusted the plugin's state mixin so that you need to write out the full selector (`@include state('isHappening')`).
 
 #### Example
 
 ```
-// Generates .kuiBtn
-@include component('kuiBtn') {
+// Generates .kuiButton
+@include component('kuiButton') {
   color: white;
   background: gray;
   padding: 20px;
 
-  // Generates .kuiBtn__icon
+  // Generates .kuiButton__icon
   @include child('icon') {
     display: inline-block;
     margin-right: 4px;
     color: white;
 
-    // Generates .kuiBtn__icon--danger
+    // Generates .kuiButton__icon--danger
     @include modifier('danger') {
       color: red;
     }
   }
 
-  // Generates .kuiBtn--primary
+  // Generates .kuiButton--primary
   @include modifier('primary') {
     background: blue;
   }
 
-  // Generates .kuiBtn.is-loading
-  @include state('is-loading') {
+  // Generates .kuiButton.isLoading
+  @include state('isLoading') {
     opacity: .5;
     cursor: not-allowed;
   }
