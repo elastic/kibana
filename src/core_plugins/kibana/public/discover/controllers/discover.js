@@ -1,6 +1,5 @@
 import _ from 'lodash';
 import angular from 'angular';
-import moment from 'moment';
 import { getSort } from 'ui/doc_table/lib/get_sort';
 import * as columnActions from 'ui/doc_table/actions/columns';
 import dateMath from '@elastic/datemath';
@@ -18,7 +17,6 @@ import 'ui/share';
 import { VisProvider } from 'ui/vis';
 import { BasicResponseHandlerProvider } from 'ui/vis/response_handlers/basic';
 import { DocTitleProvider } from 'ui/doc_title';
-import { UtilsBrushEventProvider } from 'ui/utils/brush_event';
 import PluginsKibanaDiscoverHitSortFnProvider from 'plugins/kibana/discover/_hit_sort_fn';
 import { FilterBarQueryFilterProvider } from 'ui/filter_bar/query_filter';
 import { FilterManagerProvider } from 'ui/filter_manager';
@@ -115,7 +113,6 @@ function discoverController(
 
   const Vis = Private(VisProvider);
   const docTitle = Private(DocTitleProvider);
-  const brushEvent = Private(UtilsBrushEventProvider);
   const HitSortFn = Private(PluginsKibanaDiscoverHitSortFnProvider);
   const queryFilter = Private(FilterBarQueryFilterProvider);
   const filterManager = Private(FilterManagerProvider);
@@ -510,6 +507,7 @@ function discoverController(
       $scope.mergedEsResp = merged;
 
       if ($scope.opts.timefield) {
+        $scope.searchSource.rawResponse = merged;
         responseHandler($scope.vis, merged).then(resp => {
           $scope.visData = resp;
         });
@@ -654,15 +652,6 @@ function discoverController(
       params: {
         addLegend: false,
         addTimeMarker: true
-      },
-      listeners: {
-        click: function (e) {
-          notify.log(e);
-          timefilter.time.from = moment(e.point.x);
-          timefilter.time.to = moment(e.point.x + e.data.ordered.interval);
-          timefilter.time.mode = 'absolute';
-        },
-        brush: brushEvent($scope.state)
       },
       aggs: visStateAggs
     });
