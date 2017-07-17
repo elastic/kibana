@@ -1,4 +1,4 @@
-export { MappingsCollection } from './mappings_collection';
+export { IndexMappings } from './index_mappings';
 
 export {
   getRootType,

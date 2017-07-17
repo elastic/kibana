@@ -3,7 +3,7 @@ import minimatch from 'minimatch';
 
 import UiAppCollection from './ui_app_collection';
 import UiNavLinkCollection from './ui_nav_link_collection';
-import { MappingsCollection } from '../server/mappings';
+import { IndexMappings } from '../server/mappings';
 
 export default class UiExports {
   constructor({ urlBasePath }) {
@@ -29,18 +29,24 @@ export default class UiExports {
     this.bundleProviders = [];
     this.defaultInjectedVars = {};
     this.injectedVarsReplacers = [];
-    this.mappings = new MappingsCollection('docs', {
-      '_default_': {
-        'dynamic': 'strict'
-      },
-      config: {
-        dynamic: true,
+    this.kibanaIndexMappings = new IndexMappings({
+      docs: {
+        'dynamic': 'strict',
         properties: {
-          buildNum: {
+          type: {
             type: 'keyword'
-          }
+          },
+
+          config: {
+            dynamic: true,
+            properties: {
+              buildNum: {
+                type: 'keyword'
+              }
+            }
+          },
         }
-      },
+      }
     });
   }
 
@@ -158,7 +164,7 @@ export default class UiExports {
 
       case 'mappings':
         return (plugin, mappings) => {
-          this.mappings.register(mappings, { plugin: plugin.id });
+          this.kibanaIndexMappings.addRootProperties(mappings, { plugin: plugin.id });
         };
 
       case 'replaceInjectedVars':

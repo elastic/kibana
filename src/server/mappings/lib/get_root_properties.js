@@ -7,8 +7,5 @@ export function getRootProperties(mappings) {
     throw new TypeError('Unable to get property names non-object root mapping');
   }
 
-  return Object.keys(mapping.properties || {}).map(name => ({
-    name,
-    mapping: mapping.properties[name],
-  }));
+  return mapping.properties || {};
 }

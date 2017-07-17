@@ -5,8 +5,7 @@ export default function (server, mappings) {
     index: index,
     body: {
       settings: {
-        number_of_shards: 1,
-        'index.mapper.dynamic': false
+        number_of_shards: 1
       },
       mappings
     }

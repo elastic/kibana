@@ -159,7 +159,7 @@ export default function (kibana) {
         }
       );
       // Set up the health check service and start it.
-      const mappings = kibana.uiExports.mappings.getCombined();
+      const mappings = kibana.uiExports.kibanaIndexMappings.getDsl();
       const { start, waitUntilReady } = healthCheck(this, server, { mappings });
       server.expose('waitUntilReady', waitUntilReady);
       start();

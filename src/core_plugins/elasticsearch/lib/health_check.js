@@ -7,8 +7,7 @@ import kibanaVersion from './kibana_version';
 import { ensureEsVersion } from './ensure_es_version';
 import { ensureNotTribe } from './ensure_not_tribe';
 import { ensureAllowExplicitIndex } from './ensure_allow_explicit_index';
-import { ensureTypesExist } from './ensure_types_exist';
-import { getRootProperties } from '../../../server/mappings';
+import { patchKibanaIndex } from './patch_kibana_index';
 
 const NoConnections = elasticsearch.errors.NoConnections;
 import util from 'util';
@@ -100,11 +99,11 @@ export default function (plugin, server, { mappings }) {
       .then(() => ensureNotTribe(callAdminAsKibanaUser))
       .then(() => ensureAllowExplicitIndex(callAdminAsKibanaUser, config))
       .then(waitForShards)
-      .then(() => ensureTypesExist({
+      .then(() => patchKibanaIndex({
         callCluster: callAdminAsKibanaUser,
         log: (...args) => server.log(...args),
         indexName: config.get('kibana.index'),
-        types: getRootProperties(mappings)
+        mappings: mappings
       }))
       .then(_.partial(migrateConfig, server, { mappings }))
       .then(() => {

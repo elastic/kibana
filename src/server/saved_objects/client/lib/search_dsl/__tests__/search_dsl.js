@@ -1,24 +1,25 @@
 import expect from 'expect.js';
 import { getSearchDsl } from '../search_dsl';
-import { MappingsCollection } from '../../../../../mappings';
 
 function createMappings(types = []) {
-  const props = types
-    .reduce((acc, type) => ({
-      ...acc,
-      [type]: {
-        properties: {
-          name: {
-            type: 'keyword'
-          },
-          order: {
-            type: 'integer'
+  return {
+    rootType: {
+      properties: types
+        .reduce((acc, type) => ({
+          ...acc,
+          [type]: {
+            properties: {
+              name: {
+                type: 'keyword'
+              },
+              order: {
+                type: 'integer'
+              }
+            }
           }
-        }
-      }
-    }), {});
-
-  return (new MappingsCollection('foo', props)).getCombined();
+        }), {})
+    }
+  };
 }
 
 function test({ mappings, params, expected }) {
