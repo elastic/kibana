@@ -2,8 +2,8 @@ import { IndexMappings } from './index_mappings';
 
 /**
  *  The default mappings used for the kibana index. This is
- *  extended via uiExports type "mappings". See the Kibana
- *  plugin for details.
+ *  extended via uiExports type "mappings". See the kibana
+ *  and timelion plugins for examples.
  *  @type {EsMappingDsl}
  */
 const BASE_KIBANA_INDEX_MAPPINGS = {
