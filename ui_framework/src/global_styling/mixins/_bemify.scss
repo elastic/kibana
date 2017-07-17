@@ -1,0 +1,15 @@
+// Bemify lets us use mixins to define namespacing
+// https://github.com/franzheidl/bemify
+
+$state-prefix: null;
+
+@import '../../../../node_modules/bemify/sass/_bemify';
+
+@mixin state($state) {
+  @at-root {
+    &.#{$state} {
+      @content;
+    }
+  }
+}
+
