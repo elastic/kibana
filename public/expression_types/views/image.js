@@ -1,4 +1,3 @@
-import React from 'react';
 import { get } from 'lodash';
 import { View } from '../view';
 import { Arg } from '../arg';
@@ -42,7 +41,4 @@ export const image = () => new View('image', {
     //   argType: 'url',
     // }),
   ],
-  template() {
-    return (<div>Render image on the page</div>);
-  },
 });
