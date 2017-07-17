@@ -204,6 +204,7 @@ function VisEditor($scope, $route, timefilter, AppState, $window, kbnUrl, courie
 
     // update the searchSource when query updates
     $scope.fetch = function () {
+      $state.save();
       $scope.vis.forceReload();
     };
 
