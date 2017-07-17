@@ -1,3 +1,4 @@
+import { LogLevel } from '../../LogLevel';
 import { LogRecord } from '../../LogRecord';
 import { BaseAppenderConfig } from './BaseAppenderConfig';
 
@@ -27,11 +28,19 @@ export abstract class BaseAppender implements Appender {
   protected logRecordToFormattedString(record: LogRecord) {
     const patternParameters = new Map([
       ['{timestamp}', record.timestamp.toISOString()],
-      ['{level}', record.level.id.toUpperCase()],
-      ['{context}', record.context],
+      ['{level}', this.formatLevel(record.level)],
+      ['{context}', this.formatContext(record.context)],
       ['{message}', record.message]
     ]);
 
     return this.config.pattern.replace(PATTERN_REGEX, (match) => patternParameters.get(match)!);
+  }
+
+  protected formatLevel(level: LogLevel) {
+    return level.id.toUpperCase().padEnd(5);
+  }
+
+  protected formatContext(context: string) {
+    return context;
   }
 }
