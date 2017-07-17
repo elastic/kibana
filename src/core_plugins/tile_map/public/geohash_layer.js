@@ -25,6 +25,7 @@ export class GeohashLayer extends KibanaMapLayer {
 
   _createGeohashMarkers() {
     const markerOptions = {
+      isFilteredByCollar: this._geohashOptions.isFilteredByCollar,
       valueFormatter: this._geohashOptions.valueFormatter,
       tooltipFormatter: this._geohashOptions.tooltipFormatter
     };
@@ -79,7 +80,6 @@ export class GeohashLayer extends KibanaMapLayer {
     }
     this._lastBounds = bounds;
   }
-
 
   isReusable(options) {
 

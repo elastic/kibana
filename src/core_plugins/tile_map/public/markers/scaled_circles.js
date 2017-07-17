@@ -23,12 +23,17 @@ export class ScaledCirclesMarkers extends EventEmitter {
       style: this.getStyleFunction(),
       onEachFeature: (feature, layer) => {
         this._bindPopup(feature, layer);
-      },
-      filter: (feature) => {
-        const bucketRectBounds = _.get(feature, 'properties.rectangle');
-        return kibanaMap.isInside(bucketRectBounds);
       }
     });
+
+    // Filter leafletlayer on client when results are not filtered on the server
+    if (!options.isFilteredByCollar) {
+      this._leafletLayer.filter = (feature) => {
+        const bucketRectBounds = _.get(feature, 'properties.rectangle');
+        return kibanaMap.isInside(bucketRectBounds);
+      };
+    }
+
     this._leafletLayer.addData(this._geohashGeoJson);
   }
 

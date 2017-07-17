@@ -244,6 +244,7 @@ export function MapsVisualizationProvider(serviceSettings, Notifier, getAppState
         valueFormatter: this._chartData ? this._chartData.valueFormatter : null,
         tooltipFormatter: this._chartData ? this._chartData.tooltipFormatter : null,
         mapType: newParams.mapType,
+        isFilteredByCollar: this._isFilteredByCollar(),
         heatmap: {
           heatBlur: newParams.heatBlur,
           heatMaxZoom: newParams.heatMaxZoom,
@@ -305,6 +306,17 @@ export function MapsVisualizationProvider(serviceSettings, Notifier, getAppState
       return this.vis.aggs.find((agg) => {
         return agg.type.dslName === 'geohash_grid';
       });
+    }
+
+    _isFilteredByCollar() {
+      const DEFAULT_USE_FILTER = false;
+
+      const agg = this._getGeoHashAgg();
+      if (agg) {
+        return _.get(agg, 'params.useFilter', DEFAULT_USE_FILTER);
+      } else {
+        return DEFAULT_USE_FILTER;
+      }
     }
   }
 

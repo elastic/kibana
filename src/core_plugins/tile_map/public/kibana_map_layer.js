@@ -22,9 +22,6 @@ export class KibanaMapLayer extends EventEmitter {
   appendLegendContents() {
   }
 
-  updateExtent() {
-  }
-
   movePointer() {
   }
 

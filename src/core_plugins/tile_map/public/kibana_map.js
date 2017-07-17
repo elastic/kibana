@@ -442,7 +442,6 @@ export class KibanaMap extends EventEmitter {
 
   resize() {
     this._leafletMap.invalidateSize();
-    this._updateExtent();
   }
 
 
@@ -544,10 +543,6 @@ export class KibanaMap extends EventEmitter {
     };
 
     return (typeof options.url === 'string' && options.url.length) ? L.tileLayer.wms(options.url, wmsOptions) : null;
-  }
-
-  _updateExtent() {
-    this._layers.forEach(layer => layer.updateExtent());
   }
 
   _updateDesaturation() {
