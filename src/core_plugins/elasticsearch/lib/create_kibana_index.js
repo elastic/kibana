@@ -1,4 +1,4 @@
-export default function (server, mappings) {
+export default function (server) {
   const { callWithInternalUser } = server.plugins.elasticsearch.getCluster('admin');
   const index = server.config().get('kibana.index');
   return callWithInternalUser('indices.create', {
@@ -7,7 +7,7 @@ export default function (server, mappings) {
       settings: {
         number_of_shards: 1
       },
-      mappings
+      mappings: server.getKibanaIndexMappingsDsl()
     }
   })
   .catch(() => {

@@ -75,10 +75,13 @@ describe('plugins/elasticsearch', () => {
           elasticsearch: {
             getCluster: sinon.stub().returns(cluster)
           }
+        },
+        getKibanaIndexMappingsDsl() {
+          return mappings;
         }
       };
 
-      health = healthCheck(plugin, server, { mappings });
+      health = healthCheck(plugin, server);
     });
 
     afterEach(() => sandbox.restore());
