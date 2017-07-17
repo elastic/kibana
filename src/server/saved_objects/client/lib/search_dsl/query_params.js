@@ -51,7 +51,7 @@ export function getQueryParams(mappings, type, search, searchFields) {
             searchFields,
             type
               ? [type]
-              : getRootProperties(mappings).map(prop => prop.name)
+              : Object.keys(getRootProperties(mappings))
           )
         }
       }

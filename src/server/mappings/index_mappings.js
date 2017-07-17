@@ -1,4 +1,6 @@
 import { cloneDeep, isPlainObject } from 'lodash';
+
+import { formatListAsProse } from '../../utils';
 import { getRootProperties, getRootType } from './lib';
 
 const DEFAULT_INITIAL_DSL = {
@@ -28,17 +30,17 @@ export class IndexMappings {
     const { plugin } = options;
     const rootProperties = getRootProperties(this._dsl);
 
-    const pluginPartial = plugin
-      ? `registered by plugin ${plugin} `
-      : '';
 
-    Object.keys(newProperties).forEach(key => {
-      if (rootProperties.hasOwnProperty(key)) {
-        throw new Error(
-          `Mappings for ${key} ${pluginPartial}have already been defined`
-        );
-      }
-    });
+    const conflicts = Object.keys(newProperties)
+      .filter(key => rootProperties.hasOwnProperty(key));
+
+    if (conflicts.length) {
+      const props = formatListAsProse(conflicts);
+      const owner = plugin ? `registered by plugin ${plugin} ` : '';
+      throw new Error(
+        `Mappings for ${props} ${owner}have already been defined`
+      );
+    }
 
     this._setProperties({
       ...rootProperties,
