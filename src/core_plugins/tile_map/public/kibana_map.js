@@ -95,6 +95,7 @@ export class KibanaMap extends EventEmitter {
     this._layers = [];
     this._listeners = [];
     this._showTooltip = false;
+    this._isFilteredByCollar = options.isFilteredByCollar;
 
 
     const leafletOptions = {
@@ -178,8 +179,6 @@ export class KibanaMap extends EventEmitter {
     });
 
     this.resize();
-
-
   }
 
   setShowTooltip(showTooltip) {
@@ -442,6 +441,7 @@ export class KibanaMap extends EventEmitter {
 
   resize() {
     this._leafletMap.invalidateSize();
+    this._updateExtent();
   }
 
 
@@ -543,6 +543,12 @@ export class KibanaMap extends EventEmitter {
     };
 
     return (typeof options.url === 'string' && options.url.length) ? L.tileLayer.wms(options.url, wmsOptions) : null;
+  }
+
+  _updateExtent() {
+    if (!this._isFilteredByCollar()) {
+      this._layers.forEach(layer => layer.updateExtent());
+    }
   }
 
   _updateDesaturation() {

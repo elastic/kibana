@@ -86,6 +86,7 @@ export function MapsVisualizationProvider(serviceSettings, Notifier, getAppState
       const centerFromUIState = uiState.get('mapCenter');
       options.zoom = !isNaN(zoomFromUiState) ? zoomFromUiState : this.vis.type.visConfig.defaults.mapZoom;
       options.center = centerFromUIState ? centerFromUIState : this.vis.type.visConfig.defaults.mapCenter;
+      options.isFilteredByCollar = this._isFilteredByCollar.bind(this);
 
       this._kibanaMap = new KibanaMap(containerElement, options);
       uiState.set('mapZoom', this._kibanaMap.getZoomLevel());
