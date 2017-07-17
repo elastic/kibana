@@ -4,26 +4,23 @@ import { times, cloneDeep } from 'lodash';
 import Chance from 'chance';
 
 import { ensureTypesExist } from '../ensure_types_exist';
-import { getTypesFromMappings } from '../get_types_from_mappings';
-import { MappingsCollection } from '../../../../ui/ui_mappings';
+import { MappingsCollection, getRootProperties } from '../../../../server/mappings';
 
 const chance = new Chance();
 
 function createRandomTypes(n = chance.integer({ min: 10, max: 20 })) {
+  const randomProps = times(n, () => chance.word())
+    .reduce((acc, prop) => ({
+      ...acc,
+      [prop]: {
+        type: chance.pickone(['keyword', 'text', 'integer', 'boolean'])
+      }
+    }));
+
   // using the actual MappingsCollection so that we can be sure that
   // we're testing the actual data that will come from it. Not doing
-  // this caused a bug, so jsut trying to cover my butt
-  const uiMappings = new MappingsCollection();
-
-  times(n, () => {
-    uiMappings.register({
-      [chance.word()]: {
-        type: chance.pickone(['keyword', 'text', 'integer', 'boolean'])
-      },
-    });
-  });
-
-  return getTypesFromMappings(uiMappings.getCombined());
+  // this caused a bug, so just trying to cover my butt
+  return getRootProperties(new MappingsCollection(chance.word(), randomProps));
 }
 
 function typesToMapping(types) {

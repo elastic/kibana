@@ -1,19 +1,20 @@
 import Boom from 'boom';
 import uuid from 'uuid';
 
+import { getRootType } from '../../mappings';
+
 import {
-  createFindQuery,
+  getSearchDsl,
   handleEsError,
   trimIdPrefix,
   includedFields
 } from './lib';
 
-export const V6_TYPE = 'doc';
-
 export class SavedObjectsClient {
   constructor(kibanaIndex, mappings, callAdminCluster) {
     this._kibanaIndex = kibanaIndex;
     this._mappings = mappings;
+    this._type = getRootType(this._mappings);
     this._callAdminCluster = callAdminCluster;
   }
 
@@ -36,7 +37,7 @@ export class SavedObjectsClient {
     const method = id && !overwrite ? 'create' : 'index';
     const response = await this._withKibanaIndex(method, {
       id: this._generateEsId(type, id),
-      type: V6_TYPE,
+      type: this._type,
       refresh: 'wait_for',
       body: {
         type,
@@ -72,7 +73,7 @@ export class SavedObjectsClient {
         {
           [method]: {
             _id: this._generateEsId(object.type, object.id),
-            _type: V6_TYPE,
+            _type: this._type,
           }
         },
         {
@@ -132,7 +133,7 @@ export class SavedObjectsClient {
   async delete(type, id) {
     const response = await this._withKibanaIndex('delete', {
       id: this._generateEsId(type, id),
-      type: V6_TYPE,
+      type: this._type,
       refresh: 'wait_for',
     });
 
@@ -227,7 +228,7 @@ export class SavedObjectsClient {
       body: {
         docs: objects.map(object => ({
           _id: this._generateEsId(object.type, object.id),
-          _type: V6_TYPE,
+          _type: this._type,
         }))
       }
     });
@@ -264,7 +265,7 @@ export class SavedObjectsClient {
   async get(type, id) {
     const response = await this._withKibanaIndex('get', {
       id: this._generateEsId(type, id),
-      type: V6_TYPE,
+      type: this._type,
     });
 
     return {
@@ -287,7 +288,7 @@ export class SavedObjectsClient {
   async update(type, id, attributes, options = {}) {
     const response = await this._withKibanaIndex('update', {
       id: this._generateEsId(type, id),
-      type: V6_TYPE,
+      type: this._type,
       version: options.version,
       refresh: 'wait_for',
       body: {
