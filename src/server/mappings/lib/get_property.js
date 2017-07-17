@@ -3,7 +3,8 @@ import toPath from 'lodash/internal/toPath';
 import { getRootType } from './get_root_type';
 
 /**
- *  Get a property of a mapping of type:object
+ *  Recursively read properties from the mapping object of type "object"
+ *  until the `path` is resolved.
  *  @param  {EsObjectMapping} mapping
  *  @param  {Array<string>} path
  *  @return {Objects|undefined}
@@ -24,8 +25,8 @@ function getPropertyMappingFromObjectMapping(mapping, path) {
 }
 
 /**
- *  Get the mapping for a specific property within the root type in the mapping.
- *  @param  {Object} mappings
+ *  Get the mapping for a specific property within the root type of the EsMappingsDsl.
+ *  @param  {EsMappingsDsl} mappings
  *  @param  {string|Array<string>} path
  *  @return {Object|undefined}
  */

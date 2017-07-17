@@ -65,7 +65,7 @@ describe('es/healthCheck/patchKibanaIndex()', () => {
       await patchKibanaIndex({
         callCluster,
         indexName,
-        mappings,
+        kibanaIndexMappingsDsl: mappings,
         log: sinon.stub()
       });
 
@@ -92,7 +92,7 @@ describe('es/healthCheck/patchKibanaIndex()', () => {
         await patchKibanaIndex({
           indexName,
           callCluster,
-          mappings,
+          kibanaIndexMappingsDsl: mappings,
           log: sinon.stub()
         });
         throw new Error('expected patchKibanaIndex() to throw an error');
@@ -112,7 +112,7 @@ describe('es/healthCheck/patchKibanaIndex()', () => {
       await patchKibanaIndex({
         indexName,
         callCluster,
-        mappings,
+        kibanaIndexMappingsDsl: mappings,
         log: sinon.stub()
       });
 
@@ -132,7 +132,7 @@ describe('es/healthCheck/patchKibanaIndex()', () => {
       await patchKibanaIndex({
         indexName,
         callCluster,
-        mappings,
+        kibanaIndexMappingsDsl: mappings,
         log: sinon.stub()
       });
 
@@ -154,7 +154,7 @@ describe('es/healthCheck/patchKibanaIndex()', () => {
       await patchKibanaIndex({
         indexName,
         callCluster,
-        mappings,
+        kibanaIndexMappingsDsl: mappings,
         log: sinon.stub()
       });
 

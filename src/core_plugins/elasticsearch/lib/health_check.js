@@ -103,7 +103,7 @@ export default function (plugin, server) {
         callCluster: callAdminAsKibanaUser,
         log: (...args) => server.log(...args),
         indexName: config.get('kibana.index'),
-        mappings: server.getKibanaIndexMappingsDsl()
+        kibanaIndexMappingsDsl: server.getKibanaIndexMappingsDsl()
       }))
       .then(_.partial(migrateConfig, server))
       .then(() => {

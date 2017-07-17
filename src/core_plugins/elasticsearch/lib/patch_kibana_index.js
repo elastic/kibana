@@ -1,4 +1,8 @@
-import { getRootType, getRootProperties } from '../../../server/mappings';
+import {
+  getTypes,
+  getRootType,
+  getRootProperties
+} from '../../../server/mappings';
 
 /**
  *  Checks that a kibana index has all of the types specified. Any type
@@ -6,17 +10,23 @@ import { getRootType, getRootProperties } from '../../../server/mappings';
  *  `indicies.putMapping` API.
  *
  *  @param  {Object} options
- *  @property {Function} options.log a method for writing log messages
- *  @property {string} options.indexName name of the index in elasticsearch
- *  @property {Function} options.callCluster a function for executing client requests
- *  @property {Array<Object>} options.mapping the combined mapping dsl for the kibana index
- *                                            that will be available after the patch completes
+ *  @property {Function} options.log
+ *  @property {string} options.indexName
+ *  @property {Function} options.callCluster
+ *  @property {EsMappingsDsl} options.kibanaIndexMappingsDsl
  *  @return {Promise<undefined>}
  */
-export async function patchKibanaIndex({ log, indexName, callCluster, mappings }) {
-  const rootEsType = getRootType(mappings);
-  const currentMappings = await getCurrentMappings(callCluster, indexName, rootEsType);
-  const missingProperties = await getMissingRootProperties(currentMappings, mappings);
+export async function patchKibanaIndex(options) {
+  const {
+    log,
+    indexName,
+    callCluster,
+    kibanaIndexMappingsDsl
+  } = options;
+
+  const rootEsType = getRootType(kibanaIndexMappingsDsl);
+  const currentMappingsDsl = await getCurrentMappings(callCluster, indexName, rootEsType);
+  const missingProperties = await getMissingRootProperties(currentMappingsDsl, kibanaIndexMappingsDsl);
 
   const missingPropertyNames = Object.keys(missingProperties);
   if (!missingPropertyNames.length) {
@@ -44,7 +54,7 @@ export async function patchKibanaIndex({ log, indexName, callCluster, mappings }
  *  Get the mappings dsl for the current Kibana index
  *  @param  {Function} callCluster
  *  @param  {string} indexName
- *  @param  {string} rootEsType  [description]
+ *  @param  {string} rootEsType
  *  @return {EsMappingsDsl}
  */
 async function getCurrentMappings(callCluster, indexName, rootEsType) {
@@ -55,8 +65,8 @@ async function getCurrentMappings(callCluster, indexName, rootEsType) {
 
   // could be different if aliases were resolved by `indices.get`
   const resolvedName = Object.keys(index)[0];
-  const currentMappings = index[resolvedName].mappings;
-  const currentTypes = Object.keys(currentMappings);
+  const currentMappingsDsl = index[resolvedName].mappings;
+  const currentTypes = getTypes(currentMappingsDsl);
 
   const isV5Index = currentTypes.length > 1 || currentTypes[0] !== rootEsType;
   if (isV5Index) {
@@ -65,18 +75,21 @@ async function getCurrentMappings(callCluster, indexName, rootEsType) {
     );
   }
 
-  return currentMappings;
+  return currentMappingsDsl;
 }
 
 /**
- *  The the properties that are in `expecting`
- *  @param  {[type]} currentMappings  [description]
- *  @param  {[type]} expectedMappings [description]
- *  @return {[type]}                 [description]
+ *  Get the properties that are in the expectedMappingsDsl but not the
+ *  currentMappingsDsl. Properties will be an object of properties normally
+ *  found at `[index]mappings[typeName].properties` is es mapping responses
+ *
+ *  @param  {EsMappingsDsl} currentMappingsDsl
+ *  @param  {EsMappingsDsl} expectedMappingsDsl
+ *  @return {PropertyMappings}
  */
-async function getMissingRootProperties(currentMappings, expectedMappings) {
-  const expectedProps = getRootProperties(expectedMappings);
-  const existingProps = getRootProperties(currentMappings);
+async function getMissingRootProperties(currentMappingsDsl, expectedMappingsDsl) {
+  const expectedProps = getRootProperties(expectedMappingsDsl);
+  const existingProps = getRootProperties(currentMappingsDsl);
 
   return Object.keys(expectedProps)
     .reduce((acc, prop) => {
