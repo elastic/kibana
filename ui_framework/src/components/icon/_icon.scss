@@ -1,14 +1,6 @@
 @include component('kuiIcon') {
   display: inline-block;
 
-  @include modifier('xSmall') {
-    @include size($kuiSizeXS);
-  }
-
-  @include modifier('small') {
-    @include size($kuiSizeS);
-  }
-
   @include modifier('medium') {
     @include size($kuiSizeM);
   }
