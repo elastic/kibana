@@ -1,6 +1,8 @@
 import expect from 'expect.js';
 import sinon from 'sinon';
 import { SavedObjectsClient } from '../saved_objects_client';
+import * as getSearchDslNS from '../lib/search_dsl/search_dsl';
+import { getSearchDsl } from '../lib';
 
 describe('SavedObjectsClient', () => {
   const sandbox = sinon.sandbox.create();
@@ -69,6 +71,7 @@ describe('SavedObjectsClient', () => {
   beforeEach(() => {
     callAdminCluster = sandbox.stub();
     savedObjectsClient = new SavedObjectsClient('.kibana-test', mappings, callAdminCluster);
+    sandbox.stub(getSearchDslNS, 'getSearchDsl').returns({});
   });
 
   afterEach(() => {
@@ -311,6 +314,15 @@ describe('SavedObjectsClient', () => {
       callAdminCluster.returns(searchResults);
     });
 
+    it('requires searchFields be an array if defined', async () => {
+      try {
+        await savedObjectsClient.find({ searchFields: 'string' });
+        throw new Error('expected find() to reject');
+      } catch (error) {
+        expect(error).to.have.property('message').contain('must be an array');
+      }
+    });
+
     it('requires fields be an array if defined', async () => {
       try {
         await savedObjectsClient.find({ fields: 'string' });
@@ -320,13 +332,30 @@ describe('SavedObjectsClient', () => {
       }
     });
 
-    it('requires searchFields be an array if defined', async () => {
-      try {
-        await savedObjectsClient.find({ searchFields: 'string' });
-        throw new Error('expected find() to reject');
-      } catch (error) {
-        expect(error).to.have.property('message').contain('must be an array');
-      }
+    it('passes mappings, search, searchFields, type, sortField, and sortOrder to getSearchDsl', async () => {
+      const relevantOpts = {
+        search: 'foo*',
+        searchFields: ['foo'],
+        type: 'bar',
+        sortField: 'name',
+        sortOrder: 'desc'
+      };
+
+      await savedObjectsClient.find(relevantOpts);
+      sinon.assert.calledOnce(getSearchDsl);
+      sinon.assert.calledWithExactly(getSearchDsl, mappings, relevantOpts);
+    });
+
+    it('merges output of getSearchDsl into es request body', async () => {
+      getSearchDsl.returns({ query: 1, aggregations: 2 });
+      await savedObjectsClient.find();
+      sinon.assert.calledOnce(callAdminCluster);
+      sinon.assert.calledWithExactly(callAdminCluster, 'search', sinon.match({
+        body: sinon.match({
+          query: 1,
+          aggregations: 2,
+        })
+      }));
     });
 
     it('formats Elasticsearch response', async () => {
@@ -355,78 +384,6 @@ describe('SavedObjectsClient', () => {
       const options = callAdminCluster.getCall(0).args[1];
       expect(options.size).to.be(10);
       expect(options.from).to.be(50);
-    });
-
-    it('accepts type', async () => {
-      await savedObjectsClient.find({ type: 'index-pattern' });
-
-      expect(callAdminCluster.calledOnce).to.be(true);
-
-      const options = callAdminCluster.getCall(0).args[1];
-      const expectedQuery = {
-        bool: {
-          must: [{ match_all: {} }],
-          filter: [
-            {
-              bool: {
-                should: [
-                  {
-                    term: {
-                      _type: 'index-pattern'
-                    }
-                  }, {
-                    term: {
-                      type: 'index-pattern'
-                    }
-                  }
-                ]
-              }
-            }
-          ]
-        }
-      };
-
-      expect(options.body).to.eql({
-        query: expectedQuery, version: true
-      });
-    });
-
-    it('throws error when providing sortField but no type', (done) => {
-      savedObjectsClient.find({
-        sortField: 'someField'
-      }).then(() => {
-        done('failed');
-      }).catch(e => {
-        expect(e).to.be.an(Error);
-        done();
-      });
-    });
-
-    it('accepts sort with type', async () => {
-      await savedObjectsClient.find({
-        type: 'index-pattern',
-        sortField: 'someField',
-        sortOrder: 'desc',
-      });
-
-      expect(callAdminCluster.calledOnce).to.be(true);
-
-      const options = callAdminCluster.getCall(0).args[1];
-      const expectedQuerySort = [
-        {
-          someField: {
-            order: 'desc',
-            unmapped_type: 'keyword'
-          },
-        }, {
-          'index-pattern.someField': {
-            order: 'desc',
-            unmapped_type: 'keyword'
-          },
-        },
-      ];
-
-      expect(options.body.sort).to.eql(expectedQuerySort);
     });
 
     it('can filter by fields', async () => {
