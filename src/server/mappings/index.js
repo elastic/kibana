@@ -1,4 +1,6 @@
-export { IndexMappings } from './index_mappings';
+export {
+  kibanaIndexMappingsMixin
+} from './kibana_index_mappings_mixin';
 
 export {
   getRootType,
