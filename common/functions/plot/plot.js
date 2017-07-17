@@ -143,6 +143,7 @@ module.exports = new Fn({
       value: {
         data: sortBy(data, 'label'),
         options: {
+          canvas: false,
           colors: args.palette.colors,
           legend: {
             show: true,
