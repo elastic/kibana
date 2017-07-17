@@ -5,9 +5,19 @@ import { KuiTableHeaderCell } from './table_header_cell';
 
 export const KuiTableHeaderCheckBoxCell = ({ onChange, isChecked, className, ...rest }) => {
   const classes = classNames('kuiTableHeaderCell--checkBox', className);
-  return <KuiTableHeaderCell className={ classes } {...rest} >
-      <input type="checkbox" className="kuiCheckBox" onChange={ onChange } checked={ isChecked } />
-  </KuiTableHeaderCell>;
+  return (
+    <KuiTableHeaderCell
+      className={ classes }
+      {...rest}
+    >
+      <input
+        type="checkbox"
+        className="kuiCheckBox"
+        onChange={ onChange }
+        checked={ isChecked }
+      />
+    </KuiTableHeaderCell>
+  );
 };
 KuiTableHeaderCheckBoxCell.propTypes = {
   isChecked: PropTypes.bool,

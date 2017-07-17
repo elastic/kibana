@@ -43,11 +43,13 @@ export class ControlledTableWithEmptyPrompt extends React.Component {
 
             <KuiButton
               buttonType="basic"
-              icon={<KuiButtonIcon type="settings" />} />
+              icon={<KuiButtonIcon type="settings" />}
+            />
 
             <KuiButton
               buttonType="basic"
-              icon={<KuiButtonIcon type="menu" />} />
+              icon={<KuiButtonIcon type="menu" />}
+            />
           </KuiToolBarSection>
 
           <KuiToolBarSection>

@@ -5,6 +5,8 @@ import {
   KuiTableRow,
   KuiTableRowCell,
   KuiTableHeaderCell,
+  KuiTableHeader,
+  KuiTableBody,
 } from '../../../../components';
 
 import {
@@ -13,84 +15,82 @@ import {
 
 export function TableWithMenuButtons() {
   return (
-     <KuiTable>
-        <thead>
-          <tr>
-            <KuiTableHeaderCell>
-              Reminder
-            </KuiTableHeaderCell>
-            <KuiTableHeaderCell>
-              A
-            </KuiTableHeaderCell>
-            <KuiTableHeaderCell>
-              B
-            </KuiTableHeaderCell>
-            <KuiTableHeaderCell>
-              C
-            </KuiTableHeaderCell>
-            <KuiTableHeaderCell className="kuiTableHeaderCell--alignRight">
-              Actions
-            </KuiTableHeaderCell>
-          </tr>
-        </thead>
+    <KuiTable>
+      <KuiTableHeader>
+        <KuiTableHeaderCell>
+          Reminder
+        </KuiTableHeaderCell>
+        <KuiTableHeaderCell>
+          A
+        </KuiTableHeaderCell>
+        <KuiTableHeaderCell>
+          B
+        </KuiTableHeaderCell>
+        <KuiTableHeaderCell>
+          C
+        </KuiTableHeaderCell>
+        <KuiTableHeaderCell className="kuiTableHeaderCell--alignRight">
+          Actions
+        </KuiTableHeaderCell>
+      </KuiTableHeader>
 
-        <tbody>
-          <KuiTableRow>
-            <KuiTableRowCell>
-              Core temperature critical
-            </KuiTableRowCell>
-            <KuiTableRowCell>
-              A
-            </KuiTableRowCell>
-            <KuiTableRowCell>
-              B
-            </KuiTableRowCell>
-            <KuiTableRowCell>
-              C
-            </KuiTableRowCell>
-            <KuiTableRowCell align={ RIGHT_ALIGNMENT }>
-              <div className="kuiMenuButtonGroup kuiMenuButtonGroup--alignRight">
-                <button className="kuiMenuButton kuiMenuButton--basic">
-                  Acknowledge
-                </button>
-                <button className="kuiMenuButton kuiMenuButton--basic">
-                  Silence
-                </button>
-                <button className="kuiMenuButton kuiMenuButton--danger">
-                  Delete
-                </button>
-              </div>
-            </KuiTableRowCell>
-          </KuiTableRow>
+      <KuiTableBody>
+        <KuiTableRow>
+          <KuiTableRowCell>
+            Core temperature critical
+          </KuiTableRowCell>
+          <KuiTableRowCell>
+            A
+          </KuiTableRowCell>
+          <KuiTableRowCell>
+            B
+          </KuiTableRowCell>
+          <KuiTableRowCell>
+            C
+          </KuiTableRowCell>
+          <KuiTableRowCell align={ RIGHT_ALIGNMENT }>
+            <div className="kuiMenuButtonGroup kuiMenuButtonGroup--alignRight">
+              <button className="kuiMenuButton kuiMenuButton--basic">
+                Acknowledge
+              </button>
+              <button className="kuiMenuButton kuiMenuButton--basic">
+                Silence
+              </button>
+              <button className="kuiMenuButton kuiMenuButton--danger">
+                Delete
+              </button>
+            </div>
+          </KuiTableRowCell>
+        </KuiTableRow>
 
-          <KuiTableRow>
-            <KuiTableRowCell>
-              Time for your snack
-            </KuiTableRowCell>
-            <KuiTableRowCell>
-              A
-            </KuiTableRowCell>
-            <KuiTableRowCell>
-              B
-            </KuiTableRowCell>
-            <KuiTableRowCell>
-              C
-            </KuiTableRowCell>
-            <KuiTableRowCell align={ RIGHT_ALIGNMENT }>
-              <div className="kuiMenuButtonGroup kuiMenuButtonGroup--alignRight">
-                <button className="kuiMenuButton kuiMenuButton--basic">
-                  Acknowledge
-                </button>
-                <button className="kuiMenuButton kuiMenuButton--basic">
-                  Silence
-                </button>
-                <button className="kuiMenuButton kuiMenuButton--danger">
-                  Delete
-                </button>
-              </div>
-            </KuiTableRowCell>
-          </KuiTableRow>
-        </tbody>
-      </KuiTable>
+        <KuiTableRow>
+          <KuiTableRowCell>
+            Time for your snack
+          </KuiTableRowCell>
+          <KuiTableRowCell>
+            A
+          </KuiTableRowCell>
+          <KuiTableRowCell>
+            B
+          </KuiTableRowCell>
+          <KuiTableRowCell>
+            C
+          </KuiTableRowCell>
+          <KuiTableRowCell align={ RIGHT_ALIGNMENT }>
+            <div className="kuiMenuButtonGroup kuiMenuButtonGroup--alignRight">
+              <button className="kuiMenuButton kuiMenuButton--basic">
+                Acknowledge
+              </button>
+              <button className="kuiMenuButton kuiMenuButton--basic">
+                Silence
+              </button>
+              <button className="kuiMenuButton kuiMenuButton--danger">
+                Delete
+              </button>
+            </div>
+          </KuiTableRowCell>
+        </KuiTableRow>
+      </KuiTableBody>
+    </KuiTable>
   );
 }

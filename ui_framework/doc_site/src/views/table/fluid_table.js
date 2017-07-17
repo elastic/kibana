@@ -5,23 +5,23 @@ import {
   KuiTableRow,
   KuiTableRowCell,
   KuiTableHeaderCell,
+  KuiTableHeader,
+  KuiTableBody,
 } from '../../../../components';
 
 export function FluidTable() {
   return (
      <KuiTable shrinkToContent={ true }>
-        <thead>
-          <tr>
+        <KuiTableHeader>
             <KuiTableHeaderCell>
               System
             </KuiTableHeaderCell>
             <KuiTableHeaderCell>
               Action
             </KuiTableHeaderCell>
-          </tr>
-        </thead>
+        </KuiTableHeader>
 
-        <tbody>
+        <KuiTableBody>
           <KuiTableRow>
             <KuiTableRowCell>
               Cryogenics
@@ -60,7 +60,7 @@ export function FluidTable() {
               </select>
             </KuiTableRowCell>
           </KuiTableRow>
-        </tbody>
+        </KuiTableBody>
       </KuiTable>
   );
 }

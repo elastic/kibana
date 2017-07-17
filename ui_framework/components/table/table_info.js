@@ -4,7 +4,7 @@ import classNames from 'classnames';
 
 export const KuiTableInfo = ({ children, className, ...rest }) => {
   const classes = classNames('kuiTableInfo', className);
-  return <kuiTableInfo className={classes} {...rest} >{children}</kuiTableInfo>;
+  return <div className={classes} {...rest} >{children}</div>;
 };
 KuiTableInfo.propTypes = {
   children: PropTypes.node,
