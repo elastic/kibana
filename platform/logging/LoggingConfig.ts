@@ -1,15 +1,15 @@
 import * as schema from '../lib/schema';
 import { typeOfSchema } from '../types';
 import { LogLevel } from './LogLevel';
-import { BaseAppenderConfig, BaseAppenderConfigSchemaType } from './appenders/base/BaseAppenderConfig';
-import { ConsoleAppenderConfig } from './appenders/console/ConsoleAppenderConfig';
-import { FileAppenderConfig } from './appenders/file/FileAppenderConfig';
-import { RollingFileAppenderConfig } from './appenders/rolling-file/RollingFileAppenderConfig';
+import { BaseAppenderConfig, BaseAppenderConfigSchema } from './appenders/base/BaseAppenderConfig';
+import { ConsoleAppenderConfig, ConsoleAppenderConfigSchema } from './appenders/console/ConsoleAppenderConfig';
+import { FileAppenderConfig, FileAppenderConfigSchema } from './appenders/file/FileAppenderConfig';
+import { RollingFileAppenderConfig, RollingFileAppenderConfigSchema } from './appenders/rolling-file/RollingFileAppenderConfig';
 
 const CONTEXT_SEPARATOR = '::';
 const ROOT_CONTEXT_NAME = 'root';
 
-const KNOWN_APPENDERS = new Map<string, new (schema:  BaseAppenderConfigSchemaType) => BaseAppenderConfig>([
+const KNOWN_APPENDERS = new Map<string, new (schema:  schema.TypeOf<typeof BaseAppenderConfigSchema>) => BaseAppenderConfig>([
   ['console', ConsoleAppenderConfig],
   ['file', FileAppenderConfig],
   ['rolling-file', RollingFileAppenderConfig]
@@ -18,9 +18,9 @@ const KNOWN_APPENDERS = new Map<string, new (schema:  BaseAppenderConfigSchemaTy
 const createLoggerSchema = () => {
   return schema.object({
     appenders: schema.mapOf(schema.string(), schema.oneOf([
-      ConsoleAppenderConfig.getSchema(),
-      FileAppenderConfig.getSchema(),
-      RollingFileAppenderConfig.getSchema()
+      ConsoleAppenderConfigSchema,
+      FileAppenderConfigSchema,
+      RollingFileAppenderConfigSchema
     ])),
     loggers: schema.mapOf(schema.string(), schema.object({
       level: schema.oneOf([

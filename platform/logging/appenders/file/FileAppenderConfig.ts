@@ -1,23 +1,17 @@
 import * as schema from '../../../lib/schema';
-import { BaseAppenderConfig, getRawSchema as getBaseRawSchema } from '../base/BaseAppenderConfig'
-import { typeOfSchema } from '../../../types';
+import { BaseAppenderConfig, BaseAppenderRawConfigSchema } from '../base/BaseAppenderConfig'
 import { FileAppender } from './FileAppender';
 
-function getSchema() {
-  return schema.object({
-    ...getBaseRawSchema(),
-    kind: schema.literal('file'),
-    path: schema.string()
-  });
-}
-
-const schemaType = typeOfSchema(getSchema);
-type FileAppenderConfigSchemaType = typeof schemaType;
+export const FileAppenderConfigSchema = schema.object({
+  ...BaseAppenderRawConfigSchema,
+  kind: schema.literal('file'),
+  path: schema.string()
+});
 
 export class FileAppenderConfig extends BaseAppenderConfig {
   readonly path: string;
 
-  constructor(schema: FileAppenderConfigSchemaType) {
+  constructor(schema: schema.TypeOf<typeof FileAppenderConfigSchema>) {
     super(schema);
 
     this.path = schema.path;
@@ -25,9 +19,5 @@ export class FileAppenderConfig extends BaseAppenderConfig {
 
   createAppender(): FileAppender {
     return new FileAppender(this);
-  }
-
-  static getSchema() {
-    return getSchema();
   }
 }
