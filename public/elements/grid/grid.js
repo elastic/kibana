@@ -1,7 +1,6 @@
 import { Element } from '../element';
 import ReactDOM from 'react-dom';
 import React from 'react';
-import { Table } from 'react-bootstrap';
 import header from './header.png';
 import { min, max, get } from 'lodash';
 import chroma from 'chroma-js';
@@ -12,8 +11,6 @@ module.exports = new Element('grid', {
   image: header,
   expression: 'demodata().pointseries(x="project", y="state", color="sum(cost)", size="median(price)").grid()',
   render(domNode, config, done) {
-
-    console.log(chroma);
 
     const { summary, columns, rows } = config;
 
@@ -52,28 +49,30 @@ module.exports = new Element('grid', {
         };
         break;
       default:
-        getColor = () => '#000000';
+        getColor = () => null;
     }
 
     const table = (
-      <div style={{ height: '100%', overflow: 'auto' }}>
-        <Table condensed>
-          <thead>
-            <tr>
-              {!summary.y ? null :
-                <th>{summary.y.expression}</th>
-              }
-              {columns.map(col => (
-                <th key={`header-${col}`} style={{ fontWeight: 'normal' }}>{col}</th>
-              ))}
-            </tr>
-          </thead>
+      <div style={{ height: '100%', overflow: 'auto' }} className="canvas__element--grid">
+        <table>
+          {!summary.y && !summary.x ? null : (
+            <thead>
+              <tr>
+                {!summary.y ? null :
+                  <th>{summary.y.expression}</th>
+                }
+                {columns.map(col => (
+                  <th key={`header-${col}`} style={{ fontWeight: 'normal' }}>{col}</th>
+                ))}
+              </tr>
+            </thead>
+          )}
           <tbody>
             {rows.map((row, i) => (
               <tr key=  {`row-${i}`}>
-                {row.label == null ? null :
-                  (<td>{row.label}</td>)
-                }
+                {row.label == null ? null : (
+                  <td>{row.label}</td>
+                )}
 
                 {row.cells.map((col, j) => (
                   <td key={`row-${i}-${j}`}>
@@ -89,7 +88,7 @@ module.exports = new Element('grid', {
               </tr>
             ))}
           </tbody>
-        </Table>
+        </table>
         {/*<pre>
           {JSON.stringify(config, null, ' ')}
         </pre>*/}
