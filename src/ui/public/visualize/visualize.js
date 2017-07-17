@@ -50,9 +50,22 @@ uiModules
       const responseHandler = getHandler(responseHandlers, $scope.vis.type.responseHandler);
 
       $scope.fetch = _.debounce(function () {
+
         // searchSource is only there for courier request handler
         requestHandler($scope.vis, $scope.appState, $scope.uiState, $scope.savedObj.searchSource)
-          .then(resp => responseHandler($scope.vis, resp), e => {
+          .then(requestHandlerResponse => {
+
+            //No need to call the response handler when there have been no data nor has been there changes
+            //in the vis-state (response handler does not depend on uiStat
+            const canSkipResponseHandler = (
+              $scope.previousRequestHandlerResponse && $scope.previousRequestHandlerResponse === requestHandlerResponse &&
+              $scope.previousVisState && _.isEqual($scope.previousVisState, $scope.vis.getState())
+            );
+
+            $scope.previousVisState = $scope.vis.getState();
+            $scope.previousRequestHandlerResponse = requestHandlerResponse;
+            return canSkipResponseHandler ? $scope.visData : responseHandler($scope.vis, requestHandlerResponse);
+          }, e => {
             $scope.savedObj.searchSource.cancelQueued();
             $el.trigger('renderComplete');
             if (isTermSizeZeroError(e)) {
@@ -62,7 +75,6 @@ uiModules
                 `the error.`
               );
             }
-
             notify.error(e);
           })
           .then(resp => {
@@ -75,8 +87,7 @@ uiModules
 
       $scope.vis.on('update', () => {
         if ($scope.editorMode) {
-          const visState = $scope.vis.getState();
-          $scope.appState.vis = visState;
+          $scope.appState.vis = $scope.vis.getState();
           $scope.appState.save();
         } else {
           $scope.fetch();

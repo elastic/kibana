@@ -20,6 +20,7 @@ export class GeohashLayer extends KibanaMapLayer {
     const geojson = L.geoJson(this._geohashGeoJson);
     this._bounds = geojson.getBounds();
     this._createGeohashMarkers();
+    this._lastBounds = null;
   }
 
   _createGeohashMarkers() {
@@ -69,10 +70,14 @@ export class GeohashLayer extends KibanaMapLayer {
   }
 
   updateExtent() {
-    //this removal is required to trigger the bounds filter again
-    this._kibanaMap.removeLayer(this);
-    this._createGeohashMarkers();
-    this._kibanaMap.addLayer(this);
+    const bounds = this._kibanaMap.getLeafletBounds();
+    if (!this._lastBounds || !this._lastBounds.equals(bounds)) {
+      //this removal is required to trigger the bounds filter again
+      this._kibanaMap.removeLayer(this);
+      this._createGeohashMarkers();
+      this._kibanaMap.addLayer(this);
+    }
+    this._lastBounds = bounds;
   }
 
 
