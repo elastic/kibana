@@ -1,6 +1,6 @@
 import expect from 'expect.js';
 import sinon from 'sinon';
-import { isEqual, times, cloneDeep, size, pick, partition } from 'lodash';
+import { times, cloneDeep, pick, partition } from 'lodash';
 import Chance from 'chance';
 
 import { patchKibanaIndex } from '../patch_kibana_index';
@@ -17,7 +17,7 @@ function createRandomMappings(n = chance.integer({ min: 10, max: 20 })) {
           [prop]: {
             type: chance.pickone(['keyword', 'text', 'integer', 'boolean'])
           }
-        }))
+        }), {})
     }
   };
 }
@@ -56,7 +56,6 @@ function createCallCluster(index) {
   });
 }
 
-// TODO: these tests fail
 describe('es/healthCheck/patchKibanaIndex()', () => {
   describe('general', () => {
     it('reads the _mappings feature of the indexName', async () => {
@@ -71,7 +70,7 @@ describe('es/healthCheck/patchKibanaIndex()', () => {
       });
 
       sinon.assert.calledOnce(callCluster);
-      sinon.assert.calledWith(callCluster, 'indices.get', sinon.match({
+      sinon.assert.calledWithExactly(callCluster, 'indices.get', sinon.match({
         feature: '_mappings'
       }));
     });
@@ -100,7 +99,7 @@ describe('es/healthCheck/patchKibanaIndex()', () => {
       } catch (error) {
         expect(error)
           .to.have.property('message')
-            .contain('Support for Kibana index format v5 has been removed');
+            .contain('Your Kibana index is out of date');
       }
     });
   });
@@ -118,79 +117,58 @@ describe('es/healthCheck/patchKibanaIndex()', () => {
       });
 
       sinon.assert.calledOnce(callCluster);
-      sinon.assert.calledWith(callCluster, 'indices.get', sinon.match({ index: indexName }));
+      sinon.assert.calledWithExactly(callCluster, 'indices.get', sinon.match({ index: indexName }));
     });
 
     it('adds properties that are not in index', async () => {
       const [indexMappings, missingMappings] = splitMappings(createRandomMappings());
+      const mappings = {
+        ...indexMappings,
+        ...missingMappings,
+      };
 
       const indexName = chance.word();
       const callCluster = createCallCluster(createIndex(indexName, indexMappings));
       await patchKibanaIndex({
         indexName,
         callCluster,
-        mappings: [
-          ...indexMappings,
-          ...missingMappings,
-        ],
+        mappings,
         log: sinon.stub()
       });
 
-      sinon.assert.callCount(callCluster, 1 + size(missingMappings));
-      sinon.assert.calledWith(callCluster, 'indices.get', sinon.match({ index: indexName }));
-      sinon.assert.calledWith(callCluster, 'indices.putMapping', sinon.match({
+      sinon.assert.calledTwice(callCluster);
+      sinon.assert.calledWithExactly(callCluster, 'indices.get', sinon.match({ index: indexName }));
+      sinon.assert.calledWithExactly(callCluster, 'indices.putMapping', sinon.match({
         index: indexName,
-        type: 'doc',
+        type: getRootType(mappings),
         body: {
-          properties: sinon.match(props => isEqual(
-            Object.keys(missingMappings),
-            Object.keys(props)
-          ), 'sameKeys')
+          properties: getRootProperties(mappings)
         }
       }));
     });
 
     it('ignores extra properties in index', async () => {
-      const [indexMappings, missingMappings] = splitMappings(createRandomMappings());
+      const [indexMappings, mappings] = splitMappings(createRandomMappings());
       const indexName = chance.word();
       const callCluster = createCallCluster(createIndex(indexName, indexMappings));
       await patchKibanaIndex({
         indexName,
         callCluster,
-        mappings: missingMappings,
+        mappings,
         log: sinon.stub()
       });
 
-      sinon.assert.callCount(callCluster, 1 + size(missingMappings));
-      sinon.assert.calledWith(callCluster, 'indices.get', sinon.match({ index: indexName }));
-      missingMappings.forEach(type => {
-        sinon.assert.calledWith(callCluster, 'indices.putMapping', sinon.match({
-          index: indexName,
-          type: 'doc',
-          body: {
-            properties: {
-              [type.name]: type.mapping,
-            }
-          }
-        }));
-      });
-    });
-
-    it('does not define the _default_ type', async () => {
-      const indexMappings = {};
-      const missingMappings = createRandomMappings();
-
-      const indexName = chance.word();
-      const callCluster = createCallCluster(createIndex(indexName, indexMappings));
-      await patchKibanaIndex({
-        indexName,
-        callCluster,
-        mappings: missingMappings,
-        log: sinon.stub()
-      });
-
-      sinon.assert.calledOnce(callCluster);
-      sinon.assert.calledWith(callCluster, 'indices.get', sinon.match({ index: indexName }));
+      sinon.assert.calledTwice(callCluster);
+      sinon.assert.calledWithExactly(callCluster, 'indices.get', sinon.match({
+        index: indexName
+      }));
+      sinon.assert.calledWithExactly(callCluster, 'indices.putMapping', sinon.match({
+        index: indexName,
+        type: getRootType(mappings),
+        body: {
+          properties: getRootProperties(mappings)
+        }
+      }));
     });
   });
 });

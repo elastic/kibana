@@ -61,7 +61,7 @@ async function getCurrentMappings(callCluster, indexName, rootEsType) {
   const isV5Index = currentTypes.length > 1 || currentTypes[0] !== rootEsType;
   if (isV5Index) {
     throw new Error(
-      'Your kibana index is out of date, reset it or use the x-pack upgrade assistant.'
+      'Your Kibana index is out of date, reset it or use the X-Pack upgrade assistant.'
     );
   }
 
