@@ -179,13 +179,16 @@ export class SavedObjectsClient {
       size: perPage,
       from: perPage * (page - 1),
       _source: includedFields(type, fields),
-      body: createFindQuery(this._mappings, {
-        search,
-        searchFields,
-        type,
-        sortField,
-        sortOrder
-      })
+      body: {
+        version: true,
+        ...getSearchDsl(this._mappings, {
+          search,
+          searchFields,
+          type,
+          sortField,
+          sortOrder
+        })
+      }
     };
 
     const response = await this._withKibanaIndex('search', esOptions);
