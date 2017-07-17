@@ -3,7 +3,7 @@ import minimatch from 'minimatch';
 
 import UiAppCollection from './ui_app_collection';
 import UiNavLinkCollection from './ui_nav_link_collection';
-import { MappingsCollection } from './ui_mappings';
+import { MappingsCollection } from '../server/mappings';
 
 export default class UiExports {
   constructor({ urlBasePath }) {
@@ -29,7 +29,19 @@ export default class UiExports {
     this.bundleProviders = [];
     this.defaultInjectedVars = {};
     this.injectedVarsReplacers = [];
-    this.mappings = new MappingsCollection();
+    this.mappings = new MappingsCollection('docs', {
+      '_default_': {
+        'dynamic': 'strict'
+      },
+      config: {
+        dynamic: true,
+        properties: {
+          buildNum: {
+            type: 'keyword'
+          }
+        }
+      },
+    });
   }
 
   consumePlugin(plugin) {
