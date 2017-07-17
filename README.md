@@ -37,6 +37,14 @@ https://www.elastic.co/elasticon/conf/2017/sf/opening-keynote
 
 No internal build available yet. 
 
+**OK, fine, be like that. Where can I get screenshots?**  
+If you want a stream of conciousness of the absolute latest development, scroll to the end of Rashid's "blog issue"  
+https://github.com/elastic/kibana-canvas/issues/1
+
+Screenshots from the ElasticON talk are available here:  
+https://drive.google.com/drive/u/0/folders/0B1DdqIqU4qUNZklhU0xaM1lRYUE
+
+
 
 ### Engineering
 
