@@ -53,6 +53,6 @@ export const ArgType = compose(
 ArgType.propTypes = {
   expressionType: PropTypes.object,
   context: PropTypes.object,
-  contextExpression: PropTypes.object,
+  contextExpression: PropTypes.string,
   updateContext: PropTypes.func,
 };
