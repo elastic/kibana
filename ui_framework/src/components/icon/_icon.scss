@@ -1,0 +1,27 @@
+@include component('kuiIcon') {
+  display: inline-block;
+
+  @include modifier('xSmall') {
+    @include size($kuiSizeXS);
+  }
+
+  @include modifier('small') {
+    @include size($kuiSizeS);
+  }
+
+  @include modifier('medium') {
+    @include size($kuiSizeM);
+  }
+
+  @include modifier('large') {
+    @include size($kuiSizeL);
+  }
+
+  @include modifier('xLarge') {
+    @include size($kuiSizeXL);
+  }
+
+  @include modifier('xxLarge') {
+    @include size($kuiSizeXXL);
+  }
+}
