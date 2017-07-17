@@ -18,6 +18,14 @@ export const pointseries = () => new Model('pointseries', {
       displayName: 'Color',
       argType: 'datacolumn',
     }),
+    new Arg('size', {
+      displayName: 'Size',
+      argType: 'datacolumn',
+    }),
+    new Arg('text', {
+      displayName: 'Text',
+      argType: 'datacolumn',
+    }),
   ],
   resolve({ context }) {
     if (getState(context) !== 'ready') return { columns: [] };
