@@ -24,8 +24,8 @@ describe('kuery AST API', function () {
   describe('fromKueryExpression', function () {
 
     it('should return location and text metadata for each AST node', function () {
-      const notNode = ast.fromKueryExpression('-foo:bar');
-      expect(notNode).to.have.property('text', '-foo:bar');
+      const notNode = ast.fromKueryExpression('!foo:bar');
+      expect(notNode).to.have.property('text', '!foo:bar');
       expect(notNode.location).to.eql({ min: 0, max: 8 });
 
       const isNode = notNode.arguments[0];
@@ -103,13 +103,13 @@ describe('kuery AST API', function () {
       expectDeepEqual(actual, expected);
     });
 
-    it('should support negation of queries with a "-" prefix', function () {
+    it('should support negation of queries with a "!" prefix', function () {
       const expected = nodeTypes.function.buildNode('not',
         nodeTypes.function.buildNode('or', [
           nodeTypes.literal.buildNode('foo'),
           nodeTypes.literal.buildNode('bar'),
         ], 'function'), 'operator');
-      const actual = fromKueryExpressionNoMeta('-or(foo, bar)');
+      const actual = fromKueryExpressionNoMeta('!or(foo, bar)');
       expectDeepEqual(actual, expected);
     });
 
@@ -239,13 +239,13 @@ describe('kuery AST API', function () {
       testExpression('response:"200"');
       testExpression('"response":"200"');
       testExpression('is(response, 200)');
-      testExpression('-is(response, 200)');
+      testExpression('!is(response, 200)');
       testExpression('foo or is(tic, tock) or foo:bar');
       testExpression('or(foo, is(tic, tock), foo:bar)');
       testExpression('foo is(tic, tock) foo:bar');
       testExpression('foo and is(tic, tock) and foo:bar');
       testExpression('(foo or is(tic, tock)) and foo:bar');
-      testExpression('-(foo or is(tic, tock)) and foo:bar');
+      testExpression('!(foo or is(tic, tock)) and foo:bar');
     });
 
   });

@@ -34,9 +34,9 @@ export function toKueryExpression(node) {
     (argument.function === 'and' || argument.function === 'or') &&
     argument.serializeStyle !== 'function'
   ) {
-    return `-(${queryString})`;
+    return `!(${queryString})`;
   }
   else {
-    return `-${queryString}`;
+    return `!${queryString}`;
   }
 }
