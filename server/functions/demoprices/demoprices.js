@@ -10,7 +10,7 @@ module.exports = new Fn({
   name: 'demoprices',
   aliases: [],
   type: 'datatable',
-  help: 'Returns some crappy demo price data',
+  help: 'Product pricing data in a variety of intervals',
   context: {
     types: ['filter'],
   },

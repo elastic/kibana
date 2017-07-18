@@ -6,7 +6,7 @@ module.exports = new Fn({
   name: 'demodata',
   aliases: [],
   type: 'datatable',
-  help: 'Returns some crappy demo data',
+  help: 'Project CI times with usernames and country',
   context: {
     types: ['filter'],
   },
