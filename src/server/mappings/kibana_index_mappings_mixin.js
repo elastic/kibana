@@ -6,8 +6,8 @@ import { IndexMappings } from './index_mappings';
  *  and timelion plugins for examples.
  *  @type {EsMappingDsl}
  */
-const BASE_KIBANA_INDEX_MAPPINGS = {
-  docs: {
+const BASE_KIBANA_INDEX_MAPPINGS_DSL = {
+  doc: {
     'dynamic': 'strict',
     properties: {
       type: {
@@ -39,7 +39,7 @@ export function kibanaIndexMappingsMixin(kbnServer, server) {
    *
    *  @type {IndexMappings}
    */
-  kbnServer.mappings = new IndexMappings(BASE_KIBANA_INDEX_MAPPINGS);
+  kbnServer.mappings = new IndexMappings(BASE_KIBANA_INDEX_MAPPINGS_DSL);
 
   /**
    *  Get the mappings dsl that we expect to see in the

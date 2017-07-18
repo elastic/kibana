@@ -6,22 +6,27 @@ import { KibanaServerStatus } from './status';
 import { KibanaServerUiSettings } from './ui_settings';
 import { KibanaServerVersion } from './version';
 
-export function KibanaServerProvider({ getService }) {
+export async function KibanaServerProvider({ getService }) {
   const log = getService('log');
   const config = getService('config');
   const lifecycle = getService('lifecycle');
   const es = getService('es');
+  const retry = getService('retry');
 
   class KibanaServer {
     constructor() {
       const url = formatUrl(config.get('servers.kibana'));
       this.status = new KibanaServerStatus(url);
       this.version = new KibanaServerVersion(this.status);
-      this.uiSettings = new KibanaServerUiSettings(log, es, this.version);
+      this.uiSettings = new KibanaServerUiSettings(log, es, retry, '.kibana', this.version);
 
       lifecycle.on('beforeEachTest', async () => {
         await this.waitForStabilization();
       });
+    }
+
+    async init() {
+      await this.uiSettings.init();
     }
 
     async waitForStabilization() {
@@ -65,5 +70,7 @@ export function KibanaServerProvider({ getService }) {
     }
   }
 
-  return new KibanaServer();
+  const kibanaServer = new KibanaServer();
+  await kibanaServer.init();
+  return kibanaServer;
 }

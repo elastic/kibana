@@ -2,7 +2,6 @@ import { get } from 'lodash';
 import toPath from 'lodash/internal/toPath';
 
 import { SavedObjectsClient } from '../../../../src/server/saved_objects';
-import kibanaCoreMappings from '../../../../src/core_plugins/kibana/mappings';
 
 function createCallCluster(es) {
   return function callCluster(method, params) {
@@ -17,13 +16,25 @@ function createCallCluster(es) {
 }
 
 export class KibanaServerUiSettings {
-  constructor(log, es, kibanaVersion) {
+  constructor(log, es, retry, kibanaIndex, kibanaVersion) {
     this._log = log;
+    this._retry = retry;
+    this._kibanaIndex = kibanaIndex;
     this._kibanaVersion = kibanaVersion;
+    this._callCluster = createCallCluster(es);
+  }
+
+  async init() {
+    const index = await this._retry.try(async () => {
+      return await this._callCluster('indices.get', {
+        index: this._kibanaIndex
+      });
+    });
+
     this._savedObjectsClient = new SavedObjectsClient(
-      '.kibana',
-      { config: kibanaCoreMappings.config },
-      createCallCluster(es)
+      this._kibanaIndex,
+      Object.values(index)[0].mappings,
+      this._callCluster
     );
   }
 
@@ -40,6 +51,9 @@ export class KibanaServerUiSettings {
   */
   async getDefaultIndex() {
     const doc = await this._read();
+    if (!doc) {
+      throw new TypeError('Failed to fetch kibana config doc');
+    }
     const defaultIndex = doc.attributes.defaultIndex;
     this._log.verbose('uiSettings.defaultIndex: %j', defaultIndex);
     return defaultIndex;
