@@ -32,9 +32,6 @@ module.exports = class extends Generator {
   writing() {
     const config = this.config;
 
-    // Clean and format input.
-    config.path = utils.makePathRelative(config.path);
-
     const writeComponent = isStatelessFunction => {
       const componentName = utils.makeComponentName(config.name);
       const cssClassName = utils.lowerCaseFirstLetter(componentName);

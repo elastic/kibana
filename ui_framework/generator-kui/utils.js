@@ -27,22 +27,9 @@ function addDirectoryToPath(path, dirName, shouldMakeDirectory) {
   return path;
 }
 
-function makePathRelative(path) {
-  return path;
-  if (!path) {
-    // Leave out the trailing slash deliberately.
-    return '.';
-  }
-  if (path.indexOf('./') === 0) {
-    return path;
-  }
-  return './' + path;
-}
-
 module.exports = {
   makeComponentName: makeComponentName,
   lowerCaseFirstLetter: lowerCaseFirstLetter,
   upperCaseFirstLetter: upperCaseFirstLetter,
   addDirectoryToPath: addDirectoryToPath,
-  makePathRelative: makePathRelative,
 };
