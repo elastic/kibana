@@ -105,7 +105,7 @@ export default function (plugin, server, { mappings }) {
         indexName: config.get('kibana.index'),
         types: Object.keys(mappings).map(name => ({ name, mapping: mappings[name] }))
       }))
-      .then(_.partial(migrateConfig, server, { mappings }))
+      .then(_.partial(migrateConfig, server))
       .then(() => {
         const tribeUrl = config.get('elasticsearch.tribe.url');
         if (tribeUrl) {

@@ -72,7 +72,11 @@ describe('plugins/elasticsearch', () => {
           elasticsearch: {
             getCluster: sinon.stub().returns(cluster)
           }
-        }
+        },
+        savedObjectsClientFactory: () => ({
+          find: sinon.stub().returns(Promise.resolve({ saved_objects: [] })),
+          create: sinon.stub().returns(Promise.resolve({ id: 'foo' })),
+        })
       };
 
       health = healthCheck(plugin, server, { mappings });
