@@ -18,7 +18,7 @@ export function PointSeriesInitYAxisProvider() {
       chart.yAxisFormatter = y.agg.fieldFormatter();
       chart.yAxisLabel = y.col.title;
       if (scaledInterval) {
-        chart.yAxisLabel += ` per ${scaledInterval.description}`;
+        chart.yAxisLabel += ` per ${scaledInterval.preScaled.description}`;
       }
     }
 
