@@ -45,6 +45,7 @@ $kuiHeaderChildSize: $kuiSizeXXL + $kuiSizeL;
     line-height: $kuiHeaderChildSize;
     padding: 0 $kuiSize;
     position: relative;
+    color: $kuiHeaderBreadcrumbColor;
 
     // Slanted separator. Shows on all but last item.
     &:not(:last-child):after {
