@@ -5,9 +5,8 @@ import {
 } from '../../../server/mappings';
 
 /**
- *  Checks that a kibana index has all of the types specified. Any type
- *  that is not defined in the existing index will be added via the
- *  `indicies.putMapping` API.
+ *  Checks that the root type in the kibana index has all of the
+ *  root properties specified by the kibanaIndexMappings.
  *
  *  @param  {Object} options
  *  @property {Function} options.log
