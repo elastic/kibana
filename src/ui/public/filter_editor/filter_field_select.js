@@ -19,10 +19,6 @@ module.directive('filterFieldSelect', function () {
       $scope.$watch('indexPatterns', (indexPatterns) => {
         $scope.fieldOptions = getFieldOptions(indexPatterns);
       });
-
-      $scope.getFieldIndexPattern = (field) => {
-        return field.indexPattern.title;
-      };
     }
   };
 });

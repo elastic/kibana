@@ -1,8 +1,6 @@
 import _ from 'lodash';
 import chrome from 'ui/chrome';
 
-const baseUrl = chrome.addBasePath('/api/kibana/suggestions/values');
-
 export function filterParamsPhraseController($http, $scope, config) {
   const shouldSuggestValues = this.shouldSuggestValues = config.get('filterEditor:suggestValues');
 
@@ -27,7 +25,7 @@ export function filterParamsPhraseController($http, $scope, config) {
       field: field.name
     };
 
-    return $http.post(`${baseUrl}/${field.indexPattern.title}`, params)
+    return $http.post(chrome.addBasePath(`/api/kibana/suggestions/values/${field.indexPattern.id}`), params)
       .then(response => response.data)
       .catch(() => []);
   }
