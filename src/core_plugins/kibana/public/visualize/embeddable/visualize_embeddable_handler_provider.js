@@ -1,5 +1,5 @@
 import { VisualizeEmbeddableHandler } from './visualize_embeddable_handler';
-import { EmbeddableHandlersRegistryProvider } from 'ui/registry/embeddable_handlers';
+import { EmbeddableHandlersRegistryProvider } from 'ui/embeddable/embeddable_handlers_registry';
 
 export function visualizeEmbeddableHandlerProvider(Private) {
   const VisualizeEmbeddableHandlerProvider = ($compile, $rootScope, savedVisualizations, timefilter, Notifier) => {
