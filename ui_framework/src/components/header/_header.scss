@@ -27,6 +27,7 @@ $kuiHeaderChildSize: $kuiSizeXXL + $kuiSizeL;
   @include child('logoIcon') {
     height: $kuiSizeXL;
     width: $kuiSizeL;
+    opacity: 1;
   }
 
   // Truncate long text.
@@ -108,7 +109,7 @@ $kuiHeaderChildSize: $kuiSizeXXL + $kuiSizeL;
     @include child('breadcrumb') {
       display: none;
 
-      // Only show last 3 breadcrumbs
+      // Only show last 4 breadcrumbs
       &:nth-last-child(-n+4) {
         display: inline-block;
       }

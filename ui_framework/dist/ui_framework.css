@@ -146,7 +146,8 @@ table {
       background: #D9D9D9; }
   .kuiHeader__logoIcon {
     height: 32px;
-    width: 24px; }
+    width: 24px;
+    opacity: 1; }
   .kuiHeader__breadcrumbText {
     white-space: nowrap;
     max-width: 150px;
