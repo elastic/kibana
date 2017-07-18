@@ -15,6 +15,14 @@ uiModules.get('kibana/region_map')
 
         $scope.collections = $scope.vis.type.editorConfig.collections;
 
+        $scope.initializeLayerSetting = function () {
+          $scope.vis.params.selectedLayer = $scope.collections.vectorLayers[0];
+        };
+
+        $scope.initializeFieldSetting = function () {
+          $scope.vis.params.selectedJoinField = $scope.vis.params.selectedLayer.fields[0];
+        };
+
         $scope.onLayerChange = onLayerChange;
         serviceSettings.getFileLayers()
           .then(function (layersFromService) {
@@ -50,6 +58,7 @@ uiModules.get('kibana/region_map')
         function onLayerChange() {
           $scope.vis.params.selectedJoinField = $scope.vis.params.selectedLayer.fields[0];
         }
+
 
       }
     };
