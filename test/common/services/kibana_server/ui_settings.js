@@ -16,25 +16,13 @@ function createCallCluster(es) {
 }
 
 export class KibanaServerUiSettings {
-  constructor(log, es, retry, kibanaIndex, kibanaVersion) {
+  constructor(log, es, kibanaIndex, kibanaVersion) {
     this._log = log;
-    this._retry = retry;
-    this._kibanaIndex = kibanaIndex;
     this._kibanaVersion = kibanaVersion;
-    this._callCluster = createCallCluster(es);
-  }
-
-  async init() {
-    const index = await this._retry.try(async () => {
-      return await this._callCluster('indices.get', {
-        index: this._kibanaIndex
-      });
-    });
-
     this._savedObjectsClient = new SavedObjectsClient(
-      this._kibanaIndex,
-      Object.values(index)[0].mappings,
-      this._callCluster
+      kibanaIndex.getName(),
+      kibanaIndex.getMappingsDsl(),
+      createCallCluster(es)
     );
   }
 

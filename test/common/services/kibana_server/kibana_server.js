@@ -11,22 +11,18 @@ export async function KibanaServerProvider({ getService }) {
   const config = getService('config');
   const lifecycle = getService('lifecycle');
   const es = getService('es');
-  const retry = getService('retry');
+  const kibanaIndex = await getService('kibanaIndex').init();
 
-  class KibanaServer {
+  return new class KibanaServer {
     constructor() {
       const url = formatUrl(config.get('servers.kibana'));
       this.status = new KibanaServerStatus(url);
       this.version = new KibanaServerVersion(this.status);
-      this.uiSettings = new KibanaServerUiSettings(log, es, retry, '.kibana', this.version);
+      this.uiSettings = new KibanaServerUiSettings(log, es, kibanaIndex, this.version);
 
       lifecycle.on('beforeEachTest', async () => {
         await this.waitForStabilization();
       });
-    }
-
-    async init() {
-      await this.uiSettings.init();
     }
 
     async waitForStabilization() {
@@ -68,9 +64,5 @@ export async function KibanaServerProvider({ getService }) {
       const docState = exists ? 'exists' : `doesn't exist`;
       throw new Error(`Kibana never stabilized: config doc ${docState} and status is ${state}`);
     }
-  }
-
-  const kibanaServer = new KibanaServer();
-  await kibanaServer.init();
-  return kibanaServer;
+  };
 }
