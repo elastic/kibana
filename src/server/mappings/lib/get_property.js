@@ -10,17 +10,19 @@ import { getRootType } from './get_root_type';
  *  @return {Objects|undefined}
  */
 function getPropertyMappingFromObjectMapping(mapping, path) {
-  if (!mapping || !mapping.properties) {
+  const props = mapping && (mapping.properties || mapping.fields);
+
+  if (!props) {
     return undefined;
   }
 
   if (path.length > 1) {
     return getPropertyMappingFromObjectMapping(
-      mapping.properties[path[0]],
+      props[path[0]],
       path.slice(1)
     );
   } else {
-    return mapping.properties[path[0]];
+    return props[path[0]];
   }
 }
 
