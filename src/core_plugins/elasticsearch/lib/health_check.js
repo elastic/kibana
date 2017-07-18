@@ -108,7 +108,7 @@ module.exports = function (plugin, server, { mappings }) {
         indexName: config.get('kibana.index'),
         types: Object.keys(mappings).map(name => ({ name, mapping: mappings[name] }))
       }))
-      .then(_.partial(migrateConfig, server, { mappings }))
+      .then(_.partial(migrateConfig, server))
       .then(async () => {
         results.enabledScriptingLangs = await determineEnabledScriptingLangs(callDataAsKibanaUser);
       })
