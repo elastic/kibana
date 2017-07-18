@@ -14,6 +14,8 @@ export class Datasource extends BaseRenderable {
       template: defaultTemplate,
       ...props,
     });
+
+    this.image = props.image;
   }
 }
 

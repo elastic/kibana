@@ -2,7 +2,9 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { FormGroup, ControlLabel, FormControl } from 'react-bootstrap';
 import { get } from 'lodash';
-import { Datasource } from '../datasource';
+import { Datasource } from '../../datasource';
+import header from './header.png';
+
 
 const template = ({ args, updateArgs }) => {
   const updateBucket = ({ target }) => {
@@ -42,5 +44,6 @@ template.propTypes = {
 
 export const demoprices = () => new Datasource('demoprices', {
   displayName: 'Demo Prices',
+  image: header,
   template,
 });
