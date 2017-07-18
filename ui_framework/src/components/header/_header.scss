@@ -1,0 +1,43 @@
+$kuiHeaderChildSize: $kuiSizeXXL + 8px;
+
+@include component('kuiHeader') {
+  background: $kuiHeaderBackgroundColor;
+  border-bottom: $kuiBorderThin;
+  padding-top: $kuiFontSize;
+
+  @include child('logo') {
+    height: $kuiHeaderChildSize;
+    width: $kuiHeaderChildSize;
+    display: inline-block;
+    border-right: $kuiBorderThin;
+    vertical-align: middle;
+  }
+
+  @include child('breadcrumb') {
+    display: inline-block;
+    height: $kuiHeaderChildSize;
+    line-height: $kuiHeaderChildSize;
+    padding: 0 $kuiSize;
+    position: relative;
+
+    // Slanted separator
+    &:not(:last-child):after {
+      position: absolute;
+      top: 25%;
+      right: -3px; // Half the transformed width.
+      content: "";
+      width: 1px;
+      height: 50%;
+      transform: rotate(15deg);
+      background: $kuiColorLightGray;
+    }
+
+    @include state('isActive') {
+      color: $kuiColorMediumGray;
+    }
+  }
+
+  @include child('breadcrumb') {
+
+  }
+}

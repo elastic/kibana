@@ -1,3 +1,13 @@
+// Mixes a provided color with white.
+@function tint($color, $percent) {
+  @return mix(#fff, $color, $percent);
+}
+
+// Mixes a provided color with black.
+@function shade($color, $percent) {
+  @return mix(#000, $color, $percent);
+}
+
 // True colors
 
 $kuiColorBlue: #0079a5;
@@ -11,3 +21,9 @@ $kuiColorDarkGray: #666;
 $kuiColorDarkestGray: #3F3F3F;
 $kuiColorBlack: #000;
 $kuiColorWhite: #FFF;
+
+$kuiLinkColor: $kuiColorBlue;
+$kuiFocusBackgroundColor: tint($kuiColorBlue, 80%);
+
+$kuiHeaderBackgroundColor: $kuiColorWhite;
+

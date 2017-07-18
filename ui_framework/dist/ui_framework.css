@@ -2,8 +2,8 @@
  * Adapted from Eric Meyer's reset (http://meyerweb.com/eric/tools/css/reset/, v2.0 | 20110126).
  *
  */
-* {
-  border-box: box-sizing; }
+*, *:before, *:after {
+  box-sizing: border-box; }
 
 html, body, div, span, applet, object, iframe,
 h1, h2, h3, h4, h5, h6, p, blockquote, pre,
@@ -30,8 +30,31 @@ article, aside, details, figcaption, figure,
 footer, header, hgroup, menu, nav, section {
   display: block; }
 
+html {
+  font-family: "Roboto", Helvetica, Arial, sans-serif;
+  font-weight: 400;
+  color: #3F3F3F;
+  height: 100%; }
+
 body {
   line-height: 1; }
+
+a {
+  text-decoration: none;
+  color: #0079a5; }
+
+a:hover {
+  text-decoration: underline; }
+
+a:focus {
+  background: #cce4ed;
+  outline: none; }
+
+button {
+  background: none;
+  border: none;
+  padding: 0;
+  margin: 0; }
 
 ol, ul {
   list-style: none; }
@@ -48,6 +71,35 @@ table {
   border-collapse: collapse;
   border-spacing: 0; }
 
+.u-flex {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex; }
+
+.u-flex-row {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-orient: horizontal;
+  -webkit-box-direction: normal;
+  -webkit-flex-direction: row;
+      -ms-flex-direction: row;
+          flex-direction: row; }
+
+.u-flex-grow-1 {
+  -webkit-box-flex: 1;
+  -webkit-flex-grow: 1;
+      -ms-flex-positive: 1;
+          flex-grow: 1; }
+
+.u-text-align-right {
+  text-align: right !important; }
+
+.u-text-align-left {
+  text-align: left !important; }
+
 .kuiIcon {
   display: inline-block; }
   .kuiIcon--medium {
@@ -62,3 +114,32 @@ table {
   .kuiIcon--xxLarge {
     width: 40px;
     height: 40px; }
+
+.kuiHeader {
+  background: #FFF;
+  border-bottom: 1px solid #D9D9D9;
+  padding-top: 16px; }
+  .kuiHeader__logo {
+    height: 48px;
+    width: 48px;
+    display: inline-block;
+    border-right: 1px solid #D9D9D9;
+    vertical-align: middle; }
+  .kuiHeader__breadcrumb {
+    display: inline-block;
+    height: 48px;
+    line-height: 48px;
+    padding: 0 16px;
+    position: relative; }
+    .kuiHeader__breadcrumb:not(:last-child):after {
+      position: absolute;
+      top: 25%;
+      right: -3px;
+      content: "";
+      width: 1px;
+      height: 50%;
+      -webkit-transform: rotate(15deg);
+              transform: rotate(15deg);
+      background: #D9D9D9; }
+    .kuiHeader__breadcrumb.isActive {
+      color: #999; }

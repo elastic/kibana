@@ -3,8 +3,8 @@
  *
  */
 
-* {
-  border-box: box-sizing;
+*, *:before, *:after {
+  box-sizing: border-box;
 }
 
 html, body, div, span, applet, object, iframe,
@@ -34,8 +34,36 @@ footer, header, hgroup, menu, nav, section {
   display: block;
 }
 
+html {
+  font-family: $kuiFontFamily;
+  font-weight: $kuiFontWeightRegular;
+  color: $kuiColorDarkestGray;
+  height: 100%;
+}
+
 body {
   line-height: 1;
+}
+
+a {
+  text-decoration: none;
+  color: $kuiLinkColor;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+a:focus {
+  background: $kuiFocusBackgroundColor;
+  outline: none;
+}
+
+button {
+  background: none;
+  border: none;
+  padding: 0;
+  margin: 0;
 }
 
 ol, ul {
