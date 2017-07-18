@@ -50,12 +50,15 @@ table {
 
 .kuiIcon {
   display: inline-block; }
+<<<<<<< Updated upstream
   .kuiIcon--xSmall {
     width: 4px;
     height: 4px; }
   .kuiIcon--small {
     width: 8px;
     height: 8px; }
+=======
+>>>>>>> Stashed changes
   .kuiIcon--medium {
     width: 16px;
     height: 16px; }
