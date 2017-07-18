@@ -3,6 +3,4 @@ export {
   KuiScreenReaderOnly,
 } from './accessibility';
 
-export {
-  KuiPopover,
-} from './popover';
+import './icon';

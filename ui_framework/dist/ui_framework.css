@@ -47,3 +47,18 @@ q:before, q:after {
 table {
   border-collapse: collapse;
   border-spacing: 0; }
+
+.kuiIcon {
+  display: inline-block; }
+  .kuiIcon--medium {
+    width: 16px;
+    height: 16px; }
+  .kuiIcon--large {
+    width: 24px;
+    height: 24px; }
+  .kuiIcon--xLarge {
+    width: 32px;
+    height: 32px; }
+  .kuiIcon--xxLarge {
+    width: 40px;
+    height: 40px; }
