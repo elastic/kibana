@@ -1,7 +1,14 @@
 import { SslConfig } from './SslConfig';
 import { Env } from '../../config';
 import { ByteSizeValue } from '../../lib/ByteSizeValue';
-import { Schema, typeOfSchema } from '../../types';
+import {
+  object,
+  string,
+  number,
+  byteSize,
+  maybe,
+  TypeOf
+} from '../../lib/schema';
 
 const validHostnameRegex = /^(([A-Z0-9]|[A-Z0-9][A-Z0-9\-]*[A-Z0-9])\.)*([A-Z0-9]|[A-Z0-9][A-Z0-9\-]*[A-Z0-9])$/i;
 const validBasePathRegex = /(^$|^\/.*[^\/]$)/;
@@ -9,37 +16,32 @@ const validBasePathRegex = /(^$|^\/.*[^\/]$)/;
 const match = (regex: RegExp, errorMsg: string) => (str: string) =>
   regex.test(str) ? undefined : errorMsg;
 
-const createHttpSchema = (schema: Schema) => {
-  const { object, string, number, byteSize, maybe } = schema;
+const httpSchema = object({
+  host: string({
+    defaultValue: 'localhost',
+    validate: match(validHostnameRegex, 'must be a valid hostname')
+  }),
+  port: number({
+    defaultValue: 5601
+  }),
+  maxPayload: byteSize({
+    defaultValue: '1mb'
+  }),
+  basePath: maybe(
+    string({
+      validate: match(
+        validBasePathRegex,
+        "must start with a slash, don't end with one"
+      )
+    })
+  ),
+  ssl: SslConfig.createSchema()
+});
 
-  return object({
-    host: string({
-      defaultValue: 'localhost',
-      validate: match(validHostnameRegex, 'must be a valid hostname')
-    }),
-    port: number({
-      defaultValue: 5601
-    }),
-    maxPayload: byteSize({
-      defaultValue: '1mb'
-    }),
-    basePath: maybe(
-      string({
-        validate: match(
-          validBasePathRegex,
-          "must start with a slash, don't end with one"
-        )
-      })
-    ),
-    ssl: SslConfig.createSchema(schema)
-  });
-};
-
-const httpConfigType = typeOfSchema(createHttpSchema);
-type HttpConfigType = typeof httpConfigType;
+type HttpConfigType = TypeOf<typeof httpSchema>;
 
 export class HttpConfig {
-  static createSchema = createHttpSchema;
+  static createSchema = () => httpSchema;
 
   host: string;
   port: number;

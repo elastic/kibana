@@ -1,19 +1,15 @@
-import { Schema, typeOfSchema } from '../../types';
+import { object, string, TypeOf } from '../../lib/schema';
 
-const createKibanaSchema = (schema: Schema) =>
-  schema.object({
-    index: schema.string({ defaultValue: '.kibana' })
-  });
-
-const kibanaConfigType = typeOfSchema(createKibanaSchema);
-type KibanaConfigType = typeof kibanaConfigType;
+const kibanaSchema = object({
+  index: string({ defaultValue: '.kibana' })
+});
 
 export class KibanaConfig {
-  static createSchema = createKibanaSchema;
+  static createSchema = () => kibanaSchema;
 
   readonly index: string;
 
-  constructor(config: KibanaConfigType) {
+  constructor(config: TypeOf<typeof kibanaSchema>) {
     this.index = config.index;
   }
 }

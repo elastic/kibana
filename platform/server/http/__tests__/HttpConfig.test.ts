@@ -1,14 +1,13 @@
-import * as schema from '../../../lib/schema';
 import { HttpConfig } from '../HttpConfig';
 
 test('has defaults for config', () => {
-  const httpSchema = HttpConfig.createSchema(schema);
+  const httpSchema = HttpConfig.createSchema();
   const obj = {};
   expect(httpSchema.validate(obj)).toMatchSnapshot();
 });
 
 test('throws if invalid hostname', () => {
-  const httpSchema = HttpConfig.createSchema(schema);
+  const httpSchema = HttpConfig.createSchema();
   const obj = {
     host: 'asdf$%^'
   };
@@ -16,7 +15,7 @@ test('throws if invalid hostname', () => {
 });
 
 test('can specify max payload as string', () => {
-  const httpSchema = HttpConfig.createSchema(schema);
+  const httpSchema = HttpConfig.createSchema();
   const obj = {
     maxPayload: '2mb'
   };
@@ -25,7 +24,7 @@ test('can specify max payload as string', () => {
 });
 
 test('throws is basepath is missing prepended slash', () => {
-  const httpSchema = HttpConfig.createSchema(schema);
+  const httpSchema = HttpConfig.createSchema();
   const obj = {
     basePath: 'foo'
   };
@@ -33,7 +32,7 @@ test('throws is basepath is missing prepended slash', () => {
 });
 
 test('throws is basepath appends a slash', () => {
-  const httpSchema = HttpConfig.createSchema(schema);
+  const httpSchema = HttpConfig.createSchema();
   const obj = {
     basePath: '/foo/'
   };

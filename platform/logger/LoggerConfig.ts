@@ -1,39 +1,32 @@
 import { Level, LogLevelId } from './Level';
-import { Schema, typeOfSchema } from '../types';
+import { object, string, oneOf, literal, TypeOf } from '../lib/schema';
 
-const createLoggerSchema = (schema: Schema) => {
-  const { object, string, oneOf, literal } = schema;
-
-  return object({
-    dest: string({
-      defaultValue: 'stdout'
-    }),
-    level: oneOf(
-      [
-        literal('fatal'),
-        literal('error'),
-        literal('warn'),
-        literal('info'),
-        literal('debug'),
-        literal('trace')
-      ],
-      {
-        defaultValue: 'info'
-      }
-    )
-  });
-};
-
-const loggingConfigType = typeOfSchema(createLoggerSchema);
-type HttpConfigType = typeof loggingConfigType;
+const loggerSchema = object({
+  dest: string({
+    defaultValue: 'stdout'
+  }),
+  level: oneOf(
+    [
+      literal('fatal'),
+      literal('error'),
+      literal('warn'),
+      literal('info'),
+      literal('debug'),
+      literal('trace')
+    ],
+    {
+      defaultValue: 'info'
+    }
+  )
+});
 
 export class LoggerConfig {
-  static createSchema = createLoggerSchema;
+  static createSchema = () => loggerSchema;
 
   readonly dest: string;
   private readonly level: LogLevelId;
 
-  constructor(config: HttpConfigType) {
+  constructor(config: TypeOf<typeof loggerSchema>) {
     this.dest = config.dest;
 
     // TODO: To enable more control we could explore the same direction as ES,

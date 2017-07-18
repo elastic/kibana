@@ -1,13 +1,10 @@
 import { ElasticsearchConfig } from './ElasticsearchConfig';
-import {
-  createElasticsearchSchema,
-  ElasticsearchConfigsSchema
-} from './schema';
+import { elasticsearchSchema, ElasticsearchConfigsSchema } from './schema';
 import { ElasticsearchClusterType } from '../../types';
 import { Env } from '../../config';
 
 export class ElasticsearchConfigs {
-  static createSchema = createElasticsearchSchema;
+  static createSchema = () => elasticsearchSchema;
 
   private readonly configs: {
     [type in ElasticsearchClusterType]: ElasticsearchConfig
