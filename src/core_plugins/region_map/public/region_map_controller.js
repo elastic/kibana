@@ -106,18 +106,6 @@ module.controller('KbnRegionMapController', function ($scope, $element, Private,
     kibanaMap.addLegendControl();
     kibanaMap.addFitControl();
     kibanaMap.persistUiStateForVisualization($scope.vis);
-
-
-    const saveCurrentLocation = () => {
-      //to ensure we dirty the state of the viz. (not sure why this is required. Tilemap visualization does not require it)
-      $scope.vis.params.mapZoom = kibanaMap.getZoomLevel();
-      $scope.vis.params.mapCenter = kibanaMap.getCenter();
-      $scope.$apply();
-    };
-
-    kibanaMap.on('dragend', saveCurrentLocation);
-    kibanaMap.on('zoomend', saveCurrentLocation);
-
   }
 
   function setTooltipFormatter() {
