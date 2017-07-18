@@ -3,7 +3,6 @@ import ngMock from 'ng_mock';
 import './agg_type';
 import './agg_params';
 import './buckets/_histogram';
-import './buckets/date_histogram/_date_histogram';
 import './buckets/_geo_hash';
 import './buckets/_range';
 import { AggTypesIndexProvider } from 'ui/agg_types/index';
