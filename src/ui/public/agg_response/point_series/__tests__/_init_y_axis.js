@@ -48,6 +48,35 @@ describe('initYAxis', function () {
       initYAxis(chart);
       expect(chart).to.have.property('yAxisLabel', 'y1');
     });
+
+    describe('when metric is scaled', function () {
+      const metricScaledBaseChart = _.cloneDeep(singleYBaseChart);
+      metricScaledBaseChart.aspects.x.agg = {
+        fieldFormatter: _.constant({}),
+        write: _.constant({
+          params: {},
+          metricScaledInterval: {
+            scale: .005,
+            preScaled: {
+              description: 'milliseconds'
+            }
+          }
+        }),
+        type: {}
+      };
+
+      it('sets yScale', function () {
+        const chart = _.cloneDeep(metricScaledBaseChart);
+        initYAxis(chart);
+        expect(chart).to.have.property('yScale', .005);
+      });
+
+      it('specifies scaled units in yAxisLabel', function () {
+        const chart = _.cloneDeep(metricScaledBaseChart);
+        initYAxis(chart);
+        expect(chart).to.have.property('yAxisLabel', 'y1 per milliseconds');
+      });
+    });
   });
 
   describe('with mutliple y aspects', function () {
