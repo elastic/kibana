@@ -73,7 +73,7 @@ module.exports = class extends Generator {
         this.destinationPath(stylesPath),
         vars
       );
-    }
+    };
 
     switch (this.fileType) {
       case 'component':
@@ -91,7 +91,7 @@ module.exports = class extends Generator {
       const componentName = this.config.vars.componentName;
       const componentPath = this.config.componentPath;
 
-      this.log(chalk.gray('// Export component.'));
+      this.log(chalk.gray('\n// Export component.'));
       this.log(
         `${chalk.magenta('export')} {\n` +
         `  ${componentName},\n` +
@@ -105,13 +105,19 @@ module.exports = class extends Generator {
         `} ${chalk.magenta('from')} ${chalk.cyan(`'./${this.config.name}'`)};`
       );
 
-      const stylesPath = this.config.stylesImportPath;
       this.log(chalk.gray('\n// Import styles.'));
-      this.log(chalk.magenta('@import') + ' ' + chalk.cyan('\'' + stylesPath + '\'') + ';');
-    }
+      this.log(
+        `${chalk.magenta('@import')} ${chalk.cyan(`'./${this.config.name}'`)};`
+      );
+
+      this.log(chalk.gray('\n// Import index styles.'));
+      this.log(
+        `${chalk.magenta('@import')} ${chalk.cyan(`'./${this.config.name}/index'`)};`
+      );
+    };
 
     this.log('------------------------------------------------');
-    this.log(chalk.bold('Import snippets:'));
+    this.log(chalk.bold('Handy snippets:'));
     switch (this.fileType) {
       case 'component':
         showImportComponentSnippet();
