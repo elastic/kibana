@@ -1,7 +1,7 @@
 import * as process from 'process';
 import { resolve } from 'path';
 
-interface WithConfig {
+export interface WithConfig {
   config?: string;
   [key: string]: any;
 }

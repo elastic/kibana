@@ -1,4 +1,4 @@
-type ByteSizeValueUnit = 'b' | 'kb' | 'mb' | 'gb';
+export type ByteSizeValueUnit = 'b' | 'kb' | 'mb' | 'gb';
 
 const unitMultiplier: { [unit: string]: number } = {
   b: 1024 ** 0,

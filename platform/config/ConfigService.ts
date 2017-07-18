@@ -6,7 +6,7 @@ import { Logger, LoggerFactory } from '../logger';
 import * as schema from '../lib/schema';
 import { ConfigWithSchema } from '../types';
 
-type ConfigPath = string | string[];
+export type ConfigPath = string | string[];
 
 export class ConfigService {
   private readonly log: Logger;

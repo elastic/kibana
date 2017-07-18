@@ -7,6 +7,9 @@ import { ElasticsearchClusterType } from '../../types';
 import { Env } from '../../config';
 
 export class ElasticsearchConfigs {
+  /**
+   * @internal
+   */
   static createSchema = createElasticsearchSchema;
 
   private readonly configs: {

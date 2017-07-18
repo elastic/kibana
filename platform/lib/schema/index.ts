@@ -13,7 +13,7 @@ function toContext(parent: string = '', child: string | number) {
 export type Any = Setting<any>;
 export type TypeOf<RT extends Any> = RT['_type'];
 
-type SettingOptions<T> = {
+export type SettingOptions<T> = {
   defaultValue?: T;
   validate?: (value: T) => string | void;
 };
@@ -45,7 +45,7 @@ export abstract class Setting<V> {
   protected abstract process(value: any, context?: string): V;
 }
 
-class MaybeSetting<V> extends Setting<V | undefined> {
+export class MaybeSetting<V> extends Setting<V | undefined> {
   private readonly setting: Setting<V>;
 
   constructor(setting: Setting<V>) {
@@ -69,7 +69,7 @@ class MaybeSetting<V> extends Setting<V | undefined> {
   }
 }
 
-class BooleanSetting extends Setting<boolean> {
+export class BooleanSetting extends Setting<boolean> {
   process(value: any, context?: string): boolean {
     if (typeof value !== 'boolean') {
       throw new SettingError(
@@ -82,12 +82,12 @@ class BooleanSetting extends Setting<boolean> {
   }
 }
 
-type StringOptions = SettingOptions<string> & {
+export type StringOptions = SettingOptions<string> & {
   minLength?: number;
   maxLength?: number;
 };
 
-class StringSetting extends Setting<string> {
+export class StringSetting extends Setting<string> {
   private readonly minLength: number | void;
   private readonly maxLength: number | void;
 
@@ -125,7 +125,7 @@ class StringSetting extends Setting<string> {
   }
 }
 
-class LiteralSetting<T> extends Setting<T> {
+export class LiteralSetting<T> extends Setting<T> {
   constructor(private readonly value: T) {
     super();
   }
@@ -142,7 +142,7 @@ class LiteralSetting<T> extends Setting<T> {
   }
 }
 
-class UnionSetting<RTS extends Array<Any>, T> extends Setting<T> {
+export class UnionSetting<RTS extends Array<Any>, T> extends Setting<T> {
   constructor(public readonly settings: RTS, options?: SettingOptions<T>) {
     super(options);
   }
@@ -162,12 +162,12 @@ class UnionSetting<RTS extends Array<Any>, T> extends Setting<T> {
   }
 }
 
-type NumberOptions = SettingOptions<number> & {
+export type NumberOptions = SettingOptions<number> & {
   min?: number;
   max?: number;
 };
 
-class NumberSetting extends Setting<number> {
+export class NumberSetting extends Setting<number> {
   private readonly min: number | void;
   private readonly max: number | void;
 
@@ -217,7 +217,7 @@ class NumberSetting extends Setting<number> {
   }
 }
 
-type ByteSizeOptions = {
+export type ByteSizeOptions = {
   // we need to special-case defaultValue as we want to handle string inputs too
   validate?: (value: ByteSizeValue) => string | void;
   defaultValue?: ByteSizeValue | string;
@@ -229,7 +229,7 @@ function ensureByteSizeValue(value?: ByteSizeValue | string) {
   return typeof value === 'string' ? ByteSizeValue.parse(value) : value;
 }
 
-class ByteSizeSetting extends Setting<ByteSizeValue> {
+export class ByteSizeSetting extends Setting<ByteSizeValue> {
   private readonly min: ByteSizeValue | void;
   private readonly max: ByteSizeValue | void;
 
@@ -281,7 +281,7 @@ class ByteSizeSetting extends Setting<ByteSizeValue> {
   }
 }
 
-type DurationOptions = {
+export type DurationOptions = {
   // we need to special-case defaultValue as we want to handle string inputs too
   validate?: (value: Duration) => string | void;
   defaultValue?: Duration | string;
@@ -308,7 +308,7 @@ function stringToDuration(text: string) {
   return momentDuration(count, unit);
 }
 
-class DurationSetting extends Setting<Duration> {
+export class DurationSetting extends Setting<Duration> {
   constructor(options: DurationOptions = {}) {
     const { defaultValue, ...rest } = options;
 
@@ -336,12 +336,12 @@ class DurationSetting extends Setting<Duration> {
   }
 }
 
-type ArrayOptions<T> = SettingOptions<Array<T>> & {
+export type ArrayOptions<T> = SettingOptions<Array<T>> & {
   minSize?: number;
   maxSize?: number;
 };
 
-class ArraySetting<T> extends Setting<Array<T>> {
+export class ArraySetting<T> extends Setting<Array<T>> {
   private readonly itemSetting: Setting<T>;
   private readonly minSize?: number;
   private readonly maxSize?: number;
@@ -388,7 +388,7 @@ export type Props = Record<string, Any>;
 // Because of https://github.com/Microsoft/TypeScript/issues/14041
 // this might not have perfect _rendering_ output, but it will be typed.
 
-type ObjectSettingType<P extends Props> = Readonly<
+export type ObjectSettingType<P extends Props> = Readonly<
   { [K in keyof P]: TypeOf<P[K]> }
 >;
 
@@ -440,7 +440,7 @@ function isMap<K, V>(o: any): o is Map<K, V> {
   return o instanceof Map;
 }
 
-type MapOfOptions<K, V> = SettingOptions<Map<K, V>>;
+export type MapOfOptions<K, V> = SettingOptions<Map<K, V>>;
 
 export class MapOfSetting<K, V> extends Setting<Map<K, V>> {
   constructor(
