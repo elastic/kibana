@@ -47,14 +47,18 @@ a:hover {
   text-decoration: underline; }
 
 a:focus {
-  background: #cce4ed;
+  text-decoration: underline;
+  background: #bfe9e6;
   outline: none; }
 
 button {
   background: none;
   border: none;
   padding: 0;
-  margin: 0; }
+  margin: 0;
+  outline: none; }
+  button:hover {
+    cursor: pointer; }
 
 ol, ul {
   list-style: none; }
@@ -94,6 +98,11 @@ table {
       -ms-flex-positive: 1;
           flex-grow: 1; }
 
+.u-flex-shrink-1 {
+  -webkit-flex-shrink: 1;
+      -ms-flex-negative: 1;
+          flex-shrink: 1; }
+
 .u-text-align-right {
   text-align: right !important; }
 
@@ -101,7 +110,10 @@ table {
   text-align: left !important; }
 
 .kuiIcon {
+  opacity: .8;
   display: inline-block; }
+  .kuiIcon:hover {
+    opacity: 1; }
   .kuiIcon--medium {
     width: 16px;
     height: 16px; }
@@ -117,29 +129,86 @@ table {
 
 .kuiHeader {
   background: #FFF;
-  border-bottom: 1px solid #D9D9D9;
-  padding-top: 16px; }
+  border-bottom: 1px solid #D9D9D9; }
   .kuiHeader__logo {
-    height: 48px;
-    width: 48px;
+    position: relative;
+    height: 64px;
+    padding: 16px 32px;
     display: inline-block;
-    border-right: 1px solid #D9D9D9;
     vertical-align: middle; }
+    .kuiHeader__logo:after {
+      position: absolute;
+      content: "";
+      width: 1px;
+      top: 16px;
+      bottom: 0;
+      right: 0;
+      background: #D9D9D9; }
+  .kuiHeader__logoIcon {
+    height: 32px;
+    width: 24px; }
+  .kuiHeader__breadcrumbText {
+    white-space: nowrap;
+    max-width: 150px;
+    display: block;
+    text-overflow: ellipsis;
+    overflow: hidden; }
   .kuiHeader__breadcrumb {
     display: inline-block;
-    height: 48px;
-    line-height: 48px;
+    height: 64px;
+    line-height: 64px;
     padding: 0 16px;
     position: relative; }
     .kuiHeader__breadcrumb:not(:last-child):after {
       position: absolute;
-      top: 25%;
+      top: 24px;
       right: -3px;
       content: "";
       width: 1px;
-      height: 50%;
+      height: 16px;
       -webkit-transform: rotate(15deg);
               transform: rotate(15deg);
       background: #D9D9D9; }
     .kuiHeader__breadcrumb.isActive {
       color: #999; }
+    .kuiHeader__breadcrumb.isCollapsed {
+      color: #D9D9D9; }
+  .kuiHeader__breadcrumbText {
+    white-space: nowrap;
+    max-width: 150px;
+    display: block;
+    text-overflow: ellipsis;
+    overflow: hidden; }
+  .kuiHeader__button {
+    height: 64px;
+    width: 64px;
+    text-align: center;
+    position: relative; }
+    .kuiHeader__button:after {
+      position: absolute;
+      content: "";
+      width: 1px;
+      top: 16px;
+      bottom: 0;
+      left: 0;
+      background: #D9D9D9; }
+    .kuiHeader__button:hover {
+      background: #F5F5F5; }
+    .kuiHeader__button:focus {
+      background: #bfe9e6; }
+
+@media only screen and (min-width: 992px) and (max-width: 1199px) {
+  .kuiHeader__breadcrumb {
+    display: none; }
+    .kuiHeader__breadcrumb:nth-last-child(-n+4) {
+      display: inline-block; } }
+
+@media only screen and (min-width: 769px) and (max-width: 991px) {
+  .kuiHeader__breadcrumb {
+    display: none; }
+    .kuiHeader__breadcrumb:nth-last-child(-n+2) {
+      display: inline-block; } }
+
+@media only screen and (max-width: 768px) {
+  .kuiHeader__breadcrumb {
+    display: none; } }

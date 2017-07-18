@@ -55,6 +55,7 @@ a:hover {
 }
 
 a:focus {
+  text-decoration: underline;
   background: $kuiFocusBackgroundColor;
   outline: none;
 }
@@ -64,6 +65,11 @@ button {
   border: none;
   padding: 0;
   margin: 0;
+  outline: none;
+
+  &:hover {
+    cursor: pointer;
+  }
 }
 
 ol, ul {

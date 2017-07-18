@@ -14,7 +14,7 @@ const headerJs = require('raw!./header.js');
 export default props => (
   <GuidePage title={props.route.name}>
     <GuideSection
-      title="HeaderItem"
+      title="Header"
       source={[{
         type: GuideSectionTypes.HTML,
         code: headerHtml,
@@ -24,7 +24,7 @@ export default props => (
       }]}
     >
       <GuideText>
-        Header stuff
+        Global nav / header.
       </GuideText>
 
       <GuideDemo

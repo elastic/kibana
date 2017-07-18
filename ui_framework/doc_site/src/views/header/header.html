@@ -2,29 +2,46 @@
   <section class="u-flex-row">
     <section class="u-flex-grow-1">
       <span class="u-flex">
-        <div class="kuiHeader__logo"></div>
-        <a href="" class="kuiHeader__breadcrumb">Management</a>
-        <a href="" class="kuiHeader__breadcrumb">Elasticsearch</a>
-        <a href="" class="kuiHeader__breadcrumb">Users</a>
-        <a href="" class="kuiHeader__breadcrumb isActive">Create</a>
+        <a href="" class="kuiHeader__logo">
+          <svg class="kuiIcon kuiHeader__logoIcon">
+            <use href="#logo" />
+          </svg>
+        </a>
+        <a href="#" class="kuiHeader__breadcrumb">
+          <span class="kuiHeader__breadcrumbText">Management</span>
+        </a>
+        <a href="#" class="kuiHeader__breadcrumb">
+          <span class="kuiHeader__breadcrumbText">Truncation test is here</span>
+        </a>
+        <span class="kuiHeader__breadcrumb isCollapsed">
+          <span class="kuiHeader__breadcrumbText">&#8230;</span>
+        </span>
+        <a href="#" class="kuiHeader__breadcrumb">
+          <span class="kuiHeader__breadcrumbText">Users</span>
+        </a>
+        <a href="#" class="kuiHeader__breadcrumb isActive">
+          <span class="kuiHeader__breadcrumbText">Create</span>
+        </a>
       </span>
     </section>
-    <section class="u-flex-grow-1 u-text-align-right">
-      <button class="kuiHeader__button">
-        <svg class="kuiIcon kuiIcon--medium">
-          <use href="#search" />
-        </svg>
-      </button>
-      <button class="kuiHeader__button">
-        <svg class="kuiIcon kuiIcon--medium">
-          <use href="#search" />
-        </svg>
-      </button>
-      <button class="kuiHeader__button">
-        <svg class="kuiIcon kuiIcon--medium">
-          <use href="#search" />
-        </svg>
-      </button>
+    <section class="u-flex-shrink-1 u-text-align-right">
+      <div class="u-flex">
+        <button class="kuiHeader__button">
+          <svg class="kuiIcon kuiIcon--medium">
+            <use href="#search" />
+          </svg>
+        </button>
+        <button class="kuiHeader__button">
+          <svg class="kuiIcon kuiIcon--medium">
+            <use href="#user" />
+          </svg>
+        </button>
+        <button class="kuiHeader__button">
+          <svg class="kuiIcon kuiIcon--medium">
+            <use href="#apps" />
+          </svg>
+        </button>
+      </div>
     </section>
   </section>
 </div>

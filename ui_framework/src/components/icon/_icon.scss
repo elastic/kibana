@@ -1,5 +1,10 @@
 @include component('kuiIcon') {
+  opacity: .8;
   display: inline-block;
+
+  &:hover {
+    opacity: 1;
+  }
 
   @include modifier('medium') {
     @include size($kuiSizeM);
