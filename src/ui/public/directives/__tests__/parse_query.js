@@ -66,18 +66,17 @@ describe('parse-query directive', function () {
       expect(fromUser({ foo: 'bar' })).to.eql({ foo: 'bar' });
     });
 
-    it('unless the object is empty, that implies a *', function () {
-      expect(fromUser({})).to.eql({ query_string: { query: '*' } });
+    it('should treat an empty object as matching all documents', function () {
+      expect(fromUser({})).to.eql({ match_all: {} });
     });
 
-    it('should treat an empty string as a *', function () {
-      expect(fromUser('')).to.eql({ query_string: { query: '*' } });
+    it('should treat an empty string as matching all documents', function () {
+      expect(fromUser('')).to.eql({ match_all: {} });
     });
 
     it('should merge in the query string options', function () {
       config.set('query:queryString:options', { analyze_wildcard: true });
       expect(fromUser('foo')).to.eql({ query_string: { query: 'foo', analyze_wildcard: true } });
-      expect(fromUser('')).to.eql({ query_string: { query: '*', analyze_wildcard: true } });
     });
 
     it('should treat input that does not start with { as a query string', function () {
@@ -112,6 +111,10 @@ describe('parse-query directive', function () {
 
     it('should present query_string queries without a query as an empty string', function () {
       expect(toUser({ query_string: {} })).to.be('');
+    });
+
+    it('should present match_all queries as an empty string', function () {
+      expect(toUser({ match_all: {} })).to.be('');
     });
 
     it('should present string as strings', function () {
