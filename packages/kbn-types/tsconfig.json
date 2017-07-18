@@ -2,7 +2,8 @@
   "extends": "../../tsconfig",
   "compilerOptions": {
     "declaration": true,
-    "declarationDir": "./types"
+    "declarationDir": "./types",
+    "stripInternal": true
   },
   "files": [
     "./index.ts",
