@@ -1,11 +1,14 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 
+import './arg_type.less';
+
 // compose the above branch components, to short-circuit rending this ArgType component
-export const ArgTypeComponent = ({ args, expressionType, onValueChange, context, nextExpressionType }) => {
+export const ArgTypeComponent = (props) => {
+  const { expressionType, ...passedProps } = props;
   return (
     <div className="canvas__argtype">
-      { expressionType.render({ args, context, nextExpressionType, onValueChange }) }
+      { expressionType.render(passedProps) }
     </div>
   );
 };
@@ -14,6 +17,7 @@ ArgTypeComponent.propTypes = {
   args: PropTypes.object.isRequired,
   expressionType: PropTypes.object.isRequired,
   onValueChange: PropTypes.func.isRequired,
+  onValueRemove: PropTypes.func.isRequired,
   nextExpressionType: PropTypes.object,
   context: PropTypes.object,
 };

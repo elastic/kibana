@@ -5,8 +5,7 @@ import { MathExpression } from './math_expression';
 import { ArgType } from '../../arg_type';
 import './datacolumn.less';
 
-const template = ({ data, typeInstance }) => {
-  const { onValueChange, columns, argValue } = data;
+const template = ({ onValueChange, columns, argValue, typeInstance }) => {
   const { name, displayName } = typeInstance;
   const inputRefs = {};
 
@@ -62,8 +61,10 @@ const template = ({ data, typeInstance }) => {
 };
 
 template.propTypes = {
-  data: PropTypes.object,
-  typeInstance: PropTypes.object,
+  columns: PropTypes.array.isRequired,
+  onValueChange: PropTypes.func.isRequired,
+  argValue: PropTypes.object.isRequired,
+  typeInstance: PropTypes.object.isRequired,
 };
 
 export const datacolumn = () => new ArgType('datacolumn', {

@@ -4,7 +4,7 @@ import { get } from 'lodash';
 import { ArgType as Component } from './arg_type';
 import { toAstValue } from '../../lib/map_arg_value';
 import { findExpressionType } from '../../lib/find_expression_type';
-import { fetchContext, setArgumentAtIndex } from '../../state/actions/elements';
+import { fetchContext, setArgumentAtIndex, deleteArgumentAtIndex } from '../../state/actions/elements';
 import {
   getSelectedElement,
   getSelectedPage,
@@ -22,13 +22,17 @@ const mapStateToProps = (state, { expressionIndex }) => {
 };
 
 const mapDispatchToProps = (dispatch, { expressionIndex }) => ({
-  setArgument: (props) => dispatch(setArgumentAtIndex({ index: expressionIndex, ...props })),
+  setArgument: (element, pageId) => (arg) => dispatch(setArgumentAtIndex({ index: expressionIndex, element, pageId, arg })),
+  deleteArgument: (element, pageId) => (argName) => dispatch(deleteArgumentAtIndex({ index: expressionIndex, element, pageId, argName })),
   updateContext: () => dispatch(fetchContext({ index: expressionIndex })),
 });
 
 const mergeProps = (stateProps, dispatchProps, ownProps) => {
   const { element, pageId } = stateProps;
   const { argType, nextArgType } = ownProps;
+
+  const setArgument = dispatchProps.setArgument(element, pageId);
+  const deleteArgument = dispatchProps.deleteArgument(element, pageId);
 
   return Object.assign({}, stateProps, dispatchProps, ownProps, {
     expressionType: findExpressionType(argType),
@@ -38,12 +42,9 @@ const mergeProps = (stateProps, dispatchProps, ownProps) => {
         [argName]: toAstValue(arg[argName]),
       }), {});
 
-      return dispatchProps.setArgument({
-        arg: mappedArg,
-        element,
-        pageId,
-      });
+      return setArgument(mappedArg);
     },
+    onValueRemove: (argName) => deleteArgument(argName),
   });
 };
 

@@ -43,6 +43,7 @@ const mapStateToProps = (state) => {
   }, { mapped: [], context: [] });
 
   return {
+    element: selectedElement,
     argTypeItems: argTypeItems.mapped,
   };
 };

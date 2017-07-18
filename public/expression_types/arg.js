@@ -25,15 +25,11 @@ export class Arg {
     });
   }
 
-  render({ key, data, resolvedData }) {
+  render(props) {
     return createElement(this.argType.template, {
-      key,
-      data: {
-        ...data,
-        ...resolvedData,
-        argValue: toInterfaceValue(data.argValue, this.multiVal),
-      },
-      resolvedData: this.resolve(data),
+      ...props,
+      ...this.resolve(props),
+      argValue: toInterfaceValue(props.argValue, this.multiVal),
       typeInstance: this,
     });
   }

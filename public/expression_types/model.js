@@ -2,14 +2,14 @@ import React from 'react';
 import { Alert } from 'react-bootstrap';
 import { pick } from 'lodash';
 import { Registry } from '../../common/lib/registry';
-import { BaseRenderable } from './base_renderable';
+import { ArgRenderable } from './arg_renderable';
 
 function getModelArgs(expressionType) {
   if (!expressionType || !expressionType.modelArgs) return false;
   return (expressionType.modelArgs.length > 0) ? expressionType.modelArgs : false;
 }
 
-export class Model extends BaseRenderable {
+export class Model extends ArgRenderable {
   constructor(name, props) {
     super(name, props);
 
@@ -21,12 +21,14 @@ export class Model extends BaseRenderable {
     Object.assign(this, defaultProps, pick(props, propNames));
   }
 
-  renderArgs(props, args) {
+  renderArgs(props, dataArgs) {
+    // custom renderer uses `modelArgs` from following expression to control
+    // which arguments get rendered
     let hasError = false;
-    const { nextExpressionType } = props.data;
+    const { nextExpressionType } = props;
     const modelArgs = getModelArgs(nextExpressionType);
 
-    return args.reduce((acc, arg) => {
+    return dataArgs.reduce((acc, dataArg) => {
       // short-circuit logic, always show error dialog
       if (hasError) return acc;
 
@@ -38,15 +40,17 @@ export class Model extends BaseRenderable {
         return (
           <Alert bsStyle="danger">
             <h4>{ nextExpressionType.displayName } modelArgs Error</h4>
-            The modelArgs value is empty. Either it should contain an arg, or a model should not be used.
+            The modelArgs value is empty. Either it should contain an arg,
+            or a model should not be used in the expression.
           </Alert>
         );
       }
 
       // if argument is in modelArgs, render it
-      if (modelArgs.includes(arg.name)) {
-        return acc.concat(this.renderArg(props, arg));
-      }
+      return acc.concat(this.renderArg(props, {
+        ...dataArg,
+        skipRender: !modelArgs.includes(dataArg.argName),
+      }));
 
       return acc;
     }, []);

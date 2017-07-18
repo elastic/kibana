@@ -1,5 +1,5 @@
-import React from 'react';
-import { pick, isPlainObject } from 'lodash';
+import React, { createElement } from 'react';
+import { pick } from 'lodash';
 
 const defaultTemplate = (p = {}) => (<pre>{ JSON.stringify(p, null, 2) }</pre>);
 
@@ -18,30 +18,7 @@ export class BaseRenderable {
     Object.assign(this, defaults, pick(props, propNames));
   }
 
-  renderArg({ data, resolvedData, typeInstance }, arg) {
-    return arg.render({
-      key: `${typeInstance.name}-${arg.name}`,
-      data: {
-        ...data,
-        argValue: data.args[arg.name],
-      },
-      resolvedData,
-      typeInstance,
-    });
-  }
-
-  renderArgs(props, args) {
-    return args.map(arg => this.renderArg(props, arg));
-  }
-
-  render(data = {}) {
-    const { args } = data;
-
-    if (!isPlainObject(args)) {
-      throw new Error(`Renderable "${this.name}" expects "args" object`);
-    }
-
-    // props are passed to resolve and the returned object is mixed into the template props
-    return this.renderArgs({ data, resolvedData: this.resolve(data), typeInstance: this }, this.args);
+  render(props = {}) {
+    return createElement(this.template, { ...props, ...this.resolve(props) });
   }
 }

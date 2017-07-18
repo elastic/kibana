@@ -1,6 +1,6 @@
 import { createAction } from 'redux-actions';
 import { get, omit } from 'lodash';
-import { assign, set } from 'object-path-immutable';
+import { assign, set, del } from 'object-path-immutable';
 import { notify } from '../../lib/notify';
 import { getSelectedElement, getElementById, getPages } from '../selectors/workpad';
 import { getDefaultElement } from '../defaults';
@@ -120,6 +120,13 @@ export const setAstAtIndex = ({ index, ast, element, pageId }) => (dispatch) => 
 // demodata().pointseries().plot(), demodata is 0, pointseries is 1, and plot is 2
 export const setArgumentAtIndex = ({ index, arg, element, pageId }) => (dispatch) => {
   const newElement = assign(element, ['ast', 'chain', index, 'arguments'], arg);
+  dispatch(setExpression(astToExpression({ ast: get(newElement, 'ast'), element, pageId })));
+};
+
+// index here is the top-level argument in the expression. for example in the expression
+// demodata().pointseries().plot(), demodata is 0, pointseries is 1, and plot is 2
+export const deleteArgumentAtIndex = ({ index, argName, element, pageId }) => (dispatch) => {
+  const newElement = del(element, ['ast', 'chain', index, 'arguments', argName]);
   dispatch(setExpression(astToExpression({ ast: get(newElement, 'ast'), element, pageId })));
 };
 

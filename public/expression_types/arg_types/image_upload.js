@@ -5,9 +5,8 @@ import { withState } from 'recompose';
 import { ArgType } from '../arg_type';
 import { encode } from '../../../common/lib/dataurl';
 
-const template = ({ typeInstance, data, setLoading, isLoading }) => {
+const template = ({ typeInstance, onValueChange, setLoading, isLoading }) => {
   const { name } = typeInstance;
-  const { onValueChange } = data;
 
   function handleUpload(ev) {
     const [ upload ] = ev.target.files;
@@ -36,10 +35,9 @@ const template = ({ typeInstance, data, setLoading, isLoading }) => {
 };
 
 template.propTypes = {
-  data: PropTypes.object,
-  resolvedData: PropTypes.object,
-  typeInstance: PropTypes.object,
-  setLoading: PropTypes.func,
+  onValueChange: PropTypes.func.isRequired,
+  typeInstance: PropTypes.object.isRequired,
+  setLoading: PropTypes.func.isRequired,
   isLoading: PropTypes.bool,
 };
 

@@ -1,4 +1,4 @@
-import React, { createElement } from 'react';
+import React from 'react';
 import { Registry } from '../../common/lib/registry';
 import { BaseRenderable } from './base_renderable';
 
@@ -14,10 +14,6 @@ export class Datasource extends BaseRenderable {
       template: defaultTemplate,
       ...props,
     });
-  }
-
-  render(props = {}) {
-    return createElement(this.template, props);
   }
 }
 

@@ -1,8 +1,8 @@
 import { pick } from 'lodash';
 import { Registry } from '../../common/lib/registry';
-import { BaseRenderable } from './base_renderable';
+import { ArgRenderable } from './arg_renderable';
 
-export class View extends BaseRenderable {
+export class View extends ArgRenderable {
   constructor(name, props) {
     super(name, props);
     const propNames = ['description', 'modelArgs'];
