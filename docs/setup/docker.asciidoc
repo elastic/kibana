@@ -34,7 +34,8 @@ endif::[]
 === Configuring Kibana on Docker
 
 The Docker image provides several methods for configuring Kibana. The conventional
-approach is to provide a `kibana.yml` file as described in <<settings>>, but it's
+approach is to provide a `kibana.yml` file as described in {kibana-ref}/settings.html[Configuring
+Kibana], but it's
 also possible to use environment variables to define settings.
 
 [[docker-bind-mount-config]]

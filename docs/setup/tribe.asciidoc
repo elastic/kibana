@@ -21,7 +21,8 @@ When configured to use a tribe node, actions that modify Kibana's state will be 
 will retrieve data from the node at `elasticsearch.tribe.url`.  It's acceptable to use a node for `elasticsearch.url` that is part of one of the clusters that
 a tribe node is pointing to.
 
-The full list of configurations can be found at <<settings>>.
+The full list of configurations can be found at {kibana-ref}/settings.html[Configuring
+Kibana].
 
 [float]
 [[tribe-limitations]]
