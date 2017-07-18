@@ -10,6 +10,33 @@ Our style guide is an extension of [Sass Guidelines by Hugo Giraudel](https://sa
 * [Variables](https://sass-guidelin.es/#variables)
 * [Mixins](https://sass-guidelin.es/#mixins)
 
+
+## Responsive layouts
+
+Kibana aims to provide at least a read state on anylayouts when on small devices. We place any responsive sass at the bottom of our sass documents, rather than intermingled within the components themselves.
+
+```
+// Good
+@include component('kuiHeader') {
+  display: block;
+}
+
+@include screenSmall {
+  @include component('kuiHeader') {
+    display: none;
+  }
+}
+
+// Bad
+@include component('kuiHeader') {
+  display: block;
+
+  @include screenSmall {
+    display: none;
+  }
+}
+```
+
 ## Syntax and formatting
 
 The Sass Guidelines site recommends using RBG and HSL values to format colors, but we're using
