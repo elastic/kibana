@@ -75,13 +75,13 @@ table {
   border-collapse: collapse;
   border-spacing: 0; }
 
-.u-flex {
+.uFlex {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
   display: flex; }
 
-.u-flex-row {
+.uFlexRow {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -92,21 +92,21 @@ table {
       -ms-flex-direction: row;
           flex-direction: row; }
 
-.u-flex-grow-1 {
+.uFlexGrow1 {
   -webkit-box-flex: 1;
   -webkit-flex-grow: 1;
       -ms-flex-positive: 1;
           flex-grow: 1; }
 
-.u-flex-shrink-1 {
+.uFlexShrink1 {
   -webkit-flex-shrink: 1;
       -ms-flex-negative: 1;
           flex-shrink: 1; }
 
-.u-text-align-right {
+.uTextAlignRight {
   text-align: right !important; }
 
-.u-text-align-left {
+.uTextAlignLeft {
   text-align: left !important; }
 
 .kuiIcon {
