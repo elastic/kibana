@@ -68,7 +68,7 @@ describe('QueryManager', function () {
       };
       queryManager = queryManager(state);
       queryManager.add('foo', 'bar', '-', indexPattern);
-      expect(state.query.query).to.be('foo -"foo":"bar"');
+      expect(state.query.query).to.be('foo !"foo":"bar"');
     });
 
     it('should add an exists query when the provided field name is "_exists_"' , function () {
