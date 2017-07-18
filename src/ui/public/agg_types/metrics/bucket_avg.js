@@ -17,10 +17,10 @@ export function AggTypesMetricsBucketAvgProvider(Private) {
     ],
     getValue: function (agg, bucket) {
       const customMetric = agg.params.customMetric;
-      const scalingMetric = customMetric.type && (customMetric.type.name === 'count' || customMetric.type.name === 'sum');
+      const scaleMetrics = customMetric.type && customMetric.type.isScalable();
 
       let value = bucket[agg.id] && bucket[agg.id].value;
-      if (value && scalingMetric) {
+      if (scaleMetrics) {
         const aggInfo = agg.params.customBucket.write();
         value *= get(aggInfo, 'bucketInterval.scale', 1);
       }

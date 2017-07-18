@@ -64,6 +64,8 @@ export function AggResponseTabifyProvider(Private, Notifier) {
         break;
       case 'metrics':
         let value = agg.getValue(bucket);
+        // since the aggregation could be a non integer (such as a max date)
+        // only do the scaling calculation if it is needed.
         if (aggScale !== 1) {
           value *= aggScale;
         }

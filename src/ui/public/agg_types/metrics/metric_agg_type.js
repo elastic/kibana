@@ -48,5 +48,12 @@ export function AggTypesMetricsMetricAggTypeProvider(Private) {
     return field ? field.format : fieldFormats.getDefaultInstance('number');
   };
 
+  /**
+   * Determines if this metric can be scaled
+   */
+  MetricAggType.prototype.isScalable = function () {
+    return false;
+  };
+
   return MetricAggType;
 }
