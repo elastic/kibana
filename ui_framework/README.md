@@ -38,7 +38,56 @@ There are four steps to creating a new component:
 3. Document it with examples in `ui_framework/doc_site`.
 4. Write tests.
 
-### Create component SCSS
+You can do this using Yeoman (the easy way), or you can do it manually (the hard way).
+
+### Using Yeoman
+
+#### Install Yeoman
+
+```bash
+npm install -g yo
+```
+
+#### Create a new component
+
+From the command line, run `npm run uiFramework:create`.
+
+First, you'll be prompted for what kind of component to create:
+
+| Choice | Files created |
+|---|---|
+| Stateless function | {name}.js, {name}.test.js, {_name}.scss |
+| Component class | {name}.js, {name}.test.js, {_name}.scss |
+
+Next, you'll enter a series of prompts:
+
+##### "What's the name of the file?"
+
+Yeoman will ask you what to name the file. It expects you to provide the name
+in snake case. Yeoman will automatically add file extensions and a "kui" prefix so you should leave those out.
+
+##### "Where should it go?"
+
+This defaults to the last directory you specified for this prompt. To change this location, type in the path to the directory where the files should live.
+
+If you want Yeoman to automatically generate a directory to organize the files,
+that directory will be created inside of the location you specify (see next prompt).
+
+##### "Does it need its own directory?""
+
+This defaults to `YES`. This will automatically generate a directory with the
+same name as the file, but without a "kui" prefix.
+
+##### Done!
+
+Yeoman will generate the files you need in your project's folder system.
+
+For your convenience, it will also output some snippets you can tweak to import
+and re-export the generated JS and SCSS files.
+
+### Manually
+
+#### Create component SCSS
 
 1. Create a directory for your component in `ui_framework/components`.
 2. In this directory, create `_{component name}.scss`.
@@ -50,7 +99,7 @@ you created.
 
 This makes your styles available to Kibana and the UI Framework documentation.
 
-### Create the React component
+#### Create the React component
 
 1. Create the React component(s) in the same directory as the related SCSS file(s).
 2. Export these components from an `index.js` file.
@@ -58,7 +107,7 @@ This makes your styles available to Kibana and the UI Framework documentation.
 
 This makes your React component available for import into Kibana.
 
-### Document the component with examples
+#### Document the component with examples
 
 1. Create a directory for your example in `ui_framework/doc_site/src/views`. Name it the name of the
 component.
@@ -76,7 +125,7 @@ complex they should be. In general, your examples should demonstrate:
 content.
 * The various states of the component, e.g. disabled, selected, empty of content, error state.
 
-### Test the component
+#### Test the component
 
 1. Start Jest in watch mode by running `node scripts/jest --watch`.
 2. Create test files with the name pattern of `{component name}.test.js`.
