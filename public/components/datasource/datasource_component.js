@@ -1,6 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { Button, ButtonToolbar } from 'react-bootstrap';
+import { Button, ButtonToolbar, FormGroup } from 'react-bootstrap';
 import { DatasourceSelector } from './datasource_selector';
 
 export const DatasourceComponent = (props) => {
@@ -16,6 +16,8 @@ export const DatasourceComponent = (props) => {
     updateArgs,
     setDatasourceArgs,
     setDatasourceAst,
+    selecting,
+    setSelecting,
     done,
   } = props;
 
@@ -28,6 +30,7 @@ export const DatasourceComponent = (props) => {
       updateArgs && updateArgs({});
     }
     selectDatasource && selectDatasource(datasources.find(d => d.name === value));
+    setSelecting(false);
   };
 
   const close = () => {
@@ -51,14 +54,25 @@ export const DatasourceComponent = (props) => {
 
   return (
     <div>
-      <DatasourceSelector datasources={datasources} onSelect={setSelectedDatasource} />
-      <div className="canvas__datasource">
-        {stateDatasource.render({ args: stateArgs, updateArgs, datasourceDef })}
-      </div>
-      <ButtonToolbar>
-        <Button bsStyle="primary" onClick={save}> Save</Button>
-        <Button onClick={close}> Done</Button>
-      </ButtonToolbar>
+      {!selecting ? (
+        <div className="canvas__datasource">
+          <div>
+            <h5>
+              <i className="fa fa-database"/> &nbsp;
+               Configure <i>{stateDatasource.name}</i> or <a onClick={() => setSelecting(!selecting)}>Change Datasource</a>
+            </h5>
+            <FormGroup>
+              {stateDatasource.render({ args: stateArgs, updateArgs, datasourceDef })}
+            </FormGroup>
+          </div>
+          <ButtonToolbar>
+            <Button bsStyle="primary" onClick={save}> Apply</Button>
+            <Button onClick={close}> Cancel</Button>
+          </ButtonToolbar>
+        </div>
+      ) : (
+        <DatasourceSelector datasources={datasources} onSelect={setSelectedDatasource} />
+      )}
     </div>
   );
 };
@@ -76,4 +90,6 @@ DatasourceComponent.propTypes = {
   updateArgs: PropTypes.func,
   resetArgs: PropTypes.func.isRequired,
   done: PropTypes.func,
+  selecting: PropTypes.bool,
+  setSelecting: PropTypes.func,
 };

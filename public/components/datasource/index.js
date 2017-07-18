@@ -51,7 +51,7 @@ const mergeProps = (stateProps, dispatchProps, ownProps) => {
 
   return Object.assign({}, ownProps, stateProps, dispatchProps, {
     ...datasourceAst,
-    datasources: datasourceRegistry.toArray().map(ds => Object.assign({}, ds, { function: getServerFunctionByName(ds.name) })),
+    datasources: datasourceRegistry.toArray().map(ds => Object.assign(ds, { function: getServerFunctionByName(ds.name) })),
     setDatasourceAst: dispatchAstAtIndex({
       pageId,
       element,
@@ -68,6 +68,7 @@ const mergeProps = (stateProps, dispatchProps, ownProps) => {
 export const Datasource = compose(
   connect(mapStateToProps, mapDispatchToProps, mergeProps),
   withState('stateArgs', 'updateArgs', ({ args }) => args),
+  withState('selecting', 'setSelecting', false),
   withState('stateDatasource', 'selectDatasource', ({ datasource }) => datasource),
   withHandlers({
     resetArgs: ({ updateArgs, args }) => () => updateArgs(args),

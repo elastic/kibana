@@ -5,5 +5,5 @@ import header from './header.png';
 export const demodata = () => new Datasource('demodata', {
   displayName: 'Demo Data',
   image: header,
-  template() { return (<div>Demodata has no conifgurable options</div>); },
+  template() { return (<div/>); },
 });
