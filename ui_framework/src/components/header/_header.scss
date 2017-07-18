@@ -100,6 +100,17 @@ $kuiHeaderChildSize: $kuiSizeXXL + $kuiSizeL;
       background: $kuiFocusBackgroundColor;
     }
   }
+
+  @include child('notification') {
+    display: inline-block;
+    border-radius: $kuiBorderRadius;
+    background: $kuiHeaderNotificationBackgroundColor;
+    color: $kuiColorWhite;
+    font-size: $kuiFontSizeXS;
+    height: $kuiSize;
+    min-width: $kuiSize;
+    vertical-align: middle;
+  }
 }
 
 // Laptop

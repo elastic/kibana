@@ -109,6 +109,9 @@ table {
 .uTextAlignLeft {
   text-align: left !important; }
 
+.uVerticalAlignMiddle {
+  vertical-align: middle !important; }
+
 .kuiIcon {
   opacity: .8;
   display: inline-block; }
@@ -198,6 +201,15 @@ table {
       background: #F5F5F5; }
     .kuiHeader__button:focus {
       background: #bfe9e6; }
+  .kuiHeader__notification {
+    display: inline-block;
+    border-radius: 4px;
+    background: #DD0A73;
+    color: #FFF;
+    font-size: 12px;
+    height: 16px;
+    min-width: 16px;
+    vertical-align: middle; }
 
 @media only screen and (min-width: 992px) and (max-width: 1199px) {
   .kuiHeader__breadcrumb {
