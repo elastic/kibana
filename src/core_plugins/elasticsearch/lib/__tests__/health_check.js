@@ -11,6 +11,7 @@ import kibanaVersion from '../kibana_version';
 import { esTestServerUrlParts } from '../../../../../test/es_test_server_url_parts';
 import * as determineEnabledScriptingLangsNS from '../determine_enabled_scripting_langs';
 import { determineEnabledScriptingLangs } from '../determine_enabled_scripting_langs';
+import * as ensureTypesExistNS from '../ensure_types_exist';
 
 const esPort = esTestServerUrlParts.port;
 const esUrl = url.format(esTestServerUrlParts);
@@ -29,6 +30,7 @@ describe('plugins/elasticsearch', () => {
 
       // Stub the Kibana version instead of drawing from package.json.
       sinon.stub(kibanaVersion, 'get').returns(COMPATIBLE_VERSION_NUMBER);
+      sinon.stub(ensureTypesExistNS, 'ensureTypesExist');
 
       // setup the plugin stub
       plugin = {
@@ -42,7 +44,7 @@ describe('plugins/elasticsearch', () => {
 
       cluster = { callWithInternalUser: sinon.stub() };
       cluster.callWithInternalUser.withArgs('index', sinon.match.any).returns(Promise.resolve());
-      cluster.callWithInternalUser.withArgs('create', sinon.match.any).returns(Promise.resolve({ _id: 1, _version: 1 }));
+      cluster.callWithInternalUser.withArgs('create', sinon.match.any).returns(Promise.resolve({ _id: '1', _version: 1 }));
       cluster.callWithInternalUser.withArgs('mget', sinon.match.any).returns(Promise.resolve({ ok: true }));
       cluster.callWithInternalUser.withArgs('get', sinon.match.any).returns(Promise.resolve({ found: false }));
       cluster.callWithInternalUser.withArgs('search', sinon.match.any).returns(Promise.resolve({ hits: { hits: [] } }));
@@ -76,7 +78,11 @@ describe('plugins/elasticsearch', () => {
           elasticsearch: {
             getCluster: sinon.stub().returns(cluster)
           }
-        }
+        },
+        savedObjectsClientFactory: () => ({
+          find: sinon.stub().returns(Promise.resolve({ saved_objects: [] })),
+          create: sinon.stub().returns(Promise.resolve({ id: 'foo' })),
+        })
       };
 
       health = healthCheck(plugin, server, { mappings });
@@ -85,6 +91,7 @@ describe('plugins/elasticsearch', () => {
     afterEach(() => {
       kibanaVersion.get.restore();
       determineEnabledScriptingLangs.restore();
+      ensureTypesExistNS.ensureTypesExist.restore();
     });
 
     it('should set the cluster green if everything is ready', function () {

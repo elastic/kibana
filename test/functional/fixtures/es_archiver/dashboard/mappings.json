@@ -4,78 +4,128 @@
     "index": ".kibana",
     "settings": {
       "index": {
-        "number_of_shards": "5",
+        "number_of_shards": "1",
+        "mapper": {
+          "dynamic": "false"
+        },
         "number_of_replicas": "1"
       }
     },
     "mappings": {
-      "config": {
+      "index-pattern": {
+        "dynamic": "strict",
         "properties": {
-          "buildNum": {
+          "fieldFormatMap": {
+            "type": "text"
+          },
+          "fields": {
+            "type": "text"
+          },
+          "intervalName": {
             "type": "keyword"
+          },
+          "notExpandable": {
+            "type": "boolean"
+          },
+          "sourceFilters": {
+            "type": "text"
+          },
+          "timeFieldName": {
+            "type": "keyword"
+          },
+          "title": {
+            "type": "text"
           }
         }
       },
       "visualization": {
+        "dynamic": "strict",
         "properties": {
           "description": {
-            "type": "text",
-            "fields": {
-              "keyword": {
-                "type": "keyword",
-                "ignore_above": 256
-              }
-            }
+            "type": "text"
           },
           "kibanaSavedObjectMeta": {
             "properties": {
               "searchSourceJSON": {
-                "type": "text",
-                "fields": {
-                  "keyword": {
-                    "type": "keyword",
-                    "ignore_above": 256
-                  }
-                }
+                "type": "text"
               }
             }
+          },
+          "savedSearchId": {
+            "type": "keyword"
           },
           "title": {
-            "type": "text",
-            "fields": {
-              "keyword": {
-                "type": "keyword",
-                "ignore_above": 256
-              }
-            }
+            "type": "text"
           },
           "uiStateJSON": {
-            "type": "text",
-            "fields": {
-              "keyword": {
-                "type": "keyword",
-                "ignore_above": 256
-              }
-            }
+            "type": "text"
           },
           "version": {
             "type": "integer"
           },
           "visState": {
-            "type": "text",
-            "fields": {
-              "keyword": {
-                "type": "keyword",
-                "ignore_above": 256
+            "type": "text"
+          }
+        }
+      },
+      "_default_": {
+        "dynamic": "strict"
+      },
+      "server": {
+        "dynamic": "strict",
+        "properties": {
+          "uuid": {
+            "type": "keyword"
+          }
+        }
+      },
+      "timelion-sheet": {
+        "dynamic": "strict",
+        "properties": {
+          "description": {
+            "type": "text"
+          },
+          "hits": {
+            "type": "integer"
+          },
+          "kibanaSavedObjectMeta": {
+            "properties": {
+              "searchSourceJSON": {
+                "type": "text"
               }
             }
+          },
+          "timelion_chart_height": {
+            "type": "integer"
+          },
+          "timelion_columns": {
+            "type": "integer"
+          },
+          "timelion_interval": {
+            "type": "keyword"
+          },
+          "timelion_other_interval": {
+            "type": "keyword"
+          },
+          "timelion_rows": {
+            "type": "integer"
+          },
+          "timelion_sheet": {
+            "type": "text"
+          },
+          "title": {
+            "type": "text"
+          },
+          "version": {
+            "type": "integer"
           }
         }
       },
       "search": {
+        "dynamic": "strict",
         "properties": {
           "columns": {
-            "type": "text"
+            "type": "keyword"
           },
           "description": {
             "type": "text"
@@ -91,7 +141,7 @@
             }
           },
           "sort": {
-            "type": "text"
+            "type": "keyword"
           },
           "title": {
             "type": "text"
@@ -101,54 +151,16 @@
           }
         }
       },
-      "index-pattern": {
+      "config": {
+        "dynamic": "true",
         "properties": {
-          "fields": {
-            "type": "text",
-            "fields": {
-              "keyword": {
-                "type": "keyword",
-                "ignore_above": 256
-              }
-            }
-          },
-          "sourceFilters": {
-            "type": "text",
-            "fields": {
-              "keyword": {
-                "type": "keyword",
-                "ignore_above": 256
-              }
-            }
-          },
-          "timeFieldName": {
-            "type": "text",
-            "fields": {
-              "keyword": {
-                "type": "keyword",
-                "ignore_above": 256
-              }
-            }
-          },
-          "title": {
-            "type": "text",
-            "fields": {
-              "keyword": {
-                "type": "keyword",
-                "ignore_above": 256
-              }
-            }
-          }
-        }
-      },
-      "server": {
-        "properties": {
-          "uuid": {
+          "buildNum": {
             "type": "keyword"
           }
         }
       },
       "dashboard": {
+        "dynamic": "strict",
         "properties": {
           "description": {
             "type": "text"
@@ -169,14 +181,30 @@
           "panelsJSON": {
             "type": "text"
           },
+          "refreshInterval": {
+            "properties": {
+              "display": {
+                "type": "keyword"
+              },
+              "pause": {
+                "type": "boolean"
+              },
+              "section": {
+                "type": "integer"
+              },
+              "value": {
+                "type": "integer"
+              }
+            }
+          },
           "timeFrom": {
-            "type": "text"
+            "type": "keyword"
           },
           "timeRestore": {
             "type": "boolean"
           },
           "timeTo": {
-            "type": "text"
+            "type": "keyword"
           },
           "title": {
             "type": "text"
@@ -186,6 +214,29 @@
           },
           "version": {
             "type": "integer"
+          }
+        }
+      },
+      "url": {
+        "dynamic": "strict",
+        "properties": {
+          "accessCount": {
+            "type": "long"
+          },
+          "accessDate": {
+            "type": "date"
+          },
+          "createDate": {
+            "type": "date"
+          },
+          "url": {
+            "type": "text",
+            "fields": {
+              "keyword": {
+                "type": "keyword",
+                "ignore_above": 2048
+              }
+            }
           }
         }
       }

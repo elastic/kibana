@@ -175,7 +175,11 @@
 
         <td class="kuiTableRowCell">
           <div class="kuiTableRowCell__liner">
-            <a class="kuiLink" ng-href="{{ listingController.getUrlForItem(item) }}">
+            <a
+              class="kuiLink"
+              data-test-subj="dashboardListingTitleLink"
+              ng-href="{{ listingController.getUrlForItem(item) }}"
+            >
               {{ item.title }}
             </a>
           </div>

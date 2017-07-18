@@ -1,6 +1,7 @@
 import d3 from 'd3';
 import _ from 'lodash';
 import $ from 'jquery';
+import marked from 'marked';
 import { NoResults } from 'ui/errors';
 import { Binder } from 'ui/binder';
 import { VislibLibLayoutLayoutProvider } from './layout/layout';
@@ -203,7 +204,7 @@ export function VisHandlerProvider(Private) {
 
         div.append('div').attr('class', 'item bottom');
       } else {
-        div.append('h4').text(message);
+        div.append('h4').text(marked.inlineLexer(message, []));
       }
 
       $(this.el).trigger('renderComplete');

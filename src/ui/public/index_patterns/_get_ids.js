@@ -1,6 +1,8 @@
 import _ from 'lodash';
+import { SavedObjectsClientProvider } from 'ui/saved_objects';
 
-export function IndexPatternsGetIdsProvider(esAdmin, kbnIndex) {
+export function IndexPatternsGetIdsProvider(Private) {
+  const savedObjectsClient = Private(SavedObjectsClientProvider);
 
   // many places may require the id list, so we will cache it separately
   // didn't incorporate with the indexPattern cache to prevent id collisions.
@@ -14,17 +16,12 @@ export function IndexPatternsGetIdsProvider(esAdmin, kbnIndex) {
       });
     }
 
-    cachedPromise = esAdmin.search({
-      index: kbnIndex,
+    cachedPromise = savedObjectsClient.find({
       type: 'index-pattern',
-      storedFields: [],
-      body: {
-        query: { match_all: {} },
-        size: 10000
-      }
-    })
-    .then(function (resp) {
-      return _.pluck(resp.hits.hits, '_id');
+      fields: [],
+      perPage: 10000
+    }).then(resp => {
+      return resp.savedObjects.map(obj => obj.id);
     });
 
     // ensure that the response stays pristine by cloning it here too

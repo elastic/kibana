@@ -18,7 +18,8 @@ export function handleEsError(error) {
     throw new Error('Expected an instance of Error');
   }
 
-  const reason = get(error, 'body.error.reason');
+  const { reason, type } = get(error, 'body.error', {});
+  const details = { type };
 
   if (
     error instanceof ConnectionFault ||
@@ -30,19 +31,19 @@ export function handleEsError(error) {
   }
 
   if (error instanceof Conflict) {
-    throw Boom.conflict(reason);
+    throw Boom.conflict(reason, details);
   }
 
   if (error instanceof Forbidden) {
-    throw Boom.forbidden(reason);
+    throw Boom.forbidden(reason, details);
   }
 
   if (error instanceof NotFound) {
-    throw Boom.notFound(reason);
+    throw Boom.notFound(reason, details);
   }
 
   if (error instanceof BadRequest) {
-    throw Boom.badRequest(reason);
+    throw Boom.badRequest(reason, details);
   }
 
   throw error;

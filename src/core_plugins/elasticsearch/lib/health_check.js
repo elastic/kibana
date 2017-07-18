@@ -8,6 +8,7 @@ import { ensureEsVersion } from './ensure_es_version';
 import { ensureNotTribe } from './ensure_not_tribe';
 import { ensureAllowExplicitIndex } from './ensure_allow_explicit_index';
 import { determineEnabledScriptingLangs } from './determine_enabled_scripting_langs';
+import { ensureTypesExist } from './ensure_types_exist';
 
 const NoConnections = elasticsearch.errors.NoConnections;
 import util from 'util';
@@ -101,7 +102,13 @@ module.exports = function (plugin, server, { mappings }) {
       .then(() => ensureNotTribe(callAdminAsKibanaUser))
       .then(() => ensureAllowExplicitIndex(callAdminAsKibanaUser, config))
       .then(waitForShards)
-      .then(_.partial(migrateConfig, server, { mappings }))
+      .then(() => ensureTypesExist({
+        callCluster: callAdminAsKibanaUser,
+        log: (...args) => server.log(...args),
+        indexName: config.get('kibana.index'),
+        types: Object.keys(mappings).map(name => ({ name, mapping: mappings[name] }))
+      }))
+      .then(_.partial(migrateConfig, server))
       .then(async () => {
         results.enabledScriptingLangs = await determineEnabledScriptingLangs(callDataAsKibanaUser);
       })

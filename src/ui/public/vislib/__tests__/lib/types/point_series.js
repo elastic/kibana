@@ -107,8 +107,8 @@ describe('Point Series Config Type Class Test Suite', function () {
       expect(parsedConfig.valueAxes[0].show).to.be(false);
     });
 
-    it('should add second value axis', function () {
-      expect(parsedConfig.valueAxes.length).to.equal(2);
+    it('should add second category axis', function () {
+      expect(parsedConfig.categoryAxes.length).to.equal(2);
     });
   });
 });

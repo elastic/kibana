@@ -28,13 +28,10 @@ export function getUiSettingsServiceForRequest(server, request, options = {}) {
     getDefaults
   } = options;
 
-  const adminCluster = server.plugins.elasticsearch.getCluster('admin');
   const uiSettingsService = uiSettingsServiceFactory(server, {
     readInterceptor,
     getDefaults,
-    callCluster(...args) {
-      return adminCluster.callWithRequest(request, ...args);
-    }
+    savedObjectsClient: request.getSavedObjectsClient()
   });
 
   BY_REQUEST_CACHE.set(request, uiSettingsService);
