@@ -26,7 +26,7 @@ function MarkdownVisProvider(Private) {
     category: CATEGORY.OTHER,
     visConfig: {
       template: markdownVisTemplate,
-      params: {
+      defaults: {
         fontSize: 12
       }
     },
