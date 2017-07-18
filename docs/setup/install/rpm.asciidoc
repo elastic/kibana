@@ -152,7 +152,7 @@ include::systemd.asciidoc[]
 
 Kibana loads its configuration from the `/etc/kibana/kibana.yml`
 file by default.  The format of this config file is explained in
-<<settings>>.
+{kibana-ref}/settings.html[Configuring Kibana].
 
 [[rpm-layout]]
 ==== Directory layout of RPM
