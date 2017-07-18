@@ -66,7 +66,7 @@
     "uiFramework:build": "grunt uiFramework:build",
     "ts:build": "tsc",
     "ts:start": "tsc --watch",
-    "ts:build-start": "tsc -p packages/kbn-types",
+    "ts:build-types": "tsc -p packages/kbn-types",
     "prettier": "prettier --single-quote --write './platform/**/*.ts'"
   },
   "repository": {
