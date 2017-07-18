@@ -78,7 +78,7 @@ $kuiHeaderChildSize: $kuiSizeXXL + $kuiSizeL;
 
   @include child('button') {
     height: $kuiHeaderChildSize;
-    width: $kuiHeaderChildSize;
+    min-width: $kuiHeaderChildSize;
     text-align: center;
     position: relative;
 

@@ -186,7 +186,7 @@ table {
     overflow: hidden; }
   .kuiHeader__button {
     height: 64px;
-    width: 64px;
+    min-width: 64px;
     text-align: center;
     position: relative; }
     .kuiHeader__button:after {
