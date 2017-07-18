@@ -219,6 +219,7 @@ const components = [{
 }, {
   name: 'Table',
   component: TableExample,
+  hasReact: true,
 }, {
   name: 'Tabs',
   component: TabsExample,
