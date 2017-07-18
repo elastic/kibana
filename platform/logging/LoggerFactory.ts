@@ -1,23 +1,27 @@
-import { LoggingConfig, LoggerConfig } from './LoggingConfig';
+import { LoggingConfig, LoggerConfigType } from './LoggingConfig';
 import { LogLevel } from './LogLevel';
 import { Logger, BaseLogger, LoggerAdapter } from './Logger';
-import { BaseAppender } from './appenders/base/BaseAppender';
-import { BaseAppenderConfig } from './appenders/base/BaseAppenderConfig';
+import { Appenders, DisposableAppender } from './appenders/Appenders';
 import { BufferAppender } from './appenders/buffer/BufferAppender';
 
-const BUFFERED_APPENDER_KEY = '__buffer__';
-
+/**
+ * Interface that defines a way to retrieve a logger.
+ */
 export interface LoggerFactory {
+  /**
+   * Returns a `Logger` instance for the specified context.
+   * @param context Context to return logger for.
+   */
   get(context: string): Logger;
 }
 
+/**
+ * @internal
+ */
 export class MutableLoggerFactory implements LoggerFactory {
   private config?: LoggingConfig;
-  private readonly appenders: Map<string, BaseAppender> = new Map([
-    [BUFFERED_APPENDER_KEY, new BufferAppender(
-      new BaseAppenderConfig({ kind: 'buffer', pattern: '' })
-    )]
-  ]);
+  private readonly appenders: Map<string, DisposableAppender> = new Map();
+  private readonly bufferAppender = new BufferAppender();
   private readonly loggers: Map<string, LoggerAdapter> = new Map();
 
   get(context: string): Logger {
@@ -25,87 +29,97 @@ export class MutableLoggerFactory implements LoggerFactory {
       return this.loggers.get(context)!;
     }
 
-    let loggerConfig;
+    let loggerLevel, loggerAppenders;
     if (this.config) {
-      loggerConfig = this.getLoggerConfigByContext(this.config, context)!;
+      const { level, appenders } = this.getLoggerConfigByContext(
+        this.config,
+        context
+      )!;
+      loggerLevel = LogLevel.fromId(level);
+      loggerAppenders = appenders.map(
+        appenderKey => this.appenders.get(appenderKey)!
+      );
     } else {
       // If we don't have config yet, use `buffered` appender that will store all logged messages in the memory
       // until the config is ready.
-      loggerConfig = { level: LogLevel.All, appenders: [BUFFERED_APPENDER_KEY] };
+      loggerLevel = LogLevel.All;
+      loggerAppenders = [this.bufferAppender];
     }
 
-    this.loggers.set(context,
-      new LoggerAdapter(
-        new BaseLogger(
-          context,
-          loggerConfig.level,
-          loggerConfig.appenders.map((appenderKey) => this.appenders.get(appenderKey)!)
-        )
-      )
+    this.loggers.set(
+      context,
+      new LoggerAdapter(new BaseLogger(context, loggerLevel, loggerAppenders))
     );
 
     return this.loggers.get(context)!;
   }
 
-  updateConfig(config: LoggingConfig) {
-    // TODO: Should we support `config.isEqual()` to avoid updating the config if it's still the same?
+  /**
+   * Updates all current active loggers with the new config values.
+   * @param config New config instance.
+   * @returns Promise that is resolved once all loggers are successfully updated.
+   */
+  async updateConfig(config: LoggingConfig) {
+    // Config update is asynchronous and may require some time to complete, so we should invalidate
+    // config so that new loggers will be using BufferAppender until newly configured appenders are ready.
+    // TODO: Before disposing of appenders, we should switch all existing loggers to BufferAppender first.
+    this.config = undefined;
+
+    for (const appender of this.appenders.values()) {
+      await appender.dispose();
+    }
+
+    this.appenders.clear();
+    for (const [appenderKey, appenderConfig] of config.appenders.entries()) {
+      this.appenders.set(appenderKey, Appenders.create(appenderConfig));
+    }
+
+    for (const [loggerKey, loggerAdapter] of this.loggers.entries()) {
+      const loggerConfig = this.getLoggerConfigByContext(config, loggerKey);
+      loggerAdapter.logger = new BaseLogger(
+        loggerKey,
+        LogLevel.fromId(loggerConfig.level),
+        loggerConfig.appenders.map(
+          appenderKey => this.appenders.get(appenderKey)!
+        )
+      );
+    }
+
     this.config = config;
 
-    // Before we dispose appenders, let's check whether we have any `buffered` appender that may need to be
-    // flushed via newly configured appenders.
-    const bufferedLogRecords = this.appenders.has(BUFFERED_APPENDER_KEY) ?
-      [...(<BufferAppender>this.appenders.get(BUFFERED_APPENDER_KEY)!).buffer] :
-      [];
-
-    this.updateAppendersFromConfig(config);
-    this.updateLoggersFromConfig(config);
-
     // Re-log all buffered log records with newly configured appenders.
-    for (const logRecord of bufferedLogRecords) {
+    for (const logRecord of this.bufferAppender.flush()) {
       this.get(logRecord.context).log(logRecord);
     }
   }
 
+  /**
+   * Disposes all loggers (closes log files, clears buffers etc.). Factory is not usable after
+   * calling of this method.
+   * @returns Promise that is resolved once all loggers are successfully disposed.
+   */
   async close() {
     for (const appender of this.appenders.values()) {
-      await appender.close();
+      await appender.dispose();
     }
+
+    await this.bufferAppender.dispose();
 
     this.appenders.clear();
     this.loggers.clear();
   }
 
-  private updateAppendersFromConfig(config: LoggingConfig) {
-    for (const appender of this.appenders.values()) {
-      appender.close();
-    }
-
-    this.appenders.clear();
-
-    for (const [appenderKey, appenderConfig] of config.appenders.entries()) {
-      this.appenders.set(appenderKey, appenderConfig.createAppender());
-    }
-  }
-
-  private updateLoggersFromConfig(config: LoggingConfig) {
-    for (const [loggerKey, loggerAdapter] of this.loggers.entries()) {
-      const loggerConfig = this.getLoggerConfigByContext(config, loggerKey);
-      loggerAdapter.logger = new BaseLogger(
-        loggerKey,
-        loggerConfig.level,
-        loggerConfig.appenders.map((appenderKey) => this.appenders.get(appenderKey)!)
-      );
-    }
-  }
-
-  private getLoggerConfigByContext(config: LoggingConfig, context: string): LoggerConfig {
+  private getLoggerConfigByContext(
+    config: LoggingConfig,
+    context: string
+  ): LoggerConfigType {
     const loggerConfig = config.loggers.get(context);
     if (loggerConfig) {
       return loggerConfig;
     }
 
-    // If we don't have configuration for the specified context and it's the "nested" one (eg. `foo.bar.baz`),
-    // let's move up to the parent context (eg. `foo.bar`) and check if it has config we can rely on. Otherwise
+    // If we don't have configuration for the specified context and it's the "nested" one (eg. `foo::bar::baz`),
+    // let's move up to the parent context (eg. `foo::bar`) and check if it has config we can rely on. Otherwise
     // we fallback to the `root` context that should always be defined (enforced by configuration schema).
     return this.getLoggerConfigByContext(
       config,

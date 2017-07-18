@@ -102,36 +102,3 @@
 # The default locale. This locale can be used in certain circumstances to substitute any missing
 # translations.
 #i18n.defaultLocale: "en"
-
-logging:
-  appenders:
-    console:
-      kind: console
-      pattern: "[{timestamp}][{level}][{context}] {message}"
-    server-console:
-      kind: console
-    file:
-      kind: file
-      path: path
-    rolling-file-by-size:
-      kind: rolling-file
-      path: path
-      policy:
-        kind: time
-        limit: 30s
-    rolling-file-by-time:
-      kind: rolling-file
-      path: path
-      policy:
-        kind: size
-        limit: 30gb
-  loggers:
-    root:
-      appenders: [console, file]
-      level: info
-    server:
-      appenders: [server-console]
-      level: all
-    requests:
-      appenders: [rolling-file-by-size]
-      level: debug

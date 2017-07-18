@@ -4,7 +4,7 @@ import { Server } from '../server';
 import { ConfigService, Env } from '../config';
 
 import { Logger } from '../logging/Logger';
-import { LoggerService } from '../logging/LoggerService';
+import { LoggingService } from '../logging/LoggingService';
 import { LoggerFactory, MutableLoggerFactory } from '../logging/LoggerFactory';
 import { LoggingConfig } from '../logging/LoggingConfig';
 
@@ -18,7 +18,7 @@ export class Root {
   server?: Server;
   readonly log: Logger;
   readonly logger: LoggerFactory;
-  private readonly loggerService: LoggerService;
+  private readonly loggingService: LoggingService;
 
   constructor(
     rawConfig$: Observable<{ [key: string]: any }>,
@@ -26,7 +26,7 @@ export class Root {
     private readonly onShutdown: OnShutdown
   ) {
     const loggerFactory = new MutableLoggerFactory();
-    this.loggerService = new LoggerService(loggerFactory);
+    this.loggingService = new LoggingService(loggerFactory);
     this.logger = loggerFactory;
 
     this.log = this.logger.get('root');
@@ -36,7 +36,7 @@ export class Root {
   async start() {
     try {
       const loggingConfig$ = this.configService.atPath('logging', LoggingConfig);
-      this.loggerService.upgrade(loggingConfig$);
+      this.loggingService.upgrade(loggingConfig$);
     } catch (e) {
       // This specifically console.logs because we were not able to configure
       // the logger.
@@ -62,7 +62,7 @@ export class Root {
       await this.server.stop();
     }
 
-    await this.loggerService.stop();
+    await this.loggingService.stop();
 
     this.onShutdown(reason);
   }

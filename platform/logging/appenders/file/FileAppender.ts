@@ -1,33 +1,67 @@
 import { createWriteStream, WriteStream } from 'fs';
+import { Schema, typeOfSchema } from '../../../types';
+import { Layout, Layouts } from '../../layouts/Layouts';
 import { LogRecord } from '../../LogRecord';
-import { BaseAppender } from '../base/BaseAppender';
-import { FileAppenderConfig } from './FileAppenderConfig';
+import { DisposableAppender } from '../Appenders';
 
-export class FileAppender extends BaseAppender {
-  private outputStream: WriteStream | null;
+export const createSchema = (schema: Schema) => {
+  const { literal, object, string } = schema;
+  return object({
+    kind: literal('file'),
+    path: string(),
+    layout: Layouts.createConfigSchema(schema)
+  });
+};
 
-  constructor(protected readonly config: FileAppenderConfig) {
-    super(config);
+const schemaType = typeOfSchema(createSchema);
+export type FileAppenderConfigType = typeof schemaType;
 
-    this.outputStream = createWriteStream(config.path, {
-      flags: 'a',
-      encoding: 'utf8'
-    });
-  }
+/**
+ * Appender that formats all the `LogRecord` instances it receives and writes them to the specified file.
+ */
+export class FileAppender implements DisposableAppender {
+  /**
+   * @internal
+   */
+  static createConfigSchema = createSchema;
 
+  /**
+   * Writable file stream to write formatted `LogRecord` to.
+   */
+  private outputStream: WriteStream | null = null;
+
+  /**
+   * Creates FileAppender instance.
+   * @param layout Instance of `Layout` sub-class responsible for `LogRecord` formatting.
+   * @param path Path to the file where log records should be stored.
+   */
+  constructor(private readonly layout: Layout, private readonly path: string) {}
+
+  /**
+   * Formats specified `record` and writes them to the specified file.
+   * @param record `LogRecord` instance to be logged.
+   */
   append(record: LogRecord) {
-    super.append(record);
+    if (this.outputStream === null) {
+      this.outputStream = createWriteStream(this.path, {
+        flags: 'a',
+        encoding: 'utf8'
+      });
+    }
 
-    this.outputStream!.write(`${this.logRecordToFormattedString(record)}\n`);
+    this.outputStream.write(`${this.layout.format(record)}\n`);
   }
 
-  async close() {
-    // Workaround for a Babel `await super.***();` bug (https://github.com/babel/babel/issues/3930), we should
-    // get rid of it once we migrate to Babel 7 (fixed in https://github.com/babel/babel/pull/5677).
-    await BaseAppender.prototype.close.call(this);
+  /**
+   * Disposes `FileAppender`. Waits for the underlying file stream to be completely flushed and closed.
+   */
+  async dispose() {
+    await new Promise(resolve => {
+      if (this.outputStream === null) {
+        return resolve();
+      }
 
-    await new Promise((resolve) => {
-      this.outputStream!.end(undefined, undefined, () => {
+      this.outputStream.end(undefined, undefined, () => {
         this.outputStream = null;
         resolve();
       });

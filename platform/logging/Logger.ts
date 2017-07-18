@@ -1,7 +1,11 @@
-import { Appender } from './appenders/base/BaseAppender';
+import { Appender } from './appenders/Appenders';
 import { LogLevel } from './LogLevel';
 import { LogRecord } from './LogRecord';
 
+/**
+ * Interface that defines all the methods that can be used to
+ * log any type of information.
+ */
 export interface Logger {
   trace(message: string, meta?: { [key: string]: any }): void;
   debug(message: string, meta?: { [key: string]: any }): void;
@@ -9,15 +13,22 @@ export interface Logger {
   warn(errorOrMessage: string | Error, meta?: { [key: string]: any }): void;
   error(errorOrMessage: string | Error, meta?: { [key: string]: any }): void;
   fatal(errorOrMessage: string | Error, meta?: { [key: string]: any }): void;
+
+  /**
+   * @internal
+   */
   log(record: LogRecord): void;
 }
 
+/**
+ * @internal
+ */
 export class BaseLogger implements Logger {
   constructor(
     private readonly context: string,
     private readonly level: LogLevel,
-    private appenders: Appender[]) {
-  }
+    private appenders: Appender[]
+  ) {}
 
   trace(message: string, meta?: { [key: string]: any }): void {
     this.log(this.createLogRecord(LogLevel.Trace, message, meta));
@@ -53,22 +64,30 @@ export class BaseLogger implements Logger {
     }
   }
 
-  private createLogRecord(level: LogLevel, errorOrMessage: string | Error, meta?: { [key: string]: any }): LogRecord {
+  private createLogRecord(
+    level: LogLevel,
+    errorOrMessage: string | Error,
+    meta?: { [key: string]: any }
+  ): LogRecord {
     const isError = errorOrMessage instanceof Error;
     return {
       timestamp: new Date(),
       level,
       context: this.context,
-      message: isError ? (<Error>errorOrMessage).message : <string>errorOrMessage,
+      message: isError
+        ? (<Error>errorOrMessage).message
+        : <string>errorOrMessage,
       error: isError ? <Error>errorOrMessage : undefined,
       meta
     };
   }
 }
 
+/**
+ * @internal
+ */
 export class LoggerAdapter implements Logger {
-  constructor(public logger: BaseLogger) {
-  }
+  constructor(public logger: Logger) {}
 
   trace(message: string, meta?: { [key: string]: any }): void {
     this.logger.trace(message, meta);

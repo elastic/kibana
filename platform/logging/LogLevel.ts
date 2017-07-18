@@ -1,5 +1,8 @@
 import { assertNever } from '../lib/utils';
 
+/**
+ * Possible log level string values.
+ */
 export type LogLevelId =
   | 'all'
   | 'fatal'
@@ -10,23 +13,37 @@ export type LogLevelId =
   | 'trace'
   | 'off';
 
+/**
+ * Class that represents log level, manages string -> `LogLevel` conversion and
+ * comparison of log level priorities between themselves.
+ */
 export class LogLevel {
-  static Off = new LogLevel('off', 1);
-  static Fatal = new LogLevel('fatal', 2);
-  static Error = new LogLevel('error', 3);
-  static Warn = new LogLevel('warn', 4);
-  static Info = new LogLevel('info', 5);
-  static Debug = new LogLevel('debug', 6);
-  static Trace = new LogLevel('trace', 7);
-  static All = new LogLevel('all', 8);
+  static readonly Off = new LogLevel('off', 1);
+  static readonly Fatal = new LogLevel('fatal', 2);
+  static readonly Error = new LogLevel('error', 3);
+  static readonly Warn = new LogLevel('warn', 4);
+  static readonly Info = new LogLevel('info', 5);
+  static readonly Debug = new LogLevel('debug', 6);
+  static readonly Trace = new LogLevel('trace', 7);
+  static readonly All = new LogLevel('all', 8);
 
-  constructor(readonly id: LogLevelId, readonly value: number) {}
+  private constructor(readonly id: LogLevelId, readonly value: number) {}
 
+  /**
+   * Indicates whether current log level covers the one that is passed as an argument.
+   * @param level Instance of `LogLevel` to compare to.
+   * @returns True if specified `level` is covered by this log level.
+   */
   supports(level: LogLevel) {
     return this.value >= level.value;
   }
 
-  static fromId(level: LogLevelId) {
+  /**
+   * Converts string representation of log level into `LogLevel` instance.
+   * @param level String representation of log level.
+   * @returns Instance of `LogLevel` class.
+   */
+  static fromId(level: LogLevelId): LogLevel {
     switch (level) {
       case 'all':
         return LogLevel.All;

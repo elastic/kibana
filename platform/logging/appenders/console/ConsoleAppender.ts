@@ -1,44 +1,45 @@
-import { LogLevel } from "../../LogLevel";
+import { Schema, typeOfSchema } from '../../../types';
 import { LogRecord } from '../../LogRecord';
-import { BaseAppender } from '../base/BaseAppender';
-import { ConsoleAppenderConfig } from './ConsoleAppenderConfig';
+import { Layout, Layouts } from '../../layouts/Layouts';
+import { DisposableAppender } from '../Appenders';
 
-class Color {
-  static readonly Red = 31;
-  static readonly Green = 32;
-  static readonly Yellow = 33;
-  static readonly Blue = 34;
-  static readonly Magenta = 35;
-}
+export const createSchema = (schema: Schema) => {
+  const { literal, object } = schema;
 
-const LEVEL_COLORS = new Map([
-  [LogLevel.Fatal, Color.Red],
-  [LogLevel.Error, Color.Red],
-  [LogLevel.Warn, Color.Yellow],
-  [LogLevel.Debug, Color.Green],
-  [LogLevel.Trace, Color.Blue]
-]);
+  return object({
+    kind: literal('console'),
+    layout: Layouts.createConfigSchema(schema)
+  });
+};
 
-export class ConsoleAppender extends BaseAppender {
-  constructor(protected readonly config: ConsoleAppenderConfig) {
-    super(config)
-  }
+const schemaType = typeOfSchema(createSchema);
+export type ConsoleAppenderConfigType = typeof schemaType;
 
+/**
+ * Appender that formats all the `LogRecord` instances it receives and logs them via built-in `console`.
+ */
+export class ConsoleAppender implements DisposableAppender {
+  /**
+   * @internal
+   */
+  static createConfigSchema = createSchema;
+
+  /**
+   * Creates ConsoleAppender instance.
+   * @param layout Instance of `Layout` sub-class responsible for `LogRecord` formatting.
+   */
+  constructor(private readonly layout: Layout) {}
+
+  /**
+   * Formats specified `record` and logs it via built-in `console`.
+   * @param record `LogRecord` instance to be logged.
+   */
   append(record: LogRecord) {
-    super.append(record);
-    console.log(this.logRecordToFormattedString(record));
+    console.log(this.layout.format(record));
   }
 
-  protected formatLevel(level: LogLevel) {
-    const levelString = super.formatLevel(level);
-    if (!LEVEL_COLORS.has(level)) {
-      return levelString;
-    }
-
-    return `\x1b[${LEVEL_COLORS.get(level)}m${levelString}\x1b[0m`;
-  }
-
-  protected formatContext(context: string) {
-    return `\x1b[${Color.Magenta}m${super.formatContext(context)}\x1b[0m`;
-  }
+  /**
+   * Disposes `ConsoleAppender`.
+   */
+  dispose() {}
 }
