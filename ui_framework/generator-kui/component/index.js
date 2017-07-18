@@ -7,7 +7,6 @@ module.exports = class extends Generator {
     super(args, options);
 
     this.fileType = options.fileType;
-    this.log(this.fileType)
   }
 
   prompting() {
@@ -58,22 +57,22 @@ module.exports = class extends Generator {
       // Create component file.
       this.fs.copyTpl(
         isStatelessFunction ?
-          this.templatePath('component/stateless_function.js') :
-          this.templatePath('component/component.js'),
+          this.templatePath('stateless_function.js') :
+          this.templatePath('component.js'),
         this.destinationPath(componentPath),
         vars
       );
 
       // Create component test file.
       this.fs.copyTpl(
-        this.templatePath('component/component.test.js'),
+        this.templatePath('component.test.js'),
         this.destinationPath(testPath),
         vars
       );
 
       // Create component styles file.
       this.fs.copyTpl(
-        this.templatePath('component/_component.scss'),
+        this.templatePath('_component.scss'),
         this.destinationPath(stylesPath),
         vars
       );

@@ -1,5 +1,7 @@
 const Generator = require('yeoman-generator');
 
+const componentGenerator = require.resolve('../component/index.js');
+
 module.exports = class extends Generator {
   prompting() {
     return this.prompt([{
@@ -19,22 +21,19 @@ module.exports = class extends Generator {
   }
 
   writing() {
-    const createFile = () => {
-      this.composeWith(
-        require.resolve('../file/index.js'),
-        {
-          fileType: this.config.fileType,
-        }
-      );
+    const createComponent = () => {
+      this.composeWith(componentGenerator, {
+        fileType: this.config.fileType,
+      });
     }
 
     switch (this.config.fileType) {
       case 'component':
-        createFile();
+        createComponent();
         break;
 
       case 'function':
-        createFile();
+        createComponent();
         break;
     }
   }
