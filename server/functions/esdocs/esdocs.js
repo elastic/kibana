@@ -9,7 +9,7 @@ const client = new elasticsearch.Client({
 module.exports = new Fn({
   name: 'esdocs',
   context: {
-    types: ['filters', 'null'],
+    types: ['filter'],
   },
   args: {
     index: {

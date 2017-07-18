@@ -11,7 +11,9 @@ module.exports = new Fn({
   aliases: [],
   type: 'datatable',
   help: 'Returns some crappy demo price data',
-  context: {},
+  context: {
+    types: ['filter'],
+  },
   args: {
     bucket: {
       types: ['string'],
