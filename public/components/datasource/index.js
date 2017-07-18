@@ -23,6 +23,8 @@ const mergeProps = (stateProps, dispatchProps, ownProps) => {
   const { element, pageId, serverFunctions } = stateProps;
   const { dispatchArgumentAtIndex, dispatchAstAtIndex } = dispatchProps;
 
+  const getServerFunctionByName = name => serverFunctions.find(fn => fn.name === name);
+
   // find the matching datasource from the expression AST
   const datasourceAst = get(element, 'ast.chain', []).map((astDef, i) => {
     // if it's not a function, it's can't be a datasource
@@ -33,7 +35,7 @@ const mergeProps = (stateProps, dispatchProps, ownProps) => {
     const datasource = datasourceRegistry.get(astDef.function);
     if (!datasource) return;
 
-    const datasourceDef = serverFunctions.find(fn => fn.name === datasource.name);
+    const datasourceDef = getServerFunctionByName(datasource.name);
     const knownArgs = datasourceDef && Object.keys(datasourceDef.args);
     const unknownArgs = datasourceDef && Object.keys(args).filter(arg => knownArgs.indexOf(arg) === -1);
 
@@ -49,7 +51,7 @@ const mergeProps = (stateProps, dispatchProps, ownProps) => {
 
   return Object.assign({}, ownProps, stateProps, dispatchProps, {
     ...datasourceAst,
-    datasources: datasourceRegistry.toArray(),
+    datasources: datasourceRegistry.toArray().map(ds => Object.assign({}, ds, { function: getServerFunctionByName(ds.name) })),
     setDatasourceAst: dispatchAstAtIndex({
       pageId,
       element,

@@ -51,7 +51,7 @@ export const DatasourceComponent = (props) => {
 
   return (
     <div>
-      <DatasourceSelector selected={stateDatasource} datasources={datasources} onSelect={setSelectedDatasource} />
+      <DatasourceSelector datasources={datasources} onSelect={setSelectedDatasource} />
       <div className="canvas__datasource">
         {stateDatasource.render({ args: stateArgs, updateArgs, datasourceDef })}
       </div>

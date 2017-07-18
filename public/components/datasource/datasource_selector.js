@@ -1,18 +1,22 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { FormGroup, FormControl, ControlLabel } from 'react-bootstrap';
+import { MediaCard } from '../media_card';
 
-export const DatasourceSelector = ({ onSelect, selected, datasources }) => (
-  <FormGroup controlId="formControlsSelect">
-    <ControlLabel>Select Datasource</ControlLabel>
-    <FormControl componentClass="select" value={selected.name} onChange={({ target: { value } }) => onSelect(value)}>
-      { datasources.map(d => <option key={d.name} value={d.name}>{d.displayName}</option>) }
-    </FormControl>
-  </FormGroup>
+export const DatasourceSelector = ({ onSelect, datasources }) => (
+  <div>
+    { datasources.map(d =>
+      <MediaCard
+        key={d.name}
+        title={d.displayName}
+        image={d.image}
+        onClick={() => onSelect(d.name)}>
+        {d.function.help}
+      </MediaCard>)
+    }
+  </div>
 );
 
 DatasourceSelector.propTypes = {
   onSelect: PropTypes.func.isRequired,
-  selected: PropTypes.object.isRequired,
   datasources: PropTypes.array.isRequired,
 };
