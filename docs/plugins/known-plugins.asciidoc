@@ -25,23 +25,24 @@ This list of plugins is not guaranteed to work on your version of Kibana. Instea
 
 [float]
 === Visualizations
-* https://github.com/prelert/kibana-swimlane-vis[Swimlanes] (prelert)
-* https://github.com/sbeyn/kibana-plugin-line-sg[Line] (sbeyn)
-* https://github.com/sbeyn/kibana-plugin-gauge-sg[Gauge] (sbeyn)
-* https://github.com/sbeyn/kibana-plugin-traffic-sg[Traffic] (sbeyn)
-* https://github.com/JuanCarniglia/area3d_vis[3D Graph] (JuanCarniglia)
-* https://github.com/nreese/enhanced_tilemap[Enhanced Tilemap] (nreese)
-* https://github.com/dlumbrer/kbn_network[Network Plugin] (dlumbrer)
-* https://github.com/mstoyano/kbn_c3js_vis[C3JS Visualizations] (mstoyano)
-* https://github.com/clamarque/Kibana_health_metric_vis[Health Metric] (clamarque)
-* https://github.com/ommsolutions/kibana_ext_metrics_vis[Extended Metric] (ommsolutions)
 * https://github.com/virusu/3D_kibana_charts_vis[3D Charts] (virusu)
-* https://github.com/DeanF/health_metric_vis[Colored Metric Visualization] (deanf)
+* https://github.com/JuanCarniglia/area3d_vis[3D Graph] (JuanCarniglia)
+* https://github.com/mstoyano/kbn_c3js_vis[C3JS Visualizations] (mstoyano)
 * https://github.com/elo7/cohort[Cohort analysis] (elo7)
-* https://github.com/amannocci/kibana-plugin-metric-percent[Percent] (amannocci)
+* https://github.com/DeanF/health_metric_vis[Colored Metric Visualization] (deanf)
+* https://github.com/nreese/enhanced_tilemap[Enhanced Tilemap] (nreese)
+* https://github.com/ommsolutions/kibana_ext_metrics_vis[Extended Metric] (ommsolutions)
 * https://github.com/outbrain/ob-kb-funnel[Funnel Visualization] (roybass)
-* https://github.com/PhaedrusTheGreek/transform_vis[Transform Visualization] (PhaedrusTheGreek)
+* https://github.com/sbeyn/kibana-plugin-gauge-sg[Gauge] (sbeyn)
+* https://github.com/clamarque/Kibana_health_metric_vis[Health Metric] (clamarque)
+* https://github.com/sbeyn/kibana-plugin-line-sg[Line] (sbeyn)
+* https://github.com/dlumbrer/kbn_network[Network Plugin] (dlumbrer)
+* https://github.com/amannocci/kibana-plugin-metric-percent[Percent] (amannocci)
 * https://github.com/dlumbrer/kbn_searchtables[Search-Tables] (dlumbrer)
+* https://github.com/prelert/kibana-swimlane-vis[Swimlanes] (prelert)
+* https://github.com/sbeyn/kibana-plugin-traffic-sg[Traffic] (sbeyn)
+* https://github.com/PhaedrusTheGreek/transform_vis[Transform Visualization] (PhaedrusTheGreek)
+* https://github.com/nyurik/kibana-vega-vis[Vega-based visualization with map support] (nyurik)
 
 [float]
 === Other

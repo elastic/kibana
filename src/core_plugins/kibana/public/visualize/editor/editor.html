@@ -19,7 +19,7 @@
         class="fullWidth"
       >
         <!-- Block searching if the Visualization is linked to a Saved Search. -->
-        <div ng-if="vis.type.requiresSearch && $state.linked">
+        <div ng-if="vis.type.requiresSearch && state.linked">
           Linked to Saved Search &ldquo;{{ savedVis.savedSearch.title }}&rdquo;
           &nbsp;
           <a
@@ -33,7 +33,7 @@
 
         <!-- Allow searching if there is no linked Saved Search. -->
         <form
-          ng-if="vis.type.requiresSearch && !$state.linked && vis.type.options.showQueryBar"
+          ng-if="vis.type.requiresSearch && vis.type.options.showQueryBar && !state.linked"
           name="queryInput"
           ng-submit="fetch()"
           class="fullWidth"
@@ -81,7 +81,7 @@
 
   <!-- Filters. -->
   <filter-bar
-    ng-if="vis.type.options.showFilterBar"
+    ng-if="vis.type.options.showFilterBar && !state.linked"
     state="state"
     index-patterns="[indexPattern]"
   ></filter-bar>

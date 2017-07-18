@@ -41,7 +41,6 @@ uiModules
 
       $scope.vis = $scope.savedObj.vis;
       $scope.editorMode = $scope.editorMode || false;
-      $scope.vis.showSpyPanel = $scope.showSpyPanel || false;
       $scope.vis.editorMode = $scope.editorMode;
       $scope.vis.visualizeScope = true;
 

@@ -17,6 +17,7 @@ uiModules
     restrict: 'E',
     require: '?renderCounter',
     scope : {
+      showSpyPanel: '=?',
       vis: '=',
       visData: '=',
       uiState: '=?',
@@ -26,9 +27,6 @@ uiModules
     link: function ($scope, $el) {
       const minVisChartHeight = 180;
       const resizeChecker = new ResizeChecker($el);
-
-      $scope.showSpyPanel = $scope.vis && $scope.vis.showSpyPanel || false;
-
 
       //todo: lets make this a simple function call.
       const getVisEl = jQueryGetter('.visualize-chart');

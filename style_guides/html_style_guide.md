@@ -61,6 +61,28 @@ If the element doesn't have children, add the closing tag on the same line as th
 ></div>
 ```
 
+## Nested elements belong on multiple lines
+
+Putting nested elements on multiple lines makes it easy to scan and identify tags, attributes, and text
+nodes, and to distinguish elements from one another. This is especially useful if there are multiple
+similar elements which appear sequentially in the markup.
+
+### Do
+
+```html
+<div>
+  <span>
+    hi
+  </span>
+</div>
+```
+
+### Don't
+
+```html
+<div><span>hi</span></div>
+```
+
 ## Accessibility
 
 ### Don't use the `title` attribute

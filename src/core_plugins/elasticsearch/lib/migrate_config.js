@@ -1,10 +1,8 @@
 import upgrade from './upgrade_config';
 
 export async function migrateConfig(server) {
-  const { callWithInternalUser } = server.plugins.elasticsearch.getCluster('admin');
-
   const savedObjectsClient = server.savedObjectsClientFactory({
-    callCluster: callWithInternalUser
+    callCluster: server.plugins.elasticsearch.getCluster('admin').callWithInternalUser
   });
 
   const { saved_objects: configSavedObjects } = await savedObjectsClient.find({
