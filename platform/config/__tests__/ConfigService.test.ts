@@ -205,9 +205,7 @@ test('handles disabled path and marks config as used', async () => {
 
 function createClassWithSchema(schema: schemaLib.Any) {
   return class ExampleClassWithSchema {
-    static createSchema = () => {
-      return schema;
-    };
+    static createSchema = () => schema;
 
     constructor(readonly value: schemaLib.TypeOf<typeof schema>) {}
   };

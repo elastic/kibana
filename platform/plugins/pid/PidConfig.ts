@@ -1,28 +1,25 @@
-import { Schema, typeOfSchema } from '../../types';
+import { object, boolean, string, TypeOf } from '../../lib/schema';
 
-const createPidSchema = (schema: Schema) =>
-  schema.object({
-    enabled: schema.boolean({
-      defaultValue: true
-    }),
+const pidSchema = object({
+  enabled: boolean({
+    defaultValue: true
+  }),
 
-    file: schema.string(),
+  file: string(),
 
-    // whether or not we should fail if pid file already exists
-    exclusive: schema.boolean({
-      defaultValue: false
-    })
-  });
-
-const pidConfigType = typeOfSchema(createPidSchema);
+  // whether or not we should fail if pid file already exists
+  exclusive: boolean({
+    defaultValue: false
+  })
+});
 
 export class PidConfig {
-  static createSchema = createPidSchema;
+  static createSchema = () => pidSchema;
 
   file: string;
   failIfPidFileAlreadyExists: boolean;
 
-  constructor(config: typeof pidConfigType) {
+  constructor(config: TypeOf<typeof pidSchema>) {
     this.file = config.file;
     this.failIfPidFileAlreadyExists = config.exclusive;
   }
