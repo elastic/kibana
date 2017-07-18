@@ -3,11 +3,17 @@ import Slugify from '../string/slugify';
 import AccessibilityExample
   from '../../views/accessibility/accessibility_example';
 
+import IconExample
+  from '../../views/icon/icon_example';
+
 // Component route names should match the component name exactly.
 const components = [{
   name: 'Accessibility',
   component: AccessibilityExample,
   hasReact: true,
+}, {
+  name: 'Icon',
+  component: IconExample,
 }];
 
 const sandboxes = [];
