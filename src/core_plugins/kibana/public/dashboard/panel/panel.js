@@ -72,7 +72,6 @@ uiModules
       /**
        * @type {Object}
        */
-      saveState: '=',
       appState: '=',
     },
     link: function ($scope, element) {
@@ -96,6 +95,8 @@ uiModules
       };
 
       const panelId = $scope.panel.id;
+
+      // TODO: This function contains too much internal panel knowledge. Logic should be pushed to embeddable handlers.
       const handleError = (error) => {
         $scope.error = error.message;
 
