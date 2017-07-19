@@ -1,10 +1,6 @@
 @include component('kuiIcon') {
-  opacity: .8;
   display: inline-block;
-
-  &:hover {
-    opacity: 1;
-  }
+  fill: $kuiColorDarkestGray;
 
   @include modifier('medium') {
     @include size($kuiSizeM);

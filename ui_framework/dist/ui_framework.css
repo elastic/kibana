@@ -113,10 +113,8 @@ table {
   vertical-align: middle !important; }
 
 .kuiIcon {
-  opacity: .8;
-  display: inline-block; }
-  .kuiIcon:hover {
-    opacity: 1; }
+  display: inline-block;
+  fill: #3F3F3F; }
   .kuiIcon--medium {
     width: 16px;
     height: 16px; }
@@ -189,6 +187,8 @@ table {
     min-width: 64px;
     text-align: center;
     position: relative; }
+    .kuiHeader__button svg g {
+      fill: #DD0A73; }
     .kuiHeader__button:after {
       position: absolute;
       content: "";

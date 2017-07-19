@@ -88,6 +88,10 @@ $kuiHeaderChildSize: $kuiSizeXXL + $kuiSizeL;
     text-align: center;
     position: relative;
 
+    svg g {
+      fill: $kuiColorPink;
+    }
+
     @include kuiHeaderSeparation('left');
 
     &:hover {
