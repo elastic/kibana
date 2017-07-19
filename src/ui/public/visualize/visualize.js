@@ -53,6 +53,7 @@ uiModules
         // searchSource is only there for courier request handler
         requestHandler($scope.vis, $scope.appState, $scope.uiState, $scope.savedObj.searchSource)
           .then(resp => responseHandler($scope.vis, resp), e => {
+            $scope.savedObj.searchSource.cancelQueued();
             $el.trigger('renderComplete');
             if (isTermSizeZeroError(e)) {
               return notify.error(
