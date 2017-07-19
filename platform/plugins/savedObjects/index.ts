@@ -1,4 +1,4 @@
-import { KibanaFunctionalPlugin } from '../../server/plugins/types';
+import { KibanaFunctionalPlugin } from 'kbn-types';
 import { SavedObjectsService } from './SavedObjectsService';
 import { registerEndpoints } from './registerEndpoints';
 

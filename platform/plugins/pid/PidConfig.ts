@@ -1,4 +1,4 @@
-import { Schema, typeOfSchema } from '../../types';
+import { Schema, typeOfSchema } from 'kbn-types';
 
 const createPidSchema = (schema: Schema) =>
   schema.object({

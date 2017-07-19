@@ -1,4 +1,4 @@
-import { Schema, typeOfSchema } from '../../types';
+import { Schema, typeOfSchema } from 'kbn-types';
 
 const createReportingSchema = (schema: Schema) =>
   schema.object({
