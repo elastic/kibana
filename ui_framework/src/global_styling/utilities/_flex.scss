@@ -1,0 +1,16 @@
+@include utility('flex') {
+  display: flex;
+}
+
+@include utility('flexRow') {
+  display: flex;
+  flex-direction: row;
+}
+
+@include utility('flexGrow1') {
+  flex-grow: 1;
+}
+
+@include utility('flexShrink1') {
+  flex-shrink: 1;
+}

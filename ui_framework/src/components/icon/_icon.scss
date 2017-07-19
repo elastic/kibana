@@ -1,5 +1,6 @@
 @include component('kuiIcon') {
   display: inline-block;
+  fill: $kuiTextColor;
 
   @include modifier('medium') {
     @include size($kuiSizeM);
