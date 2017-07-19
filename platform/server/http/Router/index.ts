@@ -3,7 +3,7 @@ import * as express from 'express';
 import { Headers, filterHeaders } from './headers';
 import { ObjectSetting, Props, Any, TypeOf } from '../../../lib/schema';
 
-interface Route<
+export interface Route<
   Params extends ObjectSetting<{}>,
   Query extends ObjectSetting<{}>
 > {
@@ -14,33 +14,36 @@ interface Route<
   };
 }
 
-type Obj<T> = { [key: string]: T };
-
-interface ResponseFactory {
-  ok<T extends Obj<any>>(payload: T): KibanaResponse<T>;
-  accepted<T extends Obj<any>>(payload: T): KibanaResponse<T>;
+export interface ResponseFactory {
+  ok<T extends { [key: string]: any }>(payload: T): KibanaResponse<T>;
+  accepted<T extends { [key: string]: any }>(payload: T): KibanaResponse<T>;
   noContent(): KibanaResponse<void>;
   badRequest<T extends Error>(err: T): KibanaResponse<T>;
 }
 
 const responseFactory: ResponseFactory = {
-  ok: <T extends Obj<any>>(payload: T) => new KibanaResponse(200, payload),
-  accepted: <T extends Obj<any>>(payload: T) =>
+  ok: <T extends { [key: string]: any }>(payload: T) =>
+    new KibanaResponse(200, payload),
+  accepted: <T extends { [key: string]: any }>(payload: T) =>
     new KibanaResponse(202, payload),
   noContent: () => new KibanaResponse<void>(204),
   badRequest: <T extends Error>(err: T) => new KibanaResponse(400, err)
 };
 
-type RequestHandler<RequestValue, Params extends Any, Query extends Any> = (
+export type RequestHandler<
+  RequestValue,
+  Params extends Any,
+  Query extends Any
+> = (
   onRequestValue: RequestValue,
   req: KibanaRequest<TypeOf<Params>, TypeOf<Query>>,
   createResponse: ResponseFactory
-) => Promise<KibanaResponse<any> | Obj<any>>;
+) => Promise<KibanaResponse<any> | { [key: string]: any }>;
 
 // TODO Needs _some_ work
-type StatusCode = 200 | 202 | 204 | 400;
+export type StatusCode = 200 | 202 | 204 | 400;
 
-class KibanaResponse<T> {
+export class KibanaResponse<T> {
   constructor(readonly status: StatusCode, readonly payload?: T) {}
 }
 
@@ -97,7 +100,7 @@ export interface RouterOptions<T> {
 }
 
 export class Router<V> {
-  readonly router = express.Router();
+  readonly router: express.Router = express.Router();
 
   constructor(readonly path: string, readonly options: RouterOptions<V> = {}) {}
 

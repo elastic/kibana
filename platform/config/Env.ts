@@ -13,10 +13,16 @@ export class Env {
   readonly logDir: string;
   readonly staticFilesDir: string;
 
+  /**
+   * @internal
+   */
   static createDefault(argv: WithConfig): Env {
     return new Env(process.cwd(), argv);
   }
 
+  /**
+   * @internal
+   */
   constructor(readonly homeDir: string, private readonly argv: WithConfig) {
     // TODO Fix path, should not be `ts-tmp`, that was only to get stuff running
     const platformDir = resolve(this.homeDir, 'ts-tmp');

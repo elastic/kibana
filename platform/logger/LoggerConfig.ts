@@ -28,11 +28,17 @@ const loggingConfigType = typeOfSchema(createLoggerSchema);
 type HttpConfigType = typeof loggingConfigType;
 
 export class LoggerConfig {
+  /**
+   * @internal
+   */
   static createSchema = createLoggerSchema;
 
   readonly dest: string;
   private readonly level: LogLevelId;
 
+  /**
+   * @internal
+   */
   constructor(config: HttpConfigType) {
     this.dest = config.dest;
 

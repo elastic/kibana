@@ -13,7 +13,7 @@ function toContext(parent: string = '', child: string | number) {
 export type Any = Setting<any>;
 export type TypeOf<RT extends Any> = RT['_type'];
 
-type SettingOptions<T> = {
+export type SettingOptions<T> = {
   defaultValue?: T;
   validate?: (value: T) => string | void;
 };
@@ -82,7 +82,7 @@ class BooleanSetting extends Setting<boolean> {
   }
 }
 
-type StringOptions = SettingOptions<string> & {
+export type StringOptions = SettingOptions<string> & {
   minLength?: number;
   maxLength?: number;
 };
@@ -162,7 +162,7 @@ class UnionSetting<RTS extends Array<Any>, T> extends Setting<T> {
   }
 }
 
-type NumberOptions = SettingOptions<number> & {
+export type NumberOptions = SettingOptions<number> & {
   min?: number;
   max?: number;
 };
@@ -217,7 +217,7 @@ class NumberSetting extends Setting<number> {
   }
 }
 
-type ByteSizeOptions = {
+export type ByteSizeOptions = {
   // we need to special-case defaultValue as we want to handle string inputs too
   validate?: (value: ByteSizeValue) => string | void;
   defaultValue?: ByteSizeValue | string;
@@ -281,7 +281,7 @@ class ByteSizeSetting extends Setting<ByteSizeValue> {
   }
 }
 
-type DurationOptions = {
+export type DurationOptions = {
   // we need to special-case defaultValue as we want to handle string inputs too
   validate?: (value: Duration) => string | void;
   defaultValue?: Duration | string;
@@ -336,7 +336,7 @@ class DurationSetting extends Setting<Duration> {
   }
 }
 
-type ArrayOptions<T> = SettingOptions<Array<T>> & {
+export type ArrayOptions<T> = SettingOptions<Array<T>> & {
   minSize?: number;
   maxSize?: number;
 };
@@ -388,7 +388,7 @@ export type Props = Record<string, Any>;
 // Because of https://github.com/Microsoft/TypeScript/issues/14041
 // this might not have perfect _rendering_ output, but it will be typed.
 
-type ObjectSettingType<P extends Props> = Readonly<
+export type ObjectSettingType<P extends Props> = Readonly<
   { [K in keyof P]: TypeOf<P[K]> }
 >;
 
@@ -440,9 +440,9 @@ function isMap<K, V>(o: any): o is Map<K, V> {
   return o instanceof Map;
 }
 
-type MapOfOptions<K, V> = SettingOptions<Map<K, V>>;
+export type MapOfOptions<K, V> = SettingOptions<Map<K, V>>;
 
-export class MapOfSetting<K, V> extends Setting<Map<K, V>> {
+class MapOfSetting<K, V> extends Setting<Map<K, V>> {
   constructor(
     private readonly keySetting: Setting<K>,
     private readonly valueSetting: Setting<V>,
@@ -543,25 +543,22 @@ export function mapOf<K, V>(
 export function oneOf<A, B, C, D>(
   types: [Setting<A>, Setting<B>, Setting<C>, Setting<D>],
   options?: SettingOptions<A | B | C | D>
-): UnionSetting<
-  [Setting<A>, Setting<B>, Setting<C>, Setting<D>],
-  A | B | C | D
->;
+): Setting<A | B | C | D>;
 export function oneOf<A, B, C>(
   types: [Setting<A>, Setting<B>, Setting<C>],
   options?: SettingOptions<A | B | C>
-): UnionSetting<[Setting<A>, Setting<B>, Setting<C>], A | B | C>;
+): Setting<A | B | C>;
 export function oneOf<A, B>(
   types: [Setting<A>, Setting<B>],
   options?: SettingOptions<A | B>
-): UnionSetting<[Setting<A>, Setting<B>], A | B>;
+): Setting<A | B>;
 export function oneOf<A>(
   types: [Setting<A>],
   options?: SettingOptions<A>
-): UnionSetting<[Setting<A>], A>;
+): Setting<A>;
 export function oneOf<RTS extends Array<Any>>(
   types: RTS,
   options?: SettingOptions<any>
-): UnionSetting<RTS, any> {
+): Setting<any> {
   return new UnionSetting(types, options);
 }

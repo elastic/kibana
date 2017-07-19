@@ -1,5 +1,8 @@
 import { Schema, typeOfSchema } from '../../types';
 
+/**
+ * @internal
+ */
 export const createSslSchema = (schema: Schema) =>
   schema.object({
     verificationMode: schema.oneOf([
@@ -17,6 +20,9 @@ export const createSslSchema = (schema: Schema) =>
 
 const DEFAULT_REQUEST_HEADERS = ['authorization'];
 
+/**
+ * @internal
+ */
 const createSharedFields = (schema: Schema) => ({
   url: schema.string({ defaultValue: 'http://localhost:9200' }),
   preserveHost: schema.boolean({ defaultValue: true }),
@@ -35,16 +41,25 @@ const createSharedFields = (schema: Schema) => ({
   ssl: schema.maybe(createSslSchema(schema))
 });
 
+/**
+ * @internal
+ */
 const clusterSchema = (schema: Schema) =>
   schema.object({
     ...createSharedFields(schema)
   });
 
+/**
+ * @internal
+ */
 export const createTribeSchema = (schema: Schema) =>
   schema.object({
     ...createSharedFields(schema)
   });
 
+/**
+ * @internal
+ */
 export const createElasticsearchSchema = (schema: Schema) =>
   schema.object({
     enabled: schema.boolean({ defaultValue: true }),
@@ -57,7 +72,14 @@ export const createElasticsearchSchema = (schema: Schema) =>
 
 const elasticsearchConfigType = typeOfSchema(createElasticsearchSchema);
 
+/**
+ * @internal
+ */
 export type ElasticsearchConfigsSchema = typeof elasticsearchConfigType;
 
 const clusterConfigType = typeOfSchema(clusterSchema);
+
+/**
+ * @internal
+ */
 export type ClusterSchema = typeof clusterConfigType;

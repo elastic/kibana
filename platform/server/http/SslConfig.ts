@@ -38,10 +38,16 @@ const sslConfigType = typeOfSchema(createSslSchema);
 type SslConfigType = typeof sslConfigType;
 
 export class SslConfig {
+  /**
+   * @internal
+   */
   static createSchema = createSslSchema;
 
   enabled: boolean;
 
+  /**
+   * @internal
+   */
   constructor(config: SslConfigType) {
     this.enabled = config.enabled;
   }

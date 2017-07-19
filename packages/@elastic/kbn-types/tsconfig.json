@@ -1,0 +1,16 @@
+{
+  "extends": "../../../tsconfig",
+  "compilerOptions": {
+    "declaration": true,
+    "declarationDir": "./types",
+    "stripInternal": true
+  },
+  "files": [
+    "./index.ts",
+    "../../../types/index.d.ts"
+  ],
+  "include": [],
+  "exclude": [
+    "node_modules"
+  ]
+}

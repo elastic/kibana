@@ -39,6 +39,9 @@ const httpConfigType = typeOfSchema(createHttpSchema);
 type HttpConfigType = typeof httpConfigType;
 
 export class HttpConfig {
+  /**
+   * @internal
+   */
   static createSchema = createHttpSchema;
 
   host: string;
@@ -48,6 +51,9 @@ export class HttpConfig {
   publicDir: string;
   ssl: SslConfig;
 
+  /**
+   * @internal
+   */
   constructor(config: HttpConfigType, env: Env) {
     this.host = config.host;
     this.port = config.port;
