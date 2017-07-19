@@ -44,6 +44,14 @@ const mergeProps = (stateProps, dispatchProps, ownProps) => {
 
       return setArgument(mappedArg);
     },
+    onValueAdd: (argName) => {
+      setArgument({
+        [argName]: [{
+          type: 'string',
+          value: '',
+        }],
+      });
+    },
     onValueRemove: (argName) => deleteArgument(argName),
   });
 };
