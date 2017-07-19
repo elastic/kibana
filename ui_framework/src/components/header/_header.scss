@@ -1,18 +1,5 @@
 // Header. Includes breadcrumbs of nav buttons.
 
-// Adds a border to the left or right of an item. Requires relative position on parent.
-@mixin kuiHeaderSeparation($position) {
-  &:after {
-    position: absolute;
-    content: "";
-    width: 1px;
-    top: $kuiSize;
-    bottom: 0;
-    background: $kuiBorderColor;
-    #{$position}: 0;
-  }
-}
-
 @include component('kuiHeader') {
   background: $kuiHeaderBackgroundColor;
   border-bottom: $kuiBorderThin;
@@ -34,27 +21,6 @@
     opacity: 1;
   }
 
-  @include child('button') {
-    height: $kuiHeaderChildSize;
-    min-width: $kuiHeaderChildSize;
-    text-align: center;
-    position: relative;
-
-    svg g {
-      fill: $kuiColorPink;
-    }
-
-    @include kuiHeaderSeparation('left');
-
-    &:hover {
-      background: $kuiColorLightestGray;
-    }
-
-    &:focus {
-      background: $kuiFocusBackgroundColor;
-    }
-  }
-
   @include child('notification') {
     display: inline-block;
     border-radius: $kuiBorderRadius;
@@ -64,49 +30,5 @@
     height: $kuiSize;
     min-width: $kuiSize;
     vertical-align: middle;
-  }
-}
-
-// Laptop
-@include screenMedium {
-
-  @include component('kuiHeader') {
-
-    @include child('breadcrumb') {
-      display: none;
-
-      // Only show last 4 breadcrumbs
-      &:nth-last-child(-n+4) {
-        display: inline-block;
-      }
-    }
-  }
-}
-
-// Tablets
-@include screenSmall {
-
-  @include component('kuiHeader') {
-
-    @include child('breadcrumb') {
-      display: none;
-
-      // Only show last 2 breadcrumbs
-      &:nth-last-child(-n+2) {
-        display: inline-block;
-      }
-    }
-  }
-}
-
-// Mobile
-@include screenXSmall {
-
-  @include component('kuiHeader') {
-
-    // Don't show breadcrumbs
-    @include child('breadcrumb') {
-      display: none;
-    }
   }
 }

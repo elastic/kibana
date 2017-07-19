@@ -1,3 +1,5 @@
+// Breadcrumb navigation included in the header.
+
 @include component('kuiHeaderBreadcrumb') {
   display: inline-block;
   height: $kuiHeaderChildSize;
@@ -34,3 +36,38 @@
     overflow: hidden;
   }
 }
+
+// Laptop
+@include screenMedium {
+
+  @include component('kuiHeaderBreadcrumb') {
+    display: none;
+
+    // Only show last 4 breadcrumbs
+    &:nth-last-child(-n+4) {
+      display: inline-block;
+    }
+  }
+}
+
+// Tablets
+@include screenSmall {
+
+  @include component('kuiHeaderBreadcrumb') {
+    display: none;
+
+    // Only show last 2 breadcrumbs
+    &:nth-last-child(-n+2) {
+      display: inline-block;
+    }
+  }
+}
+
+// Mobile
+@include screenXSmall {
+
+  @include component('kuiHeaderBreadcrumb') {
+    display: none;
+  }
+}
+

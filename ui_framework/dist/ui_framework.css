@@ -149,25 +149,6 @@ table {
     height: 32px;
     width: 24px;
     opacity: 1; }
-  .kuiHeader__button {
-    height: 64px;
-    min-width: 64px;
-    text-align: center;
-    position: relative; }
-    .kuiHeader__button svg g {
-      fill: #DD0A73; }
-    .kuiHeader__button:after {
-      position: absolute;
-      content: "";
-      width: 1px;
-      top: 16px;
-      bottom: 0;
-      background: #D9D9D9;
-      left: 0; }
-    .kuiHeader__button:hover {
-      background: #F5F5F5; }
-    .kuiHeader__button:focus {
-      background: #bfe9e6; }
   .kuiHeader__notification {
     display: inline-block;
     border-radius: 4px;
@@ -177,22 +158,6 @@ table {
     height: 16px;
     min-width: 16px;
     vertical-align: middle; }
-
-@media only screen and (min-width: 992px) and (max-width: 1199px) {
-  .kuiHeader__breadcrumb {
-    display: none; }
-    .kuiHeader__breadcrumb:nth-last-child(-n+4) {
-      display: inline-block; } }
-
-@media only screen and (min-width: 769px) and (max-width: 991px) {
-  .kuiHeader__breadcrumb {
-    display: none; }
-    .kuiHeader__breadcrumb:nth-last-child(-n+2) {
-      display: inline-block; } }
-
-@media only screen and (max-width: 768px) {
-  .kuiHeader__breadcrumb {
-    display: none; } }
 
 .kuiHeaderBreadcrumb {
   display: inline-block;
@@ -221,3 +186,38 @@ table {
     display: block;
     text-overflow: ellipsis;
     overflow: hidden; }
+
+@media only screen and (min-width: 992px) and (max-width: 1199px) {
+  .kuiHeaderBreadcrumb {
+    display: none; }
+    .kuiHeaderBreadcrumb:nth-last-child(-n+4) {
+      display: inline-block; } }
+
+@media only screen and (min-width: 769px) and (max-width: 991px) {
+  .kuiHeaderBreadcrumb {
+    display: none; }
+    .kuiHeaderBreadcrumb:nth-last-child(-n+2) {
+      display: inline-block; } }
+
+@media only screen and (max-width: 768px) {
+  .kuiHeaderBreadcrumb {
+    display: none; } }
+
+.kuiHeaderItem {
+  position: relative; }
+  .kuiHeaderItem:after {
+    position: absolute;
+    content: "";
+    width: 1px;
+    top: 16px;
+    bottom: 0;
+    background: #D9D9D9;
+    left: 0; }
+  .kuiHeaderItem__button {
+    height: 64px;
+    min-width: 64px;
+    text-align: center; }
+    .kuiHeaderItem__button:hover {
+      background: #F5F5F5; }
+    .kuiHeaderItem__button:focus {
+      background: #bfe9e6; }

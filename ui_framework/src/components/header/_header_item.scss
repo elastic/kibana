@@ -1,0 +1,23 @@
+// Header items are the small icon links that pop up menus
+
+@include component('kuiHeaderItem') {
+  position: relative;
+
+  // Add a pseudo-border to the left
+  @include kuiHeaderSeparation('left');
+
+  @include child('button') {
+    height: $kuiHeaderChildSize;
+    min-width: $kuiHeaderChildSize;
+    text-align: center;
+
+    &:hover {
+      background: $kuiColorLightestGray;
+    }
+
+    &:focus {
+      background: $kuiFocusBackgroundColor;
+    }
+  }
+}
+
