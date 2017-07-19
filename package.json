@@ -222,7 +222,7 @@
     "@types/lodash": "3.10.1",
     "@types/node": "6.0.78",
     "@types/sinon": "1.16.36",
-    "@types/supertest": "2.0.1",
+    "@types/supertest": "2.0.2",
     "@types/yargs": "6.6.0",
     "angular-mocks": "1.4.7",
     "babel-eslint": "7.2.3",
