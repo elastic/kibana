@@ -12,3 +12,11 @@ $state-prefix: null;
     }
   }
 }
+
+@mixin utility($utility) {
+  @at-root {
+    .kui--#{$utility} {
+      @content;
+    }
+  }
+}
