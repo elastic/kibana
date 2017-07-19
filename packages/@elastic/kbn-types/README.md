@@ -5,8 +5,8 @@ npm install
 npm run build
 ```
 
-This builds declaration files into `./types/packages/kbn-types`, which is
-specified as the "main" type file for this package in `./package.json`.
+This builds declaration files into `./types/packages/@elastic/kbn-types`, which
+is specified as the "main" type file for this package in `./package.json`.
 
 Now external code can use this package, e.g. something like this:
 

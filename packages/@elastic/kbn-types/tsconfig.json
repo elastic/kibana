@@ -1,5 +1,5 @@
 {
-  "extends": "../../tsconfig",
+  "extends": "../../../tsconfig",
   "compilerOptions": {
     "declaration": true,
     "declarationDir": "./types",
@@ -7,7 +7,7 @@
   },
   "files": [
     "./index.ts",
-    "../../types/index.d.ts"
+    "../../../types/index.d.ts"
   ],
   "include": [],
   "exclude": [
