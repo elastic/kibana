@@ -49,14 +49,16 @@ First, you'll be prompted for what kind of component to create:
 
 Next, you'll enter a series of prompts.
 
-#### "What's the name of the file?"
+#### "What's the name of this component?"
 
 Yeoman will ask you what to name the file. It expects you to provide the name
 in snake case. Yeoman will automatically add file extensions and a "kui" prefix so you should leave those out.
 
-#### "Where should it go?"
+#### "Where do you want to create this component's files?"
 
-This defaults to the last directory you specified for this prompt. To change this location, type in the path to the directory where the files should live.
+This defaults to the last directory you specified for this prompt, or to the UI Framework's
+components directory if you haven't specified one. To change this location, type in the path to the
+directory where the files should live.
 
 If you want Yeoman to automatically generate a directory to organize the files,
 that directory will be created inside of the location you specify (see next prompt).

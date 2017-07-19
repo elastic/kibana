@@ -11,11 +11,11 @@ module.exports = class extends Generator {
 
   prompting() {
     return this.prompt([{
-      message: 'What\'s the name of this file? Use snake_case, please.',
+      message: 'What\'s the name of this component? Use snake_case, please.',
       name: 'name',
       type: 'input',
     }, {
-      message: 'Where should it go?',
+      message: `Where do you want to create this component's files?`,
       type: 'input',
       name: 'path',
       default: 'ui_framework/src/components',
@@ -51,6 +51,21 @@ module.exports = class extends Generator {
       const testPath = config.testPath = `${path}/${fileName}.test.js`;
       const stylesPath = config.stylesPath = `${path}/_${fileName}.scss`;
       config.stylesImportPath = `./_${fileName}.scss`;
+
+      // If it needs its own directory then it will need a root index file too.
+      if (this.config.shouldMakeDirectory) {
+        this.fs.copyTpl(
+          this.templatePath('_index.scss'),
+          this.destinationPath(`${path}/_index.scss`),
+          vars
+        );
+
+        this.fs.copyTpl(
+          this.templatePath('index.js'),
+          this.destinationPath(`${path}/index.js`),
+          vars
+        );
+      }
 
       // Create component file.
       this.fs.copyTpl(
@@ -92,29 +107,28 @@ module.exports = class extends Generator {
       const componentName = this.config.vars.componentName;
       const componentPath = this.config.componentPath;
 
-      this.log(chalk.white('\n// Export component.'));
-      this.log(
-        `${chalk.magenta('export')} {\n` +
-        `  ${componentName},\n` +
-        `} ${chalk.magenta('from')} ${chalk.cyan(`'./${this.config.name}'`)};`
-      );
+      if (!this.config.shouldMakeDirectory) {
+        this.log(chalk.white(`\n// Export component from component's index.js.`));
+        this.log(
+          `${chalk.magenta('export')} {\n` +
+          `  ${componentName},\n` +
+          `} ${chalk.magenta('from')} ${chalk.cyan(`'./${this.config.name}'`)};`
+        );
+      }
 
-      this.log(chalk.white('\n// Import component.'));
-      this.log(
-        `${chalk.magenta('import')} {\n` +
-        `  ${componentName},\n` +
-        `} ${chalk.magenta('from')} ${chalk.cyan(`'./${this.config.name}'`)};`
-      );
+      if (!this.config.shouldMakeDirectory) {
+        this.log(chalk.white('\n// Import styles.'));
+        this.log(
+          `${chalk.magenta('@import')} ${chalk.cyan(`'./${this.config.name}'`)};`
+        );
+      }
 
-      this.log(chalk.white('\n// Import styles.'));
-      this.log(
-        `${chalk.magenta('@import')} ${chalk.cyan(`'./${this.config.name}'`)};`
-      );
-
-      this.log(chalk.white('\n// Import index styles.'));
-      this.log(
-        `${chalk.magenta('@import')} ${chalk.cyan(`'./${this.config.name}/index'`)};`
-      );
+      if (this.config.shouldMakeDirectory) {
+        this.log(chalk.white('\n// Import component styles into the root index.scss.'));
+        this.log(
+          `${chalk.magenta('@import')} ${chalk.cyan(`'./${this.config.name}/index'`)};`
+        );
+      }
     };
 
     this.log('------------------------------------------------');
