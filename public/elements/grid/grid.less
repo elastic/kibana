@@ -1,6 +1,23 @@
 .canvas__element--grid {
-  th {
-    padding-right: 10px;
+  padding: 10px;
+
+  table {
+    width: 100%;
+    table-layout: fixed;
+  }
+
+  .canvas__element--grid-label {
+    padding-right: 20px;
+    font-size: 0.9em;
+    font-weight: 100;
+  }
+
+  th.canvas__element--grid-label {
+    text-align: center;
+  }
+
+  td:not(.canvas__element--grid-label) {
+    text-align: center;
   }
 
   tr {

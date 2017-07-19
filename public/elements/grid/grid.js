@@ -63,7 +63,7 @@ module.exports = new Element('grid', {
                   <th>{summary.y.expression}</th>
                 }
                 {columns.map(col => (
-                  <th key={`header-${col}`} style={{ fontWeight: 'normal' }}>{col}</th>
+                  <th key={`header-${col}`} className="canvas__element--grid-label">{col}</th>
                 ))}
               </tr>
             </thead>
@@ -72,7 +72,7 @@ module.exports = new Element('grid', {
             {rows.map((row, i) => (
               <tr key=  {`row-${i}`}>
                 {row.label == null ? null : (
-                  <td>{row.label}</td>
+                  <td className="canvas__element--grid-label">{row.label}</td>
                 )}
 
                 {row.cells.map((col, j) => (
