@@ -1,11 +1,11 @@
-function makeComponentName(str) {
+function makeComponentName(str, usePrefix = true) {
   const words = str.split('_');
 
   const componentName = words.map(function(word) {
     return upperCaseFirstLetter(word);
   }).join('');
 
-  return `Kui${componentName}`;
+  return `${usePrefix ? 'Kui' : ''}${componentName}`;
 }
 
 function lowerCaseFirstLetter(str) {

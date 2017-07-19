@@ -42,10 +42,10 @@ From the command line, run `npm run uiFramework:create`.
 
 First, you'll be prompted for what kind of component to create:
 
-| Choice | Files created |
+| Choice | Description |
 |---|---|
-| Stateless function | {name}.js, {name}.test.js, {_name}.scss |
-| Component class | {name}.js, {name}.test.js, {_name}.scss |
+| Stateless function | A stateless functional React component |
+| Component class | A class-based React component |
 
 Next, you'll enter a series of prompts.
 
@@ -122,6 +122,23 @@ complex they should be. In general, your examples should demonstrate:
 * How the component handles edge cases, e.g. overflowing content, text-based vs. element-based
 content.
 * The various states of the component, e.g. disabled, selected, empty of content, error state.
+
+## Creating documentation
+
+You can use the same Yeoman generator referenced above to create documentation.
+
+From the command line, run `npm run uiFramework:document`.
+
+First, you'll be prompted for what kind of documentation to create:
+
+| Choice | Description |
+|---|---|
+| Page | A page for documenting a component(s) with multiple demos |
+| Page demo | An individual demo of a particular component use case |
+| Sandbox | An empty document where you can do pretty much anything |
+
+Just follow the prompts and your documentation files will be created.
+You can use the snippets that are printed to the terminal to integrate these files into the UI Framework documentation site.
 
 ## Principles
 

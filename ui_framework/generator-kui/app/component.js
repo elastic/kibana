@@ -10,10 +10,10 @@ module.exports = class extends Generator {
       type: 'list',
       choices: [{
         name: 'Stateless function',
-        value: 'function'
+        value: 'function',
       }, {
         name: 'Component class',
-        value: 'component'
+        value: 'component',
       }],
     }]).then(answers => {
       this.config = answers;
@@ -21,20 +21,8 @@ module.exports = class extends Generator {
   }
 
   writing() {
-    const createComponent = () => {
-      this.composeWith(componentGenerator, {
-        fileType: this.config.fileType,
-      });
-    }
-
-    switch (this.config.fileType) {
-      case 'component':
-        createComponent();
-        break;
-
-      case 'function':
-        createComponent();
-        break;
-    }
+    this.composeWith(componentGenerator, {
+      fileType: this.config.fileType,
+    });
   }
 }
