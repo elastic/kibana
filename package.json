@@ -209,7 +209,7 @@
     "angular-mocks": "1.4.7",
     "babel-eslint": "7.2.3",
     "chai": "3.5.0",
-    "chalk": "1.1.1",
+    "chalk": "2.0.1",
     "chance": "1.0.6",
     "cheerio": "0.22.0",
     "chokidar": "1.6.0",

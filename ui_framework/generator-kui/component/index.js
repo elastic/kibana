@@ -91,26 +91,26 @@ module.exports = class extends Generator {
       const componentName = this.config.vars.componentName;
       const componentPath = this.config.componentPath;
 
-      this.log(chalk.gray('\n// Export component.'));
+      this.log(chalk.white('\n// Export component.'));
       this.log(
         `${chalk.magenta('export')} {\n` +
         `  ${componentName},\n` +
         `} ${chalk.magenta('from')} ${chalk.cyan(`'./${this.config.name}'`)};`
       );
 
-      this.log(chalk.gray('\n// Import component.'));
+      this.log(chalk.white('\n// Import component.'));
       this.log(
         `${chalk.magenta('import')} {\n` +
         `  ${componentName},\n` +
         `} ${chalk.magenta('from')} ${chalk.cyan(`'./${this.config.name}'`)};`
       );
 
-      this.log(chalk.gray('\n// Import styles.'));
+      this.log(chalk.white('\n// Import styles.'));
       this.log(
         `${chalk.magenta('@import')} ${chalk.cyan(`'./${this.config.name}'`)};`
       );
 
-      this.log(chalk.gray('\n// Import index styles.'));
+      this.log(chalk.white('\n// Import index styles.'));
       this.log(
         `${chalk.magenta('@import')} ${chalk.cyan(`'./${this.config.name}/index'`)};`
       );

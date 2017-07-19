@@ -136,7 +136,7 @@ module.exports = class extends Generator {
         fileName,
       } = this.config.demoVars;
 
-      this.log(chalk.gray('\n// Import example into routes.js.'));
+      this.log(chalk.white('\n// Import example into routes.js.'));
       this.log(
         `${chalk.magenta('import')} ${componentExampleName}Example\n` +
         `  ${chalk.magenta('from')} ${chalk.cyan(`'../../views/${fileName}/${fileName}_example'`)};`
@@ -150,10 +150,10 @@ module.exports = class extends Generator {
         fileName,
       } = this.config.demoVars;
 
-      this.log(chalk.gray('\n// Import demo into example.'));
+      this.log(chalk.white('\n// Import demo into example.'));
       this.log(
-        `${chalk.magenta('import')} ${componentExampleName} from './${fileName};\n` +
-        `${chalk.magenta('const')} ${componentExamplePrefix}Source = require('!!raw!./${fileName}');\n` +
+        `${chalk.magenta('import')} ${componentExampleName} from ${chalk.cyan(`'./${fileName}'`)};\n` +
+        `${chalk.magenta('const')} ${componentExamplePrefix}Source = require(${chalk.cyan(`'!!raw!./${fileName}'`)});\n` +
         `${chalk.magenta('const')} ${componentExamplePrefix}Html = renderToHtml(${componentExampleName});`
       );
     };
@@ -164,7 +164,7 @@ module.exports = class extends Generator {
         fileName,
       } = this.config.sandboxVars;
 
-      this.log(chalk.gray('\n// Import example into routes.js.'));
+      this.log(chalk.white('\n// Import example into routes.js.'));
       this.log(
         `${chalk.magenta('import')} ${componentExampleName}Sandbox\n` +
         `  ${chalk.magenta('from')} ${chalk.cyan(`'../../views/${fileName}/${fileName}_sandbox'`)};`
