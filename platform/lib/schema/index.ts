@@ -45,7 +45,7 @@ export abstract class Setting<V> {
   protected abstract process(value: any, context?: string): V;
 }
 
-export class MaybeSetting<V> extends Setting<V | undefined> {
+class MaybeSetting<V> extends Setting<V | undefined> {
   private readonly setting: Setting<V>;
 
   constructor(setting: Setting<V>) {
@@ -69,7 +69,7 @@ export class MaybeSetting<V> extends Setting<V | undefined> {
   }
 }
 
-export class BooleanSetting extends Setting<boolean> {
+class BooleanSetting extends Setting<boolean> {
   process(value: any, context?: string): boolean {
     if (typeof value !== 'boolean') {
       throw new SettingError(
@@ -87,7 +87,7 @@ export type StringOptions = SettingOptions<string> & {
   maxLength?: number;
 };
 
-export class StringSetting extends Setting<string> {
+class StringSetting extends Setting<string> {
   private readonly minLength: number | void;
   private readonly maxLength: number | void;
 
@@ -125,7 +125,7 @@ export class StringSetting extends Setting<string> {
   }
 }
 
-export class LiteralSetting<T> extends Setting<T> {
+class LiteralSetting<T> extends Setting<T> {
   constructor(private readonly value: T) {
     super();
   }
@@ -142,7 +142,7 @@ export class LiteralSetting<T> extends Setting<T> {
   }
 }
 
-export class UnionSetting<RTS extends Array<Any>, T> extends Setting<T> {
+class UnionSetting<RTS extends Array<Any>, T> extends Setting<T> {
   constructor(public readonly settings: RTS, options?: SettingOptions<T>) {
     super(options);
   }
@@ -167,7 +167,7 @@ export type NumberOptions = SettingOptions<number> & {
   max?: number;
 };
 
-export class NumberSetting extends Setting<number> {
+class NumberSetting extends Setting<number> {
   private readonly min: number | void;
   private readonly max: number | void;
 
@@ -229,7 +229,7 @@ function ensureByteSizeValue(value?: ByteSizeValue | string) {
   return typeof value === 'string' ? ByteSizeValue.parse(value) : value;
 }
 
-export class ByteSizeSetting extends Setting<ByteSizeValue> {
+class ByteSizeSetting extends Setting<ByteSizeValue> {
   private readonly min: ByteSizeValue | void;
   private readonly max: ByteSizeValue | void;
 
@@ -308,7 +308,7 @@ function stringToDuration(text: string) {
   return momentDuration(count, unit);
 }
 
-export class DurationSetting extends Setting<Duration> {
+class DurationSetting extends Setting<Duration> {
   constructor(options: DurationOptions = {}) {
     const { defaultValue, ...rest } = options;
 
@@ -341,7 +341,7 @@ export type ArrayOptions<T> = SettingOptions<Array<T>> & {
   maxSize?: number;
 };
 
-export class ArraySetting<T> extends Setting<Array<T>> {
+class ArraySetting<T> extends Setting<Array<T>> {
   private readonly itemSetting: Setting<T>;
   private readonly minSize?: number;
   private readonly maxSize?: number;
@@ -442,7 +442,7 @@ function isMap<K, V>(o: any): o is Map<K, V> {
 
 export type MapOfOptions<K, V> = SettingOptions<Map<K, V>>;
 
-export class MapOfSetting<K, V> extends Setting<Map<K, V>> {
+class MapOfSetting<K, V> extends Setting<Map<K, V>> {
   constructor(
     private readonly keySetting: Setting<K>,
     private readonly valueSetting: Setting<V>,
@@ -543,25 +543,22 @@ export function mapOf<K, V>(
 export function oneOf<A, B, C, D>(
   types: [Setting<A>, Setting<B>, Setting<C>, Setting<D>],
   options?: SettingOptions<A | B | C | D>
-): UnionSetting<
-  [Setting<A>, Setting<B>, Setting<C>, Setting<D>],
-  A | B | C | D
->;
+): Setting<A | B | C | D>;
 export function oneOf<A, B, C>(
   types: [Setting<A>, Setting<B>, Setting<C>],
   options?: SettingOptions<A | B | C>
-): UnionSetting<[Setting<A>, Setting<B>, Setting<C>], A | B | C>;
+): Setting<A | B | C>;
 export function oneOf<A, B>(
   types: [Setting<A>, Setting<B>],
   options?: SettingOptions<A | B>
-): UnionSetting<[Setting<A>, Setting<B>], A | B>;
+): Setting<A | B>;
 export function oneOf<A>(
   types: [Setting<A>],
   options?: SettingOptions<A>
-): UnionSetting<[Setting<A>], A>;
+): Setting<A>;
 export function oneOf<RTS extends Array<Any>>(
   types: RTS,
   options?: SettingOptions<any>
-): UnionSetting<RTS, any> {
+): Setting<any> {
   return new UnionSetting(types, options);
 }
