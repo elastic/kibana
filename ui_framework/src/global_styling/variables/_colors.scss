@@ -19,21 +19,16 @@ $kuiColorDanger: #A30000;
 $kuiColorWarning: #E5830E;
 
 // Grays
-$kuiColorLightestGray: #F5F5F5;
-$kuiColorLightGray: #D9D9D9;
-$kuiColorMediumGray: #999;
-$kuiColorDarkGray: #666;
-$kuiColorDarkestGray: #3F3F3F;
-$kuiColorBlack: #000;
-$kuiColorWhite: #FFF;
+$kuiColorEmptyShade: #FFF;
+$kuiColorLightestShade: #F5F5F5;
+$kuiColorLightShade: #D9D9D9;
+$kuiColorMediumShade: #999;
+$kuiColorDarkShade: #666;
+$kuiColorDarkestShade: #3F3F3F;
+$kuiColorFullShade: #000;
 
 // Every color below must be based mathmatically on the set above.
 
-$kuiTextColor: $kuiColorDarkestGray;
+$kuiTextColor: $kuiColorDarkestShade;
 $kuiLinkColor: $kuiColorPrimary;
 $kuiFocusBackgroundColor: tint($kuiColorSecondary, 75%);
-
-$kuiHeaderBackgroundColor: $kuiColorWhite;
-$kuiHeaderBreadcrumbColor: $kuiColorDarkestGray;
-$kuiHeaderNotificationBackgroundColor: $kuiColorAccent;
-

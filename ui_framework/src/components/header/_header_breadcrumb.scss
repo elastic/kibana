@@ -17,15 +17,15 @@
     width: 1px;
     height: $kuiSize;
     transform: rotate(15deg);
-    background: $kuiColorLightGray;
+    background: $kuiColorLightShade;
   }
 
   @include state('isActive') {
-    color: $kuiColorMediumGray;
+    color: $kuiColorMediumShade;
   }
 
   @include state('isCollapsed') {
-    color: $kuiColorLightGray;
+    color: $kuiColorLightShade;
   }
 
   @include child('text') {
