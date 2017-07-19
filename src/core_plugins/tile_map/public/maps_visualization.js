@@ -91,7 +91,7 @@ export function MapsVisualizationProvider(serviceSettings, Notifier, getAppState
       uiState.set('mapZoom', this._kibanaMap.getZoomLevel());
       uiState.set('mapBounds', this._kibanaMap.getUntrimmedBounds());
       this._kibanaMap.addDrawControl();
-      this._kibanaMap.addFitControl(this.getGeohashBounds.bind(this));
+      this._kibanaMap.addFitControl();
       this._kibanaMap.addLegendControl();
       this._kibanaMap.persistUiStateForVisualization(this.vis);
 
@@ -245,6 +245,7 @@ export function MapsVisualizationProvider(serviceSettings, Notifier, getAppState
         tooltipFormatter: this._chartData ? this._chartData.tooltipFormatter : null,
         mapType: newParams.mapType,
         isFilteredByCollar: this._isFilteredByCollar(),
+        fetchBounds: this.getGeohashBounds.bind(this),
         heatmap: {
           heatBlur: newParams.heatBlur,
           heatMaxZoom: newParams.heatMaxZoom,

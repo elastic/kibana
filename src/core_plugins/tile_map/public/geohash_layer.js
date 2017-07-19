@@ -66,7 +66,17 @@ export class GeohashLayer extends KibanaMapLayer {
     this._geohashMarkers.movePointer(...args);
   }
 
-  getBounds() {
+  async getBounds() {
+    if (this._geohashOptions.fetchBounds) {
+      const geoHashBounds = await this._geohashOptions.fetchBounds();
+      if (geoHashBounds) {
+        const northEast = L.latLng(geoHashBounds.top_left.lat, geoHashBounds.bottom_right.lon);
+        const southWest = L.latLng(geoHashBounds.bottom_right.lat, geoHashBounds.top_left.lon);
+        const leaftetBounds = L.latLngBounds(southWest, northEast);
+        return leaftetBounds;
+      }
+    }
+
     return this._bounds;
   }
 
