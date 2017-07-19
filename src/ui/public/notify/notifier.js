@@ -107,9 +107,6 @@ const typeToAlertClassMap = {
 };
 
 function add(notif, cb) {
-  if (notif.lifetime < 0) {
-    return;
-  }
   _.set(notif, 'info.version', version);
   _.set(notif, 'info.buildNum', buildNum);
 
