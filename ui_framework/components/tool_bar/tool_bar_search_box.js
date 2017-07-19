@@ -1,7 +1,7 @@
 import React from 'react';
 import classNames from 'classnames';
 
-export function KuiToolBarSearchBox({ filter, onFilter, className, ...rest }) {
+export function KuiToolBarSearchBox({ filter, onFilter, placeholder, className, ...rest }) {
   function onChange(event) {
     onFilter(event.target.value);
   }
@@ -12,7 +12,7 @@ export function KuiToolBarSearchBox({ filter, onFilter, className, ...rest }) {
       <input
         className="kuiToolBarSearchBox__input"
         type="text"
-        placeholder="Search..."
+        placeholder={ placeholder }
         aria-label="Filter"
         defaultValue={ filter }
         onChange={ onChange }
@@ -24,4 +24,8 @@ export function KuiToolBarSearchBox({ filter, onFilter, className, ...rest }) {
 KuiToolBarSearchBox.propTypes = {
   filter: React.PropTypes.string,
   onFilter: React.PropTypes.func.isRequired
+};
+
+KuiToolBarSearchBox.defaultProps = {
+  placeholder: 'Search...'
 };
