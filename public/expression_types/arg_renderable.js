@@ -17,7 +17,7 @@ export class ArgRenderable extends BaseRenderable {
         { (!argValue) ? (
           <div className="canvas__argtype__add" >
             <Label bsStyle="default" onClick={() => onValueAdd(argName)}>
-              + {arg.name}
+              + {arg.displayName}
             </Label>
           </div>
         ) : (
