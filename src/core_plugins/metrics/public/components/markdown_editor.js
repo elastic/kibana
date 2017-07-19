@@ -103,7 +103,7 @@ class MarkdownEditor extends Component {
             onChange={this.handleChange}/>
         </div>
         <div className="vis_editor__markdown-variables">
-          <div>The following variables can be used in the Markdown by using the Handlebar (mustache) syntax. <a href="http://handlebarsjs.com/expressions.html" target="_BLANK">Click here for documentation</a> on the available expressions. HTML is also enabled.</div>
+          <div>The following variables can be used in the Markdown by using the Handlebar (mustache) syntax. <a href="http://handlebarsjs.com/expressions.html" target="_BLANK">Click here for documentation</a> on the available expressions.</div>
           <table className="table">
             <thead>
               <tr>

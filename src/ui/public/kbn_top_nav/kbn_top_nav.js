@@ -37,17 +37,18 @@ import _ from 'lodash';
 import angular from 'angular';
 import 'ui/watch_multi';
 import 'ui/directives/input_focus';
-import uiModules from 'ui/modules';
+import { uiModules } from 'ui/modules';
 import template from './kbn_top_nav.html';
-import KbnTopNavControllerProvider from './kbn_top_nav_controller';
-import RegistryNavbarExtensionsProvider from 'ui/registry/navbar_extensions';
+import { KbnTopNavControllerProvider } from './kbn_top_nav_controller';
+import { NavBarExtensionsRegistryProvider } from 'ui/registry/navbar_extensions';
+
 import './bread_crumbs/bread_crumbs';
 
 const module = uiModules.get('kibana');
 
 module.directive('kbnTopNav', function (Private) {
   const KbnTopNavController = Private(KbnTopNavControllerProvider);
-  const navbarExtensions = Private(RegistryNavbarExtensionsProvider);
+  const navbarExtensions = Private(NavBarExtensionsRegistryProvider);
   const getNavbarExtensions = _.memoize(function (name) {
     if (!name) throw new Error('navbar directive requires a name attribute');
     return _.sortBy(navbarExtensions.byAppName[name], 'order');

@@ -23,18 +23,18 @@ describe('kbnGlobalTimepicker', function () {
     const $el = compile();
     expect($el.attr('data-test-subj')).to.be('globalTimepicker');
   });
-  it('sets shared-timefilter to false when timefilter.enabled is false', function () {
+  it('sets data-shared-timefilter to false when timefilter.enabled is false', function () {
     scope.timefilter = {
       enabled: false
     };
     const $el = compile();
-    expect($el.attr('shared-timefilter')).to.eql('false');
+    expect($el.attr('data-shared-timefilter')).to.eql('false');
   });
-  it('sets shared-timefilter to true when timefilter.enabled is true', function () {
+  it('sets data-shared-timefilter to true when timefilter.enabled is true', function () {
     scope.timefilter = {
       enabled: true
     };
     const $el = compile();
-    expect($el.attr('shared-timefilter')).to.eql('true');
+    expect($el.attr('data-shared-timefilter')).to.eql('true');
   });
 });

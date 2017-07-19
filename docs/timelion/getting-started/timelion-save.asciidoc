@@ -1,0 +1,25 @@
+[[timelion-save]]
+=== Add to dashboard
+
+You’ve officially harnessed the power of Timelion to create time series visualizations. The final step of this tutorial is to add your new visualizations to a dashboard. Below, this section will show you how to save a visualization from your Timelion sheet and add it to an existing dashboard.
+
+To save a Timelion visualization as a dashboard panel, follow the steps below.
+
+. Select the visualization you’d like to add to one (or multiple) dashboards
+. Click the `Save` option in the top menu
+. Select `Save current expression as Kibana dashboard panel`
+. Name your panel and and click `Save` to save as a dashboard visualization
+
+image::images/timelion-save01.png[]
+{nbsp}
+
+Now you can add this dashboard panel to any dashboard you’d like. This visualization will now be listed in the Visualize list. Go ahead and follow the same process for the rest of the visualizations you created.
+
+Create a new dashboard or open an existing one to add the Timelion visualizations as you would any other visualization.
+
+image::images/timelion-save02.png[]
+{nbsp}
+
+TIP: You can also create time series visualizations right from the Visualize
+app--just select the Timeseries visualization type and enter a Timelion
+expression in the expression field.

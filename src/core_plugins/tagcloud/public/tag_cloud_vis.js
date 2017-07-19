@@ -1,57 +1,62 @@
 import 'plugins/tagcloud/tag_cloud.less';
 import 'plugins/tagcloud/tag_cloud_controller';
 import 'plugins/tagcloud/tag_cloud_vis_params';
-import TemplateVisTypeTemplateVisTypeProvider from 'ui/template_vis_type/template_vis_type';
-import VisSchemasProvider from 'ui/vis/schemas';
+import { VisFactoryProvider } from 'ui/vis/vis_factory';
+import { CATEGORY } from 'ui/vis/vis_category';
+import { VisSchemasProvider } from 'ui/vis/editors/default/schemas';
 import tagCloudTemplate from 'plugins/tagcloud/tag_cloud_controller.html';
-import visTypes from 'ui/registry/vis_types';
+import { VisTypesRegistryProvider } from 'ui/registry/vis_types';
+import image from './images/icon-tagcloud.svg';
 
-visTypes.register(function TagCloudProvider(Private) {
-  const TemplateVisType = Private(TemplateVisTypeTemplateVisTypeProvider);
+VisTypesRegistryProvider.register(function TagCloudProvider(Private) {
+  const VisFactory = Private(VisFactoryProvider);
   const Schemas = Private(VisSchemasProvider);
 
-  return new TemplateVisType({
+  return VisFactory.createAngularVisualization({
     name: 'tagcloud',
-    title: 'Tag cloud',
-    implementsRenderComplete: true,
-    description: 'A tag cloud visualization is a visual representation of text data, ' +
-    'typically used to visualize individual words. The font size of a word corresponds ' +
-    'with its importance.',
-    icon: 'fa-cloud',
-    template: tagCloudTemplate,
-    params: {
+    title: 'Tag Cloud',
+    image,
+    description: 'A group of words, sized according to their importance',
+    category: CATEGORY.OTHER,
+    visConfig: {
       defaults: {
         scale: 'linear',
         orientation: 'single',
         minFontSize: 18,
         maxFontSize: 72
       },
-      scales: ['linear', 'log', 'square root'],
-      orientations: ['single', 'right angled', 'multiple'],
-      editor: '<tagcloud-vis-params></tagcloud-vis-params>'
+      template: tagCloudTemplate,
     },
-    schemas: new Schemas([
-      {
-        group: 'metrics',
-        name: 'metric',
-        title: 'Tag Size',
-        min: 1,
-        max: 1,
-        aggFilter: ['!std_dev', '!percentiles', '!percentile_ranks', '!derivative'],
-        defaults: [
-          { schema: 'metric', type: 'count' }
-        ]
+    responseHandler: 'none',
+    editorConfig: {
+      collections: {
+        scales: ['linear', 'log', 'square root'],
+        orientations: ['single', 'right angled', 'multiple'],
       },
-      {
-        group: 'buckets',
-        name: 'segment',
-        icon: 'fa fa-cloud',
-        title: 'Tags',
-        min: 1,
-        max: 1,
-        aggFilter: ['terms']
-      }
-    ])
+      optionsTemplate: '<tagcloud-vis-params></tagcloud-vis-params>',
+      schemas: new Schemas([
+        {
+          group: 'metrics',
+          name: 'metric',
+          title: 'Tag Size',
+          min: 1,
+          max: 1,
+          aggFilter: ['!std_dev', '!percentiles', '!percentile_ranks', '!derivative'],
+          defaults: [
+            { schema: 'metric', type: 'count' }
+          ]
+        },
+        {
+          group: 'buckets',
+          name: 'segment',
+          icon: 'fa fa-cloud',
+          title: 'Tags',
+          min: 1,
+          max: 1,
+          aggFilter: ['terms']
+        }
+      ])
+    }
   });
 });
 

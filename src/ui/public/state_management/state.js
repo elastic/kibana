@@ -9,24 +9,24 @@
 import _ from 'lodash';
 import angular from 'angular';
 import rison from 'rison-node';
-import applyDiff from 'ui/utils/diff_object';
-import EventsProvider from 'ui/events';
-import Notifier from 'ui/notify/notifier';
+import { applyDiff } from 'ui/utils/diff_object';
+import { EventsProvider } from 'ui/events';
+import { Notifier } from 'ui/notify/notifier';
 
 import {
   createStateHash,
-  hashedItemStoreSingleton,
+  HashedItemStoreSingleton,
   isStateHash,
 } from './state_storage';
 
-export default function StateProvider(Private, $rootScope, $location, config, kbnUrl) {
+export function StateProvider(Private, $rootScope, $location, config, kbnUrl) {
   const Events = Private(EventsProvider);
 
   _.class(State).inherits(Events);
   function State(
     urlParam,
     defaults,
-    hashedItemStore = hashedItemStoreSingleton,
+    hashedItemStore = HashedItemStoreSingleton,
     notifier = new Notifier()
   ) {
     State.Super.call(this);
@@ -71,7 +71,7 @@ export default function StateProvider(Private, $rootScope, $location, config, kb
     }
 
     if (isStateHash(urlVal)) {
-      return this._parseQueryParamValue(urlVal);
+      return this._parseStateHash(urlVal);
     }
 
     let risonEncoded;
@@ -174,7 +174,7 @@ export default function StateProvider(Private, $rootScope, $location, config, kb
    */
   State.prototype.reset = function () {
     kbnUrl.removeParam(this.getQueryParamName());
-    // apply diff to _attributes from defaults, this is side effecting so
+    // apply diff to attributes from defaults, this is side effecting so
     // it will change the state in place.
     const diffResults = applyDiff(this, this._defaults);
     if (diffResults.keys.length) {
@@ -197,18 +197,14 @@ export default function StateProvider(Private, $rootScope, $location, config, kb
   };
 
   /**
-   *  Parse the query param value to it's unserialized
-   *  value. Hashes are restored to their pre-hashed state.
+   *  Parse the state hash to it's unserialized value. Hashes are restored
+   *  to their pre-hashed state.
    *
-   *  @param  {string} queryParam - value from the query string
-   *  @return {any} - the stored value, or null if hash does not resolve
+   *  @param  {string} stateHash - state hash value from the query string.
+   *  @return {any} - the stored value, or null if hash does not resolve.
    */
-  State.prototype._parseQueryParamValue = function (queryParam) {
-    if (!isStateHash(queryParam)) {
-      return rison.decode(queryParam);
-    }
-
-    const json = this._hashedItemStore.getItem(queryParam);
+  State.prototype._parseStateHash = function (stateHash) {
+    const json = this._hashedItemStore.getItem(stateHash);
     if (json === null) {
       this._notifier.error('Unable to completely restore the URL, be sure to use the share functionality.');
     }
@@ -217,14 +213,18 @@ export default function StateProvider(Private, $rootScope, $location, config, kb
   };
 
   /**
-   *  Lookup the value for a hash and return it's value
-   *  in rison format
+   *  Lookup the value for a hash and return it's value in rison format or just
+   *  return passed argument if it's not recognized as state hash.
    *
-   *  @param  {string} hash
+   *  @param  {string} stateHashOrRison - either state hash value or rison string.
    *  @return {string} rison
    */
-  State.prototype.translateHashToRison = function (hash) {
-    return rison.encode(this._parseQueryParamValue(hash));
+  State.prototype.translateHashToRison = function (stateHashOrRison) {
+    if (isStateHash(stateHashOrRison)) {
+      return rison.encode(this._parseStateHash(stateHashOrRison));
+    }
+
+    return stateHashOrRison;
   };
 
   State.prototype.isHashingEnabled = function () {

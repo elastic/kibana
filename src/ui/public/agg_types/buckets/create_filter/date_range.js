@@ -1,7 +1,7 @@
-import dateRange from 'ui/utils/date_range';
-import buildRangeFilter from 'ui/filter_manager/lib/range';
+import { dateRange } from 'ui/utils/date_range';
+import { buildRangeFilter } from 'ui/filter_manager/lib/range';
 
-export default function createDateRangeFilterProvider(config) {
+export function AggTypesBucketsCreateFilterDateRangeProvider(config) {
 
   return function (agg, key) {
     const range = dateRange.parse(key, config.get('dateFormat'));

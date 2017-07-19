@@ -12,7 +12,7 @@
       ng-class="{ 'management-section-info-expanded': section.showInfo }"
       class="page-row"
     >
-      <div class="kuiPanel kuiPanel--withHeader management-panel">
+      <div class="kuiPanel management-panel">
         <div class="kuiPanelHeader">
           <div class="kuiPanelHeaderSection">
             <div
@@ -41,6 +41,7 @@
                 ng-repeat="item in section.visibleItems"
               >
                 <a
+                  data-test-subj="{{::item.name}}"
                   class="management-panel__link"
                   ng-class="{ 'management-panel__link--disabled': item.disabled || !item.url }"
                   kbn-href="{{::item.disabled ? '' : item.url}}"

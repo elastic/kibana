@@ -1,7 +1,6 @@
 import { resolve } from 'path';
 import {
   rename,
-  readdir,
   createReadStream,
   createWriteStream
 } from 'fs';
@@ -14,18 +13,18 @@ import {
 
 import {
   prioritizeMappings,
-  getArchiveFiles,
+  readDirectory,
   isGzip,
   createParseArchiveStreams,
   createFormatArchiveStreams,
 } from '../lib';
 
 export async function rebuildAllAction({ dataDir, log }) {
-  const archiveNames = await fromNode(cb => readdir(dataDir, cb));
+  const archiveNames = await readDirectory(dataDir);
 
   for (const name of archiveNames) {
     const inputDir = resolve(dataDir, name);
-    const files = prioritizeMappings(await getArchiveFiles(inputDir));
+    const files = prioritizeMappings(await readDirectory(inputDir));
     for (const filename of files) {
       log.info('[%s] Rebuilding %j', name, filename);
 

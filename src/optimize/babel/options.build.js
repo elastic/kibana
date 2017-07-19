@@ -1,19 +1,16 @@
 const {
-  nodePresets,
-  webpackPresets,
-  plugins,
+  nodePreset,
+  webpackPreset,
   buildIgnore
 } = require('./helpers');
 
 const nodeOptions = {
-  presets: nodePresets,
-  plugins,
+  presets: [nodePreset],
   ignore: buildIgnore
 };
 
 exports.webpack = {
-  presets: webpackPresets,
-  plugins: plugins
+  presets: [webpackPreset],
 };
 
 exports.node = nodeOptions;

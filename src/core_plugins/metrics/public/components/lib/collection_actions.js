@@ -1,5 +1,8 @@
-import uuid from 'node-uuid';
+import uuid from 'uuid';
 import _ from 'lodash';
+
+const newFn = () => ({ id: uuid.v1() });
+
 export function handleChange(props, doc) {
   const { model, name } = props;
   const collection = model[name] || [];
@@ -23,7 +26,6 @@ export function handleDelete(props, doc) {
   }
 }
 
-const newFn = () => ({ id: uuid.v1() });
 export function handleAdd(props, fn = newFn) {
   if (!_.isFunction(fn)) fn = newFn;
   const { model, name } = props;

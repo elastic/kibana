@@ -9,14 +9,16 @@ import { handleShortUrlError } from './short_url_error';
 import { shortUrlAssertValid } from './short_url_assert_valid';
 import shortUrlLookupProvider from './short_url_lookup';
 import setupConnectionMixin from './setup_connection';
+import setupRedirectMixin from './setup_redirect_server';
 import registerHapiPluginsMixin from './register_hapi_plugins';
 import xsrfMixin from './xsrf';
 
-module.exports = async function (kbnServer, server, config) {
+export default async function (kbnServer, server, config) {
   server = kbnServer.server = new Hapi.Server();
 
   const shortUrlLookup = shortUrlLookupProvider(server);
   await kbnServer.mixin(setupConnectionMixin);
+  await kbnServer.mixin(setupRedirectMixin);
   await kbnServer.mixin(registerHapiPluginsMixin);
 
   // provide a simple way to expose static directories
@@ -119,7 +121,18 @@ module.exports = async function (kbnServer, server, config) {
       try {
         const url = await shortUrlLookup.getUrl(request.params.urlId, request);
         shortUrlAssertValid(url);
-        reply().redirect(config.get('server.basePath') + url);
+
+        const uiSettings = request.getUiSettingsService();
+        const stateStoreInSessionStorage = await uiSettings.get('state:storeInSessionStorage');
+        if (!stateStoreInSessionStorage) {
+          reply().redirect(config.get('server.basePath') + url);
+          return;
+        }
+
+        const app = kbnServer.uiExports.apps.byId.stateSessionStorageRedirect;
+        reply.renderApp(app, {
+          redirectUrl: url,
+        });
       } catch (err) {
         reply(handleShortUrlError(err));
       }

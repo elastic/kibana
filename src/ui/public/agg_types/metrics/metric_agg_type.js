@@ -1,7 +1,8 @@
 import _ from 'lodash';
-import AggTypesAggTypeProvider from 'ui/agg_types/agg_type';
-import RegistryFieldFormatsProvider from 'ui/registry/field_formats';
-export default function MetricAggTypeProvider(Private) {
+import { AggTypesAggTypeProvider } from 'ui/agg_types/agg_type';
+import { RegistryFieldFormatsProvider } from 'ui/registry/field_formats';
+
+export function AggTypesMetricsMetricAggTypeProvider(Private) {
   const AggType = Private(AggTypesAggTypeProvider);
   const fieldFormats = Private(RegistryFieldFormatsProvider);
 
@@ -45,6 +46,13 @@ export default function MetricAggTypeProvider(Private) {
   MetricAggType.prototype.getFormat = function (agg) {
     const field = agg.getField();
     return field ? field.format : fieldFormats.getDefaultInstance('number');
+  };
+
+  /**
+   * Determines if this metric can be scaled
+   */
+  MetricAggType.prototype.isScalable = function () {
+    return false;
   };
 
   return MetricAggType;

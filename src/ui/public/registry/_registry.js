@@ -1,5 +1,5 @@
 import _ from 'lodash';
-import IndexedArray from 'ui/indexed_array';
+import { IndexedArray } from 'ui/indexed_array';
 const notPropsOptNames = IndexedArray.OPT_NAMES.concat('constructor');
 
 /**
@@ -45,7 +45,7 @@ const notPropsOptNames = IndexedArray.OPT_NAMES.concat('constructor');
  *
  * @return {[type]}      [description]
  */
-export default function createRegistry(spec) {
+export function uiRegistry(spec) {
   spec = spec || {};
 
   const constructor = _.has(spec, 'constructor') && spec.constructor;
@@ -54,7 +54,7 @@ export default function createRegistry(spec) {
   const providers = [];
 
   /**
-   * This is the Private module that will be instanciated by
+   * This is the Private module that will be instantiated by
    *
    * @tag:PrivateModule
    * @return {IndexedArray} - an indexed array containing the values

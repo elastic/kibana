@@ -1,5 +1,5 @@
 import _ from 'lodash';
-import uiModules from 'ui/modules';
+import { uiModules } from 'ui/modules';
 import contextSizePickerTemplate from './size_picker.html';
 import './size_picker.less';
 

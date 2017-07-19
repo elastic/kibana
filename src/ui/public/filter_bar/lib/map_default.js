@@ -1,6 +1,7 @@
 import angular from 'angular';
 import _ from 'lodash';
-export default function mapDefaultProvider(Promise) {
+
+export function FilterBarLibMapDefaultProvider(Promise) {
 
   const metaProperty = /(^\$|meta)/;
 
@@ -10,9 +11,11 @@ export default function mapDefaultProvider(Promise) {
     });
 
     if (key) {
+      const type = 'custom';
       const value = angular.toJson(filter[key]);
-      return Promise.resolve({ key: key, value: value });
+      return Promise.resolve({ type, key, value });
     }
+
     return Promise.reject(filter);
   };
 }

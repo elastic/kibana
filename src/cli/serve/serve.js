@@ -72,7 +72,7 @@ function readServerSettings(opts, extraCliOptions) {
   return settings;
 }
 
-module.exports = function (program) {
+export default function (program) {
   const command = program.command('serve');
 
   command
@@ -114,7 +114,7 @@ module.exports = function (program) {
   if (canCluster) {
     command
     .option('--dev', 'Run the server with development mode defaults')
-    .option('--no-ssl', 'Don\'t run the dev server using HTTPS')
+    .option('--ssl', 'Run the dev server using HTTPS')
     .option('--no-base-path', 'Don\'t put a proxy in front of the dev server, which adds a random basePath')
     .option('--no-watch', 'Prevents automatic restarts of the server in --dev mode');
   }
@@ -147,18 +147,27 @@ module.exports = function (program) {
     try {
       kbnServer = new KbnServer(settings);
       await kbnServer.ready();
-    }
-    catch (err) {
+    } catch (error) {
       const { server } = kbnServer;
 
-      if (err.code === 'EADDRINUSE') {
-        logFatal(`Port ${err.port} is already in use. Another instance of Kibana may be running!`, server);
-      } else {
-        logFatal(err, server);
+      switch (error.code) {
+        case 'EADDRINUSE':
+          logFatal(`Port ${error.port} is already in use. Another instance of Kibana may be running!`, server);
+          break;
+
+        case 'InvalidConfig':
+          logFatal(error.message, server);
+          break;
+
+        default:
+          logFatal(error, server);
+          break;
       }
 
       kbnServer.close();
-      process.exit(1); // eslint-disable-line no-process-exit
+      const exitCode = error.processExitCode == null ? 1 : error.processExitCode;
+      // eslint-disable-next-line no-process-exit
+      process.exit(exitCode);
     }
 
     process.on('SIGHUP', function reloadConfig() {
@@ -170,11 +179,12 @@ module.exports = function (program) {
 
     return kbnServer;
   });
-};
+}
 
 function logFatal(message, server) {
   if (server) {
     server.log(['fatal'], message);
+  } else {
+    console.error('FATAL', message);
   }
-  console.error('FATAL', message);
 }

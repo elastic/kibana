@@ -3,7 +3,7 @@
 You can search the indices that match the current index pattern by entering
 your search criteria in the Query bar. You can perform a simple text search,
 use the Lucene https://lucene.apache.org/core/2_9_4/queryparsersyntax.html[
-query syntax], or use the full JSON-based {es-ref}query-dsl.html[Elasticsearch
+query syntax], or use the full JSON-based {ref}/query-dsl.html[Elasticsearch
 Query DSL].
 
 When you submit a search request, the histogram, Documents table, and Fields
@@ -37,8 +37,8 @@ codes and have an extension of `php` or `html`, you could enter `status:[400 TO
 499] AND (extension:php OR extension:html)`.
 
 NOTE: These examples use the Lucene query syntax. You can also submit queries
-using the Elasticsearch Query DSL. For examples, see 
-{es-ref}query-dsl-query-string-query.html#query-string-syntax[query string syntax]
+using the Elasticsearch Query DSL. For examples, see
+{ref}/query-dsl-query-string-query.html#query-string-syntax[query string syntax]
 in the Elasticsearch Reference.
 
 [float]
@@ -53,7 +53,7 @@ To save the current search:
 . Click *Save* in the Kibana toolbar.
 . Enter a name for the search and click *Save*.
 
-You can import, export and delete saved searches from *Management/Kibana/Saved Objects*. 
+You can import, export and delete saved searches from *Management/Kibana/Saved Objects*.
 
 [float]
 [[load-search]]
@@ -72,7 +72,7 @@ selected, opening the saved search also changes the selected index pattern.
 When you submit a search request, the indices that match the currently-selected
 index pattern are searched. The current index pattern is shown below the toolbar.
 To change which indices you are searching, click the index pattern and select a
-different index pattern. 
+different index pattern.
 
 For more information about index patterns, see <<settings-create-pattern,
 Creating an Index Pattern>>.
@@ -83,7 +83,7 @@ Creating an Index Pattern>>.
 As more documents are added to the indices you're searching, the search results
 shown in Discover and used to display visualizations get stale. You can
 configure a refresh interval to periodically resubmit your searches to
-retrieve the latest results.  
+retrieve the latest results.
 
 To enable auto refresh:
 
@@ -100,5 +100,3 @@ click *Pause*.
 
 NOTE: If auto refresh is not enabled, you can manually refresh visualizations
 by clicking *Refresh*.
-
-

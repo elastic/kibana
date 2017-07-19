@@ -1,19 +1,14 @@
+export default function ({ getService, loadTestFile }) {
+  const remote = getService('remote');
 
-import {
-  bdd,
-  remote,
-  defaultTimeout,
-} from '../../../support';
+  describe('dashboard app', function () {
+    before(() => remote.setWindowSize(1200,800));
 
-bdd.describe('dashboard app', function () {
-  this.timeout = defaultTimeout;
-
-  bdd.before(function () {
-    return remote.setWindowSize(1200,800);
+    loadTestFile(require.resolve('./_view_edit'));
+    loadTestFile(require.resolve('./_dashboard'));
+    loadTestFile(require.resolve('./_dashboard_save'));
+    loadTestFile(require.resolve('./_dashboard_time'));
+    loadTestFile(require.resolve('./_dashboard_listing'));
+    loadTestFile(require.resolve('./_dashboard_clone'));
   });
-
-  require('./_view_edit');
-  require('./_dashboard');
-  require('./_dashboard_save');
-  require('./_dashboard_time');
-});
+}

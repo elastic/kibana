@@ -1,4 +1,4 @@
-export default function (_) {
+export function lodashLangMixin(_) {
   _.mixin(_, {
 
 

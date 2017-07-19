@@ -388,6 +388,7 @@ angular.module('ui.bootstrap.datepicker', ['ui.bootstrap.dateparser', 'ui.bootst
 
         scope.title = [years[0].label, years[range - 1].label].join(' - ');
         scope.rows = ctrl.split(years, 5);
+        scope.yearRange = ctrl.yearRange;
       };
 
       ctrl.compare = function(date1, date2) {

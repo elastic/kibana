@@ -1,81 +1,53 @@
 [[tilemap]]
-== Tile Maps
+== Coordinate Maps
 
-A tile map displays a geographic area overlaid with circles keyed to the data determined by the buckets you specify.
+A coordinate map displays a geographic area overlaid with circles keyed to the data determined by the buckets you specify.
 
-NOTE: By default, Kibana uses the https://www.elastic.co/elastic-tile-service[Elastic Tile Service]
+NOTE: By default, Kibana uses the https://www.elastic.co/elastic-maps-service[Elastic Maps Service]
 to display map tiles. To use other tile service providers, configure the <<tilemap-settings,tilemap settings>>
 in `kibana.yml`.
 
-The default _metrics_ aggregation for a tile map is the *Count* aggregation. You can select any of the following
+=== Configuration
+
+==== Data
+
+===== Metrics
+
+The default _metrics_ aggregation for a coordinate map is the *Count* aggregation. You can select any of the following
 aggregations as the metrics aggregation:
 
-*Count*:: The {es-ref}search-aggregations-metrics-valuecount-aggregation.html[_count_] aggregation returns a raw count of
+*Count*:: The {ref}/search-aggregations-metrics-valuecount-aggregation.html[_count_] aggregation returns a raw count of
 the elements in the selected index pattern.
-*Average*:: This aggregation returns the {es-ref}search-aggregations-metrics-avg-aggregation.html[_average_] of a numeric
+*Average*:: This aggregation returns the {ref}/search-aggregations-metrics-avg-aggregation.html[_average_] of a numeric
 field. Select a field from the drop-down.
-*Sum*:: The {es-ref}search-aggregations-metrics-sum-aggregation.html[_sum_] aggregation returns the total sum of a numeric
+*Sum*:: The {ref}/search-aggregations-metrics-sum-aggregation.html[_sum_] aggregation returns the total sum of a numeric
 field. Select a field from the drop-down.
-*Min*:: The {es-ref}search-aggregations-metrics-min-aggregation.html[_min_] aggregation returns the minimum value of a
+*Min*:: The {ref}/search-aggregations-metrics-min-aggregation.html[_min_] aggregation returns the minimum value of a
 numeric field. Select a field from the drop-down.
-*Max*:: The {es-ref}search-aggregations-metrics-max-aggregation.html[_max_] aggregation returns the maximum value of a
+*Max*:: The {ref}/search-aggregations-metrics-max-aggregation.html[_max_] aggregation returns the maximum value of a
 numeric field. Select a field from the drop-down.
-*Unique Count*:: The {es-ref}search-aggregations-metrics-cardinality-aggregation.html[_cardinality_] aggregation returns
+*Unique Count*:: The {ref}/search-aggregations-metrics-cardinality-aggregation.html[_cardinality_] aggregation returns
 the number of unique values in a field. Select a field from the drop-down.
 
 Enter a string in the *Custom Label* field to change the display label.
 
-The _buckets_ aggregations determine what information is being retrieved from your data set.
+===== Buckets
 
-Before you choose a buckets aggregation, specify if you are splitting the chart or displaying the buckets as *Geo
-Coordinates* on a single chart. A multiple chart split must run before any other aggregations.
+Coordinate maps use the {es-ref}search-aggregations-bucket-geohashgrid-aggregation.html[_geohash_] aggregation. Select a field, typically coordinates, from the
+drop-down. 
 
-Tile maps use the *Geohash* aggregation as their initial aggregation. Select a field, typically coordinates, from the
-drop-down. The *Precision* slider determines the granularity of the results displayed on the map. See the documentation
-for the {es-ref}search-aggregations-bucket-geohashgrid-aggregation.html#_cell_dimensions_at_the_equator[geohash grid]
-aggregation for details on the area specified by each precision level. Kibana supports a maximum geohash length of 7.
+- The_Change precision on map zoom_ box is checked by default. Uncheck the box to disable this behavior.
+The _Precision_ slider determines the granularity of the results displayed on the map. See the documentation
+for the {ref}/search-aggregations-bucket-geohashgrid-aggregation.html#_cell_dimensions_at_the_equator[geohash grid]
+aggregation for details on the area specified by each precision level.
 
 NOTE: Higher precisions increase memory usage for the browser displaying Kibana as well as for the underlying
 Elasticsearch cluster.
 
-Once you've specified a buckets aggregation, you can define sub-aggregations to refine the visualization. Tile maps
-only support sub-aggregations as split charts. Click *+ Add Sub Aggregation*, then *Split Chart* to select a
-sub-aggregation from the list of types:
+- The _place markers off grid (use {ref}/search-aggregations-metrics-geocentroid-aggregation.html[geocentroid])_ box is checked by default. When this box is checked, the markers are
+placed in the center of all the documents in that bucket. When unchecked, the markers are placed in the center
+of the geohash grid cell. Leaving this checked generally results in a more accurate visualization.
 
-*Date Histogram*:: A {es-ref}search-aggregations-bucket-datehistogram-aggregation.html[_date histogram_] is built from a
-numeric field and organized by date. You can specify a time frame for the intervals in seconds, minutes, hours, days,
-weeks, months, or years. You can also specify a custom interval frame by selecting *Custom* as the interval and
-specifying a number and a time unit in the text field. Custom interval time units are *s* for seconds, *m* for minutes,
-*h* for hours, *d* for days, *w* for weeks, and *y* for years. Different units support different levels of precision,
-down to one second.
-*Histogram*:: A standard {es-ref}search-aggregations-bucket-histogram-aggregation.html[_histogram_] is built from a
-numeric field. Specify an integer interval for this field. Select the *Show empty buckets* checkbox to include empty
-intervals in the histogram.
-*Range*:: With a {es-ref}search-aggregations-bucket-range-aggregation.html[_range_] aggregation, you can specify ranges
-of values for a numeric field. Click *Add Range* to add a set of range endpoints. Click the red *(x)* symbol to remove
-a range.
-After changing options, click the  *Apply changes* button to update your visualization, or the grey *Discard
-changes* button to keep your visualization in its current state.
-*Date Range*:: A {es-ref}search-aggregations-bucket-daterange-aggregation.html[_date range_] aggregation reports values
-that are within a range of dates that you specify. You can specify the ranges for the dates using
-{es-ref}common-options.html#date-math[_date math_] expressions. Click *Add Range* to add a set of range endpoints.
-Click the red *(/)* symbol to remove a range.
-*IPv4 Range*:: The {es-ref}search-aggregations-bucket-iprange-aggregation.html[_IPv4 range_] aggregation enables you to
-specify ranges of IPv4 addresses. Click *Add Range* to add a set of range endpoints. Click the red *(/)* symbol to
-remove a range.
-*Terms*:: A {es-ref}search-aggregations-bucket-terms-aggregation.html[_terms_] aggregation enables you to specify the top
-or bottom _n_ elements of a  given field to display, ordered by count or a custom metric.
-*Filters*:: You can specify a set of {es-ref}search-aggregations-bucket-filters-aggregation.html[_filters_] for the data.
-You can specify a filter as a query string or in JSON format, just as in the Discover search bar. Click *Add Filter* to
-add another filter. Click the image:images/labelbutton.png[] *label* button to open the label field, where you can type
-in a name to display on the visualization.
-*Significant Terms*:: Displays the results of the experimental
-{es-ref}search-aggregations-bucket-significantterms-aggregation.html[_significant terms_] aggregation. The value of the
-*Size* parameter defines the number of entries this aggregation returns.
-*Geohash*:: The {es-ref}search-aggregations-bucket-geohashgrid-aggregation.html[_geohash_] aggregation displays points
-based on the geohash coordinates.
-
-NOTE: By default, the *Change precision on map zoom* box is checked. Uncheck the box to disable this behavior.
 
 Enter a string in the *Custom Label* field to change the display label.
 
@@ -90,11 +62,12 @@ definition, as in the following example:
 { "script" : "doc['grade'].value * 1.2" }
 
 NOTE: In Elasticsearch releases 1.4.3 and later, this functionality requires you to enable
-{es-ref}modules-scripting.html[dynamic Groovy scripting].
+{ref}/modules-scripting.html[dynamic Groovy scripting].
 
 The availability of these options varies depending on the aggregation you choose.
 
-Select the *Options* tab to change the following aspects of the chart:
+==== Options
+
 
 *Map type*:: Select one of the following options from the drop-down.
 *_Scaled Circle Markers_*:: Scale the size of the markers based on the metric aggregation's value.
@@ -130,7 +103,9 @@ changes* button to keep your visualization in its current state.
 
 [float]
 [[navigating-map]]
-==== Navigating the Map
+
+=== Navigating the Map
+
 Once your tilemap visualization is ready, you can explore the map in several ways:
 
 * Click and hold anywhere on the map and move the cursor to move the map center. Hold Shift and drag a bounding box
@@ -140,9 +115,3 @@ across the map to zoom in on the selection.
 geohash buckets that have at least one result.
 * Click the *Latitude/Longitude Filter* image:images/viz-lat-long-filter.png[] button, then drag a bounding box across the
 map, to create a filter for the box coordinates.
-
-[float]
-[[tilemap-viewing-detailed-information]]
-==== Viewing Detailed Information
-
-include::visualization-raw-data.asciidoc[]

@@ -1,14 +1,14 @@
 import _ from 'lodash';
-import uiModules from 'ui/modules';
+import { uiModules } from 'ui/modules';
 import TagCloud from 'plugins/tagcloud/tag_cloud';
 import AggConfigResult from 'ui/vis/agg_config_result';
-import FilterBarFilterBarClickHandlerProvider from 'ui/filter_bar/filter_bar_click_handler';
+import { FilterBarClickHandlerProvider } from 'ui/filter_bar/filter_bar_click_handler';
 
 const module = uiModules.get('kibana/tagcloud', ['kibana']);
 module.controller('KbnTagCloudController', function ($scope, $element, Private, getAppState) {
 
   const containerNode = $element[0];
-  const filterBarClickHandler = Private(FilterBarFilterBarClickHandlerProvider);
+  const filterBarClickHandler = Private(FilterBarClickHandlerProvider);
   const maxTagCount = 200;
   let truncated = false;
 
@@ -20,6 +20,7 @@ module.controller('KbnTagCloudController', function ($scope, $element, Private, 
     const aggConfigResult = new AggConfigResult(aggs[0], false, event, event);
     clickHandler({ point: { aggConfigResult: aggConfigResult } });
   });
+
   tagCloud.on('renderComplete', () => {
 
     const truncatedMessage = containerNode.querySelector('.tagcloud-truncated-message');
@@ -33,13 +34,9 @@ module.controller('KbnTagCloudController', function ($scope, $element, Private, 
 
     const bucketName = containerNode.querySelector('.tagcloud-custom-label');
     bucketName.innerHTML = `${$scope.vis.aggs[0].makeLabel()} - ${$scope.vis.aggs[1].makeLabel()}`;
-
-
     truncatedMessage.style.display = truncated ? 'block' : 'none';
 
-
     const status = tagCloud.getStatus();
-
     if (TagCloud.STATUS.COMPLETE === status) {
       incompleteMessage.style.display = 'none';
     } else if (TagCloud.STATUS.INCOMPLETE === status) {
@@ -47,7 +44,7 @@ module.controller('KbnTagCloudController', function ($scope, $element, Private, 
     }
 
 
-    $element.trigger('renderComplete');
+    $scope.renderComplete();
   });
 
   $scope.$watch('esResponse', async function (response) {
@@ -87,14 +84,9 @@ module.controller('KbnTagCloudController', function ($scope, $element, Private, 
 
   $scope.$watch('vis.params', (options) => tagCloud.setOptions(options));
 
-  $scope.$watch(getContainerSize, _.debounce(() => {
+  $scope.$watch('resize', () => {
     tagCloud.resize();
-  }, 1000, { trailing: true }), true);
-
-
-  function getContainerSize() {
-    return { width: $element.width(), height: $element.height() };
-  }
+  });
 
   function getValue(metricsAgg, bucket) {
     let size = metricsAgg.getValue(bucket);

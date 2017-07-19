@@ -1,10 +1,10 @@
 import _ from 'lodash';
 
-import IsRequestProvider from './is_request';
-import MergeDuplicatesRequestProvider from './merge_duplicate_requests';
-import ReqStatusProvider from './req_status';
+import { IsRequestProvider } from './is_request';
+import { MergeDuplicatesRequestProvider } from './merge_duplicate_requests';
+import { ReqStatusProvider } from './req_status';
 
-export default function CourierFetchCallClient(Private, Promise, esAdmin, es) {
+export function CallClientProvider(Private, Promise, esAdmin, es) {
 
   const isRequest = Private(IsRequestProvider);
   const mergeDuplicateRequests = Private(MergeDuplicatesRequestProvider);
@@ -17,8 +17,8 @@ export default function CourierFetchCallClient(Private, Promise, esAdmin, es) {
     const statuses = mergeDuplicateRequests(requests);
 
     // get the actual list of requests that we will be fetching
-    const executable = statuses.filter(isRequest);
-    let execCount = executable.length;
+    let requestsToFetch = statuses.filter(isRequest);
+    let execCount = requestsToFetch.length;
 
     if (!execCount) return Promise.resolve([]);
 
@@ -29,14 +29,19 @@ export default function CourierFetchCallClient(Private, Promise, esAdmin, es) {
     // for each respond with either the response or ABORTED
     const respond = function (responses) {
       responses = responses || [];
-      return Promise.map(requests, function (req, i) {
+      return Promise.map(requests, function (request, i) {
         switch (statuses[i]) {
           case ABORTED:
             return ABORTED;
           case DUPLICATE:
-            return req._uniq.resp;
+            return request._uniq.resp;
           default:
-            return responses[_.findIndex(executable, req)];
+            const index = _.findIndex(requestsToFetch, request);
+            if (index < 0) {
+              // This means the request failed.
+              return ABORTED;
+            }
+            return responses[index];
         }
       })
       .then(
@@ -76,17 +81,33 @@ export default function CourierFetchCallClient(Private, Promise, esAdmin, es) {
       });
     });
 
-
     // Now that all of THAT^^^ is out of the way, lets actually
     // call out to elasticsearch
-    Promise.map(executable, function (req) {
-      return Promise.try(req.getFetchParams, void 0, req)
-      .then(function (fetchParams) {
-        return (req.fetchParams = fetchParams);
-      });
+    Promise.map(requestsToFetch, function (request) {
+      return Promise.try(request.getFetchParams, void 0, request)
+        .then(function (fetchParams) {
+          return (request.fetchParams = fetchParams);
+        })
+        .then(value => ({ resolved: value }))
+        .catch(error => ({ rejected: error }));
     })
-    .then(function (reqsFetchParams) {
-      return strategy.reqsFetchParamsToBody(reqsFetchParams);
+    .then(function (results) {
+      const requestsWithFetchParams = [];
+      // Gather the fetch param responses from all the successful requests.
+      results.forEach((result, index) => {
+        if (result.resolved) {
+          requestsWithFetchParams.push(result.resolved);
+        } else {
+          const request = requestsToFetch[index];
+          request.handleFailure(result.rejected);
+          requestsToFetch[index] = undefined;
+        }
+      });
+      // The index of the request inside requestsToFetch determines which response is mapped to it. If a request
+      // won't generate a response, since it already failed, we need to remove the request
+      // from the requestsToFetch array so the indexes will continue to match up to the responses correctly.
+      requestsToFetch = requestsToFetch.filter(request => request !== undefined);
+      return strategy.reqsFetchParamsToBody(requestsWithFetchParams);
     })
     .then(function (body) {
       // while the strategy was converting, our request was aborted

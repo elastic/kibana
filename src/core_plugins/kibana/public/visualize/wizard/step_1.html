@@ -13,35 +13,71 @@
 </kbn-top-nav>
 
 <div class="kuiViewContent kuiViewContent--constrainedWidth">
-  <!-- Header -->
   <div class="kuiViewContentItem">
-    <h1 class="kuiTitle kuiVerticalRhythm">
+    <!-- Header -->
+    <h1 class="kuiTitle kuiVerticalRhythm kuiVerticalRhythm--medium">
       Select visualization type
     </h1>
 
-    <div class="kuiVerticalRhythm">
-      <a
-        class="wizard-type"
-        ng-repeat="type in visTypes.inTitleOrder"
-        ng-href="{{ visTypeUrl(type) }}"
+    <!-- Search -->
+    <div class="kuiSearchInput kuiVerticalRhythm kuiVerticalRhythm--medium fullWidth">
+      <div class="kuiSearchInput__icon kuiIcon fa-search"></div>
+      <input
+        class="kuiSearchInput__input"
+        type="text"
+        placeholder="Search visualization types..."
+        ng-model="searchTerm"
       >
-        <div class="wizard-type-heading">
-          <span
-            aria-hidden="true"
-            class="wizard-type-heading-icon fa fa-fw"
-            ng-class="type.icon"
-          ></span>
+    </div>
 
-          <h4
+    <div
+      class="kuiVerticalRhythm kuiVerticalRhythm--medium"
+      ng-repeat="category in filteredVisTypeCategories"
+    >
+
+      <!-- Title for each category -->
+      <h2 class="kuiSubTitle kuiVerticalRhythm">
+        {{ category.label }}
+      </h2>
+
+      <!-- Gallery of buttons for each vis type -->
+      <div class="kuiGallery kuiVerticalRhythm">
+        <a
+          class="kuiGalleryButton"
+          ng-repeat="type in category.list"
+          ng-href="{{ getVisTypeUrl(type) }}"
+          tooltip="{{ getVisTypeTooltip(type) }}"
+          tooltip-placement="{{ getVisTypeTooltipPosition($parent.$index) }}"
+        >
+          <div class="kuiGalleryButton__image">
+            <img
+              ng-if="type.image"
+              aria-hidden="true"
+              ng-src="{{ type.image }}"
+            />
+
+            <!-- If there's no image, default to an icon, for BWC. -->
+            <span
+              ng-if="!type.image"
+              aria-hidden="true"
+              class="kuiIcon visualizeWizardVisTypeIcon"
+              ng-class="type.icon"
+            ></span>
+          </div>
+
+          <div
+            lass="kuiGalleryButton__label"
             data-test-subj="visualizeWizardChartTypeTitle"
-            class="wizard-type-heading-text"
           >
-            {{type.title}}
-          </h4>
-        </div>
+            {{ type.title }}
+          </div>
 
-        <p class="wizard-type-description">{{type.description}}</p>
-      </a>
+          <div
+            class="kuiGalleryButton__icon kuiIcon fa-flask"
+            ng-if="type.isExperimental"
+          ></div>
+        </a>
+      </div>
     </div>
   </div>
 </div>

@@ -4,7 +4,7 @@ import Collection from '../utils/collection';
 
 const byIdCache = Symbol('byId');
 
-module.exports = class UiAppCollection extends Collection {
+export default class UiAppCollection extends Collection {
 
   constructor(uiExports, parent) {
     super();
@@ -42,4 +42,4 @@ module.exports = class UiAppCollection extends Collection {
     return this[byIdCache] || (this[byIdCache] = _.indexBy([...this], 'id'));
   }
 
-};
+}

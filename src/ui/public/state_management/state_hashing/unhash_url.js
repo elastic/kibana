@@ -9,9 +9,9 @@ import {
   stringify as stringifyQueryString
 } from 'querystring';
 
-import unhashQueryString from './unhash_query_string';
+import { unhashQueryString } from './unhash_query_string';
 
-export default function unhashUrl(urlWithHashes, states) {
+export function unhashUrl(urlWithHashes, states) {
   if (!urlWithHashes) return urlWithHashes;
 
   const urlWithHashesParsed = parseUrl(urlWithHashes, true);

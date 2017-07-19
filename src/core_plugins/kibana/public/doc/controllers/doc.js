@@ -4,7 +4,7 @@ import 'ui/doc_viewer';
 import 'ui/index_patterns';
 import html from 'plugins/kibana/doc/index.html';
 import uiRoutes from 'ui/routes';
-import uiModules from 'ui/modules';
+import { uiModules } from 'ui/modules';
 
 
 const app = uiModules.get('apps/doc', [

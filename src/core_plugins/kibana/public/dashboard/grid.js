@@ -1,9 +1,9 @@
 import _ from 'lodash';
 import $ from 'jquery';
-import Binder from 'ui/binder';
+import { Binder } from 'ui/binder';
 import chrome from 'ui/chrome';
 import 'gridster';
-import uiModules from 'ui/modules';
+import { uiModules } from 'ui/modules';
 import { DashboardViewMode } from 'plugins/kibana/dashboard/dashboard_view_mode';
 import { PanelUtils } from 'plugins/kibana/dashboard/panel/panel_utils';
 
@@ -23,6 +23,12 @@ app.directive('dashboardGrid', function ($compile, Notifier) {
        * @type {function} - Returns a {PersistedState} child uiState for this scope.
        */
       createChildUiState: '=',
+      /**
+       * Registers an index pattern with the dashboard app used by each panel. The index patterns are used by the
+       * filter bar for generating field suggestions.
+       * @type {function(IndexPattern)}
+       */
+      registerPanelIndexPattern: '=',
       /**
        * Trigger after a panel has been removed from the grid.
        */
@@ -47,6 +53,7 @@ app.directive('dashboardGrid', function ($compile, Notifier) {
        * @type {function}
        */
       saveState: '=',
+      appState: '=',
       /**
        * Expand or collapse a panel, so it either takes up the whole screen or goes back to its
        * natural size.
@@ -106,7 +113,7 @@ app.directive('dashboardGrid', function ($compile, Notifier) {
             stop: readGridsterChangeHandler
           },
           draggable: {
-            handle: '.panel-move, .fa-arrows',
+            handle: '[data-dashboard-panel-drag-handle]',
             stop: readGridsterChangeHandler
           }
         }).data('gridster');
@@ -135,11 +142,27 @@ app.directive('dashboardGrid', function ($compile, Notifier) {
 
         $scope.$watchCollection('panels', function (panels) {
           const currentPanels = gridster.$widgets.toArray().map(
-            el => PanelUtils.findPanelByPanelIndex(el.panelIndex, $scope.panels)
+            el => {
+              const panel = PanelUtils.findPanelByPanelIndex(el.panelIndex, $scope.panels);
+              if (panel) {
+                // A panel may have had its state updated, refresh gridster with the latest values.
+                const panelElement = panelElementMapping[panel.panelIndex];
+                PanelUtils.refreshElementSizeAndPosition(panel, panelElement);
+                return panel;
+              } else {
+                return { panelIndex: el.panelIndex };
+              }
+            }
           );
 
-          // panels that have been added
+          // Panels in the grid that are missing from the panels array. This can happen if the url is modified, and a
+          // panel is manually removed.
+          const removed = _.difference(currentPanels, panels);
+          // Panels that have been added.
           const added = _.difference(panels, currentPanels);
+
+          removed.forEach(panel => $scope.removePanel(panel.panelIndex));
+
           if (added.length) {
             // See issue https://github.com/elastic/kibana/issues/2138 and the
             // subsequent fix for why we need to sort here. Short story is that
@@ -157,9 +180,10 @@ app.directive('dashboardGrid', function ($compile, Notifier) {
             added.forEach(addPanel);
           }
 
-          if (added.length) {
+          if (added.length || removed.length) {
             $scope.saveState();
           }
+          layout();
         });
 
         $scope.$on('$destroy', function () {
@@ -179,6 +203,7 @@ app.directive('dashboardGrid', function ($compile, Notifier) {
         $window.on('resize', safeLayout);
         $scope.$on('ready:vis', safeLayout);
         $scope.$on('globalNav:update', safeLayout);
+        $scope.$on('reLayout', safeLayout);
       }
 
       // tell gridster to add the panel, and create additional meatadata like $scope
@@ -195,6 +220,8 @@ app.directive('dashboardGrid', function ($compile, Notifier) {
                   get-vis-click-handler="getVisClickHandler"
                   get-vis-brush-handler="getVisBrushHandler"
                   save-state="saveState"
+                  app-state="appState"
+                  register-panel-index-pattern="registerPanelIndexPattern"
                   toggle-expand="toggleExpand(${panel.panelIndex})"
                   create-child-ui-state="createChildUiState">
             </li>`;

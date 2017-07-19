@@ -1,7 +1,7 @@
-import sinon from 'auto-release-sinon';
+import sinon from 'sinon';
 import expect from 'expect.js';
 import ngMock from 'ng_mock';
-import TimefilterLibDiffTimeProvider from 'ui/timefilter/lib/diff_time';
+import { TimefilterLibDiffTimeProvider } from 'ui/timefilter/lib/diff_time';
 
 describe('Timefilter service', function () {
   describe('time diff watcher', function () {

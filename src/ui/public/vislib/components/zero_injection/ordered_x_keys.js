@@ -1,7 +1,8 @@
 import _ from 'lodash';
 import moment from 'moment';
-import VislibComponentsZeroInjectionUniqKeysProvider from './uniq_keys';
-export default function OrderedXKeysUtilService(Private) {
+import { VislibComponentsZeroInjectionUniqKeysProvider } from './uniq_keys';
+
+export function VislibComponentsZeroInjectionOrderedXKeysProvider(Private) {
   const getUniqKeys = Private(VislibComponentsZeroInjectionUniqKeysProvider);
 
   /*

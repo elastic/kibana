@@ -1,5 +1,5 @@
 import _ from 'lodash';
-import uiModules from 'ui/modules';
+import { uiModules } from 'ui/modules';
 import paginatedSelectableListTemplate from 'ui/partials/paginated_selectable_list.html';
 
 const module = uiModules.get('kibana');
@@ -15,7 +15,7 @@ module.directive('paginatedSelectableList', function () {
     scope: {
       perPage: '=?',
       list: '=',
-      listProperty: '=',
+      listProperty: '@',
       userMakeUrl: '=?',
       userOnSelect: '=?'
     },
@@ -32,7 +32,7 @@ module.directive('paginatedSelectableList', function () {
       }
 
       $scope.perPage = $scope.perPage || 10;
-      $scope.hits = $scope.list = _.sortBy($scope.list, accessor);
+      $scope.hits = $scope.list = _.sortBy($scope.list, $scope.accessor);
       $scope.hitCount = $scope.hits.length;
 
       /**
@@ -48,7 +48,7 @@ module.directive('paginatedSelectableList', function () {
        * @return {Array} Array sorted either ascending or descending
        */
       $scope.sortHits = function (hits) {
-        const sortedList = _.sortBy(hits, accessor);
+        const sortedList = _.sortBy(hits, $scope.accessor);
 
         $scope.isAscending = !$scope.isAscending;
         $scope.hits = $scope.isAscending ? sortedList : sortedList.reverse();
@@ -62,10 +62,10 @@ module.directive('paginatedSelectableList', function () {
         return $scope.userOnSelect(hit, $event);
       };
 
-      function accessor(val) {
+      $scope.accessor = function (val) {
         const prop = $scope.listProperty;
-        return prop ? val[prop] : val;
-      }
+        return prop ? _.get(val, prop) : val;
+      };
     }
   };
 });

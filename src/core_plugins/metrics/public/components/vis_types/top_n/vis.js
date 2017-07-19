@@ -1,7 +1,10 @@
 import tickFormatter from '../../lib/tick_formatter';
 import _ from 'lodash';
-import { TopN, getLastValue } from 'plugins/metrics/visualizations';
+import TopN from 'plugins/metrics/visualizations/components/top_n';
+import getLastValue from 'plugins/metrics/visualizations/lib/get_last_value';
+
 import color from 'color';
+import replaceVars from '../../lib/replace_vars';
 
 import React, { PropTypes } from 'react';
 function TopNVisualization(props) {
@@ -40,6 +43,12 @@ function TopNVisualization(props) {
 
   if (panelBackgroundColor && panelBackgroundColor !== 'inherit') {
     params.reversed = color(panelBackgroundColor).luminosity() < 0.45;
+  }
+
+  if (model.drilldown_url) {
+    params.onClick = (item) => {
+      window.location = replaceVars(model.drilldown_url, {}, { key: item.label });
+    };
   }
   const style = { backgroundColor: panelBackgroundColor };
   return (

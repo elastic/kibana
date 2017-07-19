@@ -1,6 +1,6 @@
 import expect from 'expect.js';
 import ngMock from 'ng_mock';
-import getColors from 'ui/vislib/components/color/heatmap_color';
+import { getHeatmapColors } from 'ui/vislib/components/color/heatmap_color';
 
 describe('Vislib Heatmap Color Module Test Suite', function () {
   const emptyObject = {};
@@ -11,51 +11,51 @@ describe('Vislib Heatmap Color Module Test Suite', function () {
 
   it('should throw an error if input is not a number', function () {
     expect(function () {
-      getColors([200]);
+      getHeatmapColors([200]);
     }).to.throwError();
 
     expect(function () {
-      getColors('help');
+      getHeatmapColors('help');
     }).to.throwError();
 
     expect(function () {
-      getColors(true);
+      getHeatmapColors(true);
     }).to.throwError();
 
     expect(function () {
-      getColors(notAValue);
+      getHeatmapColors(notAValue);
     }).to.throwError();
 
     expect(function () {
-      getColors(nullValue);
+      getHeatmapColors(nullValue);
     }).to.throwError();
 
     expect(function () {
-      getColors(emptyObject);
+      getHeatmapColors(emptyObject);
     }).to.throwError();
   });
 
   it('should throw an error if input is less than 0', function () {
     expect(function () {
-      getColors(-2);
+      getHeatmapColors(-2);
     }).to.throwError();
   });
 
   it('should throw an error if input is greater than 9', function () {
     expect(function () {
-      getColors(10);
+      getHeatmapColors(10);
     }).to.throwError();
   });
 
   it('should be a function', function () {
-    expect(typeof getColors).to.be('function');
+    expect(typeof getHeatmapColors).to.be('function');
   });
 
   it('should return a color for numbers from 0 to 9', function () {
     const colorRegex = /^rgb\((\d{1,3}),(\d{1,3}),(\d{1,3})\)$/;
     const schema = 'Greens';
     for (let i = 0; i < 10; i++) {
-      expect(getColors(i / 10, schema)).to.match(colorRegex);
+      expect(getHeatmapColors(i / 10, schema)).to.match(colorRegex);
     }
   });
 

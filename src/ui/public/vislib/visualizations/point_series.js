@@ -1,18 +1,17 @@
 import d3 from 'd3';
 import _ from 'lodash';
 import $ from 'jquery';
-import errors from 'ui/errors';
-import TooltipProvider from 'ui/vis/components/tooltip';
-import VislibVisualizationsChartProvider from './_chart';
-import VislibVisualizationsTimeMarkerProvider from './time_marker';
-import VislibVisualizationsSeriTypesProvider from './point_series/series_types';
+import { TooltipProvider } from 'ui/vis/components/tooltip';
+import { VislibVisualizationsChartProvider } from './_chart';
+import { VislibVisualizationsTimeMarkerProvider } from './time_marker';
+import { VislibVisualizationsSeriesTypesProvider } from './point_series/series_types';
 
-export default function PointSeriesFactory(Private) {
+export function VislibVisualizationsPointSeriesProvider(Private) {
 
   const Chart = Private(VislibVisualizationsChartProvider);
   const Tooltip = Private(TooltipProvider);
   const TimeMarker = Private(VislibVisualizationsTimeMarkerProvider);
-  const seriTypes = Private(VislibVisualizationsSeriTypesProvider);
+  const seriTypes = Private(VislibVisualizationsSeriesTypesProvider);
   const touchdownTmpl = _.template(require('../partials/touchdown.tmpl.html'));
   /**
    * Line Chart Visualization
@@ -201,25 +200,14 @@ export default function PointSeriesFactory(Private) {
       const width = this.chartConfig.width = $elem.width();
       const height = this.chartConfig.height = $elem.height();
       const xScale = this.handler.categoryAxes[0].getScale();
-      const minWidth = 50;
-      const minHeight = 50;
       const addTimeMarker = this.chartConfig.addTimeMarker;
       const times = this.chartConfig.times || [];
-      let timeMarker;
       let div;
       let svg;
 
       return function (selection) {
         selection.each(function (data) {
           const el = this;
-
-          if (width < minWidth || height < minHeight) {
-            throw new errors.ContainerTooSmall();
-          }
-
-          if (addTimeMarker) {
-            timeMarker = new TimeMarker(times, xScale, height);
-          }
 
           div = d3.select(el);
 
@@ -245,7 +233,13 @@ export default function PointSeriesFactory(Private) {
           });
 
           if (addTimeMarker) {
-            timeMarker.render(svg);
+            //Domain end of 'now' will be milliseconds behind current time
+            //Extend toTime by 1 minute to ensure those cases have a TimeMarker
+            const toTime = new Date(xScale.domain()[1].getTime() + 60000);
+            const currentTime = new Date();
+            if (toTime > currentTime) {
+              new TimeMarker(times, xScale, height).render(svg);
+            }
           }
 
           return svg;

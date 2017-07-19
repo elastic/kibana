@@ -1,0 +1,21 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`property isSecondary renders the secondary modifier 1`] = `
+<div
+  aria-label="aria-label"
+  class="kuiLocalNavRow testClass1 testClass2 kuiLocalNavRow--secondary"
+  data-test-subj="test subject string"
+>
+  children
+</div>
+`;
+
+exports[`renders KuiLocalNavRow 1`] = `
+<div
+  aria-label="aria-label"
+  class="kuiLocalNavRow testClass1 testClass2"
+  data-test-subj="test subject string"
+>
+  children
+</div>
+`;

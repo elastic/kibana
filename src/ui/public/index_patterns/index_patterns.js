@@ -1,19 +1,20 @@
 import 'ui/filters/short_dots';
-import errors from 'ui/errors';
-import IndexPatternsIndexPatternProvider from 'ui/index_patterns/_index_pattern';
-import IndexPatternsPatternCacheProvider from 'ui/index_patterns/_pattern_cache';
-import IndexPatternsGetIdsProvider from 'ui/index_patterns/_get_ids';
-import IndexPatternsIntervalsProvider from 'ui/index_patterns/_intervals';
-import IndexPatternsMapperProvider from 'ui/index_patterns/_mapper';
-import IndexPatternsPatternToWildcardProvider from 'ui/index_patterns/_pattern_to_wildcard';
-import RegistryFieldFormatsProvider from 'ui/registry/field_formats';
-import uiModules from 'ui/modules';
+import { IndexPatternMissingIndices } from 'ui/errors';
+import { IndexPatternProvider } from 'ui/index_patterns/_index_pattern';
+import { IndexPatternsPatternCacheProvider } from 'ui/index_patterns/_pattern_cache';
+import { IndexPatternsGetIdsProvider } from 'ui/index_patterns/_get_ids';
+import { IndexPatternsIntervalsProvider } from 'ui/index_patterns/_intervals';
+import { FieldsFetcherProvider } from './fields_fetcher_provider';
+import { RegistryFieldFormatsProvider } from 'ui/registry/field_formats';
+import { uiModules } from 'ui/modules';
 const module = uiModules.get('kibana/index_patterns');
 
-function IndexPatternsProvider(esAdmin, Notifier, Private, Promise, kbnIndex) {
+export { IndexPatternsApiClientProvider } from './index_patterns_api_client_provider';
+
+export function IndexPatternsProvider(Notifier, Private) {
   const self = this;
 
-  const IndexPattern = Private(IndexPatternsIndexPatternProvider);
+  const IndexPattern = Private(IndexPatternProvider);
   const patternCache = Private(IndexPatternsPatternCacheProvider);
 
   self.get = function (id) {
@@ -29,27 +30,19 @@ function IndexPatternsProvider(esAdmin, Notifier, Private, Promise, kbnIndex) {
 
   self.delete = function (pattern) {
     self.getIds.clearCache();
-    pattern.destroy();
-
-    return esAdmin.delete({
-      index: kbnIndex,
-      type: 'index-pattern',
-      id: pattern.id
-    });
+    return pattern.destroy();
   };
 
   self.errors = {
-    MissingIndices: errors.IndexPatternMissingIndices
+    MissingIndices: IndexPatternMissingIndices
   };
 
   self.cache = patternCache;
   self.getIds = Private(IndexPatternsGetIdsProvider);
   self.intervals = Private(IndexPatternsIntervalsProvider);
-  self.mapper = Private(IndexPatternsMapperProvider);
-  self.patternToWildcard = Private(IndexPatternsPatternToWildcardProvider);
+  self.fieldsFetcher = Private(FieldsFetcherProvider);
   self.fieldFormats = Private(RegistryFieldFormatsProvider);
   self.IndexPattern = IndexPattern;
 }
 
 module.service('indexPatterns', Private => Private(IndexPatternsProvider));
-export default IndexPatternsProvider;

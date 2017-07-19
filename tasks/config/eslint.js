@@ -12,6 +12,7 @@ export default grunt => ({
       'ui_framework/components',
       'ui_framework/doc_site',
       'utilities',
+      'webpackShims',
     ],
   },
 

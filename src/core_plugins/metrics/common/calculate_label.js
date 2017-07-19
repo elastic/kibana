@@ -11,7 +11,8 @@ const paths = [
   'std_deviation_bucket',
   'variance_bucket',
   'sum_of_squares_bucket',
-  'serial_diff'
+  'serial_diff',
+  'positive_only'
 ];
 export default function calculateLabel(metric, metrics) {
   if (!metric) return 'Unknown';
@@ -21,6 +22,7 @@ export default function calculateLabel(metric, metrics) {
   if (metric.type === 'calculation') return 'Calculation';
   if (metric.type === 'series_agg') return `Series Agg (${metric.function})`;
   if (metric.type === 'filter_ratio') return 'Filter Ratio';
+  if (metric.type === 'static') return `Static Value of ${metric.value}`;
 
   if (metric.type === 'percentile_rank') {
     return `${lookup[metric.type]} (${metric.value}) of ${metric.field}`;

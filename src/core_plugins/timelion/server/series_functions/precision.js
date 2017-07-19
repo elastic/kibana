@@ -1,7 +1,8 @@
 import reduce from '../lib/reduce.js';
 import alter from '../lib/alter.js';
 import Chainable from '../lib/classes/chainable';
-module.exports = new Chainable('precision', {
+
+export default new Chainable('precision', {
   args: [
     {
       name: 'inputSeries',

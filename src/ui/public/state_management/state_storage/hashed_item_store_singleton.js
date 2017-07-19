@@ -1,3 +1,3 @@
-import HashedItemStore from './hashed_item_store';
+import { HashedItemStore } from './hashed_item_store';
 
-export default new HashedItemStore(window.sessionStorage);
+export const HashedItemStoreSingleton = new HashedItemStore(window.sessionStorage);

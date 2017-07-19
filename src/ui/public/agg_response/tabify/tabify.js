@@ -1,9 +1,10 @@
 import _ from 'lodash';
-import AggResponseTabifyResponseWriterProvider from 'ui/agg_response/tabify/_response_writer';
-import AggResponseTabifyBucketsProvider from 'ui/agg_response/tabify/_buckets';
-export default function tabifyAggResponseProvider(Private, Notifier) {
-  const TabbedAggResponseWriter = Private(AggResponseTabifyResponseWriterProvider);
-  const Buckets = Private(AggResponseTabifyBucketsProvider);
+import { TabbedAggResponseWriterProvider } from 'ui/agg_response/tabify/_response_writer';
+import { AggResponseBucketsProvider } from 'ui/agg_response/tabify/_buckets';
+
+export function AggResponseTabifyProvider(Private, Notifier) {
+  const TabbedAggResponseWriter = Private(TabbedAggResponseWriterProvider);
+  const Buckets = Private(AggResponseBucketsProvider);
   const notify = new Notifier({ location: 'agg_response/tabify' });
 
   function tabifyAggResponse(vis, esResponse, respOpts) {
@@ -13,7 +14,7 @@ export default function tabifyAggResponseProvider(Private, Notifier) {
       doc_count: esResponse.hits.total
     });
 
-    collectBucket(write, topLevelBucket);
+    collectBucket(write, topLevelBucket, '', 1);
 
     return write.response();
   }
@@ -27,8 +28,10 @@ export default function tabifyAggResponseProvider(Private, Notifier) {
    * @param {undefined|string} key - the key where the bucket was found
    * @returns {undefined}
    */
-  function collectBucket(write, bucket, key) {
+  function collectBucket(write, bucket, key, aggScale) {
     const agg = write.aggStack.shift();
+    const aggInfo = agg.write();
+    aggScale *= aggInfo.metricScale || 1;
 
     switch (agg.schema.group) {
       case 'buckets':
@@ -37,12 +40,12 @@ export default function tabifyAggResponseProvider(Private, Notifier) {
           const splitting = write.canSplit && agg.schema.name === 'split';
           if (splitting) {
             write.split(agg, buckets, function forEachBucket(subBucket, key) {
-              collectBucket(write, subBucket, agg.getKey(subBucket), key);
+              collectBucket(write, subBucket, agg.getKey(subBucket, key), aggScale);
             });
           } else {
             buckets.forEach(function (subBucket, key) {
               write.cell(agg, agg.getKey(subBucket, key), function () {
-                collectBucket(write, subBucket, agg.getKey(subBucket, key));
+                collectBucket(write, subBucket, agg.getKey(subBucket, key), aggScale);
               });
             });
           }
@@ -51,7 +54,7 @@ export default function tabifyAggResponseProvider(Private, Notifier) {
           // level, then pass all the empty buckets and jump back in for
           // the metrics.
           write.aggStack.unshift(agg);
-          passEmptyBuckets(write, bucket, key);
+          passEmptyBuckets(write, bucket, key, aggScale);
           write.aggStack.shift();
         } else {
           // we don't have any buckets, and we don't have isHierarchical
@@ -60,14 +63,19 @@ export default function tabifyAggResponseProvider(Private, Notifier) {
         }
         break;
       case 'metrics':
-        const value = agg.getValue(bucket);
+        let value = agg.getValue(bucket);
+        // since the aggregation could be a non integer (such as a max date)
+        // only do the scaling calculation if it is needed.
+        if (aggScale !== 1) {
+          value *= aggScale;
+        }
         write.cell(agg, value, function () {
           if (!write.aggStack.length) {
             // row complete
             write.row();
           } else {
             // process the next agg at this same level
-            collectBucket(write, bucket, key);
+            collectBucket(write, bucket, key, aggScale);
           }
         });
         break;
@@ -78,19 +86,19 @@ export default function tabifyAggResponseProvider(Private, Notifier) {
 
   // write empty values for each bucket agg, then write
   // the metrics from the initial bucket using collectBucket()
-  function passEmptyBuckets(write, bucket, key) {
+  function passEmptyBuckets(write, bucket, key, aggScale) {
     const agg = write.aggStack.shift();
 
     switch (agg.schema.group) {
       case 'metrics':
         // pass control back to collectBucket()
         write.aggStack.unshift(agg);
-        collectBucket(write, bucket, key);
+        collectBucket(write, bucket, key, aggScale);
         return;
 
       case 'buckets':
         write.cell(agg, '', function () {
-          passEmptyBuckets(write, bucket, key);
+          passEmptyBuckets(write, bucket, key, aggScale);
         });
     }
 

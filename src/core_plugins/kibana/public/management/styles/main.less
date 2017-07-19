@@ -82,6 +82,10 @@ kbn-management-landing {
     margin-right: -3px; /* 2 */
   }
 
+  .management-panel__heading-icon--security {
+    background-image: url("~ui/icons/security-gray.svg");
+  }
+
   .management-panel__heading-icon--elasticsearch {
     background-image: url("~ui/icons/elasticsearch-gray.svg");
   }
@@ -131,22 +135,6 @@ kbn-management-objects {
     }
   }
 
-  .action-bar {
-    margin-top: 10px;
-    background-color: @management-objects-action-bar-bg;
-    padding: 4px 12px;
-
-    label {
-      font-size: 10px;
-      font-weight: normal;
-    }
-
-    .btn {
-      font-size: 10px;
-      margin-left: 20px;
-    }
-  }
-
   .header {
     .title, .controls {
       padding-right: 1em;
@@ -164,6 +152,10 @@ kbn-management-advanced {
     tbody > tr > td {
       vertical-align: middle;
     }
+  }
+
+  .advancedSettingsTableRowActionsCell {
+    max-width: 300px;
   }
 }
 
@@ -235,10 +227,6 @@ kbn-management-indices {
   p.text-center {
     padding-top: 1em;
   }
-}
-
-.kbn-settings-indices-create {
-  .time-and-pattern > div {}
 }
 
 @import "~ui/dragula/gu-dragula.less";

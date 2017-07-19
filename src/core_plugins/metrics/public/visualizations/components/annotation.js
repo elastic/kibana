@@ -1,5 +1,6 @@
 import React, { Component, PropTypes } from 'react';
 import moment from 'moment';
+import reactcss from 'reactcss';
 class Annotation extends Component {
 
   constructor(props) {
@@ -43,16 +44,28 @@ class Annotation extends Component {
   render() {
     const { color, plot, icon, series } = this.props;
     const offset = plot.pointOffset({ x: series[0], y: 0 });
-    const style = { left: offset.left - 6, bottom: 0, top: 5 };
     const tooltip = this.renderTooltip();
+    const style = reactcss({
+      default: {
+        container: {
+          left: offset.left - 6,
+          bottom: 0,
+          top: 5
+        },
+        line: {
+          backgroundColor: color
+        },
+        icon: { color }
+      }
+    });
     return(
-      <div className="annotation" style={style}>
-        <div className="annotation__line" style={{ width: 2, backgroundColor: color }}></div>
+      <div className="annotation" style={style.container}>
+        <div className="annotation__line" style={style.line}></div>
         <div
           onMouseOver={this.handleMouseOver}
           onMouseOut={this.handleMouseOut}
           className="annotation__icon">
-          <i className={`fa ${icon}`} style={{ color }}></i>
+          <i className={`fa ${icon}`} style={style.icon}></i>
           { tooltip }
         </div>
       </div>

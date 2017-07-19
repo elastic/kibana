@@ -55,4 +55,6 @@ class Storage {
   }
 }
 
-module.exports = new Storage(localStorage, 'sense:');
+const instance = new Storage(localStorage, 'sense:');
+
+export default instance;

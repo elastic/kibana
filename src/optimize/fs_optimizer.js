@@ -1,8 +1,7 @@
-
 import BaseOptimizer from './base_optimizer';
 import { fromNode } from 'bluebird';
 
-module.exports = class FsOptimizer extends BaseOptimizer {
+export default class FsOptimizer extends BaseOptimizer {
   async init() {
     await this.initCompiler();
   }
@@ -23,4 +22,4 @@ module.exports = class FsOptimizer extends BaseOptimizer {
       });
     });
   }
-};
+}

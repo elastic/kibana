@@ -4,8 +4,8 @@ import ngMock from 'ng_mock';
 import expect from 'expect.js';
 import $ from 'jquery';
 import 'ui/persisted_state';
-import VislibLibYAxisProvider from 'ui/vislib/lib/axis';
-import VislibVisConfig from 'ui/vislib/lib/vis_config';
+import { VislibLibAxisProvider } from 'ui/vislib/lib/axis';
+import { VislibVisConfigProvider } from 'ui/vislib/lib/vis_config';
 
 let YAxis;
 let persistedState;
@@ -94,8 +94,8 @@ describe('Vislib yAxis Class Test Suite', function () {
 
   beforeEach(ngMock.inject(function (Private, $injector) {
     persistedState = new ($injector.get('PersistedState'))();
-    YAxis = Private(VislibLibYAxisProvider);
-    VisConfig = Private(VislibVisConfig);
+    YAxis = Private(VislibLibAxisProvider);
+    VisConfig = Private(VislibVisConfigProvider);
 
     expect($('.y-axis-wrapper')).to.have.length(0);
   }));

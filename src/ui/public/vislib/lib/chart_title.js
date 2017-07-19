@@ -1,10 +1,10 @@
 import d3 from 'd3';
 import _ from 'lodash';
-import ErrorHandlerProvider from './_error_handler';
-import TooltipProvider from 'ui/vis/components/tooltip';
+import { VislibLibErrorHandlerProvider } from './_error_handler';
+import { TooltipProvider } from 'ui/vis/components/tooltip';
 
-export default function ChartTitleFactory(Private) {
-  const ErrorHandler = Private(ErrorHandlerProvider);
+export function VislibLibChartTitleProvider(Private) {
+  const ErrorHandler = Private(VislibLibErrorHandlerProvider);
   const Tooltip = Private(TooltipProvider);
 
   class ChartTitle extends ErrorHandler {

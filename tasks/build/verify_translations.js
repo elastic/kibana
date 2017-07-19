@@ -1,7 +1,7 @@
 import Promise from 'bluebird';
 import _ from 'lodash';
 
-import fromRoot from '../../src/utils/from_root';
+import { fromRoot } from '../../src/utils';
 import KbnServer from '../../src/server/kbn_server';
 import * as i18nVerify from '../utils/i18n_verify_keys';
 

@@ -1,7 +1,7 @@
 
 import _ from 'lodash';
 import expect from 'expect.js';
-import IndexedArray from 'ui/indexed_array';
+import { IndexedArray } from 'ui/indexed_array';
 
 // this is generally a data-structure that IndexedArray is good for managing
 const users = [

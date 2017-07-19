@@ -1,6 +1,6 @@
 import pluginInit from './plugin_init';
 
-module.exports = async function (kbnServer, server, config) {
+export default async function (kbnServer, server, config) {
 
   if (!config.get('plugins.initialize')) {
     server.log(['info'], 'Plugin initialization disabled.');

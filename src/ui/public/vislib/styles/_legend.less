@@ -6,10 +6,8 @@ visualize-legend {
   flex-direction: row;
 }
 
-.legend-icon {
-  color: #BEBEBE;
-  font-size: 1.2em;
-  margin: 1px;
+.legend-collapse-button {
+  align-self: flex-start;
 }
 
 .legend-col-wrapper {
@@ -40,24 +38,6 @@ visualize-legend {
   .header {
     cursor: pointer;
     width: 15px;
-  }
-
-  .legend-toggle {
-    &:hover {
-      color: @sidebar-hover-color;
-    }
-
-    .vis-container--legend-top &,
-    .vis-container--legend-bottom & {
-      text-align: center;
-    }
-
-    padding-right: 5px;
-    font-size: 14px;
-  }
-
-  .column-labels {
-    text-align: right;
   }
 
   .legend-ul {
@@ -121,18 +101,6 @@ visualize-legend {
 
   .legend-value-details {
     border-bottom: 1px solid @sidebar-bg;
-
-    .filter-button {
-      display: block;
-      float: left;
-      width: 50%;
-      border-radius: 0px;
-      background-color: @sidebar-bg;
-
-      &:hover {
-        background-color: @sidebar-hover-bg;
-      }
-    }
   }
 
   .legend-value-color-picker {

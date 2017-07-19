@@ -16,7 +16,8 @@ To set a time filter with the Time Picker:
 image::images/time-filter.jpg[Time filter shortcuts]
 . To specify a time filter relative to the current time, click *Relative* and
 specify the start time as a number of seconds, minutes, hours, days,
-months, or years ago.
+months, or years. You can also specify the end time relative
+to the current time. Relative times can be in the past or future.
 +
 image::images/time-filter-relative.jpg[Relative time filter]
 . To specify both the start and end times for the time filter, click
@@ -33,8 +34,12 @@ To set a time filter from the histogram, do one of the following:
 the cursor over the background of the chart--the cursor changes to a plus sign
 when you hover over a valid start point.
 
+To move forward/backward in time, click the arrows to the left or right of the Time Picker:
+
+image::images/time-picker-step.jpg[Move backwards in time]
+
 You can use the browser Back button to undo your changes.
 
 The displayed time range and interval are shown on the histogram. By default,
 the interval is set automatically based on the time range. To use a different
-interval, click the link and select an interval. 
+interval, click the link and select an interval.

@@ -4,7 +4,7 @@ import _ from 'lodash';
 // Good: min, max, average
 // Bad: sum, count
 
-module.exports = function (dataTuples, targetTuples) {
+export default function average(dataTuples, targetTuples) {
 
   // Phase 1: Downsample
   // We nessecarily won't well match the dataSource here as we don't know how much data
@@ -72,4 +72,4 @@ module.exports = function (dataTuples, targetTuples) {
 
   const resultTuples = _.zip(resultTimes, resultValues);
   return resultTuples;
-};
+}

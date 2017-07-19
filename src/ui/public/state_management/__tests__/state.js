@@ -3,8 +3,8 @@ import expect from 'expect.js';
 import ngMock from 'ng_mock';
 import { encode as encodeRison } from 'rison-node';
 import 'ui/private';
-import Notifier from 'ui/notify/notifier';
-import StateManagementStateProvider from 'ui/state_management/state';
+import { Notifier } from 'ui/notify/notifier';
+import { StateProvider } from 'ui/state_management/state';
 import {
   unhashQueryString,
 } from 'ui/state_management/state_hashing';
@@ -12,9 +12,9 @@ import {
   createStateHash,
   isStateHash,
 } from 'ui/state_management/state_storage';
-import HashedItemStore from 'ui/state_management/state_storage/hashed_item_store';
+import { HashedItemStore } from 'ui/state_management/state_storage/hashed_item_store';
 import StubBrowserStorage from 'test_utils/stub_browser_storage';
-import EventsProvider from 'ui/events';
+import { EventsProvider } from 'ui/events';
 
 describe('State Management', function () {
   const notifier = new Notifier();
@@ -28,7 +28,7 @@ describe('State Management', function () {
   beforeEach(ngMock.inject(function (_$rootScope_, _$location_, Private, config) {
     $location = _$location_;
     $rootScope = _$rootScope_;
-    State = Private(StateManagementStateProvider);
+    State = Private(StateProvider);
     Events = Private(EventsProvider);
     Notifier.prototype._notifs.splice(0);
 
@@ -188,6 +188,26 @@ describe('State Management', function () {
       expect(stateObj).to.eql({});
     });
 
+    it('should clear state when it is invalid', function () {
+      let stateObj;
+      const { state } = setup();
+
+      $location.search({ _s: '' });
+      state.fetch();
+      stateObj = state.toObject();
+      expect(stateObj).to.eql({});
+
+      $location.search({ _s: '!n' });
+      state.fetch();
+      stateObj = state.toObject();
+      expect(stateObj).to.eql({});
+
+      $location.search({ _s: 'alert(1)' });
+      state.fetch();
+      stateObj = state.toObject();
+      expect(stateObj).to.eql({});
+    });
+
     it('does not replace the state value on read', () => {
       const { state } = setup();
       sinon.stub($location, 'search', (newSearch) => {
@@ -231,7 +251,7 @@ describe('State Management', function () {
       expect(hashedItemStore.getItem(urlVal)).to.eql(JSON.stringify(obj));
     });
 
-    context('error handling', () => {
+    describe('error handling', () => {
       it('notifies the user when a hash value does not map to a stored value', () => {
         const { state, notifier } = setup({ storeInHash: true });
         const search = $location.search();
@@ -258,6 +278,21 @@ describe('State Management', function () {
         sinon.assert.calledOnce(fatalStub);
         expect(fatalStub.firstCall.args[0]).to.be.an(Error);
         expect(fatalStub.firstCall.args[0].message).to.match(/github\.com/);
+      });
+
+      it('translateHashToRison should gracefully fallback if parameter can not be parsed', () => {
+        const { state, hashedItemStore } = setup({ storeInHash: false });
+
+        expect(state.translateHashToRison('(a:b)')).to.be('(a:b)');
+        expect(state.translateHashToRison('')).to.be('');
+
+        const existingHash = createStateHash('{"a": "b"}', () => null);
+        hashedItemStore.setItem(existingHash, '{"a": "b"}');
+
+        const nonExistingHash = createStateHash('{"b": "c"}', () => null);
+
+        expect(state.translateHashToRison(existingHash)).to.be('(a:b)');
+        expect(state.translateHashToRison(nonExistingHash)).to.be('!n');
       });
     });
   });

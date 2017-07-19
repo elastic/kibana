@@ -41,36 +41,36 @@ describe('Console Proxy Route', () => {
   });
 
   describe('response body', () => {
-    context('GET request', () => {
+    describe('GET request', () => {
       it('returns the exact body', async () => {
         const { payload } = await request('GET', '/', 'foobar');
         expect(payload).to.be('foobar');
       });
     });
-    context('POST request', () => {
+    describe('POST request', () => {
       it('returns the exact body', async () => {
         const { payload } = await request('POST', '/', 'foobar');
         expect(payload).to.be('foobar');
       });
     });
-    context('PUT request', () => {
+    describe('PUT request', () => {
       it('returns the exact body', async () => {
         const { payload } = await request('PUT', '/', 'foobar');
         expect(payload).to.be('foobar');
       });
     });
-    context('DELETE request', () => {
+    describe('DELETE request', () => {
       it('returns the exact body', async () => {
         const { payload } = await request('DELETE', '/', 'foobar');
         expect(payload).to.be('foobar');
       });
     });
-    context('HEAD request', () => {
+    describe('HEAD request', () => {
       it('returns the status code and text', async () => {
         const { payload } = await request('HEAD', '/');
         expect(payload).to.be('200 - OK');
       });
-      context('mixed casing', () => {
+      describe('mixed casing', () => {
         it('returns the status code and text', async () => {
           const { payload } = await request('HeAd', '/');
           expect(payload).to.be('200 - OK');

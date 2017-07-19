@@ -1,4 +1,4 @@
-export default function PointSeriesAddToSiri() {
+export function PointSeriesAddToSiriProvider() {
   return function addToSiri(series, point, id, label, agg) {
     id = id == null ? '' : id + '';
 

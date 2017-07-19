@@ -1,5 +1,5 @@
 import expect from 'expect.js';
-import propFilter from 'ui/filters/_prop_filter';
+import { propFilter } from 'ui/filters/_prop_filter';
 
 describe('prop filter', function () {
   let nameFilter;

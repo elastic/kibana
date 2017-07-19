@@ -1,12 +1,9 @@
 import _ from 'lodash';
 
-module.exports = function (chrome, internals) {
+// eslint-disable-next-line kibana-custom/no-default-export
+export default function (chrome, internals) {
   /**
    * ui/chrome Theme API
-   *
-   *   Nav Background
-   *     applies to the entire nav bar and is specified as a css string.
-   *     eg. 'red' or 'url(..) no-repeat left center'
    *
    *   Logo
    *     Set the background for the logo and small logo in the navbar.
@@ -17,22 +14,6 @@ module.exports = function (chrome, internals) {
    *   Brand
    *     Similar to a logo, but is just text with styles to make it stick out.
    */
-
-  /**
-   * @param {string} background - css background definition
-   * @return {chrome}
-   */
-  chrome.setNavBackground = function (cssBackground) {
-    internals.navBackground = cssBackground;
-    return chrome;
-  };
-
-  /**
-   * @return {string} - css background
-   */
-  chrome.getNavBackground = function () {
-    return internals.navBackground;
-  };
 
   /**
    * @param {string|object} item - brand key to set, or object to apply
@@ -97,4 +78,4 @@ module.exports = function (chrome, internals) {
     return internals.applicationClasses.join(' ');
   };
 
-};
+}

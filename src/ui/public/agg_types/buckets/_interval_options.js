@@ -1,4 +1,4 @@
-export default function IntervalOptionsService() {
+export function AggTypesBucketsIntervalOptionsProvider() {
   return [
     {
       display: 'Auto',

@@ -1,0 +1,12 @@
+<div
+  json-input
+  require-keys="true"
+  ui-ace="{
+    mode: 'json',
+    onLoad: aceLoaded
+  }"
+  ng-model="queryDsl"
+  ng-change="onChange({
+    queryDsl: queryDsl
+  })"
+></div>

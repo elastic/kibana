@@ -22,52 +22,69 @@
           ng-class="notif.getToastMessageClass()"
         ></render-directive>
 
-        <div class="btn-group" ng-class="notif.getButtonGroupClass()">
+        <div class="kuiButtonGroup" ng-class="notif.getButtonGroupClass()">
           <button
             type="button"
             ng-if="notif.stack && !notif.showStack"
-            class="btn"
+            class="kuiButton"
             ng-class="notif.getButtonClass()"
             ng-click="notif.cancelTimer(); notif.showStack = true"
-          >More Info</button>
+          >
+            More Info
+          </button>
           <button
             type="button"
             ng-if="notif.stack && notif.showStack"
-            class="btn"
+            class="kuiButton"
             ng-class="notif.getButtonClass()"
             ng-click="notif.showStack = false"
-          >Less Info</button>
+          >
+            Less Info
+          </button>
           <button
+            data-test-subj="notifierDismissButton"
             type="button"
             ng-if="notif.accept"
-            class="btn"
+            class="kuiButton"
             ng-class="notif.getButtonClass()"
             ng-click="notif.accept()"
-          >OK</button>
+          >
+            OK
+          </button>
           <button
             type="button"
             ng-if="notif.address"
-            class="btn"
+            class="kuiButton"
             ng-class="notif.getButtonClass()"
             ng-click="notif.address()"
-          >Fix it</button>
+          >
+            Fix it
+          </button>
           <button
             type="button"
-            class="btn"
+            class="kuiButton"
             ng-repeat="action in notif.customActions"
             ng-class="action.getButtonClass()"
             ng-click="action.callback()"
             ng-bind="action.key"
+            data-test-subj="{{action.dataTestSubj}}"
           ></button>
         </div>
 
+        <!-- Countdown badge -->
         <button
           type="button"
           ng-if="notif.isTimed()"
           class="toaster-countdown"
-          ng-class="notif.getButtonClass()"
           ng-click="notif.cancelTimer()"
-        ><span class="badge" hover-text="stop">{{notif.timeRemaining}}s</span></button>
+        >
+          <span
+            class="badge"
+            hover-text="stop"
+          >
+            {{notif.timeRemaining}}s
+          </span>
+        </button>
       </div>
 
       <div ng-if="notif.stack && notif.showStack" ng-class="notif.getAlertClassStack()">

@@ -1,11 +1,9 @@
 import _ from 'lodash';
-import flattenWith from './flatten_with';
 import explodeBy from './explode_by';
+import { getFlattenedObject } from '../../utils';
 
-module.exports = function (target, source) {
-  const _target = flattenWith('.', target);
-  const _source = flattenWith('.', source);
+export default function (target, source) {
+  const _target = getFlattenedObject(target);
+  const _source = getFlattenedObject(source);
   return explodeBy('.', _.defaults(_source, _target));
-};
-
-
+}

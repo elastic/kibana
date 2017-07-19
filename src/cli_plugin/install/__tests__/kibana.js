@@ -1,5 +1,6 @@
 import expect from 'expect.js';
 import sinon from 'sinon';
+import mockFs from 'mock-fs';
 import Logger from '../../lib/logger';
 import { join } from 'path';
 import rimraf from 'rimraf';
@@ -13,13 +14,15 @@ describe('kibana cli', function () {
     describe('kibana', function () {
       const testWorkingPath = join(__dirname, '.test.data');
       const tempArchiveFilePath = join(testWorkingPath, 'archive.part');
+      const pluginDir = join(__dirname, 'plugins');
 
       const settings = {
         workingPath: testWorkingPath,
         tempArchiveFile: tempArchiveFilePath,
         plugin: 'test-plugin',
         version: '1.0.0',
-        plugins: [ { name: 'foo', path: join(testWorkingPath, 'foo') } ]
+        plugins: [ { name: 'foo' } ],
+        pluginDir
       };
 
       const logger = new Logger(settings);
@@ -130,13 +133,10 @@ describe('kibana cli', function () {
       });
 
       describe('existingInstall', function () {
-        let testWorkingPath;
         let processExitStub;
 
         beforeEach(function () {
           processExitStub = sinon.stub(process, 'exit');
-          testWorkingPath = join(__dirname, '.test.data');
-          rimraf.sync(testWorkingPath);
           sinon.stub(logger, 'log');
           sinon.stub(logger, 'error');
         });
@@ -145,26 +145,23 @@ describe('kibana cli', function () {
           processExitStub.restore();
           logger.log.restore();
           logger.error.restore();
-          rimraf.sync(testWorkingPath);
         });
 
-        it('should throw an error if the workingPath already exists.', function () {
-          mkdirp.sync(settings.plugins[0].path);
-          existingInstall(settings, logger);
+        it('should throw an error if the plugin already exists.', function () {
+          mockFs({ [`${pluginDir}/foo`]: {} });
 
+          existingInstall(settings, logger);
           expect(logger.error.firstCall.args[0]).to.match(/already exists/);
           expect(process.exit.called).to.be(true);
+
+          mockFs.restore();
         });
 
-        it('should not throw an error if the workingPath does not exist.', function () {
+        it('should not throw an error if the plugin does not exist.', function () {
           existingInstall(settings, logger);
           expect(logger.error.called).to.be(false);
         });
-
       });
-
     });
-
   });
-
 });

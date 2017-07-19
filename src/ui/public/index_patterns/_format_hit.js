@@ -1,8 +1,8 @@
 import _ from 'lodash';
 // Takes a hit, merges it with any stored/scripted fields, and with the metaFields
-// returns a formated version
+// returns a formatted version
 
-export default function (indexPattern, defaultFormat) {
+export function formatHit(indexPattern, defaultFormat) {
 
   function convert(hit, val, fieldName) {
     const field = indexPattern.fields.byName[fieldName];

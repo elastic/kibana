@@ -8,7 +8,7 @@ import {
 
 export default () => (
   <div>
-    <KuiButton type="basic">
+    <KuiButton buttonType="basic">
       Button element
     </KuiButton>
 
@@ -18,7 +18,7 @@ export default () => (
       e.preventDefault();
       window.alert('Submit');
     }}>
-      <KuiSubmitButton type="basic">
+      <KuiSubmitButton buttonType="basic">
         Submit input element
       </KuiSubmitButton>
     </form>
@@ -28,7 +28,7 @@ export default () => (
       e.preventDefault();
       window.alert('Submit');
     }}>
-      <KuiSubmitButton type="basic" disabled>
+      <KuiSubmitButton buttonType="basic" disabled>
         Submit input element, disabled
       </KuiSubmitButton>
     </form>
@@ -36,7 +36,7 @@ export default () => (
     &nbsp;
 
     <KuiLinkButton
-      type="basic"
+      buttonType="basic"
       href="http://www.google.com"
       target="_blank"
     >
@@ -46,7 +46,7 @@ export default () => (
     &nbsp;
 
     <KuiLinkButton
-      type="basic"
+      buttonType="basic"
       href="http://www.google.com"
       target="_blank"
       disabled

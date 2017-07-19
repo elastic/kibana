@@ -1,10 +1,9 @@
-import sinon from 'auto-release-sinon';
+import sinon from 'sinon';
 import ngMock from 'ng_mock';
 import expect from 'expect.js';
 
-import DomLocationProvider from 'ui/dom_location';
-import { constant } from 'lodash';
-import { cloneDeep } from 'lodash';
+import { DomLocationProvider } from 'ui/dom_location';
+import { constant, cloneDeep } from 'lodash';
 import $ from 'jquery';
 import 'ui/chrome';
 import '../app_switcher';
@@ -43,7 +42,7 @@ describe('appSwitcher directive', function () {
     });
   }
 
-  context('when one link is for the active app', function () {
+  describe('when one link is for the active app', function () {
     const myLink = {
       active: true,
       title: 'myLink',
@@ -73,7 +72,7 @@ describe('appSwitcher directive', function () {
     });
   });
 
-  context('when none of the links are for the active app', function () {
+  describe('when none of the links are for the active app', function () {
     const myLink = {
       active: false,
       title: 'myLink',
@@ -103,7 +102,7 @@ describe('appSwitcher directive', function () {
     });
   });
 
-  context('clicking a link with matching href but missing hash', function () {
+  describe('clicking a link with matching href but missing hash', function () {
     const url = 'http://localhost:555/app/myApp?query=1';
     beforeEach(setup(url + '#/lastSubUrl', [
       { url: url }
@@ -126,7 +125,7 @@ describe('appSwitcher directive', function () {
     });
   });
 
-  context('clicking a link that matches entire url', function () {
+  describe('clicking a link that matches entire url', function () {
     const url = 'http://localhost:555/app/myApp#/lastSubUrl';
     beforeEach(setup(url, [
       { url: url }
@@ -149,7 +148,7 @@ describe('appSwitcher directive', function () {
     });
   });
 
-  context('clicking a link with matching href but changed hash', function () {
+  describe('clicking a link with matching href but changed hash', function () {
     const rootUrl = 'http://localhost:555/app/myApp?query=1';
     const url = rootUrl + '#/lastSubUrl2';
 
@@ -174,7 +173,7 @@ describe('appSwitcher directive', function () {
     });
   });
 
-  context('clicking a link with matching host', function () {
+  describe('clicking a link with matching host', function () {
     beforeEach(setup('http://localhost:555/someOtherPath', [
       {
         active: true,
@@ -195,7 +194,7 @@ describe('appSwitcher directive', function () {
     });
   });
 
-  context('clicking a link with matching host and path', function () {
+  describe('clicking a link with matching host and path', function () {
     beforeEach(setup('http://localhost:555/app/myApp?someQuery=true', [
       {
         active: true,

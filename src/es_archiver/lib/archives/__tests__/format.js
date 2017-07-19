@@ -15,7 +15,7 @@ const INPUTS = [1, 2, { foo: 'bar' }, [1,2]];
 const INPUT_JSON = INPUTS.map(i => JSON.stringify(i, null, 2)).join('\n\n');
 
 describe('esArchiver createFormatArchiveStreams', () => {
-  context('{ gzip: false }', () => {
+  describe('{ gzip: false }', () => {
     it('returns an array of streams', () => {
       const streams = createFormatArchiveStreams({ gzip: false });
       expect(streams).to.be.an('array');
@@ -45,7 +45,7 @@ describe('esArchiver createFormatArchiveStreams', () => {
     });
   });
 
-  context('{ gzip: true }', () => {
+  describe('{ gzip: true }', () => {
     it('returns an array of streams', () => {
       const streams = createFormatArchiveStreams({ gzip: true });
       expect(streams).to.be.an('array');
@@ -75,7 +75,7 @@ describe('esArchiver createFormatArchiveStreams', () => {
     });
   });
 
-  context('defaults', () => {
+  describe('defaults', () => {
     it('product is not gzipped', async () => {
       const json = await createPromiseFromStreams([
         createListStream(INPUTS),

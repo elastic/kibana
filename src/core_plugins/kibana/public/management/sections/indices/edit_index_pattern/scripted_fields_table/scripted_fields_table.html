@@ -1,0 +1,38 @@
+<h3 class="kuiTextTitle kuiVerticalRhythm">
+  Scripted fields
+</h3>
+
+<p class="kuiText kuiVerticalRhythm">
+  These scripted fields are computed on the fly from your data. They can be used in visualizations and displayed in your documents, however they can not be searched. You can manage them here and add new ones as you see fit, but be careful, scripts can be tricky!
+</p>
+
+<a
+  data-test-subj="addScriptedFieldLink"
+  ng-href="{{ kbnUrl.getRouteHref(indexPattern, 'addField') }}"
+  class="kuiButton kuiButton--primary kuiButton--iconText kuiVerticalRhythm"
+>
+  <span aria-hidden="true" class="kuiButton__icon kuiIcon fa-plus"></span>
+  <span>Add Scripted Field</span>
+</a>
+
+<div class="kuiVerticalRhythm">
+  <paginated-table
+    columns="columns"
+    rows="rows"
+    per-page="perPage"
+    link-to-top="true"
+    show-blank-rows="false"
+  ></paginated-table>
+</div>
+
+<div
+  class="kuiInfoPanel kuiInfoPanel--info kuiVerticalRhythm"
+  ng-if="rows.length === 0"
+>
+  <div class="kuiInfoPanelHeader">
+    <span class="kuiInfoPanelHeader__icon kuiIcon kuiIcon--info fa-info"></span>
+    <span class="kuiInfoPanelHeader__title">
+      No scripted fields found.
+    </span>
+  </div>
+</div>

@@ -1,5 +1,5 @@
 import _ from 'lodash';
-import safeMakeLabel from './safe_make_label';
+import { safeMakeLabel } from './safe_make_label';
 
 const parentPipelineAggController = function ($scope) {
 
@@ -9,8 +9,12 @@ const parentPipelineAggController = function ($scope) {
   $scope.$watch('agg.params.metricAgg', updateOrderAgg);
 
   $scope.$on('$destroy', function () {
+    const lastBucket = _.findLast($scope.vis.aggs, agg => agg.schema.group === 'buckets');
     if ($scope.aggForm && $scope.aggForm.agg) {
       $scope.aggForm.agg.$setValidity('bucket', true);
+    }
+    if (lastBucket && lastBucket.error) {
+      delete lastBucket.error;
     }
   });
 

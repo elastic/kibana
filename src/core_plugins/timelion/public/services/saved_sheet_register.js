@@ -1,5 +1,5 @@
-define(function () {
-  return function savedSearchObjectFn(savedSheets) {
-    return savedSheets;
-  };
-});
+import './saved_sheets';
+
+export default function savedSearchObjectFn(savedSheets) {
+  return savedSheets;
+}

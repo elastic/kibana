@@ -1,5 +1,5 @@
 import reqRespStatsHTML from 'plugins/spy_modes/req_resp_stats_spy_mode.html';
-import spyModesRegistry from 'ui/registry/spy_modes';
+import { SpyModesRegistryProvider } from 'ui/registry/spy_modes';
 
 const linkReqRespStats = function ($scope) {
   $scope.$bind('req', 'searchSource.history[searchSource.history.length - 1]');
@@ -27,7 +27,7 @@ const linkReqRespStats = function ($scope) {
   });
 };
 
-spyModesRegistry
+SpyModesRegistryProvider
 .register(function () {
   return {
     name: 'request',

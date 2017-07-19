@@ -1,4 +1,4 @@
-export default function DelayedUpdaterFactory($http, chrome, Promise) {
+export function ConfigDelayedUpdaterProvider($http, chrome, Promise) {
   let unsavedChanges = {};
   let unresolvedPromises = [];
   let saveTimeout = null;

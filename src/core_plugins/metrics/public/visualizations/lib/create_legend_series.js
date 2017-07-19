@@ -12,7 +12,7 @@ export default props => (row, i) => {
   const classes = ['rhythm_chart__legend_item'];
   const key = row.id;
   if (!_.includes(props.seriesFilter, row.id)) classes.push('disabled');
-  if (!row.label || row.legend === false) return (<div key={ key } style={{ display: 'none' }}/>);
+  if (row.label == null || row.legend === false) return (<div key={ key } style={{ display: 'none' }}/>);
   return (
     <div
       className={ classes.join(' ') }

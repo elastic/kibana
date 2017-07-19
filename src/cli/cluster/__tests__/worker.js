@@ -1,5 +1,5 @@
 import expect from 'expect.js';
-import sinon from 'auto-release-sinon';
+import sinon from 'sinon';
 import cluster from 'cluster';
 import { findIndex } from 'lodash';
 
@@ -21,30 +21,28 @@ function assertListenerRemoved(emitter, event) {
 }
 
 function setup(opts = {}) {
-  sinon.stub(cluster, 'fork', function () {
-    return new MockClusterFork();
-  });
-
   const worker = new Worker(opts);
   workersToShutdown.push(worker);
   return worker;
 }
 
 describe('CLI cluster manager', function () {
+  const sandbox = sinon.sandbox.create();
+
+  beforeEach(function () {
+    sandbox.stub(cluster, 'fork', () => new MockClusterFork());
+  });
 
   afterEach(async function () {
-    for (const worker of workersToShutdown) {
-      if (worker.shutdown.restore) {
-        // if the shutdown method was stubbed, restore it first
-        worker.shutdown.restore();
-      }
+    sandbox.restore();
 
+    for (const worker of workersToShutdown) {
       await worker.shutdown();
     }
   });
 
   describe('#onChange', function () {
-    context('opts.watch = true', function () {
+    describe('opts.watch = true', function () {
       it('restarts the fork', function () {
         const worker = setup({ watch: true });
         sinon.stub(worker, 'start');
@@ -54,7 +52,7 @@ describe('CLI cluster manager', function () {
       });
     });
 
-    context('opts.watch = false', function () {
+    describe('opts.watch = false', function () {
       it('does not restart the fork', function () {
         const worker = setup({ watch: false });
         sinon.stub(worker, 'start');
@@ -66,7 +64,7 @@ describe('CLI cluster manager', function () {
   });
 
   describe('#shutdown', function () {
-    context('after starting()', function () {
+    describe('after starting()', function () {
       it('kills the worker and unbinds from message, online, and disconnect events', async function () {
         const worker = setup();
         await worker.start();
@@ -84,7 +82,7 @@ describe('CLI cluster manager', function () {
       });
     });
 
-    context('before being started', function () {
+    describe('before being started', function () {
       it('does nothing', function () {
         const worker = setup();
         worker.shutdown();
@@ -93,7 +91,7 @@ describe('CLI cluster manager', function () {
   });
 
   describe('#parseIncomingMessage()', function () {
-    context('on a started worker', function () {
+    describe('on a started worker', function () {
       it(`is bound to fork's message event`, async function () {
         const worker = setup();
         await worker.start();
@@ -120,7 +118,7 @@ describe('CLI cluster manager', function () {
   });
 
   describe('#onMessage', function () {
-    context('when sent WORKER_BROADCAST message', function () {
+    describe('when sent WORKER_BROADCAST message', function () {
       it('emits the data to be broadcasted', function () {
         const worker = setup();
         const data = {};
@@ -130,7 +128,7 @@ describe('CLI cluster manager', function () {
       });
     });
 
-    context('when sent WORKER_LISTENING message', function () {
+    describe('when sent WORKER_LISTENING message', function () {
       it('sets the listening flag and emits the listening event', function () {
         const worker = setup();
         const stub = sinon.stub(worker, 'emit');
@@ -141,7 +139,7 @@ describe('CLI cluster manager', function () {
       });
     });
 
-    context('when passed an unkown message', function () {
+    describe('when passed an unkown message', function () {
       it('does nothing', function () {
         const worker = setup();
         worker.onMessage('asdlfkajsdfahsdfiohuasdofihsdoif');
@@ -152,7 +150,7 @@ describe('CLI cluster manager', function () {
   });
 
   describe('#start', function () {
-    context('when not started', function () {
+    describe('when not started', function () {
       it('creates a fork and waits for it to come online', async function () {
         const worker = setup();
 
@@ -179,7 +177,7 @@ describe('CLI cluster manager', function () {
       });
     });
 
-    context('when already started', function () {
+    describe('when already started', function () {
       it('calls shutdown and waits for the graceful shutdown to cause a restart', async function () {
         const worker = setup();
         await worker.start();

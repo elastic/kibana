@@ -2,7 +2,7 @@ import _ from 'lodash';
 import ngMock from 'ng_mock';
 import expect from 'expect.js';
 
-import VislibLibDataProvider from 'ui/vislib/lib/data';
+import { VislibLibDataProvider } from 'ui/vislib/lib/data';
 import 'ui/persisted_state';
 
 const seriesData = {

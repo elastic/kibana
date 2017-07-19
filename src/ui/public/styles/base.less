@@ -14,11 +14,6 @@ label > small {
   font-weight: normal;
 }
 
-button {
-  // buttons have a stupid 1990's default look which should be disabled
-  .btn();
-}
-
 .small {
   font-size: 0.9em !important;
 }
@@ -153,10 +148,6 @@ a {
       margin-left: auto;
       padding-right: 0;
       line-height: 20px;
-
-      .button-group > :last-child {
-        border-radius: 0;
-      }
     }
   }
 
@@ -164,7 +155,7 @@ a {
     z-index: 1;
   }
   > navbar { padding-bottom: 4px; }
-  > kbn-top-nav { z-index: 3; }
+  > kbn-top-nav { z-index: @localNavDepth; }
 
   > nav,
   > navbar {
@@ -189,14 +180,6 @@ a {
   }
 }
 
-.navbtn {
-  .button-variant(@navbar-default-color; @navbar-default-bg; @navbar-default-border);
-}
-
-.navbtn-inverse {
-  .button-variant(@navbar-default-color; @navbar-default-bg; @navbar-default-border);
-}
-
   .navbar-timepicker-time-desc > .fa-clock-o {
     padding-right: 5px;
   }
@@ -205,28 +188,14 @@ kbn-info i {
   cursor: help;
 }
 
-.kbn-timepicker .btn-default {
-  background: transparent;
-  color: @text-color;
-  border: 0px;
-  box-shadow: none;
-  text-shadow: none;
-}
-
-.kbn-timepicker .btn-info {
-  .button-variant(@btn-info-color; @btn-info-bg; @btn-info-border);
-  .text-info { color: @btn-info-color; }
-  text-shadow: none;
-}
-
 .kbn-timepicker .refresh-interval {
   padding: 0.2em 0.4em;
   border-radius: @border-radius-small;
 }
 
 .kbn-timepicker .refresh-interval-active {
-  background-color: @btn-info-bg;
-  color: @btn-info-color;
+  background-color: @brand-info;
+  color: @white;
 }
 
 //== Table
@@ -238,8 +207,18 @@ kbn-table, .kbn-table {
     white-space: nowrap;
     padding-right: 10px;
 
+    .table-header-move {
+      border: none;
+      background: none;
+      padding: 0;
+    }
+
     .table-header-move, .table-header-sortchange {
-      visibility: hidden;
+      opacity: 0;
+
+      &:focus {
+        opacity: 1;
+      }
     }
 
     .fa {
@@ -250,7 +229,7 @@ kbn-table, .kbn-table {
 
   th:hover {
     .table-header-move, .table-header-sortchange {
-      visibility: visible;
+      opacity: 1;
     }
   }
 }
@@ -268,56 +247,6 @@ table {
 //== SavedObjectFinder
 saved-object-finder,
 paginated-selectable-list {
-  .row {
-    padding: 10px;
-    display: flex;
-    flex-direction: row;
-  }
-
-  .finder-hit-count,
-  .finder-manage-object {
-    min-width: 80px;
-    padding: 5px;
-    text-align: center;
-  }
-
-  .finder-hit-count {
-    flex: 1;
-
-    span {
-      color: @kibanaGray3;
-    }
-  }
-
-  .finder-manage-object {
-    flex: 3;
-    text-align: left;
-    text-transform: capitalize;
-  }
-
-  .form-group {
-    margin-bottom: 0;
-    float: left;
-    flex: 8;
-
-    input {
-      border: none;
-      padding: 5px 0px;
-      border-radius: @border-radius-base;
-    }
-
-    span {
-      padding: 5px 0px;
-      background-color: @white;
-      border: none;
-
-      i {
-        color: @kibanaGray3;
-        width: 15px;
-      }
-    }
-  }
-
   ul.li-striped {
     li {
       border: none;
@@ -369,45 +298,6 @@ paginated-selectable-list {
     }
   }
 
-  .finder-form {
-    position: relative;
-  }
-
-    .finder-form-options {
-      .flex-parent();
-      flex-direction: row;
-      justify-content: flex-end;
-    }
-
-  .finder-options {
-    max-height: 300px;
-    overflow: auto;
-    padding: 0;
-    .border-top-radius(0);
-
-    // replace the padding that was originally on the outer well
-    > * {
-      padding: @padding-base-vertical @padding-base-horizontal;
-      margin: 0;
-    }
-
-    // enable bigger backgrounds for "active" elements
-    > li {
-      margin-top: -ceil(@padding-base-vertical / 2);
-
-      &:first-child {
-        margin: 0;
-      }
-      &.active {
-        background-color: @component-active-bg;
-        color: @component-active-color;
-        a {
-          color: @component-active-color;
-        }
-      }
-    }
-  }
-
   paginate {
     paginate-controls {
       margin: 20px;
@@ -415,22 +305,11 @@ paginated-selectable-list {
   }
 }
 
-// when rendered within a config dropdown, don't use a bottom margin
-.config saved-object-finder .finder-options {
-  margin-bottom: 0;
-  background: @config-saved-object-finder-options-bg;
-}
-
 //== inputDatetime
 .input-datetime-format {
   font-size: @font-size-small;
   color: @text-muted;
   padding: @padding-base-vertical @padding-base-horizontal;
-}
-
-//== clicking disabled buttons should not cause the whole page to get selected
-button[disabled] {
-  user-select: none;
 }
 
 //== override the disabled cursor that doesn't work everywhere
@@ -489,15 +368,17 @@ style-compile {
 
 
 .cell-hover {
-  background-color: @table-cell-hover-bg;
   position: relative;
 
+  /**
+   * 1. Center vertically regardless of row height.
+   */
   .table-cell-filter {
     position: absolute;
-    background-color: @table-cell-hover-bg;
     white-space: nowrap;
     right: 0;
-    top: 5px;
+    top: 50%; /* 1 */
+    transform: translateY(-50%); /* 1 */
     display: none;
   }
 }
@@ -519,6 +400,7 @@ style-compile {
 
 mark, .mark {
   background-color: @mark-bg;
+  border-radius: 2px;
 }
 
 fieldset {
@@ -554,8 +436,8 @@ fieldset {
 // TODO: Extract these styles into the UI Framework.
 
 .page-row {
-  padding: 0 10px;
-  margin: 10px 0;
+  padding: 0 20px;
+  margin: 20px 0;
 }
 
 .page-row-text {
@@ -598,19 +480,6 @@ fieldset {
 
 .kuiInputNote--warning {
   color: #F39C12;
-}
-
-/**
- * 1. Override Bootstrap ui-select component styles. If side padding is > 5px, the component breaks.
- */
-.ui-select-multiple.ui-select-bootstrap {
-  padding: 3px 5px 2px !important; // 1
-  border: 1px solid #D4D4D4; // 1
-  background-color: #ffffff !important; // 1
-
-  &.kuiInputError {
-    border-color: #E74C3C; // 1
-  }
 }
 
 /**
@@ -706,30 +575,32 @@ fieldset {
 }
 
 .kuiSideBarSection {
-  margin-bottom: 6px;
+  margin-bottom: 10px;
+  background-color: @globalColorWhite;
+  padding: 10px;
+  border-radius: 4px;
 }
 
+.kuiSideBarSection .kuiSideBarSection .kuiSideBarSection{
+  border-radius: 0px;
+  border-left: solid 1px tint(@globalColorBlue, 20%);
+  margin-left: 3px; // Align to caret open
+}
+
+
 .kuiSideBarSection__main {
-  margin-bottom: 25px;
 }
 
 .kuiSideBarSectionTitle {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 6px;
-  border-bottom: 1px solid #D4D4D4;
-}
-
-.kuiSideBarSection__main .kuiSideBarSectionTitle {
-  background-color: #E4E4E4;
-  padding: 2px 10px;
+  margin-bottom: 10px;
 }
 
 .kuiSideBarSectionTitle__text {
-  font-size: 14px;
-  font-weight: 700;
-  color: #5A5A5A;
+  font-size: 18px;
+  color: @globalColorDarkestGray;
 }
 
 /**
@@ -739,10 +610,11 @@ fieldset {
   background-color: transparent; // 1
   padding: 0; // 1
   cursor: pointer;
-  color: #328CAA;
+  color: @globalColorBlue;
+  border: none;
 
   &:hover {
-    color: #105A73;
+    color: darken(@globalColorBlue, 10%);
   }
 }
 
@@ -751,8 +623,7 @@ fieldset {
   align-items: center;
   justify-content: space-between;
   width: 100%;
-  margin-bottom: 4px;
-  border-bottom: 1px solid #E8E8E8;
+  margin-bottom: 10px;
 }
 
 .kuiSideBarCollapsibleTitle__label {
@@ -764,17 +635,15 @@ fieldset {
  * 1. Override FontAwesome .fa styles.
  */
 .kuiSideBarCollapsibleTitle__caret {
-  width: 12px;
-  height: 12px;
-  font-size: 12px !important; // 1
-  font-weight: 700;
-  color: #5A5A5A;
+  width: 14px;
+  height: 14px;
+  font-size: 14px !important; // 1
+  color: @globalColorBlue;
 }
 
 .kuiSideBarCollapsibleTitle__text {
-  font-size: 12px;
-  font-weight: 700;
-  color: #5A5A5A;
+  font-size: 14px;
+  color: @globalColorBlue;
 }
 
 /**
@@ -784,15 +653,15 @@ fieldset {
   background-color: transparent; // 1
   padding: 0; // 1
   cursor: pointer;
-  color: #328CAA;
+  color: @globalColorBlue;
+  border: none;
 
   &:hover {
-    color: #105A73;
+    color: darken(@globalColorBlue, 10%);
   }
 }
 
 .kuiSideBarCollapsibleSection {
-  padding-left: 16px;
 }
 
 /**
@@ -800,10 +669,8 @@ fieldset {
  */
 .kuiSideBarFormSectionTitle {
   font-size: 12px;
-  font-weight: 700;
-  color: #5A5A5A;
-  border-bottom: 1px solid #E8E8E8;
-  margin: 4px 0 !important; // 1
+  color: @globalColorMediumGray;
+  margin: 10px 0 !important; // 1
   padding-bottom: 2px;
 }
 
@@ -811,7 +678,7 @@ fieldset {
   display: flex;
   align-items: center;
   min-height: 24px;
-  margin-bottom: 1px;
+  margin-bottom: 10px;
 }
 
 /**
@@ -844,9 +711,8 @@ fieldset {
 .kuiSideBarOptionsLink {
   display: flex;
   align-items: baseline;
-  margin-bottom: 8px;
   font-size: 12px;
-  color: #328CAA !important; // 1
+  color: @globalColorBlue !important; // 1
 
   &:hover {
     color: #105A73 !important; // 1

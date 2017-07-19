@@ -1,10 +1,10 @@
 import _ from 'lodash';
 import expect from 'expect.js';
 import ngMock from 'ng_mock';
-import VislibComponentsLabelsLabelsProvider from 'ui/vislib/components/labels/labels';
-import VislibComponentsLabelsDataArrayProvider from 'ui/vislib/components/labels/data_array';
-import VislibComponentsLabelsUniqLabelsProvider from 'ui/vislib/components/labels/uniq_labels';
-import VislibComponentsLabelsFlattenSeriesProvider from 'ui/vislib/components/labels/flatten_series';
+import { VislibComponentsLabelsLabelsProvider } from 'ui/vislib/components/labels/labels';
+import { VislibComponentsLabelsDataArrayProvider } from 'ui/vislib/components/labels/data_array';
+import { VislibComponentsLabelsUniqLabelsProvider } from 'ui/vislib/components/labels/uniq_labels';
+import { VislibComponentsLabelsFlattenSeriesProvider } from 'ui/vislib/components/labels/flatten_series';
 
 let getLabels;
 let seriesLabels;

@@ -1,6 +1,6 @@
 import _ from 'lodash';
 
-module.exports = function (server) {
+export default function (server) {
   server.route({
     method: 'GET',
     path: '/api/timelion/functions',
@@ -12,4 +12,4 @@ module.exports = function (server) {
       reply(_.sortBy(functionArray, 'name'));
     }
   });
-};
+}

@@ -1,4 +1,5 @@
 import _ from 'lodash';
+import path from 'path';
 import { fromRoot } from '../../utils';
 import KbnServer from '../../server/kbn_server';
 import readYamlConfig from '../../cli/serve/read_yaml_config';
@@ -7,7 +8,7 @@ import { statSync } from 'fs';
 
 export function existingInstall(settings, logger) {
   try {
-    statSync(settings.plugins[0].path);
+    statSync(path.join(settings.pluginDir, settings.plugins[0].name));
 
     logger.error(`Plugin ${settings.plugins[0].name} already exists, please remove before installing a new version`);
     process.exit(70); // eslint-disable-line no-process-exit

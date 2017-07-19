@@ -1,7 +1,8 @@
 import _ from 'lodash';
 import expect from 'expect.js';
 import ngMock from 'ng_mock';
-import AggResponseTabifyTableProvider from 'ui/agg_response/tabify/_table';
+import { AggResponseTabifyTableProvider } from 'ui/agg_response/tabify/_table';
+
 describe('Table class', function () {
 
   let Table;

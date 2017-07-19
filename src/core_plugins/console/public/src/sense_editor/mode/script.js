@@ -11,12 +11,12 @@ acequire("ace/tokenizer")
 
 var ScriptHighlightRules = require("./script_highlight_rules").ScriptHighlightRules;
 
-
-export var ScriptMode = function () {
+export function ScriptMode() {
   this.$outdent = new MatchingBraceOutdent();
   this.$behaviour = new CstyleBehaviour();
   this.foldingRules = new CStyleFoldMode();
-};
+}
+
 oop.inherits(ScriptMode, TextMode);
 
 (function () {

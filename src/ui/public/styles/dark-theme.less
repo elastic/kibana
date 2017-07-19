@@ -15,6 +15,9 @@
     }
   }
 
+  .exitFullScreenMode {
+    background-color: @globalColorDarkestGray;
+  }
 
 // /src/ui/public/styles/bootstrap/forms.less
   .form-control {
@@ -69,40 +72,20 @@
         color: @table-sort-color;
       }
 
+      button.fa-sort-asc,
+      button.fa-sort-down,
       i.fa-sort-asc,
       i.fa-sort-down {
         color: @table-sort-asc-color;
       }
 
+      button.fa-sort-desc,
+      button.fa-sort-up,
       i.fa-sort-desc,
       i.fa-sort-up {
         color: @table-sort-desc-color;
       }
     }
-  }
-
-
-// /src/ui/public/styles/bootstrap/buttons.less
-  .btn {
-    background-color: @dark-button-bg;
-    color: @dark-button-font;
-
-    &:hover,
-    &:focus,
-    &.focus {
-      color: @btn-default-color;
-    }
-
-    .findme {
-      font-weight: bold;
-    }
-  }
-
-  .btn-default {
-    .button-variant(@btn-default-color; @btn-default-bg; @btn-default-border);
-  }
-  .btn-primary {
-    .button-variant(@btn-primary-color; @btn-primary-bg; @btn-primary-border);
   }
 
 
@@ -239,18 +222,6 @@
         color: @saved-object-finder-link-color !important;
       }
     }
-
-    .finder-options {
-      > li {
-        &.active {
-          background-color: @component-active-bg;
-          color: @component-active-color;
-          a {
-            color: @component-active-color;
-          }
-        }
-      }
-    }
   }
 
   .cell-hover {
@@ -306,6 +277,10 @@
     fill: @svg-tick-text-color;
   }
 
+  .chart-label {
+    fill: @svg-tick-text-color;
+  }
+
   .brush .extent {
     stroke: @svg-brush-color;
   }
@@ -344,14 +319,6 @@
 
   .legend-value-details {
     border-bottom: 1px solid @sidebar-bg;
-
-    .filter-button {
-      background-color: @sidebar-bg;
-
-      &:hover {
-        background-color: @sidebar-hover-bg;
-      }
-    }
   }
 
 
@@ -603,5 +570,39 @@
         background-color: @panel-bg;
       }
     }
+  }
+}
+
+.theme-dark {
+  .markdown-body {
+    color: @text-color;
+  }
+
+  .markdown-body code {
+    color: #ffffff;
+    background-color: #5f5f5f;
+  }
+
+  .markdown-body pre {
+    background-color: #5f5f5f;
+    border: none;
+  }
+
+  .markdown-body table {
+    border-left: 1px solid @table-border-color;
+  }
+
+  .markdown-body table th,
+  .markdown-body table td {
+    border-top: 1px solid @table-border-color;
+    border-bottom: 1px solid @table-border-color;
+
+    &:last-child {
+      border-right: 1px solid @table-border-color;
+    }
+  }
+
+  .markdown-body table tr {
+    border-top: 1px solid @table-border-color;
   }
 }

@@ -1,0 +1,26 @@
+import { RegistryFieldFormatsProvider } from 'ui/registry/field_formats';
+import { UrlFormat } from '../../common/field_formats/types/url';
+import { BytesFormat } from '../../common/field_formats/types/bytes';
+import { DateFormat } from '../../common/field_formats/types/date';
+import { DurationFormat } from '../../common/field_formats/types/duration';
+import { IpFormat } from '../../common/field_formats/types/ip';
+import { NumberFormat } from '../../common/field_formats/types/number';
+import { PercentFormat } from '../../common/field_formats/types/percent';
+import { StringFormat } from '../../common/field_formats/types/string';
+import { SourceFormat } from '../../common/field_formats/types/source';
+import { ColorFormat } from '../../common/field_formats/types/color';
+import { TruncateFormat } from '../../common/field_formats/types/truncate';
+import { BoolFormat } from '../../common/field_formats/types/boolean';
+
+RegistryFieldFormatsProvider.register(() => UrlFormat);
+RegistryFieldFormatsProvider.register(() => BytesFormat);
+RegistryFieldFormatsProvider.register(() => DateFormat);
+RegistryFieldFormatsProvider.register(() => DurationFormat);
+RegistryFieldFormatsProvider.register(() => IpFormat);
+RegistryFieldFormatsProvider.register(() => NumberFormat);
+RegistryFieldFormatsProvider.register(() => PercentFormat);
+RegistryFieldFormatsProvider.register(() => StringFormat);
+RegistryFieldFormatsProvider.register(() => SourceFormat);
+RegistryFieldFormatsProvider.register(() => ColorFormat);
+RegistryFieldFormatsProvider.register(() => TruncateFormat);
+RegistryFieldFormatsProvider.register(() => BoolFormat);

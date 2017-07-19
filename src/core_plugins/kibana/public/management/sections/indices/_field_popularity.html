@@ -1,9 +1,0 @@
-<div ng-mouseover="popularityField.name = field.name" ng-mouseout="popularityField.name = null">
-  <span>{{ field.count }}</span>
-  <span class="field-popularize" ng-show="popularityField.name == field.name">
-    <span aria-label="Plus" ng-click="indexPattern.popularizeField(field.name, 1)"
-      class="label label-default"><i  aria-hidden="true" class="fa fa-plus"></i></span>
-    <span aria-label="Minus" ng-click="indexPattern.popularizeField(field.name, -1)"
-      class="label label-default"><i  aria-hidden="true" class="fa fa-minus"></i></span>
-  </span>
-</div>

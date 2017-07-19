@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="60px" height="46px" viewBox="0 0 60 46" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <!-- Generator: Sketch 42 (36781) - http://www.bohemiancoding.com/sketch -->
+    <title>icon-line</title>
+    <desc>Created with Sketch.</desc>
+    <defs></defs>
+    <g id="Visualize" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="Visualize-Create-New" transform="translate(-436.000000, -222.000000)" fill="#000000">
+            <g id="charts" transform="translate(75.000000, 148.000000)">
+                <g id="line" transform="translate(321.000000, 43.000000)">
+                    <g id="icon-line" transform="translate(40.000000, 31.000000)">
+                        <path d="M52,6.75675676 L52,17.0439189 C52,17.7060811 51.1580189,18.0608108 50.6379717,17.5641892 L47.6415094,14.7027027 L31.9658019,29.6722973 C31.6438679,29.9797297 31.1485849,29.9797297 30.8266509,29.6722973 L25.0566038,24.1621622 L14.754717,34 L10,29.4594595 L24.4870283,15.625 C24.8089623,15.3175676 25.3042453,15.3175676 25.6261792,15.625 L31.3962264,21.1351351 L42.8867925,10.1621622 L39.8903302,7.30067568 C39.370283,6.80405405 39.7417453,6 40.4351415,6 L51.2075472,6 C51.6533019,6 52,6.33108108 52,6.75675676 Z" id="arrow"></path>
+                        <polygon id="xy-axis" fill-rule="nonzero" points="4 0 0 0 0 45.0116263 60.0000011 45.0116263 60.0000011 41.0116263 4 41.0116263"></polygon>
+                    </g>
+                </g>
+            </g>
+        </g>
+    </g>
+</svg>

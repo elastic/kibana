@@ -4,8 +4,41 @@ import postcssConfig from '../src/optimize/postcss.config';
 import chokidar from 'chokidar';
 import debounce from 'lodash/function/debounce';
 const platform = require('os').platform();
+const isPlatformWindows = /^win/.test(platform);
 
 module.exports = function (grunt) {
+  grunt.registerTask('uiFramework:build', function () {
+    const done = this.async();
+
+    const serverCmd = {
+      cmd: isPlatformWindows ? '.\\node_modules\\.bin\\webpack.cmd' : './node_modules/.bin/webpack',
+      args: [
+        '-p',
+        '--config=ui_framework/doc_site/webpack.config.js',
+        '--devtool', // Prevent the source map from being generated
+      ],
+      opts: { stdio: 'inherit' }
+    };
+
+    const uiFrameworkServerBuild = new Promise((resolve, reject) => {
+      grunt.util.spawn(serverCmd, (error, result, code) => {
+        if (error || code !== 0) {
+          const message = result.stderr || result.stdout;
+
+          grunt.log.error(message);
+
+          return reject();
+        }
+
+        grunt.log.writeln(result);
+
+        resolve();
+      });
+    });
+
+    uiFrameworkServerBuild.then(done);
+  });
+
   grunt.registerTask('uiFramework:start', function () {
     const done = this.async();
     Promise.all([uiFrameworkWatch(), uiFrameworkServerStart()]).then(done);
@@ -13,7 +46,7 @@ module.exports = function (grunt) {
 
   function uiFrameworkServerStart() {
     const serverCmd = {
-      cmd: /^win/.test(platform) ? '.\\node_modules\\.bin\\webpack-dev-server.cmd' : './node_modules/.bin/webpack-dev-server',
+      cmd: isPlatformWindows ? '.\\node_modules\\.bin\\webpack-dev-server.cmd' : './node_modules/.bin/webpack-dev-server',
       args: [
         '--config=ui_framework/doc_site/webpack.config.js',
         '--hot ',

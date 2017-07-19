@@ -8,13 +8,13 @@ function replyWithError(e, reply) {
 }
 
 
-module.exports = (server) => {
+export default function (server) {
   server.route({
     method: ['POST', 'GET'],
     path: '/api/timelion/run',
     handler: async (request, reply) => {
       try {
-        const uiSettings = await server.uiSettings().getAll(request);
+        const uiSettings = await request.getUiSettingsService().getAll();
 
         const tlConfig = require('../handlers/lib/tl_config.js')({
           server,
@@ -49,4 +49,4 @@ module.exports = (server) => {
     }
   });
 
-};
+}

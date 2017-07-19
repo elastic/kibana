@@ -1,0 +1,23 @@
+[[timelion-getting-started]]
+== Getting Started
+
+Ready to experience all that is Timelion? This getting started tutorial shows
+you how to:
+
+* <<timelion-create, Create a time series chart with multiple expressions>>
+* <<timelion-customize, Customize the visualization type and formatting options>>
+* <<timelion-math, Use mathematical functions to manipulate your data>>
+* <<timelion-conditional, Track trends and use conditional logic to format outliers>>
+* <<timelion-save, Add Timelion visualizations to a dashboard>>
+* <<timelion-inline-help, Access inline help and documentation>>
+
+
+include::getting-started/timelion-create.asciidoc[]
+
+include::getting-started/timelion-customize.asciidoc[]
+
+include::getting-started/timelion-math.asciidoc[]
+
+include::getting-started/timelion-conditional.asciidoc[]
+
+include::getting-started/timelion-save.asciidoc[]

@@ -1,11 +1,15 @@
 import _ from 'lodash';
 import moment from 'moment';
-import parseInterval from 'ui/utils/parse_interval';
-import TimeBucketsCalcAutoIntervalProvider from 'ui/time_buckets/calc_auto_interval';
-import TimeBucketsCalcEsIntervalProvider from 'ui/time_buckets/calc_es_interval';
-export default function IntervalHelperProvider(Private, timefilter, config) {
+import { parseInterval } from 'ui/utils/parse_interval';
+import { TimeBucketsCalcAutoIntervalProvider } from 'ui/time_buckets/calc_auto_interval';
+import { TimeBucketsCalcEsIntervalProvider } from 'ui/time_buckets/calc_es_interval';
+import { RegistryFieldFormatsProvider } from 'ui/registry/field_formats';
+
+export function TimeBucketsProvider(Private, timefilter, config) {
   const calcAuto = Private(TimeBucketsCalcAutoIntervalProvider);
   const calcEsInterval = Private(TimeBucketsCalcEsIntervalProvider);
+  const fieldFormats = Private(RegistryFieldFormatsProvider);
+  const getConfig = (...args) => config.get(...args);
 
   function isValidMoment(m) {
     return m && ('isValid' in m) && m.isValid();
@@ -273,6 +277,13 @@ export default function IntervalHelperProvider(Private, timefilter, config) {
     return config.get('dateFormat');
   };
 
+  TimeBuckets.prototype.getScaledDateFormatter = function () {
+    const DateFieldFormat = fieldFormats.getType('date');
+    return new DateFieldFormat({
+      pattern: this.getScaledDateFormat()
+    }, getConfig);
+  };
+
 
   TimeBuckets.__cached__ = function (self) {
     let cache = {};
@@ -366,3 +377,4 @@ export default function IntervalHelperProvider(Private, timefilter, config) {
 
   return TimeBuckets;
 }
+

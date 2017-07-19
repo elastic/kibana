@@ -6,7 +6,7 @@ export default function stdDeviationSibling(resp, panel, series) {
   return next => results => {
     const metric = getLastMetric(series);
     if (metric.mode === 'band' && metric.type === 'std_deviation_bucket') {
-      getSplits(resp, series).forEach((split) => {
+      getSplits(resp, panel, series).forEach((split) => {
 
         const mapBucketByMode = (mode) => {
           return bucket => {

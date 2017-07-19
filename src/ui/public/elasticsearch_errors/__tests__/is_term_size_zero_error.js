@@ -1,5 +1,5 @@
 import expect from 'expect.js';
-import isTermSizeZeroError from '../is_term_size_zero_error';
+import { isTermSizeZeroError } from '../is_term_size_zero_error';
 
 describe('isTermSizeZeroError', () => {
   const identifyingString = 'size must be positive, got 0';

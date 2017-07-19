@@ -6,8 +6,8 @@
   line-height: 1.1;
   font-size: @font-size-base;
   font-weight: normal;
-  background: @tooltip-bg;
-  color: @tooltip-color;
+  background: @tooltip-bg !important;
+  color: @tooltip-color !important;
   border-radius: 4px;
   position: fixed;
   z-index: 120;
@@ -26,6 +26,8 @@
 
   .tooltip-label {
     font-family: @font-family-sans-serif;
+    color: tint(@globalColorBlue, 40%);
+    font-weight: normal;
 
     th {
       font-weight: @tooltip-bold;
@@ -52,6 +54,7 @@
   padding: @tooltip-space-tight @tooltip-space;
   display: flex;
   align-items: center;
+  line-height: 1.5;
 
   &:last-child {
     margin-bottom: 0;

@@ -1,3 +1,4 @@
+/* eslint import/no-unresolved: 0 */
 (function (window) {
   "use strict";
 

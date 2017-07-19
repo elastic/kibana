@@ -1,6 +1,6 @@
 import _ from 'lodash';
 
-export default function ColumnHandler() {
+export function VislibTypesPointSeries() {
 
   const createSerieFromParams = (cfg, seri) => {
     const matchingSeriParams = cfg.seriesParams ? cfg.seriesParams.find(seriConfig => {
@@ -34,7 +34,8 @@ export default function ColumnHandler() {
       valueAxis: matchingSeriParams.valueAxis,
       drawLinesBetweenPoints: matchingSeriParams.drawLinesBetweenPoints,
       showCircles: matchingSeriParams.showCircles,
-      radiusRatio: matchingSeriParams.radiusRatio,
+      radiusRatio: cfg.radiusRatio,
+      lineWidth: matchingSeriParams.lineWidth,
       data: seri
     };
   };
@@ -129,6 +130,13 @@ export default function ColumnHandler() {
             }
           }
         ];
+      } else {
+        const categoryAxis1 = config.categoryAxes.find((categoryAxis) => {
+          return categoryAxis.id === 'CategoryAxis-1';
+        });
+        if (categoryAxis1) {
+          categoryAxis1.title.text = data.get('xAxisLabel');
+        }
       }
 
       if (!config.charts) {
@@ -179,7 +187,7 @@ export default function ColumnHandler() {
       const defaults = create()(cfg, data);
       const seriesLimit = 25;
       const hasCharts = defaults.charts.length;
-      const tooManySeries = defaults.charts[0].series.length > seriesLimit;
+      const tooManySeries = defaults.charts.length && defaults.charts[0].series.length > seriesLimit;
       if (hasCharts && tooManySeries) {
         defaults.error = 'There are too many series defined.';
       }
@@ -188,7 +196,7 @@ export default function ColumnHandler() {
         rangePadding: 0,
         rangeOuterPadding: 0
       };
-      defaults.valueAxes.push({
+      defaults.categoryAxes.push({
         id: 'CategoryAxis-2',
         type: 'category',
         position: 'left',
@@ -198,11 +206,14 @@ export default function ColumnHandler() {
         },
         labels: {
           filter: false,
-          axisFormatter: data.data.yAxisFormatter
+          axisFormatter:  function (val) { return val; }
         },
         style: {
           rangePadding: 0,
           rangeOuterPadding: 0
+        },
+        title: {
+          text: data.get('zAxisLabel') || ''
         }
       });
       return defaults;

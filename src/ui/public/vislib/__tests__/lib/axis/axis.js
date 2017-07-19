@@ -4,8 +4,8 @@ import ngMock from 'ng_mock';
 import expect from 'expect.js';
 import $ from 'jquery';
 import 'ui/persisted_state';
-import VislibLibAxisProvider from 'ui/vislib/lib/axis';
-import VislibVisConfig from 'ui/vislib/lib/vis_config';
+import { VislibLibAxisProvider } from 'ui/vislib/lib/axis';
+import { VislibVisConfigProvider } from 'ui/vislib/lib/vis_config';
 
 describe('Vislib Axis Class Test Suite', function () {
   let Axis;
@@ -87,7 +87,7 @@ describe('Vislib Axis Class Test Suite', function () {
   beforeEach(ngMock.inject(function (Private, $injector) {
     persistedState = new ($injector.get('PersistedState'))();
     Axis = Private(VislibLibAxisProvider);
-    VisConfig = Private(VislibVisConfig);
+    VisConfig = Private(VislibVisConfigProvider);
 
     el = d3.select('body').append('div')
       .attr('class', 'x-axis-wrapper')

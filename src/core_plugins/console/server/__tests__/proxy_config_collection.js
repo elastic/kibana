@@ -67,67 +67,67 @@ describe('ProxyConfigCollection', function () {
     return collection.configForUri(uri).timeout;
   }
 
-  context('http://localhost:5601', function () {
+  describe('http://localhost:5601', function () {
     it('defaults to the first matching timeout', function () {
       expect(getTimeout('http://localhost:5601')).to.be(3);
     });
   });
 
-  context('https://localhost:5601/.kibana', function () {
+  describe('https://localhost:5601/.kibana', function () {
     it('defaults to the first matching timeout', function () {
       expect(getTimeout('https://localhost:5601/.kibana')).to.be(1);
     });
   });
 
-  context('http://localhost:5602', function () {
+  describe('http://localhost:5602', function () {
     it('defaults to the first matching timeout', function () {
       expect(getTimeout('http://localhost:5602')).to.be(4);
     });
   });
 
-  context('https://localhost:5602', function () {
+  describe('https://localhost:5602', function () {
     it('defaults to the first matching timeout', function () {
       expect(getTimeout('https://localhost:5602')).to.be(4);
     });
   });
 
-  context('http://localhost:5603', function () {
+  describe('http://localhost:5603', function () {
     it('defaults to the first matching timeout', function () {
       expect(getTimeout('http://localhost:5603')).to.be(4);
     });
   });
 
-  context('https://localhost:5603', function () {
+  describe('https://localhost:5603', function () {
     it('defaults to the first matching timeout', function () {
       expect(getTimeout('https://localhost:5603')).to.be(4);
     });
   });
 
-  context('https://localhost:5601/index', function () {
+  describe('https://localhost:5601/index', function () {
     it('defaults to the first matching timeout', function () {
       expect(getTimeout('https://localhost:5601/index')).to.be(2);
     });
   });
 
-  context('http://localhost:5601/index', function () {
+  describe('http://localhost:5601/index', function () {
     it('defaults to the first matching timeout', function () {
       expect(getTimeout('http://localhost:5601/index')).to.be(3);
     });
   });
 
-  context('https://localhost:5601/index/type', function () {
+  describe('https://localhost:5601/index/type', function () {
     it('defaults to the first matching timeout', function () {
       expect(getTimeout('https://localhost:5601/index/type')).to.be(2);
     });
   });
 
-  context('http://notlocalhost', function () {
+  describe('http://notlocalhost', function () {
     it('defaults to the first matching timeout', function () {
       expect(getTimeout('http://notlocalhost')).to.be(5);
     });
   });
 
-  context('collection with ssl config and root level verify:false', function () {
+  describe('collection with ssl config and root level verify:false', function () {
     function makeCollection() {
       return new ProxyConfigCollection([
         {
@@ -143,7 +143,7 @@ describe('ProxyConfigCollection', function () {
 
     it('verifies for config that produces ssl agent', function () {
       const conf = makeCollection().configForUri('https://es.internal.org/_search');
-      expect(conf).to.have.property('rejectUnauthorized', true);
+      expect(conf.agent.options).to.have.property('rejectUnauthorized', true);
       expect(conf.agent).to.be.an(HttpsAgent);
     });
 

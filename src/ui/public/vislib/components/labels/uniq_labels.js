@@ -1,5 +1,6 @@
 import _ from 'lodash';
-export default function UniqLabelUtilService() {
+
+export function VislibComponentsLabelsUniqLabelsProvider() {
 
   /*
    * Accepts an array of data objects and a formatter function.

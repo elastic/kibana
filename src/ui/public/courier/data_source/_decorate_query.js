@@ -1,6 +1,6 @@
 import _ from 'lodash';
 
-export default function DecorateQuery(config) {
+export function DecorateQueryProvider(config) {
   /**
    * Decorate queries with default parameters
    * @param {query} query object

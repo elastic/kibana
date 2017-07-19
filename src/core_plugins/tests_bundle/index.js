@@ -1,5 +1,4 @@
 import { union } from 'lodash';
-import defaultsProvider from '../../ui/settings/defaults';
 import findSourceFiles from './find_source_files';
 import { fromRoot } from '../../utils';
 
@@ -51,13 +50,17 @@ export default (kibana) => {
 
         if (config.get('tests_bundle.instrument')) {
           env.addPostLoader({
-            test: /\.jsx?$/,
+            test: /\.js$/,
             exclude: /[\/\\](__tests__|node_modules|bower_components|webpackShims)[\/\\]/,
             loader: 'istanbul-instrumenter'
           });
         }
 
-        env.defaultUiSettings = defaultsProvider();
+        env.defaultUiSettings = plugins.kbnServer.uiExports.consumers
+          // find the first uiExportsConsumer that has a getUiSettingDefaults method
+          // See src/ui/ui_settings/ui_exports_consumer.js
+          .find(consumer => typeof consumer.getUiSettingDefaults === 'function')
+          .getUiSettingDefaults();
 
         return new UiBundle({
           id: 'tests',
@@ -71,7 +74,7 @@ export default (kibana) => {
         ng_mock$: fromRoot('src/core_plugins/dev_mode/public/ng_mock'),
         'angular-mocks$': require.resolve('./webpackShims/angular-mocks'),
         fixtures: fromRoot('src/fixtures'),
-        test_utils: fromRoot('src/test_utils'),
+        test_utils: fromRoot('src/test_utils/public'),
       }
     }
   });

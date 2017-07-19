@@ -1,8 +1,8 @@
 import _ from 'lodash';
 import expect from 'expect.js';
 import ngMock from 'ng_mock';
-import TopHitProvider from 'ui/agg_types/metrics/top_hit';
-import VisProvider from 'ui/vis';
+import { AggTypesMetricsTopHitProvider } from 'ui/agg_types/metrics/top_hit';
+import { VisProvider } from 'ui/vis';
 import StubbedIndexPattern from 'fixtures/stubbed_logstash_index_pattern';
 
 describe('Top hit metric', function () {
@@ -15,7 +15,7 @@ describe('Top hit metric', function () {
     ngMock.inject(function (Private) {
       const Vis = Private(VisProvider);
       const indexPattern = Private(StubbedIndexPattern);
-      topHitMetric = Private(TopHitProvider);
+      topHitMetric = Private(AggTypesMetricsTopHitProvider);
 
       const params = {};
       if (field) {
@@ -71,15 +71,27 @@ describe('Top hit metric', function () {
     expect(aggDsl.top_hits.docvalue_fields).to.be(undefined);
   });
 
-  it('should request both for the source and doc_values fields', function () {
+  it('requests both source and docvalues_fields for non-text aggregatable fields', function () {
     init({ field: 'bytes' });
     expect(aggDsl.top_hits._source).to.be('bytes');
     expect(aggDsl.top_hits.docvalue_fields).to.eql([ 'bytes' ]);
   });
 
-  it('should only request for the source if the field does not have the doc_values property', function () {
-    init({ field: 'ssl' });
-    expect(aggDsl.top_hits._source).to.be('ssl');
+  it('requests just source for aggregatable text fields', function () {
+    init({ field: 'machine.os' });
+    expect(aggDsl.top_hits._source).to.be('machine.os');
+    expect(aggDsl.top_hits.docvalue_fields).to.be(undefined);
+  });
+
+  it('requests just source for not-aggregatable text fields', function () {
+    init({ field: 'non-sortable' });
+    expect(aggDsl.top_hits._source).to.be('non-sortable');
+    expect(aggDsl.top_hits.docvalue_fields).to.be(undefined);
+  });
+
+  it('requests just source for not-aggregatable, non-text fields', function () {
+    init({ field: 'hashed' });
+    expect(aggDsl.top_hits._source).to.be('hashed');
     expect(aggDsl.top_hits.docvalue_fields).to.be(undefined);
   });
 

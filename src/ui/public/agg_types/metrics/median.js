@@ -1,6 +1,7 @@
-import AggTypesMetricsMetricAggTypeProvider from 'ui/agg_types/metrics/metric_agg_type';
-import AggTypesMetricsPercentilesProvider from 'ui/agg_types/metrics/percentiles';
-export default function AggTypeMetricMedianProvider(Private) {
+import { AggTypesMetricsMetricAggTypeProvider } from 'ui/agg_types/metrics/metric_agg_type';
+import { AggTypesMetricsPercentilesProvider } from 'ui/agg_types/metrics/percentiles';
+
+export function AggTypesMetricsMedianProvider(Private) {
 
   const MetricAggType = Private(AggTypesMetricsMetricAggTypeProvider);
   const percentiles = Private(AggTypesMetricsPercentilesProvider);

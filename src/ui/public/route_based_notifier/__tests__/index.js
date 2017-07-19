@@ -1,8 +1,8 @@
 import { find } from 'lodash';
 import expect from 'expect.js';
 import ngMock from 'ng_mock';
-import Notifier from '../../notify/notifier';
-import routeBasedNotifierProvider from '../index';
+import { Notifier } from '../../notify/notifier';
+import { RouteBasedNotifierProvider } from '../index';
 
 describe('ui/route_based_notifier', function () {
   let $rootScope;
@@ -11,7 +11,7 @@ describe('ui/route_based_notifier', function () {
   beforeEach(ngMock.module('kibana'));
   beforeEach(ngMock.inject(($injector) => {
     const Private = $injector.get('Private');
-    routeBasedNotifier = Private(routeBasedNotifierProvider);
+    routeBasedNotifier = Private(RouteBasedNotifierProvider);
     $rootScope = $injector.get('$rootScope');
   }));
 

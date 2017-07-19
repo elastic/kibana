@@ -1,5 +1,3 @@
-import { endsWith } from 'lodash';
-
 import { resolve } from 'path';
 
 module.exports = function (grunt) {
@@ -11,17 +9,14 @@ module.exports = function (grunt) {
   return [
     'darwin-x64',
     'linux-x64',
-    'linux-x86',
-    'windows-x86'
+    'windows-x64'
   ].map(function (baseName) {
-    const win = baseName === 'windows-x86';
+    const win = baseName === 'windows-x64';
 
-    const nodeUrl = win ? `${baseUri}/win-x86/node.exe` : `${baseUri}/node-v${nodeVersion}-${baseName}.tar.gz`;
+    const nodeUrl = win ? `${baseUri}/win-x64/node.exe` : `${baseUri}/node-v${nodeVersion}-${baseName}.tar.gz`;
     const nodeDir = resolve(rootPath, `.node_binaries/${nodeVersion}/${baseName}`);
 
-    const name = endsWith(baseName, '-x64')
-      ? baseName.replace('-x64', '-x86_64')
-      : baseName;
+    const name = baseName.replace('-x64', '-x86_64');
 
     const nodeShaSums = `${baseUri}/SHASUMS256.txt`;
 
@@ -41,11 +36,11 @@ module.exports = function (grunt) {
     let debArch;
     let rpmArch;
     if (name.match('linux')) {
-      debArch = name.match('x86_64') ? 'amd64' : 'i386';
+      debArch = 'amd64';
       debName = `kibana-${version}-${debArch}.deb`;
       debPath = resolve(rootPath, `target/${debName}`);
 
-      rpmArch = name.match('x86_64') ? 'x86_64' : 'i686';
+      rpmArch = 'x86_64';
       rpmName = `kibana-${version}-${rpmArch}.rpm`;
       rpmPath = resolve(rootPath, `target/${rpmName}`);
     }

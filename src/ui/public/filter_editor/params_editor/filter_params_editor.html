@@ -1,0 +1,19 @@
+<ng-switch on="operator.type">
+  <filter-params-phrase-editor
+    ng-switch-when="phrase"
+    field="field"
+    params="params"
+  ></filter-params-phrase-editor>
+
+  <filter-params-phrases-editor
+    ng-switch-when="phrases"
+    field="field"
+    params="params"
+  ></filter-params-phrases-editor>
+
+  <filter-params-range-editor
+    ng-switch-when="range"
+    field="field"
+    params="params"
+  ></filter-params-range-editor>
+</ng-switch>

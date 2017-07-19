@@ -1,7 +1,7 @@
 import expect from 'expect.js';
 import ngMock from 'ng_mock';
 import _ from 'lodash';
-import VislibVisualizationsVisTypesProvider from 'ui/vislib/visualizations/vis_types';
+import { VislibVisualizationsVisTypesProvider } from 'ui/vislib/visualizations/vis_types';
 
 describe('Vislib Vis Types Test Suite', function () {
   let visTypes;

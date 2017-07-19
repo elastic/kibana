@@ -1,7 +1,7 @@
-import AggTypesMetricsMetricAggTypeProvider from 'ui/agg_types/metrics/metric_agg_type';
-import RegistryFieldFormatsProvider from 'ui/registry/field_formats';
+import { AggTypesMetricsMetricAggTypeProvider } from 'ui/agg_types/metrics/metric_agg_type';
+import { RegistryFieldFormatsProvider } from 'ui/registry/field_formats';
 
-export default function AggTypeMetricCountProvider(Private) {
+export function AggTypesMetricsCountProvider(Private) {
   const MetricAggType = Private(AggTypesMetricsMetricAggTypeProvider);
   const fieldFormats = Private(RegistryFieldFormatsProvider);
 
@@ -17,6 +17,9 @@ export default function AggTypeMetricCountProvider(Private) {
     },
     getValue: function (agg, bucket) {
       return bucket.doc_count;
+    },
+    isScalable: function () {
+      return true;
     }
   });
 }

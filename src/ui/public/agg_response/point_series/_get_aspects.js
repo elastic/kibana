@@ -1,7 +1,8 @@
 import _ from 'lodash';
-import AggResponsePointSeriesFakeXAspectProvider from 'ui/agg_response/point_series/_fake_x_aspect';
-export default function PointSeriesGetAspects(Private) {
-  const fakeXAspect = Private(AggResponsePointSeriesFakeXAspectProvider);
+import { PointSeriesFakeXAxisProvider } from 'ui/agg_response/point_series/_fake_x_aspect';
+
+export function PointSeriesGetAspectsProvider(Private) {
+  const fakeXAspect = Private(PointSeriesFakeXAxisProvider);
 
   const map = {
     segment: 'x',

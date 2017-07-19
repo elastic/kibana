@@ -14,7 +14,7 @@ export default (grunt) => {
     grunt.file.mkdir(targetDir);
 
     config.get('platforms')
-    .filter(({ name }) => /linux-x86(_64)?$/.test(name))
+    .filter(({ name }) => /linux-x86_64$/.test(name))
     .forEach(({ buildDir, debArch, rpmArch }) => {
       const baseOptions = [
         '--force',

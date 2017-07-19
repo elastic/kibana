@@ -10,9 +10,16 @@
 You can view interactive documentation by running `npm run uiFramework:start` and then visiting
 `http://localhost:8020/`.
 
+You can run `node scripts/jest --watch` to watch for changes and run the tests as you code.
+
+You can run `node scripts/jest --coverage` to generate a code coverage report to see how
+fully-tested the code is.
+
+See the documentation in [`scripts/jest.js`](../scripts/jest.js) for more options.
+
 ### React components
 
-Here are the components you can import from the Framnework:
+Here are the components you can import from the Framework:
 
 ```javascript
 import {
@@ -71,19 +78,13 @@ content.
 
 ### Test the component
 
-1. Create test files with the name pattern of `{component name}.test.js`.
-2. Create your tests.
-3. Run tests with `npm run uiFramework:test`.
+1. Start Jest in watch mode by running `node scripts/jest --watch`.
+2. Create test files with the name pattern of `{component name}.test.js`.
+3. Write your tests and see them fail or succeed.
 
-You can check how well the components have been covered
-by the tests by viewing the generated report at `ui_framework/jest/report/index.html`.
-
-#### React component development tips
-
-You can run `npm run uiFramework:dev` to watch your files and automatically run the tests when you
-make changes. Under this command, the tests will run faster than under `uiFramework:test` because
-they'll only test the files you've changed -- the code coverage report won't be re-genereated,
-however.
+To see how well the components have been covered by tests, you can run
+`node scripts/jest --coverage` and check the generated report in
+`target/jest-coverage/index.html`.
 
 ## Principles
 
@@ -91,7 +92,7 @@ however.
 
 If a component has subcomponents (e.g. ToolBar and ToolBarSearch), tightly-coupled components (e.g.
 Button and ButtonGroup), or you just want to group some related components together (e.g. TextInput,
-TextArea, and CheckBox), then they belong in the same logicaly grouping. In this case, you can create
+TextArea, and CheckBox), then they belong in the same logical grouping. In this case, you can create
 additional SCSS files for these components in the same component directory.
 
 ### Writing CSS

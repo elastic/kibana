@@ -1,13 +1,21 @@
-
 $guideLineHeight: 24px;
 $guideNavHeight: 60px;
 $guideSideNavWidth: 400px;
 $guideSideNavSmallWidth: 220px;
-$guideCodeViewerWidth: 700px;
-$guideCodeViewerSmallWidth: 580px;
+$guideCodeViewerWidth: 660px;
+$guideCodeViewerSmallWidth: 520px;
 $guideCodeViewerTransition: 0.2s ease;
 
-$normalBreakpoint: 1900px;
+// Colors
+$guideBaseBackgroundColor: #f7f7f7;
+$guidePanelBackgroundColor: #ffffff;
+$guideTextColor: #444;
+$guideLinkColor: #00a9e5;
+$guideLinkHoverColor: #00a9e5;
+
+// Breakpoints
+$guideMinWidth: 840px;
+$guideNormalBreakpoint: 1900px;
 
 @mixin whenNarrowerThan($browserWidth) {
   @media only screen and (max-width: #{$browserWidth}) {

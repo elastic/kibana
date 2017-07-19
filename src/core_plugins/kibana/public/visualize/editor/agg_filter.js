@@ -1,5 +1,5 @@
-import propFilter from 'ui/filters/_prop_filter';
-import uiModules from 'ui/modules';
+import { propFilter } from 'ui/filters/_prop_filter';
+import { uiModules } from 'ui/modules';
 
 uiModules
 .get('kibana')

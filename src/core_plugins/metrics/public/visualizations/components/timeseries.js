@@ -4,6 +4,7 @@ import getLastValue from '../lib/get_last_value';
 import TimeseriesChart from './timeseries_chart';
 import Legend from './legend';
 import eventBus from '../lib/events';
+import reactcss from 'reactcss';
 
 class Timeseries extends Component {
 
@@ -108,13 +109,16 @@ class Timeseries extends Component {
     if (this.props.reversed) {
       className += ' reversed';
     }
-    const style = {};
-    if (this.props.legendPosition === 'bottom') {
-      style.flexDirection = 'column';
-    }
+    const styles = reactcss({
+      bottomLegend: {
+        content: {
+          flexDirection: 'column'
+        }
+      }
+    }, { bottomLegend: this.props.legendPosition === 'bottom' });
     return (
       <div className={className}>
-        <div style={style} className="rhythm_chart__content">
+        <div style={styles.content} className="rhythm_chart__content">
           <div className="rhythm_chart__visualization">
             <TimeseriesChart
               crosshair={this.props.crosshair}
@@ -124,8 +128,10 @@ class Timeseries extends Component {
               series={this.props.series}
               annotations={this.props.annotations}
               show={ this.state.show }
+              showGrid={ this.props.showGrid }
               tickFormatter={this.props.tickFormatter}
               options={this.props.options}
+              xaxisLabel={this.props.xaxisLabel}
               yaxes={this.props.yaxes} />
           </div>
           <Legend
@@ -147,7 +153,8 @@ class Timeseries extends Component {
 }
 
 Timeseries.defaultProps = {
-  legned: true
+  legned: true,
+  showGrid: true
 };
 
 Timeseries.propTypes = {
@@ -158,7 +165,9 @@ Timeseries.propTypes = {
   annotations: PropTypes.array,
   reversed: PropTypes.bool,
   options: PropTypes.object,
-  tickFormatter: PropTypes.func
+  tickFormatter: PropTypes.func,
+  showGrid: PropTypes.bool,
+  xaxisLabel: PropTypes.string
 };
 
 export default Timeseries;

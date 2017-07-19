@@ -67,6 +67,11 @@ class Gauge extends Component {
           left: this.state.left || 0,
           transform: `matrix(${scale}, 0, 0, ${scale}, ${translateX}, ${translateY})`
         }
+      },
+      valueColor: {
+        value: {
+          color: this.props.valueColor
+        }
       }
     }, this.props);
 
@@ -80,10 +85,6 @@ class Gauge extends Component {
       color: metric && metric.color || '#8ac336',
       type
     };
-    const valueStyle = {};
-    if (this.props.valueColor) {
-      valueStyle.color = this.props.valueColor;
-    }
 
     let metrics;
     if (type === 'half') {
@@ -97,7 +98,7 @@ class Gauge extends Component {
             ref="title">{ title }</div>
           <div
             className="thorHalfGauge__value"
-            style={valueStyle}
+            style={styles.value}
             ref="label">{ formatter(value) }</div>
         </div>
       );
@@ -109,7 +110,7 @@ class Gauge extends Component {
           style={styles.inner}>
           <div
             className="thorCircleGauge__value"
-            style={valueStyle}
+            style={styles.value}
             ref="label">{ formatter(value) }</div>
           <div
             className="thorCircleGauge__label"

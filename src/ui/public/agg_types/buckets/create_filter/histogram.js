@@ -1,6 +1,6 @@
-import buildRangeFilter from 'ui/filter_manager/lib/range';
+import { buildRangeFilter } from 'ui/filter_manager/lib/range';
 
-export default function createHistogramFilterProvider() {
+export function AggTypesBucketsCreateFilterHistogramProvider() {
   return function (aggConfig, key) {
     const value = parseInt(key, 10);
 

@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="56px" height="45px" viewBox="0 0 56 45" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <!-- Generator: Sketch 42 (36781) - http://www.bohemiancoding.com/sketch -->
+    <title>icon-table</title>
+    <desc>Created with Sketch.</desc>
+    <defs></defs>
+    <g id="Visualize" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="Visualize-Create-New" transform="translate(-119.000000, -654.000000)" fill="#000000">
+            <g id="data" transform="translate(74.000000, 576.000000)">
+                <g id="table" transform="translate(2.000000, 44.000000)">
+                    <path d="M43,34 L99,34 L99,79 L43,79 L43,34 Z M47,42 L47,51 L61,51 L61,42 L47,42 Z M64,42 L64,51 L78,51 L78,42 L64,42 Z M81,42 L81,51 L95,51 L95,42 L81,42 Z M47,54 L47,63 L61,63 L61,54 L47,54 Z M64,54 L64,63 L78,63 L78,54 L64,54 Z M81,54 L81,63 L95,63 L95,54 L81,54 Z M47,66 L47,75 L61,75 L61,66 L47,66 Z M64,66 L64,75 L78,75 L78,66 L64,66 Z M81,66 L81,75 L95,75 L95,66 L81,66 Z" id="icon-table"></path>
+                </g>
+            </g>
+        </g>
+    </g>
+</svg>

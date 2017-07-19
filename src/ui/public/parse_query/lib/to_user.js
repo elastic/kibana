@@ -6,7 +6,7 @@ import angular from 'angular';
  * @param {text} model value
  * @returns {string}
  */
-export default function toUser(text) {
+export function toUser(text) {
   if (text == null) return '';
   if (_.isObject(text)) {
     if (text.query_string) return toUser(text.query_string.query);

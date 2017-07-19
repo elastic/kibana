@@ -7,7 +7,7 @@ import {
   getSource,
   getTitle,
 } from '../store';
-import { AppView } from './app_view.jsx';
+import { AppView } from './app_view';
 import {
   openCodeViewer,
   closeCodeViewer,

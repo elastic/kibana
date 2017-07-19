@@ -52,14 +52,14 @@
 
 import _ from 'lodash';
 
-import NormalizeSortRequestProvider from './_normalize_sort_request';
-import rootSearchSource from './_root_search_source';
-import AbstractDataSourceProvider from './_abstract';
-import SearchRequestProvider from '../fetch/request/search';
-import SegmentedRequestProvider from '../fetch/request/segmented';
-import SearchStrategyProvider from '../fetch/strategy/search';
+import { NormalizeSortRequestProvider } from './_normalize_sort_request';
+import { RootSearchSourceProvider } from './_root_search_source';
+import { AbstractDataSourceProvider } from './_abstract';
+import { SearchRequestProvider } from '../fetch/request/search';
+import { SegmentedRequestProvider } from '../fetch/request/segmented';
+import { SearchStrategyProvider } from '../fetch/strategy/search';
 
-export default function SearchSourceFactory(Promise, Private, config) {
+export function SearchSourceProvider(Promise, Private, config) {
   const SourceAbstract = Private(AbstractDataSourceProvider);
   const SearchRequest = Private(SearchRequestProvider);
   const SegmentedRequest = Private(SegmentedRequestProvider);
@@ -96,9 +96,11 @@ export default function SearchSourceFactory(Promise, Private, config) {
     'highlightAll',
     'aggs',
     'from',
+    'searchAfter',
     'size',
     'source',
-    'version'
+    'version',
+    'fields',
   ];
 
   SearchSource.prototype.index = function (indexPattern) {
@@ -152,7 +154,7 @@ export default function SearchSourceFactory(Promise, Private, config) {
     const self = this;
     if (self._parent === false) return;
     if (self._parent) return self._parent;
-    return onlyHardLinked ? undefined : Private(rootSearchSource).get();
+    return onlyHardLinked ? undefined : Private(RootSearchSourceProvider).get();
   };
 
   /**
@@ -255,6 +257,10 @@ export default function SearchSourceFactory(Promise, Private, config) {
           state[key] = val;
         }
         return;
+      case 'searchAfter':
+        key = 'search_after';
+        addToBody();
+        break;
       case 'source':
         key = '_source';
         addToBody();
@@ -262,6 +268,9 @@ export default function SearchSourceFactory(Promise, Private, config) {
       case 'sort':
         val = normalizeSortRequest(val, this.get('index'));
         addToBody();
+        break;
+      case 'fields':
+        state[key] = _.uniq([...(state[key] || []), ...val]);
         break;
       default:
         addToBody();
@@ -281,6 +290,20 @@ export default function SearchSourceFactory(Promise, Private, config) {
         state.body[key] = val;
       }
     }
+  };
+
+  SearchSource.prototype.clone = function () {
+    const clone = new SearchSource(this.toString());
+    // when serializing the internal state with .toString() we lose the internal classes used in the index
+    // pattern, so we have to set it again to workaround this behavior
+    clone.set('index', this.get('index'));
+    clone.inherits(this.getParent());
+    return clone;
+  };
+
+  SearchSource.prototype.getSearchRequestBody = async function () {
+    const searchRequest = await this._flatten();
+    return searchRequest.body;
   };
 
   return SearchSource;

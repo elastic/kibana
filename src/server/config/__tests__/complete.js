@@ -1,99 +1,200 @@
-import complete from '../complete';
+import completeMixin from '../complete';
 import expect from 'expect.js';
-import { noop } from 'lodash';
 import sinon from 'sinon';
 
-describe('server config complete', function () {
-  it(`should call server.log when there's an unused setting`, function () {
-    const kbnServer = {
-      settings: {
-        unused: true
-      }
-    };
+/* eslint-disable import/no-duplicates */
+import * as transformDeprecationsNS from '../transform_deprecations';
+import { transformDeprecations } from '../transform_deprecations';
+/* eslint-enable import/no-duplicates */
+
+describe('server/config completeMixin()', function () {
+  const sandbox = sinon.sandbox.create();
+  afterEach(() => sandbox.restore());
+
+  const setup = (options = {}) => {
+    const {
+      settings = {},
+      configValues = {}
+    } = options;
 
     const server = {
-      decorate: noop,
-      log: sinon.spy()
+      decorate: sinon.stub()
     };
 
     const config = {
-      get: sinon.stub().returns({
-        used: true
-      })
+      get: sinon.stub().returns(configValues)
     };
 
-    complete(kbnServer, server, config);
+    const kbnServer = {
+      settings,
+      server,
+      config
+    };
 
-    expect(server.log.calledOnce).to.be(true);
+    const callCompleteMixin = () => {
+      completeMixin(kbnServer, server, config);
+    };
+
+    return { config, callCompleteMixin, server };
+  };
+
+  describe('server decoration', () => {
+    it('adds a config() function to the server', () => {
+      const { config, callCompleteMixin, server } = setup({
+        settings: {},
+        configValues: {}
+      });
+
+      callCompleteMixin();
+      sinon.assert.calledOnce(server.decorate);
+      sinon.assert.calledWith(server.decorate, 'server', 'config', sinon.match.func);
+      expect(server.decorate.firstCall.args[2]()).to.be(config);
+    });
   });
 
-  it(`shouldn't call server.log when there isn't an unused setting`, function () {
-    const kbnServer = {
-      settings: {
-        used: true
-      }
-    };
+  describe('all settings used', () => {
+    it('should not throw', function () {
+      const { callCompleteMixin } = setup({
+        settings: {
+          used: true
+        },
+        configValues: {
+          used: true
+        },
+      });
 
-    const server = {
-      decorate: noop,
-      log: sinon.spy()
-    };
+      callCompleteMixin();
+    });
 
-    const config = {
-      get: sinon.stub().returns({
-        used: true
-      })
-    };
+    describe('more config values than settings', () => {
+      it('should not throw', function () {
+        const { callCompleteMixin } = setup({
+          settings: {
+            used: true
+          },
+          configValues: {
+            used: true,
+            foo: 'bar'
+          }
+        });
 
-    complete(kbnServer, server, config);
-
-    expect(server.log.called).to.be(false);
+        callCompleteMixin();
+      });
+    });
   });
 
-  it(`shouldn't call server.log when there are more config values than settings`, function () {
-    const kbnServer = {
-      settings: {
-        used: true
-      }
-    };
-
-    const server = {
-      decorate: noop,
-      log: sinon.spy()
-    };
-
-    const config = {
-      get: sinon.stub().returns({
-        used: true,
-        foo: 'bar'
-      })
-    };
-
-    complete(kbnServer, server, config);
-    expect(server.log.called).to.be(false);
-  });
-
-  it('should transform deprecated settings ', function () {
-    const kbnServer = {
-      settings: {
-        port: 8080
-      }
-    };
-
-    const server = {
-      decorate: noop,
-      log: sinon.spy()
-    };
-
-    const config = {
-      get: sinon.stub().returns({
-        server: {
-          port: 8080
+  describe('env setting specified', () => {
+    it('should not throw', () => {
+      const { callCompleteMixin } = setup({
+        settings: {
+          env: 'development'
+        },
+        configValues: {
+          env: {
+            name: 'development'
+          }
         }
-      })
-    };
+      });
 
-    complete(kbnServer, server, config);
-    expect(server.log.called).to.be(false);
+      callCompleteMixin();
+    });
+  });
+
+  describe('settings include non-default array settings', () => {
+    it('should not throw', () => {
+      const { callCompleteMixin } = setup({
+        settings: {
+          foo: [
+            'a',
+            'b'
+          ]
+        },
+        configValues: {
+          foo: []
+        }
+      });
+
+      callCompleteMixin();
+    });
+  });
+
+  describe('some settings unused', () => {
+    it('should throw an error', function () {
+      const { callCompleteMixin } = setup({
+        settings: {
+          unused: true
+        },
+        configValues: {
+          used: true
+        }
+      });
+
+      expect(callCompleteMixin).to.throwError('"unused" not applied');
+    });
+
+    describe('error thrown', () => {
+      it('has correct code, processExitCode, and message', () => {
+        const { callCompleteMixin } = setup({
+          settings: {
+            unused: true,
+            foo: 'bar',
+            namespace: {
+              with: {
+                sub: {
+                  keys: true
+                }
+              }
+            }
+          }
+        });
+
+        expect(callCompleteMixin).to.throwError((error) => {
+          expect(error).to.have.property('code', 'InvalidConfig');
+          expect(error).to.have.property('processExitCode', 64);
+          expect(error.message).to.contain('"unused", "foo", and "namespace.with.sub.keys"');
+        });
+      });
+    });
+  });
+
+  describe('deprecation support', () => {
+    it('should transform settings when determining what is unused', function () {
+      sandbox.spy(transformDeprecationsNS, 'transformDeprecations');
+
+      const settings = {
+        foo: 1
+      };
+
+      const { callCompleteMixin } = setup({
+        settings,
+        configValues: {
+          ...settings
+        }
+      });
+
+      callCompleteMixin();
+      sinon.assert.calledOnce(transformDeprecations);
+      sinon.assert.calledWithExactly(transformDeprecations, settings);
+    });
+
+    it('should use transformed settings when considering what is used', function () {
+      sandbox.stub(transformDeprecationsNS, 'transformDeprecations', (settings) => {
+        settings.bar = settings.foo;
+        delete settings.foo;
+        return settings;
+      });
+
+      const { callCompleteMixin } = setup({
+        settings: {
+          foo: 1
+        },
+        configValues: {
+          bar: 1
+        }
+      });
+
+      callCompleteMixin();
+      sinon.assert.calledOnce(transformDeprecations);
+    });
   });
 });

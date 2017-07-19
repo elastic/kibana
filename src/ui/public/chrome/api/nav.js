@@ -1,9 +1,15 @@
-import { parse, format } from 'url';
-import { startsWith, isString } from 'lodash';
+import { remove } from 'lodash';
+import { prependPath } from 'ui/url/prepend_path';
+import { relativeToAbsolute } from 'ui/url/relative_to_absolute';
+import { absoluteToParsedUrl } from 'ui/url/absolute_to_parsed_url';
 
-export default function (chrome, internals) {
+export function initChromeNavApi(chrome, internals) {
   chrome.getNavLinks = function () {
     return internals.nav;
+  };
+
+  chrome.navLinkExists = (id) => {
+    return !!internals.nav.find(link => link.id === id);
   };
 
   chrome.getNavLinkById = (id) => {
@@ -14,28 +20,21 @@ export default function (chrome, internals) {
     return navLink;
   };
 
+  chrome.showOnlyById = (id) => {
+    remove(internals.nav, app => app.id !== id);
+  };
+
   chrome.getBasePath = function () {
     return internals.basePath || '';
   };
 
+  /**
+   *
+   * @param url {string} a relative url. ex: /app/kibana#/management
+   * @return {string} the relative url with the basePath prepended to it. ex: rkz/app/kibana#/management
+   */
   chrome.addBasePath = function (url) {
-    const isUrl = url && isString(url);
-    if (!isUrl) return url;
-
-    const parsed = parse(url, true, true);
-    if (!parsed.host && parsed.pathname) {
-      if (parsed.pathname[0] === '/') {
-        parsed.pathname = chrome.getBasePath() + parsed.pathname;
-      }
-    }
-
-    return format({
-      protocol: parsed.protocol,
-      host: parsed.host,
-      pathname: parsed.pathname,
-      query: parsed.query,
-      hash: parsed.hash,
-    });
+    return prependPath(url, chrome.getBasePath());
   };
 
   chrome.removeBasePath = function (url) {
@@ -64,53 +63,42 @@ export default function (chrome, internals) {
     link.lastSubUrl = internals.appUrlStore.getItem(lastSubUrlKey(link)) || link.lastSubUrl || link.url;
   }
 
-  function getAppId(url) {
-    const pathname = parse(url).pathname;
-    const pathnameWithoutBasepath = pathname.slice(chrome.getBasePath().length);
-    const match = pathnameWithoutBasepath.match(/^\/app\/([^\/]+)(?:\/|\?|#|$)/);
-    if (match) return match[1];
-  }
-
-  function decodeKibanaUrl(url) {
-    const parsedUrl = parse(url, true);
-    const appId = getAppId(parsedUrl);
-    const hash = parsedUrl.hash || '';
-    const parsedHash = parse(hash.slice(1), true);
-    const globalState = parsedHash.query && parsedHash.query._g;
-    return { appId, globalState, parsedUrl, parsedHash };
-  }
-
   function injectNewGlobalState(link, fromAppId, newGlobalState) {
-    // parse the lastSubUrl of this link so we can manipulate its parts
-    const { appId: toAppId, parsedHash: toHash, parsedUrl: toParsed } = decodeKibanaUrl(link.lastSubUrl);
+    const kibanaParsedUrl = absoluteToParsedUrl(link.lastSubUrl, chrome.getBasePath());
 
     // don't copy global state if links are for different apps
-    if (fromAppId !== toAppId) return;
+    if (fromAppId !== kibanaParsedUrl.appId) return;
 
-    // add the new globalState to the hashUrl in the linkurl
-    const toHashQuery = toHash.query || {};
-    toHashQuery._g = newGlobalState;
+    kibanaParsedUrl.setGlobalState(newGlobalState);
 
-    // format the new subUrl and include the newHash
-    link.lastSubUrl = format({
-      protocol: toParsed.protocol,
-      port: toParsed.port,
-      hostname: toParsed.hostname,
-      pathname: toParsed.pathname,
-      query: toParsed.query,
-      hash: format({
-        pathname: toHash.pathname,
-        query: toHashQuery,
-        hash: toHash.hash,
-      }),
-    });
+    link.lastSubUrl = kibanaParsedUrl.getAbsoluteUrl();
   }
 
+  /**
+   * Manually sets the last url for the given app. The last url for a given app is updated automatically during
+   * normal page navigation, so this should only need to be called to insert a last url that was not actually
+   * navigated to. For instance, when saving an object and redirecting to another page, the last url of the app
+   * should be the saved instance, but because of the redirect to a different page (e.g. `Save and Add to Dashboard`
+   * on visualize tab), it won't be tracked automatically and will need to be inserted manually. See
+   * https://github.com/elastic/kibana/pull/11932 for more background on why this was added.
+   * @param linkId {String} - an id that represents the navigation link.
+   * @param kibanaParsedUrl {KibanaParsedUrl} the url to track
+   */
+  chrome.trackSubUrlForApp = (linkId, kibanaParsedUrl) => {
+    for (const link of internals.nav) {
+      if (link.id === linkId) {
+        const absoluteUrl = kibanaParsedUrl.getAbsoluteUrl();
+        setLastUrl(link, absoluteUrl);
+        return;
+      }
+    }
+  };
+
   internals.trackPossibleSubUrl = function (url) {
-    const { appId, globalState: newGlobalState } = decodeKibanaUrl(url);
+    const kibanaParsedUrl = absoluteToParsedUrl(url, chrome.getBasePath());
 
     for (const link of internals.nav) {
-      link.active = startsWith(url, link.url);
+      link.active = url.startsWith(link.subUrlBase);
       if (link.active) {
         setLastUrl(link, url);
         continue;
@@ -118,17 +106,16 @@ export default function (chrome, internals) {
 
       refreshLastUrl(link);
 
+      const newGlobalState = kibanaParsedUrl.getGlobalState();
       if (newGlobalState) {
-        injectNewGlobalState(link, appId, newGlobalState);
+        injectNewGlobalState(link, kibanaParsedUrl.appId, newGlobalState);
       }
     }
   };
 
   internals.nav.forEach(link => {
-    // convert all link urls to absolute urls
-    const a = document.createElement('a');
-    a.setAttribute('href', link.url);
-    link.url = a.href;
+    link.url = relativeToAbsolute(link.url);
+    link.subUrlBase = relativeToAbsolute(link.subUrlBase);
   });
 
   // simulate a possible change in url to initialize the

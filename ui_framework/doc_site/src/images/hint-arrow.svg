@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="33px" height="49px" viewBox="0 0 33 49" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <!-- Generator: Sketch 43.2 (39069) - http://www.bohemiancoding.com/sketch -->
+    <title>arrow</title>
+    <desc>Created with Sketch.</desc>
+    <defs></defs>
+    <g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="arrow" transform="translate(1.000000, 1.000000)">
+            <polygon id="Path-2" fill="#FFFFFF" points="11.5991211 0.698242188 28.7232122 12.8994141 23.8833008 14.7114258 30.5878906 40.6455078 25.2529297 45.0541992 13.1123047 46.5180664 7.92724609 22.1758009 0.65625 21.4760742 6.46533203 3.15625"></polygon>
+            <polygon id="Path-3" stroke="#00C0B4" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" points="12.2182617 0.248046875 29.2192383 12.9946289 24.0693359 14.1850586 30.3686523 40.2514648 17.4643555 42.2636719 11.4897461 17.4106445 5.90136719 18.2470703"></polygon>
+            <polyline id="Path-4" stroke="#00C0B4" stroke-width="2" stroke-linejoin="round" points="12.0644531 0.201171875 7.65820313 2.56591797 0.029296875 23.2556152 8.34814453 21.8032227 12.9428711 46.269043 24.7758789 44.972168 30.7910156 40.1357422"></polyline>
+            <path d="M25.5,41.5 L20.5,45.5" id="Line" stroke="#00C0B4" stroke-linecap="square"></path>
+            <path d="M6.5,5.5 L9.5,4.5" id="Line" stroke="#00C0B4" stroke-linecap="square"></path>
+            <path d="M4.5,10.5 L8.5,8.5" id="Line" stroke="#00C0B4" stroke-linecap="square"></path>
+            <path d="M7.5,12.5 L2.5,15.5" id="Line" stroke="#00C0B4" stroke-linecap="square"></path>
+            <path d="M5.5,17.5 L1.5,20.5" id="Line" stroke="#00C0B4" stroke-linecap="square"></path>
+            <path d="M3.5,22.5 L11.5,17.5" id="Line" stroke="#00C0B4" stroke-linecap="square"></path>
+            <path d="M9.5,24.5 L12.5,22.5" id="Line" stroke="#00C0B4" stroke-linecap="square"></path>
+            <path d="M9.5,30.5 L13.5,27.5" id="Line" stroke="#00C0B4" stroke-linecap="square"></path>
+            <path d="M11.5,35.5 L15.5,32.5" id="Line" stroke="#00C0B4" stroke-linecap="square"></path>
+            <path d="M11.5,41.5 L15.5,38.5" id="Line" stroke="#00C0B4" stroke-linecap="square"></path>
+            <path d="M15.5,45.5 L18.5,42.5" id="Line" stroke="#00C0B4" stroke-linecap="square"></path>
+        </g>
+    </g>
+</svg>

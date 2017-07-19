@@ -1,11 +1,11 @@
 import angular from 'angular';
 import _ from 'lodash';
-import sinon from 'auto-release-sinon';
+import sinon from 'sinon';
 import expect from 'expect.js';
 import ngMock from 'ng_mock';
 import 'ui/render_directive';
 import 'plugins/kbn_doc_views/views/table';
-import docViewsRegistry from 'ui/registry/doc_views';
+import { DocViewsRegistryProvider } from 'ui/registry/doc_views';
 import StubbedLogstashIndexPattern from 'fixtures/stubbed_logstash_index_pattern';
 const hit = {
   '_index': 'logstash-2014.09.09',
@@ -55,7 +55,7 @@ describe('docViews', function () {
     ngMock.inject(function (Private) {
       indexPattern = Private(StubbedLogstashIndexPattern);
       flattened = indexPattern.flattenHit(hit);
-      docViews = Private(docViewsRegistry);
+      docViews = Private(DocViewsRegistryProvider);
     });
     initView = function initView(view) {
       $elem.append(view.directive.template);

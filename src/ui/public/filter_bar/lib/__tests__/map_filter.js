@@ -1,6 +1,6 @@
 import expect from 'expect.js';
 import ngMock from 'ng_mock';
-import FilterBarLibMapFilterProvider from 'ui/filter_bar/lib/map_filter';
+import { FilterBarLibMapFilterProvider } from 'ui/filter_bar/lib/map_filter';
 
 describe('Filter Bar Directive', function () {
   let mapFilter;
@@ -38,8 +38,8 @@ describe('Filter Bar Directive', function () {
       const before = { meta: { index: 'logstash-*' }, exists: { field: '@timestamp' } };
       mapFilter(before).then(function (after) {
         expect(after).to.have.property('meta');
-        expect(after.meta).to.have.property('key', 'exists');
-        expect(after.meta).to.have.property('value', '@timestamp');
+        expect(after.meta).to.have.property('key', '@timestamp');
+        expect(after.meta).to.have.property('value', 'exists');
         expect(after.meta).to.have.property('disabled', false);
         expect(after.meta).to.have.property('negate', false);
         done();
@@ -51,8 +51,8 @@ describe('Filter Bar Directive', function () {
       const before = { meta: { index: 'logstash-*' }, missing: { field: '@timestamp' } };
       mapFilter(before).then(function (after) {
         expect(after).to.have.property('meta');
-        expect(after.meta).to.have.property('key', 'missing');
-        expect(after.meta).to.have.property('value', '@timestamp');
+        expect(after.meta).to.have.property('key', '@timestamp');
+        expect(after.meta).to.have.property('value', 'missing');
         expect(after.meta).to.have.property('disabled', false);
         expect(after.meta).to.have.property('negate', false);
         done();

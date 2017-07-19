@@ -1,6 +1,6 @@
 import _ from 'lodash';
 
-module.exports = function preProcessChainFn(tlConfig) {
+export default function preProcessChainFn(tlConfig) {
   return function preProcessChain(chain, queries) {
     queries = queries || {};
     function validateAndStore(item) {
@@ -45,4 +45,4 @@ module.exports = function preProcessChainFn(tlConfig) {
 
     return queries;
   };
-};
+}

@@ -4,15 +4,16 @@
   right: 0;
   bottom: 0;
   width: $guideCodeViewerWidth;
-  padding: 40px 20px;
+  padding: 6px 0 40px;
   background-color: white;
   transform: translateX($guideCodeViewerWidth);
   transition: transform $guideCodeViewerTransition;
   overflow: auto;
+  border-left: 1px solid #d6d6d6;
 
   @include scrollbar;
 
-  @include whenNarrowerThan($normalBreakpoint) {
+  @include whenNarrowerThan($guideNormalBreakpoint) {
     width: $guideCodeViewerSmallWidth;
   }
 
@@ -22,31 +23,30 @@
 }
 
   .guideCodeViewer__header {
-    padding-bottom: 10px;
+    padding: 0 20px 6px;
     line-height: $guideLineHeight;
     border-bottom: 1px solid #d6d6d6;
-    font-size: 18px;
+    font-size: 14px;
     font-weight: 700;
     margin-bottom: 10px;
   }
 
   .guideCodeViewer__closeButton {
     position: absolute;
-    top: 5px;
-    right: 5px;
+    top: 0;
+    right: 10px;
     cursor: pointer;
     padding: 10px;
     border-radius: 3px;
-    color: #6b7490;
+    color: $guideTextColor;
 
     &:hover {
-      color: #2b52cc;
+      color: $guideLinkHoverColor;
     }
   }
 
-
   .guideCodeViewer__title {
-    padding-bottom: 6px;
+    padding: 0 20px 6px;
     border-bottom: 1px solid #d6d6d6;
     line-height: $guideLineHeight;
     font-size: 14px;

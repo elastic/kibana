@@ -12,12 +12,12 @@ var CStyleFoldMode = ace.require("ace/mode/folding/cstyle").FoldMode;
 ace.require("ace/worker/worker_client");
 var AceTokenizer = ace.require("ace/tokenizer").Tokenizer;
 
-var Mode = function () {
+export function Mode() {
   this.$tokenizer = new AceTokenizer(new HighlightRules().getRules());
   this.$outdent = new MatchingBraceOutdent();
   this.$behaviour = new CstyleBehaviour();
   this.foldingRules = new CStyleFoldMode();
-};
+}
 oop.inherits(Mode, JSONMode);
 
 (function () {
@@ -27,5 +27,3 @@ oop.inherits(Mode, JSONMode);
 
   this.$id = "sense/mode/input";
 }).call(Mode.prototype);
-
-module.exports.Mode = Mode;

@@ -1,10 +1,9 @@
 // autoloading
 
 // preloading (for faster webpack builds)
-import moment from 'moment-timezone';
 import chrome from 'ui/chrome';
 import routes from 'ui/routes';
-import modules from 'ui/modules';
+import { uiModules } from 'ui/modules';
 
 import 'ui/autoload/all';
 import 'plugins/kibana/discover/index';
@@ -18,8 +17,9 @@ import 'ui/vislib';
 import 'ui/agg_response';
 import 'ui/agg_types';
 import 'ui/timepicker';
-import Notifier from 'ui/notify/notifier';
+import { Notifier } from 'ui/notify/notifier';
 import 'leaflet';
+import { KibanaRootController } from './kibana_root_controller';
 
 routes.enable();
 
@@ -28,24 +28,6 @@ routes
   redirectTo: `/${chrome.getInjected('kbnDefaultAppId', 'discover')}`
 });
 
-chrome
-.setRootController('kibana', function ($scope, courier, config) {
-  // wait for the application to finish loading
-  $scope.$on('application.load', function () {
-    courier.start();
-  });
+chrome.setRootController('kibana', KibanaRootController);
 
-  config.watch('dateFormat:tz', setDefaultTimezone, $scope);
-  config.watch('dateFormat:dow', setStartDayOfWeek, $scope);
-
-  function setDefaultTimezone(tz) {
-    moment.tz.setDefault(tz);
-  }
-
-  function setStartDayOfWeek(day) {
-    const dow = moment.weekdays().indexOf(day);
-    moment.updateLocale(moment.locale(), { week: { dow } });
-  }
-});
-
-modules.get('kibana').run(Notifier.pullMessageFromUrl);
+uiModules.get('kibana').run(Notifier.pullMessageFromUrl);

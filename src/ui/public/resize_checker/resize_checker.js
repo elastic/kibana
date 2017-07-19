@@ -2,7 +2,7 @@ import $ from 'jquery';
 import ResizeObserver from 'resize-observer-polyfill';
 import { isEqual } from 'lodash';
 
-import EventsProvider from 'ui/events';
+import { EventsProvider } from 'ui/events';
 
 export function ResizeCheckerProvider(Private) {
   const EventEmitter = Private(EventsProvider);

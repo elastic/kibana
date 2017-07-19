@@ -38,9 +38,7 @@ Kibana uses Webpack to bundle Kibana's dependencies.
 
 Here is how import/require statements are resolved to a file:
 
-NOTE: if you're familiar with the node.js algorithm, the changes are in *2.ii* and *3.i.f* to *3.i.g*
-
-. Pick an algorithm
+. Check the beginning of the module path  
   * if the path starts with a '.'
     ** append it the directory of the current file
     ** proceed to *3*
@@ -64,17 +62,11 @@ NOTE: if you're familiar with the node.js algorithm, the changes are in *2.ii* a
   * the first of the following paths that resolves to a **file** is our match
     ** path + '.js'
     ** path + '.json'
-    ** path + '.jsx'
-    ** path + '.less'
     ** path
     ** path/${basename(path)} + '.js'
     ** path/${basename(path)} + '.json'
-    ** path/${basename(path)} + '.jsx'
-    ** path/${basename(path)} + '.less'
     ** path/${basename(path)}
     ** path/index + '.js'
     ** path/index + '.json'
-    ** path/index + '.jsx'
-    ** path/index + '.less'
     ** path/index
   * if none of the above paths matches then an error is thrown

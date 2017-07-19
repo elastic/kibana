@@ -1,6 +1,7 @@
-import registry from 'ui/registry/_registry';
+import { uiRegistry } from 'ui/registry/_registry';
 import expect from 'expect.js';
 import ngMock from 'ng_mock';
+
 describe('Registry', function () {
   let Private;
 
@@ -10,13 +11,13 @@ describe('Registry', function () {
   }));
 
   it('is technically a function', function () {
-    const reg = registry();
+    const reg = uiRegistry();
     expect(reg).to.be.a('function');
   });
 
   describe('#register', function () {
     it('accepts a Private module', function () {
-      const reg = registry();
+      const reg = uiRegistry();
       const mod = function SomePrivateModule() {};
 
       reg.register(mod);
@@ -26,7 +27,7 @@ describe('Registry', function () {
 
   describe('as a module', function () {
     it('exposes the list of registered modules', function () {
-      const reg = registry();
+      const reg = uiRegistry();
       const mod = function SomePrivateModule(Private) {
         this.PrivateModuleLoader = Private;
       };
@@ -42,7 +43,7 @@ describe('Registry', function () {
     it('executes with the module list as "this", and can override it', function () {
       let self;
 
-      const reg = registry({
+      const reg = uiRegistry({
         constructor: function () {
           return { mods: (self = this) };
         }
@@ -56,7 +57,7 @@ describe('Registry', function () {
 
   describe('spec.name', function () {
     it('sets the displayName of the registry and the name param on the final instance', function () {
-      const reg = registry({
+      const reg = uiRegistry({
         name: 'visTypes'
       });
 
@@ -69,7 +70,7 @@ describe('Registry', function () {
     it('executes before the modules are returned', function () {
       let i = 0;
 
-      const reg = registry({
+      const reg = uiRegistry({
         constructor: function () {
           i = i + 1;
         }
@@ -82,7 +83,7 @@ describe('Registry', function () {
     it('executes with the module list as "this", and can override it', function () {
       let self;
 
-      const reg = registry({
+      const reg = uiRegistry({
         constructor: function () {
           return { mods: (self = this) };
         }
@@ -96,7 +97,7 @@ describe('Registry', function () {
 
   describe('spec[any]', function () {
     it('mixes the extra properties into the module list', function () {
-      const reg = registry({
+      const reg = uiRegistry({
         someMethod: function () {
           return this;
         }

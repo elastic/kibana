@@ -1,0 +1,24 @@
+* {
+  box-sizing: border-box;
+
+  &:before,
+  &:after {
+    box-sizing: border-box;
+  }
+}
+
+// Removes outline, but still provides a two color box shadow that works anywhere.
+:focus {
+  @include focus;
+}
+
+body {
+  font-family: $globalFontFamily;
+}
+
+/**
+ * 1. Required for IE11.
+ */
+main {
+  display: block; /* 1 */
+}

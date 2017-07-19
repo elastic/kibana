@@ -1,4 +1,4 @@
-import safeMakeLabel from './safe_make_label';
+import { safeMakeLabel } from './safe_make_label';
 
 const siblingPipelineAggController = function (type) {
   return function ($scope) {
