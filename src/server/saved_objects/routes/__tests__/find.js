@@ -99,7 +99,7 @@ describe('GET /api/saved_objects/{type?}', () => {
     expect(savedObjectsClient.find.calledOnce).to.be(true);
 
     const options = savedObjectsClient.find.getCall(0).args[0];
-    expect(options).to.eql({ perPage: 20, page: 1, searchFields: 'title' });
+    expect(options).to.eql({ perPage: 20, page: 1, searchFields: ['title'] });
   });
 
   it('accepts the query parameter fields as a string', async () => {
@@ -113,7 +113,7 @@ describe('GET /api/saved_objects/{type?}', () => {
     expect(savedObjectsClient.find.calledOnce).to.be(true);
 
     const options = savedObjectsClient.find.getCall(0).args[0];
-    expect(options).to.eql({ perPage: 20, page: 1, fields: 'title' });
+    expect(options).to.eql({ perPage: 20, page: 1, fields: ['title'] });
   });
 
   it('accepts the query parameter fields as an array', async () => {

@@ -11,7 +11,6 @@ const URL_LIMIT_WARN_WITHIN = 1000;
 
 export function initAngularApi(chrome, internals) {
   chrome.getFirstPathSegment = _.noop;
-  chrome.getBreadcrumbs = _.noop;
 
   chrome.setupAngular = function () {
     const kibana = uiModules.get('kibana');
@@ -47,19 +46,6 @@ export function initAngularApi(chrome, internals) {
     .run(($location, $rootScope, Private, config) => {
       chrome.getFirstPathSegment = () => {
         return $location.path().split('/')[1];
-      };
-
-      chrome.getBreadcrumbs = () => {
-        const path = $location.path();
-        let length = path.length - 1;
-
-        // trim trailing slash
-        if (path.charAt(length) === '/') {
-          length--;
-        }
-
-        return path.substr(1, length)
-          .split('/');
       };
 
       const notify = new Notifier();

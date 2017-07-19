@@ -3,10 +3,9 @@ import minimatch from 'minimatch';
 
 import UiAppCollection from './ui_app_collection';
 import UiNavLinkCollection from './ui_nav_link_collection';
-import { MappingsCollection } from './ui_mappings';
 
 export default class UiExports {
-  constructor({ urlBasePath }) {
+  constructor({ urlBasePath, kibanaIndexMappings }) {
     this.navLinks = new UiNavLinkCollection(this);
     this.apps = new UiAppCollection(this);
     this.aliases = {
@@ -29,7 +28,7 @@ export default class UiExports {
     this.bundleProviders = [];
     this.defaultInjectedVars = {};
     this.injectedVarsReplacers = [];
-    this.mappings = new MappingsCollection();
+    this.kibanaIndexMappings = kibanaIndexMappings;
   }
 
   consumePlugin(plugin) {
@@ -146,7 +145,7 @@ export default class UiExports {
 
       case 'mappings':
         return (plugin, mappings) => {
-          this.mappings.register(mappings, { plugin: plugin.id });
+          this.kibanaIndexMappings.addRootProperties(mappings, { plugin: plugin.id });
         };
 
       case 'replaceInjectedVars':

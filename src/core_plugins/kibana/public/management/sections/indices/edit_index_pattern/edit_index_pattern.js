@@ -46,7 +46,7 @@ uiModules.get('apps/management')
 
   $scope.kbnUrl = Private(KbnUrlProvider);
   $scope.indexPattern = $route.current.locals.indexPattern;
-  docTitle.change($scope.indexPattern.id);
+  docTitle.change($scope.indexPattern.title);
 
   const otherPatterns = _.filter($route.current.locals.indexPatterns, pattern => {
     return pattern.id !== $scope.indexPattern.id;

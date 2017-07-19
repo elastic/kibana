@@ -21,6 +21,7 @@ import pluginsInitializeMixin from './plugins/initialize';
 import { indexPatternsMixin } from './index_patterns';
 import { savedObjectsMixin } from './saved_objects';
 import { statsMixin } from './stats';
+import { kibanaIndexMappingsMixin } from './mappings';
 import { serverExtensionsMixin } from './server_extensions';
 
 const rootDir = fromRoot('.');
@@ -61,6 +62,9 @@ export default class KbnServer {
 
       // tell the config we are done loading plugins
       configCompleteMixin,
+
+      // setup kbnServer.mappings and server.getKibanaIndexMappingsDsl()
+      kibanaIndexMappingsMixin,
 
       // setup this.uiExports and this.bundles
       uiMixin,

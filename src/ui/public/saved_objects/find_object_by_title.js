@@ -17,7 +17,7 @@ export function findObjectByTitle(savedObjectsClient, type, title) {
     type,
     perPage: 10,
     search: `"${title}"`,
-    searchFields: 'title',
+    searchFields: ['title'],
     fields: ['title']
   }).then(response => {
     const match = find(response.savedObjects, (obj) => {
