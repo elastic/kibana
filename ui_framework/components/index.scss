@@ -22,7 +22,6 @@ time, mark, audio, video {
   padding: 0;
   border: 0;
   font-size: 100%;
-  font: inherit;
   vertical-align: baseline; }
 
 /* HTML5 display-role reset for older browsers */
@@ -31,13 +30,13 @@ footer, header, hgroup, menu, nav, section {
   display: block; }
 
 html {
-  font-family: "Roboto", Helvetica, Arial, sans-serif;
+  font-family: "Open Sans", Helvetica, Arial, sans-serif;
+  font-size: 14px;
+  line-height: 1.42857143;
+  color: #2D2D2D;
   font-weight: 400;
-  color: #3F3F3F;
-  height: 100%; }
-
-body {
-  line-height: 1; }
+  height: 100%;
+}
 
 a {
   text-decoration: none; }
