@@ -14,29 +14,9 @@ describe('Saved Object', function () {
 
   let SavedObject;
   let IndexPattern;
-  let esAdminStub;
   let esDataStub;
   let savedObjectsClientStub;
   let window;
-
-  /**
-   * Some default es stubbing to avoid timeouts and allow a default type of 'dashboard'.
-   */
-  function mockEsService() {
-    // Allows the type 'dashboard' to be used.
-    // Unfortunately we need to use bluebird here instead of native promises because there is
-    // a call to finally.
-    sinon.stub(esAdminStub.indices, 'getFieldMapping').returns(BluebirdPromise.resolve({
-      '.kibana' : {
-        'mappings': {
-          'dashboard': {}
-        }
-      }
-    }));
-
-    // Necessary to avoid a timeout condition.
-    sinon.stub(esAdminStub.indices, 'putMapping').returns(BluebirdPromise.resolve());
-  }
 
   /**
    * Returns a fake doc response with the given index and id, of type dashboard
@@ -94,15 +74,12 @@ describe('Saved Object', function () {
     })
   );
 
-  beforeEach(ngMock.inject(function (es, esAdmin, Private, $window) {
+  beforeEach(ngMock.inject(function (es, Private, $window) {
     SavedObject = Private(SavedObjectProvider);
     IndexPattern = Private(IndexPatternProvider);
-    esAdminStub = esAdmin;
     esDataStub = es;
     savedObjectsClientStub = Private(SavedObjectsClientProvider);
     window = $window;
-
-    mockEsService();
   }));
 
   describe('save', function () {
