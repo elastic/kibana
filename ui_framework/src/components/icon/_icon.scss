@@ -1,6 +1,6 @@
 @include component('kuiIcon') {
   display: inline-block;
-  fill: $kuiColorDarkestGray;
+  fill: $kuiTextColor;
 
   @include modifier('medium') {
     @include size($kuiSizeM);
