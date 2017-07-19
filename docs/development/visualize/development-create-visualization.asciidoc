@@ -4,6 +4,9 @@
 This is a short description of functions and interfaces provided. For more information you should check the kibana
 source code and the existing visualizations provided with it.
 
+- <<development-visualization-factory>>
+* <<development-base-visualization-type>>
+* <<development-angular-visualization-type>>
 * <<development-react-visualization-type>>
 * <<development-vislib-visualization-type>>
 - <<development-vis-editors>>
@@ -82,6 +85,18 @@ Render function needs to return a promise, which should be resolved once the vis
 
 image::images/visualize-flow.png[Main Flow]
 
+- Your visualizations constructor will get called with `vis` object and element to which it should render.
+At this point you should prepare everything for rendering, but not render yet
+- <visualize> component monitors `appState`, `uiState` and `vis` for changes
+- on change <visualize> will call your `requestHandler`, which should return new data (or in case nothing changed
+the old data). Implementing request handler is optional, you might use on of the provided.
+- response from `requestHandler` will get passed to `responseHandler`. IT should convert raw data to something that
+can be consumed by visualization. Implementing responseHandler is optional, you might use of of the provided.
+- `ResizeMonitor` monitors the <visualize> for size change
+- on new data from `responseHandler` or on size change your visualization render method gets called.
+It should return a promise and resolve once its done rendering.
+- <visualize> will emit `renderComplete` event on the element once your render methods promise is resolved.
+- visualization should call `updateState()` any time something changed that requires to re-render or fetch new data.
 
 ["source","js"]
 -----------
