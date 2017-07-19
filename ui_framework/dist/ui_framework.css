@@ -40,16 +40,13 @@ body {
   line-height: 1; }
 
 a {
-  text-decoration: none;
-  color: #0079a5; }
-
-a:hover {
-  text-decoration: underline; }
-
-a:focus {
-  text-decoration: underline;
-  background: #bfe9e6;
-  outline: none; }
+  text-decoration: none; }
+  a:hover {
+    text-decoration: underline; }
+  a:focus {
+    text-decoration: underline;
+    background: #bfe9e6;
+    outline: none; }
 
 button {
   background: none;
@@ -75,13 +72,13 @@ table {
   border-collapse: collapse;
   border-spacing: 0; }
 
-.uFlex {
+.kui--flex {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
   display: flex; }
 
-.uFlexRow {
+.kui--flexRow {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -92,24 +89,24 @@ table {
       -ms-flex-direction: row;
           flex-direction: row; }
 
-.uFlexGrow1 {
+.kui--flexGrow1 {
   -webkit-box-flex: 1;
   -webkit-flex-grow: 1;
       -ms-flex-positive: 1;
           flex-grow: 1; }
 
-.uFlexShrink1 {
+.kui--flexShrink1 {
   -webkit-flex-shrink: 1;
       -ms-flex-negative: 1;
           flex-shrink: 1; }
 
-.uTextAlignRight {
+.kui--textAlignRight {
   text-align: right !important; }
 
-.uTextAlignLeft {
+.kui--textAlignLeft {
   text-align: left !important; }
 
-.uVerticalAlignMiddle {
+.kui--verticalAlignMiddle {
   vertical-align: middle !important; }
 
 .kuiIcon {

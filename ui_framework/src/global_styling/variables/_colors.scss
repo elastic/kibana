@@ -25,6 +25,7 @@ $kuiColorWhite: #FFF;
 
 // Every color below must be based mathmatically on the set above.
 
+$kuiTextColor: $kuiColorDarkestGray;
 $kuiLinkColor: $kuiColorBlue;
 $kuiFocusBackgroundColor: tint($kuiColorTeal, 75%);
 

@@ -37,7 +37,7 @@ footer, header, hgroup, menu, nav, section {
 html {
   font-family: $kuiFontFamily;
   font-weight: $kuiFontWeightRegular;
-  color: $kuiColorDarkestGray;
+  color: $kuiTextColor;
   height: 100%;
 }
 
@@ -47,18 +47,17 @@ body {
 
 a {
   text-decoration: none;
-  color: $kuiLinkColor;
+  &:hover {
+    text-decoration: underline;
+  }
+
+  &:focus {
+    text-decoration: underline;
+    background: $kuiFocusBackgroundColor;
+    outline: none;
+  }
 }
 
-a:hover {
-  text-decoration: underline;
-}
-
-a:focus {
-  text-decoration: underline;
-  background: $kuiFocusBackgroundColor;
-  outline: none;
-}
 
 button {
   background: none;

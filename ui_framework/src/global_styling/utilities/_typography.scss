@@ -1,11 +1,11 @@
-.uTextAlignRight {
+@include utility('textAlignRight') {
   text-align: right !important;
 }
 
-.uTextAlignLeft {
+@include utility('textAlignLeft') {
   text-align: left !important;
 }
 
-.uVerticalAlignMiddle {
+@include utility('verticalAlignMiddle') {
   vertical-align: middle !important;
 }

@@ -1,15 +1,16 @@
-.uFlex {
+@include utility('flex') {
   display: flex;
 }
-.uFlexRow {
+
+@include utility('flexRow') {
   display: flex;
   flex-direction: row;
 }
 
-.uFlexGrow1 {
+@include utility('flexGrow1') {
   flex-grow: 1;
 }
 
-.uFlexShrink1 {
+@include utility('flexShrink1') {
   flex-shrink: 1;
 }
