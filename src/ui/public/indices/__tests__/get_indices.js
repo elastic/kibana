@@ -23,7 +23,7 @@ describe('GetIndices', function () {
       }
     };
 
-    $provide.service('esAdmin', function () {
+    $provide.service('es', function () {
       return {
         cat: {
           indices: async () => indicesResponse

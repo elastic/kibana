@@ -1,6 +1,6 @@
 import { pluck, reduce, size } from 'lodash';
 
-export function IndicesGetIndicesProvider(esAdmin) {
+export function IndicesGetIndicesProvider(es) {
   const getIndexNamesFromAliasesResponse = json => {
     // Assume this function won't be called in the event of a 404.
     return reduce(json, (list, { aliases }, indexName) => {
@@ -21,11 +21,11 @@ export function IndicesGetIndicesProvider(esAdmin) {
   };
 
   return async function getIndices(query) {
-    const aliases = await esAdmin.indices.getAlias({ index: query, allowNoIndices: true, ignore: 404 });
+    const aliases = await es.indices.getAlias({ index: query, allowNoIndices: true, ignore: 404 });
 
     // If aliases return 200, they'll include matching indices, too.
     if (aliases.status === 404) {
-      const indices = await esAdmin.cat.indices({ index: query, format: 'json', ignore: 404 });
+      const indices = await es.cat.indices({ index: query, format: 'json', ignore: 404 });
       return getIndexNamesFromIndicesResponse(indices);
     }
 
