@@ -1,0 +1,11 @@
+@include utility('textAlignRight') {
+  text-align: right !important;
+}
+
+@include utility('textAlignLeft') {
+  text-align: left !important;
+}
+
+@include utility('verticalAlignMiddle') {
+  vertical-align: middle !important;
+}

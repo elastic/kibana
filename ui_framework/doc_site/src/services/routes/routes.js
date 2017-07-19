@@ -6,6 +6,9 @@ import AccessibilityExample
 import IconExample
   from '../../views/icon/icon_example';
 
+import HeaderExample
+  from '../../views/header/header_example';
+
 // Component route names should match the component name exactly.
 const components = [{
   name: 'Accessibility',
@@ -14,6 +17,9 @@ const components = [{
 }, {
   name: 'Icon',
   component: IconExample,
+}, {
+  name: 'Header',
+  component: HeaderExample,
 }];
 
 const sandboxes = [];

@@ -2,8 +2,8 @@
  * Adapted from Eric Meyer's reset (http://meyerweb.com/eric/tools/css/reset/, v2.0 | 20110126).
  *
  */
-* {
-  border-box: box-sizing; }
+*, *:before, *:after {
+  box-sizing: border-box; }
 
 html, body, div, span, applet, object, iframe,
 h1, h2, h3, h4, h5, h6, p, blockquote, pre,
@@ -30,8 +30,32 @@ article, aside, details, figcaption, figure,
 footer, header, hgroup, menu, nav, section {
   display: block; }
 
+html {
+  font-family: "Roboto", Helvetica, Arial, sans-serif;
+  font-weight: 400;
+  color: #3F3F3F;
+  height: 100%; }
+
 body {
   line-height: 1; }
+
+a {
+  text-decoration: none; }
+  a:hover {
+    text-decoration: underline; }
+  a:focus {
+    text-decoration: underline;
+    background: #bfe9e6;
+    outline: none; }
+
+button {
+  background: none;
+  border: none;
+  padding: 0;
+  margin: 0;
+  outline: none; }
+  button:hover {
+    cursor: pointer; }
 
 ol, ul {
   list-style: none; }
@@ -48,8 +72,46 @@ table {
   border-collapse: collapse;
   border-spacing: 0; }
 
+.kui--flex {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex; }
+
+.kui--flexRow {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-orient: horizontal;
+  -webkit-box-direction: normal;
+  -webkit-flex-direction: row;
+      -ms-flex-direction: row;
+          flex-direction: row; }
+
+.kui--flexGrow1 {
+  -webkit-box-flex: 1;
+  -webkit-flex-grow: 1;
+      -ms-flex-positive: 1;
+          flex-grow: 1; }
+
+.kui--flexShrink1 {
+  -webkit-flex-shrink: 1;
+      -ms-flex-negative: 1;
+          flex-shrink: 1; }
+
+.kui--textAlignRight {
+  text-align: right !important; }
+
+.kui--textAlignLeft {
+  text-align: left !important; }
+
+.kui--verticalAlignMiddle {
+  vertical-align: middle !important; }
+
 .kuiIcon {
-  display: inline-block; }
+  display: inline-block;
+  fill: #3F3F3F; }
   .kuiIcon--medium {
     width: 16px;
     height: 16px; }
@@ -62,3 +124,92 @@ table {
   .kuiIcon--xxLarge {
     width: 40px;
     height: 40px; }
+
+.kuiHeader {
+  background: #FFF;
+  border-bottom: 1px solid #D9D9D9; }
+  .kuiHeader__notification {
+    display: inline-block;
+    border-radius: 4px;
+    background: #DD0A73;
+    color: #FFF;
+    font-size: 12px;
+    height: 16px;
+    min-width: 16px;
+    vertical-align: middle; }
+
+.kuiHeaderBreadcrumb {
+  display: inline-block;
+  height: 64px;
+  line-height: 64px;
+  padding: 0 16px;
+  position: relative;
+  color: #3F3F3F; }
+  .kuiHeaderBreadcrumb:not(:last-child):after {
+    position: absolute;
+    top: 24px;
+    right: -3px;
+    content: "";
+    width: 1px;
+    height: 16px;
+    -webkit-transform: rotate(15deg);
+            transform: rotate(15deg);
+    background: #D9D9D9; }
+  .kuiHeaderBreadcrumb.isActive {
+    color: #999; }
+  .kuiHeaderBreadcrumb.isCollapsed {
+    color: #D9D9D9; }
+  .kuiHeaderBreadcrumb__text {
+    white-space: nowrap;
+    max-width: 150px;
+    display: block;
+    text-overflow: ellipsis;
+    overflow: hidden; }
+
+@media only screen and (min-width: 992px) and (max-width: 1199px) {
+  .kuiHeaderBreadcrumb {
+    display: none; }
+    .kuiHeaderBreadcrumb:nth-last-child(-n+4) {
+      display: inline-block; } }
+
+@media only screen and (min-width: 769px) and (max-width: 991px) {
+  .kuiHeaderBreadcrumb {
+    display: none; }
+    .kuiHeaderBreadcrumb:nth-last-child(-n+2) {
+      display: inline-block; } }
+
+@media only screen and (max-width: 768px) {
+  .kuiHeaderBreadcrumb {
+    display: none; } }
+
+.kuiHeaderItem {
+  position: relative; }
+  .kuiHeaderItem:after {
+    position: absolute;
+    content: "";
+    width: 1px;
+    top: 16px;
+    bottom: 0;
+    background: #D9D9D9;
+    left: 0; }
+  .kuiHeaderItem--borderRight:after {
+    left: auto;
+    right: 0; }
+  .kuiHeaderItem__logo {
+    position: relative;
+    height: 64px;
+    padding: 16px 32px;
+    display: inline-block;
+    vertical-align: middle; }
+  .kuiHeaderItem__logoIcon {
+    height: 32px;
+    width: 24px;
+    opacity: 1; }
+  .kuiHeaderItem__button {
+    height: 64px;
+    min-width: 64px;
+    text-align: center; }
+    .kuiHeaderItem__button:hover {
+      background: #F5F5F5; }
+    .kuiHeaderItem__button:focus {
+      background: #bfe9e6; }
