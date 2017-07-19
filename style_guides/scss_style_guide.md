@@ -107,4 +107,4 @@ KUI is fully themeable. We do this with strict variable naming. Please use the f
 
 * Global vars that can be used across all of KUI should be placed in the `global_styles/variables` directory.
 * Component vars that are local to the component should be places in the `component/component_name/index.scss` file at the top of the document.
-* Component vars that deal with coloring should *always* be mathmatically calculated from the global coloring variables. This allows us to cascade theming down into the components.
+* Component vars that deal with coloring should *always* be mathematically calculated from the global coloring variables. This allows us to cascade theming down into the components.
