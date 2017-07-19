@@ -1,8 +1,6 @@
-import {
-  KibanaCoreModules,
-  KibanaPluginFeatures,
-  ConfigWithSchema
-} from '../../types';
+import { KibanaPluginFeatures } from './types';
+import { KibanaCoreModules } from '../../types';
+import { ConfigWithSchema } from '../../config';
 import * as schema from '../../lib/schema';
 import { Router, RouterOptions } from '../http';
 

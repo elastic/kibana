@@ -1,9 +1,11 @@
-import { ElasticsearchConfig } from './ElasticsearchConfig';
+import {
+  ElasticsearchConfig,
+  ElasticsearchClusterType
+} from './ElasticsearchConfig';
 import {
   createElasticsearchSchema,
   ElasticsearchConfigsSchema
 } from './schema';
-import { ElasticsearchClusterType } from '../../types';
 import { Env } from '../../config';
 
 export class ElasticsearchConfigs {
