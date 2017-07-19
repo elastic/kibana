@@ -29,7 +29,7 @@ export function savedObjectsMixin(kbnServer, server) {
   server.decorate('server', 'savedObjectsClientFactory', ({ callCluster }) => {
     return new SavedObjectsClient(
       server.config().get('kibana.index'),
-      kbnServer.uiExports.mappings.getCombined(),
+      server.getKibanaIndexMappingsDsl(),
       callCluster
     );
   });

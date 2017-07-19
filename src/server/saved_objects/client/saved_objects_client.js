@@ -1,23 +1,20 @@
 import Boom from 'boom';
 import uuid from 'uuid';
-import { get } from 'lodash';
+
+import { getRootType } from '../../mappings';
 
 import {
-  createFindQuery,
-  createIdQuery,
+  getSearchDsl,
   handleEsError,
-  v5BulkCreate,
-  v6BulkCreate,
-  normalizeEsDoc,
+  trimIdPrefix,
   includedFields
 } from './lib';
-
-export const V6_TYPE = 'doc';
 
 export class SavedObjectsClient {
   constructor(kibanaIndex, mappings, callAdminCluster) {
     this._kibanaIndex = kibanaIndex;
     this._mappings = mappings;
+    this._type = getRootType(this._mappings);
     this._callAdminCluster = callAdminCluster;
   }
 
@@ -32,22 +29,28 @@ export class SavedObjectsClient {
    * @returns {promise} - { id, type, version, attributes }
   */
   async create(type, attributes = {}, options = {}) {
-    const method = options.id && !options.overwrite ? 'create' : 'index';
-    const response = await this._withKibanaIndexAndMappingFallback(method, {
-      type,
-      id: options.id,
-      body: attributes,
-      refresh: 'wait_for'
-    }, {
-      type: V6_TYPE,
-      id: `${type}:${options.id || uuid.v1()}`,
+    const {
+      id,
+      overwrite = false
+    } = options;
+
+    const method = id && !overwrite ? 'create' : 'index';
+    const response = await this._withKibanaIndex(method, {
+      id: this._generateEsId(type, id),
+      type: this._type,
+      refresh: 'wait_for',
       body: {
         type,
         [type]: attributes
-      }
+      },
     });
 
-    return normalizeEsDoc(response, { type, attributes });
+    return {
+      id: trimIdPrefix(response._id, type),
+      type,
+      version: response._version,
+      attributes
+    };
   }
 
   /**
@@ -55,41 +58,68 @@ export class SavedObjectsClient {
    *
    * @param {array} objects - [{ type, id, attributes }]
    * @param {object} [options={}]
-   * @property {boolean} [options.force=false] - overrides existing documents
-   * @property {string} [options.format=v5]
+   * @property {boolean} [options.overwrite=false] - overwrites existing documents
    * @returns {promise} - [{ id, type, version, attributes, error: { message } }]
    */
   async bulkCreate(objects, options = {}) {
-    const { format = 'v5' } = options;
+    const {
+      overwrite = false
+    } = options;
 
-    const bulkCreate = format === 'v5' ? v5BulkCreate : v6BulkCreate;
-    const response = await this._withKibanaIndex('bulk', {
-      body: bulkCreate(objects, options),
-      refresh: 'wait_for'
+    const objectToBulkRequest = (object) => {
+      const method = object.id && !overwrite ? 'create' : 'index';
+
+      return [
+        {
+          [method]: {
+            _id: this._generateEsId(object.type, object.id),
+            _type: this._type,
+          }
+        },
+        {
+          type: object.type,
+          [object.type]: object.attributes
+        }
+      ];
+    };
+
+    const { items } = await this._withKibanaIndex('bulk', {
+      refresh: 'wait_for',
+      body: objects.reduce((acc, object) => ([
+        ...acc,
+        ...objectToBulkRequest(object)
+      ]), []),
     });
 
-    const items = get(response, 'items', []);
-    const missingTypesCount = items.filter(item => {
-      const method = Object.keys(item)[0];
-      return get(item, `${method}.error.type`) === 'type_missing_exception';
-    }).length;
+    return items.map((response, i) => {
+      const {
+        error,
+        _id: responseId,
+        _version: version,
+      } = Object.values(response)[0];
 
-    const formatFallback = format === 'v5' && items.length > 0 && items.length === missingTypesCount;
-
-    if (formatFallback) {
-      return this.bulkCreate(objects, Object.assign({}, options, { format: 'v6' }));
-    }
-
-    return get(response, 'items', []).map((resp, i) => {
-      const method = Object.keys(resp)[0];
-      const { type, attributes } = objects[i];
-
-      return normalizeEsDoc(resp[method], {
-        id: resp[method]._id,
+      const {
+        id = responseId,
         type,
         attributes,
-        error: resp[method].error ? { message: get(resp[method], 'error.reason') } : undefined
-      });
+      } = objects[i];
+
+      if (error) {
+        return {
+          id,
+          type,
+          error: {
+            message: error.reason || JSON.stringify(error)
+          }
+        };
+      }
+
+      return {
+        id,
+        type,
+        version,
+        attributes
+      };
     });
   }
 
@@ -101,27 +131,28 @@ export class SavedObjectsClient {
    * @returns {promise}
    */
   async delete(type, id) {
-    const response = await this._withKibanaIndex('deleteByQuery', {
-      body: createIdQuery({ type, id }),
-      refresh: 'wait_for'
+    const response = await this._withKibanaIndex('delete', {
+      id: this._generateEsId(type, id),
+      type: this._type,
+      refresh: 'wait_for',
     });
 
-    if (get(response, 'deleted') === 0) {
+    if (response.found === false) {
       throw Boom.notFound();
     }
   }
 
   /**
    * @param {object} [options={}]
-   * @property {string} options.type
-   * @property {string} options.search
-   * @property {string} options.searchFields - see Elasticsearch Simple Query String
+   * @property {string} [options.type]
+   * @property {string} [options.search]
+   * @property {Array<string>} [options.searchFields] - see Elasticsearch Simple Query String
    *                                        Query field argument for more information
    * @property {integer} [options.page=1]
    * @property {integer} [options.perPage=20]
-   * @property {string} options.sortField
-   * @property {string} options.sortOrder
-   * @property {array|string} options.fields
+   * @property {string} [options.sortField]
+   * @property {string} [options.sortOrder]
+   * @property {Array<string>} [options.fields]
    * @returns {promise} - { saved_objects: [{ id, type, version, attributes }], total, per_page, page }
    */
   async find(options = {}) {
@@ -136,23 +167,46 @@ export class SavedObjectsClient {
       fields,
     } = options;
 
+    if (searchFields && !Array.isArray(searchFields)) {
+      throw new TypeError('options.searchFields must be an array');
+    }
+
+    if (fields && !Array.isArray(fields)) {
+      throw new TypeError('options.searchFields must be an array');
+    }
+
     const esOptions = {
-      _source: includedFields(type, fields),
       size: perPage,
       from: perPage * (page - 1),
-      body: createFindQuery(this._mappings, { search, searchFields, type, sortField, sortOrder })
+      _source: includedFields(type, fields),
+      body: {
+        version: true,
+        ...getSearchDsl(this._mappings, {
+          search,
+          searchFields,
+          type,
+          sortField,
+          sortOrder
+        })
+      }
     };
 
     const response = await this._withKibanaIndex('search', esOptions);
 
     return {
-      saved_objects: get(response, 'hits.hits', []).map(hit => {
-        return normalizeEsDoc(hit);
-      }),
-      total: get(response, 'hits.total', 0),
+      page,
       per_page: perPage,
-      page
+      total: response.hits.total,
+      saved_objects: response.hits.hits.map(hit => {
+        const type = hit._source.type;
 
+        return {
+          id: trimIdPrefix(hit._id, type),
+          type,
+          version: hit._version,
+          attributes: hit._source[type],
+        };
+      }),
     };
   }
 
@@ -173,24 +227,33 @@ export class SavedObjectsClient {
       return { saved_objects: [] };
     }
 
-    const docs = objects.reduce((acc, { type, id }) => {
-      return [...acc, {}, createIdQuery({ type, id })];
-    }, []);
-
-    const response = await this._withKibanaIndex('msearch', { body: docs });
-    const responses = get(response, 'responses', []);
+    const response = await this._withKibanaIndex('mget', {
+      body: {
+        docs: objects.map(object => ({
+          _id: this._generateEsId(object.type, object.id),
+          _type: this._type,
+        }))
+      }
+    });
 
     return {
-      saved_objects: responses.map((r, i) => {
-        const [hit] = get(r, 'hits.hits', []);
+      saved_objects: response.docs.map((doc, i) => {
+        const { id, type } = objects[i];
 
-        if (!hit) {
-          return Object.assign({}, objects[i], {
+        if (doc.found === false) {
+          return {
+            id,
+            type,
             error: { statusCode: 404, message: 'Not found' }
-          });
+          };
         }
 
-        return normalizeEsDoc(hit, objects[i]);
+        return {
+          id,
+          type,
+          version: doc._version,
+          attributes: doc._source[type]
+        };
       })
     };
   }
@@ -203,14 +266,17 @@ export class SavedObjectsClient {
    * @returns {promise} - { id, type, version, attributes }
    */
   async get(type, id) {
-    const response = await this._withKibanaIndex('search', { body: createIdQuery({ type, id }) });
-    const [hit] = get(response, 'hits.hits', []);
+    const response = await this._withKibanaIndex('get', {
+      id: this._generateEsId(type, id),
+      type: this._type,
+    });
 
-    if (!hit) {
-      throw Boom.notFound();
-    }
-
-    return normalizeEsDoc(hit);
+    return {
+      id,
+      type,
+      version: response._version,
+      attributes: response._source[type]
+    };
   }
 
   /**
@@ -223,41 +289,24 @@ export class SavedObjectsClient {
    * @returns {promise}
    */
   async update(type, id, attributes, options = {}) {
-    const response = await this._withKibanaIndexAndMappingFallback('update', {
-      id,
-      type,
+    const response = await this._withKibanaIndex('update', {
+      id: this._generateEsId(type, id),
+      type: this._type,
       version: options.version,
       refresh: 'wait_for',
-      body: {
-        doc: attributes
-      }
-    }, {
-      type: V6_TYPE,
-      id: `${type}:${id}`,
       body: {
         doc: {
           [type]: attributes
         }
-      }
+      },
     });
 
-    return normalizeEsDoc(response, { id, type, attributes });
-  }
-
-  _withKibanaIndexAndMappingFallback(method, params, fallbackParams) {
-    const fallbacks = {
-      'create': ['type_missing_exception'],
-      'index': ['type_missing_exception'],
-      'update': ['document_missing_exception']
+    return {
+      id,
+      type,
+      version: response._version,
+      attributes
     };
-
-    return this._withKibanaIndex(method, params).catch(err => {
-      if (get(fallbacks, method, []).includes(get(err, 'data.type'))) {
-        return this._withKibanaIndex(method, Object.assign({}, params, fallbackParams));
-      }
-
-      throw err;
-    });
   }
 
   async _withKibanaIndex(method, params) {
@@ -269,5 +318,9 @@ export class SavedObjectsClient {
     } catch (err) {
       throw handleEsError(err);
     }
+  }
+
+  _generateEsId(type, id) {
+    return `${type}:${id || uuid.v1()}`;
   }
 }

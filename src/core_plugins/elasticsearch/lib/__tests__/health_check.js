@@ -9,7 +9,8 @@ import mappings from './fixtures/mappings';
 import healthCheck from '../health_check';
 import kibanaVersion from '../kibana_version';
 import { esTestServerUrlParts } from '../../../../../test/es_test_server_url_parts';
-import * as ensureTypesExistNS from '../ensure_types_exist';
+import * as patchKibanaIndexNS from '../patch_kibana_index';
+import * as migrateConfigNS from '../migrate_config';
 
 const esPort = esTestServerUrlParts.port;
 const esUrl = url.format(esTestServerUrlParts);
@@ -21,13 +22,15 @@ describe('plugins/elasticsearch', () => {
     let health;
     let plugin;
     let cluster;
+    const sandbox = sinon.sandbox.create();
 
     beforeEach(() => {
       const COMPATIBLE_VERSION_NUMBER = '5.0.0';
 
       // Stub the Kibana version instead of drawing from package.json.
-      sinon.stub(kibanaVersion, 'get').returns(COMPATIBLE_VERSION_NUMBER);
-      sinon.stub(ensureTypesExistNS, 'ensureTypesExist');
+      sandbox.stub(kibanaVersion, 'get').returns(COMPATIBLE_VERSION_NUMBER);
+      sandbox.stub(patchKibanaIndexNS, 'patchKibanaIndex');
+      sandbox.stub(migrateConfigNS, 'migrateConfig');
 
       // setup the plugin stub
       plugin = {
@@ -73,19 +76,15 @@ describe('plugins/elasticsearch', () => {
             getCluster: sinon.stub().returns(cluster)
           }
         },
-        savedObjectsClientFactory: () => ({
-          find: sinon.stub().returns(Promise.resolve({ saved_objects: [] })),
-          create: sinon.stub().returns(Promise.resolve({ id: 'foo' })),
-        })
+        getKibanaIndexMappingsDsl() {
+          return mappings;
+        }
       };
 
-      health = healthCheck(plugin, server, { mappings });
+      health = healthCheck(plugin, server);
     });
 
-    afterEach(() => {
-      kibanaVersion.get.restore();
-      ensureTypesExistNS.ensureTypesExist.restore();
-    });
+    afterEach(() => sandbox.restore());
 
     it('should set the cluster green if everything is ready', function () {
       cluster.callWithInternalUser.withArgs('ping').returns(Promise.resolve());
@@ -101,6 +100,7 @@ describe('plugins/elasticsearch', () => {
           sinon.assert.calledOnce(cluster.callWithInternalUser.withArgs('ping'));
           sinon.assert.calledTwice(cluster.callWithInternalUser.withArgs('nodes.info', sinon.match.any));
           sinon.assert.calledOnce(cluster.callWithInternalUser.withArgs('cluster.health', sinon.match.any));
+          sinon.assert.notCalled(plugin.status.red);
           sinon.assert.calledOnce(plugin.status.green);
 
           expect(plugin.status.green.args[0][0]).to.be('Kibana index ready');

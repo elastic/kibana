@@ -74,7 +74,6 @@ module.exports = function (grunt) {
         ...stdDevArgs,
         '--dev',
         '--no-base-path',
-        '--no-ssl',
         '--optimize.enabled=false',
         '--elasticsearch.url=' + format(esTestServerUrlParts),
         '--server.port=' + kibanaTestServerUrlParts.port,
