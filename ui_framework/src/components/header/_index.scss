@@ -1,1 +1,4 @@
-@import 'header.scss'
+$kuiHeaderChildSize: $kuiSizeXXL + $kuiSizeL;
+
+@import 'header';
+@import 'header_breadcrumb';

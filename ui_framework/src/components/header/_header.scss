@@ -1,7 +1,5 @@
 // Header. Includes breadcrumbs of nav buttons.
 
-$kuiHeaderChildSize: $kuiSizeXXL + $kuiSizeL;
-
 // Adds a border to the left or right of an item. Requires relative position on parent.
 @mixin kuiHeaderSeparation($position) {
   &:after {
@@ -34,52 +32,6 @@ $kuiHeaderChildSize: $kuiSizeXXL + $kuiSizeL;
     height: $kuiSizeXL;
     width: $kuiSizeL;
     opacity: 1;
-  }
-
-  // Truncate long text.
-  @include child('breadcrumbText') {
-    white-space: nowrap;
-    max-width: 150px;
-    display: block;
-    text-overflow: ellipsis;
-    overflow: hidden;
-  }
-
-  @include child('breadcrumb') {
-    display: inline-block;
-    height: $kuiHeaderChildSize;
-    line-height: $kuiHeaderChildSize;
-    padding: 0 $kuiSize;
-    position: relative;
-    color: $kuiHeaderBreadcrumbColor;
-
-    // Slanted separator. Shows on all but last item.
-    &:not(:last-child):after {
-      position: absolute;
-      top: $kuiSizeL;
-      right: -3px; // Half the transformed width.
-      content: "";
-      width: 1px;
-      height: $kuiSize;
-      transform: rotate(15deg);
-      background: $kuiColorLightGray;
-    }
-
-    @include state('isActive') {
-      color: $kuiColorMediumGray;
-    }
-
-    @include state('isCollapsed') {
-      color: $kuiColorLightGray;
-    }
-  }
-
-  @include child('breadcrumbText') {
-    white-space: nowrap;
-    max-width: 150px;
-    display: block;
-    text-overflow: ellipsis;
-    overflow: hidden;
   }
 
   @include child('button') {

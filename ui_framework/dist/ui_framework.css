@@ -149,39 +149,6 @@ table {
     height: 32px;
     width: 24px;
     opacity: 1; }
-  .kuiHeader__breadcrumbText {
-    white-space: nowrap;
-    max-width: 150px;
-    display: block;
-    text-overflow: ellipsis;
-    overflow: hidden; }
-  .kuiHeader__breadcrumb {
-    display: inline-block;
-    height: 64px;
-    line-height: 64px;
-    padding: 0 16px;
-    position: relative;
-    color: #3F3F3F; }
-    .kuiHeader__breadcrumb:not(:last-child):after {
-      position: absolute;
-      top: 24px;
-      right: -3px;
-      content: "";
-      width: 1px;
-      height: 16px;
-      -webkit-transform: rotate(15deg);
-              transform: rotate(15deg);
-      background: #D9D9D9; }
-    .kuiHeader__breadcrumb.isActive {
-      color: #999; }
-    .kuiHeader__breadcrumb.isCollapsed {
-      color: #D9D9D9; }
-  .kuiHeader__breadcrumbText {
-    white-space: nowrap;
-    max-width: 150px;
-    display: block;
-    text-overflow: ellipsis;
-    overflow: hidden; }
   .kuiHeader__button {
     height: 64px;
     min-width: 64px;
@@ -226,3 +193,31 @@ table {
 @media only screen and (max-width: 768px) {
   .kuiHeader__breadcrumb {
     display: none; } }
+
+.kuiHeaderBreadcrumb {
+  display: inline-block;
+  height: 64px;
+  line-height: 64px;
+  padding: 0 16px;
+  position: relative;
+  color: #3F3F3F; }
+  .kuiHeaderBreadcrumb:not(:last-child):after {
+    position: absolute;
+    top: 24px;
+    right: -3px;
+    content: "";
+    width: 1px;
+    height: 16px;
+    -webkit-transform: rotate(15deg);
+            transform: rotate(15deg);
+    background: #D9D9D9; }
+  .kuiHeaderBreadcrumb.isActive {
+    color: #999; }
+  .kuiHeaderBreadcrumb.isCollapsed {
+    color: #D9D9D9; }
+  .kuiHeaderBreadcrumb__text {
+    white-space: nowrap;
+    max-width: 150px;
+    display: block;
+    text-overflow: ellipsis;
+    overflow: hidden; }
