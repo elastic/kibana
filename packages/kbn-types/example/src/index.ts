@@ -1,6 +1,6 @@
 import { KibanaFunctionalPlugin, Logger } from 'kbn-types';
 
-const plugin: KibanaFunctionalPlugin<{}> = (core) => {
+const plugin: KibanaFunctionalPlugin<{}> = core => {
   const { elasticsearch, http, logger } = core;
 
   foo(logger.get());
@@ -10,7 +10,7 @@ const plugin: KibanaFunctionalPlugin<{}> = (core) => {
   });
 
   const router = http.createAndRegisterRouter('/api/foo', {});
-}
+};
 
 function foo(log: Logger) {
   log.info('test');

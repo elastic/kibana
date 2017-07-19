@@ -22,14 +22,19 @@ export interface ResponseFactory {
 }
 
 const responseFactory: ResponseFactory = {
-  ok: <T extends { [key: string]: any }>(payload: T) => new KibanaResponse(200, payload),
+  ok: <T extends { [key: string]: any }>(payload: T) =>
+    new KibanaResponse(200, payload),
   accepted: <T extends { [key: string]: any }>(payload: T) =>
     new KibanaResponse(202, payload),
   noContent: () => new KibanaResponse<void>(204),
   badRequest: <T extends Error>(err: T) => new KibanaResponse(400, err)
 };
 
-export type RequestHandler<RequestValue, Params extends Any, Query extends Any> = (
+export type RequestHandler<
+  RequestValue,
+  Params extends Any,
+  Query extends Any
+> = (
   onRequestValue: RequestValue,
   req: KibanaRequest<TypeOf<Params>, TypeOf<Query>>,
   createResponse: ResponseFactory
