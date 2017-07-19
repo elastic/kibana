@@ -1,5 +1,11 @@
-// Vars
+// Themable colors
+$kuiHeaderBackgroundColor: $kuiColorWhite;
+$kuiHeaderBreadcrumbColor: $kuiColorDarkestGray;
+$kuiHeaderNotificationBackgroundColor: $kuiColorAccent;
+
+// Layout vars
 $kuiHeaderChildSize: $kuiSizeXXL + $kuiSizeL;
+
 
 // Mixin to add a border to the left or right of an item. Requires relative position on the parent.
 @mixin kuiHeaderSeparation($position) {

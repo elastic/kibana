@@ -8,13 +8,17 @@
   @return mix(#000, $color, $percent);
 }
 
-// Core theme colors
+// Core
 
-$kuiColorBlue: #0079a5;
-$kuiColorTeal: #00A69B;
-$kuiColorRed: #A30000;
-$kuiColorPink: #DD0A73;
-$kuiColorOrange: #E5830E;
+$kuiColorPrimary: #0079a5;
+$kuiColorSecondary: #00A69B;
+$kuiColorAccent: #DD0A73;
+
+// Status
+$kuiColorDanger: #A30000;
+$kuiColorWarning: #E5830E;
+
+// Grays
 $kuiColorLightestGray: #F5F5F5;
 $kuiColorLightGray: #D9D9D9;
 $kuiColorMediumGray: #999;
@@ -26,10 +30,10 @@ $kuiColorWhite: #FFF;
 // Every color below must be based mathmatically on the set above.
 
 $kuiTextColor: $kuiColorDarkestGray;
-$kuiLinkColor: $kuiColorBlue;
-$kuiFocusBackgroundColor: tint($kuiColorTeal, 75%);
+$kuiLinkColor: $kuiColorPrimary;
+$kuiFocusBackgroundColor: tint($kuiColorSecondary, 75%);
 
 $kuiHeaderBackgroundColor: $kuiColorWhite;
 $kuiHeaderBreadcrumbColor: $kuiColorDarkestGray;
-$kuiHeaderNotificationBackgroundColor: $kuiColorPink;
+$kuiHeaderNotificationBackgroundColor: $kuiColorAccent;
 
