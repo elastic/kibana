@@ -25,7 +25,7 @@ import { notify } from 'ui/notify';
 import './panel/get_object_loaders_for_dashboard';
 import { documentationLinks } from 'ui/documentation_links/documentation_links';
 import { showCloneModal } from './top_nav/show_clone_modal';
-import { ESC_KEY_CODE } from 'ui_framework/services';
+// import { ESC_KEY_CODE } from 'ui_framework/services';
 
 const app = uiModules.get('app/dashboard', [
   'elasticsearch',
