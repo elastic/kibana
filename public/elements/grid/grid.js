@@ -4,6 +4,7 @@ import React from 'react';
 import header from './header.png';
 import { min, max, get } from 'lodash';
 import chroma from 'chroma-js';
+import './grid.less';
 
 module.exports = new Element('grid', {
   displayName: 'Grid',
