@@ -10,7 +10,7 @@ is specified as the "main" type file for this package in `./package.json`.
 
 Now external code can use this package, e.g. something like this:
 
-```js
+```ts
 import { KibanaFunctionalPlugin } from 'kbn-types';
 
 export const plugin: KibanaFunctionalPlugin<{}> = function(core) {
