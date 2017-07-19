@@ -18,6 +18,7 @@ module.exports = class extends Generator {
       message: 'Where should it go?',
       type: 'input',
       name: 'path',
+      default: 'ui_framework/src/components',
       store: true,
     }, {
       message: 'Does it need its own directory?',
