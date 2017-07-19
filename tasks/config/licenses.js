@@ -49,8 +49,8 @@ module.exports = function () {
         'indexof@0.0.1': ['MIT'],
         'ripemd160@0.2.0': ['MIT'],
         'select@1.0.6': ['MIT'],
-        'uglify-js@2.2.5': ['BSD'],
-        'ua-parser-js@0.7.13': ['MIT']
+        'ua-parser-js@0.7.14': ['MIT'],
+        'uglify-js@2.2.5': ['BSD']
       }
     }
   };
