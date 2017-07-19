@@ -3,39 +3,17 @@ import Progress from '../progress';
 import { fromNode as fn } from 'bluebird';
 import { createWriteStream } from 'fs';
 import HttpProxyAgent from 'http-proxy-agent';
-import URL from 'url';
-
-function getEnv(name) {
-  return process.env[name.toLowerCase()] || process.env[name.toUpperCase()];
-}
+import { getProxyForUrl } from 'proxy-from-env';
 
 function getProxyAgent(sourceUrl, logger) {
-  const httpProxy = getEnv('http_proxy') || '';
-  // we have a proxy detected, lets use it
-  if (!httpProxy) {
+  const proxy = getProxyForUrl(sourceUrl);
+
+  if (!proxy) {
     return null;
   }
 
-  logger.log(`Picked up proxy ${httpProxy} from http_proxy environment variable.`);
-  // get the hostname of the sourceUrl
-  const { hostname } = URL.parse(sourceUrl);
-  const noProxy = getEnv('no_proxy') || '';
-  const excludedHosts = noProxy.split(',');
-
-  // proxy if the hostname is not in noProxy
-  const shouldProxy = !excludedHosts.includes(hostname);
-
-  if (shouldProxy) {
-    logger.log(`Using proxy to download plugin.`);
-    logger.log(`Hint: you can add ${hostname} to the no_proxy environment variable, `
-      + `to exclude that host from proxying.`);
-    return new HttpProxyAgent(httpProxy);
-  } else {
-    logger.log(`Found exception for host ${hostname} in no_proxy environment variable. `
-      + `Skipping proxy.`);
-  }
-
-  return null;
+  logger.log(`Picked up proxy ${proxy} from environment variable.`);
+  return new HttpProxyAgent(proxy);
 }
 
 function sendRequest({ sourceUrl, timeout }, logger) {
