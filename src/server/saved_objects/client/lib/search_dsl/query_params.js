@@ -6,7 +6,7 @@ import { getProperty, getRootProperties } from '../../../../mappings';
  *  @param  {Array<string>} types
  *  @return {Object}
  */
-function getFieldsForTypes(mappings, searchFields, types) {
+function getFieldsForTypes(searchFields, types) {
   if (!searchFields || !searchFields.length) {
     return {
       all_fields: true
@@ -16,9 +16,7 @@ function getFieldsForTypes(mappings, searchFields, types) {
   return {
     fields: searchFields.reduce((acc, field) => [
       ...acc,
-      ...types
-        .map(prefix => `${prefix}.${field}`)
-        .filter(field => getProperty(mappings, field))
+      ...types.map(prefix => `${prefix}.${field}`)
     ], []),
   };
 }
@@ -50,7 +48,6 @@ export function getQueryParams(mappings, type, search, searchFields) {
         simple_query_string: {
           query: search,
           ...getFieldsForTypes(
-            mappings,
             searchFields,
             type ? [type] : Object.keys(getRootProperties(mappings))
           )

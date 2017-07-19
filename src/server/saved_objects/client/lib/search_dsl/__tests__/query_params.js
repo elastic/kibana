@@ -107,7 +107,7 @@ describe('searchDsl/queryParams', () => {
   });
 
   describe('{search,searchFields}', () => {
-    it('supports fields pointing to multi-fields', () => {
+    it('includes all types for field', () => {
       expect(getQueryParams(MAPPINGS, null, 'y*', ['title']))
         .to.eql({
           query: {
@@ -117,6 +117,7 @@ describe('searchDsl/queryParams', () => {
                   simple_query_string: {
                     query: 'y*',
                     fields: [
+                      'type.title',
                       'pending.title',
                       'saved.title'
                     ]
@@ -127,26 +128,7 @@ describe('searchDsl/queryParams', () => {
           }
         });
     });
-    it('excludes field paths which do not exist', () => {
-      expect(getQueryParams(MAPPINGS, null, 'y*', ['title.raw']))
-        .to.eql({
-          query: {
-            bool: {
-              must: [
-                {
-                  simple_query_string: {
-                    query: 'y*',
-                    fields: [
-                      'saved.title.raw'
-                    ]
-                  }
-                }
-              ]
-            }
-          }
-        });
-    });
-    it('supports multiple search fields', () => {
+    it('supports field and multi-field', () => {
       expect(getQueryParams(MAPPINGS, null, 'y*', ['title', 'title.raw']))
         .to.eql({
           query: {
@@ -156,9 +138,12 @@ describe('searchDsl/queryParams', () => {
                   simple_query_string: {
                     query: 'y*',
                     fields: [
+                      'type.title',
                       'pending.title',
                       'saved.title',
-                      'saved.title.raw'
+                      'type.title.raw',
+                      'pending.title.raw',
+                      'saved.title.raw',
                     ]
                   }
                 }
