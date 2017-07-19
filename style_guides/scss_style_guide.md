@@ -42,7 +42,7 @@ Kibana aims to provide at least a read-only (meaning, editing and controls can b
 The Sass Guidelines site recommends using RBG and HSL values to format colors, but we're using
 hex values.
 
-### Bemify for namespacing
+### Bemify for namespacing components
 
 We use [bemify](https://github.com/franzheidl/bemify) for namespacing the sass into a BEM format. We use `component`, `child`, `modifier` and `state` as our mixin names. We've adjusted the plugin's state mixin so that you need to write out the full selector (`@include state('isHappening')`).
 
@@ -77,6 +77,23 @@ We use [bemify](https://github.com/franzheidl/bemify) for namespacing the sass i
     opacity: .5;
     cursor: not-allowed;
   }
+}
+```
+
+### Utility class naming
+
+KUI includes utility classes in `global_styles/utility` which are used to cut down on the amount of duplicate CSS we write and make designing in code faster. Utilities include the `kui--` prefix, since we consider them modifiers to KUI as a whole.
+
+```
+<div class="kuiSomeComponent kui--flexRow">
+```
+
+There is also a mixin for creating these utilities in the Sass.
+
+```
+@include utility('flexRow') {
+  display: flex;
+  flex-direction: row;
 }
 ```
 
