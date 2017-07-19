@@ -4,9 +4,9 @@ const getIndexPatternsFromResponse = json => {
   return uniq(flatten(pluck(json, 'index_patterns')));
 };
 
-export function IndicesGetTemplateIndexPatternsProvider(esAdmin) {
+export function IndicesGetTemplateIndexPatternsProvider(es) {
   return async function getTemplateIndexPatterns(query) {
-    const templatesJson = await esAdmin.indices.getTemplate({ name: query, ignore: 404 });
+    const templatesJson = await es.indices.getTemplate({ name: query, ignore: 404 });
     return getIndexPatternsFromResponse(templatesJson);
   };
 }

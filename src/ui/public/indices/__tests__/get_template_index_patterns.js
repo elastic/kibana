@@ -25,7 +25,7 @@ describe('GetTemplateIndexPatterns', function () {
       },
     };
 
-    $provide.service('esAdmin', function () {
+    $provide.service('es', function () {
       return {
         indices: {
           getTemplate: async function () {
