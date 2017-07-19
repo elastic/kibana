@@ -16,6 +16,9 @@ export class ElasticsearchConfigs {
     [type in ElasticsearchClusterType]: ElasticsearchConfig
   };
 
+  /**
+   * @internal
+   */
   constructor(config: ElasticsearchConfigsSchema, env: Env) {
     this.configs = {
       data:

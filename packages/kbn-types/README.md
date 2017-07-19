@@ -1,9 +1,8 @@
 # External types for Kibana
 
-For now I'm building this from Kibana root:
-
 ```
-npm run ts:build-start
+npm install
+npm run build
 ```
 
 This builds declaration files into `./types/packages/kbn-types`, which is
@@ -18,6 +17,8 @@ export const plugin: KibanaFunctionalPlugin<{}> = function(core) {
   const router = core.http.createAndRegisterRouter('/some-path');
 }
 ```
+
+If you want to play around with an example, see the `./example` folder.
 
 ## Exposing types
 

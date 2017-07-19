@@ -10,6 +10,9 @@ import { ElasticsearchClusterType } from '../../types';
 export class ElasticsearchConfig {
   requestHeadersWhitelist: string[];
 
+  /**
+   * @internal
+   */
   constructor(
     readonly clusterType: ElasticsearchClusterType,
     private readonly config: ClusterSchema
