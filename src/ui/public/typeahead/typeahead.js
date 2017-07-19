@@ -3,7 +3,7 @@ import 'ui/typeahead/typeahead.less';
 import 'ui/typeahead/_input';
 import 'ui/typeahead/_items';
 import { uiModules } from 'ui/modules';
-import { comboBoxKeyCodes } from 'ui_framework/services';
+// import { comboBoxKeyCodes } from 'ui_framework/services';
 
 const typeahead = uiModules.get('kibana/typeahead');
 

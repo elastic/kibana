@@ -2,7 +2,7 @@ import { SavedObjectRegistryProvider } from 'ui/saved_objects/saved_object_regis
 import 'ui/pager_control';
 import 'ui/pager';
 import { DashboardConstants, createDashboardEditUrl } from '../dashboard_constants';
-import { SortableProperties } from 'ui_framework/services';
+// import { SortableProperties } from 'ui_framework/services';
 import { ConfirmationButtonTypes } from 'ui/modals';
 
 export function DashboardListingController($injector, $scope) {

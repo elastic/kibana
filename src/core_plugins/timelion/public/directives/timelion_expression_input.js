@@ -33,7 +33,7 @@ import {
   suggest,
   insertAtLocation,
 } from './timelion_expression_input_helpers';
-import { comboBoxKeyCodes } from 'ui_framework/services';
+// import { comboBoxKeyCodes } from 'ui_framework/services';
 
 const Parser = PEG.buildParser(grammar);
 const app = require('ui/modules').get('apps/timelion', []);

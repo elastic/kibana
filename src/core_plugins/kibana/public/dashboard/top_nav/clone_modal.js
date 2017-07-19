@@ -1,16 +1,16 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 
-import {
-  KuiModal,
-  KuiModalHeader,
-  KuiModalHeaderTitle,
-  KuiModalBody,
-  KuiModalBodyText,
-  KuiModalFooter,
-  KuiButton,
-  KuiModalOverlay
-} from 'ui_framework/components';
+// import {
+//   KuiModal,
+//   KuiModalHeader,
+//   KuiModalHeaderTitle,
+//   KuiModalBody,
+//   KuiModalBodyText,
+//   KuiModalFooter,
+//   KuiButton,
+//   KuiModalOverlay
+// } from 'ui_framework/components';
 
 export class DashboardCloneModal extends React.Component {
   constructor(props) {

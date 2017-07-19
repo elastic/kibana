@@ -18,10 +18,10 @@
  * Apply this directive to any of these elements to automatically do the above.
  */
 
-import {
-  accessibleClickKeys,
-  SPACE_KEY,
-} from 'ui_framework/services';
+// import {
+//   accessibleClickKeys,
+//   SPACE_KEY,
+// } from 'ui_framework/services';
 import { uiModules } from 'ui/modules';
 
 uiModules.get('kibana')
