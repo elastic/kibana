@@ -112,17 +112,21 @@ export function decorateMochaUi(lifecycle, context) {
     switch (property) {
       case 'describe':
       case 'describe.only':
+      case 'describe.skip':
       case 'xdescribe':
       case 'context':
       case 'context.only':
+      case 'context.skip':
       case 'xcontext':
         return wrapSuiteFunction(property, value);
 
       case 'it':
       case 'it.only':
+      case 'it.skip':
       case 'xit':
       case 'specify':
       case 'specify.only':
+      case 'specify.skip':
       case 'xspecify':
         return wrapTestFunction(property, value);
 

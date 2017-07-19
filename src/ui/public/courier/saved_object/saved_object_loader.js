@@ -89,7 +89,7 @@ export class SavedObjectLoader {
    * @param size
    * @returns {Promise}
    */
-  find(search, size = 100) {
+  find(search = '', size = 100) {
     return this.savedObjectsClient.find(
       {
         type: this.lowercaseType,

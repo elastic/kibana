@@ -74,7 +74,7 @@ export class SavedObjectsClient {
    * @returns {promise} - { savedObjects: [ SavedObject({ id, type, version, attributes }) ]}
    */
   find(options = {}) {
-    const url = this._getUrl([options.type], keysToSnakeCaseShallow(options));
+    const url = this._getUrl([], keysToSnakeCaseShallow(options));
 
     return this._request('GET', url).then(resp => {
       resp.saved_objects = resp.saved_objects.map(d => this.createSavedObject(d));
