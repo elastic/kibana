@@ -11,3 +11,4 @@ export {
 export { SortableProperties } from './sort';
 
 export { LEFT_ALIGNMENT, RIGHT_ALIGNMENT } from './alignment';
+
