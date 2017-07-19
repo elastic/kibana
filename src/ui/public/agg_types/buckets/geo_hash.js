@@ -63,7 +63,7 @@ export function AggTypesBucketsGeoHashProvider(Private, config) {
         write: _.noop
       },
       {
-        name: 'useFilter',
+        name: 'isFilteredByCollar',
         default: true,
         write: _.noop
       },
@@ -101,7 +101,7 @@ export function AggTypesBucketsGeoHashProvider(Private, config) {
     getRequestAggs: function (agg) {
       const aggs = [];
 
-      if (agg.params.useFilter && agg.getField()) {
+      if (agg.params.isFilteredByCollar && agg.getField()) {
         const vis = agg.vis;
         let mapBounds;
         let mapZoom;
@@ -113,7 +113,7 @@ export function AggTypesBucketsGeoHashProvider(Private, config) {
           const lastMapCollar = vis.uiStateVal('mapCollar');
           let mapCollar;
           if (!lastMapCollar || lastMapCollar.zoom !== mapZoom || isOutsideCollar(mapBounds, lastMapCollar)) {
-            mapCollar = scaleBounds(mapBounds, 1.5);
+            mapCollar = scaleBounds(mapBounds);
             mapCollar.zoom = mapZoom;
             vis.getUiState().set('mapCollar', mapCollar);
           } else {

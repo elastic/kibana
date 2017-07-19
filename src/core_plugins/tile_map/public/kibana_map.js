@@ -346,6 +346,44 @@ export class KibanaMap extends EventEmitter {
 
     const southEast = bounds.getSouthEast();
     const northWest = bounds.getNorthWest();
+    let southEastLng = southEast.lng;
+    if (southEastLng > 180) {
+      southEastLng -= 360;
+    }
+    let northWestLng = northWest.lng;
+    if (northWestLng < -180) {
+      northWestLng += 360;
+    }
+
+    const southEastLat = southEast.lat;
+    const northWestLat = northWest.lat;
+
+    //Bounds cannot be created unless they form a box with larger than 0 dimensions
+    //Invalid areas are rejected by ES.
+    if (southEastLat === northWestLat || southEastLng === northWestLng) {
+      return;
+    }
+
+    return {
+      bottom_right: {
+        lat: southEastLat,
+        lon: southEastLng
+      },
+      top_left: {
+        lat: northWestLat,
+        lon: northWestLng
+      }
+    };
+  }
+
+  getUntrimmedBounds() {
+    const bounds = this._leafletMap.getBounds();
+    if (!bounds) {
+      return null;
+    }
+
+    const southEast = bounds.getSouthEast();
+    const northWest = bounds.getNorthWest();
     const southEastLng = southEast.lng;
     const northWestLng = northWest.lng;
     const southEastLat = southEast.lat;
@@ -573,7 +611,7 @@ export class KibanaMap extends EventEmitter {
       if (!centerFromUIState || centerFromMap.lon !== centerFromUIState[1] || centerFromMap.lat !== centerFromUIState[0]) {
         visualization.uiStateVal('mapCenter', [centerFromMap.lat, centerFromMap.lon]);
       }
-      uiState.set('mapBounds', this.getBounds());
+      uiState.set('mapBounds', this.getUntrimmedBounds());
     }
 
     this.on('dragend', persistMapStateInUiState);

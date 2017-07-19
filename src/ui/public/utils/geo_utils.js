@@ -15,13 +15,10 @@ export function geoContains(collar, bounds) {
   return true;
 }
 
-export function scaleBounds(bounds, scale) {
+export function scaleBounds(bounds) {
   if (!bounds) return;
 
-  let safeScale = scale;
-  if(safeScale < 1) scale = 1;
-  if(safeScale > 5) scale = 5;
-  safeScale = safeScale - 1;
+  const scale = .5; // scale bounds by 50%
 
   const topLeft = bounds.top_left;
   const bottomRight = bounds.bottom_right;
@@ -30,12 +27,12 @@ export function scaleBounds(bounds, scale) {
   //map height can be zero when vis is first created
   if(latDiff === 0) latDiff = lonDiff;
 
-  const latDelta = latDiff * safeScale;
+  const latDelta = latDiff * scale;
   let topLeftLat = _.round(topLeft.lat, 5) + latDelta;
   if(topLeftLat > 90) topLeftLat = 90;
   let bottomRightLat = _.round(bottomRight.lat, 5) - latDelta;
   if(bottomRightLat < -90) bottomRightLat = -90;
-  const lonDelta = lonDiff * safeScale;
+  const lonDelta = lonDiff * scale;
   let topLeftLon = _.round(topLeft.lon, 5) - lonDelta;
   if(topLeftLon < -180) topLeftLon = -180;
   let bottomRightLon = _.round(bottomRight.lon, 5) + lonDelta;

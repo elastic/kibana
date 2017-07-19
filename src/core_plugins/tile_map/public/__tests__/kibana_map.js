@@ -67,7 +67,7 @@ describe('kibana_map tests', function () {
 
   });
 
-  describe('KibanaMap - getBounds', function () {
+  describe('KibanaMap - getUntrimmedBounds', function () {
 
     beforeEach(async function () {
       setupDOM();
@@ -86,8 +86,8 @@ describe('kibana_map tests', function () {
       teardownDOM();
     });
 
-    it('should get map bounds', function () {
-      const bounds = kibanaMap.getBounds(false);
+    it('should get untrimmed map bounds', function () {
+      const bounds = kibanaMap.getUntrimmedBounds(false);
       expect(bounds.bottom_right.lon).to.equal(281.25);
       expect(bounds.top_left.lon).to.equal(-281.25);
     });

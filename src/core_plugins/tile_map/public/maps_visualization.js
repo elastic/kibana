@@ -90,7 +90,7 @@ export function MapsVisualizationProvider(serviceSettings, Notifier, getAppState
 
       this._kibanaMap = new KibanaMap(containerElement, options);
       uiState.set('mapZoom', this._kibanaMap.getZoomLevel());
-      uiState.set('mapBounds', this._kibanaMap.getBounds());
+      uiState.set('mapBounds', this._kibanaMap.getUntrimmedBounds());
       this._kibanaMap.addDrawControl();
       this._kibanaMap.addFitControl(this.getGeohashBounds.bind(this));
       this._kibanaMap.addLegendControl();
@@ -310,13 +310,13 @@ export function MapsVisualizationProvider(serviceSettings, Notifier, getAppState
     }
 
     _isFilteredByCollar() {
-      const DEFAULT_USE_FILTER = false;
+      const DEFAULT = false;
 
       const agg = this._getGeoHashAgg();
       if (agg) {
-        return _.get(agg, 'params.useFilter', DEFAULT_USE_FILTER);
+        return _.get(agg, 'params.isFilteredByCollar', DEFAULT);
       } else {
-        return DEFAULT_USE_FILTER;
+        return DEFAULT;
       }
     }
   }

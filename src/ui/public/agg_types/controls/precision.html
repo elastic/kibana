@@ -39,8 +39,8 @@
 <div class="vis-option-item indented">
   <label>
     <input type="checkbox"
-           name="useFilter"
-           ng-model="agg.params.useFilter">
-    Enable collar (geo_bounding_box filter)
+           name="isFilteredByCollar"
+           ng-model="agg.params.isFilteredByCollar">
+    Only request data around extent of map <kbn-info info="Apply geo_bounding_box filter aggregation to narrow the subject area to the map view box with collar."></kbn-info>
   </label>
 </div>
