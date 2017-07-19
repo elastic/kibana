@@ -1,6 +1,5 @@
 import { Duration } from 'moment';
-
-import { Schema, typeOfSchema } from '../../types';
+import { Schema, typeOfSchema } from 'kbn-types';
 
 const createXPackConfig = (schema: Schema) =>
   schema.object({

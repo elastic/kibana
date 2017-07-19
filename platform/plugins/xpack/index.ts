@@ -1,6 +1,6 @@
 import { Observable } from 'rxjs';
 
-import { KibanaFunctionalPlugin } from '../../server/plugins/types';
+import { KibanaFunctionalPlugin } from 'kbn-types';
 import { XPackConfig } from './XPackConfig';
 
 export const configPath = ['xpack', 'xpack_main'];

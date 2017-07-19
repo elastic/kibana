@@ -1,9 +1,6 @@
 import { Observable } from 'rxjs';
 
-// TODO Change imports to some types file
-import { ElasticsearchService } from '../../server/elasticsearch/ElasticsearchService';
-import { KibanaConfig } from '../../server/kibana';
-import { KibanaRequest } from '../../server/http';
+import { ElasticsearchService, KibanaConfig, KibanaRequest } from 'kbn-types';
 
 export class SavedObjectsService {
   constructor(
