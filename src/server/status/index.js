@@ -56,9 +56,6 @@ export default function (kbnServer, server, config) {
   server.route(wrapAuth({
     method: 'GET',
     path: '/status',
-    config: {
-      tags: ['api']
-    },
     handler: function (request, reply) {
       return reply.renderStatusPage();
     }
