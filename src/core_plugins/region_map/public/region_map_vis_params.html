@@ -17,7 +17,6 @@
         ng-model="vis.params.selectedLayer"
         ng-options="layer.name for layer in collections.vectorLayers track by layer.url"
         ng-change="onLayerChange()"
-        ng-init="initializeLayerSetting()"
       ></select>
     </div>
   </div>
@@ -30,7 +29,6 @@
       <select id="joinField"
               ng-model="vis.params.selectedJoinField"
               ng-options="field.description for field in vis.params.selectedLayer.fields track by field.name"
-              ng-init="initializeFieldSetting()"
       >
         <option value=''>Select</option></select>
     </div>
