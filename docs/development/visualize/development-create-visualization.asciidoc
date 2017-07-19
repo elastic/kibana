@@ -28,6 +28,7 @@ The factory can create `Base`, `Angular`, `React` and `Vislib` visualization.
 
 ["source","html"]
 -----------
+import { CATEGORY } from 'ui/vis/vis_category';
 import { VisFactoryProvider } from 'ui/vis/vis_factory';
 
 export default function MyNewVisType(Private) {
@@ -38,6 +39,7 @@ export default function MyNewVisType(Private) {
     title: 'My New Vis',
     icon: 'my_icon',
     description: 'Cool new chart',
+    category: CATEGORY.OTHER
     ...
   });
 }
@@ -62,7 +64,6 @@ The list of common parameters:
 - *options.showQueryBar*: <bool> show or hide query bar (defaults to true)
 - *options.showFilterBar*: <bool> show or hide filter bar (defaults to true)
 - *options.showIndexSelection*: <bool> show or hide index selection (defaults to true)
-- *options.hierarchicalData*: <bool> use hierarchical data (defaults to false) [BWC]
 - *isExperimental*: <bool> mark visualization as experimental (defaults to false)
 
 
@@ -71,7 +72,7 @@ Each of the factories have some of the custom parameters, which will be describe
 [[development-base-visualization-type]]
 ==== Base Visualization Type
 The base visualization type does not make any assumptions about the rendering technology you are going to use and
-works with pure javascript. Its the visualization type we recommend to use.
+works with pure Javascript. It's the visualization type we recommend to use.
 
 You need to provide an object with constructor, render function which will be called every time options 
 or data change and destroy function which will be called to cleanup.
@@ -115,8 +116,8 @@ export default function MyNewVisType(Private) {
 -----------
 
 [[development-angular-visualization-type]]
-==== Angular Visualization Type
-Angular visualization type assumes you are using angular as your rendering technology. Instead of providing the
+==== AngularJS Visualization Type
+AngularJS visualization type assumes you are using angular as your rendering technology. Instead of providing the
 controller we need to provide the angular template to render. 
 
 Visualization will receive vis, uiState and visData on the $scope and needs to call $scope.renderComplete() once 
@@ -141,7 +142,7 @@ export default function MyNewVisType(Private) {
 
 [[development-react-visualization-type]]
 ==== React Visualization Type
-React visualization type assumes you are using React as your rendering technology. Instead of passing it an angular
+React visualization type assumes you are using React as your rendering technology. Instead of passing it an AngularJS
 template you need to pass React component.
 
 Visualization will receive vis, uiState and visData as props as well as the renderComplete which should be called once
@@ -173,11 +174,15 @@ point series charts and pie charts.
 
 [[development-vis-editors]]
 === Visualization Editors
-By default visualization will use the `default` editor (which is the sidebar editor you see in current kibana charts) but can be changed. Currently no other editors are provided (`timelion` editor will probably be added in the near future). Plugin can register a new editor in registry to make it available to other visualizations, but is not necessary (if its a one-time thing which will not be reused)
+By default visualization will use the `default` editor (which is the sidebar editor you see in current kibana charts) 
+but can be changed. Currently no other editors are provided. Plugin can register a new editor in registry to make 
+it available to other visualizations, but is not necessary (if its a one-time thing which will not be reused)
 
 [[development-default-editor]]
 ==== `default` editor controller
-The default editor controller can receive `optionsTemplate` or `optionsTabs` parameter which can be either an angular template or react component. React component will receive two params: scope, which is an angular scope and stageEditorParams which will update the editor with parameters set in react component.
+The default editor controller can receive `optionsTemplate` or `optionsTabs` parameter which can be either an AngularJS 
+template or React component. React component will receive two params: scope, which is an AngularJS scope and 
+stageEditorParams function which will update the editor with parameters set in react component.
 
 ["source","js"]
 -----------
@@ -189,9 +194,11 @@ The default editor controller can receive `optionsTemplate` or `optionsTabs` par
     editorController: 'default',
     editorConfig: {
        optionsTemplate: '<my-custom-options-directive></my-custom-options-directive>' // or
+       optionsTemplate: MyReactComponent // or if multiple tabs are required:
        optionsTabs: [
            { title: 'tab 1', template: '<div>....</div> },
-           { title: 'tab 2', template: '<my-custom-options-directive></my-custom-options-directive>' }
+           { title: 'tab 2', template: '<my-custom-options-directive></my-custom-options-directive>' },
+           { title: 'tab 3', template: MyReactComponent }
        ]
     }
   }
@@ -210,9 +217,11 @@ class MyEditorController {
     constructor(el, vis) {
       this.el = el;
       this.vis = vis;
+      this.config = vis.type.editorConfig;
    }
    render(visData) {
       return new Promise(resolve => {
+         console.log(this.config.my);
          ...
          resolve('done rendering');
       }),
@@ -237,27 +246,70 @@ export default function MyNewVisType(Private) {
 
 [[development-visualization-request-handlers]]
 === Visualization Request Handlers
+Request handler gets called when one of the following keys on AppState change:
+`vis`, `query`, `filters` or `uiState`. This sums up to pretty much every change to visualization. On top
+of that it will also get called on force refresh.
+
 By default visualizations will use courier request handler. They can also choose to use any of the other provided 
-request handlers. Its also possible to define your own request handler 
-(which you can then register to be used by other visualizations)
+request handlers. It's also possible to define your own request handler 
+(which you can then register to be used by other visualizations).
 
 [[development-default-request-handler]]
 ==== courier request handler
-'courier' is the default request handler which works with out 'default' side bar editor.
+'courier' is the default request handler which works with the 'default' side bar editor.
 
 [[development-none-request-handler]]
 ==== `none` request handler
-Using 'none' as your request handles means your visualization does not require search.
+Using 'none' as your request handles means your visualization does not require any data to be requested.
 
 [[development-custom-request-handler]]
 ==== custom request handler
 You can define your custom request handler by providing a function with the following definition:
 `function (vis, appState, uiState, searchSource) { ... }`
 
+Function must return a promise, which should get resolved with new data that will be passed to responseHandler.
+
+It's up to function to decide when it wants to issue a new request or return previous data 
+(if none of the objects relevant to the request handler changed).
+
+["source","js"]
+-----------
+import { VisFactoryProvider } from 'ui/vis/vis_factory';
+
+const myRequestHandler = (vis, appState, uiState, searchSource) => {
+  const shouldQuery = () => {
+     // check if any of the relevant objects changed
+     // if not we should just return the old data
+  };
+  
+  return new Promise((resolve, reject) => {
+     if (shouldQuery()) {
+        // get your data
+        // resolve(myNewData);
+     } else {
+       resolve(myOldData);
+     }
+  });
+};
+
+export default function MyNewVisType(Private) {
+  const VisFactory = Private(VisFactoryProvider);
+
+  return VisFactory.createAngularVisualization({
+    name: 'my_new_vis',
+    title: 'My New Vis',
+    icon: 'my_icon',
+    description: 'Cool new chart',
+    requestHandler: myRequestHandler
+  });
+}
+-----------
+
 [[development-visualization-response-handlers]]
 === Visualization Response Handlers
-Response handler will receive the data from request handler and an instance of Vis object. Its job is to convert the data to a format visualization can use.
-by default 'none' request handler is used which just passes the data it receives back, but can be changed to 'basic' (which VislibVisTypeFactory uses) or to a custom one.
+Response handler will receive the data from request handler and an instance of Vis object. 
+Its job is to convert the data to a format visualization can use. By default 'none' request handler is used 
+which just passes the data it received back. The data object will then be passed to visualization.
 
 [[development-default-response-handler]]
 ==== default response handler
@@ -265,12 +317,37 @@ Default response handler will convert pure elasticsearch response to tabular for
 
 [[development-none-response-handler]]
 ==== none response handler
-None response handler is an identity function, which will return the pure elasticsearch response.
+None response handler is an identity function, which will return the same data it receives.
 
 [[development-custom-response-handler]]
 ==== custom response handler
 You can define your custom response handler by providing a function with the following definition:
-'function (vis, response) { ... }'
+'function (vis, response) { ... }'.
+
+Function should return the transformed data object that visualization can consume.
+
+["source","js"]
+-----------
+import { VisFactoryProvider } from 'ui/vis/vis_factory';
+
+const myResponseHandler = (vis, response) => {
+   // transform the response (based on vis object?)
+   if (vis.params.transformTable) return transformTable(response);
+   return response;
+};
+
+export default function MyNewVisType(Private) {
+  const VisFactory = Private(VisFactoryProvider);
+
+  return VisFactory.createAngularVisualization({
+    name: 'my_new_vis',
+    title: 'My New Vis',
+    icon: 'my_icon',
+    description: 'Cool new chart',
+    responseHandler: myResponseHandler
+  });
+}
+-----------
 
 [[development-vis-object]]
 === Vis object
@@ -281,6 +358,7 @@ Vis object holds the visualization state and is the window into kibana:
 - *vis.getState()*: gets current visualization state 
 - *vis.updateState()*: updates current state with values from `vis.params`
 - *vis.resetState()*: resets `vis.params` to the values in the current state
+- *vis.forceReload()*: forces whole cycle (request handler gets called)
 - *vis.getUiState()*: gets UI state of visualization
 - *vis.uiStateVal(name, val)*: updates a property in UI state
 - *vis.isEditorMode()*: returns true if in editor mode
@@ -288,11 +366,15 @@ Vis object holds the visualization state and is the window into kibana:
 - *vis.API.events.click*: default click handler
 - *vis.API.events.brush*: default brush handler
 
-Visualization gets all its parameters in `vis.params` (defaults merged with the current state). If it wants to update them it should update them in this object and then call `vis.updateState()` which will inform <visualize> about the change, which will call request and response handler and then your visualizations render method.
+Visualization gets all its parameters in `vis.params` (defaults merged with the current state). 
+If it wants to update them it should update them in this object and then call `vis.updateState()` 
+which will inform <visualize> about the change, which will call request and response handler and then your 
+visualizations render method.
 
-For the parameters that should not be saved with visualization you should use UI state (such as current state: popup open/closed, custom colors applied to the series etc)
+For the parameters that should not be saved with visualization (are viewer specific) you should use UI state 
+(such as current state: popup open/closed, custom colors applied to the series etc).
 
-You can access filter bar and time picker thru the objects defined on `vis.API`
+You can access filter bar and time picker through the objects defined on `vis.API`
 
 [[development-vis-timefilter]]
 ==== timeFilter

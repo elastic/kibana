@@ -2,11 +2,11 @@
 === Using Visualizations
 
 There are two ways to insert visualization in your page. Using `<visualize>` directive or using `<visualization>` directive.
-The following assumes you are using angular in your plugin.
+The following assumes you are using AngularJS in your plugin.
 
 ==== `<visualize>` directive
 `<visualize>` directive takes a savedVis object and it takes care of loading data, parsing data, 
-rendering editor (if in edit mode) and rendering the visualization. Its the easiest way to add visualization to your
+rendering the editor (if in edit mode) and rendering the visualization. Its the easiest way to add visualization to your
 page under the assumption that the visualization you are trying to display is saved in kibana. If that is not the case
 take a look at using <visualization> directive. 
 
@@ -14,18 +14,20 @@ Once <visualize> is done rendering the element will emit `renderComplete` event.
 
 `<visualize saved-obj='savedVis' app-state='appState' ui-state='uiState' editor-mode='false'></visualize>` where
 
-`savedVis` is an instance of savedVisualization object, which can be retrieved using `savedVisualizations` service.
+`savedVis` is an instance of savedVisualization object, which can be retrieved using `savedVisualizations` service
+which is explained later in this documentation.
 
-`appState` is an instance of `AppState`. visualize is expecting two parameters defined on it:
+`appState` is an instance of `AppState`. <visualize> is expecting two keys defined on AppState:
 
 - `filters` which is an instance of searchSource filter object and
 - `query` which is an instance of searchSource query object
 
 if not provided <visualize> will still work, just without monitoring the AppState.
 
-`uiState` should be an instance of `PersistedState`. if not provided visualize will generate one, but you will have no access to it.
+`uiState` should be an instance of `PersistedState`. if not provided visualize will generate one, 
+but you will have no access to it. Its used to store viewer specific information (like is legend toggled or not)
 
-`editor-mode` sets wether <visualize> should render in editor or in view mode.
+`editor-mode` defines if <visualize> should render in editor or in view mode.
 
 *code example: showing saved visualization, without linking to querybar or filterbar*
 ["source","html"]
@@ -45,7 +47,7 @@ uiModules.get('kibana')
 });
 -----------
 
-When <visualize> is ready it will emmit `ready:vis` event on the root scope.
+When <visualize> is ready it will emit `ready:vis` event on the root scope.
 When <visualize> is done rendering it will emit `renderComplete` event on the element.
 
 ==== `<visualization>` directive
@@ -59,7 +61,7 @@ When <visualize> is done rendering it will emit `renderComplete` event on the el
 - visConfig (object): the configuration object
 - uiState (object): uiState object you want to pass to Vis. If not provided Vis will create its own.
 
-`visData` is the data object visualization expects. this is a bit tricky at the moment as visualizations still expect object which is tightly coupled to ES, but this should change (visualizations should probably take some sort of tabular data .... response_converters should be responsible for converting ES data in appropriate format.
+`visData` is the data object visualization expects. This is a bit tricky at the moment as visualizations still expect object which is tightly coupled to ES, but this should change (visualizations should probably take some sort of tabular data .... response_converters should be responsible for converting ES data in appropriate format.)
 
 `uiState` is an instance of PersistedState. Visualization uses it to keep track of its current state. If not provided 
 <visualization> will create its own (but you won't be able to check its values)
@@ -85,4 +87,4 @@ uiModules.get('kibana')
 });
 -----------
 
-<visualization> will trigger `renderComplete` event on the element once its done rendering.
+<visualization> will trigger `renderComplete` event on the element once it's done rendering.
