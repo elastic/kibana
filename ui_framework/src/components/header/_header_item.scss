@@ -3,8 +3,36 @@
 @include component('kuiHeaderItem') {
   position: relative;
 
-  // Add a pseudo-border to the left
-  @include kuiHeaderSeparation('left');
+  &:after {
+    position: absolute;
+    content: "";
+    width: 1px;
+    top: $kuiSize;
+    bottom: 0;
+    background: $kuiBorderColor;
+    left: 0;
+  }
+
+  @include modifier('borderRight') {
+    &:after {
+      left: auto;
+      right: 0;
+    }
+  }
+
+  @include child('logo') {
+    position: relative;
+    height: $kuiHeaderChildSize;
+    padding: $kuiSize $kuiSizeXL;
+    display: inline-block;
+    vertical-align: middle;
+  }
+
+  @include child('logoIcon') {
+    height: $kuiSizeXL;
+    width: $kuiSizeL;
+    opacity: 1;
+  }
 
   @include child('button') {
     height: $kuiHeaderChildSize;

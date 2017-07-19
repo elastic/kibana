@@ -4,23 +4,6 @@
   background: $kuiHeaderBackgroundColor;
   border-bottom: $kuiBorderThin;
 
-  @include child('logo') {
-    position: relative;
-    height: $kuiHeaderChildSize;
-    padding: $kuiSize $kuiSizeXL;
-    display: inline-block;
-    vertical-align: middle;
-
-    @include kuiHeaderSeparation('right');
-
-  }
-
-  @include child('logoIcon') {
-    height: $kuiSizeXL;
-    width: $kuiSizeL;
-    opacity: 1;
-  }
-
   @include child('notification') {
     display: inline-block;
     border-radius: $kuiBorderRadius;

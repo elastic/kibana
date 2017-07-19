@@ -128,24 +128,6 @@ table {
 .kuiHeader {
   background: #FFF;
   border-bottom: 1px solid #D9D9D9; }
-  .kuiHeader__logo {
-    position: relative;
-    height: 64px;
-    padding: 16px 32px;
-    display: inline-block;
-    vertical-align: middle; }
-    .kuiHeader__logo:after {
-      position: absolute;
-      content: "";
-      width: 1px;
-      top: 16px;
-      bottom: 0;
-      background: #D9D9D9;
-      right: 0; }
-  .kuiHeader__logoIcon {
-    height: 32px;
-    width: 24px;
-    opacity: 1; }
   .kuiHeader__notification {
     display: inline-block;
     border-radius: 4px;
@@ -210,6 +192,19 @@ table {
     bottom: 0;
     background: #D9D9D9;
     left: 0; }
+  .kuiHeaderItem--borderRight:after {
+    left: auto;
+    right: 0; }
+  .kuiHeaderItem__logo {
+    position: relative;
+    height: 64px;
+    padding: 16px 32px;
+    display: inline-block;
+    vertical-align: middle; }
+  .kuiHeaderItem__logoIcon {
+    height: 32px;
+    width: 24px;
+    opacity: 1; }
   .kuiHeaderItem__button {
     height: 64px;
     min-width: 64px;
