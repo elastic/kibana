@@ -95,8 +95,6 @@ export class KibanaMap extends EventEmitter {
     this._layers = [];
     this._listeners = [];
     this._showTooltip = false;
-    this._isFilteredByCollar = options.isFilteredByCollar;
-
 
     const leafletOptions = {
       minZoom: options.minZoom,
@@ -584,9 +582,7 @@ export class KibanaMap extends EventEmitter {
   }
 
   _updateExtent() {
-    if (!this._isFilteredByCollar()) {
-      this._layers.forEach(layer => layer.updateExtent());
-    }
+    this._layers.forEach(layer => layer.updateExtent());
   }
 
   _updateDesaturation() {

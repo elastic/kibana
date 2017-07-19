@@ -71,14 +71,17 @@ export class GeohashLayer extends KibanaMapLayer {
   }
 
   updateExtent() {
-    const bounds = this._kibanaMap.getLeafletBounds();
-    if (!this._lastBounds || !this._lastBounds.equals(bounds)) {
-      //this removal is required to trigger the bounds filter again
-      this._kibanaMap.removeLayer(this);
-      this._createGeohashMarkers();
-      this._kibanaMap.addLayer(this);
+    // Client-side filtering is only enabled when server-side filter is not used
+    if (!this._geohashOptions.isFilteredByCollar) {
+      const bounds = this._kibanaMap.getLeafletBounds();
+      if (!this._lastBounds || !this._lastBounds.equals(bounds)) {
+        //this removal is required to trigger the bounds filter again
+        this._kibanaMap.removeLayer(this);
+        this._createGeohashMarkers();
+        this._kibanaMap.addLayer(this);
+      }
+      this._lastBounds = bounds;
     }
-    this._lastBounds = bounds;
   }
 
   isReusable(options) {
