@@ -56,6 +56,15 @@ export const ParentPipelineAggHelperProvider = function (Private) {
           write: parentPipelineAggWritter
         }
       ];
+    },
+    getFormat: function (agg) {
+      let subAgg;
+      if (agg.params.customMetric) {
+        subAgg = agg.params.customMetric;
+      } else {
+        subAgg = agg.vis.aggs.byId[agg.params.metricAgg];
+      }
+      return subAgg.type.getFormat(subAgg);
     }
   };
 };
