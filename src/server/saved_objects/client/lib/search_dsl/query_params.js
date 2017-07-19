@@ -1,4 +1,4 @@
-import { getRootProperties } from '../../../../mappings';
+import { getProperty, getRootProperties } from '../../../../mappings';
 
 /**
  *  Get the field params based on the types and searchFields
@@ -6,7 +6,7 @@ import { getRootProperties } from '../../../../mappings';
  *  @param  {Array<string>} types
  *  @return {Object}
  */
-function getFieldsForTypes(searchFields, types) {
+function getFieldsForTypes(mappings, searchFields, types) {
   if (!searchFields || !searchFields.length) {
     return {
       all_fields: true
@@ -16,7 +16,9 @@ function getFieldsForTypes(searchFields, types) {
   return {
     fields: searchFields.reduce((acc, field) => [
       ...acc,
-      ...types.map(prefix => `${prefix}.${field}`)
+      ...types
+        .map(prefix => `${prefix}.${field}`)
+        .filter(field => getProperty(mappings, field))
     ], []),
   };
 }
@@ -24,10 +26,10 @@ function getFieldsForTypes(searchFields, types) {
 /**
  *  Get the "query" related keys for the search body
  *  @param  {EsMapping} mapping mappings from Ui
- *  @param  {[type]} type         [description]
- *  @param  {[type]} search       [description]
- *  @param  {[type]} searchFields [description]
- *  @return {[type]}              [description]
+ *  @param  {Object} type
+ *  @param  {String} search
+ *  @param  {Array<string>} searchFields
+ *  @return {Object}
  */
 export function getQueryParams(mappings, type, search, searchFields) {
   if (!type && !search) {
@@ -48,10 +50,9 @@ export function getQueryParams(mappings, type, search, searchFields) {
         simple_query_string: {
           query: search,
           ...getFieldsForTypes(
+            mappings,
             searchFields,
-            type
-              ? [type]
-              : Object.keys(getRootProperties(mappings))
+            type ? [type] : Object.keys(getRootProperties(mappings))
           )
         }
       }
