@@ -75,7 +75,10 @@ export function TabbedAggResponseWriterProvider(Private) {
     if (group) {
       table.aggConfig = agg;
       table.key = key;
-      table.title =  (table.fieldFormatter()(key)) + ': ' + agg.makeLabel();
+      table.title = (table.fieldFormatter()(key));
+      if (agg.makeLabel() !== 'filters') {
+        table.title += ': ' + agg.makeLabel();
+      }
     }
 
     // link the parent and child
