@@ -63,7 +63,7 @@ function timerCanceler(notif, cb = _.noop, key) {
 function startNotifTimer(notif, cb) {
   const interval = 1000;
 
-  if (notif.lifetime === Infinity || notif.lifetime === 0) {
+  if (notif.lifetime === 'Infinity' || notif.lifetime === Infinity || notif.lifetime === 0) {
     return;
   }
 
@@ -107,6 +107,9 @@ const typeToAlertClassMap = {
 };
 
 function add(notif, cb) {
+  if (notif.lifetime < 0) {
+    return;
+  }
   _.set(notif, 'info.version', version);
   _.set(notif, 'info.buildNum', buildNum);
 
