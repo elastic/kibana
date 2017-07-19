@@ -17,6 +17,9 @@ export function AggTypesMetricsCountProvider(Private) {
     },
     getValue: function (agg, bucket) {
       return bucket.doc_count;
+    },
+    isScalable: function () {
+      return true;
     }
   });
 }

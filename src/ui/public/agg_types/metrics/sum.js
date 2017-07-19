@@ -14,6 +14,9 @@ export function AggTypesMetricsSumProvider(Private) {
         name: 'field',
         filterFieldTypes: 'number'
       }
-    ]
+    ],
+    isScalable: function () {
+      return true;
+    }
   });
 }

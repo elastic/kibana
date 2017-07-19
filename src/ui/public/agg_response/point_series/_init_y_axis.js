@@ -4,7 +4,6 @@ export function PointSeriesInitYAxisProvider() {
 
   return function initYAxis(chart) {
     const y = chart.aspects.y;
-    const x = chart.aspects.x;
 
     if (_.isArray(y)) {
       // TODO: vis option should allow choosing this format
@@ -25,9 +24,5 @@ export function PointSeriesInitYAxisProvider() {
         chart.zAxisLabel = z.col.title;
       }
     }
-
-
-    const xAggOutput = x.agg.write();
-    chart.yScale = xAggOutput.metricScale || null;
   };
 }
