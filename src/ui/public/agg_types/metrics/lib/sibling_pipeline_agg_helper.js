@@ -83,6 +83,9 @@ export const SiblingPipelineAggHelperProvider = function (Private) {
           write: siblingPipelineAggWritter
         }
       ];
+    },
+    getFormat: function (agg) {
+      return agg.params.customMetric.type.getFormat(agg.params.customMetric);
     }
   };
 
