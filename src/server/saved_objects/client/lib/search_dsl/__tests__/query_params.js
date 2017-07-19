@@ -128,6 +128,27 @@ describe('searchDsl/queryParams', () => {
           }
         });
     });
+    it('supports field boosting', () => {
+      expect(getQueryParams(MAPPINGS, null, 'y*', ['title^3']))
+        .to.eql({
+          query: {
+            bool: {
+              must: [
+                {
+                  simple_query_string: {
+                    query: 'y*',
+                    fields: [
+                      'type.title^3',
+                      'pending.title^3',
+                      'saved.title^3'
+                    ]
+                  }
+                }
+              ]
+            }
+          }
+        });
+    });
     it('supports field and multi-field', () => {
       expect(getQueryParams(MAPPINGS, null, 'y*', ['title', 'title.raw']))
         .to.eql({
