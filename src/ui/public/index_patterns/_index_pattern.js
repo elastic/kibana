@@ -393,7 +393,7 @@ export function IndexPatternProvider(Private, $http, config, kbnIndex, Promise, 
       });
     }
 
-    async save() {
+    save() {
       return savedObjectsClient.update(type, this.id, this.prepBody())
         .then(({ id }) => setId(this, id));
     }

@@ -27,7 +27,7 @@ export function IndexPatternsFieldProvider(Private, shortDotsFilter, $rootScope,
       notify.error(
         'Unknown field type "' + spec.type + '"' +
         ' for field "' + spec.name + '"' +
-        ' in indexPattern "' + indexPattern.id + '"'
+        ' in indexPattern "' + indexPattern.title + '"'
       );
     }
 
