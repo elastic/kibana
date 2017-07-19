@@ -149,7 +149,6 @@
     "json-loader": "0.5.3",
     "json-stringify-safe": "5.0.1",
     "jstimezonedetect": "1.0.5",
-    "kbn-types": "file:packages/kbn-types",
     "leaflet": "0.7.5",
     "less": "2.7.1",
     "less-loader": "2.2.3",
