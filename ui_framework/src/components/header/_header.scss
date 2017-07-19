@@ -2,6 +2,19 @@
 
 $kuiHeaderChildSize: $kuiSizeXXL + $kuiSizeL;
 
+// Adds a border to the left or right of an item. Requires relative position on parent.
+@mixin kuiHeaderSeparation($position) {
+  &:after {
+    position: absolute;
+    content: "";
+    width: 1px;
+    top: $kuiSize;
+    bottom: 0;
+    background: $kuiBorderColor;
+    #{$position}: 0;
+  }
+}
+
 @include component('kuiHeader') {
   background: $kuiHeaderBackgroundColor;
   border-bottom: $kuiBorderThin;
@@ -13,15 +26,8 @@ $kuiHeaderChildSize: $kuiSizeXXL + $kuiSizeL;
     display: inline-block;
     vertical-align: middle;
 
-    &:after {
-      position: absolute;
-      content: "";
-      width: 1px;
-      top: $kuiSize;
-      bottom: 0;
-      right: 0;
-      background: $kuiBorderColor;
-    }
+    @include kuiHeaderSeparation('right');
+
   }
 
   @include child('logoIcon') {
@@ -82,15 +88,7 @@ $kuiHeaderChildSize: $kuiSizeXXL + $kuiSizeL;
     text-align: center;
     position: relative;
 
-    &:after {
-      position: absolute;
-      content: "";
-      width: 1px;
-      top: $kuiSize;
-      bottom: 0;
-      left: 0;
-      background: $kuiBorderColor;
-    }
+    @include kuiHeaderSeparation('left');
 
     &:hover {
       background: $kuiColorLightestGray;

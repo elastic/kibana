@@ -145,8 +145,8 @@ table {
       width: 1px;
       top: 16px;
       bottom: 0;
-      right: 0;
-      background: #D9D9D9; }
+      background: #D9D9D9;
+      right: 0; }
   .kuiHeader__logoIcon {
     height: 32px;
     width: 24px;
@@ -195,8 +195,8 @@ table {
       width: 1px;
       top: 16px;
       bottom: 0;
-      left: 0;
-      background: #D9D9D9; }
+      background: #D9D9D9;
+      left: 0; }
     .kuiHeader__button:hover {
       background: #F5F5F5; }
     .kuiHeader__button:focus {

@@ -13,7 +13,7 @@ Our style guide is an extension of [Sass Guidelines by Hugo Giraudel](https://sa
 
 ## Responsive layouts
 
-Kibana aims to provide at least a read state on anylayouts when on small devices. We place any responsive sass at the bottom of our sass documents, rather than intermingled within the components themselves.
+Kibana aims to provide at least a read-only (meaning, editing and controls can be hidden) on layouts when on a small device. We place any responsive Sass at the bottom of our SCSS documents, rather than intermingled within the components themselves.
 
 ```
 // Good
