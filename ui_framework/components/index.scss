@@ -1,0 +1,116 @@
+/**
+ * Adapted from Eric Meyer's reset (http://meyerweb.com/eric/tools/css/reset/, v2.0 | 20110126).
+ *
+ */
+*, *:before, *:after {
+  box-sizing: border-box; }
+
+html, body, div, span, applet, object, iframe,
+h1, h2, h3, h4, h5, h6, p, blockquote, pre,
+a, abbr, acronym, address, big, cite, code,
+del, dfn, em, img, ins, kbd, q, s, samp,
+small, strike, strong, sub, sup, tt, var,
+b, u, i, center,
+dl, dt, dd, ol, ul, li,
+fieldset, form, label, legend,
+table, caption, tbody, tfoot, thead, tr, th, td,
+article, aside, canvas, details, embed,
+figure, figcaption, footer, header, hgroup,
+menu, nav, output, ruby, section, summary,
+time, mark, audio, video {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  font-size: 100%;
+  font: inherit;
+  vertical-align: baseline; }
+
+/* HTML5 display-role reset for older browsers */
+article, aside, details, figcaption, figure,
+footer, header, hgroup, menu, nav, section {
+  display: block; }
+
+html {
+  font-family: "Roboto", Helvetica, Arial, sans-serif;
+  font-weight: 400;
+  color: #3F3F3F;
+  height: 100%; }
+
+body {
+  line-height: 1; }
+
+a {
+  text-decoration: none; }
+  a:hover {
+    text-decoration: underline; }
+  a:focus {
+    text-decoration: underline;
+    background: #bfe9e6;
+    outline: none; }
+
+button {
+  background: none;
+  border: none;
+  padding: 0;
+  margin: 0;
+  outline: none; }
+  button:hover {
+    cursor: pointer; }
+
+ol, ul {
+  list-style: none; }
+
+blockquote, q {
+  quotes: none; }
+
+blockquote:before, blockquote:after,
+q:before, q:after {
+  content: '';
+  content: none; }
+
+table {
+  border-collapse: collapse;
+  border-spacing: 0; }
+
+// Global constants
+@import "variables";
+@import "mixins";
+@import "common_styles";
+
+// Components
+@import "action_item/index";
+@import "badge/index";
+@import "bar/index";
+@import "button/index";
+@import "card/index";
+@import "collapse_button/index";
+@import "color_picker/index";
+@import "column/index";
+@import "event/index";
+@import "expression/index";
+@import "form/index";
+@import "form_layout/index";
+@import "gallery/index";
+@import "header_bar/index";
+@import "info_button/index";
+@import "icon/index";
+@import "info_panel/index";
+@import "link/index";
+@import "local_nav/index";
+@import "menu/index";
+@import "menu_button/index";
+@import "micro_button/index";
+@import "modal/index";
+@import "notice/index";
+@import "pager/index";
+@import "panel/index";
+@import "empty_table_prompt/index";
+@import "status_text/index";
+@import "table/index";
+@import "table_info/index";
+@import "tabs/index";
+@import "toggle_button/index";
+@import "tool_bar/index";
+@import "typography/index";
+@import "vertical_rhythm/index";
+@import "view/index";
