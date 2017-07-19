@@ -82,6 +82,7 @@ export {
   KuiMenuItem,
 } from './menu';
 
+
 export * from './modal';
 
 export {
@@ -95,7 +96,23 @@ export {
 } from './tabs';
 
 export {
-  KuiToolBarSearchBox,
+  KuiTable,
+  KuiControlledTable,
+  KuiTableHeaderCell,
+  KuiTableRow,
+  KuiTableRowCell,
+  KuiTableInfo,
+  KuiTableRowCheckBoxCell,
+  KuiTableHeaderCheckBoxCell,
+  KuiTableHeader,
+  KuiTableBody,
+} from './table';
+
+export {
   KuiToolBar,
+  KuiToolBarSearchBox,
   KuiToolBarFooter,
+  KuiToolBarSection,
+  KuiToolBarFooterSection,
+  KuiToolBarText
 } from './tool_bar';

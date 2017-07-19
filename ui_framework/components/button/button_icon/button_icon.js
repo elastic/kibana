@@ -10,6 +10,8 @@ const ICON_TYPES = [
   'previous',
   'next',
   'loading',
+  'settings',
+  'menu',
 ];
 
 const KuiButtonIcon = props => {
@@ -19,6 +21,8 @@ const KuiButtonIcon = props => {
     previous: 'fa-chevron-left',
     next: 'fa-chevron-right',
     loading: 'fa-spinner fa-spin',
+    settings: 'fa-gear',
+    menu: 'fa-bars',
   };
 
   const iconClasses = classNames('kuiButton__icon kuiIcon', props.className, {
