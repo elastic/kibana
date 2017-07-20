@@ -1,5 +1,5 @@
 import { ElasticsearchService } from './ElasticsearchService';
-import { ElasticsearchClusterType } from '../../types';
+import { ElasticsearchClusterType } from './ElasticsearchConfig';
 import { Cluster } from './Cluster';
 
 export class ElasticsearchRequestHelpers {

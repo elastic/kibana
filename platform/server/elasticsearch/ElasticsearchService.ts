@@ -1,9 +1,10 @@
 import { Observable, Subscription } from 'rxjs';
 
+import { ElasticsearchClusterType } from './ElasticsearchConfig';
 import { ElasticsearchConfigs } from './ElasticsearchConfigs';
 import { Cluster } from './Cluster';
 import { LoggerFactory } from '../../logger';
-import { ElasticsearchClusterType, CoreService } from '../../types';
+import { CoreService } from '../../types';
 
 type Clusters = { [type in ElasticsearchClusterType]: Cluster };
 

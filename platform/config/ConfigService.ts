@@ -4,7 +4,7 @@ import { get, isEqual } from 'lodash';
 import { Env } from './Env';
 import { Logger, LoggerFactory } from '../logger';
 import * as schema from '../lib/schema';
-import { ConfigWithSchema } from '../types';
+import { ConfigWithSchema } from './ConfigWithSchema';
 
 export type ConfigPath = string | string[];
 

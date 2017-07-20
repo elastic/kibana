@@ -5,7 +5,8 @@ import { noop } from 'lodash';
 
 import { ClusterSchema } from './schema';
 import { pick, assertNever } from '../../lib/utils';
-import { ElasticsearchClusterType } from '../../types';
+
+export type ElasticsearchClusterType = 'data' | 'admin';
 
 export class ElasticsearchConfig {
   requestHeadersWhitelist: string[];
