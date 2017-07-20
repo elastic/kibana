@@ -13,7 +13,7 @@ module.exports = new Element('plot', {
   displayName: 'Coordinate plot',
   description: 'An customizable XY plot for making line, bar or dot charts from your data',
   image: header,
-  expression: 'demodata().pointseries(x="time", y="sum(price)", color="state").plot(defaultStyle=seriesStyle(lines=2))',
+  expression: 'demodata().pointseries(x="time", y="sum(price)", color="state").plot(defaultStyle=seriesStyle(lines=2)).render()',
   render(domNode, config, done, events) {
 
     config.options.legend.labelBoxBorderColor = 'transparent';
