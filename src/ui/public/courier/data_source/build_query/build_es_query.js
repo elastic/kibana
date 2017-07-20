@@ -1,4 +1,4 @@
-import { groupBy } from 'lodash';
+import { groupBy, has } from 'lodash';
 import { DecorateQueryProvider } from '../_decorate_query';
 import { buildQueryFromKuery } from './from_kuery';
 import { buildQueryFromFilters } from './from_filters';
@@ -13,7 +13,8 @@ export function BuildESQueryProvider(Private) {
    * @param filters - an array of filter objects
    */
   function buildESQuery(indexPattern, queries, filters) {
-    const queriesByLanguage = groupBy(queries, 'language');
+    const validQueries = queries.filter((query) => has(query, 'query'));
+    const queriesByLanguage = groupBy(validQueries, 'language');
 
     const kueryQuery = buildQueryFromKuery(indexPattern, queriesByLanguage.kuery);
     const luceneQuery = buildQueryFromLucene(queriesByLanguage.lucene, decorateQuery);
