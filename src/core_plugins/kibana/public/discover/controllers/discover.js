@@ -334,10 +334,11 @@ function discoverController(
       });
 
       // Necessary for handling new time filters when the date histogram is clicked
-      $scope.$watch('state.$newFilters', function (filters = []) {
+      $scope.$watchCollection('state.$newFilters', function (filters = []) {
         // need to convert filters generated from user interaction with viz into kuery AST
         // These are handled by the filter bar directive when lucene is the query language
         Promise.all(filters.map(queryManager.addLegacyFilter))
+        .then(() => $scope.state.$newFilters = [])
         .then($scope.fetch);
       });
 
