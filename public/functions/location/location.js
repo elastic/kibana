@@ -2,14 +2,15 @@ const Fn = require('../../../common/functions/fn.js');
 
 module.exports = new Fn({
   name: 'location',
-  type: 'geoposition',
+  type: 'string',
   help: 'Get the users location',
   fn: () => {
     return new Promise((resolve) => {
       function createLocation(geoposition) {
-        resolve({ type: 'geoposition', coords: geoposition.coords });
+        const { latitude, longitude } = geoposition.coords;
+        return resolve(`${latitude}, ${longitude}`);
       }
-      navigator.geolocation.getCurrentPosition(createLocation);
+      return navigator.geolocation.getCurrentPosition(createLocation);
     });
   },
 });
