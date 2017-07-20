@@ -74,7 +74,7 @@ export default function ({ getService, getPageObjects }) {
 
     describe('field list pagination', function () {
       const EXPECTED_DEFAULT_PAGE_SIZE = 25;
-      const EXPECTED_FIELD_COUNT = 85;
+      const EXPECTED_FIELD_COUNT = 86;
       const EXPECTED_LAST_PAGE_COUNT = 10;
       const LAST_PAGE_NUMBER = 4;
 
