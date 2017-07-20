@@ -19,6 +19,7 @@ import uiMixin from '../ui';
 import optimizeMixin from '../optimize';
 import pluginsInitializeMixin from './plugins/initialize';
 import { indexPatternsMixin } from './index_patterns';
+import { indicesMixin } from './indices';
 import { savedObjectsMixin } from './saved_objects';
 import { statsMixin } from './stats';
 import { kibanaIndexMappingsMixin } from './mappings';
@@ -69,6 +70,7 @@ export default class KbnServer {
       // setup this.uiExports and this.bundles
       uiMixin,
       indexPatternsMixin,
+      indicesMixin,
 
       // setup saved object routes
       savedObjectsMixin,

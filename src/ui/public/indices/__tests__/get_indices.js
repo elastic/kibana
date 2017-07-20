@@ -1,8 +1,12 @@
 import expect from 'expect.js';
 import ngMock from 'ng_mock';
+import sinon from 'sinon';
+
 import { IndicesGetIndicesProvider } from 'ui/indices/get_indices';
+import { IndicesApiClientProvider } from 'ui/indices/indices_api_client_provider';
 
 describe('GetIndices', function () {
+  const searchSpy = sinon.spy();
   let indicesResponse;
   let aliasesResponse;
   let getIndices;
@@ -37,27 +41,20 @@ describe('GetIndices', function () {
 
   beforeEach(ngMock.inject((Private) => {
     getIndices = Private(IndicesGetIndicesProvider);
+    const provider = Private(IndicesApiClientProvider);
+    provider.search = searchSpy;
   }));
 
   it('should be a function', function () {
     expect(getIndices).to.be.a(Function);
   });
 
-  it('should rely on the alias endpoint if it returns a non 404', async function () {
-    const indices = await getIndices();
-    expect(indices.length).to.be(2);
-    expect(indices[0]).to.be('.monitoring-es-1');
-    expect(indices[1]).to.be('.monitoring-es-active');
-  });
-
-  it('should fallback to the cat indices endpoint if there are no aliases', async function () {
-    const aliasesResponseCopy = Object.assign({}, aliasesResponse);
-    aliasesResponse = { status: 404 };
-    const indices = await getIndices();
-    expect(indices.length).to.be(indicesResponse.length);
-    indicesResponse.forEach((indexObj, idx) => {
-      expect(indices[idx]).to.be(indexObj.index);
-    });
-    aliasesResponse = aliasesResponseCopy;
+  it('should call the indices api client', async function () {
+    await getIndices('foo', 12, false);
+    expect(searchSpy.calledWith({
+      pattern: 'foo',
+      maxNumberOfMatchingIndices: 12,
+      useDataCluster: false
+    })).to.be(true);
   });
 });
