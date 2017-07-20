@@ -6,6 +6,17 @@ Make sure you're running the Node version specified in `../.node-version`.
 
 ## TypeScript
 
+Both the platform and core plugins are built using TypeScript.
+
+First you need to build the `kbn-types` package, which is the "external types"
+used by core plugins.
+
+Go to `../packages/@elastic/kbn-types` and build the types (see the readme in
+that folder).
+
+Then, when `kbn-types` is built you can build the platform and core plugins
+using:
+
 ```
 npm run ts:start
 ```
