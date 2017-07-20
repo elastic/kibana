@@ -9,12 +9,12 @@ module.exports = new Fn({
     types: ['string'],
   },
   args: {
-    format: {
+    _: {
       types: ['string'],
       help: 'Format with which to bucket', // If you need categorization, transform the field.
     },
   },
   fn: (context, args) => {
-    return moment(moment(context).format(args.format), args.format).format();
+    return moment(moment(context).format(args._), args._).format();
   },
 });
