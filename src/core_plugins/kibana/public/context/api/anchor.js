@@ -1,31 +1,43 @@
 import _ from 'lodash';
 
-import { addComputedFields } from './utils/fields';
-import { createAnchorQueryBody } from './utils/queries';
+import { SearchSourceProvider } from 'ui/courier/data_source/search_source';
 
 
-async function fetchAnchor(es, indexPattern, uid, sort) {
-  const indices = await indexPattern.toIndexList();
-  const queryBody = addComputedFields(indexPattern, createAnchorQueryBody(uid, sort));
-  const response = await es.search({
-    index: indices,
-    body: queryBody,
-  });
+function fetchAnchorProvider(courier, Private) {
+  const SearchSource = Private(SearchSourceProvider);
 
-  if (_.get(response, ['hits', 'total'], 0) < 1) {
-    throw new Error('Failed to load anchor document.');
-  }
+  return async function fetchAnchor(indexPatternId, uid, sort) {
+    const indexPattern = await courier.indexPatterns.get(indexPatternId);
 
-  return Object.assign(
-    {},
-    response.hits.hits[0],
-    {
-      $$_isAnchor: true,
-    },
-  );
+    const searchSource = new SearchSource()
+      .inherits(false)
+      .set('index', indexPattern)
+      .set('version', true)
+      .set('size', 1)
+      .set('query', {
+        terms: {
+          _uid: [uid],
+        },
+      })
+      .set('sort', sort);
+
+    const response = await searchSource.fetchAsRejectablePromise();
+
+    if (_.get(response, ['hits', 'total'], 0) < 1) {
+      throw new Error('Failed to load anchor document.');
+    }
+
+    return Object.assign(
+      {},
+      _.get(response, ['hits', 'hits', 0]),
+      {
+        $$_isAnchor: true,
+      },
+    );
+  };
 }
 
 
 export {
-  fetchAnchor,
+  fetchAnchorProvider,
 };

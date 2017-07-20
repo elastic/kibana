@@ -1,0 +1,37 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`renders KuiEmptyTablePrompt 1`] = `
+<div
+  aria-label="aria-label"
+  class="kuiEmptyTablePrompt testClass1 testClass2"
+  data-test-subj="test subject string"
+>
+  <div
+    class="kuiEmptyTablePrompt__message"
+  >
+    Uh oh, You have no items!
+  </div>
+  <div
+    class="kuiEmptyTablePrompt__actions"
+  >
+    <a
+      aria-label="Add a new item"
+      class="kuiButton kuiButton--primary kuiButton--iconText"
+      data-test-subj="addNewPromptButton"
+      href="#"
+    >
+      <span
+        class="kuiButton__inner"
+      >
+        <span
+          aria-hidden="true"
+          class="kuiButton__icon kuiIcon fa-plus"
+        />
+        <span>
+          Add a new item
+        </span>
+      </span>
+    </a>
+  </div>
+</div>
+`;

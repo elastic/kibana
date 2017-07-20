@@ -3,7 +3,7 @@ import _ from 'lodash';
 /**
  * just a place to put feature detection checks
  */
-export default {
+export const supports = {
   cssFilters: (function () {
     const e = document.createElement('img');
     const rules = ['webkitFilter', 'mozFilter', 'msFilter', 'filter'];

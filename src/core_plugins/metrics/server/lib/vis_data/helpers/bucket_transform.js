@@ -46,6 +46,19 @@ export default {
       }
     };
   },
+  static: (bucket) => {
+    checkMetric(bucket, ['value']);
+    return {
+      bucket_script: {
+        buckets_path: { count: '_count' },
+        script: {
+          inline: bucket.value,
+          lang: 'painless'
+        },
+        gap_policy: 'skip'
+      }
+    };
+  },
   avg: stdMetric,
   max: stdMetric,
   min: stdMetric,
@@ -162,6 +175,25 @@ export default {
     };
     if (bucket.gap_policy) body.bucket_script.gap_policy = bucket.gap_policy;
     return body;
+  },
+
+  positive_only: (bucket, metrics) => {
+    checkMetric(bucket, ['field', 'type']);
+    const body = {
+      bucket_script: {
+        buckets_path: {
+          value: getBucketsPath(bucket.field, metrics)
+        },
+        script: {
+          inline: 'params.value > 0 ? params.value : 0',
+          lang: 'painless'
+        },
+        gap_policy: 'skip' // seems sane
+      }
+    };
+    return body;
   }
+
+
 };
 

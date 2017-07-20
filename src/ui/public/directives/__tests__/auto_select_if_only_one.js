@@ -48,4 +48,22 @@ describe('Auto-select if only one directive', function () {
 
     expect($rootScope.value).to.be(multiOptions[1]);
   });
+
+  it('should auto-select if the collection changes', function () {
+    $rootScope.options = multiOptions;
+    $rootScope.$digest();
+    expect($rootScope.value).to.not.be.ok();
+    $rootScope.options = oneOption;
+    $rootScope.$digest();
+    expect($rootScope.value).to.be(oneOption[0]);
+  });
+
+  it('should auto-select if the collection is mutated', function () {
+    $rootScope.options = multiOptions.slice();
+    $rootScope.$digest();
+    expect($rootScope.value).to.not.be.ok();
+    $rootScope.options.length = 1;
+    $rootScope.$digest();
+    expect($rootScope.value).to.be($rootScope.options[0]);
+  });
 });

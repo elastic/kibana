@@ -1,9 +1,9 @@
 import React, { PropTypes } from 'react';
 import tickFormatter from '../../lib/tick_formatter';
 import _ from 'lodash';
-import { Metric, getLastValue } from 'plugins/metrics/visualizations';
+import Metric from 'plugins/metrics/visualizations/components/metric';
+import getLastValue from 'plugins/metrics/visualizations/lib/get_last_value';
 import color from 'color';
-
 
 function getColors(props) {
   const { model, visData } = props;

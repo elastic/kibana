@@ -1,6 +1,6 @@
 import expect from 'expect.js';
 import moment from 'moment';
-import timeNavigation from '../time_navigation';
+import { timeNavigation } from '../time_navigation';
 
 describe('timeNavigation', () => {
   let bounds;
@@ -14,15 +14,15 @@ describe('timeNavigation', () => {
 
   it('should step forward by the amount of the duration', () => {
     const { from, to, mode } = timeNavigation.stepForward(bounds);
-    expect(from).to.be('2016-01-01T00:15:00.000Z');
-    expect(to).to.be('2016-01-01T00:30:00.000Z');
+    expect(from).to.be('2016-01-01T00:15:00.001Z');
+    expect(to).to.be('2016-01-01T00:30:00.001Z');
     expect(mode).to.be('absolute');
   });
 
   it('should step backward by the amount of the duration', () => {
     const { from, to, mode } = timeNavigation.stepBackward(bounds);
-    expect(from).to.be('2015-12-31T23:45:00.000Z');
-    expect(to).to.be('2016-01-01T00:00:00.000Z');
+    expect(from).to.be('2015-12-31T23:44:59.999Z');
+    expect(to).to.be('2015-12-31T23:59:59.999Z');
     expect(mode).to.be('absolute');
   });
 

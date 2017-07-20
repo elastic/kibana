@@ -1,5 +1,6 @@
-import _ from 'lodash';
-import { __dirname as root } from './package_json';
-import { join, normalize } from 'path';
+import { pkg } from './package_json';
+import { resolve } from 'path';
 
-module.exports = _.flow(_.partial(join, root), normalize);
+export function fromRoot(...args) {
+  return resolve(pkg.__dirname, ...args);
+}

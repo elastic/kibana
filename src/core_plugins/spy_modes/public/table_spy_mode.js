@@ -1,10 +1,10 @@
 import 'ui/agg_table';
-import AggResponseTabifyTabifyProvider from 'ui/agg_response/tabify/tabify';
+import { AggResponseTabifyProvider } from 'ui/agg_response/tabify/tabify';
 import tableSpyModeTemplate from 'plugins/spy_modes/table_spy_mode.html';
-import spyModesRegistry from 'ui/registry/spy_modes';
+import { SpyModesRegistryProvider } from 'ui/registry/spy_modes';
 
 function VisSpyTableProvider(Notifier, $filter, $rootScope, config, Private) {
-  const tabifyAggResponse = Private(AggResponseTabifyTabifyProvider);
+  const tabifyAggResponse = Private(AggResponseTabifyProvider);
   const PER_PAGE_DEFAULT = 10;
 
   return {
@@ -15,16 +15,16 @@ function VisSpyTableProvider(Notifier, $filter, $rootScope, config, Private) {
     link: function tableLinkFn($scope) {
       $rootScope.$watchMulti.call($scope, [
         'vis',
-        'esResp'
+        'visData'
       ], function () {
-        if (!$scope.vis || !$scope.esResp) {
+        if (!$scope.vis || !$scope.visData) {
           $scope.table = null;
         } else {
           if (!$scope.spy.params.spyPerPage) {
             $scope.spy.params.spyPerPage = PER_PAGE_DEFAULT;
           }
 
-          $scope.table = tabifyAggResponse($scope.vis, $scope.esResp, {
+          $scope.table = tabifyAggResponse($scope.vis, $scope.searchSource.rawResponse, {
             canSplit: false,
             asAggConfigResults: true,
             partialRows: true
@@ -35,4 +35,4 @@ function VisSpyTableProvider(Notifier, $filter, $rootScope, config, Private) {
   };
 }
 
-spyModesRegistry.register(VisSpyTableProvider);
+SpyModesRegistryProvider.register(VisSpyTableProvider);

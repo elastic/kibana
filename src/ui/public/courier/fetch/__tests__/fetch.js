@@ -1,13 +1,13 @@
 import ngMock from 'ng_mock';
 import expect from 'expect.js';
-import sinon from 'auto-release-sinon';
+import sinon from 'sinon';
 
 import IndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
 import searchResp from 'fixtures/search_response';
 
-import FetchProvider from '../fetch';
-import DocSourceProvider from '../../data_source/doc_source';
-import SearchSourceProvider from '../../data_source/search_source';
+import { FetchProvider } from '../fetch';
+import { DocSourceProvider } from '../../data_source/doc_source';
+import { SearchSourceProvider } from '../../data_source/search_source';
 
 describe('Fetch service', function () {
   require('test_utils/no_digest_promises').activateForSuite();

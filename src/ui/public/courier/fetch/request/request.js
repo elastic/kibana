@@ -1,10 +1,10 @@
 import _ from 'lodash';
 import moment from 'moment';
 
-import RequestQueueProvider from '../../_request_queue';
-import ErrorHandlerRequestProvider from './error_handler';
+import { RequestQueueProvider } from '../../_request_queue';
+import { ErrorHandlerRequestProvider } from './error_handler';
 
-export default function AbstractReqProvider(Private, Promise) {
+export function AbstractRequestProvider(Private, Promise) {
   const requestQueue = Private(RequestQueueProvider);
   const requestErrorHandler = Private(ErrorHandlerRequestProvider);
 
@@ -13,6 +13,12 @@ export default function AbstractReqProvider(Private, Promise) {
       this.source = source;
       this.defer = defer || Promise.defer();
       this.abortedDefer = Promise.defer();
+
+      this.setErrorHandler((...args) => {
+        this.retry();
+        return requestErrorHandler(...args);
+      });
+
       requestQueue.push(this);
     }
 
@@ -89,8 +95,7 @@ export default function AbstractReqProvider(Private, Promise) {
     handleFailure(error) {
       this.success = false;
       this.resp = error && error.resp;
-      this.retry();
-      return requestErrorHandler(this, error);
+      return this.errorHandler(this, error);
     }
 
     isIncomplete() {
@@ -142,6 +147,10 @@ export default function AbstractReqProvider(Private, Promise) {
 
     clone() {
       return new this.constructor(this.source, this.defer);
+    }
+
+    setErrorHandler(errorHandler) {
+      this.errorHandler = errorHandler;
     }
   };
 }

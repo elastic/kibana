@@ -1,5 +1,5 @@
 import _ from 'lodash';
-import uiModules from 'ui/modules';
+import { uiModules } from 'ui/modules';
 import samplesTemplate from 'ui/field_format_editor/samples/samples.html';
 
 uiModules

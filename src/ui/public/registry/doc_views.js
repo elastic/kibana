@@ -1,6 +1,7 @@
 import _ from 'lodash';
-import uiRegistry from 'ui/registry/_registry';
-export default uiRegistry({
+import { uiRegistry } from 'ui/registry/_registry';
+
+export const DocViewsRegistryProvider = uiRegistry({
   name: 'docViews',
   index: ['name'],
   order: ['order'],

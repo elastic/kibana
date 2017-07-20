@@ -1,10 +1,10 @@
-import sinon from 'auto-release-sinon';
+import sinon from 'sinon';
 import expect from 'expect.js';
 import ngMock from 'ng_mock';
 
 import StubbedSearchSourceProvider from 'fixtures/stubbed_search_source';
 
-import SegmentedRequestProvider from '../segmented';
+import { SegmentedRequestProvider } from '../segmented';
 
 describe('ui/courier/fetch/request/segmented/_createQueue', () => {
   let Promise;

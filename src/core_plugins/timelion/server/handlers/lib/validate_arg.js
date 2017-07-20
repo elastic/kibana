@@ -1,7 +1,7 @@
 import argType from './arg_type';
 import _ from 'lodash';
 
-module.exports = function (functionDef) {
+export default function validateArgFn(functionDef) {
   return function validateArg(value, name, argDef) {
     const type = argType(value);
     const required = argDef.types;
@@ -20,4 +20,4 @@ module.exports = function (functionDef) {
       throw new Error (functionDef.name + '(' + name + ') must be one of ' + JSON.stringify(required) + '. Got: ' + type);
     }
   };
-};
+}

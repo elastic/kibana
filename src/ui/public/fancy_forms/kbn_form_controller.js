@@ -6,7 +6,7 @@ import _ from 'lodash';
  *
  * @param {$scope} $scope
  */
-function KbnFormController($scope, $element) {
+export function KbnFormController($scope, $element) {
   const self = this;
 
   self.errorCount = function () {
@@ -72,5 +72,3 @@ function KbnFormController($scope, $element) {
     $element.off('submit', filterSubmits);
   });
 }
-
-export default KbnFormController;

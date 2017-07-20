@@ -12,12 +12,12 @@ describe('Comma-List filter', function () {
   }));
 
   it('converts a string to a pretty list', function () {
-    expect(commaList('john,jaine,jim', true)).to.be('john, jaine and jim');
-    expect(commaList('john,jaine,jim', false)).to.be('john, jaine or jim');
+    expect(commaList('john,jaine,jim', true)).to.be('john, jaine, and jim');
+    expect(commaList('john,jaine,jim', false)).to.be('john, jaine, or jim');
   });
 
   it('can accept an array too', function () {
-    expect(commaList(['john', 'jaine', 'jim'])).to.be('john, jaine or jim');
+    expect(commaList(['john', 'jaine', 'jim'])).to.be('john, jaine, or jim');
   });
 
   it('handles undefined ok', function () {

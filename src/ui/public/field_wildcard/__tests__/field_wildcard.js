@@ -1,7 +1,7 @@
 import expect from 'expect.js';
 import ngMock from 'ng_mock';
 
-import FieldWildcardProvider from '../../field_wildcard';
+import { FieldWildcardProvider } from '../../field_wildcard';
 
 describe('fieldWildcard', function () {
   let fieldWildcardFilter;

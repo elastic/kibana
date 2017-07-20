@@ -2,7 +2,7 @@ import _ from 'lodash';
 import ngMock from 'ng_mock';
 import expect from 'expect.js';
 import sinon from 'sinon';
-import Notifier from 'ui/notify/notifier';
+import { Notifier } from 'ui/notify/notifier';
 
 describe('Notifier', function () {
   let $interval;
@@ -124,7 +124,7 @@ describe('Notifier', function () {
 
     it('has css class helper functions', function () {
       expect(notify('error').getIconClass()).to.equal('fa fa-warning');
-      expect(notify('error').getButtonClass()).to.equal('btn-danger');
+      expect(notify('error').getButtonClass()).to.equal('kuiButton--danger');
       expect(notify('error').getAlertClassStack()).to.equal('toast-stack alert alert-danger');
       expect(notify('error').getAlertClass()).to.equal('toast alert alert-danger');
       expect(notify('error').getButtonGroupClass()).to.equal('toast-controls');
@@ -171,7 +171,7 @@ describe('Notifier', function () {
 
     it('has css class helper functions', function () {
       expect(notify('warning').getIconClass()).to.equal('fa fa-warning');
-      expect(notify('warning').getButtonClass()).to.equal('btn-warning');
+      expect(notify('warning').getButtonClass()).to.equal('kuiButton--warning');
       expect(notify('warning').getAlertClassStack()).to.equal('toast-stack alert alert-warning');
       expect(notify('warning').getAlertClass()).to.equal('toast alert alert-warning');
       expect(notify('warning').getButtonGroupClass()).to.equal('toast-controls');
@@ -218,7 +218,7 @@ describe('Notifier', function () {
 
     it('has css class helper functions', function () {
       expect(notify('info').getIconClass()).to.equal('fa fa-info-circle');
-      expect(notify('info').getButtonClass()).to.equal('btn-info');
+      expect(notify('info').getButtonClass()).to.equal('kuiButton--primary');
       expect(notify('info').getAlertClassStack()).to.equal('toast-stack alert alert-info');
       expect(notify('info').getAlertClass()).to.equal('toast alert alert-info');
       expect(notify('info').getButtonGroupClass()).to.equal('toast-controls');
@@ -286,9 +286,9 @@ describe('Notifier', function () {
         expect(action).to.have.property('getButtonClass');
         expect(action.getButtonClass).to.be.a('function');
         if (idx === 0) {
-          expect(action.getButtonClass()).to.be('btn-primary btn-info');
+          expect(action.getButtonClass()).to.be('kuiButton--primary kuiButton--primary');
         } else {
-          expect(action.getButtonClass()).to.be('btn-default btn-info');
+          expect(action.getButtonClass()).to.be('kuiButton--basic kuiButton--primary');
         }
       });
     });
@@ -402,7 +402,7 @@ describe('Notifier', function () {
 
     it('has css class helper functions', function () {
       expect(notify('banner').getIconClass()).to.equal('');
-      expect(notify('banner').getButtonClass()).to.equal('btn-banner');
+      expect(notify('banner').getButtonClass()).to.equal('kuiButton--basic');
       expect(notify('banner').getAlertClassStack()).to.equal('toast-stack alert alert-banner');
       expect(notify('banner').getAlertClass()).to.equal('alert alert-banner');
       expect(notify('banner').getButtonGroupClass()).to.equal('toast-controls-banner');
@@ -420,13 +420,13 @@ describe('Notifier', function () {
   }
 
   function testVersionInfo(fnName) {
-    context('when version is configured', function () {
+    describe('when version is configured', function () {
       it('adds version to notification', function () {
         const notification = notify(fnName);
         expect(notification.info.version).to.equal(version);
       });
     });
-    context('when build number is configured', function () {
+    describe('when build number is configured', function () {
       it('adds buildNum to notification', function () {
         const notification = notify(fnName);
         expect(notification.info.buildNum).to.equal(buildNum);

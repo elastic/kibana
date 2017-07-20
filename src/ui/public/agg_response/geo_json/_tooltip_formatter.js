@@ -1,7 +1,8 @@
 import $ from 'jquery';
 import _ from 'lodash';
-import RegistryFieldFormatsProvider from 'ui/registry/field_formats';
-export default function TileMapTooltipFormatter($compile, $rootScope, Private) {
+import { RegistryFieldFormatsProvider } from 'ui/registry/field_formats';
+
+export function TileMapTooltipFormatterProvider($compile, $rootScope, Private) {
 
   const fieldFormats = Private(RegistryFieldFormatsProvider);
   const $tooltipScope = $rootScope.$new();
@@ -25,11 +26,12 @@ export default function TileMapTooltipFormatter($compile, $rootScope, Private) {
         value: metricAgg.fieldFormatter()(value)
       },
       {
-        label: 'Center',
-        value: geoFormat.convert({
-          lat: feature.geometry.coordinates[1],
-          lon: feature.geometry.coordinates[0]
-        })
+        label: 'Latitude',
+        value: feature.geometry.coordinates[1]
+      },
+      {
+        label: 'Longitude',
+        value: feature.geometry.coordinates[0]
       }
     ];
 

@@ -1,33 +1,12 @@
 import expect from 'expect.js';
 
 import {
-  reverseQuerySort,
   reverseSortDirection,
   reverseSortDirective
 } from 'plugins/kibana/context/api/utils/sorting';
 
 
 describe('context app', function () {
-  describe('function reverseQuerySort', function () {
-    it('should reverse all the `sort` property values', function () {
-      expect(reverseQuerySort({
-        sort: [
-          { field1: { order: 'desc', mode: 'max' } },
-          { field2: 'asc' },
-          'field3',
-          '_score',
-        ],
-      })).to.eql({
-        sort: [
-          { field1: { order: 'asc', mode: 'max' } },
-          { field2: 'desc' },
-          { field3: 'desc' },
-          { _score: 'asc' },
-        ],
-      });
-    });
-  });
-
   describe('function reverseSortDirection', function () {
     it('should reverse a direction given as a string', function () {
       expect(reverseSortDirection('asc')).to.eql('desc');

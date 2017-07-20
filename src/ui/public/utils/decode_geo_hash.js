@@ -1,4 +1,3 @@
-/* eslint-disable */
 /*
  * Decodes geohash to object containing
  * top-left and bottom-right corners of
@@ -15,7 +14,7 @@
  * @param mask {Number}
  * @return {Object} interval
  */
-function decodeGeoHash(geohash) {
+export function decodeGeoHash(geohash) {
   let BITS = [16, 8, 4, 2, 1];
   let BASE32 = '0123456789bcdefghjkmnpqrstuvwxyz';
   let is_even = 1;
@@ -54,9 +53,6 @@ function refine_interval(interval, cd, mask) {
     interval[1] = (interval[0] + interval[1]) / 2;
   }
 }
-
-export default decodeGeoHash;
-
 
 /**
  * Get the number of geohash cells for a given precision

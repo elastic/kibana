@@ -1,7 +1,6 @@
 import { defaults, _ } from 'lodash';
-import { props } from 'bluebird';
+import { props, reduce as reduceAsync } from 'bluebird';
 import Boom from 'boom';
-import { reduce as reduceAsync } from 'bluebird';
 import { resolve } from 'path';
 
 import UiExports from './ui_exports';
@@ -10,10 +9,18 @@ import UiBundleCollection from './ui_bundle_collection';
 import UiBundlerEnv from './ui_bundler_env';
 import { UiI18n } from './ui_i18n';
 
+import { uiSettingsMixin } from './ui_settings';
+import { fieldFormatsMixin } from './field_formats_mixin';
+
 export default async (kbnServer, server, config) => {
   const uiExports = kbnServer.uiExports = new UiExports({
-    urlBasePath: config.get('server.basePath')
+    urlBasePath: config.get('server.basePath'),
+    kibanaIndexMappings: kbnServer.mappings,
   });
+
+  await kbnServer.mixin(uiSettingsMixin);
+
+  await kbnServer.mixin(fieldFormatsMixin);
 
   const uiI18n = kbnServer.uiI18n = new UiI18n(config.get('i18n.defaultLocale'));
   uiI18n.addUiExportConsumer(uiExports);
@@ -64,14 +71,15 @@ export default async (kbnServer, server, config) => {
     }
   });
 
-  async function getKibanaPayload({ app, request, includeUserProvidedConfig }) {
-    const uiSettings = server.uiSettings();
+  async function getKibanaPayload({ app, request, includeUserProvidedConfig, injectedVarsOverrides }) {
+    const uiSettings = request.getUiSettingsService();
     const translations = await uiI18n.getTranslationsForRequest(request);
 
     return {
       app: app,
       nav: uiExports.navLinks.inOrder,
       version: kbnServer.version,
+      branch: config.get('pkg.branch'),
       buildNum: config.get('pkg.buildNum'),
       buildSha: config.get('pkg.buildSha'),
       basePath: config.get('server.basePath'),
@@ -80,17 +88,17 @@ export default async (kbnServer, server, config) => {
       translations: translations,
       uiSettings: await props({
         defaults: uiSettings.getDefaults(),
-        user: includeUserProvidedConfig && uiSettings.getUserProvided(request)
+        user: includeUserProvidedConfig && uiSettings.getUserProvided()
       }),
       vars: await reduceAsync(
         uiExports.injectedVarsReplacers,
         async (acc, replacer) => await replacer(acc, request, server),
-        defaults(await app.getInjectedVars() || {}, uiExports.defaultInjectedVars)
+        defaults(injectedVarsOverrides, await app.getInjectedVars() || {}, uiExports.defaultInjectedVars)
       ),
     };
   }
 
-  async function renderApp({ app, reply, includeUserProvidedConfig = true }) {
+  async function renderApp({ app, reply, includeUserProvidedConfig = true, injectedVarsOverrides = {} }) {
     try {
       const request = reply.request;
       const translations = await uiI18n.getTranslationsForRequest(request);
@@ -100,7 +108,8 @@ export default async (kbnServer, server, config) => {
         kibanaPayload: await getKibanaPayload({
           app,
           request,
-          includeUserProvidedConfig
+          includeUserProvidedConfig,
+          injectedVarsOverrides
         }),
         bundlePath: `${config.get('server.basePath')}/bundles`,
         i18n: key => _.get(translations, key, ''),
@@ -110,11 +119,12 @@ export default async (kbnServer, server, config) => {
     }
   }
 
-  server.decorate('reply', 'renderApp', function (app) {
+  server.decorate('reply', 'renderApp', function (app, injectedVarsOverrides) {
     return renderApp({
       app,
       reply: this,
       includeUserProvidedConfig: true,
+      injectedVarsOverrides,
     });
   });
 

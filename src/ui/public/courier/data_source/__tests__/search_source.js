@@ -1,9 +1,9 @@
 import ngMock from 'ng_mock';
 import expect from 'expect.js';
-import sinon from 'auto-release-sinon';
+import sinon from 'sinon';
 
-import RequestQueueProv from '../../_request_queue';
-import SearchSourceProv from '../search_source';
+import { RequestQueueProvider } from '../../_request_queue';
+import { SearchSourceProvider } from '../search_source';
 import StubIndexPatternProv from 'test_utils/stub_index_pattern';
 
 describe('SearchSource', function () {
@@ -16,8 +16,8 @@ describe('SearchSource', function () {
 
   beforeEach(ngMock.module('kibana'));
   beforeEach(ngMock.inject(function (Private) {
-    requestQueue = Private(RequestQueueProv);
-    SearchSource = Private(SearchSourceProv);
+    requestQueue = Private(RequestQueueProvider);
+    SearchSource = Private(SearchSourceProvider);
 
     const IndexPattern = Private(StubIndexPatternProv);
     indexPattern = new IndexPattern('test-*', null, []);
@@ -67,7 +67,7 @@ describe('SearchSource', function () {
 
   describe('#index()', function () {
     describe('auto-sourceFiltering', function () {
-      context('new index pattern assigned', function () {
+      describe('new index pattern assigned', function () {
         it('generates a source filter', function () {
           const source = new SearchSource();
           expect(source.get('index')).to.be(undefined);
@@ -86,7 +86,7 @@ describe('SearchSource', function () {
         });
       });
 
-      context('new index pattern assigned over another', function () {
+      describe('new index pattern assigned over another', function () {
         it('replaces source filter with new', function () {
           const source = new SearchSource();
           source.set('index', indexPattern);
@@ -107,7 +107,7 @@ describe('SearchSource', function () {
         });
       });
 
-      context('ip assigned before custom source filter', function () {
+      describe('ip assigned before custom source filter', function () {
         it('custom source filter becomes new source', function () {
           const source = new SearchSource();
           const football = {};
@@ -129,7 +129,7 @@ describe('SearchSource', function () {
         });
       });
 
-      context('ip assigned after custom source filter', function () {
+      describe('ip assigned after custom source filter', function () {
         it('leaves the custom filter in place', function () {
           const source = new SearchSource();
           const football = {};

@@ -1,5 +1,5 @@
 import _ from 'lodash';
-import uiModules from 'ui/modules';
+import { uiModules } from 'ui/modules';
 // See https://github.com/elastic/elasticsearch/issues/6736
 
 uiModules
@@ -16,11 +16,13 @@ uiModules
         }
 
         const isValid = function (input) {
-          if (input == null || input === '' || input === '.' || input === '..') return false;
+          if (input == null || input === '') return !attr.required === true;
+          if (input === '.' || input === '..') return false;
 
           const match = _.find(illegalCharacters, function (character) {
             return input.indexOf(character) >= 0;
           });
+
           return !match;
         };
 

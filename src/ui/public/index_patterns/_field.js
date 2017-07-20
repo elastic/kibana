@@ -1,11 +1,10 @@
-import ObjDefine from 'ui/utils/obj_define';
-import IndexPatternsFieldFormatFieldFormatProvider from 'ui/index_patterns/_field_format/field_format';
-import IndexPatternsFieldTypesProvider from 'ui/index_patterns/_field_types';
-import RegistryFieldFormatsProvider from 'ui/registry/field_formats';
-export default function FieldObjectProvider(Private, shortDotsFilter, $rootScope, Notifier) {
+import { ObjDefine } from 'ui/utils/obj_define';
+import { FieldFormat } from '../../field_formats/field_format';
+import { RegistryFieldFormatsProvider } from 'ui/registry/field_formats';
+import { getKbnFieldType } from '../../../utils';
+
+export function IndexPatternsFieldProvider(Private, shortDotsFilter, $rootScope, Notifier) {
   const notify = new Notifier({ location: 'IndexPattern Field' });
-  const FieldFormat = Private(IndexPatternsFieldFormatFieldFormatProvider);
-  const fieldTypes = Private(IndexPatternsFieldTypesProvider);
   const fieldFormats = Private(RegistryFieldFormatsProvider);
 
   function Field(indexPattern, spec) {
@@ -22,16 +21,16 @@ export default function FieldObjectProvider(Private, shortDotsFilter, $rootScope
     }
 
     // find the type for this field, fallback to unknown type
-    let type = fieldTypes.byName[spec.type];
+    let type = getKbnFieldType(spec.type);
     if (spec.type && !type) {
       notify.error(
         'Unknown field type "' + spec.type + '"' +
         ' for field "' + spec.name + '"' +
-        ' in indexPattern "' + indexPattern.id + '"'
+        ' in indexPattern "' + indexPattern.title + '"'
       );
     }
 
-    if (!type) type = fieldTypes.byName.unknown;
+    if (!type) type = getKbnFieldType('unknown');
 
     let format = spec.format;
     if (!format || !(format instanceof FieldFormat)) {
@@ -42,6 +41,7 @@ export default function FieldObjectProvider(Private, shortDotsFilter, $rootScope
     const scripted = !!spec.scripted;
     const searchable = !!spec.searchable || scripted;
     const aggregatable = !!spec.aggregatable || scripted;
+    const readFromDocValues = !!spec.readFromDocValues && !scripted;
     const sortable = spec.name === '_score' || ((indexed || aggregatable) && type.sortable);
     const filterable = spec.name === '_id' || scripted || ((indexed || searchable) && type.filterable);
     const visualizable = aggregatable;
@@ -55,14 +55,10 @@ export default function FieldObjectProvider(Private, shortDotsFilter, $rootScope
     obj.writ('script', scripted ? spec.script : null);
     obj.writ('lang', scripted ? (spec.lang || 'painless') : null);
 
-    // mapping info
-    obj.fact('indexed', indexed);
-    obj.fact('analyzed', !!spec.analyzed);
-    obj.fact('doc_values', !!spec.doc_values);
-
     // stats
     obj.fact('searchable', searchable);
     obj.fact('aggregatable', aggregatable);
+    obj.fact('readFromDocValues', readFromDocValues);
 
     // usage flags, read-only and won't be saved
     obj.comp('format', format);
@@ -80,6 +76,24 @@ export default function FieldObjectProvider(Private, shortDotsFilter, $rootScope
 
     return obj.create();
   }
+
+  Object.defineProperties(Field.prototype, {
+    indexed: {
+      get() {
+        throw new Error('field.indexed has been removed, see https://github.com/elastic/kibana/pull/11969');
+      }
+    },
+    analyzed: {
+      get() {
+        throw new Error('field.analyzed has been removed, see https://github.com/elastic/kibana/pull/11969');
+      }
+    },
+    doc_values: {
+      get() {
+        throw new Error('field.doc_values has been removed, see https://github.com/elastic/kibana/pull/11969');
+      }
+    },
+  });
 
   Field.prototype.routes = {
     edit: '/management/kibana/indices/{{indexPattern.id}}/field/{{name}}'

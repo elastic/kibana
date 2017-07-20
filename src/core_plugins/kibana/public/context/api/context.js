@@ -1,46 +1,69 @@
 import _ from 'lodash';
 
-import { addComputedFields } from './utils/fields';
-import { createSuccessorsQueryBody } from './utils/queries.js';
-import { reverseQuerySort } from './utils/sorting';
+import { SearchSourceProvider } from 'ui/courier/data_source/search_source';
+
+import { reverseSortDirective } from './utils/sorting';
 
 
-async function fetchSuccessors(es, indexPattern, anchorDocument, sort, size) {
-  const successorsQueryBody = prepareQueryBody(indexPattern, anchorDocument, sort, size);
-  const results = await performQuery(es, indexPattern, successorsQueryBody);
-  return results;
-}
+function fetchContextProvider(courier, Private) {
+  const SearchSource = Private(SearchSourceProvider);
 
-async function fetchPredecessors(es, indexPattern, anchorDocument, sort, size) {
-  const successorsQueryBody = prepareQueryBody(indexPattern, anchorDocument, sort, size);
-  const predecessorsQueryBody = reverseQuerySort(successorsQueryBody);
-  const reversedResults = await performQuery(es, indexPattern, predecessorsQueryBody);
-  const results = reversedResults.slice().reverse();
-  return results;
-}
+  return {
+    fetchPredecessors,
+    fetchSuccessors,
+  };
 
+  async function fetchSuccessors(indexPatternId, anchorDocument, contextSort, size, filters) {
+    const successorsSearchSource = await createSearchSource(
+      indexPatternId,
+      anchorDocument,
+      contextSort,
+      size,
+      filters,
+    );
+    const results = await performQuery(successorsSearchSource);
+    return results;
+  }
 
-function prepareQueryBody(indexPattern, anchorDocument, sort, size) {
-  const successorsQueryBody = addComputedFields(
-    indexPattern,
-    createSuccessorsQueryBody(anchorDocument.sort, sort, size)
-  );
-  return successorsQueryBody;
-}
+  async function fetchPredecessors(indexPatternId, anchorDocument, contextSort, size, filters) {
+    const predecessorsSort = contextSort.map(reverseSortDirective);
+    const predecessorsSearchSource = await createSearchSource(
+      indexPatternId,
+      anchorDocument,
+      predecessorsSort,
+      size,
+      filters,
+    );
+    const reversedResults = await performQuery(predecessorsSearchSource);
+    const results = reversedResults.slice().reverse();
+    return results;
+  }
 
-async function performQuery(es, indexPattern, queryBody) {
-  const indices = await indexPattern.toIndexList();
+  async function createSearchSource(indexPatternId, anchorDocument, sort, size, filters) {
 
-  const response = await es.search({
-    index: indices,
-    body: queryBody,
-  });
+    const indexPattern = await courier.indexPatterns.get(indexPatternId);
 
-  return _.get(response, ['hits', 'hits'], []);
+    return new SearchSource()
+      .inherits(false)
+      .set('index', indexPattern)
+      .set('version', true)
+      .set('size', size)
+      .set('filter', filters)
+      .set('query', {
+        match_all: {},
+      })
+      .set('searchAfter', anchorDocument.sort)
+      .set('sort', sort);
+  }
+
+  async function performQuery(searchSource) {
+    const response = await searchSource.fetchAsRejectablePromise();
+
+    return _.get(response, ['hits', 'hits'], []);
+  }
 }
 
 
 export {
-  fetchPredecessors,
-  fetchSuccessors,
+  fetchContextProvider,
 };

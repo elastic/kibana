@@ -32,7 +32,7 @@ function addNodeattrsCat(api) {
   });
 }
 
-module.exports = function (api) {
+export default function (api) {
   addSimpleCat('_cat/aliases', api);
   addSimpleCat('_cat/allocation', api, null, ['_cat/allocation', '_cat/allocation/{nodes}']);
   addSimpleCat('_cat/count', api);
@@ -53,4 +53,4 @@ module.exports = function (api) {
   addSimpleCat('_cat/plugins', api);
   addSimpleCat('_cat/segments', api);
   addNodeattrsCat(api);
-};
+}

@@ -2,20 +2,17 @@ import expect from 'expect.js';
 import ngMock from 'ng_mock';
 import 'ui/private';
 
-describe('Base Object', function () {
-  let BaseObject;
+import { BaseObject } from 'ui/utils/base_object';
 
+describe('Base Object', function () {
   beforeEach(ngMock.module('kibana'));
-  beforeEach(ngMock.inject(function () {
-    BaseObject = require('ui/utils/base_object');
-  }));
 
   it('should take an inital set of values', function () {
     const baseObject = new BaseObject({ message: 'test' });
     expect(baseObject).to.have.property('message', 'test');
   });
 
-  it('should serialize _attributes to RISON', function () {
+  it('should serialize attributes to RISON', function () {
     const baseObject = new BaseObject();
     baseObject.message = 'Testing... 1234';
     const rison = baseObject.toRISON();
@@ -30,7 +27,7 @@ describe('Base Object', function () {
     expect(rison).to.equal('(message:\'Testing... 1234\')');
   });
 
-  it('should serialize _attributes for JSON', function () {
+  it('should serialize attributes for JSON', function () {
     const baseObject = new BaseObject();
     baseObject.message = 'Testing... 1234';
     baseObject._private = 'foo';

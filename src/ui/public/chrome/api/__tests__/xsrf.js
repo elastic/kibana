@@ -1,40 +1,46 @@
 import $ from 'jquery';
 import expect from 'expect.js';
-import { stub } from 'auto-release-sinon';
+import sinon from 'sinon';
 import ngMock from 'ng_mock';
 
-import xsrfChromeApi from '../xsrf';
+import { initChromeXsrfApi } from '../xsrf';
 import { version } from '../../../../../../package.json';
 
 const xsrfHeader = 'kbn-version';
 
 describe('chrome xsrf apis', function () {
+  const sandbox = sinon.sandbox.create();
+
+  afterEach(function () {
+    sandbox.restore();
+  });
+
   describe('#getXsrfToken()', function () {
     it('exposes the token', function () {
       const chrome = {};
-      xsrfChromeApi(chrome, { version });
+      initChromeXsrfApi(chrome, { version });
       expect(chrome.getXsrfToken()).to.be(version);
     });
   });
 
-  context('jQuery support', function () {
+  describe('jQuery support', function () {
     it('adds a global jQuery prefilter', function () {
-      stub($, 'ajaxPrefilter');
-      xsrfChromeApi({}, { version });
+      sandbox.stub($, 'ajaxPrefilter');
+      initChromeXsrfApi({}, { version });
       expect($.ajaxPrefilter.callCount).to.be(1);
     });
 
-    context('jQuery prefilter', function () {
+    describe('jQuery prefilter', function () {
       let prefilter;
 
       beforeEach(function () {
-        stub($, 'ajaxPrefilter');
-        xsrfChromeApi({}, { version });
+        sandbox.stub($, 'ajaxPrefilter');
+        initChromeXsrfApi({}, { version });
         prefilter = $.ajaxPrefilter.args[0][0];
       });
 
       it(`sets the ${xsrfHeader} header`, function () {
-        const setHeader = stub();
+        const setHeader = sinon.stub();
         prefilter({}, {}, { setRequestHeader: setHeader });
 
         expect(setHeader.callCount).to.be(1);
@@ -45,21 +51,21 @@ describe('chrome xsrf apis', function () {
       });
 
       it('can be canceled by setting the kbnXsrfToken option', function () {
-        const setHeader = stub();
+        const setHeader = sinon.stub();
         prefilter({ kbnXsrfToken: false }, {}, { setRequestHeader: setHeader });
         expect(setHeader.callCount).to.be(0);
       });
     });
 
-    context('Angular support', function () {
+    describe('Angular support', function () {
 
       let $http;
       let $httpBackend;
 
       beforeEach(function () {
-        stub($, 'ajaxPrefilter');
+        sandbox.stub($, 'ajaxPrefilter');
         const chrome = {};
-        xsrfChromeApi(chrome, { version });
+        initChromeXsrfApi(chrome, { version });
         ngMock.module(chrome.$setupXsrfRequestInterceptor);
       });
 

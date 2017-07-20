@@ -1,0 +1,16 @@
+.kuiEmptyTablePrompt {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 30px;
+}
+
+  .kuiEmptyTablePrompt__message {
+    font-size: $globalTitleFontSize;
+    color: $globalSubduedTextColor;
+    line-height: $globalLineHeight;
+  }
+
+  .kuiEmptyTablePrompt__actions {
+    margin-top: 10px;
+  }

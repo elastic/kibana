@@ -1,6 +1,6 @@
 import _ from 'lodash';
 
-module.exports = _.once(function (kbnServer) {
+export default _.once(function (kbnServer) {
   const {
     config
   } = kbnServer;

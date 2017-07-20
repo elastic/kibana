@@ -1,2 +1,2 @@
-export rename from './rename';
-export unused from './unused';
+export { rename } from './rename';
+export { unused } from './unused';

@@ -1,11 +1,10 @@
-$modalPadding: 10px;
-
 .kuiModal {
-  line-height: $lineHeight;
-  background-color: #ffffff;
-  border: 1px solid $focusColor;
-  border-radius: 4px;
-  box-shadow: 0 5px 22px rgba(#000000, 0.25);
+  line-height: $globalLineHeight;
+  background-color: $modalBackgroundColor;
+  border: 1px solid $modalBorderColor;
+  border-radius: $globalBorderRadius;
+  box-shadow: $globalBoxShadow;
+  z-index: $globalModalDepth + 1;
 }
 
 .kuiModalHeader {
@@ -13,20 +12,21 @@ $modalPadding: 10px;
   justify-content: space-between;
   align-items: center;
   padding: $modalPadding;
-  border-bottom: $tableBorder;
+  padding-left: $modalPadding * 2;
+  border-bottom: $globalBorderThin;
 }
 
   .kuiModalHeader__title {
-    font-size: $titleFontSize;
+    font-size: $globalTitleFontSize;
   }
 
 .kuiModalHeaderCloseButton {
   @include microButton;
-  font-size: 18px;
+  font-size: $globalTitleFontSize;
 }
 
 .kuiModalBody {
-  padding: 20px $modalPadding;
+  padding: $modalPadding * 2;
 }
 
 .kuiModalBodyText {
@@ -36,7 +36,8 @@ $modalPadding: 10px;
 .kuiModalFooter {
   display: flex;
   justify-content: flex-end;
-  padding: 0 $modalPadding $modalPadding;
+  padding: $modalPadding * 2;
+  padding-top:: $modalPadding;
 
   > * + * {
     margin-left: 5px;

@@ -2,7 +2,7 @@ import expect from 'expect.js';
 import { resolve } from 'path';
 
 import UiExports from '../ui_exports';
-import * as kbnTestServer from '../../../test/utils/kbn_server';
+import * as kbnTestServer from '../../test_utils/kbn_server';
 
 describe('UiExports', function () {
   describe('#find()', function () {
@@ -27,7 +27,7 @@ describe('UiExports', function () {
   });
 //
   describe('#defaultInjectedVars', function () {
-    context('two plugins, two sync', function () {
+    describe('two plugins, two sync', function () {
       this.slow(10000);
       this.timeout(60000);
 
@@ -36,8 +36,8 @@ describe('UiExports', function () {
         kbnServer = kbnTestServer.createServer({
           plugins: {
             paths: [
+              resolve(__dirname, 'fixtures/plugin_foo'),
               resolve(__dirname, 'fixtures/plugin_bar'),
-              resolve(__dirname, 'fixtures/plugin_foo')
             ]
           },
 
@@ -64,7 +64,7 @@ describe('UiExports', function () {
       });
     });
 
-    context('two plugins, one async', function () {
+    describe('two plugins, one async', function () {
       this.slow(10000);
       this.timeout(60000);
 
@@ -75,7 +75,7 @@ describe('UiExports', function () {
             scanDirs: [],
             paths: [
               resolve(__dirname, 'fixtures/plugin_async_foo'),
-              resolve(__dirname, 'fixtures/plugin_foo')
+              resolve(__dirname, 'fixtures/plugin_bar'),
             ]
           },
 

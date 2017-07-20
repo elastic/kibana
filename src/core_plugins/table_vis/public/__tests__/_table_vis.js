@@ -2,8 +2,9 @@ import $ from 'jquery';
 import _ from 'lodash';
 import expect from 'expect.js';
 import ngMock from 'ng_mock';
-import VisProvider from 'ui/vis';
+import { VisProvider } from 'ui/vis';
 import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
+
 describe('Integration', function () {
   let $rootScope;
   let $compile;
@@ -28,9 +29,10 @@ describe('Integration', function () {
     $rootScope.vis = vis;
     $rootScope.esResponse = esResponse;
     $rootScope.uiState = require('fixtures/mock_ui_state');
-    $el = $('<visualize vis="vis" es-resp="esResponse" ui-state="uiState">');
+    $el = $('<visualization vis="vis" vis-data="esResponse" ui-state="uiState">');
     $compile($el)($rootScope);
     $rootScope.$apply();
+
   }
 
   function OneRangeVis(params) {
@@ -88,20 +90,25 @@ describe('Integration', function () {
   it('passes the table groups to the kbnAggTableGroup directive', function () {
     init(new OneRangeVis(), fixtures.oneRangeBucket);
 
-    const $atg = $el.find('kbn-agg-table-group').first();
-    expect($atg.size()).to.be(1);
-    expect($atg.attr('group')).to.be('tableGroups');
-    expect($atg.isolateScope().group).to.be($atg.scope().tableGroups);
+    $rootScope.$on('renderComplete', () => {
+      const $atg = $el.find('kbn-agg-table-group').first();
+      expect($atg.size()).to.be(1);
+      expect($atg.attr('group')).to.be('tableGroups');
+      expect($atg.isolateScope().group).to.be($atg.scope().tableGroups);
+    });
+
   });
 
   it('displays an error if the search had no hits', function () {
     init(new OneRangeVis(), { hits: { total: 0, hits: [] } });
 
-    expect($el.find('kbn-agg-table-group').size()).to.be(0);
+    $rootScope.$on('renderComplete', () => {
+      expect($el.find('kbn-agg-table-group').size()).to.be(0);
 
-    const $err = $el.find('.table-vis-error');
-    expect($err.size()).to.be(1);
-    expect($err.text().trim()).to.be('No results found');
+      const $err = $el.find('.table-vis-error');
+      expect($err.size()).to.be(1);
+      expect($err.text().trim()).to.be('No results found');
+    });
   });
 
   it('displays an error if the search hits, but didn\'t create any rows', function () {
@@ -120,10 +127,12 @@ describe('Integration', function () {
 
     init(new ThreeTermVis(visParams), resp);
 
-    expect($el.find('kbn-agg-table-group').size()).to.be(0);
+    $rootScope.$on('renderComplete', () => {
+      expect($el.find('kbn-agg-table-group').size()).to.be(0);
 
-    const $err = $el.find('.table-vis-error');
-    expect($err.size()).to.be(1);
-    expect($err.text().trim()).to.be('No results found');
+      const $err = $el.find('.table-vis-error');
+      expect($err.size()).to.be(1);
+      expect($err.text().trim()).to.be('No results found');
+    });
   });
 });

@@ -47,7 +47,7 @@ function initTrend(samplePoints, seasonLength) {
   return sum / seasonLength;
 }
 
-module.exports = function tes(points, alpha, beta, gamma, seasonLength, seasonsToSample) {
+export default function tes(points, alpha, beta, gamma, seasonLength, seasonsToSample) {
 
   const samplePoints = points.slice(0, seasonLength * seasonsToSample);
   const seasonals = initSeasonalComponents(samplePoints, seasonLength);
@@ -86,4 +86,4 @@ module.exports = function tes(points, alpha, beta, gamma, seasonLength, seasonsT
   });
 
   return result;
-};
+}

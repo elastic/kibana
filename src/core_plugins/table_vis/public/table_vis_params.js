@@ -1,4 +1,4 @@
-import uiModules from 'ui/modules';
+import { uiModules } from 'ui/modules';
 import tableVisParamsTemplate from 'plugins/table_vis/table_vis_params.html';
 
 uiModules.get('kibana/table_vis')

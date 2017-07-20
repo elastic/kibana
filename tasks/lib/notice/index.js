@@ -1,0 +1,1 @@
+export { generateNoticeText } from './notice';

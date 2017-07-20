@@ -5,7 +5,7 @@ import dateMath from '@elastic/datemath';
 // Assume interval is in the form (value)(unit), such as "1h"
 const INTERVAL_STRING_RE = new RegExp('^([0-9\\.]*)\\s*(' + dateMath.units.join('|') + ')$');
 
-export default function parseInterval(interval) {
+export function parseInterval(interval) {
   const matches = String(interval).trim().match(INTERVAL_STRING_RE);
 
   if (!matches) return null;

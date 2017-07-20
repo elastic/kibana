@@ -1,6 +1,6 @@
 import truncText from 'trunc-text';
 import truncHTML from 'trunc-html';
-import uiModules from 'ui/modules';
+import { uiModules } from 'ui/modules';
 import truncatedTemplate from 'ui/directives/partials/truncated.html';
 import 'angular-sanitize';
 

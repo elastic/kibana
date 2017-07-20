@@ -1,0 +1,138 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`property hasNextPage disables next button when false 1`] = `
+<div
+  class="kuiPager"
+>
+  <div
+    class="kuiPagerText"
+  >
+    1–10 of 20
+  </div>
+  <div
+    class="kuiButtonGroup kuiButtonGroup--united"
+  >
+    <button
+      aria-label="Show previous page"
+      class="kuiButton kuiButton--basic kuiButton--iconText"
+      data-test-subj="pagerPreviousButton"
+    >
+      <span
+        class="kuiButton__inner"
+      >
+        <span
+          aria-hidden="true"
+          class="kuiButton__icon kuiIcon fa-chevron-left"
+        />
+      </span>
+    </button>
+    <button
+      aria-label="Show next page"
+      class="kuiButton kuiButton--basic kuiButton--iconText"
+      data-test-subj="pagerNextButton"
+      disabled=""
+    >
+      <span
+        class="kuiButton__inner"
+      >
+        <span
+          aria-hidden="true"
+          class="kuiButton__icon kuiIcon fa-chevron-right"
+        />
+      </span>
+    </button>
+  </div>
+</div>
+`;
+
+exports[`property hasPreviousPage disables previous button when false 1`] = `
+<div
+  class="kuiPager"
+>
+  <div
+    class="kuiPagerText"
+  >
+    1–10 of 20
+  </div>
+  <div
+    class="kuiButtonGroup kuiButtonGroup--united"
+  >
+    <button
+      aria-label="Show previous page"
+      class="kuiButton kuiButton--basic kuiButton--iconText"
+      data-test-subj="pagerPreviousButton"
+      disabled=""
+    >
+      <span
+        class="kuiButton__inner"
+      >
+        <span
+          aria-hidden="true"
+          class="kuiButton__icon kuiIcon fa-chevron-left"
+        />
+      </span>
+    </button>
+    <button
+      aria-label="Show next page"
+      class="kuiButton kuiButton--basic kuiButton--iconText"
+      data-test-subj="pagerNextButton"
+    >
+      <span
+        class="kuiButton__inner"
+      >
+        <span
+          aria-hidden="true"
+          class="kuiButton__icon kuiIcon fa-chevron-right"
+        />
+      </span>
+    </button>
+  </div>
+</div>
+`;
+
+exports[`renders KuiPager 1`] = `
+<div
+  aria-label="aria-label"
+  class="kuiPager testClass1 testClass2"
+  data-test-subj="test subject string"
+>
+  <div
+    class="kuiPagerText"
+  >
+    1–10 of 20
+  </div>
+  <div
+    class="kuiButtonGroup kuiButtonGroup--united"
+  >
+    <button
+      aria-label="Show previous page"
+      class="kuiButton kuiButton--basic kuiButton--iconText"
+      data-test-subj="pagerPreviousButton"
+      disabled=""
+    >
+      <span
+        class="kuiButton__inner"
+      >
+        <span
+          aria-hidden="true"
+          class="kuiButton__icon kuiIcon fa-chevron-left"
+        />
+      </span>
+    </button>
+    <button
+      aria-label="Show next page"
+      class="kuiButton kuiButton--basic kuiButton--iconText"
+      data-test-subj="pagerNextButton"
+    >
+      <span
+        class="kuiButton__inner"
+      >
+        <span
+          aria-hidden="true"
+          class="kuiButton__icon kuiIcon fa-chevron-right"
+        />
+      </span>
+    </button>
+  </div>
+</div>
+`;

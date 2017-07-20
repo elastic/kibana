@@ -22,7 +22,7 @@ export default (row, metric) => {
 
   if (metric.type === 'percentile_rank') {
     const percentileRankKey = `${metric.value}`;
-    return row[metric.id] && row[metric.id].values[percentileRankKey];
+    return row[metric.id] && row[metric.id].values && row[metric.id].values[percentileRankKey];
   }
 
   // Derivatives

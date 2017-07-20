@@ -1,5 +1,5 @@
 
-import extractBuckets from 'ui/agg_response/hierarchical/_extract_buckets';
+import { extractBuckets } from 'ui/agg_response/hierarchical/_extract_buckets';
 import expect from 'expect.js';
 
 describe('buildHierarchicalData()', function () {

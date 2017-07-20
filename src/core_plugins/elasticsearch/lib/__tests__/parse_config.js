@@ -3,7 +3,7 @@ import { parseConfig } from '../parse_config';
 
 describe('plugins/elasticsearch', function () {
   describe('lib/parse_config', function () {
-    context('ssl', function () {
+    describe('ssl', function () {
       let serverConfig;
 
       beforeEach(function () {

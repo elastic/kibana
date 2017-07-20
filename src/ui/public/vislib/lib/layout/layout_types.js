@@ -1,7 +1,8 @@
-import VislibLibLayoutTypesColumnLayoutProvider from './types/column_layout';
-import VislibLibLayoutTypesPieLayoutProvider from './types/pie_layout';
+import { VislibLibLayoutTypesColumnLayoutProvider } from './types/column_layout';
+import { VislibLibLayoutTypesPieLayoutProvider } from './types/pie_layout';
+import { GaugeLayoutProvider } from './types/gauge_layout';
 
-export default function LayoutTypeFactory(Private) {
+export function VislibLibLayoutLayoutTypesProvider(Private) {
 
   /**
    * Provides the HTML layouts for each visualization class
@@ -13,6 +14,9 @@ export default function LayoutTypeFactory(Private) {
    */
   return {
     pie: Private(VislibLibLayoutTypesPieLayoutProvider),
+    gauge: Private(GaugeLayoutProvider),
+    goal: Private(GaugeLayoutProvider),
+    metric: Private(GaugeLayoutProvider),
     point_series: Private(VislibLibLayoutTypesColumnLayoutProvider)
   };
 }

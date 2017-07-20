@@ -2,7 +2,7 @@ import Boom from 'boom';
 import _ from 'lodash';
 import { errors as esErrors } from 'elasticsearch';
 
-module.exports = function handleESError(error) {
+export default function handleESError(error) {
   if (!(error instanceof Error)) {
     throw new Error('Expected an instance of Error');
   }
@@ -23,4 +23,4 @@ module.exports = function handleESError(error) {
   } else {
     return error;
   }
-};
+}

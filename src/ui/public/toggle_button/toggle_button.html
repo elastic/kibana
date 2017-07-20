@@ -1,0 +1,12 @@
+<button
+  class="kuiToggleButton"
+  ng-disabled="toggleButton.isDisabled"
+  ng-click="toggleButton.onClick()"
+  type="button"
+>
+  <span
+    ng-class="{'fa-caret-down': !toggleButton.isCollapsed, 'fa-caret-right': toggleButton.isCollapsed}"
+    class="kuiToggleButton__icon kuiIcon"
+  ></span>
+  <span ng-transclude></span>
+</button>

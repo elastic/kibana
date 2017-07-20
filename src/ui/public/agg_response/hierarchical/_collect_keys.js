@@ -1,5 +1,5 @@
 import _ from 'lodash';
-export default function collectKeys(children) {
+export function collectKeys(children) {
   const nextChildren = _.pluck(children, 'children');
   const keys = _.pluck(children, 'name');
   return _(nextChildren)

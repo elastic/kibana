@@ -37,16 +37,6 @@ A high level overview of our contributing guidelines.
 
 Don't fret, it's not as daunting as the table of contents makes it out to be!
 
-## Effective issue reporting in Kibana
-
-At any given time the Kibana team at Elastic is working on dozens of features and enhancements, both for Kibana itself and for a few other projects at Elastic. When you file an issue, we'll take the time to digest it, consider solutions, and weigh its applicability to both the Kibana user base at large and the long-term vision for the project. Once we've completed that process, we will assign the issue a priority.
-
-- **P1**: A high-priority issue that affects virtually all Kibana users. Bugs that would cause incorrect results, security issues and features that would vastly improve the user experience for everyone. Work arounds for P1s generally don't exist without a code change.
-- **P2**: A broadly applicable, high visibility, issue that enhances the usability of Kibana for a majority users.
-- **P3**: Nice-to-have bug fixes or functionality. Work arounds for P3 items generally exist.
-- **P4**: Niche and special interest issues that may not fit our core goals. We would take a high quality pull for this if implemented in such a way that it does not meaningfully impact other functionality or existing code. Issues may also be labeled P4 if they would be better implemented in Elasticsearch.
-- **P5**: Highly niche or in opposition to our core goals. Should usually be closed. This doesn't mean we wouldn't take a pull for it, but if someone really wanted this they would be better off working on a plugin. The Kibana team will usually not work on P5 issues but may be willing to assist plugin developers on IRC.
-
 ### Voicing the importance of an issue
 
 We seriously appreciate thoughtful comments. If an issue is important to you, add a comment with a solid write up of your use case and explain why it's so important. Please avoid posting comments comprised solely of a thumbs up emoji 👍.
@@ -71,6 +61,12 @@ We enjoy working with contributors to get their code accepted. There are many ap
 
 ## How We Use Git and GitHub
 
+### Forking
+
+We follow the [GitHub forking model](https://help.github.com/articles/fork-a-repo/) for collaborating
+on Kibana code. This model assumes that you have a remote called `upstream` which points to the
+official Kibana repo, which we'll refer to in later code snippets.
+
 ### Branching
 
 * All work on the next major release goes into master.
@@ -84,8 +80,56 @@ We enjoy working with contributors to get their code accepted. There are many ap
 * Feel free to make as many commits as you want, while working on a branch.
 * When submitting a PR for review, please perform an interactive rebase to present a logical history that's easy for the reviewers to follow.
 * Please use your commit messages to include helpful information on your changes, e.g. changes to APIs, UX changes, bugs fixed, and an explanation of *why* you made the changes that you did.
-* Resolve merge conflicts by rebasing the target branch over your feature branch, and force-pushing.
+* Resolve merge conflicts by rebasing the target branch over your feature branch, and force-pushing (see below for instructions).
 * When merging, we'll squash your commits into a single commit.
+
+#### Rebasing and fixing merge conflicts
+
+Rebasing can be tricky, and fixing merge conflicts can be even trickier because it involves force pushing. This is all compounded by the fact that attempting to push a rebased branch remotely will be rejected by git, and you'll be prompted to do a `pull`, which is not at all what you should do (this will really mess up your branch's history).
+
+Here's how you should rebase master onto your branch, and how to fix merge conflicts when they arise.
+
+First, make sure master is up-to-date.
+
+```
+git checkout master
+git fetch upstream
+git rebase upstream/master
+```
+
+Then, check out your branch and rebase master on top of it, which will apply all of the new commits on master to your branch, and then apply all of your branch's new commits after that.
+
+```
+git checkout name-of-your-branch
+git rebase master
+```
+
+You want to make sure there are no merge conflicts. If there is are merge conflicts, git will pause the rebase and allow you to fix the conflicts before continuing.
+
+You can use `git status` to see which files contain conflicts. They'll be the ones that aren't staged for commit. Open those files, and look for where git has marked the conflicts. Resolve the conflicts so that the changes you want to make to the code have been incorporated in a way that doesn't destroy work that's been done in master. Refer to master's commit history on GitHub if you need to gain a better understanding of how code is conflicting and how best to resolve it.
+
+Once you've resolved all of the merge conflicts, use `git add -A` to stage them to be commiteed, and then use `git rebase --continue` to tell git to continue the rebase.
+
+When the rebase has completed, you will need to force push your branch because the history is now completely different than what's on the remote. **This is potentially dangerous** because it will completely overwrite what you have on the remote, so you need to be sure that you haven't lost any work when resolving merge conflicts. (If there weren't any merge conflicts, then you can force push without having to worry about this.)
+
+```
+git push origin name-of-your-branch --force
+```
+
+This will overwrite the remote branch with what you have locally. You're done!
+
+**Note that you should not run `git pull`**, for example in response to a push rejection like this:
+
+```
+! [rejected] name-of-your-branch -> name-of-your-branch (non-fast-forward)
+error: failed to push some refs to 'https://github.com/YourGitHubHandle/kibana.git'
+hint: Updates were rejected because the tip of your current branch is behind
+hint: its remote counterpart. Integrate the remote changes (e.g.
+hint: 'git pull ...') before pushing again.
+hint: See the 'Note about fast-forwards' in 'git push --help' for details.
+```
+
+Assuming you've successfully rebased and you're happy with the code, you should force push instead.
 
 ### What Goes Into a Pull Request
 
@@ -130,10 +174,10 @@ npm run elasticsearch
 If you're just getting started with `elasticsearch`, you could use the following command to populate your instance with a few fake logs to hit the ground running.
 
 ```bash
-npm run makelogs
+node scripts/makelogs
 ```
 
-> Make sure to execute `npm run makelogs` *after* elasticsearch is up and running!
+> Make sure to execute `node scripts/makelogs` *after* elasticsearch is up and running!
 
 Start the development server.
   ```bash
@@ -158,19 +202,7 @@ In development mode, Kibana runs a customized version of [Webpack](http://webpac
 
 #### Setting Up SSL
 
-When Kibana runs in development mode it will automatically use bundled SSL certificates. These certificates won't be trusted by your OS by default which will likely cause your browser to complain about the certificate.
-
-If you run into this issue, visit the development server and configure your OS to trust the certificate.
-
-- OSX: https://www.accuweaver.com/2014/09/19/make-chrome-accept-a-self-signed-certificate-on-osx/
-- Windows: http://stackoverflow.com/a/1412118
-- Linux: http://unix.stackexchange.com/a/90607
-
-There are a handful of other options, although we enthusiastically recommend that you trust our development certificate.
-
-- Click through the warning and accept future warnings
-- Supply your own certificate using the `config/kibana.dev.yml` file
-- Disable SSL in Kibana by starting the application with `npm start -- --no-ssl`
+Kibana includes a self-signed certificate that can be used for development purposes: `npm start -- --ssl`.
 
 ### Linting
 
@@ -218,13 +250,13 @@ npm run test:server
 When you'd like to execute individual server-side test files, you can use the command below. Note that this command takes care of configuring Mocha with Babel compilation for you, and you'll be better off avoiding a globally installed `mocha` package. This command is great for development and for quickly identifying bugs.
 
 ```bash
-npm run mocha <file>
+node scripts/mocha <file>
 ```
 
-You could also add the `:debug` target so that `node` is run using the `--debug-brk` flag. You'll need to connect a remote debugger such as [`node-inspector`](https://github.com/node-inspector/node-inspector) to proceed in this mode.
+You could also add the `--debug` option so that `node` is run using the `--debug-brk` flag. You'll need to connect a remote debugger such as [`node-inspector`](https://github.com/node-inspector/node-inspector) to proceed in this mode.
 
 ```bash
-npm run mocha:debug <file>
+node scripts/mocha --debug <file>
 ```
 
 With `npm run test:browser`, you can run only the browser tests. Coverage reports are available for browser tests by running `npm run test:coverage`. You can find the results under the `coverage/` directory that will be created upon completion.
@@ -245,10 +277,11 @@ npm run test:dev
 
 This should work super if you're using the [Kibana plugin generator](https://github.com/elastic/generator-kibana-plugin). If you're not using the generator, well, you're on your own. We suggest you look at how the generator works.
 
-To run the tests for just your particular plugin, assuming you plugin lives outside of the `plugins directory`, use the following command.
+To run the tests for just your particular plugin run the following command from your plugin:
 
 ```bash
-npm run test:dev -- --kbnServer.testsBundle.pluginId=some_special_plugin --kbnServer.plugin-path=../some_special_plugin
+npm run test:server
+npm run test:browser -- --dev # remove the --dev flag to run them once and close
 ```
 
 ### Cross-browser Compatibility
@@ -262,21 +295,19 @@ npm run test:dev -- --kbnServer.testsBundle.pluginId=some_special_plugin --kbnSe
 * Open VMWare and go to Window > Virtual Machine Library. Unzip the virtual machine and drag the .vmx file into your Virtual Machine Library.
 * Right-click on the virtual machine you just added to your library and select "Snapshots...", and then click the "Take" button in the modal that opens. You can roll back to this snapshot when the VM expires in 90 days.
 * In System Preferences > Sharing, change your computer name to be something simple, e.g. "computer".
-* Run Kibana with `npm start -- --no-ssl --host=computer.local` (substituting your computer name).
+* Run Kibana with `npm start -- --host=computer.local` (substituting your computer name).
 * Now you can run your VM, open the browser, and navigate to `http://computer.local:5601` to test Kibana.
 
 #### Running Browser Automation Tests
 
 The following will start Kibana, Elasticsearch and the chromedriver for you. To run the functional UI tests use the following commands
 
-If you want to run the functional UI tests one time and exit, use the following command. This is used by the CI systems and is great for quickly checking that things pass. It is essentially a combination of the next two tasks.  This supports options `--grep=foo` for only running tests that match a regular expression, and `--appSuites=management` for running tests for a specific application.
-
 ```bash
 npm run test:ui
 ```
 
 
-In order to start the server required for the `test:ui:runner` tasks, use the following command. Once the server is started `test:ui:runner` can be run multiple times without waiting for the server to start.
+In order to start the server required for the `node scripts/functional_test_runner` tasks, use the following command. Once the server is started `node scripts/functional_test_runner` can be run multiple times without waiting for the server to start.
 
 ```bash
 npm run test:ui:server
@@ -285,8 +316,10 @@ npm run test:ui:server
 To execute the front-end browser tests, enter the following. This requires the server started by the `test:ui:server` task.
 
 ```bash
-npm run test:ui:runner
+node scripts/functional_test_runner
 ```
+
+To filter these tests, use `--grep=foo` for only running tests that match a regular expression.
 
 To run these browser tests against against some other Elasticsearch and Kibana instance you can set these environment variables and then run the test runner.
 Here's an example to run against an Elastic Cloud instance (note that you should run the same branch of tests as the version of Kibana you're testing);
@@ -303,17 +336,12 @@ export TEST_ES_HOSTNAME=aaa5d22032d76805fcce724ed9d9f5a2.us-east-1.aws.found.io
 export TEST_ES_PORT=9200
 export TEST_ES_USER=elastic
 export TEST_ES_PASS=<your password here>
-npm run test:ui:runner
+node scripts/functional_test_runner
 ```
 
 ##### Browser Automation Notes
 
-- Using Page Objects pattern (https://theintern.github.io/intern/#writing-functional-test)
-- At least the initial tests for the Settings, Discover, and Visualize tabs all depend on a very specific set of logstash-type data (generated with makelogs).  Since that is a static set of data, all the Discover and Visualize tests use a specific Absolute time range.  This guarantees the same results each run.
-- These tests have been developed and tested with Chrome and Firefox browser.  In theory, they should work on all browsers (that's the benefit of Intern using Leadfoot).
-- These tests should also work with an external testing service like https://saucelabs.com/ or https://www.browserstack.com/ but that has not been tested.
-- https://theintern.github.io/
-- https://theintern.github.io/leadfoot/module-leadfoot_Element.html
+[Read about the `FunctionalTestRunner`](https://www.elastic.co/guide/en/kibana/current/development-functional-tests.html) to learn more about how you can run and develop functional tests for Kibana core and plugins.
 
 ### Building OS packages
 

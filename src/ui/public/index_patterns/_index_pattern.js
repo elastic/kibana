@@ -1,103 +1,130 @@
 import _ from 'lodash';
-import errors from 'ui/errors';
+import { SavedObjectNotFound, DuplicateField, IndexPatternAlreadyExists, IndexPatternMissingIndices } from 'ui/errors';
 import angular from 'angular';
-import getComputedFields from 'ui/index_patterns/_get_computed_fields';
-import formatHit from 'ui/index_patterns/_format_hit';
-import RegistryFieldFormatsProvider from 'ui/registry/field_formats';
-import IndexPatternsGetIdsProvider from 'ui/index_patterns/_get_ids';
-import IndexPatternsMapperProvider from 'ui/index_patterns/_mapper';
-import IndexPatternsIntervalsProvider from 'ui/index_patterns/_intervals';
-import DocSourceProvider from 'ui/courier/data_source/admin_doc_source';
+import { RegistryFieldFormatsProvider } from 'ui/registry/field_formats';
 import UtilsMappingSetupProvider from 'ui/utils/mapping_setup';
-import IndexPatternsFieldListProvider from 'ui/index_patterns/_field_list';
-import IndexPatternsFlattenHitProvider from 'ui/index_patterns/_flatten_hit';
-import IndexPatternsCalculateIndicesProvider from 'ui/index_patterns/_calculate_indices';
-import IndexPatternsPatternCacheProvider from 'ui/index_patterns/_pattern_cache';
+import { Notifier } from 'ui/notify';
 
-export default function IndexPatternFactory(Private, Notifier, config, kbnIndex, Promise, confirmModalPromise) {
-  const fieldformats = Private(RegistryFieldFormatsProvider);
-  const getIds = Private(IndexPatternsGetIdsProvider);
-  const mapper = Private(IndexPatternsMapperProvider);
-  const intervals = Private(IndexPatternsIntervalsProvider);
-  const DocSource = Private(DocSourceProvider);
-  const mappingSetup = Private(UtilsMappingSetupProvider);
-  const FieldList = Private(IndexPatternsFieldListProvider);
-  const flattenHit = Private(IndexPatternsFlattenHitProvider);
-  const calculateIndices = Private(IndexPatternsCalculateIndicesProvider);
-  const patternCache = Private(IndexPatternsPatternCacheProvider);
-  const type = 'index-pattern';
-  const notify = new Notifier();
-  const configWatchers = new WeakMap();
-  const docSources = new WeakMap();
-  const getRoutes = () => ({
+import { getComputedFields } from './_get_computed_fields';
+import { formatHit } from './_format_hit';
+import { IndexPatternsGetIdsProvider } from './_get_ids';
+import { IndexPatternsIntervalsProvider } from './_intervals';
+import { IndexPatternsFieldListProvider } from './_field_list';
+import { IndexPatternsFlattenHitProvider } from './_flatten_hit';
+import { IndexPatternsPatternCacheProvider } from './_pattern_cache';
+import { FieldsFetcherProvider } from './fields_fetcher_provider';
+import { IsUserAwareOfUnsupportedTimePatternProvider } from './unsupported_time_patterns';
+import { SavedObjectsClientProvider, findObjectByTitle } from 'ui/saved_objects';
+
+export function getRoutes() {
+  return {
     edit: '/management/kibana/indices/{{id}}',
     addField: '/management/kibana/indices/{{id}}/create-field',
     indexedFields: '/management/kibana/indices/{{id}}?_a=(tab:indexedFields)',
     scriptedFields: '/management/kibana/indices/{{id}}?_a=(tab:scriptedFields)',
     sourceFilters: '/management/kibana/indices/{{id}}?_a=(tab:sourceFilters)'
-  });
+  };
+}
+
+export function IndexPatternProvider(Private, $http, config, kbnIndex, Promise, confirmModalPromise, kbnUrl) {
+  const fieldformats = Private(RegistryFieldFormatsProvider);
+  const getConfig = (...args) => config.get(...args);
+  const getIds = Private(IndexPatternsGetIdsProvider);
+  const fieldsFetcher = Private(FieldsFetcherProvider);
+  const intervals = Private(IndexPatternsIntervalsProvider);
+  const mappingSetup = Private(UtilsMappingSetupProvider);
+  const FieldList = Private(IndexPatternsFieldListProvider);
+  const flattenHit = Private(IndexPatternsFlattenHitProvider);
+  const patternCache = Private(IndexPatternsPatternCacheProvider);
+  const isUserAwareOfUnsupportedTimePattern = Private(IsUserAwareOfUnsupportedTimePatternProvider);
+  const savedObjectsClient = Private(SavedObjectsClientProvider);
+
+  const type = 'index-pattern';
+  const notify = new Notifier();
+  const configWatchers = new WeakMap();
 
   const mapping = mappingSetup.expandShorthand({
     title: 'text',
     timeFieldName: 'keyword',
-    notExpandable: 'boolean',
     intervalName: 'keyword',
     fields: 'json',
     sourceFilters: 'json',
     fieldFormatMap: {
       type: 'text',
       _serialize(map = {}) {
-        const serialized = _.transform(map, serialize);
+        const serialized = _.transform(map, serializeFieldFormatMap);
         return _.isEmpty(serialized) ? undefined : angular.toJson(serialized);
       },
       _deserialize(map = '{}') {
-        return _.mapValues(angular.fromJson(map), deserialize);
+        return _.mapValues(angular.fromJson(map), deserializeFieldFormatMap);
       }
     }
   });
 
-  function serialize(flat, format, field) {
+  function serializeFieldFormatMap(flat, format, field) {
     if (format) {
       flat[field] = format;
     }
   }
 
-  function deserialize(mapping) {
+  function deserializeFieldFormatMap(mapping) {
     const FieldFormat = fieldformats.byId[mapping.id];
-    return FieldFormat && new FieldFormat(mapping.params);
+    return FieldFormat && new FieldFormat(mapping.params, getConfig);
   }
 
   function updateFromElasticSearch(indexPattern, response) {
     if (!response.found) {
-      throw new errors.SavedObjectNotFound(type, indexPattern.id);
+      const markdownSaveId = indexPattern.id.replace('*', '%2A');
+
+      throw new SavedObjectNotFound(
+        type,
+        indexPattern.id,
+        kbnUrl.eval('#/management/kibana/index?id={{id}}&name=', { id: markdownSaveId })
+      );
     }
 
     _.forOwn(mapping, (fieldMapping, name) => {
       if (!fieldMapping._deserialize) {
         return;
       }
-      response._source[name] = fieldMapping._deserialize(
-        response._source[name], response, name, fieldMapping
-      );
+      response._source[name] = fieldMapping._deserialize(response._source[name]);
     });
 
     // give index pattern all of the values in _source
     _.assign(indexPattern, response._source);
 
-    const promise = indexFields(indexPattern);
+    if (!indexPattern.title) {
+      indexPattern.title = indexPattern.id;
+    }
 
-    // any time index pattern in ES is updated, update index pattern object
-    docSources
-    .get(indexPattern)
-    .onUpdate()
-    .then(response => updateFromElasticSearch(indexPattern, response), notify.fatal);
+    if (indexPattern.isUnsupportedTimePattern()) {
+      if (!isUserAwareOfUnsupportedTimePattern(indexPattern)) {
+        const warning = (
+          'Support for time-intervals has been removed. ' +
+          `View the ["${indexPattern.title}" index pattern in management](` +
+          kbnUrl.getRouteHref(indexPattern, 'edit') +
+          ') for more information.'
+        );
+        notify.warning(warning, { lifetime: Infinity });
+      }
+    }
 
-    return promise;
+    return indexFields(indexPattern);
   }
 
-  function containsFieldCapabilities(fields) {
-    return _.any(fields, (field) => {
-      return _.has(field, 'aggregatable') && _.has(field, 'searchable');
+  function isFieldRefreshRequired(indexPattern) {
+    if (!indexPattern.fields) {
+      return true;
+    }
+
+    return indexPattern.fields.every(field => {
+      // See https://github.com/elastic/kibana/pull/8421
+      const hasFieldCaps = ('aggregatable' in field) && ('searchable' in field);
+
+      // See https://github.com/elastic/kibana/pull/11969
+      const hasDocValuesFlag = ('readFromDocValues' in field);
+
+      return !hasFieldCaps || !hasDocValuesFlag;
     });
   }
 
@@ -108,10 +135,13 @@ export default function IndexPatternFactory(Private, Notifier, config, kbnIndex,
       return promise;
     }
 
-    if (!indexPattern.fields || !containsFieldCapabilities(indexPattern.fields)) {
+    if (isFieldRefreshRequired(indexPattern)) {
       promise = indexPattern.refreshFields();
     }
-    return promise.then(() => {initFields(indexPattern);});
+
+    return promise.then(() => {
+      initFields(indexPattern);
+    });
   }
 
   function setId(indexPattern, id) {
@@ -146,8 +176,8 @@ export default function IndexPatternFactory(Private, Notifier, config, kbnIndex,
   }
 
   function fetchFields(indexPattern) {
-    return mapper
-    .getFieldsForIndexPattern(indexPattern, true)
+    return Promise.resolve()
+    .then(() => fieldsFetcher.fetch(indexPattern))
     .then(fields => {
       const scripted = indexPattern.getScriptedFields();
       const all = fields.concat(scripted);
@@ -158,8 +188,6 @@ export default function IndexPatternFactory(Private, Notifier, config, kbnIndex,
   class IndexPattern {
     constructor(id) {
       setId(this, id);
-      docSources.set(this, new DocSource());
-
       this.metaFields = config.get('metaFields');
       this.getComputedFields = getComputedFields.bind(this);
 
@@ -173,31 +201,25 @@ export default function IndexPatternFactory(Private, Notifier, config, kbnIndex,
     }
 
     init() {
-      docSources
-      .get(this)
-      .index(kbnIndex)
-      .type(type)
-      .id(this.id);
-
       watch(this);
 
-      return mappingSetup
-      .isDefined(type)
-      .then(defined => {
-        if (defined) {
-          return true;
-        }
-        return mappingSetup.setup(type, mapping);
-      })
-      .then(() => {
-        if (!this.id) {
-          return; // no id === no elasticsearch document
-        }
-        return docSources.get(this)
-        .fetch()
-        .then(response => updateFromElasticSearch(this, response));
-      })
-      .then(() => this);
+      if (!this.id) {
+        return Promise.resolve(this); // no id === no elasticsearch document
+      }
+
+      return savedObjectsClient.get(type, this.id)
+        .then(resp => {
+          // temporary compatability for savedObjectsClient
+
+          return {
+            _id: resp.id,
+            _type: resp.type,
+            _source: _.cloneDeep(resp.attributes),
+            found: resp._version ? true : false
+          };
+        })
+        .then(response => updateFromElasticSearch(this, response))
+        .then(() => this);
     }
 
     // Get the source filtering configuration for that index.
@@ -212,7 +234,7 @@ export default function IndexPatternFactory(Private, Notifier, config, kbnIndex,
       const names = _.pluck(scriptedFields, 'name');
 
       if (_.contains(names, name)) {
-        throw new errors.DuplicateField(name);
+        throw new DuplicateField(name);
       }
 
       this.fields.push({
@@ -273,37 +295,45 @@ export default function IndexPatternFactory(Private, Notifier, config, kbnIndex,
 
     toDetailedIndexList(start, stop, sortDirection) {
       return Promise.resolve().then(() => {
-        const interval = this.getInterval();
-        if (interval) {
+        if (this.isTimeBasedInterval()) {
           return intervals.toIndexList(
-            this.id, interval, start, stop, sortDirection
+            this.title, this.getInterval(), start, stop, sortDirection
           );
         }
 
-        if (this.isWildcard() && this.hasTimeField() && this.canExpandIndices()) {
-          return calculateIndices(
-            this.id, this.timeFieldName, start, stop, sortDirection
-          );
-        }
-
-        return {
-          index: this.id,
-          min: -Infinity,
-          max: Infinity
-        };
+        return [
+          {
+            index: this.title,
+            min: -Infinity,
+            max: Infinity
+          }
+        ];
       });
     }
 
-    canExpandIndices() {
-      return !this.notExpandable;
+    isTimeBased() {
+      return !!this.timeFieldName && (!this.fields || !!this.getTimeField());
     }
 
-    hasTimeField() {
-      return !!(this.timeFieldName && this.fields.byName[this.timeFieldName]);
+    isTimeBasedInterval() {
+      return this.isTimeBased() && !!this.getInterval();
+    }
+
+    isUnsupportedTimePattern() {
+      return !!this.intervalName;
+    }
+
+    isTimeBasedWildcard() {
+      return this.isTimeBased() && this.isWildcard();
+    }
+
+    getTimeField() {
+      if (!this.timeFieldName || !this.fields || !this.fields.byName) return;
+      return this.fields.byName[this.timeFieldName];
     }
 
     isWildcard() {
-      return _.includes(this.id, '*');
+      return _.includes(this.title, '*');
     }
 
     prepBody() {
@@ -318,52 +348,87 @@ export default function IndexPatternFactory(Private, Notifier, config, kbnIndex,
         }
       });
 
-      // ensure that the docSource has the current this.id
-      docSources.get(this).id(this.id);
-
       // clear the indexPattern list cache
       getIds.clearCache();
       return body;
     }
 
-    create() {
-      const body = this.prepBody();
-      return docSources.get(this)
-      .doCreate(body)
-      .then(id => setId(this, id))
-      .catch(err => {
-        if (_.get(err, 'origError.status') !== 409) {
-          return Promise.resolve(false);
-        }
-        const confirmMessage = 'Are you sure you want to overwrite this?';
+    /**
+     * Returns a promise that resolves to true if either the title is unique, or if the user confirmed they
+     * wished to save the duplicate title.  Promise is rejected if the user rejects the confirmation.
+     */
+    warnIfDuplicateTitle() {
+      return findObjectByTitle(savedObjectsClient, type, this.title)
+        .then(duplicate => {
+          if (!duplicate) return false;
+          if (duplicate.id === this.id) return false;
 
-        return confirmModalPromise(confirmMessage, { confirmButtonText: 'Overwrite' })
-        .then(() => Promise
-          .try(() => {
-            const cached = patternCache.get(this.id);
-            if (cached) {
-              return cached.then(pattern => pattern.destroy());
+          const confirmMessage =
+            `An index pattern with the title '${this.title}' already exists.`;
+
+          return confirmModalPromise(confirmMessage, { confirmButtonText: 'Edit existing pattern' })
+            .then(() => {
+              kbnUrl.change('/management/kibana/indices/{{id}}', { id: duplicate.id });
+              return true;
+            })
+            .catch(() => {
+              throw new IndexPatternAlreadyExists(this.title);
+            });
+        });
+    }
+
+    create() {
+      return this.warnIfDuplicateTitle().then((duplicate) => {
+        if (duplicate) return;
+
+        const body = this.prepBody();
+
+        return savedObjectsClient.create(type, body, { id: this.id })
+          .then(response => setId(this, response.id))
+          .catch(err => {
+            if (err.statusCode !== 409) {
+              return Promise.resolve(false);
             }
-          })
-          .then(() => docSources.get(this).doIndex(body))
-          .then(id => setId(this, id)),
-          _.constant(false) // if the user doesn't overwrite, resolve with false
-        );
+            const confirmMessage = 'Are you sure you want to overwrite this?';
+
+            return confirmModalPromise(confirmMessage, { confirmButtonText: 'Overwrite' })
+            .then(() => Promise
+              .try(() => {
+                const cached = patternCache.get(this.id);
+                if (cached) {
+                  return cached.then(pattern => pattern.destroy());
+                }
+              })
+              .then(() => savedObjectsClient.create(type, body, { id: this.id, overwrite: true }))
+              .then(response => setId(this, response.id)),
+              _.constant(false) // if the user doesn't overwrite, resolve with false
+            );
+          });
       });
     }
 
     save() {
-      const body = this.prepBody();
-      return docSources.get(this)
-      .doIndex(body)
-      .then(id => setId(this, id));
+      return savedObjectsClient.update(type, this.id, this.prepBody())
+        .then(({ id }) => setId(this, id));
     }
 
     refreshFields() {
-      return mapper
-      .clearCache(this)
-      .then(() => fetchFields(this))
-      .then(() => this.save());
+      return fetchFields(this)
+      .then(() => this.save())
+      .catch((err) => {
+        notify.error(err);
+        // https://github.com/elastic/kibana/issues/9224
+        // This call will attempt to remap fields from the matching
+        // ES index which may not actually exist. In that scenario,
+        // we still want to notify the user that there is a problem
+        // but we do not want to potentially make any pages unusable
+        // so do not rethrow the error here
+        if (err instanceof IndexPatternMissingIndices) {
+          return [];
+        }
+
+        throw err;
+      });
     }
 
     toJSON() {
@@ -377,8 +442,7 @@ export default function IndexPatternFactory(Private, Notifier, config, kbnIndex,
     destroy() {
       unwatch(this);
       patternCache.clear(this.id);
-      docSources.get(this).destroy();
-      docSources.delete(this);
+      return savedObjectsClient.delete(type, this.id);
     }
   }
 

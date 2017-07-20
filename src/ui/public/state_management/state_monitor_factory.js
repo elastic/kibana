@@ -1,6 +1,6 @@
 import { cloneDeep, isEqual, set, isPlainObject } from 'lodash';
 
-export default {
+export const stateMonitorFactory = {
   create: (state, customInitialState) => stateMonitor(state, customInitialState)
 };
 

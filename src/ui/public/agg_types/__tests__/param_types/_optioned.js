@@ -1,7 +1,8 @@
 import expect from 'expect.js';
 import ngMock from 'ng_mock';
-import AggTypesParamTypesBaseProvider from 'ui/agg_types/param_types/base';
-import AggTypesParamTypesOptionedProvider from 'ui/agg_types/param_types/optioned';
+import { AggTypesParamTypesBaseProvider } from 'ui/agg_types/param_types/base';
+import { AggTypesParamTypesOptionedProvider } from 'ui/agg_types/param_types/optioned';
+
 describe('Optioned', function () {
 
   let BaseAggParam;

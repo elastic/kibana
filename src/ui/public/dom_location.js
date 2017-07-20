@@ -1,4 +1,4 @@
-export default function DomLocationProvider($window) {
+export function DomLocationProvider($window) {
   return {
     reload: function (forceFetch) {
       $window.location.reload(forceFetch);

@@ -1,9 +1,9 @@
 import ngMock from 'ng_mock';
 import expect from 'expect.js';
-import sinon from 'auto-release-sinon';
+import sinon from 'sinon';
 
-import RequestQueueProv from '../../_request_queue';
-import DocSourceProv from '../doc_source';
+import { RequestQueueProvider } from '../../_request_queue';
+import { DocSourceProvider } from '../doc_source';
 
 describe('DocSource', function () {
   require('test_utils/no_digest_promises').activateForSuite();
@@ -13,8 +13,8 @@ describe('DocSource', function () {
 
   beforeEach(ngMock.module('kibana'));
   beforeEach(ngMock.inject(function (Private) {
-    requestQueue = Private(RequestQueueProv);
-    DocSource = Private(DocSourceProv);
+    requestQueue = Private(RequestQueueProvider);
+    DocSource = Private(DocSourceProvider);
   }));
 
   describe('#onUpdate()', function () {

@@ -1,6 +1,6 @@
 import _ from 'lodash';
 
-module.exports = {
+export default {
   'columns': [
     {
       'label': 'logstash: index',

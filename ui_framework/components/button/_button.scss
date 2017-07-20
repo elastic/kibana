@@ -1,62 +1,3 @@
-$buttonHeight: 30px;
-
-/**
- * 1. Links can't have a disabled attribute, so they can't support :disabled.
- */
-@mixin kuiButtonDisabled {
-  &:disabled {
-    @content;
-  }
-
-  @at-root a#{&}.kuiButton-isDisabled {
-    @content;
-  }
-}
-
-/**
- * 1. Links can't have a disabled attribute, so they can't support :enabled.
- */
-@mixin kuiButtonHover {
-  &:enabled:hover {
-    @content;
-  }
-
-  @at-root a#{&}:not(.kuiButton-isDisabled):hover { /* 1 */
-    @content;
-  }
-}
-
-/**
- * 1. Links can't have a disabled attribute, so they can't support :enabled.
- */
-@mixin kuiButtonActive {
-  &:enabled:active {
-    @content;
-  }
-
-  @at-root a#{&}:not(.kuiButton-isDisabled):active { /* 1 */
-    @content;
-  }
-}
-
-/**
- * 1. Links can't have a disabled attribute, so they can't support :enabled.
- */
-@mixin kuiButtonFocus {
-  &:not(a):enabled:focus {
-    @content;
-  }
-
-  @at-root a#{&}:not(.kuiButton-isDisabled):focus { /* 1 */
-    @content;
-  }
-}
-
-@mixin kuiButtonHoverAndActive {
-  @include kuiButtonHover { @content }
-  @include kuiButtonActive { @content }
-}
-
 /**
  * 1. Setting to inline-block guarantees the same height when applied to both
  *    button elements and anchor tags.
@@ -68,29 +9,23 @@ $buttonHeight: 30px;
   appearance: none;
   cursor: pointer;
   padding: 4px 12px 5px;
-  font-size: $fontSize;
-  font-weight: 400;
-  line-height: $lineHeight;
+  font-size: $globalFontSize;
+  font-weight: $buttonFontWeight;
+  line-height: $globalLineHeight;
   height: $buttonHeight;
   text-decoration: none;
   border: none;
-  border-radius: $buttonBorderRadius;
+  border-radius: $globalBorderRadius;
 
   @include kuiButtonDisabled {
-    cursor: default;
+    cursor: not-allowed;
+    opacity: .5;
   }
 
   @include kuiButtonActive {
     transform: translateY(1px);
   }
 
-  &:focus {
-    outline: none; /* 2 */
-  }
-
-  @include kuiButtonFocus {
-    @include focus;
-  }
 }
 
   /**
@@ -101,16 +36,37 @@ $buttonHeight: 30px;
     align-items: center; /* 1 */
   }
 
+.kuiButton--small {
+  font-size: $buttonSmallFontSize;
+  padding: $buttonSmallPadding;
+  height: $buttonSmallHeight;
+}
+
+.kuiButton--fullWidth {
+  width: 100%;
+  text-align: center;
+}
+
 .kuiButton--iconText {
   .kuiButton__icon {
-    $iconSpacing: 8px;
-
     &:first-child:not(:only-child) {
-      margin-right: $iconSpacing;
+      margin-right: $buttonIconSpacing;
     }
 
     &:last-child:not(:only-child) {
-      margin-left: $iconSpacing;
+      margin-left: $buttonIconSpacing;
+    }
+  }
+
+  &.kuiButton--small {
+    .kuiButton__icon {
+      &:first-child:not(:only-child) {
+        margin-right: $buttonIconSmallSpacing;
+      }
+
+      &:last-child:not(:only-child) {
+        margin-left: $buttonIconSmallSpacing;
+      }
     }
   }
 }
@@ -119,20 +75,29 @@ $buttonHeight: 30px;
  * 1. Override Bootstrap.
  */
 .kuiButton--basic {
-  color: #5a5a5a;
-  background-color: #F2F2F2;
+  color: $buttonBasicTextColor;
+  background-color: $buttonBasicBackgroundColor;
 
   @include kuiButtonFocus {
-    color: #5a5a5a;
+    color: $buttonBasicTextColor;
   }
 
   @include kuiButtonHoverAndActive {
-    color: #ffffff !important; /* 1 */
-    background-color: #9B9B9B !important; /* 1 */
+    background-color: $buttonBasicHoverBackgroundColor !important; /* 1 */
   }
 
-  @include kuiButtonDisabled {
-    color: #9B9B9B;
+  @include darkTheme {
+    color: $buttonBasicTextColor--darkTheme;
+    background-color: $buttonBasicBackgroundColor--darkTheme;
+
+    @include kuiButtonFocus {
+      @include focus($globalFocusColor, $globalBackgroundColor--darkTheme);
+      color: $buttonBasicTextColor--darkTheme;
+    }
+
+    @include kuiButtonHoverAndActive {
+      background-color: $buttonBasicHoverBackgroundColor--darkTheme !important; /* 1 */
+    }
   }
 }
 
@@ -140,20 +105,33 @@ $buttonHeight: 30px;
  * 1. Override Bootstrap.
  */
 .kuiButton--primary {
-  color: #FFFFFF;
-  background-color: #6EADC1;
+  color: $buttonDefaultTextColor;
+  background-color: $buttonPrimaryBackgroundColor;
 
   @include kuiButtonFocus {
-    color: #FFFFFF;
+    color: $buttonDefaultTextColor;
   }
 
   @include kuiButtonHoverAndActive {
-    color: #FFFFFF !important; /* 1 */
-    background-color: #006E8A;
+    color: $buttonDefaultTextColor !important; /* 1 */
+    background-color: $buttonPrimaryHoverBackgroundColor;
+  }
+}
+
+/**
+ * 1. Override Bootstrap.
+ */
+.kuiButton--success {
+  color: $buttonDefaultTextColor;
+  background-color: $buttonSuccessBackgroundColor;
+
+  @include kuiButtonFocus {
+    color: $buttonDefaultTextColor;
   }
 
-  @include kuiButtonDisabled {
-    background-color: #B6D6E0;
+  @include kuiButtonHoverAndActive {
+    color: $buttonDefaultTextColor !important; /* 1 */
+    background-color: $buttonSuccessHoverBackgroundColor;
   }
 }
 
@@ -161,21 +139,41 @@ $buttonHeight: 30px;
  * 1. Override Bootstrap.
  */
 .kuiButton--danger {
-  color: #FFFFFF;
-  background-color: #D76051;
+  color: $globalColorRed;
+  background-color: rgba($globalColorWhite, 0.5);
+  border: solid 1px $globalColorRed;
 
   @include kuiButtonFocus {
-    @include focus($focusDangerColor);
-    color: #FFFFFF;
+    @include focus($globalFocusDangerColor);
+    color: $globalColorRed;
   }
 
   @include kuiButtonHoverAndActive {
-    color: #FFFFFF !important; /* 1 */
-    background-color: #A52E1F;
+    color: darken($globalColorRed, 10%) !important;
+    background-color: rgba(lighten($globalColorRed, 50%), 0.5);
+    border: solid 1px darken($globalColorRed, 10%);
+  }
+}
+
+/**
+ * 1. Override Bootstrap.
+ */
+.kuiButton--warning {
+  color: $buttonDefaultTextColor;
+  background-color: $buttonWarningBackgroundColor;
+
+  @include kuiButtonFocus {
+    @include focus($globalFocusWarningColor);
+    color: $buttonDefaultTextColor;
+  }
+
+  @include kuiButtonHoverAndActive {
+    color: $buttonDefaultTextColor !important; /* 1 */
+    background-color: $buttonWarningHoverBackgroundColor;
   }
 
   @include kuiButtonDisabled {
-    background-color: #efc0ba;
+    background-color: $buttonWarningDisabledBackgroundColor;
   }
 }
 
@@ -184,15 +182,23 @@ $buttonHeight: 30px;
  * 2. Override either Bootstrap or Timelion styles.
  */
 .kuiButton--hollow {
-  color: $linkColor !important; /* 2 */
+  color: $globalLinkColor !important; /* 2 */
   background-color: transparent;
 
   @include kuiButtonHoverAndActive {
-    color: $linkHoverColor !important; /* 1 */
+    color: $globalLinkHoverColor !important; /* 1 */
     text-decoration: underline;
   }
+}
 
-  @include kuiButtonDisabled {
-    color: #dddddd;
+.kuiButton--secondary {
+  color: $globalLinkColor !important; /* 2 */
+  border: solid 1px $globalColorBlue;
+  background-color: rgba($globalColorWhite, 0.5);
+
+  @include kuiButtonHoverAndActive {
+    color: darken($globalLinkColor, 10%) !important; /* 1 */
+    border: solid 1px darken($globalColorBlue, 10%);
+    background-color: rgba(lighten($globalLinkColor, 50%), 0.5);
   }
 }

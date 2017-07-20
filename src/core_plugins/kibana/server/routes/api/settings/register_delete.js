@@ -6,11 +6,12 @@ export default function registerDelete(server) {
     method: 'DELETE',
     handler: function (req, reply) {
       const { key } = req.params;
-      const uiSettings = server.uiSettings();
+      const uiSettings = req.getUiSettingsService();
+
       uiSettings
-        .remove(req, key)
+        .remove(key)
         .then(() => uiSettings
-          .getUserProvided(req)
+          .getUserProvided()
           .then(settings => reply({ settings }).type('application/json'))
         )
         .catch(err => reply(Boom.wrap(err, err.statusCode)));

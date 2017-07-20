@@ -41,8 +41,8 @@ describe(`Server logging configuration`, function () {
       });
 
       child.on('exit', code => {
+        expect([null, 0]).to.contain(code);
         expect(asserted).to.eql(true);
-        expect(code === null || code === 0).to.eql(true);
         done();
       });
 

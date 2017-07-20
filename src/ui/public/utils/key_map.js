@@ -1,4 +1,4 @@
-export default {
+export const keyMap = {
   8: 'backspace',
   9: 'tab',
   13: 'enter',

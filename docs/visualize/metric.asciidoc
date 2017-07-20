@@ -14,14 +14,8 @@ definition, as in the following example:
 { "script" : "doc['grade'].value * 1.2" }
 
 NOTE: In Elasticsearch releases 1.4.3 and later, this functionality requires you to enable
-{es-ref}modules-scripting.html[dynamic Groovy scripting].
+{ref}/modules-scripting.html[dynamic Groovy scripting].
 
 The availability of these options varies depending on the aggregation you choose.
 
 Click the *Options* tab to display the font size slider.
-
-[float]
-[[metric-viewing-detailed-information]]
-=== Viewing Detailed Information
-
-include::visualization-raw-data.asciidoc[]

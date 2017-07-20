@@ -3,12 +3,16 @@
 
 [partintro]
 --
-A Kibana _dashboard_ displays a collection of saved visualizations. You can
-arrange and resize the visualizations as needed and save dashboards so
+A Kibana _dashboard_ displays a collection of saved visualizations.
+
+.Sample dashboard.
+image:images/tutorial-dashboard.png[Example dashboard]
+
+In edit mode you can arrange and resize the visualizations as needed and save dashboards so
 they be reloaded and shared.
 
-.Sample dashboard
-image:images/tutorial-dashboard.png[Example dashboard]
+.Edit mode
+image:images/Dashboard-Tutorial-Edit-Mode.png[Example dashboard in edit mode]
 --
 
 [[dashboard-getting-started]]
@@ -17,15 +21,22 @@ image:images/tutorial-dashboard.png[Example dashboard]
 To build a dashboard:
 
 . Click *Dashboard* in the side navigation. If you haven't previously viewed a
-dashboard, Kibana displays an empty dashboard. Otherwise, click *New* to start
-building your dashboard.
+dashboard, Kibana displays a landing page where you can click *+*.
+Otherwise, click the *Dashboard* breadcrumb to navigate back to the landing page.
 +
-image:images/NewDashboard.png[New Dashboard]
+image:images/Dashboard-Landing-Page.png[Dashboard Landing Page]
 
 [[adding-visualizations-to-a-dashboard]]
-. To add a visualization to the dashboard, click *Add* and select the
+. To add a visualization to the dashboard, click *Edit* mode.
+Brand new dashboards will be in *Edit* mode automatically.
++
+image:images/Dashboard-View-Mode.png[Dashboard View Mode]
+
+. Once in Edit mode, click *Add* and select the
 visualization. If you have a large number of visualizations, you can enter a
 *Filter* string to filter the list.
++
+image:images/Dashboard-Edit-Mode.png[Dashboard Edit Mode]
 +
 Kibana displays the selected visualization  in a container on the dashboard.
 If you see a message that the container is too small, you can
@@ -48,7 +59,7 @@ dashboard:
 [[customizing-your-dashboard]]
 === Arranging Dashboard Elements
 
-The visualizations in your dashboard are stored in resizable, moveable containers.
+In *Edit Mode*, visualizations in your dashboard are stored in resizable, moveable containers.
 
 [float]
 [[moving-containers]]
@@ -114,6 +125,7 @@ corner of the container.
 
 To open a visualization in the Visualization Editor:
 
+. Enter Edit Mode.
 . Hover over it to display the container controls.
 . Click the *Edit* button in the upper right corner of the container.
 

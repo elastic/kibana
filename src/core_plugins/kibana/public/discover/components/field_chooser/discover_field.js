@@ -3,20 +3,26 @@ import html from 'plugins/kibana/discover/components/field_chooser/discover_fiel
 import _ from 'lodash';
 import 'ui/directives/css_truncate';
 import 'ui/directives/field_name';
+import 'ui/accessibility/kbn_accessible_click';
 import detailsHtml from 'plugins/kibana/discover/components/field_chooser/lib/detail_views/string.html';
-import uiModules from 'ui/modules';
+import { uiModules } from 'ui/modules';
 const app = uiModules.get('apps/discover');
-
-
 
 app.directive('discoverField', function ($compile) {
   return {
     restrict: 'E',
     template: html,
     replace: true,
+    scope: {
+      field: '=',
+      onAddField: '=',
+      onAddFilter: '=',
+      onRemoveField: '=',
+      onShowDetails: '=',
+    },
     link: function ($scope, $elem) {
       let detailsElem;
-      let detailScope = $scope.$new();
+      let detailScope;
 
 
       const init = function () {
@@ -27,23 +33,6 @@ app.directive('discoverField', function ($compile) {
 
       const getWarnings = function (field) {
         let warnings = [];
-
-        if (!field.scripted) {
-          if (!field.doc_values && field.type !== 'boolean' && !(field.analyzed && field.type === 'string')) {
-            warnings.push('Doc values are not enabled on this field. This may lead to excess heap consumption when visualizing.');
-          }
-
-          if (field.analyzed && field.type === 'string') {
-            warnings.push('This is an analyzed string field.' +
-              ' Analyzed strings are highly unique and can use a lot of memory to visualize.' +
-              ' Values such as foo-bar will be broken into foo and bar.');
-          }
-
-          if (!field.indexed && !field.searchable) {
-            warnings.push('This field is not indexed and might not be usable in visualizations.');
-          }
-        }
-
 
         if (field.scripted) {
           warnings.push('Scripted fields can take a long time to execute.');
@@ -60,20 +49,29 @@ app.directive('discoverField', function ($compile) {
       };
 
       $scope.toggleDisplay = function (field) {
-        // This is inherited from fieldChooser
-        $scope.toggle(field.name);
-        if (field.display) $scope.increaseFieldCounter(field);
+        if (field.display) {
+          $scope.onRemoveField(field.name);
+        } else {
+          $scope.onAddField(field.name);
+        }
 
         if (field.details) {
           $scope.toggleDetails(field);
         }
       };
 
+      $scope.onClickToggleDetails = function onClickToggleDetails($event, field) {
+        // Do nothing if the event originated from a child.
+        if ($event.currentTarget !== $event.target) {
+          $event.preventDefault();
+        }
+
+        $scope.toggleDetails(field);
+      };
+
       $scope.toggleDetails = function (field, recompute) {
         if (_.isUndefined(field.details) || recompute) {
-          // This is inherited from fieldChooser
-          $scope.details(field, recompute);
-          detailScope.$destroy();
+          $scope.onShowDetails(field, recompute);
           detailScope = $scope.$new();
           detailScope.warnings = getWarnings(field);
 
@@ -82,6 +80,7 @@ app.directive('discoverField', function ($compile) {
           $elem.append(detailsElem).addClass('active');
         } else {
           delete field.details;
+          detailScope.$destroy();
           detailsElem.remove();
           $elem.removeClass('active');
         }

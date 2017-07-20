@@ -1,10 +1,10 @@
 import angular from 'angular';
 import 'ace';
-import docViewsRegistry from 'ui/registry/doc_views';
+import { DocViewsRegistryProvider } from 'ui/registry/doc_views';
 
 import jsonHtml from './json.html';
 
-docViewsRegistry.register(function () {
+DocViewsRegistryProvider.register(function () {
   return {
     title: 'JSON',
     order: 20,

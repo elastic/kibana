@@ -1,7 +1,6 @@
 import expect from 'expect.js';
 import sinon from 'sinon';
-import * as kbnTestServer from '../../../../../../test/utils/kbn_server.js';
-import fromRoot from '../../../../../utils/from_root';
+import * as kbnTestServer from '../../../../../test_utils/kbn_server.js';
 import manageUuid from '../manage_uuid';
 
 describe('core_plugins/kibana/server/lib', function () {
@@ -13,13 +12,7 @@ describe('core_plugins/kibana/server/lib', function () {
     before(async function () {
       this.timeout(60000); // sometimes waiting for server takes longer than 10
 
-      kbnServer = kbnTestServer.createServer({
-        plugins: {
-          scanDirs: [
-            fromRoot('src/core_plugins')
-          ]
-        }
-      });
+      kbnServer = kbnTestServer.createServerWithCorePlugins();
 
       await kbnServer.ready();
     });

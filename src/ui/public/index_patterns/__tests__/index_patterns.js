@@ -1,8 +1,8 @@
 import ngMock from 'ng_mock';
 import expect from 'expect.js';
-import sinon from 'auto-release-sinon';
-import IndexPatternProvider from '../_index_pattern';
-import IndexPatternsProvider from '../index_patterns';
+import sinon from 'sinon';
+import { IndexPatternProvider } from '../_index_pattern';
+import { IndexPatternsProvider } from '../index_patterns';
 
 describe('IndexPatterns service', function () {
   let indexPatterns;
@@ -14,7 +14,7 @@ describe('IndexPatterns service', function () {
 
     // prevent IndexPattern initialization from doing anything
     Private.stub(
-      require('../_index_pattern'),
+      IndexPatternProvider,
       function (...args) {
         const indexPattern = new IndexPattern(...args);
         sinon.stub(indexPattern, 'init', function () {

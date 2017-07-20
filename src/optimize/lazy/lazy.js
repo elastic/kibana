@@ -1,5 +1,6 @@
 import { isWorker } from 'cluster';
-module.exports = async kbnServer => {
+
+export default async kbnServer => {
 
 
   if (!isWorker) {

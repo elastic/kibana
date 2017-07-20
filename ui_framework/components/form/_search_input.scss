@@ -1,8 +1,17 @@
+$searchInputTextColor: #ACACAC;
+
 .kuiSearchInput {
+  width: $globalFormFieldDefaultWidth;
   display: inline-block;
   position: relative;
-  font-size: $fontSize;
-  line-height: $lineHeight;
+  font-size: $globalFontSize;
+  line-height: $globalLineHeight;
+
+  &.kuiSearchInput-isInvalid {
+    .kuiSearchInput__input {
+      @include formControlInvalid;
+    }
+  }
 }
 
   .kuiSearchInput__icon {
@@ -10,7 +19,7 @@
     top: 0.5em;
     left: 0.7em;
     font-size: 1em;
-    color: #ACACAC;
+    color: $searchInputTextColor;
   }
 
   /**
@@ -22,3 +31,11 @@
     padding-left: 28px; /* 1 */
     width: 100%; /* 2 */
   }
+
+.kuiSearchInput--small {
+  width: $globalFormFieldSmallWidth;
+}
+
+.kuiSearchInput--large {
+  width: $globalFormFieldLargeWidth;
+}

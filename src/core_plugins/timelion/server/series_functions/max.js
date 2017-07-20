@@ -1,6 +1,7 @@
 import reduce from '../lib/reduce.js';
 import Chainable from '../lib/classes/chainable';
-module.exports = new Chainable('max', {
+
+export default new Chainable('max', {
   args: [
     {
       name: 'inputSeries',

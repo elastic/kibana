@@ -1,13 +1,25 @@
 import expect from 'expect.js';
+import ngMock from 'ng_mock';
+
+import { FilterManagerProvider } from 'ui/filter_manager';
 
 import { createStateStub } from './_utils';
 import { QueryParameterActionsProvider } from '../actions';
 
 
 describe('context app', function () {
+  beforeEach(ngMock.module('kibana'));
+
   describe('action increasePredecessorCount', function () {
+    let increasePredecessorCount;
+
+    beforeEach(ngMock.inject(function createPrivateStubs(Private) {
+      Private.stub(FilterManagerProvider, {});
+
+      increasePredecessorCount = Private(QueryParameterActionsProvider).increasePredecessorCount;
+    }));
+
     it('should increase the predecessorCount by the given value', function () {
-      const { increasePredecessorCount } = new QueryParameterActionsProvider();
       const state = createStateStub();
 
       increasePredecessorCount(state)(20);
@@ -16,7 +28,6 @@ describe('context app', function () {
     });
 
     it('should increase the predecessorCount by the default step size if not value is given', function () {
-      const { increasePredecessorCount } = new QueryParameterActionsProvider();
       const state = createStateStub();
 
       increasePredecessorCount(state)();
@@ -25,7 +36,6 @@ describe('context app', function () {
     });
 
     it('should limit the predecessorCount to 0 as a lower bound', function () {
-      const { increasePredecessorCount } = new QueryParameterActionsProvider();
       const state = createStateStub();
 
       increasePredecessorCount(state)(-20);
@@ -34,7 +44,6 @@ describe('context app', function () {
     });
 
     it('should limit the predecessorCount to 10000 as an upper bound', function () {
-      const { increasePredecessorCount } = new QueryParameterActionsProvider();
       const state = createStateStub();
 
       increasePredecessorCount(state)(20000);

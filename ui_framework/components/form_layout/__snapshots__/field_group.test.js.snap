@@ -1,0 +1,21 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`renders KuiFieldGroup 1`] = `
+<div
+  aria-label="aria-label"
+  class="kuiFieldGroup testClass1 testClass2"
+  data-test-subj="test subject string"
+>
+  children
+</div>
+`;
+
+exports[`renders KuiFieldGroup isAlignedTop 1`] = `
+<div
+  aria-label="aria-label"
+  class="kuiFieldGroup testClass1 testClass2 kuiFieldGroup--alignTop"
+  data-test-subj="test subject string"
+>
+  children
+</div>
+`;

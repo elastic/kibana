@@ -1,17 +1,14 @@
 import _ from 'lodash';
 import d3 from 'd3';
-import Binder from 'ui/binder';
-import errors from 'ui/errors';
-import EventsProvider from 'ui/events';
-import { ResizeCheckerProvider } from 'ui/resize_checker';
+import { KbnError } from 'ui/errors';
+import { EventsProvider } from 'ui/events';
 import './styles/main.less';
-import VisConifgProvider from './lib/vis_config';
-import VisHandlerProvider from './lib/handler';
+import { VislibVisConfigProvider } from './lib/vis_config';
+import { VisHandlerProvider } from './lib/handler';
 
-export default function VisFactory(Private) {
-  const ResizeChecker = Private(ResizeCheckerProvider);
+export function VislibVisProvider(Private) {
   const Events = Private(EventsProvider);
-  const VisConfig = Private(VisConifgProvider);
+  const VisConfig = Private(VislibVisConfigProvider);
   const Handler = Private(VisHandlerProvider);
 
   /**
@@ -26,13 +23,7 @@ export default function VisFactory(Private) {
     constructor($el, visConfigArgs) {
       super(arguments);
       this.el = $el.get ? $el.get(0) : $el;
-      this.binder = new Binder();
       this.visConfigArgs = _.cloneDeep(visConfigArgs);
-
-      // bind the resize function so it can be used as an event handler
-      this.resize = _.bind(this.resize, this);
-      this.resizeChecker = new ResizeChecker(this.el);
-      this.binder.on(this.resizeChecker, 'resize', this.resize);
     }
 
     hasLegend() {
@@ -69,7 +60,7 @@ export default function VisFactory(Private) {
       this.visConfig = new VisConfig(this.visConfigArgs, this.data, this.uiState, this.el);
 
       this.handler = new Handler(this, this.visConfig);
-      this._runWithoutResizeChecker('render');
+      this._runOnHandler('render');
     }
 
     getLegendLabels() {
@@ -80,35 +71,12 @@ export default function VisFactory(Private) {
       return this.visConfig ? this.visConfig.get('legend.colors', null) : null;
     }
 
-    /**
-     * Resizes the visualization
-     *
-     * @method resize
-     */
-    resize() {
-      if (!this.data) {
-        return;
-      }
-
-      if (this.handler && _.isFunction(this.handler.resize)) {
-        this._runOnHandler('resize');
-      } else {
-        this.render(this.data, this.uiState);
-      }
-    }
-
-    _runWithoutResizeChecker(method) {
-      this.resizeChecker.modifySizeWithoutTriggeringResize(() => {
-        this._runOnHandler(method);
-      });
-    }
-
     _runOnHandler(method) {
       try {
         this.handler[method]();
       } catch (error) {
 
-        if (error instanceof errors.KbnError) {
+        if (error instanceof KbnError) {
           error.displayToScreen(this.handler);
         } else {
           throw error;
@@ -128,8 +96,6 @@ export default function VisFactory(Private) {
     destroy() {
       const selection = d3.select(this.el).select('.vis-wrapper');
 
-      this.binder.destroy();
-      this.resizeChecker.destroy();
       if (this.uiState) this.uiState.off('change', this._uiStateChangeHandler);
       if (this.handler) this._runOnHandler('destroy');
 

@@ -1,23 +1,26 @@
-import ManagementSection from './section';
+import { ManagementSection } from './section';
 
-const sections = new ManagementSection('management', {
+export const management = new ManagementSection('management', {
   display: 'Management'
 });
 
 // TODO: where should this live?
-sections.register('data', {
+management.register('data', {
   display: 'Connect Data',
   order: 0
 });
 
-sections.register('elasticsearch', {
+management.register('elasticsearch', {
   display: 'Elasticsearch',
-  order: 10
+  order: 20
 });
 
-sections.register('kibana', {
+management.register('kibana', {
   display: 'Kibana',
-  order: 20,
+  order: 30,
 });
 
-export default sections;
+management.register('logstash', {
+  display: 'Logstash',
+  order: 30,
+});

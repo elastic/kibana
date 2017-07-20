@@ -2,7 +2,7 @@ import _ from 'lodash';
 import sinon from 'sinon';
 import expect from 'expect.js';
 import Promise from 'bluebird';
-
+import mappings from './fixtures/mappings';
 import createKibanaIndex from '../create_kibana_index';
 
 describe('plugins/elasticsearch', function () {
@@ -22,13 +22,13 @@ describe('plugins/elasticsearch', function () {
       get.withArgs('kibana.index').returns(config.kibana.index);
       config = function () { return { get: get }; };
 
-      _.set(server, 'plugins.elasticsearch', {});
       _.set(server, 'config', config);
+      _.set(server, 'getKibanaIndexMappingsDsl', sinon.stub().returns(mappings));
 
       callWithInternalUser = sinon.stub();
       cluster = { callWithInternalUser: callWithInternalUser };
 
-      server.plugins.elasticsearch.getCluster = sinon.stub().withArgs('admin').returns(cluster);
+      _.set(server, 'plugins.elasticsearch.getCluster', sinon.stub().withArgs('admin').returns(cluster));
     });
 
     describe('successful requests', function () {

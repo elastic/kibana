@@ -58,14 +58,16 @@
   <div class="settings-footer">
     <button
       ng-click="kbnTopNav.close()"
-      class="btn btn-default">
+      class="kuiButton kuiButton--hollow"
+    >
       Cancel
     </button>
     <button
       type="submit"
       ng-disabled="settingsForm.$invalid"
-      class="btn btn-primary"
-      data-test-subj="settings-save-button">
+      class="kuiButton kuiButton--primary"
+      data-test-subj="settings-save-button"
+    >
       Save
     </button>
   </div>

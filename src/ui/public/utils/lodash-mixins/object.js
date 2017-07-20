@@ -1,4 +1,4 @@
-export default function (_) {
+export function lodashObjectMixin(_) {
   return _.mixin(_, {
 
     /**

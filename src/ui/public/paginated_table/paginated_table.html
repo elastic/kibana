@@ -28,7 +28,7 @@
       <tbody kbn-rows="page" kbn-rows-min="paginatedTable.rowsToShow(perPage, page.length)"></tbody>
       <tfoot ng-if="showTotal">
         <tr>
-          <th ng-repeat="col in columns" class="numeric-value">{{col.total | number}}</th>
+          <th ng-repeat="col in columns" class="numeric-value">{{col.total}}</th>
         </tr>
       </tfoot>
     </table>

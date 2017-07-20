@@ -12,11 +12,20 @@
           </a>
         </kbn-tooltip>
         <span dropdown>
-          <a class="editor_action" dropdown-toggle href="#">
-            <i class="fa fa-wrench"></i>
+          <a
+            id="consoleRequestOptions"
+            class="editor_action"
+            dropdown-toggle href="#"
+            aria-label="Request options"
+          >
+            <span class="kuiIcon fa-wrench"></span>
           </a>
 
-          <ul class="dropdown-menu" role="menu" aria-labelledby="split-button">
+          <ul
+            class="dropdown-menu"
+            role="menu"
+            aria-labelledby="consoleRequestOptions"
+          >
             <li role="menuitem">
               <a class="link" id="copy_as_curl">Copy as cURL</a>
             </li>

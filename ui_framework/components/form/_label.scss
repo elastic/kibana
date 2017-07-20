@@ -1,0 +1,9 @@
+/**
+ * 1. Override Bootstrap.
+ */
+.kuiLabel {
+  font-size: $globalFontSize;
+  line-height: $globalLineHeight;
+  font-weight: bold;
+  margin-bottom: 0; /* 1 */
+}

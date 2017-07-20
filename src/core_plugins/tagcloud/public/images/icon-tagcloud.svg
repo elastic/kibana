@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="52px" height="34px" viewBox="0 0 52 34" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <!-- Generator: Sketch 43.1 (39012) - http://www.bohemiancoding.com/sketch -->
+    <title>icon-tagcloud sm</title>
+    <desc>Created with Sketch.</desc>
+    <defs></defs>
+    <g id="Visualize" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="Visualize-Create-New" transform="translate(-760.000000, -658.000000)" fill="#000000">
+            <g id="other" transform="translate(555.000000, 576.000000)">
+                <g id="tag-cloud" transform="translate(161.000000, 44.000000)">
+                    <g id="icon-tagcloud-sm" transform="translate(44.000000, 38.000000)">
+                        <rect id="1" x="0.9004329" y="14.0692641" width="50.6493506" height="8.44155844" rx="4"></rect>
+                        <rect id="2" x="26.2251082" y="2.81385281" width="22.5108225" height="5.62770563" rx="2.81385281"></rect>
+                        <rect id="3" x="14.969697" y="28.1385281" width="22.5108225" height="5.62770563" rx="2.81385281"></rect>
+                        <rect id="4" x="3.71428571" y="0" width="16.8831169" height="5.62770563" rx="2.81385281"></rect>
+                    </g>
+                </g>
+            </g>
+        </g>
+    </g>
+</svg>

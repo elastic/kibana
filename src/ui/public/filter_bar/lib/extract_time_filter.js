@@ -1,5 +1,6 @@
 import _ from 'lodash';
-export default function extractTimeFilterProvider(courier, Promise) {
+
+export function FilterBarLibExtractTimeFilterProvider(courier, Promise) {
   return Promise.method(function (filters) {
     // Assume all the index patterns are the same since they will be added
     // from the same visualization.

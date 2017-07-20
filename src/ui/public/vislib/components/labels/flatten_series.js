@@ -1,5 +1,6 @@
 import _ from 'lodash';
-export default function GetSeriesUtilService() {
+
+export function VislibComponentsLabelsFlattenSeriesProvider() {
 
   /*
    * Accepts a Kibana data object with a rows or columns key

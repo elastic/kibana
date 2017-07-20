@@ -1,11 +1,11 @@
-import FetchProvider from '../fetch';
-import LooperProvider from './_looper';
-import DocStrategyProvider from '../fetch/strategy/doc_data';
+import { FetchProvider } from '../fetch';
+import { LooperProvider } from './_looper';
+import { DocDataStrategyProvider } from '../fetch/strategy/doc_data';
 
-export default function DocLooperService(Private) {
+export function DocDataLooperProvider(Private) {
   const fetch = Private(FetchProvider);
   const Looper = Private(LooperProvider);
-  const DocStrategy = Private(DocStrategyProvider);
+  const DocStrategy = Private(DocDataStrategyProvider);
 
   /**
    * The Looper which will manage the doc fetch interval

@@ -1,6 +1,6 @@
 import 'ui/compile_recursive_directive';
 import 'ui/agg_table';
-import uiModules from 'ui/modules';
+import { uiModules } from 'ui/modules';
 import aggTableGroupTemplate from 'ui/agg_table/agg_table_group.html';
 
 uiModules

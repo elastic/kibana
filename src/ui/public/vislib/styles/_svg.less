@@ -17,6 +17,10 @@
   fill: @svg-tick-text-color;
 }
 
+.chart-text {
+  fill: @svg-tick-text-color;
+}
+
 /* Brush Styling */
 .brush .extent {
   stroke: @svg-brush-color;
@@ -24,7 +28,7 @@
   shape-rendering: crispEdges;
 }
 
-@vis-hover-opacity: 0.65;
+@vis-hover-opacity: 0.8;
 
 /* SVG Element Default Styling */
 rect {
@@ -46,13 +50,14 @@ circle {
 }
 
 .overlap_area {
-  opacity: 0.6;
+  opacity: 0.8;
 }
 
 .series > path,
 .series > rect {
-  fill-opacity: 0.6;
+  fill-opacity: 0.8;
   stroke-opacity: 1;
+  stroke-width: 0;
 }
 
 .blur_shape {

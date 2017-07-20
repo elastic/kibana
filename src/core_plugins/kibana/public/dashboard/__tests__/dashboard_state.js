@@ -10,9 +10,11 @@ describe('DashboardState', function () {
   let SavedDashboard;
   let timefilter;
   let quickTimeRanges;
+  let dashboardConfig;
+  const mockIndexPattern = { id: 'index1' };
 
   function initDashboardState() {
-    dashboardState = new DashboardState(savedDashboard, AppState);
+    dashboardState = new DashboardState(savedDashboard, AppState, dashboardConfig);
   }
 
   beforeEach(ngMock.module('kibana'));
@@ -21,6 +23,7 @@ describe('DashboardState', function () {
     quickTimeRanges = $injector.get('quickRanges');
     AppState = $injector.get('AppState');
     SavedDashboard = $injector.get('SavedDashboard');
+    dashboardConfig = $injector.get('dashboardConfig');
     savedDashboard = new SavedDashboard();
   }));
 
@@ -74,6 +77,27 @@ describe('DashboardState', function () {
       expect(timefilter.time.mode).to.equal('absolute');
       expect(timefilter.time.to).to.equal(savedDashboard.timeTo);
       expect(timefilter.time.from).to.equal(savedDashboard.timeFrom);
+    });
+  });
+
+  describe('panelIndexPatternMapping', function () {
+    it('registers index pattern', function () {
+      const state = new DashboardState(savedDashboard, AppState, dashboardConfig);
+      state.registerPanelIndexPatternMap('panel1', mockIndexPattern);
+      expect(state.getPanelIndexPatterns().length).to.equal(1);
+    });
+
+    it('registers unique index patterns', function () {
+      const state = new DashboardState(savedDashboard, AppState, dashboardConfig);
+      state.registerPanelIndexPatternMap('panel1', mockIndexPattern);
+      state.registerPanelIndexPatternMap('panel2', mockIndexPattern);
+      expect(state.getPanelIndexPatterns().length).to.equal(1);
+    });
+
+    it('does not register undefined index pattern for panels with no index pattern', function () {
+      const state = new DashboardState(savedDashboard, AppState, dashboardConfig);
+      state.registerPanelIndexPatternMap('markdownPanel1', undefined);
+      expect(state.getPanelIndexPatterns().length).to.equal(0);
     });
   });
 });

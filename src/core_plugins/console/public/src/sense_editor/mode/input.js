@@ -15,8 +15,7 @@ var HighlightRules = require("./input_highlight_rules").InputHighlightRules;
 
 acequire("ace/config").setModuleUrl("sense_editor/mode/worker", require("file!./worker.js"));
 
-
-var Mode = function () {
+export function Mode() {
   this.$tokenizer = new AceTokenizer(new HighlightRules().getRules());
   this.$outdent = new MatchingBraceOutdent();
   this.$behaviour = new CstyleBehaviour();
@@ -24,7 +23,7 @@ var Mode = function () {
   this.createModeDelegates({
     "script-": ScriptMode
   });
-};
+}
 oop.inherits(Mode, TextMode);
 
 (function () {
@@ -72,5 +71,3 @@ oop.inherits(Mode, TextMode);
 
 
 }).call(Mode.prototype);
-
-module.exports.Mode = Mode;

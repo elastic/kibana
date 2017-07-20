@@ -1,4 +1,3 @@
-
 /**
  * 1. Breadcrumbs are placed in the top-left corner and need to be bumped over
  *    a bit.
@@ -6,56 +5,39 @@
 .kuiLocalBreadcrumbs {
   display: flex;
   align-items: center;
-  height: 100%;
   padding-left: $localNavSideSpacing; /* 1 */
 }
 
-  .kuiLocalBreadcrumb {
-    & + & {
-      margin-left: 6px;
+.kuiLocalBreadcrumb {
+  font-size: 14px;
+  margin: 0;
+  font-weight: normal;
 
-      &:before {
-        content: '/';
-        user-select: none;
-        margin-right: 4px;
-        color: $localNavBreadcrumbDelimiterColor;
+  & + & {
+    margin-left: 6px;
 
-        @include darkTheme {
-          color: $localNavBreadcrumbDelimiterColor--darkTheme;
-        }
-      }
-    }
+    &:before {
+      content: '/';
+      user-select: none;
+      margin-right: 4px;
+      color: $localNavBreadcrumbDelimiterColor;
 
-    &:last-child {
-      .kuiLocalBreadcrumb__link {
-        color: $localNavTextColor;
-        cursor: default;
-
-        &:hover {
-          text-decoration: none;
-        }
-
-        @include darkTheme {
-          color: $localNavTextColor--darkTheme;
-        }
+      @include darkTheme {
+        color: $localNavBreadcrumbDelimiterColor--darkTheme;
       }
     }
   }
+}
 
-    .kuiLocalBreadcrumb__link {
-      font-size: $localNavFontSizeNormal;
-      color: #5a5a5a;
-      text-decoration: none;
+/**
+ * 1. Make it a bit darker to contrast with the gray background.
+ */
+.kuiLocalBreadcrumb__link {
+  @include link;
+  color: $localBreadcrumbLinkColor; /* 1 */
+  font-size: $globalFontSize;
+}
 
-      &:hover {
-        text-decoration: underline;
-      }
-
-      @include darkTheme {
-        color: $localNavButtonTextColor--darkTheme;
-      }
-    }
-
-    .kuiLocalBreadcrumb__emphasis {
-      font-weight: 700;
-    }
+.kuiLocalBreadcrumb__emphasis {
+  font-weight: $globalFontWeightBold;
+}

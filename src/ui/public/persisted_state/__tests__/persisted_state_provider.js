@@ -1,9 +1,9 @@
 import _ from 'lodash';
-import sinon from 'auto-release-sinon';
+import sinon from 'sinon';
 import noDigestPromises from 'test_utils/no_digest_promises';
 import ngMock from 'ng_mock';
 import expect from 'expect.js';
-import errors from 'ui/errors';
+import { PersistedStateError } from 'ui/errors';
 import 'ui/persisted_state';
 
 let PersistedState;
@@ -62,7 +62,7 @@ describe('Persisted State Provider', function () {
       };
 
       expect(run).to.throwException(function (err) {
-        expect(err).to.be.a(errors.PersistedStateError);
+        expect(err).to.be.a(PersistedStateError);
       });
     });
 
@@ -86,7 +86,7 @@ describe('Persisted State Provider', function () {
       };
 
       expect(run).to.throwException(function (err) {
-        expect(err).to.be.a(errors.PersistedStateError);
+        expect(err).to.be.a(PersistedStateError);
       });
     });
 
@@ -100,7 +100,7 @@ describe('Persisted State Provider', function () {
       };
 
       expect(run).to.throwException(function (err) {
-        expect(err).to.be.a(errors.PersistedStateError);
+        expect(err).to.be.a(PersistedStateError);
       });
     });
   });

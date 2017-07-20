@@ -1,7 +1,7 @@
 [[tagcloud-chart]]
 == Tag Clouds
 
-A tag cloud visualization is a visual representation of text data, typically used to visualize free form text. 
+A tag cloud visualization is a visual representation of text data, typically used to visualize free form text.
 Tags are usually single words, and the importance of each tag is shown with font size or color.
 
 The font size for each word is determined by the _metrics_ aggregation. The following aggregations are available for
@@ -16,7 +16,7 @@ Before you choose a buckets aggregation, select the *Split Tags* option.
 
 You can specify the following bucket aggregations for tag cloud visualization:
 
-*Terms*:: A {es-ref}search-aggregations-bucket-terms-aggregation.html[_terms_] aggregation enables you to specify the top
+*Terms*:: A {ref}/search-aggregations-bucket-terms-aggregation.html[_terms_] aggregation enables you to specify the top
 or bottom _n_ elements of a  given field to display, ordered by count or a custom metric.
 
 You can click the *Advanced* link to display more customization options for your metrics or bucket aggregation:
@@ -28,7 +28,7 @@ definition, as in the following example:
 { "script" : "doc['grade'].value * 1.2" }
 
 NOTE: In Elasticsearch releases 1.4.3 and later, this functionality requires you to enable
-{es-ref}modules-scripting.html[dynamic Groovy scripting].
+{ref}/modules-scripting.html[dynamic Groovy scripting].
 
 
 Select the *Options* tab to change the following aspects of the chart:
@@ -39,6 +39,3 @@ regularize the display of data sets with variabilities that are themselves highl
 *Orientation*:: You can select how to orientate your text in the tag cloud. You can choose one of the following options:
 Single, right angles and multiple.
 *Font Size*:: Allows you to set minimum and maximum font size to use for this visualization.
-
-
-include::visualization-raw-data.asciidoc[]

@@ -3,7 +3,7 @@ import { Server } from 'hapi';
 import { fromNode } from 'bluebird';
 import registerHapiPlugins from '../../server/http/register_hapi_plugins';
 
-module.exports = class LazyServer {
+export default class LazyServer {
   constructor(host, port, optimizer) {
     this.optimizer = optimizer;
     this.server = new Server();
@@ -21,4 +21,4 @@ module.exports = class LazyServer {
     this.optimizer.bindToServer(this.server);
     await fromNode(cb => this.server.start(cb));
   }
-};
+}

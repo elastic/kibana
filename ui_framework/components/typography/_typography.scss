@@ -3,9 +3,8 @@
  */
 .kuiTitle {
   margin: 0; /* 1 */
-  font-weight: 400; /* 1 */
-  color: $fontColor;
-  font-size: 22px;
+  font-weight: $globalFontWeightRegular; /* 1 */
+  font-size: $typcographyTitleFontSize;
 }
 
 /**
@@ -13,9 +12,18 @@
  */
 .kuiSubTitle {
   margin: 0; /* 1 */
-  font-weight: 400; /* 1 */
-  color: $fontColor;
-  font-size: 18px;
+  font-weight: $globalFontWeightRegular; /* 1 */
+  font-size: $globalTitleFontSize;
+}
+
+/**
+ * 1. Override p.
+ */
+.kuiTextTitle {
+  margin: 0; /* 1 */
+  font-weight: $globalFontWeightBold; /* 1 */
+  line-height: $globalLineHeight;
+  font-size: $globalFontSize;
 }
 
 /**
@@ -23,8 +31,18 @@
  */
 .kuiText {
   margin: 0; /* 1 */
-  font-weight: 400; /* 1 */
-  color: $fontColor;
-  line-height: $lineHeight;
-  font-size: $fontSize;
+  font-weight: $globalFontWeightRegular; /* 1 */
+  line-height: $globalLineHeight;
+  font-size: $globalFontSize;
+}
+
+.kuiSubText {
+  margin: 0; /* 1 */
+  font-weight: $globalFontWeightRegular; /* 1 */
+  line-height: $globalLineHeight;
+  font-size: $globalSubTextFontSize;
+}
+
+.kuiSubduedText {
+  color: $globalSubduedTextColor !important;
 }

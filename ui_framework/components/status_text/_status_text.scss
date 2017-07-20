@@ -4,21 +4,27 @@
 }
 
 .kuiStatusText--info {
-  color: $infoColor;
+  color: $globalInfoColor;
 }
 
 .kuiStatusText--success {
-  color: $successColor;
+  color: $globalSuccessColor;
 }
 
 .kuiStatusText--warning {
-  color: $warningColor;
+  color: $globalWarningColor;
 }
 
 .kuiStatusText--error {
-  color: $errorColor;
+  color: $globalDangerColor;
 }
 
-  .kuiStatusText__icon {
-    margin-right: 6px;
-  }
+/**
+ * 1. Set the image to be the same size as a font icon at 14px.
+ * 2. We need to cap the height too, in case the icon was designed thin and tall.
+ */
+.kuiStatusText__icon {
+  margin-right: 6px;
+  width: $statusTextIconSize; /* 1 */
+  max-height:$statusTextIconSize; /* 2 */
+}

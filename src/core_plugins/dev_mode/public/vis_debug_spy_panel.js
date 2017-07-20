@@ -1,5 +1,5 @@
 import visDebugSpyPanelTemplate from 'plugins/dev_mode/vis_debug_spy_panel.html';
-import spyModesRegistry from 'ui/registry/spy_modes';
+import { SpyModesRegistryProvider } from 'ui/registry/spy_modes';
 
 function VisDetailsSpyProvider() {
   return {
@@ -16,4 +16,4 @@ function VisDetailsSpyProvider() {
 }
 
 // register the spy mode or it won't show up in the spys
-spyModesRegistry.register(VisDetailsSpyProvider);
+SpyModesRegistryProvider.register(VisDetailsSpyProvider);

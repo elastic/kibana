@@ -1,12 +1,12 @@
 import moment from 'moment';
 
-export default {
+export const timeNavigation = {
   // travel forward in time based on the interval between from and to
   stepForward({ min, max }) {
     const diff = max.diff(min);
     return {
-      from: max.toISOString(),
-      to: moment(max).add(diff).toISOString(),
+      from: moment(max).add(1, 'ms').toISOString(),
+      to: moment(max).add(diff + 1, 'ms').toISOString(),
       mode: 'absolute'
     };
   },
@@ -15,8 +15,8 @@ export default {
   stepBackward({ min, max }) {
     const diff = max.diff(min);
     return {
-      from: moment(min).subtract(diff).toISOString(),
-      to: min.toISOString(),
+      from: moment(min).subtract(diff + 1, 'ms').toISOString(),
+      to: moment(min).subtract(1, 'ms').toISOString(),
       mode: 'absolute'
     };
   },
@@ -25,8 +25,8 @@ export default {
   zoomOut({ min, max }) {
     const diff = max.diff(min);
     return {
-      from: moment(min).subtract(diff / 2).toISOString(),
-      to: moment(max).add(diff / 2).toISOString(),
+      from: moment(min).subtract(diff / 2, 'ms').toISOString(),
+      to: moment(max).add(diff / 2, 'ms').toISOString(),
       mode: 'absolute'
     };
   },
@@ -35,8 +35,8 @@ export default {
   zoomIn({ min, max }) {
     const diff = max.diff(min);
     return {
-      from: moment(min).add(diff / 4).toISOString(),
-      to: moment(max).subtract(diff / 4).toISOString(),
+      from: moment(min).add(diff / 4, 'ms').toISOString(),
+      to: moment(max).subtract(diff / 4, 'ms').toISOString(),
       mode: 'absolute'
     };
   }

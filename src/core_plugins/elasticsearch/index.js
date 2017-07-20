@@ -9,14 +9,13 @@ import { clientLogger } from './lib/client_logger';
 import { createClusters } from './lib/create_clusters';
 import filterHeaders from './lib/filter_headers';
 
-import createProxy, { createPath } from './lib/create_proxy';
+import { createProxy, createPath } from './lib/create_proxy';
 
 const DEFAULT_REQUEST_HEADERS = [ 'authorization' ];
 
-module.exports = function ({ Plugin }) {
-  return new Plugin({
+export default function (kibana) {
+  return new kibana.Plugin({
     require: ['kibana'],
-
     config(Joi) {
       const { array, boolean, number, object, string, ref } = Joi;
 
@@ -159,7 +158,6 @@ module.exports = function ({ Plugin }) {
           pre: [ noDirectIndex, noBulkCheck ]
         }
       );
-
       // Set up the health check service and start it.
       const { start, waitUntilReady } = healthCheck(this, server);
       server.expose('waitUntilReady', waitUntilReady);
@@ -167,4 +165,4 @@ module.exports = function ({ Plugin }) {
     }
   });
 
-};
+}

@@ -2,13 +2,12 @@ import expect from 'expect.js';
 import ngMock from 'ng_mock';
 import './agg_type';
 import './agg_params';
-import './bucket_count_between';
 import './buckets/_histogram';
 import './buckets/_geo_hash';
 import './buckets/_range';
-import AggTypesIndexProvider from 'ui/agg_types/index';
-import AggTypesBucketsBucketAggTypeProvider from 'ui/agg_types/buckets/_bucket_agg_type';
-import AggTypesMetricsMetricAggTypeProvider from 'ui/agg_types/metrics/metric_agg_type';
+import { AggTypesIndexProvider } from 'ui/agg_types/index';
+import { AggTypesBucketsBucketAggTypeProvider } from 'ui/agg_types/buckets/_bucket_agg_type';
+import { AggTypesMetricsMetricAggTypeProvider } from 'ui/agg_types/metrics/metric_agg_type';
 
 describe('AggTypesComponent', function () {
 

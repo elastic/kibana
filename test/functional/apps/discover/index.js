@@ -1,26 +1,20 @@
+export default function ({ getService, loadTestFile }) {
+  const esArchiver = getService('esArchiver');
+  const remote = getService('remote');
 
-import {
-  bdd,
-  esArchiver,
-  defaultTimeout,
-} from '../../../support';
+  describe('discover app', function () {
+    before(function () {
+      return remote.setWindowSize(1200,800);
+    });
 
-import PageObjects from '../../../support/page_objects';
+    after(function unloadMakelogs() {
+      return esArchiver.unload('logstash_functional');
+    });
 
-bdd.describe('discover app', function () {
-  this.timeout = defaultTimeout;
-
-  bdd.before(function () {
-    return PageObjects.remote.setWindowSize(1200,800);
+    loadTestFile(require.resolve('./_discover'));
+    loadTestFile(require.resolve('./_field_data'));
+    loadTestFile(require.resolve('./_shared_links'));
+    loadTestFile(require.resolve('./_collapse_expand'));
+    loadTestFile(require.resolve('./_source_filters'));
   });
-
-  bdd.after(function unloadMakelogs() {
-    return esArchiver.unload('logstash_functional');
-  });
-
-  require('./_discover');
-  require('./_field_data');
-  require('./_shared_links');
-  require('./_collapse_expand');
-  require('./_source_filters');
-});
+}

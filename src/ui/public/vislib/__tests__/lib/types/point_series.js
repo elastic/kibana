@@ -1,7 +1,7 @@
 import ngMock from 'ng_mock';
 import expect from 'expect.js';
 import stackedSeries from 'fixtures/vislib/mock_data/date_histogram/_stacked_series';
-import VislibLibVisPointSeriesTypeConfigProvider from 'ui/vislib/lib/types/point_series';
+import { VislibTypesPointSeries } from 'ui/vislib/lib/types/point_series';
 
 describe('Point Series Config Type Class Test Suite', function () {
   let pointSeriesConfig;
@@ -71,7 +71,7 @@ describe('Point Series Config Type Class Test Suite', function () {
 
   beforeEach(ngMock.module('kibana'));
   beforeEach(ngMock.inject(function (Private) {
-    pointSeriesConfig = Private(VislibLibVisPointSeriesTypeConfigProvider);
+    pointSeriesConfig = Private(VislibTypesPointSeries);
   }));
 
   describe('histogram chart', function () {
@@ -107,8 +107,8 @@ describe('Point Series Config Type Class Test Suite', function () {
       expect(parsedConfig.valueAxes[0].show).to.be(false);
     });
 
-    it('should add second value axis', function () {
-      expect(parsedConfig.valueAxes.length).to.equal(2);
+    it('should add second category axis', function () {
+      expect(parsedConfig.categoryAxes.length).to.equal(2);
     });
   });
 });

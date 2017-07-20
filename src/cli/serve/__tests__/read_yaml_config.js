@@ -29,7 +29,7 @@ describe('cli/serve/read_yaml_config', function () {
     });
   });
 
-  context('different cwd()', function () {
+  describe('different cwd()', function () {
     const oldCwd = process.cwd();
     const newCwd = join(oldCwd, '..');
 

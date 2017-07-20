@@ -1,6 +1,6 @@
 .kuiInfoPanel {
   padding: 14px 20px 18px;
-  line-height: $lineHeight;
+  line-height: $globalLineHeight;
   border: 2px solid;
 }
 
@@ -8,28 +8,28 @@
  * 1. TODO: Pick a hex value instead of making these colors translucent.
  */
 .kuiInfoPanel--info {
-  border-color: rgba($infoColor, 0.25); /* 1 */
+  border-color: rgba($globalInfoColor, 0.25); /* 1 */
 }
 
 /**
  * 1. TODO: Pick a hex value instead of making these colors translucent.
  */
 .kuiInfoPanel--success {
-  border-color: rgba($successColor, 0.25); /* 1 */
+  border-color: rgba($globalSuccessColor, 0.25); /* 1 */
 }
 
 /**
  * 1. TODO: Pick a hex value instead of making these colors translucent.
  */
 .kuiInfoPanel--warning {
-  border-color: rgba($warningColor, 0.25); /* 1 */
+  border-color: rgba($globalWarningColor, 0.25); /* 1 */
 }
 
 /**
  * 1. TODO: Pick a hex value instead of making these colors translucent.
  */
 .kuiInfoPanel--error {
-  border-color: rgba($errorColor, 0.25); /* 1 */
+  border-color: rgba($globalDangerColor, 0.25); /* 1 */
 }
 
 /**
@@ -42,19 +42,17 @@
 
   .kuiInfoPanelHeader__icon {
     margin-right: 10px;
-    font-size: $fontSize;
-    line-height: $lineHeight;
+    font-size: $globalFontSize;
+    line-height: $globalLineHeight;
   }
 
   .kuiInfoPanelHeader__title {
-    font-size: $fontSize;
-    line-height: $lineHeight;
-    font-weight: 700;
+    font-size: $globalFontSize;
+    line-height: $globalLineHeight;
+    font-weight: $globalFontWeightBold;
   }
 
 .kuiInfoPanelBody {
-  $infoPanelVerticalRhythm: 8px;
-
   margin-top: $infoPanelVerticalRhythm;
 
   > * + * {
@@ -62,7 +60,7 @@
   }
 }
 
-  .kuiInfoPanelBody__message {
-    font-size: $fontSize;
-    line-height: $lineHeight;
-  }
+.kuiInfoPanelBody__message {
+  font-size: $globalFontSize;
+  line-height: $globalLineHeight;
+}

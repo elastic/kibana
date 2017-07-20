@@ -16,13 +16,17 @@ import pluginsCheckEnabledMixin from './plugins/check_enabled';
 import pluginsCheckVersionMixin from './plugins/check_version';
 import configCompleteMixin from './config/complete';
 import uiMixin from '../ui';
-import uiSettingsMixin from '../ui/settings';
 import optimizeMixin from '../optimize';
 import pluginsInitializeMixin from './plugins/initialize';
+import { indexPatternsMixin } from './index_patterns';
+import { savedObjectsMixin } from './saved_objects';
+import { statsMixin } from './stats';
+import { kibanaIndexMappingsMixin } from './mappings';
+import { serverExtensionsMixin } from './server_extensions';
 
 const rootDir = fromRoot('.');
 
-module.exports = class KbnServer {
+export default class KbnServer {
   constructor(settings) {
     this.name = pkg.name;
     this.version = pkg.version;
@@ -35,11 +39,18 @@ module.exports = class KbnServer {
       configSetupMixin,
       // sets this.server
       httpMixin,
+      // adds methods for extending this.server
+      serverExtensionsMixin,
       loggingMixin,
       warningsMixin,
       statusMixin,
+
+      // set up stats route
+      statsMixin,
+
       // writes pid file
       pidMixin,
+
       // find plugins and set this.plugins
       pluginsScanMixin,
 
@@ -51,15 +62,21 @@ module.exports = class KbnServer {
 
       // tell the config we are done loading plugins
       configCompleteMixin,
+
+      // setup kbnServer.mappings and server.getKibanaIndexMappingsDsl()
+      kibanaIndexMappingsMixin,
+
       // setup this.uiExports and this.bundles
       uiMixin,
+      indexPatternsMixin,
 
-      // setup server.uiSettings
-      uiSettingsMixin,
+      // setup saved object routes
+      savedObjectsMixin,
 
       // ensure that all bundles are built, or that the
       // lazy bundle server is running
       optimizeMixin,
+
       // finally, initialize the plugins
       pluginsInitializeMixin,
       () => {
@@ -141,4 +158,4 @@ module.exports = class KbnServer {
     this.server.log(['info', 'config'], 'New logging configuration:\n' + plain);
     this.server.plugins['even-better'].monitor.reconfigure(loggingOptions);
   }
-};
+}

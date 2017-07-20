@@ -7,13 +7,9 @@
   height: 100%;
 }
 
-  /**
-   * 1. Make sure the bottom border is flush with the bottom of the LocalNav.
-   */
   .kuiLocalTab {
     padding: 5px 0 6px 0;
     font-size: 18px;
-    line-height: 22px; /* 1 */
     color: $localTabTextColor;
     border-bottom: 2px solid transparent;
     text-decoration: none;

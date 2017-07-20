@@ -5,7 +5,7 @@ import _ from 'lodash';
 // Bad: sum, count
 
 // Don't use this to down sample, it simply won't do the right thing.
-module.exports = function (dataTuples, targetTuples) {
+export default function carry(dataTuples, targetTuples) {
 
   if (dataTuples.length > targetTuples.length) {
     throw new Error (`Don't use the 'carry' fit method to down sample, use 'scale' or 'average'`);
@@ -23,4 +23,4 @@ module.exports = function (dataTuples, targetTuples) {
 
     return [bucket[0], currentCarry];
   });
-};
+}

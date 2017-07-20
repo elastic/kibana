@@ -1,7 +1,7 @@
 import _ from 'lodash';
 import createDateAgg from './create_date_agg';
 
-module.exports =  function buildRequest(config, tlConfig) {
+export default function buildRequest(config, tlConfig) {
 
   const bool = { must: [] };
 
@@ -58,4 +58,4 @@ module.exports =  function buildRequest(config, tlConfig) {
       size: 0
     }
   };
-};
+}

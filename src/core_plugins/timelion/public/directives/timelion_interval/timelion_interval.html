@@ -1,0 +1,12 @@
+<input
+  input-focus
+  class="kuiTextInput timelion-interval-custom"
+  ng-show="interval === 'other'"
+  ng-class="{ 'timelion-interval-custom-compact': interval === 'other' }"
+  ng-model="otherInterval"
+><select
+  class="kuiSelect timelion-interval-presets"
+  ng-options="intervalOption for intervalOption in intervalOptions"
+  ng-class="{ 'timelion-interval-presets-compact': interval === 'other'}"
+  ng-model="interval"
+></select>

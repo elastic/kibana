@@ -6,7 +6,7 @@ import createSelectHandler from '../lib/create_select_handler';
 import createTextHandler from '../lib/create_text_handler';
 import ColorRules from '../color_rules';
 import ColorPicker from '../color_picker';
-import uuid from 'node-uuid';
+import uuid from 'uuid';
 import YesNo from 'plugins/metrics/components/yes_no';
 
 class GaugePanelConfig extends Component {

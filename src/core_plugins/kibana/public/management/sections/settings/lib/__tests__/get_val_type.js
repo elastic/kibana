@@ -1,5 +1,5 @@
 
-import getValType from 'plugins/kibana/management/sections/settings/lib/get_val_type';
+import { getValType } from 'plugins/kibana/management/sections/settings/lib/get_val_type';
 import expect from 'expect.js';
 
 describe('Settings', function () {

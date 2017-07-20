@@ -1,8 +1,8 @@
-import UiModules from 'ui/modules';
+import { uiModules } from 'ui/modules';
 import template from './loading_indicator.html';
 import './loading_indicator.less';
 
-UiModules
+uiModules
 .get('ui/kibana')
 .directive('kbnLoadingIndicator', function () {
   return {

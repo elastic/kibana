@@ -1,9 +1,9 @@
 import d3 from 'd3';
 import expect from 'expect.js';
 import ngMock from 'ng_mock';
-import VislibVisProvider from 'ui/vislib/vis';
+import { VislibVisProvider } from 'ui/vislib/vis';
 import 'ui/persisted_state';
-import VislibVisualizationsChartProvider from 'ui/vislib/visualizations/_chart';
+import { VislibVisualizationsChartProvider } from 'ui/vislib/visualizations/_chart';
 
 describe('Vislib _chart Test Suite', function () {
   let Chart;
@@ -90,7 +90,6 @@ describe('Vislib _chart Test Suite', function () {
       type: 'histogram',
       addTooltip: true,
       addLegend: true,
-      hasTimeField: true,
       zeroFill: true
     };
 
@@ -113,12 +112,4 @@ describe('Vislib _chart Test Suite', function () {
     expect(typeof myChart.render === 'function').to.be(true);
   });
 
-  it('should destroy the chart element', function () {
-    // Once destroy is called, a chart should not be able to be drawn
-    myChart.destroy();
-
-    expect(function () {
-      myChart.render();
-    }).to.throwError();
-  });
 });

@@ -18,7 +18,7 @@ describe('promiseFromStreams', () => {
     expect(await sumPromise).to.be(6);
   });
 
-  context('last stream is writable', () => {
+  describe('last stream is writable', () => {
     it('waits for the last stream to finish writing', async () => {
       let written = '';
 
@@ -51,7 +51,7 @@ describe('promiseFromStreams', () => {
     });
   });
 
-  context('last stream is readable', () => {
+  describe('last stream is readable', () => {
     it(`resolves to it's final value`, async () => {
       const result = await createPromiseFromStreams([
         createListStream(['a', 'b', 'c'])
@@ -61,7 +61,7 @@ describe('promiseFromStreams', () => {
     });
   });
 
-  context('last stream is duplex', () => {
+  describe('last stream is duplex', () => {
     it('waits for writing and resolves to final value', async () => {
       let written = '';
       const result = await createPromiseFromStreams([

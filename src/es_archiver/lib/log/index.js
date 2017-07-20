@@ -1,1 +1,0 @@
-export { createLog } from './log';

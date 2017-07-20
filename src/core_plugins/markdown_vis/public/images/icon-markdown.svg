@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="60px" height="40px" viewBox="0 0 60 40" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <!-- Generator: Sketch 43.1 (39012) - http://www.bohemiancoding.com/sketch -->
+    <title>icon-markdown update</title>
+    <desc>Created with Sketch.</desc>
+    <defs></defs>
+    <g id="Visualize" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="Visualize-Create-New" transform="translate(-596.000000, -655.000000)">
+            <g id="other" transform="translate(555.000000, 576.000000)">
+                <g id="markdown" transform="translate(0.000000, 44.000000)">
+                    <g id="icon-markdown-update" transform="translate(41.000000, 35.000000)">
+                        <rect id="BG" fill="#000000" x="0" y="0" width="60" height="40" rx="2"></rect>
+                        <g id="M-and-arrow-down" transform="translate(7.600000, 9.400000)" fill="#FFFFFF">
+                            <polygon id="Shape" fill-rule="nonzero" points="0.8 20.3751777 0.8 0.6 6.57706221 0.6 12.3541244 7.87028592 18.1311866 0.6 23.9082488 0.6 23.9082488 20.3751777 18.1311866 20.3751777 18.1311866 9.03353166 12.3541244 16.3038176 6.57706221 9.03353166 6.57706221 20.3751777"></polygon>
+                            <polygon id="Path" points="36.9066388 20.3751777 28.2410455 10.7784003 34.0181077 10.7784003 34.0181077 0.6 39.7951699 0.6 39.7951699 10.7784003 45.5722321 10.7784003"></polygon>
+                        </g>
+                    </g>
+                </g>
+            </g>
+        </g>
+    </g>
+</svg>

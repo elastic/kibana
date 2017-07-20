@@ -1,5 +1,8 @@
 import _ from 'lodash';
-import sinon from 'auto-release-sinon';
+import sinon from 'sinon';
+import { AggTypesParamTypesBaseProvider } from 'ui/agg_types/param_types/base';
+import { AggTypesParamTypesFieldProvider } from 'ui/agg_types/param_types/field';
+import { AggTypesParamTypesOptionedProvider } from 'ui/agg_types/param_types/optioned';
 
 function ParamClassStub(parent, body) {
   const stub = sinon.spy(body || function () {
@@ -23,21 +26,22 @@ function ParamClassStub(parent, body) {
  * @param  {PrivateLoader} Private - The private module loader, inject by passing this function to ngMock.inject()
  * @return {undefined}
  */
-module.exports = function stubParamClasses(Private) {
+// eslint-disable-next-line kibana-custom/no-default-export
+export default function stubParamClasses(Private) {
   const BaseAggParam = Private.stub(
-    require('ui/agg_types/param_types/base'),
+    AggTypesParamTypesBaseProvider,
     new ParamClassStub(null, function (config) {
       _.assign(this, config);
     })
   );
 
   Private.stub(
-    require('ui/agg_types/param_types/field'),
+    AggTypesParamTypesFieldProvider,
     new ParamClassStub(BaseAggParam)
   );
 
   Private.stub(
-    require('ui/agg_types/param_types/optioned'),
+    AggTypesParamTypesOptionedProvider,
     new ParamClassStub(BaseAggParam)
   );
-};
+}

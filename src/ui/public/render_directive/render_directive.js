@@ -1,6 +1,6 @@
 import { isPlainObject } from 'lodash';
-import uiModules from 'ui/modules';
-import applyScopeBindingsProvider from './apply_scope_bindings';
+import { uiModules } from 'ui/modules';
+import { ApplyScopeBindingsProvider } from './apply_scope_bindings';
 
 /**
  * The <render-directive> directive is useful for programaticaly modifying or
@@ -27,7 +27,7 @@ import applyScopeBindingsProvider from './apply_scope_bindings';
 uiModules
 .get('kibana')
 .directive('renderDirective', function (Private) {
-  const applyScopeBindings = Private(applyScopeBindingsProvider);
+  const applyScopeBindings = Private(ApplyScopeBindingsProvider);
 
   return {
     restrict: 'E',

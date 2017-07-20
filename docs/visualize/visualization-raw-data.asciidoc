@@ -1,5 +1,9 @@
-To display the raw data behind the visualization, click the bar at the bottom of the container. Tabs with detailed
-information about the raw data replace the visualization:
+[[vis-spy]]
+== Visualization Spy
+
+To display the raw data behind the visualization, click the image:images/spy-open-button.png[] button in the bottom left corner of the container. The visualization spy panel will open. Use the select input to view detailed information about the raw data.
+
+image:images/spy-panel.png[]
 
 .Table
 A representation of the underlying data, presented as a paginated data grid. You can sort the items
@@ -15,6 +19,9 @@ The raw response from the server, presented in JSON format.
 A summary of the statistics related to the request and the response, presented as a data grid. The data
 grid includes the query duration, the request duration, the total number of records found on the server, and the
 index pattern used to make the query.
+
+.Debug
+The visualization saved state presented in JSON format.
 
 To export the raw data behind the visualization as a comma-separated-values (CSV) file, click on either the
 *Raw* or *Formatted* links at the bottom of any of the detailed information tabs. A raw export contains the data as it

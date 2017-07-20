@@ -2,9 +2,10 @@ import _ from 'lodash';
 import fixtures from 'fixtures/fake_hierarchical_data';
 import expect from 'expect.js';
 import ngMock from 'ng_mock';
-import AggResponseTabifyTabifyProvider from 'ui/agg_response/tabify/tabify';
-import VisProvider from 'ui/vis';
+import { AggResponseTabifyProvider } from 'ui/agg_response/tabify/tabify';
+import { VisProvider } from 'ui/vis';
 import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
+
 describe('tabifyAggResponse Integration', function () {
   let Vis;
   let indexPattern;
@@ -12,7 +13,7 @@ describe('tabifyAggResponse Integration', function () {
 
   beforeEach(ngMock.module('kibana'));
   beforeEach(ngMock.inject(function (Private) {
-    tabifyAggResponse = Private(AggResponseTabifyTabifyProvider);
+    tabifyAggResponse = Private(AggResponseTabifyProvider);
     Vis = Private(VisProvider);
     indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
   }));

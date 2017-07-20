@@ -1,6 +1,6 @@
 import { connect } from 'react-redux';
 
-import { GuideSection } from './guide_section.jsx';
+import { GuideSection } from './guide_section';
 import {
   openCodeViewer,
   registerSection,

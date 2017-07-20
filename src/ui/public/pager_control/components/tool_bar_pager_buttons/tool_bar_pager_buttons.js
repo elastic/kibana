@@ -1,4 +1,4 @@
-import uiModules from 'ui/modules';
+import { uiModules } from 'ui/modules';
 import template from './tool_bar_pager_buttons.html';
 
 const app = uiModules.get('kibana');

@@ -1,6 +1,7 @@
 import ngMock from 'ng_mock';
 import expect from 'expect.js';
-import FilterBarLibMapMissingProvider from 'ui/filter_bar/lib/map_missing';
+import { FilterBarLibMapMissingProvider } from 'ui/filter_bar/lib/map_missing';
+
 describe('Filter Bar Directive', function () {
   describe('mapMissing()', function () {
 
@@ -16,8 +17,8 @@ describe('Filter Bar Directive', function () {
     it('should return the key and value for matching filters', function (done) {
       const filter = { missing: { field: '_type' } };
       mapMissing(filter).then(function (result) {
-        expect(result).to.have.property('key', 'missing');
-        expect(result).to.have.property('value', '_type');
+        expect(result).to.have.property('key', '_type');
+        expect(result).to.have.property('value', 'missing');
         done();
       });
       $rootScope.$apply();

@@ -1,7 +1,7 @@
 import moment from 'moment';
 import expect from 'expect.js';
 import ngMock from 'ng_mock';
-import IndexPatternsIntervalsProvider from 'ui/index_patterns/_intervals';
+import { IndexPatternsIntervalsProvider } from 'ui/index_patterns/_intervals';
 
 describe('Index Patterns', function () {
   describe('interval.toIndexList()', function () {
@@ -123,7 +123,7 @@ describe('Index Patterns', function () {
       ]);
     });
 
-    context('with sortDirection=asc', function () {
+    describe('with sortDirection=asc', function () {
       it('returns values in ascending order', function () {
         const start = moment.utc('2014-12-01');
         const end = moment.utc('2015-02-01');
@@ -144,7 +144,7 @@ describe('Index Patterns', function () {
       });
     });
 
-    context('with sortDirection=desc', function () {
+    describe('with sortDirection=desc', function () {
       it('returns values in descending order', function () {
         const start = moment.utc('2014-12-01');
         const end = moment.utc('2015-02-01');

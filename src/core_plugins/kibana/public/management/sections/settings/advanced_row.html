@@ -1,136 +1,194 @@
-<tr ng-class="conf.value === undefined ? 'default' : 'custom'">
-  <td class="name">
-    <b>{{conf.name}}</b>
-    <span class="smaller" ng-show="!conf.isCustom && conf.value !== undefined">
-      (Default: <i>{{conf.defVal == undefined || conf.defVal === '' ? 'null' : conf.defVal}}</i>)
-    </span>
-    <span class="smaller" ng-show="conf.isCustom">
-      (Custom setting)
-    </span>
-    <br>
-    <span class="smaller" ng-bind-html="conf.description | trustAsHtml"></span>
-  </td>
-  <td class="value">
+<tr class="kuiTableRow">
+  <!-- Name -->
+  <td class="kuiTableRowCell kuiTableRowCell--wrap">
+    <div class="kuiTableRowCell__liner">
+      <p class="kuiTextTitle kuiVerticalRhythmSmall">
+        {{conf.name}}
+      </p>
 
-
-    <!-- Settings editors -->
-    <form
-      name="forms.configEdit"
-      ng-if="conf.editing"
-      ng-submit="save(conf)"
-      role="form"
-    >
-
-      <input
-        ng-if="conf.normal"
-        ng-model="conf.unsavedValue"
-        ng-keyup="maybeCancel($event, conf)"
-        placeholder="{{conf.value || conf.defVal}}"
-        type="text"
-        class="form-control"
+      <p
+        class="kuiSubText kuiSubduedText kuiVerticalRhythmSmall"
+        ng-if="!isDefaultValue(conf)"
       >
+        Default: <em>{{conf.defVal == undefined || conf.defVal === '' ? 'null' : conf.defVal}}</em>
+      </p>
+
+      <p
+        class="kuiSubText kuiSubduedText kuiVerticalRhythmSmall"
+        ng-if="conf.isCustom"
+      >
+        (Custom setting)
+      </p>
+
+      <p
+        class="kuiSubText kuiVerticalRhythmSmall"
+        ng-bind-html="conf.description | trustAsHtml"
+      ></p>
+    </div>
+  </td>
+
+  <!-- Value -->
+  <td class="kuiTableRowCell">
+    <div class="kuiTableRowCell__liner">
+      <!-- Settings editors -->
+      <form
+        name="forms.configEdit"
+        ng-if="conf.editing"
+        ng-submit="save(conf)"
+        role="form"
+      >
+        <input
+          ng-if="conf.normal"
+          ng-model="conf.unsavedValue"
+          ng-keyup="maybeCancel($event, conf)"
+          placeholder="{{conf.value || conf.defVal}}"
+          type="text"
+          class="kuiTextInput fullWidth"
+        >
 
         <textarea
           ng-if="conf.markdown"
           type="text"
-          class="form-control"
+          class="kuiTextArea fullWidth"
           ng-model="conf.unsavedValue"
           ng-keyup="maybeCancel($event, conf)"
           elastic-textarea
         ></textarea>
 
-      <textarea
-        ng-if="conf.json"
-        type="text"
-        class="form-control"
-        ng-model="conf.unsavedValue"
-        ng-keyup="maybeCancel($event, conf)"
-        elastic-textarea
-        validate-json
-      ></textarea>
-      <small ng-show="forms.configEdit.$error.jsonInput">Invalid JSON syntax</small>
+        <textarea
+          ng-if="conf.json"
+          type="text"
+          class="kuiTextArea fullWidth"
+          ng-model="conf.unsavedValue"
+          ng-keyup="maybeCancel($event, conf)"
+          elastic-textarea
+          validate-json
+        ></textarea>
 
-      <input
-        ng-if="conf.array"
-        ng-list=","
-        ng-model="conf.unsavedValue"
-        ng-keyup="maybeCancel($event, conf)"
-        placeholder="{{(conf.value || conf.defVal).join(', ')}}"
-        type="text"
-        class="form-control"
+        <p
+          class="kuiSubText"
+          ng-show="forms.configEdit.$error.jsonInput"
+        >
+          Invalid JSON syntax
+        </p>
+
+        <input
+          ng-if="conf.array"
+          ng-list=","
+          ng-model="conf.unsavedValue"
+          ng-keyup="maybeCancel($event, conf)"
+          placeholder="{{(conf.value || conf.defVal).join(', ')}}"
+          type="text"
+          class="kuiTextInput fullWidth"
+        >
+
+        <input
+          ng-if="conf.bool"
+          ng-model="conf.unsavedValue"
+          type="checkbox"
+          class="kuiCheckBox"
+          data-test-subj="advancedSetting-{{conf.name}}-checkbox"
+        >
+
+        <select
+          ng-if="conf.select"
+          name="conf.name"
+          ng-model="conf.unsavedValue"
+          ng-options="option as option for option in conf.options"
+          class="kuiSelect"
+        ></select>
+      </form>
+
+      <!-- Setting display formats -->
+      <span
+        ng-if="!conf.editing"
+        data-test-subj="advancedSetting-{{conf.name}}-currentValue"
       >
-
-      <input
-        ng-if="conf.bool"
-        ng-model="conf.unsavedValue"
-        type="checkbox"
-        class="form-control"
-      >
-
-      <select
-        ng-if="conf.select"
-        name="conf.name"
-        ng-model="conf.unsavedValue"
-        ng-options="option as option for option in conf.options"
-        class="form-control"
-      >
-      </select>
-    </form>
-
-    <!-- Setting display formats -->
-    <span ng-if="!conf.editing" data-test-subj="advancedSetting-{{conf.name}}-currentValue">
-      <span ng-if="(conf.normal || conf.json || conf.select)">{{conf.value || conf.defVal}}</span>
-      <span ng-if="conf.array">{{(conf.value || conf.defVal).join(', ')}}</span>
-      <span ng-if="conf.bool">{{conf.value === undefined ? conf.defVal : conf.value}}</span>
-      <span ng-if="conf.markdown" ng-bind-html="conf.value | markdown"></span>
-    </span>
-
+        <span ng-if="(conf.normal || conf.json || conf.select)">
+          {{conf.value || conf.defVal}}
+        </span>
+        <span ng-if="conf.array">
+          {{(conf.value || conf.defVal).join(', ')}}
+        </span>
+        <span ng-if="conf.bool">
+          {{conf.value === undefined ? conf.defVal : conf.value}}
+        </span>
+        <span
+          ng-if="conf.markdown"
+          ng-bind-html="conf.value | markdown"
+        ></span>
+      </span>
+    </div>
   </td>
-  <td class="actions">
-    <button
-      ng-if="!conf.editing"
-      ng-click="edit(conf)"
-      class="btn btn-default"
-      ng-disabled="conf.tooComplex"
-      aria-label="Edit"
-      data-test-subj="advancedSetting-{{conf.name}}-editButton"
-    >
-      <span class="sr-only">Edit</span>
-      <i aria-hidden="true" class="fa fa-pencil"></i>
-    </button>
 
-    <button
-      ng-if="conf.editing"
-      ng-click="save(conf)"
-      class="btn btn-success"
-      ng-disabled="conf.loading || conf.tooComplex || forms.configEdit.$invalid"
-      aria-label="Save"
-      data-test-subj="advancedSetting-{{conf.name}}-saveButton"
-    >
-      <span class="sr-only">Save</span>
-      <i aria-hidden="true" ng-if="!conf.loading" class="fa fa-save"></i>
-      <i aria-hidden="true" ng-if="conf.loading" class="fa fa-spinner"></i>
-    </button>
+  <!-- Actions -->
+  <td class="kuiTableRowCell advancedSettingsTableRowActionsCell">
+    <div class="kuiTableRowCell__liner">
+      <div class="kuiMenuButtonGroup kuiMenuButtonGroup--alignRight">
+        <!-- Edit -->
+        <button
+          ng-if="!conf.editing"
+          ng-click="edit(conf)"
+          class="kuiMenuButton kuiMenuButton--basic kuiMenuButton--iconText"
+          ng-disabled="conf.tooComplex"
+          data-test-subj="advancedSetting-{{conf.name}}-editButton"
+        >
+          <span
+            aria-hidden="true"
+            class="kuiMenuButton__icon kuiIcon fa-pencil"
+          ></span>
+          <span>Edit</span>
+        </button>
 
-    <button
-      ng-if="!conf.editing"
-      ng-click="clear(conf)"
-      ng-hide="conf.value === undefined"
-      class="btn btn-danger"
-      aria-label="Clear"
-    >
-      <span class="sr-only">Clear</span>
-      <i aria-hidden="true" class="fa fa-trash-o"></i>
-    </button>
+        <!-- Save -->
+        <button
+          ng-if="conf.editing"
+          ng-click="save(conf)"
+          class="kuiMenuButton kuiMenuButton--primary kuiMenuButton--iconText"
+          ng-disabled="conf.loading || conf.tooComplex || forms.configEdit.$invalid"
+          data-test-subj="advancedSetting-{{conf.name}}-saveButton"
+        >
+          <span
+            aria-hidden="true"
+            ng-if="!conf.loading"
+            class="kuiMenuButton__icon kuiIcon fa-save"
+          ></span>
+          <span
+            aria-hidden="true"
+            ng-if="conf.loading"
+            class="kuiMenuButton__icon kuiIcon fa-spinner"
+          ></span>
+          <span>Save</span>
+        </button>
 
-    <button
-      ng-if="conf.editing"
-      ng-click="cancelEdit(conf)"
-      class="btn btn-default"
-      aria-label="Cancel edit"
-    >
-      <span class="sr-only">Cancel Edit</span>
-      <i aria-hidden="true" class="fa fa-times"></i>
-    </button>
+        <!-- Clear -->
+        <button
+          ng-if="!conf.editing"
+          ng-click="clear(conf)"
+          ng-hide="isDefaultValue(conf)"
+          class="kuiMenuButton kuiMenuButton--danger kuiMenuButton--iconText"
+        >
+          <span
+            aria-hidden="true"
+            class="kuiMenuButton__icon kuiIcon fa-trash-o"
+          ></span>
+          <span>Clear</span>
+        </button>
+
+        <!-- Cancel -->
+        <button
+          ng-if="conf.editing"
+          ng-click="cancelEdit(conf)"
+          class="kuiMenuButton kuiMenuButton--basic kuiMenuButton--iconText"
+          aria-label="Cancel edit"
+        >
+          <span
+            aria-hidden="true"
+            class="kuiMenuButton__icon kuiIcon fa-times"
+          ></span>
+          <span>Cancel</span>
+        </button>
+      </div>
+    </div>
   </td>
 </tr>

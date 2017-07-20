@@ -1,4 +1,4 @@
-import parseInterval from 'ui/utils/parse_interval';
+import { parseInterval } from 'ui/utils/parse_interval';
 import expect from 'expect.js';
 
 describe('parseInterval', function () {

@@ -1,0 +1,5 @@
+{
+  "name": "state_session_storage_redirect",
+  "version": "kibana",
+  "description": "When using the state:storeInSessionStorage setting with the short-urls, we need some way to get the full URL's hashed states into sessionStorage, this app will grab the URL from the kbn-initial-state and and put the URL hashed states into sessionStorage before redirecting the user."
+}

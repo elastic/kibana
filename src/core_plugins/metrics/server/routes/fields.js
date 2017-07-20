@@ -5,9 +5,12 @@ export default (server) => {
     path: '/api/metrics/fields',
     method: 'GET',
     handler: (req, reply) => {
-      return getFields(req)
+      getFields(req)
         .then(reply)
-        .catch(() => reply([]));
+        .catch((err) => {
+          if (err.isBoom && err.status === 401) return reply(err);
+          reply([]);
+        });
     }
   });
 

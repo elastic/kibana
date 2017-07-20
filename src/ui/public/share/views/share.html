@@ -23,13 +23,19 @@
       <div class="kuiLocalDropdownSection" ng-if="share.allowEmbed">
         <!-- Header -->
         <div class="kuiLocalDropdownHeader">
-          <div class="kuiLocalDropdownHeader__label">
+          <label
+            id="originalIframeUrlLabel"
+            class="kuiLocalDropdownHeader__label"
+            for="originalIframeUrl"
+          >
             Embedded iframe
-          </div>
+          </label>
           <div class="kuiLocalDropdownHeader__actions">
             <a
+              aria-describedby="originalIframeUrlLabel"
               class="kuiLocalDropdownHeader__action"
               ng-click="share.copyToClipboard('#originalIframeUrl')"
+              kbn-accessible-click
             >
               Copy
             </a>
@@ -39,6 +45,7 @@
         <!-- Input -->
         <input
           id="originalIframeUrl"
+          aria-describedby="originalIframeUrlHelpText"
           class="kuiLocalDropdownInput"
           type="text"
           readonly
@@ -46,7 +53,10 @@
         />
 
         <!-- Notes -->
-        <div class="kuiLocalDropdownFormNote">
+        <div
+          id="originalIframeUrlHelpText"
+          class="kuiLocalDropdownFormNote"
+        >
           Add to your HTML source. Note that all clients must be able to access Kibana.
         </div>
       </div>
@@ -55,13 +65,19 @@
       <div class="kuiLocalDropdownSection">
         <!-- Header -->
         <div class="kuiLocalDropdownHeader">
-          <div class="kuiLocalDropdownHeader__label">
+          <label
+            id="originalUrlLabel"
+            class="kuiLocalDropdownHeader__label"
+            for="originalUrl"
+          >
             Link
-          </div>
+          </label>
           <div class="kuiLocalDropdownHeader__actions">
             <a
+              aria-describedby="originalUrlLabel"
               class="kuiLocalDropdownHeader__action"
               ng-click="share.copyToClipboard('#originalUrl')"
+              kbn-accessible-click
             >
               Copy
             </a>
@@ -96,29 +112,39 @@
     <div class="kuiLocalDropdownSection" ng-if="share.allowEmbed">
       <!-- Header -->
       <div class="kuiLocalDropdownHeader">
-        <div class="kuiLocalDropdownHeader__label">
+        <label
+          id="snapshotIframeUrlLabel"
+          class="kuiLocalDropdownHeader__label"
+          for="snapshotIframeUrl"
+        >
           Embedded iframe
-        </div>
+        </label>
         <div class="kuiLocalDropdownHeader__actions">
           <a
+            aria-describedby="snapshotIframeUrlLabel"
             class="kuiLocalDropdownHeader__action"
             ng-if="!share.urlFlags.shortSnapshotIframe"
             ng-click="share.toggleShortSnapshotIframeUrl()"
+            kbn-accessible-click
           >
             Short URL
           </a>
 
           <a
+            aria-describedby="snapshotIframeUrlLabel"
             class="kuiLocalDropdownHeader__action"
             ng-if="share.urlFlags.shortSnapshotIframe"
             ng-click="share.toggleShortSnapshotIframeUrl()"
+            kbn-accessible-click
           >
             Long URL
           </a>
 
           <a
+            aria-describedby="snapshotIframeUrlLabel"
             class="kuiLocalDropdownHeader__action"
             ng-click="share.copyToClipboard('#snapshotIframeUrl')"
+            kbn-accessible-click
           >
             Copy
           </a>
@@ -128,6 +154,7 @@
       <!-- Input -->
       <input
         id="snapshotIframeUrl"
+        aria-describedby="snapshotIframeUrlHelpText"
         class="kuiLocalDropdownInput"
         type="text"
         readonly
@@ -135,7 +162,10 @@
       />
 
       <!-- Notes -->
-      <div class="kuiLocalDropdownFormNote">
+      <div
+        id="snapshotIframeUrlHelpText"
+        class="kuiLocalDropdownFormNote"
+      >
         Add to your HTML source. Note that all clients must be able to access Kibana.
       </div>
     </div>
@@ -144,31 +174,41 @@
     <div class="kuiLocalDropdownSection">
       <!-- Header -->
       <div class="kuiLocalDropdownHeader">
-        <div class="kuiLocalDropdownHeader__label">
+        <label
+          id="snapshotUrlLabel"
+          class="kuiLocalDropdownHeader__label"
+          for="snapshotUrl"
+        >
           Link
-        </div>
+        </label>
         <div class="kuiLocalDropdownHeader__actions">
           <a
+            aria-describedby="snapshotUrlLabel"
             data-test-subj="sharedSnapshotShortUrlButton"
             class="kuiLocalDropdownHeader__action"
             ng-if="!share.urlFlags.shortSnapshot"
             ng-click="share.toggleShortSnapshotUrl()"
+            kbn-accessible-click
           >
             Short URL
           </a>
 
           <a
+            aria-describedby="snapshotUrlLabel"
             class="kuiLocalDropdownHeader__action"
             ng-if="share.urlFlags.shortSnapshot"
             ng-click="share.toggleShortSnapshotUrl()"
+            kbn-accessible-click
           >
             Long URL
           </a>
 
           <a
+            aria-describedby="snapshotUrlLabel"
             data-test-subj="sharedSnapshotCopyButton"
             class="kuiLocalDropdownHeader__action"
             ng-click="share.copyToClipboard('#snapshotUrl')"
+            kbn-accessible-click
           >
             Copy
           </a>
@@ -179,6 +219,7 @@
       <input
         data-test-subj="sharedSnapshotUrl"
         id="snapshotUrl"
+        aria-describedby="snapshotUrlHelpText"
         class="kuiLocalDropdownInput"
         type="text"
         readonly
@@ -186,7 +227,10 @@
       />
 
       <!-- Notes -->
-      <div class="kuiLocalDropdownFormNote">
+      <div
+        id="snapshotUrlHelpText"
+        class="kuiLocalDropdownFormNote"
+      >
         We recommend sharing shortened snapshot URLs for maximum compatibility. Internet Explorer has URL length restrictions, and some wiki and markup parsers don't do well with the full-length version of the snapshot URL, but the short URL should work great.
       </div>
     </div>

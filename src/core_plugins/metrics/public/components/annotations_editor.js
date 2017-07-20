@@ -1,11 +1,12 @@
 import React, { Component, PropTypes } from 'react';
 import _ from 'lodash';
-import collectionActions from './lib/collection_actions';
+import * as collectionActions from './lib/collection_actions';
 import AddDeleteButtons from './add_delete_buttons';
 import ColorPicker from './color_picker';
 import FieldSelect from './aggs/field_select';
-import uuid from 'node-uuid';
+import uuid from 'uuid';
 import IconSelect from './icon_select';
+import YesNo from './yes_no';
 
 function newAnnotation() {
   return {
@@ -13,7 +14,9 @@ function newAnnotation() {
     color: '#F00',
     index_pattern: '*',
     time_field: '@timestamp',
-    icon: 'fa-tag'
+    icon: 'fa-tag',
+    ignore_global_filters: 1,
+    ignore_panel_filters: 1
   };
 }
 
@@ -81,6 +84,22 @@ class AnnotationsEditor extends Component {
                 type="text"
                 onChange={this.handleChange(model, 'query_string')}
                 value={model.query_string} />
+            </div>
+            <div className="vis_editor__row-item-small">
+              <div className="vis_editor__label">Ignore Global Filters</div>
+              <YesNo
+                value={model.ignore_global_filters}
+                name="ignore_global_filters"
+                onChange={handleChange}/>
+
+            </div>
+            <div className="vis_editor__row-item-small">
+              <div className="vis_editor__label">Ignore Panel Filters</div>
+              <YesNo
+                value={model.ignore_panel_filters}
+                name="ignore_panel_filters"
+                onChange={handleChange}/>
+
             </div>
           </div>
           <div className="vis_editor__row">

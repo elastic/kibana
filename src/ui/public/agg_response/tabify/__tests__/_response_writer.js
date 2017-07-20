@@ -1,12 +1,14 @@
 import _ from 'lodash';
-import sinon from 'auto-release-sinon';
+import sinon from 'sinon';
 import expect from 'expect.js';
 import ngMock from 'ng_mock';
-import AggResponseTabifyResponseWriterProvider from 'ui/agg_response/tabify/_response_writer';
-import AggResponseTabifyTableGroupProvider from 'ui/agg_response/tabify/_table_group';
-import AggResponseTabifyBucketsProvider from 'ui/agg_response/tabify/_buckets';
-import VisProvider from 'ui/vis';
+import { TabbedAggResponseWriterProvider } from 'ui/agg_response/tabify/_response_writer';
+import { AggResponseTabifyTableGroupProvider } from 'ui/agg_response/tabify/_table_group';
+import { AggResponseBucketsProvider } from 'ui/agg_response/tabify/_buckets';
+import { AggResponseGetColumnsProvider } from 'ui/agg_response/tabify/_get_columns';
+import { VisProvider } from 'ui/vis';
 import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
+
 describe('ResponseWriter class', function () {
   let Vis;
   let Buckets;
@@ -23,12 +25,12 @@ describe('ResponseWriter class', function () {
 
       if (stubGetColumns) {
         getColumns = sinon.stub();
-        Private.stub(require('ui/agg_response/tabify/_get_columns'), getColumns);
+        Private.stub(AggResponseGetColumnsProvider, getColumns);
       }
 
-      ResponseWriter = Private(AggResponseTabifyResponseWriterProvider);
+      ResponseWriter = Private(TabbedAggResponseWriterProvider);
       TableGroup = Private(AggResponseTabifyTableGroupProvider);
-      Buckets = Private(AggResponseTabifyBucketsProvider);
+      Buckets = Private(AggResponseBucketsProvider);
       Vis = Private(VisProvider);
       indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
     }));

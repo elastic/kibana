@@ -1,23 +1,20 @@
 // this file is not transpiled in dev
 
 const {
-  nodePresets,
-  webpackPresets,
+  nodePreset,
+  webpackPreset,
   webpackCacheDir,
-  plugins,
   devIgnore
 } = require('./helpers');
 
 const nodeOptions = {
-  presets: nodePresets,
-  plugins,
+  presets: [nodePreset],
   ignore: devIgnore
 };
 
 exports.webpack = {
   cacheDirectory: webpackCacheDir,
-  presets: webpackPresets,
-  plugins: plugins
+  presets: [webpackPreset],
 };
 
 exports.node = nodeOptions;

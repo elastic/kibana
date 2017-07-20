@@ -10,7 +10,14 @@
     list-style: none;
   }
 
+  /**
+   * 1. Shouldn't look like a button.
+   */
   .toaster-countdown {
+    appearance: none;
+    background: none;
+    border: none;
+
     .badge {
       color: @white;
     }
@@ -48,7 +55,7 @@
 
   .toast-message {
     flex: 1 1 auto;
-    margin-top: 10px;
+    padding-top: 10px;
     .ellipsis();
     line-height: normal;
   }
@@ -68,13 +75,6 @@
 
   .toast-controls {
     display: flex;
-
-    button {
-      flex: 0 0 auto;
-      border: 0;
-      border-radius: 0;
-      padding: 10px 15px;
-    }
   }
 
   // add darkened background to the different badges

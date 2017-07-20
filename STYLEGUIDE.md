@@ -5,10 +5,11 @@ recommended for the development of all Kibana plugins.
 
 - [JavaScript](style_guides/js_style_guide.md)
 - [Angular](style_guides/angular_style_guide.md)
+- [React](style_guides/react_style_guide.md)
 - [CSS](style_guides/css_style_guide.md)
 - [HTML](style_guides/html_style_guide.md)
 - [API](style_guides/api_style_guide.md)
-- [Architecture](style_guides/architecture.md)
+- [Architecture](style_guides/architecture_style_guide.md)
 
 ## Filenames
 

@@ -1,13 +1,12 @@
 import _ from 'lodash';
-import onlyDisabled from 'ui/filter_bar/lib/only_disabled';
-import onlyStateChanged from 'ui/filter_bar/lib/only_state_changed';
-import uniqFilters from 'ui/filter_bar/lib/uniq_filters';
-import compareFilters from 'ui/filter_bar/lib/compare_filters';
-import angular from 'angular';
-import EventsProvider from 'ui/events';
-import FilterBarLibMapAndFlattenFiltersProvider from 'ui/filter_bar/lib/map_and_flatten_filters';
+import { onlyDisabled } from 'ui/filter_bar/lib/only_disabled';
+import { onlyStateChanged } from 'ui/filter_bar/lib/only_state_changed';
+import { uniqFilters } from 'ui/filter_bar/lib/uniq_filters';
+import { compareFilters } from 'ui/filter_bar/lib/compare_filters';
+import { EventsProvider } from 'ui/events';
+import { FilterBarLibMapAndFlattenFiltersProvider } from 'ui/filter_bar/lib/map_and_flatten_filters';
 
-export default function (Private, $rootScope, getAppState, globalState, config) {
+export function FilterBarQueryFilterProvider(Private, $rootScope, getAppState, globalState, config) {
   const EventEmitter = Private(EventsProvider);
   const mapAndFlattenFilters = Private(FilterBarLibMapAndFlattenFiltersProvider);
 
@@ -101,26 +100,6 @@ export default function (Private, $rootScope, getAppState, globalState, config) 
   };
 
   /**
-  * Updates an existing filter
-  * @param {object} filter Contains a reference to a filter and its new model
-  * @param {object} filter.source The filter reference
-  * @param {string} filter.model The edited filter
-  * @returns {object} Promise that resolves to the new filter on a successful merge
-  */
-  queryFilter.updateFilter = function (filter) {
-    const mergedFilter = _.assign({}, filter.source, filter.model);
-    mergedFilter.meta.alias = filter.alias;
-    //If the filter type is changed we want to discard the old type
-    //when merging changes back in
-    const filterTypeReplaced = filter.model[filter.type] !== mergedFilter[filter.type];
-    if (filterTypeReplaced) {
-      delete mergedFilter[filter.type];
-    }
-
-    return angular.copy(mergedFilter, filter.source);
-  };
-
-  /**
    * Removes all filters
    */
   queryFilter.removeAll = function () {
@@ -189,13 +168,13 @@ export default function (Private, $rootScope, getAppState, globalState, config) 
     if (!_.isArray(globalState.filters)) globalState.filters = [];
     if (!_.isArray(appState.filters)) appState.filters = [];
 
-    const appIndex = _.indexOf(appState.filters, filter);
+    const appIndex = _.findIndex(appState.filters, appFilter => _.isEqual(appFilter, filter));
 
     if (appIndex !== -1 && force !== false) {
       appState.filters.splice(appIndex, 1);
       globalState.filters.push(filter);
     } else {
-      const globalIndex = _.indexOf(globalState.filters, filter);
+      const globalIndex = _.findIndex(globalState.filters, globalFilter => _.isEqual(globalFilter, filter));
 
       if (globalIndex === -1 || force === true) return filter;
 
