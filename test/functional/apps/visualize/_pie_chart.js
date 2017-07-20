@@ -2,6 +2,7 @@ import expect from 'expect.js';
 
 export default function ({ getService, getPageObjects }) {
   const log = getService('log');
+  const screenshots = getService('screenshots');
   const PageObjects = getPageObjects(['common', 'visualize', 'header', 'settings']);
 
   describe('visualize app', function describeIndexTests() {
@@ -84,7 +85,7 @@ export default function ({ getService, getPageObjects }) {
         return PageObjects.visualize.getPieChartData()
         .then(function (pieData) {
           log.debug('pieData.length = ' + pieData.length);
-          PageObjects.common.saveScreenshot('Visualize-pie-chart');
+          screenshots.take('Visualize-pie-chart');
           expect(pieData.length).to.be(expectedPieChartSliceCount);
         });
       });

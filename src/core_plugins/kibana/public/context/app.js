@@ -4,6 +4,7 @@ import { uiModules } from 'ui/modules';
 import contextAppTemplate from './app.html';
 import './components/loading_button';
 import './components/size_picker/size_picker';
+import { getFirstSortableField } from './api/utils/sorting';
 import {
   createInitialQueryParametersState,
   QueryParameterActionsProvider,
@@ -11,6 +12,7 @@ import {
 } from './query_parameters';
 import {
   createInitialLoadingStatusState,
+  FAILURE_REASONS,
   LOADING_STATUS,
   QueryActionsProvider,
 } from './query';
@@ -33,6 +35,7 @@ module.directive('contextApp', function ContextApp() {
       anchorUid: '=',
       columns: '=',
       indexPattern: '=',
+      filters: '=',
       predecessorCount: '=',
       successorCount: '=',
       sort: '=',
@@ -51,6 +54,7 @@ function ContextAppController($scope, config, Private, timefilter) {
 
   this.state = createInitialState(
     parseInt(config.get('context:step'), 10),
+    getFirstSortableField(this.indexPattern, config.get('context:tieBreakerFields')),
     this.discoverUrl,
   );
 
@@ -61,6 +65,7 @@ function ContextAppController($scope, config, Private, timefilter) {
   ), (action) => (...args) => action(this.state)(...args));
 
   this.constants = {
+    FAILURE_REASONS,
     LOADING_STATUS,
   };
 
@@ -71,29 +76,48 @@ function ContextAppController($scope, config, Private, timefilter) {
   ], (newValues) => this.actions.setAllRows(...newValues));
 
   /**
-   * Sync query parameters to arguments
+   * Sync properties to state
    */
   $scope.$watchCollection(
-    () => _.pick(this, QUERY_PARAMETER_KEYS),
-    (newValues) => {
-      // break the watch cycle
-      if (!_.isEqual(newValues, this.state.queryParameters)) {
-        this.actions.fetchAllRowsWithNewQueryParameters(newValues);
+    () => ({
+      ...(_.pick(this, QUERY_PARAMETER_KEYS)),
+      indexPatternId: this.indexPattern.id,
+    }),
+    (newQueryParameters) => {
+      const { queryParameters } = this.state;
+      if (
+        (newQueryParameters.indexPatternId !== queryParameters.indexPatternId)
+        || (newQueryParameters.anchorUid !== queryParameters.anchorUid)
+        || (!_.isEqual(newQueryParameters.sort, queryParameters.sort))
+      ) {
+        this.actions.fetchAllRowsWithNewQueryParameters(_.cloneDeep(newQueryParameters));
+      } else if (
+        (newQueryParameters.predecessorCount !== queryParameters.predecessorCount)
+        || (newQueryParameters.successorCount !== queryParameters.successorCount)
+        || (!_.isEqual(newQueryParameters.filters, queryParameters.filters))
+      ) {
+        this.actions.fetchContextRowsWithNewQueryParameters(_.cloneDeep(newQueryParameters));
       }
     },
   );
 
+  /**
+   * Sync state to properties
+   */
   $scope.$watchCollection(
-    () => this.state.queryParameters,
-    (newValues) => {
-      _.assign(this, newValues);
+    () => ({
+      predecessorCount: this.state.queryParameters.predecessorCount,
+      successorCount: this.state.queryParameters.successorCount,
+    }),
+    (newParameters) => {
+      _.assign(this, newParameters);
     },
   );
 }
 
-function createInitialState(defaultStepSize, discoverUrl) {
+function createInitialState(defaultStepSize, tieBreakerField, discoverUrl) {
   return {
-    queryParameters: createInitialQueryParametersState(defaultStepSize),
+    queryParameters: createInitialQueryParametersState(defaultStepSize, tieBreakerField),
     rows: {
       all: [],
       anchor: null,

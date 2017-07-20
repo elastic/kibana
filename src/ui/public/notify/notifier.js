@@ -87,7 +87,7 @@ function restartNotifTimer(notif, cb) {
 
 const typeToButtonClassMap = {
   danger: 'kuiButton--danger', // NOTE: `error` type is internally named as `danger`
-  warning: 'kuiButton--danger',
+  warning: 'kuiButton--warning',
   info: 'kuiButton--primary',
   banner: 'kuiButton--basic'
 };

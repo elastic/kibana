@@ -162,14 +162,30 @@ export class DuplicateField extends KbnError {
 }
 
 /**
+ * when a mapping already exists for a field the user is attempting to add
+ * @param {String} name - the field name
+ */
+export class IndexPatternAlreadyExists extends KbnError {
+  constructor(name) {
+    super(
+      `An index pattern of "${name}" already exists`,
+      IndexPatternAlreadyExists);
+  }
+}
+
+/**
  * A saved object was not found
  */
 export class SavedObjectNotFound extends KbnError {
-  constructor(type, id) {
+  constructor(type, id, link) {
     const idMsg = id ? ` (id: ${id})` : '';
-    super(
-      `Could not locate that ${type}${idMsg}`,
-      SavedObjectNotFound);
+    let message = `Could not locate that ${type}${idMsg}`;
+
+    if (link) {
+      message += `, [click here to re-create it](${link})`;
+    }
+
+    super(message, SavedObjectNotFound);
 
     this.savedObjectType = type;
     this.savedObjectId = id;
@@ -257,17 +273,6 @@ export class InvalidLogScaleValues extends VislibError {
 }
 
 export class StackedBarChartConfig extends VislibError {
-  constructor(message) {
-    super(message);
-  }
-}
-
-/**
- * error thrown when user tries to render an chart with less
- * than the required number of data points
- * @param {String} message - the message to provide with the error
- */
-export class NotEnoughData extends VislibError {
   constructor(message) {
     super(message);
   }

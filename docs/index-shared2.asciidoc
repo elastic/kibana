@@ -1,0 +1,12 @@
+
+include::migration.asciidoc[]
+
+include::getting-started.asciidoc[]
+
+include::discover.asciidoc[]
+
+include::visualize.asciidoc[]
+
+include::dashboard.asciidoc[]
+
+include::timelion.asciidoc[]

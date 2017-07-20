@@ -7,6 +7,8 @@ import kibanaVersion from './kibana_version';
 import { ensureEsVersion } from './ensure_es_version';
 import { ensureNotTribe } from './ensure_not_tribe';
 import { ensureAllowExplicitIndex } from './ensure_allow_explicit_index';
+import { determineEnabledScriptingLangs } from './determine_enabled_scripting_langs';
+import { ensureTypesExist } from './ensure_types_exist';
 
 const NoConnections = elasticsearch.errors.NoConnections;
 import util from 'util';
@@ -92,13 +94,24 @@ module.exports = function (plugin, server, { mappings }) {
   }
 
   function check() {
+    const results = {};
+
     const healthCheck =
       waitForPong(callAdminAsKibanaUser, config.get('elasticsearch.url'))
       .then(waitForEsVersion)
       .then(() => ensureNotTribe(callAdminAsKibanaUser))
       .then(() => ensureAllowExplicitIndex(callAdminAsKibanaUser, config))
       .then(waitForShards)
-      .then(_.partial(migrateConfig, server, { mappings }))
+      .then(() => ensureTypesExist({
+        callCluster: callAdminAsKibanaUser,
+        log: (...args) => server.log(...args),
+        indexName: config.get('kibana.index'),
+        types: Object.keys(mappings).map(name => ({ name, mapping: mappings[name] }))
+      }))
+      .then(_.partial(migrateConfig, server))
+      .then(async () => {
+        results.enabledScriptingLangs = await determineEnabledScriptingLangs(callDataAsKibanaUser);
+      })
       .then(() => {
         const tribeUrl = config.get('elasticsearch.tribe.url');
         if (tribeUrl) {
@@ -108,6 +121,7 @@ module.exports = function (plugin, server, { mappings }) {
       });
 
     return healthCheck
+    .then(() => server.expose('latestHealthCheckResults', results))
     .then(setGreenStatus)
     .catch(err => plugin.status.red(err));
   }

@@ -26,6 +26,10 @@ import Danger from './button_danger';
 const dangerSource = require('!!raw!./button_danger');
 const dangerHtml = renderToHtml(Danger);
 
+import Warning from './button_warning';
+const warningSource = require('!!raw!./button_danger');
+const warningHtml = renderToHtml(Warning);
+
 import Loading from './button_loading';
 const loadingSource = require('!!raw!./button_loading');
 const loadingHtml = renderToHtml(Loading, { isLoading: true });
@@ -132,6 +136,25 @@ export default props => (
 
       <GuideDemo>
         <Danger />
+      </GuideDemo>
+    </GuideSection>
+
+    <GuideSection
+      title="Warning Button"
+      source={[{
+        type: GuideSectionTypes.JS,
+        code: warningSource,
+      }, {
+        type: GuideSectionTypes.HTML,
+        code: warningHtml,
+      }]}
+    >
+      <GuideText>
+        Warning Buttons represent potentially notable actions.
+      </GuideText>
+
+      <GuideDemo>
+        <Warning />
       </GuideDemo>
     </GuideSection>
 

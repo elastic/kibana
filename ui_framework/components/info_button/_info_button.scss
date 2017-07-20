@@ -1,0 +1,13 @@
+.kuiInfoButton {
+  font-size: 16px;
+  background-color: transparent;
+  color: $globalLinkColor;
+  cursor: pointer;
+  border: none;
+  padding: 0;
+
+  &:hover,
+  &:active {
+    color: $globalLinkColor-isHover;
+  }
+}

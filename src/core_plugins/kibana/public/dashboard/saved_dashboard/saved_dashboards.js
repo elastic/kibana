@@ -13,6 +13,6 @@ savedObjectManagementRegistry.register({
 });
 
 // This is the only thing that gets injected into controllers
-module.service('savedDashboards', function (SavedDashboard, kbnIndex, esAdmin, kbnUrl) {
-  return new SavedObjectLoader(SavedDashboard, kbnIndex, esAdmin, kbnUrl);
+module.service('savedDashboards', function (SavedDashboard, kbnIndex, esAdmin, kbnUrl, $http) {
+  return new SavedObjectLoader(SavedDashboard, kbnIndex, esAdmin, kbnUrl, $http);
 });

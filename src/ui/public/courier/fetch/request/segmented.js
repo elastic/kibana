@@ -186,11 +186,8 @@ export function SegmentedRequestProvider(es, Private, Promise, timefilter, confi
 
       return indexPattern.toDetailedIndexList(timeBounds.min, timeBounds.max, this._direction)
       .then(queue => {
-        if (!_.isArray(queue)) queue = [queue];
-
         this._queue = queue;
         this._queueCreated = true;
-
         return queue;
       });
     }

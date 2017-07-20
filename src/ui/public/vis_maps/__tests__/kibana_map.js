@@ -1,5 +1,7 @@
 import expect from 'expect.js';
-import { KibanaMap } from 'ui/vis_maps/kibana_map';
+import { KibanaMap } from '../kibana_map';
+import { KibanaMapLayer } from '../kibana_map_layer';
+import L from 'leaflet';
 
 describe('kibana_map tests', function () {
 
@@ -40,13 +42,13 @@ describe('kibana_map tests', function () {
       teardownDOM();
     });
 
-    it('should instantiate with world in view', function () {
+    it('should instantiate at zoom level 2', function () {
       const bounds = kibanaMap.getBounds();
-      expect(bounds.bottom_right.lon).to.equal(180);
-      expect(bounds.top_left.lon).to.equal(-180);
+      expect(bounds.bottom_right.lon).to.equal(90);
+      expect(bounds.top_left.lon).to.equal(-90);
       expect(kibanaMap.getCenter().lon).to.equal(0);
       expect(kibanaMap.getCenter().lat).to.equal(0);
-      expect(kibanaMap.getZoomLevel()).to.equal(1);
+      expect(kibanaMap.getZoomLevel()).to.equal(2);
     });
 
     it('should resize to fit container', function () {
@@ -66,9 +68,52 @@ describe('kibana_map tests', function () {
       expect(bounds.top_left.lon).to.equal(-180);
 
     });
-
   });
 
+
+  describe('KibanaMap - attributions', function () {
+
+
+    beforeEach(async function () {
+      setupDOM();
+      kibanaMap = new KibanaMap(domNode, {
+        minZoom: 1,
+        maxZoom: 10,
+        center: [0, 0],
+        zoom: 0
+      });
+    });
+
+    afterEach(function () {
+      kibanaMap.destroy();
+      teardownDOM();
+    });
+
+    function makeMockLayer(attribution) {
+      const layer = new KibanaMapLayer();
+      layer._attribution = attribution;
+      layer._leafletLayer = L.geoJson(null);
+      return layer;
+    }
+
+    it('should update attributions correctly', function () {
+      kibanaMap.addLayer(makeMockLayer('foo|bar'));
+      expect(domNode.querySelectorAll('.leaflet-control-attribution')[0].innerHTML).to.equal('foo, bar');
+
+      kibanaMap.addLayer(makeMockLayer('bar'));
+      expect(domNode.querySelectorAll('.leaflet-control-attribution')[0].innerHTML).to.equal('foo, bar');
+
+      const layer = makeMockLayer('bar,stool');
+      kibanaMap.addLayer(layer);
+      expect(domNode.querySelectorAll('.leaflet-control-attribution')[0].innerHTML).to.equal('foo, bar, stool');
+
+      kibanaMap.removeLayer(layer);
+      expect(domNode.querySelectorAll('.leaflet-control-attribution')[0].innerHTML).to.equal('foo, bar');
+
+
+    });
+
+  });
 
   describe('KibanaMap - baseLayer', function () {
 
@@ -94,7 +139,7 @@ describe('kibana_map tests', function () {
         'url': 'https://tiles-stage.elastic.co/v2/default/{z}/{x}/{y}.png?elastic_tile_service_tos=agree&my_app_name=kibana',
         'minZoom': 0,
         'maxZoom': 12,
-        'attribution': '© [Elastic Tile Service](https://www.elastic.co/elastic-tile-service)'
+        'attribution': '© [Elastic Maps Service](https://www.elastic.co/elastic-maps-service)'
       };
 
 

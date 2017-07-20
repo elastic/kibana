@@ -21,7 +21,6 @@ import {
   PieContainsAllZeros,
   InvalidLogScaleValues,
   StackedBarChartConfig,
-  NotEnoughData,
   NoResults,
   KbnError
 } from 'ui/errors';
@@ -49,7 +48,6 @@ describe('ui/errors', () => {
     new PieContainsAllZeros(),
     new InvalidLogScaleValues(),
     new StackedBarChartConfig('err'),
-    new NotEnoughData('nodata'),
     new NoResults()
   ];
 

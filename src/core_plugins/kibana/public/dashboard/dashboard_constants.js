@@ -1,5 +1,3 @@
-import { encodeQueryComponent } from '../../../../utils';
-
 export const DashboardConstants = {
   ADD_VISUALIZATION_TO_DASHBOARD_MODE_PARAM: 'addToDashboard',
   NEW_VISUALIZATION_ID_PARAM: 'addVisualization',
@@ -8,5 +6,5 @@ export const DashboardConstants = {
 };
 
 export function createDashboardEditUrl(id) {
-  return `/dashboard/${encodeQueryComponent(id)}`;
+  return `/dashboard/${id}`;
 }

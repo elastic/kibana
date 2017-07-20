@@ -50,6 +50,7 @@ describe('ProxyConfig', function () {
         ca: [{ path: 'path/to/ca' }],
         cert: undefined,
         key: undefined,
+        rejectUnauthorized: true
       });
     });
 
@@ -68,6 +69,7 @@ describe('ProxyConfig', function () {
         ca: undefined,
         cert: { path: 'path/to/cert' },
         key: { path: 'path/to/key' },
+        rejectUnauthorized: true
       });
     });
 
@@ -76,7 +78,8 @@ describe('ProxyConfig', function () {
         ssl: {
           ca: ['path/to/ca'],
           cert: 'path/to/cert',
-          key: 'path/to/key'
+          key: 'path/to/key',
+          rejectUnauthorized: true
         }
       });
 
@@ -87,6 +90,7 @@ describe('ProxyConfig', function () {
         ca: [{ path: 'path/to/ca' }],
         cert: { path: 'path/to/cert' },
         key: { path: 'path/to/key' },
+        rejectUnauthorized: true
       });
     });
   });

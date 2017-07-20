@@ -15,7 +15,7 @@ import { Notifier } from 'ui/notify/notifier';
 
 import {
   createStateHash,
-  hashedItemStoreSingleton,
+  HashedItemStoreSingleton,
   isStateHash,
 } from './state_storage';
 
@@ -26,7 +26,7 @@ export function StateProvider(Private, $rootScope, $location, config, kbnUrl) {
   function State(
     urlParam,
     defaults,
-    hashedItemStore = hashedItemStoreSingleton,
+    hashedItemStore = HashedItemStoreSingleton,
     notifier = new Notifier()
   ) {
     State.Super.call(this);
@@ -174,7 +174,7 @@ export function StateProvider(Private, $rootScope, $location, config, kbnUrl) {
    */
   State.prototype.reset = function () {
     kbnUrl.removeParam(this.getQueryParamName());
-    // apply diff to _attributes from defaults, this is side effecting so
+    // apply diff to attributes from defaults, this is side effecting so
     // it will change the state in place.
     const diffResults = applyDiff(this, this._defaults);
     if (diffResults.keys.length) {

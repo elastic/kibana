@@ -3,6 +3,7 @@ import expect from 'expect.js';
 export default function ({ getService, getPageObjects }) {
   const log = getService('log');
   const retry = getService('retry');
+  const screenshots = getService('screenshots');
   const PageObjects = getPageObjects(['common', 'visualize', 'header']);
 
   describe('visualize app', function describeIndexTests() {
@@ -78,7 +79,7 @@ export default function ({ getService, getPageObjects }) {
           return PageObjects.visualize.getDataTableData()
           .then(function showData(data) {
             log.debug(data.split('\n'));
-            PageObjects.common.saveScreenshot('Visualize-data-table');
+            screenshots.take('Visualize-data-table');
             expect(data.split('\n')).to.eql(expectedChartData);
           });
         });

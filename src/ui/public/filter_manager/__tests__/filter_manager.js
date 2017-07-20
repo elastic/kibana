@@ -1,11 +1,11 @@
 import _ from 'lodash';
-import sinon from 'auto-release-sinon';
+import sinon from 'sinon';
 import MockState from 'fixtures/mock_state';
 import expect from 'expect.js';
 import ngMock from 'ng_mock';
 import { FilterManagerProvider } from 'ui/filter_manager';
 import { FilterBarQueryFilterProvider } from 'ui/filter_bar/query_filter';
-import { buildInlineScriptForPhraseFilter } from '../lib/phrase';
+import { getPhraseScript } from '../lib/phrase';
 let queryFilter;
 let filterManager;
 let appState;
@@ -117,13 +117,7 @@ describe('Filter Manager', function () {
     filterManager.add(scriptedField, 1, '+', 'myIndex');
     checkAddFilters(1, [{
       meta: { index: 'myIndex', negate: false, field: 'scriptedField' },
-      script: {
-        script: {
-          inline: buildInlineScriptForPhraseFilter(scriptedField),
-          lang: scriptedField.lang,
-          params: { value: 1 }
-        }
-      }
+      script: getPhraseScript(scriptedField, 1)
     }], 4);
     expect(appState.filters).to.have.length(3);
 

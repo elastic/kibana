@@ -22,6 +22,7 @@
       <paginated-selectable-list
         per-page="20"
         list="indexPattern.list"
+        list-property="attributes.title"
         user-make-url="makeUrl"
         class="wizard-row visualizeWizardPaginatedSelectableList kuiVerticalRhythm"
       ></paginated-selectable-list>
@@ -34,7 +35,6 @@
 
       <!-- Saved searches -->
       <saved-object-finder
-        title="Saved Searches"
         type="searches"
         class="wizard-row visualizeWizardSavedObjectFinder kuiVerticalRhythm"
         make-url="step2WithSearchUrl"

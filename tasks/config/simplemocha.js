@@ -11,15 +11,10 @@ module.exports = {
       'test/mocha_setup.js',
       'test/**/__tests__/**/*.js',
       'src/**/__tests__/**/*.js',
+      'tasks/**/__tests__/**/*.js',
       'test/fixtures/__tests__/*.js',
       '!src/**/public/**',
       '!**/_*.js'
-    ]
-  },
-  api: {
-    src: [
-      'test/mocha_setup.js',
-      'test/unit/**/*.js'
     ]
   }
 };

@@ -11,6 +11,8 @@ import { noWhiteSpace } from 'ui/utils/no_white_space';
 import openRowHtml from 'ui/doc_table/components/table_row/open.html';
 import detailsHtml from 'ui/doc_table/components/table_row/details.html';
 import { uiModules } from 'ui/modules';
+import { disableFilter } from 'ui/filter_bar';
+
 const module = uiModules.get('app/discover');
 
 
@@ -35,6 +37,7 @@ module.directive('kbnTableRow', function ($compile, $httpParamSerializer, kbnUrl
     scope: {
       columns: '=',
       filter: '=',
+      filters: '=?',
       indexPattern: '=',
       row: '=kbnTableRow',
       onAddColumn: '=?',
@@ -102,6 +105,7 @@ module.directive('kbnTableRow', function ($compile, $httpParamSerializer, kbnUrl
         const hash = $httpParamSerializer({
           _a: rison.encode({
             columns: $scope.columns,
+            filters: ($scope.filters || []).map(disableFilter),
           }),
         });
         return `${path}?${hash}`;

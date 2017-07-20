@@ -5,6 +5,12 @@ $searchInputTextColor: #ACACAC;
   position: relative;
   font-size: $globalFontSize;
   line-height: $globalLineHeight;
+
+  &.kuiSearchInput-isInvalid {
+    .kuiSearchInput__input {
+      @include formControlInvalid;
+    }
+  }
 }
 
   .kuiSearchInput__icon {

@@ -17,38 +17,45 @@ exports[`KuiSubmitButton Baseline is rendered 1`] = `
 />
 `;
 
-exports[`KuiSubmitButton Props children is rendered as value 1`] = `
-<input
-  class="kuiButton"
-  type="submit"
-  value="Hello"
-/>
-`;
-
-exports[`KuiSubmitButton Props type basic renders the basic class 1`] = `
+exports[`KuiSubmitButton Props buttonType basic renders the basic class 1`] = `
 <input
   class="kuiButton kuiButton--basic"
   type="submit"
 />
 `;
 
-exports[`KuiSubmitButton Props type danger renders the danger class 1`] = `
+exports[`KuiSubmitButton Props buttonType danger renders the danger class 1`] = `
 <input
   class="kuiButton kuiButton--danger"
   type="submit"
 />
 `;
 
-exports[`KuiSubmitButton Props type hollow renders the hollow class 1`] = `
+exports[`KuiSubmitButton Props buttonType hollow renders the hollow class 1`] = `
 <input
   class="kuiButton kuiButton--hollow"
   type="submit"
 />
 `;
 
-exports[`KuiSubmitButton Props type primary renders the primary class 1`] = `
+exports[`KuiSubmitButton Props buttonType primary renders the primary class 1`] = `
 <input
   class="kuiButton kuiButton--primary"
   type="submit"
+/>
+`;
+
+exports[`KuiSubmitButton Props buttonType warning renders the warning class 1`] = `
+<input
+  class="kuiButton kuiButton--warning"
+  type="submit"
+/>
+`;
+
+exports[`KuiSubmitButton Props children is rendered as value 1`] = `
+<input
+  class="kuiButton"
+  type="submit"
+  value="Hello"
 />
 `;

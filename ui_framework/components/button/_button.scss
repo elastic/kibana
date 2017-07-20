@@ -161,6 +161,28 @@
 
 /**
  * 1. Override Bootstrap.
+ */
+.kuiButton--warning {
+  color: $buttonDefaultTextColor;
+  background-color: $buttonWarningBackgroundColor;
+
+  @include kuiButtonFocus {
+    @include focus($globalFocusWarningColor);
+    color: $buttonDefaultTextColor;
+  }
+
+  @include kuiButtonHoverAndActive {
+    color: $buttonDefaultTextColor !important; /* 1 */
+    background-color: $buttonWarningHoverBackgroundColor;
+  }
+
+  @include kuiButtonDisabled {
+    background-color: $buttonWarningDisabledBackgroundColor;
+  }
+}
+
+/**
+ * 1. Override Bootstrap.
  * 2. Override either Bootstrap or Timelion styles.
  */
 .kuiButton--hollow {

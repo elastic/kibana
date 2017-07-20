@@ -5,11 +5,14 @@
 .kuiLocalBreadcrumbs {
   display: flex;
   align-items: center;
-  height: 100%;
   padding-left: $localNavSideSpacing; /* 1 */
 }
 
 .kuiLocalBreadcrumb {
+  font-size: 14px;
+  margin: 0;
+  font-weight: normal;
+
   & + & {
     margin-left: 6px;
 

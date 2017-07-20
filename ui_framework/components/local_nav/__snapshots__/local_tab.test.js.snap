@@ -1,0 +1,31 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`property isDisabled renders the isDisabled modifier 1`] = `
+<a
+  aria-label="aria-label"
+  class="kuiLocalTab testClass1 testClass2 kuiLocalTab-isDisabled"
+  data-test-subj="test subject string"
+>
+  children
+</a>
+`;
+
+exports[`property isSelected renders the isSelected modifier 1`] = `
+<a
+  aria-label="aria-label"
+  class="kuiLocalTab testClass1 testClass2 kuiLocalTab-isSelected"
+  data-test-subj="test subject string"
+>
+  children
+</a>
+`;
+
+exports[`renders KuiLocalTab 1`] = `
+<a
+  aria-label="aria-label"
+  class="kuiLocalTab testClass1 testClass2"
+  data-test-subj="test subject string"
+>
+  children
+</a>
+`;

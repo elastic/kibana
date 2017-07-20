@@ -3,7 +3,7 @@ const { resolve } = require('path');
 module.exports = function (grunt) {
   grunt.registerTask('test:jest', function () {
     const done = this.async();
-    runJest().then(done);
+    runJest().then(done, done);
   });
 
   function runJest() {
@@ -18,15 +18,13 @@ module.exports = function (grunt) {
     return new Promise((resolve, reject) => {
       grunt.util.spawn(serverCmd, (error, result, code) => {
         if (error || code !== 0) {
-          const message = result.stderr || result.stdout;
-
-          grunt.log.error(message);
-
-          return reject();
+          const error = new Error(`jest exited with code ${code}`);
+          grunt.fail.fatal(error);
+          reject(error);
+          return;
         }
 
         grunt.log.writeln(result);
-
         resolve();
       });
 

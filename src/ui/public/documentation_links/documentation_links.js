@@ -1,9 +1,6 @@
-import semver from 'semver';
 import { metadata } from '../metadata';
 
-const major = semver.major(metadata.version);
-const minor = semver.minor(metadata.version);
-const urlVersion = `${major}.${minor}`;
+const urlVersion = metadata.branch;
 const baseUrl = 'https://www.elastic.co/';
 
 export const documentationLinks = {
@@ -24,6 +21,10 @@ export const documentationLinks = {
     luceneExpressions: `${baseUrl}guide/en/elasticsearch/reference/${urlVersion}/modules-scripting-expression.html`
   },
   query: {
-    luceneQuerySyntax: `${baseUrl}guide/en/elasticsearch/reference/${urlVersion}/query-dsl-query-string-query.html#query-string-syntax`
-  }
+    luceneQuerySyntax: `${baseUrl}guide/en/elasticsearch/reference/${urlVersion}/query-dsl-query-string-query.html#query-string-syntax`,
+    queryDsl: `${baseUrl}guide/en/elasticsearch/reference/${urlVersion}/query-dsl.html`,
+  },
+  date: {
+    dateMath: `${baseUrl}guide/en/elasticsearch/reference/${urlVersion}/common-options.html#date-math`
+  },
 };

@@ -25,6 +25,11 @@ export function createFunctionalTestRunner({ log, configFile, configOverrides })
         const config = await readConfigFile(log, configFile, configOverrides);
         log.info('Config loaded');
 
+        if (config.get('testFiles').length === 0) {
+          log.warning('No test files defined.');
+          return;
+        }
+
         const providers = createProviderCollection(lifecycle, log, config);
         await providers.loadAll();
 

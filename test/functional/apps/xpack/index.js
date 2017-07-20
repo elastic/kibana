@@ -1,11 +1,8 @@
 export default function ({ getService, getPageObjects }) {
-  const config = getService('config');
   const log = getService('log');
   const PageObjects = getPageObjects(['monitoring', 'settings']);
 
   describe('dismiss x-pack', function () {
-    this.timeout(config.get('timeouts.test'));
-
     // Putting everything here in 'before' so it doesn't count as a test
     // since x-pack may or may not be installed.  We just want the banner closed.
     before(function () {

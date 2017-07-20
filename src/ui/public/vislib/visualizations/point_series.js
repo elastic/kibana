@@ -1,7 +1,6 @@
 import d3 from 'd3';
 import _ from 'lodash';
 import $ from 'jquery';
-import { ContainerTooSmall } from 'ui/errors';
 import { TooltipProvider } from 'ui/vis/components/tooltip';
 import { VislibVisualizationsChartProvider } from './_chart';
 import { VislibVisualizationsTimeMarkerProvider } from './time_marker';
@@ -201,8 +200,6 @@ export function VislibVisualizationsPointSeriesProvider(Private) {
       const width = this.chartConfig.width = $elem.width();
       const height = this.chartConfig.height = $elem.height();
       const xScale = this.handler.categoryAxes[0].getScale();
-      const minWidth = 50;
-      const minHeight = 50;
       const addTimeMarker = this.chartConfig.addTimeMarker;
       const times = this.chartConfig.times || [];
       let timeMarker;
@@ -212,10 +209,6 @@ export function VislibVisualizationsPointSeriesProvider(Private) {
       return function (selection) {
         selection.each(function (data) {
           const el = this;
-
-          if (width < minWidth || height < minHeight) {
-            throw new ContainerTooSmall();
-          }
 
           if (addTimeMarker) {
             timeMarker = new TimeMarker(times, xScale, height);

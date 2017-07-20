@@ -1,5 +1,5 @@
 import _ from 'lodash';
-import { InvalidLogScaleValues, NotEnoughData } from 'ui/errors';
+import { InvalidLogScaleValues } from 'ui/errors';
 
 export function VislibVisualizationsPointSeriesProvider() {
 
@@ -87,17 +87,6 @@ export function VislibVisualizationsPointSeriesProvider() {
       }
       const click = events.addClickEvent();
       return element.call(click);
-    }
-
-    checkIfEnoughData() {
-      const message = 'Area charts require more than one data point. Try adding ' +
-        'an X-Axis Aggregation';
-
-      const notEnoughData = this.chartData.values.length < 2;
-
-      if (notEnoughData) {
-        throw new NotEnoughData(message);
-      }
     }
   }
 

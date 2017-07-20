@@ -1,4 +1,4 @@
-import uuid from 'node-uuid';
+import uuid from 'uuid';
 import _ from 'lodash';
 export function handleChange(props, doc) {
   const { model, name } = props;

@@ -39,7 +39,7 @@ export function createLocalChromedriverApi(log, url) {
 
       const pingsStartedAt = Date.now();
       while (true) {
-        log.verbose('[chromedriver:ping] attempting to reach chromedriver at %j', url);
+        log.debug('[chromedriver:ping] attempting to reach chromedriver at %j', url);
         if (await ping(url)) {
           // chromedriver is running and accepting connections
           break;

@@ -1,0 +1,12 @@
+<ui-select
+  ng-model="operator"
+  ui-select-focus-on="focus-operator"
+  on-select="onSelect({ operator: operator })"
+>
+  <ui-select-match placeholder="Operators...">
+    {{$select.selected.name}}
+  </ui-select-match>
+  <ui-select-choices repeat="operator in operatorOptions | filter:{ name: $select.search }">
+    <div ng-bind-html="operator.name | highlight: $select.search"></div>
+  </ui-select-choices>
+</ui-select>

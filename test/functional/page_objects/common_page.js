@@ -1,12 +1,6 @@
-import { delay, promisify } from 'bluebird';
-import fs from 'fs';
-import mkdirp from 'mkdirp';
-import { resolve } from 'path';
+import { delay } from 'bluebird';
 
-import getUrl from '../../utils/get_url';
-
-const mkdirpAsync = promisify(mkdirp);
-const writeFileAsync = promisify(fs.writeFile);
+import getUrl from '../../../src/test_utils/get_url';
 
 export function CommonPageProvider({ getService, getPageObjects }) {
   const log = getService('log');
@@ -17,7 +11,6 @@ export function CommonPageProvider({ getService, getPageObjects }) {
   const kibanaServer = getService('kibanaServer');
   const PageObjects = getPageObjects(['shield']);
 
-  const screenshotDirectory = config.get('screenshots.directory');
   const defaultTryTimeout = config.get('timeouts.try');
   const defaultFindTimeout = config.get('timeouts.find');
 
@@ -30,6 +23,10 @@ export function CommonPageProvider({ getService, getPageObjects }) {
       return getUrl.baseUrl(config.get('servers.elasticsearch'));
     }
 
+    /**
+     * @param {string} appName As defined in the apps config
+     * @param {string} subUrl The route after the hash (#)
+     */
     navigateToUrl(appName, subUrl) {
       const appConfig = Object.assign({}, config.get(['apps', appName]), {
         // Overwrite the default hash with the URL we really want.
@@ -75,26 +72,25 @@ export function CommonPageProvider({ getService, getPageObjects }) {
             log.debug('returned from get, calling refresh');
             return remote.refresh();
           })
-          .then(function () {
-            return remote.getCurrentUrl();
-          })
-          .then(function (currentUrl) {
+          .then(async function () {
+            const currentUrl = await remote.getCurrentUrl();
             const loginPage = currentUrl.includes('/login');
             const wantedLoginPage = appUrl.includes('/login') || appUrl.includes('/logout');
+
             if (loginPage && !wantedLoginPage) {
-              log.debug('Found loginPage username = '
-                + config.get('servers.kibana.username'));
-              return PageObjects.shield.login(config.get('servers.kibana.username'),
-                config.get('servers.kibana.password'))
-              .then(function () {
-                return remote.getCurrentUrl();
-              });
-            } else {
-              return currentUrl;
+              log.debug(`Found loginPage username = ${config.get('servers.kibana.username')}`);
+              await PageObjects.shield.login(
+                config.get('servers.kibana.username'),
+                config.get('servers.kibana.password')
+              );
+            }
+
+            if (currentUrl.includes('app/kibana')) {
+              await testSubjects.find('kibanaChrome');
             }
           })
-          .then(function (currentUrl) {
-            currentUrl = currentUrl.replace(/\/\/\w+:\w+@/, '//');
+          .then(async function () {
+            const currentUrl = (await remote.getCurrentUrl()).replace(/\/\/\w+:\w+@/, '//');
             const maxAdditionalLengthOnNavUrl = 230;
             // On several test failures at the end of the TileMap test we try to navigate back to
             // Visualize so we can create the next Vertical Bar Chart, but we can see from the
@@ -194,21 +190,6 @@ export function CommonPageProvider({ getService, getPageObjects }) {
       };
     }
 
-    async saveScreenshot(fileName, isFailure = false) {
-      try {
-        const type = isFailure ? 'failure' : 'session';
-        const directory = resolve(screenshotDirectory, type);
-        const path = resolve(directory, `${fileName}.png`);
-        log.debug(`Taking screenshot "${path}"`);
-
-        const screenshot = await remote.takeScreenshot();
-        await mkdirpAsync(directory);
-        await writeFileAsync(path, screenshot);
-      } catch (err) {
-        log.warning(`SCREENSHOT FAILED: ${err}`);
-      }
-    }
-
     async waitUntilUrlIncludes(path) {
       await retry.try(async () => {
         const url = await remote.getCurrentUrl();
@@ -247,6 +228,10 @@ export function CommonPageProvider({ getService, getPageObjects }) {
       await this.ensureModalOverlayHidden();
     }
 
+    async pressEnterKey() {
+      await remote.pressKeys('\uE007');
+    }
+
     async clickCancelOnModal() {
       log.debug('Clicking modal cancel');
       await testSubjects.click('confirmModalCancelButton');
@@ -275,6 +260,19 @@ export function CommonPageProvider({ getService, getPageObjects }) {
 
       log.debug(`exists? ${exists}`);
       return exists;
+    }
+
+    async isChromeVisible() {
+      return await testSubjects.exists('kibanaChrome');
+    }
+
+    async waitForTopNavToBeVisible() {
+      await retry.try(async () => {
+        const isNavVisible = await testSubjects.exists('top-nav');
+        if (!isNavVisible) {
+          throw new Error('Local nav not visible yet');
+        }
+      });
     }
   }
 

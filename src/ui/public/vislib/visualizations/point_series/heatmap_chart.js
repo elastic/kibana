@@ -101,7 +101,7 @@ export function VislibVisualizationsHeatmapChartProvider(Private) {
 
     addSquares(svg, data) {
       const xScale = this.getCategoryAxis().getScale();
-      const yScale = this.handler.valueAxes[1].getScale();
+      const yScale = this.handler.categoryAxes[1].getScale();
       const zScale = this.getValueAxis().getScale();
       const tooltip = this.baseChart.tooltip;
       const isTooltip = this.handler.visConfig.get('tooltip.show');
@@ -243,7 +243,7 @@ export function VislibVisualizationsHeatmapChartProvider(Private) {
             return `rotate(${rotate},${horizontalCenter},${verticalCenter})`;
           });
         if (hiddenLabels) {
-          this.baseChart.handler.alerts.show('Some labels were hidden due to size constrains');
+          this.baseChart.handler.alerts.show('Some labels were hidden due to size constraints');
         }
       }
 

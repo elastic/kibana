@@ -1,7 +1,7 @@
 import _ from 'lodash';
 import expect from 'expect.js';
 import ngMock from 'ng_mock';
-import sinon from 'auto-release-sinon';
+import sinon from 'sinon';
 import 'ui/private';
 import { AggTypesAggParamsProvider } from 'ui/agg_types/agg_params';
 import { VisProvider } from 'ui/vis';

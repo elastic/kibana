@@ -4,13 +4,14 @@ import { IndexPatternProvider } from 'ui/index_patterns/_index_pattern';
 import { IndexPatternsPatternCacheProvider } from 'ui/index_patterns/_pattern_cache';
 import { IndexPatternsGetIdsProvider } from 'ui/index_patterns/_get_ids';
 import { IndexPatternsIntervalsProvider } from 'ui/index_patterns/_intervals';
-import { IndexPatternsMapperProvider } from 'ui/index_patterns/_mapper';
-import { IndexPatternsPatternToWildcardProvider } from 'ui/index_patterns/_pattern_to_wildcard';
+import { FieldsFetcherProvider } from './fields_fetcher_provider';
 import { RegistryFieldFormatsProvider } from 'ui/registry/field_formats';
 import { uiModules } from 'ui/modules';
 const module = uiModules.get('kibana/index_patterns');
 
-export function IndexPatternsProvider(esAdmin, Notifier, Private, Promise, kbnIndex) {
+export { IndexPatternsApiClientProvider } from './index_patterns_api_client_provider';
+
+export function IndexPatternsProvider(Notifier, Private) {
   const self = this;
 
   const IndexPattern = Private(IndexPatternProvider);
@@ -29,13 +30,7 @@ export function IndexPatternsProvider(esAdmin, Notifier, Private, Promise, kbnIn
 
   self.delete = function (pattern) {
     self.getIds.clearCache();
-    pattern.destroy();
-
-    return esAdmin.delete({
-      index: kbnIndex,
-      type: 'index-pattern',
-      id: pattern.id
-    });
+    return pattern.destroy();
   };
 
   self.errors = {
@@ -45,11 +40,9 @@ export function IndexPatternsProvider(esAdmin, Notifier, Private, Promise, kbnIn
   self.cache = patternCache;
   self.getIds = Private(IndexPatternsGetIdsProvider);
   self.intervals = Private(IndexPatternsIntervalsProvider);
-  self.mapper = Private(IndexPatternsMapperProvider);
-  self.patternToWildcard = Private(IndexPatternsPatternToWildcardProvider);
+  self.fieldsFetcher = Private(FieldsFetcherProvider);
   self.fieldFormats = Private(RegistryFieldFormatsProvider);
   self.IndexPattern = IndexPattern;
 }
 
 module.service('indexPatterns', Private => Private(IndexPatternsProvider));
-

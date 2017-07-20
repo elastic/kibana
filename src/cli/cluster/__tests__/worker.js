@@ -1,5 +1,5 @@
 import expect from 'expect.js';
-import sinon from 'auto-release-sinon';
+import sinon from 'sinon';
 import cluster from 'cluster';
 import { findIndex } from 'lodash';
 
@@ -21,24 +21,22 @@ function assertListenerRemoved(emitter, event) {
 }
 
 function setup(opts = {}) {
-  sinon.stub(cluster, 'fork', function () {
-    return new MockClusterFork();
-  });
-
   const worker = new Worker(opts);
   workersToShutdown.push(worker);
   return worker;
 }
 
 describe('CLI cluster manager', function () {
+  const sandbox = sinon.sandbox.create();
+
+  beforeEach(function () {
+    sandbox.stub(cluster, 'fork', () => new MockClusterFork());
+  });
 
   afterEach(async function () {
-    for (const worker of workersToShutdown) {
-      if (worker.shutdown.restore) {
-        // if the shutdown method was stubbed, restore it first
-        worker.shutdown.restore();
-      }
+    sandbox.restore();
 
+    for (const worker of workersToShutdown) {
       await worker.shutdown();
     }
   });

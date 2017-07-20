@@ -118,8 +118,18 @@
 .rhythm_chart__timeseries-container {
   position: relative;
   display: flex;
-  row-direction: column;
+  flex-direction: column;
   flex: 1 0 auto;
+}
+
+.rhythm_chart__axis-label {
+  font-size: 0.8em;
+  color: rgba(0,0,0,0.4);
+  text-align: center;
+  min-height: 1.2em;
+  &.reversed {
+    color: rgba(255,255,255,0.6);
+  }
 }
 
 .annotation {

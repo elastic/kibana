@@ -14,7 +14,7 @@ export default function TileMapVisType(Private, getAppState, courier, config) {
 
   return new MapsVisType({
     name: 'tile_map',
-    title: 'Tile Map',
+    title: 'Coordinate Map',
     image,
     description: 'Plot latitude and longitude coordinates on a map',
     category: VisType.CATEGORY.MAP,
@@ -27,7 +27,6 @@ export default function TileMapVisType(Private, getAppState, courier, config) {
         heatMinOpacity: 0.1,
         heatRadius: 25,
         heatBlur: 15,
-        heatNormalizeData: true,
         legendPosition: 'bottomright',
         mapZoom: 2,
         mapCenter: [0, 0],

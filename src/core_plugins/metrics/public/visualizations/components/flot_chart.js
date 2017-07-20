@@ -19,13 +19,19 @@ class FlotChart extends Component {
     if (props.reversed !== this.props.reversed) {
       return true;
     }
+
+    // if the grid changes we need to re-render
+    if (props.showGrid !== this.props.showGrid) return true;
+
     if (props.yaxes && this.props.yaxes) {
       // We need to rerender if the axis change
       const valuesChanged = props.yaxes.some((axis, i) => {
         if (this.props.yaxes[i]) {
           return axis.position !== this.props.yaxes[i].position ||
           axis.max !== this.props.yaxes[i].max ||
-          axis.min !== this.props.yaxes[i].min;
+          axis.min !== this.props.yaxes[i].min ||
+          axis.axisFormatter !== this.props.yaxes[i].axisFormatter ||
+          axis.axisFormatterTemplate !== this.props.yaxes[i].axisFormatterTemplate;
         }
       });
       if (props.yaxes.length !== this.props.yaxes.length || valuesChanged) {
@@ -103,21 +109,36 @@ class FlotChart extends Component {
     if (this.props.onDraw) this.props.onDraw(plot);
   }
 
-  getOptions() {
-    const yaxes = this.props.yaxes || [{}];
+  getOptions(props) {
+    const yaxes = props.yaxes || [{}];
 
-    const lineColor = this.props.reversed ? colors.lineColorReversed : colors.lineColor;
-    const textColor = this.props.reversed ? colors.textColorReversed : colors.textColor;
+    const lineColor = props.reversed ? colors.lineColorReversed : colors.lineColor;
+    const textColor = props.reversed ? colors.textColorReversed : colors.textColor;
+
+    const borderWidth = { bottom: 1, top: 0, left: 0, right: 0 };
+
+    if (yaxes.some(y => y.position === 'left')) borderWidth.left = 1;
+    if (yaxes.some(y => y.position === 'right')) borderWidth.right = 1;
+
+    if (props.showGrid) {
+      borderWidth.top = 1;
+      borderWidth.left = 1;
+      borderWidth.right = 1;
+    }
 
     const opts = {
       legend: { show: false },
-      yaxes: yaxes,
+      yaxes: yaxes.map(axis => {
+        axis.tickLength = props.showGrid ? null : 0;
+        return axis;
+      }),
       yaxis: {
         color: lineColor,
         font: { color: textColor },
-        tickFormatter: this.props.tickFormatter
+        tickFormatter: props.tickFormatter
       },
       xaxis: {
+        tickLength: props.showGrid ? null : 0,
         color: lineColor,
         timezone: 'browser',
         mode: 'time',
@@ -128,26 +149,26 @@ class FlotChart extends Component {
       },
       grid: {
         margin: 0,
-        borderWidth: 1,
+        borderWidth,
         borderColor: lineColor,
         hoverable: true,
         mouseActiveRadius: 200,
       }
     };
 
-    if (this.props.crosshair) {
+    if (props.crosshair) {
       _.set(opts, 'crosshair', {
         mode: 'x',
-        color: this.props.reversed ? '#FFF' : '#000',
+        color: props.reversed ? '#FFF' : '#000',
         lineWidth: 1
       });
     }
 
-    if (this.props.onBrush) {
+    if (props.onBrush) {
       _.set(opts, 'selection', { mode: 'x', color: textColor });
     }
-    _.set(opts, 'series.bars.barWidth', calculateBarWidth(this.props.series));
-    return _.assign(opts, this.props.options);
+    _.set(opts, 'series.bars.barWidth', calculateBarWidth(props.series));
+    return _.assign(opts, props.options);
   }
 
   handleResize() {
@@ -174,7 +195,7 @@ class FlotChart extends Component {
       const { series } = this.props;
       const data = this.calculateData(series, this.props.show);
 
-      this.plot = $.plot(this.target, data, this.getOptions());
+      this.plot = $.plot(this.target, data, this.getOptions(this.props));
       this.handleDraw(this.plot);
 
       _.defer(() => this.handleResize());
@@ -248,6 +269,10 @@ class FlotChart extends Component {
 
 }
 
+FlotChart.defaultProps = {
+  showGrid: true
+};
+
 FlotChart.propTypes = {
   crosshair: PropTypes.bool,
   onBrush: PropTypes.func,
@@ -260,6 +285,7 @@ FlotChart.propTypes = {
   series: PropTypes.array,
   show: PropTypes.array,
   tickFormatter: PropTypes.func,
+  showGrid: PropTypes.bool,
   yaxes: PropTypes.array,
 };
 

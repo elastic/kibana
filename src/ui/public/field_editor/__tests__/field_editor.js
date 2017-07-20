@@ -1,15 +1,14 @@
 import $ from 'jquery';
 import ngMock from 'ng_mock';
 import expect from 'expect.js';
+
 import { IndexPatternsFieldProvider } from 'ui/index_patterns/_field';
-import { RegistryFieldFormatsProvider } from 'ui/registry/field_formats';
 import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
 import _ from 'lodash';
 
 describe('FieldEditor directive', function () {
 
   let Field;
-  let StringFormat;
   let $rootScope;
 
   let compile;
@@ -17,22 +16,19 @@ describe('FieldEditor directive', function () {
   let $el;
 
   let $httpBackend;
+  let getScriptedLangsResponse;
 
   beforeEach(ngMock.module('kibana'));
   beforeEach(ngMock.inject(function ($compile, $injector, Private) {
     $httpBackend = $injector.get('$httpBackend');
-    $httpBackend
-    .when('GET', '/api/kibana/scripts/languages')
-    .respond(['expression', 'painless']);
+    getScriptedLangsResponse = $httpBackend.when('GET', '/api/kibana/scripts/languages');
+    getScriptedLangsResponse.respond(['expression', 'painless']);
 
     $rootScope = $injector.get('$rootScope');
     Field = Private(IndexPatternsFieldProvider);
-    StringFormat = Private(RegistryFieldFormatsProvider).getType('string');
 
     $rootScope.indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
-    // set the field format for this field
-    $rootScope.indexPattern.fieldFormatMap.time = new StringFormat({ foo: 1, bar: 2 });
-    $rootScope.indexPattern._indexFields();
+    $rootScope.indexPattern.stubSetFieldFormat('time', 'string', { foo: 1, bar: 2 });
     $rootScope.field = $rootScope.indexPattern.fields.byName.time;
 
     compile = function () {
@@ -157,12 +153,7 @@ describe('FieldEditor directive', function () {
         expect(field.lang).to.be('expression');
       });
 
-      it('provides lang options based on what is enabled for inline use in ES', function () {
-        $httpBackend.flush();
-        expect(_.isEqual(editor.scriptingLangs, ['expression', 'painless'])).to.be.ok();
-      });
-
-      it('provides curated type options based on language', function () {
+      it('provides specific type when language is painless', function () {
         $rootScope.$apply();
         expect(editor.fieldTypes).to.have.length(1);
         expect(editor.fieldTypes[0]).to.be('number');
@@ -172,6 +163,23 @@ describe('FieldEditor directive', function () {
 
         expect(editor.fieldTypes).to.have.length(4);
         expect(_.isEqual(editor.fieldTypes, ['number', 'string', 'date', 'boolean'])).to.be.ok();
+      });
+
+      it('provides all kibana types when language is groovy (only possible in 5.x)', function () {
+        $rootScope.$apply();
+        expect(editor.fieldTypes).to.have.length(1);
+        expect(editor.fieldTypes[0]).to.be('number');
+
+        editor.field.lang = 'groovy';
+        $rootScope.$apply();
+
+        expect(editor.fieldTypes).to.contain('number');
+        expect(editor.fieldTypes).to.contain('string');
+        expect(editor.fieldTypes).to.contain('geo_point');
+        expect(editor.fieldTypes).to.contain('ip');
+        expect(editor.fieldTypes).to.not.contain('text');
+        expect(editor.fieldTypes).to.not.contain('keyword');
+        expect(editor.fieldTypes).to.not.contain('attachement');
       });
 
       it('updates formatter options based on field type', function () {

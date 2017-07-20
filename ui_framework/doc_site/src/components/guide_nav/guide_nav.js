@@ -99,15 +99,22 @@ export class GuideNav extends Component {
       this.props.components.filter(item => (
         item.name.toLowerCase().indexOf(this.state.search.toLowerCase()) !== -1
       )).map((item, index) => {
+        const icon =
+          item.hasReact
+          ? <div className="guideNavItem__reactLogo" />
+          : undefined;
         return (
-          <Link
-            key={index}
-            className="guideNavItem"
-            to={item.path}
-            onClick={this.props.onClickNavItem}
-          >
-            {item.name}
-          </Link>
+          <div key={`componentNavItem-${index}`} className="guideNavItem">
+            <Link
+              className="guideNavItem__link"
+              to={item.path}
+              onClick={this.props.onClickNavItem}
+            >
+              {item.name}
+            </Link>
+
+            {icon}
+          </div>
         );
       });
 
@@ -116,14 +123,15 @@ export class GuideNav extends Component {
         item.name.toLowerCase().indexOf(this.state.search.toLowerCase()) !== -1
       )).map((item, index) => {
         return (
-          <Link
-            key={index}
-            className="guideNavItem"
-            to={item.path}
-            onClick={this.props.onClickNavItem}
-          >
-            {item.name}
-          </Link>
+          <div key={`sandboxNavItem-${index}`} className="guideNavItem">
+            <Link
+              className="guideNavItem__link"
+              to={item.path}
+              onClick={this.props.onClickNavItem}
+            >
+              {item.name}
+            </Link>
+          </div>
         );
       });
 

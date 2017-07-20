@@ -1,10 +1,7 @@
 export default function ({ getService, loadTestFile }) {
-  const config = getService('config');
   const esArchiver = getService('esArchiver');
 
   describe('management', function () {
-    this.timeout(config.get('timeouts.test'));
-
     // on setup, we create an settingsPage instance
     // that we will use for all the tests
     before(async function () {

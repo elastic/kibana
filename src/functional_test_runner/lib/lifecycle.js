@@ -3,6 +3,8 @@ export function createLifecycle() {
     beforeLoadTests: [],
     beforeTests: [],
     beforeEachTest: [],
+    testFailure: [],
+    testHookFailure: [],
     cleanup: [],
     phaseStart: [],
     phaseEnd: [],
@@ -15,6 +17,7 @@ export function createLifecycle() {
       }
 
       listeners[name].push(fn);
+      return this;
     }
 
     async trigger(name, ...args) {

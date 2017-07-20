@@ -58,7 +58,6 @@ export function VislibVisualizationsAreaChartProvider(Private) {
         };
       }
 
-      this.checkIfEnoughData();
     }
 
     addPath(svg, data) {

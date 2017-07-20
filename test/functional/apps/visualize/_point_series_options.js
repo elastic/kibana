@@ -2,6 +2,7 @@ import expect from 'expect.js';
 
 export default function ({ getService, getPageObjects }) {
   const log = getService('log');
+  const screenshots = getService('screenshots');
   const PageObjects = getPageObjects(['common', 'visualize', 'header', 'pointSeries']);
   const pointSeriesVis = PageObjects.pointSeries;
 
@@ -101,7 +102,7 @@ export default function ({ getService, getPageObjects }) {
           .then(function showData(data) {
             log.debug('count data=' + data);
             log.debug('data.length=' + data.length);
-            PageObjects.common.saveScreenshot('Visualize-secondary-value-axis');
+            screenshots.take('Visualize-secondary-value-axis');
             expect(data).to.eql(expectedChartValues[0]);
           })
           .then(function () {

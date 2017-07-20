@@ -1,0 +1,10 @@
+<button
+  class="kuiToggleButton"
+  ng-click="toggleButton.onClick()"
+>
+  <span
+    ng-class="{'fa-caret-down': !toggleButton.isCollapsed, 'fa-caret-right': toggleButton.isCollapsed}"
+    class="kuiToggleButton__icon kuiIcon"
+  ></span>
+  {{ toggleButton.text }}
+</button>

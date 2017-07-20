@@ -1,0 +1,124 @@
+{
+  "type": "index",
+  "value": {
+    "index": "yearly-2017",
+    "settings": {
+      "index": {
+        "number_of_shards": "1",
+        "number_of_replicas": "1"
+      }
+    },
+    "mappings": {
+      "type": {
+        "properties": {
+          "count": {
+            "type": "long"
+          },
+          "time": {
+            "type": "date"
+          }
+        }
+      }
+    }
+  }
+}
+
+{
+  "type": "index",
+  "value": {
+    "index": "yearly-2016",
+    "settings": {
+      "index": {
+        "number_of_shards": "1",
+        "number_of_replicas": "1"
+      }
+    },
+    "mappings": {
+      "type": {
+        "properties": {
+          "count": {
+            "type": "long"
+          },
+          "time": {
+            "type": "date"
+          }
+        }
+      }
+    }
+  }
+}
+
+{
+  "type": "index",
+  "value": {
+    "index": "yearly-2018",
+    "settings": {
+      "index": {
+        "number_of_shards": "1",
+        "number_of_replicas": "1"
+      }
+    },
+    "mappings": {
+      "type": {
+        "properties": {
+          "count": {
+            "type": "long"
+          },
+          "time": {
+            "type": "date"
+          }
+        }
+      }
+    }
+  }
+}
+
+{
+  "type": "index",
+  "value": {
+    "index": "monthly-invalid",
+    "settings": {
+      "index": {
+        "number_of_shards": "1",
+        "number_of_replicas": "1"
+      }
+    },
+    "mappings": {
+      "type": {
+        "properties": {
+          "count": {
+            "type": "long"
+          },
+          "time": {
+            "type": "date"
+          }
+        }
+      }
+    }
+  }
+}
+
+{
+  "type": "index",
+  "value": {
+    "index": "monthly-2017.01",
+    "settings": {
+      "index": {
+        "number_of_shards": "1",
+        "number_of_replicas": "1"
+      }
+    },
+    "mappings": {
+      "type": {
+        "properties": {
+          "count": {
+            "type": "long"
+          },
+          "time": {
+            "type": "date"
+          }
+        }
+      }
+    }
+  }
+}

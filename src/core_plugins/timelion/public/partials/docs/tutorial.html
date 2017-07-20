@@ -1,4 +1,4 @@
-<div ng-show="section === 'tutorial'">
+<div>
   <div ng-show="page === 1">
     <div class="doc-container-content">
       <h1>Welcome to <strong>Timelion</strong>!</h1>
@@ -14,7 +14,7 @@
       </p>
       <p>
         Ready to get started? Click <strong>Next</strong>. Want to skip the
-        tutorial and view the docs? <a ng-click="section = 'functions'">
+        tutorial and view the docs? <a ng-click="setPage(0)">
         Jump to the function reference</a>.
       </p>
     </div>
@@ -29,7 +29,7 @@
       </div>
       <div class="btn-doc-next">
         <button
-          ng-click="page = page+1"
+          ng-click="setPage(page+1)"
           class="kuiButton kuiButton--primary"
         >
           Next
@@ -58,7 +58,7 @@
       <div class="doc-container-buttons">
         <div class="btn-doc-prev">
           <button
-            ng-click="page = page-1"
+            ng-click="setPage(page-1)"
             class="kuiButton kuiButton--primary"
           >
             Previous
@@ -133,7 +133,7 @@
       <div class="doc-container-buttons">
         <div class="btn-doc-prev">
           <button
-            ng-click="page = page-1"
+            ng-click="setPage(page-1)"
             class="kuiButton kuiButton--primary"
           >
             Previous
@@ -141,7 +141,7 @@
         </div>
         <div class="btn-doc-next">
           <button
-            ng-click="page = page+1"
+            ng-click="setPage(page+1)"
             class="kuiButton kuiButton--primary"
           >
             Next
@@ -209,7 +209,7 @@
     <div class="doc-container-buttons">
       <div class="btn-doc-prev">
         <button
-          ng-click="page = page-1"
+          ng-click="setPage(page-1)"
           class="kuiButton kuiButton--primary"
         >
           Previous
@@ -217,7 +217,7 @@
       </div>
       <div class="btn-doc-next">
         <button
-          ng-click="page = page+1"
+          ng-click="setPage(page+1)"
           class="kuiButton kuiButton--primary"
         >
           Next
@@ -281,13 +281,13 @@
       <p>
         Timelion provides additional view transformation functions you can use
         to customize the appearance of your charts. For the complete list, see
-        the <a ng-click="section = 'functions'">Function reference</a>.
+        the <a ng-click="setPage(0)">Function reference</a>.
       </p>
     </div>
     <div class="doc-container-buttons">
       <div class="btn-doc-prev">
         <button
-          ng-click="page = page-1"
+          ng-click="setPage(page-1)"
           class="kuiButton kuiButton--primary"
         >
           Previous
@@ -295,7 +295,7 @@
       </div>
       <div class="btn-doc-next">
         <button
-          ng-click="page = page+1"
+          ng-click="setPage(page+1)"
           class="kuiButton kuiButton--primary"
         >
           Next
@@ -337,7 +337,7 @@
         <code>derivative</code>.
       </p>
       <p>Now that you're familiar with the syntax, refer to the
-        <a ng-click="section = 'functions'">Function reference</a> to see
+        <a ng-click="setPage(0)">Function reference</a> to see
         how to use all of the available Timelion functions. You can view
         the reference at any time by clicking <strong>Docs</strong>
         in the Kibana toolbar. To get back to this tutorial, click the
@@ -347,7 +347,7 @@
     <div class="doc-container-buttons">
       <div class="btn-doc-prev">
         <button
-          ng-click="page = page-1"
+          ng-click="setPage(page-1)"
           class="kuiButton kuiButton--primary"
         >
           Previous
@@ -365,13 +365,13 @@
     </div>
   </div>
 </div>
-<div ng-show="section === 'functions'">
+<div ng-show="page === 0">
   <div class="kuiLocalDropdownTitle">
     Function reference
   </div>
   <div class="kuiLocalDropdownHelpText">
     Click any function for more information. Just getting started?
-    <a ng-click="section = 'tutorial'">Check out the tutorial</a>.
+    <a ng-click="setPage(1)">Check out the tutorial</a>.
   </div>
   <div class="timelionFunctionsDropdownContent">
     <table class="table table-condensed table-bordered timelionFunctionsTable">

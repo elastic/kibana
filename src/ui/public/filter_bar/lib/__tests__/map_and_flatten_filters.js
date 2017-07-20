@@ -39,10 +39,10 @@ describe('Filter Bar Directive', function () {
         expect(results[2]).to.have.property('meta');
         expect(results[3]).to.have.property('meta');
         expect(results[4]).to.have.property('meta');
-        expect(results[0].meta).to.have.property('key', 'exists');
-        expect(results[0].meta).to.have.property('value', '_type');
-        expect(results[1].meta).to.have.property('key', 'missing');
-        expect(results[1].meta).to.have.property('value', '_type');
+        expect(results[0].meta).to.have.property('key', '_type');
+        expect(results[0].meta).to.have.property('value', 'exists');
+        expect(results[1].meta).to.have.property('key', '_type');
+        expect(results[1].meta).to.have.property('value', 'missing');
         expect(results[2].meta).to.have.property('key', 'query');
         expect(results[2].meta).to.have.property('value', 'foo:bar');
         expect(results[3].meta).to.have.property('key', 'bytes');

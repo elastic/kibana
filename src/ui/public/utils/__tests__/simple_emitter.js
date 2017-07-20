@@ -1,6 +1,6 @@
 import { SimpleEmitter } from 'ui/utils/simple_emitter';
 import expect from 'expect.js';
-import sinon from 'auto-release-sinon';
+import sinon from 'sinon';
 
 describe('SimpleEmitter class', function () {
   let emitter;

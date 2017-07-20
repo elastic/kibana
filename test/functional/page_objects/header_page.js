@@ -10,27 +10,31 @@ export function HeaderPageProvider({ getService, getPageObjects }) {
   const defaultFindTimeout = config.get('timeouts.find');
 
   class HeaderPage {
+
     async clickSelector(selector) {
-      remote.setFindTimeout(defaultFindTimeout);
-      await remote.findByCssSelector(selector).click();
+      log.debug(`clickSelector(${selector})`);
+      await retry.try(async () => await remote.findByCssSelector(selector).click());
     }
 
     async clickDiscover() {
       log.debug('click Discover tab');
       await this.clickSelector('a[href*=\'discover\']');
-      await PageObjects.common.sleep(3000);
+      await PageObjects.common.waitForTopNavToBeVisible();
+      await this.isGlobalLoadingIndicatorHidden();
     }
 
     async clickVisualize() {
       log.debug('click Visualize tab');
       await this.clickSelector('a[href*=\'visualize\']');
-      await PageObjects.common.sleep(3000);
+      await PageObjects.common.waitForTopNavToBeVisible();
+      await this.isGlobalLoadingIndicatorHidden();
     }
 
     async clickDashboard() {
       log.debug('click Dashboard tab');
       await this.clickSelector('a[href*=\'dashboard\']');
-      await PageObjects.common.sleep(3000);
+      await PageObjects.common.waitForTopNavToBeVisible();
+      await this.isGlobalLoadingIndicatorHidden();
     }
 
     async clickSettings() {

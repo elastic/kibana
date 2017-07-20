@@ -45,4 +45,8 @@ describe('Date Format', function () {
     expect(chicagoTime).not.to.equal(phoenixTime);
     off();
   });
+
+  it('should parse date math values', function () {
+    expect(convert('2015-01-01||+1M/d')).to.be('January 1st 2015, 00:00:00.000');
+  });
 });

@@ -48,13 +48,13 @@ async function buildGallery(comparisons) {
   });
 
   return writeFileAsync(
-    path.resolve('./test/screenshots/visual_regression_gallery.html'),
+    path.resolve('./test/functional/screenshots/visual_regression_gallery.html'),
     html
   );
 }
 
 async function compareScreenshots() {
-  const SCREENSHOTS_DIR = 'test/screenshots';
+  const SCREENSHOTS_DIR = 'test/functional/screenshots';
   const BASELINE_SCREENSHOTS_DIR = path.resolve(SCREENSHOTS_DIR, 'baseline');
   const DIFF_SCREENSHOTS_DIR = path.resolve(SCREENSHOTS_DIR, 'diff');
   const SESSION_SCREENSHOTS_DIR = path.resolve(SCREENSHOTS_DIR, 'session');

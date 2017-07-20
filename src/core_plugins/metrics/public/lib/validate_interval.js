@@ -1,4 +1,4 @@
-import parseInterval from 'ui/utils/parse_interval';
+import { parseInterval } from 'ui/utils/parse_interval';
 export function validateInterval(timefilter, panel, maxBuckets) {
   const { interval } = panel;
   const { min, max } = timefilter.getBounds();

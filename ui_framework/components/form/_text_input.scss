@@ -1,5 +1,9 @@
 .kuiTextInput {
   @include formControl;
+
+  &.kuiTextInput-isInvalid {
+    @include formControlInvalid;
+  }
 }
 
 .kuiTextInput--small {

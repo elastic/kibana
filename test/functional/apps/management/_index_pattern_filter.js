@@ -13,7 +13,7 @@ export default function ({ getService, getPageObjects }) {
         return PageObjects.settings.navigateTo();
       })
       .then(function () {
-        return PageObjects.settings.clickKibanaIndicies();
+        return PageObjects.settings.clickKibanaIndices();
       });
     });
 
@@ -27,12 +27,12 @@ export default function ({ getService, getPageObjects }) {
 
     it('should filter indexed fields', async function () {
       await PageObjects.settings.navigateTo();
-      await PageObjects.settings.clickKibanaIndicies();
+      await PageObjects.settings.clickKibanaIndices();
       await PageObjects.settings.getFieldTypes();
 
       await PageObjects.settings.setFieldTypeFilter('string');
 
-      await retry.try(async function() {
+      await retry.try(async function () {
         const fieldTypes = await PageObjects.settings.getFieldTypes();
         expect(fieldTypes.length).to.be.above(0);
         for (const fieldType of fieldTypes) {
@@ -42,7 +42,7 @@ export default function ({ getService, getPageObjects }) {
 
       await PageObjects.settings.setFieldTypeFilter('number');
 
-      await retry.try(async function() {
+      await retry.try(async function () {
         const fieldTypes = await PageObjects.settings.getFieldTypes();
         expect(fieldTypes.length).to.be.above(0);
         for (const fieldType of fieldTypes) {

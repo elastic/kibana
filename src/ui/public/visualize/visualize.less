@@ -12,13 +12,17 @@ visualize {
     white-space: pre-line;
   }
 
+  /**
+   * 1. Expand to fill the container but accept being squeezed smaller by the spy, even so small
+   *    that it disappears entirely.
+   */
   .vis-container {
+    flex: 1 1 0; /* 1 */
     display: flex;
     flex-direction: row;
     overflow: auto;
     -webkit-transition: opacity 0.01s;
     transition: opacity 0.01s;
-    flex: 1 1 0;
 
     // IE11 Hack
     //
@@ -62,7 +66,11 @@ visualize {
   }
 }
 
+/**
+ * 1. Expand to fill the container and accept being squeezed smaller by the spy.
+ */
 .visualize-error {
+  flex: 1 1 0;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -72,6 +80,9 @@ visualize {
 }
 
 visualize-spy {
+  background-color: #ffffff;
+  z-index: 1;
+
   // this element should flex
   flex: 0 1 auto;
   padding: 0px 0px 0px 15px;
@@ -109,11 +120,17 @@ visualize-spy {
   }
 }
 
+/**
+ * 1. Restrict height of the spy and scroll if the content exceeds this height. This prevents
+ *    the spy from pushing surrounding content around, e.g. pushing the table down in Discover.
+ */
 .visualize-spy-container {
   flex: 1 1 auto;
 
   display: flex;
   flex-direction: column;
+  height: 482px; /* 1 */
+  overflow-y: auto; /* 1 */
 
   height: 482px;
   overflow-y: auto;

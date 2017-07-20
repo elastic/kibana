@@ -70,7 +70,10 @@
   </kbn-top-nav>
 
   <!-- Filters. -->
-  <filter-bar state="state"></filter-bar>
+  <filter-bar
+    state="state"
+    index-patterns="indexPatterns"
+  ></filter-bar>
 
   <div
     ng-show="getShouldShowEditHelp()"
@@ -106,6 +109,7 @@
     toggle-expand="toggleExpandPanel"
     create-child-ui-state="createChildUiState"
     toggle-expand="toggleExpandPanel"
+    register-panel-index-pattern="registerPanelIndexPattern"
     data-shared-items-count="{{panels.length}}"
   ></dashboard-grid>
 
@@ -118,6 +122,7 @@
     get-vis-click-handler="getFilterBarClickHandler"
     get-vis-brush-handler="getBrushEvent"
     save-state="saveState"
+    register-panel-index-pattern="registerPanelIndexPattern"
     create-child-ui-state="createChildUiState"
     toggle-expand="toggleExpandPanel(expandedPanel.panelIndex)"
   ></dashboard-panel>

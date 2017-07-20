@@ -1,8 +1,9 @@
 import { format } from 'util';
 import { PassThrough } from 'stream';
 
-import { parseLogLevel } from './log_levels';
 import { magenta, yellow, red, blue, brightBlack } from 'ansicolors';
+
+import { parseLogLevel } from './log_levels';
 
 export function createToolingLog(initialLogLevelName = 'silent') {
   // current log level (see logLevel.name and logLevel.flags) changed
@@ -13,6 +14,10 @@ export function createToolingLog(initialLogLevelName = 'silent') {
   let indentString = '';
 
   class ToolingLog extends PassThrough {
+    constructor() {
+      super({ objectMode: true });
+    }
+
     verbose(...args) {
       if (!logLevel.flags.verbose) return;
       this.write(' %s ', magenta('sill'), format(...args));

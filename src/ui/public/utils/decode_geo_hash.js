@@ -1,4 +1,3 @@
-/* eslint-disable */
 /*
  * Decodes geohash to object containing
  * top-left and bottom-right corners of

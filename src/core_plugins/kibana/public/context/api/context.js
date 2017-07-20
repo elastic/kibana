@@ -5,7 +5,7 @@ import { SearchSourceProvider } from 'ui/courier/data_source/search_source';
 import { reverseSortDirective } from './utils/sorting';
 
 
-function fetchContextProvider(Private) {
+function fetchContextProvider(courier, Private) {
   const SearchSource = Private(SearchSourceProvider);
 
   return {
@@ -13,37 +13,42 @@ function fetchContextProvider(Private) {
     fetchSuccessors,
   };
 
-  async function fetchSuccessors(indexPattern, anchorDocument, contextSort, size) {
-    const successorsSort = [contextSort, { _uid: 'asc' }];
-    const successorsSearchSource = createSearchSource(
-      indexPattern,
+  async function fetchSuccessors(indexPatternId, anchorDocument, contextSort, size, filters) {
+    const successorsSearchSource = await createSearchSource(
+      indexPatternId,
       anchorDocument,
-      successorsSort,
+      contextSort,
       size,
+      filters,
     );
     const results = await performQuery(successorsSearchSource);
     return results;
   }
 
-  async function fetchPredecessors(indexPattern, anchorDocument, contextSort, size) {
-    const predecessorsSort = [reverseSortDirective(contextSort), { _uid: 'desc' }];
-    const predecessorsSearchSource = createSearchSource(
-      indexPattern,
+  async function fetchPredecessors(indexPatternId, anchorDocument, contextSort, size, filters) {
+    const predecessorsSort = contextSort.map(reverseSortDirective);
+    const predecessorsSearchSource = await createSearchSource(
+      indexPatternId,
       anchorDocument,
       predecessorsSort,
       size,
+      filters,
     );
     const reversedResults = await performQuery(predecessorsSearchSource);
     const results = reversedResults.slice().reverse();
     return results;
   }
 
-  function createSearchSource(indexPattern, anchorDocument, sort, size) {
+  async function createSearchSource(indexPatternId, anchorDocument, sort, size, filters) {
+
+    const indexPattern = await courier.indexPatterns.get(indexPatternId);
+
     return new SearchSource()
       .inherits(false)
       .set('index', indexPattern)
       .set('version', true)
       .set('size', size)
+      .set('filter', filters)
       .set('query', {
         match_all: {},
       })
@@ -52,7 +57,7 @@ function fetchContextProvider(Private) {
   }
 
   async function performQuery(searchSource) {
-    const response = await searchSource.fetch();
+    const response = await searchSource.fetchAsRejectablePromise();
 
     return _.get(response, ['hits', 'hits'], []);
   }

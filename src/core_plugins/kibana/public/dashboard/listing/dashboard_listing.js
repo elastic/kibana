@@ -3,6 +3,7 @@ import 'ui/pager_control';
 import 'ui/pager';
 import { DashboardConstants, createDashboardEditUrl } from '../dashboard_constants';
 import { SortableProperties } from 'ui_framework/services';
+import { ConfirmationButtonTypes } from 'ui/modals';
 
 export function DashboardListingController($injector, $scope) {
   const $filter = $injector.get('$filter');
@@ -11,6 +12,7 @@ export function DashboardListingController($injector, $scope) {
   const pagerFactory = $injector.get('pagerFactory');
   const Private = $injector.get('Private');
   const timefilter = $injector.get('timefilter');
+  const config = $injector.get('config');
 
   timefilter.enabled = false;
 
@@ -44,10 +46,13 @@ export function DashboardListingController($injector, $scope) {
   const fetchItems = () => {
     this.isFetchingItems = true;
 
-    dashboardService.find(this.filter)
+    dashboardService.find(this.filter, config.get('savedObjects:listingLimit'))
       .then(result => {
         this.isFetchingItems = false;
         this.items = result.hits;
+        this.totalItems = result.total;
+        this.showLimitError = result.total > config.get('savedObjects:listingLimit');
+        this.listingLimit = config.get('savedObjects:listingLimit');
         calculateItemsOnPage();
       });
   };
@@ -125,7 +130,8 @@ export function DashboardListingController($injector, $scope) {
       'Are you sure you want to delete the selected dashboards? This action is irreversible!',
       {
         confirmButtonText: 'Delete',
-        onConfirm: doDelete
+        onConfirm: doDelete,
+        defaultFocusedButton: ConfirmationButtonTypes.CANCEL
       });
   };
 

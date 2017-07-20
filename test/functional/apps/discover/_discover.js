@@ -6,6 +6,7 @@ export default function ({ getService, getPageObjects }) {
   const esArchiver = getService('esArchiver');
   const remote = getService('remote');
   const kibanaServer = getService('kibanaServer');
+  const screenshots = getService('screenshots');
   const PageObjects = getPageObjects(['common', 'discover', 'header']);
 
   describe('discover app', function describeIndexTests() {
@@ -48,7 +49,7 @@ export default function ({ getService, getPageObjects }) {
 
         const expectedToastMessage = `Discover: Saved Data Source "${queryName1}"`;
         expect(toastMessage).to.be(expectedToastMessage);
-        await PageObjects.common.saveScreenshot('Discover-save-query-toast');
+        await screenshots.take('Discover-save-query-toast');
 
         await PageObjects.header.waitForToastMessageGone();
         const actualQueryNameString = await PageObjects.discover.getCurrentQueryName();
@@ -59,15 +60,15 @@ export default function ({ getService, getPageObjects }) {
       it('load query should show query name', async function () {
         await PageObjects.discover.loadSavedSearch(queryName1);
 
-        await retry.try(async function() {
+        await retry.try(async function () {
           expect(await PageObjects.discover.getCurrentQueryName()).to.be(queryName1);
         });
-        await PageObjects.common.saveScreenshot('Discover-load-query');
+        await screenshots.take('Discover-load-query');
       });
 
       it('should show the correct hit count', async function () {
         const expectedHitCount = '14,004';
-        await retry.try(async function() {
+        await retry.try(async function () {
           expect(await PageObjects.discover.getHitCount()).to.be(expectedHitCount);
         });
       });
@@ -208,7 +209,7 @@ export default function ({ getService, getPageObjects }) {
       it('should show "no results"', async () => {
         const isVisible = await PageObjects.discover.hasNoResults();
         expect(isVisible).to.be(true);
-        await PageObjects.common.saveScreenshot('Discover-no-results');
+        await screenshots.take('Discover-no-results');
       });
 
       it('should suggest a new time range is picked', async () => {
@@ -216,7 +217,7 @@ export default function ({ getService, getPageObjects }) {
         expect(isVisible).to.be(true);
       });
 
-      it('should have a link that opens and closes the time picker', async function() {
+      it('should have a link that opens and closes the time picker', async function () {
         const noResultsTimepickerLink = await PageObjects.discover.getNoResultsTimepicker();
         expect(await PageObjects.header.isTimepickerOpen()).to.be(false);
 

@@ -16,15 +16,19 @@ body {
  *    on styles inherited from body.
  */
 body {
-  background-color: $guideBaseBackgroundColor;
+  background-color: #000000;
   line-height: 40px; /* 1 */
   margin: 0;
   min-width: $guideMinWidth;
 }
 
+/**
+ * 1. Expand container to fit the page if the content is shorter than the page, or expand with the
+ *    content if it's taller than the page.
+ */
 .guide {
   display: flex;
-  height: 100%;
+  min-height: 100%; /* 1 */
 }
 
 .guideContent {
@@ -32,7 +36,10 @@ body {
   flex-direction: column;
   flex: 1 1 auto;
   padding-top: $guideNavHeight;
-  transition: padding-right $guideCodeViewerTransition;
+  background-color: $guideBaseBackgroundColor;
+  transition:
+    padding-right $guideCodeViewerTransition,
+    opacity $guideCodeViewerTransition;
 
   &.is-code-viewer-open {
     padding-right: $guideCodeViewerWidth;
@@ -40,6 +47,10 @@ body {
     @include whenNarrowerThan($guideNormalBreakpoint) {
       padding-right: $guideCodeViewerSmallWidth;
     }
+  }
+
+  .is-guide-nav-open + & {
+    opacity: 0.7;
   }
 }
 

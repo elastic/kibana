@@ -12,7 +12,7 @@ describe('Base Object', function () {
     expect(baseObject).to.have.property('message', 'test');
   });
 
-  it('should serialize _attributes to RISON', function () {
+  it('should serialize attributes to RISON', function () {
     const baseObject = new BaseObject();
     baseObject.message = 'Testing... 1234';
     const rison = baseObject.toRISON();
@@ -27,7 +27,7 @@ describe('Base Object', function () {
     expect(rison).to.equal('(message:\'Testing... 1234\')');
   });
 
-  it('should serialize _attributes for JSON', function () {
+  it('should serialize attributes for JSON', function () {
     const baseObject = new BaseObject();
     baseObject.message = 'Testing... 1234';
     baseObject._private = 'foo';

@@ -144,3 +144,5 @@ To delete an index pattern:
 . Select the pattern you want to remove in the Index Patterns list.
 . Click the pattern's *Delete* button.
 . Confirm that you want to remove the index pattern.
+
+include::index-patterns/management-cross-cluster-search.asciidoc[]

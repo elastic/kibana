@@ -1,13 +1,13 @@
 import expect from 'expect.js';
 import $ from 'jquery';
 import _ from 'lodash';
-import sinon from 'auto-release-sinon';
+import sinon from 'sinon';
 import { positionTooltip } from '../position_tooltip';
 
 describe('Tooltip Positioning', function () {
-
+  const sandbox = sinon.sandbox.create();
   const positions = ['north', 'south', 'east', 'west'];
-  const bounds = ['top', 'left', 'bottom', 'right'];
+  const bounds = ['top', 'left', 'bottom', 'right', 'area'];
   let $window;
   let $chart;
   let $tooltip;
@@ -51,6 +51,7 @@ describe('Tooltip Positioning', function () {
     $window.remove();
     $window = $chart = $tooltip = $sizer = null;
     positionTooltip.removeClone();
+    sandbox.restore();
   });
 
   function makeEvent(xPercent, yPercent) {
@@ -67,8 +68,8 @@ describe('Tooltip Positioning', function () {
 
   describe('getTtSize()', function () {
     it('should measure the outer-size of the tooltip using an un-obstructed clone', function () {
-      const w = sinon.spy($.fn, 'outerWidth');
-      const h = sinon.spy($.fn, 'outerHeight');
+      const w = sandbox.spy($.fn, 'outerWidth');
+      const h = sandbox.spy($.fn, 'outerHeight');
 
       positionTooltip.getTtSize($tooltip.html(), $sizer);
 
@@ -146,6 +147,31 @@ describe('Tooltip Positioning', function () {
           expect(overflow[p]).to.be.lessThan(0);
         }
       });
+    });
+
+    it('identifies only right overflow when tooltip overflows both sides of inner container but outer contains tooltip', function () {
+      // Size $tooltip larger than chart
+      const largeWidth = $chart.width() + 10;
+      $tooltip.css({ width: largeWidth });
+      $sizer.css({ width: largeWidth });
+      const size = positionTooltip.getTtSize($tooltip.html(), $sizer);
+      expect(size).to.have.property('width', largeWidth);
+
+      // $chart is flush with the $window on the left side
+      expect(positionTooltip.getBounds($chart).left).to.be(0);
+
+      // Size $window large enough for tooltip on right side
+      $window.css({ width: $chart.width() * 3 });
+
+      // Position click event in center of $chart so $tooltip overflows both sides of chart
+      const pos = positionTooltip.getBasePosition(size, makeEvent(0.5, 0.5));
+
+      const overflow = positionTooltip.getOverflow(size, pos, [$chart, $window]);
+
+      // no overflow on left (east)
+      expect(overflow.east).to.be.lessThan(0);
+      // overflow on right (west)
+      expect(overflow.west).to.be.greaterThan(0);
     });
   });
 

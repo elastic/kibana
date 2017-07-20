@@ -4,7 +4,6 @@ import './indexed_fields_table';
 import './scripted_fields_table';
 import './scripted_field_editor';
 import './source_filters_table';
-import { RefreshKibanaIndex } from '../refresh_kibana_index';
 import UrlProvider from 'ui/url';
 import { IndicesEditSectionsProvider } from './edit_sections';
 import uiRoutes from 'ui/routes';
@@ -44,12 +43,14 @@ uiModules.get('apps/management')
     $scope, $location, $route, config, courier, Notifier, Private, AppState, docTitle, confirmModal) {
   const notify = new Notifier();
   const $state = $scope.state = new AppState();
-  const refreshKibanaIndex = Private(RefreshKibanaIndex);
 
   $scope.kbnUrl = Private(UrlProvider);
   $scope.indexPattern = $route.current.locals.indexPattern;
-  docTitle.change($scope.indexPattern.id);
-  const otherIds = _.without($route.current.locals.indexPatternIds, $scope.indexPattern.id);
+  docTitle.change($scope.indexPattern.title);
+
+  const otherPatterns = _.filter($route.current.locals.indexPatterns, pattern => {
+    return pattern.id !== $scope.indexPattern.id;
+  });
 
   $scope.$watch('indexPattern.fields', function () {
     $scope.editSections = Private(IndicesEditSectionsProvider)($scope.indexPattern);
@@ -104,13 +105,13 @@ uiModules.get('apps/management')
     function doRemove() {
       if ($scope.indexPattern.id === config.get('defaultIndex')) {
         config.remove('defaultIndex');
-        if (otherIds.length) {
-          config.set('defaultIndex', otherIds[0]);
+
+        if (otherPatterns.length) {
+          config.set('defaultIndex', otherPatterns[0].id);
         }
       }
 
       courier.indexPatterns.delete($scope.indexPattern)
-        .then(refreshKibanaIndex)
         .then(function () {
           $location.url('/management/kibana/index');
         })

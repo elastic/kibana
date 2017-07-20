@@ -39,9 +39,13 @@ class VisEditor extends Component {
             model={model}
             onChange={handleChange} />
           <VisEditorVisualization
+            dirty={this.props.dirty}
+            autoApply={this.props.autoApply}
             model={model}
             visData={this.props.visData}
             onBrush={this.props.onBrush}
+            onCommit={this.props.onCommit}
+            onToggleAutoApply={this.props.onToggleAutoApply}
             onChange={handleChange} />
           <PanelConfig
             fields={this.props.fields}
@@ -61,7 +65,11 @@ VisEditor.propTypes = {
   model: PropTypes.object,
   onBrush: PropTypes.func,
   onChange: PropTypes.func,
-  visData: PropTypes.object
+  onCommit: PropTypes.func,
+  onToggleAutoApply: PropTypes.func,
+  visData: PropTypes.object,
+  dirty: PropTypes.bool,
+  autoApply: PropTypes.bool
 };
 
 export default VisEditor;

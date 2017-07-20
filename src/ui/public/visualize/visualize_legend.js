@@ -113,7 +113,7 @@ uiModules.get('kibana')
           $scope.open = $scope.vis.params.addLegend;
         }
 
-        if (vislibVis.visConfigArgs.type === 'heatmap') {
+        if (['heatmap', 'gauge'].includes(vislibVis.visConfigArgs.type)) {
           const labels = vislibVis.getLegendLabels();
           if (labels) {
             $scope.labels = _.map(labels, label => {

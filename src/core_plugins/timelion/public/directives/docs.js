@@ -4,13 +4,11 @@ define(function (require) {
   const _ = require('lodash');
   const moment = require('moment');
 
-  app.directive('timelionDocs', function (config, $http) {
+  app.directive('timelionDocs', function ($http) {
     return {
       restrict: 'E',
       template: html,
-      controller: function ($scope, config) {
-        $scope.section = config.get('timelion:showTutorial', true) ? 'tutorial' : 'functions';
-        $scope.page = 1;
+      controller: function ($scope) {
         $scope.functions = {
           list: [],
           details: null

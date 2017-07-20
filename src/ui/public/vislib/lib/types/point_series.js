@@ -130,6 +130,13 @@ export function VislibTypesPointSeries() {
             }
           }
         ];
+      } else {
+        const categoryAxis1 = config.categoryAxes.find((categoryAxis) => {
+          return categoryAxis.id === 'CategoryAxis-1';
+        });
+        if (categoryAxis1) {
+          categoryAxis1.title.text = data.get('xAxisLabel');
+        }
       }
 
       if (!config.charts) {
@@ -189,7 +196,7 @@ export function VislibTypesPointSeries() {
         rangePadding: 0,
         rangeOuterPadding: 0
       };
-      defaults.valueAxes.push({
+      defaults.categoryAxes.push({
         id: 'CategoryAxis-2',
         type: 'category',
         position: 'left',
@@ -199,7 +206,7 @@ export function VislibTypesPointSeries() {
         },
         labels: {
           filter: false,
-          axisFormatter: data.get('zAxisFormatter') || function () { return ''; }
+          axisFormatter:  function (val) { return val; }
         },
         style: {
           rangePadding: 0,

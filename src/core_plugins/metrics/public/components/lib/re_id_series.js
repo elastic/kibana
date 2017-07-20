@@ -1,4 +1,4 @@
-import uuid from 'node-uuid';
+import uuid from 'uuid';
 import _ from 'lodash';
 export default source => {
   const series = _.cloneDeep(source);

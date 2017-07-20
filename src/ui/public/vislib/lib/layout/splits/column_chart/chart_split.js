@@ -44,11 +44,15 @@ define(function () {
           .append('div')
           .attr('class', function (d, i) {
             let fullDivClass = divClass;
-            if (chartsNumber > 1) {
-              if (i === 0) {
-                fullDivClass += ' chart-first';
-              } else if (i === chartsNumber - 1) {
-                fullDivClass += ' chart-last';
+            if (fullDivClass !== 'chart') {
+              if (chartsNumber > 1) {
+                if (i === 0) {
+                  fullDivClass += ' chart-first';
+                } else if (i === chartsNumber - 1) {
+                  fullDivClass += ' chart-last';
+                }
+              } else {
+                fullDivClass += ' chart-first chart-last';
               }
             }
             return fullDivClass;

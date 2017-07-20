@@ -27,7 +27,6 @@ uiModules.get('apps/management')
         { title: 'format' },
         { title: 'searchable', info: 'These fields can be used in the filter bar' },
         { title: 'aggregatable' , info: 'These fields can be used in visualization aggregations' },
-        { title: 'analyzed', info: 'Analyzed fields may require extra memory to visualize' },
         { title: 'excluded', info: 'Fields that are excluded from _source when it is fetched' },
         { title: 'controls', sortable: false }
       ];
@@ -76,10 +75,6 @@ uiModules.get('apps/management')
             {
               markup: field.aggregatable ? yesTemplate : noTemplate,
               value: field.aggregatable
-            },
-            {
-              markup: field.analyzed ? yesTemplate : noTemplate,
-              value: field.analyzed
             },
             {
               markup: excluded ? yesTemplate : noTemplate,

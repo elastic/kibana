@@ -2,7 +2,7 @@
 == Line, Area, and Bar charts
 Line, Area, and Bar charts allow you to plot your data on X/Y axis.
 
-First you need to select your _metrics_ which define Value axis. 
+First you need to select your _metrics_ which define Value axis.
 
 include::y-axis-aggs.asciidoc[]
 
@@ -29,22 +29,22 @@ definition, as in the following example:
 { "script" : "doc['grade'].value * 1.2" }
 
 NOTE: In Elasticsearch releases 1.4.3 and later, this functionality requires you to enable
-{es-ref}modules-scripting.html[dynamic Groovy scripting].
+{ref}/modules-scripting.html[dynamic Groovy scripting].
 
 The availability of these options varies depending on the aggregation you choose.
 
 === Metrics & Axes
 
-Select the *Metrics & Axes* tab to change the way each individual metric is shown on the chart. 
+Select the *Metrics & Axes* tab to change the way each individual metric is shown on the chart.
 The data series are styled in the _Metrics_ section, while the axes are styled in the X and Y axis sections.
 
 ==== Metrics
 Modify how each metric from the Data panel is visualized on the chart.
 
 *Chart type*:: Choose between *Area*, *Line*, and *Bar* types.
-*Mode*:: stack the different metrics, or plot them next to each other 
+*Mode*:: stack the different metrics, or plot them next to each other
 *Value Axis*:: choose the axis you want to plot this data too (the properties of each are configured under Y-axes).
-*Line mode*:: should the outline of lines or bars appear *smooth*, *straight*, or *stepped*. 
+*Line mode*:: should the outline of lines or bars appear *smooth*, *straight*, or *stepped*.
 
 ==== Y-axis
 
@@ -62,8 +62,6 @@ Style all the Y-axes of the chart.
 *Custom Extents*:::: You can define custom minimum and maximum for each axis
 
 ==== X-Axis
-By default one X-axis is defined on a chart, but you can add as much as you need. Clicking on the + sign to create a new
-X-axis.
 
 *Position*:: position of the X-Axis (*left* or *right* for horizontal charts, and *top* or *bottom* for vertical charts).
 *Advanced Options*::
@@ -86,7 +84,7 @@ These are options that apply to the entire chart and not just the individual dat
 You can enable grid on the chart. By default grid is displayed on the category axis only.
 
 *X-axis*:: You can disable the display of grid lines on category axis
-*Y-axis*:: You can choose on which (if any) of the value axes you want to display grid lines 
+*Y-axis*:: You can choose on which (if any) of the value axes you want to display grid lines
 
 [float]
 [[vertbar-viewing-detailed-information]]

@@ -84,11 +84,14 @@
   }
 }
 
+/**
+ * 1. Height of the searchbox.
+ */
 .guideNavItemsContainer {
   @include scrollbar;
   display: flex;
   overflow: auto;
-  min-height: calc(100vh - #{$guideNavHeight});
+  min-height: calc(100vh - #{$guideNavHeight + 40px}); /* 1 */
 }
 
 .guideNavItems {
@@ -111,7 +114,6 @@
 .guideNavItem,
 .guideNavNoItems {
   min-width: 200px;
-  text-decoration: none;
   font-size: 20px;
   line-height: 20px;
   padding: 8px 20px;
@@ -119,12 +121,27 @@
 }
 
 .guideNavItem {
-  color: $guideTextColor;
-
-  &:hover {
-    color: $guideLinkHoverColor;
-  }
+  display: flex;
+  align-items: center;
 }
+
+  .guideNavItem__link {
+    color: $guideTextColor;
+    text-decoration: none;
+
+    &:hover {
+      color: $guideLinkHoverColor;
+    }
+  }
+
+  .guideNavItem__reactLogo {
+    margin-left: 10px;
+    background-image: url("images/react-logo.svg");
+    width: 24px;
+    height: 22px;
+    background-repeat: no-repeat;
+    background-size: contain;
+  }
 
 .guideNavNoItems {
   color: rgba($guideTextColor, 0.5);

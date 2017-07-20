@@ -8,6 +8,7 @@ import { getData } from '../path';
 module.exports = () => Joi.object({
   pkg: Joi.object({
     version: Joi.string().default(Joi.ref('$version')),
+    branch: Joi.string().default(Joi.ref('$branch')),
     buildNum: Joi.number().default(Joi.ref('$buildNum')),
     buildSha: Joi.string().default(Joi.ref('$buildSha')),
   }).default(),
@@ -162,12 +163,14 @@ module.exports = () => Joi.object({
     allowAnonymous: Joi.boolean().default(false),
     v6ApiFormat: Joi.boolean().default(false)
   }).default(),
-  tilemap: Joi.object({
+  map: Joi.object({
     manifestServiceUrl: Joi.when('$dev', {
       is: true,
-      then: Joi.string().default('https://tiles-stage.elastic.co/v2/manifest'),
-      otherwise: Joi.string().default('https://tiles.elastic.co/v2/manifest')
-    }),
+      then: Joi.string().default('https://staging-dot-catalogue-dot-elastic-layer.appspot.com/v1/manifest'),
+      otherwise: Joi.string().default('https://catalogue.maps.elastic.co/v1/manifest')
+    })
+  }).default(),
+  tilemap: Joi.object({
     url: Joi.string(),
     options: Joi.object({
       attribution: Joi.string(),
@@ -180,6 +183,18 @@ module.exports = () => Joi.object({
       reuseTiles: Joi.boolean(),
       bounds: Joi.array().items(Joi.array().items(Joi.number()).min(2).required()).min(2)
     }).default()
+  }).default(),
+  regionmap: Joi.object({
+    layers: Joi.array().items(Joi.object({
+      url: Joi.string(),
+      type: Joi.string(),
+      attribution: Joi.string(),
+      name: Joi.string(),
+      fields: Joi.array().items(Joi.object({
+        name: Joi.string(),
+        description: Joi.string()
+      }))
+    }))
   }).default(),
   uiSettings: Joi.object({
     // this is used to prevent the uiSettings from initializing. Since they

@@ -25,6 +25,11 @@
  * Nothing fancy, just the basics so we can use this for both regular and static controls.
  */
 /**
+ * 1. Angular will add an ng-untouched class to an input if it hasn't been touched yet.
+ *    We only want invalid inputs to appear invalid after the user has had a chance to interact
+ *    with it.
+ */
+/**
  * 1. Embedded SVG of fa-caret-down (https://github.com/encharm/Font-Awesome-SVG-PNG/blob/master/black/svg/caret-down.svg).
  * 2. Make room on right side for the caret.
  * 3. Prevent Firefox from showing dotted line around text on focus.
@@ -384,6 +389,52 @@ body {
 
 /**
  * 1. Override Bootstrap.
+ */
+.kuiButton--warning {
+  color: #FFF;
+  background-color: #f3bb57; }
+  .kuiButton--warning:not(a):enabled:focus {
+    z-index: 1;
+    /* 1 */
+    outline: none !important;
+    /* 2 */
+    box-shadow: 0 0 0 1px #ffffff, 0 0 0 2px #ffa500;
+    /* 3 */
+    color: #FFF; }
+  a.kuiButton--warning:not(.kuiButton-isDisabled):focus {
+    /* 1 */
+    z-index: 1;
+    /* 1 */
+    outline: none !important;
+    /* 2 */
+    box-shadow: 0 0 0 1px #ffffff, 0 0 0 2px #ffa500;
+    /* 3 */
+    color: #FFF; }
+  .kuiButton--warning:enabled:hover {
+    color: #FFF !important;
+    /* 1 */
+    background-color: #e69606; }
+  a.kuiButton--warning:not(.kuiButton-isDisabled):hover {
+    /* 1 */
+    color: #FFF !important;
+    /* 1 */
+    background-color: #e69606; }
+  .kuiButton--warning:enabled:active {
+    color: #FFF !important;
+    /* 1 */
+    background-color: #e69606; }
+  a.kuiButton--warning:not(.kuiButton-isDisabled):active {
+    /* 1 */
+    color: #FFF !important;
+    /* 1 */
+    background-color: #e69606; }
+  .kuiButton--warning:disabled {
+    background-color: #f4debc; }
+  a.kuiButton--warning.kuiButton-isDisabled {
+    background-color: #f4debc; }
+
+/**
+ * 1. Override Bootstrap.
  * 2. Override either Bootstrap or Timelion styles.
  */
 .kuiButton--hollow {
@@ -509,35 +560,59 @@ body {
   font-size: 14px;
   padding: 0 15px 20px; }
 
+/**
+ * 1. Use this container to offset the spacing between wrapped cards.
+ */
+.kuiCardGroupContainer {
+  margin: -15px;
+  /* 1 */ }
+
+/**
+ * 1. Wrap cards when necessary.
+ */
 .kuiCardGroup {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
-  display: flex; }
+  display: flex;
+  -webkit-flex-wrap: wrap;
+      -ms-flex-wrap: wrap;
+          flex-wrap: wrap;
+  /* 1 */
+  /**
+   * 1. Use the defined width of the card to determine when to wrap.
+   * 2. Use an even margin all around the card so that the spacing is still even when wrapped.
+   */ }
+  .kuiCardGroup .kuiCard {
+    -webkit-box-flex: 1;
+    -webkit-flex: 1 1 0;
+        -ms-flex: 1 1 0px;
+            flex: 1 1 0;
+    /* 1 */
+    margin: 15px;
+    /* 2 */ }
+    .kuiCardGroup .kuiCard .kuiCard__description {
+      -webkit-box-flex: 1;
+      -webkit-flex: 1 1 auto;
+          -ms-flex: 1 1 auto;
+              flex: 1 1 auto; }
 
-.kuiCardGroup__card {
-  -webkit-box-flex: 1;
-  -webkit-flex: 1 1 0%;
-      -ms-flex: 1 1 0%;
-          flex: 1 1 0%; }
-  .kuiCardGroup__card + .kuiCardGroup__card {
-    margin-left: 30px; }
-
-.kuiCardGroup__cardDescription {
-  -webkit-box-flex: 1;
-  -webkit-flex: 1 1 auto;
-      -ms-flex: 1 1 auto;
-          flex: 1 1 auto; }
-
+/**
+ * 1. There's no way to make this look good when wrapped.
+ */
 .kuiCardGroup--united {
+  -webkit-flex-wrap: nowrap;
+      -ms-flex-wrap: nowrap;
+          flex-wrap: nowrap;
+  /* 1 */
   border: 1px solid #E0E0E0;
   border-radius: 4px;
   overflow: hidden; }
-  .kuiCardGroup--united .kuiCardGroup__card {
+  .kuiCardGroup--united .kuiCard {
     border: none;
-    border-radius: 0; }
-  .kuiCardGroup--united .kuiCardGroup__card + .kuiCardGroup__card {
-    margin-left: 0;
+    border-radius: 0;
+    margin: 0; }
+  .kuiCardGroup--united .kuiCard + .kuiCard {
     border-left: 1px solid #E0E0E0; }
 
 .kuiCollapseButton {
@@ -783,6 +858,9 @@ body {
   position: relative;
   font-size: 14px;
   line-height: 1.5; }
+  .kuiSearchInput.kuiSearchInput-isInvalid .kuiSearchInput__input:not(.ng-untouched) {
+    /* 1 */
+    border-color: #D86051; }
 
 .kuiSearchInput__icon {
   position: absolute;
@@ -809,11 +887,6 @@ body {
   border: 1px solid #DEDEDE;
   border-radius: 4px;
   transition: border-color 0.1s linear;
-  /**
-   * 1. Angular will add an ng-untouched class to an input if it hasn't been touched yet.
-   *    We only want invalid inputs to appear invalid after the user has had a chance to interact
-   *    with it.
-   */
   padding-left: 28px;
   /* 1 */
   width: 100%;
@@ -850,11 +923,6 @@ body {
   border: 1px solid #DEDEDE;
   border-radius: 4px;
   transition: border-color 0.1s linear;
-  /**
-   * 1. Angular will add an ng-untouched class to an input if it hasn't been touched yet.
-   *    We only want invalid inputs to appear invalid after the user has had a chance to interact
-   *    with it.
-   */
   padding-right: 30px;
   /* 2 */
   background-image: url('data:image/svg+xml;utf8,<svg width="1792" height="1792" viewBox="0 0 1792 1792" xmlns="http://www.w3.org/2000/svg"><path d="M1408 704q0 26-19 45l-448 448q-19 19-45 19t-45-19l-448-448q-19-19-19-45t19-45 45-19h896q26 0 45 19t19 45z"/></svg>');
@@ -922,12 +990,7 @@ body {
   background-color: #ffffff;
   border: 1px solid #DEDEDE;
   border-radius: 4px;
-  transition: border-color 0.1s linear;
-  /**
-   * 1. Angular will add an ng-untouched class to an input if it hasn't been touched yet.
-   *    We only want invalid inputs to appear invalid after the user has had a chance to interact
-   *    with it.
-   */ }
+  transition: border-color 0.1s linear; }
   .theme-dark .kuiTextArea {
     color: #cecece; }
   .kuiTextArea:invalid:not(.ng-untouched) {
@@ -945,6 +1008,9 @@ body {
     .theme-dark .kuiTextArea:focus {
       outline: none;
       border-color: #6EADC1; }
+  .kuiTextArea.kuiTextArea-isInvalid:not(.ng-untouched) {
+    /* 1 */
+    border-color: #D86051; }
 
 .kuiTextArea--nonResizable {
   resize: none; }
@@ -962,12 +1028,7 @@ body {
   background-color: #ffffff;
   border: 1px solid #DEDEDE;
   border-radius: 4px;
-  transition: border-color 0.1s linear;
-  /**
-   * 1. Angular will add an ng-untouched class to an input if it hasn't been touched yet.
-   *    We only want invalid inputs to appear invalid after the user has had a chance to interact
-   *    with it.
-   */ }
+  transition: border-color 0.1s linear; }
   .theme-dark .kuiTextInput {
     color: #cecece; }
   .kuiTextInput:invalid:not(.ng-untouched) {
@@ -985,6 +1046,9 @@ body {
     .theme-dark .kuiTextInput:focus {
       outline: none;
       border-color: #6EADC1; }
+  .kuiTextInput.kuiTextInput-isInvalid:not(.ng-untouched) {
+    /* 1 */
+    border-color: #D86051; }
 
 .kuiTextInput--small {
   width: 100%;
@@ -1164,6 +1228,16 @@ body {
     margin-left: 0;
     /* 1 */ }
 
+.kuiInfoButton {
+  font-size: 16px;
+  background-color: transparent;
+  color: #3CAED2;
+  cursor: pointer;
+  border: none;
+  padding: 0; }
+  .kuiInfoButton:hover, .kuiInfoButton:active {
+    color: #105A73; }
+
 /**
  * 1. Copied from FontAwesome's .fa class. We use a custom class to make it easier to migrate away
  *    from FontAwesome someday. When we do migrate away, we can just update this definition.
@@ -1281,12 +1355,6 @@ body {
     .theme-dark .kuiLink:hover {
       color: #b7e2ea; }
 
-.kuiLoadingItems {
-  padding: 30px;
-  font-size: 18px;
-  color: #9fa3a7;
-  line-height: 1.5; }
-
 /**
  * 1. Breadcrumbs are placed in the top-left corner and need to be bumped over
  *    a bit.
@@ -1300,22 +1368,25 @@ body {
   -webkit-align-items: center;
       -ms-flex-align: center;
           align-items: center;
-  height: 100%;
   padding-left: 10px;
   /* 1 */ }
 
-.kuiLocalBreadcrumb + .kuiLocalBreadcrumb {
-  margin-left: 6px; }
-  .kuiLocalBreadcrumb + .kuiLocalBreadcrumb:before {
-    content: '/';
-    -webkit-user-select: none;
-       -moz-user-select: none;
-        -ms-user-select: none;
-            user-select: none;
-    margin-right: 4px;
-    color: #5a5a5a; }
-    .theme-dark .kuiLocalBreadcrumb + .kuiLocalBreadcrumb:before {
-      color: #a5a5a5; }
+.kuiLocalBreadcrumb {
+  font-size: 14px;
+  margin: 0;
+  font-weight: normal; }
+  .kuiLocalBreadcrumb + .kuiLocalBreadcrumb {
+    margin-left: 6px; }
+    .kuiLocalBreadcrumb + .kuiLocalBreadcrumb:before {
+      content: '/';
+      -webkit-user-select: none;
+         -moz-user-select: none;
+          -ms-user-select: none;
+              user-select: none;
+      margin-right: 4px;
+      color: #5a5a5a; }
+      .theme-dark .kuiLocalBreadcrumb + .kuiLocalBreadcrumb:before {
+        color: #a5a5a5; }
 
 /**
  * 1. Make it a bit darker to contrast with the gray background.
@@ -1630,11 +1701,10 @@ body {
   display: -webkit-flex;
   display: -ms-flexbox;
   display: flex;
-  -webkit-box-align: center;
-  -webkit-align-items: center;
-      -ms-flex-align: center;
-          align-items: center;
-  height: 100%; }
+  -webkit-box-align: stretch;
+  -webkit-align-items: stretch;
+      -ms-flex-align: stretch;
+          align-items: stretch; }
 
 .kuiLocalMenuItem {
   display: -webkit-box;
@@ -1705,23 +1775,34 @@ body {
     color: #cecece;
     background-color: #333333; }
 
+/**
+ * 1. Allow row to expand if the content is so long that it wraps.
+ */
 .kuiLocalNavRow {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
   display: flex;
-  -webkit-box-align: center;
-  -webkit-align-items: center;
-      -ms-flex-align: center;
-          align-items: center;
+  -webkit-box-align: stretch;
+  -webkit-align-items: stretch;
+      -ms-flex-align: stretch;
+          align-items: stretch;
   -webkit-box-pack: justify;
   -webkit-justify-content: space-between;
       -ms-flex-pack: justify;
           justify-content: space-between;
-  height: 32px; }
+  min-height: 32px;
+  /* 1 */ }
 
 .kuiLocalNavRow__section {
-  height: 100%; }
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-align: stretch;
+  -webkit-align-items: stretch;
+      -ms-flex-align: stretch;
+          align-items: stretch; }
 
 /**
  * 1. We make this row flex-start because it usually contains a search input, which may expand
@@ -1762,11 +1843,6 @@ body {
   border: 1px solid #DEDEDE;
   border-radius: 4px;
   transition: border-color 0.1s linear;
-  /**
-   * 1. Angular will add an ng-untouched class to an input if it hasn't been touched yet.
-   *    We only want invalid inputs to appear invalid after the user has had a chance to interact
-   *    with it.
-   */
   -webkit-box-flex: 1;
   -webkit-flex: 1 1 100%;
       -ms-flex: 1 1 100%;
@@ -1844,11 +1920,6 @@ body {
   border: 1px solid #DEDEDE;
   border-radius: 4px;
   transition: border-color 0.1s linear;
-  /**
-   * 1. Angular will add an ng-untouched class to an input if it hasn't been touched yet.
-   *    We only want invalid inputs to appear invalid after the user has had a chance to interact
-   *    with it.
-   */
   padding-right: 30px;
   /* 2 */
   background-image: url('data:image/svg+xml;utf8,<svg width="1792" height="1792" viewBox="0 0 1792 1792" xmlns="http://www.w3.org/2000/svg"><path d="M1408 704q0 26-19 45l-448 448q-19 19-45 19t-45-19l-448-448q-19-19-19-45t19-45 45-19h896q26 0 45 19t19 45z"/></svg>');
@@ -1979,12 +2050,24 @@ body {
   font-size: 14px;
   font-weight: bold; }
 
+/**
+ * 1. Allow this class to be applied to `ul` and `ol` elements
+ */
+.kuiMenu {
+  padding-left: 0;
+  /* 1 */ }
+
 .kuiMenu--contained {
   border: 1px solid #E4E4E4; }
   .kuiMenu--contained .kuiMenuItem {
     padding: 6px 10px; }
 
+/**
+ * 1. Allow this class to be applied to `li` elements
+ */
 .kuiMenuItem {
+  list-style: none;
+  /* 1 */
   padding: 6px 0; }
   .kuiMenuItem + .kuiMenuItem {
     border-top: 1px solid #E4E4E4; }
@@ -2213,17 +2296,34 @@ body {
   .kuiModalFooter > * + * {
     margin-left: 5px; }
 
-.kuiNoItems {
-  padding: 30px;
-  font-size: 18px;
-  color: #9fa3a7;
-  line-height: 1.5; }
-
 .kuiNotice {
   padding: 40px 60px 48px;
   margin: 20px;
   background-color: #FFF;
   line-height: 1.5; }
+
+/**
+ * 1. Put 10px of space between each child.
+ */
+.kuiPager {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-align: center;
+  -webkit-align-items: center;
+      -ms-flex-align: center;
+          align-items: center; }
+  .kuiPager > * + * {
+    margin-left: 10px;
+    /* 1 */ }
+
+.kuiPagerText {
+  font-size: 14px;
+  line-height: 1.5;
+  color: #5A5A5A;
+  white-space: nowrap;
+  /* 1 */ }
 
 .kuiPanel {
   border: 2px solid #E4E4E4; }
@@ -2472,6 +2572,9 @@ body {
   line-height: 1.5;
   color: #a7a7a7; }
 
+.kuiTableHeaderCell__liner {
+  display: inline-block; }
+
 /**
  * 1. Prevent rapid clicking from selecting text.
  */
@@ -2559,6 +2662,12 @@ body {
     overflow: visible;
     /* 3 */ }
 
+.kuiTableInfo {
+  padding: 30px;
+  font-size: 18px;
+  color: #9fa3a7;
+  line-height: 1.5; }
+
 .kuiTabs {
   display: -webkit-box;
   display: -webkit-flex;
@@ -2633,7 +2742,9 @@ body {
   /* 1 */
   line-height: inherit;
   /* 1 */
-  color: #3CAED2; }
+  color: #191E23; }
+  .kuiToggleButton:focus {
+    color: #191E23; }
   .kuiToggleButton:active {
     color: #3CAED2 !important;
     /* 2 */ }
@@ -2649,6 +2760,19 @@ body {
 .kuiToggleButton__icon {
   width: 0.8em;
   /* 1 */ }
+
+.kuiTogglePanelHeader {
+  padding-bottom: 4px;
+  margin-bottom: 15px;
+  border-bottom: 1px solid #E4E4E4;
+  /**
+   * 1. Allow the user to click anywhere on the header, not just on the button text.
+   */ }
+  .kuiTogglePanelHeader .kuiToggleButton {
+    width: 100%;
+    /* 1 */
+    text-align: left;
+    /* 1 */ }
 
 .kuiToolBar {
   display: -webkit-box;

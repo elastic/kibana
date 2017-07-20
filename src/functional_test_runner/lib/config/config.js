@@ -6,8 +6,25 @@ import { schema } from './schema';
 const $values = Symbol('values');
 
 export class Config {
-  constructor(settings) {
-    const { error, value } = schema.validate(settings);
+  constructor(options = {}) {
+    const {
+      settings = {},
+      primary = false,
+      path,
+    } = options;
+
+    if (!path) {
+      throw new TypeError('path is a required option');
+    }
+
+    const { error, value } = schema.validate(settings, {
+      abortEarly: false,
+      context: {
+        primary: !!primary,
+        path,
+      }
+    });
+
     if (error) throw error;
     this[$values] = value;
   }

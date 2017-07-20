@@ -27,8 +27,8 @@ encompasses the entire pie:
 
 image::images/tutorial-visualize-pie-1.png[]
 
-To specify what slices to display in the chart, you use an Elasticsearch 
-{es-ref}search-aggregations.html[bucket aggregation]. A bucket aggregation
+To specify what slices to display in the chart, you use an Elasticsearch
+{ref}/search-aggregations.html[bucket aggregation]. A bucket aggregation
 simply sorts the documents that match your search criteria into different
 categories, aka _buckets_. For example, the account data includes the balance
 of each account. Using a bucket aggregation, you can establish multiple ranges
@@ -40,7 +40,7 @@ To define a bucket for each range:
 . Select *Range* from the *Aggregation* list.
 . Select the *balance* field from the *Field* list.
 . Click *Add Range* four times to bring the
-total number of ranges to six. 
+total number of ranges to six.
 . Define the following ranges:
 +
 [source,text]
@@ -63,10 +63,10 @@ age. By adding another bucket aggregation, you can see the ages of the account
 holders in each balance range:
 
 . Click *Add sub-buckets* below the buckets list.
-. Click *Split Slices* in the buckets type list. 
+. Click *Split Slices* in the buckets type list.
 . Select *Terms* from the aggregation list.
 . Select *age* from the field list.
-. Click  *Apply changes* image:images/apply-changes-button.png[]. 
+. Click  *Apply changes* image:images/apply-changes-button.png[].
 
 Now you can see the break down of the account holders' ages displayed
 in a ring around the balance ranges.
@@ -79,7 +79,7 @@ Next, we're going to look at data in the Shakespeare data set. Let's find out ho
 plays compare when it comes to the number of speaking parts and display the information
 in a bar chart:
 
-. Click *New* and select *Vertical bar chart*. 
+. Click *New* and select *Vertical bar chart*.
 . Select the `shakes*` index pattern. Since you haven't defined any buckets yet,
 you'll see a single big bar that shows the total count of documents that match
 the default wildcard query.
@@ -87,13 +87,13 @@ the default wildcard query.
 image::images/tutorial-visualize-bar-1.png[]
 
 . To show the number of speaking parts per play along the y-axis, you need to
-configure the Y-axis {es-ref}search-aggregations.html[metric aggregation]. A metric
+configure the Y-axis {ref}/search-aggregations.html[metric aggregation]. A metric
 aggregation computes metrics based on values extracted from the search results.
 To get the number of speaking parts per play, select the *Unique Count*
 aggregation and choose *speaker* from the field list. You can also give the
 axis a custom label, _Speaking Parts_.
 
-. To show the different plays long the x-axis, select the X-Axis buckets type, 
+. To show the different plays long the x-axis, select the X-Axis buckets type,
 select *Terms* from the aggregation list, and choose *play_name* from the field
 list. To list them alphabetically, select *Ascending* order. You can also give
 the axis a custom label, _Play Name_.
@@ -111,7 +111,7 @@ Hovering over each bar shows you the number of speaking parts for each play as a
 off and configure other options for your visualizations, select the Visualization builder's *Options* tab.
 
 Now that you have a list of the smallest casts for Shakespeare plays, you might also be curious to see which of these
-plays makes the greatest demands on an individual actor by showing the maximum number of speeches for a given part. 
+plays makes the greatest demands on an individual actor by showing the maximum number of speeches for a given part.
 
 . Click *Add metrics* to add a Y-axis aggregation.
 . Choose the *Max* aggregation and select the *speech_number* field.
@@ -129,11 +129,11 @@ make the differences stand out, starting the Y-axis at a value closer to the min
 
 Save this chart with the name _Bar Example_.
 
-Next, we're going to use a tile map chart to visualize geographic information in our log file sample data. 
+Next, we're going to use a coordinate map chart to visualize geographic information in our log file sample data.
 
 . Click *New*.
-. Select  *Tile map*. 
-. Select the `logstash-*` index pattern. 
+. Select  *Coordinate map*.
+. Select the `logstash-*` index pattern.
 . Set the time window for the events we're exploring:
 . Click the time picker in the Kibana toolbar.
 . Click *Absolute*.
@@ -141,8 +141,8 @@ Next, we're going to use a tile map chart to visualize geographic information in
 +
 image::images/tutorial-timepicker.png[]
 
-. Once you've got the time range set up, click the *Go* button and close the time picker by 
-clicking the small up arrow in the bottom right corner. 
+. Once you've got the time range set up, click the *Go* button and close the time picker by
+clicking the small up arrow in the bottom right corner.
 
 You'll see a map of the world, since we haven't defined any buckets yet:
 
@@ -154,14 +154,14 @@ Your chart should now look like this:
 
 image::images/tutorial-visualize-map-2.png[]
 
-You can navigate the map by clicking and dragging, zoom with the 
-image:images/viz-zoom.png[] buttons, or hit the *Fit Data Bounds* 
+You can navigate the map by clicking and dragging, zoom with the
+image:images/viz-zoom.png[] buttons, or hit the *Fit Data Bounds*
 image:images/viz-fit-bounds.png[] button to zoom to the lowest level that
 includes all the points. You can also include or exclude a rectangular area
 by clicking the *Latitude/Longitude Filter* image:images/viz-lat-long-filter.png[]
 button and drawing a bounding box on the map. Applied filters are displayed
 below the query bar. Hovering over a filter displays controls to toggle,
-pin, invert, or delete the filter. 
+pin, invert, or delete the filter.
 
 image::images/tutorial-visualize-map-3.png[]
 

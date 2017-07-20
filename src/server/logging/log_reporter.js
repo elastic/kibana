@@ -32,6 +32,9 @@ module.exports = class KbnLogger {
 
     emitter.on('stop', () => {
       this.output.unpipe(this.dest);
+      if (this.dest !== process.stdout) {
+        this.dest.end();
+      }
     });
 
     callback();

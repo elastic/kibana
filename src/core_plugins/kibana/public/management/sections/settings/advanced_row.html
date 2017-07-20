@@ -87,6 +87,7 @@
           ng-model="conf.unsavedValue"
           type="checkbox"
           class="kuiCheckBox"
+          data-test-subj="advancedSetting-{{conf.name}}-checkbox"
         >
 
         <select
@@ -121,7 +122,7 @@
   </td>
 
   <!-- Actions -->
-  <td class="kuiTableRowCell">
+  <td class="kuiTableRowCell advancedSettingsTableRowActionsCell">
     <div class="kuiTableRowCell__liner">
       <div class="kuiMenuButtonGroup kuiMenuButtonGroup--alignRight">
         <!-- Edit -->

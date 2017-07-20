@@ -10,7 +10,7 @@ uiModules
 .get('kibana')
 .directive('kbnAggTable', function ($filter, config, Private, compileRecursiveDirective) {
   const fieldFormats = Private(RegistryFieldFormatsProvider);
-  const numberFormatter = fieldFormats.getDefaultInstance('number').getConverterFor('html');
+  const numberFormatter = fieldFormats.getDefaultInstance('number').getConverterFor('text');
 
   return {
     restrict: 'E',
@@ -130,7 +130,7 @@ uiModules
                 return prev + curr[i].value;
               }, 0);
             }
-            const formatter = agg.fieldFormatter('html');
+            const formatter = agg.fieldFormatter('text');
 
             switch ($scope.totalFunc) {
               case 'sum':
