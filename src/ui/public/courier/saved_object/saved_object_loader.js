@@ -4,15 +4,14 @@ import { StringUtils } from 'ui/utils/string_utils';
 import { SavedObjectsClient } from 'ui/saved_objects';
 
 export class SavedObjectLoader {
-  constructor(SavedObjectClass, kbnIndex, esAdmin, kbnUrl, $http) {
+  constructor(SavedObjectClass, kbnIndex, kbnUrl, $http) {
     this.type = SavedObjectClass.type;
     this.Class = SavedObjectClass;
     this.lowercaseType = this.type.toLowerCase();
     this.kbnIndex = kbnIndex;
     this.kbnUrl = kbnUrl;
-    this.esAdmin = esAdmin;
 
-    this.scanner = new Scanner(esAdmin, {
+    this.scanner = new Scanner($http, {
       index: kbnIndex,
       type: this.lowercaseType
     });
