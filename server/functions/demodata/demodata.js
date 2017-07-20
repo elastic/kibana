@@ -1,6 +1,7 @@
 const Fn = require('../../../common/functions/fn.js');
 const rows = require('./mock.json');
 const _ = require('lodash');
+const moment = require('moment');
 
 module.exports = new Fn({
   name: 'demodata',
@@ -27,6 +28,7 @@ module.exports = new Fn({
       ],
       rows: _.map(_.cloneDeep(rows), (row, i) => _.assign(row, {
         _rowId: i,
+        time: moment(moment(row.time).format('YYYY-MM-DD'), 'YYYY-MM-DD').format(),
       })),
     };
   },
