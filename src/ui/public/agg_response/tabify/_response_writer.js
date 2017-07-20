@@ -76,7 +76,8 @@ export function TabbedAggResponseWriterProvider(Private) {
       table.aggConfig = agg;
       table.key = key;
       table.title = (table.fieldFormatter()(key));
-      if (agg.makeLabel() !== 'filters') {
+      // aggs that don't implement makeLabel should not add to title
+      if (agg.makeLabel() !== agg.name) {
         table.title += ': ' + agg.makeLabel();
       }
     }
