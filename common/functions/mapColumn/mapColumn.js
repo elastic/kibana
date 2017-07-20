@@ -22,7 +22,9 @@ module.exports = new Fn({
     },
   },
   fn: (context, args) => {
+    console.log(args.dest);
     if (args.dest) {
+      context.columns.push({ name: args.dest, type: 'string' });
       context.columns[args.dest] = { type: 'string' };
     } else {
       args.dest = args.column;
@@ -34,6 +36,7 @@ module.exports = new Fn({
           return Object.assign({}, row, { [args.dest]: val });
         });
     });
+
 
     return Promise.all(rowPromises).then(rows => Object.assign({}, context, { rows: rows }));
   },
