@@ -61,9 +61,9 @@ export default function ({ getService, getPageObjects }) {
         });
       });
 
-      it('search _type:apache should show the correct hit count', function () {
+      it('search type:apache should show the correct hit count', function () {
         const expectedHitCount = '11,156';
-        return PageObjects.discover.query('_type:apache')
+        return PageObjects.discover.query('type:apache')
         .then(function () {
           return retry.try(function tryingForTime() {
             return PageObjects.discover.getHitCount()
@@ -85,7 +85,7 @@ export default function ({ getService, getPageObjects }) {
       it('doc view should show oldest time first', function () {
         // Note: Could just check the timestamp, but might as well check that the whole doc is as expected.
         const ExpectedDoc =
-          'September 22nd 2015, 23:50:13.253\nindex:logstash-2015.09.22 @timestamp:September 22nd 2015, 23:50:13.253'
+          'September 22nd 2015, 23:50:13.253\ntype:apache index:logstash-2015.09.22 @timestamp:September 22nd 2015, 23:50:13.253'
           + ' ip:238.171.34.42 extension:jpg response:200 geo.coordinates:{ "lat": 38.66494528, "lon": -88.45299556'
           + ' } geo.src:FR geo.dest:KH geo.srcdest:FR:KH @tags:success, info utc_time:September 22nd 2015,'
           + ' 23:50:13.253 referer:http://twitter.com/success/nancy-currie agent:Mozilla/4.0 (compatible; MSIE 6.0;'
@@ -124,7 +124,7 @@ export default function ({ getService, getPageObjects }) {
           + ' Here&rsquo;s...", "twitter:card": "summary", "twitter:image": "'
           + 'http://IMAGES1.laweekly.com/imager/the-rapture-at-the-mayan-7-25/u/original/2463272/rapturetn05.jpg",'
           + ' "twitter:site": "@laweekly" } machine.os:win 7 machine.ram:7,516,192,768 _id:AU_x3_g4GFA8no6QjkYX'
-          + ' _type:apache _index:logstash-2015.09.22 _score: - relatedContent.article:modified_time:November 27th'
+          + ' _type:doc _index:logstash-2015.09.22 _score: - relatedContent.article:modified_time:November 27th'
           + ' 2014, 16:00:51.000, November 27th 2014, 16:28:42.000 relatedContent.article:published_time:July 26th'
           + ' 2007, 19:42:30.000, December 13th 2007, 20:19:35.000';
         return PageObjects.discover.getDocTableIndex(1)
@@ -136,7 +136,7 @@ export default function ({ getService, getPageObjects }) {
       it('doc view should sort ascending', function () {
         // Note: Could just check the timestamp, but might as well check that the whole doc is as expected.
         const ExpectedDoc =
-          'September 20th 2015, 00:00:00.000\nindex:logstash-2015.09.20 @timestamp:September 20th 2015, 00:00:00.000'
+          'September 20th 2015, 00:00:00.000\ntype:apache index:logstash-2015.09.20 @timestamp:September 20th 2015, 00:00:00.000'
           + ' ip:143.84.142.7 extension:jpg response:200 geo.coordinates:{ "lat": 38.68407028, "lon": -120.9871642 }'
           + ' geo.src:ES geo.dest:US geo.srcdest:ES:US @tags:error, info utc_time:September 20th 2015, 00:00:00.000'
           + ' referer:http://www.slate.com/success/vladimir-kovalyonok agent:Mozilla/4.0 (compatible; MSIE 6.0;'
@@ -201,7 +201,7 @@ export default function ({ getService, getPageObjects }) {
           + ' "Arts", "og:site_name": "LA Weekly", "twitter:title": "Shopping Daze", "twitter:description": "LA'
           + ' Weekly is the definitive source of information for news, music, movies, restaurants, reviews, and'
           + ' events in Los Angeles.", "twitter:card": "summary", "twitter:site": "@laweekly" } machine.os:osx'
-          + ' machine.ram:15,032,385,536 _id:AU_x3_g3GFA8no6QjkFm _type:apache _index:logstash-2015.09.20 _score: -'
+          + ' machine.ram:15,032,385,536 _id:AU_x3_g3GFA8no6QjkFm _type:doc _index:logstash-2015.09.20 _score: -'
           + ' relatedContent.article:modified_time:October 28th 2014, 22:00:08.000, November 26th 2014,'
           + ' 01:05:47.000, November 26th 2014, 03:52:35.000, November 26th 2014, 04:15:21.000, November 27th 2014,'
           + ' 16:01:03.000 relatedContent.article:published_time:October 21st 2005, 01:10:25.000, March 5th 2006,'
