@@ -252,6 +252,10 @@ describe('kibana cli', function () {
         });
       });
 
+      after(function () {
+        nock.cleanAll();
+      });
+
     });
 
     describe('proxy support', function () {
