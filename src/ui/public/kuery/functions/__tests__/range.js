@@ -32,7 +32,7 @@ describe('kuery functions', function () {
       });
 
       it('arguments should contain the provided params as named arguments', function () {
-        const givenParams = { gt: 1000, lt: 8000 };
+        const givenParams = { gt: 1000, lt: 8000, format: 'epoch_millis' };
         const result = range.buildNodeParams('bytes', givenParams);
         const { arguments: [ , ...params ] } = result;
 
@@ -41,7 +41,7 @@ describe('kuery functions', function () {
 
         params.map((param) => {
           expect(param).to.have.property('type', 'namedArg');
-          expect(['gt', 'lt'].includes(param.name)).to.be(true);
+          expect(['gt', 'lt', 'format'].includes(param.name)).to.be(true);
           expect(param.value.type).to.be('literal');
           expect(param.value.value).to.be(givenParams[param.name]);
         });

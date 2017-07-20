@@ -4,11 +4,10 @@ import * as ast from '../ast';
 import { getRangeScript } from 'ui/filter_manager/lib/range';
 
 export function buildNodeParams(fieldName, params, serializeStyle = 'operator') {
-  params = _.pick(params, 'gt', 'lt', 'gte', 'lte');
+  params = _.pick(params, 'gt', 'lt', 'gte', 'lte', 'format');
   const fieldNameArg = nodeTypes.literal.buildNode(fieldName);
-  const args = _.pairs(params).map((argument) => {
-    const [ name, value ] = argument;
-    return nodeTypes.namedArg.buildNode(name, value);
+  const args = _.map(params, (value, key) => {
+    return nodeTypes.namedArg.buildNode(key, value);
   });
 
   // we only support inclusive ranges in the operator syntax currently
@@ -64,7 +63,7 @@ function extractArguments(args) {
     throw new Error('range ends cannot be both inclusive and exclusive');
   }
 
-  const unnamedArgOrder = ['gte', 'lte'];
+  const unnamedArgOrder = ['gte', 'lte', 'format'];
 
   return args.reduce((acc, arg, index) => {
     if (arg.type === 'namedArg') {
