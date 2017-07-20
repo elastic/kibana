@@ -60,7 +60,7 @@ AndQuery
   = left:NegatedClause space 'and'i space right:AndQuery {
     return addMeta(nodeTypes.function.buildNode('and', [left, right], 'operator'), text(), location());
   }
-  / left:NegatedClause space !'or' right:AndQuery {
+  / left:NegatedClause space !'or'i right:AndQuery {
     return addMeta(nodeTypes.function.buildNode('and', [left, right], 'implicit'), text(), location());
   }
   / NegatedClause
@@ -117,7 +117,7 @@ literal_arg_type
  }
 
 Keywords
-  = 'and' / 'or'
+  = 'and'i / 'or'i
 
  /* ----- Core types ----- */
 
