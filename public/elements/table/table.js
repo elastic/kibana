@@ -11,7 +11,6 @@ module.exports = new Element('table', {
   image: header,
   expression: 'demodata().render()',
   render(domNode, config, done) {
-    console.log(config.type);
 
     const table = (
       <div style={{ height: '100%', overflow: 'auto' }}>

@@ -22,7 +22,6 @@ module.exports = new Fn({
     },
   },
   fn: (context, args) => {
-    console.log(args.dest);
     if (args.dest) {
       context.columns.push({ name: args.dest, type: 'string' });
       context.columns[args.dest] = { type: 'string' };
