@@ -45,12 +45,13 @@ export const Toolbar = ({ editing, tray, setTray, addElement, addPage, previousP
         <NavbarButton onClick={ addPage }><i className="fa fa-plus-square" /> Add a page</NavbarButton>
 
         { !elementIsSelected ? null : (
-          <NavbarButton onClick={() => showHideTray('expression')}><i className="fa fa-terminal" /> Code</NavbarButton>
+            <NavbarButton onClick={() => showHideTray('datasource')}><i className="fa fa-database" /> Datasource</NavbarButton>
         ) }
 
         { !elementIsSelected ? null : (
-            <NavbarButton onClick={() => showHideTray('datasource')}><i className="fa fa-database" /> Datasource</NavbarButton>
+          <NavbarButton onClick={() => showHideTray('expression')}><i className="fa fa-terminal" /> Code</NavbarButton>
         ) }
+
       </Navbar>
     </div>
   );
