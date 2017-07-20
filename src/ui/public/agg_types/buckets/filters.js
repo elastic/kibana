@@ -36,7 +36,8 @@ export function AggTypesBucketsFiltersProvider(Private, Notifier) {
 
             decorateQuery(query);
 
-            const label = filter.label || _.get(query, 'query_string.query') || angular.toJson(query);
+            const matchAllLabel = (filter.input.query === '' && _.has(query, 'match_all')) ? '*' : '';
+            const label = filter.label || matchAllLabel || _.get(query, 'query_string.query') || angular.toJson(query);
             filters[label] = input;
           }, {});
 
