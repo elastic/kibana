@@ -13,8 +13,8 @@ savedObjectManagementRegistry.register({
 });
 
 // This is the only thing that gets injected into controllers
-module.service('savedSheets', function (Promise, SavedSheet, kbnIndex, esAdmin, kbnUrl, $http) {
-  const savedSheetLoader = new SavedObjectLoader(SavedSheet, kbnIndex, esAdmin, kbnUrl, $http);
+module.service('savedSheets', function (Promise, SavedSheet, kbnIndex, kbnUrl, $http) {
+  const savedSheetLoader = new SavedObjectLoader(SavedSheet, kbnIndex, kbnUrl, $http);
   savedSheetLoader.urlFor = function (id) {
     return kbnUrl.eval('#/{{id}}', { id: id });
   };
