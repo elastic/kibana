@@ -93,7 +93,7 @@ export class SavedObjectLoader {
     return this.savedObjectsClient.find(
       {
         type: this.lowercaseType,
-        search: `${search}*`,
+        search: search ? `${search}*` : undefined,
         perPage: size,
         page: 1,
         searchFields: ['title^3', 'description']

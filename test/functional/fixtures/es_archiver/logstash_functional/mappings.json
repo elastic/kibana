@@ -18,7 +18,7 @@
       }
     },
     "mappings": {
-      "docs": {
+      "doc": {
         "dynamic_templates": [
           {
             "string_fields": {
@@ -36,6 +36,9 @@
           }
         ],
         "properties": {
+          "type": {
+            "type": "keyword"
+          },
           "@message": {
             "type": "text",
             "fields": {
@@ -382,7 +385,7 @@
       }
     },
     "mappings": {
-      "docs": {
+      "doc": {
         "dynamic_templates": [
           {
             "string_fields": {
@@ -400,6 +403,9 @@
           }
         ],
         "properties": {
+          "type": {
+            "type": "keyword"
+          },
           "@message": {
             "type": "text",
             "fields": {
@@ -746,7 +752,7 @@
       }
     },
     "mappings": {
-      "docs": {
+      "doc": {
         "dynamic_templates": [
           {
             "string_fields": {
@@ -764,6 +770,9 @@
           }
         ],
         "properties": {
+          "type": {
+            "type": "keyword"
+          },
           "@message": {
             "type": "text",
             "fields": {
