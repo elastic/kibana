@@ -271,7 +271,7 @@ describe('kibana cli', function () {
         // care about the download promise being resolved.
         res.writeHead(200);
         res.end();
-      }).listen(proxyPort);
+      });
 
       function expectProxyHit() {
         expect(proxyHit).to.be(true);
@@ -286,6 +286,10 @@ describe('kibana cli', function () {
           .get('/plugin.zip')
           .replyWithFile(200, join(__dirname, 'replies/test_plugin.zip'));
       }
+
+      before(function (done) {
+        proxy.listen(proxyPort, done);
+      });
 
       beforeEach(function () {
         proxyHit = false;
@@ -368,8 +372,8 @@ describe('kibana cli', function () {
           .then(expectNoProxyHit);
       });
 
-      after(function () {
-        proxy.close();
+      after(function (done) {
+        proxy.close(done);
       });
 
     });
