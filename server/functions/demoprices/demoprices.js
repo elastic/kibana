@@ -1,6 +1,8 @@
 const moment = require('moment');
 const Fn = require('../../../common/functions/fn.js');
 const rows = require('./mock.json');
+import { queryDatatable } from '../../../common/lib/datatable/query';
+
 
 function mapRecord(row, i, adjustedTime) {
   return Object.assign({}, row, { _rowId: i, time: adjustedTime || row.time });
@@ -12,7 +14,7 @@ module.exports = new Fn({
   type: 'datatable',
   help: 'Product pricing data in a variety of intervals',
   context: {
-    types: ['filter'],
+    types: ['query'],
   },
   args: {
     bucket: {
@@ -63,7 +65,7 @@ module.exports = new Fn({
 
     const bucketedRows = getRows(args.bucket);
 
-    return {
+    return queryDatatable({
       type: 'datatable',
       columns: [
         { name: '_rowId', type: 'number' },
@@ -72,6 +74,7 @@ module.exports = new Fn({
         { name: 'time', type: 'date' },
       ],
       rows: bucketedRows,
-    };
+    }, context);
+
   },
 });

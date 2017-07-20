@@ -1,14 +1,15 @@
 const Type = require('../type');
 
 module.exports = new Type({
-  name: 'filter',
+  name: 'query',
   from: {
     null: () => {
       return {
-        type: 'filter',
+        type: 'query',
+        meta: null,
         size: null,
         sort: null,
-        filter: null,
+        and: [],
       };
     },
   },

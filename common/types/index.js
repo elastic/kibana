@@ -5,5 +5,5 @@ export const typeSpecs = [
   require('./string'),
   require('./dataurl'),
   require('./image'),
-  require('./filter'),
+  require('./query'),
 ];

@@ -14,4 +14,5 @@ export const commonFunctions = [
   require('./image/image'),
   require('./rounddate/rounddate'),
   require('./grid/grid'),
+  require('./size/size'),
 ];

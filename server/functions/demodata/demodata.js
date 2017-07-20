@@ -2,6 +2,7 @@ const Fn = require('../../../common/functions/fn.js');
 const rows = require('./mock.json');
 const _ = require('lodash');
 const moment = require('moment');
+import { queryDatatable } from '../../../common/lib/datatable/query';
 
 module.exports = new Fn({
   name: 'demodata',
@@ -9,11 +10,11 @@ module.exports = new Fn({
   type: 'datatable',
   help: 'Project CI times with usernames and country',
   context: {
-    types: ['filter'],
+    types: ['query'],
   },
   args: {},
-  fn: () => {
-    return {
+  fn: (context) => {
+    return queryDatatable({
       type: 'datatable',
       columns: [
         { name: '_rowId', type: 'number' },
@@ -30,6 +31,6 @@ module.exports = new Fn({
         _rowId: i,
         time: moment(moment(row.time).format('YYYY-MM-DD'), 'YYYY-MM-DD').format(),
       })),
-    };
+    }, context);
   },
 });
