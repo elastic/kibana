@@ -5,6 +5,7 @@ import { notify } from '../../lib/notify';
 import { getSelectedElement, getElementById, getPages } from '../selectors/workpad';
 import { getDefaultElement } from '../defaults';
 import { interpretAst } from '../../lib/interpreter';
+import { createThunk } from '../../lib/create_thunk';
 import { getType } from '../../../common/types/get_type';
 import { fromExpression, toExpression } from '../../../common/lib/ast';
 import * as args from './resolved_args';
@@ -21,7 +22,7 @@ function astToExpression({ ast, element, pageId }) {
 export const removeElement = createAction('removeElement', (elementId, pageId) => ({ pageId, elementId }));
 export const setPosition = createAction('setPosition', (elementId, pageId, position) => ({ pageId, elementId, position }));
 
-export const fetchContext = ({ index }) => (dispatch, getState) => {
+export const fetchContext = createThunk('fetchContext', ({ dispatch, getState }, { index }) => {
   const element = getSelectedElement(getState());
   const chain = get(element, ['ast', 'chain']);
   const invalidIndex = (chain) ? index >= chain.length : true;
@@ -48,10 +49,9 @@ export const fetchContext = ({ index }) => (dispatch, getState) => {
       value,
     }));
   });
-};
-fetchContext.toString = () => 'fetchContext'; // createAction name proxy
+});
 
-export const fetchRenderable = (elementId, pageId) => (dispatch, getState) => {
+export const fetchRenderable = createThunk('fetchRenderable', ({ dispatch, getState }, elementId, pageId) => {
   const element = getElementById(getState(), elementId, pageId);
   const argumentPath = [element.id, 'expressionRenderable'];
   const { ast } = element;
@@ -87,56 +87,56 @@ export const fetchRenderable = (elementId, pageId) => (dispatch, getState) => {
       value: err,
     }));
   });
-};
+});
 
-export const fetchAllRenderables = () => (dispatch, getState) => {
+export const fetchAllRenderables = createThunk('fetchAllRenderables', ({ dispatch, getState }) => {
   const pages = getPages(getState());
   pages.forEach(page => {
     page.elements.forEach(element => {
       dispatch(fetchRenderable(element.id, page.id));
     });
   });
-};
+});
 
-export const setExpression = payload => (dispatch) => {
+export const setExpression = createThunk('setExpression', ({ dispatch }, payload) => {
   const _setExpression = createAction('setExpression');
   dispatch(_setExpression(payload));
   dispatch(fetchRenderable(payload.element.id, payload.pageId));
-};
-setExpression.toString = () => 'setExpression';
+});
 
-export const setAst = payload => (dispatch) => {
+export const setAst = createThunk('setAst', ({ dispatch }, payload) => {
   dispatch(setExpression(astToExpression(payload)));
-};
+});
 
 // index here is the top-level argument in the expression. for example in the expression
 // demodata().pointseries().plot(), demodata is 0, pointseries is 1, and plot is 2
-export const setAstAtIndex = ({ index, ast, element, pageId }) => (dispatch) => {
+export const setAstAtIndex = createThunk('setAstAtIndex', ({ dispatch }, { index, ast, element, pageId }) => {
   const newElement = set(element, ['ast', 'chain', index], ast);
   dispatch(setExpression(astToExpression({ ast: get(newElement, 'ast'), element, pageId })));
-};
+});
 
 // index here is the top-level argument in the expression. for example in the expression
 // demodata().pointseries().plot(), demodata is 0, pointseries is 1, and plot is 2
-export const setArgumentAtIndex = ({ index, arg, element, pageId }) => (dispatch) => {
+export const setArgumentAtIndex = createThunk('setArgumentAtIndex', ({ dispatch }, args) => {
+  const { index, arg, element, pageId } = args;
   const newElement = assign(element, ['ast', 'chain', index, 'arguments'], arg);
   dispatch(setExpression(astToExpression({ ast: get(newElement, 'ast'), element, pageId })));
-};
+});
 
 // index here is the top-level argument in the expression. for example in the expression
 // demodata().pointseries().plot(), demodata is 0, pointseries is 1, and plot is 2
-export const deleteArgumentAtIndex = ({ index, argName, element, pageId }) => (dispatch) => {
+export const deleteArgumentAtIndex = createThunk('deleteArgumentAtIndex', ({ dispatch }, args) => {
+  const { index, argName, element, pageId } = args;
   const newElement = del(element, ['ast', 'chain', index, 'arguments', argName]);
   dispatch(setExpression(astToExpression({ ast: get(newElement, 'ast'), element, pageId })));
-};
+});
 
 /*
   payload: element defaults. Eg {expression: 'foo()'}
 */
-export const addElement = (element, pageId) => (dispatch) => {
+export const addElement = createThunk('addElement', ({ dispatch }, element, pageId) => {
   const newElement = Object.assign({}, getDefaultElement(), omit(element, 'id'));
   const _addElement = createAction('addElement', () => ({ pageId, element: newElement }));
   dispatch(_addElement());
   dispatch(fetchRenderable(newElement.id, pageId));
-};
-addElement.toString = () => 'addElement';
+});

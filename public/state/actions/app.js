@@ -1,4 +1,5 @@
 import { createAction } from 'redux-actions';
+import { createThunk } from '../../lib/create_thunk';
 import { fetch } from '../../../common/lib/fetch';
 
 // actions to set the application state
@@ -9,7 +10,7 @@ export const appError = createAction('appError');
 export const loadServerFunctionsStart = createAction('loadServerFunctionsStart');
 export const loadServerFunctionsComplete = createAction('loadServerFunctionsComplete');
 export const loadServerFunctionsError = createAction('loadServerFunctionsError');
-export const loadServerFunctions = (basePath) => (dispatch) => {
+export const loadServerFunctions = createThunk('loadServerFunctions', ({ dispatch }, basePath) => {
   dispatch(loadServerFunctionsStart());
 
   return fetch.get(`${basePath}/api/canvas/functions`, { params: { type: 'datatable' } })
@@ -19,5 +20,4 @@ export const loadServerFunctions = (basePath) => (dispatch) => {
     dispatch(loadServerFunctionsError(err));
     dispatch(appError(err));
   });
-};
-loadServerFunctions.toString = () => 'loadServerFunctions'; // createAction name proxy
+});
