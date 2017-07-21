@@ -516,10 +516,10 @@ data.oneFilterBucket = {
   'aggregations': {
     'agg_2': {
       'buckets': {
-        '_type:apache': {
+        'type:apache': {
           'doc_count': 4844
         },
-        '_type:nginx': {
+        'type:nginx': {
           'doc_count': 1161
         }
       }
