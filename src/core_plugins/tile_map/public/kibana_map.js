@@ -96,7 +96,6 @@ export class KibanaMap extends EventEmitter {
     this._listeners = [];
     this._showTooltip = false;
 
-
     const leafletOptions = {
       minZoom: options.minZoom,
       maxZoom: options.maxZoom,
@@ -178,8 +177,6 @@ export class KibanaMap extends EventEmitter {
     });
 
     this.resize();
-
-
   }
 
   setShowTooltip(showTooltip) {
@@ -377,6 +374,36 @@ export class KibanaMap extends EventEmitter {
     };
   }
 
+  getUntrimmedBounds() {
+    const bounds = this._leafletMap.getBounds();
+    if (!bounds) {
+      return null;
+    }
+
+    const southEast = bounds.getSouthEast();
+    const northWest = bounds.getNorthWest();
+    const southEastLng = southEast.lng;
+    const northWestLng = northWest.lng;
+    const southEastLat = southEast.lat;
+    const northWestLat = northWest.lat;
+
+    //Bounds cannot be created unless they form a box with larger than 0 dimensions
+    //Invalid areas are rejected by ES.
+    if (southEastLat === northWestLat || southEastLng === northWestLng) {
+      return;
+    }
+
+    return {
+      bottom_right: {
+        lat: southEastLat,
+        lon: southEastLng
+      },
+      top_left: {
+        lat: northWestLat,
+        lon: northWestLng
+      }
+    };
+  }
 
   setDesaturateBaseLayer(isDesaturated) {
     if (isDesaturated === this._baseLayerIsDesaturated) {
@@ -513,15 +540,18 @@ export class KibanaMap extends EventEmitter {
     return mapBounds.intersects(bucketRectBounds);
   }
 
-  fitToData() {
+  async fitToData() {
 
     if (!this._leafletMap) {
       return;
     }
 
+    const boundsArray = await Promise.all(this._layers.map(async (layer) => {
+      return await layer.getBounds();
+    }));
+
     let bounds = null;
-    this._layers.forEach(layer => {
-      const b = layer.getBounds();
+    boundsArray.forEach(async (b) => {
       if (bounds) {
         bounds.extend(b);
       } else {
@@ -582,6 +612,7 @@ export class KibanaMap extends EventEmitter {
       if (!centerFromUIState || centerFromMap.lon !== centerFromUIState[1] || centerFromMap.lat !== centerFromUIState[0]) {
         visualization.uiStateVal('mapCenter', [centerFromMap.lat, centerFromMap.lon]);
       }
+      uiState.set('mapBounds', this.getUntrimmedBounds());
     }
 
     this.on('dragend', persistMapStateInUiState);

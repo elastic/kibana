@@ -32,56 +32,21 @@
         </div>
 
         <!-- Allow searching if there is no linked Saved Search. -->
-        <form
-          ng-if="vis.type.requiresSearch && vis.type.options.showQueryBar && !state.linked"
-          name="queryInput"
-          ng-submit="fetch()"
-          class="fullWidth"
-        >
-          <div class="typeahead" kbn-typeahead="visualize" on-select="fetch()">
-            <div class="kuiLocalSearch">
-              <div class="kuiLocalSearchAssistedInput">
-                <input
-                  ng-model="state.query"
-                  parse-query
-                  input-focus
-                  kbn-typeahead-input
-                  placeholder="Search... (e.g. status:200 AND extension:PHP)"
-                  type="text"
-                  class="kuiLocalSearchInput kuiLocalSearchInput--lucene"
-                  ng-class="{'kuiLocalSearchInput-isInvalid': queryInput.$invalid}"
-                >
-                <div class="kuiLocalSearchAssistedInput__assistance">
-                  <p class="kuiText">
-                    <a
-                      class="kuiLink"
-                      ng-href="{{queryDocLinks.luceneQuerySyntax}}"
-                      target="_blank"
-                    >
-                      Uses lucene query syntax
-                    </a>
-                  </p>
-                </div>
-              </div>
-              <button
-                type="submit"
-                aria-label="Search"
-                class="kuiLocalSearchButton"
-                ng-disabled="queryInput.$invalid"
-              >
-                <span aria-hidden="true" class="kuiIcon fa-search"></span>
-              </button>
-            </div>
-            <kbn-typeahead-items></kbn-typeahead-items>
-          </div>
-        </form>
+        <div ng-if="vis.type.requiresSearch && !state.linked && vis.type.options.showQueryBar" class="fullWidth">
+          <query-bar
+            query="state.query"
+            app-name="'visualize'"
+            on-submit="updateQuery($query)"
+          >
+          </query-bar>
+        </div>
       </div>
     </div>
   </kbn-top-nav>
 
   <!-- Filters. -->
   <filter-bar
-    ng-if="vis.type.options.showFilterBar && !state.linked"
+    ng-if="vis.type.options.showFilterBar && state.query.language === 'lucene' && !state.linked"
     state="state"
     index-patterns="[indexPattern]"
   ></filter-bar>

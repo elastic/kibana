@@ -4,14 +4,18 @@ import $ from 'jquery';
 import _ from 'lodash';
 import { KibanaMap } from './kibana_map';
 import { GeohashLayer } from './geohash_layer';
+import { SearchSourceProvider } from 'ui/courier/data_source/search_source';
+import { VisAggConfigProvider } from 'ui/vis/agg_config';
 // import './lib/service_settings';
 import 'ui/vis/map/service_settings';
 import './styles/_tilemap.less';
 
 
-export function MapsVisualizationProvider(serviceSettings, Notifier, getAppState) {
+export function MapsVisualizationProvider(serviceSettings, Notifier, getAppState, Private) {
 
+  const AggConfig = Private(VisAggConfigProvider);
   const notify = new Notifier({ location: 'Coordinate Map' });
+  const SearchSource = Private(SearchSourceProvider);
 
   class MapsVisualization {
 
@@ -43,6 +47,7 @@ export function MapsVisualizationProvider(serviceSettings, Notifier, getAppState
         if (esResponse && typeof esResponse.geohashGridAgg === 'undefined') {
           return resolve();
         }
+
         if (status.data) {
           this._recreateGeohashLayer(esResponse);
         }
@@ -52,6 +57,7 @@ export function MapsVisualizationProvider(serviceSettings, Notifier, getAppState
         if (status.resize) {
           this._kibanaMap.resize();
         }
+
         this._doRenderComplete(resolve);
 
       });
@@ -82,6 +88,8 @@ export function MapsVisualizationProvider(serviceSettings, Notifier, getAppState
       options.center = centerFromUIState ? centerFromUIState : this.vis.type.visConfig.defaults.mapCenter;
 
       this._kibanaMap = new KibanaMap(containerElement, options);
+      uiState.set('mapZoom', this._kibanaMap.getZoomLevel());
+      uiState.set('mapBounds', this._kibanaMap.getUntrimmedBounds());
       this._kibanaMap.addDrawControl();
       this._kibanaMap.addFitControl();
       this._kibanaMap.addLegendControl();
@@ -92,7 +100,10 @@ export function MapsVisualizationProvider(serviceSettings, Notifier, getAppState
       this._kibanaMap.on('zoomchange', () => {
         precisionChange = (previousPrecision !== this._kibanaMap.getAutoPrecision());
         previousPrecision = this._kibanaMap.getAutoPrecision();
-        this.vis.aggs[1].params.precision = previousPrecision;
+        const agg = this._getGeoHashAgg();
+        if (agg) {
+          agg.params.precision = previousPrecision;
+        }
       });
       this._kibanaMap.on('zoomend', () => {
 
@@ -233,6 +244,8 @@ export function MapsVisualizationProvider(serviceSettings, Notifier, getAppState
         valueFormatter: this._chartData ? this._chartData.valueFormatter : null,
         tooltipFormatter: this._chartData ? this._chartData.tooltipFormatter : null,
         mapType: newParams.mapType,
+        isFilteredByCollar: this._isFilteredByCollar(),
+        fetchBounds: this.getGeohashBounds.bind(this),
         heatmap: {
           heatBlur: newParams.heatBlur,
           heatMaxZoom: newParams.heatMaxZoom,
@@ -266,10 +279,47 @@ export function MapsVisualizationProvider(serviceSettings, Notifier, getAppState
       this.vis.updateState();
     }
 
+    async getGeohashBounds() {
+      const agg = this._getGeoHashAgg();
+      if (agg) {
+        const searchSource = new SearchSource();
+        searchSource.index(this.vis.indexPattern);
+        searchSource.size(0);
+        searchSource.aggs(function () {
+          const geoBoundsAgg = new AggConfig(agg.vis, {
+            type: 'geo_bounds',
+            enabled:true,
+            params: {
+              field: agg.getField()
+            },
+            schema: 'metric'
+          });
+          return {
+            '1': geoBoundsAgg.toDsl()
+          };
+        });
+        const esResp = await searchSource.fetch();
+        return _.get(esResp, 'aggregations.1.bounds');
+      }
+    }
+
+    _getGeoHashAgg() {
+      return this.vis.aggs.find((agg) => {
+        return agg.type.dslName === 'geohash_grid';
+      });
+    }
+
+    _isFilteredByCollar() {
+      const DEFAULT = false;
+
+      const agg = this._getGeoHashAgg();
+      if (agg) {
+        return _.get(agg, 'params.isFilteredByCollar', DEFAULT);
+      } else {
+        return DEFAULT;
+      }
+    }
   }
-
-
-
 
   return MapsVisualization;
 }

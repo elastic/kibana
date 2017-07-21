@@ -14,17 +14,17 @@ export function FilterBarLibMapRangeProvider(Promise, courier) {
       const type = 'range';
       const key = isScriptedRangeFilter ? filter.meta.field : Object.keys(filter.range)[0];
       const convert = indexPattern.fields.byName[key].format.getConverterFor('text');
-      const range = isScriptedRangeFilter ? filter.script.script.params : filter.range[key];
+      const params = isScriptedRangeFilter ? filter.script.script.params : filter.range[key];
 
-      let left = has(range, 'gte') ? range.gte : range.gt;
+      let left = has(params, 'gte') ? params.gte : params.gt;
       if (left == null) left = -Infinity;
 
-      let right = has(range, 'lte') ? range.lte : range.lt;
+      let right = has(params, 'lte') ? params.lte : params.lt;
       if (right == null) right = Infinity;
 
       const value = `${convert(left)} to ${convert(right)}`;
 
-      return { type, key, value };
+      return { type, key, value, params };
     });
 
   };

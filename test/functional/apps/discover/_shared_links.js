@@ -75,8 +75,8 @@ export default function ({ getService, getPageObjects }) {
           + '/discover?_g=(refreshInterval:(display:Off,pause:!f,value:0),time'
           + ':(from:\'2015-09-19T06:31:44.000Z\',mode:absolute,to:\'2015-09'
           + '-23T18:31:44.000Z\'))&_a=(columns:!(_source),index:\'logstash-'
-          + '*\',interval:auto,query:(query_string:(analyze_wildcard:!t,query'
-          + ':\'*\')),sort:!(\'@timestamp\',desc))';
+          + '*\',interval:auto,query:(language:lucene,query:\'\')'
+          + ',sort:!(\'@timestamp\',desc))';
         return PageObjects.discover.getSharedUrl()
         .then(function (actualUrl) {
           // strip the timestamp out of each URL
