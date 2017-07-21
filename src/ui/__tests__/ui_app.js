@@ -1,7 +1,7 @@
 import expect from 'expect.js';
 import UiApp from '../ui_app.js';
 import UiExports from '../ui_exports';
-import { isUndefined, noop } from 'lodash';
+import { noop } from 'lodash';
 
 function getMockSpec(extraParams) {
   return {
@@ -22,7 +22,7 @@ describe('UiApp', () => {
   describe('constructor', () => {
     const uiExports = new UiExports({});
 
-    it('throw if ID is not given', () => {
+    it('throws an exception if an ID is not given', () => {
       function newAppMissingID() {
         const spec = {}; // should have id property
         const newApp = new UiApp(uiExports, spec);
@@ -38,34 +38,17 @@ describe('UiApp', () => {
         newApp = new UiApp(uiExports, spec);
       });
 
-      it('use the spec ID', () => {
-        expect(newApp.id).to.be('uiapp-test-defaults');
+      it('copies the ID from the spec', () => {
+        expect(newApp.id).to.be(spec.id);
       });
 
-      it('creates fields with undefined value', () => {
-        // test that the fields exist, but have undefined value
-        expect('main' in newApp).to.be(true);
-        expect(isUndefined(newApp.main)).to.be(true);
-
-        expect('title' in newApp).to.be(true);
-        expect(isUndefined(newApp.title)).to.be(true);
-
-        expect('description' in newApp).to.be(true);
-        expect(isUndefined(newApp.description)).to.be(true);
-
-        expect('icon' in newApp).to.be(true);
-        expect(isUndefined(newApp.icon)).to.be(true);
-
-        expect('linkToLastSubUrl' in newApp).to.be(true);
-        expect(isUndefined(newApp.linkToLastSubUrl)).to.be(true);
-      });
-
-      it('default navLink', () => {
+      it('has a built-in default navLink', () => {
         expect(newApp.navLink).to.eql({
           id: 'uiapp-test-defaults',
           title: undefined,
           order: 0,
           url: '/app/uiapp-test-defaults',
+          subUrlBase: '/app/uiapp-test-defaults',
           description: undefined,
           icon: undefined,
           linkToLastSubUrl: true,
@@ -75,11 +58,11 @@ describe('UiApp', () => {
         });
       });
 
-      it('default order of 0', () => {
+      it('has a built-in default order of 0', () => {
         expect(newApp.order).to.be(0);
       });
 
-      it('template name is ui_app', () => {
+      it('has a built-in default template name of ui_app', () => {
         expect(newApp.templateName).to.be('ui_app');
       });
     });
@@ -91,24 +74,25 @@ describe('UiApp', () => {
         newApp = new UiApp(uiExports, spec);
       });
 
-      it('use the spec ID', () => {
-        expect(newApp.id).to.be('uiapp-test');
+      it('copies the ID from the spec', () => {
+        expect(newApp.id).to.be(spec.id);
       });
 
       it('copies field values from spec', () => {
         // test that the fields exist, but have undefined value
-        expect(newApp.main).to.be('main.js');
-        expect(newApp.title).to.be('UIApp Test');
-        expect(newApp.description).to.be('Test of UI App Constructor');
-        expect(newApp.icon).to.be('ui_app_test.svg');
-        expect(newApp.linkToLastSubUrl).to.be(true);
-        expect(newApp.templateName).to.be('ui_app_test');
-        expect(newApp.order).to.be(9000);
+        expect(newApp.main).to.be(spec.main);
+        expect(newApp.title).to.be(spec.title);
+        expect(newApp.description).to.be(spec.description);
+        expect(newApp.icon).to.be(spec.icon);
+        expect(newApp.linkToLastSubUrl).to.be(spec.linkToLastSubUrl);
+        expect(newApp.templateName).to.be(spec.templateName);
+        expect(newApp.order).to.be(spec.order);
         expect(newApp.navLink).to.eql({
           id: 'uiapp-test',
           title: 'UIApp Test',
           order: 9000,
           url: '/app/uiapp-test',
+          subUrlBase: '/app/uiapp-test',
           description: 'Test of UI App Constructor',
           icon: 'ui_app_test.svg',
           linkToLastSubUrl: true,
@@ -126,23 +110,15 @@ describe('UiApp', () => {
         newApp = new UiApp(uiExports, spec);
       });
 
-      it('uiExports', () => {
+      it('has a reference to the uiExports object', () => {
         expect(newApp.uiExports).to.be(uiExports);
       });
-      it('spec', () => {
+
+      it('has a reference to the original spec', () => {
         expect(newApp.spec).to.be(spec);
       });
-    });
 
-    describe('getInjectedVars', () => {
-      it('noop function by default', () => {
-        const spec = {
-          id: 'uiapp-test'
-        };
-        const newApp = new UiApp(uiExports, spec);
-        expect(newApp.getInjectedVars).to.be(noop);
-      });
-      it('reference to spec.injectVars', () => {
+      it('has a reference to the spec.injectVars function', () => {
         const helloFunction = () => 'hello';
         const spec = {
           id: 'uiapp-test',
@@ -153,8 +129,18 @@ describe('UiApp', () => {
       });
     });
 
-    describe('hidden and listed', () => {
-      it('if hidden and listed are not set, hidden is set as false and listed is set as true', () => {
+    describe('app.getInjectedVars', () => {
+      it('is noop function by default', () => {
+        const spec = {
+          id: 'uiapp-test'
+        };
+        const newApp = new UiApp(uiExports, spec);
+        expect(newApp.getInjectedVars).to.be(noop);
+      });
+    });
+
+    describe('hidden and listed flags', () => {
+      it('has hidden defaulted to false and listed defaulted to true', () => {
         const spec = {
           id: 'uiapp-test'
         };
@@ -162,7 +148,8 @@ describe('UiApp', () => {
         expect(newApp.hidden).to.be(false);
         expect(newApp.listed).to.be(true);
       });
-      it('if listed is passed as null, and hidden is true, listed is set as false', () => {
+
+      it('has listed set to false if listed is passed as null and hidden is passed as true, ', () => {
         const spec = {
           id: 'uiapp-test',
           hidden: true,
@@ -172,7 +159,8 @@ describe('UiApp', () => {
         expect(newApp.hidden).to.be(true);
         expect(newApp.listed).to.be(false);
       });
-      it('if listed is passed as null, and hidden is false, listed is set as true', () => {
+
+      it('has listed set to true if listed is passed as null and hidden passed as false, ', () => {
         const spec = {
           id: 'uiapp-test',
           hidden: false,
@@ -182,7 +170,8 @@ describe('UiApp', () => {
         expect(newApp.hidden).to.be(false);
         expect(newApp.listed).to.be(true);
       });
-      it('if listed is passed as null, and hidden not set, listed is set as true', () => {
+
+      it('has listed set to true if listed is passed as null and hidden not passed', () => {
         const spec = {
           id: 'uiapp-test',
           listed: null
@@ -191,7 +180,8 @@ describe('UiApp', () => {
         expect(newApp.hidden).to.be(false);
         expect(newApp.listed).to.be(true);
       });
-      it('if listed is passed as true, is set with that value', () => {
+
+      it('has listed set to what it was passed as', () => {
         const spec = {
           id: 'uiapp-test',
           listed: true
@@ -199,15 +189,14 @@ describe('UiApp', () => {
         const newApp = new UiApp(uiExports, spec);
         expect(newApp.hidden).to.be(false);
         expect(newApp.listed).to.be(true);
-      });
-      it('if listed is passed as false, is set with that value', () => {
-        const spec = {
+
+        const spec2 = {
           id: 'uiapp-test',
           listed: false
         };
-        const newApp = new UiApp(uiExports, spec);
-        expect(newApp.hidden).to.be(false);
-        expect(newApp.listed).to.be(false);
+        const newApp2 = new UiApp(uiExports, spec2);
+        expect(newApp2.hidden).to.be(false);
+        expect(newApp2.listed).to.be(false);
       });
     });
   });
@@ -249,6 +238,7 @@ describe('UiApp', () => {
           title: 'UIApp Test',
           order: 9000,
           url: '/app/uiapp-test',
+          subUrlBase: '/app/uiapp-test',
           description: 'Test of UI App Constructor',
           icon: 'ui_app_test.svg',
           linkToLastSubUrl: true,
