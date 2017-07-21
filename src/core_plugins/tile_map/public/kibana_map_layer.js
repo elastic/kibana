@@ -7,7 +7,7 @@ export class KibanaMapLayer extends EventEmitter {
     this._leafletLayer = null;
   }
 
-  getBounds() {
+  async getBounds() {
     return this._leafletLayer.getBounds();
   }
 

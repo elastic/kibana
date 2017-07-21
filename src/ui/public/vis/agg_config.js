@@ -261,7 +261,7 @@ export function VisAggConfigProvider(Private) {
   AggConfig.prototype.getAggParams = function () {
     return [].concat(
       (this.type) ? this.type.params.raw : [],
-      (this.schema) ? this.schema.params.raw : []
+      (_.has(this, 'schema.params')) ? this.schema.params.raw : []
     );
   };
 

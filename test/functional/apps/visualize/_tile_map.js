@@ -56,11 +56,31 @@ export default function ({ getService, getPageObjects }) {
 
       function tokenize(row) {
         const tokens = row.split(' ');
+
+        let geohashIndex;
+        let countIndex;
+        let latIndex;
+        let lonIndex;
+        if (tokens.length === 8) {
+          // table row aggregations: geohash_grid -> count -> geocentroid
+          geohashIndex = 0;
+          countIndex = 1;
+          latIndex = 4;
+          lonIndex = 6;
+        } else if (tokens.length === 9) {
+          // table row aggregations: filter -> geohash_grid -> count -> geocentroid
+          geohashIndex = 1;
+          countIndex = 2;
+          latIndex = 5;
+          lonIndex = 7;
+        } else {
+          log.error(`Unexpected number of tokens contained in spy table row: ${row}`);
+        }
         return {
-          geohash: tokens[0],
-          count: tokens[1],
-          lat: Math.floor(parseFloat(tokens[4])),
-          lon: Math.floor(parseFloat(tokens[6]))
+          geohash: tokens[geohashIndex],
+          count: tokens[countIndex],
+          lat: Math.floor(parseFloat(tokens[latIndex])),
+          lon: Math.floor(parseFloat(tokens[lonIndex]))
         };
       }
 
@@ -182,26 +202,28 @@ export default function ({ getService, getPageObjects }) {
        ** changed, then open the saved viz and check that it's back to the original data.
        */
       it('should save with zoom level and load, take screenshot', function () {
-        const expectedTableData = [ 'dr4 127 { "lat": 40.142432276496855, "lon": -75.17097956302949 }',
-          'dr7 92 { "lat": 41.48015560278588, "lon": -73.90037568609999 }',
-          '9q5 91 { "lat": 34.293431888365156, "lon": -118.57068410102319 }',
-          '9qc 89 { "lat": 38.645468642830515, "lon": -121.59105310990904 }',
-          'drk 87 { "lat": 41.38891646156794, "lon": -72.50977680472464 }',
-          'dps 82 { "lat": 42.79333563657796, "lon": -83.55129436180904 }',
-          'dph 82 { "lat": 40.03466797526926, "lon": -83.6603344113725 }',
-          'dp3 79 { "lat": 41.68207621697006, "lon": -87.98703811709073 }',
-          'dpe 78 { "lat": 42.83740988287788, "lon": -85.13176125187714 }',
-          'dp8 77 { "lat": 43.00976751178697, "lon": -89.27605860007854 }' ];
-        const expectedTableDataZoomed = [ 'dr5r 21 { "lat": 40.73313889359789, "lon": -74.00737997410553 }',
-          'dps8 20 { "lat": 42.25258858362213, "lon": -83.4615091625601 }',
-          '9q5b 19 { "lat": 33.8619567100939, "lon": -118.28354520723224 }',
-          'b6uc 17 { "lat": 60.721656321274004, "lon": -161.86279475141097 }',
-          '9y63 17 { "lat": 35.48034298178904, "lon": -97.90940423550852 }',
-          'c20g 16 { "lat": 45.59211885672994, "lon": -122.47455088770948 }',
-          'dqfz 15 { "lat": 39.24278838559985, "lon": -74.69487586989999 }',
-          'dr8h 14 { "lat": 42.9455179042582, "lon": -78.65373932623437 }',
-          'dp8p 14 { "lat": 43.52336289028504, "lon": -89.84673104515034 }',
-          'dp3k 14 { "lat": 41.569707432229606, "lon": -88.12707824898618 }' ];
+        const expectedTableData = [
+          '- 9q5 91 { "lat": 34.2934322102855, "lon": -118.57068326651722 }',
+          '- 9qc 89 { "lat": 38.64546895785822, "lon": -121.59105236401383 }',
+          '- dp3 79 { "lat": 41.68207651723318, "lon": -87.98703769162958 }',
+          '- dp8 77 { "lat": 43.00976789278256, "lon": -89.27605793496909 }',
+          '- dp6 74 { "lat": 41.468768046942316, "lon": -86.55083711737313 }',
+          '- 9qh 74 { "lat": 34.18319454366291, "lon": -117.426273193009 }',
+          '- 9y7 73 { "lat": 35.87868071952197, "lon": -96.3330221912275 }',
+          '- 9ys 71 { "lat": 37.31065319536228, "lon": -94.82038319412567 }',
+          '- 9yn 71 { "lat": 34.57203017311617, "lon": -92.17198946946104 }',
+          '- 9q9 70 { "lat": 37.327310177098425, "lon": -121.70855726221842 }' ];
+        const expectedTableDataZoomed = [
+          '- c20g 16 { "lat": 45.59211894578766, "lon": -122.47455075674225 }',
+          '- c28c 13 { "lat": 48.0181491561234, "lon": -122.43847891688347 }',
+          '- c2e5 11 { "lat": 48.46440218389034, "lon": -119.51805034652352 }',
+          '- c262 10 { "lat": 46.56816971953958, "lon": -120.5440594162792 }',
+          '- c23n 10 { "lat": 47.51524904742837, "lon": -122.26747375912964 }',
+          '- 9rw6 10 { "lat": 42.59157135151327, "lon": -114.79671782813966 }',
+          '- c2mq 9 { "lat": 47.547698873095214, "lon": -116.18850083090365 }',
+          '- c27x 9 { "lat": 47.753206375055015, "lon": -118.7438936624676 }',
+          '- c25p 9 { "lat": 46.30563497543335, "lon": -119.30418533273041 }',
+          '- c209 9 { "lat": 45.29028058052063, "lon": -122.9347869195044 }' ];
         const vizName1 = 'Visualization TileMap';
 
         return PageObjects.visualize.clickMapZoomIn()
