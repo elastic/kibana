@@ -137,7 +137,7 @@ export default function ({ getService, getPageObjects }) {
         });
       });
 
-      it('Fit data bounds should zoom to level 3', function () {
+      it('Fit data bounds should zoom to level 3', async function () {
         const expectedPrecision2ZoomCircles = [
           { color: '#750000', radius: 192 },
           { color: '#750000', radius: 191 },
@@ -187,11 +187,9 @@ export default function ({ getService, getPageObjects }) {
           { color: '#b99939', radius: 9 }
         ];
 
-        return PageObjects.visualize.clickMapFitDataBounds()
-        .then(function () {
-          return PageObjects.visualize.getTileMapData();
-        })
-        .then(function (data) {
+        await retry.try(async () => {
+          await PageObjects.visualize.clickMapFitDataBounds();
+          const data = await PageObjects.visualize.getTileMapData();
           expect(data).to.eql(expectedPrecision2ZoomCircles);
         });
       });
@@ -238,7 +236,7 @@ export default function ({ getService, getPageObjects }) {
           expect(message).to.be('Visualization Editor: Saved Visualization \"' + vizName1 + '\"');
         })
         .then(function testVisualizeWaitForToastMessageGone() {
-          return PageObjects.visualize.waitForToastMessageGone();
+          return PageObjects.header.waitForToastMessageGone();
         })
         .then(function () {
           return PageObjects.visualize.openSpyPanel();
