@@ -1,6 +1,8 @@
 <dashboard-app class="app-container dashboard-container">
   <div class="fullScreenModePlaceholder">
     <div
+      aria-label="Exit full screen mode"
+      kbn-accessible-click
       ng-if="fullScreenMode"
       class="exitFullScreenMode"
       ng-click="exitFullScreenMode()"
