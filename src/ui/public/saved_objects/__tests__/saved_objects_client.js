@@ -298,7 +298,7 @@ describe('SavedObjectsClient', () => {
       expect($http.calledOnce).to.be(true);
 
       const options = $http.getCall(0).args[0];
-      expect(options.url).to.eql(`${basePath}/api/saved_objects/index-pattern?type=index-pattern&invalid=true`);
+      expect(options.url).to.eql(`${basePath}/api/saved_objects/?type=index-pattern&invalid=true`);
     });
 
     it('accepts fields', () => {

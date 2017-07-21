@@ -15,20 +15,12 @@ describe('dashboard panel', function () {
 
   function init(mockDocResponse) {
     ngMock.module('kibana');
-    ngMock.inject(($rootScope, $compile, Private, esAdmin) => {
+    ngMock.inject(($rootScope, $compile, Private) => {
       Private.swap(SavedObjectsClientProvider, () => {
         return {
           get: sinon.stub().returns(Promise.resolve(mockDocResponse))
         };
       });
-
-      sinon.stub(esAdmin.indices, 'getFieldMapping').returns(Promise.resolve({
-        '.kibana': {
-          mappings: {
-            visualization: {}
-          }
-        }
-      }));
 
       parentScope = $rootScope.$new();
       parentScope.saveState = sinon.stub();

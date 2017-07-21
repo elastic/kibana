@@ -1,13 +1,13 @@
 import _ from 'lodash';
 import Promise from 'bluebird';
 import elasticsearch from 'elasticsearch';
-import migrateConfig from './migrate_config';
+import { migrateConfig } from './migrate_config';
 import createKibanaIndex from './create_kibana_index';
 import kibanaVersion from './kibana_version';
 import { ensureEsVersion } from './ensure_es_version';
 import { ensureNotTribe } from './ensure_not_tribe';
 import { ensureAllowExplicitIndex } from './ensure_allow_explicit_index';
-import { ensureTypesExist } from './ensure_types_exist';
+import { patchKibanaIndex } from './patch_kibana_index';
 
 const NoConnections = elasticsearch.errors.NoConnections;
 import util from 'util';
@@ -17,7 +17,7 @@ const NO_INDEX = 'no_index';
 const INITIALIZING = 'initializing';
 const READY = 'ready';
 
-export default function (plugin, server, { mappings }) {
+export default function (plugin, server) {
   const config = server.config();
   const callAdminAsKibanaUser = server.plugins.elasticsearch.getCluster('admin').callWithInternalUser;
   const callDataAsKibanaUser = server.plugins.elasticsearch.getCluster('data').callWithInternalUser;
@@ -71,7 +71,7 @@ export default function (plugin, server, { mappings }) {
     .then(function (health) {
       if (health === NO_INDEX) {
         plugin.status.yellow('No existing Kibana index found');
-        return createKibanaIndex(server, mappings);
+        return createKibanaIndex(server);
       }
 
       if (health === INITIALIZING) {
@@ -99,11 +99,11 @@ export default function (plugin, server, { mappings }) {
       .then(() => ensureNotTribe(callAdminAsKibanaUser))
       .then(() => ensureAllowExplicitIndex(callAdminAsKibanaUser, config))
       .then(waitForShards)
-      .then(() => ensureTypesExist({
+      .then(() => patchKibanaIndex({
         callCluster: callAdminAsKibanaUser,
         log: (...args) => server.log(...args),
         indexName: config.get('kibana.index'),
-        types: Object.keys(mappings).map(name => ({ name, mapping: mappings[name] }))
+        kibanaIndexMappingsDsl: server.getKibanaIndexMappingsDsl()
       }))
       .then(_.partial(migrateConfig, server))
       .then(() => {

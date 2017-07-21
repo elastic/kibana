@@ -8,28 +8,35 @@ describe('GetIndices', function () {
   let getIndices;
 
   beforeEach(ngMock.module('kibana', ($provide) => {
-    indicesResponse = [
-      { index: '.kibana' },
-      { index: '.monitoring-es-2' },
-      { index: '.monitoring-es-3' },
-      { index: '.monitoring-es-4' },
-      { index: '.monitoring-es-5' }
-    ];
+    indicesResponse = {
+      data: [
+        { index: '.kibana' },
+        { index: '.monitoring-es-2' },
+        { index: '.monitoring-es-3' },
+        { index: '.monitoring-es-4' },
+        { index: '.monitoring-es-5' }
+      ]
+    };
     aliasesResponse = {
-      '.monitoring-es-1': {
-        aliases: {
-          '.monitoring-es-active': {}
+      data: {
+        '.monitoring-es-1': {
+          aliases: {
+            '.monitoring-es-active': {}
+          }
         }
       }
     };
 
-    $provide.service('esAdmin', function () {
+    $provide.service('$http', function () {
       return {
-        cat: {
-          indices: async () => indicesResponse
-        },
-        indices: {
-          getAlias: async () => aliasesResponse
+        async get(path) {
+          if (path.includes('aliases')) {
+            return aliasesResponse;
+          }
+          if (path.includes('indices')) {
+            return indicesResponse;
+          }
+          throw new Error(`Unexpected path to $http.get(): ${path}`);
         }
       };
     });
@@ -54,8 +61,8 @@ describe('GetIndices', function () {
     const aliasesResponseCopy = Object.assign({}, aliasesResponse);
     aliasesResponse = { status: 404 };
     const indices = await getIndices();
-    expect(indices.length).to.be(indicesResponse.length);
-    indicesResponse.forEach((indexObj, idx) => {
+    expect(indices.length).to.be(indicesResponse.data.length);
+    indicesResponse.data.forEach((indexObj, idx) => {
       expect(indices[idx]).to.be(indexObj.index);
     });
     aliasesResponse = aliasesResponseCopy;

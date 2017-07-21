@@ -27,6 +27,7 @@ describe('parent pipeline aggs', function () {
         ngMock.inject(function (Private) {
           const Vis = Private(VisProvider);
           const indexPattern = Private(StubbedIndexPattern);
+          indexPattern.stubSetFieldFormat('bytes', 'bytes');
           metricAgg = Private(metric.provider);
 
           const params = settings || {
@@ -52,6 +53,12 @@ describe('parent pipeline aggs', function () {
                 type: metric.name,
                 schema: 'metric',
                 params
+              },
+              {
+                id: '3',
+                type: 'max',
+                params: { field: '@timestamp' },
+                schema: 'metric'
               }
             ],
             listeners: {}
@@ -137,6 +144,33 @@ describe('parent pipeline aggs', function () {
         expect(aggDsl.parentAggs['2-metric'][metric.name].buckets_path).to.be('2-metric-metric');
       });
 
+      it('should have correct formatter', function () {
+        init({
+          metricAgg: '3'
+        });
+        expect(metricAgg.getFormat(aggConfig).type.id).to.be('date');
+      });
+
+      it('should have correct customMetric nested formatter', function () {
+        init({
+          metricAgg: 'custom',
+          customMetric: {
+            id:'2-metric',
+            type: metric.name,
+            params: {
+              buckets_path: 'custom',
+              customMetric: {
+                id:'2-metric-metric',
+                type: 'max',
+                params: { field: 'bytes' },
+                schema: 'orderAgg'
+              }
+            },
+            schema: 'orderAgg'
+          }
+        });
+        expect(metricAgg.getFormat(aggConfig).type.id).to.be('bytes');
+      });
     });
   });
 
