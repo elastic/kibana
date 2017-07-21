@@ -1,7 +1,7 @@
 import { Registry } from '../../common/lib/registry';
-import { BaseRenderable } from './base_renderable';
+import { BaseForm } from './base_form';
 
-export class ArgType extends BaseRenderable {
+export class ArgType extends BaseForm {
   constructor(name, props) {
     super(name, props);
   }
