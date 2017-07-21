@@ -16,9 +16,8 @@ export function PointSeriesOrderedDateAxisProvider() {
       interval: buckets.getInterval(),
     };
 
-    const axisOnTimeField = xAgg.fieldIsTimeField();
     const bounds = buckets.getBounds();
-    if (bounds && axisOnTimeField) {
+    if (bounds) {
       chart.ordered.min = bounds.min;
       chart.ordered.max = bounds.max;
     } else {
