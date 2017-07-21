@@ -31,4 +31,4 @@ $kuiColorFullShade: #000;
 
 $kuiTextColor: $kuiColorDarkestShade;
 $kuiLinkColor: $kuiColorPrimary;
-$kuiFocusBackgroundColor: tint($kuiColorSecondary, 75%);
+$kuiFocusBackgroundColor: tint($kuiColorPrimary, 90%);
