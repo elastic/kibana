@@ -1,0 +1,109 @@
+// Namespace mixin
+// This forces component, child, modifier and state namespacing.
+// Check the styleguide for more detail.
+
+$childSeparator: '__';
+$modifierSeparator: '--';
+$stateSeparator: '.is';
+
+// Is this mixin itself nested within a mixin?
+// Is this mixin itself nested within a mixin?
+@function isNested($selector) {
+  $selector: selectorToString($selector);
+
+  @if str-index($selector, $modifierSeparator) {
+    @return true;
+  }
+
+  @if str-index($selector, $stateSeparator){
+    @return true;
+  }
+
+  @if str-index($selector, $childSeparator){
+    @return true;
+  }
+
+  @return false;
+}
+
+@function selectorToString($selector) {
+  $selector: inspect($selector); //cast to string
+  $selector: str-slice($selector, 2, -2); //remove brackets
+  @return $selector;
+}
+
+// Output the component name from the given nested selector.
+@function getComponent($selector) {
+  $selector: selectorToString($selector);
+
+  @if str-index($selector, $modifierSeparator) {
+    $modifierStart: str-index($selector, $modifierSeparator) - 1;
+    @return str-slice($selector, 0, $modifierStart);
+  }
+
+  @if str-index($selector, $childSeparator){
+    $childStart: str-index($selector, $childSeparator) - 1;
+    @return '.' + str-slice($selector, 0, $childStart);
+  }
+
+  @if str-index($selector, $stateSeparator){
+    $stateStart: str-index($selector, $stateSeparator) - 1;
+    @return str-slice($selector, 0, $stateStart);
+  }
+}
+
+// Components are top level selectors
+@mixin component($component) {
+  .#{$component} {
+    @content;
+  }
+}
+
+// Children are related to a component .kuiComponent__child
+@mixin child($child) {
+  $selector: &;
+
+  @if isNested($selector) {
+    $block: getComponent($selector);
+    @at-root {
+      #{$selector} {
+        #{$block+$childSeparator+$child} {
+          @content;
+        }
+      }
+    }
+  } @else {
+    @at-root {
+      #{$selector+$childSeparator+$child} {
+        @content;
+      }
+    }
+  }
+}
+
+// Modifiers modify a component or child .kuiComponent--modifier
+@mixin modifier($modifier) {
+  @at-root {
+    #{&}#{$modifierSeparator+$modifier} {
+      @content;
+    }
+  }
+}
+
+// States are attached to the parent. ex: .kuiComponent.isState
+@mixin state($state) {
+  @at-root {
+    #{&}.#{$state} {
+      @content;
+    }
+  }
+}
+
+// Utilities are .kui--name
+@mixin utility($utility) {
+  @at-root {
+    .kui--#{$utility} {
+      @content;
+    }
+  }
+}

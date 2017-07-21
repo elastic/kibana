@@ -7,10 +7,18 @@
   flex-direction: row;
 }
 
+@include utility('flexWrap') {
+  flex-wrap: wrap;
+}
+
 @include utility('flexGrow1') {
   flex-grow: 1;
 }
 
 @include utility('flexShrink1') {
   flex-shrink: 1;
+}
+
+@include utility('flexBasisOneThird') {
+  flex-basis: 33.33%;
 }
