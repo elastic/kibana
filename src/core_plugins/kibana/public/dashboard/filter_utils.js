@@ -1,5 +1,5 @@
 import _ from 'lodash';
-import { isDefaultQuery, isTextQuery, getDefaultQuery } from 'ui/parse_query';
+import { getDefaultQuery } from 'ui/parse_query';
 
 /**
  * @typedef {Object} QueryFilter
@@ -15,7 +15,7 @@ export class FilterUtils {
    * (e.g. goes in the query input bar), false otherwise (e.g. is in the filter bar).
    */
   static isQueryFilter(filter) {
-    return filter.query && !filter.meta && (isDefaultQuery(filter.query) || isTextQuery(filter.query));
+    return filter.query && !filter.meta;
   }
 
   /**
