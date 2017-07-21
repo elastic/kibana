@@ -1,36 +1,26 @@
 import { Scanner } from 'ui/utils/scanner';
 import expect from 'expect.js';
-import Bluebird from 'bluebird';
 import 'elasticsearch-browser';
 import ngMock from 'ng_mock';
 import sinon from 'sinon';
-import url from 'url';
-
-import { esTestServerUrlParts } from '../../../../../test/es_test_server_url_parts';
 
 describe('Scanner', function () {
-  let es;
+  let http;
 
   beforeEach(ngMock.module('kibana'));
-  beforeEach(ngMock.inject(function (esFactory) {
-    es = esFactory({
-      host: url.format(esTestServerUrlParts),
-      defer: function () {
-        return Bluebird.defer();
-      }
-    });
+  beforeEach(ngMock.inject(function ($http) {
+    http = $http;
   }));
 
   afterEach(function () {
-    es.close();
-    es = null;
+    http = null;
   });
 
   describe('initialization', function () {
     it('should throw errors if missing arguments on initialization', function () {
       expect(() => new Scanner()).to.throwError();
-      expect(() => new Scanner(es)).to.throwError();
-      expect(() => new Scanner(es, {
+      expect(() => new Scanner(http)).to.throwError();
+      expect(() => new Scanner(http, {
         index: 'foo',
         type: 'bar'
       })).not.to.throwError();
@@ -38,6 +28,7 @@ describe('Scanner', function () {
   });
 
   describe('scan', function () {
+    let httpPost;
     let search;
     let scroll;
     let scanner;
@@ -54,17 +45,26 @@ describe('Scanner', function () {
     const mockScroll = { 'took':1,'timed_out':false,'_shards':{ 'total':1,'successful':1,'failed':0 },'hits':{ 'total':2,'max_score':0.0,'hits':hits } }; // eslint-disable-line max-len
 
     beforeEach(function () {
-      scanner = new Scanner(es, {
+      scanner = new Scanner(http, {
         index: 'foo',
         type: 'bar'
       });
-      search = sinon.stub(scanner.client, 'search', (req, cb) => cb(null, mockSearch));
-      scroll = sinon.stub(scanner.client, 'scroll', (req, cb) => cb(null, mockScroll));
+
+      search = sinon.stub().returns(Promise.resolve({ data: mockSearch }));
+      scroll = sinon.stub().returns(Promise.resolve({ data: mockScroll }));
+      httpPost = sinon.stub(scanner.$http, 'post', (path, ...args) => {
+        if (path.includes('legacy_scroll_start')) {
+          return search(...args);
+        }
+        if (path.includes('legacy_scroll_continue')) {
+          return scroll(...args);
+        }
+        throw new Error(`Unexpected path to $http.post(): ${path}`);
+      });
     });
 
     it('should reject when an error occurs', function () {
-      search.restore();
-      search = sinon.stub(scanner.client, 'search', (req, cb) => cb(new Error('fail.')));
+      search = search.returns(Promise.reject(new Error('fail.')));
       return scanner.scanAndMap('')
       .then(function () {
         throw new Error('should reject');
@@ -103,9 +103,8 @@ describe('Scanner', function () {
     });
 
     it('should scroll across multiple pages', function () {
-      scroll.restore();
       const oneResult = { 'took':1,'timed_out':false,'_shards':{ 'total':1,'successful':1,'failed':0 },'hits':{ 'total':2,'max_score':0.0,'hits':['one'] } }; // eslint-disable-line max-len
-      scroll = sinon.stub(scanner.client, 'scroll', (req, cb) => cb(null, oneResult));
+      scroll = sinon.stub().returns(Promise.resolve({ data: oneResult }));
       return scanner.scanAndMap(null, { pageSize: 1 })
       .then(function (response) {
         expect(scroll.calledTwice);
@@ -116,8 +115,7 @@ describe('Scanner', function () {
     });
 
     afterEach(function () {
-      search.restore();
-      scroll.restore();
+      httpPost.restore();
     });
   });
 

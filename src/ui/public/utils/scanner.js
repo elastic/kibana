@@ -1,13 +1,26 @@
 import _ from 'lodash';
+import chrome from 'ui/chrome';
 
-export const Scanner = function (client, { index, type } = {}) {
+export const Scanner = function ($http, { index, type } = {}) {
   if (!index) throw new Error('Expected index');
   if (!type) throw new Error('Expected type');
-  if (!client) throw new Error('Expected client');
+  if (!$http) throw new Error('Expected $http');
 
-  this.client = client;
+  this.$http = $http;
   this.index = index;
   this.type = type;
+};
+
+Scanner.prototype.start = function (searchBody) {
+  const { addBasePath } = chrome;
+  const scrollStartPath = addBasePath('/api/kibana/legacy_scroll_start');
+  return this.$http.post(scrollStartPath, searchBody);
+};
+
+Scanner.prototype.continue = function (scrollId) {
+  const { addBasePath } = chrome;
+  const scrollContinuePath = addBasePath('/api/kibana/legacy_scroll_continue');
+  return this.$http.post(scrollContinuePath, { scrollId });
 };
 
 Scanner.prototype.scanAndMap = function (searchString, options, mapFn) {
@@ -92,18 +105,19 @@ Scanner.prototype.scanAndMap = function (searchString, options, mapFn) {
       if (collectedAllResults) {
         resolve(allResults);
       } else {
-        this.client.scroll({
-          scrollId
-        }, getMoreUntilDone);
+        this.continue(scrollId)
+          .then(response => getMoreUntilDone(null, response.data))
+          .catch(error => getMoreUntilDone(error));
       }
     };
 
-    this.client.search({
+    const searchBody = {
       index: this.index,
       size: opts.pageSize,
       body: { query: { bool } },
-      scroll: '1m',
-      sort: '_doc',
-    }, getMoreUntilDone);
+    };
+    this.start(searchBody)
+      .then(response => getMoreUntilDone(null, response.data))
+      .catch(error => getMoreUntilDone(error));
   });
 };
