@@ -5,7 +5,7 @@ import { isEqual } from 'lodash';
 import { Events } from '../../lib/events';
 import Style from 'style-it';
 
-export const RenderElementComponent = ({ renderFn, size, domNode, setDomNode, setEventEmitter, css }) => {
+export const RenderElementComponent = ({ renderFn, size, done, config, domNode, setDomNode, setEventEmitter, css }) => {
   const renderElement = (refNode) => {
     if (refNode && !domNode) {
 
@@ -16,7 +16,7 @@ export const RenderElementComponent = ({ renderFn, size, domNode, setDomNode, se
 
       // Initialize the domNode property. This should only happen once, even if config changes.
       setDomNode(refNode);
-      renderFn(refNode, _events);
+      renderFn(refNode, config, done || (() => {}), _events);
     }
   };
 
@@ -30,12 +30,12 @@ export const RenderElementComponent = ({ renderFn, size, domNode, setDomNode, se
 const RenderElementLifecycle = lifecycle({
 
   componentDidUpdate(prevProps) {
-    const { events, config, domNode, size, renderFn } = this.props;
+    const { events, config, domNode, done, size, renderFn } = this.props;
 
     // Config changes
     if (!isEqual(config, prevProps.config) || !isEqual(renderFn, prevProps.renderFn)) {
       this.destroy();
-      return renderFn(domNode, events);
+      return renderFn(domNode, config, done || (() => {}), events);
     }
 
     // Size changes
