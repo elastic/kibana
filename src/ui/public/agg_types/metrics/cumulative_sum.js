@@ -13,6 +13,7 @@ export function AggTypesMetricsCumulativeSumProvider(Private) {
     makeLabel: agg => makeNestedLabel(agg, 'cumulative sum'),
     params: [
       ...parentPipelineAggHelper.params()
-    ]
+    ],
+    getFormat: parentPipelineAggHelper.getFormat
   });
 }

@@ -13,6 +13,7 @@ export function AggTypesMetricsSerialDiffProvider(Private) {
     makeLabel: agg => makeNestedLabel(agg, 'serial diff'),
     params: [
       ...parentPipelineAggHelper.params()
-    ]
+    ],
+    getFormat: parentPipelineAggHelper.getFormat
   });
 }
