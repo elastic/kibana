@@ -4,7 +4,7 @@ import { IsRequestProvider } from './is_request';
 import { MergeDuplicatesRequestProvider } from './merge_duplicate_requests';
 import { ReqStatusProvider } from './req_status';
 
-export function CallClientProvider(Private, Promise, esAdmin, es) {
+export function CallClientProvider(Private, Promise, es) {
 
   const isRequest = Private(IsRequestProvider);
   const mergeDuplicateRequests = Private(MergeDuplicatesRequestProvider);
@@ -115,9 +115,7 @@ export function CallClientProvider(Private, Promise, esAdmin, es) {
         throw ABORTED;
       }
 
-      const id = strategy.id;
-      const client = (id && id.includes('admin')) ? esAdmin : es;
-      return (esPromise = client[strategy.clientMethod]({ body }));
+      return (esPromise = es[strategy.clientMethod]({ body }));
     })
     .then(function (clientResp) {
       return strategy.getResponses(clientResp);

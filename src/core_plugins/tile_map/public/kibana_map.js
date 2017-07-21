@@ -119,7 +119,10 @@ export class KibanaMap extends EventEmitter {
     });
     this._leafletMap.on('zoomend', () => this.emit('zoomend'));
     this._leafletMap.on('dragend', () => this.emit('dragend'));
-    this._leafletMap.on('dragend', e => this._layers.forEach(layer => layer.updateExtent('dragend', e)));
+
+    this._leafletMap.on('zoomend', () => this._updateExtent());
+    this._leafletMap.on('dragend', () => this._updateExtent());
+
     this._leafletMap.on('mousemove', e => this._layers.forEach(layer => layer.movePointer('mousemove', e)));
     this._leafletMap.on('mouseout', e => this._layers.forEach(layer => layer.movePointer('mouseout', e)));
     this._leafletMap.on('mousedown', e => this._layers.forEach(layer => layer.movePointer('mousedown', e)));
@@ -329,6 +332,10 @@ export class KibanaMap extends EventEmitter {
 
   getAutoPrecision() {
     return zoomToPrecision(this._leafletMap.getZoom(), 12, this._leafletMap.getMaxZoom());
+  }
+
+  getLeafletBounds() {
+    return this._leafletMap.getBounds();
   }
 
   getBounds() {
