@@ -42,7 +42,7 @@ describe('UiApp', () => {
         expect(newApp.id).to.be(spec.id);
       });
 
-      it('has a built-in default navLink', () => {
+      it('has a default navLink', () => {
         expect(newApp.navLink).to.eql({
           id: 'uiapp-test-defaults',
           title: undefined,
@@ -58,11 +58,11 @@ describe('UiApp', () => {
         });
       });
 
-      it('has a built-in default order of 0', () => {
+      it('has a default order of 0', () => {
         expect(newApp.order).to.be(0);
       });
 
-      it('has a built-in default template name of ui_app', () => {
+      it('has a default template name of ui_app', () => {
         expect(newApp.templateName).to.be('ui_app');
       });
     });
