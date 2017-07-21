@@ -1,4 +1,8 @@
 export {
+  KuiObjectTitle,
+} from './object_title';
+
+export {
   KuiPageTitle,
 } from './page_title';
 

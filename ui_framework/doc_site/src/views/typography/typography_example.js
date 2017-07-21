@@ -19,6 +19,10 @@ import SectionTitle from './section_title';
 const sectionTitleSource = require('!!raw!./section_title');
 const sectionTitleHtml = renderToHtml(SectionTitle);
 
+import ObjectTitle from './object_title';
+const objectTitleSource = require('!!raw!./object_title');
+const objectTitleHtml = renderToHtml(ObjectTitle);
+
 export default props => (
   <GuidePage title={props.route.name}>
     <GuideSection
@@ -62,6 +66,25 @@ export default props => (
 
       <GuideDemo>
         <SectionTitle />
+      </GuideDemo>
+    </GuideSection>
+
+    <GuideSection
+      title="ObjectTitle"
+      source={[{
+        type: GuideSectionTypes.JS,
+        code: objectTitleSource,
+      }, {
+        type: GuideSectionTypes.HTML,
+        code: objectTitleHtml,
+      }]}
+    >
+      <GuideText>
+        This component identifies subsections within a section.
+      </GuideText>
+
+      <GuideDemo>
+        <ObjectTitle />
       </GuideDemo>
     </GuideSection>
   </GuidePage>

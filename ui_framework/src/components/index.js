@@ -7,6 +7,7 @@ export {
 } from './icon';
 
 export {
+  KuiObjectTitle,
   KuiPageTitle,
   KuiSectionTitle,
 } from './typography';
