@@ -139,64 +139,89 @@ describe('UiApp', () => {
       });
     });
 
-    describe('hidden and listed flags', () => {
-      it('has hidden defaulted to false and listed defaulted to true', () => {
+    /*
+     * The "hidden" and "listed" flags have an bound relationship. The "hidden"
+     * flag gets cast to a boolean value, and the "listed" flag is dependent on
+      * "hidden"
+     */
+    describe('hidden flag', () => {
+      describe('is cast to boolean value', () => {
+        it('when undefined', () => {
+          const spec = {
+            id: 'uiapp-test',
+          };
+          const newApp = new UiApp(uiExports, spec);
+          expect(newApp.hidden).to.be(false);
+        });
+
+        it('when null', () => {
+          const spec = {
+            id: 'uiapp-test',
+            hidden: null,
+          };
+          const newApp = new UiApp(uiExports, spec);
+          expect(newApp.hidden).to.be(false);
+        });
+      });
+    });
+
+    describe('listed flag', () => {
+      describe('defaults to the opposite value of hidden', () => {
+        it(`when it's null and hidden is true`, () => {
+          const spec = {
+            id: 'uiapp-test',
+            hidden: true,
+            listed: null,
+          };
+          const newApp = new UiApp(uiExports, spec);
+          expect(newApp.listed).to.be(false);
+        });
+
+        it(`when it's null and hidden is false`, () => {
+          const spec = {
+            id: 'uiapp-test',
+            hidden: false,
+            listed: null,
+          };
+          const newApp = new UiApp(uiExports, spec);
+          expect(newApp.listed).to.be(true);
+        });
+
+        it(`when it's undefined and hidden is false`, () => {
+          const spec = {
+            id: 'uiapp-test',
+            hidden: false,
+          };
+          const newApp = new UiApp(uiExports, spec);
+          expect(newApp.listed).to.be(true);
+        });
+
+        it(`when it's undefined and hidden is true`, () => {
+          const spec = {
+            id: 'uiapp-test',
+            hidden: true,
+          };
+          const newApp = new UiApp(uiExports, spec);
+          expect(newApp.listed).to.be(false);
+        });
+      });
+
+      it(`is set to true when it's passed as true`, () => {
         const spec = {
-          id: 'uiapp-test'
+          id: 'uiapp-test',
+          listed: true,
         };
         const newApp = new UiApp(uiExports, spec);
-        expect(newApp.hidden).to.be(false);
         expect(newApp.listed).to.be(true);
       });
 
-      it('has listed set to false if listed is passed as null and hidden is passed as true, ', () => {
+      it(`is set to false when it's passed as false`, () => {
         const spec = {
           id: 'uiapp-test',
-          hidden: true,
-          listed: null
+          listed: false,
         };
         const newApp = new UiApp(uiExports, spec);
-        expect(newApp.hidden).to.be(true);
         expect(newApp.listed).to.be(false);
-      });
-
-      it('has listed set to true if listed is passed as null and hidden passed as false, ', () => {
-        const spec = {
-          id: 'uiapp-test',
-          hidden: false,
-          listed: null
-        };
-        const newApp = new UiApp(uiExports, spec);
-        expect(newApp.hidden).to.be(false);
-        expect(newApp.listed).to.be(true);
-      });
-
-      it('has listed set to true if listed is passed as null and hidden not passed', () => {
-        const spec = {
-          id: 'uiapp-test',
-          listed: null
-        };
-        const newApp = new UiApp(uiExports, spec);
-        expect(newApp.hidden).to.be(false);
-        expect(newApp.listed).to.be(true);
-      });
-
-      it('has listed set to what it was passed as', () => {
-        const spec = {
-          id: 'uiapp-test',
-          listed: true
-        };
-        const newApp = new UiApp(uiExports, spec);
-        expect(newApp.hidden).to.be(false);
-        expect(newApp.listed).to.be(true);
-
-        const spec2 = {
-          id: 'uiapp-test',
-          listed: false
-        };
-        const newApp2 = new UiApp(uiExports, spec2);
-        expect(newApp2.hidden).to.be(false);
-        expect(newApp2.listed).to.be(false);
       });
     });
   });
