@@ -15,6 +15,10 @@ import PageTitle from './page_title';
 const pageTitleSource = require('!!raw!./page_title');
 const pageTitleHtml = renderToHtml(PageTitle);
 
+import SectionTitle from './section_title';
+const sectionTitleSource = require('!!raw!./section_title');
+const sectionTitleHtml = renderToHtml(SectionTitle);
+
 export default props => (
   <GuidePage title={props.route.name}>
     <GuideSection
@@ -39,6 +43,25 @@ export default props => (
 
       <GuideDemo>
         <PageTitle />
+      </GuideDemo>
+    </GuideSection>
+
+    <GuideSection
+      title="SectionTitle"
+      source={[{
+        type: GuideSectionTypes.JS,
+        code: sectionTitleSource,
+      }, {
+        type: GuideSectionTypes.HTML,
+        code: sectionTitleHtml,
+      }]}
+    >
+      <GuideText>
+        The <GuideCode>SectionTitle</GuideCode> component identifies sections within a page.
+      </GuideText>
+
+      <GuideDemo>
+        <SectionTitle />
       </GuideDemo>
     </GuideSection>
   </GuidePage>

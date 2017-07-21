@@ -1,0 +1,5 @@
+@include component('kuiSectionTitle') {
+  @extend %kuiFontSizeL;
+  color: $kuiTextColor;
+  font-weight: $kuiFontWeightLight;
+}

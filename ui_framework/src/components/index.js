@@ -8,4 +8,5 @@ export {
 
 export {
   KuiPageTitle,
+  KuiSectionTitle,
 } from './typography';

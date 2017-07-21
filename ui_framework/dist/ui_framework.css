@@ -3,6 +3,11 @@
   font-size: 0.875rem;
   line-height: 24px; }
 
+.kuiSectionTitle {
+  font-size: 24px;
+  font-size: 1.5rem;
+  line-height: 36px; }
+
 .kuiPageTitle {
   font-size: 32px;
   font-size: 2rem;
@@ -342,5 +347,9 @@ table {
       left: auto; }
 
 .kuiPageTitle {
+  color: #3F3F3F;
+  font-weight: 300; }
+
+.kuiSectionTitle {
   color: #3F3F3F;
   font-weight: 300; }
