@@ -36,7 +36,7 @@ export class VisualizeEmbeddableHandler extends EmbeddableHandler {
       const uiState = savedObject.uiStateJSON ? JSON.parse(savedObject.uiStateJSON) : {};
       visualizeScope.uiState = container.createChildUiState(getPersistedStateId(panel), uiState);
 
-      visualizeScope.savedObj.vis.setUiState(uiState);
+      visualizeScope.savedObj.vis.setUiState(visualizeScope.uiState);
 
       visualizeScope.savedObj.vis.listeners.click = this.filterBarClickHandler(container.getAppState());
       visualizeScope.savedObj.vis.listeners.brush = this.brushEvent(container.getAppState());
