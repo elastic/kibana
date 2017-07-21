@@ -3,7 +3,6 @@ import { set, del } from 'object-path-immutable';
 import { restoreHistory } from '../actions/history';
 import * as actions from '../actions/transient';
 import { removeElement } from '../actions/elements';
-import { loadServerFunctionsComplete } from '../actions/app';
 
 export default handleActions({
   [restoreHistory]: (transientState) => set(transientState, 'resolvedArgs', {}),
@@ -26,6 +25,4 @@ export default handleActions({
       selectedElement: payload || null,
     };
   },
-
-  [loadServerFunctionsComplete]: (transientState, { payload }) => ({ ...transientState, serverFunctions: payload }),
 }, {});
