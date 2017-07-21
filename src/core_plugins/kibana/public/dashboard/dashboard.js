@@ -6,6 +6,7 @@ import chrome from 'ui/chrome';
 
 import 'plugins/kibana/dashboard/grid';
 import 'plugins/kibana/dashboard/panel/panel';
+import 'ui/query_bar';
 
 import { SavedObjectNotFound } from 'ui/errors';
 import { getDashboardTitle, getUnsavedChangesWarningMessage } from './dashboard_strings';
@@ -25,6 +26,8 @@ import { notify } from 'ui/notify';
 import './panel/get_object_loaders_for_dashboard';
 import { documentationLinks } from 'ui/documentation_links/documentation_links';
 import { showCloneModal } from './top_nav/show_clone_modal';
+import { migrateLegacyQuery } from 'ui/utils/migrateLegacyQuery';
+import { QueryManagerProvider } from 'ui/query_manager';
 import { ESC_KEY_CODE } from 'ui_framework/services';
 
 const app = uiModules.get('app/dashboard', [
@@ -81,6 +84,7 @@ app.directive('dashboardApp', function ($injector) {
   const quickRanges = $injector.get('quickRanges');
   const kbnUrl = $injector.get('kbnUrl');
   const confirmModal = $injector.get('confirmModal');
+  const config = $injector.get('config');
   const Private = $injector.get('Private');
   const brushEvent = Private(UtilsBrushEventProvider);
   const filterBarClickHandler = Private(FilterBarClickHandlerProvider);
@@ -100,6 +104,7 @@ app.directive('dashboardApp', function ($injector) {
       }
 
       const dashboardState = new DashboardState(dash, AppState, dashboardConfig);
+      const queryManager = Private(QueryManagerProvider)(dashboardState.getAppState());
 
       // The 'previouslyStored' check is so we only update the time filter on dashboard open, not during
       // normal cross app navigation.
@@ -130,7 +135,10 @@ app.directive('dashboardApp', function ($injector) {
         updateState();
       });
 
-      dashboardState.applyFilters(dashboardState.getQuery(), filterBar.getFilters());
+      dashboardState.applyFilters(
+        dashboardState.getQuery() || { query: '', language: config.get('search:queryLanguage') },
+        filterBar.getFilters()
+      );
       let pendingVisCount = _.size(dashboardState.getPanels());
 
       timefilter.enabled = true;
@@ -179,9 +187,14 @@ app.directive('dashboardApp', function ($injector) {
         }
       };
 
-      $scope.filterResults = function () {
-        dashboardState.applyFilters($scope.model.query, filterBar.getFilters());
-        $scope.refresh();
+      $scope.updateQuery = function (query) {
+        // reset state if language changes
+        if ($scope.model.query.language && $scope.model.query.language !== query.language) {
+          filterBar.removeAll();
+          dashboardState.getAppState().$newFilters = [];
+        }
+
+        $scope.model.query = query;
       };
 
       // called by the saved-object-finder when a user clicks a vis
@@ -228,6 +241,28 @@ app.directive('dashboardApp', function ($injector) {
         dashboardState.removePanel(panelIndex);
         $scope.indexPatterns = dashboardState.getPanelIndexPatterns();
       };
+
+      $scope.filter = function (field, value, operator, index) {
+        queryManager.add(field, value, operator, index);
+        updateState();
+      };
+
+
+      $scope.$watch('model.query', (newQuery) => {
+        $scope.model.query = migrateLegacyQuery(newQuery);
+        dashboardState.applyFilters($scope.model.query, filterBar.getFilters());
+        $scope.refresh();
+      });
+
+      $scope.$watchCollection(() => dashboardState.getAppState().$newFilters, function (filters = []) {
+        // need to convert filters generated from user interaction with viz into kuery AST
+        // These are handled by the filter bar directive when lucene is the query language
+        Promise.all(filters.map(queryManager.addLegacyFilter))
+          .then(() => dashboardState.getAppState().$newFilters = [])
+          .then(updateState)
+          .then(() => dashboardState.applyFilters($scope.model.query, filterBar.getFilters()))
+          .then($scope.refresh());
+      });
 
       $scope.$listen(timefilter, 'fetch', $scope.refresh);
 

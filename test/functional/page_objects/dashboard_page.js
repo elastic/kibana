@@ -60,18 +60,18 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
     }
 
     async getQuery() {
-      const queryObject = await testSubjects.find('dashboardQuery');
+      const queryObject = await testSubjects.find('queryInput');
       return await queryObject.getProperty('value');
     }
 
     appendQuery(query) {
       log.debug('Appending query');
-      return retry.try(() => testSubjects.find('dashboardQuery').type(query));
+      return retry.try(() => testSubjects.find('queryInput').type(query));
     }
 
     clickFilterButton() {
       log.debug('Clicking filter button');
-      return testSubjects.click('dashboardQueryFilterButton');
+      return testSubjects.click('querySubmitButton');
     }
 
     async clickClone() {
