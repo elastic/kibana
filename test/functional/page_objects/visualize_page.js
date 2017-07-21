@@ -206,7 +206,8 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
     }
 
     toggleSpyPanel() {
-      return testSubjects.click('spyToggleButton');
+      testSubjects.click('spyToggleButton');
+      return PageObjects.common.sleep(1000);
     }
 
     getMetric() {
