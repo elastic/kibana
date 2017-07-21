@@ -13,6 +13,7 @@ export function AggTypesMetricsMovingAvgProvider(Private) {
     makeLabel: agg => makeNestedLabel(agg, 'moving avg'),
     params: [
       ...parentPipelineAggHelper.params()
-    ]
+    ],
+    getFormat: parentPipelineAggHelper.getFormat
   });
 }
