@@ -13,6 +13,7 @@ export function AggTypesMetricsDerivativeProvider(Private) {
     makeLabel: agg => makeNestedLabel(agg, 'derivative'),
     params: [
       ...parentPipelineAggHelper.params()
-    ]
+    ],
+    getFormat: parentPipelineAggHelper.getFormat
   });
 }

@@ -17,6 +17,7 @@ export function importApi(server) {
           exclude: [Joi.string(), Joi.array().items(Joi.string())]
         })
       },
+      tags: ['api'],
     },
 
     handler: (req, reply) => {
