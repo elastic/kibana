@@ -31,10 +31,9 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
       await this.clickLinkText('Index Patterns');
     }
 
-    getAdvancedSettings(propertyName) {
+    async getAdvancedSettings(propertyName) {
       log.debug('in setAdvancedSettings');
-      return testSubjects.find(`advancedSetting-${propertyName}-currentValue`)
-      .getVisibleText();
+      return await testSubjects.getVisibleText(`advancedSetting-${propertyName}-currentValue`);
     }
 
     async setAdvancedSettings(propertyName, propertyValue) {
@@ -151,14 +150,11 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
         );
     }
 
-    getFieldsTabCount() {
-      return retry.try(() => {
-        return testSubjects.find('tab-count-indexedFields')
-          .getVisibleText()
-          .then((theText) => {
-          // the value has () around it, remove them
-            return theText.replace(/\((.*)\)/, '$1');
-          });
+    async getFieldsTabCount() {
+      return await retry.try(async () => {
+        const text = await testSubjects.getVisibleText('tab-count-indexedFields');
+        // the value has () around it, remove them
+        return text.replace(/\((.*)\)/, '$1');
       });
     }
 
@@ -305,8 +301,7 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
 
     async setIndexPatternField(pattern) {
       log.debug(`setIndexPatternField(${pattern})`);
-      return testSubjects.find('createIndexPatternNameInput')
-        .clearValue().type(pattern);
+      return await testSubjects.setValue('createIndexPatternNameInput', pattern);
     }
 
 
