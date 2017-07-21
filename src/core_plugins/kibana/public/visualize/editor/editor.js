@@ -20,7 +20,7 @@ import editorTemplate from 'plugins/kibana/visualize/editor/editor.html';
 import { DashboardConstants } from 'plugins/kibana/dashboard/dashboard_constants';
 import { VisualizeConstants } from '../visualize_constants';
 import { documentationLinks } from 'ui/documentation_links/documentation_links';
-import { getDefaultQuery } from 'ui/parse_query/lib/query_utils';
+import { getDefaultQuery } from 'ui/parse_query';
 
 uiRoutes
 .when(VisualizeConstants.CREATE_PATH, {

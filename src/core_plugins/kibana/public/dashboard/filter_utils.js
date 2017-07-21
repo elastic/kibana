@@ -1,5 +1,5 @@
 import _ from 'lodash';
-import { isDefaultQuery, isTextQuery, getDefaultQuery } from 'ui/parse_query/lib/query_utils';
+import { isDefaultQuery, isTextQuery, getDefaultQuery } from 'ui/parse_query';
 
 /**
  * @typedef {Object} QueryFilter
