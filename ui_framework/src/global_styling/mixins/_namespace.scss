@@ -6,11 +6,14 @@ $childSeparator: '__';
 $modifierSeparator: '--';
 $stateSeparator: '.is';
 
-@function containsModifier($selector) {
+// Is this mixin itself nested within a mixin?
+@function isNested($selector) {
     $selector: selectorToString($selector);
     @if str-index($selector, $modifierSeparator) {
         @return true;
     } @else if str-index($selector, $stateSeparator){
+      @return true;
+    } @else if str-index($selector, $childSeparator){
       @return true;
     } @else {
       @return false;
@@ -23,15 +26,18 @@ $stateSeparator: '.is';
     @return $selector;
 }
 
+// Output the component name from the given nested selector.
 @function getComponent($selector) {
     $selector: selectorToString($selector);
 
     @if str-index($selector, $modifierSeparator) {
         $modifierStart: str-index($selector, $modifierSeparator) - 1;
         @return str-slice($selector, 0, $modifierStart);
-    } @else {
-      $stateStart: str-index($selector, '.is') - 1;
-      @debug $stateStart;
+    } @else if str-index($selector, $childSeparator){
+      $childStart: str-index($selector, $childSeparator) - 1;
+      @return '.' + str-slice($selector, 0, $childStart);
+    } @else if str-index($selector, $stateSeparator){
+      $stateStart: str-index($selector, $stateSeparator) - 1;
       @return str-slice($selector, 0, $stateStart);
     }
 
@@ -47,7 +53,7 @@ $stateSeparator: '.is';
 // Children are related to a component .kuiComponent__child
 @mixin child($child) {
     $selector: &;
-    @if containsModifier($selector) {
+    @if isNested($selector) {
         $block: getComponent($selector);
         @at-root {
             #{$selector} {

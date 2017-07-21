@@ -260,17 +260,17 @@ table {
     border: 1px solid #D9D9D9;
     border-color: transparent;
     border-radius: 4px; }
-    .kuiKeyPad__item svg {
-      transition: -webkit-transform cubic-bezier(0.34, 1.61, 0.7, 1) 250ms;
-      transition: transform cubic-bezier(0.34, 1.61, 0.7, 1) 250ms;
-      transition: transform cubic-bezier(0.34, 1.61, 0.7, 1) 250ms, -webkit-transform cubic-bezier(0.34, 1.61, 0.7, 1) 250ms;
-      -webkit-transform: translateY(4px);
-              transform: translateY(4px); }
     .kuiKeyPad__item:hover, .kuiKeyPad__item:focus {
       border-color: #D9D9D9; }
-      .kuiKeyPad__item:hover svg, .kuiKeyPad__item:focus svg {
+      .kuiKeyPad__item:hover .kuiKeyPad__icon, .kuiKeyPad__item:focus .kuiKeyPad__icon {
         -webkit-transform: translateY(0);
                 transform: translateY(0); }
+  .kuiKeyPad__icon {
+    transition: -webkit-transform cubic-bezier(0.34, 1.61, 0.7, 1) 250ms;
+    transition: transform cubic-bezier(0.34, 1.61, 0.7, 1) 250ms;
+    transition: transform cubic-bezier(0.34, 1.61, 0.7, 1) 250ms, -webkit-transform cubic-bezier(0.34, 1.61, 0.7, 1) 250ms;
+    -webkit-transform: translateY(4px);
+            transform: translateY(4px); }
 
 .kuiPopMenu {
   position: relative; }

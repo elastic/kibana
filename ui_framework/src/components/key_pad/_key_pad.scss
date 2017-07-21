@@ -18,17 +18,17 @@
     border-color: transparent;
     border-radius: $kuiBorderRadius;
 
-    svg {
-      transition: transform $kuiAnimSlightBounce $kuiAnimSpeedNormal;
-      transform: translateY($kuiSizeXS);
-    }
-
     &:hover, &:focus {
       border-color: $kuiBorderColor;
 
-      svg {
+      @include child('icon') {
         transform: translateY(0);
       }
     }
+  }
+
+  @include child('icon') {
+    transition: transform $kuiAnimSlightBounce $kuiAnimSpeedNormal;
+    transform: translateY($kuiSizeXS);
   }
 }
