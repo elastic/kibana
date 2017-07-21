@@ -8,16 +8,58 @@ We use functional tests to make sure the Kibana UI works as expected. It replace
 
 The `FunctionalTestRunner` is very bare bones and gets most of its functionality from its config file, located at {blob}test/functional/config.js[test/functional/config.js]. If you’re writing a plugin you will have your own config file. See <<development-plugin-functional-tests>> for more info.
 
-Execute the `FunctionalTestRunner`'s script with node.js to run the tests with Kibana's default configuration:
+
+The following will start Kibana, Elasticsearch and the chromedriver for you. To run the functional UI tests use the following commands
+
+["source","shell"]
+----------
+npm run test:ui
+----------
+
+
+Use the following command to start the server required for the `node scripts/functional_test_runner` tasks. Once the server is started `node scripts/functional_test_runner` can be run multiple times without waiting for the server to start.
+
+["source","shell"]
+----------
+npm run test:ui:server
+----------
+
+
+Execute the `FunctionalTestRunner`'s script with node.js to run the tests with Kibana's default configuration. This requires the server started by the `test:ui:server` task.
 
 ["source","shell"]
 -----------
 node scripts/functional_test_runner
 -----------
 
-When run without any arguments the `FunctionalTestRunner` automatically loads the configuration in the standard location, but you can override that behavior with the `--config` flag. There are also command line flags for `--bail` and `--grep`, which behave just like their mocha counterparts. The logging can also be customized with `--quiet`, `--debug`, or `--verbose` flags.
+
+When run without any arguments the `FunctionalTestRunner` automatically loads the configuration in the standard location, but you can override that behavior with the `--config` flag.
+
+There are also command line flags for `--bail` and `--grep`, which behave just like their mocha counterparts. For instance, use `--grep=foo` to run only tests that match a regular expression.
+
+Logging can also be customized with `--quiet`, `--debug`, or `--verbose` flags.
 
 Use the `--help` flag for more options.
+
+To run these browser tests against against some other Elasticsearch and Kibana instance you can set these environment variables and then run the test runner.
+Here's an example to run against an Elastic Cloud instance (note that you should run the same branch of tests as the version of Kibana you're testing);
+
+["source","shell"]
+-----------
+export TEST_KIBANA_PROTOCOL=https
+export TEST_KIBANA_HOSTNAME=9249d04b1186b3e7bbe11ea60df4f963.us-east-1.aws.found.io
+export TEST_KIBANA_PORT=443
+export TEST_KIBANA_USER=elastic
+export TEST_KIBANA_PASS=<your password here>
+
+export TEST_ES_PROTOCOL=http
+export TEST_ES_HOSTNAME=aaa5d22032d76805fcce724ed9d9f5a2.us-east-1.aws.found.io
+export TEST_ES_PORT=9200
+export TEST_ES_USER=elastic
+export TEST_ES_PASS=<your password here>
+node scripts/functional_test_runner
+-----------
+
 
 [float]
 ==== Writing functional tests
