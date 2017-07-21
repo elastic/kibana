@@ -25,6 +25,7 @@ export class GeohashLayer extends KibanaMapLayer {
 
   _createGeohashMarkers() {
     const markerOptions = {
+      isFilteredByCollar: this._geohashOptions.isFilteredByCollar,
       valueFormatter: this._geohashOptions.valueFormatter,
       tooltipFormatter: this._geohashOptions.tooltipFormatter
     };
@@ -65,21 +66,33 @@ export class GeohashLayer extends KibanaMapLayer {
     this._geohashMarkers.movePointer(...args);
   }
 
-  getBounds() {
+  async getBounds() {
+    if (this._geohashOptions.fetchBounds) {
+      const geoHashBounds = await this._geohashOptions.fetchBounds();
+      if (geoHashBounds) {
+        const northEast = L.latLng(geoHashBounds.top_left.lat, geoHashBounds.bottom_right.lon);
+        const southWest = L.latLng(geoHashBounds.bottom_right.lat, geoHashBounds.top_left.lon);
+        const leaftetBounds = L.latLngBounds(southWest, northEast);
+        return leaftetBounds;
+      }
+    }
+
     return this._bounds;
   }
 
   updateExtent() {
-    const bounds = this._kibanaMap.getLeafletBounds();
-    if (!this._lastBounds || !this._lastBounds.equals(bounds)) {
-      //this removal is required to trigger the bounds filter again
-      this._kibanaMap.removeLayer(this);
-      this._createGeohashMarkers();
-      this._kibanaMap.addLayer(this);
+    // Client-side filtering is only enabled when server-side filter is not used
+    if (!this._geohashOptions.isFilteredByCollar) {
+      const bounds = this._kibanaMap.getLeafletBounds();
+      if (!this._lastBounds || !this._lastBounds.equals(bounds)) {
+        //this removal is required to trigger the bounds filter again
+        this._kibanaMap.removeLayer(this);
+        this._createGeohashMarkers();
+        this._kibanaMap.addLayer(this);
+      }
+      this._lastBounds = bounds;
     }
-    this._lastBounds = bounds;
   }
-
 
   isReusable(options) {
 
