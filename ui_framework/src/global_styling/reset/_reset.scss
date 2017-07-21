@@ -39,6 +39,7 @@ html {
   font-weight: $kuiFontWeightRegular;
   color: $kuiTextColor;
   height: 100%;
+  -webkit-font-smoothing: antialiased;
 }
 
 body {

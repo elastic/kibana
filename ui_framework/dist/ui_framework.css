@@ -1,3 +1,8 @@
+.kui--fontSizeSmall, .kuiKeyPad {
+  font-size: 14px;
+  font-size: 0.875rem;
+  line-height: 24px; }
+
 /**
  * Adapted from Eric Meyer's reset (http://meyerweb.com/eric/tools/css/reset/, v2.0 | 20110126).
  *
@@ -34,7 +39,8 @@ html {
   font-family: "Roboto", Helvetica, Arial, sans-serif;
   font-weight: 400;
   color: #3F3F3F;
-  height: 100%; }
+  height: 100%;
+  -webkit-font-smoothing: antialiased; }
 
 body {
   line-height: 1; }
@@ -45,7 +51,7 @@ a {
     text-decoration: underline; }
   a:focus {
     text-decoration: underline;
-    background: #bfe9e6;
+    background: #e6f2f6;
     outline: none; }
 
 button {
@@ -89,6 +95,11 @@ table {
       -ms-flex-direction: row;
           flex-direction: row; }
 
+.kui--flexWrap {
+  -webkit-flex-wrap: wrap;
+      -ms-flex-wrap: wrap;
+          flex-wrap: wrap; }
+
 .kui--flexGrow1 {
   -webkit-box-flex: 1;
   -webkit-flex-grow: 1;
@@ -100,14 +111,25 @@ table {
       -ms-flex-negative: 1;
           flex-shrink: 1; }
 
+.kui--flexBasisOneThird {
+  -webkit-flex-basis: 33.33%;
+      -ms-flex-preferred-size: 33.33%;
+          flex-basis: 33.33%; }
+
 .kui--textAlignRight {
   text-align: right !important; }
 
 .kui--textAlignLeft {
   text-align: left !important; }
 
+.kui--textAlignCenter {
+  text-align: center !important; }
+
 .kui--verticalAlignMiddle {
   vertical-align: middle !important; }
+
+.kui--bottomShadow {
+  box-shadow: 0 16px 16px -8px rgba(0, 0, 0, 0.1); }
 
 .kuiIcon {
   display: inline-block;
@@ -184,6 +206,8 @@ table {
 
 .kuiHeaderItem {
   position: relative; }
+  .kuiHeaderItem:hover {
+    background: #F5F5F5; }
   .kuiHeaderItem:after {
     position: absolute;
     content: "";
@@ -209,7 +233,105 @@ table {
     height: 64px;
     min-width: 64px;
     text-align: center; }
-    .kuiHeaderItem__button:hover {
-      background: #F5F5F5; }
     .kuiHeaderItem__button:focus {
-      background: #bfe9e6; }
+      background: #e6f2f6; }
+
+.kuiKeyPad {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-orient: horizontal;
+  -webkit-box-direction: normal;
+  -webkit-flex-direction: row;
+      -ms-flex-direction: row;
+          flex-direction: row;
+  -webkit-flex-wrap: wrap;
+      -ms-flex-wrap: wrap;
+          flex-wrap: wrap;
+  width: 288px;
+  text-align: center; }
+  .kuiKeyPad__item {
+    padding: 16px;
+    height: 96px;
+    width: 96px;
+    display: block;
+    color: #666;
+    border: 1px solid #D9D9D9;
+    border-color: transparent;
+    border-radius: 4px; }
+    .kuiKeyPad__item:hover, .kuiKeyPad__item:focus {
+      border-color: #D9D9D9; }
+      .kuiKeyPad__item:hover .kuiKeyPad__icon, .kuiKeyPad__item:focus .kuiKeyPad__icon {
+        -webkit-transform: translateY(0);
+                transform: translateY(0); }
+  .kuiKeyPad__icon {
+    transition: -webkit-transform cubic-bezier(0.34, 1.61, 0.7, 1) 250ms;
+    transition: transform cubic-bezier(0.34, 1.61, 0.7, 1) 250ms;
+    transition: transform cubic-bezier(0.34, 1.61, 0.7, 1) 250ms, -webkit-transform cubic-bezier(0.34, 1.61, 0.7, 1) 250ms;
+    -webkit-transform: translateY(4px);
+            transform: translateY(4px); }
+
+.kuiPopMenu {
+  position: relative; }
+  .kuiPopMenu.isOpen .kuiPopMenu__body {
+    opacity: 1;
+    visibility: visible;
+    z-index: 2;
+    -webkit-transform: translateY(0) translateZ(0);
+            transform: translateY(0) translateZ(0); }
+  .kuiPopMenu__body {
+    background: #FFF;
+    position: absolute;
+    min-width: 256px;
+    top: 100%;
+    left: -128px;
+    background: #FFF;
+    border: 1px solid #D9D9D9;
+    border-radius: 4px 0 4px 4px;
+    padding: 16px;
+    -webkit-transform: translateY(8px) translateZ(0);
+            transform: translateY(8px) translateZ(0);
+    -webkit-backface-visibility: hidden;
+            backface-visibility: hidden;
+    transition: all cubic-bezier(0.34, 1.61, 0.7, 1) 350ms;
+    -webkit-transform-origin: center top;
+            transform-origin: center top;
+    opacity: 0;
+    visibility: hidden; }
+    .kuiPopMenu__body:before {
+      position: absolute;
+      content: "";
+      top: -16px;
+      height: 0;
+      width: 0;
+      left: 50%;
+      margin-left: -16px;
+      border-left: 16px solid transparent;
+      border-right: 16px solid transparent;
+      border-bottom: 16px solid #D9D9D9; }
+    .kuiPopMenu__body:after {
+      position: absolute;
+      content: "";
+      top: -15px;
+      right: 0;
+      height: 0;
+      left: 50%;
+      margin-left: -16px;
+      width: 0;
+      border-left: 16px solid transparent;
+      border-right: 16px solid transparent;
+      border-bottom: 16px solid #FFF; }
+  .kuiPopMenu--anchorLeft .kuiPopMenu__body {
+    right: auto;
+    left: 0; }
+    .kuiPopMenu--anchorLeft .kuiPopMenu__body:before, .kuiPopMenu--anchorLeft .kuiPopMenu__body:after {
+      right: auto;
+      left: 16px;
+      margin: 0; }
+  .kuiPopMenu--anchorRight .kuiPopMenu__body {
+    right: 0;
+    left: auto; }
+    .kuiPopMenu--anchorRight .kuiPopMenu__body:before, .kuiPopMenu--anchorRight .kuiPopMenu__body:after {
+      right: 16px;
+      left: auto; }
