@@ -75,20 +75,20 @@ export default async function (kbnServer, server, config) {
   server.ext('onPreResponse', function (req, reply) {
     const response = req.response;
 
-    const customResponseHeaders = config.get('server.customResponseHeaders');
+    const customHeaders = {
+      ...config.get('server.customResponseHeaders'),
+      'kbn-name': kbnServer.name,
+      'kbn-version': kbnServer.version,
+    };
 
     if (response.isBoom) {
       response.output.headers = {
         ...response.output.headers,
-        ...customResponseHeaders,
-        'kbn-name': kbnServer.name,
-        'kbn-version': kbnServer.version,
+        ...customHeaders
       };
     } else {
-      response.header('kbn-name', kbnServer.name);
-      response.header('kbn-version', kbnServer.version);
-      Object.keys(customResponseHeaders).forEach(name => {
-        response.header(name, customResponseHeaders[name]);
+      Object.keys(customHeaders).forEach(name => {
+        response.header(name, customHeaders[name]);
       });
     }
 
