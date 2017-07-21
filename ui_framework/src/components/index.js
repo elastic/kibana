@@ -5,3 +5,7 @@ export {
 export {
   KuiIcon,
 } from './icon';
+
+export {
+  KuiPageTitle,
+} from './typography';

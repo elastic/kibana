@@ -3,6 +3,11 @@
   font-size: 0.875rem;
   line-height: 24px; }
 
+.kuiPageTitle {
+  font-size: 32px;
+  font-size: 2rem;
+  line-height: 48px; }
+
 /**
  * Adapted from Eric Meyer's reset (http://meyerweb.com/eric/tools/css/reset/, v2.0 | 20110126).
  *
@@ -131,22 +136,6 @@ table {
 .kui--bottomShadow {
   box-shadow: 0 16px 16px -8px rgba(0, 0, 0, 0.1); }
 
-.kuiIcon {
-  display: inline-block;
-  fill: #3F3F3F; }
-  .kuiIcon--medium {
-    width: 16px;
-    height: 16px; }
-  .kuiIcon--large {
-    width: 24px;
-    height: 24px; }
-  .kuiIcon--xLarge {
-    width: 32px;
-    height: 32px; }
-  .kuiIcon--xxLarge {
-    width: 40px;
-    height: 40px; }
-
 .kuiHeader {
   background: #FFF;
   border-bottom: 1px solid #D9D9D9; }
@@ -235,6 +224,22 @@ table {
     text-align: center; }
     .kuiHeaderItem__button:focus {
       background: #e6f2f6; }
+
+.kuiIcon {
+  display: inline-block;
+  fill: #3F3F3F; }
+  .kuiIcon--medium {
+    width: 16px;
+    height: 16px; }
+  .kuiIcon--large {
+    width: 24px;
+    height: 24px; }
+  .kuiIcon--xLarge {
+    width: 32px;
+    height: 32px; }
+  .kuiIcon--xxLarge {
+    width: 40px;
+    height: 40px; }
 
 .kuiKeyPad {
   display: -webkit-box;
@@ -335,3 +340,7 @@ table {
     .kuiPopMenu--anchorRight .kuiPopMenu__body:before, .kuiPopMenu--anchorRight .kuiPopMenu__body:after {
       right: 16px;
       left: auto; }
+
+.kuiPageTitle {
+  color: #3F3F3F;
+  font-weight: 300; }
