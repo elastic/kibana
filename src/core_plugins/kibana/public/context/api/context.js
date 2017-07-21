@@ -50,7 +50,10 @@ function fetchContextProvider(courier, Private) {
       .set('size', size)
       .set('filter', filters)
       .set('query', {
-        match_all: {},
+        query: {
+          match_all: {},
+        },
+        language: 'lucene'
       })
       .set('searchAfter', anchorDocument.sort)
       .set('sort', sort);

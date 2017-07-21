@@ -88,9 +88,12 @@ describe('context app', function () {
           const setQuerySpy = searchSourceStub.set.withArgs('query');
           expect(setQuerySpy.calledOnce).to.be(true);
           expect(setQuerySpy.firstCall.args[1]).to.eql({
-            terms: {
-              _uid: ['UID'],
+            query: {
+              terms: {
+                _uid: ['UID'],
+              }
             },
+            language: 'lucene'
           });
         });
     });

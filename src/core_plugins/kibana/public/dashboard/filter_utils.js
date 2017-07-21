@@ -33,10 +33,13 @@ export class FilterUtils {
    * @returns {QueryFilter}
    */
   static getQueryFilterForDashboard(dashboard) {
-    const defaultQueryFilter = { query_string: { query: '*' } };
+    if (dashboard.searchSource.getOwn('query')) {
+      return dashboard.searchSource.getOwn('query');
+    }
+
     const dashboardFilters = this.getDashboardFilters(dashboard);
     const dashboardQueryFilter = _.find(dashboardFilters, this.isQueryFilter);
-    return dashboardQueryFilter ? dashboardQueryFilter.query : defaultQueryFilter;
+    return dashboardQueryFilter ? dashboardQueryFilter.query : '';
   }
 
   /**

@@ -6,15 +6,15 @@ import 'ui/promises';
 import { RequestQueueProvider } from '../_request_queue';
 import { ErrorHandlersProvider } from '../_error_handlers';
 import { FetchProvider } from '../fetch';
-import { DecorateQueryProvider } from './_decorate_query';
 import { FieldWildcardProvider } from '../../field_wildcard';
 import { getHighlightRequest } from '../../../../core_plugins/kibana/common/highlight';
-import { migrateFilter } from './_migrate_filter';
+import { BuildESQueryProvider } from './build_query';
 
 export function AbstractDataSourceProvider(Private, Promise, PromiseEmitter, config) {
   const requestQueue = Private(RequestQueueProvider);
   const errorHandlers = Private(ErrorHandlersProvider);
   const courierFetch = Private(FetchProvider);
+  const buildESQuery = Private(BuildESQueryProvider);
   const { fieldWildcardFilter } = Private(FieldWildcardProvider);
   const getConfig = (...args) => config.get(...args);
 
@@ -301,16 +301,7 @@ export function AbstractDataSourceProvider(Private, Promise, PromiseEmitter, con
     .then(function () {
       if (type === 'search') {
         // This is down here to prevent the circular dependency
-        const decorateQuery = Private(DecorateQueryProvider);
-
         flatState.body = flatState.body || {};
-
-        // defaults for the query
-        if (!flatState.body.query) {
-          flatState.body.query = {
-            'match_all': {}
-          };
-        }
 
         const computedFields = flatState.index.getComputedFields();
         flatState.body.stored_fields = computedFields.storedFields;
@@ -339,27 +330,20 @@ export function AbstractDataSourceProvider(Private, Promise, PromiseEmitter, con
           _.set(flatState.body, '_source.includes', remainingFields);
         }
 
-        decorateQuery(flatState.body.query);
+        flatState.body.query = buildESQuery(flatState.index, flatState.query, flatState.filters);
+
+        if (flatState.highlightAll != null) {
+          if (flatState.highlightAll && flatState.body.query) {
+            flatState.body.highlight = getHighlightRequest(flatState.body.query, getConfig);
+          }
+          delete flatState.highlightAll;
+        }
 
         /**
-         * Create a filter that can be reversed for filters with negate set
-         * @param {boolean} reverse This will reverse the filter. If true then
-         *                          anything where negate is set will come
-         *                          through otherwise it will filter out
-         * @returns {function}
+         * Translate a filter into a query to support es 3+
+         * @param  {Object} filter - The filter to translate
+         * @return {Object} the query version of that filter
          */
-        const filterNegate = function (reverse) {
-          return function (filter) {
-            if (_.isUndefined(filter.meta) || _.isUndefined(filter.meta.negate)) return !reverse;
-            return filter.meta && filter.meta.negate === reverse;
-          };
-        };
-
-        /**
-        * Translate a filter into a query to support es 3+
-        * @param  {Object} filter - The filter to translate
-        * @return {Object} the query version of that filter
-        */
         const translateToQuery = function (filter) {
           if (!filter) return;
 
@@ -369,55 +353,6 @@ export function AbstractDataSourceProvider(Private, Promise, PromiseEmitter, con
 
           return filter;
         };
-
-        /**
-         * Clean out any invalid attributes from the filters
-         * @param {object} filter The filter to clean
-         * @returns {object}
-         */
-        const cleanFilter = function (filter) {
-          return _.omit(filter, ['meta']);
-        };
-
-        // switch to filtered query if there are filters
-        if (flatState.filters) {
-          if (flatState.filters.length) {
-            _.each(flatState.filters, function (filter) {
-              if (filter.query) {
-                decorateQuery(filter.query);
-              }
-            });
-
-            flatState.body.query = {
-              bool: {
-                must: (
-                  [flatState.body.query].concat(
-                    (flatState.filters || [])
-                    .filter(filterNegate(false))
-                    .map(translateToQuery)
-                    .map(cleanFilter)
-                    .map(migrateFilter)
-                  )
-                ),
-                must_not: (
-                  (flatState.filters || [])
-                  .filter(filterNegate(true))
-                  .map(translateToQuery)
-                  .map(cleanFilter)
-                  .map(migrateFilter)
-                )
-              }
-            };
-          }
-          delete flatState.filters;
-        }
-
-        if (flatState.highlightAll != null) {
-          if (flatState.highlightAll && flatState.body.query) {
-            flatState.body.highlight = getHighlightRequest(flatState.body.query, getConfig);
-          }
-          delete flatState.highlightAll;
-        }
 
         // re-write filters within filter aggregations
         (function recurse(aggBranch) {

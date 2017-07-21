@@ -60,6 +60,11 @@ app.directive('dashboardGrid', function ($compile, Notifier) {
        * @type {function}
        */
       toggleExpand: '=',
+      /**
+       * Called when a filter action has been triggered by a panel
+       * @type {function}
+       */
+      onFilter: '=',
     },
     link: function ($scope, $el) {
       const notify = new Notifier();
@@ -223,7 +228,8 @@ app.directive('dashboardGrid', function ($compile, Notifier) {
                   app-state="appState"
                   register-panel-index-pattern="registerPanelIndexPattern"
                   toggle-expand="toggleExpand(${panel.panelIndex})"
-                  create-child-ui-state="createChildUiState">
+                  create-child-ui-state="createChildUiState"
+                  on-filter="onFilter">
             </li>`;
         const panelElement = $compile(panelHtml)($scope);
         panelElementMapping[panel.panelIndex] = panelElement;
