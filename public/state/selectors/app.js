@@ -14,8 +14,6 @@ export function getAppReady(state) {
 }
 
 // return true only when the required parameters are in the state
-export function isAppReady(state) {
-
-  // This probably isn't required anymore
-  return Array.isArray(getFunctionDefinitions(state));
+export function isAppReady() {
+  return true;
 }
