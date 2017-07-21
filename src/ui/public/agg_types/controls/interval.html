@@ -1,4 +1,16 @@
 <div class="form-group">
+
+  <div
+    class="vis-option-item indented"
+    ng-show="!agg.fieldIsTimeField()">
+    <label>
+      <input type="checkbox"
+             name="isFilteredByKbnTime"
+             ng-model="agg.params.isFilteredByKbnTime">
+      Only request data within Kibana time period
+    </label>
+  </div>
+
   <label>
     Interval
     <kbn-info
