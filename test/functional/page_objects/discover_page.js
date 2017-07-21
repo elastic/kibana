@@ -221,8 +221,8 @@ export function DiscoverPageProvider({ getService, getPageObjects }) {
       .getProperty('value');
     }
 
-    toggleSidebarCollapse() {
-      return testSubjects.find('collapseSideBarButton').click();
+    async toggleSidebarCollapse() {
+      return await testSubjects.click('collapseSideBarButton');
     }
 
     getAllFieldNames() {

@@ -99,12 +99,12 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
     }
 
     async clickDefaultIndexButton() {
-      await testSubjects.find('setDefaultIndexPatternButton').click();
+      await testSubjects.click('setDefaultIndexPatternButton');
       await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
     async clickDeletePattern() {
-      await testSubjects.find('deleteIndexPatternButton').click();
+      await testSubjects.click('deleteIndexPatternButton');
     }
 
     getIndexPageHeading() {
@@ -318,7 +318,7 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
       });
       await retry.try(async () => {
         log.debug('getAlertText');
-        alertText = await testSubjects.find('confirmModalBodyText').getVisibleText();
+        alertText = await testSubjects.getVisibleText('confirmModalBodyText');
       });
       await retry.try(async () => {
         log.debug('acceptConfirmation');
@@ -392,7 +392,7 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
 
     async setScriptedFieldName(name) {
       log.debug('set scripted field name = ' + name);
-      await testSubjects.find('editorFieldName').type(name);
+      await testSubjects.setValue('editorFieldName', name);
     }
 
     async setScriptedFieldLanguage(language) {
@@ -453,12 +453,12 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
 
     async setScriptedFieldPopularity(popularity) {
       log.debug('set scripted field popularity = ' + popularity);
-      await testSubjects.find('editorFieldCount').type(popularity);
+      await testSubjects.setValue('editorFieldCount', popularity);
     }
 
     async setScriptedFieldScript(script) {
       log.debug('set scripted field script = ' + script);
-      await testSubjects.find('editorFieldScript').type(script);
+      await testSubjects.setValue('editorFieldScript', script);
     }
   }
 
