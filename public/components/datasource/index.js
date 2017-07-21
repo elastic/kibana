@@ -5,13 +5,13 @@ import { get } from 'lodash';
 import { Datasource as Component } from './datasource';
 import { datasourceRegistry } from '../../expression_types';
 import { getSelectedElement, getSelectedPage } from '../../state/selectors/workpad';
-import { getServerFunctions } from '../../state/selectors/app';
+import { getFunctionDefinitions } from '../../state/selectors/app';
 import { setArgumentAtIndex, setAstAtIndex } from '../../state/actions/elements';
 
 const mapStateToProps = (state) => ({
   element: getSelectedElement(state),
   pageId: getSelectedPage(state),
-  serverFunctions: getServerFunctions(state),
+  functionDefinitions: getFunctionDefinitions(state),
 });
 
 const mapDispatchToProps = (dispatch) => ({
@@ -20,10 +20,10 @@ const mapDispatchToProps = (dispatch) => ({
 });
 
 const mergeProps = (stateProps, dispatchProps, ownProps) => {
-  const { element, pageId, serverFunctions } = stateProps;
+  const { element, pageId, functionDefinitions } = stateProps;
   const { dispatchArgumentAtIndex, dispatchAstAtIndex } = dispatchProps;
 
-  const getServerFunctionByName = name => serverFunctions.find(fn => fn.name === name);
+  const getServerFunctionByName = name => functionDefinitions.find(fn => fn.name === name && fn.type === 'datatable');
 
   // find the matching datasource from the expression AST
   const datasourceAst = get(element, 'ast.chain', []).map((astDef, i) => {
