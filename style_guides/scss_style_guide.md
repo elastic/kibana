@@ -44,9 +44,9 @@ hex values.
 
 ### Bemify for namespacing components
 
-We use [bemify](https://github.com/franzheidl/bemify) for namespacing the sass into a BEM format. We use `component`, `child`, `modifier` and `state` as our mixin names. We've adjusted the plugin's state mixin so that you need to write out the full selector (`@include state('isHappening')`).
+We use a mixin system for namespacing the sass into a BEM-like format. We use `component`, `child`, `modifier`, `state` and `utiligy` as our mixin names.
 
-#### Example
+Component example with lots of nesting.
 
 ```
 // Generates .kuiButton
@@ -76,26 +76,32 @@ We use [bemify](https://github.com/franzheidl/bemify) for namespacing the sass i
   @include state('isLoading') {
     opacity: .5;
     cursor: not-allowed;
+
+    // Generates .kuiButton.isLoading .kuiButton__icon
+    @include child('icon') {
+      color: gray;
+    }
   }
 }
 ```
 
-### Utility class naming
-
 KUI includes utility classes in `global_styles/utility` which are used to cut down on the amount of duplicate CSS we write and make designing in code faster. Utilities include the `kui--` prefix, since we consider them modifiers to KUI as a whole.
 
 ```
-<div class="kuiSomeComponent kui--flexRow">
+```
+// Generates .kui--textAlignRight
+@include utility('textAlignRight') {
+  text-align: right !important;
+}
+```
+
+The combination of this namespacing means that we can visually see the different between components and utilities.
+
+```
+<div class="kuiButton kuiButton--primary kui--textAlignRight">
 ```
 
 There is also a mixin for creating these utilities in the Sass.
-
-```
-@include utility('flexRow') {
-  display: flex;
-  flex-direction: row;
-}
-```
 
 ## Dealing with extends
 

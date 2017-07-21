@@ -6,7 +6,7 @@
 
   // Open state happens on the wrapper and applies to the body.
   @include state('isOpen') {
-    .kuiPopMenu__body {
+    @include child('body') {
       opacity: 1;
       visibility: visible;
       z-index: 2;
@@ -64,7 +64,7 @@
 
   // Positions the menu and arrow to the left of the parent.
   @include modifier('anchorLeft') {
-    .kuiPopMenu__body {
+    @include child('body') {
       right: auto;
       left: 0;
 
@@ -78,7 +78,7 @@
 
   // Positions the menu and arrow to the right of the parent.
   @include modifier('anchorRight') {
-    .kuiPopMenu__body {
+    @include child('body') {
       right: 0;
       left: auto;
 
