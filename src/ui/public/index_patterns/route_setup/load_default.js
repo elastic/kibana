@@ -15,8 +15,7 @@ export default function (opts) {
 
   uiRoutes
   .addSetupWork(function loadDefaultIndexPattern(Private, Promise, $route, config) {
-    const getProvider = Private(IndexPatternsGetProvider);
-    const getIds = getProvider('id');
+    const getIds = Private(IndexPatternsGetProvider)('id');
     const route = _.get($route, 'current.$$route');
 
     return getIds()

@@ -29,8 +29,7 @@ export function getRoutes() {
 export function IndexPatternProvider(Private, $http, config, kbnIndex, Promise, confirmModalPromise, kbnUrl) {
   const fieldformats = Private(RegistryFieldFormatsProvider);
   const getConfig = (...args) => config.get(...args);
-  const getProvider = Private(IndexPatternsGetProvider);
-  const getIds = getProvider('id');
+  const getIds = Private(IndexPatternsGetProvider)('id');
   const fieldsFetcher = Private(FieldsFetcherProvider);
   const intervals = Private(IndexPatternsIntervalsProvider);
   const mappingSetup = Private(UtilsMappingSetupProvider);
