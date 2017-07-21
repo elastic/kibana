@@ -1,4 +1,4 @@
-.kui--fontSizeSmall {
+.kui--fontSizeSmall, .kuiKeyPad {
   font-size: 14px;
   font-size: 0.875rem;
   line-height: 24px; }
@@ -236,7 +236,7 @@ table {
     .kuiHeaderItem__button:focus {
       background: #e6f2f6; }
 
-.kuiDialMenu {
+.kuiKeyPad {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -249,8 +249,9 @@ table {
   -webkit-flex-wrap: wrap;
       -ms-flex-wrap: wrap;
           flex-wrap: wrap;
-  width: 288px; }
-  .kuiDialMenu__item {
+  width: 288px;
+  text-align: center; }
+  .kuiKeyPad__item {
     padding: 16px;
     height: 96px;
     width: 96px;
@@ -259,15 +260,15 @@ table {
     border: 1px solid #D9D9D9;
     border-color: transparent;
     border-radius: 4px; }
-    .kuiDialMenu__item svg {
+    .kuiKeyPad__item svg {
       transition: -webkit-transform cubic-bezier(0.34, 1.61, 0.7, 1) 250ms;
       transition: transform cubic-bezier(0.34, 1.61, 0.7, 1) 250ms;
       transition: transform cubic-bezier(0.34, 1.61, 0.7, 1) 250ms, -webkit-transform cubic-bezier(0.34, 1.61, 0.7, 1) 250ms;
       -webkit-transform: translateY(4px);
               transform: translateY(4px); }
-    .kuiDialMenu__item:hover, .kuiDialMenu__item:focus {
+    .kuiKeyPad__item:hover, .kuiKeyPad__item:focus {
       border-color: #D9D9D9; }
-      .kuiDialMenu__item:hover svg, .kuiDialMenu__item:focus svg {
+      .kuiKeyPad__item:hover svg, .kuiKeyPad__item:focus svg {
         -webkit-transform: translateY(0);
                 transform: translateY(0); }
 

@@ -1,15 +1,17 @@
 // Dial menu is a phone like dial comprised of an svg icon and a title.
 
-@include component('kuiDialMenu') {
+@include component('kuiKeyPad') {
   display: flex;
   flex-direction: row;
   flex-wrap: wrap;
-  width: $kuiDialMenuWidth * 3; // Default to grid of 3
+  width: $kuiKeyPadSize * 3; // Default to grid of 3
+  text-align: center;
+  @extend %kuiFontSizeS;
 
   @include child('item') {
     padding: $kuiSize;
-    height: $kuiDialMenuWidth;
-    width: $kuiDialMenuWidth;
+    height: $kuiKeyPadSize;
+    width: $kuiKeyPadSize;
     display: block;
     color: $kuiColorDarkShade;
     border: $kuiBorderThin;
