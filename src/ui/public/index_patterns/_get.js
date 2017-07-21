@@ -6,17 +6,17 @@ export function IndexPatternsGetProvider(Private) {
 
   // many places may require the id list, so we will cache it separately
   // didn't incorporate with the indexPattern cache to prevent id collisions.
-  const cachedPromises = {};
+  let cachedIdPromise;
 
   const get = function (field) {
-    if (cachedPromises[field]) {
+    if (field === 'id' && cachedIdPromise) {
       // return a clone of the cached response
-      return cachedPromises[field].then(function (cachedResp) {
+      return cachedIdPromise.then(function (cachedResp) {
         return _.clone(cachedResp);
       });
     }
 
-    cachedPromises[field] = savedObjectsClient.find({
+    const promise = savedObjectsClient.find({
       type: 'index-pattern',
       fields: [],
       perPage: 10000
@@ -24,17 +24,23 @@ export function IndexPatternsGetProvider(Private) {
       return resp.savedObjects.map(obj => _.get(obj, field));
     });
 
+    if (field === 'id') {
+      cachedIdPromise = promise;
+    }
+
     // ensure that the response stays pristine by cloning it here too
-    return cachedPromises[field].then(function (resp) {
+    return promise.then(function (resp) {
       return _.clone(resp);
     });
   };
 
   return (field) => {
     const getter = get.bind(get, field);
-    getter.clearCache = function () {
-      delete cachedPromises[field];
-    };
+    if (field === 'id') {
+      getter.clearCache = function () {
+        cachedIdPromise = null;
+      };
+    }
     return getter;
   };
 }
