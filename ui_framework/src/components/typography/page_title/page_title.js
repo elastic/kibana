@@ -16,5 +16,5 @@ export const KuiPageTitle = ({ children, className, ...rest }) => {
 };
 
 KuiPageTitle.PropTypes = {
-  children: PropTypes.any.isRequired,
+  children: PropTypes.node.isRequired,
 };

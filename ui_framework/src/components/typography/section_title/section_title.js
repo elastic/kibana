@@ -16,5 +16,5 @@ export const KuiSectionTitle = ({ children, className, ...rest }) => {
 };
 
 KuiSectionTitle.PropTypes = {
-  children: PropTypes.any.isRequired,
+  children: PropTypes.node.isRequired,
 };
