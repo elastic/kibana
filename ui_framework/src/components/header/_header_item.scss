@@ -3,6 +3,10 @@
 @include component('kuiHeaderItem') {
   position: relative;
 
+  &:hover {
+    background: $kuiColorLightestShade;
+  }
+
   &:after {
     position: absolute;
     content: "";
@@ -38,10 +42,6 @@
     height: $kuiHeaderChildSize;
     min-width: $kuiHeaderChildSize;
     text-align: center;
-
-    &:hover {
-      background: $kuiColorLightestShade;
-    }
 
     &:focus {
       background: $kuiFocusBackgroundColor;
