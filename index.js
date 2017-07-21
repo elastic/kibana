@@ -1,7 +1,6 @@
 import init from './init';
 import { functions as serverFunctionsRegistry } from './server/lib/functions';
 
-
 export default function (kibana) {
   return new kibana.Plugin({
     name: 'canvas',

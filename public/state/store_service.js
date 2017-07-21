@@ -6,7 +6,6 @@ import getRootReducer from './reducers';
 import { historyProvider } from '../lib/history_provider';
 import { onStart } from './on_start';
 import { uniqBy } from 'lodash';
-
 import { functions as clientFunctionsRegistry } from '../lib/functions';
 
 const app = uiModules.get('apps/canvas');
