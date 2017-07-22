@@ -3,7 +3,7 @@
   font-size: 0.875rem;
   line-height: 24px; }
 
-.kuiObjectTitle {
+.kuiObjectTitle, .kuiText {
   font-size: 16px;
   font-size: 1rem;
   line-height: 24px; }
@@ -353,7 +353,8 @@ table {
 
 .kuiObjectTitle {
   color: #3F3F3F;
-  font-weight: 300; }
+  font-weight: 300;
+  font-style: italic; }
 
 .kuiPageTitle {
   color: #3F3F3F;
@@ -362,3 +363,7 @@ table {
 .kuiSectionTitle {
   color: #3F3F3F;
   font-weight: 300; }
+
+.kuiText {
+  color: #3F3F3F;
+  font-weight: 400; }

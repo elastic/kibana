@@ -1,0 +1,1 @@
+export { KuiText } from './text';

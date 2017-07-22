@@ -9,3 +9,7 @@ export {
 export {
   KuiSectionTitle,
 } from './section_title';
+
+export {
+  KuiText,
+} from './text';

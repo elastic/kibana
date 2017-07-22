@@ -10,4 +10,5 @@ export {
   KuiObjectTitle,
   KuiPageTitle,
   KuiSectionTitle,
+  KuiText,
 } from './typography';

@@ -11,6 +11,10 @@ import {
   GuideText,
 } from '../../components';
 
+import Typography from './typography';
+const typographySource = require('!!raw!./typography');
+const typographyHtml = renderToHtml(Typography);
+
 import PageTitle from './page_title';
 const pageTitleSource = require('!!raw!./page_title');
 const pageTitleHtml = renderToHtml(PageTitle);
@@ -23,8 +27,27 @@ import ObjectTitle from './object_title';
 const objectTitleSource = require('!!raw!./object_title');
 const objectTitleHtml = renderToHtml(ObjectTitle);
 
+import Text from './text';
+const textSource = require('!!raw!./text');
+const textHtml = renderToHtml(Text);
+
 export default props => (
   <GuidePage title={props.route.name}>
+    <GuideSection
+      title="Typography"
+      source={[{
+        type: GuideSectionTypes.JS,
+        code: typographySource,
+      }, {
+        type: GuideSectionTypes.HTML,
+        code: typographyHtml,
+      }]}
+    >
+      <GuideDemo>
+        <Typography />
+      </GuideDemo>
+    </GuideSection>
+
     <GuideSection
       title="PageTitle"
       source={[{
@@ -85,6 +108,25 @@ export default props => (
 
       <GuideDemo>
         <ObjectTitle />
+      </GuideDemo>
+    </GuideSection>
+
+    <GuideSection
+      title="Text"
+      source={[{
+        type: GuideSectionTypes.JS,
+        code: textSource,
+      }, {
+        type: GuideSectionTypes.HTML,
+        code: textHtml,
+      }]}
+    >
+      <GuideText>
+        You'll generally use this component for paragraphs.
+      </GuideText>
+
+      <GuideDemo>
+        <Text />
       </GuideDemo>
     </GuideSection>
   </GuidePage>
