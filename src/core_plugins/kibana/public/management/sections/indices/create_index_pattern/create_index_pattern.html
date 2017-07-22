@@ -5,15 +5,15 @@
       data-test-subj="createIndexPatternContainer"
       class="kuiViewContent"
     >
-      <h1
-        class="kuiTitle kuiVerticalRhythm"
-        translate="KIBANA-CONFIGURE_INDEX_PATTERN"
-      ></h1>
+      <h1 class="kuiTitle kuiVerticalRhythm">
+        Configure an index pattern
+      </h1>
 
-      <p
-        class="kuiText kuiVerticalRhythm"
-        translate="KIBANA-MUST_CONFIGURE_INDEX_PATTERN"
-      ></p>
+      <p class="kuiText kuiVerticalRhythm">
+        In order to use Kibana you must configure at least one index pattern.
+        Index patterns are used to identify the Elasticsearch index to run
+        search and analytics against. They are also used to configure fields.
+      </p>
 
       <div class="kuiVerticalRhythm">
         <!-- Form -->
@@ -27,14 +27,15 @@
           <!-- Index pattern input -->
           <div class="kuiVerticalRhythm">
             <label class="kuiLabel kuiVerticalRhythmSmall">
-              <span translate="KIBANA-INDEX_PATTERN"></span>
+              <span>Index pattern</span>
 
               <small>
                 <a
                   class="kuiLink"
                   ng-click="controller.toggleAdvancedIndexOptions();"
-                  translate="KIBANA-ADVANCED_OPTIONS"
-                ></a>
+                >
+                  advanced options
+                </a>
               </small>
             </label>
 
@@ -67,18 +68,16 @@
 
             <!-- Input help text -->
             <div class="kuiVerticalRhythm">
-              <p
-                class="kuiSubText kuiVerticalRhythmSmall"
-                translate="KIBANA-WILDCARD_DYNAMIC_INDEX_PATTERNS"
-              ></p>
+              <p class="kuiSubText kuiVerticalRhythmSmall">
+                Patterns allow you to define dynamic index names using * as a wildcard. Example: logstash-*
+              </p>
             </div>
           </div>
 
           <!-- Index pattern id input -->
           <div class="kuiVerticalRhythm" ng-if="controller.showAdvancedOptions">
-            <label
-              class="kuiLabel kuiVerticalRhythmSmall"
-              translate="KIBANA-INDEX_PATTERN_ID">
+            <label class="kuiLabel kuiVerticalRhythmSmall">
+              Index pattern ID
             </label>
 
             <div class="kuiVerticalRhythm kuiVerticalRhythmSmall">
@@ -96,26 +95,24 @@
 
             <!-- ID help text -->
             <div class="kuiVerticalRhythm">
-              <p
-                class="kuiSubText kuiVerticalRhythmSmall"
-                translate="KIBANA-INDEX_PATTERN_SPECIFY_ID"
-              ></p>
+              <p class="kuiSubText kuiVerticalRhythmSmall">
+                Creates the index pattern with the specified ID.
+              </p>
             </div>
           </div>
 
           <!-- Time field select -->
           <div class="kuiVerticalRhythm">
             <label class="kuiLabel kuiVerticalRhythmSmall">
-              <span translate="KIBANA-TIME_FILTER_FIELD_NAME"></span>
+              <span>Time Filter field name</span>
               &nbsp;
-              <kbn-info info="{{ 'KIBANA-FIELD_FILTER_EVENTS_GLOBAL_TIME' | translate }}"></kbn-info>
+              <kbn-info info="This field will be used to filter events with the global time filter"></kbn-info>
               &nbsp;
               <small>
                 <a
                   class="kuiLink"
                   ng-click="controller.refreshTimeFieldOptions();"
-                  translate="KIBANA-REFRESH_FIELDS"
-                ></a>
+                >refresh fields</a>
               </small>
             </label>
 
