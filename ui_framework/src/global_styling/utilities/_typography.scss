@@ -17,3 +17,11 @@
 @include utility('fontSizeSmall') {
   @extend %kuiFontSizeS;
 }
+
+@include utility('codeFont') {
+  @extend %kuiCodeFont;
+}
+
+@include utility('subduedText') {
+  color: $kuiColorDarkShade;
+}

@@ -30,5 +30,6 @@ $kuiColorFullShade: #000;
 // Every color below must be based mathmatically on the set above.
 
 $kuiTextColor: $kuiColorDarkestShade;
+$kuiTitleColor: $kuiColorFullShade;
 $kuiLinkColor: $kuiColorPrimary;
 $kuiFocusBackgroundColor: tint($kuiColorPrimary, 90%);
