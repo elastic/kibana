@@ -1,16 +1,18 @@
 <dashboard-app class="app-container dashboard-container">
   <div class="fullScreenModePlaceholder">
-    <button
+    <div
+      aria-label="Exit full screen mode"
+      kbn-accessible-click
       ng-if="fullScreenMode"
       class="exitFullScreenMode"
       ng-click="exitFullScreenMode()"
     >
-      <span aria-hidden="true" class="exitFullScreenModeLogo"></span>
+      <span class="exitFullScreenModeLogo"></span>
       <span class="exitFullScreenModeText">
         Exit full screen
-        <span aria-hidden="true" class="kuiIcon fa fa-angle-left"></span>
+        <span class="kuiIcon fa fa-angle-left"></span>
       </span>
-    </button>
+    </div>
   </div>
   <!-- Local nav. -->
   <kbn-top-nav name="dashboard" config="topNavMenu">
