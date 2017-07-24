@@ -2,6 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { Button, ButtonToolbar, FormGroup } from 'react-bootstrap';
 import { DatasourceSelector } from './datasource_selector';
+import { DatasourcePreview } from './datasource_preview';
 
 export const DatasourceComponent = (props) => {
   const {
@@ -18,8 +19,17 @@ export const DatasourceComponent = (props) => {
     setDatasourceAst,
     selecting,
     setSelecting,
+    previewing,
+    setPreviewing,
     done,
   } = props;
+
+
+  const getDatasourceFunctionNode = (name, args) => ({
+    arguments: args,
+    function: name,
+    type: 'function',
+  });
 
   const setSelectedDatasource = (value) => {
     if (datasource.name === value) {
@@ -40,11 +50,7 @@ export const DatasourceComponent = (props) => {
   const save = () => {
     if (stateDatasource !== datasource) {
       // if this is a new datasource, create an AST object and update the whole thing
-      const datasourceAst = {
-        arguments: stateArgs,
-        function: stateDatasource.name,
-        type: 'function',
-      };
+      const datasourceAst = getDatasourceFunctionNode(stateDatasource.name, stateArgs);
       setDatasourceAst && setDatasourceAst(datasourceAst);
     } else if (stateArgs !== args) {
       // otherwise, simply update the arguments
@@ -52,27 +58,30 @@ export const DatasourceComponent = (props) => {
     }
   };
 
+  if (selecting) {
+    return (<DatasourceSelector datasources={datasources} onSelect={setSelectedDatasource} />);
+  }
+
+  if (previewing) {
+    return (<DatasourcePreview done={() => setPreviewing(false)} function={getDatasourceFunctionNode(stateDatasource.name, stateArgs)}/>);
+  }
+
   return (
-    <div>
-      {!selecting ? (
-        <div className="canvas__datasource">
-          <div>
-            <h5>
-              <i className="fa fa-database"/> &nbsp;
-               Configure <i>{stateDatasource.name}</i> or <a onClick={() => setSelecting(!selecting)}>Change Datasource</a>
-            </h5>
-            <FormGroup>
-              {stateDatasource.render({ args: stateArgs, updateArgs, datasourceDef })}
-            </FormGroup>
-          </div>
-          <ButtonToolbar>
-            <Button bsStyle="primary" onClick={save}> Apply</Button>
-            <Button onClick={close}> Cancel</Button>
-          </ButtonToolbar>
-        </div>
-      ) : (
-        <DatasourceSelector datasources={datasources} onSelect={setSelectedDatasource} />
-      )}
+    <div className="canvas__datasource">
+      <div>
+        <h5>
+          <i className="fa fa-database"/> &nbsp;
+           Configure <i>{stateDatasource.name}</i> or <a onClick={() => setSelecting(!selecting)}>Change Datasource</a>
+        </h5>
+        <FormGroup>
+          {stateDatasource.render({ args: stateArgs, updateArgs, datasourceDef })}
+        </FormGroup>
+      </div>
+      <ButtonToolbar>
+        <Button bsStyle="success" onClick={save}> Apply</Button>
+        <Button bsStyle="primary" onClick={() => setPreviewing(true)}> Preview</Button>
+        <Button onClick={close}> Cancel</Button>
+      </ButtonToolbar>
     </div>
   );
 };
@@ -92,4 +101,6 @@ DatasourceComponent.propTypes = {
   done: PropTypes.func,
   selecting: PropTypes.bool,
   setSelecting: PropTypes.func,
+  previewing: PropTypes.bool,
+  setPreviewing: PropTypes.func,
 };
