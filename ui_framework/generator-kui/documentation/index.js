@@ -12,7 +12,7 @@ module.exports = class extends Generator {
   }
 
   prompting() {
-    const prompts = [{
+    let prompts = [{
       message: 'What\'s the name of the component you\'re documenting? Use snake_case, please.',
       name: 'name',
       type: 'input',
@@ -122,6 +122,7 @@ module.exports = class extends Generator {
 
     switch (this.fileType) {
       case 'documentation':
+        writeDocumentationPage();
         writeDocumentationPageDemo(config.name, config.name);
         break;
 
@@ -193,7 +194,7 @@ module.exports = class extends Generator {
         `  hasReact: ${chalk.magenta('true')},\n` +
         `}`
       );
-    };
+    }
 
     this.log('------------------------------------------------');
     this.log(chalk.bold('Import snippets:'));
