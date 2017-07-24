@@ -2,14 +2,14 @@ import React from 'react';
 import { Alert } from 'react-bootstrap';
 import { pick } from 'lodash';
 import { Registry } from '../../common/lib/registry';
-import { ArgRenderable } from './arg_renderable';
+import { ArgForm } from './arg_form';
 
 function getModelArgs(expressionType) {
   if (!expressionType || !expressionType.modelArgs) return false;
   return (expressionType.modelArgs.length > 0) ? expressionType.modelArgs : false;
 }
 
-export class Model extends ArgRenderable {
+export class Model extends ArgForm {
   constructor(name, props) {
     super(name, props);
 

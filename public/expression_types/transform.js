@@ -1,8 +1,8 @@
 import { pick } from 'lodash';
 import { Registry } from '../../common/lib/registry';
-import { BaseRenderable } from './base_renderable';
+import { BaseForm } from './base_form';
 
-export class Transform extends BaseRenderable {
+export class Transform extends BaseForm {
   constructor(name, props) {
     super(name, props);
 

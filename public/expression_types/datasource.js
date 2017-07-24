@@ -1,6 +1,6 @@
 import React from 'react';
 import { Registry } from '../../common/lib/registry';
-import { BaseRenderable } from './base_renderable';
+import { BaseForm } from './base_form';
 
 const defaultTemplate = () => (
   <div>
@@ -8,7 +8,7 @@ const defaultTemplate = () => (
   </div>
 );
 
-export class Datasource extends BaseRenderable {
+export class Datasource extends BaseForm {
   constructor(name, props) {
     super(name, {
       template: defaultTemplate,

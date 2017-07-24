@@ -1,9 +1,9 @@
 import React from 'react';
 import { Label } from 'react-bootstrap';
-import { BaseRenderable } from './base_renderable';
+import { BaseForm } from './base_form';
 import { isPlainObject, uniq } from 'lodash';
 
-export class ArgRenderable extends BaseRenderable {
+export class ArgForm extends BaseForm {
   renderArg(props, dataArg) {
     const { arg, argName, argValue, skipRender } = dataArg;
     const { onValueRemove, onValueAdd, ...passedProps } = props;
@@ -40,7 +40,7 @@ export class ArgRenderable extends BaseRenderable {
     const { args } = data;
 
     if (!isPlainObject(args)) {
-      throw new Error(`Renderable "${this.name}" expects "args" object`);
+      throw new Error(`Form "${this.name}" expects "args" object`);
     }
 
     // get a mapping of the expression arg values and matching arg definitions
