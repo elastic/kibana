@@ -1,5 +1,5 @@
 @include component('kuiPageTitle') {
   @extend %kuiFontSizeXL;
-  color: $kuiTextColor;
+  color: $kuiTitleColor;
   font-weight: $kuiFontWeightLight;
 }

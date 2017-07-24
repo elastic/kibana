@@ -352,16 +352,15 @@ table {
       left: auto; }
 
 .kuiObjectTitle {
-  color: #3F3F3F;
-  font-weight: 300;
-  font-style: italic; }
+  color: #000;
+  font-weight: 300; }
 
 .kuiPageTitle {
-  color: #3F3F3F;
+  color: #000;
   font-weight: 300; }
 
 .kuiSectionTitle {
-  color: #3F3F3F;
+  color: #000;
   font-weight: 300; }
 
 .kuiText {
