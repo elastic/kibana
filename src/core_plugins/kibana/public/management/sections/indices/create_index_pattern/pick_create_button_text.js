@@ -6,18 +6,16 @@ export function pickCreateButtonText($translate, state) {
   } = state;
 
   if (loading) {
-    return $translate.instant('KIBANA-LOADING');
+    return 'Loading';
   }
 
   if (invalidIndexName) {
-    return $translate.instant('KIBANA-INVALID_INDEX_PATTERN');
+    return 'Invalid index name pattern.';
   }
 
   if (!timeFieldOption) {
-    return $translate.instant('KIBANA-FIELD_IS_REQUIRED', {
-      fieldName: $translate.instant('KIBANA-TIME_FILTER_FIELD_NAME')
-    });
+    return 'Time Filter field name is required';
   }
 
-  return $translate.instant('KIBANA-CREATE');
+  return 'Create';
 }
