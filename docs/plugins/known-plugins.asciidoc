@@ -42,7 +42,6 @@ This list of plugins is not guaranteed to work on your version of Kibana. Instea
 * https://github.com/prelert/kibana-swimlane-vis[Swimlanes] (prelert)
 * https://github.com/sbeyn/kibana-plugin-traffic-sg[Traffic] (sbeyn)
 * https://github.com/PhaedrusTheGreek/transform_vis[Transform Visualization] (PhaedrusTheGreek)
-* https://github.com/dlumbrer/kbn_searchtables[Search-Tables] (dlumbrer)
 * https://github.com/nyurik/kibana-vega-vis[Vega-based visualization with map support] (nyurik)
 
 [float]
