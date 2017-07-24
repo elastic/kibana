@@ -57,7 +57,7 @@ export const KuiIcon = ({
     title
     ? <title>{title}</title>
     : <title>{`${humanizeCamelCase(type)} icon`}</title>;
-  const svgReference = type ? <use href={`#${typeToIconMap[type]}`} /> : undefined;
+  const svgReference = <use href={`#${typeToIconMap[type]}`} />;
 
   return (
     <svg

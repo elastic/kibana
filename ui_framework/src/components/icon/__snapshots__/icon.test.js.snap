@@ -5,37 +5,75 @@ exports[`KuiIcon is rendered 1`] = `
   aria-label="aria-label"
   class="kuiIcon testClass1 testClass2 kuiIcon--medium"
   data-test-subj="test subject string"
-/>
+>
+  <title>
+    search icon
+  </title>
+  <use
+    href="#search"
+  />
+</svg>
 `;
 
 exports[`KuiIcon renders size large 1`] = `
 <svg
   class="kuiIcon kuiIcon--large"
-/>
+>
+  <title>
+    search icon
+  </title>
+  <use
+    href="#search"
+  />
+</svg>
 `;
 
 exports[`KuiIcon renders size medium 1`] = `
 <svg
   class="kuiIcon kuiIcon--medium"
-/>
+>
+  <title>
+    search icon
+  </title>
+  <use
+    href="#search"
+  />
+</svg>
 `;
 
 exports[`KuiIcon renders size xLarge 1`] = `
 <svg
   class="kuiIcon kuiIcon--xLarge"
-/>
+>
+  <title>
+    search icon
+  </title>
+  <use
+    href="#search"
+  />
+</svg>
 `;
 
 exports[`KuiIcon renders size xxLarge 1`] = `
 <svg
   class="kuiIcon kuiIcon--xxLarge"
-/>
+>
+  <title>
+    search icon
+  </title>
+  <use
+    href="#search"
+  />
+</svg>
 `;
 
 exports[`KuiIcon renders type apps 1`] = `
 <svg
   class="kuiIcon kuiIcon--medium"
 >
+  <title>
+    apps icon
+  </title>
   <use
     href="#apps"
   />
@@ -46,6 +84,9 @@ exports[`KuiIcon renders type dashboardApp 1`] = `
 <svg
   class="kuiIcon kuiIcon--medium"
 >
+  <title>
+    dashboard app icon
+  </title>
   <use
     href="#app_dashboard"
   />
@@ -56,6 +97,9 @@ exports[`KuiIcon renders type devToolsApp 1`] = `
 <svg
   class="kuiIcon kuiIcon--medium"
 >
+  <title>
+    dev tools app icon
+  </title>
   <use
     href="#app_devtools"
   />
@@ -66,6 +110,9 @@ exports[`KuiIcon renders type discoverApp 1`] = `
 <svg
   class="kuiIcon kuiIcon--medium"
 >
+  <title>
+    discover app icon
+  </title>
   <use
     href="#app_discover"
   />
@@ -76,6 +123,9 @@ exports[`KuiIcon renders type graphApp 1`] = `
 <svg
   class="kuiIcon kuiIcon--medium"
 >
+  <title>
+    graph app icon
+  </title>
   <use
     href="#app_graph"
   />
@@ -86,6 +136,9 @@ exports[`KuiIcon renders type kibanaLogo 1`] = `
 <svg
   class="kuiIcon kuiIcon--medium"
 >
+  <title>
+    kibana logo icon
+  </title>
   <use
     href="#logo"
   />
@@ -96,6 +149,9 @@ exports[`KuiIcon renders type machineLearningApp 1`] = `
 <svg
   class="kuiIcon kuiIcon--medium"
 >
+  <title>
+    machine learning app icon
+  </title>
   <use
     href="#app_ml"
   />
@@ -106,6 +162,9 @@ exports[`KuiIcon renders type search 1`] = `
 <svg
   class="kuiIcon kuiIcon--medium"
 >
+  <title>
+    search icon
+  </title>
   <use
     href="#search"
   />
@@ -116,6 +175,9 @@ exports[`KuiIcon renders type timelionApp 1`] = `
 <svg
   class="kuiIcon kuiIcon--medium"
 >
+  <title>
+    timelion app icon
+  </title>
   <use
     href="#app_timelion"
   />
@@ -126,6 +188,9 @@ exports[`KuiIcon renders type user 1`] = `
 <svg
   class="kuiIcon kuiIcon--medium"
 >
+  <title>
+    user icon
+  </title>
   <use
     href="#user"
   />
@@ -136,8 +201,37 @@ exports[`KuiIcon renders type visualizeApp 1`] = `
 <svg
   class="kuiIcon kuiIcon--medium"
 >
+  <title>
+    visualize app icon
+  </title>
   <use
     href="#app_visualize"
+  />
+</svg>
+`;
+
+exports[`KuiIcon title defaults to a humanized version of the type 1`] = `
+<svg
+  class="kuiIcon kuiIcon--medium"
+>
+  <title>
+    dashboard app icon
+  </title>
+  <use
+    href="#app_dashboard"
+  />
+</svg>
+`;
+
+exports[`KuiIcon title is rendered 1`] = `
+<svg
+  class="kuiIcon kuiIcon--medium"
+>
+  <title>
+    a custom title
+  </title>
+  <use
+    href="#search"
   />
 </svg>
 `;

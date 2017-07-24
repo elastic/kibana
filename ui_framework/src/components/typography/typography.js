@@ -9,7 +9,7 @@ const sizeToClassNameMap = {
   large: 'kuiTitle--large',
 };
 
-const SIZES = Object.keys(sizeToClassNameMap);
+export const SIZES = Object.keys(sizeToClassNameMap);
 
 export const KuiTitle = ({ size, children, className, ...rest }) => {
   const classes = classNames('kuiTitle', sizeToClassNameMap[size], className);
