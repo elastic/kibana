@@ -5,12 +5,16 @@ import { getRootType } from '../../mappings';
 
 import {
   getSearchDsl,
-  handleEsError,
   trimIdPrefix,
-  includedFields
+  includedFields,
+  decorateEsError,
+  errorTypeHelpers,
 } from './lib';
 
 export class SavedObjectsClient {
+  static errors = errorTypeHelpers
+  errors = errorTypeHelpers
+
   constructor(kibanaIndex, mappings, callAdminCluster) {
     this._kibanaIndex = kibanaIndex;
     this._mappings = mappings;
@@ -316,7 +320,7 @@ export class SavedObjectsClient {
         index: this._kibanaIndex,
       });
     } catch (err) {
-      throw handleEsError(err);
+      throw decorateEsError(err);
     }
   }
 
