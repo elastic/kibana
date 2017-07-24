@@ -1,5 +1,4 @@
 import { defaultsDeep, noop } from 'lodash';
-import { errors as esErrors } from 'elasticsearch';
 
 function hydrateUserSettings(userSettings) {
   return Object.keys(userSettings)
@@ -105,16 +104,17 @@ export class UiSettingsService {
     const {
       ignore401Errors = false
     } = options;
+    const savedObjectsClient = this._savedObjectsClient;
 
     const isIgnorableError = error => (
-      error instanceof esErrors[404] ||
-      error instanceof esErrors[403] ||
-      error instanceof esErrors.NoConnections ||
-      (ignore401Errors && error instanceof esErrors[401])
+      savedObjectsClient.errors.isNotFound(error) ||
+      savedObjectsClient.errors.isForbidden(error) ||
+      savedObjectsClient.errors.isEsUnavailable(error) ||
+      (ignore401Errors && savedObjectsClient.errors.isNotAuthorized(error))
     );
 
     try {
-      const resp = await this._savedObjectsClient.get(this._type, this._id);
+      const resp = await savedObjectsClient.get(this._type, this._id);
       return resp.attributes;
     } catch (error) {
       if (isIgnorableError(error)) {
