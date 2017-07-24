@@ -126,7 +126,7 @@ export function DiscoverPageProvider({ getService, getPageObjects }) {
     }
 
     async getChartInterval() {
-      const selectedValue = await testSubjects.getProperty('discoverIntervalSelect');
+      const selectedValue = await testSubjects.getProperty('discoverIntervalSelect', 'value');
       const selectedOption = await find.byCssSelector('option[value="' + selectedValue + '"]');
       return selectedOption.getVisibleText();
     }
