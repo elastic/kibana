@@ -7,24 +7,24 @@ import { Layout } from './Layouts';
  * Class that consists of static constants describing supported parameters
  * in the log message pattern.
  */
-abstract class Parameters {
-  static readonly Timestamp = '{timestamp}';
-  static readonly Level = '{level}';
-  static readonly Context = '{context}';
-  static readonly Message = '{message}';
-}
+const Parameters = Object.freeze({
+  Timestamp: '{timestamp}',
+  Level: '{level}',
+  Context: '{context}',
+  Message: '{message}'
+});
 
 /**
  * Class that consists of static constants describing possible colors that can
  * be used for highlighting of log message parts.
  */
-abstract class HighlightColor {
-  static readonly Red = 31;
-  static readonly Green = 32;
-  static readonly Yellow = 33;
-  static readonly Blue = 34;
-  static readonly Magenta = 35;
-}
+const HighlightColor = Object.freeze({
+  Red: 31,
+  Green: 32,
+  Yellow: 33,
+  Blue: 34,
+  Magenta: 35
+});
 
 /**
  * Regular expression used to parse log message pattern and fill in placeholders

@@ -12,6 +12,23 @@ const CONTEXT_SEPARATOR = '::';
  */
 const ROOT_CONTEXT_NAME = 'root';
 
+const defaultAppenders = new Map([
+  [
+    'console',
+    {
+      kind: 'console',
+      layout: {
+        kind: 'pattern',
+        highlight: true
+      }
+    }
+  ]
+]);
+
+const defaultLoggers = new Map([
+  ['root', { appenders: ['console'], level: 'info' as LogLevelId }]
+]);
+
 const createLoggerSchema = (schema: Schema) => {
   const { literal, object, string, arrayOf, oneOf } = schema;
 
@@ -40,23 +57,10 @@ const createLoggingSchema = (schema: Schema) => {
 
   return object({
     appenders: mapOf(string(), Appenders.createConfigSchema(schema), {
-      defaultValue: new Map([
-        [
-          'console',
-          {
-            kind: 'console',
-            layout: {
-              kind: 'pattern',
-              highlight: true
-            }
-          }
-        ]
-      ])
+      defaultValue: defaultAppenders
     }),
     loggers: mapOf(string(), createLoggerSchema(schema), {
-      defaultValue: new Map([
-        ['root', { appenders: ['console'], level: 'info' as LogLevelId }]
-      ]),
+      defaultValue: defaultLoggers,
       validate(value) {
         const rootLogger = value.get(ROOT_CONTEXT_NAME);
         if (!rootLogger) {

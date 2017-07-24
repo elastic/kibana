@@ -24,7 +24,8 @@ export interface Appender {
 
 /**
  * Interface that should be additionally implemented by the `Appender`'s when they should
- * be properly disposed.
+ * be properly disposed. It's intentionally separated from `Appender` interface so that `Logger`
+ * that interacts with `Appender` doesn't have control over appender lifetime.
  * @internal
  */
 export interface DisposableAppender extends Appender {

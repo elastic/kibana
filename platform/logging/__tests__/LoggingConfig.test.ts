@@ -4,6 +4,10 @@ import { LoggingConfig } from '../LoggingConfig';
 test('`createSchema()` creates correct schema with defaults.', () => {
   const loggingConfigSchema = LoggingConfig.createSchema(mockSchema);
   expect(loggingConfigSchema.validate({})).toMatchSnapshot();
+});
+
+test('`createSchema()` throws if `root` logger is not configured.', () => {
+  const loggingConfigSchema = LoggingConfig.createSchema(mockSchema);
 
   expect(() =>
     loggingConfigSchema.validate({
@@ -14,6 +18,10 @@ test('`createSchema()` creates correct schema with defaults.', () => {
       }
     })
   ).toThrowErrorMatchingSnapshot();
+});
+
+test('`createSchema()` throws if `root` logger does not have appenders configured.', () => {
+  const loggingConfigSchema = LoggingConfig.createSchema(mockSchema);
 
   expect(() =>
     loggingConfigSchema.validate({

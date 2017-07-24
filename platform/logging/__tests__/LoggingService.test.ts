@@ -50,25 +50,20 @@ test('`upgrade()` updates logging factory config.', () => {
 
   const newConfig = createRandomConfig('new');
   config$.next(newConfig);
-  expect(factory.updateConfig).toHaveBeenCalledTimes(2);
+  expect(updateConfigMock).toHaveBeenCalledTimes(2);
   expect(getLastMockCallArgs(updateConfigMock)[0]).toBe(newConfig);
 });
 
 test('`stop()` closes logger factory and stops config updates.', async () => {
-  const config = createRandomConfig('old');
-  const config$ = new BehaviorSubject<LoggingConfig>(config);
+  const config$ = new BehaviorSubject<LoggingConfig>(createRandomConfig('old'));
 
   service.upgrade(config$);
-
-  expect(factory.updateConfig).toHaveBeenCalledTimes(1);
-  expect(getLastMockCallArgs(updateConfigMock)[0]).toBe(config);
+  updateConfigMock.mockReset();
 
   await service.stop();
 
   expect(factory.close).toHaveBeenCalled();
 
-  const newConfig = createRandomConfig('new');
-  config$.next(newConfig);
-  expect(factory.updateConfig).toHaveBeenCalledTimes(1);
-  expect(getLastMockCallArgs(updateConfigMock)[0]).not.toBe(newConfig);
+  config$.next(createRandomConfig('new'));
+  expect(updateConfigMock).not.toHaveBeenCalled();
 });

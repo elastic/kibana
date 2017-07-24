@@ -23,8 +23,8 @@ Object {
 }
 `;
 
-exports[`\`createSchema()\` creates correct schema with defaults. 2`] = `"\\"root\\" logger should be configured!"`;
+exports[`\`createSchema()\` throws if \`root\` logger does not have appenders configured. 1`] = `"\\"root\\" logger should have at least one \\"appender\\" configured."`;
 
-exports[`\`createSchema()\` creates correct schema with defaults. 3`] = `"\\"root\\" logger should have at least one \\"appender\\" configured."`;
+exports[`\`createSchema()\` throws if \`root\` logger is not configured. 1`] = `"\\"root\\" logger should be configured!"`;
 
 exports[`fails if loggers use unknown appenders. 1`] = `"Logger \\"root\\" contains unsupported appender key \\"file\\"."`;
