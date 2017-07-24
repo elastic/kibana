@@ -216,7 +216,12 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
     }
 
     async selectAggregation(myString) {
-      return find.clickByCssSelector('vis-editor-agg-params:not(.ng-hide) option[label="' + myString + '"]');
+      await retry.try(async () => {
+        await find.click('visEditorAggSelect');
+        const input = await find.byCssSelector(`input.ui-select-search`);
+        await input.type(myString);
+        await remote.pressKeys('\uE006');
+      });
     }
 
     async getField() {
