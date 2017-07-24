@@ -1,7 +1,6 @@
 {
   "rootDir": "../../",
   "roots": [
-    "<rootDir>/src/core_plugins/kibana/public/dashboard",
     "<rootDir>/ui_framework/"
   ],
   "collectCoverageFrom": [
@@ -13,7 +12,8 @@
     "!ui_framework/components/**/*/index.js"
   ],
   "moduleNameMapper": {
-    "^ui_framework/components": "<rootDir>/ui_framework/components"
+    "^ui_framework/components": "<rootDir>/ui_framework/components",
+    "\\.(jpg|jpeg|png|gif|eot|otf|webp|svg|ttf|woff|woff2|mp4|webm|wav|mp3|m4a|aac|oga)$": "<rootDir>/ui_framework/src/test/file_mock.js"
   },
   "coverageDirectory": "<rootDir>/target/jest-coverage",
   "coverageReporters": [
@@ -27,7 +27,7 @@
     "**/*.test.js"
   ],
   "testPathIgnorePatterns": [
-    "<rootDir>[/\\\\]ui_framework[/\\\\](dist|doc_site|jest)[/\\\\]"
+    "<rootDir>[/\\\\]ui_framework[/\\\\](dist|doc_site|generator-kui)[/\\\\]"
   ],
   "transform": {
     "^.+\\.js$": "<rootDir>/src/jest/babelTransform.js"
