@@ -11,18 +11,38 @@ import {
 describe('KuiIcon', () => {
   test('is rendered', () => {
     const component = render(
-      <KuiIcon { ...requiredProps } />
+      <KuiIcon type="search" { ...requiredProps } />
     );
 
     expect(component)
       .toMatchSnapshot();
   });
 
+  describe('title', () => {
+    test('defaults to a humanized version of the type', () => {
+      const component = render(
+        <KuiIcon type="dashboardApp" />
+      );
+
+      expect(component)
+        .toMatchSnapshot();
+    });
+
+    test('is rendered', () => {
+      const component = render(
+        <KuiIcon type="search" title="a custom title" />
+      );
+
+      expect(component)
+        .toMatchSnapshot();
+    });
+  });
+
   describe('renders size', () => {
     SIZES.forEach(size => {
       test(size, () => {
         const component = render(
-          <KuiIcon size={size} />
+          <KuiIcon type="search" size={size} />
         );
 
         expect(component)
