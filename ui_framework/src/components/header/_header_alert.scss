@@ -18,10 +18,7 @@
     right: $kuiSize;
     top: $kuiSize;
     transition: opacity $kuiAnimSpeedNormal ease-in;
-
-    &:focus {
-      opacity: 1;
-    }
+    cursor: pointer;
   }
 
   @include child('title') {
@@ -32,6 +29,7 @@
 
   @include child('text') {
     @extend %kuiFontSizeXS;
+    margin-bottom: $kuiSizeS;
   }
 
   @include child('action') {

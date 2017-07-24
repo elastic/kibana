@@ -430,12 +430,13 @@ table {
     position: absolute;
     right: 16px;
     top: 16px;
-    transition: opacity 250ms ease-in; }
-    .kuiHeaderAlert__dismiss:focus {
-      opacity: 1; }
+    transition: opacity 250ms ease-in;
+    cursor: pointer; }
   .kuiHeaderAlert__title {
     font-weight: 500;
     padding-right: 24px; }
+  .kuiHeaderAlert__text {
+    margin-bottom: 8px; }
   .kuiHeaderAlert__action {
     color: #0079a5; }
     .kuiHeaderAlert__action:focus {
