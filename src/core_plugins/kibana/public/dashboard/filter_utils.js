@@ -1,4 +1,5 @@
 import _ from 'lodash';
+import { getDefaultQuery } from 'ui/parse_query';
 
 /**
  * @typedef {Object} QueryFilter
@@ -14,7 +15,7 @@ export class FilterUtils {
    * (e.g. goes in the query input bar), false otherwise (e.g. is in the filter bar).
    */
   static isQueryFilter(filter) {
-    return filter.query && filter.query.query_string && !filter.meta;
+    return filter.query && !filter.meta;
   }
 
   /**
@@ -33,10 +34,9 @@ export class FilterUtils {
    * @returns {QueryFilter}
    */
   static getQueryFilterForDashboard(dashboard) {
-    const defaultQueryFilter = { query_string: { query: '*' } };
     const dashboardFilters = this.getDashboardFilters(dashboard);
     const dashboardQueryFilter = _.find(dashboardFilters, this.isQueryFilter);
-    return dashboardQueryFilter ? dashboardQueryFilter.query : defaultQueryFilter;
+    return dashboardQueryFilter ? dashboardQueryFilter.query : getDefaultQuery();
   }
 
   /**

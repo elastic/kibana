@@ -28,6 +28,7 @@ import { uiModules } from 'ui/modules';
 import indexTemplate from 'plugins/kibana/discover/index.html';
 import { StateProvider } from 'ui/state_management/state';
 import { documentationLinks } from 'ui/documentation_links/documentation_links';
+import { getDefaultQuery } from 'ui/parse_query';
 
 const app = uiModules.get('apps/discover', [
   'kibana/notify',
@@ -160,7 +161,7 @@ function discoverController($scope, config, courier, $route, $window, Notifier,
 
   function getStateDefaults() {
     return {
-      query: $scope.searchSource.get('query') || '',
+      query: $scope.searchSource.get('query') || getDefaultQuery(),
       sort: getSort.array(savedSearch.sort, $scope.indexPattern),
       columns: savedSearch.columns.length > 0 ? savedSearch.columns : config.get('defaultColumns').slice(),
       index: $scope.indexPattern.id,
