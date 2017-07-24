@@ -4,12 +4,7 @@ export default function byType(type) {
     switch (type) {
       case 'numeric':
         return _.includes([
-          'scaled_float',
-          'half_float',
-          'integer',
-          'float',
-          'long',
-          'double'
+          'number'
         ], field.type);
       case 'string':
         return _.includes([
