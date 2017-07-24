@@ -1,0 +1,49 @@
+@include component('kuiHeaderAlert') {
+  text-align: left;
+  min-width: 300px;
+  position: relative;
+  margin: 0 (-$kuiSize);
+  padding: $kuiSize;
+  border-top: $kuiBorderThin;
+
+  &:hover {
+    @include child('dismiss') {
+      visibility: visible;
+      opacity: 1;
+    }
+  }
+
+  @include child('dismiss') {
+    visibility: hidden;
+    opacity: 0;
+    position: absolute;
+    right: 0;
+    top: $kuiSize;
+    transition: opacity $kuiAnimSpeedNormal ease-in;
+  }
+
+  @include child('title') {
+    font-weight: $kuiFontWeightMedium;
+    @extend %kuiFontSizeM;
+    padding-right: $kuiSizeL; // Accounts for the dismiss button.
+  }
+
+  @include child('text') {
+    @extend %kuiFontSizeXS;
+  }
+
+  @include child('action') {
+    @extend %kuiFontSizeXS;
+    color: $kuiLinkColor;
+
+    &:focus {
+      outline: solid $kuiFontSizeXS / 2 $kuiFocusBackgroundColor;
+    }
+  }
+
+  @include child('date') {
+    @extend %kuiFontSizeXS;
+    color: $kuiColorDarkShade;
+    text-align: right;
+  }
+}
