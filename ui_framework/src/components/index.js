@@ -14,3 +14,8 @@ export {
 export {
   KuiPopover,
 } from './popover';
+
+export {
+  KuiTitle,
+  KuiText,
+} from './typography';
