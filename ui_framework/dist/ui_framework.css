@@ -146,6 +146,9 @@ table {
 .kui--verticalAlignMiddle {
   vertical-align: middle !important; }
 
+.kui--subduedText {
+  color: #666; }
+
 .kui--bottomShadow {
   box-shadow: 0 16px 16px -8px rgba(0, 0, 0, 0.1); }
 
