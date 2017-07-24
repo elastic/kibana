@@ -13,6 +13,7 @@ export function AggTypesMetricsBucketAvgProvider(Private) {
     subtype: siblingPipelineHelper.subtype,
     params: [
       ...siblingPipelineHelper.params()
-    ]
+    ],
+    getFormat: siblingPipelineHelper.getFormat
   });
 }
