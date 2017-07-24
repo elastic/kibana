@@ -229,8 +229,8 @@ export function DiscoverPageProvider({ getService, getPageObjects }) {
       return await testSubjects.exists('discoverNoResults');
     }
 
-    getNoResultsTimepicker() {
-      return testSubjects.find('discoverNoResultsTimefilter');
+    async getNoResultsTimepicker() {
+      return await testSubjects.find('discoverNoResultsTimefilter');
     }
 
     hasNoResultsTimepicker() {
@@ -240,8 +240,8 @@ export function DiscoverPageProvider({ getService, getPageObjects }) {
       .catch(() => false);
     }
 
-    clickFieldListItem(field) {
-      return testSubjects.click(`field-${field}`);
+    async clickFieldListItem(field) {
+      return await testSubjects.click(`field-${field}`);
     }
 
     async clickFieldListItemAdd(field) {

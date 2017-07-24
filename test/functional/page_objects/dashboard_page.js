@@ -327,18 +327,15 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
       });
     }
 
-    getPanelTitles() {
+    async getPanelTitles() {
       log.debug('in getPanelTitles');
-      return testSubjects.findAll('dashboardPanelTitle')
-      .then(function (titleObjects) {
+      const titleObjects = await testSubjects.findAll('dashboardPanelTitle');
 
-        function getTitles(chart) {
-          return chart.getVisibleText();
-        }
-
-        const getTitlePromises = titleObjects.map(getTitles);
-        return Promise.all(getTitlePromises);
-      });
+      function getTitles(chart) {
+        return chart.getVisibleText();
+      }
+      const getTitlePromises = titleObjects.map(getTitles);
+      return Promise.all(getTitlePromises);
     }
 
     async getDashboardPanels() {

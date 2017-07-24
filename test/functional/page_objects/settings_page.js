@@ -5,6 +5,7 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
   const retry = getService('retry');
   const config = getService('config');
   const remote = getService('remote');
+  const find = getService('find');
   const testSubjects = getService('testSubjects');
   const PageObjects = getPageObjects(['header', 'common']);
 
@@ -61,40 +62,43 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
       await PageObjects.common.navigateToApp('settings');
     }
 
-    getIndexPatternField() {
-      return testSubjects.find('createIndexPatternNameInput');
+    async getIndexPatternField() {
+      return await testSubjects.find('createIndexPatternNameInput');
     }
 
-    getTimeFieldNameField() {
-      return testSubjects.find('createIndexPatternTimeFieldSelect');
+    async clickTimeFieldNameField() {
+      return await testSubjects.click('createIndexPatternTimeFieldSelect');
+    }
+
+    async getTimeFieldNameField() {
+      return await testSubjects.find('createIndexPatternTimeFieldSelect');
     }
 
     async selectTimeFieldOption(selection) {
       // open dropdown
-      (await this.getTimeFieldNameField()).click();
+      await this.clickTimeFieldNameField();
       // close dropdown, keep focus
-      (await this.getTimeFieldNameField()).click();
+      await this.clickTimeFieldNameField();
       await PageObjects.header.waitUntilLoadingHasFinished();
-      await retry.try(async () => {
+      return await retry.try(async () => {
         log.debug(`selectTimeFieldOption(${selection})`);
-        (await this.getTimeFieldOption(selection)).click();
-        const selected = (await this.getTimeFieldOption(selection)).isSelected();
+        const timeFieldOption = await this.getTimeFieldOption(selection);
+        await timeFieldOption.click();
+        const selected = await timeFieldOption.isSelected();
         if (!selected) throw new Error('option not selected: ' + selected);
       });
     }
 
-    getTimeFieldOption(selection) {
-      return remote.setFindTimeout(defaultFindTimeout)
-        .findDisplayedByCssSelector('option[label="' + selection + '"]');
+    async getTimeFieldOption(selection) {
+      return await find.displayedByCssSelector('option[label="' + selection + '"]');
     }
 
-    getCreateIndexPatternButton() {
-      return testSubjects.find('createIndexPatternCreateButton');
+    async getCreateIndexPatternButton() {
+      return await testSubjects.find('createIndexPatternCreateButton');
     }
 
-    getCreateButton() {
-      return remote.setFindTimeout(defaultFindTimeout)
-        .findDisplayedByCssSelector('[type="submit"]');
+    async getCreateButton() {
+      return await find.displayedByCssSelector('[type="submit"]');
     }
 
     async clickDefaultIndexButton() {
@@ -106,8 +110,8 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
       await testSubjects.click('deleteIndexPatternButton');
     }
 
-    getIndexPageHeading() {
-      return testSubjects.find('indexPatternTitle');
+    async getIndexPageHeading() {
+      return await testSubjects.find('indexPatternTitle');
     }
 
     getConfigureHeader() {
@@ -274,7 +278,8 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
         await this.clickKibanaIndices();
         await this.setIndexPatternField(indexPatternName);
         await this.selectTimeFieldOption(timefield);
-        await this.getCreateButton().click();
+        const createButton = await this.getCreateButton();
+        await createButton.click();
       });
       await PageObjects.header.waitUntilLoadingHasFinished();
       await retry.try(async () => {
