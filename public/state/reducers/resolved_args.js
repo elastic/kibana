@@ -68,4 +68,12 @@ export default handleActions({
     const { path } = payload;
     return del(transientState, getFullPath(path));
   },
+
+  [actions.inFlightActive]: (transientState) => {
+    return set(transientState, 'inFlight', true);
+  },
+
+  [actions.inFlightComplete]: (transientState) => {
+    return set(transientState, 'inFlight', false);
+  },
 }, {});

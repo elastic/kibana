@@ -2,12 +2,13 @@ import { applyMiddleware, compose } from 'redux';
 import thunkMiddleware from 'redux-thunk';
 import persistState from 'redux-localstorage';
 import { historyMiddleware } from './history';
+import { inFlight } from './in_flight';
 import { appReady } from './app_ready';
 
 const storageKey = 'canvas';
 
 const middlewares = [
-  applyMiddleware(thunkMiddleware, historyMiddleware(window), appReady),
+  applyMiddleware(thunkMiddleware, historyMiddleware(window), inFlight, appReady),
   persistState('persistent', { key: storageKey }),
 ];
 
