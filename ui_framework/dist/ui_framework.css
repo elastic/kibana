@@ -1,31 +1,3 @@
-.kui--codeFont {
-  font-family: "Roboto Mono", monospace; }
-
-.kuiHeaderAlert__text, .kuiHeaderAlert__action, .kuiHeaderAlert__date {
-  font-size: 12px;
-  font-size: 0.75rem;
-  line-height: 24px; }
-
-.kui--fontSizeSmall, .kuiKeyPad {
-  font-size: 14px;
-  font-size: 0.875rem;
-  line-height: 24px; }
-
-.kuiHeaderAlert__title, .kuiTitle--small, .kuiText {
-  font-size: 16px;
-  font-size: 1rem;
-  line-height: 24px; }
-
-.kuiTitle {
-  font-size: 24px;
-  font-size: 1.5rem;
-  line-height: 36px; }
-
-.kuiTitle--large {
-  font-size: 32px;
-  font-size: 2rem;
-  line-height: 48px; }
-
 /**
  * Adapted from Eric Meyer's reset (http://meyerweb.com/eric/tools/css/reset/, v2.0 | 20110126).
  *
@@ -159,6 +131,14 @@ table {
 
 .kui--verticalAlignMiddle {
   vertical-align: middle !important; }
+
+.kui--fontSizeSmall {
+  font-size: 14px;
+  font-size: 0.875rem;
+  line-height: 24px; }
+
+.kui--codeFont {
+  font-family: "Roboto Mono", monospace; }
 
 .kui--subduedText {
   color: #666; }
@@ -434,14 +414,26 @@ table {
     cursor: pointer; }
   .kuiHeaderAlert__title {
     font-weight: 500;
+    font-size: 16px;
+    font-size: 1rem;
+    line-height: 24px;
     padding-right: 24px; }
   .kuiHeaderAlert__text {
+    font-size: 12px;
+    font-size: 0.75rem;
+    line-height: 24px;
     margin-bottom: 8px; }
   .kuiHeaderAlert__action {
+    font-size: 12px;
+    font-size: 0.75rem;
+    line-height: 24px;
     color: #0079a5; }
     .kuiHeaderAlert__action:focus {
       outline: solid 6px #e6f2f6; }
   .kuiHeaderAlert__date {
+    font-size: 12px;
+    font-size: 0.75rem;
+    line-height: 24px;
     color: #666;
     text-align: right; }
 
@@ -482,7 +474,10 @@ table {
       -ms-flex-wrap: wrap;
           flex-wrap: wrap;
   width: 288px;
-  text-align: center; }
+  text-align: center;
+  font-size: 14px;
+  font-size: 0.875rem;
+  line-height: 24px; }
   .kuiKeyPad__item {
     padding: 16px;
     height: 96px;
@@ -577,9 +572,23 @@ table {
       left: auto; }
 
 .kuiTitle {
+  font-size: 24px;
+  font-size: 1.5rem;
+  line-height: 36px;
   color: #000;
   font-weight: 300; }
+  .kuiTitle--small {
+    font-size: 16px;
+    font-size: 1rem;
+    line-height: 24px; }
+  .kuiTitle--large {
+    font-size: 32px;
+    font-size: 2rem;
+    line-height: 48px; }
 
 .kuiText {
+  font-size: 16px;
+  font-size: 1rem;
+  line-height: 24px;
   color: #3F3F3F;
   font-weight: 400; }

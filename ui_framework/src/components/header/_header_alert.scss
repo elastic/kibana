@@ -23,17 +23,17 @@
 
   @include child('title') {
     font-weight: $kuiFontWeightMedium;
-    @extend %kuiFontSizeM;
+    @include kuiFontSizeM;
     padding-right: $kuiSizeL; // Accounts for the dismiss button.
   }
 
   @include child('text') {
-    @extend %kuiFontSizeXS;
+    @include kuiFontSizeXS;
     margin-bottom: $kuiSizeS;
   }
 
   @include child('action') {
-    @extend %kuiFontSizeXS;
+    @include kuiFontSizeXS;
     color: $kuiLinkColor;
 
     &:focus {
@@ -42,7 +42,7 @@
   }
 
   @include child('date') {
-    @extend %kuiFontSizeXS;
+    @include kuiFontSizeXS;
     color: $kuiColorDarkShade;
     text-align: right;
   }
