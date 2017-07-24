@@ -1,7 +1,7 @@
 import React from 'react';
 import { render, shallow } from 'enzyme';
 import sinon from 'sinon';
-import { requiredProps } from '../../../test/required_props';
+import { requiredProps } from '../../test/required_props';
 
 import {
   KuiLargeTitle,
