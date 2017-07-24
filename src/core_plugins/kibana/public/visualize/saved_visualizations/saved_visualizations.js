@@ -13,13 +13,13 @@ savedObjectManagementRegistry.register({
   title: 'visualizations'
 });
 
-app.service('savedVisualizations', function (Promise, esAdmin, kbnIndex, SavedVis, Private, Notifier, kbnUrl, $http) {
+app.service('savedVisualizations', function (Promise, kbnIndex, SavedVis, Private, Notifier, kbnUrl, $http) {
   const visTypes = Private(VisTypesRegistryProvider);
   const notify = new Notifier({
     location: 'Saved Visualization Service'
   });
 
-  const saveVisualizationLoader = new SavedObjectLoader(SavedVis, kbnIndex, esAdmin, kbnUrl, $http);
+  const saveVisualizationLoader = new SavedObjectLoader(SavedVis, kbnIndex, kbnUrl, $http);
 
   saveVisualizationLoader.mapHitSource = function (source, id) {
     source.id = id;

@@ -1,6 +1,5 @@
 import _ from 'lodash';
 import angular from 'angular';
-import moment from 'moment';
 import { getSort } from 'ui/doc_table/lib/get_sort';
 import * as columnActions from 'ui/doc_table/actions/columns';
 import dateMath from '@elastic/datemath';
@@ -15,13 +14,12 @@ import 'ui/index_patterns';
 import 'ui/state_management/app_state';
 import 'ui/timefilter';
 import 'ui/share';
+import 'ui/query_bar';
 import { VisProvider } from 'ui/vis';
 import { BasicResponseHandlerProvider } from 'ui/vis/response_handlers/basic';
 import { DocTitleProvider } from 'ui/doc_title';
-import { UtilsBrushEventProvider } from 'ui/utils/brush_event';
 import PluginsKibanaDiscoverHitSortFnProvider from 'plugins/kibana/discover/_hit_sort_fn';
 import { FilterBarQueryFilterProvider } from 'ui/filter_bar/query_filter';
-import { FilterManagerProvider } from 'ui/filter_manager';
 import { AggTypesBucketsIntervalOptionsProvider } from 'ui/agg_types/buckets/_interval_options';
 import { stateMonitorFactory } from 'ui/state_management/state_monitor_factory';
 import uiRoutes from 'ui/routes';
@@ -29,6 +27,8 @@ import { uiModules } from 'ui/modules';
 import indexTemplate from 'plugins/kibana/discover/index.html';
 import { StateProvider } from 'ui/state_management/state';
 import { documentationLinks } from 'ui/documentation_links/documentation_links';
+import { migrateLegacyQuery } from 'ui/utils/migrateLegacyQuery';
+import { QueryManagerProvider } from 'ui/query_manager';
 import { SavedObjectsClientProvider } from 'ui/saved_objects';
 
 const app = uiModules.get('apps/discover', [
@@ -115,10 +115,8 @@ function discoverController(
 
   const Vis = Private(VisProvider);
   const docTitle = Private(DocTitleProvider);
-  const brushEvent = Private(UtilsBrushEventProvider);
   const HitSortFn = Private(PluginsKibanaDiscoverHitSortFnProvider);
   const queryFilter = Private(FilterBarQueryFilterProvider);
-  const filterManager = Private(FilterManagerProvider);
   const responseHandler = Private(BasicResponseHandlerProvider).handler;
   const notify = new Notifier({
     location: 'Discover'
@@ -179,6 +177,7 @@ function discoverController(
   };
 
   const $state = $scope.state = new AppState(getStateDefaults());
+  const queryManager = Private(QueryManagerProvider)($state);
 
   const getFieldCounts = async () => {
     // the field counts aren't set until we have the data back,
@@ -254,7 +253,7 @@ function discoverController(
 
   function getStateDefaults() {
     return {
-      query: $scope.searchSource.get('query') || '',
+      query: $scope.searchSource.get('query') || { query: '', language: config.get('search:queryLanguage') },
       sort: getSort.array(savedSearch.sort, $scope.indexPattern),
       columns: savedSearch.columns.length > 0 ? savedSearch.columns : config.get('defaultColumns').slice(),
       index: $scope.indexPattern.id,
@@ -334,6 +333,15 @@ function discoverController(
         $scope.fetch();
       });
 
+      // Necessary for handling new time filters when the date histogram is clicked
+      $scope.$watchCollection('state.$newFilters', function (filters = []) {
+        // need to convert filters generated from user interaction with viz into kuery AST
+        // These are handled by the filter bar directive when lucene is the query language
+        Promise.all(filters.map(queryManager.addLegacyFilter))
+        .then(() => $scope.state.$newFilters = [])
+        .then($scope.fetch);
+      });
+
       $scope.$watch('vis.aggs', function () {
         // no timefield, no vis, nothing to update
         if (!$scope.opts.timefield) return;
@@ -343,6 +351,12 @@ function discoverController(
         if (buckets && buckets.length === 1) {
           $scope.bucketInterval = buckets[0].buckets.getInterval();
         }
+      });
+
+      $scope.$watch('state.query', (newQuery) => {
+        $state.query = migrateLegacyQuery(newQuery);
+
+        $scope.fetch();
       });
 
       $scope.$watchMulti([
@@ -447,6 +461,15 @@ function discoverController(
     .catch(notify.error);
   };
 
+  $scope.updateQuery = function (query) {
+    // reset state if language changes
+    if ($state.query.language && $state.query.language !== query.language) {
+      $state.filters = [];
+    }
+
+    $state.query = query;
+  };
+
   $scope.searchSource.onBeginSegmentedFetch(function (segmented) {
     function flushResponseData() {
       $scope.hits = 0;
@@ -510,6 +533,7 @@ function discoverController(
       $scope.mergedEsResp = merged;
 
       if ($scope.opts.timefield) {
+        $scope.searchSource.rawResponse = merged;
         responseHandler($scope.vis, merged).then(resp => {
           $scope.visData = resp;
         });
@@ -586,7 +610,7 @@ function discoverController(
   // TODO: On array fields, negating does not negate the combination, rather all terms
   $scope.filterQuery = function (field, values, operation) {
     $scope.indexPattern.popularizeField(field, 1);
-    filterManager.add(field, values, operation, $state.index);
+    queryManager.add(field, values, operation, $scope.indexPattern.id);
   };
 
   $scope.addColumn = function addColumn(columnName) {
@@ -654,15 +678,6 @@ function discoverController(
       params: {
         addLegend: false,
         addTimeMarker: true
-      },
-      listeners: {
-        click: function (e) {
-          notify.log(e);
-          timefilter.time.from = moment(e.point.x);
-          timefilter.time.to = moment(e.point.x + e.data.ordered.interval);
-          timefilter.time.mode = 'absolute';
-        },
-        brush: brushEvent($scope.state)
       },
       aggs: visStateAggs
     });

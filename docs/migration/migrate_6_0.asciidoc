@@ -65,3 +65,10 @@ This is no longer the case. Now, only commas are a valid query separator: e.g. `
 *Details:* Kibana 5.x redirected requests from http to https on the same port if TLS was configured. Starting in Kibana 6.0.0, Kibana no longer redirects basic http traffic to https.
 
 *Impact:* With the new configuration setting `server.ssl.redirectHttpFromPort` you can specify a port that will redirect from http to https. This cannot be the same port as the https port.
+
+
+[float]
+=== Removed "expand index pattern when searching" setting for index patterns
+*Details:* Since 4.3, index patterns could be configured to do a pre-flight field_stats request before a search in order to determine exact indices that could contain matching documents. Elasticsearch now optimizes searches internally in a similar way and has also removed the field_stats API, so this option was removed from Kibana entirely.
+
+*Impact:* No change is required for existing Kibana index patterns. Those previously configured with this option will gracefully use the new Elasticsearch optimizations instead, as will all new index patterns.

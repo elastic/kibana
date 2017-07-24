@@ -96,7 +96,6 @@ export class KibanaMap extends EventEmitter {
     this._listeners = [];
     this._showTooltip = false;
 
-
     const leafletOptions = {
       minZoom: options.minZoom,
       maxZoom: options.maxZoom,
@@ -105,6 +104,7 @@ export class KibanaMap extends EventEmitter {
     };
 
     this._leafletMap = L.map(containerNode, leafletOptions);
+    this._leafletMap.attributionControl.setPrefix('');
     this._leafletMap.scrollWheelZoom.disable();
     const worldBounds = L.latLngBounds(L.latLng(-90, -180), L.latLng(90, 180));
     this._leafletMap.setMaxBounds(worldBounds);
@@ -118,7 +118,10 @@ export class KibanaMap extends EventEmitter {
     });
     this._leafletMap.on('zoomend', () => this.emit('zoomend'));
     this._leafletMap.on('dragend', () => this.emit('dragend'));
-    this._leafletMap.on('dragend', e => this._layers.forEach(layer => layer.updateExtent('dragend', e)));
+
+    this._leafletMap.on('zoomend', () => this._updateExtent());
+    this._leafletMap.on('dragend', () => this._updateExtent());
+
     this._leafletMap.on('mousemove', e => this._layers.forEach(layer => layer.movePointer('mousemove', e)));
     this._leafletMap.on('mouseout', e => this._layers.forEach(layer => layer.movePointer('mouseout', e)));
     this._leafletMap.on('mousedown', e => this._layers.forEach(layer => layer.movePointer('mousedown', e)));
@@ -174,8 +177,6 @@ export class KibanaMap extends EventEmitter {
     });
 
     this.resize();
-
-
   }
 
   setShowTooltip(showTooltip) {
@@ -234,18 +235,48 @@ export class KibanaMap extends EventEmitter {
     this._layers.push(kibanaLayer);
     kibanaLayer.addToLeafletMap(this._leafletMap);
     this.emit('layers:update');
+
+    this._addAttributions(kibanaLayer.getAttributions());
   }
 
-  removeLayer(layer) {
-    const index = this._layers.indexOf(layer);
+  removeLayer(kibanaLayer) {
+
+    if (!kibanaLayer) {
+      return;
+    }
+
+    this._removeAttributions(kibanaLayer.getAttributions());
+    const index = this._layers.indexOf(kibanaLayer);
     if (index >= 0) {
       this._layers.splice(index, 1);
-      layer.removeFromLeafletMap(this._leafletMap);
+      kibanaLayer.removeFromLeafletMap(this._leafletMap);
     }
     this._listeners.forEach(listener => {
-      if (listener.layer === layer) {
+      if (listener.layer === kibanaLayer) {
         listener.layer.removeListener(listener.name, listener.handle);
       }
+    });
+
+    //must readd all attributions, because we might have removed dupes
+    this._layers.forEach((layer) => this._addAttributions(layer.getAttributions()));
+    if (this._baseLayerSettings) {
+      this._addAttributions(this._baseLayerSettings.options.attribution);
+    }
+  }
+
+
+  _addAttributions(attribution) {
+    const attributions = getAttributionArray(attribution);
+    attributions.forEach((attribution) => {
+      this._leafletMap.attributionControl.removeAttribution(attribution);//this ensures we do not add duplicates
+      this._leafletMap.attributionControl.addAttribution(attribution);
+    });
+  }
+
+  _removeAttributions(attribution) {
+    const attributions = getAttributionArray(attribution);
+    attributions.forEach((attribution) => {
+      this._leafletMap.attributionControl.removeAttribution(attribution);//this ensures we do not add duplicates
     });
   }
 
@@ -300,6 +331,10 @@ export class KibanaMap extends EventEmitter {
     return zoomToPrecision(this._leafletMap.getZoom(), 12, this._leafletMap.getMaxZoom());
   }
 
+  getLeafletBounds() {
+    return this._leafletMap.getBounds();
+  }
+
   getBounds() {
 
     const bounds = this._leafletMap.getBounds();
@@ -339,6 +374,36 @@ export class KibanaMap extends EventEmitter {
     };
   }
 
+  getUntrimmedBounds() {
+    const bounds = this._leafletMap.getBounds();
+    if (!bounds) {
+      return null;
+    }
+
+    const southEast = bounds.getSouthEast();
+    const northWest = bounds.getNorthWest();
+    const southEastLng = southEast.lng;
+    const northWestLng = northWest.lng;
+    const southEastLat = southEast.lat;
+    const northWestLat = northWest.lat;
+
+    //Bounds cannot be created unless they form a box with larger than 0 dimensions
+    //Invalid areas are rejected by ES.
+    if (southEastLat === northWestLat || southEastLng === northWestLng) {
+      return;
+    }
+
+    return {
+      bottom_right: {
+        lat: southEastLat,
+        lon: southEastLng
+      },
+      top_left: {
+        lat: northWestLat,
+        lon: northWestLng
+      }
+    };
+  }
 
   setDesaturateBaseLayer(isDesaturated) {
     if (isDesaturated === this._baseLayerIsDesaturated) {
@@ -425,15 +490,18 @@ export class KibanaMap extends EventEmitter {
       return;
     }
 
-    this._baseLayerSettings = settings;
+
     if (settings === null) {
       if (this._leafletBaseLayer && this._leafletMap) {
+        this._removeAttributions(this._baseLayerSettings.options.attribution);
         this._leafletMap.removeLayer(this._leafletBaseLayer);
         this._leafletBaseLayer = null;
+        this._baseLayerSettings = null;
       }
       return;
     }
 
+    this._baseLayerSettings = settings;
     if (this._leafletBaseLayer) {
       this._leafletMap.removeLayer(this._leafletBaseLayer);
       this._leafletBaseLayer = null;
@@ -461,6 +529,7 @@ export class KibanaMap extends EventEmitter {
       if (settings.options.minZoom > this._leafletMap.getZoom()) {
         this._leafletMap.setZoom(settings.options.minZoom);
       }
+      this._addAttributions(settings.options.attribution);
       this.resize();
     }
 
@@ -471,15 +540,18 @@ export class KibanaMap extends EventEmitter {
     return mapBounds.intersects(bucketRectBounds);
   }
 
-  fitToData() {
+  async fitToData() {
 
     if (!this._leafletMap) {
       return;
     }
 
+    const boundsArray = await Promise.all(this._layers.map(async (layer) => {
+      return await layer.getBounds();
+    }));
+
     let bounds = null;
-    this._layers.forEach(layer => {
-      const b = layer.getBounds();
+    boundsArray.forEach(async (b) => {
       if (bounds) {
         bounds.extend(b);
       } else {
@@ -496,14 +568,12 @@ export class KibanaMap extends EventEmitter {
     return L.tileLayer(options.url, {
       minZoom: options.minZoom,
       maxZoom: options.maxZoom,
-      subdomains: options.subdomains || [],
-      attribution: options.attribution
+      subdomains: options.subdomains || []
     });
   }
 
   _getWMSBaseLayer(options) {
     const wmsOptions = {
-      attribution: options.attribution || '',
       format: options.format || '',
       layers: options.layers || '',
       minZoom: options.minZoom,
@@ -542,6 +612,7 @@ export class KibanaMap extends EventEmitter {
       if (!centerFromUIState || centerFromMap.lon !== centerFromUIState[1] || centerFromMap.lat !== centerFromUIState[0]) {
         visualization.uiStateVal('mapCenter', [centerFromMap.lat, centerFromMap.lon]);
       }
+      uiState.set('mapBounds', this.getUntrimmedBounds());
     }
 
     this.on('dragend', persistMapStateInUiState);
@@ -561,4 +632,13 @@ export class KibanaMap extends EventEmitter {
   }
 }
 
+
+function getAttributionArray(attribution) {
+  const attributionString = attribution || '';
+  let attributions = attributionString.split('|');
+  if (attributions.length === 1) {//temp work-around due to inconsistency in manifests of how attributions are delimited
+    attributions = attributions[0].split(',');
+  }
+  return attributions;
+}
 

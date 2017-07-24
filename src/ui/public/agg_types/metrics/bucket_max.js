@@ -13,6 +13,7 @@ export function AggTypesMetricsBucketMaxProvider(Private) {
     subtype: siblingPipelineHelper.subtype,
     params: [
       ...siblingPipelineHelper.params()
-    ]
+    ],
+    getFormat: siblingPipelineHelper.getFormat
   });
 }

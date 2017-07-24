@@ -1,5 +1,3 @@
-
-import _ from 'lodash';
 import expect from 'expect.js';
 import ngMock from 'ng_mock';
 import { VisProvider } from 'ui/vis';
@@ -28,8 +26,8 @@ describe('AggConfig Filters', function () {
             schema: 'segment',
             params: {
               filters: [
-                { input: { query: { query_string: { query: '_type:apache' } } } },
-                { input: { query: { query_string: { query: '_type:nginx' } } } }
+                { input: { query: { query_string: { query: 'type:apache' } } } },
+                { input: { query: { query_string: { query: 'type:nginx' } } } }
               ]
             }
           }
@@ -37,8 +35,8 @@ describe('AggConfig Filters', function () {
       });
 
       const aggConfig = vis.aggs.byTypeName.filters[0];
-      const filter = createFilter(aggConfig, '_type:nginx');
-      expect(_.omit(filter, 'meta')).to.eql(aggConfig.params.filters[1].input);
+      const filter = createFilter(aggConfig, 'type:nginx');
+      expect(filter.query.query_string.query).to.be('type:nginx');
       expect(filter.meta).to.have.property('index', indexPattern.id);
 
     });

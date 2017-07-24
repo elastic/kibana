@@ -53,6 +53,7 @@ export default () => Joi.object({
     autoListen: Joi.boolean().default(true),
     defaultRoute: Joi.string().default('/app/kibana').regex(/^\//, `start with a slash`),
     basePath: Joi.string().default('').allow('').regex(/(^$|^\/.*[^\/]$)/, `start with a slash, don't end with one`),
+    customResponseHeaders: Joi.object().unknown(true).default({}),
     ssl: Joi.object({
       enabled: Joi.boolean().default(false),
       redirectHttpFromPort: Joi.number(),
@@ -188,6 +189,7 @@ export default () => Joi.object({
     layers: Joi.array().items(Joi.object({
       url: Joi.string(),
       type: Joi.string(),
+      attribution: Joi.string(),
       name: Joi.string(),
       fields: Joi.array().items(Joi.object({
         name: Joi.string(),

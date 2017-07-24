@@ -14,6 +14,16 @@ export function getUiSettingDefaults() {
       description: '<a href="https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-query-string-query.html" target="_blank">Options</a> for the lucene query string parser',
       type: 'json'
     },
+    'search:queryLanguage': {
+      value: 'lucene',
+      description: 'Query language used by the query bar. Kuery is an experimental new language built specifically for Kibana.',
+      type: 'select',
+      options: ['lucene', 'kuery']
+    },
+    'search:queryLanguage:switcher:enable': {
+      value: false,
+      description: 'Show or hide the query language switcher in the query bar'
+    },
     'sort:options': {
       value: '{ "unmapped_type": "boolean" }',
       description: '<a href="https://www.elastic.co/guide/en/elasticsearch/reference/current/search-request-sort.html" target="_blank">Options</a> for the Elasticsearch sort parameter',
@@ -272,22 +282,26 @@ export function getUiSettingDefaults() {
     'notifications:lifetime:banner': {
       value: 3000000,
       description: 'The time in milliseconds which a banner notification ' +
-      'will be displayed on-screen for. Setting to Infinity will disable.'
+      'will be displayed on-screen for. Setting to Infinity will disable the countdown.',
+      type: 'number',
     },
     'notifications:lifetime:error': {
       value: 300000,
       description: 'The time in milliseconds which an error notification ' +
-      'will be displayed on-screen for. Setting to Infinity will disable.'
+      'will be displayed on-screen for. Setting to Infinity will disable.',
+      type: 'number',
     },
     'notifications:lifetime:warning': {
       value: 10000,
       description: 'The time in milliseconds which a warning notification ' +
-        'will be displayed on-screen for. Setting to Infinity will disable.'
+        'will be displayed on-screen for. Setting to Infinity will disable.',
+      type: 'number',
     },
     'notifications:lifetime:info': {
       value: 5000,
       description: 'The time in milliseconds which an information notification ' +
-        'will be displayed on-screen for. Setting to Infinity will disable.'
+        'will be displayed on-screen for. Setting to Infinity will disable.',
+      type: 'number',
     },
     'metrics:max_buckets': {
       value: 2000,

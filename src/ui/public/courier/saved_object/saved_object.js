@@ -17,6 +17,7 @@ import MappingSetupProvider from 'ui/utils/mapping_setup';
 
 import { SearchSourceProvider } from '../data_source/search_source';
 import { SavedObjectsClientProvider, findObjectByTitle } from 'ui/saved_objects';
+import { migrateLegacyQuery } from '../../utils/migrateLegacyQuery.js';
 
 /**
  * An error message to be used when the user rejects a confirm overwrite.
@@ -39,7 +40,7 @@ function isErrorNonFatal(error) {
   return error.message === OVERWRITE_REJECTED || error.message === SAVE_DUPLICATE_REJECTED;
 }
 
-export function SavedObjectProvider(esAdmin, kbnIndex, Promise, Private, Notifier, confirmModalPromise, indexPatterns) {
+export function SavedObjectProvider(Promise, Private, Notifier, confirmModalPromise, indexPatterns) {
   const savedObjectsClient = Private(SavedObjectsClientProvider);
   const SearchSource = Private(SearchSourceProvider);
   const mappingSetup = Private(MappingSetupProvider);
@@ -53,7 +54,6 @@ export function SavedObjectProvider(esAdmin, kbnIndex, Promise, Private, Notifie
 
     // type name for this object, used as the ES-type
     const esType = config.type;
-    this.index = kbnIndex;
 
     this.getDisplayName = function () {
       return esType;
@@ -106,6 +106,8 @@ export function SavedObjectProvider(esAdmin, kbnIndex, Promise, Private, Notifie
       }, {});
 
       this.searchSource.set(_.defaults(state, fnProps));
+
+      this.searchSource.set('query', migrateLegacyQuery(this.searchSource.getOwn('query')));
     };
 
     /**
@@ -153,24 +155,7 @@ export function SavedObjectProvider(esAdmin, kbnIndex, Promise, Private, Notifie
       // ensure that the esType is defined
       if (!esType) throw new Error('You must define a type name to use SavedObject objects.');
 
-      // check that the mapping for this esType is defined
-      return mappingSetup.isDefined(esType)
-        .then(function (defined) {
-          // if it is already defined skip this step
-          if (defined) return true;
-
-          mapping.kibanaSavedObjectMeta = {
-            properties: {
-              // setup the searchSource mapping, even if it is not used but this type yet
-              searchSourceJSON: {
-                type: 'text'
-              }
-            }
-          };
-
-          // tell mappingSetup to set esType
-          return mappingSetup.setup(esType, mapping);
-        })
+      return Promise.resolve()
         .then(() => {
           // If there is not id, then there is no document to fetch from elasticsearch
           if (!this.id) {
@@ -195,16 +180,11 @@ export function SavedObjectProvider(esAdmin, kbnIndex, Promise, Private, Notifie
             })
             .then(this.applyESResp)
             .catch(this.applyEsResp);
-
         })
-        .then(() => {
-          return customInit.call(this);
-        })
-        .then(() => {
-          // return our obj as the result of init()
-          return this;
-        });
+        .then(() => customInit.call(this))
+        .then(() => this);
     });
+
 
     this.applyESResp = (resp) => {
       this._source = _.cloneDeep(resp._source);

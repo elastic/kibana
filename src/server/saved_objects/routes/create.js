@@ -9,7 +9,7 @@ export const createCreateRoute = (prereqs) => {
       validate: {
         query: Joi.object().keys({
           overwrite: Joi.boolean().default(false)
-        }),
+        }).default(),
         params: Joi.object().keys({
           type: Joi.string().required(),
           id: Joi.string()

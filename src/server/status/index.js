@@ -18,6 +18,9 @@ export default function (kbnServer, server, config) {
   server.route(wrapAuth({
     method: 'GET',
     path: '/api/status',
+    config: {
+      tags: ['api']
+    },
     handler: function (request, reply) {
       const status = {
         name: config.get('server.name'),

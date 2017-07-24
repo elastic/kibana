@@ -231,8 +231,8 @@ describe('buildHierarchicalData', function () {
             schema: 'segment',
             params: {
               filters: [
-                { input: { query: { query_string: { query: '_type:apache' } } } },
-                { input: { query: { query_string: { query: '_type:nginx' } } } }
+                { input: { query: { query_string: { query: 'type:apache' } } } },
+                { input: { query: { query_string: { query: 'type:nginx' } } } }
               ]
             }
           }
@@ -267,8 +267,8 @@ describe('buildHierarchicalData', function () {
             schema: 'split',
             params: {
               filters: [
-                { input: { query: { query_string: { query: '_type:apache' } } } },
-                { input: { query: { query_string: { query: '_type:nginx' } } } }
+                { input: { query: { query_string: { query: 'type:apache' } } } },
+                { input: { query: { query_string: { query: 'type:nginx' } } } }
               ]
             }
           }

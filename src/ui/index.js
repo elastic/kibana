@@ -14,7 +14,8 @@ import { fieldFormatsMixin } from './field_formats_mixin';
 
 export default async (kbnServer, server, config) => {
   const uiExports = kbnServer.uiExports = new UiExports({
-    urlBasePath: config.get('server.basePath')
+    urlBasePath: config.get('server.basePath'),
+    kibanaIndexMappings: kbnServer.mappings,
   });
 
   await kbnServer.mixin(uiSettingsMixin);

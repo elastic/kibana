@@ -131,43 +131,6 @@
             </div>
           </div>
 
-          <!-- Expand index pattern checkbox -->
-          <div class="kuiVerticalRhythm" ng-if="controller.canEnableExpandWildcard()">
-            <label class="kuiCheckBoxLabel kuiVerticalRhythm">
-              <input
-                class="kuiCheckBox"
-                type="checkbox"
-                data-test-subj="createIndexPatternEnableExpand"
-                ng-model="controller.formValues.expandWildcard"
-              >
-              <span class="kuiCheckBoxLabel__text">
-                <span translate="KIBANA-EXPAND_INDEX_PATTERN"></span>
-                <span translate="KIBANA-DEPRECATED"></span>
-              </span>
-            </label>
-
-            <!-- Checkbox help text -->
-            <div class="kuiVerticalRhythm">
-              <p
-                class="kuiSubText kuiVerticalRhythmSmall"
-                translate="KIBANA-WILDCARD_DEFAULT_EXPANDED_TO_CURRENT_TIME_RANGE"
-              ></p>
-
-              <p class="kuiSubText kuiVerticalRhythmSmall">
-                <span translate="KIBANA-SEARCH_AGAINST_INDEX_PATTERN"></span>
-                <em translate="KIBANA-LOGSTASH_WILDCARD"></em>
-                <span translate="KIBANA-ACTUALLY_QUERY"></span>
-                <em translate="KIBANA-EXAMPLE_TIME_RANGE"></em>
-                <span translate="KIBANA-FALL_WITHIN_CURRENT_TIME_RANGE"></span>
-              </p>
-
-              <p
-                class="kuiSubText kuiVerticalRhythmSmall"
-                translate="KIBANA-EXPAND_INDEX_PATTERN_DEPRECATION"
-              ></p>
-            </div>
-          </div>
-
           <!-- Form actions -->
           <button
             data-test-subj="createIndexPatternCreateButton"

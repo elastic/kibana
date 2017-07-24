@@ -14,6 +14,7 @@ export function exportApi(server) {
           ).required()
         })
       },
+      tags: ['api'],
     },
     method: ['GET'],
     handler: (req, reply) => {

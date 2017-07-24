@@ -4,9 +4,6 @@
     "index": ".kibana",
     "settings": {
       "index": {
-        "mapping": {
-          "single_type": "false"
-        },
         "number_of_shards": "1",
         "mapper": {
           "dynamic": "false"

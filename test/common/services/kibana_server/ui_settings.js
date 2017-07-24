@@ -1,46 +1,49 @@
 import { get } from 'lodash';
+import toPath from 'lodash/internal/toPath';
+
+import { SavedObjectsClient } from '../../../../src/server/saved_objects';
+
+function createCallCluster(es) {
+  return function callCluster(method, params) {
+    const path = toPath(method);
+    const contextPath = path.slice(0, -1);
+
+    const action = get(es, path);
+    const context = contextPath.length ? get(es, contextPath) : es;
+
+    return action.call(context, params);
+  };
+}
 
 export class KibanaServerUiSettings {
-  constructor(log, es, kibanaVersion) {
-    this.es = es;
-    this.log = log;
-    this.kibanaVersion = kibanaVersion;
+  constructor(log, es, kibanaIndex, kibanaVersion) {
+    this._log = log;
+    this._kibanaVersion = kibanaVersion;
+    this._savedObjectsClient = new SavedObjectsClient(
+      kibanaIndex.getName(),
+      kibanaIndex.getMappingsDsl(),
+      createCallCluster(es)
+    );
   }
 
-  async _docParams() {
-    const { kibanaVersion } = this;
-    return {
-      index: '.kibana',
-      type: 'config',
-      id: await kibanaVersion.get()
-    };
+  async _id() {
+    return await this._kibanaVersion.get();
   }
 
   async existInEs() {
-    const { es } = this;
-    return await es.exists(await this._docParams());
-  }
-
-  async _read() {
-    const { log, es } = this;
-    try {
-      const doc = await es.get(await this._docParams());
-      log.verbose('Fetched kibana config doc', doc);
-      return doc;
-    } catch (err) {
-      log.debug('Failed to fetch kibana config doc', err.message);
-      return;
-    }
+    return !!(await this._read());
   }
 
   /*
   ** Gets defaultIndex from the config doc.
   */
   async getDefaultIndex() {
-    const { log } = this;
     const doc = await this._read();
-    const defaultIndex = get(doc, ['_source', 'defaultIndex']);
-    log.verbose('uiSettings.defaultIndex: %j', defaultIndex);
+    if (!doc) {
+      throw new TypeError('Failed to fetch kibana config doc');
+    }
+    const defaultIndex = doc.attributes.defaultIndex;
+    this._log.verbose('uiSettings.defaultIndex: %j', defaultIndex);
     return defaultIndex;
   }
 
@@ -62,12 +65,10 @@ export class KibanaServerUiSettings {
   }
 
   async replace(doc) {
-    const { log, es } = this;
-    log.debug('updating kibana config doc: %j', doc);
-    await es.index({
-      ...(await this._docParams()),
-      refresh: 'wait_for',
-      body: doc,
+    this._log.debug('replacing kibana config doc: %j', doc);
+    await this._savedObjectsClient.create('config', { doc }, {
+      id: await this._id(),
+      overwrite: true,
     });
   }
 
@@ -75,13 +76,19 @@ export class KibanaServerUiSettings {
   * Add fields to the config doc (like setting timezone and defaultIndex)
   * @return {Promise} A promise that is resolved when elasticsearch has a response
   */
-  async update(doc) {
-    const { log, es } = this;
-    log.debug('updating kibana config doc: %j', doc);
-    await es.update({
-      ...(await this._docParams()),
-      refresh: 'wait_for',
-      body: { doc, upsert: doc },
-    });
+  async update(updates) {
+    this._log.debug('applying update to kibana config: %j', updates);
+    await this._savedObjectsClient.update('config', await this._id(), updates);
+  }
+
+  async _read() {
+    try {
+      const doc = await this._savedObjectsClient.get('config', await this._id());
+      this._log.verbose('Fetched kibana config doc', doc);
+      return doc;
+    } catch (err) {
+      this._log.debug('Failed to fetch kibana config doc', err.message);
+      return;
+    }
   }
 }

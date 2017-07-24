@@ -7,14 +7,15 @@ import { truncatedColorMaps } from 'ui/vislib/components/color/truncated_colorma
 
 export default class ChoroplethLayer extends KibanaMapLayer {
 
-  constructor(geojsonUrl) {
+  constructor(geojsonUrl, attribution) {
     super();
-
 
     this._metrics = null;
     this._joinField = null;
     this._colorRamp = truncatedColorMaps[Object.keys(truncatedColorMaps)[0]];
     this._tooltipFormatter = () => '';
+    this._attribution = attribution;
+    this._boundsOfData = null;
 
     this._geojsonUrl = geojsonUrl;
     this._leafletLayer = L.geoJson(null, {
@@ -75,6 +76,8 @@ export default class ChoroplethLayer extends KibanaMapLayer {
       const quantizeDomain = (min !== max) ? [min, max] : d3.scale.quantize().domain();
       this._legendQuantizer = d3.scale.quantize().domain(quantizeDomain).range(this._legendColors);
     }
+
+    this._boundsOfData = styler.getLeafletBounds();
     this.emit('styleChanged', {
       mismatches: styler.getMismatches()
     });
@@ -132,6 +135,11 @@ export default class ChoroplethLayer extends KibanaMapLayer {
     return this._geojsonUrl === geojsonUrl;
   }
 
+  getBounds() {
+    const bounds = super.getBounds();
+    return (this._boundsOfData) ? this._boundsOfData  : bounds;
+  }
+
   appendLegendContents(jqueryDiv) {
 
 
@@ -162,9 +170,7 @@ export default class ChoroplethLayer extends KibanaMapLayer {
 
       jqueryDiv.append(label);
     });
-
   }
-
 }
 
 
@@ -195,12 +201,17 @@ function makeChoroplethStyler(data, colorramp, joinField) {
       },
       getMismatches: function () {
         return [];
+      },
+      getLeafletBounds: function () {
+        return null;
       }
     };
   }
 
   const { min, max } = getMinMax(data);
   const outstandingFeatures = data.slice();
+
+  const boundsOfAllFeatures = new L.LatLngBounds();
   return {
     getLeafletStyleFunction: function (geojsonFeature) {
       let lastIndex = -1;
@@ -214,6 +225,10 @@ function makeChoroplethStyler(data, colorramp, joinField) {
       }
 
       outstandingFeatures.splice(lastIndex, 1);
+
+      const boundsOfFeature = L.geoJson(geojsonFeature).getBounds();
+      boundsOfAllFeatures.extend(boundsOfFeature);
+
       return {
         fillColor: getChoroplethColor(match.value, min, max, colorramp),
         weight: 2,
@@ -228,6 +243,9 @@ function makeChoroplethStyler(data, colorramp, joinField) {
      */
     getMismatches: function () {
       return outstandingFeatures.map((bucket) => bucket.term);
+    },
+    getLeafletBounds: function () {
+      return boundsOfAllFeatures.isValid() ?  boundsOfAllFeatures : null;
     }
   };
 

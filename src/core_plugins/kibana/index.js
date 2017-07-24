@@ -6,6 +6,8 @@ import { mkdirp as mkdirpNode } from 'mkdirp';
 import manageUuid from './server/lib/manage_uuid';
 import search from './server/routes/api/search';
 import settings from './server/routes/api/settings';
+import { adminIndicesApi } from './server/routes/api/admin_indices';
+import { scrollSearchApi } from './server/routes/api/scroll_search';
 import { importApi } from './server/routes/api/import';
 import { exportApi } from './server/routes/api/export';
 import scripts from './server/routes/api/scripts';
@@ -35,6 +37,11 @@ export default function (kibana) {
     uiExports: {
       hacks: ['plugins/kibana/dev_tools/hacks/hide_empty_tools'],
       fieldFormats: ['plugins/kibana/field_formats/register'],
+      savedObjectTypes: [
+        'plugins/kibana/visualize/saved_visualizations/saved_visualization_register',
+        'plugins/kibana/discover/saved_searches/saved_search_register',
+        'plugins/kibana/dashboard/saved_dashboard/saved_dashboard_register',
+      ],
       app: {
         id: 'kibana',
         title: 'Kibana',
@@ -43,6 +50,10 @@ export default function (kibana) {
         main: 'plugins/kibana/kibana',
         uses: [
           'visTypes',
+          'visResponseHandlers',
+          'visRequestHandlers',
+          'visEditorTypes',
+          'savedObjectTypes',
           'spyModes',
           'fieldFormats',
           'fieldFormatEditors',
@@ -134,6 +145,8 @@ export default function (kibana) {
       search(server);
       settings(server);
       scripts(server);
+      adminIndicesApi(server);
+      scrollSearchApi(server);
       importApi(server);
       exportApi(server);
       registerSuggestionsApi(server);

@@ -5,7 +5,6 @@ import * as columnActions from 'ui/doc_table/actions/columns';
 import 'plugins/kibana/dashboard/panel/get_object_loaders_for_dashboard';
 import 'plugins/kibana/visualize/saved_visualizations';
 import 'plugins/kibana/discover/saved_searches';
-import { FilterManagerProvider } from 'ui/filter_manager';
 import { uiModules } from 'ui/modules';
 import panelTemplate from 'plugins/kibana/dashboard/panel/panel.html';
 import { savedObjectManagementRegistry } from 'plugins/kibana/management/saved_object_registry';
@@ -16,7 +15,6 @@ import { DashboardViewMode } from '../dashboard_view_mode';
 uiModules
 .get('app/dashboard')
 .directive('dashboardPanel', function (savedVisualizations, savedSearches, Notifier, Private, $injector, getObjectLoadersForDashboard) {
-  const filterManager = Private(FilterManagerProvider);
 
   const services = savedObjectManagementRegistry.all().map(function (serviceObj) {
     const service = $injector.get(serviceObj.service);
@@ -86,6 +84,11 @@ uiModules
        * @type {function}
        */
       saveState: '=',
+      /**
+       * Called when a filter action has been triggered
+       * @type {function}
+       */
+      onFilter: '=',
       appState: '=',
     },
     link: function ($scope, element) {
@@ -148,7 +151,7 @@ uiModules
 
         $scope.filter = function (field, value, operator) {
           const index = $scope.savedObj.searchSource.get('index').id;
-          filterManager.add(field, value, operator, index);
+          $scope.onFilter(field, value, operator, index);
         };
 
       }

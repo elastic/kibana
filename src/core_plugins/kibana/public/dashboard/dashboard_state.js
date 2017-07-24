@@ -219,7 +219,19 @@ export class DashboardState {
    * new dashboard, if the query differs from the default.
    */
   getQueryChanged() {
-    return !_.isEqual(this.appState.query, this.getLastSavedQuery());
+    const currentQuery = this.appState.query;
+    const lastSavedQuery = this.getLastSavedQuery();
+
+    const isLegacyStringQuery = (
+      _.isString(lastSavedQuery)
+      && _.isPlainObject(currentQuery)
+      && _.has(currentQuery, 'query')
+    );
+    if (isLegacyStringQuery) {
+      return lastSavedQuery !== currentQuery.query;
+    }
+
+    return !_.isEqual(currentQuery, lastSavedQuery);
   }
 
   /**
@@ -404,14 +416,8 @@ export class DashboardState {
    */
   applyFilters(query, filters) {
     this.appState.query = query;
-    if (this.appState.query) {
-      this.savedDashboard.searchSource.set('filter', _.union(filters, [{
-        query: this.appState.query
-      }]));
-    } else {
-      this.savedDashboard.searchSource.set('filter', filters);
-    }
-
+    this.savedDashboard.searchSource.set('query', query);
+    this.savedDashboard.searchSource.set('filter', filters);
     this.saveState();
   }
 
@@ -424,6 +430,8 @@ export class DashboardState {
     this.stateMonitor.ignoreProps('viewMode');
     // Filters need to be compared manually because they sometimes have a $$hashkey stored on the object.
     this.stateMonitor.ignoreProps('filters');
+    // Query needs to be compared manually because saved legacy queries get migrated in app state automatically
+    this.stateMonitor.ignoreProps('query');
 
     this.stateMonitor.onChange(status => {
       this.isDirty = status.dirty;
