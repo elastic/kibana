@@ -8,18 +8,20 @@
 
   &:hover {
     @include child('dismiss') {
-      visibility: visible;
       opacity: 1;
     }
   }
 
   @include child('dismiss') {
-    visibility: hidden;
     opacity: 0;
     position: absolute;
-    right: 0;
+    right: $kuiSize;
     top: $kuiSize;
     transition: opacity $kuiAnimSpeedNormal ease-in;
+
+    &:focus {
+      opacity: 1;
+    }
   }
 
   @include child('title') {

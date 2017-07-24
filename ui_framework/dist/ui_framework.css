@@ -68,6 +68,9 @@ html {
 body {
   line-height: 1; }
 
+*:focus {
+  outline: none; }
+
 a {
   text-decoration: none; }
   a:hover {
@@ -421,15 +424,15 @@ table {
   padding: 16px;
   border-top: 1px solid #D9D9D9; }
   .kuiHeaderAlert:hover .kuiHeaderAlert__dismiss {
-    visibility: visible;
     opacity: 1; }
   .kuiHeaderAlert__dismiss {
-    visibility: hidden;
     opacity: 0;
     position: absolute;
-    right: 0;
+    right: 16px;
     top: 16px;
     transition: opacity 250ms ease-in; }
+    .kuiHeaderAlert__dismiss:focus {
+      opacity: 1; }
   .kuiHeaderAlert__title {
     font-weight: 500;
     padding-right: 24px; }
@@ -448,6 +451,9 @@ table {
 .kuiIcon {
   display: inline-block;
   fill: #3F3F3F; }
+  .kuiIcon:focus {
+    opacity: 1;
+    background: #e6f2f6; }
   .kuiIcon--medium {
     width: 16px;
     height: 16px; }
