@@ -2,17 +2,15 @@ import searchTemplate from './search_template.html';
 import angular from 'angular';
 import * as columnActions from 'ui/doc_table/actions/columns';
 import { getPersistedStateId } from 'plugins/kibana/dashboard/panel/panel_state';
-import { FilterManagerProvider } from 'ui/filter_manager';
 import { EmbeddableHandler } from 'ui/embeddable';
 
 
 export class SearchEmbeddableHandler extends EmbeddableHandler {
 
-  constructor($compile, $rootScope, searchLoader, Private) {
+  constructor($compile, $rootScope, searchLoader) {
     super();
     this.$compile = $compile;
     this.searchLoader = searchLoader;
-    this.filterManager = Private(FilterManagerProvider);
     this.$rootScope = $rootScope;
     this.name = 'search';
   }
@@ -68,7 +66,7 @@ export class SearchEmbeddableHandler extends EmbeddableHandler {
 
       searchScope.filter = function (field, value, operator) {
         const index = savedObject.searchSource.get('index').id;
-        this.filterManager.add(field, value, operator, index);
+        container.onFilter(field, value, operator, index);
       };
 
       const searchInstance = this.$compile(searchTemplate)(searchScope);

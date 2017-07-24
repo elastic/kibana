@@ -13,9 +13,10 @@ export function FilterBarLibMapPhraseProvider(Promise, courier) {
       const type = 'phrase';
       const key = isScriptedPhraseFilter ? filter.meta.field : Object.keys(filter.query.match)[0];
       const field = indexPattern.fields.byName[key];
-      const query = isScriptedPhraseFilter ? filter.script.script.params.value : filter.query.match[key].query;
+      const params = isScriptedPhraseFilter ? filter.script.script.params : filter.query.match[key];
+      const query = isScriptedPhraseFilter ? params.value : params.query;
       const value = field.format.convert(query);
-      return { type, key, value };
+      return { type, key, value, params };
     });
   };
 }

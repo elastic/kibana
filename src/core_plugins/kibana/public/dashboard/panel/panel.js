@@ -70,6 +70,11 @@ uiModules
        */
       saveState: '=',
       /**
+       * Called when a filter action has been triggered
+       * @type {function}
+       */
+      onFilter: '=',
+      /**
        * @type {Object}
        */
       appState: '=',
@@ -87,6 +92,7 @@ uiModules
       };
 
       const containerAPI = {
+        onFilter: $scope.onFilter,
         savePanelState,
         getAppState: () => $scope.appState,
         getIsViewOnlyMode: $scope.isViewOnlyMode,

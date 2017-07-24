@@ -43,7 +43,6 @@ app.directive('dashboardGrid', function ($compile, Notifier) {
        * @type {function}
        */
       saveState: '=',
-      appState: '=',
       /**
        * Expand or collapse a panel, so it either takes up the whole screen or goes back to its
        * natural size.
@@ -54,6 +53,11 @@ app.directive('dashboardGrid', function ($compile, Notifier) {
        * @type {Object}
        */
       appState: '=',
+      /**
+       * Called when a filter action has been triggered by a panel
+       * @type {function}
+       */
+      onFilter: '=',
     },
     link: function ($scope, $el) {
       const notify = new Notifier();
@@ -216,7 +220,8 @@ app.directive('dashboardGrid', function ($compile, Notifier) {
                   register-panel-index-pattern="registerPanelIndexPattern"
                   app-state="appState"
                   toggle-expand="toggleExpand(${panel.panelIndex})"
-                  create-child-ui-state="createChildUiState">
+                  create-child-ui-state="createChildUiState"
+                  on-filter="onFilter">
             </li>`;
         const panelElement = $compile(panelHtml)($scope);
         panelElementMapping[panel.panelIndex] = panelElement;

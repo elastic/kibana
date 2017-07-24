@@ -50,38 +50,38 @@ describe('plugins/elasticsearch', function () {
     testRoute({
       method: 'GET',
       url: '/elasticsearch/_nodes'
-    });
+    }, 404);
 
     testRoute({
       method: 'GET',
-      url: '/elasticsearch/'
-    });
+      url: '/elasticsearch'
+    }, 404);
 
     testRoute({
       method: 'POST',
       url: '/elasticsearch/.kibana'
-    }, 405);
+    }, 404);
 
     testRoute({
       method: 'PUT',
       url: '/elasticsearch/.kibana'
-    }, 405);
+    }, 404);
 
     testRoute({
       method: 'DELETE',
       url: '/elasticsearch/.kibana'
-    }, 405);
+    }, 404);
 
     testRoute({
       method: 'GET',
       url: '/elasticsearch/.kibana'
-    });
+    }, 404);
 
     testRoute({
       method: 'POST',
       url: '/elasticsearch/.kibana/_bulk',
       payload: '{}'
-    }, 400);
+    }, 404);
 
     testRoute({
       method: 'POST',
@@ -90,7 +90,7 @@ describe('plugins/elasticsearch', function () {
         'content-type': 'application/json'
       },
       payload: { query: { query_string: { analyze_wildcard: true, query: '*' } } }
-    });
+    }, 404);
 
     testRoute({
       method: 'POST',
@@ -99,7 +99,7 @@ describe('plugins/elasticsearch', function () {
         'content-type': 'application/json'
       },
       payload: { docs: [{ _index: '.kibana', _type: 'index-pattern', _id: '[logstash-]YYYY.MM.DD' }] }
-    });
+    }, 404);
 
     testRoute({
       method: 'POST',

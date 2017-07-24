@@ -18,17 +18,23 @@ export class ScaledCirclesMarkers extends EventEmitter {
     this._legendQuantizer = null;
 
     this._popups = [];
-    this._leafletLayer = L.geoJson(null, {
+
+    const layerOptions = {
       pointToLayer: this.getMarkerFunction(),
       style: this.getStyleFunction(),
       onEachFeature: (feature, layer) => {
         this._bindPopup(feature, layer);
-      },
-      filter: (feature) => {
+      }
+    };
+    // Filter leafletlayer on client when results are not filtered on the server
+    if (!options.isFilteredByCollar) {
+      layerOptions.filter = (feature) => {
         const bucketRectBounds = _.get(feature, 'properties.rectangle');
         return kibanaMap.isInside(bucketRectBounds);
-      }
-    });
+      };
+    }
+    this._leafletLayer = L.geoJson(null, layerOptions);
+
     this._leafletLayer.addData(this._geohashGeoJson);
   }
 

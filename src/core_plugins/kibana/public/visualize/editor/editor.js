@@ -5,6 +5,7 @@ import 'plugins/kibana/visualize/editor/agg_filter';
 import 'ui/visualize';
 import 'ui/collapsible_sidebar';
 import 'ui/share';
+import 'ui/query_bar';
 import chrome from 'ui/chrome';
 import angular from 'angular';
 import { Notifier } from 'ui/notify/notifier';
@@ -20,6 +21,8 @@ import { VisualizeConstants } from '../visualize_constants';
 import { documentationLinks } from 'ui/documentation_links/documentation_links';
 import { KibanaParsedUrl } from 'ui/url/kibana_parsed_url';
 import { absoluteToParsedUrl } from 'ui/url/absolute_to_parsed_url';
+import { migrateLegacyQuery } from 'ui/utils/migrateLegacyQuery';
+import { QueryManagerProvider } from 'ui/query_manager';
 
 uiRoutes
 .when(VisualizeConstants.CREATE_PATH, {
@@ -69,7 +72,7 @@ uiModules
   };
 });
 
-function VisEditor($scope, $route, timefilter, AppState, $window, kbnUrl, courier, Private, Promise, kbnBaseUrl) {
+function VisEditor($scope, $route, timefilter, AppState, $window, kbnUrl, courier, Private, Promise, config, kbnBaseUrl) {
   const docTitle = Private(DocTitleProvider);
   const queryFilter = Private(FilterBarQueryFilterProvider);
 
@@ -127,7 +130,7 @@ function VisEditor($scope, $route, timefilter, AppState, $window, kbnUrl, courie
   const stateDefaults = {
     uiState: savedVis.uiStateJSON ? JSON.parse(savedVis.uiStateJSON) : {},
     linked: !!savedVis.savedSearchId,
-    query: searchSource.getOwn('query') || { query_string: { query: '*' } },
+    query: searchSource.getOwn('query') || { query: '', language: config.get('search:queryLanguage') },
     filters: searchSource.getOwn('filter') || [],
     vis: savedVisState
   };
@@ -151,6 +154,7 @@ function VisEditor($scope, $route, timefilter, AppState, $window, kbnUrl, courie
 
     return appState;
   }());
+  const queryManager = Private(QueryManagerProvider)($state);
 
   function init() {
     // export some objects
@@ -182,6 +186,20 @@ function VisEditor($scope, $route, timefilter, AppState, $window, kbnUrl, courie
     stateMonitor = stateMonitorFactory.create($state, stateDefaults);
     stateMonitor.ignoreProps([ 'vis.listeners' ]).onChange((status) => {
       $appStatus.dirty = status.dirty || !savedVis.id;
+    });
+
+    $scope.$watchCollection('state.$newFilters', function (filters = []) {
+      // need to convert filters generated from user interaction with viz into kuery AST
+      // These are handled by the filter bar directive when lucene is the query language
+      Promise.all(filters.map(queryManager.addLegacyFilter))
+      .then(() => $scope.state.$newFilters = [])
+      .then($scope.fetch);
+    });
+
+    $scope.$watch('state.query', (newQuery) => {
+      $state.query = migrateLegacyQuery(newQuery);
+
+      $scope.fetch();
     });
 
     $state.replace();
@@ -217,6 +235,16 @@ function VisEditor($scope, $route, timefilter, AppState, $window, kbnUrl, courie
       stateMonitor.destroy();
     });
   }
+
+  $scope.updateQuery = function (query) {
+    // reset state if language changes
+    if ($state.query.language && $state.query.language !== query.language) {
+      $state.filters = [];
+      $state.$newFilters = [];
+    }
+
+    $state.query = query;
+  };
 
   /**
    * Called when the user clicks "Save" button.

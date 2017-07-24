@@ -17,6 +17,7 @@ import MappingSetupProvider from 'ui/utils/mapping_setup';
 
 import { SearchSourceProvider } from '../data_source/search_source';
 import { SavedObjectsClientProvider, findObjectByTitle } from 'ui/saved_objects';
+import { migrateLegacyQuery } from '../../utils/migrateLegacyQuery.js';
 
 /**
  * An error message to be used when the user rejects a confirm overwrite.
@@ -105,6 +106,8 @@ export function SavedObjectProvider(Promise, Private, Notifier, confirmModalProm
       }, {});
 
       this.searchSource.set(_.defaults(state, fnProps));
+
+      this.searchSource.set('query', migrateLegacyQuery(this.searchSource.getOwn('query')));
     };
 
     /**
