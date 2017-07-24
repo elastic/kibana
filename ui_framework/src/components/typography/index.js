@@ -1,6 +1,6 @@
 export {
-  KuiPageTitle,
-  KuiSectionTitle,
-  KuiObjectTitle,
+  KuiLargeTitle,
+  KuiMediumTitle,
+  KuiSmallTitle,
   KuiText,
 } from './typography';

@@ -3,17 +3,17 @@
   font-size: 0.875rem;
   line-height: 24px; }
 
-.kuiObjectTitle, .kuiText {
+.kuiSmallTitle, .kuiText {
   font-size: 16px;
   font-size: 1rem;
   line-height: 24px; }
 
-.kuiSectionTitle {
+.kuiMediumTitle {
   font-size: 24px;
   font-size: 1.5rem;
   line-height: 36px; }
 
-.kuiPageTitle {
+.kuiLargeTitle {
   font-size: 32px;
   font-size: 2rem;
   line-height: 48px; }
@@ -351,15 +351,15 @@ table {
       right: 16px;
       left: auto; }
 
-.kuiPageTitle {
+.kuiLargeTitle {
   color: #000;
   font-weight: 300; }
 
-.kuiSectionTitle {
+.kuiMediumTitle {
   color: #000;
   font-weight: 300; }
 
-.kuiObjectTitle {
+.kuiSmallTitle {
   color: #000;
   font-weight: 300; }
 

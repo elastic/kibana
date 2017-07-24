@@ -1,17 +1,17 @@
 import React from 'react';
 
 import {
-  KuiPageTitle,
+  KuiLargeTitle,
 } from '../../../../components';
 
 export default () => (
   <div>
-    <KuiPageTitle>
+    <KuiLargeTitle>
       <h1>This is the title of the page</h1>
-    </KuiPageTitle>
+    </KuiLargeTitle>
 
-    <KuiPageTitle>
-      <h2>This is a PageTitle applied to an h2 element</h2>
-    </KuiPageTitle>
+    <KuiLargeTitle>
+      <h2>This is a LargeTitle applied to an h2 element</h2>
+    </KuiLargeTitle>
   </div>
 );

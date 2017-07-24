@@ -15,17 +15,17 @@ import Typography from './typography';
 const typographySource = require('!!raw!./typography');
 const typographyHtml = renderToHtml(Typography);
 
-import PageTitle from './page_title';
-const pageTitleSource = require('!!raw!./page_title');
-const pageTitleHtml = renderToHtml(PageTitle);
+import LargeTitle from './large_title';
+const pageTitleSource = require('!!raw!./large_title');
+const pageTitleHtml = renderToHtml(LargeTitle);
 
-import SectionTitle from './section_title';
-const sectionTitleSource = require('!!raw!./section_title');
-const sectionTitleHtml = renderToHtml(SectionTitle);
+import MediumTitle from './medium_title';
+const sectionTitleSource = require('!!raw!./medium_title');
+const sectionTitleHtml = renderToHtml(MediumTitle);
 
-import ObjectTitle from './object_title';
-const objectTitleSource = require('!!raw!./object_title');
-const objectTitleHtml = renderToHtml(ObjectTitle);
+import SmallTitle from './small_title';
+const objectTitleSource = require('!!raw!./small_title');
+const objectTitleHtml = renderToHtml(SmallTitle);
 
 import Text from './text';
 const textSource = require('!!raw!./text');
@@ -49,7 +49,7 @@ export default props => (
     </GuideSection>
 
     <GuideSection
-      title="PageTitle"
+      title="LargeTitle"
       source={[{
         type: GuideSectionTypes.JS,
         code: pageTitleSource,
@@ -59,7 +59,7 @@ export default props => (
       }]}
     >
       <GuideText>
-        The <GuideCode>PageTitle</GuideCode> component identifies the page you're on. Generally, there should
+        The <GuideCode>LargeTitle</GuideCode> component identifies the page you're on. Generally, there should
         only be one of these used at a time.
       </GuideText>
 
@@ -69,12 +69,12 @@ export default props => (
       </GuideText>
 
       <GuideDemo>
-        <PageTitle />
+        <LargeTitle />
       </GuideDemo>
     </GuideSection>
 
     <GuideSection
-      title="SectionTitle"
+      title="MediumTitle"
       source={[{
         type: GuideSectionTypes.JS,
         code: sectionTitleSource,
@@ -84,16 +84,16 @@ export default props => (
       }]}
     >
       <GuideText>
-        The <GuideCode>SectionTitle</GuideCode> component identifies sections within a page.
+        The <GuideCode>MediumTitle</GuideCode> component identifies sections within a page.
       </GuideText>
 
       <GuideDemo>
-        <SectionTitle />
+        <MediumTitle />
       </GuideDemo>
     </GuideSection>
 
     <GuideSection
-      title="ObjectTitle"
+      title="SmallTitle"
       source={[{
         type: GuideSectionTypes.JS,
         code: objectTitleSource,
@@ -107,7 +107,7 @@ export default props => (
       </GuideText>
 
       <GuideDemo>
-        <ObjectTitle />
+        <SmallTitle />
       </GuideDemo>
     </GuideSection>
 

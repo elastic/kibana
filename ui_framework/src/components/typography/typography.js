@@ -4,8 +4,8 @@ import React, {
 } from 'react';
 import classNames from 'classnames';
 
-export const KuiPageTitle = ({ children, className, ...rest }) => {
-  const classes = classNames('kuiPageTitle', className);
+export const KuiLargeTitle = ({ children, className, ...rest }) => {
+  const classes = classNames('kuiLargeTitle', className);
 
   const props = {
     className: classes,
@@ -15,12 +15,12 @@ export const KuiPageTitle = ({ children, className, ...rest }) => {
   return cloneElement(children, props);
 };
 
-KuiPageTitle.PropTypes = {
+KuiLargeTitle.PropTypes = {
   children: PropTypes.node.isRequired,
 };
 
-export const KuiObjectTitle = ({ children, className, ...rest }) => {
-  const classes = classNames('kuiObjectTitle', className);
+export const KuiSmallTitle = ({ children, className, ...rest }) => {
+  const classes = classNames('kuiSmallTitle', className);
 
   const props = {
     className: classes,
@@ -30,12 +30,12 @@ export const KuiObjectTitle = ({ children, className, ...rest }) => {
   return cloneElement(children, props);
 };
 
-KuiObjectTitle.PropTypes = {
+KuiSmallTitle.PropTypes = {
   children: PropTypes.node.isRequired,
 };
 
-export const KuiSectionTitle = ({ children, className, ...rest }) => {
-  const classes = classNames('kuiSectionTitle', className);
+export const KuiMediumTitle = ({ children, className, ...rest }) => {
+  const classes = classNames('kuiMediumTitle', className);
 
   const props = {
     className: classes,
@@ -45,7 +45,7 @@ export const KuiSectionTitle = ({ children, className, ...rest }) => {
   return cloneElement(children, props);
 };
 
-KuiSectionTitle.PropTypes = {
+KuiMediumTitle.PropTypes = {
   children: PropTypes.node.isRequired,
 };
 

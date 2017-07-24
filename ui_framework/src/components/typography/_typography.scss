@@ -1,16 +1,16 @@
-@include component('kuiPageTitle') {
+@include component('kuiLargeTitle') {
   @extend %kuiFontSizeXL;
   color: $kuiTitleColor;
   font-weight: $kuiFontWeightLight;
 }
 
-@include component('kuiSectionTitle') {
+@include component('kuiMediumTitle') {
   @extend %kuiFontSizeL;
   color: $kuiTitleColor;
   font-weight: $kuiFontWeightLight;
 }
 
-@include component('kuiObjectTitle') {
+@include component('kuiSmallTitle') {
   @extend %kuiFontSizeM;
   color: $kuiTitleColor;
   font-weight: $kuiFontWeightLight;

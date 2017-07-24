@@ -4,18 +4,18 @@ import sinon from 'sinon';
 import { requiredProps } from '../../../test/required_props';
 
 import {
-  KuiPageTitle,
-  KuiSectionTitle,
-  KuiObjectTitle,
+  KuiLargeTitle,
+  KuiMediumTitle,
+  KuiSmallTitle,
   KuiText,
 } from './typography';
 
-describe('KuiPageTitle', () => {
+describe('KuiLargeTitle', () => {
   test('is rendered', () => {
     const component = render(
-      <KuiPageTitle { ...requiredProps }>
+      <KuiLargeTitle { ...requiredProps }>
         <h1>Hello</h1>
-      </KuiPageTitle>
+      </KuiLargeTitle>
     );
 
     expect(component)
@@ -23,12 +23,12 @@ describe('KuiPageTitle', () => {
   });
 });
 
-describe('KuiSectionTitle', () => {
+describe('KuiMediumTitle', () => {
   test('is rendered', () => {
     const component = render(
-      <KuiSectionTitle { ...requiredProps }>
+      <KuiMediumTitle { ...requiredProps }>
         <h1>Hello</h1>
-      </KuiSectionTitle>
+      </KuiMediumTitle>
     );
 
     expect(component)
@@ -36,12 +36,12 @@ describe('KuiSectionTitle', () => {
   });
 });
 
-describe('KuiObjectTitle', () => {
+describe('KuiSmallTitle', () => {
   test('is rendered', () => {
     const component = render(
-      <KuiObjectTitle { ...requiredProps }>
+      <KuiSmallTitle { ...requiredProps }>
         <h1>Hello</h1>
-      </KuiObjectTitle>
+      </KuiSmallTitle>
     );
 
     expect(component)
