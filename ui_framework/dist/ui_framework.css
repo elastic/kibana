@@ -351,15 +351,15 @@ table {
       right: 16px;
       left: auto; }
 
-.kuiObjectTitle {
-  color: #000;
-  font-weight: 300; }
-
 .kuiPageTitle {
   color: #000;
   font-weight: 300; }
 
 .kuiSectionTitle {
+  color: #000;
+  font-weight: 300; }
+
+.kuiObjectTitle {
   color: #000;
   font-weight: 300; }
 

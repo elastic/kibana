@@ -1,5 +1,0 @@
-@include component('kuiText') {
-  @extend %kuiFontSizeM;
-  color: $kuiTextColor;
-  font-weight: $kuiFontWeightRegular;
-}
