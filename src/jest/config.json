@@ -1,7 +1,6 @@
 {
   "rootDir": "../../",
   "roots": [
-    "<rootDir>/src/core_plugins/kibana/public/dashboard",
     "<rootDir>/ui_framework/"
   ],
   "collectCoverageFrom": [
