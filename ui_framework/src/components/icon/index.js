@@ -1,11 +1,3 @@
-import '!!svg-sprite!./assets/search.svg';
-import '!!svg-sprite!./assets/user.svg';
-import '!!svg-sprite!./assets/apps.svg';
-import '!!svg-sprite!./assets/logo.svg';
-import '!!svg-sprite!./assets/app_discover.svg';
-import '!!svg-sprite!./assets/app_dashboard.svg';
-import '!!svg-sprite!./assets/app_devtools.svg';
-import '!!svg-sprite!./assets/app_timelion.svg';
-import '!!svg-sprite!./assets/app_visualize.svg';
-import '!!svg-sprite!./assets/app_ml.svg';
-import '!!svg-sprite!./assets/app_graph.svg';
+export {
+  KuiIcon,
+} from './icon';
