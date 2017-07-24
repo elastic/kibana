@@ -15,6 +15,11 @@ import '!!svg-sprite!./assets/logo.svg';
 import '!!svg-sprite!./assets/search.svg';
 import '!!svg-sprite!./assets/user.svg';
 
+const humanizeCamelCase = str => (
+  // Put spaces between words in camel-cased strings.
+  str.replace(/([A-Z])/g, g => ` ${g[0].toLowerCase()}`)
+);
+
 const typeToIconMap = {
   dashboardApp: 'app_dashboard',
   devToolsApp: 'app_devtools',
@@ -40,8 +45,18 @@ const sizeToClassNameMap = {
 
 export const SIZES = Object.keys(sizeToClassNameMap);
 
-export const KuiIcon = ({ type, size, className, ...rest }) => {
+export const KuiIcon = ({
+  type,
+  size,
+  className,
+  title,
+  ...rest,
+}) => {
   const classes = classNames('kuiIcon', className, sizeToClassNameMap[size]);
+  const titleElement =
+    title
+    ? <title>{title}</title>
+    : <title>{`${humanizeCamelCase(type)} icon`}</title>;
   const svgReference = type ? <use href={`#${typeToIconMap[type]}`} /> : undefined;
 
   return (
@@ -49,6 +64,7 @@ export const KuiIcon = ({ type, size, className, ...rest }) => {
       className={classes}
       {...rest}
     >
+      {titleElement}
       {svgReference}
     </svg>
   );
@@ -57,6 +73,7 @@ export const KuiIcon = ({ type, size, className, ...rest }) => {
 KuiIcon.propTypes = {
   type: PropTypes.oneOf(TYPES),
   size: PropTypes.oneOf(SIZES),
+  title: PropTypes.string,
 };
 
 KuiIcon.defaultProps = {

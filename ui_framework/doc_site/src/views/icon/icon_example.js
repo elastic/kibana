@@ -3,10 +3,12 @@ import React from 'react';
 import { renderToHtml } from '../../services';
 
 import {
+  GuideCode,
   GuideDemo,
   GuidePage,
   GuideSection,
   GuideSectionTypes,
+  GuideText,
 } from '../../components';
 
 import Icons from './icons';
@@ -24,6 +26,10 @@ const logosHtml = renderToHtml(Logos);
 import IconSizes from './icon_sizes';
 const iconSizesSource = require('!!raw!./icon_sizes');
 const iconSizesHtml = renderToHtml(IconSizes);
+
+import Accessibility from './accessibility';
+const accessibilitySource = require('!!raw!./accessibility');
+const accessibilityHtml = renderToHtml(Accessibility);
 
 export default props => (
   <GuidePage title={props.route.name}>
@@ -84,6 +90,26 @@ export default props => (
     >
       <GuideDemo>
         <IconSizes />
+      </GuideDemo>
+    </GuideSection>
+
+    <GuideSection
+      title="Accessibility"
+      source={[{
+        type: GuideSectionTypes.JS,
+        code: accessibilitySource,
+      }, {
+        type: GuideSectionTypes.HTML,
+        code: accessibilityHtml,
+      }]}
+    >
+      <GuideText>
+        By default, this component will use a human-readable version of the <GuideCode>type</GuideCode>
+        to title the SVG. You can specify a <GuideCode>title</GuideCode> prop to override this.
+      </GuideText>
+
+      <GuideDemo>
+        <Accessibility />
       </GuideDemo>
     </GuideSection>
   </GuidePage>
