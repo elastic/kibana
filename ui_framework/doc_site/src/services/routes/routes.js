@@ -9,6 +9,9 @@ import IconExample
 import HeaderExample
   from '../../views/header/header_example';
 
+import TypographyExample
+  from '../../views/typography/typography_example';
+
 // Component route names should match the component name exactly.
 const components = [{
   name: 'Accessibility',
@@ -17,9 +20,14 @@ const components = [{
 }, {
   name: 'Icon',
   component: IconExample,
+  hasReact: true,
 }, {
   name: 'Header',
   component: HeaderExample,
+}, {
+  name: 'Typography',
+  component: TypographyExample,
+  hasReact: true,
 }];
 
 const sandboxes = [];
