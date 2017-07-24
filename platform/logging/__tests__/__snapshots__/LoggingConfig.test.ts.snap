@@ -1,0 +1,30 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`\`createSchema()\` creates correct schema with defaults. 1`] = `
+Object {
+  "appenders": Map {
+    "console" => Object {
+      "kind": "console",
+      "layout": Object {
+        "highlight": true,
+        "kind": "pattern",
+        "pattern": "[{timestamp}][{level}][{context}] {message}",
+      },
+    },
+  },
+  "loggers": Map {
+    "root" => Object {
+      "appenders": Array [
+        "console",
+      ],
+      "level": "info",
+    },
+  },
+}
+`;
+
+exports[`\`createSchema()\` creates correct schema with defaults. 2`] = `"\\"root\\" logger should be configured!"`;
+
+exports[`\`createSchema()\` creates correct schema with defaults. 3`] = `"\\"root\\" logger should have at least one \\"appender\\" configured."`;
+
+exports[`fails if loggers use unknown appenders. 1`] = `"Logger \\"root\\" contains unsupported appender key \\"file\\"."`;
