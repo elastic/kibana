@@ -5,15 +5,21 @@ import middleware from './middleware';
 import getRootReducer from './reducers';
 import { historyProvider } from '../lib/history_provider';
 import { onStart } from './on_start';
+import { uniqBy } from 'lodash';
+import { functions as clientFunctionsRegistry } from '../lib/functions';
 
 const app = uiModules.get('apps/canvas');
 
-app.service('$store', (kbnVersion, basePath) => {
+app.service('$store', (kbnVersion, basePath, serverFunctions) => {
+  const clientFunctionsPOJO = JSON.parse(JSON.stringify(clientFunctionsRegistry.toArray())); // this is effectively what happens to serverFunctions
+  const functionDefinitions = uniqBy(serverFunctions.concat(clientFunctionsPOJO), 'name');
+
   const initialState = getInitialState();
 
   // Set the defaults from Kibana plugin
   initialState.app = {
     kbnVersion,
+    functionDefinitions,
     basePath,
     ready: false,
   };

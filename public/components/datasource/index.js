@@ -5,13 +5,13 @@ import { get } from 'lodash';
 import { Datasource as Component } from './datasource';
 import { datasourceRegistry } from '../../expression_types';
 import { getSelectedElement, getSelectedPage } from '../../state/selectors/workpad';
-import { getServerFunctions } from '../../state/selectors/app';
+import { getFunctionDefinitions } from '../../state/selectors/app';
 import { setArgumentAtIndex, setAstAtIndex } from '../../state/actions/elements';
 
 const mapStateToProps = (state) => ({
   element: getSelectedElement(state),
   pageId: getSelectedPage(state),
-  serverFunctions: getServerFunctions(state),
+  functionDefinitions: getFunctionDefinitions(state),
 });
 
 const mapDispatchToProps = (dispatch) => ({
@@ -20,10 +20,10 @@ const mapDispatchToProps = (dispatch) => ({
 });
 
 const mergeProps = (stateProps, dispatchProps, ownProps) => {
-  const { element, pageId, serverFunctions } = stateProps;
+  const { element, pageId, functionDefinitions } = stateProps;
   const { dispatchArgumentAtIndex, dispatchAstAtIndex } = dispatchProps;
 
-  const getServerFunctionByName = name => serverFunctions.find(fn => fn.name === name);
+  const getDataTableFunctionsByName = name => functionDefinitions.find(fn => fn.name === name && fn.type === 'datatable');
 
   // find the matching datasource from the expression AST
   const datasourceAst = get(element, 'ast.chain', []).map((astDef, i) => {
@@ -35,7 +35,7 @@ const mergeProps = (stateProps, dispatchProps, ownProps) => {
     const datasource = datasourceRegistry.get(astDef.function);
     if (!datasource) return;
 
-    const datasourceDef = getServerFunctionByName(datasource.name);
+    const datasourceDef = getDataTableFunctionsByName(datasource.name);
     const knownArgs = datasourceDef && Object.keys(datasourceDef.args);
     const unknownArgs = datasourceDef && Object.keys(args).filter(arg => knownArgs.indexOf(arg) === -1);
 
@@ -51,7 +51,7 @@ const mergeProps = (stateProps, dispatchProps, ownProps) => {
 
   return Object.assign({}, ownProps, stateProps, dispatchProps, {
     ...datasourceAst,
-    datasources: datasourceRegistry.toArray().map(ds => Object.assign(ds, { function: getServerFunctionByName(ds.name) })),
+    datasources: datasourceRegistry.toArray().map(ds => Object.assign(ds, { function: getDataTableFunctionsByName(ds.name) })),
     setDatasourceAst: dispatchAstAtIndex({
       pageId,
       element,

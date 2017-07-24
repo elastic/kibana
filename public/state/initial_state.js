@@ -8,7 +8,6 @@ export default (path) => {
     transient: {
       editing: true,
       selectedElement: null,
-      serverFunctions: null,
       resolvedArgs: {},
       // values in resolvedArgs should live under a unique index so they can be looked up.
       // The ID of the element is a great example.

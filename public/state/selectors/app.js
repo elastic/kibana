@@ -5,15 +5,15 @@ export function getEditing(state) {
   return get(state, 'transient.editing');
 }
 
-export function getServerFunctions(state) {
-  return get(state, 'transient.serverFunctions');
+export function getFunctionDefinitions(state) {
+  return get(state, 'app.functionDefinitions');
 }
 
 export function getAppReady(state) {
   return get(state, 'app.ready');
 }
 
-export function isAppReady(state) {
-  // return true only when the required parameters are in the state
-  return Array.isArray(getServerFunctions(state));
+// return true only when the required parameters are in the state
+export function isAppReady() {
+  return true;
 }
