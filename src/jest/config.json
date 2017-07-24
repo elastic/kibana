@@ -4,12 +4,12 @@
     "<rootDir>/ui_framework/"
   ],
   "collectCoverageFrom": [
-    "ui_framework/services/**/*.js",
-    "!ui_framework/services/index.js",
-    "!ui_framework/services/**/*/index.js",
-    "ui_framework/components/**/*.js",
-    "!ui_framework/components/index.js",
-    "!ui_framework/components/**/*/index.js"
+    "ui_framework/src/services/**/*.js",
+    "!ui_framework/src/services/index.js",
+    "!ui_framework/src/services/**/*/index.js",
+    "ui_framework/src/components/**/*.js",
+    "!ui_framework/src/components/index.js",
+    "!ui_framework/src/components/**/*/index.js"
   ],
   "moduleNameMapper": {
     "^ui_framework/components": "<rootDir>/ui_framework/components",
