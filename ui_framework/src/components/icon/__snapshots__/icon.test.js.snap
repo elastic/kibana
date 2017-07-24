@@ -1,0 +1,143 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`KuiIcon is rendered 1`] = `
+<svg
+  aria-label="aria-label"
+  class="kuiIcon testClass1 testClass2 kuiIcon--medium"
+  data-test-subj="test subject string"
+/>
+`;
+
+exports[`KuiIcon renders size large 1`] = `
+<svg
+  class="kuiIcon kuiIcon--large"
+/>
+`;
+
+exports[`KuiIcon renders size medium 1`] = `
+<svg
+  class="kuiIcon kuiIcon--medium"
+/>
+`;
+
+exports[`KuiIcon renders size xLarge 1`] = `
+<svg
+  class="kuiIcon kuiIcon--xLarge"
+/>
+`;
+
+exports[`KuiIcon renders size xxLarge 1`] = `
+<svg
+  class="kuiIcon kuiIcon--xxLarge"
+/>
+`;
+
+exports[`KuiIcon renders type apps 1`] = `
+<svg
+  class="kuiIcon kuiIcon--medium"
+>
+  <use
+    href="#apps"
+  />
+</svg>
+`;
+
+exports[`KuiIcon renders type dashboardApp 1`] = `
+<svg
+  class="kuiIcon kuiIcon--medium"
+>
+  <use
+    href="#app_dashboard"
+  />
+</svg>
+`;
+
+exports[`KuiIcon renders type devToolsApp 1`] = `
+<svg
+  class="kuiIcon kuiIcon--medium"
+>
+  <use
+    href="#app_devtools"
+  />
+</svg>
+`;
+
+exports[`KuiIcon renders type discoverApp 1`] = `
+<svg
+  class="kuiIcon kuiIcon--medium"
+>
+  <use
+    href="#app_discover"
+  />
+</svg>
+`;
+
+exports[`KuiIcon renders type graphApp 1`] = `
+<svg
+  class="kuiIcon kuiIcon--medium"
+>
+  <use
+    href="#app_graph"
+  />
+</svg>
+`;
+
+exports[`KuiIcon renders type kibanaLogo 1`] = `
+<svg
+  class="kuiIcon kuiIcon--medium"
+>
+  <use
+    href="#logo"
+  />
+</svg>
+`;
+
+exports[`KuiIcon renders type machineLearningApp 1`] = `
+<svg
+  class="kuiIcon kuiIcon--medium"
+>
+  <use
+    href="#app_ml"
+  />
+</svg>
+`;
+
+exports[`KuiIcon renders type search 1`] = `
+<svg
+  class="kuiIcon kuiIcon--medium"
+>
+  <use
+    href="#search"
+  />
+</svg>
+`;
+
+exports[`KuiIcon renders type timelionApp 1`] = `
+<svg
+  class="kuiIcon kuiIcon--medium"
+>
+  <use
+    href="#app_timelion"
+  />
+</svg>
+`;
+
+exports[`KuiIcon renders type user 1`] = `
+<svg
+  class="kuiIcon kuiIcon--medium"
+>
+  <use
+    href="#user"
+  />
+</svg>
+`;
+
+exports[`KuiIcon renders type visualizeApp 1`] = `
+<svg
+  class="kuiIcon kuiIcon--medium"
+>
+  <use
+    href="#app_visualize"
+  />
+</svg>
+`;
