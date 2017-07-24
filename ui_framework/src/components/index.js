@@ -2,4 +2,6 @@ export {
   KuiKeyboardAccessible,
 } from './accessibility';
 
-import './icon';
+export {
+  KuiIcon,
+} from './icon';
