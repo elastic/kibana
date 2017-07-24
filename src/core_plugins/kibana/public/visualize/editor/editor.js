@@ -20,6 +20,7 @@ import editorTemplate from 'plugins/kibana/visualize/editor/editor.html';
 import { DashboardConstants } from 'plugins/kibana/dashboard/dashboard_constants';
 import { VisualizeConstants } from '../visualize_constants';
 import { documentationLinks } from 'ui/documentation_links/documentation_links';
+import { getDefaultQuery } from 'ui/parse_query';
 
 uiRoutes
 .when(VisualizeConstants.CREATE_PATH, {
@@ -135,7 +136,7 @@ function VisEditor($rootScope, $scope, $route, timefilter, AppState, $window, kb
   const stateDefaults = {
     uiState: savedVis.uiStateJSON ? JSON.parse(savedVis.uiStateJSON) : {},
     linked: !!savedVis.savedSearchId,
-    query: searchSource.getOwn('query') || { query_string: { query: '*' } },
+    query: searchSource.getOwn('query') || getDefaultQuery(),
     filters: searchSource.getOwn('filter') || [],
     vis: savedVisState
   };
