@@ -1,7 +1,6 @@
 {
   "rootDir": "../../",
   "roots": [
-    "<rootDir>/src/core_plugins/kibana/public/dashboard",
     "<rootDir>/ui_framework/"
   ],
   "collectCoverageFrom": [
@@ -29,7 +28,7 @@
     "**/*.test.js"
   ],
   "testPathIgnorePatterns": [
-    "<rootDir>[/\\\\]ui_framework[/\\\\](dist|doc_site|jest)[/\\\\]"
+    "<rootDir>[/\\\\]ui_framework[/\\\\](dist|doc_site|generator-kui)[/\\\\]"
   ],
   "transform": {
     "^.+\\.js$": "<rootDir>/src/jest/babelTransform.js"
