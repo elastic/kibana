@@ -73,6 +73,7 @@ const KBN_FIELD_TYPES = [
   }),
   new KbnFieldType({
     name: 'conflict',
+    filterable: true
   }),
 ];
 

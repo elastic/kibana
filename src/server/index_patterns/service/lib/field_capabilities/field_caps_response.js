@@ -67,8 +67,8 @@ export function readFieldCapsResponse(fieldCapsResponse) {
       return {
         name: fieldName,
         type: 'conflict',
-        searchable: false,
-        aggregatable: false,
+        searchable: types.reduce((acc, esType) => (acc || capsByType[esType].searchable), false),
+        aggregatable: types.reduce((acc, esType) => (acc || capsByType[esType].aggregatable), false),
         readFromDocValues: false,
         conflictDescriptions: types.reduce((acc, esType) => ({
           ...acc,
@@ -79,11 +79,13 @@ export function readFieldCapsResponse(fieldCapsResponse) {
 
     const esType = types[0];
     const caps = capsByType[esType];
+    const someAreSearchable = caps.non_searchable_indices && caps.non_searchable_indices.length > 0;
+    const someAreAggregatable = caps.non_aggregatable_indices && caps.non_aggregatable_indices.length > 0;
     return {
       name: fieldName,
       type: castEsToKbnFieldTypeName(esType),
-      searchable: caps.searchable,
-      aggregatable: caps.aggregatable,
+      searchable: caps.searchable || someAreSearchable,
+      aggregatable: caps.aggregatable || someAreAggregatable,
       readFromDocValues: shouldReadFieldFromDocValues(caps.aggregatable, esType),
     };
   });

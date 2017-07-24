@@ -63,7 +63,7 @@ export function AggTypesBucketsTermsProvider(Private) {
     params: [
       {
         name: 'field',
-        filterFieldTypes: ['number', 'boolean', 'date', 'ip',  'string']
+        filterFieldTypes: ['number', 'boolean', 'date', 'ip',  'string', 'conflict']
       },
       {
         name: 'exclude',
