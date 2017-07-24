@@ -205,6 +205,31 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
       return await testSubjects.exists('spyToggleButton');
     }
 
+    async openSpyPanel() {
+      log.debug('openSpyPanel');
+      const isOpen = await testSubjects.exists('spyModeSelect');
+      if (!isOpen) {
+        await retry.try(async () => {
+          await this.toggleSpyPanel();
+          await testSubjects.find('spyModeSelect');
+        });
+      }
+    }
+
+    async closeSpyPanel() {
+      log.debug('closeSpyPanel');
+      let isOpen = await testSubjects.exists('spyModeSelect');
+      if (isOpen) {
+        await retry.try(async () => {
+          await this.toggleSpyPanel();
+          isOpen = await testSubjects.exists('spyModeSelect');
+          if (isOpen) {
+            throw new Error('Failed to close spy panel');
+          }
+        });
+      }
+    }
+
     toggleSpyPanel() {
       return testSubjects.click('spyToggleButton');
     }

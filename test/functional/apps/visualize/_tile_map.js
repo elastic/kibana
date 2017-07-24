@@ -6,7 +6,7 @@ export default function ({ getService, getPageObjects }) {
   const screenshots = getService('screenshots');
   const PageObjects = getPageObjects(['common', 'visualize', 'header', 'settings']);
 
-  describe('visualize app', function describeIndexTests() {
+  describe('tile map visualize app', function describeIndexTests() {
     before(function () {
       const fromTime = '2015-09-19 06:31:44.000';
       const toTime = '2015-09-23 18:31:44.000';
@@ -98,7 +98,7 @@ export default function ({ getService, getPageObjects }) {
           'f 187 { "lat": 45.656166475784175, "lon": -82.45831044201545 }',
           '8 108 { "lat": 18.85260305600241, "lon": -156.5148810390383 }'];
 
-        return PageObjects.visualize.toggleSpyPanel()
+        return PageObjects.visualize.openSpyPanel()
         .then(function () {
           //level 1
           return PageObjects.visualize.clickMapZoomOut();
@@ -114,7 +114,7 @@ export default function ({ getService, getPageObjects }) {
           return PageObjects.visualize.getDataTableData()
           .then(function showData(actualTableData) {
             compareTableData(expectedTableData, actualTableData.trim().split('\n'));
-            return PageObjects.visualize.toggleSpyPanel();
+            return PageObjects.visualize.closeSpyPanel();
           });
         });
       });
@@ -241,7 +241,7 @@ export default function ({ getService, getPageObjects }) {
           return PageObjects.visualize.waitForToastMessageGone();
         })
         .then(function () {
-          return PageObjects.visualize.toggleSpyPanel();
+          return PageObjects.visualize.openSpyPanel();
         })
         // we're not selecting page size all, so we only have to verify the first page of data
         .then(function getDataTableData() {
@@ -250,14 +250,14 @@ export default function ({ getService, getPageObjects }) {
         })
         .then(function showData(data) {
           compareTableData(expectedTableData, data.trim().split('\n'));
-          return PageObjects.visualize.toggleSpyPanel();
+          return PageObjects.visualize.closeSpyPanel();
         })
         .then(function () {
           // zoom to level 6, and make sure we go back to the saved level 5
           return PageObjects.visualize.clickMapZoomIn();
         })
         .then(function () {
-          return PageObjects.visualize.toggleSpyPanel();
+          return PageObjects.visualize.openSpyPanel();
         })
         .then(function getDataTableData() {
           log.debug('second get the zoom level 6 page data and verify it');
@@ -265,7 +265,7 @@ export default function ({ getService, getPageObjects }) {
         })
         .then(function showData(data) {
           compareTableData(expectedTableDataZoomed, data.trim().split('\n'));
-          return PageObjects.visualize.toggleSpyPanel();
+          return PageObjects.visualize.closeSpyPanel();
         })
         .then(function () {
           return PageObjects.visualize.loadSavedVisualization(vizName1);
@@ -278,7 +278,7 @@ export default function ({ getService, getPageObjects }) {
           return PageObjects.common.sleep(4000);
         })
         .then(function () {
-          return PageObjects.visualize.toggleSpyPanel();
+          return PageObjects.visualize.openSpyPanel();
         })
         .then(function getDataTableData() {
           log.debug('third get the zoom level 5 page data and verify it');
@@ -286,7 +286,7 @@ export default function ({ getService, getPageObjects }) {
         })
         .then(function showData(data) {
           compareTableData(expectedTableData, data.trim().split('\n'));
-          return PageObjects.visualize.toggleSpyPanel();
+          return PageObjects.visualize.closeSpyPanel();
         })
         .then(function takeScreenshot() {
           log.debug('Take screenshot');
@@ -331,7 +331,7 @@ export default function ({ getService, getPageObjects }) {
 
       it('wms switch should change allow to zoom in further', function () {
 
-        return PageObjects.visualize.toggleSpyPanel()
+        return PageObjects.visualize.openSpyPanel()
           .then(function () {
             return PageObjects.visualize.clickOptions();
           })
