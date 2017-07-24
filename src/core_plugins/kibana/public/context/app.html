@@ -52,10 +52,9 @@
   </div>
 </div>
 
-<div
+<main
   class="kuiViewContent kuiViewContentItem"
   ng-if="contextApp.state.loadingStatus.anchor.status !== contextApp.constants.LOADING_STATUS.FAILED"
-  role="main"
 >
   <!-- Controls -->
   <div class="kuiBar kuiVerticalRhythm">
@@ -118,6 +117,7 @@
         sorting="contextApp.state.queryParameters.sort"
         columns="contextApp.state.queryParameters.columns"
         infinite-scroll="true"
+        minimum-visible-rows="contextApp.state.rows.all.length"
       ></doc-table>
     </div>
   </div>
@@ -156,4 +156,4 @@
     <div class="kuiBarSection">
     </div>
   </div>
-</div>
+</main>

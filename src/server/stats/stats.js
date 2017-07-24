@@ -1,4 +1,4 @@
-import { SavedObjectsClient } from '../saved_objects/client';
+
 import { snakeCase } from 'lodash';
 
 async function getStatsForType(savedObjectsClient, type) {
@@ -6,8 +6,7 @@ async function getStatsForType(savedObjectsClient, type) {
   return { total };
 }
 
-export async function getStats(kibanaIndex, callAdminCluster) {
-  const savedObjectsClient = new SavedObjectsClient(kibanaIndex, callAdminCluster);
+export async function getStats(kibanaIndex, savedObjectsClient) {
   const types = ['dashboard', 'visualization', 'search', 'index-pattern'];
   const requests = types.map(type => getStatsForType(savedObjectsClient, type));
   const results = await Promise.all(requests);

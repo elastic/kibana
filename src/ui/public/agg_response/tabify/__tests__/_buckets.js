@@ -58,4 +58,15 @@ describe('Buckets wrapper', function () {
 
     test(aggResp, count, keys);
   });
+
+  describe('with single bucket aggregations (filter)', function () {
+    it('creates single bucket from agg content', function () {
+      const aggResp = {
+        single_bucket: {},
+        doc_count: 5
+      };
+      const buckets = new Buckets(aggResp);
+      expect(buckets).to.have.length(1);
+    });
+  });
 });

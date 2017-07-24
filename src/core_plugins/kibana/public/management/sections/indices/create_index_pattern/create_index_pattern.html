@@ -23,12 +23,20 @@
           class="kuiVerticalRhythm"
           ng-submit="controller.createIndexPattern()"
         >
+
           <!-- Index pattern input -->
           <div class="kuiVerticalRhythm">
-            <label
-              class="kuiLabel kuiVerticalRhythmSmall"
-              translate="KIBANA-INDEX_NAME_OR_PATTERN"
-            ></label>
+            <label class="kuiLabel kuiVerticalRhythmSmall">
+              <span translate="KIBANA-INDEX_PATTERN"></span>
+
+              <small>
+                <a
+                  class="kuiLink"
+                  ng-click="controller.toggleAdvancedIndexOptions();"
+                  translate="KIBANA-ADVANCED_OPTIONS"
+                ></a>
+              </small>
+            </label>
 
             <div class="kuiVerticalRhythm kuiVerticalRhythmSmall">
               <input
@@ -66,6 +74,35 @@
             </div>
           </div>
 
+          <!-- Index pattern id input -->
+          <div class="kuiVerticalRhythm" ng-if="controller.showAdvancedOptions">
+            <label
+              class="kuiLabel kuiVerticalRhythmSmall"
+              translate="KIBANA-INDEX_PATTERN_ID">
+            </label>
+
+            <div class="kuiVerticalRhythm kuiVerticalRhythmSmall">
+              <input
+                class="kuiTextInput kuiTextInput--large"
+                data-test-subj="createIndexPatternIdInput"
+                ng-model="controller.formValues.id"
+                ng-model-options="{ updateOn: 'default blur', debounce: {'default': 500, 'blur': 0} }"
+                validate-index-name
+                allow-wildcard
+                name="id"
+                type="text"
+              >
+            </div>
+
+            <!-- ID help text -->
+            <div class="kuiVerticalRhythm">
+              <p
+                class="kuiSubText kuiVerticalRhythmSmall"
+                translate="KIBANA-INDEX_PATTERN_SPECIFY_ID"
+              ></p>
+            </div>
+          </div>
+
           <!-- Time field select -->
           <div class="kuiVerticalRhythm">
             <label class="kuiLabel kuiVerticalRhythmSmall">
@@ -91,43 +128,6 @@
                 ng-options="option.display for option in controller.timeFieldOptions"
                 ng-model="controller.formValues.timeFieldOption"
               ></select>
-            </div>
-          </div>
-
-          <!-- Expand index pattern checkbox -->
-          <div class="kuiVerticalRhythm" ng-if="controller.canEnableExpandWildcard()">
-            <label class="kuiCheckBoxLabel kuiVerticalRhythm">
-              <input
-                class="kuiCheckBox"
-                type="checkbox"
-                data-test-subj="createIndexPatternEnableExpand"
-                ng-model="controller.formValues.expandWildcard"
-              >
-              <span class="kuiCheckBoxLabel__text">
-                <span translate="KIBANA-EXPAND_INDEX_PATTERN"></span>
-                <span translate="KIBANA-DEPRECATED"></span>
-              </span>
-            </label>
-
-            <!-- Checkbox help text -->
-            <div class="kuiVerticalRhythm">
-              <p
-                class="kuiSubText kuiVerticalRhythmSmall"
-                translate="KIBANA-WILDCARD_DEFAULT_EXPANDED_TO_CURRENT_TIME_RANGE"
-              ></p>
-
-              <p class="kuiSubText kuiVerticalRhythmSmall">
-                <span translate="KIBANA-SEARCH_AGAINST_INDEX_PATTERN"></span>
-                <em translate="KIBANA-LOGSTASH_WILDCARD"></em>
-                <span translate="KIBANA-ACTUALLY_QUERY"></span>
-                <em translate="KIBANA-EXAMPLE_TIME_RANGE"></em>
-                <span translate="KIBANA-FALL_WITHIN_CURRENT_TIME_RANGE"></span>
-              </p>
-
-              <p
-                class="kuiSubText kuiVerticalRhythmSmall"
-                translate="KIBANA-EXPAND_INDEX_PATTERN_DEPRECATION"
-              ></p>
             </div>
           </div>
 

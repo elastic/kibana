@@ -24,8 +24,6 @@ const app = require('ui/modules').get('apps/timelion', []);
 require('plugins/timelion/services/saved_sheets');
 require('plugins/timelion/services/_saved_sheet');
 
-require('plugins/kibana/visualize/saved_visualizations/saved_visualizations');
-require('plugins/kibana/discover/saved_searches/saved_searches');
 require('./vis');
 
 SavedObjectRegistryProvider.register(require('plugins/timelion/services/saved_sheet_register'));
@@ -61,7 +59,6 @@ app.controller('timelion', function (
     kbnUrl,
     Notifier,
     Private,
-    savedVisualizations,
     timefilter
   ) {
 
@@ -78,6 +75,7 @@ app.controller('timelion', function (
     location: 'Timelion'
   });
 
+  const savedVisualizations = Private(SavedObjectRegistryProvider).byLoaderPropertiesName.visualizations;
   const timezone = Private(require('plugins/timelion/services/timezone'))();
   const docTitle = Private(DocTitleProvider);
 

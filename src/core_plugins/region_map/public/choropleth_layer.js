@@ -2,19 +2,19 @@ import $ from 'jquery';
 import L from 'leaflet';
 import _ from 'lodash';
 import d3 from 'd3';
-import { KibanaMapLayer } from 'ui/vis_maps/kibana_map_layer';
+import { KibanaMapLayer } from '../../tile_map/public/kibana_map_layer';
 import { truncatedColorMaps } from 'ui/vislib/components/color/truncated_colormaps';
 
 export default class ChoroplethLayer extends KibanaMapLayer {
 
-  constructor(geojsonUrl) {
+  constructor(geojsonUrl, attribution) {
     super();
-
 
     this._metrics = null;
     this._joinField = null;
     this._colorRamp = truncatedColorMaps[Object.keys(truncatedColorMaps)[0]];
     this._tooltipFormatter = () => '';
+    this._attribution = attribution;
 
     this._geojsonUrl = geojsonUrl;
     this._leafletLayer = L.geoJson(null, {
@@ -162,9 +162,7 @@ export default class ChoroplethLayer extends KibanaMapLayer {
 
       jqueryDiv.append(label);
     });
-
   }
-
 }
 
 

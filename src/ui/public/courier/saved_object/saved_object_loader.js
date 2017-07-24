@@ -4,15 +4,14 @@ import { StringUtils } from 'ui/utils/string_utils';
 import { SavedObjectsClient } from 'ui/saved_objects';
 
 export class SavedObjectLoader {
-  constructor(SavedObjectClass, kbnIndex, esAdmin, kbnUrl, $http) {
+  constructor(SavedObjectClass, kbnIndex, kbnUrl, $http) {
     this.type = SavedObjectClass.type;
     this.Class = SavedObjectClass;
     this.lowercaseType = this.type.toLowerCase();
     this.kbnIndex = kbnIndex;
     this.kbnUrl = kbnUrl;
-    this.esAdmin = esAdmin;
 
-    this.scanner = new Scanner(esAdmin, {
+    this.scanner = new Scanner($http, {
       index: kbnIndex,
       type: this.lowercaseType
     });
@@ -64,21 +63,11 @@ export class SavedObjectLoader {
     return source;
   }
 
-  /**
-   * Updates hit._source to contain an id and url field, and returns the updated
-   * source object.
-   * @param hit
-   * @returns {hit._source} The modified hit._source object, with an id and url field.
-   */
-  mapHits(hit) {
-    return this.mapHitSource(hit._source, hit._id);
-  }
-
   scanAll(queryString, pageSize = 1000) {
     return this.scanner.scanAndMap(queryString, {
       pageSize,
       docCount: Infinity
-    }, (hit) => this.mapHits(hit));
+    });
   }
 
   /**
@@ -99,11 +88,11 @@ export class SavedObjectLoader {
    * @param size
    * @returns {Promise}
    */
-  find(search, size = 100) {
+  find(search = '', size = 100) {
     return this.savedObjectsClient.find(
       {
         type: this.lowercaseType,
-        search,
+        search: search ? `${search}*` : undefined,
         perPage: size,
         page: 1,
         searchFields: ['title^3', 'description']

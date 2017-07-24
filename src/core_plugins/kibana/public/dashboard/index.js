@@ -4,14 +4,10 @@ import 'plugins/kibana/dashboard/styles/index.less';
 import 'plugins/kibana/dashboard/dashboard_config';
 import uiRoutes from 'ui/routes';
 import 'ui/accessibility/kbn_accessible_click';
-import { SavedObjectRegistryProvider } from 'ui/saved_objects/saved_object_registry';
-import { savedDashboardRegister } from 'plugins/kibana/dashboard/saved_dashboard/saved_dashboard_register';
 
 import dashboardListingTemplate from './listing/dashboard_listing.html';
 import { DashboardListingController } from './listing/dashboard_listing';
 import { DashboardConstants } from './dashboard_constants';
-
-SavedObjectRegistryProvider.register(savedDashboardRegister);
 
 uiRoutes
   .defaults(/dashboard/, {

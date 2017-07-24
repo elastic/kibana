@@ -14,30 +14,9 @@ describe('Saved Object', function () {
 
   let SavedObject;
   let IndexPattern;
-  let esAdminStub;
   let esDataStub;
   let savedObjectsClientStub;
   let window;
-
-  /**
-   * Some default es stubbing to avoid timeouts and allow a default type of 'dashboard'.
-   */
-  function mockEsService() {
-    // Allows the type 'dashboard' to be used.
-    // Unfortunately we need to use bluebird here instead of native promises because there is
-    // a call to finally.
-    sinon.stub(esAdminStub.indices, 'getFieldMapping').returns(BluebirdPromise.resolve({
-      '.kibana' : {
-        'mappings': {
-          'dashboard': {}
-        }
-      }
-    }));
-
-    // Necessary to avoid a timeout condition.
-    sinon.stub(esAdminStub.indices, 'putMapping').returns(BluebirdPromise.resolve());
-    sinon.stub(esAdminStub.indices, 'refresh').returns(BluebirdPromise.resolve());
-  }
 
   /**
    * Returns a fake doc response with the given index and id, of type dashboard
@@ -62,11 +41,9 @@ describe('Saved Object', function () {
    * @param {Object} mockDocResponse
    */
   function stubESResponse(mockDocResponse) {
-    sinon.stub(esAdminStub, 'mget').returns(BluebirdPromise.resolve({ docs: [mockDocResponse] }));
-    sinon.stub(esAdminStub, 'index').returns(BluebirdPromise.resolve(mockDocResponse));
-
     // Stub out search for duplicate title:
     sinon.stub(savedObjectsClientStub, 'get').returns(BluebirdPromise.resolve(mockDocResponse));
+    sinon.stub(savedObjectsClientStub, 'update').returns(BluebirdPromise.resolve(mockDocResponse));
 
     sinon.stub(savedObjectsClientStub, 'find').returns(BluebirdPromise.resolve({ savedObjects: [], total: 0 }));
     sinon.stub(savedObjectsClientStub, 'bulkGet').returns(BluebirdPromise.resolve({ savedObjects: [mockDocResponse] }));
@@ -97,23 +74,18 @@ describe('Saved Object', function () {
     })
   );
 
-  beforeEach(ngMock.inject(function (es, esAdmin, Private, $window) {
+  beforeEach(ngMock.inject(function (es, Private, $window) {
     SavedObject = Private(SavedObjectProvider);
     IndexPattern = Private(IndexPatternProvider);
-    esAdminStub = esAdmin;
     esDataStub = es;
     savedObjectsClientStub = Private(SavedObjectsClientProvider);
     window = $window;
-
-    mockEsService();
   }));
 
   describe('save', function () {
     describe('with confirmOverwrite', function () {
       function stubConfirmOverwrite() {
         window.confirm = sinon.stub().returns(true);
-
-        sinon.stub(esAdminStub, 'create').returns(BluebirdPromise.reject({ status : 409 }));
         sinon.stub(esDataStub, 'create').returns(BluebirdPromise.reject({ status : 409 }));
       }
 
@@ -421,7 +393,6 @@ describe('Saved Object', function () {
     });
 
     describe('searchSource', function () {
-
       it('when true, creates index', function () {
         const indexPatternId = 'testIndexPattern';
         const afterESRespCallback = sinon.spy();
@@ -434,10 +405,12 @@ describe('Saved Object', function () {
         };
 
         stubESResponse({
-          _id: indexPatternId,
-          _type: 'dashboard',
-          _source: {},
-          found: true
+          id: indexPatternId,
+          type: 'dashboard',
+          attributes: {
+            title: 'testIndexPattern'
+          },
+          _version: 2
         });
 
         const savedObject = new SavedObject(config);

@@ -22,6 +22,7 @@
         class="kuiSelect"
         ng-model="selectedModeName"
         ng-change="onSpyModeChange()"
+        data-test-subj="spyModeSelect"
       >
         <option
           ng-repeat="mode in modes.inOrder"

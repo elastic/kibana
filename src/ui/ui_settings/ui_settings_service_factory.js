@@ -19,16 +19,15 @@ export function uiSettingsServiceFactory(server, options) {
   const config = server.config();
 
   const {
-    callCluster,
+    savedObjectsClient,
     readInterceptor,
     getDefaults,
   } = options;
 
   return new UiSettingsService({
-    index: config.get('kibana.index'),
     type: 'config',
     id: config.get('pkg.version'),
-    callCluster,
+    savedObjectsClient,
     readInterceptor,
     getDefaults,
   });

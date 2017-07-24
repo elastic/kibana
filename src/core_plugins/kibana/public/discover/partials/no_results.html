@@ -34,12 +34,13 @@
       </p>
     </div>
 
-    <h3>Refine your query</h3>
-    <p>
-      The search bar at the top uses Elasticsearch's support for Lucene <a class="kuiLink" ng-href="{{queryDocLinks.luceneQuerySyntax}}" target="_blank">Query String syntax</a>. Let's say we're searching web server logs that have been parsed into a few fields.
-    </p>
+    <div ng-if="state.query.language === 'lucene'">
+      <h3>Refine your query</h3>
+      <p>
+        The search bar at the top uses Elasticsearch's support for Lucene <a class="kuiLink" ng-href="{{queryDocLinks.luceneQuerySyntax}}" target="_blank">Query String syntax</a>. Let's say we're searching web server logs that have been parsed into a few fields.
+      </p>
 
-    <p>
+      <p>
       <h4>Examples:</h4>
       Find requests that contain the number 200, in any field:
       <pre>200</pre>
@@ -55,7 +56,7 @@
 
       Or HTML
       <pre>status:[400 TO 499] AND (extension:php OR extension:html)</pre>
-    </p>
+    </div>
 
   </div>
 </div>

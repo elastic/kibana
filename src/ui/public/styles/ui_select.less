@@ -30,3 +30,37 @@
 .btn-default .ui-select-placeholder {
   color: tint(@globalColorBlue, 70%); /* 1 */
 }
+
+/**
+* 1. Make ui-select input match other inputs.
+*/
+.ui-select-match {
+  .btn {
+    border: 1px solid @globalColorLightGray; /* 1 */
+    background-color: @white; /* 1 */
+    color: @kibanaGray1; /* 1 */
+
+    .ui-select-placeholder {
+      color: @input-color-placeholder; /* 1 */
+      padding-right: 1em; /* 1 */
+    }
+
+    &:focus {
+      outline: none;
+    }
+
+    &:active {
+      background-color: @white; /* 1 */
+      color: @kibanaGray1; /* 1 */
+    }
+  }
+
+  &.btn-default-focus {
+    box-shadow: none;
+    outline: none;
+
+    .btn {
+      border-color: @globalColorBlue;
+    }
+  }
+}

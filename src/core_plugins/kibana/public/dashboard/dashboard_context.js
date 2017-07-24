@@ -2,16 +2,19 @@
 import _ from 'lodash';
 import { FilterBarQueryFilterProvider } from 'ui/filter_bar/query_filter';
 import 'ui/state_management/app_state';
+import { luceneStringToDsl } from '../../../../ui/public/courier/data_source/build_query/lucene_string_to_dsl';
 
 export function dashboardContextProvider(Private, getAppState) {
   return () => {
     const queryFilter = Private(FilterBarQueryFilterProvider);
     const bool = { must: [], must_not: [] };
     const filterBarFilters = queryFilter.getFilters();
-    const queryBarFilter = getAppState().query;
+    const queryBarQuery = getAppState().query;
 
-    // Add the query bar filter, its handled differently.
-    bool.must.push(queryBarFilter);
+    if (queryBarQuery.language === 'lucene') {
+      // Add the query bar filter, its handled differently.
+      bool.must.push(luceneStringToDsl(queryBarQuery.query));
+    }
 
     // Add each of the filter bar filters
     _.each(filterBarFilters, function (filter) {

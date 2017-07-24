@@ -10,7 +10,12 @@ export function registerValueSuggestions(server) {
 
       const { callWithRequest } = server.plugins.elasticsearch.getCluster('data');
       const include = query ? `.*${query}.*` : undefined;
-      const body = getBody({ field, include });
+      const body = getBody({
+        field,
+        include,
+        shard_size: 10,
+        size: 10
+      });
 
       return callWithRequest(req, 'search', { index, body })
       .then((res) => {

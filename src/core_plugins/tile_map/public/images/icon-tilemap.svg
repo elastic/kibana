@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="30px" height="46px" viewBox="0 0 30 46" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <!-- Generator: Sketch 42 (36781) - http://www.bohemiancoding.com/sketch -->
+    <title>icon-tilemap</title>
+    <desc>Created with Sketch.</desc>
+    <defs></defs>
+    <g id="Visualize" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="Visualize-Create-New" transform="translate(-130.000000, -436.000000)" fill="#000000">
+            <g id="maps" transform="translate(74.000000, 361.000000)">
+                <g id="tile-map" transform="translate(2.000000, 45.000000)">
+                    <path d="M76.5,45.3333333 C76.5,41.1106771 73.1308594,37.6666667 69,37.6666667 C64.8691406,37.6666667 61.5,41.1106771 61.5,45.3333333 C61.5,49.5559896 64.8691406,53 69,53 C73.1308594,53 76.5,49.5559896 76.5,45.3333333 Z M84,45.3333333 C84,47.1601562 83.7949219,49.046875 83.0332031,50.6940104 L72.3691406,73.8736979 C71.7539062,75.1914062 70.40625,76 69,76 C67.59375,76 66.2460938,75.1914062 65.6601562,73.8736979 L54.9667969,50.6940104 C54.2050781,49.046875 54,47.1601562 54,45.3333333 C54,36.8580729 60.7089844,30 69,30 C77.2910156,30 84,36.8580729 84,45.3333333 Z" id="icon-tilemap"></path>
+                </g>
+            </g>
+        </g>
+    </g>
+</svg>

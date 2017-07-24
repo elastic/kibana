@@ -35,6 +35,13 @@ exports[`KuiButtonIcon Props type loading renders the loading class 1`] = `
 />
 `;
 
+exports[`KuiButtonIcon Props type menu renders the menu class 1`] = `
+<span
+  aria-hidden="true"
+  class="kuiButton__icon kuiIcon fa-bars"
+/>
+`;
+
 exports[`KuiButtonIcon Props type next renders the next class 1`] = `
 <span
   aria-hidden="true"
@@ -46,5 +53,12 @@ exports[`KuiButtonIcon Props type previous renders the previous class 1`] = `
 <span
   aria-hidden="true"
   class="kuiButton__icon kuiIcon fa-chevron-left"
+/>
+`;
+
+exports[`KuiButtonIcon Props type settings renders the settings class 1`] = `
+<span
+  aria-hidden="true"
+  class="kuiButton__icon kuiIcon fa-gear"
 />
 `;

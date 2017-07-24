@@ -1,7 +1,11 @@
 import _ from 'lodash';
 import chrome from 'ui/chrome';
 
-export function filterParamsPhraseController($http, $scope) {
+const baseUrl = chrome.addBasePath('/api/kibana/suggestions/values');
+
+export function filterParamsPhraseController($http, $scope, config) {
+  const shouldSuggestValues = this.shouldSuggestValues = config.get('filterEditor:suggestValues');
+
   this.compactUnion = _.flow(_.union, _.compact);
 
   this.getValueSuggestions = _.memoize(getValueSuggestions, getFieldQueryHash);
@@ -14,7 +18,7 @@ export function filterParamsPhraseController($http, $scope) {
   this.refreshValueSuggestions();
 
   function getValueSuggestions(field, query) {
-    if (!_.get(field, 'aggregatable') || field.type !== 'string') {
+    if (!shouldSuggestValues || !_.get(field, 'aggregatable') || field.type !== 'string') {
       return Promise.resolve([]);
     }
 
@@ -23,7 +27,7 @@ export function filterParamsPhraseController($http, $scope) {
       field: field.name
     };
 
-    return $http.post(chrome.addBasePath(`/api/kibana/suggestions/values/${field.indexPattern.id}`), params)
+    return $http.post(`${baseUrl}/${field.indexPattern.title}`, params)
       .then(response => response.data)
       .catch(() => []);
   }

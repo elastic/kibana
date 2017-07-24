@@ -69,6 +69,13 @@
 body {
   font-family: "Open Sans", Helvetica, Arial, sans-serif; }
 
+/**
+ * 1. Required for IE11.
+ */
+main {
+  display: block;
+  /* 1 */ }
+
 .kuiActionItem {
   display: -webkit-box;
   display: -webkit-flex;
@@ -1588,7 +1595,6 @@ body {
   -webkit-align-items: center;
       -ms-flex-align: center;
           align-items: center;
-  height: 100%;
   padding-left: 10px;
   /* 1 */ }
 
@@ -1930,11 +1936,10 @@ body {
   display: -webkit-flex;
   display: -ms-flexbox;
   display: flex;
-  -webkit-box-align: center;
-  -webkit-align-items: center;
-      -ms-flex-align: center;
-          align-items: center;
-  height: 100%; }
+  -webkit-box-align: stretch;
+  -webkit-align-items: stretch;
+      -ms-flex-align: stretch;
+          align-items: stretch; }
 
 .kuiLocalMenuItem {
   display: -webkit-box;
@@ -2025,10 +2030,10 @@ body {
   display: -webkit-flex;
   display: -ms-flexbox;
   display: flex;
-  -webkit-box-align: center;
-  -webkit-align-items: center;
-      -ms-flex-align: center;
-          align-items: center;
+  -webkit-box-align: stretch;
+  -webkit-align-items: stretch;
+      -ms-flex-align: stretch;
+          align-items: stretch;
   -webkit-box-pack: justify;
   -webkit-justify-content: space-between;
       -ms-flex-pack: justify;
@@ -2037,7 +2042,14 @@ body {
   /* 1 */ }
 
 .kuiLocalNavRow__section {
-  height: 100%; }
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-align: stretch;
+  -webkit-align-items: stretch;
+      -ms-flex-align: stretch;
+          align-items: stretch; }
 
 /**
  * 1. We make this row flex-start because it usually contains a search input, which may expand
@@ -2113,8 +2125,9 @@ body {
       -ms-flex: 0 0 auto;
           flex: 0 0 auto;
   border-radius: 0;
-  border-left-color: #DEDEDE; }
+  border-left-width: 0; }
   .theme-dark .kuiLocalSearchInput--secondary {
+    border-left-width: 1px;
     border-left-color: #333333;
     border-right-color: #333333; }
 
@@ -2166,8 +2179,7 @@ body {
   background-repeat: no-repeat;
   background-position: calc(100% - 8px);
   /* 2 */
-  border-color: #ffffff;
-  border-left-color: #DEDEDE;
+  border-left-width: 0;
   border-radius: 0; }
   .theme-dark .kuiLocalSearchSelect {
     color: #cecece; }
@@ -2973,10 +2985,13 @@ body {
   .kuiToggleButton:active {
     color: #0079a5 !important;
     /* 2 */ }
-  .kuiToggleButton:hover {
+  .kuiToggleButton:hover:not(:disabled) {
     color: #006E8A !important;
     /* 2 */
     text-decoration: underline; }
+  .kuiToggleButton:disabled {
+    cursor: not-allowed;
+    opacity: .5; }
 
 /**
    * 1. Make icon a consistent width so the text doesn't get pushed around as the icon changes

@@ -1,8 +1,6 @@
-import _ from 'lodash';
 import { IndexPatternMissingIndices } from 'ui/errors';
 import 'ui/directives/validate_index_name';
 import 'ui/directives/auto_select_if_only_one';
-import { RefreshKibanaIndex } from '../refresh_kibana_index';
 import uiRoutes from 'ui/routes';
 import { uiModules } from 'ui/modules';
 import template from './create_index_pattern.html';
@@ -15,21 +13,32 @@ uiRoutes
 });
 
 uiModules.get('apps/management')
-.controller('managementIndicesCreate', function ($scope, kbnUrl, Private, Notifier, indexPatterns, es, config, Promise, $translate) {
+.controller('managementIndicesCreate', function (
+  $scope,
+  $routeParams,
+  kbnUrl,
+  Private,
+  Notifier,
+  indexPatterns,
+  es,
+  config,
+  Promise,
+  $translate
+) {
   const notify = new Notifier();
-  const refreshKibanaIndex = Private(RefreshKibanaIndex);
   let loadingCount = 0;
 
   // Configure the new index pattern we're going to create.
   this.formValues = {
+    id: $routeParams.id ? decodeURIComponent($routeParams.id) : undefined,
     name: config.get('indexPattern:placeholder'),
-    expandWildcard: false,
     timeFieldOption: null,
   };
 
   // UI state.
   this.timeFieldOptions = [];
   this.timeFieldOptionsError = null;
+  this.showAdvancedOptions = $routeParams.id || false;
 
   const getTimeFieldOptions = () => {
     loadingCount += 1;
@@ -123,21 +132,6 @@ uiModules.get('apps/management')
     return Boolean(this.formValues.timeFieldOption.fieldName);
   };
 
-  this.canEnableExpandWildcard = () => {
-    return (
-      this.isTimeBased() &&
-        !this.isCrossClusterName() &&
-        _.includes(this.formValues.name, '*')
-    );
-  };
-
-  this.isExpandWildcardEnabled = () => {
-    return (
-      this.canEnableExpandWildcard() &&
-        !!this.formValues.expandWildcard
-    );
-  };
-
   this.isCrossClusterName = () => {
     return (
       this.formValues.name &&
@@ -191,43 +185,40 @@ uiModules.get('apps/management')
       });
   };
 
+  this.toggleAdvancedIndexOptions = () => {
+    this.showAdvancedOptions = !!!this.showAdvancedOptions;
+  };
+
   this.createIndexPattern = () => {
     const {
+      id,
       name,
       timeFieldOption,
     } = this.formValues;
-
-    const id = name;
 
     const timeFieldName = timeFieldOption
       ? timeFieldOption.fieldName
       : undefined;
 
-    const notExpandable = this.isExpandWildcardEnabled()
-      ? undefined
-      : true;
-
     loadingCount += 1;
     sendCreateIndexPatternRequest(indexPatterns, {
       id,
+      name,
       timeFieldName,
-      notExpandable,
     }).then(createdId => {
       if (!createdId) {
         return;
       }
 
-      refreshKibanaIndex().then(() => {
-        if (!config.get('defaultIndex')) {
-          config.set('defaultIndex', id);
-        }
+      if (!config.get('defaultIndex')) {
+        config.set('defaultIndex', createdId);
+      }
 
-        indexPatterns.cache.clear(id);
-        kbnUrl.change(`/management/kibana/indices/${id}`);
+      indexPatterns.cache.clear(createdId);
+      kbnUrl.change(`/management/kibana/indices/${createdId}`);
 
-        // force loading while kbnUrl.change takes effect
-        loadingCount = Infinity;
-      });
+      // force loading while kbnUrl.change takes effect
+      loadingCount = Infinity;
     }).catch(err => {
       if (err instanceof IndexPatternMissingIndices) {
         return notify.error($translate.instant('KIBANA-NO_INDICES_MATCHING_PATTERN'));

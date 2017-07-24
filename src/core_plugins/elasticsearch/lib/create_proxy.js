@@ -12,7 +12,6 @@ export function createPath(prefix, path) {
 export function createProxy(server, method, path, config) {
   const proxies = new Map([
     ['/elasticsearch', server.plugins.elasticsearch.getCluster('data')],
-    ['/es_admin', server.plugins.elasticsearch.getCluster('admin')]
   ]);
 
   const responseHandler = function (err, upstreamResponse, request, reply) {

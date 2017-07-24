@@ -25,12 +25,10 @@ describe('GetTemplateIndexPatterns', function () {
       },
     };
 
-    $provide.service('esAdmin', function () {
+    $provide.service('$http', function () {
       return {
-        indices: {
-          getTemplate: async function () {
-            return response;
-          }
+        async get() {
+          return { data: response };
         }
       };
     });

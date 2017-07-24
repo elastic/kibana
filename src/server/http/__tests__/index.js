@@ -1,6 +1,5 @@
 import expect from 'expect.js';
 import * as kbnTestServer from '../../../test_utils/kbn_server';
-import { fromRoot } from '../../../utils';
 
 describe('routes', function () {
   this.slow(10000);
@@ -8,13 +7,7 @@ describe('routes', function () {
 
   let kbnServer;
   beforeEach(function () {
-    kbnServer = kbnTestServer.createServer({
-      plugins: {
-        scanDirs: [
-          fromRoot('src/core_plugins')
-        ]
-      }
-    });
+    kbnServer = kbnTestServer.createServerWithCorePlugins();
     return kbnServer.ready();
   });
   afterEach(function () {

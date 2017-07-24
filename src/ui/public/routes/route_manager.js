@@ -1,7 +1,8 @@
-import _ from 'lodash';
+import { defaultsDeep, wrap } from 'lodash';
 
 import { wrapRouteWithPrep } from './wrap_route_with_prep';
 import { RouteSetupManager } from './route_setup_manager';
+import { parsePathToBreadcrumbs } from './breadcrumbs';
 
 // eslint-disable-next-line kibana-custom/no-default-export
 export default function RouteManager() {
@@ -16,18 +17,17 @@ export default function RouteManager() {
       const path = args[0];
       const route = args[1] || {};
 
-      // merge in any defaults
-      defaults.forEach(function (args) {
-        if (args[0].test(path)) {
-          _.merge(route, args[1]);
+      defaults.forEach(def => {
+        if (def.regex.test(path)) {
+          defaultsDeep(route, def.value);
         }
       });
 
-      if (route.reloadOnSearch === void 0) {
+      if (route.reloadOnSearch == null) {
         route.reloadOnSearch = false;
       }
 
-      if (route.requireDefaultIndex === void 0) {
+      if (route.requireDefaultIndex == null) {
         route.requireDefaultIndex = false;
       }
 
@@ -41,14 +41,22 @@ export default function RouteManager() {
     }
   };
 
+  self.run = function ($location, $route, $injector) {
+    self.getBreadcrumbs = () => {
+      const breadcrumbs = parsePathToBreadcrumbs($location.path());
+      const map = $route.current.mapBreadcrumbs;
+      return map ? $injector.invoke(map, null, { breadcrumbs }) : breadcrumbs;
+    };
+  };
+
   const wrapSetupAndChain = (fn, ...args) => {
     fn.apply(setup, args);
     return this;
   };
 
-  this.addSetupWork = _.wrap(setup.addSetupWork, wrapSetupAndChain);
-  this.afterSetupWork = _.wrap(setup.afterSetupWork, wrapSetupAndChain);
-  this.afterWork = _.wrap(setup.afterWork, wrapSetupAndChain);
+  this.addSetupWork = wrap(setup.addSetupWork, wrapSetupAndChain);
+  this.afterSetupWork = wrap(setup.afterSetupWork, wrapSetupAndChain);
+  this.afterWork = wrap(setup.afterWork, wrapSetupAndChain);
 
   self.when = function (path, route) {
     when.push([path, route]);
@@ -57,14 +65,19 @@ export default function RouteManager() {
 
   // before attaching the routes to the routeProvider, test the RE
   // against the .when() path and add/override the resolves if there is a match
-  self.defaults = function (RE, def) {
-    defaults.push([RE, def]);
+  self.defaults = function (regex, value) {
+    defaults.push({ regex, value });
     return self;
   };
 
   self.otherwise = function (route) {
     otherwise = route;
     return self;
+  };
+
+  self.getBreadcrumbs = function () {
+    // overwritten in self.run();
+    return [];
   };
 
   self.RouteManager = RouteManager;

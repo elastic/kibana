@@ -21,6 +21,26 @@ exports[`filter initializes search box value 1`] = `
 </div>
 `;
 
+exports[`placeholder initializes search box placeholder 1`] = `
+<div
+  class="kuiToolBarSearch"
+>
+  <div
+    class="kuiToolBarSearchBox"
+  >
+    <div
+      class="kuiToolBarSearchBox__icon kuiIcon fa-search"
+    />
+    <input
+      aria-label="Filter"
+      class="kuiToolBarSearchBox__input"
+      placeholder="Filter items..."
+      type="text"
+    />
+  </div>
+</div>
+`;
+
 exports[`renders KuiToolBarSearchBox 1`] = `
 <div
   aria-label="aria-label"

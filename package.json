@@ -11,7 +11,7 @@
     "dashboarding"
   ],
   "private": false,
-  "version": "6.0.0-alpha3",
+  "version": "6.0.0-beta1",
   "branch": "master",
   "build": {
     "number": 8467,
@@ -75,7 +75,6 @@
   "dependencies": {
     "@bigfunger/jsondiffpatch": "0.1.38-webpack",
     "@elastic/datemath": "2.3.0",
-    "@elastic/httpolyglot": "0.1.2-elasticpatch1",
     "@elastic/webpack-directory-name-as-main": "2.0.2",
     "@spalger/filesaver": "1.1.2",
     "@spalger/leaflet-draw": "0.2.3",
@@ -276,7 +275,7 @@
     "leadfoot": "1.7.1",
     "license-checker": "5.1.2",
     "load-grunt-config": "0.19.2",
-    "makelogs": "4.0.1",
+    "makelogs": "4.0.2",
     "marked-text-renderer": "0.1.0",
     "mocha": "3.3.0",
     "mock-fs": "4.2.0",

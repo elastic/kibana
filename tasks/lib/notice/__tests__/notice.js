@@ -9,11 +9,11 @@ const NODE_MODULES = resolve(__dirname, '../../../../node_modules');
 const NODE_DIR = resolve(process.execPath, '../..');
 const PACKAGES = [
   {
-    name: '@elastic/httpolyglot',
-    version: '0.1.2-elasticpatch1',
+    name: '@spalger/filesaver',
+    version: '1.1.2',
     licenses: ['MIT'],
-    directory: resolve(NODE_MODULES, '@elastic/httpolyglot'),
-    relative: 'node_modules/@elastic/httpolyglot',
+    directory: resolve(NODE_MODULES, '@spalger/filesaver'),
+    relative: 'node_modules/@spalger/filesaver',
   },
   {
     name: 'aws-sdk',
@@ -41,7 +41,7 @@ describe('tasks/lib/notice', () => {
     });
 
     it('includes *LICENSE* files from packages', () => {
-      expect(notice).to.contain(readFileSync(resolve(NODE_MODULES, '@elastic/httpolyglot/LICENSE'), 'utf8'));
+      expect(notice).to.contain(readFileSync(resolve(NODE_MODULES, '@spalger/filesaver/LICENSE.md'), 'utf8'));
     });
 
     it('includes the LICENSE file from node', () => {
