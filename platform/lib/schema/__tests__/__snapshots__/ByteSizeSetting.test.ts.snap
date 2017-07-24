@@ -28,6 +28,8 @@ ByteSizeValue {
 }
 `;
 
+exports[`includes context in failure 1`] = `"[foo-context]: expected value of type [ByteSize] but got [undefined]"`;
+
 exports[`is required by default 1`] = `"expected value of type [ByteSize] but got [undefined]"`;
 
 exports[`returns error when not string 1`] = `"expected value of type [ByteSize] but got [number]"`;

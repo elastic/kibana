@@ -6,6 +6,8 @@ exports[`#min returns error when smaller number 1`] = `"Value is [3] but it must
 
 exports[`fails if number is \`NaN\` 1`] = `"expected value of type [number] but got [number]"`;
 
+exports[`includes context in failure 1`] = `"[foo-context]: expected value of type [number] but got [undefined]"`;
+
 exports[`is required by default 1`] = `"expected value of type [number] but got [undefined]"`;
 
 exports[`returns error when not number or numeric string 1`] = `"expected value of type [number] but got [string]"`;

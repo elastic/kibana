@@ -4,6 +4,8 @@ exports[`#defaultValue can be a moment.Duration 1`] = `"PT1H"`;
 
 exports[`#defaultValue can be a string 1`] = `"PT1H"`;
 
+exports[`includes context in failure 1`] = `"[foo-context]: expected value of type [moment.Duration] but got [undefined]"`;
+
 exports[`is required by default 1`] = `"expected value of type [moment.Duration] but got [undefined]"`;
 
 exports[`returns error when not string 1`] = `"expected value of type [moment.Duration] but got [number]"`;

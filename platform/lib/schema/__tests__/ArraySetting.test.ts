@@ -14,6 +14,20 @@ test('fails if wrong input type', () => {
   expect(() => setting.validate('test')).toThrowErrorMatchingSnapshot();
 });
 
+test('includes context in failure when wrong top-level type', () => {
+  const setting = arrayOf(string());
+  expect(() =>
+    setting.validate('test', 'foo-context')
+  ).toThrowErrorMatchingSnapshot();
+});
+
+test('includes context in failure when wrong item type', () => {
+  const setting = arrayOf(string());
+  expect(() =>
+    setting.validate([123], 'foo-context')
+  ).toThrowErrorMatchingSnapshot();
+});
+
 test('fails if wrong type of content in array', () => {
   const setting = arrayOf(string());
   expect(() => setting.validate([1, 2, 3])).toThrowErrorMatchingSnapshot();

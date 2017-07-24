@@ -9,6 +9,12 @@ test('is required by default', () => {
   expect(() => byteSize().validate(undefined)).toThrowErrorMatchingSnapshot();
 });
 
+test('includes context in failure', () => {
+  expect(() =>
+    byteSize().validate(undefined, 'foo-context')
+  ).toThrowErrorMatchingSnapshot();
+});
+
 describe('#defaultValue', () => {
   test('can be a ByteSizeValue', () => {
     expect(

@@ -11,7 +11,7 @@ test('returns value by default', () => {
   expect(setting.validate(value)).toEqual({ name: 'test' });
 });
 
-test('fails if missing string', () => {
+test('fails if missing required value', () => {
   const setting = object({
     name: string()
   });
@@ -107,4 +107,27 @@ test('handles oneOf', () => {
 
   expect(setting.validate({ key: 'foo' })).toEqual({ key: 'foo' });
   expect(() => setting.validate({ key: 123 })).toThrowErrorMatchingSnapshot();
+});
+
+test('includes context in failure when wrong top-level type', () => {
+  const setting = object({
+    foo: string()
+  });
+
+  expect(() =>
+    setting.validate([], 'foo-context')
+  ).toThrowErrorMatchingSnapshot();
+});
+
+test('includes context in failure when wrong value type', () => {
+  const setting = object({
+    foo: string()
+  });
+  const value = {
+    foo: 123
+  };
+
+  expect(() =>
+    setting.validate(value, 'foo-context')
+  ).toThrowErrorMatchingSnapshot();
 });

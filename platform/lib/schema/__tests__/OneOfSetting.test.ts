@@ -59,6 +59,14 @@ test('handles object with wrong type', () => {
   expect(() => setting.validate({ age: 'foo' })).toThrowErrorMatchingSnapshot();
 });
 
+test('includes context in failure', () => {
+  const setting = oneOf([object({ age: number() })]);
+
+  expect(() =>
+    setting.validate({ age: 'foo' }, 'foo-context')
+  ).toThrowErrorMatchingSnapshot();
+});
+
 test('handles multiple objects with same key', () => {
   const setting = oneOf([object({ age: string() }), object({ age: number() })]);
 

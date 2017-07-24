@@ -28,6 +28,35 @@ test('fails when not receiving expected key type', () => {
   expect(() => setting.validate(value)).toThrowErrorMatchingSnapshot();
 });
 
+test('includes context in failure when wrong top-level type', () => {
+  const setting = mapOf(string(), string());
+  expect(() =>
+    setting.validate([], 'foo-context')
+  ).toThrowErrorMatchingSnapshot();
+});
+
+test('includes context in failure when wrong value type', () => {
+  const setting = mapOf(string(), string());
+  const value = {
+    name: 123
+  };
+
+  expect(() =>
+    setting.validate(value, 'foo-context')
+  ).toThrowErrorMatchingSnapshot();
+});
+
+test('includes context in failure when wrong key type', () => {
+  const setting = mapOf(number(), string());
+  const value = {
+    name: 'foo'
+  };
+
+  expect(() =>
+    setting.validate(value, 'foo-context')
+  ).toThrowErrorMatchingSnapshot();
+});
+
 test('returns default value if undefined', () => {
   const obj = new Map([['foo', 'bar']]);
 

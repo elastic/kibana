@@ -38,3 +38,10 @@ test('fails if null', () => {
   const setting = maybe(string());
   expect(() => setting.validate(null)).toThrowErrorMatchingSnapshot();
 });
+
+test('includes context in failure', () => {
+  const setting = maybe(string());
+  expect(() =>
+    setting.validate(null, 'foo-context')
+  ).toThrowErrorMatchingSnapshot();
+});

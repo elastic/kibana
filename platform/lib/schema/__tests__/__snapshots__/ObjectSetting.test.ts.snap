@@ -6,11 +6,15 @@ exports[`called with wrong type 2`] = `"expected a plain object value, but found
 
 exports[`fails if key does not exist in schema 1`] = `"missing definitions in schema for keys [bar]"`;
 
-exports[`fails if missing string 1`] = `"[name]: expected value of type [string] but got [undefined]"`;
+exports[`fails if missing required value 1`] = `"[name]: expected value of type [string] but got [undefined]"`;
 
 exports[`handles oneOf 1`] = `
 "[key]: settings that failed validation:
 - [key.0]: expected value of type [string] but got [number]"
 `;
+
+exports[`includes context in failure when wrong top-level type 1`] = `"[foo-context]: expected a plain object value, but found [Array] instead."`;
+
+exports[`includes context in failure when wrong value type 1`] = `"[foo-context.foo]: expected value of type [string] but got [number]"`;
 
 exports[`object within object with required 1`] = `"[foo.bar]: expected value of type [string] but got [undefined]"`;

@@ -1,3 +1,5 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`fails if null 1`] = `"expected value to either be undefined or defined, but not [null]"`;
+
+exports[`includes context in failure 1`] = `"[foo-context]: expected value to either be undefined or defined, but not [null]"`;
