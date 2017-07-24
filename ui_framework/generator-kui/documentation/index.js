@@ -12,7 +12,7 @@ module.exports = class extends Generator {
   }
 
   prompting() {
-    const prompts = [{
+    let prompts = [{
       message: 'What\'s the name of the component you\'re documenting? Use snake_case, please.',
       name: 'name',
       type: 'input',
@@ -20,6 +20,13 @@ module.exports = class extends Generator {
     }];
 
     if (this.fileType === 'demo') {
+      prompts.push({
+        message: `What's the name of the directory this demo should go in? (Within ui_framework/doc_site/src/views). Use snake_case, please.`,
+        name: 'folderName',
+        type: 'input',
+        store: true,
+      });
+
       prompts.push({
         message: 'What would you like to name this demo? Use snake_case, please.',
         name: 'demoName',
@@ -60,15 +67,14 @@ module.exports = class extends Generator {
       );
     };
 
-    const writeDocumentationPageDemo = () => {
-      const fileName = config.demoName || config.name;
+    const writeDocumentationPageDemo = (fileName, folderName) => {
       const componentExampleName = utils.makeComponentName(fileName, false);
       const componentExamplePrefix = utils.lowerCaseFirstLetter(componentExampleName);
       const componentName = utils.makeComponentName(config.name);
 
       const path = DOCUMENTATION_PAGE_PATH;
 
-      const vars = config.demoVars = {
+      const vars = config.documentationVars = {
         componentExampleName,
         componentExamplePrefix,
         componentName,
@@ -77,7 +83,7 @@ module.exports = class extends Generator {
 
       const documentationPageDemoPath
         = config.documentationPageDemoPath
-        = `${path}/${config.name}/${fileName}.js`;
+        = `${path}/${folderName}/${fileName}.js`;
 
       this.fs.copyTpl(
         this.templatePath('documentation_page_demo.js'),
@@ -92,7 +98,7 @@ module.exports = class extends Generator {
 
       const path = DOCUMENTATION_PAGE_PATH;
 
-      const vars = config.sandboxVars = {
+      const vars = config.documentationVars = {
         componentExampleName,
         fileName,
       };
@@ -116,11 +122,11 @@ module.exports = class extends Generator {
     switch (this.fileType) {
       case 'documentation':
         writeDocumentationPage();
-        writeDocumentationPageDemo();
+        writeDocumentationPageDemo(config.name, config.name);
         break;
 
       case 'demo':
-        writeDocumentationPageDemo();
+        writeDocumentationPageDemo(config.demoName, config.folderName);
         break;
 
       case 'sandbox':
@@ -130,25 +136,12 @@ module.exports = class extends Generator {
   }
 
   end() {
-    const showImportDocumentationPageSnippet = () => {
-      const {
-        componentExampleName,
-        fileName,
-      } = this.config.demoVars;
-
-      this.log(chalk.white('\n// Import example into routes.js.'));
-      this.log(
-        `${chalk.magenta('import')} ${componentExampleName}Example\n` +
-        `  ${chalk.magenta('from')} ${chalk.cyan(`'../../views/${fileName}/${fileName}_example'`)};`
-      );
-    };
-
     const showImportDemoSnippet = () => {
       const {
         componentExampleName,
         componentExamplePrefix,
         fileName,
-      } = this.config.demoVars;
+      } = this.config.documentationVars;
 
       this.log(chalk.white('\n// Import demo into example.'));
       this.log(
@@ -156,27 +149,58 @@ module.exports = class extends Generator {
         `${chalk.magenta('const')} ${componentExamplePrefix}Source = require(${chalk.cyan(`'!!raw!./${fileName}'`)});\n` +
         `${chalk.magenta('const')} ${componentExamplePrefix}Html = renderToHtml(${componentExampleName});`
       );
+
+      this.log(chalk.white('\n// Render demo.'));
+      this.log(
+        `<GuideSection\n` +
+        `  title="${componentExampleName}"\n` +
+        `  source={[{\n` +
+        `    type: GuideSectionTypes.JS,\n` +
+        `    code: ${componentExamplePrefix}Source,\n` +
+        `  }, {\n` +
+        `    type: GuideSectionTypes.HTML,\n` +
+        `    code: ${componentExamplePrefix}Html,\n` +
+        `  }]}\n` +
+        `>\n` +
+        `  <GuideText>\n` +
+        `    Description needed: how to use the ${componentExampleName} component.\n` +
+        `  </GuideText>\n` +
+        `\n` +
+        `  <GuideDemo>\n` +
+        `    <${componentExampleName} />\n` +
+        `  </GuideDemo>\n` +
+        `</GuideSection>\n`
+      );
     };
 
-    const showImportSandboxSnippet = () => {
+    const showImportRouteSnippet = suffix => {
       const {
         componentExampleName,
         fileName,
-      } = this.config.sandboxVars;
+      } = this.config.documentationVars;
 
       this.log(chalk.white('\n// Import example into routes.js.'));
       this.log(
-        `${chalk.magenta('import')} ${componentExampleName}Sandbox\n` +
-        `  ${chalk.magenta('from')} ${chalk.cyan(`'../../views/${fileName}/${fileName}_sandbox'`)};`
+        `${chalk.magenta('import')} ${componentExampleName}${suffix}\n` +
+        `  ${chalk.magenta('from')} ${chalk.cyan(`'../../views/${fileName}/${fileName}_${suffix.toLowerCase()}'`)};`
       );
-    };
+
+      this.log(chalk.white('\n// Import route definition into routes.js.'));
+      this.log(
+        `{\n` +
+        `  name: ${chalk.cyan(`"${componentExampleName}"`)},\n` +
+        `  component: ${componentExampleName}${suffix},\n` +
+        `  hasReact: ${chalk.magenta('true')},\n` +
+        `}`
+      );
+    }
 
     this.log('------------------------------------------------');
     this.log(chalk.bold('Import snippets:'));
 
     switch (this.fileType) {
       case 'documentation':
-        showImportDocumentationPageSnippet();
+        showImportRouteSnippet('Example');
         break;
 
       case 'demo':
@@ -184,7 +208,7 @@ module.exports = class extends Generator {
         break;
 
       case 'sandbox':
-        showImportSandboxSnippet();
+        showImportRouteSnippet('Sandbox');
         break;
     }
     this.log('------------------------------------------------');

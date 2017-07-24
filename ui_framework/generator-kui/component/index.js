@@ -107,28 +107,22 @@ module.exports = class extends Generator {
       const componentName = this.config.vars.componentName;
       const componentPath = this.config.componentPath;
 
-      if (!this.config.shouldMakeDirectory) {
-        this.log(chalk.white(`\n// Export component from component's index.js.`));
-        this.log(
-          `${chalk.magenta('export')} {\n` +
-          `  ${componentName},\n` +
-          `} ${chalk.magenta('from')} ${chalk.cyan(`'./${this.config.name}'`)};`
-        );
-      }
+      this.log(chalk.white(`\n// Export component (e.. from component's index.js).`));
+      this.log(
+        `${chalk.magenta('export')} {\n` +
+        `  ${componentName},\n` +
+        `} ${chalk.magenta('from')} ${chalk.cyan(`'./${this.config.name}'`)};`
+      );
 
-      if (!this.config.shouldMakeDirectory) {
-        this.log(chalk.white('\n// Import styles.'));
-        this.log(
-          `${chalk.magenta('@import')} ${chalk.cyan(`'./${this.config.name}'`)};`
-        );
-      }
+      this.log(chalk.white('\n// Import styles.'));
+      this.log(
+        `${chalk.magenta('@import')} ${chalk.cyan(`'${this.config.name}'`)};`
+      );
 
-      if (this.config.shouldMakeDirectory) {
-        this.log(chalk.white('\n// Import component styles into the root index.scss.'));
-        this.log(
-          `${chalk.magenta('@import')} ${chalk.cyan(`'./${this.config.name}/index'`)};`
-        );
-      }
+      this.log(chalk.white('\n// Import component styles into the root index.scss.'));
+      this.log(
+        `${chalk.magenta('@import')} ${chalk.cyan(`'./${this.config.name}/index'`)};`
+      );
     };
 
     this.log('------------------------------------------------');
