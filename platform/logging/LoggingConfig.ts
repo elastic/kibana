@@ -120,7 +120,7 @@ export class LoggingConfig {
 
   private fillAppendersConfig(schema: LoggingConfigType) {
     for (const [appenderKey, appenderSchema] of schema.appenders) {
-      this.appenders.set(appenderKey, <AppenderConfigType>appenderSchema);
+      this.appenders.set(appenderKey, appenderSchema as AppenderConfigType);
     }
   }
 

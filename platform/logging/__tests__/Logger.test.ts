@@ -454,7 +454,7 @@ describe('LoggerAdapter methods', () => {
       'trace-message',
       undefined
     );
-    (<jest.Mock<Function>>oldInternalLogger.trace).mockReset();
+    (oldInternalLogger.trace as jest.Mock<Function>).mockReset();
 
     adapter.logger = newInternalLogger;
     adapter.trace('trace-message');

@@ -71,9 +71,9 @@ export class BaseLogger implements Logger {
       level,
       context: this.context,
       message: isError
-        ? (<Error>errorOrMessage).message
-        : <string>errorOrMessage,
-      error: isError ? <Error>errorOrMessage : undefined,
+        ? (errorOrMessage as Error).message
+        : errorOrMessage as string,
+      error: isError ? errorOrMessage as Error : undefined,
       meta
     };
   }
