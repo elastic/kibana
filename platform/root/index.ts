@@ -36,9 +36,14 @@ export class Root {
   }
 
   async start() {
-    const loggingConfig$ = this.configService.atPath('logging', LoggerConfig);
-
-    this.loggerService.upgrade(loggingConfig$);
+    try {
+      const loggingConfig$ = this.configService.atPath('logging', LoggerConfig);
+      this.loggerService.upgrade(loggingConfig$);
+    } catch (e) {
+      console.log('Configuring logger failed with the following errors:');
+      console.log(e.message);
+      this.shutdown(e);
+    }
 
     this.log.info('starting the server');
 

@@ -1,0 +1,12 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`calls shutdown when configuring logger fails 1`] = `
+Array [
+  Array [
+    "Configuring logger failed with the following errors:",
+  ],
+  Array [
+    "fail",
+  ],
+]
+`;
