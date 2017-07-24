@@ -4,8 +4,15 @@ import React, {
 } from 'react';
 import classNames from 'classnames';
 
-export const KuiLargeTitle = ({ children, className, ...rest }) => {
-  const classes = classNames('kuiLargeTitle', className);
+const sizeToClassNameMap = {
+  small: 'kuiTitle--small',
+  large: 'kuiTitle--large',
+};
+
+const SIZES = Object.keys(sizeToClassNameMap);
+
+export const KuiTitle = ({ size, children, className, ...rest }) => {
+  const classes = classNames('kuiTitle', sizeToClassNameMap[size], className);
 
   const props = {
     className: classes,
@@ -15,38 +22,9 @@ export const KuiLargeTitle = ({ children, className, ...rest }) => {
   return cloneElement(children, props);
 };
 
-KuiLargeTitle.PropTypes = {
+KuiTitle.PropTypes = {
   children: PropTypes.node.isRequired,
-};
-
-export const KuiSmallTitle = ({ children, className, ...rest }) => {
-  const classes = classNames('kuiSmallTitle', className);
-
-  const props = {
-    className: classes,
-    ...rest,
-  };
-
-  return cloneElement(children, props);
-};
-
-KuiSmallTitle.PropTypes = {
-  children: PropTypes.node.isRequired,
-};
-
-export const KuiMediumTitle = ({ children, className, ...rest }) => {
-  const classes = classNames('kuiMediumTitle', className);
-
-  const props = {
-    className: classes,
-    ...rest,
-  };
-
-  return cloneElement(children, props);
-};
-
-KuiMediumTitle.PropTypes = {
-  children: PropTypes.node.isRequired,
+  size: PropTypes.oneOf(SIZES),
 };
 
 export const KuiText = ({ children, className, ...rest }) => {

@@ -4,48 +4,36 @@ import sinon from 'sinon';
 import { requiredProps } from '../../test/required_props';
 
 import {
-  KuiLargeTitle,
-  KuiMediumTitle,
-  KuiSmallTitle,
+  KuiTitle,
   KuiText,
+  SIZES,
 } from './typography';
 
-describe('KuiLargeTitle', () => {
+describe('KuiTitle', () => {
   test('is rendered', () => {
     const component = render(
-      <KuiLargeTitle { ...requiredProps }>
+      <KuiTitle { ...requiredProps }>
         <h1>Hello</h1>
-      </KuiLargeTitle>
+      </KuiTitle>
     );
 
     expect(component)
       .toMatchSnapshot();
   });
-});
 
-describe('KuiMediumTitle', () => {
-  test('is rendered', () => {
-    const component = render(
-      <KuiMediumTitle { ...requiredProps }>
-        <h1>Hello</h1>
-      </KuiMediumTitle>
-    );
+  describe('renders size', () => {
+    SIZES.forEach(size => {
+      test(size, () => {
+        const component = render(
+          <KuiTitle size={size}>
+            <h1>Hello</h1>
+          </KuiTitle>
+        );
 
-    expect(component)
-      .toMatchSnapshot();
-  });
-});
-
-describe('KuiSmallTitle', () => {
-  test('is rendered', () => {
-    const component = render(
-      <KuiSmallTitle { ...requiredProps }>
-        <h1>Hello</h1>
-      </KuiSmallTitle>
-    );
-
-    expect(component)
-      .toMatchSnapshot();
+        expect(component)
+          .toMatchSnapshot();
+      });
+    });
   });
 });
 

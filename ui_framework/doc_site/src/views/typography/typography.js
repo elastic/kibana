@@ -1,25 +1,23 @@
 import React from 'react';
 
 import {
-  KuiSmallTitle,
-  KuiLargeTitle,
-  KuiMediumTitle,
+  KuiTitle,
   KuiText,
 } from '../../../../components';
 
 export default () => (
   <div>
-    <KuiLargeTitle>
+    <KuiTitle size="large">
       <h1>This is the title of the page -- descriptive enough for ya?</h1>
-    </KuiLargeTitle>
+    </KuiTitle>
 
-    <KuiMediumTitle>
+    <KuiTitle>
       <h2>And this is a section within the page</h2>
-    </KuiMediumTitle>
+    </KuiTitle>
 
-    <KuiSmallTitle>
+    <KuiTitle size="small">
       <h3>Note</h3>
-    </KuiSmallTitle>
+    </KuiTitle>
 
     <KuiText>
       <p>

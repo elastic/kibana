@@ -20,6 +20,7 @@ const components = [{
 }, {
   name: 'Icon',
   component: IconExample,
+  hasReact: true,
 }, {
   name: 'Header',
   component: HeaderExample,

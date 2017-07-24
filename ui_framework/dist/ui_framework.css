@@ -6,17 +6,17 @@
   font-size: 0.875rem;
   line-height: 24px; }
 
-.kuiSmallTitle, .kuiText {
+.kuiTitle--small, .kuiText {
   font-size: 16px;
   font-size: 1rem;
   line-height: 24px; }
 
-.kuiMediumTitle {
+.kuiTitle {
   font-size: 24px;
   font-size: 1.5rem;
   line-height: 36px; }
 
-.kuiLargeTitle {
+.kuiTitle--large {
   font-size: 32px;
   font-size: 2rem;
   line-height: 48px; }
@@ -357,15 +357,7 @@ table {
       right: 16px;
       left: auto; }
 
-.kuiLargeTitle {
-  color: #000;
-  font-weight: 300; }
-
-.kuiMediumTitle {
-  color: #000;
-  font-weight: 300; }
-
-.kuiSmallTitle {
+.kuiTitle {
   color: #000;
   font-weight: 300; }
 

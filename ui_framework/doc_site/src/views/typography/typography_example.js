@@ -3,7 +3,6 @@ import React from 'react';
 import { renderToHtml } from '../../services';
 
 import {
-  GuideCode,
   GuideDemo,
   GuidePage,
   GuideSection,
@@ -49,7 +48,7 @@ export default props => (
     </GuideSection>
 
     <GuideSection
-      title="LargeTitle"
+      title="Large Title"
       source={[{
         type: GuideSectionTypes.JS,
         code: pageTitleSource,
@@ -59,7 +58,7 @@ export default props => (
       }]}
     >
       <GuideText>
-        The <GuideCode>LargeTitle</GuideCode> component identifies the page you're on. Generally, there should
+        The large size is usually used to identify the page you're on. Generally, there should
         only be one of these used at a time.
       </GuideText>
 
@@ -74,7 +73,7 @@ export default props => (
     </GuideSection>
 
     <GuideSection
-      title="MediumTitle"
+      title="Medium Title"
       source={[{
         type: GuideSectionTypes.JS,
         code: sectionTitleSource,
@@ -84,7 +83,7 @@ export default props => (
       }]}
     >
       <GuideText>
-        The <GuideCode>MediumTitle</GuideCode> component identifies sections within a page.
+        This size is commonly used to identify sections within a page. It's also the default size.
       </GuideText>
 
       <GuideDemo>
@@ -93,7 +92,7 @@ export default props => (
     </GuideSection>
 
     <GuideSection
-      title="SmallTitle"
+      title="Small Title"
       source={[{
         type: GuideSectionTypes.JS,
         code: objectTitleSource,
@@ -103,7 +102,7 @@ export default props => (
       }]}
     >
       <GuideText>
-        This component identifies subsections within a section.
+        This size is commonly used to identify subsections within a section.
       </GuideText>
 
       <GuideDemo>

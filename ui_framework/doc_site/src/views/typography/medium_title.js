@@ -1,11 +1,11 @@
 import React from 'react';
 
 import {
-  KuiMediumTitle,
+  KuiTitle,
 } from '../../../../components';
 
 export default () => (
-  <KuiMediumTitle>
+  <KuiTitle>
     <h2>Here's the title of a section</h2>
-  </KuiMediumTitle>
+  </KuiTitle>
 );
