@@ -1,3 +1,6 @@
+.kui--codeFont {
+  font-family: "Roboto Mono", monospace; }
+
 .kui--fontSizeSmall, .kuiKeyPad {
   font-size: 14px;
   font-size: 0.875rem;
