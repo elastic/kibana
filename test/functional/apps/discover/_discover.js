@@ -10,6 +10,10 @@ export default function ({ getService, getPageObjects }) {
   const queryBar = getService('queryBar');
   const filterBar = getService('filterBar');
   const PageObjects = getPageObjects(['common', 'discover', 'header']);
+  const defaultSettings = {
+    'dateFormat:tz': 'UTC',
+    'defaultIndex': 'logstash-*'
+  };
 
   describe('discover app', function describeIndexTests() {
     const fromTime = '2015-09-19 06:31:44.000';
@@ -19,10 +23,7 @@ export default function ({ getService, getPageObjects }) {
 
     before(async function () {
       // delete .kibana index and update configDoc
-      await kibanaServer.uiSettings.replace({
-        'dateFormat:tz':'UTC',
-        'defaultIndex':'logstash-*'
-      });
+      await kibanaServer.uiSettings.replace(defaultSettings);
 
       log.debug('load kibana index with default index pattern');
       await esArchiver.load('discover');
@@ -234,10 +235,7 @@ export default function ({ getService, getPageObjects }) {
     describe('query language switching', function () {
 
       after(async function () {
-        await kibanaServer.uiSettings.replace({
-          'dateFormat:tz':'UTC',
-          'defaultIndex':'logstash-*'
-        });
+        await kibanaServer.uiSettings.replace(defaultSettings);
 
         log.debug('discover');
         await PageObjects.common.navigateToApp('discover');
@@ -248,7 +246,7 @@ export default function ({ getService, getPageObjects }) {
         expect(languageSwitcherExists).to.be(false);
       });
 
-      it('should show a language switcher after it has been enable in the advanced settings', async function () {
+      it('should show a language switcher after it has been enabled in the advanced settings', async function () {
         await kibanaServer.uiSettings.update({
           'search:queryLanguage:switcher:enable': true
         });
