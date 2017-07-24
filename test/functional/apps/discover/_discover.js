@@ -229,17 +229,19 @@ export default function ({ getService, getPageObjects }) {
       });
     });
 
-    describe('data-shared-item', function () {
+    describe('data-shared-item', async function () {
       it('should have correct data-shared-item title and description', async () => {
         const expected = {
           title: 'A Saved Search',
           description: 'A Saved Search Description'
         };
 
-        await PageObjects.discover.loadSavedSearch(expected.title);
-        const { title, description } = await PageObjects.common.getSharedItemTitleAndDescription();
-        expect(title).to.eql(expected.title);
-        expect(description).to.eql(expected.description);
+        await retry.try(async () => {
+          await PageObjects.discover.loadSavedSearch(expected.title);
+          const { title, description } = await PageObjects.common.getSharedItemTitleAndDescription();
+          expect(title).to.eql(expected.title);
+          expect(description).to.eql(expected.description);
+        });
       });
     });
   });
