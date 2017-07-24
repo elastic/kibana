@@ -3,7 +3,7 @@ import { Observable } from 'rxjs';
 
 import { Plugin } from './Plugin';
 import { PluginSystem } from './PluginSystem';
-import { Logger, LoggerFactory } from '../../logger';
+import { Logger, LoggerFactory } from '../../logging';
 import { CoreService } from '../../types';
 import { ConfigService } from '../../config';
 

@@ -4,7 +4,7 @@ import { Layout, Layouts } from '../../layouts/Layouts';
 import { LogRecord } from '../../LogRecord';
 import { DisposableAppender } from '../Appenders';
 
-export const createSchema = (schema: Schema) => {
+const createSchema = (schema: Schema) => {
   const { literal, object, string } = schema;
   return object({
     kind: literal('file'),
@@ -14,15 +14,14 @@ export const createSchema = (schema: Schema) => {
 };
 
 const schemaType = typeOfSchema(createSchema);
+/** @internal */
 export type FileAppenderConfigType = typeof schemaType;
 
 /**
  * Appender that formats all the `LogRecord` instances it receives and writes them to the specified file.
+ * @internal
  */
 export class FileAppender implements DisposableAppender {
-  /**
-   * @internal
-   */
   static createConfigSchema = createSchema;
 
   /**

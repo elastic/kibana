@@ -2,7 +2,7 @@ import { Client } from 'elasticsearch';
 
 import { ElasticsearchConfig } from './ElasticsearchConfig';
 import { KibanaRequest } from '../http';
-import { Logger, LoggerFactory } from '../../logger';
+import { Logger, LoggerFactory } from '../../logging';
 
 export class Cluster {
   private readonly log: Logger;
@@ -13,7 +13,7 @@ export class Cluster {
     private readonly config: ElasticsearchConfig,
     logger: LoggerFactory
   ) {
-    this.log = logger.get('elasticsearch', 'client', config.clusterType);
+    this.log = logger.get(`elasticsearch::client::${config.clusterType}`);
 
     this.client = new Client(config.toElasticsearchClientConfig());
     this.noAuthClient = new Client(

@@ -2,16 +2,15 @@ import { Schema } from '../../types';
 import { PatternLayout, PatternLayoutConfigType } from './PatternLayout';
 import { LogRecord } from '../LogRecord';
 
-export type LayoutConfigType = PatternLayoutConfigType;
+type LayoutConfigType = PatternLayoutConfigType;
 
+/** @internal */
 export interface Layout {
   format(record: LogRecord): string;
 }
 
+/** @internal */
 export class Layouts {
-  /**
-   * @internal
-   */
   static createConfigSchema(schema: Schema) {
     return PatternLayout.createConfigSchema(schema);
   }

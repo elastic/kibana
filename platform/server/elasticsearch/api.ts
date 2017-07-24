@@ -1,13 +1,13 @@
 import { Router } from '../http';
 import { object, string, maybe } from '../../lib/schema';
 import { ElasticsearchRequestHelpers } from './ElasticsearchFacade';
-import { LoggerFactory } from '../../logger';
+import { LoggerFactory } from '../../logging';
 
 export function registerElasticsearchRoutes(
   router: Router<ElasticsearchRequestHelpers>,
   logger: LoggerFactory
 ) {
-  const log = logger.get('elasticsearch', 'routes');
+  const log = logger.get('elasticsearch::routes');
 
   log.info('creating elasticsearch api');
 

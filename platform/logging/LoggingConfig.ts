@@ -76,6 +76,7 @@ const createLoggingSchema = (schema: Schema) => {
 };
 
 const loggerConfigType = typeOfSchema(createLoggerSchema);
+/** @internal */
 export type LoggerConfigType = typeof loggerConfigType;
 
 const loggingConfigType = typeOfSchema(createLoggingSchema);
@@ -83,11 +84,9 @@ type LoggingConfigType = typeof loggingConfigType;
 
 /**
  * Class that describes config used to setup logging subsystem.
+ * @internal
  */
 export class LoggingConfig {
-  /**
-   * @internal
-   */
   static createSchema = createLoggingSchema;
 
   /**

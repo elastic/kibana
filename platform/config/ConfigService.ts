@@ -2,7 +2,7 @@ import { Observable } from 'rxjs';
 import { get, isEqual } from 'lodash';
 
 import { Env } from './Env';
-import { Logger, LoggerFactory } from '../logger';
+import { Logger, LoggerFactory } from '../logging';
 import * as schema from '../lib/schema';
 import { ConfigWithSchema } from './ConfigWithSchema';
 

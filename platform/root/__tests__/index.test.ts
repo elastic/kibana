@@ -12,7 +12,7 @@ const server = {
 };
 const mockServer = jest.fn(() => server);
 
-const loggerService = {
+const loggingService = {
   upgrade: jest.fn(),
   stop: jest.fn()
 };
@@ -26,14 +26,16 @@ const logger = {
 
 const mockMutableLoggerFactory = jest.fn(() => logger);
 
-const mockLoggerService = jest.fn(() => loggerService);
+const mockLoggingService = jest.fn(() => loggingService);
 
 import { BehaviorSubject } from 'rxjs';
 
 jest.mock('../../config', () => ({ ConfigService: mockConfigService }));
 jest.mock('../../server', () => ({ Server: mockServer }));
-jest.mock('../../logger', () => ({
-  LoggerService: mockLoggerService,
+jest.mock('../../logging/LoggingService', () => ({
+  LoggingService: mockLoggingService
+}));
+jest.mock('../../logging/LoggerFactory', () => ({
   MutableLoggerFactory: mockMutableLoggerFactory
 }));
 
@@ -58,13 +60,13 @@ afterEach(() => {
 test('starts services on "start"', async () => {
   const root = new Root(config$, env, noop);
 
-  expect(loggerService.upgrade).toHaveBeenCalledTimes(0);
+  expect(loggingService.upgrade).toHaveBeenCalledTimes(0);
   expect(server.start).toHaveBeenCalledTimes(0);
 
   await root.start();
 
-  expect(loggerService.upgrade).toHaveBeenCalledTimes(1);
-  expect(loggerService.upgrade).toHaveBeenLastCalledWith(loggerConfig);
+  expect(loggingService.upgrade).toHaveBeenCalledTimes(1);
+  expect(loggingService.upgrade).toHaveBeenLastCalledWith(loggerConfig);
   expect(server.start).toHaveBeenCalledTimes(1);
 });
 
@@ -73,12 +75,12 @@ test('stops services on "shutdown"', async () => {
 
   await root.start();
 
-  expect(loggerService.stop).toHaveBeenCalledTimes(0);
+  expect(loggingService.stop).toHaveBeenCalledTimes(0);
   expect(server.stop).toHaveBeenCalledTimes(0);
 
   await root.shutdown();
 
-  expect(loggerService.stop).toHaveBeenCalledTimes(1);
+  expect(loggingService.stop).toHaveBeenCalledTimes(1);
   expect(server.stop).toHaveBeenCalledTimes(1);
 });
 

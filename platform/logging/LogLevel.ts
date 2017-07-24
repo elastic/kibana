@@ -2,6 +2,7 @@ import { assertNever } from '../lib/utils';
 
 /**
  * Possible log level string values.
+ * @internal
  */
 export type LogLevelId =
   | 'all'
@@ -16,6 +17,7 @@ export type LogLevelId =
 /**
  * Class that represents log level, manages string -> `LogLevel` conversion and
  * comparison of log level priorities between themselves.
+ * @internal
  */
 export class LogLevel {
   static readonly Off = new LogLevel('off', 1);

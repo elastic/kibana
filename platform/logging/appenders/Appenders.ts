@@ -8,6 +8,7 @@ import { FileAppender, FileAppenderConfigType } from './file/FileAppender';
 import { LogRecord } from '../LogRecord';
 import { Layouts } from '../layouts/Layouts';
 
+/** @internal */
 export type AppenderConfigType =
   | ConsoleAppenderConfigType
   | FileAppenderConfigType;
@@ -15,6 +16,7 @@ export type AppenderConfigType =
 /**
  * Interface that describes entity that can append `LogRecord` instances to file, stdout, memory or
  * whatever is implemented internally.
+ * @internal
  */
 export interface Appender {
   append(record: LogRecord): void;
@@ -23,15 +25,14 @@ export interface Appender {
 /**
  * Interface that should be additionally implemented by the `Appender`'s when they should
  * be properly disposed.
+ * @internal
  */
 export interface DisposableAppender extends Appender {
   dispose: () => void;
 }
 
+/** @internal */
 export class Appenders {
-  /**
-   * @internal
-   */
   static createConfigSchema(schema: Schema) {
     const { oneOf } = schema;
 

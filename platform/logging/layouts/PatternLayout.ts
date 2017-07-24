@@ -58,16 +58,15 @@ const createSchema = ({ boolean, literal, object, string }: Schema) => {
 };
 
 const schemaType = typeOfSchema(createSchema);
+/** @internal */
 export type PatternLayoutConfigType = typeof schemaType;
 
 /**
  * Layout that formats `LogRecord` using the `pattern` string with optional
  * color highlighting.
+ * @internal
  */
 export class PatternLayout implements Layout {
-  /**
-   * @internal
-   */
   static createConfigSchema = createSchema;
 
   constructor(private readonly config: PatternLayoutConfigType) {}

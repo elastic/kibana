@@ -3,7 +3,7 @@ import { LogRecord } from '../../LogRecord';
 import { Layout, Layouts } from '../../layouts/Layouts';
 import { DisposableAppender } from '../Appenders';
 
-export const createSchema = (schema: Schema) => {
+const createSchema = (schema: Schema) => {
   const { literal, object } = schema;
 
   return object({
@@ -13,15 +13,14 @@ export const createSchema = (schema: Schema) => {
 };
 
 const schemaType = typeOfSchema(createSchema);
+/** @internal */
 export type ConsoleAppenderConfigType = typeof schemaType;
 
 /**
  * Appender that formats all the `LogRecord` instances it receives and logs them via built-in `console`.
+ * @internal
  */
 export class ConsoleAppender implements DisposableAppender {
-  /**
-   * @internal
-   */
   static createConfigSchema = createSchema;
 
   /**

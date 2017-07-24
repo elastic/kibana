@@ -7,7 +7,7 @@ jest.mock('../KibanaPluginValues', () => {
 import { Plugin } from '../Plugin';
 import { PluginSystem } from '../PluginSystem';
 import { KibanaCoreModules } from '../../../types';
-import { logger } from '../../../logger/__mocks__';
+import { logger } from '../../../logging/__mocks__';
 
 // To make typings work in the tests
 const coreValues = {} as KibanaCoreModules;

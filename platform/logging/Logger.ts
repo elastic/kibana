@@ -14,15 +14,11 @@ export interface Logger {
   error(errorOrMessage: string | Error, meta?: { [key: string]: any }): void;
   fatal(errorOrMessage: string | Error, meta?: { [key: string]: any }): void;
 
-  /**
-   * @internal
-   */
+  /** @internal */
   log(record: LogRecord): void;
 }
 
-/**
- * @internal
- */
+/** @internal */
 export class BaseLogger implements Logger {
   constructor(
     private readonly context: string,
@@ -83,9 +79,7 @@ export class BaseLogger implements Logger {
   }
 }
 
-/**
- * @internal
- */
+/** @internal */
 export class LoggerAdapter implements Logger {
   constructor(public logger: Logger) {}
 

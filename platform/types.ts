@@ -63,7 +63,7 @@ import { ConfigService } from './config';
 import { HttpModule } from './server/http';
 import { KibanaModule } from './server/kibana';
 import { ElasticsearchModule } from './server/elasticsearch';
-import { LoggerFactory } from './logger';
+import { LoggerFactory } from './logging';
 
 export type Schema = typeof schemaLib;
 

@@ -5,7 +5,7 @@ import { ElasticsearchRequestHelpers } from './ElasticsearchFacade';
 import { registerElasticsearchRoutes } from './api';
 import { Router } from '../http';
 import { ElasticsearchConfigs } from './ElasticsearchConfigs';
-import { LoggerFactory } from '../../logger';
+import { LoggerFactory } from '../../logging';
 
 export {
   ElasticsearchService,

@@ -15,9 +15,7 @@ export interface LoggerFactory {
   get(context: string): Logger;
 }
 
-/**
- * @internal
- */
+/** @internal */
 export class MutableLoggerFactory implements LoggerFactory {
   private config?: LoggingConfig;
   private readonly appenders: Map<string, DisposableAppender> = new Map();

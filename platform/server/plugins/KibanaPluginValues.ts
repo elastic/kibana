@@ -23,8 +23,13 @@ export function createKibanaValuesForPlugin(
 ): KibanaPluginFeatures {
   return {
     logger: {
-      get: (...namespace) => {
-        return core.logger.get('plugins', pluginName, ...namespace);
+      get(namespace?: string) {
+        const namespaceParts = ['plugins', pluginName];
+        if (namespace) {
+          namespaceParts.push(namespace);
+        }
+
+        return core.logger.get(namespaceParts.join('::'));
       }
     },
     util: {

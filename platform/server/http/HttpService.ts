@@ -2,7 +2,7 @@ import { Observable, Subscription } from 'rxjs';
 
 import { HttpServer } from './HttpServer';
 import { HttpConfig } from './HttpConfig';
-import { Logger, LoggerFactory } from '../../logger';
+import { Logger, LoggerFactory } from '../../logging';
 import { Router } from './Router';
 import { CoreService } from '../../types';
 

@@ -2,7 +2,7 @@ import { Observable } from 'rxjs';
 
 import { HttpService } from './HttpService';
 import { HttpConfig } from './HttpConfig';
-import { LoggerFactory } from '../../logger';
+import { LoggerFactory } from '../../logging';
 
 export { Router, RouterOptions, KibanaRequest } from './Router';
 export { HttpService };

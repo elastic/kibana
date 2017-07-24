@@ -2,6 +2,7 @@ import { LogLevel } from './LogLevel';
 
 /**
  * Interface describing essential parts of every log message.
+ * @internal
  */
 export interface LogRecord {
   timestamp: Date;
