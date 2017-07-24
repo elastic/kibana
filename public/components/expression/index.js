@@ -1,7 +1,6 @@
 import { connect } from 'react-redux';
-import { compose } from 'recompose';
+import { compose, withState, withHandlers } from 'recompose';
 import { Expression as Component } from './expression';
-import { statefulProp } from '../../lib/stateful_component';
 import { getSelectedPage, getSelectedElement } from '../../state/selectors/workpad';
 import { setExpression } from '../../state/actions/elements';
 
@@ -29,5 +28,17 @@ const mergeProps = (stateProps, dispatchProps, ownProps) => {
 
 export const Expression = compose(
   connect(mapStateToProps, mapDispatchToProps, mergeProps),
-  statefulProp('expression'),
+  withState('formState', 'setFormState', ({ expression }) => ({
+    expression,
+    dirty: false,
+  })),
+  withHandlers({
+    updateValue: ({ setFormState }) => ev => {
+      setFormState({ expression: ev.target.value, dirty: true });
+    },
+    setExpression: ({ setExpression, setFormState }) => exp => {
+      setFormState((prev) => ({ ...prev, dirty: false }));
+      setExpression(exp);
+    },
+  })
 )(Component);

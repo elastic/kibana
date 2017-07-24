@@ -7,7 +7,7 @@ import './expression.less';
 
 const noSelected = branch(props => !props.element, renderComponent(ElementNotSelected));
 
-const Component = ({ expression, updateValue, setExpression, done }) => {
+const Component = ({ formState, updateValue, setExpression, done }) => {
   let input;
 
   return (
@@ -19,16 +19,16 @@ const Component = ({ expression, updateValue, setExpression, done }) => {
           placeholder="Enter expression..."
           inputRef={ref => input = ref}
           onChange={updateValue}
-          value={expression}
+          value={formState.expression}
         />
         <ControlLabel>
           The Canvas expression backing the element. Better know what you're doing here.
         </ControlLabel>
       </FormGroup>
       <ButtonToolbar>
-        <Button bsStyle="primary" onClick={() => setExpression(input.value)}> Run</Button>
+        <Button bsStyle="success" onClick={() => setExpression(input.value)}> Run</Button>
         {done ?
-          (<Button onClick={done}> Done</Button>)
+          (<Button onClick={done}> {formState.dirty ? 'Cancel' : 'Done'}</Button>)
         : null}
       </ButtonToolbar>
     </div>
@@ -36,7 +36,7 @@ const Component = ({ expression, updateValue, setExpression, done }) => {
 };
 
 Component.propTypes = {
-  expression: PropTypes.string.isRequired,
+  formState: PropTypes.object,
   updateValue: PropTypes.func,
   setExpression: PropTypes.func,
   done: PropTypes.func,
