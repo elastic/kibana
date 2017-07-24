@@ -1,5 +1,5 @@
 import { connect } from 'react-redux';
-import { compose, withState, withHandlers } from 'recompose';
+import { compose, withState, withHandlers, lifecycle } from 'recompose';
 import { Expression as Component } from './expression';
 import { getSelectedPage, getSelectedElement } from '../../state/selectors/workpad';
 import { setExpression } from '../../state/actions/elements';
@@ -26,6 +26,12 @@ const mergeProps = (stateProps, dispatchProps, ownProps) => {
   });
 };
 
+const expressionLifecycle = lifecycle({
+  componentWillReceiveProps({ formState, setFormState, expression }) {
+    if (this.props.expression !== expression && expression !== formState.expression) setFormState({ expression, dirty: false });
+  },
+});
+
 export const Expression = compose(
   connect(mapStateToProps, mapDispatchToProps, mergeProps),
   withState('formState', 'setFormState', ({ expression }) => ({
@@ -40,5 +46,6 @@ export const Expression = compose(
       setFormState((prev) => ({ ...prev, dirty: false }));
       setExpression(exp);
     },
-  })
+  }),
+  expressionLifecycle,
 )(Component);
