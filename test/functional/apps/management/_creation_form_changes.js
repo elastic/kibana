@@ -17,16 +17,13 @@ export default function ({ getService, getPageObjects }) {
       });
     });
 
-    it('should enable creation after selecting time field', function () {
+    it('should enable creation after selecting time field', async function () {
       // select a time field and check that Create button is enabled
-      return PageObjects.settings.selectTimeFieldOption('@timestamp')
-      .then(function () {
-        return PageObjects.settings.getCreateButton().isEnabled()
-        .then(function (enabled) {
-          screenshots.take('Settings-indices-enable-creation');
-          expect(enabled).to.be.ok();
-        });
-      });
+      await PageObjects.settings.selectTimeFieldOption('@timestamp');
+      const createButton = await PageObjects.settings.getCreateButton();
+      const enabled = await createButton.isEnabled();
+      screenshots.take('Settings-indices-enable-creation');
+      expect(enabled).to.be.ok();
     });
   });
 }
