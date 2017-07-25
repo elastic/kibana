@@ -64,46 +64,42 @@ export function readFieldCapsResponse(fieldCapsResponse) {
     const capsByType = capsByNameThenType[fieldName];
     const types = Object.keys(capsByType);
 
+    // If a single type is marked as searchable or aggregatable, all the types are searchable or aggregatable
+    const isSearchable = types.some(type => {
+      return !!capsByType[type].searchable ||
+        (!!capsByType[type].non_searchable_indices && capsByType[type].non_searchable_indices.length > 0);
+    });
+
+    const isAggregatable = types.some(type => {
+      return !!capsByType[type].aggregatable ||
+        (!!capsByType[type].non_aggregatable_indices && capsByType[type].non_aggregatable_indices.length > 0);
+    });
+
+
     // If there are multiple types but they all resolve to the same kibana type
     // ignore the conflict and carry on (my wayward son)
-    if (types.length > 1) {
-      const uniqueKibanaTypes = uniq(types.map(castEsToKbnFieldTypeName));
-      if (uniqueKibanaTypes.length > 1) {
-        // If a single type is marked as searchable or aggregatable, all the types are searcuable or aggregatable
-        const conflictIsSearchable = types.some(type => {
-          return !!capsByType[type].searchable ||
-            (!!capsByType[type].non_searchable_indices && capsByType[type].non_searchable_indices.length > 0);
-        });
-
-        const conflictIsAggregatable = types.some(type => {
-          return !!capsByType[type].aggregatable ||
-            (!!capsByType[type].non_aggregatable_indices && capsByType[type].non_aggregatable_indices.length > 0);
-        });
-
-        return {
-          name: fieldName,
-          type: 'conflict',
-          searchable: conflictIsSearchable,
-          aggregatable: conflictIsAggregatable,
-          readFromDocValues: false,
-          conflictDescriptions: types.reduce((acc, esType) => ({
-            ...acc,
-            [esType]: capsByType[esType].indices
-          }), {})
-        };
-      }
+    const uniqueKibanaTypes = uniq(types.map(castEsToKbnFieldTypeName));
+    if (uniqueKibanaTypes.length > 1) {
+      return {
+        name: fieldName,
+        type: 'conflict',
+        searchable: isSearchable,
+        aggregatable: isAggregatable,
+        readFromDocValues: false,
+        conflictDescriptions: types.reduce((acc, esType) => ({
+          ...acc,
+          [esType]: capsByType[esType].indices
+        }), {})
+      };
     }
 
     const esType = types[0];
-    const caps = capsByType[esType];
-    const someAreSearchable = caps.non_searchable_indices && caps.non_searchable_indices.length > 0;
-    const someAreAggregatable = caps.non_aggregatable_indices && caps.non_aggregatable_indices.length > 0;
     return {
       name: fieldName,
       type: castEsToKbnFieldTypeName(esType),
-      searchable: caps.searchable || someAreSearchable,
-      aggregatable: caps.aggregatable || someAreAggregatable,
-      readFromDocValues: shouldReadFieldFromDocValues(caps.aggregatable, esType),
+      searchable: isSearchable,
+      aggregatable: isAggregatable,
+      readFromDocValues: shouldReadFieldFromDocValues(isAggregatable, esType),
     };
   });
 }
