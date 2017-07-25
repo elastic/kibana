@@ -2,7 +2,7 @@ import 'ui/filters/short_dots';
 import { IndexPatternMissingIndices } from 'ui/errors';
 import { IndexPatternProvider } from 'ui/index_patterns/_index_pattern';
 import { IndexPatternsPatternCacheProvider } from 'ui/index_patterns/_pattern_cache';
-import { IndexPatternsGetIdsProvider } from 'ui/index_patterns/_get_ids';
+import { IndexPatternsGetProvider } from 'ui/index_patterns/_get';
 import { IndexPatternsIntervalsProvider } from 'ui/index_patterns/_intervals';
 import { FieldsFetcherProvider } from './fields_fetcher_provider';
 import { RegistryFieldFormatsProvider } from 'ui/registry/field_formats';
@@ -16,6 +16,7 @@ export function IndexPatternsProvider(Notifier, Private) {
 
   const IndexPattern = Private(IndexPatternProvider);
   const patternCache = Private(IndexPatternsPatternCacheProvider);
+  const getProvider = Private(IndexPatternsGetProvider);
 
   self.get = function (id) {
     if (!id) return self.make();
@@ -38,7 +39,8 @@ export function IndexPatternsProvider(Notifier, Private) {
   };
 
   self.cache = patternCache;
-  self.getIds = Private(IndexPatternsGetIdsProvider);
+  self.getIds = getProvider('id');
+  self.getTitles = getProvider('attributes.title');
   self.intervals = Private(IndexPatternsIntervalsProvider);
   self.fieldsFetcher = Private(FieldsFetcherProvider);
   self.fieldFormats = Private(RegistryFieldFormatsProvider);
