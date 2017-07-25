@@ -361,6 +361,13 @@ table {
     color: #666;
     text-align: right; }
 
+/**
+ * 1. Override KeyPadMenu.
+ */
+.kuiHeaderAppMenu {
+  top: calc(100% - 16px) !important;
+  /* 1 */ }
+
 .kuiHeaderProfile {
   text-align: left;
   padding-bottom: 16px; }
@@ -372,8 +379,8 @@ table {
   display: inline-block;
   vertical-align: middle; }
   .kuiHeaderLogo__icon {
-    height: 32px !important;
-    width: 24px !important;
+    height: 32px;
+    width: 24px;
     opacity: 1; }
 
 .kuiHeaderBreadcrumb {
@@ -489,12 +496,13 @@ table {
   border-color: transparent;
   border-radius: 4px; }
   .kuiKeyPadMenuItem:hover, .kuiKeyPadMenuItem:focus {
-    border-color: #D9D9D9;
-    background: #e6f2f6; }
+    border-color: #D9D9D9; }
     .kuiKeyPadMenuItem:hover .kuiKeyPadMenuItem__icon, .kuiKeyPadMenuItem:focus .kuiKeyPadMenuItem__icon {
       -webkit-transform: translateY(0);
               transform: translateY(0); }
-    .kuiKeyPadMenuItem:hover .kuiKeyPadMenuItem__label, .kuiKeyPadMenuItem:focus .kuiKeyPadMenuItem__label {
+  .kuiKeyPadMenuItem:focus {
+    background: #e6f2f6; }
+    .kuiKeyPadMenuItem:focus .kuiKeyPadMenuItem__label {
       text-decoration: underline; }
   .kuiKeyPadMenuItem__inner {
     width: 100%;
@@ -543,13 +551,13 @@ table {
   .kuiPopover.isOpen .kuiPopover__body {
     opacity: 1;
     visibility: visible;
-    z-index: 2;
+    z-index: 0;
     margin-top: 8px; }
   .kuiPopover__body {
     background: #FFF;
     position: absolute;
     min-width: 256px;
-    top: calc(100% + 8px);
+    top: 100%;
     left: 50%;
     background: #FFF;
     border: 1px solid #D9D9D9;

@@ -48,6 +48,7 @@ export class KuiPopover extends Component {
   render() {
     const {
       anchorPosition,
+      bodyClassName,
       button,
       isOpen,
       children,
@@ -63,8 +64,10 @@ export class KuiPopover extends Component {
       className
     );
 
-    const content = (
-      <div className="kuiPopover__body kui--bottomShadow">
+    const bodyClasses = classNames('kuiPopover__body kui--bottomShadow', bodyClassName);
+
+    const body = (
+      <div className={bodyClasses}>
         {children}
       </div>
     );
@@ -76,7 +79,7 @@ export class KuiPopover extends Component {
         {...rest}
       >
         {button}
-        {content}
+        {body}
       </div>
     );
   }
@@ -88,6 +91,7 @@ KuiPopover.propTypes = {
   button: PropTypes.node.isRequired,
   children: PropTypes.node,
   anchorPosition: PropTypes.oneOf(ANCHOR_POSITIONS),
+  bodyClassName: PropTypes.string,
 };
 
 KuiPopover.defaultProps = {

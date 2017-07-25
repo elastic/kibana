@@ -10,7 +10,7 @@
     @include child('body') {
       opacity: 1;
       visibility: visible;
-      z-index: 2;
+      z-index: $kuiZContent;
       margin-top: $kuiSizeS;
     }
   }
@@ -20,7 +20,7 @@
     background: $kuiColorEmptyShade;
     position: absolute;
     min-width: $kuiSize * 16; // Can expand further, but this size is good for our menus.
-    top: calc(100% + #{$kuiSizeS});
+    top: 100%;
     left: 50%;
     background: $kuiColorEmptyShade;
     border: $kuiBorderThin;

@@ -19,11 +19,14 @@
 
   &:hover, &:focus {
     border-color: $kuiBorderColor;
-    background: $kuiFocusBackgroundColor;
 
     .kuiKeyPadMenuItem__icon {
       transform: translateY(0);
     }
+  }
+
+  &:focus {
+    background: $kuiFocusBackgroundColor;
 
     .kuiKeyPadMenuItem__label {
       text-decoration: underline;

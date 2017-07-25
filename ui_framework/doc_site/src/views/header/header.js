@@ -71,7 +71,7 @@ export default class extends Component {
   renderSearch() {
     return (
       <KuiHeaderSectionItemButton>
-        <KuiIcon type="search" />
+        <KuiIcon type="search" size="medium" />
       </KuiHeaderSectionItemButton>
     );
   }
@@ -79,7 +79,7 @@ export default class extends Component {
   renderUser() {
     return (
       <KuiHeaderSectionItemButton>
-        <KuiIcon type="user" />
+        <KuiIcon type="user" size="medium" />
         <span className="kuiHeader__notification">3</span>
       </KuiHeaderSectionItemButton>
     );
@@ -88,7 +88,7 @@ export default class extends Component {
   renderAppMenu() {
     const button = (
       <KuiHeaderSectionItemButton onClick={this.onAppMenuButtonClick.bind(this)}>
-        <KuiIcon type="apps" />
+        <KuiIcon type="apps" size="medium" />
       </KuiHeaderSectionItemButton>
     );
 
@@ -98,6 +98,7 @@ export default class extends Component {
         isOpen={this.state.isAppMenuOpen}
         anchorPosition="right"
         closePopover={this.closeAppMenu.bind(this)}
+        bodyClassName="kuiHeaderAppMenu"
       >
         <KuiKeyPadMenu>
           <KuiKeyPadMenuItem

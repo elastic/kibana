@@ -18,6 +18,10 @@ import PopoverAnchorPosition from './popover_anchor_position';
 const popoverAnchorPositionSource = require('!!raw!./popover_anchor_position');
 const popoverAnchorPositionHtml = renderToHtml(PopoverAnchorPosition);
 
+import PopoverBodyClassName from './popover_body_class_name';
+const popoverBodyClassNameSource = require('!!raw!./popover_body_class_name');
+const popoverBodyClassNameHtml = renderToHtml(PopoverBodyClassName);
+
 export default props => (
   <GuidePage title={props.route.name}>
     <GuideSection
@@ -40,7 +44,7 @@ export default props => (
     </GuideSection>
 
     <GuideSection
-      title="Anchorosition"
+      title="Anchor position"
       source={[{
         type: GuideSectionTypes.JS,
         code: popoverAnchorPositionSource,
@@ -51,6 +55,21 @@ export default props => (
     >
       <GuideDemo>
         <PopoverAnchorPosition />
+      </GuideDemo>
+    </GuideSection>
+
+    <GuideSection
+      title="Body class name"
+      source={[{
+        type: GuideSectionTypes.JS,
+        code: popoverBodyClassNameSource,
+      }, {
+        type: GuideSectionTypes.HTML,
+        code: popoverBodyClassNameHtml,
+      }]}
+    >
+      <GuideDemo>
+        <PopoverBodyClassName />
       </GuideDemo>
     </GuideSection>
   </GuidePage>

@@ -1,37 +1,63 @@
-import React from 'react';
+import React, {
+  Component,
+} from 'react';
 
 import {
   KuiPopover,
 } from '../../../../components';
 
-export default () => (
-  <div>
-    <KuiPopover
-      button= {(
-        <button>
-          Popover anchored to the right.
-        </button>
-      )}
-      isOpen={true}
-      anchorPosition="right"
-      closePopover={() => {}}
-    >
-      Popover content
-    </KuiPopover>
+export default class extends Component {
+  constructor(props) {
+    super(props);
 
-    &nbsp;
+    this.state = {
+      isPopoverOpen: false,
+    };
+  }
 
-    <KuiPopover
-      button= {(
-        <button>
-          Popover anchored to the left.
-        </button>
-      )}
-      isOpen={true}
-      anchorPosition="left"
-      closePopover={() => {}}
-    >
-      Popover content
-    </KuiPopover>
-  </div>
-);
+  onButtonClick() {
+    this.setState({
+      isPopoverOpen: !this.state.isPopoverOpen,
+    });
+  }
+
+  closePopover() {
+    this.setState({
+      isPopoverOpen: false,
+    });
+  }
+
+  render() {
+    return (
+      <div>
+        <KuiPopover
+          button= {(
+            <button onClick={this.onButtonClick.bind(this)}>
+              Popover anchored to the right.
+            </button>
+          )}
+          isOpen={this.state.isPopoverOpen}
+          anchorPosition="right"
+          closePopover={() => {}}
+        >
+          Popover content
+        </KuiPopover>
+
+        &nbsp;
+
+        <KuiPopover
+          button= {(
+            <button onClick={this.onButtonClick.bind(this)}>
+              Popover anchored to the left.
+            </button>
+          )}
+          isOpen={this.state.isPopoverOpen}
+          anchorPosition="left"
+          closePopover={() => {}}
+        >
+          Popover content
+        </KuiPopover>
+      </div>
+    );
+  }
+}

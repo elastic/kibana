@@ -6,8 +6,8 @@
   vertical-align: middle;
 
   @include child('icon') {
-    height: $kuiSizeXL !important;
-    width: $kuiSizeL !important;
+    height: $kuiSizeXL;
+    width: $kuiSizeL;
     opacity: 1;
   }
 }
