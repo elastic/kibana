@@ -28,28 +28,27 @@ export function ContextPageProvider({ getService }) {
       await this.waitUntilContextLoadingHasFinished();
     }
 
-    getPredecessorCountPicker() {
-      return testSubjects.find('predecessorCountPicker');
+    async getPredecessorCountPicker() {
+      return await testSubjects.find('predecessorCountPicker');
     }
 
-    getSuccessorCountPicker() {
-      return testSubjects.find('successorCountPicker');
+    async getSuccessorCountPicker() {
+      return await testSubjects.find('successorCountPicker');
     }
 
-    getPredecessorLoadMoreButton() {
-      return testSubjects.find('predecessorLoadMoreButton');
+    async getPredecessorLoadMoreButton() {
+      return await testSubjects.find('predecessorLoadMoreButton');
     }
 
-    getSuccessorLoadMoreButton() {
-      return testSubjects.find('predecessorLoadMoreButton');
+    async getSuccessorLoadMoreButton() {
+      return await testSubjects.find('predecessorLoadMoreButton');
     }
 
     waitUntilContextLoadingHasFinished() {
       return retry.try(async () => {
-        if (
-          !(await this.getSuccessorLoadMoreButton().isEnabled())
-          || !(await this.getPredecessorLoadMoreButton().isEnabled())
-        ) {
+        const successorLoadMoreButton = await this.getSuccessorLoadMoreButton();
+        const predecessorLoadMoreButton = await this.getPredecessorLoadMoreButton();
+        if (!successorLoadMoreButton.isEnabled() || !predecessorLoadMoreButton.isEnabled()) {
           throw new Error('loading context rows');
         }
       });
