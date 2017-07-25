@@ -1,4 +1,5 @@
 import React, {
+  Component,
   PropTypes,
 } from 'react';
 import classNames from 'classnames';
@@ -11,40 +12,79 @@ const anchorPositionToClassNameMap = {
 
 export const ANCHOR_POSITIONS = Object.keys(anchorPositionToClassNameMap);
 
-export const KuiPopover = ({
-  anchorPosition,
-  button,
-  isOpen,
-  children,
-  className,
-  ...rest,
-}) => {
-  const classes = classNames(
-    'kuiPopover',
-    anchorPositionToClassNameMap[anchorPosition],
-    isOpen ? 'isOpen' : undefined,
-    className
-  );
+export class KuiPopover extends Component {
+  constructor(props) {
+    super(props);
 
-  const content = (
-    <div className="kuiPopover__body kui--bottomShadow">
-      {children}
-    </div>
-  );
+    // Use this variable to differentiate between clicks on the element that should not cause the pop up
+    // to close, and external clicks that should cause the pop up to close.
+    this.didClickMyself = false;
+  }
 
-  return (
-    <div
-      className={classes}
-      {...rest}
-    >
-      {button}
-      {content}
-    </div>
-  );
-};
+  closePopover = () => {
+    if (this.didClickMyself) {
+      this.didClickMyself = false;
+      return;
+    }
+
+    this.props.closePopover();
+  };
+
+  onClickRootElement = () => {
+    // This prevents clicking on the element from closing it, due to the event handler on the
+    // document object.
+    this.didClickMyself = true;
+  };
+
+  componentDidMount() {
+    // When the user clicks somewhere outside of the color picker, we will dismiss it.
+    document.addEventListener('click', this.closePopover);
+  }
+
+  componentWillUnmount() {
+    document.removeEventListener('click', this.closePopover);
+  }
+
+  render() {
+    const {
+      anchorPosition,
+      button,
+      isOpen,
+      children,
+      className,
+      closePopover, // eslint-disable-line no-unused-vars
+      ...rest,
+    } = this.props;
+
+    const classes = classNames(
+      'kuiPopover',
+      anchorPositionToClassNameMap[anchorPosition],
+      isOpen ? 'isOpen' : undefined,
+      className
+    );
+
+    const content = (
+      <div className="kuiPopover__body kui--bottomShadow">
+        {children}
+      </div>
+    );
+
+    return (
+      <div
+        onClick={this.onClickRootElement}
+        className={classes}
+        {...rest}
+      >
+        {button}
+        {content}
+      </div>
+    );
+  }
+}
 
 KuiPopover.propTypes = {
   isOpen: PropTypes.bool,
+  closePopover: PropTypes.func.isRequired,
   button: PropTypes.node.isRequired,
   children: PropTypes.node,
   anchorPosition: PropTypes.oneOf(ANCHOR_POSITIONS),

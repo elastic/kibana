@@ -21,6 +21,12 @@ export default class extends Component {
     });
   }
 
+  closePopover() {
+    this.setState({
+      isPopoverOpen: false,
+    });
+  }
+
   render() {
     const button = (
       <button onClick={this.onButtonClick.bind(this)}>
@@ -32,6 +38,7 @@ export default class extends Component {
       <KuiPopover
         button={button}
         isOpen={this.state.isPopoverOpen}
+        closePopover={this.closePopover.bind(this)}
       >
         <div style={{ width: '300px' }}>Popover content that's wider than the default width</div>
       </KuiPopover>

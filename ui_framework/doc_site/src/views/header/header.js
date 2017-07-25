@@ -32,6 +32,12 @@ export default class extends Component {
     });
   }
 
+  closeAppMenu() {
+    this.setState({
+      isAppMenuOpen: false,
+    });
+  }
+
   renderLogo() {
     return (
       <KuiHeaderLogo href="#" />
@@ -91,6 +97,7 @@ export default class extends Component {
         button={button}
         isOpen={this.state.isAppMenuOpen}
         anchorPosition="right"
+        closePopover={this.closeAppMenu.bind(this)}
       >
         <KuiKeyPadMenu>
           <KuiKeyPadMenuItem

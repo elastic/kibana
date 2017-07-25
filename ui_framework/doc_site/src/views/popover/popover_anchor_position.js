@@ -14,6 +14,7 @@ export default () => (
       )}
       isOpen={true}
       anchorPosition="right"
+      closePopover={() => {}}
     >
       Popover content
     </KuiPopover>
@@ -28,6 +29,7 @@ export default () => (
       )}
       isOpen={true}
       anchorPosition="left"
+      closePopover={() => {}}
     >
       Popover content
     </KuiPopover>
