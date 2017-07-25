@@ -6,9 +6,10 @@ describe('routes', function () {
   this.timeout(60000);
 
   let kbnServer;
-  beforeEach(function () {
+  beforeEach(async function () {
     kbnServer = kbnTestServer.createServerWithCorePlugins();
-    return kbnServer.ready();
+    await kbnServer.ready();
+    await kbnServer.server.plugins.elasticsearch.waitUntilReady();
   });
   afterEach(function () {
     return kbnServer.close();
