@@ -6,6 +6,8 @@ exports[`#minLength returns error when shorter string 1`] = `"value is [foo] but
 
 exports[`#validate throws when returns string 1`] = `"validator failure"`;
 
+exports[`includes context in failure 1`] = `"[foo-context]: expected value of type [string] but got [undefined]"`;
+
 exports[`is required by default 1`] = `"expected value of type [string] but got [undefined]"`;
 
 exports[`returns error when not string 1`] = `"expected value of type [string] but got [number]"`;

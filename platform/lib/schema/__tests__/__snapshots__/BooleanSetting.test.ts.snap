@@ -1,5 +1,7 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`includes context in failure 1`] = `"[foo-context]: expected value of type [boolean] but got [undefined]"`;
+
 exports[`is required by default 1`] = `"expected value of type [boolean] but got [undefined]"`;
 
 exports[`returns error when not boolean 1`] = `"expected value of type [boolean] but got [number]"`;

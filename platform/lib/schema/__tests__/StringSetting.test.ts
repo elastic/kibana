@@ -8,6 +8,12 @@ test('is required by default', () => {
   expect(() => string().validate(undefined)).toThrowErrorMatchingSnapshot();
 });
 
+test('includes context in failure', () => {
+  expect(() =>
+    string().validate(undefined, 'foo-context')
+  ).toThrowErrorMatchingSnapshot();
+});
+
 describe('#minLength', () => {
   test('returns value when longer string', () => {
     expect(string({ minLength: 2 }).validate('foo')).toBe('foo');

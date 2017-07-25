@@ -10,6 +10,12 @@ test('is required by default', () => {
   expect(() => duration().validate(undefined)).toThrowErrorMatchingSnapshot();
 });
 
+test('includes context in failure', () => {
+  expect(() =>
+    duration().validate(undefined, 'foo-context')
+  ).toThrowErrorMatchingSnapshot();
+});
+
 describe('#defaultValue', () => {
   test('can be a moment.Duration', () => {
     expect(

@@ -454,11 +454,11 @@ class MapOfSetting<K, V> extends Setting<Map<K, V>> {
   process(obj: any, context?: string): Map<K, V> {
     if (isPlainObject(obj)) {
       const entries = Object.keys(obj).map(key => [key, obj[key]]);
-      return this.processEntries(entries);
+      return this.processEntries(entries, context);
     }
 
     if (isMap(obj)) {
-      return this.processEntries([...obj.entries()]);
+      return this.processEntries([...obj], context);
     }
 
     throw new SettingError(

@@ -2,4 +2,4 @@
 
 exports[`throws error if config class does not implement 'createSchema' 1`] = `[TypeError: ConfigClass.createSchema is not a function]`;
 
-exports[`throws if config at path does not match schema 1`] = `"expected value of type [string] but got [number]"`;
+exports[`throws if config at path does not match schema 1`] = `"[key]: expected value of type [string] but got [number]"`;

@@ -12,4 +12,8 @@ exports[`fails if wrong input type 1`] = `"expected value of type [array] but go
 
 exports[`fails if wrong type of content in array 1`] = `"[0]: expected value of type [string] but got [number]"`;
 
+exports[`includes context in failure when wrong item type 1`] = `"[foo-context.0]: expected value of type [string] but got [number]"`;
+
+exports[`includes context in failure when wrong top-level type 1`] = `"[foo-context]: expected value of type [array] but got [string]"`;
+
 exports[`object within array with required 1`] = `"[0.foo]: expected value of type [string] but got [undefined]"`;

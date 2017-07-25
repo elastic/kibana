@@ -12,7 +12,7 @@ test('handles number', () => {
   expect(literal(123).validate(123)).toBe(123);
 });
 
-test('returns error when not corrent', () => {
+test('returns error when not correct', () => {
   expect(() => literal('test').validate('foo')).toThrowErrorMatchingSnapshot();
 
   expect(() => literal(true).validate(false)).toThrowErrorMatchingSnapshot();
@@ -22,4 +22,10 @@ test('returns error when not corrent', () => {
   ).toThrowErrorMatchingSnapshot();
 
   expect(() => literal(123).validate('abc')).toThrowErrorMatchingSnapshot();
+});
+
+test('includes context in failure', () => {
+  expect(() =>
+    literal('test').validate('foo', 'foo-context')
+  ).toThrowErrorMatchingSnapshot();
 });

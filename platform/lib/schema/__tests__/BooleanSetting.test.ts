@@ -8,6 +8,12 @@ test('is required by default', () => {
   expect(() => boolean().validate(undefined)).toThrowErrorMatchingSnapshot();
 });
 
+test('includes context in failure', () => {
+  expect(() =>
+    boolean().validate(undefined, 'foo-context')
+  ).toThrowErrorMatchingSnapshot();
+});
+
 describe('#defaultValue', () => {
   test('returns default when undefined', () => {
     expect(boolean({ defaultValue: true }).validate(undefined)).toBe(true);

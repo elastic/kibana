@@ -20,6 +20,12 @@ test('is required by default', () => {
   expect(() => number().validate(undefined)).toThrowErrorMatchingSnapshot();
 });
 
+test('includes context in failure', () => {
+  expect(() =>
+    number().validate(undefined, 'foo-context')
+  ).toThrowErrorMatchingSnapshot();
+});
+
 describe('#min', () => {
   test('returns value when larger number', () => {
     expect(number({ min: 2 }).validate(3)).toBe(3);

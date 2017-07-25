@@ -49,7 +49,7 @@ export class ConfigService {
     ConfigClass: ConfigWithSchema<Schema, Config>
   ) {
     return this.getDistinctRawConfig(path).map(rawConfig =>
-      this.createConfig(rawConfig, ConfigClass)
+      this.createConfig(path, rawConfig, ConfigClass)
     );
   }
 
@@ -67,7 +67,7 @@ export class ConfigService {
       rawConfig =>
         rawConfig === undefined
           ? undefined
-          : this.createConfig(rawConfig, ConfigClass)
+          : this.createConfig(path, rawConfig, ConfigClass)
     );
   }
 
@@ -94,10 +94,16 @@ export class ConfigService {
   }
 
   private createConfig<Schema extends schema.Any, Config>(
+    path: ConfigPath,
     rawConfig: {},
     ConfigClass: ConfigWithSchema<Schema, Config>
   ) {
-    const config = ConfigClass.createSchema(schema).validate(rawConfig);
+    const context = Array.isArray(path) ? path.join('.') : path;
+
+    const config = ConfigClass.createSchema(schema).validate(
+      rawConfig,
+      context
+    );
     return new ConfigClass(config, this.env);
   }
 

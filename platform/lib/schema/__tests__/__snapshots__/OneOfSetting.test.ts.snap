@@ -25,3 +25,8 @@ exports[`handles object with wrong type 1`] = `
 "settings that failed validation:
 - [0.age]: expected value of type [number] but got [string]"
 `;
+
+exports[`includes context in failure 1`] = `
+"[foo-context]: settings that failed validation:
+- [foo-context.0.age]: expected value of type [number] but got [string]"
+`;
