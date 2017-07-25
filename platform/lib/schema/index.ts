@@ -458,7 +458,7 @@ class MapOfSetting<K, V> extends Setting<Map<K, V>> {
     }
 
     if (isMap(obj)) {
-      return this.processEntries([...obj.entries()], context);
+      return this.processEntries([...obj], context);
     }
 
     throw new SettingError(
