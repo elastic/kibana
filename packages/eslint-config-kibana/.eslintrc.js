@@ -5,7 +5,7 @@ module.exports = {
     'mocha',
     'babel',
     'react',
-    'import'
+    'import',
   ],
 
   env: {
