@@ -17,6 +17,9 @@ const DEFAULTS_SETTINGS = {
     quiet: true
   },
   plugins: {},
+  uiSettings: {
+    enabled: false
+  },
   optimize: {
     enabled: false
   },
@@ -32,9 +35,11 @@ const DEFAULT_SETTINGS_WITH_CORE_PLUGINS = {
     url: url.format(esTestServerUrlParts),
     username: kibanaServer.username,
     password: kibanaServer.password
-  }
+  },
+  uiSettings: {
+    enabled: true
+  },
 };
-
 
 /**
  * Creates an instance of KbnServer with default configuration
