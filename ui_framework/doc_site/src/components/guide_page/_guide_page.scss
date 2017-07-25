@@ -1,20 +1,21 @@
 .guidePage {
   display: flex;
   flex: 1 0 auto;
-  padding-bottom: 20px;
+  margin-bottom: $kuiSizeL;
+  overflow: hidden;
 }
 
 .guidePageBody {
-  $topMargin: 40px;
+  $topMargin: $kuiSizeL;
   $leftMargin: 120px + $guideSideNavWidth;
   $rightMargin: 80px;
   $scrollBarWidth: 20px;
 
-  background-color: $guidePanelBackgroundColor;
-  border: 1px solid #CCCCCC;
-  border-radius: 4px;
+  background-color: $kuiColorEmptyShade;
+  border: $kuiBorderThin;
+  border-radius: $kuiBorderRadius;
   flex: 1 1 auto;
-  padding: 40px 60px;
+  padding: 0 $kuiSizeL $kuiSizeL $kuiSizeL;
   margin: $topMargin $rightMargin 0 $leftMargin;
   width: calc(100vw - #{$leftMargin + $rightMargin + $scrollBarWidth});
 
@@ -23,8 +24,8 @@
   }
 
   @include whenNarrowerThan($guideNormalBreakpoint) {
-    $leftMargin: 20px + $guideSideNavSmallWidth;
-    $rightMargin: 20px;
+    $leftMargin: $kuiSizeL + $guideSideNavSmallWidth;
+    $rightMargin: $kuiSizeL;
 
     margin: $topMargin $rightMargin 0 $leftMargin;
     width: calc(100vw - #{$leftMargin + $rightMargin + $scrollBarWidth});

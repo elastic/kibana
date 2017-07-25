@@ -61,7 +61,9 @@ export class GuideNav extends Component {
         className={previousClasses}
         to={this.state.previousRoute ? this.state.previousRoute.path : ''}
       >
-        <span className="fa fa-angle-left"></span>
+        <svg className="kuiIcon kuiIcon--medium">
+          <use href="#arrow_left" />
+        </svg>
       </Link>
     );
 
@@ -74,7 +76,9 @@ export class GuideNav extends Component {
         className={nextClasses}
         to={this.state.nextRoute ? this.state.nextRoute.path : ''}
       >
-        <span className="fa fa-angle-right"></span>
+        <svg className="kuiIcon kuiIcon--medium">
+          <use href="#arrow_right" />
+        </svg>
       </Link>
     );
 
@@ -91,7 +95,7 @@ export class GuideNav extends Component {
       'is-guide-nav-open': this.props.isNavOpen,
     });
 
-    const buttonClasses = classNames('guideNav__menu fa fa-bars', {
+    const buttonClasses = classNames('guideNav__menu', {
       'is-menu-button-pinned': this.props.isNavOpen,
     });
 
@@ -141,7 +145,11 @@ export class GuideNav extends Component {
           <div
             className={buttonClasses}
             onClick={this.props.onToggleNav}
-          />
+          >
+            <svg className="kuiIcon kuiIcon--medium">
+              <use href="#grid" />
+            </svg>
+          </div>
           <Link
             className="guideNav__title"
             to="/"

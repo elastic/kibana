@@ -1,6 +1,8 @@
 .guideCode {
-  padding: 2px 4px;
   font-family: 'Roboto Mono', monospace;
-  background-color: #e8e8e8;
-  color: #565656;
+  background-color: $kuiColorLightestShade;
+  padding: $kuiSizeXS / 2 $kuiSizeXS;
+  border-radius: $kuiBorderRadius;
+  color: $kuiColorAccent;
+  @include kuiFontSizeXS;
 }

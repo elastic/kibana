@@ -1,18 +1,21 @@
-$guideVerticalRhythm: 20px;
-$guideLineHeight: 24px;
-$guideNavHeight: 60px;
+@import '../../../src/global_styling/variables/_index';
+@import '../../../src/global_styling/mixins/_index';
+
+$guideVerticalRhythm: $kuiSizeL;
+$guideLineHeight: $kuiSizeL;
+$guideNavHeight: $kuiSize * 4;
 $guideSideNavWidth: 400px;
-$guideSideNavSmallWidth: 220px;
+$guideSideNavSmallWidth: $kuiSize * 12;
 $guideCodeViewerWidth: 660px;
 $guideCodeViewerSmallWidth: 520px;
-$guideCodeViewerTransition: 0.2s ease;
+$guideCodeViewerTransition: $kuiAnimSpeedNormal $kuiAnimSlightResistance;
 
 // Colors
-$guideBaseBackgroundColor: #f7f7f7;
+$guideBaseBackgroundColor: $kuiColorLightestShade;
 $guidePanelBackgroundColor: #ffffff;
-$guideTextColor: #444;
-$guideLinkColor: #00a9e5;
-$guideLinkHoverColor: #00a9e5;
+$guideTextColor: $kuiColorDarkShade;
+$guideLinkColor: $kuiColorPrimary;
+$guideLinkHoverColor: darken($kuiColorPrimary, 10%);
 
 // Breakpoints
 $guideMinWidth: 840px;

@@ -18,10 +18,30 @@ export default () => (
 
     &nbsp;
 
-    <KuiIcon type="cross" />
+    <KuiIcon type="help" />
 
     &nbsp;
 
-    <KuiIcon type="help" />
+    <KuiIcon type="grid" />
+
+    &nbsp;
+
+    <KuiIcon type="arrowTop" />
+
+    &nbsp;
+
+    <KuiIcon type="arrowRight" />
+
+    &nbsp;
+
+    <KuiIcon type="arrowBottom" />
+
+    &nbsp;
+
+    <KuiIcon type="arrowLeft" />
+
+    &nbsp;
+
+    <KuiIcon type="console" />
   </div>
 );

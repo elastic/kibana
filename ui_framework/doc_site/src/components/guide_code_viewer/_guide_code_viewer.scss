@@ -1,21 +1,13 @@
 .guideCodeViewer {
   position: fixed;
-  top: $guideNavHeight;
+  top: 50%;
   right: 0;
+  left: 0;
   bottom: 0;
-  width: $guideCodeViewerWidth;
-  padding: 6px 0 40px;
-  background-color: white;
-  transform: translateX($guideCodeViewerWidth);
+  background-color: #002b36;
+  transform: translateY(100%);
   transition: transform $guideCodeViewerTransition;
   overflow: auto;
-  border-left: 1px solid #d6d6d6;
-
-  @include scrollbar;
-
-  @include whenNarrowerThan($guideNormalBreakpoint) {
-    width: $guideCodeViewerSmallWidth;
-  }
 
   &.is-code-viewer-open {
     transform: translateX(0);
@@ -23,33 +15,38 @@
 }
 
   .guideCodeViewer__header {
-    padding: 0 20px 6px;
-    line-height: $guideLineHeight;
-    border-bottom: 1px solid #d6d6d6;
-    font-size: 14px;
-    font-weight: 700;
-    margin-bottom: 10px;
+    padding: $kuiSize;
+    @include kuiFontSizeL;
+    color: #93a1a1;
   }
 
   .guideCodeViewer__closeButton {
-    position: absolute;
-    top: 0;
-    right: 10px;
+    position: fixed;
+    background: #d33682;
+    color: #fdf6e3;
+    display: inline-block;
+    height: $kuiSizeXL;
+    padding: 0 $kuiSizeS;
+    line-height: $kuiSizeXL;
+    font-family: $kuiCodeFontFamily;
+    font-size: $kuiFontSizeXS;
+    top: 50%;
+    right: 15px;
     cursor: pointer;
-    padding: 10px;
-    border-radius: 3px;
-    color: $guideTextColor;
+    visibility: hidden;
+    margin-top: 1px;
 
-    &:hover {
-      color: $guideLinkHoverColor;
+    &.is-code-viewer-open {
+      visibility: visible;
+      z-index: 999999;
     }
   }
 
   .guideCodeViewer__title {
-    padding: 0 20px 6px;
-    border-bottom: 1px solid #d6d6d6;
-    line-height: $guideLineHeight;
-    font-size: 14px;
+    padding: $kuiSize;
+    @include kuiFontSizeM;
+    background: #073642;
+    color: #93a1a1;
   }
 
   .guideCodeViewer__content {
@@ -60,54 +57,82 @@
 
 .hljs {
   display: block;
-  padding: 15px 20px;
-  color: #637c84;
-  font-size: 14px;
-  line-height: 1.3;
+  overflow-x: auto;
+  padding: 0.5em;
+  background: #002b36;
   font-family: 'Roboto Mono', monospace;
+  color: #839496;
+  font-size: 12px;
+  line-height: 1.5;
 }
 
-.hljs-keyword {
-  color: #b58900;
+.hljs-comment,
+.hljs-quote {
+  color: #586e75;
 }
 
-.hljs-function {
-  .hljs-keyword {
-    color: #268bd2;
-  }
-
-  .hljs-title {
-    color: #7441c6;
-  }
+/* Solarized Green */
+.hljs-keyword,
+.hljs-selector-tag,
+.hljs-addition {
+  color: #859900;
 }
 
-.hljs-built_in {
+/* Solarized Cyan */
+.hljs-number,
+.hljs-string,
+.hljs-meta .hljs-meta-string,
+.hljs-literal,
+.hljs-doctag,
+.hljs-regexp {
+  color: #2aa198;
+}
+
+/* Solarized Blue */
+.hljs-title,
+.hljs-section,
+.hljs-name,
+.hljs-selector-id,
+.hljs-selector-class {
   color: #268bd2;
 }
 
-.hljs-string {
-  color: #36958e;
+/* Solarized Yellow */
+.hljs-attribute,
+.hljs-attr,
+.hljs-variable,
+.hljs-template-variable,
+.hljs-class .hljs-title,
+.hljs-type {
+  color: #b58900;
 }
 
-.hljs-comment {
-  color: #9d9d9d;
+/* Solarized Orange */
+.hljs-symbol,
+.hljs-bullet,
+.hljs-subst,
+.hljs-meta,
+.hljs-meta .hljs-keyword,
+.hljs-selector-attr,
+.hljs-selector-pseudo,
+.hljs-link {
+  color: #cb4b16;
 }
 
-.hljs-number,
-.hljs-literal {
-  color: #d84a7e;
+/* Solarized Red */
+.hljs-built_in,
+.hljs-deletion {
+  color: #dc322f;
 }
 
-.hljs-tag {
-  .hljs-name {
-    color: #63a35c;
-  }
+.hljs-formula {
+  background: #073642;
+}
 
-  .hljs-attr {
-    color: #795da3;
-  }
+.hljs-emphasis {
+  font-style: italic;
+}
 
-  .hljs-string {
-    color: #df5000;
-  }
+.hljs-strong {
+  font-weight: bold;
 }
