@@ -40,6 +40,8 @@ export class Root {
       const loggingConfig$ = this.configService.atPath('logging', LoggerConfig);
       this.loggerService.upgrade(loggingConfig$);
     } catch (e) {
+      // This specifically console.logs because we were not able to configure
+      // the logger.
       console.log('Configuring logger failed with the following errors:');
       console.log(e.message);
       this.shutdown(e);
