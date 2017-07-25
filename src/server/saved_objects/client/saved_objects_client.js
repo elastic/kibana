@@ -8,7 +8,7 @@ import {
   trimIdPrefix,
   includedFields,
   decorateEsError,
-  errorTypeHelpers,
+  errors,
 } from './lib';
 
 export class SavedObjectsClient {
@@ -19,7 +19,8 @@ export class SavedObjectsClient {
     this._callAdminCluster = callAdminCluster;
   }
 
-  errorTypeHelpers = errorTypeHelpers
+  static errors = errors
+  errors = errors
 
   /**
    * Persists an object

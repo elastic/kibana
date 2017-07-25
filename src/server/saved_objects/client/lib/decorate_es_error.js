@@ -21,7 +21,7 @@ import {
   wrapConflictError,
   wrapEsUnavailableError,
   wrapGeneralError,
-} from './error_types';
+} from './errors';
 
 export function decorateEsError(error) {
   if (!(error instanceof Error)) {

@@ -18,7 +18,7 @@ export default function (server) {
     async generateUrlId(url, req) {
       const id = crypto.createHash('md5').update(url).digest('hex');
       const savedObjectsClient = req.getSavedObjectsClient();
-      const { isConflictError } = savedObjectsClient.errorTypeHelpers;
+      const { isConflictError } = savedObjectsClient.errors;
 
       try {
         const doc = await savedObjectsClient.create('url', {

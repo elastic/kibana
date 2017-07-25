@@ -110,7 +110,7 @@ export class UiSettingsService {
       isForbiddenError,
       isEsUnavailableError,
       isNotAuthorizedError
-    } = this._savedObjectsClient.errorTypeHelpers;
+    } = this._savedObjectsClient.errors;
 
     const isIgnorableError = error => (
       isNotFoundError(error) ||
