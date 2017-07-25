@@ -80,6 +80,19 @@ exports[`KuiIcon renders type apps 1`] = `
 </svg>
 `;
 
+exports[`KuiIcon renders type cross 1`] = `
+<svg
+  class="kuiIcon"
+>
+  <title>
+    cross icon
+  </title>
+  <use
+    href="#cross"
+  />
+</svg>
+`;
+
 exports[`KuiIcon renders type dashboardApp 1`] = `
 <svg
   class="kuiIcon kuiIcon--medium"
@@ -128,6 +141,19 @@ exports[`KuiIcon renders type graphApp 1`] = `
   </title>
   <use
     href="#app_graph"
+  />
+</svg>
+`;
+
+exports[`KuiIcon renders type help 1`] = `
+<svg
+  class="kuiIcon"
+>
+  <title>
+    help icon
+  </title>
+  <use
+    href="#help"
   />
 </svg>
 `;

@@ -1,0 +1,21 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`KuiHeaderSection is rendered 1`] = `
+<div
+  aria-label="aria-label"
+  class="kuiHeaderSection kui--flexGrow1 kui--flex testClass1 testClass2"
+  data-test-subj="test subject string"
+/>
+`;
+
+exports[`KuiHeaderSection side defaults to left 1`] = `
+<div
+  class="kuiHeaderSection kui--flexGrow1 kui--flex"
+/>
+`;
+
+exports[`KuiHeaderSection side renders right 1`] = `
+<div
+  class="kuiHeaderSection kui--flexShrink1 kui--flex"
+/>
+`;

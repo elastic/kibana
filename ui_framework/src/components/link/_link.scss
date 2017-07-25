@@ -1,4 +1,6 @@
 @include component('kuiLink') {
+  @include kuiLink;
+
   color: $kuiLinkColor;
 
   &:hover {

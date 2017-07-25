@@ -45,8 +45,8 @@ export const KuiPopover = ({
         className={classes}
         {...rest}
       >
-        { button }
-        { body }
+        {button}
+        {body}
       </div>
     </KuiOutsideClickDetector>
   );
