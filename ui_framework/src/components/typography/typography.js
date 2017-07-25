@@ -1,4 +1,4 @@
-import React, {
+import {
   cloneElement,
   PropTypes,
 } from 'react';
