@@ -4,7 +4,13 @@ import expect from 'expect.js';
 export function createObjectsClientStub(type, id, esDocSource = {}) {
   const savedObjectsClient = {
     update: sinon.stub().returns(Promise.resolve()),
-    get: sinon.stub().returns({ attributes: esDocSource })
+    get: sinon.stub().returns({ attributes: esDocSource }),
+    errorTypeHelpers: {
+      isNotFoundError: sinon.stub().returns(false),
+      isForbiddenError: sinon.stub().returns(false),
+      isEsUnavailableError: sinon.stub().returns(false),
+      isNotAuthorizedError: sinon.stub().returns(false),
+    }
   };
 
   savedObjectsClient.assertGetQuery = () => {
