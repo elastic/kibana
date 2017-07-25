@@ -28,26 +28,9 @@ export class MutableLoggerFactory implements LoggerFactory {
       return this.loggers.get(context)!;
     }
 
-    let loggerLevel, loggerAppenders;
-    if (this.config) {
-      const { level, appenders } = this.getLoggerConfigByContext(
-        this.config,
-        context
-      )!;
-      loggerLevel = LogLevel.fromId(level);
-      loggerAppenders = appenders.map(
-        appenderKey => this.appenders.get(appenderKey)!
-      );
-    } else {
-      // If we don't have config yet, use `buffered` appender that will store all logged messages in the memory
-      // until the config is ready.
-      loggerLevel = LogLevel.All;
-      loggerAppenders = [this.bufferAppender];
-    }
-
     this.loggers.set(
       context,
-      new LoggerAdapter(new BaseLogger(context, loggerLevel, loggerAppenders))
+      new LoggerAdapter(this.createLogger(context, this.config))
     );
 
     return this.loggers.get(context)!;
@@ -74,14 +57,7 @@ export class MutableLoggerFactory implements LoggerFactory {
     }
 
     for (const [loggerKey, loggerAdapter] of this.loggers.entries()) {
-      const loggerConfig = this.getLoggerConfigByContext(config, loggerKey);
-      loggerAdapter.logger = new BaseLogger(
-        loggerKey,
-        LogLevel.fromId(loggerConfig.level),
-        loggerConfig.appenders.map(
-          appenderKey => this.appenders.get(appenderKey)!
-        )
-      );
+      loggerAdapter.logger = this.createLogger(loggerKey, config);
     }
 
     this.config = config;
@@ -106,6 +82,22 @@ export class MutableLoggerFactory implements LoggerFactory {
 
     this.appenders.clear();
     this.loggers.clear();
+  }
+
+  private createLogger(context: string, config: LoggingConfig | undefined) {
+    if (config === undefined) {
+      // If we don't have config yet, use `buffered` appender that will store all logged messages in the memory
+      // until the config is ready.
+      return new BaseLogger(context, LogLevel.All, [this.bufferAppender]);
+    }
+
+    const { level, appenders } = this.getLoggerConfigByContext(config, context);
+    const loggerLevel = LogLevel.fromId(level);
+    const loggerAppenders = appenders.map(
+      appenderKey => this.appenders.get(appenderKey)!
+    );
+
+    return new BaseLogger(context, loggerLevel, loggerAppenders);
   }
 
   private getLoggerConfigByContext(
