@@ -64,6 +64,8 @@ describe('routes', function () {
 
     it('redirects shortened urls', (done) => {
       kbnTestServer.makeRequest(kbnServer, shortenOptions, (res) => {
+        expect(res).to.have.property('statusCode', 200);
+
         const gotoOptions = {
           method: 'GET',
           url: '/goto/' + res.payload
