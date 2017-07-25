@@ -1,0 +1,26 @@
+// Helper mixins
+
+// Useful border shade when dealing with images of unknown color.
+@mixin innerBorder($type: 'dark', $borderRadius: 0, $alpha: .1) {
+
+  $color: rgba(0, 0, 0, $alpha);
+
+  @if $type == 'light' {
+    $color: rgba(255, 255, 255, $alpha);
+  }
+
+  position: relative;
+
+  &:after {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    border-radius: $borderRadius;
+    content: "";
+    pointer-events: none;
+    border: 1px solid $color;
+  }
+}
+

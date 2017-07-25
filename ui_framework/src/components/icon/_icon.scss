@@ -2,6 +2,11 @@
   display: inline-block;
   fill: $kuiTextColor;
 
+  &:focus {
+    opacity: 1; // We often hide icons on hover. Make sure they appear on focus.
+    background: $kuiFocusBackgroundColor;
+  }
+
   @include modifier('medium') {
     @include size($kuiSizeM);
   }
