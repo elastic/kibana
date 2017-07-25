@@ -1,0 +1,69 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`KuiKeyPadMenuItem is rendered 1`] = `
+<a
+  aria-label="aria-label"
+  class="kuiKeyPadMenuItem testClass1 testClass2"
+  data-test-subj="test subject string"
+>
+  <div
+    class="kuiKeyPadMenuItem__inner"
+  >
+    <div
+      class="kuiKeyPadMenuItem__icon"
+    >
+      Icon
+    </div>
+    <p
+      class="kuiKeyPadMenuItem__label"
+    >
+      Label
+    </p>
+  </div>
+</a>
+`;
+
+exports[`KuiKeyPadMenuItem renders href 1`] = `
+<a
+  class="kuiKeyPadMenuItem"
+  href="#"
+>
+  <div
+    class="kuiKeyPadMenuItem__inner"
+  >
+    <div
+      class="kuiKeyPadMenuItem__icon"
+    >
+      Icon
+    </div>
+    <p
+      class="kuiKeyPadMenuItem__label"
+    >
+      Label
+    </p>
+  </div>
+</a>
+`;
+
+exports[`KuiKeyPadMenuItemButton is rendered 1`] = `
+<button
+  aria-label="aria-label"
+  class="kuiKeyPadMenuItem testClass1 testClass2"
+  data-test-subj="test subject string"
+>
+  <div
+    class="kuiKeyPadMenuItem__inner"
+  >
+    <div
+      class="kuiKeyPadMenuItem__icon"
+    >
+      Icon
+    </div>
+    <p
+      class="kuiKeyPadMenuItem__label"
+    >
+      Label
+    </p>
+  </div>
+</button>
+`;

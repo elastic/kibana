@@ -9,6 +9,12 @@ import IconExample
 import HeaderExample
   from '../../views/header/header_example';
 
+import KeyPadMenuExample
+  from '../../views/key_pad_menu/key_pad_menu_example';
+
+import PopoverExample
+  from '../../views/popover/popover_example';
+
 import TypographyExample
   from '../../views/typography/typography_example';
 
@@ -24,6 +30,15 @@ const components = [{
 }, {
   name: 'Header',
   component: HeaderExample,
+  hasReact: true,
+}, {
+  name: 'KeyPadMenu',
+  component: KeyPadMenuExample,
+  hasReact: true,
+}, {
+  name: 'Popover',
+  component: PopoverExample,
+  hasReact: true,
 }, {
   name: 'Typography',
   component: TypographyExample,

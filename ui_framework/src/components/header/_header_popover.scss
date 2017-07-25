@@ -1,0 +1,6 @@
+/**
+ * 1. Override KeyPadMenu.
+ */
+.kuiHeaderPopover {
+  top: calc(100% - #{$kuiSize}) !important; /* 1 */
+}

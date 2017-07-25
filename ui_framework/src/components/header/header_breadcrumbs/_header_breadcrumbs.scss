@@ -20,11 +20,15 @@
     background: $kuiColorLightShade;
   }
 
+  &:not(.kuiHeaderBreadcrumb--collapsed) {
+    @include kuiLink;
+  }
+
   @include state('isActive') {
     color: $kuiColorMediumShade;
   }
 
-  @include state('isCollapsed') {
+  @include modifier('collapsed') {
     color: $kuiColorLightShade;
   }
 
@@ -39,7 +43,6 @@
 
 // Laptop
 @include screenMedium {
-
   @include component('kuiHeaderBreadcrumb') {
     display: none;
 
@@ -52,7 +55,6 @@
 
 // Tablets
 @include screenSmall {
-
   @include component('kuiHeaderBreadcrumb') {
     display: none;
 
@@ -65,9 +67,7 @@
 
 // Mobile
 @include screenXSmall {
-
   @include component('kuiHeaderBreadcrumb') {
     display: none;
   }
 }
-

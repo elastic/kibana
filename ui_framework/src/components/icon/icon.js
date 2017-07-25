@@ -79,7 +79,3 @@ KuiIcon.propTypes = {
   size: PropTypes.oneOf(SIZES),
   title: PropTypes.string,
 };
-
-KuiIcon.defaultProps = {
-  size: 'medium',
-};
