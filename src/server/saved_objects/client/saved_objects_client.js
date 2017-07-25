@@ -12,15 +12,14 @@ import {
 } from './lib';
 
 export class SavedObjectsClient {
-  static errors = errorTypeHelpers
-  errors = errorTypeHelpers
-
   constructor(kibanaIndex, mappings, callAdminCluster) {
     this._kibanaIndex = kibanaIndex;
     this._mappings = mappings;
     this._type = getRootType(this._mappings);
     this._callAdminCluster = callAdminCluster;
   }
+
+  errorTypeHelpers = errorTypeHelpers
 
   /**
    * Persists an object

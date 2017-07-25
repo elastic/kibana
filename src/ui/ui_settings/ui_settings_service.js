@@ -104,17 +104,23 @@ export class UiSettingsService {
     const {
       ignore401Errors = false
     } = options;
-    const savedObjectsClient = this._savedObjectsClient;
+
+    const {
+      isNotFoundError,
+      isForbiddenError,
+      isEsUnavailableError,
+      isNotAuthorizedError
+    } = this._savedObjectsClient.errorTypeHelpers;
 
     const isIgnorableError = error => (
-      savedObjectsClient.errors.isNotFound(error) ||
-      savedObjectsClient.errors.isForbidden(error) ||
-      savedObjectsClient.errors.isEsUnavailable(error) ||
-      (ignore401Errors && savedObjectsClient.errors.isNotAuthorized(error))
+      isNotFoundError(error) ||
+      isForbiddenError(error) ||
+      isEsUnavailableError(error) ||
+      (ignore401Errors && isNotAuthorizedError(error))
     );
 
     try {
-      const resp = await savedObjectsClient.get(this._type, this._id);
+      const resp = await this._savedObjectsClient.get(this._type, this._id);
       return resp.attributes;
     } catch (error) {
       if (isIgnorableError(error)) {
