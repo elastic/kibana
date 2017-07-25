@@ -188,7 +188,7 @@ module.exports = class extends Generator {
       this.log(chalk.white('\n// Import route definition into routes.js.'));
       this.log(
         `{\n` +
-        `  name: ${chalk.cyan(`"${componentExampleName}"`)},\n` +
+        `  name: ${chalk.cyan(`'${componentExampleName}'`)},\n` +
         `  component: ${componentExampleName}${suffix},\n` +
         `  hasReact: ${chalk.magenta('true')},\n` +
         `}`
