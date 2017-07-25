@@ -42,9 +42,8 @@ export class Root {
     } catch (e) {
       // This specifically console.logs because we were not able to configure
       // the logger.
-      console.log('Configuring logger failed with the following errors:');
-      console.log(e.message);
-      this.shutdown(e);
+      console.error('Configuring logger failed:', e.message);
+      return this.shutdown(e);
     }
 
     this.log.info('starting the server');

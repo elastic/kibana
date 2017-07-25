@@ -100,13 +100,13 @@ test('calls onShutdown param on "shutdown"', async () => {
 });
 
 test('calls shutdown when configuring logger fails', async () => {
-  const logged = jest.spyOn(console, 'log');
+  const logged = jest.spyOn(console, 'error');
   logged.mockImplementation(noop);
 
   const onShutdown = jest.fn();
 
   const root = new Root(config$, env, onShutdown);
-  const err = new Error('fail');
+  const err = new Error('foo bar baz');
 
   configService.atPath.mockImplementationOnce(() => {
     throw err;
