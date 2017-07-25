@@ -20,8 +20,8 @@
     background: $kuiColorLightShade;
   }
 
-  &:hover:not(.kuiHeaderBreadcrumb--collapsed) {
-    text-decoration: underline;
+  &:not(.kuiHeaderBreadcrumb--collapsed) {
+    @include kuiLink;
   }
 
   @include state('isActive') {

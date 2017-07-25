@@ -35,7 +35,7 @@
     transform-origin: center top;
     opacity: 0;
     visibility: hidden;
-    margin-top: $kuiSize;
+    margin-top: $kuiSizeL;
 
     // This fakes a border on the arrow.
     &:before {

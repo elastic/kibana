@@ -1,4 +1,6 @@
 @include component('kuiHeaderLogo') {
+  @include kuiLink;
+
   position: relative;
   height: $kuiHeaderChildSize;
   padding: $kuiSize $kuiSizeXL;

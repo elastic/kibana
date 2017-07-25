@@ -364,7 +364,7 @@ table {
 /**
  * 1. Override KeyPadMenu.
  */
-.kuiHeaderAppMenu {
+.kuiHeaderPopover {
   top: calc(100% - 16px) !important;
   /* 1 */ }
 
@@ -378,6 +378,11 @@ table {
   padding: 16px 32px;
   display: inline-block;
   vertical-align: middle; }
+  .kuiHeaderLogo:hover {
+    text-decoration: underline; }
+  .kuiHeaderLogo:focus {
+    text-decoration: underline;
+    background: #e6f2f6; }
   .kuiHeaderLogo__icon {
     height: 32px;
     width: 24px;
@@ -400,8 +405,11 @@ table {
     -webkit-transform: rotate(15deg);
             transform: rotate(15deg);
     background: #D9D9D9; }
-  .kuiHeaderBreadcrumb:hover:not(.kuiHeaderBreadcrumb--collapsed) {
+  .kuiHeaderBreadcrumb:not(.kuiHeaderBreadcrumb--collapsed):hover {
     text-decoration: underline; }
+  .kuiHeaderBreadcrumb:not(.kuiHeaderBreadcrumb--collapsed):focus {
+    text-decoration: underline;
+    background: #e6f2f6; }
   .kuiHeaderBreadcrumb.isActive {
     color: #999; }
   .kuiHeaderBreadcrumb--collapsed {
@@ -540,6 +548,11 @@ table {
 .kuiLink {
   color: #0079a5; }
   .kuiLink:hover {
+    text-decoration: underline; }
+  .kuiLink:focus {
+    text-decoration: underline;
+    background: #e6f2f6; }
+  .kuiLink:hover {
     color: #005472; }
   .kuiLink:focus {
     background: #e6f2f6;
@@ -572,7 +585,7 @@ table {
             transform-origin: center top;
     opacity: 0;
     visibility: hidden;
-    margin-top: 16px; }
+    margin-top: 24px; }
     .kuiPopover__body:before {
       position: absolute;
       content: "";

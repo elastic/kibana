@@ -9,7 +9,7 @@ $kuiHeaderChildSize: $kuiSizeXXL + $kuiSizeL;
 // Components
 @import 'header';
 @import 'header_alert';
-@import 'header_app_menu';
+@import 'header_popover';
 @import 'header_profile';
 @import 'header_logo';
 @import 'header_breadcrumbs/index';
