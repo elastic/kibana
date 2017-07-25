@@ -29,7 +29,7 @@ beforeEach(() => {
   mockConsoleLog.mockClear();
 });
 
-test('`get()` returns Logger that appends records to buffer if config is not ready.', async () => {
+test('`get()` returns Logger that appends records to buffer if config is not ready.', () => {
   const factory = new MutableLoggerFactory();
   const loggerWithoutConfig = factory.get('some-context');
   const testsLogger = factory.get('tests');
@@ -70,7 +70,7 @@ test('`get()` returns Logger that appends records to buffer if config is not rea
     })
   );
 
-  await factory.updateConfig(config);
+  factory.updateConfig(config);
 
   // Now all logs should added to configured appenders.
   expect(mockConsoleLog).toHaveBeenCalledTimes(1);
@@ -87,7 +87,7 @@ test('`get()` returns Logger that appends records to buffer if config is not rea
   );
 });
 
-test('`get()` returns `root` logger if context is not specified.', async () => {
+test('`get()` returns `root` logger if context is not specified.', () => {
   const loggingConfigSchema = LoggingConfig.createSchema(mockSchema);
   const factory = new MutableLoggerFactory();
   const config = loggingConfigSchema.validate({
@@ -98,7 +98,7 @@ test('`get()` returns `root` logger if context is not specified.', async () => {
       }
     }
   });
-  await factory.updateConfig(new LoggingConfig(config));
+  factory.updateConfig(new LoggingConfig(config));
 
   const rootLogger = factory.get();
 
@@ -129,7 +129,7 @@ test('`close()` disposes all resources used by appenders.', async () => {
     })
   );
 
-  await factory.updateConfig(config);
+  factory.updateConfig(config);
 
   const logger = factory.get('some-context');
   logger.info('You know, just for your info.');

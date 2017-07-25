@@ -39,16 +39,14 @@ export class MutableLoggerFactory implements LoggerFactory {
   /**
    * Updates all current active loggers with the new config values.
    * @param config New config instance.
-   * @returns Promise that is resolved once all loggers are successfully updated.
    */
-  async updateConfig(config: LoggingConfig) {
+  updateConfig(config: LoggingConfig) {
     // Config update is asynchronous and may require some time to complete, so we should invalidate
     // config so that new loggers will be using BufferAppender until newly configured appenders are ready.
-    // TODO: Before disposing of appenders, we should switch all existing loggers to BufferAppender first.
     this.config = undefined;
 
     for (const appender of this.appenders.values()) {
-      await appender.dispose();
+      appender.dispose();
     }
 
     this.appenders.clear();
