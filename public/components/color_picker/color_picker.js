@@ -51,9 +51,7 @@ export const ColorPicker = ({ value, colorRows, onChange }) => {
 
   return (
     <div className="canvas__color-picker">
-      <center>
-        {table}
-      </center>
+      {table}
     </div>
   );
 };

@@ -1,9 +1,24 @@
 @import (reference) "../../style/variables";
 
 .canvas__workpad_config {
+  // TODO: Hack for popover width. Gross.
+  width: 180px;
+
   .canvas__workpad_config--presets .label {
     display: inline-block;
     margin: @spacingXXS;
     cursor: pointer;
+  }
+
+  .row {
+    div {
+      padding-left: 0;
+      padding-right: 10px;
+    }
+
+    i {
+      line-height: 50px;
+      cursor: pointer;
+    }
   }
 }
