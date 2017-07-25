@@ -10,6 +10,9 @@ export const render = () => new View('render', {
       displayName: 'Custom CSS',
       description: 'CSS will be scoped to your element',
       argType: 'textarea',
+      options: {
+        confirm: 'Apply Stylesheet',
+      },
     }),
     // TODO: add the url input and handling
     // new Arg('url', {
