@@ -2,20 +2,31 @@ import expect from 'expect.js';
 import _ from 'lodash';
 import { handleShortUrlError } from '../short_url_error';
 
-describe('handleShortUrlError()', () => {
-  const caughtErrors = [{
-    status: 401
-  }, {
-    status: 403
-  }, {
-    status: 404
-  }];
+function createErrorWithStatus(status) {
+  const error = new Error();
+  error.status = status;
+}
 
-  const uncaughtErrors = [{
-    status: null
-  }, {
-    status: 500
-  }];
+function createErrorWithStatusCode(statusCode) {
+  const error = new Error();
+  error.statusCode = statusCode;
+}
+
+describe('handleShortUrlError()', () => {
+  const caughtErrors = [
+    createErrorWithStatus(401),
+    createErrorWithStatus(403),
+    createErrorWithStatus(404),
+    createErrorWithStatusCode(401),
+    createErrorWithStatusCode(403),
+    createErrorWithStatusCode(404),
+  ];
+
+  const uncaughtErrors = [
+    new Error(),
+    createErrorWithStatus(500),
+    createErrorWithStatusCode(500)
+  ];
 
   caughtErrors.forEach((err) => {
     it(`should handle ${err.status} errors`, function () {
