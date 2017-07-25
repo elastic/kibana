@@ -1,17 +1,23 @@
 import { Appender } from '../appenders/Appenders';
+import { LoggingConfig } from '../LoggingConfig';
 import { LogLevel } from '../LogLevel';
 import { Logger, BaseLogger, LoggerAdapter } from '../Logger';
 
 describe('BaseAppender methods', () => {
-  const context = 'context::parent::child';
-  const timestamp = new Date(2012, 1, 1);
+  const context = LoggingConfig.getLoggerContext([
+    'context',
+    'parent',
+    'child'
+  ]);
   let appenderMocks: Appender[];
   let logger: BaseLogger;
+
+  const timestamp = new Date(2012, 1, 1);
+  jest.spyOn(global, 'Date').mockImplementation(() => timestamp);
 
   beforeEach(() => {
     appenderMocks = [{ append: jest.fn() }, { append: jest.fn() }];
     logger = new BaseLogger(context, LogLevel.All, appenderMocks);
-    jest.spyOn(global, 'Date').mockImplementation(() => timestamp);
   });
 
   test('`trace()` correctly forms `LogRecord` and passes it to all appenders.', () => {

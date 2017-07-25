@@ -23,7 +23,7 @@ export class BaseLogger implements Logger {
   constructor(
     private readonly context: string,
     private readonly level: LogLevel,
-    private appenders: Appender[]
+    private readonly appenders: Appender[]
   ) {}
 
   trace(message: string, meta?: { [key: string]: any }): void {

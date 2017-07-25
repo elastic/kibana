@@ -6,7 +6,7 @@ import { ConfigWithSchema } from '../../config';
 import { Router, RouterOptions } from '../http';
 import { KibanaConfig } from '../kibana';
 import { ElasticsearchService, ElasticsearchConfigs } from '../elasticsearch';
-import { Logger } from '../../logging';
+import { LoggerFactory } from '../../logging';
 
 export type PluginName = string & As<'PluginName'>;
 
@@ -14,7 +14,7 @@ export interface KibanaPluginFeatures {
   /**
    * Plugin-scoped logger
    */
-  logger: { get: (namespace?: string) => Logger };
+  logger: LoggerFactory;
 
   /**
    * Core Kibana utilities

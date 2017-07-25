@@ -1,4 +1,4 @@
-  import * as mockSchema from '../../../lib/schema';
+import * as mockSchema from '../../../lib/schema';
 
 import { LogLevel } from '../../LogLevel';
 import { LogRecord } from '../../LogRecord';

@@ -109,6 +109,16 @@ export class LoggingConfig {
   }
 
   /**
+   * Helper method that joins separate string context parts into single context string.
+   * In case joined context is an empty string, `root` context name is returned.
+   * @param contextParts List of the context parts (e.g. ['parent', 'child'].
+   * @returns {string} Joined context string (e.g. 'parent::child').
+   */
+  static getLoggerContext(contextParts: string[]) {
+    return contextParts.join(CONTEXT_SEPARATOR) || ROOT_CONTEXT_NAME;
+  }
+
+  /**
    * Helper method that returns parent context for the specified one.
    * @param context Context to find parent for.
    * @returns Name of the parent context or `root` if the context is the top level one.

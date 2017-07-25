@@ -7,7 +7,7 @@ export function registerElasticsearchRoutes(
   router: Router<ElasticsearchRequestHelpers>,
   logger: LoggerFactory
 ) {
-  const log = logger.get('elasticsearch::routes');
+  const log = logger.get('elasticsearch', 'routes');
 
   log.info('creating elasticsearch api');
 

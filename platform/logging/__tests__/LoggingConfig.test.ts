@@ -40,6 +40,13 @@ test('`getParentLoggerContext()` returns correct parent context name.', () => {
   expect(LoggingConfig.getParentLoggerContext('a')).toEqual('root');
 });
 
+test('`getLoggerContext()` returns correct joined context name.', () => {
+  expect(LoggingConfig.getLoggerContext(['a', 'b', 'c'])).toEqual('a::b::c');
+  expect(LoggingConfig.getLoggerContext(['a', 'b'])).toEqual('a::b');
+  expect(LoggingConfig.getLoggerContext(['a'])).toEqual('a');
+  expect(LoggingConfig.getLoggerContext([])).toEqual('root');
+});
+
 test('correctly fills in `appenders` config.', () => {
   const loggingConfigSchema = LoggingConfig.createSchema(mockSchema);
   const config = new LoggingConfig(

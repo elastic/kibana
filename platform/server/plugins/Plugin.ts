@@ -69,7 +69,7 @@ export class Plugin<DependenciesType extends BasePluginsType, ExposableType> {
     this.dependencies = pluginDefinition.dependencies as PluginName[];
     this.run = pluginDefinition.run;
     this.configPath = pluginDefinition.configPath;
-    this.log = logger.get(`plugins::${pluginDefinition.name}`);
+    this.log = logger.get('plugins', pluginDefinition.name);
   }
 
   getExposedValues(): ExposableType {

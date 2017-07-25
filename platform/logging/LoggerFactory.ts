@@ -10,9 +10,9 @@ import { BufferAppender } from './appenders/buffer/BufferAppender';
 export interface LoggerFactory {
   /**
    * Returns a `Logger` instance for the specified context.
-   * @param context Context to return logger for.
+   * @param contextParts Parts of the context to return logger for.
    */
-  get(context: string): Logger;
+  get(...contextParts: string[]): Logger;
 }
 
 /** @internal */
@@ -22,7 +22,8 @@ export class MutableLoggerFactory implements LoggerFactory {
   private readonly bufferAppender = new BufferAppender();
   private readonly loggers: Map<string, LoggerAdapter> = new Map();
 
-  get(context: string): Logger {
+  get(...contextParts: string[]): Logger {
+    const context = LoggingConfig.getLoggerContext(contextParts);
     if (this.loggers.has(context)) {
       return this.loggers.get(context)!;
     }
