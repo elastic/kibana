@@ -23,6 +23,10 @@ $stateSeparator: '.is';
     @return true;
   }
 
+  @if str-index($selector, ":"){
+    @return true;
+  }
+
   @return false;
 }
 
@@ -49,6 +53,11 @@ $stateSeparator: '.is';
   @if str-index($selector, $stateSeparator){
     $stateStart: str-index($selector, $stateSeparator) - 1;
     @return str-slice($selector, 0, $stateStart);
+  }
+
+  @if str-index($selector, ":"){
+    $psuedoStart: str-index($selector, ":") - 1;
+    @return str-slice($selector, 0, $psuedoStart);
   }
 }
 

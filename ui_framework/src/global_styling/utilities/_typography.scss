@@ -15,11 +15,11 @@
 }
 
 @include utility('fontSizeSmall') {
-  @extend %kuiFontSizeS;
+  @include kuiFontSizeS;
 }
 
 @include utility('codeFont') {
-  @extend %kuiCodeFont;
+  @include kuiCodeFont;
 }
 
 @include utility('subduedText') {

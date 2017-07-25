@@ -33,3 +33,13 @@ $kuiTextColor: $kuiColorDarkestShade;
 $kuiTitleColor: $kuiColorFullShade;
 $kuiLinkColor: $kuiColorPrimary;
 $kuiFocusBackgroundColor: tint($kuiColorPrimary, 90%);
+
+// Dark theme overides
+// $kuiColorEmptyShade: #222;
+// $kuiColorLightestShade: #3F3F3F;
+// $kuiColorLightShade: #666;
+// $kuiColorMediumShade: #999;
+// $kuiColorDarkShade: #D9D9D9;
+// $kuiColorDarkestShade: #F5F5F5;
+// $kuiColorFullShade: #FFF;
+// $kuiFocusBackgroundColor: #3F3F3F;
