@@ -460,7 +460,7 @@ table {
     width: 40px;
     height: 40px; }
 
-.kuiKeyPad {
+.kuiKeyPadMenu {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -478,7 +478,7 @@ table {
   font-size: 14px;
   font-size: 0.875rem;
   line-height: 24px; }
-  .kuiKeyPad__item {
+  .kuiKeyPadMenu__item {
     padding: 16px;
     height: 96px;
     width: 96px;
@@ -487,12 +487,12 @@ table {
     border: 1px solid #D9D9D9;
     border-color: transparent;
     border-radius: 4px; }
-    .kuiKeyPad__item:hover, .kuiKeyPad__item:focus {
+    .kuiKeyPadMenu__item:hover, .kuiKeyPadMenu__item:focus {
       border-color: #D9D9D9; }
-      .kuiKeyPad__item:hover .kuiKeyPad__icon, .kuiKeyPad__item:focus .kuiKeyPad__icon {
+      .kuiKeyPadMenu__item:hover .kuiKeyPadMenu__icon, .kuiKeyPadMenu__item:focus .kuiKeyPadMenu__icon {
         -webkit-transform: translateY(0);
                 transform: translateY(0); }
-  .kuiKeyPad__icon {
+  .kuiKeyPadMenu__icon {
     transition: -webkit-transform cubic-bezier(0.34, 1.61, 0.7, 1) 250ms;
     transition: transform cubic-bezier(0.34, 1.61, 0.7, 1) 250ms;
     transition: transform cubic-bezier(0.34, 1.61, 0.7, 1) 250ms, -webkit-transform cubic-bezier(0.34, 1.61, 0.7, 1) 250ms;
@@ -507,34 +507,35 @@ table {
     background: #e6f2f6;
     outline: solid 3px #e6f2f6; }
 
-.kuiPopMenu {
+.kuiPopover {
+  display: inline-block;
   position: relative; }
-  .kuiPopMenu.isOpen .kuiPopMenu__body {
+  .kuiPopover.isOpen .kuiPopover__body {
     opacity: 1;
     visibility: visible;
     z-index: 2;
-    -webkit-transform: translateY(0) translateZ(0);
-            transform: translateY(0) translateZ(0); }
-  .kuiPopMenu__body {
+    margin-top: 8px; }
+  .kuiPopover__body {
     background: #FFF;
     position: absolute;
     min-width: 256px;
-    top: 100%;
-    left: -128px;
+    top: calc(100% + 8px);
+    left: 50%;
     background: #FFF;
     border: 1px solid #D9D9D9;
     border-radius: 4px 0 4px 4px;
     padding: 16px;
-    -webkit-transform: translateY(8px) translateZ(0);
-            transform: translateY(8px) translateZ(0);
+    -webkit-transform: translateX(-50%) translateY(8px) translateZ(0);
+            transform: translateX(-50%) translateY(8px) translateZ(0);
     -webkit-backface-visibility: hidden;
             backface-visibility: hidden;
-    transition: all cubic-bezier(0.34, 1.61, 0.7, 1) 350ms;
+    transition: opacity cubic-bezier(0.34, 1.61, 0.7, 1) 350ms, visibility cubic-bezier(0.34, 1.61, 0.7, 1) 350ms, margin-top cubic-bezier(0.34, 1.61, 0.7, 1) 350ms;
     -webkit-transform-origin: center top;
             transform-origin: center top;
     opacity: 0;
-    visibility: hidden; }
-    .kuiPopMenu__body:before {
+    visibility: hidden;
+    margin-top: 16px; }
+    .kuiPopover__body:before {
       position: absolute;
       content: "";
       top: -16px;
@@ -545,7 +546,7 @@ table {
       border-left: 16px solid transparent;
       border-right: 16px solid transparent;
       border-bottom: 16px solid #D9D9D9; }
-    .kuiPopMenu__body:after {
+    .kuiPopover__body:after {
       position: absolute;
       content: "";
       top: -15px;
@@ -557,17 +558,19 @@ table {
       border-left: 16px solid transparent;
       border-right: 16px solid transparent;
       border-bottom: 16px solid #FFF; }
-  .kuiPopMenu--anchorLeft .kuiPopMenu__body {
-    right: auto;
-    left: 0; }
-    .kuiPopMenu--anchorLeft .kuiPopMenu__body:before, .kuiPopMenu--anchorLeft .kuiPopMenu__body:after {
+  .kuiPopover--anchorLeft .kuiPopover__body {
+    left: 0;
+    -webkit-transform: translateX(0%) translateY(8px) translateZ(0);
+            transform: translateX(0%) translateY(8px) translateZ(0); }
+    .kuiPopover--anchorLeft .kuiPopover__body:before, .kuiPopover--anchorLeft .kuiPopover__body:after {
       right: auto;
       left: 16px;
       margin: 0; }
-  .kuiPopMenu--anchorRight .kuiPopMenu__body {
-    right: 0;
-    left: auto; }
-    .kuiPopMenu--anchorRight .kuiPopMenu__body:before, .kuiPopMenu--anchorRight .kuiPopMenu__body:after {
+  .kuiPopover--anchorRight .kuiPopover__body {
+    left: 100%;
+    -webkit-transform: translateX(-100%) translateY(8px) translateZ(0);
+            transform: translateX(-100%) translateY(8px) translateZ(0); }
+    .kuiPopover--anchorRight .kuiPopover__body:before, .kuiPopover--anchorRight .kuiPopover__body:after {
       right: 16px;
       left: auto; }
 

@@ -9,6 +9,9 @@ import IconExample
 import HeaderExample
   from '../../views/header/header_example';
 
+import PopoverExample
+  from '../../views/popover/popover_example';
+
 import TypographyExample
   from '../../views/typography/typography_example';
 
@@ -24,6 +27,10 @@ const components = [{
 }, {
   name: 'Header',
   component: HeaderExample,
+}, {
+  name: 'Popover',
+  component: PopoverExample,
+  hasReact: true,
 }, {
   name: 'Typography',
   component: TypographyExample,
