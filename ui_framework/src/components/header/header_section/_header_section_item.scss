@@ -1,6 +1,6 @@
 // Header items are the small icon links that pop up menus.
 
-@include component('kuiHeaderItem') {
+@include component('kuiHeaderSectionItem') {
   position: relative;
 
   &:hover {
@@ -22,20 +22,6 @@
       left: auto;
       right: 0;
     }
-  }
-
-  @include child('logo') {
-    position: relative;
-    height: $kuiHeaderChildSize;
-    padding: $kuiSize $kuiSizeXL;
-    display: inline-block;
-    vertical-align: middle;
-  }
-
-  @include child('logoIcon') {
-    height: $kuiSizeXL;
-    width: $kuiSizeL;
-    opacity: 1;
   }
 
   @include child('button') {

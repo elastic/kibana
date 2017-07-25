@@ -25,6 +25,7 @@ time, mark, audio, video {
   border: 0;
   font-size: 100%;
   font: inherit;
+  font-family: $kuiFontFamily;
   vertical-align: baseline;
 }
 
@@ -52,13 +53,13 @@ body {
 
 a {
   text-decoration: none;
+
   &:hover {
-    text-decoration: underline;
+    text-decoration: none;
   }
 
   &:focus {
-    text-decoration: underline;
-    background: $kuiFocusBackgroundColor;
+    text-decoration: none;
     outline: none;
   }
 }
