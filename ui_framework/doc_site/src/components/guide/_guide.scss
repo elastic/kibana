@@ -18,16 +18,26 @@
   flex-direction: column;
   flex: 1 1 auto;
   padding-top: $guideNavHeight;
-  background-color: $guideBaseBackgroundColor;
+  background-color: $kuiColorLightestShade;
   transition:
     padding-right $guideCodeViewerTransition,
     opacity $guideCodeViewerTransition;
 
   &.is-code-viewer-open {
-    padding-right: $guideCodeViewerWidth;
-
-    @include whenNarrowerThan($guideNormalBreakpoint) {
-      padding-right: $guideCodeViewerSmallWidth;
+    .guidePageBody {
+      position: fixed;
+      left: 0;
+      right: 0;
+      bottom: 50%;
+      top: 0;
+      overflow: auto;
+      z-index: 99999;
+      width: 100%;
+      padding-left: $kuiSizeL;
+      margin: -1px;
+    }
+    .guideSection__sourceButton {
+      display: none;
     }
   }
 
@@ -51,7 +61,7 @@
   display: flex;
   justify-content: center;
   flex: 1 0 auto;
-  background-color: #ffffff;
+  background-color: $kuiColorEmptyShade;
 }
 
   .guideContentPage__hint {

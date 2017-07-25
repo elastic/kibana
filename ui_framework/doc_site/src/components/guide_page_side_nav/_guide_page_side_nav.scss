@@ -1,12 +1,11 @@
 .guidePageSideNav {
   position: fixed;
-  top: 70px;
-  left: 10px;
+  top: $guideNavHeight + $kuiSizeL;
   bottom: 10px;
   width: $guideSideNavWidth;
   overflow: auto;
   z-index: 100;
-  padding: 12px 20px;
+  padding: 0 $kuiSizeL;
 
   @include scrollbar;
 
@@ -16,20 +15,16 @@
 }
 
   .guidePageSideNav__title {
-    padding-bottom: 10px;
-    margin-bottom: 7px;
-    font-size: 22px;
     line-height: $guideLineHeight;
-    opacity: 0.8;
-  }
-
-  .guidePageSideNavMenu {
-    line-height: $guideLineHeight;
+    color: $kuiColorDarkestShade;
+    @include kuiFontSizeL;
+    margin-bottom: $kuiSize;
   }
 
     .guidePageSideNavMenu__item {
+      margin-left: $kuiSize;
       & + & {
-        margin-top: 6px;
+        margin-top: $kuiSize;
       }
     }
 
@@ -39,6 +34,7 @@
         text-decoration: none;
 
         &:hover {
-          color: $guideLinkHoverColor;
+          color: $kuiColorDarkestShade;
+          text-decoration: underline;
         }
       }

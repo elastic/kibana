@@ -53,22 +53,26 @@ export class GuideCodeViewer extends Component {
       'is-code-viewer-open': this.props.isOpen,
     });
 
+    const buttonClasses = classNames('guideCodeViewer__closeButton', {
+      'is-code-viewer-open': this.props.isOpen,
+    });
+
     const codeSections = this.props.source.map(sourceObject => (
       this.renderSection(sourceObject.type, sourceObject.code)
     ));
 
     return (
-      <div className={classes}>
-        <div className="guideCodeViewer__header">
-          {this.props.title}
+      <div>
+        <div className={buttonClasses} onClick={this.props.onClose}>
+          close (x)
         </div>
+        <div className={classes}>
+          <div className="guideCodeViewer__header">
+            {this.props.title}
+          </div>
 
-        <div
-          className="guideCodeViewer__closeButton fa fa-times"
-          onClick={this.props.onClose}
-        />
-
-        {codeSections}
+          {codeSections}
+        </div>
       </div>
     );
   }
