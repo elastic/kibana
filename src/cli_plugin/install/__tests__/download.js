@@ -317,6 +317,26 @@ describe('kibana cli', function () {
           .then(expectProxyHit);
       });
 
+      it('should not use http_proxy for HTTPS urls', function () {
+        process.env.http_proxy = proxyUrl;
+        settings.urls = ['https://example.com/plugin.zip'];
+
+        nockPluginForUrl('https://example.com');
+
+        return download(settings, logger)
+          .then(expectNoProxyHit);
+      });
+
+      it('should not use https_proxy for HTTP urls', function () {
+        process.env.https_proxy = proxyUrl;
+        settings.urls = ['http://example.com/plugin.zip'];
+
+        nockPluginForUrl('http://example.com');
+
+        return download(settings, logger)
+          .then(expectNoProxyHit);
+      });
+
       it('should support domains in no_proxy', function () {
         process.env.http_proxy = proxyUrl;
         process.env.no_proxy = 'foo.bar, example.com';
