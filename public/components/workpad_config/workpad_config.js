@@ -33,7 +33,6 @@ export const WorkpadConfig = ({ setSize, size }) => {
         </ControlLabel>
 
         <div className="canvas__workpad_config--presets">
-          Presets
           <Label bsStyle="default" onClick={() => setSize({ height: 1080, width: 1920 })}>1080p</Label>
           <Label bsStyle="default" onClick={() => setSize({ height: 720, width: 1280 })}>720p</Label>
           <Label bsStyle="default" onClick={() => setSize({ height: 842, width: 590 })}>A4</Label>
