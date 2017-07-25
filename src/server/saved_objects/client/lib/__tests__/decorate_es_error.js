@@ -9,7 +9,7 @@ import {
   isForbiddenError,
   isNotFoundError,
   isBadRequestError,
-} from '../error_types';
+} from '../errors';
 
 describe('savedObjectsClient/decorateEsError', () => {
   it('always returns the same error it receives', () => {

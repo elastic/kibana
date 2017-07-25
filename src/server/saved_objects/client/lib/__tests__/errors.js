@@ -15,7 +15,7 @@ import {
   wrapEsUnavailableError,
   isEsUnavailableError,
   wrapGeneralError,
-} from '../error_types';
+} from '../errors';
 
 describe('savedObjectsClient/errorTypes', () => {
   describe('BadRequest error', () => {
