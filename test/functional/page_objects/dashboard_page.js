@@ -64,14 +64,14 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
       return await queryObject.getProperty('value');
     }
 
-    appendQuery(query) {
-      log.debug('Appending query');
-      return retry.try(() => testSubjects.find('queryInput').type(query));
+    async setQuery(query) {
+      log.debug(`setQuery(${query})`);
+      return await testSubjects.setValue('queryInput', query);
     }
 
-    clickFilterButton() {
+    async clickFilterButton() {
       log.debug('Clicking filter button');
-      return testSubjects.click('querySubmitButton');
+      return await testSubjects.click('querySubmitButton');
     }
 
     async clickClone() {
@@ -327,18 +327,15 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
       });
     }
 
-    getPanelTitles() {
+    async getPanelTitles() {
       log.debug('in getPanelTitles');
-      return testSubjects.findAll('dashboardPanelTitle')
-      .then(function (titleObjects) {
+      const titleObjects = await testSubjects.findAll('dashboardPanelTitle');
 
-        function getTitles(chart) {
-          return chart.getVisibleText();
-        }
-
-        const getTitlePromises = titleObjects.map(getTitles);
-        return Promise.all(getTitlePromises);
-      });
+      function getTitles(chart) {
+        return chart.getVisibleText();
+      }
+      const getTitlePromises = titleObjects.map(getTitles);
+      return Promise.all(getTitlePromises);
     }
 
     async getDashboardPanels() {
