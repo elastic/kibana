@@ -21,7 +21,7 @@ app.service('$store', (kbnVersion, basePath, serverFunctions) => {
     kbnVersion,
     functionDefinitions,
     basePath,
-    ready: false,
+    ready: true,
   };
 
   const rootReducer = getRootReducer(initialState);
