@@ -11,7 +11,7 @@
     "dashboarding"
   ],
   "private": false,
-  "version": "5.5.1",
+  "version": "5.5.2",
   "branch": "5.x",
   "build": {
     "number": 8467,
