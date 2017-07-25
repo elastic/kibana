@@ -1,3 +1,4 @@
+import { uniq } from 'lodash';
 import { castEsToKbnFieldTypeName } from '../../../../../utils';
 import { shouldReadFieldFromDocValues } from './should_read_field_from_doc_values';
 
@@ -63,18 +64,34 @@ export function readFieldCapsResponse(fieldCapsResponse) {
     const capsByType = capsByNameThenType[fieldName];
     const types = Object.keys(capsByType);
 
+    // If there are multiple types but they all resolve to the same kibana type
+    // ignore the conflict and carry on (my wayward son)
     if (types.length > 1) {
-      return {
-        name: fieldName,
-        type: 'conflict',
-        searchable: types.some(type => !!capsByType[type].searchable),
-        aggregatable: types.some(type => !!capsByType[type].aggregatable),
-        readFromDocValues: false,
-        conflictDescriptions: types.reduce((acc, esType) => ({
-          ...acc,
-          [esType]: capsByType[esType].indices
-        }), {})
-      };
+      const uniqueKibanaTypes = uniq(types.map(castEsToKbnFieldTypeName));
+      if (uniqueKibanaTypes.length > 1) {
+        // If a single type is marked as searchable or aggregatable, all the types are searcuable or aggregatable
+        const conflictIsSearchable = types.some(type => {
+          return !!capsByType[type].searchable ||
+            (!!capsByType[type].non_searchable_indices && capsByType[type].non_searchable_indices.length > 0);
+        });
+
+        const conflictIsAggregatable = types.some(type => {
+          return !!capsByType[type].aggregatable ||
+            (!!capsByType[type].non_aggregatable_indices && capsByType[type].non_aggregatable_indices.length > 0);
+        });
+
+        return {
+          name: fieldName,
+          type: 'conflict',
+          searchable: conflictIsSearchable,
+          aggregatable: conflictIsAggregatable,
+          readFromDocValues: false,
+          conflictDescriptions: types.reduce((acc, esType) => ({
+            ...acc,
+            [esType]: capsByType[esType].indices
+          }), {})
+        };
+      }
     }
 
     const esType = types[0];
