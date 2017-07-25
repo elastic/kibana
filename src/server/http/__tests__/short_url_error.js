@@ -5,11 +5,13 @@ import { handleShortUrlError } from '../short_url_error';
 function createErrorWithStatus(status) {
   const error = new Error();
   error.status = status;
+  return error;
 }
 
 function createErrorWithStatusCode(statusCode) {
   const error = new Error();
   error.statusCode = statusCode;
+  return error;
 }
 
 describe('handleShortUrlError()', () => {
