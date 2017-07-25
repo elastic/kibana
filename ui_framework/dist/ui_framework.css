@@ -1,26 +1,3 @@
-.kui--codeFont {
-  font-family: "Roboto Mono", monospace; }
-
-.kui--fontSizeSmall, .kuiKeyPad {
-  font-size: 14px;
-  font-size: 0.875rem;
-  line-height: 24px; }
-
-.kuiTitle--small, .kuiText {
-  font-size: 16px;
-  font-size: 1rem;
-  line-height: 24px; }
-
-.kuiTitle {
-  font-size: 24px;
-  font-size: 1.5rem;
-  line-height: 36px; }
-
-.kuiTitle--large {
-  font-size: 32px;
-  font-size: 2rem;
-  line-height: 48px; }
-
 /**
  * Adapted from Eric Meyer's reset (http://meyerweb.com/eric/tools/css/reset/, v2.0 | 20110126).
  *
@@ -62,6 +39,9 @@ html {
 
 body {
   line-height: 1; }
+
+*:focus {
+  outline: none; }
 
 a {
   text-decoration: none; }
@@ -134,6 +114,12 @@ table {
       -ms-flex-preferred-size: 33.33%;
           flex-basis: 33.33%; }
 
+.kui--flexAlignItemsCenter {
+  -webkit-box-align: center;
+  -webkit-align-items: center;
+      -ms-flex-align: center;
+          align-items: center; }
+
 .kui--textAlignRight {
   text-align: right !important; }
 
@@ -146,11 +132,180 @@ table {
 .kui--verticalAlignMiddle {
   vertical-align: middle !important; }
 
+.kui--fontSizeSmall {
+  font-size: 14px;
+  font-size: 0.875rem;
+  line-height: 24px; }
+
+.kui--codeFont {
+  font-family: "Roboto Mono", monospace; }
+
 .kui--subduedText {
   color: #666; }
 
 .kui--bottomShadow {
   box-shadow: 0 16px 16px -8px rgba(0, 0, 0, 0.1); }
+
+.kui--margin {
+  margin: 16px !important; }
+
+.kui--marginLarge {
+  margin: 24px !important; }
+
+.kui--marginSmall {
+  margin: 8px !important; }
+
+.kui--padding {
+  padding: 16px !important; }
+
+.kui--paddingLarge {
+  padding: 24px !important; }
+
+.kui--paddingSmall {
+  padding: 8px !important; }
+
+.kui--marginTopBottom {
+  margin-top: 16px !important;
+  margin-bottom: 16px !important; }
+
+.kui--marginTopBottomSmall {
+  margin-top: 8px !important;
+  margin-bottom: 8px !important; }
+
+.kui--marginTopBottomLarge {
+  margin-top: 24px !important;
+  margin-bottom: 24px !important; }
+
+.kui--marginTop {
+  margin-top: 16px !important; }
+
+.kui--marginBottom {
+  margin-bottom: 16px !important; }
+
+.kui--marginTopSmall {
+  margin-top: 8px !important; }
+
+.kui--marginBottomSmall {
+  margin-bottom: 8px !important; }
+
+.kui--marginTopLarge {
+  margin-top: 24px !important; }
+
+.kui--marginBottomLarge {
+  margin-bottom: 24px !important; }
+
+.kui--marginLeftRight {
+  margin-left: 16px !important;
+  margin-right: 16px !important; }
+
+.kui--marginLeftRightSmall {
+  margin-left: 8px !important;
+  margin-right: 8px !important; }
+
+.kui--marginLeftRightLarge {
+  margin-left: 24px !important;
+  margin-right: 24px !important; }
+
+.kui--marginLeft {
+  margin-left: 16px !important; }
+
+.kui--marginRight {
+  margin-right: 16px !important; }
+
+.kui--marginLeftSmall {
+  margin-left: 8px !important; }
+
+.kui--marginRightSmall {
+  margin-right: 8px !important; }
+
+.kui--marginLeftLarge {
+  margin-left: 24px !important; }
+
+.kui--marginRightLarge {
+  margin-right: 24px !important; }
+
+.kui--paddingTopBottom {
+  padding-top: 16px !important;
+  padding-bottom: 16px !important; }
+
+.kui--paddingTopBottomSmall {
+  padding-top: 8px !important;
+  padding-bottom: 8px !important; }
+
+.kui--paddingTopBottomLarge {
+  padding-top: 24px !important;
+  padding-bottom: 24px !important; }
+
+.kui--paddingTop {
+  padding-top: 16px !important; }
+
+.kui--paddingBottom {
+  padding-bottom: 16px !important; }
+
+.kui--paddingTopSmall {
+  padding-top: 8px !important; }
+
+.kui--paddingBottomSmall {
+  padding-bottom: 8px !important; }
+
+.kui--paddingTopLarge {
+  padding-top: 24px !important; }
+
+.kui--paddingBottomLarge {
+  padding-bottom: 24px !important; }
+
+.kui--paddingLeftRight {
+  padding-left: 16px !important;
+  padding-right: 16px !important; }
+
+.kui--paddingLeftRightSmall {
+  padding-left: 8px !important;
+  padding-right: 8px !important; }
+
+.kui--paddingLeftRightLarge {
+  padding-left: 24px !important;
+  padding-right: 24px !important; }
+
+.kui--paddingLeft {
+  padding-left: 16px !important; }
+
+.kui--paddingRight {
+  padding-right: 16px !important; }
+
+.kui--paddingLeftSmall {
+  padding-left: 8px !important; }
+
+.kui--paddingRightSmall {
+  padding-right: 8px !important; }
+
+.kui--paddingLeftLarge {
+  padding-left: 24px !important; }
+
+.kui--paddingRightLarge {
+  padding-right: 24px !important; }
+
+.kuiAvatar {
+  border-radius: 50%;
+  width: 24px;
+  height: 24px;
+  display: inline-block;
+  position: relative; }
+  .kuiAvatar:after {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    border-radius: 50%;
+    content: "";
+    pointer-events: none;
+    border: 1px solid rgba(0, 0, 0, 0.1); }
+  .kuiAvatar--small {
+    width: 16px;
+    height: 16px; }
+  .kuiAvatar--large {
+    width: 64px;
+    height: 64px; }
 
 .kuiHeader {
   background: #FFF;
@@ -241,9 +396,57 @@ table {
     .kuiHeaderItem__button:focus {
       background: #e6f2f6; }
 
+.kuiHeaderAlert {
+  text-align: left;
+  min-width: 300px;
+  position: relative;
+  margin: 0 -16px;
+  padding: 16px;
+  border-top: 1px solid #D9D9D9; }
+  .kuiHeaderAlert:hover .kuiHeaderAlert__dismiss {
+    opacity: 1; }
+  .kuiHeaderAlert__dismiss {
+    opacity: 0;
+    position: absolute;
+    right: 16px;
+    top: 16px;
+    transition: opacity 250ms ease-in;
+    cursor: pointer; }
+  .kuiHeaderAlert__title {
+    font-weight: 500;
+    font-size: 16px;
+    font-size: 1rem;
+    line-height: 24px;
+    padding-right: 24px; }
+  .kuiHeaderAlert__text {
+    font-size: 12px;
+    font-size: 0.75rem;
+    line-height: 24px;
+    margin-bottom: 8px; }
+  .kuiHeaderAlert__action {
+    font-size: 12px;
+    font-size: 0.75rem;
+    line-height: 24px;
+    color: #0079a5; }
+    .kuiHeaderAlert__action:focus {
+      outline: solid 6px #e6f2f6; }
+  .kuiHeaderAlert__date {
+    font-size: 12px;
+    font-size: 0.75rem;
+    line-height: 24px;
+    color: #666;
+    text-align: right; }
+
+.kuiHeaderProfile {
+  text-align: left;
+  padding-bottom: 16px; }
+
 .kuiIcon {
   display: inline-block;
   fill: #3F3F3F; }
+  .kuiIcon:focus {
+    opacity: 1;
+    background: #e6f2f6; }
   .kuiIcon--medium {
     width: 16px;
     height: 16px; }
@@ -271,7 +474,10 @@ table {
       -ms-flex-wrap: wrap;
           flex-wrap: wrap;
   width: 288px;
-  text-align: center; }
+  text-align: center;
+  font-size: 14px;
+  font-size: 0.875rem;
+  line-height: 24px; }
   .kuiKeyPad__item {
     padding: 16px;
     height: 96px;
@@ -292,6 +498,14 @@ table {
     transition: transform cubic-bezier(0.34, 1.61, 0.7, 1) 250ms, -webkit-transform cubic-bezier(0.34, 1.61, 0.7, 1) 250ms;
     -webkit-transform: translateY(4px);
             transform: translateY(4px); }
+
+.kuiLink {
+  color: #0079a5; }
+  .kuiLink:hover {
+    color: #005472; }
+  .kuiLink:focus {
+    background: #e6f2f6;
+    outline: solid 3px #e6f2f6; }
 
 .kuiPopMenu {
   position: relative; }
@@ -358,9 +572,23 @@ table {
       left: auto; }
 
 .kuiTitle {
+  font-size: 24px;
+  font-size: 1.5rem;
+  line-height: 36px;
   color: #000;
   font-weight: 300; }
+  .kuiTitle--small {
+    font-size: 16px;
+    font-size: 1rem;
+    line-height: 24px; }
+  .kuiTitle--large {
+    font-size: 32px;
+    font-size: 2rem;
+    line-height: 48px; }
 
 .kuiText {
+  font-size: 16px;
+  font-size: 1rem;
+  line-height: 24px;
   color: #3F3F3F;
   font-weight: 400; }

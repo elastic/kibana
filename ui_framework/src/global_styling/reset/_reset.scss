@@ -46,6 +46,10 @@ body {
   line-height: 1;
 }
 
+*:focus {
+  outline: none;
+}
+
 a {
   text-decoration: none;
   &:hover {

@@ -15,5 +15,13 @@ export default () => (
     &nbsp;
 
     <KuiIcon type="user" />
+
+    &nbsp;
+
+    <KuiIcon type="cross" />
+
+    &nbsp;
+
+    <KuiIcon type="help" />
   </div>
 );

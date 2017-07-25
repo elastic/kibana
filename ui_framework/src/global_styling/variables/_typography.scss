@@ -42,48 +42,48 @@ $kuiFontWeightMedium:   500;
 
 // Our base fonts
 
-%kuiFont {
+@mixin kuiFont {
   font-family: $kuiFontFamily;
   font-weight: $kuiFontWeightRegular;
 }
 
-%kuiCodeFont {
+@mixin kuiCodeFont {
   font-family: $kuiCodeFontFamily;
 }
 
 // Font sizing extends, using rem mixin
 
-%kuiFontSize {
+@mixin kuiFontSize {
   @include fontSize($kuiFontSize);
   line-height: $kuiLineHeight;
 }
 
-%kuiFontSizeXS {
+@mixin kuiFontSizeXS {
   @include fontSize($kuiFontSizeXS);
   line-height: $kuiLineHeight;
 }
 
-%kuiFontSizeS {
+@mixin kuiFontSizeS {
   @include fontSize($kuiFontSizeS);
   line-height: $kuiLineHeight;
 }
 
-%kuiFontSizeM {
+@mixin kuiFontSizeM {
   @include fontSize($kuiFontSizeM);
   line-height: $kuiLineHeight;
 }
 
-%kuiFontSizeL {
+@mixin kuiFontSizeL {
   @include fontSize($kuiFontSizeL);
   line-height: $kuiLineHeight * 1.5;
 }
 
-%kuiFontSizeXL {
+@mixin kuiFontSizeXL {
   @include fontSize($kuiFontSizeXL);
   line-height: $kuiLineHeight * 2;
 }
 
-%kuiFontSizeXXL {
+@mixin kuiFontSizeXXL {
   @include fontSize($kuiFontSizeXXL);
   line-height: $kuiLineHeight * 3;
 }

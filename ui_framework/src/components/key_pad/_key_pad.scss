@@ -6,7 +6,7 @@
   flex-wrap: wrap;
   width: $kuiKeyPadSize * 3; // Default to grid of 3
   text-align: center;
-  @extend %kuiFontSizeS;
+  @include kuiFontSizeS;
 
   @include child('item') {
     padding: $kuiSize;

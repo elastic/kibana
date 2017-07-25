@@ -1,19 +1,19 @@
 @include component('kuiTitle') {
-  @extend %kuiFontSizeL;
+  @include kuiFontSizeL;
   color: $kuiTitleColor;
   font-weight: $kuiFontWeightLight;
 
   @include modifier('small') {
-    @extend %kuiFontSizeM;
+    @include kuiFontSizeM;
   }
 
   @include modifier('large') {
-    @extend %kuiFontSizeXL;
+    @include kuiFontSizeXL;
   }
 }
 
 @include component('kuiText') {
-  @extend %kuiFontSizeM;
+  @include kuiFontSizeM;
   color: $kuiTextColor;
   font-weight: $kuiFontWeightRegular;
 }

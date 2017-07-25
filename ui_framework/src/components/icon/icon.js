@@ -14,6 +14,8 @@ import '!!svg-sprite!./assets/apps.svg';
 import '!!svg-sprite!./assets/logo.svg';
 import '!!svg-sprite!./assets/search.svg';
 import '!!svg-sprite!./assets/user.svg';
+import '!!svg-sprite!./assets/help.svg';
+import '!!svg-sprite!./assets/cross.svg';
 
 const humanizeCamelCase = str => (
   // Put spaces between words in camel-cased strings.
@@ -32,6 +34,8 @@ const typeToIconMap = {
   kibanaLogo: 'logo',
   search: 'search',
   user: 'user',
+  help: 'help',
+  cross: 'cross',
 };
 
 export const TYPES = Object.keys(typeToIconMap);

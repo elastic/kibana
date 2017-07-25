@@ -22,3 +22,7 @@
 @include utility('flexBasisOneThird') {
   flex-basis: 33.33%;
 }
+
+@include utility('flexAlignItemsCenter') {
+  align-items: center;
+}
