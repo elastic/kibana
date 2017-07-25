@@ -7,6 +7,12 @@ export {
 } from './icon';
 
 export {
+  KuiKeyPadMenu,
+  KuiKeyPadMenuItem,
+  KuiKeyPadMenuItemButton,
+} from './key_pad_menu';
+
+export {
   KuiPopover,
 } from './popover';
 

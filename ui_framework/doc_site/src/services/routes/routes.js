@@ -9,6 +9,9 @@ import IconExample
 import HeaderExample
   from '../../views/header/header_example';
 
+import KeyPadMenuExample
+  from '../../views/key_pad_menu/key_pad_menu_example';
+
 import PopoverExample
   from '../../views/popover/popover_example';
 
@@ -27,6 +30,10 @@ const components = [{
 }, {
   name: 'Header',
   component: HeaderExample,
+}, {
+  name: 'KeyPadMenu',
+  component: KeyPadMenuExample,
+  hasReact: true,
 }, {
   name: 'Popover',
   component: PopoverExample,

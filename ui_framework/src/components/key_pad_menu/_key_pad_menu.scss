@@ -5,30 +5,48 @@
   flex-direction: row;
   flex-wrap: wrap;
   width: $kuiKeyPadMenuSize * 3; // Default to grid of 3
-  text-align: center;
+}
+
+@include component('kuiKeyPadMenuItem') {
   @include kuiFontSizeS;
 
-  @include child('item') {
-    padding: $kuiSize;
-    height: $kuiKeyPadMenuSize;
-    width: $kuiKeyPadMenuSize;
-    display: block;
-    color: $kuiColorDarkShade;
-    border: $kuiBorderThin;
-    border-color: transparent;
-    border-radius: $kuiBorderRadius;
+  display: block;
+  padding: $kuiSize;
+  height: $kuiKeyPadMenuSize;
+  width: $kuiKeyPadMenuSize;
+  color: $kuiColorDarkShade;
+  border: $kuiBorderThin;
+  border-color: transparent;
+  border-radius: $kuiBorderRadius;
 
-    &:hover, &:focus {
-      border-color: $kuiBorderColor;
+  &:hover, &:focus {
+    border-color: $kuiBorderColor;
+    background: $kuiFocusBackgroundColor;
 
-      @include child('icon') {
-        transform: translateY(0);
-      }
+    @include child('icon') {
+      transform: translateY(0);
     }
+
+    @include child('label') {
+      text-decoration: underline;
+    }
+  }
+
+  @include child('inner') {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
   }
 
   @include child('icon') {
     transition: transform $kuiAnimSlightBounce $kuiAnimSpeedNormal;
     transform: translateY($kuiSizeXS);
+  }
+
+  @include child('label') {
+    text-align: center;
   }
 }
