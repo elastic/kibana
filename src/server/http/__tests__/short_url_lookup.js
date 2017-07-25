@@ -60,7 +60,7 @@ describe('shortUrlLookupProvider', () => {
     });
 
     it('gracefully handles version conflict', async () => {
-      const error = savedObjectsClient.errors.wrapConflictError(new Error());
+      const error = savedObjectsClient.errors.decorateConflictError(new Error());
       savedObjectsClient.create.throws(error);
       const id = await shortUrl.generateUrlId(URL, req);
       expect(id).to.eql(ID);

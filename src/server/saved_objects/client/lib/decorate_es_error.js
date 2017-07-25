@@ -14,13 +14,13 @@ const {
 } = elasticsearch.errors;
 
 import {
-  wrapBadRequestError,
-  wrapNotAuthorizedError,
-  wrapForbiddenError,
-  wrapNotFoundError,
-  wrapConflictError,
-  wrapEsUnavailableError,
-  wrapGeneralError,
+  decorateBadRequestError,
+  decorateNotAuthorizedError,
+  decorateForbiddenError,
+  decorateNotFoundError,
+  decorateConflictError,
+  decorateEsUnavailableError,
+  decorateGeneralError,
 } from './errors';
 
 export function decorateEsError(error) {
@@ -35,28 +35,28 @@ export function decorateEsError(error) {
     error instanceof NoConnections ||
     error instanceof RequestTimeout
   ) {
-    return wrapEsUnavailableError(error, reason);
+    return decorateEsUnavailableError(error, reason);
   }
 
   if (error instanceof Conflict) {
-    return wrapConflictError(error, reason);
+    return decorateConflictError(error, reason);
   }
 
   if (error instanceof NotAuthorized) {
-    return wrapNotAuthorizedError(error, reason);
+    return decorateNotAuthorizedError(error, reason);
   }
 
   if (error instanceof Forbidden) {
-    return wrapForbiddenError(error, reason);
+    return decorateForbiddenError(error, reason);
   }
 
   if (error instanceof NotFound) {
-    return wrapNotFoundError(error, reason);
+    return decorateNotFoundError(error, reason);
   }
 
   if (error instanceof BadRequest) {
-    return wrapBadRequestError(error, reason);
+    return decorateBadRequestError(error, reason);
   }
 
-  return wrapGeneralError(error, reason);
+  return decorateGeneralError(error, reason);
 }

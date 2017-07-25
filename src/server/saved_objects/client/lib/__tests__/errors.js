@@ -2,300 +2,300 @@ import expect from 'expect.js';
 import Boom from 'boom';
 
 import {
-  wrapBadRequestError,
+  decorateBadRequestError,
   isBadRequestError,
-  wrapNotAuthorizedError,
+  decorateNotAuthorizedError,
   isNotAuthorizedError,
-  wrapForbiddenError,
+  decorateForbiddenError,
   isForbiddenError,
-  wrapNotFoundError,
+  decorateNotFoundError,
   isNotFoundError,
-  wrapConflictError,
+  decorateConflictError,
   isConflictError,
-  wrapEsUnavailableError,
+  decorateEsUnavailableError,
   isEsUnavailableError,
-  wrapGeneralError,
+  decorateGeneralError,
 } from '../errors';
 
 describe('savedObjectsClient/errorTypes', () => {
   describe('BadRequest error', () => {
-    describe('wrapBadRequestError', () => {
+    describe('decorateBadRequestError', () => {
       it('returns original object', () => {
         const error = new Error();
-        expect(wrapBadRequestError(error)).to.be(error);
+        expect(decorateBadRequestError(error)).to.be(error);
       });
 
       it('makes the error identifiable as a BadRequest error', () => {
         const error = new Error();
         expect(isBadRequestError(error)).to.be(false);
-        wrapBadRequestError(error);
+        decorateBadRequestError(error);
         expect(isBadRequestError(error)).to.be(true);
       });
 
       it('adds boom properties', () => {
-        const error = wrapBadRequestError(new Error());
+        const error = decorateBadRequestError(new Error());
         expect(error.output).to.be.an('object');
         expect(error.output.statusCode).to.be(400);
       });
 
       it('preserves boom properties of input', () => {
         const error = Boom.notFound();
-        wrapBadRequestError(error);
+        decorateBadRequestError(error);
         expect(error.output.statusCode).to.be(404);
       });
 
       describe('error.output', () => {
         it('defaults to message of erorr', () => {
-          const error = wrapBadRequestError(new Error('foobar'));
+          const error = decorateBadRequestError(new Error('foobar'));
           expect(error.output.payload).to.have.property('message', 'foobar');
         });
         it('prefixes message with passed reason', () => {
-          const error = wrapBadRequestError(new Error('foobar'), 'biz');
+          const error = decorateBadRequestError(new Error('foobar'), 'biz');
           expect(error.output.payload).to.have.property('message', 'biz: foobar');
         });
         it('sets statusCode to 400', () => {
-          const error = wrapBadRequestError(new Error('foo'));
+          const error = decorateBadRequestError(new Error('foo'));
           expect(error.output).to.have.property('statusCode', 400);
         });
       });
     });
   });
   describe('NotAuthorized error', () => {
-    describe('wrapNotAuthorizedError', () => {
+    describe('decorateNotAuthorizedError', () => {
       it('returns original object', () => {
         const error = new Error();
-        expect(wrapNotAuthorizedError(error)).to.be(error);
+        expect(decorateNotAuthorizedError(error)).to.be(error);
       });
 
       it('makes the error identifiable as a NotAuthorized error', () => {
         const error = new Error();
         expect(isNotAuthorizedError(error)).to.be(false);
-        wrapNotAuthorizedError(error);
+        decorateNotAuthorizedError(error);
         expect(isNotAuthorizedError(error)).to.be(true);
       });
 
       it('adds boom properties', () => {
-        const error = wrapNotAuthorizedError(new Error());
+        const error = decorateNotAuthorizedError(new Error());
         expect(error.output).to.be.an('object');
         expect(error.output.statusCode).to.be(401);
       });
 
       it('preserves boom properties of input', () => {
         const error = Boom.notFound();
-        wrapNotAuthorizedError(error);
+        decorateNotAuthorizedError(error);
         expect(error.output.statusCode).to.be(404);
       });
 
       describe('error.output', () => {
         it('defaults to message of erorr', () => {
-          const error = wrapNotAuthorizedError(new Error('foobar'));
+          const error = decorateNotAuthorizedError(new Error('foobar'));
           expect(error.output.payload).to.have.property('message', 'foobar');
         });
         it('prefixes message with passed reason', () => {
-          const error = wrapNotAuthorizedError(new Error('foobar'), 'biz');
+          const error = decorateNotAuthorizedError(new Error('foobar'), 'biz');
           expect(error.output.payload).to.have.property('message', 'biz: foobar');
         });
         it('sets statusCode to 401', () => {
-          const error = wrapNotAuthorizedError(new Error('foo'));
+          const error = decorateNotAuthorizedError(new Error('foo'));
           expect(error.output).to.have.property('statusCode', 401);
         });
       });
     });
   });
   describe('Forbidden error', () => {
-    describe('wrapForbiddenError', () => {
+    describe('decorateForbiddenError', () => {
       it('returns original object', () => {
         const error = new Error();
-        expect(wrapForbiddenError(error)).to.be(error);
+        expect(decorateForbiddenError(error)).to.be(error);
       });
 
       it('makes the error identifiable as a Forbidden error', () => {
         const error = new Error();
         expect(isForbiddenError(error)).to.be(false);
-        wrapForbiddenError(error);
+        decorateForbiddenError(error);
         expect(isForbiddenError(error)).to.be(true);
       });
 
       it('adds boom properties', () => {
-        const error = wrapForbiddenError(new Error());
+        const error = decorateForbiddenError(new Error());
         expect(error.output).to.be.an('object');
         expect(error.output.statusCode).to.be(403);
       });
 
       it('preserves boom properties of input', () => {
         const error = Boom.notFound();
-        wrapForbiddenError(error);
+        decorateForbiddenError(error);
         expect(error.output.statusCode).to.be(404);
       });
 
       describe('error.output', () => {
         it('defaults to message of erorr', () => {
-          const error = wrapForbiddenError(new Error('foobar'));
+          const error = decorateForbiddenError(new Error('foobar'));
           expect(error.output.payload).to.have.property('message', 'foobar');
         });
         it('prefixes message with passed reason', () => {
-          const error = wrapForbiddenError(new Error('foobar'), 'biz');
+          const error = decorateForbiddenError(new Error('foobar'), 'biz');
           expect(error.output.payload).to.have.property('message', 'biz: foobar');
         });
         it('sets statusCode to 403', () => {
-          const error = wrapForbiddenError(new Error('foo'));
+          const error = decorateForbiddenError(new Error('foo'));
           expect(error.output).to.have.property('statusCode', 403);
         });
       });
     });
   });
   describe('NotFound error', () => {
-    describe('wrapNotFoundError', () => {
+    describe('decorateNotFoundError', () => {
       it('returns original object', () => {
         const error = new Error();
-        expect(wrapNotFoundError(error)).to.be(error);
+        expect(decorateNotFoundError(error)).to.be(error);
       });
 
       it('makes the error identifiable as a NotFound error', () => {
         const error = new Error();
         expect(isNotFoundError(error)).to.be(false);
-        wrapNotFoundError(error);
+        decorateNotFoundError(error);
         expect(isNotFoundError(error)).to.be(true);
       });
 
       it('adds boom properties', () => {
-        const error = wrapNotFoundError(new Error());
+        const error = decorateNotFoundError(new Error());
         expect(error.output).to.be.an('object');
         expect(error.output.statusCode).to.be(404);
       });
 
       it('preserves boom properties of input', () => {
         const error = Boom.forbidden();
-        wrapNotFoundError(error);
+        decorateNotFoundError(error);
         expect(error.output.statusCode).to.be(403);
       });
 
       describe('error.output', () => {
         it('defaults to message of erorr', () => {
-          const error = wrapNotFoundError(new Error('foobar'));
+          const error = decorateNotFoundError(new Error('foobar'));
           expect(error.output.payload).to.have.property('message', 'foobar');
         });
         it('prefixes message with passed reason', () => {
-          const error = wrapNotFoundError(new Error('foobar'), 'biz');
+          const error = decorateNotFoundError(new Error('foobar'), 'biz');
           expect(error.output.payload).to.have.property('message', 'biz: foobar');
         });
         it('sets statusCode to 404', () => {
-          const error = wrapNotFoundError(new Error('foo'));
+          const error = decorateNotFoundError(new Error('foo'));
           expect(error.output).to.have.property('statusCode', 404);
         });
       });
     });
   });
   describe('Conflict error', () => {
-    describe('wrapConflictError', () => {
+    describe('decorateConflictError', () => {
       it('returns original object', () => {
         const error = new Error();
-        expect(wrapConflictError(error)).to.be(error);
+        expect(decorateConflictError(error)).to.be(error);
       });
 
       it('makes the error identifiable as a Conflict error', () => {
         const error = new Error();
         expect(isConflictError(error)).to.be(false);
-        wrapConflictError(error);
+        decorateConflictError(error);
         expect(isConflictError(error)).to.be(true);
       });
 
       it('adds boom properties', () => {
-        const error = wrapConflictError(new Error());
+        const error = decorateConflictError(new Error());
         expect(error.output).to.be.an('object');
         expect(error.output.statusCode).to.be(409);
       });
 
       it('preserves boom properties of input', () => {
         const error = Boom.notFound();
-        wrapConflictError(error);
+        decorateConflictError(error);
         expect(error.output.statusCode).to.be(404);
       });
 
       describe('error.output', () => {
         it('defaults to message of erorr', () => {
-          const error = wrapConflictError(new Error('foobar'));
+          const error = decorateConflictError(new Error('foobar'));
           expect(error.output.payload).to.have.property('message', 'foobar');
         });
         it('prefixes message with passed reason', () => {
-          const error = wrapConflictError(new Error('foobar'), 'biz');
+          const error = decorateConflictError(new Error('foobar'), 'biz');
           expect(error.output.payload).to.have.property('message', 'biz: foobar');
         });
         it('sets statusCode to 409', () => {
-          const error = wrapConflictError(new Error('foo'));
+          const error = decorateConflictError(new Error('foo'));
           expect(error.output).to.have.property('statusCode', 409);
         });
       });
     });
   });
   describe('EsUnavailable error', () => {
-    describe('wrapEsUnavailableError', () => {
+    describe('decorateEsUnavailableError', () => {
       it('returns original object', () => {
         const error = new Error();
-        expect(wrapEsUnavailableError(error)).to.be(error);
+        expect(decorateEsUnavailableError(error)).to.be(error);
       });
 
       it('makes the error identifiable as a EsUnavailable error', () => {
         const error = new Error();
         expect(isEsUnavailableError(error)).to.be(false);
-        wrapEsUnavailableError(error);
+        decorateEsUnavailableError(error);
         expect(isEsUnavailableError(error)).to.be(true);
       });
 
       it('adds boom properties', () => {
-        const error = wrapEsUnavailableError(new Error());
+        const error = decorateEsUnavailableError(new Error());
         expect(error.output).to.be.an('object');
         expect(error.output.statusCode).to.be(503);
       });
 
       it('preserves boom properties of input', () => {
         const error = Boom.notFound();
-        wrapEsUnavailableError(error);
+        decorateEsUnavailableError(error);
         expect(error.output.statusCode).to.be(404);
       });
 
       describe('error.output', () => {
         it('defaults to message of erorr', () => {
-          const error = wrapEsUnavailableError(new Error('foobar'));
+          const error = decorateEsUnavailableError(new Error('foobar'));
           expect(error.output.payload).to.have.property('message', 'foobar');
         });
         it('prefixes message with passed reason', () => {
-          const error = wrapEsUnavailableError(new Error('foobar'), 'biz');
+          const error = decorateEsUnavailableError(new Error('foobar'), 'biz');
           expect(error.output.payload).to.have.property('message', 'biz: foobar');
         });
         it('sets statusCode to 503', () => {
-          const error = wrapEsUnavailableError(new Error('foo'));
+          const error = decorateEsUnavailableError(new Error('foo'));
           expect(error.output).to.have.property('statusCode', 503);
         });
       });
     });
   });
   describe('General error', () => {
-    describe('wrapGeneralError', () => {
+    describe('decorateGeneralError', () => {
       it('returns original object', () => {
         const error = new Error();
-        expect(wrapGeneralError(error)).to.be(error);
+        expect(decorateGeneralError(error)).to.be(error);
       });
 
       it('adds boom properties', () => {
-        const error = wrapGeneralError(new Error());
+        const error = decorateGeneralError(new Error());
         expect(error.output).to.be.an('object');
         expect(error.output.statusCode).to.be(500);
       });
 
       it('preserves boom properties of input', () => {
         const error = Boom.notFound();
-        wrapGeneralError(error);
+        decorateGeneralError(error);
         expect(error.output.statusCode).to.be(404);
       });
 
       describe('error.output', () => {
         it('ignores error message', () => {
-          const error = wrapGeneralError(new Error('foobar'));
+          const error = decorateGeneralError(new Error('foobar'));
           expect(error.output.payload).to.have.property('message').match(/internal server error/i);
         });
         it('sets statusCode to 500', () => {
-          const error = wrapGeneralError(new Error('foo'));
+          const error = decorateGeneralError(new Error('foo'));
           expect(error.output).to.have.property('statusCode', 500);
         });
       });
