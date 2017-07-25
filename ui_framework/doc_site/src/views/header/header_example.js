@@ -1,5 +1,7 @@
 import React from 'react';
 
+import { renderToHtml } from '../../services';
+
 import {
   GuideDemo,
   GuidePage,
@@ -8,30 +10,29 @@ import {
   GuideSectionTypes,
 } from '../../components';
 
-const headerHtml = require('./header.html');
-const headerJs = require('raw!./header.js');
+import Header from './header';
+const headerSource = require('!!raw!./header');
+const headerHtml = renderToHtml(Header);
 
 export default props => (
   <GuidePage title={props.route.name}>
     <GuideSection
       title="Header"
       source={[{
+        type: GuideSectionTypes.JS,
+        code: headerSource,
+      }, {
         type: GuideSectionTypes.HTML,
         code: headerHtml,
-      }, {
-        type: GuideSectionTypes.JS,
-        code: headerJs,
       }]}
     >
       <GuideText>
-        Global nav / header.
+        Global navigation, user state, and controls.
       </GuideText>
 
-      <GuideDemo
-        html={headerHtml}
-        js={headerJs}
-      />
+      <GuideDemo>
+        <Header />
+      </GuideDemo>
     </GuideSection>
-
   </GuidePage>
 );

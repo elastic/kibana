@@ -60,7 +60,7 @@ export class KuiPopover extends Component {
       anchorPositionToClassNameMap[anchorPosition],
       className,
       {
-        'kuiPopover-isOpen': isOpen,
+        'isOpen': isOpen,
       },
     );
 
@@ -68,7 +68,7 @@ export class KuiPopover extends Component {
 
     const body = (
       <div className={bodyClasses}>
-        { children }
+        {children}
       </div>
     );
 
@@ -78,8 +78,8 @@ export class KuiPopover extends Component {
         className={classes}
         {...rest}
       >
-        { button }
-        { body }
+        {button}
+        {body}
       </div>
     );
   }
