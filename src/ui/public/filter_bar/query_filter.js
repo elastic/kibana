@@ -5,6 +5,7 @@ import { uniqFilters } from 'ui/filter_bar/lib/uniq_filters';
 import { compareFilters } from 'ui/filter_bar/lib/compare_filters';
 import { EventsProvider } from 'ui/events';
 import { FilterBarLibMapAndFlattenFiltersProvider } from 'ui/filter_bar/lib/map_and_flatten_filters';
+import { multiSelectFilterManager } from 'ui/filter_bar/multi_select_filter_manager';
 
 export function FilterBarQueryFilterProvider(Private, $rootScope, getAppState, globalState, config) {
   const EventEmitter = Private(EventsProvider);
@@ -39,14 +40,21 @@ export function FilterBarQueryFilterProvider(Private, $rootScope, getAppState, g
     return _.map(globalState.filters, appendStoreType('globalState'));
   };
 
+  queryFilter.addFilters  = function (filters, global) {
+    if (multiSelectFilterManager.isStagingFilters()) {
+      multiSelectFilterManager.stage(filters);
+    } else {
+      queryFilter.submitFilters(filters, global);
+    }
+  };
+
   /**
    * Adds new filters to the scope and state
    * @param {object|array} filters Filter(s) to add
    * @param {bool} global Whether the filter should be added to global state
    * @returns {Promise} filter map promise
    */
-  queryFilter.addFilters = function (filters, global) {
-
+  queryFilter.submitFilters = function (filters, global) {
     if (global === undefined) {
       const configDefault = config.get('filters:pinnedByDefault');
 
@@ -197,6 +205,8 @@ export function FilterBarQueryFilterProvider(Private, $rootScope, getAppState, g
     executeOnFilters(pin);
   };
 
+  multiSelectFilterManager.setMapAndFlattenFilters(mapAndFlattenFilters);
+  multiSelectFilterManager.setSubmitFilters(queryFilter.submitFilters);
   initWatchers();
 
   return queryFilter;
