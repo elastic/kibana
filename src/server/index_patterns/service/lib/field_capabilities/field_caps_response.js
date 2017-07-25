@@ -67,8 +67,8 @@ export function readFieldCapsResponse(fieldCapsResponse) {
       return {
         name: fieldName,
         type: 'conflict',
-        searchable: types.reduce((acc, esType) => (acc || capsByType[esType].searchable), false),
-        aggregatable: types.reduce((acc, esType) => (acc || capsByType[esType].aggregatable), false),
+        searchable: types.some(type => !!capsByType[type].searchable),
+        aggregatable: types.some(type => !!capsByType[type].aggregatable),
         readFromDocValues: false,
         conflictDescriptions: types.reduce((acc, esType) => ({
           ...acc,
