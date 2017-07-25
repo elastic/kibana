@@ -54,7 +54,7 @@ export class Root {
       await this.server.start();
     } catch (e) {
       this.log.error(e);
-      this.shutdown(e);
+      return this.shutdown(e);
     }
   }
 
