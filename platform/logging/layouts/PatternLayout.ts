@@ -1,10 +1,11 @@
+import * as chalk from 'chalk';
 import { Schema, typeOfSchema } from '../../types';
 import { LogLevel } from '../LogLevel';
 import { LogRecord } from '../LogRecord';
 import { Layout } from './Layouts';
 
 /**
- * Class that consists of static constants describing supported parameters
+ * Object that consists of static constants describing supported parameters
  * in the log message pattern.
  */
 const Parameters = Object.freeze({
@@ -12,18 +13,6 @@ const Parameters = Object.freeze({
   Level: '{level}',
   Context: '{context}',
   Message: '{message}'
-});
-
-/**
- * Class that consists of static constants describing possible colors that can
- * be used for highlighting of log message parts.
- */
-const HighlightColor = Object.freeze({
-  Red: 31,
-  Green: 32,
-  Yellow: 33,
-  Blue: 34,
-  Magenta: 35
 });
 
 /**
@@ -40,11 +29,11 @@ const PATTERN_REGEX = new RegExp(
  * the log message.
  */
 const LEVEL_COLORS = new Map([
-  [LogLevel.Fatal, HighlightColor.Red],
-  [LogLevel.Error, HighlightColor.Red],
-  [LogLevel.Warn, HighlightColor.Yellow],
-  [LogLevel.Debug, HighlightColor.Green],
-  [LogLevel.Trace, HighlightColor.Blue]
+  [LogLevel.Fatal, chalk.red],
+  [LogLevel.Error, chalk.red],
+  [LogLevel.Warn, chalk.yellow],
+  [LogLevel.Debug, chalk.green],
+  [LogLevel.Trace, chalk.blue]
 ]);
 
 const createSchema = ({ boolean, literal, object, string }: Schema) => {
@@ -98,19 +87,16 @@ export class PatternLayout implements Layout {
     formattedRecord: Map<string, string>
   ) {
     if (LEVEL_COLORS.has(record.level)) {
+      const color = LEVEL_COLORS.get(record.level)!;
       formattedRecord.set(
         Parameters.Level,
-        `\x1b[${LEVEL_COLORS.get(record.level)}m${formattedRecord.get(
-          Parameters.Level
-        )}\x1b[0m`
+        color(formattedRecord.get(Parameters.Level)!)
       );
     }
 
     formattedRecord.set(
       Parameters.Context,
-      `\x1b[${HighlightColor.Magenta}m${formattedRecord.get(
-        Parameters.Context
-      )}\x1b[0m`
+      chalk.magenta(formattedRecord.get(Parameters.Context)!)
     );
   }
 }
