@@ -83,30 +83,6 @@ module.exports = function (grunt) {
       },
     },
 
-    test: {
-      options: {
-        directory: resolve(directory, 'test'),
-        purge: true,
-        config: {
-          http: {
-            port: esTestServerUrlParts.port
-          },
-          cluster: {
-            name: 'esvm-test'
-          },
-          discovery: {
-            zen: {
-              ping: {
-                unicast: {
-                  hosts: [ `localhost:${esTestServerUrlParts.port}` ]
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-
     ui: {
       options: {
         directory: resolve(directory, 'test'),
