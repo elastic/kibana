@@ -72,7 +72,7 @@ const KBN_FIELD_TYPES = [
     name: 'unknown',
   }),
   new KbnFieldType({
-    name: 'conflict'
+    name: 'conflict',
   }),
 ];
 
