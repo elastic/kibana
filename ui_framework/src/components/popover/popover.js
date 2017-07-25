@@ -26,7 +26,7 @@ export const KuiPopover = ({
     className
   );
 
-  const content =(
+  const content = (
     <div className="kuiPopover__body kui--bottomShadow">
       {children}
     </div>

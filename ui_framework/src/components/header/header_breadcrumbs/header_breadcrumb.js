@@ -18,6 +18,7 @@ export const KuiHeaderBreadcrumb = ({
     <a
       href={href}
       className={classes}
+      {...rest}
     >
       <div className="kuiHeaderBreadcrumb__text">
         {children}

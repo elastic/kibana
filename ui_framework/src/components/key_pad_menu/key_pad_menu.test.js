@@ -1,6 +1,5 @@
 import React from 'react';
-import { render, shallow } from 'enzyme';
-import sinon from 'sinon';
+import { render } from 'enzyme';
 import { requiredProps } from '../../test/required_props';
 
 import { KuiKeyPadMenu } from './key_pad_menu';
