@@ -135,7 +135,7 @@ table {
 .kui--fontSizeSmall {
   font-size: 14px;
   font-size: 0.875rem;
-  line-height: 24px; }
+  line-height: 18px; }
 
 .kui--codeFont {
   font-family: "Roboto Mono", monospace; }
@@ -320,82 +320,6 @@ table {
     min-width: 16px;
     vertical-align: middle; }
 
-.kuiHeaderBreadcrumb {
-  display: inline-block;
-  height: 64px;
-  line-height: 64px;
-  padding: 0 16px;
-  position: relative;
-  color: #3F3F3F; }
-  .kuiHeaderBreadcrumb:not(:last-child):after {
-    position: absolute;
-    top: 24px;
-    right: -3px;
-    content: "";
-    width: 1px;
-    height: 16px;
-    -webkit-transform: rotate(15deg);
-            transform: rotate(15deg);
-    background: #D9D9D9; }
-  .kuiHeaderBreadcrumb.isActive {
-    color: #999; }
-  .kuiHeaderBreadcrumb.isCollapsed {
-    color: #D9D9D9; }
-  .kuiHeaderBreadcrumb__text {
-    white-space: nowrap;
-    max-width: 150px;
-    display: block;
-    text-overflow: ellipsis;
-    overflow: hidden; }
-
-@media only screen and (min-width: 992px) and (max-width: 1199px) {
-  .kuiHeaderBreadcrumb {
-    display: none; }
-    .kuiHeaderBreadcrumb:nth-last-child(-n+4) {
-      display: inline-block; } }
-
-@media only screen and (min-width: 769px) and (max-width: 991px) {
-  .kuiHeaderBreadcrumb {
-    display: none; }
-    .kuiHeaderBreadcrumb:nth-last-child(-n+2) {
-      display: inline-block; } }
-
-@media only screen and (max-width: 768px) {
-  .kuiHeaderBreadcrumb {
-    display: none; } }
-
-.kuiHeaderItem {
-  position: relative; }
-  .kuiHeaderItem:hover {
-    background: #F5F5F5; }
-  .kuiHeaderItem:after {
-    position: absolute;
-    content: "";
-    width: 1px;
-    top: 16px;
-    bottom: 0;
-    background: #D9D9D9;
-    left: 0; }
-  .kuiHeaderItem--borderRight:after {
-    left: auto;
-    right: 0; }
-  .kuiHeaderItem__logo {
-    position: relative;
-    height: 64px;
-    padding: 16px 32px;
-    display: inline-block;
-    vertical-align: middle; }
-  .kuiHeaderItem__logoIcon {
-    height: 32px;
-    width: 24px;
-    opacity: 1; }
-  .kuiHeaderItem__button {
-    height: 64px;
-    min-width: 64px;
-    text-align: center; }
-    .kuiHeaderItem__button:focus {
-      background: #e6f2f6; }
-
 .kuiHeaderAlert {
   text-align: left;
   min-width: 300px;
@@ -421,19 +345,19 @@ table {
   .kuiHeaderAlert__text {
     font-size: 12px;
     font-size: 0.75rem;
-    line-height: 24px;
+    line-height: 18px;
     margin-bottom: 8px; }
   .kuiHeaderAlert__action {
     font-size: 12px;
     font-size: 0.75rem;
-    line-height: 24px;
+    line-height: 18px;
     color: #0079a5; }
     .kuiHeaderAlert__action:focus {
       outline: solid 6px #e6f2f6; }
   .kuiHeaderAlert__date {
     font-size: 12px;
     font-size: 0.75rem;
-    line-height: 24px;
+    line-height: 18px;
     color: #666;
     text-align: right; }
 
@@ -441,9 +365,89 @@ table {
   text-align: left;
   padding-bottom: 16px; }
 
+.kuiHeaderLogo {
+  position: relative;
+  height: 64px;
+  padding: 16px 32px;
+  display: inline-block;
+  vertical-align: middle; }
+  .kuiHeaderLogo__icon {
+    height: 32px !important;
+    width: 24px !important;
+    opacity: 1; }
+
+.kuiHeaderBreadcrumb {
+  display: inline-block;
+  height: 64px;
+  line-height: 64px;
+  padding: 0 16px;
+  position: relative;
+  color: #3F3F3F; }
+  .kuiHeaderBreadcrumb:not(:last-child):after {
+    position: absolute;
+    top: 24px;
+    right: -3px;
+    content: "";
+    width: 1px;
+    height: 16px;
+    -webkit-transform: rotate(15deg);
+            transform: rotate(15deg);
+    background: #D9D9D9; }
+  .kuiHeaderBreadcrumb:hover:not(.kuiHeaderBreadcrumb--collapsed) {
+    text-decoration: underline; }
+  .kuiHeaderBreadcrumb.isActive {
+    color: #999; }
+  .kuiHeaderBreadcrumb--collapsed {
+    color: #D9D9D9; }
+  .kuiHeaderBreadcrumb__text {
+    white-space: nowrap;
+    max-width: 150px;
+    display: block;
+    text-overflow: ellipsis;
+    overflow: hidden; }
+
+@media only screen and (min-width: 992px) and (max-width: 1199px) {
+  .kuiHeaderBreadcrumb {
+    display: none; }
+    .kuiHeaderBreadcrumb:nth-last-child(-n+4) {
+      display: inline-block; } }
+
+@media only screen and (min-width: 769px) and (max-width: 991px) {
+  .kuiHeaderBreadcrumb {
+    display: none; }
+    .kuiHeaderBreadcrumb:nth-last-child(-n+2) {
+      display: inline-block; } }
+
+@media only screen and (max-width: 768px) {
+  .kuiHeaderBreadcrumb {
+    display: none; } }
+
+.kuiHeaderSectionItem {
+  position: relative; }
+  .kuiHeaderSectionItem:hover {
+    background: #F5F5F5; }
+  .kuiHeaderSectionItem:after {
+    position: absolute;
+    content: "";
+    width: 1px;
+    top: 16px;
+    bottom: 0;
+    background: #D9D9D9;
+    left: 0; }
+  .kuiHeaderSectionItem--borderRight:after {
+    left: auto;
+    right: 0; }
+  .kuiHeaderSectionItem__button {
+    height: 64px;
+    min-width: 64px;
+    text-align: center; }
+    .kuiHeaderSectionItem__button:focus {
+      background: #e6f2f6; }
+
 .kuiIcon {
   display: inline-block;
-  fill: #3F3F3F; }
+  fill: #3F3F3F;
+  vertical-align: middle; }
   .kuiIcon:focus {
     opacity: 1;
     background: #e6f2f6; }
@@ -476,9 +480,6 @@ table {
   width: 288px; }
 
 .kuiKeyPadMenuItem {
-  font-size: 14px;
-  font-size: 0.875rem;
-  line-height: 24px;
   display: block;
   padding: 16px;
   height: 96px;
@@ -490,10 +491,10 @@ table {
   .kuiKeyPadMenuItem:hover, .kuiKeyPadMenuItem:focus {
     border-color: #D9D9D9;
     background: #e6f2f6; }
-    .kuiKeyPadMenuItem:hover kuiKeyPadMenuItem__icon, .kuiKeyPadMenuItem:focus kuiKeyPadMenuItem__icon {
+    .kuiKeyPadMenuItem:hover .kuiKeyPadMenuItem__icon, .kuiKeyPadMenuItem:focus .kuiKeyPadMenuItem__icon {
       -webkit-transform: translateY(0);
               transform: translateY(0); }
-    .kuiKeyPadMenuItem:hover kuiKeyPadMenuItem__label, .kuiKeyPadMenuItem:focus kuiKeyPadMenuItem__label {
+    .kuiKeyPadMenuItem:hover .kuiKeyPadMenuItem__label, .kuiKeyPadMenuItem:focus .kuiKeyPadMenuItem__label {
       text-decoration: underline; }
   .kuiKeyPadMenuItem__inner {
     width: 100%;
@@ -520,8 +521,12 @@ table {
     transition: transform cubic-bezier(0.34, 1.61, 0.7, 1) 250ms;
     transition: transform cubic-bezier(0.34, 1.61, 0.7, 1) 250ms, -webkit-transform cubic-bezier(0.34, 1.61, 0.7, 1) 250ms;
     -webkit-transform: translateY(4px);
-            transform: translateY(4px); }
+            transform: translateY(4px);
+    margin-bottom: 8px; }
   .kuiKeyPadMenuItem__label {
+    font-size: 14px;
+    font-size: 0.875rem;
+    line-height: 18px;
     text-align: center; }
 
 .kuiLink {

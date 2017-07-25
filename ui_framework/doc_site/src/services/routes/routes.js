@@ -30,6 +30,7 @@ const components = [{
 }, {
   name: 'Header',
   component: HeaderExample,
+  hasReact: true,
 }, {
   name: 'KeyPadMenu',
   component: KeyPadMenuExample,

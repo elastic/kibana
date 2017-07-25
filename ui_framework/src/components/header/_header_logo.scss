@@ -1,0 +1,13 @@
+@include component('kuiHeaderLogo') {
+  position: relative;
+  height: $kuiHeaderChildSize;
+  padding: $kuiSize $kuiSizeXL;
+  display: inline-block;
+  vertical-align: middle;
+
+  @include child('icon') {
+    height: $kuiSizeXL !important;
+    width: $kuiSizeL !important;
+    opacity: 1;
+  }
+}

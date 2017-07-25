@@ -60,12 +60,12 @@ $kuiFontWeightMedium:   500;
 
 @mixin kuiFontSizeXS {
   @include fontSize($kuiFontSizeXS);
-  line-height: $kuiLineHeight;
+  line-height: $kuiLineHeight * 0.75;
 }
 
 @mixin kuiFontSizeS {
   @include fontSize($kuiFontSizeS);
-  line-height: $kuiLineHeight;
+  line-height: $kuiLineHeight * 0.75;
 }
 
 @mixin kuiFontSizeM {

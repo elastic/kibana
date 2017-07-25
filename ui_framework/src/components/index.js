@@ -3,6 +3,17 @@ export {
 } from './accessibility';
 
 export {
+  KuiHeader,
+  KuiHeaderBreadcrumb,
+  KuiHeaderBreadcrumbCollapsed,
+  KuiHeaderBreadcrumbs,
+  KuiHeaderLogo,
+  KuiHeaderSection,
+  KuiHeaderSectionItem,
+  KuiHeaderSectionItemButton,
+} from './header';
+
+export {
   KuiIcon,
 } from './icon';
 

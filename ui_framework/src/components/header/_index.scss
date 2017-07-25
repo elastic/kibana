@@ -8,7 +8,8 @@ $kuiHeaderChildSize: $kuiSizeXXL + $kuiSizeL;
 
 // Components
 @import 'header';
-@import 'header_breadcrumb';
-@import 'header_item';
 @import 'header_alert';
 @import 'header_profile';
+@import 'header_logo';
+@import 'header_breadcrumbs/index';
+@import 'header_section/index';

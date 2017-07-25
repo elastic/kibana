@@ -8,8 +8,6 @@
 }
 
 @include component('kuiKeyPadMenuItem') {
-  @include kuiFontSizeS;
-
   display: block;
   padding: $kuiSize;
   height: $kuiKeyPadMenuSize;
@@ -23,11 +21,11 @@
     border-color: $kuiBorderColor;
     background: $kuiFocusBackgroundColor;
 
-    @include child('icon') {
+    .kuiKeyPadMenuItem__icon {
       transform: translateY(0);
     }
 
-    @include child('label') {
+    .kuiKeyPadMenuItem__label {
       text-decoration: underline;
     }
   }
@@ -44,9 +42,11 @@
   @include child('icon') {
     transition: transform $kuiAnimSlightBounce $kuiAnimSpeedNormal;
     transform: translateY($kuiSizeXS);
+    margin-bottom: $kuiSizeS;
   }
 
   @include child('label') {
+    @include kuiFontSizeS;
     text-align: center;
   }
 }
