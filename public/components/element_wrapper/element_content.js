@@ -44,16 +44,20 @@ export const ElementContent = compose(
   invalidRenderTypeBranch,
   invalidExpressionBranch
 )(({ elementTypeDefintion, renderable, size }) => {
+
   return Style.it(renderable.css,
-    <div className="canvas__element--content">
-      <RenderElement
-        renderFn={elementTypeDefintion.render}
-        config={renderable.value}
-        css={renderable.css} // This is an actual CSS stylesheet string, it will be scoped by RenderElement
-        done={() => {}}
-        size={size}
-      />
-    </div>);
+    <div style={Object.assign({}, renderable.containerStyle, size)}>
+      <div className="canvas__element--content">
+        <RenderElement
+          renderFn={elementTypeDefintion.render}
+          config={renderable.value}
+          css={renderable.css} // This is an actual CSS stylesheet string, it will be scoped by RenderElement
+          done={() => {}}
+          size={size} // Size is only passed for the purpose of triggering the resize event, it isn't really used otherwise
+        />
+      </div>
+    </div>
+  );
 });
 
 ElementContent.propTypes = {

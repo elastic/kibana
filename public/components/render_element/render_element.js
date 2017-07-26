@@ -4,7 +4,7 @@ import { lifecycle, compose } from 'recompose';
 import { isEqual } from 'lodash';
 import { Events } from '../../lib/events';
 
-export const RenderElementComponent = ({ size, domNode, setDomNode }) => {
+export const RenderElementComponent = ({ domNode, setDomNode }) => {
   const linkRef = (refNode) => {
     if (!domNode && refNode) {
       // Initialize the domNode property. This should only happen once, even if config changes.
@@ -13,7 +13,7 @@ export const RenderElementComponent = ({ size, domNode, setDomNode }) => {
   };
 
   return (
-    <div className="canvas__workpad--element_render canvas__element" style={size} ref={linkRef} />
+    <div className="canvas__workpad--element_render canvas__element" style={{ height: '100%', width: '100%' }} ref={linkRef} />
   );
 };
 

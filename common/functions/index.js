@@ -7,6 +7,7 @@ export const commonFunctions = [
   require('./plot/plot'),
   require('./kuler/kuler'),
   require('./seriesStyle/seriesStyle'),
+  require('./containerStyle/containerStyle'),
   require('./palette/palette'),
   require('./pointseries/pointseries'),
   require('./replace/replace'),
