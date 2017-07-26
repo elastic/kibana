@@ -20,6 +20,10 @@ module.exports = new Fn({
       default: '* > * {}',
       help: 'Any block of custom CSS to be scoped to this element.',
     },
+    containerStyle: {
+      types: ['containerStyle', 'null'],
+      help: 'Background, border and opacity',
+    },
   },
   fn: (context, args) => {
     if (args.css.length === 0) args.css = '* > * {}';
