@@ -23,13 +23,15 @@ class SerialDiffAgg extends Component {
         model={this.props.model}
         onAdd={this.props.onAdd}
         onDelete={this.props.onDelete}
-        siblings={this.props.siblings}>
+        siblings={this.props.siblings}
+      >
         <div className="vis_editor__row_item">
           <div className="vis_editor__label">Aggregation</div>
           <AggSelect
             siblings={this.props.siblings}
             value={model.type}
-            onChange={handleSelectChange('type')}/>
+            onChange={handleSelectChange('type')}
+          />
         </div>
         <div className="vis_editor__row_item">
           <div className="vis_editor__label">Metric</div>
@@ -37,7 +39,8 @@ class SerialDiffAgg extends Component {
             onChange={handleSelectChange('field')}
             metrics={siblings}
             metric={model}
-            value={model.field}/>
+            value={model.field}
+          />
         </div>
         <div>
           <div className="vis_editor__label">Lag</div>
@@ -45,7 +48,8 @@ class SerialDiffAgg extends Component {
             className="vis_editor__input"
             onChange={handleNumberChange('lag')}
             value={model.lag}
-            type="text"/>
+            type="text"
+          />
         </div>
       </AggRow>
     );

@@ -26,7 +26,8 @@ class StandardSiblingAgg extends Component {
           <input
             className="vis_editor__std_deviation-sigma"
             value={model.sigma}
-            onChange={handleTextChange('sigma')}/>
+            onChange={handleTextChange('sigma')}
+          />
         </div>
       );
 
@@ -43,7 +44,8 @@ class StandardSiblingAgg extends Component {
           <Select
             options={modeOptions}
             onChange={handleSelectChange('mode')}
-            value={model.mode}/>
+            value={model.mode}
+          />
         </div>
       );
     }
@@ -54,13 +56,15 @@ class StandardSiblingAgg extends Component {
         model={this.props.model}
         onAdd={this.props.onAdd}
         onDelete={this.props.onDelete}
-        siblings={this.props.siblings}>
+        siblings={this.props.siblings}
+      >
         <div className="vis_editor__row_item">
           <div className="vis_editor__label">Aggregation</div>
           <AggSelect
             siblings={this.props.siblings}
             value={model.type}
-            onChange={handleSelectChange('type')}/>
+            onChange={handleSelectChange('type')}
+          />
         </div>
         <div className="vis_editor__std_sibling-metric">
           <div className="vis_editor__label">Metric</div>
@@ -69,7 +73,8 @@ class StandardSiblingAgg extends Component {
             exclude={['percentile']}
             metrics={siblings}
             metric={model}
-            value={model.field}/>
+            value={model.field}
+          />
         </div>
         { stdDev.sigma }
         { stdDev.mode }

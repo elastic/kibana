@@ -7,6 +7,6 @@ import {
 } from './table_row_cell';
 
 test('renders KuiTableRowCell', () => {
-  const component = <KuiTableRowCell { ...requiredProps }></KuiTableRowCell>;
+  const component = <KuiTableRowCell { ...requiredProps } />;
   expect(render(component)).toMatchSnapshot();
 });
