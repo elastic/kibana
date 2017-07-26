@@ -9,7 +9,7 @@ function mapToMathValue(mathObj, { value, function: fn }) {
     return {
       type: 'math',
       value: mathObj.args[0].name,
-      function: mathObj.fn.name,
+      function: mathObj.fn.name || null,
     };
   }
 
@@ -17,7 +17,7 @@ function mapToMathValue(mathObj, { value, function: fn }) {
   return {
     type: 'math',
     value,
-    function: fn,
+    function: fn || null,
   };
 }
 
