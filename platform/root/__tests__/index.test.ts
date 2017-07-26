@@ -98,3 +98,37 @@ test('calls onShutdown param on "shutdown"', async () => {
   expect(onShutdown).toHaveBeenCalledTimes(1);
   expect(onShutdown).toHaveBeenLastCalledWith(err);
 });
+
+describe('when configuring logger fails', () => {
+  const logged = jest.spyOn(console, 'error');
+
+  beforeEach(() => {
+    logged.mockImplementation(noop);
+  });
+
+  afterEach(() => {
+    logged.mockRestore();
+  });
+
+  test('calls shutdown', async () => {
+    const onShutdown = jest.fn();
+
+    const root = new Root(config$, env, onShutdown);
+    const err = new Error('foo bar baz');
+
+    configService.atPath.mockImplementationOnce(() => {
+      throw err;
+    });
+
+    mockServer.mockClear();
+
+    await root.start();
+
+    expect(mockServer).not.toHaveBeenCalled();
+
+    expect(onShutdown).toHaveBeenCalledTimes(1);
+    expect(onShutdown).toHaveBeenLastCalledWith(err);
+
+    expect(logged.mock.calls).toMatchSnapshot();
+  });
+});

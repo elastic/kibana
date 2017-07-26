@@ -36,9 +36,15 @@ export class Root {
   }
 
   async start() {
-    const loggingConfig$ = this.configService.atPath('logging', LoggerConfig);
-
-    this.loggerService.upgrade(loggingConfig$);
+    try {
+      const loggingConfig$ = this.configService.atPath('logging', LoggerConfig);
+      this.loggerService.upgrade(loggingConfig$);
+    } catch (e) {
+      // This specifically console.logs because we were not able to configure
+      // the logger.
+      console.error('Configuring logger failed:', e.message);
+      return this.shutdown(e);
+    }
 
     this.log.info('starting the server');
 
@@ -48,7 +54,7 @@ export class Root {
       await this.server.start();
     } catch (e) {
       this.log.error(e);
-      this.shutdown(e);
+      return this.shutdown(e);
     }
   }
 
