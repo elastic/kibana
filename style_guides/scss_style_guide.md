@@ -129,8 +129,8 @@ Good
 $kuiPrimaryColor: #0079a5; // Blue
 
 // A local color variable that lives at /src/components/some_component/_index.scss
-// tintOrShade() will alter the based upon the brightness of the theme.
-// This makes it work for dark and light themes from the same starting base value.
+// tintOrShade() will alter the color one way or the other based upon the brightness of the theme.
+// This makes our colors work out of the box for dark and light themes.
 
 $kuiSomeComponentItemBackground: tintOrShade($kuiColorPrimary, 90%, 50%);
 
