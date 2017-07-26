@@ -1,6 +1,5 @@
 import { format } from 'util';
 
-import { esTestServerUrlParts } from '../../../../../test/es_test_server_url_parts';
 import * as kbnTestServer from '../../../../test_utils/kbn_server';
 import { esTestCluster } from '../../../../test_utils/es';
 
@@ -9,7 +8,6 @@ describe('plugins/elasticsearch', function () {
     let kbnServer;
     const es = esTestCluster.use({
       name: 'core_plugins/es/routes',
-      port: esTestServerUrlParts.port,
     });
 
     before(async function () {

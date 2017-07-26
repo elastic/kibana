@@ -1,4 +1,5 @@
 import { resolve } from 'path';
+import { esTestServerUrlParts } from '../../../test/es_test_server_url_parts';
 
 import libesvm from 'libesvm';
 
@@ -11,13 +12,13 @@ export class EsTestCluster {
   use(options = {}) {
     const {
       name,
-      port,
+      port = esTestServerUrlParts.port,
       log = console.log,
       branch = 'master',
     } = options;
 
-    if (!name || !port) {
-      throw new Error('esTestCluster.use() requires { name, port }');
+    if (!name) {
+      throw new Error('esTestCluster.use() requires { name }');
     }
 
     // assigned in use.start(), reassigned in use.stop()
