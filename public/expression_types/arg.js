@@ -5,7 +5,7 @@ import { toInterfaceValue } from '../lib/map_arg_value';
 
 export class Arg {
   constructor(name, props) {
-    const propNames = ['displayName', 'description', 'multiVal', 'types', 'resolve', 'options'];
+    const propNames = ['displayName', 'description', 'multi', 'types', 'resolve', 'options'];
     const argType = argTypeRegistry.get(props.argType);
     if (!argType) throw new Error(`Invalid arg type: ${props.argType}`);
 
@@ -13,7 +13,7 @@ export class Arg {
     const defaultProps = {
       displayName: name,
       description: name,
-      multiVal: false,
+      multi: false,
       options: {},
       types: [],
       resolve: () => ({}),
@@ -29,7 +29,7 @@ export class Arg {
     return createElement(this.argType.template, {
       ...props,
       ...this.resolve(props),
-      argValue: toInterfaceValue(props.argValue, this.multiVal),
+      argValue: toInterfaceValue(props.argValue, this.multi),
       typeInstance: this,
     });
   }

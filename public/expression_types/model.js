@@ -1,12 +1,14 @@
-import React from 'react';
-import { Alert } from 'react-bootstrap';
 import { pick } from 'lodash';
 import { Registry } from '../../common/lib/registry';
 import { ArgForm } from './arg_form';
 
+const NO_NEXT_EXP = 'no next expression';
+const NO_MODEL_ARGS = 'no model args';
+
 function getModelArgs(expressionType) {
-  if (!expressionType || !expressionType.modelArgs) return false;
-  return (expressionType.modelArgs.length > 0) ? expressionType.modelArgs : false;
+  if (!expressionType) return NO_NEXT_EXP;
+  if (!expressionType.modelArgs) return NO_MODEL_ARGS;
+  return (expressionType.modelArgs.length > 0) ? expressionType.modelArgs : NO_MODEL_ARGS;
 }
 
 export class Model extends ArgForm {
@@ -21,39 +23,28 @@ export class Model extends ArgForm {
     Object.assign(this, defaultProps, pick(props, propNames));
   }
 
-  renderArgs(props, dataArgs) {
-    // custom renderer uses `modelArgs` from following expression to control
-    // which arguments get rendered
-    let hasError = false;
+  resolveArgs(dataArgs, props) {
+    // custom argument resolver
+    // uses `modelArgs` from following expression to control which arguments get rendered
     const { nextExpressionType } = props;
     const modelArgs = getModelArgs(nextExpressionType);
 
-    return dataArgs.reduce((acc, dataArg) => {
-      // short-circuit logic, always show error dialog
-      if (hasError) return acc;
-
+    return dataArgs.map((dataArg) => {
       // if modelArgs is false, something went wrong here
-      if (modelArgs === false) {
-        hasError = true;
-        // TODO: use a better looking Error component for this message
-        if (!nextExpressionType) return;
-        return (
-          <Alert bsStyle="danger">
-            <h4>{ nextExpressionType.displayName } modelArgs Error</h4>
-            The modelArgs value is empty. Either it should contain an arg,
-            or a model should not be used in the expression.
-          </Alert>
-        );
+      if (modelArgs === NO_MODEL_ARGS) {
+        // if there is a next expression, it is lacking modelArgs, so we throw
+        throw new Error(`${nextExpressionType.displayName} modelArgs Error:
+          The modelArgs value is empty. Either it should contain an arg,
+          or a model should not be used in the expression.
+        `);
       }
 
-      // if argument is in modelArgs, render it
-      return acc.concat(this.renderArg(props, {
+      // if argument is missing from modelArgs, mark it as skipped
+      return {
         ...dataArg,
-        skipRender: !modelArgs.includes(dataArg.argName),
-      }));
-
-      return acc;
-    }, []);
+        skipRender: modelArgs !== NO_NEXT_EXP && !modelArgs.includes(dataArg.argName),
+      };
+    }).filter(Boolean);
   }
 }
 

@@ -1,39 +1,47 @@
 import React from 'react';
-import { Label } from 'react-bootstrap';
+import { Label, Alert } from 'react-bootstrap';
 import { BaseForm } from './base_form';
-import { isPlainObject, uniq } from 'lodash';
+import { isPlainObject, uniq, last } from 'lodash';
 
 export class ArgForm extends BaseForm {
   renderArg(props, dataArg) {
-    const { arg, argName, argValue, skipRender } = dataArg;
-    const { onValueRemove, onValueAdd, ...passedProps } = props;
+    const { onValueRemove, ...passedProps } = props;
+    const { arg, argValues, skipRender } = dataArg;
 
     // TODO: show some information to the user than an argument was skipped
     if (!arg || skipRender) return null;
 
-    // Render the argument's template, wrapped in a remove control
-    return (
-      <div key={`${props.typeInstance.name}-${arg.name}`}>
-        { (!argValue) ? (
-          <div className="canvas__argtype__add" >
-            <Label bsStyle="default" onClick={() => onValueAdd(argName)}>
-              + {arg.displayName}
-            </Label>
-          </div>
-        ) : (
-          <div className="canvas__argtype__arg" >
-            <div className="canvas__argtype__arg--controls">{ arg.render({ ...passedProps, argValue }) }</div>
-            <div className="canvas__argtype__arg--remove" onClick={() => onValueRemove(argName)}>
-              <i className="fa fa-trash-o" />
-            </div>
-          </div>
-        )}
+    // If value in expression, render the argument's template, wrapped in a remove control
+    return argValues && argValues.map((argValue, valueIndex) => (
+      <div className="canvas__argtype__arg" key={`${props.typeInstance.name}-${arg.name}-${valueIndex}`}>
+        <div className="canvas__argtype__arg--controls">{ arg.render({ ...passedProps, argValue }) }</div>
+        <div className="canvas__argtype__arg--remove" onClick={() => onValueRemove(arg.name, valueIndex)}>
+          <i className="fa fa-trash-o" />
+        </div>
+      </div>
+    ));
+  }
+
+  renderAddArg(props, dataArg) {
+    const { onValueAdd } = props;
+    const { arg, argValues } = dataArg;
+
+    // skip arguments that aren't defined in the expression type schema
+    if (!arg) return null;
+
+    // if no value in expression, render the add control
+    return (!argValues || arg.multi) && (
+      <div className="canvas__argtype__add" key={`${props.typeInstance.name}-${arg.name}-add`}>
+        <Label bsStyle="default" onClick={() => onValueAdd(arg.name)}>
+          + {arg.displayName}
+        </Label>
       </div>
     );
   }
 
-  renderArgs(props, dataArgs) {
-    return dataArgs.map(dataArg => this.renderArg(props, dataArg));
+  resolveArgs(dataArgs) {
+    // basically a no-op placeholder
+    return dataArgs;
   }
 
   render(data = {}) {
@@ -43,16 +51,30 @@ export class ArgForm extends BaseForm {
       throw new Error(`Form "${this.name}" expects "args" object`);
     }
 
-    // get a mapping of the expression arg values and matching arg definitions
-    const argNames = uniq(Object.keys(args).concat(this.args.map(arg => arg.name)));
-    const dataArgs = argNames.map(argName => ({
-      argName,
-      argValue: args[argName],
-      arg: this.args.find(arg => arg.name === argName),
-    }))
-    .sort(arg => arg.argValue ? 0 : 1); // put args missing a value at the end of the array
+    // get a mapping of arg values from the expression and from the renderable's schema
+    const argNames = uniq(this.args.map(arg => arg.name).concat(Object.keys(args)));
+    const dataArgs = argNames.map(argName => {
+      const arg = this.args.find(arg => arg.name === argName);
+
+      // if arg is not multi, only preserve the last value found
+      const isMulti = arg && arg.multi;
+      const argValues = args[argName] && !isMulti ? [last(args[argName])] : args[argName];
+
+      return { arg, argName, argValues };
+    });
 
     // props are passed to resolve and the returned object is mixed into the template props
-    return this.renderArgs({ ...data, ...this.resolve(data), typeInstance: this }, dataArgs);
+    const props = { ...data, ...this.resolve(data), typeInstance: this };
+
+    try {
+      // allow a hook to override the data args
+      const resolvedDataArgs = this.resolveArgs(dataArgs, props);
+      return resolvedDataArgs.map(d => this.renderArg(props, d)).concat(resolvedDataArgs.map(d => this.renderAddArg(props, d)));
+    } catch (e) {
+      return (<Alert bsStyle="danger">
+        <h4>Expression rendering error</h4>
+        {e.message}
+      </Alert>);
+    }
   }
 }

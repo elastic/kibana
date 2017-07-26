@@ -1,8 +1,7 @@
-import { last } from 'lodash';
 import { parse } from 'mathjs';
 import { toExpression, fromExpression } from '../../common/lib/ast';
 
-function mapToMathValue(mathObj, val) {
+function mapToMathValue(mathObj, { value, function: fn }) {
   // if there's a single SymbolNode argument, map to the value
   const hasArgs = mathObj.args && mathObj.args.length === 1;
 
@@ -17,8 +16,8 @@ function mapToMathValue(mathObj, val) {
   // anything else, just change the type to math
   return {
     type: 'math',
-    value: val.value,
-    function: null,
+    value,
+    function: fn,
   };
 }
 
@@ -50,49 +49,43 @@ function mapFromFunctionValue(argValue) {
   return fromExpression(argValue.value);
 }
 
-export function toInterfaceValue(argValue, multiVal = false) {
-  // if not multiVal, only use the last value
-  const vals = (!multiVal) ? [last(argValue)] : argValue;
+export function toInterfaceValue(argValue) {
+  if (argValue == null) {
+    return {
+      type: 'string',
+      value: null,
+      function: null,
+    };
+  }
 
-  const resolvedVal = vals.reduce((acc, val) => {
-    if (val == null) {
-      return acc.concat({
-        type: 'string',
-        value: null,
-        function: null,
-      });
+  const { function: fn, type, value, chain } = argValue;
+
+  // if argValue is a function, set the value to its expression string
+  if (argValue.type === 'expression' || argValue.type === 'partial') {
+    return {
+      type,
+      chain,
+      value: toExpression(argValue),
+      function: fn || null,
+    };
+  }
+
+  try {
+    // check if the value is a math expression, and set its type if it is
+    const mathObj = parse(argValue.value);
+    if (mathObj.type !== 'SymbolNode') {
+      // SymbolNode is just a string, anything else must be a math expression
+      return mapToMathValue(mathObj, argValue);
     }
+  } catch (e) {
+    // math.js throws on crazy values, errors can be swallowed here
+  }
 
-    // if value is a function, convert it to an expression string
-    if (val.type === 'expression' || val.type === 'partial') {
-      return acc.concat({
-        type: val.type,
-        value: toExpression(val),
-        function: val.function || null,
-      });
-    }
-
-    // check math expression, if not an excluded type
-    try {
-      // check if the value is a math expression, and set its type if it is
-      const mathObj = parse(val.value);
-      if (mathObj.type !== 'SymbolNode') {
-        // SymbolNode is just a string, anything else must be a math expression
-        return acc.concat(mapToMathValue(mathObj, val));
-      }
-    } catch (e) {
-      // math.js throws on crazy values, errors can be swallowed here
-    }
-
-    return acc.concat({
-      type: val.type,
-      value: val.value,
-      function: val.function || null,
-    });
-  }, []);
-
-  // if multival, return array, otherwise just the value
-  return (multiVal) ? resolvedVal : resolvedVal[0];
+  return {
+    type,
+    value,
+    function: fn || null,
+  };
 }
 
 export function toAstValue(argValue) {

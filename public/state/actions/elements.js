@@ -118,16 +118,44 @@ export const setAstAtIndex = createThunk('setAstAtIndex', ({ dispatch }, { index
 // index here is the top-level argument in the expression. for example in the expression
 // demodata().pointseries().plot(), demodata is 0, pointseries is 1, and plot is 2
 export const setArgumentAtIndex = createThunk('setArgumentAtIndex', ({ dispatch }, args) => {
-  const { index, arg, element, pageId } = args;
+  const { index, element, pageId, arg } = args;
   const newElement = assign(element, ['ast', 'chain', index, 'arguments'], arg);
   dispatch(setExpression(astToExpression({ ast: get(newElement, 'ast'), element, pageId })));
 });
 
 // index here is the top-level argument in the expression. for example in the expression
 // demodata().pointseries().plot(), demodata is 0, pointseries is 1, and plot is 2
+export const addArgumentValueAtIndex = createThunk('addArgumentValueAtIndex', ({ dispatch }, args) => {
+  const { index, arg, element } = args;
+  const argKeys = Object.keys(arg);
+
+  const argValues = argKeys.map((argKey) => {
+    const values = get(element, ['ast', 'chain', index, 'arguments', argKey], []);
+    return {
+      [argKey]: values.concat(arg[argKey]),
+    };
+  });
+
+  dispatch(setArgumentAtIndex({
+    ...args,
+    arg: argValues.reduce((acc, val) => {
+      return Object.assign(acc, val);
+    }, {}),
+  }));
+});
+
+// index here is the top-level argument in the expression. for example in the expression
+// demodata().pointseries().plot(), demodata is 0, pointseries is 1, and plot is 2
 export const deleteArgumentAtIndex = createThunk('deleteArgumentAtIndex', ({ dispatch }, args) => {
-  const { index, argName, element, pageId } = args;
-  const newElement = del(element, ['ast', 'chain', index, 'arguments', argName]);
+  const { index, element, pageId, argName, valueIndex } = args;
+  const curVal = get(element, ['ast', 'chain', index, 'arguments', argName]);
+
+  const newElement = (valueIndex && curVal.length > 1)
+    // if more than one val, remove the specified val
+    ? del(element, ['ast', 'chain', index, 'arguments', argName, valueIndex])
+    // otherwise, remove the entire key
+    : del(element, ['ast', 'chain', index, 'arguments', argName]);
+
   dispatch(setExpression(astToExpression({ ast: get(newElement, 'ast'), element, pageId })));
 });
 
