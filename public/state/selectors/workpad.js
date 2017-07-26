@@ -33,6 +33,10 @@ export function getWorkpadName(state) {
   return get(state, 'persistent.workpad.name');
 }
 
+export function getWorkpadColors(state) {
+  return get(state, 'persistent.workpad.colors');
+}
+
 // element getters
 export function getSelectedElementId(state) {
   return get(state, 'transient.selectedElement');
