@@ -26,8 +26,8 @@ export default function ({ getService }) {
               {
                 name: 'success',
                 type: 'conflict',
-                aggregatable: false,
-                searchable: false,
+                aggregatable: true,
+                searchable: true,
                 readFromDocValues: false,
                 conflictDescriptions: {
                   boolean: [
