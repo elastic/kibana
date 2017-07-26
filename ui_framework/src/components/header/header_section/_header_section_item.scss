@@ -1,6 +1,6 @@
 // Header items are the small icon links that pop up menus.
 
-@include component('kuiHeaderSectionItem') {
+.kuiHeaderSectionItem {
   position: relative;
 
   &:hover {

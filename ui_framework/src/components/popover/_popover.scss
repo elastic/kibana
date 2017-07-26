@@ -1,7 +1,7 @@
 // Pop menu is an animated popover relatively positioned to a button / action.
 // By default it positions in the middle, but can be anchored left and right.
 
-@include component('kuiPopover') {
+.kuiPopover {
   display: inline-block;
   position: relative;
 

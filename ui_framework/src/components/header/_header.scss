@@ -1,6 +1,6 @@
 // Header. Includes breadcrumbs of nav buttons.
 
-@include component('kuiHeader') {
+.kuiHeader {
   background: $kuiHeaderBackgroundColor;
   border-bottom: $kuiBorderThin;
 

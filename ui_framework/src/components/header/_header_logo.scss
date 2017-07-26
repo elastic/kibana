@@ -1,4 +1,4 @@
-@include component('kuiHeaderLogo') {
+.kuiHeaderLogo {
   @include kuiLink;
 
   position: relative;
