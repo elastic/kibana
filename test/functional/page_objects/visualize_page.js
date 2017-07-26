@@ -7,6 +7,7 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
   const log = getService('log');
   const PageObjects = getPageObjects(['common', 'header']);
   const defaultFindTimeout = config.get('timeouts.find');
+  const find = getService('find');
 
   class VisualizePage {
 
@@ -474,10 +475,8 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
     }
 
     async getDataTableHeaders() {
-      return remote
-      .setFindTimeout(defaultFindTimeout * 2)
-      .findByCssSelector('table.table.table-condensed thead')
-      .getVisibleText();
+      const dataTableHeader = await retry.try(async () => await find.byCssSelector('table.table.table-condensed thead'));
+      return await dataTableHeader.getVisibleText();
     }
 
     async getMarkdownData() {
