@@ -3,11 +3,9 @@ import './flot';
 import './plot.less';
 import { size } from './plugins/size';
 import header from './header.png';
-import { debounce } from 'lodash';
+import { debounce, includes } from 'lodash';
 
 
-const $ = window.$;
-$.plot.plugins.push(size);
 
 module.exports = new Element('plot', {
   displayName: 'Coordinate plot',
@@ -15,6 +13,10 @@ module.exports = new Element('plot', {
   image: header,
   expression: 'demodata().pointseries(x="time", y="sum(price)", color="state").plot(defaultStyle=seriesStyle(lines=2)).render()',
   render(domNode, config, done, events) {
+    const $ = window.$;
+
+    // TODO: OH NOES
+    if (!includes($.plot.plugins, size)) $.plot.plugins.push(size);
 
     config.options.legend.labelBoxBorderColor = 'transparent';
     const plot = $.plot($(domNode), config.data, config.options);
