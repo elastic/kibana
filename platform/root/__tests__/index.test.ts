@@ -99,29 +99,36 @@ test('calls onShutdown param on "shutdown"', async () => {
   expect(onShutdown).toHaveBeenLastCalledWith(err);
 });
 
-test('calls shutdown when configuring logger fails', async () => {
+describe('when configuring logger fails', () => {
   const logged = jest.spyOn(console, 'error');
-  logged.mockImplementation(noop);
 
-  const onShutdown = jest.fn();
-
-  const root = new Root(config$, env, onShutdown);
-  const err = new Error('foo bar baz');
-
-  configService.atPath.mockImplementationOnce(() => {
-    throw err;
+  beforeEach(() => {
+    logged.mockImplementation(noop);
   });
 
-  mockServer.mockClear();
+  afterEach(() => {
+    logged.mockRestore();
+  });
 
-  await root.start();
+  test('calls shutdown', async () => {
+    const onShutdown = jest.fn();
 
-  expect(mockServer).not.toHaveBeenCalled();
+    const root = new Root(config$, env, onShutdown);
+    const err = new Error('foo bar baz');
 
-  expect(onShutdown).toHaveBeenCalledTimes(1);
-  expect(onShutdown).toHaveBeenLastCalledWith(err);
+    configService.atPath.mockImplementationOnce(() => {
+      throw err;
+    });
 
-  expect(logged.mock.calls).toMatchSnapshot();
+    mockServer.mockClear();
 
-  logged.mockRestore();
+    await root.start();
+
+    expect(mockServer).not.toHaveBeenCalled();
+
+    expect(onShutdown).toHaveBeenCalledTimes(1);
+    expect(onShutdown).toHaveBeenLastCalledWith(err);
+
+    expect(logged.mock.calls).toMatchSnapshot();
+  });
 });
