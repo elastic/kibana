@@ -300,7 +300,7 @@
     "webpack-dev-server": "1.14.1"
   },
   "engines": {
-    "node": "8.1.4",
+    "node": "8.2.1",
     "npm": "5.3.0"
   }
 }

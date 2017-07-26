@@ -2,8 +2,7 @@
 
 ## Dev setup
 
-Make sure you're running Node 8 and at least npm 5.3.0. If you're using `nvm` to
-install Node, afterwards run `npm i -g npm@latest`.
+Make sure you're running the Node version specified in `../.node-version`.
 
 ## TypeScript
 
