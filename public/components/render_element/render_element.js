@@ -3,37 +3,38 @@ import PropTypes from 'prop-types';
 import { lifecycle, compose } from 'recompose';
 import { isEqual } from 'lodash';
 import { Events } from '../../lib/events';
-import Style from 'style-it';
 
-export const RenderElementComponent = ({ renderFn, size, done, config, domNode, setDomNode, setEventEmitter, css }) => {
-  const renderElement = (refNode) => {
-    if (refNode && !domNode) {
-
-      // TODO: OMG this is so gross, but it works. I tried passing it in from the container,
-      // but it kept getting recreated and would get out of sync with what the render function had subscribed to.
-      const _events = new Events();
-      setEventEmitter(_events);
-
+export const RenderElementComponent = ({ size, domNode, setDomNode }) => {
+  const linkRef = (refNode) => {
+    if (!domNode && refNode) {
       // Initialize the domNode property. This should only happen once, even if config changes.
       setDomNode(refNode);
-      renderFn(refNode, config, done || (() => {}), _events);
     }
   };
 
-  return Style.it(css,
-    <div className="canvas__workpad--element_render canvas__element">
-      <div style={size} ref={renderElement} />
-    </div>
+  return (
+    <div className="canvas__workpad--element_render canvas__element" style={size} ref={linkRef} />
   );
 };
 
 const RenderElementLifecycle = lifecycle({
 
+  componentWillMount() {
+    if (!this.props.events) {
+      const _events = new Events();
+      this.props.setEventEmitter(_events);
+    }
+  },
+
   componentDidUpdate(prevProps) {
     const { events, config, domNode, done, size, renderFn } = this.props;
 
     // Config changes
-    if (!isEqual(config, prevProps.config) || !isEqual(renderFn, prevProps.renderFn)) {
+    if (
+      !isEqual(config, prevProps.config) ||
+      !isEqual(renderFn, prevProps.renderFn) ||
+      !isEqual(events, prevProps.events)
+    ) {
       this.destroy();
       return renderFn(domNode, config, done || (() => {}), events);
     }
@@ -44,13 +45,13 @@ const RenderElementLifecycle = lifecycle({
     // CSS changes, don't do squat. React's job.
   },
 
-  shouldComponentUpdate(nextProps) {
+  shouldComponentUpdate({ config, size, renderFn, events }) {
     // TODO: What a shitty hack. None of these props should update when you move the element.
     // This should be fixed at a higher level.
-    return !isEqual(this.props.config, nextProps.config) ||
-      !isEqual(this.props.size, nextProps.size) ||
-      !isEqual(this.props.renderFn.toString(), nextProps.renderFn.toString()) ||
-      !isEqual(this.props.css, nextProps.css);
+    return !isEqual(this.props.config, config) ||
+      !isEqual(this.props.size, size) ||
+      !isEqual(this.props.renderFn.toString(), renderFn.toString()) ||
+      !isEqual(this.props.events, events);
   },
 
   componentWillUnmount() {
@@ -75,7 +76,6 @@ RenderElementComponent.propTypes = {
   size: PropTypes.object,
   events: PropTypes.object,
   setEventEmitter: PropTypes.func,
-  css: PropTypes.string,
 };
 
 export const RenderElement = compose(

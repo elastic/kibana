@@ -13,6 +13,7 @@ import { InvalidElementType } from './invalid_element_type';
 import { Loading } from '../loading';
 import { pure, compose, branch, renderComponent } from 'recompose';
 import { RenderElement } from '../render_element';
+import Style from 'style-it';
 
 /*
   Branches
@@ -43,15 +44,16 @@ export const ElementContent = compose(
   invalidRenderTypeBranch,
   invalidExpressionBranch
 )(({ elementTypeDefintion, renderable, size }) => {
-  return (
-    <RenderElement
-      renderFn={elementTypeDefintion.render}
-      config={renderable.value}
-      css={renderable.css} // This is an actual CSS stylesheet string, it will be scoped by RenderElement
-      done={() => {}}
-      size={size}
-    />
-  );
+  return Style.it(renderable.css,
+    <div className="canvas__element--content">
+      <RenderElement
+        renderFn={elementTypeDefintion.render}
+        config={renderable.value}
+        css={renderable.css} // This is an actual CSS stylesheet string, it will be scoped by RenderElement
+        done={() => {}}
+        size={size}
+      />
+    </div>);
 });
 
 ElementContent.propTypes = {
