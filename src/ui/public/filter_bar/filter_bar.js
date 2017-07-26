@@ -10,22 +10,10 @@ import { FilterBarLibFilterOutTimeBasedFilterProvider } from 'ui/filter_bar/lib/
 import { FilterBarLibChangeTimeFilterProvider } from 'ui/filter_bar/lib/change_time_filter';
 import { FilterBarQueryFilterProvider } from 'ui/filter_bar/query_filter';
 import { compareFilters } from './lib/compare_filters';
+import { mergeFilters, isMultiSelectEnabled } from 'ui/filter_bar/lib/multi_filter';
 import { uiModules } from 'ui/modules';
 
 export { disableFilter, enableFilter, toggleFilterDisabled } from './lib/disable_filter';
-
-const MULTI_SELECT_KEY = 18; // alt
-let isMultiSelect = false;
-window.addEventListener('keydown', (event) => {
-  if (event.keyCode === MULTI_SELECT_KEY) {
-    isMultiSelect = true;
-  }
-}, false);
-window.addEventListener('keyup', async (event) => {
-  if (event.keyCode === MULTI_SELECT_KEY) {
-    isMultiSelect = false;
-  }
-}, false);
 
 const module = uiModules.get('kibana');
 
@@ -123,7 +111,7 @@ module.directive('filterBar', function (Private, Promise, getAppState) {
         // - more than one new filter getting added
         // - new filters exist that have not been applied
         // - multiselect is enabled
-        if (filters.length > 1 || $scope.newFilters.length > 0 || isMultiSelect) {
+        if (filters.length > 1 || $scope.newFilters.length > 0 || isMultiSelectEnabled()) {
           return mapFlattenAndWrapFilters(filters)
           .then(function (results) {
             extractTimeFilter(results).then(function (filter) {
@@ -177,69 +165,6 @@ module.directive('filterBar', function (Private, Promise, getAppState) {
           });
           $scope.$emit('filterbar:updated');
         });
-      }
-
-      function mergeFilters(filters) {
-        // Group filters by key
-        const filterGroups = new Map();
-        const filtersWithNoKey = [];
-        filters.forEach((filter) => {
-          const key = _.get(filter, 'meta.key');
-          if (!key) {
-            filtersWithNoKey.push(filter);
-            return;
-          }
-
-          if (!filterGroups.has(key)) {
-            filterGroups.set(key, [filter]);
-          } else {
-            filterGroups.set(key, filterGroups.get(key).concat(filter));
-          }
-        });
-
-        const filtersWithKey = [];
-        filterGroups.forEach((filterGroup, key) => {
-          if (filterGroup.length === 1) {
-            // Key with only one filter
-            filtersWithKey.push(filterGroup[0]);
-          } else {
-            const values = [];
-            const shouldFilters = [];
-            const mustNotFilters = [];
-            filterGroup.forEach((filter) => {
-              const value = _.get(filter, 'meta.value', '');
-              if (_.get(filter, 'meta.negate', false)) {
-                values.push('!' + value);
-                mustNotFilters.push(cleanFilter(filter));
-              } else {
-                values.push(value);
-                shouldFilters.push(cleanFilter(filter));
-              }
-            });
-
-            // Key with multiple filters - combine into OR query
-            filtersWithKey.push({
-              bool: {
-                should: shouldFilters,
-                must_not: mustNotFilters
-              },
-              meta: {
-                alias: `${key}: ${values.join()}`
-              }
-            });
-          }
-        });
-
-        return filtersWithKey.concat(filtersWithNoKey);
-      }
-
-      function cleanFilter(filter) {
-        if (_.has(filter, 'query')) {
-          return filter.query;
-        }
-
-        delete filter.meta;
-        return filter;
       }
 
       updateFilters();
