@@ -2,7 +2,7 @@ import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import { get } from 'lodash';
 import { ElementWrapper as Component } from './element_wrapper';
-import { fetchRenderable, removeElement, setPosition } from '../../state/actions/elements';
+import { removeElement, setPosition } from '../../state/actions/elements';
 import { selectElement } from '../../state/actions/transient';
 import { getSelectedElementId, getResolvedArgs, getSelectedPage } from '../../state/selectors/workpad';
 import { getState, getValue, getError } from '../../lib/resolved_arg';
@@ -15,7 +15,6 @@ const mapStateToProps = (state, { element }) => ({
 });
 
 const mapDispatchToProps = (dispatch, { element }) => ({
-  fetchRenderable: () => dispatch(fetchRenderable(element.id)),
   select(ev) {
     ev && ev.stopPropagation();
     dispatch(selectElement(element.id));
