@@ -36,7 +36,6 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.visualize.openSpyPanel();
 
         headers = await PageObjects.visualize.getDataTableHeaders();
-        PageObjects.common.sleep(400000);
         expect(headers.trim()).to.equal('Count Average machine.ram');
       });
     });
