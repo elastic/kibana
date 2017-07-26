@@ -119,22 +119,11 @@ export default function ({ getService, getPageObjects }) {
         });
       });
 
-      it('should not be able to zoom out beyond 0', function () {
-        return PageObjects.visualize.getMapZoomOutEnabled()
-        // we can tell we're at level 1 because zoom out is disabled
-        .then(function () {
-          return retry.try(function tryingForTime() {
-            return PageObjects.visualize.getMapZoomOutEnabled()
-            .then(function (enabled) {
-              //should be able to zoom more as current config has 0 as min level.
-              expect(enabled).to.be(false);
-            });
-          });
-        })
-        .then(function takeScreenshot() {
-          log.debug('Take screenshot (success)');
-          screenshots.take('map-at-zoom-0');
-        });
+      it('should not be able to zoom out beyond 0', async function () {
+        await PageObjects.visualize.zoomAllTheWayOut();
+        const enabled = await PageObjects.visualize.getMapZoomOutEnabled();
+        expect(enabled).to.be(false);
+        screenshots.take('map-at-zoom-0');
       });
 
       it('Fit data bounds should zoom to level 3', async function () {
@@ -188,6 +177,7 @@ export default function ({ getService, getPageObjects }) {
         ];
 
         await retry.try(async () => {
+          await PageObjects.visualize.zoomAllTheWayOut();
           await PageObjects.visualize.clickMapFitDataBounds();
           const data = await PageObjects.visualize.getTileMapData();
           expect(data).to.eql(expectedPrecision2ZoomCircles);

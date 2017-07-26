@@ -55,7 +55,7 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
     }
 
     async getTextTag() {
-      const elements = await retry.try(async () => await find.allByCssSelector('text'));
+      const elements = await find.allByCssSelector('text');
       return await Promise.all(elements.map(async element => await element.getVisibleText()));
     }
 
@@ -510,6 +510,18 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
       const zooms = await this.getZoomSelectors(zoomSelector);
       const classAttributes = await Promise.all(zooms.map(async zoom => await zoom.getAttribute('class')));
       return !classAttributes.join('').includes('leaflet-disabled');
+    }
+
+    async zoomAllTheWayOut() {
+      // we can tell we're at level 1 because zoom out is disabled
+      return await retry.try(async () => {
+        await this.clickMapZoomOut();
+        const enabled = await this.getMapZoomOutEnabled();
+        //should be able to zoom more as current config has 0 as min level.
+        if (enabled) {
+          throw new Error('Not fully zoomed out yet');
+        }
+      });
     }
 
     async getMapZoomInEnabled() {
