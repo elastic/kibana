@@ -62,3 +62,19 @@ There are two ways to fix this problem:
 For grep-ability, this is the error you'll likely see if hitting this problem:
 
 > has or is using name 'Foo' from external module "./bar" but cannot be named
+
+## Why expose declaration files instead of TypeScript files?
+
+This package builds TypeScript [declaration files][ts-decl] instead of just
+including the TypeScript files themselves. There are a couple reasons for this:
+
+- If we shipped `.ts` files packages that depend on `kbn-types` would have to
+  use the same compiler options. That means we also need to find a way to share
+  that in a sane manner. However, if TypeScript adds the option of using
+  [`extends` with a package][tsconfig-extends] it might become easier.
+- Tools like ts-loader [does not work nicely][ts-loader-node-modules] with `.ts`
+  files in `node_modules`.
+
+[ts-decl]: https://www.typescriptlang.org/docs/handbook/declaration-files/introduction.html
+[tsconfig-extends]: https://github.com/Microsoft/TypeScript/issues/15984
+[ts-loader-node-modules]: https://github.com/TypeStrong/ts-loader/issues/278
