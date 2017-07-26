@@ -69,21 +69,21 @@ function cleanFilter(filter) {
   return filter;
 }
 
-const MULTI_SELECT_KEY = 18; // alt
+const CTRL_KEY = 17;
+const MACOS_COMMAND_KEY = 93;
 let isMultiSelect = false;
 window.addEventListener('keydown', (event) => {
-  if (event.keyCode === MULTI_SELECT_KEY) {
+  if (event.keyCode === CTRL_KEY || event.keyCode === MACOS_COMMAND_KEY) {
     isMultiSelect = true;
   }
 }, false);
-window.addEventListener('keyup', async (event) => {
-  if (event.keyCode === MULTI_SELECT_KEY) {
+window.addEventListener('keyup', (event) => {
+  if (event.keyCode === CTRL_KEY || event.keyCode === MACOS_COMMAND_KEY) {
     isMultiSelect = false;
   }
 }, false);
 
 /**
- * Multi-select functionallity enabled by holding down MULTI_SELECT_KEY while creating filter(s)
  * Use this function to know when multi-select functionallity is enabled.
  *
  * @returns {boolean} Is multi-select functionallity enabled?
