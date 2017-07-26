@@ -66,7 +66,7 @@ export class KibanaServerUiSettings {
 
   async replace(doc) {
     this._log.debug('replacing kibana config doc: %j', doc);
-    await this._savedObjectsClient.create('config', { doc }, {
+    await this._savedObjectsClient.create('config', doc, {
       id: await this._id(),
       overwrite: true,
     });
