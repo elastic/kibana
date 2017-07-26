@@ -473,6 +473,13 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
       return await dataTable.getVisibleText();
     }
 
+    async getDataTableHeaders() {
+      return remote
+      .setFindTimeout(defaultFindTimeout * 2)
+      .findByCssSelector('table.table.table-condensed thead')
+      .getVisibleText();
+    }
+
     async getMarkdownData() {
       const markdown = await retry.try(async () => find.byCssSelector('visualize.ng-isolate-scope'));
       return await markdown.getVisibleText();

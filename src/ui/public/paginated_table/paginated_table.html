@@ -8,7 +8,7 @@
       <thead>
         <tr>
           <th
-            ng-repeat="col in ::columns"
+            ng-repeat="col in columns"
             ng-click="paginatedTable.sortColumn($index)"
             class="{{ col.class }}">
             <span ng-bind="::col.title"></span>
