@@ -4,14 +4,14 @@
   height: $kuiSizeL;
   display: inline-block;
   @include innerBorder('dark', 50%);
+}
 
-  @include modifier('small') {
-    width: $kuiSize;
-    height: $kuiSize;
-  }
+.kuiAvatar--small {
+  width: $kuiSize;
+  height: $kuiSize;
+}
 
-  @include modifier('large') {
-    width: $kuiSize * 4;
-    height: $kuiSize * 4;
-  }
+.kuiAvatar--large {
+  width: $kuiSize * 4;
+  height: $kuiSize * 4;
 }

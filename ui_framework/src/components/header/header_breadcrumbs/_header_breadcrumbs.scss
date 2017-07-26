@@ -24,21 +24,21 @@
     @include kuiLink;
   }
 
-  @include state('isActive') {
+  &.isActive {
     color: $kuiColorMediumShade;
   }
+}
 
-  @include modifier('collapsed') {
-    color: $kuiColorLightShade;
-  }
-
-  @include child('text') {
+  .kuiHeaderSectionItem__text {
     white-space: nowrap;
     max-width: 150px;
     display: block;
     text-overflow: ellipsis;
     overflow: hidden;
   }
+
+.kuiHeaderBreadcrumb--collapsed {
+  color: $kuiColorLightShade;
 }
 
 // Laptop

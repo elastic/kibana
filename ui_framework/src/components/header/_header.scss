@@ -3,8 +3,9 @@
 .kuiHeader {
   background: $kuiHeaderBackgroundColor;
   border-bottom: $kuiBorderThin;
+}
 
-  @include child('notification') {
+  .kuiHeader__notification {
     display: inline-block;
     border-radius: $kuiBorderRadius;
     background: $kuiHeaderNotificationBackgroundColor;
@@ -15,4 +16,3 @@
     min-width: $kuiSize;
     vertical-align: middle;
   }
-}

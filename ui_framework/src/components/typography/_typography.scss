@@ -2,14 +2,14 @@
   @include kuiFontSizeL;
   color: $kuiTitleColor;
   font-weight: $kuiFontWeightLight;
+}
 
-  @include modifier('small') {
-    @include kuiFontSizeM;
-  }
+.kuiTitle--small {
+  @include kuiFontSizeM;
+}
 
-  @include modifier('large') {
-    @include kuiFontSizeXL;
-  }
+.kuiTitle--large {
+  @include kuiFontSizeXL;
 }
 
 .kuiText {

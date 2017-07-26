@@ -32,8 +32,9 @@
       text-decoration: underline;
     }
   }
+}
 
-  @include child('inner') {
+  .kuiKeyPadMenuItem__inner {
     width: 100%;
     height: 100%;
     display: flex;
@@ -42,14 +43,13 @@
     justify-content: center;
   }
 
-  @include child('icon') {
+  .kuiKeyPadMenuItem__icon {
     transition: transform $kuiAnimSlightBounce $kuiAnimSpeedNormal;
     transform: translateY($kuiSizeXS);
     margin-bottom: $kuiSizeS;
   }
 
-  @include child('label') {
+  .kuiKeyPadMenuItem__label {
     @include kuiFontSizeS;
     text-align: center;
   }
-}
