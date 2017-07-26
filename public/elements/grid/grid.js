@@ -15,6 +15,9 @@ module.exports = new Element('grid', {
 
     const { summary, columns, rows } = config;
 
+    const nominalPalette = ['#01A4A4', '#CC6666', '#D0D102', '#616161', '#00A1CB', '#32742C', '#F18D05', '#113F8C', '#61AE24', '#D70060'];
+    const ordinalPalette = ['#ACF0F2', '#1695A3', '#225378'];
+
     // TODO: This should be between 0.5 and 1.5, or something, currently between 0 and 1, 0 is bad.
     let getSize; // This should always return a number between 0 and 1, whether for dimensions or metrics
     switch (get(summary.size, 'role')) {
@@ -38,15 +41,14 @@ module.exports = new Element('grid', {
     switch (get(summary.color, 'role')) {
       case 'measure':
         getColor = (val) => {
-          const gradient = chroma.scale(['#ACF0F2', '#1695A3', '#225378'])
+          const gradient = chroma.scale(ordinalPalette)
             .domain([0, summary.color.values.length - 1]);
           return gradient(summary.color.values.indexOf(val));
         };
         break;
       case 'dimension':
         getColor = (val) => {
-          const palette = ['#01A4A4', '#CC6666', '#D0D102', '#616161', '#00A1CB', '#32742C', '#F18D05', '#113F8C', '#61AE24', '#D70060'];
-          return palette[summary.color.values.indexOf(val) % palette.length];
+          return nominalPalette[summary.color.values.indexOf(val) % nominalPalette.length];
         };
         break;
       default:
