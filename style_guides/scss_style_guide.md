@@ -112,5 +112,40 @@ Don't extend classes. The only time use should use an extend is when you are ext
 KUI is fully themeable. We do this with strict variable naming. Please use the following rules.
 
 * Global vars that can be used across all of KUI should be placed in the `global_styles/variables` directory.
-* Component vars that are local to the component should be places in the `component/component_name/index.scss` file at the top of the document.
+* Component vars that are local to the component should be places in the `component/component_name/_index.scss` file at the top of the document.
 * Component vars that deal with coloring should *always* be mathematically calculated from the global coloring variables. This allows us to cascade theming down into the components.
+* Make use of the `tintOrShade()` sass function for any coloring that needs variance based upon the lightness of the design.
+* In general, there should be few global variables, but we should strive to have many local variables that inherit them.
+
+### Example ###
+
+Good
+
+```
+// A global color variable that lives at /src/global_styling/variables/_colors.scss
+
+$kuiPrimaryColor: #0079a5; // Blue
+
+// A local color variable that lives at /src/components/some_component/_index.scss
+// tintOrShade() will alter the based upon the brightness of the theme. This makes it work for dark and light themes from the same starting base value.
+
+$kuiSomeComponentItemBackground: tintOrShade($kuiColorPrimary, 90%, 50%);
+
+// A local style that lives in /src/components/some_component/_some_component_item.scss
+
+$kuiSomeComponent__item {
+  background: $kuiSomeComponentItemBackground;
+}
+```
+
+Bad
+```
+// A global color variable that lives at /src/global_styling/variables/_colors.scss
+
+$kuiPrimaryColor: #0079a5; // Blue
+
+// A local variable that doesn't scope against our global theming.
+
+$kuiSomeComponentItemBackground: #990000;
+
+```
