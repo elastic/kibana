@@ -1,0 +1,14 @@
+{
+  "type": "doc",
+  "value": {
+    "index": ".kibana",
+    "type": "doc",
+    "id": "config:6.0.0-alpha3",
+    "source": {
+      "type": "config",
+      "config": {
+        "buildNum": 8467
+      }
+    }
+  }
+}
