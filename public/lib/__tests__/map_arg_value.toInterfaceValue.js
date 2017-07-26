@@ -1,36 +1,10 @@
 import expect from 'expect.js';
 import { toInterfaceValue } from '../map_arg_value';
 
-function addFunctoin(arg) {
-  if (Array.isArray(arg)) return arg.map(a => Object.assign({ function: null }, a));
-  return Object.assign({ function: null }, arg);
-}
-
 describe('mapArgValue.toInterfaceValue', () => {
-  describe('multivalue string arguments', () => {
-    let argVals;
-
-    beforeEach(() => {
-      argVals = [{
-        type: 'string',
-        value: 'hello',
-      }, {
-        type: 'string',
-        value: 'world',
-      }];
-    });
-    it('maps into a single value, using the last one provided', () => {
-      expect(toInterfaceValue(argVals)).to.eql(addFunctoin(argVals[1]));
-    });
-
-    it('leave multivalue string alone', () => {
-      expect(toInterfaceValue(argVals, true)).to.eql(addFunctoin(argVals));
-    });
-  });
-
   describe('expressions', () => {
     it('turns "expression" chain into parsed expression string', () => {
-      const argValue = [{
+      const argValue = {
         type: 'expression',
         chain: [{
           type: 'function',
@@ -42,19 +16,20 @@ describe('mapArgValue.toInterfaceValue', () => {
             }],
           },
         }],
-      }];
+      };
 
       expect(toInterfaceValue(argValue)).to.eql({
         type: 'expression',
         value: 'csv("stuff\nthings")',
         function: null,
+        chain: argValue.chain,
       });
     });
   });
 
   describe('partial', () => {
     it('turns "partial" chain into parsed expression string', () => {
-      const argValue = [{
+      const argValue = {
         type: 'partial',
         chain: [{
           type: 'function',
@@ -66,12 +41,13 @@ describe('mapArgValue.toInterfaceValue', () => {
             }],
           },
         }],
-      }];
+      };
 
       expect(toInterfaceValue(argValue)).to.eql({
         type: 'partial',
         value: '.partial("i am a partial")',
         function: null,
+        chain: argValue.chain,
       });
     });
   });
@@ -80,10 +56,10 @@ describe('mapArgValue.toInterfaceValue', () => {
     let argValue;
 
     beforeEach(() => {
-      argValue = [{
+      argValue = {
         type: 'string',
         value: 'median(cost)',
-      }];
+      };
     });
 
     it('is a math type', () => {
@@ -100,10 +76,10 @@ describe('mapArgValue.toInterfaceValue', () => {
     let argValue;
 
     beforeEach(() => {
-      argValue = [{
+      argValue = {
         type: 'string',
         value: 'median(cost + 100)',
-      }];
+      };
     });
 
     it('is a math type', () => {
@@ -116,10 +92,10 @@ describe('mapArgValue.toInterfaceValue', () => {
     });
 
     it('handles parens values', () => {
-      const value = [{
+      const value = {
         type: 'string',
         value: '(testing)',
-      }];
+      };
 
       expect(toInterfaceValue(value)).to.eql({
         type: 'math',
