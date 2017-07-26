@@ -210,15 +210,11 @@ export function HeaderPageProvider({ getService, getPageObjects }) {
     }
 
     async getPrettyDuration() {
-      return await testSubjects.find('globalTimepickerRange').getVisibleText();
+      return await testSubjects.getVisibleText('globalTimepickerRange');
     }
 
     async isSharedTimefilterEnabled() {
-      const element = await remote
-      .setFindTimeout(defaultFindTimeout)
-      .findByCssSelector(`[shared-timefilter=true]`);
-
-      return !!element;
+      return await find.existsByCssSelector('[shared-timefilter=true]');
     }
   }
 
