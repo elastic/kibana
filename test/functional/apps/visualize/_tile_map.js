@@ -177,7 +177,11 @@ export default function ({ getService, getPageObjects }) {
         ];
 
         await retry.try(async () => {
-          await PageObjects.visualize.zoomAllTheWayOut();
+          // See https://github.com/elastic/kibana/issues/13137 for the reason behind this finagling of the spy
+          // pane to ensure the test passes.
+          await PageObjects.visualize.openSpyPanel();
+          await PageObjects.visualize.closeSpyPanel();
+
           await PageObjects.visualize.clickMapFitDataBounds();
           const data = await PageObjects.visualize.getTileMapData();
           expect(data).to.eql(expectedPrecision2ZoomCircles);
