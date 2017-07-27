@@ -6,7 +6,7 @@ import {
 
 export default () => (
   <div>
-    <KuiInfoButton></KuiInfoButton>
+    <KuiInfoButton />
   </div>
 );
 

@@ -28,7 +28,7 @@ export function LocalNavWithBreadcrumbs() {
             <div className="kuiLocalMenuItem">Save</div>
             <div className="kuiLocalMenuItem">Open</div>
             <button className="kuiLocalMenuItem">
-              <div className="kuiLocalMenuItem__icon kuiIcon fa-clock-o"></div>
+              <div className="kuiLocalMenuItem__icon kuiIcon fa-clock-o" />
               Last 5 minutes
             </button>
           </div>

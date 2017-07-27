@@ -58,9 +58,9 @@ export class ControlledTableLoadingItems extends React.Component {
         </KuiToolBar>
 
         <KuiEmptyTablePromptPanel>
-            <KuiTableInfo>
+          <KuiTableInfo>
               Loading...
-            </KuiTableInfo>
+          </KuiTableInfo>
         </KuiEmptyTablePromptPanel>
 
         <KuiToolBarFooter>

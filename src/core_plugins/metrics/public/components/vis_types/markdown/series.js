@@ -47,7 +47,8 @@ function MarkdownSeries(props) {
             dynamic={true}
             direction="vertical"
             onSort={handleSort}
-            sortHandle="vis_editor__agg_sort">
+            sortHandle="vis_editor__agg_sort"
+          >
             { aggs }
           </Sortable>
           <div className="vis_editor__series_row">
@@ -56,7 +57,8 @@ function MarkdownSeries(props) {
                 onChange={props.onChange}
                 fields={fields}
                 panel={panel}
-                model={model}/>
+                model={model}
+              />
             </div>
           </div>
         </div>
@@ -66,16 +68,23 @@ function MarkdownSeries(props) {
         <SeriesConfig
           fields={props.fields}
           model={props.model}
-          onChange={props.onChange} />
+          onChange={props.onChange}
+        />
       );
     }
     body = (
       <div className="vis_editor__series-row">
         <div className="kbnTabs sm">
-          <div className={metricsClassName}
-            onClick={() => props.switchTab('metrics')}>Metrics</div>
-          <div className={optionsClassname}
-            onClick={() => props.switchTab('options')}>Options</div>
+          <div
+            className={metricsClassName}
+            onClick={() => props.switchTab('metrics')}
+          >Metrics
+          </div>
+          <div
+            className={optionsClassname}
+            onClick={() => props.switchTab('options')}
+          >Options
+          </div>
         </div>
         {seriesBody}
       </div>
@@ -87,7 +96,8 @@ function MarkdownSeries(props) {
       className={`${props.className} vis_editor__series`}
       style={props.style}
       onMouseDown={props.onMouseDown}
-      onTouchStart={props.onTouchStart}>
+      onTouchStart={props.onTouchStart}
+    >
       <div className="vis_editor__container">
         <div className="vis_editor__series-details">
           <div onClick={ props.toggleVisible }><i className={ caretClassName }/></div>
@@ -96,12 +106,14 @@ function MarkdownSeries(props) {
               className="vis_editor__input-grows vis_editor__row_item"
               onChange={handleChange('label')}
               placeholder='Label'
-              value={model.label}/>
+              value={model.label}
+            />
             <input
               className="vis_editor__input-grows"
               onChange={handleChange('var_name')}
               placeholder='Variable Name'
-              value={model.var_name}/>
+              value={model.var_name}
+            />
           </div>
           <AddDeleteButtons
             addTooltip="Add Series"
@@ -111,7 +123,8 @@ function MarkdownSeries(props) {
             onClone={props.onClone}
             onAdd={onAdd}
             disableDelete={disableDelete}
-            disableAdd={disableAdd}/>
+            disableAdd={disableAdd}
+          />
         </div>
       </div>
       { body }

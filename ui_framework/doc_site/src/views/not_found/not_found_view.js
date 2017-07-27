@@ -20,7 +20,7 @@ export const NotFoundView = () => (
           to="/"
         >
           home page
-        </Link>?
+            </Link>?
       </p>
     </div>
   </div>

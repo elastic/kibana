@@ -17,7 +17,7 @@ export function showCloneModal(onClone, title) {
   };
   document.body.appendChild(container);
   const element = (
-    <DashboardCloneModal onClone={onCloneConfirmed} onClose={closeModal} title={title + ' Copy'}></DashboardCloneModal>
+    <DashboardCloneModal onClone={onCloneConfirmed} onClose={closeModal} title={title + ' Copy'} />
   );
   ReactDOM.render(element, container);
 }

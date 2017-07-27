@@ -120,7 +120,8 @@ class Metric extends Component {
       <div className="rhythm_metric" style={styles.container}>
         <div
           ref={(el) => this.resize = el}
-          className="rhythm_metric__resize">
+          className="rhythm_metric__resize"
+        >
           <div ref={(el) => this.inner = el} className="rhythm_metric__inner" style={styles.inner}>
             <div className="rhythm_metric__primary">
               { primaryLabel }

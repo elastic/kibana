@@ -22,11 +22,11 @@ export function KuiPager({
         (startNumber === 1 && endNumber === totalItems)
           ? null
           : <KuiPagerButtonGroup
-              hasNext={hasNextPage}
-              hasPrevious={hasPreviousPage}
-              onNext={onNextPage}
-              onPrevious={onPreviousPage}
-            />
+            hasNext={hasNextPage}
+            hasPrevious={hasPreviousPage}
+            onNext={onNextPage}
+            onPrevious={onPreviousPage}
+          />
       }
     </div>
   );

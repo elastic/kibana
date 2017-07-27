@@ -55,7 +55,8 @@ function TimeseriesConfig(props) {
             clearable={false}
             options={chartTypeOptions}
             value={model.chart_type}
-            onChange={handleSelectChange('chart_type')}/>
+            onChange={handleSelectChange('chart_type')}
+          />
         </div>
         <div className="vis_editor__label">Stacked</div>
         <div className="vis_editor__item">
@@ -63,7 +64,8 @@ function TimeseriesConfig(props) {
             clearable={false}
             options={stackedOptions}
             value={model.stacked}
-            onChange={handleSelectChange('stacked')}/>
+            onChange={handleSelectChange('stacked')}
+          />
         </div>
         <div className="vis_editor__label">Fill (0 to 1)</div>
         <input
@@ -71,24 +73,28 @@ function TimeseriesConfig(props) {
           type="number"
           step="0.1"
           onChange={handleTextChange('fill')}
-          value={model.fill}/>
+          value={model.fill}
+        />
         <div className="vis_editor__label">Line Width</div>
         <input
           className="vis_editor__input-grows"
           type="number"
           onChange={handleTextChange('line_width')}
-          value={model.line_width}/>
+          value={model.line_width}
+        />
         <div className="vis_editor__label">Point Size</div>
         <input
           className="vis_editor__input-grows"
           type="number"
           onChange={handleTextChange('point_size')}
-          value={model.point_size}/>
+          value={model.point_size}
+        />
         <div className="vis_editor__label">Steps</div>
         <YesNo
           value={model.steps}
           name="steps"
-          onChange={props.onChange}/>
+          onChange={props.onChange}
+        />
       </div>
     );
   }
@@ -101,7 +107,8 @@ function TimeseriesConfig(props) {
             clearable={false}
             options={chartTypeOptions}
             value={model.chart_type}
-            onChange={handleSelectChange('chart_type')}/>
+            onChange={handleSelectChange('chart_type')}
+          />
         </div>
         <div className="vis_editor__label">Stacked</div>
         <div className="vis_editor__item">
@@ -109,7 +116,8 @@ function TimeseriesConfig(props) {
             clearable={false}
             options={stackedOptions}
             value={model.stacked}
-            onChange={handleSelectChange('stacked')}/>
+            onChange={handleSelectChange('stacked')}
+          />
         </div>
         <div className="vis_editor__label">Fill (0 to 1)</div>
         <input
@@ -117,13 +125,15 @@ function TimeseriesConfig(props) {
           type="number"
           step="0.5"
           onChange={handleTextChange('fill')}
-          value={model.fill}/>
+          value={model.fill}
+        />
         <div className="vis_editor__label">Line Width</div>
         <input
           className="vis_editor__input-grows"
           type="number"
           onChange={handleTextChange('line_width')}
-          value={model.line_width}/>
+          value={model.line_width}
+        />
       </div>
     );
   }
@@ -136,12 +146,14 @@ function TimeseriesConfig(props) {
         <div className="vis_editor__series_config-row">
           <DataFormatPicker
             onChange={handleSelectChange('formatter')}
-            value={model.formatter}/>
+            value={model.formatter}
+          />
           <div className="vis_editor__label">Template (eg.<code>{'{{value}}/s'}</code>)</div>
           <input
             className="vis_editor__input-grows"
             onChange={handleTextChange('value_template')}
-            value={model.value_template}/>
+            value={model.value_template}
+          />
         </div>
         { type }
         <div className="vis_editor__series_config-row">
@@ -150,19 +162,22 @@ function TimeseriesConfig(props) {
             className="vis_editor__input-grows"
             type="text"
             onChange={handleTextChange('offset_time')}
-            value={model.offset_time}/>
+            value={model.offset_time}
+          />
           <div className="vis_editor__label">Hide in Legend</div>
           <YesNo
             value={model.hide_in_legend}
             name="hide_in_legend"
-            onChange={props.onChange}/>
+            onChange={props.onChange}
+          />
           <div className="vis_editor__label">Split Color Theme</div>
           <div className="vis_editor__row_item">
             <Select
               clearable={false}
               options={splitColorOptions}
               value={model.split_color_mode}
-              onChange={handleSelectChange('split_color_mode')}/>
+              onChange={handleSelectChange('split_color_mode')}
+            />
           </div>
         </div>
         <div className="vis_editor__series_config-row">
@@ -170,21 +185,24 @@ function TimeseriesConfig(props) {
           <YesNo
             value={model.seperate_axis}
             name="seperate_axis"
-            onChange={props.onChange}/>
+            onChange={props.onChange}
+          />
           <div className="vis_editor__label">Axis Min</div>
           <input
             className="vis_editor__input-grows"
             type="number"
             disabled={disableSeperateYaxis}
             onChange={handleTextChange('axis_min')}
-            value={model.axis_min}/>
+            value={model.axis_min}
+          />
           <div className="vis_editor__label">Axis Max</div>
           <input
             className="vis_editor__input-grows"
             type="number"
             disabled={disableSeperateYaxis}
             onChange={handleTextChange('axis_max')}
-            value={model.axis_max}/>
+            value={model.axis_max}
+          />
           <div className="vis_editor__label">Axis Position</div>
           <div className="vis_editor__row_item">
             <Select
@@ -192,7 +210,8 @@ function TimeseriesConfig(props) {
               disabled={disableSeperateYaxis}
               options={positionOptions}
               value={model.axis_position}
-              onChange={handleSelectChange('axis_position')}/>
+              onChange={handleSelectChange('axis_position')}
+            />
           </div>
         </div>
         <div className="vis_editor__series_config-row">
@@ -200,13 +219,15 @@ function TimeseriesConfig(props) {
           <YesNo
             value={model.override_index_pattern}
             name="override_index_pattern"
-            onChange={props.onChange}/>
+            onChange={props.onChange}
+          />
           <IndexPattern
             {...props}
             prefix="series_"
             className="vis_editor__row_item vis_editor__row"
             disabled={!model.override_index_pattern}
-            with-interval={true} />
+            with-interval={true}
+          />
         </div>
       </div>
     </div>
