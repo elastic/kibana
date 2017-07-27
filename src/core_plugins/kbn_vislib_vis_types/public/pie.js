@@ -23,6 +23,7 @@ export default function HistogramVisType(Private) {
         isDonut: false
       },
     },
+    responseHandler: 'hierarchical_data',
     editorConfig: {
       collections: {
         legendPositions: [{

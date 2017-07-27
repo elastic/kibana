@@ -45,6 +45,7 @@ export default function HeatmapVisType(Private) {
         }]
       },
     },
+    responseHandler: 'series_data',
     editorConfig: {
       collections: {
         legendPositions: [{

@@ -16,7 +16,7 @@ import 'ui/timefilter';
 import 'ui/share';
 import 'ui/query_bar';
 import { VisProvider } from 'ui/vis';
-import { BasicResponseHandlerProvider } from 'ui/vis/response_handlers/basic';
+import { seriesResponseHandlerProvider } from 'ui/vis/response_handlers/series_data';
 import { DocTitleProvider } from 'ui/doc_title';
 import PluginsKibanaDiscoverHitSortFnProvider from 'plugins/kibana/discover/_hit_sort_fn';
 import { FilterBarQueryFilterProvider } from 'ui/filter_bar/query_filter';
@@ -117,7 +117,7 @@ function discoverController(
   const docTitle = Private(DocTitleProvider);
   const HitSortFn = Private(PluginsKibanaDiscoverHitSortFnProvider);
   const queryFilter = Private(FilterBarQueryFilterProvider);
-  const responseHandler = Private(BasicResponseHandlerProvider).handler;
+  const responseHandler = Private(seriesResponseHandlerProvider).handler;
   const notify = new Notifier({
     location: 'Discover'
   });

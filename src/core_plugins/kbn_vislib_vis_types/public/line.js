@@ -84,6 +84,7 @@ export default function PointSeriesVisType(Private) {
         addTimeMarker: false,
       },
     },
+    responseHandler: 'series_data',
     editorConfig: {
       collections: {
         positions: ['top', 'left', 'right', 'bottom'],
