@@ -68,7 +68,7 @@ export default function ({ getService, getPageObjects }) {
           expect(message).to.be(`Visualization Editor: Saved Visualization "${vizNamewithSpecialChars}"`);
         })
         .then(function testVisualizeWaitForToastMessageGone() {
-          return PageObjects.visualize.waitForToastMessageGone();
+          return PageObjects.header.waitForToastMessageGone();
         });
       });
 
@@ -79,7 +79,7 @@ export default function ({ getService, getPageObjects }) {
         log.debug(`Saved viz message with umlaut = ${message}`);
         expect(message).to.be(`Visualization Editor: Saved Visualization "${vizNamewithSpecialChars}"`);
 
-        await PageObjects.visualize.waitForToastMessageGone();
+        await PageObjects.header.waitForToastMessageGone();
       });
 
       it('should save and load', function () {
@@ -90,7 +90,7 @@ export default function ({ getService, getPageObjects }) {
           expect(message).to.be('Visualization Editor: Saved Visualization \"' + vizName1 + '\"');
         })
         .then(function testVisualizeWaitForToastMessageGone() {
-          return PageObjects.visualize.waitForToastMessageGone();
+          return PageObjects.header.waitForToastMessageGone();
         })
         .then(function loadSavedVisualization() {
           return PageObjects.visualize.loadSavedVisualization(vizName1);

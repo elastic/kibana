@@ -2,6 +2,7 @@ import expect from 'expect.js';
 
 export default function ({ getService, getPageObjects }) {
   const log = getService('log');
+  const retry = getService('retry');
   const screenshots = getService('screenshots');
   const PageObjects = getPageObjects(['common', 'visualize', 'header']);
 
@@ -57,7 +58,7 @@ export default function ({ getService, getPageObjects }) {
           expect(message).to.be('Visualization Editor: Saved Visualization \"' + vizName1 + '\"');
         })
         .then(function testVisualizeWaitForToastMessageGone() {
-          return PageObjects.visualize.waitForToastMessageGone();
+          return PageObjects.header.waitForToastMessageGone();
         })
         .then(function () {
           return PageObjects.visualize.loadSavedVisualization(vizName1);
@@ -70,7 +71,7 @@ export default function ({ getService, getPageObjects }) {
         });
       });
 
-      it('should show correct chart, take screenshot', function () {
+      it('should show correct chart, take screenshot', async function () {
         const expectedChartValues = [37, 202, 740, 1437, 1371, 751, 188, 31, 42, 202, 683,
           1361, 1415, 707, 177, 27, 32, 175, 707, 1408, 1355, 726, 201, 29
         ];
@@ -78,18 +79,14 @@ export default function ({ getService, getPageObjects }) {
         // Most recent failure on Jenkins usually indicates the bar chart is still being drawn?
         // return arguments[0].getAttribute(arguments[1]);","args":[{"ELEMENT":"592"},"fill"]}] arguments[0].getAttribute is not a function
         // try sleeping a bit before getting that data
-        return PageObjects.common.sleep(50000)
-        .then(function () {
-          return PageObjects.visualize.getBarChartData();
-        })
-        .then(function showData(data) {
+        await retry.try(async() => {
+          const data = await PageObjects.visualize.getBarChartData();
           log.debug('data=' + data);
           log.debug('data.length=' + data.length);
           screenshots.take('Visualize-vertical-bar-chart');
           expect(data).to.eql(expectedChartValues);
         });
       });
-
 
       it('should show correct data', function () {
         // this is only the first page of the tabular data.
