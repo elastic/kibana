@@ -331,7 +331,7 @@ table {
   margin: 0 -16px;
   padding: 16px;
   border-top: 1px solid #D9D9D9; }
-  .kuiHeaderAlert:hover .__dismiss {
+  .kuiHeaderAlert:hover .kuiHeaderAlert__dismiss {
     opacity: 1; }
 
 .kuiHeaderAlert__dismiss {
@@ -423,7 +423,7 @@ table {
   .kuiHeaderBreadcrumb.kuiHeaderBreadcrumb-isActive {
     color: #999; }
 
-.kuiHeaderSectionItem__text {
+.kuiHeaderBreadcrumb__text {
   white-space: nowrap;
   max-width: 150px;
   display: block;

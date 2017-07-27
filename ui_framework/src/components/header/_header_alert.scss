@@ -7,7 +7,7 @@
   border-top: $kuiBorderThin;
 
   &:hover {
-    .__dismiss {
+    .kuiHeaderAlert__dismiss {
       opacity: 1;
     }
   }
