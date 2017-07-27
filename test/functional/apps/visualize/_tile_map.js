@@ -90,33 +90,23 @@ export default function ({ getService, getPageObjects }) {
 
     describe('tile map chart', function indexPatternCreation() {
 
-      it('should show correct tile map data on default zoom level', function () {
+      it('should show correct tile map data on default zoom level', async function () {
         const expectedTableData = ['9 5,787 { "lat": 37.22448418632405, "lon": -103.01935195013255 }',
           'd 5,600 { "lat": 37.44271478370398, "lon": -81.72692197253595 }',
           'c 1,319 { "lat": 47.72720855392425, "lon": -109.84745063951028 }',
           'b 999 { "lat": 62.04130042948433, "lon": -155.28087269195967 }',
           'f 187 { "lat": 45.656166475784175, "lon": -82.45831044201545 }',
           '8 108 { "lat": 18.85260305600241, "lon": -156.5148810390383 }'];
+        //level 1
+        await PageObjects.visualize.clickMapZoomOut();
+        //level 0
+        await PageObjects.visualize.clickMapZoomOut();
 
-        return PageObjects.visualize.openSpyPanel()
-        .then(function () {
-          //level 1
-          return PageObjects.visualize.clickMapZoomOut();
-        })
-        .then(function () {
-          //level 0
-          return PageObjects.visualize.clickMapZoomOut();
-        })
-        .then(function () {
-          return PageObjects.settings.setPageSize('All');
-        })
-        .then(function getDataTableData() {
-          return PageObjects.visualize.getDataTableData()
-          .then(function showData(actualTableData) {
-            compareTableData(expectedTableData, actualTableData.trim().split('\n'));
-            return PageObjects.visualize.closeSpyPanel();
-          });
-        });
+        await PageObjects.visualize.openSpyPanel();
+        await PageObjects.settings.setPageSize('All');
+        const actualTableData = await PageObjects.visualize.getDataTableData();
+        compareTableData(expectedTableData, actualTableData.trim().split('\n'));
+        await PageObjects.visualize.closeSpyPanel();
       });
 
       it('should not be able to zoom out beyond 0', async function () {
@@ -126,6 +116,7 @@ export default function ({ getService, getPageObjects }) {
         screenshots.take('map-at-zoom-0');
       });
 
+      // See https://github.com/elastic/kibana/issues/13137 if this test starts failing intermittently
       it('Fit data bounds should zoom to level 3', async function () {
         const expectedPrecision2ZoomCircles = [
           { color: '#750000', radius: 192 },
@@ -176,15 +167,11 @@ export default function ({ getService, getPageObjects }) {
           { color: '#b99939', radius: 9 }
         ];
 
-        await retry.try(async () => {
-          // See https://github.com/elastic/kibana/issues/13137 for the reason behind this finagling of the spy
-          // pane to ensure the test passes.
-          await PageObjects.visualize.openSpyPanel();
-          await PageObjects.visualize.closeSpyPanel();
-
+        await retry.try(async() => {
           await PageObjects.visualize.clickMapFitDataBounds();
           const data = await PageObjects.visualize.getTileMapData();
           expect(data).to.eql(expectedPrecision2ZoomCircles);
+          screenshots.take('map-at-zoom-3');
         });
       });
 

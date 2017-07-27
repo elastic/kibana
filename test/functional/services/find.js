@@ -51,7 +51,7 @@ export function FindProvider({ getService }) {
           let elements = await remote.findAllByCssSelector(selector);
           if (!elements) elements = [];
           // Force isStale checks for all the retrieved elements.
-          elements.map(element => element.isEnabled());
+          await Promise.all(elements.map(async element => await element.isEnabled()));
           log.debug(`Found ${elements.length} for selector ${selector}`);
           return elements;
         });

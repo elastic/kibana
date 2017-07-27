@@ -537,7 +537,7 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
     }
 
     async getTileMapData() {
-      const chartTypes = await retry.try(async () => await find.allByCssSelector('path.leaflet-clickable'));
+      const chartTypes = await find.allByCssSelector('path.leaflet-clickable');
       async function getChartType(chart) {
         const color = await chart.getAttribute('stroke');
         const d = await chart.getAttribute('d');
