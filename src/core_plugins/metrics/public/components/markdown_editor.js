@@ -100,7 +100,8 @@ class MarkdownEditor extends Component {
             name={`ace-${model.id}`}
             setOptions={{ wrap: true, fontSize: '14px' }}
             value={model.markdown}
-            onChange={this.handleChange}/>
+            onChange={this.handleChange}
+          />
         </div>
         <div className="vis_editor__markdown-variables">
           <div>The following variables can be used in the Markdown by using the Handlebar (mustache) syntax. <a href="http://handlebarsjs.com/expressions.html" target="_BLANK">Click here for documentation</a> on the available expressions.</div>
@@ -121,7 +122,8 @@ class MarkdownEditor extends Component {
 
 {{#each _all}}
 - {{ label }} {{ last.formatted }}
-{{/each}}`}</code>
+{{/each}}`}
+            </code>
           </pre>
         </div>
       </div>

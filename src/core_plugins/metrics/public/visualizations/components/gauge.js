@@ -92,14 +92,19 @@ class Gauge extends Component {
         <div
           className="thorHalfGauge__metrics"
           ref={(el) => this.inner = el}
-          style={styles.inner}>
+          style={styles.inner}
+        >
           <div
             className="thorHalfGauge__label"
-            ref="title">{ title }</div>
+            ref="title"
+          >{ title }
+          </div>
           <div
             className="thorHalfGauge__value"
             style={styles.value}
-            ref="label">{ formatter(value) }</div>
+            ref="label"
+          >{ formatter(value) }
+          </div>
         </div>
       );
     } else {
@@ -107,14 +112,19 @@ class Gauge extends Component {
         <div
           className="thorCircleGauge__metrics"
           ref={(el) => this.inner = el}
-          style={styles.inner}>
+          style={styles.inner}
+        >
           <div
             className="thorCircleGauge__value"
             style={styles.value}
-            ref="label">{ formatter(value) }</div>
+            ref="label"
+          >{ formatter(value) }
+          </div>
           <div
             className="thorCircleGauge__label"
-            ref="title">{ title }</div>
+            ref="title"
+          >{ title }
+          </div>
         </div>
       );
     }
@@ -124,7 +134,8 @@ class Gauge extends Component {
       <div className={className}>
         <div
           ref={(el) => this.resize = el}
-          className={`${className}__resize`}>
+          className={`${className}__resize`}
+        >
           { metrics }
           <GaugeVis {...gaugeProps}/>
         </div>

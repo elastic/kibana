@@ -47,7 +47,8 @@ function TopNSeries(props) {
             dynamic={true}
             direction="vertical"
             onSort={handleSort}
-            sortHandle="vis_editor__agg_sort">
+            sortHandle="vis_editor__agg_sort"
+          >
             { aggs }
           </Sortable>
           <div className="vis_editor__series_row">
@@ -56,7 +57,8 @@ function TopNSeries(props) {
                 onChange={props.onChange}
                 fields={fields}
                 panel={panel}
-                model={model}/>
+                model={model}
+              />
             </div>
           </div>
         </div>
@@ -66,16 +68,23 @@ function TopNSeries(props) {
         <SeriesConfig
           fields={props.fields}
           model={props.model}
-          onChange={props.onChange} />
+          onChange={props.onChange}
+        />
       );
     }
     body = (
       <div className="vis_editor__series-row">
         <div className="kbnTabs sm">
-          <div className={metricsClassName}
-            onClick={() => props.switchTab('metrics')}>Metrics</div>
-          <div className={optionsClassname}
-            onClick={() => props.switchTab('options')}>Options</div>
+          <div
+            className={metricsClassName}
+            onClick={() => props.switchTab('metrics')}
+          >Metrics
+          </div>
+          <div
+            className={optionsClassname}
+            onClick={() => props.switchTab('options')}
+          >Options
+          </div>
         </div>
         {seriesBody}
       </div>
@@ -87,7 +96,8 @@ function TopNSeries(props) {
       disableTrash={true}
       onChange={props.onChange}
       name="color"
-      value={model.color}/>
+      value={model.color}
+    />
   );
 
   let dragHandle;
@@ -95,7 +105,7 @@ function TopNSeries(props) {
     dragHandle = (
       <Tooltip text="Sort">
         <div className="vis_editor__sort thor__button-outlined-default sm">
-          <i className="fa fa-sort"></i>
+          <i className="fa fa-sort" />
         </div>
       </Tooltip>
     );
@@ -106,7 +116,8 @@ function TopNSeries(props) {
       className={`${props.className} vis_editor__series`}
       style={props.style}
       onMouseDown={props.onMouseDown}
-      onTouchStart={props.onTouchStart}>
+      onTouchStart={props.onTouchStart}
+    >
       <div className="vis_editor__container">
         <div className="vis_editor__series-details">
           <div onClick={ props.toggleVisible }><i className={ caretClassName }/></div>
@@ -116,7 +127,8 @@ function TopNSeries(props) {
               className="vis_editor__input-grows"
               onChange={handleChange('label')}
               placeholder='Label'
-              value={model.label}/>
+              value={model.label}
+            />
           </div>
           { dragHandle }
           <AddDeleteButtons
@@ -127,7 +139,8 @@ function TopNSeries(props) {
             onClone={props.onClone}
             onAdd={onAdd}
             disableDelete={disableDelete}
-            disableAdd={disableAdd}/>
+            disableAdd={disableAdd}
+          />
         </div>
       </div>
       { body }

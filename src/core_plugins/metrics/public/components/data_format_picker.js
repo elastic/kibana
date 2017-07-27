@@ -47,7 +47,8 @@ class DataFormatPicker extends Component {
             defaultValue={value}
             ref={(el) => this.custom = el}
             onChange={this.handleCustomChange}
-            type="text"/>
+            type="text"
+          />
         </div>
       );
     }
@@ -61,7 +62,8 @@ class DataFormatPicker extends Component {
             clearable={false}
             value={defaultValue}
             options={options}
-            onChange={this.handleChange}/>
+            onChange={this.handleChange}
+          />
         </div>
         {custom}
       </div>
