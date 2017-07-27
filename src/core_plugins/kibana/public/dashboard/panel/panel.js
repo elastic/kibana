@@ -127,7 +127,7 @@ uiModules
       const embeddableHandlers = Private(EmbeddableHandlersRegistryProvider);
       const embeddableHandler = embeddableHandlers.byName[$scope.panel.type];
       if (!embeddableHandler) {
-        handleError(`No embeddable handler for panel type ${$scope.panel.type} was found.`);
+        handleError(new Error(`No embeddable handler for panel type ${$scope.panel.type} was found.`));
         return;
       }
       $scope.editUrl = embeddableHandler.getEditPath(panelId);
