@@ -4,10 +4,11 @@ module.exports = function (grunt) {
   const resolve = require('path').resolve;
   const directory = resolve(__dirname, '../../esvm');
   const dataDir = resolve(directory, 'data_dir');
+  const pkgBranch = grunt.config.get('pkg.branch');
 
   return {
     options: {
-      branch: '6.x',
+      branch: pkgBranch,
       fresh: !grunt.option('esvm-no-fresh'),
       config: {
         http: {
