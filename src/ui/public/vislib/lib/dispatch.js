@@ -30,45 +30,40 @@ export function VislibLibDispatchProvider(Private, config) {
      * e: (d3.event|*), handler: (Object|*)}} Event response object
      */
     eventResponse(d, i) {
-      const datum = d._input || d;
-      const data = d3.event.target.nearestViewportElement ?
-        d3.event.target.nearestViewportElement.__data__ : d3.event.target.__data__;
-      const label = d.label ? d.label : (d.series || 'Count');
-      const isSeries = !!(data && data.series);
-      const isSlices = !!(data && data.slices);
-      const series = isSeries ? data.series : undefined;
-      const slices = isSlices ? data.slices : undefined;
       const handler = this.handler;
-      const color = _.get(handler, 'data.color');
+
+      const chartData = d3.event.target.nearestViewportElement ?
+        d3.event.target.nearestViewportElement.__data__ : d3.event.target.__data__;
 
       const eventData = {
-        value: d.y,
-        point: datum,
-        datum: datum,
-        label: label,
-        color: color ? color(label) : undefined,
+        point: d3.event.target.__data__,
         pointIndex: i,
-        series: series,
-        slices: slices,
-        config: handler && handler.visConfig,
-        data: data,
+        handler: handler,
+        chartData: chartData,
         e: d3.event,
-        handler: handler
+        label: 'Count',
+        color: _.get(handler, 'data.color')
       };
 
-      if (isSeries) {
-        // Find object with the actual d value and add it to the point object
-        const aggId = d3.event.target.parentElement.__data__.aggId;
-        const percentageMode = handler.charts[0].getSeries(aggId).getValueAxis().axisConfig.isPercentage();
-        const object = _.find(series, { 'label': label });
-        if (object) {
-          eventData.value = +object.values[i].y;
-
-          if (percentageMode) {
-            // Add the formatted percentage to the point object
-            eventData.percent = (100 * d.y).toFixed(1) + '%';
+      switch (handler.data.type) {
+        case 'series':
+          let element = d3.event.target.parentElement;
+          while (true) {
+            if (!element.__data__) throw('vislib dispatch: series data was not found');
+            if (element.__data__.label) break;
+            element = element.parentElement;
           }
-        }
+          eventData.seriesData = element.__data__;
+          eventData.aggs = eventData.seriesData.aggs;
+          eventData.label = eventData.seriesData.label;
+          break;
+        case 'slices':
+          eventData.point = _.cloneDeep(d);
+          eventData.aggs = eventData.point.values[0].aggs;
+          delete eventData.point.values;
+          break;
+        default:
+          throw('vislib dispatch: unknown data type');
       }
 
       return eventData;
