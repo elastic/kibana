@@ -114,6 +114,15 @@ export function VislibVisualizationsHeatmapChartProvider(Private) {
       const zAxisConfig = this.getValueAxis().axisConfig;
       const zAxisFormatter = zAxisConfig.get('labels.axisFormatter');
       const showLabels = zAxisConfig.get('labels.show');
+      const percentageMode = this.handler.visConfig.get('percentageMode');
+
+      const [min, max] = zScale.domain();
+      if (percentageMode && this.chartData.aggs) {
+        this.chartData.aggs[0].value = 'val';
+        this.chartData.values.forEach(value => {
+          value.val = Math.round(100 * (value.y - min) / (max - min)) + '%';
+        });
+      }
 
       const layer = svg.append('g')
         .attr('class', 'series');
@@ -140,11 +149,10 @@ export function VislibVisualizationsHeatmapChartProvider(Private) {
         return xScale(d.x);
       }
 
-      function y(d) {
-        return yScale(d.series);
+      function y() {
+        return yScale(data.label);
       }
 
-      const [min, max] = zScale.domain();
       function getColorBucket(d) {
         let val = 0;
         if (setColorRange && colorsRange.length) {

@@ -41,7 +41,7 @@ export function VislibLibLayoutSplitsPieChartChartSplitProvider() {
           return divClass;
         });
 
-      if (!data.slices) {
+      if (!data.children) {
         charts.call(split);
       }
     });

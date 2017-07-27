@@ -49,6 +49,7 @@ export function VislibVisualizationsColumnChartProvider(Private) {
       const color = this.handler.data.getColorFunc();
       const tooltip = this.baseChart.tooltip;
       const isTooltip = this.handler.visConfig.get('tooltip.show');
+      const isPercentage = this.getValueAxis().axisConfig.isPercentage();
 
       const layer = svg.append('g')
       .attr('class', 'series histogram')
@@ -58,6 +59,13 @@ export function VislibVisualizationsColumnChartProvider(Private) {
       .data(data.values.filter(function (d) {
         return !_.isNull(d.y);
       }));
+
+      if (isPercentage && this.chartData.aggs) {
+        data.aggs[0].value = 'val';
+        data.values.forEach(value => {
+          value.val = Math.round(value.y * 100) + '%';
+        });
+      }
 
       bars
       .exit()

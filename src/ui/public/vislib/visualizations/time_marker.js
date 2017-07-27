@@ -27,7 +27,7 @@ export function VislibVisualizationsTimeMarkerProvider() {
     }
 
     _isTimeBasedChart(selection) {
-      const data = selection.data();
+      const data = selection.data()[0].charts;
       return data.every(function (datum) {
         return (datum.ordered && datum.ordered.date);
       });

@@ -43,6 +43,14 @@ export function VislibVisualizationsLineChartProvider(Private) {
       const isTooltip = this.handler.visConfig.get('tooltip.show');
       const isHorizontal = this.getCategoryAxis().axisConfig.isHorizontal();
       const lineWidth = this.seriesConfig.lineWidth;
+      const isPercentage = this.getValueAxis().axisConfig.isPercentage();
+
+      if (isPercentage && this.chartData.aggs) {
+        data.aggs[0].value = 'val';
+        data.values.forEach(value => {
+          value.val = Math.round(value.y * 100) + '%';
+        });
+      }
 
       const radii =  this.baseChart.radii;
 
@@ -77,18 +85,18 @@ export function VislibVisualizationsLineChartProvider(Private) {
         return yScale(y0 + y);
       }
 
-      function cColor(d) {
-        return color(d.series);
+      function cColor() {
+        return color(data.label);
       }
 
-      function colorCircle(d) {
+      function colorCircle() {
         const parent = d3.select(this).node().parentNode;
         const lengthOfParent = d3.select(parent).data()[0].length;
         const isVisible = (lengthOfParent === 1);
 
         // If only 1 point exists, show circle
         if (!showCircles && !isVisible) return 'none';
-        return cColor(d);
+        return cColor();
       }
 
       function getCircleRadiusFn(modifier) {
