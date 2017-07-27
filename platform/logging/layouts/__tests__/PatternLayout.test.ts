@@ -47,11 +47,11 @@ const records: LogRecord[] = [
 test('`createConfigSchema()` creates correct schema.', () => {
   const layoutSchema = PatternLayout.createConfigSchema(mockSchema);
 
-  const validConfigWithDefaults = { kind: 'pattern' };
-  expect(layoutSchema.validate(validConfigWithDefaults)).toEqual({
+  const validConfigWithOptional = { kind: 'pattern' };
+  expect(layoutSchema.validate(validConfigWithOptional)).toEqual({
     kind: 'pattern',
-    pattern: '[{timestamp}][{level}][{context}] {message}',
-    highlight: false
+    pattern: undefined,
+    highlight: undefined
   });
 
   const validConfig = {
@@ -73,8 +73,7 @@ test('`createConfigSchema()` creates correct schema.', () => {
 });
 
 test('`format()` correctly formats record with full pattern.', () => {
-  const layoutSchema = PatternLayout.createConfigSchema(mockSchema);
-  const layout = new PatternLayout(layoutSchema.validate({ kind: 'pattern' }));
+  const layout = new PatternLayout();
 
   for (const record of records) {
     const { timestamp, level, context, message } = record;
@@ -87,13 +86,7 @@ test('`format()` correctly formats record with full pattern.', () => {
 });
 
 test('`format()` correctly formats record with custom pattern.', () => {
-  const layoutSchema = PatternLayout.createConfigSchema(mockSchema);
-  const layout = new PatternLayout(
-    layoutSchema.validate({
-      kind: 'pattern',
-      pattern: 'mock-{message}-{context}-{message}'
-    })
-  );
+  const layout = new PatternLayout('mock-{message}-{context}-{message}');
 
   for (const record of records) {
     const { context, message } = record;
@@ -102,13 +95,7 @@ test('`format()` correctly formats record with custom pattern.', () => {
 });
 
 test('`format()` correctly formats record with highlighting.', () => {
-  const layoutSchema = PatternLayout.createConfigSchema(mockSchema);
-  const layout = new PatternLayout(
-    layoutSchema.validate({
-      kind: 'pattern',
-      highlight: true
-    })
-  );
+  const layout = new PatternLayout(undefined, true);
 
   for (const record of records) {
     expect(layout.format(record)).toMatchSnapshot();

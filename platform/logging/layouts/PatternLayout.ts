@@ -36,13 +36,16 @@ const LEVEL_COLORS = new Map([
   [LogLevel.Trace, chalk.blue]
 ]);
 
-const createSchema = ({ boolean, literal, object, string }: Schema) => {
+/**
+ * Default pattern used by PatternLayout if it's not overridden in the configuration.
+ */
+const DEFAULT_PATTERN = `[${Parameters.Timestamp}][${Parameters.Level}][${Parameters.Context}] ${Parameters.Message}`;
+
+const createSchema = ({ boolean, literal, maybe, object, string }: Schema) => {
   return object({
     kind: literal('pattern'),
-    pattern: string({
-      defaultValue: `[${Parameters.Timestamp}][${Parameters.Level}][${Parameters.Context}] ${Parameters.Message}`
-    }),
-    highlight: boolean({ defaultValue: false })
+    pattern: maybe(string()),
+    highlight: maybe(boolean())
   });
 };
 
@@ -58,7 +61,10 @@ export type PatternLayoutConfigType = typeof schemaType;
 export class PatternLayout implements Layout {
   static createConfigSchema = createSchema;
 
-  constructor(private readonly config: PatternLayoutConfigType) {}
+  constructor(
+    private readonly pattern = DEFAULT_PATTERN,
+    private readonly highlight = false
+  ) {}
 
   /**
    * Formats `LogRecord` into string based on the specified `pattern` and `highlighting` option.
@@ -72,11 +78,11 @@ export class PatternLayout implements Layout {
       [Parameters.Message, record.message]
     ]);
 
-    if (this.config.highlight) {
+    if (this.highlight) {
       PatternLayout.highlightRecord(record, formattedRecord);
     }
 
-    return this.config.pattern.replace(
+    return this.pattern.replace(
       PATTERN_REGEX,
       match => formattedRecord.get(match)!
     );

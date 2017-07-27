@@ -1,81 +1,61 @@
 import { Schema, typeOfSchema } from '../types';
-import { LogLevelId } from './LogLevel';
 import { Appenders, AppenderConfigType } from './appenders/Appenders';
 
 /**
- * Separator string that used within nested context name (eg. plugins::pid).
+ * Separator string that used within nested context name (eg. plugins.pid).
  */
-const CONTEXT_SEPARATOR = '::';
+const CONTEXT_SEPARATOR = '.';
 
 /**
  * Name of the `root` context that should always be defined.
  */
 const ROOT_CONTEXT_NAME = 'root';
 
-const defaultAppenders = new Map([
-  [
-    'console',
-    {
-      kind: 'console',
-      layout: {
-        kind: 'pattern',
-        highlight: true
-      }
-    }
-  ]
-]);
+const DEFAULT_APPENDER_NAME = 'default';
 
-const defaultLoggers = new Map([
-  ['root', { appenders: ['console'], level: 'info' as LogLevelId }]
-]);
+const createLevelSchema = ({ literal, oneOf }: Schema) => {
+  return oneOf(
+    [
+      literal('all'),
+      literal('fatal'),
+      literal('error'),
+      literal('warn'),
+      literal('info'),
+      literal('debug'),
+      literal('trace'),
+      literal('off')
+    ],
+    {
+      defaultValue: 'info'
+    }
+  );
+};
 
 const createLoggerSchema = (schema: Schema) => {
-  const { literal, object, string, arrayOf, oneOf } = schema;
+  const { object, string, arrayOf } = schema;
 
   return object({
-    level: oneOf(
-      [
-        literal('all'),
-        literal('fatal'),
-        literal('error'),
-        literal('warn'),
-        literal('info'),
-        literal('debug'),
-        literal('trace'),
-        literal('off')
-      ],
-      {
-        defaultValue: 'info'
-      }
-    ),
+    context: string(),
+    level: createLevelSchema(schema),
     appenders: arrayOf(string(), { defaultValue: [] })
   });
 };
 
 const createLoggingSchema = (schema: Schema) => {
-  const { object, string, mapOf } = schema;
+  const { arrayOf, object, string, mapOf } = schema;
 
   return object({
     appenders: mapOf(string(), Appenders.createConfigSchema(schema), {
-      defaultValue: defaultAppenders
+      defaultValue: new Map()
     }),
-    loggers: mapOf(string(), createLoggerSchema(schema), {
-      defaultValue: defaultLoggers,
-      validate(value) {
-        const rootLogger = value.get(ROOT_CONTEXT_NAME);
-        if (!rootLogger) {
-          throw new Error(
-            `"${ROOT_CONTEXT_NAME}" logger should be configured!`
-          );
-        }
-
-        if (rootLogger.appenders.length === 0) {
-          throw new Error(
-            `"${ROOT_CONTEXT_NAME}" logger should have at least one "appender" configured.`
-          );
-        }
-      }
-    })
+    root: object({
+      level: createLevelSchema(schema),
+      appenders: arrayOf(string(), {
+        defaultValue: [DEFAULT_APPENDER_NAME],
+        minSize: 1
+      })
+    }),
+    loggers: arrayOf(createLoggerSchema(schema), { defaultValue: [] })
   });
 };
 
@@ -96,7 +76,15 @@ export class LoggingConfig {
   /**
    * Map of the appender unique arbitrary key and its corresponding config.
    */
-  readonly appenders: Map<string, AppenderConfigType> = new Map();
+  readonly appenders: Map<string, AppenderConfigType> = new Map([
+    [
+      DEFAULT_APPENDER_NAME,
+      {
+        kind: 'console',
+        layout: { kind: 'pattern', highlight: true }
+      } as AppenderConfigType
+    ]
+  ]);
 
   /**
    * Map of the logger unique arbitrary key (context) and its corresponding config.
@@ -112,7 +100,7 @@ export class LoggingConfig {
    * Helper method that joins separate string context parts into single context string.
    * In case joined context is an empty string, `root` context name is returned.
    * @param contextParts List of the context parts (e.g. ['parent', 'child'].
-   * @returns {string} Joined context string (e.g. 'parent::child').
+   * @returns {string} Joined context string (e.g. 'parent.child').
    */
   static getLoggerContext(contextParts: string[]) {
     return contextParts.join(CONTEXT_SEPARATOR) || ROOT_CONTEXT_NAME;
@@ -139,7 +127,21 @@ export class LoggingConfig {
   }
 
   private fillLoggersConfig(schema: LoggingConfigType) {
-    for (let [loggerKey, loggerConfig] of schema.loggers) {
+    // Include `root` logger into common logger list so that it can easily be a part
+    // of the logger hierarchy.
+    const loggersMap = new Map(
+      [
+        { context: ROOT_CONTEXT_NAME, ...schema.root },
+        ...schema.loggers
+      ].map(loggerConfig => {
+        return [loggerConfig.context, loggerConfig] as [
+          string,
+          LoggerConfigType
+        ];
+      })
+    );
+
+    for (let [loggerContext, loggerConfig] of loggersMap) {
       // We can't check whether logger config refers to the existing appenders at the config schema
       // validation step, so we should do it here.
       const unsupportedAppenderKey = loggerConfig.appenders.find(
@@ -148,20 +150,20 @@ export class LoggingConfig {
 
       if (unsupportedAppenderKey) {
         throw new Error(
-          `Logger "${loggerKey}" contains unsupported appender key "${unsupportedAppenderKey}".`
+          `Logger "${loggerContext}" contains unsupported appender key "${unsupportedAppenderKey}".`
         );
       }
 
       // If config for current context doesn't have any defined appenders we should inherit appenders
       // from the parent context config.
-      let currentContext = loggerKey;
+      let currentContext = loggerConfig.context;
       let appenders = loggerConfig.appenders;
       while (appenders.length === 0) {
         const parentContext = LoggingConfig.getParentLoggerContext(
           currentContext
         );
 
-        const parentLogger = schema.loggers.get(parentContext);
+        const parentLogger = loggersMap.get(parentContext);
         if (parentLogger) {
           appenders = parentLogger.appenders;
         }
@@ -171,9 +173,9 @@ export class LoggingConfig {
 
       // We expect `appenders` to never be empty at this point, since the `root` context config should always
       // have at least one appender that is enforced by the config schema validation.
-      this.loggers.set(loggerKey, {
-        appenders,
-        level: loggerConfig.level
+      this.loggers.set(loggerContext, {
+        ...loggerConfig,
+        appenders
       });
     }
   }

@@ -47,7 +47,7 @@ test('`get()` returns Logger that appends records to buffer if config is not rea
   const config = new LoggingConfig(
     loggingConfigSchema.validate({
       appenders: {
-        console: {
+        'default': {
           kind: 'console',
           layout: { kind: 'pattern' }
         },
@@ -57,16 +57,17 @@ test('`get()` returns Logger that appends records to buffer if config is not rea
           layout: { kind: 'pattern' }
         }
       },
-      loggers: {
-        root: { appenders: ['console'] },
-        tests: {
+      loggers: [
+        {
+          context: 'tests',
           appenders: ['file'],
           level: 'warn'
         },
-        'tests::child': {
+        {
+          context: 'tests.child',
           level: 'error'
         }
-      }
+      ]
     })
   );
 
@@ -83,7 +84,7 @@ test('`get()` returns Logger that appends records to buffer if config is not rea
     '[2012-01-31T23:00:00.000Z][WARN ][tests] Config is not ready!\n'
   );
   expect(mockStreamWrite).toHaveBeenCalledWith(
-    '[2012-01-31T23:00:00.000Z][ERROR][tests::child] Too bad that config is not ready :/\n'
+    '[2012-01-31T23:00:00.000Z][ERROR][tests.child] Too bad that config is not ready :/\n'
   );
 });
 
@@ -92,7 +93,7 @@ test('`get()` returns `root` logger if context is not specified.', () => {
   const factory = new MutableLoggerFactory();
   const config = loggingConfigSchema.validate({
     appenders: {
-      console: {
+      'default': {
         kind: 'console',
         layout: { kind: 'pattern' }
       }
@@ -117,14 +118,11 @@ test('`close()` disposes all resources used by appenders.', async () => {
   const config = new LoggingConfig(
     loggingConfigSchema.validate({
       appenders: {
-        file: {
+        'default': {
           kind: 'file',
           path: 'path',
           layout: { kind: 'pattern' }
         }
-      },
-      loggers: {
-        root: { appenders: ['file'] }
       }
     })
   );

@@ -107,8 +107,8 @@ export class MutableLoggerFactory implements LoggerFactory {
       return loggerConfig;
     }
 
-    // If we don't have configuration for the specified context and it's the "nested" one (eg. `foo::bar::baz`),
-    // let's move up to the parent context (eg. `foo::bar`) and check if it has config we can rely on. Otherwise
+    // If we don't have configuration for the specified context and it's the "nested" one (eg. `foo.bar.baz`),
+    // let's move up to the parent context (eg. `foo.bar`) and check if it has config we can rely on. Otherwise
     // we fallback to the `root` context that should always be defined (enforced by configuration schema).
     return this.getLoggerConfigByContext(
       config,

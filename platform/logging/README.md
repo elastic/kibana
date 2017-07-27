@@ -20,8 +20,8 @@ __Layouts__ define how log messages are formatted and what type of information t
 ## Logger hierarchy
 
 Every logger has its unique name or context that follows hierarchical naming rule. The logger is considered to be an 
-ancestor of another logger if its name followed by a `::` is a prefix of the descendant logger name. For example logger
-with `a::b` context is an ancestor of logger with `a::b::c` context. All top-level loggers are descendants of special
+ancestor of another logger if its name followed by a `.` is a prefix of the descendant logger name. For example logger
+with `a.b` context is an ancestor of logger with `a.b.c` context. All top-level loggers are descendants of special
 logger with `root` context that resides at the top of the logger hierarchy. This logger always exists and 
 fully configured.
 
@@ -65,28 +65,42 @@ logging:
       kind: console
       layout:
         kind: pattern
-        pattern: [{timestamp}][{level}] {message} 
+        pattern: [{timestamp}][{level}] {message}
+
+  root:
+    appenders: [console, file]
+    level: error
+
   loggers:
-    root:
-      appenders: [console, file]
-      level: all
-    plugins:
+    - context: plugins
       appenders: [custom]
       level: warn
-    plugins::pid:
+    - context: plugins.pid
       level: info
-    server:
-      level: error
+    - context: server
+      level: fatal
+    - context: optimize
+      appenders: [console]
 ```
 
 Here is what you get with the config above:
 
 | Context       | Appenders     | Level |
 | ------------- |:-------------:| -----:|
-| root          | console, file | all   |
+| root          | console, file | error |
 | plugins       | custom        | warn  |
-| plugins::pid  | custom        | info  |
-| server        | console, file | error |
+| plugins.pid   | custom        | info  |
+| server        | console, file | fatal |
+| optimize      | console       | error |
+
+As you see `root` logger has a dedicated configuration node since this context is special and should always exist. By 
+default `root` is configured with `info` level and `default` appender that is also always available. This is the 
+configuration that all your loggers will use unless you re-configure them explicitly. For example to see _all_ log 
+messages that fall back on the `root` logger configuration, just add one line to the configuration:
+
+```yaml
+root.level: all
+```
 
 ## Usage
 
@@ -94,7 +108,6 @@ Usage is very straightforward, one should just get a logger for a specific conte
 different log level. 
 
 ```typescript
-
 const logger = kibana.logger.get('server');
 
 logger.trace('Message with `trace` log level.');
@@ -104,6 +117,9 @@ logger.warn('Message with `warn` log level.');
 logger.error('Message with `error` log level.');
 logger.fatal('Message with `fatal` log level.');
 
+const loggerWithNestedContext = kibana.logger.get('server', 'http');
+loggerWithNestedContext.trace('Message with `trace` log level.');
+loggerWithNestedContext.debug('Message with `debug` log level.');
 ```
 
 And assuming you're using `console` appender and `trace` level for `server` context, in console you'll see:
@@ -114,6 +130,9 @@ And assuming you're using `console` appender and `trace` level for `server` cont
 [2017-07-25T18:54:41.639Z][WARN ][server] Message with `warn` log level.
 [2017-07-25T18:54:41.639Z][ERROR][server] Message with `error` log level.
 [2017-07-25T18:54:41.639Z][FATAL][server] Message with `fatal` log level.
+
+[2017-07-25T18:54:41.639Z][TRACE][server.http] Message with `trace` log level.
+[2017-07-25T18:54:41.639Z][DEBUG][server.http] Message with `debug` log level.
 ```
 
 Obviously your log will be less verbose with `warn` level for the `server` context:

@@ -21,6 +21,6 @@ export class Layouts {
    * @returns Fully constructed `Layout` instance.
    */
   static create(config: LayoutConfigType): Layout {
-    return new PatternLayout(config);
+    return new PatternLayout(config.pattern, config.highlight);
   }
 }

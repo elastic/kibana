@@ -2,29 +2,17 @@
 
 exports[`\`createSchema()\` creates correct schema with defaults. 1`] = `
 Object {
-  "appenders": Map {
-    "console" => Object {
-      "kind": "console",
-      "layout": Object {
-        "highlight": true,
-        "kind": "pattern",
-        "pattern": "[{timestamp}][{level}][{context}] {message}",
-      },
-    },
-  },
-  "loggers": Map {
-    "root" => Object {
-      "appenders": Array [
-        "console",
-      ],
-      "level": "info",
-    },
+  "appenders": Map {},
+  "loggers": Array [],
+  "root": Object {
+    "appenders": Array [
+      "default",
+    ],
+    "level": "info",
   },
 }
 `;
 
-exports[`\`createSchema()\` throws if \`root\` logger does not have appenders configured. 1`] = `"\\"root\\" logger should have at least one \\"appender\\" configured."`;
+exports[`\`createSchema()\` throws if \`root\` logger does not have appenders configured. 1`] = `"[root.appenders]: array size is [0], but cannot be smaller than [1]"`;
 
-exports[`\`createSchema()\` throws if \`root\` logger is not configured. 1`] = `"\\"root\\" logger should be configured!"`;
-
-exports[`fails if loggers use unknown appenders. 1`] = `"Logger \\"root\\" contains unsupported appender key \\"file\\"."`;
+exports[`fails if loggers use unknown appenders. 1`] = `"Logger \\"some.nested.context\\" contains unsupported appender key \\"unknown\\"."`;

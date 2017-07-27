@@ -35,7 +35,10 @@ export class Root {
 
   async start() {
     try {
-      const loggingConfig$ = this.configService.atPath('logging', LoggingConfig);
+      const loggingConfig$ = this.configService.atPath(
+        'logging',
+        LoggingConfig
+      );
       this.loggingService.upgrade(loggingConfig$);
     } catch (e) {
       // This specifically console.logs because we were not able to configure

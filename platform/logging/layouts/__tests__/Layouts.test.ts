@@ -4,11 +4,11 @@ import { Layouts } from '../Layouts';
 
 test('`createConfigSchema()` creates correct schema.', () => {
   const layoutsSchema = Layouts.createConfigSchema(mockSchema);
-  const validConfigWithDefaults = { kind: 'pattern' };
-  expect(layoutsSchema.validate(validConfigWithDefaults)).toEqual({
+  const validConfigWithOptional = { kind: 'pattern' };
+  expect(layoutsSchema.validate(validConfigWithOptional)).toEqual({
     kind: 'pattern',
-    pattern: '[{timestamp}][{level}][{context}] {message}',
-    highlight: false
+    pattern: undefined,
+    highlight: undefined
   });
 
   const validConfig = {
