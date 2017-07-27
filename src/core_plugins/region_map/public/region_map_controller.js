@@ -6,7 +6,6 @@ import { KibanaMap } from '../../tile_map/public/kibana_map';
 import ChoroplethLayer from './choropleth_layer';
 import { truncatedColorMaps }  from 'ui/vislib/components/color/truncated_colormaps';
 import AggResponsePointSeriesTooltipFormatterProvider from './tooltip_formatter';
-// import '../../tile_map/public/lib/service_settings';
 import 'ui/vis/map/service_settings';
 
 
@@ -14,9 +13,13 @@ const module = uiModules.get('kibana/region_map', ['kibana']);
 module.controller('KbnRegionMapController', function ($scope, $element, Private, Notifier, getAppState,
                                                        serviceSettings, config) {
 
+  const DEFAULT_ZOOM_SETTINGS = {
+    zoom: 2,
+    mapCenter: [0, 0]
+  };
+
   const tooltipFormatter = Private(AggResponsePointSeriesTooltipFormatterProvider);
   const notify = new Notifier({ location: 'Region map' });
-
 
   let kibanaMap = null;
   let choroplethLayer = null;
@@ -90,10 +93,19 @@ module.controller('KbnRegionMapController', function ($scope, $element, Private,
   async function makeKibanaMap() {
     const tmsSettings = await serviceSettings.getTMSService();
     const minMaxZoom = tmsSettings.getMinMaxZoom(false);
-    kibanaMap = new KibanaMap($element[0], minMaxZoom);
-    const url = tmsSettings.getUrl();
-    const options = tmsSettings.getTMSOptions();
-    kibanaMap.setBaseLayer({ baseLayerType: 'tms', options: { url, ...options } });
+
+    const options = { ...minMaxZoom };
+    const uiState = $scope.vis.getUiState();
+    const zoomFromUiState = parseInt(uiState.get('mapZoom'));
+    const centerFromUIState = uiState.get('mapCenter');
+    options.zoom = !isNaN(zoomFromUiState) ? zoomFromUiState : DEFAULT_ZOOM_SETTINGS.zoom;
+    options.center = centerFromUIState ? centerFromUIState : DEFAULT_ZOOM_SETTINGS.mapCenter;
+    kibanaMap = new KibanaMap($element[0], options);
+
+
+    const tmsUrl = tmsSettings.getUrl();
+    const tmsOptions = tmsSettings.getTMSOptions();
+    kibanaMap.setBaseLayer({ baseLayerType: 'tms', options: { tmsUrl, ...tmsOptions } });
     kibanaMap.addLegendControl();
     kibanaMap.addFitControl();
     kibanaMap.persistUiStateForVisualization($scope.vis);
