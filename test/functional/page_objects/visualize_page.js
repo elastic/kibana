@@ -3,202 +3,129 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
   const config = getService('config');
   const testSubjects = getService('testSubjects');
   const retry = getService('retry');
+  const find = getService('find');
   const log = getService('log');
   const PageObjects = getPageObjects(['common', 'header']);
   const defaultFindTimeout = config.get('timeouts.find');
 
   class VisualizePage {
-    clickAreaChart() {
-      return remote
-      .setFindTimeout(defaultFindTimeout)
-      .findByPartialLinkText('Area')
-      .click();
+
+    async clickAreaChart() {
+      await find.clickByPartialLinkText('Area');
     }
 
-    clickDataTable() {
-      return remote
-      .setFindTimeout(defaultFindTimeout)
-      .findByPartialLinkText('Data Table')
-      .click();
+    async clickDataTable() {
+      await find.clickByPartialLinkText('Data Table');
     }
 
-    clickLineChart() {
-      return remote
-      .setFindTimeout(defaultFindTimeout)
-      .findByPartialLinkText('Line')
-      .click();
+    async clickLineChart() {
+      await find.clickByPartialLinkText('Line');
     }
 
-
-    clickRegionMap() {
-      return remote
-        .setFindTimeout(defaultFindTimeout)
-        .findByPartialLinkText('Region Map')
-        .click();
+    async clickRegionMap() {
+      await find.clickByPartialLinkText('Region Map');
     }
 
-    getVectorMapData() {
-      return remote
-        .setFindTimeout(defaultFindTimeout)
-        .findAllByCssSelector('path.leaflet-clickable')
-        .then((chartTypes) => {
-
-
-          function getChartType(chart) {
-            let color;
-            return chart.getAttribute('fill')
-              .then((stroke) => {
-                color = stroke;
-              })
-              .then(() => {
-                return { color: color };
-              });
-          }
-
-          const getChartTypesPromises = chartTypes.map(getChartType);
-          return Promise.all(getChartTypesPromises);
-        })
-        .then((data) => {
-          data = data.filter((country) => {
-            //filter empty colors
-            return country.color !== 'rgb(200,200,200)';
-          });
-          return data;
-        });
+    async clickMarkdownWidget() {
+      await find.clickByPartialLinkText('Markdown');
     }
 
-    clickMarkdownWidget() {
-      return remote
-      .setFindTimeout(defaultFindTimeout)
-      .findByPartialLinkText('Markdown')
-      .click();
+    async clickAddMetric() {
+      await find.clickByCssSelector('[group-name="metrics"] [data-test-subj="visualizeEditorAddAggregationButton"]');
     }
 
-    clickAddMetric() {
-      return remote
-      .setFindTimeout(defaultFindTimeout)
-      .findByCssSelector('[group-name="metrics"] [data-test-subj="visualizeEditorAddAggregationButton"]')
-      .click();
+    async clickMetric() {
+      await find.clickByPartialLinkText('Metric');
     }
 
-    clickMetric() {
-      return remote
-      .setFindTimeout(defaultFindTimeout)
-      .findByPartialLinkText('Metric')
-      .click();
+    async clickGauge() {
+      await find.clickByPartialLinkText('Gauge');
     }
 
-    clickGauge() {
-      return remote
-        .setFindTimeout(defaultFindTimeout)
-        .findByPartialLinkText('Gauge')
-        .click();
+    async clickPieChart() {
+      await find.clickByPartialLinkText('Pie');
     }
 
-    clickPieChart() {
-      return remote
-      .setFindTimeout(defaultFindTimeout)
-      .findByPartialLinkText('Pie')
-      .click();
+    async clickTileMap() {
+      await find.clickByPartialLinkText('Coordinate Map');
     }
 
-    clickTileMap() {
-      return remote
-      .setFindTimeout(defaultFindTimeout)
-      .findByPartialLinkText('Coordinate Map')
-      .click();
+    async clickTagCloud() {
+      await find.clickByPartialLinkText('Tag Cloud');
     }
 
-    clickTagCloud() {
-      return remote
-      .setFindTimeout(defaultFindTimeout)
-      .findByPartialLinkText('Tag Cloud')
-      .click();
+    async getTextTag() {
+      const elements = await find.allByCssSelector('text');
+      return await Promise.all(elements.map(async element => await element.getVisibleText()));
     }
 
-    getTextTag() {
-      return remote
-      .setFindTimeout(defaultFindTimeout)
-      .findAllByCssSelector('text').getVisibleText();
-    }
+    async getVectorMapData() {
+      const chartTypes = await find.allByCssSelector('path.leaflet-clickable');
 
+      async function getChartColors(chart) {
+        const stroke = await chart.getAttribute('fill');
+        return { color: stroke };
+      }
 
-    getTextSizes() {
-      return remote
-      .setFindTimeout(defaultFindTimeout)
-      .findAllByCssSelector('text')
-      .then(function (tags) {
-        function returnTagSize(tag) {
-          return tag.getAttribute('style')
-          .then(function (style) {
-            return style.match(/font-size: ([^;]*);/)[1];
-          });
-        }
-        return Promise.all(tags.map(returnTagSize));
+      let colorData = await Promise.all(chartTypes.map(getChartColors));
+      colorData = colorData.filter((country) => {
+        //filter empty colors
+        return country.color !== 'rgb(200,200,200)';
       });
+      return colorData;
     }
 
-
-    clickVerticalBarChart() {
-      return remote
-      .setFindTimeout(defaultFindTimeout)
-      .findByPartialLinkText('Vertical Bar')
-      .click();
+    async getTextSizes() {
+      const tags = await find.allByCssSelector('text');
+      async function returnTagSize(tag) {
+        const style = await tag.getAttribute('style');
+        return style.match(/font-size: ([^;]*);/)[1];
+      }
+      return await Promise.all(tags.map(returnTagSize));
     }
 
-    clickHeatmapChart() {
-      return remote
-      .setFindTimeout(defaultFindTimeout)
-      .findByPartialLinkText('Heat Map')
-      .click();
+    async clickVerticalBarChart() {
+      await find.clickByPartialLinkText('Vertical Bar');
     }
 
-    getChartTypeCount() {
-      return remote
-      .setFindTimeout(defaultFindTimeout)
-      .findAllByCssSelector('a.wizard-vis-type.ng-scope')
-      .length;
+    async clickHeatmapChart() {
+      await find.clickByPartialLinkText('Heat Map');
     }
 
-    getChartTypes() {
-      return testSubjects.findAll('visualizeWizardChartTypeTitle')
-      .then(function (chartTypes) {
-        function getChartType(chart) {
-          return chart.getVisibleText();
-        }
-        const getChartTypesPromises = chartTypes.map(getChartType);
-        return Promise.all(getChartTypesPromises);
-      })
-      .then(function (texts) {
-        return texts;
-      });
+    async getChartTypeCount() {
+      const tags = await find.allByCssSelector('a.wizard-vis-type.ng-scope');
+      return tags.length;
     }
 
-    clickAbsoluteButton() {
-      return remote
-      .setFindTimeout(defaultFindTimeout * 2)
-      .findByCssSelector('ul.nav.nav-pills.nav-stacked.kbn-timepicker-modes:contains("absolute")')
-      .click();
+    async getChartTypes() {
+      const chartTypes = await testSubjects.findAll('visualizeWizardChartTypeTitle');
+      async function getChartType(chart) {
+        return await chart.getVisibleText();
+      }
+      const getChartTypesPromises = chartTypes.map(getChartType);
+      return await Promise.all(getChartTypesPromises);
     }
 
-    setFromTime(timeString) {
-      return remote
-      .setFindTimeout(defaultFindTimeout * 2)
-      .findByCssSelector('input[ng-model="absolute.from"]')
-      .clearValue()
-      .type(timeString);
+    async clickAbsoluteButton() {
+      await find.clickByCssSelector(
+        'ul.nav.nav-pills.nav-stacked.kbn-timepicker-modes:contains("absolute")',
+        defaultFindTimeout * 2);
     }
 
-    setToTime(timeString) {
-      return remote
-      .setFindTimeout(defaultFindTimeout * 2)
-      .findByCssSelector('input[ng-model="absolute.to"]')
-      .clearValue()
-      .type(timeString);
+    async setFromTime(timeString) {
+      const input = await find.byCssSelector('input[ng-model="absolute.from"]', defaultFindTimeout * 2);
+      await input.clearValue();
+      await input.type(timeString);
     }
 
-    clickGoButton() {
-      return testSubjects.click('timepickerGoButton');
+    async setToTime(timeString) {
+      const input = await find.byCssSelector('input[ng-model="absolute.to"]', defaultFindTimeout * 2);
+      await input.clearValue();
+      await input.type(timeString);
+    }
+
+    async clickGoButton() {
+      await testSubjects.click('timepickerGoButton');
     }
 
     async getSpyToggleExists() {
@@ -230,259 +157,156 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
       }
     }
 
-    toggleSpyPanel() {
-      return testSubjects.click('spyToggleButton');
+    async toggleSpyPanel() {
+      await testSubjects.click('spyToggleButton');
     }
 
-    getMetric() {
-      return remote
-      .setFindTimeout(2000)
-      .findByCssSelector('div[ng-controller="KbnMetricVisController"]')
-      .getVisibleText();
+    async getMetric() {
+      const metricElement = await find.byCssSelector('div[ng-controller="KbnMetricVisController"]');
+      return await metricElement.getVisibleText();
     }
 
-    getGaugeValue() {
-      return remote
-        .setFindTimeout(2000)
-        .findAllByCssSelector('visualize .chart svg')
-        .getVisibleText();
+    async getGaugeValue() {
+      const elements = await find.allByCssSelector('visualize .chart svg');
+      return await Promise.all(elements.map(async element => await element.getVisibleText()));
     }
 
-    clickMetricEditor() {
-      return remote
-      .setFindTimeout(defaultFindTimeout)
-      .findByCssSelector('button[aria-label="Open Editor"]')
-      .click();
+    async clickMetricEditor() {
+      await find.clickByCssSelector('button[aria-label="Open Editor"]');
     }
 
-    clickNewSearch() {
-      return remote
-      .setFindTimeout(defaultFindTimeout)
-      .findByCssSelector('.list-group-item a')
-      .click();
+    async clickNewSearch() {
+      await find.clickByCssSelector('.list-group-item a');
     }
 
-    setValue(newValue) {
-      return remote
-      .setFindTimeout(defaultFindTimeout * 2)
-      .findByCssSelector('button[ng-click="numberListCntr.add()"]')
-      .click()
-      .then(() => {
-        return remote
-        .setFindTimeout(defaultFindTimeout)
-        .findByCssSelector('input[ng-model="numberListCntr.getList()[$index]"]')
-        .clearValue();
-      })
-      .then(() => {
-        return remote
-        .setFindTimeout(defaultFindTimeout)
-        .findByCssSelector('input[ng-model="numberListCntr.getList()[$index]"]')
-        .type(newValue);
-      });
+    async setValue(newValue) {
+      await find.clickByCssSelector('button[ng-click="numberListCntr.add()"]', defaultFindTimeout * 2);
+      const input = await find.byCssSelector('input[ng-model="numberListCntr.getList()[$index]"]');
+      await input.clearValue();
+      await input.type(newValue);
     }
 
-    clickSavedSearch() {
-      return remote
-      .setFindTimeout(defaultFindTimeout)
-      .findByCssSelector('li[ng-click="stepTwoMode=\'saved\'"]')
-      .click();
+    async clickSavedSearch() {
+      await find.clickByCssSelector('li[ng-click="stepTwoMode=\'saved\'"]');
     }
 
-    selectSearch(searchName) {
-      return remote
-      .setFindTimeout(defaultFindTimeout)
-      .findByLinkText(searchName)
-      .click();
+    async selectSearch(searchName) {
+      await find.clickByLinkText(searchName);
     }
 
-
-    getErrorMessage() {
-      return remote
-      .setFindTimeout(defaultFindTimeout)
-      .findByCssSelector('.item>h4')
-      .getVisibleText();
+    async getErrorMessage() {
+      const element = await find.byCssSelector('.item>h4');
+      return await element.getVisibleText();
     }
 
     // clickBucket(bucketType) 'X-Axis', 'Split Area', 'Split Chart'
-    clickBucket(bucketName) {
-      return remote
-      .setFindTimeout(defaultFindTimeout)
-      .findAllByCssSelector('li.list-group-item.list-group-menu-item.ng-binding.ng-scope')
-      .then(chartTypes => {
-        log.debug('found bucket types ' + chartTypes.length);
+    async clickBucket(bucketName) {
+      const chartTypes = await retry.try(
+        async () => await find.allByCssSelector('li.list-group-item.list-group-menu-item.ng-binding.ng-scope'));
+      log.debug('found bucket types ' + chartTypes.length);
 
-        function getChartType(chart) {
-          return chart
-          .getVisibleText()
-          .then(chartString => {
-            //log.debug(chartString);
-            if (chartString === bucketName) {
-              chart.click();
-            }
-          });
+      async function getChartType(chart) {
+        const chartString = await chart.getVisibleText();
+        if (chartString === bucketName) {
+          await chart.click();
         }
-        const getChartTypesPromises = chartTypes.map(getChartType);
-        return Promise.all(getChartTypesPromises);
+      }
+      const getChartTypesPromises = chartTypes.map(getChartType);
+      await Promise.all(getChartTypesPromises);
+    }
+
+    async selectAggregation(myString) {
+      return find.clickByCssSelector('vis-editor-agg-params:not(.ng-hide) option[label="' + myString + '"]');
+    }
+
+    async getField() {
+      const field = await retry.try(
+        async () => await find.byCssSelector('.ng-valid-required[name="field"] .ui-select-match-text'));
+      return await field.getVisibleText();
+    }
+
+    async selectField(fieldValue, groupName = 'buckets') {
+      await retry.try(async () => {
+        await find.clickByCssSelector(`[group-name="${groupName}"] .ui-select-container`);
+        const input = await find.byCssSelector(`[group-name="${groupName}"] input.ui-select-search`);
+        await input.type(fieldValue);
+        await remote.pressKeys('\uE006');
       });
     }
 
-    selectAggregation(myString) {
-      return remote
-      .setFindTimeout(defaultFindTimeout)
-      .findByCssSelector('vis-editor-agg-params:not(.ng-hide) option[label="' + myString + '"]')
-      .click();
+    async selectFieldById(fieldValue, id) {
+      await find.clickByCssSelector(`#${id} > option[label="${fieldValue}"]`);
     }
 
-    getField() {
-      return remote
-      .setFindTimeout(defaultFindTimeout)
-      .findByCssSelector('.ng-valid-required[name="field"] .ui-select-match-text')
-      .getVisibleText();
+    async orderBy(fieldValue) {
+      await find.clickByCssSelector(
+          'select.form-control.ng-pristine.ng-valid.ng-untouched.ng-valid-required[ng-model="agg.params.orderBy"] ' +
+          'option.ng-binding.ng-scope:contains("' + fieldValue + '")');
     }
 
-    selectField(fieldValue, groupName = 'buckets') {
-      return retry.try(function tryingForTime() {
-        return remote
-          .setFindTimeout(defaultFindTimeout)
-          .findByCssSelector(`[group-name="${groupName}"] .ui-select-container`)
-          .click()
-          .then(() => {
-            return remote
-              .findByCssSelector(`[group-name="${groupName}"] input.ui-select-search`)
-              .type(fieldValue)
-              .pressKeys('\uE006');
-          });
-      });
+    async selectOrderBy(fieldValue) {
+      await find.clickByCssSelector('select[name="orderBy"] > option[value="' + fieldValue + '"]');
     }
 
-    selectFieldById(fieldValue, id) {
-      return retry.try(function tryingForTime() {
-        return remote
-          .setFindTimeout(defaultFindTimeout)
-          // the css below should be more selective
-          .findByCssSelector(`#${id} > option[label="${fieldValue}"]`)
-          .click();
-      });
+    async getInterval() {
+      const select = await find.byCssSelector('select[ng-model="agg.params.interval"]');
+      const selectedIndex = await select.getProperty('selectedIndex');
+      const intervalElement = await find.byCssSelector(
+        `select[ng-model="agg.params.interval"] option:nth-child(${(selectedIndex + 1)})`);
+      return await intervalElement.getProperty('label');
     }
 
-    orderBy(fieldValue) {
-      return remote
-      .setFindTimeout(defaultFindTimeout)
-      .findByCssSelector('select.form-control.ng-pristine.ng-valid.ng-untouched.ng-valid-required[ng-model="agg.params.orderBy"] ' +
-        'option.ng-binding.ng-scope:contains("' + fieldValue + '")'
-      )
-      .click();
+    async setInterval(newValue) {
+      const input = await find.byCssSelector('select[ng-model="agg.params.interval"]');
+      await input.type(newValue);
     }
 
-    selectOrderBy(fieldValue) {
-      return remote
-      .setFindTimeout(defaultFindTimeout)
-      .findByCssSelector('select[name="orderBy"] > option[value="' + fieldValue + '"]')
-      .click();
+    async setNumericInterval(newValue) {
+      const input = await find.byCssSelector('input[name="interval"]');
+      await input.type(newValue);
     }
 
-
-    getInterval() {
-      return remote
-      .setFindTimeout(defaultFindTimeout)
-      .findByCssSelector('select[ng-model="agg.params.interval"]')
-      .getProperty('selectedIndex')
-      .then(selectedIndex => {
-        return remote
-        .setFindTimeout(defaultFindTimeout)
-        .findByCssSelector('select[ng-model="agg.params.interval"] option:nth-child(' + (selectedIndex + 1) + ')')
-        .getProperty('label');
-      });
+    async clickGo() {
+      await testSubjects.click('visualizeEditorRenderButton');
+      await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
-    setInterval(newValue) {
-      return remote
-      .setFindTimeout(defaultFindTimeout)
-      .findByCssSelector('select[ng-model="agg.params.interval"]')
-      .type(newValue);
+    async clickOptions() {
+      await find.clickByPartialLinkText('Options');
     }
 
-    setNumericInterval(newValue) {
-      return remote
-      .setFindTimeout(defaultFindTimeout)
-      .findByCssSelector('input[name="interval"]')
-      .type(newValue);
+    async selectWMS() {
+      await find.clickByCssSelector('input[name="wms.enabled"]');
     }
 
-    clickGo() {
-      return testSubjects.click('visualizeEditorRenderButton')
-      .then(function () {
-        return PageObjects.header.waitUntilLoadingHasFinished();
-      });
+    async saveVisualization(vizName) {
+      await testSubjects.click('visualizeSaveButton');
+      log.debug('saveButton button clicked');
+      const visTitle = await find.byName('visTitle');
+      await visTitle.type(vizName);
+      log.debug('click submit button');
+      await testSubjects.click('saveVisualizationButton');
+      await PageObjects.header.waitUntilLoadingHasFinished();
+
+      return await PageObjects.header.getToastMessage();
     }
 
-    clickOptions() {
-      return remote
-        .setFindTimeout(defaultFindTimeout)
-        .findByPartialLinkText('Options')
-        .click();
-    }
-
-    selectWMS() {
-      return remote
-        .setFindTimeout(defaultFindTimeout)
-        .findByCssSelector('input[name="wms.enabled"]')
-        .click();
-    }
-
-
-    saveVisualization(vizName) {
-      return testSubjects.click('visualizeSaveButton')
-      .then(() => {
-        return PageObjects.common.sleep(1000);
-      })
-      .then(() => {
-        log.debug('saveButton button clicked');
-        return remote
-        .setFindTimeout(defaultFindTimeout)
-        .findByName('visTitle')
-        .type(vizName);
-      })
-      //   // click save button
-      .then(() => {
-        log.debug('click submit button');
-        return testSubjects.click('saveVisualizationButton');
-      })
-      .then(function () {
-        return PageObjects.header.waitUntilLoadingHasFinished();
-      })
-      // verify that green message at the top of the page.
-      // it's only there for about 5 seconds
-      .then(() => {
-        return retry.try(function tryingForTime() {
-          return remote
-          .setFindTimeout(defaultFindTimeout)
-          .findByCssSelector('kbn-truncated.toast-message.ng-isolate-scope')
-          .getVisibleText();
-        });
-      });
-    }
-
-    clickLoadSavedVisButton() {
+    async clickLoadSavedVisButton() {
       // TODO: Use a test subject selector once we rewrite breadcrumbs to accept each breadcrumb
       // element as a child instead of building the breadcrumbs dynamically.
-      return remote
-      .setFindTimeout(defaultFindTimeout)
-      .findByCssSelector('[href="#/visualize"]')
-      .click();
+      await find.clickByCssSelector('[href="#/visualize"]');
     }
 
-    filterVisByName(vizName) {
-      return remote
-      .findByCssSelector('input[name="filter"]')
-      .click()
+    async filterVisByName(vizName) {
+      const input = await find.byCssSelector('input[name="filter"]');
+      await input.click();
       // can't uses dashes in saved visualizations when filtering
       // or extended character sets
       // https://github.com/elastic/kibana/issues/6300
-      .type(vizName.replace('-',' '));
+      await input.type(vizName.replace('-',' '));
     }
 
-    clickVisualizationByName(vizName) {
+    async clickVisualizationByName(vizName) {
       log.debug('clickVisualizationByLinkText(' + vizName + ')');
 
       return retry.try(function tryingForTime() {
@@ -495,404 +319,233 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
 
     // this starts by clicking the Load Saved Viz button, not from the
     // bottom half of the "Create a new visualization      Step 1" page
-    loadSavedVisualization(vizName) {
-      return this.clickLoadSavedVisButton()
-      .then(() => this.openSavedVisualization(vizName));
+    async loadSavedVisualization(vizName) {
+      await this.clickLoadSavedVisButton();
+      await this.openSavedVisualization(vizName);
     }
 
-    openSavedVisualization(vizName) {
-      return this.clickVisualizationByName(vizName);
+    async openSavedVisualization(vizName) {
+      await this.clickVisualizationByName(vizName);
     }
 
-    getXAxisLabels() {
-      return remote
-      .setFindTimeout(defaultFindTimeout)
-      .findAllByCssSelector('.x > g')
-      .then(chartTypes => {
-        function getChartType(chart) {
-          return chart
-          .getVisibleText();
-        }
-        const getChartTypesPromises = chartTypes.map(getChartType);
-        return Promise.all(getChartTypesPromises);
-      })
-      .then(texts => {
-        // log.debug('returning types array ' + texts + ' array length =' + texts.length);
-        return texts;
-      });
+    async getXAxisLabels() {
+      const chartTypes = await find.allByCssSelector('.x > g');
+      async function getChartType(chart) {
+        return await chart.getVisibleText();
+      }
+      const getChartTypesPromises = chartTypes.map(getChartType);
+      return await Promise.all(getChartTypesPromises);
     }
 
-
-    getYAxisLabels() {
-      return remote
-      .setFindTimeout(defaultFindTimeout)
-      .findAllByCssSelector('.y > g')
-      .then(chartTypes => {
-        function getChartType(chart) {
-          return chart
-          .getVisibleText();
-        }
-        const getChartTypesPromises = chartTypes.map(getChartType);
-        return Promise.all(getChartTypesPromises);
-      })
-      .then(texts => {
-        // log.debug('returning types array ' + texts + ' array length =' + texts.length);
-        return texts;
-      });
+    async getYAxisLabels() {
+      const chartTypes = await find.allByCssSelector('.y > g');
+      const getChartTypesPromises = chartTypes.map(async chart => await chart.getVisibleText());
+      return await Promise.all(getChartTypesPromises);
     }
-
 
     /*
      ** This method gets the chart data and scales it based on chart height and label.
      ** Returns an array of height values
      */
-    getAreaChartData(aggregateName) {
-      const chartData = [];
-      let tempArray = [];
-      let chartSections = 0;
-      let yAxisLabel = 0;
-      let yAxisHeight = 0;
-
+    async getAreaChartData(aggregateName) {
       // 1). get the maximim chart Y-Axis marker value
-      return remote
-      .setFindTimeout(defaultFindTimeout)
-      .findByCssSelector('div.y-axis-div-wrapper > div > svg > g > g:last-of-type')
-      .getVisibleText()
-      .then(function (yLabel) {
-        // since we're going to use the y-axis 'last' (top) label as a number to
-        // scale the chart pixel data, we need to clean out commas and % marks.
-        yAxisLabel = yLabel.replace(/(%|,)/g, '');
-        log.debug('yAxisLabel = ' + yAxisLabel);
-        return yLabel;
-      })
-      // 2). find and save the y-axis pixel size (the chart height)
-      .then(function () {
-        return remote
-        .setFindTimeout(defaultFindTimeout)
-        .findByCssSelector('rect.background') // different here
-        .getAttribute('height');
-      })
-      .then(function (chartH) {
-        yAxisHeight = chartH;
-        log.debug('height --------- ' + yAxisHeight);
-      })
-      .then(function () {
-        return remote.setFindTimeout(defaultFindTimeout * 2)
-        .findByCssSelector('path[data-label="' + aggregateName + '"]')
-        .getAttribute('d');
-      })
-      .then(function (data) {
-        log.debug(data);
-        // This area chart data starts with a 'M'ove to a x,y location, followed
-        // by a bunch of 'L'ines from that point to the next.  Those points are
-        // the values we're going to use to calculate the data values we're testing.
-        // So git rid of the one 'M' and split the rest on the 'L's.
-        tempArray = data.replace('M','').split('L');
-        chartSections = tempArray.length / 2;
-        log.debug('chartSections = ' + chartSections + ' height = ' + yAxisHeight + ' yAxisLabel = ' + yAxisLabel);
-        for (let i = 0; i < chartSections; i++) {
-          chartData[i] = Math.round((yAxisHeight - tempArray[i].split(',')[1]) / yAxisHeight * yAxisLabel);
-          log.debug('chartData[i] =' + chartData[i]);
-        }
-        return chartData;
-      });
-    }
+      const maxChartYAxisElement = await retry.try(
+        async () => await find.byCssSelector('div.y-axis-div-wrapper > div > svg > g > g:last-of-type'));
 
+      const yLabel = await maxChartYAxisElement.getVisibleText();
+      // since we're going to use the y-axis 'last' (top) label as a number to
+      // scale the chart pixel data, we need to clean out commas and % marks.
+      const yAxisLabel = yLabel.replace(/(%|,)/g, '');
+      log.debug('yAxisLabel = ' + yAxisLabel);
+
+      const rectangle = await find.byCssSelector('rect.background');
+      const yAxisHeight = await rectangle.getAttribute('height');
+      log.debug(`height --------- ${yAxisHeight}`);
+
+      const path = await retry.try(
+        async () => await find.byCssSelector(`path[data-label="${aggregateName}"]`, defaultFindTimeout * 2));
+      const data = await path.getAttribute('d');
+      log.debug(data);
+      // This area chart data starts with a 'M'ove to a x,y location, followed
+      // by a bunch of 'L'ines from that point to the next.  Those points are
+      // the values we're going to use to calculate the data values we're testing.
+      // So git rid of the one 'M' and split the rest on the 'L's.
+      const tempArray = data.replace('M','').split('L');
+      const chartSections = tempArray.length / 2;
+      log.debug('chartSections = ' + chartSections + ' height = ' + yAxisHeight + ' yAxisLabel = ' + yAxisLabel);
+      const chartData = [];
+      for (let i = 0; i < chartSections; i++) {
+        chartData[i] = Math.round((yAxisHeight - tempArray[i].split(',')[1]) / yAxisHeight * yAxisLabel);
+        log.debug('chartData[i] =' + chartData[i]);
+      }
+      return chartData;
+    }
 
     // The current test shows dots, not a line.  This function gets the dots and normalizes their height.
-    getLineChartData(cssPart, axis = 'ValueAxis-1') {
-      let yAxisLabel = 0;
-      let yAxisHeight;
-
+    async getLineChartData(cssPart, axis = 'ValueAxis-1') {
       // 1). get the maximim chart Y-Axis marker value
-      return remote
-        .setFindTimeout(defaultFindTimeout)
-        .findByCssSelector(`div.y-axis-div-wrapper > div > svg > g.${axis} > g:last-of-type`)
-        .getVisibleText()
-        .then(function (yLabel) {
-          yAxisLabel = yLabel.replace(/,/g, '');
-          log.debug('yAxisLabel = ' + yAxisLabel);
-          return yLabel;
-        })
+      const maxYAxisMarker = await retry.try(
+        async () => await find.byCssSelector(`div.y-axis-div-wrapper > div > svg > g.${axis} > g:last-of-type`));
+      const yLabel = await maxYAxisMarker.getVisibleText();
+      const yAxisLabel = yLabel.replace(/,/g, '');
+
         // 2). find and save the y-axis pixel size (the chart height)
-        .then(function getRect() {
-          return remote
-          .setFindTimeout(defaultFindTimeout)
-          .findByCssSelector('clipPath rect')
-          .getAttribute('height')
-          .then(function (theHeight) {
-            yAxisHeight = theHeight;
-            log.debug('theHeight = ' + theHeight);
-            return theHeight;
-          });
-        })
-        // 3). get the chart-wrapper elements
-        .then(function getChartWrapper() {
-          return remote
-          .setFindTimeout(defaultFindTimeout * 2)
-          .findAllByCssSelector(`.chart-wrapper circle[${cssPart}]`)
-          .then(function (chartTypes) {
+      const rectangle = await find.byCssSelector('clipPath rect');
+      const theHeight = await rectangle.getAttribute('height');
+      const yAxisHeight = theHeight;
+      log.debug('theHeight = ' + theHeight);
 
-            // 5). for each chart element, find the green circle, then the cy position
-            function getChartType(chart) {
-              return chart
-              .getAttribute('cy')
-              .then(function (cy) {
-                // log.debug(' yAxisHeight=' + yAxisHeight + ' yAxisLabel=' + yAxisLabel + '  cy=' + cy +
-                //   ' ((yAxisHeight - cy)/yAxisHeight * yAxisLabel)=' + ((yAxisHeight - cy) / yAxisHeight * yAxisLabel));
-                return Math.round((yAxisHeight - cy) / yAxisHeight * yAxisLabel);
-              });
-            }
+      // 3). get the chart-wrapper elements
+      const chartTypes = await retry.try(
+        async () => await find.allByCssSelector(`.chart-wrapper circle[${cssPart}]`, defaultFindTimeout * 2));
 
-            // 4). pass the chartTypes to the getChartType function
-            const getChartTypesPromises = chartTypes.map(getChartType);
-            return Promise.all(getChartTypesPromises);
-          });
-        })
+      // 5). for each chart element, find the green circle, then the cy position
+      async function getChartType(chart) {
+        const cy = await chart.getAttribute('cy');
+        return Math.round((yAxisHeight - cy) / yAxisHeight * yAxisLabel);
+      }
 
-      .then(function (yCoords) {
-        return yCoords;
-      });
+      // 4). pass the chartTypes to the getChartType function
+      const getChartTypesPromises = chartTypes.map(getChartType);
+      return await Promise.all(getChartTypesPromises);
     }
-
 
     // this is ALMOST identical to DiscoverPage.getBarChartData
-    getBarChartData() {
-      let yAxisLabel = 0;
-      let yAxisHeight;
-
+    async getBarChartData() {
       // 1). get the maximim chart Y-Axis marker value
-      return remote
-      .setFindTimeout(defaultFindTimeout)
-      .findByCssSelector('div.y-axis-div-wrapper > div > svg > g > g:last-of-type')
-      .then(function setYAxisLabel(y) {
-        return y
-        .getVisibleText()
-        .then(function (yLabel) {
-          yAxisLabel = yLabel.replace(',', '');
-          log.debug('yAxisLabel = ' + yAxisLabel);
-          return yLabel;
-        });
-      })
+      const maxYAxisChartMarker = await retry.try(
+        async () => await find.byCssSelector('div.y-axis-div-wrapper > div > svg > g > g:last-of-type'));
+
+      const yLabel = await maxYAxisChartMarker.getVisibleText();
+      const yAxisLabel = yLabel.replace(',', '');
+      log.debug('yAxisLabel = ' + yAxisLabel);
+
       // 2). find and save the y-axis pixel size (the chart height)
-      .then(function getRect() {
-        return remote
-        .setFindTimeout(defaultFindTimeout)
-        .findByCssSelector('rect.background')
-        .then(function getRectHeight(chartAreaObj) {
-          return chartAreaObj
-          .getAttribute('height')
-          .then(function (theHeight) {
-            yAxisHeight = theHeight;
-            log.debug('theHeight = ' + theHeight);
-            return theHeight;
-          });
-        });
-      })
+      const chartAreaObj = await find.byCssSelector('rect.background');
+      const yAxisHeight = await chartAreaObj.getAttribute('height');
+
       // 3). get the chart-wrapper elements
-      .then(function () {
-        return remote
-        .setFindTimeout(defaultFindTimeout * 2)
-        // #kibana-body > div.content > div > div > div > div.vis-editor-canvas > visualize > div.visualize-chart > div > div.vis-col-wrapper > div.chart-wrapper > div > svg > g > g.series.\30 > rect:nth-child(1)
-        .findAllByCssSelector('svg > g > g.series > rect') // rect
-        .then(function (chartTypes) {
-          function getChartType(chart) {
-            return chart
-            .getAttribute('fill')
-            .then(function (fillColor) {
-              // we're getting the default count color from defaults.js
-              if (fillColor === '#00a69b') {
-                return chart
-                .getAttribute('height')
-                .then(function (barHeight) {
-                  return Math.round(barHeight / yAxisHeight * yAxisLabel);
-                });
-              }
-            });
-          }
-          const getChartTypesPromises = chartTypes.map(getChartType);
-          return Promise.all(getChartTypesPromises);
-        })
-        .then(function (bars) {
-          return bars;
-        });
-      });
-    }
+      const chartTypes = await find.allByCssSelector('svg > g > g.series > rect');
+      async function getChartType(chart) {
+        const fillColor = await chart.getAttribute('fill');
 
-    getHeatmapData() {
-      // 1). get the maximim chart Y-Axis marker value
-      return remote
-      .setFindTimeout(defaultFindTimeout * 2)
-      // #kibana-body > div.content > div > div > div > div.vis-editor-canvas > visualize > div.visualize-chart > div > div.vis-col-wrapper > div.chart-wrapper > div > svg > g > g.series.\30 > rect:nth-child(1)
-      .findAllByCssSelector('svg > g > g.series rect') // rect
-      .then(function (chartTypes) {
-        log.debug('rects=' + chartTypes);
-        function getChartType(chart) {
-          return chart
-          .getAttribute('data-label');
+        // we're getting the default count color from defaults.js
+        if (fillColor === '#00a69b') {
+          const barHeight = await chart.getAttribute('height');
+          return Math.round(barHeight / yAxisHeight * yAxisLabel);
         }
-        const getChartTypesPromises = chartTypes.map(getChartType);
-        return Promise.all(getChartTypesPromises);
-      })
-      .then(function (labels) {
-        log.debug('labels=' + labels);
-        return labels;
-      });
+      }
+      const getChartTypesPromises = chartTypes.map(getChartType);
+      return await Promise.all(getChartTypesPromises);
     }
 
-    getPieChartData() {
-      // 1). get the maximim chart Y-Axis marker value
-      return remote
-      .setFindTimeout(defaultFindTimeout * 2)
-      // path.slice:nth-child(11)
-      .findAllByCssSelector('path.slice')
-      .then(function (chartTypes) {
-        function getChartType(chart) {
-          return chart
-          .getAttribute('d')
-          .then(function (slice) {
-            return slice;
-          });
+    async getHeatmapData() {
+      const chartTypes = await retry.try(
+        async () => await find.allByCssSelector('svg > g > g.series rect', defaultFindTimeout * 2));
+      log.debug('rects=' + chartTypes);
+      async function getChartType(chart) {
+        return await chart.getAttribute('data-label');
+      }
+      const getChartTypesPromises = chartTypes.map(getChartType);
+      return await Promise.all(getChartTypesPromises);
+    }
+
+    async getPieChartData() {
+      const chartTypes = await find.allByCssSelector('path.slice', defaultFindTimeout * 2);
+
+      const getChartTypesPromises = chartTypes.map(async chart => await chart.getAttribute('d'));
+      return await Promise.all(getChartTypesPromises);
+    }
+
+    async getChartAreaWidth() {
+      const rect = await retry.try(async () => find.byCssSelector('clipPath rect'));
+      return await rect.getAttribute('width');
+    }
+
+    async getChartAreaHeight() {
+      const rect = await retry.try(async () => find.byCssSelector('clipPath rect'));
+      return await rect.getAttribute('height');
+    }
+
+    async getDataTableData() {
+      const dataTable = await retry.try(
+        async () => find.byCssSelector('table.table.table-condensed tbody', defaultFindTimeout * 2));
+      return await dataTable.getVisibleText();
+    }
+
+    async getMarkdownData() {
+      const markdown = await retry.try(async () => find.byCssSelector('visualize.ng-isolate-scope'));
+      return await markdown.getVisibleText();
+    }
+
+    async clickColumns() {
+      await find.clickByCssSelector('div.schemaEditors.ng-scope > div > div > button:nth-child(2)');
+    }
+
+    async waitForVisualization() {
+      return await find.byCssSelector('visualization');
+    }
+
+    async getZoomSelectors(zoomSelector) {
+      return await find.allByCssSelector(zoomSelector);
+    }
+
+    async clickMapButton(zoomSelector) {
+      const zooms = await this.getZoomSelectors(zoomSelector);
+      await Promise.all(zooms.map(async zoom => await zoom.click()));
+      await PageObjects.header.waitUntilLoadingHasFinished();
+    }
+
+    async clickMapZoomIn() {
+      await this.clickMapButton('a.leaflet-control-zoom-in');
+    }
+
+    async clickMapZoomOut() {
+      await this.clickMapButton('a.leaflet-control-zoom-out');
+    }
+
+    async getMapZoomEnabled(zoomSelector) {
+      const zooms = await this.getZoomSelectors(zoomSelector);
+      const classAttributes = await Promise.all(zooms.map(async zoom => await zoom.getAttribute('class')));
+      return !classAttributes.join('').includes('leaflet-disabled');
+    }
+
+    async zoomAllTheWayOut() {
+      // we can tell we're at level 1 because zoom out is disabled
+      return await retry.try(async () => {
+        await this.clickMapZoomOut();
+        const enabled = await this.getMapZoomOutEnabled();
+        //should be able to zoom more as current config has 0 as min level.
+        if (enabled) {
+          throw new Error('Not fully zoomed out yet');
         }
-        const getChartTypesPromises = chartTypes.map(getChartType);
-        return Promise.all(getChartTypesPromises);
-      })
-      .then(function (slices) {
-        log.debug('slices=' + slices);
-        return slices;
       });
     }
 
-    getChartAreaWidth() {
-      return remote
-      .setFindTimeout(defaultFindTimeout)
-      .findByCssSelector('clipPath rect')
-      .getAttribute('width');
-    }
-    getChartAreaHeight() {
-      return remote
-      .setFindTimeout(defaultFindTimeout)
-      .findByCssSelector('clipPath rect')
-      .getAttribute('height');
+    async getMapZoomInEnabled() {
+      return await this.getMapZoomEnabled('a.leaflet-control-zoom-in');
     }
 
-    getDataTableData() {
-      return remote
-      .setFindTimeout(defaultFindTimeout * 2)
-      .findByCssSelector('table.table.table-condensed tbody')
-      .getVisibleText();
+    async getMapZoomOutEnabled() {
+      return await this.getMapZoomEnabled('a.leaflet-control-zoom-out');
     }
 
-    getMarkdownData() {
-      return remote
-      .setFindTimeout(defaultFindTimeout)
-      .findByCssSelector('visualize.ng-isolate-scope')
-      .getVisibleText();
+    async clickMapFitDataBounds() {
+      return await this.clickMapButton('a.fa-crop');
     }
 
-    clickColumns() {
-      return remote
-      .setFindTimeout(defaultFindTimeout)
-      .findByCssSelector('div.schemaEditors.ng-scope > div > div > button:nth-child(2)')
-      .click();
-    }
-
-    waitForToastMessageGone() {
-      return retry.try(function tryingForTime() {
-        return remote
-        .setFindTimeout(100)
-        .findAllByCssSelector('kbn-truncated.toast-message.ng-isolate-scope')
-        .then(function toastMessage(messages) {
-          if (messages.length > 0) {
-            throw new Error('waiting for toast message to clear');
-          } else {
-            log.debug('now messages = 0 "' + messages + '"');
-            return messages;
-          }
-        });
-      });
-    }
-
-    waitForVisualization() {
-      return remote
-      .setFindTimeout(defaultFindTimeout)
-      .findByCssSelector('visualization');
-    }
-
-    clickMapButton(zoomSelector) {
-      return remote
-      .setFindTimeout(defaultFindTimeout)
-      .findAllByCssSelector(zoomSelector)
-      .click()
-      .then(() => {
-        return PageObjects.common.sleep(1000);
-      })
-      .then(() => {
-        return PageObjects.header.waitUntilLoadingHasFinished();
-      });
-    }
-
-    clickMapZoomIn() {
-      return this.clickMapButton('a.leaflet-control-zoom-in');
-    }
-
-    clickMapZoomOut() {
-      return this.clickMapButton('a.leaflet-control-zoom-out');
-    }
-
-    getMapZoomEnabled(zoomSelector) {
-      return remote
-      .setFindTimeout(defaultFindTimeout)
-      .findAllByCssSelector(zoomSelector)
-      .getAttribute('class')
-      .then((element) => {
-        return !element.toString().includes('leaflet-disabled');
-      });
-    }
-
-    getMapZoomInEnabled() {
-      return this.getMapZoomEnabled('a.leaflet-control-zoom-in');
-    }
-
-    getMapZoomOutEnabled() {
-      return this.getMapZoomEnabled('a.leaflet-control-zoom-out');
-    }
-
-    clickMapFitDataBounds() {
-      return this.clickMapButton('a.fa-crop');
-    }
-
-    getTileMapData() {
-      return remote
-      .setFindTimeout(defaultFindTimeout)
-      .findAllByCssSelector('path.leaflet-clickable')
-      .then((chartTypes) => {
-
-        function getChartType(chart) {
-          let color;
-          let radius;
-          return chart.getAttribute('stroke')
-          .then((stroke) => {
-            color = stroke;
-          })
-          .then(() => {
-            return chart.getAttribute('d');
-          })
-          .then((d) => {
-            // scale the radius up (sometimes less than 1) and then round to int
-            radius = d.replace(/.*A(\d+\.\d+),.*/,'$1') * 10;
-            radius = Math.round(radius);
-          })
-          .then(() => {
-            return { color: color, radius: radius };
-          });
-        }
-        const getChartTypesPromises = chartTypes.map(getChartType);
-        return Promise.all(getChartTypesPromises);
-      })
-      .then((circles) => {
-        return circles;
-      });
+    async getTileMapData() {
+      const chartTypes = await find.allByCssSelector('path.leaflet-clickable');
+      async function getChartType(chart) {
+        const color = await chart.getAttribute('stroke');
+        const d = await chart.getAttribute('d');
+        // scale the radius up (sometimes less than 1) and then round to int
+        let radius = d.replace(/.*A(\d+\.\d+),.*/,'$1') * 10;
+        radius = Math.round(radius);
+        return { color, radius };
+      }
+      const getChartTypesPromises = chartTypes.map(getChartType);
+      return await Promise.all(getChartTypesPromises);
     }
 
   }
