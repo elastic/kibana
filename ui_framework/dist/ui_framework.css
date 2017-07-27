@@ -676,10 +676,14 @@ table {
         -ms-flex-direction: column;
             flex-direction: column; } }
 
+.kuiPageContentHeaderSection + .kuiPageContentHeaderSection {
+  margin-left: 32px; }
+
 @media only screen and (max-width: 768px) {
   .kuiPageContentHeaderSection {
     width: 100%; }
     .kuiPageContentHeaderSection + .kuiPageContentHeaderSection {
+      margin-left: 0;
       margin-top: 16px; } }
 
 .kuiPageSidebar {
@@ -719,10 +723,14 @@ table {
         -ms-flex-direction: column;
             flex-direction: column; } }
 
+.kuiPageHeaderSection + .kuiPageHeaderSection {
+  margin-left: 32px; }
+
 @media only screen and (max-width: 768px) {
   .kuiPageHeaderSection {
     width: 100%; }
     .kuiPageHeaderSection + .kuiPageHeaderSection {
+      margin-left: 0;
       margin-top: 16px; } }
 
 .kuiPopover {
