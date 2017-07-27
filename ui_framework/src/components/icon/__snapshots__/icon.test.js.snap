@@ -3,7 +3,7 @@
 exports[`KuiIcon is rendered 1`] = `
 <svg
   aria-label="aria-label"
-  class="kuiIcon testClass1 testClass2 kuiIcon--medium"
+  class="kuiIcon testClass1 testClass2"
   data-test-subj="test subject string"
 >
   <title>
@@ -69,7 +69,7 @@ exports[`KuiIcon renders size xxLarge 1`] = `
 
 exports[`KuiIcon renders type apps 1`] = `
 <svg
-  class="kuiIcon kuiIcon--medium"
+  class="kuiIcon"
 >
   <title>
     apps icon
@@ -95,7 +95,7 @@ exports[`KuiIcon renders type cross 1`] = `
 
 exports[`KuiIcon renders type dashboardApp 1`] = `
 <svg
-  class="kuiIcon kuiIcon--medium"
+  class="kuiIcon"
 >
   <title>
     dashboard app icon
@@ -108,7 +108,7 @@ exports[`KuiIcon renders type dashboardApp 1`] = `
 
 exports[`KuiIcon renders type devToolsApp 1`] = `
 <svg
-  class="kuiIcon kuiIcon--medium"
+  class="kuiIcon"
 >
   <title>
     dev tools app icon
@@ -121,7 +121,7 @@ exports[`KuiIcon renders type devToolsApp 1`] = `
 
 exports[`KuiIcon renders type discoverApp 1`] = `
 <svg
-  class="kuiIcon kuiIcon--medium"
+  class="kuiIcon"
 >
   <title>
     discover app icon
@@ -134,7 +134,7 @@ exports[`KuiIcon renders type discoverApp 1`] = `
 
 exports[`KuiIcon renders type graphApp 1`] = `
 <svg
-  class="kuiIcon kuiIcon--medium"
+  class="kuiIcon"
 >
   <title>
     graph app icon
@@ -160,7 +160,7 @@ exports[`KuiIcon renders type help 1`] = `
 
 exports[`KuiIcon renders type kibanaLogo 1`] = `
 <svg
-  class="kuiIcon kuiIcon--medium"
+  class="kuiIcon"
 >
   <title>
     kibana logo icon
@@ -173,7 +173,7 @@ exports[`KuiIcon renders type kibanaLogo 1`] = `
 
 exports[`KuiIcon renders type machineLearningApp 1`] = `
 <svg
-  class="kuiIcon kuiIcon--medium"
+  class="kuiIcon"
 >
   <title>
     machine learning app icon
@@ -186,7 +186,7 @@ exports[`KuiIcon renders type machineLearningApp 1`] = `
 
 exports[`KuiIcon renders type search 1`] = `
 <svg
-  class="kuiIcon kuiIcon--medium"
+  class="kuiIcon"
 >
   <title>
     search icon
@@ -199,7 +199,7 @@ exports[`KuiIcon renders type search 1`] = `
 
 exports[`KuiIcon renders type timelionApp 1`] = `
 <svg
-  class="kuiIcon kuiIcon--medium"
+  class="kuiIcon"
 >
   <title>
     timelion app icon
@@ -212,7 +212,7 @@ exports[`KuiIcon renders type timelionApp 1`] = `
 
 exports[`KuiIcon renders type user 1`] = `
 <svg
-  class="kuiIcon kuiIcon--medium"
+  class="kuiIcon"
 >
   <title>
     user icon
@@ -225,7 +225,7 @@ exports[`KuiIcon renders type user 1`] = `
 
 exports[`KuiIcon renders type visualizeApp 1`] = `
 <svg
-  class="kuiIcon kuiIcon--medium"
+  class="kuiIcon"
 >
   <title>
     visualize app icon
@@ -238,7 +238,7 @@ exports[`KuiIcon renders type visualizeApp 1`] = `
 
 exports[`KuiIcon title defaults to a humanized version of the type 1`] = `
 <svg
-  class="kuiIcon kuiIcon--medium"
+  class="kuiIcon"
 >
   <title>
     dashboard app icon
@@ -251,7 +251,7 @@ exports[`KuiIcon title defaults to a humanized version of the type 1`] = `
 
 exports[`KuiIcon title is rendered 1`] = `
 <svg
-  class="kuiIcon kuiIcon--medium"
+  class="kuiIcon"
 >
   <title>
     a custom title

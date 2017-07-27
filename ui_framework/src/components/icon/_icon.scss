@@ -1,4 +1,4 @@
-@include component('kuiIcon') {
+.kuiIcon {
   display: inline-block;
   fill: $kuiTextColor;
   vertical-align: middle;
@@ -7,20 +7,20 @@
     opacity: 1; // We often hide icons on hover. Make sure they appear on focus.
     background: $kuiFocusBackgroundColor;
   }
+}
 
-  @include modifier('medium') {
-    @include size($kuiSizeM);
-  }
+.kuiIcon--medium {
+  @include size($kuiSizeM);
+}
 
-  @include modifier('large') {
-    @include size($kuiSizeL);
-  }
+.kuiIcon--large {
+  @include size($kuiSizeL);
+}
 
-  @include modifier('xLarge') {
-    @include size($kuiSizeXL);
-  }
+.kuiIcon--xLarge {
+  @include size($kuiSizeXL);
+}
 
-  @include modifier('xxLarge') {
-    @include size($kuiSizeXXL);
-  }
+.kuiIcon--xxLarge {
+  @include size($kuiSizeXXL);
 }

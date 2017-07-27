@@ -1,28 +1,28 @@
-@include utility('flex') {
+.kui--flex {
   display: flex;
 }
 
-@include utility('flexRow') {
+.kui--flexRow {
   display: flex;
   flex-direction: row;
 }
 
-@include utility('flexWrap') {
+.kui--flexWrap {
   flex-wrap: wrap;
 }
 
-@include utility('flexGrow1') {
+.kui--flexGrow1 {
   flex-grow: 1;
 }
 
-@include utility('flexShrink1') {
+.kui--flexShrink1 {
   flex-shrink: 1;
 }
 
-@include utility('flexBasisOneThird') {
+.kui--flexBasisOneThird {
   flex-basis: 33.33%;
 }
 
-@include utility('flexAlignItemsCenter') {
+.kui--flexAlignItemsCenter {
   align-items: center;
 }

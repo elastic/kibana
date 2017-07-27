@@ -1,13 +1,13 @@
 // Dial menu is a phone like dial comprised of an svg icon and a title.
 
-@include component('kuiKeyPadMenu') {
+.kuiKeyPadMenu {
   display: flex;
   flex-direction: row;
   flex-wrap: wrap;
   width: $kuiKeyPadMenuSize * 3; // Default to grid of 3
 }
 
-@include component('kuiKeyPadMenuItem') {
+.kuiKeyPadMenuItem {
   display: block;
   padding: $kuiSize;
   height: $kuiKeyPadMenuSize;
@@ -32,8 +32,9 @@
       text-decoration: underline;
     }
   }
+}
 
-  @include child('inner') {
+  .kuiKeyPadMenuItem__inner {
     width: 100%;
     height: 100%;
     display: flex;
@@ -42,14 +43,13 @@
     justify-content: center;
   }
 
-  @include child('icon') {
+  .kuiKeyPadMenuItem__icon {
     transition: transform $kuiAnimSlightBounce $kuiAnimSpeedNormal;
     transform: translateY($kuiSizeXS);
     margin-bottom: $kuiSizeS;
   }
 
-  @include child('label') {
+  .kuiKeyPadMenuItem__label {
     @include kuiFontSizeS;
     text-align: center;
   }
-}
