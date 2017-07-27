@@ -82,9 +82,13 @@ uiModules
     link: function ($scope, element) {
       if (!$scope.panel.id || !$scope.panel.type) return;
 
-      const savePanelState = (panel) => {
-        $scope.panel = Object.assign($scope.panel, panel);
+      const updatePanel = (panelAttributes) => {
+        $scope.panel = {
+          ...$scope.panel,
+          ...panelAttributes
+        };
         $scope.saveState();
+        return $scope.panel;
       };
 
       $scope.isViewOnlyMode = () => {
@@ -93,7 +97,7 @@ uiModules
 
       const containerAPI = {
         onFilter: $scope.onFilter,
-        savePanelState,
+        updatePanel,
         getAppState: () => $scope.appState,
         getIsViewOnlyMode: $scope.isViewOnlyMode,
         createChildUiState: $scope.createChildUiState,
