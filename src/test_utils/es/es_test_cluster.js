@@ -7,7 +7,6 @@ const ESVM_DIR = resolve(__dirname, '../../../esvm/test_utils/es_test_cluster');
 
 export class EsTestCluster {
   _freshBranches = [];
-  _directory = resolve(ESVM_DIR);
 
   use(options = {}) {
     const {
@@ -35,7 +34,7 @@ export class EsTestCluster {
         cluster = libesvm.createCluster({
           fresh: download,
           purge: !download,
-          directory: this._directory,
+          directory: ESVM_DIR,
           branch,
           config: {
             http: {
