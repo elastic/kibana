@@ -60,8 +60,10 @@ export class KuiPopover extends Component {
     const classes = classNames(
       'kuiPopover',
       anchorPositionToClassNameMap[anchorPosition],
-      isOpen ? 'isOpen' : undefined,
-      className
+      className,
+      {
+        'kuiPopover-isOpen': isOpen,
+      },
     );
 
     const bodyClasses = classNames('kuiPopover__body kui--bottomShadow', bodyClassName);

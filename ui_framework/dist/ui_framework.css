@@ -420,7 +420,7 @@ table {
   .kuiHeaderBreadcrumb:not(.kuiHeaderBreadcrumb--collapsed):focus {
     text-decoration: underline;
     background: #e6f2f6; }
-  .kuiHeaderBreadcrumb.isActive {
+  .kuiHeaderBreadcrumb.kuiHeaderBreadcrumb-isActive {
     color: #999; }
 
 .kuiHeaderSectionItem__text {
@@ -582,7 +582,7 @@ table {
 .kuiPopover {
   display: inline-block;
   position: relative; }
-  .kuiPopover.isOpen .kuiPopover__body {
+  .kuiPopover.kuiPopover-isOpen .kuiPopover__body {
     opacity: 1;
     visibility: visible;
     z-index: 0;

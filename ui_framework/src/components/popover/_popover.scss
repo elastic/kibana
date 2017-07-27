@@ -6,7 +6,7 @@
   position: relative;
 
   // Open state happens on the wrapper and applies to the body.
-  &.isOpen {
+  &.kuiPopover-isOpen {
     .kuiPopover__body {
       opacity: 1;
       visibility: visible;

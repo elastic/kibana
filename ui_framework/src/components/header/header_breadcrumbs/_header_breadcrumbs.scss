@@ -24,7 +24,7 @@
     @include kuiLink;
   }
 
-  &.isActive {
+  &.kuiHeaderBreadcrumb-isActive {
     color: $kuiColorMediumShade;
   }
 }
