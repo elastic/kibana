@@ -31,6 +31,13 @@ export class EsTestCluster {
       start: async () => {
         const download = this._isDownloadNeeded(branch);
 
+        if (cluster) {
+          throw new Error(`
+            EsTestCluster[${name}] is already started, call and await es.stop()
+            before calling es.start() again.
+          `);
+        }
+
         cluster = libesvm.createCluster({
           fresh: download,
           purge: !download,
