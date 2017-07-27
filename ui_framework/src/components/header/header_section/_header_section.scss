@@ -1,0 +1,11 @@
+.kuiHeaderSection {
+  display: flex;
+}
+
+.kuiHeaderSection--left {
+  flex-grow: 1;
+}
+
+.kuiHeaderSection--right {
+  flex-shrink: 1;
+}

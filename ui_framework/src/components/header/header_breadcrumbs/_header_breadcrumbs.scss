@@ -1,5 +1,9 @@
 // Breadcrumb navigation included in the header.
 
+.kuiHeaderBreadcrumbs {
+  display: flex;
+}
+
 .kuiHeaderBreadcrumb {
   display: inline-block;
   height: $kuiHeaderChildSize;

@@ -4,8 +4,8 @@ import React, {
 import classNames from 'classnames';
 
 const sideToClassNameMap = {
-  left: 'kui--flexGrow1 kui--flex',
-  right: 'kui--flexShrink1 kui--flex',
+  left: 'kuiHeaderSection--left',
+  right: 'kuiHeaderSection--right',
 };
 
 const SIDES = Object.keys(sideToClassNameMap);

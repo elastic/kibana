@@ -18,6 +18,8 @@
 
   // Animation happens on the body.
   .kuiPopover__body {
+    @include kuiBottomShadow;
+
     background: $kuiColorEmptyShade;
     position: absolute;
     min-width: $kuiSize * 16; // Can expand further, but this size is good for our menus.

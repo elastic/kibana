@@ -1,6 +1,7 @@
 // Header. Includes breadcrumbs of nav buttons.
 
 .kuiHeader {
+  display: flex;
   background: $kuiHeaderBackgroundColor;
   border-bottom: $kuiBorderThin;
 }

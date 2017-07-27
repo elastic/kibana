@@ -2,7 +2,7 @@ import React from 'react';
 import classNames from 'classnames';
 
 export const KuiHeaderBreadcrumbs = ({ children, className, ...rest }) => {
-  const classes = classNames('kui--flex', className);
+  const classes = classNames('kuiHeaderBreadcrumbs', className);
 
   return (
     <div
