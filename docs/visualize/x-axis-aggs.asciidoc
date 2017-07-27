@@ -11,6 +11,8 @@ specifying a number and a time unit in the text field. Custom interval time unit
 *h* for hours, *d* for days, *w* for weeks, and *y* for years. Different units support different levels of precision,
 down to one second.
 
+Kibana's {ref}/set-time-filter.html[_Global Time Range_] is set by the Time Picker. The global time range restricts the search results to a specific time period. An {ref}/tutorial-define-index.html[_Index Pattern_] can only specify a single Date Field for which the global time range is filtered. All Date Histogram aggregations are filtered by the global time range against the index pattern time-field. Date Histograms created on non-time-field Date Fields are further restricted to only aggregate documents where the non-time-field Date Field is within the global time range. Unselect the *Restrict to global time range* checkbox to disable this additional filtering.
+
 *Histogram*:: A standard {ref}/search-aggregations-bucket-histogram-aggregation.html[_histogram_] is built from a
 numeric field. Specify an integer interval for this field. Select the *Show empty buckets* checkbox to include empty
 intervals in the histogram.

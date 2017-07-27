@@ -28,10 +28,18 @@ export function AggTypesBucketsDateHistogramProvider(timefilter, config, Private
     return interval;
   }
 
+  function shouldSetBounds(agg) {
+    if (agg.fieldIsTimeField() || agg.params.restrictToGlobalTime) {
+      return true;
+    }
+
+    return false;
+  }
+
   function setBounds(agg, force) {
     if (agg.buckets._alreadySet && !force) return;
     agg.buckets._alreadySet = true;
-    agg.buckets.setBounds(timefilter.getActiveBounds());
+    agg.buckets.setBounds(shouldSetBounds(agg) && timefilter.getActiveBounds());
   }
 
 
@@ -161,7 +169,7 @@ export function AggTypesBucketsDateHistogramProvider(timefilter, config, Private
       },
 
       {
-        name: 'isFilteredByKbnTime',
+        name: 'restrictToGlobalTime',
         default: true,
         write: _.noop
       }
@@ -170,7 +178,7 @@ export function AggTypesBucketsDateHistogramProvider(timefilter, config, Private
       const aggs = [];
 
       // Filter only needed when date field is not index pattern time field
-      if (!agg.fieldIsTimeField() && agg.params.isFilteredByKbnTime && agg.getField()) {
+      if (!agg.fieldIsTimeField() && agg.params.restrictToGlobalTime && agg.getField()) {
         const timeRange = {};
         timeRange[agg.getField().name] = {
           'gte': moment(agg.buckets.getBounds().min).valueOf(),

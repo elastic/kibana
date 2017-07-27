@@ -5,9 +5,9 @@
     ng-show="!agg.fieldIsTimeField()">
     <label>
       <input type="checkbox"
-             name="isFilteredByKbnTime"
-             ng-model="agg.params.isFilteredByKbnTime">
-      Only request data within Kibana time period
+             name="restrictToGlobalTime"
+             ng-model="agg.params.restrictToGlobalTime">
+      Restrict to global time range
     </label>
   </div>
 
