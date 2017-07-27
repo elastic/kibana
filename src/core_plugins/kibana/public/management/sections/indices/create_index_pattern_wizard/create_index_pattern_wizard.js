@@ -104,6 +104,36 @@ uiModules.get('apps/management')
   let mostRecentFetchMatchingIndicesRequest;
 
   this.fetchMatchingIndices = () => {
+    this.isFetchingMatchingIndices = true;
+
+    // Default to searching for all indices.
+    const exactSearchQuery = this.formValues.name;
+    let partialSearchQuery = this.formValues.name;
+
+    if (!_.endsWith(partialSearchQuery, '*')) {
+      partialSearchQuery = `${partialSearchQuery}*`;
+    }
+    if (!_.startsWith(partialSearchQuery, '*')) {
+      partialSearchQuery = `*${partialSearchQuery}`;
+    }
+
+    const thisFetchMatchingIndicesRequest = mostRecentFetchMatchingIndicesRequest = Promise.all([
+      createReasonableWait(),
+    ])
+    .then(([
+    ]) => {
+      if (thisFetchMatchingIndicesRequest === mostRecentFetchMatchingIndicesRequest) {
+        const matchingIndicesResponse = [{ name: 'logstash-0' }, { name: '.kibana' }];
+        const partialMatchingIndicesResponse = [{ name: 'logstash-0' }, { name: '.kibana' }];
+        matchingIndices = matchingIndicesResponse.sort();
+        partialMatchingIndices = partialMatchingIndicesResponse.sort();
+        updateWhiteListedIndices();
+        this.isFetchingMatchingIndices = false;
+      }
+    }).catch(error => {
+      notify.error(error);
+    });
+
     /**
     this.isFetchingMatchingIndices = true;
 
@@ -140,6 +170,22 @@ uiModules.get('apps/management')
   };
 
   this.fetchExistingIndices = () => {
+    this.isFetchingExistingIndices = true;
+    const allExistingLocalAndRemoteIndicesPattern = '*,*:*';
+
+    Promise.all([
+      createReasonableWait(),
+    ])
+    .then(([]) => {
+      const allIndicesResponse = [{ name: 'logstash-0' }, { name: '.kibana' }];
+      // Cache all indices.
+      allIndices = allIndicesResponse.sort();
+      updateWhiteListedIndices();
+      this.isFetchingExistingIndices = false;
+    }).catch(error => {
+      notify.error(error);
+    });
+
     /**
     this.isFetchingExistingIndices = true;
     const allExistingLocalAndRemoteIndicesPattern = '*,*:*';
