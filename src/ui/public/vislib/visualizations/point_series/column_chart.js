@@ -20,6 +20,10 @@ export function VislibVisualizationsColumnChartProvider(Private) {
     let datumWidth = defaultWidth;
     if (nextDatum) {
       datumWidth = ((scale(nextDatum.x) - scale(datum.x)) - gutterWidth) / groupCount;
+      // To handle data-sets with holes, do not let width be larger than default.
+      if (datumWidth > defaultWidth) {
+        datumWidth = defaultWidth;
+      }
     }
     return datumWidth;
   }
