@@ -1,6 +1,6 @@
 // Breadcrumb navigation included in the header.
 
-@include component('kuiHeaderBreadcrumb') {
+.kuiHeaderBreadcrumb {
   display: inline-block;
   height: $kuiHeaderChildSize;
   line-height: $kuiHeaderChildSize;
@@ -24,26 +24,26 @@
     @include kuiLink;
   }
 
-  @include state('isActive') {
+  &.kuiHeaderBreadcrumb-isActive {
     color: $kuiColorMediumShade;
   }
+}
 
-  @include modifier('collapsed') {
-    color: $kuiColorLightShade;
-  }
-
-  @include child('text') {
+  .kuiHeaderBreadcrumb__text {
     white-space: nowrap;
     max-width: 150px;
     display: block;
     text-overflow: ellipsis;
     overflow: hidden;
   }
+
+.kuiHeaderBreadcrumb--collapsed {
+  color: $kuiColorLightShade;
 }
 
 // Laptop
 @include screenMedium {
-  @include component('kuiHeaderBreadcrumb') {
+  .kuiHeaderBreadcrumb {
     display: none;
 
     // Only show last 4 breadcrumbs
@@ -55,7 +55,7 @@
 
 // Tablets
 @include screenSmall {
-  @include component('kuiHeaderBreadcrumb') {
+  .kuiHeaderBreadcrumb {
     display: none;
 
     // Only show last 2 breadcrumbs
@@ -67,7 +67,7 @@
 
 // Mobile
 @include screenXSmall {
-  @include component('kuiHeaderBreadcrumb') {
+  .kuiHeaderBreadcrumb {
     display: none;
   }
 }

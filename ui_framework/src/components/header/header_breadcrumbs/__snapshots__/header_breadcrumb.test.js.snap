@@ -13,7 +13,9 @@ exports[`KuiHeaderBreadcrumb href is rendered 1`] = `
 
 exports[`KuiHeaderBreadcrumb is rendered 1`] = `
 <a
+  aria-label="aria-label"
   class="kuiHeaderBreadcrumb testClass1 testClass2"
+  data-test-subj="test subject string"
 >
   <div
     class="kuiHeaderBreadcrumb__text"
@@ -25,7 +27,7 @@ exports[`KuiHeaderBreadcrumb is rendered 1`] = `
 
 exports[`KuiHeaderBreadcrumb isActive is rendered 1`] = `
 <a
-  class="kuiHeaderBreadcrumb isActive"
+  class="kuiHeaderBreadcrumb kuiHeaderBreadcrumb-isActive"
 >
   <div
     class="kuiHeaderBreadcrumb__text"
