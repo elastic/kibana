@@ -1,15 +1,17 @@
-import Boom from 'boom';
-
 export default function registerGet(server) {
+
+  async function handleRequest(request) {
+    const uiSettings = request.getUiSettingsService();
+    return {
+      settings: await uiSettings.getUserProvided()
+    };
+  }
+
   server.route({
     path: '/api/kibana/settings',
     method: 'GET',
-    handler: function (req, reply) {
-      req
-        .getUiSettingsService()
-        .getUserProvided()
-        .then(settings => reply({ settings }).type('application/json'))
-        .catch(err => reply(Boom.wrap(err, err.statusCode)));
+    handler: function (request, reply) {
+      reply(handleRequest(request));
     }
   });
 }
