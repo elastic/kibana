@@ -15,10 +15,13 @@ function createErrorWithStatusCode(statusCode) {
 }
 
 describe('handleShortUrlError()', () => {
-  const caughtErrors = [
+  const caughtErrorsWithStatus = [
     createErrorWithStatus(401),
     createErrorWithStatus(403),
     createErrorWithStatus(404),
+  ];
+
+  const caughtErrorsWithStatusCode = [
     createErrorWithStatusCode(401),
     createErrorWithStatusCode(403),
     createErrorWithStatusCode(404),
@@ -30,9 +33,15 @@ describe('handleShortUrlError()', () => {
     createErrorWithStatusCode(500)
   ];
 
-  caughtErrors.forEach((err) => {
-    it(`should handle ${err.status || err.statusCode} errors`, function () {
-      expect(_.get(handleShortUrlError(err), 'output.statusCode')).to.be(err.status || err.statusCode);
+  caughtErrorsWithStatus.forEach((err) => {
+    it(`should handle errors with status of ${err.status}`, function () {
+      expect(_.get(handleShortUrlError(err), 'output.statusCode')).to.be(err.status);
+    });
+  });
+
+  caughtErrorsWithStatusCode.forEach((err) => {
+    it(`should handle errors with statusCode of ${err.statusCode}`, function () {
+      expect(_.get(handleShortUrlError(err), 'output.statusCode')).to.be(err.statusCode);
     });
   });
 
