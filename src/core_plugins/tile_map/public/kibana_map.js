@@ -199,7 +199,7 @@ export class KibanaMap extends EventEmitter {
       }
 
       if (!this._popup) {
-        this._popup = L.popup({ autoPan: false });
+        this._popup = L.responsivePopup({ autoPan: false });
         this._popup.setLatLng(event.position);
         this._popup.setContent(event.content);
         this._popup.openOn(this._leafletMap);
