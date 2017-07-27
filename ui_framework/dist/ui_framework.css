@@ -310,6 +310,10 @@ table {
   height: 64px; }
 
 .kuiHeader {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
   background: #FFF;
   border-bottom: 1px solid #D9D9D9; }
 
@@ -398,6 +402,12 @@ table {
   width: 24px;
   opacity: 1; }
 
+.kuiHeaderBreadcrumbs {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex; }
+
 .kuiHeaderBreadcrumb {
   display: inline-block;
   height: 64px;
@@ -448,6 +458,23 @@ table {
 @media only screen and (max-width: 768px) {
   .kuiHeaderBreadcrumb {
     display: none; } }
+
+.kuiHeaderSection {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex; }
+
+.kuiHeaderSection--left {
+  -webkit-box-flex: 1;
+  -webkit-flex-grow: 1;
+      -ms-flex-positive: 1;
+          flex-grow: 1; }
+
+.kuiHeaderSection--right {
+  -webkit-flex-shrink: 1;
+      -ms-flex-negative: 1;
+          flex-shrink: 1; }
 
 .kuiHeaderSectionItem {
   position: relative; }
@@ -589,6 +616,7 @@ table {
     margin-top: 8px; }
 
 .kuiPopover__body {
+  box-shadow: 0 16px 16px -8px rgba(0, 0, 0, 0.1);
   background: #FFF;
   position: absolute;
   min-width: 256px;
