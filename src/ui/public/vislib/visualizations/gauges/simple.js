@@ -116,12 +116,12 @@ export function SimpleGaugeProvider() {
         .data([data])
         .enter()
         .append('g')
-        .attr('data-label', (d) => this.getLabel(d.values[0].y));
+        .attr('data-label', (d) => this.getLabel(_.last(d.values).y));
 
 
       const gauges = gaugeHolders
         .selectAll('g')
-        .data(d => d.values)
+        .data(d => { return [ _.last(d.values) ]; })
         .enter();
 
 
@@ -178,16 +178,13 @@ export function SimpleGaugeProvider() {
             const percentage = Math.round(100 * (d.y - min) / (max - min));
             return `${percentage}%`;
           }
-          if (d.aggConfig) {
-            return d.aggConfig.fieldFormatter('text')(d.y);
-          }
-          return d.y;
+          return data.formatter ? data.formatter(d.y) : d.y;
         })
         .attr('style', 'dominant-baseline: central; font-weight: bold; white-space: nowrap;text-overflow: ellipsis;overflow: hidden;')
         .style('text-anchor', 'middle')
         .style('font-size', fontSize + 'pt')
         .style('fill', function () {
-          return !bgColor && labelColor ? self.getColorBucket(data.values[0].y) : bgFill;
+          return !bgColor && labelColor ? self.getColorBucket(data.value) : bgFill;
         });
 
       if (isTooltip) {

@@ -120,7 +120,7 @@ export function VislibTypesPointSeries() {
             id: 'CategoryAxis-1',
             type: 'category',
             labels: {
-              axisFormatter: data.data.xAxisFormatter || data.get('xAxisFormatter')
+              axisFormatter: data.get('xAxisFormatter')
             },
             scale: {
               expandLastBucket: opts.expandLastBucket

@@ -155,13 +155,11 @@ export function MeterGaugeProvider() {
       const angleFactor = this.gaugeConfig.gaugeType === 'Meter' ? 0.75 : 1;
       const maxRadius = (Math.min(width, height / angleFactor) / 2) * marginFactor;
 
-      const extendRange = this.gaugeConfig.extendRange;
-      const maxY = _.max(data.values, 'y').y;
       const min = this.gaugeConfig.colorsRange[0].from;
       const max = _.last(this.gaugeConfig.colorsRange).to;
       const angle = d3.scale.linear()
         .range([minAngle, maxAngle])
-        .domain([min, extendRange && max < maxY ? maxY : max]);
+        .domain([min, max]);
       const radius = d3.scale.linear()
         .range([0, maxRadius])
         .domain([this.gaugeConfig.innerSpace + 1, 0]);
@@ -197,12 +195,12 @@ export function MeterGaugeProvider() {
         .data([data])
         .enter()
         .append('g')
-        .attr('data-label', (d) => this.getLabel(d.values[0].y));
+        .attr('data-label', (d) => this.getLabel(_.last(d.values).y));
 
 
       const gauges = gaugeHolders
         .selectAll('g')
-        .data(d => d.values)
+        .data(d => [ _.last(d.values) ])
         .enter();
 
 
@@ -262,10 +260,7 @@ export function MeterGaugeProvider() {
             const percentage = Math.round(100 * (d.y - min) / (max - min));
             return `${percentage}%`;
           }
-          if (d.aggConfig) {
-            return d.aggConfig.fieldFormatter('text')(d.y);
-          }
-          return d.y;
+          return data.formatter ? data.formatter(d.y) : d.y;
         })
         .attr('style', 'dominant-baseline: central;')
         .style('text-anchor', 'middle')
