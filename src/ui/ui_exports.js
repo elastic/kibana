@@ -16,7 +16,9 @@ export default class UiExports {
       ],
       visResponseHandlers: [
         'ui/vis/response_handlers/basic',
-        'ui/vis/response_handlers/none'
+        'ui/vis/response_handlers/none',
+        'ui/vis/response_handlers/series_data',
+        'ui/vis/response_handlers/hierarchical_data',
       ],
       visEditorTypes: [
         'ui/vis/editors/default/default',
