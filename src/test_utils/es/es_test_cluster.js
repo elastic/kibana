@@ -1,5 +1,5 @@
 import { resolve } from 'path';
-import { esTestServerUrlParts } from '../../../test/es_test_server_url_parts';
+import { esTestConfig } from './es_test_config';
 
 import libesvm from 'libesvm';
 
@@ -12,9 +12,9 @@ export class EsTestCluster {
   use(options = {}) {
     const {
       name,
-      port = esTestServerUrlParts.port,
       log = console.log,
-      branch = 'master',
+      port = esTestConfig.getPort(),
+      branch = esTestConfig.getBranch(),
     } = options;
 
     if (!name) {
@@ -25,6 +25,10 @@ export class EsTestCluster {
     let cluster;
 
     return {
+      getStartTimeout: () => {
+        return esTestConfig.getLibesvmStartTimeout();
+      },
+
       start: async () => {
         const download = this._isDownloadNeeded(branch);
 

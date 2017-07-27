@@ -2,16 +2,14 @@ import expect from 'expect.js';
 import * as kbnTestServer from '../../../test_utils/kbn_server';
 import { esTestCluster } from '../../../test_utils/es';
 
-describe('routes', function () {
-  this.slow(60 * 1000);
-  this.timeout(3 * 60 * 1000);
-
+describe('routes', () => {
   let kbnServer;
   const es = esTestCluster.use({
     name: 'server/http',
   });
 
-  before(async () => {
+  before(async function () {
+    this.timeout(es.getStartTimeout());
     await es.start();
     kbnServer = kbnTestServer.createServerWithCorePlugins();
     await kbnServer.ready();

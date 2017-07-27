@@ -10,13 +10,11 @@ import { startupKibana } from '../lib';
 const SCRIPT = resolve(__dirname, '../../../../scripts/functional_test_runner.js');
 const CONFIG = resolve(__dirname, '../fixtures/with_es_archiver/config.js');
 
-describe('single test that uses esArchiver', function () {
-  this.timeout(3 * 60 * 1000);
-
+describe('single test that uses esArchiver', () => {
   let log;
   const cleanupWork = [];
 
-  before(async () => {
+  before(async function () {
     log = createToolingLog('debug');
     log.pipe(process.stdout);
     log.indent(6);
@@ -32,6 +30,8 @@ describe('single test that uses esArchiver', function () {
       port: config.get('servers.elasticsearch.port')
     });
     cleanupWork.unshift(() => es.stop());
+
+    this.timeout(es.getStartTimeout());
     await es.start();
 
     log.indent(-2);

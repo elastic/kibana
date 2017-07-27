@@ -11,14 +11,10 @@ describe('plugins/elasticsearch', function () {
     });
 
     before(async function () {
-      // Sometimes waiting for kbnServer/es takes longer than 10s.
-      // NOTE: This can't be a fat-arrow function because `this` needs to refer to the execution
-      // context, not to the parent context.
-      this.timeout(3 * 60 * 1000);
-
+      this.timeout(es.getStartTimeout());
       await es.start();
-      kbnServer = kbnTestServer.createServerWithCorePlugins();
 
+      kbnServer = kbnTestServer.createServerWithCorePlugins();
       await kbnServer.ready();
       await kbnServer.server.plugins.elasticsearch.waitUntilReady();
     });
