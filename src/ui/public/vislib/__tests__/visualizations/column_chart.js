@@ -10,6 +10,8 @@ import seriesNeg from 'fixtures/vislib/mock_data/date_histogram/_series_neg';
 import termsColumns from 'fixtures/vislib/mock_data/terms/_columns';
 import histogramRows from 'fixtures/vislib/mock_data/histogram/_rows';
 import stackedSeries from 'fixtures/vislib/mock_data/date_histogram/_stacked_series';
+import { seriesMonthlyInterval } from 'fixtures/vislib/mock_data/date_histogram/_series_monthly_interval';
+import { rowsSeriesWithHoles } from 'fixtures/vislib/mock_data/date_histogram/_rows_series_with_holes';
 import $ from 'jquery';
 import FixturesVislibVisFixtureProvider from 'fixtures/vislib/_vis_fixture';
 import 'ui/persisted_state';
@@ -182,5 +184,73 @@ dataTypesArray.forEach(function (dataType) {
         });
       });
     });
+  });
+});
+
+describe('datumWidth - split chart data set with holes', function () {
+  let vis;
+  let persistedState;
+  const visLibParams = {
+    type: 'histogram',
+    addLegend: true,
+    addTooltip: true,
+    mode: 'stacked',
+    zeroFill: true
+  };
+
+  beforeEach(ngMock.module('kibana'));
+  beforeEach(ngMock.inject(function (Private, $injector) {
+    vis = Private(FixturesVislibVisFixtureProvider)(visLibParams);
+    persistedState = new ($injector.get('PersistedState'))();
+    vis.on('brush', _.noop);
+    vis.render(rowsSeriesWithHoles, persistedState);
+  }));
+
+  afterEach(function () {
+    vis.destroy();
+  });
+
+  it('should not have bar widths that span multiple time bins', function () {
+    expect(vis.handler.charts.length).to.equal(1);
+    const chart = vis.handler.charts[0];
+    const rects = $(chart.chartEl).find('.series rect');
+    const MAX_WIDTH_IN_PIXELS = 27;
+    rects.each(function () {
+      const width = $(this).attr('width');
+      expect(width).to.be.lessThan(MAX_WIDTH_IN_PIXELS);
+    });
+  });
+});
+
+describe('datumWidth - monthly interval', function () {
+  let vis;
+  let persistedState;
+  const visLibParams = {
+    type: 'histogram',
+    addLegend: true,
+    addTooltip: true,
+    mode: 'stacked',
+    zeroFill: true
+  };
+
+  beforeEach(ngMock.module('kibana'));
+  beforeEach(ngMock.inject(function (Private, $injector) {
+    vis = Private(FixturesVislibVisFixtureProvider)(visLibParams);
+    persistedState = new ($injector.get('PersistedState'))();
+    vis.on('brush', _.noop);
+    vis.render(seriesMonthlyInterval, persistedState);
+  }));
+
+  afterEach(function () {
+    vis.destroy();
+  });
+
+  it('should vary bar width when date histogram intervals are not equal', function () {
+    expect(vis.handler.charts.length).to.equal(1);
+    const chart = vis.handler.charts[0];
+    const rects = $(chart.chartEl).find('.series rect');
+    const januaryBarWidth = $(rects.get(0)).attr('width');
+    const febuaryBarWidth = $(rects.get(1)).attr('width');
+    expect(febuaryBarWidth).to.be.lessThan(januaryBarWidth);
   });
 });
