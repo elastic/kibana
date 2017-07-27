@@ -15,7 +15,8 @@ function Agg(props) {
       className={props.className}
       style={style}
       onMouseDown={props.onMouseDown}
-      onTouchStart={props.onTouchStart}>
+      onTouchStart={props.onTouchStart}
+    >
       <Component
         fields={props.fields}
         disableDelete={props.disableDelete}
@@ -25,7 +26,8 @@ function Agg(props) {
         onDelete={props.onDelete}
         panel={props.panel}
         series={props.series}
-        siblings={props.siblings}/>
+        siblings={props.siblings}
+      />
     </div>
   );
 

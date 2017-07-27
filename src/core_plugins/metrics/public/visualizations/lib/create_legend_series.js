@@ -17,9 +17,10 @@ export default props => (row, i) => {
     <div
       className={ classes.join(' ') }
       onClick={ event => props.onToggle(event, row.id) }
-      key={ key }>
+      key={ key }
+    >
       <div className="rhythm_chart__legend_label">
-        <i className="fa fa-circle" style={{ color: row.color }}></i>
+        <i className="fa fa-circle" style={{ color: row.color }} />
         <span>{ row.label }</span>
       </div>
       <div className="rhythm_chart__legend_value">{ value }</div>

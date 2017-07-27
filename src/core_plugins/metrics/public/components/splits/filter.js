@@ -17,13 +17,15 @@ class SplitByFilter extends Component {
         <div className="vis_editor__split-selects">
           <GroupBySelect
             value={model.split_mode}
-            onChange={handleSelectChange('split_mode')} />
+            onChange={handleSelectChange('split_mode')}
+          />
         </div>
         <div className="vis_editor__label">Query String</div>
         <input
           className="vis_editor__split-filter"
           value={model.filter}
-          onChange={handleTextChange('filter')} />
+          onChange={handleTextChange('filter')}
+        />
       </div>
     );
   }

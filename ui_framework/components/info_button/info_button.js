@@ -9,7 +9,7 @@ const KuiInfoButton = props => {
 
   return (
     <button className={iconClasses} {...props}>
-      <span className='kuiIcon fa-info-circle'></span>
+      <span className='kuiIcon fa-info-circle' />
     </button>
   );
 };

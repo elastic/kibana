@@ -54,7 +54,8 @@ class AnnotationsEditor extends Component {
             disableTrash={true}
             onChange={handleChange}
             name="color"
-            value={model.color}/>
+            value={model.color}
+          />
         </div>
         <div className="vis_editor__annotations-content">
           <div className="vis_editor__row">
@@ -64,7 +65,8 @@ class AnnotationsEditor extends Component {
                 className="vis_editor__input-grows-100"
                 type="text"
                 onChange={this.handleChange(model, 'index_pattern')}
-                value={model.index_pattern} />
+                value={model.index_pattern}
+              />
             </div>
             <div className="vis_editor__row-item">
               <div className="vis_editor__label">Time Field (required)</div>
@@ -73,7 +75,8 @@ class AnnotationsEditor extends Component {
                 value={model.time_field}
                 onChange={this.handleChange(model, 'time_field')}
                 indexPattern={model.index_pattern}
-                fields={this.props.fields}/>
+                fields={this.props.fields}
+              />
             </div>
           </div>
           <div className="vis_editor__row">
@@ -83,14 +86,16 @@ class AnnotationsEditor extends Component {
                 className="vis_editor__input-grows-100"
                 type="text"
                 onChange={this.handleChange(model, 'query_string')}
-                value={model.query_string} />
+                value={model.query_string}
+              />
             </div>
             <div className="vis_editor__row-item-small">
               <div className="vis_editor__label">Ignore Global Filters</div>
               <YesNo
                 value={model.ignore_global_filters}
                 name="ignore_global_filters"
-                onChange={handleChange}/>
+                onChange={handleChange}
+              />
 
             </div>
             <div className="vis_editor__row-item-small">
@@ -98,7 +103,8 @@ class AnnotationsEditor extends Component {
               <YesNo
                 value={model.ignore_panel_filters}
                 name="ignore_panel_filters"
-                onChange={handleChange}/>
+                onChange={handleChange}
+              />
 
             </div>
           </div>
@@ -108,7 +114,8 @@ class AnnotationsEditor extends Component {
               <div className="vis_editor__item">
                 <IconSelect
                   value={model.icon}
-                  onChange={this.handleChange(model, 'icon')} />
+                  onChange={this.handleChange(model, 'icon')}
+                />
               </div>
             </div>
             <div className="vis_editor__row-item">
@@ -117,7 +124,8 @@ class AnnotationsEditor extends Component {
                 className="vis_editor__input-grows-100"
                 type="text"
                 onChange={this.handleChange(model, 'fields')}
-                value={model.fields} />
+                value={model.fields}
+              />
             </div>
             <div className="vis_editor__row-item">
               <div className="vis_editor__label">Row Template (required - eg.<code>{'{{field}}'}</code>)</div>
@@ -125,14 +133,16 @@ class AnnotationsEditor extends Component {
                 className="vis_editor__input-grows-100"
                 type="text"
                 onChange={this.handleChange(model, 'template')}
-                value={model.template} />
+                value={model.template}
+              />
             </div>
           </div>
         </div>
         <div className="vis_editor__annotations-controls">
           <AddDeleteButtons
             onAdd={handleAdd}
-            onDelete={handleDelete} />
+            onDelete={handleDelete}
+          />
         </div>
       </div>
     );
@@ -147,8 +157,11 @@ class AnnotationsEditor extends Component {
       content = (
         <div className="vis_editor__annotations-missing">
           <p>Click the button below to create an annotation data source.</p>
-          <a className="thor__button-outlined-default large"
-        onClick={handleAdd}>Add Data Source</a>
+          <a
+            className="thor__button-outlined-default large"
+            onClick={handleAdd}
+          >Add Data Source
+          </a>
         </div>
       );
     } else {

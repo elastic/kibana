@@ -11,7 +11,8 @@ function SplitByEverything(props) {
       <div className="vis_editor__split-selects">
         <GroupBySelect
           value={model.split_mode}
-          onChange={handleSelectChange('split_mode')} />
+          onChange={handleSelectChange('split_mode')}
+        />
       </div>
     </div>
   );
