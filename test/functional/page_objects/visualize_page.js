@@ -60,7 +60,7 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
     }
 
     async getVectorMapData() {
-      const chartTypes = await retry.try(async () => await find.allByCssSelector('path.leaflet-clickable'));
+      const chartTypes = await find.allByCssSelector('path.leaflet-clickable');
 
       async function getChartColors(chart) {
         const stroke = await chart.getAttribute('fill');
@@ -76,7 +76,7 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
     }
 
     async getTextSizes() {
-      const tags = await retry.try(async () => await find.allByCssSelector('text'));
+      const tags = await find.allByCssSelector('text');
       async function returnTagSize(tag) {
         const style = await tag.getAttribute('style');
         return style.match(/font-size: ([^;]*);/)[1];
@@ -162,14 +162,12 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
     }
 
     async getMetric() {
-      const metricElement =
-        await retry.try(async () => await find.byCssSelector('div[ng-controller="KbnMetricVisController"]'));
+      const metricElement = await find.byCssSelector('div[ng-controller="KbnMetricVisController"]');
       return await metricElement.getVisibleText();
     }
 
     async getGaugeValue() {
-      const elements =
-        await retry.try(async () => await find.allByCssSelector('visualize .chart svg'));
+      const elements = await find.allByCssSelector('visualize .chart svg');
       return await Promise.all(elements.map(async element => await element.getVisibleText()));
     }
 
@@ -197,7 +195,7 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
     }
 
     async getErrorMessage() {
-      const element = await retry.try(async () => await find.byCssSelector('.item>h4'));
+      const element = await find.byCssSelector('.item>h4');
       return await element.getVisibleText();
     }
 
@@ -251,20 +249,20 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
     }
 
     async getInterval() {
-      const select = await retry.try(async () => await find.byCssSelector('select[ng-model="agg.params.interval"]'));
+      const select = await find.byCssSelector('select[ng-model="agg.params.interval"]');
       const selectedIndex = await select.getProperty('selectedIndex');
-      const intervalElement = await retry.try(async () => await find.byCssSelector(
-        `select[ng-model="agg.params.interval"] option:nth-child(${(selectedIndex + 1)})`));
+      const intervalElement = await find.byCssSelector(
+        `select[ng-model="agg.params.interval"] option:nth-child(${(selectedIndex + 1)})`);
       return await intervalElement.getProperty('label');
     }
 
     async setInterval(newValue) {
-      const input = await retry.try(async () => await find.byCssSelector('select[ng-model="agg.params.interval"]'));
+      const input = await find.byCssSelector('select[ng-model="agg.params.interval"]');
       await input.type(newValue);
     }
 
     async setNumericInterval(newValue) {
-      const input = await retry.try(async () => await find.byCssSelector('input[name="interval"]'));
+      const input = await find.byCssSelector('input[name="interval"]');
       await input.type(newValue);
     }
 
@@ -284,7 +282,7 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
     async saveVisualization(vizName) {
       await testSubjects.click('visualizeSaveButton');
       log.debug('saveButton button clicked');
-      const visTitle = await retry.try(async () => await find.byName('visTitle'));
+      const visTitle = await find.byName('visTitle');
       await visTitle.type(vizName);
       log.debug('click submit button');
       await testSubjects.click('saveVisualizationButton');
@@ -300,7 +298,7 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
     }
 
     async filterVisByName(vizName) {
-      const input = await retry.try(async () => await find.byCssSelector('input[name="filter"]'));
+      const input = await find.byCssSelector('input[name="filter"]');
       await input.click();
       // can't uses dashes in saved visualizations when filtering
       // or extended character sets
@@ -331,7 +329,7 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
     }
 
     async getXAxisLabels() {
-      const chartTypes = await retry.try(async () => await find.allByCssSelector('.x > g'));
+      const chartTypes = await find.allByCssSelector('.x > g');
       async function getChartType(chart) {
         return await chart.getVisibleText();
       }
@@ -340,7 +338,7 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
     }
 
     async getYAxisLabels() {
-      const chartTypes = await retry.try(async () => await find.allByCssSelector('.y > g'));
+      const chartTypes = await find.allByCssSelector('.y > g');
       const getChartTypesPromises = chartTypes.map(async chart => await chart.getVisibleText());
       return await Promise.all(getChartTypesPromises);
     }
@@ -360,7 +358,7 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
       const yAxisLabel = yLabel.replace(/(%|,)/g, '');
       log.debug('yAxisLabel = ' + yAxisLabel);
 
-      const rectangle = await retry.try(async () => await find.byCssSelector('rect.background'));
+      const rectangle = await find.byCssSelector('rect.background');
       const yAxisHeight = await rectangle.getAttribute('height');
       log.debug(`height --------- ${yAxisHeight}`);
 
@@ -392,7 +390,7 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
       const yAxisLabel = yLabel.replace(/,/g, '');
 
         // 2). find and save the y-axis pixel size (the chart height)
-      const rectangle = await retry.try(async () => await find.byCssSelector('clipPath rect'));
+      const rectangle = await find.byCssSelector('clipPath rect');
       const theHeight = await rectangle.getAttribute('height');
       const yAxisHeight = theHeight;
       log.debug('theHeight = ' + theHeight);
@@ -423,11 +421,11 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
       log.debug('yAxisLabel = ' + yAxisLabel);
 
       // 2). find and save the y-axis pixel size (the chart height)
-      const chartAreaObj = await retry.try(async () => await find.byCssSelector('rect.background'));
+      const chartAreaObj = await find.byCssSelector('rect.background');
       const yAxisHeight = await chartAreaObj.getAttribute('height');
 
       // 3). get the chart-wrapper elements
-      const chartTypes = await retry.try(async () => await find.allByCssSelector('svg > g > g.series > rect'));
+      const chartTypes = await find.allByCssSelector('svg > g > g.series > rect');
       async function getChartType(chart) {
         const fillColor = await chart.getAttribute('fill');
 
@@ -453,7 +451,7 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
     }
 
     async getPieChartData() {
-      const chartTypes = await retry.try(async () => await find.allByCssSelector('path.slice', defaultFindTimeout * 2));
+      const chartTypes = await find.allByCssSelector('path.slice', defaultFindTimeout * 2);
 
       const getChartTypesPromises = chartTypes.map(async chart => await chart.getAttribute('d'));
       return await Promise.all(getChartTypesPromises);
@@ -489,7 +487,7 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
     }
 
     async getZoomSelectors(zoomSelector) {
-      return await retry.try(async () => await find.allByCssSelector(zoomSelector));
+      return await find.allByCssSelector(zoomSelector);
     }
 
     async clickMapButton(zoomSelector) {

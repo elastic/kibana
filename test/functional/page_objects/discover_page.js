@@ -47,7 +47,7 @@ export function DiscoverPageProvider({ getService, getPageObjects }) {
 
     async loadSavedSearch(searchName) {
       await this.clickLoadSavedSearchButton();
-      const searchLink = await retry.try(async () => await find.byPartialLinkText(searchName));
+      const searchLink = await find.byPartialLinkText(searchName);
       await searchLink.click();
       await PageObjects.header.waitUntilLoadingHasFinished();
     }

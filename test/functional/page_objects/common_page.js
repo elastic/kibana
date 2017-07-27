@@ -201,7 +201,7 @@ export function CommonPageProvider({ getService, getPageObjects }) {
     }
 
     async getSharedItemTitleAndDescription() {
-      const element = await retry.try(async () => await find.byCssSelector('[data-shared-item]'));
+      const element = await find.byCssSelector('[data-shared-item]');
       return {
         title: await element.getAttribute('data-title'),
         description: await element.getAttribute('data-description')
