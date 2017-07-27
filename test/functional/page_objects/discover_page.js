@@ -3,6 +3,7 @@ export function DiscoverPageProvider({ getService, getPageObjects }) {
   const log = getService('log');
   const retry = getService('retry');
   const testSubjects = getService('testSubjects');
+  const find = getService('find');
   const PageObjects = getPageObjects(['header', 'common']);
 
   const getRemote = () => (
@@ -21,9 +22,8 @@ export function DiscoverPageProvider({ getService, getPageObjects }) {
       .findByCssSelector('button[aria-label=\'Search\']');
     }
 
-    getTimespanText() {
-      return testSubjects.find('globalTimepickerRange')
-      .getVisibleText();
+    async getTimespanText() {
+      return await testSubjects.getVisibleText('globalTimepickerRange');
     }
 
     getChartTimespan() {
@@ -67,9 +67,8 @@ export function DiscoverPageProvider({ getService, getPageObjects }) {
       return testSubjects.click('discoverOpenButton');
     }
 
-    getCurrentQueryName() {
-      return testSubjects.find('discoverCurrentQuery')
-        .getVisibleText();
+    async getCurrentQueryName() {
+      return await testSubjects.getVisibleText('discoverCurrentQuery');
     }
 
     getBarChartData() {
@@ -126,32 +125,21 @@ export function DiscoverPageProvider({ getService, getPageObjects }) {
       });
     }
 
-    getChartInterval() {
-      return testSubjects.find('discoverIntervalSelect')
-      .getProperty('value')
-      .then(selectedValue => {
-        return getRemote()
-        .findByCssSelector('option[value="' + selectedValue + '"]')
-        .getVisibleText();
-      });
+    async getChartInterval() {
+      const selectedValue = await testSubjects.getProperty('discoverIntervalSelect', 'value');
+      const selectedOption = await find.byCssSelector('option[value="' + selectedValue + '"]');
+      return selectedOption.getVisibleText();
     }
 
-    setChartInterval(interval) {
-      return getRemote()
-      .setFindTimeout(5000)
-      .findByCssSelector('option[label="' + interval + '"]')
-      .click()
-      .then(() => {
-        return PageObjects.header.waitUntilLoadingHasFinished();
-      });
+    async setChartInterval(interval) {
+      const optionElement = await find.byCssSelector('option[label="' + interval + '"]', 5000);
+      await optionElement.click();
+      return await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
-    getHitCount() {
-      return PageObjects.header.waitUntilLoadingHasFinished()
-      .then(() => {
-        return testSubjects.find('discoverQueryHits')
-        .getVisibleText();
-      });
+    async getHitCount() {
+      await PageObjects.header.waitUntilLoadingHasFinished();
+      return await testSubjects.getVisibleText('discoverQueryHits');
     }
 
     query(queryString) {
@@ -211,18 +199,16 @@ export function DiscoverPageProvider({ getService, getPageObjects }) {
       return testSubjects.click('sharedSnapshotCopyButton');
     }
 
-    getShareCaption() {
-      return testSubjects.find('shareUiTitle')
-      .getVisibleText();
+    async getShareCaption() {
+      return await testSubjects.getVisibleText('shareUiTitle');
     }
 
-    getSharedUrl() {
-      return testSubjects.find('sharedSnapshotUrl')
-      .getProperty('value');
+    async getSharedUrl() {
+      return await testSubjects.getProperty('sharedSnapshotUrl', 'value');
     }
 
-    toggleSidebarCollapse() {
-      return testSubjects.find('collapseSideBarButton').click();
+    async toggleSidebarCollapse() {
+      return await testSubjects.click('collapseSideBarButton');
     }
 
     getAllFieldNames() {
@@ -239,14 +225,12 @@ export function DiscoverPageProvider({ getService, getPageObjects }) {
       .getProperty('clientWidth');
     }
 
-    hasNoResults() {
-      return testSubjects.find('discoverNoResults')
-      .then(() => true)
-      .catch(() => false);
+    async hasNoResults() {
+      return await testSubjects.exists('discoverNoResults');
     }
 
-    getNoResultsTimepicker() {
-      return testSubjects.find('discoverNoResultsTimefilter');
+    async getNoResultsTimepicker() {
+      return await testSubjects.find('discoverNoResultsTimefilter');
     }
 
     hasNoResultsTimepicker() {
@@ -256,8 +240,8 @@ export function DiscoverPageProvider({ getService, getPageObjects }) {
       .catch(() => false);
     }
 
-    clickFieldListItem(field) {
-      return testSubjects.click(`field-${field}`);
+    async clickFieldListItem(field) {
+      return await testSubjects.click(`field-${field}`);
     }
 
     async clickFieldListItemAdd(field) {

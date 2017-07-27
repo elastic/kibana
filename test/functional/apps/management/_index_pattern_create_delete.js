@@ -28,12 +28,11 @@ export default function ({ getService, getPageObjects }) {
           .then(id => indexPatternId = id);
       });
 
-      it('should have index pattern in page header', function () {
-        return PageObjects.settings.getIndexPageHeading().getVisibleText()
-        .then(function (patternName) {
-          screenshots.take('Settings-indices-new-index-pattern');
-          expect(patternName).to.be('logstash-*');
-        });
+      it('should have index pattern in page header', async function () {
+        const indexPageHeading = await PageObjects.settings.getIndexPageHeading();
+        const patternName = await indexPageHeading.getVisibleText();
+        screenshots.take('Settings-indices-new-index-pattern');
+        expect(patternName).to.be('logstash-*');
       });
 
       it('should have index pattern in url', function url() {

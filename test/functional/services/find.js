@@ -6,11 +6,12 @@ export function FindProvider({ getService }) {
   const defaultFindTimeout = config.get('timeouts.find');
 
   class Find {
-    byCssSelector(selector) {
+    async byCssSelector(selector, timeout = defaultFindTimeout) {
       log.debug(`findByCssSelector ${selector}`);
-      return remote
-        .setFindTimeout(defaultFindTimeout)
-        .findByCssSelector(selector);
+      const remoteWithTimeout = remote.setFindTimeout(timeout);
+      const element = await remoteWithTimeout.findByCssSelector(selector);
+      remoteWithTimeout.setFindTimeout(defaultFindTimeout);
+      return element;
     }
 
     async allByCssSelector(selector, timeout = defaultFindTimeout) {
@@ -33,14 +34,31 @@ export function FindProvider({ getService }) {
 
     async existsByLinkText(linkText) {
       log.debug(`existsByLinkText ${linkText}`);
-
-      const exists = await remote
-        .setFindTimeout(1000)
-        .findDisplayedByLinkText(linkText)
+      const remoteWithTimeout = remote.setFindTimeout(1000);
+      const exists = await remoteWithTimeout.findDisplayedByLinkText(linkText)
         .then(() => true)
         .catch(() => false);
+      remoteWithTimeout.setFindTimeout(defaultFindTimeout);
+      return exists;
+    }
 
-      remote.setFindTimeout(defaultFindTimeout);
+    async existsByDisplayedByCssSelector(selector) {
+      log.debug(`existsByDisplayedByCssSelector ${selector}`);
+      const remoteWithTimeout = remote.setFindTimeout(1000);
+      const exists = await remoteWithTimeout.findDisplayedByCssSelector(selector)
+        .then(() => true)
+        .catch(() => false);
+      remoteWithTimeout.setFindTimeout(defaultFindTimeout);
+      return exists;
+    }
+
+    async existsByCssSelector(selector) {
+      log.debug(`existsByCssSelector ${selector}`);
+      const remoteWithTimeout = remote.setFindTimeout(1000);
+      const exists = await remoteWithTimeout.findByCssSelector(selector)
+        .then(() => true)
+        .catch(() => false);
+      remoteWithTimeout.setFindTimeout(defaultFindTimeout);
       return exists;
     }
   }
