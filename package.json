@@ -12,7 +12,7 @@
   ],
   "private": false,
   "version": "6.1.0",
-  "branch": "master",
+  "branch": "6.x",
   "build": {
     "number": 8467,
     "sha": "6cb7fec4e154faa0a4a3fee4b33dfef91b9870d9"
