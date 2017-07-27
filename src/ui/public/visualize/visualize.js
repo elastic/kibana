@@ -55,7 +55,7 @@ uiModules
         $scope.fetch = _.debounce(function () {
 
         // searchSource is only there for courier request handler
-          requestHandler($scope.vis, $scope.appState, $scope.uiState, $scope.savedObj.searchSource, queryFilter)
+          requestHandler($scope.vis, $scope.appState, $scope.uiState, queryFilter, $scope.savedObj.searchSource)
           .then(requestHandlerResponse => {
 
             //No need to call the response handler when there have been no data nor has been there changes
@@ -106,9 +106,7 @@ uiModules
         $scope.$on('courier:searchRefresh', reload);
       // dashboard will fire fetch event when it wants to refresh
         $scope.$on('fetch', reload);
-        queryFilter.on('update', () => {
-          $scope.fetch();
-        });
+        queryFilter.on('update', $scope.fetch);
 
         if ($scope.appState) {
           let oldUiState;

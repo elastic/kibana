@@ -5,7 +5,7 @@ import { VisRequestHandlersRegistryProvider } from 'ui/registry/vis_request_hand
 const CourierRequestHandlerProvider = function (Private, courier, timefilter) {
   return {
     name: 'courier',
-    handler: function (vis, appState, uiState, searchSource, queryFilter) {
+    handler: function (vis, appState, uiState, queryFilter, searchSource) {
 
 
       if (queryFilter && vis.editorMode) {
