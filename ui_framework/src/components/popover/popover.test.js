@@ -9,6 +9,7 @@ describe('KuiPopover', () => {
     const component = render(
       <KuiPopover
         button={<button />}
+        closePopover={() => {}}
         { ...requiredProps }
       />
     );
@@ -21,6 +22,7 @@ describe('KuiPopover', () => {
     const component = render(
       <KuiPopover
         button={<button />}
+        closePopover={() => {}}
       >
         Children
       </KuiPopover>
@@ -35,6 +37,7 @@ describe('KuiPopover', () => {
       const component = render(
         <KuiPopover
           button={<button />}
+          closePopover={() => {}}
         />
       );
 
@@ -46,6 +49,7 @@ describe('KuiPopover', () => {
       const component = render(
         <KuiPopover
           button={<button />}
+          closePopover={() => {}}
           anchorPosition="left"
         />
       );
@@ -58,6 +62,7 @@ describe('KuiPopover', () => {
       const component = render(
         <KuiPopover
           button={<button />}
+          closePopover={() => {}}
           anchorPosition="right"
         />
       );
@@ -72,6 +77,7 @@ describe('KuiPopover', () => {
       const component = render(
         <KuiPopover
           button={<button />}
+          closePopover={() => {}}
         />
       );
 
@@ -79,10 +85,11 @@ describe('KuiPopover', () => {
         .toMatchSnapshot();
     });
 
-    test('true is rendered', () => {
+    test('renders true', () => {
       const component = render(
         <KuiPopover
           button={<button />}
+          closePopover={() => {}}
           isOpen={true}
         />
       );
