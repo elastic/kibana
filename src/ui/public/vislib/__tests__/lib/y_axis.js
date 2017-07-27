@@ -45,18 +45,20 @@ function makeSeriesData(data) {
 function createData(seriesData) {
   const data = {
     hits: 621,
-    label: 'test',
-    ordered: {
-      date: true,
-      interval: 30000,
-      max: 1408734982458,
-      min: 1408734082458
-    },
-    series: seriesData.map(function (series) {
-      return { values: makeSeriesData(series) };
-    }),
-    xAxisLabel: 'Date Histogram',
-    yAxisLabel: 'Count'
+    charts: [{
+      label: 'test',
+      ordered: {
+        date: true,
+        interval: 30000,
+        max: 1408734982458,
+        min: 1408734082458
+      },
+      series: seriesData.map(function (series) {
+        return { values: makeSeriesData(series) };
+      }),
+      xAxisLabel: 'Date Histogram',
+      yAxisLabel: 'Count'
+    }]
   };
 
   const node = $('<div>').css({

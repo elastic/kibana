@@ -42,8 +42,8 @@ describe('Vislib Time Marker Test Suite', function () {
   beforeEach(ngMock.module('kibana'));
   beforeEach(ngMock.inject(function (Private) {
     TimeMarker = Private(VislibVisualizationsTimeMarkerProvider);
-    minDomain = getExtent(series.series, d3.min);
-    maxDomain = getExtent(series.series, d3.max);
+    minDomain = getExtent(series.charts[0].series, d3.min);
+    maxDomain = getExtent(series.charts[0].series, d3.max);
     domain = [minDomain, maxDomain];
     xScale = d3.time.scale().domain(domain).range([0, 500]);
     defaultMarker = new TimeMarker(times, xScale, height);

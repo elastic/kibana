@@ -1,7 +1,8 @@
 import moment from 'moment';
 
 export default {
-  'rows': [
+  'split': 'rows',
+  'charts': [
     {
       'label': '0.0-1000.0: bytes',
       'xAxisLabel': '@timestamp per 30 sec',

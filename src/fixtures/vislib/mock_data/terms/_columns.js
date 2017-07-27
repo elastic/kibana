@@ -1,7 +1,8 @@
 import _ from 'lodash';
 
 export default {
-  'columns': [
+  'split': 'columns',
+  'charts': [
     {
       'label': 'logstash: index',
       'xAxisLabel': 'Top 5 extension',
