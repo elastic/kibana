@@ -31,9 +31,7 @@ VisTypesRegistryProvider.register(function RegionMapProvider(Private, regionmaps
         addTooltip: true,
         colorSchema: 'Yellow to Red',
         selectedLayer: selectedLayer,
-        selectedJoinField: selectedJoinField,
-        mapZoom: 2,
-        mapCenter: [0, 0]
+        selectedJoinField: selectedJoinField
       },
       template: regionTemplate,
     },

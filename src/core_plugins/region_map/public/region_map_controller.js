@@ -6,7 +6,6 @@ import { KibanaMap } from '../../tile_map/public/kibana_map';
 import ChoroplethLayer from './choropleth_layer';
 import { truncatedColorMaps }  from 'ui/vislib/components/color/truncated_colormaps';
 import AggResponsePointSeriesTooltipFormatterProvider from './tooltip_formatter';
-// import '../../tile_map/public/lib/service_settings';
 import 'ui/vis/map/service_settings';
 
 
@@ -14,9 +13,13 @@ const module = uiModules.get('kibana/region_map', ['kibana']);
 module.controller('KbnRegionMapController', function ($scope, $element, Private, Notifier, getAppState,
                                                        serviceSettings, config) {
 
+  const DEFAULT_ZOOM_SETTINGS = {
+    zoom: 2,
+    mapCenter: [0, 0]
+  };
+
   const tooltipFormatter = Private(AggResponsePointSeriesTooltipFormatterProvider);
   const notify = new Notifier({ location: 'Region map' });
-
 
   let kibanaMap = null;
   let choroplethLayer = null;
@@ -95,8 +98,8 @@ module.controller('KbnRegionMapController', function ($scope, $element, Private,
     const uiState = $scope.vis.getUiState();
     const zoomFromUiState = parseInt(uiState.get('mapZoom'));
     const centerFromUIState = uiState.get('mapCenter');
-    options.zoom = !isNaN(zoomFromUiState) ? zoomFromUiState : $scope.vis.type.visConfig.defaults.mapZoom;
-    options.center = centerFromUIState ? centerFromUIState : $scope.vis.type.visConfig.defaults.mapCenter;
+    options.zoom = !isNaN(zoomFromUiState) ? zoomFromUiState : DEFAULT_ZOOM_SETTINGS.zoom;
+    options.center = centerFromUIState ? centerFromUIState : DEFAULT_ZOOM_SETTINGS.mapCenter;
     kibanaMap = new KibanaMap($element[0], options);
 
 
