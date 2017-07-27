@@ -19,7 +19,8 @@ function FieldSelect(props) {
       disabled={props.disabled}
       options={options}
       value={props.value}
-      onChange={props.onChange}/>
+      onChange={props.onChange}
+    />
   );
 }
 

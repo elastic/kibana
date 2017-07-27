@@ -16,7 +16,7 @@ beforeEach(() => {
 });
 
 test('renders KuiPager', () => {
-  const component = <KuiPager
+  const component = (<KuiPager
     hasPreviousPage={false}
     hasNextPage={true}
     onPreviousPage={onPreviousPage}
@@ -24,49 +24,53 @@ test('renders KuiPager', () => {
     startNumber={1}
     endNumber={10}
     totalItems={20}
-    { ...requiredProps }/>;
+    { ...requiredProps }
+  />);
   expect(render(component)).toMatchSnapshot();
 });
 
 describe('property', () => {
   describe('hasPreviousPage', () => {
     test('disables previous button when false', () => {
-      const component = <KuiPager
+      const component = (<KuiPager
         hasPreviousPage={false}
         hasNextPage={true}
         onPreviousPage={onPreviousPage}
         onNextPage={onNextPage}
         startNumber={1}
         endNumber={10}
-        totalItems={20}/>;
+        totalItems={20}
+      />);
       expect(render(component)).toMatchSnapshot();
     });
   });
 
   describe('hasNextPage', () => {
     test('disables next button when false', () => {
-      const component = <KuiPager
+      const component = (<KuiPager
         hasPreviousPage={true}
         hasNextPage={false}
         onPreviousPage={onPreviousPage}
         onNextPage={onNextPage}
         startNumber={1}
         endNumber={10}
-        totalItems={20}/>;
+        totalItems={20}
+      />);
       expect(render(component)).toMatchSnapshot();
     });
   });
 
   describe('onPreviousPage', () => {
     test('is called when clicked', () => {
-      const component = <KuiPager
+      const component = (<KuiPager
         hasPreviousPage={true}
         hasNextPage={true}
         onPreviousPage={onPreviousPage}
         onNextPage={onNextPage}
         startNumber={1}
         endNumber={10}
-        totalItems={20}/>;
+        totalItems={20}
+      />);
       const pager = mount(component);
       pager.find('[data-test-subj="pagerPreviousButton"]').simulate('click');
       sinon.assert.calledOnce(onPreviousPage);
@@ -76,14 +80,15 @@ describe('property', () => {
 
   describe('onNextPage', () => {
     test('is called when clicked', () => {
-      const component = <KuiPager
+      const component = (<KuiPager
         hasPreviousPage={true}
         hasNextPage={true}
         onPreviousPage={onPreviousPage}
         onNextPage={onNextPage}
         startNumber={1}
         endNumber={10}
-        totalItems={20}/>;
+        totalItems={20}
+      />);
       const pager = mount(component);
       pager.find('[data-test-subj="pagerNextButton"]').simulate('click');
       sinon.assert.calledOnce(onNextPage);

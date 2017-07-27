@@ -47,7 +47,8 @@ class TimeseriesPanelConfig extends Component {
           fields={this.props.fields}
           model={this.props.model}
           name={this.props.name}
-          onChange={this.props.onChange} />
+          onChange={this.props.onChange}
+        />
       );
     } else if (selectedTab === 'annotations') {
       view = (
@@ -55,7 +56,8 @@ class TimeseriesPanelConfig extends Component {
           fields={this.props.fields}
           model={this.props.model}
           name="annotations"
-          onChange={this.props.onChange} />
+          onChange={this.props.onChange}
+        />
       );
     } else {
       view = (
@@ -63,20 +65,23 @@ class TimeseriesPanelConfig extends Component {
           <IndexPattern
             fields={this.props.fields}
             model={this.props.model}
-            onChange={this.props.onChange}/>
+            onChange={this.props.onChange}
+          />
           <div className="vis_editor__vis_config-row">
             <div className="vis_editor__label">Axis Min</div>
             <input
               className="vis_editor__input-grows"
               type="text"
               onChange={handleTextChange('axis_min')}
-              value={model.axis_min}/>
+              value={model.axis_min}
+            />
             <div className="vis_editor__label">Axis Max</div>
             <input
               className="vis_editor__input-grows"
               type="text"
               onChange={handleTextChange('axis_max')}
-              value={model.axis_max}/>
+              value={model.axis_max}
+            />
             <div className="vis_editor__label">Axis Position</div>
             <div className="vis_editor__row_item">
               <Select
@@ -84,7 +89,8 @@ class TimeseriesPanelConfig extends Component {
                 clearable={false}
                 options={positionOptions}
                 value={model.axis_position}
-                onChange={handleSelectChange('axis_position')}/>
+                onChange={handleSelectChange('axis_position')}
+              />
             </div>
           </div>
           <div className="vis_editor__vis_config-row">
@@ -92,25 +98,29 @@ class TimeseriesPanelConfig extends Component {
             <ColorPicker
               onChange={this.props.onChange}
               name="background_color"
-              value={model.background_color}/>
+              value={model.background_color}
+            />
             <div className="vis_editor__label">Show Legend</div>
             <YesNo
               value={model.show_legend}
               name="show_legend"
-              onChange={this.props.onChange}/>
+              onChange={this.props.onChange}
+            />
             <div className="vis_editor__label">Legend Position</div>
             <div className="vis_editor__row_item">
               <Select
                 clearable={false}
                 options={legendPositionOptions}
                 value={model.legend_position}
-                onChange={handleSelectChange('legend_position')}/>
+                onChange={handleSelectChange('legend_position')}
+              />
             </div>
             <div className="vis_editor__label">Display Grid</div>
             <YesNo
               value={model.show_grid}
               name="show_grid"
-              onChange={this.props.onChange}/>
+              onChange={this.props.onChange}
+            />
           </div>
           <div className="vis_editor__vis_config-row">
             <div className="vis_editor__label">Panel Filter</div>
@@ -118,12 +128,14 @@ class TimeseriesPanelConfig extends Component {
               className="vis_editor__input-grows"
               type="text"
               onChange={handleTextChange('filter')}
-              value={model.filter}/>
+              value={model.filter}
+            />
             <div className="vis_editor__label">Ignore Global Filter</div>
             <YesNo
               value={model.ignore_global_filter}
               name="ignore_global_filter"
-              onChange={this.props.onChange}/>
+              onChange={this.props.onChange}
+            />
           </div>
         </div>
       );
@@ -131,12 +143,21 @@ class TimeseriesPanelConfig extends Component {
     return (
       <div>
         <div className="kbnTabs">
-          <div className={`kbnTabs__tab${selectedTab === 'data' && '-active' || ''}`}
-            onClick={() => this.switchTab('data')}>Data</div>
-          <div className={`kbnTabs__tab${selectedTab === 'options' && '-active' || ''}`}
-            onClick={() => this.switchTab('options')}>Panel Options</div>
-          <div className={`kbnTabs__tab${selectedTab === 'annotations' && '-active' || ''}`}
-            onClick={() => this.switchTab('annotations')}>Annotations</div>
+          <div
+            className={`kbnTabs__tab${selectedTab === 'data' && '-active' || ''}`}
+            onClick={() => this.switchTab('data')}
+          >Data
+          </div>
+          <div
+            className={`kbnTabs__tab${selectedTab === 'options' && '-active' || ''}`}
+            onClick={() => this.switchTab('options')}
+          >Panel Options
+          </div>
+          <div
+            className={`kbnTabs__tab${selectedTab === 'annotations' && '-active' || ''}`}
+            onClick={() => this.switchTab('annotations')}
+          >Annotations
+          </div>
         </div>
         {view}
       </div>

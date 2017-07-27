@@ -12,7 +12,8 @@ function GroupBySelect(props) {
       clearable={false}
       value={ props.value || 'everything' }
       onChange={props.onChange}
-      options={ modeOptions }/>
+      options={ modeOptions }
+    />
   );
 
 }

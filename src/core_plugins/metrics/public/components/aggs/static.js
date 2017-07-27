@@ -26,7 +26,8 @@ class FilterRatioAgg extends Component {
         model={this.props.model}
         onAdd={this.props.onAdd}
         onDelete={this.props.onDelete}
-        siblings={this.props.siblings}>
+        siblings={this.props.siblings}
+      >
         <div style={{ flex: '1 0 auto' }}>
           <div style={{ flex: '1 0 auto', display: 'flex' }}>
             <div className="vis_editor__row_item">
@@ -34,7 +35,8 @@ class FilterRatioAgg extends Component {
               <AggSelect
                 siblings={this.props.siblings}
                 value={model.type}
-                onChange={handleSelectChange('type')}/>
+                onChange={handleSelectChange('type')}
+              />
             </div>
             <div className="vis_editor__row_item">
               <div className="vis_editor__label">Static Value</div>
@@ -43,7 +45,8 @@ class FilterRatioAgg extends Component {
                 onChange={handleTextChange('value')}
                 value={model.value}
                 steps="0.1"
-                type="number"/>
+                type="number"
+              />
             </div>
           </div>
         </div>

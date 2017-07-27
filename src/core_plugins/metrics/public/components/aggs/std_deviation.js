@@ -33,13 +33,15 @@ class StandardDeviationAgg extends Component {
         model={this.props.model}
         onAdd={this.props.onAdd}
         onDelete={this.props.onDelete}
-        siblings={this.props.siblings}>
+        siblings={this.props.siblings}
+      >
         <div className="vis_editor__row_item">
           <div className="vis_editor__label">Aggregation</div>
           <AggSelect
             siblings={this.props.siblings}
             value={model.type}
-            onChange={handleSelectChange('type')}/>
+            onChange={handleSelectChange('type')}
+          />
         </div>
         <div className="vis_editor__std_deviation-field">
           <div className="vis_editor__label">Field</div>
@@ -49,21 +51,24 @@ class StandardDeviationAgg extends Component {
             restrict="numeric"
             indexPattern={indexPattern}
             value={model.field}
-            onChange={handleSelectChange('field')}/>
+            onChange={handleSelectChange('field')}
+          />
         </div>
         <div className="vis_editor__std_deviation-sigma_item">
           <div className="vis_editor__label">Sigma</div>
           <input
             className="vis_editor__std_deviation-sigma"
             value={model.sigma}
-            onChange={handleTextChange('sigma')}/>
+            onChange={handleTextChange('sigma')}
+          />
         </div>
         <div className="vis_editor__row_item">
           <div className="vis_editor__label">Mode</div>
           <Select
             options={modeOptions}
             onChange={handleSelectChange('mode')}
-            value={model.mode}/>
+            value={model.mode}
+          />
         </div>
       </AggRow>
     );

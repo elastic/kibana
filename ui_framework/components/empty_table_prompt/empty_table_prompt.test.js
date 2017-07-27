@@ -12,7 +12,7 @@ import {
 } from '../button';
 
 test('renders KuiEmptyTablePrompt', () => {
-  const component = <KuiEmptyTablePrompt
+  const component = (<KuiEmptyTablePrompt
     actions={
       <KuiLinkButton
         icon={<KuiButtonIcon type="create"/>}
@@ -26,6 +26,6 @@ test('renders KuiEmptyTablePrompt', () => {
     }
     message="Uh oh, You have no items!"
     { ...requiredProps }
-  />;
+  />);
   expect(render(component)).toMatchSnapshot();
 });

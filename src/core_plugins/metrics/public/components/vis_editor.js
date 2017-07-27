@@ -65,7 +65,8 @@ class VisEditor extends Component {
           onBrush={this.onBrush}
           fields={this.props.vis.fields}
           model={this.props.vis.params}
-          visData={this.props.visData} />
+          visData={this.props.visData}
+        />
       );
     }
 
@@ -77,7 +78,8 @@ class VisEditor extends Component {
         <div className="vis_editor">
           <VisPicker
             model={model}
-            onChange={handleChange} />
+            onChange={handleChange}
+          />
           <VisEditorVisualization
             dirty={this.state.dirty}
             autoApply={this.state.autoApply}
@@ -86,12 +88,14 @@ class VisEditor extends Component {
             onBrush={this.onBrush}
             onCommit={handleCommit}
             onToggleAutoApply={handleAutoApplyToggle}
-            onChange={handleChange} />
+            onChange={handleChange}
+          />
           <PanelConfig
             fields={this.props.vis.fields}
             model={model}
             visData={this.props.visData}
-            onChange={handleChange} />
+            onChange={handleChange}
+          />
         </div>
       );
     }
