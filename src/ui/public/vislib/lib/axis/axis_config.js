@@ -1,6 +1,6 @@
 import _ from 'lodash';
 import d3 from 'd3';
-import { SCALE_MODES } from './scale_modes';
+import { SCALE_MODES } from '../../../vis/scale_modes';
 
 export function VislibLibAxisConfigProvider() {
 

@@ -2,10 +2,10 @@
 //////////
 release-state can be: released | prerelease | unreleased
 //////////
-:release-state:  unreleased
-:version:        7.0.0-alpha1
-:major-version:  7.x
-:branch:         master
+:release-state:  prerelease
+:version:        6.0.0-alpha2
+:major-version:  6.x
+:branch:         6.0
 
 :docker-image:   docker.elastic.co/kibana/kibana:{version}
 :repo:           https://github.com/elastic/kibana/
