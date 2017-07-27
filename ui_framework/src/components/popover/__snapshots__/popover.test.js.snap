@@ -6,11 +6,7 @@ exports[`KuiPopover anchorPosition defaults to center 1`] = `
 >
   <button />
   <div
-<<<<<<< HEAD
     class="kuiPopover__body"
-=======
-    class="kuiPopover__body kui--bottomShadow"
->>>>>>> [K7] Add KeyPadMenu Popover, and Header components. (#13087)
   />
 </div>
 `;
@@ -21,11 +17,7 @@ exports[`KuiPopover anchorPosition left is rendered 1`] = `
 >
   <button />
   <div
-<<<<<<< HEAD
     class="kuiPopover__body"
-=======
-    class="kuiPopover__body kui--bottomShadow"
->>>>>>> [K7] Add KeyPadMenu Popover, and Header components. (#13087)
   />
 </div>
 `;
@@ -36,11 +28,7 @@ exports[`KuiPopover anchorPosition right is rendered 1`] = `
 >
   <button />
   <div
-<<<<<<< HEAD
     class="kuiPopover__body"
-=======
-    class="kuiPopover__body kui--bottomShadow"
->>>>>>> [K7] Add KeyPadMenu Popover, and Header components. (#13087)
   />
 </div>
 `;
@@ -51,11 +39,7 @@ exports[`KuiPopover children is rendered 1`] = `
 >
   <button />
   <div
-<<<<<<< HEAD
     class="kuiPopover__body"
-=======
-    class="kuiPopover__body kui--bottomShadow"
->>>>>>> [K7] Add KeyPadMenu Popover, and Header components. (#13087)
   >
     Children
   </div>
@@ -70,11 +54,7 @@ exports[`KuiPopover is rendered 1`] = `
 >
   <button />
   <div
-<<<<<<< HEAD
     class="kuiPopover__body"
-=======
-    class="kuiPopover__body kui--bottomShadow"
->>>>>>> [K7] Add KeyPadMenu Popover, and Header components. (#13087)
   />
 </div>
 `;
@@ -85,16 +65,11 @@ exports[`KuiPopover isOpen defaults to false 1`] = `
 >
   <button />
   <div
-<<<<<<< HEAD
     class="kuiPopover__body"
-=======
-    class="kuiPopover__body kui--bottomShadow"
->>>>>>> [K7] Add KeyPadMenu Popover, and Header components. (#13087)
   />
 </div>
 `;
 
-<<<<<<< HEAD
 exports[`KuiPopover isOpen renders true 1`] = `
 <div
   class="kuiPopover kuiPopover-isOpen"
@@ -102,15 +77,6 @@ exports[`KuiPopover isOpen renders true 1`] = `
   <button />
   <div
     class="kuiPopover__body"
-=======
-exports[`KuiPopover isOpen true is rendered 1`] = `
-<div
-  class="kuiPopover kuiPopover-isOpen"
->
-  <button />
-  <div
-    class="kuiPopover__body kui--bottomShadow"
->>>>>>> [K7] Add KeyPadMenu Popover, and Header components. (#13087)
   />
 </div>
 `;

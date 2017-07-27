@@ -3,7 +3,7 @@
 exports[`KuiHeaderBreadcrumbs is rendered 1`] = `
 <div
   aria-label="aria-label"
-  class="kui--flex testClass1 testClass2"
+  class="kuiHeaderBreadcrumbs testClass1 testClass2"
   data-test-subj="test subject string"
 />
 `;
