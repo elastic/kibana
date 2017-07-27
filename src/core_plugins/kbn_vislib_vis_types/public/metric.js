@@ -55,6 +55,7 @@ export default function MetricVisType(Private) {
         }
       },
     },
+    responseHandler: 'series_data',
     editorConfig: {
       collections: {
         gaugeTypes: ['Arc', 'Circle', 'Metric'],
