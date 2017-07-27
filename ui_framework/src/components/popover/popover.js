@@ -66,7 +66,7 @@ export class KuiPopover extends Component {
       },
     );
 
-    const bodyClasses = classNames('kuiPopover__body kui--bottomShadow', bodyClassName);
+    const bodyClasses = classNames('kuiPopover__body', bodyClassName);
 
     const body = (
       <div className={bodyClasses}>
