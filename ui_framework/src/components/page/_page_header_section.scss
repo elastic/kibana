@@ -1,6 +1,6 @@
 @include screenXSmall {
 
-  @include component('kuiPageHeaderSection') {
+  .kuiPageHeaderSection {
     width: 100%;
 
     & + & {

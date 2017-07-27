@@ -22,6 +22,14 @@ import PageContentOnly from './page_content_only';
 const pageContentOnlySource = require('!!raw!./page_content_only');
 const pageContentOnlyHtml = renderToHtml(Page);
 
+import PageContentCenter from './page_content_center';
+const pageContentCenterSource = require('!!raw!./page_content_center');
+const pageContentCenterHtml = renderToHtml(Page);
+
+import PageContentCenterWithSidebar from './page_content_center_with_sidebar';
+const PageContentCenterWithSidebarSource = require('!!raw!./page_content_center_with_sidebar');
+const PageContentCenterWithSidebarHtml = renderToHtml(Page);
+
 export default props => (
   <GuidePage title={props.route.name}>
     <GuideSection
@@ -56,9 +64,8 @@ export default props => (
       }]}
     >
       <GuideText>
-        Page layouts are modular and have the ability to add or remove components
-        as needed for the design. These examples are colored for illustrative
-        purposes only.
+        Most pages don't have sidebars. A lot of our pages don't have extra abilities next to the title.
+        Simply exclude those components and everything will still line up.
       </GuideText>
 
       <GuideDemo>
@@ -77,13 +84,51 @@ export default props => (
       }]}
     >
       <GuideText>
-        Page layouts are modular and have the ability to add or remove components
-        as needed for the design. These examples are colored for illustrative
-        purposes only.
+        We can further simplify pages by only showing the content.
       </GuideText>
 
       <GuideDemo>
         <div className="guideDemo__highlightLayout"><PageContentOnly /></div>
+      </GuideDemo>
+    </GuideSection>
+
+    <GuideSection
+      title="Page content centered"
+      source={[{
+        type: GuideSectionTypes.JS,
+        code: pageContentCenterSource,
+      }, {
+        type: GuideSectionTypes.HTML,
+        code: pageContentCenterHtml,
+      }]}
+    >
+      <GuideText>
+        The page content can be optionally centered either vertically
+        or horizontally. This is useful for various empty states.
+      </GuideText>
+
+      <GuideDemo>
+        <div className="guideDemo__highlightLayout"><PageContentCenter /></div>
+      </GuideDemo>
+    </GuideSection>
+
+    <GuideSection
+      title="Page content centered in a full layout"
+      source={[{
+        type: GuideSectionTypes.JS,
+        code: PageContentCenterWithSidebarSource,
+      }, {
+        type: GuideSectionTypes.HTML,
+        code: PageContentCenterWithSidebarHtml,
+      }]}
+    >
+      <GuideText>
+        Centering the content can happen regardless of layout configuration.
+        In this example, we're cetnering within a complex sidebar layout.
+      </GuideText>
+
+      <GuideDemo>
+        <div className="guideDemo__highlightLayout"><PageContentCenterWithSidebar /></div>
       </GuideDemo>
     </GuideSection>
 
