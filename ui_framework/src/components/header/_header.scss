@@ -1,10 +1,11 @@
 // Header. Includes breadcrumbs of nav buttons.
 
-@include component('kuiHeader') {
+.kuiHeader {
   background: $kuiHeaderBackgroundColor;
   border-bottom: $kuiBorderThin;
+}
 
-  @include child('notification') {
+  .kuiHeader__notification {
     display: inline-block;
     border-radius: $kuiBorderRadius;
     background: $kuiHeaderNotificationBackgroundColor;
@@ -15,4 +16,3 @@
     min-width: $kuiSize;
     vertical-align: middle;
   }
-}

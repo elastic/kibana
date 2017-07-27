@@ -72,7 +72,7 @@ exports[`KuiPopover isOpen defaults to false 1`] = `
 
 exports[`KuiPopover isOpen true is rendered 1`] = `
 <div
-  class="kuiPopover isOpen"
+  class="kuiPopover kuiPopover-isOpen"
 >
   <button />
   <div

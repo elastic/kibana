@@ -1,4 +1,4 @@
-@include component('kuiLink') {
+.kuiLink {
   @include kuiLink;
 
   color: $kuiLinkColor;

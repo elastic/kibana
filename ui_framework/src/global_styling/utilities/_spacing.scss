@@ -1,185 +1,185 @@
 // Margin
-@include utility('margin') {
+.kui--margin {
   margin: $kuiSize !important;
 }
 
-@include utility('marginLarge') {
+.kui--marginLarge {
   margin: $kuiSizeL !important;
 }
 
-@include utility('marginSmall') {
+.kui--marginSmall {
   margin: $kuiSizeS !important;
 }
 
 // Full padding
-@include utility('padding') {
+.kui--padding {
   padding: $kuiSize !important;
 }
 
-@include utility('paddingLarge') {
+.kui--paddingLarge {
   padding: $kuiSizeL !important;
 }
 
-@include utility('paddingSmall') {
+.kui--paddingSmall {
   padding: $kuiSizeS !important;
 }
 
 // Vertical margins
-@include utility('marginTopBottom') {
+.kui--marginTopBottom {
   margin-top: $kuiSize !important;
   margin-bottom: $kuiSize !important;
 }
 
-@include utility('marginTopBottomSmall') {
+.kui--marginTopBottomSmall {
   margin-top: $kuiSizeS !important;
   margin-bottom: $kuiSizeS !important;
 }
 
-@include utility('marginTopBottomLarge') {
+.kui--marginTopBottomLarge {
   margin-top: $kuiSizeL !important;
   margin-bottom: $kuiSizeL !important;
 }
 
-@include utility('marginTop') {
+.kui--marginTop {
   margin-top: $kuiSize !important;
 }
 
-@include utility('marginBottom') {
+.kui--marginBottom {
   margin-bottom: $kuiSize !important;
 }
 
-@include utility('marginTopSmall') {
+.kui--marginTopSmall {
   margin-top: $kuiSizeS !important;
 }
 
-@include utility('marginBottomSmall') {
+.kui--marginBottomSmall {
   margin-bottom: $kuiSizeS !important;
 }
 
-@include utility('marginTopLarge') {
+.kui--marginTopLarge {
   margin-top: $kuiSizeL !important;
 }
 
-@include utility('marginBottomLarge') {
+.kui--marginBottomLarge {
   margin-bottom: $kuiSizeL !important;
 }
 
 // Horizontal Margins
-@include utility('marginLeftRight') {
+.kui--marginLeftRight {
   margin-left: $kuiSize !important;
   margin-right: $kuiSize !important;
 }
 
-@include utility('marginLeftRightSmall') {
+.kui--marginLeftRightSmall {
   margin-left: $kuiSizeS !important;
   margin-right: $kuiSizeS !important;
 }
 
-@include utility('marginLeftRightLarge') {
+.kui--marginLeftRightLarge {
   margin-left: $kuiSizeL !important;
   margin-right: $kuiSizeL !important;
 }
 
-@include utility('marginLeft') {
+.kui--marginLeft {
   margin-left: $kuiSize !important;
 }
 
-@include utility('marginRight') {
+.kui--marginRight {
   margin-right: $kuiSize !important;
 }
 
-@include utility('marginLeftSmall') {
+.kui--marginLeftSmall {
   margin-left: $kuiSizeS !important;
 }
 
-@include utility('marginRightSmall') {
+.kui--marginRightSmall {
   margin-right: $kuiSizeS !important;
 }
 
-@include utility('marginLeftLarge') {
+.kui--marginLeftLarge {
   margin-left: $kuiSizeL !important;
 }
 
-@include utility('marginRightLarge') {
+.kui--marginRightLarge {
   margin-right: $kuiSizeL !important;
 }
 
 // Vertical padding
-@include utility('paddingTopBottom') {
+.kui--paddingTopBottom {
   padding-top: $kuiSize !important;
   padding-bottom: $kuiSize !important;
 }
 
-@include utility('paddingTopBottomSmall') {
+.kui--paddingTopBottomSmall {
   padding-top: $kuiSizeS !important;
   padding-bottom: $kuiSizeS !important;
 }
 
-@include utility('paddingTopBottomLarge') {
+.kui--paddingTopBottomLarge {
   padding-top: $kuiSizeL !important;
   padding-bottom: $kuiSizeL !important;
 }
 
-@include utility('paddingTop') {
+.kui--paddingTop {
   padding-top: $kuiSize !important;
 }
 
-@include utility('paddingBottom') {
+.kui--paddingBottom {
   padding-bottom: $kuiSize !important;
 }
 
-@include utility('paddingTopSmall') {
+.kui--paddingTopSmall {
   padding-top: $kuiSizeS !important;
 }
 
-@include utility('paddingBottomSmall') {
+.kui--paddingBottomSmall {
   padding-bottom: $kuiSizeS !important;
 }
 
-@include utility('paddingTopLarge') {
+.kui--paddingTopLarge {
   padding-top: $kuiSizeL !important;
 }
 
-@include utility('paddingBottomLarge') {
+.kui--paddingBottomLarge {
   padding-bottom: $kuiSizeL !important;
 }
 
 // Horizontal padding
-@include utility('paddingLeftRight') {
+.kui--paddingLeftRight {
   padding-left: $kuiSize !important;
   padding-right: $kuiSize !important;
 }
 
-@include utility('paddingLeftRightSmall') {
+.kui--paddingLeftRightSmall {
   padding-left: $kuiSizeS !important;
   padding-right: $kuiSizeS !important;
 }
 
-@include utility('paddingLeftRightLarge') {
+.kui--paddingLeftRightLarge {
   padding-left: $kuiSizeL !important;
   padding-right: $kuiSizeL !important;
 }
 
-@include utility('paddingLeft') {
+.kui--paddingLeft {
   padding-left: $kuiSize !important;
 }
 
-@include utility('paddingRight') {
+.kui--paddingRight {
   padding-right: $kuiSize !important;
 }
 
-@include utility('paddingLeftSmall') {
+.kui--paddingLeftSmall {
   padding-left: $kuiSizeS !important;
 }
 
-@include utility('paddingRightSmall') {
+.kui--paddingRightSmall {
   padding-right: $kuiSizeS !important;
 }
 
-@include utility('paddingLeftLarge') {
+.kui--paddingLeftLarge {
   padding-left: $kuiSizeL !important;
 }
 
-@include utility('paddingRightLarge') {
+.kui--paddingRightLarge {
   padding-right: $kuiSizeL !important;
 }
