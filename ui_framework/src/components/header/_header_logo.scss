@@ -1,4 +1,4 @@
-@include component('kuiHeaderLogo') {
+.kuiHeaderLogo {
   @include kuiLink;
 
   position: relative;
@@ -6,10 +6,10 @@
   padding: $kuiSize $kuiSizeXL;
   display: inline-block;
   vertical-align: middle;
+}
 
-  @include child('icon') {
+  .kuiHeaderLogo__icon {
     height: $kuiSizeXL;
     width: $kuiSizeL;
     opacity: 1;
   }
-}

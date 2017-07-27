@@ -11,7 +11,7 @@ export const KuiHeaderBreadcrumb = ({
   ...rest,
 }) => {
   const classes = classNames('kuiHeaderBreadcrumb', className, {
-    'isActive': isActive,
+    'kuiHeaderBreadcrumb-isActive': isActive,
   });
 
   return (

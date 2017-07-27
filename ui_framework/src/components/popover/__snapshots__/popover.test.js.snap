@@ -105,7 +105,7 @@ exports[`KuiPopover isOpen renders true 1`] = `
 =======
 exports[`KuiPopover isOpen true is rendered 1`] = `
 <div
-  class="kuiPopover isOpen"
+  class="kuiPopover kuiPopover-isOpen"
 >
   <button />
   <div

@@ -60,7 +60,7 @@ export class KuiPopover extends Component {
       anchorPositionToClassNameMap[anchorPosition],
       className,
       {
-        'isOpen': isOpen,
+        'kuiPopover-isOpen': isOpen,
       },
     );
 

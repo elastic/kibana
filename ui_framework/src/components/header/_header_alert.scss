@@ -1,4 +1,4 @@
-@include component('kuiHeaderAlert') {
+.kuiHeaderAlert {
   text-align: left;
   min-width: 300px;
   position: relative;
@@ -7,12 +7,13 @@
   border-top: $kuiBorderThin;
 
   &:hover {
-    @include child('dismiss') {
+    .kuiHeaderAlert__dismiss {
       opacity: 1;
     }
   }
+}
 
-  @include child('dismiss') {
+  .kuiHeaderAlert__dismiss {
     opacity: 0;
     position: absolute;
     right: $kuiSize;
@@ -21,18 +22,18 @@
     cursor: pointer;
   }
 
-  @include child('title') {
+  .kuiHeaderAlert__title {
     font-weight: $kuiFontWeightMedium;
     @include kuiFontSizeM;
     padding-right: $kuiSizeL; // Accounts for the dismiss button.
   }
 
-  @include child('text') {
+  .kuiHeaderAlert__text {
     @include kuiFontSizeXS;
     margin-bottom: $kuiSizeS;
   }
 
-  @include child('action') {
+  .kuiHeaderAlert__action {
     @include kuiFontSizeXS;
     color: $kuiLinkColor;
 
@@ -41,9 +42,8 @@
     }
   }
 
-  @include child('date') {
+  .kuiHeaderAlert__date {
     @include kuiFontSizeXS;
     color: $kuiColorDarkShade;
     text-align: right;
   }
-}
