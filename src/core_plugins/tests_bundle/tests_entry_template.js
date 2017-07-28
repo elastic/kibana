@@ -1,5 +1,3 @@
-import { esTestConfig } from '../../test_utils/es';
-
 export default function ({ env, bundle }) {
 
   const pluginSlug = env.pluginInfo.sort()
@@ -28,7 +26,7 @@ window.__KBN__ = {
   vars: {
     kbnIndex: '.kibana',
     esShardTimeout: 1500,
-    esApiVersion: ${JSON.stringify(esTestConfig.getBranch())},
+    esApiVersion: 'master',
     esRequestTimeout: '300000',
     tilemapsConfig: {
       deprecated: {
