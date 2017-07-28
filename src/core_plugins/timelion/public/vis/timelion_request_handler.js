@@ -11,7 +11,7 @@ const TimelionRequestHandlerProvider = function (Private, Notifier, $http, $root
 
   return {
     name: 'timelion',
-    handler: function (vis /*, appState, uiState */) {
+    handler: function (vis /*, appState, uiState, queryFilter*/) {
 
       return new Promise((resolve, reject) => {
         console.log('[timelion] get');

@@ -5,10 +5,14 @@ import { VisRequestHandlersRegistryProvider } from 'ui/registry/vis_request_hand
 const CourierRequestHandlerProvider = function (Private, courier, timefilter) {
   return {
     name: 'courier',
-    handler: function (vis, appState, uiState, searchSource) {
-      if (appState && vis.editorMode) {
-        searchSource.set('filter', appState.filters);
-        if (!appState.linked) searchSource.set('query', appState.query);
+    handler: function (vis, appState, uiState, queryFilter, searchSource) {
+
+
+      if (queryFilter && vis.editorMode) {
+        searchSource.set('filter', queryFilter.getFilters());
+        if (!appState.linked) {
+          searchSource.set('query', appState.query);
+        }
       }
 
       const shouldQuery = () => {
