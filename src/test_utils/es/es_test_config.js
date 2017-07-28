@@ -17,7 +17,7 @@ export const esTestConfig = new class EsTestConfig {
       throw new Error('getDirectoryForEsvm() requires uniqueSubDir');
     }
 
-    return resolve(__dirname, '../esvm', uniqueSubDir);
+    return resolve(__dirname, '../../../esvm', uniqueSubDir);
   }
 
   getBranch() {
