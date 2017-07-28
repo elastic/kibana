@@ -201,12 +201,13 @@ export function HeaderPageProvider({ getService, getPageObjects }) {
     }
 
     async isGlobalLoadingIndicatorVisible() {
-      return await testSubjects.find('globalLoadingIndicator', defaultFindTimeout / 5);
+      log.debug('isGlobalLoadingIndicatorVisible');
+      return await testSubjects.exists('globalLoadingIndicator');
     }
 
     async isGlobalLoadingIndicatorHidden() {
-      remote.setFindTimeout(defaultFindTimeout * 10);
-      return await remote.findByCssSelector('[data-test-subj="globalLoadingIndicator"].ng-hide');
+      log.debug('isGlobalLoadingIndicatorHidden');
+      return await find.byCssSelector('[data-test-subj="globalLoadingIndicator"].ng-hide', defaultFindTimeout * 10);
     }
 
     async getPrettyDuration() {
