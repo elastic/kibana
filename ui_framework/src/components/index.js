@@ -25,6 +25,18 @@ export {
 } from './key_pad_menu';
 
 export {
+  KuiPage,
+  KuiPageBody,
+  KuiPageContent,
+  KuiPageContentBody,
+  KuiPageContentHeader,
+  KuiPageContentHeaderSection,
+  KuiPageHeader,
+  KuiPageHeaderSection,
+  KuiPageSidebar,
+} from './page';
+
+export {
   KuiPopover,
 } from './popover';
 
