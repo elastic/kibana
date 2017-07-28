@@ -606,6 +606,135 @@ table {
     background: #e6f2f6;
     outline: solid 3px #e6f2f6; }
 
+.kuiPage {
+  padding: 32px; }
+
+.kuiPageBody {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-orient: horizontal;
+  -webkit-box-direction: normal;
+  -webkit-flex-direction: row;
+      -ms-flex-direction: row;
+          flex-direction: row;
+  -webkit-box-align: stretch;
+  -webkit-align-items: stretch;
+      -ms-flex-align: stretch;
+          align-items: stretch;
+  min-height: 400px; }
+
+@media only screen and (max-width: 768px) {
+  .kuiPageBody {
+    -webkit-box-orient: vertical;
+    -webkit-box-direction: normal;
+    -webkit-flex-direction: column;
+        -ms-flex-direction: column;
+            flex-direction: column; } }
+
+.kuiPageContent {
+  padding: 24px;
+  background: #FFF;
+  border: 1px solid #D9D9D9;
+  border-radius: 4px;
+  width: 100%; }
+
+.kuiPageContent--verticalCenter {
+  -webkit-align-self: center;
+      -ms-flex-item-align: center;
+              -ms-grid-row-align: center;
+          align-self: center; }
+
+.kuiPageContent--horizontalCenter {
+  width: auto;
+  margin: auto; }
+
+.kuiPageContentHeader {
+  margin-bottom: 32px;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-orient: horizontal;
+  -webkit-box-direction: normal;
+  -webkit-flex-direction: row;
+      -ms-flex-direction: row;
+          flex-direction: row;
+  -webkit-box-pack: justify;
+  -webkit-justify-content: space-between;
+      -ms-flex-pack: justify;
+          justify-content: space-between;
+  -webkit-box-align: center;
+  -webkit-align-items: center;
+      -ms-flex-align: center;
+          align-items: center; }
+
+@media only screen and (max-width: 768px) {
+  .kuiPageContentHeader {
+    -webkit-box-orient: vertical;
+    -webkit-box-direction: normal;
+    -webkit-flex-direction: column;
+        -ms-flex-direction: column;
+            flex-direction: column; } }
+
+.kuiPageContentHeaderSection + .kuiPageContentHeaderSection {
+  margin-left: 32px; }
+
+@media only screen and (max-width: 768px) {
+  .kuiPageContentHeaderSection {
+    width: 100%; }
+    .kuiPageContentHeaderSection + .kuiPageContentHeaderSection {
+      margin-left: 0;
+      margin-top: 16px; } }
+
+.kuiPageSidebar {
+  width: 192px;
+  margin-right: 32px; }
+
+@media only screen and (max-width: 768px) {
+  .kuiPageSidebar {
+    width: 100%;
+    margin-bottom: 32px; } }
+
+.kuiPageHeader {
+  margin-bottom: 32px;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-orient: horizontal;
+  -webkit-box-direction: normal;
+  -webkit-flex-direction: row;
+      -ms-flex-direction: row;
+          flex-direction: row;
+  -webkit-box-pack: justify;
+  -webkit-justify-content: space-between;
+      -ms-flex-pack: justify;
+          justify-content: space-between;
+  -webkit-box-align: center;
+  -webkit-align-items: center;
+      -ms-flex-align: center;
+          align-items: center; }
+
+@media only screen and (max-width: 768px) {
+  .kuiPageHeader {
+    -webkit-box-orient: vertical;
+    -webkit-box-direction: normal;
+    -webkit-flex-direction: column;
+        -ms-flex-direction: column;
+            flex-direction: column; } }
+
+.kuiPageHeaderSection + .kuiPageHeaderSection {
+  margin-left: 32px; }
+
+@media only screen and (max-width: 768px) {
+  .kuiPageHeaderSection {
+    width: 100%; }
+    .kuiPageHeaderSection + .kuiPageHeaderSection {
+      margin-left: 0;
+      margin-top: 16px; } }
+
 .kuiPopover {
   display: inline-block;
   position: relative; }
