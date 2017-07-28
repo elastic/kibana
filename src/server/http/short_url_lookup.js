@@ -37,14 +37,10 @@ export default function (server) {
     },
 
     async getUrl(id, req) {
-      try {
-        const doc = await req.getSavedObjectsClient().get('url', id);
-        updateMetadata(doc, req);
+      const doc = await req.getSavedObjectsClient().get('url', id);
+      updateMetadata(doc, req);
 
-        return doc.attributes.url;
-      } catch (err) {
-        return '/';
-      }
+      return doc.attributes.url;
     }
   };
 }

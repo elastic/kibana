@@ -2,24 +2,46 @@ import expect from 'expect.js';
 import _ from 'lodash';
 import { handleShortUrlError } from '../short_url_error';
 
+function createErrorWithStatus(status) {
+  const error = new Error();
+  error.status = status;
+  return error;
+}
+
+function createErrorWithStatusCode(statusCode) {
+  const error = new Error();
+  error.statusCode = statusCode;
+  return error;
+}
+
 describe('handleShortUrlError()', () => {
-  const caughtErrors = [{
-    status: 401
-  }, {
-    status: 403
-  }, {
-    status: 404
-  }];
+  const caughtErrorsWithStatus = [
+    createErrorWithStatus(401),
+    createErrorWithStatus(403),
+    createErrorWithStatus(404),
+  ];
 
-  const uncaughtErrors = [{
-    status: null
-  }, {
-    status: 500
-  }];
+  const caughtErrorsWithStatusCode = [
+    createErrorWithStatusCode(401),
+    createErrorWithStatusCode(403),
+    createErrorWithStatusCode(404),
+  ];
 
-  caughtErrors.forEach((err) => {
-    it(`should handle ${err.status} errors`, function () {
+  const uncaughtErrors = [
+    new Error(),
+    createErrorWithStatus(500),
+    createErrorWithStatusCode(500)
+  ];
+
+  caughtErrorsWithStatus.forEach((err) => {
+    it(`should handle errors with status of ${err.status}`, function () {
       expect(_.get(handleShortUrlError(err), 'output.statusCode')).to.be(err.status);
+    });
+  });
+
+  caughtErrorsWithStatusCode.forEach((err) => {
+    it(`should handle errors with statusCode of ${err.statusCode}`, function () {
+      expect(_.get(handleShortUrlError(err), 'output.statusCode')).to.be(err.statusCode);
     });
   });
 
