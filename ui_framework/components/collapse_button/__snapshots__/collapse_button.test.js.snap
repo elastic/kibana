@@ -7,7 +7,7 @@ exports[`KuiCollapseButton Props direction down renders the down class 1`] = `
   data-test-subj="test subject string"
   type="button"
 >
-  <div
+  <span
     class="kuiIcon fa-chevron-circle-down"
   />
 </button>
@@ -20,7 +20,7 @@ exports[`KuiCollapseButton Props direction left renders the left class 1`] = `
   data-test-subj="test subject string"
   type="button"
 >
-  <div
+  <span
     class="kuiIcon fa-chevron-circle-left"
   />
 </button>
@@ -33,7 +33,7 @@ exports[`KuiCollapseButton Props direction right renders the right class 1`] = `
   data-test-subj="test subject string"
   type="button"
 >
-  <div
+  <span
     class="kuiIcon fa-chevron-circle-right"
   />
 </button>
@@ -46,7 +46,7 @@ exports[`KuiCollapseButton Props direction up renders the up class 1`] = `
   data-test-subj="test subject string"
   type="button"
 >
-  <div
+  <span
     class="kuiIcon fa-chevron-circle-up"
   />
 </button>

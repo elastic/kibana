@@ -7,6 +7,7 @@ export function CommonPageProvider({ getService, getPageObjects }) {
   const config = getService('config');
   const remote = getService('remote');
   const retry = getService('retry');
+  const find = getService('find');
   const testSubjects = getService('testSubjects');
   const kibanaServer = getService('kibanaServer');
   const PageObjects = getPageObjects(['shield']);
@@ -200,10 +201,7 @@ export function CommonPageProvider({ getService, getPageObjects }) {
     }
 
     async getSharedItemTitleAndDescription() {
-      const element = await remote
-        .setFindTimeout(defaultFindTimeout)
-        .findByCssSelector('[data-shared-item]');
-
+      const element = await find.byCssSelector('[data-shared-item]');
       return {
         title: await element.getAttribute('data-title'),
         description: await element.getAttribute('data-description')
@@ -239,12 +237,8 @@ export function CommonPageProvider({ getService, getPageObjects }) {
     }
 
     async isConfirmModalOpen() {
-      const isOpen = await testSubjects
-      .find('confirmModalCancelButton', 2000)
-      .then(() => true, () => false);
-
-      await remote.setFindTimeout(defaultFindTimeout);
-      return isOpen;
+      log.debug('isConfirmModalOpen');
+      return await testSubjects.exists('confirmModalCancelButton', 2000);
     }
 
     async doesCssSelectorExist(selector) {

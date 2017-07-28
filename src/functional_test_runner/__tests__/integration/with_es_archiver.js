@@ -4,18 +4,17 @@ import { format as formatUrl } from 'url';
 
 import { readConfigFile } from '../../lib';
 import { createToolingLog, createReduceStream } from '../../../utils';
-import { startupEs, startupKibana } from '../lib';
+import { esTestCluster } from '../../../test_utils/es';
+import { startupKibana } from '../lib';
 
 const SCRIPT = resolve(__dirname, '../../../../scripts/functional_test_runner.js');
 const CONFIG = resolve(__dirname, '../fixtures/with_es_archiver/config.js');
 
-describe('single test that uses esArchiver', function () {
-  this.timeout(3 * 60 * 1000);
-
+describe('single test that uses esArchiver', () => {
   let log;
   const cleanupWork = [];
 
-  before(async () => {
+  before(async function () {
     log = createToolingLog('debug');
     log.pipe(process.stdout);
     log.indent(6);
@@ -24,11 +23,17 @@ describe('single test that uses esArchiver', function () {
 
     log.info('starting elasticsearch');
     log.indent(2);
-    const es = await startupEs({
-      log,
-      port: config.get('servers.elasticsearch.port'),
-      fresh: false
+
+    const es = esTestCluster.use({
+      log: msg => log.debug(msg),
+      name: 'ftr/withEsArchiver',
+      port: config.get('servers.elasticsearch.port')
     });
+    cleanupWork.unshift(() => es.stop());
+
+    this.timeout(es.getStartTimeout());
+    await es.start();
+
     log.indent(-2);
 
     log.info('starting kibana');
@@ -39,8 +44,7 @@ describe('single test that uses esArchiver', function () {
     });
     log.indent(-2);
 
-    cleanupWork.push(() => kibana.close());
-    cleanupWork.push(() => es.shutdown());
+    cleanupWork.unshift(() => kibana.close());
   });
 
   it('test', async () => {

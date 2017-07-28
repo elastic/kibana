@@ -1,18 +1,24 @@
 import expect from 'expect.js';
 import * as kbnTestServer from '../../../test_utils/kbn_server';
+import { esTestCluster } from '../../../test_utils/es';
 
-describe('routes', function () {
-  this.slow(10000);
-  this.timeout(60000);
-
+describe('routes', () => {
   let kbnServer;
-  beforeEach(async function () {
+  const es = esTestCluster.use({
+    name: 'server/http',
+  });
+
+  before(async function () {
+    this.timeout(es.getStartTimeout());
+    await es.start();
     kbnServer = kbnTestServer.createServerWithCorePlugins();
     await kbnServer.ready();
     await kbnServer.server.plugins.elasticsearch.waitUntilReady();
   });
-  afterEach(function () {
-    return kbnServer.close();
+
+  after(async () => {
+    await kbnServer.close();
+    await es.stop();
   });
 
   describe('cookie validation', function () {

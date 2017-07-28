@@ -61,7 +61,7 @@ export class GuideNav extends Component {
         className={previousClasses}
         to={this.state.previousRoute ? this.state.previousRoute.path : ''}
       >
-        <span className="fa fa-angle-left"></span>
+        <span className="fa fa-angle-left" />
       </Link>
     );
 
@@ -74,7 +74,7 @@ export class GuideNav extends Component {
         className={nextClasses}
         to={this.state.nextRoute ? this.state.nextRoute.path : ''}
       >
-        <span className="fa fa-angle-right"></span>
+        <span className="fa fa-angle-right" />
       </Link>
     );
 

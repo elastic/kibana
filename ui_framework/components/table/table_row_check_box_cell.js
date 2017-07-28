@@ -5,14 +5,19 @@ import { KuiTableRowCell } from './table_row_cell';
 
 export const KuiTableRowCheckBoxCell = ({ onChange, isChecked, className, ...rest }) => {
   const classes = classNames('kuiTableRowCell--checkBox', className);
-  return <KuiTableRowCell className={ classes } {...rest} >
-    <input
-      type="checkbox"
-      className="kuiCheckBox"
-      onChange={ onChange }
-      checked={ isChecked }
-    />
-  </KuiTableRowCell>;
+  return (
+    <KuiTableRowCell
+      className={ classes }
+      {...rest}
+    >
+      <input
+        type="checkbox"
+        className="kuiCheckBox"
+        onChange={ onChange }
+        checked={ isChecked }
+      />
+    </KuiTableRowCell>
+  );
 };
 KuiTableRowCheckBoxCell.propTypes = {
   isChecked: PropTypes.bool,

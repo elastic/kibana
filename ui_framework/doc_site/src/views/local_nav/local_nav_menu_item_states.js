@@ -28,7 +28,7 @@ export function LocalNavWithMenuItemStates() {
             <div className="kuiLocalMenuItem">Save</div>
             <div className="kuiLocalMenuItem kuiLocalMenuItem-isDisabled">Open</div>
             <button className="kuiLocalMenuItem">
-              <div className="kuiLocalMenuItem__icon kuiIcon fa-clock-o"></div>
+              <div className="kuiLocalMenuItem__icon kuiIcon fa-clock-o" />
               Last 5 minutes
             </button>
           </div>
@@ -43,7 +43,7 @@ export function LocalNavWithMenuItemStates() {
             autoComplete="off"
           />
           <button className="kuiLocalSearchButton">
-            <span className="kuiIcon fa-search"></span>
+            <span className="kuiIcon fa-search" />
           </button>
         </div>
       </KuiLocalNavRow>

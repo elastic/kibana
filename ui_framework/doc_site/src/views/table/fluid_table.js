@@ -11,56 +11,56 @@ import {
 
 export function FluidTable() {
   return (
-     <KuiTable shrinkToContent={ true }>
-        <KuiTableHeader>
-            <KuiTableHeaderCell>
+    <KuiTable shrinkToContent={ true }>
+      <KuiTableHeader>
+        <KuiTableHeaderCell>
               System
-            </KuiTableHeaderCell>
-            <KuiTableHeaderCell>
+        </KuiTableHeaderCell>
+        <KuiTableHeaderCell>
               Action
-            </KuiTableHeaderCell>
-        </KuiTableHeader>
+        </KuiTableHeaderCell>
+      </KuiTableHeader>
 
-        <KuiTableBody>
-          <KuiTableRow>
-            <KuiTableRowCell>
+      <KuiTableBody>
+        <KuiTableRow>
+          <KuiTableRowCell>
               Cryogenics
-            </KuiTableRowCell>
-            <KuiTableRowCell>
-              <select className="kuiSelect" defaultValue="on">
-                <option value="on">On</option>
-                <option value="off">Off</option>
-                <option value="selfDestruct">Self-destruct</option>
-              </select>
-            </KuiTableRowCell>
-          </KuiTableRow>
+          </KuiTableRowCell>
+          <KuiTableRowCell>
+            <select className="kuiSelect" defaultValue="on">
+              <option value="on">On</option>
+              <option value="off">Off</option>
+              <option value="selfDestruct">Self-destruct</option>
+            </select>
+          </KuiTableRowCell>
+        </KuiTableRow>
 
-          <KuiTableRow>
-            <KuiTableRowCell>
+        <KuiTableRow>
+          <KuiTableRowCell>
               Propellant
-            </KuiTableRowCell>
-            <KuiTableRowCell>
-              <select className="kuiSelect" defaultValue="on">
-                <option value="on">On</option>
-                <option value="off">Off</option>
-                <option value="selfDestruct">Self-destruct</option>
-              </select>
-            </KuiTableRowCell>
-          </KuiTableRow>
+          </KuiTableRowCell>
+          <KuiTableRowCell>
+            <select className="kuiSelect" defaultValue="on">
+              <option value="on">On</option>
+              <option value="off">Off</option>
+              <option value="selfDestruct">Self-destruct</option>
+            </select>
+          </KuiTableRowCell>
+        </KuiTableRow>
 
-          <KuiTableRow>
-            <KuiTableRowCell>
+        <KuiTableRow>
+          <KuiTableRowCell>
               Rockets
-            </KuiTableRowCell>
-            <KuiTableRowCell>
-              <select className="kuiSelect" defaultValue="off">
-                <option value="on">On</option>
-                <option value="off">Off</option>
-                <option value="selfDestruct">Self-destruct</option>
-              </select>
-            </KuiTableRowCell>
-          </KuiTableRow>
-        </KuiTableBody>
-      </KuiTable>
+          </KuiTableRowCell>
+          <KuiTableRowCell>
+            <select className="kuiSelect" defaultValue="off">
+              <option value="on">On</option>
+              <option value="off">Off</option>
+              <option value="selfDestruct">Self-destruct</option>
+            </select>
+          </KuiTableRowCell>
+        </KuiTableRow>
+      </KuiTableBody>
+    </KuiTable>
   );
 }
