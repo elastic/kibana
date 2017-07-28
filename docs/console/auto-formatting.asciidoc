@@ -1,19 +1,18 @@
 [[auto-formatting]]
-== Auto Formatting
+== 自动格式化
 
-Console allows you to auto format messy requests. To do so, position the cursor on the request you would like to format
-and select Auto Indent from the action menu:
+控制台允许你自动格式复杂的请求，为此,请将光标置于你想格式化的请求上，并从操作菜单中选择自动缩进：
 
-.Auto Indent a request
+.自动缩进一个请求
 image::images/auto_format_before.png["Auto format before",width=500,align="center"]
 
-Console will adjust the JSON body of the request and it will now look like this:
 
-.A formatted request
+控制台将调整请求的JSON体，之后请求会像图片所示：
+
+.格式化的请求
 image::images/auto_format_after.png["Auto format after",width=500,align="center"]
 
-If you select Auto Indent on a request that is already perfectly formatted, Console will collapse the
-request body to a single line per document. This is very handy when working with Elasticsearch's bulk APIs:
+如果你选择自动缩进一个已经完美格式化后的请求，控制台将把每个文档的请求体折叠到一行，这在使用 Elasticsearch 的批量 API 的时候会非常方便。
 
-.One doc per line
+.每个文档一行
 image::images/auto_format_bulk.png["Auto format bulk",width=550,align="center"]
