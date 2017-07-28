@@ -13,7 +13,8 @@ export function dashboardContextProvider(Private, getAppState) {
 
     if (queryBarQuery.language === 'lucene') {
       // Add the query bar filter, its handled differently.
-      bool.must.push(luceneStringToDsl(queryBarQuery.query));
+      const query = luceneStringToDsl(queryBarQuery.query);
+      if (query) bool.must.push(query);
     }
 
     // Add each of the filter bar filters
@@ -26,10 +27,10 @@ export function dashboardContextProvider(Private, getAppState) {
       if (filter.meta.disabled) return;
       if (filter.meta.negate) {
         bool.must_not = bool.must_not || [];
-        bool.must_not.push(esFilter.query || esFilter);
+        if (esFilter.query || esFilter) bool.must_not.push(esFilter.query || esFilter);
       } else {
         bool.must = bool.must || [];
-        bool.must.push(esFilter.query || esFilter);
+        if (esFilter.query || esFilter) bool.must.push(esFilter.query || esFilter);
       }
     });
 
