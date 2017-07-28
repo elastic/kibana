@@ -24,10 +24,24 @@ export default function ({ getService }) {
                 readFromDocValues: true,
               },
               {
+                name: 'number_conflict',
+                type: 'number',
+                aggregatable: true,
+                searchable: true,
+                readFromDocValues: true,
+              },
+              {
+                name: 'string_conflict',
+                type: 'string',
+                aggregatable: true,
+                searchable: true,
+                readFromDocValues: false,
+              },
+              {
                 name: 'success',
                 type: 'conflict',
-                aggregatable: false,
-                searchable: false,
+                aggregatable: true,
+                searchable: true,
                 readFromDocValues: false,
                 conflictDescriptions: {
                   boolean: [
