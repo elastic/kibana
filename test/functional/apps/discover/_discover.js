@@ -230,7 +230,7 @@ export default function ({ getService, getPageObjects }) {
     });
 
     describe('data-shared-item', function () {
-      it.skip('should have correct data-shared-item title and description', async () => {
+      it('should have correct data-shared-item title and description', async () => {
         const expected = {
           title: 'A Saved Search',
           description: 'A Saved Search Description'
