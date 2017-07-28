@@ -639,14 +639,16 @@ table {
   border: 1px solid #D9D9D9;
   border-radius: 4px;
   width: 100%; }
-  .kuiPageContent.kuiPageContent--verticalCenter {
-    -webkit-align-self: center;
-        -ms-flex-item-align: center;
-                -ms-grid-row-align: center;
-            align-self: center; }
-  .kuiPageContent.kuiPageContent--horizontalCenter {
-    width: auto;
-    margin: auto; }
+
+.kuiPageContent--verticalCenter {
+  -webkit-align-self: center;
+      -ms-flex-item-align: center;
+              -ms-grid-row-align: center;
+          align-self: center; }
+
+.kuiPageContent--horizontalCenter {
+  width: auto;
+  margin: auto; }
 
 .kuiPageContentHeader {
   margin-bottom: 32px;
