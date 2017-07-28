@@ -12,6 +12,9 @@ import HeaderExample
 import KeyPadMenuExample
   from '../../views/key_pad_menu/key_pad_menu_example';
 
+import KibanaSandbox
+  from '../../views/kibana/kibana_sandbox';
+
 import PageExample
   from '../../views/page/page_example';
 
@@ -20,6 +23,7 @@ import PopoverExample
 
 import TypographyExample
   from '../../views/typography/typography_example';
+
 
 // Component route names should match the component name exactly.
 const components = [{
@@ -52,7 +56,11 @@ const components = [{
   hasReact: true,
 }];
 
-const sandboxes = [];
+const sandboxes = [{
+  name: 'Kibana',
+  component: KibanaSandbox,
+  hasReact: true,
+}];
 
 const allRoutes = components.concat(sandboxes);
 
