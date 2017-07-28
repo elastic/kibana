@@ -1,7 +1,7 @@
 import { writeFileSync, unlinkSync } from 'fs';
 
 import { PidConfig } from './PidConfig';
-import { LoggerFactory, Logger } from '../../logger';
+import { LoggerFactory, Logger } from '../../logging';
 import { KibanaError } from '../../lib/Errors';
 
 const FILE_ALREADY_EXISTS = 'EEXIST';

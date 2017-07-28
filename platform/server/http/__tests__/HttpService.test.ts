@@ -10,7 +10,7 @@ import { BehaviorSubject } from 'rxjs';
 import { HttpService } from '../HttpService';
 import { HttpConfig } from '../HttpConfig';
 import { Router } from '../Router';
-import { logger } from '../../../logger/__mocks__';
+import { logger } from '../../../logging/__mocks__';
 
 beforeEach(() => {
   logger._clear();

@@ -2,13 +2,11 @@ import { Observable } from 'rxjs';
 
 import { Server } from '../server';
 import { ConfigService, Env } from '../config';
-import {
-  LoggerService,
-  Logger,
-  LoggerFactory,
-  LoggerConfig,
-  MutableLoggerFactory
-} from '../logger';
+
+import { Logger } from '../logging/Logger';
+import { LoggingService } from '../logging/LoggingService';
+import { LoggerFactory, MutableLoggerFactory } from '../logging/LoggerFactory';
+import { LoggingConfig } from '../logging/LoggingConfig';
 
 export type OnShutdown = (reason?: Error) => void;
 
@@ -18,9 +16,9 @@ export type OnShutdown = (reason?: Error) => void;
 export class Root {
   configService: ConfigService;
   server?: Server;
-  log: Logger;
-  logger: LoggerFactory;
-  loggerService: LoggerService;
+  readonly log: Logger;
+  readonly logger: LoggerFactory;
+  private readonly loggingService: LoggingService;
 
   constructor(
     rawConfig$: Observable<{ [key: string]: any }>,
@@ -28,7 +26,7 @@ export class Root {
     private readonly onShutdown: OnShutdown
   ) {
     const loggerFactory = new MutableLoggerFactory();
-    this.loggerService = new LoggerService(loggerFactory);
+    this.loggingService = new LoggingService(loggerFactory);
     this.logger = loggerFactory;
 
     this.log = this.logger.get('root');
@@ -37,8 +35,11 @@ export class Root {
 
   async start() {
     try {
-      const loggingConfig$ = this.configService.atPath('logging', LoggerConfig);
-      this.loggerService.upgrade(loggingConfig$);
+      const loggingConfig$ = this.configService.atPath(
+        'logging',
+        LoggingConfig
+      );
+      this.loggingService.upgrade(loggingConfig$);
     } catch (e) {
       // This specifically console.logs because we were not able to configure
       // the logger.
@@ -63,7 +64,8 @@ export class Root {
     if (this.server !== undefined) {
       await this.server.stop();
     }
-    this.loggerService.stop();
+
+    await this.loggingService.stop();
 
     this.onShutdown(reason);
   }

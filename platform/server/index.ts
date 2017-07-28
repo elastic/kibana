@@ -2,7 +2,7 @@ import { ConfigService } from '../config';
 import { HttpModule, HttpConfig } from './http';
 import { ElasticsearchModule, ElasticsearchConfigs } from './elasticsearch';
 import { KibanaModule, KibanaConfig } from './kibana';
-import { Logger, LoggerFactory } from '../logger';
+import { Logger, LoggerFactory } from '../logging';
 import { PluginsService } from './plugins/PluginsService';
 import { PluginSystem } from './plugins/PluginSystem';
 

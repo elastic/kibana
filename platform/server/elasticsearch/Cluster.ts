@@ -2,7 +2,7 @@ import { Client } from 'elasticsearch';
 
 import { ElasticsearchConfig } from './ElasticsearchConfig';
 import { KibanaRequest } from '../http';
-import { Logger, LoggerFactory } from '../../logger';
+import { Logger, LoggerFactory } from '../../logging';
 
 export class Cluster {
   private readonly log: Logger;

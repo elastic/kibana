@@ -1,7 +1,7 @@
 import { Router } from '../http';
 import { object, string, maybe } from '../../lib/schema';
 import { ElasticsearchRequestHelpers } from './ElasticsearchFacade';
-import { LoggerFactory } from '../../logger';
+import { LoggerFactory } from '../../logging';
 
 export function registerElasticsearchRoutes(
   router: Router<ElasticsearchRequestHelpers>,

@@ -6,7 +6,7 @@ import { ConfigWithSchema } from '../../config';
 import { Router, RouterOptions } from '../http';
 import { KibanaConfig } from '../kibana';
 import { ElasticsearchService, ElasticsearchConfigs } from '../elasticsearch';
-import { LoggerFactory } from '../../logger';
+import { LoggerFactory } from '../../logging';
 
 export type PluginName = string & As<'PluginName'>;
 
