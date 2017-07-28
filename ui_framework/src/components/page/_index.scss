@@ -1,9 +1,5 @@
 @import 'page';
-@import 'page_body';
-@import 'page_content';
-@import 'page_content_body';
-@import 'page_content_header';
-@import 'page_content_header_section';
-@import 'page_sidebar';
-@import 'page_header';
-@import 'page_header_section';
+@import 'page_body/index';
+@import 'page_content/index';
+@import 'page_sidebar/index';
+@import 'page_header/index';
