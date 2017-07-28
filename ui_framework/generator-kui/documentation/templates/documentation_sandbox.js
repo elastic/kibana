@@ -1,5 +1,7 @@
 import React from 'react';
 
+import { renderToHtml } from '../../services';
+
 import {
   GuideDemo,
   GuideSandbox,
@@ -7,21 +9,25 @@ import {
   GuideSectionTypes,
 } from '../../components';
 
-const html = require('./<%= fileName %>_sandbox.html');
+import <%= componentExampleName %> from './<%= fileName %>';
+const <%= componentExamplePrefix %>Source = require('!!raw!./<%= fileName %>');
+const <%= componentExamplePrefix %>Html = renderToHtml(<%= componentExampleName %>);
 
 export default props => (
   <GuideSandbox>
-    <GuideDemo
-      isFullScreen={true}
-      html={html}
-    />
+    <GuideDemo isFullScreen={true}>
+      <<%= componentExampleName %> />
+    </GuideDemo>
 
     <GuideSandboxCodeToggle
-      source={[{
-        type: GuideSectionTypes.HTML,
-        code: html,
-      }]}
       title={props.route.name}
+      source={[{
+        type: GuideSectionTypes.JS,
+        code: <%= componentExamplePrefix %>Source,
+      }, {
+        type: GuideSectionTypes.HTML,
+        code: <%= componentExamplePrefix %>Html,
+      }]}
     />
   </GuideSandbox>
 );
