@@ -1,10 +1,10 @@
 import expect from 'expect.js';
 import * as kbnTestServer from '../../../test_utils/kbn_server';
-import { esTestCluster } from '../../../test_utils/es';
+import { createEsTestCluster } from '../../../test_utils/es';
 
 describe('routes', () => {
   let kbnServer;
-  const es = esTestCluster.use({
+  const es = createEsTestCluster({
     name: 'server/http',
   });
 
