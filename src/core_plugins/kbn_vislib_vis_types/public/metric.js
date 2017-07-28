@@ -49,7 +49,6 @@ export default function MetricVisType(Private) {
           type: 'simple',
           style: {
             fontSize: 60,
-            bgFill: '#000',
             bgColor: false,
             labelColor: false,
             subText: ''
