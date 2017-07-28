@@ -3,7 +3,7 @@
 release-state can be: released | prerelease | unreleased
 //////////
 :release-state:  prerelease
-:version:        6.0.0-alpha2
+:version:        6.0.0-beta1
 :major-version:  6.x
 :branch:         6.0
 
