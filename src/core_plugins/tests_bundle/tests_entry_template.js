@@ -1,3 +1,5 @@
+import { esTestConfig } from '../../test_utils/es';
+
 export default function ({ env, bundle }) {
 
   const pluginSlug = env.pluginInfo.sort()
@@ -26,22 +28,22 @@ window.__KBN__ = {
   vars: {
     kbnIndex: '.kibana',
     esShardTimeout: 1500,
-    esApiVersion: 'master',
+    esApiVersion: ${JSON.stringify(esTestConfig.getBranch())},
     esRequestTimeout: '300000',
     tilemapsConfig: {
       deprecated: {
         isOverridden: false,
-        config: {          
-          options: {                                   
+        config: {
+          options: {
           }
-        }        
-      }      
+        }
+      }
     },
     regionmapsConfig: {
       layers: []
     },
     mapConfig: {
-      manifestServiceUrl: 'https://geo.elastic.co/v1/manifest'      
+      manifestServiceUrl: 'https://geo.elastic.co/v1/manifest'
     }
   },
   uiSettings: {
