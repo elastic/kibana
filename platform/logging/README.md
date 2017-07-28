@@ -28,6 +28,11 @@ fully configured.
 Developer can configure _log level_ and _appenders_ that should be used within particular context. If logger configuration
 specifies only _log level_ then _appenders_ configuration will be inherited from the ancestor logger. 
 
+__Note:__ in the current implementation log messages are only forwarded to appenders configured for a particular logger 
+context or to appenders of the closest ancestor if current logger doesn't have any appenders configured. That means that
+we __don't support__ so called _appender additivity_ when log messages are forwarded to _every_ distinct appender within
+ancestor chain including `root`.
+
 ## Log level
 
 Currently we support the following log levels: _all_, _fatal_, _error_, _warn_, _info_, _debug_, _trace_, _off_.
