@@ -1,25 +1,27 @@
 import { format } from 'util';
 
 import * as kbnTestServer from '../../../../test_utils/kbn_server';
+import { esTestCluster } from '../../../../test_utils/es';
 
 describe('plugins/elasticsearch', function () {
   describe('routes', function () {
     let kbnServer;
+    const es = esTestCluster.use({
+      name: 'core_plugins/es/routes',
+    });
 
     before(async function () {
-      // Sometimes waiting for server takes longer than 10s.
-      // NOTE: This can't be a fat-arrow function because `this` needs to refer to the execution
-      // context, not to the parent context.
-      this.timeout(60000);
+      this.timeout(es.getStartTimeout());
+      await es.start();
 
       kbnServer = kbnTestServer.createServerWithCorePlugins();
-
       await kbnServer.ready();
       await kbnServer.server.plugins.elasticsearch.waitUntilReady();
     });
 
-    after(function () {
-      return kbnServer.close();
+    after(async function () {
+      await kbnServer.close();
+      await es.stop();
     });
 
     function testRoute(options, statusCode = 200) {
