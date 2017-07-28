@@ -4,13 +4,13 @@
   border: $kuiBorderThin;
   border-radius: $kuiBorderRadius;
   width: 100%;
+}
 
-  &.kuiPageContent--verticalCenter {
-    align-self: center;
-  }
+.kuiPageContent--verticalCenter {
+  align-self: center;
+}
 
-  &.kuiPageContent--horizontalCenter {
-    width: auto;
-    margin: auto;
-  }
+.kuiPageContent--horizontalCenter {
+  width: auto;
+  margin: auto;
 }
