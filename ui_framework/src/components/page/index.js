@@ -1,9 +1,23 @@
-export { KuiPage } from './page';
-export { KuiPageBody } from './page_body';
-export { KuiPageContent } from './page_content';
-export { KuiPageContentBody } from './page_content_body';
-export { KuiPageContentHeader } from './page_content_header';
-export { KuiPageContentHeaderSection } from './page_content_header_section';
-export { KuiPageHeader } from './page_header';
-export { KuiPageHeaderSection } from './page_header_section';
-export { KuiPageSidebar } from './page_sidebar';
+export {
+  KuiPage,
+} from './page';
+
+export {
+  KuiPageBody,
+} from './page_body';
+
+export {
+  KuiPageContent,
+  KuiPageContentBody,
+  KuiPageContentHeader,
+  KuiPageContentHeaderSection,
+} from './page_content';
+
+export {
+  KuiPageHeader,
+  KuiPageHeaderSection,
+} from './page_header';
+
+export {
+  KuiPageSidebar,
+} from './page_sidebar';
