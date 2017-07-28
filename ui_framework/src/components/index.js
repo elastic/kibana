@@ -29,6 +29,18 @@ export {
 } from './outside_click_detector';
 
 export {
+  KuiPage,
+  KuiPageBody,
+  KuiPageContent,
+  KuiPageContentBody,
+  KuiPageContentHeader,
+  KuiPageContentHeaderSection,
+  KuiPageHeader,
+  KuiPageHeaderSection,
+  KuiPageSidebar,
+} from './page';
+
+export {
   KuiPopover,
 } from './popover';
 

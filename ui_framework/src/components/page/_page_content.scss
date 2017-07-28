@@ -1,0 +1,16 @@
+.kuiPageContent {
+  padding: $kuiSizeL;
+  background: $kuiColorEmptyShade;
+  border: $kuiBorderThin;
+  border-radius: $kuiBorderRadius;
+  width: 100%;
+}
+
+.kuiPageContent--verticalCenter {
+  align-self: center;
+}
+
+.kuiPageContent--horizontalCenter {
+  width: auto;
+  margin: auto;
+}

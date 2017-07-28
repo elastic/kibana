@@ -12,3 +12,9 @@
   background-color: #272727;
   padding: 10px;
 }
+
+.guideDemo__highlightLayout {
+  div {
+    background: transparentize(#0096CC, .9);
+  }
+}
