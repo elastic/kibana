@@ -75,11 +75,6 @@ describe('hashUrl', function () {
       expect(hashUrl(states, url)).to.be(url);
     });
 
-    it('if empty hash without query', () => {
-      const url = 'https://localhost:5601/app/kibana#';
-      expect(hashUrl(states, url)).to.be(url);
-    });
-
     it('if hash is just a path', () => {
       const url = 'https://localhost:5601/app/kibana#/discover';
       expect(hashUrl(states, url)).to.be(url);
