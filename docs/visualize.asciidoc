@@ -34,6 +34,7 @@ To create a visualization:
 [horizontal]
 <<data-table,Data table>>:: Display the raw data of a composed aggregation.
 <<metric-chart,Metric>>:: Display a single number.
+<<goal-chart,Goal and Gauge>>:: Display a gauge.
 * *Maps*
 [horizontal]
 <<tilemap,Coordinate map>>:: Associate the results of an aggregation with geographic locations.
@@ -142,6 +143,8 @@ include::visualize/datatable.asciidoc[]
 include::visualize/markdown.asciidoc[]
 
 include::visualize/metric.asciidoc[]
+
+include::visualize/goal.asciidoc[]
 
 include::visualize/pie.asciidoc[]
 
