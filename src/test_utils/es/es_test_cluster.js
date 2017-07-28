@@ -6,7 +6,7 @@ import libesvm from 'libesvm';
 const ESVM_DIR = resolve(__dirname, '../../../esvm/test_utils/es_test_cluster');
 
 export class EsTestCluster {
-  _freshBranches = [];
+  _branchesDownloaded = [];
 
   use(options = {}) {
     const {
@@ -67,6 +67,13 @@ export class EsTestCluster {
         });
 
         await cluster.install();
+
+        if (download) {
+          // track the branches that have successfully downloaded
+          // after cluster.install() resolves
+          this._branchesDownloaded.push(branch);
+        }
+
         await cluster.start();
       },
 
@@ -85,11 +92,10 @@ export class EsTestCluster {
       return false;
     }
 
-    if (this._freshBranches.includes(branch)) {
+    if (this._branchesDownloaded.includes(branch)) {
       return false;
     }
 
-    this._freshBranches.push(branch);
     return true;
   }
 }
