@@ -2,9 +2,8 @@ import _ from 'lodash';
 import Promise from 'bluebird';
 import sinon from 'sinon';
 import expect from 'expect.js';
-import url from 'url';
 
-import { esTestServerUrlParts } from '../../../../../test/es_test_server_url_parts';
+import { esTestConfig } from '../../../../test_utils/es';
 import { ensureEsVersion } from '../ensure_es_version';
 
 describe('plugins/elasticsearch', () => {
@@ -22,7 +21,7 @@ describe('plugins/elasticsearch', () => {
             status: {
               red: sinon.stub()
             },
-            url: url.format(esTestServerUrlParts)
+            url: esTestConfig.getUrl()
           }
         }
       };
