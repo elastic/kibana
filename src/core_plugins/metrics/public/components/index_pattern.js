@@ -28,7 +28,8 @@ class IndexPattern extends Component {
           className="vis_editor__input"
           disabled={this.props.disabled}
           onChange={handleTextChange(indexPatternName, '*')}
-          value={model[indexPatternName]}/>
+          value={model[indexPatternName]}
+        />
         <div className="vis_editor__label">Time Field</div>
         <div className="vis_editor__index_pattern-fields">
           <FieldSelect
@@ -37,19 +38,22 @@ class IndexPattern extends Component {
             disabled={this.props.disabled}
             onChange={handleSelectChange(timeFieldName)}
             indexPattern={model[indexPatternName]}
-            fields={fields}/>
+            fields={fields}
+          />
         </div>
         <div className="vis_editor__label">Interval (auto, 1m, 1d, 1w, 1y)</div>
         <input
           className="vis_editor__input"
           disabled={this.props.disabled}
           onChange={handleTextChange(intervalName, 'auto')}
-          value={model[intervalName]}/>
+          value={model[intervalName]}
+        />
         <div className="vis_editor__label">Drop Last Bucket</div>
         <YesNo
           value={model[dropBucketName]}
           name={dropBucketName}
-          onChange={this.props.onChange}/>
+          onChange={this.props.onChange}
+        />
       </div>
     );
   }

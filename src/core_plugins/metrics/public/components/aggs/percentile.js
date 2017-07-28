@@ -51,14 +51,16 @@ class Percentiles extends Component {
             type="number"
             step="1"
             onChange={this.handleTextChange(model, 'value')}
-            value={model.value}/>
+            value={model.value}
+          />
           <div className="vis_editor__label">Mode</div>
           <div className="vis_editor__row_item">
             <Select
               clearable={false}
               onChange={this.handleTextChange(model, 'mode')}
               options={modeOptions}
-              value={model.mode}/>
+              value={model.mode}
+            />
           </div>
           <div style={optionsStyle} className="vis_editor__label">Fill To</div>
           <input
@@ -67,7 +69,8 @@ class Percentiles extends Component {
             type="number"
             step="1"
             onChange={this.handleTextChange(model, 'percentile')}
-            value={model.percentile}/>
+            value={model.percentile}
+          />
           <div style={optionsStyle} className="vis_editor__label">Shade (0 to 1)</div>
           <input
             style={optionsStyle}
@@ -75,12 +78,14 @@ class Percentiles extends Component {
             type="number"
             step="0.1"
             onChange={this.handleTextChange(model, 'shade')}
-            value={model.shade}/>
+            value={model.shade}
+          />
         </div>
         <AddDeleteButtons
           onAdd={handleAdd}
           onDelete={handleDelete}
-          disableDelete={items.length < 2}/>
+          disableDelete={items.length < 2}
+        />
       </div>
     );
   }
@@ -132,7 +137,8 @@ class PercentileAgg extends Component {
         model={this.props.model}
         onAdd={this.props.onAdd}
         onDelete={this.props.onDelete}
-        siblings={this.props.siblings}>
+        siblings={this.props.siblings}
+      >
         <div className="vis_editor__row_item">
           <div className="vis_editor__agg_row-item">
             <div className="vis_editor__row_item">
@@ -140,7 +146,8 @@ class PercentileAgg extends Component {
               <AggSelect
                 siblings={this.props.siblings}
                 value={model.type}
-                onChange={handleSelectChange('type')}/>
+                onChange={handleSelectChange('type')}
+              />
             </div>
             <div className="vis_editor__row_item">
               <div className="vis_editor__label">Field</div>
@@ -150,13 +157,15 @@ class PercentileAgg extends Component {
                 restrict="numeric"
                 indexPattern={indexPattern}
                 value={model.field}
-                onChange={handleSelectChange('field')}/>
+                onChange={handleSelectChange('field')}
+              />
             </div>
           </div>
           <Percentiles
             onChange={handleChange}
             name="percentiles"
-            model={model}/>
+            model={model}
+          />
         </div>
       </AggRow>
     );

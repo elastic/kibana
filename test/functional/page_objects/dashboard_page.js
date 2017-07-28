@@ -59,19 +59,24 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
       }
     }
 
+    async getQueryInputElement() {
+      return retry.try(() => testSubjects.find('queryInput'));
+    }
+
     async getQuery() {
-      const queryObject = await testSubjects.find('queryInput');
-      return await queryObject.getProperty('value');
+      log.debug(`getQuery`);
+      const queryInputElement = await this.getQueryInputElement();
+      return await queryInputElement.getProperty('value');
     }
 
-    appendQuery(query) {
-      log.debug('Appending query');
-      return retry.try(() => testSubjects.find('queryInput').type(query));
+    async setQuery(query) {
+      log.debug(`setQuery(${query})`);
+      return await testSubjects.setValue('queryInput', query);
     }
 
-    clickFilterButton() {
+    async clickFilterButton() {
       log.debug('Clicking filter button');
-      return testSubjects.click('querySubmitButton');
+      return await testSubjects.click('querySubmitButton');
     }
 
     async clickClone() {
@@ -104,7 +109,7 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
     }
 
     clickCancelOutOfEditMode() {
-      log.debug('Clicking cancel');
+      log.debug('clickCancelOutOfEditMode');
       return testSubjects.click('dashboardViewOnlyMode');
     }
 
@@ -229,12 +234,7 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
 
       // verify that green message at the top of the page.
       // it's only there for about 5 seconds
-      await retry.try(() => {
-        log.debug('verify toast-message for saved dashboard');
-        return getRemote()
-          .findByCssSelector('kbn-truncated.toast-message.ng-isolate-scope')
-          .getVisibleText();
-      });
+      return await PageObjects.header.getToastMessage();
     }
 
     /**
@@ -327,18 +327,15 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
       });
     }
 
-    getPanelTitles() {
+    async getPanelTitles() {
       log.debug('in getPanelTitles');
-      return testSubjects.findAll('dashboardPanelTitle')
-      .then(function (titleObjects) {
+      const titleObjects = await testSubjects.findAll('dashboardPanelTitle');
 
-        function getTitles(chart) {
-          return chart.getVisibleText();
-        }
-
-        const getTitlePromises = titleObjects.map(getTitles);
-        return Promise.all(getTitlePromises);
-      });
+      function getTitles(chart) {
+        return chart.getVisibleText();
+      }
+      const getTitlePromises = titleObjects.map(getTitles);
+      return Promise.all(getTitlePromises);
     }
 
     async getDashboardPanels() {

@@ -21,13 +21,15 @@ const KuiCollapseButton = ({ className, direction, ...rest }) => {
   const classes = classNames('kuiCollapseButton', className);
   const childClasses = classNames('kuiIcon', directionToClassNameMap[direction]);
 
-  return (<button
-            type="button"
-            className={classes}
-            {...rest}
-          >
-            <div className={childClasses}/>
-          </button>);
+  return (
+    <button
+      type="button"
+      className={classes}
+      {...rest}
+    >
+      <span className={childClasses} />
+    </button>
+  );
 };
 
 KuiCollapseButton.propTypes = {
