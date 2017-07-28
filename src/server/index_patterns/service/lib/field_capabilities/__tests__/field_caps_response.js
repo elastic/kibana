@@ -19,7 +19,7 @@ describe('index_patterns/field_capabilities/field_caps_response', () => {
     describe('conflicts', () => {
       it('returns a field for each in response, no filtering', () => {
         const fields = readFieldCapsResponse(esResponse);
-        expect(fields).to.have.length(13);
+        expect(fields).to.have.length(19);
       });
 
       it('includes only name, type, searchable, aggregatable, readFromDocValues, and maybe conflictDescriptions of each field', () => {
@@ -65,8 +65,8 @@ describe('index_patterns/field_capabilities/field_caps_response', () => {
           {
             name: 'success',
             type: 'conflict',
-            searchable: false,
-            aggregatable: false,
+            searchable: true,
+            aggregatable: true,
             readFromDocValues: false,
             conflictDescriptions: {
               boolean: [
@@ -78,6 +78,30 @@ describe('index_patterns/field_capabilities/field_caps_response', () => {
             }
           }
         ]);
+      });
+
+      it('does not return conflicted fields if the types are resolvable to the same kibana type', () => {
+        const fields = readFieldCapsResponse(esResponse);
+        const resolvableToString = fields.find(f => f.name === 'resolvable_to_string');
+        const resolvableToNumber = fields.find(f => f.name === 'resolvable_to_number');
+        expect(resolvableToString.type).to.be('string');
+        expect(resolvableToNumber.type).to.be('number');
+      });
+
+      it('returns aggregatable if at least one field is aggregatable', () => {
+        const fields = readFieldCapsResponse(esResponse);
+        const mixAggregatable = fields.find(f => f.name === 'mix_aggregatable');
+        const mixAggregatableOther = fields.find(f => f.name === 'mix_aggregatable_other');
+        expect(mixAggregatable.aggregatable).to.be(true);
+        expect(mixAggregatableOther.aggregatable).to.be(true);
+      });
+
+      it('returns searchable if at least one field is searchable', () => {
+        const fields = readFieldCapsResponse(esResponse);
+        const mixSearchable = fields.find(f => f.name === 'mix_searchable');
+        const mixSearchableOther = fields.find(f => f.name === 'mix_searchable_other');
+        expect(mixSearchable.searchable).to.be(true);
+        expect(mixSearchableOther.searchable).to.be(true);
       });
     });
   });
