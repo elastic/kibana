@@ -11,7 +11,7 @@ export function dashboardContextProvider(Private, getAppState) {
     const filterBarFilters = queryFilter.getFilters();
     const queryBarQuery = getAppState().query;
 
-    if (queryBarQuery.language === 'lucene') {
+    if (queryBarQuery.language === 'lucene' && queryBarQuery.query) {
       // Add the query bar filter, its handled differently.
       bool.must.push(luceneStringToDsl(queryBarQuery.query));
     }
