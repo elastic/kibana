@@ -59,9 +59,14 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
       }
     }
 
+    async getQueryInputElement() {
+      return retry.try(() => testSubjects.find('queryInput'));
+    }
+
     async getQuery() {
-      const queryObject = await testSubjects.find('queryInput');
-      return await queryObject.getProperty('value');
+      log.debug(`getQuery`);
+      const queryInputElement = await this.getQueryInputElement();
+      return await queryInputElement.getProperty('value');
     }
 
     async setQuery(query) {
@@ -104,7 +109,7 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
     }
 
     clickCancelOutOfEditMode() {
-      log.debug('Clicking cancel');
+      log.debug('clickCancelOutOfEditMode');
       return testSubjects.click('dashboardViewOnlyMode');
     }
 
@@ -229,12 +234,7 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
 
       // verify that green message at the top of the page.
       // it's only there for about 5 seconds
-      await retry.try(() => {
-        log.debug('verify toast-message for saved dashboard');
-        return getRemote()
-          .findByCssSelector('kbn-truncated.toast-message.ng-isolate-scope')
-          .getVisibleText();
-      });
+      return await PageObjects.header.getToastMessage();
     }
 
     /**

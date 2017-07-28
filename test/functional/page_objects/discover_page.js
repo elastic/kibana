@@ -45,26 +45,23 @@ export function DiscoverPageProvider({ getService, getPageObjects }) {
       });
     }
 
-    loadSavedSearch(searchName) {
-      return this.clickLoadSavedSearchButton()
-      .then(() => {
-        getRemote().findByPartialLinkText(searchName).click();
-      })
-      .then(() => {
-        return PageObjects.header.waitUntilLoadingHasFinished();
-      });
+    async loadSavedSearch(searchName) {
+      await this.clickLoadSavedSearchButton();
+      const searchLink = await find.byPartialLinkText(searchName);
+      await searchLink.click();
+      await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
-    clickNewSearchButton() {
-      return testSubjects.click('discoverNewButton');
+    async clickNewSearchButton() {
+      await testSubjects.click('discoverNewButton');
     }
 
-    clickSaveSearchButton() {
-      return testSubjects.click('discoverSaveButton');
+    async clickSaveSearchButton() {
+      await testSubjects.click('discoverSaveButton');
     }
 
-    clickLoadSavedSearchButton() {
-      return testSubjects.click('discoverOpenButton');
+    async clickLoadSavedSearchButton() {
+      await testSubjects.click('discoverOpenButton');
     }
 
     async getCurrentQueryName() {

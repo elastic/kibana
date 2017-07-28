@@ -37,7 +37,7 @@ export default () => {
             <KuiLinkButton
               buttonType="basic"
               href="#"
-             >
+            >
               Banana!
             </KuiLinkButton>
           </KuiCardFooter>
@@ -106,7 +106,7 @@ export default () => {
             <KuiLinkButton
               buttonType="basic"
               href="#"
-             >
+            >
               Banana!
             </KuiLinkButton>
           </KuiCardFooter>

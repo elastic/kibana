@@ -2,6 +2,7 @@ import expect from 'expect.js';
 
 export default function ({ getService, getPageObjects }) {
   const log = getService('log');
+  const retry = getService('retry');
   const screenshots = getService('screenshots');
   const PageObjects = getPageObjects(['common', 'visualize', 'header', 'pointSeries']);
   const pointSeriesVis = PageObjects.pointSeries;
@@ -82,7 +83,7 @@ export default function ({ getService, getPageObjects }) {
 
     describe('secondary value axis', function () {
 
-      it('should show correct chart, take screenshot', function () {
+      it('should show correct chart, take screenshot', async function () {
         const expectedChartValues = [
           [ 37, 202, 740, 1437, 1371, 751, 188, 31, 42, 202, 683,
             1361, 1415, 707, 177, 27, 32, 175, 707, 1408, 1355, 726, 201, 29 ],
@@ -92,27 +93,18 @@ export default function ({ getService, getPageObjects }) {
             12807319386, 13375732998, 13190755620, 12627508458, 12731510199, 13153337344  ],
         ];
 
-        // Most recent failure on Jenkins usually indicates the bar chart is still being drawn?
-        // return arguments[0].getAttribute(arguments[1]);","args":[{"ELEMENT":"592"},"fill"]}] arguments[0].getAttribute is not a function
-        // try sleeping a bit before getting that data
-        return PageObjects.common.sleep(2000)
-          .then(function () {
-            return PageObjects.visualize.getLineChartData('fill="#00a69b"');
-          })
-          .then(function showData(data) {
-            log.debug('count data=' + data);
-            log.debug('data.length=' + data.length);
-            screenshots.take('Visualize-secondary-value-axis');
-            expect(data).to.eql(expectedChartValues[0]);
-          })
-          .then(function () {
-            return PageObjects.visualize.getLineChartData('fill="#57c17b"', 'ValueAxis-2');
-          })
-          .then(function showData(data) {
-            log.debug('average memory data=' + data);
-            log.debug('data.length=' + data.length);
-            expect(data).to.eql(expectedChartValues[1]);
-          });
+        await retry.try(async () => {
+          const data = await PageObjects.visualize.getLineChartData('fill="#00a69b"');
+          log.debug('count data=' + data);
+          log.debug('data.length=' + data.length);
+          screenshots.take('Visualize-secondary-value-axis');
+          expect(data).to.eql(expectedChartValues[0]);
+
+          const avgMemoryData = await PageObjects.visualize.getLineChartData('fill="#57c17b"', 'ValueAxis-2');
+          log.debug('average memory data=' + avgMemoryData);
+          log.debug('data.length=' + avgMemoryData.length);
+          expect(avgMemoryData).to.eql(expectedChartValues[1]);
+        });
       });
 
       it('should put secondary axis on the right', function () {

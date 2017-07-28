@@ -4,19 +4,19 @@ import { KuiEmptyTablePrompt, KuiLinkButton, KuiButtonIcon } from '../../../../c
 
 export function EmptyTablePrompt() {
   return (
-      <KuiEmptyTablePrompt
-        actions={
-          <KuiLinkButton
-            icon={<KuiButtonIcon type="create"/>}
-            aria-label="Add a new item"
-            data-test-subj="addNewPromptButton"
-            buttonType="primary"
-            href="#"
-          >
+    <KuiEmptyTablePrompt
+      actions={
+        <KuiLinkButton
+          icon={<KuiButtonIcon type="create"/>}
+          aria-label="Add a new item"
+          data-test-subj="addNewPromptButton"
+          buttonType="primary"
+          href="#"
+        >
             Add a new item
-          </KuiLinkButton>
+        </KuiLinkButton>
         }
-        message="Uh oh, You have no items!"
-      />
+      message="Uh oh, You have no items!"
+    />
   );
 }
