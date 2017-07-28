@@ -4,7 +4,7 @@ import { MutableLoggerFactory } from './LoggerFactory';
 import { LoggingConfig } from './LoggingConfig';
 
 /**
- * Service that is  responsible for maintaining the log config subscription and
+ * Service that is responsible for maintaining the log config subscription and
  * pushing updates the the logger factory.
  */
 export class LoggingService {

@@ -4,7 +4,10 @@ import { LogRecord } from '../LogRecord';
 
 type LayoutConfigType = PatternLayoutConfigType;
 
-/** @internal */
+/**
+ * Entity that can format `LogRecord` instance into a string.
+ * @internal
+ */
 export interface Layout {
   format(record: LogRecord): string;
 }

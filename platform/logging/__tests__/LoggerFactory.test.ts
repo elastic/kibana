@@ -47,7 +47,7 @@ test('`get()` returns Logger that appends records to buffer if config is not rea
   const config = new LoggingConfig(
     loggingConfigSchema.validate({
       appenders: {
-        'default': {
+        default: {
           kind: 'console',
           layout: { kind: 'pattern' }
         },
@@ -93,7 +93,7 @@ test('`get()` returns `root` logger if context is not specified.', () => {
   const factory = new MutableLoggerFactory();
   const config = loggingConfigSchema.validate({
     appenders: {
-      'default': {
+      default: {
         kind: 'console',
         layout: { kind: 'pattern' }
       }
@@ -118,7 +118,7 @@ test('`close()` disposes all resources used by appenders.', async () => {
   const config = new LoggingConfig(
     loggingConfigSchema.validate({
       appenders: {
-        'default': {
+        default: {
           kind: 'file',
           path: 'path',
           layout: { kind: 'pattern' }

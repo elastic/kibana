@@ -14,8 +14,8 @@ export type AppenderConfigType =
   | FileAppenderConfigType;
 
 /**
- * Interface that describes entity that can append `LogRecord` instances to file, stdout, memory or
- * whatever is implemented internally.
+ * Entity that can append `LogRecord` instances to file, stdout, memory or whatever
+ * is implemented internally. It's supposed to be used by `Logger`.
  * @internal
  */
 export interface Appender {
@@ -23,8 +23,8 @@ export interface Appender {
 }
 
 /**
- * Interface that should be additionally implemented by the `Appender`'s when they should
- * be properly disposed. It's intentionally separated from `Appender` interface so that `Logger`
+ * This interface should be additionally implemented by the `Appender`'s if they are supposed
+ * to be properly disposed. It's intentionally separated from `Appender` interface so that `Logger`
  * that interacts with `Appender` doesn't have control over appender lifetime.
  * @internal
  */

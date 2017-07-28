@@ -7,10 +7,13 @@ import { Appenders, AppenderConfigType } from './appenders/Appenders';
 const CONTEXT_SEPARATOR = '.';
 
 /**
- * Name of the `root` context that should always be defined.
+ * Name of the `root` context that always exists and sits at the top of logger hierarchy.
  */
 const ROOT_CONTEXT_NAME = 'root';
 
+/**
+ * Name of the appender that is always presented and used by `root` logger by default.
+ */
 const DEFAULT_APPENDER_NAME = 'default';
 
 const createLevelSchema = ({ literal, oneOf }: Schema) => {
@@ -67,7 +70,7 @@ const loggingConfigType = typeOfSchema(createLoggingSchema);
 type LoggingConfigType = typeof loggingConfigType;
 
 /**
- * Class that describes config used to setup logging subsystem.
+ * Describes the config used to fully setup logging subsystem.
  * @internal
  */
 export class LoggingConfig {
@@ -128,7 +131,7 @@ export class LoggingConfig {
 
   private fillLoggersConfig(schema: LoggingConfigType) {
     // Include `root` logger into common logger list so that it can easily be a part
-    // of the logger hierarchy.
+    // of the logger hierarchy and put all the loggers in map for easier retrieval.
     const loggersMap = new Map(
       [
         { context: ROOT_CONTEXT_NAME, ...schema.root },

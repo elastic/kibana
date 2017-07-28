@@ -5,8 +5,7 @@ import { LogRecord } from '../LogRecord';
 import { Layout } from './Layouts';
 
 /**
- * Object that consists of static constants describing supported parameters
- * in the log message pattern.
+ * A set of static constants describing supported parameters in the log message pattern.
  */
 const Parameters = Object.freeze({
   Timestamp: '{timestamp}',
@@ -17,7 +16,7 @@ const Parameters = Object.freeze({
 
 /**
  * Regular expression used to parse log message pattern and fill in placeholders
- * with actual data.
+ * with the actual data.
  */
 const PATTERN_REGEX = new RegExp(
   `${Parameters.Timestamp}|${Parameters.Level}|${Parameters.Context}|${Parameters.Message}`,
@@ -55,7 +54,7 @@ export type PatternLayoutConfigType = typeof schemaType;
 
 /**
  * Layout that formats `LogRecord` using the `pattern` string with optional
- * color highlighting.
+ * color highlighting (eg. to make log messages easier to read in the terminal).
  * @internal
  */
 export class PatternLayout implements Layout {
@@ -67,7 +66,7 @@ export class PatternLayout implements Layout {
   ) {}
 
   /**
-   * Formats `LogRecord` into string based on the specified `pattern` and `highlighting` option.
+   * Formats `LogRecord` into a string based on the specified `pattern` and `highlighting` options.
    * @param record Instance of `LogRecord` to format into string.
    */
   format(record: LogRecord): string {

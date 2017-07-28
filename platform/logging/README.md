@@ -95,11 +95,18 @@ Here is what you get with the config above:
 
 As you see `root` logger has a dedicated configuration node since this context is special and should always exist. By 
 default `root` is configured with `info` level and `default` appender that is also always available. This is the 
-configuration that all your loggers will use unless you re-configure them explicitly. For example to see _all_ log 
-messages that fall back on the `root` logger configuration, just add one line to the configuration:
+configuration that all your loggers will use unless you re-configure them explicitly.
+
+For example to see _all_ log messages that fall back on the `root` logger configuration, just add one line to the configuration:
 
 ```yaml
-root.level: all
+logging.root.level: all
+```
+
+Or disable logging entirely with `off`:
+
+```yaml
+logging.root.level: off
 ```
 
 ## Usage

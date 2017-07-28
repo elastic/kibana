@@ -30,7 +30,7 @@ export class FileAppender implements DisposableAppender {
   private outputStream: WriteStream | null = null;
 
   /**
-   * Creates FileAppender instance.
+   * Creates FileAppender instance with specified layout and file path.
    * @param layout Instance of `Layout` sub-class responsible for `LogRecord` formatting.
    * @param path Path to the file where log records should be stored.
    */

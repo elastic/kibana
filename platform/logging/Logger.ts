@@ -3,8 +3,8 @@ import { LogLevel } from './LogLevel';
 import { LogRecord } from './LogRecord';
 
 /**
- * Interface that defines all the methods that can be used to
- * log any type of information.
+ * Logger exposes all the necessary methods to log any type of information and
+ * this is the interface used by the logging consumers including plugins.
  */
 export interface Logger {
   trace(message: string, meta?: { [key: string]: any }): void;

@@ -15,8 +15,8 @@ export type LogLevelId =
   | 'off';
 
 /**
- * Class that represents log level, manages string -> `LogLevel` conversion and
- * comparison of log level priorities between themselves.
+ * Represents the log level, manages string -> `LogLevel` conversion and comparison of log level
+ * priorities between themselves.
  * @internal
  */
 export class LogLevel {
