@@ -4,7 +4,7 @@ import { format as formatUrl } from 'url';
 
 import { readConfigFile } from '../../lib';
 import { createToolingLog, createReduceStream } from '../../../utils';
-import { esTestCluster } from '../../../test_utils/es';
+import { createEsTestCluster } from '../../../test_utils/es';
 import { startupKibana } from '../lib';
 
 const SCRIPT = resolve(__dirname, '../../../../scripts/functional_test_runner.js');
@@ -24,7 +24,7 @@ describe('single test that uses esArchiver', () => {
     log.info('starting elasticsearch');
     log.indent(2);
 
-    const es = esTestCluster.use({
+    const es = createEsTestCluster({
       log: msg => log.debug(msg),
       name: 'ftr/withEsArchiver',
       port: config.get('servers.elasticsearch.port')
