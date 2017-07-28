@@ -32,26 +32,29 @@ describe('getHighlightRequest', () => {
     expect(getHighlightRequest).to.be.a(Function);
   });
 
-  it('should add the all_fields param with query_string query without modifying original query', () => {
+  it('should add the default_field param with query_string query without modifying original query', () => {
     const request = getHighlightRequest(queryStringQuery, getConfig);
     expect(request.fields['*']).to.have.property('highlight_query');
-    expect(request.fields['*'].highlight_query.query_string).to.have.property('all_fields');
-    expect(queryStringQuery.query_string).to.not.have.property('all_fields');
+    expect(request.fields['*'].highlight_query.query_string).to.have.property('default_field');
+    expect(request.fields['*'].highlight_query.query_string.default_field).to.be('*');
+    expect(queryStringQuery.query_string).to.not.have.property('default_field');
   });
 
-  it('should add the all_fields param with bool query with single condition without modifying original query', () => {
+  it('should add the default_field param with bool query with single condition without modifying original query', () => {
     const request = getHighlightRequest(boolQueryWithSingleCondition, getConfig);
     expect(request.fields['*']).to.have.property('highlight_query');
-    expect(request.fields['*'].highlight_query.bool.must.query_string).to.have.property('all_fields');
-    expect(queryStringQuery.query_string).to.not.have.property('all_fields');
+    expect(request.fields['*'].highlight_query.bool.must.query_string).to.have.property('default_field');
+    expect(request.fields['*'].highlight_query.bool.must.query_string.default_field).to.be('*');
+    expect(queryStringQuery.query_string).to.not.have.property('default_field');
   });
 
-  it('should add the all_fields param with bool query with multiple conditions without modifying original query', () => {
+  it('should add the default_field param with bool query with multiple conditions without modifying original query', () => {
     const request = getHighlightRequest(boolQueryWithMultipleConditions, getConfig);
     expect(request.fields['*']).to.have.property('highlight_query');
     expect(request.fields['*'].highlight_query.bool.must).to.have.length(boolQueryWithMultipleConditions.bool.must.length);
-    expect(request.fields['*'].highlight_query.bool.must[0].query_string).to.have.property('all_fields');
-    expect(queryStringQuery.query_string).to.not.have.property('all_fields');
+    expect(request.fields['*'].highlight_query.bool.must[0].query_string).to.have.property('default_field');
+    expect(request.fields['*'].highlight_query.bool.must[0].query_string.default_field).to.be('*');
+    expect(queryStringQuery.query_string).to.not.have.property('default_field');
   });
 
   it('should return undefined if highlighting is turned off', () => {
@@ -75,19 +78,20 @@ describe('getHighlightRequest', () => {
     expect(request).to.be(undefined);
   });
 
-  it('should not add the all_fields param with query_string query when default_field is specified', () => {
+  it('should not modify the default_field param with query_string query when default_field is specified', () => {
+    const defaultField = queryStringWithDefaultFieldQuery.query_string.default_field;
     const request = getHighlightRequest(queryStringWithDefaultFieldQuery, getConfig);
     expect(request.fields['*']).to.have.property('highlight_query');
     expect(request.fields['*'].highlight_query.query_string).to.have.property('default_field');
-    expect(request.fields['*'].highlight_query.query_string).to.not.have.property('all_fields');
-    expect(queryStringQuery.query_string).to.not.have.property('all_fields');
+    expect(request.fields['*'].highlight_query.query_string.default_field).to.be(defaultField);
+    expect(queryStringWithDefaultFieldQuery.query_string.default_field).to.be(defaultField);
   });
 
-  it('should not add the all_fields param with query_string query when fields are specified', () => {
+  it('should not add the default_field param with query_string query when fields are specified', () => {
     const request = getHighlightRequest(queryStringWithFieldQuery, getConfig);
     expect(request.fields['*']).to.have.property('highlight_query');
     expect(request.fields['*'].highlight_query.query_string).to.have.property('fields');
-    expect(request.fields['*'].highlight_query.query_string).to.not.have.property('all_fields');
-    expect(queryStringQuery.query_string).to.not.have.property('all_fields');
+    expect(request.fields['*'].highlight_query.query_string).to.not.have.property('default_field');
+    expect(queryStringQuery.query_string).to.not.have.property('default_field');
   });
 });

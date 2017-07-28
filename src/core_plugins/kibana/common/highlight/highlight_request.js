@@ -4,7 +4,7 @@ import { highlightTags } from './highlight_tags';
 const FRAGMENT_SIZE = Math.pow(2, 31) - 1; // Max allowed value for fragment_size (limit of a java int)
 
 /**
-  * Returns a clone of the query with `"all_fields": true` set on any `query_string` queries
+  * Returns a clone of the query with `"default_field": *` set on any `query_string` queries
   */
 function getHighlightQuery(query) {
   const clone = _.cloneDeep(query);
@@ -14,7 +14,7 @@ function getHighlightQuery(query) {
     && !_.has(clone, ['query_string', 'default_field'])
     && !_.has(clone, ['query_string', 'fields'])
   ) {
-    clone.query_string.all_fields = true;
+    clone.query_string.default_field = '*';
   } else if (_.has(clone, 'bool.must')) {
     if (Array.isArray(clone.bool.must)) {
       clone.bool.must = clone.bool.must.map(getHighlightQuery);
