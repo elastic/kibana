@@ -1,0 +1,13 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`\`format()\` correctly formats record. 1`] = `"{\\"timestamp\\":\\"2012-01-31T23:00:00.000Z\\",\\"message\\":\\"message-1\\",\\"context\\":\\"context-1\\",\\"error\\":\\"Some error message\\",\\"level\\":{\\"id\\":\\"fatal\\",\\"value\\":2}}"`;
+
+exports[`\`format()\` correctly formats record. 2`] = `"{\\"timestamp\\":\\"2012-01-31T23:00:00.000Z\\",\\"message\\":\\"message-2\\",\\"context\\":\\"context-2\\",\\"level\\":{\\"id\\":\\"error\\",\\"value\\":3}}"`;
+
+exports[`\`format()\` correctly formats record. 3`] = `"{\\"timestamp\\":\\"2012-01-31T23:00:00.000Z\\",\\"message\\":\\"message-3\\",\\"context\\":\\"context-3\\",\\"level\\":{\\"id\\":\\"warn\\",\\"value\\":4}}"`;
+
+exports[`\`format()\` correctly formats record. 4`] = `"{\\"timestamp\\":\\"2012-01-31T23:00:00.000Z\\",\\"message\\":\\"message-4\\",\\"context\\":\\"context-4\\",\\"level\\":{\\"id\\":\\"debug\\",\\"value\\":6}}"`;
+
+exports[`\`format()\` correctly formats record. 5`] = `"{\\"timestamp\\":\\"2012-01-31T23:00:00.000Z\\",\\"message\\":\\"message-5\\",\\"context\\":\\"context-5\\",\\"level\\":{\\"id\\":\\"info\\",\\"value\\":5}}"`;
+
+exports[`\`format()\` correctly formats record. 6`] = `"{\\"timestamp\\":\\"2012-01-31T23:00:00.000Z\\",\\"message\\":\\"message-6\\",\\"context\\":\\"context-6\\",\\"level\\":{\\"id\\":\\"trace\\",\\"value\\":7}}"`;

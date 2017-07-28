@@ -1,8 +1,9 @@
 import * as mockSchema from '../../../lib/schema';
+import { JsonLayout } from '../JsonLayout';
 import { PatternLayout } from '../PatternLayout';
 import { Layouts } from '../Layouts';
 
-test('`createConfigSchema()` creates correct schema.', () => {
+test('`createConfigSchema()` creates correct schema for `pattern` layout.', () => {
   const layoutsSchema = Layouts.createConfigSchema(mockSchema);
   const validConfigWithOptional = { kind: 'pattern' };
   expect(layoutsSchema.validate(validConfigWithOptional)).toEqual({
@@ -22,11 +23,15 @@ test('`createConfigSchema()` creates correct schema.', () => {
     highlight: true
   });
 
-  const wrongConfig1 = { kind: 'json' };
-  expect(() => layoutsSchema.validate(wrongConfig1)).toThrow();
-
   const wrongConfig2 = { kind: 'pattern', pattern: 1 };
   expect(() => layoutsSchema.validate(wrongConfig2)).toThrow();
+});
+
+test('`createConfigSchema()` creates correct schema for `json` layout.', () => {
+  const layoutsSchema = Layouts.createConfigSchema(mockSchema);
+
+  const validConfig = { kind: 'json' };
+  expect(layoutsSchema.validate(validConfig)).toEqual({ kind: 'json' });
 });
 
 test('`create()` creates correct layout.', () => {
@@ -36,4 +41,7 @@ test('`create()` creates correct layout.', () => {
     highlight: false
   });
   expect(patternLayout).toBeInstanceOf(PatternLayout);
+
+  const jsonLayout = Layouts.create({ kind: 'json' });
+  expect(jsonLayout).toBeInstanceOf(JsonLayout);
 });
