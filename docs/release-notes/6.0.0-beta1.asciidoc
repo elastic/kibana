@@ -40,7 +40,8 @@ Visualization::
 [float]
 [[enhancement-6.0.0-beta1]]
 === Enhancements
-Design::
+Design::       
+* We'd like to extend a special thanks to Arpad Popradi for his contributions to the UI Framework.
 * [UI Framework] Reactify menu {pull}12135[#12135]
 * Adding for and id attributes to labels and form elements {pull}12215[#12215]
 * [UI Framework] Reactify kuiEvent and related CSS components (#12226) {pull}12228[#12228]
