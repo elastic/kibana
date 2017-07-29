@@ -9,24 +9,24 @@ import {
   GuideSectionTypes,
 } from '../../components';
 
-import <%= componentExampleName %> from './<%= fileName %>';
-const <%= componentExamplePrefix %>Source = require('!!raw!./<%= fileName %>');
-const <%= componentExamplePrefix %>Html = renderToHtml(<%= componentExampleName %>);
+import Kibana from './kibana';
+const kibanaSource = require('!!raw!./kibana');
+const kibanaHtml = renderToHtml(Kibana);
 
 export default props => (
   <GuideSandbox>
     <GuideDemo isFullScreen={true}>
-      <<%= componentExampleName %> />
+      <Kibana />
     </GuideDemo>
 
     <GuideSandboxCodeToggle
       title={props.route.name}
       source={[{
         type: GuideSectionTypes.JS,
-        code: <%= componentExamplePrefix %>Source,
+        code: kibanaSource,
       }, {
         type: GuideSectionTypes.HTML,
-        code: <%= componentExamplePrefix %>Html,
+        code: kibanaHtml,
       }]}
     />
   </GuideSandbox>
