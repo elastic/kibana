@@ -96,22 +96,19 @@ module.exports = class extends Generator {
     const writeSandbox = () => {
       const fileName = config.name;
       const componentExampleName = utils.makeComponentName(fileName, false);
+      const componentExamplePrefix = utils.lowerCaseFirstLetter(componentExampleName);
 
       const path = DOCUMENTATION_PAGE_PATH;
 
       const vars = config.documentationVars = {
         componentExampleName,
+        componentExamplePrefix,
         fileName,
       };
 
       const sandboxPath
         = config.documentationPageDemoPath
         = `${path}/${config.name}/${fileName}`;
-
-      this.fs.copyTpl(
-        this.templatePath('documentation_sandbox.html'),
-        this.destinationPath(`${sandboxPath}_sandbox.html`)
-      );
 
       this.fs.copyTpl(
         this.templatePath('documentation_sandbox.js'),
@@ -132,6 +129,7 @@ module.exports = class extends Generator {
 
       case 'sandbox':
         writeSandbox();
+        writeDocumentationPageDemo(config.name, config.name);
         break;
     }
   }
