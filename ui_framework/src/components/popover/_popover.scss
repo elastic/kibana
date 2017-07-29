@@ -20,12 +20,11 @@
   .kuiPopover__body {
     @include kuiBottomShadow;
 
-    background: $kuiColorEmptyShade;
+    background-color: $kuiColorEmptyShade;
     position: absolute;
     min-width: $kuiSize * 16; // Can expand further, but this size is good for our menus.
     top: 100%;
     left: 50%;
-    background: $kuiColorEmptyShade;
     border: $kuiBorderThin;
     border-radius: $kuiBorderRadius 0 $kuiBorderRadius $kuiBorderRadius;
     padding: $kuiSize;

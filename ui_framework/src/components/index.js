@@ -25,6 +25,19 @@ export {
 } from './key_pad_menu';
 
 export {
+  KUI_MODAL_CANCEL_BUTTON,
+  KUI_MODAL_CONFIRM_BUTTON,
+  KuiConfirmModal,
+  KuiModal,
+  KuiModalBody,
+  KuiModalBodyText,
+  KuiModalFooter,
+  KuiModalHeader,
+  KuiModalHeaderTitle,
+  KuiModalOverlay,
+} from './modal';
+
+export {
   KuiOutsideClickDetector,
 } from './outside_click_detector';
 

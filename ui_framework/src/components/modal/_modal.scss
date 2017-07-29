@@ -1,0 +1,38 @@
+.kuiModal {
+  @include kuiBottomShadow;
+
+  background-color: $kuiColorEmptyShade;
+  border: $kuiBorderThin;
+  border-radius: $kuiBorderRadius;
+  z-index: $kuiZModal;
+}
+
+.kuiModalHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: $kuiSize;
+}
+
+  .kuiModalHeader__title {
+  }
+
+.kuiModalHeaderCloseButton {
+}
+
+.kuiModalBody {
+  padding: $kuiSize;
+}
+
+.kuiModalBodyText {
+}
+
+.kuiModalFooter {
+  padding: $kuiSize;
+  display: flex;
+  justify-content: flex-end;
+
+  > * + * {
+    margin-left: 5px;
+  }
+}
