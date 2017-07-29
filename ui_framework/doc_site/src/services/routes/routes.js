@@ -15,6 +15,12 @@ import KeyPadMenuExample
 import KibanaSandbox
   from '../../views/kibana/kibana_sandbox';
 
+import LinkExample
+  from '../../views/link/link_example';
+
+import ModalExample
+  from '../../views/modal/modal_example';
+
 import PageExample
   from '../../views/page/page_example';
 
@@ -41,6 +47,13 @@ const components = [{
 }, {
   name: 'KeyPadMenu',
   component: KeyPadMenuExample,
+  hasReact: true,
+}, {
+  name: 'Link',
+  component: LinkExample,
+}, {
+  name: 'Modal',
+  component: ModalExample,
   hasReact: true,
 }, {
   name: 'Page',
