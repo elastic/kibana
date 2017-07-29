@@ -25,7 +25,7 @@ describe('plugins/elasticsearch', () => {
     const sandbox = sinon.sandbox.create();
 
     function getTimerCount() {
-      return Object.keys(sandbox.clock.timers || {});
+      return Object.keys(sandbox.clock.timers || {}).length;
     }
 
     beforeEach(() => {
