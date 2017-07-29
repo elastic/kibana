@@ -1,3 +1,5 @@
+import Joi from 'joi';
+
 async function handleRequest(request) {
   const { changes } = request.payload;
   const uiSettings = request.getUiSettingsService();
@@ -11,7 +13,14 @@ async function handleRequest(request) {
 export const setManyRoute = {
   path: '/api/kibana/settings',
   method: 'POST',
-  handler: function (request, reply) {
-    reply(handleRequest(request));
+  config: {
+    validate: {
+      payload: Joi.object().keys({
+        changes: Joi.object().unknown(true).required()
+      }).required()
+    },
+    handler(request, reply) {
+      reply(handleRequest(request));
+    }
   }
 };

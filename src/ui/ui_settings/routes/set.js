@@ -1,3 +1,5 @@
+import Joi from 'joi';
+
 async function handleRequest(request) {
   const { key } = request.params;
   const { value } = request.payload;
@@ -12,7 +14,18 @@ async function handleRequest(request) {
 export const setRoute = {
   path: '/api/kibana/settings/{key}',
   method: 'POST',
-  handler(request, reply) {
-    reply(handleRequest(request));
+  config: {
+    validate: {
+      params: Joi.object().keys({
+        key: Joi.string().required(),
+      }).default(),
+
+      payload: Joi.object().keys({
+        value: Joi.any().required()
+      }).required()
+    },
+    handler(request, reply) {
+      reply(handleRequest(request));
+    }
   }
 };
