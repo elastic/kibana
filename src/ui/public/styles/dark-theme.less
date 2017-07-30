@@ -5,7 +5,7 @@
   color: @text-color;
   background-color: @dashboard-bg;
 
-// /src/ui/public/styles/bootstrap/scaffolding.less
+  // /src/ui/public/styles/bootstrap/scaffolding.less
   a {
     color: @link-color;
 
@@ -15,11 +15,8 @@
     }
   }
 
-  .exitFullScreenMode {
-    background-color: @globalColorDarkestGray;
-  }
 
-// /src/ui/public/styles/bootstrap/forms.less
+  // /src/ui/public/styles/bootstrap/forms.less
   .form-control {
     color: @input-color;
     background-color: @input-bg;
@@ -32,13 +29,13 @@
   }
 
 
-// /src/ui/public/styles/bootstrap/panels.less
+  // /src/ui/public/styles/bootstrap/panels.less
   .panel {
     background-color: @panel-bg;
   }
 
 
-// /src/ui/public/styles/bootstrap/tables.less
+  // /src/ui/public/styles/bootstrap/tables.less
   .table {
     // Cells
     > thead,
@@ -72,15 +69,11 @@
         color: @table-sort-color;
       }
 
-      button.fa-sort-asc,
-      button.fa-sort-down,
       i.fa-sort-asc,
       i.fa-sort-down {
         color: @table-sort-asc-color;
       }
 
-      button.fa-sort-desc,
-      button.fa-sort-up,
       i.fa-sort-desc,
       i.fa-sort-up {
         color: @table-sort-desc-color;
@@ -89,7 +82,7 @@
   }
 
 
-// /src/ui/public/styles/bootstrap/list-group.less
+  // /src/ui/public/styles/bootstrap/list-group.less
   .list-group-item {
     background-color: @list-group-bg;
     border: 0 none transparent;
@@ -162,7 +155,7 @@
   }
 
 
-// /src/ui/public/styles/bootstrap/navs.less
+  // /src/ui/public/styles/bootstrap/navs.less
   .nav {
     > li {
       > a {
@@ -175,7 +168,7 @@
   }
 
 
-// /src/ui/public/styles/bootstrap/navs.less
+  // /src/ui/public/styles/bootstrap/navs.less
   .nav-tabs {
     border-bottom: 1px solid @gray4;
     > li {
@@ -199,7 +192,7 @@
   }
 
 
-// /src/ui/public/styles/navbar.less
+  // /src/ui/public/styles/navbar.less
   navbar {
     color: @navbar-default-color;
     background-color: @navbar-default-bg;
@@ -211,7 +204,7 @@
   }
 
 
-// /src/ui/public/styles/base.less
+  // /src/ui/public/styles/base.less
   saved-object-finder {
     .list-group-item {
       a {
@@ -233,13 +226,16 @@
   }
 
 
-// /src/ui/public/styles/spinner.less
+  // /src/ui/public/styles/spinner.less
   .spinner > div {
     background-color: @spinner-bg;
   }
 
 
-// /src/ui/public/agg_table/agg_table.less
+  // /src/ui/public/agg_table/agg_table.less
+  .table-highlight{
+    background-color: @table-row-hover-bg;
+  }
   .agg-table-paginated {
     tr:hover td {
       background-color: @table-row-hover-bg;
@@ -251,7 +247,7 @@
   }
 
 
-// /src/ui/public/visualize/visualize.less
+  // /src/ui/public/visualize/visualize.less
   .visualize-show-spy {
     border-top-color: @visualize-show-spy-border;
   }
@@ -266,7 +262,7 @@
   }
 
 
-// /src/ui/public/vislib/styles/_svg.less
+  // /src/ui/public/vislib/styles/_svg.less
   .axis {
     line, path {
       stroke: @svg-axis-color;
@@ -291,7 +287,7 @@
   }
 
 
-// /src/ui/public/vislib/styles/_legend.less
+  // /src/ui/public/vislib/styles/_legend.less
   .legend {
     background-color: @dashboard-panel-bg;
   }
@@ -323,7 +319,7 @@
 
 
 
-// /src/ui/public/vislib/styles/_layout.less
+  // /src/ui/public/vislib/styles/_layout.less
   .y-axis-title text, .x-axis-title text {
     fill: @vis-axis-title-color;
   }
@@ -333,7 +329,7 @@
   }
 
 
-// /src/ui/public/vislib/styles/_tilemap.less
+  // /src/ui/public/vislib/styles/_tilemap.less
   .tilemap {
     border-color: @tilemap-border;
   }
@@ -405,7 +401,7 @@
   }
 
 
-// /src/ui/public/filter_bar/filter_bar.less
+  // /src/ui/public/filter_bar/filter_bar.less
   .filter-bar-confirm {
     background: @filter-bar-confirm-bg;
     border-bottom-color: @filter-bar-confirm-border;
@@ -434,12 +430,12 @@
     }
   }
 
-    .filter-bar-condensed {
-      background: @filter-bar-bar-condensed-bg;
-    }
+  .filter-bar-condensed {
+    background: @filter-bar-bar-condensed-bg;
+  }
 
 
-// /src/ui/public/styles/config.less
+  // /src/ui/public/styles/config.less
   .config {
     border-bottom: 0 none transparent;
 
@@ -453,10 +449,10 @@
   }
 
 
-// /src/ui/public/styles/list-group-menu.less
+  // /src/ui/public/styles/list-group-menu.less
   .list-group-menu {
     &.select-mode a{
-       color: @list-group-menu-item-select-color;
+      color: @list-group-menu-item-select-color;
     }
 
     .list-group-menu-item {
@@ -475,14 +471,14 @@
   }
 
 
-// /src/ui/public/styles/input.less
+  // /src/ui/public/styles/input.less
   select {
     color: @input-color;
     background-color: @input-bg;
   }
 
 
-// /src/ui/public/styles/pagination.less
+  // /src/ui/public/styles/pagination.less
   paginate {
     paginate-controls {
       .pagination-other-pages-list {
@@ -500,7 +496,7 @@
   }
 
 
-// /src/core_plugins/kibana/public/dashboard/styles/main.less
+  // /src/core_plugins/kibana/public/dashboard/styles/main.less
   .start-screen {
     background-color: @dashboard-bg;
   }
@@ -563,46 +559,12 @@
     }
   }
 
-// /src/ui/public/doc_table/doc_table.less
+  // /src/ui/public/doc_table/doc_table.less
   .discover-table-row {
     td {
       .table-cell-filter {
         background-color: @panel-bg;
       }
     }
-  }
-}
-
-.theme-dark {
-  .markdown-body {
-    color: @text-color;
-  }
-
-  .markdown-body code {
-    color: #ffffff;
-    background-color: #5f5f5f;
-  }
-
-  .markdown-body pre {
-    background-color: #5f5f5f;
-    border: none;
-  }
-
-  .markdown-body table {
-    border-left: 1px solid @table-border-color;
-  }
-
-  .markdown-body table th,
-  .markdown-body table td {
-    border-top: 1px solid @table-border-color;
-    border-bottom: 1px solid @table-border-color;
-
-    &:last-child {
-      border-right: 1px solid @table-border-color;
-    }
-  }
-
-  .markdown-body table tr {
-    border-top: 1px solid @table-border-color;
   }
 }

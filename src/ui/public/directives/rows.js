@@ -4,6 +4,8 @@ import AggConfigResult from 'ui/vis/agg_config_result';
 import { FilterBarClickHandlerProvider } from 'ui/filter_bar/filter_bar_click_handler';
 import { uiModules } from 'ui/modules';
 import tableCellFilterHtml from './partials/table_cell_filter.html';
+import { isAltKeyPressed } from '../filter_bar/lib/multiselect';
+
 const module = uiModules.get('kibana');
 
 module.directive('kbnRows', function ($compile, $rootScope, getAppState, Private) {
@@ -29,7 +31,15 @@ module.directive('kbnRows', function ($compile, $rootScope, getAppState, Private
             if ($(event.target).is('a')) {
               return;
             }
-
+            if (isAltKeyPressed) {
+              const tdElements = $(event.target).closest('tr').children('td');
+              if (tdElements.hasClass('table-highlight')) {
+                tdElements.removeClass('table-highlight');
+              }
+              else {
+                tdElements.addClass('table-highlight');
+              }
+            }
             addFilter({ point: { aggConfigResult: aggConfigResult }, negate });
           };
 
@@ -116,9 +126,13 @@ module.directive('kbnRows', function ($compile, $rootScope, getAppState, Private
           // crate the empty row which will be pushed into the row list over and over
           const emptyRow = new Array(width);
           // fill the empty row with values
-          _.times(width, function (i) { emptyRow[i] = ''; });
+          _.times(width, function (i) {
+            emptyRow[i] = '';
+          });
           // push as many empty rows into the row array as needed
-          _.times(min - rows.length, function () { rows.push(emptyRow); });
+          _.times(min - rows.length, function () {
+            rows.push(emptyRow);
+          });
         }
 
         rows.forEach(function (row) {
