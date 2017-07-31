@@ -15,27 +15,3 @@ exports[`KuiScreenReaderOnly adds an accessibility class to a child element when
   This paragraph is not visibile to sighted users but will be read by screenreaders.
 </p>
 `;
-
-exports[`KuiScreenReaderOnly adds an accessibility class to an element 1`] = `
-<p
-  class="kuiScreenReaderOnly"
->
-  This paragraph is not visibile to sighted users but will be read by screenreaders.
-</p>
-`;
-
-exports[`KuiScreenReaderOnly adds an accessibility class to an element and combines other classNames (foo, bar) given as props 1`] = `
-<p
-  class="kuiScreenReaderOnly"
->
-  This paragraph is not visibile to sighted users but will be read by screenreaders.
-</p>
-`;
-
-exports[`KuiScreenReaderOnly adds an accessibility class to an element when used with no props 1`] = `
-<p
-  class="kuiScreenReaderOnly"
->
-  This paragraph is not visibile to sighted users but will be read by screenreaders.
-</p>
-`;
