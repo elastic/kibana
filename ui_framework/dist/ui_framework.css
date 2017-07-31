@@ -5,6 +5,12 @@
 *, *:before, *:after {
   box-sizing: border-box; }
 
+/**
+ * 1. Inheriting the font will allow some browser defaults to take effect, e.g. Chrome applies
+ *    `font: 11px system-ui` to the button element. We can't hardcode the font-family here because
+ *    that will disrupt components which rely upon a different inherited font-family, e.g. code
+ *    blocks.
+ */
 html, body, div, span, applet, object, iframe,
 h1, h2, h3, h4, h5, h6, p, blockquote, pre,
 a, abbr, acronym, address, big, cite, code,
@@ -23,7 +29,9 @@ time, mark, audio, video {
   border: 0;
   font-size: 100%;
   font: inherit;
-  font-family: "Roboto", Helvetica, Arial, sans-serif;
+  /* 1 */
+  font-family: inherit;
+  /* 1 */
   vertical-align: baseline; }
 
 /* HTML5 display-role reset for older browsers */
@@ -524,6 +532,12 @@ table {
   width: 40px;
   height: 40px; }
 
+/**
+ * Dial menu is a phone like dial comprised of an svg icon and a title.
+ */
+/**
+ * 1. Default to grid of 3.
+ */
 .kuiKeyPadMenu {
   display: -webkit-box;
   display: -webkit-flex;
@@ -537,8 +551,12 @@ table {
   -webkit-flex-wrap: wrap;
       -ms-flex-wrap: wrap;
           flex-wrap: wrap;
-  width: 288px; }
+  width: 288px;
+  /* 1 */ }
 
+/**
+ * 1. If this class is applied to a button, we need to override the Chrome default font.
+ */
 .kuiKeyPadMenuItem {
   display: block;
   padding: 16px;
@@ -547,7 +565,9 @@ table {
   color: #666;
   border: 1px solid #D9D9D9;
   border-color: transparent;
-  border-radius: 4px; }
+  border-radius: 4px;
+  font-family: "Roboto", Helvetica, Arial, sans-serif;
+  /* 1 */ }
   .kuiKeyPadMenuItem:hover, .kuiKeyPadMenuItem:focus {
     border-color: #D9D9D9; }
     .kuiKeyPadMenuItem:hover .kuiKeyPadMenuItem__icon, .kuiKeyPadMenuItem:focus .kuiKeyPadMenuItem__icon {
