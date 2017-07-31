@@ -55,11 +55,14 @@ export default props => (
       }]}
     >
       <GuideText>
-        This class can be useful to add accessibility to older designs that
-        are still in use, but it shouldn't be a permanent solution.
-        See <GuideLink href='http://webaim.org/techniques/css/invisiblecontent/'>
+        This class can be useful to add accessibility to older designs that are
+        still in use, but it shouldn't be a permanent solution. See <GuideLink
+          href='http://webaim.org/techniques/css/invisiblecontent/'
+        >
           http://webaim.org/techniques/css/invisiblecontent/
-        </GuideLink> for more information.
+        {
+          // eslint-disable-next-line react/jsx-closing-tag-location
+        }</GuideLink> for more information.
       </GuideText>
 
       <GuideText>
