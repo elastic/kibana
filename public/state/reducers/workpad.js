@@ -5,5 +5,9 @@ export default function workdpadReducer(workpadState = {}, { type, payload }) {
     return Object.assign({}, workpadState, payload);
   }
 
+  if (type === 'setColors') {
+    return Object.assign({}, workpadState, { colors: payload });
+  }
+
   return workpadState;
 }

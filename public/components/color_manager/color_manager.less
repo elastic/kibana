@@ -1,0 +1,34 @@
+@import (reference) "../../style/main";
+
+.canvas__color-manager {
+  display: flex;
+
+  .canvas__color-manager--input {
+    border-radius: @spacingXS;
+    padding-left: @spacingS;
+    margin-right: @spacingXS;
+    font-weight: bold;
+  }
+
+  .fa {
+    font-size: 29px; // TODO: This is a hack to make these icons the same size as the colored dots
+    margin-right: @spacingXS;
+
+    &:hover {
+      cursor: pointer;
+    }
+  }
+
+  .canvas__color-manager--add {
+    color: @mediumGrey;
+  }
+
+  .canvas__color-manager--active {
+    color: @blue;
+  }
+
+
+  .canvas__color-manager--remove {
+    color: @mediumGrey;
+  }
+}
