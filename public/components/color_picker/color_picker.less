@@ -1,16 +1,23 @@
 @import (reference) "../../style/main";
 
 .canvas__color-picker {
-  .canvas__color-picker--dot {
-    .fa {
-      font-size: @textXSmall;
-      margin-left: @spacingXS;
-    }
 
-    &:hover {
-      cursor: pointer;
-    }
+}
+
+.canvas__color-picker--dot {
+  display: inline-block;
+  height: 25px;
+  width: 25px;
+  border-radius: 15px;
+  margin: 0px @spacingXS @spacingXS 0px;
+  border: 2px solid @darkGrey;
+
+  .fa {
+    font-size: @textXSmall;
+    margin-left: @spacingXS;
   }
 
-
+  &:hover {
+    cursor: pointer;
+  }
 }

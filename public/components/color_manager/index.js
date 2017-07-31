@@ -1,4 +1,4 @@
-import { pure, compose, withState } from 'recompose';
+import { compose, withState } from 'recompose';
 
 import { ColorManager as Component } from './color_manager';
 

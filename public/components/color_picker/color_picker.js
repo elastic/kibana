@@ -1,6 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import chroma from 'chroma-js';
+import { readableColor } from '../../lib/readable_color';
 import { last } from 'lodash';
 
 import './color_picker.less';
@@ -13,14 +13,9 @@ export const ColorPicker = ({ value, colors, colorsPerRow, onChange }) => {
   const table = colors.reduce((rows, color) => {
     if (last(rows).length >= colorsPerRow) rows.push([]);
 
-    let fontColor;
-    try {
-      fontColor = chroma.contrast(value, '#000') < 4.5 ? '#FFF' : '#333';
-    } catch (e) {
-      fontColor = '#333';
-    }
 
-    const background = color === 'rgba(0,0,0,0)' ?
+
+    const background = color === 'rgba(1,1,1,0)' ?
     {
       backgroundImage: `
         linear-gradient(45deg, #aaa 25%, transparent 25%),
@@ -32,21 +27,12 @@ export const ColorPicker = ({ value, colors, colorsPerRow, onChange }) => {
     { background: color };
 
     const dot = (
-      <div
+      <div key={color}
       onClick={() => onChange(color)}
       className="canvas__color-picker--dot"
-      style={Object.assign({
-        display: 'inline-block',
-        height: 25,
-        width: 25,
-        borderRadius: 15,
-        margin: '0px 5px 5px 0px',
-        border: '2px solid #666',
-      },
-        background,
-      )}>
+      style={background}>
       { color !== value ? <i className="fa"/> :
-        <i className="fa fa-check" style={{ color: fontColor }}/>
+        <i className="fa fa-check" style={{ color: readableColor(value) }}/>
       }
       </div>
     );
