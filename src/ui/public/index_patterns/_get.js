@@ -21,7 +21,12 @@ export function IndexPatternsGetProvider(Private) {
       fields: [],
       perPage: 10000
     }).then(resp => {
-      return resp.savedObjects.map(obj => _.get(obj, field));
+      return resp.savedObjects.map(obj => {
+        if (field) {
+          return _.get(obj, field);
+        }
+        return obj;
+      });
     });
 
     if (field === 'id') {

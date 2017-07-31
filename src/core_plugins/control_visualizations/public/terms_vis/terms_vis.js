@@ -5,7 +5,7 @@ import { VisFactoryProvider } from 'ui/vis/vis_factory';
 import { VisTypesRegistryProvider } from 'ui/registry/vis_types';
 import { VisController } from './vis_controller';
 import { newField } from './lib/editor_utils';
-import { Simple } from './components/simple';
+import { TermsVisEditor } from './components/terms_vis_editor';
 
 function TermsVisProvider(Private) {
   const VisFactory = Private(VisFactoryProvider);
@@ -26,7 +26,7 @@ function TermsVisProvider(Private) {
     },
     editor: 'default',
     editorConfig: {
-      optionsTemplate: Simple
+      optionsTemplate: TermsVisEditor
     },
     requestHandler: 'none',
     responseHandler: 'none',

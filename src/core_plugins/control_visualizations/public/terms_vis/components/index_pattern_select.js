@@ -9,9 +9,12 @@ export class IndexPatternSelect extends Component {
   }
 
   loadOptions(input, callback) {
-    this.props.getIndexPatternIds().then(ids => {
-      const options = ids.map(id => {
-        return { label: id, value: id };
+    this.props.getIndexPatterns().then((indexPatternSavedObjects) => {
+      const options = indexPatternSavedObjects.map((indexPatternSavedObject) => {
+        return {
+          label: indexPatternSavedObject.attributes.title,
+          value: indexPatternSavedObject.id
+        };
       });
       //Setting complete=true means loadOptions will never be called again.
       callback(null, { options: options, complete: true });
@@ -32,7 +35,8 @@ export class IndexPatternSelect extends Component {
             value={this.props.value}
             loadOptions={this.loadOptions}
             onChange={this.props.onChange}
-            resetValue={''}/>
+            resetValue={''}
+          />
         </div>
       </div>
     );
@@ -40,7 +44,7 @@ export class IndexPatternSelect extends Component {
 }
 
 IndexPatternSelect.propTypes = {
-  getIndexPatternIds: PropTypes.func.isRequired,
+  getIndexPatterns: PropTypes.func.isRequired,
   onChange: PropTypes.func.isRequired,
   value: PropTypes.string
 };
