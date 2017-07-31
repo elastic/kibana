@@ -56,8 +56,8 @@ query language you can also submit queries using the {ref}/query-dsl.html[Elasti
 
 include::kuery.asciidoc[]
 
-[[save-load-search]]
-=== Saving and Loading Searches
+[[save-open-search]]
+=== Saving and Opening Searches
 Saving searches enables you to reload them into Discover and use them as the basis
 for <<visualize, visualizations>>. Saving a search saves both the search query string
 and the currently selected index pattern.
