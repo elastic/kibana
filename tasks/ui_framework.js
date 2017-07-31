@@ -110,9 +110,8 @@ module.exports = function (grunt) {
       // Compile the SCSS in a separate process because node-sass throws a fatal error if it fails
       // to compile.
       grunt.util.spawn({
-        cmd: 'npm',
+        cmd: isPlatformWindows ? '.\\node_modules\\.bin\\grunt.cmd' : './node_modules/.bin/grunt',
         args: [
-          'run',
           'uiFramework:compileCss',
         ],
       }, (error, result) => {

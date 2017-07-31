@@ -7,7 +7,8 @@
 
 ### Documentation
 
-Compile the CSS with `npm run uiFramework:compileCss`.
+Compile the CSS with `./node_modules/grunt/bin/grunt uiFramework:compileCss` (OS X) or
+`.\node_modules\grunt\bin\grunt uiFramework:compileCss` (Windows).
 
 You can view interactive documentation by running `npm run uiFramework:start` and then visiting
 `http://localhost:8020/`. This will also start watching the SCSS files, and will recompile the CSS

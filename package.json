@@ -63,8 +63,7 @@
     "mocha": "echo 'use `node scripts/mocha`' && false",
     "sterilize": "grunt sterilize",
     "uiFramework:start": "grunt uiFramework:start",
-    "uiFramework:build": "grunt uiFramework:build",
-    "uiFramework:compileCss": "grunt uiFramework:compileCss"
+    "uiFramework:build": "grunt uiFramework:build"
   },
   "repository": {
     "type": "git",
