@@ -23,13 +23,13 @@ export const WorkpadHeader = ({ workpadName, editing, inFlight, toggleEditing })
       <h2>
         { workpadName }
         <OverlayTrigger trigger="click" rootClose placement="bottom" overlay={pageConfigPopover}>
-          <i className="fa fa-gear"/>
+          <i className="fa fa-gear canvas__workpad_header--button"/>
         </OverlayTrigger>
-        <span className="canvas__workpad_header--editToggle">
+        <span className="canvas__workpad_header--editToggle canvas__workpad_header--button">
           <Toggle value={editing} onChange={toggleEditing} />
         </span>
         { inFlight && (
-          <span>
+          <span className="canvas__workpad_header--button">
             <i className="fa fa-spinner fa-pulse" />
           </span>
         ) }
