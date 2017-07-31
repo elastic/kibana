@@ -14,9 +14,12 @@ import {
 
 import KeyboardAccessible from './keyboard_accessible';
 import ScreenReaderOnly from './screen_reader';
+
 const keyboardAccessibleSource = require('!!raw!./keyboard_accessible');
 const keyboardAccessibleHtml = renderToHtml(KeyboardAccessible);
+
 const screenReaderOnlyHtml = renderToHtml(ScreenReaderOnly);
+const screenReaderOnlySource = require('!!raw!./screen_reader');
 
 export default props => (
   <GuidePage title={props.route.name}>
@@ -44,6 +47,9 @@ export default props => (
     <GuideSection
       title="ScreenReaderOnly"
       source={[{
+        type: GuideSectionTypes.JS,
+        code: screenReaderOnlySource,
+      }, {
         type: GuideSectionTypes.HTML,
         code: screenReaderOnlyHtml,
       }]}
