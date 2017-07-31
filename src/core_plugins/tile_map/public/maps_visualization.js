@@ -44,10 +44,7 @@ export function MapsVisualizationProvider(serviceSettings, Notifier, getAppState
         await this._kibanaMapReady;
 
         if (status.resize) {
-          console.log('resize');
           this._kibanaMap.resize();
-        } else {
-          console.log('no resize', status.resize);
         }
 
         if (status.params || status.aggs) await this._updateParams();
