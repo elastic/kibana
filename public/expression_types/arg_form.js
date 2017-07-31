@@ -35,11 +35,13 @@ export class ArgForm extends BaseForm {
     // skip arguments that aren't defined in the expression type schema
     if (!arg) return null;
 
+    const newArgValue = fromExpression(arg.defaultValue) || { type: 'string', value: '' };
+
     // if no value in expression, render the add control
     // TODO: pass in the value when adding arguments, likely using some default defined in the type config
     return (!argValues || arg.multi) && (
       <div className="canvas__argtype__add" key={`${props.typeInstance.name}-${arg.name}-add`}>
-        <Label bsStyle="default" onClick={onValueAdd(arg.name, fromExpression(arg.defaultValue))}>
+        <Label bsStyle="default" onClick={onValueAdd(arg.name, newArgValue)}>
           + {arg.displayName}
         </Label>
       </div>
