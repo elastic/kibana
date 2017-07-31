@@ -3,9 +3,9 @@ import { VisResponseHandlersRegistryProvider } from 'ui/registry/vis_response_ha
 
 const HierarchicalResponseHandlerProvider = function () {
   /***
-   * Prepares series out of esResponse.
-   * each combination of metric, segment bucket and group bucket will add a series
+   * Prepares hierarchical data out of esResponse.
    * each split bucket will create multiple charts
+   * everything else will create sub buckets on the children property
    *
    * @param vis
    * @param esResponse

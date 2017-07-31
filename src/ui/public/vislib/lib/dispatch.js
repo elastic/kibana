@@ -59,7 +59,7 @@ export function VislibLibDispatchProvider(Private, config) {
           break;
         case 'slices':
           eventData.point = _.cloneDeep(d);
-          eventData.aggs = eventData.point.values[0].aggs;
+          eventData.aggs = eventData.point.values[0].aggs || eventData.point.aggs;
           delete eventData.point.values;
           break;
         default:
