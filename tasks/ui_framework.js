@@ -44,6 +44,11 @@ module.exports = function (grunt) {
     Promise.all([uiFrameworkWatch(), uiFrameworkServerStart()]).then(done);
   });
 
+  grunt.registerTask('uiFramework:compileCss', function () {
+    const done = this.async();
+    uiFrameworkCompile().then(done);
+  });
+
   function uiFrameworkServerStart() {
     const serverCmd = {
       cmd: isPlatformWindows ? '.\\node_modules\\.bin\\webpack-dev-server.cmd' : './node_modules/.bin/webpack-dev-server',
@@ -77,27 +82,47 @@ module.exports = function (grunt) {
   }
 
   function uiFrameworkCompile() {
-    sass.render({
-      file: 'ui_framework/components/index.scss'
-    }, function (error, result) {
-      if (error) {
-        grunt.log.error(error);
-      }
+    return new Promise(resolve => {
+      sass.render({
+        file: 'ui_framework/components/index.scss'
+      }, function (error, result) {
+        if (error) {
+          grunt.log.error(error);
+        }
 
-      postcss([postcssConfig])
-        .process(result.css, { from: 'ui_framework/components/index.scss', to: 'ui_framework/dist/ui_framework.css' })
-        .then(result => {
-          grunt.file.write('ui_framework/dist/ui_framework.css', result.css);
+        postcss([postcssConfig])
+          .process(result.css, { from: 'ui_framework/components/index.scss', to: 'ui_framework/dist/ui_framework.css' })
+          .then(result => {
+            grunt.file.write('ui_framework/dist/ui_framework.css', result.css);
 
-          if (result.map) {
-            grunt.file.write('ui_framework/dist/ui_framework.css.map', result.map);
-          }
-        });
+            if (result.map) {
+              grunt.file.write('ui_framework/dist/ui_framework.css.map', result.map);
+            }
+
+            resolve();
+          });
+      });
     });
   }
 
   function uiFrameworkWatch() {
-    const debouncedCompile = debounce(uiFrameworkCompile, 400, { leading: true });
+    const debouncedCompile = debounce(() => {
+      // Compile the SCSS in a separate process because node-sass throws a fatal error if it fails
+      // to compile.
+      grunt.util.spawn({
+        cmd: 'npm',
+        args: [
+          'run',
+          'uiFramework:compileCss',
+        ],
+      }, (error, result) => {
+        if (error) {
+          grunt.log.error(result.stdout);
+        } else {
+          grunt.log.writeln(result);
+        }
+      });
+    }, 400, { leading: true });
 
     return new Promise(() => {
       debouncedCompile();
