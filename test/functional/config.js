@@ -15,6 +15,7 @@ import {
 import {
   RemoteProvider,
   FilterBarProvider,
+  QueryBarProvider,
   FindProvider,
   TestSubjectsProvider,
   DocTableProvider,
@@ -56,6 +57,7 @@ export default async function ({ readConfigFile }) {
       retry: commonConfig.get('services.retry'),
       remote: RemoteProvider,
       filterBar: FilterBarProvider,
+      queryBar: QueryBarProvider,
       find: FindProvider,
       testSubjects: TestSubjectsProvider,
       docTable: DocTableProvider,
