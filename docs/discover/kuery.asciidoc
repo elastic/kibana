@@ -5,7 +5,8 @@ experimental[This functionality is experimental and may be changed or removed co
 
 Kuery is a new query language built specifically for Kibana. It aims to simplify the search experience in Kibana
 and enable the creation of helpful features like auto-complete, seamless migration of saved searches, additional
-query types, and more.
+query types, and more. Kuery is a basic experience today but we're hard at work building these additional features on
+top of the foundation Kuery provides.
 
 Kuery queries are built with functions. Many functions take a field name as their first argument. Extremely common functions have shorthand notations.
 
