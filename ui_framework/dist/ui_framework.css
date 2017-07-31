@@ -2935,7 +2935,6 @@ main {
   background-color: #FFF;
   /* 1 */
   border: 1px solid #D9D9D9;
-  border-bottom-width: 1px;
   border-radius: 0;
   /* 1 */
   margin-bottom: -1px;
@@ -2968,6 +2967,7 @@ main {
     color: #006E8A;
     background-color: #F2F2F2; }
     .theme-dark .kuiTab:hover:not(.kuiTab-isSelected) {
+      color: #def2f6;
       background-color: #777777; }
   .kuiTab.kuiTab-isSelected {
     cursor: default;

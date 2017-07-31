@@ -23,7 +23,6 @@
   color: $globalSubduedTextColor;
   background-color: $tabBackgroundColor; /* 1 */
   border: 1px solid $globalBorderColor;
-  border-bottom-width: 1px;
   border-radius: 0; /* 1 */
   margin-bottom: -1px; /* 3 */
 
@@ -66,6 +65,7 @@
     background-color: $tabHoverBackgroundColor;
 
     @include darkTheme {
+      color: $globalLinkColor-isHover--darkTheme;
       background-color: $tabHoverBackgroundColor--darkTheme;
     }
   }
