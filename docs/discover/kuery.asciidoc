@@ -43,6 +43,9 @@ Some query functions have named arguments.
 
 `range("bytes", gt=1000, lt=8000)` will match documents where the bytes field is greater than 1000 and less than 8000.
 
+Quotes are generally optional if your terms don't have whitespace or special characters. `range(bytes, gt=1000, lt=8000)`
+would also be a valid query.
+
 [NOTE]
 ============
 Terms without fields will be matched against all fields. For example, a query for 200 will search for the value 200 across all fields in your index.
