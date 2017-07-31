@@ -3,6 +3,7 @@ import expect from 'expect.js';
 export default function ({ getService, getPageObjects }) {
   const log = getService('log');
   const screenshots = getService('screenshots');
+  const retry = getService('retry');
   const PageObjects = getPageObjects(['common', 'visualize', 'header']);
 
   describe('visualize app', function describeIndexTests() {
@@ -57,7 +58,7 @@ export default function ({ getService, getPageObjects }) {
           expect(message).to.be('Visualization Editor: Saved Visualization \"' + vizName1 + '\"');
         })
         .then(function testVisualizeWaitForToastMessageGone() {
-          return PageObjects.visualize.waitForToastMessageGone();
+          return PageObjects.header.waitForToastMessageGone();
         })
         .then(function () {
           return PageObjects.visualize.loadSavedVisualization(vizName1);
@@ -70,20 +71,14 @@ export default function ({ getService, getPageObjects }) {
         });
       });
 
-      it('should show correct chart, take screenshot', function () {
+      it('should show correct chart, take screenshot', async function () {
         const expectedChartValues = ['0 - 400', '0 - 400', '400 - 800', '1,200 - 1,600',
           '1,200 - 1,600', '400 - 800', '0 - 400', '0 - 400', '0 - 400', '0 - 400', '400 - 800',
           '1,200 - 1,600', '1,200 - 1,600', '400 - 800', '0 - 400', '0 - 400', '0 - 400', '0 - 400',
           '400 - 800', '1,200 - 1,600', '1,200 - 1,600', '400 - 800', '0 - 400', '0 - 400' ];
 
-        // Most recent failure on Jenkins usually indicates the bar chart is still being drawn?
-        // return arguments[0].getAttribute(arguments[1]);","args":[{"ELEMENT":"592"},"fill"]}] arguments[0].getAttribute is not a function
-        // try sleeping a bit before getting that data
-        return PageObjects.common.sleep(5000)
-        .then(function () {
-          return PageObjects.visualize.getHeatmapData();
-        })
-        .then(function showData(data) {
+        await retry.try(async () => {
+          const data = await PageObjects.visualize.getHeatmapData();
           log.debug('data=' + data);
           log.debug('data.length=' + data.length);
           screenshots.take('Visualize-heatmap-chart');

@@ -90,54 +90,34 @@ export default function ({ getService, getPageObjects }) {
 
     describe('tile map chart', function indexPatternCreation() {
 
-      it('should show correct tile map data on default zoom level', function () {
+      it('should show correct tile map data on default zoom level', async function () {
         const expectedTableData = ['9 5,787 { "lat": 37.22448418632405, "lon": -103.01935195013255 }',
           'd 5,600 { "lat": 37.44271478370398, "lon": -81.72692197253595 }',
           'c 1,319 { "lat": 47.72720855392425, "lon": -109.84745063951028 }',
           'b 999 { "lat": 62.04130042948433, "lon": -155.28087269195967 }',
           'f 187 { "lat": 45.656166475784175, "lon": -82.45831044201545 }',
           '8 108 { "lat": 18.85260305600241, "lon": -156.5148810390383 }'];
+        //level 1
+        await PageObjects.visualize.clickMapZoomOut();
+        //level 0
+        await PageObjects.visualize.clickMapZoomOut();
 
-        return PageObjects.visualize.openSpyPanel()
-        .then(function () {
-          //level 1
-          return PageObjects.visualize.clickMapZoomOut();
-        })
-        .then(function () {
-          //level 0
-          return PageObjects.visualize.clickMapZoomOut();
-        })
-        .then(function () {
-          return PageObjects.settings.setPageSize('All');
-        })
-        .then(function getDataTableData() {
-          return PageObjects.visualize.getDataTableData()
-          .then(function showData(actualTableData) {
-            compareTableData(expectedTableData, actualTableData.trim().split('\n'));
-            return PageObjects.visualize.closeSpyPanel();
-          });
-        });
+        await PageObjects.visualize.openSpyPanel();
+        await PageObjects.settings.setPageSize('All');
+        const actualTableData = await PageObjects.visualize.getDataTableData();
+        compareTableData(expectedTableData, actualTableData.trim().split('\n'));
+        await PageObjects.visualize.closeSpyPanel();
       });
 
-      it('should not be able to zoom out beyond 0', function () {
-        return PageObjects.visualize.getMapZoomOutEnabled()
-        // we can tell we're at level 1 because zoom out is disabled
-        .then(function () {
-          return retry.try(function tryingForTime() {
-            return PageObjects.visualize.getMapZoomOutEnabled()
-            .then(function (enabled) {
-              //should be able to zoom more as current config has 0 as min level.
-              expect(enabled).to.be(false);
-            });
-          });
-        })
-        .then(function takeScreenshot() {
-          log.debug('Take screenshot (success)');
-          screenshots.take('map-at-zoom-0');
-        });
+      it('should not be able to zoom out beyond 0', async function () {
+        await PageObjects.visualize.zoomAllTheWayOut();
+        const enabled = await PageObjects.visualize.getMapZoomOutEnabled();
+        expect(enabled).to.be(false);
+        screenshots.take('map-at-zoom-0');
       });
 
-      it('Fit data bounds should zoom to level 3', function () {
+      // See https://github.com/elastic/kibana/issues/13137 if this test starts failing intermittently
+      it('Fit data bounds should zoom to level 3', async function () {
         const expectedPrecision2ZoomCircles = [
           { color: '#750000', radius: 192 },
           { color: '#750000', radius: 191 },
@@ -187,12 +167,11 @@ export default function ({ getService, getPageObjects }) {
           { color: '#b99939', radius: 9 }
         ];
 
-        return PageObjects.visualize.clickMapFitDataBounds()
-        .then(function () {
-          return PageObjects.visualize.getTileMapData();
-        })
-        .then(function (data) {
+        await retry.try(async() => {
+          await PageObjects.visualize.clickMapFitDataBounds();
+          const data = await PageObjects.visualize.getTileMapData();
           expect(data).to.eql(expectedPrecision2ZoomCircles);
+          screenshots.take('map-at-zoom-3');
         });
       });
 
@@ -238,7 +217,7 @@ export default function ({ getService, getPageObjects }) {
           expect(message).to.be('Visualization Editor: Saved Visualization \"' + vizName1 + '\"');
         })
         .then(function testVisualizeWaitForToastMessageGone() {
-          return PageObjects.visualize.waitForToastMessageGone();
+          return PageObjects.header.waitForToastMessageGone();
         })
         .then(function () {
           return PageObjects.visualize.openSpyPanel();

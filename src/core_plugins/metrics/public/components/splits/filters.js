@@ -12,7 +12,8 @@ function SplitByFilters(props) {
         <div className="vis_editor__split-selects">
           <GroupBySelect
             value={model.split_mode}
-            onChange={handleSelectChange('split_mode')} />
+            onChange={handleSelectChange('split_mode')}
+          />
         </div>
       </div>
       <div className="vis_editor__split-container">
@@ -20,7 +21,8 @@ function SplitByFilters(props) {
           <FilterItems
             name="split_filters"
             model={model}
-            onChange={onChange} />
+            onChange={onChange}
+          />
         </div>
       </div>
     </div>

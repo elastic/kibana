@@ -28,14 +28,16 @@ class Split extends Component {
       return (
         <SplitByFilter
           model={model}
-          onChange={this.props.onChange} />
+          onChange={this.props.onChange}
+        />
       );
     }
     if (model.split_mode === 'filters') {
       return (
         <SplitByFilters
           model={model}
-          onChange={this.props.onChange} />
+          onChange={this.props.onChange}
+        />
       );
     }
     if (model.split_mode === 'terms') {
@@ -44,13 +46,15 @@ class Split extends Component {
           model={model}
           indexPattern={indexPattern}
           fields={this.props.fields}
-          onChange={this.props.onChange} />
+          onChange={this.props.onChange}
+        />
       );
     }
     return (
       <SplitByEverything
         model={model}
-        onChange={this.props.onChange} />
+        onChange={this.props.onChange}
+      />
     );
   }
 
