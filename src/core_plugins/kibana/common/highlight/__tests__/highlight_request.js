@@ -32,12 +32,9 @@ describe('getHighlightRequest', () => {
     expect(getHighlightRequest).to.be.a(Function);
   });
 
-  it('should add the default_field param with query_string query without modifying original query', () => {
-    const request = getHighlightRequest(queryStringQuery, getConfig);
-    expect(request.fields['*']).to.have.property('highlight_query');
-    expect(request.fields['*'].highlight_query.query_string).to.have.property('default_field');
-    expect(request.fields['*'].highlight_query.query_string.default_field).to.be('*');
-    expect(queryStringQuery.query_string).to.not.have.property('default_field');
+  it('should not modify the original query', () => {
+    getHighlightRequest(queryStringQuery, getConfig);
+    expect(queryStringQuery.query_string).to.not.have.property('highlight');
   });
 
   it('should add the default_field param with bool query with single condition without modifying original query', () => {
