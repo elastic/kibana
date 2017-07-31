@@ -10,7 +10,7 @@ import './workpad_header.less';
 export const WorkpadHeader = ({ workpadName, editing, inFlight, toggleEditing }) => {
   const pageConfigPopover = (
     <Popover id="popover-trigger-click">
-      <div className="canvas">
+      <div className="canvas canvas__workpad_header--config">
         <PageConfig/>
 
         <WorkpadConfig/>
