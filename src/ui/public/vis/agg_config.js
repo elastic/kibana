@@ -7,7 +7,7 @@
 
 import _ from 'lodash';
 import { RegistryFieldFormatsProvider } from 'ui/registry/field_formats';
-import { SCALE_MODES } from './scale_modes';
+import { isPercentage } from '../vislib/isPercentage';
 
 export function VisAggConfigProvider(Private) {
   const fieldFormats = Private(RegistryFieldFormatsProvider);
@@ -304,15 +304,10 @@ export function VisAggConfigProvider(Private) {
   };
 
   AggConfig.prototype.isPercentage = function () {
-    if (!this.vis || !this.vis.params || !this.vis.params.seriesParams) {
+    if (!this.vis || !this.vis.params || !this.vis.params.seriesParams || !this.vis.params.valueAxes) {
       return false;
     }
-    const dataSeries = this.vis.params.seriesParams.find((dataSeries) => dataSeries.data.id === this.id);
-    if (!dataSeries) {
-      return false;
-    }
-    const valueAxis = this.vis.params.valueAxes.find((valueAxis) => valueAxis.id === dataSeries.valueAxis);
-    return (valueAxis) ? valueAxis.scale.mode === SCALE_MODES.PERCENTAGE : false;
+    return isPercentage(this.id, this.vis.params.seriesParams, this.vis.params.valueAxes);
   };
 
   AggConfig.prototype.getIndexPattern = function () {

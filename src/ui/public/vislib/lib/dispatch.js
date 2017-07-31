@@ -2,6 +2,7 @@ import d3 from 'd3';
 import _ from 'lodash';
 import $ from 'jquery';
 import { SimpleEmitter } from 'ui/utils/simple_emitter';
+import { isPercentage } from '../../vislib/isPercentage';
 
 export function VislibLibDispatchProvider(Private, config) {
 
@@ -57,13 +58,22 @@ export function VislibLibDispatchProvider(Private, config) {
         handler: handler
       };
 
+      const seriesParams = handler.visConfig.get('seriesParams');
+      const valueAxes = handler.visConfig.get('valueAxes');
+      const aggConfigId = d3.event.target.parentElement.__data__.aggId;
+
+      let isPercentageMode = false;
+      if (seriesParams && valueAxes) {
+        isPercentageMode = isPercentage(aggConfigId, seriesParams, valueAxes);
+      }
+
       if (isSeries) {
         // Find object with the actual d value and add it to the point object
         const object = _.find(series, { 'label': label });
         if (object) {
           eventData.value = +object.values[i].y;
 
-          if (d.aggConfig ? d.aggConfig.isPercentage() : false) {
+          if (isPercentageMode) {
             // Add the formatted percentage to the point object
             eventData.percent = (100 * d.y).toFixed(1) + '%';
           }
@@ -330,11 +340,7 @@ export function VislibLibDispatchProvider(Private, config) {
    */
   function isQuantitativeScale(scale) {
     //Invert is a method that only exists on quantitative scales
-    if (scale.invert) {
-      return true;
-    } else {
-      return false;
-    }
+    return (scale.invert) ? true : false;
   }
 
   function validBrushClick(event) {
