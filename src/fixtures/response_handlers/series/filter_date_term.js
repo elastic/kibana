@@ -11,7 +11,8 @@ const response = {
       }, {
         'id': '4',
         'label': 'filters',
-        'value': '200'
+        'value': '200',
+        'rawValue': '200'
       }, {
         'id': '3',
         'label': 'response.raw: descending',
@@ -153,7 +154,8 @@ const response = {
       }, {
         'id': '4',
         'label': 'filters',
-        'value': '200'
+        'value': '200',
+        'rawValue': '200'
       }, {
         'id': '3',
         'label': 'response.raw: descending',
@@ -295,7 +297,8 @@ const response = {
       }, {
         'id': '4',
         'label': 'filters',
-        'value': '200'
+        'value': '200',
+        'rawValue': '200'
       }, {
         'id': '3',
         'label': 'response.raw: descending',
@@ -428,7 +431,8 @@ const response = {
       }, {
         'id': '4',
         'label': 'filters',
-        'value': '404'
+        'value': '404',
+        'rawValue': '404'
       }, {
         'id': '3',
         'label': 'response.raw: descending',
@@ -570,7 +574,8 @@ const response = {
       }, {
         'id': '4',
         'label': 'filters',
-        'value': '404'
+        'value': '404',
+        'rawValue': '404'
       }, {
         'id': '3',
         'label': 'response.raw: descending',
@@ -712,7 +717,8 @@ const response = {
       }, {
         'id': '4',
         'label': 'filters',
-        'value': '404'
+        'value': '404',
+        'rawValue': '404'
       }, {
         'id': '3',
         'label': 'response.raw: descending',

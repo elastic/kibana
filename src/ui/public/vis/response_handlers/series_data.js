@@ -14,6 +14,8 @@ const seriesResponseHandlerProvider = function () {
     name: 'series_data',
     handler: (vis, esResponse) => {
 
+      const clonedResponse = _.cloneDeep(esResponse);
+
       const metrics = vis.aggs.filter(agg => agg.schema.group === 'metrics');
       const buckets = vis.aggs.filter(agg => agg.schema.group === 'buckets');
       const segment = vis.aggs.find(agg => agg.schema.name === 'segment');
@@ -23,20 +25,7 @@ const seriesResponseHandlerProvider = function () {
       let scale = 1;
       let xAxisFormatter;
       let yAxisFormatter;
-
       const charts = {};
-      const getValue = (metric, data) => {
-        if (metric.type.name === 'count') return data.doc_count * scale;
-        if (data[metric.id].value) {
-          return data[metric.id].value * scale;
-        }
-        if (data[metric.id].values) {
-          if (data[metric.id].values.length && !isNaN(data[metric.id].values[0].value)) {
-            return data[metric.id].values[0].value * scale;
-          }
-        }
-        return 0;
-      };
 
       const getBucketKey = (aggConfig, bucket, key) => {
         let value = bucket.key || key;
@@ -63,6 +52,40 @@ const seriesResponseHandlerProvider = function () {
         return value;
       };
 
+      const getBucketProps = (aggConfig, bucket, key) => {
+        const value = getBucketKey(aggConfig, bucket, key);
+        //const useRawValue = !['range', 'ip_range', 'date_range', 'filters'].includes(aggConfig.type.name);
+        const useRawValue = !['ip_range', 'date_range'].includes(aggConfig.type.name);
+
+        return {
+          id: aggConfig.id,
+          label: aggConfig.makeLabel(),
+          value: value,
+          rawValue: useRawValue ? getBucketRawKey(aggConfig, bucket) : null
+        };
+      };
+
+      const sortBuckets = (aggConfig, buckets) => {
+        if (['range', 'filters'].includes(aggConfig.type.name)) {
+          const sortedBuckets = [];
+          if (aggConfig.type.name === 'range') {
+            aggConfig.params.ranges.forEach(range => {
+              const key = _.findKey(buckets, bucket => bucket.from === range.from && bucket.to === range.to);
+              buckets[key].key = key;
+              sortedBuckets.push(buckets[key]);
+            });
+          } else if (aggConfig.type.name === 'filters') {
+            aggConfig.params.filters.forEach(filter => {
+              const key = filter.label || filter.input.query.query_string.query;
+              buckets[key].key = key;
+              sortedBuckets.push(buckets[key]);
+            });
+          }
+          return sortedBuckets;
+        }
+        return buckets;
+      };
+
       const getSeriesName = (series, metric) => {
         if (!series) return metric.makeLabel();
         if (metrics.length === 1) return series.trim().replace(/:+$/g, '');
@@ -73,45 +96,53 @@ const seriesResponseHandlerProvider = function () {
         if (done) {
           _.map(metrics, metric => {
             if (metric.schema.name === 'radius') return;
-            const name = getSeriesName(seri, metric);
-            const value = getValue(metric, data);
-            if (!charts[chart]) {
-              charts[chart] = {
-                aggId: chart,
-                label: segment ? segment.makeLabel() : '',
-                series: {}
-              };
+            const responseAggs = metric.getResponseAggs ? metric.getResponseAggs() : [metric];
+            responseAggs.forEach(metric => {
+              const name = getSeriesName(seri, metric);
+              const value = metric.getValue(data) * scale;
+              if (!charts[chart]) {
+                charts[chart] = {
+                  aggId: chart,
+                  label: segment ? segment.makeLabel() : '',
+                  series: {}
+                };
 
-              if (segment) {
-                charts[chart].ordered = {
-                  date: segment.type.name === 'date_histogram',
-                  interval: segment.buckets ? segment.buckets.getInterval().asMilliseconds() : segment.params.interval
+                if (segment) {
+                  const isDate = segment.type.name === 'date_histogram';
+                  const bounds = isDate ? segment.buckets.getBounds() : {};
+                  charts[chart].ordered = {
+                    date: isDate,
+                    interval: segment.buckets ? segment.buckets.getInterval().asMilliseconds() : segment.params.interval,
+                    min: bounds.min ? bounds.min._d.valueOf() : null,
+                    max: bounds.max ? bounds.max._d.valueOf() : null
+                  };
+                }
+              }
+              if (!charts[chart].series[name]) {
+                const metricAgg = {
+                  id: metric.parentId || metric.id,
+                  label: metric.makeLabel(),
+                  formatter: metric.fieldFormatter('text'),
+                  value: 'y'
+                };
+                charts[chart].series[name] = {
+                  aggId: metric.parentId || metric.id,
+                  label: name,
+                  formatter: metric.fieldFormatter('text'),
+                  aggs: aggs.concat(metricAgg).slice().reverse(),
+                  values: []
                 };
               }
-            }
-            if (!charts[chart].series[name]) {
-              const metricAgg = {
-                id: metric.id,
-                label: metric.makeLabel(),
-                formatter: metric.fieldFormatter('text'),
-                value: 'y'
-              };
-              charts[chart].series[name] = {
-                aggId: metric.id,
-                label: name,
-                formatter: metric.fieldFormatter('text'),
-                aggs: aggs.concat(metricAgg).slice().reverse(),
-                values: []
-              };
-            }
-            yAxisFormatter = metric.fieldFormatter('text');
-            charts[chart].xAxisFormatter = xAxisFormatter;
-            charts[chart].yAxisFormatter = yAxisFormatter;
-            charts[chart].series[name].values.push({
-              ...category,
-              y: value,
-              z: radius ? getValue(radius, data) : null
+              yAxisFormatter = metric.fieldFormatter('text');
+              charts[chart].xAxisFormatter = xAxisFormatter;
+              charts[chart].yAxisFormatter = yAxisFormatter;
+              charts[chart].series[name].values.push({
+                ...category,
+                y: value,
+                z: radius ? radius.getValue(data) * scale : null
+              });
             });
+
           });
           return;
         }
@@ -121,48 +152,29 @@ const seriesResponseHandlerProvider = function () {
           const aggConfig = vis.aggs.find(agg => agg.id === id);
 
           if (!aggConfig) throw 'undefined aggregation while converting series data';
+          if (agg.buckets) {
+            agg.buckets = sortBuckets(aggConfig, agg.buckets);
+          }
 
           if (aggConfig.schema.name === 'split') {
             chartSplit = aggConfig.params.row ? 'row' : 'column';
             _.map(agg.buckets, (bucket, key) => {
-              const value = getBucketKey(aggConfig, bucket, key);
-              const useRawValue = !['ip_range', 'date_range'].includes(aggConfig.type.name);
+              const bucketProps = getBucketProps(aggConfig, bucket, key);
 
-              if (!charts[value]) {
-                charts[value] = {
-                  label: aggConfig.makeLabel(value),
+              chart = bucketProps.value;
+              if (!charts[chart]) {
+                charts[chart] = {
+                  label: aggConfig.makeLabel(chart),
                   series: {}
                 };
               }
-              chart = value;
-              const newAggs = aggs.concat({
-                id: aggConfig.id,
-                label: aggConfig.makeLabel(),
-                value: value,
-                rawValue: useRawValue ? getBucketRawKey(aggConfig, bucket) : null
-              });
-              return getSeries(bucket, chart, seri, category, newAggs, id === lastBucket.id);
+
+              return getSeries(bucket, chart, seri, category, aggs.concat(bucketProps), id === lastBucket.id);
             });
           } else if (aggConfig.schema.name === 'segment') {
             xAxisFormatter = aggConfig.fieldFormatter('text');
             scale = aggConfig.write().metricScale || 1;
-            if (['range', 'filters'].includes(aggConfig.type.name)) {
-              const sortedBuckets = [];
-              if (aggConfig.type.name === 'range') {
-                aggConfig.params.ranges.forEach(range => {
-                  const key = _.findKey(agg.buckets, bucket => bucket.from === range.from && bucket.to === range.to);
-                  agg.buckets[key].key = key;
-                  sortedBuckets.push(agg.buckets[key]);
-                });
-              } else if (aggConfig.type.name === 'filters') {
-                aggConfig.params.filters.forEach(filter => {
-                  const key = filter.label || filter.input.query.query_string.query;
-                  agg.buckets[key].key = key;
-                  sortedBuckets.push(agg.buckets[key]);
-                });
-              }
-              agg.buckets = sortedBuckets;
-            }
+
             _.map(agg.buckets, (bucket, key) => {
               const useRawValue = !['range', 'ip_range', 'date_range', 'filters'].includes(aggConfig.type.name);
               const value = {
@@ -185,17 +197,8 @@ const seriesResponseHandlerProvider = function () {
 
           } else if (aggConfig.schema.group === 'buckets') {
             _.map(agg.buckets, (bucket, key) => {
-              const value = getBucketKey(aggConfig, bucket, key);
-              const useRawValue = !['ip_range', 'date_range'].includes(aggConfig.type.name);
-
-              const newAggs = aggs.concat({
-                id: aggConfig.id,
-                label: aggConfig.makeLabel(),
-                value: value,
-                rawValue: useRawValue ? getBucketRawKey(aggConfig, bucket) : null
-              });
-
-              return getSeries(bucket, chart, seri + value + ': ', category, newAggs, id === lastBucket.id);
+              const bucketProps = getBucketProps(aggConfig, bucket, key);
+              return getSeries(bucket, chart, seri + bucketProps.value + ': ', category, aggs.concat(bucketProps), id === lastBucket.id);
             });
           }
 
@@ -205,8 +208,8 @@ const seriesResponseHandlerProvider = function () {
       let result;
       if (buckets.length === 0) {
         if (metrics.length > 1 || metrics[0].type.name !== 'count') {
-          esResponse.aggregations.doc_count = esResponse.hits.total;
-          getSeries(esResponse.aggregations, 0, '', null, [], true);
+          clonedResponse.aggregations.doc_count = clonedResponse.hits.total;
+          getSeries(clonedResponse.aggregations, 0, '', null, [], true);
           result = {
             charts: _.map(charts, chart => {
               chart.series = _.values(chart.series);
@@ -219,15 +222,15 @@ const seriesResponseHandlerProvider = function () {
               label: '',
               series: [{
                 label: 'Count',
-                aggs: [{ label: 'Count', value: esResponse.hits.total }],
+                aggs: [{ label: 'Count', value: clonedResponse.hits.total }],
                 formatter: metrics[0].fieldFormatter('text'),
-                values: [ { x: 'all', y: esResponse.hits.total } ]
+                values: [ { x: 'all', y: clonedResponse.hits.total } ]
               }]
             }]
           };
         }
       } else {
-        getSeries(esResponse.aggregations, 0, '');
+        getSeries(clonedResponse.aggregations, 0, '');
         result = {
           charts: _.map(charts, chart => {
             chart.series = _.values(chart.series);
@@ -237,7 +240,7 @@ const seriesResponseHandlerProvider = function () {
       }
 
       result.split = chartSplit;
-      result.hits = esResponse.hits.total;
+      result.hits = clonedResponse.hits.total;
 
       return Promise.resolve(result);
     }
