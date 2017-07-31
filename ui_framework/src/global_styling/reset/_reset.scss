@@ -7,6 +7,12 @@
   box-sizing: border-box;
 }
 
+/**
+ * 1. Inheriting the font will allow some browser defaults to take effect, e.g. Chrome applies
+ *    `font: 11px system-ui` to the button element. We can't hardcode the font-family here because
+ *    that will disrupt components which rely upon a different inherited font-family, e.g. code
+ *    blocks.
+ */
 html, body, div, span, applet, object, iframe,
 h1, h2, h3, h4, h5, h6, p, blockquote, pre,
 a, abbr, acronym, address, big, cite, code,
@@ -24,8 +30,8 @@ time, mark, audio, video {
   padding: 0;
   border: 0;
   font-size: 100%;
-  font: inherit;
-  font-family: $kuiFontFamily;
+  font: inherit; /* 1 */
+  font-family: inherit; /* 1 */
   vertical-align: baseline;
 }
 
