@@ -239,6 +239,7 @@ app.controller('timelion', function (
       $scope.running = false;
 
       const err = new Error(resp.message);
+      err.stack = resp.stack;
       notify.error(err);
 
     });

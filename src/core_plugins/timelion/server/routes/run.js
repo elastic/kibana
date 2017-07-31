@@ -7,7 +7,7 @@ function replyWithError(e, reply) {
   reply({
     title: e.toString(),
     message: e.toString()
-  }).code(400);
+  }).code(500);
 }
 
 
@@ -42,6 +42,7 @@ export default function (server) {
         });
 
       } catch (err) {
+        server.log(['timelion', 'error'], `${err.toString()}: ${err.stack}`);
         // TODO Maybe we should just replace everywhere we throw with Boom? Probably.
         if (err.isBoom) {
           reply(err);

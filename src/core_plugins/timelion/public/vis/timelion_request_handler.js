@@ -36,6 +36,7 @@ const TimelionRequestHandlerProvider = function (Private, Notifier, $http, $root
           })
           .error(function (resp) {
             const err = new Error(resp.message);
+            err.stack = resp.stack;
             notify.error(err);
             reject(err);
           });
