@@ -134,15 +134,12 @@ uiModules
           });
         }
 
-        let resizeInit = false;
         const resizeFunc = _.debounce(() => {
-          if (!resizeInit) return resizeInit = true;
-          $scope.vis.size = [$el.width(), $el.height()];
           $scope.$broadcast('render');
         }, 200);
         resizeChecker.on('resize',  resizeFunc);
 
-      // visualize needs to know about timeFilter
+        // visualize needs to know about timeFilter
         $scope.$listen(timefilter, 'fetch', $scope.fetch);
         $scope.$on('renderComplete', () => {
           $el.trigger('renderComplete');

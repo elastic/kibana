@@ -26,12 +26,20 @@ uiModules
     template: visualizationTemplate,
     link: function ($scope, $el) {
       const minVisChartHeight = 180;
-      const resizeChecker = new ResizeChecker($el);
+      const visualizationPlusEditorResizeChecker = new ResizeChecker($el);
 
       //todo: lets make this a simple function call.
       const getVisEl = jQueryGetter('.visualize-chart');
       const getVisContainer = jQueryGetter('.vis-container');
       const getSpyContainer = jQueryGetter('.visualize-spy-container');
+
+      const visElement = getVisEl();
+      const chartResizeChecker  = new ResizeChecker(visElement);
+      chartResizeChecker.on('resize', _.debounce(()=>{
+        $scope.vis.size = [visElement.width(), visElement.height()];
+        $scope.$emit('render');
+      }, 200));
+
 
       // Show no results message when isZeroHits is true and it requires search
       $scope.showNoResultsMessage = function () {
@@ -124,8 +132,9 @@ uiModules
       });
 
       $scope.$on('$destroy', () => {
-        resizeChecker.destroy();
+        visualizationPlusEditorResizeChecker.destroy();
         visualization.destroy();
+        chartResizeChecker.destroy();
       });
 
       if (!$scope.vis.visualizeScope) {
@@ -138,7 +147,7 @@ uiModules
           if (!resizeInit) return resizeInit = true;
           $scope.$emit('render');
         }, 200);
-        resizeChecker.on('resize',  resizeFunc);
+        visualizationPlusEditorResizeChecker.on('resize',  resizeFunc);
       }
 
       function jQueryGetter(selector) {

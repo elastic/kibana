@@ -22,8 +22,9 @@ function serializer() {
 }
 
 const getUpdateStatus = ($scope) => {
-  if (!$scope._oldStatus) $scope._oldStatus = [];
-
+  if (!$scope._oldStatus) {
+    $scope._oldStatus = {};
+  }
   const hasChanged = (name, value) => {
     const currentValue = JSON.stringify(value, serializer());
     if (currentValue !== $scope._oldStatus[name]) {
@@ -33,15 +34,26 @@ const getUpdateStatus = ($scope) => {
     return false;
   };
 
-  const status = {
+  function hasSizeChanged(oldStatus, newSize) {
+    if (!newSize) {
+      return true;
+    }
+    if (!oldStatus.size) {//initialize
+      oldStatus.size = newSize.slice();
+      return true;
+    }
+    const hasChanged = oldStatus.size[0] !== newSize[0] || oldStatus.size[1] !== newSize[1];
+    oldStatus.size = newSize.slice();
+    return hasChanged;
+  }
+
+  return {
     aggs: hasChanged('aggs', $scope.vis.aggs),
     data: hasChanged('data', $scope.visData),
     params: hasChanged('param', $scope.vis.params),
-    resize: hasChanged('resize', $scope.vis.size),
+    resize: hasSizeChanged($scope._oldStatus, $scope.vis.size),
     uiState: hasChanged('uiState', $scope.uiState)
   };
-
-  return status;
 };
 
 module.exports = { getUpdateStatus };
