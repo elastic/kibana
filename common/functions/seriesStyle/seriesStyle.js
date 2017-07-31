@@ -15,34 +15,41 @@ module.exports = new Fn({
   args: {
     label: {
       types: ['string'],
+      displayName: 'Series Label',
       help: 'The label of the line this style applies to, not the name you would like to give the line.',
     },
     color: {
       types: ['string', 'null'],
+      displayName: 'Color',
       help: 'Color to assign the line',
     },
     lines: {
       types: ['number', 'null'],
+      displayName: 'Line width',
       help: 'Width of the line',
       default: 2,
     },
     bars: {
       types: ['number', 'null'],
+      displayName: 'Bar Width',
       help: 'Width of bars',
       default: 0,
     },
     points: {
       types: ['number', 'null'],
+      displayName: 'Show Points',
       help: 'Size of points on line',
       default: 0,
     },
     fill: {
       types: ['boolean', 'null'],
+      displayName: 'Fill points',
       help: 'Should we fill points?',
       default: false,
     },
     stack: {
       types: ['boolean', 'null'],
+      displayName: 'Stack Series',
       help: 'Should we stack the series?',
       default: false,
     },

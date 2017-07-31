@@ -23,28 +23,25 @@ export class Model extends ArgForm {
     Object.assign(this, defaultProps, pick(props, propNames));
   }
 
-  resolveArgs(dataArgs, props) {
+  resolveArgs(dataArg, props) {
     // custom argument resolver
     // uses `modelArgs` from following expression to control which arguments get rendered
     const { nextExpressionType } = props;
     const modelArgs = getModelArgs(nextExpressionType);
 
-    return dataArgs.map((dataArg) => {
-      // if modelArgs is false, something went wrong here
-      if (modelArgs === NO_MODEL_ARGS) {
-        // if there is a next expression, it is lacking modelArgs, so we throw
-        throw new Error(`${nextExpressionType.displayName} modelArgs Error:
-          The modelArgs value is empty. Either it should contain an arg,
-          or a model should not be used in the expression.
-        `);
-      }
+    // if modelArgs is false, something went wrong here
+    if (modelArgs === NO_MODEL_ARGS) {
+      // if there is a next expression, it is lacking modelArgs, so we throw
+      throw new Error(`${nextExpressionType.displayName} modelArgs Error:
+        The modelArgs value is empty. Either it should contain an arg,
+        or a model should not be used in the expression.
+      `);
+    }
 
-      // if argument is missing from modelArgs, mark it as skipped
-      return {
-        ...dataArg,
-        skipRender: modelArgs !== NO_NEXT_EXP && !modelArgs.includes(dataArg.argName),
-      };
-    }).filter(Boolean);
+    // if argument is missing from modelArgs, mark it as skipped
+    return {
+      skipRender: modelArgs !== NO_NEXT_EXP && !modelArgs.includes(dataArg.argName),
+    };
   }
 }
 

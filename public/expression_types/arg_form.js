@@ -1,11 +1,12 @@
 import React from 'react';
 import { Label, Alert } from 'react-bootstrap';
-import { BaseForm } from './base_form';
 import { isPlainObject, uniq, last } from 'lodash';
+import { BaseForm } from './base_form';
+import { fromExpression } from '../../common/lib/ast';
 
 export class ArgForm extends BaseForm {
   renderArg(props, dataArg) {
-    const { onValueRemove, ...passedProps } = props;
+    const { onValueRemove, onValueChange, ...passedProps } = props;
     const { arg, argValues, skipRender } = dataArg;
 
     // TODO: show some information to the user than an argument was skipped
@@ -14,8 +15,13 @@ export class ArgForm extends BaseForm {
     // If value in expression, render the argument's template, wrapped in a remove control
     return argValues && argValues.map((argValue, valueIndex) => (
       <div className="canvas__argtype__arg" key={`${props.typeInstance.name}-${arg.name}-${valueIndex}`}>
-        <div className="canvas__argtype__arg--controls">{ arg.render({ ...passedProps, argValue }) }</div>
-        <div className="canvas__argtype__arg--remove" onClick={() => onValueRemove(arg.name, valueIndex)}>
+        <div className="canvas__argtype__arg--controls">
+          {arg.render({ ...passedProps, valueIndex, argValue, onValueChange: onValueChange(arg.name, valueIndex) })}
+        </div>
+        <div
+          className="canvas__argtype__arg--remove"
+          onClick={onValueRemove(arg.name, valueIndex)}
+        >
           <i className="fa fa-trash-o" />
         </div>
       </div>
@@ -30,18 +36,19 @@ export class ArgForm extends BaseForm {
     if (!arg) return null;
 
     // if no value in expression, render the add control
+    // TODO: pass in the value when adding arguments, likely using some default defined in the type config
     return (!argValues || arg.multi) && (
       <div className="canvas__argtype__add" key={`${props.typeInstance.name}-${arg.name}-add`}>
-        <Label bsStyle="default" onClick={() => onValueAdd(arg.name)}>
+        <Label bsStyle="default" onClick={onValueAdd(arg.name, fromExpression(arg.defaultValue))}>
           + {arg.displayName}
         </Label>
       </div>
     );
   }
 
-  resolveArgs(dataArgs) {
+  resolveArg() {
     // basically a no-op placeholder
-    return dataArgs;
+    return {};
   }
 
   render(data = {}) {
@@ -57,10 +64,11 @@ export class ArgForm extends BaseForm {
       const arg = this.args.find(arg => arg.name === argName);
 
       // if arg is not multi, only preserve the last value found
+      // otherwise, leave the value alone (including if the arg is not defined)
       const isMulti = arg && arg.multi;
       const argValues = args[argName] && !isMulti ? [last(args[argName])] : args[argName];
 
-      return { arg, argName, argValues };
+      return { arg, argValues };
     });
 
     // props are passed to resolve and the returned object is mixed into the template props
@@ -68,7 +76,7 @@ export class ArgForm extends BaseForm {
 
     try {
       // allow a hook to override the data args
-      const resolvedDataArgs = this.resolveArgs(dataArgs, props);
+      const resolvedDataArgs = dataArgs.map(d => ({ ...d, ...this.resolveArg(d, props) }));
       return resolvedDataArgs.map(d => this.renderArg(props, d)).concat(resolvedDataArgs.map(d => this.renderAddArg(props, d)));
     } catch (e) {
       return (<Alert bsStyle="danger">

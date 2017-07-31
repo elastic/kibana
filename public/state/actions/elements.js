@@ -1,6 +1,6 @@
 import { createAction } from 'redux-actions';
 import { get, omit } from 'lodash';
-import { assign, set, del } from 'object-path-immutable';
+import { set, del } from 'object-path-immutable';
 import { notify } from '../../lib/notify';
 import { getSelectedElement, getElementById, getPages } from '../selectors/workpad';
 import { getDefaultElement } from '../defaults';
@@ -117,42 +117,42 @@ export const setAstAtIndex = createThunk('setAstAtIndex', ({ dispatch }, { index
 
 // index here is the top-level argument in the expression. for example in the expression
 // demodata().pointseries().plot(), demodata is 0, pointseries is 1, and plot is 2
+// argIndex is the index in multi-value arguments, and is optional. excluding it will cause
+// the entire argument from be set to the passed value
 export const setArgumentAtIndex = createThunk('setArgumentAtIndex', ({ dispatch }, args) => {
-  const { index, element, pageId, arg } = args;
-  const newElement = assign(element, ['ast', 'chain', index, 'arguments'], arg);
+  const { index, element, pageId, argName, value, valueIndex } = args;
+  const selector = ['ast', 'chain', index, 'arguments', argName];
+  if (valueIndex != null) selector.push(valueIndex);
+
+  const newElement = set(element, selector, value);
   dispatch(setExpression(astToExpression({ ast: get(newElement, 'ast'), element, pageId })));
 });
 
 // index here is the top-level argument in the expression. for example in the expression
 // demodata().pointseries().plot(), demodata is 0, pointseries is 1, and plot is 2
 export const addArgumentValueAtIndex = createThunk('addArgumentValueAtIndex', ({ dispatch }, args) => {
-  const { index, arg, element } = args;
-  const argKeys = Object.keys(arg);
+  const { index, argName, value, element } = args;
 
-  const argValues = argKeys.map((argKey) => {
-    const values = get(element, ['ast', 'chain', index, 'arguments', argKey], []);
-    return {
-      [argKey]: values.concat(arg[argKey]),
-    };
-  });
+  const values = get(element, ['ast', 'chain', index, 'arguments', argName], []);
+  const newValue = values.concat(value);
 
   dispatch(setArgumentAtIndex({
     ...args,
-    arg: argValues.reduce((acc, val) => {
-      return Object.assign(acc, val);
-    }, {}),
+    value: newValue,
   }));
 });
 
 // index here is the top-level argument in the expression. for example in the expression
 // demodata().pointseries().plot(), demodata is 0, pointseries is 1, and plot is 2
+// argIndex is the index in multi-value arguments, and is optional. excluding it will remove
+// the entire argument from the expresion
 export const deleteArgumentAtIndex = createThunk('deleteArgumentAtIndex', ({ dispatch }, args) => {
-  const { index, element, pageId, argName, valueIndex } = args;
+  const { index, element, pageId, argName, argIndex } = args;
   const curVal = get(element, ['ast', 'chain', index, 'arguments', argName]);
 
-  const newElement = (valueIndex && curVal.length > 1)
+  const newElement = (argIndex != null && curVal.length > 1)
     // if more than one val, remove the specified val
-    ? del(element, ['ast', 'chain', index, 'arguments', argName, valueIndex])
+    ? del(element, ['ast', 'chain', index, 'arguments', argName, argIndex])
     // otherwise, remove the entire key
     : del(element, ['ast', 'chain', index, 'arguments', argName]);
 
