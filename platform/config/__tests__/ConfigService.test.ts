@@ -2,7 +2,7 @@ import { BehaviorSubject } from 'rxjs';
 
 import { ConfigService } from '../ConfigService';
 import { Env } from '../Env';
-import { logger } from '../../logger/__mocks__';
+import { logger } from '../../logging/__mocks__';
 import { Schema } from '../../types';
 import * as schemaLib from '../../lib/schema';
 

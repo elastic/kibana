@@ -1,5 +1,5 @@
 import { KibanaPlugin, KibanaPluginFeatures } from '../../server/plugins/types';
-import { Logger } from '../../logger';
+import { Logger } from '../../logging';
 
 import { PidConfig } from './PidConfig';
 import { PidService } from './PidService';

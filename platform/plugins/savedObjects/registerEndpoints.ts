@@ -1,5 +1,5 @@
 import { Router } from '../../server/http';
-import { LoggerFactory } from '../../logger';
+import { LoggerFactory } from '../../logging';
 import { Schema } from '../../types';
 import { SavedObjectsService } from './SavedObjectsService';
 

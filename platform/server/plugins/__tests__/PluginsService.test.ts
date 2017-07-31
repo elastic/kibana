@@ -8,7 +8,7 @@ import { pick } from 'lodash';
 import { resolve } from 'path';
 
 import { PluginsService } from '../PluginsService';
-import { logger } from '../../../logger/__mocks__';
+import { logger } from '../../../logging/__mocks__';
 
 const examplesPluginsDir = resolve(__dirname, './examplePlugins');
 

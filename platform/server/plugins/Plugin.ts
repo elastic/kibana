@@ -4,7 +4,7 @@ import {
   KibanaPluginStatic,
   PluginName
 } from './types';
-import { Logger, LoggerFactory } from '../../logger';
+import { Logger, LoggerFactory } from '../../logging';
 import { createKibanaValuesForPlugin } from './KibanaPluginValues';
 import { KibanaCoreModules } from '../../types';
 
