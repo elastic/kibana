@@ -7,6 +7,7 @@
 
 import _ from 'lodash';
 import { RegistryFieldFormatsProvider } from 'ui/registry/field_formats';
+import { isPercentage } from '../vislib/isPercentage';
 
 export function VisAggConfigProvider(Private) {
   const fieldFormats = Private(RegistryFieldFormatsProvider);
@@ -298,8 +299,15 @@ export function VisAggConfigProvider(Private) {
     }
 
     if (!this.type) return '';
-    let pre = (_.get(this.vis, 'params.mode') === 'percentage') ? 'Percentage of ' : '';
+    let pre = (this.isPercentage()) ? 'Percentage of ' : '';
     return pre += this.type.makeLabel(this);
+  };
+
+  AggConfig.prototype.isPercentage = function () {
+    if (!this.vis || !this.vis.params || !this.vis.params.seriesParams || !this.vis.params.valueAxes) {
+      return false;
+    }
+    return isPercentage(this.id, this.vis.params.seriesParams, this.vis.params.valueAxes);
   };
 
   AggConfig.prototype.getIndexPattern = function () {
