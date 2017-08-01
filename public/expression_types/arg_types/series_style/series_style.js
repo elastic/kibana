@@ -45,7 +45,7 @@ const template = (props) => {
                 onChange={(ev) => handleChange('label', ev)}
               >
                 <option value={null} disabled>Select a Series Label</option>
-                { labels.map(val => <option key={val} value={val}>{val}</option>) }
+                { labels.sort().map(val => <option key={val} value={val}>{val}</option>) }
               </FormControl>
             )
           }
