@@ -48,7 +48,8 @@ would also be a valid query.
 
 [NOTE]
 ============
-Terms without fields will be matched against all fields. For example, a query for `200` will search for the value 200 across all fields in your index.
+Terms without fields will be matched against all fields. For example, a query for `response:200` will search for the value 200
+in the response field, but a query for just `200` will search for 200 across all fields in your index.
 ============
 
 ==== Function Reference
