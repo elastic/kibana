@@ -3,6 +3,7 @@ import React from 'react';
 import { renderToHtml } from '../../services';
 
 import {
+  GuideCode,
   GuideDemo,
   GuidePage,
   GuideSection,
@@ -31,7 +32,8 @@ export default props => (
       }]}
     >
       <GuideText>
-        Description needed: how to use the Button component.
+        Button <GuideCode>type</GuideCode> defines the color of the button.
+        <GuideCode>fill</GuideCode> can be optionally added to add more focus to an action.
       </GuideText>
 
       <GuideDemo>
@@ -49,7 +51,8 @@ export default props => (
       }]}
     >
       <GuideText>
-        Description needed: how to use the Button component.
+        The passed icon needs to come from our list of svg icons. Can be flipped
+        to the other side by passing <GuideCode>iconReverse</GuideCode>.
       </GuideText>
 
       <GuideDemo>
