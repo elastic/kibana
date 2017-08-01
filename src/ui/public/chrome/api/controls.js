@@ -19,6 +19,10 @@ export default function (chrome, internals) {
    * @return {chrome}
    */
   chrome.setVisible = function (display) {
+    if (!def) {
+      // If the default chrome visibility is off, we don't want it to ever appear.
+      return;
+    }
     internals.visible = Boolean(display);
     return chrome;
   };

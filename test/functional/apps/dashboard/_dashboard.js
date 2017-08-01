@@ -190,6 +190,32 @@ export default function ({ getService, getPageObjects }) {
       });
     });
 
+    describe('embed mode', () => {
+      it('hides the chrome', async () => {
+        let isChromeVisible = await PageObjects.common.isChromeVisible();
+        expect(isChromeVisible).to.be(true);
+
+        const currentUrl = await remote.getCurrentUrl();
+        const newUrl = currentUrl + '&embed=true';
+        // Embed parameter only works on a hard refresh.
+        const useTimeStamp = true;
+        await remote.get(newUrl.toString(), useTimeStamp);
+
+        await retry.try(async () => {
+          isChromeVisible = await PageObjects.common.isChromeVisible();
+          expect(isChromeVisible).to.be(false);
+        });
+      });
+
+      after(async function () {
+        const currentUrl = await remote.getCurrentUrl();
+        const newUrl = currentUrl.replace('&embed=true', '');
+        // Remove the timestamp so the rest of the tests retain state across app navigation.
+        const useTimeStamp = false;
+        await remote.get(newUrl.toString(), useTimeStamp);
+      });
+    });
+
     describe('add new visualization link', () => {
       it('adds a new visualization', async () => {
         await PageObjects.dashboard.clickAddVisualization();
