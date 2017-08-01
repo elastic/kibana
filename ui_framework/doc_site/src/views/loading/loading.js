@@ -1,15 +1,13 @@
 import React from 'react';
 
 import {
-  KuiIcon,
+  KuiLoading,
 } from '../../../../components/';
 
 export default () => (
   <div>
-    <KuiIcon
-      type="search"
-      size="large"
-      title="Find information"
-    />
+    <KuiLoading size="medium"/>
+    <KuiLoading size="large"/>
+    <KuiLoading size="xLarge"/>
   </div>
 );

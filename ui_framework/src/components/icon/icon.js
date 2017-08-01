@@ -16,6 +16,10 @@ import '!!svg-sprite!./assets/search.svg';
 import '!!svg-sprite!./assets/user.svg';
 import '!!svg-sprite!./assets/help.svg';
 import '!!svg-sprite!./assets/cross.svg';
+import '!!svg-sprite!./assets/arrow_up.svg';
+import '!!svg-sprite!./assets/arrow_down.svg';
+import '!!svg-sprite!./assets/arrow_left.svg';
+import '!!svg-sprite!./assets/arrow_right.svg';
 
 const humanizeCamelCase = str => (
   // Put spaces between words in camel-cased strings.
@@ -36,6 +40,10 @@ const typeToIconMap = {
   user: 'user',
   help: 'help',
   cross: 'cross',
+  arrowUp: 'arrow_up',
+  arrowDown: 'arrow_down',
+  arrowLeft: 'arrow_left',
+  arrowRight: 'arrow_right',
 };
 
 export const TYPES = Object.keys(typeToIconMap);

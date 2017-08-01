@@ -2,7 +2,7 @@ import React from 'react';
 
 import {
   KuiKeyboardAccessible,
-} from '../../../../components';
+} from '../../../../components/';
 
 // For custom components, we just need to make sure they delegate props to their rendered root
 // element, e.g. onClick, tabIndex, and role.

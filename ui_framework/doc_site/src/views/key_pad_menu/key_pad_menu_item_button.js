@@ -3,7 +3,7 @@ import React from 'react';
 import {
   KuiIcon,
   KuiKeyPadMenuItemButton,
-} from '../../../../components';
+} from '../../../../components/';
 
 export default () => (
   <KuiKeyPadMenuItemButton

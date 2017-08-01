@@ -83,7 +83,8 @@ button {
   border: none;
   padding: 0;
   margin: 0;
-  outline: none; }
+  outline: none;
+  font-size: 16px; }
   button:hover {
     cursor: pointer; }
 
@@ -334,6 +335,144 @@ table {
 .kuiAvatar--large {
   width: 64px;
   height: 64px; }
+
+.kuiButton {
+  display: inline-block;
+  -webkit-appearance: none;
+     -moz-appearance: none;
+          appearance: none;
+  cursor: pointer;
+  height: 40px;
+  text-decoration: none;
+  border: solid 1px #0079a5;
+  border-radius: 4px;
+  color: #0079a5;
+  padding: 0 8px;
+  min-width: 112px;
+  text-align: center;
+  font-family: "Roboto", Helvetica, Arial, sans-serif;
+  transition: all 250ms cubic-bezier(0.34, 1.61, 0.7, 1);
+  whitespace: nowrap; }
+  .kuiButton.kuiButton--small {
+    height: 32px; }
+  .kuiButton .kuiButton__icon {
+    vertical-align: -2px;
+    fill: #0079a5; }
+  .kuiButton:hover, .kuiButton:focus {
+    text-decoration: underline;
+    background-color: rgba(0, 121, 165, 0.1); }
+  .kuiButton:focus {
+    -webkit-transform: translateY(2px);
+            transform: translateY(2px); }
+  .kuiButton.kuiButton--fill {
+    background-color: #0079a5;
+    color: #FFF;
+    border-color: #0079a5; }
+    .kuiButton.kuiButton--fill:hover, .kuiButton.kuiButton--fill:focus {
+      background-color: #00668c;
+      border-color: #00668c; }
+    .kuiButton.kuiButton--fill .kuiButton__icon {
+      fill: #FFF; }
+
+.kuiButton__inner {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-orient: horizontal;
+  -webkit-box-direction: normal;
+  -webkit-flex-direction: row;
+      -ms-flex-direction: row;
+          flex-direction: row;
+  -webkit-box-pack: center;
+  -webkit-justify-content: center;
+      -ms-flex-pack: center;
+          justify-content: center;
+  -webkit-box-align: center;
+  -webkit-align-items: center;
+      -ms-flex-align: center;
+          align-items: center; }
+  .kuiButton__inner > * + * {
+    margin-left: 8px; }
+
+.kuiButton__inner--reverse {
+  -webkit-box-orient: horizontal;
+  -webkit-box-direction: reverse;
+  -webkit-flex-direction: row-reverse;
+      -ms-flex-direction: row-reverse;
+          flex-direction: row-reverse; }
+  .kuiButton__inner--reverse > * + * {
+    margin-left: 0;
+    margin-right: 8px; }
+
+.kuiButton--secondary {
+  color: #00A69B;
+  border-color: #00A69B; }
+  .kuiButton--secondary .kuiButton__icon {
+    fill: #00A69B; }
+  .kuiButton--secondary:hover, .kuiButton--secondary:focus {
+    background-color: rgba(0, 166, 155, 0.1); }
+  .kuiButton--secondary.kuiButton--fill {
+    background-color: #00A69B;
+    color: #FFF;
+    border-color: #00A69B; }
+    .kuiButton--secondary.kuiButton--fill:hover, .kuiButton--secondary.kuiButton--fill:focus {
+      background-color: #008d83;
+      border-color: #008d83; }
+    .kuiButton--secondary.kuiButton--fill .kuiButton__icon {
+      fill: #FFF; }
+
+.kuiButton--danger {
+  color: #A30000;
+  border-color: #A30000; }
+  .kuiButton--danger .kuiButton__icon {
+    fill: #A30000; }
+  .kuiButton--danger:hover, .kuiButton--danger:focus {
+    background-color: rgba(163, 0, 0, 0.1); }
+  .kuiButton--danger.kuiButton--fill {
+    background-color: #A30000;
+    color: #FFF;
+    border-color: #A30000; }
+    .kuiButton--danger.kuiButton--fill:hover, .kuiButton--danger.kuiButton--fill:focus {
+      background-color: #8a0000;
+      border-color: #8a0000; }
+    .kuiButton--danger.kuiButton--fill .kuiButton__icon {
+      fill: #FFF; }
+
+.kuiButton--warning {
+  color: #E5830E;
+  border-color: #E5830E; }
+  .kuiButton--warning .kuiButton__icon {
+    fill: #E5830E; }
+  .kuiButton--warning:hover, .kuiButton--warning:focus {
+    background-color: rgba(229, 131, 14, 0.1); }
+  .kuiButton--warning.kuiButton--fill {
+    background-color: #E5830E;
+    color: #FFF;
+    border-color: #E5830E; }
+    .kuiButton--warning.kuiButton--fill:hover, .kuiButton--warning.kuiButton--fill:focus {
+      background-color: #cd750d;
+      border-color: #cd750d; }
+    .kuiButton--warning.kuiButton--fill .kuiButton__icon {
+      fill: #FFF; }
+
+.kuiButton--disabled {
+  color: #c5c5c5;
+  border-color: #c5c5c5; }
+  .kuiButton--disabled .kuiButton__icon {
+    fill: #c5c5c5; }
+  .kuiButton--disabled:hover, .kuiButton--disabled:focus {
+    background-color: rgba(197, 197, 197, 0.1);
+    cursor: not-allowed; }
+  .kuiButton--disabled.kuiButton--fill {
+    background-color: #c5c5c5;
+    color: #FFF;
+    border-color: #c5c5c5; }
+    .kuiButton--disabled.kuiButton--fill:hover, .kuiButton--disabled.kuiButton--fill:focus {
+      background-color: #b8b8b8;
+      border-color: #b8b8b8; }
+    .kuiButton--disabled.kuiButton--fill .kuiButton__icon {
+      fill: #FFF; }
 
 .kuiHeader {
   display: -webkit-box;
@@ -1026,3 +1165,175 @@ table {
   line-height: 24px;
   color: #3F3F3F;
   font-weight: 400; }
+
+.kuiLoading {
+  position: relative;
+  display: inline-block; }
+  .kuiLoading:after {
+    position: absolute;
+    content: "";
+    width: 90%;
+    left: 50%;
+    -webkit-transform: translateX(-50%);
+            transform: translateX(-50%);
+    border-radius: 50%;
+    background-color: #000;
+    opacity: 0.2;
+    -webkit-transform-origin: -50% -50%;
+            transform-origin: -50% -50%;
+    -webkit-animation: 1s pulsate cubic-bezier(0.694, 0.0482, 0.335, 1) infinite;
+            animation: 1s pulsate cubic-bezier(0.694, 0.0482, 0.335, 1) infinite;
+    z-index: 1; }
+
+.kuiLoading--medium:after {
+  height: 4px;
+  bottom: -4px; }
+
+.kuiLoading--medium .kuiLoading__icon {
+  z-index: 999;
+  -webkit-animation: 1s bounceMedium cubic-bezier(0.694, 0.0482, 0.335, 1) infinite;
+          animation: 1s bounceMedium cubic-bezier(0.694, 0.0482, 0.335, 1) infinite; }
+
+.kuiLoading--large:after {
+  height: 8px;
+  bottom: -8px; }
+
+.kuiLoading--large .kuiLoading__icon {
+  -webkit-animation: 1s bounceLarge cubic-bezier(0.694, 0.0482, 0.335, 1) infinite;
+          animation: 1s bounceLarge cubic-bezier(0.694, 0.0482, 0.335, 1) infinite; }
+
+.kuiLoading--xLarge:after {
+  height: 12px;
+  bottom: -12px; }
+
+.kuiLoading--xLarge .kuiLoading__icon {
+  -webkit-animation: 1s bounceXLarge cubic-bezier(0.694, 0.0482, 0.335, 1) infinite;
+          animation: 1s bounceXLarge cubic-bezier(0.694, 0.0482, 0.335, 1) infinite; }
+
+@-webkit-keyframes bounceMedium {
+  50% {
+    -webkit-transform: translateY(-8px);
+            transform: translateY(-8px); } }
+
+@keyframes bounceMedium {
+  50% {
+    -webkit-transform: translateY(-8px);
+            transform: translateY(-8px); } }
+
+@-webkit-keyframes bounceLarge {
+  50% {
+    -webkit-transform: translateY(-12px);
+            transform: translateY(-12px); } }
+
+@keyframes bounceLarge {
+  50% {
+    -webkit-transform: translateY(-12px);
+            transform: translateY(-12px); } }
+
+@-webkit-keyframes bounceXLarge {
+  50% {
+    -webkit-transform: translateY(-16px);
+            transform: translateY(-16px); } }
+
+@keyframes bounceXLarge {
+  50% {
+    -webkit-transform: translateY(-16px);
+            transform: translateY(-16px); } }
+
+@-webkit-keyframes pulsate {
+  0% {
+    opacity: 0; }
+  50% {
+    -webkit-transform: scale(0.5);
+            transform: scale(0.5);
+    opacity: 0.15; }
+  100% {
+    opacity: 0; } }
+
+@keyframes pulsate {
+  0% {
+    opacity: 0; }
+  50% {
+    -webkit-transform: scale(0.5);
+            transform: scale(0.5);
+    opacity: 0.15; }
+  100% {
+    opacity: 0; } }
+
+.kuiLoadingChart {
+  height: 32px;
+  z-index: 500;
+  overflow: hidden;
+  display: inline-block; }
+  .kuiLoadingChart > div {
+    height: 100%;
+    width: 8px;
+    display: inline-block;
+    float: left;
+    margin-bottom: -16px;
+    margin-left: 2px; }
+    .kuiLoadingChart > div:nth-child(1) {
+      background-color: #0079a5;
+      -webkit-animation: chart 1s infinite;
+              animation: chart 1s infinite; }
+    .kuiLoadingChart > div:nth-child(2) {
+      background-color: #00A69B;
+      -webkit-animation: chart 1s infinite;
+              animation: chart 1s infinite;
+      -webkit-animation-delay: .1s;
+              animation-delay: .1s; }
+    .kuiLoadingChart > div:nth-child(3) {
+      background-color: #DD0A73;
+      -webkit-animation: chart 1s infinite;
+              animation: chart 1s infinite;
+      -webkit-animation-delay: .2s;
+              animation-delay: .2s; }
+    .kuiLoadingChart > div:nth-child(4) {
+      background-color: #3F3F3F;
+      -webkit-animation: chart 1s infinite;
+              animation: chart 1s infinite;
+      -webkit-animation-delay: .3s;
+              animation-delay: .3s; }
+
+.kuiLoadingChart--medium {
+  height: 16px; }
+  .kuiLoadingChart--medium > div {
+    width: 2px;
+    margin-left: 2px;
+    margin-bottom: 8px; }
+
+.kuiLoadingChart--large {
+  height: 24px; }
+  .kuiLoadingChart--large > div {
+    width: 4px;
+    margin-left: 2px;
+    margin-bottom: 12px; }
+
+.kuiLoadingChart--xLarge {
+  height: 32px; }
+  .kuiLoadingChart--xLarge > div {
+    width: 8px;
+    margin-left: 4px;
+    margin-bottom: 16px; }
+
+@-webkit-keyframes chart {
+  0% {
+    -webkit-transform: translateY(0);
+            transform: translateY(0); }
+  50% {
+    -webkit-transform: translateY(66%);
+            transform: translateY(66%); }
+  100% {
+    -webkit-transform: translateY(0);
+            transform: translateY(0); } }
+
+@keyframes chart {
+  0% {
+    -webkit-transform: translateY(0);
+            transform: translateY(0); }
+  50% {
+    -webkit-transform: translateY(66%);
+            transform: translateY(66%); }
+  100% {
+    -webkit-transform: translateY(0);
+            transform: translateY(0); } }

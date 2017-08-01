@@ -3,7 +3,7 @@ import React from 'react';
 import {
   KuiTitle,
   KuiText,
-} from '../../../../components';
+} from '../../../../components/';
 
 export default () => (
   <div>

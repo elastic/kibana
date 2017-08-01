@@ -4,7 +4,7 @@ import {
   KuiIcon,
   KuiKeyPadMenu,
   KuiKeyPadMenuItem,
-} from '../../../../components';
+} from '../../../../components/';
 
 export default () => (
   <KuiKeyPadMenu>

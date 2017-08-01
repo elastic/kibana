@@ -1,0 +1,82 @@
+.kuiLoading {
+  position: relative;
+  display: inline-block;
+
+  &:after {
+    position: absolute;
+    content: "";
+    width: 90%;
+    left: 50%;
+    transform: translateX(-50%);
+    border-radius: 50%;
+    background-color: $kuiColorFullShade;
+    opacity: 0.2;
+    transform-origin: -50% -50%;
+    animation: 1s pulsate $kuiAnimSlightResistance infinite;
+    z-index: 1;
+  }
+}
+
+.kuiLoading--medium {
+  &:after {
+    height: $kuiSizeXS;
+    bottom: -$kuiSizeXS;
+  }
+  .kuiLoading__icon {
+    z-index: 999;
+    animation: 1s bounceMedium $kuiAnimSlightResistance infinite;
+  }
+}
+
+.kuiLoading--large {
+  &:after {
+    height: $kuiSizeS;
+    bottom: -$kuiSizeS;
+  }
+  .kuiLoading__icon {
+    animation: 1s bounceLarge $kuiAnimSlightResistance infinite;
+  }
+}
+
+.kuiLoading--xLarge {
+  &:after {
+    height: ($kuiSize - $kuiSizeXS);
+    bottom: -($kuiSize - $kuiSizeXS);
+  }
+  .kuiLoading__icon {
+    animation: 1s bounceXLarge $kuiAnimSlightResistance infinite;
+  }
+}
+
+@keyframes bounceMedium {
+  50% {
+    transform: translateY(-$kuiSizeS);
+  }
+}
+
+@keyframes bounceLarge {
+  50% {
+    transform: translateY(-($kuiSize - $kuiSizeXS));
+  }
+}
+
+@keyframes bounceXLarge {
+  50% {
+    transform: translateY(-$kuiSize);
+  }
+}
+
+@keyframes pulsate {
+  0% {
+    opacity: 0;
+  }
+  50% {
+    transform: scale(0.5);
+    opacity: 0.15;
+  }
+
+  100% {
+    opacity: 0;
+  }
+}
+

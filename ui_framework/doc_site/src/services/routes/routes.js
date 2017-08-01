@@ -3,6 +3,9 @@ import Slugify from '../string/slugify';
 import AccessibilityExample
   from '../../views/accessibility/accessibility_example';
 
+import ButtonExample
+  from '../../views/button/button_example';
+
 import IconExample
   from '../../views/icon/icon_example';
 
@@ -24,6 +27,9 @@ import ModalExample
 import PageExample
   from '../../views/page/page_example';
 
+import LoadingExample
+  from '../../views/loading/loading_example';
+
 import PopoverExample
   from '../../views/popover/popover_example';
 
@@ -37,6 +43,10 @@ import TypographyExample
 const components = [{
   name: 'Accessibility',
   component: AccessibilityExample,
+  hasReact: true,
+}, {
+  name: 'Button',
+  component: ButtonExample,
   hasReact: true,
 }, {
   name: 'Icon',
@@ -61,6 +71,10 @@ const components = [{
 }, {
   name: 'Page',
   component: PageExample,
+  hasReact: true,
+}, {
+  name: 'Loading',
+  component: LoadingExample,
   hasReact: true,
 }, {
   name: 'Popover',

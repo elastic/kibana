@@ -5,7 +5,7 @@ import classNames from 'classnames';
 
 import {
   KuiIcon,
-} from '../../../components';
+} from '../../../components/';
 
 export const KuiHeaderLogo = ({ href, className, ...rest }) => {
   const classes = classNames('kuiHeaderLogo', className);
