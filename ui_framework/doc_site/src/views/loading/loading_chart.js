@@ -15,6 +15,18 @@ export default () => (
     &nbsp;&nbsp;
 
     <KuiLoadingChart size="xLarge"/>
+
+    <br/><br/>
+
+    <KuiLoadingChart mono size="medium"/>
+
+    &nbsp;&nbsp;
+
+    <KuiLoadingChart mono size="large"/>
+
+    &nbsp;&nbsp;
+
+    <KuiLoadingChart mono size="xLarge"/>
   </div>
 );
 

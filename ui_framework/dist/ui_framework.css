@@ -1295,6 +1295,18 @@ table {
       -webkit-animation-delay: .3s;
               animation-delay: .3s; }
 
+.kuiLoadingChart--mono > div:nth-child(1) {
+  background-color: #D9D9D9; }
+
+.kuiLoadingChart--mono > div:nth-child(2) {
+  background-color: #cfcfcf; }
+
+.kuiLoadingChart--mono > div:nth-child(3) {
+  background-color: #c5c5c5; }
+
+.kuiLoadingChart--mono > div:nth-child(4) {
+  background-color: #bababa; }
+
 .kuiLoadingChart--medium {
   height: 16px; }
   .kuiLoadingChart--medium > div {

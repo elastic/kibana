@@ -11,9 +11,10 @@ const sizeToClassNameMap = {
 
 export const SIZES = Object.keys(sizeToClassNameMap);
 
-export const KuiLoadingChart = ({ size, className, ...rest }) => {
+export const KuiLoadingChart = ({ size, mono, className, ...rest }) => {
   const classes = classNames(
     'kuiLoadingChart',
+    mono === true ? 'kuiLoadingChart--mono' : '',
     className,
     sizeToClassNameMap[size],
   );
