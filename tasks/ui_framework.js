@@ -88,7 +88,7 @@ module.exports = function (grunt) {
 
     return new Promise(resolve => {
       sass.render({
-        file: 'ui_framework/components/index.scss'
+        file: src,
       }, function (error, result) {
         if (error) {
           grunt.log.error(error);
