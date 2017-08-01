@@ -2,7 +2,7 @@ import React from 'react';
 
 import {
   KuiLoadingSpinner,
-} from '../../../../components/';
+} from '../../../../components';
 
 export default () => (
   <div>

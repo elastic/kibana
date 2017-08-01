@@ -4,7 +4,7 @@ import React, {
 
 import {
   KuiPopover,
-} from '../../../../components/';
+} from '../../../../components';
 
 export default class extends Component {
   constructor(props) {

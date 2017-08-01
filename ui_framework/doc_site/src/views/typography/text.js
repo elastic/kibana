@@ -2,7 +2,7 @@ import React from 'react';
 
 import {
   KuiText,
-} from '../../../../components/';
+} from '../../../../components';
 
 export default () => (
   <KuiText>

@@ -15,7 +15,7 @@ import {
   KuiKeyPadMenu,
   KuiKeyPadMenuItem,
   KuiPopover,
-} from '../../../../components/';
+} from '../../../../components';
 
 export default class extends Component {
   constructor(props) {
