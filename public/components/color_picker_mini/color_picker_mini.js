@@ -3,6 +3,7 @@ import PropTypes from 'prop-types';
 import { ColorPicker } from '../color_picker';
 import { ColorDot } from '../color_dot';
 import { Popover, Overlay } from 'react-bootstrap';
+import './color_picker_mini.less';
 
 
 export const ColorPickerMini = ({ onChange, value, placement, popover, setPopover, target, setTarget }) => {
@@ -17,7 +18,7 @@ export const ColorPickerMini = ({ onChange, value, placement, popover, setPopove
   }
 
   return (
-    <div>
+    <div className="canvas__color-picker-mini">
       <span onClick={open}><ColorDot value={value}/></span>
 
       <Overlay
