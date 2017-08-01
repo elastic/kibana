@@ -80,15 +80,11 @@
     on-panel-removed="onPanelRemoved"
     dashboard-view-mode="dashboardViewMode"
     panels="panels"
-    app-state="appState"
     save-state="saveState"
-    app-state="appState"
-    toggle-expand="toggleExpandPanel"
-    create-child-ui-state="createChildUiState"
     toggle-expand="toggleExpandPanel"
     register-panel-index-pattern="registerPanelIndexPattern"
     data-shared-items-count="{{panels.length}}"
-    on-filter="filter"
+    container-api="containerApi"
   ></dashboard-grid>
 
   <dashboard-panel
@@ -96,12 +92,7 @@
     panel="expandedPanel"
     is-full-screen-mode="!chrome.getVisible()"
     is-expanded="true"
-    app-state="appState"
     dashboard-view-mode="dashboardViewMode"
-    save-state="saveState"
-    app-state="appState"
-    register-panel-index-pattern="registerPanelIndexPattern"
-    create-child-ui-state="createChildUiState"
     toggle-expand="toggleExpandPanel(expandedPanel.panelIndex)"
   ></dashboard-panel>
 

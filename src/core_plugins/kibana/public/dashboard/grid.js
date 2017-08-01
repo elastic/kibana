@@ -19,17 +19,6 @@ app.directive('dashboardGrid', function ($compile, Notifier) {
        */
       dashboardViewMode: '=',
       /**
-       * Used to create a child persisted state for the panel from parent state.
-       * @type {function} - Returns a {PersistedState} child uiState for this scope.
-       */
-      createChildUiState: '=',
-      /**
-       * Registers an index pattern with the dashboard app used by each panel. The index patterns are used by the
-       * filter bar for generating field suggestions.
-       * @type {function(IndexPattern)}
-       */
-      registerPanelIndexPattern: '=',
-      /**
        * Trigger after a panel has been removed from the grid.
        */
       onPanelRemoved: '=',
@@ -50,14 +39,9 @@ app.directive('dashboardGrid', function ($compile, Notifier) {
        */
       toggleExpand: '=',
       /**
-       * @type {Object}
+       * @type {DashboardContainerApi}
        */
-      appState: '=',
-      /**
-       * Called when a filter action has been triggered by a panel
-       * @type {function}
-       */
-      onFilter: '=',
+      containerApi: '=',
     },
     link: function ($scope, $el) {
       const notify = new Notifier();
@@ -215,13 +199,9 @@ app.directive('dashboardGrid', function ($compile, Notifier) {
                   is-full-screen-mode="isFullScreenMode"
                   is-expanded="false"
                   dashboard-view-mode="dashboardViewMode"
-                  save-state="saveState"
-                  app-state="appState"
-                  register-panel-index-pattern="registerPanelIndexPattern"
-                  app-state="appState"
+                  container-api="containerApi"
                   toggle-expand="toggleExpand(${panel.panelIndex})"
-                  create-child-ui-state="createChildUiState"
-                  on-filter="onFilter">
+                 >
             </li>`;
         const panelElement = $compile(panelHtml)($scope);
         panelElementMapping[panel.panelIndex] = panelElement;

@@ -34,17 +34,6 @@ uiModules
        */
       isFullScreenMode: '=',
       /**
-       * Used to create a child persisted state for the panel from parent state.
-       * @type {function} - Returns a {PersistedState} child uiState for this scope.
-       */
-      createChildUiState: '=',
-      /**
-       * Registers an index pattern with the dashboard app used by this panel. Used by the filter bar for
-       * generating field suggestions.
-       * @type {function(IndexPattern)}
-       */
-      registerPanelIndexPattern: '=',
-      /**
        * Contains information about this panel.
        * @type {PanelState}
        */
@@ -65,43 +54,15 @@ uiModules
        */
       isExpanded: '=',
       /**
-       * Call when changes should be propagated to the url and thus saved in state.
-       * @type {function}
+       * @type {DashboardContainerApi}
        */
-      saveState: '=',
-      /**
-       * Called when a filter action has been triggered
-       * @type {function}
-       */
-      onFilter: '=',
-      /**
-       * @type {Object}
-       */
-      appState: '=',
+      containerApi: '='
     },
     link: function ($scope, element) {
       if (!$scope.panel.id || !$scope.panel.type) return;
 
-      const updatePanel = (panelAttributes) => {
-        $scope.panel = {
-          ...$scope.panel,
-          ...panelAttributes
-        };
-        $scope.saveState();
-        return $scope.panel;
-      };
-
       $scope.isViewOnlyMode = () => {
         return $scope.dashboardViewMode === DashboardViewMode.VIEW || $scope.isFullScreenMode;
-      };
-
-      const containerAPI = {
-        onFilter: $scope.onFilter,
-        updatePanel,
-        getAppState: () => $scope.appState,
-        getIsViewOnlyMode: $scope.isViewOnlyMode,
-        createChildUiState: $scope.createChildUiState,
-        registerPanelIndexPattern: $scope.registerPanelIndexPattern,
       };
 
       const panelId = $scope.panel.id;
@@ -139,7 +100,7 @@ uiModules
         $scope.title = title;
       });
       $scope.loadedPanel =
-        embeddableHandler.render(element.find('#embeddedPanel').get(0), $scope.panel, containerAPI).catch(handleError);
+        embeddableHandler.render(element.find('#embeddedPanel').get(0), $scope.panel, $scope.containerApi).catch(handleError);
     }
   };
 });

@@ -35,7 +35,7 @@ export class SearchEmbeddableHandler extends EmbeddableHandler {
       // This causes changes to a saved search to be hidden, but also allows
       // the user to locally modify and save changes to a saved search only in a dashboard.
       // See https://github.com/elastic/kibana/issues/9523 for more details.
-      searchScope.panel = container.updatePanel({
+      searchScope.panel = container.updatePanel(searchScope.panel.panelIndex, {
         columns: searchScope.panel.columns || searchScope.savedObj.columns,
         sort: searchScope.panel.sort || searchScope.savedObj.sort
       });
@@ -44,24 +44,24 @@ export class SearchEmbeddableHandler extends EmbeddableHandler {
       searchScope.uiState = container.createChildUiState(getPersistedStateId(panel), uiState);
 
       searchScope.setSortOrder = function setSortOrder(columnName, direction) {
-        searchScope.panel = container.updatePanel({ sort: [columnName, direction] });
+        searchScope.panel = container.updatePanel(searchScope.panel.panelIndex, { sort: [columnName, direction] });
       };
 
       searchScope.addColumn = function addColumn(columnName) {
         savedObject.searchSource.get('index').popularizeField(columnName, 1);
         columnActions.addColumn(searchScope.panel.columns, columnName);
-        searchScope.panel = container.updatePanel({ columns: searchScope.panel.columns });
+        searchScope.panel = container.updatePanel(searchScope.panel.panelIndex, { columns: searchScope.panel.columns });
       };
 
       searchScope.removeColumn = function removeColumn(columnName) {
         savedObject.searchSource.get('index').popularizeField(columnName, 1);
         columnActions.removeColumn(searchScope.panel.columns, columnName);
-        searchScope.panel = container.updatePanel({ columns: searchScope.panel.columns });
+        searchScope.panel = container.updatePanel(searchScope.panel.panelIndex, { columns: searchScope.panel.columns });
       };
 
       searchScope.moveColumn = function moveColumn(columnName, newIndex) {
         columnActions.moveColumn(searchScope.panel.columns, columnName, newIndex);
-        searchScope.panel = container.updatePanel({ columns: searchScope.panel.columns });
+        searchScope.panel = container.updatePanel(searchScope.panel.panelIndex, { columns: searchScope.panel.columns });
       };
 
       searchScope.filter = function (field, value, operator) {
