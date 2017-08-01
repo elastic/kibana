@@ -4,7 +4,10 @@ import chainRunnerFn from '../handlers/chain_runner.js';
 const timelionDefaults = require('../lib/get_namespaced_settings')();
 
 function replyWithError(e, reply) {
-  reply({ title: e.toString(), message: e.toString(), stack: e.stack }).code(400);
+  reply({
+    title: e.toString(),
+    message: e.toString()
+  }).code(500);
 }
 
 
@@ -39,6 +42,7 @@ module.exports = (server) => {
         });
 
       } catch (err) {
+        server.log(['timelion', 'error'], `${err.toString()}: ${err.stack}`);
         // TODO Maybe we should just replace everywhere we throw with Boom? Probably.
         if (err.isBoom) {
           reply(err);
