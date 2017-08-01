@@ -1,3 +1,15 @@
+@-webkit-keyframes kuiAnimFadeIn {
+  0% {
+    opacity: 0; }
+  100% {
+    opacity: 1; } }
+
+@keyframes kuiAnimFadeIn {
+  0% {
+    opacity: 0; }
+  100% {
+    opacity: 1; } }
+
 /**
  * Adapted from Eric Meyer's reset (http://meyerweb.com/eric/tools/css/reset/, v2.0 | 20110126).
  *
@@ -637,6 +649,7 @@ table {
   display: -webkit-flex;
   display: -ms-flexbox;
   display: flex;
+  background: rgba(255, 255, 255, 0.9);
   -webkit-box-align: center;
   -webkit-align-items: center;
       -ms-flex-align: center;
@@ -645,14 +658,20 @@ table {
   -webkit-justify-content: center;
       -ms-flex-pack: center;
           justify-content: center;
-  padding-bottom: 10vh; }
+  padding-bottom: 10vh;
+  -webkit-animation: kuiAnimFadeIn 150ms ease-in;
+          animation: kuiAnimFadeIn 150ms ease-in; }
 
 .kuiModal {
   box-shadow: 0 16px 16px -8px rgba(0, 0, 0, 0.1);
   background-color: #FFF;
   border: 1px solid #D9D9D9;
   border-radius: 4px;
-  z-index: 8000; }
+  z-index: 8000;
+  padding: 32px;
+  min-width: 50%;
+  -webkit-animation: kuiModal 350ms cubic-bezier(0.34, 1.61, 0.7, 1);
+          animation: kuiModal 350ms cubic-bezier(0.34, 1.61, 0.7, 1); }
 
 .kuiModalHeader {
   display: -webkit-box;
@@ -666,14 +685,17 @@ table {
   -webkit-box-align: center;
   -webkit-align-items: center;
       -ms-flex-align: center;
-          align-items: center;
-  padding: 16px; }
+          align-items: center; }
+
+.kuiModalHeader__title {
+  font-size: 24px;
+  font-size: 1.5rem;
+  line-height: 36px; }
 
 .kuiModalBody {
-  padding: 16px; }
+  padding: 32px 0; }
 
 .kuiModalFooter {
-  padding: 16px;
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -683,7 +705,27 @@ table {
       -ms-flex-pack: end;
           justify-content: flex-end; }
   .kuiModalFooter > * + * {
-    margin-left: 5px; }
+    margin-left: 16px; }
+
+@-webkit-keyframes kuiModal {
+  0% {
+    opacity: 0;
+    -webkit-transform: translateY(32px);
+            transform: translateY(32px); }
+  100% {
+    opacity: 1;
+    -webkit-transform: translateY(0);
+            transform: translateY(0); } }
+
+@keyframes kuiModal {
+  0% {
+    opacity: 0;
+    -webkit-transform: translateY(32px);
+            transform: translateY(32px); }
+  100% {
+    opacity: 1;
+    -webkit-transform: translateY(0);
+            transform: translateY(0); } }
 
 .kuiPage {
   padding: 32px; }
