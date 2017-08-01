@@ -173,7 +173,7 @@ And assuming logger for `server` context with `console` appender and `trace` lev
 [2017-07-25T18:54:41.639Z][DEBUG][server.http] Message with `debug` log level.
 ```
 
-Obviously log will be less verbose with `warn` level for the `server` context:
+The log will be less verbose with `warn` level for the `server` context:
 ```bash
 [2017-07-25T18:54:41.639Z][WARN ][server] Message with `warn` log level.
 [2017-07-25T18:54:41.639Z][ERROR][server] Message with `error` log level.

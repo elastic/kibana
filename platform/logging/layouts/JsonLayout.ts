@@ -19,12 +19,14 @@ export type JsonLayoutConfigType = typeof schemaType;
 export class JsonLayout implements Layout {
   static createConfigSchema = createSchema;
 
-  format(record: LogRecord): string {
-    // Per spec `timestamp.toJSON()` uses `timestamp.toISOString()` under the hood.
-    // See http://www.ecma-international.org/ecma-262/5.1/#sec-15.9.5.44
+  format({ timestamp, level, context, message, error, meta }: LogRecord): string {
     return JSON.stringify({
-      ...record,
-      error: record.error && record.error.message
+      '@timestamp': timestamp.toISOString(),
+      level: level.id.toUpperCase(),
+      context,
+      message,
+      error: error && error.message,
+      meta
     });
   }
 }
