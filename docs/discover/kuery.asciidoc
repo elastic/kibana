@@ -8,7 +8,7 @@ and enable the creation of helpful features like auto-complete, seamless migrati
 query types, and more. Kuery is a basic experience today but we're hard at work building these additional features on
 top of the foundation Kuery provides.
 
-Kuery queries are built with functions. Many functions take a field name as their first argument. Extremely common functions have shorthand notations.
+Kueries are built with functions. Many functions take a field name as their first argument. Extremely common functions have shorthand notations.
 
 `is("response", 200)` will match documents where the response field matches the value 200.
 `response:200` does the same thing. `:` is an alias for the `is` function.
