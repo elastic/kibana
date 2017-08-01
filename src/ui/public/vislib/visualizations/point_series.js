@@ -40,6 +40,10 @@ export function VislibVisualizationsPointSeriesProvider(Private) {
       return charts[chartIndex];
     }
 
+    getSeries(seriesId) {
+      return this.series.find(series => series.chartData.aggId === seriesId);
+    }
+
     addBackground(svg, width, height) {
       const startX = 0;
       const startY = 0;
