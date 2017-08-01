@@ -3,8 +3,12 @@ import postcss from 'postcss';
 import postcssConfig from '../src/optimize/postcss.config';
 import chokidar from 'chokidar';
 import debounce from 'lodash/function/debounce';
+import { promisify } from 'bluebird';
+
 const platform = require('os').platform();
 const isPlatformWindows = /^win/.test(platform);
+
+const renderSass = promisify(sass.render);
 
 module.exports = function (grunt) {
   grunt.registerTask('uiFramework:build', function () {
@@ -82,26 +86,23 @@ module.exports = function (grunt) {
   }
 
   function uiFrameworkCompile() {
-    return new Promise(resolve => {
-      sass.render({
-        file: 'ui_framework/components/index.scss'
-      }, function (error, result) {
-        if (error) {
-          grunt.log.error(error);
-        }
+    const src = 'ui_framework/components/index.scss';
+    const dest = 'ui_framework/dist/ui_framework.css';
 
-        postcss([postcssConfig])
-          .process(result.css, { from: 'ui_framework/components/index.scss', to: 'ui_framework/dist/ui_framework.css' })
-          .then(result => {
-            grunt.file.write('ui_framework/dist/ui_framework.css', result.css);
+    return renderSass({
+      file: src
+    }).then(result => {
+      postcss([postcssConfig])
+        .process(result.css, { from: src, to: dest })
+        .then(result => {
+          grunt.file.write(dest, result.css);
 
-            if (result.map) {
-              grunt.file.write('ui_framework/dist/ui_framework.css.map', result.map);
-            }
-
-            resolve();
-          });
-      });
+          if (result.map) {
+            grunt.file.write(`${dest}.map`, result.map);
+          }
+        });
+    }).catch(error => {
+      grunt.log.error(error);
     });
   }
 
