@@ -20,7 +20,8 @@ export default function createAggRowRender(props) {
         panel={panel}
         series={model}
         siblings={items}
-        sortData={row.id} />
+        sortData={row.id}
+      />
     );
   };
 }

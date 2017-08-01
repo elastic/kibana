@@ -2,64 +2,118 @@ export function FindProvider({ getService }) {
   const log = getService('log');
   const config = getService('config');
   const remote = getService('remote');
+  const retry = getService('retry');
 
   const defaultFindTimeout = config.get('timeouts.find');
 
   class Find {
+    async withTimeout(timeout, block) {
+      try {
+        const remoteWithTimeout = remote.setFindTimeout(timeout);
+        return await block(remoteWithTimeout);
+      } finally {
+        remote.setFindTimeout(defaultFindTimeout);
+      }
+    }
+
+    async ensureElementWithTimeout(timeout, getElementFunction) {
+      try {
+        const remoteWithTimeout = remote.setFindTimeout(timeout);
+        return await retry.try(async () => {
+          const element = await getElementFunction(remoteWithTimeout);
+          // Calling any method forces a staleness check
+          element.isEnabled();
+          return element;
+        });
+      } finally {
+        remote.setFindTimeout(defaultFindTimeout);
+      }
+    }
+
+    async byName(selector, timeout = defaultFindTimeout) {
+      log.debug(`find.byName(${selector})`);
+      return await this.ensureElementWithTimeout(timeout, async remote => {
+        return await remote.findByName(selector);
+      });
+    }
+
     async byCssSelector(selector, timeout = defaultFindTimeout) {
       log.debug(`findByCssSelector ${selector}`);
-      const remoteWithTimeout = remote.setFindTimeout(timeout);
-      const element = await remoteWithTimeout.findByCssSelector(selector);
-      remoteWithTimeout.setFindTimeout(defaultFindTimeout);
-      return element;
+      return await this.ensureElementWithTimeout(timeout, async remote => {
+        return await remote.findByCssSelector(selector);
+      });
     }
 
     async allByCssSelector(selector, timeout = defaultFindTimeout) {
       log.debug('in findAllByCssSelector: ' + selector);
-      const remoteWithTimeout = remote.setFindTimeout(timeout);
-      let elements = await remoteWithTimeout.findAllByCssSelector(selector);
-      remoteWithTimeout.setFindTimeout(defaultFindTimeout);
-      if (!elements) elements = [];
-      log.debug(`Found ${elements.length} for selector ${selector}`);
-      return elements;
+      return await this.withTimeout(timeout, async remote => {
+        return await retry.try(async () => {
+          let elements = await remote.findAllByCssSelector(selector);
+          if (!elements) elements = [];
+          // Force isStale checks for all the retrieved elements.
+          await Promise.all(elements.map(async element => await element.isEnabled()));
+          log.debug(`Found ${elements.length} for selector ${selector}`);
+          return elements;
+        });
+      });
     }
 
     async displayedByCssSelector(selector, timeout = defaultFindTimeout) {
       log.debug('in displayedByCssSelector: ' + selector);
-      const remoteWithTimeout = remote.setFindTimeout(timeout);
-      const element = await remoteWithTimeout.findDisplayedByCssSelector(selector);
-      remoteWithTimeout.setFindTimeout(defaultFindTimeout);
-      return element;
+      return await this.ensureElementWithTimeout(timeout, async remote => {
+        return await remote.findDisplayedByCssSelector(selector);
+      });
     }
 
-    async existsByLinkText(linkText) {
+    async byPartialLinkText(partialLinkText, timeout = defaultFindTimeout) {
+      log.debug(`find.byPartialLinkText(${partialLinkText})`);
+      return await this.ensureElementWithTimeout(timeout, async remote => {
+        return await remote.findByPartialLinkText(partialLinkText);
+      });
+    }
+
+    async exists(findFunction, timeout = 1000) {
+      return await this.withTimeout(timeout, async remote => {
+        try {
+          await findFunction(remote);
+          return true;
+        } catch (error) {
+          return false;
+        }
+      });
+    }
+
+    async existsByLinkText(linkText, timeout = 1000) {
       log.debug(`existsByLinkText ${linkText}`);
-      const remoteWithTimeout = remote.setFindTimeout(1000);
-      const exists = await remoteWithTimeout.findDisplayedByLinkText(linkText)
-        .then(() => true)
-        .catch(() => false);
-      remoteWithTimeout.setFindTimeout(defaultFindTimeout);
-      return exists;
+      return await this.exists(async remote => await remote.findDisplayedByLinkText(linkText), timeout);
     }
 
-    async existsByDisplayedByCssSelector(selector) {
+    async existsByDisplayedByCssSelector(selector, timeout = 1000) {
       log.debug(`existsByDisplayedByCssSelector ${selector}`);
-      const remoteWithTimeout = remote.setFindTimeout(1000);
-      const exists = await remoteWithTimeout.findDisplayedByCssSelector(selector)
-        .then(() => true)
-        .catch(() => false);
-      remoteWithTimeout.setFindTimeout(defaultFindTimeout);
-      return exists;
+      return await this.exists(async remote => await remote.findDisplayedByCssSelector(selector), timeout);
     }
 
-    async existsByCssSelector(selector) {
+    async existsByCssSelector(selector, timeout = 1000) {
       log.debug(`existsByCssSelector ${selector}`);
-      const remoteWithTimeout = remote.setFindTimeout(1000);
-      const exists = await remoteWithTimeout.findByCssSelector(selector)
-        .then(() => true)
-        .catch(() => false);
-      remoteWithTimeout.setFindTimeout(defaultFindTimeout);
-      return exists;
+      return await this.exists(async remote => await remote.findByCssSelector(selector), timeout);
+    }
+
+    async clickByPartialLinkText(linkText, timeout = defaultFindTimeout) {
+      log.debug(`clickByPartialLinkText(${linkText})`);
+      const element = await retry.try(async () => await this.byPartialLinkText(linkText, timeout));
+      await element.click();
+    }
+
+    async clickByLinkText(linkText, timeout = defaultFindTimeout) {
+      log.debug(`clickByLinkText(${linkText})`);
+      const element = await this.byLinkText(linkText, timeout);
+      await element.click();
+    }
+
+    async clickByCssSelector(selector, timeout = defaultFindTimeout) {
+      log.debug(`clickByCssSelector(${selector})`);
+      const element = await this.byCssSelector(selector, timeout);
+      await element.click();
     }
   }
 

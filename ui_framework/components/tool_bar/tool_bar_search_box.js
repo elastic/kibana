@@ -6,19 +6,24 @@ export function KuiToolBarSearchBox({ filter, onFilter, placeholder, className, 
     onFilter(event.target.value);
   }
   const classes = classNames('kuiToolBarSearch', className);
-  return <div className={ classes } { ...rest } >
-    <div className="kuiToolBarSearchBox">
-      <div className="kuiToolBarSearchBox__icon kuiIcon fa-search"></div>
-      <input
-        className="kuiToolBarSearchBox__input"
-        type="text"
-        placeholder={ placeholder }
-        aria-label="Filter"
-        defaultValue={ filter }
-        onChange={ onChange }
-      />
+  return (
+    <div
+      className={ classes }
+      { ...rest }
+    >
+      <div className="kuiToolBarSearchBox">
+        <div className="kuiToolBarSearchBox__icon kuiIcon fa-search" />
+        <input
+          className="kuiToolBarSearchBox__input"
+          type="text"
+          placeholder={ placeholder }
+          aria-label="Filter"
+          defaultValue={ filter }
+          onChange={ onChange }
+        />
+      </div>
     </div>
-  </div>;
+  );
 }
 
 KuiToolBarSearchBox.propTypes = {

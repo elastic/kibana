@@ -56,7 +56,8 @@ export class CustomColorPicker extends Component {
         <CompactColor
           key={c}
           color={c}
-          onClick={handleSwatchChange}/>
+          onClick={handleSwatchChange}
+        />
       );
     });
 

@@ -58,7 +58,8 @@ class GaugePanelConfig extends Component {
           limit={1}
           model={this.props.model}
           name={this.props.name}
-          onChange={this.props.onChange} />
+          onChange={this.props.onChange}
+        />
       );
     } else {
       view = (
@@ -66,39 +67,45 @@ class GaugePanelConfig extends Component {
           <IndexPattern
             fields={this.props.fields}
             model={this.props.model}
-            onChange={this.props.onChange}/>
+            onChange={this.props.onChange}
+          />
           <div className="vis_editor__vis_config-row">
             <div className="vis_editor__label">Panel Filter</div>
             <input
               className="vis_editor__input-grows"
               type="text"
               onChange={handleTextChange('filter')}
-              value={model.filter}/>
+              value={model.filter}
+            />
             <div className="vis_editor__label">Ignore Global Filter</div>
             <YesNo
               value={model.ignore_global_filter}
               name="ignore_global_filter"
-              onChange={this.props.onChange}/>
+              onChange={this.props.onChange}
+            />
           </div>
           <div className="vis_editor__vis_config-row">
             <div className="vis_editor__label">Background Color</div>
             <ColorPicker
               onChange={this.props.onChange}
               name="background_color"
-              value={model.background_color}/>
+              value={model.background_color}
+            />
             <div className="vis_editor__label">Gauge Max (empty for auto)</div>
             <input
               className="vis_editor__input-grows"
               type="number"
               onChange={handleTextChange('gauge_max')}
-              value={model.gauge_max}/>
+              value={model.gauge_max}
+            />
             <div className="vis_editor__label">Gauge Style</div>
             <Select
               autosize={false}
               clearable={false}
               options={styleOptions}
               value={model.gauge_style}
-              onChange={handleSelectChange('gauge_style')}/>
+              onChange={handleSelectChange('gauge_style')}
+            />
 
           </div>
           <div className="vis_editor__vis_config-row">
@@ -106,19 +113,22 @@ class GaugePanelConfig extends Component {
             <ColorPicker
               onChange={this.props.onChange}
               name="gauge_inner_color"
-              value={model.gauge_inner_color}/>
+              value={model.gauge_inner_color}
+            />
             <div className="vis_editor__label">Inner Line Width</div>
             <input
               className="vis_editor__input-grows"
               type="number"
               onChange={handleTextChange('gauge_inner_width')}
-              value={model.gauge_inner_width}/>
+              value={model.gauge_inner_width}
+            />
             <div className="vis_editor__label">Gauge Line Width</div>
             <input
               className="vis_editor__input-grows"
               type="number"
               onChange={handleTextChange('gauge_width')}
-              value={model.gauge_width} />
+              value={model.gauge_width}
+            />
           </div>
           <div>
             <div className="vis_editor__label">Color Rules</div>
@@ -131,7 +141,8 @@ class GaugePanelConfig extends Component {
               secondaryVarName="text"
               model={model}
               onChange={this.props.onChange}
-              name="gauge_color_rules"/>
+              name="gauge_color_rules"
+            />
           </div>
         </div>
       );
@@ -139,10 +150,16 @@ class GaugePanelConfig extends Component {
     return (
       <div>
         <div className="kbnTabs">
-          <div className={`kbnTabs__tab${selectedTab === 'data' && '-active' || ''}`}
-            onClick={() => this.switchTab('data')}>Data</div>
-          <div className={`kbnTabs__tab${selectedTab === 'options' && '-active' || ''}`}
-            onClick={() => this.switchTab('options')}>Panel Options</div>
+          <div
+            className={`kbnTabs__tab${selectedTab === 'data' && '-active' || ''}`}
+            onClick={() => this.switchTab('data')}
+          >Data
+          </div>
+          <div
+            className={`kbnTabs__tab${selectedTab === 'options' && '-active' || ''}`}
+            onClick={() => this.switchTab('options')}
+          >Panel Options
+          </div>
         </div>
         {view}
       </div>

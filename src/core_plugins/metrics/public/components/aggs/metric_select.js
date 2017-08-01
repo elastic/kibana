@@ -41,7 +41,8 @@ function MetricSelect(props) {
       placeholder="Select metric..."
       options={options.concat(props.additionalOptions)}
       value={value}
-      onChange={onChange}/>
+      onChange={onChange}
+    />
   );
 }
 

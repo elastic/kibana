@@ -152,7 +152,7 @@ uiModules.get('apps/management')
             $scope.aceInvalidEditors = _.without($scope.aceInvalidEditors, fieldName);
           }
 
-          if ($rootScope.$$phase) $scope.$apply();
+          if (!$rootScope.$$phase) $scope.$apply();
         });
       };
 
@@ -185,7 +185,7 @@ uiModules.get('apps/management')
       };
 
       $scope.submit = function () {
-        const source = _.cloneDeep($scope.obj._source);
+        const source = _.cloneDeep($scope.obj.attributes);
 
         _.each($scope.fields, function (field) {
           let value = field.value;
@@ -209,7 +209,7 @@ uiModules.get('apps/management')
       };
 
       function redirectHandler(action) {
-        const msg = 'You successfully ' + action + ' the "' + $scope.obj._source.title + '" ' + $scope.title.toLowerCase() + ' object';
+        const msg = 'You successfully ' + action + ' the "' + $scope.obj.attributes.title + '" ' + $scope.title.toLowerCase() + ' object';
 
         $location.path('/management/kibana/objects').search({
           _a: rison.encode({
