@@ -24,6 +24,7 @@ export {
 export {
   KuiLoading,
   KuiLoadingChart,
+  KuiLoadingSpinner,
 } from './loading';
 
 export {

@@ -1181,8 +1181,8 @@ table {
     opacity: 0.2;
     -webkit-transform-origin: -50% -50%;
             transform-origin: -50% -50%;
-    -webkit-animation: 1s pulsate cubic-bezier(0.694, 0.0482, 0.335, 1) infinite;
-            animation: 1s pulsate cubic-bezier(0.694, 0.0482, 0.335, 1) infinite;
+    -webkit-animation: 1s kuiLoadingPulsate cubic-bezier(0.694, 0.0482, 0.335, 1) infinite;
+            animation: 1s kuiLoadingPulsate cubic-bezier(0.694, 0.0482, 0.335, 1) infinite;
     z-index: 1; }
 
 .kuiLoading--medium:after {
@@ -1191,56 +1191,56 @@ table {
 
 .kuiLoading--medium .kuiLoading__icon {
   z-index: 999;
-  -webkit-animation: 1s bounceMedium cubic-bezier(0.694, 0.0482, 0.335, 1) infinite;
-          animation: 1s bounceMedium cubic-bezier(0.694, 0.0482, 0.335, 1) infinite; }
+  -webkit-animation: 1s kuiLoadingBounceMedium cubic-bezier(0.694, 0.0482, 0.335, 1) infinite;
+          animation: 1s kuiLoadingBounceMedium cubic-bezier(0.694, 0.0482, 0.335, 1) infinite; }
 
 .kuiLoading--large:after {
   height: 8px;
   bottom: -8px; }
 
 .kuiLoading--large .kuiLoading__icon {
-  -webkit-animation: 1s bounceLarge cubic-bezier(0.694, 0.0482, 0.335, 1) infinite;
-          animation: 1s bounceLarge cubic-bezier(0.694, 0.0482, 0.335, 1) infinite; }
+  -webkit-animation: 1s kuiLoadingBounceLarge cubic-bezier(0.694, 0.0482, 0.335, 1) infinite;
+          animation: 1s kuiLoadingBounceLarge cubic-bezier(0.694, 0.0482, 0.335, 1) infinite; }
 
 .kuiLoading--xLarge:after {
   height: 12px;
   bottom: -12px; }
 
 .kuiLoading--xLarge .kuiLoading__icon {
-  -webkit-animation: 1s bounceXLarge cubic-bezier(0.694, 0.0482, 0.335, 1) infinite;
-          animation: 1s bounceXLarge cubic-bezier(0.694, 0.0482, 0.335, 1) infinite; }
+  -webkit-animation: 1s kuiLoadingBounceXLarge cubic-bezier(0.694, 0.0482, 0.335, 1) infinite;
+          animation: 1s kuiLoadingBounceXLarge cubic-bezier(0.694, 0.0482, 0.335, 1) infinite; }
 
-@-webkit-keyframes bounceMedium {
+@-webkit-keyframes kuiLoadingBounceMedium {
   50% {
     -webkit-transform: translateY(-8px);
             transform: translateY(-8px); } }
 
-@keyframes bounceMedium {
+@keyframes kuiLoadingBounceMedium {
   50% {
     -webkit-transform: translateY(-8px);
             transform: translateY(-8px); } }
 
-@-webkit-keyframes bounceLarge {
+@-webkit-keyframes kuiLoadingBounceLarge {
   50% {
     -webkit-transform: translateY(-12px);
             transform: translateY(-12px); } }
 
-@keyframes bounceLarge {
+@keyframes kuiLoadingBounceLarge {
   50% {
     -webkit-transform: translateY(-12px);
             transform: translateY(-12px); } }
 
-@-webkit-keyframes bounceXLarge {
+@-webkit-keyframes kuiLoadingBounceXLarge {
   50% {
     -webkit-transform: translateY(-16px);
             transform: translateY(-16px); } }
 
-@keyframes bounceXLarge {
+@keyframes kuiLoadingBounceXLarge {
   50% {
     -webkit-transform: translateY(-16px);
             transform: translateY(-16px); } }
 
-@-webkit-keyframes pulsate {
+@-webkit-keyframes kuiLoadingPulsate {
   0% {
     opacity: 0; }
   50% {
@@ -1250,7 +1250,7 @@ table {
   100% {
     opacity: 0; } }
 
-@keyframes pulsate {
+@keyframes kuiLoadingPulsate {
   0% {
     opacity: 0; }
   50% {
@@ -1344,3 +1344,47 @@ table {
   100% {
     -webkit-transform: translateY(0);
             transform: translateY(0); } }
+
+.kuiLoadingSpinner {
+  display: inline-block;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: solid 2px #D9D9D9;
+  border-top-color: #0079a5;
+  -webkit-animation: kuiLoadingSpinner .6s infinite linear;
+          animation: kuiLoadingSpinner .6s infinite linear; }
+
+.kuiLoadingSpinner--small {
+  width: 8px;
+  height: 8px;
+  border-width: 1px; }
+
+.kuiLoadingSpinner--medium {
+  width: 16px;
+  height: 16px;
+  border-width: 1px; }
+
+.kuiLoadingSpinner--large {
+  width: 24px;
+  height: 24px; }
+
+.kuiLoadingSpinner--xLarge {
+  width: 32px;
+  height: 32px; }
+
+@-webkit-keyframes kuiLoadingSpinner {
+  from {
+    -webkit-transform: rotate(0deg);
+            transform: rotate(0deg); }
+  to {
+    -webkit-transform: rotate(359deg);
+            transform: rotate(359deg); } }
+
+@keyframes kuiLoadingSpinner {
+  from {
+    -webkit-transform: rotate(0deg);
+            transform: rotate(0deg); }
+  to {
+    -webkit-transform: rotate(359deg);
+            transform: rotate(359deg); } }

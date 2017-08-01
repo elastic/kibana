@@ -12,7 +12,7 @@
     background-color: $kuiColorFullShade;
     opacity: 0.2;
     transform-origin: -50% -50%;
-    animation: 1s pulsate $kuiAnimSlightResistance infinite;
+    animation: 1s kuiLoadingPulsate $kuiAnimSlightResistance infinite;
     z-index: 1;
   }
 }
@@ -24,7 +24,7 @@
   }
   .kuiLoading__icon {
     z-index: 999;
-    animation: 1s bounceMedium $kuiAnimSlightResistance infinite;
+    animation: 1s kuiLoadingBounceMedium $kuiAnimSlightResistance infinite;
   }
 }
 
@@ -34,7 +34,7 @@
     bottom: -$kuiSizeS;
   }
   .kuiLoading__icon {
-    animation: 1s bounceLarge $kuiAnimSlightResistance infinite;
+    animation: 1s kuiLoadingBounceLarge $kuiAnimSlightResistance infinite;
   }
 }
 
@@ -44,29 +44,29 @@
     bottom: -($kuiSize - $kuiSizeXS);
   }
   .kuiLoading__icon {
-    animation: 1s bounceXLarge $kuiAnimSlightResistance infinite;
+    animation: 1s kuiLoadingBounceXLarge $kuiAnimSlightResistance infinite;
   }
 }
 
-@keyframes bounceMedium {
+@keyframes kuiLoadingBounceMedium {
   50% {
     transform: translateY(-$kuiSizeS);
   }
 }
 
-@keyframes bounceLarge {
+@keyframes kuiLoadingBounceLarge {
   50% {
     transform: translateY(-($kuiSize - $kuiSizeXS));
   }
 }
 
-@keyframes bounceXLarge {
+@keyframes kuiLoadingBounceXLarge {
   50% {
     transform: translateY(-$kuiSize);
   }
 }
 
-@keyframes pulsate {
+@keyframes kuiLoadingPulsate {
   0% {
     opacity: 0;
   }
