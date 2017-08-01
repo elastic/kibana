@@ -6,17 +6,20 @@ import { VislibLibDataProvider } from 'ui/vislib/lib/data';
 import 'ui/persisted_state';
 
 const seriesData = {
-  'label': '',
-  'series': [
-    {
-      'label': '100',
-      'values': [{ x: 0, y: 1 }, { x: 1, y: 2 }, { x: 2, y: 3 }]
-    }
-  ]
+  'charts': [{
+    'label': '',
+    'series': [
+      {
+        'label': '100',
+        'values': [{ x: 0, y: 1 }, { x: 1, y: 2 }, { x: 2, y: 3 }]
+      }
+    ]
+  }]
 };
 
 const rowsData = {
-  'rows': [
+  'split': 'rows',
+  'charts': [
     {
       'label': 'a',
       'series': [
@@ -57,7 +60,8 @@ const rowsData = {
 };
 
 const colsData = {
-  'columns': [
+  'split': 'columns',
+  'charts': [
     {
       'label': 'a',
       'series': [
@@ -122,13 +126,13 @@ describe('Vislib Data Class Test Suite', function () {
   describe('_removeZeroSlices', function () {
     let data;
     const pieData = {
-      slices: {
+      charts: [{
         children: [
-          { size: 30 },
-          { size: 20 },
-          { size: 0 }
+          { values: [{ value: 30 }] },
+          { values: [{ value: 20 }] },
+          { values: [{ value: 0 }] }
         ]
-      }
+      }]
     };
 
     beforeEach(function () {
@@ -136,7 +140,7 @@ describe('Vislib Data Class Test Suite', function () {
     });
 
     it('should remove zero values', function () {
-      const slices = data._removeZeroSlices(data.data.slices);
+      const slices = data._removeZeroSlices(data.data.columns[0]);
       expect(slices.children.length).to.be(2);
     });
   });
@@ -172,65 +176,6 @@ describe('Vislib Data Class Test Suite', function () {
     }
   });
 
-  describe('geohashGrid methods', function () {
-    let data;
-    const geohashGridData = {
-      hits: 3954,
-      rows: [{
-        title: 'Top 5 _type: apache',
-        label: 'Top 5 _type: apache',
-        geoJson: {
-          type: 'FeatureCollection',
-          features: [],
-          properties: {
-            min: 2,
-            max: 331,
-            zoom: 3,
-            center: [
-              47.517200697839414,
-              -112.06054687499999
-            ]
-          }
-        },
-      }, {
-        title: 'Top 5 _type: nginx',
-        label: 'Top 5 _type: nginx',
-        geoJson: {
-          type: 'FeatureCollection',
-          features: [],
-          properties: {
-            min: 1,
-            max: 88,
-            zoom: 3,
-            center: [
-              47.517200697839414,
-              -112.06054687499999
-            ]
-          }
-        },
-      }]
-    };
-
-    beforeEach(function () {
-      data = new Data(geohashGridData, persistedState);
-    });
-
-    describe('getVisData', function () {
-      it('should return the rows property', function () {
-        const visData = data.getVisData();
-        expect(visData).to.eql(geohashGridData.rows);
-      });
-    });
-
-    describe('getGeoExtents', function () {
-      it('should return the min and max geoJson properties', function () {
-        const minMax = data.getGeoExtents();
-        expect(minMax.min).to.be(1);
-        expect(minMax.max).to.be(331);
-      });
-    });
-  });
-
   describe('null value check', function () {
     it('should return false', function () {
       const data = new Data(rowsData, persistedState);
@@ -238,8 +183,8 @@ describe('Vislib Data Class Test Suite', function () {
     });
 
     it('should return true', function () {
-      const nullRowData = { rows: rowsData.rows.slice(0) };
-      nullRowData.rows.push({
+      const nullRowData = { charts: rowsData.charts.slice(0) };
+      nullRowData.charts.push({
         'label': 'e',
         'series': [
           {

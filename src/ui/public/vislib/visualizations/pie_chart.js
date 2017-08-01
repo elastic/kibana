@@ -28,7 +28,7 @@ export function VislibVisualizationsPieChartProvider(Private) {
     constructor(handler, chartEl, chartData) {
       super(handler, chartEl, chartData);
 
-      const charts = this.handler.data.getVisData();
+      const charts = this.handler.data.chartData();
       this._validatePieData(charts);
 
       this._attr = _.defaults(handler.visConfig.get('chart', {}), defaults);
@@ -41,7 +41,7 @@ export function VislibVisualizationsPieChartProvider(Private) {
      */
     _validatePieData(charts) {
       const isAllZeros = charts.every(function (chart) {
-        return chart.slices.children.length === 0;
+        return chart.children.length === 0;
       });
 
       if (isAllZeros) {
@@ -74,11 +74,11 @@ export function VislibVisualizationsPieChartProvider(Private) {
         const parentPercent = parent.percentOfParent;
 
         const sum = parent.sumOfChildren = Math.abs(children.reduce(function (sum, child) {
-          return sum + Math.abs(child.size);
+          return sum + Math.abs(child.values[0].value);
         }, 0));
 
         children.forEach(function (child) {
-          child.percentOfGroup = Math.abs(child.size) / sum;
+          child.percentOfGroup = Math.abs(child.values[0].value) / sum;
           child.percentOfParent = child.percentOfGroup;
 
           if (parentPercent != null) {
@@ -154,13 +154,13 @@ export function VislibVisualizationsPieChartProvider(Private) {
         }
         return 'slice';
       })
-      .call(self._addIdentifier, 'name')
+      .call(self._addIdentifier, 'label')
       .style('stroke', '#fff')
       .style('fill', function (d) {
         if (d.depth === 0) {
           return 'none';
         }
-        return color(d.name);
+        return color(d.label);
       });
 
       if (isTooltip) {
@@ -190,14 +190,11 @@ export function VislibVisualizationsPieChartProvider(Private) {
 
       return function (selection) {
         selection.each(function (data) {
-          const slices = data.slices;
           const div = d3.select(this);
           const width = $(this).width();
           const height = $(this).height();
 
-          if (!slices.children.length) return;
-
-          self.convertToPercentage(slices);
+          self.convertToPercentage(data);
           self._validateContainerSize(width, height);
 
           const svg = div.append('svg')
@@ -206,7 +203,7 @@ export function VislibVisualizationsPieChartProvider(Private) {
           .append('g')
           .attr('transform', 'translate(' + width / 2 + ',' + height / 2 + ')');
 
-          const path = self.addPath(width, height, svg, slices);
+          const path = self.addPath(width, height, svg, data);
           self.addPathEvents(path);
 
           self.events.emit('rendered', {

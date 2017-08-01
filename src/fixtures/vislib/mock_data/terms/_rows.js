@@ -1,7 +1,8 @@
 import _ from 'lodash';
 
 export default {
-  'rows': [
+  'split': 'rows',
+  'charts': [
     {
       'label': '0.0-1000.0: bytes',
       'xAxisLabel': 'Top 5 extension',

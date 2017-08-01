@@ -2,45 +2,10 @@ import d3 from 'd3';
 import expect from 'expect.js';
 import ngMock from 'ng_mock';
 import _ from 'lodash';
-import fixtures from 'fixtures/fake_hierarchical_data';
 import $ from 'jquery';
 import FixturesVislibVisFixtureProvider from 'fixtures/vislib/_vis_fixture';
-import { VisProvider } from 'ui/vis';
 import 'ui/persisted_state';
-import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
-import { BuildHierarchicalDataProvider } from 'ui/agg_response/hierarchical/build_hierarchical_data';
-
-const rowAgg = [
-  { type: 'avg', schema: 'metric', params: { field: 'bytes' } },
-  { type: 'terms', schema: 'split', params: { field: 'extension', rows: true } },
-  { type: 'terms', schema: 'segment', params: { field: 'machine.os' } },
-  { type: 'terms', schema: 'segment', params: { field: 'geo.src' } }
-];
-
-const colAgg = [
-  { type: 'avg', schema: 'metric', params: { field: 'bytes' } },
-  { type: 'terms', schema: 'split', params: { field: 'extension', row: false } },
-  { type: 'terms', schema: 'segment', params: { field: 'machine.os' } },
-  { type: 'terms', schema: 'segment', params: { field: 'geo.src' } }
-];
-
-const sliceAgg = [
-  { type: 'avg', schema: 'metric', params: { field: 'bytes' } },
-  { type: 'terms', schema: 'segment', params: { field: 'machine.os' } },
-  { type: 'terms', schema: 'segment', params: { field: 'geo.src' } }
-];
-
-const aggArray = [
-  rowAgg,
-  colAgg,
-  sliceAgg
-];
-
-const names = [
-  'rows',
-  'columns',
-  'slices'
-];
+import pieData from 'fixtures/vislib/mock_data/pie/_histogram';
 
 const sizes = [
   0,
@@ -52,146 +17,63 @@ const sizes = [
 ];
 
 describe('No global chart settings', function () {
-  const visLibParams1 = {
-    el: '<div class=chart1></div>',
+  const visLibParams = {
+    el: $('<div class=chart1></div>'),
     type: 'pie',
     addLegend: true,
     addTooltip: true
   };
-  const visLibParams2 = {
-    el: '<div class=chart2></div>',
-    type: 'pie',
-    addLegend: true,
-    addTooltip: true
-  };
-  let chart1;
-  let chart2;
-  let Vis;
+  let vis;
   let persistedState;
-  let indexPattern;
-  let buildHierarchicalData;
-  let data1;
-  let data2;
 
   beforeEach(ngMock.module('kibana'));
   beforeEach(ngMock.inject(function (Private, $injector) {
-    chart1 = Private(FixturesVislibVisFixtureProvider)(visLibParams1);
-    chart2 = Private(FixturesVislibVisFixtureProvider)(visLibParams2);
-    Vis = Private(VisProvider);
+    vis = Private(FixturesVislibVisFixtureProvider)(visLibParams);
     persistedState = new ($injector.get('PersistedState'))();
-    indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
-    buildHierarchicalData = Private(BuildHierarchicalDataProvider);
-
-    let id1 = 1;
-    let id2 = 1;
-    const stubVis1 = new Vis(indexPattern, {
-      type: 'pie',
-      aggs: rowAgg
-    });
-    const stubVis2 = new Vis(indexPattern, {
-      type: 'pie',
-      aggs: colAgg
-    });
-
-    // We need to set the aggs to a known value.
-    _.each(stubVis1.aggs, function (agg) {
-      agg.id = 'agg_' + id1++;
-    });
-    _.each(stubVis2.aggs, function (agg) {
-      agg.id = 'agg_' + id2++;
-    });
-
-    data1 = buildHierarchicalData(stubVis1, fixtures.threeTermBuckets);
-    data2 = buildHierarchicalData(stubVis2, fixtures.threeTermBuckets);
-
-    chart1.render(data1, persistedState);
-    chart2.render(data2, persistedState);
+    vis.on('brush', _.noop);
+    vis.render(pieData, persistedState);
   }));
 
   afterEach(function () {
-    chart1.destroy();
-    chart2.destroy();
+    vis.destroy();
   });
 
   it('should render chart titles for all charts', function () {
-    expect($(chart1.el).find('.y-axis-chart-title').length).to.be(1);
-    expect($(chart2.el).find('.x-axis-chart-title').length).to.be(1);
+    expect($(vis.el).find('.x-axis-chart-title').length).to.be(1);
   });
 
   describe('_validatePieData method', function () {
     const allZeros = [
-      { slices: { children: [] } },
-      { slices: { children: [] } },
-      { slices: { children: [] } }
+      { children: [] },
+      { children: [] },
+      { children: [] }
     ];
 
     const someZeros = [
-      { slices: { children: [{}] } },
-      { slices: { children: [{}] } },
-      { slices: { children: [] } }
+      { children: [{}] },
+      { children: [{}] },
+      { children: [] }
     ];
 
     const noZeros = [
-      { slices: { children: [{}] } },
-      { slices: { children: [{}] } },
-      { slices: { children: [{}] } }
+      { children: [{}] },
+      { children: [{}] },
+      { children: [{}] }
     ];
 
     it('should throw an error when all charts contain zeros', function () {
       expect(function () {
-        chart1.handler.ChartClass.prototype._validatePieData(allZeros);
+        vis.handler.ChartClass.prototype._validatePieData(allZeros);
       }).to.throwError();
     });
 
     it('should not throw an error when only some or no charts contain zeros', function () {
       expect(function () {
-        chart1.handler.ChartClass.prototype._validatePieData(someZeros);
+        vis.handler.ChartClass.prototype._validatePieData(someZeros);
       }).to.not.throwError();
       expect(function () {
-        chart1.handler.ChartClass.prototype._validatePieData(noZeros);
+        vis.handler.ChartClass.prototype._validatePieData(noZeros);
       }).to.not.throwError();
-    });
-  });
-});
-
-aggArray.forEach(function (dataAgg, i) {
-  describe('Vislib PieChart Class Test Suite for ' + names[i] + ' data', function () {
-    const visLibParams = {
-      type: 'pie',
-      addLegend: true,
-      addTooltip: true
-    };
-    let vis;
-    let Vis;
-    let persistedState;
-    let indexPattern;
-    let buildHierarchicalData;
-    let data;
-
-    beforeEach(ngMock.module('kibana'));
-    beforeEach(ngMock.inject(function (Private, $injector) {
-      vis = Private(FixturesVislibVisFixtureProvider)(visLibParams);
-      Vis = Private(VisProvider);
-      persistedState = new ($injector.get('PersistedState'))();
-      indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
-      buildHierarchicalData = Private(BuildHierarchicalDataProvider);
-
-      let id = 1;
-      const stubVis = new Vis(indexPattern, {
-        type: 'pie',
-        aggs: dataAgg
-      });
-
-      // We need to set the aggs to a known value.
-      _.each(stubVis.aggs, function (agg) { agg.id = 'agg_' + id++; });
-
-      data = buildHierarchicalData(stubVis, fixtures.threeTermBuckets);
-
-      vis.render(data, persistedState);
-    }));
-
-    afterEach(function () {
-      vis.destroy();
     });
 
     describe('addPathEvents method', function () {
@@ -235,7 +117,7 @@ aggArray.forEach(function (dataAgg, i) {
           width = $(chart.chartEl).width();
           height = $(chart.chartEl).height();
           svg = d3.select($(chart.chartEl).find('svg')[0]);
-          slices = chart.chartData.slices;
+          slices = chart.chartData;
         });
       }));
 
@@ -292,6 +174,5 @@ aggArray.forEach(function (dataAgg, i) {
         });
       });
     });
-
   });
 });

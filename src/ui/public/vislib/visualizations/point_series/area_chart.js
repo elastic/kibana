@@ -69,6 +69,14 @@ export function VislibVisualizationsAreaChartProvider(Private) {
       const yScale = this.getValueAxis().getScale();
       const interpolate = this.seriesConfig.interpolate;
       const isHorizontal = this.getCategoryAxis().axisConfig.isHorizontal();
+      const isPercentage = this.getValueAxis().axisConfig.isPercentage();
+
+      if (isPercentage && this.chartData.aggs) {
+        data.aggs[0].value = 'val';
+        data.values.forEach(value => {
+          value.val = Math.round(value.y * 100) + '%';
+        });
+      }
 
       // Data layers
       const layer = svg.append('g')

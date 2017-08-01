@@ -1,15 +1,12 @@
 import d3 from 'd3';
 import _ from 'lodash';
 import { VislibComponentsZeroInjectionInjectZerosProvider } from '../components/zero_injection/inject_zeros';
-import { VislibComponentsZeroInjectionOrderedXKeysProvider } from '../components/zero_injection/ordered_x_keys';
-import { VislibComponentsLabelsLabelsProvider } from '../components/labels/labels';
 import { VislibComponentsColorColorProvider } from 'ui/vis/components/color/color';
+import { tooltipFormatter } from 'ui/vis/components/tooltip/formatter';
 
 export function VislibLibDataProvider(Private) {
 
   const injectZeros = Private(VislibComponentsZeroInjectionInjectZerosProvider);
-  const orderKeys = Private(VislibComponentsZeroInjectionOrderedXKeysProvider);
-  const getLabels = Private(VislibComponentsLabelsLabelsProvider);
   const color = Private(VislibComponentsColorColorProvider);
 
   /**
@@ -24,92 +21,47 @@ export function VislibLibDataProvider(Private) {
   class Data {
     constructor(data, uiState) {
       this.uiState = uiState;
+      this.type = this.getDataType(data);
       this.data = this.copyDataObj(data);
-      this.type = this.getDataType();
 
-      this.labels = this._getLabels(this.data);
+      this.labels = this.getLabels();
       this.color = this.labels ? color(this.labels, uiState.get('vis.colors')) : undefined;
       this._normalizeOrdered();
+
+      this.chartData()[0].tooltipFormatter = tooltipFormatter;
+    }
+
+    getDataType(data) {
+      if (!data.charts || !data.charts.length) return 'no data';
+      if (data.charts[0].series) return 'series';
+      if (data.charts[0].children) return 'slices';
+      if (data.charts[0].cells) return 'table';
+
+      throw ('vislib: invalid data format');
     }
 
     copyDataObj(data) {
-      const copyChart = data => {
-        const newData = {};
-        Object.keys(data).forEach(key => {
-          if (key !== 'series') {
-            newData[key] = data[key];
-          } else {
-            newData[key] = data[key].map(seri => {
-              return {
-                label: seri.label,
-                aggLabel: seri.aggLabel,
-                aggId: seri.aggId,
-                values: seri.values.map(val => {
-                  const newVal = _.clone(val);
-                  newVal.aggConfig = val.aggConfig;
-                  newVal.aggConfigResult = val.aggConfigResult;
-                  newVal.extraMetrics = val.extraMetrics;
-                  newVal.series = val.series || seri.label;
-                  return newVal;
-                })
-              };
-            });
-          }
+      if (data.split === 'row') {
+        return { rows: _.cloneDeep(data.charts) };
+      }
+      return { columns: _.cloneDeep(data.charts) };
+    }
+
+    getLabels(data = this.chartData()) {
+      const getSeriesLabels = (data) => {
+        const labels = {};
+        data.forEach(chart => {
+          _.each(chart.series, series => {
+            if (!labels[series.label]) labels[series.label] = 1;
+          });
         });
-        return newData;
+        return _.keys(labels);
       };
-
-      if (!data.series) {
-        const newData = {};
-        Object.keys(data).forEach(key => {
-          if (!['rows', 'columns'].includes(key)) {
-            newData[key] = data[key];
-          }
-          else {
-            newData[key] = data[key].map(chart => {
-              return copyChart(chart);
-            });
-          }
-        });
-        return newData;
-      }
-      return copyChart(data);
+      return this.type === 'series' ? getSeriesLabels(data) : this.pieNames();
     }
 
-    _getLabels(data) {
-      return this.type === 'series' ? getLabels(data) : this.pieNames();
-    }
-
-    getDataType() {
-      const data = this.getVisData();
-      let type;
-
-      data.forEach(function (obj) {
-        if (obj.series) {
-          type = 'series';
-        } else if (obj.slices) {
-          type = 'slices';
-        } else if (obj.geoJson) {
-          type = 'geoJson';
-        }
-      });
-
-      return type;
-    }
-
-    /**
-     * Returns an array of the actual x and y data value objects
-     * from data with series keys
-     *
-     * @method chartData
-     * @returns {*} Array of data objects
-     */
     chartData() {
-      if (!this.data.series) {
-        const arr = this.data.rows ? this.data.rows : this.data.columns;
-        return _.toArray(arr);
-      }
-      return [this.data];
+      return this.data.columns || this.data.rows;
     }
 
     shouldBeStacked(seriesConfig) {
@@ -141,65 +93,9 @@ export function VislibLibDataProvider(Private) {
     }
 
     stackData(handler) {
-      const data = this.data;
-      if (data.rows || data.columns) {
-        const charts = data.rows ? data.rows : data.columns;
-        charts.forEach((chart, i) => {
-          this.stackChartData(handler, chart.series, handler.visConfig.get(`charts[${i}]`));
-        });
-      } else {
-        this.stackChartData(handler, data.series, handler.visConfig.get('charts[0]'));
-      }
-    }
-
-    /**
-     * Returns an array of chart data objects
-     *
-     * @method getVisData
-     * @returns {*} Array of chart data objects
-     */
-    getVisData() {
-      let visData;
-
-      if (this.data.rows) {
-        visData = this.data.rows;
-      } else if (this.data.columns) {
-        visData = this.data.columns;
-      } else {
-        visData = [this.data];
-      }
-
-      return visData;
-    }
-
-    /**
-     * get min and max for all cols, rows of data
-     *
-     * @method getMaxMin
-     * @return {Object}
-     */
-    getGeoExtents() {
-      const visData = this.getVisData();
-
-      return _.reduce(_.pluck(visData, 'geoJson.properties'), function (minMax, props) {
-        return {
-          min: Math.min(props.min, minMax.min),
-          max: Math.max(props.max, minMax.max)
-        };
-      }, { min: Infinity, max: -Infinity });
-    }
-
-    /**
-     * Returns array of chart data objects for pie data objects
-     *
-     * @method pieData
-     * @returns {*} Array of chart data objects
-     */
-    pieData() {
-      if (!this.data.slices) {
-        return this.data.rows ? this.data.rows : this.data.columns;
-      }
-      return [this.data];
+      this.chartData().forEach((chart, i) => {
+        this.stackChartData(handler, chart.series, handler.visConfig.get(`charts[${i}]`));
+      });
     }
 
     /**
@@ -213,7 +109,7 @@ export function VislibLibDataProvider(Private) {
      * @returns {*} Data object value
      */
     get(thing, def) {
-      const source = (this.data.rows || this.data.columns || [this.data])[0];
+      const source = this.chartData()[0];
       return _.get(source, thing, def);
     }
 
@@ -250,79 +146,17 @@ export function VislibLibDataProvider(Private) {
         .value();
     }
 
-    /**
-     * Validates that the Y axis min value defined by user input
-     * is a number.
-     *
-     * @param val {Number} Y axis min value
-     * @returns {Number} Y axis min value
-     */
-    validateUserDefinedYMin(val) {
-      if (!_.isNumber(val)) {
-        throw new Error('validateUserDefinedYMin expects a number');
-      }
-      return val;
-    }
-
-    /**
-     * Helper function for getNames
-     * Returns an array of objects with a name (key) value and an index value.
-     * The index value allows us to sort the names in the correct nested order.
-     *
-     * @method returnNames
-     * @param array {Array} Array of data objects
-     * @param index {Number} Number of times the object is nested
-     * @param columns {Object} Contains name formatter information
-     * @returns {Array} Array of labels (strings)
-     */
-    returnNames(array, index, columns) {
-      const names = [];
-      const self = this;
-
-      _.forEach(array, function (obj) {
-        names.push({
-          label: obj.name,
-          values: obj,
-          index: index
-        });
-
-        if (obj.children) {
-          const plusIndex = index + 1;
-
-          _.forEach(self.returnNames(obj.children, plusIndex, columns), function (namedObj) {
-            names.push(namedObj);
+    getNames(slices) {
+      return slices
+        .reduce((slices, slice) => {
+          if (slice.children && slice.children.length) {
+            slices = slices.concat(this.getNames(slice.children));
+          }
+          slices.push({
+            label: slice.label
           });
-        }
-      });
-
-      return names;
-    }
-
-    /**
-     * Flattens hierarchical data into an array of objects with a name and index value.
-     * The indexed value determines the order of nesting in the data.
-     * Returns an array with names sorted by the index value.
-     *
-     * @method getNames
-     * @param data {Object} Chart data object
-     * @param columns {Object} Contains formatter information
-     * @returns {Array} Array of names (strings)
-     */
-    getNames(data, columns) {
-      const slices = data.slices;
-
-      if (slices.children) {
-        const namedObj = this.returnNames(slices.children, 0, columns);
-
-        return _(namedObj)
-        .sortBy(function (obj) {
-          return obj.index;
-        })
-        .unique(function (d) {
-          return d.label;
-        })
-        .value();
-      }
+          return slices;
+        }, []);
     }
 
     /**
@@ -330,20 +164,19 @@ export function VislibLibDataProvider(Private) {
      * @param slices
      * @returns {*}
      */
-    _removeZeroSlices(slices) {
+    _removeZeroSlices(data) {
       const self = this;
 
-      if (!slices.children) return slices;
+      if (!data.children || !data.children.length) return data;
 
-      slices = _.clone(slices);
-      slices.children = slices.children.reduce(function (children, child) {
-        if (child.size !== 0) {
+      data.children = data.children.reduce(function (children, child) {
+        if (child.values[0].value !== 0) {
           children.push(self._removeZeroSlices(child));
         }
         return children;
       }, []);
 
-      return slices;
+      return data;
     }
 
     /**
@@ -358,10 +191,9 @@ export function VislibLibDataProvider(Private) {
       const names = [];
 
       _.forEach(data, function (obj) {
-        const columns = obj.raw ? obj.raw.columns : undefined;
-        obj.slices = self._removeZeroSlices(obj.slices);
+        obj = self._removeZeroSlices(obj);
 
-        _.forEach(self.getNames(obj, columns), function (name) {
+        _.forEach(self.getNames(obj.children), function (name) {
           names.push(name);
         });
       });
@@ -386,19 +218,26 @@ export function VislibLibDataProvider(Private) {
      * @returns {Array} Array of x axis values
      */
     xValues(orderBucketsBySum = false) {
-      return orderKeys(this.data, orderBucketsBySum);
-    }
-
-    /**
-     * Return an array of unique labels
-     * Curently, only used for vertical bar and line charts,
-     * or any data object with series values
-     *
-     * @method getLabels
-     * @returns {Array} Array of labels (strings)
-     */
-    getLabels() {
-      return getLabels(this.data);
+      const buckets = [];
+      this.chartData().forEach(chart => {
+        _.each(chart.series, series => {
+          series.values.forEach(value => {
+            const bucket = buckets.find(bucket => bucket.label === value.x);
+            if (bucket) {
+              bucket.value += value.y;
+            } else {
+              buckets.push({
+                label: value.x,
+                value: value.y
+              });
+            }
+          });
+        });
+      });
+      if (orderBucketsBySum) {
+        return _.sortByOrder(buckets, 'value', 'desc').map(bucket => bucket.label);
+      }
+      return buckets.map(bucket => bucket.label);
     }
 
     /**
@@ -424,7 +263,7 @@ export function VislibLibDataProvider(Private) {
      * @returns {Function} Performs lookup on string and returns hex color
      */
     getPieColorFunc() {
-      return color(this.pieNames(this.getVisData()).map(function (d) {
+      return color(this.pieNames(this.chartData()).map(function (d) {
         return d.label;
       }), this.uiState.get('vis.colors'));
     }
@@ -436,7 +275,7 @@ export function VislibLibDataProvider(Private) {
      * @return {undefined}
      */
     _normalizeOrdered() {
-      const data = this.getVisData();
+      const data = this.chartData();
       const self = this;
 
       data.forEach(function (d) {
@@ -447,27 +286,10 @@ export function VislibLibDataProvider(Private) {
 
         if (missingMax || missingMin) {
           const extent = d3.extent(self.xValues());
-          if (missingMin) d.ordered.min = extent[0];
-          if (missingMax) d.ordered.max = extent[1];
+          if (missingMin) d.ordered.min = parseInt(extent[0]);
+          if (missingMax) d.ordered.max = parseInt(extent[1]);
         }
       });
-    }
-
-    /**
-     * Calculates min and max values for all map data
-     * series.rows is an array of arrays
-     * each row is an array of values
-     * last value in row array is bucket count
-     *
-     * @method mapDataExtents
-     * @param series {Array} Array of data objects
-     * @returns {Array} min and max values
-     */
-    mapDataExtents(series) {
-      const values = _.map(series.rows, function (row) {
-        return row[row.length - 1];
-      });
-      return [_.min(values), _.max(values)];
     }
 
     /**

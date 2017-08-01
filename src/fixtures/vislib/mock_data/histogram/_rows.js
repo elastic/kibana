@@ -1,7 +1,8 @@
 import _ from 'lodash';
 
 export default {
-  'rows': [
+  'split': 'rows',
+  'charts': [
     {
       'label': '404: response',
       'xAxisLabel': 'machine.ram',

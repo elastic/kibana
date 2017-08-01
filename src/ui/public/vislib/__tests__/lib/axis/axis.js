@@ -18,69 +18,71 @@ describe('Vislib Axis Class Test Suite', function () {
 
   const data = {
     hits: 621,
-    ordered: {
-      date: true,
-      interval: 30000,
-      max: 1408734982458,
-      min: 1408734082458
-    },
-    series: [
-      {
-        label: 'Count',
-        values: [
-          {
-            x: 1408734060000,
-            y: 8
-          },
-          {
-            x: 1408734090000,
-            y: 23
-          },
-          {
-            x: 1408734120000,
-            y: 30
-          },
-          {
-            x: 1408734130000,
-            y: 30
-          },
-          {
-            x: 1408734150000,
-            y: 28
-          }
-        ]
+    charts: [{
+      ordered: {
+        date: true,
+        interval: 30000,
+        max: 1408734982458,
+        min: 1408734082458
       },
-      {
-        label: 'Count2',
-        values: [
-          {
-            x: 1408734060000,
-            y: 8
-          },
-          {
-            x: 1408734090000,
-            y: 23
-          },
-          {
-            x: 1408734120000,
-            y: 30
-          },
-          {
-            x: 1408734140000,
-            y: 30
-          },
-          {
-            x: 1408734150000,
-            y: 28
-          }
-        ]
-      }
-    ],
-    xAxisFormatter: function (thing) {
-      return new Date(thing);
-    },
-    xAxisLabel: 'Date Histogram',
-    yAxisLabel: 'Count'
+      series: [
+        {
+          label: 'Count',
+          values: [
+            {
+              x: 1408734060000,
+              y: 8
+            },
+            {
+              x: 1408734090000,
+              y: 23
+            },
+            {
+              x: 1408734120000,
+              y: 30
+            },
+            {
+              x: 1408734130000,
+              y: 30
+            },
+            {
+              x: 1408734150000,
+              y: 28
+            }
+          ]
+        },
+        {
+          label: 'Count2',
+          values: [
+            {
+              x: 1408734060000,
+              y: 8
+            },
+            {
+              x: 1408734090000,
+              y: 23
+            },
+            {
+              x: 1408734120000,
+              y: 30
+            },
+            {
+              x: 1408734140000,
+              y: 30
+            },
+            {
+              x: 1408734150000,
+              y: 28
+            }
+          ]
+        }
+      ],
+      xAxisFormatter: function (thing) {
+        return new Date(thing);
+      },
+      xAxisLabel: 'Date Histogram',
+      yAxisLabel: 'Count'
+    }]
   };
 
   beforeEach(ngMock.module('kibana'));
@@ -104,7 +106,7 @@ describe('Vislib Axis Class Test Suite', function () {
       id: 'ValueAxis-1'
     });
 
-    seriesData = data.series.map(series => {
+    seriesData = data.charts[0].series.map(series => {
       return series.values;
     });
   }));
