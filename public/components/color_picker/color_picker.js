@@ -15,7 +15,7 @@ export const ColorPicker = ({ value, colors, colorsPerRow, onChange }) => {
 
 
 
-    const background = color === 'rgba(1,1,1,0)' ?
+    const background = color === 'rgba(255,255,255,0)' ?
     {
       backgroundImage: `
         linear-gradient(45deg, #aaa 25%, transparent 25%),

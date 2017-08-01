@@ -46,7 +46,7 @@ export const getDefaultWorkpad = () => {
       '#45bdb0', '#f2bc33', '#e74b8b', '#4fbf48', '#1ea6dc', '#fd7643',
       '#72cec3', '#f5cc5d', '#ec77a8', '#7acf74', '#4cbce4', '#fd986f',
       '#a1ded7', '#f8dd91', '#f2a4c5', '#a6dfa2', '#86d2ed', '#fdba9f',
-      '#000000', '#444444', '#777777', '#BBBBBB', '#FFFFFF', 'rgba(1,1,1,0)', // 'transparent'
+      '#000000', '#444444', '#777777', '#BBBBBB', '#FFFFFF', 'rgba(255,255,255,0)', // 'transparent'
     ],
   };
 };
