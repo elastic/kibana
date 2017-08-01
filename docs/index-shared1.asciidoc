@@ -1,12 +1,4 @@
 
-//////////
-release-state can be: released | prerelease | unreleased
-//////////
-:release-state:   released
-:version:         5.5.1
-:major-version:   5.x
-:branch:          5.5
-
 :docker-image:   docker.elastic.co/kibana/kibana:{version}
 :repo:           https://github.com/elastic/kibana/
 :issue:          {repo}issues/
@@ -15,6 +7,7 @@ release-state can be: released | prerelease | unreleased
 :blob:           {repo}blob/{branch}/
 :security-ref:   https://www.elastic.co/community/security/
 
+include::{asciidoc-dir}/../../shared/versions55.asciidoc[]
 include::{asciidoc-dir}/../../shared/attributes.asciidoc[]
 
 include::introduction.asciidoc[]
