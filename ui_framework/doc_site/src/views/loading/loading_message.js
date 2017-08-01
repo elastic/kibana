@@ -2,7 +2,7 @@ import React from 'react';
 
 import {
   KuiLoadingMessage,
-} from '../../../../components';
+} from '../../../../components/';
 
 export default () => (
   <div>
