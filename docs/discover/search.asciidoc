@@ -4,7 +4,7 @@ You can search the indices that match the current index pattern by entering
 your search criteria in the Query bar. You can use the Lucene
 https://lucene.apache.org/core/2_9_4/queryparsersyntax.html[
 query syntax], the full JSON-based {ref}/query-dsl.html[Elasticsearch
-Query DSL], or Kuery, an experimental new query language built specifically for Kibana.
+Query DSL] or Kuery, an experimental new query language built specifically for Kibana.
 
 When you submit a search request, the histogram, Documents table, and Fields
 list are updated to reflect the search results. The total number of hits
