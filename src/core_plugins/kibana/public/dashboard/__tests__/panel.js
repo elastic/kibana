@@ -59,7 +59,7 @@ describe('dashboard panel', function () {
 
   it('should not visualize the visualization if it does not exist', function () {
     init({ found: false });
-    return $scope.loadedPanel.then(() => {
+    return $scope.renderPromise.then(() => {
       expect($scope.error).to.be('Could not locate that visualization (id: foo1)');
       parentScope.$digest();
       const content = $el.find('.panel-content');
@@ -69,7 +69,7 @@ describe('dashboard panel', function () {
 
   it('should try to visualize the visualization if found', function () {
     init({ id: 'foo1', type: 'visualization', _version: 2, attributes: {} });
-    return $scope.loadedPanel.then(() => {
+    return $scope.renderPromise.then(() => {
       expect($scope.error).not.to.be.ok();
       parentScope.$digest();
       const content = $el.find('.panel-content');

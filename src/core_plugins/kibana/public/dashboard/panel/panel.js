@@ -95,11 +95,13 @@ uiModules
         handleError(new Error(`No embeddable handler for panel type ${$scope.panel.type} was found.`));
         return;
       }
-      $scope.editUrl = embeddableHandler.getEditPath(panelId);
+      embeddableHandler.getEditPath(panelId).then(path => {
+        $scope.editUrl = path;
+      });
       embeddableHandler.getTitleFor(panelId).then(title => {
         $scope.title = title;
       });
-      $scope.loadedPanel =
+      $scope.renderPromise =
         embeddableHandler.render(element.find('#embeddedPanel').get(0), $scope.panel, $scope.containerApi).catch(handleError);
     }
   };
