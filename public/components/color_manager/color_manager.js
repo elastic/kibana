@@ -10,14 +10,15 @@ export const ColorManager = ({ value, addColor, removeColor, onChange }) => {
   return (
     <div className="canvas__color-manager">
 
-      <FormControl
-        type="text"
-        value={value}
-        placeholder="#hex color"
-        style={{ backgroundColor: value, color: readableColor(value) }}
-        className="canvas__color-manager--input"
-        onChange={e => onChange(e.target.value)}
-      />
+      <div style={{ display: 'inline-block' }} className="canvas__checkered canvas__color-manager--input">
+        <FormControl
+          type="text"
+          value={value}
+          placeholder="#hex color"
+          style={{ backgroundColor: value, color: readableColor(value) }}
+          onChange={e => onChange(e.target.value)}
+        />
+      </div>
       <i onClick={() => addColor(value)} className="canvas__color-manager--add fa fa-plus-circle"/>
       <i onClick={() => removeColor(value)} className="canvas__color-manager--remove fa fa-times-circle"/>
 
