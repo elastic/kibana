@@ -12,7 +12,7 @@ export class TermsVisEditor extends Component {
   constructor(props) {
     super(props);
 
-    this.visParams = _.cloneDeep(props.scope.vis.getCurrentState().params);
+    this.props.scope.vis.params = props.scope.vis.params;
     this.getIndexPatterns = async () => {
       return await props.scope.vis.API.indexPatterns.getIndexPatterns();
     };
@@ -27,40 +27,40 @@ export class TermsVisEditor extends Component {
   }
 
   setVisParam(paramName, paramValue) {
-    const params = _.cloneDeep(this.visParams);
+    const params = _.cloneDeep(this.props.scope.vis.params);
     params[paramName] = paramValue;
     this.props.stageEditorParams(params);
   }
 
   handleLabelChange(fieldIndex, evt) {
-    const updatedField = this.visParams.fields[fieldIndex];
+    const updatedField = this.props.scope.vis.params.fields[fieldIndex];
     updatedField.label = evt.target.value;
-    this.setVisParam('fields', setField(this.visParams.fields, fieldIndex, updatedField));
+    this.setVisParam('fields', setField(this.props.scope.vis.params.fields, fieldIndex, updatedField));
   }
 
   handleIndexPatternChange(fieldIndex, evt) {
-    const updatedField = this.visParams.fields[fieldIndex];
+    const updatedField = this.props.scope.vis.params.fields[fieldIndex];
     updatedField.indexPattern = evt.value;
     updatedField.fieldName = '';
-    this.setVisParam('fields', setField(this.visParams.fields, fieldIndex, updatedField));
+    this.setVisParam('fields', setField(this.props.scope.vis.params.fields, fieldIndex, updatedField));
   }
 
   handleFieldNameChange(fieldIndex, evt) {
-    const updatedField = this.visParams.fields[fieldIndex];
+    const updatedField = this.props.scope.vis.params.fields[fieldIndex];
     updatedField.fieldName = evt.value;
-    this.setVisParam('fields', setField(this.visParams.fields, fieldIndex, updatedField));
+    this.setVisParam('fields', setField(this.props.scope.vis.params.fields, fieldIndex, updatedField));
   }
 
   handleRemoveField(fieldIndex) {
-    this.setVisParam('fields', removeField(this.visParams.fields, fieldIndex));
+    this.setVisParam('fields', removeField(this.props.scope.vis.params.fields, fieldIndex));
   }
 
   handleAddField() {
-    this.setVisParam('fields', addField(this.visParams.fields, newField()));
+    this.setVisParam('fields', addField(this.props.scope.vis.params.fields, newField()));
   }
 
   renderFields() {
-    return this.visParams.fields.map((field, index) => {
+    return this.props.scope.vis.params.fields.map((field, index) => {
       return (
         <div key={index} className="field-section">
           <div className="kuiFieldGroup">
@@ -109,7 +109,8 @@ export class TermsVisEditor extends Component {
         {this.renderFields()}
 
         <KuiButton
-          type="primary"
+          buttonType="primary"
+          type="button"
           icon={<KuiButtonIcon type="create" />}
           onClick={this.handleAddField}
         >
