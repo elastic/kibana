@@ -1,6 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { readableColor } from '../../lib/readable_color';
+import { ColorDot } from '../color_dot';
 import { last } from 'lodash';
 
 import './color_palette.less';
@@ -13,27 +14,15 @@ export const ColorPalette = ({ value, colors, colorsPerRow, onChange }) => {
   const table = colors.reduce((rows, color) => {
     if (last(rows).length >= colorsPerRow) rows.push([]);
 
-
-
-    const background = color === 'rgba(255,255,255,0)' ?
-    {
-      backgroundImage: `
-        linear-gradient(45deg, #aaa 25%, transparent 25%),
-        linear-gradient(-45deg, #aaa 25%, transparent 25%),
-        linear-gradient(45deg, transparent 75%, #aaa 75%),
-        linear-gradient(-45deg, transparent 75%, #aaa 75%)`,
-      backgroundSize: '8px 8px',
-    } :
-    { background: color };
-
     const dot = (
       <div key={color}
       onClick={() => onChange(color)}
-      className="canvas__color-palette--dot"
-      style={background}>
-      { color !== value ? <i className="fa"/> :
-        <i className="fa fa-check" style={{ color: readableColor(value) }}/>
-      }
+      className="canvas__color-palette--dot">
+        <ColorDot value={color}>
+          { color !== value ? <i className="fa"/> :
+            <i className="fa fa-check" style={{ color: readableColor(value) }}/>
+          }
+        </ColorDot>
       </div>
     );
 
