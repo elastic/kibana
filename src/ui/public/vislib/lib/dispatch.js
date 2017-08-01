@@ -40,7 +40,6 @@ export function VislibLibDispatchProvider(Private, config) {
       const slices = isSlices ? data.slices : undefined;
       const handler = this.handler;
       const color = _.get(handler, 'data.color');
-      const isPercentage = (handler && handler.visConfig.get('mode', 'normal') === 'percentage');
 
       const eventData = {
         value: d.y,
@@ -59,11 +58,13 @@ export function VislibLibDispatchProvider(Private, config) {
 
       if (isSeries) {
         // Find object with the actual d value and add it to the point object
+        const aggId = d3.event.target.parentElement.__data__.aggId;
+        const percentageMode = handler.charts[0].getSeries(aggId).getValueAxis().axisConfig.isPercentage();
         const object = _.find(series, { 'label': label });
         if (object) {
           eventData.value = +object.values[i].y;
 
-          if (isPercentage) {
+          if (percentageMode) {
             // Add the formatted percentage to the point object
             eventData.percent = (100 * d.y).toFixed(1) + '%';
           }
