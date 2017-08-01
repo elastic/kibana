@@ -2,7 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { Form, FormGroup, ControlLabel } from 'react-bootstrap';
 import { get } from 'lodash';
-import { set } from 'object-path-immutable';
+import { set, del } from 'object-path-immutable';
 import { LabeledInput } from './labeled_input';
 import { LabeledSelect } from './labeled_select';
 import { ArgType } from '../../arg_type';
@@ -15,11 +15,13 @@ const template = (props) => {
   const { name, displayName } = typeInstance;
 
   const handleChange = (argName, ev) => {
-    const newValue = set(argValue, ['chain', 0, 'arguments', argName], [{
+    const fn = ev.target.value === '' ? del : set;
+
+    const newValue = fn(argValue, ['chain', 0, 'arguments', argName], [{
       type: 'string',
       value: ev.target.value,
     }]);
-    onValueChange(newValue);
+    return onValueChange(newValue);
   };
 
   // TODO: add fill and stack options
