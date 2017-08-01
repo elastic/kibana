@@ -51,6 +51,7 @@ const components = [{
 }, {
   name: 'Link',
   component: LinkExample,
+  hasReact: true,
 }, {
   name: 'Modal',
   component: ModalExample,
