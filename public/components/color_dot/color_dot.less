@@ -1,0 +1,28 @@
+@import (reference) "../../style/main";
+
+.canvas__color-dot {
+  display: inline-block;
+  position: relative;
+  height: 25px;
+  width: 25px;
+
+
+  .canvas__color-dot--background {
+    position: absolute;
+    height: 25px;
+    width: 25px;
+    border-radius: 15px;
+    top: 0;
+    left: 0;
+  }
+
+  .canvas__color-dot--foreground {
+    position: absolute;
+    border: 2px solid @darkGrey;
+    height: 25px;
+    width: 25px;
+    border-radius: 15px;
+    top: 0;
+    left: 0;
+  }
+}
