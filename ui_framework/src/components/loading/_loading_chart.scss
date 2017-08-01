@@ -3,42 +3,39 @@
   z-index: 500;
   overflow: hidden;
   display: inline-block;
+}
 
-  > div {
-    height: 100%;
-    width: 8px;
-    display: inline-block;
-    float: left;
-    margin-bottom: -16px;
-    margin-left: 2px;
+.kuiLoadingChart__bar {
+  height: 100%;
+  width: 8px;
+  display: inline-block;
+  float: left;
+  margin-bottom: -16px;
+  margin-left: 2px;
+  animation: kuiLoadingChart 1s infinite;
 
-    &:nth-child(1) {
-      background-color: $kuiColorPrimary;
-      animation: chart 1s infinite;
-    }
+  &:nth-child(1) {
+    background-color: $kuiColorPrimary;
+  }
 
-    &:nth-child(2) {
-      background-color: $kuiColorSecondary;
-      animation: chart 1s infinite;
-      animation-delay: .1s;
-    }
+  &:nth-child(2) {
+    background-color: $kuiColorSecondary;
+    animation-delay: .1s;
+  }
 
-    &:nth-child(3) {
-      background-color: $kuiColorAccent;
-      animation: chart 1s infinite;
-      animation-delay: .2s;
-    }
+  &:nth-child(3) {
+    background-color: $kuiColorAccent;
+    animation-delay: .2s;
+  }
 
-    &:nth-child(4) {
-      background-color: $kuiColorDarkestShade;
-      animation: chart 1s infinite;
-      animation-delay: .3s;
-    }
+  &:nth-child(4) {
+    background-color: $kuiColorDarkestShade;
+    animation-delay: .3s;
   }
 }
 
 .kuiLoadingChart--mono {
-  > div {
+  .kuiLoadingChart__bar {
     &:nth-child(1) {
       background-color: $kuiColorLightShade;
     }
@@ -81,7 +78,7 @@
   }
 }
 
-@keyframes chart {
+@keyframes kuiLoadingChart {
   0% {
     transform: translateY(0);
   }

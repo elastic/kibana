@@ -1265,46 +1265,41 @@ table {
   z-index: 500;
   overflow: hidden;
   display: inline-block; }
-  .kuiLoadingChart > div {
-    height: 100%;
-    width: 8px;
-    display: inline-block;
-    float: left;
-    margin-bottom: -16px;
-    margin-left: 2px; }
-    .kuiLoadingChart > div:nth-child(1) {
-      background-color: #0079a5;
-      -webkit-animation: chart 1s infinite;
-              animation: chart 1s infinite; }
-    .kuiLoadingChart > div:nth-child(2) {
-      background-color: #00A69B;
-      -webkit-animation: chart 1s infinite;
-              animation: chart 1s infinite;
-      -webkit-animation-delay: .1s;
-              animation-delay: .1s; }
-    .kuiLoadingChart > div:nth-child(3) {
-      background-color: #DD0A73;
-      -webkit-animation: chart 1s infinite;
-              animation: chart 1s infinite;
-      -webkit-animation-delay: .2s;
-              animation-delay: .2s; }
-    .kuiLoadingChart > div:nth-child(4) {
-      background-color: #3F3F3F;
-      -webkit-animation: chart 1s infinite;
-              animation: chart 1s infinite;
-      -webkit-animation-delay: .3s;
-              animation-delay: .3s; }
 
-.kuiLoadingChart--mono > div:nth-child(1) {
+.kuiLoadingChart__bar {
+  height: 100%;
+  width: 8px;
+  display: inline-block;
+  float: left;
+  margin-bottom: -16px;
+  margin-left: 2px;
+  -webkit-animation: kuiLoadingChart 1s infinite;
+          animation: kuiLoadingChart 1s infinite; }
+  .kuiLoadingChart__bar:nth-child(1) {
+    background-color: #0079a5; }
+  .kuiLoadingChart__bar:nth-child(2) {
+    background-color: #00A69B;
+    -webkit-animation-delay: .1s;
+            animation-delay: .1s; }
+  .kuiLoadingChart__bar:nth-child(3) {
+    background-color: #DD0A73;
+    -webkit-animation-delay: .2s;
+            animation-delay: .2s; }
+  .kuiLoadingChart__bar:nth-child(4) {
+    background-color: #3F3F3F;
+    -webkit-animation-delay: .3s;
+            animation-delay: .3s; }
+
+.kuiLoadingChart--mono .kuiLoadingChart__bar:nth-child(1) {
   background-color: #D9D9D9; }
 
-.kuiLoadingChart--mono > div:nth-child(2) {
+.kuiLoadingChart--mono .kuiLoadingChart__bar:nth-child(2) {
   background-color: #cfcfcf; }
 
-.kuiLoadingChart--mono > div:nth-child(3) {
+.kuiLoadingChart--mono .kuiLoadingChart__bar:nth-child(3) {
   background-color: #c5c5c5; }
 
-.kuiLoadingChart--mono > div:nth-child(4) {
+.kuiLoadingChart--mono .kuiLoadingChart__bar:nth-child(4) {
   background-color: #bababa; }
 
 .kuiLoadingChart--medium {
@@ -1328,7 +1323,7 @@ table {
     margin-left: 4px;
     margin-bottom: 16px; }
 
-@-webkit-keyframes chart {
+@-webkit-keyframes kuiLoadingChart {
   0% {
     -webkit-transform: translateY(0);
             transform: translateY(0); }
@@ -1339,7 +1334,7 @@ table {
     -webkit-transform: translateY(0);
             transform: translateY(0); } }
 
-@keyframes chart {
+@keyframes kuiLoadingChart {
   0% {
     -webkit-transform: translateY(0);
             transform: translateY(0); }

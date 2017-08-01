@@ -24,10 +24,9 @@ export const KuiLoadingChart = ({ size, mono, className, ...rest }) => {
       className={classes}
       {...rest}
     >
-      <div />
-      <div />
-      <div />
-      <div />
+      <div className="kuiLoadingChart__bar" />
+      <div className="kuiLoadingChart__bar" />
+      <div className="kuiLoadingChart__bar" />
     </div>
   );
 };
