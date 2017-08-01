@@ -61,7 +61,7 @@ export class GuideNav extends Component {
         className={previousClasses}
         to={this.state.previousRoute ? this.state.previousRoute.path : ''}
       >
-        <span className="fa fa-angle-left"></span>
+        <span className="fa fa-angle-left" />
       </Link>
     );
 
@@ -74,7 +74,7 @@ export class GuideNav extends Component {
         className={nextClasses}
         to={this.state.nextRoute ? this.state.nextRoute.path : ''}
       >
-        <span className="fa fa-angle-right"></span>
+        <span className="fa fa-angle-right" />
       </Link>
     );
 
@@ -122,6 +122,10 @@ export class GuideNav extends Component {
       this.props.sandboxes.filter(item => (
         item.name.toLowerCase().indexOf(this.state.search.toLowerCase()) !== -1
       )).map((item, index) => {
+        const icon =
+          item.hasReact
+          ? <div className="guideNavItem__reactLogo" />
+          : undefined;
         return (
           <div key={`sandboxNavItem-${index}`} className="guideNavItem">
             <Link
@@ -131,6 +135,8 @@ export class GuideNav extends Component {
             >
               {item.name}
             </Link>
+
+            {icon}
           </div>
         );
       });
