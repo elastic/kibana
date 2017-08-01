@@ -5,9 +5,10 @@ import { ArgForm } from './arg_form';
 export class View extends ArgForm {
   constructor(name, props) {
     super(name, props);
-    const propNames = ['description', 'modelArgs'];
+    const propNames = ['description', 'modelArgs', 'requiresContext'];
     const defaultProps = {
       description: `Element: ${name}`,
+      requiresContext: false,
     };
 
     Object.assign(this, defaultProps, pick(props, propNames));

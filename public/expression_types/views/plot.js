@@ -1,10 +1,14 @@
 import { View } from '../view';
 import { Arg } from '../arg';
+import { getState, getValue } from '../../lib/resolved_arg';
+import { map, uniq } from 'lodash';
+
 
 export const plot = () => new View('plot', {
   displayName: 'Plot Chart',
   description: 'Show your data, as plots',
   modelArgs: ['x', 'y', 'color', 'size'],
+  requiresContext: true,
   args: [
     new Arg('defaultStyle', {
       displayName: 'Default style',
@@ -18,4 +22,8 @@ export const plot = () => new View('plot', {
       multi: true,
     }),
   ],
+  resolve({ context }) {
+    if (getState(context) !== 'ready') return { labels: [] };
+    return { labels: uniq(map(getValue(context).rows, 'color')) };
+  },
 });
