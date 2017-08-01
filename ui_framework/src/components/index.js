@@ -57,6 +57,15 @@ export {
 } from './popover';
 
 export {
+  KuiTable,
+  KuiTableBody,
+  KuiTableHeader,
+  KuiTableHeaderCell,
+  KuiTableRow,
+  KuiTableRowCell,
+} from './table';
+
+export {
   KuiTitle,
   KuiText,
 } from './typography';
