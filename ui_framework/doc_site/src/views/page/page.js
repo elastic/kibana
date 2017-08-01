@@ -14,7 +14,6 @@ import {
 } from '../../../../components';
 
 export default () => (
-
   <KuiPage>
     <KuiPageHeader>
       <KuiPageHeaderSection>

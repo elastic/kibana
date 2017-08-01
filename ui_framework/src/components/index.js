@@ -25,6 +25,10 @@ export {
 } from './key_pad_menu';
 
 export {
+  KuiLink,
+} from './link';
+
+export {
   KUI_MODAL_CANCEL_BUTTON,
   KUI_MODAL_CONFIRM_BUTTON,
   KuiConfirmModal,
