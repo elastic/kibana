@@ -1,11 +1,11 @@
 import { createAction } from 'redux-actions';
 import { get, omit } from 'lodash';
 import { set, del } from 'object-path-immutable';
+import { createThunk } from 'redux-thunks';
 import { notify } from '../../lib/notify';
 import { getSelectedElement, getElementById, getPages } from '../selectors/workpad';
 import { getDefaultElement } from '../defaults';
 import { interpretAst } from '../../lib/interpreter';
-import { createThunk } from '../../lib/create_thunk';
 import { getType } from '../../../common/types/get_type';
 import { fromExpression, toExpression } from '../../../common/lib/ast';
 import * as args from './resolved_args';

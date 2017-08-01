@@ -1,5 +1,9 @@
+import clientdata from '../functions/clientdata/clientdata';
+import location from '../functions/location/location';
+import navigator from '../functions/navigator/navigator';
+
 export const clientFunctions = [
-  require('../functions/clientdata/clientdata'),
-  require('../functions/location/location'),
-  require('../functions/navigator/navigator'),
+  clientdata,
+  location,
+  navigator,
 ];

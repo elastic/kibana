@@ -1,10 +1,12 @@
-import { functions } from '../lib/functions';
 import { map } from 'lodash';
+import socket from 'socket.io';
+import { functions } from '../lib/functions';
 import { socketInterpreterProvider } from '../../common/interpreter/socket_interpret';
 import { types } from '../../common/lib/types';
 
 export function socketApi(server) {
-  const io = require('socket.io')(server.listener);
+  const io = socket(server.listener);
+
   io.on('connection', (socket) => {
     console.log('User connected, attaching handlers');
 

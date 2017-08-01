@@ -1,7 +1,7 @@
-const Type = require('../type');
-const datatable = require('../datatable');
+import Type from '../type';
+import datatable from '../datatable';
 
-module.exports = new Type({
+export default new Type({
   name: 'pointseries',
   from: {
     null: () => {

@@ -4,7 +4,7 @@ import { getType } from './get_type';
 
 // TODO: Currently all casting functions must be syncronous.
 
-module.exports = function Type(config) {
+export default function Type(config) {
   // Required
   this.name = config.name;
 
@@ -32,4 +32,4 @@ module.exports = function Type(config) {
     if (!this.castsFrom([typeName])) throw new Error(`Can not cast '${typeName}' to any of ${this.name}`);
     return fns.from[typeName](node);
   };
-};
+}

@@ -1,7 +1,7 @@
-const Fn = require('../fn.js');
+import _ from 'lodash';
+import Fn from '../fn.js';
 
-const _ = require('lodash');
-module.exports = new Fn({
+export default new Fn({
   name: 'alterColumn',
   type: 'datatable',
   help: 'Converts between core types, eg string, number, null, boolean, date',

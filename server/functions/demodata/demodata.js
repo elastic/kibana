@@ -1,10 +1,10 @@
-const Fn = require('../../../common/functions/fn.js');
-const rows = require('./mock.json');
-const _ = require('lodash');
-const moment = require('moment');
+import _ from 'lodash';
+import moment from 'moment';
+import rows from './mock.json';
+import Fn from '../../../common/functions/fn.js';
 import { queryDatatable } from '../../../common/lib/datatable/query';
 
-module.exports = new Fn({
+export default new Fn({
   name: 'demodata',
   aliases: [],
   type: 'datatable',

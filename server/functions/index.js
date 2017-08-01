@@ -1,5 +1,9 @@
+import esdocs from './esdocs/esdocs';
+import demodata from './demodata/demodata';
+import demoprices from './demoprices/demoprices';
+
 export const serverFunctions = [
-  require('./esdocs/esdocs'),
-  require('./demodata/demodata'),
-  require('./demoprices/demoprices'),
+  esdocs,
+  demodata,
+  demoprices,
 ];

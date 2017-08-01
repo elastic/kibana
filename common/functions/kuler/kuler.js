@@ -2,7 +2,7 @@ import Fn from '../fn.js';
 import fetch from 'axios';
 import { map } from 'lodash';
 
-module.exports = new Fn({
+export default new Fn({
   name: 'kuler',
   aliases: [],
   type: 'palette',

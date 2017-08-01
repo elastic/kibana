@@ -1,4 +1,4 @@
-const Fn = require('../fn.js');
+import Fn from '../fn.js';
 import { groupBy, keyBy, get, set, map, sortBy } from 'lodash';
 
 /*
@@ -18,7 +18,7 @@ demodata()
 )
 */
 
-module.exports = new Fn({
+export default new Fn({
   name: 'plot',
   aliases: [],
   type: 'render',

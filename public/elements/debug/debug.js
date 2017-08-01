@@ -3,7 +3,7 @@ import ReactDOM from 'react-dom';
 import React from 'react';
 import header from './header.png';
 
-module.exports = new Element('debug', {
+export default new Element('debug', {
   displayName: 'Debug',
   description: 'Just dumps the configuration of the element',
   image: header,

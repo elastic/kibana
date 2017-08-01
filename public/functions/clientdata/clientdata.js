@@ -1,8 +1,8 @@
-const Fn = require('../../../common/functions/fn.js');
-const _ = require('lodash');
-const cheap = require('./cheap.json');
+import _ from 'lodash';
+import Fn from '../../../common/functions/fn.js';
+import cheap from './cheap.json';
 
-module.exports = new Fn({
+export default new Fn({
   name: 'clientdata',
   aliases: [],
   type: 'datatable',

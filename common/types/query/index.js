@@ -1,6 +1,6 @@
-const Type = require('../type');
+import Type from '../type';
 
-module.exports = new Type({
+export default new Type({
   name: 'query',
   from: {
     null: () => {

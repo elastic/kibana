@@ -1,5 +1,5 @@
 import { createAction } from 'redux-actions';
-import { createThunk } from '../../lib/create_thunk';
+import { createThunk } from 'redux-thunks';
 import { getWorkpadColors } from '../selectors/workpad';
 import { fetchAllRenderables } from './elements';
 import { without, includes } from 'lodash';

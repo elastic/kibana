@@ -1,8 +1,8 @@
-import Fn from '../fn.js';
-import { findInObject } from '../../lib/find_in_object';
 import math from 'mathjs';
 import moment from 'moment';
 import { groupBy, zipObject, uniqBy, omit, pickBy, find, uniq, map, mapValues } from 'lodash';
+import Fn from '../fn.js';
+import { findInObject } from '../../lib/find_in_object';
 import { getMathjsScope } from '../math/get_mathjs_scope';
 
 function isColumnReference(mathExpression) {
@@ -44,7 +44,7 @@ function getType(columns, mathExpression) {
   return (symbolTypes.length === 1) ? symbolTypes[0] : 'string';
 }
 
-module.exports = new Fn({
+export default new Fn({
   name: 'pointseries',
   type: 'pointseries',
   help: 'Turn a datatable into a point series model. Dimensions are combined to create unique keys. Measures are then ' +

@@ -1,6 +1,6 @@
-const _ = require('lodash');
+import { includes } from 'lodash';
 
-module.exports = function Arg(config) {
+export default function Arg(config) {
   this.name = config.name;
   this.types = config.types || [];
   this.default = config.default;
@@ -8,6 +8,6 @@ module.exports = function Arg(config) {
   this.multi = config.multi == null ? false : config.multi;
   this.accepts = (type) => {
     if (!this.types.length) return true;
-    return _.includes(config.types, type);
+    return includes(config.types, type);
   };
-};
+}

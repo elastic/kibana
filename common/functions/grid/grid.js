@@ -1,7 +1,7 @@
-const Fn = require('../fn.js');
 import { uniq, map, sortBy, mapValues } from 'lodash';
+import Fn from '../fn.js';
 
-module.exports = new Fn({
+export default new Fn({
   name: 'grid',
   aliases: [],
   type: 'render',

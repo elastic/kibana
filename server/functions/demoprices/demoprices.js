@@ -1,14 +1,13 @@
-const moment = require('moment');
-const Fn = require('../../../common/functions/fn.js');
-const rows = require('./mock.json');
+import moment from 'moment';
+import rows from './mock.json';
+import Fn from '../../../common/functions/fn.js';
 import { queryDatatable } from '../../../common/lib/datatable/query';
-
 
 function mapRecord(row, i, adjustedTime) {
   return Object.assign({}, row, { _rowId: i, time: adjustedTime || row.time });
 }
 
-module.exports = new Fn({
+export default new Fn({
   name: 'demoprices',
   aliases: [],
   type: 'datatable',

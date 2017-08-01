@@ -1,6 +1,6 @@
-const Fn = require('../fn.js');
+import Fn from '../fn.js';
 
-module.exports = new Fn({
+export default new Fn({
   name: 'render',
   aliases: [],
   type: 'render',

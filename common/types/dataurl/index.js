@@ -1,7 +1,7 @@
-const Type = require('../type');
+import Type from '../type';
 import { parse } from '../../lib/dataurl';
 
-module.exports = new Type({
+export default new Type({
   name: 'dataurl',
   from: {
     null: () => '',

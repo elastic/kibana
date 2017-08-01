@@ -1,6 +1,6 @@
-const _ = require('lodash');
+import _ from 'lodash';
 
-module.exports = function flattenHit(hit, metaFields) {
+export default function flattenHit(hit, metaFields) {
   const flat = {};
 
   metaFields = metaFields || ['_type', '_index'];
@@ -36,4 +36,4 @@ module.exports = function flattenHit(hit, metaFields) {
   });
 
   return flat;
-};
+}

@@ -1,6 +1,6 @@
-const Fn = require('../fn.js');
+import Fn from '../fn.js';
 
-module.exports = new Fn({
+export default new Fn({
   name: 'replace',
   type: 'string',
   help: 'Use a regular expression to replace parts of a string',

@@ -6,7 +6,7 @@ import { min, max, get } from 'lodash';
 import chroma from 'chroma-js';
 import './grid.less';
 
-module.exports = new Element('grid', {
+export default new Element('grid', {
   displayName: 'Grid',
   description: 'A colorable, sizable, grid for displaying a point series',
   image: header,

@@ -1,7 +1,7 @@
-const Fn = require('../fn.js');
+import Fn from '../fn.js';
 
 // seriesConfig(series=_all, label="free beer", width=1, color=blue)
-module.exports = new Fn({
+export default new Fn({
   name: 'containerStyle',
   aliases: [],
   type: 'containerStyle',

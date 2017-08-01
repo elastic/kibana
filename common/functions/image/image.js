@@ -1,10 +1,9 @@
+import { includes } from 'lodash';
 import Fn from '../fn.js';
 import elasticLogo from './elastic_logo';
 import { fetchImage } from '../../lib/fetch_image';
-import { includes } from 'lodash';
 
-
-module.exports = new Fn({
+export default new Fn({
   name: 'image',
   aliases: [],
   type: 'image',

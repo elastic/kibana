@@ -1,14 +1,6 @@
-/*
-This breaks in the browser, besides, its faster if we generate the parser and load that
-const grammar = fs.readFileSync(path.resolve(__dirname, '../grammar.peg'), 'utf8');
-const fs = require('fs');
-const path = require('path');
-const PEG = require('pegjs');
-const Parser = PEG.generate(grammar);
-*/
+import { parse } from './grammar';
 
-import Parser from './grammar';
-
+// This breaks in the browser, besides, its faster if we generate the parser and load that
 function getExpressionArgs(block) {
   const args = block.arguments;
 
@@ -68,7 +60,7 @@ function getExpression(chain, expType = 'expression', exp = '') {
 export function fromExpression(expression) {
   if (typeof expression === 'string' && expression.length === 0) return;
   try {
-    return Parser.parse(expression);
+    return parse(expression);
   } catch (e) {
     throw new Error(`Unable to parse expression: ${e.message}`);
   }

@@ -1,6 +1,6 @@
-const Fn = require('../../../common/functions/fn.js');
+import Fn from '../../../common/functions/fn.js';
 
-module.exports = new Fn({
+export default new Fn({
   name: 'location',
   type: 'string',
   help: 'Get the users location',

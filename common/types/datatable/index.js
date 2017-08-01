@@ -1,8 +1,7 @@
-const Type = require('../type');
-
 import { map } from 'lodash';
+import Type from '../type';
 
-module.exports = new Type({
+export default new Type({
   name: 'datatable',
   from: {
     null: () => {

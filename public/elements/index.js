@@ -1,7 +1,13 @@
+import plot from './plot/plot';
+import table from './table/table';
+import image from './image/image';
+import debug from './debug/debug';
+import grid from './grid/grid';
+
 export const elementSpecs = [
-  require('./plot/plot'),
-  require('./table/table'),
-  require('./image/image'),
-  require('./debug/debug'),
-  require('./grid/grid'),
+  plot,
+  table,
+  image,
+  debug,
+  grid,
 ];

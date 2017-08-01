@@ -1,12 +1,13 @@
-const Fn = require('../../../common/functions/fn.js');
-const _ = require('lodash');
-const flattenHit = require('./lib/flatten_hit');
-const elasticsearch = require('elasticsearch');
+import _ from 'lodash';
+import elasticsearch from 'elasticsearch';
+import Fn from '../../../common/functions/fn.js';
+import flattenHit from './lib/flatten_hit';
+
 const client = new elasticsearch.Client({
   host: 'localhost:9200',
 });
 
-module.exports = new Fn({
+export default new Fn({
   name: 'esdocs',
   context: {
     types: ['filter'],

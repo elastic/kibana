@@ -2,7 +2,7 @@ import Fn from '../fn.js';
 import math from 'mathjs';
 import { getMathjsScope } from './get_mathjs_scope';
 
-module.exports = new Fn({
+export default new Fn({
   name: 'math',
   type: 'number',
   help: 'Turn a datatable into a single number using a MathJS formula',

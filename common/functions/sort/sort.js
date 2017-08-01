@@ -1,7 +1,7 @@
-const Fn = require('../fn.js');
-const _ = require('lodash');
+import Fn from '../fn.js';
+import _ from 'lodash';
 
-module.exports = new Fn({
+export default new Fn({
   name: 'sort',
   aliases: [],
   type: 'datatable',

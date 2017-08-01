@@ -1,6 +1,6 @@
-const Fn = require('../fn.js');
+import Fn from '../fn.js';
 
-module.exports = new Fn({
+export default new Fn({
   name: 'mapColumn',
   aliases: ['mc'], // midnight commander. So many times I've launched midnight commander instead of moving a file.
   type: 'datatable',
