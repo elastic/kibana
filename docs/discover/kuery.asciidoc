@@ -104,7 +104,7 @@ Examples::: `exists("response")`
 geoBoundingBox::
 Purpose::: Creates a geo_bounding_box query
 Examples:::
-* `geoBoundingBox("coordinates", topLeft="40.73, -74.1", bottomRight="40.01, -71.12")`
+* `geoBoundingBox("coordinates", topLeft="40.73, -74.1", bottomRight="40.01, -71.12")` (whitespace between lat and lon is ignored)
 Named arguments:::
 * `topLeft` - the top left corner of the bounding box as a "lat, lon" string
 * `bottomRight` - the bottom right corner of the bounding box as a "lat, lon" string
