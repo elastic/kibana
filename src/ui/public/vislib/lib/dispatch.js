@@ -57,9 +57,16 @@ export function VislibLibDispatchProvider(Private, config) {
       };
 
       if (isSeries) {
-        // Find object with the actual d value and add it to the point object
-        const aggId = d3.event.target.parentElement.__data__.aggId;
-        const percentageMode = handler.charts[0].getSeries(aggId).getValueAxis().axisConfig.isPercentage();
+        let percentageMode = false;
+        //only series charts work in percentage mode.
+        if (handler.charts && handler.charts[0] && handler.charts[0].getSeries && d3.event.target.parentElement.__data__) {
+          const aggId = d3.event.target.parentElement.__data__.aggId;
+          const seriesFromAggId = handler.charts[0].getSeries(aggId);
+          if (seriesFromAggId && seriesFromAggId.getValueAxis) {
+            percentageMode = seriesFromAggId.getValueAxis().axisConfig.isPercentage();
+          }
+        }
+
         const object = _.find(series, { 'label': label });
         if (object) {
           eventData.value = +object.values[i].y;
