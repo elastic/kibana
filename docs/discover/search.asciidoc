@@ -77,7 +77,9 @@ To load a saved search into Discover:
 . Select the search you want to open.
 
 If the saved search is associated with a different index pattern than is currently
-selected, opening the saved search also changes the selected index pattern.
+selected, opening the saved search changes the selected index pattern. The query language
+used for the saved search will also be automatically selected.
+
 
 [[select-pattern]]
 === Changing Which Indices You're Searching
