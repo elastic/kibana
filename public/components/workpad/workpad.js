@@ -9,11 +9,13 @@ export const Workpad = ({ elements, style, workpad }) => {
   const itsTheNewStyle = Object.assign({}, style, { height, width });
 
   return (
-    <div className="canvas__workpad" style={itsTheNewStyle}>
-      { elements.map(element => (
-          <ElementWrapper key={element.id} element={element} />
-      ))
-      }
+    <div className="canvas__checkered" style={{ height, width }}>
+      <div className="canvas__workpad" style={itsTheNewStyle}>
+        { elements.map(element => (
+            <ElementWrapper key={element.id} element={element} />
+        ))
+        }
+      </div>
     </div>
   );
 };
