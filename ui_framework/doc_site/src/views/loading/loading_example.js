@@ -18,6 +18,10 @@ import LoadingChart from './loading_chart';
 const loadingChartSource = require('!!raw!./loading_chart');
 const loadingChartHtml = renderToHtml(LoadingChart);
 
+import LoadingMessage from './loading_message';
+const loadingMessageSource = require('!!raw!./loading_message');
+const loadingMessageHtml = renderToHtml(LoadingMessage);
+
 import LoadingSpinner from './loading_spinner';
 const loadingSpinnerSource = require('!!raw!./loading_spinner');
 const loadingSpinnerHtml = renderToHtml(LoadingSpinner);
@@ -81,6 +85,25 @@ export default props => (
 
       <GuideDemo>
         <LoadingSpinner />
+      </GuideDemo>
+    </GuideSection>
+
+    <GuideSection
+      title="Loading with Message"
+      source={[{
+        type: GuideSectionTypes.JS,
+        code: loadingMessageSource,
+      }, {
+        type: GuideSectionTypes.HTML,
+        code: loadingMessageHtml,
+      }]}
+    >
+      <GuideText>
+        Present any loader with a message.
+      </GuideText>
+
+      <GuideDemo>
+        <LoadingMessage />
       </GuideDemo>
     </GuideSection>
   </GuidePage>
