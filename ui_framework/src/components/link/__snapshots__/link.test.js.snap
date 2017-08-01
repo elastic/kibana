@@ -1,0 +1,11 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`KuiLink is rendered 1`] = `
+<a
+  aria-label="aria-label"
+  class="kuiLink testClass1 testClass2"
+  data-test-subj="test subject string"
+  href="#"
+  target="_blank"
+/>
+`;
