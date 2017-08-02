@@ -1,9 +1,9 @@
 import PropTypes from 'prop-types';
 import { compose, branch, renderComponent, lifecycle } from 'recompose';
-import { ArgTypeComponent } from './arg_type_component';
-import { ArgTypeUnknown } from './arg_type_unknown';
-import { ArgTypeContextPending } from './arg_type_context_pending';
-import { ArgTypeContextError } from './arg_type_context_error';
+import { FunctionFormComponent } from './function_form_component';
+import { FunctionUnknown } from './function_unknown';
+import { FunctionFormContextPending } from './function_form_context_pending';
+import { FunctionFormContextError } from './function_form_context_error';
 
 function requiresContext(expressionType) {
   return Boolean(expressionType && expressionType.requiresContext);
@@ -19,11 +19,11 @@ function checkState(state) {
 
 const branches = [
   // if no expressionType was provided, render the ArgTypeUnknown component
-  branch(props => !props.expressionType, renderComponent(ArgTypeUnknown)),
+  branch(props => !props.expressionType, renderComponent(FunctionUnknown)),
   // if the expressionType is in a pending state, render ArgTypeContextPending
-  branch(checkState('pending'), renderComponent(ArgTypeContextPending)),
+  branch(checkState('pending'), renderComponent(FunctionFormContextPending)),
   // if the expressionType is in an error state, render ArgTypeContextError
-  branch(checkState('error'), renderComponent(ArgTypeContextError)),
+  branch(checkState('error'), renderComponent(FunctionFormContextError)),
 ];
 
 // dispatch context update if none is provided
@@ -45,12 +45,12 @@ const contextLifecycle = lifecycle({
   },
 });
 
-export const ArgType = compose(
+export const FunctionForm = compose(
   contextLifecycle,
   ...branches
-)(ArgTypeComponent);
+)(FunctionFormComponent);
 
-ArgType.propTypes = {
+FunctionForm.propTypes = {
   expressionType: PropTypes.object,
   context: PropTypes.object,
   contextExpression: PropTypes.string,

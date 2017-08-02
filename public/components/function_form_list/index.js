@@ -1,6 +1,6 @@
 import { connect } from 'react-redux';
 import { get } from 'lodash';
-import { ArgTypes as Component } from './arg_types';
+import { FunctionFormList as Component } from './function_form_list';
 import { modelRegistry, viewRegistry } from '../../expression_types';
 import { getSelectedElement } from '../../state/selectors/workpad';
 import { toExpression } from '../../../common/lib/ast';
@@ -16,13 +16,13 @@ function getExpression(chain) {
 
 const mapStateToProps = (state) => {
   const selectedElement = getSelectedElement(state);
-  const argTypeChain = get(selectedElement, 'ast.chain', []);
+  const FunctionFormChain = get(selectedElement, 'ast.chain', []);
 
   // map argTypes from AST, attaching nextArgType if one exists
-  const argTypeItems = argTypeChain.reduce((acc, argType, i) => {
+  const FunctionFormListItems = FunctionFormChain.reduce((acc, argType, i) => {
     const inSidebar = modelRegistry.get(argType.function) || viewRegistry.get(argType.function);
     const prevContext = acc.context;
-    const nextArg = argTypeChain[i + 1] || null;
+    const nextArg = FunctionFormChain[i + 1] || null;
 
     // filter out argTypes that shouldn't be in the sidebar
     if (inSidebar) {
@@ -44,8 +44,8 @@ const mapStateToProps = (state) => {
 
   return {
     element: selectedElement,
-    argTypeItems: argTypeItems.mapped,
+    functionFormItems: FunctionFormListItems.mapped,
   };
 };
 
-export const ArgTypes = connect(mapStateToProps)(Component);
+export const FunctionFormList = connect(mapStateToProps)(Component);

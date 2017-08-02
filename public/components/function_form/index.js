@@ -1,7 +1,7 @@
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import { get } from 'lodash';
-import { ArgType as Component } from './arg_type';
+import { FunctionForm as Component } from './function_form';
 import { findExpressionType } from '../../lib/find_expression_type';
 import { fetchContext, setArgumentAtIndex, addArgumentValueAtIndex, deleteArgumentAtIndex } from '../../state/actions/elements';
 import {
@@ -59,9 +59,9 @@ const mergeProps = (stateProps, dispatchProps, ownProps) => {
   });
 };
 
-export const ArgType = connect(mapStateToProps, mapDispatchToProps, mergeProps)(Component);
+export const FunctionForm = connect(mapStateToProps, mapDispatchToProps, mergeProps)(Component);
 
-ArgType.propTypes = {
+FunctionForm.propTypes = {
   expressionIndex: PropTypes.number,
   argType: PropTypes.string,
   nextArgType: PropTypes.string,

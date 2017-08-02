@@ -1,10 +1,10 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 
-export const ArgTypeUnknown = ({ argType }) => (
+export const FunctionUnknown = ({ argType }) => (
   <div>Unknown expression type "{argType}"</div>
 );
 
-ArgTypeUnknown.propTypes = {
+FunctionUnknown.propTypes = {
   argType: PropTypes.string,
 };

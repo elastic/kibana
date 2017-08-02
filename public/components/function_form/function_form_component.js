@@ -1,10 +1,10 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 
-import './arg_type.less';
+import './function_form.less';
 
 // compose the above branch components, to short-circuit rending this ArgType component
-export const ArgTypeComponent = (props) => {
+export const FunctionFormComponent = (props) => {
   const { expressionType, ...passedProps } = props;
   return (
     <div className="canvas__function">
@@ -13,7 +13,7 @@ export const ArgTypeComponent = (props) => {
   );
 };
 
-ArgTypeComponent.propTypes = {
+FunctionFormComponent.propTypes = {
   args: PropTypes.object.isRequired,
   expressionType: PropTypes.object.isRequired,
   onValueChange: PropTypes.func.isRequired,

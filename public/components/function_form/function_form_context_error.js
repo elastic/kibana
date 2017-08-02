@@ -1,10 +1,10 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 
-export const ArgTypeContextError = ({ context }) => (
+export const FunctionFormContextError = ({ context }) => (
   <div>ERROR: {context.error}</div>
 );
 
-ArgTypeContextError.propTypes = {
+FunctionFormContextError.propTypes = {
   context: PropTypes.object,
 };

@@ -1,6 +1,6 @@
 import PropTypes from 'prop-types';
 import { compose, branch, renderComponent } from 'recompose';
-import { ArgTypesComponent } from './arg_types_component';
+import { FunctionFormListComponent } from './function_form_list_component';
 import { ElementNotSelected } from './element_not_selected';
 
 const branches = [
@@ -8,10 +8,10 @@ const branches = [
   branch(props => !props.element, renderComponent(ElementNotSelected)),
 ];
 
-export const ArgTypes = compose(
+export const FunctionFormList = compose(
   ...branches
-)(ArgTypesComponent);
+)(FunctionFormListComponent);
 
-ArgTypes.propTypes = {
+FunctionFormList.propTypes = {
   element: PropTypes.object,
 };
