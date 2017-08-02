@@ -157,7 +157,7 @@
     "no-ui-slider": "1.2.0",
     "node-fetch": "1.3.2",
     "pegjs": "0.9.0",
-    "postcss-loader": "1.2.1",
+    "postcss-loader": "1.3.3",
     "proxy-from-env": "1.0.0",
     "prop-types": "15.5.8",
     "pui-react-overlay-trigger": "7.5.4",
