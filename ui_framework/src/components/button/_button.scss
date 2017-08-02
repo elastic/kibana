@@ -24,6 +24,18 @@
     fill: $kuiColorPrimary;
   }
 
+  .kuiButton__content {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+
+    // Apply margin to all but last item in the flex.
+    > * + * {
+      margin-left: $kuiSizeS;
+    }
+  }
+
   &:hover, &:focus {
     text-decoration: underline;
     background-color: transparentize($kuiColorPrimary, .9);
@@ -45,18 +57,6 @@
 
     .kuiButton__icon {
       fill: #FFF;
-    }
-  }
-
-  .kuiButton__content {
-    display: flex;
-    flex-direction: row;
-    justify-content: center;
-    align-items: center;
-
-    // Apply margin to all but last item in the flex.
-    > * + * {
-      margin-left: $kuiSizeS;
     }
   }
 

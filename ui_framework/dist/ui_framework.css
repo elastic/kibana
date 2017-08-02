@@ -358,21 +358,6 @@ table {
   .kuiButton .kuiButton__icon {
     vertical-align: -2px;
     fill: #0079a5; }
-  .kuiButton:hover, .kuiButton:focus {
-    text-decoration: underline;
-    background-color: rgba(0, 121, 165, 0.1); }
-  .kuiButton:focus {
-    -webkit-animation: kuiButtonFocus 250ms cubic-bezier(0.34, 1.61, 0.7, 1);
-            animation: kuiButtonFocus 250ms cubic-bezier(0.34, 1.61, 0.7, 1); }
-  .kuiButton.kuiButton--fill {
-    background-color: #0079a5;
-    color: #FFF;
-    border-color: #0079a5; }
-    .kuiButton.kuiButton--fill:hover, .kuiButton.kuiButton--fill:focus {
-      background-color: #00668c;
-      border-color: #00668c; }
-    .kuiButton.kuiButton--fill .kuiButton__icon {
-      fill: #FFF; }
   .kuiButton .kuiButton__content {
     display: -webkit-box;
     display: -webkit-flex;
@@ -393,6 +378,21 @@ table {
             align-items: center; }
     .kuiButton .kuiButton__content > * + * {
       margin-left: 8px; }
+  .kuiButton:hover, .kuiButton:focus {
+    text-decoration: underline;
+    background-color: rgba(0, 121, 165, 0.1); }
+  .kuiButton:focus {
+    -webkit-animation: kuiButtonFocus 250ms cubic-bezier(0.34, 1.61, 0.7, 1);
+            animation: kuiButtonFocus 250ms cubic-bezier(0.34, 1.61, 0.7, 1); }
+  .kuiButton.kuiButton--fill {
+    background-color: #0079a5;
+    color: #FFF;
+    border-color: #0079a5; }
+    .kuiButton.kuiButton--fill:hover, .kuiButton.kuiButton--fill:focus {
+      background-color: #00668c;
+      border-color: #00668c; }
+    .kuiButton.kuiButton--fill .kuiButton__icon {
+      fill: #FFF; }
   .kuiButton.kuiButton--reverse .kuiButton__content {
     -webkit-box-orient: horizontal;
     -webkit-box-direction: reverse;
