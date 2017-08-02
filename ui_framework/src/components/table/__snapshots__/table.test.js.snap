@@ -28,7 +28,7 @@ exports[`renders KuiTable 1`] = `
         class="kuiTableRowCell"
       >
         <div
-          class="kuiTableRowCell__liner"
+          class="kuiTableRowCell__content"
         >
           Hi
         </div>
@@ -41,7 +41,7 @@ exports[`renders KuiTable 1`] = `
         class="kuiTableRowCell"
       >
         <div
-          class="kuiTableRowCell__liner"
+          class="kuiTableRowCell__content"
         >
           Bye
         </div>

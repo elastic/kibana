@@ -8,7 +8,7 @@ exports[`isSelected renders true when specified 1`] = `
     class="kuiTableRowCell"
   >
     <div
-      class="kuiTableRowCell__liner"
+      class="kuiTableRowCell__content"
     />
   </td>
 </tr>
@@ -24,7 +24,7 @@ exports[`renders KuiTableRow 1`] = `
     class="kuiTableRowCell"
   >
     <div
-      class="kuiTableRowCell__liner"
+      class="kuiTableRowCell__content"
     >
       hi
     </div>

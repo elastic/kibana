@@ -71,6 +71,7 @@ export class Table extends Component {
     }, {
       label: 'Type',
       alignment: LEFT_ALIGNMENT,
+      width: '60px',
     }, {
       label: 'Date created',
       alignment: LEFT_ALIGNMENT,
@@ -85,6 +86,7 @@ export class Table extends Component {
       <KuiTableHeaderCell
         key={columnIndex}
         align={this.columns[columnIndex].alignment}
+        width={column.width}
       >
         {column.label}
       </KuiTableHeaderCell>

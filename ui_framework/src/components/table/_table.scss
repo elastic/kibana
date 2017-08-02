@@ -6,7 +6,7 @@
   width: 100%;
   border: none;
   border-collapse: collapse;
-  font-size: $kuiTableFontSize;
+  font-size: $kuiFontSizeS;
 }
 
 .kuiTableHeaderCell {
@@ -16,13 +16,13 @@
   color: $kuiTitleColor;
 }
 
+  .kuiTableHeaderCell__content {
+    display: inline-block;
+  }
+
 .kuiTableHeaderCell--alignRight {
   text-align: right;
 }
-
-  .kuiTableHeaderCell__liner {
-    display: inline-block;
-  }
 
 .kuiTableRow {
   &:hover {
@@ -39,18 +39,7 @@
 
   color: $kuiTextColor;
   border-top: $kuiBorderThin;
-}
-
-.kuiTableRowCell--alignRight {
-  .kuiTableRowCell__liner {
-    text-align: right;
-  }
-}
-
-.kuiTableRowCell--wrapText {
-  .kuiTableRowCell__liner {
-    white-space: normal;
-  }
+  border-bottom: $kuiBorderThin;
 }
 
   /**
@@ -58,7 +47,7 @@
    * 2. Truncate text with an ellipsis. The padding on this div allows the ellipsis to show. If
    *    the padding was on the cell, the ellipsis would be cropped.
    */
-  .kuiTableRowCell__liner {
+  .kuiTableRowCell__content {
     white-space: nowrap; /* 2 */
     overflow: hidden; /* 2 */
     text-overflow: ellipsis; /* 2 */
@@ -68,3 +57,15 @@
       vertical-align: middle; /* 1 */
     }
   }
+
+.kuiTableRowCell--alignRight {
+  .kuiTableRowCell__content {
+    text-align: right;
+  }
+}
+
+.kuiTableRowCell--wrapText {
+  .kuiTableRowCell__content {
+    white-space: normal;
+  }
+}
