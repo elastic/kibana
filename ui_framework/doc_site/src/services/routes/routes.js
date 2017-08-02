@@ -27,9 +27,11 @@ import PageExample
 import PopoverExample
   from '../../views/popover/popover_example';
 
+import TableExample
+  from '../../views/table/table_example';
+
 import TypographyExample
   from '../../views/typography/typography_example';
-
 
 // Component route names should match the component name exactly.
 const components = [{
@@ -63,6 +65,10 @@ const components = [{
 }, {
   name: 'Popover',
   component: PopoverExample,
+  hasReact: true,
+}, {
+  name: 'Table',
+  component: TableExample,
   hasReact: true,
 }, {
   name: 'Typography',
