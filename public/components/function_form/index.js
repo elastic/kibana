@@ -24,7 +24,7 @@ const mapDispatchToProps = (dispatch, { expressionIndex }) => ({
   addArgument: (element, pageId) => (argName, argValue) => () => {
     dispatch(addArgumentValueAtIndex({ index: expressionIndex, element, pageId, argName, value: argValue }));
   },
-  updateContext: () => dispatch(fetchContext({ index: expressionIndex })),
+  updateContext: (element) => () => dispatch(fetchContext({ index: expressionIndex, element })),
   setArgument: (element, pageId) => (argName, valueIndex) => (value) => {
     dispatch(setArgumentAtIndex({
       index: expressionIndex,
@@ -51,6 +51,7 @@ const mergeProps = (stateProps, dispatchProps, ownProps) => {
   const { argType, nextArgType } = ownProps;
 
   return Object.assign({}, stateProps, dispatchProps, ownProps, {
+    updateContext: dispatchProps.updateContext(element),
     expressionType: findExpressionType(argType),
     nextExpressionType: nextArgType ? findExpressionType(nextArgType) : nextArgType,
     onValueChange: dispatchProps.setArgument(element, pageId),

@@ -41,7 +41,8 @@ const contextLifecycle = lifecycle({
   componentWillReceiveProps(newProps) {
     const oldContext = this.props.contextExpression;
     const newContext = newProps.contextExpression;
-    fetchContext(newProps, oldContext !== newContext);
+    const forceUpdate = requiresContext(newProps.expressionType) && oldContext !== newContext;
+    fetchContext(newProps, forceUpdate);
   },
 });
 

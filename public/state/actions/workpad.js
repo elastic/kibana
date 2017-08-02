@@ -4,7 +4,6 @@ import { getWorkpadColors } from '../selectors/workpad';
 import { fetchAllRenderables } from './elements';
 import { without, includes } from 'lodash';
 
-
 export const sizeWorkpad = createAction('sizeWorkpad');
 
 export const initializeWorkpad = createThunk('initializeWorkpad', ({ dispatch }) => {

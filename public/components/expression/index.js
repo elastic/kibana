@@ -9,8 +9,8 @@ const mapStateToProps = (state) => ({
   element: getSelectedElement(state),
 });
 
-const mapDispatchToProps = ({
-  setExpression,
+const mapDispatchToProps = (dispatch) => ({
+  setExpression: (element, pageId) => (expression) => dispatch(setExpression(expression, element, pageId)),
 });
 
 const mergeProps = (stateProps, dispatchProps, ownProps) => {
@@ -22,7 +22,7 @@ const mergeProps = (stateProps, dispatchProps, ownProps) => {
 
   return Object.assign({}, ownProps, stateProps, dispatchProps, {
     expression,
-    setExpression: (exp) => dispatchProps.setExpression({ expression: exp, element, pageId }),
+    setExpression: dispatchProps.setExpression(element, pageId),
   });
 };
 

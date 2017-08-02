@@ -8,6 +8,7 @@ export const image = () => new View('image', {
   displayName: 'Image',
   description: 'Display an image',
   modelArgs: [],
+  requiresContext: false,
   args: [
     new Arg('dataurl', {
       displayName: 'Image Dataurl',

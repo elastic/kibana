@@ -8,7 +8,7 @@ export class View extends FunctionForm {
     const propNames = ['description', 'modelArgs', 'requiresContext'];
     const defaultProps = {
       description: `Element: ${name}`,
-      requiresContext: false,
+      requiresContext: true,
     };
 
     Object.assign(this, defaultProps, pick(props, propNames));

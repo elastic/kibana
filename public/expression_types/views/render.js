@@ -5,6 +5,7 @@ export const render = () => new View('render', {
   displayName: 'Render',
   description: 'Generic element properties',
   modelArgs: [],
+  requiresContext: false,
   args: [
     new Arg('css', {
       displayName: 'Custom CSS',

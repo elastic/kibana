@@ -37,8 +37,8 @@ describe('elements reducer', () => {
     };
     const action = actionCreator('setExpression')({
       expression,
-      pageId: 'page-1',
       element: { id: 'element-1' },
+      pageId: 'page-1',
     });
 
     const newState = reducer(state, action);
