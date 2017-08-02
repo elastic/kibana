@@ -7,7 +7,7 @@ import { KuiHeaderBreadcrumb } from './header_breadcrumb';
 describe('KuiHeaderBreadcrumb', () => {
   test('is rendered', () => {
     const component = render(
-      <KuiHeaderBreadcrumb { ...requiredProps }>
+      <KuiHeaderBreadcrumb {...requiredProps}>
         content
       </KuiHeaderBreadcrumb>
     );

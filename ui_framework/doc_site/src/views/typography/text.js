@@ -7,7 +7,7 @@ import {
 export default () => (
   <KuiText>
     <p>
-      The quick brown fox jumped over the lazy dog. But the lazy dog wasn't lazy, it was {
+      The quick brown fox jumped over the lazy dog. But the lazy dog wasn&rsquo;t lazy, it was {
       // react/jsx-closing-tag-location
       } <strong>just practicing mindfulness</strong>, so really in the long run it was much more {
       // react/jsx-closing-tag-location

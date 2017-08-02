@@ -5,7 +5,7 @@ import PropTypes from 'prop-types';
 export function KuiModalHeaderTitle({ className, children, ...rest }) {
   const classes = classnames('kuiModalHeader__title', className);
   return (
-    <div className={ classes } { ...rest }>
+    <div className={classes} {...rest}>
       { children }
     </div>
   );

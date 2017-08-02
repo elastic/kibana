@@ -7,6 +7,6 @@ import {
 } from './modal';
 
 test('renders KuiModal', () => {
-  const component = <KuiModal { ...requiredProps }>children</KuiModal>;
+  const component = <KuiModal {...requiredProps}>children</KuiModal>;
   expect(render(component)).toMatchSnapshot();
 });

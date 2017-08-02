@@ -64,7 +64,7 @@ export default props => (
       }]}
     >
       <GuideText>
-        Most pages don't have sidebars. A lot of our pages don't have extra abilities next to the title.
+        Most pages don&rsquo;t have sidebars. A lot of our pages don&rsquo;t have extra abilities next to the title.
         Simply exclude those components and everything will still line up.
       </GuideText>
 
@@ -124,7 +124,7 @@ export default props => (
     >
       <GuideText>
         Centering the content can happen regardless of layout configuration.
-        In this example, we're cetnering within a complex sidebar layout.
+        In this example, we&rsquo;re cetnering within a complex sidebar layout.
       </GuideText>
 
       <GuideDemo>

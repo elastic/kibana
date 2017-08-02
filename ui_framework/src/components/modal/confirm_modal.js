@@ -41,10 +41,10 @@ export function KuiConfirmModal({
   return (
     <KuiModal
       style={{ 'width': '450px' }}
-      data-tests-subj={ dataTestSubj }
-      aria-label={ ariaLabel }
-      className={ className }
-      onKeyDown={ onKeyDown }
+      data-tests-subj={dataTestSubj}
+      aria-label={ariaLabel}
+      className={className}
+      onKeyDown={onKeyDown}
     >
       {
         title ?
@@ -63,16 +63,16 @@ export function KuiConfirmModal({
 
       <KuiModalFooter>
         <button
-          autoFocus={ defaultFocusedButton === CANCEL_BUTTON }
+          autoFocus={defaultFocusedButton === CANCEL_BUTTON}
           data-test-subj="confirmModalCancelButton"
-          onClick={ onCancel }
+          onClick={onCancel}
         >
           {cancelButtonText}
         </button>
         <button
-          autoFocus={ defaultFocusedButton === CONFIRM_BUTTON }
+          autoFocus={defaultFocusedButton === CONFIRM_BUTTON}
           data-test-subj="confirmModalConfirmButton"
-          onClick={ onConfirm }
+          onClick={onConfirm}
         >
           {confirmButtonText}
         </button>

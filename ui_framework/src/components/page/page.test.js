@@ -7,7 +7,7 @@ import { KuiPage } from './page';
 describe('KuiPage', () => {
   test('is rendered', () => {
     const component = render(
-      <KuiPage { ...requiredProps } />
+      <KuiPage {...requiredProps} />
     );
 
     expect(component)

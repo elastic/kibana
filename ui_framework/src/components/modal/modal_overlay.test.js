@@ -7,6 +7,6 @@ import {
 } from './modal_overlay';
 
 test('renders KuiModalOverlay', () => {
-  const component = <KuiModalOverlay { ...requiredProps }>children</KuiModalOverlay>;
+  const component = <KuiModalOverlay {...requiredProps}>children</KuiModalOverlay>;
   expect(render(component)).toMatchSnapshot();
 });

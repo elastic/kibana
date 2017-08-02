@@ -8,7 +8,7 @@ import { KuiHeaderSectionItemButton } from './header_section_item_button';
 describe('KuiHeaderSectionItemButton', () => {
   test('is rendered', () => {
     const component = render(
-      <KuiHeaderSectionItemButton { ...requiredProps } />
+      <KuiHeaderSectionItemButton {...requiredProps} />
     );
 
     expect(component)

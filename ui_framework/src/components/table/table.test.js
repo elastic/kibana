@@ -11,7 +11,7 @@ import { KuiTableHeaderCell } from './table_header_cell';
 
 test('renders KuiTable', () => {
   const component = (
-    <KuiTable { ...requiredProps }>
+    <KuiTable {...requiredProps}>
       <KuiTableHeader>
         <KuiTableHeaderCell>
           Hi Title

@@ -7,7 +7,7 @@ import { KuiHeaderBreadcrumbCollapsed } from './header_breadcrumb_collapsed';
 describe('KuiHeaderBreadcrumbCollapsed', () => {
   test('is rendered', () => {
     const component = render(
-      <KuiHeaderBreadcrumbCollapsed { ...requiredProps } />
+      <KuiHeaderBreadcrumbCollapsed {...requiredProps} />
     );
 
     expect(component)

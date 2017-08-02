@@ -12,7 +12,7 @@ import {
 
 test('renders KuiTableRow', () => {
   const component = (
-    <KuiTableRow { ...requiredProps }>
+    <KuiTableRow {...requiredProps}>
       <KuiTableRowCell>hi</KuiTableRowCell>
     </KuiTableRow>
   );

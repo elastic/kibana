@@ -9,7 +9,7 @@ import {
 describe('KuiTabs', () => {
   test('renders', () => {
     const component = (
-      <KuiTabs { ...requiredProps } />
+      <KuiTabs {...requiredProps} />
     );
 
     expect(render(component)).toMatchSnapshot();

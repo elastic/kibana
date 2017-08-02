@@ -7,7 +7,7 @@ import { KuiHeaderSectionItem } from './header_section_item';
 describe('KuiHeaderSectionItem', () => {
   test('is rendered', () => {
     const component = render(
-      <KuiHeaderSectionItem { ...requiredProps } />
+      <KuiHeaderSectionItem {...requiredProps} />
     );
 
     expect(component)

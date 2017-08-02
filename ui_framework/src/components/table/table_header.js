@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 
 export const KuiTableHeader = ({ children, className, ...rest }) => {
   return (
-    <thead className={ className } { ...rest }>
+    <thead className={className} {...rest}>
       <tr>{ children }</tr>
     </thead>
   );

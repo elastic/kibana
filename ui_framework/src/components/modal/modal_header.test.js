@@ -7,6 +7,6 @@ import {
 } from './modal_header';
 
 test('renders KuiModalHeader', () => {
-  const component = <KuiModalHeader { ...requiredProps }>children</KuiModalHeader>;
+  const component = <KuiModalHeader {...requiredProps}>children</KuiModalHeader>;
   expect(render(component)).toMatchSnapshot();
 });

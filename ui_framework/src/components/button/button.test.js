@@ -7,7 +7,7 @@ import { KuiButton } from './button';
 describe('KuiButton', () => {
   test('is rendered', () => {
     const component = render(
-      <KuiButton { ...requiredProps } />
+      <KuiButton {...requiredProps} />
     );
 
     expect(component)

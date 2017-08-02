@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 
 export const KuiTableBody = ({ children, className, ...rest }) => {
   return (
-    <tbody className={ className } { ...rest }>
+    <tbody className={className} {...rest}>
       { children }
     </tbody>
   );

@@ -7,7 +7,7 @@ import { KuiPageContent } from './page_content';
 describe('KuiPageContent', () => {
   test('is rendered', () => {
     const component = render(
-      <KuiPageContent { ...requiredProps } />
+      <KuiPageContent {...requiredProps} />
     );
 
     expect(component)
