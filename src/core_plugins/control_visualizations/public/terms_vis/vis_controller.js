@@ -18,9 +18,7 @@ class VisController {
     if (status.params) {
       this.fetchTerms();
     }
-    return new Promise(resolve => {
-      resolve();
-    });
+    return new Promise(() => {});
   }
 
   resize() {}
@@ -148,6 +146,7 @@ class VisController {
       control.selected = this.getSelected(control.indexPattern.id, control.field.name);
       return control;
     });
+    this.drawTermsVis();
   }
 }
 
