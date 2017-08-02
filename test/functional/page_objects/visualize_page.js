@@ -469,8 +469,14 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
 
     async getDataTableData() {
       const dataTable = await retry.try(
-        async () => find.byCssSelector('table.table.table-condensed tbody', defaultFindTimeout * 2));
+        async () => testSubjects.find('paginated-table-body'));
       return await dataTable.getVisibleText();
+    }
+
+    async getDataTableHeaders() {
+      const dataTableHeader = await retry.try(
+        async () => testSubjects.find('paginated-table-header'));
+      return await dataTableHeader.getVisibleText();
     }
 
     async getMarkdownData() {
