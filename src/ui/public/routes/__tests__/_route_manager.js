@@ -137,6 +137,7 @@ describe('routes/route_manager', function () {
       sinon.assert.calledWithExactly($rp.when, '/foo', sinon.match({ name: 'foo' }));
     });
 
+    // See https://github.com/elastic/kibana/issues/13294
     it('does not assign defaults by reference, to prevent accidentally merging unrelated defaults together', () => {
       routes.when('/foo', { name: 'foo' });
       routes.when('/bar', { name: 'bar' });
