@@ -1,12 +1,21 @@
 <div class="form-group">
   <label ng-if="$index < 1 || groupName !== 'buckets'">Aggregation</label>
   <label ng-if="$index >= 1 && groupName === 'buckets'">Sub Aggregation</label>
-  <select
-    name="agg"
-    class="form-control"
-    ng-model="agg.type"
+  <ui-select
     required
-    auto-select-if-only-one="aggTypeOptions | aggFilter:agg.schema.aggFilter"
-    ng-options="agg as agg.title group by agg.subtype for agg in aggTypeOptions | aggFilter:agg.schema.aggFilter">
-  </select>
+    name="agg"
+    class="vis-editor-field-ui-select agg-select"
+    data-test-subj="visEditorAggSelect"
+    ng-model="agg.type"
+  >
+    <ui-select-match placeholder="Select an aggregation">
+      {{$select.selected.title}}
+    </ui-select-match>
+    <ui-select-choices
+      group-by="'subtype'"
+      repeat="agg in aggTypeOptions | aggFilter:agg.schema.aggFilter | filter: { title: $select.search } "
+    >
+      <div ng-bind-html="agg.title | highlight: $select.search"></div>
+    </ui-select-choices>
+  </ui-select>
 </div>
