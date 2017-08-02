@@ -42,17 +42,24 @@ export class KuiButton extends Component {
       typeToClassNameMap[type],
       sizeToClassNameMap[size],
       className,
-      fill === true ? 'kuiButton--fill' : '',
-      iconReverse === true ? 'kuiButton--reverse' : ''
+      {
+        'kuiButton--fill': fill,
+        'kuiButton--reverse': iconReverse,
+      },
     );
 
     // Add an icon to the button if one exists.
     let buttonIcon = null;
     if (icon) {
-      buttonIcon =
+      buttonIcon = (
         <span aria-hidden="true">
-          <KuiIcon className="kuiButton__icon" type={icon} size="medium" />
-        </span>;
+          <KuiIcon
+            className="kuiButton__icon"
+            type={icon}
+            size="medium"
+          />
+        </span>
+      );
     }
 
     return (
