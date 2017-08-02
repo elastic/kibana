@@ -101,8 +101,11 @@ uiModules
       embeddableHandler.getTitleFor(panelId).then(title => {
         $scope.title = title;
       });
-      $scope.renderPromise =
-        embeddableHandler.render(element.find('#embeddedPanel').get(0), $scope.panel, $scope.containerApi).catch(handleError);
+      $scope.renderPromise = embeddableHandler.render(
+        element.find('#embeddedPanel').get(0),
+        $scope.panel,
+        $scope.containerApi)
+        .catch(handleError);
     }
   };
 });

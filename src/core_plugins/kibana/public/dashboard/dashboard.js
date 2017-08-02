@@ -99,7 +99,7 @@ app.directive('dashboardApp', function ($injector) {
         docTitle.change(dash.title);
       }
 
-      const dashboardState = new DashboardState(dash, AppState, dashboardConfig);
+      const dashboardState = new DashboardState(dash, AppState, dashboardConfig.getHideWriteControls());
       $scope.appState = dashboardState.getAppState();
       const queryManager = Private(QueryManagerProvider)(dashboardState.getAppState());
       $scope.containerApi = new DashboardContainerAPI(dashboardState, queryManager);
