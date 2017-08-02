@@ -2940,6 +2940,7 @@ main {
   margin-bottom: -1px;
   /* 3 */ }
   .theme-dark .kuiTab {
+    color: #cecece;
     background-color: #333333;
     border-color: #777777; }
   .kuiTab + .kuiTab {

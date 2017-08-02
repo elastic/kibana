@@ -27,6 +27,7 @@
   margin-bottom: -1px; /* 3 */
 
   @include darkTheme {
+    color: $tabColor--darkTheme;
     background-color: $tabBackgroundColor--darkTheme;
     border-color: $tabBorderColor--darkTheme;
   }
