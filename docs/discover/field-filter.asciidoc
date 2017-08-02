@@ -70,9 +70,10 @@ displayed below the query bar instead of the filter definition.
 . Click *Save*. The filter will be applied to your search and be displayed below
 the query bar.
 
-NOTE: To make the filter editor more user-friendly, you can enable the `filterEditor:suggestValues` advanced setting.
-Enabling this will cause the editor to suggest values from your indices if you are filtering against an aggregatable
-field. However, this is not recommended for extremely large datasets, as it can result in long queries.
+NOTE: By default, the filter editor will suggest values for fields that are aggregatable. If this
+results in long-running requests, you can configure the `filterEditor:suggestions:terminateAfter`
+advanced setting. Setting it to a lower value will result in quicker requests but may also result
+in less helpful suggestions. Setting it to `0` will disable suggestions completely.
 
 [float]
 [[filter-pinning]]

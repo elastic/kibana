@@ -269,10 +269,10 @@ export function getUiSettingDefaults() {
       value: false,
       description: 'Whether the filters should have a global state (be pinned) by default'
     },
-    'filterEditor:suggestValues': {
-      value: false,
-      description: 'Set this property to `true` to have the filter editor suggest values for fields, ' +
-        'instead of just providing a text input. This may result in heavy queries to Elasticsearch.'
+    'filterEditor:suggestions:terminateAfter': {
+      value: 10000,
+      description: 'By default, the filter editor will suggest values for aggregatable fields. Setting this to a lower value will make the'
+        + 'request for aggregatable fields quicker, yet may result in fewer suggestions. Set to `0` to disable suggestions entirely.'
     },
     'notifications:banner': {
       type: 'markdown',
