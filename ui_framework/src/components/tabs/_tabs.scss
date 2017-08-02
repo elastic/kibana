@@ -3,44 +3,39 @@
   border-bottom: $kuiBorderThin;
 }
 
-/**
- * 1. Move the tab down so that its bottom stripe will cover the container's bottom border.
- */
 .kuiTab {
   @include kuiFontSize;
 
   position: relative;
   cursor: pointer;
-  padding: $kuiSizeS $kuiSize;
+  padding: ($kuiSize - $kuiSizeXS) $kuiSize;
   color: $kuiColorDarkShade;
-  margin-bottom: -$kuiBorderWidthThin; /* 1 */
-  overflow: hidden;
-  transition: color $kuiAnimSpeedFast;
+  background-color: $kuiColorEmptyShade;
+  transition: all $kuiAnimSpeedNormal $kuiAnimSlightResistance;
 
   &:hover:not(.kuiTab-isSelected) {
-    .kuiTab__content {
-      transform: translateY(-$kuiSizeXS);
-    }
+    color: $kuiTextColor;
+    text-decoration: underline;
   }
 
-  &:after {
-    position: absolute;
-    top: 100%;
-    left: 0;
-    transform: translateY(0);
-    content: ' ';
-    width: 100%;
-    height: $kuiBorderWidthThick;
-    background-color: $kuiColorSecondary;
-    transition: transform $kuiAnimSpeedFast $kuiAnimSlightBounce;
+  &:focus {
+    background-color: $kuiFocusBackgroundColor;
+    text-decoration: underline;
   }
 
   &.kuiTab-isSelected {
     cursor: default;
-    color: $kuiTitleColor;
+    color: $kuiColorSecondary;
 
     &:after {
-      transform: translateY(-100%); /* 1 */
+      position: absolute;
+      bottom: -1px;
+      left: 0;
+      content: ' ';
+      width: 100%;
+      height: $kuiBorderWidthThick;
+      background-color: $kuiColorSecondary;
+      animation: kuiTab $kuiAnimSpeedFast $kuiAnimSlightResistance;
     }
   }
 }
@@ -50,3 +45,13 @@
     transition: transform $kuiAnimSpeedFast $kuiAnimSlightBounce;
     transform: translateY(0);
   }
+
+
+@keyframes kuiTab {
+  0% {
+    transform: scaleX(0);
+  }
+  100% {
+    transform: scaleX(1);
+  }
+}
