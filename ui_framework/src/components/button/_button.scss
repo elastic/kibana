@@ -30,7 +30,7 @@
   }
 
   &:focus {
-    transform: translateY(2px);
+    animation: kuiButtonFocus $kuiAnimSpeedNormal $kuiAnimSlightBounce;
   }
 
   &.kuiButton--fill {
@@ -47,27 +47,29 @@
       fill: #FFF;
     }
   }
-}
 
-.kuiButton__inner {
-  display: flex;
-  flex-direction: row;
-  justify-content: center;
-  align-items: center;
+  .kuiButton__content {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
 
-  // Apply margin to all but last item in the flex.
-  > * + * {
-    margin-left: $kuiSizeS;
+    // Apply margin to all but last item in the flex.
+    > * + * {
+      margin-left: $kuiSizeS;
+    }
   }
-}
 
-.kuiButton__inner--reverse {
-  flex-direction: row-reverse;
+  &.kuiButton--reverse {
 
-  // Margin gets flipped because of the row-reverse.
-  > * + * {
-    margin-left: 0;
-    margin-right: $kuiSizeS;
+    .kuiButton__content {
+      flex-direction: row-reverse;
+      // Margin gets flipped because of the row-reverse.
+      > * + * {
+        margin-left: 0;
+        margin-right: $kuiSizeS;
+      }
+    }
   }
 }
 
@@ -119,5 +121,11 @@ $buttonTypes: (
         }
       }
     }
+  }
+}
+
+@keyframes kuiButtonFocus {
+  50% {
+    transform: translateY($kuiSizeXS / 2);
   }
 }

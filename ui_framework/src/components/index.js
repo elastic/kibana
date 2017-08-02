@@ -22,7 +22,7 @@ export {
 } from './icon';
 
 export {
-  KuiLoading,
+  KuiLoadingKibana,
   KuiLoadingChart,
   KuiLoadingSpinner,
 } from './loading';

@@ -1,4 +1,4 @@
-.kuiLoading {
+.kuiLoadingKibana {
   position: relative;
   display: inline-block;
 
@@ -17,68 +17,74 @@
 
   &:before {
     box-shadow: 0 0 8px $kuiColorFullShade;
-    animation: 1s kuiLoadingPulsateAndFade $kuiAnimSlightResistance infinite;
+    animation: 1s kuiLoadingKibanaPulsateAndFade $kuiAnimSlightResistance infinite;
   }
 
   &:after {
     background-color: $kuiColorFullShade;
-    animation: 1s kuiLoadingPulsate $kuiAnimSlightResistance infinite;
+    animation: 1s kuiLoadingKibanaPulsate $kuiAnimSlightResistance infinite;
   }
 }
 
-.kuiLoading--medium {
+/**
+ * 1. Requires pixel math for animation.
+ */
+.kuiLoadingKibana--medium {
   &:before,
   &:after {
-    height: $kuiSizeXS - 1;
+    height: $kuiSizeXS - 1; /* 1 */
     bottom: -$kuiSizeXS;
   }
-  .kuiLoading__icon {
+  .kuiLoadingKibana__icon {
     z-index: 999;
-    animation: 1s kuiLoadingBounceMedium $kuiAnimSlightResistance infinite;
+    animation: 1s kuiLoadingKibanaBounceMedium $kuiAnimSlightResistance infinite;
   }
 }
 
-.kuiLoading--large {
+/**
+ * 1. Requires pixel math for animation.
+ */
+.kuiLoadingKibana--large {
   &:before,
   &:after {
-    height: $kuiSizeS - 2;
+    height: $kuiSizeS - 2; /* 1 */
     bottom: -$kuiSizeS;
   }
-  .kuiLoading__icon {
-    animation: 1s kuiLoadingBounceLarge $kuiAnimSlightResistance infinite;
+  .kuiLoadingKibana__icon {
+    animation: 1s kuiLoadingKibanaBounceLarge $kuiAnimSlightResistance infinite;
   }
 }
 
-.kuiLoading--xLarge {
+.kuiLoadingKibana--xLarge {
   &:before,
   &:after {
     height: $kuiSizeS;
     bottom: -($kuiSize - $kuiSizeXS);
   }
-  .kuiLoading__icon {
-    animation: 1s kuiLoadingBounceXLarge $kuiAnimSlightResistance infinite;
+  .kuiLoadingKibana__icon {
+    animation: 1s kuiLoadingKibanaBounceXLarge $kuiAnimSlightResistance infinite;
   }
 }
 
-@keyframes kuiLoadingBounceMedium {
+@keyframes kuiLoadingKibanaBounceMedium {
   50% {
     transform: translateY(-$kuiSizeS);
   }
 }
 
-@keyframes kuiLoadingBounceLarge {
+@keyframes kuiLoadingKibanaBounceLarge {
   50% {
     transform: translateY(-($kuiSize - $kuiSizeXS));
   }
 }
 
-@keyframes kuiLoadingBounceXLarge {
+@keyframes kuiLoadingKibanaBounceXLarge {
   50% {
     transform: translateY(-$kuiSize);
   }
 }
 
-@keyframes kuiLoadingPulsateAndFade {
+@keyframes kuiLoadingKibanaPulsateAndFade {
   0% {
     opacity: 0;
   }
@@ -93,7 +99,7 @@
   }
 }
 
-@keyframes kuiLoadingPulsate {
+@keyframes kuiLoadingKibanaPulsate {
   0% {
     opacity: 0.15;
   }

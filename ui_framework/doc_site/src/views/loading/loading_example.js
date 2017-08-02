@@ -10,9 +10,9 @@ import {
   GuideText,
 } from '../../components';
 
-import Loading from './loading';
-const loadingSource = require('!!raw!./loading');
-const loadingHtml = renderToHtml(Loading);
+import LoadingKibana from './loading_kibana';
+const loadingKibanaSource = require('!!raw!./loading_kibana');
+const loadingKibanaHtml = renderToHtml(LoadingKibana);
 
 import LoadingChart from './loading_chart';
 const loadingChartSource = require('!!raw!./loading_chart');
@@ -25,13 +25,13 @@ const loadingSpinnerHtml = renderToHtml(LoadingSpinner);
 export default props => (
   <GuidePage title={props.route.name}>
     <GuideSection
-      title="Loading"
+      title="Loading Kibana"
       source={[{
         type: GuideSectionTypes.JS,
-        code: loadingSource,
+        code: loadingKibanaSource,
       }, {
         type: GuideSectionTypes.HTML,
-        code: loadingHtml,
+        code: loadingKibanaHtml,
       }]}
     >
       <GuideText>
@@ -39,7 +39,7 @@ export default props => (
       </GuideText>
 
       <GuideDemo>
-        <Loading />
+        <LoadingKibana />
       </GuideDemo>
     </GuideSection>
 

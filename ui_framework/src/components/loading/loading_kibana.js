@@ -5,16 +5,16 @@ import classNames from 'classnames';
 import { KuiIcon } from '../../components';
 
 const sizeToClassNameMap = {
-  medium: 'kuiLoading--medium',
-  large: 'kuiLoading--large',
-  xLarge: 'kuiLoading--xLarge',
+  medium: 'kuiLoadingKibana--medium',
+  large: 'kuiLoadingKibana--large',
+  xLarge: 'kuiLoadingKibana--xLarge',
 };
 
 export const SIZES = Object.keys(sizeToClassNameMap);
 
-export const KuiLoading = ({ children, size, className, ...rest }) => {
+export const KuiLoadingKibana = ({ children, size, className, ...rest }) => {
   const classes = classNames(
-    'kuiLoading',
+    'kuiLoadingKibana',
     sizeToClassNameMap[size],
     className,
   );
@@ -24,7 +24,7 @@ export const KuiLoading = ({ children, size, className, ...rest }) => {
       className={classes}
       {...rest}
     >
-      <div className="kuiLoading__icon">
+      <div className="kuiLoadingKibana__icon">
         <KuiIcon type="kibanaLogo" size={size} />
       </div>
       {children}
@@ -32,6 +32,6 @@ export const KuiLoading = ({ children, size, className, ...rest }) => {
   );
 };
 
-KuiLoading.propTypes = {
+KuiLoadingKibana.propTypes = {
   size: PropTypes.oneOf(SIZES),
 };

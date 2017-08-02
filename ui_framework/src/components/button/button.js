@@ -43,11 +43,7 @@ export class KuiButton extends Component {
       sizeToClassNameMap[size],
       className,
       fill === true ? 'kuiButton--fill' : '',
-    );
-
-    const innerClasses = classNames(
-      'kuiButton__inner',
-      iconReverse === true ? 'kuiButton__inner--reverse' : '',
+      iconReverse === true ? 'kuiButton--reverse' : ''
     );
 
     // Add an icon to the button if one exists.
@@ -64,7 +60,7 @@ export class KuiButton extends Component {
         className={classes}
         {...rest}
       >
-        <span className={innerClasses}>
+        <span className="kuiButton__content">
           {buttonIcon}
           <span>{children}</span>
         </span>
@@ -84,10 +80,3 @@ KuiButton.defaultProps = {
   iconReverse: false,
   fill: false,
 };
-
-
-
-
-
-
-
