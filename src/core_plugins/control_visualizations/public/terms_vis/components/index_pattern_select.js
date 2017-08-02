@@ -31,6 +31,7 @@ export class IndexPatternSelect extends Component {
         </div>
         <div className="kuiFieldGroupSection kuiFieldGroupSection--wide">
           <Select.Async
+            className="index-pattern-react-select"
             placeholder="Select..."
             value={this.props.value}
             loadOptions={this.loadOptions}

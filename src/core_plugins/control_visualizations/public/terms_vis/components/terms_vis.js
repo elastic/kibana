@@ -19,16 +19,20 @@ export class TermsVis extends Component {
   render() {
     return (
       <div className="vertical-layout">
-        {this.props.controls.map((control, index) =>
-          <div key={index} className="terms-field">
-            <span>{control.label}</span>
-            <Select
-              className="terms-select"
-              placeholder="Select..."
-              value={control.selected}
-              options={control.terms}
-              onChange={this.handleOnChange.bind(null, control)}/>
-          </div>
+        {this.props.controls.map((control, index) => {
+          return (
+            <div key={index} className="terms-field" data-test-subj="termsControl">
+              <span>{control.label}</span>
+              <Select
+                className="terms-select"
+                placeholder="Select..."
+                value={control.selected}
+                options={control.terms}
+                onChange={this.handleOnChange.bind(null, control)}
+              />
+            </div>
+          );
+        }
         )}
       </div>
     );

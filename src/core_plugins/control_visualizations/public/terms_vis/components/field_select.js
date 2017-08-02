@@ -43,11 +43,13 @@ export class FieldSelect extends Component {
         </div>
         <div className="kuiFieldGroupSection kuiFieldGroupSection--wide">
           <Select.Async
+            className="field-react-select"
             placeholder="Select..."
             value={this.props.value}
             loadOptions={this.loadFields}
             onChange={this.props.onChange}
-            resetValue={''}/>
+            resetValue={''}
+          />
         </div>
       </div>
     );

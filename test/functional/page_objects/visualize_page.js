@@ -82,6 +82,10 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
       await find.clickByPartialLinkText('Heat Map');
     }
 
+    async clickTermsControl() {
+      await find.clickByPartialLinkText('Terms Control');
+    }
+
     async getChartTypeCount() {
       const tags = await find.allByCssSelector('a.wizard-vis-type.ng-scope');
       return tags.length;
@@ -129,6 +133,35 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
       const input = await find.byCssSelector('input[ng-model="absolute.to"]', defaultFindTimeout * 2);
       await input.clearValue();
       await input.type(timeString);
+    }
+
+    async setReactSelect(className, value) {
+      const input = await find.byCssSelector(className + ' * input', 0);
+      await input.clearValue();
+      await input.type(value);
+      await remote.pressKeys('\uE006');
+    }
+
+    async getReactSelectOptions() {
+      await testSubjects.click('termsControl');
+      const menu = await retry.try(
+          async () => find.byCssSelector('.Select-menu-outer'));
+      return await menu.getVisibleText();
+    }
+
+    async doesReactSelectHaveValue(className) {
+      return await find.existsByCssSelector(className + ' * .Select-value-label', 0);
+    }
+
+    async getReactSelectValue(className) {
+      const hasValue = await this.doesReactSelectHaveValue(className);
+      if (!hasValue) {
+        return '';
+      }
+
+      const valueElement = await retry.try(
+          async () => find.byCssSelector(className + ' * .Select-value-label'));
+      return await valueElement.getVisibleText();
     }
 
     async clickGoButton() {
