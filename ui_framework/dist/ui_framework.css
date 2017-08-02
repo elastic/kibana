@@ -903,7 +903,8 @@ table {
   line-height: 18px;
   width: 100%;
   border: none;
-  border-collapse: collapse; }
+  border-collapse: collapse;
+  background-color: #FFF; }
 
 .kuiTableHeaderCell {
   text-align: left;
