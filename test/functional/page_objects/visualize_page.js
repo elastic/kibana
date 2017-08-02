@@ -216,9 +216,10 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
     }
 
     async selectAggregation(myString, groupName = 'buckets') {
+      const selector = `[group-name="${groupName}"] .vis-editor-agg-wrapper:last-child .agg-select`;
       await retry.try(async () => {
-        await find.clickByCssSelector(`[group-name="${groupName}"] .agg-select`);
-        const input = await find.byCssSelector(`[group-name="${groupName}"] .agg-select input.ui-select-search`);
+        await find.clickByCssSelector(selector);
+        const input = await find.byCssSelector(`${selector} input.ui-select-search`);
         await input.type(myString);
         await remote.pressKeys('\uE006');
       });
@@ -231,9 +232,10 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
     }
 
     async selectField(fieldValue, groupName = 'buckets') {
+      const selector = `[group-name="${groupName}"] .vis-editor-agg-wrapper:last-child .field-select`;
       await retry.try(async () => {
-        await find.clickByCssSelector(`[group-name="${groupName}"] .field-select`);
-        const input = await find.byCssSelector(`[group-name="${groupName}"] .field-select input.ui-select-search`);
+        await find.clickByCssSelector(selector);
+        const input = await find.byCssSelector(`${selector} input.ui-select-search`);
         await input.type(fieldValue);
         await remote.pressKeys('\uE006');
       });
