@@ -1,9 +1,9 @@
 import expect from 'expect.js';
 import * as is from '../is';
 import { nodeTypes } from '../../node_types';
-import _ from 'lodash';
 import StubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
 import ngMock from 'ng_mock';
+import { expectDeepEqual } from '../../../../../test_utils/expect_deep_equal';
 
 let indexPattern;
 
@@ -54,34 +54,22 @@ describe('kuery functions', function () {
 
         const node = nodeTypes.function.buildNode('is', '*', '*');
         const result = is.toElasticsearchQuery(node, indexPattern);
-        expect(_.isEqual(expected, result)).to.be(true);
+        expectDeepEqual(result, expected);
       });
 
-      it('should return an ES simple_query_string query in all fields mode when fieldName is "*"', function () {
+      it('should return an ES multi_match query when fieldName is "*"', function () {
         const expected = {
-          simple_query_string: {
-            query: '"200"',
-            all_fields: true,
+          multi_match: {
+            query: 200,
+            fields: ['*'],
+            type: 'phrase',
+            lenient: true,
           }
         };
 
         const node = nodeTypes.function.buildNode('is', '*', 200);
         const result = is.toElasticsearchQuery(node, indexPattern);
-        expect(_.isEqual(expected, result)).to.be(true);
-      });
-
-      // See discussion about kuery escaping for background:
-      // https://github.com/elastic/kibana/pull/12624#issuecomment-312650307
-      it('should ensure the simple_query_string query is wrapped in double quotes to force a phrase search', function () {
-        const node = nodeTypes.function.buildNode('is', '*', '+response');
-        const result = is.toElasticsearchQuery(node, indexPattern);
-        expect(result.simple_query_string.query).to.be('"+response"');
-      });
-
-      it('already double quoted phrases should not get wrapped a second time', function () {
-        const node = nodeTypes.function.buildNode('is', '*', '"+response"');
-        const result = is.toElasticsearchQuery(node, indexPattern);
-        expect(result.simple_query_string.query).to.be('"+response"');
+        expectDeepEqual(result, expected);
       });
 
       it('should return an ES exists query when value is "*"', function () {
@@ -91,7 +79,7 @@ describe('kuery functions', function () {
 
         const node = nodeTypes.function.buildNode('is', 'response', '*');
         const result = is.toElasticsearchQuery(node, indexPattern);
-        expect(_.isEqual(expected, result)).to.be(true);
+        expectDeepEqual(result, expected);
       });
 
       it('should return an ES match_phrase query when a concrete fieldName and value are provided', function () {
@@ -103,7 +91,7 @@ describe('kuery functions', function () {
 
         const node = nodeTypes.function.buildNode('is', 'response', 200);
         const result = is.toElasticsearchQuery(node, indexPattern);
-        expect(_.isEqual(expected, result)).to.be(true);
+        expectDeepEqual(result, expected);
       });
 
       it('should support scripted fields', function () {
