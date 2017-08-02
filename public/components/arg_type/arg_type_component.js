@@ -7,7 +7,7 @@ import './arg_type.less';
 export const ArgTypeComponent = (props) => {
   const { expressionType, ...passedProps } = props;
   return (
-    <div className="canvas__argtype">
+    <div className="canvas__function">
       { expressionType.render(passedProps) }
     </div>
   );

@@ -1,25 +1,27 @@
 @import (reference) "../../style/variables";
 
-.canvas__argtype {
+.canvas__function {
+
+}
+
+.canvas__function__arg {
+  display: flex;
   padding: @spacingM;
   border-bottom: @borderStyle;
 }
 
-.canvas__argtype__arg {
-  display: flex;
-}
-
-.canvas__argtype__arg--controls {
+.canvas__function__arg--controls {
+  max-width: 280px;
   flex: 1 0;
 }
 
-.canvas__argtype__arg--remove {
+.canvas__function__arg--remove {
   padding-left: @spacingS;
   margin: auto;
   cursor: pointer;
 }
 
-.canvas__argtype__add {
+.canvas__function__arg--add {
   display: inline-block;
 
   .label {
