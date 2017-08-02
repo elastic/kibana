@@ -23,5 +23,21 @@ export default () => (
     &nbsp;
 
     <KuiIcon type="help" size="medium" />
+
+    &nbsp;
+
+    <KuiIcon type="arrowUp" size="medium" />
+
+    &nbsp;
+
+    <KuiIcon type="arrowDown" size="medium" />
+
+    &nbsp;
+
+    <KuiIcon type="arrowLeft" size="medium" />
+
+    &nbsp;
+
+    <KuiIcon type="arrowRight" size="medium" />
   </div>
 );
