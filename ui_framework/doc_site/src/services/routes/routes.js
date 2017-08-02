@@ -36,6 +36,9 @@ import PopoverExample
 import TableExample
   from '../../views/table/table_example';
 
+import TabsExample
+  from '../../views/tabs/tabs_example';
+
 import TypographyExample
   from '../../views/typography/typography_example';
 
@@ -83,6 +86,10 @@ const components = [{
 }, {
   name: 'Table',
   component: TableExample,
+  hasReact: true,
+}, {
+  name: 'Tabs',
+  component: TabsExample,
   hasReact: true,
 }, {
   name: 'Typography',
