@@ -80,6 +80,58 @@ exports[`KuiIcon renders type apps 1`] = `
 </svg>
 `;
 
+exports[`KuiIcon renders type arrowDown 1`] = `
+<svg
+  class="kuiIcon"
+>
+  <title>
+    arrow down icon
+  </title>
+  <use
+    href="#arrow_down"
+  />
+</svg>
+`;
+
+exports[`KuiIcon renders type arrowLeft 1`] = `
+<svg
+  class="kuiIcon"
+>
+  <title>
+    arrow left icon
+  </title>
+  <use
+    href="#arrow_left"
+  />
+</svg>
+`;
+
+exports[`KuiIcon renders type arrowRight 1`] = `
+<svg
+  class="kuiIcon"
+>
+  <title>
+    arrow right icon
+  </title>
+  <use
+    href="#arrow_right"
+  />
+</svg>
+`;
+
+exports[`KuiIcon renders type arrowUp 1`] = `
+<svg
+  class="kuiIcon"
+>
+  <title>
+    arrow up icon
+  </title>
+  <use
+    href="#arrow_up"
+  />
+</svg>
+`;
+
 exports[`KuiIcon renders type cross 1`] = `
 <svg
   class="kuiIcon"
