@@ -1,0 +1,93 @@
+.kuiLoadingChart {
+  height: 32px;
+  z-index: 500;
+  overflow: hidden;
+  display: inline-block;
+}
+
+.kuiLoadingChart__bar {
+  height: 100%;
+  width: 8px;
+  display: inline-block;
+  float: left;
+  margin-bottom: -16px;
+  margin-left: 2px;
+  animation: kuiLoadingChart 1s infinite;
+
+  &:nth-child(1) {
+    background-color: $kuiColorPrimary;
+  }
+
+  &:nth-child(2) {
+    background-color: $kuiColorSecondary;
+    animation-delay: .1s;
+  }
+
+  &:nth-child(3) {
+    background-color: $kuiColorAccent;
+    animation-delay: .2s;
+  }
+
+  &:nth-child(4) {
+    background-color: $kuiColorDarkestShade;
+    animation-delay: .3s;
+  }
+}
+
+.kuiLoadingChart--mono {
+  .kuiLoadingChart__bar {
+    &:nth-child(1) {
+      background-color: $kuiColorLightShade;
+    }
+    &:nth-child(2) {
+      background-color: darken($kuiColorLightShade, 4%);
+    }
+    &:nth-child(3) {
+      background-color: darken($kuiColorLightShade, 8%);
+    }
+    &:nth-child(4) {
+      background-color: darken($kuiColorLightShade, 12%);
+    }
+  }
+}
+
+.kuiLoadingChart--medium {
+  height: $kuiSize;
+  > div {
+    width: $kuiSizeXS / 2;
+    margin-left: $kuiSizeXS / 2;
+    margin-bottom: $kuiSizeS;
+  }
+}
+
+.kuiLoadingChart--large {
+  height: $kuiSizeL;
+  > div {
+    width: $kuiSizeXS;
+    margin-left: $kuiSizeXS / 2;
+    margin-bottom: $kuiSizeL / 2;
+  }
+}
+
+.kuiLoadingChart--xLarge {
+  height: $kuiSizeXL;
+  > div {
+    width: $kuiSizeS;
+    margin-left: $kuiSizeXS;
+    margin-bottom: $kuiSizeXL / 2;
+  }
+}
+
+@keyframes kuiLoadingChart {
+  0% {
+    transform: translateY(0);
+  }
+
+  50% {
+    transform: translateY(66%);
+  }
+
+  100% {
+    transform: translateY(0);
+  }
+}

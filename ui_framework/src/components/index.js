@@ -4,6 +4,10 @@ export {
 } from './accessibility';
 
 export {
+  KuiButton,
+} from './button';
+
+export {
   KuiHeader,
   KuiHeaderBreadcrumb,
   KuiHeaderBreadcrumbCollapsed,
@@ -17,6 +21,12 @@ export {
 export {
   KuiIcon,
 } from './icon';
+
+export {
+  KuiLoadingKibana,
+  KuiLoadingChart,
+  KuiLoadingSpinner,
+} from './loading';
 
 export {
   KuiKeyPadMenu,
