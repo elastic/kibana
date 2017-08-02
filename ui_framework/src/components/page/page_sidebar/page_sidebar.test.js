@@ -7,7 +7,7 @@ import { KuiPageSidebar } from './page_sidebar';
 describe('KuiPageSidebar', () => {
   test('is rendered', () => {
     const component = render(
-      <KuiPageSidebar { ...requiredProps } />
+      <KuiPageSidebar {...requiredProps} />
     );
 
     expect(component)

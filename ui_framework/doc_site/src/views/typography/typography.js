@@ -27,7 +27,7 @@ export default () => (
 
     <KuiText>
       <p>
-        But the dog wasn't lazy, it was just
+        But the dog wasn&rsquo;t lazy, it was just
         practicing mindfulness, so it had a greater sense of
         life-satisfaction than that fox with all its jumping.
       </p>

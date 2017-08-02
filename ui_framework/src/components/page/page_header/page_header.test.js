@@ -7,7 +7,7 @@ import { KuiPageHeader } from './page_header';
 describe('KuiPageHeader', () => {
   test('is rendered', () => {
     const component = render(
-      <KuiPageHeader { ...requiredProps } />
+      <KuiPageHeader {...requiredProps} />
     );
 
     expect(component)

@@ -6,8 +6,8 @@ export function KuiModalOverlay({ className,  ...rest }) {
   const classes = classnames('kuiModalOverlay', className);
   return (
     <div
-      className={ classes }
-      { ...rest}
+      className={classes}
+      {...rest}
     />
   );
 }

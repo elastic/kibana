@@ -11,7 +11,7 @@ import {
 describe('KuiIcon', () => {
   test('is rendered', () => {
     const component = render(
-      <KuiIcon type="search" { ...requiredProps } />
+      <KuiIcon type="search" {...requiredProps} />
     );
 
     expect(component)
