@@ -6,7 +6,11 @@ exports[`KuiTab renders 1`] = `
   class="kuiTab testClass1 testClass2"
   data-test-subj="test subject string"
 >
-  children
+  <span
+    class="kuiTab__content"
+  >
+    children
+  </span>
 </button>
 `;
 
@@ -16,6 +20,10 @@ exports[`KuiTab renders isSelected 1`] = `
   class="kuiTab testClass1 testClass2 kuiTab-isSelected"
   data-test-subj="test subject string"
 >
-  children
+  <span
+    class="kuiTab__content"
+  >
+    children
+  </span>
 </button>
 `;
