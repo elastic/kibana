@@ -1,0 +1,5 @@
+.kuiSideNavTitle {
+  @include kuiFontSize;
+  font-weight: $kuiFontWeightMedium;
+  color: $kuiColorFullShade;
+}

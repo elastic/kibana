@@ -24,6 +24,9 @@ import {
   KuiPageHeaderSection,
   KuiPageSidebar,
   KuiPopover,
+  KuiSideNav,
+  KuiSideNavItem,
+  KuiSideNavTitle,
   KuiTitle,
 } from '../../../../components';
 
@@ -298,7 +301,10 @@ export default class extends Component {
         </KuiPageHeader>
         <KuiPageBody>
           <KuiPageSidebar>
-            Sidebar nav
+            <KuiSideNav>
+              <KuiSideNavTitle>Title</KuiSideNavTitle>
+              <KuiSideNavItem>Item</KuiSideNavItem>
+            </KuiSideNav>
           </KuiPageSidebar>
           <KuiPageContent>
             <KuiPageContentHeader>

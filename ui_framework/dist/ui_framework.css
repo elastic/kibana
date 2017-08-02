@@ -1399,6 +1399,13 @@ table {
     right: 16px;
     left: auto; }
 
+.kuiSideNavTitle {
+  font-size: 16px;
+  font-size: 1rem;
+  line-height: 24px;
+  font-weight: 500;
+  color: #000; }
+
 /**
  * 1. Prevent cells from expanding based on content size. This substitutes for table-layout: fixed.
  */
