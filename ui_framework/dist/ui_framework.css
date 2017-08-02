@@ -791,6 +791,262 @@ table {
     background: #e6f2f6;
     outline: solid 3px #e6f2f6; }
 
+.kuiLoadingKibana {
+  position: relative;
+  display: inline-block; }
+  .kuiLoadingKibana:before, .kuiLoadingKibana:after {
+    position: absolute;
+    content: "";
+    width: 90%;
+    left: 50%;
+    -webkit-transform: translateX(-50%);
+            transform: translateX(-50%);
+    border-radius: 50%;
+    opacity: 0.2;
+    -webkit-transform-origin: -50% -50%;
+            transform-origin: -50% -50%;
+    z-index: 1; }
+  .kuiLoadingKibana:before {
+    box-shadow: 0 0 8px #000;
+    -webkit-animation: 1s kuiLoadingKibanaPulsateAndFade cubic-bezier(0.694, 0.0482, 0.335, 1) infinite;
+            animation: 1s kuiLoadingKibanaPulsateAndFade cubic-bezier(0.694, 0.0482, 0.335, 1) infinite; }
+  .kuiLoadingKibana:after {
+    background-color: #000;
+    -webkit-animation: 1s kuiLoadingKibanaPulsate cubic-bezier(0.694, 0.0482, 0.335, 1) infinite;
+            animation: 1s kuiLoadingKibanaPulsate cubic-bezier(0.694, 0.0482, 0.335, 1) infinite; }
+
+/**
+ * 1. Requires pixel math for animation.
+ */
+.kuiLoadingKibana--medium:before, .kuiLoadingKibana--medium:after {
+  height: 3px;
+  /* 1 */
+  bottom: -4px; }
+
+.kuiLoadingKibana--medium .kuiLoadingKibana__icon {
+  z-index: 999;
+  -webkit-animation: 1s kuiLoadingKibanaBounceMedium cubic-bezier(0.694, 0.0482, 0.335, 1) infinite;
+          animation: 1s kuiLoadingKibanaBounceMedium cubic-bezier(0.694, 0.0482, 0.335, 1) infinite; }
+
+/**
+ * 1. Requires pixel math for animation.
+ */
+.kuiLoadingKibana--large:before, .kuiLoadingKibana--large:after {
+  height: 6px;
+  /* 1 */
+  bottom: -8px; }
+
+.kuiLoadingKibana--large .kuiLoadingKibana__icon {
+  -webkit-animation: 1s kuiLoadingKibanaBounceLarge cubic-bezier(0.694, 0.0482, 0.335, 1) infinite;
+          animation: 1s kuiLoadingKibanaBounceLarge cubic-bezier(0.694, 0.0482, 0.335, 1) infinite; }
+
+.kuiLoadingKibana--xLarge:before, .kuiLoadingKibana--xLarge:after {
+  height: 8px;
+  bottom: -12px; }
+
+.kuiLoadingKibana--xLarge .kuiLoadingKibana__icon {
+  -webkit-animation: 1s kuiLoadingKibanaBounceXLarge cubic-bezier(0.694, 0.0482, 0.335, 1) infinite;
+          animation: 1s kuiLoadingKibanaBounceXLarge cubic-bezier(0.694, 0.0482, 0.335, 1) infinite; }
+
+@-webkit-keyframes kuiLoadingKibanaBounceMedium {
+  50% {
+    -webkit-transform: translateY(-8px);
+            transform: translateY(-8px); } }
+
+@keyframes kuiLoadingKibanaBounceMedium {
+  50% {
+    -webkit-transform: translateY(-8px);
+            transform: translateY(-8px); } }
+
+@-webkit-keyframes kuiLoadingKibanaBounceLarge {
+  50% {
+    -webkit-transform: translateY(-12px);
+            transform: translateY(-12px); } }
+
+@keyframes kuiLoadingKibanaBounceLarge {
+  50% {
+    -webkit-transform: translateY(-12px);
+            transform: translateY(-12px); } }
+
+@-webkit-keyframes kuiLoadingKibanaBounceXLarge {
+  50% {
+    -webkit-transform: translateY(-16px);
+            transform: translateY(-16px); } }
+
+@keyframes kuiLoadingKibanaBounceXLarge {
+  50% {
+    -webkit-transform: translateY(-16px);
+            transform: translateY(-16px); } }
+
+@-webkit-keyframes kuiLoadingKibanaPulsateAndFade {
+  0% {
+    opacity: 0; }
+  50% {
+    -webkit-transform: scale(0.5);
+            transform: scale(0.5);
+    opacity: 0.1; }
+  100% {
+    opacity: 0; } }
+
+@keyframes kuiLoadingKibanaPulsateAndFade {
+  0% {
+    opacity: 0; }
+  50% {
+    -webkit-transform: scale(0.5);
+            transform: scale(0.5);
+    opacity: 0.1; }
+  100% {
+    opacity: 0; } }
+
+@-webkit-keyframes kuiLoadingKibanaPulsate {
+  0% {
+    opacity: 0.15; }
+  50% {
+    -webkit-transform: scale(0.5);
+            transform: scale(0.5);
+    opacity: 0.05; }
+  100% {
+    opacity: 0.15; } }
+
+@keyframes kuiLoadingKibanaPulsate {
+  0% {
+    opacity: 0.15; }
+  50% {
+    -webkit-transform: scale(0.5);
+            transform: scale(0.5);
+    opacity: 0.05; }
+  100% {
+    opacity: 0.15; } }
+
+.kuiLoadingChart {
+  height: 32px;
+  z-index: 500;
+  overflow: hidden;
+  display: inline-block; }
+
+.kuiLoadingChart__bar {
+  height: 100%;
+  width: 8px;
+  display: inline-block;
+  float: left;
+  margin-bottom: -16px;
+  margin-left: 2px;
+  -webkit-animation: kuiLoadingChart 1s infinite;
+          animation: kuiLoadingChart 1s infinite; }
+  .kuiLoadingChart__bar:nth-child(1) {
+    background-color: #0079a5; }
+  .kuiLoadingChart__bar:nth-child(2) {
+    background-color: #00A69B;
+    -webkit-animation-delay: .1s;
+            animation-delay: .1s; }
+  .kuiLoadingChart__bar:nth-child(3) {
+    background-color: #DD0A73;
+    -webkit-animation-delay: .2s;
+            animation-delay: .2s; }
+  .kuiLoadingChart__bar:nth-child(4) {
+    background-color: #3F3F3F;
+    -webkit-animation-delay: .3s;
+            animation-delay: .3s; }
+
+.kuiLoadingChart--mono .kuiLoadingChart__bar:nth-child(1) {
+  background-color: #D9D9D9; }
+
+.kuiLoadingChart--mono .kuiLoadingChart__bar:nth-child(2) {
+  background-color: #cfcfcf; }
+
+.kuiLoadingChart--mono .kuiLoadingChart__bar:nth-child(3) {
+  background-color: #c5c5c5; }
+
+.kuiLoadingChart--mono .kuiLoadingChart__bar:nth-child(4) {
+  background-color: #bababa; }
+
+.kuiLoadingChart--medium {
+  height: 16px; }
+  .kuiLoadingChart--medium > div {
+    width: 2px;
+    margin-left: 2px;
+    margin-bottom: 8px; }
+
+.kuiLoadingChart--large {
+  height: 24px; }
+  .kuiLoadingChart--large > div {
+    width: 4px;
+    margin-left: 2px;
+    margin-bottom: 12px; }
+
+.kuiLoadingChart--xLarge {
+  height: 32px; }
+  .kuiLoadingChart--xLarge > div {
+    width: 8px;
+    margin-left: 4px;
+    margin-bottom: 16px; }
+
+@-webkit-keyframes kuiLoadingChart {
+  0% {
+    -webkit-transform: translateY(0);
+            transform: translateY(0); }
+  50% {
+    -webkit-transform: translateY(66%);
+            transform: translateY(66%); }
+  100% {
+    -webkit-transform: translateY(0);
+            transform: translateY(0); } }
+
+@keyframes kuiLoadingChart {
+  0% {
+    -webkit-transform: translateY(0);
+            transform: translateY(0); }
+  50% {
+    -webkit-transform: translateY(66%);
+            transform: translateY(66%); }
+  100% {
+    -webkit-transform: translateY(0);
+            transform: translateY(0); } }
+
+.kuiLoadingSpinner {
+  display: inline-block;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: solid 2px #D9D9D9;
+  border-top-color: #0079a5;
+  -webkit-animation: kuiLoadingSpinner .6s infinite linear;
+          animation: kuiLoadingSpinner .6s infinite linear; }
+
+.kuiLoadingSpinner--small {
+  width: 8px;
+  height: 8px;
+  border-width: 1px; }
+
+.kuiLoadingSpinner--medium {
+  width: 16px;
+  height: 16px;
+  border-width: 1px; }
+
+.kuiLoadingSpinner--large {
+  width: 24px;
+  height: 24px; }
+
+.kuiLoadingSpinner--xLarge {
+  width: 32px;
+  height: 32px; }
+
+@-webkit-keyframes kuiLoadingSpinner {
+  from {
+    -webkit-transform: rotate(0deg);
+            transform: rotate(0deg); }
+  to {
+    -webkit-transform: rotate(359deg);
+            transform: rotate(359deg); } }
+
+@keyframes kuiLoadingSpinner {
+  from {
+    -webkit-transform: rotate(0deg);
+            transform: rotate(0deg); }
+  to {
+    -webkit-transform: rotate(359deg);
+            transform: rotate(359deg); } }
+
 .kuiModalOverlay {
   position: fixed;
   z-index: 6000;
@@ -1234,259 +1490,3 @@ table {
   line-height: 24px;
   color: #3F3F3F;
   font-weight: 400; }
-
-.kuiLoadingKibana {
-  position: relative;
-  display: inline-block; }
-  .kuiLoadingKibana:before, .kuiLoadingKibana:after {
-    position: absolute;
-    content: "";
-    width: 90%;
-    left: 50%;
-    -webkit-transform: translateX(-50%);
-            transform: translateX(-50%);
-    border-radius: 50%;
-    opacity: 0.2;
-    -webkit-transform-origin: -50% -50%;
-            transform-origin: -50% -50%;
-    z-index: 1; }
-  .kuiLoadingKibana:before {
-    box-shadow: 0 0 8px #000;
-    -webkit-animation: 1s kuiLoadingKibanaPulsateAndFade cubic-bezier(0.694, 0.0482, 0.335, 1) infinite;
-            animation: 1s kuiLoadingKibanaPulsateAndFade cubic-bezier(0.694, 0.0482, 0.335, 1) infinite; }
-  .kuiLoadingKibana:after {
-    background-color: #000;
-    -webkit-animation: 1s kuiLoadingKibanaPulsate cubic-bezier(0.694, 0.0482, 0.335, 1) infinite;
-            animation: 1s kuiLoadingKibanaPulsate cubic-bezier(0.694, 0.0482, 0.335, 1) infinite; }
-
-/**
- * 1. Requires pixel math for animation.
- */
-.kuiLoadingKibana--medium:before, .kuiLoadingKibana--medium:after {
-  height: 3px;
-  /* 1 */
-  bottom: -4px; }
-
-.kuiLoadingKibana--medium .kuiLoadingKibana__icon {
-  z-index: 999;
-  -webkit-animation: 1s kuiLoadingKibanaBounceMedium cubic-bezier(0.694, 0.0482, 0.335, 1) infinite;
-          animation: 1s kuiLoadingKibanaBounceMedium cubic-bezier(0.694, 0.0482, 0.335, 1) infinite; }
-
-/**
- * 1. Requires pixel math for animation.
- */
-.kuiLoadingKibana--large:before, .kuiLoadingKibana--large:after {
-  height: 6px;
-  /* 1 */
-  bottom: -8px; }
-
-.kuiLoadingKibana--large .kuiLoadingKibana__icon {
-  -webkit-animation: 1s kuiLoadingKibanaBounceLarge cubic-bezier(0.694, 0.0482, 0.335, 1) infinite;
-          animation: 1s kuiLoadingKibanaBounceLarge cubic-bezier(0.694, 0.0482, 0.335, 1) infinite; }
-
-.kuiLoadingKibana--xLarge:before, .kuiLoadingKibana--xLarge:after {
-  height: 8px;
-  bottom: -12px; }
-
-.kuiLoadingKibana--xLarge .kuiLoadingKibana__icon {
-  -webkit-animation: 1s kuiLoadingKibanaBounceXLarge cubic-bezier(0.694, 0.0482, 0.335, 1) infinite;
-          animation: 1s kuiLoadingKibanaBounceXLarge cubic-bezier(0.694, 0.0482, 0.335, 1) infinite; }
-
-@-webkit-keyframes kuiLoadingKibanaBounceMedium {
-  50% {
-    -webkit-transform: translateY(-8px);
-            transform: translateY(-8px); } }
-
-@keyframes kuiLoadingKibanaBounceMedium {
-  50% {
-    -webkit-transform: translateY(-8px);
-            transform: translateY(-8px); } }
-
-@-webkit-keyframes kuiLoadingKibanaBounceLarge {
-  50% {
-    -webkit-transform: translateY(-12px);
-            transform: translateY(-12px); } }
-
-@keyframes kuiLoadingKibanaBounceLarge {
-  50% {
-    -webkit-transform: translateY(-12px);
-            transform: translateY(-12px); } }
-
-@-webkit-keyframes kuiLoadingKibanaBounceXLarge {
-  50% {
-    -webkit-transform: translateY(-16px);
-            transform: translateY(-16px); } }
-
-@keyframes kuiLoadingKibanaBounceXLarge {
-  50% {
-    -webkit-transform: translateY(-16px);
-            transform: translateY(-16px); } }
-
-@-webkit-keyframes kuiLoadingKibanaPulsateAndFade {
-  0% {
-    opacity: 0; }
-  50% {
-    -webkit-transform: scale(0.5);
-            transform: scale(0.5);
-    opacity: 0.1; }
-  100% {
-    opacity: 0; } }
-
-@keyframes kuiLoadingKibanaPulsateAndFade {
-  0% {
-    opacity: 0; }
-  50% {
-    -webkit-transform: scale(0.5);
-            transform: scale(0.5);
-    opacity: 0.1; }
-  100% {
-    opacity: 0; } }
-
-@-webkit-keyframes kuiLoadingKibanaPulsate {
-  0% {
-    opacity: 0.15; }
-  50% {
-    -webkit-transform: scale(0.5);
-            transform: scale(0.5);
-    opacity: 0.05; }
-  100% {
-    opacity: 0.15; } }
-
-@keyframes kuiLoadingKibanaPulsate {
-  0% {
-    opacity: 0.15; }
-  50% {
-    -webkit-transform: scale(0.5);
-            transform: scale(0.5);
-    opacity: 0.05; }
-  100% {
-    opacity: 0.15; } }
-
-.kuiLoadingChart {
-  height: 32px;
-  z-index: 500;
-  overflow: hidden;
-  display: inline-block; }
-
-.kuiLoadingChart__bar {
-  height: 100%;
-  width: 8px;
-  display: inline-block;
-  float: left;
-  margin-bottom: -16px;
-  margin-left: 2px;
-  -webkit-animation: kuiLoadingChart 1s infinite;
-          animation: kuiLoadingChart 1s infinite; }
-  .kuiLoadingChart__bar:nth-child(1) {
-    background-color: #0079a5; }
-  .kuiLoadingChart__bar:nth-child(2) {
-    background-color: #00A69B;
-    -webkit-animation-delay: .1s;
-            animation-delay: .1s; }
-  .kuiLoadingChart__bar:nth-child(3) {
-    background-color: #DD0A73;
-    -webkit-animation-delay: .2s;
-            animation-delay: .2s; }
-  .kuiLoadingChart__bar:nth-child(4) {
-    background-color: #3F3F3F;
-    -webkit-animation-delay: .3s;
-            animation-delay: .3s; }
-
-.kuiLoadingChart--mono .kuiLoadingChart__bar:nth-child(1) {
-  background-color: #D9D9D9; }
-
-.kuiLoadingChart--mono .kuiLoadingChart__bar:nth-child(2) {
-  background-color: #cfcfcf; }
-
-.kuiLoadingChart--mono .kuiLoadingChart__bar:nth-child(3) {
-  background-color: #c5c5c5; }
-
-.kuiLoadingChart--mono .kuiLoadingChart__bar:nth-child(4) {
-  background-color: #bababa; }
-
-.kuiLoadingChart--medium {
-  height: 16px; }
-  .kuiLoadingChart--medium > div {
-    width: 2px;
-    margin-left: 2px;
-    margin-bottom: 8px; }
-
-.kuiLoadingChart--large {
-  height: 24px; }
-  .kuiLoadingChart--large > div {
-    width: 4px;
-    margin-left: 2px;
-    margin-bottom: 12px; }
-
-.kuiLoadingChart--xLarge {
-  height: 32px; }
-  .kuiLoadingChart--xLarge > div {
-    width: 8px;
-    margin-left: 4px;
-    margin-bottom: 16px; }
-
-@-webkit-keyframes kuiLoadingChart {
-  0% {
-    -webkit-transform: translateY(0);
-            transform: translateY(0); }
-  50% {
-    -webkit-transform: translateY(66%);
-            transform: translateY(66%); }
-  100% {
-    -webkit-transform: translateY(0);
-            transform: translateY(0); } }
-
-@keyframes kuiLoadingChart {
-  0% {
-    -webkit-transform: translateY(0);
-            transform: translateY(0); }
-  50% {
-    -webkit-transform: translateY(66%);
-            transform: translateY(66%); }
-  100% {
-    -webkit-transform: translateY(0);
-            transform: translateY(0); } }
-
-.kuiLoadingSpinner {
-  display: inline-block;
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
-  border: solid 2px #D9D9D9;
-  border-top-color: #0079a5;
-  -webkit-animation: kuiLoadingSpinner .6s infinite linear;
-          animation: kuiLoadingSpinner .6s infinite linear; }
-
-.kuiLoadingSpinner--small {
-  width: 8px;
-  height: 8px;
-  border-width: 1px; }
-
-.kuiLoadingSpinner--medium {
-  width: 16px;
-  height: 16px;
-  border-width: 1px; }
-
-.kuiLoadingSpinner--large {
-  width: 24px;
-  height: 24px; }
-
-.kuiLoadingSpinner--xLarge {
-  width: 32px;
-  height: 32px; }
-
-@-webkit-keyframes kuiLoadingSpinner {
-  from {
-    -webkit-transform: rotate(0deg);
-            transform: rotate(0deg); }
-  to {
-    -webkit-transform: rotate(359deg);
-            transform: rotate(359deg); } }
-
-@keyframes kuiLoadingSpinner {
-  from {
-    -webkit-transform: rotate(0deg);
-            transform: rotate(0deg); }
-  to {
-    -webkit-transform: rotate(359deg);
-            transform: rotate(359deg); } }
