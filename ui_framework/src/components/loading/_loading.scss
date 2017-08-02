@@ -2,6 +2,7 @@
   position: relative;
   display: inline-block;
 
+  &:before,
   &:after {
     position: absolute;
     content: "";
@@ -9,17 +10,26 @@
     left: 50%;
     transform: translateX(-50%);
     border-radius: 50%;
-    background-color: $kuiColorFullShade;
     opacity: 0.2;
     transform-origin: -50% -50%;
-    animation: 1s kuiLoadingPulsate $kuiAnimSlightResistance infinite;
     z-index: 1;
+  }
+
+  &:before {
+    box-shadow: 0 0 8px $kuiColorFullShade;
+    animation: 1s kuiLoadingPulsateAndFade $kuiAnimSlightResistance infinite;
+  }
+
+  &:after {
+    background-color: $kuiColorFullShade;
+    animation: 1s kuiLoadingPulsate $kuiAnimSlightResistance infinite;
   }
 }
 
 .kuiLoading--medium {
+  &:before,
   &:after {
-    height: $kuiSizeXS;
+    height: $kuiSizeXS - 1;
     bottom: -$kuiSizeXS;
   }
   .kuiLoading__icon {
@@ -29,8 +39,9 @@
 }
 
 .kuiLoading--large {
+  &:before,
   &:after {
-    height: $kuiSizeS;
+    height: $kuiSizeS - 2;
     bottom: -$kuiSizeS;
   }
   .kuiLoading__icon {
@@ -39,8 +50,9 @@
 }
 
 .kuiLoading--xLarge {
+  &:before,
   &:after {
-    height: ($kuiSize - $kuiSizeXS);
+    height: $kuiSizeS;
     bottom: -($kuiSize - $kuiSizeXS);
   }
   .kuiLoading__icon {
@@ -66,13 +78,14 @@
   }
 }
 
-@keyframes kuiLoadingPulsate {
+@keyframes kuiLoadingPulsateAndFade {
   0% {
     opacity: 0;
   }
+
   50% {
     transform: scale(0.5);
-    opacity: 0.15;
+    opacity: 0.1;
   }
 
   100% {
@@ -80,3 +93,17 @@
   }
 }
 
+@keyframes kuiLoadingPulsate {
+  0% {
+    opacity: 0.15;
+  }
+
+  50% {
+    transform: scale(0.5);
+    opacity: 0.05;
+  }
+
+  100% {
+    opacity: 0.15;
+  }
+}
