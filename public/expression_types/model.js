@@ -1,6 +1,6 @@
 import { pick } from 'lodash';
 import { Registry } from '../../common/lib/registry';
-import { ArgForm } from './arg_form';
+import { FunctionForm } from './function_form';
 
 const NO_NEXT_EXP = 'no next expression';
 const NO_MODEL_ARGS = 'no model args';
@@ -11,7 +11,7 @@ function getModelArgs(expressionType) {
   return (expressionType.modelArgs.length > 0) ? expressionType.modelArgs : NO_MODEL_ARGS;
 }
 
-export class Model extends ArgForm {
+export class Model extends FunctionForm {
   constructor(name, props) {
     super(name, props);
 

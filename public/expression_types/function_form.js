@@ -4,7 +4,7 @@ import { isPlainObject, uniq, last } from 'lodash';
 import { BaseForm } from './base_form';
 import { fromExpression } from '../../common/lib/ast';
 
-export class ArgForm extends BaseForm {
+export class FunctionForm extends BaseForm {
   renderArg(props, dataArg) {
     const { onValueRemove, onValueChange, ...passedProps } = props;
     const { arg, argValues, skipRender } = dataArg;
@@ -14,12 +14,13 @@ export class ArgForm extends BaseForm {
 
     // If value in expression, render the argument's template, wrapped in a remove control
     return argValues && argValues.map((argValue, valueIndex) => (
-      <div className="canvas__argtype__arg" key={`${props.typeInstance.name}-${arg.name}-${valueIndex}`}>
-        <div className="canvas__argtype__arg--controls">
+      <div className="canvas__function__arg" key={`${props.typeInstance.name}-${arg.name}-${valueIndex}`}>
+        <div className="canvas__function__arg--controls">
+          {/* If we make this thing a component we can inject setTitle here */}
           {arg.render({ ...passedProps, valueIndex, argValue, onValueChange: onValueChange(arg.name, valueIndex) })}
         </div>
         <div
-          className="canvas__argtype__arg--remove"
+          className="canvas__function__arg--remove"
           onClick={onValueRemove(arg.name, valueIndex)}
         >
           <i className="fa fa-trash-o" />
@@ -40,7 +41,7 @@ export class ArgForm extends BaseForm {
     // if no value in expression, render the add control
     // TODO: pass in the value when adding arguments, likely using some default defined in the type config
     return (!argValues || arg.multi) && (
-      <div className="canvas__argtype__add" key={`${props.typeInstance.name}-${arg.name}-add`}>
+      <div className="canvas__function__arg--add" key={`${props.typeInstance.name}-${arg.name}-add`}>
         <Label bsStyle="default" onClick={onValueAdd(arg.name, newArgValue)}>
           + {arg.displayName}
         </Label>
@@ -79,7 +80,9 @@ export class ArgForm extends BaseForm {
     try {
       // allow a hook to override the data args
       const resolvedDataArgs = dataArgs.map(d => ({ ...d, ...this.resolveArg(d, props) }));
-      return resolvedDataArgs.map(d => this.renderArg(props, d)).concat(resolvedDataArgs.map(d => this.renderAddArg(props, d)));
+      return resolvedDataArgs
+        .map(d => this.renderArg(props, d)) // Argument forms
+        .concat(resolvedDataArgs.map(d => this.renderAddArg(props, d))); // Buttons for adding more arguments
     } catch (e) {
       return (<Alert bsStyle="danger">
         <h4>Expression rendering error</h4>

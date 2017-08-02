@@ -1,8 +1,8 @@
 import { pick } from 'lodash';
 import { Registry } from '../../common/lib/registry';
-import { ArgForm } from './arg_form';
+import { FunctionForm } from './function_form';
 
-export class View extends ArgForm {
+export class View extends FunctionForm {
   constructor(name, props) {
     super(name, props);
     const propNames = ['description', 'modelArgs', 'requiresContext'];
