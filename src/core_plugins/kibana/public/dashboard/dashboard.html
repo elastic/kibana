@@ -82,7 +82,6 @@
     panels="panels"
     save-state="saveState"
     toggle-expand="toggleExpandPanel"
-    register-panel-index-pattern="registerPanelIndexPattern"
     data-shared-items-count="{{panels.length}}"
     container-api="containerApi"
   ></dashboard-grid>
@@ -93,6 +92,7 @@
     is-full-screen-mode="!chrome.getVisible()"
     is-expanded="true"
     dashboard-view-mode="dashboardViewMode"
+    container-api="containerApi"
     toggle-expand="toggleExpandPanel(expandedPanel.panelIndex)"
   ></dashboard-panel>
 
