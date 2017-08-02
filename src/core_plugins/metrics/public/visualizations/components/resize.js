@@ -48,7 +48,8 @@ class Resize extends Component {
       <div
         style={style}
         className={className}
-        ref={(el) => this.el = el} >
+        ref={(el) => this.el = el}
+      >
         {this.props.children}
       </div>
     );

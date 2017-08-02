@@ -18,8 +18,11 @@ class Annotation extends Component {
     const reversed = this.props.reversed ? '-reversed' : '';
     const messages = messageSource.map((message, i) => {
       return (
-        <div key={`${message}-${i}`}
-          className="annotation__message">{ message }</div>
+        <div
+          key={`${message}-${i}`}
+          className="annotation__message"
+        >{ message }
+        </div>
       );
     });
     return (
@@ -28,7 +31,7 @@ class Annotation extends Component {
           <div className={`annotation__timestamp${reversed}`}>{ moment(timestamp).format('lll') }</div>
           { messages }
         </div>
-        <div className={`annotation__caret${reversed}`}></div>
+        <div className={`annotation__caret${reversed}`} />
       </div>
     );
   }
@@ -60,12 +63,13 @@ class Annotation extends Component {
     });
     return(
       <div className="annotation" style={style.container}>
-        <div className="annotation__line" style={style.line}></div>
+        <div className="annotation__line" style={style.line} />
         <div
           onMouseOver={this.handleMouseOver}
           onMouseOut={this.handleMouseOut}
-          className="annotation__icon">
-          <i className={`fa ${icon}`} style={style.icon}></i>
+          className="annotation__icon"
+        >
+          <i className={`fa ${icon}`} style={style.icon} />
           { tooltip }
         </div>
       </div>

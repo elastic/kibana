@@ -46,13 +46,11 @@ export const ToolBar = () => (
         <KuiButton
           buttonType="basic"
           icon={<KuiButtonIcon type="previous" />}
-        >
-        </KuiButton>
+        />
         <KuiButton
           buttonType="basic"
           icon={<KuiButtonIcon type="next" />}
-        >
-        </KuiButton>
+        />
       </KuiButtonGroup>
     </div>
   </KuiToolBar>

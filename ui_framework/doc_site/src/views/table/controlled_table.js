@@ -36,25 +36,25 @@ export class ControlledTable extends React.Component {
     this.rows = [
       [
         <a className="kuiLink" href="#">Alligator</a>,
-        <div className="kuiIcon kuiIcon--success fa-check"></div>,
+        <div className="kuiIcon kuiIcon--success fa-check" />,
         'Tue Dec 06 2016 12:56:15 GMT-0800 (PST)',
         '1'
       ],
       [
         <a className="kuiLink" href="#">Boomerang</a>,
-        <div className="kuiIcon kuiIcon--success fa-check"></div>,
+        <div className="kuiIcon kuiIcon--success fa-check" />,
         'Tue Dec 06 2016 12:56:15 GMT-0800 (PST)',
         '10'
       ],
       [
         <a className="kuiLink" href="#">Celebration</a>,
-        <div className="kuiIcon kuiIcon--warning fa-bolt"></div>,
+        <div className="kuiIcon kuiIcon--warning fa-bolt" />,
         'Tue Dec 06 2016 12:56:15 GMT-0800 (PST)',
         '100'
       ],
       [
         <a className="kuiLink" href="#">Dog</a>,
-        <div className="kuiIcon kuiIcon--error fa-warning"></div>,
+        <div className="kuiIcon kuiIcon--error fa-warning" />,
         'Tue Dec 06 2016 12:56:15 GMT-0800 (PST)',
         '1000'
       ]
@@ -158,7 +158,7 @@ export class ControlledTable extends React.Component {
           </KuiTableHeader>
 
           <KuiTableBody>
-          {
+            {
             this.renderTableRows()
           }
           </KuiTableBody>

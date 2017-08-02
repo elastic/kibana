@@ -19,16 +19,20 @@ function YesNo(props) {
           name={inputName}
           checked={Boolean(value)}
           value="yes"
-          onChange={handleChange(1)}/>
-        Yes</label>
+          onChange={handleChange(1)}
+        />
+        Yes
+      </label>
       <label>
         <input
           type="radio"
           name={inputName}
           checked={!Boolean(value)}
           value="no"
-          onChange={handleChange(0)}/>
-        No</label>
+          onChange={handleChange(0)}
+        />
+        No
+      </label>
     </div>
   );
 }

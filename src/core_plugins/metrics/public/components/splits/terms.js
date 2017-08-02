@@ -22,7 +22,8 @@ class SplitByTerms extends Component {
         <div className="vis_editor__split-selects">
           <GroupBySelect
             value={model.split_mode}
-            onChange={handleSelectChange('split_mode')} />
+            onChange={handleSelectChange('split_mode')}
+          />
         </div>
         <div className="vis_editor__label">By</div>
         <div className="vis_editor__item">
@@ -30,7 +31,8 @@ class SplitByTerms extends Component {
             indexPattern={indexPattern}
             onChange={handleSelectChange('terms_field')}
             value={model.terms_field}
-            fields={this.props.fields} />
+            fields={this.props.fields}
+          />
         </div>
         <div className="vis_editor__label">Top</div>
         <input
@@ -38,7 +40,8 @@ class SplitByTerms extends Component {
           type="number"
           value={model.terms_size}
           className="vis_editor__split-term_count"
-          onChange={handleTextChange('terms_size')} />
+          onChange={handleTextChange('terms_size')}
+        />
         <div className="vis_editor__label">Order By</div>
         <div className="vis_editor__split-aggs">
           <MetricSelect
@@ -47,7 +50,8 @@ class SplitByTerms extends Component {
             additionalOptions={[defaultCount]}
             onChange={handleSelectChange('terms_order_by')}
             restrict="basic"
-            value={model.terms_order_by}/>
+            value={model.terms_order_by}
+          />
         </div>
       </div>
     );

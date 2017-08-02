@@ -21,7 +21,7 @@ export default () => {
             <KuiHeaderBarSection>
               <span className="kuiText">
                 <span className="kuiStatusText kuiStatusText--error">
-                  <span className="kuiStatusText__icon kuiIcon fa-warning"></span>
+                  <span className="kuiStatusText__icon kuiIcon fa-warning" />
                   Rope Hoth
                 </span>
               </span>
@@ -34,7 +34,7 @@ export default () => {
             <div className="kuiToolBar">
               <div className="kuiToolBarSearch">
                 <div className="kuiToolBarSearchBox">
-                  <div className="kuiToolBarSearchBox__icon kuiIcon fa-search"></div>
+                  <div className="kuiToolBarSearchBox__icon kuiIcon fa-search" />
                   <input
                     className="kuiToolBarSearchBox__input"
                     type="text"
@@ -49,11 +49,11 @@ export default () => {
                 </button>
 
                 <button className="kuiButton kuiButton--basic kuiButton--icon">
-                  <span className="kuiButton__icon kuiIcon fa-gear"></span>
+                  <span className="kuiButton__icon kuiIcon fa-gear" />
                 </button>
 
                 <button className="kuiButton kuiButton--basic kuiButton--icon">
-                  <span className="kuiButton__icon kuiIcon fa-bars"></span>
+                  <span className="kuiButton__icon kuiIcon fa-bars" />
                 </button>
               </div>
 
@@ -64,10 +64,10 @@ export default () => {
 
                 <div className="kuiButtonGroup kuiButtonGroup--united">
                   <button className="kuiButton kuiButton--basic kuiButton--icon">
-                    <span className="kuiButton__icon kuiIcon fa-chevron-left"></span>
+                    <span className="kuiButton__icon kuiIcon fa-chevron-left" />
                   </button>
                   <button className="kuiButton kuiButton--basic kuiButton--icon">
-                    <span className="kuiButton__icon kuiIcon fa-chevron-right"></span>
+                    <span className="kuiButton__icon kuiIcon fa-chevron-right" />
                   </button>
                 </div>
               </div>
@@ -109,7 +109,7 @@ export default () => {
                   </td>
                   <td className="kuiTableRowCell">
                     <div className="kuiTableRowCell__liner">
-                      <div className="kuiIcon kuiIcon--success fa-check"></div>
+                      <div className="kuiIcon kuiIcon--success fa-check" />
                     </div>
                   </td>
                   <td className="kuiTableRowCell">
@@ -137,7 +137,7 @@ export default () => {
                   </td>
                   <td className="kuiTableRowCell">
                     <div className="kuiTableRowCell__liner">
-                      <div className="kuiIcon kuiIcon--success fa-check"></div>
+                      <div className="kuiIcon kuiIcon--success fa-check" />
                     </div>
                   </td>
                   <td className="kuiTableRowCell">
@@ -165,7 +165,7 @@ export default () => {
                   </td>
                   <td className="kuiTableRowCell">
                     <div className="kuiTableRowCell__liner">
-                      <div className="kuiIcon kuiIcon--warning fa-bolt"></div>
+                      <div className="kuiIcon kuiIcon--warning fa-bolt" />
                     </div>
                   </td>
                   <td className="kuiTableRowCell">
@@ -193,7 +193,7 @@ export default () => {
                   </td>
                   <td className="kuiTableRowCell">
                     <div className="kuiTableRowCell__liner">
-                      <div className="kuiIcon kuiIcon--error fa-warning"></div>
+                      <div className="kuiIcon kuiIcon--error fa-warning" />
                     </div>
                   </td>
                   <td className="kuiTableRowCell">
@@ -225,10 +225,10 @@ export default () => {
 
                 <div className="kuiButtonGroup kuiButtonGroup--united">
                   <button className="kuiButton kuiButton--basic kuiButton--icon">
-                    <span className="kuiButton__icon kuiIcon fa-chevron-left"></span>
+                    <span className="kuiButton__icon kuiIcon fa-chevron-left" />
                   </button>
                   <button className="kuiButton kuiButton--basic kuiButton--icon">
-                    <span className="kuiButton__icon kuiIcon fa-chevron-right"></span>
+                    <span className="kuiButton__icon kuiIcon fa-chevron-right" />
                   </button>
                 </div>
               </div>

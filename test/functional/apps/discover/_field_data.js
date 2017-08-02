@@ -1,7 +1,6 @@
 import expect from 'expect.js';
 
 export default function ({ getService, getPageObjects }) {
-  const log = getService('log');
   const retry = getService('retry');
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
@@ -9,31 +8,21 @@ export default function ({ getService, getPageObjects }) {
   const PageObjects = getPageObjects(['common', 'header', 'discover']);
 
   describe('discover app', function describeIndexTests() {
-    before(function () {
+    before(async function () {
       const fromTime = '2015-09-19 06:31:44.000';
       const toTime = '2015-09-23 18:31:44.000';
 
+      await esArchiver.loadIfNeeded('logstash_functional');
+      await esArchiver.load('discover');
+      await kibanaServer.waitForStabilization();
       // delete .kibana index and update configDoc
-      return kibanaServer.uiSettings.replace({
+      await kibanaServer.uiSettings.replace({
         'dateFormat:tz': 'UTC',
         'defaultIndex': 'logstash-*'
-      })
-      .then(function loadkibanaIndexPattern() {
-        log.debug('load kibana index with default index pattern');
-        return esArchiver.load('discover');
-      })
-      // and load a set of makelogs data
-      .then(function loadIfEmptyMakelogs() {
-        return esArchiver.loadIfNeeded('logstash_functional');
-      })
-      .then(function () {
-        log.debug('discover');
-        return PageObjects.common.navigateToApp('discover');
-      })
-      .then(function () {
-        log.debug('setAbsoluteRange');
-        return PageObjects.header.setAbsoluteRange(fromTime, toTime);
       });
+
+      await PageObjects.common.navigateToApp('discover');
+      await PageObjects.header.setAbsoluteRange(fromTime, toTime);
     });
 
 
