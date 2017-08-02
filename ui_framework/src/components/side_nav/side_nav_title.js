@@ -5,7 +5,7 @@ import classNames from 'classnames';
 
 import {
   KuiTitle,
-} from '../../../../components';
+} from '../../components';
 
 export const KuiSideNavTitle = ({ children, className, ...rest }) => {
   const classes = classNames('kuiSideNavTitle', className);
@@ -16,7 +16,7 @@ export const KuiSideNavTitle = ({ children, className, ...rest }) => {
       {...rest}
     >
       <KuiTitle size="small">
-        <h4>{children}</h4>
+        <span>{children}</span>
       </KuiTitle>
     </div>
   );

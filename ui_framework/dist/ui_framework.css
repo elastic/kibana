@@ -347,12 +347,13 @@ table {
   border: solid 1px #0079a5;
   border-radius: 4px;
   color: #0079a5;
-  padding: 0 8px;
+  padding: 0 12px;
   min-width: 112px;
   text-align: center;
   font-family: "Roboto", Helvetica, Arial, sans-serif;
   transition: all 250ms cubic-bezier(0.34, 1.61, 0.7, 1);
   whitespace: nowrap;
+  box-shadow: 0 4px 4px -2px rgba(0, 0, 0, 0.2);
   /**
    * 1. Apply margin to all but last item in the flex.
    */ }
@@ -550,7 +551,8 @@ table {
   display: -ms-flexbox;
   display: flex;
   background: #FFF;
-  border-bottom: 1px solid #D9D9D9; }
+  border-bottom: 1px solid #D9D9D9;
+  box-shadow: 0 2px 2px -1px rgba(0, 0, 0, 0.1); }
 
 .kuiHeader__notification {
   display: inline-block;
@@ -623,7 +625,7 @@ table {
 .kuiHeaderLogo {
   position: relative;
   height: 64px;
-  padding: 16px 32px;
+  padding: 16px 24px;
   display: inline-block;
   vertical-align: middle; }
   .kuiHeaderLogo:hover {
@@ -1201,7 +1203,7 @@ table {
             transform: translateY(0); } }
 
 .kuiPage {
-  padding: 32px; }
+  padding: 24px; }
 
 .kuiPageBody {
   display: -webkit-box;
@@ -1232,7 +1234,8 @@ table {
   background: #FFF;
   border: 1px solid #D9D9D9;
   border-radius: 4px;
-  width: 100%; }
+  width: 100%;
+  box-shadow: 0 2px 2px -1px rgba(0, 0, 0, 0.1); }
 
 .kuiPageContent--verticalCenter {
   -webkit-align-self: center;
@@ -1245,7 +1248,7 @@ table {
   margin: auto; }
 
 .kuiPageContentHeader {
-  margin-bottom: 32px;
+  margin-bottom: 24px;
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -1284,15 +1287,15 @@ table {
 
 .kuiPageSidebar {
   width: 192px;
-  margin-right: 32px; }
+  margin-right: 24px; }
 
 @media only screen and (max-width: 768px) {
   .kuiPageSidebar {
     width: 100%;
-    margin-bottom: 32px; } }
+    margin-bottom: 24px; } }
 
 .kuiPageHeader {
-  margin-bottom: 32px;
+  margin-bottom: 24px;
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -1399,12 +1402,43 @@ table {
     right: 16px;
     left: auto; }
 
+.kuiSideNavItem {
+  display: block;
+  width: 100%;
+  text-align: left;
+  font-size: 14px;
+  font-size: 0.875rem;
+  line-height: 18px;
+  padding: 4px 8px;
+  color: #666;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  border: 1px solid #D9D9D9;
+  border-color: transparent; }
+  .kuiSideNavItem.isSelected {
+    color: #00A69B;
+    font-weight: 500;
+    border-left: 2px solid #D9D9D9;
+    border-left-color: #00A69B;
+    background-color: #FFF;
+    box-shadow: 0 2px 2px -1px rgba(0, 0, 0, 0.1); }
+  .kuiSideNavItem:hover {
+    text-decoration: underline; }
+  .kuiSideNavItem:focus {
+    background-color: #e6f2f6; }
+  .kuiSideNavItem:focus:not(.isSelected) {
+    border: solid 1px #c1dfe9; }
+
 .kuiSideNavTitle {
   font-size: 16px;
   font-size: 1rem;
   line-height: 24px;
   font-weight: 500;
-  color: #000; }
+  margin-bottom: 8px;
+  margin-top: 16px; }
+  .kuiSideNavTitle:first-of-type {
+    margin-top: 0; }
 
 /**
  * 1. Prevent cells from expanding based on content size. This substitutes for table-layout: fixed.

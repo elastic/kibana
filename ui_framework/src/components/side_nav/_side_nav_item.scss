@@ -1,3 +1,34 @@
 .kuiSideNavItem {
+  display: block;
+  width: 100%;
+  text-align: left;
+  @include kuiFontSizeS;
+  padding: $kuiSizeXS $kuiSizeS;
+  color: $kuiColorDarkShade;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  border: $kuiBorderThin;
+  border-color: transparent;
 
+  &.isSelected {
+    color: $kuiColorSecondary;
+    font-weight: $kuiFontWeightMedium;
+    border-left: $kuiBorderThick;
+    border-left-color: $kuiColorSecondary;
+    background-color: $kuiColorEmptyShade;
+    @include kuiBottomShadowSmall;
+  }
+
+  &:hover {
+    text-decoration: underline;
+  }
+
+  &:focus {
+    background-color: $kuiFocusBackgroundColor;
+  }
+
+  &:focus:not(.isSelected) {
+    border: solid 1px darken($kuiFocusBackgroundColor, 10%);
+  }
 }

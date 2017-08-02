@@ -4,6 +4,7 @@
   border: $kuiBorderThin;
   border-radius: $kuiBorderRadius;
   width: 100%;
+  @include kuiBottomShadowSmall;
 }
 
 .kuiPageContent--verticalCenter {

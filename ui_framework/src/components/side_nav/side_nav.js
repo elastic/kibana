@@ -7,12 +7,12 @@ export const KuiSideNav = ({ children, className, ...rest }) => {
   const classes = classNames('kuiSideNav', className);
 
   return (
-    <div
+    <nav
       className={classes}
       {...rest}
     >
       {children}
-    </div>
+    </nav>
   );
 };
 

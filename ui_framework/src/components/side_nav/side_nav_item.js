@@ -3,16 +3,22 @@ import React, {
 } from 'react';
 import classNames from 'classnames';
 
-export const KuiSideNavItem = ({ children, className, ...rest }) => {
-  const classes = classNames('kuiSideNavItem', className);
+export const KuiSideNavItem = ({ children, isSelected, className, ...rest }) => {
+  const classes = classNames(
+    'kuiSideNavItem',
+    className,
+    {
+      'isSelected' : isSelected,
+    }
+  );
 
   return (
-    <div
+    <button
       className={classes}
       {...rest}
     >
       {children}
-    </div>
+    </button>
   );
 };
 
