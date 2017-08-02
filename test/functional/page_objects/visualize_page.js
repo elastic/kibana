@@ -215,8 +215,13 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
       await Promise.all(getChartTypesPromises);
     }
 
-    async selectAggregation(myString) {
-      return find.clickByCssSelector('vis-editor-agg-params:not(.ng-hide) option[label="' + myString + '"]');
+    async selectAggregation(myString, groupName = 'buckets') {
+      await retry.try(async () => {
+        await find.clickByCssSelector(`[group-name="${groupName}"] .agg-select`);
+        const input = await find.byCssSelector(`[group-name="${groupName}"] .agg-select input.ui-select-search`);
+        await input.type(myString);
+        await remote.pressKeys('\uE006');
+      });
     }
 
     async getField() {
@@ -227,8 +232,8 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
 
     async selectField(fieldValue, groupName = 'buckets') {
       await retry.try(async () => {
-        await find.clickByCssSelector(`[group-name="${groupName}"] .ui-select-container`);
-        const input = await find.byCssSelector(`[group-name="${groupName}"] input.ui-select-search`);
+        await find.clickByCssSelector(`[group-name="${groupName}"] .field-select`);
+        const input = await find.byCssSelector(`[group-name="${groupName}"] .field-select input.ui-select-search`);
         await input.type(fieldValue);
         await remote.pressKeys('\uE006');
       });
