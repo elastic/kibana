@@ -1,0 +1,131 @@
+// Our base button
+.kuiButton {
+  display: inline-block;
+  appearance: none;
+  cursor: pointer;
+  height: $kuiSizeXXL;
+  text-decoration: none;
+  border: solid 1px $kuiColorPrimary;
+  border-radius: $kuiBorderRadius;
+  color: $kuiColorPrimary;
+  padding: 0 $kuiSizeS;
+  min-width: $kuiSize * 7;
+  text-align: center;
+  font-family: $kuiFontFamily;
+  transition: all $kuiAnimSpeedNormal $kuiAnimSlightBounce;
+  whitespace: nowrap;
+
+  &.kuiButton--small {
+    height: $kuiSizeXL;
+  }
+
+  .kuiButton__icon {
+    vertical-align: -2px;
+    fill: $kuiColorPrimary;
+  }
+
+  .kuiButton__content {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+
+    // Apply margin to all but last item in the flex.
+    > * + * {
+      margin-left: $kuiSizeS;
+    }
+  }
+
+  &:hover, &:focus {
+    text-decoration: underline;
+    background-color: transparentize($kuiColorPrimary, .9);
+  }
+
+  &:focus {
+    animation: kuiButtonFocus $kuiAnimSpeedNormal $kuiAnimSlightBounce;
+  }
+
+  &.kuiButton--fill {
+    background-color: $kuiColorPrimary;
+    color: #FFF;
+    border-color: $kuiColorPrimary;
+
+    &:hover, &:focus {
+      background-color: darken($kuiColorPrimary, 5%);
+      border-color: darken($kuiColorPrimary, 5%);
+    }
+
+    .kuiButton__icon {
+      fill: #FFF;
+    }
+  }
+
+  &.kuiButton--reverse {
+
+    .kuiButton__content {
+      flex-direction: row-reverse;
+      // Margin gets flipped because of the row-reverse.
+      > * + * {
+        margin-left: 0;
+        margin-right: $kuiSizeS;
+      }
+    }
+  }
+}
+
+
+// Modifier naming and colors.
+$buttonTypes: (
+  secondary: $kuiColorSecondary,
+  danger: $kuiColorDanger,
+  warning: $kuiColorWarning,
+  disabled: tintOrShade($kuiTextColor, 70%, 80%)
+);
+
+// Create button modifiders based upon the map.
+@each $name, $color in $buttonTypes {
+  .kuiButton--#{$name} {
+    color: $color;
+    border-color: $color;
+
+    .kuiButton__icon {
+      fill: $color;
+    }
+
+    &:hover, &:focus {
+      background-color: transparentize($color, .9);
+      @if ($name == 'disabled') {
+        cursor: not-allowed;
+      }
+    }
+
+    &.kuiButton--fill {
+      background-color: $color;
+      @if (lightness($kuiTextColor) > 50) {
+        color: $kuiTextColor;
+      } @else {
+        color: #FFF;
+      }
+      border-color: $color;
+
+      &:hover, &:focus {
+        background-color: darken($color, 5%);
+        border-color: darken($color, 5%);
+      }
+
+      .kuiButton__icon {
+        @if (lightness($kuiTextColor) > 50) {
+          fill: $kuiTextColor;
+        } @else {
+          fill: #FFF;
+        }
+      }
+    }
+  }
+}
+
+@keyframes kuiButtonFocus {
+  50% {
+    transform: translateY($kuiSizeXS / 2);
+  }
+}
