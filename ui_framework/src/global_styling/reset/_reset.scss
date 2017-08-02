@@ -30,9 +30,16 @@ time, mark, audio, video {
   padding: 0;
   border: 0;
   font: inherit; /* 1 */
-  font-size: $kuiFontSize;
   font-family: inherit; /* 1 */
   vertical-align: baseline;
+}
+
+em {
+  font-style: italic;
+}
+
+strong {
+  font-weight: 500;
 }
 
 /* HTML5 display-role reset for older browsers */
@@ -44,6 +51,7 @@ footer, header, hgroup, menu, nav, section {
 html {
   font-family: $kuiFontFamily;
   font-weight: $kuiFontWeightRegular;
+  font-size: $kuiFontSize;
   color: $kuiTextColor;
   height: 100%;
   -webkit-font-smoothing: antialiased;

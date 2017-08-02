@@ -41,10 +41,15 @@ time, mark, audio, video {
   border: 0;
   font: inherit;
   /* 1 */
-  font-size: 16px;
   font-family: inherit;
   /* 1 */
   vertical-align: baseline; }
+
+em {
+  font-style: italic; }
+
+strong {
+  font-weight: 500; }
 
 /* HTML5 display-role reset for older browsers */
 article, aside, details, figcaption, figure,
@@ -54,6 +59,7 @@ footer, header, hgroup, menu, nav, section {
 html {
   font-family: "Roboto", Helvetica, Arial, sans-serif;
   font-weight: 400;
+  font-size: 16px;
   color: #3F3F3F;
   height: 100%;
   -webkit-font-smoothing: antialiased; }
@@ -925,6 +931,77 @@ table {
   .kuiPopover--anchorRight .kuiPopover__body:before, .kuiPopover--anchorRight .kuiPopover__body:after {
     right: 16px;
     left: auto; }
+
+/**
+ * 1. Prevent cells from expanding based on content size. This substitutes for table-layout: fixed.
+ */
+/**
+ * NOTE: table-layout: fixed causes a bug in IE11 and Edge (see #9929). It also prevents us from
+ * specifying a column width, e.g. the checkbox column.
+ */
+.kuiTable {
+  font-size: 14px;
+  font-size: 0.875rem;
+  line-height: 18px;
+  width: 100%;
+  border: none;
+  border-collapse: collapse;
+  background-color: #FFF; }
+
+.kuiTable--compressed .kuiTableHeaderCell,
+.kuiTable--compressed .kuiTableRowCell__content {
+  padding: 8px; }
+
+.kuiTableHeaderCell {
+  text-align: left;
+  max-width: 20px;
+  /* 1 */
+  padding: 12px;
+  color: #000; }
+
+.kuiTableHeaderCell__content {
+  display: inline-block; }
+
+.kuiTableHeaderCell--alignRight {
+  text-align: right; }
+
+.kuiTableRow:hover {
+  background-color: rgba(0, 121, 165, 0.05); }
+
+.kuiTableRow.kuiTableRow-isSelected {
+  background-color: rgba(255, 255, 0, 0.05); }
+
+.kuiTableRowCell {
+  text-align: left;
+  max-width: 20px;
+  /* 1 */
+  color: #3F3F3F;
+  border-top: 1px solid #D9D9D9;
+  border-bottom: 1px solid #D9D9D9; }
+
+/**
+   * 1. Vertically align all children.
+   * 2. Truncate text with an ellipsis. The padding on this div allows the ellipsis to show. If
+   *    the padding was on the cell, the ellipsis would be cropped.
+   */
+.kuiTableRowCell__content {
+  white-space: nowrap;
+  /* 2 */
+  overflow: hidden;
+  /* 2 */
+  text-overflow: ellipsis;
+  /* 2 */
+  padding: 12px;
+  /* 2 */ }
+  .kuiTableRowCell__content > * {
+    vertical-align: middle;
+    /* 1 */ }
+
+.kuiTableRowCell--alignRight .kuiTableRowCell__content {
+  text-align: right; }
+
+.kuiTableRowCell--wrapText .kuiTableRowCell__content {
+  white-space: normal; }
 
 .kuiTitle {
   font-size: 24px;

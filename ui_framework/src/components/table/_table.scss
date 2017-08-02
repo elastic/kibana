@@ -1,0 +1,80 @@
+/**
+ * NOTE: table-layout: fixed causes a bug in IE11 and Edge (see #9929). It also prevents us from
+ * specifying a column width, e.g. the checkbox column.
+ */
+.kuiTable {
+  @include kuiFontSizeS;
+
+  width: 100%;
+  border: none;
+  border-collapse: collapse;
+  background-color: $kuiColorEmptyShade;
+}
+
+.kuiTable--compressed {
+  .kuiTableHeaderCell,
+  .kuiTableRowCell__content {
+    padding: $kuiTableCellPaddingCompressed;
+  }
+}
+
+.kuiTableHeaderCell {
+  @include kuiTableCell;
+
+  padding: $kuiTableCellPadding;
+  color: $kuiTitleColor;
+}
+
+  .kuiTableHeaderCell__content {
+    display: inline-block;
+  }
+
+.kuiTableHeaderCell--alignRight {
+  text-align: right;
+}
+
+.kuiTableRow {
+  &:hover {
+    background-color: rgba($kuiColorPrimary, 0.05);
+  }
+
+  &.kuiTableRow-isSelected {
+    background-color: rgba($kuiColorHighlight, 0.05);
+  }
+}
+
+.kuiTableRowCell {
+  @include kuiTableCell;
+
+  color: $kuiTextColor;
+  border-top: $kuiBorderThin;
+  border-bottom: $kuiBorderThin;
+}
+
+  /**
+   * 1. Vertically align all children.
+   * 2. Truncate text with an ellipsis. The padding on this div allows the ellipsis to show. If
+   *    the padding was on the cell, the ellipsis would be cropped.
+   */
+  .kuiTableRowCell__content {
+    white-space: nowrap; /* 2 */
+    overflow: hidden; /* 2 */
+    text-overflow: ellipsis; /* 2 */
+    padding: $kuiTableCellPadding; /* 2 */
+
+    & > * {
+      vertical-align: middle; /* 1 */
+    }
+  }
+
+.kuiTableRowCell--alignRight {
+  .kuiTableRowCell__content {
+    text-align: right;
+  }
+}
+
+.kuiTableRowCell--wrapText {
+  .kuiTableRowCell__content {
+    white-space: normal;
+  }
+}
