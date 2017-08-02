@@ -12,8 +12,12 @@
       {{$select.selected.title}}
     </ui-select-match>
     <ui-select-choices
+      repeat="agg in aggTypeOptions
+        | aggFilter:agg.schema.aggFilter
+        | filter: { title: $select.search }
+        | orderBy:'title'
+        | sortPrefixFirst:$select.search:'title'"
       group-by="'subtype'"
-      repeat="agg in aggTypeOptions | aggFilter:agg.schema.aggFilter | filter: { title: $select.search } "
     >
       <div ng-bind-html="agg.title | highlight: $select.search"></div>
     </ui-select-choices>
