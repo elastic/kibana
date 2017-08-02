@@ -4,19 +4,37 @@
 }
 
 /**
- * 1. Move the tab down so that its bottom box-shadow will cover the container's bottom border.
+ * 1. Move the tab down so that its bottom stripe will cover the container's bottom border.
  */
 .kuiTab {
   @include kuiFontSize;
 
+  position: relative;
   cursor: pointer;
   padding: $kuiSizeS $kuiSize;
   color: $kuiColorDarkShade;
   margin-bottom: -$kuiBorderWidthThin; /* 1 */
+  overflow: hidden;
+  transition: color $kuiAnimSpeedFast;
+
+  &:after {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    transform: translateY(0);
+    content: ' ';
+    width: 100%;
+    height: $kuiBorderWidthThick;
+    background-color: $kuiColorSecondary;
+    transition: transform $kuiAnimSpeedFast $kuiAnimSlightBounce;
+  }
 
   &.kuiTab-isSelected {
     cursor: default;
     color: $kuiTitleColor;
-    box-shadow: inset 0 #{-$kuiBorderWidthThick} 0 $kuiColorSecondary; /* 1 */
+
+    &:after {
+      transform: translateY(-100%); /* 1 */
+    }
   }
 }
