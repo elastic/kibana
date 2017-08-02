@@ -1,0 +1,22 @@
+.kuiTabs {
+  display: flex;
+  border-bottom: $kuiBorderThin;
+}
+
+/**
+ * 1. Move the tab down so that its bottom box-shadow will cover the container's bottom border.
+ */
+.kuiTab {
+  @include kuiFontSize;
+
+  cursor: pointer;
+  padding: $kuiSizeS $kuiSize;
+  color: $kuiColorDarkShade;
+  margin-bottom: -$kuiBorderWidthThin; /* 1 */
+
+  &.kuiTab-isSelected {
+    cursor: default;
+    color: $kuiTitleColor;
+    box-shadow: inset 0 #{-$kuiBorderWidthThick} 0 $kuiColorSecondary; /* 1 */
+  }
+}

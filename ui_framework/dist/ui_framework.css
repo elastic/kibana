@@ -1003,6 +1003,31 @@ table {
 .kuiTableRowCell--wrapText .kuiTableRowCell__content {
   white-space: normal; }
 
+.kuiTabs {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  border-bottom: 1px solid #D9D9D9; }
+
+/**
+ * 1. Move the tab down so that its bottom box-shadow will cover the container's bottom border.
+ */
+.kuiTab {
+  font-size: 16px;
+  font-size: 1rem;
+  line-height: 24px;
+  cursor: pointer;
+  padding: 8px 16px;
+  color: #666;
+  margin-bottom: -1px;
+  /* 1 */ }
+  .kuiTab.kuiTab-isSelected {
+    cursor: default;
+    color: #000;
+    box-shadow: inset 0 -2px 0 #00A69B;
+    /* 1 */ }
+
 .kuiTitle {
   font-size: 24px;
   font-size: 1.5rem;
