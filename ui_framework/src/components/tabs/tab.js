@@ -13,7 +13,9 @@ export const KuiTab = ({ isSelected, onClick, children, className, ...rest }) =>
       onClick={onClick}
       {...rest}
     >
-      {children}
+      <span className="kuiTab__content">
+        {children}
+      </span>
     </button>
   );
 };

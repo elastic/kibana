@@ -17,6 +17,12 @@
   overflow: hidden;
   transition: color $kuiAnimSpeedFast;
 
+  &:hover:not(.kuiTab-isSelected) {
+    .kuiTab__content {
+      transform: translateY(-$kuiSizeXS);
+    }
+  }
+
   &:after {
     position: absolute;
     top: 100%;
@@ -38,3 +44,9 @@
     }
   }
 }
+
+  .kuiTab__content {
+    display: block;
+    transition: transform $kuiAnimSpeedFast $kuiAnimSlightBounce;
+    transform: translateY(0);
+  }
