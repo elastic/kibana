@@ -107,8 +107,7 @@ export default class extends Component {
       >
         <div className="kuiHeaderProfile kui--flexRow kui--flexAlignItemsCenter">
           <div className="kui--flexShrink1 kui--paddingRight">
-            <div className="kuiAvatar kuiAvatar--large" style={{ background: `url('http://lorempixel.com/64/64/cats/')` }}>
-            </div>
+            <div className="kuiAvatar kuiAvatar--large" style={{ background: `url('http://lorempixel.com/64/64/cats/')` }} />
           </div>
           <div className="kui--flexGrow1">
             <p className="kui--marginBottom">John Username</p>

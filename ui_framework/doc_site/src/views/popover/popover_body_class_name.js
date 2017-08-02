@@ -30,7 +30,7 @@ export default class extends Component {
   render() {
     return (
       <KuiPopover
-        button= {(
+        button={(
           <button onClick={this.onButtonClick.bind(this)}>
             Custom class
           </button>

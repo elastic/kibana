@@ -31,7 +31,7 @@ export default class extends Component {
     return (
       <div>
         <KuiPopover
-          button= {(
+          button={(
             <button onClick={this.onButtonClick.bind(this)}>
               Popover anchored to the right.
             </button>
@@ -46,7 +46,7 @@ export default class extends Component {
         &nbsp;
 
         <KuiPopover
-          button= {(
+          button={(
             <button onClick={this.onButtonClick.bind(this)}>
               Popover anchored to the left.
             </button>
