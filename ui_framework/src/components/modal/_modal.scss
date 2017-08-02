@@ -5,34 +5,47 @@
   border: $kuiBorderThin;
   border-radius: $kuiBorderRadius;
   z-index: $kuiZModal;
+  padding: $kuiSizeXL;
+  min-width: 50%;
+  animation: kuiModal $kuiAnimSpeedSlow $kuiAnimSlightBounce;
 }
 
 .kuiModalHeader {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: $kuiSize;
 }
 
   .kuiModalHeader__title {
+    @include kuiFontSizeL;
   }
 
 .kuiModalHeaderCloseButton {
 }
 
 .kuiModalBody {
-  padding: $kuiSize;
+  padding: $kuiSizeXL 0;
 }
 
 .kuiModalBodyText {
 }
 
 .kuiModalFooter {
-  padding: $kuiSize;
   display: flex;
   justify-content: flex-end;
 
   > * + * {
-    margin-left: 5px;
+    margin-left: $kuiSize;
+  }
+}
+
+@keyframes kuiModal {
+  0% {
+    opacity: 0;
+    transform: translateY($kuiSizeXL);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
   }
 }
