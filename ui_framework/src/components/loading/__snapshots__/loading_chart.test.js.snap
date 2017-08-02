@@ -1,0 +1,41 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`KuiLoadingChart is rendered 1`] = `
+<div
+  aria-label="aria-label"
+  class="kuiLoadingChart testClass1 testClass2"
+  data-test-subj="test subject string"
+>
+  <div
+    class="kuiLoadingChart__bar"
+  />
+  <div
+    class="kuiLoadingChart__bar"
+  />
+  <div
+    class="kuiLoadingChart__bar"
+  />
+  <div
+    class="kuiLoadingChart__bar"
+  />
+</div>
+`;
+
+exports[`KuiLoadingChart mono is rendered 1`] = `
+<div
+  class="kuiLoadingChart kuiLoadingChart--mono"
+>
+  <div
+    class="kuiLoadingChart__bar"
+  />
+  <div
+    class="kuiLoadingChart__bar"
+  />
+  <div
+    class="kuiLoadingChart__bar"
+  />
+  <div
+    class="kuiLoadingChart__bar"
+  />
+</div>
+`;
