@@ -44,18 +44,26 @@ export function FindProvider({ getService }) {
       });
     }
 
-    async allByCssSelector(selector, timeout = defaultFindTimeout) {
-      log.debug('in findAllByCssSelector: ' + selector);
+    async allByCustom(findAllFunction, timeout = defaultFindTimeout) {
       return await this.withTimeout(timeout, async remote => {
         return await retry.try(async () => {
-          let elements = await remote.findAllByCssSelector(selector);
+          let elements = await findAllFunction(remote);
           if (!elements) elements = [];
           // Force isStale checks for all the retrieved elements.
           await Promise.all(elements.map(async element => await element.isEnabled()));
-          log.debug(`Found ${elements.length} for selector ${selector}`);
           return elements;
         });
       });
+    }
+
+    async allByLinkText(selector, timeout = defaultFindTimeout) {
+      log.debug('find.allByLinkText: ' + selector);
+      return await this.allByCustom(remote => remote.findAllByLinkText(selector), timeout);
+    }
+
+    async allByCssSelector(selector, timeout = defaultFindTimeout) {
+      log.debug('in findAllByCssSelector: ' + selector);
+      return await this.allByCustom(remote => remote.findAllByCssSelector(selector), timeout);
     }
 
     async displayedByCssSelector(selector, timeout = defaultFindTimeout) {
