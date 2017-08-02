@@ -1,11 +1,11 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { FormGroup, ControlLabel, FormControl } from 'react-bootstrap';
+import { FormGroup, FormControl } from 'react-bootstrap';
 import { ArgType } from '../arg_type';
 
 const template = ({ typeInstance, onValueChange, argValue }) => {
   // Why is this neccesary? Does the dialog really need to know what parameter it is setting?
-  const { name, displayName } = typeInstance;
+  const { name } = typeInstance;
   const choices = typeInstance.options.choices;
 
   function handleChange(ev) {
@@ -23,7 +23,6 @@ const template = ({ typeInstance, onValueChange, argValue }) => {
 
   return (
     <FormGroup controlId="formControlsSelect">
-      <ControlLabel>{displayName}</ControlLabel>
       <FormControl componentClass="select" value={argValue.value} onChange={handleChange}>
         {options}
       </FormControl>

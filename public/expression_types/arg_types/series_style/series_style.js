@@ -1,6 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { Form, FormGroup, FormControl, ControlLabel } from 'react-bootstrap';
+import { Form, FormGroup, FormControl } from 'react-bootstrap';
 import { get } from 'lodash';
 import { set, del } from 'object-path-immutable';
 import { ColorPickerMini } from '../../../components/color_picker_mini';
@@ -9,10 +9,10 @@ import { ArgType } from '../../arg_type';
 import './series_style.less';
 
 const template = (props) => {
-  const { typeInstance, onValueChange, labels, argValue } = props;
+  const { typeInstance, onValueChange, labels, argValue, setLabel } = props;
   const chain = get(argValue, 'chain.0', {});
   const chainArgs = get(chain, 'arguments', {});
-  const { name, displayName } = typeInstance;
+  const { name } = typeInstance;
 
   const handleChange = (argName, ev) => {
     const fn = ev.target.value === '' ? del : set;
@@ -31,10 +31,14 @@ const template = (props) => {
   const label = get(chainArgs, 'label.0.value', '');
   const color = get(chainArgs, 'color.0.value', '');
 
+  console.log(label);
+
+  // TODO: OMG Gross. Its this or lifecycles. So gross.
+  setTimeout(() => {if (label) setLabel(`Style: ${label}`);}, 0);
+
   return (
     <Form onSubmit={() => false}>
       <FormGroup controlId="formControlsSelect">
-        <ControlLabel>{displayName}</ControlLabel>
         <div className="canvas__argtype--seriesStyle">
           {name !== 'defaultStyle' &&
             (
@@ -42,7 +46,7 @@ const template = (props) => {
                 componentClass="select"
                 placeholder="Select Series"
                 value={label}
-                onChange={(ev) => handleChange('label', ev)}
+                onChange={ev => handleChange('label', ev)}
               >
                 <option value={null} disabled>Select a Series Label</option>
                 { labels.sort().map(val => <option key={val} value={val}>{val}</option>) }
@@ -88,6 +92,7 @@ template.propTypes = {
   argValue: PropTypes.object.isRequired,
   typeInstance: PropTypes.object,
   labels: PropTypes.array,
+  setLabel: PropTypes.func,
 };
 
 export const seriesStyle = () => new ArgType('seriesStyle', {

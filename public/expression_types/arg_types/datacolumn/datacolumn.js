@@ -1,13 +1,13 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { FormGroup, ControlLabel, FormControl } from 'react-bootstrap';
+import { FormGroup, FormControl } from 'react-bootstrap';
 import { MathExpression } from './math_expression';
 import { ArgType } from '../../arg_type';
 import { toAstValue } from '../../../lib/map_arg_value';
 import './datacolumn.less';
 
 const template = ({ onValueChange, columns, argValue, typeInstance }) => {
-  const { name, displayName } = typeInstance;
+  const { name } = typeInstance;
   const inputRefs = {};
 
   const updateValue = (valueType) => () => {
@@ -53,7 +53,6 @@ const template = ({ onValueChange, columns, argValue, typeInstance }) => {
 
   return (
     <FormGroup key={name} controlId="formControlsSelect">
-      <ControlLabel>{ displayName }</ControlLabel>
       { formControl(argValue) }
     </FormGroup>
   );

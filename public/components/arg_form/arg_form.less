@@ -2,13 +2,13 @@
 
 .canvas__arg {
   display: flex;
-  padding: @spacingS @spacingXS @spacingS @spacingM;
+  padding: @spacingM 0 @spacingM @spacingM;
+  border-bottom: @borderStyle;
 }
 
 .canvas__arg--controls {
   flex: 1 0;
   width: 280px;
-  border-right: @spacingXS solid @border;
   padding-right: @spacingS;
 }
 
@@ -20,9 +20,13 @@
 
 .canvas__function__arg--add {
   display: inline-block;
+  border-bottom: @borderStyle;
+  border-right: @borderStyle;
 
+  // TODO: This shouldn't be a bootstrap <Label>
   .label {
-    margin: @spacingXXS;
+    background-color: transparent;
+    color: @labelColor;
     cursor: pointer;
   }
 }
