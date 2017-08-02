@@ -1,28 +1,26 @@
 @import (reference) "../../style/variables";
 
-.canvas__function {
-
-}
-
 .canvas__function__arg {
   display: flex;
-  padding: @spacingM;
-  border-bottom: @borderStyle;
+  padding: @spacingS @spacingM;
 }
 
 .canvas__function__arg--controls {
-  max-width: 280px;
   flex: 1 0;
+  max-width: 290px;
+  border-right: @spacingXS solid @border;
+  padding-right: @spacingS;
 }
 
 .canvas__function__arg--remove {
-  padding-left: @spacingS;
-  margin: auto;
+  padding-left: @spacingXS;
+  margin: auto @spacingXS;
   cursor: pointer;
 }
 
 .canvas__function__arg--add {
   display: inline-block;
+  padding-left: @spacingXS;
 
   .label {
     margin: @spacingXXS;
