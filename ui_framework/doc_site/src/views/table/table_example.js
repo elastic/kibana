@@ -13,6 +13,10 @@ import { Table } from './table';
 const tableSource = require('!!raw!./table');
 const tableHtml = renderToHtml(Table);
 
+import { Compressed } from './compressed';
+const compressedSource = require('!!raw!./compressed');
+const compressedHtml = renderToHtml(Compressed);
+
 export default props => (
   <GuidePage title={props.route.name}>
     <GuideSection
@@ -31,6 +35,21 @@ export default props => (
 
       <GuideDemo>
         <Table />
+      </GuideDemo>
+    </GuideSection>
+
+    <GuideSection
+      title="Compressed"
+      source={[{
+        type: GuideSectionTypes.HTML,
+        code: compressedHtml,
+      }, {
+        type: GuideSectionTypes.JS,
+        code: compressedSource,
+      }]}
+    >
+      <GuideDemo>
+        <Compressed />
       </GuideDemo>
     </GuideSection>
   </GuidePage>

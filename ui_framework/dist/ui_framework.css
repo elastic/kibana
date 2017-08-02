@@ -906,11 +906,15 @@ table {
   border-collapse: collapse;
   background-color: #FFF; }
 
+.kuiTable--compressed .kuiTableHeaderCell,
+.kuiTable--compressed .kuiTableRowCell__content {
+  padding: 8px; }
+
 .kuiTableHeaderCell {
   text-align: left;
   max-width: 20px;
   /* 1 */
-  padding: 8px;
+  padding: 12px;
   color: #000; }
 
 .kuiTableHeaderCell__content {
@@ -945,7 +949,7 @@ table {
   /* 2 */
   text-overflow: ellipsis;
   /* 2 */
-  padding: 8px;
+  padding: 12px;
   /* 2 */ }
   .kuiTableRowCell__content > * {
     vertical-align: middle;

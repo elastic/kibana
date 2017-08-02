@@ -1,4 +1,5 @@
-$kuiTableCellPadding: $kuiSizeS;
+$kuiTableCellPadding: $kuiSizeM - $kuiSizeXS;
+$kuiTableCellPaddingCompressed: $kuiSizeS;
 
 /**
  * 1. Prevent cells from expanding based on content size. This substitutes for table-layout: fixed.

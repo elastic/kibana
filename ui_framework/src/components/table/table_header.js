@@ -8,6 +8,7 @@ export const KuiTableHeader = ({ children, className, ...rest }) => {
     </thead>
   );
 };
+
 KuiTableHeader.propTypes = {
   children: PropTypes.node,
   className: PropTypes.string,

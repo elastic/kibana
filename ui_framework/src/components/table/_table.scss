@@ -11,6 +11,13 @@
   background-color: $kuiColorEmptyShade;
 }
 
+.kuiTable--compressed {
+  .kuiTableHeaderCell,
+  .kuiTableRowCell__content {
+    padding: $kuiTableCellPaddingCompressed;
+  }
+}
+
 .kuiTableHeaderCell {
   @include kuiTableCell;
 
