@@ -3,6 +3,7 @@ import { Label, Alert } from 'react-bootstrap';
 import { isPlainObject, uniq, last } from 'lodash';
 import { BaseForm } from './base_form';
 import { fromExpression } from '../../common/lib/ast';
+import { ArgForm } from '../components/arg_form';
 
 export class FunctionForm extends BaseForm {
   renderArg(props, dataArg) {
@@ -14,18 +15,14 @@ export class FunctionForm extends BaseForm {
 
     // If value in expression, render the argument's template, wrapped in a remove control
     return argValues && argValues.map((argValue, valueIndex) => (
-      <div className="canvas__function__arg" key={`${props.typeInstance.name}-${arg.name}-${valueIndex}`}>
-        <div className="canvas__function__arg--controls">
-          {/* If we make this thing a component we can inject setTitle here */}
-          {arg.render({ ...passedProps, valueIndex, argValue, onValueChange: onValueChange(arg.name, valueIndex) })}
-        </div>
-        <div
-          className="canvas__function__arg--remove"
-          onClick={onValueRemove(arg.name, valueIndex)}
-        >
-          <i className="fa fa-trash-o" />
-        </div>
-      </div>
+      <ArgForm
+        {...passedProps}
+        arg={arg}
+        valueIndex={valueIndex}
+        argValue={argValue}
+        onValueChange={onValueChange(arg.name, valueIndex)}
+        onValueRemove={onValueRemove(arg.name, valueIndex)}
+      />
     ));
   }
 

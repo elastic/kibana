@@ -1,0 +1,28 @@
+@import (reference) "../../style/variables";
+
+.canvas__arg {
+  display: flex;
+  padding: @spacingS @spacingM;
+}
+
+.canvas__arg--controls {
+  flex: 1 0;
+  width: 280px;
+  border-right: @spacingXS solid @border;
+  padding-right: @spacingS;
+}
+
+.canvas__arg--remove {
+  padding-left: @spacingXS;
+  margin: auto @spacingXS;
+  cursor: pointer;
+}
+
+.canvas__function__arg--add {
+  display: inline-block;
+
+  .label {
+    margin: @spacingXXS;
+    cursor: pointer;
+  }
+}
