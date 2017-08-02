@@ -41,7 +41,7 @@ export class GuideSection extends Component {
             className="guideSection__sourceButton"
             onClick={this.onClickSource}
           >
-            <span className="fa fa-code"></span>
+            <span className="fa fa-code" />
           </button>
         </div>
 
