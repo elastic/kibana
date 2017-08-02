@@ -45,6 +45,6 @@ describe('sortPrefixFirst', function () {
     const prefix = 'histo';
     const result = sortPrefixFirst(array, prefix);
     expect(result).to.not.be(array);
-    expect(result).to.eql('Historgram', 'Date Histogram');
+    expect(result).to.eql('Histogram', 'Date Histogram');
   });
 });

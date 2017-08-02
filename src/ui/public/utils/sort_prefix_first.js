@@ -1,6 +1,6 @@
 export function sortPrefixFirst(array, prefix, property) {
   if (!prefix) return array;
-  const lowerCasePrefix = prefix.toLowerCase();
+  const lowerCasePrefix = ('' + prefix).toLowerCase();
   return [...array].sort(sortPrefixFirstComparator);
 
   function sortPrefixFirstComparator(a, b) {
