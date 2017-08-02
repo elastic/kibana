@@ -19,7 +19,7 @@ const linkReqRespStats = function ($scope) {
     if (req && req.ms != null) stats.push(['Request Duration', req.ms + 'ms']);
     if (resp && resp.hits) stats.push(['Hits', resp.hits.total]);
 
-    if (req.fetchParams) {
+    if (req.fetchParams && req.fetchParams.index) {
       if (req.fetchParams.index.title) stats.push(['Index', req.fetchParams.index.title]);
       if (req.fetchParams.index.type) stats.push(['Type', req.fetchParams.index.type]);
       if (req.fetchParams.index.id) stats.push(['Id', req.fetchParams.index.id]);
