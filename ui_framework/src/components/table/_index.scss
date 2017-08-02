@@ -1,0 +1,12 @@
+$kuiTableCellPadding: $kuiSizeM - $kuiSizeXS;
+$kuiTableCellPaddingCompressed: $kuiSizeS;
+
+/**
+ * 1. Prevent cells from expanding based on content size. This substitutes for table-layout: fixed.
+ */
+@mixin kuiTableCell {
+  text-align: left;
+  max-width: 20px; /* 1 */
+}
+
+@import "table";
