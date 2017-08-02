@@ -898,16 +898,18 @@ table {
  * specifying a column width, e.g. the checkbox column.
  */
 .kuiTable {
+  font-size: 14px;
+  font-size: 0.875rem;
+  line-height: 18px;
   width: 100%;
   border: none;
-  border-collapse: collapse;
-  font-size: 14px; }
+  border-collapse: collapse; }
 
 .kuiTableHeaderCell {
   text-align: left;
   max-width: 20px;
   /* 1 */
-  padding: 12px;
+  padding: 8px;
   color: #000; }
 
 .kuiTableHeaderCell__content {
@@ -942,7 +944,7 @@ table {
   /* 2 */
   text-overflow: ellipsis;
   /* 2 */
-  padding: 12px;
+  padding: 8px;
   /* 2 */ }
   .kuiTableRowCell__content > * {
     vertical-align: middle;

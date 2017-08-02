@@ -3,10 +3,11 @@
  * specifying a column width, e.g. the checkbox column.
  */
 .kuiTable {
+  @include kuiFontSizeS;
+
   width: 100%;
   border: none;
   border-collapse: collapse;
-  font-size: $kuiFontSizeS;
 }
 
 .kuiTableHeaderCell {
