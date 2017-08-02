@@ -1150,6 +1150,67 @@ table {
 .kuiTableRowCell--wrapText .kuiTableRowCell__content {
   white-space: normal; }
 
+.kuiTabs {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  border-bottom: 1px solid #D9D9D9; }
+
+.kuiTab {
+  font-size: 16px;
+  font-size: 1rem;
+  line-height: 24px;
+  position: relative;
+  cursor: pointer;
+  padding: 12px 16px;
+  color: #666;
+  background-color: #FFF;
+  transition: all 250ms cubic-bezier(0.694, 0.0482, 0.335, 1); }
+  .kuiTab:hover:not(.kuiTab-isSelected) {
+    color: #3F3F3F;
+    text-decoration: underline; }
+  .kuiTab:focus {
+    background-color: #e6f2f6;
+    text-decoration: underline; }
+  .kuiTab.kuiTab-isSelected {
+    cursor: default;
+    color: #00A69B; }
+    .kuiTab.kuiTab-isSelected:after {
+      position: absolute;
+      bottom: -1px;
+      left: 0;
+      content: ' ';
+      width: 100%;
+      height: 2px;
+      background-color: #00A69B;
+      -webkit-animation: kuiTab 150ms cubic-bezier(0.694, 0.0482, 0.335, 1);
+              animation: kuiTab 150ms cubic-bezier(0.694, 0.0482, 0.335, 1); }
+
+.kuiTab__content {
+  display: block;
+  transition: -webkit-transform 150ms cubic-bezier(0.34, 1.61, 0.7, 1);
+  transition: transform 150ms cubic-bezier(0.34, 1.61, 0.7, 1);
+  transition: transform 150ms cubic-bezier(0.34, 1.61, 0.7, 1), -webkit-transform 150ms cubic-bezier(0.34, 1.61, 0.7, 1);
+  -webkit-transform: translateY(0);
+          transform: translateY(0); }
+
+@-webkit-keyframes kuiTab {
+  0% {
+    -webkit-transform: scaleX(0);
+            transform: scaleX(0); }
+  100% {
+    -webkit-transform: scaleX(1);
+            transform: scaleX(1); } }
+
+@keyframes kuiTab {
+  0% {
+    -webkit-transform: scaleX(0);
+            transform: scaleX(0); }
+  100% {
+    -webkit-transform: scaleX(1);
+            transform: scaleX(1); } }
+
 .kuiTitle {
   font-size: 24px;
   font-size: 1.5rem;
