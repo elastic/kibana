@@ -58,7 +58,7 @@ export default props => (
       }]}
     >
       <GuideText>
-        The large size is usually used to identify the page you're on. Generally, there should
+        The large size is usually used to identify the page you&rsquo;re on. Generally, there should
         only be one of these used at a time.
       </GuideText>
 
@@ -83,7 +83,7 @@ export default props => (
       }]}
     >
       <GuideText>
-        This size is commonly used to identify sections within a page. It's also the default size.
+        This size is commonly used to identify sections within a page. It&rsquo;s also the default size.
       </GuideText>
 
       <GuideDemo>
@@ -121,7 +121,7 @@ export default props => (
       }]}
     >
       <GuideText>
-        You'll generally use this component for paragraphs.
+        You&rsquo;ll generally use this component for paragraphs.
       </GuideText>
 
       <GuideDemo>

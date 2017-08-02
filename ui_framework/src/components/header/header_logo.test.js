@@ -7,7 +7,7 @@ import { KuiHeaderLogo } from './header_logo';
 describe('KuiHeaderLogo', () => {
   test('is rendered', () => {
     const component = render(
-      <KuiHeaderLogo { ...requiredProps } />
+      <KuiHeaderLogo {...requiredProps} />
     );
 
     expect(component)

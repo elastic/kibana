@@ -6,6 +6,6 @@ import {
 
 export default () => (
   <KuiTitle>
-    <h2>Here's the title of a section</h2>
+    <h2>Here&rsquo;s the title of a section</h2>
   </KuiTitle>
 );

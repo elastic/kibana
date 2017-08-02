@@ -138,8 +138,8 @@ export default class extends Component {
           <svg tabIndex="0" className="kuiIcon kuiIcon--medium kuiHeaderAlert__dismiss">
             <use href="#cross" />
           </svg>
-          <p className="kuiHeaderAlert__title">Here's a notification title</p>
-          <p className="kuiHeaderAlert__text">I am the hat judge. Show me a hat and I will tell you if it's a good hat or bad hat.</p>
+          <p className="kuiHeaderAlert__title">Here&rsquo;s a notification title</p>
+          <p className="kuiHeaderAlert__text">I am the hat judge. Show me a hat and I will tell you if it&rsquo;s a good hat or bad hat.</p>
           <div className="kui--flexRow">
             <div className="kui--flexGrow1">
               <a href="" className="kuiHeaderAlert__action kuiLink">Download your thing here</a>
@@ -153,7 +153,7 @@ export default class extends Component {
           <svg tabIndex="0" className="kuiIcon kuiIcon--medium kuiHeaderAlert__dismiss">
             <use href="#cross" />
           </svg>
-          <p className="kuiHeaderAlert__title">Here's a really long notification title with nonsense beneath it.</p>
+          <p className="kuiHeaderAlert__title">Here&rsquo;s a really long notification title with nonsense beneath it.</p>
           <p className="kuiHeaderAlert__text">Walk the cow through a warm room, and then bring it to my plate.</p>
           <div className="kui--flexRow">
             <div className="kui--flexGrow1">
@@ -168,10 +168,10 @@ export default class extends Component {
           <svg tabIndex="0" className="kuiIcon kuiIcon--medium kuiHeaderAlert__dismiss">
             <use href="#cross" />
           </svg>
-          <p className="kuiHeaderAlert__title">Here's a notification title</p>
+          <p className="kuiHeaderAlert__title">Here&rsquo;s a notification title</p>
           <p className="kuiHeaderAlert__text">
             Only usable on grilled cheese sandwiches.
-            That is the only application of Kraft Singles as far as I'm concerned.
+            That is the only application of Kraft Singles as far as I&rsquo;m concerned.
           </p>
           <div className="kui--flexRow">
             <div className="kui--flexGrow1">

@@ -8,7 +8,7 @@ export default () => (
   <div>
     <KuiButton
       onClick={() => window.alert('Button clicked')}
-      icon = "arrowUp"
+      icon="arrowUp"
     >
       Default
     </KuiButton>
@@ -17,7 +17,7 @@ export default () => (
 
     <KuiButton
       fill
-      icon = "arrowDown"
+      icon="arrowDown"
       onClick={() => window.alert('Button clicked')}
     >
       Filled
@@ -26,7 +26,7 @@ export default () => (
     &nbsp;&nbsp;
 
     <KuiButton
-      icon = "arrowLeft"
+      icon="arrowLeft"
       size="small"
       onClick={() => window.alert('Button clicked')}
     >
@@ -36,7 +36,7 @@ export default () => (
     &nbsp;&nbsp;
 
     <KuiButton
-      icon = "arrowRight"
+      icon="arrowRight"
       size="small"
       fill
       onClick={() => window.alert('Button clicked')}
@@ -49,7 +49,7 @@ export default () => (
     <KuiButton
       iconReverse
       onClick={() => window.alert('Button clicked')}
-      icon = "arrowUp"
+      icon="arrowUp"
     >
       Default
     </KuiButton>
@@ -59,7 +59,7 @@ export default () => (
     <KuiButton
       iconReverse
       fill
-      icon = "arrowDown"
+      icon="arrowDown"
       onClick={() => window.alert('Button clicked')}
     >
       Filled
@@ -69,7 +69,7 @@ export default () => (
 
     <KuiButton
       iconReverse
-      icon = "arrowLeft"
+      icon="arrowLeft"
       size="small"
       onClick={() => window.alert('Button clicked')}
     >
@@ -80,7 +80,7 @@ export default () => (
 
     <KuiButton
       iconReverse
-      icon = "arrowRight"
+      icon="arrowRight"
       size="small"
       fill
       onClick={() => window.alert('Button clicked')}

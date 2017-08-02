@@ -7,7 +7,7 @@ import { KuiLoadingSpinner } from './loading_spinner';
 describe('KuiLoadingSpinner', () => {
   test('is rendered', () => {
     const component = render(
-      <KuiLoadingSpinner { ...requiredProps } />
+      <KuiLoadingSpinner {...requiredProps} />
     );
 
     expect(component)

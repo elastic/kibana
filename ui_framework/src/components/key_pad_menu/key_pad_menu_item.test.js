@@ -11,7 +11,7 @@ import {
 describe('KuiKeyPadMenuItem', () => {
   test('is rendered', () => {
     const component = render(
-      <KuiKeyPadMenuItem label="Label" { ...requiredProps }>
+      <KuiKeyPadMenuItem label="Label" {...requiredProps}>
         Icon
       </KuiKeyPadMenuItem>
     );
@@ -35,7 +35,7 @@ describe('KuiKeyPadMenuItem', () => {
 describe('KuiKeyPadMenuItemButton', () => {
   test('is rendered', () => {
     const component = render(
-      <KuiKeyPadMenuItemButton label="Label" { ...requiredProps }>
+      <KuiKeyPadMenuItemButton label="Label" {...requiredProps}>
         Icon
       </KuiKeyPadMenuItemButton>
     );

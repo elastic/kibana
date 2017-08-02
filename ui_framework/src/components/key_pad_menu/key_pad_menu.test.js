@@ -7,7 +7,7 @@ import { KuiKeyPadMenu } from './key_pad_menu';
 describe('KuiKeyPadMenu', () => {
   test('is rendered', () => {
     const component = render(
-      <KuiKeyPadMenu { ...requiredProps } />
+      <KuiKeyPadMenu {...requiredProps} />
     );
 
     expect(component)
