@@ -1,0 +1,57 @@
+.kuiTabs {
+  display: flex;
+  border-bottom: $kuiBorderThin;
+}
+
+.kuiTab {
+  @include kuiFontSize;
+
+  position: relative;
+  cursor: pointer;
+  padding: ($kuiSize - $kuiSizeXS) $kuiSize;
+  color: $kuiColorDarkShade;
+  background-color: $kuiColorEmptyShade;
+  transition: all $kuiAnimSpeedNormal $kuiAnimSlightResistance;
+
+  &:hover:not(.kuiTab-isSelected) {
+    color: $kuiTextColor;
+    text-decoration: underline;
+  }
+
+  &:focus {
+    background-color: $kuiFocusBackgroundColor;
+    text-decoration: underline;
+  }
+
+  &.kuiTab-isSelected {
+    cursor: default;
+    color: $kuiColorSecondary;
+
+    &:after {
+      position: absolute;
+      bottom: -1px;
+      left: 0;
+      content: ' ';
+      width: 100%;
+      height: $kuiBorderWidthThick;
+      background-color: $kuiColorSecondary;
+      animation: kuiTab $kuiAnimSpeedFast $kuiAnimSlightResistance;
+    }
+  }
+}
+
+  .kuiTab__content {
+    display: block;
+    transition: transform $kuiAnimSpeedFast $kuiAnimSlightBounce;
+    transform: translateY(0);
+  }
+
+
+@keyframes kuiTab {
+  0% {
+    transform: scaleX(0);
+  }
+  100% {
+    transform: scaleX(1);
+  }
+}

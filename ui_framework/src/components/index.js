@@ -77,6 +77,11 @@ export {
 } from './table';
 
 export {
+  KuiTab,
+  KuiTabs,
+} from './tabs';
+
+export {
   KuiTitle,
   KuiText,
 } from './typography';
