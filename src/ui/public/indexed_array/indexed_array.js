@@ -22,7 +22,7 @@ const OPT_NAMES = ['index', 'group', 'order', 'initialSet', 'immutable'];
  */
 
 export class IndexedArray {
-  static OPT_NAMES = OPT_NAMES
+  static OPT_NAMES = OPT_NAMES;
 
   constructor(config) {
     config = _.pick(config || {}, OPT_NAMES);
