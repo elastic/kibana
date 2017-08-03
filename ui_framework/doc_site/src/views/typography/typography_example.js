@@ -3,6 +3,7 @@ import React from 'react';
 import { renderToHtml } from '../../services';
 
 import {
+  GuideCode,
   GuideDemo,
   GuidePage,
   GuideSection,
@@ -30,6 +31,10 @@ import Text from './text';
 const textSource = require('!!raw!./text');
 const textHtml = renderToHtml(Text);
 
+import SmallText from './small_text';
+const smallTextSource = require('!!raw!./small_text');
+const smallTextHtml = renderToHtml(SmallText);
+
 export default props => (
   <GuidePage title={props.route.name}>
     <GuideSection
@@ -42,6 +47,11 @@ export default props => (
         code: typographyHtml,
       }]}
     >
+      <GuideText>
+        You can set the <GuideCode>verticalRhythm</GuideCode> prop to automatically create vertical
+        spacing between typographic components.
+      </GuideText>
+
       <GuideDemo>
         <Typography />
       </GuideDemo>
@@ -126,6 +136,25 @@ export default props => (
 
       <GuideDemo>
         <Text />
+      </GuideDemo>
+    </GuideSection>
+
+    <GuideSection
+      title="Small Text"
+      source={[{
+        type: GuideSectionTypes.JS,
+        code: smallTextSource,
+      }, {
+        type: GuideSectionTypes.HTML,
+        code: smallTextHtml,
+      }]}
+    >
+      <GuideText>
+        For less-important paragraphs.
+      </GuideText>
+
+      <GuideDemo>
+        <SmallText />
       </GuideDemo>
     </GuideSection>
   </GuidePage>

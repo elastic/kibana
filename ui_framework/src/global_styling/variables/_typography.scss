@@ -17,10 +17,12 @@
 }
 
 // Families
+
 $kuiFontFamily: "Roboto", Helvetica, Arial, sans-serif;
 $kuiCodeFontFamily: "Roboto Mono", monospace;
 
 // Font sizes
+
 $kuiFontSize:       $kuiSize;
 
 $kuiFontSizeXS:     12px;
@@ -32,7 +34,23 @@ $kuiFontSizeXXL:    48px;
 
 // Line height
 
-$kuiLineHeight: 1.5 * $kuiFontSize;
+$kuiLineHeight:     1.5 * $kuiFontSize;
+
+$kuiLineHeightXS:   $kuiLineHeight * 0.75;
+$kuiLineHeightS:    $kuiLineHeight * 0.75;
+$kuiLineHeightM:    $kuiLineHeight;
+$kuiLineHeightL:    $kuiLineHeight * 1.5;
+$kuiLineHeightXL:   $kuiLineHeight * 2;
+$kuiLineHeightXXL:  $kuiLineHeight * 3;
+
+// Vertical rhythm
+
+$kuiVerticalRhythmXS: $kuiLineHeightXS * 0.5;
+$kuiVerticalRhythmS: $kuiLineHeightS * 0.5;
+$kuiVerticalRhythmM: $kuiLineHeightM * 0.5;
+$kuiVerticalRhythmL: $kuiLineHeightL * 0.5;
+$kuiVerticalRhythmXL: $kuiLineHeightXL * 0.5;
+$kuiVerticalRhythmXXL: $kuiLineHeightXXL * 0.5;
 
 // Font weights
 
@@ -60,30 +78,30 @@ $kuiFontWeightMedium:   500;
 
 @mixin kuiFontSizeXS {
   @include fontSize($kuiFontSizeXS);
-  line-height: $kuiLineHeight * 0.75;
+  line-height: $kuiLineHeightXS;
 }
 
 @mixin kuiFontSizeS {
   @include fontSize($kuiFontSizeS);
-  line-height: $kuiLineHeight * 0.75;
+  line-height: $kuiLineHeightS;
 }
 
 @mixin kuiFontSizeM {
   @include fontSize($kuiFontSizeM);
-  line-height: $kuiLineHeight;
+  line-height: $kuiLineHeightM;
 }
 
 @mixin kuiFontSizeL {
   @include fontSize($kuiFontSizeL);
-  line-height: $kuiLineHeight * 1.5;
+  line-height: $kuiLineHeightL;
 }
 
 @mixin kuiFontSizeXL {
   @include fontSize($kuiFontSizeXL);
-  line-height: $kuiLineHeight * 2;
+  line-height: $kuiLineHeightXL;
 }
 
 @mixin kuiFontSizeXXL {
   @include fontSize($kuiFontSizeXXL);
-  line-height: $kuiLineHeight * 3;
+  line-height: $kuiLineHeightXXL;
 }
