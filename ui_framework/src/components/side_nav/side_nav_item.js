@@ -8,7 +8,7 @@ export const KuiSideNavItem = ({ children, isSelected, className, ...rest }) => 
     'kuiSideNavItem',
     className,
     {
-      'isSelected' : isSelected,
+      'kuiSideNavItem-isSelected' : isSelected,
     }
   );
 
@@ -23,4 +23,5 @@ export const KuiSideNavItem = ({ children, isSelected, className, ...rest }) => 
 };
 
 KuiSideNavItem.propTypes = {
+  isSelected: PropTypes.string,
 };

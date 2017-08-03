@@ -1,8 +1,8 @@
 .kuiSideNavItem {
+  @include kuiFontSizeS;
   display: block;
   width: 100%;
   text-align: left;
-  @include kuiFontSizeS;
   padding: $kuiSizeXS $kuiSizeS;
   color: $kuiColorDarkShade;
   white-space: nowrap;
@@ -11,12 +11,12 @@
   border: $kuiBorderThin;
   border-color: transparent;
 
-  &.isSelected {
+  &.kuiSideNavItem-isSelected {
+    @include kuiBottomShadowSmall;
     color: $kuiColorSecondary;
     border-left: $kuiBorderThick;
     border-left-color: $kuiColorSecondary;
     background-color: $kuiColorEmptyShade;
-    @include kuiBottomShadowSmall;
   }
 
   &:hover {
@@ -27,7 +27,7 @@
     background-color: $kuiFocusBackgroundColor;
   }
 
-  &:focus:not(.isSelected) {
+  &:focus:not(.kuiSideNavItem-isSelected) {
     border: solid 1px darken($kuiFocusBackgroundColor, 10%);
   }
 }

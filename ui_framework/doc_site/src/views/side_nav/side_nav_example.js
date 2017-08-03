@@ -27,7 +27,8 @@ export default props => (
       }]}
     >
       <GuideText>
-        Description needed: how to use the SideNav component.
+        The sidenav is a responsive menu system that usually sits on the left side of a page layout.
+        It will exapand to the width of its container.
       </GuideText>
 
       <GuideDemo>

@@ -1415,18 +1415,25 @@ table {
 
 .kuiSideNav__mobileToggle {
   display: none;
-  -webkit-box-orient: horizontal;
-  -webkit-box-direction: normal;
-  -webkit-flex-direction: row;
-      -ms-flex-direction: row;
-          flex-direction: row;
   border-bottom: 1px solid #D9D9D9;
   padding: 16px 24px;
   width: 100%;
-  text-align: left; }
+  text-align: left;
+  /**
+   * 1. This toggle also works with KUI link, but we need the outline
+   *    that comes with the focus state.
+   */ }
+  .kuiSideNav__mobileToggle:focus {
+    outline: none; }
 
 .kuiSideNav__mobileIcon {
   fill: #0079a5; }
+
+.kuiSideNav__mobileWrap {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex; }
 
 .kuiSideNav__mobileTitle {
   -webkit-box-flex: 1;
@@ -1440,7 +1447,7 @@ table {
    * 1. Animation doesn't work against height. Need max-height instead.
    *    We set a value larger than what is needed to fake "auto".
    */
-  .kuiSideNav.isOpenMobile .kuiSideNav__content {
+  .kuiSideNav.kuiSideNav-isOpenMobile .kuiSideNav__content {
     visibility: visible;
     opacity: 1;
     margin: 24px;
@@ -1448,10 +1455,7 @@ table {
     /* 1 */
     transition: all 250ms cubic-bezier(0.694, 0.0482, 0.335, 1); }
   .kuiSideNav__mobileToggle {
-    display: -webkit-box;
-    display: -webkit-flex;
-    display: -ms-flexbox;
-    display: flex; }
+    display: block; }
   .kuiSideNav__content {
     visibility: hidden;
     opacity: 0;
@@ -1459,12 +1463,12 @@ table {
     margin: 0 24px; } }
 
 .kuiSideNavItem {
-  display: block;
-  width: 100%;
-  text-align: left;
   font-size: 14px;
   font-size: 0.875rem;
   line-height: 18px;
+  display: block;
+  width: 100%;
+  text-align: left;
   padding: 4px 8px;
   color: #666;
   white-space: nowrap;
@@ -1472,17 +1476,17 @@ table {
   text-overflow: ellipsis;
   border: 1px solid #D9D9D9;
   border-color: transparent; }
-  .kuiSideNavItem.isSelected {
+  .kuiSideNavItem.kuiSideNavItem-isSelected {
+    box-shadow: 0 2px 2px -1px rgba(0, 0, 0, 0.1);
     color: #00A69B;
     border-left: 2px solid #D9D9D9;
     border-left-color: #00A69B;
-    background-color: #FFF;
-    box-shadow: 0 2px 2px -1px rgba(0, 0, 0, 0.1); }
+    background-color: #FFF; }
   .kuiSideNavItem:hover {
     text-decoration: underline; }
   .kuiSideNavItem:focus {
     background-color: #e6f2f6; }
-  .kuiSideNavItem:focus:not(.isSelected) {
+  .kuiSideNavItem:focus:not(.kuiSideNavItem-isSelected) {
     border: solid 1px #c1dfe9; }
 
 .kuiSideNavTitle {
@@ -1491,9 +1495,14 @@ table {
   line-height: 24px;
   font-weight: 500;
   margin-bottom: 8px;
-  margin-top: 16px; }
+  margin-top: 16px;
+  /**
+   * 1. Only want the first title to have margin. Since buttons exist in nav
+   *    we need to use first of type.
+   */ }
   .kuiSideNavTitle:first-of-type {
-    margin-top: 0; }
+    margin-top: 0;
+    /* 1 */ }
 
 /**
  * 1. Prevent cells from expanding based on content size. This substitutes for table-layout: fixed.

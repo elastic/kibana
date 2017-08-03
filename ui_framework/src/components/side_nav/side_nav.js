@@ -9,7 +9,7 @@ export const KuiSideNav = ({ children, isOpenMobile, className, ...rest }) => {
     'kuiSideNav',
     className,
     {
-      'isOpenMobile': isOpenMobile,
+      'kuiSideNav-isOpenMobile': isOpenMobile,
     },
   );
 
@@ -20,8 +20,16 @@ export const KuiSideNav = ({ children, isOpenMobile, className, ...rest }) => {
     >
       {/* Hidden from view, except in mobile */}
       <button className="kuiSideNav__mobileToggle kuiLink">
-        <span className="kuiSideNav__mobileTitle">Navigate within management</span>
-        <span><KuiIcon className="kuiSideNav__mobileIcon" type="apps" size="medium"/></span>
+        <span className="kuiSideNav__mobileWrap">
+          <span className="kuiSideNav__mobileTitle">Navigate within management</span>
+          <span>
+            <KuiIcon
+              className="kuiSideNav__mobileIcon"
+              type="apps"
+              size="medium"
+            />
+          </span>
+        </span>
       </button>
 
       {/* Hidden from view in mobile, but toggled from the button above */}
