@@ -18,9 +18,17 @@
   }
 }
 
+@function shadeOrTint($color, $shade, $tint) {
+  @if (lightness($kuiTextColor) < 50) {
+    @return shade($color, $shade);
+  } @else {
+    @return tint($color, $tint);
+  }
+}
+
 // Core
 
-$kuiColorPrimary: #0079a5;
+$kuiColorPrimary: #0079a5 !default;
 $kuiColorSecondary: #00A69B;
 $kuiColorAccent: #DD0A73;
 $kuiColorHighlight: #FFFF00;
@@ -30,13 +38,13 @@ $kuiColorDanger: #A30000;
 $kuiColorWarning: #E5830E;
 
 // Grays
-$kuiColorEmptyShade: #FFF;
-$kuiColorLightestShade: #F5F5F5;
-$kuiColorLightShade: #D9D9D9;
-$kuiColorMediumShade: #999;
-$kuiColorDarkShade: #666;
-$kuiColorDarkestShade: #3F3F3F;
-$kuiColorFullShade: #000;
+$kuiColorEmptyShade: #FFF !default;
+$kuiColorLightestShade: #F5F5F5 !default;
+$kuiColorLightShade: #D9D9D9 !default;
+$kuiColorMediumShade: #999 !default;
+$kuiColorDarkShade: #666 !default;
+$kuiColorDarkestShade: #3F3F3F !default;
+$kuiColorFullShade: #000 !default;
 
 
 // Dark theme overides

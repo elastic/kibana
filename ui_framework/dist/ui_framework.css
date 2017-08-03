@@ -352,22 +352,19 @@ table {
   text-align: center;
   font-family: "Roboto", Helvetica, Arial, sans-serif;
   transition: all 250ms cubic-bezier(0.34, 1.61, 0.7, 1);
-  whitespace: nowrap; }
+  whitespace: nowrap;
+  /**
+   * 1. Apply margin to all but last item in the flex.
+   */ }
   .kuiButton.kuiButton--small {
     height: 32px; }
   .kuiButton .kuiButton__icon {
-    vertical-align: -2px;
     fill: #0079a5; }
   .kuiButton .kuiButton__content {
     display: -webkit-box;
     display: -webkit-flex;
     display: -ms-flexbox;
     display: flex;
-    -webkit-box-orient: horizontal;
-    -webkit-box-direction: normal;
-    -webkit-flex-direction: row;
-        -ms-flex-direction: row;
-            flex-direction: row;
     -webkit-box-pack: center;
     -webkit-justify-content: center;
         -ms-flex-pack: center;
@@ -377,7 +374,8 @@ table {
         -ms-flex-align: center;
             align-items: center; }
     .kuiButton .kuiButton__content > * + * {
-      margin-left: 8px; }
+      margin-left: 8px;
+      /* 1 */ }
   .kuiButton:hover, .kuiButton:focus {
     text-decoration: underline;
     background-color: rgba(0, 121, 165, 0.1); }
@@ -420,23 +418,6 @@ table {
     .kuiButton--secondary.kuiButton--fill .kuiButton__icon {
       fill: #FFF; }
 
-.kuiButton--danger {
-  color: #A30000;
-  border-color: #A30000; }
-  .kuiButton--danger .kuiButton__icon {
-    fill: #A30000; }
-  .kuiButton--danger:hover, .kuiButton--danger:focus {
-    background-color: rgba(163, 0, 0, 0.1); }
-  .kuiButton--danger.kuiButton--fill {
-    background-color: #A30000;
-    color: #FFF;
-    border-color: #A30000; }
-    .kuiButton--danger.kuiButton--fill:hover, .kuiButton--danger.kuiButton--fill:focus {
-      background-color: #8a0000;
-      border-color: #8a0000; }
-    .kuiButton--danger.kuiButton--fill .kuiButton__icon {
-      fill: #FFF; }
-
 .kuiButton--warning {
   color: #E5830E;
   border-color: #E5830E; }
@@ -452,6 +433,23 @@ table {
       background-color: #cd750d;
       border-color: #cd750d; }
     .kuiButton--warning.kuiButton--fill .kuiButton__icon {
+      fill: #FFF; }
+
+.kuiButton--danger {
+  color: #A30000;
+  border-color: #A30000; }
+  .kuiButton--danger .kuiButton__icon {
+    fill: #A30000; }
+  .kuiButton--danger:hover, .kuiButton--danger:focus {
+    background-color: rgba(163, 0, 0, 0.1); }
+  .kuiButton--danger.kuiButton--fill {
+    background-color: #A30000;
+    color: #FFF;
+    border-color: #A30000; }
+    .kuiButton--danger.kuiButton--fill:hover, .kuiButton--danger.kuiButton--fill:focus {
+      background-color: #8a0000;
+      border-color: #8a0000; }
+    .kuiButton--danger.kuiButton--fill .kuiButton__icon {
       fill: #FFF; }
 
 .kuiButton--disabled {
@@ -481,6 +479,70 @@ table {
   50% {
     -webkit-transform: translateY(2px);
             transform: translateY(2px); } }
+
+.kuiCallOut {
+  padding: 16px 24px;
+  border-left: 4px solid #0079a5;
+  background-color: #e6f2f6;
+  /* 1 */ }
+
+.kuiCallOut--success {
+  border-color: #00A69B;
+  background-color: #e6f6f5; }
+  .kuiCallOut--success .kuiCallOutHeader__icon {
+    fill: #00746d; }
+  .kuiCallOut--success .kuiCallOutHeader__title {
+    color: #00746d; }
+
+.kuiCallOut--warning {
+  border-color: #E5830E;
+  background-color: #fcf3e7; }
+  .kuiCallOut--warning .kuiCallOutHeader__icon {
+    fill: #a05c0a; }
+  .kuiCallOut--warning .kuiCallOutHeader__title {
+    color: #a05c0a; }
+
+.kuiCallOut--danger {
+  border-color: #A30000;
+  background-color: #f6e6e6; }
+  .kuiCallOut--danger .kuiCallOutHeader__icon {
+    fill: #720000; }
+  .kuiCallOut--danger .kuiCallOutHeader__title {
+    color: #720000; }
+
+/**
+ * 1. Align icon with first line of title text if it wraps.
+ * 2. Apply margin to all but last item in the flex.
+ */
+.kuiCallOutHeader {
+  font-size: 16px;
+  font-size: 1rem;
+  line-height: 24px;
+  margin-bottom: 9px;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-align: baseline;
+  -webkit-align-items: baseline;
+      -ms-flex-align: baseline;
+          align-items: baseline;
+  /* 1 */ }
+  .kuiCallOutHeader > * + * {
+    margin-left: 8px;
+    /* 2 */ }
+
+/**
+   * 1. Vertically center icon with first line of title.
+   */
+.kuiCallOutHeader__icon {
+  fill: #0079a5;
+  -webkit-transform: translateY(2px);
+          transform: translateY(2px);
+  /* 1 */ }
+
+.kuiCallOutHeader__title {
+  color: #0079a5; }
 
 .kuiHeader {
   display: -webkit-box;
@@ -675,11 +737,13 @@ table {
 
 .kuiIcon {
   display: inline-block;
-  fill: #3F3F3F;
   vertical-align: middle; }
   .kuiIcon:focus {
     opacity: 1;
     background: #e6f2f6; }
+
+.kuiIcon--basic {
+  fill: #3F3F3F; }
 
 .kuiIcon--medium {
   width: 16px;
@@ -1490,3 +1554,26 @@ table {
   line-height: 24px;
   color: #3F3F3F;
   font-weight: 400; }
+
+.kuiText--small {
+  font-size: 14px;
+  font-size: 0.875rem;
+  line-height: 18px; }
+
+.kuiVerticalRhythm {
+  margin-bottom: 12px; }
+
+.kuiVerticalRhythm--xSmall {
+  margin-bottom: 9px; }
+
+.kuiVerticalRhythm--small {
+  margin-bottom: 9px; }
+
+.kuiVerticalRhythm--large {
+  margin-bottom: 18px; }
+
+.kuiVerticalRhythm--xLarge {
+  margin-bottom: 24px; }
+
+.kuiVerticalRhythm--xxLarge {
+  margin-bottom: 36px; }

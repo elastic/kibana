@@ -4,15 +4,30 @@ import {
 } from 'react';
 import classNames from 'classnames';
 
-const sizeToClassNameMap = {
+const titleSizeToClassNameMap = {
   small: 'kuiTitle--small',
   large: 'kuiTitle--large',
 };
 
-export const SIZES = Object.keys(sizeToClassNameMap);
+const titleSizeToVerticalRhythmClassNameMap = {
+  small: 'kuiVerticalRhythm',
+  large: 'kuiVerticalRhythm--xLarge',
+};
 
-export const KuiTitle = ({ size, children, className, ...rest }) => {
-  const classes = classNames('kuiTitle', sizeToClassNameMap[size], className);
+export const TITLE_SIZES = Object.keys(titleSizeToClassNameMap);
+
+export const KuiTitle = ({ size, verticalRhythm, children, className, ...rest }) => {
+  const verticalRhythmClass =
+    verticalRhythm
+    ? titleSizeToVerticalRhythmClassNameMap[size] || 'kuiVerticalRhythm--large'
+    : undefined;
+
+  const classes = classNames(
+    'kuiTitle',
+    titleSizeToClassNameMap[size],
+    verticalRhythmClass,
+    className
+  );
 
   const props = {
     className: classes,
@@ -22,13 +37,34 @@ export const KuiTitle = ({ size, children, className, ...rest }) => {
   return cloneElement(children, props);
 };
 
-KuiTitle.PropTypes = {
-  children: PropTypes.node.isRequired,
-  size: PropTypes.oneOf(SIZES),
+KuiTitle.propTypes = {
+  children: PropTypes.element.isRequired,
+  size: PropTypes.oneOf(TITLE_SIZES),
+  verticalRhythm: PropTypes.bool,
 };
 
-export const KuiText = ({ children, className, ...rest }) => {
-  const classes = classNames('kuiText', className);
+const textSizeToClassNameMap = {
+  small: 'kuiText--small',
+};
+
+const textSizeToVerticalRhythmClassNameMap = {
+  small: 'kuiVerticalRhythm--small',
+};
+
+export const TEXT_SIZES = Object.keys(textSizeToClassNameMap);
+
+export const KuiText = ({ size, verticalRhythm, children, className, ...rest }) => {
+  const verticalRhythmClass =
+    verticalRhythm
+    ? textSizeToVerticalRhythmClassNameMap[size] || 'kuiVerticalRhythm'
+    : undefined;
+
+  const classes = classNames(
+    'kuiText',
+    textSizeToClassNameMap[size],
+    verticalRhythmClass,
+    className
+  );
 
   const props = {
     className: classes,
@@ -38,6 +74,8 @@ export const KuiText = ({ children, className, ...rest }) => {
   return cloneElement(children, props);
 };
 
-KuiText.PropTypes = {
-  children: PropTypes.node.isRequired,
+KuiText.propTypes = {
+  children: PropTypes.element.isRequired,
+  size: PropTypes.oneOf(TEXT_SIZES),
+  verticalRhythm: PropTypes.bool,
 };

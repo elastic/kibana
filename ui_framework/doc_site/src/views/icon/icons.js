@@ -4,40 +4,30 @@ import {
   KuiIcon,
 } from '../../../../components';
 
+const iconTypes = [
+  'apps',
+  'search',
+  'user',
+  'cross',
+  'help',
+  'arrowUp',
+  'arrowDown',
+  'arrowLeft',
+  'arrowRight',
+];
+
 export default () => (
   <div>
-    <KuiIcon type="apps" size="medium" />
-
-    &nbsp;
-
-    <KuiIcon type="search" size="medium" />
-
-    &nbsp;
-
-    <KuiIcon type="user" size="medium" />
-
-    &nbsp;
-
-    <KuiIcon type="cross" size="medium" />
-
-    &nbsp;
-
-    <KuiIcon type="help" size="medium" />
-
-    &nbsp;
-
-    <KuiIcon type="arrowUp" size="medium" />
-
-    &nbsp;
-
-    <KuiIcon type="arrowDown" size="medium" />
-
-    &nbsp;
-
-    <KuiIcon type="arrowLeft" size="medium" />
-
-    &nbsp;
-
-    <KuiIcon type="arrowRight" size="medium" />
+    {
+      iconTypes.map(iconType => (
+        <span key={iconType}>
+          <KuiIcon
+            type={iconType}
+            size="medium"
+          />
+          &nbsp;
+        </span>
+      ))
+    }
   </div>
 );

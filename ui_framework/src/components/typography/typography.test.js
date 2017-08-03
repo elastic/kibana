@@ -5,7 +5,8 @@ import { requiredProps } from '../../test/required_props';
 import {
   KuiTitle,
   KuiText,
-  SIZES,
+  TITLE_SIZES,
+  TEXT_SIZES,
 } from './typography';
 
 describe('KuiTitle', () => {
@@ -21,7 +22,7 @@ describe('KuiTitle', () => {
   });
 
   describe('renders size', () => {
-    SIZES.forEach(size => {
+    TITLE_SIZES.forEach(size => {
       test(size, () => {
         const component = render(
           <KuiTitle size={size}>
@@ -40,11 +41,26 @@ describe('KuiText', () => {
   test('is rendered', () => {
     const component = render(
       <KuiText { ...requiredProps }>
-        <h1>Hello</h1>
+        <p>Hello</p>
       </KuiText>
     );
 
     expect(component)
       .toMatchSnapshot();
+  });
+
+  describe('renders size', () => {
+    TEXT_SIZES.forEach(size => {
+      test(size, () => {
+        const component = render(
+          <KuiText size={size}>
+            <p>Hello</p>
+          </KuiText>
+        );
+
+        expect(component)
+          .toMatchSnapshot();
+      });
+    });
   });
 });
