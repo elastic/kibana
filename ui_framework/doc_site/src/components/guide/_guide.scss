@@ -4,8 +4,6 @@ html {
 
 .guideBody {
   height: 100%;
-  background-color: #000000;
-  min-width: $guideMinWidth;
 }
 
 /**
@@ -22,7 +20,6 @@ html {
   flex-direction: column;
   flex: 1 1 auto;
   padding-top: $guideNavHeight;
-  background-color: $guideBaseBackgroundColor;
   transition:
     padding-top $guideChromeTransition,
     padding-right $guideCodeViewerTransition,

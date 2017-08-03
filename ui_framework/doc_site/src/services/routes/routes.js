@@ -36,6 +36,9 @@ import LoadingExample
 import PopoverExample
   from '../../views/popover/popover_example';
 
+import SideNavExample
+  from '../../views/side_nav/side_nav_example';
+
 import TableExample
   from '../../views/table/table_example';
 
@@ -89,6 +92,10 @@ const components = [{
 }, {
   name: 'Popover',
   component: PopoverExample,
+  hasReact: true,
+}, {
+  name: 'SideNav',
+  component: SideNavExample,
   hasReact: true,
 }, {
   name: 'Table',

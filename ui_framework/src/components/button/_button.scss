@@ -8,12 +8,13 @@
   border: solid 1px $kuiColorPrimary;
   border-radius: $kuiBorderRadius;
   color: $kuiColorPrimary;
-  padding: 0 $kuiSizeS;
+  padding: 0 ($kuiSize - $kuiSizeXS);
   min-width: $kuiSize * 7;
   text-align: center;
   font-family: $kuiFontFamily;
   transition: all $kuiAnimSpeedNormal $kuiAnimSlightBounce;
   whitespace: nowrap;
+  @include kuiBottomShadowMedium;
 
   &.kuiButton--small {
     height: $kuiSizeXL;

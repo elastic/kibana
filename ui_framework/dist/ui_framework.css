@@ -62,6 +62,7 @@ html {
   font-size: 16px;
   color: #3F3F3F;
   height: 100%;
+  background-color: #F5F5F5;
   -webkit-font-smoothing: antialiased; }
 
 body {
@@ -347,12 +348,13 @@ table {
   border: solid 1px #0079a5;
   border-radius: 4px;
   color: #0079a5;
-  padding: 0 8px;
+  padding: 0 12px;
   min-width: 112px;
   text-align: center;
   font-family: "Roboto", Helvetica, Arial, sans-serif;
   transition: all 250ms cubic-bezier(0.34, 1.61, 0.7, 1);
   whitespace: nowrap;
+  box-shadow: 0 4px 4px -2px rgba(0, 0, 0, 0.2);
   /**
    * 1. Apply margin to all but last item in the flex.
    */ }
@@ -481,7 +483,7 @@ table {
             transform: translateY(2px); } }
 
 .kuiCallOut {
-  padding: 16px 24px;
+  padding: 12px 24px;
   border-left: 4px solid #0079a5;
   background-color: #e6f2f6;
   /* 1 */ }
@@ -550,7 +552,8 @@ table {
   display: -ms-flexbox;
   display: flex;
   background: #FFF;
-  border-bottom: 1px solid #D9D9D9; }
+  border-bottom: 1px solid #D9D9D9;
+  box-shadow: 0 2px 2px -1px rgba(0, 0, 0, 0.1); }
 
 .kuiHeader__notification {
   display: inline-block;
@@ -623,7 +626,7 @@ table {
 .kuiHeaderLogo {
   position: relative;
   height: 64px;
-  padding: 16px 32px;
+  padding: 16px 24px;
   display: inline-block;
   vertical-align: middle; }
   .kuiHeaderLogo:hover {
@@ -1201,7 +1204,11 @@ table {
             transform: translateY(0); } }
 
 .kuiPage {
-  padding: 32px; }
+  padding: 24px; }
+
+@media only screen and (max-width: 768px) {
+  .kuiPage {
+    padding: 24px 0; } }
 
 .kuiPageBody {
   display: -webkit-box;
@@ -1232,7 +1239,8 @@ table {
   background: #FFF;
   border: 1px solid #D9D9D9;
   border-radius: 4px;
-  width: 100%; }
+  width: 100%;
+  box-shadow: 0 2px 2px -1px rgba(0, 0, 0, 0.1); }
 
 .kuiPageContent--verticalCenter {
   -webkit-align-self: center;
@@ -1244,8 +1252,13 @@ table {
   width: auto;
   margin: auto; }
 
+@media only screen and (max-width: 768px) {
+  .kuiPageContent {
+    border-radius: 0;
+    border: none; } }
+
 .kuiPageContentHeader {
-  margin-bottom: 32px;
+  margin-bottom: 24px;
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -1284,15 +1297,14 @@ table {
 
 .kuiPageSidebar {
   width: 192px;
-  margin-right: 32px; }
+  margin-right: 24px; }
 
 @media only screen and (max-width: 768px) {
   .kuiPageSidebar {
-    width: 100%;
-    margin-bottom: 32px; } }
+    width: 100%; } }
 
 .kuiPageHeader {
-  margin-bottom: 32px;
+  margin-bottom: 24px;
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -1317,7 +1329,9 @@ table {
     -webkit-box-direction: normal;
     -webkit-flex-direction: column;
         -ms-flex-direction: column;
-            flex-direction: column; } }
+            flex-direction: column;
+    padding: 0 24px;
+    margin-bottom: 0; } }
 
 .kuiPageHeaderSection + .kuiPageHeaderSection {
   margin-left: 32px; }
@@ -1398,6 +1412,97 @@ table {
   .kuiPopover--anchorRight .kuiPopover__body:before, .kuiPopover--anchorRight .kuiPopover__body:after {
     right: 16px;
     left: auto; }
+
+.kuiSideNav__mobileToggle {
+  display: none;
+  border-bottom: 1px solid #D9D9D9;
+  padding: 16px 24px;
+  width: 100%;
+  text-align: left;
+  /**
+   * 1. This toggle also works with KUI link, but we need the outline
+   *    that comes with the focus state.
+   */ }
+  .kuiSideNav__mobileToggle:focus {
+    outline: none; }
+
+.kuiSideNav__mobileIcon {
+  fill: #0079a5; }
+
+.kuiSideNav__mobileWrap {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex; }
+
+.kuiSideNav__mobileTitle {
+  -webkit-box-flex: 1;
+  -webkit-flex-grow: 1;
+      -ms-flex-positive: 1;
+          flex-grow: 1;
+  color: #0079a5; }
+
+@media only screen and (max-width: 768px) {
+  /**
+   * 1. Animation doesn't work against height. Need max-height instead.
+   *    We set a value larger than what is needed to fake "auto".
+   */
+  .kuiSideNav.kuiSideNav-isOpenMobile .kuiSideNav__content {
+    visibility: visible;
+    opacity: 1;
+    margin: 24px;
+    max-height: 5000px;
+    /* 1 */
+    transition: all 250ms cubic-bezier(0.694, 0.0482, 0.335, 1); }
+  .kuiSideNav__mobileToggle {
+    display: block; }
+  .kuiSideNav__content {
+    visibility: hidden;
+    opacity: 0;
+    max-height: 0;
+    margin: 0 24px; } }
+
+.kuiSideNavItem {
+  font-size: 14px;
+  font-size: 0.875rem;
+  line-height: 18px;
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 4px 8px;
+  color: #666;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  border: 1px solid #D9D9D9;
+  border-color: transparent; }
+  .kuiSideNavItem.kuiSideNavItem-isSelected {
+    box-shadow: 0 2px 2px -1px rgba(0, 0, 0, 0.1);
+    color: #00A69B;
+    border-left: 2px solid #D9D9D9;
+    border-left-color: #00A69B;
+    background-color: #FFF; }
+  .kuiSideNavItem:hover {
+    text-decoration: underline; }
+  .kuiSideNavItem:focus {
+    background-color: #e6f2f6; }
+  .kuiSideNavItem:focus:not(.kuiSideNavItem-isSelected) {
+    border: solid 1px #c1dfe9; }
+
+.kuiSideNavTitle {
+  font-size: 16px;
+  font-size: 1rem;
+  line-height: 24px;
+  font-weight: 500;
+  margin-bottom: 8px;
+  margin-top: 16px;
+  /**
+   * 1. Only want the first title to have margin. Since buttons exist in nav
+   *    we need to use first of type.
+   */ }
+  .kuiSideNavTitle:first-of-type {
+    margin-top: 0;
+    /* 1 */ }
 
 /**
  * 1. Prevent cells from expanding based on content size. This substitutes for table-layout: fixed.

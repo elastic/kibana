@@ -1,12 +1,11 @@
 .kuiPageSidebar {
   width: $kuiSize * 12;
-  margin-right: $kuiSizeXL;
+  margin-right: $kuiSizeL;
 }
 
 @include screenXSmall {
   .kuiPageSidebar {
     width: 100%;
-    margin-bottom: $kuiSizeXL;
   }
 }
 
