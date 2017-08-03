@@ -9,7 +9,7 @@ const records: LogRecord[] = [
     timestamp: new Date(2012, 1, 1),
     message: 'message-1',
     context: 'context-1',
-    error: new Error('Error'),
+    error: new Error('Some error message'),
     level: LogLevel.Fatal
   },
   {
@@ -76,12 +76,7 @@ test('`format()` correctly formats record with full pattern.', () => {
   const layout = new PatternLayout();
 
   for (const record of records) {
-    const { timestamp, level, context, message } = record;
-    const formattedLevel = level.id.toUpperCase().padEnd(5);
-
-    expect(layout.format(record)).toBe(
-      `[${timestamp.toISOString()}][${formattedLevel}][${context}] ${message}`
-    );
+    expect(layout.format(record)).toMatchSnapshot();
   }
 });
 

@@ -1,8 +1,10 @@
+import { assertNever } from '../../lib/utils';
 import { Schema } from '../../types';
+import { JsonLayout, JsonLayoutConfigType } from './JsonLayout';
 import { PatternLayout, PatternLayoutConfigType } from './PatternLayout';
 import { LogRecord } from '../LogRecord';
 
-type LayoutConfigType = PatternLayoutConfigType;
+type LayoutConfigType = PatternLayoutConfigType | JsonLayoutConfigType;
 
 /**
  * Entity that can format `LogRecord` instance into a string.
@@ -15,7 +17,12 @@ export interface Layout {
 /** @internal */
 export class Layouts {
   static createConfigSchema(schema: Schema) {
-    return PatternLayout.createConfigSchema(schema);
+    const { oneOf } = schema;
+
+    return oneOf([
+      JsonLayout.createConfigSchema(schema),
+      PatternLayout.createConfigSchema(schema)
+    ]);
   }
 
   /**
@@ -24,6 +31,13 @@ export class Layouts {
    * @returns Fully constructed `Layout` instance.
    */
   static create(config: LayoutConfigType): Layout {
-    return new PatternLayout(config.pattern, config.highlight);
+    switch (config.kind) {
+      case 'json':
+        return new JsonLayout();
+      case 'pattern':
+        return new PatternLayout(config.pattern, config.highlight);
+      default:
+        return assertNever(config);
+    }
   }
 }
