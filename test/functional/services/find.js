@@ -73,6 +73,13 @@ export function FindProvider({ getService }) {
       });
     }
 
+    async byLinkText(selector, timeout = defaultFindTimeout) {
+      log.debug('Find.byLinkText: ' + selector);
+      return await this.ensureElementWithTimeout(timeout, async remote => {
+        return await remote.findByLinkText(selector);
+      });
+    }
+
     async byPartialLinkText(partialLinkText, timeout = defaultFindTimeout) {
       log.debug(`find.byPartialLinkText(${partialLinkText})`);
       return await this.ensureElementWithTimeout(timeout, async remote => {

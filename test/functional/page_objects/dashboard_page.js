@@ -56,7 +56,7 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
     }
 
     async getQueryInputElement() {
-      return retry.try(() => testSubjects.find('queryInput'));
+      return await testSubjects.find('queryInput');
     }
 
     async getQuery() {
@@ -94,27 +94,27 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
       await testSubjects.setValue('clonedDashboardTitle', title);
     }
 
-    clickEdit() {
+    async clickEdit() {
       log.debug('Clicking edit');
-      return testSubjects.click('dashboardEditMode');
+      return await testSubjects.click('dashboardEditMode');
     }
 
-    getIsInViewMode() {
+    async getIsInViewMode() {
       log.debug('getIsInViewMode');
-      return testSubjects.exists('dashboardEditMode');
+      return await testSubjects.exists('dashboardEditMode');
     }
 
-    clickCancelOutOfEditMode() {
+    async clickCancelOutOfEditMode() {
       log.debug('clickCancelOutOfEditMode');
-      return testSubjects.click('dashboardViewOnlyMode');
+      return await testSubjects.click('dashboardViewOnlyMode');
     }
 
-    clickNewDashboard() {
-      return testSubjects.click('newDashboardLink');
+    async clickNewDashboard() {
+      return await testSubjects.click('newDashboardLink');
     }
 
     async clickCreateDashboardPrompt() {
-      await retry.try(() => testSubjects.click('createDashboardPromptButton'));
+      await testSubjects.click('createDashboardPromptButton');
     }
 
     async getCreateDashboardPromptExists() {
@@ -129,28 +129,28 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
       await testSubjects.click('deleteSelectedDashboards');
     }
 
-    clickAddVisualization() {
-      return testSubjects.click('dashboardAddPanelButton');
+    async clickAddVisualization() {
+      await testSubjects.click('dashboardAddPanelButton');
     }
 
-    clickAddNewVisualizationLink() {
-      return testSubjects.click('addNewSavedObjectLink');
+    async clickAddNewVisualizationLink() {
+      await testSubjects.click('addNewSavedObjectLink');
     }
 
-    clickOptions() {
-      return testSubjects.click('dashboardOptionsButton');
+    async clickOptions() {
+      await testSubjects.click('dashboardOptionsButton');
     }
 
-    isOptionsOpen() {
+    async isOptionsOpen() {
       log.debug('isOptionsOpen');
-      return testSubjects.exists('dashboardDarkThemeCheckbox');
+      return await testSubjects.exists('dashboardDarkThemeCheckbox');
     }
 
     async openOptions() {
       log.debug('openOptions');
       const isOpen = await this.isOptionsOpen();
       if (!isOpen) {
-        return testSubjects.click('dashboardOptionsButton');
+        return await testSubjects.click('dashboardOptionsButton');
       }
     }
 
@@ -165,7 +165,7 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
       await this.openOptions();
       const isDarkThemeOn = await this.isDarkThemeOn();
       if (isDarkThemeOn !== on) {
-        return testSubjects.click('dashboardDarkThemeCheckbox');
+        return await testSubjects.click('dashboardDarkThemeCheckbox');
       }
     }
 
@@ -249,9 +249,9 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
         await this.setSaveAsNewCheckBox(saveOptions.saveAsNew);
       }
 
-      await retry.try(() => {
+      await retry.try(async () => {
         log.debug('clicking final Save button for named dashboard');
-        return testSubjects.click('confirmSaveDashboardButton');
+        return await testSubjects.click('confirmSaveDashboardButton');
       });
     }
 
@@ -323,7 +323,7 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
       function getTitles(chart) {
         return chart.getVisibleText();
       }
-      const getTitlePromises = titleObjects.map(getTitles);
+      const getTitlePromises = _.map(titleObjects, getTitles);
       return Promise.all(getTitlePromises);
     }
 
@@ -332,7 +332,7 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
     }
 
     async getPanelSizeData() {
-      const titleObjects = find.allByCssSelector('li.gs-w'); // These are gridster-defined elements and classes
+      const titleObjects = await find.allByCssSelector('li.gs-w'); // These are gridster-defined elements and classes
       async function getTitles(chart) {
         const dataCol = await chart.getAttribute('data-col');
         const dataRow = await chart.getAttribute('data-row');
@@ -342,7 +342,7 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
         return { dataCol, dataRow, dataSizeX, dataSizeY, title };
       }
 
-      const getTitlePromises = titleObjects.map(getTitles);
+      const getTitlePromises = _.map(titleObjects, getTitles);
       return await Promise.all(getTitlePromises);
     }
 
@@ -430,7 +430,7 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
     async getSharedItemsCount() {
       log.debug('in getSharedItemsCount');
       const attributeName = 'data-shared-items-count';
-      const element = find.byCssSelector(`[${attributeName}]`);
+      const element = await find.byCssSelector(`[${attributeName}]`);
       if (element) {
         return await element.getAttribute(attributeName);
       }
