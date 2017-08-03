@@ -6,6 +6,15 @@ import { fromExpression } from '../../common/lib/ast';
 import { ArgForm } from '../components/arg_form';
 
 export class FunctionForm extends BaseForm {
+  constructor(name, props) {
+    super(name, {
+      ...props,
+    });
+
+    this.args = props.args || [];
+    this.resolve = props.resolve || (() => ({}));
+  }
+
   renderArg(props, dataArg) {
     const { onValueRemove, onValueChange, ...passedProps } = props;
     const { arg, argValues, skipRender } = dataArg;

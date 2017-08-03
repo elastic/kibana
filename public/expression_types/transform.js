@@ -1,8 +1,8 @@
 import { pick } from 'lodash';
 import { Registry } from '../../common/lib/registry';
-import { BaseForm } from './base_form';
+import { FunctionForm } from './function_form';
 
-export class Transform extends BaseForm {
+export class Transform extends FunctionForm {
   constructor(name, props) {
     super(name, props);
 
