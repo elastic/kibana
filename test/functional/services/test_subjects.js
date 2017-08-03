@@ -1,5 +1,8 @@
 import testSubjSelector from '@spalger/test-subj-selector';
-import { filter as filterAsync } from 'bluebird';
+import {
+  filter as filterAsync,
+  map as mapAsync,
+} from 'bluebird';
 
 export function TestSubjectsProvider({ getService }) {
   const log = getService('log');
@@ -62,6 +65,19 @@ export function TestSubjectsProvider({ getService }) {
       return await retry.try(async () => {
         const element = await this.find(selector);
         return await element.getVisibleText();
+      });
+    }
+
+    async getVisibleTextAll(selectorAll) {
+      return await this._mapAll(selectorAll, async (element) => {
+        return await element.getVisibleText();
+      });
+    }
+
+    async _mapAll(selectorAll, mapFn) {
+      return await retry.try(async () => {
+        const elements = await this.findAll(selectorAll);
+        return await mapAsync(elements, mapFn);
       });
     }
   }
