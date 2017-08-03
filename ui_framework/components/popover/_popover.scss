@@ -19,6 +19,7 @@
 
   // Animation happens on the body.
   .kuiPopover__body {
+    line-height: 20px;
     position: absolute;
     min-width: 256px; // Can expand further, but this size is good for our menus.
     top: 100%;
@@ -26,7 +27,7 @@
     background: $popOverBackgroundColor;
     border: 1px solid $globalBorderColor;
     border-radius: $globalBorderRadius 0 $globalBorderRadius $globalBorderRadius;
-    padding: $globalFormControlPadding;
+    padding: 16px;
     transform: translateX(-50%) translateY(8px) translateZ(0);
     backface-visibility: hidden;
     transform-origin: center top;

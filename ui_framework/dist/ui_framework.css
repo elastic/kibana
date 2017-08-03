@@ -2727,6 +2727,7 @@ main {
     box-shadow: 0 16px 16px -8px rgba(0, 0, 0, 0.1); }
 
 .kuiPopover__body {
+  line-height: 20px;
   position: absolute;
   min-width: 256px;
   top: 100%;
@@ -2734,7 +2735,7 @@ main {
   background: #FFF;
   border: 1px solid #D9D9D9;
   border-radius: 4px 0 4px 4px;
-  padding: 3px 12px 4px;
+  padding: 16px;
   -webkit-transform: translateX(-50%) translateY(8px) translateZ(0);
           transform: translateX(-50%) translateY(8px) translateZ(0);
   -webkit-backface-visibility: hidden;
