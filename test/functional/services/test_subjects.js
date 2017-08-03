@@ -61,6 +61,19 @@ export function TestSubjectsProvider({ getService }) {
       });
     }
 
+    async isSelected(selector) {
+      return await retry.try(async () => {
+        const element = await this.find(selector);
+        return await element.isSelected();
+      });
+    }
+
+    async isSelectedAll(selectorAll) {
+      return await this._mapAll(selectorAll, async (element) => {
+        return await element.isSelected();
+      });
+    }
+
     async getVisibleText(selector) {
       return await retry.try(async () => {
         const element = await this.find(selector);
