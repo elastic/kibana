@@ -216,7 +216,7 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
     }
 
     async selectAggregation(myString, groupName = 'buckets') {
-      const selector = `[group-name="${groupName}"] .vis-editor-agg-wrapper:last-child .agg-select`;
+      const selector = `[group-name="${groupName}"] vis-editor-agg-params:not(.ng-hide) .agg-select`;
       await retry.try(async () => {
         await find.clickByCssSelector(selector);
         const input = await find.byCssSelector(`${selector} input.ui-select-search`);
@@ -232,7 +232,7 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
     }
 
     async selectField(fieldValue, groupName = 'buckets') {
-      const selector = `[group-name="${groupName}"] .vis-editor-agg-wrapper:last-child .field-select`;
+      const selector = `[group-name="${groupName}"] vis-editor-agg-params:not(.ng-hide) .field-select`;
       await retry.try(async () => {
         await find.clickByCssSelector(selector);
         const input = await find.byCssSelector(`${selector} input.ui-select-search`);
