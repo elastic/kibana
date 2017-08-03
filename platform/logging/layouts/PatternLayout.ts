@@ -70,11 +70,13 @@ export class PatternLayout implements Layout {
    * @param record Instance of `LogRecord` to format into string.
    */
   format(record: LogRecord): string {
+    // Error stack is much more useful than just the message.
+    const message = (record.error && record.error.stack) || record.message;
     const formattedRecord = new Map([
       [Parameters.Timestamp, record.timestamp.toISOString()],
       [Parameters.Level, record.level.id.toUpperCase().padEnd(5)],
       [Parameters.Context, record.context],
-      [Parameters.Message, record.message]
+      [Parameters.Message, message]
     ]);
 
     if (this.highlight) {

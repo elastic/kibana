@@ -9,7 +9,11 @@ const records: LogRecord[] = [
     timestamp: new Date(2012, 1, 1),
     message: 'message-1',
     context: 'context-1',
-    error: new Error('Some error message'),
+    error: {
+      message: 'Some error message',
+      name: 'Some error name',
+      stack: 'Some error stack'
+    },
     level: LogLevel.Fatal
   },
   {
@@ -84,8 +88,7 @@ test('`format()` correctly formats record with custom pattern.', () => {
   const layout = new PatternLayout('mock-{message}-{context}-{message}');
 
   for (const record of records) {
-    const { context, message } = record;
-    expect(layout.format(record)).toBe(`mock-${message}-${context}-${message}`);
+    expect(layout.format(record)).toMatchSnapshot();
   }
 });
 

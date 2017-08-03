@@ -9,7 +9,11 @@ const records: LogRecord[] = [
     timestamp: new Date(2012, 1, 1),
     message: 'message-1',
     context: 'context-1',
-    error: new Error('Some error message'),
+    error: {
+      message: 'Some error message',
+      name: 'Some error name',
+      stack: 'Some error stack'
+    },
     level: LogLevel.Fatal
   },
   {
