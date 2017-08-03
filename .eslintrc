@@ -1,5 +1,7 @@
 ---
-extends: '@elastic/kibana'
+extends:
+  - '@elastic/eslint-config-kibana'
+  - '@elastic/eslint-config-kibana/jest'
 
 settings:
   import/resolver:

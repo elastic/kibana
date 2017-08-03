@@ -2,6 +2,7 @@ export { KuiActionItem } from './action_item';
 
 export {
   KuiKeyboardAccessible,
+  KuiScreenReaderOnly,
 } from './accessibility';
 
 export {

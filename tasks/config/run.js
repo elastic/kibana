@@ -1,5 +1,4 @@
-import { format } from 'url';
-import { esTestServerUrlParts } from '../../test/es_test_server_url_parts';
+import { esTestConfig } from '../../src/test_utils/es';
 import { kibanaTestServerUrlParts } from '../../test/kibana_test_server_url_parts';
 
 module.exports = function (grunt) {
@@ -55,7 +54,7 @@ module.exports = function (grunt) {
       args: [
         ...stdDevArgs,
         '--optimize.enabled=false',
-        '--elasticsearch.url=' + format(esTestServerUrlParts),
+        '--elasticsearch.url=' + esTestConfig.getUrl(),
         '--server.port=' + kibanaTestServerUrlParts.port,
         '--server.xsrf.disableProtection=true',
         ...kbnServerFlags,
@@ -75,7 +74,7 @@ module.exports = function (grunt) {
         '--dev',
         '--no-base-path',
         '--optimize.enabled=false',
-        '--elasticsearch.url=' + format(esTestServerUrlParts),
+        '--elasticsearch.url=' + esTestConfig.getUrl(),
         '--server.port=' + kibanaTestServerUrlParts.port,
         '--server.xsrf.disableProtection=true',
         ...kbnServerFlags,
@@ -93,7 +92,7 @@ module.exports = function (grunt) {
       args: [
         ...stdDevArgs,
         '--server.port=' + kibanaTestServerUrlParts.port,
-        '--elasticsearch.url=' + format(esTestServerUrlParts),
+        '--elasticsearch.url=' + esTestConfig.getUrl(),
         ...kbnServerFlags,
       ]
     },
@@ -109,7 +108,7 @@ module.exports = function (grunt) {
       args: [
         ...stdDevArgs,
         '--server.port=' + kibanaTestServerUrlParts.port,
-        '--elasticsearch.url=' + format(esTestServerUrlParts),
+        '--elasticsearch.url=' + esTestConfig.getUrl(),
         ...kbnServerFlags,
       ]
     },
@@ -125,7 +124,7 @@ module.exports = function (grunt) {
       args: [
         ...stdDevArgs,
         '--server.port=' + kibanaTestServerUrlParts.port,
-        '--elasticsearch.url=' + format(esTestServerUrlParts),
+        '--elasticsearch.url=' + esTestConfig.getUrl(),
         '--dev',
         '--no-base-path',
         '--optimize.lazyPort=5611',

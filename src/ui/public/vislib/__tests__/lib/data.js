@@ -155,8 +155,8 @@ describe('Vislib Data Class Test Suite', function () {
     });
 
     it('should return all points from every series', testLength(seriesData));
-    it('should return all points from every series', testLength(rowsData));
-    it('should return all points from every series', testLength(colsData));
+    it('should return all points from every series in the rows', testLength(rowsData));
+    it('should return all points from every series in the columns', testLength(colsData));
 
     function testLength(inputData) {
       return function () {
