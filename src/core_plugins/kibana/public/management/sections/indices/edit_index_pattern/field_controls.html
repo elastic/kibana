@@ -3,6 +3,7 @@
     data-test-subj="indexPatternFieldEditButton"
     ng-href="{{ kbnUrl.getRouteHref(field, 'edit') }}"
     aria-label="Edit"
+    tabindex="0"
     class="kuiButton kuiButton--basic kuiButton--small"
   >
     <span aria-hidden="true" class="kuiIcon fa-pencil"></span>
@@ -12,6 +13,7 @@
     ng-if="field.scripted"
     ng-click="remove(field)"
     class="kuiButton kuiButton--danger kuiButton--small"
+    tabindex="0"
     aria-label="Delete"
   >
     <span aria-hidden="true" class="kuiIcon fa-trash"></span>

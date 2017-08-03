@@ -15,6 +15,7 @@
             <kbn-info ng-if="col.info" info="{{ col.info }}" placement="top"></kbn-info>
             <i
               ng-if="col.sortable !== false"
+              tabindex="0"
               class="fa"
               ng-class="{
                 'fa-sort-asc': paginatedTable.sort.columnIndex === $index && paginatedTable.sort.direction === 'asc',
