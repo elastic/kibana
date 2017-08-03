@@ -33,3 +33,7 @@ export const KuiSideNav = ({ children, isOpenMobile, className, ...rest }) => {
 KuiSideNav.propTypes = {
   isOpenMobile: PropTypes.string,
 };
+
+KuiSideNav.defaultProps = {
+  isOpenMobile: false,
+};

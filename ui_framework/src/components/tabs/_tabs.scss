@@ -8,7 +8,7 @@
 
   position: relative;
   cursor: pointer;
-  padding: ($kuiSize - $kuiSizeXS) $kuiSize;
+  padding: $kuiSizeM $kuiSize;
   color: $kuiColorDarkShade;
   background-color: $kuiColorEmptyShade;
   transition: all $kuiAnimSpeedNormal $kuiAnimSlightResistance;
