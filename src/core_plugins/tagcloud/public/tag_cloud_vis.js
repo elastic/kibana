@@ -45,7 +45,7 @@ VisTypesRegistryProvider.register(function TagCloudProvider(Private) {
           title: 'Tag Size',
           min: 1,
           max: 1,
-          aggFilter: AGGREGATIONS.SIMPLE_MAPPABLE_METRICS,
+          aggFilter: AGGREGATIONS.TAG_CLOUD_METRICS,
           defaults: [
             { schema: 'metric', type: AggTypes.byName.count.name }
           ]
