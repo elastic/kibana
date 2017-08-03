@@ -15,19 +15,19 @@ export function FilterBarQueryFilterProvider(Private, $rootScope, getAppState, g
 
   const queryFilter = new EventEmitter();
 
-  let ctrlHold = false;
+  queryFilter.isAltHold = false;
   let savedCtrlFilters = [];
 
 
-  $(document.body).on('mousedown', function (e) {
+  $(document.body).keydown(function (e) {
     if (isAltKeyPressed(e)) {
-      ctrlHold = true;
+      queryFilter.isAltHold = true;
     }
   });
 
   $(document.body).keyup(function (e) {
     if (isAltKeyPressed(e)) {
-      ctrlHold = false;
+      queryFilter.isAltHold = false;
       queryFilter.addFilters();
     }
 
@@ -69,7 +69,7 @@ export function FilterBarQueryFilterProvider(Private, $rootScope, getAppState, g
    * @returns {Promise} filter map promise
    */
   queryFilter.addFilters = function (filters, global) {
-    if (ctrlHold) {
+    if (queryFilter.isAltHold) {
       //control key holds, so do not filter yet, but save the click filters
       queryFilter.addMultiselectFilters(filters);
     }
@@ -102,7 +102,7 @@ export function FilterBarQueryFilterProvider(Private, $rootScope, getAppState, g
         if (!filterState.filters) {
           filterState.filters = [];
         }
-        if (!ctrlHold) {
+        if (!queryFilter.isAltHold) {
           filterState.filters = filterState.filters.concat(filters);
         }
       });

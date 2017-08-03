@@ -16,7 +16,7 @@ import {
 } from '../elasticsearch_errors';
 
 uiModules
-.get('kibana/directive', ['ngSanitize'])
+  .get('kibana/directive', ['ngSanitize'])
   .directive('visualize', function (Notifier, Private, timefilter, getAppState) {
     const notify = new Notifier({ location: 'Visualize' });
     const requestHandlers = Private(VisRequestHandlersRegistryProvider);
@@ -51,41 +51,42 @@ uiModules
 
         const requestHandler = getHandler(requestHandlers, $scope.vis.type.requestHandler);
         const responseHandler = getHandler(responseHandlers, $scope.vis.type.responseHandler);
-
         $scope.fetch = _.debounce(function () {
+          if (!queryFilter.isAltHold) {
 
-        // searchSource is only there for courier request handler
-          requestHandler($scope.vis, $scope.appState, $scope.uiState, queryFilter, $scope.savedObj.searchSource)
-          .then(requestHandlerResponse => {
+            // searchSource is only there for courier request handler
+            requestHandler($scope.vis, $scope.appState, $scope.uiState, queryFilter, $scope.savedObj.searchSource)
+              .then(requestHandlerResponse => {
 
-            //No need to call the response handler when there have been no data nor has been there changes
-            //in the vis-state (response handler does not depend on uiStat
-            const canSkipResponseHandler = (
-              $scope.previousRequestHandlerResponse && $scope.previousRequestHandlerResponse === requestHandlerResponse &&
-              $scope.previousVisState && _.isEqual($scope.previousVisState, $scope.vis.getState())
-            );
+                //No need to call the response handler when there have been no data nor has been there changes
+                //in the vis-state (response handler does not depend on uiStat
+                const canSkipResponseHandler = (
+                  $scope.previousRequestHandlerResponse && $scope.previousRequestHandlerResponse === requestHandlerResponse &&
+                  $scope.previousVisState && _.isEqual($scope.previousVisState, $scope.vis.getState())
+                );
 
-            $scope.previousVisState = $scope.vis.getState();
-            $scope.previousRequestHandlerResponse = requestHandlerResponse;
-            return canSkipResponseHandler ? $scope.visData : responseHandler($scope.vis, requestHandlerResponse);
-          }, e => {
-            $scope.savedObj.searchSource.cancelQueued();
-            $el.trigger('renderComplete');
-            if (isTermSizeZeroError(e)) {
-              return notify.error(
-                `Your visualization ('${$scope.vis.title}') has an error: it has a term ` +
-                `aggregation with a size of 0. Please set it to a number greater than 0 to resolve ` +
-                `the error.`
-              );
-            }
-            notify.error(e);
-          })
-          .then(resp => {
-            $scope.visData = resp;
-            $scope.$apply();
-            $scope.$broadcast('render');
-            return resp;
-          });
+                $scope.previousVisState = $scope.vis.getState();
+                $scope.previousRequestHandlerResponse = requestHandlerResponse;
+                return canSkipResponseHandler ? $scope.visData : responseHandler($scope.vis, requestHandlerResponse);
+              }, e => {
+                $scope.savedObj.searchSource.cancelQueued();
+                $el.trigger('renderComplete');
+                if (isTermSizeZeroError(e)) {
+                  return notify.error(
+                    `Your visualization ('${$scope.vis.title}') has an error: it has a term ` +
+                    `aggregation with a size of 0. Please set it to a number greater than 0 to resolve ` +
+                    `the error.`
+                  );
+                }
+                notify.error(e);
+              })
+              .then(resp => {
+                $scope.visData = resp;
+                $scope.$apply();
+                $scope.$broadcast('render');
+                return resp;
+              });
+          }
         }, 100);
 
         $scope.vis.on('update', () => {
@@ -102,9 +103,9 @@ uiModules
           $scope.fetch();
         };
         $scope.vis.on('reload', reload);
-      // auto reload will trigger this event
+        // auto reload will trigger this event
         $scope.$on('courier:searchRefresh', reload);
-      // dashboard will fire fetch event when it wants to refresh
+        // dashboard will fire fetch event when it wants to refresh
         $scope.$on('fetch', reload);
         queryFilter.on('update', $scope.fetch);
 
@@ -120,8 +121,8 @@ uiModules
               $scope.fetch();
             }
             if (keys[0] === 'uiState') {
-            // uiState can be changed by other visualizations on dashboard. this makes sure this fires only if
-            // current visualizations uiState changed.
+              // uiState can be changed by other visualizations on dashboard. this makes sure this fires only if
+              // current visualizations uiState changed.
               if (!oldUiState || oldUiState !== JSON.stringify($scope.uiState.toJSON())) {
                 oldUiState = JSON.stringify($scope.uiState.toJSON());
                 $scope.fetch();
@@ -142,7 +143,7 @@ uiModules
         }, 200);
         resizeChecker.on('resize',  resizeFunc);
 
-      // visualize needs to know about timeFilter
+        // visualize needs to know about timeFilter
         $scope.$listen(timefilter, 'fetch', $scope.fetch);
         $scope.$on('renderComplete', () => {
           $el.trigger('renderComplete');
