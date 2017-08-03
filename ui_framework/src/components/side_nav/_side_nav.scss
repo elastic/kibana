@@ -1,12 +1,11 @@
+// These mobile children are hidden in everything but mobile view.
 .kuiSideNav__mobileToggle {
   display: none;
   flex-direction: row;
-  color: $kuiColorEmptyShade;
   border-bottom: $kuiBorderThin;
   padding: $kuiSize $kuiSizeL;
-}
-
-.kuiSideNav__mobileIconWrap {
+  width: 100%;
+  text-align: left;
 }
 
 .kuiSideNav__mobileIcon {
@@ -19,17 +18,15 @@
 }
 
 @include screenXSmall {
-
-  .kuiSideNav {
-    &.isOpenMobile {
-      .kuiSideNav__content {
-        visibility: visible;
-        opacity: 1;
-        height: auto;
-        margin: $kuiSizeL;
-        max-height: 5000px;
-      }
-    }
+  /**
+   * 1. Animation doesn't work against height. Need max-height instead.
+   *    We set a value larger than what is needed to fake "auto".
+   */
+  .kuiSideNav.isOpenMobile .kuiSideNav__content {
+    visibility: visible;
+    opacity: 1;
+    margin: $kuiSizeL;
+    max-height: 5000px; /* 1 */
   }
 
   .kuiSideNav__mobileToggle {

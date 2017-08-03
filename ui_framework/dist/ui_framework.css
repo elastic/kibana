@@ -1419,9 +1419,10 @@ table {
   -webkit-flex-direction: row;
       -ms-flex-direction: row;
           flex-direction: row;
-  color: #FFF;
   border-bottom: 1px solid #D9D9D9;
-  padding: 16px 24px; }
+  padding: 16px 24px;
+  width: 100%;
+  text-align: left; }
 
 .kuiSideNav__mobileIcon {
   fill: #0079a5; }
@@ -1434,12 +1435,16 @@ table {
   color: #0079a5; }
 
 @media only screen and (max-width: 768px) {
+  /**
+   * 1. Animation doesn't work against height. Need max-height instead.
+   *    We set a value larger than what is needed to fake "auto".
+   */
   .kuiSideNav.isOpenMobile .kuiSideNav__content {
     visibility: visible;
     opacity: 1;
-    height: auto;
     margin: 24px;
-    max-height: 5000px; }
+    max-height: 5000px;
+    /* 1 */ }
   .kuiSideNav__mobileToggle {
     display: -webkit-box;
     display: -webkit-flex;
