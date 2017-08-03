@@ -1,12 +1,15 @@
 .kuiIcon {
   display: inline-block;
-  fill: $kuiTextColor;
   vertical-align: middle;
 
   &:focus {
     opacity: 1; // We often hide icons on hover. Make sure they appear on focus.
     background: $kuiFocusBackgroundColor;
   }
+}
+
+.kuiIcon--basic {
+  fill: $kuiTextColor;
 }
 
 .kuiIcon--medium {

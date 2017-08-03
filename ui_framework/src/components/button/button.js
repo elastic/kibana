@@ -1,8 +1,13 @@
 import React, {
   PropTypes,
 } from 'react';
+
 import classNames from 'classnames';
-import { KuiIcon } from '../../components';
+
+import {
+  ICON_TYPES,
+  KuiIcon,
+} from '../icon';
 
 const typeToClassNameMap = {
   danger: 'kuiButton--danger',
@@ -11,18 +16,19 @@ const typeToClassNameMap = {
   disabled: 'kuiButton--disabled',
 };
 
+export const TYPES = Object.keys(typeToClassNameMap);
+
 const sizeToClassNameMap = {
   small: 'kuiButton--small',
   large: 'kuiButton--large',
 };
 
-export const TYPES = Object.keys(typeToClassNameMap);
 export const SIZES = Object.keys(sizeToClassNameMap);
 
 export const KuiButton = ({
   children,
   className,
-  icon,
+  iconType,
   iconReverse,
   type,
   size,
@@ -41,16 +47,16 @@ export const KuiButton = ({
   );
 
   // Add an icon to the button if one exists.
-  let buttonIcon = null;
-  if (icon) {
+  let buttonIcon;
+
+  if (iconType) {
     buttonIcon = (
-      <span aria-hidden="true">
-        <KuiIcon
-          className="kuiButton__icon"
-          type={icon}
-          size="medium"
-        />
-      </span>
+      <KuiIcon
+        className="kuiButton__icon"
+        type={iconType}
+        size="medium"
+        aria-hidden="true"
+      />
     );
   }
 
@@ -68,6 +74,7 @@ export const KuiButton = ({
 };
 
 KuiButton.propTypes = {
+  iconType: PropTypes.oneOf(ICON_TYPES),
   iconReverse: React.PropTypes.bool,
   fill: React.PropTypes.bool,
   type: PropTypes.oneOf(TYPES),

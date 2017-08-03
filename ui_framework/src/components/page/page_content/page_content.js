@@ -32,7 +32,7 @@ export const KuiPageContent = ({ verticalPosition, horizontalPosition, children,
   );
 };
 
-KuiPageContent.PropTypes = {
+KuiPageContent.propTypes = {
   verticalPosition: PropTypes.oneOf(VERTICAL_POSITIONS),
   horizontalPosition: PropTypes.oneOf(HORIZONTAL_POSITIONS),
 };

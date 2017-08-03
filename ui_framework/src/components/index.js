@@ -8,6 +8,10 @@ export {
 } from './button';
 
 export {
+  KuiCallOut,
+} from './call_out';
+
+export {
   KuiHeader,
   KuiHeaderBreadcrumb,
   KuiHeaderBreadcrumbCollapsed,
@@ -19,6 +23,7 @@ export {
 } from './header';
 
 export {
+  ICON_TYPES,
   KuiIcon,
 } from './icon';
 
