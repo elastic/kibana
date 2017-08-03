@@ -11,14 +11,20 @@ export default function (chrome, internals) {
    *     determines if the Kibana chrome should be displayed
    */
 
-  let def = true;
-  internals.setVisibleDefault = (_def) => def = Boolean(_def);
+  let permanentlyHideChrome = false;
+  internals.permanentlyHideChrome = () => {
+    permanentlyHideChrome = true;
+    internals.visible = false;
+  };
 
   /**
    * @param {boolean} display - should the chrome be displayed
    * @return {chrome}
    */
   chrome.setVisible = function (display) {
+    if (permanentlyHideChrome) {
+      return chrome;
+    }
     internals.visible = Boolean(display);
     return chrome;
   };
@@ -27,7 +33,7 @@ export default function (chrome, internals) {
    * @return {boolean} - display state of the chrome
    */
   chrome.getVisible = function () {
-    if (_.isUndefined(internals.visible)) return def;
+    if (_.isUndefined(internals.visible)) return !permanentlyHideChrome;
     return internals.visible;
   };
 }

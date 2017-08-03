@@ -54,6 +54,7 @@ when necessary.
 `visualization:colorMapping`:: Maps values to specified colors within visualizations.
 `visualization:loadingDelay`:: Time to wait before dimming visualizations during query.
 `visualization:dimmingOpacity`:: When part of a visualization is highlighted, by hovering over it for example, ths is the opacity applied to the other elements. A higher number means other elements will be less opaque.
+`visualization:regionmap:showWarnings`:: Whether the region map show a warning when terms cannot be joined to a shape on the map.
 `csv:separator`:: A string that serves as the separator for exported values.
 `csv:quoteValues`:: Set this property to `true` to quote exported values.
 `history:limit`:: In fields that have history, such as query inputs, the value of this property limits how many recent
