@@ -9,8 +9,8 @@ export class ContainerAPI {
    * @param operator
    * @param index
    */
-  onFilter(/*field, value, operator, index */) {
-    throw new Error('Must implement onFilter.');
+  addFilter(/*field, value, operator, index */) {
+    throw new Error('Must implement addFilter.');
   }
 
   /**
@@ -28,14 +28,14 @@ export class ContainerAPI {
   }
 
   /**
-   * Creates a child ui state for the panel. It's passed the ui state to use, but needs to
+   * Creates a new state for the panel. It's passed the ui state to use, but needs to
    * be generated from the parent.
    * @param path {String} - the unique path for this ui state.
    * @param uiState {Object} - the uiState for the child.
    * @returns {Object}
    */
-  createChildUiState(/* path, uiState */) {
-    throw new Error('Must implement createChildUiState.');
+  getInitialState(/* path, uiState */) {
+    throw new Error('Must implement getInitalState.');
   }
 
   /**

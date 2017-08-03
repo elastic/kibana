@@ -24,10 +24,7 @@ export class EmbeddableHandler {
    * @param {Element} domNode - the dom node to mount the rendered embeddable on
    * @param {PanelState} panel - a panel object which container information about the panel. Can also be modified to
    * store per panel information.
-   * @property {string} panel.id - an id to specify the object that this panel contains.
-   * @property {string} panel.type - specifies which EmbeddableHandler should render this panel.
-   * @property {number} panel.panelIndex - a unique identifier for this panel in a specific container. Different
-   * from panel.id because you can have the same object rendered multiple times in two different panels.
+   * @property {ContainerApi} containerApi - an id to specify the object that this panel contains.
    * @param {Promise.<void>} A promise that resolves when the object is finished rendering.
    */
   async render(/* domNode, panel, container */) {

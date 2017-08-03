@@ -7,7 +7,7 @@ export class DashboardContainerAPI extends ContainerAPI {
     this.queryManager = queryManager;
   }
 
-  onFilter(field, value, operator, index) {
+  addFilter(field, value, operator, index) {
     this.queryManager.add(field, value, operator, index);
   }
 
@@ -26,7 +26,7 @@ export class DashboardContainerAPI extends ContainerAPI {
     return this.dashboardState.getIsViewMode();
   }
 
-  createChildUiState(path, uiState) {
+  getInitialState(path, uiState) {
     return this.dashboardState.uiState.createChild(path, uiState, true);
   }
 

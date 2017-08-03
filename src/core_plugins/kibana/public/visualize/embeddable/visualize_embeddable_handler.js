@@ -7,52 +7,56 @@ import { FilterBarClickHandlerProvider as filterBarClickHandlerProvider } from '
 import { EmbeddableHandler } from 'ui/embeddable';
 
 export class VisualizeEmbeddableHandler extends EmbeddableHandler {
-  constructor($compile, $rootScope, visualizeLoader, timefilter, Notifier) {
+  constructor($compile, $rootScope, visualizeLoader, timefilter, Notifier, Promise) {
     super();
     this.$compile = $compile;
     this.visualizeLoader = visualizeLoader;
     this.$rootScope = $rootScope;
     this.name = 'visualization';
-
+    this.Promise = Promise;
     this.brushEvent = utilsBrushEventProvider(timefilter);
     this.filterBarClickHandler = filterBarClickHandlerProvider(Notifier);
   }
 
-  async getEditPath(panelId) {
-    return this.visualizeLoader.urlFor(panelId);
+  getEditPath(panelId) {
+    return this.Promise.resolve(this.visualizeLoader.urlFor(panelId));
   }
 
-  async getTitleFor(panelId) {
-    const savedObject = await this.visualizeLoader.get(panelId);
-    return savedObject.title;
+  getTitleFor(panelId) {
+    return this.visualizeLoader.get(panelId).then(savedObject => savedObject.title);
   }
 
-  async render(domNode, panel, container) {
-    const savedObject = await this.visualizeLoader.get(panel.id);
+  render(domNode, panel, container) {
     const visualizeScope = this.$rootScope.$new();
-    visualizeScope.editUrl = await this.getEditPath(panel.id);
-    visualizeScope.savedObj = savedObject;
-    visualizeScope.panel = panel;
+    return this.getEditPath(panel.id)
+      .then(editPath => {
+        visualizeScope.editUrl = editPath;
+        return this.visualizeLoader.get(panel.id);
+      })
+      .then(savedObject => {
+        visualizeScope.savedObj = savedObject;
+        visualizeScope.panel = panel;
 
-    const uiState = savedObject.uiStateJSON ? JSON.parse(savedObject.uiStateJSON) : {};
-    visualizeScope.uiState = container.createChildUiState(getPersistedStateId(panel), uiState);
+        const uiState = savedObject.uiStateJSON ? JSON.parse(savedObject.uiStateJSON) : {};
+        visualizeScope.uiState = container.getInitialState(getPersistedStateId(panel), uiState);
 
-    visualizeScope.savedObj.vis.setUiState(visualizeScope.uiState);
+        visualizeScope.savedObj.vis.setUiState(visualizeScope.uiState);
 
-    visualizeScope.savedObj.vis.listeners.click = this.filterBarClickHandler(container.getAppState());
-    visualizeScope.savedObj.vis.listeners.brush = this.brushEvent(container.getAppState());
-    visualizeScope.isFullScreenMode = container.getIsViewOnlyMode();
+        visualizeScope.savedObj.vis.listeners.click = this.filterBarClickHandler(container.getAppState());
+        visualizeScope.savedObj.vis.listeners.brush = this.brushEvent(container.getAppState());
+        visualizeScope.isFullScreenMode = container.getIsViewOnlyMode();
 
-    container.registerPanelIndexPattern(panel.panelIndex, visualizeScope.savedObj.vis.indexPattern);
+        container.registerPanelIndexPattern(panel.panelIndex, visualizeScope.savedObj.vis.indexPattern);
 
-    const visualizationInstance = this.$compile(visualizationTemplate)(visualizeScope);
-    const rootNode = angular.element(domNode);
-    rootNode.append(visualizationInstance);
+        const visualizationInstance = this.$compile(visualizationTemplate)(visualizeScope);
+        const rootNode = angular.element(domNode);
+        rootNode.append(visualizationInstance);
 
-    visualizationInstance.on('$destroy', function () {
-      visualizeScope.savedObj.destroy();
-      visualizeScope.$destroy();
-    });
+        visualizationInstance.on('$destroy', function () {
+          visualizeScope.savedObj.destroy();
+          visualizeScope.$destroy();
+        });
+      });
   }
 }
 
