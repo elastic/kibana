@@ -1,6 +1,7 @@
 import React, { Component, PropTypes } from 'react';
 import _ from 'lodash';
 import Select from 'react-select';
+import { durationOutputOptions, durationInputOptions } from './lib/durations';
 
 class DataFormatPicker extends Component {
 
@@ -8,6 +9,10 @@ class DataFormatPicker extends Component {
     super(props);
     this.handleChange = this.handleChange.bind(this);
     this.handleCustomChange = this.handleCustomChange.bind(this);
+    this.state = {
+      from: 'ms',
+      to: 'ms'
+    };
   }
 
   handleCustomChange() {
@@ -17,25 +22,84 @@ class DataFormatPicker extends Component {
   handleChange(value) {
     if (value.value === 'custom') {
       this.handleCustomChange();
+    } else if (value.value === 'duration') {
+      const { from, to } = this.state;
+      this.props.onChange({
+        value: `${from},${to}`
+      });
     } else {
       this.props.onChange(value);
     }
   }
 
+  handleDurationChange(name) {
+    return (value) => {
+      this.setState({
+        [name]: value.value
+      }, () => {
+        const { from, to } = this.state;
+        this.props.onChange({
+          value: `${from},${to}`
+        });
+      });
+    };
+  }
+
   render() {
     const value = this.props.value || '';
+    const durationFormatTest = /[pnumshdwMY]+,[pnumshdwMY]+/;
     let defaultValue = value;
     if (!_.includes(['bytes', 'number', 'percent'], value)) {
       defaultValue = 'custom';
+    }
+    if (durationFormatTest.test(value)) {
+      defaultValue = 'duration';
     }
     const options = [
       { label: 'Bytes', value: 'bytes' },
       { label: 'Number', value: 'number' },
       { label: 'Percent', value: 'percent' },
+      { label: 'Duration', value: 'duration' },
       { label: 'Custom', value: 'custom' }
     ];
 
     let custom;
+    if (defaultValue === 'duration') {
+      const [from, to] = value.split(',');
+      return (
+        <div className="vis_editor__data_format_picker-container">
+          <div className="vis_editor__label">
+            {this.props.label}
+          </div>
+          <div className="vis_editor__item">
+            <Select
+              clearable={false}
+              value={defaultValue}
+              options={options}
+              onChange={this.handleChange}
+            />
+          </div>
+          <div className="vis_editor__label">From</div>
+          <div className="vis_editor__item">
+            <Select
+              clearable={false}
+              value={from}
+              options={durationInputOptions}
+              onChange={this.handleDurationChange('from')}
+            />
+          </div>
+          <div className="vis_editor__label">To</div>
+          <div className="vis_editor__item">
+            <Select
+              clearable={false}
+              value={to}
+              options={durationOutputOptions}
+              onChange={this.handleDurationChange('to')}
+            />
+          </div>
+        </div>
+      );
+    }
     if (defaultValue === 'custom') {
       custom = (
         <div className="vis_editor__data_format_picker-custom_row">
