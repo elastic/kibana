@@ -20,6 +20,4 @@
 
 .kuiText--small {
   @include kuiFontSizeS;
-  color: $kuiTextColor;
-  font-weight: $kuiFontWeightRegular;
 }

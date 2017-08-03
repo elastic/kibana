@@ -1,7 +1,7 @@
 .kuiCallOut {
   padding: $kuiSizeM $kuiSizeL;
   border-left: 4px solid $kuiColorPrimary;
-  background-color: rgba($kuiColorPrimary, 0.1); /* 1 */
+  background-color: tintOrShade($kuiColorPrimary, 90%, 70%); /* 1 */
 }
 
 // Modifier naming and colors.
@@ -15,14 +15,16 @@ $callOutTypes: (
 @each $name, $color in $callOutTypes {
   .kuiCallOut--#{$name} {
     border-color: $color;
-    background-color: rgba($color, 0.1);
+    background-color: tintOrShade($color, 90%, 70%);
+
+    $textColor: shadeOrTint($color, 30%, 70%);
 
     .kuiCallOutHeader__icon {
-      fill: $color;
+      fill: $textColor;
     }
 
     .kuiCallOutHeader__title {
-      color: $color;
+      color: $textColor;
     }
   }
 }
@@ -52,6 +54,6 @@ $callOutTypes: (
   }
 
   .kuiCallOutHeader__title {
-    font-weight: $kuiFontWeightMedium;
+    // font-weight: $kuiFontWeightMedium;
     color: $kuiColorPrimary;
   }
