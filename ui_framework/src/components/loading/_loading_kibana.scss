@@ -59,7 +59,7 @@
   &:before,
   &:after {
     height: $kuiSizeS;
-    bottom: -($kuiSize - $kuiSizeXS);
+    bottom: -$kuiSizeM;
   }
   .kuiLoadingKibana__icon {
     animation: 1s kuiLoadingKibanaBounceXLarge $kuiAnimSlightResistance infinite;
@@ -74,7 +74,7 @@
 
 @keyframes kuiLoadingKibanaBounceLarge {
   50% {
-    transform: translateY(-($kuiSize - $kuiSizeXS));
+    transform: translateY(-$kuiSizeM);
   }
 }
 

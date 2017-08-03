@@ -3,6 +3,7 @@ import React, {
 } from 'react';
 
 import {
+  KuiButton,
   KuiHeader,
   KuiHeaderBreadcrumb,
   KuiHeaderBreadcrumbCollapsed,
@@ -24,6 +25,9 @@ import {
   KuiPageHeaderSection,
   KuiPageSidebar,
   KuiPopover,
+  KuiSideNav,
+  KuiSideNavItem,
+  KuiSideNavTitle,
   KuiTitle,
 } from '../../../../components';
 
@@ -289,30 +293,49 @@ export default class extends Component {
         <KuiPageHeader>
           <KuiPageHeaderSection>
             <KuiTitle size="large">
-              <h1>Page title</h1>
+              <h1>Management</h1>
             </KuiTitle>
-          </KuiPageHeaderSection>
-          <KuiPageHeaderSection>
-            Page abilities
           </KuiPageHeaderSection>
         </KuiPageHeader>
         <KuiPageBody>
           <KuiPageSidebar>
-            Sidebar nav
+            <KuiSideNav>
+              <KuiSideNavTitle>Elasticsearch</KuiSideNavTitle>
+              <KuiSideNavItem>Data sources</KuiSideNavItem>
+              <KuiSideNavItem>Users</KuiSideNavItem>
+              <KuiSideNavItem>Roles</KuiSideNavItem>
+              <KuiSideNavItem isSelected>Watches</KuiSideNavItem>
+              <KuiSideNavItem>Extremely long item is long</KuiSideNavItem>
+
+              <KuiSideNavTitle>Kibana</KuiSideNavTitle>
+              <KuiSideNavItem>Index Patterns</KuiSideNavItem>
+              <KuiSideNavItem>Saved Objects</KuiSideNavItem>
+              <KuiSideNavItem>Reporting</KuiSideNavItem>
+
+              <KuiSideNavTitle>Logstash</KuiSideNavTitle>
+              <KuiSideNavItem>Pipeline Viewer</KuiSideNavItem>
+            </KuiSideNav>
           </KuiPageSidebar>
           <KuiPageContent>
             <KuiPageContentHeader>
               <KuiPageContentHeaderSection>
                 <KuiTitle>
-                  <h2>Content title</h2>
+                  <h2>Watches</h2>
                 </KuiTitle>
               </KuiPageContentHeaderSection>
               <KuiPageContentHeaderSection>
-                Content abilities
+                <KuiButton
+                  fill
+                  icon = "arrowDown"
+                  onClick={() => window.alert('Button clicked')}
+                  iconReverse
+                >
+                  Create new watch
+                </KuiButton>
               </KuiPageContentHeaderSection>
             </KuiPageContentHeader>
             <KuiPageContentBody>
-              Content body
+              asdf
             </KuiPageContentBody>
           </KuiPageContent>
         </KuiPageBody>

@@ -1,0 +1,55 @@
+// These mobile children are hidden in everything but mobile view.
+.kuiSideNav__mobileToggle {
+  display: none;
+  border-bottom: $kuiBorderThin;
+  padding: $kuiSize $kuiSizeL;
+  width: 100%;
+  text-align: left;
+
+  /**
+   * 1. This toggle also works with KUI link, but we need the outline
+   *    that comes with the focus state.
+   */
+  &:focus {
+    outline: none;
+  }
+}
+
+.kuiSideNav__mobileIcon {
+  fill: $kuiColorPrimary;
+}
+
+.kuiSideNav__mobileWrap {
+  display: flex;
+}
+
+.kuiSideNav__mobileTitle {
+  flex-grow: 1;
+  color: $kuiColorPrimary;
+}
+
+@include screenXSmall {
+  /**
+   * 1. Animation doesn't work against height. Need max-height instead.
+   *    We set a value larger than what is needed to fake "auto".
+   */
+  .kuiSideNav.kuiSideNav-isOpenMobile .kuiSideNav__content {
+    visibility: visible;
+    opacity: 1;
+    margin: $kuiSizeL;
+    max-height: 5000px; /* 1 */
+    transition: all $kuiAnimSpeedNormal $kuiAnimSlightResistance;
+  }
+
+  .kuiSideNav__mobileToggle {
+    display: block;
+  }
+
+  .kuiSideNav__content {
+    visibility: hidden;
+    opacity: 0;
+    max-height: 0;
+    margin: 0 $kuiSizeL;
+
+  }
+}

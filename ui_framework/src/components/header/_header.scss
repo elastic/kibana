@@ -4,6 +4,7 @@
   display: flex;
   background: $kuiHeaderBackgroundColor;
   border-bottom: $kuiBorderThin;
+  @include kuiBottomShadowSmall;
 }
 
   .kuiHeader__notification {
