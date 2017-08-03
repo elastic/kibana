@@ -4,7 +4,7 @@ import { CATEGORY } from 'ui/vis/vis_category';
 import { VisFactoryProvider } from 'ui/vis/vis_factory';
 import { VisTypesRegistryProvider } from 'ui/registry/vis_types';
 import { VisController } from './vis_controller';
-import { newField } from './lib/editor_utils';
+import { newControl } from './lib/editor_utils';
 import { TermsVisEditor } from './components/terms_vis_editor';
 
 function TermsVisProvider(Private) {
@@ -20,8 +20,7 @@ function TermsVisProvider(Private) {
     visualization: VisController,
     visConfig: {
       defaults: {
-        param1: 'default value',
-        fields: [newField()]
+        controls: [newControl()]
       },
     },
     editor: 'default',

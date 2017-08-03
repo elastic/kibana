@@ -1,20 +1,21 @@
-export const setField = (fields, fieldIndex, field) => [
-  ...fields.slice(0, fieldIndex),
-  field,
-  ...fields.slice(fieldIndex + 1)
+export const setControl = (controls, controlIndex, control) => [
+  ...controls.slice(0, controlIndex),
+  control,
+  ...controls.slice(controlIndex + 1)
 ];
 
-export const addField = (fields, field) => [...fields, field];
+export const addControl = (controls, control) => [...controls, control];
 
-export const removeField = (fields, fieldIndex) => [
-  ...fields.slice(0, fieldIndex),
-  ...fields.slice(fieldIndex + 1)
+export const removeControl = (controls, controlIndex) => [
+  ...controls.slice(0, controlIndex),
+  ...controls.slice(controlIndex + 1)
 ];
 
-export const newField = () => ({
+export const newControl = () => ({
   indexPattern: '',
   fieldName: '',
   label: '',
+  type: 'terms',
   size: 5,
   order: 'desc'
 });

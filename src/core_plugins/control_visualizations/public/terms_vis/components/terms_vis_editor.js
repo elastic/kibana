@@ -6,7 +6,7 @@ import {
   KuiButton,
   KuiButtonIcon,
 } from 'ui_framework/components';
-import { addField, newField, removeField, setField } from '../lib/editor_utils';
+import { addControl, newControl, removeControl, setControl } from '../lib/editor_utils';
 
 export class TermsVisEditor extends Component {
   constructor(props) {
@@ -32,37 +32,37 @@ export class TermsVisEditor extends Component {
     this.props.stageEditorParams(params);
   }
 
-  handleLabelChange(fieldIndex, evt) {
-    const updatedField = this.props.scope.vis.params.fields[fieldIndex];
+  handleLabelChange(controlIndex, evt) {
+    const updatedField = this.props.scope.vis.params.controls[controlIndex];
     updatedField.label = evt.target.value;
-    this.setVisParam('fields', setField(this.props.scope.vis.params.fields, fieldIndex, updatedField));
+    this.setVisParam('controls', setControl(this.props.scope.vis.params.controls, controlIndex, updatedField));
   }
 
-  handleIndexPatternChange(fieldIndex, evt) {
-    const updatedField = this.props.scope.vis.params.fields[fieldIndex];
+  handleIndexPatternChange(controlIndex, evt) {
+    const updatedField = this.props.scope.vis.params.controls[controlIndex];
     updatedField.indexPattern = evt.value;
     updatedField.fieldName = '';
-    this.setVisParam('fields', setField(this.props.scope.vis.params.fields, fieldIndex, updatedField));
+    this.setVisParam('controls', setControl(this.props.scope.vis.params.controls, controlIndex, updatedField));
   }
 
-  handleFieldNameChange(fieldIndex, evt) {
-    const updatedField = this.props.scope.vis.params.fields[fieldIndex];
+  handleFieldNameChange(controlIndex, evt) {
+    const updatedField = this.props.scope.vis.params.controls[controlIndex];
     updatedField.fieldName = evt.value;
-    this.setVisParam('fields', setField(this.props.scope.vis.params.fields, fieldIndex, updatedField));
+    this.setVisParam('controls', setControl(this.props.scope.vis.params.controls, controlIndex, updatedField));
   }
 
-  handleRemoveField(fieldIndex) {
-    this.setVisParam('fields', removeField(this.props.scope.vis.params.fields, fieldIndex));
+  handleRemoveField(controlIndex) {
+    this.setVisParam('controls', removeControl(this.props.scope.vis.params.controls, controlIndex));
   }
 
   handleAddField() {
-    this.setVisParam('fields', addField(this.props.scope.vis.params.fields, newField()));
+    this.setVisParam('controls', addControl(this.props.scope.vis.params.controls, newControl()));
   }
 
   renderFields() {
-    return this.props.scope.vis.params.fields.map((field, index) => {
+    return this.props.scope.vis.params.controls.map((control, controlIndex) => {
       return (
-        <div key={index} className="field-section">
+        <div key={controlIndex} className="control-section">
           <div className="kuiFieldGroup">
             <div className="kuiFieldGroupSection">
               <label>
@@ -73,28 +73,28 @@ export class TermsVisEditor extends Component {
               <input
                 className="kuiTextInput"
                 type="text"
-                value={field.label}
-                onChange={this.handleLabelChange.bind(null, index)}
+                value={control.label}
+                onChange={this.handleLabelChange.bind(null, controlIndex)}
               />
             </div>
             <button
               className="kuiButton kuiButton--danger kuiButton--small"
-              onClick={this.handleRemoveField.bind(null, index)}
+              onClick={this.handleRemoveField.bind(null, controlIndex)}
             >
               <span className="kuiIcon fa-trash" />
             </button>
           </div>
 
           <IndexPatternSelect
-            value={field.indexPattern}
-            onChange={this.handleIndexPatternChange.bind(null, index)}
+            value={control.indexPattern}
+            onChange={this.handleIndexPatternChange.bind(null, controlIndex)}
             getIndexPatterns={this.getIndexPatterns}
           />
 
           <FieldSelect
-            value={field.fieldName}
-            indexPatternId={field.indexPattern}
-            onChange={this.handleFieldNameChange.bind(null, index)}
+            value={control.fieldName}
+            indexPatternId={control.indexPattern}
+            onChange={this.handleFieldNameChange.bind(null, controlIndex)}
             getIndexPattern={this.getIndexPattern}
           />
         </div>
