@@ -9,6 +9,9 @@ import { VisSchemasProvider } from 'ui/vis/editors/default/schemas';
 import tableVisTemplate from 'plugins/table_vis/table_vis.html';
 import { VisTypesRegistryProvider } from 'ui/registry/vis_types';
 import image from './images/icon-table.svg';
+import { AggTypesIndexProvider } from 'ui/agg_types';
+import { AggregationsProvider } from 'ui/vis/aggregations';
+
 // we need to load the css ourselves
 
 // we also need to load the controller and used by the template
@@ -24,6 +27,8 @@ VisTypesRegistryProvider.register(TableVisTypeProvider);
 function TableVisTypeProvider(Private) {
   const VisFactory = Private(VisFactoryProvider);
   const Schemas = Private(VisSchemasProvider);
+  const AggTypes = Private(AggTypesIndexProvider);
+  const AGGREGATIONS = Private(AggregationsProvider);
 
   // define the TableVisController which is used in the template
   // by angular's ng-controller directive
@@ -58,10 +63,10 @@ function TableVisTypeProvider(Private) {
           group: 'metrics',
           name: 'metric',
           title: 'Metric',
-          aggFilter: '!geo_centroid',
+          aggFilter: AGGREGATIONS.DEFAULT_METRICS_WITH_PARENT_PIPELINES,
           min: 1,
           defaults: [
-            { type: 'count', schema: 'metric' }
+            { type: AggTypes.byName.count.name, schema: 'metric' }
           ]
         },
         {

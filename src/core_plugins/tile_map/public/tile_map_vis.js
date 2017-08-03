@@ -7,6 +7,8 @@ import { AggResponseGeoJsonProvider } from 'ui/agg_response/geo_json/geo_json';
 import tileMapTemplate from './editors/tile_map.html';
 import image from './images/icon-tilemap.svg';
 import { VisTypesRegistryProvider } from 'ui/registry/vis_types';
+import { AggTypesIndexProvider } from 'ui/agg_types';
+import { AggregationsProvider } from 'ui/vis/aggregations';
 
 
 VisTypesRegistryProvider.register(function TileMapVisType(Private, getAppState, courier, config) {
@@ -15,7 +17,8 @@ VisTypesRegistryProvider.register(function TileMapVisType(Private, getAppState, 
   const geoJsonConverter = Private(AggResponseGeoJsonProvider);
   const VisFactory = Private(VisFactoryProvider);
   const MapsVisualization = Private(MapsVisualizationProvider);
-
+  const AggTypes = Private(AggTypesIndexProvider);
+  const AGGREGATIONS = Private(AggregationsProvider);
 
   return VisFactory.createBaseVisualization({
     name: 'tile_map',
@@ -74,16 +77,18 @@ VisTypesRegistryProvider.register(function TileMapVisType(Private, getAppState, 
           title: 'Value',
           min: 1,
           max: 1,
-          aggFilter: ['count', 'avg', 'sum', 'min', 'max', 'cardinality', 'top_hits'],
+          aggFilter: AGGREGATIONS.SIMPLE_METRICS,
           defaults: [
-            { schema: 'metric', type: 'count' }
+            { schema: 'metric', type: AggTypes.byName.count.name }
           ]
         },
         {
           group: 'buckets',
           name: 'segment',
           title: 'Geo Coordinates',
-          aggFilter: 'geohash_grid',
+          aggFilter: [
+            AggTypes.byName.geohash_grid.name
+          ],
           min: 1,
           max: 1
         }

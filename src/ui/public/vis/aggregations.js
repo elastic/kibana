@@ -24,7 +24,6 @@ export function AggregationsProvider(Private) {
       AggTypes.byName.std_dev.name,
       AggTypes.byName.top_hits.name
     ],
-
     /**
      * simple statistics
      */
