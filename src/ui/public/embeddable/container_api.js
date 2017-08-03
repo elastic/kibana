@@ -28,13 +28,13 @@ export class ContainerAPI {
   }
 
   /**
-   * Creates a new state for the panel. It's passed the ui state to use, but needs to
-   * be generated from the parent.
+   * Creates a new state for the panel. It's passed the ui state object to use, and is returned
+   * a PersistedState.
    * @param path {String} - the unique path for this ui state.
-   * @param uiState {Object} - the uiState for the child.
-   * @returns {Object}
+   * @param initialState {Object} - the initial state to use for the child.
+   * @returns {PersistedState}
    */
-  getInitialState(/* path, uiState */) {
+  createChildUistate(/* path, initialState */) {
     throw new Error('Must implement getInitalState.');
   }
 

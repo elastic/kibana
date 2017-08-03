@@ -38,7 +38,7 @@ export class VisualizeEmbeddableHandler extends EmbeddableHandler {
         visualizeScope.panel = panel;
 
         const uiState = savedObject.uiStateJSON ? JSON.parse(savedObject.uiStateJSON) : {};
-        visualizeScope.uiState = container.getInitialState(getPersistedStateId(panel), uiState);
+        visualizeScope.uiState = container.createChildUistate(getPersistedStateId(panel), uiState);
 
         visualizeScope.savedObj.vis.setUiState(visualizeScope.uiState);
 

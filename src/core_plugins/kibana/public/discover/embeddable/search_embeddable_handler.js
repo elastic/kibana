@@ -45,7 +45,7 @@ export class SearchEmbeddableHandler extends EmbeddableHandler {
         });
 
         const uiState = savedObject.uiStateJSON ? JSON.parse(savedObject.uiStateJSON) : {};
-        searchScope.uiState = container.getInitialState(getPersistedStateId(panel), uiState);
+        searchScope.uiState = container.createChildUistate(getPersistedStateId(panel), uiState);
 
         searchScope.setSortOrder = function setSortOrder(columnName, direction) {
           searchScope.panel = container.updatePanel(searchScope.panel.panelIndex, { sort: [columnName, direction] });

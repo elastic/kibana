@@ -26,8 +26,8 @@ export class DashboardContainerAPI extends ContainerAPI {
     return this.dashboardState.getIsViewMode();
   }
 
-  getInitialState(path, uiState) {
-    return this.dashboardState.uiState.createChild(path, uiState, true);
+  createChildUistate(path, initialState) {
+    return this.dashboardState.uiState.createChild(path, initialState, true);
   }
 
   registerPanelIndexPattern(panelIndex, pattern) {
