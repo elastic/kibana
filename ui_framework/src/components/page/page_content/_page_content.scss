@@ -15,3 +15,10 @@
   width: auto;
   margin: auto;
 }
+
+@include screenXSmall {
+  .kuiPageContent {
+    border-radius: 0;
+    border: none;
+  }
+}

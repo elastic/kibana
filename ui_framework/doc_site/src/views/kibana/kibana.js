@@ -296,9 +296,6 @@ export default class extends Component {
               <h1>Management</h1>
             </KuiTitle>
           </KuiPageHeaderSection>
-          <KuiPageHeaderSection>
-            Page abilities
-          </KuiPageHeaderSection>
         </KuiPageHeader>
         <KuiPageBody>
           <KuiPageSidebar>

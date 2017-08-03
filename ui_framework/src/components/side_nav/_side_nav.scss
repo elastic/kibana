@@ -1,2 +1,33 @@
 .kuiSideNav {
 }
+
+.kuiSideNav__mobileToggle {
+  display: none;
+  flex-direction: row;
+  color: $kuiColorEmptyShade;
+  border-bottom: $kuiBorderThin;
+  padding: $kuiSize $kuiSizeL;
+}
+
+.kuiSideNav__mobileIconWrap {
+}
+
+.kuiSideNav__mobileIcon {
+  fill: $kuiColorPrimary;
+}
+
+.kuiSideNav__mobileTitle {
+  flex-grow: 1;
+  color: $kuiColorPrimary;
+}
+
+@include screenXSmall {
+
+  .kuiSideNav__mobileToggle {
+    display: flex;
+  }
+
+  .kuiSideNav__content {
+    display: none;
+  }
+}

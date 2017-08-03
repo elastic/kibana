@@ -1205,6 +1205,10 @@ table {
 .kuiPage {
   padding: 24px; }
 
+@media only screen and (max-width: 768px) {
+  .kuiPage {
+    padding: 24px 0; } }
+
 .kuiPageBody {
   display: -webkit-box;
   display: -webkit-flex;
@@ -1246,6 +1250,11 @@ table {
 .kuiPageContent--horizontalCenter {
   width: auto;
   margin: auto; }
+
+@media only screen and (max-width: 768px) {
+  .kuiPageContent {
+    border-radius: 0;
+    border: none; } }
 
 .kuiPageContentHeader {
   margin-bottom: 24px;
@@ -1291,8 +1300,7 @@ table {
 
 @media only screen and (max-width: 768px) {
   .kuiPageSidebar {
-    width: 100%;
-    margin-bottom: 24px; } }
+    width: 100%; } }
 
 .kuiPageHeader {
   margin-bottom: 24px;
@@ -1320,7 +1328,9 @@ table {
     -webkit-box-direction: normal;
     -webkit-flex-direction: column;
         -ms-flex-direction: column;
-            flex-direction: column; } }
+            flex-direction: column;
+    padding: 0 24px;
+    margin-bottom: 0; } }
 
 .kuiPageHeaderSection + .kuiPageHeaderSection {
   margin-left: 32px; }
@@ -1401,6 +1411,36 @@ table {
   .kuiPopover--anchorRight .kuiPopover__body:before, .kuiPopover--anchorRight .kuiPopover__body:after {
     right: 16px;
     left: auto; }
+
+.kuiSideNav__mobileToggle {
+  display: none;
+  -webkit-box-orient: horizontal;
+  -webkit-box-direction: normal;
+  -webkit-flex-direction: row;
+      -ms-flex-direction: row;
+          flex-direction: row;
+  color: #FFF;
+  border-bottom: 1px solid #D9D9D9;
+  padding: 16px 24px; }
+
+.kuiSideNav__mobileIcon {
+  fill: #0079a5; }
+
+.kuiSideNav__mobileTitle {
+  -webkit-box-flex: 1;
+  -webkit-flex-grow: 1;
+      -ms-flex-positive: 1;
+          flex-grow: 1;
+  color: #0079a5; }
+
+@media only screen and (max-width: 768px) {
+  .kuiSideNav__mobileToggle {
+    display: -webkit-box;
+    display: -webkit-flex;
+    display: -ms-flexbox;
+    display: flex; }
+  .kuiSideNav__content {
+    display: none; } }
 
 .kuiSideNavItem {
   display: block;

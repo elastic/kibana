@@ -9,6 +9,7 @@
 @include screenXSmall {
   .kuiPageHeader {
     flex-direction: column;
+    padding: 0 $kuiSizeL;
+    margin-bottom: 0;
   }
-
 }
