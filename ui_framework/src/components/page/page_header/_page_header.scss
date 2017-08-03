@@ -1,5 +1,5 @@
 .kuiPageHeader {
-  margin-bottom: $kuiSizeXL;
+  margin-bottom: $kuiSizeL;
   display: flex;
   flex-direction: row;
   justify-content: space-between;
@@ -9,6 +9,7 @@
 @include screenXSmall {
   .kuiPageHeader {
     flex-direction: column;
+    padding: 0 $kuiSizeL;
+    margin-bottom: 0;
   }
-
 }
