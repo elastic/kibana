@@ -1,7 +1,8 @@
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { InputControlVis } from './components/input_control_vis';
-import { initTermsControl } from './lib/terms_control';
+import { initTermsControl } from './lib/init_terms_control';
+import { initTextControl } from './lib/init_text_control';
 
 class VisController {
   constructor(el, vis) {
@@ -42,15 +43,29 @@ class VisController {
       return control.indexPattern && control.fieldName;
     })
     .map(async (controlParams) => {
-      return initTermsControl(
-        controlParams,
-        this.vis.API.indexPatterns,
-        this.vis.API.SearchSource,
-        this.vis.API.queryFilter,
-        (control) => {
-          this.controls.push(control);
-          this.drawVis();
-        });
+      let initFunc = null;
+      switch (controlParams.type) {
+        case 'terms':
+          initFunc = initTermsControl;
+          break;
+        case 'range':
+          break;
+        case 'text':
+          initFunc = initTextControl;
+          break;
+      }
+
+      if (initFunc) {
+        return initFunc(
+          controlParams,
+          this.vis.API.indexPatterns,
+          this.vis.API.SearchSource,
+          this.vis.API.queryFilter,
+          (control) => {
+            this.controls.push(control);
+            this.drawVis();
+          });
+      }
     });
     Promise.all(createRequestPromises).then(requests => {
       this.vis.API.fetch.these(requests);

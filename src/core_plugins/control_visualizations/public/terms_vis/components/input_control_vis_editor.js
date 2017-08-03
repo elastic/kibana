@@ -95,7 +95,6 @@ export class InputControlVisEditor extends Component {
           );
           break;
         case 'text':
-        default:
           controlEditor = (
             <TextControlEditor
               controlParams={controlParams}
