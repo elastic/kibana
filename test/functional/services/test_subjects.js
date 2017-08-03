@@ -58,7 +58,7 @@ export function TestSubjectsProvider({ getService }) {
         await element.click();
 
         // in case the input element is actually a child of the testSubject, we
-        // call clearValue() and type() on the element that is focues after
+        // call clearValue() and type() on the element that is focused after
         // clicking on the testSubject
         const input = await remote.getActiveElement();
         await input.clearValue();
