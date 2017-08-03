@@ -1418,7 +1418,6 @@ table {
   border-color: transparent; }
   .kuiSideNavItem.isSelected {
     color: #00A69B;
-    font-weight: 500;
     border-left: 2px solid #D9D9D9;
     border-left-color: #00A69B;
     background-color: #FFF;
