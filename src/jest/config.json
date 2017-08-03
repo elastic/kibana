@@ -13,7 +13,8 @@
     "!ui_framework/components/**/*/index.js"
   ],
   "moduleNameMapper": {
-    "^ui_framework/components": "<rootDir>/ui_framework/components"
+    "^ui_framework/components": "<rootDir>/ui_framework/components",
+    "\\.(css|less|scss)$": "<rootDir>/src/jest/style_mock.js"
   },
   "coverageDirectory": "<rootDir>/target/jest-coverage",
   "coverageReporters": [
