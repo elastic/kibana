@@ -89,7 +89,3 @@ export {
   KuiTitle,
   KuiText,
 } from './typography';
-
-export {
-  KuiVerticalRhythm,
-} from './vertical_rhythm';

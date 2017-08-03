@@ -1,23 +1,23 @@
 .kuiVerticalRhythm {
-  @include kuiVerticalRhythm;
+  margin-bottom: $kuiVerticalRhythmM;
 }
 
 .kuiVerticalRhythm--xSmall {
-  @include kuiVerticalRhythmXS;
+  margin-bottom: $kuiVerticalRhythmXS;
 }
 
 .kuiVerticalRhythm--small {
-  @include kuiVerticalRhythmS;
+  margin-bottom: $kuiVerticalRhythmS;
 }
 
 .kuiVerticalRhythm--large {
-  @include kuiVerticalRhythmL;
+  margin-bottom: $kuiVerticalRhythmL;
 }
 
 .kuiVerticalRhythm--xLarge {
-  @include kuiVerticalRhythmXL;
+  margin-bottom: $kuiVerticalRhythmXL;
 }
 
 .kuiVerticalRhythm--xxLarge {
-  @include kuiVerticalRhythmXXL;
+  margin-bottom: $kuiVerticalRhythmXXL;
 }

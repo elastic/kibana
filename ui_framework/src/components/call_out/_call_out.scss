@@ -34,9 +34,9 @@ $callOutTypes: (
  * 2. Apply margin to all but last item in the flex.
  */
 .kuiCallOutHeader {
-  @include kuiVerticalRhythmS;
   @include kuiFontSizeM;
 
+  margin-bottom: $kuiVerticalRhythmS;
   display: flex;
   align-items: baseline; /* 1 */
 

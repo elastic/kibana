@@ -45,9 +45,6 @@ import TabsExample
 import TypographyExample
   from '../../views/typography/typography_example';
 
-import VerticalRhythmExample
-  from '../../views/vertical_rhythm/vertical_rhythm_example';
-
 // Component route names should match the component name exactly.
 const components = [{
   name: 'Accessibility',
@@ -104,10 +101,6 @@ const components = [{
 }, {
   name: 'Typography',
   component: TypographyExample,
-  hasReact: true,
-}, {
-  name: 'VerticalRhythm',
-  component: VerticalRhythmExample,
   hasReact: true,
 }];
 

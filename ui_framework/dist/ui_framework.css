@@ -515,10 +515,10 @@ table {
  * 2. Apply margin to all but last item in the flex.
  */
 .kuiCallOutHeader {
-  margin-bottom: 9px;
   font-size: 16px;
   font-size: 1rem;
   line-height: 24px;
+  margin-bottom: 9px;
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;

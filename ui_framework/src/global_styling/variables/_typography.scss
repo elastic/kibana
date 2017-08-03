@@ -105,29 +105,3 @@ $kuiFontWeightMedium:   500;
   @include fontSize($kuiFontSizeXXL);
   line-height: $kuiLineHeightXXL;
 }
-
-// Vertical rhythm
-
-@mixin kuiVerticalRhythmXS {
-  margin-bottom: $kuiVerticalRhythmXS;
-}
-
-@mixin kuiVerticalRhythmS {
-  margin-bottom: $kuiVerticalRhythmS;
-}
-
-@mixin kuiVerticalRhythm {
-  margin-bottom: $kuiVerticalRhythmM;
-}
-
-@mixin kuiVerticalRhythmL {
-  margin-bottom: $kuiVerticalRhythmL;
-}
-
-@mixin kuiVerticalRhythmXL {
-  margin-bottom: $kuiVerticalRhythmXL;
-}
-
-@mixin kuiVerticalRhythmXXL {
-  margin-bottom: $kuiVerticalRhythmXXL;
-}
