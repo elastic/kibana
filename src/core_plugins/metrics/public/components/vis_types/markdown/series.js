@@ -1,6 +1,6 @@
 import React, { PropTypes } from 'react';
 import AddDeleteButtons from '../../add_delete_buttons';
-import SeriesConfig from '../../series_config';
+import { SeriesConfig } from '../../series_config';
 import Sortable from 'react-anything-sortable';
 import Split from '../../split';
 import createAggRowRender from '../../lib/create_agg_row_render';

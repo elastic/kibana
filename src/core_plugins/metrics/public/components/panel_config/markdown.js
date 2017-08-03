@@ -1,6 +1,6 @@
 import React, { Component, PropTypes } from 'react';
 import SeriesEditor from '../series_editor';
-import IndexPattern from '../index_pattern';
+import { IndexPattern } from '../index_pattern';
 import AceEditor from 'react-ace';
 import 'brace/mode/less';
 import Select from 'react-select';
