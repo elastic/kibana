@@ -99,7 +99,7 @@ export function AggregationsProvider(Private) {
       AggTypes.byName.ip_range.name,
       AggTypes.byName.terms.name,
       AggTypes.byName.filters.name,
-      AggTypes.byName.significant_tems.name
+      AggTypes.byName.significant_terms.name
     ]
   };
 
