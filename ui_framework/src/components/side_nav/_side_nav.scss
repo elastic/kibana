@@ -27,6 +27,7 @@
     opacity: 1;
     margin: $kuiSizeL;
     max-height: 5000px; /* 1 */
+    transition: all $kuiAnimSpeedNormal $kuiAnimSlightResistance;
   }
 
   .kuiSideNav__mobileToggle {
@@ -38,6 +39,6 @@
     opacity: 0;
     max-height: 0;
     margin: 0 $kuiSizeL;
-    transition: all $kuiAnimSpeedNormal $kuiAnimSlightResistance;
+
   }
 }

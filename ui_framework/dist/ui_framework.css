@@ -1444,7 +1444,8 @@ table {
     opacity: 1;
     margin: 24px;
     max-height: 5000px;
-    /* 1 */ }
+    /* 1 */
+    transition: all 250ms cubic-bezier(0.694, 0.0482, 0.335, 1); }
   .kuiSideNav__mobileToggle {
     display: -webkit-box;
     display: -webkit-flex;
@@ -1454,8 +1455,7 @@ table {
     visibility: hidden;
     opacity: 0;
     max-height: 0;
-    margin: 0 24px;
-    transition: all 250ms cubic-bezier(0.694, 0.0482, 0.335, 1); } }
+    margin: 0 24px; } }
 
 .kuiSideNavItem {
   display: block;
