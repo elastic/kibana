@@ -9,7 +9,6 @@ describe('getHighlightRequest', () => {
   beforeEach(function () {
     configMock = {};
     configMock['doc_table:highlight'] = true;
-    configMock['doc_table:highlight:all_fields'] = true;
   });
 
   it('should be a function', () => {
