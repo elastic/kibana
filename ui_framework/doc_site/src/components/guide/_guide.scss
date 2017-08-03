@@ -1,6 +1,5 @@
 .guideBody {
   height: 100%;
-  background-color: #000000;
 }
 
 /**
@@ -17,7 +16,6 @@
   flex-direction: column;
   flex: 1 1 auto;
   padding-top: $guideNavHeight;
-  background-color: $guideBaseBackgroundColor;
   transition:
     padding-right $guideCodeViewerTransition,
     opacity $guideCodeViewerTransition;
