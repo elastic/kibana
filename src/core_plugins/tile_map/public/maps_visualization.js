@@ -275,7 +275,7 @@ export function MapsVisualizationProvider(serviceSettings, Notifier, getAppState
       const filter = { meta: { negate: false, index: indexPatternName } };
       filter[filterName] = { ignore_unmapped: true };
       filter[filterName][field] = filterData;
-      getAppState().filters.push(filter);
+      getAppState().$newFilters = [filter];
       this.vis.updateState();
     }
 
