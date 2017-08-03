@@ -5,18 +5,18 @@ import { VisFactoryProvider } from 'ui/vis/vis_factory';
 import { VisTypesRegistryProvider } from 'ui/registry/vis_types';
 import { VisController } from './vis_controller';
 import { newControl } from './lib/editor_utils';
-import { TermsVisEditor } from './components/terms_vis_editor';
+import { InputControlVisEditor } from './components/input_control_vis_editor';
 
 function TermsVisProvider(Private) {
   const VisFactory = Private(VisFactoryProvider);
 
   // return the visType object, which kibana will use to display and configure new Vis object of this type.
   return VisFactory.createBaseVisualization({
-    name: 'terms_vis',
-    title: 'Terms Control',
+    name: 'input_control_vis',
+    title: 'Dashboard Controls',
     icon: 'fa fa-gear',
-    description: 'Terms Control',
-    category: CATEGORY.CONTROL,
+    description: 'Create interactive controls for easy Dashboard manipulation.',
+    category: CATEGORY.OTHER,
     visualization: VisController,
     visConfig: {
       defaults: {
@@ -25,7 +25,7 @@ function TermsVisProvider(Private) {
     },
     editor: 'default',
     editorConfig: {
-      optionsTemplate: TermsVisEditor
+      optionsTemplate: InputControlVisEditor
     },
     requestHandler: 'none',
     responseHandler: 'none',
