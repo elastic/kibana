@@ -257,7 +257,9 @@ export function CommonPageProvider({ getService, getPageObjects }) {
     }
 
     async isChromeVisible() {
-      return await testSubjects.exists('kibanaChrome');
+      const globalNavShown = await testSubjects.exists('globalNav');
+      const topNavShown = await testSubjects.exists('top-nav');
+      return globalNavShown && topNavShown;
     }
 
     async waitForTopNavToBeVisible() {

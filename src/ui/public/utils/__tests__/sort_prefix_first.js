@@ -39,4 +39,12 @@ describe('sortPrefixFirst', function () {
     expect(result).to.not.be(array);
     expect(result).to.eql([50, 5, 1]);
   });
+
+  it('should handle mixed case', function () {
+    const array = ['Date Histogram', 'Histogram'];
+    const prefix = 'histo';
+    const result = sortPrefixFirst(array, prefix);
+    expect(result).to.not.be(array);
+    expect(result).to.eql(['Histogram', 'Date Histogram']);
+  });
 });
