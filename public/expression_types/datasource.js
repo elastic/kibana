@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { createElement } from 'react';
 import { Registry } from '../../common/lib/registry';
 import { BaseForm } from './base_form';
 
@@ -16,6 +16,10 @@ export class Datasource extends BaseForm {
     });
 
     this.image = props.image;
+  }
+
+  render(props = {}) {
+    return createElement(this.template, { ...props, ...this.resolve(props) });
   }
 }
 
