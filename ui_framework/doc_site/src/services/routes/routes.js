@@ -6,6 +6,9 @@ import AccessibilityExample
 import ButtonExample
   from '../../views/button/button_example';
 
+import CallOutExample
+  from '../../views/call_out/call_out_example';
+
 import IconExample
   from '../../views/icon/icon_example';
 
@@ -42,6 +45,9 @@ import TabsExample
 import TypographyExample
   from '../../views/typography/typography_example';
 
+import VerticalRhythmExample
+  from '../../views/vertical_rhythm/vertical_rhythm_example';
+
 // Component route names should match the component name exactly.
 const components = [{
   name: 'Accessibility',
@@ -52,12 +58,16 @@ const components = [{
   component: ButtonExample,
   hasReact: true,
 }, {
-  name: 'Icon',
-  component: IconExample,
+  name: 'CallOut',
+  component: CallOutExample,
   hasReact: true,
 }, {
   name: 'Header',
   component: HeaderExample,
+  hasReact: true,
+}, {
+  name: 'Icon',
+  component: IconExample,
   hasReact: true,
 }, {
   name: 'KeyPadMenu',
@@ -68,16 +78,16 @@ const components = [{
   component: LinkExample,
   hasReact: true,
 }, {
+  name: 'Loading',
+  component: LoadingExample,
+  hasReact: true,
+}, {
   name: 'Modal',
   component: ModalExample,
   hasReact: true,
 }, {
   name: 'Page',
   component: PageExample,
-  hasReact: true,
-}, {
-  name: 'Loading',
-  component: LoadingExample,
   hasReact: true,
 }, {
   name: 'Popover',
@@ -94,6 +104,10 @@ const components = [{
 }, {
   name: 'Typography',
   component: TypographyExample,
+  hasReact: true,
+}, {
+  name: 'VerticalRhythm',
+  component: VerticalRhythmExample,
   hasReact: true,
 }];
 

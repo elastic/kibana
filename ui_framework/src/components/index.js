@@ -7,6 +7,10 @@ export {
 } from './button';
 
 export {
+  KuiCallOut,
+} from './call_out';
+
+export {
   KuiHeader,
   KuiHeaderBreadcrumb,
   KuiHeaderBreadcrumbCollapsed,
@@ -18,6 +22,7 @@ export {
 } from './header';
 
 export {
+  ICON_TYPES,
   KuiIcon,
 } from './icon';
 
@@ -84,3 +89,7 @@ export {
   KuiTitle,
   KuiText,
 } from './typography';
+
+export {
+  KuiVerticalRhythm,
+} from './vertical_rhythm';

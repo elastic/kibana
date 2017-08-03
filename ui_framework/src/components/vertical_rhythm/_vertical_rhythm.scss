@@ -1,0 +1,23 @@
+.kuiVerticalRhythm {
+  @include kuiVerticalRhythm;
+}
+
+.kuiVerticalRhythm--xSmall {
+  @include kuiVerticalRhythmXS;
+}
+
+.kuiVerticalRhythm--small {
+  @include kuiVerticalRhythmS;
+}
+
+.kuiVerticalRhythm--large {
+  @include kuiVerticalRhythmL;
+}
+
+.kuiVerticalRhythm--xLarge {
+  @include kuiVerticalRhythmXL;
+}
+
+.kuiVerticalRhythm--xxLarge {
+  @include kuiVerticalRhythmXXL;
+}

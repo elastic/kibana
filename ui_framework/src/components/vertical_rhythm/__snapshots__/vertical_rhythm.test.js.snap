@@ -1,0 +1,51 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`KuiVerticalRhythm is rendered 1`] = `
+<div
+  aria-label="aria-label"
+  class="kuiVerticalRhythm testClass1 testClass2"
+  data-test-subj="test subject string"
+>
+  Hi
+</div>
+`;
+
+exports[`KuiVerticalRhythm renders size large 1`] = `
+<h1
+  class="kuiVerticalRhythm kuiVerticalRhythm--large"
+>
+  hi
+</h1>
+`;
+
+exports[`KuiVerticalRhythm renders size small 1`] = `
+<h1
+  class="kuiVerticalRhythm kuiVerticalRhythm--small"
+>
+  hi
+</h1>
+`;
+
+exports[`KuiVerticalRhythm renders size xLarge 1`] = `
+<h1
+  class="kuiVerticalRhythm kuiVerticalRhythm--xLarge"
+>
+  hi
+</h1>
+`;
+
+exports[`KuiVerticalRhythm renders size xSmall 1`] = `
+<h1
+  class="kuiVerticalRhythm kuiVerticalRhythm--xSmall"
+>
+  hi
+</h1>
+`;
+
+exports[`KuiVerticalRhythm renders size xxLarge 1`] = `
+<h1
+  class="kuiVerticalRhythm kuiVerticalRhythm--xxLarge"
+>
+  hi
+</h1>
+`;
