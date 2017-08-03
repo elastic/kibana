@@ -87,6 +87,12 @@ export {
 } from './tabs';
 
 export {
+  KuiSideNav,
+  KuiSideNavItem,
+  KuiSideNavTitle,
+} from './side_nav';
+
+export {
   KuiTitle,
   KuiText,
 } from './typography';
