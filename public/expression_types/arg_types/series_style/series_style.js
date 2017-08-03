@@ -31,8 +31,6 @@ const template = (props) => {
   const label = get(chainArgs, 'label.0.value', '');
   const color = get(chainArgs, 'color.0.value', '');
 
-  console.log(label);
-
   // TODO: OMG Gross. Its this or lifecycles. So gross.
   setTimeout(() => {if (label) setLabel(`Style: ${label}`);}, 0);
 

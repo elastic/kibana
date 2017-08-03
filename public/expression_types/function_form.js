@@ -3,7 +3,6 @@ import { Label, Alert } from 'react-bootstrap';
 import { isPlainObject, uniq, last } from 'lodash';
 import { BaseForm } from './base_form';
 import { fromExpression } from '../../common/lib/ast';
-import { ArgForm } from '../components/arg_form';
 
 export class FunctionForm extends BaseForm {
   constructor(name, props) {
@@ -23,16 +22,15 @@ export class FunctionForm extends BaseForm {
     if (!arg || skipRender) return null;
 
     // If value in expression, render the argument's template, wrapped in a remove control
-    return argValues && argValues.map((argValue, valueIndex) => (
-      <ArgForm
-        {...passedProps}
-        arg={arg}
-        valueIndex={valueIndex}
-        argValue={argValue}
-        onValueChange={onValueChange(arg.name, valueIndex)}
-        onValueRemove={onValueRemove(arg.name, valueIndex)}
-      />
-    ));
+    return argValues && argValues.map((argValue, valueIndex) =>
+      arg.render({
+        ...passedProps,
+        valueIndex,
+        argValue,
+        onValueChange: onValueChange(arg.name, valueIndex),
+        onValueRemove: onValueRemove(arg.name, valueIndex),
+      })
+    );
   }
 
   renderAddArg(props, dataArg) {
