@@ -4,12 +4,15 @@ import { CATEGORY } from 'ui/vis/vis_category';
 import gaugeTemplate from 'plugins/kbn_vislib_vis_types/editors/gauge.html';
 import { vislibColorMaps } from 'ui/vislib/components/color/colormaps';
 import { AggTypesIndexProvider } from 'ui/agg_types';
+import { AggregationsProvider } from 'ui/vis/aggregations';
 import image from './images/icon-number.svg';
 
 export default function MetricVisType(Private) {
   const VisFactory = Private(VisFactoryProvider);
   const Schemas = Private(VisSchemasProvider);
   const AggTypes = Private(AggTypesIndexProvider);
+  const AGGREGATIONS = Private(AggregationsProvider);
+
 
   return VisFactory.createVislibVisualization({
     name: 'metric',
@@ -71,26 +74,7 @@ export default function MetricVisType(Private) {
           name: 'metric',
           title: 'Metric',
           min: 1,
-          aggFilter: [
-            AggTypes.byName.count.name,
-            AggTypes.byName.avg.name,
-            AggTypes.byName.sum.name,
-            AggTypes.byName.median.name,
-            AggTypes.byName.min.name,
-            AggTypes.byName.max.name,
-            AggTypes.byName.std_dev.name,
-            AggTypes.byName.cardinality.name,
-            AggTypes.byName.percentiles.name,
-            AggTypes.byName.percentile_ranks.name,
-            AggTypes.byName.top_hits.name,
-            AggTypes.byName.cumulative_sum.name,
-            AggTypes.byName.moving_avg.name,
-            AggTypes.byName.serial_diff.name,
-            AggTypes.byName.avg_bucket.name,
-            AggTypes.byName.sum_bucket.name,
-            AggTypes.byName.min_bucket.name,
-            AggTypes.byName.max_bucket.name
-          ],
+          aggFilter: AGGREGATIONS.DEFAULT_METRICS,
           defaults: [
             { schema: 'metric', type: AggTypes.byName.count.name }
           ]
@@ -101,15 +85,7 @@ export default function MetricVisType(Private) {
           title: 'Split Group',
           min: 0,
           max: 1,
-          aggFilter: [
-            AggTypes.byName.date_histogram.name,
-            AggTypes.byName.histogram.name,
-            AggTypes.byName.range.name,
-            AggTypes.byName.date_range.name,
-            AggTypes.byName.ip_range.name,
-            AggTypes.byName.terms.name,
-            AggTypes.byName.filters.name
-          ]
+          aggFilter: AGGREGATIONS.DEFAULT_BUCKETS
         }
       ])
     }

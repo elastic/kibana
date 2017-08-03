@@ -3,10 +3,14 @@ import { VisSchemasProvider } from 'ui/vis/editors/default/schemas';
 import { CATEGORY } from 'ui/vis/vis_category';
 import pieTemplate from 'plugins/kbn_vislib_vis_types/editors/pie.html';
 import image from './images/icon-pie.svg';
+import { AggTypesIndexProvider } from 'ui/agg_types';
+import { AggregationsProvider } from 'ui/vis/aggregations';
 
 export default function HistogramVisType(Private) {
   const VisFactory = Private(VisFactoryProvider);
   const Schemas = Private(VisSchemasProvider);
+  const AggTypes = Private(AggTypesIndexProvider);
+  const AGGREGATIONS = Private(AggregationsProvider);
 
   return VisFactory.createVislibVisualization({
     name: 'pie',
@@ -47,9 +51,14 @@ export default function HistogramVisType(Private) {
           title: 'Slice Size',
           min: 1,
           max: 1,
-          aggFilter: ['sum', 'count', 'cardinality', 'top_hits'],
+          aggFilter: [
+            AggTypes.byName.count.name,
+            AggTypes.byName.sum.name,
+            AggTypes.byName.cardinality.name,
+            AggTypes.byName.top_hits.name
+          ],
           defaults: [
-            { schema: 'metric', type: 'count' }
+            { schema: 'metric', type: AggTypes.byName.count.name }
           ]
         },
         {
@@ -59,7 +68,7 @@ export default function HistogramVisType(Private) {
           title: 'Split Slices',
           min: 0,
           max: Infinity,
-          aggFilter: '!geohash_grid'
+          aggFilter: AGGREGATIONS.DEFAULT_BUCKETS
         },
         {
           group: 'buckets',
@@ -69,7 +78,7 @@ export default function HistogramVisType(Private) {
           mustBeFirst: true,
           min: 0,
           max: 1,
-          aggFilter: '!geohash_grid'
+          aggFilter: AGGREGATIONS.DEFAULT_BUCKETS
         }
       ])
     },
