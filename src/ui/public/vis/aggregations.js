@@ -24,6 +24,22 @@ export function AggregationsProvider(Private) {
       AggTypes.byName.std_dev.name,
       AggTypes.byName.top_hits.name
     ],
+
+
+    /**
+     * simple metrics, no pipelines
+     */
+    SIMPLE_MAPPABLE_METRICS: [
+      AggTypes.byName.count.name,
+      AggTypes.byName.avg.name,
+      AggTypes.byName.sum.name,
+      AggTypes.byName.median.name,
+      AggTypes.byName.min.name,
+      AggTypes.byName.max.name,
+      AggTypes.byName.cardinality.name,
+      AggTypes.byName.top_hits.name
+    ],
+
     /**
      * simple statistics
      */

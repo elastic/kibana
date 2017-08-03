@@ -77,7 +77,7 @@ VisTypesRegistryProvider.register(function TileMapVisType(Private, getAppState, 
           title: 'Value',
           min: 1,
           max: 1,
-          aggFilter: AGGREGATIONS.SIMPLE_METRICS,
+          aggFilter: AGGREGATIONS.SIMPLE_MAPPABLE_METRICS,
           defaults: [
             { schema: 'metric', type: AggTypes.byName.count.name }
           ]
