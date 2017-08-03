@@ -7,6 +7,6 @@ import {
 } from './controlled_table';
 
 test('renders KuiToolControlledTable', () => {
-  const component = <KuiControlledTable { ...requiredProps }>children</KuiControlledTable>;
+  const component = <KuiControlledTable {...requiredProps}>children</KuiControlledTable>;
   expect(render(component)).toMatchSnapshot();
 });

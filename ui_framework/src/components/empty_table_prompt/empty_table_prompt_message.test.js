@@ -7,6 +7,6 @@ import {
 } from './empty_table_prompt_message';
 
 test('renders KuiEmptyTablePromptMessage', () => {
-  const component = <KuiEmptyTablePromptMessage { ...requiredProps }>children</KuiEmptyTablePromptMessage>;
+  const component = <KuiEmptyTablePromptMessage {...requiredProps}>children</KuiEmptyTablePromptMessage>;
   expect(render(component)).toMatchSnapshot();
 });

@@ -7,6 +7,6 @@ import {
 } from './bar_section';
 
 test('renders KuiBarSection', () => {
-  const component = <KuiBarSection { ...requiredProps }>children</KuiBarSection>;
+  const component = <KuiBarSection {...requiredProps}>children</KuiBarSection>;
   expect(render(component)).toMatchSnapshot();
 });

@@ -15,6 +15,6 @@ export class ColorPicker extends React.Component {
   };
 
   render() {
-    return <KuiColorPicker onChange={ this.handleChange } color={ this.state.color }/>;
+    return <KuiColorPicker onChange={this.handleChange} color={this.state.color}/>;
   }
 }

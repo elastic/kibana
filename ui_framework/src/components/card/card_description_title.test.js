@@ -7,6 +7,6 @@ import {
 } from './card_description_title';
 
 test('renders KuiCardDescriptionTitle', () => {
-  const component = <KuiCardDescriptionTitle { ...requiredProps }>children</KuiCardDescriptionTitle>;
+  const component = <KuiCardDescriptionTitle {...requiredProps}>children</KuiCardDescriptionTitle>;
   expect(render(component)).toMatchSnapshot();
 });

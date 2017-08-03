@@ -8,7 +8,7 @@ export function KuiLocalTab({ className, children, isDisabled, isSelected, ...re
     'kuiLocalTab-isSelected': isSelected,
   });
   return (
-    <a className={ classes } { ...rest }>
+    <a className={classes} {...rest}>
       { children }
     </a>
   );

@@ -8,18 +8,18 @@ export function KuiToolBarSearchBox({ filter, onFilter, placeholder, className, 
   const classes = classNames('kuiToolBarSearch', className);
   return (
     <div
-      className={ classes }
-      { ...rest }
+      className={classes}
+      {...rest}
     >
       <div className="kuiToolBarSearchBox">
         <div className="kuiToolBarSearchBox__icon kuiIcon fa-search" />
         <input
           className="kuiToolBarSearchBox__input"
           type="text"
-          placeholder={ placeholder }
+          placeholder={placeholder}
           aria-label="Filter"
-          defaultValue={ filter }
-          onChange={ onChange }
+          defaultValue={filter}
+          onChange={onChange}
         />
       </div>
     </div>

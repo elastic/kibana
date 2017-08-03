@@ -7,6 +7,6 @@ import {
 } from './table_info';
 
 test('renders KuiTableInfo', () => {
-  const component = <KuiTableInfo { ...requiredProps }>children</KuiTableInfo>;
+  const component = <KuiTableInfo {...requiredProps}>children</KuiTableInfo>;
   expect(render(component)).toMatchSnapshot();
 });

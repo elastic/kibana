@@ -8,7 +8,7 @@ function AddDeleteButtons(props) {
     }
     return (
       <Tooltip text={props.deleteTooltip}>
-        <a className="thor__button-outlined-danger sm" onClick={ props.onDelete }>
+        <a className="thor__button-outlined-danger sm" onClick={props.onDelete}>
           <i className="fa fa-trash-o" />
         </a>
       </Tooltip>
@@ -20,7 +20,7 @@ function AddDeleteButtons(props) {
     }
     return (
       <Tooltip text={props.addTooltip}>
-        <a className="thor__button-outlined-default sm" onClick={ props.onAdd }>
+        <a className="thor__button-outlined-default sm" onClick={props.onAdd}>
           <i className="fa fa-plus" />
         </a>
       </Tooltip>
@@ -32,7 +32,7 @@ function AddDeleteButtons(props) {
   if (props.onClone && !props.disableAdd) {
     clone = (
       <Tooltip text={props.cloneTooltip}>
-        <a className="thor__button-outlined-default sm" onClick={ props.onClone }>
+        <a className="thor__button-outlined-default sm" onClick={props.onClone}>
           <i className="fa fa-files-o" />
         </a>
       </Tooltip>

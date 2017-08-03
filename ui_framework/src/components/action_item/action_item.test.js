@@ -7,6 +7,6 @@ import {
 } from './action_item';
 
 test('renders KuiActionItem', () => {
-  const component = <KuiActionItem { ...requiredProps }>children</KuiActionItem>;
+  const component = <KuiActionItem {...requiredProps}>children</KuiActionItem>;
   expect(render(component)).toMatchSnapshot();
 });

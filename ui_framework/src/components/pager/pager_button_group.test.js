@@ -21,7 +21,7 @@ test('renders KuiPagerButtonGroup', () => {
     onPrevious={onPrevious}
     hasNext={true}
     hasPrevious={true}
-    { ...requiredProps }
+    {...requiredProps}
   />);
   expect(render(component)).toMatchSnapshot();
 });

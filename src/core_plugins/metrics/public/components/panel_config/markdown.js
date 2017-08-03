@@ -120,7 +120,7 @@ class MarkdownPanelConfig extends Component {
               width="100%"
               name={`ace-css-${model.id}`}
               setOptions={{ fontSize: '14px' }}
-              value={ model.markdown_less}
+              value={model.markdown_less}
               onChange={this.handleCSSChange}
             />
           </div>

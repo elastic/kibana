@@ -7,6 +7,6 @@ import {
 } from './header_bar';
 
 test('renders KuiHeaderBar', () => {
-  const component = <KuiHeaderBar { ...requiredProps }>children</KuiHeaderBar>;
+  const component = <KuiHeaderBar {...requiredProps}>children</KuiHeaderBar>;
   expect(render(component)).toMatchSnapshot();
 });

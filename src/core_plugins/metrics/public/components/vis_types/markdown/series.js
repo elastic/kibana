@@ -100,18 +100,18 @@ function MarkdownSeries(props) {
     >
       <div className="vis_editor__container">
         <div className="vis_editor__series-details">
-          <div onClick={ props.toggleVisible }><i className={ caretClassName }/></div>
+          <div onClick={props.toggleVisible}><i className={caretClassName}/></div>
           <div className="vis_editor__row vis_editor__row_item">
             <input
               className="vis_editor__input-grows vis_editor__row_item"
               onChange={handleChange('label')}
-              placeholder='Label'
+              placeholder="Label"
               value={model.label}
             />
             <input
               className="vis_editor__input-grows"
               onChange={handleChange('var_name')}
-              placeholder='Variable Name'
+              placeholder="Variable Name"
               value={model.var_name}
             />
           </div>

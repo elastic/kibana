@@ -67,9 +67,9 @@ class MovingAverageAgg extends Component {
               <Select
                 clearable={false}
                 placeholder="Select..."
-                onChange={ handleSelectChange('model') }
+                onChange={handleSelectChange('model')}
                 value={this.props.model.model}
-                options={ modelOptions }
+                options={modelOptions}
               />
             </div>
             <div className="vis_editor__row_item">
@@ -85,9 +85,9 @@ class MovingAverageAgg extends Component {
               <div className="vis_editor__label">Minimize</div>
               <Select
                 placeholder="Select..."
-                onChange={ handleSelectChange('minimize') }
+                onChange={handleSelectChange('minimize')}
                 value={model.minimize}
-                options={ minimizeOptions }
+                options={minimizeOptions}
               />
             </div>
           </div>
