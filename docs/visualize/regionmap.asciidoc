@@ -31,7 +31,7 @@ as well as your self-hosted layers that are configured in the *config/kibana.yml
 to make self-hosted layers available, see the <<regionmap-settings,regionmap settings>> documentation.
 - *Join field*: this is the property from the selected vector map that will be used to join on the terms in your terms-aggregation. 
 When terms cannot be joined to any of the shapes in the vector layer because there is no exact match in the vector layer, Kibana will display a warning.
-To turn of these warnings, go to *Management/Kibana/Advanced Settings* and set `visualization:regionmap:showWarnings` to `vefalse`.
+To turn of these warnings, go to *Management/Kibana/Advanced Settings* and set `visualization:regionmap:showWarnings` to `false`.
 
 ===== Style Settings
 - *Color Schema*: the color range used to color the shapes.
