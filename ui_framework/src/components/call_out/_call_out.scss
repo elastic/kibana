@@ -1,0 +1,59 @@
+.kuiCallOut {
+  padding: $kuiSizeM $kuiSizeL;
+  border-left: 4px solid $kuiColorPrimary;
+  background-color: tintOrShade($kuiColorPrimary, 90%, 70%); /* 1 */
+}
+
+// Modifier naming and colors.
+$callOutTypes: (
+  success: $kuiColorSecondary,
+  warning: $kuiColorWarning,
+  danger: $kuiColorDanger,
+);
+
+// Create button modifiders based upon the map.
+@each $name, $color in $callOutTypes {
+  .kuiCallOut--#{$name} {
+    border-color: $color;
+    background-color: tintOrShade($color, 90%, 70%);
+
+    $textColor: shadeOrTint($color, 30%, 70%);
+
+    .kuiCallOutHeader__icon {
+      fill: $textColor;
+    }
+
+    .kuiCallOutHeader__title {
+      color: $textColor;
+    }
+  }
+}
+
+/**
+ * 1. Align icon with first line of title text if it wraps.
+ * 2. Apply margin to all but last item in the flex.
+ */
+.kuiCallOutHeader {
+  @include kuiFontSizeM;
+
+  margin-bottom: $kuiVerticalRhythmS;
+  display: flex;
+  align-items: baseline; /* 1 */
+
+  > * + * {
+    margin-left: $kuiSizeS; /* 2 */
+  }
+}
+
+  /**
+   * 1. Vertically center icon with first line of title.
+   */
+  .kuiCallOutHeader__icon {
+    fill: $kuiColorPrimary;
+    transform: translateY(2px); /* 1 */
+  }
+
+  .kuiCallOutHeader__title {
+    // font-weight: $kuiFontWeightMedium;
+    color: $kuiColorPrimary;
+  }

@@ -3,54 +3,28 @@ import React from 'react';
 import {
   KuiIcon,
 } from '../../../../components';
+const iconTypes = [
+  'dashboardApp',
+  'devToolsApp',
+  'discoverApp',
+  'graphApp',
+  'machineLearningApp',
+  'timelionApp',
+  'visualizeApp',
+];
 
 export default () => (
   <div>
-    <KuiIcon
-      type="dashboardApp"
-      size="xLarge"
-    />
-
-    &nbsp;
-
-    <KuiIcon
-      type="devToolsApp"
-      size="xLarge"
-    />
-
-    &nbsp;
-
-    <KuiIcon
-      type="discoverApp"
-      size="xLarge"
-    />
-
-    &nbsp;
-
-    <KuiIcon
-      type="graphApp"
-      size="xLarge"
-    />
-
-    &nbsp;
-
-    <KuiIcon
-      type="machineLearningApp"
-      size="xLarge"
-    />
-
-    &nbsp;
-
-    <KuiIcon
-      type="timelionApp"
-      size="xLarge"
-    />
-
-    &nbsp;
-
-    <KuiIcon
-      type="visualizeApp"
-      size="xLarge"
-    />
+    {
+      iconTypes.map(iconType => (
+        <span key={iconType}>
+          <KuiIcon
+            type={iconType}
+            size="xLarge"
+          />
+          &nbsp;
+        </span>
+      ))
+    }
   </div>
 );

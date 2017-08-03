@@ -20,19 +20,19 @@
   }
 
   .kuiButton__icon {
-    vertical-align: -2px;
     fill: $kuiColorPrimary;
   }
 
+  /**
+   * 1. Apply margin to all but last item in the flex.
+   */
   .kuiButton__content {
     display: flex;
-    flex-direction: row;
     justify-content: center;
     align-items: center;
 
-    // Apply margin to all but last item in the flex.
     > * + * {
-      margin-left: $kuiSizeS;
+      margin-left: $kuiSizeS; /* 1 */
     }
   }
 
@@ -61,7 +61,6 @@
   }
 
   &.kuiButton--reverse {
-
     .kuiButton__content {
       flex-direction: row-reverse;
       // Margin gets flipped because of the row-reverse.
@@ -73,12 +72,11 @@
   }
 }
 
-
 // Modifier naming and colors.
 $buttonTypes: (
   secondary: $kuiColorSecondary,
-  danger: $kuiColorDanger,
   warning: $kuiColorWarning,
+  danger: $kuiColorDanger,
   disabled: tintOrShade($kuiTextColor, 70%, 80%)
 );
 
