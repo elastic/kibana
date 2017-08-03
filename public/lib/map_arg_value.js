@@ -70,6 +70,7 @@ export function toInterfaceValue(argValue) {
     };
   }
 
+  // TODO: We shouldn't be handling mathJS stuff in here
   try {
     // check if the value is a math expression, and set its type if it is
     const mathObj = parse(argValue.value);
