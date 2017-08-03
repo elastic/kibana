@@ -137,7 +137,7 @@ export function getDefaultSettings() {
     },
     'visualization:regionmap:showWarnings': {
       value: true,
-      description: 'Should the vector map show a warning when terms cannot be joined to a shape on the map.'
+      description: 'Whether the region map show a warning when terms cannot be joined to a shape on the map.'
     },
     'visualization:colorMapping': {
       type: 'json',
