@@ -483,7 +483,7 @@ table {
             transform: translateY(2px); } }
 
 .kuiCallOut {
-  padding: 16px 24px;
+  padding: 12px 24px;
   border-left: 4px solid #0079a5;
   background-color: #e6f2f6;
   /* 1 */ }
