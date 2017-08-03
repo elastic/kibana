@@ -5,7 +5,7 @@ module.exports = {
     'mocha',
     'babel',
     'react',
-    'import'
+    'import',
   ],
 
   env: {
@@ -89,6 +89,7 @@ module.exports = {
     'object-curly-spacing': 'off', // overriden with babel/object-curly-spacing
     'babel/object-curly-spacing': [ 'error', 'always' ],
 
+    'jsx-quotes': ['error', 'prefer-double'],
     'react/jsx-uses-react': 'error',
     'react/react-in-jsx-scope': 'error',
     'react/jsx-uses-vars': 'error',
@@ -96,6 +97,7 @@ module.exports = {
     'react/jsx-pascal-case': 'error',
     'react/jsx-closing-bracket-location': ['error', 'line-aligned'],
     'react/jsx-closing-tag-location': 'error',
+    'react/jsx-curly-spacing': ['error', 'never', { allowMultiline: true }],
     'react/jsx-indent-props': ['error', 2],
     'react/jsx-max-props-per-line': ['error', { maximum: 1, when: 'multiline' }],
     'react/jsx-no-duplicate-props': ['error', { ignoreCase: true }],
@@ -109,6 +111,15 @@ module.exports = {
     'react/jsx-first-prop-new-line': ['error', 'multiline-multiprop'],
     'react/jsx-equals-spacing': ['error', 'never'],
     'react/jsx-indent': ['error', 2],
+    'react/no-did-mount-set-state': 'error',
+    'react/no-did-update-set-state': 'error',
+    'react/no-will-update-set-state': 'error',
+    'react/no-is-mounted': 'error',
+    'react/no-multi-comp': ['error', { ignoreStateless: true }],
+    'react/no-unknown-property': 'error',
+    'react/prefer-es6-class': ['error', 'always'],
+    'react/prefer-stateless-function': ['error', { ignorePureComponents: true }],
+    'react/no-unescaped-entities': 'error',
 
     'mocha/handle-done-callback': 'error',
     'mocha/no-exclusive-tests': 'error',
