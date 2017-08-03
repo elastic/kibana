@@ -19,14 +19,26 @@ export type JsonLayoutConfigType = typeof schemaType;
 export class JsonLayout implements Layout {
   static createConfigSchema = createSchema;
 
-  format({ timestamp, level, context, message, error, meta }: LogRecord): string {
+  format(record: LogRecord): string {
     return JSON.stringify({
-      '@timestamp': timestamp.toISOString(),
-      level: level.id.toUpperCase(),
-      context,
-      message,
-      error: error && error.message,
-      meta
+      '@timestamp': record.timestamp.toISOString(),
+      level: record.level.id.toUpperCase(),
+      context: record.context,
+      message: record.message,
+      error: JsonLayout.errorToSerializableObject(record.error),
+      meta: record.meta
     });
+  }
+
+  private static errorToSerializableObject(error: Error | undefined) {
+    if (error === undefined) {
+      return error;
+    }
+
+    return {
+      name: error.name,
+      stack: error.stack,
+      message: error.message
+    };
   }
 }
