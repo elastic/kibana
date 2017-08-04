@@ -18,7 +18,7 @@ const durationsLookup = durationInputOptions.reduce((acc, row) => {
 export default (format = '0,0.[00]', template) => {
   if (!template) template = '{{value}}';
   const render = handlebars.compile(template);
-  const durationFormatTest = /[pnumshdwMY]+,[pnumshdwMY]+/;
+  const durationFormatTest = /[pnumshdwMY]+,[pnumshdwMY]+,\d+/;
   return (val) => {
     const formatString = formatLookup[format] || format;
     let value;
@@ -26,13 +26,13 @@ export default (format = '0,0.[00]', template) => {
       value = 0;
     } else {
       if (durationFormatTest.test(format)) {
-        const [from, to] = format.split(',');
+        const [from, to, decimals] = format.split(',');
         const inputFormat = durationsLookup[from];
         const outputFormat = `as${capitalize(durationsLookup[to])}`;
         const formatter = new DurationFormat({
           inputFormat,
           outputFormat,
-          outputPrecision: 0
+          outputPrecision: decimals
         });
         value = formatter.convert(val, 'text');
       } else {

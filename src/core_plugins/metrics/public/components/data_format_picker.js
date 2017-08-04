@@ -2,6 +2,7 @@ import React, { Component, PropTypes } from 'react';
 import _ from 'lodash';
 import Select from 'react-select';
 import { durationOutputOptions, durationInputOptions } from './lib/durations';
+const durationFormatTest = /[pnumshdwMY]+,[pnumshdwMY]+,\d+/;
 
 class DataFormatPicker extends Component {
 
@@ -9,9 +10,15 @@ class DataFormatPicker extends Component {
     super(props);
     this.handleChange = this.handleChange.bind(this);
     this.handleCustomChange = this.handleCustomChange.bind(this);
+    let from = 'ms';
+    let to = 'ms';
+    if (durationFormatTest.test(props.value)) {
+      [from, to] = props.value.split(',');
+    }
     this.state = {
-      from: 'ms',
-      to: 'ms'
+      from,
+      to,
+      decimals: 2
     };
   }
 
@@ -34,12 +41,15 @@ class DataFormatPicker extends Component {
 
   handleDurationChange(name) {
     return (value) => {
+      if (name === 'decimals') {
+        value = this.decimals;
+      }
       this.setState({
         [name]: value.value
       }, () => {
-        const { from, to } = this.state;
+        const { from, to, decimals } = this.state;
         this.props.onChange({
-          value: `${from},${to}`
+          value: `${from},${to},${decimals}`
         });
       });
     };
@@ -47,7 +57,6 @@ class DataFormatPicker extends Component {
 
   render() {
     const value = this.props.value || '';
-    const durationFormatTest = /[pnumshdwMY]+,[pnumshdwMY]+/;
     let defaultValue = value;
     if (!_.includes(['bytes', 'number', 'percent'], value)) {
       defaultValue = 'custom';
@@ -65,7 +74,7 @@ class DataFormatPicker extends Component {
 
     let custom;
     if (defaultValue === 'duration') {
-      const [from, to] = value.split(',');
+      const [from, to, decimals] = value.split(',');
       return (
         <div className="vis_editor__data_format_picker-container">
           <div className="vis_editor__label">
@@ -97,6 +106,14 @@ class DataFormatPicker extends Component {
               onChange={this.handleDurationChange('to')}
             />
           </div>
+          <div className="vis_editor__label">Decimal Places</div>
+          <input
+            className="vis_editor__input"
+            defaultValue={decimals}
+            ref={(el) => this.decimals = el}
+            onChange={this.handleDurationChange('decimals')}
+            type="text"
+          />
         </div>
       );
     }
