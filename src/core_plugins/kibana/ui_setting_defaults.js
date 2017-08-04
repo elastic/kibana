@@ -93,8 +93,8 @@ export function getUiSettingDefaults() {
     },
     'doc_table:highlight:all_fields': {
       value: true,
-      description: 'Improves highlighting by using a separate "highlight_query" that uses "all_fields" mode on "query_string" queries. ' +
-        'Set to false if you are using a "default_field" in your index.',
+      description: 'Improves highlighting by using a separate "highlight_query" that uses a "default_field" of "*" on'
+         + '"query_string" queries. Set to false if you are using a "default_field" in your index.',
     },
     'courier:maxSegmentCount': {
       value: 30,
