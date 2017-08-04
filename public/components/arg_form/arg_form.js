@@ -7,9 +7,8 @@ export const ArgForm = ({ argTypeInstance, templateProps, label, setLabel, expan
   // Do createElement stuff here.
   const { template, simpleTemplate } = argTypeInstance.argType;
 
-  const templateElement = !template ? null : createElement(template, Object.assign(templateProps, { setLabel }));
-  const simpleTemplateElement = !simpleTemplate ? null : createElement(simpleTemplate, Object.assign(templateProps, { setLabel }));
-
+  const templateElement = !template ? null : createElement(template, { ...templateProps, setLabel, label });
+  const simpleTemplateElement = !simpleTemplate ? null : createElement(simpleTemplate, { ...templateProps, setLabel, label });
 
   return (
     <div className="canvas__arg">
