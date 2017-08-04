@@ -47,14 +47,9 @@ import { Env } from '../../config/Env';
 const env = new Env('.', {});
 const config$ = new BehaviorSubject({});
 
-let oldExit = process.exit;
-
-beforeEach(() => {
-  process.exit = jest.fn();
-});
-
+let mockProcessExit = jest.spyOn(global.process, 'exit').mockImplementation(() => {});
 afterEach(() => {
-  process.exit = oldExit;
+  mockProcessExit.mockReset();
 });
 
 test('starts services on "start"', async () => {

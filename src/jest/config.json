@@ -23,8 +23,8 @@
     "html"
   ],
   "globals": {
-    "__TS_CONFIG__": {
-      "target": "es6"
+    "ts-jest": {
+      "tsConfigFile": "src/jest/tsconfig.json"
     }
   },
   "mapCoverage": true,

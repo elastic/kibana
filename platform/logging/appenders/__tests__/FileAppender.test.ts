@@ -66,7 +66,7 @@ test('file stream is created only once and only after first `append()` is called
   expect(mockCreateWriteStream).toHaveBeenCalledTimes(1);
   expect(mockCreateWriteStream).toHaveBeenCalledWith(mockPath, {
     flags: 'a',
-    encoding: 'utf8'
+    defaultEncoding: 'utf8'
   });
 
   mockCreateWriteStream.mockClear();
