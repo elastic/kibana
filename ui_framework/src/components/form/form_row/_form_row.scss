@@ -1,0 +1,12 @@
+.kuiFormRow {
+  position: relative;
+  label {
+    font-size: $kuiFontSizeXS;
+    display: block;
+    font-family: $kuiFontFamily;
+    color: $kuiColorDarkShade;
+    position: absolute;
+    top: $kuiSizeS;
+    left: $kuiSizeM;
+  }
+}

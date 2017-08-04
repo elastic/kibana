@@ -560,6 +560,28 @@ table {
           transform: translateY(2px);
   /* 1 */ }
 
+.kuiFormRow {
+  position: relative; }
+  .kuiFormRow label {
+    font-size: 12px;
+    display: block;
+    font-family: "Roboto", Helvetica, Arial, sans-serif;
+    color: #666;
+    position: absolute;
+    top: 8px;
+    left: 12px; }
+
+.kuiFormText {
+  border: none;
+  font-size: 14px;
+  font-family: "Roboto", Helvetica, Arial, sans-serif;
+  padding: 24px 12px 8px 12px;
+  color: #3F3F3F;
+  min-width: 256px;
+  border-bottom: 1px solid #D9D9D9; }
+  .kuiFormText:focus + label {
+    color: #0079a5; }
+
 .kuiHeader {
   box-shadow: 0 2px 2px -1px rgba(0, 0, 0, 0.1);
   display: -webkit-box;
