@@ -1,32 +1,59 @@
 @import (reference) "../../style/variables";
 
 .canvas__arg {
-  display: flex;
-  padding: @spacingM 0 @spacingM @spacingM;
   border-bottom: @borderStyle;
-}
+  margin: 0 @spacingM;
 
-.canvas__arg--controls {
-  flex: 1 0;
-  width: 280px;
-  padding-right: @spacingS;
+  .form-control {
+    font-size: @textXSmall;
+  }
+
+  &:hover {
+    .canvas__arg--remove {
+      visibility: visible;
+    }
+  }
+
+  .canvas__arg--header {
+    display: flex;
+
+    .canvas__arg--label {
+      padding: @spacingM @spacingS;
+      flex-shrink: 0;
+      font-weight: bold;
+    }
+
+    .canvas__arg--simple-wrapper {
+      flex-shrink: 0;
+      flex-grow: 1;
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+
+      .canvas__arg--simple {
+        width: 100%;
+        text-align: right;
+        margin-left: @spacingM;
+      }
+      .canvas__arg--simple-top {align-self: flex-start;}
+      .canvas__arg--simple-bottom {align-self: flex-end;}
+    }
+
+  }
+
+  .canvas__arg--controls {
+    padding: 0 @spacingS @spacingM @spacingS;
+  }
+
 }
 
 .canvas__arg--remove {
-  padding-left: @spacingXS;
-  margin: auto @spacingXS;
   cursor: pointer;
-}
+  visibility: hidden;
+  margin: @spacingM @spacingS;
+  flex-shrink: 0;
 
-.canvas__function__arg--add {
-  display: inline-block;
-  border-bottom: @borderStyle;
-  border-right: @borderStyle;
-
-  // TODO: This shouldn't be a bootstrap <Label>
-  .label {
-    background-color: transparent;
-    color: @labelColor;
-    cursor: pointer;
+  &:hover {
+    color: @red;
   }
 }
