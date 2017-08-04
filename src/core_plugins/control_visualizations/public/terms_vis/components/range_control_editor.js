@@ -7,6 +7,10 @@ export class RangeControlEditor extends Component {
     super(props);
   }
 
+  filterField(field) {
+    return ['number'].includes(field.type);
+  }
+
   render() {
     return (
       <div>
@@ -20,7 +24,7 @@ export class RangeControlEditor extends Component {
         <FieldSelect
           value={this.props.controlParams.fieldName}
           indexPatternId={this.props.controlParams.indexPattern}
-          fieldTypes={['number']}
+          filterField={this.filterField}
           onChange={this.props.handleFieldNameChange}
           getIndexPattern={this.props.getIndexPattern}
         />

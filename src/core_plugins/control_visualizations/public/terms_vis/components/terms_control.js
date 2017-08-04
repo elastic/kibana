@@ -18,7 +18,7 @@ export class TermsControl extends Component {
 
   render() {
     return (
-      <div className="input-control" data-test-subj="termsControl">
+      <div className="input-control terms-control" data-test-subj="termsControl">
         <span>{this.props.control.label}</span>
         <Select
           className="terms-select"

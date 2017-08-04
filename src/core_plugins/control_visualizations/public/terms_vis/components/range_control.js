@@ -27,7 +27,7 @@ export class RangeControl extends Component {
 
   render() {
     return (
-      <div className="input-control">
+      <div className="input-control range-control">
         <span>{this.props.control.label}</span>
         <InputRange
           maxValue={this.props.control.max}

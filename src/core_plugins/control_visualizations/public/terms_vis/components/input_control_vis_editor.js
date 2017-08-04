@@ -156,7 +156,7 @@ export class InputControlVisEditor extends Component {
 
   render() {
     return (
-      <div>
+      <div className="input-control-vis-editor">
 
         {this.renderControls()}
 

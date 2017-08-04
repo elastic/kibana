@@ -10,7 +10,7 @@ export class InputControlVis extends Component {
 
   render() {
     return (
-      <div className="vertical-layout">
+      <div className="vertical-layout input-control-vis">
         {this.props.controls.map((control, index) => {
           let controlComponent = null;
           switch (control.type) {

@@ -47,7 +47,7 @@ export class TextControl extends Component {
 
   render() {
     return (
-      <div className="input-control">
+      <div className="input-control text-control">
         <span>{this.props.control.label}</span>
         <Select.Async
           placeholder=""

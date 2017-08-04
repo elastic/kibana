@@ -1,4 +1,4 @@
-import './terms_vis.less';
+import './input_control_vis.less';
 import 'react-select/dist/react-select.css';
 import { CATEGORY } from 'ui/vis/vis_category';
 import { VisFactoryProvider } from 'ui/vis/vis_factory';
