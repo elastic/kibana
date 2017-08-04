@@ -21,13 +21,6 @@ export class ContainerAPI {
   }
 
   /**
-   * @return {boolean} If the container is marked as being in view only mode or not.
-   */
-  getIsViewOnlyMode() {
-    throw new Error('Must implement getIsViewOnlyMode.');
-  }
-
-  /**
    * Creates a new state for the panel. It's passed the ui state object to use, and is returned
    * a PersistedState.
    * @param path {String} - the unique path for this ui state.

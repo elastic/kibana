@@ -196,6 +196,8 @@ export default function ({ getService, getPageObjects }) {
       });
 
       it('shows other panels after being minimized', async () => {
+        // Panels are all minimized on a fresh open of a dashboard, so we need to re-expand in order to then minimize.
+        await PageObjects.dashboard.toggleExpandPanel();
         await PageObjects.dashboard.toggleExpandPanel();
         const panels = await PageObjects.dashboard.getDashboardPanels();
         const visualizations = PageObjects.dashboard.getTestVisualizations();

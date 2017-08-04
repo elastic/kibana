@@ -22,10 +22,6 @@ export class DashboardContainerAPI extends ContainerAPI {
     return this.dashboardState.appState;
   }
 
-  getIsViewOnlyMode() {
-    return this.dashboardState.getIsViewMode();
-  }
-
   createChildUistate(path, initialState) {
     return this.dashboardState.uiState.createChild(path, initialState, true);
   }

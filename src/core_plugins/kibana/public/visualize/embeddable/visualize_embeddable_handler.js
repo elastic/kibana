@@ -5,6 +5,7 @@ import { getPersistedStateId } from 'plugins/kibana/dashboard/panel/panel_state'
 import { UtilsBrushEventProvider as utilsBrushEventProvider } from 'ui/utils/brush_event';
 import { FilterBarClickHandlerProvider as filterBarClickHandlerProvider } from 'ui/filter_bar/filter_bar_click_handler';
 import { EmbeddableHandler } from 'ui/embeddable';
+import chrome from 'ui/chrome';
 
 export class VisualizeEmbeddableHandler extends EmbeddableHandler {
   constructor($compile, $rootScope, visualizeLoader, timefilter, Notifier, Promise) {
@@ -44,7 +45,7 @@ export class VisualizeEmbeddableHandler extends EmbeddableHandler {
 
         visualizeScope.savedObj.vis.listeners.click = this.filterBarClickHandler(container.getAppState());
         visualizeScope.savedObj.vis.listeners.brush = this.brushEvent(container.getAppState());
-        visualizeScope.isFullScreenMode = container.getIsViewOnlyMode();
+        visualizeScope.isFullScreenMode = !chrome.getVisible();
 
         container.registerPanelIndexPattern(panel.panelIndex, visualizeScope.savedObj.vis.indexPattern);
 
