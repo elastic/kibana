@@ -83,7 +83,8 @@ module.directive('kbnTableRow', function ($compile, $httpParamSerializer, kbnUrl
       $scope.$watchMulti([
         'indexPattern.timeFieldName',
         'row.highlight',
-        '[]columns'
+        '[]columns',
+        '[]row'
       ], function () {
         createSummaryRow($scope.row, $scope.row._id);
       });
