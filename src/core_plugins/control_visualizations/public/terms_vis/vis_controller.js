@@ -1,6 +1,7 @@
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { InputControlVis } from './components/input_control_vis';
+import { initRangeControl } from './lib/init_range_control';
 import { initTermsControl } from './lib/init_terms_control';
 import { initTextControl } from './lib/init_text_control';
 
@@ -49,6 +50,7 @@ class VisController {
           initFunc = initTermsControl;
           break;
         case 'range':
+          initFunc = initRangeControl;
           break;
         case 'text':
           initFunc = initTextControl;

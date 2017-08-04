@@ -1,4 +1,5 @@
 import React, { Component, PropTypes } from 'react';
+import { RangeControl } from './range_control';
 import { TermsControl } from './terms_control';
 import { TextControl } from './text_control';
 
@@ -23,6 +24,13 @@ export class InputControlVis extends Component {
               );
               break;
             case 'range':
+              controlComponent = (
+                <RangeControl
+                  control={control}
+                  setFilter={this.props.setFilter}
+                  removeFilter={this.props.removeFilter}
+                />
+              );
               break;
             case 'text':
               controlComponent = (
@@ -43,5 +51,6 @@ export class InputControlVis extends Component {
 
 InputControlVis.propTypes = {
   setFilter: PropTypes.func.isRequired,
-  removeFilter: PropTypes.func.isRequired
+  removeFilter: PropTypes.func.isRequired,
+  controls: PropTypes.array.isRequired
 };
