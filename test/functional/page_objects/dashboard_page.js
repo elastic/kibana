@@ -338,7 +338,8 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
         const dataRow = await chart.getAttribute('data-row');
         const dataSizeX = await chart.getAttribute('data-sizex');
         const dataSizeY = await chart.getAttribute('data-sizey');
-        const title = await testSubjects.getVisibleText('dashboardPanelTitle');
+        const childElement = await testSubjects.findDescendant('dashboardPanelTitle', chart);
+        const title = await childElement.getVisibleText();
         return { dataCol, dataRow, dataSizeX, dataSizeY, title };
       }
 
