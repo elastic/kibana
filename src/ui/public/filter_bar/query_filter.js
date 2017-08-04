@@ -1,8 +1,11 @@
 import _ from 'lodash';
+import $ from 'jquery';
 import { onlyDisabled } from 'ui/filter_bar/lib/only_disabled';
 import { onlyStateChanged } from 'ui/filter_bar/lib/only_state_changed';
 import { uniqFilters } from 'ui/filter_bar/lib/uniq_filters';
 import { compareFilters } from 'ui/filter_bar/lib/compare_filters';
+import { isRemoveFilter, makeFiltersBoolean, isCtrlKeyPressed } from 'ui/filter_bar/lib/multiselect';
+
 import { EventsProvider } from 'ui/events';
 import { FilterBarLibMapAndFlattenFiltersProvider } from 'ui/filter_bar/lib/map_and_flatten_filters';
 
@@ -11,6 +14,25 @@ export function FilterBarQueryFilterProvider(Private, $rootScope, getAppState, g
   const mapAndFlattenFilters = Private(FilterBarLibMapAndFlattenFiltersProvider);
 
   const queryFilter = new EventEmitter();
+
+  let ctrlHold = false;
+  let savedCtrlFilters = [];
+
+
+  $(document.body).on('mousedown', function (e) {
+    if (isCtrlKeyPressed(e)) {
+      ctrlHold = true;
+    }
+  });
+
+  $(document.body).keyup(function (e) {
+    if (isCtrlKeyPressed(e)) {
+      ctrlHold = false;
+      queryFilter.addFilters();
+    }
+
+
+  });
 
   queryFilter.getFilters = function () {
     const compareOptions = { disabled: true, negate: true };
@@ -39,6 +61,7 @@ export function FilterBarQueryFilterProvider(Private, $rootScope, getAppState, g
     return _.map(globalState.filters, appendStoreType('globalState'));
   };
 
+
   /**
    * Adds new filters to the scope and state
    * @param {object|array} filters Filter(s) to add
@@ -46,7 +69,18 @@ export function FilterBarQueryFilterProvider(Private, $rootScope, getAppState, g
    * @returns {Promise} filter map promise
    */
   queryFilter.addFilters = function (filters, global) {
+    if (ctrlHold) {
+      //control key holds, so do not filter yet, but save the click filters
+      queryFilter.addMultiselectFilters(filters);
+    }
+    else {
+      if (savedCtrlFilters.length > 0) {
+        //If we have multiselect filters we concat them, to the filters array
+        filters = makeFiltersBoolean(savedCtrlFilters);
+        savedCtrlFilters = [];
+      }
 
+    }
     if (global === undefined) {
       const configDefault = config.get('filters:pinnedByDefault');
 
@@ -64,13 +98,25 @@ export function FilterBarQueryFilterProvider(Private, $rootScope, getAppState, g
     }
 
     return mapAndFlattenFilters(filters)
-    .then(function (filters) {
-      if (!filterState.filters) {
-        filterState.filters = [];
-      }
+      .then(function (filters) {
+        if (!filterState.filters) {
+          filterState.filters = [];
+        }
+        if (!ctrlHold) {
+          filterState.filters = filterState.filters.concat(filters);
+        }
+      });
+  };
 
-      filterState.filters = filterState.filters.concat(filters);
-    });
+  /**
+   *Adds new multiselect filters to savedCtrlFilters array
+   * @param filters
+   */
+  queryFilter.addMultiselectFilters = function (filters) {
+    //add multiselect filters
+    if (!isRemoveFilter(savedCtrlFilters, filters[0])) {
+      savedCtrlFilters = savedCtrlFilters.concat(filters);
+    }
   };
 
   /**
@@ -327,10 +373,10 @@ export function FilterBarQueryFilterProvider(Private, $rootScope, getAppState, g
         // save states and emit the required events
         saveState();
         queryFilter.emit('update')
-        .then(function () {
-          if (!doFetch) return;
-          queryFilter.emit('fetch');
-        });
+          .then(function () {
+            if (!doFetch) return;
+            queryFilter.emit('fetch');
+          });
 
         // iterate over each state type, checking for changes
         function getActions() {

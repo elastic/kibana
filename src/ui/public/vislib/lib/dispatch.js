@@ -18,6 +18,8 @@ export function VislibLibDispatchProvider(Private, config) {
       super();
       this.handler = handler;
       this._listeners = {};
+      this.resetClickAttr();
+
     }
 
     /**
@@ -136,13 +138,12 @@ export function VislibLibDispatchProvider(Private, config) {
     addMouseoutEvent() {
       const self = this;
       const addEvent = this.addEvent;
-      const $el = this.handler.el;
       if (!this.handler.unHighlight) {
         this.handler.unHighlight = self.unHighlight;
       }
 
       function mouseout() {
-        self.handler.unHighlight.call(this, $el);
+        self.handler.unHighlight.call(this, $(this));
       }
 
       return addEvent('mouseout', mouseout);
@@ -158,10 +159,33 @@ export function VislibLibDispatchProvider(Private, config) {
       const addEvent = this.addEvent;
 
       function click(d, i) {
+        const name = d.name;
+        let sameFilter;
+        if (!d.name) {
+          self.findElementByLabel(this, d.series, d);
+        }
+        else {
+          sameFilter = $(d3.select(this)).parent().find('[data-label="' + name + '"]' + '[clicked=true]');
+          if (sameFilter.length > 1) {
+            sameFilter.removeAttr('clicked');
+          }
+          else {
+            $(d3.select(this)).parent().find('[data-label="' + name + '"]').attr('clicked', 'true');
+          }
+        }
+
+
         self.emit('click', self.eventResponse(d, i));
       }
 
       return addEvent('click', click);
+    }
+
+    /**
+     * run on all html element and remove attr clicked
+     */
+    resetClickAttr() {
+      $('[clicked=true]').removeAttr('clicked');
     }
 
     /**
@@ -231,6 +255,11 @@ export function VislibLibDispatchProvider(Private, config) {
      * @returns {d3.Selection}
      */
     addMousePointer() {
+      //Add hovet to barchart visualization
+      if (this.__data__.series === 'Count') {
+        d3.select(this).style('fill-opacity', '1.0');
+      }
+
       return d3.select(this).style('cursor', 'pointer');
     }
 
@@ -247,7 +276,8 @@ export function VislibLibDispatchProvider(Private, config) {
       const dimming = config.get('visualization:dimmingOpacity');
       $(element).parent().find('[data-label]')
         .css('opacity', 1)//Opacity 1 is needed to avoid the css application
-        .not((els, el) => String($(el).data('label')) === label)
+        .not((els, el) =>
+        $(el).data('label') === label || $(el).attr('clicked') === 'true')
         .css('opacity', justifyOpacity(dimming));
     }
 
@@ -258,7 +288,49 @@ export function VislibLibDispatchProvider(Private, config) {
      * @method unHighlight
      */
     unHighlight(element) {
-      $('[data-label]', element.parentNode).css('opacity', 1);
+      if(element.length) {
+        if (element.attr('clicked')) {
+          if (element.parentNode) {
+            $('[data-label]', element.parentNode).css('opacity', 1);
+          }
+          if (element[0].nodeName === 'circle') {
+            element.css('stroke-width', '10px');
+            element.css('stroke-opacity', 0.65);
+          }
+        }
+        else {
+          if (element[0].nodeName === 'rect') {
+            element.css('fill-opacity', 0.6);
+          }
+          if (element[0].nodeName === 'circle') {
+            element.css('stroke-width', '0px');
+          }
+        }
+      }
+    }
+
+
+    /**
+     * Find Element by data-label
+     * @param eventElement
+     * @param name
+     * @param dataObject
+     */
+    findElementByLabel(eventElement, name, dataObject) {
+      const rects = $(d3.select(eventElement)).parent().find('[data-label="' + name + '"]');
+      rects.each(function () {
+        if (_.isEqual(this.__data__, dataObject)) {
+          if ($(this).attr('clicked')) {
+            $(this).removeAttr('clicked');
+          }
+          else {
+            $(this).attr('clicked', 'true');
+
+          }
+        }
+
+
+      });
     }
 
     /**
@@ -353,8 +425,10 @@ export function VislibLibDispatchProvider(Private, config) {
   function justifyOpacity(opacity) {
     const decimalNumber = parseFloat(opacity, 10);
     const fallbackOpacity = 0.5;
-    return (0 <= decimalNumber  && decimalNumber <= 1) ? decimalNumber : fallbackOpacity;
+    return (0 <= decimalNumber && decimalNumber <= 1) ? decimalNumber : fallbackOpacity;
   }
+
+
 
   return Dispatch;
 }
