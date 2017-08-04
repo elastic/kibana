@@ -4,55 +4,51 @@ import { FormGroup, FormControl, Button } from 'react-bootstrap';
 import { ArgType } from '../arg_type';
 import { get } from 'lodash';
 import { statefulProp } from '../../lib/stateful_component';
-import { compose, withPropsOnChange, withProps } from 'recompose';
+import { compose, withProps } from 'recompose';
 
-const template = ({ updateValue, typeInstance, commit, value }) => {
-  // Why is this neccesary? Does the dialog really need to know what parameter it is setting?
-  const confirm = get(typeInstance, 'options.confirm');
+const component = ({ updateValue, value, confirm, commit }) => (
+  <div>
+    <FormGroup>
+      <FormControl
+        spellCheck={false}
+        componentClass="textarea"
+        style={{ height: 200 }}
+        value={value}
+        onChange={confirm ? updateValue : (ev) => commit(ev.target.value)}
+      />
+    </FormGroup>
 
-  return (
-    <div>
-      <FormGroup>
-        <FormControl
-          spellCheck={false}
-          componentClass="textarea"
-          style={{ height: 200 }}
-          /*inputRef={ref => input = ref}*/
-          value={value}
-          onChange={confirm ? updateValue : () => commit(value)}
-        />
-      </FormGroup>
-      {!confirm ? null : (
-        <Button bsStyle="primary" onClick={() => commit(value)}>{confirm}</Button>
-      )}
-    </div>
+    {confirm && (<Button bsStyle="primary" onClick={() => commit(value)}>{confirm}</Button>)}
+  </div>
+);
 
-  );
+component.propTypes = {
+  updateValue: PropTypes.func.isRequired,
+  value: PropTypes.string.isRequired,
+  confirm: PropTypes.string,
+  commit: PropTypes.func.isRequired,
 };
 
+const template = compose(
+  withProps(({ onValueChange, typeInstance, argValue }) => ({
+    confirm: get(typeInstance, 'options.confirm'),
+    commit: (value) => onValueChange({
+      type: 'string',
+      value,
+    }),
+    value: argValue.value,
+  })),
+  statefulProp('value'),
+)(component);
+
 template.propTypes = {
-  resolvedData: PropTypes.string,
-  typeInstance: PropTypes.object,
-  commit: PropTypes.func,
-  updateValue: PropTypes.func,
-  value: PropTypes.string,
+  argValue: PropTypes.object.isRequired,
+  onValueChange: PropTypes.func.isRequired,
+  typeInstance: PropTypes.object.isRequired,
 };
 
 export const textarea = () => new ArgType('textarea', {
   displayName: 'textarea',
   description: 'Input long strings',
-  template: compose(
-    withPropsOnChange(['argValue'], ({ argValue: { value } }) => ({
-      value,
-    })),
-    withProps(({ onValueChange, typeInstance }) => ({
-      commit: (value) => onValueChange({
-        [typeInstance.name]: [{
-          type: 'string',
-          value,
-        }],
-      }),
-    })),
-    statefulProp('value'),
-  )(template),
+  template: template,
 });
