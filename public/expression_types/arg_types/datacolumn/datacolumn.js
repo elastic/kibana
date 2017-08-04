@@ -1,13 +1,12 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { FormGroup, FormControl } from 'react-bootstrap';
+import { FormControl } from 'react-bootstrap';
 import { MathExpression } from './math_expression';
 import { ArgType } from '../../arg_type';
 import { toAstValue } from '../../../lib/map_arg_value';
 import './datacolumn.less';
 
-const template = ({ onValueChange, columns, argValue, typeInstance }) => {
-  const { name } = typeInstance;
+const simpleTemplate = ({ onValueChange, columns, argValue }) => {
   const inputRefs = {};
 
   const updateValue = (valueType) => () => {
@@ -51,14 +50,10 @@ const template = ({ onValueChange, columns, argValue, typeInstance }) => {
     }
   };
 
-  return (
-    <FormGroup key={name} controlId="formControlsSelect">
-      { formControl(argValue) }
-    </FormGroup>
-  );
+  return formControl(argValue);
 };
 
-template.propTypes = {
+simpleTemplate.propTypes = {
   columns: PropTypes.array.isRequired,
   onValueChange: PropTypes.func.isRequired,
   argValue: PropTypes.object.isRequired,
@@ -68,5 +63,5 @@ template.propTypes = {
 export const datacolumn = () => new ArgType('datacolumn', {
   displayName: 'Column',
   description: 'Select the data column',
-  template,
+  simpleTemplate,
 });
