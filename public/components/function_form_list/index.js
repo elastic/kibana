@@ -4,6 +4,7 @@ import { FunctionFormList as Component } from './function_form_list';
 import { modelRegistry, viewRegistry } from '../../expression_types';
 import { getSelectedElement } from '../../state/selectors/workpad';
 import { toExpression } from '../../../common/lib/ast';
+import './function_form_list.less';
 
 function getExpression(chain) {
   if (!Array.isArray(chain) || !chain.length) return null;
