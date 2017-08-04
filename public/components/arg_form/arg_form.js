@@ -20,7 +20,8 @@ export const ArgForm = ({ argTypeInstance, templateProps, label, setLabel, expan
           </label>
         ) : (
           <label className="canvas__arg--label clickable" onClick={() => setExpand(!expand)}>
-            {label} <i className={`fa fa-chevron-${expand ? 'down' : 'right'}`}/>
+            <i className={`fa fa-chevron-${expand ? 'down' : 'right'}`}/>
+            {label}
           </label>
         )}
         <div className="canvas__arg--simple-wrapper">
