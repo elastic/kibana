@@ -307,11 +307,9 @@ npm run test:browser -- --dev # remove the --dev flag to run them once and close
 
 ### Building OS packages
 
-Packages are built using fpm, dpkg, and rpm.  Package building has only been tested on Linux and is not supported on any other platform.
+Packages are built in a Docker container.
 
 ```bash
-apt-get install ruby-dev rpm
-gem install fpm -v 1.5.0
 npm run build -- --skip-archives
 ```
 

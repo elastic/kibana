@@ -1,0 +1,12 @@
+version: '2'
+services:
+  kibana_build:
+    container_name: $KIBANA_BUILD_CONTAINER_NAME
+    environment:
+      - BUILD_OPTIONS=$KIBANA_BUILD_OPTIONS
+    build:
+      context: $KIBANA_BUILD_CONTEXT
+      dockerfile: $KIBANA_BUILD_CONTEXT/tasks/build/docker/packages/Dockerfile
+      args:
+        - node_version=$KIBANA_NODE_VERSION
+        - kibana_folder=$KIBANA_FOLDER

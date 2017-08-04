@@ -8,7 +8,7 @@ export default (grunt) => {
   const packageScriptsDir = grunt.config.get('packageScriptsDir');
   const servicesByName = indexBy(config.get('services'), 'name');
   const packages = config.get('packages');
-  const fpm = args => exec('fpm', args);
+  const fpm = (args, options = {}) => exec('bundle', args, options);
 
   grunt.registerTask('_build:osPackages', function () {
     grunt.file.mkdir(targetDir);
@@ -17,6 +17,8 @@ export default (grunt) => {
     .filter(({ name }) => /linux-x86_64$/.test(name))
     .forEach(({ buildDir, debArch, rpmArch }) => {
       const baseOptions = [
+        'exec',
+        'fpm',
         '--force',
         // we force dashes in the version file name because otherwise fpm uses
         // the filtered package version, which would have dashes replaced with
@@ -64,15 +66,19 @@ export default (grunt) => {
         `${servicesByName.systemd.outputDir}/etc/=/etc/`
       ];
 
+      const options = {
+        cwd: grunt.config.get('root')
+      };
+
       //Manually find flags, multiple args without assignment are not entirely parsed
       const flags = grunt.option.flags().filter(flag => /deb|rpm/.test(flag)).join(',');
       const buildDeb = flags.includes('deb') || !flags.length;
       const buildRpm = flags.includes('rpm') || !flags.length;
       if (buildDeb) {
-        fpm([...baseOptions, ...debOptions, ...args]);
+        fpm([...baseOptions, ...debOptions, ...args], options);
       }
       if (buildRpm) {
-        fpm([...baseOptions, ...rpmOptions, ...args]);
+        fpm([...baseOptions, ...rpmOptions, ...args], options);
       }
 
     });

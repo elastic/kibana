@@ -1,4 +1,5 @@
 import { flatten } from 'lodash';
+
 module.exports = function (grunt) {
   grunt.registerTask('build', 'Build packages', function () {
     grunt.task.run(flatten([
