@@ -5,6 +5,11 @@ import { FieldSelect } from './field_select';
 export class TextControlEditor extends Component {
   constructor(props) {
     super(props);
+
+  }
+
+  filterField(field) {
+    return ['ip', 'string'].includes(field.type);
   }
 
   render() {
@@ -20,7 +25,7 @@ export class TextControlEditor extends Component {
         <FieldSelect
           value={this.props.controlParams.fieldName}
           indexPatternId={this.props.controlParams.indexPattern}
-          fieldTypes={['ip', 'string']}
+          filterField={this.filterField}
           onChange={this.props.handleFieldNameChange}
           getIndexPattern={this.props.getIndexPattern}
         />

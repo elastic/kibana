@@ -7,6 +7,10 @@ export class TermsControlEditor extends Component {
     super(props);
   }
 
+  filterField(field) {
+    return field.aggregatable && ['number', 'boolean', 'date', 'ip', 'string'].includes(field.type);
+  }
+
   render() {
     return (
       <div>
@@ -20,7 +24,7 @@ export class TermsControlEditor extends Component {
         <FieldSelect
           value={this.props.controlParams.fieldName}
           indexPatternId={this.props.controlParams.indexPattern}
-          fieldTypes={['number', 'boolean', 'date', 'ip', 'string']}
+          filterField={this.filterField}
           onChange={this.props.handleFieldNameChange}
           getIndexPattern={this.props.getIndexPattern}
         />

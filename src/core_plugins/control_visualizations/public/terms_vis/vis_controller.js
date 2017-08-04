@@ -67,8 +67,18 @@ class VisController {
           });
       }
     });
-    Promise.all(createRequestPromises).then(requests => {
-      this.vis.API.fetch.these(requests);
+    Promise.all(createRequestPromises).then(searchRequests => {
+      // initFunc may return nothing if Control does not require a SearchRequest for initialization
+      // remove empty elements from array
+      const validSearchRequests = searchRequests.filter((request) => {
+        if (request) {
+          return true;
+        }
+        return false;
+      });
+      if (validSearchRequests.length > 0) {
+        this.vis.API.fetch.these(validSearchRequests);
+      }
     });
   }
 

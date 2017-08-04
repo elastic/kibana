@@ -1,3 +1,4 @@
+import _ from 'lodash';
 import React, { Component, PropTypes } from 'react';
 import Select from 'react-select';
 
@@ -5,6 +6,7 @@ export class FieldSelect extends Component {
   constructor(props) {
     super(props);
 
+    this.filterField = _.get(props, 'filterField', () => { return true; });
     this.loadFields = this.loadFields.bind(this);
   }
 
@@ -15,16 +17,16 @@ export class FieldSelect extends Component {
     }
 
     this.props.getIndexPattern(this.props.indexPatternId).then(index => {
-      const fields = index.fields.filter((field) => {
-        return field.aggregatable && this.props.fieldTypes.includes(field.type);
-      }).sort((a, b) => {
+      const fields = index.fields
+      .filter(this.filterField)
+      .sort((a, b) => {
         if (a.name < b.name) return -1;
         if (a.name > b.name) return 1;
         return 0;
       }).map(function (field) {
         return { label: field.name, value: field.name };
       });
-      //Setting complete=true means loadOptions will never be called again.
+      // Setting complete=true means loadOptions will never be called again.
       callback(null, { options: fields, complete: true });
     });
   }
@@ -60,5 +62,6 @@ FieldSelect.propTypes = {
   getIndexPattern: PropTypes.func.isRequired,
   indexPatternId: PropTypes.string,
   onChange: PropTypes.func.isRequired,
-  value: PropTypes.string
+  value: PropTypes.string,
+  filterField: PropTypes.func
 };
