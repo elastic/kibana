@@ -5,6 +5,7 @@ import { savedObjectManagementRegistry } from 'plugins/kibana/management/saved_o
 import objectViewHTML from 'plugins/kibana/management/sections/objects/_view.html';
 import uiRoutes from 'ui/routes';
 import { uiModules } from 'ui/modules';
+import 'ui/accessibility/kbn_ui_ace_keyboard_mode';
 import { castEsToKbnFieldTypeName } from '../../../../../../utils';
 import { SavedObjectsClientProvider } from 'ui/saved_objects';
 
