@@ -127,8 +127,7 @@ uiModules
           return;
         }
         $scope.addLegend = $scope.vis.params.addLegend;
-        $scope.$digest();
-        renderFunction();
+        $timeout(renderFunction);
       });
 
       $scope.$on('$destroy', () => {
