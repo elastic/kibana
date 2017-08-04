@@ -1,0 +1,14 @@
+@import (reference) "../../style/variables";
+
+.canvas__arg--add {
+  display: inline-block;
+  border-bottom: @borderStyle;
+  border-right: @borderStyle;
+
+  // TODO: This shouldn't be a bootstrap <Label>
+  .label {
+    background-color: transparent;
+    color: @labelColor;
+    cursor: pointer;
+  }
+}

@@ -1,8 +1,9 @@
 import React from 'react';
-import { Label, Alert } from 'react-bootstrap';
+import { Alert } from 'react-bootstrap';
 import { isPlainObject, uniq, last } from 'lodash';
 import { BaseForm } from './base_form';
 import { fromExpression } from '../../common/lib/ast';
+import { ArgAdd } from '../components/arg_add';
 
 export class FunctionForm extends BaseForm {
   constructor(name, props) {
@@ -42,14 +43,11 @@ export class FunctionForm extends BaseForm {
 
     const newArgValue = fromExpression(arg.defaultValue) || { type: 'string', value: '' };
 
-    // if no value in expression, render the add control
-    // TODO: pass in the value when adding arguments, likely using some default defined in the type config
     return (!argValues || arg.multi) && (
-      <div className="canvas__function__arg--add" key={`${props.typeInstance.name}-${arg.name}-add`}>
-        <Label bsStyle="default" onClick={onValueAdd(arg.name, newArgValue)}>
-          + {arg.displayName}
-        </Label>
-      </div>
+      <ArgAdd key={`${props.typeInstance.name}-${arg.name}-add`}
+        displayName={arg.displayName}
+        onValueAdd={onValueAdd(arg.name, newArgValue)}
+      />
     );
   }
 
