@@ -23,5 +23,5 @@ export const KuiSideNavItem = ({ children, isSelected, className, ...rest }) => 
 };
 
 KuiSideNavItem.propTypes = {
-  isSelected: PropTypes.string,
+  isSelected: PropTypes.bool,
 };
