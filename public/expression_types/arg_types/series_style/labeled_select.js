@@ -4,7 +4,6 @@ import { ControlLabel, FormControl } from 'react-bootstrap';
 
 export const LabeledSelect = ({ label, value, argName, onChange }) => (
   <div className={`canvas__argtype--seriesStyle--${argName}`}>
-    <ControlLabel>{label}</ControlLabel>
     <FormControl
       componentClass="select"
       value={value}
@@ -17,6 +16,8 @@ export const LabeledSelect = ({ label, value, argName, onChange }) => (
       <option value="4">4</option>
       <option value="5">5</option>
     </FormControl>
+    <ControlLabel>{label}</ControlLabel>
+
   </div>
 );
 

@@ -2,26 +2,28 @@
 
 .canvas__argtype--seriesStyle--properties {
   display: flex;
-  margin-top: @spacingM;
 
   & > div {
-    width: 70px;
+    flex: 1;
     margin-right: @spacingXS;
   }
 }
 
 .canvas__argtype--seriesStyle--remove-color {
-  line-height: 32px;
+  line-height: 25px;
+  display: inline-block;
+}
+
+.canvas__argtype--seriesStyle--color {
   display: inline-block;
 }
 
 .canvas__argtype--seriesStyle--color-picker {
-  display: table;
 
   & > div {
     padding-right: @spacingXS;
-    display: table-cell;
     vertical-align: middle;
-    height: 32px;
+    height: 25px;
+    line-height: 25px;
   }
 }
