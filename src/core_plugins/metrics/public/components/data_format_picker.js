@@ -12,13 +12,14 @@ class DataFormatPicker extends Component {
     this.handleCustomChange = this.handleCustomChange.bind(this);
     let from = 'ms';
     let to = 'ms';
+    let decimals = 2;
     if (durationFormatTest.test(props.value)) {
-      [from, to] = props.value.split(',');
+      [from, to, decimals] = props.value.split(',');
     }
     this.state = {
       from,
       to,
-      decimals: 2
+      decimals
     };
   }
 
@@ -30,9 +31,9 @@ class DataFormatPicker extends Component {
     if (value.value === 'custom') {
       this.handleCustomChange();
     } else if (value.value === 'duration') {
-      const { from, to } = this.state;
+      const { from, to, decimals } = this.state;
       this.props.onChange({
-        value: `${from},${to}`
+        value: `${from},${to},${decimals}`
       });
     } else {
       this.props.onChange(value);
