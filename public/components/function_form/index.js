@@ -24,7 +24,7 @@ const mapDispatchToProps = (dispatch, { expressionIndex }) => ({
   addArgument: (element, pageId) => (argName, argValue) => () => {
     dispatch(addArgumentValueAtIndex({ index: expressionIndex, element, pageId, argName, value: argValue }));
   },
-  updateContext: (element) => () => dispatch(fetchContext({ index: expressionIndex, element })),
+  updateContext: (element) => () => dispatch(fetchContext(expressionIndex, element)),
   setArgument: (element, pageId) => (argName, valueIndex) => (value) => {
     dispatch(setArgumentAtIndex({
       index: expressionIndex,

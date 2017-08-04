@@ -45,12 +45,12 @@ export function interpretProvider(config) {
       return invokeFunction(name, context, resolvedArgs) // Then invoke function with resolved arguments
       .then(newContext => invokeChain(chain, newContext)) // Continue re-invoking chain until its empty
       .catch(e => {
-        console.log('Function rejected');
+        console.log('common/interpret: Function rejected');
         throw e;
       });
     })
     .catch(e => {
-      console.log('Args rejected', e);
+      console.log('common/interpret: Args rejected', e);
       throw e;
     });
   }

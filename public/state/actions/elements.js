@@ -20,7 +20,7 @@ function astToExpression(ast, element) {
   }
 }
 
-function runInterpreter(ast, context, retry = false) {
+function runInterpreter(ast, context = null, retry = false) {
   return interpretAst(ast, context)
   .then((renderable) => {
     if (getType(renderable) === 'render') {
@@ -30,13 +30,37 @@ function runInterpreter(ast, context, retry = false) {
     }
 
     return new Error(`Ack! I don't know how to render a '${getType(renderable)}'`);
+  })
+  .catch((err) => {
+    notify.error(err);
+    throw err;
   });
+}
+
+function getSiblingContext(state, elementId, checkIndex) {
+  const prevContextPath = [elementId, 'expressionContext', checkIndex];
+  const prevContextValue = getValue(state, prevContextPath);
+
+  // if a value is found, return it, along with the index it was found at
+  if (prevContextValue != null) {
+    return {
+      index: checkIndex,
+      context: prevContextValue,
+    };
+  }
+
+  // check previous index while we're still above 0
+  const prevContextIndex = checkIndex - 1;
+  if (prevContextIndex < 0) return {};
+
+  // walk back up to find the closest cached context available
+  return getSiblingContext(state, elementId, prevContextIndex);
 }
 
 export const removeElement = createAction('removeElement', (elementId, pageId) => ({ pageId, elementId }));
 export const setPosition = createAction('setPosition', (elementId, pageId, position) => ({ pageId, elementId, position }));
 
-export const fetchContext = createThunk('fetchContext', ({ dispatch }, { index, element }) => {
+export const fetchContext = createThunk('fetchContext', ({ dispatch, getState }, index, element, fullRefresh = false) => {
   const chain = get(element, ['ast', 'chain']);
   const invalidIndex = (chain) ? index >= chain.length : true;
 
@@ -46,20 +70,31 @@ export const fetchContext = createThunk('fetchContext', ({ dispatch }, { index, 
 
   // cache context as the previous index
   const contextIndex = index - 1;
-  const argumentPath = [element.id, 'expressionContext', contextIndex];
+  const contextPath = [element.id, 'expressionContext', contextIndex];
 
+  // set context state to loading
   dispatch(args.setLoading({
-    path: argumentPath,
+    path: contextPath,
   }));
+
+  // function to walk back up to find the closest context available
+  const getContext = () => getSiblingContext(getState(), element.id, contextIndex - 1);
+  const { index: prevContextIndex, context: prevContextValue } = (fullRefresh !== true) ? getContext() : {};
+
+  // modify the ast chain passed to the interpreter
+  const astChain = element.ast.chain.filter((exp, i) => {
+    if (prevContextValue != null) return i > prevContextIndex && i < index;
+    return i < index;
+  });
 
   // get context data from a partial AST
   return interpretAst({
     ...element.ast,
-    chain: element.ast.chain.filter((exp, i) => i < index),
-  })
+    chain: astChain,
+  }, prevContextValue)
   .then((value) => {
     dispatch(args.setValue({
-      path: argumentPath,
+      path: contextPath,
       value,
     }));
   });
@@ -121,15 +156,15 @@ export const fetchAllRenderables = createThunk('fetchAllRenderables', ({ dispatc
   });
 });
 
-export const setExpression = createThunk('setExpression', ({ dispatch }, expression, element, pageId, skipRender = false) => {
+export const setExpression = createThunk('setExpression', ({ dispatch }, expression, element, pageId, doRender = true) => {
   const _setExpression = createAction('setExpression');
   dispatch(_setExpression({ expression, element, pageId }));
-  if (skipRender !== true) dispatch(fetchRenderable(element));
+  if (doRender === true) dispatch(fetchRenderable(element));
 });
 
-export const setAst = createThunk('setAst', ({ dispatch }, ast, element, pageId, skipRender = false) => {
+export const setAst = createThunk('setAst', ({ dispatch }, ast, element, pageId, doRender = true) => {
   const expression = astToExpression(ast, element);
-  dispatch(setExpression(expression, element, pageId, skipRender));
+  dispatch(setExpression(expression, element, pageId, doRender));
 });
 
 // index here is the top-level argument in the expression. for example in the expression
@@ -139,18 +174,20 @@ export const setAstAtIndex = createThunk('setAstAtIndex', ({ dispatch, getState 
   const newAst = get(newElement, 'ast');
 
   // fetch renderable using existing context, if available (value is null if not cached)
-  const contextPath = [element.id, 'expressionContext', index - 1];
-  const contextValue = getValue(getState(), contextPath);
+  const { index: contextIndex, context: contextValue } = getSiblingContext(getState(), element.id, index - 1);
 
   // if we have a cached context, update the expression, but use cache when updating the renderable
   if (contextValue) {
     // set the expression, but skip the fetchRenderable step
-    dispatch(setAst(newAst, element, pageId, true));
+    dispatch(setAst(newAst, element, pageId, false));
 
     // use context when updating the expression, it will be passed to the intepreter
     const partialAst = {
       ...newAst,
-      chain: newAst.chain.filter((exp, i) => i >= index),
+      chain: newAst.chain.filter((exp, i) => {
+        if (contextValue) return i > contextIndex;
+        return i >= index;
+      }),
     };
     return dispatch(fetchRenderableWithContext(newElement, partialAst, contextValue));
   }
