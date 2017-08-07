@@ -67,13 +67,15 @@
       <!-- ToolBar -->
       <div class="kuiToolBar">
         <div class="kuiToolBarSearch">
-          <div class="kuiToolBarSearchBox">
+          <div
+            class="kuiToolBarSearchBox"
+            role="search"
+          >
             <div class="kuiToolBarSearchBox__icon kuiIcon fa-search"></div>
             <input
               class="kuiToolBarSearchBox__input"
               type="text"
               placeholder="Search..."
-              role="search"
               aria-label="Filter"
               ng-model="managementObjectsController.advancedFilter"
             >
