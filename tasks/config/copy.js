@@ -19,10 +19,28 @@ module.exports = function () {
         'ui_framework/services/**',
         'ui_framework/dist/**',
         'webpackShims/**',
-        'config/kibana.yml',
+        'config/kibana.yml'
       ],
       dest: 'build/kibana',
       expand: true
     },
+    config: {
+      src: ['config/kibana.yml'],
+      dest: 'build/kibana/config/kibana.yml',
+      options: {
+        mode: true,
+        process(content) {
+          const replacements = {
+            'logging.dest': '/var/log/kibana/kibana.log',
+          };
+
+          Object.keys(replacements).forEach(key => {
+            const match = new RegExp(`^#${key}.*$`, 'm');
+            content = content.replace(match, `${key}: ${replacements[key]}`);
+          });
+          return content;
+        }
+      }
+    }
   };
 };
