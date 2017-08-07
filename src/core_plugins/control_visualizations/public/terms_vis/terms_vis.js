@@ -4,7 +4,6 @@ import { CATEGORY } from 'ui/vis/vis_category';
 import { VisFactoryProvider } from 'ui/vis/vis_factory';
 import { VisTypesRegistryProvider } from 'ui/registry/vis_types';
 import { VisController } from './vis_controller';
-import { newControl } from './lib/editor_utils';
 import { InputControlVisEditor } from './components/input_control_vis_editor';
 
 function TermsVisProvider(Private) {
@@ -20,7 +19,7 @@ function TermsVisProvider(Private) {
     visualization: VisController,
     visConfig: {
       defaults: {
-        controls: [newControl()]
+        controls: []
       },
     },
     editor: 'default',

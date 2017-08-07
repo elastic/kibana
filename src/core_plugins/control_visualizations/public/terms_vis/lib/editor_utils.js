@@ -11,11 +11,26 @@ export const removeControl = (controls, controlIndex) => [
   ...controls.slice(controlIndex + 1)
 ];
 
-export const newControl = () => ({
+export const getDefaultOptions = (type) => {
+  const defaultOptions = {};
+  switch (type) {
+    case 'range':
+      defaultOptions.step = 1;
+      break;
+    case 'terms':
+      defaultOptions.size = 5;
+      defaultOptions.order = 'desc';
+      break;
+    case 'text':
+      break;
+  }
+  return defaultOptions;
+};
+
+export const newControl = (type) => ({
   indexPattern: '',
   fieldName: '',
   label: '',
-  type: 'terms',
-  size: 5,
-  order: 'desc'
+  type: type,
+  options: getDefaultOptions(type),
 });

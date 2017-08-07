@@ -30,7 +30,7 @@ export async function termsControlFactory(controlParams, kbnApi, callback) {
   searchSource.inherits(false); //Do not filter by time so can not inherit from rootSearchSource
   searchSource.size(0);
   searchSource.index(indexPattern);
-  searchSource.aggs(termsAgg(indexPattern.fields.byName[controlParams.fieldName], 5, 'desc'));
+  searchSource.aggs(termsAgg(indexPattern.fields.byName[controlParams.fieldName], controlParams.options.size, 'desc'));
 
   const defer = {};
   defer.promise = new Promise((resolve, reject) => {

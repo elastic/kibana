@@ -40,7 +40,7 @@ export class FieldSelect extends Component {
       <div className="kuiFieldGroup">
         <div className="kuiFieldGroupSection">
           <label>
-            Terms Field
+            Field
           </label>
         </div>
         <div className="kuiFieldGroupSection kuiFieldGroupSection--wide">

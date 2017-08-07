@@ -7,7 +7,7 @@ import {
   KuiButton,
   KuiButtonIcon,
 } from 'ui_framework/components';
-import { addControl, newControl, removeControl, setControl } from '../lib/editor_utils';
+import { addControl, getDefaultOptions, newControl, removeControl, setControl } from '../lib/editor_utils';
 
 export class InputControlVisEditor extends Component {
   constructor(props) {
@@ -20,11 +20,6 @@ export class InputControlVisEditor extends Component {
     this.getIndexPattern = (indexPatternId) => {
       return props.scope.vis.API.indexPatterns.get(indexPatternId);
     };
-    this.handleFieldNameChange = this.handleFieldNameChange.bind(this);
-    this.handleLabelChange = this.handleLabelChange.bind(this);
-    this.handleTypeChange = this.handleTypeChange.bind(this);
-    this.handleIndexPatternChange = this.handleIndexPatternChange.bind(this);
-    this.handleRemoveControl = this.handleRemoveControl.bind(this);
     this.handleAddControl = this.handleAddControl.bind(this);
   }
 
@@ -43,6 +38,7 @@ export class InputControlVisEditor extends Component {
   handleTypeChange(controlIndex, evt) {
     const updatedControl = this.props.scope.vis.params.controls[controlIndex];
     updatedControl.type = evt.target.value;
+    updatedControl.options = getDefaultOptions(updatedControl.type);
     updatedControl.fieldName = '';
     this.setVisParam('controls', setControl(this.props.scope.vis.params.controls, controlIndex, updatedControl));
   }
@@ -60,12 +56,18 @@ export class InputControlVisEditor extends Component {
     this.setVisParam('controls', setControl(this.props.scope.vis.params.controls, controlIndex, updatedControl));
   }
 
+  handleNumberOptionChange(controlIndex, optionName, evt) {
+    const updatedControl = this.props.scope.vis.params.controls[controlIndex];
+    updatedControl.options[optionName] = parseFloat(evt.target.value);
+    this.setVisParam('controls', setControl(this.props.scope.vis.params.controls, controlIndex, updatedControl));
+  }
+
   handleRemoveControl(controlIndex) {
     this.setVisParam('controls', removeControl(this.props.scope.vis.params.controls, controlIndex));
   }
 
   handleAddControl() {
-    this.setVisParam('controls', addControl(this.props.scope.vis.params.controls, newControl()));
+    this.setVisParam('controls', addControl(this.props.scope.vis.params.controls, newControl('terms')));
   }
 
   renderControls() {
@@ -76,10 +78,11 @@ export class InputControlVisEditor extends Component {
           controlEditor = (
             <TermsControlEditor
               controlParams={controlParams}
-              handleIndexPatternChange={this.handleIndexPatternChange.bind(null, controlIndex)}
-              handleFieldNameChange={this.handleFieldNameChange.bind(null, controlIndex)}
+              handleIndexPatternChange={this.handleIndexPatternChange.bind(this, controlIndex)}
+              handleFieldNameChange={this.handleFieldNameChange.bind(this, controlIndex)}
               getIndexPatterns={this.getIndexPatterns}
               getIndexPattern={this.getIndexPattern}
+              handleSizeChange={this.handleNumberOptionChange.bind(this, controlIndex, 'size')}
             />
           );
           break;
@@ -87,10 +90,11 @@ export class InputControlVisEditor extends Component {
           controlEditor = (
             <RangeControlEditor
               controlParams={controlParams}
-              handleIndexPatternChange={this.handleIndexPatternChange.bind(null, controlIndex)}
-              handleFieldNameChange={this.handleFieldNameChange.bind(null, controlIndex)}
+              handleIndexPatternChange={this.handleIndexPatternChange.bind(this, controlIndex)}
+              handleFieldNameChange={this.handleFieldNameChange.bind(this, controlIndex)}
               getIndexPatterns={this.getIndexPatterns}
               getIndexPattern={this.getIndexPattern}
+              handleStepChange={this.handleNumberOptionChange.bind(this, controlIndex, 'step')}
             />
           );
           break;
@@ -98,8 +102,8 @@ export class InputControlVisEditor extends Component {
           controlEditor = (
             <TextControlEditor
               controlParams={controlParams}
-              handleIndexPatternChange={this.handleIndexPatternChange.bind(null, controlIndex)}
-              handleFieldNameChange={this.handleFieldNameChange.bind(null, controlIndex)}
+              handleIndexPatternChange={this.handleIndexPatternChange.bind(this, controlIndex)}
+              handleFieldNameChange={this.handleFieldNameChange.bind(this, controlIndex)}
               getIndexPatterns={this.getIndexPatterns}
               getIndexPattern={this.getIndexPattern}
             />
@@ -118,12 +122,12 @@ export class InputControlVisEditor extends Component {
                 className="kuiTextInput"
                 type="text"
                 value={controlParams.label}
-                onChange={this.handleLabelChange.bind(null, controlIndex)}
+                onChange={this.handleLabelChange.bind(this, controlIndex)}
               />
             </div>
             <button
               className="kuiButton kuiButton--danger kuiButton--small"
-              onClick={this.handleRemoveControl.bind(null, controlIndex)}
+              onClick={this.handleRemoveControl.bind(this, controlIndex)}
             >
               <span className="kuiIcon fa-trash" />
             </button>
@@ -139,7 +143,7 @@ export class InputControlVisEditor extends Component {
               <select
                 className="kuiSelectInput"
                 value={controlParams.type}
-                onChange={this.handleTypeChange.bind(null, controlIndex)}
+                onChange={this.handleTypeChange.bind(this, controlIndex)}
               >
                 <option value="range">Range Slider</option>
                 <option value="terms">Terms Dropdown</option>

@@ -14,7 +14,7 @@ export class TermsControlEditor extends Component {
   render() {
     return (
       <div>
-        <span>Terms Control Editor</span>
+
         <IndexPatternSelect
           value={this.props.controlParams.indexPattern}
           onChange={this.props.handleIndexPatternChange}
@@ -28,6 +28,23 @@ export class TermsControlEditor extends Component {
           onChange={this.props.handleFieldNameChange}
           getIndexPattern={this.props.getIndexPattern}
         />
+
+        <div className="kuiFieldGroup">
+          <div className="kuiFieldGroupSection">
+            <label>
+              Size
+            </label>
+          </div>
+          <div className="kuiFieldGroupSection">
+            <input
+              className="kuiTextInput"
+              type="number"
+              value={this.props.controlParams.options.size}
+              onChange={this.props.handleSizeChange}
+            />
+          </div>
+        </div>
+
       </div>
     );
   }
@@ -36,5 +53,8 @@ export class TermsControlEditor extends Component {
 TermsControlEditor.propTypes = {
   getIndexPatterns: PropTypes.func.isRequired,
   getIndexPattern: PropTypes.func.isRequired,
-  controlParams: PropTypes.object.isRequired
+  controlParams: PropTypes.object.isRequired,
+  handleFieldNameChange: PropTypes.func.isRequired,
+  handleIndexPatternChange: PropTypes.func.isRequired,
+  handleSizeChange: PropTypes.func.isRequired
 };

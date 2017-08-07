@@ -40,6 +40,7 @@ export async function rangeControlFactory(controlParams, kbnApi, callback) {
     const emptyValue = { min: min, max: min };
     const filterManager = new RangeFilterManager(controlParams.fieldName, indexPattern, kbnApi.queryFilter, emptyValue);
     callback({
+      options: controlParams.options,
       type: controlParams.type,
       indexPattern: indexPattern,
       field: indexPattern.fields.byName[controlParams.fieldName],
