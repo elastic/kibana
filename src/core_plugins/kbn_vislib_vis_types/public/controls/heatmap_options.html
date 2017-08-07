@@ -109,16 +109,17 @@
         <table class="vis-editor-agg-editor-ranges form-group" ng-show="vis.params.colorsRange.length">
           <tr>
             <th>
-              <label>From</label>
+              <label id="heatmapCustomRangeFrom">From</label>
             </th>
             <th colspan="2">
-              <label>To</label>
+              <label id="heatmapCustomRangeTo">To</label>
             </th>
           </tr>
 
           <tr ng-repeat="range in vis.params.colorsRange track by $index">
             <td>
               <input
+                aria-labelledby="heatmapCustomRangeFrom"
                 ng-model="range.from"
                 type="number"
                 class="form-control"
@@ -128,6 +129,7 @@
             </td>
             <td>
               <input
+                aria-labelledby="heatmapCustomRangeTo"
                 ng-model="range.to"
                 type="number"
                 class="form-control"

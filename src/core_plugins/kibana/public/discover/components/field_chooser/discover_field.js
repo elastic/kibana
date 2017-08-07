@@ -3,7 +3,6 @@ import html from 'plugins/kibana/discover/components/field_chooser/discover_fiel
 import _ from 'lodash';
 import 'ui/directives/css_truncate';
 import 'ui/directives/field_name';
-import 'ui/accessibility/kbn_accessible_click';
 import detailsHtml from 'plugins/kibana/discover/components/field_chooser/lib/detail_views/string.html';
 import { uiModules } from 'ui/modules';
 const app = uiModules.get('apps/discover');

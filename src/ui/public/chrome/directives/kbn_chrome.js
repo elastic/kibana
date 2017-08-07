@@ -37,7 +37,9 @@ export function kbnChromeProvider(chrome, internals) {
         const getUnhashableStates = Private(getUnhashableStatesProvider);
 
         // are we showing the embedded version of the chrome?
-        internals.setVisibleDefault(!$location.search().embed);
+        if (Boolean($location.search().embed)) {
+          internals.permanentlyHideChrome();
+        }
 
         // listen for route changes, propogate to tabs
         const onRouteChange = function () {

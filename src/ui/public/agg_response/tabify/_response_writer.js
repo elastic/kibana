@@ -75,7 +75,11 @@ export function TabbedAggResponseWriterProvider(Private) {
     if (group) {
       table.aggConfig = agg;
       table.key = key;
-      table.title =  (table.fieldFormatter()(key)) + ': ' + agg.makeLabel();
+      table.title = (table.fieldFormatter()(key));
+      // aggs that don't implement makeLabel should not add to title
+      if (agg.makeLabel() !== agg.name) {
+        table.title += ': ' + agg.makeLabel();
+      }
     }
 
     // link the parent and child
