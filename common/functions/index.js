@@ -1,37 +1,39 @@
-import mapColumn from './mapColumn/mapColumn';
 import alterColumn from './alterColumn/alterColumn';
-import math from './math/math';
-import sort from './sort/sort';
-import render from './render/render';
-import plot from './plot/plot';
-import kuler from './kuler/kuler';
-import seriesStyle from './seriesStyle/seriesStyle';
 import containerStyle from './containerStyle/containerStyle';
-import palette from './palette/palette';
-import pointseries from './pointseries/pointseries';
-import replace from './replace/replace';
 import droprows from './droprows/droprows';
-import image from './image/image';
-import rounddate from './rounddate/rounddate';
 import grid from './grid/grid';
+import image from './image/image';
+import kuler from './kuler/kuler';
+import mapColumn from './mapColumn/mapColumn';
+import markdown from './markdown/markdown';
+import math from './math/math';
+import palette from './palette/palette';
+import plot from './plot/plot';
+import pointseries from './pointseries/pointseries';
+import render from './render/render';
+import replace from './replace/replace';
+import rounddate from './rounddate/rounddate';
+import seriesStyle from './seriesStyle/seriesStyle';
 import size from './size/size';
+import sort from './sort/sort';
 
 export const commonFunctions = [
-  mapColumn,
   alterColumn,
-  math,
-  sort,
-  render,
-  plot,
-  kuler,
-  seriesStyle,
   containerStyle,
-  palette,
-  pointseries,
-  replace,
   droprows,
-  image,
-  rounddate,
   grid,
+  image,
+  kuler,
+  mapColumn,
+  markdown,
+  math,
+  palette,
+  plot,
+  pointseries,
+  render,
+  replace,
+  rounddate,
+  seriesStyle,
   size,
+  sort,
 ];
