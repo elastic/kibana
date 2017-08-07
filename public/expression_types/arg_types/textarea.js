@@ -18,7 +18,7 @@ const component = ({ updateValue, value, confirm, commit }) => (
       />
     </FormGroup>
 
-    {confirm && (<Button bsStyle="primary" onClick={() => commit(value)}>{confirm}</Button>)}
+    {confirm && (<Button bsStyle="primary" bsSize="xsmall" onClick={() => commit(value)}>{confirm}</Button>)}
   </div>
 );
 
