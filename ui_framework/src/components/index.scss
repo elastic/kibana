@@ -12,10 +12,6 @@
 // When possible, if making changes to those legacy components, please think about
 // instead adding them to this library and deprecating that dependency.
 
-// Global styles
-@import "global_styles/index"
-
-// Components
 @import "accessibility/index";
 @import "action_item/index";
 @import "badge/index";
