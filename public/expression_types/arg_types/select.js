@@ -1,6 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { FormGroup, FormControl } from 'react-bootstrap';
+import { FormControl } from 'react-bootstrap';
 import { ArgType } from '../arg_type';
 
 const template = ({ typeInstance, onValueChange, argValue }) => {
@@ -22,11 +22,9 @@ const template = ({ typeInstance, onValueChange, argValue }) => {
   ));
 
   return (
-    <FormGroup controlId="formControlsSelect">
-      <FormControl componentClass="select" value={argValue.value} onChange={handleChange}>
-        {options}
-      </FormControl>
-    </FormGroup>
+    <FormControl componentClass="select" value={argValue.value} onChange={handleChange}>
+      {options}
+    </FormControl>
   );
 };
 
@@ -39,5 +37,5 @@ template.propTypes = {
 export const select = () => new ArgType('select', {
   displayName: 'Select',
   description: 'Select from multiple options in a drop down',
-  template: template,
+  simpleTemplate: template,
 });
