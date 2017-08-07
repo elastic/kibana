@@ -16,7 +16,7 @@ const mapStateToProps = (state) => ({
 
 const mapDispatchToProps = (dispatch) => ({
   dispatchArgumentAtIndex: props => arg => dispatch(setArgumentAtIndex({ ...props, arg })),
-  dispatchAstAtIndex: props => ast => dispatch(setAstAtIndex({ ...props, ast })),
+  dispatchAstAtIndex: ({ index, element, pageId }) => ast => dispatch(setAstAtIndex(index, ast, element, pageId)),
 });
 
 const mergeProps = (stateProps, dispatchProps, ownProps) => {

@@ -44,7 +44,6 @@ export const ElementContent = compose(
   invalidRenderTypeBranch,
   invalidExpressionBranch
 )(({ elementTypeDefintion, renderable, size }) => {
-
   return Style.it(renderable.css,
     <div style={Object.assign({}, renderable.containerStyle, size)}>
       <div className="canvas__element--content">

@@ -3,7 +3,7 @@ import { get, omit } from 'lodash';
 import { set, del } from 'object-path-immutable';
 import { createThunk } from 'redux-thunks';
 import * as args from './resolved_args';
-import { getPages } from '../selectors/workpad';
+import { getPages, getElementById } from '../selectors/workpad';
 import { getValue } from '../selectors/resolved_args';
 import { getDefaultElement } from '../defaults';
 import { getType } from '../../../common/types/get_type';
@@ -156,10 +156,14 @@ export const fetchAllRenderables = createThunk('fetchAllRenderables', ({ dispatc
   });
 });
 
-export const setExpression = createThunk('setExpression', ({ dispatch }, expression, element, pageId, doRender = true) => {
+export const setExpression = createThunk('setExpression', ({ dispatch, getState }, expression, element, pageId, doRender = true) => {
+  // dispatch action to update the element in state
   const _setExpression = createAction('setExpression');
   dispatch(_setExpression({ expression, element, pageId }));
-  if (doRender === true) dispatch(fetchRenderable(element));
+
+  // read updated element from state and fetch renderable
+  const updatedElement = getElementById(getState(), element.id, pageId);
+  if (doRender === true) dispatch(fetchRenderable(updatedElement));
 });
 
 export const setAst = createThunk('setAst', ({ dispatch }, ast, element, pageId, doRender = true) => {
@@ -169,7 +173,7 @@ export const setAst = createThunk('setAst', ({ dispatch }, ast, element, pageId,
 
 // index here is the top-level argument in the expression. for example in the expression
 // demodata().pointseries().plot(), demodata is 0, pointseries is 1, and plot is 2
-export const setAstAtIndex = createThunk('setAstAtIndex', ({ dispatch, getState }, { index, ast, element, pageId }) => {
+export const setAstAtIndex = createThunk('setAstAtIndex', ({ dispatch, getState }, index, ast, element, pageId) => {
   const newElement = set(element, ['ast', 'chain', index], ast);
   const newAst = get(newElement, 'ast');
 
@@ -201,13 +205,13 @@ export const setAstAtIndex = createThunk('setAstAtIndex', ({ dispatch, getState 
 // argIndex is the index in multi-value arguments, and is optional. excluding it will cause
 // the entire argument from be set to the passed value
 export const setArgumentAtIndex = createThunk('setArgumentAtIndex', ({ dispatch }, args) => {
-  const { index, element, pageId, argName, value, valueIndex } = args;
+  const { index, argName, value, valueIndex, element, pageId } = args;
   const selector = ['ast', 'chain', index, 'arguments', argName];
   if (valueIndex != null) selector.push(valueIndex);
 
   const newElement = set(element, selector, value);
   const newAst = get(newElement, ['ast', 'chain', index]);
-  dispatch(setAstAtIndex({ ast: newAst, index, element, pageId }));
+  dispatch(setAstAtIndex(index, newAst, element, pageId));
 });
 
 // index here is the top-level argument in the expression. for example in the expression
@@ -238,7 +242,7 @@ export const deleteArgumentAtIndex = createThunk('deleteArgumentAtIndex', ({ dis
     // otherwise, remove the entire key
     : del(element, ['ast', 'chain', index, 'arguments', argName]);
 
-  dispatch(setAst(get(newElement, 'ast'), element, pageId));
+  dispatch(setAstAtIndex(index, get(newElement, ['ast', 'chain', index]), element, pageId));
 });
 
 /*
