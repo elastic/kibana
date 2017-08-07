@@ -9,7 +9,7 @@ export default () => (
     <KuiButton
       onClick={() => window.alert('Button clicked')}
     >
-      Default
+      Primary
     </KuiButton>
 
     &nbsp;&nbsp;

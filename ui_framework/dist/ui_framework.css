@@ -489,9 +489,15 @@ table {
 
 .kuiCallOut {
   padding: 12px 24px;
-  border-left: 4px solid #0079a5;
-  background-color: #e6f2f6;
-  /* 1 */ }
+  border-left: 4px solid transparent; }
+
+.kuiCallOut--info {
+  border-color: #0079a5;
+  background-color: #e6f2f6; }
+  .kuiCallOut--info .kuiCallOutHeader__icon {
+    fill: #005574; }
+  .kuiCallOut--info .kuiCallOutHeader__title {
+    color: #005574; }
 
 .kuiCallOut--success {
   border-color: #00A69B;
