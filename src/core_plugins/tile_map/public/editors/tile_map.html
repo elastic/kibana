@@ -15,27 +15,6 @@
 <div ng-if="vis.params.mapType === 'Heatmap'" class="form-group">
   <div>
     <label>
-      Radius
-      &nbsp;<kbn-info placement="right" info="Size of heatmap dots. Default: 25"></kbn-info>
-    </label>
-    <div class="vis-editor-agg-form-row">
-      <input
-        name="heatRadius"
-        ng-model="vis.params.heatRadius"
-        required
-        class="form-control"
-        type="range"
-        min="5"
-        max="50"
-        step="1"
-        >
-      <div class="form-group vis-editor-agg-form-value">
-        {{vis.params.heatRadius}}
-      </div>
-    </div>
-  </div>
-  <div>
-    <label>
       Blur
       &nbsp;<kbn-info placement="right" info="Amount of blur applied to dots. Default: 15"></kbn-info>
     </label>

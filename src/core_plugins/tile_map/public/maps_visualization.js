@@ -249,8 +249,7 @@ export function MapsVisualizationProvider(serviceSettings, Notifier, getAppState
         heatmap: {
           heatBlur: newParams.heatBlur,
           heatMaxZoom: newParams.heatMaxZoom,
-          heatMinOpacity: newParams.heatMinOpacity,
-          heatRadius: newParams.heatRadius
+          heatMinOpacity: newParams.heatMinOpacity
         }
       };
     }

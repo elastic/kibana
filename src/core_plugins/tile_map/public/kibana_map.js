@@ -101,7 +101,8 @@ export class KibanaMap extends EventEmitter {
       maxZoom: options.maxZoom,
       center: options.center ? options.center : [0, 0],
       zoom: options.zoom ? options.zoom : 2,
-      renderer: L.canvas()
+      renderer: L.canvas(),
+      zoomAnimation: false // Desaturate map tiles causes animation rendering artifacts
     };
 
     this._leafletMap = L.map(containerNode, leafletOptions);
@@ -334,6 +335,20 @@ export class KibanaMap extends EventEmitter {
 
   getLeafletBounds() {
     return this._leafletMap.getBounds();
+  }
+
+  getMetersPerPixel() {
+    const pointC = this._leafletMap.latLngToContainerPoint(this._leafletMap.getCenter()); // center (pixels)
+    const pointX = [pointC.x + 1, pointC.y]; // add one pixel to x
+    const pointY = [pointC.x, pointC.y + 1]; // add one pixel to y
+
+    const latLngC = this._leafletMap.containerPointToLatLng(pointC);
+    const latLngX = this._leafletMap.containerPointToLatLng(pointX);
+    const latLngY = this._leafletMap.containerPointToLatLng(pointY);
+
+    const distanceX = latLngC.distanceTo(latLngX); // calculate distance between c and x (latitude)
+    const distanceY = latLngC.distanceTo(latLngY); // calculate distance between c and y (longitude)
+    return _.min([distanceX, distanceY]);
   }
 
   getBounds() {
