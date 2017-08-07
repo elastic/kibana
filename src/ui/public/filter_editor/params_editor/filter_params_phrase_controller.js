@@ -4,12 +4,9 @@ import chrome from 'ui/chrome';
 const baseUrl = chrome.addBasePath('/api/kibana/suggestions/values');
 
 export function filterParamsPhraseController($http, $scope, config) {
-  const shouldSuggestValues = this.shouldSuggestValues = config.get('filterEditor:suggestValues');
-
+  const shouldSuggestValues = this.shouldSuggestValues = (config.get('filterEditor:suggestions:terminateAfter') !== 0);
   this.compactUnion = _.flow(_.union, _.compact);
-
   this.getValueSuggestions = _.memoize(getValueSuggestions, getFieldQueryHash);
-
   this.refreshValueSuggestions = (query) => {
     return this.getValueSuggestions($scope.field, query)
       .then(suggestions => $scope.valueSuggestions = suggestions);
@@ -32,7 +29,7 @@ export function filterParamsPhraseController($http, $scope, config) {
       .catch(() => []);
   }
 
-  function getFieldQueryHash(field, query) {
+  function getFieldQueryHash(field, query = '') {
     return `${field.indexPattern.id}/${field.name}/${query}`;
   }
 }
