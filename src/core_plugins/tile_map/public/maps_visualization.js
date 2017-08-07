@@ -247,8 +247,6 @@ export function MapsVisualizationProvider(serviceSettings, Notifier, getAppState
         isFilteredByCollar: this._isFilteredByCollar(),
         fetchBounds: this.getGeohashBounds.bind(this),
         heatmap: {
-          heatBlur: newParams.heatBlur,
-          heatMaxZoom: newParams.heatMaxZoom,
           heatMinOpacity: newParams.heatMinOpacity
         }
       };
