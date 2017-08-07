@@ -1,5 +1,5 @@
 import _ from 'lodash';
-import { RangeFilterManager } from './range_filter_manager';
+import { RangeFilterManager } from '../lib/range_filter_manager';
 
 const minMaxAgg = (field) => {
   const aggBody = {};
@@ -21,9 +21,9 @@ const minMaxAgg = (field) => {
   };
 };
 
-export async function initRangeControl(controlParams, indexPatterns, SearchSource, queryFilter, callback) {
-  const indexPattern = await indexPatterns.get(controlParams.indexPattern);
-  const searchSource = new SearchSource();
+export async function rangeControlFactory(controlParams, kbnApi, callback) {
+  const indexPattern = await kbnApi.indexPatterns.get(controlParams.indexPattern);
+  const searchSource = new kbnApi.SearchSource();
   searchSource.inherits(false); //Do not filter by time so can not inherit from rootSearchSource
   searchSource.size(0);
   searchSource.index(indexPattern);
@@ -38,7 +38,7 @@ export async function initRangeControl(controlParams, indexPatterns, SearchSourc
     const min = _.get(resp, 'aggregations.minAgg.value');
     const max = _.get(resp, 'aggregations.maxAgg.value');
     const emptyValue = { min: min, max: min };
-    const filterManager = new RangeFilterManager(controlParams.fieldName, indexPattern, queryFilter, emptyValue);
+    const filterManager = new RangeFilterManager(controlParams.fieldName, indexPattern, kbnApi.queryFilter, emptyValue);
     callback({
       type: controlParams.type,
       indexPattern: indexPattern,

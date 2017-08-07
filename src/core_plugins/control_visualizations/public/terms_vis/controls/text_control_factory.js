@@ -1,4 +1,4 @@
-import { PhraseFilterManager } from './phrase_filter_manager';
+import { PhraseFilterManager } from '../lib/phrase_filter_manager';
 
 async function getSuggestions(indexPattern, fieldName, SearchSource, value) {
   const query = { match_phrase_prefix: {} };
@@ -17,9 +17,9 @@ async function getSuggestions(indexPattern, fieldName, SearchSource, value) {
   return searchSource.fetch();
 }
 
-export async function initTextControl(controlParams, indexPatterns, SearchSource, queryFilter, callback) {
-  const indexPattern = await indexPatterns.get(controlParams.indexPattern);
-  const filterManager = new PhraseFilterManager(controlParams.fieldName, indexPattern, queryFilter);
+export async function textControlFactory(controlParams, kbnApi, callback) {
+  const indexPattern = await kbnApi.indexPatterns.get(controlParams.indexPattern);
+  const filterManager = new PhraseFilterManager(controlParams.fieldName, indexPattern, kbnApi.queryFilter);
   callback({
     value: filterManager.getValueFromFilterBar(),
     type: controlParams.type,
@@ -27,7 +27,7 @@ export async function initTextControl(controlParams, indexPatterns, SearchSource
     field: indexPattern.fields.byName[controlParams.fieldName],
     label: controlParams.label ? controlParams.label : controlParams.fieldName,
     filterManager: filterManager,
-    getSuggestions: getSuggestions.bind(null, indexPattern, controlParams.fieldName, SearchSource)
+    getSuggestions: getSuggestions.bind(null, indexPattern, controlParams.fieldName, kbnApi.SearchSource)
   });
 
   // No search request needed to init control

@@ -18,11 +18,7 @@ export class RangeControl extends Component {
   }
 
   handleOnChange(control, value) {
-    const range = {
-      gte: value.min,
-      lt: value.max
-    };
-    this.props.setFilter(control.filterManager, range);
+    this.props.stageFilter(this.props.controlIndex, value, this.props.control.filterManager.createFilter(value));
   }
 
   render() {
@@ -42,7 +38,7 @@ export class RangeControl extends Component {
 }
 
 RangeControl.propTypes = {
-  setFilter: PropTypes.func.isRequired,
-  removeFilter: PropTypes.func.isRequired,
-  control: PropTypes.object.isRequired
+  control: PropTypes.object.isRequired,
+  controlIndex: PropTypes.number.isRequired,
+  stageFilter: PropTypes.func.isRequired
 };

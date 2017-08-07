@@ -9,11 +9,13 @@ export class TermsControl extends Component {
   }
 
   handleOnChange(control, evt) {
+    let newValue = '';
+    let newFilter = undefined;
     if (evt) {
-      this.props.setFilter(control.filterManager, evt.value);
-    } else {
-      this.props.removeFilter(control.filterManager);
+      newValue = evt.value;
+      newFilter = this.props.control.filterManager.createFilter(newValue);
     }
+    this.props.stageFilter(this.props.controlIndex, newValue, newFilter);
   }
 
   render() {
@@ -33,7 +35,7 @@ export class TermsControl extends Component {
 }
 
 TermsControl.propTypes = {
-  setFilter: PropTypes.func.isRequired,
-  removeFilter: PropTypes.func.isRequired,
-  control: PropTypes.object.isRequired
+  control: PropTypes.object.isRequired,
+  controlIndex: PropTypes.number.isRequired,
+  stageFilter: PropTypes.func.isRequired
 };

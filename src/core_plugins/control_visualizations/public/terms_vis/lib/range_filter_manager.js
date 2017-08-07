@@ -1,6 +1,32 @@
 import _ from 'lodash';
 import { buildRangeFilter } from 'ui/filter_manager/lib/range';
 
+// Convert slider value into ES range filter
+function toRange(sliderValue) {
+  return {
+    gte: sliderValue.min,
+    lt: sliderValue.max
+  };
+}
+
+// Convert ES range filter into slider value
+function fromRange(range) {
+  const sliderValue = {};
+  if (_.has(range, 'gte')) {
+    sliderValue.min = _.get(range, 'gte');
+  }
+  if (_.has(range, 'gt')) {
+    sliderValue.min = _.get(range, 'gt');
+  }
+  if (_.has(range, 'lte')) {
+    sliderValue.max = _.get(range, 'lte');
+  }
+  if (_.has(range, 'lt')) {
+    sliderValue.max = _.get(range, 'lt');
+  }
+  return sliderValue;
+}
+
 export class RangeFilterManager {
   constructor(fieldName, indexPattern, queryFilter, emptyValue) {
     this.fieldName = fieldName;
@@ -9,10 +35,10 @@ export class RangeFilterManager {
     this.emptyValue = emptyValue;
   }
 
-  createFilter(range) {
+  createFilter(value) {
     return buildRangeFilter(
       this.indexPattern.fields.byName[this.fieldName],
-      range,
+      toRange(value),
       this.indexPattern);
   }
 
@@ -44,20 +70,7 @@ export class RangeFilterManager {
         range = _.get(kbnFilters[0], ['range', this.fieldName]);
       }
 
-      const value = {};
-      if (_.has(range, 'gte')) {
-        value.min = _.get(range, 'gte');
-      }
-      if (_.has(range, 'gt')) {
-        value.min = _.get(range, 'gt');
-      }
-      if (_.has(range, 'lte')) {
-        value.max = _.get(range, 'lte');
-      }
-      if (_.has(range, 'lt')) {
-        value.max = _.get(range, 'lt');
-      }
-      return value;
+      return fromRange(range);
     }
   }
 }
