@@ -4,6 +4,8 @@ import { imageUpload } from './image_upload';
 import { seriesStyle } from './series_style';
 import { select } from './select';
 import { textarea } from './textarea';
+import { palette } from './palette';
+
 
 export default [
   datacolumn,
@@ -12,4 +14,5 @@ export default [
   seriesStyle,
   select,
   textarea,
+  palette,
 ];

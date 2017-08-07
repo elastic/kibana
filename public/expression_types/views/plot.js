@@ -9,6 +9,11 @@ export const plot = () => new View('plot', {
   description: 'Show your data, as plots',
   modelArgs: ['x', 'y', 'color', 'size'],
   args: [
+    new Arg('palette', {
+      displayName: 'Color palette',
+      argType: 'palette',
+      multi: true,
+    }),
     new Arg('defaultStyle', {
       displayName: 'Default style',
       argType: 'seriesStyle',
@@ -17,7 +22,7 @@ export const plot = () => new View('plot', {
     new Arg('seriesStyle', {
       displayName: 'Series style',
       argType: 'seriesStyle',
-      defaultValue: 'seriesStyle(label="label", bars=1)',
+      defaultValue: 'seriesStyle(lines=1)',
       multi: true,
     }),
   ],
