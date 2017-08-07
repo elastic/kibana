@@ -1,6 +1,5 @@
 import { parse } from './grammar';
 
-// This breaks in the browser, besides, its faster if we generate the parser and load that
 function getExpressionArgs(block) {
   const args = block.arguments;
 
