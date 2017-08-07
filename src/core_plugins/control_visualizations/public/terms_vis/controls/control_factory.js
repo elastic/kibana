@@ -7,7 +7,7 @@ export function controlFactory(controlParamsArray, kbnApi, callback) {
     // ignore controls that do not have indexPattern or field
     return control.indexPattern && control.fieldName;
   })
-  .map(async (controlParams) => {
+  .map(async (controlParams, index) => {
     let factory = null;
     switch (controlParams.type) {
       case 'range':
@@ -25,7 +25,7 @@ export function controlFactory(controlParamsArray, kbnApi, callback) {
       return factory(
         controlParams,
         kbnApi,
-        callback);
+        callback.bind(null, index));
     }
   });
   Promise.all(createRequestPromises).then(searchRequests => {

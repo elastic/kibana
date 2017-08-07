@@ -7,7 +7,7 @@ import {
   KuiButton,
   KuiButtonIcon,
 } from 'ui_framework/components';
-import { addControl, getDefaultOptions, newControl, removeControl, setControl } from '../lib/editor_utils';
+import { addControl, getDefaultOptions, moveControl, newControl, removeControl, setControl } from '../lib/editor_utils';
 
 export class InputControlVisEditor extends Component {
   constructor(props) {
@@ -64,6 +64,10 @@ export class InputControlVisEditor extends Component {
 
   handleRemoveControl(controlIndex) {
     this.setVisParam('controls', removeControl(this.props.scope.vis.params.controls, controlIndex));
+  }
+
+  moveControl(controlIndex, direction) {
+    this.setVisParam('controls', moveControl(this.props.scope.vis.params.controls, controlIndex, direction));
   }
 
   handleAddControl() {
@@ -126,6 +130,21 @@ export class InputControlVisEditor extends Component {
               />
             </div>
             <button
+              type="button"
+              className="kuiButton kuiButton--small"
+              onClick={this.moveControl.bind(this, controlIndex, -1)}
+            >
+              ^
+            </button>
+            <button
+              type="button"
+              className="kuiButton kuiButton--small"
+              onClick={this.moveControl.bind(this, controlIndex, 1)}
+            >
+              v
+            </button>
+            <button
+              type="button"
               className="kuiButton kuiButton--danger kuiButton--small"
               onClick={this.handleRemoveControl.bind(this, controlIndex)}
             >

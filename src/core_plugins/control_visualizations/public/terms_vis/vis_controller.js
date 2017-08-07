@@ -45,8 +45,8 @@ class VisController {
     controlFactory(
       this.vis.params.controls,
       this.vis.API,
-      (control) => {
-        this.controls.push(control);
+      (index, control) => {
+        this.controls[index] = control;
         this.drawVis();
       }
     );

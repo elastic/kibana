@@ -6,6 +6,36 @@ export const setControl = (controls, controlIndex, control) => [
 
 export const addControl = (controls, control) => [...controls, control];
 
+export const moveControl = (controls, controlIndex, direction) => {
+  let newIndex;
+  if (direction >= 0) {
+    newIndex = controlIndex + 1;
+  } else {
+    newIndex = controlIndex - 1;
+  }
+
+  if (newIndex < 0) {
+    // Move first item to last
+    return [
+      ...controls.slice(1),
+      controls[0]
+    ];
+  } else if (newIndex >= controls.length) {
+    const lastItemIndex = controls.length - 1;
+    // Move last item to first
+    return [
+      controls[lastItemIndex],
+      ...controls.slice(0, lastItemIndex)
+    ];
+  } else {
+    const swapped = controls.slice();
+    const temp = swapped[newIndex];
+    swapped[newIndex] = swapped[controlIndex];
+    swapped[controlIndex] = temp;
+    return swapped;
+  }
+};
+
 export const removeControl = (controls, controlIndex) => [
   ...controls.slice(0, controlIndex),
   ...controls.slice(controlIndex + 1)
