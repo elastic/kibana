@@ -441,7 +441,7 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
     }
 
     async getFilters(timeout = defaultFindTimeout) {
-      return await find.allByCssSelector('.filter-bar > .filter', timeout);
+      return await find.allByCssSelector('.filter-bar .filter', timeout);
     }
 
     async getFilterDescriptions(timeout = defaultFindTimeout) {
