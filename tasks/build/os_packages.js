@@ -6,6 +6,7 @@ export default (grunt) => {
   const { config } = grunt;
   const targetDir = config.get('target');
   const packageScriptsDir = grunt.config.get('packageScriptsDir');
+  const tmpFilesDir = grunt.config.get('tmpFilesDir');
   const servicesByName = indexBy(config.get('services'), 'name');
   const packages = config.get('packages');
   const fpm = args => exec('fpm', args);
@@ -63,6 +64,7 @@ export default (grunt) => {
         `${buildDir}/data/=${packages.path.data}/`,
         `${servicesByName.sysv.outputDir}/etc/=/etc/`,
         `${servicesByName.systemd.outputDir}/etc/=/etc/`
+        `${tmpFilesDir}/=/usr/lib/tmpfiles.d/`
       ];
 
       //Manually find flags, multiple args without assignment are not entirely parsed

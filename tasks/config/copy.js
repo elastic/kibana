@@ -31,6 +31,7 @@ module.exports = function () {
         process(content) {
           const replacements = {
             'logging.dest': '/var/log/kibana/kibana.log',
+            'pid.file': '/var/run/kibana/kibana.pid'
           };
 
           Object.keys(replacements).forEach(key => {
