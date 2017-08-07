@@ -10,7 +10,7 @@ export default new Fn({
     _: {
       multi: true,
       types: ['string'],
-      help: 'Seed colors, rgba, hex, or HTML color string',
+      help: 'Palette colors, rgba, hex, or HTML color string',
     },
     gradient: {
       types: ['boolean', 'null'],
