@@ -60,6 +60,10 @@ export class ElasticsearchService implements CoreService {
   }
 
   async stop() {
+    if (!this.subscription) {
+      return;
+    }
+
     this.subscription.unsubscribe();
   }
 

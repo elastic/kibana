@@ -23,7 +23,7 @@ export function registerElasticsearchRoutes(
         })
       }
     },
-    async (elasticsearch, req) => {
+    async (elasticsearch, req, res) => {
       // WOHO! Both of these are typed!
       log.info(`field param: ${req.params.field}`);
       log.info(`query param: ${req.query.key}`);
@@ -38,11 +38,11 @@ export function registerElasticsearchRoutes(
         client.search({})
       );
 
-      return {
+      return res.ok({
         params: req.params,
         query: req.query,
         total_count: response.hits.total
-      };
+      });
     }
   );
 

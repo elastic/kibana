@@ -1,6 +1,7 @@
 import * as express from 'express';
 import * as bodyParser from 'body-parser';
 import * as http from 'http';
+import { promisify } from 'util';
 import { Router } from './Router';
 
 export class HttpServer {
@@ -25,15 +26,7 @@ export class HttpServer {
   }
 
   start(port: number, host: string) {
-    return new Promise((resolve, reject) => {
-      this.httpServer.listen(port, host, (err?: Error) => {
-        if (err != null) {
-          reject(err);
-        } else {
-          resolve();
-        }
-      });
-    });
+    return promisify(this.httpServer.listen).call(this.httpServer, port, host);
   }
 
   stop() {
