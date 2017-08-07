@@ -4,33 +4,35 @@ export function registerValueSuggestions(server) {
   server.route({
     path: '/api/kibana/suggestions/values/{index}',
     method: ['POST'],
-    handler: function (req, reply) {
+    handler: async function (req, reply) {
       const { index } = req.params;
       const { field, query } = req.payload;
-
       const { callWithRequest } = server.plugins.elasticsearch.getCluster('data');
-      const include = query ? `.*${query}.*` : undefined;
-      const body = getBody({
-        field,
-        include,
-        shard_size: 10,
-        size: 10
-      });
-
-      return callWithRequest(req, 'search', { index, body })
-      .then((res) => {
-        const suggestions = res.aggregations.suggestions.buckets.map(bucket => bucket.key);
-        return reply(suggestions);
-      })
-      .catch(error => reply(handleESError(error)));
+      const body = getBody({ field, query });
+      try {
+        const response = await callWithRequest(req, 'search', { index, body });
+        const suggestions = response.aggregations.suggestions.buckets.map(bucket => bucket.key);
+        reply(suggestions);
+      } catch (error) {
+        reply(handleESError(error));
+      }
     }
   });
 }
 
-function getBody(terms) {
+function getBody({ field, query }) {
+  const include = query ? `.*${query}.*` : undefined;
   return {
+    size: 0,
+    terminate_after: 100000,
     aggs: {
-      suggestions: { terms }
+      suggestions: {
+        terms: {
+          field,
+          include,
+          execution_hint: 'map'
+        }
+      }
     }
   };
 }
