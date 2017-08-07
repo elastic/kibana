@@ -120,20 +120,6 @@ describe('queryBar directive', function () {
       expectDeepEqual($parentScope.submitHandler.getCall(0).args[0], { query: 'bar', language: 'lucene' });
     });
 
-    it('should customize the input element for each language', function () {
-      init({ query: 'foo', language: 'lucene' }, 'discover', true);
-      const luceneInput = $elem.find('.kuiLocalSearchInput');
-      expect(luceneInput.attr('placeholder')).to.be('Search... (e.g. status:200 AND extension:PHP)');
-
-      const helpLink = $elem.find('.kuiLocalSearchAssistedInput__assistance .kuiLink');
-      expect(helpLink.text().trim()).to.be('Uses lucene query syntax');
-
-      $parentScope.query = { query: 'foo', language: 'kuery' };
-      $parentScope.$digest();
-      const kueryInput = $elem.find('.kuiLocalSearchInput');
-      expect(kueryInput.attr('placeholder')).to.be('Search with kuery...');
-    });
-
   });
 
   describe('typeahead key', function () {
