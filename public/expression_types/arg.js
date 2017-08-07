@@ -1,5 +1,5 @@
 import React from 'react';
-import { pick } from 'lodash';
+import { pick, isUndefined } from 'lodash';
 import { ArgForm } from '../components/arg_form';
 import { argTypeRegistry } from './arg_type';
 import { toInterfaceValue } from '../lib/map_arg_value';
@@ -16,7 +16,7 @@ export class Arg {
       description: name,
       multi: false,
       types: [],
-      defaultValue: '',
+      defaultValue: isUndefined(argType.defaultValue) ? '' : argType.defaultValue,
       options: {},
       resolve: () => ({}),
     };
