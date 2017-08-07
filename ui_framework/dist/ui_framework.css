@@ -2921,6 +2921,8 @@ main {
   display: -ms-flexbox;
   display: flex;
   border-bottom: 1px solid #D9D9D9; }
+  .theme-dark .kuiTabs {
+    border-bottom: 1px solid #777777; }
 
 /**
  * 1. Override button styles (some of which are from Bootstrap).
@@ -2941,11 +2943,14 @@ main {
   background-color: #FFF;
   /* 1 */
   border: 1px solid #D9D9D9;
-  border-bottom-width: 1px;
   border-radius: 0;
   /* 1 */
   margin-bottom: -1px;
   /* 3 */ }
+  .theme-dark .kuiTab {
+    color: #cecece;
+    background-color: #333333;
+    border-color: #777777; }
   .kuiTab + .kuiTab {
     border-left: none; }
     .kuiTab + .kuiTab:focus:not(.kuiTab-isSelected):not(:active) {
@@ -2963,13 +2968,24 @@ main {
     z-index: 1;
     color: #0079a5;
     border: 1px solid #0079a5 !important; }
+    .theme-dark .kuiTab:focus:not(.kuiTab-isSelected):not(:active) {
+      color: #cecece;
+      background-color: #333333;
+      border-color: #777777 !important; }
   .kuiTab:hover:not(.kuiTab-isSelected) {
     color: #006E8A;
     background-color: #F2F2F2; }
+    .theme-dark .kuiTab:hover:not(.kuiTab-isSelected) {
+      color: #def2f6;
+      background-color: #777777; }
   .kuiTab.kuiTab-isSelected {
     cursor: default;
     color: #191E23;
     border-bottom-color: #FFF; }
+    .theme-dark .kuiTab.kuiTab-isSelected {
+      color: #cecece;
+      background-color: #333333;
+      border-bottom-color: #333333; }
 
 /**
  * 1. Allow container to deteermine font-size and line-height.
