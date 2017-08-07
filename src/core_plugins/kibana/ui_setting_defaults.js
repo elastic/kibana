@@ -10,7 +10,7 @@ export function getUiSettingDefaults() {
       readonly: true
     },
     'query:queryString:options': {
-      value: '{ "analyze_wildcard": true }',
+      value: '{ "analyze_wildcard": true, "default_field": "*" }',
       description: '<a href="https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-query-string-query.html" target="_blank">Options</a> for the lucene query string parser',
       type: 'json'
     },
@@ -91,11 +91,6 @@ export function getUiSettingDefaults() {
       description: 'Highlight results in Discover and Saved Searches Dashboard.' +
         'Highlighting makes requests slow when working on big documents.',
     },
-    'doc_table:highlight:all_fields': {
-      value: true,
-      description: 'Improves highlighting by using a separate "highlight_query" that uses "all_fields" mode on "query_string" queries. ' +
-        'Set to false if you are using a "default_field" in your index.',
-    },
     'courier:maxSegmentCount': {
       value: 30,
       description: 'Requests in discover are split into segments to prevent massive requests from being sent to ' +
@@ -147,7 +142,7 @@ export function getUiSettingDefaults() {
     },
     'visualization:regionmap:showWarnings': {
       value: true,
-      description: 'Should the vector map show a warning when terms cannot be joined to a shape on the map.'
+      description: 'Whether the region map show a warning when terms cannot be joined to a shape on the map.'
     },
     'visualization:colorMapping': {
       type: 'json',

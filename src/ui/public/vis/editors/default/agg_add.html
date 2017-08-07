@@ -2,6 +2,8 @@
   <label>Select {{ groupName }} type</label>
   <ul class="form-group list-group list-group-menu">
     <li
+      tabindex="0"
+      id="aggSchemaListItem-{{$index}}"
       ng-hide="schema.deprecate"
       ng-repeat="schema in availableSchema"
       ng-click="add.submit(schema)"

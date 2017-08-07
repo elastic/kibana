@@ -1,5 +1,8 @@
 import testSubjSelector from '@spalger/test-subj-selector';
-import { filter as filterAsync } from 'bluebird';
+import {
+  filter as filterAsync,
+  map as mapAsync,
+} from 'bluebird';
 
 export function TestSubjectsProvider({ getService }) {
   const log = getService('log');
@@ -51,10 +54,35 @@ export function TestSubjectsProvider({ getService }) {
 
     async setValue(selector, text) {
       return await retry.try(async () => {
-        const input = await this.find(selector);
-        await input.click();
+        const element = await this.find(selector);
+        await element.click();
+
+        // in case the input element is actually a child of the testSubject, we
+        // call clearValue() and type() on the element that is focused after
+        // clicking on the testSubject
+        const input = await remote.getActiveElement();
         await input.clearValue();
         await input.type(text);
+      });
+    }
+
+    async isEnabled(selector) {
+      return await retry.try(async () => {
+        const element = await this.find(selector);
+        return await element.isEnabled();
+      });
+    }
+
+    async isSelected(selector) {
+      return await retry.try(async () => {
+        const element = await this.find(selector);
+        return await element.isSelected();
+      });
+    }
+
+    async isSelectedAll(selectorAll) {
+      return await this._mapAll(selectorAll, async (element) => {
+        return await element.isSelected();
       });
     }
 
@@ -62,6 +90,19 @@ export function TestSubjectsProvider({ getService }) {
       return await retry.try(async () => {
         const element = await this.find(selector);
         return await element.getVisibleText();
+      });
+    }
+
+    async getVisibleTextAll(selectorAll) {
+      return await this._mapAll(selectorAll, async (element) => {
+        return await element.getVisibleText();
+      });
+    }
+
+    async _mapAll(selectorAll, mapFn) {
+      return await retry.try(async () => {
+        const elements = await this.findAll(selectorAll);
+        return await mapAsync(elements, mapFn);
       });
     }
   }

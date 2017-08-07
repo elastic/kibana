@@ -30,7 +30,7 @@ export default function ({ getService, getPageObjects }) {
         log.debug('Add Average Metric on machine.ram field');
         await PageObjects.visualize.clickAddMetric();
         await PageObjects.visualize.clickBucket('Y-Axis');
-        await PageObjects.visualize.selectAggregation('Average');
+        await PageObjects.visualize.selectAggregation('Average', 'metrics');
         await PageObjects.visualize.selectField('machine.ram', 'metrics');
         await PageObjects.visualize.clickGo();
         await PageObjects.visualize.openSpyPanel();
