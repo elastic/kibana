@@ -1,5 +1,7 @@
 import { validateInterval } from '../lib/validate_interval';
 import { dashboardContextProvider } from 'plugins/kibana/dashboard/dashboard_context';
+import { jstz as tzDetect } from 'jstimezonedetect';
+import moment from 'moment';
 
 const MetricsRequestHandlerProvider = function (Private, Notifier, config, timefilter, $http) {
   const dashboardContext = Private(dashboardContextProvider);
@@ -9,11 +11,20 @@ const MetricsRequestHandlerProvider = function (Private, Notifier, config, timef
     name: 'metrics',
     handler: function (vis /*, appState, uiState, queryFilter*/) {
 
+      let timezone = config.get('dateFormat:tz', 'Browser');
+      if (timezone === 'Browser') {
+        timezone = tzDetect.determine().name();
+        if (!timezone) {
+          timezone = moment().format('Z');
+        }
+
+      }
+
       return new Promise((resolve) => {
         const panel = vis.params;
         if (panel && panel.id) {
           const params = {
-            timerange: timefilter.getBounds(),
+            timerange: { timezone, ...timefilter.getBounds() },
             filters: [dashboardContext()],
             panels: [panel]
           };
