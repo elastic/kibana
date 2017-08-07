@@ -42,6 +42,9 @@ export function MapsVisualizationProvider(serviceSettings, Notifier, getAppState
       return new Promise(async(resolve) => {
 
         await this._kibanaMapReady;
+        if (status.resize) {
+          this._kibanaMap.resize();
+        }
         if (status.params || status.aggs) await this._updateParams();
 
         if (esResponse && typeof esResponse.geohashGridAgg === 'undefined') {
@@ -53,9 +56,6 @@ export function MapsVisualizationProvider(serviceSettings, Notifier, getAppState
         }
         if (status.uiState) {
           this._kibanaMap.useUiStateFromVisualization(this.vis);
-        }
-        if (status.resize) {
-          this._kibanaMap.resize();
         }
 
         this._doRenderComplete(resolve);

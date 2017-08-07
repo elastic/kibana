@@ -33,6 +33,39 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
       return logstash;
     }
 
+    async clickFullScreenMode() {
+      log.debug(`clickFullScreenMode`);
+      await testSubjects.click('dashboardFullScreenMode');
+    }
+
+    async fullScreenModeMenuItemExists() {
+      return await testSubjects.exists('dashboardFullScreenMode');
+    }
+
+    async exitFullScreenTextButtonExists() {
+      return await testSubjects.exists('exitFullScreenModeText');
+    }
+
+    async getExitFullScreenTextButton() {
+      return await testSubjects.find('exitFullScreenModeText');
+    }
+
+    async exitFullScreenLogoButtonExists() {
+      return await testSubjects.exists('exitFullScreenModeLogo');
+    }
+
+    async getExitFullScreenLogoButton() {
+      return await testSubjects.find('exitFullScreenModeLogo');
+    }
+
+    async clickExitFullScreenLogoButton() {
+      await testSubjects.click('exitFullScreenModeLogo');
+    }
+
+    async clickExitFullScreenTextButton() {
+      await testSubjects.click('exitFullScreenModeText');
+    }
+
     /**
      * Returns true if already on the dashboard landing page (that page doesn't have a link to itself).
      * @returns {Promise<boolean>}
