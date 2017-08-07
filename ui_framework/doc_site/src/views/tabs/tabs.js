@@ -32,7 +32,7 @@ class KuiTabsExample extends React.Component {
     this.setState({
       selectedTabId: id,
     });
-  }
+  };
 
   renderTabs() {
     return this.tabs.map((tab,index) => (
