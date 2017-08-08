@@ -2727,7 +2727,8 @@ main {
     box-shadow: 0 16px 16px -8px rgba(0, 0, 0, 0.1); }
 
 .kuiPopover__body {
-  line-height: 20px;
+  line-height: 1.5;
+  font-size: 14px;
   position: absolute;
   min-width: 256px;
   top: 100%;

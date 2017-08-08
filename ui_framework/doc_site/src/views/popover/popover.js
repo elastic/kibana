@@ -30,7 +30,7 @@ export default class extends Component {
 
   render() {
     const button = (
-      <KuiButton onClick={this.onButtonClick.bind(this)}>
+      <KuiButton buttonType="basic" onClick={this.onButtonClick.bind(this)}>
         Click me
       </KuiButton>
     );

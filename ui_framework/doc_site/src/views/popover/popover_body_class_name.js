@@ -32,7 +32,7 @@ export default class extends Component {
     return (
       <KuiPopover
         button={ (
-          <KuiButton onClick={ this.onButtonClick.bind(this) }>
+          <KuiButton buttonType="basic" onClick={ this.onButtonClick.bind(this) }>
             Custom class
           </KuiButton>
         ) }

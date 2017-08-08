@@ -19,7 +19,8 @@
 
   // Animation happens on the body.
   .kuiPopover__body {
-    line-height: 20px;
+    line-height: $globalLineHeight;
+    font-size: $globalFontSize;
     position: absolute;
     min-width: 256px; // Can expand further, but this size is good for our menus.
     top: 100%;
