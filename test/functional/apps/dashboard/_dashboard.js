@@ -237,6 +237,7 @@ export default function ({ getService, getPageObjects }) {
 
     describe('full screen mode', () => {
       it('option not available in edit mode', async () => {
+        await PageObjects.dashboard.clickEdit();
         const exists = await PageObjects.dashboard.fullScreenModeMenuItemExists();
         expect(exists).to.be(false);
       });
