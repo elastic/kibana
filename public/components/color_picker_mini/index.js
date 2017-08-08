@@ -1,8 +1,5 @@
-import { compose, withState } from 'recompose';
+import { pure } from 'recompose';
 
 import { ColorPickerMini as Component } from './color_picker_mini';
 
-export const ColorPickerMini = compose(
-  withState('popover', 'setPopover'),
-  withState('target', 'setTarget'),
-)(Component);
+export const ColorPickerMini = pure(Component);

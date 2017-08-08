@@ -31,10 +31,6 @@ export const ColorPickerMini = ({ onChange, value, placement }) => {
 
 ColorPickerMini.propTypes = {
   value: PropTypes.string,
-  popover: PropTypes.bool,
-  setPopover: PropTypes.func,
-  target: PropTypes.object,
-  setTarget: PropTypes.func,
   onChange: PropTypes.func,
   placement: PropTypes.string,
 };
