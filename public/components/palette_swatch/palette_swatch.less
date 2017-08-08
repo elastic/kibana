@@ -1,0 +1,34 @@
+@import (reference) "../../style/main";
+
+.canvas__palette-swatch {
+  display: inline-block;
+  position: relative;
+  height: 25px;
+  width: 100%;
+  overflow: hidden;
+  border-radius: 15px;
+  border: 2px solid @darkGrey;
+
+  .canvas__palette-swatch--background {
+    position: absolute;
+    height: 25px;
+    top: 0;
+    left: 0;
+    width: 100%;
+  }
+
+  .canvas__palette-swatch--foreground {
+    position: absolute;
+    height: 27px; // TODO: No idea why this can't be 25, but it leaves a 1px white spot in the palettePicker if its 25
+    top: 0;
+    left: 0;
+    white-space: nowrap;
+    width: 100%;
+    display: flex;
+  }
+
+  .canvas__palette-swatch--box {
+    display: inline-block;
+    width: 100%;
+  }
+}
