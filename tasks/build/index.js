@@ -22,11 +22,11 @@ module.exports = function (grunt) {
       'clean:testsFromModules',
       'run:optimizeBuild',
       'stop:optimizeBuild',
-      'copy:config',
       '_build:versionedLinks',
       '_build:osShellScripts',
       grunt.option('skip-archives') ? [] : ['_build:archives'],
       grunt.option('skip-os-packages') ? [] : [
+        'copy:packageConfig',
         '_build:pleaseRun',
         '_build:osPackages',
       ],

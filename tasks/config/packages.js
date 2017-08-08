@@ -52,6 +52,9 @@ export default (grunt) => {
       home: FOLDER_HOME,
       kibanaBin: FILE_KIBANA_BINARY,
       kibanaConfig: FILE_KIBANA_CONF
-    }
+    },
+    kibanaYMLReplacements: {
+      'logging.dest': '/var/log/kibana/kibana.log',
+    },
   };
 };

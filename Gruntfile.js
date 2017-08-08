@@ -12,7 +12,7 @@ module.exports = function (grunt) {
     plugins: __dirname + '/src/core_plugins',
     server: __dirname + '/src/server',
     target: __dirname + '/target', // location of the compressed build targets
-    configFile: __dirname + '/src/config/kibana.yml',
+    configFile: __dirname + '/config/kibana.yml',
 
     karmaBrowser: (function () {
       if (grunt.option('browser')) {
