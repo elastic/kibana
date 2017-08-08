@@ -302,7 +302,7 @@ export function MapsVisualizationProvider(serviceSettings, Notifier, getAppState
 
     _getGeoHashAgg() {
       return this.vis.aggs.find((agg) => {
-        return agg.type.dslName === 'geohash_grid';
+        return _.get(agg, 'type.dslName') === 'geohash_grid';
       });
     }
 
