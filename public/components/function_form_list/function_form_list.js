@@ -1,17 +1,12 @@
+import { createElement } from 'react';
 import PropTypes from 'prop-types';
-import { compose, branch, renderComponent } from 'recompose';
-import { FunctionFormListComponent } from './function_form_list_component';
-import { ElementNotSelected } from './element_not_selected';
+import { FunctionForm } from '../function_form';
 
-const branches = [
-  // rendered when no arg chain is provided
-  branch(props => !props.element, renderComponent(ElementNotSelected)),
-];
-
-export const FunctionFormList = compose(
-  ...branches
-)(FunctionFormListComponent);
+export const FunctionFormList = ({ functionFormItems }) => {
+  const argTypeComponents = functionFormItems.map(spec => createElement(FunctionForm, spec));
+  return createElement('div', null, ...argTypeComponents);
+};
 
 FunctionFormList.propTypes = {
-  element: PropTypes.object,
+  functionFormItems: PropTypes.array.isRequired,
 };

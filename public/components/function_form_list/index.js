@@ -1,10 +1,8 @@
-import { connect } from 'react-redux';
+import { compose, withProps } from 'recompose';
 import { get } from 'lodash';
 import { FunctionFormList as Component } from './function_form_list';
 import { modelRegistry, viewRegistry } from '../../expression_types';
-import { getSelectedElement } from '../../state/selectors/workpad';
 import { toExpression } from '../../../common/lib/ast';
-import './function_form_list.less';
 
 function getExpression(chain) {
   if (!Array.isArray(chain) || !chain.length) return null;
@@ -15,8 +13,8 @@ function getExpression(chain) {
   });
 }
 
-const mapStateToProps = (state) => {
-  const selectedElement = getSelectedElement(state);
+const functionFormItems = withProps(props => {
+  const selectedElement = props.element;
   const FunctionFormChain = get(selectedElement, 'ast.chain', []);
 
   // map argTypes from AST, attaching nextArgType if one exists
@@ -44,9 +42,10 @@ const mapStateToProps = (state) => {
   }, { mapped: [], context: [] });
 
   return {
-    element: selectedElement,
     functionFormItems: FunctionFormListItems.mapped,
   };
-};
+});
 
-export const FunctionFormList = connect(mapStateToProps)(Component);
+export const FunctionFormList = compose(
+  functionFormItems
+)(Component);
