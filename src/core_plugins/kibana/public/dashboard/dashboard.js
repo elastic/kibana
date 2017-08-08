@@ -19,16 +19,14 @@ import { DocTitleProvider } from 'ui/doc_title';
 import { getTopNavConfig } from './top_nav/get_top_nav_config';
 import { DashboardConstants, createDashboardEditUrl } from './dashboard_constants';
 import { VisualizeConstants } from 'plugins/kibana/visualize/visualize_constants';
-import { UtilsBrushEventProvider } from 'ui/utils/brush_event';
-import { FilterBarClickHandlerProvider } from 'ui/filter_bar/filter_bar_click_handler';
 import { DashboardState } from './dashboard_state';
 import { notify } from 'ui/notify';
-import './panel/get_object_loaders_for_dashboard';
 import { documentationLinks } from 'ui/documentation_links/documentation_links';
 import { showCloneModal } from './top_nav/show_clone_modal';
 import { migrateLegacyQuery } from 'ui/utils/migrateLegacyQuery';
 import { QueryManagerProvider } from 'ui/query_manager';
 import { ESC_KEY_CODE } from 'ui_framework/services';
+import { DashboardContainerAPI } from './dashboard_container_api';
 
 const app = uiModules.get('app/dashboard', [
   'elasticsearch',
@@ -86,8 +84,6 @@ app.directive('dashboardApp', function ($injector) {
   const confirmModal = $injector.get('confirmModal');
   const config = $injector.get('config');
   const Private = $injector.get('Private');
-  const brushEvent = Private(UtilsBrushEventProvider);
-  const filterBarClickHandler = Private(FilterBarClickHandlerProvider);
 
   return {
     restrict: 'E',
@@ -103,8 +99,10 @@ app.directive('dashboardApp', function ($injector) {
         docTitle.change(dash.title);
       }
 
-      const dashboardState = new DashboardState(dash, AppState, dashboardConfig);
+      const dashboardState = new DashboardState(dash, AppState, dashboardConfig.getHideWriteControls());
+      $scope.appState = dashboardState.getAppState();
       const queryManager = Private(QueryManagerProvider)(dashboardState.getAppState());
+      $scope.containerApi = new DashboardContainerAPI(dashboardState, queryManager);
 
       // The 'previouslyStored' check is so we only update the time filter on dashboard open, not during
       // normal cross app navigation.
@@ -124,6 +122,7 @@ app.directive('dashboardApp', function ($injector) {
         };
         $scope.panels = dashboardState.getPanels();
         $scope.fullScreenMode = dashboardState.getFullScreenMode();
+        $scope.indexPatterns = dashboardState.getPanelIndexPatterns();
       };
 
       // Part of the exposed plugin API - do not remove without careful consideration.
@@ -155,11 +154,8 @@ app.directive('dashboardApp', function ($injector) {
       $scope.timefilter = timefilter;
       $scope.expandedPanel = null;
       $scope.dashboardViewMode = dashboardState.getViewMode();
-      $scope.appState = dashboardState.getAppState();
 
       $scope.landingPageUrl = () => `#${DashboardConstants.LANDING_PAGE_PATH}`;
-      $scope.getBrushEvent = () => brushEvent(dashboardState.getAppState());
-      $scope.getFilterBarClickHandler = () => filterBarClickHandler(dashboardState.getAppState());
       $scope.hasExpandedPanel = () => $scope.expandedPanel !== null;
       $scope.getDashTitle = () => getDashboardTitle(
         dashboardState.getTitle(),
@@ -212,17 +208,6 @@ app.directive('dashboardApp', function ($injector) {
         notify.info(`Search successfully added to your dashboard`);
       };
 
-      /**
-       * Creates a child ui state for the panel. It's passed the ui state to use, but needs to
-       * be generated from the parent (why, I don't know yet).
-       * @param path {String} - the unique path for this ui state.
-       * @param uiState {Object} - the uiState for the child.
-       * @returns {Object}
-       */
-      $scope.createChildUiState = function createChildUiState(path, uiState) {
-        return dashboardState.uiState.createChild(path, uiState, true);
-      };
-
       $scope.$watch('model.darkTheme', () => {
         dashboardState.setDarkTheme($scope.model.darkTheme);
         updateTheme();
@@ -241,12 +226,6 @@ app.directive('dashboardApp', function ($injector) {
         dashboardState.removePanel(panelIndex);
         $scope.indexPatterns = dashboardState.getPanelIndexPatterns();
       };
-
-      $scope.filter = function (field, value, operator, index) {
-        queryManager.add(field, value, operator, index);
-        updateState();
-      };
-
 
       $scope.$watch('model.query', (newQuery) => {
         $scope.model.query = migrateLegacyQuery(newQuery);
