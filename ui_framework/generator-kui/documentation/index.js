@@ -174,7 +174,7 @@ module.exports = class extends Generator {
       );
     };
 
-    const showImportRouteSnippet = suffix => {
+    const showImportRouteSnippet = (suffix, appendToRoute) => {
       const {
         componentExampleName,
         fileName,
@@ -189,7 +189,7 @@ module.exports = class extends Generator {
       this.log(chalk.white('\n// Import route definition into routes.js.'));
       this.log(
         `{\n` +
-        `  name: ${chalk.cyan(`'${componentExampleName}'`)},\n` +
+        `  name: ${chalk.cyan(`'${componentExampleName}${appendToRoute ? suffix : ''}'`)},\n` +
         `  component: ${componentExampleName}${suffix},\n` +
         `  hasReact: ${chalk.magenta('true')},\n` +
         `}`
@@ -209,7 +209,7 @@ module.exports = class extends Generator {
         break;
 
       case 'sandbox':
-        showImportRouteSnippet('Sandbox');
+        showImportRouteSnippet('Sandbox', true);
         break;
     }
     this.log('------------------------------------------------');
