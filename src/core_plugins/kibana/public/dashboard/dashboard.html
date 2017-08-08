@@ -80,16 +80,10 @@
     on-panel-removed="onPanelRemoved"
     dashboard-view-mode="dashboardViewMode"
     panels="panels"
-    get-vis-click-handler="getFilterBarClickHandler"
-    get-vis-brush-handler="getBrushEvent"
     save-state="saveState"
-    app-state="appState"
     toggle-expand="toggleExpandPanel"
-    create-child-ui-state="createChildUiState"
-    toggle-expand="toggleExpandPanel"
-    register-panel-index-pattern="registerPanelIndexPattern"
     data-shared-items-count="{{panels.length}}"
-    on-filter="filter"
+    container-api="containerApi"
   ></dashboard-grid>
 
   <dashboard-panel
@@ -98,12 +92,7 @@
     is-full-screen-mode="!chrome.getVisible()"
     is-expanded="true"
     dashboard-view-mode="dashboardViewMode"
-    get-vis-click-handler="getFilterBarClickHandler"
-    get-vis-brush-handler="getBrushEvent"
-    save-state="saveState"
-    app-state="appState"
-    register-panel-index-pattern="registerPanelIndexPattern"
-    create-child-ui-state="createChildUiState"
+    container-api="containerApi"
     toggle-expand="toggleExpandPanel(expandedPanel.panelIndex)"
   ></dashboard-panel>
 

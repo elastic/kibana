@@ -59,7 +59,8 @@ export default function (kibana) {
           'navbarExtensions',
           'managementSections',
           'devTools',
-          'docViews'
+          'docViews',
+          'embeddableHandlers',
         ],
         injectVars,
       },
