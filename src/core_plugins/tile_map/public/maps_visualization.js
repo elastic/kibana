@@ -145,7 +145,9 @@ export function MapsVisualizationProvider(serviceSettings, Notifier, getAppState
 
     _recreateGeohashLayer(esResponse) {
 
-      if (esResponse === this._chartData) {
+      // Only recreate geohash layer when there is new aggregation data
+      // Exception is Heatmap: which needs to be redrawn every zoom level because the clustering is based on meters per pixel
+      if (this._getMapsParams().mapType !== 'Heatmap' && esResponse === this._chartData) {
         return;
       }
 
@@ -247,7 +249,7 @@ export function MapsVisualizationProvider(serviceSettings, Notifier, getAppState
         isFilteredByCollar: this._isFilteredByCollar(),
         fetchBounds: this.getGeohashBounds.bind(this),
         heatmap: {
-          heatMinOpacity: newParams.heatMinOpacity
+          heatClusterSize: newParams.heatClusterSize
         }
       };
     }
