@@ -1,39 +1,49 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { FormControl } from 'react-bootstrap';
 import { ArgType } from '../arg_type';
-import { map } from 'lodash';
-import { palettes } from '../../../common/lib/palettes';
+import { get } from 'lodash';
+import { PalettePicker } from '../../components/palette_picker';
 
 const template = ({ onValueChange, argValue }) => {
   // Why is this neccesary? Does the dialog really need to know what parameter it is setting?
 
   const throwNotParsed = () => {throw new Error('Could not parse palette function'); };
 
-  function astToColors({ chain }) {
+  // TODO: This is weird, its basically a reimplementation of what the interpretter would return.
+  // Probably a better way todo this, and maybe a better way to handle template stype objects in general?
+  function astToPalette({ chain }) {
     if (chain.length !== 1 || chain[0].function !== 'palette') throwNotParsed();
     try {
-      return chain[0].arguments._.map(astObj => {
+      const colors =  chain[0].arguments._.map(astObj => {
         if (astObj.type !== 'string') throwNotParsed();
         return astObj.value;
       });
+
+      const gradient = get(chain[0].arguments.gradient, '[0].value');
+
+      return { colors, gradient };
     } catch (e) {
       throwNotParsed();
     }
   }
 
-  function handleChange(ev) {
-    const colors = JSON.parse(ev.target.value);
+  function handleChange(palette) {
     const astObj = {
       type: 'expression',
       chain: [{
         type: 'function',
         function: 'palette',
         arguments: {
-          _: colors.map(color => ({
+          _: palette.colors.map(color => ({
             type: 'string',
             value: color,
           })),
+          gradient: [
+            {
+              type: 'boolean',
+              value: palette.gradient,
+            },
+          ],
         },
       }],
     };
@@ -41,14 +51,10 @@ const template = ({ onValueChange, argValue }) => {
     onValueChange(astObj);
   }
 
-  const options = map(palettes, (choice, name) => (
-    <option value={JSON.stringify(choice.colors)} key={name}>{name}</option>
-  ));
+  const palette = astToPalette(argValue);
 
   return (
-    <FormControl componentClass="select" value={JSON.stringify(astToColors(argValue))} onChange={handleChange}>
-      {options}
-    </FormControl>
+    <PalettePicker value={palette} onChange={handleChange}/>
   );
 };
 
