@@ -1,8 +1,8 @@
 import React from 'react';
 import classNames from 'classnames';
 
-export const KuiPageSidebar = ({ children, className, ...rest }) => {
-  const classes = classNames('kuiPageSidebar', className);
+export const KuiPageSideBar = ({ children, className, ...rest }) => {
+  const classes = classNames('kuiPageSideBar', className);
 
   return (
     <div

@@ -1,5 +1,6 @@
 .kuiSideNavItem {
   @include kuiFontSizeS;
+
   display: block;
   width: 100%;
   text-align: left;
@@ -13,6 +14,7 @@
 
   &.kuiSideNavItem-isSelected {
     @include kuiBottomShadowSmall;
+
     color: $kuiColorSecondary;
     border-left: $kuiBorderThick;
     border-left-color: $kuiColorSecondary;

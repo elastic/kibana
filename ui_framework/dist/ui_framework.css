@@ -1295,12 +1295,12 @@ table {
       margin-left: 0;
       margin-top: 16px; } }
 
-.kuiPageSidebar {
+.kuiPageSideBar {
   width: 192px;
   margin-right: 24px; }
 
 @media only screen and (max-width: 768px) {
-  .kuiPageSidebar {
+  .kuiPageSideBar {
     width: 100%; } }
 
 .kuiPageHeader {
@@ -1447,7 +1447,7 @@ table {
    * 1. Animation doesn't work against height. Need max-height instead.
    *    We set a value larger than what is needed to fake "auto".
    */
-  .kuiSideNav.kuiSideNav-isOpenMobile .kuiSideNav__content {
+  .kuiSideNav-isOpenMobile .kuiSideNav__content {
     visibility: visible;
     opacity: 1;
     margin: 24px;

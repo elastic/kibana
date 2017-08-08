@@ -27,8 +27,12 @@ export default props => (
       }]}
     >
       <GuideText>
-        The sidenav is a responsive menu system that usually sits on the left side of a page layout.
+        The SideNav is a responsive menu system that usually sits on the left side of a page layout.
         It will exapand to the width of its container.
+      </GuideText>
+
+      <GuideText>
+        SideNavItems accept both button and anchor elements.
       </GuideText>
 
       <GuideDemo>

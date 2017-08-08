@@ -1,25 +1,24 @@
-import React, {
+import {
+  Children,
+  cloneElement,
   PropTypes,
 } from 'react';
 import classNames from 'classnames';
 
-export const KuiSideNavItem = ({ children, isSelected, className, ...rest }) => {
+export const KuiSideNavItem = ({ children, isSelected }) => {
+  const child = Children.only(children);
+
   const classes = classNames(
+    child.props.className,
     'kuiSideNavItem',
-    className,
     {
-      'kuiSideNavItem-isSelected' : isSelected,
+      'kuiSideNavItem-isSelected': isSelected,
     }
   );
 
-  return (
-    <button
-      className={classes}
-      {...rest}
-    >
-      {children}
-    </button>
-  );
+  return cloneElement(child, Object.assign({}, child.props, {
+    className: classes,
+  }));
 };
 
 KuiSideNavItem.propTypes = {

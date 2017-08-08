@@ -33,12 +33,14 @@
    * 1. Animation doesn't work against height. Need max-height instead.
    *    We set a value larger than what is needed to fake "auto".
    */
-  .kuiSideNav.kuiSideNav-isOpenMobile .kuiSideNav__content {
-    visibility: visible;
-    opacity: 1;
-    margin: $kuiSizeL;
-    max-height: 5000px; /* 1 */
-    transition: all $kuiAnimSpeedNormal $kuiAnimSlightResistance;
+  .kuiSideNav-isOpenMobile {
+    .kuiSideNav__content {
+      visibility: visible;
+      opacity: 1;
+      margin: $kuiSizeL;
+      max-height: 5000px; /* 1 */
+      transition: all $kuiAnimSpeedNormal $kuiAnimSlightResistance;
+    }
   }
 
   .kuiSideNav__mobileToggle {
@@ -50,6 +52,5 @@
     opacity: 0;
     max-height: 0;
     margin: 0 $kuiSizeL;
-
   }
 }

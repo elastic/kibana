@@ -2,12 +2,12 @@ import React from 'react';
 import { render } from 'enzyme';
 import { requiredProps } from '../../../test/required_props';
 
-import { KuiPageSidebar } from './page_sidebar';
+import { KuiPageSideBar } from './page_side_bar';
 
-describe('KuiPageSidebar', () => {
+describe('KuiPageSideBar', () => {
   test('is rendered', () => {
     const component = render(
-      <KuiPageSidebar {...requiredProps} />
+      <KuiPageSideBar {...requiredProps} />
     );
 
     expect(component)
