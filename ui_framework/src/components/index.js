@@ -69,7 +69,7 @@ export {
   KuiPageContentHeaderSection,
   KuiPageHeader,
   KuiPageHeaderSection,
-  KuiPageSidebar,
+  KuiPageSideBar,
 } from './page';
 
 export {

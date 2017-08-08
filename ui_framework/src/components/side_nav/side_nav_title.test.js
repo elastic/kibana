@@ -7,7 +7,7 @@ import { KuiSideNavTitle } from './side_nav_title';
 describe('KuiSideNavTitle', () => {
   test('is rendered', () => {
     const component = render(
-      <KuiSideNavTitle { ...requiredProps } />
+      <KuiSideNavTitle {...requiredProps} />
     );
 
     expect(component)
