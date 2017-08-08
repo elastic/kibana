@@ -10,6 +10,7 @@ import {
 } from '../icon';
 
 const typeToClassNameMap = {
+  info: 'kuiCallOut--info',
   success: 'kuiCallOut--success',
   warning: 'kuiCallOut--warning',
   danger: 'kuiCallOut--danger',
@@ -55,4 +56,8 @@ KuiCallOut.propTypes = {
   title: PropTypes.node,
   iconType: PropTypes.oneOf(ICON_TYPES),
   type: PropTypes.oneOf(TYPES),
+};
+
+KuiCallOut.defaultProps = {
+  type: 'info',
 };
