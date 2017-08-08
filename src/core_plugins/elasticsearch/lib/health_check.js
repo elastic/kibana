@@ -152,6 +152,11 @@ module.exports = function (plugin, server, { mappings }) {
     return true;
   }
 
+  server.ext('onPreStop', (request, reply) => {
+    stopChecking();
+    reply();
+  });
+
   return {
     waitUntilReady: waitUntilReady,
     run: check,
