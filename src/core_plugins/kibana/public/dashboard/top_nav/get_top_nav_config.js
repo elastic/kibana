@@ -5,17 +5,25 @@ import { TopNavIds } from './top_nav_ids';
  * @param {DashboardMode} dashboardMode.
  * @param actions {Object} - A mapping of TopNavIds to an action function that should run when the
  * corresponding top nav is clicked.
+ * @param hideWriteControls {boolean} if true, does not include any controls that allow editing or creating objects.
  * @return {Array<kbnTopNavConfig>} - Returns an array of objects for a top nav configuration, based on the
  * mode.
  */
-export function getTopNavConfig(dashboardMode, actions) {
+export function getTopNavConfig(dashboardMode, actions, hideWriteControls) {
   switch (dashboardMode) {
     case DashboardViewMode.VIEW:
-      return [
-        getFullScreenConfig(actions[TopNavIds.FULL_SCREEN]),
-        getShareConfig(),
-        getCloneConfig(actions[TopNavIds.CLONE]),
-        getEditConfig(actions[TopNavIds.ENTER_EDIT_MODE])];
+      return (
+        hideWriteControls ?
+        [
+          getFullScreenConfig(actions[TopNavIds.FULL_SCREEN])
+        ]
+        : [
+          getFullScreenConfig(actions[TopNavIds.FULL_SCREEN]),
+          getShareConfig(),
+          getCloneConfig(actions[TopNavIds.CLONE]),
+          getEditConfig(actions[TopNavIds.ENTER_EDIT_MODE])
+        ]
+      );
     case DashboardViewMode.EDIT:
       return [
         getSaveConfig(),
