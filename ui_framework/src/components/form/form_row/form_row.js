@@ -4,12 +4,13 @@ import React, {
 import classNames from 'classnames';
 import { KuiIcon } from '../../../components';
 
-export const KuiFormRow = ({ children, icon, id, helpText, label, className, ...rest }) => {
+export const KuiFormRow = ({ children, grid, icon, id, helpText, label, className, ...rest }) => {
   const classes = classNames(
     'kuiFormRow',
     className,
     {
       'kuiFormRow--withIcon' : icon,
+      'kuiFormRow--grid' : grid,
     }
   );
 
@@ -33,11 +34,17 @@ export const KuiFormRow = ({ children, icon, id, helpText, label, className, ...
       className={classes}
       {...rest}
     >
-      {/* Order is important, a flex-direction: reverse is applied for style. */}
-      {optionalIcon}
-      {optionalHelpText}
+      {/*
+          Order is important here. The label needs to be UNDER the children.
+          We rearrange the flex order in the CSS so the label ends up
+          displaying above the children / input. This allows us to still
+          use sibling selectors against the label that are tiggered by the
+          focus state of the input.
+      */}
       {children}
       {optionalLabel}
+      {optionalHelpText}
+      {optionalIcon}
     </div>
   );
 };

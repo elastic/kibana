@@ -1,3 +1,50 @@
-@include component('kuiFormCheckbox') {
+.kuiFormCheckbox {
+  position: relative;
+  height: $kuiSizeL;
+  margin-top: $kuiSizeS;
 
+
+  > input {
+    position: absolute;
+    opacity: 0;
+  }
+
+  > label {
+    position: absolute;
+    padding-left: $kuiSizeXL;
+    line-height: $kuiSizeL;
+    display: block;
+    font-weight: $kuiFontWeightRegular;
+    z-index: 5;
+  }
+
+  > :checked ~ .kuiFormCheckbox__square .kuiFormCheckbox__check {
+    background-color: $kuiTextColor;
+    mask: url('../src/components/icon/assets/check.svg') center center no-repeat;
+  }
+
+  > :focus ~ .kuiFormCheckbox__square {
+    background-color: $kuiFocusBackgroundColor;
+    border-color: $kuiColorPrimary;
+  }
+
+  > :checked:focus ~ .kuiFormCheckbox__square .kuiFormCheckbox__check {
+    background-color: $kuiTextColor;
+    mask: url('../src/components/icon/assets/check.svg') center center no-repeat;
+  }
+}
+
+.kuiFormCheckbox__square {
+  position: absolute;
+  height: $kuiSizeL;
+  width: $kuiSizeL;
+  border-radius: $kuiBorderRadius;
+  border: $kuiBorderThin;
+  background: $kuiFormBackgroundColor;
+  z-index: 0;
+}
+
+.kuiFormCheckbox__check {
+  height: 100%;
+  width: 100%;
 }

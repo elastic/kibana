@@ -1,7 +1,7 @@
 .kuiFormRow {
   margin-bottom: $kuiSizeL;
   display: flex;
-  flex-direction: column-reverse;
+  flex-direction: column;
   position: relative;
   max-width: $kuiFormMaxWidth;
 
@@ -14,23 +14,23 @@
     padding-right: $kuiSizeXXL;
   }
 
-  &.kuiFormRow--dropdown .kuiFormRow__icon {
+  &.kuiFormRow--select .kuiFormRow__icon {
     left: auto;
     right: $kuiSizeM;
   }
 
   label {
     font-size: $kuiFontSizeXS;
-    padding: $kuiSizeS;
-    padding-top: 0;
+    padding-bottom: $kuiSizeS;
     cursor: pointer;
     transition: all $kuiAnimSpeedFast $kuiAnimSlightResistance;
     font-weight: $kuiFontWeightMedium;
+    order: -1; // Force the label to be first, so we can use sibling:focus selectors.
   }
 
   .kuiFormRow__helpText {
     font-size: $kuiFontSizeXS;
-    padding: $kuiSizeS;
+    padding: $kuiSizeS 0;
     color: $kuiColorDarkShade;
   }
 

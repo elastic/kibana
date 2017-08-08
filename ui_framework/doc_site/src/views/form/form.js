@@ -44,16 +44,49 @@ export default class extends Component {
       </KuiButton>
     );
 
+    const selectOptions = ['Option one', 'Option two', 'Option three'];
+
     const formSample = (
       <KuiForm>
-        <KuiFormText label="First name" id="first" helpText="I am some friendly help text."/>
-        <KuiFormText label="Last name with icon" id="last" icon="user" placeholder="Some placeholder text" />
-        <KuiFormCheckbox/>
-        <KuiFormRadio />
-        <KuiFormSearch label="Search" id="blargh" placeholder="Search..." />
-        <KuiFormSelect label="Dropdown" id="dropdown"/>
+        <KuiFormRow
+          id="first"
+          label="First name"
+          helpText="I am some friendly help text."
+        >
+          <KuiFormText id="first" />
+        </KuiFormRow>
+        <KuiFormRow
+          id="last"
+          label="Last name with icon"
+          icon="user"
+        >
+          <KuiFormText id="last" placeholder="Some placeholder text" />
+        </KuiFormRow>
+        <KuiFormRow
+          id="search1"
+          label="Search"
+          icon="search"
+        >
+          <KuiFormSearch label="Search" id="search1" placeholder="Search..." />
+        </KuiFormRow>
+        <KuiFormRow
+          id="dropdown"
+          label="Select dropdown"
+          icon="arrowDown"
+          className="kuiFormRow--select"
+        >
+          <KuiFormSelect options={selectOptions} label="Dropdown" id="dropdown"/>
+        </KuiFormRow>
+        <KuiFormRow label="Textarea">
+          <KuiFormTextarea />
+        </KuiFormRow>
         <KuiFormSwitch id="switch"/>
-        <KuiFormTextarea />
+        <KuiFormRow label="You should always use more than one checkbox">
+          <KuiFormCheckbox label="Option one" id="checkbox1" />
+          <KuiFormCheckbox label="Another option" id="checkbox2" />
+          <KuiFormCheckbox label="Yet another useful option" id="checkbox3" />
+        </KuiFormRow>
+        <KuiFormRadio />
       </KuiForm>
     );
 

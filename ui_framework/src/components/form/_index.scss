@@ -27,7 +27,9 @@ $kuiFormBackgroundColor: tintOrShade($kuiColorLightestShade, 60%, 25%);
 
 @import 'form';
 @import 'form_row/index';
+@import 'form_checkbox/index';
 @import 'form_search/index';
 @import 'form_select/index';
-@import 'form_text/index';
 @import 'form_switch/index';
+@import 'form_text/index';
+@import 'form_textarea/index';

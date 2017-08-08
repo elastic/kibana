@@ -15,6 +15,7 @@ $switchSize: $kuiSizeL;
     padding-left: $toggleWidth + $kuiSizeS;
     z-index: 2;
     line-height: $toggleHeight;
+    font-weight: $kuiFontWeightRegular;
   }
 
   > input {
