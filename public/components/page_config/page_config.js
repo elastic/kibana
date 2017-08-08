@@ -1,14 +1,19 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { ColorPicker } from '../color_picker';
+import { ColorPickerMini } from '../color_picker_mini';
+import './page_config.less';
 
 export const PageConfig = ({ setBackground, background }) => {
 
   return (
-    <div className="canvas__page_config">
-      <h4>Page</h4>
-      <ColorPicker onChange={setBackground} value={background}/>
-      <label>Background Color</label>
+    <div className="canvas__page-config">
+      <div>
+        <label>
+          Page Background
+        </label>
+      </div>
+
+      <ColorPickerMini onChange={setBackground} value={background}/>
     </div>
   );
 };
