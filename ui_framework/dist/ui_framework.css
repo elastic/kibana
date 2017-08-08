@@ -680,6 +680,9 @@ main {
   opacity: 0.35; }
   .kuiCollapseButton:hover {
     opacity: 1; }
+  .theme-dark .kuiCollapseButton {
+    color: #cecece !important;
+    /* 1 */ }
 
 .kuiColorPicker {
   cursor: pointer; }
@@ -1821,6 +1824,9 @@ main {
   right: 5px; }
   .kuiLocalDropdownCloseButton:hover {
     opacity: 1; }
+  .theme-dark .kuiLocalDropdownCloseButton {
+    color: #cecece !important;
+    /* 1 */ }
   .theme-dark .kuiLocalDropdownCloseButton {
     color: #cecece !important;
     /* 1 */ }
