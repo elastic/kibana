@@ -1,0 +1,99 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`KuiSideNav is rendered 1`] = `
+<nav
+  aria-label="aria-label"
+  class="kuiSideNav testClass1 testClass2"
+  data-test-subj="test subject string"
+>
+  <button
+    class="kuiSideNav__mobileToggle kuiLink"
+  >
+    <span
+      class="kuiSideNav__mobileWrap"
+    >
+      <span
+        class="kuiSideNav__mobileTitle"
+      />
+      <svg
+        aria-hidden="true"
+        class="kuiIcon kuiSideNav__mobileIcon kuiIcon--medium"
+      >
+        <title>
+          apps icon
+        </title>
+        <use
+          href="#apps"
+        />
+      </svg>
+    </span>
+  </button>
+  <div
+    class="kuiSideNav__content"
+  />
+</nav>
+`;
+
+exports[`KuiSideNav isOpenOnMobile defaults to false 1`] = `
+<nav
+  class="kuiSideNav"
+>
+  <button
+    class="kuiSideNav__mobileToggle kuiLink"
+  >
+    <span
+      class="kuiSideNav__mobileWrap"
+    >
+      <span
+        class="kuiSideNav__mobileTitle"
+      />
+      <svg
+        aria-hidden="true"
+        class="kuiIcon kuiSideNav__mobileIcon kuiIcon--medium"
+      >
+        <title>
+          apps icon
+        </title>
+        <use
+          href="#apps"
+        />
+      </svg>
+    </span>
+  </button>
+  <div
+    class="kuiSideNav__content"
+  />
+</nav>
+`;
+
+exports[`KuiSideNav isOpenOnMobile is rendered when specified as true 1`] = `
+<nav
+  class="kuiSideNav kuiSideNav-isOpenMobile"
+>
+  <button
+    class="kuiSideNav__mobileToggle kuiLink"
+  >
+    <span
+      class="kuiSideNav__mobileWrap"
+    >
+      <span
+        class="kuiSideNav__mobileTitle"
+      />
+      <svg
+        aria-hidden="true"
+        class="kuiIcon kuiSideNav__mobileIcon kuiIcon--medium"
+      >
+        <title>
+          apps icon
+        </title>
+        <use
+          href="#apps"
+        />
+      </svg>
+    </span>
+  </button>
+  <div
+    class="kuiSideNav__content"
+  />
+</nav>
+`;

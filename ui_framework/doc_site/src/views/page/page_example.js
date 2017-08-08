@@ -26,9 +26,9 @@ import PageContentCenter from './page_content_center';
 const pageContentCenterSource = require('!!raw!./page_content_center');
 const pageContentCenterHtml = renderToHtml(Page);
 
-import PageContentCenterWithSidebar from './page_content_center_with_sidebar';
-const PageContentCenterWithSidebarSource = require('!!raw!./page_content_center_with_sidebar');
-const PageContentCenterWithSidebarHtml = renderToHtml(Page);
+import PageContentCenterWithSideBar from './page_content_center_with_side_bar';
+const PageContentCenterWithSideBarSource = require('!!raw!./page_content_center_with_side_bar');
+const PageContentCenterWithSideBarHtml = renderToHtml(Page);
 
 export default props => (
   <GuidePage title={props.route.name}>
@@ -116,10 +116,10 @@ export default props => (
       title="Page content centered in a full layout"
       source={[{
         type: GuideSectionTypes.JS,
-        code: PageContentCenterWithSidebarSource,
+        code: PageContentCenterWithSideBarSource,
       }, {
         type: GuideSectionTypes.HTML,
-        code: PageContentCenterWithSidebarHtml,
+        code: PageContentCenterWithSideBarHtml,
       }]}
     >
       <GuideText>
@@ -128,7 +128,7 @@ export default props => (
       </GuideText>
 
       <GuideDemo>
-        <div className="guideDemo__highlightLayout"><PageContentCenterWithSidebar /></div>
+        <div className="guideDemo__highlightLayout"><PageContentCenterWithSideBar /></div>
       </GuideDemo>
     </GuideSection>
 

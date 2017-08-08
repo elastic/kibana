@@ -1,4 +1,6 @@
-import React from 'react';
+import React, {
+  Component,
+} from 'react';
 
 import {
   KuiSideNav,
@@ -6,21 +8,104 @@ import {
   KuiSideNavTitle,
 } from '../../../../components';
 
-export default () => (
-  <KuiSideNav>
-    <KuiSideNavTitle>Elasticsearch</KuiSideNavTitle>
-    <KuiSideNavItem>Data sources</KuiSideNavItem>
-    <KuiSideNavItem>Users</KuiSideNavItem>
-    <KuiSideNavItem>Roles</KuiSideNavItem>
-    <KuiSideNavItem isSelected>Watches</KuiSideNavItem>
-    <KuiSideNavItem>Extremely long item is long</KuiSideNavItem>
+export default class extends Component {
+  constructor(props) {
+    super(props);
 
-    <KuiSideNavTitle>Kibana</KuiSideNavTitle>
-    <KuiSideNavItem>Index Patterns</KuiSideNavItem>
-    <KuiSideNavItem>Saved Objects</KuiSideNavItem>
-    <KuiSideNavItem>Reporting</KuiSideNavItem>
+    this.state = {
+      isSideNavOpenOnMobile: false,
+    };
+  }
 
-    <KuiSideNavTitle>Logstash</KuiSideNavTitle>
-    <KuiSideNavItem>Pipeline Viewer</KuiSideNavItem>
-  </KuiSideNav>
-);
+  toggleOpenOnMobile() {
+    this.setState({
+      isSideNavOpenOnMobile: !this.state.isSideNavOpenOnMobile,
+    });
+  }
+
+  render() {
+    return (
+      <KuiSideNav
+        mobileTitle="Navigate within $APP_NAME"
+        toggleOpenOnMobile={this.toggleOpenOnMobile.bind(this)}
+        isOpenOnMobile={this.state.isSideNavOpenOnMobile}
+      >
+        {/* Elasticsearch section */}
+
+        <KuiSideNavTitle>
+          Elasticsearch
+        </KuiSideNavTitle>
+
+        <KuiSideNavItem>
+          <button onClick={() => window.alert('Button clicked')}>
+            Data sources
+          </button>
+        </KuiSideNavItem>
+
+        <KuiSideNavItem>
+          <a href="http://www.elastic.co">
+            Users
+          </a>
+        </KuiSideNavItem>
+
+        <KuiSideNavItem>
+          <button>
+            Roles
+          </button>
+        </KuiSideNavItem>
+
+        <KuiSideNavItem isSelected>
+          <button>
+            Watches
+          </button>
+        </KuiSideNavItem>
+
+        <KuiSideNavItem>
+          <button>
+            Extremely long title will become truncated when the browser is narrow enough
+          </button>
+        </KuiSideNavItem>
+
+        {/* Kibana section */}
+
+        <KuiSideNavTitle>
+          <button>
+            Kibana
+          </button>
+        </KuiSideNavTitle>
+
+        <KuiSideNavItem>
+          <button>
+            Index Patterns
+          </button>
+        </KuiSideNavItem>
+
+        <KuiSideNavItem>
+          <button>
+            Saved Objects
+          </button>
+        </KuiSideNavItem>
+
+        <KuiSideNavItem>
+          <button>
+            Reporting
+          </button>
+        </KuiSideNavItem>
+
+        {/* Logstash section */}
+
+        <KuiSideNavTitle>
+          <button>
+            Logstash
+          </button>
+        </KuiSideNavTitle>
+
+        <KuiSideNavItem>
+          <button>
+            Pipeline Viewer
+          </button>
+        </KuiSideNavItem>
+      </KuiSideNav>
+    );
+  }
+}
