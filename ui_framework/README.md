@@ -42,7 +42,7 @@ npm install -g yo
 
 #### Create a new component
 
-From the command line, run `npm run uiFramework:create`.
+From the command line, run `npm run uiFramework:createComponent`.
 
 First, you'll be prompted for what kind of component to create:
 
@@ -133,7 +133,7 @@ content.
 
 You can use the same Yeoman generator referenced above to create documentation.
 
-From the command line, run `npm run uiFramework:document`.
+From the command line, run `npm run uiFramework:documentComponent`.
 
 First, you'll be prompted for what kind of documentation to create:
 
