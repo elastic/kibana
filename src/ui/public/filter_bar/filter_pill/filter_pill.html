@@ -20,6 +20,7 @@
       data-test-subj="disableFilter-{{ pill.filter.meta.key }}"
       ng-focus="pill.activateActions()"
       ng-blur="pill.deactivateActions()"
+      aria-label="{{pill.filter.meta.disabled ? 'Enable filter' : 'Disable filter'}}"
     >
       <i ng-show="pill.filter.meta.disabled" class="fa fa-fw fa-square-o disabled"></i>
       <i ng-hide="pill.filter.meta.disabled" class="fa fa-fw fa-check-square-o enabled"></i>
@@ -31,6 +32,7 @@
       data-test-subj="pinFilter-{{ pill.filter.meta.key }}"
       ng-focus="pill.activateActions()"
       ng-blur="pill.deactivateActions()"
+      aria-label="{{pill.filter.$state.store == 'globalState' ? 'Unpin filter' : 'Pin filter'}}"
     >
       <i ng-show="pill.filter.$state.store == 'globalState'" class="fa fa-fw fa-thumb-tack pinned"></i>
       <i ng-hide="pill.filter.$state.store == 'globalState'" class="fa fa-fw fa-thumb-tack fa-rotate-270 unpinned"></i>
@@ -42,6 +44,7 @@
       data-test-subj="invertFilter-{{ pill.filter.meta.key }}"
       ng-focus="pill.activateActions()"
       ng-blur="pill.deactivateActions()"
+      aria-label="Invert filter"
     >
       <i ng-show="pill.filter.meta.negate" class="fa fa-fw fa-search-plus negative"></i>
       <i ng-hide="pill.filter.meta.negate" class="fa fa-fw fa-search-minus positive"></i>
@@ -52,6 +55,7 @@
       ng-click="pill.onDeleteFilter(pill.filter)"
       ng-focus="pill.activateActions()"
       ng-blur="pill.deactivateActions()"
+      aria-label="Remove filter"
     >
       <i class="fa fa-fw fa-trash" data-test-subj="removeFilter-{{ pill.filter.meta.key }}"></i>
     </button>
@@ -61,6 +65,7 @@
       ng-click="pill.onEditFilter(pill.filter)"
       ng-focus="pill.activateActions()"
       ng-blur="pill.deactivateActions()"
+      aria-label="Edit filter"
     >
       <i class="fa fa-fw fa-edit"></i>
     </button>
