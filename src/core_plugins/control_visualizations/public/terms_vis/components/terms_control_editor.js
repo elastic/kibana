@@ -29,13 +29,11 @@ export class TermsControlEditor extends Component {
           getIndexPattern={this.props.getIndexPattern}
         />
 
-        <div className="kuiFieldGroup">
-          <div className="kuiFieldGroupSection">
-            <label>
-              Size
-            </label>
-          </div>
-          <div className="kuiFieldGroupSection">
+        <div className="kuiSideBarFormRow">
+          <label className="kuiSideBarFormRow__label">
+            Size
+          </label>
+          <div className="kuiSideBarFormRow__control kuiFieldGroupSection--wide">
             <input
               className="kuiTextInput"
               type="number"

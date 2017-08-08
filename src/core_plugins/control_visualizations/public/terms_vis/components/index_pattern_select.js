@@ -23,13 +23,11 @@ export class IndexPatternSelect extends Component {
 
   render() {
     return (
-      <div className="kuiFieldGroup">
-        <div className="kuiFieldGroupSection">
-          <label>
-            Index Pattern
-          </label>
-        </div>
-        <div className="kuiFieldGroupSection kuiFieldGroupSection--wide">
+      <div className="kuiSideBarFormRow">
+        <label className="kuiSideBarFormRow__label">
+          Index Pattern
+        </label>
+        <div className="kuiSideBarFormRow__control kuiFieldGroupSection--wide">
           <Select.Async
             className="index-pattern-react-select"
             placeholder="Select..."

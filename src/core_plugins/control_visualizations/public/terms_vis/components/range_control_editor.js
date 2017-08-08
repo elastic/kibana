@@ -29,13 +29,11 @@ export class RangeControlEditor extends Component {
           getIndexPattern={this.props.getIndexPattern}
         />
 
-        <div className="kuiFieldGroup">
-          <div className="kuiFieldGroupSection">
-            <label>
-              Step Size
-            </label>
-          </div>
-          <div className="kuiFieldGroupSection">
+        <div className="kuiSideBarFormRow">
+          <label className="kuiSideBarFormRow__label">
+            Step Size
+          </label>
+          <div className="kuiSideBarFormRow__control kuiFieldGroupSection--wide">
             <input
               className="kuiTextInput"
               type="number"

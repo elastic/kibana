@@ -1,5 +1,6 @@
 import _ from 'lodash';
 import React, { Component } from 'react';
+import { ControlEditor } from './control_editor';
 import { RangeControlEditor } from './range_control_editor';
 import { TermsControlEditor } from './terms_control_editor';
 import { TextControlEditor } from './text_control_editor';
@@ -114,72 +115,25 @@ export class InputControlVisEditor extends Component {
           );
       }
       return (
-        <div key={controlIndex} className="control-section">
-          <div className="kuiFieldGroup">
-            <div className="kuiFieldGroupSection">
-              <label>
-                Label
-              </label>
-            </div>
-            <div className="kuiFieldGroupSection">
-              <input
-                className="kuiTextInput"
-                type="text"
-                value={controlParams.label}
-                onChange={this.handleLabelChange.bind(this, controlIndex)}
-              />
-            </div>
-            <button
-              type="button"
-              className="kuiButton kuiButton--small"
-              onClick={this.moveControl.bind(this, controlIndex, -1)}
-            >
-              ^
-            </button>
-            <button
-              type="button"
-              className="kuiButton kuiButton--small"
-              onClick={this.moveControl.bind(this, controlIndex, 1)}
-            >
-              v
-            </button>
-            <button
-              type="button"
-              className="kuiButton kuiButton--danger kuiButton--small"
-              onClick={this.handleRemoveControl.bind(this, controlIndex)}
-            >
-              <span className="kuiIcon fa-trash" />
-            </button>
-          </div>
-
-          <div className="kuiFieldGroup">
-            <div className="kuiFieldGroupSection">
-              <label>
-                Type
-              </label>
-            </div>
-            <div className="kuiFieldGroupSection">
-              <select
-                className="kuiSelectInput"
-                value={controlParams.type}
-                onChange={this.handleTypeChange.bind(this, controlIndex)}
-              >
-                <option value="range">Range Slider</option>
-                <option value="terms">Terms Dropdown</option>
-                <option value="text">Text Input</option>
-              </select>
-            </div>
-          </div>
-
+        <ControlEditor
+          key={controlIndex}
+          controlIndex={controlIndex}
+          controlParams={controlParams}
+          handleLabelChange={this.handleLabelChange.bind(this, controlIndex)}
+          moveUpControl={this.moveControl.bind(this, controlIndex, -1)}
+          moveDownControl={this.moveControl.bind(this, controlIndex, 1)}
+          handleRemoveControl={this.handleRemoveControl.bind(this, controlIndex)}
+          handleTypeChange={this.handleTypeChange.bind(this, controlIndex)}
+        >
           {controlEditor}
-        </div>
+        </ControlEditor>
       );
     });
   }
 
   render() {
     return (
-      <div className="input-control-vis-editor">
+      <div>
 
         {this.renderControls()}
 

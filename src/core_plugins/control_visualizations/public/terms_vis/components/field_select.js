@@ -37,13 +37,11 @@ export class FieldSelect extends Component {
     }
 
     return (
-      <div className="kuiFieldGroup">
-        <div className="kuiFieldGroupSection">
-          <label>
-            Field
-          </label>
-        </div>
-        <div className="kuiFieldGroupSection kuiFieldGroupSection--wide">
+      <div className="kuiSideBarFormRow">
+        <label className="kuiSideBarFormRow__label">
+          Field
+        </label>
+        <div className="kuiSideBarFormRow__control kuiFieldGroupSection--wide">
           <Select.Async
             className="field-react-select"
             placeholder="Select..."
