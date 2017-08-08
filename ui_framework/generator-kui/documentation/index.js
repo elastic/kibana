@@ -25,6 +25,7 @@ module.exports = class extends Generator {
         name: 'folderName',
         type: 'input',
         store: true,
+        default: answers => answers.name,
       });
 
       prompts.push({
