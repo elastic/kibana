@@ -5,9 +5,8 @@
   cursor: pointer;
   height: $kuiSizeXXL;
   text-decoration: none;
-  border: solid 1px $kuiColorPrimary;
+  border: solid 1px transparent;
   border-radius: $kuiBorderRadius;
-  color: $kuiColorPrimary;
   padding: 0 ($kuiSize - $kuiSizeXS);
   min-width: $kuiSize * 7;
   text-align: center;
@@ -18,10 +17,6 @@
 
   &.kuiButton--small {
     height: $kuiSizeXL;
-  }
-
-  .kuiButton__icon {
-    fill: $kuiColorPrimary;
   }
 
   /**
@@ -46,21 +41,6 @@
     animation: kuiButtonFocus $kuiAnimSpeedNormal $kuiAnimSlightBounce;
   }
 
-  &.kuiButton--fill {
-    background-color: $kuiColorPrimary;
-    color: #FFF;
-    border-color: $kuiColorPrimary;
-
-    &:hover, &:focus {
-      background-color: darken($kuiColorPrimary, 5%);
-      border-color: darken($kuiColorPrimary, 5%);
-    }
-
-    .kuiButton__icon {
-      fill: #FFF;
-    }
-  }
-
   &.kuiButton--reverse {
     .kuiButton__content {
       flex-direction: row-reverse;
@@ -75,6 +55,7 @@
 
 // Modifier naming and colors.
 $buttonTypes: (
+  primary: $kuiColorPrimary,
   secondary: $kuiColorSecondary,
   warning: $kuiColorWarning,
   danger: $kuiColorDanger,
