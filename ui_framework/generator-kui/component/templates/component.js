@@ -1,10 +1,15 @@
 import React, {
   Component,
-  PropTypes,
 } from 'react';
+import PropTypes from 'prop-types';
 import classNames from 'classnames';
 
 export class <%= componentName %> extends Component {
+  static propTypes = {
+    children: PropTypes.node,
+    className: PropTypes.string,
+  }
+
   constructor(props) {
     super(props);
   }
@@ -28,6 +33,3 @@ export class <%= componentName %> extends Component {
     );
   }
 }
-
-<%= componentName %>.propTypes = {
-};
