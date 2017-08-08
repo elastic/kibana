@@ -134,16 +134,6 @@ module.directive('savedObjectFinder', function ($location, $injector, kbnUrl, Pr
       //key handler for the filter text box
       self.filterKeyDown = function ($event) {
         switch (keyMap[$event.keyCode]) {
-          case 'tab':
-            if (self.hitCount === 0) return;
-
-            self.selector.index = 0;
-            self.selector.enabled = true;
-
-            selectTopHit();
-
-            $event.preventDefault();
-            break;
           case 'enter':
             if (self.hitCount !== 1) return;
 
