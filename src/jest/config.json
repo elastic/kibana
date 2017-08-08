@@ -29,7 +29,9 @@
     "**/*.test.js"
   ],
   "testPathIgnorePatterns": [
-    "<rootDir>[/\\\\]ui_framework[/\\\\](dist|doc_site|generator-kui)[/\\\\]"
+    "<rootDir>/ui_framework/dist/",
+    "<rootDir>/ui_framework/doc_site/",
+    "<rootDir>/ui_framework/generator-kui/"
   ],
   "transform": {
     "^.+\\.js$": "<rootDir>/src/jest/babelTransform.js"
