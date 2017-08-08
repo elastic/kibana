@@ -1,10 +1,10 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { ControlLabel, FormControl, Label, Grid, Row, Col } from 'react-bootstrap';
+import { ControlLabel, FormGroup, FormControl, Label, Grid, Row, Col } from 'react-bootstrap';
 
 import './workpad_config.less';
 
-export const WorkpadConfig = ({ setSize, size }) => {
+export const WorkpadConfig = ({ size, name, setSize, setName }) => {
   const rotate = () => setSize({ width: size.height, height: size.width });
 
   return (
@@ -12,6 +12,14 @@ export const WorkpadConfig = ({ setSize, size }) => {
       <h4>
         Workpad
       </h4>
+      <FormGroup>
+        <ControlLabel>Name</ControlLabel>
+        <FormControl
+          type="text"
+          value={name}
+          onChange={e => setName(e.target.value)}
+        />
+      </FormGroup>
       <Grid style={{ width: '100%' }}>
         <Row>
           <Col sm={5}>
@@ -58,6 +66,8 @@ export const WorkpadConfig = ({ setSize, size }) => {
 };
 
 WorkpadConfig.propTypes = {
-  size: PropTypes.object,
-  setSize: PropTypes.func,
+  size: PropTypes.object.isRequired,
+  name: PropTypes.string.isRequired,
+  setSize: PropTypes.func.isRequired,
+  setName: PropTypes.func.isRequired,
 };

@@ -1,28 +1,27 @@
 import { connect } from 'react-redux';
 
 import { get } from 'lodash';
-import { sizeWorkpad } from '../../state/actions/workpad';
+import { sizeWorkpad, setName } from '../../state/actions/workpad';
 import { getWorkpad } from '../../state/selectors/workpad';
 
 
 import { WorkpadConfig as Component } from './workpad_config';
 
-const mapStateToProps = (state) => ({
-  height: get(getWorkpad(state), 'height'),
-  width: get(getWorkpad(state), 'width'),
-});
+const mapStateToProps = (state) => {
+  const workpad = getWorkpad(state);
 
-const mapDispatchToProps = ({
-  sizeWorkpad,
-});
-
-const mergeProps = (stateProps, dispatchProps) => {
   return {
-    setSize: (size) => {
-      dispatchProps.sizeWorkpad(size);
+    name: get(workpad, 'name'),
+    size: {
+      width: get(workpad, 'width'),
+      height: get(workpad, 'height'),
     },
-    size: { height: stateProps.height, width: stateProps.width },
   };
 };
 
-export const WorkpadConfig = connect(mapStateToProps, mapDispatchToProps, mergeProps)(Component);
+const mapDispatchToProps = ({
+  setSize: (size) => sizeWorkpad(size),
+  setName: (name) => setName(name),
+});
+
+export const WorkpadConfig = connect(mapStateToProps, mapDispatchToProps)(Component);
