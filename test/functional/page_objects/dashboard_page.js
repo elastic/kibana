@@ -6,17 +6,13 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
   const find = getService('find');
   const retry = getService('retry');
   const config = getService('config');
+  const remote = getService('remote');
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
   const testSubjects = getService('testSubjects');
   const PageObjects = getPageObjects(['common', 'header']);
 
   const defaultFindTimeout = config.get('timeouts.find');
-
-  const getRemote = () => (
-    getService('remote')
-      .setFindTimeout(config.get('timeouts.find'))
-  );
 
   class DashboardPage {
     async initTests() {
@@ -78,7 +74,7 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
 
     async clickDashboardBreadcrumbLink() {
       log.debug('clickDashboardBreadcrumbLink');
-      await retry.try(() => getRemote().findByCssSelector(`a[href="#${DashboardConstants.LANDING_PAGE_PATH}"]`).click());
+      await find.clickByCssSelector(`a[href="#${DashboardConstants.LANDING_PAGE_PATH}"]`);
     }
 
     async gotoDashboardLandingPage() {
@@ -93,7 +89,7 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
     }
 
     async getQueryInputElement() {
-      return retry.try(() => testSubjects.find('queryInput'));
+      return await testSubjects.find('queryInput');
     }
 
     async getQuery() {
@@ -131,27 +127,27 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
       await testSubjects.setValue('clonedDashboardTitle', title);
     }
 
-    clickEdit() {
+    async clickEdit() {
       log.debug('Clicking edit');
-      return testSubjects.click('dashboardEditMode');
+      return await testSubjects.click('dashboardEditMode');
     }
 
-    getIsInViewMode() {
+    async getIsInViewMode() {
       log.debug('getIsInViewMode');
-      return testSubjects.exists('dashboardEditMode');
+      return await testSubjects.exists('dashboardEditMode');
     }
 
-    clickCancelOutOfEditMode() {
+    async clickCancelOutOfEditMode() {
       log.debug('clickCancelOutOfEditMode');
-      return testSubjects.click('dashboardViewOnlyMode');
+      return await testSubjects.click('dashboardViewOnlyMode');
     }
 
-    clickNewDashboard() {
-      return testSubjects.click('newDashboardLink');
+    async clickNewDashboard() {
+      return await testSubjects.click('newDashboardLink');
     }
 
     async clickCreateDashboardPrompt() {
-      await retry.try(() => testSubjects.click('createDashboardPromptButton'));
+      await testSubjects.click('createDashboardPromptButton');
     }
 
     async getCreateDashboardPromptExists() {
@@ -166,28 +162,28 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
       await testSubjects.click('deleteSelectedDashboards');
     }
 
-    clickAddVisualization() {
-      return testSubjects.click('dashboardAddPanelButton');
+    async clickAddVisualization() {
+      await testSubjects.click('dashboardAddPanelButton');
     }
 
-    clickAddNewVisualizationLink() {
-      return testSubjects.click('addNewSavedObjectLink');
+    async clickAddNewVisualizationLink() {
+      await testSubjects.click('addNewSavedObjectLink');
     }
 
-    clickOptions() {
-      return testSubjects.click('dashboardOptionsButton');
+    async clickOptions() {
+      await testSubjects.click('dashboardOptionsButton');
     }
 
-    isOptionsOpen() {
+    async isOptionsOpen() {
       log.debug('isOptionsOpen');
-      return testSubjects.exists('dashboardDarkThemeCheckbox');
+      return await testSubjects.exists('dashboardDarkThemeCheckbox');
     }
 
     async openOptions() {
       log.debug('openOptions');
       const isOpen = await this.isOptionsOpen();
       if (!isOpen) {
-        return testSubjects.click('dashboardOptionsButton');
+        return await testSubjects.click('dashboardOptionsButton');
       }
     }
 
@@ -202,28 +198,23 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
       await this.openOptions();
       const isDarkThemeOn = await this.isDarkThemeOn();
       if (isDarkThemeOn !== on) {
-        return testSubjects.click('dashboardDarkThemeCheckbox');
+        return await testSubjects.click('dashboardDarkThemeCheckbox');
       }
     }
 
-    filterVizNames(vizName) {
-      return retry.try(() => getRemote()
-        .findByCssSelector('input[placeholder="Visualizations Filter..."]')
-        .click()
-        .pressKeys(vizName));
+    async filterVizNames(vizName) {
+      const visFilter = await find.byCssSelector('input[placeholder="Visualizations Filter..."]');
+      await visFilter.click();
+      await remote.pressKeys(vizName);
     }
 
-    clickVizNameLink(vizName) {
-      return retry.try(() => getRemote()
-      .findByPartialLinkText(vizName)
-      .click());
+    async clickVizNameLink(vizName) {
+      await find.clickByPartialLinkText(vizName);
     }
 
-    closeAddVizualizationPanel() {
+    async closeAddVizualizationPanel() {
       log.debug('closeAddVizualizationPanel');
-      return retry.try(() => getRemote()
-      .findByCssSelector('i.fa fa-chevron-up')
-      .click());
+      await find.clickByCssSelector('i.fa fa-chevron-up');
     }
 
     async gotoDashboardEditMode(dashboardName) {
@@ -252,7 +243,7 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
     async renameDashboard(dashName) {
       log.debug(`Naming dashboard ` + dashName);
       await testSubjects.click('dashboardRenameButton');
-      await getRemote().findById('dashboardTitle').type(dashName);
+      await testSubjects.setValue('dashboardTitle', dashName);
     }
 
     /**
@@ -281,7 +272,7 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
       await PageObjects.header.waitUntilLoadingHasFinished();
 
       log.debug('entering new title');
-      await getRemote().findById('dashboardTitle').type(dashboardTitle);
+      await testSubjects.setValue('dashboardTitle', dashboardTitle);
 
       if (saveOptions.storeTimeWithDashboard !== undefined) {
         await this.setStoreTimeWithDashboard(saveOptions.storeTimeWithDashboard);
@@ -291,16 +282,14 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
         await this.setSaveAsNewCheckBox(saveOptions.saveAsNew);
       }
 
-      await retry.try(() => {
+      await retry.try(async () => {
         log.debug('clicking final Save button for named dashboard');
-        return testSubjects.click('confirmSaveDashboardButton');
+        return await testSubjects.click('confirmSaveDashboardButton');
       });
     }
 
-    clickDashboardByLinkText(dashName) {
-      return getRemote()
-      .findByLinkText(dashName)
-      .click();
+    async clickDashboardByLinkText(dashName) {
+      await find.clickByLinkText(dashName);
     }
 
     async clearSearchValue() {
@@ -339,7 +328,7 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
       log.debug(`getDashboardCountWithName: ${dashName}`);
 
       await this.searchForDashboardWithName(dashName);
-      const links = await getRemote().findAllByLinkText(dashName);
+      const links = await find.allByLinkText(dashName);
       return links.length;
     }
 
@@ -367,7 +356,7 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
       function getTitles(chart) {
         return chart.getVisibleText();
       }
-      const getTitlePromises = titleObjects.map(getTitles);
+      const getTitlePromises = _.map(titleObjects, getTitles);
       return Promise.all(getTitlePromises);
     }
 
@@ -375,54 +364,20 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
       return await testSubjects.findAll('dashboardPanel');
     }
 
-    getPanelSizeData() {
-      return getRemote()
-      .findAllByCssSelector('li.gs-w') // These are gridster-defined elements and classes
-      .then(function (titleObjects) {
+    async getPanelSizeData() {
+      const titleObjects = await find.allByCssSelector('li.gs-w'); // These are gridster-defined elements and classes
+      async function getTitles(chart) {
+        const dataCol = await chart.getAttribute('data-col');
+        const dataRow = await chart.getAttribute('data-row');
+        const dataSizeX = await chart.getAttribute('data-sizex');
+        const dataSizeY = await chart.getAttribute('data-sizey');
+        const childElement = await testSubjects.findDescendant('dashboardPanelTitle', chart);
+        const title = await childElement.getVisibleText();
+        return { dataCol, dataRow, dataSizeX, dataSizeY, title };
+      }
 
-        function getTitles(chart) {
-          let obj = {};
-          return chart.getAttribute('data-col')
-          .then(theData => {
-            obj = { dataCol:theData };
-            return chart;
-          })
-          .then(chart => {
-            return chart.getAttribute('data-row')
-            .then(theData => {
-              obj.dataRow = theData;
-              return chart;
-            });
-          })
-          .then(chart => {
-            return chart.getAttribute('data-sizex')
-            .then(theData => {
-              obj.dataSizeX = theData;
-              return chart;
-            });
-          })
-          .then(chart => {
-            return chart.getAttribute('data-sizey')
-            .then(theData => {
-              obj.dataSizeY = theData;
-              return chart;
-            });
-          })
-          .then(chart => {
-            return chart.findByCssSelector('[data-test-subj="dashboardPanelTitle"]')
-            .then(function (titleElement) {
-              return titleElement.getVisibleText();
-            })
-            .then(theData => {
-              obj.title = theData;
-              return obj;
-            });
-          });
-        }
-
-        const getTitlePromises = titleObjects.map(getTitles);
-        return Promise.all(getTitlePromises);
-      });
+      const getTitlePromises = _.map(titleObjects, getTitles);
+      return await Promise.all(getTitlePromises);
     }
 
     getTestVisualizations() {
@@ -497,7 +452,7 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
       log.debug('toggleExpandPanel');
       const expandShown = await testSubjects.exists('dashboardPanelExpandIcon');
       if (!expandShown) {
-        const panelElements = await getRemote().findAllByCssSelector('span.panel-title');
+        const panelElements = await find.allByCssSelector('span.panel-title');
         log.debug('click title');
         await retry.try(() => panelElements[0].click()); // Click to simulate hover.
       }
@@ -506,33 +461,26 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
       await retry.try(() => expandButton.click());
     }
 
-    getSharedItemsCount() {
+    async getSharedItemsCount() {
       log.debug('in getSharedItemsCount');
       const attributeName = 'data-shared-items-count';
-      return getRemote()
-      .findByCssSelector(`[${attributeName}]`)
-      .then(function (element) {
-        if (element) {
-          return element.getAttribute(attributeName);
-        }
+      const element = await find.byCssSelector(`[${attributeName}]`);
+      if (element) {
+        return await element.getAttribute(attributeName);
+      }
 
-        throw new Error('no element');
-      });
+      throw new Error('no element');
     }
 
-    getPanelSharedItemData() {
+    async getPanelSharedItemData() {
       log.debug('in getPanelSharedItemData');
-      return getRemote()
-      .findAllByCssSelector('li.gs-w')
-      .then(function (elements) {
-        return Promise.all(elements.map(async element => {
-          const sharedItem = await element.findByCssSelector('[data-shared-item]');
-          return {
-            title: await sharedItem.getAttribute('data-title'),
-            description: await sharedItem.getAttribute('data-description')
-          };
-        }));
-      });
+      const sharedItems = await find.allByCssSelector('[data-shared-item]');
+      return await Promise.all(sharedItems.map(async sharedItem => {
+        return {
+          title: await sharedItem.getAttribute('data-title'),
+          description: await sharedItem.getAttribute('data-description')
+        };
+      }));
     }
   }
 
