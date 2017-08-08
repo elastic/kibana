@@ -10,9 +10,10 @@ import {
 } from '../icon';
 
 const typeToClassNameMap = {
-  danger: 'kuiButton--danger',
-  warning: 'kuiButton--warning',
+  primary: 'kuiButton--primary',
   secondary: 'kuiButton--secondary',
+  warning: 'kuiButton--warning',
+  danger: 'kuiButton--danger',
   disabled: 'kuiButton--disabled',
 };
 
@@ -25,16 +26,18 @@ const sizeToClassNameMap = {
 
 export const SIZES = Object.keys(sizeToClassNameMap);
 
-export const KuiButton = ({
-  children,
-  className,
-  iconType,
-  iconReverse,
-  type,
-  size,
-  fill,
-  ...rest,
-}) => {
+export const KuiButton = props => {
+  const {
+    children,
+    className,
+    iconType,
+    iconReverse,
+    type,
+    size,
+    fill,
+    ...rest,
+  } = props;
+
   const classes = classNames(
     'kuiButton',
     typeToClassNameMap[type],
@@ -83,5 +86,6 @@ KuiButton.propTypes = {
 
 KuiButton.defaultProps = {
   iconReverse: false,
+  type: 'primary',
   fill: false,
 };

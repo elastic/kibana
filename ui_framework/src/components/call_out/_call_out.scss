@@ -1,11 +1,11 @@
 .kuiCallOut {
   padding: $kuiSizeM $kuiSizeL;
-  border-left: 4px solid $kuiColorPrimary;
-  background-color: tintOrShade($kuiColorPrimary, 90%, 70%); /* 1 */
+  border-left: 4px solid transparent;
 }
 
 // Modifier naming and colors.
 $callOutTypes: (
+  info: $kuiColorPrimary,
   success: $kuiColorSecondary,
   warning: $kuiColorWarning,
   danger: $kuiColorDanger,
@@ -54,6 +54,5 @@ $callOutTypes: (
   }
 
   .kuiCallOutHeader__title {
-    // font-weight: $kuiFontWeightMedium;
     color: $kuiColorPrimary;
   }
