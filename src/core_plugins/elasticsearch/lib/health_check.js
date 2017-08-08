@@ -145,6 +145,11 @@ export default function (plugin, server) {
     return true;
   }
 
+  server.ext('onPreStop', (request, reply) => {
+    stopChecking();
+    reply();
+  });
+
   return {
     waitUntilReady: waitUntilReady,
     run: check,
