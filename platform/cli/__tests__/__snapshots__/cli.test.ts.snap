@@ -5,7 +5,8 @@ Object {
   "errors": Array [],
   "exit": true,
   "logs": Array [
-    "Usage: bin/kibana [options]
+    Array [
+      "Usage: bin/kibana [options]
 
 Kibana is an open source (Apache Licensed), browser-based analytics and search
 dashboard for Elasticsearch.
@@ -34,6 +35,7 @@ Options:
 
 Documentation: https://elastic.co/kibana
 ",
+    ],
   ],
   "result": Object {
     "$0": "--help",
@@ -66,7 +68,9 @@ Object {
   "errors": Array [],
   "exit": true,
   "logs": Array [
-    "5.2.2",
+    Array [
+      "5.2.2",
+    ],
   ],
   "result": Object {
     "$0": "--version",
@@ -97,10 +101,16 @@ Object {
 exports[`fails for unknown options 1`] = `
 Object {
   "errors": Array [
-    "The following options were not recognized:
+    Array [
+      "The following options were not recognized:
   [1m[\\"foo\\"][22m",
-    "",
-    "Specify --help for available options",
+    ],
+    Array [
+      "",
+    ],
+    Array [
+      "Specify --help for available options",
+    ],
   ],
   "exit": true,
   "logs": Array [],
@@ -134,9 +144,15 @@ Object {
 exports[`fails if config file does not exist 1`] = `
 Object {
   "errors": Array [
-    "Config file [/some-folder/kibana/config.yml] does not exist",
-    "",
-    "Specify --help for available options",
+    Array [
+      "Config file [/some-folder/kibana/config.yml] does not exist",
+    ],
+    Array [
+      "",
+    ],
+    Array [
+      "Specify --help for available options",
+    ],
   ],
   "exit": true,
   "logs": Array [],
@@ -170,9 +186,15 @@ Object {
 exports[`fails if port is not a number 1`] = `
 Object {
   "errors": Array [
-    "[port] must be a number, but was a string",
-    "",
-    "Specify --help for available options",
+    Array [
+      "[port] must be a number, but was a string",
+    ],
+    Array [
+      "",
+    ],
+    Array [
+      "Specify --help for available options",
+    ],
   ],
   "exit": true,
   "logs": Array [],

@@ -1,72 +1,47 @@
-import { clone } from 'lodash';
-
 export function captureTerminal<T extends string[]>(
   fn: (argv: T) => any,
   argv: T
 ) {
-  const _exit = process.exit;
-  const _emit = process.emit;
+  let mockProcessExit = jest.spyOn(global.process, 'exit')
+    .mockImplementation(() => {});
+  let mockProcessEmit = jest.spyOn(global.process, 'emit')
+    .mockImplementation(() => {});
+
+  let mockConsoleLog = jest.spyOn(global.console, 'log')
+    .mockImplementation(() => {});
+  let mockConsoleWarn = jest.spyOn(global.console, 'warn')
+    .mockImplementation(() => {});
+  let mockConsoleError = jest.spyOn(global.console, 'error')
+    .mockImplementation(() => {});
+
   const _env = process.env;
   const _argv = process.argv;
 
-  const _error = console.error;
-  const _log = console.log;
-  const _warn = console.warn;
-
-  let exit = false;
-  process.exit = () => {
-    exit = true;
+  process.env = {
+    ...process.env,
+    _: 'node'
   };
 
-  const env = clone(process.env);
-  env._ = 'node';
-  process.env = env;
   process.argv = argv;
 
-  const errors: any[] = [];
-  const logs: any[] = [];
-  const warnings: any[] = [];
-
-  console.error = (msg: any) => {
-    errors.push(msg);
-  };
-  console.log = (msg: any) => {
-    logs.push(msg);
-  };
-  console.warn = (msg: any) => {
-    warnings.push(msg);
-  };
-
-  let result: T;
+  const result: T = fn(argv);
 
   try {
-    result = fn(argv);
-  } finally {
-    reset();
-  }
-
-  return done();
-
-  function reset() {
-    process.exit = _exit;
-    process.emit = _emit;
-    process.env = _env;
-    process.argv = _argv;
-
-    console.error = _error;
-    console.log = _log;
-    console.warn = _warn;
-  }
-
-  function done() {
-    reset();
-
     return {
-      errors,
-      logs,
-      warnings,
-      exit,
+      errors: mockConsoleError.mock.calls,
+      logs: mockConsoleLog.mock.calls,
+      warnings: mockConsoleWarn.mock.calls,
+      exit: mockProcessExit.mock.calls.length > 0,
       result
     };
+  } finally {
+    mockProcessExit.mockReset();
+    mockProcessEmit.mockReset();
+    mockConsoleLog.mockReset();
+    mockConsoleWarn.mockReset();
+    mockConsoleError.mockReset();
+
+    process.env = _env;
+    process.argv = _argv;
   }
 }

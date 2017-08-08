@@ -44,7 +44,7 @@ export class FileAppender implements DisposableAppender {
     if (this.outputStream === null) {
       this.outputStream = createWriteStream(this.path, {
         flags: 'a',
-        encoding: 'utf8'
+        defaultEncoding: 'utf8'
       });
     }
 
