@@ -9,7 +9,7 @@ import {
   KuiPageContentHeaderSection,
   KuiPageHeader,
   KuiPageHeaderSection,
-  KuiPageSidebar,
+  KuiPageSideBar,
   KuiTitle,
 } from '../../../../components';
 
@@ -27,9 +27,9 @@ export default () => (
       </KuiPageHeaderSection>
     </KuiPageHeader>
     <KuiPageBody>
-      <KuiPageSidebar>
-        Sidebar nav
-      </KuiPageSidebar>
+      <KuiPageSideBar>
+        SideBar nav
+      </KuiPageSideBar>
       <KuiPageContent verticalPosition="center"  horizontalPosition="center">
         <KuiPageContentHeader>
           <KuiPageContentHeaderSection>

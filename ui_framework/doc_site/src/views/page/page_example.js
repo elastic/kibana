@@ -26,9 +26,9 @@ import PageContentCenter from './page_content_center';
 const pageContentCenterSource = require('!!raw!./page_content_center');
 const pageContentCenterHtml = renderToHtml(Page);
 
-import PageContentCenterWithSidebar from './page_content_center_with_sidebar';
-const PageContentCenterWithSidebarSource = require('!!raw!./page_content_center_with_sidebar');
-const PageContentCenterWithSidebarHtml = renderToHtml(Page);
+import PageContentCenterWithSideBar from './page_content_center_with_side_bar';
+const PageContentCenterWithSideBarSource = require('!!raw!./page_content_center_with_side_bar');
+const PageContentCenterWithSideBarHtml = renderToHtml(Page);
 
 export default props => (
   <GuidePage title={props.route.name}>
@@ -64,7 +64,7 @@ export default props => (
       }]}
     >
       <GuideText>
-        Most pages don't have sidebars. A lot of our pages don't have extra abilities next to the title.
+        Most pages don&rsquo;t have sidebars. A lot of our pages don&rsquo;t have extra abilities next to the title.
         Simply exclude those components and everything will still line up.
       </GuideText>
 
@@ -116,19 +116,19 @@ export default props => (
       title="Page content centered in a full layout"
       source={[{
         type: GuideSectionTypes.JS,
-        code: PageContentCenterWithSidebarSource,
+        code: PageContentCenterWithSideBarSource,
       }, {
         type: GuideSectionTypes.HTML,
-        code: PageContentCenterWithSidebarHtml,
+        code: PageContentCenterWithSideBarHtml,
       }]}
     >
       <GuideText>
         Centering the content can happen regardless of layout configuration.
-        In this example, we're cetnering within a complex sidebar layout.
+        In this example, we&rsquo;re cetnering within a complex sidebar layout.
       </GuideText>
 
       <GuideDemo>
-        <div className="guideDemo__highlightLayout"><PageContentCenterWithSidebar /></div>
+        <div className="guideDemo__highlightLayout"><PageContentCenterWithSideBar /></div>
       </GuideDemo>
     </GuideSection>
 

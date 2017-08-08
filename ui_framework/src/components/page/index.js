@@ -19,5 +19,5 @@ export {
 } from './page_header';
 
 export {
-  KuiPageSidebar,
-} from './page_sidebar';
+  KuiPageSideBar,
+} from './page_side_bar';
