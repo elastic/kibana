@@ -80,7 +80,12 @@
     ng-show="filters.length"
   >
     <div class="filter-description small">
-      <a ng-click="showFilterActions = !showFilterActions" kbn-accessible-click>
+      <a
+        ng-click="showFilterActions = !showFilterActions"
+        kbn-accessible-click
+        aria-expanded="{{!!showFilterActions}}"
+        aria-controls="filterActionsAllContainer"
+      >
         Actions
         <span
           class="fa"
@@ -111,6 +116,7 @@
 <div
   class="filter-bar filter-bar-condensed"
   ng-show="filters.length && showFilterActions"
+  id="filterActionsAllContainer"
 >
   <div class="filter-actions-all">
     <div class="filter-link">
