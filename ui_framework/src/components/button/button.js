@@ -1,5 +1,4 @@
 import React, {
-  Component,
   PropTypes,
 } from 'react';
 
@@ -11,9 +10,10 @@ import {
 } from '../icon';
 
 const typeToClassNameMap = {
-  danger: 'kuiButton--danger',
-  warning: 'kuiButton--warning',
+  primary: 'kuiButton--primary',
   secondary: 'kuiButton--secondary',
+  warning: 'kuiButton--warning',
+  danger: 'kuiButton--danger',
   disabled: 'kuiButton--disabled',
 };
 
@@ -26,61 +26,55 @@ const sizeToClassNameMap = {
 
 export const SIZES = Object.keys(sizeToClassNameMap);
 
-export class KuiButton extends Component {
-  constructor(props) {
-    super(props);
-  }
+export const KuiButton = props => {
+  const {
+    children,
+    className,
+    iconType,
+    iconReverse,
+    type,
+    size,
+    fill,
+    ...rest,
+  } = props;
 
-  render() {
-    const {
-      children,
-      className,
-      iconType,
-      iconReverse,
-      type,
-      size,
-      fill,
-      ...rest,
-    } = this.props;
+  const classes = classNames(
+    'kuiButton',
+    typeToClassNameMap[type],
+    sizeToClassNameMap[size],
+    className,
+    {
+      'kuiButton--fill': fill,
+      'kuiButton--reverse': iconReverse,
+    },
+  );
 
-    const classes = classNames(
-      'kuiButton',
-      typeToClassNameMap[type],
-      sizeToClassNameMap[size],
-      className,
-      {
-        'kuiButton--fill': fill,
-        'kuiButton--reverse': iconReverse,
-      },
-    );
+  // Add an icon to the button if one exists.
+  let buttonIcon;
 
-    // Add an icon to the button if one exists.
-    let buttonIcon;
-
-    if (iconType) {
-      buttonIcon = (
-        <KuiIcon
-          className="kuiButton__icon"
-          type={iconType}
-          size="medium"
-          aria-hidden="true"
-        />
-      );
-    }
-
-    return (
-      <button
-        className={classes}
-        {...rest}
-      >
-        <span className="kuiButton__content">
-          {buttonIcon}
-          <span>{children}</span>
-        </span>
-      </button>
+  if (iconType) {
+    buttonIcon = (
+      <KuiIcon
+        className="kuiButton__icon"
+        type={iconType}
+        size="medium"
+        aria-hidden="true"
+      />
     );
   }
-}
+
+  return (
+    <button
+      className={classes}
+      {...rest}
+    >
+      <span className="kuiButton__content">
+        {buttonIcon}
+        <span>{children}</span>
+      </span>
+    </button>
+  );
+};
 
 KuiButton.propTypes = {
   iconType: PropTypes.oneOf(ICON_TYPES),
@@ -92,5 +86,6 @@ KuiButton.propTypes = {
 
 KuiButton.defaultProps = {
   iconReverse: false,
+  type: 'primary',
   fill: false,
 };

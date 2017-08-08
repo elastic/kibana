@@ -345,9 +345,8 @@ table {
   cursor: pointer;
   height: 40px;
   text-decoration: none;
-  border: solid 1px #0079a5;
+  border: solid 1px transparent;
   border-radius: 4px;
-  color: #0079a5;
   padding: 0 12px;
   min-width: 112px;
   text-align: center;
@@ -360,8 +359,6 @@ table {
    */ }
   .kuiButton.kuiButton--small {
     height: 32px; }
-  .kuiButton .kuiButton__icon {
-    fill: #0079a5; }
   .kuiButton .kuiButton__content {
     display: -webkit-box;
     display: -webkit-flex;
@@ -384,15 +381,6 @@ table {
   .kuiButton:focus {
     -webkit-animation: kuiButtonFocus 250ms cubic-bezier(0.34, 1.61, 0.7, 1);
             animation: kuiButtonFocus 250ms cubic-bezier(0.34, 1.61, 0.7, 1); }
-  .kuiButton.kuiButton--fill {
-    background-color: #0079a5;
-    color: #FFF;
-    border-color: #0079a5; }
-    .kuiButton.kuiButton--fill:hover, .kuiButton.kuiButton--fill:focus {
-      background-color: #00668c;
-      border-color: #00668c; }
-    .kuiButton.kuiButton--fill .kuiButton__icon {
-      fill: #FFF; }
   .kuiButton.kuiButton--reverse .kuiButton__content {
     -webkit-box-orient: horizontal;
     -webkit-box-direction: reverse;
@@ -402,6 +390,23 @@ table {
     .kuiButton.kuiButton--reverse .kuiButton__content > * + * {
       margin-left: 0;
       margin-right: 8px; }
+
+.kuiButton--primary {
+  color: #0079a5;
+  border-color: #0079a5; }
+  .kuiButton--primary .kuiButton__icon {
+    fill: #0079a5; }
+  .kuiButton--primary:hover, .kuiButton--primary:focus {
+    background-color: rgba(0, 121, 165, 0.1); }
+  .kuiButton--primary.kuiButton--fill {
+    background-color: #0079a5;
+    color: #FFF;
+    border-color: #0079a5; }
+    .kuiButton--primary.kuiButton--fill:hover, .kuiButton--primary.kuiButton--fill:focus {
+      background-color: #00668c;
+      border-color: #00668c; }
+    .kuiButton--primary.kuiButton--fill .kuiButton__icon {
+      fill: #FFF; }
 
 .kuiButton--secondary {
   color: #00A69B;
@@ -484,9 +489,15 @@ table {
 
 .kuiCallOut {
   padding: 12px 24px;
-  border-left: 4px solid #0079a5;
-  background-color: #e6f2f6;
-  /* 1 */ }
+  border-left: 4px solid transparent; }
+
+.kuiCallOut--info {
+  border-color: #0079a5;
+  background-color: #e6f2f6; }
+  .kuiCallOut--info .kuiCallOutHeader__icon {
+    fill: #005574; }
+  .kuiCallOut--info .kuiCallOutHeader__title {
+    color: #005574; }
 
 .kuiCallOut--success {
   border-color: #00A69B;

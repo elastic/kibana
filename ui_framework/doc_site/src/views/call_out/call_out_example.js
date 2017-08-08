@@ -10,9 +10,9 @@ import {
   GuideText,
 } from '../../components';
 
-import CallOut from './call_out';
-const callOutSource = require('!!raw!./call_out');
-const callOutHtml = renderToHtml(CallOut);
+import Info from './info';
+const infoSource = require('!!raw!./info');
+const infoHtml = renderToHtml(Info);
 
 import Success from './success';
 const successSource = require('!!raw!./success');
@@ -29,13 +29,13 @@ const dangerHtml = renderToHtml(Danger);
 export default props => (
   <GuidePage title={props.route.name}>
     <GuideSection
-      title="CallOut"
+      title="Info"
       source={[{
         type: GuideSectionTypes.JS,
-        code: callOutSource,
+        code: infoSource,
       }, {
         type: GuideSectionTypes.HTML,
-        code: callOutHtml,
+        code: infoHtml,
       }]}
     >
       <GuideText>
@@ -43,7 +43,7 @@ export default props => (
       </GuideText>
 
       <GuideDemo>
-        <CallOut />
+        <Info />
       </GuideDemo>
     </GuideSection>
 
