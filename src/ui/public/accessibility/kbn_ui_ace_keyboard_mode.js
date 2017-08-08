@@ -17,24 +17,39 @@ import { uiModules } from 'ui/modules';
 import './kbn_ui_ace_keyboard_mode.less';
 import { ESC_KEY_CODE, ENTER_KEY } from 'ui_framework/services';
 
+let aceKeyboardModeId = 0;
+
 uiModules.get('kibana').directive('kbnUiAceKeyboardMode', () => ({
   restrict: 'A',
   link(scope, element) {
-    const uniqueId = `uiAceKeyboardHint-${scope.$id}-${Math.floor(Math.random() * 10000)}`;
+    const uniqueId = `uiAceKeyboardHint-${scope.$id}-${aceKeyboardModeId++}`;
 
-    const hint = angular.element(`<div class="ui-ace-keyboard-hint" id="${uniqueId}" tabindex="0" role="application">
-      Press Enter to start editing and Escape to exit again</div>`);
+    const hint = angular.element(
+      `<div
+        class="uiAceKeyboardHint"
+        id="${uniqueId}"
+        tabindex="0"
+        role="application"
+      >
+        <p class="kuiText kuiVerticalRhythmSmall">
+          Press Enter to start editing.
+        </p>
+        <p class="kuiText kuiVerticalRhythmSmall">
+          When you&rsquo;re done, press Escape to stop editing.
+        </p>
+      </div>
+    `);
 
     const uiAceTextbox = element.find('textarea');
 
     function startEditing() {
       // We are not using ng-class in the element, so that we won't need to $compile it
-      hint.addClass('ui-ace-keyboard-hint-inactive');
+      hint.addClass('uiAceKeyboardHint-isInactive');
       uiAceTextbox.focus();
     }
 
     function enableOverlay() {
-      hint.removeClass('ui-ace-keyboard-hint-inactive');
+      hint.removeClass('uiAceKeyboardHint-isInactive');
     }
 
     hint.keydown((ev) => {
