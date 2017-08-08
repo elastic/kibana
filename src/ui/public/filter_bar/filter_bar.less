@@ -94,20 +94,7 @@ filter-bar {
     padding: 4px 8px;
     border-radius: 12px;
 
-
-    &:hover {
-      > .filter-actions {
-        display: block;
-      }
-
-      > .filter-description {
-        opacity: 0.15;
-        background: transparent;
-        overflow: hidden;
-      }
-    }
-
-    > .filter-actions {
+    .filter-actions {
       font-size: 1.1em;
       line-height: 1.4em;
       position: absolute;
@@ -115,14 +102,17 @@ filter-bar {
       top: 0;
       left: 0;
       width: 100%;
-      display: none;
+      opacity: 0;
       text-align: center;
       white-space: nowrap;
+      display: flex;
 
-      > * {
+      .action {
+        border: none;
         border-right: 1px solid rgba(255, 255, 255, 0.4);
-        padding-right: 0;
-        margin-right: 5px;
+        padding: 0;
+        background-color: transparent;
+        flex: 1 1 auto;
 
         &:last-child {
           border-right: 0;
@@ -134,6 +124,16 @@ filter-bar {
           .opacity(.7);
         }
       }
+    }
+
+    .filter-actions-activated {
+      opacity: 1;
+    }
+
+    .filter-description-deactivated {
+      opacity: 0.15;
+      background: transparent;
+      overflow: hidden;
     }
 
     &.negate {
