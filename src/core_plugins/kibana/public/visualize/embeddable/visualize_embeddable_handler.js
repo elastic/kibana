@@ -45,7 +45,10 @@ export class VisualizeEmbeddableHandler extends EmbeddableHandler {
 
         visualizeScope.savedObj.vis.listeners.click = this.filterBarClickHandler(container.getAppState());
         visualizeScope.savedObj.vis.listeners.brush = this.brushEvent(container.getAppState());
-        visualizeScope.isFullScreenMode = !chrome.getVisible();
+
+        // The chrome is permanently hidden in "embed mode" in which case we don't want to show the spy pane, since
+        // we deem that situation to be more public facing and want to hide more detailed information.
+        visualizeScope.getShouldShowSpyPane = () => !chrome.getIsChromePermanentlyHidden();
 
         container.registerPanelIndexPattern(panel.panelIndex, visualizeScope.savedObj.vis.indexPattern);
 
