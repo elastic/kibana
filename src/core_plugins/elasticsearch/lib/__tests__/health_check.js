@@ -21,7 +21,12 @@ describe('plugins/elasticsearch', () => {
     let health;
     let plugin;
     let cluster;
+    let server;
     const sandbox = sinon.sandbox.create();
+
+    function getTimerCount() {
+      return Object.keys(sandbox.clock.timers || {}).length;
+    }
 
     beforeEach(() => {
       const COMPATIBLE_VERSION_NUMBER = '5.0.0';
@@ -66,7 +71,7 @@ describe('plugins/elasticsearch', () => {
       const set = sinon.stub();
 
       // Setup the server mock
-      const server = {
+      server = {
         log: sinon.stub(),
         info: { port: 5601 },
         config: function () { return { get, set }; },
@@ -77,13 +82,36 @@ describe('plugins/elasticsearch', () => {
         },
         getKibanaIndexMappingsDsl() {
           return mappings;
-        }
+        },
+        ext: sinon.stub()
       };
 
       health = healthCheck(plugin, server);
     });
 
     afterEach(() => sandbox.restore());
+
+    it('should stop when cluster is shutdown', () => {
+      sandbox.useFakeTimers();
+
+      // ensure that health.start() is responsible for the timer we are observing
+      expect(getTimerCount()).to.be(0);
+      health.start();
+      expect(getTimerCount()).to.be(1);
+
+      // ensure that a server extension was registered
+      sinon.assert.calledOnce(server.ext);
+      sinon.assert.calledWithExactly(server.ext, sinon.match.string, sinon.match.func);
+
+      // call the server extension
+      const reply = sinon.stub();
+      const [,handler] = server.ext.firstCall.args;
+      handler({}, reply);
+
+      // ensure that the handler called reply and unregistered the time
+      sinon.assert.calledOnce(reply);
+      expect(getTimerCount()).to.be(0);
+    });
 
     it('should set the cluster green if everything is ready', function () {
       cluster.callWithInternalUser.withArgs('ping').returns(Promise.resolve());
