@@ -10,7 +10,7 @@ export function getUiSettingDefaults() {
       readonly: true
     },
     'query:queryString:options': {
-      value: '{ "analyze_wildcard": true }',
+      value: '{ "analyze_wildcard": true, "default_field": "*" }',
       description: '<a href="https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-query-string-query.html" target="_blank">Options</a> for the lucene query string parser',
       type: 'json'
     },
@@ -90,11 +90,6 @@ export function getUiSettingDefaults() {
       value: true,
       description: 'Highlight results in Discover and Saved Searches Dashboard.' +
         'Highlighting makes requests slow when working on big documents.',
-    },
-    'doc_table:highlight:all_fields': {
-      value: true,
-      description: 'Improves highlighting by using a separate "highlight_query" that uses "all_fields" mode on "query_string" queries. ' +
-        'Set to false if you are using a "default_field" in your index.',
     },
     'courier:maxSegmentCount': {
       value: 30,
