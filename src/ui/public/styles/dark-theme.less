@@ -92,10 +92,14 @@
 // /src/ui/public/styles/bootstrap/list-group.less
   .list-group-item {
     background-color: @list-group-bg;
-    border: 0 none transparent;
+    border: 1px solid @gray7;
     &:nth-child(even) {
       background-color: @gray4;
     }
+  }
+
+  .list-group-item--noBorder {
+    border-top: 0;
   }
 
   a.list-group-item,
@@ -220,6 +224,14 @@
         }
 
         color: @saved-object-finder-link-color !important;
+      }
+    }
+  }
+
+  saved-object-finder, paginated-selectable-list {
+    ul.li-striped {
+      li {
+        border: none;
       }
     }
   }
