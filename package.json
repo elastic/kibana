@@ -11,7 +11,7 @@
     "dashboarding"
   ],
   "private": false,
-  "version": "6.0.0-beta1",
+  "version": "6.0.0-beta2",
   "branch": "6.0",
   "build": {
     "number": 8467,
