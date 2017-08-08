@@ -2,7 +2,7 @@ import readline from 'readline';
 import fs from 'fs';
 
 export default (grunt) => {
-  grunt.registerTask('configPackages', 'Set kibana.yml settings on packages', function () {
+  grunt.registerTask('_build:configPackages', 'Set kibana.yml settings on packages', function () {
     const done = this.async();
 
     const { kibanaYMLReplacements } = grunt.config.get('packages');

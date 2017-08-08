@@ -26,7 +26,7 @@ module.exports = function (grunt) {
       '_build:osShellScripts',
       grunt.option('skip-archives') ? [] : ['_build:archives'],
       grunt.option('skip-os-packages') ? [] : [
-        'copy:packageConfig',
+        '_build:configPackages',
         '_build:pleaseRun',
         '_build:osPackages',
       ],
