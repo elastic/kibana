@@ -47,7 +47,9 @@ import { Env } from '../../config/Env';
 const env = new Env('.', {});
 const config$ = new BehaviorSubject({});
 
-let mockProcessExit = jest.spyOn(global.process, 'exit').mockImplementation(() => {});
+let mockProcessExit = jest
+  .spyOn(global.process, 'exit')
+  .mockImplementation(() => {});
 afterEach(() => {
   mockProcessExit.mockReset();
 });

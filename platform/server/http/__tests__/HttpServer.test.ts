@@ -204,6 +204,72 @@ test('invalid query', async () => {
   });
 });
 
+test('valid body', async () => {
+  const router = new Router('/foo');
+
+  router.post(
+    {
+      path: '/',
+      validate: {
+        body: schema.object({
+          bar: schema.string(),
+          baz: schema.number()
+        })
+      }
+    },
+    async (val, req, res) => {
+      return res.ok(req.body);
+    }
+  );
+
+  server.registerRouter(router);
+
+  await server.start(port, '127.0.0.1');
+
+  await supertest(app)
+    .post('/foo')
+    .send({
+      bar: 'test',
+      baz: 123
+    })
+    .expect(200)
+    .then(res => {
+      expect(res.body).toEqual({ bar: 'test', baz: 123 });
+    });
+});
+
+test('invalid body', async () => {
+  const router = new Router('/foo');
+
+  router.post(
+    {
+      path: '/',
+      validate: {
+        body: schema.object({
+          bar: schema.number()
+        })
+      }
+    },
+    async (val, req, res) => {
+      return res.ok(req.body);
+    }
+  );
+
+  server.registerRouter(router);
+
+  await server.start(port, '127.0.0.1');
+
+  await supertest(app)
+    .post('/foo')
+    .send({ bar: 'test' })
+    .expect(400)
+    .then(res => {
+      expect(res.body).toEqual({
+        error: '[bar]: expected value of type [number] but got [string]'
+      });
+    });
+});
+
 test('returns 200 OK if returning object', async () => {
   const router = new Router('/foo');
 

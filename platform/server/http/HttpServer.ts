@@ -1,4 +1,5 @@
 import * as express from 'express';
+import * as bodyParser from 'body-parser';
 import * as http from 'http';
 import { Router } from './Router';
 
@@ -8,6 +9,7 @@ export class HttpServer {
 
   constructor() {
     this.app = express();
+    this.app.use(bodyParser());
     this.httpServer = http.createServer(this.app);
   }
 

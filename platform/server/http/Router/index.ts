@@ -5,12 +5,14 @@ import { ObjectSetting, Props, Any, TypeOf } from '../../../lib/schema';
 
 export interface Route<
   Params extends ObjectSetting<{}>,
-  Query extends ObjectSetting<{}>
+  Query extends ObjectSetting<{}>,
+  Body extends ObjectSetting<{}>
 > {
   path: string;
   validate?: {
     params?: Params;
     query?: Query;
+    body?: Body;
   };
 }
 
@@ -33,10 +35,11 @@ const responseFactory: ResponseFactory = {
 export type RequestHandler<
   RequestValue,
   Params extends Any,
-  Query extends Any
+  Query extends Any,
+  Body extends Any
 > = (
   onRequestValue: RequestValue,
-  req: KibanaRequest<TypeOf<Params>, TypeOf<Query>>,
+  req: KibanaRequest<TypeOf<Params>, TypeOf<Query>, TypeOf<Body>>,
   createResponse: ResponseFactory
 ) => Promise<KibanaResponse<any> | { [key: string]: any }>;
 
@@ -51,20 +54,31 @@ export class KibanaResponse<T> {
 // receive the headers you _have_ validated).
 export class KibanaRequest<
   Params extends Props = {},
-  Query extends Props = {}
+  Query extends Props = {},
+  Body extends Props = {}
 > {
   readonly headers: Headers;
 
-  static validate<Params extends Props = {}, Query extends Props = {}>(
-    route: Route<ObjectSetting<Params>, ObjectSetting<Query>>,
+  static validate<
+    Params extends Props = {},
+    Query extends Props = {},
+    Body extends Props = {}
+  >(
+    route: Route<
+      ObjectSetting<Params>,
+      ObjectSetting<Query>,
+      ObjectSetting<Body>
+    >,
     req: express.Request
-  ): { params: Params; query: Query } {
+  ): { params: Params; query: Query; body: Body } {
     let params: Params;
     let query: Query;
+    let body: Body;
 
     if (route.validate === undefined) {
       params = req.params;
       query = req.query;
+      body = req.body;
     } else {
       if (route.validate.params === undefined) {
         params = req.params;
@@ -77,15 +91,22 @@ export class KibanaRequest<
       } else {
         query = route.validate.query.validate(req.query);
       }
+
+      if (route.validate.body === undefined) {
+        body = req.body;
+      } else {
+        body = route.validate.body.validate(req.body);
+      }
     }
 
-    return { query, params };
+    return { query, params, body };
   }
 
   constructor(
     req: express.Request,
     readonly params: Params,
-    readonly query: Query
+    readonly query: Query,
+    readonly body: Body
   ) {
     this.headers = req.headers;
   }
@@ -104,73 +125,103 @@ export class Router<V> {
 
   constructor(readonly path: string, readonly options: RouterOptions<V> = {}) {}
 
-  get<P extends ObjectSetting<any>, Q extends ObjectSetting<any>>(
-    route: Route<P, Q>,
-    handler: RequestHandler<V, P, Q>
+  get<
+    P extends ObjectSetting<any>,
+    Q extends ObjectSetting<any>,
+    B extends ObjectSetting<any>
+  >(route: Route<P, Q, B>, handler: RequestHandler<V, P, Q, B>) {
+    this.router.get(
+      route.path,
+      async (req, res) => await this.handle(route, req, res, handler)
+    );
+  }
+
+  post<
+    P extends ObjectSetting<any>,
+    Q extends ObjectSetting<any>,
+    B extends ObjectSetting<any>
+  >(route: Route<P, Q, B>, handler: RequestHandler<V, P, Q, B>) {
+    this.router.post(
+      route.path,
+      async (req, res) => await this.handle(route, req, res, handler)
+    );
+  }
+
+  put<
+    P extends ObjectSetting<any>,
+    Q extends ObjectSetting<any>,
+    B extends ObjectSetting<any>
+  >(route: Route<P, Q, B>, handler: RequestHandler<V, P, Q, B>) {
+    // TODO
+  }
+
+  delete<
+    P extends ObjectSetting<any>,
+    Q extends ObjectSetting<any>,
+    B extends ObjectSetting<any>
+  >(route: Route<P, Q, B>, handler: RequestHandler<V, P, Q, B>) {
+    // TODO
+  }
+
+  private async handle<
+    P extends ObjectSetting<any>,
+    Q extends ObjectSetting<any>,
+    B extends ObjectSetting<any>
+  >(
+    route: Route<P, Q, B>,
+    request: express.Request,
+    response: express.Response,
+    handler: RequestHandler<V, P, Q, B>
   ) {
-    this.router.get(route.path, async (req, res) => {
-      let valid: { params: TypeOf<P>; query: TypeOf<P> };
+    let valid: { params: TypeOf<P>; query: TypeOf<P>; body: TypeOf<B> };
 
-      // TODO Change this so we can get failures per type
-      try {
-        valid = KibanaRequest.validate(route, req);
-      } catch (e) {
-        res.status(400);
-        res.json({ error: e.message });
-        return;
-      }
+    // TODO Change this so we can get failures per type
+    try {
+      valid = KibanaRequest.validate(route, request);
+    } catch (e) {
+      response.status(400);
+      response.json({ error: e.message });
+      return;
+    }
 
-      const kibanaRequest = new KibanaRequest(req, valid.params, valid.query);
+    const kibanaRequest = new KibanaRequest(
+      request,
+      valid.params,
+      valid.query,
+      valid.body
+    );
 
-      const value =
-        this.options.onRequest !== undefined
-          ? this.options.onRequest(kibanaRequest)
-          : {} as V;
+    const value =
+      this.options.onRequest !== undefined
+        ? this.options.onRequest(kibanaRequest)
+        : {} as V;
 
-      try {
-        const response = await handler(value, kibanaRequest, responseFactory);
+    try {
+      const kibanaResponse = await handler(
+        value,
+        kibanaRequest,
+        responseFactory
+      );
 
-        if (response instanceof KibanaResponse) {
-          res.status(response.status);
+      if (kibanaResponse instanceof KibanaResponse) {
+        response.status(kibanaResponse.status);
 
-          if (response.payload === undefined) {
-            res.send();
-          } else if (response.payload instanceof Error) {
-            // TODO Design an error format
-            res.json({ error: response.payload.message });
-          } else {
-            res.json(response.payload);
-          }
+        if (kibanaResponse.payload === undefined) {
+          response.send();
+        } else if (kibanaResponse.payload instanceof Error) {
+          // TODO Design an error format
+          response.json({ error: kibanaResponse.payload.message });
         } else {
-          res.json(response);
+          response.json(kibanaResponse.payload);
         }
-      } catch (e) {
-        // TODO Specifically handle `KibanaResponseError` and validation errors.
-
-        // Otherwise we default to something along the lines of
-        res.status(500).json({ error: e.message });
+      } else {
+        response.json(kibanaResponse);
       }
-    });
-  }
+    } catch (e) {
+      // TODO Specifically handle `KibanaResponseError` and validation errors.
 
-  post<P extends ObjectSetting<any>, Q extends ObjectSetting<any>>(
-    route: Route<P, Q>,
-    handler: RequestHandler<V, P, Q>
-  ) {
-    // TODO
-  }
-
-  put<P extends ObjectSetting<any>, Q extends ObjectSetting<any>>(
-    route: Route<P, Q>,
-    handler: RequestHandler<V, P, Q>
-  ) {
-    // TODO
-  }
-
-  delete<P extends ObjectSetting<any>, Q extends ObjectSetting<any>>(
-    route: Route<P, Q>,
-    handler: RequestHandler<V, P, Q>
-  ) {
-    // TODO
+      // Otherwise we default to something along the lines of
+      response.status(500).json({ error: e.message });
+    }
   }
 }

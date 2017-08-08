@@ -2,16 +2,21 @@ export function captureTerminal<T extends string[]>(
   fn: (argv: T) => any,
   argv: T
 ) {
-  let mockProcessExit = jest.spyOn(global.process, 'exit')
+  let mockProcessExit = jest
+    .spyOn(global.process, 'exit')
     .mockImplementation(() => {});
-  let mockProcessEmit = jest.spyOn(global.process, 'emit')
+  let mockProcessEmit = jest
+    .spyOn(global.process, 'emit')
     .mockImplementation(() => {});
 
-  let mockConsoleLog = jest.spyOn(global.console, 'log')
+  let mockConsoleLog = jest
+    .spyOn(global.console, 'log')
     .mockImplementation(() => {});
-  let mockConsoleWarn = jest.spyOn(global.console, 'warn')
+  let mockConsoleWarn = jest
+    .spyOn(global.console, 'warn')
     .mockImplementation(() => {});
-  let mockConsoleError = jest.spyOn(global.console, 'error')
+  let mockConsoleError = jest
+    .spyOn(global.console, 'error')
     .mockImplementation(() => {});
 
   const _env = process.env;
