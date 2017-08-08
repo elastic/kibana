@@ -23,7 +23,7 @@ import {
   KuiPageContentHeaderSection,
   KuiPageHeader,
   KuiPageHeaderSection,
-  KuiPageSidebar,
+  KuiPageSideBar,
   KuiPopover,
   KuiSideNav,
   KuiSideNavItem,
@@ -38,6 +38,7 @@ export default class extends Component {
     this.state = {
       isUserMenuOpen: false,
       isAppMenuOpen: false,
+      isSideNavOpenOnMobile: false,
     };
   }
 
@@ -62,6 +63,12 @@ export default class extends Component {
   closeAppMenu() {
     this.setState({
       isAppMenuOpen: false,
+    });
+  }
+
+  toggleOpenOnMobile() {
+    this.setState({
+      isSideNavOpenOnMobile: !this.state.isSideNavOpenOnMobile,
     });
   }
 
@@ -142,8 +149,8 @@ export default class extends Component {
           <svg tabIndex="0" className="kuiIcon kuiIcon--medium kuiHeaderAlert__dismiss">
             <use href="#cross" />
           </svg>
-          <p className="kuiHeaderAlert__title">Here's a notification title</p>
-          <p className="kuiHeaderAlert__text">I am the hat judge. Show me a hat and I will tell you if it's a good hat or bad hat.</p>
+          <p className="kuiHeaderAlert__title">Here&rsquo;s a notification title</p>
+          <p className="kuiHeaderAlert__text">I am the hat judge. Show me a hat and I will tell you if it&rsquo;s a good hat or bad hat.</p>
           <div className="kui--flexRow">
             <div className="kui--flexGrow1">
               <a href="" className="kuiHeaderAlert__action kuiLink">Download your thing here</a>
@@ -157,7 +164,7 @@ export default class extends Component {
           <svg tabIndex="0" className="kuiIcon kuiIcon--medium kuiHeaderAlert__dismiss">
             <use href="#cross" />
           </svg>
-          <p className="kuiHeaderAlert__title">Here's a really long notification title with nonsense beneath it.</p>
+          <p className="kuiHeaderAlert__title">Here&rsquo;s a really long notification title with nonsense beneath it.</p>
           <p className="kuiHeaderAlert__text">Walk the cow through a warm room, and then bring it to my plate.</p>
           <div className="kui--flexRow">
             <div className="kui--flexGrow1">
@@ -172,10 +179,10 @@ export default class extends Component {
           <svg tabIndex="0" className="kuiIcon kuiIcon--medium kuiHeaderAlert__dismiss">
             <use href="#cross" />
           </svg>
-          <p className="kuiHeaderAlert__title">Here's a notification title</p>
+          <p className="kuiHeaderAlert__title">Here&rsquo;s a notification title</p>
           <p className="kuiHeaderAlert__text">
             Only usable on grilled cheese sandwiches.
-            That is the only application of Kraft Singles as far as I'm concerned.
+            That is the only application of Kraft Singles as far as I&rsquo;m concerned.
           </p>
           <div className="kui--flexRow">
             <div className="kui--flexGrow1">
@@ -287,6 +294,94 @@ export default class extends Component {
     );
   }
 
+  renderSideNav() {
+    return (
+      <KuiPageSideBar>
+        <KuiSideNav
+          mobileTitle="Navigate within Management"
+          toggleOpenOnMobile={this.toggleOpenOnMobile.bind(this)}
+          isOpenOnMobile={this.state.isSideNavOpenOnMobile}
+        >
+          {/* Elasticsearch section */}
+
+          <KuiSideNavTitle>
+            Elasticsearch
+          </KuiSideNavTitle>
+
+          <KuiSideNavItem>
+            <button onClick={() => window.alert('Button clicked')}>
+              Data sources
+            </button>
+          </KuiSideNavItem>
+
+          <KuiSideNavItem>
+            <a href="http://www.elastic.co">
+              Users
+            </a>
+          </KuiSideNavItem>
+
+          <KuiSideNavItem>
+            <button>
+              Roles
+            </button>
+          </KuiSideNavItem>
+
+          <KuiSideNavItem isSelected>
+            <button>
+              Watches
+            </button>
+          </KuiSideNavItem>
+
+          <KuiSideNavItem>
+            <button>
+              Extremely long title will become truncated when the browser is narrow enough
+            </button>
+          </KuiSideNavItem>
+
+          {/* Kibana section */}
+
+          <KuiSideNavTitle>
+            <button>
+              Kibana
+            </button>
+          </KuiSideNavTitle>
+
+          <KuiSideNavItem>
+            <button>
+              Index Patterns
+            </button>
+          </KuiSideNavItem>
+
+          <KuiSideNavItem>
+            <button>
+              Saved Objects
+            </button>
+          </KuiSideNavItem>
+
+          <KuiSideNavItem>
+            <button>
+              Reporting
+            </button>
+          </KuiSideNavItem>
+
+          {/* Logstash section */}
+
+          <KuiSideNavTitle>
+            <button>
+              Logstash
+            </button>
+          </KuiSideNavTitle>
+
+          <KuiSideNavItem>
+            <button>
+              Pipeline Viewer
+            </button>
+          </KuiSideNavItem>
+        </KuiSideNav>
+      </KuiPageSideBar>
+    );
+  }
+
   renderPage() {
     return (
       <KuiPage>
@@ -298,24 +393,7 @@ export default class extends Component {
           </KuiPageHeaderSection>
         </KuiPageHeader>
         <KuiPageBody>
-          <KuiPageSidebar>
-            <KuiSideNav>
-              <KuiSideNavTitle>Elasticsearch</KuiSideNavTitle>
-              <KuiSideNavItem>Data sources</KuiSideNavItem>
-              <KuiSideNavItem>Users</KuiSideNavItem>
-              <KuiSideNavItem>Roles</KuiSideNavItem>
-              <KuiSideNavItem isSelected>Watches</KuiSideNavItem>
-              <KuiSideNavItem>Extremely long item is long</KuiSideNavItem>
-
-              <KuiSideNavTitle>Kibana</KuiSideNavTitle>
-              <KuiSideNavItem>Index Patterns</KuiSideNavItem>
-              <KuiSideNavItem>Saved Objects</KuiSideNavItem>
-              <KuiSideNavItem>Reporting</KuiSideNavItem>
-
-              <KuiSideNavTitle>Logstash</KuiSideNavTitle>
-              <KuiSideNavItem>Pipeline Viewer</KuiSideNavItem>
-            </KuiSideNav>
-          </KuiPageSidebar>
+          {this.renderSideNav()}
           <KuiPageContent>
             <KuiPageContentHeader>
               <KuiPageContentHeaderSection>
@@ -326,7 +404,7 @@ export default class extends Component {
               <KuiPageContentHeaderSection>
                 <KuiButton
                   fill
-                  icon = "arrowDown"
+                  icon="arrowDown"
                   onClick={() => window.alert('Button clicked')}
                   iconReverse
                 >
