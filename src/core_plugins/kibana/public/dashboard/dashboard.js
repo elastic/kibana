@@ -246,7 +246,7 @@ app.directive('dashboardApp', function ($injector) {
       $scope.$listen(timefilter, 'fetch', $scope.refresh);
 
       function updateViewMode(newMode) {
-        $scope.topNavMenu = dashboardConfig.getHideWriteControls() ? [] : getTopNavConfig(newMode, navActions); // eslint-disable-line no-use-before-define
+        $scope.topNavMenu = getTopNavConfig(newMode, navActions, dashboardConfig.getHideWriteControls()); // eslint-disable-line no-use-before-define
         dashboardState.switchViewMode(newMode);
         $scope.dashboardViewMode = newMode;
       }
