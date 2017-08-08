@@ -27,12 +27,12 @@ export function DashboardListingController($injector, $scope) {
   const sortableProperties = new SortableProperties([
     {
       name: 'title',
-      getValue: item => item.title,
+      getValue: item => item.title.toLowerCase(),
       isAscending: true,
     },
     {
       name: 'description',
-      getValue: item => item.description,
+      getValue: item => item.description.toLowerCase(),
       isAscending: true
     }
   ],
