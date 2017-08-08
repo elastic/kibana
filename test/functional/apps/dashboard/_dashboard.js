@@ -220,8 +220,57 @@ export default function ({ getService, getPageObjects }) {
       });
     });
 
+    describe('full screen mode', () => {
+      it('option not available in edit mode', async () => {
+        const exists = await PageObjects.dashboard.fullScreenModeMenuItemExists();
+        expect(exists).to.be(false);
+      });
+
+      it('available in view mode', async () => {
+        await PageObjects.dashboard.saveDashboard('full screen test');
+        const exists = await PageObjects.dashboard.fullScreenModeMenuItemExists();
+        expect(exists).to.be(true);
+      });
+
+      it('hides the chrome', async () => {
+        let isChromeVisible = await PageObjects.common.isChromeVisible();
+        expect(isChromeVisible).to.be(true);
+
+        await PageObjects.dashboard.clickFullScreenMode();
+
+        await retry.try(async () => {
+          isChromeVisible = await PageObjects.common.isChromeVisible();
+          expect(isChromeVisible).to.be(false);
+        });
+      });
+
+      it('displays exit full screen logo button', async () => {
+        const exists = await PageObjects.dashboard.exitFullScreenLogoButtonExists();
+        expect(exists).to.be(true);
+      });
+
+      it('displays exit full screen logo button when panel is expanded', async () => {
+        await PageObjects.dashboard.toggleExpandPanel();
+
+        const exists = await PageObjects.dashboard.exitFullScreenTextButtonExists();
+        expect(exists).to.be(true);
+      });
+
+      it('exits when the text button is clicked on', async () => {
+        const logoButton = await PageObjects.dashboard.getExitFullScreenLogoButton();
+        await remote.moveMouseTo(logoButton);
+        await PageObjects.dashboard.clickExitFullScreenTextButton();
+
+        await retry.try(async () => {
+          const isChromeVisible = await PageObjects.common.isChromeVisible();
+          expect(isChromeVisible).to.be(true);
+        });
+      });
+    });
+
     describe('add new visualization link', () => {
       it('adds a new visualization', async () => {
+        await PageObjects.dashboard.clickEdit();
         await PageObjects.dashboard.clickAddVisualization();
         await PageObjects.dashboard.clickAddNewVisualizationLink();
         await PageObjects.visualize.clickAreaChart();

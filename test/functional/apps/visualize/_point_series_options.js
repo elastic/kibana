@@ -49,7 +49,7 @@ export default function ({ getService, getPageObjects }) {
       })
       .then(function selectAggregation() {
         log.debug('Aggregation = Average');
-        return PageObjects.visualize.selectAggregation('Average');
+        return PageObjects.visualize.selectAggregation('Average', 'metrics');
       })
       .then(function selectField() {
         log.debug('Field = memory');
