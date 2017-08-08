@@ -63,9 +63,9 @@ html {
   font-family: "Roboto", Helvetica, Arial, sans-serif;
   font-weight: 400;
   font-size: 16px;
-  color: #3F3F3F;
+  color: #F5F5F5;
   height: 100%;
-  background-color: #F5F5F5;
+  background-color: #333;
   -webkit-font-smoothing: antialiased; }
 
 body {
@@ -172,7 +172,7 @@ table {
   font-family: "Roboto Mono", monospace; }
 
 .kui--subduedText {
-  color: #666; }
+  color: #D9D9D9; }
 
 .kui--bottomShadow {
   box-shadow: 0 16px 16px -8px rgba(0, 0, 0, 0.1); }
@@ -380,7 +380,7 @@ table {
       /* 1 */ }
   .kuiButton:hover, .kuiButton:focus {
     text-decoration: underline;
-    background-color: rgba(0, 121, 165, 0.1); }
+    background-color: rgba(77, 161, 192, 0.1); }
   .kuiButton:focus {
     -webkit-animation: kuiButtonFocus 250ms cubic-bezier(0.34, 1.61, 0.7, 1);
             animation: kuiButtonFocus 250ms cubic-bezier(0.34, 1.61, 0.7, 1); }
@@ -395,21 +395,21 @@ table {
       margin-right: 8px; }
 
 .kuiButton--primary {
-  color: #0079a5;
-  border-color: #0079a5; }
+  color: #4da1c0;
+  border-color: #4da1c0; }
   .kuiButton--primary .kuiButton__icon {
-    fill: #0079a5; }
+    fill: #4da1c0; }
   .kuiButton--primary:hover, .kuiButton--primary:focus {
-    background-color: rgba(0, 121, 165, 0.1); }
+    background-color: rgba(77, 161, 192, 0.1); }
   .kuiButton--primary.kuiButton--fill {
-    background-color: #0079a5;
-    color: #FFF;
-    border-color: #0079a5; }
+    background-color: #4da1c0;
+    color: #F5F5F5;
+    border-color: #4da1c0; }
     .kuiButton--primary.kuiButton--fill:hover, .kuiButton--primary.kuiButton--fill:focus {
-      background-color: #00668c;
-      border-color: #00668c; }
+      background-color: #4095b4;
+      border-color: #4095b4; }
     .kuiButton--primary.kuiButton--fill .kuiButton__icon {
-      fill: #FFF; }
+      fill: #F5F5F5; }
 
 .kuiButton--secondary {
   color: #00A69B;
@@ -420,13 +420,13 @@ table {
     background-color: rgba(0, 166, 155, 0.1); }
   .kuiButton--secondary.kuiButton--fill {
     background-color: #00A69B;
-    color: #FFF;
+    color: #F5F5F5;
     border-color: #00A69B; }
     .kuiButton--secondary.kuiButton--fill:hover, .kuiButton--secondary.kuiButton--fill:focus {
       background-color: #008d83;
       border-color: #008d83; }
     .kuiButton--secondary.kuiButton--fill .kuiButton__icon {
-      fill: #FFF; }
+      fill: #F5F5F5; }
 
 .kuiButton--warning {
   color: #E5830E;
@@ -437,13 +437,13 @@ table {
     background-color: rgba(229, 131, 14, 0.1); }
   .kuiButton--warning.kuiButton--fill {
     background-color: #E5830E;
-    color: #FFF;
+    color: #F5F5F5;
     border-color: #E5830E; }
     .kuiButton--warning.kuiButton--fill:hover, .kuiButton--warning.kuiButton--fill:focus {
       background-color: #cd750d;
       border-color: #cd750d; }
     .kuiButton--warning.kuiButton--fill .kuiButton__icon {
-      fill: #FFF; }
+      fill: #F5F5F5; }
 
 .kuiButton--danger {
   color: #A30000;
@@ -454,31 +454,31 @@ table {
     background-color: rgba(163, 0, 0, 0.1); }
   .kuiButton--danger.kuiButton--fill {
     background-color: #A30000;
-    color: #FFF;
+    color: #F5F5F5;
     border-color: #A30000; }
     .kuiButton--danger.kuiButton--fill:hover, .kuiButton--danger.kuiButton--fill:focus {
       background-color: #8a0000;
       border-color: #8a0000; }
     .kuiButton--danger.kuiButton--fill .kuiButton__icon {
-      fill: #FFF; }
+      fill: #F5F5F5; }
 
 .kuiButton--disabled {
-  color: #c5c5c5;
-  border-color: #c5c5c5; }
+  color: #313131;
+  border-color: #313131; }
   .kuiButton--disabled .kuiButton__icon {
-    fill: #c5c5c5; }
+    fill: #313131; }
   .kuiButton--disabled:hover, .kuiButton--disabled:focus {
-    background-color: rgba(197, 197, 197, 0.1);
+    background-color: rgba(49, 49, 49, 0.1);
     cursor: not-allowed; }
   .kuiButton--disabled.kuiButton--fill {
-    background-color: #c5c5c5;
-    color: #FFF;
-    border-color: #c5c5c5; }
+    background-color: #313131;
+    color: #F5F5F5;
+    border-color: #313131; }
     .kuiButton--disabled.kuiButton--fill:hover, .kuiButton--disabled.kuiButton--fill:focus {
-      background-color: #b8b8b8;
-      border-color: #b8b8b8; }
+      background-color: #242424;
+      border-color: #242424; }
     .kuiButton--disabled.kuiButton--fill .kuiButton__icon {
-      fill: #FFF; }
+      fill: #F5F5F5; }
 
 @-webkit-keyframes kuiButtonFocus {
   50% {
@@ -495,36 +495,36 @@ table {
   border-left: 4px solid transparent; }
 
 .kuiCallOut--info {
-  border-color: #0079a5;
-  background-color: #e6f2f6; }
+  border-color: #4da1c0;
+  background-color: #17303a; }
   .kuiCallOut--info .kuiCallOutHeader__icon {
-    fill: #005574; }
+    fill: #cae3ec; }
   .kuiCallOut--info .kuiCallOutHeader__title {
-    color: #005574; }
+    color: #cae3ec; }
 
 .kuiCallOut--success {
   border-color: #00A69B;
-  background-color: #e6f6f5; }
+  background-color: #00322f; }
   .kuiCallOut--success .kuiCallOutHeader__icon {
-    fill: #00746d; }
+    fill: #b3e4e1; }
   .kuiCallOut--success .kuiCallOutHeader__title {
-    color: #00746d; }
+    color: #b3e4e1; }
 
 .kuiCallOut--warning {
   border-color: #E5830E;
-  background-color: #fcf3e7; }
+  background-color: #452704; }
   .kuiCallOut--warning .kuiCallOutHeader__icon {
-    fill: #a05c0a; }
+    fill: #f7dab7; }
   .kuiCallOut--warning .kuiCallOutHeader__title {
-    color: #a05c0a; }
+    color: #f7dab7; }
 
 .kuiCallOut--danger {
   border-color: #A30000;
-  background-color: #f6e6e6; }
+  background-color: #310000; }
   .kuiCallOut--danger .kuiCallOutHeader__icon {
-    fill: #720000; }
+    fill: #e3b3b3; }
   .kuiCallOut--danger .kuiCallOutHeader__title {
-    color: #720000; }
+    color: #e3b3b3; }
 
 /**
  * 1. Align icon with first line of title text if it wraps.
@@ -561,26 +561,182 @@ table {
   /* 1 */ }
 
 .kuiFormRow {
-  position: relative; }
+  margin-bottom: 24px;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-orient: vertical;
+  -webkit-box-direction: reverse;
+  -webkit-flex-direction: column-reverse;
+      -ms-flex-direction: column-reverse;
+          flex-direction: column-reverse;
+  position: relative;
+  max-width: 400px; }
+  .kuiFormRow.kuiFormRow--withIcon input {
+    padding-left: 40px; }
+  .kuiFormRow.kuiFormRow--dropdown input {
+    padding-left: 12px;
+    padding-right: 40px; }
+  .kuiFormRow.kuiFormRow--dropdown .kuiFormRow__icon {
+    left: auto;
+    right: 12px; }
   .kuiFormRow label {
     font-size: 12px;
-    display: block;
-    font-family: "Roboto", Helvetica, Arial, sans-serif;
-    color: #666;
+    padding: 8px;
+    padding-top: 0;
+    cursor: pointer;
+    transition: all 150ms cubic-bezier(0.694, 0.0482, 0.335, 1);
+    font-weight: 500; }
+  .kuiFormRow .kuiFormRow__helpText {
+    font-size: 12px;
+    padding: 8px;
+    color: #D9D9D9; }
+  .kuiFormRow .kuiFormRow__icon {
     position: absolute;
-    top: 8px;
+    top: 32px;
     left: 12px; }
+
+.kuiFormSearch {
+  border: none;
+  font-size: 14px;
+  font-family: "Roboto", Helvetica, Arial, sans-serif;
+  padding: 12px;
+  color: #F5F5F5;
+  min-width: 256px;
+  background: #262626;
+  box-shadow: 0 2px 2px -1px rgba(0, 0, 0, 0.1), 0 0 0 1px rgba(0, 0, 0, 0.08), inset -400px 0 0 0 #262626;
+  transition: all 250ms ease-in;
+  max-width: 400px;
+  border-radius: 0; }
+  .kuiFormSearch:focus {
+    background: #222;
+    box-shadow: 0 4px 4px -2px rgba(0, 0, 0, 0.1), 0 0 0 1px rgba(0, 0, 0, 0.16), inset 0 0 0 0 #222, inset 0 -2px 0 0 #4da1c0; }
+    .kuiFormSearch:focus + label {
+      color: #4da1c0; }
+
+.kuiFormSelect {
+  -webkit-appearance: none;
+     -moz-appearance: none;
+          appearance: none;
+  border: none;
+  font-size: 14px;
+  font-family: "Roboto", Helvetica, Arial, sans-serif;
+  padding: 12px;
+  color: #F5F5F5;
+  min-width: 256px;
+  background: #262626;
+  box-shadow: 0 2px 2px -1px rgba(0, 0, 0, 0.1), 0 0 0 1px rgba(0, 0, 0, 0.08), inset -400px 0 0 0 #262626;
+  transition: all 250ms ease-in;
+  max-width: 400px;
+  border-radius: 0; }
+  .kuiFormSelect:focus {
+    background: #222;
+    box-shadow: 0 4px 4px -2px rgba(0, 0, 0, 0.1), 0 0 0 1px rgba(0, 0, 0, 0.16), inset 0 0 0 0 #222, inset 0 -2px 0 0 #4da1c0; }
+    .kuiFormSelect:focus + label {
+      color: #4da1c0; }
+
+.kuiFormSelect::-ms-expand {
+  display: none; }
 
 .kuiFormText {
   border: none;
   font-size: 14px;
   font-family: "Roboto", Helvetica, Arial, sans-serif;
-  padding: 24px 12px 8px 12px;
-  color: #3F3F3F;
+  padding: 12px;
+  color: #F5F5F5;
   min-width: 256px;
-  border-bottom: 1px solid #D9D9D9; }
-  .kuiFormText:focus + label {
-    color: #0079a5; }
+  background: #262626;
+  box-shadow: 0 2px 2px -1px rgba(0, 0, 0, 0.1), 0 0 0 1px rgba(0, 0, 0, 0.08), inset -400px 0 0 0 #262626;
+  transition: all 250ms ease-in;
+  max-width: 400px;
+  border-radius: 0; }
+  .kuiFormText:focus {
+    background: #222;
+    box-shadow: 0 4px 4px -2px rgba(0, 0, 0, 0.1), 0 0 0 1px rgba(0, 0, 0, 0.16), inset 0 0 0 0 #222, inset 0 -2px 0 0 #4da1c0; }
+    .kuiFormText:focus + label {
+      color: #4da1c0; }
+
+.kuiFormSwitch {
+  position: relative;
+  display: inline-block;
+  height: 24px;
+  cursor: pointer; }
+  .kuiFormSwitch > label {
+    position: absolute;
+    left: 0;
+    padding-left: 60px;
+    z-index: 2;
+    line-height: 24px; }
+  .kuiFormSwitch > input {
+    position: absolute;
+    opacity: 0;
+    z-index: -1; }
+  .kuiFormSwitch > input:focus + .kuiFormSwitch__body {
+    background: #222; }
+    .kuiFormSwitch > input:focus + .kuiFormSwitch__body .kuiFormSwitch__button {
+      border-color: #4da1c0;
+      background-color: #4da1c0; }
+  .kuiFormSwitch .kuiFormSwitch__body {
+    width: 52px;
+    height: 24px;
+    background: #262626;
+    border: 1px solid #444;
+    display: inline-block;
+    position: relative;
+    border-radius: 50px;
+    vertical-align: middle; }
+  .kuiFormSwitch .kuiFormSwitch__button {
+    width: 24px;
+    height: 24px;
+    display: inline-block;
+    background-color: #222;
+    position: absolute;
+    left: 28px;
+    top: -1px;
+    border-radius: 50%;
+    border: 1px solid #444;
+    transition: border-color 250ms cubic-bezier(0.34, 1.61, 0.7, 1), background-color 250ms cubic-bezier(0.34, 1.61, 0.7, 1), left 250ms cubic-bezier(0.34, 1.61, 0.7, 1), -webkit-transform 250ms cubic-bezier(0.34, 1.61, 0.7, 1);
+    transition: border-color 250ms cubic-bezier(0.34, 1.61, 0.7, 1), background-color 250ms cubic-bezier(0.34, 1.61, 0.7, 1), left 250ms cubic-bezier(0.34, 1.61, 0.7, 1), transform 250ms cubic-bezier(0.34, 1.61, 0.7, 1);
+    transition: border-color 250ms cubic-bezier(0.34, 1.61, 0.7, 1), background-color 250ms cubic-bezier(0.34, 1.61, 0.7, 1), left 250ms cubic-bezier(0.34, 1.61, 0.7, 1), transform 250ms cubic-bezier(0.34, 1.61, 0.7, 1), -webkit-transform 250ms cubic-bezier(0.34, 1.61, 0.7, 1);
+    z-index: 1; }
+  .kuiFormSwitch .kuiFormSwitch__track {
+    position: absolute;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    overflow: hidden;
+    border-radius: 24px; }
+  .kuiFormSwitch .kuiFormSwitch__icon {
+    position: absolute;
+    right: -40px;
+    top: 0;
+    bottom: 0;
+    width: 50px;
+    transition: left 250ms cubic-bezier(0.34, 1.61, 0.7, 1), right 250ms cubic-bezier(0.34, 1.61, 0.7, 1);
+    background-color: #F5F5F5;
+    -webkit-mask: url("../src/components/icon/assets/cross.svg") center center no-repeat;
+            mask: url("../src/components/icon/assets/cross.svg") center center no-repeat; }
+  .kuiFormSwitch .kuiFormSwitch__icon--checked {
+    right: auto;
+    left: -10px;
+    background-color: #F5F5F5;
+    -webkit-mask: url("../src/components/icon/assets/check.svg") center center no-repeat;
+            mask: url("../src/components/icon/assets/check.svg") center center no-repeat; }
+  .kuiFormSwitch:hover .kuiFormSwitch__button {
+    -webkit-transform: scale(1.06);
+            transform: scale(1.06); }
+  .kuiFormSwitch:active .kuiFormSwitch__button {
+    -webkit-transform: scale(0.95);
+            transform: scale(0.95); }
+  .kuiFormSwitch > :not(:checked) ~ .kuiFormSwitch__body > .kuiFormSwitch__button {
+    left: -1px; }
+  .kuiFormSwitch > :not(:checked) ~ .kuiFormSwitch__body .kuiFormSwitch__icon {
+    right: -8px; }
+    .kuiFormSwitch > :not(:checked) ~ .kuiFormSwitch__body .kuiFormSwitch__icon.kuiFormSwitch__icon--checked {
+      right: auto;
+      left: -40px; }
 
 .kuiHeader {
   box-shadow: 0 2px 2px -1px rgba(0, 0, 0, 0.1);
@@ -588,14 +744,14 @@ table {
   display: -webkit-flex;
   display: -ms-flexbox;
   display: flex;
-  background: #FFF;
-  border-bottom: 1px solid #D9D9D9; }
+  background: #222;
+  border-bottom: 1px solid #444; }
 
 .kuiHeader__notification {
   display: inline-block;
   border-radius: 4px;
   background: #DD0A73;
-  color: #FFF;
+  color: #222;
   font-size: 12px;
   line-height: 16px;
   height: 16px;
@@ -608,7 +764,7 @@ table {
   position: relative;
   margin: 0 -16px;
   padding: 16px;
-  border-top: 1px solid #D9D9D9; }
+  border-top: 1px solid #444; }
   .kuiHeaderAlert:hover .kuiHeaderAlert__dismiss {
     opacity: 1; }
 
@@ -637,15 +793,15 @@ table {
   font-size: 12px;
   font-size: 0.75rem;
   line-height: 18px;
-  color: #0079a5; }
+  color: #4da1c0; }
   .kuiHeaderAlert__action:focus {
-    outline: solid 6px #e6f2f6; }
+    outline: solid 6px #275160; }
 
 .kuiHeaderAlert__date {
   font-size: 12px;
   font-size: 0.75rem;
   line-height: 18px;
-  color: #666;
+  color: #D9D9D9;
   text-align: right; }
 
 /**
@@ -669,7 +825,7 @@ table {
     text-decoration: underline; }
   .kuiHeaderLogo:focus {
     text-decoration: underline;
-    background: #e6f2f6; }
+    background: #275160; }
 
 .kuiHeaderLogo__icon {
   height: 32px;
@@ -688,7 +844,7 @@ table {
   line-height: 64px;
   padding: 0 16px;
   position: relative;
-  color: #3F3F3F; }
+  color: #F5F5F5; }
   .kuiHeaderBreadcrumb:not(:last-child):after {
     position: absolute;
     top: 24px;
@@ -698,14 +854,14 @@ table {
     height: 16px;
     -webkit-transform: rotate(15deg);
             transform: rotate(15deg);
-    background: #D9D9D9; }
+    background: #444; }
   .kuiHeaderBreadcrumb:not(.kuiHeaderBreadcrumb--collapsed):hover {
     text-decoration: underline; }
   .kuiHeaderBreadcrumb:not(.kuiHeaderBreadcrumb--collapsed):focus {
     text-decoration: underline;
-    background: #e6f2f6; }
+    background: #275160; }
   .kuiHeaderBreadcrumb.kuiHeaderBreadcrumb-isActive {
-    color: #999; }
+    color: #555; }
 
 .kuiHeaderBreadcrumb__text {
   white-space: nowrap;
@@ -715,7 +871,7 @@ table {
   overflow: hidden; }
 
 .kuiHeaderBreadcrumb--collapsed {
-  color: #D9D9D9; }
+  color: #444; }
 
 @media only screen and (min-width: 992px) and (max-width: 1199px) {
   .kuiHeaderBreadcrumb {
@@ -753,14 +909,14 @@ table {
 .kuiHeaderSectionItem {
   position: relative; }
   .kuiHeaderSectionItem:hover {
-    background: #F5F5F5; }
+    background: #333; }
   .kuiHeaderSectionItem:after {
     position: absolute;
     content: "";
     width: 1px;
     top: 16px;
     bottom: 0;
-    background: #D9D9D9;
+    background: #444;
     left: 0; }
 
 .kuiHeaderSectionItem__button {
@@ -768,7 +924,7 @@ table {
   min-width: 64px;
   text-align: center; }
   .kuiHeaderSectionItem__button:focus {
-    background: #e6f2f6; }
+    background: #275160; }
 
 .kuiHeaderSectionItem--borderRight:after {
   left: auto;
@@ -776,13 +932,14 @@ table {
 
 .kuiIcon {
   display: inline-block;
-  vertical-align: middle; }
+  vertical-align: middle;
+  fill: #F5F5F5; }
   .kuiIcon:focus {
     opacity: 1;
-    background: #e6f2f6; }
+    background: #275160; }
 
 .kuiIcon--basic {
-  fill: #3F3F3F; }
+  fill: #F5F5F5; }
 
 .kuiIcon--medium {
   width: 16px;
@@ -830,19 +987,19 @@ table {
   padding: 16px;
   height: 96px;
   width: 96px;
-  color: #666;
-  border: 1px solid #D9D9D9;
+  color: #D9D9D9;
+  border: 1px solid #444;
   border-color: transparent;
   border-radius: 4px;
   font-family: "Roboto", Helvetica, Arial, sans-serif;
   /* 1 */ }
   .kuiKeyPadMenuItem:hover, .kuiKeyPadMenuItem:focus {
-    border-color: #D9D9D9; }
+    border-color: #444; }
     .kuiKeyPadMenuItem:hover .kuiKeyPadMenuItem__icon, .kuiKeyPadMenuItem:focus .kuiKeyPadMenuItem__icon {
       -webkit-transform: translateY(0);
               transform: translateY(0); }
   .kuiKeyPadMenuItem:focus {
-    background: #e6f2f6; }
+    background: #275160; }
     .kuiKeyPadMenuItem:focus .kuiKeyPadMenuItem__label {
       text-decoration: underline; }
 
@@ -882,17 +1039,17 @@ table {
   text-align: center; }
 
 .kuiLink {
-  color: #0079a5; }
+  color: #4da1c0; }
   .kuiLink:hover {
     text-decoration: underline; }
   .kuiLink:focus {
     text-decoration: underline;
-    background: #e6f2f6; }
+    background: #275160; }
   .kuiLink:hover {
-    color: #005472; }
+    color: #3985a1; }
   .kuiLink:focus {
-    background: #e6f2f6;
-    outline: solid 3px #e6f2f6; }
+    background: #275160;
+    outline: solid 3px #275160; }
 
 .kuiLoadingKibana {
   position: relative;
@@ -910,11 +1067,11 @@ table {
             transform-origin: -50% -50%;
     z-index: 1; }
   .kuiLoadingKibana:before {
-    box-shadow: 0 0 8px #000;
+    box-shadow: 0 0 8px #FFF;
     -webkit-animation: 1s kuiLoadingKibanaPulsateAndFade cubic-bezier(0.694, 0.0482, 0.335, 1) infinite;
             animation: 1s kuiLoadingKibanaPulsateAndFade cubic-bezier(0.694, 0.0482, 0.335, 1) infinite; }
   .kuiLoadingKibana:after {
-    background-color: #000;
+    background-color: #FFF;
     -webkit-animation: 1s kuiLoadingKibanaPulsate cubic-bezier(0.694, 0.0482, 0.335, 1) infinite;
             animation: 1s kuiLoadingKibanaPulsate cubic-bezier(0.694, 0.0482, 0.335, 1) infinite; }
 
@@ -1037,7 +1194,7 @@ table {
   -webkit-animation: kuiLoadingChart 1s infinite;
           animation: kuiLoadingChart 1s infinite; }
   .kuiLoadingChart__bar:nth-child(1) {
-    background-color: #0079a5; }
+    background-color: #4da1c0; }
   .kuiLoadingChart__bar:nth-child(2) {
     background-color: #00A69B;
     -webkit-animation-delay: .1s;
@@ -1047,21 +1204,21 @@ table {
     -webkit-animation-delay: .2s;
             animation-delay: .2s; }
   .kuiLoadingChart__bar:nth-child(4) {
-    background-color: #3F3F3F;
+    background-color: #F5F5F5;
     -webkit-animation-delay: .3s;
             animation-delay: .3s; }
 
 .kuiLoadingChart--mono .kuiLoadingChart__bar:nth-child(1) {
-  background-color: #D9D9D9; }
+  background-color: #444; }
 
 .kuiLoadingChart--mono .kuiLoadingChart__bar:nth-child(2) {
-  background-color: #cfcfcf; }
+  background-color: #3a3a3a; }
 
 .kuiLoadingChart--mono .kuiLoadingChart__bar:nth-child(3) {
-  background-color: #c5c5c5; }
+  background-color: #303030; }
 
 .kuiLoadingChart--mono .kuiLoadingChart__bar:nth-child(4) {
-  background-color: #bababa; }
+  background-color: #252525; }
 
 .kuiLoadingChart--medium {
   height: 16px; }
@@ -1111,8 +1268,8 @@ table {
   width: 32px;
   height: 32px;
   border-radius: 50%;
-  border: solid 2px #D9D9D9;
-  border-top-color: #0079a5;
+  border: solid 2px #444;
+  border-top-color: #4da1c0;
   -webkit-animation: kuiLoadingSpinner .6s infinite linear;
           animation: kuiLoadingSpinner .6s infinite linear; }
 
@@ -1161,7 +1318,7 @@ table {
   display: -webkit-flex;
   display: -ms-flexbox;
   display: flex;
-  background: rgba(255, 255, 255, 0.9);
+  background: rgba(34, 34, 34, 0.9);
   -webkit-box-align: center;
   -webkit-align-items: center;
       -ms-flex-align: center;
@@ -1176,8 +1333,8 @@ table {
 
 .kuiModal {
   box-shadow: 0 16px 16px -8px rgba(0, 0, 0, 0.1);
-  background-color: #FFF;
-  border: 1px solid #D9D9D9;
+  background-color: #222;
+  border: 1px solid #444;
   border-radius: 4px;
   z-index: 8000;
   padding: 32px;
@@ -1272,8 +1429,8 @@ table {
 
 .kuiPageContent {
   padding: 24px;
-  background: #FFF;
-  border: 1px solid #D9D9D9;
+  background: #222;
+  border: 1px solid #444;
   border-radius: 4px;
   width: 100%;
   box-shadow: 0 2px 2px -1px rgba(0, 0, 0, 0.1); }
@@ -1385,17 +1542,17 @@ table {
   .kuiPopover.kuiPopover-isOpen .kuiPopover__body {
     opacity: 1;
     visibility: visible;
-    z-index: 0;
+    z-index: 2000;
     margin-top: 8px; }
 
 .kuiPopover__body {
   box-shadow: 0 16px 16px -8px rgba(0, 0, 0, 0.1);
-  background-color: #FFF;
+  background-color: #222;
   position: absolute;
   min-width: 256px;
   top: 100%;
   left: 50%;
-  border: 1px solid #D9D9D9;
+  border: 1px solid #444;
   border-radius: 4px 0 4px 4px;
   padding: 16px;
   -webkit-transform: translateX(-50%) translateY(8px) translateZ(0);
@@ -1418,7 +1575,7 @@ table {
     margin-left: -16px;
     border-left: 16px solid transparent;
     border-right: 16px solid transparent;
-    border-bottom: 16px solid #D9D9D9; }
+    border-bottom: 16px solid #444; }
   .kuiPopover__body:after {
     position: absolute;
     content: "";
@@ -1430,7 +1587,7 @@ table {
     width: 0;
     border-left: 16px solid transparent;
     border-right: 16px solid transparent;
-    border-bottom: 16px solid #FFF; }
+    border-bottom: 16px solid #222; }
 
 .kuiPopover--anchorLeft .kuiPopover__body {
   left: 0;
@@ -1451,7 +1608,7 @@ table {
 
 .kuiSideNav__mobileToggle {
   display: none;
-  border-bottom: 1px solid #D9D9D9;
+  border-bottom: 1px solid #444;
   padding: 16px 24px;
   width: 100%;
   text-align: left;
@@ -1463,7 +1620,7 @@ table {
     outline: none; }
 
 .kuiSideNav__mobileIcon {
-  fill: #0079a5; }
+  fill: #4da1c0; }
 
 .kuiSideNav__mobileWrap {
   display: -webkit-box;
@@ -1476,7 +1633,7 @@ table {
   -webkit-flex-grow: 1;
       -ms-flex-positive: 1;
           flex-grow: 1;
-  color: #0079a5; }
+  color: #4da1c0; }
 
 @media only screen and (max-width: 768px) {
   /**
@@ -1506,24 +1663,24 @@ table {
   width: 100%;
   text-align: left;
   padding: 4px 8px;
-  color: #666;
+  color: #D9D9D9;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  border: 1px solid #D9D9D9;
+  border: 1px solid #444;
   border-color: transparent; }
   .kuiSideNavItem.kuiSideNavItem-isSelected {
     box-shadow: 0 2px 2px -1px rgba(0, 0, 0, 0.1);
     color: #00A69B;
-    border-left: 2px solid #D9D9D9;
+    border-left: 2px solid #444;
     border-left-color: #00A69B;
-    background-color: #FFF; }
+    background-color: #222; }
   .kuiSideNavItem:hover {
     text-decoration: underline; }
   .kuiSideNavItem:focus {
-    background-color: #e6f2f6; }
+    background-color: #275160; }
   .kuiSideNavItem:focus:not(.kuiSideNavItem-isSelected) {
-    border: solid 1px #c1dfe9; }
+    border: solid 1px #18323c; }
 
 .kuiSideNavTitle {
   font-size: 16px;
@@ -1554,7 +1711,7 @@ table {
   width: 100%;
   border: none;
   border-collapse: collapse;
-  background-color: #FFF; }
+  background-color: #222; }
 
 .kuiTable--compressed .kuiTableHeaderCell,
 .kuiTable--compressed .kuiTableRowCell__content {
@@ -1565,7 +1722,7 @@ table {
   max-width: 20px;
   /* 1 */
   padding: 12px;
-  color: #000; }
+  color: #FFF; }
 
 .kuiTableHeaderCell__content {
   display: inline-block; }
@@ -1574,7 +1731,7 @@ table {
   text-align: right; }
 
 .kuiTableRow:hover {
-  background-color: rgba(0, 121, 165, 0.05); }
+  background-color: rgba(77, 161, 192, 0.05); }
 
 .kuiTableRow.kuiTableRow-isSelected {
   background-color: rgba(255, 255, 0, 0.05); }
@@ -1583,9 +1740,9 @@ table {
   text-align: left;
   max-width: 20px;
   /* 1 */
-  color: #3F3F3F;
-  border-top: 1px solid #D9D9D9;
-  border-bottom: 1px solid #D9D9D9; }
+  color: #F5F5F5;
+  border-top: 1px solid #444;
+  border-bottom: 1px solid #444; }
 
 /**
    * 1. Vertically align all children.
@@ -1616,7 +1773,7 @@ table {
   display: -webkit-flex;
   display: -ms-flexbox;
   display: flex;
-  border-bottom: 1px solid #D9D9D9; }
+  border-bottom: 1px solid #444; }
 
 .kuiTab {
   font-size: 16px;
@@ -1625,14 +1782,14 @@ table {
   position: relative;
   cursor: pointer;
   padding: 12px 16px;
-  color: #666;
-  background-color: #FFF;
+  color: #D9D9D9;
+  background-color: #222;
   transition: all 250ms cubic-bezier(0.694, 0.0482, 0.335, 1); }
   .kuiTab:hover:not(.kuiTab-isSelected) {
-    color: #3F3F3F;
+    color: #F5F5F5;
     text-decoration: underline; }
   .kuiTab:focus {
-    background-color: #e6f2f6;
+    background-color: #275160;
     text-decoration: underline; }
   .kuiTab.kuiTab-isSelected {
     cursor: default;
@@ -1702,7 +1859,7 @@ table {
     width: 16px;
     height: 16px; }
   .kuiGlobalToastList::-webkit-scrollbar-thumb {
-    background-color: rgba(102, 102, 102, 0.5);
+    background-color: rgba(217, 217, 217, 0.5);
     border: 6px solid transparent;
     background-clip: content-box; }
   .kuiGlobalToastList::-webkit-scrollbar-track {
@@ -1748,8 +1905,8 @@ table {
   box-shadow: 0 16px 16px -8px rgba(0, 0, 0, 0.1);
   position: relative;
   padding: 12px;
-  background-color: #FFF;
-  border: 1px solid #D9D9D9; }
+  background-color: #222;
+  border: 1px solid #444; }
 
 /**
    * 1. Fit button to icon.
@@ -1764,16 +1921,16 @@ table {
      -moz-appearance: none;
           appearance: none; }
   .kuiToast__closeButton svg {
-    fill: gray; }
+    fill: #4d4d4d; }
   .kuiToast__closeButton:hover svg {
-    fill: #000; }
+    fill: #FFF; }
   .kuiToast__closeButton:focus {
-    background-color: #e6f2f6; }
+    background-color: #275160; }
     .kuiToast__closeButton:focus svg {
-      fill: #0079a5; }
+      fill: #4da1c0; }
 
 .kuiToast--info {
-  border-top: 2px solid #0079a5; }
+  border-top: 2px solid #4da1c0; }
 
 .kuiToast--success {
   border-top: 2px solid #00A69B; }
@@ -1813,13 +1970,13 @@ table {
   -webkit-flex: 0 0 auto;
       -ms-flex: 0 0 auto;
           flex: 0 0 auto;
-  fill: #000;
+  fill: #FFF;
   -webkit-transform: translateY(2px);
           transform: translateY(2px);
   /* 1 */ }
 
 .kuiToastHeader__title {
-  color: #000;
+  color: #FFF;
   font-weight: 300; }
 
 .kuiToastHeader--withBody {
@@ -1829,7 +1986,7 @@ table {
   font-size: 24px;
   font-size: 1.5rem;
   line-height: 36px;
-  color: #000;
+  color: #FFF;
   font-weight: 300; }
 
 .kuiTitle--small {
@@ -1846,7 +2003,7 @@ table {
   font-size: 16px;
   font-size: 1rem;
   line-height: 24px;
-  color: #3F3F3F;
+  color: #F5F5F5;
   font-weight: 400; }
 
 .kuiText--small {

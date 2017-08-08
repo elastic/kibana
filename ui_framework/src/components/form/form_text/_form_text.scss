@@ -1,17 +1,3 @@
 .kuiFormText {
-  border: none;
-  font-size: $kuiFontSizeS;
-  font-family: $kuiFontFamily;
-  padding: $kuiSizeL $kuiSizeM $kuiSizeS $kuiSizeM;
-  color: $kuiTextColor;
-  min-width: $kuiSize * 16;
-  border-bottom: $kuiBorderThin;
-  // box-shadow: 0 2px 2px 0 rgba(0,0,0,0.16), 0 0 0 1px rgba(0,0,0,0.08);
-
-  &:focus {
-    // box-shadow: 0 3px 8px 0 rgba(0,0,0,0.2), 0 0 0 1px tint($kuiColorPrimary, 50%);
-    & + label {
-      color: $kuiColorPrimary;
-    }
-  }
+  @include kuiFormTextField;
 }

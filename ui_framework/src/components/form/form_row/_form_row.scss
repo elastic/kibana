@@ -1,12 +1,42 @@
 .kuiFormRow {
+  margin-bottom: $kuiSizeL;
+  display: flex;
+  flex-direction: column-reverse;
   position: relative;
+  max-width: $kuiFormMaxWidth;
+
+  &.kuiFormRow--withIcon input {
+    padding-left: $kuiSizeXXL;
+  }
+
+  &.kuiFormRow--dropdown input {
+    padding-left: $kuiSizeM;
+    padding-right: $kuiSizeXXL;
+  }
+
+  &.kuiFormRow--dropdown .kuiFormRow__icon {
+    left: auto;
+    right: $kuiSizeM;
+  }
+
   label {
     font-size: $kuiFontSizeXS;
-    display: block;
-    font-family: $kuiFontFamily;
+    padding: $kuiSizeS;
+    padding-top: 0;
+    cursor: pointer;
+    transition: all $kuiAnimSpeedFast $kuiAnimSlightResistance;
+    font-weight: $kuiFontWeightMedium;
+  }
+
+  .kuiFormRow__helpText {
+    font-size: $kuiFontSizeXS;
+    padding: $kuiSizeS;
     color: $kuiColorDarkShade;
+  }
+
+  .kuiFormRow__icon {
     position: absolute;
-    top: $kuiSizeS;
+    top: $kuiSizeXL;
     left: $kuiSizeM;
   }
 }

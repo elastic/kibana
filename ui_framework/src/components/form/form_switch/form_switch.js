@@ -2,19 +2,36 @@ import React, {
   PropTypes,
 } from 'react';
 import classNames from 'classnames';
+import { KuiFormRow } from '../form_row';
 
-export const KuiFormSwitch = ({ children, className, ...rest }) => {
+
+export const KuiFormSwitch = ({ children, label, icon, id, name, checked, helpText, className, ...rest }) => {
   const classes = classNames('kuiFormSwitch', className);
 
   return (
-    <div
-      className={classes}
-      {...rest}
+    <KuiFormRow
+      helpText={helpText}
     >
-      {children}
-    </div>
+      <div className={classes}>
+        <input type="checkbox" id={id} defaultChecked />
+        <span className="kuiFormSwitch__body">
+          <span className="kuiFormSwitch__button"></span>
+          <span className="kuiFormSwitch__track">
+            <span className="kuiFormSwitch__icon"></span>
+            <span className="kuiFormSwitch__icon kuiFormSwitch__icon--checked"></span>
+          </span>
+        </span>
+        <label htmlFor={id}>Should we do this?</label>
+      </div>
+    </KuiFormRow>
   );
 };
 
 KuiFormSwitch.propTypes = {
 };
+
+KuiFormSwitch.defaultProps = {
+};
+
+
+

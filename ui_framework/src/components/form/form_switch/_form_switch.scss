@@ -1,3 +1,113 @@
-@include component('kuiFormSwitch') {
+$toggleHeight: $kuiSizeL;
+$toggleWidth: ($kuiSizeL * 2) + $kuiSizeXS;
+$switchSize: $kuiSizeL;
 
+.kuiFormSwitch {
+
+  position: relative;
+  display: inline-block;
+  height: $toggleHeight;
+  cursor: pointer;
+
+  > label {
+    position: absolute;
+    left: 0;
+    padding-left: $toggleWidth + $kuiSizeS;
+    z-index: 2;
+    line-height: $toggleHeight;
+  }
+
+  > input {
+    position: absolute;
+    opacity: 0;
+    z-index: -1;
+  }
+
+  > input:focus + .kuiFormSwitch__body {
+    background: $kuiColorEmptyShade;
+    .kuiFormSwitch__button {
+      border-color: $kuiColorPrimary;
+      background-color: $kuiColorPrimary;
+    }
+  }
+  .kuiFormSwitch__body {
+    width: $toggleWidth;
+    height: $toggleHeight;
+    background: $kuiFormBackgroundColor;
+    border: $kuiBorderThin;
+    display: inline-block;
+    position: relative;
+    border-radius: 50px;
+    vertical-align: middle;
+  }
+
+  .kuiFormSwitch__button {
+    width: $toggleHeight;
+    height: $toggleHeight;
+    display: inline-block;
+    background-color: $kuiColorEmptyShade;
+    position: absolute;
+    left: $toggleWidth - $switchSize;
+    top: -1px;
+    border-radius: 50%;
+    border: $kuiBorderThin;
+    transition: border-color $kuiAnimSpeedNormal $kuiAnimSlightBounce, background-color $kuiAnimSpeedNormal $kuiAnimSlightBounce, left $kuiAnimSpeedNormal $kuiAnimSlightBounce, transform $kuiAnimSpeedNormal $kuiAnimSlightBounce;
+    z-index: 1;
+  }
+
+  .kuiFormSwitch__track {
+    position: absolute;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    overflow: hidden;
+    border-radius: $toggleHeight;
+  }
+
+  .kuiFormSwitch__icon {
+    position: absolute;
+    right: -($toggleWidth - ($switchSize / 2));
+    top: 0;
+    bottom: 0;
+    width: $toggleWidth - ($switchSize / 2) + 10; // 10 compensates for animation bounce
+    transition: left $kuiAnimSpeedNormal $kuiAnimSlightBounce, right $kuiAnimSpeedNormal $kuiAnimSlightBounce;
+    background-color: $kuiTextColor;
+    mask: url('../src/components/icon/assets/cross.svg') center center no-repeat;
+  }
+
+  .kuiFormSwitch__icon--checked {
+    right: auto;
+    left: -10px;
+    background-color: $kuiTextColor;
+    mask: url('../src/components/icon/assets/check.svg') center center no-repeat;
+  }
+
+  &:hover {
+    .kuiFormSwitch__button {
+      transform: scale(1.06);
+    }
+  }
+
+  &:active {
+    .kuiFormSwitch__button {
+      transform: scale(.95);
+    }
+  }
+
+  > :not(:checked) ~ .kuiFormSwitch__body {
+
+    > .kuiFormSwitch__button {
+      left: -1px;
+    }
+
+    .kuiFormSwitch__icon {
+      right: -$kuiSizeS;
+
+      &.kuiFormSwitch__icon--checked {
+        right: auto;
+        left: -($toggleWidth - ($switchSize / 2));
+      }
+    }
+  }
 }

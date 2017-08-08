@@ -1,3 +1,9 @@
-@include component('kuiFormSelect') {
-
+.kuiFormSelect {
+  appearance: none;
+  @include kuiFormTextField;
 }
+
+.kuiFormSelect::-ms-expand {
+  display: none;
+}
+
