@@ -32,7 +32,7 @@ uiModules
     controller: function ($scope) {
       const self = this;
 
-      self._saveAs = require('@spalger/filesaver').saveAs;
+      self._saveAs = require('@elastic/filesaver').saveAs;
       self.csv = {
         separator: config.get('csv:separator'),
         quoteValues: config.get('csv:quoteValues')
