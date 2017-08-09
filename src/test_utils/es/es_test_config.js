@@ -1,7 +1,6 @@
 import { format as formatUrl } from 'url';
 import { resolve } from 'path';
 
-import pkg from '../../../package.json';
 import { admin } from '../../../test/shield';
 
 const SECOND = 1000;
@@ -21,7 +20,7 @@ export const esTestConfig = new class EsTestConfig {
   }
 
   getBranch() {
-    return process.env.TEST_ES_BRANCH || pkg.branch;
+    return '5.x';
   }
 
   getPort() {
