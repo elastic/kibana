@@ -37,27 +37,13 @@
     ng-model="value"
     ng-change="onChange({ value: value })"
   />
-  <label
-    ng-switch-when="boolean"
-    class="kuiCheckBoxLabel kuiVerticalRhythm"
-  >
-    <input
-      class="kuiCheckBox"
-      type="checkbox"
+  <div ng-switch-when="boolean">
+    <select
+      class="kuiSelect"
       ng-model="value"
+      ng-options="option for option in boolOptions"
       ng-change="onChange({ value: value })"
-    />
-    <code
-      ng-show="value"
-      class="kuiCheckBoxLabel__text"
-    >
-      true
-    </code>
-    <code
-      ng-hide="value"
-      class="kuiCheckBoxLabel__text"
-    >
-      false
-    </code>
-  </label>
+      ng-init="setDefaultBool()"
+    ></select>
+  </div>
 </div>
