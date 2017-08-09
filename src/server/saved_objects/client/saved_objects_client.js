@@ -5,11 +5,12 @@ import { get } from 'lodash';
 import {
   createFindQuery,
   createIdQuery,
-  handleEsError,
   v5BulkCreate,
   v6BulkCreate,
   normalizeEsDoc,
-  includedFields
+  includedFields,
+  decorateEsError,
+  errors,
 } from './lib';
 
 export const V6_TYPE = 'doc';
@@ -20,6 +21,9 @@ export class SavedObjectsClient {
     this._mappings = mappings;
     this._callAdminCluster = callAdminCluster;
   }
+
+  static errors = errors
+  errors = errors
 
   /**
    * Persists an object
@@ -267,7 +271,7 @@ export class SavedObjectsClient {
         index: this._kibanaIndex,
       });
     } catch (err) {
-      throw handleEsError(err);
+      throw decorateEsError(err);
     }
   }
 }

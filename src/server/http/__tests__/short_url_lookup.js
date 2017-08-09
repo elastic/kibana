@@ -1,6 +1,7 @@
 import expect from 'expect.js';
 import sinon from 'sinon';
 import shortUrlLookupProvider from '../short_url_lookup';
+import { SavedObjectsClient } from '../../saved_objects/client';
 
 describe('shortUrlLookupProvider', () => {
   const ID = 'bf00ad16941fc51420f91a93428b27a0';
@@ -17,7 +18,8 @@ describe('shortUrlLookupProvider', () => {
     savedObjectsClient = {
       get: sandbox.stub(),
       create: sandbox.stub().returns(Promise.resolve({ id: ID })),
-      update: sandbox.stub()
+      update: sandbox.stub(),
+      errors: SavedObjectsClient.errors
     };
 
     req = { getSavedObjectsClient: () => savedObjectsClient };
@@ -58,10 +60,8 @@ describe('shortUrlLookupProvider', () => {
     });
 
     it('gracefully handles version conflict', async () => {
-      const error = new Error('version conflict');
-      error.data = { type: 'version_conflict_engine_exception' };
+      const error = savedObjectsClient.errors.decorateConflictError(new Error());
       savedObjectsClient.create.throws(error);
-
       const id = await shortUrl.generateUrlId(URL, req);
       expect(id).to.eql(ID);
     });
