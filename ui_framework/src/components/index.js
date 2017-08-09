@@ -13,6 +13,7 @@ export {
 export {
   KuiForm,
   KuiFormCheckbox,
+  KuiFormNumber,
   KuiFormPassword,
   KuiFormRadio,
   KuiFormRange,

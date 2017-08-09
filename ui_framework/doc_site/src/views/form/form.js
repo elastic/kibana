@@ -7,6 +7,7 @@ import {
   KuiPopover,
   KuiForm,
   KuiFormCheckbox,
+  KuiFormNumber,
   KuiFormPassword,
   KuiFormRadio,
   KuiFormRange,
@@ -50,6 +51,13 @@ export default class extends Component {
 
     const formSample = (
       <KuiForm>
+        <KuiFormRow
+          id="first"
+          label="Number"
+          helpText="Any number between 1 and 5"
+        >
+          <KuiFormNumber id="number" mix={1} max={5} />
+        </KuiFormRow>
         <KuiFormRow
           id="first"
           label="First name"

@@ -1,5 +1,6 @@
 export { KuiForm } from './form';
 export { KuiFormCheckbox } from './form_checkbox';
+export { KuiFormNumber } from './form_number';
 export { KuiFormPassword } from './form_password';
 export { KuiFormRadio } from './form_radio';
 export { KuiFormRange } from './form_range';
