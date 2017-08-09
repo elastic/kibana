@@ -3,11 +3,15 @@ import { VisSchemasProvider } from 'ui/vis/editors/default/schemas';
 import { CATEGORY } from 'ui/vis/vis_category';
 import gaugeTemplate from 'plugins/kbn_vislib_vis_types/editors/gauge.html';
 import { vislibColorMaps } from 'ui/vislib/components/color/colormaps';
+import { AggTypesIndexProvider } from 'ui/agg_types';
+import { AggregationsProvider } from 'ui/vis/aggregations';
 import image from './images/icon-gauge.svg';
 
 export default function GaugeVisType(Private) {
   const VisFactory = Private(VisFactoryProvider);
   const Schemas = Private(VisSchemasProvider);
+  const AggTypes = Private(AggTypesIndexProvider);
+  const AGGREGATIONS = Private(AggregationsProvider);
 
   return VisFactory.createVislibVisualization({
     name: 'gauge',
@@ -76,11 +80,9 @@ export default function GaugeVisType(Private) {
           name: 'metric',
           title: 'Metric',
           min: 1,
-          aggFilter: [
-            '!std_dev', '!geo_centroid', '!percentiles', '!percentile_ranks',
-            '!derivative', '!serial_diff', '!moving_avg', '!cumulative_sum'],
+          aggFilter: AGGREGATIONS.DEFAULT_METRICS,
           defaults: [
-            { schema: 'metric', type: 'count' }
+            { schema: 'metric', type: AggTypes.byName.count.name }
           ]
         },
         {
@@ -89,7 +91,7 @@ export default function GaugeVisType(Private) {
           title: 'Split Group',
           min: 0,
           max: 1,
-          aggFilter: '!geohash_grid'
+          aggFilter: AGGREGATIONS.DEFAULT_BUCKETS
         }
       ])
     }

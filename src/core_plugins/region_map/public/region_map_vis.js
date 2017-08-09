@@ -8,6 +8,8 @@ import { CATEGORY } from 'ui/vis/vis_category';
 import { VisSchemasProvider } from 'ui/vis/editors/default/schemas';
 import { VisTypesRegistryProvider } from 'ui/registry/vis_types';
 import { truncatedColorMaps } from 'ui/vislib/components/color/truncated_colormaps';
+import { AggTypesIndexProvider } from 'ui/agg_types';
+import { AggregationsProvider } from 'ui/vis/aggregations';
 
 VisTypesRegistryProvider.register(function RegionMapProvider(Private, regionmapsConfig) {
   const VisFactory = Private(VisFactoryProvider);
@@ -16,6 +18,8 @@ VisTypesRegistryProvider.register(function RegionMapProvider(Private, regionmaps
   const vectorLayers = regionmapsConfig.layers;
   const selectedLayer = vectorLayers[0];
   const selectedJoinField = selectedLayer ? vectorLayers[0].fields[0] : null;
+  const AggTypes = Private(AggTypesIndexProvider);
+  const AGGREGATIONS = Private(AggregationsProvider);
 
   return VisFactory.createAngularVisualization({
     name: 'region_map',
@@ -61,10 +65,9 @@ VisTypesRegistryProvider.register(function RegionMapProvider(Private, regionmaps
           title: 'Value',
           min: 1,
           max: 1,
-          aggFilter: ['count', 'avg', 'sum', 'min', 'max', 'cardinality', 'top_hits',
-            'sum_bucket', 'min_bucket', 'max_bucket', 'avg_bucket'],
+          aggFilter: AGGREGATIONS.DEFAULT_METRICS,
           defaults: [
-            { schema: 'metric', type: 'count' }
+            { schema: 'metric', type: AggTypes.byName.count.name }
           ]
         },
         {
@@ -74,7 +77,7 @@ VisTypesRegistryProvider.register(function RegionMapProvider(Private, regionmaps
           title: 'shape field',
           min: 1,
           max: 1,
-          aggFilter: ['terms']
+          aggFilter: [AggTypes.byName.terms.name]
         }
       ])
     }

@@ -3,11 +3,15 @@ import { VisSchemasProvider } from 'ui/vis/editors/default/schemas';
 import { CATEGORY } from 'ui/vis/vis_category';
 import heatmapTemplate from 'plugins/kbn_vislib_vis_types/editors/heatmap.html';
 import { vislibColorMaps } from 'ui/vislib/components/color/colormaps';
+import { AggTypesIndexProvider } from 'ui/agg_types';
+import { AggregationsProvider } from 'ui/vis/aggregations';
 import image from './images/icon-heatmap.svg';
 
 export default function HeatmapVisType(Private) {
   const VisFactory = Private(VisFactoryProvider);
   const Schemas = Private(VisSchemasProvider);
+  const AggTypes = Private(AggTypesIndexProvider);
+  const AGGREGATIONS = Private(AggregationsProvider);
 
   return VisFactory.createVislibVisualization({
     name: 'heatmap',
@@ -71,9 +75,9 @@ export default function HeatmapVisType(Private) {
           title: 'Value',
           min: 1,
           max: 1,
-          aggFilter: ['count', 'avg', 'median', 'sum', 'min', 'max', 'cardinality', 'std_dev', 'top_hits'],
+          aggFilter: AGGREGATIONS.SIMPLE_METRICS,
           defaults: [
-            { schema: 'metric', type: 'count' }
+            { schema: 'metric', type: AggTypes.byName.count.name }
           ]
         },
         {
@@ -82,7 +86,7 @@ export default function HeatmapVisType(Private) {
           title: 'X-Axis',
           min: 0,
           max: 1,
-          aggFilter: '!geohash_grid'
+          aggFilter: AGGREGATIONS.DEFAULT_BUCKETS
         },
         {
           group: 'buckets',
@@ -90,7 +94,7 @@ export default function HeatmapVisType(Private) {
           title: 'Y-Axis',
           min: 0,
           max: 1,
-          aggFilter: '!geohash_grid'
+          aggFilter: AGGREGATIONS.DEFAULT_BUCKETS
         },
         {
           group: 'buckets',
@@ -98,7 +102,7 @@ export default function HeatmapVisType(Private) {
           title: 'Split Chart',
           min: 0,
           max: 1,
-          aggFilter: '!geohash_grid'
+          aggFilter: AGGREGATIONS.DEFAULT_BUCKETS
         }
       ])
     }

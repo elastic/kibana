@@ -7,10 +7,14 @@ import { VisSchemasProvider } from 'ui/vis/editors/default/schemas';
 import tagCloudTemplate from 'plugins/tagcloud/tag_cloud_controller.html';
 import { VisTypesRegistryProvider } from 'ui/registry/vis_types';
 import image from './images/icon-tagcloud.svg';
+import { AggTypesIndexProvider } from 'ui/agg_types';
+import { AggregationsProvider } from 'ui/vis/aggregations';
 
 VisTypesRegistryProvider.register(function TagCloudProvider(Private) {
   const VisFactory = Private(VisFactoryProvider);
   const Schemas = Private(VisSchemasProvider);
+  const AggTypes = Private(AggTypesIndexProvider);
+  const AGGREGATIONS = Private(AggregationsProvider);
 
   return VisFactory.createAngularVisualization({
     name: 'tagcloud',
@@ -41,9 +45,9 @@ VisTypesRegistryProvider.register(function TagCloudProvider(Private) {
           title: 'Tag Size',
           min: 1,
           max: 1,
-          aggFilter: ['!std_dev', '!percentiles', '!percentile_ranks', '!derivative'],
+          aggFilter: AGGREGATIONS.TAG_CLOUD_METRICS,
           defaults: [
-            { schema: 'metric', type: 'count' }
+            { schema: 'metric', type: AggTypes.byName.count.name }
           ]
         },
         {
@@ -53,7 +57,7 @@ VisTypesRegistryProvider.register(function TagCloudProvider(Private) {
           title: 'Tags',
           min: 1,
           max: 1,
-          aggFilter: ['terms']
+          aggFilter: [AggTypes.byName.terms.name]
         }
       ])
     }

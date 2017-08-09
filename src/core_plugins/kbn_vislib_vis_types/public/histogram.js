@@ -3,10 +3,15 @@ import { VisSchemasProvider } from 'ui/vis/editors/default/schemas';
 import { CATEGORY } from 'ui/vis/vis_category';
 import pointSeriesTemplate from 'plugins/kbn_vislib_vis_types/editors/point_series.html';
 import image from './images/icon-vertical.svg';
+import { AggTypesIndexProvider } from 'ui/agg_types';
+import { AggregationsProvider } from 'ui/vis/aggregations';
+
 
 export default function PointSeriesVisType(Private) {
   const VisFactory = Private(VisFactoryProvider);
   const Schemas = Private(VisSchemasProvider);
+  const AggTypes = Private(AggTypesIndexProvider);
+  const AGGREGATIONS = Private(AggregationsProvider);
 
   return VisFactory.createVislibVisualization({
     name: 'histogram',
@@ -126,9 +131,9 @@ export default function PointSeriesVisType(Private) {
           name: 'metric',
           title: 'Y-Axis',
           min: 1,
-          aggFilter: ['!geo_centroid'],
+          aggFilter: AGGREGATIONS.DEFAULT_METRICS_WITH_PARENT_PIPELINES,
           defaults: [
-            { schema: 'metric', type: 'count' }
+            { schema: 'metric', type: AggTypes.byName.count.name }
           ]
         },
         {
@@ -137,7 +142,7 @@ export default function PointSeriesVisType(Private) {
           title: 'Dot Size',
           min: 0,
           max: 1,
-          aggFilter: ['count', 'avg', 'sum', 'min', 'max', 'cardinality']
+          aggFilter: AGGREGATIONS.SIMPLE_STAT_METRICS
         },
         {
           group: 'buckets',
@@ -145,7 +150,7 @@ export default function PointSeriesVisType(Private) {
           title: 'X-Axis',
           min: 0,
           max: 1,
-          aggFilter: '!geohash_grid'
+          aggFilter: AGGREGATIONS.DEFAULT_BUCKETS
         },
         {
           group: 'buckets',
@@ -153,7 +158,7 @@ export default function PointSeriesVisType(Private) {
           title: 'Split Series',
           min: 0,
           max: 1,
-          aggFilter: '!geohash_grid'
+          aggFilter: AGGREGATIONS.DEFAULT_BUCKETS
         },
         {
           group: 'buckets',
@@ -161,7 +166,7 @@ export default function PointSeriesVisType(Private) {
           title: 'Split Chart',
           min: 0,
           max: 1,
-          aggFilter: '!geohash_grid'
+          aggFilter: AGGREGATIONS.DEFAULT_BUCKETS
         }
       ])
     }
