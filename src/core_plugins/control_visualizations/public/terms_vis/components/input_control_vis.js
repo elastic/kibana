@@ -2,7 +2,7 @@ import React, { Component, PropTypes } from 'react';
 import { RangeControl } from './range_control';
 import { TermsControl } from './terms_control';
 import { TextControl } from './text_control';
-import { KuiButton } from 'ui_framework/components';
+import { KuiFieldGroup, KuiFieldGroupSection, KuiButton } from 'ui_framework/components';
 
 export class InputControlVis extends Component {
   constructor(props) {
@@ -27,7 +27,7 @@ export class InputControlVis extends Component {
 
   render() {
     return (
-      <div className="vertical-layout input-control-vis">
+      <div className="inputControlVis">
         {this.props.controls.map((control, index) => {
           let controlComponent = null;
           switch (control.type) {
@@ -58,32 +58,38 @@ export class InputControlVis extends Component {
                 />
               );
           }
-          return <div key={index}>{controlComponent}</div>;
+          return controlComponent;
         }
         )}
-        <div>
-          <KuiButton
-            buttonType="primary"
-            type="button"
-            onClick={this.handleSubmit}
-          >
-            Submit
-          </KuiButton>
-          <KuiButton
-            buttonType="primary"
-            type="button"
-            onClick={this.handleReset}
-          >
-            Reset
-          </KuiButton>
-          <KuiButton
-            buttonType="primary"
-            type="button"
-            onClick={this.handleClearAll}
-          >
-            Clear All
-          </KuiButton>
-        </div>
+        <KuiFieldGroup>
+          <KuiFieldGroupSection>
+            <KuiButton
+              buttonType="primary"
+              type="button"
+              onClick={this.handleSubmit}
+            >
+              Update filters
+            </KuiButton>
+          </KuiFieldGroupSection>
+          <KuiFieldGroupSection>
+            <KuiButton
+              buttonType="basic"
+              type="button"
+              onClick={this.handleReset}
+            >
+              Cancel
+            </KuiButton>
+          </KuiFieldGroupSection>
+          <KuiFieldGroupSection>
+            <KuiButton
+              buttonType="danger"
+              type="button"
+              onClick={this.handleClearAll}
+            >
+              Remove filters
+            </KuiButton>
+          </KuiFieldGroupSection>
+        </KuiFieldGroup>
       </div>
     );
   }

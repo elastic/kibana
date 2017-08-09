@@ -1,6 +1,7 @@
 import _ from 'lodash';
 import React, { Component, PropTypes } from 'react';
 import Select from 'react-select';
+import { FormRow } from './form_row';
 
 // React select tries to perform client-side filtering of options
 // Since options are loaded from ES, client-side filtering is not desired
@@ -49,8 +50,9 @@ export class TextControl extends Component {
 
   render() {
     return (
-      <div className="input-control text-control">
-        <span>{this.props.control.label}</span>
+      <FormRow
+        label={this.props.control.label}
+      >
         <Select.Async
           placeholder=""
           value={this.props.control.value}
@@ -61,7 +63,7 @@ export class TextControl extends Component {
           filterOption={allowAnyOption}
           filterOptions={allowAllOptions}
         />
-      </div>
+      </FormRow>
     );
   }
 }

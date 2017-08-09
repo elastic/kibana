@@ -1,5 +1,6 @@
 import React, { Component, PropTypes } from 'react';
 import Select from 'react-select';
+import { FormRow } from './form_row';
 
 export class TermsControl extends Component {
   constructor(props) {
@@ -20,8 +21,9 @@ export class TermsControl extends Component {
 
   render() {
     return (
-      <div className="input-control terms-control" data-test-subj="termsControl">
-        <span>{this.props.control.label}</span>
+      <FormRow
+        label={this.props.control.label}
+      >
         <Select
           className="terms-select"
           placeholder="Select..."
@@ -29,7 +31,7 @@ export class TermsControl extends Component {
           options={this.props.control.terms}
           onChange={this.handleOnChange.bind(null, this.props.control)}
         />
-      </div>
+      </FormRow>
     );
   }
 }

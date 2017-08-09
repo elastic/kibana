@@ -1,6 +1,6 @@
 import React, { Component, PropTypes } from 'react';
 import InputRange from 'react-input-range';
-import 'react-input-range/lib/css/index.css';
+import { FormRow } from './form_row';
 
 export class RangeControl extends Component {
   constructor(props) {
@@ -23,8 +23,9 @@ export class RangeControl extends Component {
 
   render() {
     return (
-      <div className="input-control range-control">
-        <span>{this.props.control.label}</span>
+      <FormRow
+        label={this.props.control.label}
+      >
         <InputRange
           maxValue={this.props.control.max}
           minValue={this.props.control.min}
@@ -33,7 +34,7 @@ export class RangeControl extends Component {
           onChange={newValue => this.setState({ sliderValue: newValue })}
           onChangeComplete={this.handleOnChange.bind(null, this.props.control)}
         />
-      </div>
+      </FormRow>
     );
   }
 }
