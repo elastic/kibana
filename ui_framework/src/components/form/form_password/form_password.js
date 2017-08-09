@@ -2,10 +2,8 @@ import React, {
   PropTypes,
 } from 'react';
 import classNames from 'classnames';
-import { KuiFormRow } from '../form_row';
 
-
-export const KuiFormPassword = ({ children, id, name, placeholder, className, ...rest }) => {
+export const KuiFormPassword = ({ className, id, name, placeholder, value, ...rest }) => {
   const classes = classNames('kuiForm__textField', 'kuiFormPassword', className);
 
   return (
@@ -15,16 +13,19 @@ export const KuiFormPassword = ({ children, id, name, placeholder, className, ..
       name={name}
       placeholder={placeholder}
       className={classes}
+      value={value}
       {...rest}
     />
   );
 };
 
 KuiFormPassword.propTypes = {
+  name: PropTypes.string.isRequired,
+  id: PropTypes.string.isRequired,
+  placeholder: PropTypes.string,
+  value: PropTypes.string,
 };
 
 KuiFormPassword.defaultProps = {
+  value: undefined,
 };
-
-
-

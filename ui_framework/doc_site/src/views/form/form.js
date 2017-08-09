@@ -56,41 +56,41 @@ export default class extends Component {
           label="Number"
           helpText="Any number between 1 and 5"
         >
-          <KuiFormNumber id="number" min={1} max={5} />
+          <KuiFormNumber name="number" id="number" min={1} max={5} />
         </KuiFormRow>
         <KuiFormRow
           id="first"
           label="First name"
           helpText="I am some friendly help text."
         >
-          <KuiFormText id="first" />
+          <KuiFormText id="first" name="first" />
         </KuiFormRow>
         <KuiFormRow
           id="last"
           label="Last name with icon"
           icon="user"
         >
-          <KuiFormText id="last" placeholder="Some placeholder text" />
+          <KuiFormText id="last" name="first" placeholder="Some placeholder text" />
         </KuiFormRow>
         <KuiFormRow
           id="pass"
           label="Password"
           icon="lock"
         >
-          <KuiFormPassword />
+          <KuiFormPassword name="pass" id="pass" />
         </KuiFormRow>
         <KuiFormRow
           id="range"
           label="Range"
         >
-          <KuiFormRange min={0} max={100} />
+          <KuiFormRange min={0} max={100} name="range" id="range" />
         </KuiFormRow>
         <KuiFormRow
           id="search1"
           label="Search"
           icon="search"
         >
-          <KuiFormSearch label="Search" id="search1" placeholder="Search..." />
+          <KuiFormSearch label="Search" id="search1" name="search1" placeholder="Search..." />
         </KuiFormRow>
         <KuiFormRow
           id="dropdown"
@@ -98,12 +98,14 @@ export default class extends Component {
           icon="arrowDown"
           className="kuiFormRow--select"
         >
-          <KuiFormSelect options={formOptions} label="Dropdown" id="dropdown"/>
+          <KuiFormSelect options={formOptions} label="Dropdown" name="dropdown" id="dropdown"/>
         </KuiFormRow>
-        <KuiFormRow label="Textarea">
-          <KuiFormTextarea />
+        <KuiFormRow label="Textarea" id="textarea">
+          <KuiFormTextarea id="textarea" name="textarea"/>
         </KuiFormRow>
-        <KuiFormSwitch id="switch"/>
+        <KuiFormRow>
+          <KuiFormSwitch id="switch" name="switch" label="Should we do this?"/>
+        </KuiFormRow>
         <KuiFormRow label="You should always use more than one checkbox">
           <KuiFormCheckbox options={formOptions} />
         </KuiFormRow>

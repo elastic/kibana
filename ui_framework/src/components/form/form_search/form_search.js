@@ -4,7 +4,7 @@ import React, {
 import classNames from 'classnames';
 
 
-export const KuiFormSearch = ({ children, label, id, name, placeholder, className, ...rest }) => {
+export const KuiFormSearch = ({ className, id, name, placeholder, value, ...rest }) => {
   const classes = classNames('kuiForm__textField', 'kuiFormSearch', className);
 
   return (
@@ -14,14 +14,19 @@ export const KuiFormSearch = ({ children, label, id, name, placeholder, classNam
       name={name}
       placeholder={placeholder}
       className={classes}
+      value={value}
       {...rest}
     />
   );
 };
 
 KuiFormSearch.propTypes = {
+  name: PropTypes.string.isRequired,
+  id: PropTypes.string.isRequired,
+  placeholder: PropTypes.string,
+  value: PropTypes.string,
 };
 
 KuiFormSearch.defaultProps = {
+  value: undefined,
 };
-

@@ -3,7 +3,7 @@ import React, {
 } from 'react';
 import classNames from 'classnames';
 
-export const KuiFormTextarea = ({ children, rows, placeholder, className, ...rest }) => {
+export const KuiFormTextarea = ({ children, rows, name, id, placeholder, className, ...rest }) => {
   const classes = classNames('kuiForm__textField', 'kuiFormTextarea', className);
 
   return (
@@ -11,6 +11,8 @@ export const KuiFormTextarea = ({ children, rows, placeholder, className, ...res
       className={classes}
       {...rest}
       rows={rows}
+      name={name}
+      id={id}
       placeholder={placeholder}
     >
       {children}
@@ -19,6 +21,9 @@ export const KuiFormTextarea = ({ children, rows, placeholder, className, ...res
 };
 
 KuiFormTextarea.propTypes = {
+  name: PropTypes.string.isRequired,
+  id: PropTypes.string.isRequired,
+  placeholder: PropTypes.string,
   rows: PropTypes.number,
 };
 

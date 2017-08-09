@@ -4,19 +4,18 @@ import React, {
 import classNames from 'classnames';
 import { KuiIcon } from '../../../components';
 
-export const KuiFormRow = ({ children, grid, icon, id, helpText, label, className, ...rest }) => {
+export const KuiFormRow = ({ children, icon, helpText, label, id, className, ...rest }) => {
   const classes = classNames(
     'kuiFormRow',
     className,
     {
       'kuiFormRow--withIcon' : icon,
-      'kuiFormRow--grid' : grid,
     }
   );
 
   let optionalIcon = null;
   if (icon) {
-    optionalIcon = <KuiIcon className="kuiFormRow__icon" type={icon} size="medium" />
+    optionalIcon = <KuiIcon className="kuiFormRow__icon" type={icon} size="medium" />;
   }
 
   let optionalHelpText = null;
@@ -50,4 +49,8 @@ export const KuiFormRow = ({ children, grid, icon, id, helpText, label, classNam
 };
 
 KuiFormRow.propTypes = {
+  label: PropTypes.string,
+  id: PropTypes.string,
+  icon: PropTypes.string,
+  helpText: PropTypes.string,
 };

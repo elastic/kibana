@@ -2,10 +2,8 @@ import React, {
   PropTypes,
 } from 'react';
 import classNames from 'classnames';
-import { KuiFormRow } from '../form_row';
 
-
-export const KuiFormText = ({ children, icon, id, name, placeholder, className, ...rest }) => {
+export const KuiFormText = ({ id, name, placeholder, value, className, ...rest }) => {
   const classes = classNames('kuiForm__textField', 'kuiFormText', className);
 
   return (
@@ -15,17 +13,19 @@ export const KuiFormText = ({ children, icon, id, name, placeholder, className, 
       name={name}
       placeholder={placeholder}
       className={classes}
+      value={value}
       {...rest}
     />
   );
 };
 
 KuiFormText.propTypes = {
-  icon: PropTypes.string,
+  name: PropTypes.string.isRequired,
+  id: PropTypes.string.isRequired,
+  placeholder: PropTypes.string,
+  value: PropTypes.string,
 };
 
 KuiFormText.defaultProps = {
-  icon: null,
+  value: undefined,
 };
-
-
