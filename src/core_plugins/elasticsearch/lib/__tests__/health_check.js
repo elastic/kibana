@@ -1,20 +1,18 @@
 import Promise from 'bluebird';
 import sinon from 'sinon';
 import expect from 'expect.js';
-import url from 'url';
 
 const NoConnections = require('elasticsearch').errors.NoConnections;
 
 import mappings from './fixtures/mappings';
 import healthCheck from '../health_check';
 import kibanaVersion from '../kibana_version';
-import { esTestServerUrlParts } from '../../../../../test/es_test_server_url_parts';
+import { esTestConfig } from '../../../../test_utils/es';
 import * as determineEnabledScriptingLangsNS from '../determine_enabled_scripting_langs';
 import { determineEnabledScriptingLangs } from '../determine_enabled_scripting_langs';
 import * as ensureTypesExistNS from '../ensure_types_exist';
-
-const esPort = esTestServerUrlParts.port;
-const esUrl = url.format(esTestServerUrlParts);
+const esPort = esTestConfig.getPort();
+const esUrl = esTestConfig.getUrl();
 
 describe('plugins/elasticsearch', () => {
   describe('lib/health_check', function () {

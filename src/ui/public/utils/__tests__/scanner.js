@@ -4,9 +4,8 @@ import Bluebird from 'bluebird';
 import 'elasticsearch-browser';
 import ngMock from 'ng_mock';
 import sinon from 'sinon';
-import url from 'url';
 
-import { esTestServerUrlParts } from '../../../../../test/es_test_server_url_parts';
+import { esTestConfig } from 'test_utils/es_test_config';
 
 describe('Scanner', function () {
   let es;
@@ -14,7 +13,7 @@ describe('Scanner', function () {
   beforeEach(ngMock.module('kibana'));
   beforeEach(ngMock.inject(function (esFactory) {
     es = esFactory({
-      host: url.format(esTestServerUrlParts),
+      host: esTestConfig.getUrl(),
       defer: function () {
         return Bluebird.defer();
       }

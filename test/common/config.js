@@ -4,14 +4,14 @@ import {
   EsArchiverProvider,
 } from './services';
 
-import { esTestServerUrlParts } from '../es_test_server_url_parts';
+import { esTestConfig } from '../../src/test_utils/es';
 import { kibanaTestServerUrlParts } from '../kibana_test_server_url_parts';
 
 export default function () {
   return {
     servers: {
       kibana: kibanaTestServerUrlParts,
-      elasticsearch: esTestServerUrlParts,
+      elasticsearch: esTestConfig.getUrlParts(),
     },
     services: {
       kibanaServer: KibanaServerProvider,
