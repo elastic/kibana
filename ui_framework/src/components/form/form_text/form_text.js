@@ -6,7 +6,7 @@ import { KuiFormRow } from '../form_row';
 
 
 export const KuiFormText = ({ children, icon, id, name, placeholder, className, ...rest }) => {
-  const classes = classNames('kuiFormText', className);
+  const classes = classNames('kuiForm__textField', 'kuiFormText', className);
 
   return (
     <input

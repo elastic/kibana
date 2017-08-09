@@ -1,55 +1,61 @@
-$toggleHeight: $kuiSizeL;
-$toggleWidth: ($kuiSizeL * 2) + $kuiSizeXS;
-$switchSize: $kuiSizeL;
-
 .kuiFormSwitch {
-
   position: relative;
   display: inline-block;
-  height: $toggleHeight;
+  height: $kuiFormSwitchHeight;
   cursor: pointer;
 
-  > label {
+  /**
+   * 1. The label is our main clickable area. It sits above the actual switch.
+   */
+  .kuiFormSwitch__label {
     position: absolute;
     left: 0;
-    padding-left: $toggleWidth + $kuiSizeS;
-    z-index: 2;
-    line-height: $toggleHeight;
+    padding-left: $kuiFormSwitchWidth + $kuiSizeS; // 1
+    z-index: 2; // 1
+    line-height: $kuiFormSwitchHeight;
     font-weight: $kuiFontWeightRegular;
   }
 
-  > input {
+  /**
+   * 1. The input is "hidden" but still focusable.
+   */
+  .kuiFormSwitch__input {
     position: absolute;
-    opacity: 0;
-    z-index: -1;
+    opacity: 0; // 1
+    z-index: -1; // 1
   }
 
-  > input:focus + .kuiFormSwitch__body {
+  .kuiFormSwitch__input:focus + .kuiFormSwitch__body {
     background: $kuiColorEmptyShade;
-    .kuiFormSwitch__button {
+
+    .kuiFormSwitch__thumb {
       border-color: $kuiColorPrimary;
       background-color: $kuiColorPrimary;
     }
   }
+
   .kuiFormSwitch__body {
-    width: $toggleWidth;
-    height: $toggleHeight;
+    width: $kuiFormSwitchWidth;
+    height: $kuiFormSwitchHeight;
     background: $kuiFormBackgroundColor;
     border: $kuiBorderThin;
     display: inline-block;
     position: relative;
-    border-radius: 50px;
+    border-radius: $kuiFormSwitchHeight;
     vertical-align: middle;
   }
 
-  .kuiFormSwitch__button {
-    width: $toggleHeight;
-    height: $toggleHeight;
+  /**
+   * 1. Accounts for the border on the body.
+   */
+  .kuiFormSwitch__thumb {
+    position: absolute;
+    width: $kuiFormSwitchHeight;
+    height: $kuiFormSwitchHeight;
     display: inline-block;
     background-color: $kuiColorEmptyShade;
-    position: absolute;
-    left: $toggleWidth - $switchSize;
-    top: -1px;
+    left: $kuiFormSwitchWidth - $kuiFormSwitchThumbSize;
+    top: -1px; // 1
     border-radius: 50%;
     border: $kuiBorderThin;
     transition: border-color $kuiAnimSpeedNormal $kuiAnimSlightBounce, background-color $kuiAnimSpeedNormal $kuiAnimSlightBounce, left $kuiAnimSpeedNormal $kuiAnimSlightBounce, transform $kuiAnimSpeedNormal $kuiAnimSlightBounce;
@@ -63,42 +69,51 @@ $switchSize: $kuiSizeL;
     right: 0;
     bottom: 0;
     overflow: hidden;
-    border-radius: $toggleHeight;
+    border-radius: $kuiFormSwitchHeight;
   }
 
+  /**
+   * 1. Mask is used to color the svg. Text color is used so works regardless of theme.
+   */
   .kuiFormSwitch__icon {
     position: absolute;
-    right: -($toggleWidth - ($switchSize / 2));
+    right: -($kuiFormSwitchWidth - ($kuiFormSwitchThumbSize / 2));
     top: 0;
     bottom: 0;
-    width: $toggleWidth - ($switchSize / 2) + 10; // 10 compensates for animation bounce
+    width: $kuiFormSwitchWidth - ($kuiFormSwitchThumbSize / 2) + $kuiSizeS;
     transition: left $kuiAnimSpeedNormal $kuiAnimSlightBounce, right $kuiAnimSpeedNormal $kuiAnimSlightBounce;
-    background-color: $kuiTextColor;
-    mask: url('../src/components/icon/assets/cross.svg') center center no-repeat;
+    mask: url('../src/components/icon/assets/cross.svg') center center no-repeat; // 1
+    background-color: $kuiTextColor; // 1
   }
 
   .kuiFormSwitch__icon--checked {
     right: auto;
-    left: -10px;
+    left: -$kuiSizeS;
     background-color: $kuiTextColor;
     mask: url('../src/components/icon/assets/check.svg') center center no-repeat;
   }
 
+  /**
+   * The thumb is slightly scaled when in use.
+   */
   &:hover {
-    .kuiFormSwitch__button {
-      transform: scale(1.06);
+    .kuiFormSwitch__thumb {
+      transform: scale(1.05);
     }
   }
 
   &:active {
-    .kuiFormSwitch__button {
+    .kuiFormSwitch__thumb {
       transform: scale(.95);
     }
   }
 
-  > :not(:checked) ~ .kuiFormSwitch__body {
+  /**
+   * When input is not checked, we shift around the positioning of sibling/child selectors.
+   */
+  .kuiFormSwitch__input:not(:checked) ~ .kuiFormSwitch__body {
 
-    > .kuiFormSwitch__button {
+    .kuiFormSwitch__thumb {
       left: -1px;
     }
 
@@ -107,7 +122,7 @@ $switchSize: $kuiSizeL;
 
       &.kuiFormSwitch__icon--checked {
         right: auto;
-        left: -($toggleWidth - ($switchSize / 2));
+        left: -($kuiFormSwitchWidth - ($kuiFormSwitchThumbSize / 2));
       }
     }
   }

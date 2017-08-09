@@ -26,7 +26,7 @@ export const KuiFormRow = ({ children, grid, icon, id, helpText, label, classNam
 
   let optionalLabel = null;
   if (label) {
-    optionalLabel = <label htmlFor={id}>{label}</label>;
+    optionalLabel = <label className="kuiFormRow__label" htmlFor={id}>{label}</label>;
   }
 
   return (

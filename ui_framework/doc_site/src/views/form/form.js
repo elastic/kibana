@@ -7,7 +7,9 @@ import {
   KuiPopover,
   KuiForm,
   KuiFormCheckbox,
+  KuiFormPassword,
   KuiFormRadio,
+  KuiFormRange,
   KuiFormRow,
   KuiFormSearch,
   KuiFormSelect,
@@ -61,6 +63,19 @@ export default class extends Component {
           icon="user"
         >
           <KuiFormText id="last" placeholder="Some placeholder text" />
+        </KuiFormRow>
+        <KuiFormRow
+          id="pass"
+          label="Password"
+          icon="lock"
+        >
+          <KuiFormPassword />
+        </KuiFormRow>
+        <KuiFormRow
+          id="range"
+          label="Range"
+        >
+          <KuiFormRange min={0} max={100} />
         </KuiFormRow>
         <KuiFormRow
           id="search1"

@@ -5,7 +5,7 @@ import classNames from 'classnames';
 
 
 export const KuiFormSearch = ({ children, label, id, name, placeholder, className, ...rest }) => {
-  const classes = classNames('kuiFormSearch', className);
+  const classes = classNames('kuiForm__textField', 'kuiFormSearch', className);
 
   return (
     <input

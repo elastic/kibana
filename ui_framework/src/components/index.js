@@ -13,7 +13,9 @@ export {
 export {
   KuiForm,
   KuiFormCheckbox,
+  KuiFormPassword,
   KuiFormRadio,
+  KuiFormRange,
   KuiFormRow,
   KuiFormSearch,
   KuiFormSelect,

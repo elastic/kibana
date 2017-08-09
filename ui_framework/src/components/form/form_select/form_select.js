@@ -6,7 +6,7 @@ import { KuiIcon } from '../../../components';
 
 
 export const KuiFormSelect = ({ children, options, id, name, placeholder, className, ...rest }) => {
-  const classes = classNames('kuiFormSelect', className);
+  const classes = classNames('kuiForm__textField', 'kuiFormSelect', className);
 
   return (
       <select
@@ -16,7 +16,7 @@ export const KuiFormSelect = ({ children, options, id, name, placeholder, classN
         {...rest}
       >
       {options.map(function(option, index) {
-        return <option>{option}</option>;
+        return <option key={index}>{option}</option>;
       })}
     </select>
   );

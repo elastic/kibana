@@ -4,7 +4,7 @@ import React, {
 import classNames from 'classnames';
 
 export const KuiFormTextarea = ({ children, rows, placeholder, className, ...rest }) => {
-  const classes = classNames('kuiFormTextarea', className);
+  const classes = classNames('kuiForm__textField', 'kuiFormTextarea', className);
 
   return (
     <textarea
@@ -19,7 +19,7 @@ export const KuiFormTextarea = ({ children, rows, placeholder, className, ...res
 };
 
 KuiFormTextarea.propTypes = {
-  rows: PropTypes.num,
+  rows: PropTypes.number,
 };
 
 KuiFormTextarea.defaultProps = {
