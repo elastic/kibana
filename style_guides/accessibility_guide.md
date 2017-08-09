@@ -5,23 +5,23 @@ accessibility issues.
 
 ## Interactive elements
 
-### Use `<button>` and `<a>`
+### Use `<button>` and `<a href>`
 
-**TL;DR** *Use `<button>` and `<a>` (with `hred`) instead of click listeners on other elements
+**TL;DR** *Use `<button>` and `<a>` (with `href`) instead of click listeners on other elements
 and style it whatever way you need.*
 
-If you want to make an element clickable, use a `<button>` or `<a>` element for it.
-Use a *button* whenever it causes an action on the current page, and an *a* if it
+If you want to make an element clickable, use a `<button>` or `<a href>` element for it.
+Use a `<button>` whenever it causes an action on the current page, and an `<a href>` if it
 navigates to a different page. You can use click listeners just fine on these elements.
 
-An `a` element must have an `href` attribute, so that (a) it will be correctly perceived
+An `<a>` element must have an `href` attribute, so that (a) it will be correctly perceived
 as a link by a screen reader and (b) that registered click listener will correctly
-trigger on pressing <kbd>Enter</kbd>. If you don't need it, make it `hred="#"`
+trigger on pressing <kbd>Enter</kbd>. If you don't need it, make it `href="#"`
 and call `preventDefault()` on the click event.
 
 *Why not use other elements?*
 
-If you create e.g. a *div* with a click listener (like `<div ng-click="ctrl.doSomething()">...</div>`)
+If you create e.g. a `<div>` with a click listener (like `<div ng-click="ctrl.doSomething()">...</div>`)
 you will create multiple accessibility issues:
 
 * The element is not *keyboard accessible*, meaning:
