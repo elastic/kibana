@@ -56,7 +56,12 @@
     ng-show="filters.length"
   >
     <div class="filter-description small">
-      <a ng-click="showFilterActions = !showFilterActions">
+      <a
+        ng-click="showFilterActions = !showFilterActions"
+        kbn-accessible-click
+        aria-expanded="{{!!showFilterActions}}"
+        aria-controls="filterActionsAllContainer"
+      >
         Actions
         <span
           class="fa"
@@ -87,31 +92,32 @@
 <div
   class="filter-bar filter-bar-condensed"
   ng-show="filters.length && showFilterActions"
+  id="filterActionsAllContainer"
 >
   <div class="filter-actions-all">
     <div class="filter-link">
       <div class="filter-description"><strong>All filters:</strong></div>
     </div>
       <div class="filter-link">
-        <div class="filter-description"><a ng-click="toggleAll(false)">Enable</a></div>
+        <div class="filter-description"><a ng-click="toggleAll(false)" kbn-accessible-click>Enable</a></div>
       </div>
     <div class="filter-link">
-      <div class="filter-description"><a ng-click="toggleAll(true)">Disable</a></div>
+      <div class="filter-description"><a ng-click="toggleAll(true)" kbn-accessible-click>Disable</a></div>
     </div>
     <div class="filter-link">
-      <div class="filter-description"><a ng-click="pinAll(true)">Pin</a></div>
+      <div class="filter-description"><a ng-click="pinAll(true)" kbn-accessible-click>Pin</a></div>
     </div>
     <div class="filter-link">
-      <div class="filter-description"><a ng-click="pinAll(false)">Unpin</a></div>
+      <div class="filter-description"><a ng-click="pinAll(false)" kbn-accessible-click>Unpin</a></div>
     </div>
     <div class="filter-link">
-      <div class="filter-description"><a ng-click="invertAll()">Invert</a></div>
+      <div class="filter-description"><a ng-click="invertAll()" kbn-accessible-click>Invert</a></div>
     </div>
     <div class="filter-link">
-      <div class="filter-description"><a ng-click="toggleAll()">Toggle</a></div>
+      <div class="filter-description"><a ng-click="toggleAll()" kbn-accessible-click>Toggle</a></div>
     </div>
     <div class="filter-link">
-      <div class="filter-description"><a ng-click="removeAll()" data-test-subj="removeAllFilters">Remove</a></div>
+      <div class="filter-description"><a ng-click="removeAll()" data-test-subj="removeAllFilters" kbn-accessible-click>Remove</a></div>
     </div>
   </div>
 </div>
