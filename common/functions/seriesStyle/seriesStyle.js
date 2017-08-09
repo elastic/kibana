@@ -1,17 +1,10 @@
-import Fn from '../fn.js';
+import FnTypedObject from '../fn_typed_object.js';
 
 // seriesConfig(series=_all, label="free beer", width=1, color=blue)
-export default new Fn({
+export default new FnTypedObject({
   name: 'seriesStyle',
-  aliases: [],
-  type: 'seriesStyle',
   help: 'Creates an object used for describing the properties of a series on a chart.' +
   ' You would usually use this inside of a charting function',
-  context: {
-    types: [
-      'pointseries',
-    ],
-  },
   args: {
     label: {
       types: ['string'],
@@ -53,8 +46,5 @@ export default new Fn({
       help: 'Should we stack the series?',
       default: false,
     },
-  },
-  fn: (context, args) => {
-    return { type: 'seriesStyle', ...args };
   },
 });
