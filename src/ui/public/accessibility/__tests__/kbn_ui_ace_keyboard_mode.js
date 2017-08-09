@@ -18,12 +18,12 @@ describe('kbnUiAceKeyboardMode directive', () => {
   }));
 
   it('should add the hint element', () => {
-    expect(element.find('.ui-ace-keyboard-hint').length).to.be(1);
+    expect(element.find('.uiAceKeyboardHint').length).to.be(1);
   });
 
   describe('hint element', () => {
     it('should be tabable', () => {
-      expect(element.find('.ui-ace-keyboard-hint').attr('tabindex')).to.be('0');
+      expect(element.find('.uiAceKeyboardHint').attr('tabindex')).to.be('0');
     });
 
     it('should move focus to textbox and be inactive if pressed enter on it', () => {
@@ -31,20 +31,20 @@ describe('kbnUiAceKeyboardMode directive', () => {
       sinon.spy(textarea[0], 'focus');
       const ev = angular.element.Event('keydown'); // eslint-disable-line new-cap
       ev.keyCode = ENTER_KEY;
-      element.find('.ui-ace-keyboard-hint').trigger(ev);
+      element.find('.uiAceKeyboardHint').trigger(ev);
       expect(textarea[0].focus.called).to.be(true);
-      expect(element.find('.ui-ace-keyboard-hint').hasClass('ui-ace-keyboard-hint-inactive')).to.be(true);
+      expect(element.find('.uiAceKeyboardHint').hasClass('uiAceKeyboardHint-isInactive')).to.be(true);
     });
 
     it('should be shown again, when pressing Escape in ace editor', () => {
       const textarea = element.find('textarea');
-      const hint = element.find('.ui-ace-keyboard-hint');
+      const hint = element.find('.uiAceKeyboardHint');
       sinon.spy(hint[0], 'focus');
       const ev = angular.element.Event('keydown'); // eslint-disable-line new-cap
       ev.keyCode = ESC_KEY_CODE;
       textarea.trigger(ev);
       expect(hint[0].focus.called).to.be(true);
-      expect(hint.hasClass('ui-ace-keyboard-hint-inactive')).to.be(false);
+      expect(hint.hasClass('uiAceKeyboardHint-isInactive')).to.be(false);
     });
   });
 
