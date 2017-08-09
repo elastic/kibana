@@ -1,5 +1,6 @@
 import _ from 'lodash';
 import Arg from './arg';
+import { each } from 'lodash';
 
 export default function Fn(config) {
   // Required
@@ -13,6 +14,15 @@ export default function Fn(config) {
   // Optional
   this.help = config.help || ''; // A short help text
   this.args = _.mapValues(config.args, (arg, name) => new Arg(Object.assign({ name: name }, arg))); // Arguments
+
+  // Create pointers to aliases. The key of the argument in the args object will be the alias, but the 'name' property
+  // will be the actual arg name. Nice.
+  each(this.args, arg => {
+    each(arg.aliases, name => {
+      this.args[name] = arg;
+    });
+  });
+
   this.context = config.context || {};
 
   this.accepts = (type) => {

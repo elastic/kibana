@@ -78,25 +78,28 @@ export function interpretProvider(config) {
   // Processes the multi-valued AST argument values into arguments that can be passed to the function
   function resolveArgs(fnName, context, astArgs) {
     const fnDef = functions[fnName];
+    const argDefs = fnDef.args;
 
-    // Because we don't have Promise.props, we break this into keys and values, then recombine later.
-    const argNames = keys(astArgs);
+    // Break this into keys and values, then recombine later.
+    // Remap aliased arguments
+    const argNames = keys(astArgs).map(argName => argDefs[argName].name);
     const multiValuedArgs = values(astArgs);
 
     // Create an array of promises, each representing 1 argument name
     const argListPromises = map(multiValuedArgs, multiValueArg => {
       // Also an array of promises. Since each argument in the AST is multivalued each
       // argument value is an array. We use Promise.all to turn the values into a single promise.
+
+      // Note that we're resolving the argument values before even looking up their definition
       return Promise.all(map(multiValueArg, argValue => interpret(argValue, context)));
     });
 
     return Promise.all(argListPromises)
     .then(resolvedArgs => zipObject(argNames, resolvedArgs)) // Recombine the keys
     .then(resolvedArgs => {
-      const argDefs = fnDef.args;
 
       // Fill in defaults
-      // This effectively means we simply ignore unknown arguments
+      // TODO: We simply ignore unknown arguments, we should error on unknown arguments
       const args = mapValues(argDefs, (argDef, name) => {
         if (typeof resolvedArgs[name] !== 'undefined') return resolvedArgs[name];
 
