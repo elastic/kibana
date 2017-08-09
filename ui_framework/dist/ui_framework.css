@@ -11,6 +11,9 @@
     opacity: 1; } }
 
 /**
+ * Set scroll bar appearance on Chrome.
+ */
+/**
  * Adapted from Eric Meyer's reset (http://meyerweb.com/eric/tools/css/reset/, v2.0 | 20110126).
  *
  */
@@ -558,13 +561,13 @@ table {
   /* 1 */ }
 
 .kuiHeader {
+  box-shadow: 0 2px 2px -1px rgba(0, 0, 0, 0.1);
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
   display: flex;
   background: #FFF;
-  border-bottom: 1px solid #D9D9D9;
-  box-shadow: 0 2px 2px -1px rgba(0, 0, 0, 0.1); }
+  border-bottom: 1px solid #D9D9D9; }
 
 .kuiHeader__notification {
   display: inline-block;
@@ -1647,11 +1650,79 @@ table {
     -webkit-transform: scaleX(1);
             transform: scaleX(1); } }
 
+/**
+ * 1. Allow list to expand as items are added, but cap it at the screen height.
+ */
+.kuiGlobalToastList {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-orient: vertical;
+  -webkit-box-direction: normal;
+  -webkit-flex-direction: column;
+      -ms-flex-direction: column;
+          flex-direction: column;
+  -webkit-box-align: stretch;
+  -webkit-align-items: stretch;
+      -ms-flex-align: stretch;
+          align-items: stretch;
+  position: fixed;
+  z-index: 5000;
+  bottom: 0;
+  right: 10px;
+  width: 320px;
+  padding-right: 4px;
+  overflow: auto;
+  max-height: 100vh;
+  /* 1 */ }
+  .kuiGlobalToastList::-webkit-scrollbar {
+    width: 16px;
+    height: 16px; }
+  .kuiGlobalToastList::-webkit-scrollbar-thumb {
+    background-color: rgba(102, 102, 102, 0.5);
+    border: 6px solid transparent;
+    background-clip: content-box; }
+  .kuiGlobalToastList::-webkit-scrollbar-track {
+    background-color: transparent; }
+
+.kuiGlobalToastList__item {
+  margin-bottom: 20px;
+  /**
+     * 1. justify-content: flex-end interferes with overflowing content, so we'll use this to push
+     *    items to the bottom instead.
+     */ }
+  .kuiGlobalToastList__item:first-child {
+    margin-top: auto;
+    /* 1 */ }
+
 .kuiToast {
   box-shadow: 0 16px 16px -8px rgba(0, 0, 0, 0.1);
+  position: relative;
   padding: 12px;
   background-color: #FFF;
   border: 1px solid #D9D9D9; }
+
+/**
+   * 1. Fit button to icon.
+   */
+.kuiToast__closeButton {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  line-height: 0;
+  /* 1 */
+  -webkit-appearance: none;
+     -moz-appearance: none;
+          appearance: none; }
+  .kuiToast__closeButton svg {
+    fill: gray; }
+  .kuiToast__closeButton:hover svg {
+    fill: #000; }
+  .kuiToast__closeButton:focus {
+    background-color: #e6f2f6; }
+    .kuiToast__closeButton:focus svg {
+      fill: #0079a5; }
 
 .kuiToast--info {
   border-top: 2px solid #0079a5; }

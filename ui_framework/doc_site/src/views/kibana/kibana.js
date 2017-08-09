@@ -1,4 +1,5 @@
 import React, {
+  cloneElement,
   Component,
 } from 'react';
 
@@ -12,9 +13,11 @@ import {
   KuiHeaderSection,
   KuiHeaderSectionItem,
   KuiHeaderSectionItemButton,
+  KuiGlobalToastList,
   KuiIcon,
   KuiKeyPadMenu,
   KuiKeyPadMenuItem,
+  KuiLink,
   KuiPage,
   KuiPageBody,
   KuiPageContent,
@@ -28,8 +31,12 @@ import {
   KuiSideNav,
   KuiSideNavItem,
   KuiSideNavTitle,
+  KuiText,
+  KuiToast,
   KuiTitle,
 } from '../../../../components';
+
+let toastId = 0;
 
 export default class extends Component {
   constructor(props) {
@@ -39,6 +46,7 @@ export default class extends Component {
       isUserMenuOpen: false,
       isAppMenuOpen: false,
       isSideNavOpenOnMobile: false,
+      toasts: [],
     };
   }
 
@@ -51,6 +59,12 @@ export default class extends Component {
   onAppMenuButtonClick() {
     this.setState({
       isAppMenuOpen: !this.state.isAppMenuOpen,
+    });
+  }
+
+  onAddToastClick() {
+    this.setState({
+      toasts: this.state.toasts.concat(this.renderRandomToast()),
     });
   }
 
@@ -69,6 +83,12 @@ export default class extends Component {
   toggleOpenOnMobile() {
     this.setState({
       isSideNavOpenOnMobile: !this.state.isSideNavOpenOnMobile,
+    });
+  }
+
+  onDismissToast(toastId) {
+    this.setState({
+      toasts: this.state.toasts.filter(toast => toast.key !== toastId),
     });
   }
 
@@ -413,11 +433,97 @@ export default class extends Component {
               </KuiPageContentHeaderSection>
             </KuiPageContentHeader>
             <KuiPageContentBody>
-              asdf
+              <KuiButton
+                onClick={this.onAddToastClick.bind(this)}
+                size="small"
+              >
+                Add toast
+              </KuiButton>
             </KuiPageContentBody>
           </KuiPageContent>
         </KuiPageBody>
       </KuiPage>
+    );
+  }
+
+  renderRandomToast() {
+    const id = (toastId++).toString();
+
+    const toasts = [(
+      <KuiToast
+        title="Check it out, here's a really long title that will wrap within a narrower browser"
+        type="info"
+        onClose={this.onDismissToast.bind(this, id)}
+      >
+        <KuiText size="small" verticalRhythm>
+          <p>
+            Here&rsquo;s some stuff that you need to know. We can make this text really long so that,
+            when viewed within a browser that&rsquo;s fairly narrow, it will wrap, too.
+          </p>
+        </KuiText>
+
+        <KuiText size="small">
+          <p>
+            And some other stuff on another line, just for kicks. And <KuiLink href="#">here&rsquo;s a link</KuiLink>.
+          </p>
+        </KuiText>
+      </KuiToast>
+    ), (
+      <KuiToast
+        title="Download complete!"
+        type="success"
+        onClose={this.onDismissToast.bind(this, id)}
+      >
+        <KuiText size="small">
+          <p>
+            Thanks for your patience!
+          </p>
+        </KuiText>
+      </KuiToast>
+    ), (
+      <KuiToast
+        title="Logging you out soon, due to inactivity"
+        type="warning"
+        iconType="user"
+        onClose={this.onDismissToast.bind(this, id)}
+      >
+        <KuiText size="small" verticalRhythm>
+          <p>
+            This is a security measure.
+          </p>
+        </KuiText>
+
+        <KuiText size="small">
+          <p>
+            Please move your mouse to show that you&rsquo;re still using Kibana.
+          </p>
+        </KuiText>
+      </KuiToast>
+    ), (
+      <KuiToast
+        title="Oops, there was an error"
+        type="danger"
+        iconType="help"
+        onClose={this.onDismissToast.bind(this, id)}
+      >
+        <KuiText size="small">
+          <p>
+            Sorry. We&rsquo;ll try not to let it happen it again.
+          </p>
+        </KuiText>
+      </KuiToast>
+    )];
+
+    return cloneElement(toasts[Math.floor(Math.random() * toasts.length)], {
+      key: id
+    });
+  }
+
+  renderToasts() {
+    return (
+      <KuiGlobalToastList>
+        {this.state.toasts}
+      </KuiGlobalToastList>
     );
   }
 
@@ -426,6 +532,7 @@ export default class extends Component {
       <div>
         {this.renderHeader()}
         {this.renderPage()}
+        {this.renderToasts()}
       </div>
     );
   }

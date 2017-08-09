@@ -92,6 +92,7 @@ export {
 } from './side_nav';
 
 export {
+  KuiGlobalToastList,
   KuiToast,
 } from './toast';
 
