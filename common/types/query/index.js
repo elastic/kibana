@@ -6,9 +6,13 @@ export default new Type({
     null: () => {
       return {
         type: 'query',
-        meta: null,
+        // Any meta data you wish to pass along.
+        meta: {},
+        // Row limiting
         size: null,
-        sort: null,
+        // Ordered sortings. {field, direction:[asc,desc]}
+        sort: [],
+        // And filters. If you need an "or", create a filter type for it.
         and: [],
       };
     },
