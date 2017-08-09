@@ -34,6 +34,10 @@ export function TestSubjectsProvider({ getService }) {
       });
     }
 
+    async findDescendant(selector, parentElement) {
+      return await find.descendantDisplayedByCssSelector(testSubjSelector(selector), parentElement);
+    }
+
     async find(selector, timeout = defaultFindTimeout) {
       log.debug(`TestSubjects.find(${selector})`);
       return await find.displayedByCssSelector(testSubjSelector(selector), timeout);

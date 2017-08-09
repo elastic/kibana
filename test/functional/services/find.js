@@ -7,7 +7,7 @@ export function FindProvider({ getService }) {
   const defaultFindTimeout = config.get('timeouts.find');
 
   class Find {
-    async withTimeout(timeout, block) {
+    async _withTimeout(timeout, block) {
       try {
         const remoteWithTimeout = remote.setFindTimeout(timeout);
         return await block(remoteWithTimeout);
@@ -16,7 +16,17 @@ export function FindProvider({ getService }) {
       }
     }
 
-    async ensureElementWithTimeout(timeout, getElementFunction) {
+    async _ensureElement(getElementFunction) {
+      return await retry.try(async () => {
+        const element = await getElementFunction();
+        console.log('element is ', element);
+        // Calling any method forces a staleness check
+        element.isEnabled();
+        return element;
+      });
+    }
+
+    async _ensureElementWithTimeout(timeout, getElementFunction) {
       try {
         const remoteWithTimeout = remote.setFindTimeout(timeout);
         return await retry.try(async () => {
@@ -32,48 +42,68 @@ export function FindProvider({ getService }) {
 
     async byName(selector, timeout = defaultFindTimeout) {
       log.debug(`find.byName(${selector})`);
-      return await this.ensureElementWithTimeout(timeout, async remote => {
+      return await this._ensureElementWithTimeout(timeout, async remote => {
         return await remote.findByName(selector);
       });
     }
 
     async byCssSelector(selector, timeout = defaultFindTimeout) {
       log.debug(`findByCssSelector ${selector}`);
-      return await this.ensureElementWithTimeout(timeout, async remote => {
+      return await this._ensureElementWithTimeout(timeout, async remote => {
         return await remote.findByCssSelector(selector);
       });
     }
 
-    async allByCssSelector(selector, timeout = defaultFindTimeout) {
-      log.debug('in findAllByCssSelector: ' + selector);
-      return await this.withTimeout(timeout, async remote => {
+    async allByCustom(findAllFunction, timeout = defaultFindTimeout) {
+      return await this._withTimeout(timeout, async remote => {
         return await retry.try(async () => {
-          let elements = await remote.findAllByCssSelector(selector);
+          let elements = await findAllFunction(remote);
           if (!elements) elements = [];
           // Force isStale checks for all the retrieved elements.
           await Promise.all(elements.map(async element => await element.isEnabled()));
-          log.debug(`Found ${elements.length} for selector ${selector}`);
           return elements;
         });
       });
     }
 
-    async displayedByCssSelector(selector, timeout = defaultFindTimeout) {
+    async allByLinkText(selector, timeout = defaultFindTimeout) {
+      log.debug('find.allByLinkText: ' + selector);
+      return await this.allByCustom(remote => remote.findAllByLinkText(selector), timeout);
+    }
+
+    async allByCssSelector(selector, timeout = defaultFindTimeout) {
+      log.debug('in findAllByCssSelector: ' + selector);
+      return await this.allByCustom(remote => remote.findAllByCssSelector(selector), timeout);
+    }
+
+    async descendantDisplayedByCssSelector(selector, parentElement) {
+      log.debug('Find.childDisplayedByCssSelector: ' + selector);
+      return await this._ensureElement(async () => await parentElement.findDisplayedByCssSelector(selector));
+    }
+
+    async displayedByCssSelector(selector, timeout = defaultFindTimeout, parentElement) {
       log.debug('in displayedByCssSelector: ' + selector);
-      return await this.ensureElementWithTimeout(timeout, async remote => {
+      return await this._ensureElementWithTimeout(timeout, async remote => {
         return await remote.findDisplayedByCssSelector(selector);
+      }, parentElement);
+    }
+
+    async byLinkText(selector, timeout = defaultFindTimeout) {
+      log.debug('Find.byLinkText: ' + selector);
+      return await this._ensureElementWithTimeout(timeout, async remote => {
+        return await remote.findByLinkText(selector);
       });
     }
 
     async byPartialLinkText(partialLinkText, timeout = defaultFindTimeout) {
       log.debug(`find.byPartialLinkText(${partialLinkText})`);
-      return await this.ensureElementWithTimeout(timeout, async remote => {
+      return await this._ensureElementWithTimeout(timeout, async remote => {
         return await remote.findByPartialLinkText(partialLinkText);
       });
     }
 
     async exists(findFunction, timeout = 1000) {
-      return await this.withTimeout(timeout, async remote => {
+      return await this._withTimeout(timeout, async remote => {
         try {
           await findFunction(remote);
           return true;

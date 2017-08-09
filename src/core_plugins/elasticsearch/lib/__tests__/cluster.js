@@ -104,10 +104,12 @@ describe('plugins/elasticsearch', function () {
 
       describe('wrap401Errors', () => {
         let handler;
-        const error = new Error('Authentication required');
-        error.statusCode = 401;
+        let error;
 
         beforeEach(() => {
+          error = new Error('Authentication required');
+          error.statusCode = 401;
+
           handler = sinon.stub();
         });
 
