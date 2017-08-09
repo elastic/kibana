@@ -9,7 +9,6 @@ import markdown from './markdown/markdown';
 import math from './math/math';
 import palette from './palette/palette';
 import plot from './plot/plot';
-import pointseries from './pointseries/pointseries';
 import render from './render/render';
 import replace from './replace/replace';
 import rounddate from './rounddate/rounddate';
@@ -29,7 +28,6 @@ export const commonFunctions = [
   math,
   palette,
   plot,
-  pointseries,
   render,
   replace,
   rounddate,

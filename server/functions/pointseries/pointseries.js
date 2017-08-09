@@ -1,9 +1,9 @@
 import math from 'mathjs';
 import moment from 'moment';
 import { groupBy, zipObject, uniqBy, omit, pickBy, find, uniq, map, mapValues } from 'lodash';
-import Fn from '../fn.js';
-import { findInObject } from '../../lib/find_in_object';
-import { getMathjsScope } from '../math/get_mathjs_scope';
+import Fn from '../../../common/functions/fn.js';
+import { findInObject } from '../../../common/lib/find_in_object';
+import { getMathjsScope } from '../../../common/functions/math/get_mathjs_scope';
 
 function isColumnReference(mathExpression) {
   const parsedMath = math.parse(mathExpression);
