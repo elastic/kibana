@@ -575,8 +575,6 @@ table {
   .kuiForm__textField:focus {
     background: #FFF;
     box-shadow: 0 4px 4px -2px rgba(0, 0, 0, 0.1), 0 0 0 1px rgba(0, 0, 0, 0.16), inset 0 0 0 0 #FFF, inset 0 -2px 0 0 #0079a5; }
-    .kuiForm__textField:focus + label {
-      color: #0079a5; }
 
 .kuiFormRow {
   margin-bottom: 24px;
@@ -617,45 +615,49 @@ table {
     position: absolute;
     top: 32px;
     left: 12px; }
+  .kuiFormRow input:focus + label,
+  .kuiFormRow select:focus + label,
+  .kuiFormRow textarea:focus + label {
+    color: #0079a5; }
 
 .kuiFormCheckbox {
   position: relative;
   height: 24px;
   margin-top: 8px; }
-  .kuiFormCheckbox > input {
-    position: absolute;
-    opacity: 0; }
-  .kuiFormCheckbox > label {
+  .kuiFormCheckbox .kuiFormCheckbox__label {
     position: absolute;
     padding-left: 32px;
     line-height: 24px;
     display: block;
     font-weight: 400;
-    z-index: 5; }
-  .kuiFormCheckbox > :checked ~ .kuiFormCheckbox__square .kuiFormCheckbox__check {
-    background-color: #3F3F3F;
-    -webkit-mask: url("../src/components/icon/assets/check.svg") center center no-repeat;
-            mask: url("../src/components/icon/assets/check.svg") center center no-repeat; }
-  .kuiFormCheckbox > :focus ~ .kuiFormCheckbox__square {
-    background-color: #e6f2f6;
-    border-color: #0079a5; }
-  .kuiFormCheckbox > :checked:focus ~ .kuiFormCheckbox__square .kuiFormCheckbox__check {
-    background-color: #3F3F3F;
-    -webkit-mask: url("../src/components/icon/assets/check.svg") center center no-repeat;
-            mask: url("../src/components/icon/assets/check.svg") center center no-repeat; }
-
-.kuiFormCheckbox__square {
-  position: absolute;
-  height: 24px;
-  width: 24px;
-  border-radius: 4px;
-  border: 1px solid #D9D9D9;
-  background: #fbfbfb;
-  z-index: 0; }
-
-.kuiFormCheckbox__check {
-  height: 100%;
-  width: 100%; }
+    z-index: 2;
+    font-size: 14px;
+    cursor: pointer; }
+  .kuiFormCheckbox .kuiFormCheckbox__square {
+    position: absolute;
+    height: 24px;
+    width: 24px;
+    border-radius: 4px;
+    border: 1px solid #D9D9D9;
+    background: #fbfbfb;
+    z-index: 0; }
+  .kuiFormCheckbox .kuiFormCheckbox__check {
+    height: 100%;
+    width: 100%; }
+  .kuiFormCheckbox .kuiFormCheckbox__input {
+    position: absolute;
+    opacity: 0; }
+    .kuiFormCheckbox .kuiFormCheckbox__input:checked ~ .kuiFormCheckbox__square .kuiFormCheckbox__check {
+      background-color: #3F3F3F;
+      -webkit-mask: url("../src/components/icon/assets/check.svg") center center no-repeat;
+              mask: url("../src/components/icon/assets/check.svg") center center no-repeat; }
+    .kuiFormCheckbox .kuiFormCheckbox__input:focus ~ .kuiFormCheckbox__square {
+      background-color: #e6f2f6;
+      border-color: #0079a5; }
+    .kuiFormCheckbox .kuiFormCheckbox__input:checked:focus ~ .kuiFormCheckbox__square .kuiFormCheckbox__check {
+      background-color: #3F3F3F;
+      -webkit-mask: url("../src/components/icon/assets/check.svg") center center no-repeat;
+              mask: url("../src/components/icon/assets/check.svg") center center no-repeat; }
 
 .kuiFormRange {
   -webkit-appearance: none;
@@ -764,7 +766,8 @@ table {
     padding-left: 60px;
     z-index: 2;
     line-height: 24px;
-    font-weight: 400; }
+    font-size: 14px;
+    cursor: pointer; }
   .kuiFormSwitch .kuiFormSwitch__input {
     position: absolute;
     opacity: 0;

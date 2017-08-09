@@ -10,11 +10,11 @@ export const KuiFormCheckbox = ({ children, label, icon, id, name, checked, help
 
   return (
     <div className={classes}>
-      <input type="checkbox" id={id} defaultChecked />
+      <input className="kuiFormCheckbox__input" type="checkbox" id={id} defaultChecked />
       <div className="kuiFormCheckbox__square">
         <div className="kuiFormCheckbox__check" />
       </div>
-      <label htmlFor={id}>{label}</label>
+      <label className="kuiFormCheckbox__label" htmlFor={id}>{label}</label>
     </div>
   );
 };

@@ -39,4 +39,11 @@
     top: $kuiSizeXL;
     left: $kuiSizeM;
   }
+
+  // Naked selectors on purpose to touch inner components.
+  input:focus + label,
+  select:focus + label,
+  textarea:focus + label, {
+    color: $kuiColorPrimary;
+  }
 }
