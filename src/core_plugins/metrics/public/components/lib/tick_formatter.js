@@ -1,4 +1,4 @@
-import numeral from '@spalger/numeral';
+import numeral from '@elastic/numeral';
 import _ from 'lodash';
 import handlebars from 'handlebars/dist/handlebars';
 
