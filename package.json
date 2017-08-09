@@ -64,8 +64,8 @@
     "sterilize": "grunt sterilize",
     "uiFramework:start": "grunt uiFramework:start",
     "uiFramework:build": "grunt uiFramework:build",
-    "uiFramework:create": "./node_modules/_bin/yo ./ui_framework/generator-kui/app/component.js",
-    "uiFramework:document": "./node_modules/_bin/yo ./ui_framework/generator-kui/app/documentation.js"
+    "uiFramework:create": "yo ./ui_framework/generator-kui/app/component.js",
+    "uiFramework:document": "yo ./ui_framework/generator-kui/app/documentation.js"
   },
   "repository": {
     "type": "git",
