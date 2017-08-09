@@ -5,6 +5,7 @@
   padding: $kuiSizeM;
   background-color: $kuiColorEmptyShade;
   border: $kuiBorderThin;
+  animation: 0.5s kuiShowToast;
 }
 
   /**
@@ -80,3 +81,15 @@ $toastTypes: (
     color: $kuiTitleColor;
     font-weight: $kuiFontWeightLight;
   }
+
+@keyframes kuiShowToast {
+  from {
+    transform: translateX(30px);
+    opacity: 0;
+  }
+
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}

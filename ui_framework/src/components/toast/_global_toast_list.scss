@@ -10,10 +10,10 @@
   position: fixed;
   z-index: $kuiZToastList;
   bottom: 0;
-  right: 10px;
+  right: 0;
   width: 320px;
-  padding-right: 4px;
-  overflow: auto;
+  overflow-x: hidden;
+  overflow-y: scroll;
   max-height: 100vh; /* 1 */
 }
 

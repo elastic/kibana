@@ -92,6 +92,12 @@ export default class extends Component {
     });
   }
 
+  onDeleteAllToasts() {
+    this.setState({
+      toasts: [],
+    });
+  }
+
   renderLogo() {
     return (
       <KuiHeaderLogo href="#" />
@@ -438,6 +444,17 @@ export default class extends Component {
                 size="small"
               >
                 Add toast
+              </KuiButton>
+
+              <br />
+              <br />
+
+              <KuiButton
+                type="danger"
+                onClick={this.onDeleteAllToasts.bind(this)}
+                size="small"
+              >
+                Clear toasts
               </KuiButton>
             </KuiPageContentBody>
           </KuiPageContent>
