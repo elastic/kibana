@@ -38,7 +38,8 @@ you don't want it to look like a button at all).
 
 ### tabindex and id
 
-**TL;DR** *Only use `tabindex="0"` and `tabindex="-1"` and no values above 0.*
+**TL;DR** *Only use `tabindex="0"` and `tabindex="-1"` and no values above 0. Always
+add an `id` to an element with `tabindex`.*
 
 If you want to make an element focusable, that doesn't offer this feature by default
 (i.e. isn't an form element or a link), you can add `tabindex` with a value >= 0 to it.
@@ -56,6 +57,33 @@ by automated accessibility testing frameworks.
 
 `tabindex="-1"` will remove an element from tab order, that would be focusable
 otherwise. You won't need this often.
+
+*Why should you add an `id`?*
+
+Due to some bugs in some common screen readers, you will always need to add an `id`
+to an element with `tabindex`, since they wouldn't pick up the `tabindex` correctly
+otherwise.
+
+### Tooltips
+
+**TL;DR** *Add `role="tooltip"` and `aria-describedby` to elements for accessible tooltips.*
+
+Elements which act as tooltips should have the `role="tooltip"` attribute and an ID to which the
+described element can point to with the `aria-describedby` attribute. For example:
+
+```html
+<div
+  class="kuiTooltip"
+  role="tooltip"
+  id="visualizationsTooltip"
+>
+  Visualizations help you make sense of your data.
+</div>
+
+<button aria-describedby="visualizationsTooltip">
+ Visualizations
+</button>
+```
 
 ### Don't create keyboard traps
 
@@ -106,3 +134,23 @@ easily put this role to.
   [wcag/113](https://github.com/w3c/wcag/issues/113),
   [html-aria/118](https://github.com/w3c/html-aria/issues/18),
   [aria/85](https://github.com/w3c/aria/issues/85)
+
+## Miscellaneous
+
+### Don't use the `title` attribute
+
+**TL;DR** *Don't use the `title` attribute, use tooltips, `aria-label`, etc. instead.*
+
+The `title` has no clear role within the accessibility standards.
+[See the HTML5 spec](http://w3c.github.io/html/dom.html#the-title-attribute) for more information.
+
+To provide supplementary, descriptive information about a form control, button, link, or other element,
+that should also be visible to non vision impaired users, use a tooltip component instead.
+
+If you need a label only for screen readers use `aria-label`.
+
+**Additional reading:**
+
+* https://www.paciellogroup.com/blog/2010/11/using-the-html-title-attribute/
+* https://www.paciellogroup.com/blog/2012/01/html5-accessibility-chops-title-attribute-use-and-abuse/
+* https://www.deque.com/blog/text-links-practices-screen-readers/
