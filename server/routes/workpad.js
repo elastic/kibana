@@ -1,12 +1,12 @@
 import boom from 'boom';
 import uuid from 'uuid/v4';
 import { merge } from 'lodash';
-import { INDEX_WORKPAD_SUFFIX, CANVAS_TYPE } from '../../common/lib/constants';
+import { INDEX_WORKPAD_SUFFIX, CANVAS_TYPE, API_ROUTE_WORKPAD } from '../../common/lib/constants';
 
 export function workpad(server) {
   const config = server.config();
   const { callWithRequest, errors:esErrors } = server.plugins.elasticsearch.getCluster('data');
-  const routePrefix = '/api/canvas/workpad';
+  const routePrefix = API_ROUTE_WORKPAD;
   const indexName = `${config.get('canvas.indexPrefix')}${INDEX_WORKPAD_SUFFIX}`;
 
   function formatResponse(reply) {
@@ -17,6 +17,45 @@ export function workpad(server) {
       if (resp instanceof esErrors['404']) return reply(boom.wrap(resp, 404));
       return reply(resp);
     };
+  }
+
+  function createWorkpad(request) {
+    const now = new Date();
+    const doc = {
+      index: indexName,
+      type: CANVAS_TYPE,
+      id: `workpad-${uuid()}`,
+      body: { ...request.payload, '@timestamp': now, '@created': now },
+    };
+
+    return callWithRequest(request, 'create', doc);
+  }
+
+  function updateWorkpad(request) {
+    const findDoc = {
+      index: indexName,
+      type: CANVAS_TYPE,
+      id: request.params.id,
+    };
+
+    return callWithRequest(request, 'get', findDoc)
+    .then(({ _source }) => {
+      const doc = {
+        index: indexName,
+        type: CANVAS_TYPE,
+        id: request.params.id,
+        body: merge(_source, { ...request.payload, '@timestamp': new Date() }),
+      };
+
+      return callWithRequest(request, 'index', doc);
+    })
+    .catch((err) => {
+      if (err instanceof esErrors['404']) {
+        return createWorkpad(request);
+      }
+
+      throw err;
+    });
   }
 
   // get workpad
@@ -41,15 +80,7 @@ export function workpad(server) {
     method: 'POST',
     path: routePrefix,
     handler: function (request, reply) {
-      const now = new Date();
-      const doc = {
-        index: indexName,
-        type: CANVAS_TYPE,
-        id: `workpad-${uuid()}`,
-        body: { ...request.payload, '@timestamp': now, '@created': now },
-      };
-
-      callWithRequest(request, 'create', doc)
+      createWorkpad(request)
       .then(formatResponse(reply))
       .catch(formatResponse(reply));
     },
@@ -60,25 +91,9 @@ export function workpad(server) {
     method: 'PUT',
     path: `${routePrefix}/{id}`,
     handler: function (request, reply) {
-      const findDoc = {
-        index: indexName,
-        type: CANVAS_TYPE,
-        id: request.params.id,
-      };
-
-      callWithRequest(request, 'get', findDoc)
-      .then(({ _source }) => {
-        const doc = {
-          index: indexName,
-          type: CANVAS_TYPE,
-          id: request.params.id,
-          body: merge(_source, { ...request.payload, '@timestamp': new Date() }),
-        };
-
-        callWithRequest(request, 'index', doc)
-        .then(formatResponse(reply))
-        .catch(formatResponse(reply));
-      });
+      updateWorkpad(request)
+      .then(formatResponse(reply))
+      .catch(formatResponse(reply));
     },
   });
 
