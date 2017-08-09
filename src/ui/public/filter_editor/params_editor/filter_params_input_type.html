@@ -37,4 +37,27 @@
     ng-model="value"
     ng-change="onChange({ value: value })"
   />
+  <label
+    ng-switch-when="boolean"
+    class="kuiCheckBoxLabel kuiVerticalRhythm"
+  >
+    <input
+      class="kuiCheckBox"
+      type="checkbox"
+      ng-model="value"
+      ng-change="onChange({ value: value })"
+    />
+    <code
+      ng-show="value"
+      class="kuiCheckBoxLabel__text"
+    >
+      true
+    </code>
+    <code
+      ng-hide="value"
+      class="kuiCheckBoxLabel__text"
+    >
+      false
+    </code>
+  </label>
 </div>
