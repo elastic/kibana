@@ -2,7 +2,7 @@ export function queryDatatable(datatable, query) {
 
   if (query.sort) {
     // TODO: Figure out sort object shape and behavior
-    console.log(query.sort);
+    //console.log(query.sort);
   }
 
   if (query.size) {
