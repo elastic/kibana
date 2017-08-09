@@ -25,6 +25,7 @@ html {
   padding-top: $guideNavHeight;
   background-color: $guideBaseBackgroundColor;
   transition:
+    padding-top $guideChromeTransition,
     padding-right $guideCodeViewerTransition,
     opacity $guideCodeViewerTransition;
 
@@ -38,6 +39,10 @@ html {
 
   .is-guide-nav-open + & {
     opacity: 0.7;
+  }
+
+  &.is-chrome-hidden {
+    padding-top: 0;
   }
 }
 

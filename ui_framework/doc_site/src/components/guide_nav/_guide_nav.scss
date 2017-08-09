@@ -11,7 +11,10 @@
   border-bottom: 1px solid #CCCCCC;
   color: $guideTextColor;
   background-color: $guidePanelBackgroundColor;
-  transition: height 0.3s ease, box-shadow 0.3s linear;
+  transition:
+    top $guideChromeTransition,
+    height 0.3s ease,
+    box-shadow 0.3s linear;
   overflow: hidden;
   box-shadow: 0 0 0 rgba(black, 0.3);
 
@@ -19,7 +22,25 @@
     height: 100%;
     box-shadow: 0 40px 200px rgba(black, 0.05);
   }
+
+  &.is-chrome-hidden {
+    top: -$guideNavHeight;
+  }
 }
+
+  .guideNav__showButton {
+    position: fixed;
+    z-index: 9999;
+    top: 5px;
+    right: 5px;
+    font-size: 10px;
+    opacity: 0;
+    transition: opacity $guideChromeTransition;
+
+    .is-chrome-hidden & {
+      opacity: 1;
+    }
+  }
 
   .guideNav__header {
     position: relative;
