@@ -17,6 +17,10 @@ export default function (chrome, internals) {
     internals.visible = false;
   };
 
+  chrome.getIsChromePermanentlyHidden = () => {
+    return permanentlyHideChrome;
+  };
+
   /**
    * @param {boolean} display - should the chrome be displayed
    * @return {chrome}
