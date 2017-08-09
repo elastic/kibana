@@ -1,0 +1,26 @@
+@import (reference) "~ui/styles/variables";
+
+.uiAceKeyboardHint {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  right: 0;
+  left: 0;
+  background: rgba(255, 255, 255, 0.7);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  opacity: 0;
+
+  &:focus {
+    opacity: 1;
+    border: 2px solid @globalColorBlue;
+    z-index: 1000;
+  }
+
+  &.uiAceKeyboardHint-isInactive {
+    display: none;
+  }
+}
