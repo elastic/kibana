@@ -106,7 +106,9 @@ UrlFormat.prototype._convert = {
           linkLabel = label;
         }
 
-        return `<a href="${url}" target="_blank">${linkLabel}</a>`;
+        let linkTarget = this.param('openLinkInCurrentTab') ? '_self' : '_blank';
+          
+        return `<a href="${url}" target="${linkTarget}">${linkLabel}</a>`;
     }
   }
 };
