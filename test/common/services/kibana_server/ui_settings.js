@@ -1,19 +1,5 @@
-import { get } from 'lodash';
-import toPath from 'lodash/internal/toPath';
-
+import { createCallCluster } from '../../../../src/test_utils/es';
 import { SavedObjectsClient } from '../../../../src/server/saved_objects';
-
-function createCallCluster(es) {
-  return function callCluster(method, params) {
-    const path = toPath(method);
-    const contextPath = path.slice(0, -1);
-
-    const action = get(es, path);
-    const context = contextPath.length ? get(es, contextPath) : es;
-
-    return action.call(context, params);
-  };
-}
 
 export class KibanaServerUiSettings {
   constructor(log, es, kibanaIndex, kibanaVersion) {

@@ -5,7 +5,6 @@ import { mkdirp as mkdirpNode } from 'mkdirp';
 
 import manageUuid from './server/lib/manage_uuid';
 import search from './server/routes/api/search';
-import settings from './server/routes/api/settings';
 import { scrollSearchApi } from './server/routes/api/scroll_search';
 import { importApi } from './server/routes/api/import';
 import { exportApi } from './server/routes/api/export';
@@ -143,7 +142,6 @@ export default function (kibana) {
       manageUuid(server);
       // routes
       search(server);
-      settings(server);
       scripts(server);
       scrollSearchApi(server);
       importApi(server);

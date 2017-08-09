@@ -5,9 +5,10 @@ import { getRootType } from '../../mappings';
 
 import {
   getSearchDsl,
-  handleEsError,
   trimIdPrefix,
-  includedFields
+  includedFields,
+  decorateEsError,
+  errors,
 } from './lib';
 
 export class SavedObjectsClient {
@@ -17,6 +18,9 @@ export class SavedObjectsClient {
     this._type = getRootType(this._mappings);
     this._callAdminCluster = callAdminCluster;
   }
+
+  static errors = errors
+  errors = errors
 
   /**
    * Persists an object
@@ -316,7 +320,7 @@ export class SavedObjectsClient {
         index: this._kibanaIndex,
       });
     } catch (err) {
-      throw handleEsError(err);
+      throw decorateEsError(err);
     }
   }
 

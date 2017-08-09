@@ -5,7 +5,10 @@ import Chance from 'chance';
 
 import { UiSettingsService } from '../ui_settings_service';
 
-import { createObjectsClientStub } from './lib';
+import {
+  createObjectsClientStub,
+  savedObjectsClientErrors,
+} from './lib';
 
 const TYPE = 'config';
 const ID = 'kibana-version';
@@ -197,9 +200,12 @@ describe('ui settings', () => {
 
     it('throws 401 errors', async () => {
       const { uiSettings } = setup({
-        savedObjectsClient: { async get() {
-          throw new esErrors[401]();
-        } }
+        savedObjectsClient: {
+          errors: savedObjectsClientErrors,
+          async get() {
+            throw new esErrors[401]();
+          }
+        }
       });
 
       try {
@@ -214,9 +220,12 @@ describe('ui settings', () => {
       const expectedUnexpectedError = new Error('unexpected');
 
       const { uiSettings } = setup({
-        savedObjectsClient: { async get() {
-          throw expectedUnexpectedError;
-        } }
+        savedObjectsClient: {
+          errors: savedObjectsClientErrors,
+          async get() {
+            throw expectedUnexpectedError;
+          }
+        }
       });
 
       try {
