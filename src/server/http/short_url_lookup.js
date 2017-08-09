@@ -17,9 +17,11 @@ export default function (server) {
   return {
     async generateUrlId(url, req) {
       const id = crypto.createHash('md5').update(url).digest('hex');
+      const savedObjectsClient = req.getSavedObjectsClient();
+      const { isConflictError } = savedObjectsClient.errors;
 
       try {
-        const doc = await req.getSavedObjectsClient().create('url', {
+        const doc = await savedObjectsClient.create('url', {
           url,
           accessCount: 0,
           createDate: new Date(),
@@ -27,12 +29,12 @@ export default function (server) {
         }, { id });
 
         return doc.id;
-      } catch(e) {
-        if (get(e, 'data.type') === 'version_conflict_engine_exception') {
+      } catch (error) {
+        if (isConflictError(error)) {
           return id;
         }
 
-        throw e;
+        throw error;
       }
     },
 

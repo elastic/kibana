@@ -2,6 +2,12 @@ import { uiSettingsServiceFactory } from './ui_settings_service_factory';
 import { getUiSettingsServiceForRequest } from './ui_settings_service_for_request';
 import { mirrorStatus } from './mirror_status';
 import { UiExportsConsumer } from './ui_exports_consumer';
+import {
+  deleteRoute,
+  getRoute,
+  setManyRoute,
+  setRoute,
+} from './routes';
 
 export function uiSettingsMixin(kbnServer, server, config) {
   const status = kbnServer.status.create('ui settings');
@@ -56,4 +62,9 @@ export function uiSettingsMixin(kbnServer, server, config) {
       server.uiSettings has been removed, see https://github.com/elastic/kibana/pull/12243.
     `);
   });
+
+  server.route(deleteRoute);
+  server.route(getRoute);
+  server.route(setManyRoute);
+  server.route(setRoute);
 }

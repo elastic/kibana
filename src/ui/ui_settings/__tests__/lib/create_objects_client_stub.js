@@ -1,10 +1,14 @@
 import sinon from 'sinon';
 import expect from 'expect.js';
+import { SavedObjectsClient } from '../../../../server/saved_objects/client';
+
+export const savedObjectsClientErrors = SavedObjectsClient.errors;
 
 export function createObjectsClientStub(type, id, esDocSource = {}) {
   const savedObjectsClient = {
     update: sinon.stub().returns(Promise.resolve()),
-    get: sinon.stub().returns({ attributes: esDocSource })
+    get: sinon.stub().returns({ attributes: esDocSource }),
+    errors: savedObjectsClientErrors
   };
 
   savedObjectsClient.assertGetQuery = () => {
