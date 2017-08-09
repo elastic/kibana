@@ -30,7 +30,7 @@ export default (req, panel) => {
       return bodies;
     });
 
-  if (!bodies.length) return { responses: [] };
+  if (!bodies.length) return Promise.resolve({ responses: [] });
   return callWithRequest(req, 'msearch', {
     body: bodies.reduce((acc, item) => acc.concat(item), [])
   })
