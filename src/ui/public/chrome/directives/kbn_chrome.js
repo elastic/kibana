@@ -33,7 +33,7 @@ export function kbnChromeProvider(chrome, internals) {
       },
 
       controllerAs: 'chrome',
-      controller($scope, $rootScope, $location, $http, Private) {
+      controller($scope, $rootScope, $location, $http, Private, $route) {
         const getUnhashableStates = Private(getUnhashableStatesProvider);
 
         // are we showing the embedded version of the chrome?
@@ -43,6 +43,11 @@ export function kbnChromeProvider(chrome, internals) {
 
         // listen for route changes, propogate to tabs
         const onRouteChange = function () {
+          if ($route.current && $route.current.redirectTo) {
+            // don't remember redirections as "lastUrl", wait for redirects to finish
+            return;
+          }
+
           const urlWithHashes = window.location.href;
           const urlWithStates = unhashUrl(urlWithHashes, getUnhashableStates());
           internals.trackPossibleSubUrl(urlWithStates);
