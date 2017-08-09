@@ -2,8 +2,8 @@ export default (grunt) => {
   const VERSION = grunt.config.get('build.version');
   const SHORT_SHA = grunt.config.get('build.sha').substr(0, 7);
 
-  const FOLDER_STAGING = `kibana/staging/${VERSION}-${SHORT_SHA}/repos/${VERSION.match(/\d\./)[0]}x`;
-  const FOLDER_PRODUCTION = `kibana/${VERSION.match(/\d\./)[0]}x`;
+  const FOLDER_STAGING = `kibana/staging/${VERSION}-${SHORT_SHA}/repos/${VERSION.match(/\d\.\d/)[0]}`;
+  const FOLDER_PRODUCTION = `kibana/${VERSION.match(/\d\.\d/)[0]}`;
 
   const FOLDERNAME_DEB = 'debian';
   const FOLDERNAME_RPM = 'centos';
