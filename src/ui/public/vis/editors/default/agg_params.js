@@ -72,13 +72,6 @@ uiModules
         if (!agg) return;
 
         const type = $scope.agg.type;
-
-        if (newType !== oldType) {
-          // don't reset on initial load, the
-          // saved params should persist
-          agg.resetParams();
-        }
-
         if (!type) return;
 
         const aggParamHTML = {
