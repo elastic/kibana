@@ -81,8 +81,11 @@ export function interpretProvider(config) {
     const argDefs = fnDef.args;
 
     // Break this into keys and values, then recombine later.
-    // Remap aliased arguments
-    const argNames = keys(astArgs).map(argName => argDefs[argName].name);
+    // Remap aliased arguments, and check names
+    const argNames = keys(astArgs).map(argName => {
+      if (!argDefs[argName]) throw new Error(`Unknown argument '${argName}' passed to function ${fnDef.name}()`);
+      return argDefs[argName].name;
+    });
     const multiValuedArgs = values(astArgs);
 
     // Create an array of promises, each representing 1 argument name
@@ -99,7 +102,6 @@ export function interpretProvider(config) {
     .then(resolvedArgs => {
 
       // Fill in defaults
-      // TODO: We simply ignore unknown arguments, we should error on unknown arguments
       const args = mapValues(argDefs, (argDef, name) => {
         if (typeof resolvedArgs[name] !== 'undefined') return resolvedArgs[name];
 
