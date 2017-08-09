@@ -47,7 +47,7 @@ export default class extends Component {
       </KuiButton>
     );
 
-    const selectOptions = ['Option one', 'Option two', 'Option three'];
+    const formOptions = ['Option one', 'Option two', 'Option three'];
 
     const formSample = (
       <KuiForm>
@@ -56,7 +56,7 @@ export default class extends Component {
           label="Number"
           helpText="Any number between 1 and 5"
         >
-          <KuiFormNumber id="number" mix={1} max={5} />
+          <KuiFormNumber id="number" min={1} max={5} />
         </KuiFormRow>
         <KuiFormRow
           id="first"
@@ -98,16 +98,14 @@ export default class extends Component {
           icon="arrowDown"
           className="kuiFormRow--select"
         >
-          <KuiFormSelect options={selectOptions} label="Dropdown" id="dropdown"/>
+          <KuiFormSelect options={formOptions} label="Dropdown" id="dropdown"/>
         </KuiFormRow>
         <KuiFormRow label="Textarea">
           <KuiFormTextarea />
         </KuiFormRow>
         <KuiFormSwitch id="switch"/>
         <KuiFormRow label="You should always use more than one checkbox">
-          <KuiFormCheckbox label="Option one" id="checkbox1" />
-          <KuiFormCheckbox label="Another option" id="checkbox2" />
-          <KuiFormCheckbox label="Yet another useful option" id="checkbox3" />
+          <KuiFormCheckbox options={formOptions} />
         </KuiFormRow>
         <KuiFormRadio />
       </KuiForm>

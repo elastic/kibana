@@ -16,7 +16,7 @@ export const KuiFormSelect = ({ children, options, id, name, placeholder, classN
         {...rest}
       >
       {options.map(function(option, index) {
-        return <option key={index}>{option}</option>;
+        return <option value={index} key={index}>{option}</option>;
       })}
     </select>
   );
