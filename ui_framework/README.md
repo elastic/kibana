@@ -34,12 +34,6 @@ You can do this using Yeoman (the easy way), or you can do it manually (the hard
 
 ### Using Yeoman
 
-#### Install Yeoman
-
-```bash
-npm install -g yo
-```
-
 #### Create a new component
 
 From the command line, run `npm run uiFramework:createComponent`.
