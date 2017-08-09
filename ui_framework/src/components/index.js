@@ -92,6 +92,10 @@ export {
 } from './side_nav';
 
 export {
+  KuiToast,
+} from './toast';
+
+export {
   KuiTitle,
   KuiText,
 } from './typography';
