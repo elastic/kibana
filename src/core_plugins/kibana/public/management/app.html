@@ -14,11 +14,9 @@
 
       <!-- Tabs. -->
       <div data-transclude-slot="bottomRow" class="kuiLocalTabs">
-        <header ng-if="!sectionName" id="tabHeader" tabindex="0">
-          <h2 class="kuiLocalTab">
-            {{::section.display}}
-          </h2>
-        </header>
+        <h2 class="kuiLocalTab" ng-if="!sectionName" id="tabHeader" tabindex="0">
+          {{::section.display}}
+        </h2>
         <a
           ng-if="sectionName"
           ng-repeat="item in section.visibleItems"
