@@ -15,6 +15,11 @@ uiModules
 
       $scope.$bind('inputs', attrs.inputs);
       $scope.$bind('placeholder', attrs.placeholder);
+      // Note: the below binding does not work but the two lines
+      // under it do work
+      // $scope.$bind('id', attrs.id);
+      $scope.id = attrs.id;
+      attrs.$observe('id', () => $scope.id = attrs.id);
 
       // bind our local model with the outside ngModel
       $scope.$watch('model', ngModelCntrl.$setViewValue);
