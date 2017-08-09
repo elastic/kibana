@@ -1,20 +1,18 @@
 import Promise from 'bluebird';
 import sinon from 'sinon';
 import expect from 'expect.js';
-import url from 'url';
 
 const NoConnections = require('elasticsearch').errors.NoConnections;
 
 import mappings from './fixtures/mappings';
 import healthCheck from '../health_check';
 import kibanaVersion from '../kibana_version';
-import { esTestServerUrlParts } from '../../../../../test/es_test_server_url_parts';
+import { esTestConfig } from '../../../../test_utils/es';
 import * as determineEnabledScriptingLangsNS from '../determine_enabled_scripting_langs';
 import { determineEnabledScriptingLangs } from '../determine_enabled_scripting_langs';
 import * as ensureTypesExistNS from '../ensure_types_exist';
-
-const esPort = esTestServerUrlParts.port;
-const esUrl = url.format(esTestServerUrlParts);
+const esPort = esTestConfig.getPort();
+const esUrl = esTestConfig.getUrl();
 
 describe('plugins/elasticsearch', () => {
   describe('lib/health_check', function () {
@@ -24,13 +22,18 @@ describe('plugins/elasticsearch', () => {
     let plugin;
     let cluster;
     let server;
+    const sandbox = sinon.sandbox.create();
+
+    function getTimerCount() {
+      return Object.keys(sandbox.clock.timers || {}).length;
+    }
 
     beforeEach(() => {
       const COMPATIBLE_VERSION_NUMBER = '5.0.0';
 
       // Stub the Kibana version instead of drawing from package.json.
-      sinon.stub(kibanaVersion, 'get').returns(COMPATIBLE_VERSION_NUMBER);
-      sinon.stub(ensureTypesExistNS, 'ensureTypesExist');
+      sandbox.stub(kibanaVersion, 'get').returns(COMPATIBLE_VERSION_NUMBER);
+      sandbox.stub(ensureTypesExistNS, 'ensureTypesExist');
 
       // setup the plugin stub
       plugin = {
@@ -58,7 +61,7 @@ describe('plugins/elasticsearch', () => {
         }
       }));
 
-      sinon.stub(determineEnabledScriptingLangsNS, 'determineEnabledScriptingLangs').returns(Promise.resolve([]));
+      sandbox.stub(determineEnabledScriptingLangsNS, 'determineEnabledScriptingLangs').returns(Promise.resolve([]));
 
       // setup the config().get()/.set() stubs
       const get = sinon.stub();
@@ -82,16 +85,37 @@ describe('plugins/elasticsearch', () => {
         savedObjectsClientFactory: () => ({
           find: sinon.stub().returns(Promise.resolve({ saved_objects: [] })),
           create: sinon.stub().returns(Promise.resolve({ id: 'foo' })),
-        })
+        }),
+        ext: sinon.stub()
       };
 
       health = healthCheck(plugin, server, { mappings });
     });
 
     afterEach(() => {
-      kibanaVersion.get.restore();
-      determineEnabledScriptingLangs.restore();
-      ensureTypesExistNS.ensureTypesExist.restore();
+      sandbox.restore();
+    });
+
+    it('should stop when cluster is shutdown', () => {
+      sandbox.useFakeTimers();
+
+      // ensure that health.start() is responsible for the timer we are observing
+      expect(getTimerCount()).to.be(0);
+      health.start();
+      expect(getTimerCount()).to.be(1);
+
+      // ensure that a server extension was registered
+      sinon.assert.calledOnce(server.ext);
+      sinon.assert.calledWithExactly(server.ext, sinon.match.string, sinon.match.func);
+
+      // call the server extension
+      const reply = sinon.stub();
+      const [,handler] = server.ext.firstCall.args;
+      handler({}, reply);
+
+      // ensure that the handler called reply and unregistered the time
+      sinon.assert.calledOnce(reply);
+      expect(getTimerCount()).to.be(0);
     });
 
     it('should set the cluster green if everything is ready', function () {

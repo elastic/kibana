@@ -7,7 +7,7 @@ import { Notifier } from 'ui/notify';
 
 import { getComputedFields } from './_get_computed_fields';
 import { formatHit } from './_format_hit';
-import { IndexPatternsGetIdsProvider } from './_get_ids';
+import { IndexPatternsGetProvider } from './_get';
 import { IndexPatternsIntervalsProvider } from './_intervals';
 import { IndexPatternsFieldListProvider } from './_field_list';
 import { IndexPatternsFlattenHitProvider } from './_flatten_hit';
@@ -18,7 +18,7 @@ import { SavedObjectsClientProvider, findObjectByTitle } from 'ui/saved_objects'
 
 export function IndexPatternProvider(Private, $http, config, kbnIndex, Promise, confirmModalPromise, kbnUrl) {
   const fieldformats = Private(RegistryFieldFormatsProvider);
-  const getIds = Private(IndexPatternsGetIdsProvider);
+  const getIds = Private(IndexPatternsGetProvider)('id');
   const fieldsFetcher = Private(FieldsFetcherProvider);
   const intervals = Private(IndexPatternsIntervalsProvider);
   const mappingSetup = Private(UtilsMappingSetupProvider);

@@ -1,7 +1,7 @@
 import _ from 'lodash';
 import { Notifier } from 'ui/notify/notifier';
 import { NoDefaultIndexPattern } from 'ui/errors';
-import { IndexPatternsGetIdsProvider } from '../_get_ids';
+import { IndexPatternsGetProvider } from '../_get';
 import uiRoutes from 'ui/routes';
 const notify = new Notifier({
   location: 'Index Patterns'
@@ -14,7 +14,7 @@ module.exports = function (opts) {
 
   uiRoutes
   .addSetupWork(function loadDefaultIndexPattern(Private, Promise, $route, config) {
-    const getIds = Private(IndexPatternsGetIdsProvider);
+    const getIds = Private(IndexPatternsGetProvider)('id');
     const route = _.get($route, 'current.$$route');
 
     return getIds()
