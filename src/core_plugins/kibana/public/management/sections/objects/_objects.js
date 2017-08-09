@@ -1,4 +1,4 @@
-import { saveAs } from '@spalger/filesaver';
+import { saveAs } from '@elastic/filesaver';
 import { find, flattenDeep, pluck, sortBy } from 'lodash';
 import angular from 'angular';
 import { savedObjectManagementRegistry } from 'plugins/kibana/management/saved_object_registry';
