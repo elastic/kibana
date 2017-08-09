@@ -2,6 +2,7 @@ import _ from 'lodash';
 import elasticsearch from 'elasticsearch';
 import Fn from '../../../common/functions/fn.js';
 import flattenHit from './lib/flatten_hit';
+import { buildESRequest } from './lib/build_es_request';
 
 const client = new elasticsearch.Client({
   host: 'localhost:9200',
@@ -10,7 +11,7 @@ const client = new elasticsearch.Client({
 export default new Fn({
   name: 'esdocs',
   context: {
-    types: ['filter'],
+    types: ['query'],
   },
   args: {
     index: {
@@ -19,13 +20,9 @@ export default new Fn({
     },
     q: {
       types: ['string'],
+      aliases: ['query'],
       help: 'A Lucene query string',
       default: '-_index:.kibana',
-    },
-    size: {
-      help: 'How many docs to fetch. If you have big docs set this low.',
-      types: ['number'],
-      default: 100,
     },
     // TODO: This doesn't work
     fields: {
@@ -40,12 +37,11 @@ export default new Fn({
         'will only look at the first hit for determining columns. You would be wise to give ' +
         'all of your documents the same schema',
   fn: (context, args) => {
-    return client.search({
+    return client.search(buildESRequest({
       index: args.index,
       q: args.q,
       // fields: args.fields.split(',').map((str) => str.trim()),
-      size: args.size }
-    )
+    }, context))
     .then(resp => {
       const flatHits = _.map(resp.hits.hits, (hit, i) => {
         return Object.assign(flattenHit(hit), { _rowId: i });
