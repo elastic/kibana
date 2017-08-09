@@ -1,3 +1,13 @@
+import get from 'lodash';
+import mockElasticsearch from './elasticsearch_plugin';
+
+const config = {
+  canvas: {
+    enabled: true,
+    indexPrefix: '.canvas',
+  },
+};
+
 export class Plugin {
   constructor(props) {
     this.props = props;
@@ -5,7 +15,11 @@ export class Plugin {
     this.server = {
       plugins: {
         [this.props.name]: {},
+        elasticsearch: mockElasticsearch,
       },
+      config: () => ({
+        get: (key) => get(config, key),
+      }),
       route: (def) => this.routes.push(def),
     };
 

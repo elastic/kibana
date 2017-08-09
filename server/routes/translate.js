@@ -25,5 +25,4 @@ export function translate(server) {
       }
     },
   });
-
 }

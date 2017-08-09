@@ -1,6 +1,7 @@
 import { routes } from './server/routes';
 import { functions } from './server/lib/functions';
 import { serverFunctions } from './server/functions';
+import { createIndices } from './server/lib/create_indices';
 
 import { commonFunctions } from './common/functions';
 import { typeSpecs } from './common/types';
@@ -23,6 +24,9 @@ export default function (server, /*options*/) {
       types.register(typeDef);
     },
   };
+
+  // create the canvas indicies
+  createIndices(server);
 
   const { addFunction, addType } = server.plugins.canvas;
   serverFunctions.forEach(addFunction);

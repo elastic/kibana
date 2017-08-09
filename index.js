@@ -36,6 +36,7 @@ export default function (kibana) {
     config: (Joi) => {
       return Joi.object({
         enabled: Joi.boolean().default(true),
+        indexPrefix: Joi.string().default('.canvas'),
       }).default();
     },
 
