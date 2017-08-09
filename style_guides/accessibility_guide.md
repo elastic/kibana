@@ -7,12 +7,17 @@ accessibility issues.
 
 ### Use `<button>` and `<a>`
 
-**TL;DR** *Use `<button>` and `<a>` instead of click listeners on other elements
+**TL;DR** *Use `<button>` and `<a>` (with `hred`) instead of click listeners on other elements
 and style it whatever way you need.*
 
 If you want to make an element clickable, use a `<button>` or `<a>` element for it.
 Use a *button* whenever it causes an action on the current page, and an *a* if it
 navigates to a different page. You can use click listeners just fine on these elements.
+
+An `a` element must have an `href` attribute, so that (a) it will be correctly perceived
+as a link by a screen reader and (b) that registered click listener will correctly
+trigger on pressing <kbd>Enter</kbd>. If you don't need it, make it `hred="#"`
+and call `preventDefault()` on the click event.
 
 *Why not use other elements?*
 
@@ -23,7 +28,8 @@ you will create multiple accessibility issues:
   * You cannot focus it by pressing <kbd>tab</kbd>. You can add this behavior by
     adding `tabindex="0"` to the element.
   * You cannot trigger the click by pressing <kbd>Enter</kbd> or <kbd>Space</kbd>.
-    We have a `kbn-accessible-click` directive for AngularJS to add that behavior.
+    We have a `kbn-accessible-click` directive for AngularJS and a `KuiKeyboardAccessible`
+    React component to add that behavior.
 * Even if you make it keyboard accessible, a user using a screen reader won't
   recognize, that the div is actually an interactive element, the screen reader
   will just announce something like: "Sort". You would need
@@ -101,6 +107,10 @@ Unfortunately there is no universal solution for this problem, so be aware when 
 such elements, that would consume tabbing, to think about an accessible interaction
 model.
 
+*Hint:* If you create that kind of interactive elements `role="application"` might
+be a good `role` (also see below) for that element. It is meant for elements providing
+their own interaction schemes.
+
 ## Roles
 
 Each DOM element has an implicit role in the accessibility tree (that assistive technologies
@@ -120,7 +130,7 @@ by assistive technologies to quickly find and navigate to this section.
 
 If you place it on the `input` you will overwrite the implicit `textbox` or `searchbox`
 role, and as such confuse the user, since it loses it meaning as in input element.
-If you place it on the `form` element you will also overwrite it's role and
+If you place it on the `form` element you will also overwrite its role and
 remove it from a quick jump navigation to all forms.
 
 That's why it should be placed to an `div` (or any other container) between the
