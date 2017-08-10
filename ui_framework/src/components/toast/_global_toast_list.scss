@@ -18,7 +18,7 @@
 }
 
 .kuiGlobalToastListItem {
-  margin-bottom: 20px;
+  margin-bottom: $kuiSizeM;
   animation: 0.5s kuiShowToast;
   opacity: 1;
 

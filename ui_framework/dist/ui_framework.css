@@ -1687,7 +1687,7 @@ table {
     background-color: transparent; }
 
 .kuiGlobalToastListItem {
-  margin-bottom: 20px;
+  margin-bottom: 12px;
   -webkit-animation: 0.5s kuiShowToast;
           animation: 0.5s kuiShowToast;
   opacity: 1;
@@ -1734,8 +1734,8 @@ table {
    */
 .kuiToast__closeButton {
   position: absolute;
-  top: 10px;
-  right: 10px;
+  top: 4px;
+  right: 4px;
   line-height: 0;
   /* 1 */
   -webkit-appearance: none;
@@ -1770,7 +1770,6 @@ table {
   font-size: 16px;
   font-size: 1rem;
   line-height: 24px;
-  margin-bottom: 9px;
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -1800,6 +1799,9 @@ table {
 .kuiToastHeader__title {
   color: #000;
   font-weight: 300; }
+
+.kuiToastHeader--withBody {
+  margin-bottom: 9px; }
 
 .kuiTitle {
   font-size: 24px;

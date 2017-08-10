@@ -10,7 +10,7 @@ export default () => (
   <KuiToast
     title="Check it out, here's a really long title that will wrap within a narrower browser"
     type="info"
-    iconType="user"
+    iconType="discoverApp"
     onClose={() => window.alert('Dismiss toast')}
   >
     <KuiText size="small" verticalRhythm>

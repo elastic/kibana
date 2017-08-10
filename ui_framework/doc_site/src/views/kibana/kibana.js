@@ -40,6 +40,7 @@ import {
 const TOAST_LIFE_TIME_MS = 4000;
 const TOAST_FADE_OUT_MS = 250;
 let toastIdCounter = 0;
+const timeoutIds = [];
 
 export default class extends Component {
   constructor(props) {
@@ -96,14 +97,16 @@ export default class extends Component {
     });
   }
 
-  scheduleToastForDismissal(toastId) {
-    setTimeout(() => {
-      this.dismissToast(toastId);
-    }, TOAST_LIFE_TIME_MS);
+  scheduleToastForDismissal(toastId, isImmediate = false) {
+    const lifeTime = isImmediate ? TOAST_FADE_OUT_MS : TOAST_LIFE_TIME_MS;
 
-    setTimeout(() => {
+    timeoutIds.push(setTimeout(() => {
+      this.dismissToast(toastId);
+    }, lifeTime));
+
+    timeoutIds.push(setTimeout(() => {
       this.startDismissingToast(toastId);
-    }, TOAST_LIFE_TIME_MS - TOAST_FADE_OUT_MS);
+    }, lifeTime - TOAST_FADE_OUT_MS));
   }
 
   startDismissingToast(toastId) {
@@ -130,6 +133,10 @@ export default class extends Component {
     this.setState({
       toasts: [],
     });
+  }
+
+  componentWillUnmount() {
+    timeoutIds.forEach(timeoutId => clearTimeout(timeoutId));
   }
 
   renderLogo() {
@@ -499,12 +506,13 @@ export default class extends Component {
 
   renderRandomToast() {
     const toastId = (toastIdCounter++).toString();
+    const dismissToast = this.scheduleToastForDismissal.bind(this, toastId, true);
 
     const toasts = [(
       <KuiToast
         title="Check it out, here's a really long title that will wrap within a narrower browser"
         type="info"
-        onClose={this.dismissToast.bind(this, toastId)}
+        onClose={dismissToast}
       >
         <KuiText size="small" verticalRhythm>
           <p>
@@ -523,7 +531,7 @@ export default class extends Component {
       <KuiToast
         title="Download complete!"
         type="success"
-        onClose={this.dismissToast.bind(this, toastId)}
+        onClose={dismissToast}
       >
         <KuiText size="small">
           <p>
@@ -536,7 +544,7 @@ export default class extends Component {
         title="Logging you out soon, due to inactivity"
         type="warning"
         iconType="user"
-        onClose={this.dismissToast.bind(this, toastId)}
+        onClose={dismissToast}
       >
         <KuiText size="small" verticalRhythm>
           <p>
@@ -555,7 +563,7 @@ export default class extends Component {
         title="Oops, there was an error"
         type="danger"
         iconType="help"
-        onClose={this.dismissToast.bind(this, toastId)}
+        onClose={dismissToast}
       >
         <KuiText size="small">
           <p>

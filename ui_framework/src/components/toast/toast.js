@@ -19,6 +19,9 @@ export const TYPES = Object.keys(typeToClassNameMap);
 
 export const KuiToast = ({ title, type, iconType, onClose, children, className, ...rest }) => {
   const classes = classNames('kuiToast', typeToClassNameMap[type], className);
+  const headerClasses = classNames('kuiToastHeader', {
+    'kuiToastHeader--withBody': children,
+  });
 
   let headerIcon;
 
@@ -56,7 +59,7 @@ export const KuiToast = ({ title, type, iconType, onClose, children, className, 
       className={classes}
       {...rest}
     >
-      <div className="kuiToastHeader">
+      <div className={headerClasses}>
         {headerIcon}
 
         <span className="kuiToastHeader__title">
