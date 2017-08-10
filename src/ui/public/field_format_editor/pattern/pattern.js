@@ -7,18 +7,17 @@ uiModules
 .directive('fieldFormatEditorPattern', function () {
   return {
     restrict: 'E',
+    replace: true,
     template: patternTemplate,
     require: ['ngModel', '^fieldEditor'],
-    scope: true,
+    scope: {
+      id: '@'
+    },
     link: function ($scope, $el, attrs, cntrls) {
       const ngModelCntrl = cntrls[0];
 
       $scope.$bind('inputs', attrs.inputs);
       $scope.$bind('placeholder', attrs.placeholder);
-      // The id attribute is not always an angular expression but nearly always
-      // just a string passed in
-      $scope.id = attrs.id;
-      attrs.$observe('id', () => $scope.id = attrs.id);
 
       // bind our local model with the outside ngModel
       $scope.$watch('model', ngModelCntrl.$setViewValue);
