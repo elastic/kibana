@@ -9,7 +9,10 @@ export class HttpServer {
 
   constructor() {
     this.app = express();
-    this.app.use(bodyParser());
+    this.app.use([
+      bodyParser.json(),
+      bodyParser.urlencoded({ extended: false })
+    ]);
     this.httpServer = http.createServer(this.app);
   }
 
