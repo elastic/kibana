@@ -3,7 +3,7 @@
 exports[`KuiButton is rendered 1`] = `
 <button
   aria-label="aria-label"
-  class="kuiButton testClass1 testClass2"
+  class="kuiButton kuiButton--primary testClass1 testClass2"
   data-test-subj="test subject string"
 >
   <span
