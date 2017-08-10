@@ -1,4 +1,5 @@
 import React, {
+  cloneElement,
   Component,
 } from 'react';
 
@@ -12,9 +13,12 @@ import {
   KuiHeaderSection,
   KuiHeaderSectionItem,
   KuiHeaderSectionItemButton,
+  KuiGlobalToastList,
+  KuiGlobalToastListItem,
   KuiIcon,
   KuiKeyPadMenu,
   KuiKeyPadMenuItem,
+  KuiLink,
   KuiPage,
   KuiPageBody,
   KuiPageContent,
@@ -28,8 +32,15 @@ import {
   KuiSideNav,
   KuiSideNavItem,
   KuiSideNavTitle,
+  KuiText,
+  KuiToast,
   KuiTitle,
 } from '../../../../components';
+
+const TOAST_LIFE_TIME_MS = 4000;
+const TOAST_FADE_OUT_MS = 250;
+let toastIdCounter = 0;
+const timeoutIds = [];
 
 export default class extends Component {
   constructor(props) {
@@ -39,6 +50,7 @@ export default class extends Component {
       isUserMenuOpen: false,
       isAppMenuOpen: false,
       isSideNavOpenOnMobile: false,
+      toasts: [],
     };
   }
 
@@ -52,6 +64,19 @@ export default class extends Component {
     this.setState({
       isAppMenuOpen: !this.state.isAppMenuOpen,
     });
+  }
+
+  onAddToastClick() {
+    const {
+      toast,
+      toastId,
+    } = this.renderRandomToast();
+
+    this.setState({
+      toasts: this.state.toasts.concat(toast),
+    });
+
+    this.scheduleToastForDismissal(toastId);
   }
 
   closeUserMenu() {
@@ -70,6 +95,48 @@ export default class extends Component {
     this.setState({
       isSideNavOpenOnMobile: !this.state.isSideNavOpenOnMobile,
     });
+  }
+
+  scheduleToastForDismissal(toastId, isImmediate = false) {
+    const lifeTime = isImmediate ? TOAST_FADE_OUT_MS : TOAST_LIFE_TIME_MS;
+
+    timeoutIds.push(setTimeout(() => {
+      this.dismissToast(toastId);
+    }, lifeTime));
+
+    timeoutIds.push(setTimeout(() => {
+      this.startDismissingToast(toastId);
+    }, lifeTime - TOAST_FADE_OUT_MS));
+  }
+
+  startDismissingToast(toastId) {
+    this.setState({
+      toasts: this.state.toasts.map(toast => {
+        if (toast.key === toastId) {
+          return cloneElement(toast, {
+            isDismissed: true,
+          });
+        }
+
+        return toast;
+      }),
+    });
+  }
+
+  dismissToast(toastId) {
+    this.setState({
+      toasts: this.state.toasts.filter(toast => toast.key !== toastId),
+    });
+  }
+
+  onDeleteAllToasts() {
+    this.setState({
+      toasts: [],
+    });
+  }
+
+  componentWillUnmount() {
+    timeoutIds.forEach(timeoutId => clearTimeout(timeoutId));
   }
 
   renderLogo() {
@@ -413,11 +480,113 @@ export default class extends Component {
               </KuiPageContentHeaderSection>
             </KuiPageContentHeader>
             <KuiPageContentBody>
-              asdf
+              <KuiButton
+                onClick={this.onAddToastClick.bind(this)}
+                size="small"
+              >
+                Add toast
+              </KuiButton>
+
+              <br />
+              <br />
+
+              <KuiButton
+                type="danger"
+                onClick={this.onDeleteAllToasts.bind(this)}
+                size="small"
+              >
+                Clear toasts
+              </KuiButton>
             </KuiPageContentBody>
           </KuiPageContent>
         </KuiPageBody>
       </KuiPage>
+    );
+  }
+
+  renderRandomToast() {
+    const toastId = (toastIdCounter++).toString();
+    const dismissToast = this.scheduleToastForDismissal.bind(this, toastId, true);
+
+    const toasts = [(
+      <KuiToast
+        title="Check it out, here's a really long title that will wrap within a narrower browser"
+        type="info"
+        onClose={dismissToast}
+      >
+        <KuiText size="small" verticalRhythm>
+          <p>
+            Here&rsquo;s some stuff that you need to know. We can make this text really long so that,
+            when viewed within a browser that&rsquo;s fairly narrow, it will wrap, too.
+          </p>
+        </KuiText>
+
+        <KuiText size="small">
+          <p>
+            And some other stuff on another line, just for kicks. And <KuiLink href="#">here&rsquo;s a link</KuiLink>.
+          </p>
+        </KuiText>
+      </KuiToast>
+    ), (
+      <KuiToast
+        title="Download complete!"
+        type="success"
+        onClose={dismissToast}
+      >
+        <KuiText size="small">
+          <p>
+            Thanks for your patience!
+          </p>
+        </KuiText>
+      </KuiToast>
+    ), (
+      <KuiToast
+        title="Logging you out soon, due to inactivity"
+        type="warning"
+        iconType="user"
+        onClose={dismissToast}
+      >
+        <KuiText size="small" verticalRhythm>
+          <p>
+            This is a security measure.
+          </p>
+        </KuiText>
+
+        <KuiText size="small">
+          <p>
+            Please move your mouse to show that you&rsquo;re still using Kibana.
+          </p>
+        </KuiText>
+      </KuiToast>
+    ), (
+      <KuiToast
+        title="Oops, there was an error"
+        type="danger"
+        iconType="help"
+        onClose={dismissToast}
+      >
+        <KuiText size="small">
+          <p>
+            Sorry. We&rsquo;ll try not to let it happen it again.
+          </p>
+        </KuiText>
+      </KuiToast>
+    )];
+
+    const toast = (
+      <KuiGlobalToastListItem key={toastId}>
+        {toasts[Math.floor(Math.random() * toasts.length)]}
+      </KuiGlobalToastListItem>
+    );
+
+    return { toast, toastId };
+  }
+
+  renderToasts() {
+    return (
+      <KuiGlobalToastList>
+        {this.state.toasts}
+      </KuiGlobalToastList>
     );
   }
 
@@ -426,6 +595,7 @@ export default class extends Component {
       <div>
         {this.renderHeader()}
         {this.renderPage()}
+        {this.renderToasts()}
       </div>
     );
   }

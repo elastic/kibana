@@ -11,6 +11,9 @@
     opacity: 1; } }
 
 /**
+ * Set scroll bar appearance on Chrome.
+ */
+/**
  * Adapted from Eric Meyer's reset (http://meyerweb.com/eric/tools/css/reset/, v2.0 | 20110126).
  *
  */
@@ -549,22 +552,22 @@ table {
    * 1. Vertically center icon with first line of title.
    */
 .kuiCallOutHeader__icon {
-  fill: #0079a5;
+  -webkit-box-flex: 0;
+  -webkit-flex: 0 0 auto;
+      -ms-flex: 0 0 auto;
+          flex: 0 0 auto;
   -webkit-transform: translateY(2px);
           transform: translateY(2px);
   /* 1 */ }
 
-.kuiCallOutHeader__title {
-  color: #0079a5; }
-
 .kuiHeader {
+  box-shadow: 0 2px 2px -1px rgba(0, 0, 0, 0.1);
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
   display: flex;
   background: #FFF;
-  border-bottom: 1px solid #D9D9D9;
-  box-shadow: 0 2px 2px -1px rgba(0, 0, 0, 0.1); }
+  border-bottom: 1px solid #D9D9D9; }
 
 .kuiHeader__notification {
   display: inline-block;
@@ -1646,6 +1649,159 @@ table {
   100% {
     -webkit-transform: scaleX(1);
             transform: scaleX(1); } }
+
+/**
+ * 1. Allow list to expand as items are added, but cap it at the screen height.
+ */
+.kuiGlobalToastList {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-orient: vertical;
+  -webkit-box-direction: normal;
+  -webkit-flex-direction: column;
+      -ms-flex-direction: column;
+          flex-direction: column;
+  -webkit-box-align: stretch;
+  -webkit-align-items: stretch;
+      -ms-flex-align: stretch;
+          align-items: stretch;
+  position: fixed;
+  z-index: 5000;
+  bottom: 0;
+  right: 0;
+  width: 320px;
+  overflow-x: hidden;
+  overflow-y: scroll;
+  max-height: 100vh;
+  /* 1 */ }
+  .kuiGlobalToastList::-webkit-scrollbar {
+    width: 16px;
+    height: 16px; }
+  .kuiGlobalToastList::-webkit-scrollbar-thumb {
+    background-color: rgba(102, 102, 102, 0.5);
+    border: 6px solid transparent;
+    background-clip: content-box; }
+  .kuiGlobalToastList::-webkit-scrollbar-track {
+    background-color: transparent; }
+
+.kuiGlobalToastListItem {
+  margin-bottom: 12px;
+  -webkit-animation: 0.5s kuiShowToast;
+          animation: 0.5s kuiShowToast;
+  opacity: 1;
+  /**
+   * 1. justify-content: flex-end interferes with overflowing content, so we'll use this to push
+   *    items to the bottom instead.
+   */ }
+  .kuiGlobalToastListItem:first-child {
+    margin-top: auto;
+    /* 1 */ }
+  .kuiGlobalToastListItem.kuiGlobalToastListItem-isDismissed {
+    transition: opacity 250ms;
+    opacity: 0; }
+
+@-webkit-keyframes kuiShowToast {
+  from {
+    -webkit-transform: translateX(30px);
+            transform: translateX(30px);
+    opacity: 0; }
+  to {
+    -webkit-transform: translateX(0);
+            transform: translateX(0);
+    opacity: 1; } }
+
+@keyframes kuiShowToast {
+  from {
+    -webkit-transform: translateX(30px);
+            transform: translateX(30px);
+    opacity: 0; }
+  to {
+    -webkit-transform: translateX(0);
+            transform: translateX(0);
+    opacity: 1; } }
+
+.kuiToast {
+  box-shadow: 0 16px 16px -8px rgba(0, 0, 0, 0.1);
+  position: relative;
+  padding: 12px;
+  background-color: #FFF;
+  border: 1px solid #D9D9D9; }
+
+/**
+   * 1. Fit button to icon.
+   */
+.kuiToast__closeButton {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  line-height: 0;
+  /* 1 */
+  -webkit-appearance: none;
+     -moz-appearance: none;
+          appearance: none; }
+  .kuiToast__closeButton svg {
+    fill: gray; }
+  .kuiToast__closeButton:hover svg {
+    fill: #000; }
+  .kuiToast__closeButton:focus {
+    background-color: #e6f2f6; }
+    .kuiToast__closeButton:focus svg {
+      fill: #0079a5; }
+
+.kuiToast--info {
+  border-top: 2px solid #0079a5; }
+
+.kuiToast--success {
+  border-top: 2px solid #00A69B; }
+
+.kuiToast--warning {
+  border-top: 2px solid #E5830E; }
+
+.kuiToast--danger {
+  border-top: 2px solid #A30000; }
+
+/**
+ * 1. Align icon with first line of title text if it wraps.
+ * 2. Apply margin to all but last item in the flex.
+ */
+.kuiToastHeader {
+  font-size: 16px;
+  font-size: 1rem;
+  line-height: 24px;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-align: baseline;
+  -webkit-align-items: baseline;
+      -ms-flex-align: baseline;
+          align-items: baseline;
+  /* 1 */ }
+  .kuiToastHeader > * + * {
+    margin-left: 8px;
+    /* 2 */ }
+
+/**
+   * 1. Vertically center icon with first line of title.
+   */
+.kuiToastHeader__icon {
+  -webkit-box-flex: 0;
+  -webkit-flex: 0 0 auto;
+      -ms-flex: 0 0 auto;
+          flex: 0 0 auto;
+  fill: #000;
+  -webkit-transform: translateY(2px);
+          transform: translateY(2px);
+  /* 1 */ }
+
+.kuiToastHeader__title {
+  color: #000;
+  font-weight: 300; }
+
+.kuiToastHeader--withBody {
+  margin-bottom: 9px; }
 
 .kuiTitle {
   font-size: 24px;
