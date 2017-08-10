@@ -1,5 +1,5 @@
 import Fn from '../fn.js';
-import math from 'mathjs';
+import { math } from '../../lib/math.js';
 import { getMathjsScope } from './get_mathjs_scope';
 
 export default new Fn({

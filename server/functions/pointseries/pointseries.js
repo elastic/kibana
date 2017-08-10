@@ -1,4 +1,4 @@
-import math from 'mathjs';
+import { math } from '../../../common/lib/math.js';
 import moment from 'moment';
 import { groupBy, zipObject, uniqBy, omit, pickBy, find, uniq, map, mapValues } from 'lodash';
 import Fn from '../../../common/functions/fn.js';
