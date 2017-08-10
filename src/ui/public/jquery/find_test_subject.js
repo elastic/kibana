@@ -1,4 +1,4 @@
-import testSubjSelector from '@spalger/test-subj-selector';
+import testSubjSelector from '@elastic/test-subj-selector';
 
 module.exports = function bindToJquery($) {
 
