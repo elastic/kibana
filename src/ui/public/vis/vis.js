@@ -135,7 +135,9 @@ export function VisProvider(Private, indexPatterns, timefilter, getAppState) {
     clone() {
       const uiJson = this.hasUiState() ? this.getUiState().toJSON() : {};
       const uiState = new PersistedState(uiJson);
-      return new Vis(this.indexPattern, this.getState(), uiState);
+      const clonedVis = new Vis(this.indexPattern, this.getState(), uiState);
+      clonedVis.editorMode = this.editorMode;
+      return clonedVis;
     }
 
     requesting() {
