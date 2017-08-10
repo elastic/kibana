@@ -1,4 +1,4 @@
-import numeral from '@spalger/numeral';
+import numeral from '@elastic/numeral';
 import handlebars from 'handlebars/dist/handlebars';
 import { durationInputOptions } from './durations';
 import { DurationFormat } from '../../../../kibana/common/field_formats/types/duration';

@@ -5,7 +5,7 @@
     </a>
   </small>
 
-  <label>
+  <label for="scriptFieldNumeral">
     Numeral.js format pattern
     <small>
       (Default: "{{ editor.field.format.getParamDefaults().pattern }}")
@@ -14,6 +14,7 @@
 </div>
 
 <field-format-editor-pattern
+  id="scriptFieldNumeral"
   ng-model="editor.formatParams.pattern"
   placeholder="editor.field.format.getParamDefaults().pattern"
   inputs="cntrl.sampleInputs">
