@@ -11,19 +11,32 @@ export default class extends Component {
     super(props);
 
     this.state = {
-      isPopoverOpen: false,
+      isPopoverOpen1: false,
+      isPopoverOpen2: false,
     };
   }
 
-  onButtonClick() {
+  onButtonClick1() {
     this.setState({
-      isPopoverOpen: !this.state.isPopoverOpen,
+      isPopoverOpen1: !this.state.isPopoverOpen1,
     });
   }
 
-  closePopover() {
+  closePopover1() {
     this.setState({
-      isPopoverOpen: false,
+      isPopoverOpen1: false,
+    });
+  }
+
+  onButtonClick2() {
+    this.setState({
+      isPopoverOpen2: !this.state.isPopoverOpen2,
+    });
+  }
+
+  closePopover2() {
+    this.setState({
+      isPopoverOpen2: false,
     });
   }
 
@@ -32,13 +45,13 @@ export default class extends Component {
       <div>
         <KuiPopover
           button={(
-            <button onClick={this.onButtonClick.bind(this)}>
+            <button onClick={this.onButtonClick1.bind(this)}>
               Popover anchored to the right.
             </button>
           )}
-          isOpen={this.state.isPopoverOpen}
+          isOpen={this.state.isPopoverOpen1}
+          closePopover={this.closePopover1.bind(this)}
           anchorPosition="right"
-          closePopover={() => {}}
         >
           Popover content
         </KuiPopover>
@@ -47,13 +60,13 @@ export default class extends Component {
 
         <KuiPopover
           button={(
-            <button onClick={this.onButtonClick.bind(this)}>
+            <button onClick={this.onButtonClick2.bind(this)}>
               Popover anchored to the left.
             </button>
           )}
-          isOpen={this.state.isPopoverOpen}
+          isOpen={this.state.isPopoverOpen2}
+          closePopover={this.closePopover2.bind(this)}
           anchorPosition="left"
-          closePopover={() => {}}
         >
           Popover content
         </KuiPopover>

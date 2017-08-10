@@ -36,8 +36,8 @@ export default class extends Component {
           </button>
         )}
         isOpen={this.state.isPopoverOpen}
+        closePopover={this.closePopover.bind(this)}
         bodyClassName="yourClassNameHere"
-        closePopover={() => {}}
       >
         It's hard to tell but there's a custom class on this element
       </KuiPopover>
