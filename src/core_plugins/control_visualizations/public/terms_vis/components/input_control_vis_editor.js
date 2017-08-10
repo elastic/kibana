@@ -1,27 +1,24 @@
 import _ from 'lodash';
-import React, { Component } from 'react';
+import React, { Component, PropTypes } from 'react';
 import { ControlEditor } from './control_editor';
 import { RangeControlEditor } from './range_control_editor';
 import { TermsControlEditor } from './terms_control_editor';
 import { TextControlEditor } from './text_control_editor';
-import {
-  KuiButton,
-  KuiButtonIcon,
-} from 'ui_framework/components';
+import { KuiFieldGroup, KuiFieldGroupSection, KuiButton, KuiButtonIcon } from 'ui_framework/components';
 import { addControl, getDefaultOptions, moveControl, newControl, removeControl, setControl } from '../lib/editor_utils';
 
 export class InputControlVisEditor extends Component {
   constructor(props) {
     super(props);
 
-    this.props.scope.vis.params = props.scope.vis.params;
     this.getIndexPatterns = async () => {
       return await props.scope.vis.API.indexPatterns.getIndexPatterns();
     };
-    this.getIndexPattern = (indexPatternId) => {
-      return props.scope.vis.API.indexPatterns.get(indexPatternId);
+    this.getIndexPattern = async (indexPatternId) => {
+      return await props.scope.vis.API.indexPatterns.get(indexPatternId);
     };
     this.handleAddControl = this.handleAddControl.bind(this);
+    this.handleUpdateFiltersChange = this.handleUpdateFiltersChange.bind(this);
   }
 
   setVisParam(paramName, paramValue) {
@@ -79,6 +76,10 @@ export class InputControlVisEditor extends Component {
 
   handleAddControl() {
     this.setVisParam('controls', addControl(this.props.scope.vis.params.controls, newControl('terms')));
+  }
+
+  handleUpdateFiltersChange(evt) {
+    this.setVisParam('updateFiltersOnChange', evt.target.checked);
   }
 
   renderControls() {
@@ -142,6 +143,24 @@ export class InputControlVisEditor extends Component {
     return (
       <div>
 
+        <div className="sidebar-item">
+          <div className="vis-editor-agg-header">
+            <KuiFieldGroup>
+              <KuiFieldGroupSection>
+                <label>
+                  <input
+                    className="kuiCheckBox"
+                    type="checkbox"
+                    checked={this.props.scope.vis.params.updateFiltersOnChange}
+                    onChange={this.handleUpdateFiltersChange}
+                  />
+                  Update kibana filters on each change
+                </label>
+              </KuiFieldGroupSection>
+            </KuiFieldGroup>
+          </div>
+        </div>
+
         {this.renderControls()}
 
         <KuiButton
@@ -156,3 +175,8 @@ export class InputControlVisEditor extends Component {
     );
   }
 }
+
+InputControlVisEditor.propTypes = {
+  scope: PropTypes.object.isRequired,
+  stageEditorParams: PropTypes.func.isRequired
+};

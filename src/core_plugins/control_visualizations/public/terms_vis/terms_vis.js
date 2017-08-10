@@ -19,7 +19,8 @@ function TermsVisProvider(Private) {
     visualization: VisController,
     visConfig: {
       defaults: {
-        controls: []
+        controls: [],
+        updateFiltersOnChange: false
       },
     },
     editor: 'default',

@@ -30,6 +30,7 @@ class VisController {
   drawVis() {
     render(
       <InputControlVis
+        updateFiltersOnChange={this.vis.params.updateFiltersOnChange}
         controls={this.controls}
         stageFilter={this.stageFilter.bind(this)}
         submitFilters={this.submitFilters.bind(this)}
@@ -55,7 +56,13 @@ class VisController {
   stageFilter(controlIndex, newValue, kbnFilter) {
     this.controls[controlIndex].value = newValue;
     this.controls[controlIndex].stagedFilter = kbnFilter;
-    this.drawVis();
+    if (this.vis.params.updateFiltersOnChange) {
+      // submit filters on each control change
+      this.submitFilters();
+    } else {
+      // Do not submit filters, just update vis so controls are updated with latest value
+      this.drawVis();
+    }
   }
 
   submitFilters() {

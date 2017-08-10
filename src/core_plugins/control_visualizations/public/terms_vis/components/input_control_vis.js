@@ -26,6 +26,51 @@ export class InputControlVis extends Component {
   }
 
   render() {
+    const nothingStaged = this.props.controls.map((control) => {
+      if (control.stagedFilter) {
+        return false;
+      }
+      return true;
+    }).reduce((a, b) => {
+      return a || b;
+    });
+
+    let stagingButtons;
+    if (!this.props.updateFiltersOnChange) {
+      stagingButtons = (
+        <KuiFieldGroup>
+          <KuiFieldGroupSection>
+            <KuiButton
+              buttonType="primary"
+              type="button"
+              onClick={this.handleSubmit}
+              disabled={nothingStaged}
+            >
+              Update filters
+            </KuiButton>
+          </KuiFieldGroupSection>
+          <KuiFieldGroupSection>
+            <KuiButton
+              buttonType="basic"
+              type="button"
+              onClick={this.handleReset}
+              disabled={nothingStaged}
+            >
+              Cancel
+            </KuiButton>
+          </KuiFieldGroupSection>
+          <KuiFieldGroupSection>
+            <KuiButton
+              buttonType="basic"
+              type="button"
+              onClick={this.handleClearAll}
+            >
+              Remove filters
+            </KuiButton>
+          </KuiFieldGroupSection>
+        </KuiFieldGroup>
+      );
+    }
     return (
       <div className="inputControlVis">
         {this.props.controls.map((control, index) => {
@@ -61,35 +106,9 @@ export class InputControlVis extends Component {
           return controlComponent;
         }
         )}
-        <KuiFieldGroup>
-          <KuiFieldGroupSection>
-            <KuiButton
-              buttonType="primary"
-              type="button"
-              onClick={this.handleSubmit}
-            >
-              Update filters
-            </KuiButton>
-          </KuiFieldGroupSection>
-          <KuiFieldGroupSection>
-            <KuiButton
-              buttonType="basic"
-              type="button"
-              onClick={this.handleReset}
-            >
-              Cancel
-            </KuiButton>
-          </KuiFieldGroupSection>
-          <KuiFieldGroupSection>
-            <KuiButton
-              buttonType="danger"
-              type="button"
-              onClick={this.handleClearAll}
-            >
-              Remove filters
-            </KuiButton>
-          </KuiFieldGroupSection>
-        </KuiFieldGroup>
+
+        {stagingButtons}
+
       </div>
     );
   }
@@ -100,5 +119,6 @@ InputControlVis.propTypes = {
   submitFilters: PropTypes.func.isRequired,
   resetControls: PropTypes.func.isRequired,
   clearControls: PropTypes.func.isRequired,
-  controls: PropTypes.array.isRequired
+  controls: PropTypes.array.isRequired,
+  updateFiltersOnChange: PropTypes.bool
 };
