@@ -14,6 +14,7 @@ export default () => (
     </KuiButton>
 
     <br />
+    <br />
 
     <KuiButton
       buttonType="basic"
