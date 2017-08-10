@@ -1,7 +1,7 @@
 import d3 from 'd3';
 import _ from 'lodash';
 import $ from 'jquery';
-import marked from '../../../../forked/marked/lib/marked';
+import marked from '../../../../forked/marked';
 import { NoResults } from 'ui/errors';
 import { Binder } from 'ui/binder';
 import { VislibLibLayoutLayoutProvider } from './layout/layout';

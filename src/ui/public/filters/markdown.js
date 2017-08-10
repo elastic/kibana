@@ -1,4 +1,4 @@
-import marked from '../../../forked/marked/lib/marked';
+import marked from '../../../forked/marked';
 import { uiModules } from 'ui/modules';
 import 'angular-sanitize';
 
