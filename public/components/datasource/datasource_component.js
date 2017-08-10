@@ -12,10 +12,8 @@ export const DatasourceComponent = (props) => {
     datasourceDef,
     stateDatasource,
     selectDatasource,
-    args,
     stateArgs,
     updateArgs,
-    setDatasourceArgs,
     setDatasourceAst,
     selecting,
     setSelecting,
@@ -48,14 +46,8 @@ export const DatasourceComponent = (props) => {
   };
 
   const save = () => {
-    if (stateDatasource !== datasource) {
-      // if this is a new datasource, create an AST object and update the whole thing
-      const datasourceAst = getDatasourceFunctionNode(stateDatasource.name, stateArgs);
-      setDatasourceAst && setDatasourceAst(datasourceAst);
-    } else if (stateArgs !== args) {
-      // otherwise, simply update the arguments
-      setDatasourceArgs && setDatasourceArgs(stateArgs);
-    }
+    const datasourceAst = getDatasourceFunctionNode(stateDatasource.name, stateArgs);
+    setDatasourceAst && setDatasourceAst(datasourceAst);
   };
 
   if (selecting) {
@@ -92,9 +84,7 @@ DatasourceComponent.propTypes = {
   datasourceDef: PropTypes.object.isRequired,
   stateDatasource: PropTypes.object.isRequired,
   selectDatasource: PropTypes.func,
-  setDatasourceArgs: PropTypes.func,
   setDatasourceAst: PropTypes.func,
-  args: PropTypes.object.isRequired,
   stateArgs: PropTypes.object.isRequired,
   updateArgs: PropTypes.func,
   resetArgs: PropTypes.func.isRequired,
