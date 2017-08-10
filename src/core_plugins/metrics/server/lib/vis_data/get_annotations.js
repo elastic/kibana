@@ -9,7 +9,7 @@ function validAnnotation(annotation) {
     annotation.template;
 }
 
-export default (req, panel) => {
+export default async (req, panel) => {
   const { callWithRequest } = req.server.plugins.elasticsearch.getCluster('data');
   const bodies = panel.annotations
     .filter(validAnnotation)
@@ -30,23 +30,23 @@ export default (req, panel) => {
       return bodies;
     });
 
-  if (!bodies.length) return Promise.resolve({ responses: [] });
-  return callWithRequest(req, 'msearch', {
-    body: bodies.reduce((acc, item) => acc.concat(item), [])
-  })
-    .then(resp => {
-      const results = {};
-      panel.annotations
-        .filter(validAnnotation)
-        .forEach((annotation, index) => {
-          const data = resp.responses[index];
-          results[annotation.id] = handleAnnotationResponse(data, annotation);
-        });
-      return results;
-    })
-    .catch(error => {
-      if (error.message === 'missing-indices') return {};
-      throw error;
+  if (!bodies.length) return { responses: [] };
+  try {
+    const resp = await callWithRequest(req, 'msearch', {
+      body: bodies.reduce((acc, item) => acc.concat(item), [])
     });
+    const results = {};
+    panel.annotations
+      .filter(validAnnotation)
+      .forEach((annotation, index) => {
+        const data = resp.responses[index];
+        results[annotation.id] = handleAnnotationResponse(data, annotation);
+      });
+    return results;
+  } catch (error) {
+    if (error.message === 'missing-indices') return { responses: [] };
+    throw error;
+  }
+
 };
 
