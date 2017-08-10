@@ -44,6 +44,7 @@ export async function termsControlFactory(controlParams, kbnApi, callback) {
     const filterManager = new PhraseFilterManager(controlParams.fieldName, indexPattern, kbnApi.queryFilter);
     callback({
       value: filterManager.getValueFromFilterBar(),
+      options: controlParams.options,
       type: controlParams.type,
       indexPattern: indexPattern,
       field: indexPattern.fields.byName[controlParams.fieldName],

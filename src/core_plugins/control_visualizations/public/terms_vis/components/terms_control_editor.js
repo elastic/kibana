@@ -31,6 +31,20 @@ export class TermsControlEditor extends Component {
 
         <div className="kuiSideBarFormRow">
           <label className="kuiSideBarFormRow__label">
+            Enable Multiselect
+          </label>
+          <div className="kuiSideBarFormRow__control">
+            <input
+              className="kuiCheckBox"
+              type="checkbox"
+              checked={this.props.controlParams.options.multiselect}
+              onChange={this.props.handleMultiselectChange}
+            />
+          </div>
+        </div>
+
+        <div className="kuiSideBarFormRow">
+          <label className="kuiSideBarFormRow__label">
             Size
           </label>
           <div className="kuiSideBarFormRow__control kuiFieldGroupSection--wide">
@@ -54,5 +68,6 @@ TermsControlEditor.propTypes = {
   controlParams: PropTypes.object.isRequired,
   handleFieldNameChange: PropTypes.func.isRequired,
   handleIndexPatternChange: PropTypes.func.isRequired,
+  handleMultiselectChange: PropTypes.func.isRequired,
   handleSizeChange: PropTypes.func.isRequired
 };

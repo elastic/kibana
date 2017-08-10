@@ -13,7 +13,7 @@ export class TermsControl extends Component {
     let newValue = '';
     let newFilter = undefined;
     if (evt) {
-      newValue = evt.value;
+      newValue = evt;
       newFilter = this.props.control.filterManager.createFilter(newValue);
     }
     this.props.stageFilter(this.props.controlIndex, newValue, newFilter);
@@ -27,6 +27,8 @@ export class TermsControl extends Component {
         <Select
           className="terms-select"
           placeholder="Select..."
+          multi={this.props.control.options.multiselect}
+          simpleValue={true}
           value={this.props.control.value}
           options={this.props.control.terms}
           onChange={this.handleOnChange.bind(null, this.props.control)}

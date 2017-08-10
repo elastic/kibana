@@ -1,6 +1,8 @@
 import _ from 'lodash';
 import { buildPhraseFilter } from 'ui/filter_manager/lib/phrase';
 
+const emptyValue = '';
+
 export class PhraseFilterManager {
   constructor(fieldName, indexPattern, queryFilter) {
     this.fieldName = fieldName;
@@ -9,37 +11,119 @@ export class PhraseFilterManager {
   }
 
   createFilter(value) {
-    return buildPhraseFilter(
-      this.indexPattern.fields.byName[this.fieldName],
-      value,
-      this.indexPattern);
+    const phraseFilters = value.split(',').map((phrase) => {
+      return buildPhraseFilter(
+        this.indexPattern.fields.byName[this.fieldName],
+        phrase,
+        this.indexPattern);
+    });
+
+    if (phraseFilters.length === 1) {
+      return phraseFilters[0];
+    } else {
+      // convert phrase filters into bool query
+      const shouldFilters = phraseFilters.map((filter) => {
+        if (_.has(filter, 'query')) {
+          return filter.query;
+        }
+        delete filter.meta;
+        return filter;
+      });
+      return {
+        bool: {
+          should: shouldFilters
+        },
+        meta: {
+          alias: `${this.fieldName}: ${value}`,
+          index: this.indexPattern.id
+        }
+      };
+    }
   }
 
   findFilters() {
     const kbnFilters = _.flatten([this.queryFilter.getAppFilters(), this.queryFilter.getGlobalFilters()]);
     return kbnFilters.filter((kbnFilter) => {
-      if (_.has(kbnFilter, 'script')
-        && _.get(kbnFilter, 'meta.index') === this.indexPattern.id
-        && _.get(kbnFilter, 'meta.field') === this.fieldName) {
-        //filter is a scripted filter for this index/field
-        return true;
-      } else if (_.has(kbnFilter, ['query', 'match', this.fieldName]) && _.get(kbnFilter, 'meta.index') === this.indexPattern.id) {
-        //filter is a match filter for this index/field
-        return true;
-      }
-      return false;
+      return this._findFilter(kbnFilter);
     });
+  }
+
+  _findFilter(kbnFilter) {
+    // bool filter - multiple phrase filters
+    if (_.has(kbnFilter, 'bool.should')) {
+      const subFilters = _.get(kbnFilter, 'bool.should')
+      .map((kbnFilter) => {
+        return this._findFilter(kbnFilter);
+      });
+      return subFilters.reduce((a, b) => {
+        return a || b;
+      });
+    }
+
+    // scripted field filter
+    if (_.has(kbnFilter, 'script')
+      && _.get(kbnFilter, 'meta.index') === this.indexPattern.id
+      && _.get(kbnFilter, 'meta.field') === this.fieldName) {
+      return true;
+    }
+
+    // single phrase filter
+    if (_.has(kbnFilter, ['query', 'match', this.fieldName])) {
+      return true;
+    }
+
+    // single phrase filter from bool filter
+    if (_.has(kbnFilter, ['match', this.fieldName])) {
+      return true;
+    }
+
+    return false;
   }
 
   getValueFromFilterBar() {
     const kbnFilters = this.findFilters();
     if (kbnFilters.length === 0) {
-      return '';
+      return emptyValue;
     } else {
-      if (_.has(kbnFilters[0], 'script')) {
-        return _.get(kbnFilters[0], 'script.script.params.value');
-      }
-      return _.get(kbnFilters[0], ['query', 'match', this.fieldName, 'query']);
+      const values = kbnFilters
+        .map((kbnFilter) => {
+          return this._getValueFromFilter(kbnFilter);
+        });
+      return values.join();
     }
+  }
+
+  _getValueFromFilter(kbnFilter) {
+    // bool filter - multiple phrase filters
+    if (_.has(kbnFilter, 'bool.should')) {
+      return _.get(kbnFilter, 'bool.should')
+      .map((kbnFilter) => {
+        return this._getValueFromFilter(kbnFilter);
+      })
+      .filter((value) => {
+        if (value) {
+          return true;
+        }
+        return false;
+      })
+      .join();
+    }
+
+    // scripted field filter
+    if (_.has(kbnFilter, 'script')) {
+      return _.get(kbnFilter, 'script.script.params.value', emptyValue);
+    }
+
+    // single phrase filter
+    if (_.has(kbnFilter, ['query', 'match', this.fieldName])) {
+      return _.get(kbnFilter, ['query', 'match', this.fieldName, 'query'], emptyValue);
+    }
+
+    // single phrase filter from bool filter
+    if (_.has(kbnFilter, ['match', this.fieldName])) {
+      return _.get(kbnFilter, ['match', this.fieldName, 'query'], emptyValue);
+    }
+
+    return emptyValue;
   }
 }

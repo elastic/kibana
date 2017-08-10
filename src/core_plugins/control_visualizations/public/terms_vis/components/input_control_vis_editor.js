@@ -57,6 +57,12 @@ export class InputControlVisEditor extends Component {
     this.setVisParam('controls', setControl(this.props.scope.vis.params.controls, controlIndex, updatedControl));
   }
 
+  handleCheckboxOptionChange(controlIndex, optionName, evt) {
+    const updatedControl = this.props.scope.vis.params.controls[controlIndex];
+    updatedControl.options[optionName] = evt.target.checked;
+    this.setVisParam('controls', setControl(this.props.scope.vis.params.controls, controlIndex, updatedControl));
+  }
+
   handleNumberOptionChange(controlIndex, optionName, evt) {
     const updatedControl = this.props.scope.vis.params.controls[controlIndex];
     updatedControl.options[optionName] = parseFloat(evt.target.value);
@@ -87,6 +93,7 @@ export class InputControlVisEditor extends Component {
               handleFieldNameChange={this.handleFieldNameChange.bind(this, controlIndex)}
               getIndexPatterns={this.getIndexPatterns}
               getIndexPattern={this.getIndexPattern}
+              handleMultiselectChange={this.handleCheckboxOptionChange.bind(this, controlIndex, 'multiselect')}
               handleSizeChange={this.handleNumberOptionChange.bind(this, controlIndex, 'size')}
             />
           );

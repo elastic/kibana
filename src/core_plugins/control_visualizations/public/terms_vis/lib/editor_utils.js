@@ -48,6 +48,7 @@ export const getDefaultOptions = (type) => {
       defaultOptions.step = 1;
       break;
     case 'terms':
+      defaultOptions.multiselect = true;
       defaultOptions.size = 5;
       defaultOptions.order = 'desc';
       break;
