@@ -49,10 +49,6 @@ $callOutTypes: (
    * 1. Vertically center icon with first line of title.
    */
   .kuiCallOutHeader__icon {
-    fill: $kuiColorPrimary;
+    flex: 0 0 auto;
     transform: translateY(2px); /* 1 */
-  }
-
-  .kuiCallOutHeader__title {
-    color: $kuiColorPrimary;
   }

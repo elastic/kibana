@@ -24,3 +24,22 @@
   }
 }
 
+/**
+ * Set scroll bar appearance on Chrome.
+ */
+@mixin kuiScrollBar {
+  &::-webkit-scrollbar {
+    width: 16px;
+    height: 16px;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background-color: rgba($kuiColorDarkShade, 0.5);
+    border: 6px solid transparent;
+    background-clip: content-box;
+  }
+
+  &::-webkit-scrollbar-track {
+    background-color: transparent;
+  }
+}

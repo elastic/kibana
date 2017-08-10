@@ -1,10 +1,11 @@
 // Header. Includes breadcrumbs of nav buttons.
 
 .kuiHeader {
+  @include kuiBottomShadowSmall;
+
   display: flex;
   background: $kuiHeaderBackgroundColor;
   border-bottom: $kuiBorderThin;
-  @include kuiBottomShadowSmall;
 }
 
   .kuiHeader__notification {

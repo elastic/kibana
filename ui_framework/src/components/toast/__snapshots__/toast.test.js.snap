@@ -1,0 +1,17 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`KuiToast is rendered 1`] = `
+<div
+  aria-label="aria-label"
+  class="kuiToast testClass1 testClass2"
+  data-test-subj="test subject string"
+>
+  <div
+    class="kuiToastHeader"
+  >
+    <span
+      class="kuiToastHeader__title"
+    />
+  </div>
+</div>
+`;
