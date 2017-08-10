@@ -2,6 +2,8 @@
 // filesystem unless this is here.
 const mockFs: any = jest.genMockFromModule('fs');
 mockFs.readdir = (err: any, cb: any) => cb(null, ['foo', 'bar']);
+// Required by PluginService -> HttpService -> HttpServer -> body-parser.
+mockFs.readdirSync = () => [];
 jest.mock('fs', () => mockFs);
 
 import { pick } from 'lodash';
