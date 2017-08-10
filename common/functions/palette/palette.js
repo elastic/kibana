@@ -14,6 +14,7 @@ export default new Fn({
     },
     gradient: {
       types: ['boolean', 'null'],
+      default: false,
       help: 'Should we prefer to make a gradient where supported and useful?',
     },
   },
@@ -21,7 +22,7 @@ export default new Fn({
     return {
       type: 'palette',
       colors: args._,
-      gradient: args.gradient == null ? false : args.gradient,
+      gradient: args.gradient,
     };
   },
 });
