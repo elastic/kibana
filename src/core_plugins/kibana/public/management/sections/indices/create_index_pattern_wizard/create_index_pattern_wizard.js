@@ -78,6 +78,37 @@ uiModules.get('apps/management')
     });
   }
 
+  function getIndices(pattern, limit = MAX_NUMBER_OF_MATCHING_INDICES) {
+    const params = {
+      index: pattern,
+      ignore: [404],
+      body: {
+        size: 0, // no hits
+        aggs: {
+          indices: {
+            terms: {
+              field: '_index',
+              size: limit,
+            }
+          }
+        }
+      }
+    };
+
+    return es.search(params)
+      .then(response => {
+        if (!response || response.error || !response.aggregations) {
+          return [];
+        }
+
+        return response.aggregations.indices.buckets.map(bucket => {
+          return {
+            name: bucket.key
+          };
+        });
+      });
+  }
+
   const whiteListIndices = indices => {
     if (!indices) {
       return indices;
@@ -118,44 +149,13 @@ uiModules.get('apps/management')
     }
 
     const thisFetchMatchingIndicesRequest = mostRecentFetchMatchingIndicesRequest = Promise.all([
-      createReasonableWait(),
-    ])
-    .then(([
-    ]) => {
-      if (thisFetchMatchingIndicesRequest === mostRecentFetchMatchingIndicesRequest) {
-        const matchingIndicesResponse = [{ name: 'logstash-0' }, { name: '.kibana' }];
-        const partialMatchingIndicesResponse = [{ name: 'logstash-0' }, { name: '.kibana' }];
-        matchingIndices = matchingIndicesResponse.sort();
-        partialMatchingIndices = partialMatchingIndicesResponse.sort();
-        updateWhiteListedIndices();
-        this.isFetchingMatchingIndices = false;
-      }
-    }).catch(error => {
-      notify.error(error);
-    });
-
-    /**
-    this.isFetchingMatchingIndices = true;
-
-    // Default to searching for all indices.
-    const exactSearchQuery = this.formValues.name;
-    let partialSearchQuery = this.formValues.name;
-
-    if (!_.endsWith(partialSearchQuery, '*')) {
-      partialSearchQuery = `${partialSearchQuery}*`;
-    }
-    if (!_.startsWith(partialSearchQuery, '*')) {
-      partialSearchQuery = `*${partialSearchQuery}`;
-    }
-
-    const thisFetchMatchingIndicesRequest = mostRecentFetchMatchingIndicesRequest = Promise.all([
-      indicesService.getIndices(exactSearchQuery, MAX_NUMBER_OF_MATCHING_INDICES),
-      indicesService.getIndices(partialSearchQuery, MAX_NUMBER_OF_MATCHING_INDICES),
-      createReasonableWait(),
+      getIndices(exactSearchQuery),
+      getIndices(partialSearchQuery),
+      createReasonableWait()
     ])
     .then(([
       matchingIndicesResponse,
-      partialMatchingIndicesResponse,
+      partialMatchingIndicesResponse
     ]) => {
       if (thisFetchMatchingIndicesRequest === mostRecentFetchMatchingIndicesRequest) {
         matchingIndices = matchingIndicesResponse.sort();
@@ -166,7 +166,6 @@ uiModules.get('apps/management')
     }).catch(error => {
       notify.error(error);
     });
-    */
   };
 
   this.fetchExistingIndices = () => {
@@ -174,25 +173,8 @@ uiModules.get('apps/management')
     const allExistingLocalAndRemoteIndicesPattern = '*,*:*';
 
     Promise.all([
-      createReasonableWait(),
-    ])
-    .then(([]) => {
-      const allIndicesResponse = [{ name: 'logstash-0' }, { name: '.kibana' }];
-      // Cache all indices.
-      allIndices = allIndicesResponse.sort();
-      updateWhiteListedIndices();
-      this.isFetchingExistingIndices = false;
-    }).catch(error => {
-      notify.error(error);
-    });
-
-    /**
-    this.isFetchingExistingIndices = true;
-    const allExistingLocalAndRemoteIndicesPattern = '*,*:*';
-
-    Promise.all([
-      indicesService.getIndices(allExistingLocalAndRemoteIndicesPattern, MAX_NUMBER_OF_MATCHING_INDICES),
-      createReasonableWait(),
+      getIndices(allExistingLocalAndRemoteIndicesPattern),
+      createReasonableWait()
     ])
     .then(([allIndicesResponse]) => {
       // Cache all indices.
@@ -202,7 +184,6 @@ uiModules.get('apps/management')
     }).catch(error => {
       notify.error(error);
     });
-    */
   };
 
   this.isSystemIndicesCheckBoxVisible = () => (
