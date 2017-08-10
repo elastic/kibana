@@ -1,5 +1,6 @@
 /optimize
 /src/fixtures/vislib/mock_data
+/src/forked/*
 /src/ui/public/angular-bootstrap
 /test/fixtures/scenarios
 /src/core_plugins/console/public/webpackShims

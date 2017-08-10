@@ -1,6 +1,6 @@
 import { uiModules } from 'ui/modules';
 import _ from 'lodash';
-import marked from 'marked';
+import marked from '../../../../forked/marked/lib/marked';
 import { modifyUrl } from 'ui/url';
 marked.setOptions({
   gfm: true, // Github-flavored markdown
