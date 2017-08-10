@@ -632,11 +632,11 @@ table {
   .kuiFormRow.kuiFormRow--invalid textarea {
     box-shadow: 0 4px 4px -2px rgba(0, 0, 0, 0.1), 0 0 0 1px rgba(0, 0, 0, 0.16), inset 0 0 0 0 #FFF, inset 0 -2px 0 0 #A30000 !important; }
 
-.kuiFormCheckbox {
+.kuiCheckbox {
   position: relative;
   height: 24px;
   margin-top: 8px; }
-  .kuiFormCheckbox .kuiFormCheckbox__label {
+  .kuiCheckbox .kuiCheckbox__label {
     position: absolute;
     padding-left: 32px;
     line-height: 24px;
@@ -645,7 +645,7 @@ table {
     z-index: 2;
     font-size: 14px;
     cursor: pointer; }
-  .kuiFormCheckbox .kuiFormCheckbox__square {
+  .kuiCheckbox .kuiCheckbox__square {
     position: absolute;
     height: 24px;
     width: 24px;
@@ -653,25 +653,25 @@ table {
     border: 1px solid #D9D9D9;
     background: #fbfbfb;
     z-index: 0; }
-  .kuiFormCheckbox .kuiFormCheckbox__check {
+  .kuiCheckbox .kuiCheckbox__check {
     height: 100%;
     width: 100%; }
-  .kuiFormCheckbox .kuiFormCheckbox__input {
+  .kuiCheckbox .kuiCheckbox__input {
     position: absolute;
     opacity: 0; }
-    .kuiFormCheckbox .kuiFormCheckbox__input:checked ~ .kuiFormCheckbox__square .kuiFormCheckbox__check {
+    .kuiCheckbox .kuiCheckbox__input:checked ~ .kuiCheckbox__square .kuiCheckbox__check {
       background-color: #3F3F3F;
       -webkit-mask: url("../src/components/icon/assets/check.svg") center center no-repeat;
               mask: url("../src/components/icon/assets/check.svg") center center no-repeat; }
-    .kuiFormCheckbox .kuiFormCheckbox__input:focus ~ .kuiFormCheckbox__square {
+    .kuiCheckbox .kuiCheckbox__input:focus ~ .kuiCheckbox__square {
       background-color: #e6f2f6;
       border-color: #0079a5; }
-    .kuiFormCheckbox .kuiFormCheckbox__input:checked:focus ~ .kuiFormCheckbox__square .kuiFormCheckbox__check {
+    .kuiCheckbox .kuiCheckbox__input:checked:focus ~ .kuiCheckbox__square .kuiCheckbox__check {
       background-color: #3F3F3F;
       -webkit-mask: url("../src/components/icon/assets/check.svg") center center no-repeat;
               mask: url("../src/components/icon/assets/check.svg") center center no-repeat; }
 
-.kuiFormPassword {
+.kuiFieldNumber {
   border: none;
   font-size: 14px;
   font-family: "Roboto", Helvetica, Arial, sans-serif;
@@ -683,23 +683,71 @@ table {
   transition: box-shadow 250ms ease-in, background 250ms ease-in;
   max-width: 400px;
   border-radius: 0; }
-  .kuiFormPassword:focus {
+  .kuiFieldNumber:focus {
     background: #FFF;
     box-shadow: 0 4px 4px -2px rgba(0, 0, 0, 0.1), 0 0 0 1px rgba(0, 0, 0, 0.16), inset 0 0 0 0 #FFF, inset 0 -2px 0 0 #0079a5; }
 
-.kuiFormRange {
+.kuiFieldPassword {
+  border: none;
+  font-size: 14px;
+  font-family: "Roboto", Helvetica, Arial, sans-serif;
+  padding: 12px;
+  color: #3F3F3F;
+  min-width: 256px;
+  background: #fbfbfb;
+  box-shadow: 0 2px 2px -1px rgba(0, 0, 0, 0.1), 0 0 0 1px rgba(0, 0, 0, 0.08), inset -400px 0 0 0 #fbfbfb;
+  transition: box-shadow 250ms ease-in, background 250ms ease-in;
+  max-width: 400px;
+  border-radius: 0; }
+  .kuiFieldPassword:focus {
+    background: #FFF;
+    box-shadow: 0 4px 4px -2px rgba(0, 0, 0, 0.1), 0 0 0 1px rgba(0, 0, 0, 0.16), inset 0 0 0 0 #FFF, inset 0 -2px 0 0 #0079a5; }
+
+.kuiFieldSearch {
+  border: none;
+  font-size: 14px;
+  font-family: "Roboto", Helvetica, Arial, sans-serif;
+  padding: 12px;
+  color: #3F3F3F;
+  min-width: 256px;
+  background: #fbfbfb;
+  box-shadow: 0 2px 2px -1px rgba(0, 0, 0, 0.1), 0 0 0 1px rgba(0, 0, 0, 0.08), inset -400px 0 0 0 #fbfbfb;
+  transition: box-shadow 250ms ease-in, background 250ms ease-in;
+  max-width: 400px;
+  border-radius: 0; }
+  .kuiFieldSearch:focus {
+    background: #FFF;
+    box-shadow: 0 4px 4px -2px rgba(0, 0, 0, 0.1), 0 0 0 1px rgba(0, 0, 0, 0.16), inset 0 0 0 0 #FFF, inset 0 -2px 0 0 #0079a5; }
+
+.kuiFieldText {
+  border: none;
+  font-size: 14px;
+  font-family: "Roboto", Helvetica, Arial, sans-serif;
+  padding: 12px;
+  color: #3F3F3F;
+  min-width: 256px;
+  background: #fbfbfb;
+  box-shadow: 0 2px 2px -1px rgba(0, 0, 0, 0.1), 0 0 0 1px rgba(0, 0, 0, 0.08), inset -400px 0 0 0 #fbfbfb;
+  transition: box-shadow 250ms ease-in, background 250ms ease-in;
+  max-width: 400px;
+  border-radius: 0; }
+  .kuiFieldText:focus {
+    background: #FFF;
+    box-shadow: 0 4px 4px -2px rgba(0, 0, 0, 0.1), 0 0 0 1px rgba(0, 0, 0, 0.16), inset 0 0 0 0 #FFF, inset 0 -2px 0 0 #0079a5; }
+
+.kuiRange {
   -webkit-appearance: none;
   margin: 8px 0;
   width: 100%; }
-  .kuiFormRange:focus::-webkit-slider-thumb {
+  .kuiRange:focus::-webkit-slider-thumb {
     border: 2px solid #0079a5; }
-  .kuiFormRange:focus::-moz-range-thumb {
+  .kuiRange:focus::-moz-range-thumb {
     border: 2px solid #0079a5; }
-  .kuiFormRange:focus::-ms-thumb {
+  .kuiRange:focus::-ms-thumb {
     border: 2px solid #0079a5; }
-  .kuiFormRange:focus::-webkit-slider-runnable-track {
+  .kuiRange:focus::-webkit-slider-runnable-track {
     background-color: #0079a5; }
-  .kuiFormRange::-webkit-slider-runnable-track {
+  .kuiRange::-webkit-slider-runnable-track {
     cursor: pointer;
     height: 2px;
     transition: all 250ms ease-in;
@@ -707,7 +755,7 @@ table {
     background: #D9D9D9;
     border: 0 solid #D9D9D9;
     border-radius: 4px; }
-  .kuiFormRange::-webkit-slider-thumb {
+  .kuiRange::-webkit-slider-thumb {
     background: #FFF;
     border: 2px solid #3F3F3F;
     border-radius: 50%;
@@ -716,7 +764,7 @@ table {
     width: 16px;
     -webkit-appearance: none;
     margin-top: -7px; }
-  .kuiFormRange::-moz-range-track {
+  .kuiRange::-moz-range-track {
     cursor: pointer;
     height: 2px;
     transition: all 250ms ease-in;
@@ -724,14 +772,14 @@ table {
     background: #D9D9D9;
     border: 0 solid #D9D9D9;
     border-radius: 4px; }
-  .kuiFormRange::-moz-range-thumb {
+  .kuiRange::-moz-range-thumb {
     background: #FFF;
     border: 2px solid #3F3F3F;
     border-radius: 50%;
     cursor: pointer;
     height: 16px;
     width: 16px; }
-  .kuiFormRange::-ms-track {
+  .kuiRange::-ms-track {
     cursor: pointer;
     height: 2px;
     transition: all 250ms ease-in;
@@ -740,15 +788,15 @@ table {
     border-color: transparent;
     border-width: 8px 0;
     color: transparent; }
-  .kuiFormRange::-ms-fill-lower {
+  .kuiRange::-ms-fill-lower {
     background: #D9D9D9;
     border: 0 solid #D9D9D9;
     border-radius: 8px; }
-  .kuiFormRange::-ms-fill-upper {
+  .kuiRange::-ms-fill-upper {
     background: #D9D9D9;
     border: 0 solid #D9D9D9;
     border-radius: 8px; }
-  .kuiFormRange::-ms-thumb {
+  .kuiRange::-ms-thumb {
     background: #FFF;
     border: 2px solid #3F3F3F;
     border-radius: 50%;
@@ -757,23 +805,7 @@ table {
     width: 16px;
     margin-top: 0; }
 
-.kuiFormSearch {
-  border: none;
-  font-size: 14px;
-  font-family: "Roboto", Helvetica, Arial, sans-serif;
-  padding: 12px;
-  color: #3F3F3F;
-  min-width: 256px;
-  background: #fbfbfb;
-  box-shadow: 0 2px 2px -1px rgba(0, 0, 0, 0.1), 0 0 0 1px rgba(0, 0, 0, 0.08), inset -400px 0 0 0 #fbfbfb;
-  transition: box-shadow 250ms ease-in, background 250ms ease-in;
-  max-width: 400px;
-  border-radius: 0; }
-  .kuiFormSearch:focus {
-    background: #FFF;
-    box-shadow: 0 4px 4px -2px rgba(0, 0, 0, 0.1), 0 0 0 1px rgba(0, 0, 0, 0.16), inset 0 0 0 0 #FFF, inset 0 -2px 0 0 #0079a5; }
-
-.kuiFormSelect {
+.kuiSelect {
   -webkit-appearance: none;
      -moz-appearance: none;
           appearance: none;
@@ -788,14 +820,14 @@ table {
   transition: box-shadow 250ms ease-in, background 250ms ease-in;
   max-width: 400px;
   border-radius: 0; }
-  .kuiFormSelect:focus {
+  .kuiSelect:focus {
     background: #FFF;
     box-shadow: 0 4px 4px -2px rgba(0, 0, 0, 0.1), 0 0 0 1px rgba(0, 0, 0, 0.16), inset 0 0 0 0 #FFF, inset 0 -2px 0 0 #0079a5; }
 
-.kuiFormSelect::-ms-expand {
+.kuiSelect::-ms-expand {
   display: none; }
 
-.kuiFormSwitch {
+.kuiSwitch {
   position: relative;
   display: inline-block;
   height: 24px;
@@ -818,7 +850,7 @@ table {
   /**
    * When input is not checked, we shift around the positioning of sibling/child selectors.
    */ }
-  .kuiFormSwitch .kuiFormSwitch__label {
+  .kuiSwitch .kuiSwitch__label {
     position: absolute;
     left: 0;
     padding-left: 60px;
@@ -826,16 +858,16 @@ table {
     line-height: 24px;
     font-size: 14px;
     cursor: pointer; }
-  .kuiFormSwitch .kuiFormSwitch__input {
+  .kuiSwitch .kuiSwitch__input {
     position: absolute;
     opacity: 0;
     z-index: -1; }
-  .kuiFormSwitch .kuiFormSwitch__input:focus + .kuiFormSwitch__body {
+  .kuiSwitch .kuiSwitch__input:focus + .kuiSwitch__body {
     background: #FFF; }
-    .kuiFormSwitch .kuiFormSwitch__input:focus + .kuiFormSwitch__body .kuiFormSwitch__thumb {
+    .kuiSwitch .kuiSwitch__input:focus + .kuiSwitch__body .kuiSwitch__thumb {
       border-color: #0079a5;
       background-color: #0079a5; }
-  .kuiFormSwitch .kuiFormSwitch__body {
+  .kuiSwitch .kuiSwitch__body {
     width: 52px;
     height: 24px;
     background: #fbfbfb;
@@ -844,7 +876,7 @@ table {
     position: relative;
     border-radius: 24px;
     vertical-align: middle; }
-  .kuiFormSwitch .kuiFormSwitch__thumb {
+  .kuiSwitch .kuiSwitch__thumb {
     position: absolute;
     width: 24px;
     height: 24px;
@@ -858,7 +890,7 @@ table {
     transition: border-color 250ms cubic-bezier(0.34, 1.61, 0.7, 1), background-color 250ms cubic-bezier(0.34, 1.61, 0.7, 1), left 250ms cubic-bezier(0.34, 1.61, 0.7, 1), transform 250ms cubic-bezier(0.34, 1.61, 0.7, 1);
     transition: border-color 250ms cubic-bezier(0.34, 1.61, 0.7, 1), background-color 250ms cubic-bezier(0.34, 1.61, 0.7, 1), left 250ms cubic-bezier(0.34, 1.61, 0.7, 1), transform 250ms cubic-bezier(0.34, 1.61, 0.7, 1), -webkit-transform 250ms cubic-bezier(0.34, 1.61, 0.7, 1);
     z-index: 1; }
-  .kuiFormSwitch .kuiFormSwitch__track {
+  .kuiSwitch .kuiSwitch__track {
     position: absolute;
     left: 0;
     top: 0;
@@ -866,7 +898,7 @@ table {
     bottom: 0;
     overflow: hidden;
     border-radius: 24px; }
-  .kuiFormSwitch .kuiFormSwitch__icon {
+  .kuiSwitch .kuiSwitch__icon {
     position: absolute;
     right: -40px;
     top: 0;
@@ -876,27 +908,27 @@ table {
     -webkit-mask: url("../src/components/icon/assets/cross.svg") center center no-repeat;
             mask: url("../src/components/icon/assets/cross.svg") center center no-repeat;
     background-color: #3F3F3F; }
-  .kuiFormSwitch .kuiFormSwitch__icon--checked {
+  .kuiSwitch .kuiSwitch__icon--checked {
     right: auto;
     left: -8px;
     background-color: #3F3F3F;
     -webkit-mask: url("../src/components/icon/assets/check.svg") center center no-repeat;
             mask: url("../src/components/icon/assets/check.svg") center center no-repeat; }
-  .kuiFormSwitch:hover .kuiFormSwitch__thumb {
+  .kuiSwitch:hover .kuiSwitch__thumb {
     -webkit-transform: scale(1.05);
             transform: scale(1.05); }
-  .kuiFormSwitch:active .kuiFormSwitch__thumb {
+  .kuiSwitch:active .kuiSwitch__thumb {
     -webkit-transform: scale(0.95);
             transform: scale(0.95); }
-  .kuiFormSwitch .kuiFormSwitch__input:not(:checked) ~ .kuiFormSwitch__body .kuiFormSwitch__thumb {
+  .kuiSwitch .kuiSwitch__input:not(:checked) ~ .kuiSwitch__body .kuiSwitch__thumb {
     left: -1px; }
-  .kuiFormSwitch .kuiFormSwitch__input:not(:checked) ~ .kuiFormSwitch__body .kuiFormSwitch__icon {
+  .kuiSwitch .kuiSwitch__input:not(:checked) ~ .kuiSwitch__body .kuiSwitch__icon {
     right: -8px; }
-    .kuiFormSwitch .kuiFormSwitch__input:not(:checked) ~ .kuiFormSwitch__body .kuiFormSwitch__icon.kuiFormSwitch__icon--checked {
+    .kuiSwitch .kuiSwitch__input:not(:checked) ~ .kuiSwitch__body .kuiSwitch__icon.kuiSwitch__icon--checked {
       right: auto;
       left: -40px; }
 
-.kuiFormText {
+.kuiTextArea {
   border: none;
   font-size: 14px;
   font-family: "Roboto", Helvetica, Arial, sans-serif;
@@ -908,39 +940,7 @@ table {
   transition: box-shadow 250ms ease-in, background 250ms ease-in;
   max-width: 400px;
   border-radius: 0; }
-  .kuiFormText:focus {
-    background: #FFF;
-    box-shadow: 0 4px 4px -2px rgba(0, 0, 0, 0.1), 0 0 0 1px rgba(0, 0, 0, 0.16), inset 0 0 0 0 #FFF, inset 0 -2px 0 0 #0079a5; }
-
-.kuiFormTextarea {
-  border: none;
-  font-size: 14px;
-  font-family: "Roboto", Helvetica, Arial, sans-serif;
-  padding: 12px;
-  color: #3F3F3F;
-  min-width: 256px;
-  background: #fbfbfb;
-  box-shadow: 0 2px 2px -1px rgba(0, 0, 0, 0.1), 0 0 0 1px rgba(0, 0, 0, 0.08), inset -400px 0 0 0 #fbfbfb;
-  transition: box-shadow 250ms ease-in, background 250ms ease-in;
-  max-width: 400px;
-  border-radius: 0; }
-  .kuiFormTextarea:focus {
-    background: #FFF;
-    box-shadow: 0 4px 4px -2px rgba(0, 0, 0, 0.1), 0 0 0 1px rgba(0, 0, 0, 0.16), inset 0 0 0 0 #FFF, inset 0 -2px 0 0 #0079a5; }
-
-.kuiFormNumber {
-  border: none;
-  font-size: 14px;
-  font-family: "Roboto", Helvetica, Arial, sans-serif;
-  padding: 12px;
-  color: #3F3F3F;
-  min-width: 256px;
-  background: #fbfbfb;
-  box-shadow: 0 2px 2px -1px rgba(0, 0, 0, 0.1), 0 0 0 1px rgba(0, 0, 0, 0.08), inset -400px 0 0 0 #fbfbfb;
-  transition: box-shadow 250ms ease-in, background 250ms ease-in;
-  max-width: 400px;
-  border-radius: 0; }
-  .kuiFormNumber:focus {
+  .kuiTextArea:focus {
     background: #FFF;
     box-shadow: 0 4px 4px -2px rgba(0, 0, 0, 0.1), 0 0 0 1px rgba(0, 0, 0, 0.16), inset 0 0 0 0 #FFF, inset 0 -2px 0 0 #0079a5; }
 

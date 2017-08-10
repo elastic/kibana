@@ -1,7 +1,7 @@
 $kuiFormMaxWidth: 400px;
 $kuiFormBackgroundColor: tintOrShade($kuiColorLightestShade, 60%, 25%);
 
-@mixin kuiFormTextStyle {
+@mixin kuiFieldStyle {
   border: none;
   font-size: $kuiFontSizeS;
   font-family: $kuiFontFamily;
@@ -22,12 +22,12 @@ $kuiFormBackgroundColor: tintOrShade($kuiColorLightestShade, 60%, 25%);
 
 @import 'form';
 @import 'form_row/index';
-@import 'form_checkbox/index';
-@import 'form_password/index';
-@import 'form_range/index';
-@import 'form_search/index';
-@import 'form_select/index';
-@import 'form_switch/index';
-@import 'form_text/index';
-@import 'form_textarea/index';
-@import 'form_number/index';
+@import 'checkbox/index';
+@import 'field_number/index';
+@import 'field_password/index';
+@import 'field_search/index';
+@import 'field_text/index';
+@import 'range/index';
+@import 'select/index';
+@import 'switch/index';
+@import 'text_area/index';

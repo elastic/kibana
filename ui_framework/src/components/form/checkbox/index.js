@@ -1,0 +1,1 @@
+export { KuiCheckbox } from './checkbox';

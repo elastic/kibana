@@ -2,12 +2,12 @@ import React from 'react';
 import { render } from 'enzyme';
 import { requiredProps } from '../../../test/required_props';
 
-import { KuiFormRow } from './form_row';
+import { KuiRadio } from './radio';
 
-describe('KuiFormRow', () => {
+describe('KuiRadio', () => {
   test('is rendered', () => {
     const component = render(
-      <KuiFormRow { ...requiredProps } />
+      <KuiRadio { ...requiredProps } />
     );
 
     expect(component)

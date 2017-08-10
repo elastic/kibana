@@ -12,17 +12,17 @@ export {
 
 export {
   KuiForm,
-  KuiFormCheckbox,
-  KuiFormNumber,
-  KuiFormPassword,
-  KuiFormRadio,
-  KuiFormRange,
+  KuiCheckbox,
+  KuiFieldNumber,
+  KuiFieldPassword,
+  KuiRadio,
+  KuiRange,
   KuiFormRow,
-  KuiFormSearch,
-  KuiFormSelect,
-  KuiFormSwitch,
-  KuiFormText,
-  KuiFormTextarea,
+  KuiFieldSearch,
+  KuiSelect,
+  KuiSwitch,
+  KuiFieldText,
+  KuiTextArea,
 } from './form';
 
 export {

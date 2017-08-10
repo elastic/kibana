@@ -6,17 +6,17 @@ import {
   KuiButton,
   KuiPopover,
   KuiForm,
-  KuiFormCheckbox,
-  KuiFormNumber,
-  KuiFormPassword,
-  KuiFormRadio,
-  KuiFormRange,
+  KuiCheckbox,
+  KuiFieldNumber,
+  KuiFieldPassword,
+  KuiRadio,
+  KuiRange,
   KuiFormRow,
-  KuiFormSearch,
-  KuiFormSelect,
-  KuiFormSwitch,
-  KuiFormText,
-  KuiFormTextarea,
+  KuiFieldSearch,
+  KuiSelect,
+  KuiSwitch,
+  KuiFieldText,
+  KuiTextArea,
 } from '../../../../components';
 
 export default class extends Component {
@@ -58,7 +58,7 @@ export default class extends Component {
           label="Number"
           helpText="Any number between 1 and 5"
         >
-          <KuiFormNumber name="number" id="number" min={1} max={5} />
+          <KuiFieldNumber name="number" id="number" min={1} max={5} />
         </KuiFormRow>
         <KuiFormRow
           id="first"
@@ -67,34 +67,34 @@ export default class extends Component {
           invalid
           errors={['Your name is not that cool.', 'Errors could be an array of errors, like this.']}
         >
-          <KuiFormText id="first" name="first" />
+          <KuiFieldText id="first" name="first" />
         </KuiFormRow>
         <KuiFormRow
           id="last"
           label="Last name with icon"
           icon="user"
         >
-          <KuiFormText id="last" name="first" placeholder="Some placeholder text" />
+          <KuiFieldText id="last" name="first" placeholder="Some placeholder text" />
         </KuiFormRow>
         <KuiFormRow
           id="pass"
           label="Password"
           icon="lock"
         >
-          <KuiFormPassword name="pass" id="pass" />
+          <KuiFieldPassword name="pass" id="pass" />
         </KuiFormRow>
         <KuiFormRow
           id="range"
           label="Range"
         >
-          <KuiFormRange min={0} max={100} name="range" id="range" />
+          <KuiRange min={0} max={100} name="range" id="range" />
         </KuiFormRow>
         <KuiFormRow
           id="search1"
           label="Search"
           icon="search"
         >
-          <KuiFormSearch label="Search" id="search1" name="search1" placeholder="Search..." />
+          <KuiFieldSearch label="Search" id="search1" name="search1" placeholder="Search..." />
         </KuiFormRow>
         <KuiFormRow
           id="dropdown"
@@ -102,21 +102,21 @@ export default class extends Component {
           icon="arrowDown"
           className="kuiFormRow--select"
         >
-          <KuiFormSelect options={formOptions} label="Dropdown" name="dropdown" id="dropdown"/>
+          <KuiSelect options={formOptions} label="Dropdown" name="dropdown" id="dropdown"/>
         </KuiFormRow>
         <KuiFormRow label="Textarea" id="textarea">
-          <KuiFormTextarea id="textarea" name="textarea"/>
+          <KuiTextArea id="textarea" name="textarea"/>
         </KuiFormRow>
         <KuiFormRow>
-          <KuiFormSwitch id="switch" name="switch" label="Should we do this?"/>
+          <KuiSwitch id="switch" name="switch" label="Should we do this?"/>
         </KuiFormRow>
         <KuiFormRow label="You should always use more than one checkbox">
-          <KuiFormCheckbox options={formOptions} />
+          <KuiCheckbox options={formOptions} />
         </KuiFormRow>
         <KuiFormRow label="Another error example" invalid>
-          <KuiFormCheckbox options={formOptions} />
+          <KuiCheckbox options={formOptions} />
         </KuiFormRow>
-        <KuiFormRadio />
+        <KuiRadio />
       </KuiForm>
     );
 
