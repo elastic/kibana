@@ -58,7 +58,7 @@ export class InputControlVis extends Component {
               type="button"
               onClick={this.handleClearAll}
             >
-              Remove filters
+              Clear
             </KuiButton>
           </KuiFieldGroupSection>
         </KuiFieldGroup>

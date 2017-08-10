@@ -15,7 +15,7 @@ export class TextControlEditor extends Component {
   render() {
     return (
       <div>
-        <span>Text Control Editor</span>
+
         <IndexPatternSelect
           value={this.props.controlParams.indexPattern}
           onChange={this.props.handleIndexPatternChange}

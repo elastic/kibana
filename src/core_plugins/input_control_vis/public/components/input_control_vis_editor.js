@@ -5,11 +5,15 @@ import { RangeControlEditor } from './range_control_editor';
 import { TermsControlEditor } from './terms_control_editor';
 import { TextControlEditor } from './text_control_editor';
 import { KuiFieldGroup, KuiFieldGroupSection, KuiButton, KuiButtonIcon } from 'ui_framework/components';
-import { addControl, getDefaultOptions, moveControl, newControl, removeControl, setControl } from '../lib/editor_utils';
+import { addControl, moveControl, newControl, removeControl, setControl } from '../lib/editor_utils';
 
 export class InputControlVisEditor extends Component {
   constructor(props) {
     super(props);
+
+    this.state = {
+      type: 'terms'
+    };
 
     this.getIndexPatterns = async () => {
       return await props.scope.vis.API.indexPatterns.getIndexPatterns();
@@ -30,14 +34,6 @@ export class InputControlVisEditor extends Component {
   handleLabelChange(controlIndex, evt) {
     const updatedControl = this.props.scope.vis.params.controls[controlIndex];
     updatedControl.label = evt.target.value;
-    this.setVisParam('controls', setControl(this.props.scope.vis.params.controls, controlIndex, updatedControl));
-  }
-
-  handleTypeChange(controlIndex, evt) {
-    const updatedControl = this.props.scope.vis.params.controls[controlIndex];
-    updatedControl.type = evt.target.value;
-    updatedControl.options = getDefaultOptions(updatedControl.type);
-    updatedControl.fieldName = '';
     this.setVisParam('controls', setControl(this.props.scope.vis.params.controls, controlIndex, updatedControl));
   }
 
@@ -75,7 +71,7 @@ export class InputControlVisEditor extends Component {
   }
 
   handleAddControl() {
-    this.setVisParam('controls', addControl(this.props.scope.vis.params.controls, newControl('terms')));
+    this.setVisParam('controls', addControl(this.props.scope.vis.params.controls, newControl(this.state.type)));
   }
 
   handleUpdateFiltersChange(evt) {
@@ -131,7 +127,6 @@ export class InputControlVisEditor extends Component {
           moveUpControl={this.moveControl.bind(this, controlIndex, -1)}
           moveDownControl={this.moveControl.bind(this, controlIndex, 1)}
           handleRemoveControl={this.handleRemoveControl.bind(this, controlIndex)}
-          handleTypeChange={this.handleTypeChange.bind(this, controlIndex)}
         >
           {controlEditor}
         </ControlEditor>
@@ -163,14 +158,27 @@ export class InputControlVisEditor extends Component {
 
         {this.renderControls()}
 
-        <KuiButton
-          buttonType="primary"
-          type="button"
-          icon={<KuiButtonIcon type="create" />}
-          onClick={this.handleAddControl}
-        >
-          Add
-        </KuiButton>
+        <div className="kuiSideBarFormRow">
+          <KuiButton
+            buttonType="primary"
+            type="button"
+            icon={<KuiButtonIcon type="create" />}
+            onClick={this.handleAddControl}
+          >
+            Add
+          </KuiButton>
+          <div className="kuiSideBarFormRow__control kuiFieldGroupSection--wide">
+            <select
+              className="kuiSelect"
+              value={this.state.type}
+              onChange={evt => this.setState({ type: evt.target.value })}
+            >
+              <option value="range">Range Slider</option>
+              <option value="terms">Terms Dropdown</option>
+              <option value="text">Text Input</option>
+            </select>
+          </div>
+        </div>
       </div>
     );
   }

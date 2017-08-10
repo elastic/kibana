@@ -36,23 +36,6 @@ export class ControlEditor extends Component {
             </div>
           </div>
 
-          <div className="kuiSideBarFormRow">
-            <label className="kuiSideBarFormRow__label">
-              Type
-            </label>
-            <div className="kuiSideBarFormRow__control kuiFieldGroupSection--wide">
-              <select
-                className="kuiSelect"
-                value={this.props.controlParams.type}
-                onChange={this.props.handleTypeChange}
-              >
-                <option value="range">Range Slider</option>
-                <option value="terms">Terms Dropdown</option>
-                <option value="text">Text Input</option>
-              </select>
-            </div>
-          </div>
-
           {this.props.children}
         </div>
       );
@@ -63,11 +46,11 @@ export class ControlEditor extends Component {
       'fa-caret-down': this.state.isEditorVisible
     });
 
-    let controlTitle = `Control ${this.props.controlIndex}`;
+    let controlTitle = `${this.props.controlParams.type}: ${this.props.controlIndex}`;
     if (this.props.controlParams.label) {
-      controlTitle = this.props.controlParams.label;
+      controlTitle = `${this.props.controlParams.type}: ${this.props.controlParams.label}`;
     } else if (this.props.controlParams.fieldName) {
-      controlTitle = this.props.controlParams.fieldName;
+      controlTitle = `${this.props.controlParams.type}: ${this.props.controlParams.fieldName}`;
     }
 
     return (
@@ -123,6 +106,5 @@ ControlEditor.propTypes = {
   moveUpControl: PropTypes.func.isRequired,
   moveDownControl: PropTypes.func.isRequired,
   handleRemoveControl: PropTypes.func.isRequired,
-  handleTypeChange: PropTypes.func.isRequired,
   children: PropTypes.node.isRequired
 };
