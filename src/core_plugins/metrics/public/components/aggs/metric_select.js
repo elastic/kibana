@@ -17,6 +17,12 @@ function createTypeFilter(restrict, exclude) {
   };
 }
 
+export function filterRows(row) {
+  return  !/_bucket$/.test(row.type) &&
+    !/^series/.test(row.type) &&
+    !/^percentile/.test(row.type);
+}
+
 function MetricSelect(props) {
   const {
     restrict,
@@ -29,8 +35,17 @@ function MetricSelect(props) {
   const metrics = props.metrics
     .filter(createTypeFilter(restrict, exclude));
 
-  const options = calculateSiblings(metrics, metric)
-    .filter(row => !/_bucket$/.test(row.type) && !/^series/.test(row.type))
+  const siblings = calculateSiblings(metrics, metric);
+
+  const percentileOptions = siblings
+    .filter(row => /^percentile/.test(row.type))
+    .reduce((acc, row) => {
+
+    }, []);
+
+
+  const options = siblings
+    .filter(filterRows)
     .map(row => {
       const label = calculateLabel(row, metrics);
       return { value: row.id, label };
