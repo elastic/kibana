@@ -45,6 +45,9 @@ import TableExample
 import TabsExample
   from '../../views/tabs/tabs_example';
 
+import ToastExample
+  from '../../views/toast/toast_example';
+
 import TypographyExample
   from '../../views/typography/typography_example';
 
@@ -104,6 +107,10 @@ const components = [{
 }, {
   name: 'Tabs',
   component: TabsExample,
+  hasReact: true,
+}, {
+  name: 'Toast',
+  component: ToastExample,
   hasReact: true,
 }, {
   name: 'Typography',
