@@ -4,7 +4,7 @@ import React, {
 import classNames from 'classnames';
 
 export const KuiFormText = ({ id, name, placeholder, value, className, ...rest }) => {
-  const classes = classNames('kuiForm__textField', 'kuiFormText', className);
+  const classes = classNames('kuiFormText', className);
 
   return (
     <input

@@ -34,6 +34,16 @@
     color: $kuiColorDarkShade;
   }
 
+  .kuiFormRow__error {
+    font-size: $kuiFontSizeXS;
+    padding: $kuiSizeS 0;
+    color: $kuiColorDanger;
+  }
+
+  .kuiFormRow__error +  * {
+    padding-top: 0;
+  }
+
   .kuiFormRow__icon {
     position: absolute;
     top: $kuiSizeXL;
@@ -45,5 +55,23 @@
   select:focus + label,
   textarea:focus + label, {
     color: $kuiColorPrimary;
+  }
+
+  &.kuiFormRow--invalid {
+
+    .kuiFormRow__label {
+      color: $kuiColorDanger !important;
+    }
+
+    // Naked selectors on purpose to touch inner components.
+    input[type="text"],
+    input[type="password"],
+    input[type="number"],
+    input[type="search"],
+    select,
+    textarea,
+    {
+      box-shadow: 0 $kuiSizeXS $kuiSizeXS (-$kuiSizeXS / 2) rgba(0, 0, 0, 0.1), 0 0 0 1px rgba(0,0,0,0.16), inset 0 0 0 0 $kuiColorEmptyShade, inset 0 (-$kuiSizeXS / 2) 0 0 $kuiColorDanger !important;
+    }
   }
 }

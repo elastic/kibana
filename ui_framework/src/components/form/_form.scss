@@ -1,19 +1,9 @@
-// Generic text style used as the basis for all text field based components.
-.kuiForm__textField {
-  border: none;
-  font-size: $kuiFontSizeS;
-  font-family: $kuiFontFamily;
-  padding: $kuiSizeM;
-  color: $kuiTextColor;
-  min-width: $kuiSize * 16;
-  background: $kuiFormBackgroundColor;
-  box-shadow: 0 2px 2px -1px rgba(0, 0, 0, 0.1), 0 0 0 1px rgba(0,0,0,0.08), inset -400px 0 0 0 $kuiFormBackgroundColor;
-  transition: box-shadow $kuiAnimSpeedNormal ease-in, background $kuiAnimSpeedNormal ease-in;
-  max-width: $kuiFormMaxWidth;
-  border-radius: 0;
+.kuiForm__error {
+  @include kuiFontSizeS;
+  list-style: disc;
+  margin-left: $kuiSizeXL;
+}
 
-  &:focus {
-    background: $kuiColorEmptyShade;
-    box-shadow: 0 4px 4px -2px rgba(0, 0, 0, 0.1), 0 0 0 1px rgba(0,0,0,0.16), inset 0 0 0 0 $kuiColorEmptyShade, inset 0 -2px 0 0 $kuiColorPrimary;
-  }
+.kuiForm__errors {
+  margin-bottom: $kuiSize;
 }

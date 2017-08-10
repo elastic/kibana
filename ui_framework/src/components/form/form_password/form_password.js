@@ -4,7 +4,7 @@ import React, {
 import classNames from 'classnames';
 
 export const KuiFormPassword = ({ className, id, name, placeholder, value, ...rest }) => {
-  const classes = classNames('kuiForm__textField', 'kuiFormPassword', className);
+  const classes = classNames('kuiFormPassword', className);
 
   return (
     <input

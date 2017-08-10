@@ -4,12 +4,13 @@ import React, {
 import classNames from 'classnames';
 import { KuiIcon } from '../../../components';
 
-export const KuiFormRow = ({ children, icon, helpText, label, id, className, ...rest }) => {
+export const KuiFormRow = ({ children, icon, helpText, invalid, errors, label, id, className, ...rest }) => {
   const classes = classNames(
     'kuiFormRow',
     className,
     {
       'kuiFormRow--withIcon' : icon,
+      'kuiFormRow--invalid' : invalid,
     }
   );
 
@@ -21,6 +22,15 @@ export const KuiFormRow = ({ children, icon, helpText, label, id, className, ...
   let optionalHelpText = null;
   if (helpText) {
     optionalHelpText = <div className="kuiFormRow__helpText">{helpText}</div>;
+  }
+
+  let optionalErrors = null;
+  if (errors) {
+    optionalErrors = (
+      errors.map(function (error, index) {
+        return <div  key={index} className="kuiFormRow__error">{error}</div>;
+      })
+    );
   }
 
   let optionalLabel = null;
@@ -42,6 +52,7 @@ export const KuiFormRow = ({ children, icon, helpText, label, id, className, ...
       */}
       {children}
       {optionalLabel}
+      {optionalErrors}
       {optionalHelpText}
       {optionalIcon}
     </div>
@@ -52,5 +63,7 @@ KuiFormRow.propTypes = {
   label: PropTypes.string,
   id: PropTypes.string,
   icon: PropTypes.string,
+  invalid: PropTypes.bool,
+  errors: PropTypes.array,
   helpText: PropTypes.string,
 };

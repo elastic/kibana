@@ -1,5 +1,6 @@
 .kuiFormSelect {
   appearance: none;
+  @include kuiFormTextStyle;
 }
 
 .kuiFormSelect::-ms-expand {

@@ -49,8 +49,10 @@ export default class extends Component {
 
     const formOptions = ['Option one', 'Option two', 'Option three'];
 
+    const formErrors = ['Here\'s an example of a form level error', 'You might have more than one global form error.'];
+
     const formSample = (
-      <KuiForm>
+      <KuiForm invalid errors={formErrors}>
         <KuiFormRow
           id="first"
           label="Number"
@@ -62,6 +64,8 @@ export default class extends Component {
           id="first"
           label="First name"
           helpText="I am some friendly help text."
+          invalid
+          errors={['Your name is not that cool.', 'Errors could be an array of errors, like this.']}
         >
           <KuiFormText id="first" name="first" />
         </KuiFormRow>
@@ -107,6 +111,9 @@ export default class extends Component {
           <KuiFormSwitch id="switch" name="switch" label="Should we do this?"/>
         </KuiFormRow>
         <KuiFormRow label="You should always use more than one checkbox">
+          <KuiFormCheckbox options={formOptions} />
+        </KuiFormRow>
+        <KuiFormRow label="Another error example" invalid>
           <KuiFormCheckbox options={formOptions} />
         </KuiFormRow>
         <KuiFormRadio />
