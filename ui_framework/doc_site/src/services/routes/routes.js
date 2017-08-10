@@ -87,6 +87,9 @@ import PagerExample
 import PanelExample
   from '../../views/panel/panel_example';
 
+import PopoverExample
+  from '../../views/popover/popover_example';
+
 import EmptyTablePromptExample
   from '../../views/empty_table_prompt/empty_table_prompt_example';
 
@@ -213,6 +216,10 @@ const components = [{
 }, {
   name: 'Panel',
   component: PanelExample,
+}, {
+  name: 'Popover',
+  component: PopoverExample,
+  hasReact: true,
 }, {
   name: 'StatusText',
   component: StatusTextExample,

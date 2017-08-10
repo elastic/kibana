@@ -182,7 +182,22 @@ export default function ({ getService, getPageObjects }) {
         expect(spyToggleExists).to.be(true);
       });
 
+      // This was an actual bug that appeared, where the spy pane appeared on panels after adding them, but
+      // disappeared when a new dashboard was opened up.
+      it('shows the spy pane toggle directly after opening a dashboard', async () => {
+        await PageObjects.dashboard.saveDashboard('spy pane test');
+        await PageObjects.dashboard.gotoDashboardLandingPage();
+        await PageObjects.dashboard.loadSavedDashboard('spy pane test');
+        const panels = await PageObjects.dashboard.getDashboardPanels();
+        // Simulate hover
+        await remote.moveMouseTo(panels[0]);
+        const spyToggleExists = await PageObjects.visualize.getSpyToggleExists();
+        expect(spyToggleExists).to.be(true);
+      });
+
       it('shows other panels after being minimized', async () => {
+        // Panels are all minimized on a fresh open of a dashboard, so we need to re-expand in order to then minimize.
+        await PageObjects.dashboard.toggleExpandPanel();
         await PageObjects.dashboard.toggleExpandPanel();
         const panels = await PageObjects.dashboard.getDashboardPanels();
         const visualizations = PageObjects.dashboard.getTestVisualizations();
@@ -222,6 +237,7 @@ export default function ({ getService, getPageObjects }) {
 
     describe('full screen mode', () => {
       it('option not available in edit mode', async () => {
+        await PageObjects.dashboard.clickEdit();
         const exists = await PageObjects.dashboard.fullScreenModeMenuItemExists();
         expect(exists).to.be(false);
       });

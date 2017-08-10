@@ -1,6 +1,7 @@
 <div class="form-group">
-  <label>Type</label>
+  <label for="scriptFieldUrlType">Type</label>
   <select
+    id="scriptFieldUrlType"
     ng-model="editor.formatParams.type"
     ng-options="type.id as type.name for type in url.urlTypes"
     class="form-control">
@@ -12,7 +13,7 @@
     <i class="fa fa-info"></i> Url Template Help
   </span>
 
-  <label>Url Template</label>
+  <label for="scriptFieldUrlTemplate">Url Template</label>
   <div class="hintbox" ng-if="editor.showUrlTmplHelp">
     <h4 class="hintbox-heading">
       <i class="fa fa-question-circle text-info"></i> Url Template Help
@@ -60,7 +61,11 @@
     </table>
   </div>
 
-  <input ng-model="editor.formatParams.urlTemplate" class="form-control">
+  <input
+    id="scriptFieldUrlTemplate"
+    ng-model="editor.formatParams.urlTemplate"
+    class="form-control"
+  >
 </div>
 
 <div class="form-group">
@@ -68,7 +73,7 @@
     <i class="fa fa-info"></i> Label Template Help
   </span>
 
-  <label>Label Template</label>
+  <label for="scriptFieldUrlLabelTemplate">Label Template</label>
   <div class="hintbox" ng-if="editor.showLabelTmplHelp">
     <h4 class="hintbox-heading">
       <i class="fa fa-question-circle text-info"></i> Label Template Help
@@ -118,7 +123,11 @@
     </table>
   </div>
 
-  <input ng-model="editor.formatParams.labelTemplate" class="form-control">
+  <input
+    id="scriptFieldUrlLabelTemplate"
+    ng-model="editor.formatParams.labelTemplate"
+    class="form-control"
+  >
 </div>
 
 <field-format-editor-samples inputs="url.samples[editor.formatParams.type]"></field-format-editor-samples>

@@ -92,6 +92,10 @@ export {
 } from './pager';
 
 export {
+  KuiPopover,
+} from './popover';
+
+export {
   KuiTabs,
   KuiTab
 } from './tabs';

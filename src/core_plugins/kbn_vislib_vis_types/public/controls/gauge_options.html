@@ -97,16 +97,17 @@
         <table class="vis-editor-agg-editor-ranges form-group" ng-show="vis.params.gauge.colorsRange.length">
           <tr>
             <th>
-              <label>From</label>
+              <label id="gaugeOptionsCustomRangeFrom">From</label>
             </th>
             <th colspan="2">
-              <label>To</label>
+              <label id="gaugeOptionsCustomRangeTo">To</label>
             </th>
           </tr>
 
           <tr ng-repeat="range in vis.params.gauge.colorsRange track by $index">
             <td>
               <input
+                aria-labelledby="gaugeOptionsCustomRangeFrom"
                 ng-model="range.from"
                 type="number"
                 class="form-control"
@@ -117,6 +118,7 @@
             </td>
             <td>
               <input
+                aria-labelledby="gaugeOptionsCustomRangeTo"
                 ng-model="range.to"
                 type="number"
                 class="form-control"

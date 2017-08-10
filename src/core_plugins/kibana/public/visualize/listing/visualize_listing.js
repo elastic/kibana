@@ -25,12 +25,12 @@ export function VisualizeListingController($injector) {
   const sortableProperties = new SortableProperties([
     {
       name: 'title',
-      getValue: item => item.title,
+      getValue: item => item.title.toLowerCase(),
       isAscending: true,
     },
     {
       name: 'type',
-      getValue: item => item.type.title,
+      getValue: item => item.type.title.toLowerCase(),
       isAscending: true,
     }
   ],
