@@ -40,7 +40,9 @@ export default new Fn({
     return client.search(buildESRequest({
       index: args.index,
       q: args.q,
-      // fields: args.fields.split(',').map((str) => str.trim()),
+      body: {
+        _source: args.fields ? args.fields.split(',') : undefined,
+      },
     }, context))
     .then(resp => {
       const flatHits = _.map(resp.hits.hits, (hit, i) => {
