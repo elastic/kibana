@@ -1,6 +1,4 @@
 import React, {
-  cloneElement,
-  Children,
   Component,
 } from 'react';
 import PropTypes from 'prop-types';
@@ -97,11 +95,7 @@ export class KuiGlobalToastList extends Component {
         className={classes}
         {...rest}
       >
-        {Children.map(children, child => (
-          cloneElement(child, Object.assign({}, child.props, {
-            className: classNames(child.props.className, 'kuiGlobalToastList__item'),
-          }))
-        ))}
+        {children}
       </div>
     );
   }

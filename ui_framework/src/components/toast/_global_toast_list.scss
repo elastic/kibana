@@ -17,14 +17,33 @@
   max-height: 100vh; /* 1 */
 }
 
-  .kuiGlobalToastList__item {
-    margin-bottom: 20px;
+.kuiGlobalToastListItem {
+  margin-bottom: 20px;
+  animation: 0.5s kuiShowToast;
+  opacity: 1;
 
-    /**
-     * 1. justify-content: flex-end interferes with overflowing content, so we'll use this to push
-     *    items to the bottom instead.
-     */
-    &:first-child {
-      margin-top: auto; /* 1 */
-    }
+  /**
+   * 1. justify-content: flex-end interferes with overflowing content, so we'll use this to push
+   *    items to the bottom instead.
+   */
+  &:first-child {
+    margin-top: auto; /* 1 */
   }
+
+  &.kuiGlobalToastListItem-isDismissed {
+    transition: opacity $kuiAnimSpeedNormal;
+    opacity: 0;
+  }
+}
+
+@keyframes kuiShowToast {
+  from {
+    transform: translateX(30px);
+    opacity: 0;
+  }
+
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}

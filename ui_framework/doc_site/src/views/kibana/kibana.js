@@ -14,6 +14,7 @@ import {
   KuiHeaderSectionItem,
   KuiHeaderSectionItemButton,
   KuiGlobalToastList,
+  KuiGlobalToastListItem,
   KuiIcon,
   KuiKeyPadMenu,
   KuiKeyPadMenuItem,
@@ -36,7 +37,9 @@ import {
   KuiTitle,
 } from '../../../../components';
 
-let toastId = 0;
+const TOAST_LIFE_TIME_MS = 4000;
+const TOAST_FADE_OUT_MS = 250;
+let toastIdCounter = 0;
 
 export default class extends Component {
   constructor(props) {
@@ -63,9 +66,16 @@ export default class extends Component {
   }
 
   onAddToastClick() {
+    const {
+      toast,
+      toastId,
+    } = this.renderRandomToast();
+
     this.setState({
-      toasts: this.state.toasts.concat(this.renderRandomToast()),
+      toasts: this.state.toasts.concat(toast),
     });
+
+    this.scheduleToastForDismissal(toastId);
   }
 
   closeUserMenu() {
@@ -86,7 +96,31 @@ export default class extends Component {
     });
   }
 
-  onDismissToast(toastId) {
+  scheduleToastForDismissal(toastId) {
+    setTimeout(() => {
+      this.dismissToast(toastId);
+    }, TOAST_LIFE_TIME_MS);
+
+    setTimeout(() => {
+      this.startDismissingToast(toastId);
+    }, TOAST_LIFE_TIME_MS - TOAST_FADE_OUT_MS);
+  }
+
+  startDismissingToast(toastId) {
+    this.setState({
+      toasts: this.state.toasts.map(toast => {
+        if (toast.key === toastId) {
+          return cloneElement(toast, {
+            isDismissed: true,
+          });
+        }
+
+        return toast;
+      }),
+    });
+  }
+
+  dismissToast(toastId) {
     this.setState({
       toasts: this.state.toasts.filter(toast => toast.key !== toastId),
     });
@@ -464,13 +498,13 @@ export default class extends Component {
   }
 
   renderRandomToast() {
-    const id = (toastId++).toString();
+    const toastId = (toastIdCounter++).toString();
 
     const toasts = [(
       <KuiToast
         title="Check it out, here's a really long title that will wrap within a narrower browser"
         type="info"
-        onClose={this.onDismissToast.bind(this, id)}
+        onClose={this.dismissToast.bind(this, toastId)}
       >
         <KuiText size="small" verticalRhythm>
           <p>
@@ -489,7 +523,7 @@ export default class extends Component {
       <KuiToast
         title="Download complete!"
         type="success"
-        onClose={this.onDismissToast.bind(this, id)}
+        onClose={this.dismissToast.bind(this, toastId)}
       >
         <KuiText size="small">
           <p>
@@ -502,7 +536,7 @@ export default class extends Component {
         title="Logging you out soon, due to inactivity"
         type="warning"
         iconType="user"
-        onClose={this.onDismissToast.bind(this, id)}
+        onClose={this.dismissToast.bind(this, toastId)}
       >
         <KuiText size="small" verticalRhythm>
           <p>
@@ -521,7 +555,7 @@ export default class extends Component {
         title="Oops, there was an error"
         type="danger"
         iconType="help"
-        onClose={this.onDismissToast.bind(this, id)}
+        onClose={this.dismissToast.bind(this, toastId)}
       >
         <KuiText size="small">
           <p>
@@ -531,9 +565,13 @@ export default class extends Component {
       </KuiToast>
     )];
 
-    return cloneElement(toasts[Math.floor(Math.random() * toasts.length)], {
-      key: id
-    });
+    const toast = (
+      <KuiGlobalToastListItem key={toastId}>
+        {toasts[Math.floor(Math.random() * toasts.length)]}
+      </KuiGlobalToastListItem>
+    );
+
+    return { toast, toastId };
   }
 
   renderToasts() {

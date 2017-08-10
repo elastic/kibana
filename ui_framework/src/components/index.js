@@ -93,6 +93,7 @@ export {
 
 export {
   KuiGlobalToastList,
+  KuiGlobalToastListItem,
   KuiToast,
 } from './toast';
 
