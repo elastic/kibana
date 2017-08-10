@@ -5,8 +5,11 @@ describe('getBucketsPath', () => {
 
   const metrics = [
     { id: 1, type: 'derivative' },
-    { id: 2, type: 'percentile', percent: '50' },
-    { id: 3, type: 'percentile', percent: '20.0' },
+    { id: 2, type: 'percentile', percentiles: [{ value: '50' }] },
+    { id: 3, type: 'percentile', percentiles: [
+      { value: '20.0' },
+      { value: '10.0' }
+    ] },
     { id: 4, type: 'std_deviation', mode: 'raw' },
     { id: 5, type: 'std_deviation', mode: 'upper' },
     { id: 6, type: 'std_deviation', mode: 'lower' },
@@ -25,6 +28,10 @@ describe('getBucketsPath', () => {
 
   it('return path for percentile(20.0)', () => {
     expect(getBucketsPath(3, metrics)).to.equal('3[20.0]');
+  });
+
+  it('return path for percentile(10.0) with alt id', () => {
+    expect(getBucketsPath('3[10.0]', metrics)).to.equal('3[10.0]');
   });
 
   it('return path for std_deviation(raw)', () => {

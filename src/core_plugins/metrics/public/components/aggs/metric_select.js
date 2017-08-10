@@ -18,9 +18,9 @@ function createTypeFilter(restrict, exclude) {
 }
 
 export function filterRows(row) {
-  return  !/_bucket$/.test(row.type) &&
-    !/^series/.test(row.type) &&
-    !/^percentile/.test(row.type);
+  return  !/_bucket$/.test(row.type)
+    && !/^series/.test(row.type)
+    && !/^percentile/.test(row.type);
 }
 
 function MetricSelect(props) {
@@ -40,7 +40,14 @@ function MetricSelect(props) {
   const percentileOptions = siblings
     .filter(row => /^percentile/.test(row.type))
     .reduce((acc, row) => {
-
+      const label = calculateLabel(row, metrics);
+      row.percentiles.forEach(p => {
+        if (p.value) {
+          const value = /\./.test(p.value) ? p.value : `${p.value}.0`;
+          acc.push({ value: `${row.id}[${value}]`, label: `${label} (${value})` });
+        }
+      });
+      return acc;
     }, []);
 
 
@@ -54,7 +61,7 @@ function MetricSelect(props) {
   return (
     <Select
       placeholder="Select metric..."
-      options={options.concat(props.additionalOptions)}
+      options={[ ...options, ...props.additionalOptions, ...percentileOptions]}
       value={value}
       onChange={onChange}
     />

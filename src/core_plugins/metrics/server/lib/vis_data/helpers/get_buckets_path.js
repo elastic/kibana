@@ -1,6 +1,8 @@
-import _ from 'lodash';
+import { startsWith } from 'lodash';
+const percentileTest = /\[[0-9\.]+\]$/;
+const percentileNumberTest = /\d+\.\d+/;
 export default (id, metrics) => {
-  const metric = _.find(metrics, { id });
+  const metric = metrics.find(m => startsWith(id, m.id));
   let bucketsPath = String(id);
 
   switch (metric.type) {
@@ -8,7 +10,9 @@ export default (id, metrics) => {
       bucketsPath += '[normalized_value]';
       break;
     case 'percentile':
-      const percentileKey = /\./.test(`${metric.percent}`) ? `${metric.percent}` : `${metric.percent}.0`;
+      if (percentileTest.test(bucketsPath)) break;
+      const percent = metric.percentiles[0];
+      const percentileKey = percentileNumberTest.test(`${percent.value}`) ? `${percent.value}` : `${percent.value}.0`;
       bucketsPath += `[${percentileKey}]`;
       break;
     case 'percentile_rank':
