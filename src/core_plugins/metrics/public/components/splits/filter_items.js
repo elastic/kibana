@@ -39,7 +39,8 @@ class FilterItems extends Component {
             disableTrash={true}
             onChange={handleChange}
             name="color"
-            value={model.color}/>
+            value={model.color}
+          />
         </div>
         <div className="vis_editor__split-filter-item">
           <input
@@ -47,7 +48,8 @@ class FilterItems extends Component {
             className="vis_editor__input-grows-100"
             type="text"
             onChange={this.handleChange(model, 'filter')}
-            value={model.filter}/>
+            value={model.filter}
+          />
         </div>
         <div className="vis_editor__split-filter-item">
           <input
@@ -55,13 +57,15 @@ class FilterItems extends Component {
             className="vis_editor__input-grows-100"
             type="text"
             onChange={this.handleChange(model, 'label')}
-            value={model.label}/>
+            value={model.label}
+          />
         </div>
         <div className="vis_editor__split-filter-control">
           <AddDeleteButtons
             onAdd={handleAdd}
             onDelete={handleDelete}
-            disableDelete={items.length < 2}/>
+            disableDelete={items.length < 2}
+          />
         </div>
       </div>
     );

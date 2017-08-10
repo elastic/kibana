@@ -1,7 +1,12 @@
 [[tribe]]
 == Using Kibana with Tribe nodes
 
-Kibana can be configured to connect to a {ref}/current/modules-tribe.html[tribe node] for data retrieval.  Because tribe nodes can't create indices, Kibana additionally
+NOTE: While tribe nodes have been deprecated in Elasticsearch in favor of
+<<management-cross-cluster-search>>, you can still use Kibana with tribe nodes until
+version 7.0. Unlike tribe nodes, using cross cluster search in Kibana requires no
+server-side configurations and doesn't disable functionality like <<console-kibana>>.
+
+Kibana can be configured to connect to a {ref}/modules-tribe.html[tribe node] for data retrieval.  Because tribe nodes can't create indices, Kibana additionally
 requires a separate connection to a node to maintain state.  When configured, searches and visualizations will retrieve data using
 the tribe node and administrative actions (such as saving a dashboard) will be sent to non-tribe node.
 
@@ -21,7 +26,8 @@ When configured to use a tribe node, actions that modify Kibana's state will be 
 will retrieve data from the node at `elasticsearch.tribe.url`.  It's acceptable to use a node for `elasticsearch.url` that is part of one of the clusters that
 a tribe node is pointing to.
 
-The full list of configurations can be found at <<settings>>.
+The full list of configurations can be found at {kibana-ref}/settings.html[Configuring
+Kibana].
 
 [float]
 [[tribe-limitations]]

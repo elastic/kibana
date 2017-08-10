@@ -1,5 +1,4 @@
-import { format } from 'url';
-import { esTestServerUrlParts } from '../../test/es_test_server_url_parts';
+import { esTestConfig } from '../../src/test_utils/es';
 import { kibanaTestServerUrlParts } from '../../test/kibana_test_server_url_parts';
 
 module.exports = function (grunt) {
@@ -55,7 +54,7 @@ module.exports = function (grunt) {
       args: [
         ...stdDevArgs,
         '--optimize.enabled=false',
-        '--elasticsearch.url=' + format(esTestServerUrlParts),
+        '--elasticsearch.url=' + esTestConfig.getUrl(),
         '--server.port=' + kibanaTestServerUrlParts.port,
         '--server.xsrf.disableProtection=true',
         ...kbnServerFlags,
@@ -74,9 +73,8 @@ module.exports = function (grunt) {
         ...stdDevArgs,
         '--dev',
         '--no-base-path',
-        '--no-ssl',
         '--optimize.enabled=false',
-        '--elasticsearch.url=' + format(esTestServerUrlParts),
+        '--elasticsearch.url=' + esTestConfig.getUrl(),
         '--server.port=' + kibanaTestServerUrlParts.port,
         '--server.xsrf.disableProtection=true',
         ...kbnServerFlags,
@@ -94,7 +92,7 @@ module.exports = function (grunt) {
       args: [
         ...stdDevArgs,
         '--server.port=' + kibanaTestServerUrlParts.port,
-        '--elasticsearch.url=' + format(esTestServerUrlParts),
+        '--elasticsearch.url=' + esTestConfig.getUrl(),
         ...kbnServerFlags,
       ]
     },
@@ -110,7 +108,7 @@ module.exports = function (grunt) {
       args: [
         ...stdDevArgs,
         '--server.port=' + kibanaTestServerUrlParts.port,
-        '--elasticsearch.url=' + format(esTestServerUrlParts),
+        '--elasticsearch.url=' + esTestConfig.getUrl(),
         ...kbnServerFlags,
       ]
     },
@@ -126,10 +124,9 @@ module.exports = function (grunt) {
       args: [
         ...stdDevArgs,
         '--server.port=' + kibanaTestServerUrlParts.port,
-        '--elasticsearch.url=' + format(esTestServerUrlParts),
+        '--elasticsearch.url=' + esTestConfig.getUrl(),
         '--dev',
         '--no-base-path',
-        '--no-ssl',
         '--optimize.lazyPort=5611',
         '--optimize.lazyPrebuild=true',
         '--optimize.bundleDir=optimize/testUiServer',
@@ -165,7 +162,6 @@ module.exports = function (grunt) {
         ...buildTestsArgs,
         '--dev',
         '--no-watch',
-        '--no-ssl',
         '--no-base-path',
         '--server.port=5610',
         '--optimize.lazyPort=5611',

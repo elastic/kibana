@@ -1,4 +1,6 @@
 .kuiTextArea {
+  width: $globalFormFieldDefaultWidth;
+
   @include formControl;
 
   &:focus {
@@ -13,4 +15,12 @@
 
 .kuiTextArea--nonResizable {
   resize: none;
+}
+
+.kuiTextArea--small {
+  width: $globalFormFieldSmallWidth;
+}
+
+.kuiTextArea--large {
+  width: $globalFormFieldLargeWidth;
 }

@@ -112,7 +112,7 @@ export default function ({ getService, getPageObjects }) {
 
         const expectedChartData = ['png', '1,373', 'php', '445', 'jpg', '9,109', 'gif', '918', 'css', '2,159'];
 
-        return PageObjects.visualize.collapseChart()
+        return PageObjects.visualize.toggleSpyPanel()
         .then(function getDataTableData() {
           return PageObjects.visualize.getDataTableData();
         })
@@ -131,7 +131,7 @@ export default function ({ getService, getPageObjects }) {
           expect(message).to.be('Visualization Editor: Saved Visualization \"' + vizName1 + '\"');
         })
         .then(function testVisualizeWaitForToastMessageGone() {
-          return PageObjects.visualize.waitForToastMessageGone();
+          return PageObjects.header.waitForToastMessageGone();
         })
         .then(function () {
           return PageObjects.visualize.loadSavedVisualization(vizName1);

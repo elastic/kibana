@@ -53,14 +53,10 @@ export default function ({ getService, getPageObjects }) {
     describe('tile cloud chart', function indexPatternCreation() {
       const vizName1 = 'Visualization tagCloud';
 
-      it('should show correct tag cloud data', function () {
-        return PageObjects.common.sleep(2000)
-          .then(function () {
-            return PageObjects.visualize.getTextTag().then(function (results) {
-              log.debug(results);
-              expect(results).to.eql([ '32212254720', '21474836480','20401094656','19327352832','18253611008' ]);
-            });
-          });
+      it('should show correct tag cloud data', async function () {
+        const data = await PageObjects.visualize.getTextTag();
+        log.debug(data);
+        expect(data).to.eql([ '32212254720', '21474836480','20401094656','19327352832','18253611008' ]);
       });
 
 
@@ -71,7 +67,7 @@ export default function ({ getService, getPageObjects }) {
           expect(message).to.be('Visualization Editor: Saved Visualization \"' + vizName1 + '\"');
         })
           .then(function testVisualizeWaitForToastMessageGone() {
-            return PageObjects.visualize.waitForToastMessageGone();
+            return PageObjects.header.waitForToastMessageGone();
           })
           .then(function () {
             return PageObjects.visualize.loadSavedVisualization(vizName1);
@@ -102,7 +98,7 @@ export default function ({ getService, getPageObjects }) {
           '18,253,611,008', '679'
         ];
 
-        return PageObjects.visualize.collapseChart()
+        return PageObjects.visualize.toggleSpyPanel()
           .then(function () {
             return PageObjects.settings.setPageSize('All');
           })

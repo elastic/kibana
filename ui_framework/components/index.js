@@ -1,13 +1,14 @@
 export { KuiActionItem } from './action_item';
 
 export {
+  KuiKeyboardAccessible,
+  KuiScreenReaderOnly,
+} from './accessibility';
+
+export {
   KuiBar,
   KuiBarSection,
 } from './bar';
-
-export {
-  KuiKeyboardAccessible,
-} from './accessibility';
 
 export {
   KuiButton,
@@ -27,8 +28,18 @@ export {
 } from './card';
 
 export {
-  KuiCollapseButton
+  KuiColorPicker,
+} from './color_picker';
+
+export {
+  KuiCollapseButton,
 } from './collapse_button';
+
+export {
+  KuiEmptyTablePrompt,
+  KuiEmptyTablePromptMessage,
+  KuiEmptyTablePromptPanel,
+} from './empty_table_prompt';
 
 export {
   KuiEvent,
@@ -48,7 +59,7 @@ export {
   KuiGalleryButton,
   KuiGalleryButtonIcon,
   KuiGalleryButtonImage,
-  KuiGalleryButtonLabel
+  KuiGalleryButtonLabel,
 } from './gallery';
 
 export {
@@ -68,29 +79,45 @@ export {
 } from './local_nav';
 
 export {
-  KuiToolBarSearchBox,
-  KuiToolBar,
-  KuiToolBarFooter,
-} from './tool_bar';
+  KuiMenu,
+  KuiMenuItem,
+} from './menu';
+
 
 export * from './modal';
 
 export {
   KuiPager,
-  KuiPagerButtonGroup
+  KuiPagerButtonGroup,
 } from './pager';
 
 export {
-  KuiEmptyTablePrompt,
-  KuiEmptyTablePromptMessage,
-  KuiEmptyTablePromptPanel,
-} from './empty_table_prompt';
+  KuiPopover,
+} from './popover';
 
 export {
-  KuiMenu,
-  KuiMenuItem
-} from './menu';
+  KuiTabs,
+  KuiTab
+} from './tabs';
 
 export {
-  KuiColorPicker
-} from './color_picker';
+  KuiTable,
+  KuiControlledTable,
+  KuiTableHeaderCell,
+  KuiTableRow,
+  KuiTableRowCell,
+  KuiTableInfo,
+  KuiTableRowCheckBoxCell,
+  KuiTableHeaderCheckBoxCell,
+  KuiTableHeader,
+  KuiTableBody,
+} from './table';
+
+export {
+  KuiToolBar,
+  KuiToolBarSearchBox,
+  KuiToolBarFooter,
+  KuiToolBarSection,
+  KuiToolBarFooterSection,
+  KuiToolBarText
+} from './tool_bar';

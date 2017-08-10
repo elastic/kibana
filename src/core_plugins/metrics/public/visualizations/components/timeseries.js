@@ -128,10 +128,12 @@ class Timeseries extends Component {
               series={this.props.series}
               annotations={this.props.annotations}
               show={ this.state.show }
+              showGrid={ this.props.showGrid }
               tickFormatter={this.props.tickFormatter}
               options={this.props.options}
               xaxisLabel={this.props.xaxisLabel}
-              yaxes={this.props.yaxes} />
+              yaxes={this.props.yaxes}
+            />
           </div>
           <Legend
             legendPosition={this.props.legendPosition}
@@ -141,7 +143,8 @@ class Timeseries extends Component {
             showLegend={this.state.showLegend}
             seriesValues={this.state.values}
             seriesFilter={this.state.show}
-            tickFormatter={this.props.tickFormatter} />
+            tickFormatter={this.props.tickFormatter}
+          />
         </div>
       </div>
     );
@@ -152,7 +155,8 @@ class Timeseries extends Component {
 }
 
 Timeseries.defaultProps = {
-  legned: true
+  legned: true,
+  showGrid: true
 };
 
 Timeseries.propTypes = {
@@ -164,6 +168,7 @@ Timeseries.propTypes = {
   reversed: PropTypes.bool,
   options: PropTypes.object,
   tickFormatter: PropTypes.func,
+  showGrid: PropTypes.bool,
   xaxisLabel: PropTypes.string
 };
 

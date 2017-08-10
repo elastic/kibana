@@ -31,7 +31,8 @@ class CalculationVars extends Component {
             className="vis_editor__input-grows-100"
             type="text"
             onChange={this.handleChange(row, 'name')}
-            value={row.name} />
+            value={row.name}
+          />
         </div>
         <div className="vis_editor__calc_vars-var">
           <MetricSelect
@@ -39,13 +40,15 @@ class CalculationVars extends Component {
             exclude={['percentile']}
             metrics={this.props.metrics}
             metric={this.props.model}
-            value={row.field}/>
+            value={row.field}
+          />
         </div>
         <div className="vis_editor__calc_vars-control">
           <AddDeleteButtons
             onAdd={handleAdd}
             onDelete={handleDelete}
-            disableDelete={items.length < 2}/>
+            disableDelete={items.length < 2}
+          />
         </div>
       </div>
     );

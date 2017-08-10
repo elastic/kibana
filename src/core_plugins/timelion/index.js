@@ -27,7 +27,10 @@ export default function (kibana) {
             esShardTimeout: config.get('elasticsearch.shardTimeout'),
             esApiVersion: config.get('elasticsearch.apiVersion')
           };
-        }
+        },
+        uses: [
+          'savedObjectTypes',
+        ]
       },
       hacks: [
         'plugins/timelion/lib/panel_registry',

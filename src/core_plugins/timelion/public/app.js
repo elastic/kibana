@@ -4,7 +4,6 @@ import moment from 'moment-timezone';
 import { DocTitleProvider } from 'ui/doc_title';
 import { SavedObjectRegistryProvider } from 'ui/saved_objects/saved_object_registry';
 import { notify } from 'ui/notify';
-import 'ui/accessibility/kbn_accessible_click';
 
 require('plugins/timelion/directives/cells/cells');
 require('plugins/timelion/directives/fixed_element');
@@ -24,8 +23,6 @@ const app = require('ui/modules').get('apps/timelion', []);
 require('plugins/timelion/services/saved_sheets');
 require('plugins/timelion/services/_saved_sheet');
 
-require('plugins/kibana/visualize/saved_visualizations/saved_visualizations');
-require('plugins/kibana/discover/saved_searches/saved_searches');
 require('./vis');
 
 SavedObjectRegistryProvider.register(require('plugins/timelion/services/saved_sheet_register'));
@@ -61,7 +58,6 @@ app.controller('timelion', function (
     kbnUrl,
     Notifier,
     Private,
-    savedVisualizations,
     timefilter
   ) {
 
@@ -78,6 +74,7 @@ app.controller('timelion', function (
     location: 'Timelion'
   });
 
+  const savedVisualizations = Private(SavedObjectRegistryProvider).byLoaderPropertiesName.visualizations;
   const timezone = Private(require('plugins/timelion/services/timezone'))();
   const docTitle = Private(DocTitleProvider);
 

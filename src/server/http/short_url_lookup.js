@@ -1,21 +1,12 @@
 import crypto from 'crypto';
+import { get } from 'lodash';
 
 export default function (server) {
-  async function updateMetadata(urlId, urlDoc, req) {
-    const { callWithRequest } = server.plugins.elasticsearch.getCluster('admin');
-    const kibanaIndex = server.config().get('kibana.index');
-
+  async function updateMetadata(doc, req) {
     try {
-      await callWithRequest(req, 'update', {
-        index: kibanaIndex,
-        type: 'url',
-        id: urlId,
-        body: {
-          doc: {
-            'accessDate': new Date(),
-            'accessCount': urlDoc._source.accessCount + 1
-          }
-        }
+      await req.getSavedObjectsClient().update('url', doc.id, {
+        accessDate: new Date(),
+        accessCount: get(doc, 'attributes.accessCount', 0) + 1
       });
     } catch (err) {
       server.log('Warning: Error updating url metadata', err);
@@ -23,81 +14,35 @@ export default function (server) {
     }
   }
 
-  async function getUrlDoc(urlId, req) {
-    const urlDoc = await new Promise(resolve => {
-      const { callWithRequest } = server.plugins.elasticsearch.getCluster('admin');
-      const kibanaIndex = server.config().get('kibana.index');
-
-      callWithRequest(req, 'get', {
-        index: kibanaIndex,
-        type: 'url',
-        id: urlId
-      })
-      .then(response => {
-        resolve(response);
-      })
-      .catch(() => {
-        resolve();
-      });
-    });
-
-    return urlDoc;
-  }
-
-  async function createUrlDoc(url, urlId, req) {
-    const newUrlId = await new Promise((resolve, reject) => {
-      const { callWithRequest } = server.plugins.elasticsearch.getCluster('admin');
-      const kibanaIndex = server.config().get('kibana.index');
-
-      callWithRequest(req, 'index', {
-        index: kibanaIndex,
-        type: 'url',
-        id: urlId,
-        body: {
-          url,
-          'accessCount': 0,
-          'createDate': new Date(),
-          'accessDate': new Date()
-        }
-      })
-      .then(response => {
-        resolve(response._id);
-      })
-      .catch(err => {
-        reject(err);
-      });
-    });
-
-    return newUrlId;
-  }
-
-  function createUrlId(url) {
-    const urlId = crypto.createHash('md5')
-    .update(url)
-    .digest('hex');
-
-    return urlId;
-  }
-
   return {
     async generateUrlId(url, req) {
-      const urlId = createUrlId(url);
-      const urlDoc = await getUrlDoc(urlId, req);
-      if (urlDoc) return urlId;
+      const id = crypto.createHash('md5').update(url).digest('hex');
+      const savedObjectsClient = req.getSavedObjectsClient();
+      const { isConflictError } = savedObjectsClient.errors;
 
-      return createUrlDoc(url, urlId, req);
-    },
-    async getUrl(urlId, req) {
       try {
-        const urlDoc = await getUrlDoc(urlId, req);
-        if (!urlDoc) throw new Error('Requested shortened url does not exist in kibana index');
+        const doc = await savedObjectsClient.create('url', {
+          url,
+          accessCount: 0,
+          createDate: new Date(),
+          accessDate: new Date()
+        }, { id });
 
-        updateMetadata(urlId, urlDoc, req);
+        return doc.id;
+      } catch (error) {
+        if (isConflictError(error)) {
+          return id;
+        }
 
-        return urlDoc._source.url;
-      } catch (err) {
-        return '/';
+        throw error;
       }
+    },
+
+    async getUrl(id, req) {
+      const doc = await req.getSavedObjectsClient().get('url', id);
+      updateMetadata(doc, req);
+
+      return doc.attributes.url;
     }
   };
 }

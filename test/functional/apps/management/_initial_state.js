@@ -17,28 +17,25 @@ export default function ({ getService, getPageObjects }) {
       });
     });
 
-    it('should contain default index pattern', function () {
+    it('should contain default index pattern', async function () {
       const defaultPattern = 'logstash-*';
 
-      return PageObjects.settings.getIndexPatternField().getProperty('value')
-      .then(function (pattern) {
-        expect(pattern).to.be(defaultPattern);
-      });
+      const indexPatternField = await PageObjects.settings.getIndexPatternField();
+      const pattern = await indexPatternField.getProperty('value');
+      expect(pattern).to.be(defaultPattern);
     });
 
-    it('should not select the time field', function () {
-      return PageObjects.settings.getTimeFieldNameField().isSelected()
-      .then(function (timeFieldIsSelected) {
-        log.debug('timeField isSelected = ' + timeFieldIsSelected);
-        expect(timeFieldIsSelected).to.not.be.ok();
-      });
+    it('should not select the time field', async function () {
+      const timeFieldNameField = await PageObjects.settings.getTimeFieldNameField();
+      const timeFieldIsSelected = await timeFieldNameField.isSelected();
+      log.debug('timeField isSelected = ' + timeFieldIsSelected);
+      expect(timeFieldIsSelected).to.not.be.ok();
     });
 
-    it('should not enable creation', function () {
-      return PageObjects.settings.getCreateIndexPatternButton().isEnabled()
-      .then(function (enabled) {
-        expect(enabled).to.not.be.ok();
-      });
+    it('should not enable creation', async function () {
+      const createIndexPatternButton = await PageObjects.settings.getCreateIndexPatternButton();
+      const enabled = await createIndexPatternButton.isEnabled();
+      expect(enabled).to.not.be.ok();
     });
   });
 }

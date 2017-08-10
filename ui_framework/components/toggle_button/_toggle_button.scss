@@ -20,9 +20,14 @@
     color: $globalLinkColor !important; /* 2 */
   }
 
-  &:hover {
+  &:hover:not(:disabled) {
     color: $globalLinkHoverColor !important; /* 2 */
     text-decoration: underline;
+  }
+
+  &:disabled {
+    cursor: not-allowed;
+    opacity: .5;
   }
 }
 

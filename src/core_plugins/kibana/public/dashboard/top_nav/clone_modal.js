@@ -59,7 +59,8 @@ export class DashboardCloneModal extends React.Component {
                 data-test-subj="clonedDashboardTitle"
                 className="kuiTextInput kuiTextInput--large"
                 value={ this.state.newDashboardName }
-                onChange={ this.onInputChange } />
+                onChange={ this.onInputChange }
+              />
             </KuiModalBodyText>
           </KuiModalBody>
 

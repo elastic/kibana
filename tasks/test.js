@@ -14,9 +14,7 @@ module.exports = function (grunt) {
 
   grunt.registerTask('test:server', [
     'checkPlugins',
-    'esvm:test',
     'simplemocha:all',
-    'esvm_shutdown:test',
   ]);
 
   grunt.registerTask('test:browser', [
@@ -92,7 +90,7 @@ module.exports = function (grunt) {
   ]);
 
   grunt.registerTask('test:api:runner', () => {
-    grunt.fail.fatal('test:api:runner has moved, use: `node scripts/function_test_runner --config test/api_integration/config.js`');
+    grunt.fail.fatal('test:api:runner has moved, use: `node scripts/functional_test_runner --config test/api_integration/config.js`');
   });
 
   grunt.registerTask('test', subTask => {

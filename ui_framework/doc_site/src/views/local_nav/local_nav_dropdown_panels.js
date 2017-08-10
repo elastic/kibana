@@ -28,7 +28,7 @@ export function LocalNavWithDropdownPanels() {
             <div className="kuiLocalMenuItem">Save</div>
             <div className="kuiLocalMenuItem">Open</div>
             <button className="kuiLocalMenuItem">
-              <div className="kuiLocalMenuItem__icon kuiIcon fa-clock-o"></div>
+              <div className="kuiLocalMenuItem__icon kuiIcon fa-clock-o" />
               Last 5 minutes
             </button>
           </div>
@@ -37,7 +37,7 @@ export function LocalNavWithDropdownPanels() {
       <div className="kuiLocalDropdown">
         {/* Dropdown close button */}
         <button className="kuiLocalDropdownCloseButton">
-          <span className="fa fa-chevron-circle-up"></span>
+          <span className="fa fa-chevron-circle-up" />
         </button>
 
         <div className="kuiLocalDropdownPanels">
@@ -73,7 +73,7 @@ export function LocalNavWithDropdownPanels() {
             autoComplete="off"
           />
           <button className="kuiLocalSearchButton">
-            <span className="kuiIcon fa-search"></span>
+            <span className="kuiIcon fa-search" />
           </button>
         </div>
       </KuiLocalNavRow>

@@ -1,5 +1,5 @@
 <ui-select
-  ng-if="field.aggregatable && field.type === 'string'"
+  ng-if="filterParamsPhraseEditor.shouldSuggestValues && field.aggregatable && field.type === 'string'"
   ng-model="params.phrase"
   ui-select-focus-on="focus-params"
 >
@@ -22,7 +22,7 @@
 </ui-select>
 
 <filter-params-input-type
-  ng-if="!(field.aggregatable && field.type === 'string')"
+  ng-if="!(filterParamsPhraseEditor.shouldSuggestValues && field.aggregatable && field.type === 'string')"
   placeholder="Value..."
   type="field.type"
   value="params.phrase"

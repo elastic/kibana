@@ -19,9 +19,10 @@
   height: $localSearchHeight;
   flex: 0 0 auto;
   border-radius: 0;
-  border-left-color: $globalFormControlBorderColor;
+  border-left-width: 0;
 
   @include darkTheme {
+    border-left-width: 1px;
     border-left-color: $localNavBackgroundColor--darkTheme;
     border-right-color: $localNavBackgroundColor--darkTheme;
   }
@@ -47,8 +48,7 @@
 .kuiLocalSearchSelect {
   @include select;
 
-  border-color: $localSearchBackgroundColor;
-  border-left-color: $globalFormControlBorderColor;
+  border-left-width: 0;
   border-radius: 0;
 }
 

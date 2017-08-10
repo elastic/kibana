@@ -21,9 +21,8 @@ export function PointSeriesPageProvider({ getService }) {
         .click();
     }
 
-    clickAddAxis() {
-      return testSubjects.find('visualizeAddYAxisButton')
-        .click();
+    async clickAddAxis() {
+      return await testSubjects.click('visualizeAddYAxisButton');
     }
 
     getValueAxesCount() {
@@ -85,7 +84,7 @@ export function PointSeriesPageProvider({ getService }) {
     setGridValueAxis(axis) {
       return remote
         .setFindTimeout(defaultFindTimeout)
-        .findByCssSelector(`select#gridAxis option[value="string:${axis}"]`)
+        .findByCssSelector(`select#gridAxis option[value="${axis}"]`)
         .click();
     }
 

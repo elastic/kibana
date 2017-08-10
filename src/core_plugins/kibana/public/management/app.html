@@ -9,13 +9,14 @@
         omit-current-page="true"
         use-links="true"
         omit-pages="omitPages"
+        page-title="pageTitle"
       ></bread-crumbs>
 
       <!-- Tabs. -->
       <div data-transclude-slot="bottomRow" class="kuiLocalTabs">
-        <span ng-if="!sectionName" class="kuiLocalTab">
+        <h2 class="kuiLocalTab" ng-if="!sectionName" id="tabHeader" tabindex="0">
           {{::section.display}}
-        </span>
+        </h2>
         <a
           ng-if="sectionName"
           ng-repeat="item in section.visibleItems"
@@ -34,5 +35,5 @@
     </div>
   </kbn-top-nav>
 
-  <div role="main" class="management-container" ng-transclude></div>
+  <main class="management-container" ng-transclude></main>
 </div>

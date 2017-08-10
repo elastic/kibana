@@ -5,9 +5,11 @@ import Chance from 'chance';
 
 import { UiSettingsService } from '../ui_settings_service';
 
-import { createCallClusterStub } from './lib';
+import {
+  createObjectsClientStub,
+  savedObjectsClientErrors,
+} from './lib';
 
-const INDEX = '.kibana';
 const TYPE = 'config';
 const ID = 'kibana-version';
 const chance = new Chance();
@@ -18,22 +20,21 @@ function setup(options = {}) {
     getDefaults,
     defaults = {},
     esDocSource = {},
-    callCluster = createCallClusterStub(INDEX, TYPE, ID, esDocSource)
+    savedObjectsClient = createObjectsClientStub(TYPE, ID, esDocSource)
   } = options;
 
   const uiSettings = new UiSettingsService({
-    index: INDEX,
     type: TYPE,
     id: ID,
     getDefaults: getDefaults || (() => defaults),
     readInterceptor,
-    callCluster,
+    savedObjectsClient,
   });
 
   return {
     uiSettings,
-    assertGetQuery: callCluster.assertGetQuery,
-    assertUpdateQuery: callCluster.assertUpdateQuery,
+    assertGetQuery: savedObjectsClient.assertGetQuery,
+    assertUpdateQuery: savedObjectsClient.assertUpdateQuery,
   };
 }
 
@@ -199,8 +200,11 @@ describe('ui settings', () => {
 
     it('throws 401 errors', async () => {
       const { uiSettings } = setup({
-        async callCluster() {
-          throw new esErrors[401]();
+        savedObjectsClient: {
+          errors: savedObjectsClientErrors,
+          async get() {
+            throw new esErrors[401]();
+          }
         }
       });
 
@@ -216,8 +220,11 @@ describe('ui settings', () => {
       const expectedUnexpectedError = new Error('unexpected');
 
       const { uiSettings } = setup({
-        async callCluster() {
-          throw expectedUnexpectedError;
+        savedObjectsClient: {
+          errors: savedObjectsClientErrors,
+          async get() {
+            throw expectedUnexpectedError;
+          }
         }
       });
 

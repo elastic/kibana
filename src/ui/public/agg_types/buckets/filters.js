@@ -1,5 +1,6 @@
 import _ from 'lodash';
 import angular from 'angular';
+import { luceneStringToDsl } from '../../courier/data_source/build_query/lucene_string_to_dsl.js';
 
 import { AggTypesBucketsBucketAggTypeProvider } from 'ui/agg_types/buckets/_bucket_agg_type';
 import { AggTypesBucketsCreateFilterFiltersProvider } from 'ui/agg_types/buckets/create_filter/filters';
@@ -27,15 +28,16 @@ export function AggTypesBucketsFiltersProvider(Private, Notifier) {
           if (!_.size(inFilters)) return;
 
           const outFilters = _.transform(inFilters, function (filters, filter) {
-            const input = filter.input;
+            const input = _.cloneDeep(filter.input);
             if (!input) return notif.log('malformed filter agg params, missing "input" query');
 
-            const query = input.query;
+            const query = input.query = luceneStringToDsl(input.query);
             if (!query) return notif.log('malformed filter agg params, missing "query" on input');
 
             decorateQuery(query);
 
-            const label = filter.label || _.get(query, 'query_string.query') || angular.toJson(query);
+            const matchAllLabel = (filter.input.query === '' && _.has(query, 'match_all')) ? '*' : '';
+            const label = filter.label || matchAllLabel || _.get(query, 'query_string.query') || angular.toJson(query);
             filters[label] = input;
           }, {});
 

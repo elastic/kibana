@@ -16,13 +16,6 @@ describe('parseSettings', () => {
     });
   });
 
-  it('returns the true for "true"', () => {
-    const settings = 'pad=true';
-    expect(parseSettings(settings)).to.eql({
-      pad: true,
-    });
-  });
-
   it('returns the true for 1', () => {
     const settings = 'pad=1';
     expect(parseSettings(settings)).to.eql({

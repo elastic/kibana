@@ -19,7 +19,6 @@ export async function collectIndexPatterns(savedObjectsClient, panels) {
 
   if (docs.length === 0) return [];
 
-  const response = await savedObjectsClient.bulkGet(docs);
-  return response;
-
+  const { saved_objects: savedObjects } = await savedObjectsClient.bulkGet(docs);
+  return savedObjects;
 }

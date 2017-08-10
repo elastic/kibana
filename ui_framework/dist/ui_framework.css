@@ -69,6 +69,21 @@
 body {
   font-family: "Open Sans", Helvetica, Arial, sans-serif; }
 
+/**
+ * 1. Required for IE11.
+ */
+main {
+  display: block;
+  /* 1 */ }
+
+.kuiScreenReaderOnly {
+  position: absolute;
+  left: -10000px;
+  top: auto;
+  width: 1px;
+  height: 1px;
+  overflow: hidden; }
+
 .kuiActionItem {
   display: -webkit-box;
   display: -webkit-flex;
@@ -665,10 +680,12 @@ body {
   opacity: 0.35; }
   .kuiCollapseButton:hover {
     opacity: 1; }
+  .theme-dark .kuiCollapseButton {
+    color: #cecece !important;
+    /* 1 */ }
 
 .kuiColorPicker {
-  cursor: pointer;
-  display: inline-block; }
+  cursor: pointer; }
 
 .kuiColorPicker__preview {
   display: -webkit-box;
@@ -684,7 +701,17 @@ body {
   width: 20px;
   height: 20px;
   border-radius: 4px;
-  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.2); }
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.2);
+  display: inline-block; }
+
+.kuiColorPicker__emptySwatch svg {
+  position: absolute;
+  width: 20px;
+  height: 20px; }
+
+.kuiColorPicker__emptySwatch svg line {
+  stroke: red;
+  stroke-width: 2; }
 
 .kuiColorPicker__label {
   font-size: 14px;
@@ -1023,12 +1050,13 @@ body {
   /* 1 */ }
 
 .kuiSearchInput {
+  width: 180px;
   display: inline-block;
   position: relative;
   font-size: 14px;
   line-height: 1.5; }
   .kuiSearchInput.kuiSearchInput-isInvalid .kuiSearchInput__input {
-    border-color: #D86051; }
+    border-color: #A30000; }
 
 .kuiSearchInput__icon {
   position: absolute;
@@ -1064,7 +1092,7 @@ body {
   .theme-dark .kuiSearchInput__input {
     color: #cecece; }
   .kuiSearchInput__input:invalid {
-    border-color: #D86051; }
+    border-color: #A30000; }
   .kuiSearchInput__input:focus {
     outline: none;
     border-color: #0079a5; }
@@ -1078,6 +1106,15 @@ body {
       outline: none;
       border-color: #0079a5; }
 
+.kuiSearchInput--small {
+  width: 60px; }
+
+.kuiSearchInput--large {
+  width: 400px; }
+
+/**
+ * Avoid setting a width here, so that the width of the options can dynamically set the width.
+ */
 .kuiSelect {
   -webkit-appearance: none;
      -moz-appearance: none;
@@ -1101,24 +1138,11 @@ body {
   background-size: 14px;
   background-repeat: no-repeat;
   background-position: calc(100% - 8px);
-  /* 2 */
-  appearance: none;
-  font-family: "Open Sans", Helvetica, Arial, sans-serif;
-  padding: 3px 12px 4px;
-  font-size: 14px;
-  font-weight: 400;
-  line-height: 1.5;
-  color: #191E23;
-  background-color: #ffffff;
-  border: 1px solid #DEDEDE;
-  border-radius: 4px;
-  transition: border-color 0.1s linear;
-  min-height: 30px;
-  /* 1 */ }
+  /* 2 */ }
   .theme-dark .kuiSelect {
     color: #cecece; }
   .kuiSelect:invalid {
-    border-color: #D86051; }
+    border-color: #A30000; }
   .kuiSelect:focus {
     outline: none;
     border-color: #0079a5; }
@@ -1137,36 +1161,27 @@ body {
   .theme-dark .kuiSelect {
     background-image: url('data:image/svg+xml;utf8,<svg width="1792" height="1792" viewBox="0 0 1792 1792" xmlns="http://www.w3.org/2000/svg"><path d="M1408 704q0 26-19 45l-448 448q-19 19-45 19t-45-19l-448-448q-19-19-19-45t19-45 45-19h896q26 0 45 19t19 45z" fill="#CECECE"/></svg>');
     /* 1 */ }
-  .theme-dark .kuiSelect {
-    color: #cecece; }
-  .kuiSelect:invalid {
-    border-color: #D86051; }
-  .kuiSelect:focus {
-    outline: none;
-    border-color: #0079a5; }
-  .kuiSelect:disabled {
-    opacity: 0.4;
-    cursor: not-allowed; }
-  .theme-dark .kuiSelect {
-    background-color: #444444;
-    border-color: #444444; }
-    .theme-dark .kuiSelect:focus {
-      outline: none;
-      border-color: #0079a5; }
   .kuiSelect.kuiSelect-isInvalid {
-    border-color: #D86051; }
+    border-color: #A30000; }
   .kuiSelect:focus {
     box-shadow: none;
     outline: none;
     border-color: #0079a5; }
 
+.kuiSelect--small {
+  width: 60px; }
+
+.kuiSelect--medium {
+  width: 180px; }
+
 .kuiSelect--large {
-  min-width: 400px; }
+  width: 400px; }
 
 /**
  * 1. Have the same spatial footprint as the regular input.
  */
 .kuiStaticInput {
+  width: 180px;
   -webkit-appearance: none;
      -moz-appearance: none;
           appearance: none;
@@ -1183,6 +1198,7 @@ body {
     color: #cecece; }
 
 .kuiTextArea {
+  width: 180px;
   -webkit-appearance: none;
      -moz-appearance: none;
           appearance: none;
@@ -1201,7 +1217,7 @@ body {
   .theme-dark .kuiTextArea {
     color: #cecece; }
   .kuiTextArea:invalid {
-    border-color: #D86051; }
+    border-color: #A30000; }
   .kuiTextArea:focus {
     outline: none;
     border-color: #0079a5; }
@@ -1219,12 +1235,19 @@ body {
     outline: none;
     border-color: #0079a5; }
   .kuiTextArea.kuiTextArea-isInvalid {
-    border-color: #D86051; }
+    border-color: #A30000; }
 
 .kuiTextArea--nonResizable {
   resize: none; }
 
+.kuiTextArea--small {
+  width: 60px; }
+
+.kuiTextArea--large {
+  width: 400px; }
+
 .kuiTextInput {
+  width: 180px;
   -webkit-appearance: none;
      -moz-appearance: none;
           appearance: none;
@@ -1243,7 +1266,7 @@ body {
   .theme-dark .kuiTextInput {
     color: #cecece; }
   .kuiTextInput:invalid {
-    border-color: #D86051; }
+    border-color: #A30000; }
   .kuiTextInput:focus {
     outline: none;
     border-color: #0079a5; }
@@ -1257,15 +1280,13 @@ body {
       outline: none;
       border-color: #0079a5; }
   .kuiTextInput.kuiTextInput-isInvalid {
-    border-color: #D86051; }
+    border-color: #A30000; }
 
 .kuiTextInput--small {
-  width: 100%;
-  max-width: 60px; }
+  width: 60px; }
 
 .kuiTextInput--large {
-  width: 100%;
-  max-width: 400px; }
+  width: 400px; }
 
 /**
  * 1. We may want to put elements in here which have different heights.
@@ -1483,7 +1504,7 @@ body {
   color: #ec9800; }
 
 .kuiIcon--error {
-  color: #D86051; }
+  color: #A30000; }
 
 .kuiIcon--inactive {
   color: #c3c3c3; }
@@ -1521,7 +1542,7 @@ body {
  * 1. TODO: Pick a hex value instead of making these colors translucent.
  */
 .kuiInfoPanel--error {
-  border-color: rgba(216, 96, 81, 0.25);
+  border-color: rgba(163, 0, 0, 0.25);
   /* 1 */ }
 
 /**
@@ -1585,7 +1606,6 @@ body {
   -webkit-align-items: center;
       -ms-flex-align: center;
           align-items: center;
-  height: 100%;
   padding-left: 10px;
   /* 1 */ }
 
@@ -1807,6 +1827,9 @@ body {
   .theme-dark .kuiLocalDropdownCloseButton {
     color: #cecece !important;
     /* 1 */ }
+  .theme-dark .kuiLocalDropdownCloseButton {
+    color: #cecece !important;
+    /* 1 */ }
 
 .kuiLocalDropdownPanels {
   display: -webkit-box;
@@ -1927,11 +1950,10 @@ body {
   display: -webkit-flex;
   display: -ms-flexbox;
   display: flex;
-  -webkit-box-align: center;
-  -webkit-align-items: center;
-      -ms-flex-align: center;
-          align-items: center;
-  height: 100%; }
+  -webkit-box-align: stretch;
+  -webkit-align-items: stretch;
+      -ms-flex-align: stretch;
+          align-items: stretch; }
 
 .kuiLocalMenuItem {
   display: -webkit-box;
@@ -2014,23 +2036,34 @@ body {
     background-color: #333333;
     border-color: #1a1a1a; }
 
+/**
+ * 1. Allow row to expand if the content is so long that it wraps.
+ */
 .kuiLocalNavRow {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
   display: flex;
-  -webkit-box-align: center;
-  -webkit-align-items: center;
-      -ms-flex-align: center;
-          align-items: center;
+  -webkit-box-align: stretch;
+  -webkit-align-items: stretch;
+      -ms-flex-align: stretch;
+          align-items: stretch;
   -webkit-box-pack: justify;
   -webkit-justify-content: space-between;
       -ms-flex-pack: justify;
           justify-content: space-between;
-  height: 29px; }
+  min-height: 29px;
+  /* 1 */ }
 
 .kuiLocalNavRow__section {
-  height: 100%; }
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-align: stretch;
+  -webkit-align-items: stretch;
+      -ms-flex-align: stretch;
+          align-items: stretch; }
 
 /**
  * 1. We make this row flex-start because it usually contains a search input, which may expand
@@ -2083,7 +2116,7 @@ body {
   .theme-dark .kuiLocalSearchInput {
     color: #cecece; }
   .kuiLocalSearchInput:invalid {
-    border-color: #D86051; }
+    border-color: #A30000; }
   .kuiLocalSearchInput:focus {
     outline: none;
     border-color: #0079a5; }
@@ -2106,8 +2139,9 @@ body {
       -ms-flex: 0 0 auto;
           flex: 0 0 auto;
   border-radius: 0;
-  border-left-color: #DEDEDE; }
+  border-left-width: 0; }
   .theme-dark .kuiLocalSearchInput--secondary {
+    border-left-width: 1px;
     border-left-color: #333333;
     border-right-color: #333333; }
 
@@ -2159,13 +2193,12 @@ body {
   background-repeat: no-repeat;
   background-position: calc(100% - 8px);
   /* 2 */
-  border-color: #ffffff;
-  border-left-color: #DEDEDE;
+  border-left-width: 0;
   border-radius: 0; }
   .theme-dark .kuiLocalSearchSelect {
     color: #cecece; }
   .kuiLocalSearchSelect:invalid {
-    border-color: #D86051; }
+    border-color: #A30000; }
   .kuiLocalSearchSelect:focus {
     outline: none;
     border-color: #0079a5; }
@@ -2689,6 +2722,77 @@ body {
 .kuiPanelBody {
   padding: 10px; }
 
+.kuiPopover {
+  display: inline-block;
+  position: relative; }
+  .kuiPopover.kuiPopover-isOpen .kuiPopover__body {
+    opacity: 1;
+    visibility: visible;
+    z-index: 1;
+    margin-top: 10px;
+    box-shadow: 0 16px 16px -8px rgba(0, 0, 0, 0.1); }
+
+.kuiPopover__body {
+  line-height: 1.5;
+  font-size: 14px;
+  position: absolute;
+  min-width: 256px;
+  top: 100%;
+  left: 50%;
+  background: #FFF;
+  border: 1px solid #D9D9D9;
+  border-radius: 4px 0 4px 4px;
+  padding: 16px;
+  -webkit-transform: translateX(-50%) translateY(8px) translateZ(0);
+          transform: translateX(-50%) translateY(8px) translateZ(0);
+  -webkit-backface-visibility: hidden;
+          backface-visibility: hidden;
+  -webkit-transform-origin: center top;
+          transform-origin: center top;
+  opacity: 0;
+  visibility: hidden;
+  margin-top: 32px; }
+  .kuiPopover__body:before {
+    position: absolute;
+    content: "";
+    top: -16px;
+    height: 0;
+    width: 0;
+    left: 50%;
+    margin-left: -16px;
+    border-left: 16px solid transparent;
+    border-right: 16px solid transparent;
+    border-bottom: 16px solid #D9D9D9; }
+  .kuiPopover__body:after {
+    position: absolute;
+    content: "";
+    top: -15px;
+    right: 0;
+    height: 0;
+    left: 50%;
+    margin-left: -16px;
+    width: 0;
+    border-left: 16px solid transparent;
+    border-right: 16px solid transparent;
+    border-bottom: 16px solid #FFF; }
+
+.kuiPopover--anchorLeft .kuiPopover__body {
+  left: 0;
+  -webkit-transform: translateX(0%) translateY(8px) translateZ(0);
+          transform: translateX(0%) translateY(8px) translateZ(0); }
+  .kuiPopover--anchorLeft .kuiPopover__body:before, .kuiPopover--anchorLeft .kuiPopover__body:after {
+    right: auto;
+    left: 8px;
+    margin: 0; }
+
+.kuiPopover--anchorRight .kuiPopover__body {
+  left: 100%;
+  -webkit-transform: translateX(-100%) translateY(8px) translateZ(0);
+          transform: translateX(-100%) translateY(8px) translateZ(0); }
+  .kuiPopover--anchorRight .kuiPopover__body:before, .kuiPopover--anchorRight .kuiPopover__body:after {
+    right: 8px;
+    left: auto; }
+
 .kuiEmptyTablePrompt {
   display: -webkit-box;
   display: -webkit-flex;
@@ -2733,7 +2837,7 @@ body {
   color: #ec9800; }
 
 .kuiStatusText--error {
-  color: #D86051; }
+  color: #A30000; }
 
 /**
  * 1. Set the image to be the same size as a font icon at 14px.
@@ -2894,6 +2998,8 @@ body {
   display: -ms-flexbox;
   display: flex;
   border-bottom: 1px solid #D9D9D9; }
+  .theme-dark .kuiTabs {
+    border-bottom: 1px solid #777777; }
 
 /**
  * 1. Override button styles (some of which are from Bootstrap).
@@ -2914,11 +3020,14 @@ body {
   background-color: #FFF;
   /* 1 */
   border: 1px solid #D9D9D9;
-  border-bottom-width: 1px;
   border-radius: 0;
   /* 1 */
   margin-bottom: -1px;
   /* 3 */ }
+  .theme-dark .kuiTab {
+    color: #cecece;
+    background-color: #333333;
+    border-color: #777777; }
   .kuiTab + .kuiTab {
     border-left: none; }
     .kuiTab + .kuiTab:focus:not(.kuiTab-isSelected):not(:active) {
@@ -2936,13 +3045,24 @@ body {
     z-index: 1;
     color: #0079a5;
     border: 1px solid #0079a5 !important; }
+    .theme-dark .kuiTab:focus:not(.kuiTab-isSelected):not(:active) {
+      color: #cecece;
+      background-color: #333333;
+      border-color: #777777 !important; }
   .kuiTab:hover:not(.kuiTab-isSelected) {
     color: #006E8A;
     background-color: #F2F2F2; }
+    .theme-dark .kuiTab:hover:not(.kuiTab-isSelected) {
+      color: #def2f6;
+      background-color: #777777; }
   .kuiTab.kuiTab-isSelected {
     cursor: default;
     color: #191E23;
     border-bottom-color: #FFF; }
+    .theme-dark .kuiTab.kuiTab-isSelected {
+      color: #cecece;
+      background-color: #333333;
+      border-bottom-color: #333333; }
 
 /**
  * 1. Allow container to deteermine font-size and line-height.
@@ -2966,10 +3086,13 @@ body {
   .kuiToggleButton:active {
     color: #0079a5 !important;
     /* 2 */ }
-  .kuiToggleButton:hover {
+  .kuiToggleButton:hover:not(:disabled) {
     color: #006E8A !important;
     /* 2 */
     text-decoration: underline; }
+  .kuiToggleButton:disabled {
+    cursor: not-allowed;
+    opacity: .5; }
 
 /**
    * 1. Make icon a consistent width so the text doesn't get pushed around as the icon changes

@@ -27,6 +27,7 @@ describe('sibling pipeline aggs', function () {
         ngMock.inject(function (Private) {
           const Vis = Private(VisProvider);
           const indexPattern = Private(StubbedIndexPattern);
+          indexPattern.stubSetFieldFormat('bytes', 'bytes');
           metricAgg = Private(metric.provider);
 
           const params = settings || {
@@ -101,6 +102,24 @@ describe('sibling pipeline aggs', function () {
         expect(aggDsl[metric.name].buckets_path).to.be('2-bucket>2-metric');
         expect(aggDsl.parentAggs['2-bucket'].date_histogram).to.not.be.undefined;
         expect(aggDsl.parentAggs['2-bucket'].aggs['2-metric'].avg.field).to.equal('bytes');
+      });
+
+      it('should have correct formatter', function () {
+        init({
+          customMetric: {
+            id: '5',
+            type: 'avg',
+            schema: 'metric',
+            params: { field: 'bytes' },
+          },
+          customBucket: {
+            id: '6',
+            type: 'date_histogram',
+            schema: 'bucket',
+            params: { field: '@timestamp' },
+          }
+        });
+        expect(metricAgg.getFormat(aggConfig).type.id).to.be('bytes');
       });
 
     });

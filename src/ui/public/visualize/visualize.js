@@ -1,10 +1,15 @@
-import 'ui/visualize/spy';
-import 'ui/visualize/visualize.less';
-import 'ui/visualize/visualize_legend';
 import _ from 'lodash';
 import { uiModules } from 'ui/modules';
+import { stateMonitorFactory } from 'ui/state_management/state_monitor_factory';
 import visualizeTemplate from 'ui/visualize/visualize.html';
+import { VisRequestHandlersRegistryProvider } from 'ui/registry/vis_request_handlers';
+import { VisResponseHandlersRegistryProvider } from 'ui/registry/vis_response_handlers';
+import { ResizeCheckerProvider } from 'ui/resize_checker';
 import 'angular-sanitize';
+import './visualization';
+import './visualization_editor';
+import { FilterBarQueryFilterProvider } from 'ui/filter_bar/query_filter';
+
 
 import {
   isTermSizeZeroError,
@@ -12,173 +17,59 @@ import {
 
 uiModules
 .get('kibana/directive', ['ngSanitize'])
-.directive('visualize', function (Notifier, SavedVis, indexPatterns, Private, config, $timeout) {
-  const notify = new Notifier({
-    location: 'Visualize'
-  });
+  .directive('visualize', function (Notifier, Private, timefilter, getAppState) {
+    const notify = new Notifier({ location: 'Visualize' });
+    const requestHandlers = Private(VisRequestHandlersRegistryProvider);
+    const responseHandlers = Private(VisResponseHandlersRegistryProvider);
+    const ResizeChecker = Private(ResizeCheckerProvider);
+    const queryFilter = Private(FilterBarQueryFilterProvider);
 
-  return {
-    restrict: 'E',
-    require: '?renderCounter',
-    scope : {
-      showSpyPanel: '=?',
-      vis: '=',
-      uiState: '=?',
-      searchSource: '=?',
-      editableVis: '=?',
-      esResp: '=?',
-    },
-    template: visualizeTemplate,
-    link: function ($scope, $el, attr, renderCounter) {
-      const minVisChartHeight = 180;
+    function getHandler(from, name) {
+      if (typeof name === 'function') return name;
+      return from.find(handler => handler.name === name).handler;
+    }
 
-      if (_.isUndefined($scope.showSpyPanel)) {
-        $scope.showSpyPanel = true;
-      }
+    return {
+      restrict: 'E',
+      scope : {
+        showSpyPanel: '=?',
+        editorMode: '=?',
+        savedObj: '=',
+        appState: '=',
+        uiState: '=?'
+      },
+      template: visualizeTemplate,
+      link: function ($scope, $el) {
+        const resizeChecker = new ResizeChecker($el);
 
-      function getter(selector) {
-        return function () {
-          const $sel = $el.find(selector);
-          if ($sel.size()) return $sel;
-        };
-      }
+        $scope.vis = $scope.savedObj.vis;
+        $scope.editorMode = $scope.editorMode || false;
+        $scope.vis.editorMode = $scope.editorMode;
+        $scope.vis.visualizeScope = true;
 
-      const getVisEl = getter('[data-visualize-chart]');
-      const getVisContainer = getter('[data-visualize-chart-container]');
-      const getSpyContainer = getter('[data-spy-content-container]');
+        if (!$scope.appState) $scope.appState = getAppState();
 
-      // Show no results message when isZeroHits is true and it requires search
-      $scope.showNoResultsMessage = function () {
-        const requiresSearch = _.get($scope, 'vis.type.requiresSearch');
-        const isZeroHits = _.get($scope,'esResp.hits.total') === 0;
-        const shouldShowMessage = !_.get($scope, 'vis.params.handleNoResults');
+        const requestHandler = getHandler(requestHandlers, $scope.vis.type.requestHandler);
+        const responseHandler = getHandler(responseHandlers, $scope.vis.type.responseHandler);
 
-        return Boolean(requiresSearch && isZeroHits && shouldShowMessage);
-      };
+        $scope.fetch = _.debounce(function () {
 
-      const legendPositionToVisContainerClassMap = {
-        top: 'vis-container--legend-top',
-        bottom: 'vis-container--legend-bottom',
-        left: 'vis-container--legend-left',
-        right: 'vis-container--legend-right',
-      };
+        // searchSource is only there for courier request handler
+          requestHandler($scope.vis, $scope.appState, $scope.uiState, queryFilter, $scope.savedObj.searchSource)
+          .then(requestHandlerResponse => {
 
-      $scope.getVisContainerClasses = function () {
-        return legendPositionToVisContainerClassMap[$scope.vis.params.legendPosition];
-      };
+            //No need to call the response handler when there have been no data nor has been there changes
+            //in the vis-state (response handler does not depend on uiStat
+            const canSkipResponseHandler = (
+              $scope.previousRequestHandlerResponse && $scope.previousRequestHandlerResponse === requestHandlerResponse &&
+              $scope.previousVisState && _.isEqual($scope.previousVisState, $scope.vis.getState())
+            );
 
-      if (renderCounter && !$scope.vis.implementsRenderComplete()) {
-        renderCounter.disable();
-      }
-
-      $scope.spy = {};
-      $scope.spy.mode = ($scope.uiState) ? $scope.uiState.get('spy.mode', {}) : {};
-
-      const updateSpy = function () {
-        const $visContainer = getVisContainer();
-        const $spyEl = getSpyContainer();
-        if (!$spyEl) return;
-
-        const fullSpy = ($scope.spy.mode && ($scope.spy.mode.fill || $scope.fullScreenSpy));
-
-        $visContainer.toggleClass('spy-only', Boolean(fullSpy));
-        $spyEl.toggleClass('only', Boolean(fullSpy));
-
-        $timeout(function () {
-          if (shouldHaveFullSpy()) {
-            $visContainer.addClass('spy-only');
-            $spyEl.addClass('only');
-          }
-        }, 0);
-      };
-
-      // we need to wait for some watchers to fire at least once
-      // before we are "ready", this manages that
-      const prereq = (function () {
-        const fns = [];
-
-        return function register(fn) {
-          fns.push(fn);
-
-          return function () {
-            fn.apply(this, arguments);
-
-            if (fns.length) {
-              _.pull(fns, fn);
-              if (!fns.length) {
-                $scope.$root.$broadcast('ready:vis');
-              }
-            }
-          };
-        };
-      }());
-
-      const loadingDelay = config.get('visualization:loadingDelay');
-      $scope.loadingStyle = {
-        '-webkit-transition-delay': loadingDelay,
-        'transition-delay': loadingDelay
-      };
-
-      function shouldHaveFullSpy() {
-        const $visEl = getVisEl();
-        if (!$visEl) return;
-
-        return ($visEl.height() < minVisChartHeight)
-          && _.get($scope.spy, 'mode.fill')
-          && _.get($scope.spy, 'mode.name');
-      }
-
-      // spy watchers
-      $scope.$watch('fullScreenSpy', updateSpy);
-
-      $scope.$watchCollection('spy.mode', function () {
-        $scope.fullScreenSpy = shouldHaveFullSpy();
-        updateSpy();
-      });
-
-      function updateVisAggs() {
-        const enabledState = $scope.editableVis.getEnabledState();
-        const shouldUpdate = enabledState.aggs.length !== $scope.vis.aggs.length;
-
-        if (shouldUpdate) {
-          $scope.vis.setState(enabledState);
-          $scope.editableVis.dirty = false;
-        }
-      }
-
-      $scope.$watch('vis', prereq(function (vis, oldVis) {
-        const $visEl = getVisEl();
-        if (!$visEl) return;
-
-        if (!attr.editableVis) {
-          $scope.editableVis = vis;
-        }
-
-        if (oldVis) $scope.renderbot = null;
-        if (vis) {
-          $scope.renderbot = vis.type.createRenderbot(vis, $visEl, $scope.uiState);
-        }
-      }));
-
-      $scope.$watchCollection('vis.params', prereq(function () {
-        updateVisAggs();
-        if ($scope.renderbot) $scope.renderbot.updateParams();
-      }));
-
-      if (_.get($scope, 'vis.type.requiresSearch')) {
-        $scope.$watch('searchSource', prereq(function (searchSource) {
-          if (!searchSource || attr.esResp) return;
-
-          // TODO: we need to have some way to clean up result requests
-          searchSource.onResults().then(function onResults(resp) {
-            if ($scope.searchSource !== searchSource) return;
-
-            $scope.esResp = resp;
-
-            return searchSource.onResults().then(onResults);
-          }).catch(notify.fatal);
-
-          searchSource.onError(e => {
+            $scope.previousVisState = $scope.vis.getState();
+            $scope.previousRequestHandlerResponse = requestHandlerResponse;
+            return canSkipResponseHandler ? $scope.visData : responseHandler($scope.vis, requestHandlerResponse);
+          }, e => {
+            $scope.savedObj.searchSource.cancelQueued();
             $el.trigger('renderComplete');
             if (isTermSizeZeroError(e)) {
               return notify.error(
@@ -187,29 +78,81 @@ uiModules
                 `the error.`
               );
             }
-
             notify.error(e);
-          }).catch(notify.fatal);
-        }));
+          })
+          .then(resp => {
+            $scope.visData = resp;
+            $scope.$apply();
+            $scope.$broadcast('render');
+            return resp;
+          });
+        }, 100);
+
+        $scope.vis.on('update', () => {
+          if ($scope.editorMode) {
+            $scope.appState.vis = $scope.vis.getState();
+            $scope.appState.save();
+          } else {
+            $scope.fetch();
+          }
+        });
+
+        const reload = () => {
+          $scope.vis.reload = true;
+          $scope.fetch();
+        };
+        $scope.vis.on('reload', reload);
+      // auto reload will trigger this event
+        $scope.$on('courier:searchRefresh', reload);
+      // dashboard will fire fetch event when it wants to refresh
+        $scope.$on('fetch', reload);
+        queryFilter.on('update', $scope.fetch);
+
+        if ($scope.appState) {
+          let oldUiState;
+          const stateMonitor = stateMonitorFactory.create($scope.appState);
+          stateMonitor.onChange((status, type, keys) => {
+            if (keys[0] === 'vis') {
+              if ($scope.appState.vis) $scope.vis.setState($scope.appState.vis);
+              $scope.fetch();
+            }
+            if ($scope.vis.type.requiresSearch && ['query', 'filters'].includes(keys[0])) {
+              $scope.fetch();
+            }
+            if (keys[0] === 'uiState') {
+            // uiState can be changed by other visualizations on dashboard. this makes sure this fires only if
+            // current visualizations uiState changed.
+              if (!oldUiState || oldUiState !== JSON.stringify($scope.uiState.toJSON())) {
+                oldUiState = JSON.stringify($scope.uiState.toJSON());
+                $scope.fetch();
+              }
+            }
+          });
+
+          $scope.$on('$destroy', () => {
+            stateMonitor.destroy();
+          });
+        }
+
+        let resizeInit = false;
+        const resizeFunc = _.debounce(() => {
+          if (!resizeInit) return resizeInit = true;
+          $scope.$broadcast('render');
+        }, 200);
+        resizeChecker.on('resize',  resizeFunc);
+
+      // visualize needs to know about timeFilter
+        $scope.$listen(timefilter, 'fetch', $scope.fetch);
+        $scope.$on('renderComplete', () => {
+          $el.trigger('renderComplete');
+        });
+
+        $scope.$on('$destroy', () => {
+          resizeChecker.destroy();
+        });
+
+        $scope.fetch();
+        $scope.$root.$broadcast('ready:vis');
       }
-
-      $scope.$watch('esResp', prereq(function (resp) {
-        if (!resp) return;
-        $scope.renderbot.render(resp);
-      }));
-
-      $scope.$watch('renderbot', function (newRenderbot, oldRenderbot) {
-        if (oldRenderbot && newRenderbot !== oldRenderbot) {
-          oldRenderbot.destroy();
-        }
-      });
-
-      $scope.$on('$destroy', function () {
-        if ($scope.renderbot) {
-          $el.off('renderComplete');
-          $scope.renderbot.destroy();
-        }
-      });
-    }
-  };
-});
+    };
+  });

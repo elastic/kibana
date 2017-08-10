@@ -1,32 +1,27 @@
 import { format } from 'util';
 
 import * as kbnTestServer from '../../../../test_utils/kbn_server';
-import { fromRoot } from '../../../../utils';
+import { createEsTestCluster } from '../../../../test_utils/es';
 
 describe('plugins/elasticsearch', function () {
   describe('routes', function () {
     let kbnServer;
+    const es = createEsTestCluster({
+      name: 'core_plugins/es/routes',
+    });
 
     before(async function () {
-      // Sometimes waiting for server takes longer than 10s.
-      // NOTE: This can't be a fat-arrow function because `this` needs to refer to the execution
-      // context, not to the parent context.
-      this.timeout(60000);
+      this.timeout(es.getStartTimeout());
+      await es.start();
 
-      kbnServer = kbnTestServer.createServer({
-        plugins: {
-          scanDirs: [
-            fromRoot('src/core_plugins')
-          ]
-        },
-      });
-
+      kbnServer = kbnTestServer.createServerWithCorePlugins();
       await kbnServer.ready();
       await kbnServer.server.plugins.elasticsearch.waitUntilReady();
     });
 
-    after(function () {
-      return kbnServer.close();
+    after(async function () {
+      await kbnServer.close();
+      await es.stop();
     });
 
     function testRoute(options, statusCode = 200) {
@@ -57,38 +52,38 @@ describe('plugins/elasticsearch', function () {
     testRoute({
       method: 'GET',
       url: '/elasticsearch/_nodes'
-    });
+    }, 404);
 
     testRoute({
       method: 'GET',
-      url: '/elasticsearch/'
-    });
+      url: '/elasticsearch'
+    }, 404);
 
     testRoute({
       method: 'POST',
       url: '/elasticsearch/.kibana'
-    }, 405);
+    }, 404);
 
     testRoute({
       method: 'PUT',
       url: '/elasticsearch/.kibana'
-    }, 405);
+    }, 404);
 
     testRoute({
       method: 'DELETE',
       url: '/elasticsearch/.kibana'
-    }, 405);
+    }, 404);
 
     testRoute({
       method: 'GET',
       url: '/elasticsearch/.kibana'
-    });
+    }, 404);
 
     testRoute({
       method: 'POST',
       url: '/elasticsearch/.kibana/_bulk',
       payload: '{}'
-    }, 400);
+    }, 404);
 
     testRoute({
       method: 'POST',
@@ -97,7 +92,7 @@ describe('plugins/elasticsearch', function () {
         'content-type': 'application/json'
       },
       payload: { query: { query_string: { analyze_wildcard: true, query: '*' } } }
-    });
+    }, 404);
 
     testRoute({
       method: 'POST',
@@ -106,7 +101,7 @@ describe('plugins/elasticsearch', function () {
         'content-type': 'application/json'
       },
       payload: { docs: [{ _index: '.kibana', _type: 'index-pattern', _id: '[logstash-]YYYY.MM.DD' }] }
-    });
+    }, 404);
 
     testRoute({
       method: 'POST',

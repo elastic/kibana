@@ -46,7 +46,8 @@ class ColorRules extends Component {
           <ColorPicker
             onChange={handleColorChange}
             name={this.props.secondaryVarName}
-            value={model[this.props.secondaryVarName]}/>
+            value={model[this.props.secondaryVarName]}
+          />
         </div>
       );
     }
@@ -56,25 +57,29 @@ class ColorRules extends Component {
         <ColorPicker
           onChange={handleColorChange}
           name={this.props.primaryVarName}
-          value={model[this.props.primaryVarName]}/>
+          value={model[this.props.primaryVarName]}
+        />
         { secondary }
         <div className="color_rules__label">if metric is</div>
         <div className="color_rules__item">
           <Select
             onChange={this.handleChange(model, 'opperator')}
             value={model.opperator}
-            options={operatorOptions}/>
+            options={operatorOptions}
+          />
         </div>
         <input
           className="color_rules__input"
           type="number"
           value={model.value}
-          onChange={this.handleChange(model, 'value', Number)}/>
+          onChange={this.handleChange(model, 'value', Number)}
+        />
         <div className="color_rules__control">
           <AddDeleteButtons
             onAdd={handleAdd}
             onDelete={handleDelete}
-            disableDelete={items.length < 2}/>
+            disableDelete={items.length < 2}
+          />
         </div>
       </div>
     );

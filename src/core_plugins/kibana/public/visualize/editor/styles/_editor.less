@@ -47,7 +47,11 @@
     .flex-parent(0, 1, auto);
   }
 
-
+  > visualize {
+    height: 100%;
+    flex: 1 1 auto;
+    display: flex;
+  }
 }
 
 
@@ -57,6 +61,7 @@
 
   .vis-editor-content {
     .flex-parent();
+    width: 100%;
     z-index: 0;
 
     // overrides for tablet and desktop
@@ -287,32 +292,22 @@
     }
 
   /**
-  * 1. Make ui-select input match other inputs.
-  * 2. Show invalid state if the user has interacted with the input without selecting an option.
+  * 1. Show invalid state if the user has interacted with the input without selecting an option.
   */
   .vis-editor-field-ui-select {
-    .ui-select-match {
-      .btn {
-        border: 2px solid #ecf0f1; /* 1 */
-        background-color: white; /* 1 */
-        color: black; /* 1 */
-      }
-    }
-
     &.ng-invalid.ng-dirty,
     &.ng-invalid.ng-touched {
       .ui-select-match {
         .btn {
-          border-color: red; /* 2 */
+          border-color: @globalColorRed; /* 1 */
         }
       }
     }
   }
 
   .vis-editor-canvas {
-    flex: 1 0 (@screen-md-min - @vis-editor-sidebar-basis);
     display: flex;
-    flex-direction: column;
+    flex-direction: row;
     overflow: auto;
     padding-left: @collapser-width;
 
