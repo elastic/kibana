@@ -1,8 +1,9 @@
 import _ from 'lodash';
 import { dashboardContextProvider } from 'plugins/kibana/dashboard/dashboard_context';
 
+import { timezoneProvider } from 'ui/vis/lib/timezone';
 const TimelionRequestHandlerProvider = function (Private, Notifier, $http, $rootScope, timefilter) {
-  const timezone = Private(require('plugins/timelion/services/timezone'))();
+  const timezone = Private(timezoneProvider)();
   const dashboardContext = Private(dashboardContextProvider);
 
   const notify = new Notifier({

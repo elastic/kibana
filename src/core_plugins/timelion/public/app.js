@@ -4,6 +4,7 @@ import moment from 'moment-timezone';
 import { DocTitleProvider } from 'ui/doc_title';
 import { SavedObjectRegistryProvider } from 'ui/saved_objects/saved_object_registry';
 import { notify } from 'ui/notify';
+import { timezoneProvider } from 'ui/vis/lib/timezone';
 
 require('plugins/timelion/directives/cells/cells');
 require('plugins/timelion/directives/fixed_element');
@@ -75,7 +76,7 @@ app.controller('timelion', function (
   });
 
   const savedVisualizations = Private(SavedObjectRegistryProvider).byLoaderPropertiesName.visualizations;
-  const timezone = Private(require('plugins/timelion/services/timezone'))();
+  const timezone = Private(timezoneProvider)();
   const docTitle = Private(DocTitleProvider);
 
   const defaultExpression = '.es(*)';
