@@ -77,10 +77,18 @@ class MetricPanelConfig extends Component {
     return (
       <div>
         <div className="kbnTabs">
-          <div className={`kbnTabs__tab${selectedTab === 'data' && '-active' || ''}`}
-            onClick={() => this.switchTab('data')}>Data</div>
-          <div className={`kbnTabs__tab${selectedTab === 'options' && '-active' || ''}`}
-            onClick={() => this.switchTab('options')}>Panel Options</div>
+          <div
+            className={`kbnTabs__tab${selectedTab === 'data' && '-active' || ''}`}
+            onClick={() => this.switchTab('data')}
+            tabIndex="0"
+          >Data
+          </div>
+          <div
+            className={`kbnTabs__tab${selectedTab === 'options' && '-active' || ''}`}
+            onClick={() => this.switchTab('options')}
+            tabIndex="0"
+          >Panel Options
+          </div>
         </div>
         {view}
       </div>

@@ -61,7 +61,7 @@ class VisEditorVisualization extends Component {
     if (autoApply) applyMessage = 'The changes will be automatically applied.';
     const applyButton = (
       <div className="vis_editor__dirty_controls">
-        <div className="vis_editor__dirty_controls-toggle-label">Auto Apply</div>
+        <div className="vis_editor__dirty_controls-toggle-label" id="tsvbAutoApply">Auto Apply</div>
         <div className="vis_editor__dirty_controls-toggle">
           <Toggle
             defaultChecked={autoApply}
