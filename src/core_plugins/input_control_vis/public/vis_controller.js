@@ -37,6 +37,7 @@ class VisController {
         submitFilters={this.submitFilters.bind(this)}
         resetControls={this.updateControlsFromKbn.bind(this)}
         clearControls={this.clearControls.bind(this)}
+        getStagedControls={this.getStagedControls.bind(this)}
       />,
       this.el);
   }
@@ -66,13 +67,17 @@ class VisController {
     }
   }
 
-  submitFilters() {
-    const stagedControls = this.controls.filter((control) => {
+  getStagedControls() {
+    return this.controls.filter((control) => {
       if (_.has(control, 'stagedFilter')) {
         return true;
       }
       return false;
     });
+  }
+
+  submitFilters() {
+    const stagedControls = this.getStagedControls();
     const newFilters = stagedControls.map((control) => {
       return control.stagedFilter;
     });

@@ -6,7 +6,7 @@ import { VisTypesRegistryProvider } from 'ui/registry/vis_types';
 import { VisController } from './vis_controller';
 import { InputControlVisEditor } from './components/input_control_vis_editor';
 
-function TermsVisProvider(Private) {
+function InputControlVisProvider(Private) {
   const VisFactory = Private(VisFactoryProvider);
 
   // return the visType object, which kibana will use to display and configure new Vis object of this type.
@@ -33,7 +33,7 @@ function TermsVisProvider(Private) {
 }
 
 // register the provider with the visTypes registry
-VisTypesRegistryProvider.register(TermsVisProvider);
+VisTypesRegistryProvider.register(InputControlVisProvider);
 
 // export the provider so that the visType can be required with Private()
-export default TermsVisProvider;
+export default InputControlVisProvider;
