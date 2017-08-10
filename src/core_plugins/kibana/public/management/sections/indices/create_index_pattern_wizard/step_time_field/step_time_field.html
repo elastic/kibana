@@ -19,13 +19,17 @@
 
     <!-- Index pattern id input -->
     <div class="kuiVerticalRhythm">
-      <label class="kuiLabel kuiVerticalRhythmSmall">
+      <label
+        class="kuiLabel kuiVerticalRhythmSmall"
+        for="indexPatternCreationId"
+      >
         Optional index pattern ID
       </label>
 
       <div class="kuiVerticalRhythm kuiVerticalRhythmSmall">
         <input
           class="kuiTextInput kuiTextInput--large"
+          id="indexPatternCreationId"
           data-test-subj="createIndexPatternIdInput"
           ng-model="stepTimeField.indexPatternId"
           ng-model-options="{ updateOn: 'default blur', debounce: {'default': 500, 'blur': 0} }"

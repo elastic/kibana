@@ -17,9 +17,11 @@
             <label
               ng-if="controller.isSystemIndicesCheckBoxVisible()"
               class="kuiCheckBoxLabel"
+              for="indexPatternCreationIncludeSystemIndices"
             >
               <input
                 type="checkbox"
+                id="indexPatternCreationIncludeSystemIndices"
                 class="kuiCheckBox"
                 ng-model="controller.doesIncludeSystemIndices"
                 ng-change="controller.onIncludeSystemIndicesChange()"
