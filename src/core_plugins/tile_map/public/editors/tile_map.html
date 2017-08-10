@@ -1,7 +1,9 @@
 <!-- vis type specific options -->
 <div class="form-group">
-  <label>Map type</label>
-    <select name="agg"
+  <label for="coordinateMapOptionsMapType">Map type</label>
+    <select
+      id="coordinateMapOptionsMapType"
+      name="agg"
     class="form-control"
     ng-model="vis.params.mapType"
     ng-init="vis.params.mapType || vis.type.editorConfig.collections.mapTypes[0]"
