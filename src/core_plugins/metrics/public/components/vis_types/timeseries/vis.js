@@ -84,6 +84,7 @@ function TimeseriesVisualization(props) {
       const seriesInterval = item.data[1][0] - item.data[0][0];
       if (!currentInterval || seriesInterval < currentInterval) return seriesInterval;
     }
+    return currentInterval;
   }, 0);
 
   let axisCount = 1;
