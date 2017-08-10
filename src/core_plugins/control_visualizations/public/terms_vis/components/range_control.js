@@ -26,14 +26,16 @@ export class RangeControl extends Component {
       <FormRow
         label={this.props.control.label}
       >
-        <InputRange
-          maxValue={this.props.control.max}
-          minValue={this.props.control.min}
-          step={this.props.control.options.step}
-          value={this.state.sliderValue}
-          onChange={newValue => this.setState({ sliderValue: newValue })}
-          onChangeComplete={this.handleOnChange.bind(null, this.props.control)}
-        />
+        <div className="inputRangeContainer">
+          <InputRange
+            maxValue={this.props.control.max}
+            minValue={this.props.control.min}
+            step={this.props.control.options.step}
+            value={this.state.sliderValue}
+            onChange={newValue => this.setState({ sliderValue: newValue })}
+            onChangeComplete={this.handleOnChange.bind(null, this.props.control)}
+          />
+        </div>
       </FormRow>
     );
   }

@@ -1,3 +1,4 @@
+import _ from 'lodash';
 import React, { Component, PropTypes } from 'react';
 import { RangeControl } from './range_control';
 import { TermsControl } from './terms_control';
@@ -26,11 +27,11 @@ export class InputControlVis extends Component {
   }
 
   render() {
-    const nothingStaged = this.props.controls.map((control) => {
-      if (control.stagedFilter) {
-        return false;
+    const hasStaged = this.props.controls.map((control) => {
+      if (_.has(control, 'stagedFilter')) {
+        return true;
       }
-      return true;
+      return false;
     }).reduce((a, b) => {
       return a || b;
     });
@@ -44,7 +45,7 @@ export class InputControlVis extends Component {
               buttonType="primary"
               type="button"
               onClick={this.handleSubmit}
-              disabled={nothingStaged}
+              disabled={!hasStaged}
             >
               Update filters
             </KuiButton>
@@ -54,7 +55,7 @@ export class InputControlVis extends Component {
               buttonType="basic"
               type="button"
               onClick={this.handleReset}
-              disabled={nothingStaged}
+              disabled={!hasStaged}
             >
               Cancel
             </KuiButton>

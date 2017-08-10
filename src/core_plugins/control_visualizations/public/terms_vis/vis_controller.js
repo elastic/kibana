@@ -1,3 +1,4 @@
+import _ from 'lodash';
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { InputControlVis } from './components/input_control_vis';
@@ -67,7 +68,7 @@ class VisController {
 
   submitFilters() {
     const stagedControls = this.controls.filter((control) => {
-      if (control.stagedFilter) {
+      if (_.has(control, 'stagedFilter')) {
         return true;
       }
       return false;
@@ -81,7 +82,7 @@ class VisController {
       control.filterManager.findFilters().forEach((existingFilter) => {
         this.vis.API.queryFilter.removeFilter(existingFilter);
       });
-      control.stagedFilter = undefined;
+      delete control.stagedFilter;
     });
 
     this.vis.API.queryFilter.addFilters(newFilters);
@@ -97,7 +98,7 @@ class VisController {
 
   updateControlsFromKbn() {
     this.controls.forEach((control) => {
-      control.stagedFilter = undefined;
+      delete control.stagedFilter;
       control.value = control.filterManager.getValueFromFilterBar();
     });
     this.drawVis();
