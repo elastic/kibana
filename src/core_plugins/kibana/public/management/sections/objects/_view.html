@@ -130,6 +130,7 @@
 
           <div
             ng-if="field.type === 'json' || field.type === 'array'"
+            kbn-ui-ace-keyboard-mode
             ui-ace="{ onLoad: aceLoaded, mode: 'json' }"
             id="{{field.name}}"
             ng-model="field.value"
