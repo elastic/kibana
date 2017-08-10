@@ -2,7 +2,7 @@ import React, { Component, PropTypes } from 'react';
 import _ from 'lodash';
 import Select from 'react-select';
 import { durationOutputOptions, durationInputOptions } from './lib/durations';
-const durationFormatTest = /[pnumshdwMY]+,[pnumshdwMY]+,\d+/;
+const durationFormatTest = /[pnumshdwMY]+,[pnumshdwMY]+/;
 
 class DataFormatPicker extends Component {
 
