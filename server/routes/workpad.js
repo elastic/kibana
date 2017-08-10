@@ -19,12 +19,12 @@ export function workpad(server) {
     };
   }
 
-  function createWorkpad(request) {
+  function createWorkpad(request, id) {
     const now = new Date();
     const doc = {
       index: indexName,
       type: CANVAS_TYPE,
-      id: `workpad-${uuid()}`,
+      id: id || `workpad-${uuid()}`,
       body: { ...request.payload, '@timestamp': now, '@created': now },
     };
 
@@ -32,6 +32,7 @@ export function workpad(server) {
   }
 
   function updateWorkpad(request) {
+    const workpadId = request.params.id;
     const findDoc = {
       index: indexName,
       type: CANVAS_TYPE,
@@ -43,7 +44,7 @@ export function workpad(server) {
       const doc = {
         index: indexName,
         type: CANVAS_TYPE,
-        id: request.params.id,
+        id: workpadId,
         body: merge(_source, { ...request.payload, '@timestamp': new Date() }),
       };
 
@@ -51,7 +52,7 @@ export function workpad(server) {
     })
     .catch((err) => {
       if (err instanceof esErrors['404']) {
-        return createWorkpad(request);
+        return createWorkpad(request, workpadId);
       }
 
       throw err;
