@@ -1,1 +1,4 @@
-export { createCallClusterStub } from './call_cluster_stub';
+export {
+  createObjectsClientStub,
+  savedObjectsClientErrors,
+} from './create_objects_client_stub';

@@ -9,6 +9,9 @@ module.directive('heatmapOptions', function () {
     template: heatmapOptionsTemplate,
     replace: true,
     link: function ($scope) {
+
+      $scope.collections = $scope.vis.type.editorConfig.collections;
+
       const verticalRotation = 270;
       $scope.showColorRange = false;
       $scope.showLabels = false;

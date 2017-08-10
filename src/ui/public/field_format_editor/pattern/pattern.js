@@ -7,9 +7,12 @@ uiModules
 .directive('fieldFormatEditorPattern', function () {
   return {
     restrict: 'E',
+    replace: true,
     template: patternTemplate,
     require: ['ngModel', '^fieldEditor'],
-    scope: true,
+    scope: {
+      id: '@'
+    },
     link: function ($scope, $el, attrs, cntrls) {
       const ngModelCntrl = cntrls[0];
 

@@ -80,8 +80,11 @@ function TimeseriesVisualization(props) {
   });
 
   const interval = series.reduce((currentInterval, item) => {
-    const seriesInterval = item.data[1][0] - item.data[0][0];
-    if (!currentInterval || seriesInterval < currentInterval) return seriesInterval;
+    if (item.data.length > 1) {
+      const seriesInterval = item.data[1][0] - item.data[0][0];
+      if (!currentInterval || seriesInterval < currentInterval) return seriesInterval;
+    }
+    return currentInterval;
   }, 0);
 
   let axisCount = 1;
@@ -125,6 +128,7 @@ function TimeseriesVisualization(props) {
     annotations,
     yaxes,
     reversed: props.reversed,
+    showGrid: Boolean(model.show_grid),
     legend: Boolean(model.show_legend),
     onBrush: (ranges) => {
       if (props.onBrush) props.onBrush(ranges);

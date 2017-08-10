@@ -14,9 +14,7 @@ module.exports = function (grunt) {
 
   grunt.registerTask('test:server', [
     'checkPlugins',
-    'esvm:test',
     'simplemocha:all',
-    'esvm_shutdown:test',
   ]);
 
   grunt.registerTask('test:browser', [

@@ -1,7 +1,6 @@
 import _ from 'lodash';
 import angular from 'angular';
-
-import { toJson } from 'ui/utils/aggressive_parse';
+import { toJson } from '../../../../../core_plugins/kibana/common/utils/aggressive_parse';
 
 export function SearchStrategyProvider(Private, Promise, timefilter, kbnIndex, sessionId) {
 

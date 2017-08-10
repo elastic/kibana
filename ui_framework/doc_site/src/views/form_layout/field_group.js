@@ -13,7 +13,7 @@ export default () => (
     <KuiFieldGroup>
       <KuiFieldGroupSection isWide>
         <div className="kuiSearchInput">
-          <div className="kuiSearchInput__icon kuiIcon fa-search"></div>
+          <div className="kuiSearchInput__icon kuiIcon fa-search" />
           <input
             className="kuiSearchInput__input"
             type="text"
@@ -57,7 +57,7 @@ export default () => (
           placeholder="http://"
           type="text"
           rows="5"
-        ></textarea>
+        />
       </KuiFieldGroupSection>
 
       <KuiFieldGroupSection>

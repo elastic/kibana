@@ -4,24 +4,24 @@
 >
   <div class="kuiLocalDropdownTitle">Add Panels</div>
 
-  <ul class="nav nav-tabs">
-    <li ng-class="{active: mode == 'visualization'}">
-      <a
-        ng-click="mode='visualization'"
-        aria-label="List visualizations"
-      >
-        Visualization
-      </a>
-    </li>
-    <li ng-class="{active: mode == 'search'}">
-      <a
-        ng-click="mode='search'"
-        aria-label="List saved searches"
-      >
-        Saved Search
-      </a>
-    </li>
-  </ul>
+  <div class="kuiTabs">
+    <button
+      ng-class="{ 'kuiTab-isSelected': mode == 'visualization'}"
+      class="kuiTab"
+      ng-click="mode='visualization'"
+      aria-label="List visualizations"
+    >
+      Visualization
+    </button>
+    <button
+      ng-class="{ 'kuiTab-isSelected': mode == 'search' }"
+      class="kuiTab"
+      ng-click="mode='search'"
+      aria-label="List saved searches"
+    >
+      Saved Search
+    </button>
+  </div>
 
   <div class="list-group-item list-group-item--noBorder" ng-switch-when="visualization">
     <saved-object-finder

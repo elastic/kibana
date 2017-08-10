@@ -2,6 +2,7 @@ export { KuiActionItem } from './action_item';
 
 export {
   KuiKeyboardAccessible,
+  KuiScreenReaderOnly,
 } from './accessibility';
 
 export {
@@ -82,6 +83,7 @@ export {
   KuiMenuItem,
 } from './menu';
 
+
 export * from './modal';
 
 export {
@@ -90,12 +92,32 @@ export {
 } from './pager';
 
 export {
+  KuiPopover,
+} from './popover';
+
+export {
   KuiTabs,
   KuiTab
 } from './tabs';
 
 export {
-  KuiToolBarSearchBox,
+  KuiTable,
+  KuiControlledTable,
+  KuiTableHeaderCell,
+  KuiTableRow,
+  KuiTableRowCell,
+  KuiTableInfo,
+  KuiTableRowCheckBoxCell,
+  KuiTableHeaderCheckBoxCell,
+  KuiTableHeader,
+  KuiTableBody,
+} from './table';
+
+export {
   KuiToolBar,
+  KuiToolBarSearchBox,
   KuiToolBarFooter,
+  KuiToolBarSection,
+  KuiToolBarFooterSection,
+  KuiToolBarText
 } from './tool_bar';

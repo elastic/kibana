@@ -18,6 +18,9 @@ describe('exportDashboards(req)', () => {
             getCluster: () => ({ callWithRequest: sinon.stub() })
           }
         },
+      },
+      getSavedObjectsClient() {
+        return null;
       }
     };
 

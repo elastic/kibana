@@ -138,7 +138,7 @@ export default function ({ getService, getPageObjects }) {
         const currentQuery = await PageObjects.dashboard.getQuery();
         expect(currentQuery).to.equal('');
         const currentUrl = await remote.getCurrentUrl();
-        const newUrl = currentUrl.replace('query:%27*%27', 'query:%27hi%27');
+        const newUrl = currentUrl.replace('query:%27%27', 'query:%27hi%27');
         // Don't add the timestamp to the url or it will cause a hard refresh and we want to test a
         // soft refresh.
         await remote.get(newUrl.toString(), false);
@@ -182,7 +182,22 @@ export default function ({ getService, getPageObjects }) {
         expect(spyToggleExists).to.be(true);
       });
 
+      // This was an actual bug that appeared, where the spy pane appeared on panels after adding them, but
+      // disappeared when a new dashboard was opened up.
+      it('shows the spy pane toggle directly after opening a dashboard', async () => {
+        await PageObjects.dashboard.saveDashboard('spy pane test');
+        await PageObjects.dashboard.gotoDashboardLandingPage();
+        await PageObjects.dashboard.loadSavedDashboard('spy pane test');
+        const panels = await PageObjects.dashboard.getDashboardPanels();
+        // Simulate hover
+        await remote.moveMouseTo(panels[0]);
+        const spyToggleExists = await PageObjects.visualize.getSpyToggleExists();
+        expect(spyToggleExists).to.be(true);
+      });
+
       it('shows other panels after being minimized', async () => {
+        // Panels are all minimized on a fresh open of a dashboard, so we need to re-expand in order to then minimize.
+        await PageObjects.dashboard.toggleExpandPanel();
         await PageObjects.dashboard.toggleExpandPanel();
         const panels = await PageObjects.dashboard.getDashboardPanels();
         const visualizations = PageObjects.dashboard.getTestVisualizations();
@@ -190,8 +205,88 @@ export default function ({ getService, getPageObjects }) {
       });
     });
 
+    describe('embed mode', () => {
+      it('hides the chrome', async () => {
+        let isChromeVisible = await PageObjects.common.isChromeVisible();
+        expect(isChromeVisible).to.be(true);
+
+        const currentUrl = await remote.getCurrentUrl();
+        const newUrl = currentUrl + '&embed=true';
+        // Embed parameter only works on a hard refresh.
+        const useTimeStamp = true;
+        await remote.get(newUrl.toString(), useTimeStamp);
+
+        await retry.try(async () => {
+          isChromeVisible = await PageObjects.common.isChromeVisible();
+          expect(isChromeVisible).to.be(false);
+        });
+      });
+
+      after(async function () {
+        console.log('showing chrome again');
+        const currentUrl = await remote.getCurrentUrl();
+        const newUrl = currentUrl.replace('&embed=true', '');
+        // First use the timestamp to cause a hard refresh so the new embed parameter works correctly.
+        let useTimeStamp = true;
+        await remote.get(newUrl.toString(), useTimeStamp);
+        // Then get rid of the timestamp so the rest of the tests work with state and app switching.
+        useTimeStamp = false;
+        await remote.get(newUrl.toString(), useTimeStamp);
+      });
+    });
+
+    describe('full screen mode', () => {
+      it('option not available in edit mode', async () => {
+        await PageObjects.dashboard.clickEdit();
+        const exists = await PageObjects.dashboard.fullScreenModeMenuItemExists();
+        expect(exists).to.be(false);
+      });
+
+      it('available in view mode', async () => {
+        await PageObjects.dashboard.saveDashboard('full screen test');
+        const exists = await PageObjects.dashboard.fullScreenModeMenuItemExists();
+        expect(exists).to.be(true);
+      });
+
+      it('hides the chrome', async () => {
+        let isChromeVisible = await PageObjects.common.isChromeVisible();
+        expect(isChromeVisible).to.be(true);
+
+        await PageObjects.dashboard.clickFullScreenMode();
+
+        await retry.try(async () => {
+          isChromeVisible = await PageObjects.common.isChromeVisible();
+          expect(isChromeVisible).to.be(false);
+        });
+      });
+
+      it('displays exit full screen logo button', async () => {
+        const exists = await PageObjects.dashboard.exitFullScreenLogoButtonExists();
+        expect(exists).to.be(true);
+      });
+
+      it('displays exit full screen logo button when panel is expanded', async () => {
+        await PageObjects.dashboard.toggleExpandPanel();
+
+        const exists = await PageObjects.dashboard.exitFullScreenTextButtonExists();
+        expect(exists).to.be(true);
+      });
+
+      it('exits when the text button is clicked on', async () => {
+        const logoButton = await PageObjects.dashboard.getExitFullScreenLogoButton();
+        await remote.moveMouseTo(logoButton);
+        await PageObjects.dashboard.clickExitFullScreenTextButton();
+
+        await retry.try(async () => {
+          const isChromeVisible = await PageObjects.common.isChromeVisible();
+          expect(isChromeVisible).to.be(true);
+        });
+      });
+    });
+
     describe('add new visualization link', () => {
       it('adds a new visualization', async () => {
+        await PageObjects.dashboard.clickEdit();
         await PageObjects.dashboard.clickAddVisualization();
         await PageObjects.dashboard.clickAddNewVisualizationLink();
         await PageObjects.visualize.clickAreaChart();

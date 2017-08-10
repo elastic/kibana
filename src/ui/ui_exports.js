@@ -3,14 +3,28 @@ import minimatch from 'minimatch';
 
 import UiAppCollection from './ui_app_collection';
 import UiNavLinkCollection from './ui_nav_link_collection';
-import { MappingsCollection } from './ui_mappings';
 
 export default class UiExports {
-  constructor({ urlBasePath }) {
+  constructor({ urlBasePath, kibanaIndexMappings }) {
     this.navLinks = new UiNavLinkCollection(this);
     this.apps = new UiAppCollection(this);
     this.aliases = {
-      fieldFormatEditors: ['ui/field_format_editor/register']
+      fieldFormatEditors: ['ui/field_format_editor/register'],
+      visRequestHandlers: [
+        'ui/vis/request_handlers/courier',
+        'ui/vis/request_handlers/none'
+      ],
+      visResponseHandlers: [
+        'ui/vis/response_handlers/basic',
+        'ui/vis/response_handlers/none'
+      ],
+      visEditorTypes: [
+        'ui/vis/editors/default/default',
+      ],
+      embeddableHandlers: [
+        'plugins/kibana/visualize/embeddable/visualize_embeddable_handler_provider',
+        'plugins/kibana/discover/embeddable/search_embeddable_handler_provider',
+      ],
     };
     this.urlBasePath = urlBasePath;
     this.exportConsumer = _.memoize(this.exportConsumer);
@@ -18,7 +32,7 @@ export default class UiExports {
     this.bundleProviders = [];
     this.defaultInjectedVars = {};
     this.injectedVarsReplacers = [];
-    this.mappings = new MappingsCollection();
+    this.kibanaIndexMappings = kibanaIndexMappings;
   }
 
   consumePlugin(plugin) {
@@ -91,6 +105,11 @@ export default class UiExports {
         };
 
       case 'visTypes':
+      case 'visResponseHandlers':
+      case 'visRequestHandlers':
+      case 'visEditorTypes':
+      case 'savedObjectTypes':
+      case 'embeddableHandlers':
       case 'fieldFormats':
       case 'fieldFormatEditors':
       case 'spyModes':
@@ -125,13 +144,13 @@ export default class UiExports {
       case 'injectDefaultVars':
         return (plugin, injector) => {
           plugin.extendInit(async (server, options) => {
-            _.merge(this.defaultInjectedVars, await injector.call(plugin, server, options));
+            _.defaults(this.defaultInjectedVars, await injector.call(plugin, server, options));
           });
         };
 
       case 'mappings':
         return (plugin, mappings) => {
-          this.mappings.register(mappings, { plugin: plugin.id });
+          this.kibanaIndexMappings.addRootProperties(mappings, { plugin: plugin.id });
         };
 
       case 'replaceInjectedVars':

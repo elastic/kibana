@@ -52,7 +52,7 @@ and can be stopped by pressing `Ctrl-C`.
 
 Kibana loads its configuration from the `$KIBANA_HOME/config/kibana.yml`
 file by default.  The format of this config file is explained in
-<<settings>>.
+{kibana-ref}/settings.html[Configuring Kibana].
 
 [[windows-layout]]
 ==== Directory layout of `.zip` archive

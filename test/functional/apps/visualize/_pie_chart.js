@@ -65,7 +65,7 @@ export default function ({ getService, getPageObjects }) {
           expect(message).to.be('Visualization Editor: Saved Visualization \"' + vizName1 + '\"');
         })
         .then(function testVisualizeWaitForToastMessageGone() {
-          return PageObjects.visualize.waitForToastMessageGone();
+          return PageObjects.header.waitForToastMessageGone();
         })
         .then(function () {
           return PageObjects.visualize.loadSavedVisualization(vizName1);

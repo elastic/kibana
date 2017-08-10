@@ -28,7 +28,7 @@ export function LocalNavWithSearch() {
             <div className="kuiLocalMenuItem">Save</div>
             <div className="kuiLocalMenuItem">Open</div>
             <button className="kuiLocalMenuItem">
-              <div className="kuiLocalMenuItem__icon kuiIcon fa-clock-o"></div>
+              <div className="kuiLocalMenuItem__icon kuiIcon fa-clock-o" />
               Last 5 minutes
             </button>
           </div>
@@ -66,7 +66,7 @@ export function LocalNavWithSearch() {
           </select>
 
           <button className="kuiLocalSearchButton">
-            <span className="kuiIcon fa-search"></span>
+            <span className="kuiIcon fa-search" />
           </button>
         </div>
       </KuiLocalNavRow>

@@ -26,6 +26,14 @@ export function savedObjectsMixin(kbnServer, server) {
   server.route(createGetRoute(prereqs));
   server.route(createUpdateRoute(prereqs));
 
+  server.decorate('server', 'savedObjectsClientFactory', ({ callCluster }) => {
+    return new SavedObjectsClient(
+      server.config().get('kibana.index'),
+      server.getKibanaIndexMappingsDsl(),
+      callCluster
+    );
+  });
+
   const savedObjectsClientCache = new WeakMap();
   server.decorate('request', 'getSavedObjectsClient', function () {
     const request = this;
@@ -35,11 +43,9 @@ export function savedObjectsMixin(kbnServer, server) {
     }
 
     const { callWithRequest } = server.plugins.elasticsearch.getCluster('admin');
-    const callAdminCluster = (...args) => callWithRequest(request, ...args);
-    const savedObjectsClient = new SavedObjectsClient(
-      server.config().get('kibana.index'),
-      callAdminCluster
-    );
+    const callCluster = (...args) => callWithRequest(request, ...args);
+    const savedObjectsClient = server.savedObjectsClientFactory({ callCluster });
+
     savedObjectsClientCache.set(request, savedObjectsClient);
     return savedObjectsClient;
   });

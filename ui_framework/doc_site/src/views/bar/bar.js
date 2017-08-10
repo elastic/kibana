@@ -18,5 +18,5 @@ export default () => (
       <input className="kuiTextInput" size="2" value="10" readOnly/>
       <div>pages</div>
     </KuiBarSection>
-</KuiBar>
+  </KuiBar>
 );

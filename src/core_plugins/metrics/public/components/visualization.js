@@ -38,7 +38,7 @@ function Visualization(props) {
       visData: props.visData
     });
   }
-  return (<div className={props.className}></div>);
+  return (<div className={props.className} />);
 }
 
 Visualization.defaultProps = {

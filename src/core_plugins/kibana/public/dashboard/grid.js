@@ -19,17 +19,6 @@ app.directive('dashboardGrid', function ($compile, Notifier) {
        */
       dashboardViewMode: '=',
       /**
-       * Used to create a child persisted state for the panel from parent state.
-       * @type {function} - Returns a {PersistedState} child uiState for this scope.
-       */
-      createChildUiState: '=',
-      /**
-       * Registers an index pattern with the dashboard app used by each panel. The index patterns are used by the
-       * filter bar for generating field suggestions.
-       * @type {function(IndexPattern)}
-       */
-      registerPanelIndexPattern: '=',
-      /**
        * Trigger after a panel has been removed from the grid.
        */
       onPanelRemoved: '=',
@@ -38,16 +27,6 @@ app.directive('dashboardGrid', function ($compile, Notifier) {
        * @type {Array<PanelState>}
        */
       panels: '=',
-      /**
-       * Returns a click handler for a visualization.
-       * @type {function}
-       */
-      getVisClickHandler: '=',
-      /**
-       * Returns a brush event handler for a visualization.
-       * @type {function}
-       */
-      getVisBrushHandler: '=',
       /**
        * Call when changes should be propagated to the url and thus saved in state.
        * @type {function}
@@ -59,6 +38,10 @@ app.directive('dashboardGrid', function ($compile, Notifier) {
        * @type {function}
        */
       toggleExpand: '=',
+      /**
+       * @type {DashboardContainerApi}
+       */
+      containerApi: '=',
     },
     link: function ($scope, $el) {
       const notify = new Notifier();
@@ -216,12 +199,9 @@ app.directive('dashboardGrid', function ($compile, Notifier) {
                   is-full-screen-mode="isFullScreenMode"
                   is-expanded="false"
                   dashboard-view-mode="dashboardViewMode"
-                  get-vis-click-handler="getVisClickHandler"
-                  get-vis-brush-handler="getVisBrushHandler"
-                  save-state="saveState"
-                  register-panel-index-pattern="registerPanelIndexPattern"
+                  container-api="containerApi"
                   toggle-expand="toggleExpand(${panel.panelIndex})"
-                  create-child-ui-state="createChildUiState">
+                 >
             </li>`;
         const panelElement = $compile(panelHtml)($scope);
         panelElementMapping[panel.panelIndex] = panelElement;

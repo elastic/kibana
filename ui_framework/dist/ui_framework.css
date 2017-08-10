@@ -69,6 +69,21 @@
 body {
   font-family: "Open Sans", Helvetica, Arial, sans-serif; }
 
+/**
+ * 1. Required for IE11.
+ */
+main {
+  display: block;
+  /* 1 */ }
+
+.kuiScreenReaderOnly {
+  position: absolute;
+  left: -10000px;
+  top: auto;
+  width: 1px;
+  height: 1px;
+  overflow: hidden; }
+
 .kuiActionItem {
   display: -webkit-box;
   display: -webkit-flex;
@@ -665,6 +680,9 @@ body {
   opacity: 0.35; }
   .kuiCollapseButton:hover {
     opacity: 1; }
+  .theme-dark .kuiCollapseButton {
+    color: #cecece !important;
+    /* 1 */ }
 
 .kuiColorPicker {
   cursor: pointer; }
@@ -1588,7 +1606,6 @@ body {
   -webkit-align-items: center;
       -ms-flex-align: center;
           align-items: center;
-  height: 100%;
   padding-left: 10px;
   /* 1 */ }
 
@@ -1810,6 +1827,9 @@ body {
   .theme-dark .kuiLocalDropdownCloseButton {
     color: #cecece !important;
     /* 1 */ }
+  .theme-dark .kuiLocalDropdownCloseButton {
+    color: #cecece !important;
+    /* 1 */ }
 
 .kuiLocalDropdownPanels {
   display: -webkit-box;
@@ -1930,11 +1950,10 @@ body {
   display: -webkit-flex;
   display: -ms-flexbox;
   display: flex;
-  -webkit-box-align: center;
-  -webkit-align-items: center;
-      -ms-flex-align: center;
-          align-items: center;
-  height: 100%; }
+  -webkit-box-align: stretch;
+  -webkit-align-items: stretch;
+      -ms-flex-align: stretch;
+          align-items: stretch; }
 
 .kuiLocalMenuItem {
   display: -webkit-box;
@@ -2025,10 +2044,10 @@ body {
   display: -webkit-flex;
   display: -ms-flexbox;
   display: flex;
-  -webkit-box-align: center;
-  -webkit-align-items: center;
-      -ms-flex-align: center;
-          align-items: center;
+  -webkit-box-align: stretch;
+  -webkit-align-items: stretch;
+      -ms-flex-align: stretch;
+          align-items: stretch;
   -webkit-box-pack: justify;
   -webkit-justify-content: space-between;
       -ms-flex-pack: justify;
@@ -2037,7 +2056,14 @@ body {
   /* 1 */ }
 
 .kuiLocalNavRow__section {
-  height: 100%; }
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-align: stretch;
+  -webkit-align-items: stretch;
+      -ms-flex-align: stretch;
+          align-items: stretch; }
 
 /**
  * 1. We make this row flex-start because it usually contains a search input, which may expand
@@ -2113,8 +2139,9 @@ body {
       -ms-flex: 0 0 auto;
           flex: 0 0 auto;
   border-radius: 0;
-  border-left-color: #DEDEDE; }
+  border-left-width: 0; }
   .theme-dark .kuiLocalSearchInput--secondary {
+    border-left-width: 1px;
     border-left-color: #333333;
     border-right-color: #333333; }
 
@@ -2166,8 +2193,7 @@ body {
   background-repeat: no-repeat;
   background-position: calc(100% - 8px);
   /* 2 */
-  border-color: #ffffff;
-  border-left-color: #DEDEDE;
+  border-left-width: 0;
   border-radius: 0; }
   .theme-dark .kuiLocalSearchSelect {
     color: #cecece; }
@@ -2696,6 +2722,77 @@ body {
 .kuiPanelBody {
   padding: 10px; }
 
+.kuiPopover {
+  display: inline-block;
+  position: relative; }
+  .kuiPopover.kuiPopover-isOpen .kuiPopover__body {
+    opacity: 1;
+    visibility: visible;
+    z-index: 1;
+    margin-top: 10px;
+    box-shadow: 0 16px 16px -8px rgba(0, 0, 0, 0.1); }
+
+.kuiPopover__body {
+  line-height: 1.5;
+  font-size: 14px;
+  position: absolute;
+  min-width: 256px;
+  top: 100%;
+  left: 50%;
+  background: #FFF;
+  border: 1px solid #D9D9D9;
+  border-radius: 4px 0 4px 4px;
+  padding: 16px;
+  -webkit-transform: translateX(-50%) translateY(8px) translateZ(0);
+          transform: translateX(-50%) translateY(8px) translateZ(0);
+  -webkit-backface-visibility: hidden;
+          backface-visibility: hidden;
+  -webkit-transform-origin: center top;
+          transform-origin: center top;
+  opacity: 0;
+  visibility: hidden;
+  margin-top: 32px; }
+  .kuiPopover__body:before {
+    position: absolute;
+    content: "";
+    top: -16px;
+    height: 0;
+    width: 0;
+    left: 50%;
+    margin-left: -16px;
+    border-left: 16px solid transparent;
+    border-right: 16px solid transparent;
+    border-bottom: 16px solid #D9D9D9; }
+  .kuiPopover__body:after {
+    position: absolute;
+    content: "";
+    top: -15px;
+    right: 0;
+    height: 0;
+    left: 50%;
+    margin-left: -16px;
+    width: 0;
+    border-left: 16px solid transparent;
+    border-right: 16px solid transparent;
+    border-bottom: 16px solid #FFF; }
+
+.kuiPopover--anchorLeft .kuiPopover__body {
+  left: 0;
+  -webkit-transform: translateX(0%) translateY(8px) translateZ(0);
+          transform: translateX(0%) translateY(8px) translateZ(0); }
+  .kuiPopover--anchorLeft .kuiPopover__body:before, .kuiPopover--anchorLeft .kuiPopover__body:after {
+    right: auto;
+    left: 8px;
+    margin: 0; }
+
+.kuiPopover--anchorRight .kuiPopover__body {
+  left: 100%;
+  -webkit-transform: translateX(-100%) translateY(8px) translateZ(0);
+          transform: translateX(-100%) translateY(8px) translateZ(0); }
+  .kuiPopover--anchorRight .kuiPopover__body:before, .kuiPopover--anchorRight .kuiPopover__body:after {
+    right: 8px;
+    left: auto; }
+
 .kuiEmptyTablePrompt {
   display: -webkit-box;
   display: -webkit-flex;
@@ -2901,6 +2998,8 @@ body {
   display: -ms-flexbox;
   display: flex;
   border-bottom: 1px solid #D9D9D9; }
+  .theme-dark .kuiTabs {
+    border-bottom: 1px solid #777777; }
 
 /**
  * 1. Override button styles (some of which are from Bootstrap).
@@ -2921,11 +3020,14 @@ body {
   background-color: #FFF;
   /* 1 */
   border: 1px solid #D9D9D9;
-  border-bottom-width: 1px;
   border-radius: 0;
   /* 1 */
   margin-bottom: -1px;
   /* 3 */ }
+  .theme-dark .kuiTab {
+    color: #cecece;
+    background-color: #333333;
+    border-color: #777777; }
   .kuiTab + .kuiTab {
     border-left: none; }
     .kuiTab + .kuiTab:focus:not(.kuiTab-isSelected):not(:active) {
@@ -2943,13 +3045,24 @@ body {
     z-index: 1;
     color: #0079a5;
     border: 1px solid #0079a5 !important; }
+    .theme-dark .kuiTab:focus:not(.kuiTab-isSelected):not(:active) {
+      color: #cecece;
+      background-color: #333333;
+      border-color: #777777 !important; }
   .kuiTab:hover:not(.kuiTab-isSelected) {
     color: #006E8A;
     background-color: #F2F2F2; }
+    .theme-dark .kuiTab:hover:not(.kuiTab-isSelected) {
+      color: #def2f6;
+      background-color: #777777; }
   .kuiTab.kuiTab-isSelected {
     cursor: default;
     color: #191E23;
     border-bottom-color: #FFF; }
+    .theme-dark .kuiTab.kuiTab-isSelected {
+      color: #cecece;
+      background-color: #333333;
+      border-bottom-color: #333333; }
 
 /**
  * 1. Allow container to deteermine font-size and line-height.
@@ -2973,10 +3086,13 @@ body {
   .kuiToggleButton:active {
     color: #0079a5 !important;
     /* 2 */ }
-  .kuiToggleButton:hover {
+  .kuiToggleButton:hover:not(:disabled) {
     color: #006E8A !important;
     /* 2 */
     text-decoration: underline; }
+  .kuiToggleButton:disabled {
+    cursor: not-allowed;
+    opacity: .5; }
 
 /**
    * 1. Make icon a consistent width so the text doesn't get pushed around as the icon changes

@@ -10,9 +10,19 @@ export function getUiSettingDefaults() {
       readonly: true
     },
     'query:queryString:options': {
-      value: '{ "analyze_wildcard": true }',
+      value: '{ "analyze_wildcard": true, "default_field": "*" }',
       description: '<a href="https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-query-string-query.html" target="_blank">Options</a> for the lucene query string parser',
       type: 'json'
+    },
+    'search:queryLanguage': {
+      value: 'lucene',
+      description: 'Query language used by the query bar. Kuery is an experimental new language built specifically for Kibana.',
+      type: 'select',
+      options: ['lucene', 'kuery']
+    },
+    'search:queryLanguage:switcher:enable': {
+      value: false,
+      description: 'Show or hide the query language switcher in the query bar'
     },
     'sort:options': {
       value: '{ "unmapped_type": "boolean" }',
@@ -81,11 +91,6 @@ export function getUiSettingDefaults() {
       description: 'Highlight results in Discover and Saved Searches Dashboard.' +
         'Highlighting makes requests slow when working on big documents.',
     },
-    'doc_table:highlight:all_fields': {
-      value: true,
-      description: 'Improves highlighting by using a separate "highlight_query" that uses "all_fields" mode on "query_string" queries. ' +
-        'Set to false if you are using a "default_field" in your index.',
-    },
     'courier:maxSegmentCount': {
       value: 30,
       description: 'Requests in discover are split into segments to prevent massive requests from being sent to ' +
@@ -137,7 +142,7 @@ export function getUiSettingDefaults() {
     },
     'visualization:regionmap:showWarnings': {
       value: true,
-      description: 'Should the vector map show a warning when terms cannot be joined to a shape on the map.'
+      description: 'Whether the region map show a warning when terms cannot be joined to a shape on the map.'
     },
     'visualization:colorMapping': {
       type: 'json',
@@ -259,6 +264,11 @@ export function getUiSettingDefaults() {
       value: false,
       description: 'Whether the filters should have a global state (be pinned) by default'
     },
+    'filterEditor:suggestValues': {
+      value: false,
+      description: 'Set this property to `true` to have the filter editor suggest values for fields, ' +
+        'instead of just providing a text input. This may result in heavy queries to Elasticsearch.'
+    },
     'notifications:banner': {
       type: 'markdown',
       description: 'A custom banner intended for temporary notices to all users. <a href="https://help.github.com/articles/basic-writing-and-formatting-syntax/" target="_blank">Markdown supported</a>.',
@@ -267,22 +277,26 @@ export function getUiSettingDefaults() {
     'notifications:lifetime:banner': {
       value: 3000000,
       description: 'The time in milliseconds which a banner notification ' +
-      'will be displayed on-screen for. Setting to Infinity will disable.'
+      'will be displayed on-screen for. Setting to Infinity will disable the countdown.',
+      type: 'number',
     },
     'notifications:lifetime:error': {
       value: 300000,
       description: 'The time in milliseconds which an error notification ' +
-      'will be displayed on-screen for. Setting to Infinity will disable.'
+      'will be displayed on-screen for. Setting to Infinity will disable.',
+      type: 'number',
     },
     'notifications:lifetime:warning': {
       value: 10000,
       description: 'The time in milliseconds which a warning notification ' +
-        'will be displayed on-screen for. Setting to Infinity will disable.'
+        'will be displayed on-screen for. Setting to Infinity will disable.',
+      type: 'number',
     },
     'notifications:lifetime:info': {
       value: 5000,
       description: 'The time in milliseconds which an information notification ' +
-        'will be displayed on-screen for. Setting to Infinity will disable.'
+        'will be displayed on-screen for. Setting to Infinity will disable.',
+      type: 'number',
     },
     'metrics:max_buckets': {
       value: 2000,

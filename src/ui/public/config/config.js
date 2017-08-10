@@ -125,6 +125,8 @@ will set the initial value if one is not already set.`);
     const currentValue = config.isDefault(key) ? defaultValue : userValue;
     if (type === 'json') {
       return JSON.parse(currentValue);
+    } else if (type === 'number') {
+      return parseFloat(currentValue);
     }
     return currentValue;
   }

@@ -31,3 +31,10 @@ describe('filter', () => {
   });
 });
 
+describe('placeholder', () => {
+  test('initializes search box placeholder', () => {
+    const component = <KuiToolBarSearchBox onFilter={onFilter} placeholder="Filter items..." />;
+    expect(render(component)).toMatchSnapshot();
+  });
+});
+

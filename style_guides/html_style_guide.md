@@ -61,6 +61,28 @@ If the element doesn't have children, add the closing tag on the same line as th
 ></div>
 ```
 
+## Nested elements belong on multiple lines
+
+Putting nested elements on multiple lines makes it easy to scan and identify tags, attributes, and text
+nodes, and to distinguish elements from one another. This is especially useful if there are multiple
+similar elements which appear sequentially in the markup.
+
+### Do
+
+```html
+<div>
+  <span>
+    hi
+  </span>
+</div>
+```
+
+### Don't
+
+```html
+<div><span>hi</span></div>
+```
+
 ## Accessibility
 
 ### Don't use the `title` attribute
@@ -103,4 +125,10 @@ If something is meant to be clickable, favor using a `button` or `a` tag before 
 ### Use `tabindex` to make elements tabbable
 
 When added to the tab order, elements become focusable via non-sticky-mode keyboard navigation.
-To add an element to the tab order, you must add an `id` attribute as well as a `tabindex` attribute. If you don't know which number to use for the tab index, or if you simply want to add it to the general flow of the document, use `tabindex="0"`.
+To add an element to the tab order, you must add an `id` attribute as well as a `tabindex` attribute.
+
+You should only use `tabindex="0"` to add an element to the tab flow or `tabindex="-1"` to remove an
+otherwise focusable element from the focus flow (use with care).
+You should never use a value greater than 0, since tabindex is a global counter for the whole
+webpage and not scoped to parent elements, so you would need to manage a globally meaningful order
+across all elements in the whole source code.

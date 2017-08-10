@@ -7,9 +7,10 @@
     </p>
   </div>
   <div ng-if="editor.creating" class="form-group">
-    <label>Name</label>
+    <label for="scriptedFieldName">Name</label>
     <input
       ng-model="editor.field.name"
+      id="scriptedFieldName"
       required
       placeholder="New Scripted Field"
       input-focus
@@ -26,9 +27,10 @@
   </div>
 
   <div ng-if="editor.field.scripted" class="form-group">
-    <label>Language</label>
+    <label for="scriptedFieldLang">Language</label>
     <select
       ng-model="editor.field.lang"
+      id="scriptedFieldLang"
       ng-options="lang as lang for lang in editor.scriptingLangs"
       required
       class="form-control"
@@ -38,9 +40,10 @@
   </div>
 
   <div class="form-group">
-    <label>Type</label>
+    <label for="scriptedFieldType">Type</label>
     <select
       ng-if="editor.field.scripted"
+      id="scriptedFieldType"
       ng-model="editor.field.type"
       ng-options="type as type for type in editor.fieldTypes"
       class="form-control"
@@ -48,6 +51,7 @@
     </select>
     <input
       ng-if="!editor.field.scripted"
+      id="scriptedFieldType"
       ng-model="editor.field.type"
       readonly
       class="form-control">
@@ -58,7 +62,7 @@
       <i class="fa fa-warning"></i> Warning
     </span>
 
-    <label>Format <small>(Default: <i>{{editor.defFormatType.resolvedTitle}}</i>)</small></label>
+    <label for="scriptFieldFormat">Format <small>(Default: <i>{{editor.defFormatType.resolvedTitle}}</i>)</small></label>
 
     <div class="hintbox" ng-if="editor.showFormatHelp">
       <h4 class="hintbox-heading">
@@ -72,6 +76,7 @@
 
     <select
       ng-model="editor.selectedFormatId"
+      id="scriptFieldFormat"
       ng-options="format.id as format.title for format in editor.fieldFormatTypes"
       class="form-control"
       data-test-subj="editorSelectedFormatId">
@@ -85,11 +90,12 @@
   </div>
 
   <div class="form-group">
-    <label for="editor.field.count">Popularity</label>
+    <label for="editorFieldCount">Popularity</label>
     <div class="kuiFieldGroup">
       <div class="kuiFieldGroupSection">
         <input
           ng-model="editor.field.count"
+          id="editorFieldCount"
           type="number"
           class="form-control"
           data-test-subj=editorFieldCount
@@ -102,7 +108,7 @@
             data-test-subj="fieldIncreasePopularityButton"
             type="button"
             ng-click="editor.field.count = editor.field.count + 1"
-            aria-label="Plus"
+            aria-label="Increment popularity"
             class="kuiButton kuiButton--basic"
           >
             <span
@@ -114,7 +120,7 @@
           <button
             type="button"
             ng-click="editor.field.count = editor.field.count - 1"
-            aria-label="Minus"
+            aria-label="Decrement popularity"
             class="kuiButton kuiButton--basic"
           >
             <span
@@ -129,9 +135,14 @@
 
   <div ng-if="editor.field.scripted">
     <div class="form-group">
-      <label>Script</label>
-      <textarea required class="field-editor_script-input form-control text-monospace"
-      ng-model="editor.field.script" data-test-subj="editorFieldScript"></textarea>
+      <label for="scriptedFieldScript">Script</label>
+      <textarea
+        required
+        class="field-editor_script-input form-control text-monospace"
+        id="scriptedFieldScript"
+        ng-model="editor.field.script"
+        data-test-subj="editorFieldScript"
+      ></textarea>
     </div>
 
     <div class="form-group">

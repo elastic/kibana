@@ -34,14 +34,14 @@ export default props => (
       }]}
     >
       <GuideDemo>
-          <KuiConfirmModal
-            onCancel={() => {}}
-            onConfirm={() => {}}
-            confirmButtonText="Confirm"
-            cancelButtonText="Cancel"
-            message="This is a confirmation modal"
-            title="Confirm Modal Title"
-          />
+        <KuiConfirmModal
+          onCancel={() => {}}
+          onConfirm={() => {}}
+          confirmButtonText="Confirm"
+          cancelButtonText="Cancel"
+          message="This is a confirmation modal"
+          title="Confirm Modal Title"
+        />
       </GuideDemo>
     </GuideSection>
 

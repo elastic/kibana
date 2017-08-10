@@ -36,8 +36,8 @@ describe('UiExports', function () {
         kbnServer = kbnTestServer.createServer({
           plugins: {
             paths: [
+              resolve(__dirname, 'fixtures/plugin_foo'),
               resolve(__dirname, 'fixtures/plugin_bar'),
-              resolve(__dirname, 'fixtures/plugin_foo')
             ]
           },
 
@@ -75,7 +75,7 @@ describe('UiExports', function () {
             scanDirs: [],
             paths: [
               resolve(__dirname, 'fixtures/plugin_async_foo'),
-              resolve(__dirname, 'fixtures/plugin_foo')
+              resolve(__dirname, 'fixtures/plugin_bar'),
             ]
           },
 

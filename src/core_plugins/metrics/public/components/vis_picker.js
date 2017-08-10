@@ -13,9 +13,9 @@ function VisPickerItem(props) {
   return (
     <div className={itemClassName} onClick={() => props.onClick(type)}>
       <div className={iconClassName}>
-        <i className={`fa ${icon}`}></i>
+        <i className={`fa ${icon}`} />
       </div>
-      <div className={labelClassName}>
+      <div className={labelClassName} tabIndex="0">
         { label }
       </div>
     </div>
@@ -48,7 +48,8 @@ function VisPicker(props) {
         key={item.type}
         onClick={handleChange}
         selected={ item.type === model.type }
-        {...item}/>
+        {...item}
+      />
     );
   });
 

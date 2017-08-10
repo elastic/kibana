@@ -1,8 +1,6 @@
-import _ from 'lodash';
 import { IndexPatternMissingIndices } from 'ui/errors';
 import 'ui/directives/validate_index_name';
 import 'ui/directives/auto_select_if_only_one';
-import { RefreshKibanaIndex } from '../refresh_kibana_index';
 import uiRoutes from 'ui/routes';
 import { uiModules } from 'ui/modules';
 import template from './create_index_pattern.html';
@@ -15,21 +13,32 @@ uiRoutes
 });
 
 uiModules.get('apps/management')
-.controller('managementIndicesCreate', function ($scope, kbnUrl, Private, Notifier, indexPatterns, es, config, Promise, $translate) {
+.controller('managementIndicesCreate', function (
+  $scope,
+  $routeParams,
+  kbnUrl,
+  Private,
+  Notifier,
+  indexPatterns,
+  es,
+  config,
+  Promise,
+  $translate
+) {
   const notify = new Notifier();
-  const refreshKibanaIndex = Private(RefreshKibanaIndex);
   let loadingCount = 0;
 
   // Configure the new index pattern we're going to create.
   this.formValues = {
+    id: $routeParams.id ? decodeURIComponent($routeParams.id) : undefined,
     name: config.get('indexPattern:placeholder'),
-    expandWildcard: false,
     timeFieldOption: null,
   };
 
   // UI state.
   this.timeFieldOptions = [];
   this.timeFieldOptionsError = null;
+  this.showAdvancedOptions = $routeParams.id || false;
 
   const getTimeFieldOptions = () => {
     loadingCount += 1;
@@ -48,7 +57,7 @@ uiModules.get('apps/management')
         return {
           options: [
             {
-              display: $translate.instant('KIBANA-INDICES_DONT_CONTAIN_TIME_FIELDS')
+              display: `The indices which match this index pattern don't contain any time fields.`
             }
           ]
         };
@@ -57,7 +66,7 @@ uiModules.get('apps/management')
       return {
         options: [
           {
-            display: $translate.instant('KIBANA-NO_DATE_FIELD_DESIRED')
+            display: `I don't want to use the Time Filter`
           },
           ...dateFields.map(field => ({
             display: field.name,
@@ -69,7 +78,7 @@ uiModules.get('apps/management')
     .catch(err => {
       if (err instanceof IndexPatternMissingIndices) {
         return {
-          error: $translate.instant('KIBANA-INDICES_MATCH_PATTERN')
+          error: 'Unable to fetch mapping. Do you have indices matching the pattern?'
         };
       }
 
@@ -121,21 +130,6 @@ uiModules.get('apps/management')
     // it's a way to opt-out of the time field or an indication that there
     // are no fields available
     return Boolean(this.formValues.timeFieldOption.fieldName);
-  };
-
-  this.canEnableExpandWildcard = () => {
-    return (
-      this.isTimeBased() &&
-        !this.isCrossClusterName() &&
-        _.includes(this.formValues.name, '*')
-    );
-  };
-
-  this.isExpandWildcardEnabled = () => {
-    return (
-      this.canEnableExpandWildcard() &&
-        !!this.formValues.expandWildcard
-    );
   };
 
   this.isCrossClusterName = () => {
@@ -191,46 +185,43 @@ uiModules.get('apps/management')
       });
   };
 
+  this.toggleAdvancedIndexOptions = () => {
+    this.showAdvancedOptions = !!!this.showAdvancedOptions;
+  };
+
   this.createIndexPattern = () => {
     const {
+      id,
       name,
       timeFieldOption,
     } = this.formValues;
-
-    const id = name;
 
     const timeFieldName = timeFieldOption
       ? timeFieldOption.fieldName
       : undefined;
 
-    const notExpandable = this.isExpandWildcardEnabled()
-      ? undefined
-      : true;
-
     loadingCount += 1;
     sendCreateIndexPatternRequest(indexPatterns, {
       id,
+      name,
       timeFieldName,
-      notExpandable,
     }).then(createdId => {
       if (!createdId) {
         return;
       }
 
-      refreshKibanaIndex().then(() => {
-        if (!config.get('defaultIndex')) {
-          config.set('defaultIndex', id);
-        }
+      if (!config.get('defaultIndex')) {
+        config.set('defaultIndex', createdId);
+      }
 
-        indexPatterns.cache.clear(id);
-        kbnUrl.change(`/management/kibana/indices/${id}`);
+      indexPatterns.cache.clear(createdId);
+      kbnUrl.change(`/management/kibana/indices/${createdId}`);
 
-        // force loading while kbnUrl.change takes effect
-        loadingCount = Infinity;
-      });
+      // force loading while kbnUrl.change takes effect
+      loadingCount = Infinity;
     }).catch(err => {
       if (err instanceof IndexPatternMissingIndices) {
-        return notify.error($translate.instant('KIBANA-NO_INDICES_MATCHING_PATTERN'));
+        return notify.error('Could not locate any indices matching that pattern. Please add the index to Elasticsearch');
       }
 
       notify.fatal(err);
