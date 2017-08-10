@@ -1,7 +1,9 @@
-import { demodata } from './demodata/index';
-import { demoprices } from './demoprices/index';
+import { demodata } from './demodata';
+import { demoprices } from './demoprices';
+import { esdocs } from './esdocs';
 
 export default [
   demodata,
   demoprices,
+  esdocs,
 ];
