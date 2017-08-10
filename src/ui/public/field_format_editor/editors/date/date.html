@@ -5,7 +5,7 @@
     </a>
   </small>
 
-  <label>
+  <label for="scriptFieldDate">
     moment.js format pattern
     <small>
       (Default: "{{ editor.field.format.getParamDefaults().pattern }}")
@@ -13,6 +13,7 @@
   </label>
 
   <field-format-editor-pattern
+    id="scriptFieldDate"
     ng-model="editor.formatParams.pattern"
     inputs="cntrl.sampleInputs"
   ></field-format-editor-pattern>

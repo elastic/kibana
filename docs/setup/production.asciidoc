@@ -34,7 +34,8 @@ not exist. X-Pack Security does not currently provide a way to control which
 users can load which dashboards.
 
 For information about setting up Kibana users and how to configure Kibana
-to work with X-Pack, see {xpack-ref}/kibana.html[Kibana and Security].
+to work with X-Pack, see
+{kibana-ref}/using-kibana-with-security.html[Configuring Security in Kibana].
 
 [float]
 [[enabling-ssl]]
