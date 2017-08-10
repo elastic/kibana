@@ -18,7 +18,7 @@ DocViewsRegistryProvider.register(function () {
         onAddColumn: '=',
         onRemoveColumn: '=',
       },
-      controller: function ($scope) {
+      controller: function ($scope, $element) {
         $scope.mapping = $scope.indexPattern.fields.byName;
         $scope.flattened = $scope.indexPattern.flattenHit($scope.hit);
         $scope.formatted = $scope.indexPattern.formatHit($scope.hit);
@@ -39,41 +39,33 @@ DocViewsRegistryProvider.register(function () {
           }
         };
 
-        $scope.copyToClipboard = function copyToClipboard(field) {
+        $scope.isCopySupported = function isCopySupported() {
+          return document.queryCommandSuppoerted('copy');
+        };
+
+        $scope.copyToClipboard = function copyToClipboard($index) {
+
           const notify = new Notifier({
             location: `Copy to clipboard`,
           });
 
-          const textArea = document.createElement('textarea');
-          textArea.style.position = 'fixed';
-          textArea.style.top = 0;
-          textArea.style.left = 0;
-          textArea.style.width = '2em';
-          textArea.style.height = '2em';
-          textArea.style.padding = 0;
-          textArea.style.border = 'none';
-          textArea.style.outline = 'none';
-          textArea.style.boxShadow = 'none';
-          textArea.style.background = 'transparent';
-          textArea.value = $scope.flattened[field];
-
-          document.body.appendChild(textArea);
-
-          textArea.select();
+          const node = $element[0].querySelector('div.copy-target-' + $index + ' > span');
+          const range = document.createRange();
+          range.selectNode(node);
+          window.getSelection().addRange(range);
 
           try {
             const successful = document.execCommand('copy');
             if(successful) {
               notify.info('Value copied');
-            } else {
-              notify.info('Value not copied');
+            }  else {
+              notify.warning('Coulndn\'t copy value');
             }
-          } catch (err) {
-            console.log(err);
-            notify.info('Oops, unable to copy');
+          } catch(err) {
+            notify.error('Error during copying value');
+            console.error(err);
           }
-
-          document.body.removeChild(textArea);
+          window.getSelection().removeAllRanges();
         };
 
         $scope.showArrayInObjectsWarning = function (row, field) {
