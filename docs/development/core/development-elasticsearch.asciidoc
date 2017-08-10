@@ -31,9 +31,8 @@ Browser clients are exposed through AngularJS services.
 [source,javascript]
 ----
 uiModules.get('kibana')
-.run(function (esAdmin, es) {
+.run(function (es) {
   es.ping()
-  .then(() => esAdmin.ping())
   .catch(err => {
     console.log('error pinging servers');
   });
