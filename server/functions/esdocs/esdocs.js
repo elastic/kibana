@@ -1,12 +1,15 @@
-import _ from 'lodash';
 import elasticsearch from 'elasticsearch';
 import Fn from '../../../common/functions/fn.js';
 import flattenHit from './lib/flatten_hit';
 import { buildESRequest } from './lib/build_es_request';
+import { keys, map } from 'lodash';
+import { getESFieldTypes } from '../../routes/es_fields/get_es_field_types';
 
 const client = new elasticsearch.Client({
   host: 'localhost:9200',
 });
+
+
 
 export default new Fn({
   name: 'esdocs',
@@ -32,10 +35,7 @@ export default new Fn({
     },
   },
   type: 'datatable',
-  help: 'Query elasticsearch and get back raw documents, flattened into a datatable. ' +
-        'Most of the time you probably want esaggs(). Much like the csv() function this ' +
-        'will only look at the first hit for determining columns. You would be wise to give ' +
-        'all of your documents the same schema',
+  help: 'Query elasticsearch and get back raw documents.',
   fn: (context, args) => {
     return client.search(buildESRequest({
       index: args.index,
@@ -45,18 +45,22 @@ export default new Fn({
       },
     }, context))
     .then(resp => {
-      const flatHits = _.map(resp.hits.hits, (hit, i) => {
+      const flatHits = map(resp.hits.hits, (hit, i) => {
         return Object.assign(flattenHit(hit), { _rowId: i });
       });
-      const columns = _.map(flatHits[0], (fieldVal, fieldName) => {
-        return { name: fieldName, type: typeof fieldVal };
+
+      const columnNames = keys(flatHits[0]);
+
+      return getESFieldTypes(args.index, columnNames)
+      .then(typedFields => {
+        return {
+          type: 'datatable',
+          columns: map(typedFields, (type, name) => ({ name, type })),
+          rows: flatHits,
+        };
       });
 
-      return {
-        type: 'datatable',
-        columns: columns,
-        rows: flatHits,
-      };
+
     });
   },
 });
