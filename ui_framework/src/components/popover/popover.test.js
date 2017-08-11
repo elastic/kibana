@@ -10,7 +10,7 @@ describe('KuiPopover', () => {
       <KuiPopover
         button={<button />}
         closePopover={() => {}}
-        { ...requiredProps }
+        {...requiredProps}
       />
     );
 

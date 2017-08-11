@@ -45,12 +45,12 @@ export function LocalNavWithDropdown() {
 
         {/* Help text */}
         <div className="kuiLocalDropdownHelpText">
-          Here's some help text to explain the purpose of the dropdown.
+          Here&rsquo;s some help text to explain the purpose of the dropdown.
         </div>
 
         {/* Warning */}
         <div className="kuiLocalDropdownWarning">
-          Here's some warning text in case the user has something misconfigured.
+          Here&rsquo;s some warning text in case the user has something misconfigured.
         </div>
 
         <div className="kuiLocalDropdownSection">

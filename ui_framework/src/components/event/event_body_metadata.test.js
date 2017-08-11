@@ -7,6 +7,6 @@ import {
 } from './event_body_metadata';
 
 test('renders KuiEventBodyMetadata', () => {
-  const component = <KuiEventBodyMetadata { ...requiredProps }>children</KuiEventBodyMetadata>;
+  const component = <KuiEventBodyMetadata {...requiredProps}>children</KuiEventBodyMetadata>;
   expect(render(component)).toMatchSnapshot();
 });

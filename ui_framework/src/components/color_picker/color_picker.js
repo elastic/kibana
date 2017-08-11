@@ -66,24 +66,24 @@ export class KuiColorPicker extends React.Component {
     const classes = classNames('kuiColorPicker', className);
     return (
       <div
-        className={ classes }
-        data-test-subj={ this.props['data-test-subj'] }
-        onClick={ this.onClickRootElement }
+        className={classes}
+        data-test-subj={this.props['data-test-subj']}
+        onClick={this.onClickRootElement}
       >
         <div
           className="kuiColorPicker__preview"
-          onClick={ this.toggleColorSelector }
+          onClick={this.toggleColorSelector}
         >
-          <KuiColorPickerSwatch color={ color } aria-label={ this.props['aria-label'] } />
+          <KuiColorPickerSwatch color={color} aria-label={this.props['aria-label']} />
           { showColorLabel ? this.getColorLabel() : null }
         </div>
         {
           this.state.showColorSelector ?
             <div className="kuiColorPickerPopUp" data-test-subj="colorPickerPopup">
               <ChromePicker
-                color={ color ? color : '#ffffff' }
-                disableAlpha={ true }
-                onChange={ this.handleColorSelection }
+                color={color ? color : '#ffffff'}
+                disableAlpha={true}
+                onChange={this.handleColorSelection}
               />
             </div>
             : null

@@ -7,6 +7,6 @@ import {
 } from './modal_body';
 
 test('renders KuiModalBody', () => {
-  const component = <KuiModalBody { ...requiredProps }>children</KuiModalBody>;
+  const component = <KuiModalBody {...requiredProps}>children</KuiModalBody>;
   expect(render(component)).toMatchSnapshot();
 });

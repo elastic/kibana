@@ -29,9 +29,9 @@ export class ColorPickerNoColorLabel extends React.Component {
 
         <KuiFieldGroupSection>
           <KuiColorPicker
-            onChange={ this.handleChange }
-            color={ this.state.color }
-            showColorLabel={ false }
+            onChange={this.handleChange}
+            color={this.state.color}
+            showColorLabel={false}
           />
         </KuiFieldGroupSection>
       </KuiFieldGroup>

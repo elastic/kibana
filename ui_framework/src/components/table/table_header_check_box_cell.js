@@ -7,14 +7,14 @@ export const KuiTableHeaderCheckBoxCell = ({ onChange, isChecked, className, ...
   const classes = classNames('kuiTableHeaderCell--checkBox', className);
   return (
     <KuiTableHeaderCell
-      className={ classes }
+      className={classes}
       {...rest}
     >
       <input
         type="checkbox"
         className="kuiCheckBox"
-        onChange={ onChange }
-        checked={ isChecked }
+        onChange={onChange}
+        checked={isChecked}
       />
     </KuiTableHeaderCell>
   );

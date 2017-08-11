@@ -7,6 +7,6 @@ import {
 } from './modal_footer';
 
 test('renders KuiModalFooter', () => {
-  const component = <KuiModalFooter { ...requiredProps }>children</KuiModalFooter>;
+  const component = <KuiModalFooter {...requiredProps}>children</KuiModalFooter>;
   expect(render(component)).toMatchSnapshot();
 });

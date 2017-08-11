@@ -10,13 +10,13 @@ import {
 const onFilter = sinon.spy();
 
 test('renders KuiToolBarSearchBox', () => {
-  const component = <KuiToolBarSearchBox onFilter={onFilter} { ...requiredProps } />;
+  const component = <KuiToolBarSearchBox onFilter={onFilter} {...requiredProps} />;
   expect(render(component)).toMatchSnapshot();
 });
 
 describe('onFilter', () => {
   test('is called on change event, with the value entered', () => {
-    const searchBox = mount(<KuiToolBarSearchBox onFilter={onFilter} { ...requiredProps } />);
+    const searchBox = mount(<KuiToolBarSearchBox onFilter={onFilter} {...requiredProps} />);
     onFilter.reset();
     const event = { target: { value: 'a' } };
     searchBox.find('input').simulate('change', event);

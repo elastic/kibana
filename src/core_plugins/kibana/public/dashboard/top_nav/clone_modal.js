@@ -42,7 +42,7 @@ export class DashboardCloneModal extends React.Component {
           data-tests-subj="dashboardCloneModal"
           aria-label="Clone a dashboard"
           className="dashboardCloneModal"
-          onKeyDown={ this.onKeyDown }
+          onKeyDown={this.onKeyDown}
         >
           <KuiModalHeader>
             <KuiModalHeaderTitle>
@@ -58,8 +58,8 @@ export class DashboardCloneModal extends React.Component {
                 autoFocus
                 data-test-subj="clonedDashboardTitle"
                 className="kuiTextInput kuiTextInput--large"
-                value={ this.state.newDashboardName }
-                onChange={ this.onInputChange }
+                value={this.state.newDashboardName}
+                onChange={this.onInputChange}
               />
             </KuiModalBodyText>
           </KuiModalBody>
@@ -68,14 +68,14 @@ export class DashboardCloneModal extends React.Component {
             <KuiButton
               buttonType="hollow"
               data-test-subj="cloneCancelButton"
-              onClick={ this.props.onClose }
+              onClick={this.props.onClose}
             >
               Cancel
             </KuiButton>
             <KuiButton
               buttonType="primary"
               data-test-subj="cloneConfirmButton"
-              onClick={ this.cloneDashboard }
+              onClick={this.cloneDashboard}
             >
               Confirm Clone
             </KuiButton>

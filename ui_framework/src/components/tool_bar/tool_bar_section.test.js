@@ -7,6 +7,6 @@ import {
 } from './tool_bar_section';
 
 test('renders KuiToolBarSection', () => {
-  const component = <KuiToolBarSection { ...requiredProps }>children</KuiToolBarSection>;
+  const component = <KuiToolBarSection {...requiredProps}>children</KuiToolBarSection>;
   expect(render(component)).toMatchSnapshot();
 });

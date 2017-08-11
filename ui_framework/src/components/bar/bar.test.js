@@ -7,6 +7,6 @@ import {
 } from './bar';
 
 test('renders KuiBar', () => {
-  const component = <KuiBar { ...requiredProps }>children</KuiBar>;
+  const component = <KuiBar {...requiredProps}>children</KuiBar>;
   expect(render(component)).toMatchSnapshot();
 });

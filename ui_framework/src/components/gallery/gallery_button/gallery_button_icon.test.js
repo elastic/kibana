@@ -7,6 +7,6 @@ import {
 } from './gallery_button_icon';
 
 test('renders KuiGalleryButtonIcon', () => {
-  const component = <KuiGalleryButtonIcon { ...requiredProps }>children</KuiGalleryButtonIcon>;
+  const component = <KuiGalleryButtonIcon {...requiredProps}>children</KuiGalleryButtonIcon>;
   expect(render(component)).toMatchSnapshot();
 });
