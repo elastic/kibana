@@ -1,5 +1,5 @@
 define(function (require) {
-  const marked = require('marked');
+  const marked = require('../../../forked/marked');
   require('angular-sanitize');
 
   marked.setOptions({

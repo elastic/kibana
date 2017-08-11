@@ -3,7 +3,7 @@ define(function (require) {
     let _ = require('lodash');
     let $ = require('jquery');
     let L = require('leaflet');
-    let marked = require('marked');
+    let marked = require('../../../../forked/marked');
     marked.setOptions({
       gfm: true, // Github-flavored markdown
       sanitize: true // Sanitize HTML tags
