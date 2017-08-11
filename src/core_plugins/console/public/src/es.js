@@ -20,8 +20,6 @@ export function send(method, path, data) {
     method = "POST";
   }
 
-
-
   var options = {
     url: '../api/console/proxy?' + formatQueryString({ path, method }),
     data,
