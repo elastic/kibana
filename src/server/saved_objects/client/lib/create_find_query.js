@@ -53,7 +53,10 @@ export function createFindQuery(mappings, options = {}) {
     bool.should.push({ simple_query_string: v5SimpleQueryString });
 
     if (searchFields) {
-      const v6SimpleQueryString = createSimpleQuery(search, searchFields.map(field => `${type}.${field}`));
+      const v6SearchFields = Array.isArray(searchFields) ?
+        searchFields.map(field => `${type}.${field}`)
+        : `${type}.${searchFields}`;
+      const v6SimpleQueryString = createSimpleQuery(search, v6SearchFields);
       bool.should.push({ simple_query_string: v6SimpleQueryString });
     }
     bool.minimum_should_match = 1;
