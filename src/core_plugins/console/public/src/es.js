@@ -9,22 +9,7 @@ export function getVersion() {
 
 export function getContentType(body) {
   if (!body) return;
-
-  let contentType;
-  try {
-    // there is more than one line
-    const lines = body.split('\n').filter(Boolean);
-
-    if (lines.length < 2) throw new Error('not multiline json')
-
-    // each line must be valid json
-    lines.forEach(line => JSON.parse(line));
-    contentType = 'application/x-ndjson';
-  }
-  catch (e) {
-    contentType = 'application/json';
-  }
-  return contentType;
+  return 'application/json';
 }
 
 export function send(method, path, data) {
