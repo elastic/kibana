@@ -10,7 +10,7 @@ module.exports = {
       '!**/node_modules/**',
       '!**/bower_components/**',
       '!**/__tests__/**',
-      '!**/src/forked/**'
+      '!build/kibana/src/forked/**'
     ],
     dest: '.',
     expand: true
