@@ -14,11 +14,22 @@
   <div class="kuiPanelBody">
     <p class="kuiText kuiSubduedText kuiVerticalRhythm">
       You've defined <strong>{{stepTimeField.indexPatternName}}</strong> as your index pattern. Now you can specify some optional settings before we create it.
+      <small>
+        <a
+          class="kuiLink"
+          ng-click="stepTimeField.toggleAdvancedOptions()"
+        >
+          Show advanced options.
+        </a>
+      </small>
     </p>
 
 
     <!-- Index pattern id input -->
-    <div class="kuiVerticalRhythm">
+    <div
+      class="kuiVerticalRhythm"
+      ng-if="stepTimeField.showAdvancedOptions"
+    >
       <label
         class="kuiLabel kuiVerticalRhythmSmall"
         for="indexPatternCreationId"

@@ -33,6 +33,10 @@ module.directive('stepTimeField', function () {
         !this.timeFieldOptionsError
         && !this.isFetchingTimeFieldOptions
       );
+
+      this.toggleAdvancedOptions = () => {
+        this.showAdvancedOptions = !this.showAdvancedOptions;
+      };
     },
   };
 });
