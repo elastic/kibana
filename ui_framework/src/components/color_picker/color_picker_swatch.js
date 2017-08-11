@@ -18,8 +18,8 @@ export function KuiColorPickerSwatch(props) {
 
   return (
     <div
-      className={ classes }
-      aria-label={ props['aria-label'] }
+      className={classes}
+      aria-label={props['aria-label']}
       data-test-subj="colorSwatch"
       style={{ background: color ? color : '' }}
     >

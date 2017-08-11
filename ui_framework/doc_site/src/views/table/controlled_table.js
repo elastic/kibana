@@ -64,13 +64,13 @@ export class ControlledTable extends React.Component {
   renderPager() {
     return (
       <KuiPager
-        startNumber={ 1 }
-        hasNextPage={ true }
-        hasPreviousPage={ false }
-        endNumber={ 10 }
-        totalItems={ 100 }
-        onNextPage={ () => {} }
-        onPreviousPage={ () => {} }
+        startNumber={1}
+        hasNextPage={true}
+        hasPreviousPage={false}
+        endNumber={10}
+        totalItems={100}
+        onNextPage={() => {}}
+        onPreviousPage={() => {}}
       />
     );
   }
@@ -92,14 +92,14 @@ export class ControlledTable extends React.Component {
       return (
         <KuiTableRow>
           <KuiTableRowCheckBoxCell
-            isChecked={ this.isItemChecked(rowData) }
-            onChange={ () => this.toggleItem(rowData) }
+            isChecked={this.isItemChecked(rowData)}
+            onChange={() => this.toggleItem(rowData)}
           />
           {
             rowData.map((cellData, index) => {
               const align = index === rowData.length - 1 ? RIGHT_ALIGNMENT : LEFT_ALIGNMENT;
               return (
-                <KuiTableRowCell align={ align }>
+                <KuiTableRowCell align={align}>
                   { cellData }
                 </KuiTableRowCell>
               );
@@ -114,7 +114,7 @@ export class ControlledTable extends React.Component {
     return (
       <KuiControlledTable>
         <KuiToolBar>
-          <KuiToolBarSearchBox onFilter={ () => {} } />
+          <KuiToolBarSearchBox onFilter={() => {}} />
 
           <KuiToolBarSection>
             <KuiButton buttonType="primary">
@@ -140,8 +140,8 @@ export class ControlledTable extends React.Component {
         <KuiTable>
           <KuiTableHeader>
             <KuiTableHeaderCheckBoxCell
-              isChecked={ this.isItemChecked('header') }
-              onChange={ () => this.toggleItem('header') }
+              isChecked={this.isItemChecked('header')}
+              onChange={() => this.toggleItem('header')}
             />
             <KuiTableHeaderCell>
               Title

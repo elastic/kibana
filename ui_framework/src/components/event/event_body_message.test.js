@@ -7,6 +7,6 @@ import {
 } from './event_body_message';
 
 test('renders KuiEventBodyMessage', () => {
-  const component = <KuiEventBodyMessage { ...requiredProps }>children</KuiEventBodyMessage>;
+  const component = <KuiEventBodyMessage {...requiredProps}>children</KuiEventBodyMessage>;
   expect(render(component)).toMatchSnapshot();
 });

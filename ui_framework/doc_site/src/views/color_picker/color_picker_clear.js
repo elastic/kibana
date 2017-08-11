@@ -34,15 +34,15 @@ export class ColorPickerLabelAndClear extends React.Component {
 
         <KuiFieldGroupSection>
           <KuiColorPicker
-            onChange={ this.handleChange }
-            color={ this.state.color }
+            onChange={this.handleChange}
+            color={this.state.color}
           />
         </KuiFieldGroupSection>
 
         <KuiFieldGroupSection>
           <p className="kuiText">
             <KuiKeyboardAccessible>
-              <a className="kuiLink" onClick={ this.resetColor }>
+              <a className="kuiLink" onClick={this.resetColor}>
                 Reset
               </a>
             </KuiKeyboardAccessible>

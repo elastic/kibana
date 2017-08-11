@@ -7,11 +7,11 @@ import {
 } from './field_group_section';
 
 test('renders KuiFieldGroupSection', () => {
-  const component = <KuiFieldGroupSection { ...requiredProps }>children</KuiFieldGroupSection>;
+  const component = <KuiFieldGroupSection {...requiredProps}>children</KuiFieldGroupSection>;
   expect(render(component)).toMatchSnapshot();
 });
 
 test('renders KuiFieldGroupSection isWide', () => {
-  const component = <KuiFieldGroupSection isWide { ...requiredProps }>children</KuiFieldGroupSection>;
+  const component = <KuiFieldGroupSection isWide {...requiredProps}>children</KuiFieldGroupSection>;
   expect(render(component)).toMatchSnapshot();
 });

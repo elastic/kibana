@@ -14,7 +14,7 @@ describe('KuiCollapseButton', () => {
       DIRECTIONS.forEach(direction => {
         describe(direction, () => {
           test(`renders the ${direction} class`, () => {
-            const component = <KuiCollapseButton direction={direction} { ...requiredProps }/>;
+            const component = <KuiCollapseButton direction={direction} {...requiredProps}/>;
             expect(render(component)).toMatchSnapshot();
           });
         });
@@ -26,7 +26,7 @@ describe('KuiCollapseButton', () => {
         const onClickHandler = sinon.stub();
 
         shallow(
-          <KuiCollapseButton direction='left' onClick={onClickHandler} />
+          <KuiCollapseButton direction="left" onClick={onClickHandler} />
         );
 
         sinon.assert.notCalled(onClickHandler);
@@ -36,7 +36,7 @@ describe('KuiCollapseButton', () => {
         const onClickHandler = sinon.stub();
 
         const $button = shallow(
-          <KuiCollapseButton direction='left' onClick={onClickHandler} />
+          <KuiCollapseButton direction="left" onClick={onClickHandler} />
         );
 
         $button.simulate('click');

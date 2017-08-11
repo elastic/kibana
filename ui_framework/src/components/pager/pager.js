@@ -16,7 +16,7 @@ export function KuiPager({
   }) {
   const classes = classNames('kuiPager', className);
   return (
-    <div className={classes} { ...rest }>
+    <div className={classes} {...rest}>
       <div className="kuiPagerText">{startNumber}&ndash;{endNumber} of {totalItems}</div>
       {
         (startNumber === 1 && endNumber === totalItems)
