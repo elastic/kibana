@@ -80,13 +80,13 @@ describe('kibana_map tests', function () {
         const canvas = elementList[0];
 
         const ctx = canvas.getContext('2d');
-        const imageData = ctx.getImageData(0, 0, 1228, 1228);
+        const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
 
 
         const canvas2 = document.createElement('canvas');
         canvas2.id     = 'CursorLayer';
-        canvas2.width  = 1228;
-        canvas2.height = 1228;
+        canvas2.width  = canvas.width;
+        canvas2.height = canvas.height;
 
         document.body.appendChild(canvas2);
 
@@ -94,15 +94,14 @@ describe('kibana_map tests', function () {
 
         let image = new Image();
         image.onload = () => {
-          console.log("onLoad called");
-          ctx2.drawImage(image, 0, 0);
+          ctx2.drawImage(image, 0, 0, canvas.width, canvas.height);  // draw reference image to size of generated image
 
-          const imageData2 = ctx2.getImageData(0, 0, 1228, 1228);
+          const imageData2 = ctx2.getImageData(0, 0, canvas.width, canvas.height);
 
-          let diffImage = ctx.createImageData(1228, 1228);
-          const mismatchedPixels = pixelmatch(imageData.data, imageData2.data, diffImage.data, 1228, 1228, {threshold: 0.1});
-          console.log("mismatchedPixels", mismatchedPixels);
-          //expect(mismatchedPixels).to.equal(0);
+          let diffImage = ctx.createImageData(canvas.width, canvas.height);
+          const mismatchedPixels = pixelmatch(imageData.data, imageData2.data, diffImage.data, canvas.width, canvas.height, {threshold: 0.1});
+          // console.log("mismatchedPixels", mismatchedPixels);
+          expect(mismatchedPixels).to.equal(0);
 
           ctx2.putImageData(diffImage, 0, 0);
 
