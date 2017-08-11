@@ -574,7 +574,6 @@ table {
   margin-bottom: 16px; }
 
 .kuiFormRow {
-  margin-bottom: 24px;
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -586,6 +585,8 @@ table {
           flex-direction: column;
   position: relative;
   max-width: 400px; }
+  .kuiFormRow + * {
+    margin-top: 24px; }
   .kuiFormRow.kuiFormRow--withIcon input {
     padding-left: 40px; }
   .kuiFormRow.kuiFormRow--dropdown input {

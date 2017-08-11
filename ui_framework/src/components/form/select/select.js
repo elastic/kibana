@@ -13,8 +13,8 @@ export const KuiSelect = ({ className, options, id, name, ...rest }) => {
       className={classes}
       {...rest}
     >
-      {options.map(function (option, index) {
-        return <option value={index} key={index}>{option}</option>;
+      {options.map((option, index) => {
+        return <option value={option.value} key={index}>{option.text}</option>;
       })}
     </select>
   );
@@ -23,7 +23,7 @@ export const KuiSelect = ({ className, options, id, name, ...rest }) => {
 KuiSelect.propTypes = {
   name: PropTypes.string.isRequired,
   id: PropTypes.string,
-  options: PropTypes.array.isRequired,
+  options: PropTypes.arrayOf(React.PropTypes.object).isRequired,
 };
 
 

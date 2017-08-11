@@ -9,9 +9,10 @@ export const KuiCheckbox = ({ options, className, ...rest }) => {
   return (
     <div>
       {options.map((option, index) => {
+
         return (
           <div className={classes} key={index} {...rest}>
-            <input className="kuiCheckbox__input" type="checkbox" id={option.id} />
+            <input className="kuiCheckbox__input" type="checkbox" id={option.id} defaultChecked={option.checked ? true : false} />
             <div className="kuiCheckbox__square">
               <div className="kuiCheckbox__check" />
             </div>

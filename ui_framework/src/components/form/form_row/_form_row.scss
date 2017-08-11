@@ -1,9 +1,12 @@
 .kuiFormRow {
-  margin-bottom: $kuiSizeL;
   display: flex;
   flex-direction: column;
   position: relative;
   max-width: $kuiFormMaxWidth;
+
+  + * {
+    margin-top: $kuiSizeL;
+  }
 
   &.kuiFormRow--withIcon input {
     padding-left: $kuiSizeXXL;

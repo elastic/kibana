@@ -11,9 +11,13 @@ import {
   GuideText,
 } from '../../components';
 
-import Form from './form';
-const formSource = require('!!raw!./form');
-const formHtml = renderToHtml(Form);
+import FieldText from './field_text';
+const fieldTextSource = require('!!raw!./field_text');
+const fieldTextHtml = renderToHtml(FieldText);
+
+import FormEverything from './form_everything';
+const formEverythingSource = require('!!raw!./form_everything');
+const formEverythingHtml = renderToHtml(FormEverything);
 
 import FormValidation from './form_validation';
 const formValidationSource = require('!!raw!./form_validation');
@@ -26,21 +30,46 @@ const formPopoverHtml = renderToHtml(FormPopover);
 export default props => (
   <GuidePage title={props.route.name}>
     <GuideSection
-      title="Form"
+      title="Component structure"
       source={[{
         type: GuideSectionTypes.JS,
-        code: formSource,
+        code: fieldTextSource,
       }, {
         type: GuideSectionTypes.HTML,
-        code: formHtml,
+        code: fieldTextHtml,
       }]}
     >
       <GuideText>
-        Every form element.
+        <p>
+          Each form input has a base component to cover generic use cases. These are raw HTML elements with only basic styling.
+          Additionally, you can wrap any of these elements with a <GuideCode>FormRow</GuideCode> which gives you optional
+          prebuilt labels, help text and validation.  Below is an example showing the <GuideCode>FieldText</GuideCode> component
+          in a bunch of configurations, but they all act roughly the same. Farther down in the docs you can see an example
+          showing every form element and their individual prop settings (which mirror their HTML counterparts).
+        </p>
       </GuideText>
 
       <GuideDemo>
-        <Form />
+        <FieldText />
+      </GuideDemo>
+    </GuideSection>
+    <GuideSection
+      title="Form component examples"
+      source={[{
+        type: GuideSectionTypes.JS,
+        code: formEverythingSource,
+      }, {
+        type: GuideSectionTypes.HTML,
+        code: formEverythingHtml,
+      }]}
+    >
+      <GuideText>
+        This example shows every form element in use and showcases a variety of styles. Note that each one of these elements is wrapped
+        by <GuideCode>FormRow</GuideCode>.
+      </GuideText>
+
+      <GuideDemo>
+        <FormEverything />
       </GuideDemo>
     </GuideSection>
     <GuideSection

@@ -5,13 +5,14 @@ import React, {
 import classNames from 'classnames';
 import { KuiIcon } from '../../../components';
 
-export const KuiFormRow = ({ children, icon, helpText, invalid, errors, label, id, className, ...rest }) => {
+export const KuiFormRow = ({ children, icon, containsSelect, helpText, invalid, errors, label, id, className, ...rest }) => {
   const classes = classNames(
     'kuiFormRow',
     className,
     {
       'kuiFormRow--withIcon' : icon,
       'kuiFormRow--invalid' : invalid,
+      'kuiFormRow--select' : containsSelect,
     }
   );
 
@@ -75,6 +76,7 @@ KuiFormRow.propTypes = {
   id: PropTypes.string,
   icon: PropTypes.string,
   invalid: PropTypes.bool,
+  containsSelect: PropTypes.bool,
   errors: PropTypes.array,
   helpText: PropTypes.string,
 };
