@@ -63,7 +63,9 @@
     "mocha": "echo 'use `node scripts/mocha`' && false",
     "sterilize": "grunt sterilize",
     "uiFramework:start": "grunt uiFramework:start",
-    "uiFramework:build": "grunt uiFramework:build"
+    "uiFramework:build": "grunt uiFramework:build",
+    "uiFramework:createComponent": "yo ./ui_framework/generator-kui/app/component.js",
+    "uiFramework:documentComponent": "yo ./ui_framework/generator-kui/app/documentation.js"
   },
   "repository": {
     "type": "git",
@@ -208,6 +210,7 @@
     "angular-mocks": "1.4.7",
     "babel-eslint": "7.2.3",
     "chai": "3.5.0",
+    "chalk": "2.0.1",
     "chance": "1.0.6",
     "cheerio": "0.22.0",
     "chokidar": "1.6.0",
@@ -275,7 +278,9 @@
     "supertest": "3.0.0",
     "supertest-as-promised": "2.0.2",
     "tree-kill": "1.1.0",
-    "webpack-dev-server": "1.14.1"
+    "webpack-dev-server": "1.14.1",
+    "yeoman-generator": "1.1.1",
+    "yo": "2.0.0"
   },
   "engines": {
     "node": "6.11.1",

@@ -4,7 +4,7 @@ import {
   KuiConfirmModal,
   KuiModalOverlay,
   KuiButton
-} from '../../../../components/index';
+} from '../../../../components';
 
 export class ConfirmModalExample extends React.Component {
   constructor(props) {

@@ -5,7 +5,7 @@ import {
   KuiFieldGroup,
   KuiFieldGroupSection,
   KuiKeyboardAccessible,
-} from '../../../../components/index';
+} from '../../../../components';
 
 export class ColorPickerLabelAndClear extends React.Component {
   constructor(props) {
