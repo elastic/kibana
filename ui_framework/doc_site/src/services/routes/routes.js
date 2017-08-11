@@ -9,6 +9,9 @@ import ButtonExample
 import CallOutExample
   from '../../views/call_out/call_out_example';
 
+import FormExample
+  from '../../views/form/form_example';
+
 import IconExample
   from '../../views/icon/icon_example';
 
@@ -63,6 +66,10 @@ const components = [{
 }, {
   name: 'CallOut',
   component: CallOutExample,
+  hasReact: true,
+}, {
+  name: 'Form',
+  component: FormExample,
   hasReact: true,
 }, {
   name: 'Header',
