@@ -6,6 +6,7 @@ export default (grunt) => {
   const { config } = grunt;
   const targetDir = config.get('target');
   const packageScriptsDir = grunt.config.get('packageScriptsDir');
+  const tmpFilesDir = grunt.config.get('tmpFilesDir');
   const servicesByName = indexBy(config.get('services'), 'name');
   const packages = config.get('packages');
   const fpm = args => exec('fpm', args);
@@ -40,6 +41,7 @@ export default (grunt) => {
         '--template-value', `optimizeDir=${packages.path.home}/optimize`,
         '--template-value', `configDir=${packages.path.conf}`,
         '--template-value', `pluginsDir=${packages.path.plugins}`,
+        '--template-value', `logsDir=${packages.path.logs}`,
         '--template-value', `dataDir=${packages.path.data}`,
         //config folder is moved to path.conf, exclude {path.home}/config
         //uses relative path to --prefix, strip the leading /
@@ -62,6 +64,7 @@ export default (grunt) => {
         `${buildDir}/data/=${packages.path.data}/`,
         `${servicesByName.sysv.outputDir}/etc/=/etc/`,
         `${servicesByName.systemd.outputDir}/etc/=/etc/`
+        `${tmpFilesDir}/=/usr/lib/tmpfiles.d/`
       ];
 
       //Manually find flags, multiple args without assignment are not entirely parsed

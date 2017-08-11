@@ -36,4 +36,5 @@ esac
 
 chown -R <%= user %>:<%= group %> <%= optimizeDir %>
 chown <%= user %>:<%= group %> <%= dataDir %>
+chown <%= user %>:<%= group %> <%= logsDir %>
 chown <%= user %>:<%= group %> <%= pluginsDir %>

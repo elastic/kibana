@@ -44,6 +44,7 @@ module.exports = function (grunt) {
   grunt.config.set('build', require('./tasks/config/build')(grunt));
 
   config.packageScriptsDir = __dirname + '/tasks/build/package_scripts';
+  config.tmpFilesDir = __dirname + '/tasks/build/tmpfiles.d';
   // ensure that these run first, other configs need them
   config.services = require('./tasks/config/services')(grunt);
   config.platforms = require('./tasks/config/platforms')(grunt);
