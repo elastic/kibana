@@ -53,3 +53,15 @@
     opacity: 1;
   }
 }
+
+@include screenXSmall {
+  /**
+   * 1. Mobile we make these 100%. Matching change happens on the item as well.
+   */
+  .kuiGlobalToastList {
+    left: 0;
+    padding-left: $kuiSize;
+    width: 100%; /* 1 */
+  }
+}
+
