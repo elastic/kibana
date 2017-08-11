@@ -22,7 +22,7 @@ export const KuiTextArea = ({ children, rows, name, id, placeholder, className, 
 
 KuiTextArea.propTypes = {
   name: PropTypes.string.isRequired,
-  id: PropTypes.string.isRequired,
+  id: PropTypes.string,
   placeholder: PropTypes.string,
   rows: PropTypes.number,
 };

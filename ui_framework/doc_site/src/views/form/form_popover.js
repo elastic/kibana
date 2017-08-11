@@ -12,6 +12,10 @@ import {
   KuiFieldText,
 } from '../../../../components';
 
+function makeId() {
+  return Math.random().toString(36).substr(2, 5);
+}
+
 export default class extends Component {
   constructor(props) {
     super(props);
@@ -43,20 +47,20 @@ export default class extends Component {
     const formSample = (
       <KuiForm>
         <KuiFormRow>
-          <KuiSwitch id="popswitch" name="popswitch" label="Isn't this popover form cool?"/>
+          <KuiSwitch id={makeId()} name="popswitch" label="Isn't this popover form cool?"/>
         </KuiFormRow>
         <KuiFormRow
-          id="popfirst"
+          id={makeId()}
           label="A text field"
         >
-          <KuiFieldText id="popfirst" name="popfirst" />
+          <KuiFieldText name="popfirst" />
         </KuiFormRow>
         <KuiFormRow
-          id="poprange"
+          id={makeId()}
           label="Range"
           helpText="Some help text for the range"
         >
-          <KuiRange min={0} max={100} name="poprange" id="poprange" />
+          <KuiRange min={0} max={100} name="poprange" />
         </KuiFormRow>
       </KuiForm>
     );

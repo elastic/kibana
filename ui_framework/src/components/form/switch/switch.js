@@ -23,7 +23,7 @@ export const KuiSwitch = ({ label, id, name, defaultChecked, className, ...rest 
 
 KuiSwitch.propTypes = {
   name: PropTypes.string.isRequired,
-  id: PropTypes.string.isRequired,
+  id: PropTypes.string,
   label: PropTypes.string.isRequired,
   defaultChecked: PropTypes.bool,
 };

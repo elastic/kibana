@@ -10,6 +10,10 @@ import {
   KuiFieldText,
 } from '../../../../components';
 
+function makeId() {
+  return Math.random().toString(36).substr(2, 5);
+}
+
 export default class extends Component {
   constructor(props) {
     super(props);
@@ -44,27 +48,27 @@ export default class extends Component {
 
     return (
       <div>
-        <br/>
-        <br/>
-        <br/>
         <KuiForm invalid={this.state.showErrors} errors={errors}>
           <KuiFormRow
-            id="first"
+            id={makeId()}
             label="Validation only"
             invalid={this.state.showErrors}
           >
-            <KuiFieldText id="first" name="first" />
+            <KuiFieldText name="first" />
           </KuiFormRow>
           <KuiFormRow
-            id="first"
+            id={makeId()}
             label="Validation with helptext and errors"
             helpText="I am some friendly help text."
             invalid={this.state.showErrors}
             errors={errors}
           >
-            <KuiFieldText id="first" name="first" />
+            <KuiFieldText name="first" />
           </KuiFormRow>
-          <KuiFormRow label="Non text field works the same" invalid={this.state.showErrors}>
+          <KuiFormRow
+            label="Non text field works the same"
+            invalid={this.state.showErrors}
+          >
             <KuiCheckbox options={formOptions} />
           </KuiFormRow>
           {button}

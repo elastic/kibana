@@ -1,4 +1,5 @@
 import React, {
+  cloneElement,
   PropTypes,
 } from 'react';
 import classNames from 'classnames';
@@ -14,17 +15,20 @@ export const KuiFormRow = ({ children, icon, helpText, invalid, errors, label, i
     }
   );
 
+  let field;
   let optionalIcon = null;
+  let optionalHelpText = null;
+  let optionalErrors = null;
+  let optionalLabel = null;
+
   if (icon) {
     optionalIcon = <KuiIcon className="kuiFormRow__icon" type={icon} size="medium" />;
   }
 
-  let optionalHelpText = null;
   if (helpText) {
     optionalHelpText = <div className="kuiFormRow__helpText">{helpText}</div>;
   }
 
-  let optionalErrors = null;
   if (errors) {
     optionalErrors = (
       errors.map(function (error, index) {
@@ -33,9 +37,16 @@ export const KuiFormRow = ({ children, icon, helpText, invalid, errors, label, i
     );
   }
 
-  let optionalLabel = null;
   if (label) {
     optionalLabel = <label className="kuiFormRow__label" htmlFor={id}>{label}</label>;
+  }
+
+  if (id) {
+    field = cloneElement(children, {
+      id,
+    });
+  } else {
+    field = children;
   }
 
   return (
@@ -44,13 +55,13 @@ export const KuiFormRow = ({ children, icon, helpText, invalid, errors, label, i
       {...rest}
     >
       {/*
-          Order is important here. The label needs to be UNDER the children.
+          Order is important here. The label needs to be UNDER the field.
           We rearrange the flex order in the CSS so the label ends up
           displaying above the children / input. This allows us to still
           use sibling selectors against the label that are tiggered by the
           focus state of the input.
       */}
-      {children}
+      {field}
       {optionalLabel}
       {optionalErrors}
       {optionalHelpText}

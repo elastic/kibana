@@ -22,7 +22,7 @@ export const KuiRange = ({ className, id, name, min, max, value, ...rest }) => {
 
 KuiRange.propTypes = {
   name: PropTypes.string.isRequired,
-  id: PropTypes.string.isRequired,
+  id: PropTypes.string,
   min: PropTypes.number.isRequired,
   max: PropTypes.number.isRequired,
   value: PropTypes.string,

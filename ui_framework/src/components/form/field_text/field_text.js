@@ -21,7 +21,7 @@ export const KuiFieldText = ({ id, name, placeholder, value, className, ...rest 
 
 KuiFieldText.propTypes = {
   name: PropTypes.string.isRequired,
-  id: PropTypes.string.isRequired,
+  id: PropTypes.string,
   placeholder: PropTypes.string,
   value: PropTypes.string,
 };

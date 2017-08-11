@@ -16,6 +16,11 @@ import {
   KuiTextArea,
 } from '../../../../components';
 
+
+function makeId() {
+  return Math.random().toString(36).substr(2, 5);
+}
+
 export default class extends Component {
 
   render() {
@@ -25,61 +30,67 @@ export default class extends Component {
     const formSample = (
       <KuiForm>
         <KuiFormRow
-          id="first"
+          id={makeId()}
           label="Number"
           helpText="Any number between 1 and 5"
         >
-          <KuiFieldNumber name="number" id="number" min={1} max={5} />
+          <KuiFieldNumber name="number" min={1} max={5} />
         </KuiFormRow>
         <KuiFormRow
-          id="first"
+          id={makeId()}
           label="First name"
           helpText="I am some friendly help text."
         >
-          <KuiFieldText id="first" name="first" />
+          <KuiFieldText name="first" />
         </KuiFormRow>
         <KuiFormRow
-          id="last"
+          id={makeId()}
           label="Last name with icon"
           icon="user"
         >
-          <KuiFieldText id="last" name="first" placeholder="Some placeholder text" />
+          <KuiFieldText name="first" placeholder="Some placeholder text" />
         </KuiFormRow>
         <KuiFormRow
-          id="pass"
+          id={makeId()}
           label="Password"
           icon="lock"
         >
-          <KuiFieldPassword name="pass" id="pass" />
+          <KuiFieldPassword name="pass" />
         </KuiFormRow>
         <KuiFormRow
-          id="range"
+          id={makeId()}
           label="Range"
         >
           <KuiRange min={0} max={100} name="range" id="range" />
         </KuiFormRow>
         <KuiFormRow
-          id="search1"
+          id={makeId()}
           label="Search"
           icon="search"
         >
-          <KuiFieldSearch label="Search" id="search1" name="search1" placeholder="Search..." />
+          <KuiFieldSearch label="Search" name="search1" placeholder="Search..." />
         </KuiFormRow>
         <KuiFormRow
-          id="dropdown"
+          id={makeId()}
           label="Select dropdown"
           icon="arrowDown"
           className="kuiFormRow--select"
         >
-          <KuiSelect options={formOptions} label="Dropdown" name="dropdown" id="dropdown"/>
+          <KuiSelect options={formOptions} name="dropdown" />
         </KuiFormRow>
-        <KuiFormRow label="Textarea" id="textarea">
-          <KuiTextArea id="textarea" name="textarea"/>
+        <KuiFormRow
+          label="Textarea"
+          id={makeId()}
+        >
+          <KuiTextArea name="textarea"/>
         </KuiFormRow>
         <KuiFormRow>
-          <KuiSwitch id="switch" name="switch" label="Should we do this?"/>
+          <KuiSwitch name="switch" id={makeId()} label="Should we do this?"/>
         </KuiFormRow>
-        <KuiFormRow label="You should always use more than one checkbox">
+        <KuiFormRow
+          id={makeId()}
+          label="You should always use more than one checkbox"
+        >
           <KuiCheckbox options={formOptions} />
         </KuiFormRow>
       </KuiForm>

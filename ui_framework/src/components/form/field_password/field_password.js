@@ -21,7 +21,7 @@ export const KuiFieldPassword = ({ className, id, name, placeholder, value, ...r
 
 KuiFieldPassword.propTypes = {
   name: PropTypes.string.isRequired,
-  id: PropTypes.string.isRequired,
+  id: PropTypes.string,
   placeholder: PropTypes.string,
   value: PropTypes.string,
 };

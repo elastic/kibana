@@ -22,7 +22,7 @@ export const KuiSelect = ({ className, options, id, name, ...rest }) => {
 
 KuiSelect.propTypes = {
   name: PropTypes.string.isRequired,
-  id: PropTypes.string.isRequired,
+  id: PropTypes.string,
   options: PropTypes.array.isRequired,
 };
 
