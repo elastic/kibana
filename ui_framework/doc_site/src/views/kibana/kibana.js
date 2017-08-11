@@ -408,9 +408,7 @@ export default class extends Component {
           {/* Kibana section */}
 
           <KuiSideNavTitle>
-            <button>
-              Kibana
-            </button>
+            Kibana
           </KuiSideNavTitle>
 
           <KuiSideNavItem>
@@ -434,9 +432,7 @@ export default class extends Component {
           {/* Logstash section */}
 
           <KuiSideNavTitle>
-            <button>
-              Logstash
-            </button>
+            Logstash
           </KuiSideNavTitle>
 
           <KuiSideNavItem>
