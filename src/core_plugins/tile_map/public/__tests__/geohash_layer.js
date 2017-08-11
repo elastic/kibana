@@ -92,56 +92,25 @@ describe('kibana_map tests', function () {
 
         const ctx2 = canvas2.getContext('2d');
 
-        console.log(scaledCircleMarkersPng);
-
-        // TODO get pixel data from stored base64 image!
-        /*const simplePng = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUAAAAFCAIAAAACDbGyAAAAAXNSR0IArs4c6QAAAAlwSFlzAAALEwAACxMBAJqcGAAAAAd0SU1FB9oMCRUiMrIBQVkAAAAZdEVYdENvbW1lbnQAQ3JlYXRlZCB3aXRoIEdJTVBXgQ4XAAAADElEQVQI12NgoC4AAABQAAEiE+h1AAAAAElFTkSuQmCC";
         let image = new Image();
-        image.onLoad = () => {
-          ctx2.drawImage(this, 0, 0);
+        image.onload = () => {
+          console.log("onLoad called");
+          ctx2.drawImage(image, 0, 0);
+
+          const imageData2 = ctx2.getImageData(0, 0, 1228, 1228);
+
+          let diffImage = ctx.createImageData(1228, 1228);
+          const mismatchedPixels = pixelmatch(imageData.data, imageData2.data, diffImage.data, 1228, 1228, {threshold: 0.1});
+          console.log("mismatchedPixels", mismatchedPixels);
+          //expect(mismatchedPixels).to.equal(0);
+
+          ctx2.putImageData(diffImage, 0, 0);
+
+          done();
         }
-        // image.src = simplePng;
-        image.setAttribute("src", simplePng);
-        document.body.appendChild(image);
-        ctx2.drawImage(image, 0, 0);
-        //
-        //document.write(`<img src=${simplePng}/>`);
-
-        //image.src = 'https://upload.wikimedia.org/wikipedia/commons/4/47/PNG_transparency_demonstration_1.png';
-
-        // image.src = scaledCircleMarkersPng;*/
-
-        ctx2.putImageData(imageData, 0, 0);
-        // ctx2.putImageData(imageData, 500, 500);
-        const imageData2 = ctx2.getImageData(0, 0, 1228, 1228);
-
-        const diffImage = ctx.createImageData(1228, 1228);
-        const mismatchedPixels = pixelmatch(imageData.data, imageData2.data, diffImage.data, 1228, 1228, { threshold: 0.1 });
-        console.log('mismatchedPixels', mismatchedPixels);
-        //expect(mismatchedPixels).to.equal(0);
-
-        ctx2.putImageData(diffImage, 0, 0);
-
-        /*const image = canvas.toDataURL('png');
-        const base64Only = image.substring(22);
-        const unencoded = window.atob(base64Only);
-
-        let diffImage;
-        const mismatchedPixels = pixelmatch(scaledCircleMarkersPng, unencoded, diffImage, 1228, 1228, {threshold: 0.1});
-        console.log("mismatchedPixels", mismatchedPixels);
-        expect(mismatchedPixels).to.equal(0);
-
-        const base64Only = image.substring(22);
-        const unencoded = window.atob(base64Only);
-        console.log(unencoded);
-        const decoded = window.btoa(diffImage);
-        document.write(`<img src=data:image/png;base64,${decoded}/>`);*/
-        //window.location = image;
-        done();
+        image.src = scaledCircleMarkersPng;
 
        	}, 200);
-
-
       });
     });
 
