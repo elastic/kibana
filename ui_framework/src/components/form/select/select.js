@@ -25,7 +25,3 @@ KuiSelect.propTypes = {
   id: PropTypes.string,
   options: PropTypes.arrayOf(React.PropTypes.object).isRequired,
 };
-
-
-
-

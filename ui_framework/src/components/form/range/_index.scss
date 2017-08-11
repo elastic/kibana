@@ -1,17 +1,17 @@
-$kuiRangeTrackColor: $kuiColorLightShade !default;
-$kuiRangeThumbColor: $kuiColorEmptyShade !default;
+$kuiRangeTrackColor: $kuiColorLightShade;
+$kuiRangeThumbColor: $kuiColorEmptyShade;
 
-$kuiRangeThumbRadius: 50% !default;
-$kuiRangeThumbHeight: $kuiSize !default;
-$kuiRangeThumbWidth: $kuiSize !default;
-$kuiRangeBorderWidth: 2px !default;
-$kuiRangeBorderColor: $kuiTextColor !default;
+$kuiRangeThumbRadius: 50%;
+$kuiRangeThumbHeight: $kuiSize;
+$kuiRangeThumbWidth: $kuiSize;
+$kuiRangeBorderWidth: 2px;
+$kuiRangeBorderColor: $kuiTextColor;
 
-$kuiRangeTrackWidth: 100% !default;
-$kuiRangeTrackHeight: 2px !default;
-$kuiRangeTrackBorderWidth: 0 !default;
-$kuiRangeTrackBorderColor: $kuiColorLightShade !default;
-$kuiRangeTrackRadius: $kuiBorderRadius !default;
+$kuiRangeTrackWidth: 100%;
+$kuiRangeTrackHeight: 2px;
+$kuiRangeTrackBorderWidth: 0;
+$kuiRangeTrackBorderColor: $kuiColorLightShade;
+$kuiRangeTrackRadius: $kuiBorderRadius;
 
 @mixin track {
   cursor: pointer;

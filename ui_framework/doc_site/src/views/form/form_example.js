@@ -40,13 +40,11 @@ export default props => (
       }]}
     >
       <GuideText>
-        <p>
-          Each form input has a base component to cover generic use cases. These are raw HTML elements with only basic styling.
-          Additionally, you can wrap any of these elements with a <GuideCode>FormRow</GuideCode> which gives you optional
-          prebuilt labels, help text and validation.  Below is an example showing the <GuideCode>FieldText</GuideCode> component
-          in a bunch of configurations, but they all act roughly the same. Farther down in the docs you can see an example
-          showing every form element and their individual prop settings (which mirror their HTML counterparts).
-        </p>
+        Each form input has a base component to cover generic use cases. These are raw HTML elements with only basic styling.
+        Additionally, you can wrap any of these elements with a <GuideCode>FormRow</GuideCode> which gives you optional
+        prebuilt labels, help text and validation.  Below is an example showing the <GuideCode>FieldText</GuideCode> component
+        in a bunch of configurations, but they all act roughly the same. Farther down in the docs you can see an example
+        showing every form element and their individual prop settings (which mirror their HTML counterparts).
       </GuideText>
 
       <GuideDemo>

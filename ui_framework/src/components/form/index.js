@@ -2,7 +2,6 @@ export { KuiForm } from './form';
 export { KuiCheckbox } from './checkbox';
 export { KuiFieldNumber } from './field_number';
 export { KuiFieldPassword } from './field_password';
-export { KuiRadio } from './radio';
 export { KuiRange } from './range';
 export { KuiFormRow } from './form_row';
 export { KuiFieldSearch } from './field_search';
