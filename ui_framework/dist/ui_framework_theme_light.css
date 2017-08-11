@@ -2115,6 +2115,16 @@ table {
             transform: translateY(0) scale(1);
     opacity: 1; } }
 
+@media only screen and (max-width: 768px) {
+  /**
+   * 1. Mobile we make these 100%. Matching change happens on the item as well.
+   */
+  .kuiGlobalToastList {
+    left: 0;
+    padding-left: 16px;
+    width: 100%;
+    /* 1 */ } }
+
 .kuiToast {
   box-shadow: 0 16px 16px -8px rgba(0, 0, 0, 0.1);
   position: relative;
@@ -2203,6 +2213,14 @@ table {
 
 .kuiToastHeader--withBody {
   margin-bottom: 12px; }
+
+@media only screen and (max-width: 768px) {
+  /**
+   * 1. Mobile we make these 100%. Matching change happens on the list as well.
+   */
+  .kuiToast {
+    width: 100%;
+    /* 1 */ } }
 
 .kuiTitle {
   font-size: 24px;
