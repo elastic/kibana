@@ -1,4 +1,21 @@
 import { get } from 'lodash';
+
+function createSimpleQuery(search, searchFields) {
+  const simpleQueryString = {
+    query: search
+  };
+
+  if (!searchFields) {
+    simpleQueryString.all_fields = true;
+  } else if (Array.isArray(searchFields)) {
+    simpleQueryString.fields = searchFields;
+  } else {
+    simpleQueryString.fields = [searchFields];
+  }
+
+  return simpleQueryString;
+}
+
 export function createFindQuery(mappings, options = {}) {
   const { type, search, searchFields, sortField, sortOrder } = options;
 
@@ -10,7 +27,7 @@ export function createFindQuery(mappings, options = {}) {
     return { version: true, query: { match_all: {} } };
   }
 
-  const bool = { must: [], filter: [] };
+  const bool = { must: [], should: [], filter: [] };
 
   if (type) {
     bool.filter.push({
@@ -32,19 +49,14 @@ export function createFindQuery(mappings, options = {}) {
   }
 
   if (search) {
-    const simpleQueryString = {
-      query: search
-    };
+    const v5SimpleQueryString = createSimpleQuery(search, searchFields);
+    bool.should.push({ simple_query_string: v5SimpleQueryString });
 
-    if (!searchFields) {
-      simpleQueryString.all_fields = true;
-    } else if (Array.isArray(searchFields)) {
-      simpleQueryString.fields = searchFields;
-    } else {
-      simpleQueryString.fields = [searchFields];
+    if (searchFields) {
+      const v6SimpleQueryString = createSimpleQuery(search, searchFields.map(field => `${type}.${field}`));
+      bool.should.push({ simple_query_string: v6SimpleQueryString });
     }
-
-    bool.must.push({ simple_query_string: simpleQueryString });
+    bool.minimum_should_match = 1;
   } else {
     bool.must.push({
       match_all: {}
