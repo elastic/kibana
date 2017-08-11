@@ -4,7 +4,7 @@ import {
   KuiColorPicker,
   KuiFieldGroup,
   KuiFieldGroupSection,
-} from '../../../../components/index';
+} from '../../../../components';
 
 export class ColorPickerNoColorLabel extends React.Component {
   constructor(props) {

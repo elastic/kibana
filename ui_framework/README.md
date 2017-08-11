@@ -21,48 +21,91 @@ fully-tested the code is.
 
 See the documentation in [`scripts/jest.js`](../scripts/jest.js) for more options.
 
-### React components
-
-Here are the components you can import from the Framework:
-
-```javascript
-import {
-  KuiButton,
-  KuiButtonGroup,
-  KuiButtonIcon,
-} from '../path/to/ui_framework/components';
-```
-
 ## Creating components
 
 There are four steps to creating a new component:
 
-1. Create the SCSS for the component in `ui_framework/components`.
+1. Create the SCSS for the component in `ui_framework/src/components`.
 2. Create the React portion of the component.
-3. Document it with examples in `ui_framework/doc_site`.
-4. Write tests.
+3. Write tests.
+4. Document it with examples in `ui_framework/doc_site`.
 
-### Create component SCSS
+You can do this using Yeoman (the easy way), or you can do it manually (the hard way).
 
-1. Create a directory for your component in `ui_framework/components`.
+### Using Yeoman
+
+#### Create a new component
+
+From the command line, run `npm run uiFramework:createComponent`.
+
+First, you'll be prompted for what kind of component to create:
+
+| Choice | Description |
+|---|---|
+| Stateless function | A stateless functional React component |
+| Component class | A class-based React component |
+
+Next, you'll enter a series of prompts.
+
+#### "What's the name of this component?"
+
+Yeoman will ask you what to name the file. It expects you to provide the name
+in snake case. Yeoman will automatically add file extensions and a "kui" prefix so you should leave those out.
+
+#### "Where do you want to create this component's files?"
+
+This defaults to the last directory you specified for this prompt, or to the UI Framework's
+components directory if you haven't specified one. To change this location, type in the path to the
+directory where the files should live.
+
+If you want Yeoman to automatically generate a directory to organize the files,
+that directory will be created inside of the location you specify (see next prompt).
+
+#### "Does it need its own directory?""
+
+This defaults to `YES`. This will automatically generate a directory with the
+same name as the file, but without a "kui" prefix.
+
+#### Done!
+
+Yeoman will generate the files you need in your project's folder system.
+
+For your convenience, it will also output some snippets you can tweak to import
+and re-export the generated JS and SCSS files.
+
+### Manually
+
+#### Create component SCSS
+
+1. Create a directory for your component in `ui_framework/src/components`.
 2. In this directory, create `_{component name}.scss`.
 3. _Optional:_ Create any other components that should be [logically-grouped](#logically-grouped-components)
 in this directory.
 4. Create an `_index.scss` file in this directory that import all of the new component SCSS files
 you created.
-5. Import the `_index.scss` file into `ui_framework/components/index.scss`.
+5. Import the `_index.scss` file into `ui_framework/src/components/index.scss`.
 
 This makes your styles available to Kibana and the UI Framework documentation.
 
-### Create the React component
+#### Create the React component
 
 1. Create the React component(s) in the same directory as the related SCSS file(s).
 2. Export these components from an `index.js` file.
-3. Re-export these components from `ui_framework/components/index.js`.
+3. Re-export these components from `ui_framework/src/components/index.js`.
 
 This makes your React component available for import into Kibana.
 
-### Document the component with examples
+#### Test the component
+
+1. Start Jest in watch mode by running `node scripts/jest --watch`.
+2. Create test files with the name pattern of `{component name}.test.js`.
+3. Write your tests and see them fail or succeed.
+
+To see how well the components have been covered by tests, you can run
+`node scripts/jest --coverage` and check the generated report in
+`target/jest-coverage/index.html`.
+
+#### Document the component with examples
 
 1. Create a directory for your example in `ui_framework/doc_site/src/views`. Name it the name of the
 component.
@@ -80,15 +123,22 @@ complex they should be. In general, your examples should demonstrate:
 content.
 * The various states of the component, e.g. disabled, selected, empty of content, error state.
 
-### Test the component
+## Creating documentation
 
-1. Start Jest in watch mode by running `node scripts/jest --watch`.
-2. Create test files with the name pattern of `{component name}.test.js`.
-3. Write your tests and see them fail or succeed.
+You can use the same Yeoman generator referenced above to create documentation.
 
-To see how well the components have been covered by tests, you can run
-`node scripts/jest --coverage` and check the generated report in
-`target/jest-coverage/index.html`.
+From the command line, run `npm run uiFramework:documentComponent`.
+
+First, you'll be prompted for what kind of documentation to create:
+
+| Choice | Description |
+|---|---|
+| Page | A page for documenting a component(s) with multiple demos |
+| Page demo | An individual demo of a particular component use case |
+| Sandbox | An empty document where you can do pretty much anything |
+
+Just follow the prompts and your documentation files will be created.
+You can use the snippets that are printed to the terminal to integrate these files into the UI Framework documentation site.
 
 ## Principles
 
@@ -101,7 +151,8 @@ additional SCSS files for these components in the same component directory.
 
 ### Writing CSS
 
-Check out our [CSS style guide](https://github.com/elastic/kibana/blob/master/style_guides/css_style_guide.md).
+Check out our [CSS style guide](https://github.com/elastic/kibana/blob/master/style_guides/css_style_guide.md)
+and [SCSS style guide](https://github.com/elastic/kibana/blob/master/style_guides/scss_style_guide.md).
 
 ## Benefits
 

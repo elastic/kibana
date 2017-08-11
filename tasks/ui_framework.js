@@ -83,7 +83,7 @@ module.exports = function (grunt) {
   }
 
   function uiFrameworkCompile() {
-    const src = 'ui_framework/components/index.scss';
+    const src = 'ui_framework/src/index.scss';
     const dest = 'ui_framework/dist/ui_framework.css';
 
     return new Promise(resolve => {
@@ -130,7 +130,7 @@ module.exports = function (grunt) {
     return new Promise(() => {
       debouncedCompile();
 
-      chokidar.watch('ui_framework/components', { ignoreInitial: true }).on('all', (event, path) => {
+      chokidar.watch('ui_framework/src', { ignoreInitial: true }).on('all', (event, path) => {
         grunt.log.writeln(event, path);
         debouncedCompile();
       });
