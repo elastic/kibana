@@ -43,24 +43,28 @@ class TableSeriesConfig extends Component {
           <div className="vis_editor__series_config-row">
             <DataFormatPicker
               onChange={handleSelectChange('formatter')}
-              value={model.formatter}/>
+              value={model.formatter}
+            />
             <div className="vis_editor__label">Template (eg.<code>{'{{value}}/s'}</code>)</div>
             <input
               className="vis_editor__input-grows"
               onChange={handleTextChange('value_template')}
-              value={model.value_template}/>
+              value={model.value_template}
+            />
           </div>
           <div className="vis_editor__series_config-row">
             <div className="vis_editor__label">Filter</div>
             <input
               className="vis_editor__input-grows"
               onChange={handleTextChange('filter')}
-              value={model.filter}/>
+              value={model.filter}
+            />
             <div className="vis_editor__label">Show Trend Arrows</div>
             <YesNo
               value={model.trend_arrows}
               name="trend_arrows"
-              onChange={this.props.onChange} />
+              onChange={this.props.onChange}
+            />
           </div>
           <div className="vis_editor__series_config-row">
             <div className="vis_editor__label">Aggregate Column By</div>
@@ -69,14 +73,16 @@ class TableSeriesConfig extends Component {
                 fields={this.props.fields}
                 indexPattern={this.props.panel.index_pattern}
                 value={model.aggregate_by}
-                onChange={handleSelectChange('aggregate_by')} />
+                onChange={handleSelectChange('aggregate_by')}
+              />
             </div>
             <div className="vis_editor__label">Aggregate Function</div>
             <div className="vis_editor__row_item">
               <Select
                 value={model.aggregate_function}
                 options={functionOptions}
-                onChange={handleSelectChange('aggregate_function')}/>
+                onChange={handleSelectChange('aggregate_function')}
+              />
             </div>
           </div>
           <div className="vis_editor__series_config-row summarize__colorRules">
@@ -86,7 +92,8 @@ class TableSeriesConfig extends Component {
               hideSecondary={true}
               model={model}
               onChange={this.props.onChange}
-              name="color_rules"/>
+              name="color_rules"
+            />
           </div>
         </div>
       </div>

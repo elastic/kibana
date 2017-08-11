@@ -40,8 +40,10 @@ class TablePanelConfig extends Component {
           <div className="vis_editor__table-pivot-fields">
             <div className="vis_editor__container">
               <div className="vis_ediotr__vis_config-row">
-                <p>For the table visualization you need to define a field to
-                  group by using a terms aggregation.</p>
+                <p>
+                  For the table visualization you need to define a field to
+                  group by using a terms aggregation.
+                </p>
               </div>
               <div className="vis_editor__vis_config-row">
                 <div className="vis_editor__label">Group By Field</div>
@@ -50,20 +52,23 @@ class TablePanelConfig extends Component {
                     fields={this.props.fields}
                     value={model.pivot_id}
                     indexPattern={model.index_pattern}
-                    onChange={handleSelectChange('pivot_id')} />
+                    onChange={handleSelectChange('pivot_id')}
+                  />
                 </div>
                 <div className="vis_editor__label">Column Label</div>
                 <input
                   className="vis_editor__input-grows"
                   type="text"
                   onChange={handleTextChange('pivot_label')}
-                  value={model.pivot_label}/>
+                  value={model.pivot_label}
+                />
                 <div className="vis_editor__label">Rows</div>
                 <input
                   className="vis_editor__input-number"
                   type="number"
                   onChange={handleTextChange('pivot_rows')}
-                  value={model.pivot_rows}/>
+                  value={model.pivot_rows}
+                />
               </div>
             </div>
           </div>
@@ -71,7 +76,8 @@ class TablePanelConfig extends Component {
             fields={this.props.fields}
             model={this.props.model}
             name={this.props.name}
-            onChange={this.props.onChange} />
+            onChange={this.props.onChange}
+          />
         </div>
       );
     } else {
@@ -79,28 +85,33 @@ class TablePanelConfig extends Component {
         <div className="vis_editor__container">
           <div className="vis_editor__vis_config-row">
             <div className="vis_editor__label">Item Url (This supports mustache templating.
-              <code>{'{{key}}'}</code> is set to the term)</div>
+              <code>{'{{key}}'}</code> is set to the term)
+            </div>
             <input
               className="vis_editor__input-grows"
               onChange={handleTextChange('drilldown_url')}
-              value={model.drilldown_url}/>
+              value={model.drilldown_url}
+            />
           </div>
           <IndexPattern
             fields={this.props.fields}
             model={this.props.model}
-            onChange={this.props.onChange}/>
+            onChange={this.props.onChange}
+          />
           <div className="vis_editor__vis_config-row">
             <div className="vis_editor__label">Panel Filter</div>
             <input
               className="vis_editor__input-grows"
               type="text"
               onChange={handleTextChange('filter')}
-              value={model.filter}/>
+              value={model.filter}
+            />
             <div className="vis_editor__label">Ignore Global Filter</div>
             <YesNo
               value={model.ignore_global_filter}
               name="ignore_global_filter"
-              onChange={this.props.onChange}/>
+              onChange={this.props.onChange}
+            />
           </div>
         </div>
       );
@@ -108,10 +119,18 @@ class TablePanelConfig extends Component {
     return (
       <div>
         <div className="kbnTabs">
-          <div className={`kbnTabs__tab${selectedTab === 'data' && '-active' || ''}`}
-            onClick={() => this.switchTab('data')}>Columns</div>
-          <div className={`kbnTabs__tab${selectedTab === 'options' && '-active' || ''}`}
-            onClick={() => this.switchTab('options')}>Panel Options</div>
+          <div
+            className={`kbnTabs__tab${selectedTab === 'data' && '-active' || ''}`}
+            onClick={() => this.switchTab('data')}
+          >
+            Columns
+          </div>
+          <div
+            className={`kbnTabs__tab${selectedTab === 'options' && '-active' || ''}`}
+            onClick={() => this.switchTab('options')}
+          >
+            Panel Options
+          </div>
         </div>
         {view}
       </div>

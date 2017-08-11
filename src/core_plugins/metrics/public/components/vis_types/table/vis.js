@@ -45,7 +45,7 @@ class TableVis extends Component {
         const trendClass = item.slope > 0 ? 'fa-long-arrow-up' : 'fa-long-arrow-down';
         trend = (
           <span className="tsvb-table__trend">
-            <i className={`fa ${trendClass}`}></i>
+            <i className={`fa ${trendClass}`}/>
           </span>
         );
       }
@@ -94,7 +94,7 @@ class TableVis extends Component {
           sortIcon = 'sort';
         }
         sortComponent = (
-          <i className={`fa fa-${sortIcon}`}></i>
+          <i className={`fa fa-${sortIcon}`} />
         );
       }
       let headerContent = (
@@ -110,7 +110,10 @@ class TableVis extends Component {
         <th
           className="tsvb-table__columnName"
           onClick={handleClick}
-          key={item.id}>{headerContent}</th>
+          key={item.id}
+        >
+          {headerContent}
+        </th>
       );
     });
     const label = model.pivot_label || model.pivot_field || model.pivot_id;
@@ -121,7 +124,7 @@ class TableVis extends Component {
       sortIcon = 'sort';
     }
     const sortComponent = (
-      <i className={`fa fa-${sortIcon}`}></i>
+      <i className={`fa fa-${sortIcon}`} />
     );
     const handleSortClick = () => {
       let order;
@@ -161,7 +164,10 @@ class TableVis extends Component {
         <tr>
           <td
             className="tsvb-table__noResults"
-            colSpan={model.series.length + 1}>{message}</td>
+            colSpan={model.series.length + 1}
+          >
+            {message}
+          </td>
         </tr>
       );
     }

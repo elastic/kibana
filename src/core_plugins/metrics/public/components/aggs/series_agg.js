@@ -30,10 +30,12 @@ function SeriesAgg(props) {
         model={props.model}
         onAdd={props.onAdd}
         onDelete={props.onDelete}
-        siblings={props.siblings}>
+        siblings={props.siblings}
+      >
         <div className="vis_editor__item">
-          <div className="vis_editor__label">Series Agg is not compatible with the
-          table visualization.</div>
+          <div className="vis_editor__label">
+            Series Agg is not compatible with the table visualization.
+          </div>
         </div>
       </AggRow>
     );
