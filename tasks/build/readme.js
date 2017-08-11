@@ -1,4 +1,4 @@
-let marked = require('marked');
+let marked = require('../../src/forked/marked');
 let Promise = require('bluebird');
 let { join } = require('path');
 let _ = require('lodash');

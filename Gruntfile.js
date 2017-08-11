@@ -44,6 +44,7 @@ module.exports = function (grunt) {
       '<%= root %>/test/**/*.js',
       '<%= src %>/**/*.js',
       '!<%= src %>/fixtures/**/*.js',
+      '!<%= src %>/forked/**/*.js',
       '!<%= root %>/test/fixtures/scenarios/**/*.js'
     ]
   };
