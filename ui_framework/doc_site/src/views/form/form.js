@@ -25,7 +25,13 @@ export default class extends Component {
 
   render() {
 
-    const formOptions = ['Option one', 'Option two', 'Option three'];
+    const checkboxOptions = [
+      { id: makeId(), label: 'Option one' },
+      { id: makeId(), label: 'Option two' },
+      { id: makeId(), label: 'Option three' },
+    ];
+
+    const selectOptions = ['Option one', 'Option two', 'Option three'];
 
     const formSample = (
       <KuiForm>
@@ -76,7 +82,7 @@ export default class extends Component {
           icon="arrowDown"
           className="kuiFormRow--select"
         >
-          <KuiSelect options={formOptions} name="dropdown" />
+          <KuiSelect options={selectOptions} name="dropdown" />
         </KuiFormRow>
         <KuiFormRow
           label="Textarea"
@@ -91,7 +97,7 @@ export default class extends Component {
           id={makeId()}
           label="You should always use more than one checkbox"
         >
-          <KuiCheckbox options={formOptions} />
+          <KuiCheckbox options={checkboxOptions} />
         </KuiFormRow>
       </KuiForm>
     );

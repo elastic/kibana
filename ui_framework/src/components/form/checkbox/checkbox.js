@@ -8,14 +8,14 @@ export const KuiCheckbox = ({ options, className, ...rest }) => {
 
   return (
     <div>
-      {options.map(function (option, index) {
+      {options.map((option, index) => {
         return (
           <div className={classes} key={index} {...rest}>
-            <input className="kuiCheckbox__input" type="checkbox" id={index} />
+            <input className="kuiCheckbox__input" type="checkbox" id={option.id} />
             <div className="kuiCheckbox__square">
               <div className="kuiCheckbox__check" />
             </div>
-            <label className="kuiCheckbox__label" htmlFor={index}>{option}</label>
+            <label className="kuiCheckbox__label" htmlFor={option.id}>{option.label}</label>
           </div>
         );
       })}
@@ -24,5 +24,5 @@ export const KuiCheckbox = ({ options, className, ...rest }) => {
 };
 
 KuiCheckbox.propTypes = {
-  options: PropTypes.array.isRequired,
+  options: PropTypes.arrayOf(React.PropTypes.object).isRequired,
 };

@@ -36,7 +36,11 @@ export default class extends Component {
       </KuiButton>
     );
 
-    const formOptions = ['Option one', 'Option two', 'Option three'];
+    const checkboxOptions = [
+      { id: makeId(), label: 'Option one' },
+      { id: makeId(), label: 'Option two' },
+      { id: makeId(), label: 'Option three' },
+    ];
 
     let errors = null;
     if (this.state.showErrors) {
@@ -69,7 +73,7 @@ export default class extends Component {
             label="Non text field works the same"
             invalid={this.state.showErrors}
           >
-            <KuiCheckbox options={formOptions} />
+            <KuiCheckbox options={checkboxOptions} />
           </KuiFormRow>
           {button}
         </KuiForm>
