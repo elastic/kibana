@@ -3,6 +3,71 @@
 This document provides some technical guidelines how to prevent several common
 accessibility issues.
 
+## Labeling elements
+
+### `aria-label` and `aria-labelledby`
+
+Every element on a page will have a name, that is read out to an assistive technology
+like a screen reader. This will for most elements be the content of the element.
+For form elements it will be the content of the assosciated `<label>` (see below).
+
+You can overwrite that name, that is read out, by specifying a new name via the
+`aria-label` attribute. This must e.g. be done, if the element itself has no
+visual text representation (e.g. an icon button):
+
+```html
+<button aria-label="Add filter"><i class="fa fa-plus"></i></button>
+```
+
+If the actual name for that element is already present in another element,
+you can use `aria-labelledby` to reference the id of that element:
+
+```html
+<div id="datepicker">Date Picker</div>
+<button aria-labelledby="datepicker"><i class="fa fa-calendar"></i></button>
+```
+
+### Label every form element
+
+You should add a label for every form element:
+
+```html
+<label for="interval">Interval</label>
+<select id="interval"><!-- ... --></select>
+```
+
+If one label references multiple form elements, you can use the reverse logic
+and add `aria-labelledby` to all form elements:
+
+```html
+<label id="fromLabel">From</label>
+<input type="number" aria-labelledby="fromLabel">
+<input type="number" aria-labelledby="fromLabel">
+<input type="number" aria-labelledby="fromLabel">
+```
+
+You should always prefer the `<label for>` solution, since it also adds benefit
+for every user, by making the label clickable, to directly jump to the form
+element (or in case of checkboxes and radio buttons directly check them).
+
+### Don't use the `title` attribute
+
+**TL;DR** *Don't use the `title` attribute, use tooltips, `aria-label`, etc. instead.*
+
+The `title` has no clear role within the accessibility standards.
+[See the HTML5 spec](http://w3c.github.io/html/dom.html#the-title-attribute) for more information.
+
+To provide supplementary, descriptive information about a form control, button, link, or other element,
+that should also be visible to non vision impaired users, use a tooltip component instead.
+
+If you need a label only for screen readers use `aria-label`.
+
+**Additional reading:**
+
+* https://www.paciellogroup.com/blog/2010/11/using-the-html-title-attribute/
+* https://www.paciellogroup.com/blog/2012/01/html5-accessibility-chops-title-attribute-use-and-abuse/
+* https://www.deque.com/blog/text-links-practices-screen-readers/
+
 ## Interactive elements
 
 ### Use `<button>` and `<a href>`
@@ -163,23 +228,3 @@ easily put this role to.
   [wcag/113](https://github.com/w3c/wcag/issues/113),
   [html-aria/118](https://github.com/w3c/html-aria/issues/18),
   [aria/85](https://github.com/w3c/aria/issues/85)
-
-## Miscellaneous
-
-### Don't use the `title` attribute
-
-**TL;DR** *Don't use the `title` attribute, use tooltips, `aria-label`, etc. instead.*
-
-The `title` has no clear role within the accessibility standards.
-[See the HTML5 spec](http://w3c.github.io/html/dom.html#the-title-attribute) for more information.
-
-To provide supplementary, descriptive information about a form control, button, link, or other element,
-that should also be visible to non vision impaired users, use a tooltip component instead.
-
-If you need a label only for screen readers use `aria-label`.
-
-**Additional reading:**
-
-* https://www.paciellogroup.com/blog/2010/11/using-the-html-title-attribute/
-* https://www.paciellogroup.com/blog/2012/01/html5-accessibility-chops-title-attribute-use-and-abuse/
-* https://www.deque.com/blog/text-links-practices-screen-readers/
