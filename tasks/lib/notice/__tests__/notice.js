@@ -9,11 +9,11 @@ const NODE_MODULES = resolve(__dirname, '../../../../node_modules');
 const NODE_DIR = resolve(process.execPath, '../..');
 const PACKAGES = [
   {
-    name: '@spalger/filesaver',
+    name: '@elastic/filesaver',
     version: '1.1.2',
     licenses: ['MIT'],
-    directory: resolve(NODE_MODULES, '@spalger/filesaver'),
-    relative: 'node_modules/@spalger/filesaver',
+    directory: resolve(NODE_MODULES, '@elastic/filesaver'),
+    relative: 'node_modules/@elastic/filesaver',
   },
   {
     name: 'aws-sdk',
@@ -41,7 +41,7 @@ describe('tasks/lib/notice', () => {
     });
 
     it('includes *LICENSE* files from packages', () => {
-      expect(notice).to.contain(readFileSync(resolve(NODE_MODULES, '@spalger/filesaver/LICENSE.md'), 'utf8'));
+      expect(notice).to.contain(readFileSync(resolve(NODE_MODULES, '@elastic/filesaver/LICENSE.md'), 'utf8'));
     });
 
     it('includes the LICENSE file from node', () => {

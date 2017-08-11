@@ -154,7 +154,8 @@ function AggSelect(props) {
         options={options}
         value={props.value}
         optionComponent={AggSelectOption}
-        onChange={handleChange}/>
+        onChange={handleChange}
+      />
     </div>
   );
 }

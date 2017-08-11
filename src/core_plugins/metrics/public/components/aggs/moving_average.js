@@ -39,7 +39,8 @@ class MovingAverageAgg extends Component {
         model={this.props.model}
         onAdd={this.props.onAdd}
         onDelete={this.props.onDelete}
-        siblings={this.props.siblings}>
+        siblings={this.props.siblings}
+      >
         <div className="vis_editor__row_item">
           <div className="vis_editor__agg_row-item">
             <div className="vis_editor__row_item">
@@ -48,7 +49,8 @@ class MovingAverageAgg extends Component {
                 panelType={this.props.panel.type}
                 siblings={this.props.siblings}
                 value={model.type}
-                onChange={handleSelectChange('type')}/>
+                onChange={handleSelectChange('type')}
+              />
             </div>
             <div className="vis_editor__row_item">
               <div className="vis_editor__label">Metric</div>
@@ -56,7 +58,8 @@ class MovingAverageAgg extends Component {
                 onChange={handleSelectChange('field')}
                 metrics={siblings}
                 metric={model}
-                value={model.field}/>
+                value={model.field}
+              />
             </div>
           </div>
           <div className="vis_editor__agg_row-item">
@@ -67,7 +70,8 @@ class MovingAverageAgg extends Component {
                 placeholder="Select..."
                 onChange={ handleSelectChange('model') }
                 value={this.props.model.model}
-                options={ modelOptions }/>
+                options={ modelOptions }
+              />
             </div>
             <div className="vis_editor__row_item">
               <div className="vis_editor__label">Window Size</div>
@@ -75,7 +79,8 @@ class MovingAverageAgg extends Component {
                 className="vis_editor__input-grows-100"
                 type="text"
                 onChange={handleNumberChange('window')}
-                value={model.window}/>
+                value={model.window}
+              />
             </div>
             <div className="vis_editor__row_item">
               <div className="vis_editor__label">Minimize</div>
@@ -83,7 +88,8 @@ class MovingAverageAgg extends Component {
                 placeholder="Select..."
                 onChange={ handleSelectChange('minimize') }
                 value={model.minimize}
-                options={ minimizeOptions }/>
+                options={ minimizeOptions }
+              />
             </div>
           </div>
           <div className="vis_editor__agg_row-item">
@@ -93,7 +99,8 @@ class MovingAverageAgg extends Component {
                 className="vis_editor__input-grows-100"
                 type="text"
                 onChange={handleTextChange('settings')}
-                value={model.settings}/>
+                value={model.settings}
+              />
             </div>
           </div>
         </div>

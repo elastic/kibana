@@ -1,9 +1,8 @@
-import url from 'url';
 import { resolve } from 'path';
 import { defaultsDeep, set } from 'lodash';
 import { header as basicAuthHeader } from './base_auth';
 import { kibanaUser, kibanaServer } from '../../test/shield';
-import { esTestServerUrlParts } from '../../test/es_test_server_url_parts';
+import { esTestConfig } from '../test_utils/es';
 import KbnServer from '../../src/server/kbn_server';
 
 const DEFAULTS_SETTINGS = {
@@ -17,6 +16,9 @@ const DEFAULTS_SETTINGS = {
     quiet: true
   },
   plugins: {},
+  uiSettings: {
+    enabled: false
+  },
   optimize: {
     enabled: false
   },
@@ -29,12 +31,14 @@ const DEFAULT_SETTINGS_WITH_CORE_PLUGINS = {
     ],
   },
   elasticsearch: {
-    url: url.format(esTestServerUrlParts),
+    url: esTestConfig.getUrl(),
     username: kibanaServer.username,
     password: kibanaServer.password
-  }
+  },
+  uiSettings: {
+    enabled: true
+  },
 };
-
 
 /**
  * Creates an instance of KbnServer with default configuration

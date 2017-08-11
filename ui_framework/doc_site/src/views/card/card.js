@@ -26,7 +26,7 @@ export default () => {
         <KuiLinkButton
           buttonType="basic"
           href="#"
-         >
+        >
           Banana!
         </KuiLinkButton>
       </KuiCardFooter>

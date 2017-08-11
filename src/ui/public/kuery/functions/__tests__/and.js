@@ -4,6 +4,7 @@ import { nodeTypes } from '../../node_types';
 import * as ast from '../../ast';
 import StubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
 import ngMock from 'ng_mock';
+import { expectDeepEqual } from '../../../../../test_utils/expect_deep_equal';
 
 let indexPattern;
 
@@ -54,11 +55,11 @@ describe('kuery functions', function () {
 
       it('should wrap a literal argument with an "is" function targeting all fields', function () {
         const literalFoo = nodeTypes.literal.buildNode('foo');
+        const expectedChild = ast.toElasticsearchQuery(nodeTypes.function.buildNode('is', '*', 'foo'), indexPattern);
         const node = nodeTypes.function.buildNode('and', [literalFoo]);
         const result = and.toElasticsearchQuery(node, indexPattern);
         const resultChild = result.bool.filter[0];
-        expect(resultChild).to.have.property('simple_query_string');
-        expect(resultChild.simple_query_string.all_fields).to.be(true);
+        expectDeepEqual(resultChild, expectedChild);
       });
 
     });

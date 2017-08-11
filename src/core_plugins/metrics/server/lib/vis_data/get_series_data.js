@@ -19,7 +19,7 @@ export function getSeriesData(req, panel) {
       };
     })
     .then(resp => {
-      if (!panel.annotations) return resp;
+      if (!panel.annotations || panel.annotations.length === 0) return resp;
       return getAnnotations(req, panel).then(annotations => {
         resp[panel.id].annotations = annotations;
         return resp;

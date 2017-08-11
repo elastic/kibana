@@ -42,7 +42,7 @@ function Visualization(props) {
       visData: visData.type === model.type ? visData : {}
     });
   }
-  return (<div className={props.className}></div>);
+  return (<div className={props.className} />);
 }
 
 Visualization.defaultProps = {

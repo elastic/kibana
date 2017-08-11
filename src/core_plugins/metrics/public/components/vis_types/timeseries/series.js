@@ -49,7 +49,8 @@ function TimeseriesSeries(props) {
             dynamic={true}
             direction="vertical"
             onSort={handleSort}
-            sortHandle="vis_editor__agg_sort">
+            sortHandle="vis_editor__agg_sort"
+          >
             { aggs }
           </Sortable>
           <div className="vis_editor__series_row">
@@ -58,7 +59,8 @@ function TimeseriesSeries(props) {
                 onChange={props.onChange}
                 fields={fields}
                 panel={panel}
-                model={model}/>
+                model={model}
+              />
             </div>
           </div>
         </div>
@@ -68,16 +70,23 @@ function TimeseriesSeries(props) {
         <SeriesConfig
           fields={props.fields}
           model={props.model}
-          onChange={props.onChange} />
+          onChange={props.onChange}
+        />
       );
     }
     body = (
       <div className="vis_editor__series-row">
         <div className="kbnTabs sm">
-          <div className={metricsClassName}
-            onClick={() => props.switchTab('metrics')}>Metrics</div>
-          <div className={optionsClassname}
-            onClick={() => props.switchTab('options')}>Options</div>
+          <div
+            className={metricsClassName}
+            onClick={() => props.switchTab('metrics')}
+          >Metrics
+          </div>
+          <div
+            className={optionsClassname}
+            onClick={() => props.switchTab('options')}
+          >Options
+          </div>
         </div>
         {seriesBody}
       </div>
@@ -89,7 +98,8 @@ function TimeseriesSeries(props) {
       disableTrash={true}
       onChange={props.onChange}
       name="color"
-      value={model.color}/>
+      value={model.color}
+    />
   );
 
   let dragHandle;
@@ -97,7 +107,7 @@ function TimeseriesSeries(props) {
     dragHandle = (
       <Tooltip text="Sort">
         <div className="vis_editor__sort thor__button-outlined-default sm">
-          <i className="fa fa-sort"></i>
+          <i className="fa fa-sort" />
         </div>
       </Tooltip>
     );
@@ -108,17 +118,19 @@ function TimeseriesSeries(props) {
       className={`${props.className} vis_editor__series`}
       style={props.style}
       onMouseDown={props.onMouseDown}
-      onTouchStart={props.onTouchStart}>
+      onTouchStart={props.onTouchStart}
+    >
       <div className="vis_editor__container">
         <div className="vis_editor__series-details">
-          <div onClick={ props.toggleVisible }><i className={ caretClassName }/></div>
+          <div onClick={props.toggleVisible}><i className={caretClassName}/></div>
           { colorPicker }
           <div className="vis_editor__row vis_editor__row_item">
             <input
               className="vis_editor__input-grows"
               onChange={handleChange('label')}
-              placeholder='Label'
-              value={model.label}/>
+              placeholder="Label"
+              value={model.label}
+            />
           </div>
           { dragHandle }
           <AddDeleteButtons
@@ -129,7 +141,8 @@ function TimeseriesSeries(props) {
             onClone={props.onClone}
             onAdd={onAdd}
             disableDelete={disableDelete}
-            disableAdd={disableAdd}/>
+            disableAdd={disableAdd}
+          />
         </div>
       </div>
       { body }

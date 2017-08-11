@@ -40,26 +40,29 @@ function SeriesAgg(props) {
   }
 
   return (
-      <AggRow
-        disableDelete={props.disableDelete}
-        model={props.model}
-        onAdd={props.onAdd}
-        onDelete={props.onDelete}
-        siblings={props.siblings}>
+    <AggRow
+      disableDelete={props.disableDelete}
+      model={props.model}
+      onAdd={props.onAdd}
+      onDelete={props.onDelete}
+      siblings={props.siblings}
+    >
       <div className="vis_editor__item">
         <div className="vis_editor__label">Aggregation</div>
         <AggSelect
           panelType={panel.type}
           siblings={props.siblings}
           value={model.type}
-          onChange={handleSelectChange('type')}/>
+          onChange={handleSelectChange('type')}
+        />
       </div>
       <div className="vis_editor__item">
         <div className="vis_editor__label">Function</div>
         <Select
           value={model.function}
           options={functionOptions}
-          onChange={handleSelectChange('function')}/>
+          onChange={handleSelectChange('function')}
+        />
       </div>
     </AggRow>
   );

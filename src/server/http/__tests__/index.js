@@ -1,17 +1,24 @@
 import expect from 'expect.js';
 import * as kbnTestServer from '../../../test_utils/kbn_server';
+import { createEsTestCluster } from '../../../test_utils/es';
 
-describe('routes', function () {
-  this.slow(10000);
-  this.timeout(60000);
-
+describe('routes', () => {
   let kbnServer;
-  beforeEach(function () {
-    kbnServer = kbnTestServer.createServerWithCorePlugins();
-    return kbnServer.ready();
+  const es = createEsTestCluster({
+    name: 'server/http',
   });
-  afterEach(function () {
-    return kbnServer.close();
+
+  before(async function () {
+    this.timeout(es.getStartTimeout());
+    await es.start();
+    kbnServer = kbnTestServer.createServerWithCorePlugins();
+    await kbnServer.ready();
+    await kbnServer.server.plugins.elasticsearch.waitUntilReady();
+  });
+
+  after(async () => {
+    await kbnServer.close();
+    await es.stop();
   });
 
   describe('cookie validation', function () {
@@ -63,6 +70,8 @@ describe('routes', function () {
 
     it('redirects shortened urls', (done) => {
       kbnTestServer.makeRequest(kbnServer, shortenOptions, (res) => {
+        expect(res).to.have.property('statusCode', 200);
+
         const gotoOptions = {
           method: 'GET',
           url: '/goto/' + res.payload

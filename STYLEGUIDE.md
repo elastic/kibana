@@ -7,6 +7,7 @@ recommended for the development of all Kibana plugins.
 - [Angular](style_guides/angular_style_guide.md)
 - [React](style_guides/react_style_guide.md)
 - [CSS](style_guides/css_style_guide.md)
+- [SCSS](style_guides/scss_style_guide.md)
 - [HTML](style_guides/html_style_guide.md)
 - [API](style_guides/api_style_guide.md)
 - [Architecture](style_guides/architecture_style_guide.md)

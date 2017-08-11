@@ -25,7 +25,7 @@ require('ui/index_patterns/route_setup/load_default')({
 
 uiModules
 .get('apps/management')
-.directive('kbnManagementApp', function (Private, $location, timefilter, buildNum, buildSha) {
+.directive('kbnManagementApp', function (Private, $location, timefilter) {
   return {
     restrict: 'E',
     template: appTemplate,
@@ -46,8 +46,6 @@ uiModules
           item.active = `#${$location.path()}`.indexOf(item.url) > -1;
         });
       }
-
-      management.getSection('kibana').info = `Build ${buildNum}, Commit SHA ${buildSha.substr(0, 8)}`;
     }
   };
 });

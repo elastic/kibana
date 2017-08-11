@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { KuiColorPicker } from '../../../../components/index';
+import { KuiColorPicker } from '../../../../components';
 
 export class ColorPicker extends React.Component {
   constructor(props) {

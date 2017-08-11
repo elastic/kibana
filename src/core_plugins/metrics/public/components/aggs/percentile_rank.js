@@ -26,14 +26,16 @@ class PercentileRankAgg extends Component {
         model={this.props.model}
         onAdd={this.props.onAdd}
         onDelete={this.props.onDelete}
-        siblings={this.props.siblings}>
+        siblings={this.props.siblings}
+      >
         <div className="vis_editor__row_item">
           <div className="vis_editor__label">Aggregation</div>
           <AggSelect
             panelType={this.props.panel.type}
             siblings={this.props.siblings}
             value={model.type}
-            onChange={handleSelectChange('type')}/>
+            onChange={handleSelectChange('type')}
+          />
         </div>
         <div className="vis_editor__row_item">
           <div className="vis_editor__label">Field</div>
@@ -43,14 +45,16 @@ class PercentileRankAgg extends Component {
             restrict="numeric"
             indexPattern={indexPattern}
             value={model.field}
-            onChange={handleSelectChange('field')}/>
+            onChange={handleSelectChange('field')}
+          />
         </div>
         <div className="vis_editor__percentile_rank_value">
           <div className="vis_editor__label">Value</div>
           <input
             className="vis_editor__input-grows"
             value={model.value}
-            onChange={handleTextChange('value')}/>
+            onChange={handleTextChange('value')}
+          />
         </div>
       </AggRow>
     );
