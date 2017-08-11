@@ -9,7 +9,6 @@ import {
   KuiCheckbox,
   KuiFieldNumber,
   KuiFieldPassword,
-  KuiRadio,
   KuiRange,
   KuiFormRow,
   KuiFieldSearch,
@@ -49,10 +48,8 @@ export default class extends Component {
 
     const formOptions = ['Option one', 'Option two', 'Option three'];
 
-    const formErrors = ['Here\'s an example of a form level error', 'You might have more than one global form error.'];
-
     const formSample = (
-      <KuiForm invalid errors={formErrors}>
+      <KuiForm>
         <KuiFormRow
           id="first"
           label="Number"
@@ -64,8 +61,6 @@ export default class extends Component {
           id="first"
           label="First name"
           helpText="I am some friendly help text."
-          invalid
-          errors={['Your name is not that cool.', 'Errors could be an array of errors, like this.']}
         >
           <KuiFieldText id="first" name="first" />
         </KuiFormRow>
@@ -113,10 +108,6 @@ export default class extends Component {
         <KuiFormRow label="You should always use more than one checkbox">
           <KuiCheckbox options={formOptions} />
         </KuiFormRow>
-        <KuiFormRow label="Another error example" invalid>
-          <KuiCheckbox options={formOptions} />
-        </KuiFormRow>
-        <KuiRadio />
       </KuiForm>
     );
 
