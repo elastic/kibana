@@ -16,11 +16,16 @@ module.directive('matchingIndicesList', function ($filter, pagerFactory) {
     bindToController: true,
     scope: {
       indices: '=',
+      pattern: '=',
       isLoading: '=',
     },
     link: function (scope) {
       scope.$watch('matchingIndicesList.indices', () => {
         scope.matchingIndicesList.calculateItemsOnPage();
+      });
+      scope.$watch('matchingIndicesList.pattern', () => {
+        const end = scope.matchingIndicesList.pattern.length - 1;
+        scope.matchingIndicesList.formattedPattern = scope.matchingIndicesList.pattern.substring(0, end);
       });
     },
     controller: function () {
