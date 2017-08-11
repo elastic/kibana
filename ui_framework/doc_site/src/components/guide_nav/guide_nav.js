@@ -78,8 +78,23 @@ export class GuideNav extends Component {
       </Link>
     );
 
+    let hideChromeButton;
+
+    if (this.props.isSandbox) {
+      hideChromeButton = (
+        <button
+          className="guideLink"
+          style={{ marginRight: '10px' }}
+          onClick={this.props.onHideChrome}
+        >
+          Hide chrome
+        </button>
+      );
+    }
+
     return (
       <div className="guideNavPaginationButtons">
+        {hideChromeButton}
         {previousButton}
         {nextButton}
       </div>
@@ -89,6 +104,7 @@ export class GuideNav extends Component {
   render() {
     const classes = classNames('guideNav', {
       'is-guide-nav-open': this.props.isNavOpen,
+      'is-chrome-hidden': !this.props.isChromeVisible,
     });
 
     const buttonClasses = classNames('guideNav__menu fa fa-bars', {
@@ -185,14 +201,25 @@ export class GuideNav extends Component {
             { sandboxNavItems.length ? sandboxNavItems : this.renderNoItems('sandboxes') }
           </div>
         </div>
+
+        <button
+          className="guideLink guideNav__showButton"
+          onClick={this.props.onShowChrome}
+        >
+          Show chrome
+        </button>
       </div>
     );
   }
 }
 
 GuideNav.propTypes = {
+  isChromeVisible: PropTypes.bool,
   isNavOpen: PropTypes.bool,
+  isSandbox: PropTypes.bool,
   onToggleNav: PropTypes.func,
+  onHideChrome: PropTypes.func,
+  onShowChrome: PropTypes.func,
   onClickNavItem: PropTypes.func,
   version: PropTypes.string,
   routes: PropTypes.array,
