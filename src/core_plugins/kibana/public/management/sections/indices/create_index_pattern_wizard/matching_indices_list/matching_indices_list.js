@@ -1,5 +1,6 @@
 import 'ui/pager_control';
 import 'ui/pager';
+import { last } from 'lodash';
 import { uiModules } from 'ui/modules';
 import './matching_indices_list.less';
 import template from './matching_indices_list.html';
@@ -24,8 +25,12 @@ module.directive('matchingIndicesList', function ($filter, pagerFactory) {
         scope.matchingIndicesList.calculateItemsOnPage();
       });
       scope.$watch('matchingIndicesList.pattern', () => {
-        const end = scope.matchingIndicesList.pattern.length - 1;
-        scope.matchingIndicesList.formattedPattern = scope.matchingIndicesList.pattern.substring(0, end);
+        if (last(scope.matchingIndicesList.pattern) === '*') {
+          const end = scope.matchingIndicesList.pattern.length - 1;
+          scope.matchingIndicesList.formattedPattern = scope.matchingIndicesList.pattern.substring(0, end);
+        } else {
+          scope.matchingIndicesList.formattedPattern = scope.matchingIndicesList.pattern;
+        }
       });
     },
     controller: function () {
