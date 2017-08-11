@@ -10,7 +10,7 @@ module.exports = {
       '!**/node_modules/**',
       '!**/bower_components/**',
       '!**/__tests__/**',
-      '!**/forked/**'
+      '!**/src/forked/**'
     ],
     dest: '.',
     expand: true
