@@ -92,7 +92,7 @@ export default props => (
       }]}
     >
       <GuideText>
-        Use the hollow Button when presenting a neutral action, e.g. a "Cancel" button.
+        Use the hollow Button when presenting a neutral action, e.g. a &ldquo;Cancel&rdquo; button.
       </GuideText>
 
       <GuideDemo>
@@ -111,7 +111,7 @@ export default props => (
       }]}
     >
       <GuideText>
-        Use the primary Button to represent the most common action. Generally, there won't be a
+        Use the primary Button to represent the most common action. Generally, there won&rsquo;t be a
         need to present more than one of these at a time.
       </GuideText>
 
@@ -131,7 +131,7 @@ export default props => (
       }]}
     >
       <GuideText>
-        Secondary buttons are usually used for actions ("do this") that are optional actions on a page.
+        Secondary buttons are usually used for actions (&ldquo;do this&rdquo;) that are optional actions on a page.
       </GuideText>
 
       <GuideDemo>
@@ -263,7 +263,7 @@ export default props => (
       }]}
     >
       <GuideText>
-        You can create a Button using a button element, link, or input[type="submit"].
+        You can create a Button using a button element, link, or input[type=&ldquo;submit&rdquo;].
       </GuideText>
 
       <GuideDemo>

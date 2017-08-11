@@ -7,6 +7,6 @@ import {
 } from './empty_table_prompt_panel';
 
 test('renders KuiEmptyTablePromptPanel', () => {
-  const component = <KuiEmptyTablePromptPanel { ...requiredProps }>children</KuiEmptyTablePromptPanel>;
+  const component = <KuiEmptyTablePromptPanel {...requiredProps}>children</KuiEmptyTablePromptPanel>;
   expect(render(component)).toMatchSnapshot();
 });

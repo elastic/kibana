@@ -7,6 +7,6 @@ import {
 } from './menu_item';
 
 test('renders KuiMenuItem', () => {
-  const component = <KuiMenuItem { ...requiredProps }>children</KuiMenuItem>;
+  const component = <KuiMenuItem {...requiredProps}>children</KuiMenuItem>;
   expect(render(component)).toMatchSnapshot();
 });

@@ -21,7 +21,7 @@ describe('KuiScreenReaderOnly', () => {
     test('and combines other classNames (foo, bar) given as props on the child', () => {
       const $paragraph = render(
         <KuiScreenReaderOnly>
-          <p className='foo bar'>
+          <p className="foo bar">
             This paragraph is not visibile to sighted users but will be read by
             screenreaders.
           </p>

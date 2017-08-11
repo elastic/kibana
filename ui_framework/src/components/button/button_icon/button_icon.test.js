@@ -25,7 +25,7 @@ describe('KuiButtonIcon', () => {
       ICON_TYPES.forEach(type => {
         describe(type, () => {
           test(`renders the ${type} class`, () => {
-            const $buttonIcon = render(<KuiButtonIcon type={ type } />);
+            const $buttonIcon = render(<KuiButtonIcon type={type} />);
             expect($buttonIcon).toMatchSnapshot();
           });
         });

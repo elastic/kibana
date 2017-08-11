@@ -67,16 +67,16 @@ export class KuiPopover extends Component {
     const bodyClasses = classNames('kuiPopover__body', bodyClassName);
 
     const body = (
-      <div className={ bodyClasses }>
+      <div className={bodyClasses}>
         { children }
       </div>
     );
 
     return (
       <div
-        onClick={ this.onClickRootElement }
-        className={ classes }
-        { ...rest }
+        onClick={this.onClickRootElement}
+        className={classes}
+        {...rest}
       >
         { button }
         { body }

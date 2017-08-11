@@ -7,7 +7,7 @@ import {
 } from './tool_bar';
 
 test('renders KuiToolBar', () => {
-  const component = <KuiToolBar { ...requiredProps }>children</KuiToolBar>;
+  const component = <KuiToolBar {...requiredProps}>children</KuiToolBar>;
   expect(render(component)).toMatchSnapshot();
 });
 

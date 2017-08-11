@@ -89,7 +89,7 @@ export default props => (
       }]}
     >
       <GuideText>
-        You can create a MenuButton using a button element, link, or input[type="submit"].
+        You can create a MenuButton using a button element, link, or input[type=&ldquo;submit&rdquo;].
       </GuideText>
 
       <GuideDemo
