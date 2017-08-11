@@ -6,6 +6,7 @@ import {
   GuideDemo,
   GuidePage,
   GuideSection,
+  GuideText,
   GuideSectionTypes,
 } from '../../components';
 
@@ -42,6 +43,16 @@ export default props => (
       }]}
     >
       <GuideDemo>
+        <GuideText>
+          <p>
+            Toasts are small notes that appear in the bottom right of the screen. They should be used for
+            emphemeral, live actions (think "save complete" or "something just finished right now"). They
+            should not be used for historical actions ("your report built 30 minutes ago"). This means that
+            a user should never be greated with toasts when starting a session. Toasts should be brief and
+            avoid long paragraphs of text or titling.
+          </p>
+          <br/>
+        </GuideText>
         <Default />
       </GuideDemo>
     </GuideSection>

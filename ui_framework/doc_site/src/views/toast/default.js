@@ -1,7 +1,6 @@
 import React from 'react';
 
 import {
-  KuiLink,
   KuiText,
   KuiToast,
 } from '../../../../components';
@@ -9,30 +8,15 @@ import {
 export default () => (
   <div>
     <KuiToast
-      title="Check it out, here's a really long title that will wrap within a narrower browser"
-      iconType="user"
+      title="Example of a good toast"
       onClose={() => window.alert('Dismiss toast')}
     >
-      <KuiText size="small" verticalRhythm>
-        <p>
-          Here&rsquo;s some stuff that you need to know. We can make this text really long so that,
-          when viewed within a browser that&rsquo;s fairly narrow, it will wrap, too.
-        </p>
-      </KuiText>
-
       <KuiText size="small">
         <p>
-          And some other stuff on another line, just for kicks. And <KuiLink href="#">here&rsquo;s a link</KuiLink>.
+          A good toast message is short and to the point. It should very rarely include multiple
+          paragraphs.
         </p>
       </KuiText>
     </KuiToast>
-
-    <br />
-
-    <KuiToast
-      title="Check it out, here's a really long title that will wrap within a narrower browser"
-      iconType="user"
-      onClose={() => window.alert('Dismiss toast')}
-    />
   </div>
 );
