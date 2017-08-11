@@ -7,9 +7,8 @@ import { KuiCallOut } from '../../../components';
 export const KuiForm = ({ children, className, invalid, errors, ...rest }) => {
   const classes = classNames('kuiForm', className);
 
-
-
   let optionalErrors = null;
+
   if (errors) {
     optionalErrors = (
       <ul>
@@ -21,6 +20,7 @@ export const KuiForm = ({ children, className, invalid, errors, ...rest }) => {
   }
 
   let optionalErrorAlert = null;
+
   if (invalid) {
     optionalErrorAlert = (
       <KuiCallOut className="kuiForm__errors" title="Please address the errors in your form." type="danger">

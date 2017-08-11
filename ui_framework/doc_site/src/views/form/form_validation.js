@@ -42,13 +42,14 @@ export default class extends Component {
       { id: makeId(), label: 'Option three' },
     ];
 
-    let errors = null;
-    if (this.state.showErrors) {
-      errors = ['Here\'s an example of an error', 'You might have more than one error, so pass an array.'];
-    } else {
-      errors = null;
-    }
+    let errors;
 
+    if (this.state.showErrors) {
+      errors = [
+        'Here\'s an example of an error',
+        'You might have more than one error, so pass an array.',
+      ];
+    }
 
     return (
       <div>

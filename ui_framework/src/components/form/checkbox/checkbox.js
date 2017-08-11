@@ -27,3 +27,7 @@ export const KuiCheckbox = ({ options, className, ...rest }) => {
 KuiCheckbox.propTypes = {
   options: PropTypes.arrayOf(React.PropTypes.object).isRequired,
 };
+
+KuiCheckbox.defaultProps = {
+  options: [],
+};

@@ -3,9 +3,23 @@ import React, {
   PropTypes,
 } from 'react';
 import classNames from 'classnames';
-import { KuiIcon } from '../../../components';
 
-export const KuiFormRow = ({ children, icon, containsSelect, helpText, invalid, errors, label, id, className, ...rest }) => {
+import { KuiIcon } from '../../../components';
+import { KuiFormHelpText } from '../form_help_text';
+import { KuiFormErrorText } from '../form_error_text';
+
+export const KuiFormRow = ({
+  children,
+  icon,
+  containsSelect,
+  helpText,
+  invalid,
+  errors,
+  label,
+  id,
+  className,
+  ...rest,
+}) => {
   const classes = classNames(
     'kuiFormRow',
     className,
@@ -17,29 +31,47 @@ export const KuiFormRow = ({ children, icon, containsSelect, helpText, invalid, 
   );
 
   let field;
-  let optionalIcon = null;
-  let optionalHelpText = null;
-  let optionalErrors = null;
-  let optionalLabel = null;
+  let optionalIcon;
+  let optionalHelpText;
+  let optionalErrors;
+  let optionalLabel;
 
   if (icon) {
-    optionalIcon = <KuiIcon className="kuiFormRow__icon" type={icon} size="medium" />;
-  }
-
-  if (helpText) {
-    optionalHelpText = <div className="kuiFormRow__helpText">{helpText}</div>;
-  }
-
-  if (errors) {
-    optionalErrors = (
-      errors.map(function (error, index) {
-        return <div  key={index} className="kuiFormRow__error">{error}</div>;
-      })
+    optionalIcon = (
+      <KuiIcon
+        className="kuiFormRow__icon"
+        type={icon}
+        size="medium"
+      />
     );
   }
 
+  if (helpText) {
+    optionalHelpText = (
+      <KuiFormHelpText>
+        {helpText}
+      </KuiFormHelpText>
+    );
+  }
+
+  if (errors) {
+    const errorTexts = Array.isArray(errors) ? errors : [errors];
+    optionalErrors = errorTexts.map(error => (
+      <KuiFormErrorText key={error}>
+        {error}
+      </KuiFormErrorText>
+    ));
+  }
+
   if (label) {
-    optionalLabel = <label className="kuiFormRow__label" htmlFor={id}>{label}</label>;
+    optionalLabel = (
+      <label
+        className="kuiFormRow__label"
+        htmlFor={id}
+      >
+        {label}
+      </label>
+    );
   }
 
   if (id) {
@@ -77,6 +109,6 @@ KuiFormRow.propTypes = {
   icon: PropTypes.string,
   invalid: PropTypes.bool,
   containsSelect: PropTypes.bool,
-  errors: PropTypes.array,
+  errors: PropTypes.oneOfType([PropTypes.string, PropTypes.arrayOf(PropTypes.string)]),
   helpText: PropTypes.string,
 };

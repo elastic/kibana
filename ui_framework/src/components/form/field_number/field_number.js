@@ -23,7 +23,7 @@ export const KuiFieldNumber = ({ className, id, placeholder, name, min, max, val
 
 KuiFieldNumber.propTypes = {
   id: PropTypes.string,
-  name: PropTypes.string.isRequired,
+  name: PropTypes.string,
   min: PropTypes.number,
   max: PropTypes.number,
   step: PropTypes.number,

@@ -11,17 +11,18 @@ export {
 } from './call_out';
 
 export {
-  KuiForm,
   KuiCheckbox,
   KuiFieldNumber,
   KuiFieldPassword,
-  KuiRadio,
-  KuiRange,
-  KuiFormRow,
   KuiFieldSearch,
+  KuiFieldText,
+  KuiForm,
+  KuiFormErrorText,
+  KuiFormHelpText,
+  KuiFormRow,
+  KuiRange,
   KuiSelect,
   KuiSwitch,
-  KuiFieldText,
   KuiTextArea,
 } from './form';
 

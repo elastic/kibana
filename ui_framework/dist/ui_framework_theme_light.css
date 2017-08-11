@@ -563,76 +563,6 @@ table {
           transform: translateY(2px);
   /* 1 */ }
 
-.kuiForm__error {
-  font-size: 14px;
-  font-size: 0.875rem;
-  line-height: 18px;
-  list-style: disc;
-  margin-left: 32px; }
-
-.kuiForm__errors {
-  margin-bottom: 16px; }
-
-.kuiFormRow {
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-box-orient: vertical;
-  -webkit-box-direction: normal;
-  -webkit-flex-direction: column;
-      -ms-flex-direction: column;
-          flex-direction: column;
-  position: relative;
-  max-width: 400px; }
-  .kuiFormRow + * {
-    margin-top: 24px; }
-  .kuiFormRow.kuiFormRow--withIcon input {
-    padding-left: 40px; }
-  .kuiFormRow.kuiFormRow--dropdown input {
-    padding-left: 12px;
-    padding-right: 40px; }
-  .kuiFormRow.kuiFormRow--select .kuiFormRow__icon {
-    left: auto;
-    right: 12px; }
-  .kuiFormRow .kuiFormRow__label {
-    font-size: 12px;
-    padding-bottom: 8px;
-    cursor: pointer;
-    transition: all 150ms cubic-bezier(0.694, 0.0482, 0.335, 1);
-    font-weight: 500;
-    -webkit-box-ordinal-group: 0;
-    -webkit-order: -1;
-        -ms-flex-order: -1;
-            order: -1; }
-  .kuiFormRow .kuiFormRow__helpText {
-    font-size: 12px;
-    padding: 8px 0;
-    color: #666; }
-  .kuiFormRow .kuiFormRow__error {
-    font-size: 12px;
-    padding: 8px 0;
-    color: #A30000; }
-  .kuiFormRow .kuiFormRow__error + * {
-    padding-top: 0; }
-  .kuiFormRow .kuiFormRow__icon {
-    position: absolute;
-    top: 32px;
-    left: 12px; }
-  .kuiFormRow input:focus + label,
-  .kuiFormRow select:focus + label,
-  .kuiFormRow textarea:focus + label {
-    color: #0079a5; }
-  .kuiFormRow.kuiFormRow--invalid .kuiFormRow__label {
-    color: #A30000 !important; }
-  .kuiFormRow.kuiFormRow--invalid input[type="text"],
-  .kuiFormRow.kuiFormRow--invalid input[type="password"],
-  .kuiFormRow.kuiFormRow--invalid input[type="number"],
-  .kuiFormRow.kuiFormRow--invalid input[type="search"],
-  .kuiFormRow.kuiFormRow--invalid select,
-  .kuiFormRow.kuiFormRow--invalid textarea {
-    box-shadow: 0 4px 4px -2px rgba(0, 0, 0, 0.1), 0 0 0 1px rgba(0, 0, 0, 0.16), inset 0 0 0 0 #FFF, inset 0 -2px 0 0 #A30000 !important; }
-
 .kuiCheckbox {
   position: relative;
   height: 24px;
@@ -735,6 +665,75 @@ table {
   .kuiFieldText:focus {
     background: #FFF;
     box-shadow: 0 4px 4px -2px rgba(0, 0, 0, 0.1), 0 0 0 1px rgba(0, 0, 0, 0.16), inset 0 0 0 0 #FFF, inset 0 -2px 0 0 #0079a5; }
+
+.kuiForm__error {
+  font-size: 14px;
+  font-size: 0.875rem;
+  line-height: 18px;
+  list-style: disc;
+  margin-left: 32px; }
+
+.kuiForm__errors {
+  margin-bottom: 16px; }
+
+.kuiFormHelpText {
+  font-size: 12px;
+  padding: 8px 0;
+  color: #666; }
+
+.kuiFormErrorText {
+  font-size: 12px;
+  padding: 8px 0;
+  color: #A30000; }
+
+.kuiFormRow {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-orient: vertical;
+  -webkit-box-direction: normal;
+  -webkit-flex-direction: column;
+      -ms-flex-direction: column;
+          flex-direction: column;
+  position: relative;
+  max-width: 400px; }
+  .kuiFormRow + * {
+    margin-top: 24px; }
+  .kuiFormRow.kuiFormRow--withIcon input {
+    padding-left: 40px; }
+  .kuiFormRow.kuiFormRow--select .kuiFormRow__icon {
+    left: auto;
+    right: 12px; }
+  .kuiFormRow .kuiFormRow__label {
+    font-size: 12px;
+    padding-bottom: 8px;
+    cursor: pointer;
+    transition: all 150ms cubic-bezier(0.694, 0.0482, 0.335, 1);
+    font-weight: 500;
+    -webkit-box-ordinal-group: 0;
+    -webkit-order: -1;
+        -ms-flex-order: -1;
+            order: -1; }
+  .kuiFormRow .kuiFormRow__error + * {
+    padding-top: 0; }
+  .kuiFormRow .kuiFormRow__icon {
+    position: absolute;
+    top: 32px;
+    left: 12px; }
+  .kuiFormRow input:focus + label,
+  .kuiFormRow select:focus + label,
+  .kuiFormRow textarea:focus + label {
+    color: #0079a5; }
+  .kuiFormRow.kuiFormRow--invalid .kuiFormRow__label {
+    color: #A30000 !important; }
+  .kuiFormRow.kuiFormRow--invalid input[type="text"],
+  .kuiFormRow.kuiFormRow--invalid input[type="password"],
+  .kuiFormRow.kuiFormRow--invalid input[type="number"],
+  .kuiFormRow.kuiFormRow--invalid input[type="search"],
+  .kuiFormRow.kuiFormRow--invalid select,
+  .kuiFormRow.kuiFormRow--invalid textarea {
+    box-shadow: 0 4px 4px -2px rgba(0, 0, 0, 0.1), 0 0 0 1px rgba(0, 0, 0, 0.16), inset 0 0 0 0 #FFF, inset 0 -2px 0 0 #A30000 !important; }
 
 .kuiRange {
   -webkit-appearance: none;

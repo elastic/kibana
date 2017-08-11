@@ -12,11 +12,6 @@
     padding-left: $kuiSizeXXL;
   }
 
-  &.kuiFormRow--dropdown input {
-    padding-left: $kuiSizeM;
-    padding-right: $kuiSizeXXL;
-  }
-
   &.kuiFormRow--select .kuiFormRow__icon {
     left: auto;
     right: $kuiSizeM;
@@ -29,18 +24,6 @@
     transition: all $kuiAnimSpeedFast $kuiAnimSlightResistance;
     font-weight: $kuiFontWeightMedium;
     order: -1; // Force the label to be first, so we can use sibling:focus selectors.
-  }
-
-  .kuiFormRow__helpText {
-    font-size: $kuiFontSizeXS;
-    padding: $kuiSizeS 0;
-    color: $kuiColorDarkShade;
-  }
-
-  .kuiFormRow__error {
-    font-size: $kuiFontSizeXS;
-    padding: $kuiSizeS 0;
-    color: $kuiColorDanger;
   }
 
   .kuiFormRow__error +  * {

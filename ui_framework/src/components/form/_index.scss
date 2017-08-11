@@ -20,13 +20,15 @@ $kuiFormBackgroundColor: tintOrShade($kuiColorLightestShade, 60%, 25%);
   }
 }
 
-@import 'form';
-@import 'form_row/index';
 @import 'checkbox/index';
 @import 'field_number/index';
 @import 'field_password/index';
 @import 'field_search/index';
 @import 'field_text/index';
+@import 'form';
+@import 'form_help_text/index';
+@import 'form_error_text/index';
+@import 'form_row/index';
 @import 'range/index';
 @import 'select/index';
 @import 'switch/index';

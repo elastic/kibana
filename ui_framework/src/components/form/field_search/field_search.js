@@ -21,7 +21,7 @@ export const KuiFieldSearch = ({ className, id, name, placeholder, value, ...res
 };
 
 KuiFieldSearch.propTypes = {
-  name: PropTypes.string.isRequired,
+  name: PropTypes.string,
   id: PropTypes.string,
   placeholder: PropTypes.string,
   value: PropTypes.string,
