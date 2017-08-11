@@ -92,3 +92,12 @@ $toastTypes: (
 .kuiToastHeader--withBody {
   margin-bottom: $kuiSizeM;
 }
+
+@include screenXSmall {
+  /**
+   * 1. Mobile we make these 100%. Matching change happens on the list as well.
+   */
+  .kuiToast {
+    width: 100%; /* 1 */
+  }
+}
