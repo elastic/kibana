@@ -16,7 +16,7 @@ You can overwrite that name, that is read out, by specifying a new name via the
 visual text representation (e.g. an icon button):
 
 ```html
-<button aria-label="Add filter"><i class="fa fa-plus"></i></button>
+<button aria-label="Add filter"><span class="fa fa-plus"></span></button>
 ```
 
 If the actual name for that element is already present in another element,
@@ -24,7 +24,7 @@ you can use `aria-labelledby` to reference the id of that element:
 
 ```html
 <div id="datepicker">Date Picker</div>
-<button aria-labelledby="datepicker"><i class="fa fa-calendar"></i></button>
+<button aria-labelledby="datepicker"><span class="fa fa-calendar"></span></button>
 ```
 
 ### Label every form element
