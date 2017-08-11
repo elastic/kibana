@@ -1,6 +1,6 @@
 .kuiCallOut {
-  padding: $kuiSizeM $kuiSizeL;
-  border-left: 4px solid transparent;
+  padding: $kuiSize;
+  border-left: $kuiSizeXS / 2 solid transparent;
 }
 
 // Modifier naming and colors.
@@ -31,17 +31,20 @@ $callOutTypes: (
 
 /**
  * 1. Align icon with first line of title text if it wraps.
- * 2. Apply margin to all but last item in the flex.
+ * 2. If content exists under the header, space it appropriately.
+ * 3. Apply margin to all but last item in the flex.
  */
 .kuiCallOutHeader {
   @include kuiFontSizeM;
-
-  margin-bottom: $kuiVerticalRhythmS;
   display: flex;
   align-items: baseline; /* 1 */
 
+  + * {
+    margin-top: $kuiSizeS; /* 1 */
+  }
+
   > * + * {
-    margin-left: $kuiSizeS; /* 2 */
+    margin-left: $kuiSizeS; /* 3 */
   }
 }
 

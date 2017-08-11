@@ -16,6 +16,8 @@ import '!!svg-sprite!./assets/search.svg';
 import '!!svg-sprite!./assets/user.svg';
 import '!!svg-sprite!./assets/help.svg';
 import '!!svg-sprite!./assets/cross.svg';
+import '!!svg-sprite!./assets/check.svg';
+import '!!svg-sprite!./assets/lock.svg';
 import '!!svg-sprite!./assets/arrow_up.svg';
 import '!!svg-sprite!./assets/arrow_down.svg';
 import '!!svg-sprite!./assets/arrow_left.svg';
@@ -40,6 +42,8 @@ const typeToIconMap = {
   user: 'user',
   help: 'help',
   cross: 'cross',
+  check: 'check',
+  lock: 'lock',
   arrowUp: 'arrow_up',
   arrowDown: 'arrow_down',
   arrowLeft: 'arrow_left',
