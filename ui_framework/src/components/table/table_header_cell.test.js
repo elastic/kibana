@@ -7,6 +7,6 @@ import {
 } from './table_header_cell';
 
 test('renders KuiTableHeaderCell', () => {
-  const component = <KuiTableHeaderCell { ...requiredProps }>children</KuiTableHeaderCell>;
+  const component = <KuiTableHeaderCell {...requiredProps}>children</KuiTableHeaderCell>;
   expect(render(component)).toMatchSnapshot();
 });

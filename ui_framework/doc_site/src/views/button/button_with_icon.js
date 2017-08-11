@@ -40,7 +40,7 @@ export default () => (
     <KuiButton
       buttonType="basic"
       icon={<KuiButtonIcon type="next" />}
-      iconPosition='right'
+      iconPosition="right"
     >
       Next
     </KuiButton>

@@ -7,7 +7,7 @@ import {
 } from './menu';
 
 test('renders KuiMenu', () => {
-  const component = <KuiMenu { ...requiredProps }>children</KuiMenu>;
+  const component = <KuiMenu {...requiredProps}>children</KuiMenu>;
   expect(render(component)).toMatchSnapshot();
 });
 

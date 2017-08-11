@@ -7,6 +7,6 @@ import {
 } from './gallery';
 
 test('renders KuiGallery', () => {
-  const component = <KuiGallery { ...requiredProps }>children</KuiGallery>;
+  const component = <KuiGallery {...requiredProps}>children</KuiGallery>;
   expect(render(component)).toMatchSnapshot();
 });

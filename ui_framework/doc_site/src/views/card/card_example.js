@@ -31,7 +31,7 @@ export default props => (
       }]}
     >
       <GuideText>
-        Cards expand to fill their container. To restrict a card's width, define the width of its
+        Cards expand to fill their container. To restrict a card&rsquo;s width, define the width of its
         container.
       </GuideText>
 

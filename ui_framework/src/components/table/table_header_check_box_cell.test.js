@@ -7,6 +7,6 @@ import {
 } from './table_header_check_box_cell';
 
 test('renders KuiTableHeaderCheckBoxCell', () => {
-  const component = <KuiTableHeaderCheckBoxCell { ...requiredProps }>children</KuiTableHeaderCheckBoxCell>;
+  const component = <KuiTableHeaderCheckBoxCell {...requiredProps}>children</KuiTableHeaderCheckBoxCell>;
   expect(render(component)).toMatchSnapshot();
 });

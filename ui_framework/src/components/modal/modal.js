@@ -5,7 +5,7 @@ import PropTypes from 'prop-types';
 export function KuiModal({ className, children, ...rest }) {
   const classes = classnames('kuiModal', className);
   return (
-    <div className={ classes } { ...rest }>
+    <div className={classes} {...rest}>
       { children }
     </div>
   );

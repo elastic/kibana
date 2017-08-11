@@ -27,7 +27,7 @@ export default props => (
     >
       <GuideText>
         Use GalleryButton to show a gallery item.
-        It's an anchor and accepts all anchor properties.
+        It&rsquo;s an anchor and accepts all anchor properties.
       </GuideText>
 
       <GuideDemo>

@@ -7,6 +7,6 @@ import {
 } from './gallery_button';
 
 test('renders KuiGalleryButton href', () => {
-  const component = <KuiGalleryButton href="#" { ...requiredProps }>children</KuiGalleryButton>;
+  const component = <KuiGalleryButton href="#" {...requiredProps}>children</KuiGalleryButton>;
   expect(render(component)).toMatchSnapshot();
 });

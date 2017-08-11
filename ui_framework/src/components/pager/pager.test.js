@@ -24,7 +24,7 @@ test('renders KuiPager', () => {
     startNumber={1}
     endNumber={10}
     totalItems={20}
-    { ...requiredProps }
+    {...requiredProps}
   />);
   expect(render(component)).toMatchSnapshot();
 });

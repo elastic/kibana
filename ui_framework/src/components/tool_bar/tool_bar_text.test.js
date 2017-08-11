@@ -7,7 +7,7 @@ import {
 } from './tool_bar_text';
 
 test('renders KuiToolBarText', () => {
-  const component = <KuiToolBarText { ...requiredProps }>children</KuiToolBarText>;
+  const component = <KuiToolBarText {...requiredProps}>children</KuiToolBarText>;
   expect(render(component)).toMatchSnapshot();
 });
 

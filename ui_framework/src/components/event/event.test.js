@@ -7,6 +7,6 @@ import {
 } from './event';
 
 test('renders KuiEvent', () => {
-  const component = <KuiEvent { ...requiredProps }>children</KuiEvent>;
+  const component = <KuiEvent {...requiredProps}>children</KuiEvent>;
   expect(render(component)).toMatchSnapshot();
 });

@@ -16,9 +16,9 @@ beforeEach(() => {
 test('renders KuiColorPicker', () => {
   const colorPicker = render(
     <KuiColorPicker
-      onChange={ onChange }
+      onChange={onChange}
       color="#ffeedd"
-      { ...requiredProps }
+      {...requiredProps}
     />
   );
   expect(colorPicker).toMatchSnapshot();
@@ -27,9 +27,9 @@ test('renders KuiColorPicker', () => {
 test('renders KuiColorPicker with an empty swatch when color is null', () => {
   const colorPicker = render(
     <KuiColorPicker
-      onChange={ onChange }
-      color={ null }
-      { ...requiredProps }
+      onChange={onChange}
+      color={null}
+      {...requiredProps}
     />
   );
   expect(colorPicker).toMatchSnapshot();
@@ -38,10 +38,10 @@ test('renders KuiColorPicker with an empty swatch when color is null', () => {
 test('renders KuiColorPicker without a color label when showColorLabel is false', () => {
   const colorPicker = render(
     <KuiColorPicker
-      onChange={ onChange }
-      color={ '#ffffff' }
-      showColorLabel={ false }
-      { ...requiredProps }
+      onChange={onChange}
+      color={'#ffffff'}
+      showColorLabel={false}
+      {...requiredProps}
     />
   );
   expect(colorPicker).toMatchSnapshot();
@@ -50,9 +50,9 @@ test('renders KuiColorPicker without a color label when showColorLabel is false'
 test('pop up color selector is not shown by default', () => {
   const colorPicker = mount(
     <KuiColorPicker
-      onChange={ onChange }
+      onChange={onChange}
       color="#ffeedd"
-      { ...requiredProps }
+      {...requiredProps}
     />
   );
 
@@ -63,9 +63,9 @@ test('pop up color selector is not shown by default', () => {
 test('pop up color selector is shown when the color swatch is clicked', () => {
   const colorPicker = mount(
     <KuiColorPicker
-      onChange={ onChange }
+      onChange={onChange}
       color="#ffeedd"
-      { ...requiredProps }
+      {...requiredProps}
     />
   );
 
@@ -77,9 +77,9 @@ test('pop up color selector is shown when the color swatch is clicked', () => {
 test('pop up color selector is hidden when the color swatch is clicked twice', () => {
   const colorPicker = mount(
     <KuiColorPicker
-      onChange={ onChange }
+      onChange={onChange}
       color="#ffeedd"
-      { ...requiredProps }
+      {...requiredProps}
     />
   );
 
@@ -92,9 +92,9 @@ test('pop up color selector is hidden when the color swatch is clicked twice', (
 test('Setting a new color calls onChange', () => {
   const colorPicker = mount(
     <KuiColorPicker
-      onChange={ onChange }
+      onChange={onChange}
       color="#ffeedd"
-      { ...requiredProps }
+      {...requiredProps}
     />
   );
 

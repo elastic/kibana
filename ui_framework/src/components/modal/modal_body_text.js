@@ -5,7 +5,7 @@ import PropTypes from 'prop-types';
 export function KuiModalBodyText({ className, children, ...rest }) {
   const classes = classnames('kuiModalBodyText', className);
   return (
-    <div className={ classes } { ...rest }>
+    <div className={classes} {...rest}>
       { children }
     </div>
   );

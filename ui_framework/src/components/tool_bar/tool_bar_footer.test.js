@@ -7,6 +7,6 @@ import {
 } from './tool_bar_footer';
 
 test('renders KuiToolBarFooter', () => {
-  const component = <KuiToolBarFooter { ...requiredProps }>children</KuiToolBarFooter>;
+  const component = <KuiToolBarFooter {...requiredProps}>children</KuiToolBarFooter>;
   expect(render(component)).toMatchSnapshot();
 });
