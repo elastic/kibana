@@ -24,10 +24,24 @@ module.directive('stepIndexPattern', function () {
       matchingIndices: '=',
       goToNextStep: '&',
     },
-    link: function (scope) {
+    link: function (scope, element) {
+      scope.stepIndexPattern.appendedWildcard = false;
+
       scope.$watch('stepIndexPattern.allIndices', scope.stepIndexPattern.updateList);
       scope.$watch('stepIndexPattern.matchingIndices', scope.stepIndexPattern.updateList);
       scope.$watch('stepIndexPattern.indexPatternName', () => {
+        if (scope.stepIndexPattern.indexPatternName && scope.stepIndexPattern.indexPatternName.length === 1) {
+          if (scope.stepIndexPattern.indexPatternName === '*') {
+            if (scope.stepIndexPattern.appendedWildcard) {
+              scope.stepIndexPattern.indexPatternName = '';
+              scope.stepIndexPattern.appendedWildcard = false;
+            }
+          } else {
+            scope.stepIndexPattern.indexPatternName += '*';
+            scope.stepIndexPattern.appendedWildcard = true;
+            setTimeout(() => element.find('#indexPatternNameField')[0].setSelectionRange(1, 1));
+          }
+        }
         // Only send the request if there's valid input.
         if (scope.stepIndexPattern.indexPatternNameForm && scope.stepIndexPattern.indexPatternNameForm.$valid) {
           scope.stepIndexPattern.fetchMatchingIndices();
