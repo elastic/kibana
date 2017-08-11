@@ -1468,9 +1468,10 @@ main {
 
 .kuiInfoButton {
   font-size: 16px;
+  line-height: 0;
   background-color: transparent;
   color: #0079a5;
-  cursor: pointer;
+  cursor: help;
   border: none;
   padding: 0; }
   .kuiInfoButton:hover, .kuiInfoButton:active {

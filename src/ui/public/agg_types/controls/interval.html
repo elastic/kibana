@@ -4,7 +4,6 @@
     <kbn-info
       ng-show="agg.buckets.getInterval().scaled"
       placement="right"
-      class="text-warning"
       info="This interval creates {{ agg.buckets.getInterval().scale > 1 ? 'buckets that are too large' : 'too many buckets' }} to show in the selected time range, so it has been scaled to {{ agg.buckets.getInterval().description }}">
     </kbn-info>
   </label>
