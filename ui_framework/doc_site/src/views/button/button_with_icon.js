@@ -15,6 +15,7 @@ export default () => (
     </KuiButton>
 
     <br />
+    <br />
 
     <KuiButton
       buttonType="danger"
@@ -24,6 +25,7 @@ export default () => (
     </KuiButton>
 
     <br />
+    <br />
 
     <KuiButton
       buttonType="basic"
@@ -32,6 +34,7 @@ export default () => (
       Previous
     </KuiButton>
 
+    <br />
     <br />
 
     <KuiButton
@@ -43,6 +46,7 @@ export default () => (
     </KuiButton>
 
     <br />
+    <br />
 
     <KuiButton
       buttonType="basic"
@@ -51,6 +55,7 @@ export default () => (
       Loading
     </KuiButton>
 
+    <br />
     <br />
 
     <KuiButton

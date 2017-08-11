@@ -50,10 +50,6 @@ import ButtonGroupUnited from './button_group_united';
 const buttonGroupUnitedSource = require('!!raw!./button_group_united');
 const buttonGroupUnitedHtml = renderToHtml(ButtonGroupUnited);
 
-import InToolBar from './buttons_in_tool_bar';
-const inToolBarSource = require('!!raw!./buttons_in_tool_bar');
-const inToolBarHtml = renderToHtml(InToolBar);
-
 import Elements from './button_elements';
 const elementsSource = require('!!raw!./button_elements');
 const elementsHtml = renderToHtml(Elements);
@@ -253,25 +249,6 @@ export default props => (
 
       <GuideDemo>
         <ButtonGroupUnited />
-      </GuideDemo>
-    </GuideSection>
-
-    <GuideSection
-      title="In ToolBar"
-      source={[{
-        type: GuideSectionTypes.JS,
-        code: inToolBarSource,
-      }, {
-        type: GuideSectionTypes.HTML,
-        code: inToolBarHtml,
-      }]}
-    >
-      <GuideText>
-        This example verifies that Buttons are legible against the ToolBar's background.
-      </GuideText>
-
-      <GuideDemo>
-        <InToolBar />
       </GuideDemo>
     </GuideSection>
 

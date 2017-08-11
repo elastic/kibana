@@ -11,6 +11,7 @@ export default () => (
     </KuiButton>
 
     <br />
+    <br />
 
     <KuiButton
       buttonType="secondary"

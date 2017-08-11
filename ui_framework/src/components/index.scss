@@ -12,13 +12,6 @@
 // When possible, if making changes to those legacy components, please think about
 // instead adding them to this library and deprecating that dependency.
 
-
-// Global constants
-@import "variables";
-@import "mixins";
-@import "common_styles";
-
-// Components
 @import "accessibility/index";
 @import "action_item/index";
 @import "badge/index";
