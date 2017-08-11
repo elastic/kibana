@@ -1,4 +1,3 @@
-import _ from 'lodash';
 import {
   SortableProperties,
 } from './sortable_properties';

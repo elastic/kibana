@@ -122,6 +122,10 @@ export class GuideNav extends Component {
       this.props.sandboxes.filter(item => (
         item.name.toLowerCase().indexOf(this.state.search.toLowerCase()) !== -1
       )).map((item, index) => {
+        const icon =
+          item.hasReact
+          ? <div className="guideNavItem__reactLogo" />
+          : undefined;
         return (
           <div key={`sandboxNavItem-${index}`} className="guideNavItem">
             <Link
@@ -131,6 +135,8 @@ export class GuideNav extends Component {
             >
               {item.name}
             </Link>
+
+            {icon}
           </div>
         );
       });
