@@ -3,7 +3,7 @@
 This document provides some technical guidelines how to prevent several common
 accessibility issues.
 
-## Labeling elements
+## Naming elements
 
 ### `aria-label` and `aria-labelledby`
 
