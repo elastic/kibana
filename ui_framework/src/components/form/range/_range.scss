@@ -1,0 +1,83 @@
+// The following code is inspired by...
+
+// Github: https://github.com/darlanrod/input-range-sass
+// Author: Darlan Rod https://github.com/darlanrod
+// Version 1.4.1
+// MIT License
+
+// It has been modified to fit the styling patterns of Kibana and
+// to be more easily maintained / themeable going forward.
+
+.kuiRange {
+  appearance: none;
+  margin: $kuiRangeThumbHeight / 2 0;
+  width: $kuiRangeTrackWidth;
+
+  &:focus {
+
+    &::-webkit-slider-thumb {
+      border: $kuiRangeBorderWidth solid $kuiColorPrimary;
+    }
+
+    &::-moz-range-thumb {
+      border: $kuiRangeBorderWidth solid $kuiColorPrimary;
+    }
+
+    &::-ms-thumb {
+      border: $kuiRangeBorderWidth solid $kuiColorPrimary;
+    }
+    &::-webkit-slider-runnable-track {
+      background-color: $kuiColorPrimary;
+    }
+
+  }
+
+  &::-webkit-slider-runnable-track {
+    @include track;
+    background: $kuiRangeTrackColor;
+    border: $kuiRangeTrackBorderWidth solid $kuiRangeTrackBorderColor;
+    border-radius: $kuiRangeTrackRadius;
+  }
+
+  &::-webkit-slider-thumb {
+    @include thumb;
+    -webkit-appearance: none;
+    margin-top: ((-$kuiRangeTrackBorderWidth * 2 + $kuiRangeTrackHeight) / 2) - ($kuiRangeThumbHeight / 2);
+  }
+
+  &::-moz-range-track {
+    @include track;
+    background: $kuiRangeTrackColor;
+    border: $kuiRangeTrackBorderWidth solid $kuiRangeTrackBorderColor;
+    border-radius: $kuiRangeTrackRadius;
+  }
+
+  &::-moz-range-thumb {
+    @include thumb;
+  }
+
+  &::-ms-track {
+    @include track;
+    background: transparent;
+    border-color: transparent;
+    border-width: ($kuiRangeThumbHeight / 2) 0;
+    color: transparent;
+  }
+
+  &::-ms-fill-lower {
+    background: $kuiRangeTrackColor;
+    border: $kuiRangeTrackBorderWidth solid $kuiRangeTrackBorderColor;
+    border-radius: $kuiRangeTrackRadius * 2;
+  }
+
+  &::-ms-fill-upper {
+    background: $kuiRangeTrackColor;
+    border: $kuiRangeTrackBorderWidth solid $kuiRangeTrackBorderColor;
+    border-radius: $kuiRangeTrackRadius * 2;
+  }
+
+  &::-ms-thumb {
+    @include thumb;
+    margin-top: 0;
+  }
+}

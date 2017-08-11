@@ -1,0 +1,51 @@
+.kuiCheckbox {
+  position: relative;
+  height: $kuiSizeL;
+  margin-top: $kuiSizeS;
+
+  .kuiCheckbox__label {
+    position: absolute;
+    padding-left: $kuiSizeXL;
+    line-height: $kuiSizeL;
+    display: block;
+    font-weight: $kuiFontWeightRegular;
+    z-index: 2;
+    font-size: $kuiFontSizeS;
+    cursor: pointer;
+  }
+
+  .kuiCheckbox__square {
+    position: absolute;
+    height: $kuiSizeL;
+    width: $kuiSizeL;
+    border-radius: $kuiBorderRadius;
+    border: $kuiBorderThin;
+    background: $kuiFormBackgroundColor;
+    z-index: 0;
+  }
+
+  .kuiCheckbox__check {
+    height: 100%;
+    width: 100%;
+  }
+
+  .kuiCheckbox__input {
+    position: absolute;
+    opacity: 0;
+
+    &:checked ~ .kuiCheckbox__square .kuiCheckbox__check {
+      background-color: $kuiTextColor;
+      mask: url('../src/components/icon/assets/check.svg') center center no-repeat;
+    }
+
+    &:focus ~ .kuiCheckbox__square {
+      background-color: $kuiFocusBackgroundColor;
+      border-color: $kuiColorPrimary;
+    }
+
+    &:checked:focus ~ .kuiCheckbox__square .kuiCheckbox__check {
+      background-color: $kuiTextColor;
+      mask: url('../src/components/icon/assets/check.svg') center center no-repeat;
+    }
+  }
+}
