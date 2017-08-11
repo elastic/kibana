@@ -120,6 +120,25 @@ You can overwrite this role via the `role` attribute on an element, and the
 assistive technology will now behave the same like any other element with that role
 (e.g. behave like it is a button when it has `role="button"`).
 
+### Landmark roles
+
+Some roles can be used to declare so called landmarks. These landmarks tag important
+parts of a web page. Screen readers offer a quick way to jump to these
+parts of the page (*landmark navigation*).
+
+#### role=main
+
+The `main` role (or equivalent using the `<main>` tag) declares the main part
+of a page. This can be used in the landmark navigation to quickly jump to the
+actual main area of the page (and skip all headers, navigations, etc.).
+
+#### `<section>`
+
+The `<section>` element, can be used to mark a region on the page, so that it
+appears in the landmark navigation. The section element therefor needs to have
+an *accessible name*, i.e. you should add an `aria-label`, that gives a short
+title to that section of the page.
+
 ### role=search
 
 **TL;DR** *Place `role="search"` neither on the `<input>` nor the `<form>`, but
