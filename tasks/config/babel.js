@@ -8,7 +8,8 @@ module.exports = {
       '!**/public/**',
       '!**/node_modules/**',
       '!**/bower_components/**',
-      '!**/__tests__/**'
+      '!**/__tests__/**',
+      '!build/kibana/src/forked/**'
     ],
     dest: '.',
     expand: true
