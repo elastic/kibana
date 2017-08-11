@@ -824,9 +824,8 @@ table {
   .kuiSelect:focus {
     background: #FFF;
     box-shadow: 0 4px 4px -2px rgba(0, 0, 0, 0.1), 0 0 0 1px rgba(0, 0, 0, 0.16), inset 0 0 0 0 #FFF, inset 0 -2px 0 0 #0079a5; }
-
-.kuiSelect::-ms-expand {
-  display: none; }
+  .kuiSelect::-ms-expand {
+    display: none; }
 
 .kuiSwitch {
   position: relative;

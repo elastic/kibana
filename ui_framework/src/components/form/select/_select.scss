@@ -1,9 +1,10 @@
 .kuiSelect {
   appearance: none;
   @include kuiFieldStyle;
+
+  &::-ms-expand {
+    display: none;
+  }
 }
 
-.kuiSelect::-ms-expand {
-  display: none;
-}
 
