@@ -2,8 +2,8 @@ import { findKey } from 'lodash';
 
 export function normalizeType(type) {
   const normalTypes = {
-    string: ['string', 'text', 'keyword', '_type', '_id'],
-    number: ['float', 'half_float', 'scaled_float', 'double', 'integer', 'long', 'short', 'byte', 'token_count'],
+    string: ['string', 'text', 'keyword', '_type', '_id', '_index'],
+    number: ['float', 'half_float', 'scaled_float', 'double', 'integer', 'long', 'short', 'byte', 'token_count', '_version'],
     date: ['date'],
   };
 

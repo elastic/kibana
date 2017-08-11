@@ -3,13 +3,26 @@ import { Table } from 'react-bootstrap';
 import PropTypes from 'prop-types';
 
 
+const getIcon = (type) => {
+  switch (type) {
+    case 'string':
+      return (<strong>a</strong>);
+    case 'number':
+      return (<strong>#</strong>);
+    case 'date':
+      return (<i className="fa fa-calendar"/>);
+    default:
+      return (<strong>?</strong>);
+  }
+};
+
 export const Datatable = ({ datatable }) => (
   <div className="canvas__element--datatable" style={{ height: '100%', overflow: 'auto' }}>
     <Table condensed>
       <thead>
         <tr>
           {datatable.columns.map(col => (
-            <th key={`header-${col.name}`}>{col.name}</th>
+            <th key={`header-${col.name}`}>{col.name} <small className="muted">{getIcon(col.type)}</small></th>
           ))}
         </tr>
       </thead>
