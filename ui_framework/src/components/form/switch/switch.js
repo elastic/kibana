@@ -25,7 +25,7 @@ KuiSwitch.propTypes = {
   name: PropTypes.string.isRequired,
   id: PropTypes.string.isRequired,
   label: PropTypes.string.isRequired,
-  checked: PropTypes.bool,
+  defaultChecked: PropTypes.bool,
 };
 
 KuiSwitch.defaultProps = {
