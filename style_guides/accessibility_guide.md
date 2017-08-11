@@ -200,7 +200,7 @@ actual main area of the page (and skip all headers, navigations, etc.).
 #### `<section>`
 
 The `<section>` element, can be used to mark a region on the page, so that it
-appears in the landmark navigation. The section element therefor needs to have
+appears in the landmark navigation. The section element therefore needs to have
 an *accessible name*, i.e. you should add an `aria-label`, that gives a short
 title to that section of the page.
 
