@@ -30,7 +30,6 @@ uiModules.get('apps/management')
 
   // Configure the new index pattern we're going to create.
   this.formValues = {
-    id: undefined,
     name: config.get('indexPattern:placeholder'),
     timeFieldOption: null,
   };
