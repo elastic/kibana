@@ -41,7 +41,7 @@ export default class extends Component {
         isOpen={this.state.isPopoverOpen}
         closePopover={this.closePopover.bind(this)}
       >
-        <div style={{ width: '300px' }}>Popover content that's wider than the default width</div>
+        <div style={{ width: '300px' }}>Popover content that&rsquo;s wider than the default width</div>
       </KuiPopover>
     );
   }
