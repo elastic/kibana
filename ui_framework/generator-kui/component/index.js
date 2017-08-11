@@ -78,7 +78,7 @@ module.exports = class extends Generator {
 
       // Create component test file.
       this.fs.copyTpl(
-        this.templatePath('component.test.js'),
+        this.templatePath('test.js'),
         this.destinationPath(testPath),
         vars
       );

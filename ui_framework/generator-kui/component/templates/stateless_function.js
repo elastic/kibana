@@ -1,6 +1,5 @@
-import React, {
-  PropTypes,
-} from 'react';
+import React from 'react';
+import PropTypes from 'prop-types';
 import classNames from 'classnames';
 
 export const <%= componentName %> = ({ children, className, ...rest }) => {
@@ -17,4 +16,6 @@ export const <%= componentName %> = ({ children, className, ...rest }) => {
 };
 
 <%= componentName %>.propTypes = {
+  children: PropTypes.node,
+  className: PropTypes.string,
 };
