@@ -6,10 +6,10 @@
 // MIT License
 
 // It has been modified to fit the styling patterns of Kibana and
-// to be more easily maintained / themable going forward.
+// to be more easily maintained / themeable going forward.
 
 .kuiRange {
-  -webkit-appearance: none;
+  appearance: none;
   margin: $kuiRangeThumbHeight / 2 0;
   width: $kuiRangeTrackWidth;
 

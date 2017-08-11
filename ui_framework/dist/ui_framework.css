@@ -738,6 +738,8 @@ table {
 
 .kuiRange {
   -webkit-appearance: none;
+     -moz-appearance: none;
+          appearance: none;
   margin: 8px 0;
   width: 100%; }
   .kuiRange:focus::-webkit-slider-thumb {
