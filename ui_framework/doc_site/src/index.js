@@ -1,5 +1,3 @@
-require('./main.scss');
-
 import 'babel-polyfill';
 import React from 'react';
 import ReactDOM from 'react-dom';
@@ -21,7 +19,28 @@ import { NotFoundView } from './views/not_found/not_found_view';
 
 import {
   Routes,
+  registerTheme,
 } from './services';
+
+// Set up themes
+
+import themeLight from '!style/useable!css!postcss!sass!./theme_light.scss';
+import uiFrameworkThemeLight from '!style/useable!css!../../dist/ui_framework_theme_light.css';
+
+registerTheme('light', [
+  themeLight,
+  uiFrameworkThemeLight,
+]);
+
+import themeDark from '!style/useable!css!postcss!sass!./theme_dark.scss';
+import uiFrameworkThemeDark from '!style/useable!css!../../dist/ui_framework_theme_dark.css';
+
+registerTheme('dark', [
+  themeDark,
+  uiFrameworkThemeDark,
+]);
+
+// Set up app
 
 const store = configureStore();
 const browserHistory = useRouterHistory(createHashHistory)({

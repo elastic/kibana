@@ -29,13 +29,13 @@
 // Core
 
 $kuiColorPrimary: #0079a5 !default;
-$kuiColorSecondary: #00A69B;
-$kuiColorAccent: #DD0A73;
-$kuiColorHighlight: #FFFF00;
+$kuiColorSecondary: #00A69B !default;
+$kuiColorAccent: #DD0A73 !default;
+$kuiColorHighlight: #FFFF00 !default;
 
 // Status
-$kuiColorDanger: #A30000;
-$kuiColorWarning: #E5830E;
+$kuiColorDanger: #A30000 !default;
+$kuiColorWarning: #E5830E !default;
 
 // Grays
 $kuiColorEmptyShade: #FFF !default;
@@ -45,19 +45,6 @@ $kuiColorMediumShade: #999 !default;
 $kuiColorDarkShade: #666 !default;
 $kuiColorDarkestShade: #3F3F3F !default;
 $kuiColorFullShade: #000 !default;
-
-
-// Dark theme overides
-// $kuiColorEmptyShade: #222;
-// $kuiColorLightestShade: #333;
-// $kuiColorLightShade: #444;
-// $kuiColorMediumShade: #555;
-// $kuiColorDarkShade: #D9D9D9;
-// $kuiColorDarkestShade: #F5F5F5;
-// $kuiColorFullShade: #FFF;
-// $kuiColorPrimary: tint($kuiColorPrimary, 30%);
-// $kuiColorDanger: tint($kuiColorDanger, 30%);
-
 
 // Every color below must be based mathmatically on the set above.
 
