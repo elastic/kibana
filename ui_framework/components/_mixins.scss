@@ -301,3 +301,20 @@
   }
 }
 
+@mixin scrollBar($color: rgba($globalColorBlue, 0.4)) {
+  &::-webkit-scrollbar {
+    width: 15px;
+    height: 15px;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background-color: $color;
+    border-left: 10px solid transparent;
+    border-right: 4px solid transparent;
+    background-clip: content-box;
+  }
+
+  &::-webkit-scrollbar-track {
+    background-color: transparent;
+  }
+}

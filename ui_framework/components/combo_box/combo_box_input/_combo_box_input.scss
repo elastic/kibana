@@ -1,0 +1,8 @@
+.kuiComboBoxInput {
+  @include formControl;
+  width: 100%;
+
+  &.kuiComboBoxInput-isInvalid {
+    @include formControlInvalid;
+  }
+}
