@@ -8,6 +8,7 @@ import scaledCircleMarkersPng from './scaledCircleMarkers.png';
 describe('kibana_map tests', function () {
 
   let domNode;
+  let expectCanvas;
   let kibanaMap;
 
   function setupDOM() {
@@ -19,11 +20,15 @@ describe('kibana_map tests', function () {
     domNode.style.position = 'fixed';
     domNode.style['pointer-events'] = 'none';
     document.body.appendChild(domNode);
+
+    expectCanvas = document.createElement('canvas');
+    document.body.appendChild(expectCanvas);
   }
 
   function teardownDOM() {
     domNode.innerHTML = '';
     document.body.removeChild(domNode);
+    document.body.removeChild(expectCanvas);
   }
 
   describe('GeohashGridLayer', function () {
@@ -69,47 +74,47 @@ describe('kibana_map tests', function () {
 
       it(test.options.mapType, function (done) {
 
-      	const geohashGridOptions = test.options;
-	      const geohashLayer = new GeohashLayer(GeoHashSampleData, geohashGridOptions, kibanaMap.getZoomLevel(), kibanaMap);
-	      kibanaMap.addLayer(geohashLayer);
+        const geohashGridOptions = test.options;
+        const geohashLayer = new GeohashLayer(GeoHashSampleData, geohashGridOptions, kibanaMap.getZoomLevel(), kibanaMap);
+        kibanaMap.addLayer(geohashLayer);
 
-	      // Give time for canvas to render before checking output
-      	window.setTimeout(() => {
-        const elementList = domNode.querySelectorAll('canvas');
-        expect(elementList.length).to.equal(1);
-        const canvas = elementList[0];
+        // Give time for canvas to render before checking output
+        window.setTimeout(() => {
+          // Extract image data from live map
+          const elementList = domNode.querySelectorAll('canvas');
+          expect(elementList.length).to.equal(1);
+          const canvas = elementList[0];
+          const ctx = canvas.getContext('2d');
+          const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
 
-        const ctx = canvas.getContext('2d');
-        const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+          // convert expect PNG into pixels data by drawing in new canvas element
+          expectCanvas.id = 'expectCursor';
+          expectCanvas.width = canvas.width;
+          expectCanvas.height = canvas.height;
+          const imageEl = new Image();
+          imageEl.onload = () => {
+            const expectCtx = expectCanvas.getContext('2d');
+            expectCtx.drawImage(imageEl, 0, 0, canvas.width, canvas.height);  // draw reference image to size of generated image
+            const expectImageData = expectCtx.getImageData(0, 0, canvas.width, canvas.height);
 
+            // compare live map vs expected pixel data
+            const diffImage = expectCtx.createImageData(canvas.width, canvas.height);
+            const mismatchedPixels = pixelmatch(
+              imageData.data,
+              expectImageData.data,
+              diffImage.data,
+              canvas.width,
+              canvas.height,
+              { threshold: 0.1 });
+            expect(mismatchedPixels < 16).to.equal(true);
+            // Display difference image for refernce
+            expectCtx.putImageData(diffImage, 0, 0);
 
-        const canvas2 = document.createElement('canvas');
-        canvas2.id     = 'CursorLayer';
-        canvas2.width  = canvas.width;
-        canvas2.height = canvas.height;
+            done();
+          };
+          imageEl.src = scaledCircleMarkersPng;
+        }, 200);
 
-        document.body.appendChild(canvas2);
-
-        const ctx2 = canvas2.getContext('2d');
-
-        let image = new Image();
-        image.onload = () => {
-          ctx2.drawImage(image, 0, 0, canvas.width, canvas.height);  // draw reference image to size of generated image
-
-          const imageData2 = ctx2.getImageData(0, 0, canvas.width, canvas.height);
-
-          let diffImage = ctx.createImageData(canvas.width, canvas.height);
-          const mismatchedPixels = pixelmatch(imageData.data, imageData2.data, diffImage.data, canvas.width, canvas.height, {threshold: 0.1});
-          // console.log("mismatchedPixels", mismatchedPixels);
-          expect(mismatchedPixels).to.equal(0);
-
-          ctx2.putImageData(diffImage, 0, 0);
-
-          done();
-        }
-        image.src = scaledCircleMarkersPng;
-
-       	}, 200);
       });
     });
 
