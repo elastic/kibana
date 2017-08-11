@@ -70,7 +70,6 @@
     "url": "https://github.com/elastic/kibana.git"
   },
   "dependencies": {
-    "@bigfunger/jsondiffpatch": "0.1.38-webpack",
     "@elastic/datemath": "2.3.0",
     "@elastic/filesaver": "1.1.2",
     "@elastic/leaflet-draw": "0.2.3",
