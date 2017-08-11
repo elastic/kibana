@@ -1,0 +1,33 @@
+$kuiFormMaxWidth: 400px;
+$kuiFormBackgroundColor: tintOrShade($kuiColorLightestShade, 60%, 25%);
+
+@mixin kuiFieldStyle {
+  border: none;
+  font-size: $kuiFontSizeS;
+  font-family: $kuiFontFamily;
+  padding: $kuiSizeM;
+  color: $kuiTextColor;
+  min-width: $kuiSize * 16;
+  background: $kuiFormBackgroundColor;
+  box-shadow: 0 2px 2px -1px rgba(0, 0, 0, 0.1), 0 0 0 1px rgba(0,0,0,0.08), inset -400px 0 0 0 $kuiFormBackgroundColor;
+  transition: box-shadow $kuiAnimSpeedNormal ease-in, background $kuiAnimSpeedNormal ease-in;
+  max-width: $kuiFormMaxWidth;
+  border-radius: 0;
+
+  &:focus {
+    background: $kuiColorEmptyShade;
+    box-shadow: 0 4px 4px -2px rgba(0, 0, 0, 0.1), 0 0 0 1px rgba(0,0,0,0.16), inset 0 0 0 0 $kuiColorEmptyShade, inset 0 -2px 0 0 $kuiColorPrimary;
+  }
+}
+
+@import 'form';
+@import 'form_row/index';
+@import 'checkbox/index';
+@import 'field_number/index';
+@import 'field_password/index';
+@import 'field_search/index';
+@import 'field_text/index';
+@import 'range/index';
+@import 'select/index';
+@import 'switch/index';
+@import 'text_area/index';

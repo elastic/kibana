@@ -1,0 +1,32 @@
+$kuiRangeTrackColor: $kuiColorLightShade;
+$kuiRangeThumbColor: $kuiColorEmptyShade;
+
+$kuiRangeThumbRadius: 50%;
+$kuiRangeThumbHeight: $kuiSize;
+$kuiRangeThumbWidth: $kuiSize;
+$kuiRangeBorderWidth: 2px;
+$kuiRangeBorderColor: $kuiTextColor;
+
+$kuiRangeTrackWidth: 100%;
+$kuiRangeTrackHeight: 2px;
+$kuiRangeTrackBorderWidth: 0;
+$kuiRangeTrackBorderColor: $kuiColorLightShade;
+$kuiRangeTrackRadius: $kuiBorderRadius;
+
+@mixin track {
+  cursor: pointer;
+  height: $kuiRangeTrackHeight;
+  transition: all $kuiAnimSpeedNormal ease-in;
+  width: $kuiRangeTrackWidth;
+}
+
+@mixin thumb {
+  background: $kuiRangeThumbColor;
+  border: $kuiRangeBorderWidth solid $kuiRangeBorderColor;
+  border-radius: $kuiRangeThumbRadius;
+  cursor: pointer;
+  height: $kuiRangeThumbHeight;
+  width: $kuiRangeThumbWidth;
+}
+
+@import 'range';

@@ -1,0 +1,130 @@
+.kuiSwitch {
+  position: relative;
+  display: inline-block;
+  height: $kuiSwitchHeight;
+  cursor: pointer;
+
+  /**
+   * 1. The label is our main clickable area. It sits above the actual switch.
+   */
+  .kuiSwitch__label {
+    position: absolute;
+    left: 0;
+    padding-left: $kuiSwitchWidth + $kuiSizeS; // 1
+    z-index: 2; // 1
+    line-height: $kuiSwitchHeight;
+    font-size: $kuiFontSizeS;
+    cursor: pointer;
+  }
+
+  /**
+   * 1. The input is "hidden" but still focusable.
+   */
+  .kuiSwitch__input {
+    position: absolute;
+    opacity: 0; // 1
+    z-index: -1; // 1
+  }
+
+  .kuiSwitch__input:focus + .kuiSwitch__body {
+    background: $kuiColorEmptyShade;
+
+    .kuiSwitch__thumb {
+      border-color: $kuiColorPrimary;
+      background-color: $kuiColorPrimary;
+    }
+  }
+
+  .kuiSwitch__body {
+    width: $kuiSwitchWidth;
+    height: $kuiSwitchHeight;
+    background: $kuiFormBackgroundColor;
+    border: $kuiBorderThin;
+    display: inline-block;
+    position: relative;
+    border-radius: $kuiSwitchHeight;
+    vertical-align: middle;
+  }
+
+  /**
+   * 1. Accounts for the border on the body.
+   */
+  .kuiSwitch__thumb {
+    position: absolute;
+    width: $kuiSwitchHeight;
+    height: $kuiSwitchHeight;
+    display: inline-block;
+    background-color: $kuiColorEmptyShade;
+    left: $kuiSwitchWidth - $kuiSwitchThumbSize;
+    top: -1px; // 1
+    border-radius: 50%;
+    border: $kuiBorderThin;
+    transition: border-color $kuiAnimSpeedNormal $kuiAnimSlightBounce, background-color $kuiAnimSpeedNormal $kuiAnimSlightBounce, left $kuiAnimSpeedNormal $kuiAnimSlightBounce, transform $kuiAnimSpeedNormal $kuiAnimSlightBounce;
+    z-index: 1;
+  }
+
+  .kuiSwitch__track {
+    position: absolute;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    overflow: hidden;
+    border-radius: $kuiSwitchHeight;
+  }
+
+  /**
+   * 1. Mask is used to color the svg. Text color is used so works regardless of theme.
+   */
+  .kuiSwitch__icon {
+    position: absolute;
+    right: -($kuiSwitchWidth - ($kuiSwitchThumbSize / 2));
+    top: 0;
+    bottom: 0;
+    width: $kuiSwitchWidth - ($kuiSwitchThumbSize / 2) + $kuiSizeS;
+    transition: left $kuiAnimSpeedNormal $kuiAnimSlightBounce, right $kuiAnimSpeedNormal $kuiAnimSlightBounce;
+    mask: url('../src/components/icon/assets/cross.svg') center center no-repeat; // 1
+    background-color: $kuiTextColor; // 1
+  }
+
+  .kuiSwitch__icon--checked {
+    right: auto;
+    left: -$kuiSizeS;
+    background-color: $kuiTextColor;
+    mask: url('../src/components/icon/assets/check.svg') center center no-repeat;
+  }
+
+  /**
+   * The thumb is slightly scaled when in use.
+   */
+  &:hover {
+    .kuiSwitch__thumb {
+      transform: scale(1.05);
+    }
+  }
+
+  &:active {
+    .kuiSwitch__thumb {
+      transform: scale(.95);
+    }
+  }
+
+  /**
+   * When input is not checked, we shift around the positioning of sibling/child selectors.
+   */
+  .kuiSwitch__input:not(:checked) ~ .kuiSwitch__body {
+
+    .kuiSwitch__thumb {
+      left: -1px;
+    }
+
+    .kuiSwitch__icon {
+      right: -$kuiSizeS;
+
+      &.kuiSwitch__icon--checked {
+        right: auto;
+        left: -($kuiSwitchWidth - ($kuiSwitchThumbSize / 2));
+      }
+    }
+  }
+}

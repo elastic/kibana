@@ -12,6 +12,21 @@ export {
 } from './call_out';
 
 export {
+  KuiForm,
+  KuiCheckbox,
+  KuiFieldNumber,
+  KuiFieldPassword,
+  KuiRadio,
+  KuiRange,
+  KuiFormRow,
+  KuiFieldSearch,
+  KuiSelect,
+  KuiSwitch,
+  KuiFieldText,
+  KuiTextArea,
+} from './form';
+
+export {
   KuiHeader,
   KuiHeaderBreadcrumb,
   KuiHeaderBreadcrumbCollapsed,
