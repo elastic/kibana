@@ -1,18 +1,23 @@
 import { execFileSync } from 'child_process';
-import { resolve } from 'path';
+import { Command } from 'commander';
 
-const kibanaDir = resolve(__dirname, '..', '..');
-const docsIndexFile = resolve(kibanaDir, 'docs', 'index.asciidoc');
-const docsToolDir = resolve(kibanaDir, '..', 'docs');
-const docsToolCmd = resolve(docsToolDir, 'build_docs.pl');
+import {
+  defaultDocsRepoPath,
+  buildDocsScript,
+  buildDocsArgs
+} from './docs_repo';
 
-const args = process.argv.slice(2);
+const cmd = new Command('node scripts/docs');
+cmd
+  .option('--docrepo [path]', 'local path to the docs repo', defaultDocsRepoPath())
+  .option('--open', 'open the docs in the browser', false)
+  .parse(process.argv);
 
 try {
-  execFileSync(docsToolCmd, ['--doc', docsIndexFile, '--chunk=1', ...args]);
+  execFileSync(buildDocsScript(cmd), buildDocsArgs(cmd));
 } catch (err) {
   if (err.code === 'ENOENT') {
-    console.error(`elastic/docs repo must be cloned to ${docsToolDir}`);
+    console.error(`elastic/docs repo must be cloned to ${cmd.docrepo}`);
   } else {
     console.error(err.stack);
   }
