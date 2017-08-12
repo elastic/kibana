@@ -19,6 +19,7 @@ export {
   KuiForm,
   KuiFormErrorText,
   KuiFormHelpText,
+  KuiFormLabel,
   KuiFormRow,
   KuiRange,
   KuiSelect,

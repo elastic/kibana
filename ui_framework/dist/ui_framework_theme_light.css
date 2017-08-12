@@ -686,6 +686,13 @@ table {
   padding: 8px 0;
   color: #A30000; }
 
+.kuiFormLabel {
+  font-size: 12px;
+  padding-bottom: 8px;
+  cursor: pointer;
+  transition: all 150ms cubic-bezier(0.694, 0.0482, 0.335, 1);
+  font-weight: 500; }
+
 .kuiFormRow {
   display: -webkit-box;
   display: -webkit-flex;
@@ -697,7 +704,10 @@ table {
       -ms-flex-direction: column;
           flex-direction: column;
   position: relative;
-  max-width: 400px; }
+  max-width: 400px;
+  /**
+   * 1. Force the label to be first, so we can use sibling:focus selectors.
+   */ }
   .kuiFormRow + * {
     margin-top: 24px; }
   .kuiFormRow.kuiFormRow--withIcon input {
@@ -706,15 +716,11 @@ table {
     left: auto;
     right: 12px; }
   .kuiFormRow .kuiFormRow__label {
-    font-size: 12px;
-    padding-bottom: 8px;
-    cursor: pointer;
-    transition: all 150ms cubic-bezier(0.694, 0.0482, 0.335, 1);
-    font-weight: 500;
     -webkit-box-ordinal-group: 0;
     -webkit-order: -1;
         -ms-flex-order: -1;
-            order: -1; }
+            order: -1;
+    /* 1 */ }
   .kuiFormRow .kuiFormRow__error + * {
     padding-top: 0; }
   .kuiFormRow .kuiFormRow__icon {

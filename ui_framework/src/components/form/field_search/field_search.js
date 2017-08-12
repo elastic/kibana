@@ -3,7 +3,6 @@ import React, {
 } from 'react';
 import classNames from 'classnames';
 
-
 export const KuiFieldSearch = ({ className, id, name, placeholder, value, ...rest }) => {
   const classes = classNames('kuiFieldSearch', className);
 

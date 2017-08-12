@@ -6,6 +6,7 @@ export { KuiFieldText } from './field_text';
 export { KuiForm } from './form';
 export { KuiFormErrorText } from './form_error_text';
 export { KuiFormHelpText } from './form_help_text';
+export { KuiFormLabel } from './form_label';
 export { KuiFormRow } from './form_row';
 export { KuiRange } from './range';
 export { KuiSelect } from './select';

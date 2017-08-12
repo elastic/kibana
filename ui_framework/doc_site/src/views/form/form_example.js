@@ -11,17 +11,17 @@ import {
   GuideText,
 } from '../../components';
 
-import FieldText from './field_text';
-const fieldTextSource = require('!!raw!./field_text');
-const fieldTextHtml = renderToHtml(FieldText);
+import FormComponents from './form_components';
+const formComponentsSource = require('!!raw!./form_components');
+const formComponentsHtml = renderToHtml(FormComponents);
 
-import FormEverything from './form_everything';
-const formEverythingSource = require('!!raw!./form_everything');
-const formEverythingHtml = renderToHtml(FormEverything);
+import FormRows from './form_rows';
+const formRowsSource = require('!!raw!./form_rows');
+const formRowsHtml = renderToHtml(FormRows);
 
-import FormValidation from './form_validation';
-const formValidationSource = require('!!raw!./form_validation');
-const formValidationHtml = renderToHtml(FormValidation);
+import Validation from './validation';
+const validationSource = require('!!raw!./validation');
+const validationHtml = renderToHtml(Validation);
 
 import FormPopover from './form_popover';
 const formPopoverSource = require('!!raw!./form_popover');
@@ -30,46 +30,40 @@ const formPopoverHtml = renderToHtml(FormPopover);
 export default props => (
   <GuidePage title={props.route.name}>
     <GuideSection
-      title="Component structure"
+      title="Form components"
       source={[{
         type: GuideSectionTypes.JS,
-        code: fieldTextSource,
+        code: formComponentsSource,
       }, {
         type: GuideSectionTypes.HTML,
-        code: fieldTextHtml,
+        code: formComponentsHtml,
       }]}
     >
-      <GuideText>
-        Each form input has a base component to cover generic use cases. These are raw HTML elements with only basic styling.
-        Additionally, you can wrap any of these elements with a <GuideCode>FormRow</GuideCode> which gives you optional
-        prebuilt labels, help text and validation.  Below is an example showing the <GuideCode>FieldText</GuideCode> component
-        in a bunch of configurations, but they all act roughly the same. Farther down in the docs you can see an example
-        showing every form element and their individual prop settings (which mirror their HTML counterparts).
-      </GuideText>
-
       <GuideDemo>
-        <FieldText />
+        <FormComponents />
       </GuideDemo>
     </GuideSection>
+
     <GuideSection
-      title="Form component examples"
+      title="Form rows"
       source={[{
         type: GuideSectionTypes.JS,
-        code: formEverythingSource,
+        code: formRowsSource,
       }, {
         type: GuideSectionTypes.HTML,
-        code: formEverythingHtml,
+        code: formRowsHtml,
       }]}
     >
       <GuideText>
-        This example shows every form element in use and showcases a variety of styles. Note that each one of these elements is wrapped
-        by <GuideCode>FormRow</GuideCode>.
+        Use the <GuideCode>FormRow</GuideCode> component to easily associate form components with
+        labels, help text, and error text.
       </GuideText>
 
       <GuideDemo>
-        <FormEverything />
+        <FormRows />
       </GuideDemo>
     </GuideSection>
+
     <GuideSection
       title="Form in popover"
       source={[{
@@ -88,14 +82,15 @@ export default props => (
         <FormPopover />
       </GuideDemo>
     </GuideSection>
+
     <GuideSection
-      title="Form validation"
+      title="Validation"
       source={[{
         type: GuideSectionTypes.JS,
-        code: formValidationSource,
+        code: validationSource,
       }, {
         type: GuideSectionTypes.HTML,
-        code: formValidationHtml,
+        code: validationHtml,
       }]}
     >
       <GuideText>
@@ -105,7 +100,7 @@ export default props => (
       </GuideText>
 
       <GuideDemo>
-        <FormValidation />
+        <Validation />
       </GuideDemo>
     </GuideSection>
   </GuidePage>

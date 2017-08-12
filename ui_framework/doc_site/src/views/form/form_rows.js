@@ -39,7 +39,7 @@ export default () => {
     <KuiForm>
       <KuiFormRow
         id={makeId()}
-        label="Number"
+        label="Number field"
         helpText="Any number between 1 and 5"
       >
         <KuiFieldNumber
@@ -51,7 +51,7 @@ export default () => {
 
       <KuiFormRow
         id={makeId()}
-        label="First name"
+        label="Text field"
         helpText="I am some friendly help text."
       >
         <KuiFieldText name="first" />
@@ -59,7 +59,7 @@ export default () => {
 
       <KuiFormRow
         id={makeId()}
-        label="Last name with icon"
+        label="Text field with icon"
         icon="user"
       >
         <KuiFieldText
@@ -70,7 +70,7 @@ export default () => {
 
       <KuiFormRow
         id={makeId()}
-        label="Password"
+        label="Password field"
         icon="lock"
       >
         <KuiFieldPassword name="pass" />
@@ -90,11 +90,10 @@ export default () => {
 
       <KuiFormRow
         id={makeId()}
-        label="Search"
+        label="Search field"
         icon="search"
       >
         <KuiFieldSearch
-          label="Search"
           name="search1"
           placeholder="Search..."
         />
@@ -102,7 +101,7 @@ export default () => {
 
       <KuiFormRow
         id={makeId()}
-        label="Select dropdown"
+        label="Select"
         icon="arrowDown"
         containsSelect
       >
@@ -112,14 +111,14 @@ export default () => {
         />
       </KuiFormRow>
       <KuiFormRow
-        label="Textarea"
+        label="Text area"
         id={makeId()}
       >
         <KuiTextArea name="textarea"/>
       </KuiFormRow>
 
       <KuiFormRow
-        label="Use a swich if you only need one checkbox"
+        label="Use a switch instead of a single checkbox"
       >
         <KuiSwitch
           name="switch"
@@ -130,7 +129,7 @@ export default () => {
 
       <KuiFormRow
         id={makeId()}
-        label="You should always use more than one checkbox"
+        label="Checkboxes"
       >
         <KuiCheckbox options={checkboxOptions} />
       </KuiFormRow>

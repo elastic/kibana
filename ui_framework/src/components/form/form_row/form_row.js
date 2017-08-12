@@ -7,6 +7,7 @@ import classNames from 'classnames';
 import { KuiIcon } from '../../../components';
 import { KuiFormHelpText } from '../form_help_text';
 import { KuiFormErrorText } from '../form_error_text';
+import { KuiFormLabel } from '../form_label';
 
 export const KuiFormRow = ({
   children,
@@ -65,12 +66,12 @@ export const KuiFormRow = ({
 
   if (label) {
     optionalLabel = (
-      <label
+      <KuiFormLabel
         className="kuiFormRow__label"
         htmlFor={id}
       >
         {label}
-      </label>
+      </KuiFormLabel>
     );
   }
 

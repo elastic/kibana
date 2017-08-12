@@ -1,0 +1,7 @@
+.kuiFormLabel {
+  font-size: $kuiFontSizeXS;
+  padding-bottom: $kuiSizeS;
+  cursor: pointer;
+  transition: all $kuiAnimSpeedFast $kuiAnimSlightResistance;
+  font-weight: $kuiFontWeightMedium;
+}

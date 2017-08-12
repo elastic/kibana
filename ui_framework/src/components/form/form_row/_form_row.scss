@@ -17,13 +17,11 @@
     right: $kuiSizeM;
   }
 
+  /**
+   * 1. Force the label to be first, so we can use sibling:focus selectors.
+   */
   .kuiFormRow__label {
-    font-size: $kuiFontSizeXS;
-    padding-bottom: $kuiSizeS;
-    cursor: pointer;
-    transition: all $kuiAnimSpeedFast $kuiAnimSlightResistance;
-    font-weight: $kuiFontWeightMedium;
-    order: -1; // Force the label to be first, so we can use sibling:focus selectors.
+    order: -1; /* 1 */
   }
 
   .kuiFormRow__error +  * {
