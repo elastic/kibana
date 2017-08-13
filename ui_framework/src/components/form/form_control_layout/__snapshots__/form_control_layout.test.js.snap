@@ -1,9 +1,3 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`KuiFormControlLayout is rendered 1`] = `
-<div
-  aria-label="aria-label"
-  class="kuiFormControlLayout testClass1 testClass2"
-  data-test-subj="test subject string"
-/>
-`;
+exports[`KuiFormControlLayout is rendered 1`] = `<input />`;

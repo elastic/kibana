@@ -11,37 +11,31 @@ const iconSideToClassNameMap = {
 
 export const ICON_SIDES = Object.keys(iconSideToClassNameMap);
 
-export const KuiFormControlLayout = ({ children, icon, iconSide, className, ...rest }) => {
-  const classes = classNames('kuiFormControlLayout', className);
-
-  let optionalIcon;
-
+export const KuiFormControlLayout = ({ children, icon, iconSide }) => {
   if (icon) {
     const iconClasses = classNames('kuiFormControlLayout__icon', iconSideToClassNameMap[iconSide]);
 
-    optionalIcon = (
+    const optionalIcon = (
       <KuiIcon
         className={iconClasses}
         type={icon}
         size="medium"
       />
     );
+
+    return (
+      <div className="kuiFormControlLayout">
+        {children}
+        {optionalIcon}
+      </div>
+    );
   }
 
-  return (
-    <div
-      className={classes}
-      {...rest}
-    >
-      {children}
-      {optionalIcon}
-    </div>
-  );
+  return children;
 };
 
 KuiFormControlLayout.propTypes = {
   children: PropTypes.node,
-  className: PropTypes.string,
   icon: PropTypes.string,
   iconSide: PropTypes.oneOf(ICON_SIDES),
 };
