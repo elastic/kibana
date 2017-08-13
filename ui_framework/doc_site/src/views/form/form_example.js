@@ -94,7 +94,7 @@ export default props => (
       }]}
     >
       <GuideText>
-        Validation is achieved by applying <GuideCode>invalid</GuideCode> and optionally <GuideCode>error</GuideCode> props
+        Validation is achieved by applying <GuideCode>isInvalid</GuideCode> and optionally <GuideCode>error</GuideCode> props
         onto the <GuideCode>KuiForm</GuideCode> or <GuideCode>KuiFormRow</GuideCode> components. Errors are optional
         and are passed as an array in case you need to list many errors.
       </GuideText>

@@ -10,12 +10,20 @@ export class KuiValidatableControl extends Component {
     isInvalid: PropTypes.bool,
   }
 
-  componentDidUpdate() {
+  updateValidity() {
     if (this.props.isInvalid) {
       this.control.setCustomValidity('Invalid');
     } else {
       this.control.setCustomValidity('');
     }
+  }
+
+  componentDidMount() {
+    this.updateValidity();
+  }
+
+  componentDidUpdate() {
+    this.updateValidity();
   }
 
   render() {

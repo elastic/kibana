@@ -54,7 +54,10 @@ export default class extends Component {
 
     return (
       <div>
-        <KuiForm invalid={this.state.showErrors} errors={errors}>
+        <KuiForm
+          isInvalid={this.state.showErrors}
+          error={errors}
+        >
           <KuiFormRow
             id={makeId()}
             label="Validation only"
@@ -71,7 +74,7 @@ export default class extends Component {
             label="Validation with helptext and errors"
             helpText="I am some friendly help text."
             isInvalid={this.state.showErrors}
-            errors={errors}
+            error={errors}
           >
             <KuiFieldText
               name="text"

@@ -38,7 +38,7 @@ export class KuiFormRow extends Component {
       children,
       helpText,
       isInvalid,
-      errors,
+      error,
       label,
       id,
       className,
@@ -59,8 +59,8 @@ export class KuiFormRow extends Component {
 
     let optionalErrors;
 
-    if (errors) {
-      const errorTexts = Array.isArray(errors) ? errors : [errors];
+    if (error) {
+      const errorTexts = Array.isArray(error) ? error : [error];
       optionalErrors = errorTexts.map(error => (
         <KuiFormErrorText key={error}>
           {error}
@@ -108,6 +108,6 @@ KuiFormRow.propTypes = {
   label: PropTypes.string,
   id: PropTypes.string,
   isInvalid: PropTypes.bool,
-  errors: PropTypes.oneOfType([PropTypes.string, PropTypes.arrayOf(PropTypes.string)]),
+  error: PropTypes.oneOfType([PropTypes.string, PropTypes.arrayOf(PropTypes.string)]),
   helpText: PropTypes.string,
 };
