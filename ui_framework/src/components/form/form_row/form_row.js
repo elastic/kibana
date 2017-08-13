@@ -4,15 +4,12 @@ import React, {
 } from 'react';
 import classNames from 'classnames';
 
-import { KuiIcon } from '../../../components';
 import { KuiFormHelpText } from '../form_help_text';
 import { KuiFormErrorText } from '../form_error_text';
 import { KuiFormLabel } from '../form_label';
 
 export const KuiFormRow = ({
   children,
-  icon,
-  containsSelect,
   helpText,
   invalid,
   errors,
@@ -25,27 +22,14 @@ export const KuiFormRow = ({
     'kuiFormRow',
     className,
     {
-      'kuiFormRow--withIcon' : icon,
       'kuiFormRow--invalid' : invalid,
-      'kuiFormRow--select' : containsSelect,
     }
   );
 
   let field;
-  let optionalIcon;
   let optionalHelpText;
   let optionalErrors;
   let optionalLabel;
-
-  if (icon) {
-    optionalIcon = (
-      <KuiIcon
-        className="kuiFormRow__icon"
-        type={icon}
-        size="medium"
-      />
-    );
-  }
 
   if (helpText) {
     optionalHelpText = (
@@ -99,7 +83,6 @@ export const KuiFormRow = ({
       {optionalLabel}
       {optionalErrors}
       {optionalHelpText}
-      {optionalIcon}
     </div>
   );
 };
@@ -107,9 +90,7 @@ export const KuiFormRow = ({
 KuiFormRow.propTypes = {
   label: PropTypes.string,
   id: PropTypes.string,
-  icon: PropTypes.string,
   invalid: PropTypes.bool,
-  containsSelect: PropTypes.bool,
   errors: PropTypes.oneOfType([PropTypes.string, PropTypes.arrayOf(PropTypes.string)]),
   helpText: PropTypes.string,
 };

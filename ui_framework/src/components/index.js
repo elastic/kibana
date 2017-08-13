@@ -17,6 +17,7 @@ export {
   KuiFieldSearch,
   KuiFieldText,
   KuiForm,
+  KuiFormControlLayout,
   KuiFormErrorText,
   KuiFormHelpText,
   KuiFormLabel,

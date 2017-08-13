@@ -19,7 +19,23 @@ export default () => (
     <br />
     <br />
 
+    <KuiFieldText
+      defaultValue="Text field with customizable icon"
+      icon="user"
+    />
+
+    <br />
+    <br />
+
     <KuiFieldNumber defaultValue="23" />
+
+    <br />
+    <br />
+
+    <KuiFieldNumber
+      defaultValue="23"
+      icon="user"
+    />
 
     <br />
     <br />

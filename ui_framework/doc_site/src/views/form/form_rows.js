@@ -4,16 +4,12 @@ import {
   KuiForm,
   KuiCheckbox,
   KuiFieldNumber,
-  KuiFieldPassword,
   KuiRange,
   KuiFormRow,
-  KuiFieldSearch,
-  KuiSelect,
   KuiSwitch,
   KuiFieldText,
   KuiTextArea,
 } from '../../../../components';
-
 
 // Don't use this, make proper ids instead. This is just for the example.
 function makeId() {
@@ -26,13 +22,6 @@ export default () => {
     { id: makeId(), label: 'Option one' },
     { id: makeId(), label: 'Option two is checked by default', checked: true },
     { id: makeId(), label: 'Option three' },
-  ];
-
-  // Select options are passed as an array of objects.
-  const selectOptions = [
-    { value: 'option_one', text: 'Option one' },
-    { value: 'option_two', text: 'Option two' },
-    { value: 'option_three', text: 'Option three' },
   ];
 
   return (
@@ -59,25 +48,6 @@ export default () => {
 
       <KuiFormRow
         id={makeId()}
-        label="Text field with icon"
-        icon="user"
-      >
-        <KuiFieldText
-          name="first"
-          placeholder="Some placeholder text"
-        />
-      </KuiFormRow>
-
-      <KuiFormRow
-        id={makeId()}
-        label="Password field"
-        icon="lock"
-      >
-        <KuiFieldPassword name="pass" />
-      </KuiFormRow>
-
-      <KuiFormRow
-        id={makeId()}
         label="Range"
       >
         <KuiRange
@@ -88,28 +58,6 @@ export default () => {
         />
       </KuiFormRow>
 
-      <KuiFormRow
-        id={makeId()}
-        label="Search field"
-        icon="search"
-      >
-        <KuiFieldSearch
-          name="search1"
-          placeholder="Search..."
-        />
-      </KuiFormRow>
-
-      <KuiFormRow
-        id={makeId()}
-        label="Select"
-        icon="arrowDown"
-        containsSelect
-      >
-        <KuiSelect
-          options={selectOptions}
-          name="dropdown"
-        />
-      </KuiFormRow>
       <KuiFormRow
         label="Text area"
         id={makeId()}

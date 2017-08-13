@@ -4,6 +4,7 @@ export { KuiFieldPassword } from './field_password';
 export { KuiFieldSearch } from './field_search';
 export { KuiFieldText } from './field_text';
 export { KuiForm } from './form';
+export { KuiFormControlLayout } from './form_control_layout';
 export { KuiFormErrorText } from './form_error_text';
 export { KuiFormHelpText } from './form_help_text';
 export { KuiFormLabel } from './form_label';

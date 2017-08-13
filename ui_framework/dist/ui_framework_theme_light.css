@@ -603,68 +603,78 @@ table {
               mask: url("../src/components/icon/assets/check.svg") center center no-repeat; }
 
 .kuiFieldNumber {
+  min-width: 256px;
+  max-width: 400px;
+  width: 100%;
   border: none;
   font-size: 14px;
   font-family: "Roboto", Helvetica, Arial, sans-serif;
   padding: 12px;
   color: #3F3F3F;
-  min-width: 256px;
   background: #fbfbfb;
   box-shadow: 0 2px 2px -1px rgba(0, 0, 0, 0.1), 0 0 0 1px rgba(0, 0, 0, 0.08), inset -400px 0 0 0 #fbfbfb;
   transition: box-shadow 250ms ease-in, background 250ms ease-in;
-  max-width: 400px;
   border-radius: 0; }
   .kuiFieldNumber:focus {
     background: #FFF;
     box-shadow: 0 4px 4px -2px rgba(0, 0, 0, 0.1), 0 0 0 1px rgba(0, 0, 0, 0.16), inset 0 0 0 0 #FFF, inset 0 -2px 0 0 #0079a5; }
+  .kuiFieldNumber--withIcon {
+    padding-left: 40px; }
 
 .kuiFieldPassword {
+  min-width: 256px;
+  max-width: 400px;
+  width: 100%;
   border: none;
   font-size: 14px;
   font-family: "Roboto", Helvetica, Arial, sans-serif;
   padding: 12px;
   color: #3F3F3F;
-  min-width: 256px;
   background: #fbfbfb;
   box-shadow: 0 2px 2px -1px rgba(0, 0, 0, 0.1), 0 0 0 1px rgba(0, 0, 0, 0.08), inset -400px 0 0 0 #fbfbfb;
   transition: box-shadow 250ms ease-in, background 250ms ease-in;
-  max-width: 400px;
-  border-radius: 0; }
+  border-radius: 0;
+  padding-left: 40px; }
   .kuiFieldPassword:focus {
     background: #FFF;
     box-shadow: 0 4px 4px -2px rgba(0, 0, 0, 0.1), 0 0 0 1px rgba(0, 0, 0, 0.16), inset 0 0 0 0 #FFF, inset 0 -2px 0 0 #0079a5; }
 
 .kuiFieldSearch {
+  min-width: 256px;
+  max-width: 400px;
+  width: 100%;
   border: none;
   font-size: 14px;
   font-family: "Roboto", Helvetica, Arial, sans-serif;
   padding: 12px;
   color: #3F3F3F;
-  min-width: 256px;
   background: #fbfbfb;
   box-shadow: 0 2px 2px -1px rgba(0, 0, 0, 0.1), 0 0 0 1px rgba(0, 0, 0, 0.08), inset -400px 0 0 0 #fbfbfb;
   transition: box-shadow 250ms ease-in, background 250ms ease-in;
-  max-width: 400px;
-  border-radius: 0; }
+  border-radius: 0;
+  padding-left: 40px; }
   .kuiFieldSearch:focus {
     background: #FFF;
     box-shadow: 0 4px 4px -2px rgba(0, 0, 0, 0.1), 0 0 0 1px rgba(0, 0, 0, 0.16), inset 0 0 0 0 #FFF, inset 0 -2px 0 0 #0079a5; }
 
 .kuiFieldText {
+  min-width: 256px;
+  max-width: 400px;
+  width: 100%;
   border: none;
   font-size: 14px;
   font-family: "Roboto", Helvetica, Arial, sans-serif;
   padding: 12px;
   color: #3F3F3F;
-  min-width: 256px;
   background: #fbfbfb;
   box-shadow: 0 2px 2px -1px rgba(0, 0, 0, 0.1), 0 0 0 1px rgba(0, 0, 0, 0.08), inset -400px 0 0 0 #fbfbfb;
   transition: box-shadow 250ms ease-in, background 250ms ease-in;
-  max-width: 400px;
   border-radius: 0; }
   .kuiFieldText:focus {
     background: #FFF;
     box-shadow: 0 4px 4px -2px rgba(0, 0, 0, 0.1), 0 0 0 1px rgba(0, 0, 0, 0.16), inset 0 0 0 0 #FFF, inset 0 -2px 0 0 #0079a5; }
+  .kuiFieldText--withIcon {
+    padding-left: 40px; }
 
 .kuiForm__error {
   font-size: 14px;
@@ -676,15 +686,31 @@ table {
 .kuiForm__errors {
   margin-bottom: 16px; }
 
-.kuiFormHelpText {
-  font-size: 12px;
-  padding: 8px 0;
-  color: #666; }
+.kuiFormControlLayout {
+  min-width: 256px;
+  max-width: 400px;
+  width: 100%;
+  display: inline-block;
+  position: relative; }
+
+.kuiFormControlLayout__icon {
+  position: absolute;
+  top: 12px;
+  left: 12px; }
+
+.kuiFormControlLayout__icon--right {
+  left: auto;
+  right: 12px; }
 
 .kuiFormErrorText {
   font-size: 12px;
   padding: 8px 0;
   color: #A30000; }
+
+.kuiFormHelpText {
+  font-size: 12px;
+  padding: 8px 0;
+  color: #666; }
 
 .kuiFormLabel {
   font-size: 12px;
@@ -710,11 +736,6 @@ table {
    */ }
   .kuiFormRow + * {
     margin-top: 24px; }
-  .kuiFormRow.kuiFormRow--withIcon input {
-    padding-left: 40px; }
-  .kuiFormRow.kuiFormRow--select .kuiFormRow__icon {
-    left: auto;
-    right: 12px; }
   .kuiFormRow .kuiFormRow__label {
     -webkit-box-ordinal-group: 0;
     -webkit-order: -1;
@@ -723,10 +744,6 @@ table {
     /* 1 */ }
   .kuiFormRow .kuiFormRow__error + * {
     padding-top: 0; }
-  .kuiFormRow .kuiFormRow__icon {
-    position: absolute;
-    top: 32px;
-    left: 12px; }
   .kuiFormRow input:focus + label,
   .kuiFormRow select:focus + label,
   .kuiFormRow textarea:focus + label {
@@ -813,21 +830,27 @@ table {
     width: 16px;
     margin-top: 0; }
 
+/**
+ * 1. Leave room for caret.
+ */
 .kuiSelect {
-  -webkit-appearance: none;
-     -moz-appearance: none;
-          appearance: none;
+  min-width: 256px;
+  max-width: 400px;
+  width: 100%;
   border: none;
   font-size: 14px;
   font-family: "Roboto", Helvetica, Arial, sans-serif;
   padding: 12px;
   color: #3F3F3F;
-  min-width: 256px;
   background: #fbfbfb;
   box-shadow: 0 2px 2px -1px rgba(0, 0, 0, 0.1), 0 0 0 1px rgba(0, 0, 0, 0.08), inset -400px 0 0 0 #fbfbfb;
   transition: box-shadow 250ms ease-in, background 250ms ease-in;
-  max-width: 400px;
-  border-radius: 0; }
+  border-radius: 0;
+  padding-right: 40px;
+  /* 1 */
+  -webkit-appearance: none;
+     -moz-appearance: none;
+          appearance: none; }
   .kuiSelect:focus {
     background: #FFF;
     box-shadow: 0 4px 4px -2px rgba(0, 0, 0, 0.1), 0 0 0 1px rgba(0, 0, 0, 0.16), inset 0 0 0 0 #FFF, inset 0 -2px 0 0 #0079a5; }
@@ -936,16 +959,17 @@ table {
       left: -40px; }
 
 .kuiTextArea {
+  min-width: 256px;
+  max-width: 400px;
+  width: 100%;
   border: none;
   font-size: 14px;
   font-family: "Roboto", Helvetica, Arial, sans-serif;
   padding: 12px;
   color: #3F3F3F;
-  min-width: 256px;
   background: #fbfbfb;
   box-shadow: 0 2px 2px -1px rgba(0, 0, 0, 0.1), 0 0 0 1px rgba(0, 0, 0, 0.08), inset -400px 0 0 0 #fbfbfb;
   transition: box-shadow 250ms ease-in, background 250ms ease-in;
-  max-width: 400px;
   border-radius: 0; }
   .kuiTextArea:focus {
     background: #FFF;

@@ -8,15 +8,6 @@
     margin-top: $kuiSizeL;
   }
 
-  &.kuiFormRow--withIcon input {
-    padding-left: $kuiSizeXXL;
-  }
-
-  &.kuiFormRow--select .kuiFormRow__icon {
-    left: auto;
-    right: $kuiSizeM;
-  }
-
   /**
    * 1. Force the label to be first, so we can use sibling:focus selectors.
    */
@@ -26,12 +17,6 @@
 
   .kuiFormRow__error +  * {
     padding-top: 0;
-  }
-
-  .kuiFormRow__icon {
-    position: absolute;
-    top: $kuiSizeXL;
-    left: $kuiSizeM;
   }
 
   // Naked selectors on purpose to touch inner components.

@@ -3,19 +3,37 @@ import React, {
 } from 'react';
 import classNames from 'classnames';
 
-export const KuiFieldText = ({ id, name, placeholder, value, className, ...rest }) => {
-  const classes = classNames('kuiFieldText', className);
+import {
+  KuiFormControlLayout,
+} from '../form_control_layout';
+
+export const KuiFieldText = ({
+  id,
+  name,
+  placeholder,
+  value,
+  className,
+  icon,
+  ...rest,
+}) => {
+  const classes = classNames('kuiFieldText', className, {
+    'kuiFieldText--withIcon': icon,
+  });
 
   return (
-    <input
-      type="text"
-      id={id}
-      name={name}
-      placeholder={placeholder}
-      className={classes}
-      value={value}
-      {...rest}
-    />
+    <KuiFormControlLayout
+      icon={icon}
+    >
+      <input
+        type="text"
+        id={id}
+        name={name}
+        placeholder={placeholder}
+        className={classes}
+        value={value}
+        {...rest}
+      />
+    </KuiFormControlLayout>
   );
 };
 
@@ -24,6 +42,7 @@ KuiFieldText.propTypes = {
   id: PropTypes.string,
   placeholder: PropTypes.string,
   value: PropTypes.string,
+  icon: PropTypes.string,
 };
 
 KuiFieldText.defaultProps = {
