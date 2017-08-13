@@ -26,6 +26,7 @@ export {
   KuiSelect,
   KuiSwitch,
   KuiTextArea,
+  KuiValidatableControl,
 } from './form';
 
 export {

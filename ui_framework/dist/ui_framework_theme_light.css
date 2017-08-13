@@ -618,6 +618,8 @@ table {
   .kuiFieldNumber:focus {
     background: #FFF;
     box-shadow: 0 4px 4px -2px rgba(0, 0, 0, 0.1), 0 0 0 1px rgba(0, 0, 0, 0.16), inset 0 0 0 0 #FFF, inset 0 -2px 0 0 #0079a5; }
+  .kuiFieldNumber:invalid {
+    box-shadow: 0 4px 4px -2px rgba(0, 0, 0, 0.1), 0 0 0 1px rgba(0, 0, 0, 0.16), inset 0 0 0 0 #FFF, inset 0 -2px 0 0 #A30000 !important; }
   .kuiFieldNumber--withIcon {
     padding-left: 40px; }
 
@@ -638,6 +640,8 @@ table {
   .kuiFieldPassword:focus {
     background: #FFF;
     box-shadow: 0 4px 4px -2px rgba(0, 0, 0, 0.1), 0 0 0 1px rgba(0, 0, 0, 0.16), inset 0 0 0 0 #FFF, inset 0 -2px 0 0 #0079a5; }
+  .kuiFieldPassword:invalid {
+    box-shadow: 0 4px 4px -2px rgba(0, 0, 0, 0.1), 0 0 0 1px rgba(0, 0, 0, 0.16), inset 0 0 0 0 #FFF, inset 0 -2px 0 0 #A30000 !important; }
 
 .kuiFieldSearch {
   min-width: 256px;
@@ -656,6 +660,8 @@ table {
   .kuiFieldSearch:focus {
     background: #FFF;
     box-shadow: 0 4px 4px -2px rgba(0, 0, 0, 0.1), 0 0 0 1px rgba(0, 0, 0, 0.16), inset 0 0 0 0 #FFF, inset 0 -2px 0 0 #0079a5; }
+  .kuiFieldSearch:invalid {
+    box-shadow: 0 4px 4px -2px rgba(0, 0, 0, 0.1), 0 0 0 1px rgba(0, 0, 0, 0.16), inset 0 0 0 0 #FFF, inset 0 -2px 0 0 #A30000 !important; }
 
 .kuiFieldText {
   min-width: 256px;
@@ -673,6 +679,8 @@ table {
   .kuiFieldText:focus {
     background: #FFF;
     box-shadow: 0 4px 4px -2px rgba(0, 0, 0, 0.1), 0 0 0 1px rgba(0, 0, 0, 0.16), inset 0 0 0 0 #FFF, inset 0 -2px 0 0 #0079a5; }
+  .kuiFieldText:invalid {
+    box-shadow: 0 4px 4px -2px rgba(0, 0, 0, 0.1), 0 0 0 1px rgba(0, 0, 0, 0.16), inset 0 0 0 0 #FFF, inset 0 -2px 0 0 #A30000 !important; }
   .kuiFieldText--withIcon {
     padding-left: 40px; }
 
@@ -712,51 +720,42 @@ table {
   padding: 8px 0;
   color: #666; }
 
+/**
+ * 1. Focused state overrides invalid state.
+ */
 .kuiFormLabel {
   font-size: 12px;
-  padding-bottom: 8px;
+  margin-bottom: 8px;
   cursor: pointer;
   transition: all 150ms cubic-bezier(0.694, 0.0482, 0.335, 1);
   font-weight: 500; }
+  .kuiFormLabel.kuiFormLabel-isInvalid {
+    color: #A30000;
+    /* 1 */ }
+  .kuiFormLabel.kuiFormLabel-isFocused {
+    color: #0079a5;
+    /* 1 */ }
 
+/**
+ * 1. Coerce inline form elements to behave as block-level elements.
+ */
 .kuiFormRow {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
   display: flex;
+  /* 1 */
   -webkit-box-orient: vertical;
   -webkit-box-direction: normal;
   -webkit-flex-direction: column;
       -ms-flex-direction: column;
           flex-direction: column;
-  position: relative;
-  max-width: 400px;
-  /**
-   * 1. Force the label to be first, so we can use sibling:focus selectors.
-   */ }
+  /* 1 */
+  max-width: 400px; }
   .kuiFormRow + * {
     margin-top: 24px; }
-  .kuiFormRow .kuiFormRow__label {
-    -webkit-box-ordinal-group: 0;
-    -webkit-order: -1;
-        -ms-flex-order: -1;
-            order: -1;
-    /* 1 */ }
   .kuiFormRow .kuiFormRow__error + * {
     padding-top: 0; }
-  .kuiFormRow input:focus + label,
-  .kuiFormRow select:focus + label,
-  .kuiFormRow textarea:focus + label {
-    color: #0079a5; }
-  .kuiFormRow.kuiFormRow--invalid .kuiFormRow__label {
-    color: #A30000 !important; }
-  .kuiFormRow.kuiFormRow--invalid input[type="text"],
-  .kuiFormRow.kuiFormRow--invalid input[type="password"],
-  .kuiFormRow.kuiFormRow--invalid input[type="number"],
-  .kuiFormRow.kuiFormRow--invalid input[type="search"],
-  .kuiFormRow.kuiFormRow--invalid select,
-  .kuiFormRow.kuiFormRow--invalid textarea {
-    box-shadow: 0 4px 4px -2px rgba(0, 0, 0, 0.1), 0 0 0 1px rgba(0, 0, 0, 0.16), inset 0 0 0 0 #FFF, inset 0 -2px 0 0 #A30000 !important; }
 
 .kuiRange {
   -webkit-appearance: none;
@@ -854,6 +853,8 @@ table {
   .kuiSelect:focus {
     background: #FFF;
     box-shadow: 0 4px 4px -2px rgba(0, 0, 0, 0.1), 0 0 0 1px rgba(0, 0, 0, 0.16), inset 0 0 0 0 #FFF, inset 0 -2px 0 0 #0079a5; }
+  .kuiSelect:invalid {
+    box-shadow: 0 4px 4px -2px rgba(0, 0, 0, 0.1), 0 0 0 1px rgba(0, 0, 0, 0.16), inset 0 0 0 0 #FFF, inset 0 -2px 0 0 #A30000 !important; }
   .kuiSelect::-ms-expand {
     display: none; }
 
@@ -974,6 +975,8 @@ table {
   .kuiTextArea:focus {
     background: #FFF;
     box-shadow: 0 4px 4px -2px rgba(0, 0, 0, 0.1), 0 0 0 1px rgba(0, 0, 0, 0.16), inset 0 0 0 0 #FFF, inset 0 -2px 0 0 #0079a5; }
+  .kuiTextArea:invalid {
+    box-shadow: 0 4px 4px -2px rgba(0, 0, 0, 0.1), 0 0 0 1px rgba(0, 0, 0, 0.16), inset 0 0 0 0 #FFF, inset 0 -2px 0 0 #A30000 !important; }
 
 .kuiHeader {
   box-shadow: 0 2px 2px -1px rgba(0, 0, 0, 0.1);

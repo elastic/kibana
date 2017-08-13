@@ -7,22 +7,36 @@ import {
   KuiFormControlLayout,
 } from '../form_control_layout';
 
-export const KuiFieldSearch = ({ className, id, name, placeholder, value, ...rest }) => {
+import {
+  KuiValidatableControl,
+} from '../validatable_control';
+
+export const KuiFieldSearch = ({
+  className,
+  id,
+  name,
+  placeholder,
+  value,
+  isInvalid,
+  ...rest,
+}) => {
   const classes = classNames('kuiFieldSearch', className);
 
   return (
     <KuiFormControlLayout
       icon="search"
     >
-      <input
-        type="search"
-        id={id}
-        name={name}
-        placeholder={placeholder}
-        className={classes}
-        value={value}
-        {...rest}
-      />
+      <KuiValidatableControl isInvalid={isInvalid}>
+        <input
+          type="search"
+          id={id}
+          name={name}
+          placeholder={placeholder}
+          className={classes}
+          value={value}
+          {...rest}
+        />
+      </KuiValidatableControl>
     </KuiFormControlLayout>
   );
 };
@@ -32,6 +46,7 @@ KuiFieldSearch.propTypes = {
   id: PropTypes.string,
   placeholder: PropTypes.string,
   value: PropTypes.string,
+  isInvalid: PropTypes.bool,
 };
 
 KuiFieldSearch.defaultProps = {

@@ -7,6 +7,10 @@ import {
   KuiFormControlLayout,
 } from '../form_control_layout';
 
+import {
+  KuiValidatableControl,
+} from '../validatable_control';
+
 export const KuiFieldText = ({
   id,
   name,
@@ -14,6 +18,7 @@ export const KuiFieldText = ({
   value,
   className,
   icon,
+  isInvalid,
   ...rest,
 }) => {
   const classes = classNames('kuiFieldText', className, {
@@ -24,15 +29,19 @@ export const KuiFieldText = ({
     <KuiFormControlLayout
       icon={icon}
     >
-      <input
-        type="text"
-        id={id}
-        name={name}
-        placeholder={placeholder}
-        className={classes}
-        value={value}
-        {...rest}
-      />
+      <KuiValidatableControl
+        isInvalid={isInvalid}
+      >
+        <input
+          type="text"
+          id={id}
+          name={name}
+          placeholder={placeholder}
+          className={classes}
+          value={value}
+          {...rest}
+        />
+      </KuiValidatableControl>
     </KuiFormControlLayout>
   );
 };
@@ -43,6 +52,7 @@ KuiFieldText.propTypes = {
   placeholder: PropTypes.string,
   value: PropTypes.string,
   icon: PropTypes.string,
+  isInvalid: PropTypes.bool,
 };
 
 KuiFieldText.defaultProps = {

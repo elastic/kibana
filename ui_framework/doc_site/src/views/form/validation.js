@@ -5,8 +5,9 @@ import React, {
 import {
   KuiButton,
   KuiForm,
-  KuiCheckbox,
+  KuiSelect,
   KuiFormRow,
+  KuiTextArea,
   KuiFieldText,
 } from '../../../../components';
 
@@ -19,7 +20,7 @@ export default class extends Component {
     super(props);
 
     this.state = {
-      showErrors: false,
+      showErrors: true,
     };
   }
 
@@ -36,7 +37,7 @@ export default class extends Component {
       </KuiButton>
     );
 
-    const checkboxOptions = [
+    const selectOptions = [
       { id: makeId(), label: 'Option one' },
       { id: makeId(), label: 'Option two' },
       { id: makeId(), label: 'Option three' },
@@ -57,25 +58,48 @@ export default class extends Component {
           <KuiFormRow
             id={makeId()}
             label="Validation only"
-            invalid={this.state.showErrors}
+            isInvalid={this.state.showErrors}
           >
-            <KuiFieldText name="first" />
+            <KuiFieldText
+              name="first"
+              isInvalid={this.state.showErrors}
+            />
           </KuiFormRow>
+
           <KuiFormRow
             id={makeId()}
             label="Validation with helptext and errors"
             helpText="I am some friendly help text."
-            invalid={this.state.showErrors}
+            isInvalid={this.state.showErrors}
             errors={errors}
           >
-            <KuiFieldText name="first" />
+            <KuiFieldText
+              name="text"
+              isInvalid={this.state.showErrors}
+            />
           </KuiFormRow>
+
           <KuiFormRow
-            label="Non text field works the same"
-            invalid={this.state.showErrors}
+            id={makeId()}
+            label="Text area"
+            isInvalid={this.state.showErrors}
           >
-            <KuiCheckbox options={checkboxOptions} />
+            <KuiTextArea
+              name="area"
+              isInvalid={this.state.showErrors}
+            />
           </KuiFormRow>
+
+          <KuiFormRow
+            label="Select"
+            isInvalid={this.state.showErrors}
+          >
+            <KuiSelect
+              options={selectOptions}
+              isInvalid={this.state.showErrors}
+            />
+          </KuiFormRow>
+
           {button}
         </KuiForm>
       </div>

@@ -1,15 +1,14 @@
 import React from 'react';
 import { render } from 'enzyme';
-import { requiredProps } from '../../../test/required_props';
 
-import { KuiFormRow } from './form_row';
+import { KuiValidatableControl } from './validatable_control';
 
-describe('KuiFormRow', () => {
+describe('KuiValidatableControl', () => {
   test('is rendered', () => {
     const component = render(
-      <KuiFormRow {...requiredProps}>
+      <KuiValidatableControl>
         <input />
-      </KuiFormRow>
+      </KuiValidatableControl>
     );
 
     expect(component)

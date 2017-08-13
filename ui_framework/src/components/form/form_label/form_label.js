@@ -2,8 +2,11 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
 
-export const KuiFormLabel = ({ children, className, ...rest }) => {
-  const classes = classNames('kuiFormLabel', className);
+export const KuiFormLabel = ({ children, isFocused, isInvalid, className, ...rest }) => {
+  const classes = classNames('kuiFormLabel', className, {
+    'kuiFormLabel-isFocused': isFocused,
+    'kuiFormLabel-isInvalid': isInvalid,
+  });
 
   return (
     <label
@@ -18,4 +21,6 @@ export const KuiFormLabel = ({ children, className, ...rest }) => {
 KuiFormLabel.propTypes = {
   children: PropTypes.node,
   className: PropTypes.string,
+  isFocused: PropTypes.bool,
+  isInvalid: PropTypes.bool,
 };

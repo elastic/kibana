@@ -13,3 +13,4 @@ export { KuiRange } from './range';
 export { KuiSelect } from './select';
 export { KuiSwitch } from './switch';
 export { KuiTextArea } from './text_area';
+export { KuiValidatableControl } from './validatable_control';

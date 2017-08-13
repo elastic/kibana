@@ -1,46 +1,16 @@
+/**
+ * 1. Coerce inline form elements to behave as block-level elements.
+ */
 .kuiFormRow {
-  display: flex;
-  flex-direction: column;
-  position: relative;
+  display: flex; /* 1 */
+  flex-direction: column; /* 1 */
   max-width: $kuiFormMaxWidth;
 
   + * {
     margin-top: $kuiSizeL;
   }
 
-  /**
-   * 1. Force the label to be first, so we can use sibling:focus selectors.
-   */
-  .kuiFormRow__label {
-    order: -1; /* 1 */
-  }
-
-  .kuiFormRow__error +  * {
+  .kuiFormRow__error + * {
     padding-top: 0;
-  }
-
-  // Naked selectors on purpose to touch inner components.
-  input:focus + label,
-  select:focus + label,
-  textarea:focus + label, {
-    color: $kuiColorPrimary;
-  }
-
-  &.kuiFormRow--invalid {
-
-    .kuiFormRow__label {
-      color: $kuiColorDanger !important;
-    }
-
-    // Naked selectors on purpose to touch inner components.
-    input[type="text"],
-    input[type="password"],
-    input[type="number"],
-    input[type="search"],
-    select,
-    textarea,
-    {
-      box-shadow: 0 $kuiSizeXS $kuiSizeXS (-$kuiSizeXS / 2) rgba(0, 0, 0, 0.1), 0 0 0 1px rgba(0,0,0,0.16), inset 0 0 0 0 $kuiColorEmptyShade, inset 0 (-$kuiSizeXS / 2) 0 0 $kuiColorDanger !important;
-    }
   }
 }

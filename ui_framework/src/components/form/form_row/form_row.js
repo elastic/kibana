@@ -1,5 +1,6 @@
 import React, {
   cloneElement,
+  Component,
   PropTypes,
 } from 'react';
 import classNames from 'classnames';
@@ -8,89 +9,105 @@ import { KuiFormHelpText } from '../form_help_text';
 import { KuiFormErrorText } from '../form_error_text';
 import { KuiFormLabel } from '../form_label';
 
-export const KuiFormRow = ({
-  children,
-  helpText,
-  invalid,
-  errors,
-  label,
-  id,
-  className,
-  ...rest,
-}) => {
-  const classes = classNames(
-    'kuiFormRow',
-    className,
-    {
-      'kuiFormRow--invalid' : invalid,
-    }
-  );
+export class KuiFormRow extends Component {
+  constructor(props) {
+    super(props);
 
-  let field;
-  let optionalHelpText;
-  let optionalErrors;
-  let optionalLabel;
+    this.state = {
+      isFocused: false,
+    };
 
-  if (helpText) {
-    optionalHelpText = (
-      <KuiFormHelpText>
-        {helpText}
-      </KuiFormHelpText>
-    );
+    this.onFocus = this.onFocus.bind(this);
+    this.onBlur = this.onBlur.bind(this);
   }
 
-  if (errors) {
-    const errorTexts = Array.isArray(errors) ? errors : [errors];
-    optionalErrors = errorTexts.map(error => (
-      <KuiFormErrorText key={error}>
-        {error}
-      </KuiFormErrorText>
-    ));
-  }
-
-  if (label) {
-    optionalLabel = (
-      <KuiFormLabel
-        className="kuiFormRow__label"
-        htmlFor={id}
-      >
-        {label}
-      </KuiFormLabel>
-    );
-  }
-
-  if (id) {
-    field = cloneElement(children, {
-      id,
+  onFocus() {
+    this.setState({
+      isFocused: true,
     });
-  } else {
-    field = children;
   }
 
-  return (
-    <div
-      className={classes}
-      {...rest}
-    >
-      {/*
-          Order is important here. The label needs to be UNDER the field.
-          We rearrange the flex order in the CSS so the label ends up
-          displaying above the children / input. This allows us to still
-          use sibling selectors against the label that are tiggered by the
-          focus state of the input.
-      */}
-      {field}
-      {optionalLabel}
-      {optionalErrors}
-      {optionalHelpText}
-    </div>
-  );
-};
+  onBlur() {
+    this.setState({
+      isFocused: false,
+    });
+  }
+
+  render() {
+    const {
+      children,
+      helpText,
+      isInvalid,
+      errors,
+      label,
+      id,
+      className,
+      ...rest,
+    } = this.props;
+
+    const classes = classNames('kuiFormRow', className);
+
+    let optionalHelpText;
+
+    if (helpText) {
+      optionalHelpText = (
+        <KuiFormHelpText>
+          {helpText}
+        </KuiFormHelpText>
+      );
+    }
+
+    let optionalErrors;
+
+    if (errors) {
+      const errorTexts = Array.isArray(errors) ? errors : [errors];
+      optionalErrors = errorTexts.map(error => (
+        <KuiFormErrorText key={error}>
+          {error}
+        </KuiFormErrorText>
+      ));
+    }
+
+    let optionalLabel;
+
+    if (label) {
+      optionalLabel = (
+        <KuiFormLabel
+          isFocused={this.state.isFocused}
+          isInvalid={isInvalid}
+          htmlFor={id}
+        >
+          {label}
+        </KuiFormLabel>
+      );
+    }
+
+    const field = cloneElement(children, {
+      id,
+      onFocus: this.onFocus,
+      onBlur: this.onBlur,
+    });
+
+    return (
+      <div
+        className={classes}
+        {...rest}
+      >
+        {optionalLabel}
+        {field}
+        {optionalErrors}
+        {optionalHelpText}
+      </div>
+    );
+  }
+}
 
 KuiFormRow.propTypes = {
+  children: PropTypes.node.isRequired,
+  className: PropTypes.string,
   label: PropTypes.string,
   id: PropTypes.string,
-  invalid: PropTypes.bool,
+  isInvalid: PropTypes.bool,
   errors: PropTypes.oneOfType([PropTypes.string, PropTypes.arrayOf(PropTypes.string)]),
   helpText: PropTypes.string,
 };

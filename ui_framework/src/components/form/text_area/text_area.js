@@ -3,20 +3,35 @@ import React, {
 } from 'react';
 import classNames from 'classnames';
 
-export const KuiTextArea = ({ children, rows, name, id, placeholder, className, ...rest }) => {
+import {
+  KuiValidatableControl,
+} from '../validatable_control';
+
+export const KuiTextArea = ({
+  children,
+  rows,
+  name,
+  id,
+  placeholder,
+  className,
+  isInvalid,
+  ...rest,
+}) => {
   const classes = classNames('kuiTextArea', className);
 
   return (
-    <textarea
-      className={classes}
-      {...rest}
-      rows={rows}
-      name={name}
-      id={id}
-      placeholder={placeholder}
-    >
-      {children}
-    </textarea>
+    <KuiValidatableControl isInvalid={isInvalid}>
+      <textarea
+        className={classes}
+        {...rest}
+        rows={rows}
+        name={name}
+        id={id}
+        placeholder={placeholder}
+      >
+        {children}
+      </textarea>
+    </KuiValidatableControl>
   );
 };
 
@@ -25,6 +40,7 @@ KuiTextArea.propTypes = {
   id: PropTypes.string,
   placeholder: PropTypes.string,
   rows: PropTypes.number,
+  isInvalid: PropTypes.bool,
 };
 
 KuiTextArea.defaultProps = {

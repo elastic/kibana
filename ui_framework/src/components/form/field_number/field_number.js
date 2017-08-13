@@ -7,6 +7,10 @@ import {
   KuiFormControlLayout,
 } from '../form_control_layout';
 
+import {
+  KuiValidatableControl,
+} from '../validatable_control';
+
 export const KuiFieldNumber = ({
   className,
   icon,
@@ -16,6 +20,7 @@ export const KuiFieldNumber = ({
   min,
   max,
   value,
+  isInvalid,
   ...rest,
 }) => {
   const classes = classNames('kuiFieldNumber', className, {
@@ -26,17 +31,19 @@ export const KuiFieldNumber = ({
     <KuiFormControlLayout
       icon={icon}
     >
-      <input
-        type="number"
-        id={id}
-        min={min}
-        max={max}
-        name={name}
-        value={value}
-        placeholder={placeholder}
-        className={classes}
-        {...rest}
-      />
+      <KuiValidatableControl isInvalid={isInvalid}>
+        <input
+          type="number"
+          id={id}
+          min={min}
+          max={max}
+          name={name}
+          value={value}
+          placeholder={placeholder}
+          className={classes}
+          {...rest}
+        />
+      </KuiValidatableControl>
     </KuiFormControlLayout>
   );
 };
@@ -49,6 +56,7 @@ KuiFieldNumber.propTypes = {
   step: PropTypes.number,
   value: PropTypes.number,
   icon: PropTypes.string,
+  isInvalid: PropTypes.bool,
 };
 
 KuiFieldNumber.defaultProps = {
