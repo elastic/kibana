@@ -72,13 +72,23 @@
     </div>
 
     <div class="kuiVerticalRhythm">
-      <a
-        kbn-accessible-click
-        class="kuiLink"
+      <button
+        class="kuiToggleButton"
+        data-id="toggleButton"
         ng-click="stepTimeField.toggleAdvancedOptions()"
       >
-        Show advanced options.
-      </a>
+        <span
+          class="kuiToggleButton__icon kuiIcon"
+          ng-class="{
+            'fa-caret-right': !stepTimeField.showAdvancedOptions,
+            'fa-caret-down': stepTimeField.showAdvancedOptions
+          }"
+          data-id="toggleButtonIcon"
+        >
+        </span>
+        <span ng-if="stepTimeField.showAdvancedOptions">Hide advanced options</span>
+        <span ng-if="!stepTimeField.showAdvancedOptions">Show advanced options</span>
+      </button>
     </div>
 
     <!-- Index pattern id input -->
