@@ -53,7 +53,9 @@ export default props => (
           </p>
           <br/>
         </GuideText>
-        <Default />
+        <div style={{ width: 320 }}>
+          <Default />
+        </div>
       </GuideDemo>
     </GuideSection>
 
@@ -68,7 +70,9 @@ export default props => (
       }]}
     >
       <GuideDemo>
-        <Info />
+        <div style={{ width: 320 }}>
+          <Info />
+        </div>
       </GuideDemo>
     </GuideSection>
 
@@ -83,7 +87,9 @@ export default props => (
       }]}
     >
       <GuideDemo>
-        <Success />
+        <div style={{ width: 320 }}>
+          <Success />
+        </div>
       </GuideDemo>
     </GuideSection>
 
@@ -98,7 +104,9 @@ export default props => (
       }]}
     >
       <GuideDemo>
-        <Warning />
+        <div style={{ width: 320 }}>
+          <Warning />
+        </div>
       </GuideDemo>
     </GuideSection>
 
@@ -113,7 +121,9 @@ export default props => (
       }]}
     >
       <GuideDemo>
-        <Danger />
+        <div style={{ width: 320 }}>
+          <Danger />
+        </div>
       </GuideDemo>
     </GuideSection>
   </GuidePage>
