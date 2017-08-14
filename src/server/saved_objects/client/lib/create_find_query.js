@@ -13,7 +13,7 @@ import { get } from 'lodash';
  * @return {Object}
  */
 export function createFindQuery(mappings, options = {}) {
-  const { type, search, searchFields, sortField, sortOrder } = options;
+  const { type, search, sortField, sortOrder } = options;
 
   if (!type && sortField) {
     throw new Error('Cannot sort without knowing the type');
@@ -45,23 +45,24 @@ export function createFindQuery(mappings, options = {}) {
   }
 
   if (search) {
-    // If searchFields is a singular string field, turn it into an array of one.
-    let searchFieldsArray = !searchFields || Array.isArray(searchFields) ? searchFields : [searchFields];
+    let searchFields = options.searchFields;
+    // If options.searchFields is a singular string field, turn it into an array of one.
+    searchFields = searchFields && !Array.isArray(searchFields) ? [searchFields] : searchFields;
 
-    if (searchFieldsArray && type) {
+    if (searchFields && type) {
       // Version 6 requires the type prefixed to the field name.
-      const newArray = searchFieldsArray.map(field => `${type}.${field}`);
-      searchFieldsArray = searchFieldsArray.concat(newArray);
+      const newArray = searchFields.map(field => `${type}.${field}`);
+      searchFields = searchFields.concat(newArray);
     }
 
     const simpleQueryString = {
       query: search
     };
 
-    if (!searchFields) {
-      simpleQueryString.all_fields = true;
+    if (searchFields) {
+      simpleQueryString.fields = searchFields;
     } else {
-      simpleQueryString.fields = searchFieldsArray;
+      simpleQueryString.all_fields = true;
     }
 
     bool.must.push({ simple_query_string : simpleQueryString });
