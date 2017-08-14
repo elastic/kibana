@@ -2,9 +2,15 @@
   @include kuiBottomShadow;
 
   position: relative;
-  padding: $kuiSizeM;
+  padding: $kuiSize;
   background-color: $kuiColorEmptyShade;
   border: $kuiBorderThin;
+  width: 100%;
+
+  &:hover .kuiToast__closeButton,
+  &:focus .kuiToast__closeButton, {
+    opacity: 1;
+  }
 }
 
   /**
@@ -12,10 +18,12 @@
    */
   .kuiToast__closeButton {
     position: absolute;
-    top: $kuiSizeXS;
-    right: $kuiSizeXS;
+    top: $kuiSize;
+    right: $kuiSize;
     line-height: 0; /* 1 */
     appearance: none;
+    opacity: 0;
+    transition: opacity $kuiAnimSpeedFast $kuiAnimSlightResistance;
 
     svg {
       fill: tintOrShade($kuiTitleColor, 50%, 70%);
@@ -29,6 +37,7 @@
 
     &:focus {
       background-color: $kuiFocusBackgroundColor;
+      opacity: 1;
 
       svg {
         fill: $kuiColorPrimary;
@@ -54,9 +63,11 @@ $toastTypes: (
 /**
  * 1. Align icon with first line of title text if it wraps.
  * 2. Apply margin to all but last item in the flex.
+ * 3. Account for close button.
  */
 .kuiToastHeader {
   @include kuiFontSizeM;
+  padding-right: $kuiSizeL; /* 3 */
 
   display: flex;
   align-items: baseline; /* 1 */
@@ -81,5 +92,5 @@ $toastTypes: (
   }
 
 .kuiToastHeader--withBody {
-  margin-bottom: $kuiVerticalRhythmS;
+  margin-bottom: $kuiSizeM;
 }
