@@ -410,6 +410,22 @@ table {
       border-color: #00668c; }
     .kuiButton--primary.kuiButton--fill .kuiButton__icon {
       fill: #FFF; }
+  .kuiButton--primary.kuiButton--link {
+    border-color: transparent;
+    background-color: transparent;
+    box-shadow: none; }
+    .kuiButton--primary.kuiButton--link:focus {
+      background-color: rgba(0, 121, 165, 0.1); }
+  .kuiButton--primary.kuiButton--linkFlush {
+    border-color: transparent;
+    background-color: transparent;
+    border-right: none;
+    border-left: none;
+    padding-right: 0;
+    padding-left: 0;
+    box-shadow: none; }
+    .kuiButton--primary.kuiButton--linkFlush:focus {
+      background-color: rgba(0, 121, 165, 0.1); }
 
 .kuiButton--secondary {
   color: #00A69B;
@@ -427,6 +443,22 @@ table {
       border-color: #008d83; }
     .kuiButton--secondary.kuiButton--fill .kuiButton__icon {
       fill: #FFF; }
+  .kuiButton--secondary.kuiButton--link {
+    border-color: transparent;
+    background-color: transparent;
+    box-shadow: none; }
+    .kuiButton--secondary.kuiButton--link:focus {
+      background-color: rgba(0, 166, 155, 0.1); }
+  .kuiButton--secondary.kuiButton--linkFlush {
+    border-color: transparent;
+    background-color: transparent;
+    border-right: none;
+    border-left: none;
+    padding-right: 0;
+    padding-left: 0;
+    box-shadow: none; }
+    .kuiButton--secondary.kuiButton--linkFlush:focus {
+      background-color: rgba(0, 166, 155, 0.1); }
 
 .kuiButton--warning {
   color: #E5830E;
@@ -444,6 +476,22 @@ table {
       border-color: #cd750d; }
     .kuiButton--warning.kuiButton--fill .kuiButton__icon {
       fill: #FFF; }
+  .kuiButton--warning.kuiButton--link {
+    border-color: transparent;
+    background-color: transparent;
+    box-shadow: none; }
+    .kuiButton--warning.kuiButton--link:focus {
+      background-color: rgba(229, 131, 14, 0.1); }
+  .kuiButton--warning.kuiButton--linkFlush {
+    border-color: transparent;
+    background-color: transparent;
+    border-right: none;
+    border-left: none;
+    padding-right: 0;
+    padding-left: 0;
+    box-shadow: none; }
+    .kuiButton--warning.kuiButton--linkFlush:focus {
+      background-color: rgba(229, 131, 14, 0.1); }
 
 .kuiButton--danger {
   color: #A30000;
@@ -461,6 +509,22 @@ table {
       border-color: #8a0000; }
     .kuiButton--danger.kuiButton--fill .kuiButton__icon {
       fill: #FFF; }
+  .kuiButton--danger.kuiButton--link {
+    border-color: transparent;
+    background-color: transparent;
+    box-shadow: none; }
+    .kuiButton--danger.kuiButton--link:focus {
+      background-color: rgba(163, 0, 0, 0.1); }
+  .kuiButton--danger.kuiButton--linkFlush {
+    border-color: transparent;
+    background-color: transparent;
+    border-right: none;
+    border-left: none;
+    padding-right: 0;
+    padding-left: 0;
+    box-shadow: none; }
+    .kuiButton--danger.kuiButton--linkFlush:focus {
+      background-color: rgba(163, 0, 0, 0.1); }
 
 .kuiButton--disabled {
   color: #c5c5c5;
@@ -479,6 +543,22 @@ table {
       border-color: #b8b8b8; }
     .kuiButton--disabled.kuiButton--fill .kuiButton__icon {
       fill: #FFF; }
+  .kuiButton--disabled.kuiButton--link {
+    border-color: transparent;
+    background-color: transparent;
+    box-shadow: none; }
+    .kuiButton--disabled.kuiButton--link:focus {
+      background-color: rgba(197, 197, 197, 0.1); }
+  .kuiButton--disabled.kuiButton--linkFlush {
+    border-color: transparent;
+    background-color: transparent;
+    border-right: none;
+    border-left: none;
+    padding-right: 0;
+    padding-left: 0;
+    box-shadow: none; }
+    .kuiButton--disabled.kuiButton--linkFlush:focus {
+      background-color: rgba(197, 197, 197, 0.1); }
 
 @-webkit-keyframes kuiButtonFocus {
   50% {
