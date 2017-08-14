@@ -36,10 +36,10 @@ export class FunctionForm extends BaseForm {
 
   renderAddArg(props, dataArg) {
     const { onValueAdd } = props;
-    const { arg, argValues } = dataArg;
+    const { arg, argValues, skipRender } = dataArg;
 
     // skip arguments that aren't defined in the expression type schema
-    if (!arg) return null;
+    if (!arg || skipRender) return null;
 
     const newArgValue = fromExpression(arg.defaultValue) || { type: 'string', value: '' };
 

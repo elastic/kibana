@@ -1,4 +1,4 @@
-import { pick } from 'lodash';
+import { get, pick } from 'lodash';
 import { Registry } from '../../common/lib/registry';
 import { FunctionForm } from './function_form';
 
@@ -23,7 +23,7 @@ export class Model extends FunctionForm {
     Object.assign(this, defaultProps, pick(props, propNames));
   }
 
-  resolveArgs(dataArg, props) {
+  resolveArg(dataArg, props) {
     // custom argument resolver
     // uses `modelArgs` from following expression to control which arguments get rendered
     const { nextExpressionType } = props;
@@ -40,7 +40,7 @@ export class Model extends FunctionForm {
 
     // if argument is missing from modelArgs, mark it as skipped
     return {
-      skipRender: modelArgs !== NO_NEXT_EXP && !modelArgs.includes(dataArg.argName),
+      skipRender: modelArgs !== NO_NEXT_EXP && !modelArgs.includes(get(dataArg, 'arg.name')),
     };
   }
 }
