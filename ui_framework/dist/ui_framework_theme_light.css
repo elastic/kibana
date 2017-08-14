@@ -563,6 +563,9 @@ table {
           transform: translateY(2px);
   /* 1 */ }
 
+/**
+ * 1. Override invalid state with focus state.
+ */
 .kuiCheckbox {
   position: relative;
   height: 24px;
@@ -615,11 +618,13 @@ table {
   box-shadow: 0 2px 2px -1px rgba(0, 0, 0, 0.1), 0 0 0 1px rgba(0, 0, 0, 0.08), inset -400px 0 0 0 #fbfbfb;
   transition: box-shadow 250ms ease-in, background 250ms ease-in;
   border-radius: 0; }
+  .kuiFieldNumber:invalid {
+    /* 1 */
+    box-shadow: 0 4px 4px -2px rgba(0, 0, 0, 0.1), 0 0 0 1px rgba(0, 0, 0, 0.16), inset 0 0 0 0 #FFF, inset 0 -2px 0 0 #A30000; }
   .kuiFieldNumber:focus {
+    /* 1 */
     background: #FFF;
     box-shadow: 0 4px 4px -2px rgba(0, 0, 0, 0.1), 0 0 0 1px rgba(0, 0, 0, 0.16), inset 0 0 0 0 #FFF, inset 0 -2px 0 0 #0079a5; }
-  .kuiFieldNumber:invalid {
-    box-shadow: 0 4px 4px -2px rgba(0, 0, 0, 0.1), 0 0 0 1px rgba(0, 0, 0, 0.16), inset 0 0 0 0 #FFF, inset 0 -2px 0 0 #A30000 !important; }
   .kuiFieldNumber--withIcon {
     padding-left: 40px; }
 
@@ -637,11 +642,13 @@ table {
   transition: box-shadow 250ms ease-in, background 250ms ease-in;
   border-radius: 0;
   padding-left: 40px; }
+  .kuiFieldPassword:invalid {
+    /* 1 */
+    box-shadow: 0 4px 4px -2px rgba(0, 0, 0, 0.1), 0 0 0 1px rgba(0, 0, 0, 0.16), inset 0 0 0 0 #FFF, inset 0 -2px 0 0 #A30000; }
   .kuiFieldPassword:focus {
+    /* 1 */
     background: #FFF;
     box-shadow: 0 4px 4px -2px rgba(0, 0, 0, 0.1), 0 0 0 1px rgba(0, 0, 0, 0.16), inset 0 0 0 0 #FFF, inset 0 -2px 0 0 #0079a5; }
-  .kuiFieldPassword:invalid {
-    box-shadow: 0 4px 4px -2px rgba(0, 0, 0, 0.1), 0 0 0 1px rgba(0, 0, 0, 0.16), inset 0 0 0 0 #FFF, inset 0 -2px 0 0 #A30000 !important; }
 
 .kuiFieldSearch {
   min-width: 256px;
@@ -657,11 +664,13 @@ table {
   transition: box-shadow 250ms ease-in, background 250ms ease-in;
   border-radius: 0;
   padding-left: 40px; }
+  .kuiFieldSearch:invalid {
+    /* 1 */
+    box-shadow: 0 4px 4px -2px rgba(0, 0, 0, 0.1), 0 0 0 1px rgba(0, 0, 0, 0.16), inset 0 0 0 0 #FFF, inset 0 -2px 0 0 #A30000; }
   .kuiFieldSearch:focus {
+    /* 1 */
     background: #FFF;
     box-shadow: 0 4px 4px -2px rgba(0, 0, 0, 0.1), 0 0 0 1px rgba(0, 0, 0, 0.16), inset 0 0 0 0 #FFF, inset 0 -2px 0 0 #0079a5; }
-  .kuiFieldSearch:invalid {
-    box-shadow: 0 4px 4px -2px rgba(0, 0, 0, 0.1), 0 0 0 1px rgba(0, 0, 0, 0.16), inset 0 0 0 0 #FFF, inset 0 -2px 0 0 #A30000 !important; }
 
 .kuiFieldText {
   min-width: 256px;
@@ -676,11 +685,13 @@ table {
   box-shadow: 0 2px 2px -1px rgba(0, 0, 0, 0.1), 0 0 0 1px rgba(0, 0, 0, 0.08), inset -400px 0 0 0 #fbfbfb;
   transition: box-shadow 250ms ease-in, background 250ms ease-in;
   border-radius: 0; }
+  .kuiFieldText:invalid {
+    /* 1 */
+    box-shadow: 0 4px 4px -2px rgba(0, 0, 0, 0.1), 0 0 0 1px rgba(0, 0, 0, 0.16), inset 0 0 0 0 #FFF, inset 0 -2px 0 0 #A30000; }
   .kuiFieldText:focus {
+    /* 1 */
     background: #FFF;
     box-shadow: 0 4px 4px -2px rgba(0, 0, 0, 0.1), 0 0 0 1px rgba(0, 0, 0, 0.16), inset 0 0 0 0 #FFF, inset 0 -2px 0 0 #0079a5; }
-  .kuiFieldText:invalid {
-    box-shadow: 0 4px 4px -2px rgba(0, 0, 0, 0.1), 0 0 0 1px rgba(0, 0, 0, 0.16), inset 0 0 0 0 #FFF, inset 0 -2px 0 0 #A30000 !important; }
   .kuiFieldText--withIcon {
     padding-left: 40px; }
 
@@ -850,11 +861,13 @@ table {
   -webkit-appearance: none;
      -moz-appearance: none;
           appearance: none; }
+  .kuiSelect:invalid {
+    /* 1 */
+    box-shadow: 0 4px 4px -2px rgba(0, 0, 0, 0.1), 0 0 0 1px rgba(0, 0, 0, 0.16), inset 0 0 0 0 #FFF, inset 0 -2px 0 0 #A30000; }
   .kuiSelect:focus {
+    /* 1 */
     background: #FFF;
     box-shadow: 0 4px 4px -2px rgba(0, 0, 0, 0.1), 0 0 0 1px rgba(0, 0, 0, 0.16), inset 0 0 0 0 #FFF, inset 0 -2px 0 0 #0079a5; }
-  .kuiSelect:invalid {
-    box-shadow: 0 4px 4px -2px rgba(0, 0, 0, 0.1), 0 0 0 1px rgba(0, 0, 0, 0.16), inset 0 0 0 0 #FFF, inset 0 -2px 0 0 #A30000 !important; }
   .kuiSelect::-ms-expand {
     display: none; }
 
@@ -972,11 +985,13 @@ table {
   box-shadow: 0 2px 2px -1px rgba(0, 0, 0, 0.1), 0 0 0 1px rgba(0, 0, 0, 0.08), inset -400px 0 0 0 #fbfbfb;
   transition: box-shadow 250ms ease-in, background 250ms ease-in;
   border-radius: 0; }
+  .kuiTextArea:invalid {
+    /* 1 */
+    box-shadow: 0 4px 4px -2px rgba(0, 0, 0, 0.1), 0 0 0 1px rgba(0, 0, 0, 0.16), inset 0 0 0 0 #FFF, inset 0 -2px 0 0 #A30000; }
   .kuiTextArea:focus {
+    /* 1 */
     background: #FFF;
     box-shadow: 0 4px 4px -2px rgba(0, 0, 0, 0.1), 0 0 0 1px rgba(0, 0, 0, 0.16), inset 0 0 0 0 #FFF, inset 0 -2px 0 0 #0079a5; }
-  .kuiTextArea:invalid {
-    box-shadow: 0 4px 4px -2px rgba(0, 0, 0, 0.1), 0 0 0 1px rgba(0, 0, 0, 0.16), inset 0 0 0 0 #FFF, inset 0 -2px 0 0 #A30000 !important; }
 
 .kuiHeader {
   box-shadow: 0 2px 2px -1px rgba(0, 0, 0, 0.1);
