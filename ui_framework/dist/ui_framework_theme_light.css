@@ -568,8 +568,7 @@ table {
  */
 .kuiCheckbox {
   position: relative;
-  height: 24px;
-  margin-top: 8px; }
+  height: 24px; }
   .kuiCheckbox .kuiCheckbox__label {
     position: absolute;
     padding-left: 32px;
@@ -604,6 +603,9 @@ table {
       background-color: #3F3F3F;
       -webkit-mask: url("../src/components/icon/assets/check.svg") center center no-repeat;
               mask: url("../src/components/icon/assets/check.svg") center center no-repeat; }
+
+.kuiCheckboxGroup__item + .kuiCheckboxGroup__item {
+  margin-top: 8px; }
 
 .kuiFieldNumber {
   min-width: 256px;

@@ -2,8 +2,8 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
 
-export const KuiCheckbox = ({ options, className, ...rest }) => {
-  const classes = classNames('kuiCheckbox', className);
+export const KuiCheckboxGroup = ({ options, className, ...rest }) => {
+  const classes = classNames('kuiCheckbox kuiCheckboxGroup__item', className);
 
   return (
     <div>
@@ -40,7 +40,7 @@ export const KuiCheckbox = ({ options, className, ...rest }) => {
   );
 };
 
-KuiCheckbox.propTypes = {
+KuiCheckboxGroup.propTypes = {
   options: PropTypes.arrayOf(
     PropTypes.shape({
       id: PropTypes.string,
@@ -51,6 +51,6 @@ KuiCheckbox.propTypes = {
   ).isRequired,
 };
 
-KuiCheckbox.defaultProps = {
+KuiCheckboxGroup.defaultProps = {
   options: [],
 };

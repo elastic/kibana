@@ -2,12 +2,12 @@ import React from 'react';
 import { render } from 'enzyme';
 import { requiredProps } from '../../../test/required_props';
 
-import { KuiCheckbox } from './checkbox';
+import { KuiCheckboxGroup } from './checkbox_group';
 
-describe('KuiCheckbox', () => {
+describe('KuiCheckboxGroup', () => {
   test('is rendered', () => {
     const component = render(
-      <KuiCheckbox { ...requiredProps } />
+      <KuiCheckboxGroup {...requiredProps} />
     );
 
     expect(component)

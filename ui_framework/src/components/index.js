@@ -11,7 +11,7 @@ export {
 } from './call_out';
 
 export {
-  KuiCheckbox,
+  KuiCheckboxGroup,
   KuiFieldNumber,
   KuiFieldPassword,
   KuiFieldSearch,

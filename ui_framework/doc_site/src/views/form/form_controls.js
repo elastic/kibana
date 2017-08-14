@@ -1,7 +1,7 @@
 import React from 'react';
 
 import {
-  KuiCheckbox,
+  KuiCheckboxGroup,
   KuiFieldNumber,
   KuiFieldPassword,
   KuiFieldSearch,
@@ -76,7 +76,7 @@ export default () => (
     <br />
     <br />
 
-    <KuiCheckbox
+    <KuiCheckboxGroup
       options={[
         { id: '0', label: 'Option one', onChange: () => {} },
         { id: '1', label: 'Option two is checked by default', checked: true, onChange: () => {} },

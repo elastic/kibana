@@ -1,4 +1,4 @@
-export { KuiCheckbox } from './checkbox';
+export { KuiCheckboxGroup } from './checkbox';
 export { KuiFieldNumber } from './field_number';
 export { KuiFieldPassword } from './field_password';
 export { KuiFieldSearch } from './field_search';
