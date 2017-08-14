@@ -877,10 +877,6 @@ table {
   position: relative;
   display: inline-block;
   height: 24px;
-  cursor: pointer;
-  /**
-   * 1. The label is our main clickable area. It sits above the actual switch.
-   */
   /**
    * 1. The input is "hidden" but still focusable.
    */
@@ -897,23 +893,23 @@ table {
    * When input is not checked, we shift around the positioning of sibling/child selectors.
    */ }
   .kuiSwitch .kuiSwitch__label {
-    position: absolute;
-    left: 0;
-    padding-left: 60px;
-    z-index: 2;
+    padding-left: 8px;
     line-height: 24px;
-    font-size: 14px;
-    cursor: pointer; }
+    font-size: 14px; }
   .kuiSwitch .kuiSwitch__input {
     position: absolute;
     opacity: 0;
-    z-index: -1; }
+    /* 1 */
+    width: 100%;
+    height: 100%;
+    cursor: pointer; }
   .kuiSwitch .kuiSwitch__input:focus + .kuiSwitch__body {
     background: #222; }
     .kuiSwitch .kuiSwitch__input:focus + .kuiSwitch__body .kuiSwitch__thumb {
       border-color: #4da1c0;
       background-color: #4da1c0; }
   .kuiSwitch .kuiSwitch__body {
+    pointer-events: none;
     width: 52px;
     height: 24px;
     background: #262626;

@@ -1,4 +1,6 @@
-import React from 'react';
+import React, {
+  Component,
+} from 'react';
 
 import {
   KuiCheckboxGroup,
@@ -12,76 +14,98 @@ import {
   KuiTextArea,
 } from '../../../../components';
 
-export default () => (
-  <div>
-    <KuiFieldText placeholder="Placeholder text" />
+export default class extends Component {
+  constructor(props) {
+    super(props);
 
-    <br />
-    <br />
+    this.state = {
+      isSwitchChecked: false,
+    };
+  }
 
-    <KuiFieldText
-      defaultValue="Text field with customizable icon"
-      icon="user"
-    />
+  onSwitchChange = () => {
+    this.setState({
+      isSwitchChecked: !this.state.isSwitchChecked,
+    });
+  }
 
-    <br />
-    <br />
+  render() {
+    return (
+      <div>
+        <KuiFieldText placeholder="Placeholder text" />
 
-    <KuiFieldNumber defaultValue="23" />
+        <br />
+        <br />
 
-    <br />
-    <br />
+        <KuiFieldText
+          defaultValue="Text field with customizable icon"
+          icon="user"
+        />
 
-    <KuiFieldNumber
-      defaultValue="23"
-      icon="user"
-    />
+        <br />
+        <br />
 
-    <br />
-    <br />
+        <KuiFieldNumber defaultValue="23" />
 
-    <KuiFieldPassword defaultValue="password" />
+        <br />
+        <br />
 
-    <br />
-    <br />
+        <KuiFieldNumber
+          defaultValue="23"
+          icon="user"
+        />
 
-    <KuiFieldSearch defaultValue="Search field" />
+        <br />
+        <br />
 
-    <br />
-    <br />
+        <KuiFieldPassword defaultValue="password" />
 
-    <KuiTextArea />
+        <br />
+        <br />
 
-    <br />
-    <br />
+        <KuiFieldSearch defaultValue="Search field" />
 
-    <KuiSelect
-      options={[
-        { value: 'option_one', text: 'Option one' },
-        { value: 'option_two', text: 'Option two' },
-        { value: 'option_three', text: 'Option three' },
-      ]}
-    />
+        <br />
+        <br />
 
-    <br />
-    <br />
+        <KuiTextArea />
 
-    <KuiRange />
+        <br />
+        <br />
 
-    <br />
-    <br />
+        <KuiSelect
+          options={[
+            { value: 'option_one', text: 'Option one' },
+            { value: 'option_two', text: 'Option two' },
+            { value: 'option_three', text: 'Option three' },
+          ]}
+        />
 
-    <KuiSwitch />
+        <br />
+        <br />
 
-    <br />
-    <br />
+        <KuiRange />
 
-    <KuiCheckboxGroup
-      options={[
-        { id: '0', label: 'Option one', onChange: () => {} },
-        { id: '1', label: 'Option two is checked by default', checked: true, onChange: () => {} },
-        { id: '2', label: 'Option three', onChange: () => {} },
-      ]}
-    />
-  </div>
-);
+        <br />
+        <br />
+
+        <KuiSwitch
+          label="Switch control"
+          checked={this.state.isSwitchChecked}
+          onChange={this.onSwitchChange}
+        />
+
+        <br />
+        <br />
+
+        <KuiCheckboxGroup
+          options={[
+            { id: '0', label: 'Option one', onChange: () => {} },
+            { id: '1', label: 'Option two is checked by default', checked: true, onChange: () => {} },
+            { id: '2', label: 'Option three', onChange: () => {} },
+          ]}
+        />
+      </div>
+    );
+  }
+}

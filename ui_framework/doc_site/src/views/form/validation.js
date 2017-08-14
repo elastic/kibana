@@ -37,12 +37,6 @@ export default class extends Component {
       </KuiButton>
     );
 
-    const selectOptions = [
-      { id: makeId(), label: 'Option one' },
-      { id: makeId(), label: 'Option two' },
-      { id: makeId(), label: 'Option three' },
-    ];
-
     let errors;
 
     if (this.state.showErrors) {
@@ -98,7 +92,11 @@ export default class extends Component {
             isInvalid={this.state.showErrors}
           >
             <KuiSelect
-              options={selectOptions}
+              options={[
+                { value: 'option_one', text: 'Option one' },
+                { value: 'option_two', text: 'Option two' },
+                { value: 'option_three', text: 'Option three' },
+              ]}
               isInvalid={this.state.showErrors}
             />
           </KuiFormRow>
