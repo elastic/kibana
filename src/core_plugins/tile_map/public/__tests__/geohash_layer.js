@@ -4,6 +4,8 @@ import { KibanaMap } from '../kibana_map';
 import { GeohashLayer } from '../geohash_layer';
 import { GeoHashSampleData } from './geohash_sample_data';
 import scaledCircleMarkersPng from './scaledCircleMarkers.png';
+import shadedCircleMarkersPng from './shadedCircleMarkers.png';
+import shadedGeohashGridPng from './shadedGeohashGrid.png';
 
 describe('kibana_map tests', function () {
 
@@ -51,24 +53,18 @@ describe('kibana_map tests', function () {
       teardownDOM();
     });
 
-    /*[
-      {
-        options:  { 'mapType': 'Scaled Circle Markers' },
-        expected: ``
-      },
-      {
-        options: { 'mapType': 'Shaded Circle Markers' },
-        expected: ``
-      },
-      {
-        options: { 'mapType': 'Shaded Geohash Grid' },
-        expected: ``
-      }
-    ]*/
     [
       {
         options:  { 'mapType': 'Scaled Circle Markers' },
-        expected: ``
+        expected: scaledCircleMarkersPng
+      },
+      {
+        options: { 'mapType': 'Shaded Circle Markers' },
+        expected: shadedCircleMarkersPng
+      },
+      {
+        options: { 'mapType': 'Shaded Geohash Grid' },
+        expected: shadedGeohashGridPng
       }
     ].forEach(function (test) {
 
@@ -87,7 +83,7 @@ describe('kibana_map tests', function () {
           const ctx = canvas.getContext('2d');
           const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
 
-          // convert expect PNG into pixels data by drawing in new canvas element
+          // convert expect PNG into pixel data by drawing in new canvas element
           expectCanvas.id = 'expectCursor';
           expectCanvas.width = canvas.width;
           expectCanvas.height = canvas.height;
@@ -112,15 +108,22 @@ describe('kibana_map tests', function () {
 
             done();
           };
-          imageEl.src = scaledCircleMarkersPng;
+          imageEl.src = test.expected;
+
+          // Instructions for creating expected image PNGs
+          // Comment out imageEl creation and image loading
+          // Comment out teardown line that removes expectCanvas from DOM
+          // Uncomment out below lines. Run test, right click canvas and select "Save Image As"
+          // const expectCtx = expectCanvas.getContext('2d');
+          // expectCtx.putImageData(imageData, 0, 0);
+          // done();
+
         }, 200);
 
       });
     });
 
-
     it('should not throw when fitting on empty-data layer', function () {
-
       const geohashLayer = new GeohashLayer({
         type: 'FeatureCollection',
         features: []
@@ -131,8 +134,5 @@ describe('kibana_map tests', function () {
         kibanaMap.fitToData();
       }).to.not.throwException();
     });
-
-
   });
-
 });
