@@ -368,15 +368,18 @@ export function IndexPatternProvider(Private, $http, config, kbnIndex, Promise, 
 
           return confirmModalPromise(confirmMessage, { confirmButtonText: 'Edit existing pattern' })
             .then(() => {
-              kbnUrl.change('/management/kibana/indices/{{id}}', { id: duplicate.id });
-              return Promise.reject();
-            })
-            .catch(() => Promise.reject());
+              kbnUrl.redirect('/management/kibana/indices/{{id}}', { id: duplicate.id });
+              return true;
+            }).catch(() => {
+              return true;
+            });
         });
     }
 
     create() {
-      return this.warnIfDuplicateTitle().then(() => {
+      return this.warnIfDuplicateTitle().then((isDuplicate) => {
+        if (isDuplicate) return;
+
         const body = this.prepBody();
 
         return savedObjectsClient.create(type, body, { id: this.id })
