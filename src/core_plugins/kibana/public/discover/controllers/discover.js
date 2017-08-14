@@ -167,9 +167,8 @@ function discoverController(
   .highlightAll(true)
   .version(true);
 
-  if (savedSearch.id) {
-    docTitle.change(savedSearch.title);
-  }
+  const pageTitleSuffix = savedSearch.id && savedSearch.title ? `: ${savedSearch.title}` : '';
+  docTitle.change(`Discover${pageTitleSuffix}`);
 
   let stateMonitor;
   const $appStatus = $scope.appStatus = this.appStatus = {
