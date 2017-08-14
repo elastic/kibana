@@ -33,13 +33,12 @@ export function toElasticsearchQuery(node, indexPattern) {
     return { match_all: {} };
   }
   else if (fieldName === '*' && value !== '*') {
-    const userQuery = String(value);
-    const query = isDoubleQuoted(userQuery) ? userQuery : `"${userQuery}"`;
-
     return {
-      simple_query_string: {
-        query,
-        all_fields: true
+      multi_match: {
+        query: value,
+        fields: ['*'],
+        type: 'phrase',
+        lenient: true,
       }
     };
   }
@@ -68,8 +67,3 @@ export function toKueryExpression(node) {
 
   return `${fieldName}:${value}`;
 }
-
-function isDoubleQuoted(str) {
-  return str.startsWith('"') && str.endsWith('"');
-}
-

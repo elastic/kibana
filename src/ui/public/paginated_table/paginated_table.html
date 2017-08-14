@@ -5,11 +5,13 @@
   class="agg-table">
   <div class="agg-table-paginated">
     <table class="table table-condensed">
-      <thead>
+      <thead data-test-subj="paginated-table-header">
         <tr>
           <th
-            ng-repeat="col in ::columns"
+            ng-repeat="col in columns"
             ng-click="paginatedTable.sortColumn($index)"
+            kbn-accessible-click
+            tabindex="0"
             class="{{ col.class }}">
             <span ng-bind="::col.title"></span>
             <kbn-info ng-if="col.info" info="{{ col.info }}" placement="top"></kbn-info>
@@ -25,7 +27,12 @@
           </th>
         </tr>
       </thead>
-      <tbody kbn-rows="page" kbn-rows-min="paginatedTable.rowsToShow(perPage, page.length)"></tbody>
+      <tbody
+        data-test-subj="paginated-table-body"
+        kbn-rows="page"
+        kbn-rows-min="paginatedTable.rowsToShow(perPage, page.length)"
+      >
+      </tbody>
       <tfoot ng-if="showTotal">
         <tr>
           <th ng-repeat="col in columns" class="numeric-value">{{col.total}}</th>

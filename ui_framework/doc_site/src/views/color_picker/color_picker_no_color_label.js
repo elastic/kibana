@@ -4,7 +4,7 @@ import {
   KuiColorPicker,
   KuiFieldGroup,
   KuiFieldGroupSection,
-} from '../../../../components/index';
+} from '../../../../components';
 
 export class ColorPickerNoColorLabel extends React.Component {
   constructor(props) {
@@ -29,9 +29,9 @@ export class ColorPickerNoColorLabel extends React.Component {
 
         <KuiFieldGroupSection>
           <KuiColorPicker
-            onChange={ this.handleChange }
-            color={ this.state.color }
-            showColorLabel={ false }
+            onChange={this.handleChange}
+            color={this.state.color}
+            showColorLabel={false}
           />
         </KuiFieldGroupSection>
       </KuiFieldGroup>

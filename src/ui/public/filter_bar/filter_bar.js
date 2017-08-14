@@ -2,6 +2,7 @@ import _ from 'lodash';
 import template from 'ui/filter_bar/filter_bar.html';
 import 'ui/directives/json_input';
 import '../filter_editor';
+import './filter_pill/filter_pill';
 import { filterAppliedAndUnwrap } from 'ui/filter_bar/lib/filter_applied_and_unwrap';
 import { FilterBarLibMapAndFlattenFiltersProvider } from 'ui/filter_bar/lib/map_and_flatten_filters';
 import { FilterBarLibMapFlattenAndWrapFiltersProvider } from 'ui/filter_bar/lib/map_flatten_and_wrap_filters';

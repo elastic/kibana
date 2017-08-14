@@ -1,0 +1,17 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`KuiScreenReaderOnly adds an accessibility class to a child element and combines other classNames (foo, bar) given as props on the child 1`] = `
+<p
+  class="kuiScreenReaderOnly foo bar"
+>
+  This paragraph is not visibile to sighted users but will be read by screenreaders.
+</p>
+`;
+
+exports[`KuiScreenReaderOnly adds an accessibility class to a child element when used with no props 1`] = `
+<p
+  class="kuiScreenReaderOnly"
+>
+  This paragraph is not visibile to sighted users but will be read by screenreaders.
+</p>
+`;

@@ -101,6 +101,98 @@
         "searchable": false,
         "aggregatable": true
       }
+    },
+    "resolvable_to_string": {
+      "text": {
+        "type": "text",
+        "searchable": true,
+        "aggregatable": true,
+        "indices": [
+          "index1"
+        ]
+      },
+      "keyword": {
+        "type": "keyword",
+        "searchable": true,
+        "aggregatable": true,
+        "indices": [
+          "index2"
+        ]
+      }
+    },
+    "resolvable_to_number": {
+      "integer": {
+        "type": "integer",
+        "searchable": true,
+        "aggregatable": true,
+        "indices": [
+          "index1"
+        ]
+      },
+      "long": {
+        "type": "long",
+        "searchable": true,
+        "aggregatable": true,
+        "indices": [
+          "index2"
+        ]
+      }
+    },
+    "mix_searchable": {
+      "text": {
+        "type": "text",
+        "searchable": false,
+        "aggregatable": true,
+        "indices": [
+          "index1"
+        ]
+      },
+      "keyword": {
+        "type": "keyword",
+        "searchable": true,
+        "aggregatable": true,
+        "indices": [
+          "index2"
+        ]
+      }
+    },
+    "mix_aggregatable": {
+      "text": {
+        "type": "text",
+        "searchable": true,
+        "aggregatable": false,
+        "indices": [
+          "index1"
+        ]
+      },
+      "keyword": {
+        "type": "keyword",
+        "searchable": true,
+        "aggregatable": true,
+        "indices": [
+          "index2"
+        ]
+      }
+    },
+    "mix_searchable_other": {
+      "int": {
+        "type": "integer",
+        "searchable": false,
+        "aggregatable": false,
+        "non_searchable_indices": [
+          "index1"
+        ]
+      }
+    },
+    "mix_aggregatable_other": {
+      "int": {
+        "type": "integer",
+        "searchable": false,
+        "aggregatable": false,
+        "non_aggregatable_indices": [
+          "index1"
+        ]
+      }
     }
   }
 }

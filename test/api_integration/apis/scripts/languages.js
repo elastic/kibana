@@ -12,6 +12,7 @@ export default function ({ getService }) {
         })
     ));
 
+    // eslint-disable-next-line jest/no-disabled-tests
     it.skip('should only return langs enabled for inline scripting', () => (
       supertest.get('/api/kibana/scripts/languages')
         .expect(200)

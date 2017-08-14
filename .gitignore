@@ -36,3 +36,4 @@ selenium
 ui_framework/doc_site/build
 !ui_framework/doc_site/build/index.html
 yarn.lock
+.yo-rc.json

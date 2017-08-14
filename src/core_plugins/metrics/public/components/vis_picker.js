@@ -15,7 +15,7 @@ function VisPickerItem(props) {
       <div className={iconClassName}>
         <i className={`fa ${icon}`} />
       </div>
-      <div className={labelClassName}>
+      <div className={labelClassName} tabIndex="0">
         { label }
       </div>
     </div>
@@ -47,7 +47,7 @@ function VisPicker(props) {
       <VisPickerItem
         key={item.type}
         onClick={handleChange}
-        selected={ item.type === model.type }
+        selected={item.type === model.type}
         {...item}
       />
     );
