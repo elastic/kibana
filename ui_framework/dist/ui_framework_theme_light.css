@@ -2131,8 +2131,9 @@ table {
   padding: 16px;
   background-color: #FFF;
   border: 1px solid #D9D9D9;
-  width: 320px; }
-  .kuiToast:hover .kuiToast__closeButton {
+  width: 100%; }
+  .kuiToast:hover .kuiToast__closeButton,
+  .kuiToast:focus .kuiToast__closeButton {
     opacity: 1; }
 
 /**
@@ -2213,14 +2214,6 @@ table {
 
 .kuiToastHeader--withBody {
   margin-bottom: 12px; }
-
-@media only screen and (max-width: 768px) {
-  /**
-   * 1. Mobile we make these 100%. Matching change happens on the list as well.
-   */
-  .kuiToast {
-    width: 100%;
-    /* 1 */ } }
 
 .kuiTitle {
   font-size: 24px;
