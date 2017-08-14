@@ -5,6 +5,7 @@
       <div id="editor_actions">
         <kbn-tooltip text="click to send request">
           <a
+            kbn-accessible-click
             class="editor_action"
             ng-click="sendSelected()"
             data-test-subj="send-request-button">
@@ -27,10 +28,10 @@
             aria-labelledby="consoleRequestOptions"
           >
             <li role="menuitem">
-              <a class="link" id="copy_as_curl">Copy as cURL</a>
+              <button class="link" id="copy_as_curl">Copy as cURL</button>
             </li>
             <li role="menuitem">
-              <a ng-click="autoIndent($event)">Auto indent</a>
+              <button ng-click="autoIndent($event)">Auto indent</button>
             </li>
           </ul>
         </span>
