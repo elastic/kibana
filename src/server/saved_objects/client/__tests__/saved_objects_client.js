@@ -9,6 +9,8 @@ describe('SavedObjectsClient', () => {
 
   let callAdminCluster;
   let savedObjectsClient;
+  const mockTimestamp = '2017-08-14T15:49:14.886Z';
+  const mockTimestampFields = { updated_at: mockTimestamp };
   const searchResults = {
     hits: {
       total: 3,
@@ -19,6 +21,7 @@ describe('SavedObjectsClient', () => {
         _score: 1,
         _source: {
           type: 'index-pattern',
+          ...mockTimestampFields,
           'index-pattern': {
             title: 'logstash-*',
             timeFieldName: '@timestamp',
@@ -32,6 +35,7 @@ describe('SavedObjectsClient', () => {
         _score: 1,
         _source: {
           type: 'config',
+          ...mockTimestampFields,
           config: {
             buildNum: 8467,
             defaultIndex: 'logstash-*'
@@ -44,6 +48,7 @@ describe('SavedObjectsClient', () => {
         _score: 1,
         _source: {
           type: 'index-pattern',
+          ...mockTimestampFields,
           'index-pattern': {
             title: 'stocks-*',
             timeFieldName: '@timestamp',
@@ -71,6 +76,7 @@ describe('SavedObjectsClient', () => {
   beforeEach(() => {
     callAdminCluster = sandbox.stub();
     savedObjectsClient = new SavedObjectsClient('.kibana-test', mappings, callAdminCluster);
+    sandbox.stub(savedObjectsClient, '_getCurrentTime').returns(mockTimestamp);
     sandbox.stub(getSearchDslNS, 'getSearchDsl').returns({});
   });
 
@@ -96,6 +102,7 @@ describe('SavedObjectsClient', () => {
       expect(response).to.eql({
         type: 'index-pattern',
         id: 'logstash-*',
+        ...mockTimestampFields,
         version: 2,
         attributes: {
           title: 'Logstash',
@@ -167,9 +174,9 @@ describe('SavedObjectsClient', () => {
       expect(args[0]).to.be('bulk');
       expect(args[1].body).to.eql([
         { create: { _type: 'doc', _id: 'config:one' } },
-        { type: 'config', config: { title: 'Test One' } },
+        { type: 'config', ...mockTimestampFields, config: { title: 'Test One' } },
         { create: { _type: 'doc', _id: 'index-pattern:two' } },
-        { type: 'index-pattern', 'index-pattern': { title: 'Test Two' } }
+        { type: 'index-pattern', ...mockTimestampFields, 'index-pattern': { title: 'Test Two' } }
       ]);
     });
 
@@ -182,7 +189,7 @@ describe('SavedObjectsClient', () => {
         body: [
           // uses create because overwriting is not allowed
           { create: { _type: 'doc', _id: 'foo:bar' } },
-          { type: 'foo', 'foo': {} },
+          { type: 'foo', ...mockTimestampFields, 'foo': {} },
         ]
       }));
 
@@ -194,7 +201,7 @@ describe('SavedObjectsClient', () => {
         body: [
           // uses index because overwriting is allowed
           { index: { _type: 'doc', _id: 'foo:bar' } },
-          { type: 'foo', 'foo': {} },
+          { type: 'foo', ...mockTimestampFields, 'foo': {} },
         ]
       }));
 
@@ -235,6 +242,7 @@ describe('SavedObjectsClient', () => {
           id: 'two',
           type: 'index-pattern',
           version: 2,
+          ...mockTimestampFields,
           attributes: { title: 'Test Two' },
         }
       ]);
@@ -268,11 +276,13 @@ describe('SavedObjectsClient', () => {
           id: 'one',
           type: 'config',
           version: 2,
+          ...mockTimestampFields,
           attributes: { title: 'Test One' },
         }, {
           id: 'two',
           type: 'index-pattern',
           version: 2,
+          ...mockTimestampFields,
           attributes: { title: 'Test Two' },
         }
       ]);
@@ -370,6 +380,7 @@ describe('SavedObjectsClient', () => {
         expect(response.saved_objects[i]).to.eql({
           id: doc._id.replace(/(index-pattern|config)\:/, ''),
           type: doc._source.type,
+          ...mockTimestampFields,
           version: doc._version,
           attributes: doc._source[doc._source.type]
         });
@@ -406,6 +417,7 @@ describe('SavedObjectsClient', () => {
         _version: 2,
         _source: {
           type: 'index-pattern',
+          ...mockTimestampFields,
           'index-pattern': {
             title: 'Testing'
           }
@@ -418,6 +430,7 @@ describe('SavedObjectsClient', () => {
       expect(response).to.eql({
         id: 'logstash-*',
         type: 'index-pattern',
+        updated_at: mockTimestamp,
         version: 2,
         attributes: {
           title: 'Testing'
@@ -468,7 +481,7 @@ describe('SavedObjectsClient', () => {
           _id: 'config:good',
           found: true,
           _version: 2,
-          _source: { config: { title: 'Test' } }
+          _source: { ...mockTimestampFields, config: { title: 'Test' } }
         }, {
           _type: 'doc',
           _id: 'config:bad',
@@ -484,6 +497,7 @@ describe('SavedObjectsClient', () => {
       expect(savedObjects[0]).to.eql({
         id: 'good',
         type: 'config',
+        ...mockTimestampFields,
         version: 2,
         attributes: { title: 'Test' }
       });
@@ -515,6 +529,7 @@ describe('SavedObjectsClient', () => {
       expect(response).to.eql({
         id,
         type,
+        ...mockTimestampFields,
         version: newVersion,
         attributes
       });
@@ -544,7 +559,9 @@ describe('SavedObjectsClient', () => {
         type: 'doc',
         id: 'index-pattern:logstash-*',
         version: undefined,
-        body: { doc: { 'index-pattern': { title: 'Testing' } } },
+        body: {
+          doc: { updated_at: mockTimestamp, 'index-pattern': { title: 'Testing' } }
+        },
         refresh: 'wait_for',
         index: '.kibana-test'
       });
