@@ -96,19 +96,12 @@ describe('createFindQuery', () => {
               ]
             }
           }],
-          should: [{
+          must: [{
             simple_query_string: {
               query: 'foo',
-              fields: ['title']
+              fields: ['title', 'bar.title']
             }
-          },
-          {
-            simple_query_string: {
-              query: 'foo',
-              fields: ['bar.title']
-            }
-          }],
-          minimum_should_match: 1
+          }]
         }
       },
       version: true
@@ -136,19 +129,12 @@ describe('createFindQuery', () => {
               ]
             }
           }],
-          should: [{
+          must: [{
             simple_query_string: {
               query: 'foo',
-              fields: ['title', 'description']
+              fields: ['title', 'description', 'bar.title', 'bar.description']
             }
-          },
-          {
-            simple_query_string: {
-              query: 'foo',
-              fields: ['bar.title', 'bar.description']
-            }
-          }],
-          minimum_should_match: 1
+          }]
         }
       },
       version: true

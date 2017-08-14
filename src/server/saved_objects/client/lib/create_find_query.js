@@ -2,44 +2,6 @@ import { get } from 'lodash';
 
 /**
  *
- * @param {string} search - a search string.
- * @param {Array?} searchFields - Optional array of search fields.
- * @return {Object} a simple query string object.
- */
-function createSimpleQuery(search, searchFields) {
-  const simpleQueryString = {
-    query: search
-  };
-
-  if (!searchFields) {
-    simpleQueryString.all_fields = true;
-  } else {
-    simpleQueryString.fields = searchFields;
-  }
-
-  return { simple_query_string : simpleQueryString };
-}
-
-/**
- * @param {Object} bool the bool query that we are going to add a search query too.
- * @param {string} search - the search string
- * @param {Array?} searchFields - Optional array of fields to search on
- * @param {string?} type - Optional type to search on
- */
-function addSearchQuery(bool, search, searchFields, type) {
-  if (!searchFields || !type) {
-    bool.must = [createSimpleQuery(search, searchFields)];
-  } else {
-    const v5SimpleQueryString = createSimpleQuery(search, searchFields);
-    const v6SimpleQueryString = createSimpleQuery(search, searchFields.map(field => `${type}.${field}`));
-
-    bool.should = [v6SimpleQueryString, v5SimpleQueryString];
-    bool.minimum_should_match = 1;
-  }
-}
-
-/**
- *
  * @param mappings
  * @param options
  * @property {Array|string} options.searchFields - Optional search fields, can be either a string, if searching on
@@ -61,7 +23,7 @@ export function createFindQuery(mappings, options = {}) {
     return { version: true, query: { match_all: {} } };
   }
 
-  const bool = { filter: [] };
+  const bool = { must: [], filter: [] };
 
   if (type) {
     bool.filter.push({
@@ -83,12 +45,30 @@ export function createFindQuery(mappings, options = {}) {
   }
 
   if (search) {
-    const searchFieldsArray = !searchFields || Array.isArray(searchFields) ? searchFields : [searchFields];
-    addSearchQuery(bool, search, searchFieldsArray, type);
+    // If searchFields is a singular string field, turn it into an array of one.
+    let searchFieldsArray = !searchFields || Array.isArray(searchFields) ? searchFields : [searchFields];
+
+    if (searchFieldsArray && type) {
+      // Version 6 requires the type prefixed to the field name.
+      const newArray = searchFieldsArray.map(field => `${type}.${field}`);
+      searchFieldsArray = searchFieldsArray.concat(newArray);
+    }
+
+    const simpleQueryString = {
+      query: search
+    };
+
+    if (!searchFields) {
+      simpleQueryString.all_fields = true;
+    } else {
+      simpleQueryString.fields = searchFieldsArray;
+    }
+
+    bool.must.push({ simple_query_string : simpleQueryString });
   } else {
-    bool.must = [{
+    bool.must.push({
       match_all: {}
-    }];
+    });
   }
 
   const query = { version: true, query: { bool } };
