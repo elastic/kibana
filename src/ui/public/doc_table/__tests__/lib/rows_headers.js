@@ -120,6 +120,22 @@ describe('Doc Table', function () {
       columnTests('[data-test-subj~="docTableHeaderField"]', $elem);
     });
 
+    describe('sorting button', function () {
+
+      beforeEach(function () {
+        $parentScope.columns = ['bytes', '_source'];
+        $elem.scope().$digest();
+      });
+
+      it('should show for sortable columns', function () {
+        expect($elem.find(`[data-test-subj="docTableHeaderFieldSort_bytes"]`).length).to.be(1);
+      });
+
+      it('should not be shown for unsortable columns', function () {
+        expect($elem.find(`[data-test-subj="docTableHeaderFieldSort__source"]`).length).to.be(0);
+      });
+    });
+
     describe('cycleSortOrder function', function () {
       it('should exist', function () {
         expect($scope.cycleSortOrder).to.be.a(Function);
