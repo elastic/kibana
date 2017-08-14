@@ -1,19 +1,32 @@
 import { get } from 'lodash';
 
-function createSimpleQuery(search, searchFields) {
-  const simpleQueryString = {
+/**
+ *
+ * @param search - the search string
+ * @param searchFields - the fields to search on
+ * @param type - the type to search on
+ * @return {Array} Two simpleQueries in an array, one for v5, one for v6 (which has type appended).
+ */
+function createSimpleQueries(search, searchFields, type) {
+  const v5SimpleQueryString = {
+    query: search
+  };
+  const v6SimpleQueryString = {
     query: search
   };
 
   if (!searchFields) {
-    simpleQueryString.all_fields = true;
+    v5SimpleQueryString.all_fields = true;
+    v6SimpleQueryString.all_fields = true;
   } else if (Array.isArray(searchFields)) {
-    simpleQueryString.fields = searchFields;
+    v5SimpleQueryString.fields = searchFields;
+    v6SimpleQueryString.fields = searchFields.map(field => `${type}.${field}`);
   } else {
-    simpleQueryString.fields = [searchFields];
+    v5SimpleQueryString.fields = [searchFields];
+    v6SimpleQueryString.fields = [`${type}.${searchFields}`];
   }
 
-  return simpleQueryString;
+  return [v6SimpleQueryString, v5SimpleQueryString];
 }
 
 export function createFindQuery(mappings, options = {}) {
@@ -49,16 +62,7 @@ export function createFindQuery(mappings, options = {}) {
   }
 
   if (search) {
-    const v5SimpleQueryString = createSimpleQuery(search, searchFields);
-    bool.should.push({ simple_query_string: v5SimpleQueryString });
-
-    if (searchFields) {
-      const v6SearchFields = Array.isArray(searchFields) ?
-        searchFields.map(field => `${type}.${field}`)
-        : `${type}.${searchFields}`;
-      const v6SimpleQueryString = createSimpleQuery(search, v6SearchFields);
-      bool.should.push({ simple_query_string: v6SimpleQueryString });
-    }
+    bool.should.concat(createSimpleQueries(search, searchFields, type));
     bool.minimum_should_match = 1;
   } else {
     bool.must.push({
