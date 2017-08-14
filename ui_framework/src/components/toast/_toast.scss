@@ -37,6 +37,7 @@
 
     &:focus {
       background-color: $kuiFocusBackgroundColor;
+      opacity: 1;
 
       svg {
         fill: $kuiColorPrimary;

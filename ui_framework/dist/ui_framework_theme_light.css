@@ -2155,7 +2155,8 @@ table {
   .kuiToast__closeButton:hover svg {
     fill: #000; }
   .kuiToast__closeButton:focus {
-    background-color: #e6f2f6; }
+    background-color: #e6f2f6;
+    opacity: 1; }
     .kuiToast__closeButton:focus svg {
       fill: #0079a5; }
 
