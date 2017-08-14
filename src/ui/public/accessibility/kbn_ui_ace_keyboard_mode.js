@@ -19,9 +19,9 @@ import { ESC_KEY_CODE, ENTER_KEY } from 'ui_framework/services';
 
 let aceKeyboardModeId = 0;
 
-uiModules.get('kibana').directive('kbnUiAceKeyboardMode', () => ({
-  restrict: 'A',
-  link(scope, element) {
+uiModules.get('kibana')
+.factory('kbnUiAceKeyboardModeService', () => ({
+  initialize(scope, element) {
     const uniqueId = `uiAceKeyboardHint-${scope.$id}-${aceKeyboardModeId++}`;
 
     const hint = angular.element(
@@ -76,5 +76,11 @@ uiModules.get('kibana').directive('kbnUiAceKeyboardMode', () => ({
     // Prevent tabbing into the ACE textarea, we now handle all focusing for it
     uiAceTextbox.attr('tabindex', '-1');
     element.prepend(hint);
+  }
+}))
+.directive('kbnUiAceKeyboardMode', (kbnUiAceKeyboardModeService) => ({
+  restrict: 'A',
+  link(scope, element) {
+    kbnUiAceKeyboardModeService.initialize(scope, element);
   }
 }));
