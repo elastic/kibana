@@ -116,6 +116,15 @@ class Metric extends Component {
       );
     }
 
+    let additionalLabel;
+    if (this.props.additionalLabel) {
+      additionalLabel = (
+        <div className="rhythm_metric__additionalLabel">
+          {this.props.additionalLabel}
+        </div>
+      );
+    }
+
     return (
       <div className="rhythm_metric" style={styles.container}>
         <div
@@ -128,6 +137,7 @@ class Metric extends Component {
               <div style={styles.primary_value} className="rhythm_metric__primary-value">{ primaryValue }</div>
             </div>
             { secondarySnippet }
+            {additionalLabel}
           </div>
         </div>
       </div>
@@ -140,7 +150,8 @@ Metric.propTypes = {
   backgroundColor: PropTypes.string,
   metric: PropTypes.object,
   secondary: PropTypes.object,
-  reversed: PropTypes.bool
+  reversed: PropTypes.bool,
+  additionalLabel: PropTypes.string
 };
 
 export default Metric;
