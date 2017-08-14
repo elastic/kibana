@@ -10,7 +10,7 @@
     margin-top: $kuiSizeL;
   }
 
-  .kuiFormRow__error + * {
+  .kuiFormRow__text + .kuiFormRow__text {
     padding-top: 0;
   }
 }

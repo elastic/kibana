@@ -51,7 +51,7 @@ export class KuiFormRow extends Component {
 
     if (helpText) {
       optionalHelpText = (
-        <KuiFormHelpText>
+        <KuiFormHelpText className="kuiFormRow__text">
           {helpText}
         </KuiFormHelpText>
       );
@@ -62,7 +62,7 @@ export class KuiFormRow extends Component {
     if (error) {
       const errorTexts = Array.isArray(error) ? error : [error];
       optionalErrors = errorTexts.map(error => (
-        <KuiFormErrorText key={error}>
+        <KuiFormErrorText key={error} className="kuiFormRow__text">
           {error}
         </KuiFormErrorText>
       ));

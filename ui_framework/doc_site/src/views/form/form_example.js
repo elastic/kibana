@@ -11,9 +11,9 @@ import {
   GuideText,
 } from '../../components';
 
-import FormComponents from './form_components';
-const formComponentsSource = require('!!raw!./form_components');
-const formComponentsHtml = renderToHtml(FormComponents);
+import FormControls from './form_controls';
+const formControlsSource = require('!!raw!./form_controls');
+const formControlsHtml = renderToHtml(FormControls);
 
 import FormRows from './form_rows';
 const formRowsSource = require('!!raw!./form_rows');
@@ -30,17 +30,17 @@ const formPopoverHtml = renderToHtml(FormPopover);
 export default props => (
   <GuidePage title={props.route.name}>
     <GuideSection
-      title="Form components"
+      title="Form controls"
       source={[{
         type: GuideSectionTypes.JS,
-        code: formComponentsSource,
+        code: formControlsSource,
       }, {
         type: GuideSectionTypes.HTML,
-        code: formComponentsHtml,
+        code: formControlsHtml,
       }]}
     >
       <GuideDemo>
-        <FormComponents />
+        <FormControls />
       </GuideDemo>
     </GuideSection>
 

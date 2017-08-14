@@ -1,13 +1,16 @@
 import React from 'react';
 
 import {
-  KuiForm,
   KuiCheckbox,
   KuiFieldNumber,
-  KuiRange,
-  KuiFormRow,
-  KuiSwitch,
+  KuiFieldPassword,
+  KuiFieldSearch,
   KuiFieldText,
+  KuiForm,
+  KuiFormRow,
+  KuiRange,
+  KuiSelect,
+  KuiSwitch,
   KuiTextArea,
 } from '../../../../components';
 
@@ -19,13 +22,31 @@ function makeId() {
 export default () => {
   // Checkboxes are passed as an array of objects. They can be optionally checked to start.
   const checkboxOptions = [
-    { id: makeId(), label: 'Option one' },
-    { id: makeId(), label: 'Option two is checked by default', checked: true },
-    { id: makeId(), label: 'Option three' },
+    { id: makeId(), label: 'Option one', onChange: () => {} },
+    { id: makeId(), label: 'Option two is checked by default', checked: true, onChange: () => {} },
+    { id: makeId(), label: 'Option three', onChange: () => {} },
   ];
 
   return (
     <KuiForm>
+      <KuiFormRow
+        id={makeId()}
+        label="Text field"
+        helpText="I am some friendly help text."
+      >
+        <KuiFieldText name="first" />
+      </KuiFormRow>
+
+      <KuiFormRow
+        id={makeId()}
+        label="Text field with icon"
+      >
+        <KuiFieldText
+          defaultValue="Text field with customizable icon"
+          icon="user"
+        />
+      </KuiFormRow>
+
       <KuiFormRow
         id={makeId()}
         label="Number field"
@@ -40,10 +61,36 @@ export default () => {
 
       <KuiFormRow
         id={makeId()}
-        label="Text field"
-        helpText="I am some friendly help text."
+        label="Password"
       >
-        <KuiFieldText name="first" />
+        <KuiFieldPassword defaultValue="password" />
+      </KuiFormRow>
+
+      <KuiFormRow
+        id={makeId()}
+        label="Search"
+      >
+        <KuiFieldSearch />
+      </KuiFormRow>
+
+      <KuiFormRow
+        label="Text area"
+        id={makeId()}
+      >
+        <KuiTextArea name="textarea"/>
+      </KuiFormRow>
+
+      <KuiFormRow
+        label="Select"
+        id={makeId()}
+      >
+        <KuiSelect
+          options={[
+            { value: 'option_one', text: 'Option one' },
+            { value: 'option_two', text: 'Option two' },
+            { value: 'option_three', text: 'Option three' },
+          ]}
+        />
       </KuiFormRow>
 
       <KuiFormRow
@@ -56,13 +103,6 @@ export default () => {
           name="range"
           id="range"
         />
-      </KuiFormRow>
-
-      <KuiFormRow
-        label="Text area"
-        id={makeId()}
-      >
-        <KuiTextArea name="textarea"/>
       </KuiFormRow>
 
       <KuiFormRow

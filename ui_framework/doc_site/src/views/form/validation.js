@@ -71,7 +71,7 @@ export default class extends Component {
 
           <KuiFormRow
             id={makeId()}
-            label="Validation with helptext and errors"
+            label="Validation with help text and errors"
             helpText="I am some friendly help text."
             isInvalid={this.state.showErrors}
             error={errors}

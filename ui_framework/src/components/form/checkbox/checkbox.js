@@ -1,6 +1,5 @@
-import React, {
-  PropTypes,
-} from 'react';
+import React from 'react';
+import PropTypes from 'prop-types';
 import classNames from 'classnames';
 
 export const KuiCheckbox = ({ options, className, ...rest }) => {
@@ -11,12 +10,29 @@ export const KuiCheckbox = ({ options, className, ...rest }) => {
       {options.map((option, index) => {
 
         return (
-          <div className={classes} key={index} {...rest}>
-            <input className="kuiCheckbox__input" type="checkbox" id={option.id} defaultChecked={option.checked ? true : false} />
+          <div
+            className={classes}
+            key={index}
+            {...rest}
+          >
+            <input
+              className="kuiCheckbox__input"
+              type="checkbox"
+              id={option.id}
+              checked={option.checked}
+              onChange={option.onChange}
+            />
+
             <div className="kuiCheckbox__square">
               <div className="kuiCheckbox__check" />
             </div>
-            <label className="kuiCheckbox__label" htmlFor={option.id}>{option.label}</label>
+
+            <label
+              className="kuiCheckbox__label"
+              htmlFor={option.id}
+            >
+              {option.label}
+            </label>
           </div>
         );
       })}
@@ -25,7 +41,14 @@ export const KuiCheckbox = ({ options, className, ...rest }) => {
 };
 
 KuiCheckbox.propTypes = {
-  options: PropTypes.arrayOf(React.PropTypes.object).isRequired,
+  options: PropTypes.arrayOf(
+    PropTypes.shape({
+      id: PropTypes.string,
+      checked: PropTypes.bool,
+      onChange: PropTypes.func.isRequired,
+      label: PropTypes.string,
+    }),
+  ).isRequired,
 };
 
 KuiCheckbox.defaultProps = {

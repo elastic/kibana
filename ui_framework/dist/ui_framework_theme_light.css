@@ -765,7 +765,7 @@ table {
   max-width: 400px; }
   .kuiFormRow + * {
     margin-top: 24px; }
-  .kuiFormRow .kuiFormRow__error + * {
+  .kuiFormRow .kuiFormRow__text + .kuiFormRow__text {
     padding-top: 0; }
 
 .kuiRange {

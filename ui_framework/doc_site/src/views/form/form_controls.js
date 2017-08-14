@@ -76,6 +76,12 @@ export default () => (
     <br />
     <br />
 
-    <KuiCheckbox />
+    <KuiCheckbox
+      options={[
+        { id: '0', label: 'Option one', onChange: () => {} },
+        { id: '1', label: 'Option two is checked by default', checked: true, onChange: () => {} },
+        { id: '2', label: 'Option three', onChange: () => {} },
+      ]}
+    />
   </div>
 );
