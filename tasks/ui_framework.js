@@ -83,30 +83,34 @@ module.exports = function (grunt) {
   }
 
   function uiFrameworkCompile() {
-    const src = 'ui_framework/src/index.scss';
-    const dest = 'ui_framework/dist/ui_framework.css';
+    const compileTheme = name => {
+      const src = `ui_framework/src/${name}.scss`;
+      const dest = `ui_framework/dist/ui_framework_${name}.css`;
 
-    return new Promise(resolve => {
-      sass.render({
-        file: src,
-      }, function (error, result) {
-        if (error) {
-          grunt.log.error(error);
-        }
+      return new Promise(resolve => {
+        sass.render({
+          file: src,
+        }, function (error, result) {
+          if (error) {
+            grunt.log.error(error);
+          }
 
-        postcss([postcssConfig])
-          .process(result.css, { from: src, to: dest })
-          .then(result => {
-            grunt.file.write(dest, result.css);
+          postcss([postcssConfig])
+            .process(result.css, { from: src, to: dest })
+            .then(result => {
+              grunt.file.write(dest, result.css);
 
-            if (result.map) {
-              grunt.file.write(`${dest}.map`, result.map);
-            }
+              if (result.map) {
+                grunt.file.write(`${dest}.map`, result.map);
+              }
 
-            resolve();
-          });
+              resolve();
+            });
+        });
       });
-    });
+    };
+
+    return Promise.all([compileTheme('theme_light'), compileTheme('theme_dark')]);
   }
 
   function uiFrameworkWatch() {
