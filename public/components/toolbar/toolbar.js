@@ -7,10 +7,21 @@ import { NavbarButton } from '../navbar_button';
 import { Expression } from '../expression';
 import { Datasource } from '../datasource';
 import { ElementTypes } from './element_types';
+import { WorkpadLoader } from '../workpad_loader';
 
 import './toolbar.less';
 
-export const Toolbar = ({ editing, tray, setTray, addElement, addPage, previousPage, nextPage, elementIsSelected, selectedPageNumber }) => {
+export const Toolbar = (props) => {
+  const { editing,
+    tray,
+    setTray,
+    addElement,
+    addPage,
+    previousPage,
+    nextPage,
+    elementIsSelected,
+    selectedPageNumber,
+  } = props;
   const done = () => setTray(null);
   const showHideTray = (exp) => {
     if (tray && tray === exp) return done();
@@ -28,6 +39,7 @@ export const Toolbar = ({ editing, tray, setTray, addElement, addPage, previousP
     elements: (<ElementTypes done={done} onClick={createElement} />),
     expression: !elementIsSelected ? null : (<Expression done={done} />),
     datasource: !elementIsSelected ? null : (<Datasource done={done} />),
+    workpadloader: (<WorkpadLoader onClose={done} />),
   };
 
   return !editing ? null : (
@@ -40,9 +52,12 @@ export const Toolbar = ({ editing, tray, setTray, addElement, addPage, previousP
         { selectedPageNumber }
         <NavbarButton onClick={ nextPage }><i className="fa fa-chevron-right"/></NavbarButton>
 
+        <NavbarButton onClick={() => showHideTray('workpadloader')}><i className="fa fa-file" /> Workpads</NavbarButton>
+
         <NavbarButton onClick={() => showHideTray('elements')}><i className="fa fa-plus" /> Add an element</NavbarButton>
 
         <NavbarButton onClick={ addPage }><i className="fa fa-plus-square" /> Add a page</NavbarButton>
+
 
         { !elementIsSelected ? null : (
             <NavbarButton onClick={() => showHideTray('datasource')}><i className="fa fa-database" /> Datasource</NavbarButton>
@@ -60,11 +75,11 @@ export const Toolbar = ({ editing, tray, setTray, addElement, addPage, previousP
 Toolbar.propTypes = {
   editing: PropTypes.bool,
   tray: PropTypes.node,
-  setTray: PropTypes.func,
-  addElement: PropTypes.func,
-  addPage: PropTypes.func,
-  nextPage: PropTypes.func,
-  previousPage: PropTypes.func,
-  selectedPageNumber: PropTypes.number,
-  elementIsSelected: PropTypes.bool,
+  setTray: PropTypes.func.isRequired,
+  addElement: PropTypes.func.isRequired,
+  addPage: PropTypes.func.isRequired,
+  nextPage: PropTypes.func.isRequired,
+  previousPage: PropTypes.func.isRequired,
+  selectedPageNumber: PropTypes.number.isRequired,
+  elementIsSelected: PropTypes.bool.isRequired,
 };

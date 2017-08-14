@@ -9,23 +9,28 @@ export function workpad(server) {
   const routePrefix = API_ROUTE_WORKPAD;
   const indexName = `${config.get('canvas.indexPrefix')}${INDEX_WORKPAD_SUFFIX}`;
 
-  function formatResponse(reply) {
+  function formatResponse(reply, returnResponse = false) {
     return (resp) => {
       if (resp instanceof esErrors['400']) return reply(boom.badRequest(resp));
       if (resp instanceof esErrors['401']) return reply(boom.unauthorized());
       if (resp instanceof esErrors['403']) return reply(boom.forbidden('Sorry, you don\'t have access to that'));
       if (resp instanceof esErrors['404']) return reply(boom.wrap(resp, 404));
-      return reply(resp);
+      return returnResponse ? resp : reply(resp);
     };
   }
 
   function createWorkpad(request, id) {
     const now = new Date();
     const doc = {
+      refresh: 'wait_for',
       index: indexName,
       type: CANVAS_TYPE,
-      id: id || `workpad-${uuid()}`,
-      body: { ...request.payload, '@timestamp': now, '@created': now },
+      id: id || request.payload.id || `workpad-${uuid()}`,
+      body: {
+        ...request.payload,
+        '@timestamp': now,
+        '@created': now,
+      },
     };
 
     return callWithRequest(request, 'create', doc);
@@ -36,16 +41,21 @@ export function workpad(server) {
     const findDoc = {
       index: indexName,
       type: CANVAS_TYPE,
-      id: request.params.id,
+      id: workpadId,
     };
 
     return callWithRequest(request, 'get', findDoc)
     .then(({ _source }) => {
       const doc = {
+        refresh: 'wait_for',
         index: indexName,
         type: CANVAS_TYPE,
         id: workpadId,
-        body: merge(_source, { ...request.payload, '@timestamp': new Date() }),
+        body: merge(_source, {
+          ...request.payload,
+          '@created': _source['@created'] || new Date(),
+          '@timestamp': new Date(),
+        }),
       };
 
       return callWithRequest(request, 'index', doc);
@@ -71,7 +81,10 @@ export function workpad(server) {
       };
 
       callWithRequest(request, 'get', doc)
-      .then(formatResponse(reply))
+      .then(formatResponse(reply, true))
+      .then(resp => reply({
+        workpad: resp._source,
+      }))
       .catch(formatResponse(reply));
     },
   });
@@ -120,7 +133,9 @@ export function workpad(server) {
     method: 'GET',
     path: `${routePrefix}/find`,
     handler: function (request, reply) {
-      const { name } = request.query;
+      const { name, page } = request.query;
+      const limit = Number(request.query.limit) || 10000;
+      const offset = (page && page >= 1) ? (page - 1) * limit : 0;
 
       const getQuery = (name) => {
         if (name != null) {
@@ -147,12 +162,19 @@ export function workpad(server) {
           _source: ['name', 'id', '@timestamp', '@created'],
           sort: [{ '@timestamp': { order: 'desc' } }],
           // TODO: Don't you hate this? Kibana did this, drives people nuts. Welcome to nut town. Nutball.
-          size: 10000,
+          size: limit,
+          from: offset,
         },
       };
 
       callWithRequest(request, 'search', doc)
-      .then(formatResponse(reply))
+      .then(formatResponse(reply, true))
+      .then((resp) => {
+        reply({
+          total: resp.hits.total,
+          workpads: resp.hits.hits.map(hit => hit._source),
+        });
+      })
       .catch(formatResponse(reply));
     },
   });

@@ -1,10 +1,8 @@
 import { connect } from 'react-redux';
-
 import { get } from 'lodash';
+import { PageConfig as Component } from './page_config';
 import { getSelectedPageIndex, getPages } from '../../state/selectors/workpad';
 import { stylePage } from '../../state/actions/pages';
-
-import { PageConfig as Component } from './page_config';
 
 const mapStateToProps = (state) => ({
   page: getPages(state)[getSelectedPageIndex(state)],

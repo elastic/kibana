@@ -1,16 +1,20 @@
+import { handleActions } from 'redux-actions';
+import { setWorkpad, sizeWorkpad, setColors, setName } from '../actions/workpad';
 
-export default function workdpadReducer(workpadState = {}, { type, payload }) {
-  if (type === 'sizeWorkpad') {
-    return Object.assign({}, workpadState, payload);
-  }
+export default handleActions({
+  [setWorkpad]: (workpadState, { payload }) => {
+    return payload;
+  },
 
-  if (type === 'setColors') {
-    return Object.assign({}, workpadState, { colors: payload });
-  }
+  [sizeWorkpad]: (workpadState, { payload }) => {
+    return { ...workpadState, payload };
+  },
 
-  if (type === 'setName') {
+  [setColors]: (workpadState, { payload }) => {
+    return { ...workpadState, colors: payload };
+  },
+
+  [setName]: (workpadState, { payload }) => {
     return { ...workpadState, name: payload };
-  }
-
-  return workpadState;
-}
+  },
+}, {});

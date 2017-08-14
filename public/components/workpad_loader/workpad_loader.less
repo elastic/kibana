@@ -1,0 +1,44 @@
+@import "../../style/variables.less";
+
+.canvas__workpad_loader {
+
+  .canvas__workpad_loader--search {
+    background-color: @lightestGrey;
+    color: @trueBlack;
+    padding: @spacingM;
+    height: 360px;
+    overflow: auto;
+
+    .canvas__workpad_loader--controls {
+      display: inline-block;
+    }
+
+    .form-inline {
+      display: inline-block;
+      margin: 0 @spacingM;
+    }
+
+    .form-group {
+      display: inline-block;
+
+      label, input, button {
+        margin-right: @spacingM;
+      }
+
+      input {
+        color: @darkGrey;
+        min-width: 200px;
+      }
+    }
+
+    .workpad {
+      td {
+        color: @darkestGrey;
+      }
+
+      td.name {
+        cursor: pointer;
+      }
+    }
+  }
+}

@@ -6,7 +6,6 @@ import { getSelectedPage, getSelectedElement, getSelectedPageIndex } from '../..
 import { addElement } from '../../state/actions/elements';
 import { addPage, nextPage, previousPage } from '../../state/actions/pages';
 
-
 import { Toolbar as Component } from './toolbar';
 
 const mapStateToProps = (state) => ({
