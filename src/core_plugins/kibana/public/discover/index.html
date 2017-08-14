@@ -75,7 +75,7 @@
               </span>
             </button>
 
-            <div class="discover-timechart" ng-if="opts.timefield">
+            <section aria-label="Histogram of found documents" class="discover-timechart" ng-if="opts.timefield">
               <header>
                 <center class="small">
                   <span tooltip="To change the time, click the clock icon in the navigation bar">{{timeRange.from | moment}} - {{timeRange.to | moment}}</span>
@@ -114,9 +114,9 @@
                  style="height: 200px"
                 >
               </visualization>
-            </div>
+            </section>
 
-            <div class="discover-table" fixed-scroll>
+            <section class="discover-table" fixed-scroll aria-label="Documents">
               <doc-table
                 hits="rows"
                 index-pattern="indexPattern"
@@ -143,7 +143,7 @@
                 your search, refine your search to see others.
                 <a kbn-accessible-click ng-click="scrollToTop()">Back to top.</a>
               </div>
-            </div>
+            </section>
           </div>
         </div>
       </div>
