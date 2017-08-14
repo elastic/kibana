@@ -2,33 +2,54 @@ import { get } from 'lodash';
 
 /**
  *
- * @param search - the search string
- * @param searchFields - the fields to search on
- * @param type - the type to search on
- * @return {Array} Two simpleQueries in an array, one for v5, one for v6 (which has type appended).
+ * @param {string} search - a search string.
+ * @param {Array?} searchFields - Optional array of search fields.
+ * @return {Object} a simple query string object.
  */
-function createSimpleQueries(search, searchFields, type) {
-  const v5SimpleQueryString = {
-    query: search
-  };
-  const v6SimpleQueryString = {
+function createSimpleQuery(search, searchFields) {
+  const simpleQueryString = {
     query: search
   };
 
   if (!searchFields) {
-    v5SimpleQueryString.all_fields = true;
-    v6SimpleQueryString.all_fields = true;
-  } else if (Array.isArray(searchFields)) {
-    v5SimpleQueryString.fields = searchFields;
-    v6SimpleQueryString.fields = searchFields.map(field => `${type}.${field}`);
+    simpleQueryString.all_fields = true;
   } else {
-    v5SimpleQueryString.fields = [searchFields];
-    v6SimpleQueryString.fields = [`${type}.${searchFields}`];
+    simpleQueryString.fields = searchFields;
   }
 
-  return [v6SimpleQueryString, v5SimpleQueryString];
+  return { simple_query_string : simpleQueryString };
 }
 
+/**
+ * @param {Object} bool the bool query that we are going to add a search query too.
+ * @param {string} search - the search string
+ * @param {Array?} searchFields - Optional array of fields to search on
+ * @param {string?} type - Optional type to search on
+ */
+function addSearchQuery(bool, search, searchFields, type) {
+  if (!searchFields || !type) {
+    bool.must = [createSimpleQuery(search, searchFields)];
+  } else {
+    const v5SimpleQueryString = createSimpleQuery(search, searchFields);
+    const v6SimpleQueryString = createSimpleQuery(search, searchFields.map(field => `${type}.${field}`));
+
+    bool.should = [v6SimpleQueryString, v5SimpleQueryString];
+    bool.minimum_should_match = 1;
+  }
+}
+
+/**
+ *
+ * @param mappings
+ * @param options
+ * @property {Array|string} options.searchFields - Optional search fields, can be either a string, if searching on
+ * only one field, or an array, if searching across many.
+ * @property {string} options.search - optional search query
+ * @property {string} options.type - optional type to limit the query to.
+ * @property {string} options.sortField - optional field to sort on.
+ * @property {string} options.sortOrder - optional direction to sort using.
+ * @return {Object}
+ */
 export function createFindQuery(mappings, options = {}) {
   const { type, search, searchFields, sortField, sortOrder } = options;
 
@@ -40,7 +61,7 @@ export function createFindQuery(mappings, options = {}) {
     return { version: true, query: { match_all: {} } };
   }
 
-  const bool = { must: [], should: [], filter: [] };
+  const bool = { filter: [] };
 
   if (type) {
     bool.filter.push({
@@ -62,12 +83,12 @@ export function createFindQuery(mappings, options = {}) {
   }
 
   if (search) {
-    bool.should.concat(createSimpleQueries(search, searchFields, type));
-    bool.minimum_should_match = 1;
+    const searchFieldsArray = !searchFields || Array.isArray(searchFields) ? searchFields : [searchFields];
+    addSearchQuery(bool, search, searchFieldsArray, type);
   } else {
-    bool.must.push({
+    bool.must = [{
       match_all: {}
-    });
+    }];
   }
 
   const query = { version: true, query: { bool } };
