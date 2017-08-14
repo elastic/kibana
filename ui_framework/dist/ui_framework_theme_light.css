@@ -2039,6 +2039,8 @@ table {
 
 /**
  * 1. Allow list to expand as items are added, but cap it at the screen height.
+ * 2. Only show the scroll on hover. Generally, scrolling is bad for toasts.
+ * 3. Allow some padding if a scroll shows up.
  */
 .kuiGlobalToastList {
   display: -webkit-box;
@@ -2058,9 +2060,9 @@ table {
   z-index: 5000;
   bottom: 0;
   right: 0;
-  width: 320px;
-  overflow-x: hidden;
-  overflow-y: scroll;
+  width: 336px;
+  /* 3 */
+  padding-right: 16px;
   max-height: 100vh;
   /* 1 */ }
   .kuiGlobalToastList::-webkit-scrollbar {
@@ -2072,11 +2074,15 @@ table {
     background-clip: content-box; }
   .kuiGlobalToastList::-webkit-scrollbar-track {
     background-color: transparent; }
+  .kuiGlobalToastList:hover {
+    overflow-y: auto;
+    /* 2 */ }
 
 .kuiGlobalToastListItem {
-  margin-bottom: 12px;
-  -webkit-animation: 0.5s kuiShowToast;
-          animation: 0.5s kuiShowToast;
+  margin-bottom: 16px;
+  margin-right: 16px;
+  -webkit-animation: 250ms kuiShowToast cubic-bezier(0.694, 0.0482, 0.335, 1);
+          animation: 250ms kuiShowToast cubic-bezier(0.694, 0.0482, 0.335, 1);
   opacity: 1;
   /**
    * 1. justify-content: flex-end interferes with overflowing content, so we'll use this to push
@@ -2091,49 +2097,66 @@ table {
 
 @-webkit-keyframes kuiShowToast {
   from {
-    -webkit-transform: translateX(30px);
-            transform: translateX(30px);
+    -webkit-transform: translateY(24px) scale(0.9);
+            transform: translateY(24px) scale(0.9);
     opacity: 0; }
   to {
-    -webkit-transform: translateX(0);
-            transform: translateX(0);
+    -webkit-transform: translateY(0) scale(1);
+            transform: translateY(0) scale(1);
     opacity: 1; } }
 
 @keyframes kuiShowToast {
   from {
-    -webkit-transform: translateX(30px);
-            transform: translateX(30px);
+    -webkit-transform: translateY(24px) scale(0.9);
+            transform: translateY(24px) scale(0.9);
     opacity: 0; }
   to {
-    -webkit-transform: translateX(0);
-            transform: translateX(0);
+    -webkit-transform: translateY(0) scale(1);
+            transform: translateY(0) scale(1);
     opacity: 1; } }
+
+@media only screen and (max-width: 768px) {
+  /**
+   * 1. Mobile we make these 100%. Matching change happens on the item as well.
+   */
+  .kuiGlobalToastList {
+    left: 0;
+    padding-left: 16px;
+    width: 100%;
+    /* 1 */ } }
 
 .kuiToast {
   box-shadow: 0 16px 16px -8px rgba(0, 0, 0, 0.1);
   position: relative;
-  padding: 12px;
+  padding: 16px;
   background-color: #FFF;
-  border: 1px solid #D9D9D9; }
+  border: 1px solid #D9D9D9;
+  width: 100%; }
+  .kuiToast:hover .kuiToast__closeButton,
+  .kuiToast:focus .kuiToast__closeButton {
+    opacity: 1; }
 
 /**
    * 1. Fit button to icon.
    */
 .kuiToast__closeButton {
   position: absolute;
-  top: 4px;
-  right: 4px;
+  top: 16px;
+  right: 16px;
   line-height: 0;
   /* 1 */
   -webkit-appearance: none;
      -moz-appearance: none;
-          appearance: none; }
+          appearance: none;
+  opacity: 0;
+  transition: opacity 150ms cubic-bezier(0.694, 0.0482, 0.335, 1); }
   .kuiToast__closeButton svg {
     fill: gray; }
   .kuiToast__closeButton:hover svg {
     fill: #000; }
   .kuiToast__closeButton:focus {
-    background-color: #e6f2f6; }
+    background-color: #e6f2f6;
+    opacity: 1; }
     .kuiToast__closeButton:focus svg {
       fill: #0079a5; }
 
@@ -2152,11 +2175,14 @@ table {
 /**
  * 1. Align icon with first line of title text if it wraps.
  * 2. Apply margin to all but last item in the flex.
+ * 3. Account for close button.
  */
 .kuiToastHeader {
   font-size: 16px;
   font-size: 1rem;
   line-height: 24px;
+  padding-right: 24px;
+  /* 3 */
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -2188,7 +2214,7 @@ table {
   font-weight: 300; }
 
 .kuiToastHeader--withBody {
-  margin-bottom: 9px; }
+  margin-bottom: 12px; }
 
 .kuiTitle {
   font-size: 24px;

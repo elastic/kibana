@@ -6,12 +6,7 @@ html {
   height: 100%;
 }
 
-/**
- * 1. Expand container to fit the page if the content is shorter than the page, or expand with the
- *    content if it's taller than the page.
- */
 .guide {
-  display: flex;
   min-height: 100%; /* 1 */
 }
 

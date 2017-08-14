@@ -6,6 +6,7 @@ import {
   GuideDemo,
   GuidePage,
   GuideSection,
+  GuideText,
   GuideSectionTypes,
 } from '../../components';
 
@@ -42,7 +43,19 @@ export default props => (
       }]}
     >
       <GuideDemo>
-        <Default />
+        <GuideText>
+          <p>
+            Toasts are small notes that appear in the bottom right of the screen. They should be used for
+            emphemeral, live actions (think "save complete" or "something just finished right now"). They
+            should not be used for historical actions ("your report built 30 minutes ago"). This means that
+            a user should never be greated with toasts when starting a session. Toasts should be brief and
+            avoid long paragraphs of text or titling.
+          </p>
+          <br/>
+        </GuideText>
+        <div style={{ width: 320 }}>
+          <Default />
+        </div>
       </GuideDemo>
     </GuideSection>
 
@@ -57,7 +70,9 @@ export default props => (
       }]}
     >
       <GuideDemo>
-        <Info />
+        <div style={{ width: 320 }}>
+          <Info />
+        </div>
       </GuideDemo>
     </GuideSection>
 
@@ -72,7 +87,9 @@ export default props => (
       }]}
     >
       <GuideDemo>
-        <Success />
+        <div style={{ width: 320 }}>
+          <Success />
+        </div>
       </GuideDemo>
     </GuideSection>
 
@@ -87,7 +104,9 @@ export default props => (
       }]}
     >
       <GuideDemo>
-        <Warning />
+        <div style={{ width: 320 }}>
+          <Warning />
+        </div>
       </GuideDemo>
     </GuideSection>
 
@@ -102,7 +121,9 @@ export default props => (
       }]}
     >
       <GuideDemo>
-        <Danger />
+        <div style={{ width: 320 }}>
+          <Danger />
+        </div>
       </GuideDemo>
     </GuideSection>
   </GuidePage>

@@ -1,27 +1,27 @@
 import React from 'react';
 
 import {
-  KuiLink,
   KuiText,
   KuiToast,
 } from '../../../../components';
 
 export default () => (
   <KuiToast
-    title="Check it out, here's a really long title that will wrap within a narrower browser"
+    title="This is an example of a poor toast title. It's way too long."
     type="success"
     iconType="user"
   >
     <KuiText size="small" verticalRhythm>
       <p>
-        Here&rsquo;s some stuff that you need to know. We can make this text really long so that,
-        when viewed within a browser that&rsquo;s fairly narrow, it will wrap, too.
+        While the layout will adjust properly for wrapping titles, they don't look particularly good.
+        Similarily, don't use a whole lot of text in your body either. At a certain point people won't
+        have enough time to read these things. Like, you probably aren't even reading this now.
       </p>
     </KuiText>
 
     <KuiText size="small">
       <p>
-        And some other stuff on another line, just for kicks. And <KuiLink href="#">here&rsquo;s a link</KuiLink>.
+        You shouldn't even need a second paragraph. Again, we're getting long winded here.
       </p>
     </KuiText>
   </KuiToast>
