@@ -7,6 +7,11 @@ import {
 
 import classNames from 'classnames';
 
+import {
+  getTheme,
+  applyTheme,
+} from '../../services';
+
 export class GuideNav extends Component {
   constructor(props) {
     super(props);
@@ -19,9 +24,23 @@ export class GuideNav extends Component {
       search: '',
       nextRoute,
       previousRoute,
+      theme: getTheme(),
     };
 
     this.onSearchChange = this.onSearchChange.bind(this);
+    this.onToggleTheme = this.onToggleTheme.bind(this);
+  }
+
+  onToggleTheme() {
+    if (getTheme() === 'light') {
+      applyTheme('dark');
+    } else {
+      applyTheme('light');
+    }
+
+    this.setState({
+      theme: getTheme(),
+    });
   }
 
   onSearchChange(event) {
@@ -50,6 +69,30 @@ export class GuideNav extends Component {
   }
 
   renderPagination() {
+    let hideChromeButton;
+
+    if (this.props.isSandbox) {
+      hideChromeButton = (
+        <button
+          className="guideLink"
+          style={{ marginRight: '10px' }}
+          onClick={this.props.onHideChrome}
+        >
+          Hide chrome
+        </button>
+      );
+    }
+
+    const themeButton = (
+      <button
+        className="guideLink"
+        style={{ marginRight: '10px' }}
+        onClick={this.onToggleTheme}
+      >
+        {this.state.theme === 'light' ? 'Dark theme' : 'Light theme'}
+      </button>
+    );
+
     const previousClasses = classNames('guideNavPaginationButton', {
       'guideNavPaginationButton-isDisabled': !this.state.previousRoute,
     });
@@ -76,23 +119,10 @@ export class GuideNav extends Component {
       </Link>
     );
 
-    let hideChromeButton;
-
-    if (this.props.isSandbox) {
-      hideChromeButton = (
-        <button
-          className="guideLink"
-          style={{ marginRight: '10px' }}
-          onClick={this.props.onHideChrome}
-        >
-          Hide chrome
-        </button>
-      );
-    }
-
     return (
       <div className="guideNavPaginationButtons">
         {hideChromeButton}
+        {themeButton}
         {previousButton}
         {nextButton}
       </div>
