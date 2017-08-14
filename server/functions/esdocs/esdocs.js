@@ -41,7 +41,7 @@ export default new Fn({
       index: args.index,
       q: args.q,
       body: {
-        _source: args.fields ? args.fields.split(',') : undefined,
+        _source: args.fields ? args.fields.split(',').map(str => str.trim()) : undefined,
       },
     }, context))
     .then(resp => {
