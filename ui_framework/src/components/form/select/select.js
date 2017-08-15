@@ -3,25 +3,52 @@ import React, {
 } from 'react';
 import classNames from 'classnames';
 
-export const KuiSelect = ({ className, options, id, name, ...rest }) => {
+import {
+  KuiFormControlLayout,
+} from '../form_control_layout';
+
+import {
+  KuiValidatableControl,
+} from '../validatable_control';
+
+export const KuiSelect = ({
+  className,
+  options,
+  id,
+  name,
+  isInvalid,
+  ...rest,
+}) => {
   const classes = classNames('kuiSelect', className);
 
   return (
-    <select
-      id={id}
-      name={name}
-      className={classes}
-      {...rest}
+    <KuiFormControlLayout
+      icon="arrowDown"
+      iconSide="right"
     >
-      {options.map((option, index) => {
-        return <option value={option.value} key={index}>{option.text}</option>;
-      })}
-    </select>
+      <KuiValidatableControl isInvalid={isInvalid}>
+        <select
+          id={id}
+          name={name}
+          className={classes}
+          {...rest}
+        >
+          {options.map((option, index) => {
+            return <option value={option.value} key={index}>{option.text}</option>;
+          })}
+        </select>
+      </KuiValidatableControl>
+    </KuiFormControlLayout>
   );
 };
 
 KuiSelect.propTypes = {
-  name: PropTypes.string.isRequired,
+  name: PropTypes.string,
   id: PropTypes.string,
   options: PropTypes.arrayOf(React.PropTypes.object).isRequired,
+  isInvalid: PropTypes.bool,
+};
+
+KuiSelect.defaultProps = {
+  options: [],
 };

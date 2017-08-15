@@ -3,27 +3,56 @@ import React, {
 } from 'react';
 import classNames from 'classnames';
 
-export const KuiFieldText = ({ id, name, placeholder, value, className, ...rest }) => {
-  const classes = classNames('kuiFieldText', className);
+import {
+  KuiFormControlLayout,
+} from '../form_control_layout';
+
+import {
+  KuiValidatableControl,
+} from '../validatable_control';
+
+export const KuiFieldText = ({
+  id,
+  name,
+  placeholder,
+  value,
+  className,
+  icon,
+  isInvalid,
+  ...rest,
+}) => {
+  const classes = classNames('kuiFieldText', className, {
+    'kuiFieldText--withIcon': icon,
+  });
 
   return (
-    <input
-      type="text"
-      id={id}
-      name={name}
-      placeholder={placeholder}
-      className={classes}
-      value={value}
-      {...rest}
-    />
+    <KuiFormControlLayout
+      icon={icon}
+    >
+      <KuiValidatableControl
+        isInvalid={isInvalid}
+      >
+        <input
+          type="text"
+          id={id}
+          name={name}
+          placeholder={placeholder}
+          className={classes}
+          value={value}
+          {...rest}
+        />
+      </KuiValidatableControl>
+    </KuiFormControlLayout>
   );
 };
 
 KuiFieldText.propTypes = {
-  name: PropTypes.string.isRequired,
+  name: PropTypes.string,
   id: PropTypes.string,
   placeholder: PropTypes.string,
   value: PropTypes.string,
+  icon: PropTypes.string,
+  isInvalid: PropTypes.bool,
 };
 
 KuiFieldText.defaultProps = {

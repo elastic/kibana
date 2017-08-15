@@ -4,26 +4,39 @@ import React, {
 import classNames from 'classnames';
 import { KuiCallOut } from '../../../components';
 
-export const KuiForm = ({ children, className, invalid, errors, ...rest }) => {
+export const KuiForm = ({
+  children,
+  className,
+  isInvalid,
+  error,
+  ...rest,
+}) => {
   const classes = classNames('kuiForm', className);
 
+  let optionalErrors;
 
-
-  let optionalErrors = null;
-  if (errors) {
+  if (error) {
+    const errorTexts = Array.isArray(error) ? error : [error];
     optionalErrors = (
       <ul>
-        {errors.map(function (error, index) {
-          return <li className="kuiForm__error" key={index}>{error}</li>;
-        })}
+        {errorTexts.map(error => (
+          <li className="kuiForm__error" key={error}>
+            {error}
+          </li>
+        ))}
       </ul>
     );
   }
 
-  let optionalErrorAlert = null;
-  if (invalid) {
+  let optionalErrorAlert;
+
+  if (isInvalid) {
     optionalErrorAlert = (
-      <KuiCallOut className="kuiForm__errors" title="Please address the errors in your form." type="danger">
+      <KuiCallOut
+        className="kuiForm__errors"
+        title="Please address the errors in your form."
+        type="danger"
+      >
         {optionalErrors}
       </KuiCallOut>
     );
@@ -41,6 +54,6 @@ export const KuiForm = ({ children, className, invalid, errors, ...rest }) => {
 };
 
 KuiForm.propTypes = {
-  invalid: PropTypes.bool,
-  errors: PropTypes.array,
+  isInvalid: PropTypes.bool,
+  error: PropTypes.oneOfType([PropTypes.string, PropTypes.arrayOf(PropTypes.string)]),
 };

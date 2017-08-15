@@ -1,0 +1,23 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`KuiSelect is rendered 1`] = `
+<div
+  class="kuiFormControlLayout"
+>
+  <select
+    aria-label="aria-label"
+    class="kuiSelect testClass1 testClass2"
+    data-test-subj="test subject string"
+  />
+  <svg
+    class="kuiIcon kuiFormControlLayout__icon kuiFormControlLayout__icon--right kuiIcon--medium"
+  >
+    <title>
+      arrow down icon
+    </title>
+    <use
+      href="#arrow_down"
+    />
+  </svg>
+</div>
+`;
