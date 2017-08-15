@@ -9,6 +9,8 @@ const iconTypes = [
   'search',
   'user',
   'cross',
+  'check',
+  'lock',
   'help',
   'arrowUp',
   'arrowDown',

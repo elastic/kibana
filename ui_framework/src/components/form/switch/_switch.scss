@@ -34,16 +34,13 @@
     width: $kuiSwitchWidth;
     height: $kuiSwitchHeight;
     background: $kuiFormBackgroundColor;
-    border: $kuiBorderThin;
+    box-shadow: inset 0 0 0 1px $kuiBorderColor;
     display: inline-block;
     position: relative;
     border-radius: $kuiSwitchHeight;
     vertical-align: middle;
   }
 
-  /**
-   * 1. Accounts for the border on the body.
-   */
   .kuiSwitch__thumb {
     position: absolute;
     width: $kuiSwitchHeight;
@@ -51,7 +48,6 @@
     display: inline-block;
     background-color: $kuiColorEmptyShade;
     left: $kuiSwitchWidth - $kuiSwitchThumbSize;
-    top: -1px; // 1
     border-radius: 50%;
     border: $kuiBorderThin;
     transition: border-color $kuiAnimSpeedNormal $kuiAnimSlightBounce, background-color $kuiAnimSpeedNormal $kuiAnimSlightBounce, left $kuiAnimSpeedNormal $kuiAnimSlightBounce, transform $kuiAnimSpeedNormal $kuiAnimSlightBounce;
@@ -68,25 +64,21 @@
     border-radius: $kuiSwitchHeight;
   }
 
-  /**
-   * 1. Mask is used to color the svg. Text color is used so works regardless of theme.
-   */
   .kuiSwitch__icon {
     position: absolute;
     right: -($kuiSwitchWidth - ($kuiSwitchThumbSize / 2));
-    top: 0;
+    top: ($kuiSwitchHeight - $kuiSwitchIconHeight) / 2;
     bottom: 0;
     width: $kuiSwitchWidth - ($kuiSwitchThumbSize / 2) + $kuiSizeS;
+    height: $kuiSwitchIconHeight;
     transition: left $kuiAnimSpeedNormal $kuiAnimSlightBounce, right $kuiAnimSpeedNormal $kuiAnimSlightBounce;
-    mask: url('../src/components/icon/assets/cross.svg') center center no-repeat; // 1
-    background-color: $kuiTextColor; // 1
+    fill: $kuiTextColor;
   }
 
   .kuiSwitch__icon--checked {
     right: auto;
     left: -$kuiSizeS;
-    background-color: $kuiTextColor;
-    mask: url('../src/components/icon/assets/check.svg') center center no-repeat;
+    fill: $kuiTextColor;
   }
 
   /**
@@ -108,9 +100,8 @@
    * When input is not checked, we shift around the positioning of sibling/child selectors.
    */
   .kuiSwitch__input:not(:checked) ~ .kuiSwitch__body {
-
     .kuiSwitch__thumb {
-      left: -1px;
+      left: 0;
     }
 
     .kuiSwitch__icon {
