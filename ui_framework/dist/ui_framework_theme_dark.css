@@ -340,6 +340,66 @@ table {
   width: 64px;
   height: 64px; }
 
+.kuiBadge {
+  font-size: 12px;
+  line-height: 24px;
+  display: inline-block;
+  text-decoration: none;
+  border: solid 1px transparent;
+  border-radius: 24px;
+  padding: 0 8px;
+  background-color: transparent;
+  white-space: nowrap;
+  vertical-align: middle; }
+  .kuiBadge .kuiBadge__content {
+    display: -webkit-box;
+    display: -webkit-flex;
+    display: -ms-flexbox;
+    display: flex;
+    -webkit-box-pack: center;
+    -webkit-justify-content: center;
+        -ms-flex-pack: center;
+            justify-content: center;
+    -webkit-box-align: center;
+    -webkit-align-items: center;
+        -ms-flex-align: center;
+            align-items: center; }
+  .kuiBadge .kuiBadge__icon {
+    margin-left: 4px; }
+  .kuiBadge.kuiBadge--iconLeft .kuiBadge__content {
+    -webkit-box-orient: horizontal;
+    -webkit-box-direction: reverse;
+    -webkit-flex-direction: row-reverse;
+        -ms-flex-direction: row-reverse;
+            flex-direction: row-reverse; }
+    .kuiBadge.kuiBadge--iconLeft .kuiBadge__content .kuiBadge__icon {
+      margin-right: 4px;
+      margin-left: 0; }
+
+.kuiBadge--default {
+  border-color: #444;
+  background-color: rgba(68, 68, 68, 0.1); }
+
+.kuiBadge--primary {
+  border-color: #4da1c0;
+  background-color: rgba(77, 161, 192, 0.1); }
+
+.kuiBadge--secondary {
+  border-color: #00A69B;
+  background-color: rgba(0, 166, 155, 0.1); }
+
+.kuiBadge--warning {
+  border-color: #E5830E;
+  background-color: rgba(229, 131, 14, 0.1); }
+
+.kuiBadge--danger {
+  border-color: #bf4d4d;
+  background-color: rgba(191, 77, 77, 0.1); }
+
+.kuiBadge--accent {
+  border-color: #DD0A73;
+  background-color: rgba(221, 10, 115, 0.1); }
+
 .kuiButton {
   display: inline-block;
   -webkit-appearance: none;
