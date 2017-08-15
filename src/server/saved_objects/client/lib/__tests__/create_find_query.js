@@ -28,7 +28,6 @@ describe('createFindQuery', () => {
                   }
                 }
               ]
-
             }
           }],
           must: [{
@@ -58,7 +57,7 @@ describe('createFindQuery', () => {
     });
   });
 
-  it('can search a single field', () => {
+  it('can search a single field with no type', () => {
     const query = createFindQuery(mappings, { search: 'foo', searchFields: 'title' });
     expect(query).to.eql({
       query: {
@@ -76,16 +75,64 @@ describe('createFindQuery', () => {
     });
   });
 
-  it('can search across multiple fields', () => {
-    const query = createFindQuery(mappings, { search: 'foo', searchFields: ['title', 'description'] });
+  it('can search a single field with a given type', () => {
+    const query = createFindQuery(mappings, { search: 'foo', searchFields: 'title', type: 'bar' });
     expect(query).to.eql({
       query: {
         bool: {
-          filter: [],
+          filter: [{
+            bool: {
+              should: [
+                {
+                  term: {
+                    _type: 'bar'
+                  }
+                },
+                {
+                  term: {
+                    type: 'bar'
+                  }
+                }
+              ]
+            }
+          }],
           must: [{
             simple_query_string: {
               query: 'foo',
-              fields: ['title', 'description']
+              fields: ['title', 'bar.title']
+            }
+          }]
+        }
+      },
+      version: true
+    });
+  });
+
+  it('can search across multiple fields', () => {
+    const query = createFindQuery(mappings, { search: 'foo', searchFields: ['title', 'description'], type: 'bar'  });
+    expect(query).to.eql({
+      query: {
+        bool: {
+          filter: [{
+            bool: {
+              should: [
+                {
+                  term: {
+                    _type: 'bar'
+                  }
+                },
+                {
+                  term: {
+                    type: 'bar'
+                  }
+                }
+              ]
+            }
+          }],
+          must: [{
+            simple_query_string: {
+              query: 'foo',
+              fields: ['title', 'description', 'bar.title', 'bar.description']
             }
           }]
         }
