@@ -3,7 +3,6 @@ import { Arg } from '../arg';
 import { getState, getValue } from '../../lib/resolved_arg';
 import { map, uniq } from 'lodash';
 
-
 export const plot = () => new View('plot', {
   displayName: 'Plot Chart',
   description: 'Show your data, as plots',
@@ -12,7 +11,6 @@ export const plot = () => new View('plot', {
     new Arg('palette', {
       displayName: 'Color palette',
       argType: 'palette',
-      multi: true,
     }),
     new Arg('defaultStyle', {
       displayName: 'Default style',

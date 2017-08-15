@@ -3,7 +3,6 @@ import { Arg } from '../arg';
 import { getState, getValue } from '../../lib/resolved_arg';
 import { map, uniq } from 'lodash';
 
-
 export const pie = () => new View('pie', {
   displayName: 'Pie Chart',
   description: 'Show your data, as a pie chart',
