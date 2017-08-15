@@ -2498,6 +2498,9 @@ main {
   border-radius: 4px;
   box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.1);
   z-index: 1001; }
+  .theme-dark .kuiModal {
+    background-color: #272727;
+    border-color: #000; }
 
 .kuiModalHeader {
   display: -webkit-box;
@@ -2515,6 +2518,8 @@ main {
   padding: 10px;
   padding-left: 20px;
   border-bottom: 1px solid #D9D9D9; }
+  .theme-dark .kuiModalHeader {
+    border-bottom-color: #000; }
 
 .kuiModalHeader__title {
   font-size: 18px; }
