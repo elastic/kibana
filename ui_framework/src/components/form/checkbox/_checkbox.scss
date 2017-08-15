@@ -32,19 +32,17 @@
     position: absolute;
     opacity: 0;
 
-    &:checked ~ .kuiCheckbox__square .kuiCheckbox__check {
-      background-color: $kuiTextColor;
-      mask: url('../src/components/icon/assets/check.svg') center center no-repeat;
+    &:checked ~ .kuiCheckbox__square {
+      .kuiCheckbox__check {
+        background-color: $kuiTextColor;
+        mask: url('../src/components/icon/assets/check.svg') center center no-repeat;
+      }
     }
 
-    &:focus ~ .kuiCheckbox__square {
+    &:focus ~ .kuiCheckbox__square,
+    &:active ~ .kuiCheckbox__square {
       background-color: $kuiFocusBackgroundColor;
       border-color: $kuiColorPrimary;
-    }
-
-    &:checked:focus ~ .kuiCheckbox__square .kuiCheckbox__check {
-      background-color: $kuiTextColor;
-      mask: url('../src/components/icon/assets/check.svg') center center no-repeat;
     }
   }
 }
