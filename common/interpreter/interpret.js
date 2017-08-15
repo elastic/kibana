@@ -1,4 +1,4 @@
-import { clone, each, keys, last, map, mapValues, values, zipObject } from 'lodash';
+import { clone, each, keys, last, map, mapValues, values, zipObject, omitBy } from 'lodash';
 import { castProvider } from './cast';
 import { getType } from '../types/get_type';
 
@@ -81,12 +81,12 @@ export function interpretProvider(config) {
     const argDefs = fnDef.args;
 
     // Break this into keys and values, then recombine later.
-    // Remap aliased arguments, and check names
     const argNames = keys(astArgs).map(argName => {
       if (!argDefs[argName]) throw new Error(`Unknown argument '${argName}' passed to function ${fnDef.name}()`);
       return argDefs[argName].name;
     });
     const multiValuedArgs = values(astArgs);
+
 
     // Create an array of promises, each representing 1 argument name
     const argListPromises = map(multiValuedArgs, multiValueArg => {
@@ -97,12 +97,16 @@ export function interpretProvider(config) {
       return Promise.all(map(multiValueArg, argValue => interpret(argValue, context)));
     });
 
+
     return Promise.all(argListPromises)
     .then(resolvedArgs => zipObject(argNames, resolvedArgs)) // Recombine the keys
     .then(resolvedArgs => {
+      console.log('RES - ', fnName);
 
+
+      console.log('ARGDEFS -- ', Object.keys(omitBy(argDefs, ({ isAlias: true }))));
       // Fill in defaults
-      const args = mapValues(argDefs, (argDef, name) => {
+      const args = mapValues(omitBy(argDefs, { isAlias: true }), (argDef, name) => {
         if (typeof resolvedArgs[name] !== 'undefined') return resolvedArgs[name];
 
         // Still treating everything as multivalued here
@@ -124,6 +128,7 @@ export function interpretProvider(config) {
 
         // Otherwise return the final instance
         const argValue = last(val);
+        console.log('CAST -- ', fnName, name, argValue);
         return cast(argValue, argDef.types);
       });
     });

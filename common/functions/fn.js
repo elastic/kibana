@@ -1,4 +1,4 @@
-import { mapValues, each, includes } from 'lodash';
+import { each, includes } from 'lodash';
 import Arg from './arg';
 
 export default function Fn(config) {
@@ -12,13 +12,11 @@ export default function Fn(config) {
 
   // Optional
   this.help = config.help || ''; // A short help text
-  this.args = mapValues(config.args, (arg, name) => new Arg(Object.assign({ name: name }, arg))); // Arguments
-
-  // Create pointers to aliases. The key of the argument in the args object will be the alias, but the 'name' property
-  // will be the actual arg name. Nice.
-  each(this.args, arg => {
-    each(arg.aliases, name => {
-      this.args[name] = arg;
+  this.args = {};
+  each(config.args, (arg, name) => {
+    this.args[name] = new Arg(Object.assign({ name: name }, arg));
+    each(arg.aliases, alias => {
+      this.args[alias] = new Arg(Object.assign({ name: name, isAlias: true }, arg));
     });
   });
 
