@@ -7,7 +7,7 @@ import {
 export default () => (
   <div>
 
-    <KuiBadge iconType="cross">
+    <KuiBadge iconType="help">
       Primary
     </KuiBadge>
 
