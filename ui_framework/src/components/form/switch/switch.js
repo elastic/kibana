@@ -3,6 +3,8 @@ import React, {
 } from 'react';
 import classNames from 'classnames';
 
+import { KuiIcon } from '../../icon';
+
 export const KuiSwitch = ({
   label,
   id,
@@ -28,8 +30,17 @@ export const KuiSwitch = ({
       <span className="kuiSwitch__body">
         <span className="kuiSwitch__thumb" />
         <span className="kuiSwitch__track">
-          <span className="kuiSwitch__icon" />
-          <span className="kuiSwitch__icon kuiSwitch__icon--checked" />
+          <KuiIcon
+            type="cross"
+            size="medium"
+            className="kuiSwitch__icon"
+          />
+
+          <KuiIcon
+            type="check"
+            size="medium"
+            className="kuiSwitch__icon kuiSwitch__icon--checked"
+          />
         </span>
       </span>
 
