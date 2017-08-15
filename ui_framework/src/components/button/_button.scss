@@ -101,6 +101,30 @@ $buttonTypes: (
         }
       }
     }
+
+    &.kuiButton--link {
+      border-color: transparent;
+      background-color: transparent;
+      box-shadow: none;
+
+      &:focus {
+        background-color: transparentize($color, .9);
+      }
+    }
+
+    &.kuiButton--linkFlush {
+      border-color: transparent;
+      background-color: transparent;
+      border-right: none;
+      border-left: none;
+      padding-right: 0;
+      padding-left: 0;
+      box-shadow: none;
+
+      &:focus {
+        background-color: transparentize($color, .9);
+      }
+    }
   }
 }
 
