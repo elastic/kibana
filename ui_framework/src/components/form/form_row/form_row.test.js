@@ -7,7 +7,9 @@ import { KuiFormRow } from './form_row';
 describe('KuiFormRow', () => {
   test('is rendered', () => {
     const component = render(
-      <KuiFormRow { ...requiredProps } />
+      <KuiFormRow {...requiredProps}>
+        <input />
+      </KuiFormRow>
     );
 
     expect(component)

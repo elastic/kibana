@@ -2,19 +2,11 @@
   position: relative;
   display: inline-block;
   height: $kuiSwitchHeight;
-  cursor: pointer;
 
-  /**
-   * 1. The label is our main clickable area. It sits above the actual switch.
-   */
   .kuiSwitch__label {
-    position: absolute;
-    left: 0;
-    padding-left: $kuiSwitchWidth + $kuiSizeS; // 1
-    z-index: 2; // 1
+    padding-left: $kuiSizeS;
     line-height: $kuiSwitchHeight;
     font-size: $kuiFontSizeS;
-    cursor: pointer;
   }
 
   /**
@@ -22,8 +14,10 @@
    */
   .kuiSwitch__input {
     position: absolute;
-    opacity: 0; // 1
-    z-index: -1; // 1
+    opacity: 0; /* 1 */
+    width: 100%;
+    height: 100%;
+    cursor: pointer;
   }
 
   .kuiSwitch__input:focus + .kuiSwitch__body {
@@ -36,6 +30,7 @@
   }
 
   .kuiSwitch__body {
+    pointer-events: none;
     width: $kuiSwitchWidth;
     height: $kuiSwitchHeight;
     background: $kuiFormBackgroundColor;

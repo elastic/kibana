@@ -1,82 +1,113 @@
 import React, {
   cloneElement,
+  Component,
   PropTypes,
 } from 'react';
 import classNames from 'classnames';
-import { KuiIcon } from '../../../components';
 
-export const KuiFormRow = ({ children, icon, containsSelect, helpText, invalid, errors, label, id, className, ...rest }) => {
-  const classes = classNames(
-    'kuiFormRow',
-    className,
-    {
-      'kuiFormRow--withIcon' : icon,
-      'kuiFormRow--invalid' : invalid,
-      'kuiFormRow--select' : containsSelect,
+import { KuiFormHelpText } from '../form_help_text';
+import { KuiFormErrorText } from '../form_error_text';
+import { KuiFormLabel } from '../form_label';
+
+export class KuiFormRow extends Component {
+  constructor(props) {
+    super(props);
+
+    this.state = {
+      isFocused: false,
+    };
+
+    this.onFocus = this.onFocus.bind(this);
+    this.onBlur = this.onBlur.bind(this);
+  }
+
+  onFocus() {
+    this.setState({
+      isFocused: true,
+    });
+  }
+
+  onBlur() {
+    this.setState({
+      isFocused: false,
+    });
+  }
+
+  render() {
+    const {
+      children,
+      helpText,
+      isInvalid,
+      error,
+      label,
+      id,
+      className,
+      ...rest,
+    } = this.props;
+
+    const classes = classNames('kuiFormRow', className);
+
+    let optionalHelpText;
+
+    if (helpText) {
+      optionalHelpText = (
+        <KuiFormHelpText className="kuiFormRow__text">
+          {helpText}
+        </KuiFormHelpText>
+      );
     }
-  );
 
-  let field;
-  let optionalIcon = null;
-  let optionalHelpText = null;
-  let optionalErrors = null;
-  let optionalLabel = null;
+    let optionalErrors;
 
-  if (icon) {
-    optionalIcon = <KuiIcon className="kuiFormRow__icon" type={icon} size="medium" />;
-  }
+    if (error) {
+      const errorTexts = Array.isArray(error) ? error : [error];
+      optionalErrors = errorTexts.map(error => (
+        <KuiFormErrorText key={error} className="kuiFormRow__text">
+          {error}
+        </KuiFormErrorText>
+      ));
+    }
 
-  if (helpText) {
-    optionalHelpText = <div className="kuiFormRow__helpText">{helpText}</div>;
-  }
+    let optionalLabel;
 
-  if (errors) {
-    optionalErrors = (
-      errors.map(function (error, index) {
-        return <div  key={index} className="kuiFormRow__error">{error}</div>;
-      })
+    if (label) {
+      optionalLabel = (
+        <KuiFormLabel
+          isFocused={this.state.isFocused}
+          isInvalid={isInvalid}
+          htmlFor={id}
+        >
+          {label}
+        </KuiFormLabel>
+      );
+    }
+
+    const field = cloneElement(children, {
+      id,
+      onFocus: this.onFocus,
+      onBlur: this.onBlur,
+    });
+
+    return (
+      <div
+        className={classes}
+        {...rest}
+      >
+        {optionalLabel}
+        {field}
+        {optionalErrors}
+        {optionalHelpText}
+      </div>
     );
   }
-
-  if (label) {
-    optionalLabel = <label className="kuiFormRow__label" htmlFor={id}>{label}</label>;
-  }
-
-  if (id) {
-    field = cloneElement(children, {
-      id,
-    });
-  } else {
-    field = children;
-  }
-
-  return (
-    <div
-      className={classes}
-      {...rest}
-    >
-      {/*
-          Order is important here. The label needs to be UNDER the field.
-          We rearrange the flex order in the CSS so the label ends up
-          displaying above the children / input. This allows us to still
-          use sibling selectors against the label that are tiggered by the
-          focus state of the input.
-      */}
-      {field}
-      {optionalLabel}
-      {optionalErrors}
-      {optionalHelpText}
-      {optionalIcon}
-    </div>
-  );
-};
+}
 
 KuiFormRow.propTypes = {
+  children: PropTypes.node.isRequired,
+  className: PropTypes.string,
   label: PropTypes.string,
   id: PropTypes.string,
-  icon: PropTypes.string,
-  invalid: PropTypes.bool,
-  containsSelect: PropTypes.bool,
-  errors: PropTypes.array,
+  isInvalid: PropTypes.bool,
+  error: PropTypes.oneOfType([PropTypes.string, PropTypes.arrayOf(PropTypes.string)]),
   helpText: PropTypes.string,
 };

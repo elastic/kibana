@@ -3,31 +3,60 @@ import React, {
 } from 'react';
 import classNames from 'classnames';
 
-export const KuiFieldNumber = ({ className, id, placeholder, name, min, max, value, ...rest }) => {
-  const classes = classNames('kuiFieldNumber', className);
+import {
+  KuiFormControlLayout,
+} from '../form_control_layout';
+
+import {
+  KuiValidatableControl,
+} from '../validatable_control';
+
+export const KuiFieldNumber = ({
+  className,
+  icon,
+  id,
+  placeholder,
+  name,
+  min,
+  max,
+  value,
+  isInvalid,
+  ...rest,
+}) => {
+  const classes = classNames('kuiFieldNumber', className, {
+    'kuiFieldNumber--withIcon': icon,
+  });
 
   return (
-    <input
-      type="number"
-      id={id}
-      min={min}
-      max={max}
-      name={name}
-      value={value}
-      placeholder={placeholder}
-      className={classes}
-      {...rest}
-    />
+    <KuiFormControlLayout
+      icon={icon}
+    >
+      <KuiValidatableControl isInvalid={isInvalid}>
+        <input
+          type="number"
+          id={id}
+          min={min}
+          max={max}
+          name={name}
+          value={value}
+          placeholder={placeholder}
+          className={classes}
+          {...rest}
+        />
+      </KuiValidatableControl>
+    </KuiFormControlLayout>
   );
 };
 
 KuiFieldNumber.propTypes = {
   id: PropTypes.string,
-  name: PropTypes.string.isRequired,
+  name: PropTypes.string,
   min: PropTypes.number,
   max: PropTypes.number,
   step: PropTypes.number,
   value: PropTypes.number,
+  icon: PropTypes.string,
+  isInvalid: PropTypes.bool,
 };
 
 KuiFieldNumber.defaultProps = {

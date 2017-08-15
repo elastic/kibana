@@ -1,80 +1,16 @@
+/**
+ * 1. Coerce inline form elements to behave as block-level elements.
+ */
 .kuiFormRow {
-  display: flex;
-  flex-direction: column;
-  position: relative;
+  display: flex; /* 1 */
+  flex-direction: column; /* 1 */
   max-width: $kuiFormMaxWidth;
 
   + * {
     margin-top: $kuiSizeL;
   }
 
-  &.kuiFormRow--withIcon input {
-    padding-left: $kuiSizeXXL;
-  }
-
-  &.kuiFormRow--dropdown input {
-    padding-left: $kuiSizeM;
-    padding-right: $kuiSizeXXL;
-  }
-
-  &.kuiFormRow--select .kuiFormRow__icon {
-    left: auto;
-    right: $kuiSizeM;
-  }
-
-  .kuiFormRow__label {
-    font-size: $kuiFontSizeXS;
-    padding-bottom: $kuiSizeS;
-    cursor: pointer;
-    transition: all $kuiAnimSpeedFast $kuiAnimSlightResistance;
-    font-weight: $kuiFontWeightMedium;
-    order: -1; // Force the label to be first, so we can use sibling:focus selectors.
-  }
-
-  .kuiFormRow__helpText {
-    font-size: $kuiFontSizeXS;
-    padding: $kuiSizeS 0;
-    color: $kuiColorDarkShade;
-  }
-
-  .kuiFormRow__error {
-    font-size: $kuiFontSizeXS;
-    padding: $kuiSizeS 0;
-    color: $kuiColorDanger;
-  }
-
-  .kuiFormRow__error +  * {
+  .kuiFormRow__text + .kuiFormRow__text {
     padding-top: 0;
-  }
-
-  .kuiFormRow__icon {
-    position: absolute;
-    top: $kuiSizeXL;
-    left: $kuiSizeM;
-  }
-
-  // Naked selectors on purpose to touch inner components.
-  input:focus + label,
-  select:focus + label,
-  textarea:focus + label, {
-    color: $kuiColorPrimary;
-  }
-
-  &.kuiFormRow--invalid {
-
-    .kuiFormRow__label {
-      color: $kuiColorDanger !important;
-    }
-
-    // Naked selectors on purpose to touch inner components.
-    input[type="text"],
-    input[type="password"],
-    input[type="number"],
-    input[type="search"],
-    select,
-    textarea,
-    {
-      box-shadow: 0 $kuiSizeXS $kuiSizeXS (-$kuiSizeXS / 2) rgba(0, 0, 0, 0.1), 0 0 0 1px rgba(0,0,0,0.16), inset 0 0 0 0 $kuiColorEmptyShade, inset 0 (-$kuiSizeXS / 2) 0 0 $kuiColorDanger !important;
-    }
   }
 }
