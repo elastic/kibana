@@ -1,0 +1,10 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`KuiFieldNumber is rendered 1`] = `
+<input
+  aria-label="aria-label"
+  class="kuiFieldNumber testClass1 testClass2"
+  data-test-subj="test subject string"
+  type="number"
+/>
+`;

@@ -1,0 +1,34 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`KuiSwitch is rendered 1`] = `
+<div
+  aria-label="aria-label"
+  class="kuiSwitch testClass1 testClass2"
+  data-test-subj="test subject string"
+>
+  <input
+    class="kuiSwitch__input"
+    type="checkbox"
+  />
+  <span
+    class="kuiSwitch__body"
+  >
+    <span
+      class="kuiSwitch__thumb"
+    />
+    <span
+      class="kuiSwitch__track"
+    >
+      <span
+        class="kuiSwitch__icon"
+      />
+      <span
+        class="kuiSwitch__icon kuiSwitch__icon--checked"
+      />
+    </span>
+  </span>
+  <label
+    class="kuiSwitch__label"
+  />
+</div>
+`;

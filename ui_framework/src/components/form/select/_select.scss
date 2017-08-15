@@ -1,10 +1,13 @@
+/**
+ * 1. Leave room for caret.
+ */
 .kuiSelect {
+  @include kuiFormControlStyle;
+
+  padding-right: $kuiSizeXXL; /* 1 */
   appearance: none;
-  @include kuiFieldStyle;
 
   &::-ms-expand {
     display: none;
   }
 }
-
-

@@ -1,4 +1,4 @@
 .kuiFieldSearch {
-  @include kuiFieldStyle;
+  @include kuiFormControlStyle;
+  @include kuiFormControlWithIcon($isIconOptional: false);
 }
-

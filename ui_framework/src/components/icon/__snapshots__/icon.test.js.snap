@@ -132,6 +132,19 @@ exports[`KuiIcon renders type arrowUp 1`] = `
 </svg>
 `;
 
+exports[`KuiIcon renders type check 1`] = `
+<svg
+  class="kuiIcon kuiIcon--basic"
+>
+  <title>
+    check icon
+  </title>
+  <use
+    href="#check"
+  />
+</svg>
+`;
+
 exports[`KuiIcon renders type cross 1`] = `
 <svg
   class="kuiIcon kuiIcon--basic"
@@ -219,6 +232,19 @@ exports[`KuiIcon renders type kibanaLogo 1`] = `
   </title>
   <use
     href="#logo"
+  />
+</svg>
+`;
+
+exports[`KuiIcon renders type lock 1`] = `
+<svg
+  class="kuiIcon kuiIcon--basic"
+>
+  <title>
+    lock icon
+  </title>
+  <use
+    href="#lock"
   />
 </svg>
 `;

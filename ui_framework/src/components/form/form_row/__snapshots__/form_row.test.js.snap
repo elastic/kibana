@@ -1,0 +1,11 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`KuiFormRow is rendered 1`] = `
+<div
+  aria-label="aria-label"
+  class="kuiFormRow testClass1 testClass2"
+  data-test-subj="test subject string"
+>
+  <input />
+</div>
+`;

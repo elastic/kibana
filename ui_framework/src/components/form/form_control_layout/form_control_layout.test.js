@@ -1,13 +1,14 @@
 import React from 'react';
 import { render } from 'enzyme';
-import { requiredProps } from '../../../test/required_props';
 
-import { KuiCheckbox } from './checkbox';
+import { KuiFormControlLayout } from './form_control_layout';
 
-describe('KuiCheckbox', () => {
+describe('KuiFormControlLayout', () => {
   test('is rendered', () => {
     const component = render(
-      <KuiCheckbox { ...requiredProps } />
+      <KuiFormControlLayout>
+        <input />
+      </KuiFormControlLayout>
     );
 
     expect(component)

@@ -22,16 +22,23 @@ export default class extends Component {
 
     this.state = {
       isPopoverOpen: false,
+      isSwitchChecked: true,
     };
   }
 
-  onButtonClick() {
+  onSwitchChange = () => {
+    this.setState({
+      isSwitchChecked: !this.state.isSwitchChecked,
+    });
+  }
+
+  onButtonClick = () => {
     this.setState({
       isPopoverOpen: !this.state.isPopoverOpen,
     });
   }
 
-  closePopover() {
+  closePopover = () => {
     this.setState({
       isPopoverOpen: false,
     });
@@ -39,7 +46,12 @@ export default class extends Component {
 
   render() {
     const button = (
-      <KuiButton iconReverse fill iconType="arrowDown" onClick={this.onButtonClick.bind(this)}>
+      <KuiButton
+        iconReverse
+        fill
+        iconType="arrowDown"
+        onClick={this.onButtonClick}
+      >
         Form in a popover
       </KuiButton>
     );
@@ -47,20 +59,32 @@ export default class extends Component {
     const formSample = (
       <KuiForm>
         <KuiFormRow>
-          <KuiSwitch id={makeId()} name="popswitch" label="Isn't this popover form cool?"/>
+          <KuiSwitch
+            id={makeId()}
+            name="popswitch"
+            label="Isn't this popover form cool?"
+            checked={this.state.isSwitchChecked}
+            onChange={this.onSwitchChange}
+          />
         </KuiFormRow>
+
         <KuiFormRow
           id={makeId()}
           label="A text field"
         >
           <KuiFieldText name="popfirst" />
         </KuiFormRow>
+
         <KuiFormRow
           id={makeId()}
           label="Range"
           helpText="Some help text for the range"
         >
-          <KuiRange min={0} max={100} name="poprange" />
+          <KuiRange
+            min={0}
+            max={100}
+            name="poprange"
+          />
         </KuiFormRow>
       </KuiForm>
     );
@@ -72,7 +96,9 @@ export default class extends Component {
           isOpen={this.state.isPopoverOpen}
           closePopover={this.closePopover.bind(this)}
         >
-          <div style={{ width: '300px' }}>{formSample}</div>
+          <div style={{ width: '300px' }}>
+            {formSample}
+          </div>
         </KuiPopover>
       </div>
     );
