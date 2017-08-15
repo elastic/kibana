@@ -101,10 +101,6 @@ export function interpretProvider(config) {
     return Promise.all(argListPromises)
     .then(resolvedArgs => zipObject(argNames, resolvedArgs)) // Recombine the keys
     .then(resolvedArgs => {
-      console.log('RES - ', fnName);
-
-
-      console.log('ARGDEFS -- ', Object.keys(omitBy(argDefs, ({ isAlias: true }))));
       // Fill in defaults
       const args = mapValues(omitBy(argDefs, { isAlias: true }), (argDef, name) => {
         if (typeof resolvedArgs[name] !== 'undefined') return resolvedArgs[name];
@@ -128,7 +124,6 @@ export function interpretProvider(config) {
 
         // Otherwise return the final instance
         const argValue = last(val);
-        console.log('CAST -- ', fnName, name, argValue);
         return cast(argValue, argDef.types);
       });
     });
