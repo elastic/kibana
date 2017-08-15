@@ -31,7 +31,7 @@ export default props => (
       }]}
     >
       <GuideText>
-        Description needed: how to use the Badge component.
+        Badges are used to focus on important bits of information.
       </GuideText>
 
       <GuideDemo>
@@ -50,7 +50,7 @@ export default props => (
       }]}
     >
       <GuideText>
-        Description needed: how to use the Badge component.
+        Badges can use icons on the left and right (default) sides.
       </GuideText>
 
       <GuideDemo>
