@@ -1,0 +1,3 @@
+export {
+  KuiBadge,
+} from './badge';
