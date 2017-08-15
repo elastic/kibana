@@ -25,8 +25,9 @@
     <span class="table-header-name">
       {{name | shortDots}}
       <button
+        data-test-subj="docTableHeaderFieldSort_{{name}}"
         id="docTableHeaderFieldSort{{name}}"
-        tabindex="0"
+        ng-if="isSortableColumn(name)"
         aria-label="{{ getAriaLabelForColumn(name) }}"
         class="docTableHeaderButton"
         ng-class="headerClass(name)"
