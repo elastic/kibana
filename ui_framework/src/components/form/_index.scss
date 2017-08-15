@@ -1,32 +1,74 @@
 $kuiFormMaxWidth: 400px;
 $kuiFormBackgroundColor: tintOrShade($kuiColorLightestShade, 60%, 25%);
 
-@mixin kuiFieldStyle {
+@mixin kuiFormControlSize {
+  min-width: $kuiSize * 16;
+  max-width: $kuiFormMaxWidth;
+  width: 100%;
+}
+
+@mixin kuiFormControlWithIcon($isIconOptional: false) {
+  $iconPadding: $kuiSizeXXL;
+
+  @if ($isIconOptional) {
+    @at-root {
+      #{&}--withIcon {
+        padding-left: $iconPadding;
+      }
+    }
+  } @else {
+    padding-left: $iconPadding;
+  }
+}
+
+/**
+ * 1. Override invalid state with focus state.
+ */
+@mixin kuiFormControlStyle {
+  @include kuiFormControlSize;
+
   border: none;
   font-size: $kuiFontSizeS;
   font-family: $kuiFontFamily;
   padding: $kuiSizeM;
   color: $kuiTextColor;
-  min-width: $kuiSize * 16;
   background: $kuiFormBackgroundColor;
-  box-shadow: 0 2px 2px -1px rgba(0, 0, 0, 0.1), 0 0 0 1px rgba(0,0,0,0.08), inset -400px 0 0 0 $kuiFormBackgroundColor;
+  box-shadow:
+    0 2px 2px -1px rgba(0, 0, 0, 0.1),
+    0 0 0 1px rgba(0,0,0,0.08),
+    inset #{-$kuiFormMaxWidth} 0 0 0 $kuiFormBackgroundColor;
   transition: box-shadow $kuiAnimSpeedNormal ease-in, background $kuiAnimSpeedNormal ease-in;
-  max-width: $kuiFormMaxWidth;
   border-radius: 0;
 
-  &:focus {
+  &:invalid { /* 1 */
+    box-shadow:
+      0 $kuiSizeXS $kuiSizeXS (-$kuiSizeXS / 2) rgba(0, 0, 0, 0.1),
+      0 0 0 1px rgba(0,0,0,0.16),
+      inset 0 0 0 0 $kuiColorEmptyShade,
+      inset 0 (-$kuiSizeXS / 2) 0 0 $kuiColorDanger;
+  }
+
+  &:focus { /* 1 */
     background: $kuiColorEmptyShade;
-    box-shadow: 0 4px 4px -2px rgba(0, 0, 0, 0.1), 0 0 0 1px rgba(0,0,0,0.16), inset 0 0 0 0 $kuiColorEmptyShade, inset 0 -2px 0 0 $kuiColorPrimary;
+    box-shadow:
+      0 4px 4px -2px rgba(0, 0, 0, 0.1),
+      0 0 0 1px rgba(0,0,0,0.16),
+      inset 0 0 0 0 $kuiColorEmptyShade,
+      inset 0 -2px 0 0 $kuiColorPrimary;
   }
 }
 
-@import 'form';
-@import 'form_row/index';
 @import 'checkbox/index';
 @import 'field_number/index';
 @import 'field_password/index';
 @import 'field_search/index';
 @import 'field_text/index';
+@import 'form';
+@import 'form_control_layout/index';
+@import 'form_error_text/index';
+@import 'form_help_text/index';
+@import 'form_label/index';
+@import 'form_row/index';
 @import 'range/index';
 @import 'select/index';
 @import 'switch/index';

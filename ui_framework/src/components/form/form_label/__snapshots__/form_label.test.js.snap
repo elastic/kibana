@@ -1,0 +1,9 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`KuiFormLabel is rendered 1`] = `
+<label
+  aria-label="aria-label"
+  class="kuiFormLabel testClass1 testClass2"
+  data-test-subj="test subject string"
+/>
+`;

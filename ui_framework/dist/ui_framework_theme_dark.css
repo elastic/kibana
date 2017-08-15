@@ -563,80 +563,12 @@ table {
           transform: translateY(2px);
   /* 1 */ }
 
-.kuiForm__error {
-  font-size: 14px;
-  font-size: 0.875rem;
-  line-height: 18px;
-  list-style: disc;
-  margin-left: 32px; }
-
-.kuiForm__errors {
-  margin-bottom: 16px; }
-
-.kuiFormRow {
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-box-orient: vertical;
-  -webkit-box-direction: normal;
-  -webkit-flex-direction: column;
-      -ms-flex-direction: column;
-          flex-direction: column;
-  position: relative;
-  max-width: 400px; }
-  .kuiFormRow + * {
-    margin-top: 24px; }
-  .kuiFormRow.kuiFormRow--withIcon input {
-    padding-left: 40px; }
-  .kuiFormRow.kuiFormRow--dropdown input {
-    padding-left: 12px;
-    padding-right: 40px; }
-  .kuiFormRow.kuiFormRow--select .kuiFormRow__icon {
-    left: auto;
-    right: 12px; }
-  .kuiFormRow .kuiFormRow__label {
-    font-size: 12px;
-    padding-bottom: 8px;
-    cursor: pointer;
-    transition: all 150ms cubic-bezier(0.694, 0.0482, 0.335, 1);
-    font-weight: 500;
-    -webkit-box-ordinal-group: 0;
-    -webkit-order: -1;
-        -ms-flex-order: -1;
-            order: -1; }
-  .kuiFormRow .kuiFormRow__helpText {
-    font-size: 12px;
-    padding: 8px 0;
-    color: #D9D9D9; }
-  .kuiFormRow .kuiFormRow__error {
-    font-size: 12px;
-    padding: 8px 0;
-    color: #bf4d4d; }
-  .kuiFormRow .kuiFormRow__error + * {
-    padding-top: 0; }
-  .kuiFormRow .kuiFormRow__icon {
-    position: absolute;
-    top: 32px;
-    left: 12px; }
-  .kuiFormRow input:focus + label,
-  .kuiFormRow select:focus + label,
-  .kuiFormRow textarea:focus + label {
-    color: #4da1c0; }
-  .kuiFormRow.kuiFormRow--invalid .kuiFormRow__label {
-    color: #bf4d4d !important; }
-  .kuiFormRow.kuiFormRow--invalid input[type="text"],
-  .kuiFormRow.kuiFormRow--invalid input[type="password"],
-  .kuiFormRow.kuiFormRow--invalid input[type="number"],
-  .kuiFormRow.kuiFormRow--invalid input[type="search"],
-  .kuiFormRow.kuiFormRow--invalid select,
-  .kuiFormRow.kuiFormRow--invalid textarea {
-    box-shadow: 0 4px 4px -2px rgba(0, 0, 0, 0.1), 0 0 0 1px rgba(0, 0, 0, 0.16), inset 0 0 0 0 #222, inset 0 -2px 0 0 #bf4d4d !important; }
-
+/**
+ * 1. Override invalid state with focus state.
+ */
 .kuiCheckbox {
   position: relative;
-  height: 24px;
-  margin-top: 8px; }
+  height: 24px; }
   .kuiCheckbox .kuiCheckbox__label {
     position: absolute;
     padding-left: 32px;
@@ -672,69 +604,171 @@ table {
       -webkit-mask: url("../src/components/icon/assets/check.svg") center center no-repeat;
               mask: url("../src/components/icon/assets/check.svg") center center no-repeat; }
 
+.kuiCheckboxGroup__item + .kuiCheckboxGroup__item {
+  margin-top: 8px; }
+
 .kuiFieldNumber {
+  min-width: 256px;
+  max-width: 400px;
+  width: 100%;
   border: none;
   font-size: 14px;
   font-family: "Roboto", Helvetica, Arial, sans-serif;
   padding: 12px;
   color: #F5F5F5;
-  min-width: 256px;
   background: #262626;
   box-shadow: 0 2px 2px -1px rgba(0, 0, 0, 0.1), 0 0 0 1px rgba(0, 0, 0, 0.08), inset -400px 0 0 0 #262626;
   transition: box-shadow 250ms ease-in, background 250ms ease-in;
-  max-width: 400px;
   border-radius: 0; }
+  .kuiFieldNumber:invalid {
+    /* 1 */
+    box-shadow: 0 4px 4px -2px rgba(0, 0, 0, 0.1), 0 0 0 1px rgba(0, 0, 0, 0.16), inset 0 0 0 0 #222, inset 0 -2px 0 0 #bf4d4d; }
   .kuiFieldNumber:focus {
+    /* 1 */
     background: #222;
     box-shadow: 0 4px 4px -2px rgba(0, 0, 0, 0.1), 0 0 0 1px rgba(0, 0, 0, 0.16), inset 0 0 0 0 #222, inset 0 -2px 0 0 #4da1c0; }
+  .kuiFieldNumber--withIcon {
+    padding-left: 40px; }
 
 .kuiFieldPassword {
+  min-width: 256px;
+  max-width: 400px;
+  width: 100%;
   border: none;
   font-size: 14px;
   font-family: "Roboto", Helvetica, Arial, sans-serif;
   padding: 12px;
   color: #F5F5F5;
-  min-width: 256px;
   background: #262626;
   box-shadow: 0 2px 2px -1px rgba(0, 0, 0, 0.1), 0 0 0 1px rgba(0, 0, 0, 0.08), inset -400px 0 0 0 #262626;
   transition: box-shadow 250ms ease-in, background 250ms ease-in;
-  max-width: 400px;
-  border-radius: 0; }
+  border-radius: 0;
+  padding-left: 40px; }
+  .kuiFieldPassword:invalid {
+    /* 1 */
+    box-shadow: 0 4px 4px -2px rgba(0, 0, 0, 0.1), 0 0 0 1px rgba(0, 0, 0, 0.16), inset 0 0 0 0 #222, inset 0 -2px 0 0 #bf4d4d; }
   .kuiFieldPassword:focus {
+    /* 1 */
     background: #222;
     box-shadow: 0 4px 4px -2px rgba(0, 0, 0, 0.1), 0 0 0 1px rgba(0, 0, 0, 0.16), inset 0 0 0 0 #222, inset 0 -2px 0 0 #4da1c0; }
 
 .kuiFieldSearch {
+  min-width: 256px;
+  max-width: 400px;
+  width: 100%;
   border: none;
   font-size: 14px;
   font-family: "Roboto", Helvetica, Arial, sans-serif;
   padding: 12px;
   color: #F5F5F5;
-  min-width: 256px;
   background: #262626;
   box-shadow: 0 2px 2px -1px rgba(0, 0, 0, 0.1), 0 0 0 1px rgba(0, 0, 0, 0.08), inset -400px 0 0 0 #262626;
   transition: box-shadow 250ms ease-in, background 250ms ease-in;
-  max-width: 400px;
-  border-radius: 0; }
+  border-radius: 0;
+  padding-left: 40px; }
+  .kuiFieldSearch:invalid {
+    /* 1 */
+    box-shadow: 0 4px 4px -2px rgba(0, 0, 0, 0.1), 0 0 0 1px rgba(0, 0, 0, 0.16), inset 0 0 0 0 #222, inset 0 -2px 0 0 #bf4d4d; }
   .kuiFieldSearch:focus {
+    /* 1 */
     background: #222;
     box-shadow: 0 4px 4px -2px rgba(0, 0, 0, 0.1), 0 0 0 1px rgba(0, 0, 0, 0.16), inset 0 0 0 0 #222, inset 0 -2px 0 0 #4da1c0; }
 
 .kuiFieldText {
+  min-width: 256px;
+  max-width: 400px;
+  width: 100%;
   border: none;
   font-size: 14px;
   font-family: "Roboto", Helvetica, Arial, sans-serif;
   padding: 12px;
   color: #F5F5F5;
-  min-width: 256px;
   background: #262626;
   box-shadow: 0 2px 2px -1px rgba(0, 0, 0, 0.1), 0 0 0 1px rgba(0, 0, 0, 0.08), inset -400px 0 0 0 #262626;
   transition: box-shadow 250ms ease-in, background 250ms ease-in;
-  max-width: 400px;
   border-radius: 0; }
+  .kuiFieldText:invalid {
+    /* 1 */
+    box-shadow: 0 4px 4px -2px rgba(0, 0, 0, 0.1), 0 0 0 1px rgba(0, 0, 0, 0.16), inset 0 0 0 0 #222, inset 0 -2px 0 0 #bf4d4d; }
   .kuiFieldText:focus {
+    /* 1 */
     background: #222;
     box-shadow: 0 4px 4px -2px rgba(0, 0, 0, 0.1), 0 0 0 1px rgba(0, 0, 0, 0.16), inset 0 0 0 0 #222, inset 0 -2px 0 0 #4da1c0; }
+  .kuiFieldText--withIcon {
+    padding-left: 40px; }
+
+.kuiForm__error {
+  font-size: 14px;
+  font-size: 0.875rem;
+  line-height: 18px;
+  list-style: disc;
+  margin-left: 32px; }
+
+.kuiForm__errors {
+  margin-bottom: 16px; }
+
+.kuiFormControlLayout {
+  min-width: 256px;
+  max-width: 400px;
+  width: 100%;
+  display: inline-block;
+  position: relative; }
+
+.kuiFormControlLayout__icon {
+  position: absolute;
+  top: 12px;
+  left: 12px; }
+
+.kuiFormControlLayout__icon--right {
+  left: auto;
+  right: 12px; }
+
+.kuiFormErrorText {
+  font-size: 12px;
+  padding: 8px 0;
+  color: #bf4d4d; }
+
+.kuiFormHelpText {
+  font-size: 12px;
+  padding: 8px 0;
+  color: #D9D9D9; }
+
+/**
+ * 1. Focused state overrides invalid state.
+ */
+.kuiFormLabel {
+  font-size: 12px;
+  margin-bottom: 8px;
+  cursor: pointer;
+  transition: all 150ms cubic-bezier(0.694, 0.0482, 0.335, 1);
+  font-weight: 500; }
+  .kuiFormLabel.kuiFormLabel-isInvalid {
+    color: #bf4d4d;
+    /* 1 */ }
+  .kuiFormLabel.kuiFormLabel-isFocused {
+    color: #4da1c0;
+    /* 1 */ }
+
+/**
+ * 1. Coerce inline form elements to behave as block-level elements.
+ */
+.kuiFormRow {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  /* 1 */
+  -webkit-box-orient: vertical;
+  -webkit-box-direction: normal;
+  -webkit-flex-direction: column;
+      -ms-flex-direction: column;
+          flex-direction: column;
+  /* 1 */
+  max-width: 400px; }
+  .kuiFormRow + * {
+    margin-top: 24px; }
+  .kuiFormRow .kuiFormRow__text + .kuiFormRow__text {
+    padding-top: 0; }
 
 .kuiRange {
   -webkit-appearance: none;
@@ -808,22 +842,32 @@ table {
     width: 16px;
     margin-top: 0; }
 
+/**
+ * 1. Leave room for caret.
+ */
 .kuiSelect {
-  -webkit-appearance: none;
-     -moz-appearance: none;
-          appearance: none;
+  min-width: 256px;
+  max-width: 400px;
+  width: 100%;
   border: none;
   font-size: 14px;
   font-family: "Roboto", Helvetica, Arial, sans-serif;
   padding: 12px;
   color: #F5F5F5;
-  min-width: 256px;
   background: #262626;
   box-shadow: 0 2px 2px -1px rgba(0, 0, 0, 0.1), 0 0 0 1px rgba(0, 0, 0, 0.08), inset -400px 0 0 0 #262626;
   transition: box-shadow 250ms ease-in, background 250ms ease-in;
-  max-width: 400px;
-  border-radius: 0; }
+  border-radius: 0;
+  padding-right: 40px;
+  /* 1 */
+  -webkit-appearance: none;
+     -moz-appearance: none;
+          appearance: none; }
+  .kuiSelect:invalid {
+    /* 1 */
+    box-shadow: 0 4px 4px -2px rgba(0, 0, 0, 0.1), 0 0 0 1px rgba(0, 0, 0, 0.16), inset 0 0 0 0 #222, inset 0 -2px 0 0 #bf4d4d; }
   .kuiSelect:focus {
+    /* 1 */
     background: #222;
     box-shadow: 0 4px 4px -2px rgba(0, 0, 0, 0.1), 0 0 0 1px rgba(0, 0, 0, 0.16), inset 0 0 0 0 #222, inset 0 -2px 0 0 #4da1c0; }
   .kuiSelect::-ms-expand {
@@ -833,10 +877,6 @@ table {
   position: relative;
   display: inline-block;
   height: 24px;
-  cursor: pointer;
-  /**
-   * 1. The label is our main clickable area. It sits above the actual switch.
-   */
   /**
    * 1. The input is "hidden" but still focusable.
    */
@@ -853,23 +893,23 @@ table {
    * When input is not checked, we shift around the positioning of sibling/child selectors.
    */ }
   .kuiSwitch .kuiSwitch__label {
-    position: absolute;
-    left: 0;
-    padding-left: 60px;
-    z-index: 2;
+    padding-left: 8px;
     line-height: 24px;
-    font-size: 14px;
-    cursor: pointer; }
+    font-size: 14px; }
   .kuiSwitch .kuiSwitch__input {
     position: absolute;
     opacity: 0;
-    z-index: -1; }
+    /* 1 */
+    width: 100%;
+    height: 100%;
+    cursor: pointer; }
   .kuiSwitch .kuiSwitch__input:focus + .kuiSwitch__body {
     background: #222; }
     .kuiSwitch .kuiSwitch__input:focus + .kuiSwitch__body .kuiSwitch__thumb {
       border-color: #4da1c0;
       background-color: #4da1c0; }
   .kuiSwitch .kuiSwitch__body {
+    pointer-events: none;
     width: 52px;
     height: 24px;
     background: #262626;
@@ -931,18 +971,23 @@ table {
       left: -40px; }
 
 .kuiTextArea {
+  min-width: 256px;
+  max-width: 400px;
+  width: 100%;
   border: none;
   font-size: 14px;
   font-family: "Roboto", Helvetica, Arial, sans-serif;
   padding: 12px;
   color: #F5F5F5;
-  min-width: 256px;
   background: #262626;
   box-shadow: 0 2px 2px -1px rgba(0, 0, 0, 0.1), 0 0 0 1px rgba(0, 0, 0, 0.08), inset -400px 0 0 0 #262626;
   transition: box-shadow 250ms ease-in, background 250ms ease-in;
-  max-width: 400px;
   border-radius: 0; }
+  .kuiTextArea:invalid {
+    /* 1 */
+    box-shadow: 0 4px 4px -2px rgba(0, 0, 0, 0.1), 0 0 0 1px rgba(0, 0, 0, 0.16), inset 0 0 0 0 #222, inset 0 -2px 0 0 #bf4d4d; }
   .kuiTextArea:focus {
+    /* 1 */
     background: #222;
     box-shadow: 0 4px 4px -2px rgba(0, 0, 0, 0.1), 0 0 0 1px rgba(0, 0, 0, 0.16), inset 0 0 0 0 #222, inset 0 -2px 0 0 #4da1c0; }
 

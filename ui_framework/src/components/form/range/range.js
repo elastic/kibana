@@ -21,7 +21,7 @@ export const KuiRange = ({ className, id, name, min, max, value, ...rest }) => {
 };
 
 KuiRange.propTypes = {
-  name: PropTypes.string.isRequired,
+  name: PropTypes.string,
   id: PropTypes.string,
   min: PropTypes.number.isRequired,
   max: PropTypes.number.isRequired,
@@ -29,8 +29,6 @@ KuiRange.propTypes = {
 };
 
 KuiRange.defaultProps = {
-  value: undefined,
   min: 1,
   max: 100,
 };
-
