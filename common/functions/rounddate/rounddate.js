@@ -6,7 +6,7 @@ export default new Fn({
   type: 'string',
   help: 'Round dates using a moment formatting string',
   context: {
-    types: ['string'],
+    types: ['string', 'number'],
   },
   args: {
     _: {
