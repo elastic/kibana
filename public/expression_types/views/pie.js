@@ -12,7 +12,6 @@ export const pie = () => new View('pie', {
     new Arg('palette', {
       displayName: 'Color palette',
       argType: 'palette',
-      multi: true,
     }),
   ],
   resolve({ context }) {
