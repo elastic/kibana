@@ -20,18 +20,44 @@ import {
 function makeId() {
   return Math.random().toString(36).substr(2, 5);
 }
+
 export default class extends Component {
   constructor(props) {
     super(props);
 
+    const idPrefix = makeId();
+
     this.state = {
       isSwitchChecked: false,
+      checkboxes: [{
+        id: `${idPrefix}0`,
+        label: 'Option one',
+      }, {
+        id: `${idPrefix}1`,
+        label: 'Option two is checked by default',
+      }, {
+        id: `${idPrefix}2`,
+        label: 'Option three',
+      }],
+      checkboxIdToSelectedMap: {
+        [`${idPrefix}1`]: true,
+      },
     };
   }
 
   onSwitchChange = () => {
     this.setState({
       isSwitchChecked: !this.state.isSwitchChecked,
+    });
+  }
+
+  onCheckboxChange = option => {
+    const newCheckboxIdToSelectedMap = Object.assign({}, this.state.checkboxIdToSelectedMap, {
+      [option.id]: !this.state.checkboxIdToSelectedMap[option.id],
+    });
+
+    this.setState({
+      checkboxIdToSelectedMap: newCheckboxIdToSelectedMap,
     });
   }
 
@@ -131,11 +157,10 @@ export default class extends Component {
           label="Checkboxes"
         >
           <KuiCheckboxGroup
-            options={[
-              { id: makeId(), label: 'Option one', onChange: () => {} },
-              { id: makeId(), label: 'Option two is checked by default', checked: true, onChange: () => {} },
-              { id: makeId(), label: 'Option three', onChange: () => {} },
-            ]}
+            options={this.state.checkboxes.map(checkbox => Object.assign({}, checkbox, {
+              checked: this.state.checkboxIdToSelectedMap[checkbox.id],
+            }))}
+            onChange={this.onCheckboxChange}
           />
         </KuiFormRow>
       </KuiForm>
