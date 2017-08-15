@@ -3,6 +3,9 @@ import Slugify from '../string/slugify';
 import AccessibilityExample
   from '../../views/accessibility/accessibility_example';
 
+import BadgeExample
+  from '../../views/badge/badge_example';
+
 import ButtonExample
   from '../../views/button/button_example';
 
@@ -62,6 +65,10 @@ const components = [{
 }, {
   name: 'Button',
   component: ButtonExample,
+  hasReact: true,
+}, {
+  name: 'Badge',
+  component: BadgeExample,
   hasReact: true,
 }, {
   name: 'CallOut',

@@ -8,6 +8,10 @@ export {
 } from './button';
 
 export {
+  KuiBadge,
+} from './badge';
+
+export {
   KuiCallOut,
 } from './call_out';
 
