@@ -596,13 +596,10 @@ table {
       background-color: #3F3F3F;
       -webkit-mask: url("../src/components/icon/assets/check.svg") center center no-repeat;
               mask: url("../src/components/icon/assets/check.svg") center center no-repeat; }
-    .kuiCheckbox .kuiCheckbox__input:focus ~ .kuiCheckbox__square {
+    .kuiCheckbox .kuiCheckbox__input:focus ~ .kuiCheckbox__square,
+    .kuiCheckbox .kuiCheckbox__input:active ~ .kuiCheckbox__square {
       background-color: #e6f2f6;
       border-color: #0079a5; }
-    .kuiCheckbox .kuiCheckbox__input:checked:focus ~ .kuiCheckbox__square .kuiCheckbox__check {
-      background-color: #3F3F3F;
-      -webkit-mask: url("../src/components/icon/assets/check.svg") center center no-repeat;
-              mask: url("../src/components/icon/assets/check.svg") center center no-repeat; }
 
 .kuiCheckboxGroup__item + .kuiCheckboxGroup__item {
   margin-top: 8px; }
