@@ -11,6 +11,7 @@ export const MathExpression = ({ onChange, value, defaultValue, inputRef }) => {
     'min',
     'max',
     'mode',
+    'size',
   ];
 
   const renderControlled = () => (<FormControl
