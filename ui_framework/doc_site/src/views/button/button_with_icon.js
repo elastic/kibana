@@ -47,7 +47,7 @@ export default () => (
     <br/><br/>
 
     <KuiButton
-      iconReverse
+      iconSide="right"
       onClick={() => window.alert('Button clicked')}
       iconType="arrowUp"
     >
@@ -57,7 +57,7 @@ export default () => (
     &nbsp;&nbsp;
 
     <KuiButton
-      iconReverse
+      iconSide="right"
       fill
       iconType="arrowDown"
       onClick={() => window.alert('Button clicked')}
@@ -68,7 +68,7 @@ export default () => (
     &nbsp;&nbsp;
 
     <KuiButton
-      iconReverse
+      iconSide="right"
       iconType="arrowLeft"
       size="small"
       onClick={() => window.alert('Button clicked')}
@@ -79,7 +79,7 @@ export default () => (
     &nbsp;&nbsp;
 
     <KuiButton
-      iconReverse
+      iconSide="right"
       iconType="arrowRight"
       size="small"
       fill

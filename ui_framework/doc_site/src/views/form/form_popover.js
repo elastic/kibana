@@ -47,7 +47,7 @@ export default class extends Component {
   render() {
     const button = (
       <KuiButton
-        iconReverse
+        iconSide="right"
         fill
         iconType="arrowDown"
         onClick={this.onButtonClick}

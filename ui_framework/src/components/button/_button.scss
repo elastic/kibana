@@ -41,7 +41,7 @@
     animation: kuiButtonFocus $kuiAnimSpeedNormal $kuiAnimSlightBounce;
   }
 
-  &.kuiButton--reverse {
+  &.kuiButton--iconRight {
     .kuiButton__content {
       flex-direction: row-reverse;
       // Margin gets flipped because of the row-reverse.

@@ -12,20 +12,19 @@
 
   .kuiBadge__content {
     display: flex;
-    justify-content: center;
     align-items: center;
   }
 
   .kuiBadge__icon {
-    margin-left: $kuiSizeXS;
+    margin-right: $kuiSizeXS;
   }
 
-  &.kuiBadge--iconLeft .kuiBadge__content {
+  &.kuiBadge--iconRight .kuiBadge__content {
     flex-direction: row-reverse;
 
     .kuiBadge__icon {
-      margin-right: $kuiSizeXS;
-      margin-left: 0;
+      margin-left: $kuiSizeXS;
+      margin-right: 0;
     }
   }
 }

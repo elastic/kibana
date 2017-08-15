@@ -467,9 +467,9 @@ export default class extends Component {
               <KuiPageContentHeaderSection>
                 <KuiButton
                   fill
-                  icon="arrowDown"
+                  iconType="arrowDown"
                   onClick={() => window.alert('Button clicked')}
-                  iconReverse
+                  iconSide="right"
                 >
                   Create new watch
                 </KuiButton>

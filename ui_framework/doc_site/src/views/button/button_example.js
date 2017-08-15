@@ -51,8 +51,9 @@ export default props => (
       }]}
     >
       <GuideText>
-        The passed icon needs to come from our list of svg icons. Can be flipped
-        to the other side by passing <GuideCode>iconReverse</GuideCode>.
+        The passed icon needs to come from our list of svg icons. Can be flipped {
+          // eslint-disable-next-line react/no-unescaped-entities
+        } to the other side by passing <GuideCode>iconSide="right"</GuideCode>.
       </GuideText>
 
       <GuideDemo>

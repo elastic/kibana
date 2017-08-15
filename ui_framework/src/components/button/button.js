@@ -26,12 +26,19 @@ const sizeToClassNameMap = {
 
 export const SIZES = Object.keys(sizeToClassNameMap);
 
+const iconSideToClassNameMap = {
+  left: '',
+  right: 'kuiButton--iconRight',
+};
+
+export const ICON_SIDES = Object.keys(iconSideToClassNameMap);
+
 export const KuiButton = props => {
   const {
     children,
     className,
     iconType,
-    iconReverse,
+    iconSide,
     type,
     size,
     fill,
@@ -42,10 +49,10 @@ export const KuiButton = props => {
     'kuiButton',
     typeToClassNameMap[type],
     sizeToClassNameMap[size],
+    iconSideToClassNameMap[iconSide],
     className,
     {
       'kuiButton--fill': fill,
-      'kuiButton--reverse': iconReverse,
     },
   );
 
@@ -78,14 +85,14 @@ export const KuiButton = props => {
 
 KuiButton.propTypes = {
   iconType: PropTypes.oneOf(ICON_TYPES),
-  iconReverse: React.PropTypes.bool,
+  iconSide: PropTypes.oneOf(ICON_SIDES),
   fill: React.PropTypes.bool,
   type: PropTypes.oneOf(TYPES),
   size: PropTypes.oneOf(SIZES),
 };
 
 KuiButton.defaultProps = {
-  iconReverse: false,
+  iconSide: 'left',
   type: 'primary',
   fill: false,
 };
