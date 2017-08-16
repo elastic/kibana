@@ -53,13 +53,13 @@
 
       <div class="kuiVerticalRhythmSmall kuiVerticalRhythm">
         <select
-          ng-if="stepTimeField.hasTimeFieldOptions()"
+          ng-show="stepTimeField.hasTimeFieldOptions()"
           id="timeFilterFieldSelect"
           aria-describedby="timeFilterFieldSelectHelpText"
           class="kuiSelect kuiSelect--large"
           data-test-subj="createIndexPatternTimeFieldSelect"
           ng-disabled="stepTimeField.isTimeFieldSelectDisabled()"
-          ng-required="stepTimeField.timeFieldOptions.length"
+          ng-required="stepTimeField.hasTimeFieldOptions()"
           ng-options="option as option.display disable when option.isDisabled for option in stepTimeField.timeFieldOptions"
           ng-model="stepTimeField.selectedTimeFieldOption"
         ></select>

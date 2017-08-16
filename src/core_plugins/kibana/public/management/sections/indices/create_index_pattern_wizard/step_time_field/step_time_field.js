@@ -26,7 +26,6 @@ module.directive('stepTimeField', function () {
       this.isTimeFieldSelectDisabled = () => (
         this.isFetchingTimeFieldOptions
         || this.timeFieldOptionsError
-        || this.timeFieldOptions.length === 0
       );
 
       this.isFormValid = () => (
