@@ -4,14 +4,15 @@ import { FormGroup, ControlLabel, FormControl } from 'react-bootstrap';
 import { getSimpleArg, setSimpleArg } from '../../../lib/arg_helpers';
 import { Datasource } from '../../datasource';
 import header from './header.png';
+import { ESFieldsSelect } from '../../../components/es_fields_select';
 
 
 const template = ({ args, updateArgs }) => {
 
-  const setArg = (name) => ({ target }) => {
+  const setArg = (name, value) => {
     updateArgs && updateArgs(Object.assign({},
       args,
-      setSimpleArg(name, target.value),
+      setSimpleArg(name, value),
     ));
   };
 
@@ -20,7 +21,8 @@ const template = ({ args, updateArgs }) => {
   };
 
   const getFields = () => {
-    return getSimpleArg('fields', args) || '';
+    const commas = getSimpleArg('fields', args)[0] || '';
+    return commas.split(',').map(str => str.trim());
   };
 
   return (
@@ -30,17 +32,12 @@ const template = ({ args, updateArgs }) => {
         <FormControl
           type="text"
           value={getQuery()}
-          onChange={setArg('query')}
+          onChange={(e) => setArg('query', e.target.value)}
         />
       </FormGroup>
-      <FormGroup controlId="formControlsSelect">
-        <ControlLabel>Fields</ControlLabel>
-        <FormControl
-          type="text"
-          value={getFields()}
-          onChange={setArg('fields')}
-        />
-      </FormGroup>
+
+      <label>Fields</label>
+      <ESFieldsSelect onChange={(fields) => setArg('fields', fields.join(', '))} selected={getFields()}/>
     </div>
   );
 };
