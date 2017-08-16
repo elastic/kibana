@@ -1550,7 +1550,7 @@ table {
  * Dial menu is a phone like dial comprised of an svg icon and a title.
  */
 /**
- * 1. Default to grid of 3.
+ * 1. Default to grid of 3, account for padding.
  */
 .kuiKeyPadMenu {
   display: -webkit-box;
@@ -1565,8 +1565,9 @@ table {
   -webkit-flex-wrap: wrap;
       -ms-flex-wrap: wrap;
           flex-wrap: wrap;
-  width: 288px;
-  /* 1 */ }
+  width: 320px;
+  /* 1 */
+  padding: 16px; }
 
 /**
  * 1. If this class is applied to a button, we need to override the Chrome default font.
@@ -2143,7 +2144,6 @@ table {
   left: 50%;
   border: 1px solid #444;
   border-radius: 4px 0 4px 4px;
-  padding: 16px;
   -webkit-transform: translateX(-50%) translateY(8px) translateZ(0);
           transform: translateX(-50%) translateY(8px) translateZ(0);
   -webkit-backface-visibility: hidden;
@@ -2285,6 +2285,28 @@ table {
   .kuiSideNavTitle:first-of-type {
     margin-top: 0;
     /* 1 */ }
+
+.kuiShiftNav {
+  width: 256px; }
+  .kuiShiftNav .kuiShiftNav__option {
+    display: -webkit-box;
+    display: -webkit-flex;
+    display: -ms-flexbox;
+    display: flex;
+    padding: 8px;
+    width: 100%;
+    text-align: left; }
+  .kuiShiftNav .kuiShiftNav__icon {
+    margin-right: 8px; }
+  .kuiShiftNav .kuiShiftNav__text {
+    -webkit-box-flex: 1;
+    -webkit-flex-grow: 1;
+        -ms-flex-positive: 1;
+            flex-grow: 1; }
+  .kuiShiftNav .kuiShiftNav__arrow {
+    -webkit-align-self: flex-end;
+        -ms-flex-item-align: end;
+            align-self: flex-end; }
 
 /**
  * 1. Prevent cells from expanding based on content size. This substitutes for table-layout: fixed.

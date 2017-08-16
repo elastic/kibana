@@ -48,6 +48,9 @@ import PopoverExample
 import SideNavExample
   from '../../views/side_nav/side_nav_example';
 
+import ShiftNavExample
+  from '../../views/shift_nav/shift_nav_example';
+
 import TableExample
   from '../../views/table/table_example';
 
@@ -120,6 +123,10 @@ const components = [{
 }, {
   name: 'SideNav',
   component: SideNavExample,
+  hasReact: true,
+}, {
+  name: 'ShiftNav',
+  component: ShiftNavExample,
   hasReact: true,
 }, {
   name: 'Table',

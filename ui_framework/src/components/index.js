@@ -103,6 +103,10 @@ export {
 } from './popover';
 
 export {
+  KuiShiftNav,
+} from './shift_nav';
+
+export {
   KuiTable,
   KuiTableBody,
   KuiTableHeader,

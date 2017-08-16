@@ -1,0 +1,22 @@
+.kuiShiftNav {
+  width: $kuiSize * 16;
+
+  .kuiShiftNav__option {
+    display: flex;
+    padding: $kuiSizeS;
+    width: 100%;
+    text-align: left;
+  }
+
+  .kuiShiftNav__icon {
+    margin-right: $kuiSizeS;
+  }
+
+  .kuiShiftNav__text {
+    flex-grow: 1;
+  }
+
+  .kuiShiftNav__arrow {
+    align-self: flex-end;
+  }
+}
