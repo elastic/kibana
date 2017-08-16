@@ -168,6 +168,9 @@ app.directive('timelionExpressionInput', function ($document, $http, $interval, 
           case comboBoxKeyCodes.TAB:
             // If there are no suggestions or none is selected, the user tabs to the next input.
             if (scope.functionSuggestions.isEmpty() || scope.functionSuggestions.index < 0) {
+              // Before letting the tab be handled to focus the next element
+              // we need to hide the suggestions, otherwise it will focus these
+              // instead of the time interval select.
               scope.functionSuggestions.hide();
               return;
             }
