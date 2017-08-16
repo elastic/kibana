@@ -45,6 +45,8 @@ module.directive('stepTimeField', function () {
       this.toggleAdvancedOptions = () => {
         this.showAdvancedOptions = !this.showAdvancedOptions;
       };
+
+      this.showAdvancedOptions = !!this.indexPatternId;
     },
   };
 });
