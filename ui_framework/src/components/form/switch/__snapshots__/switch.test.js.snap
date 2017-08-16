@@ -19,12 +19,26 @@ exports[`KuiSwitch is rendered 1`] = `
     <span
       class="kuiSwitch__track"
     >
-      <span
-        class="kuiSwitch__icon"
-      />
-      <span
-        class="kuiSwitch__icon kuiSwitch__icon--checked"
-      />
+      <svg
+        class="kuiIcon kuiSwitch__icon kuiIcon--medium"
+      >
+        <title>
+          cross icon
+        </title>
+        <use
+          href="#cross"
+        />
+      </svg>
+      <svg
+        class="kuiIcon kuiSwitch__icon kuiSwitch__icon--checked kuiIcon--medium"
+      >
+        <title>
+          check icon
+        </title>
+        <use
+          href="#check"
+        />
+      </svg>
     </span>
   </span>
   <label

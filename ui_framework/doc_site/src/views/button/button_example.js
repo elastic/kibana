@@ -19,6 +19,14 @@ import ButtonWithIcon from './button_with_icon';
 const buttonWithIconSource = require('!!raw!./button_with_icon');
 const buttonWithIconHtml = renderToHtml(Button);
 
+import ButtonOption from './button_option';
+const buttonOptionSource = require('!!raw!./button_option');
+const buttonOptionHtml = renderToHtml(ButtonOption);
+
+import ButtonOptionFlush from './button_option_flush';
+const buttonOptionFlushSource = require('!!raw!./button_option_flush');
+const buttonOptionFlushHtml = renderToHtml(ButtonOptionFlush);
+
 export default props => (
   <GuidePage title={props.route.name}>
     <GuideSection
@@ -58,6 +66,42 @@ export default props => (
 
       <GuideDemo>
         <ButtonWithIcon />
+      </GuideDemo>
+    </GuideSection>
+
+    <GuideSection
+      title="Button Option"
+      source={[{
+        type: GuideSectionTypes.JS,
+        code: buttonOptionSource,
+      }, {
+        type: GuideSectionTypes.HTML,
+        code: buttonOptionHtml,
+      }]}
+    >
+      <GuideDemo>
+        <ButtonOption />
+      </GuideDemo>
+    </GuideSection>
+
+    <GuideSection
+      title="Flush Button Option"
+      source={[{
+        type: GuideSectionTypes.JS,
+        code: buttonOptionFlushSource,
+      }, {
+        type: GuideSectionTypes.HTML,
+        code: buttonOptionFlushHtml,
+      }]}
+    >
+      <GuideText>
+        When aligning <GuideCode>KuiButtonOption</GuideCode> components to the left or the right,
+        you should make sure they&rsquo;re flush with the edge of their container, so that they&rsquo;re
+        horizontally-aligned with the other content in the container.
+      </GuideText>
+
+      <GuideDemo>
+        <ButtonOptionFlush />
       </GuideDemo>
     </GuideSection>
   </GuidePage>

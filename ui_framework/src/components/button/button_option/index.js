@@ -1,5 +1,3 @@
-export { KuiButton } from './button';
-
 export {
   KuiButtonOption,
 } from './button_option';

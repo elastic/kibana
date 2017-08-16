@@ -396,6 +396,19 @@ table {
   border-color: #DD0A73;
   background-color: rgba(221, 10, 115, 0.1); }
 
+/**
+ * 1. Apply margin to all but last item in the flex.
+ * 2. Margin gets flipped because of the row-reverse.
+ */
+@-webkit-keyframes kuiButtonFocus {
+  50% {
+    -webkit-transform: translateY(2px);
+            transform: translateY(2px); } }
+@keyframes kuiButtonFocus {
+  50% {
+    -webkit-transform: translateY(2px);
+            transform: translateY(2px); } }
+
 .kuiButton {
   display: inline-block;
   -webkit-appearance: none;
@@ -405,20 +418,21 @@ table {
   height: 40px;
   text-decoration: none;
   border: solid 1px transparent;
-  border-radius: 4px;
-  padding: 0 12px;
-  min-width: 112px;
   text-align: center;
   font-family: "Roboto", Helvetica, Arial, sans-serif;
   transition: all 250ms cubic-bezier(0.34, 1.61, 0.7, 1);
   whitespace: nowrap;
   box-shadow: 0 4px 4px -2px rgba(0, 0, 0, 0.2);
-  /**
-   * 1. Apply margin to all but last item in the flex.
-   */ }
-  .kuiButton.kuiButton--small {
-    height: 32px; }
+  border-radius: 4px;
+  min-width: 112px; }
+  .kuiButton:hover, .kuiButton:focus {
+    text-decoration: underline; }
+  .kuiButton:focus {
+    -webkit-animation: kuiButtonFocus 250ms cubic-bezier(0.34, 1.61, 0.7, 1);
+            animation: kuiButtonFocus 250ms cubic-bezier(0.34, 1.61, 0.7, 1); }
   .kuiButton .kuiButton__content {
+    height: 100%;
+    width: 100%;
     display: -webkit-box;
     display: -webkit-flex;
     display: -ms-flexbox;
@@ -430,17 +444,16 @@ table {
     -webkit-box-align: center;
     -webkit-align-items: center;
         -ms-flex-align: center;
-            align-items: center; }
+            align-items: center;
+    padding: 0 12px; }
     .kuiButton .kuiButton__content > * + * {
       margin-left: 8px;
       /* 1 */ }
-  .kuiButton:hover, .kuiButton:focus {
-    text-decoration: underline;
-    background-color: rgba(0, 121, 165, 0.1); }
-  .kuiButton:focus {
-    -webkit-animation: kuiButtonFocus 250ms cubic-bezier(0.34, 1.61, 0.7, 1);
-            animation: kuiButtonFocus 250ms cubic-bezier(0.34, 1.61, 0.7, 1); }
+  .kuiButton.kuiButton--small {
+    height: 32px; }
   .kuiButton.kuiButton--iconRight .kuiButton__content {
+    height: 100%;
+    width: 100%;
     -webkit-box-orient: horizontal;
     -webkit-box-direction: reverse;
     -webkit-flex-direction: row-reverse;
@@ -448,15 +461,35 @@ table {
             flex-direction: row-reverse; }
     .kuiButton.kuiButton--iconRight .kuiButton__content > * + * {
       margin-left: 0;
-      margin-right: 8px; }
+      /* 1 */
+      margin-right: 8px;
+      /* 1 */ }
+  .kuiButton:hover, .kuiButton:focus {
+    background-color: rgba(0, 121, 165, 0.1); }
+  .kuiButton:disabled {
+    color: #c5c5c5;
+    border-color: #c5c5c5;
+    pointer-events: none; }
+    .kuiButton:disabled .kuiButton__content {
+      pointer-events: auto;
+      cursor: not-allowed; }
+    .kuiButton:disabled .kuiButton__icon {
+      fill: #c5c5c5; }
+    .kuiButton:disabled.kuiButton--fill {
+      background-color: #c5c5c5;
+      border-color: #c5c5c5; }
+      .kuiButton:disabled.kuiButton--fill:hover, .kuiButton:disabled.kuiButton--fill:focus {
+        background-color: #c5c5c5;
+        border-color: #c5c5c5; }
+    .kuiButton:disabled:hover, .kuiButton:disabled:focus {
+      background-color: #FFF;
+      text-decoration: none; }
 
 .kuiButton--primary {
   color: #0079a5;
   border-color: #0079a5; }
   .kuiButton--primary .kuiButton__icon {
     fill: #0079a5; }
-  .kuiButton--primary:hover, .kuiButton--primary:focus {
-    background-color: rgba(0, 121, 165, 0.1); }
   .kuiButton--primary.kuiButton--fill {
     background-color: #0079a5;
     color: #FFF;
@@ -466,30 +499,14 @@ table {
       border-color: #00668c; }
     .kuiButton--primary.kuiButton--fill .kuiButton__icon {
       fill: #FFF; }
-  .kuiButton--primary.kuiButton--link {
-    border-color: transparent;
-    background-color: transparent;
-    box-shadow: none; }
-    .kuiButton--primary.kuiButton--link:focus {
-      background-color: rgba(0, 121, 165, 0.1); }
-  .kuiButton--primary.kuiButton--linkFlush {
-    border-color: transparent;
-    background-color: transparent;
-    border-right: none;
-    border-left: none;
-    padding-right: 0;
-    padding-left: 0;
-    box-shadow: none; }
-    .kuiButton--primary.kuiButton--linkFlush:focus {
-      background-color: rgba(0, 121, 165, 0.1); }
+  .kuiButton--primary:hover, .kuiButton--primary:focus {
+    background-color: rgba(0, 121, 165, 0.1); }
 
 .kuiButton--secondary {
   color: #00A69B;
   border-color: #00A69B; }
   .kuiButton--secondary .kuiButton__icon {
     fill: #00A69B; }
-  .kuiButton--secondary:hover, .kuiButton--secondary:focus {
-    background-color: rgba(0, 166, 155, 0.1); }
   .kuiButton--secondary.kuiButton--fill {
     background-color: #00A69B;
     color: #FFF;
@@ -499,30 +516,14 @@ table {
       border-color: #008d83; }
     .kuiButton--secondary.kuiButton--fill .kuiButton__icon {
       fill: #FFF; }
-  .kuiButton--secondary.kuiButton--link {
-    border-color: transparent;
-    background-color: transparent;
-    box-shadow: none; }
-    .kuiButton--secondary.kuiButton--link:focus {
-      background-color: rgba(0, 166, 155, 0.1); }
-  .kuiButton--secondary.kuiButton--linkFlush {
-    border-color: transparent;
-    background-color: transparent;
-    border-right: none;
-    border-left: none;
-    padding-right: 0;
-    padding-left: 0;
-    box-shadow: none; }
-    .kuiButton--secondary.kuiButton--linkFlush:focus {
-      background-color: rgba(0, 166, 155, 0.1); }
+  .kuiButton--secondary:hover, .kuiButton--secondary:focus {
+    background-color: rgba(0, 166, 155, 0.1); }
 
 .kuiButton--warning {
   color: #E5830E;
   border-color: #E5830E; }
   .kuiButton--warning .kuiButton__icon {
     fill: #E5830E; }
-  .kuiButton--warning:hover, .kuiButton--warning:focus {
-    background-color: rgba(229, 131, 14, 0.1); }
   .kuiButton--warning.kuiButton--fill {
     background-color: #E5830E;
     color: #FFF;
@@ -532,30 +533,14 @@ table {
       border-color: #cd750d; }
     .kuiButton--warning.kuiButton--fill .kuiButton__icon {
       fill: #FFF; }
-  .kuiButton--warning.kuiButton--link {
-    border-color: transparent;
-    background-color: transparent;
-    box-shadow: none; }
-    .kuiButton--warning.kuiButton--link:focus {
-      background-color: rgba(229, 131, 14, 0.1); }
-  .kuiButton--warning.kuiButton--linkFlush {
-    border-color: transparent;
-    background-color: transparent;
-    border-right: none;
-    border-left: none;
-    padding-right: 0;
-    padding-left: 0;
-    box-shadow: none; }
-    .kuiButton--warning.kuiButton--linkFlush:focus {
-      background-color: rgba(229, 131, 14, 0.1); }
+  .kuiButton--warning:hover, .kuiButton--warning:focus {
+    background-color: rgba(229, 131, 14, 0.1); }
 
 .kuiButton--danger {
   color: #A30000;
   border-color: #A30000; }
   .kuiButton--danger .kuiButton__icon {
     fill: #A30000; }
-  .kuiButton--danger:hover, .kuiButton--danger:focus {
-    background-color: rgba(163, 0, 0, 0.1); }
   .kuiButton--danger.kuiButton--fill {
     background-color: #A30000;
     color: #FFF;
@@ -565,66 +550,111 @@ table {
       border-color: #8a0000; }
     .kuiButton--danger.kuiButton--fill .kuiButton__icon {
       fill: #FFF; }
-  .kuiButton--danger.kuiButton--link {
-    border-color: transparent;
-    background-color: transparent;
-    box-shadow: none; }
-    .kuiButton--danger.kuiButton--link:focus {
-      background-color: rgba(163, 0, 0, 0.1); }
-  .kuiButton--danger.kuiButton--linkFlush {
-    border-color: transparent;
-    background-color: transparent;
-    border-right: none;
-    border-left: none;
-    padding-right: 0;
-    padding-left: 0;
-    box-shadow: none; }
-    .kuiButton--danger.kuiButton--linkFlush:focus {
-      background-color: rgba(163, 0, 0, 0.1); }
+  .kuiButton--danger:hover, .kuiButton--danger:focus {
+    background-color: rgba(163, 0, 0, 0.1); }
 
-.kuiButton--disabled {
-  color: #c5c5c5;
-  border-color: #c5c5c5; }
-  .kuiButton--disabled .kuiButton__icon {
+.kuiButtonOption {
+  display: inline-block;
+  -webkit-appearance: none;
+     -moz-appearance: none;
+          appearance: none;
+  cursor: pointer;
+  height: 40px;
+  text-decoration: none;
+  border: solid 1px transparent;
+  text-align: center;
+  font-family: "Roboto", Helvetica, Arial, sans-serif;
+  transition: all 250ms cubic-bezier(0.34, 1.61, 0.7, 1);
+  whitespace: nowrap;
+  border-color: transparent;
+  background-color: transparent;
+  box-shadow: none; }
+  .kuiButtonOption:hover, .kuiButtonOption:focus {
+    text-decoration: underline; }
+  .kuiButtonOption:focus {
+    -webkit-animation: kuiButtonFocus 250ms cubic-bezier(0.34, 1.61, 0.7, 1);
+            animation: kuiButtonFocus 250ms cubic-bezier(0.34, 1.61, 0.7, 1); }
+  .kuiButtonOption .kuiButtonOption__content {
+    height: 100%;
+    width: 100%;
+    display: -webkit-box;
+    display: -webkit-flex;
+    display: -ms-flexbox;
+    display: flex;
+    -webkit-box-pack: center;
+    -webkit-justify-content: center;
+        -ms-flex-pack: center;
+            justify-content: center;
+    -webkit-box-align: center;
+    -webkit-align-items: center;
+        -ms-flex-align: center;
+            align-items: center;
+    padding: 0 8px; }
+    .kuiButtonOption .kuiButtonOption__content > * + * {
+      margin-left: 8px;
+      /* 1 */ }
+  .kuiButtonOption.kuiButtonOption--small {
+    height: 32px; }
+  .kuiButtonOption.kuiButtonOption--iconRight .kuiButtonOption__content {
+    height: 100%;
+    width: 100%;
+    -webkit-box-orient: horizontal;
+    -webkit-box-direction: reverse;
+    -webkit-flex-direction: row-reverse;
+        -ms-flex-direction: row-reverse;
+            flex-direction: row-reverse; }
+    .kuiButtonOption.kuiButtonOption--iconRight .kuiButtonOption__content > * + * {
+      margin-left: 0;
+      /* 1 */
+      margin-right: 8px;
+      /* 1 */ }
+  .kuiButtonOption:disabled {
+    color: #c5c5c5;
+    pointer-events: none; }
+    .kuiButtonOption:disabled .kuiButtonOption__content {
+      pointer-events: auto;
+      cursor: not-allowed; }
+    .kuiButtonOption:disabled .kuiButtonOption__icon {
+      fill: #c5c5c5; }
+    .kuiButtonOption:disabled:hover, .kuiButtonOption:disabled:focus {
+      background-color: #FFF;
+      text-decoration: none; }
+
+.kuiButtonOption--primary {
+  color: #0079a5; }
+  .kuiButtonOption--primary .kuiButtonOption__icon {
+    fill: #0079a5; }
+  .kuiButtonOption--primary:focus {
+    background-color: rgba(0, 121, 165, 0.1); }
+  .kuiButtonOption--primary:hover, .kuiButtonOption--primary:focus {
+    background-color: rgba(0, 121, 165, 0.1); }
+
+.kuiButtonOption--danger {
+  color: #A30000; }
+  .kuiButtonOption--danger .kuiButtonOption__icon {
+    fill: #A30000; }
+  .kuiButtonOption--danger:focus {
+    background-color: rgba(163, 0, 0, 0.1); }
+  .kuiButtonOption--danger:hover, .kuiButtonOption--danger:focus {
+    background-color: rgba(163, 0, 0, 0.1); }
+
+.kuiButtonOption--disabled {
+  color: #c5c5c5; }
+  .kuiButtonOption--disabled .kuiButtonOption__icon {
     fill: #c5c5c5; }
-  .kuiButton--disabled:hover, .kuiButton--disabled:focus {
+  .kuiButtonOption--disabled:focus {
+    background-color: rgba(197, 197, 197, 0.1); }
+  .kuiButtonOption--disabled:hover, .kuiButtonOption--disabled:focus {
     background-color: rgba(197, 197, 197, 0.1);
     cursor: not-allowed; }
-  .kuiButton--disabled.kuiButton--fill {
-    background-color: #c5c5c5;
-    color: #FFF;
-    border-color: #c5c5c5; }
-    .kuiButton--disabled.kuiButton--fill:hover, .kuiButton--disabled.kuiButton--fill:focus {
-      background-color: #b8b8b8;
-      border-color: #b8b8b8; }
-    .kuiButton--disabled.kuiButton--fill .kuiButton__icon {
-      fill: #FFF; }
-  .kuiButton--disabled.kuiButton--link {
-    border-color: transparent;
-    background-color: transparent;
-    box-shadow: none; }
-    .kuiButton--disabled.kuiButton--link:focus {
-      background-color: rgba(197, 197, 197, 0.1); }
-  .kuiButton--disabled.kuiButton--linkFlush {
-    border-color: transparent;
-    background-color: transparent;
-    border-right: none;
-    border-left: none;
-    padding-right: 0;
-    padding-left: 0;
-    box-shadow: none; }
-    .kuiButton--disabled.kuiButton--linkFlush:focus {
-      background-color: rgba(197, 197, 197, 0.1); }
 
-@-webkit-keyframes kuiButtonFocus {
-  50% {
-    -webkit-transform: translateY(2px);
-            transform: translateY(2px); } }
+.kuiButtonOption--flushLeft .kuiButtonOption__content {
+  border-left: none;
+  padding-left: 0; }
 
-@keyframes kuiButtonFocus {
-  50% {
-    -webkit-transform: translateY(2px);
-            transform: translateY(2px); } }
+.kuiButtonOption--flushRight .kuiButtonOption__content {
+  border-right: none;
+  padding-right: 0; }
 
 .kuiCallOut {
   padding: 16px;
