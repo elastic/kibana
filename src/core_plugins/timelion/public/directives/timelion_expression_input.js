@@ -166,8 +166,9 @@ app.directive('timelionExpressionInput', function ($document, $http, $interval, 
             break;
 
           case comboBoxKeyCodes.TAB:
-            // If there are no suggestions, the user tabs to the next input.
-            if (scope.functionSuggestions.isEmpty()) {
+            // If there are no suggestions or none is selected, the user tabs to the next input.
+            if (scope.functionSuggestions.isEmpty() || scope.functionSuggestions.index < 0) {
+              scope.functionSuggestions.hide();
               return;
             }
 
@@ -204,6 +205,13 @@ app.directive('timelionExpressionInput', function ($document, $http, $interval, 
 
       scope.onClickSuggestion = index => {
         insertSuggestionIntoExpression(index);
+      };
+
+      scope.getActiveSuggestionId = () => {
+        if(scope.functionSuggestions.isVisible && scope.functionSuggestions.index > -1) {
+          return `timelionSuggestion${scope.functionSuggestions.index}`;
+        }
+        return '';
       };
 
       init();
