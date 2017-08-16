@@ -33,7 +33,6 @@ uiModules.get('apps/management')
 
   // Configure the new index pattern we're going to create.
   this.formValues = {
-    id: $routeParams.id ? decodeURIComponent($routeParams.id) : undefined,
     name: config.get('indexPattern:placeholder'),
     nameIsPattern: false,
     expandWildcard: false,
@@ -49,7 +48,16 @@ uiModules.get('apps/management')
   this.existing = null;
   this.nameIntervalOptions = intervals;
   this.patternErrors = [];
-  this.showAdvancedOptions = $routeParams.id || false;
+
+  this.showAdvancedOptions = false;
+
+  // fills index-pattern ID based on query param.
+  if ($routeParams.id) {
+    this.formValues.id = decodeURIComponent($routeParams.id);
+    this.formValues.name = '';
+
+    this.showAdvancedOptions = true;
+  }
 
   const getTimeFieldOptions = () => {
     loadingCount += 1;
