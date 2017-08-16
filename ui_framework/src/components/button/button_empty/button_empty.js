@@ -1,57 +1,60 @@
-import React, {
-  PropTypes,
-} from 'react';
-
+import React from 'react';
+import PropTypes from 'prop-types';
 import classNames from 'classnames';
 
 import {
   ICON_TYPES,
   KuiIcon,
-} from '../icon';
+} from '../../icon';
 
 const typeToClassNameMap = {
-  primary: 'kuiButton--primary',
-  secondary: 'kuiButton--secondary',
-  warning: 'kuiButton--warning',
-  danger: 'kuiButton--danger',
+  primary: 'kuiButtonEmpty--primary',
+  danger: 'kuiButtonEmpty--danger',
+  disabled: 'kuiButtonEmpty--disabled',
 };
 
 export const TYPES = Object.keys(typeToClassNameMap);
 
 const sizeToClassNameMap = {
-  small: 'kuiButton--small',
-  large: 'kuiButton--large',
+  small: 'kuiButtonEmpty--small',
+  large: 'kuiButtonEmpty--large',
 };
 
 export const SIZES = Object.keys(sizeToClassNameMap);
 
 const iconSideToClassNameMap = {
   left: '',
-  right: 'kuiButton--iconRight',
+  right: 'kuiButtonEmpty--iconRight',
 };
 
 export const ICON_SIDES = Object.keys(iconSideToClassNameMap);
 
-export const KuiButton = ({
+const flushTypeToClassNameMap = {
+  'left': 'kuiButtonEmpty--flushLeft',
+  'right': 'kuiButtonEmpty--flushRight',
+};
+
+export const FLUSH_TYPES = Object.keys(flushTypeToClassNameMap);
+
+export const KuiButtonEmpty = ({
   children,
   className,
   iconType,
   iconSide,
   type,
   size,
-  fill,
+  flush,
   isDisabled,
   ...rest,
 }) => {
+
   const classes = classNames(
-    'kuiButton',
+    'kuiButtonEmpty',
     typeToClassNameMap[type],
     sizeToClassNameMap[size],
     iconSideToClassNameMap[iconSide],
+    flushTypeToClassNameMap[flush],
     className,
-    {
-      'kuiButton--fill': fill,
-    },
   );
 
   // Add an icon to the button if one exists.
@@ -60,7 +63,7 @@ export const KuiButton = ({
   if (iconType) {
     buttonIcon = (
       <KuiIcon
-        className="kuiButton__icon"
+        className="kuiButtonEmpty__icon"
         type={iconType}
         size="medium"
         aria-hidden="true"
@@ -74,7 +77,7 @@ export const KuiButton = ({
       className={classes}
       {...rest}
     >
-      <span className="kuiButton__content">
+      <span className="kuiButtonEmpty__content">
         {buttonIcon}
         <span>{children}</span>
       </span>
@@ -82,19 +85,18 @@ export const KuiButton = ({
   );
 };
 
-KuiButton.propTypes = {
+KuiButtonEmpty.propTypes = {
   children: PropTypes.node,
   className: PropTypes.string,
   iconType: PropTypes.oneOf(ICON_TYPES),
   iconSide: PropTypes.oneOf(ICON_SIDES),
-  fill: React.PropTypes.bool,
   type: PropTypes.oneOf(TYPES),
   size: PropTypes.oneOf(SIZES),
+  flush: PropTypes.oneOf(FLUSH_TYPES),
   isDisabled: PropTypes.bool,
 };
 
-KuiButton.defaultProps = {
+KuiButtonEmpty.defaultProps = {
   iconSide: 'left',
   type: 'primary',
-  fill: false,
 };
