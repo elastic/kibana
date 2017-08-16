@@ -1,54 +1,58 @@
 // Our base button
 .kuiButton {
-  display: inline-block;
-  appearance: none;
-  cursor: pointer;
-  height: $kuiSizeXXL;
-  text-decoration: none;
-  border: solid 1px transparent;
-  border-radius: $kuiBorderRadius;
-  padding: 0 ($kuiSize - $kuiSizeXS);
-  min-width: $kuiSize * 7;
-  text-align: center;
-  font-family: $kuiFontFamily;
-  transition: all $kuiAnimSpeedNormal $kuiAnimSlightBounce;
-  whitespace: nowrap;
+  @include kuiButton;
   @include kuiBottomShadowMedium;
 
-  &.kuiButton--small {
-    height: $kuiSizeXL;
+  border-radius: $kuiBorderRadius;
+  min-width: $kuiSize * 7;
+
+  .kuiButton__content {
+    @include kuiButtonContent;
+
+    padding: 0 ($kuiSize - $kuiSizeXS);
   }
 
-  /**
-   * 1. Apply margin to all but last item in the flex.
-   */
-  .kuiButton__content {
-    display: flex;
-    justify-content: center;
-    align-items: center;
+  &.kuiButton--small {
+    height: $kuiButtonHeightSmall;
+  }
 
-    > * + * {
-      margin-left: $kuiSizeS; /* 1 */
+  &.kuiButton--iconRight {
+    .kuiButton__content {
+      @include kuiButtonContent($isReverse: true);
     }
   }
 
   &:hover, &:focus {
-    text-decoration: underline;
     background-color: transparentize($kuiColorPrimary, .9);
   }
 
-  &:focus {
-    animation: kuiButtonFocus $kuiAnimSpeedNormal $kuiAnimSlightBounce;
-  }
+  &:disabled {
+    color: $kuiButtonColorDisabled;
+    border-color: $kuiButtonColorDisabled;
+    pointer-events: none;
 
-  &.kuiButton--reverse {
     .kuiButton__content {
-      flex-direction: row-reverse;
-      // Margin gets flipped because of the row-reverse.
-      > * + * {
-        margin-left: 0;
-        margin-right: $kuiSizeS;
+      pointer-events: auto;
+      cursor: not-allowed;
+    }
+
+    .kuiButton__icon {
+      fill: $kuiButtonColorDisabled;
+    }
+
+    &.kuiButton--fill {
+      background-color: $kuiButtonColorDisabled;
+      border-color: $kuiButtonColorDisabled;
+
+      &:hover, &:focus {
+        background-color: $kuiButtonColorDisabled;
+        border-color: $kuiButtonColorDisabled;
       }
+    }
+
+    &:hover, &:focus {
+      background-color: $kuiColorEmptyShade;
+      text-decoration: none;
     }
   }
 }
@@ -59,7 +63,6 @@ $buttonTypes: (
   secondary: $kuiColorSecondary,
   warning: $kuiColorWarning,
   danger: $kuiColorDanger,
-  disabled: tintOrShade($kuiTextColor, 70%, 80%)
 );
 
 // Create button modifiders based upon the map.
@@ -72,20 +75,15 @@ $buttonTypes: (
       fill: $color;
     }
 
-    &:hover, &:focus {
-      background-color: transparentize($color, .9);
-      @if ($name == 'disabled') {
-        cursor: not-allowed;
-      }
-    }
-
     &.kuiButton--fill {
       background-color: $color;
+
       @if (lightness($kuiTextColor) > 50) {
         color: $kuiTextColor;
       } @else {
         color: #FFF;
       }
+
       border-color: $color;
 
       &:hover, &:focus {
@@ -102,34 +100,12 @@ $buttonTypes: (
       }
     }
 
-    &.kuiButton--link {
-      border-color: transparent;
-      background-color: transparent;
-      box-shadow: none;
+    &:hover, &:focus {
+      background-color: transparentize($color, .9);
 
-      &:focus {
-        background-color: transparentize($color, .9);
+      @if ($name == 'disabled') {
+        cursor: not-allowed;
       }
     }
-
-    &.kuiButton--linkFlush {
-      border-color: transparent;
-      background-color: transparent;
-      border-right: none;
-      border-left: none;
-      padding-right: 0;
-      padding-left: 0;
-      box-shadow: none;
-
-      &:focus {
-        background-color: transparentize($color, .9);
-      }
-    }
-  }
-}
-
-@keyframes kuiButtonFocus {
-  50% {
-    transform: translateY($kuiSizeXS / 2);
   }
 }

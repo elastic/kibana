@@ -163,8 +163,7 @@ export default () => (
     <br/><br/>
 
     <KuiButton
-      disabled
-      type="disabled"
+      isDisabled
       onClick={() => window.alert('Button clicked')}
     >
       Disabled
@@ -173,8 +172,7 @@ export default () => (
     &nbsp;&nbsp;
 
     <KuiButton
-      disabled
-      type="disabled"
+      isDisabled
       fill
       onClick={() => window.alert('Button clicked')}
     >
@@ -184,8 +182,7 @@ export default () => (
     &nbsp;&nbsp;
 
     <KuiButton
-      disabled
-      type="disabled"
+      isDisabled
       size="small"
       onClick={() => window.alert('Button clicked')}
     >
@@ -195,8 +192,7 @@ export default () => (
     &nbsp;&nbsp;
 
     <KuiButton
-      disabled
-      type="disabled"
+      isDisabled
       size="small"
       fill
       onClick={() => window.alert('Button clicked')}
