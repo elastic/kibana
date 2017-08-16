@@ -9,6 +9,7 @@ import FixturesLogstashFieldsProvider from 'fixtures/logstash_fields';
 import { FixturesStubbedSavedObjectIndexPatternProvider } from 'fixtures/stubbed_saved_object_index_pattern';
 import { IndexPatternsIntervalsProvider } from 'ui/index_patterns/_intervals';
 import { IndexPatternProvider } from 'ui/index_patterns/_index_pattern';
+import { SupportedFeaturesProvider } from 'ui/supported_features';
 import NoDigestPromises from 'test_utils/no_digest_promises';
 
 import { FieldsFetcherProvider } from '../fields_fetcher_provider';
@@ -31,6 +32,7 @@ describe('index pattern', function () {
   let intervals;
   let indexPatternsApiClient;
   let defaultTimeField;
+  let supportedFeatures;
 
   beforeEach(ngMock.module('kibana', StubIndexPatternsApiClientModule, (PrivateProvider) => {
     PrivateProvider.swap(IndexPatternsCalculateIndicesProvider, () => {
@@ -66,6 +68,10 @@ describe('index pattern', function () {
     IndexPattern = Private(IndexPatternProvider);
     fieldsFetcher = Private(FieldsFetcherProvider);
     indexPatternsApiClient = Private(IndexPatternsApiClientProvider);
+
+    supportedFeatures = Private(SupportedFeaturesProvider);
+    sinon.stub(supportedFeatures, 'isFeatureSupported')
+      .withArgs('field_stats_api').returns(Promise.resolve(true));
   }));
 
   // create an indexPattern instance for each test
@@ -340,6 +346,23 @@ describe('index pattern', function () {
       });
     });
 
+    describe('when index pattern is a time-base wildcard but field_stats are not supported', function () {
+      beforeEach(function () {
+        indexPattern.id = 'randomID';
+        indexPattern.title = 'logstash-*';
+        indexPattern.timeFieldName = defaultTimeField.name;
+        indexPattern.intervalName = null;
+        indexPattern.notExpandable = false;
+        supportedFeatures.isFeatureSupported
+          .withArgs('field_stats_api').returns(Promise.resolve(false));
+      });
+
+      it('is fulfilled by title', async function () {
+        const indexList = await indexPattern.toDetailedIndexList();
+        expect(indexList.map(i => i.index)).to.eql([indexPattern.title]);
+      });
+    });
+
     describe('when index pattern is neither an interval nor a time-based wildcard', function () {
       beforeEach(function () {
         indexPattern.id = 'randomID';
@@ -424,6 +447,23 @@ describe('index pattern', function () {
       });
 
       it('is fulfilled using the id', async function () {
+        const indexList = await indexPattern.toIndexList();
+        expect(indexList).to.eql([indexPattern.title]);
+      });
+    });
+
+    describe('when index pattern is a time-base wildcard but field_stats are not supported', function () {
+      beforeEach(function () {
+        indexPattern.id = 'randomID';
+        indexPattern.title = 'logstash-*';
+        indexPattern.timeFieldName = defaultTimeField.name;
+        indexPattern.intervalName = null;
+        indexPattern.notExpandable = false;
+        supportedFeatures.isFeatureSupported
+          .withArgs('field_stats_api').returns(Promise.resolve(false));
+      });
+
+      it('is fulfilled by title', async function () {
         const indexList = await indexPattern.toIndexList();
         expect(indexList).to.eql([indexPattern.title]);
       });
