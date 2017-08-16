@@ -7,7 +7,7 @@ export default handleActions({
   },
 
   [sizeWorkpad]: (workpadState, { payload }) => {
-    return { ...workpadState, payload };
+    return { ...workpadState, ...payload };
   },
 
   [setColors]: (workpadState, { payload }) => {
