@@ -1,4 +1,5 @@
 <form
+  name="stepTimeField.form"
   role="form"
   ng-submit="stepTimeField.createIndexPattern()"
   class="kuiPanel"
@@ -24,7 +25,7 @@
           class="kuiLabel"
           for="timeFilterFieldSelect"
         >
-          Optional Time Filter field name
+          Time Filter field name
         </label>
 
         <a
@@ -52,6 +53,7 @@
 
       <div class="kuiVerticalRhythmSmall kuiVerticalRhythm">
         <select
+          ng-if="stepTimeField.hasTimeFieldOptions()"
           id="timeFilterFieldSelect"
           aria-describedby="timeFilterFieldSelectHelpText"
           class="kuiSelect kuiSelect--large"
@@ -61,13 +63,21 @@
           ng-options="option as option.display disable when option.isDisabled for option in stepTimeField.timeFieldOptions"
           ng-model="stepTimeField.selectedTimeFieldOption"
         ></select>
+        <p
+          ng-if="!stepTimeField.hasTimeFieldOptions()"
+          class="kuiText kuiSubduedText"
+        >
+          The indices which match this index pattern don't contain any time fields.
+        </p>
       </div>
 
       <p
+        ng-if="stepTimeField.hasTimeFieldOptions()"
         id="timeFilterFieldSelectHelpText"
         class="kuiText kuiSubduedText kuiVerticalRhythm"
       >
         The Time Filter will use this field to filter your data by time.
+        You can choose not to have a time field, but you will not be able to narrow down your data by a time range.
       </p>
     </div>
 
