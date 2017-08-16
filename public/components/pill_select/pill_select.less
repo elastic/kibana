@@ -1,0 +1,39 @@
+@import (reference) "../../style/main";
+
+#canvas__pill-select--popover {
+
+  .popover-content {
+    padding: 0px;
+  }
+
+  .canvas__pill-select--options {
+    height: 200px;
+    overflow-y: auto;
+    overflow-x: hidden;
+    text-overflow: ellipsis; // TODO: This will truncate long words, needs a tooltip or something
+    white-space: nowrap;
+    padding: 0 @spacingS @spacingS @spacingS;
+  }
+
+  .canvas__pill-select--search {
+    padding: @spacingS;
+  }
+
+}
+
+.canvas__pill-select {
+  padding-top: @spacingS;
+  border-bottom: @borderStyle;
+
+  .canvas__pill-select--pill {
+    margin-right: @spacingS;
+    margin-bottom: @spacingS;
+    border-radius: @spacingM;
+    border: @borderStyle;
+    background-color: transparent;
+    font-weight: normal;
+    font-size: @textXSmall;
+    padding: 1px @spacingS;
+    display: inline-block;
+  }
+}
