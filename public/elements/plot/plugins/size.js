@@ -36,7 +36,7 @@ const options = {
   series: {
     bubbles: {
       size: {
-        max: 30,
+        max: 20,
         min: 2,
       },
       active: true,
