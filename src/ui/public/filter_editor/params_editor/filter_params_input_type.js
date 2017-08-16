@@ -13,6 +13,17 @@ module.directive('filterParamsInputType', function () {
       placeholder: '@',
       value: '=',
       onChange: '&'
+    },
+    link: function (scope) {
+      scope.boolOptions = [true, false];
+      scope.setDefaultBool = () => {
+        if (scope.value == null) {
+          scope.value = scope.boolOptions[0];
+          scope.onChange({
+            value: scope.value
+          });
+        }
+      };
     }
   };
 });
