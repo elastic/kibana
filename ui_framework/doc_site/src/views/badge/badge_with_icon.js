@@ -6,17 +6,14 @@ import {
 
 export default () => (
   <div>
-
     <KuiBadge iconType="help">
       Primary
     </KuiBadge>
 
     &nbsp;&nbsp;
 
-    <KuiBadge type="primary" iconType="user" iconSide="left">
+    <KuiBadge type="primary" iconType="user" iconSide="right">
       Secondary
     </KuiBadge>
-
   </div>
-
 );

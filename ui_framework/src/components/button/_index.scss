@@ -1,1 +1,58 @@
+$kuiButtonHeightSmall: $kuiSizeXL;
+$kuiButtonColorDisabled: tintOrShade($kuiTextColor, 70%, 80%);
+
+@mixin kuiButton {
+  display: inline-block;
+  appearance: none;
+  cursor: pointer;
+  height: $kuiSizeXXL;
+  text-decoration: none;
+  border: solid 1px transparent;
+  text-align: center;
+  font-family: $kuiFontFamily;
+  transition: all $kuiAnimSpeedNormal $kuiAnimSlightBounce;
+  whitespace: nowrap;
+
+  &:hover, &:focus {
+    text-decoration: underline;
+  }
+
+  &:focus {
+    animation: kuiButtonFocus $kuiAnimSpeedNormal $kuiAnimSlightBounce;
+  }
+}
+
+/**
+ * 1. Apply margin to all but last item in the flex.
+ * 2. Margin gets flipped because of the row-reverse.
+ */
+@mixin kuiButtonContent($isReverse: false) {
+  height: 100%;
+  width: 100%;
+
+  @if ($isReverse) {
+    flex-direction: row-reverse;
+
+    > * + * {
+      margin-left: 0; /* 1 */
+      margin-right: $kuiSizeS; /* 1 */
+    }
+  } @else {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    > * + * {
+      margin-left: $kuiSizeS; /* 1 */
+    }
+  }
+}
+
+@keyframes kuiButtonFocus {
+  50% {
+    transform: translateY($kuiSizeXS / 2);
+  }
+}
+
 @import 'button';
+@import 'button_empty/index';

@@ -19,8 +19,8 @@ const typesToClassNameMap = {
 export const TYPES = Object.keys(typesToClassNameMap);
 
 const iconSideToClassNameMap = {
-  left: 'kuiBadge--iconLeft',
-  right: '',
+  left: '',
+  right: 'kuiBadge--iconRight',
 };
 
 export const ICON_SIDES = Object.keys(iconSideToClassNameMap);
@@ -41,10 +41,10 @@ export const KuiBadge = ({ children, type, iconType, iconSide, className, ...res
       {...rest}
     >
       <span className="kuiBadge__content">
+        {optionalIcon}
         <span>
           {children}
         </span>
-        {optionalIcon}
       </span>
     </div>
   );
@@ -60,5 +60,5 @@ KuiBadge.propTypes = {
 
 KuiBadge.defaultProps = {
   type: 'default',
-  iconSide: 'right',
+  iconSide: 'left',
 };
