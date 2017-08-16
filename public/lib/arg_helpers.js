@@ -19,7 +19,7 @@ export function wrapSimpleArgValue(value) {
 }
 
 export function getSimpleArg(name, args) {
-  if (!args[name]) return;
+  if (!args[name]) return [];
   return args[name].map(astVal => {
     if (!isAllowed(astVal.type)) throw badType();
     return astVal.value;
