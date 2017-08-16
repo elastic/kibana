@@ -37,4 +37,13 @@
     ng-model="value"
     ng-change="onChange({ value: value })"
   />
+  <div ng-switch-when="boolean">
+    <select
+      class="kuiSelect"
+      ng-model="value"
+      ng-options="option for option in boolOptions"
+      ng-change="onChange({ value: value })"
+      ng-init="setDefaultBool()"
+    ></select>
+  </div>
 </div>
