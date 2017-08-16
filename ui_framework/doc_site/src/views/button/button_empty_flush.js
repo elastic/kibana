@@ -1,17 +1,17 @@
 import React from 'react';
 
 import {
-  KuiButtonOption,
+  KuiButtonEmpty,
 } from '../../../../components';
 
 export default () => (
   <div>
-    <KuiButtonOption flush="left">
+    <KuiButtonEmpty flush="left">
       Flush left
-    </KuiButtonOption>
+    </KuiButtonEmpty>
 
-    <KuiButtonOption flush="right">
+    <KuiButtonEmpty flush="right">
       Flush right
-    </KuiButtonOption>
+    </KuiButtonEmpty>
   </div>
 );

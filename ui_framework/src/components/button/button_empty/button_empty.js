@@ -8,35 +8,35 @@ import {
 } from '../../icon';
 
 const typeToClassNameMap = {
-  primary: 'kuiButtonOption--primary',
-  danger: 'kuiButtonOption--danger',
-  disabled: 'kuiButtonOption--disabled',
+  primary: 'kuiButtonEmpty--primary',
+  danger: 'kuiButtonEmpty--danger',
+  disabled: 'kuiButtonEmpty--disabled',
 };
 
 export const TYPES = Object.keys(typeToClassNameMap);
 
 const sizeToClassNameMap = {
-  small: 'kuiButtonOption--small',
-  large: 'kuiButtonOption--large',
+  small: 'kuiButtonEmpty--small',
+  large: 'kuiButtonEmpty--large',
 };
 
 export const SIZES = Object.keys(sizeToClassNameMap);
 
 const iconSideToClassNameMap = {
   left: '',
-  right: 'kuiButtonOption--iconRight',
+  right: 'kuiButtonEmpty--iconRight',
 };
 
 export const ICON_SIDES = Object.keys(iconSideToClassNameMap);
 
 const flushTypeToClassNameMap = {
-  'left': 'kuiButtonOption--flushLeft',
-  'right': 'kuiButtonOption--flushRight',
+  'left': 'kuiButtonEmpty--flushLeft',
+  'right': 'kuiButtonEmpty--flushRight',
 };
 
 export const FLUSH_TYPES = Object.keys(flushTypeToClassNameMap);
 
-export const KuiButtonOption = ({
+export const KuiButtonEmpty = ({
   children,
   className,
   iconType,
@@ -49,7 +49,7 @@ export const KuiButtonOption = ({
 }) => {
 
   const classes = classNames(
-    'kuiButtonOption',
+    'kuiButtonEmpty',
     typeToClassNameMap[type],
     sizeToClassNameMap[size],
     iconSideToClassNameMap[iconSide],
@@ -63,7 +63,7 @@ export const KuiButtonOption = ({
   if (iconType) {
     buttonIcon = (
       <KuiIcon
-        className="kuiButtonOption__icon"
+        className="kuiButtonEmpty__icon"
         type={iconType}
         size="medium"
         aria-hidden="true"
@@ -77,7 +77,7 @@ export const KuiButtonOption = ({
       className={classes}
       {...rest}
     >
-      <span className="kuiButtonOption__content">
+      <span className="kuiButtonEmpty__content">
         {buttonIcon}
         <span>{children}</span>
       </span>
@@ -85,7 +85,7 @@ export const KuiButtonOption = ({
   );
 };
 
-KuiButtonOption.propTypes = {
+KuiButtonEmpty.propTypes = {
   children: PropTypes.node,
   className: PropTypes.string,
   iconType: PropTypes.oneOf(ICON_TYPES),
@@ -96,7 +96,7 @@ KuiButtonOption.propTypes = {
   isDisabled: PropTypes.bool,
 };
 
-KuiButtonOption.defaultProps = {
+KuiButtonEmpty.defaultProps = {
   iconSide: 'left',
   type: 'primary',
 };

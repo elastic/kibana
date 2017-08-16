@@ -553,7 +553,7 @@ table {
   .kuiButton--danger:hover, .kuiButton--danger:focus {
     background-color: rgba(163, 0, 0, 0.1); }
 
-.kuiButtonOption {
+.kuiButtonEmpty {
   display: inline-block;
   -webkit-appearance: none;
      -moz-appearance: none;
@@ -569,12 +569,12 @@ table {
   border-color: transparent;
   background-color: transparent;
   box-shadow: none; }
-  .kuiButtonOption:hover, .kuiButtonOption:focus {
+  .kuiButtonEmpty:hover, .kuiButtonEmpty:focus {
     text-decoration: underline; }
-  .kuiButtonOption:focus {
+  .kuiButtonEmpty:focus {
     -webkit-animation: kuiButtonFocus 250ms cubic-bezier(0.34, 1.61, 0.7, 1);
             animation: kuiButtonFocus 250ms cubic-bezier(0.34, 1.61, 0.7, 1); }
-  .kuiButtonOption .kuiButtonOption__content {
+  .kuiButtonEmpty .kuiButtonEmpty__content {
     height: 100%;
     width: 100%;
     display: -webkit-box;
@@ -590,12 +590,12 @@ table {
         -ms-flex-align: center;
             align-items: center;
     padding: 0 8px; }
-    .kuiButtonOption .kuiButtonOption__content > * + * {
+    .kuiButtonEmpty .kuiButtonEmpty__content > * + * {
       margin-left: 8px;
       /* 1 */ }
-  .kuiButtonOption.kuiButtonOption--small {
+  .kuiButtonEmpty.kuiButtonEmpty--small {
     height: 32px; }
-  .kuiButtonOption.kuiButtonOption--iconRight .kuiButtonOption__content {
+  .kuiButtonEmpty.kuiButtonEmpty--iconRight .kuiButtonEmpty__content {
     height: 100%;
     width: 100%;
     -webkit-box-orient: horizontal;
@@ -603,56 +603,56 @@ table {
     -webkit-flex-direction: row-reverse;
         -ms-flex-direction: row-reverse;
             flex-direction: row-reverse; }
-    .kuiButtonOption.kuiButtonOption--iconRight .kuiButtonOption__content > * + * {
+    .kuiButtonEmpty.kuiButtonEmpty--iconRight .kuiButtonEmpty__content > * + * {
       margin-left: 0;
       /* 1 */
       margin-right: 8px;
       /* 1 */ }
-  .kuiButtonOption:disabled {
+  .kuiButtonEmpty:disabled {
     color: #c5c5c5;
     pointer-events: none; }
-    .kuiButtonOption:disabled .kuiButtonOption__content {
+    .kuiButtonEmpty:disabled .kuiButtonEmpty__content {
       pointer-events: auto;
       cursor: not-allowed; }
-    .kuiButtonOption:disabled .kuiButtonOption__icon {
+    .kuiButtonEmpty:disabled .kuiButtonEmpty__icon {
       fill: #c5c5c5; }
-    .kuiButtonOption:disabled:hover, .kuiButtonOption:disabled:focus {
+    .kuiButtonEmpty:disabled:hover, .kuiButtonEmpty:disabled:focus {
       background-color: #FFF;
       text-decoration: none; }
 
-.kuiButtonOption--primary {
+.kuiButtonEmpty--primary {
   color: #0079a5; }
-  .kuiButtonOption--primary .kuiButtonOption__icon {
+  .kuiButtonEmpty--primary .kuiButtonEmpty__icon {
     fill: #0079a5; }
-  .kuiButtonOption--primary:focus {
+  .kuiButtonEmpty--primary:focus {
     background-color: rgba(0, 121, 165, 0.1); }
-  .kuiButtonOption--primary:hover, .kuiButtonOption--primary:focus {
+  .kuiButtonEmpty--primary:hover, .kuiButtonEmpty--primary:focus {
     background-color: rgba(0, 121, 165, 0.1); }
 
-.kuiButtonOption--danger {
+.kuiButtonEmpty--danger {
   color: #A30000; }
-  .kuiButtonOption--danger .kuiButtonOption__icon {
+  .kuiButtonEmpty--danger .kuiButtonEmpty__icon {
     fill: #A30000; }
-  .kuiButtonOption--danger:focus {
+  .kuiButtonEmpty--danger:focus {
     background-color: rgba(163, 0, 0, 0.1); }
-  .kuiButtonOption--danger:hover, .kuiButtonOption--danger:focus {
+  .kuiButtonEmpty--danger:hover, .kuiButtonEmpty--danger:focus {
     background-color: rgba(163, 0, 0, 0.1); }
 
-.kuiButtonOption--disabled {
+.kuiButtonEmpty--disabled {
   color: #c5c5c5; }
-  .kuiButtonOption--disabled .kuiButtonOption__icon {
+  .kuiButtonEmpty--disabled .kuiButtonEmpty__icon {
     fill: #c5c5c5; }
-  .kuiButtonOption--disabled:focus {
+  .kuiButtonEmpty--disabled:focus {
     background-color: rgba(197, 197, 197, 0.1); }
-  .kuiButtonOption--disabled:hover, .kuiButtonOption--disabled:focus {
+  .kuiButtonEmpty--disabled:hover, .kuiButtonEmpty--disabled:focus {
     background-color: rgba(197, 197, 197, 0.1);
     cursor: not-allowed; }
 
-.kuiButtonOption--flushLeft .kuiButtonOption__content {
+.kuiButtonEmpty--flushLeft .kuiButtonEmpty__content {
   border-left: none;
   padding-left: 0; }
 
-.kuiButtonOption--flushRight .kuiButtonOption__content {
+.kuiButtonEmpty--flushRight .kuiButtonEmpty__content {
   border-right: none;
   padding-right: 0; }
 

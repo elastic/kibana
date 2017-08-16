@@ -1,120 +1,120 @@
 import React from 'react';
 
 import {
-  KuiButtonOption,
+  KuiButtonEmpty,
 } from '../../../../components';
 
 export default () => (
   <div>
-    <KuiButtonOption
+    <KuiButtonEmpty
       onClick={() => window.alert('Button clicked')}
     >
       Primary
-    </KuiButtonOption>
+    </KuiButtonEmpty>
 
     &nbsp;&nbsp;
 
-    <KuiButtonOption
+    <KuiButtonEmpty
       size="small"
       onClick={() => window.alert('Button clicked')}
     >
       small
-    </KuiButtonOption>
+    </KuiButtonEmpty>
 
     <br/><br/>
 
-    <KuiButtonOption
+    <KuiButtonEmpty
       onClick={() => window.alert('Button clicked')}
       iconType="arrowDown"
     >
       Primary
-    </KuiButtonOption>
+    </KuiButtonEmpty>
 
     &nbsp;&nbsp;
 
-    <KuiButtonOption
+    <KuiButtonEmpty
       size="small"
       onClick={() => window.alert('Button clicked')}
       iconType="arrowDown"
     >
       small
-    </KuiButtonOption>
+    </KuiButtonEmpty>
 
     &nbsp;&nbsp;
 
-    <KuiButtonOption
+    <KuiButtonEmpty
       onClick={() => window.alert('Button clicked')}
       iconType="arrowDown"
       iconSide="right"
     >
       Primary
-    </KuiButtonOption>
+    </KuiButtonEmpty>
 
     &nbsp;&nbsp;
 
-    <KuiButtonOption
+    <KuiButtonEmpty
       size="small"
       onClick={() => window.alert('Button clicked')}
       iconType="arrowDown"
       iconSide="right"
     >
       small
-    </KuiButtonOption>
+    </KuiButtonEmpty>
 
     <br/><br/>
 
-    <KuiButtonOption
+    <KuiButtonEmpty
       type="danger"
       onClick={() => window.alert('Button clicked')}
     >
       Danger
-    </KuiButtonOption>
+    </KuiButtonEmpty>
 
     &nbsp;&nbsp;
 
-    <KuiButtonOption
+    <KuiButtonEmpty
       type="danger"
       size="small"
       onClick={() => window.alert('Button clicked')}
     >
       small
-    </KuiButtonOption>
+    </KuiButtonEmpty>
 
     <br/><br/>
 
-    <KuiButtonOption
+    <KuiButtonEmpty
       type="danger"
       onClick={() => window.alert('Button clicked')}
       iconType="arrowDown"
     >
       Danger
-    </KuiButtonOption>
+    </KuiButtonEmpty>
 
     &nbsp;&nbsp;
 
-    <KuiButtonOption
+    <KuiButtonEmpty
       type="danger"
       size="small"
       onClick={() => window.alert('Button clicked')}
       iconType="arrowDown"
     >
       small
-    </KuiButtonOption>
+    </KuiButtonEmpty>
 
     &nbsp;&nbsp;
 
-    <KuiButtonOption
+    <KuiButtonEmpty
       type="danger"
       onClick={() => window.alert('Button clicked')}
       iconType="arrowDown"
       iconSide="right"
     >
       Danger
-    </KuiButtonOption>
+    </KuiButtonEmpty>
 
     &nbsp;&nbsp;
 
-    <KuiButtonOption
+    <KuiButtonEmpty
       type="danger"
       size="small"
       onClick={() => window.alert('Button clicked')}
@@ -122,43 +122,43 @@ export default () => (
       iconSide="right"
     >
       small
-    </KuiButtonOption>
+    </KuiButtonEmpty>
 
     <br/><br/>
 
-    <KuiButtonOption
+    <KuiButtonEmpty
       type="danger"
       onClick={() => window.alert('Button clicked')}
       isDisabled
     >
       Disabled
-    </KuiButtonOption>
+    </KuiButtonEmpty>
 
     &nbsp;&nbsp;
 
-    <KuiButtonOption
+    <KuiButtonEmpty
       type="danger"
       size="small"
       onClick={() => window.alert('Button clicked')}
       isDisabled
     >
       small
-    </KuiButtonOption>
+    </KuiButtonEmpty>
 
     <br/><br/>
 
-    <KuiButtonOption
+    <KuiButtonEmpty
       type="danger"
       onClick={() => window.alert('Button clicked')}
       iconType="arrowDown"
       isDisabled
     >
       Disabled
-    </KuiButtonOption>
+    </KuiButtonEmpty>
 
     &nbsp;&nbsp;
 
-    <KuiButtonOption
+    <KuiButtonEmpty
       type="danger"
       size="small"
       onClick={() => window.alert('Button clicked')}
@@ -166,11 +166,11 @@ export default () => (
       isDisabled
     >
       small
-    </KuiButtonOption>
+    </KuiButtonEmpty>
 
     &nbsp;&nbsp;
 
-    <KuiButtonOption
+    <KuiButtonEmpty
       type="danger"
       onClick={() => window.alert('Button clicked')}
       iconType="arrowDown"
@@ -178,11 +178,11 @@ export default () => (
       isDisabled
     >
       Disabled
-    </KuiButtonOption>
+    </KuiButtonEmpty>
 
     &nbsp;&nbsp;
 
-    <KuiButtonOption
+    <KuiButtonEmpty
       type="danger"
       size="small"
       onClick={() => window.alert('Button clicked')}
@@ -191,6 +191,6 @@ export default () => (
       isDisabled
     >
       small
-    </KuiButtonOption>
+    </KuiButtonEmpty>
   </div>
 );

@@ -5,7 +5,7 @@ export {
 
 export {
   KuiButton,
-  KuiButtonOption,
+  KuiButtonEmpty,
 } from './button';
 
 export {

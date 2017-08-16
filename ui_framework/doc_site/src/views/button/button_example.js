@@ -19,12 +19,12 @@ import ButtonWithIcon from './button_with_icon';
 const buttonWithIconSource = require('!!raw!./button_with_icon');
 const buttonWithIconHtml = renderToHtml(Button);
 
-import ButtonOption from './button_option';
-const buttonOptionSource = require('!!raw!./button_option');
+import ButtonOption from './button_empty';
+const buttonOptionSource = require('!!raw!./button_empty');
 const buttonOptionHtml = renderToHtml(ButtonOption);
 
-import ButtonOptionFlush from './button_option_flush';
-const buttonOptionFlushSource = require('!!raw!./button_option_flush');
+import ButtonOptionFlush from './button_empty_flush';
+const buttonOptionFlushSource = require('!!raw!./button_empty_flush');
 const buttonOptionFlushHtml = renderToHtml(ButtonOptionFlush);
 
 export default props => (
@@ -70,7 +70,7 @@ export default props => (
     </GuideSection>
 
     <GuideSection
-      title="Button Option"
+      title="ButtonEmpty"
       source={[{
         type: GuideSectionTypes.JS,
         code: buttonOptionSource,
@@ -85,7 +85,7 @@ export default props => (
     </GuideSection>
 
     <GuideSection
-      title="Flush Button Option"
+      title="Flush ButtonEmpty"
       source={[{
         type: GuideSectionTypes.JS,
         code: buttonOptionFlushSource,
@@ -95,7 +95,7 @@ export default props => (
       }]}
     >
       <GuideText>
-        When aligning <GuideCode>KuiButtonOption</GuideCode> components to the left or the right,
+        When aligning <GuideCode>KuiButtonEmpty</GuideCode> components to the left or the right,
         you should make sure they&rsquo;re flush with the edge of their container, so that they&rsquo;re
         horizontally-aligned with the other content in the container.
       </GuideText>
