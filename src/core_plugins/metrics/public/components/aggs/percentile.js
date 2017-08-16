@@ -114,7 +114,7 @@ Percentiles.propTypes = {
 };
 
 
-class PercentileAgg extends Component {
+class PercentileAgg extends Component { // eslint-disable-line react/no-multi-comp
 
   componentWillMount() {
     if (!this.props.model.percentiles) {

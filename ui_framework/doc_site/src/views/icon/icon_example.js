@@ -62,7 +62,7 @@ export default props => (
       }]}
     >
       <GuideText>
-        Use this Icon when you don't want to communicate any particular meaning with the icon's
+        Use this Icon when you don&rsquo;t want to communicate any particular meaning with the icon&rsquo;s
         color.
       </GuideText>
 

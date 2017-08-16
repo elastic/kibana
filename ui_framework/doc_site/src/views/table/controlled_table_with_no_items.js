@@ -19,13 +19,13 @@ export class ControlledTableWithNoItems extends React.Component {
   getPager() {
     return (
       <KuiPager
-        startNumber={ 1 }
-        hasNextPage={ true }
-        hasPreviousPage={ false }
-        endNumber={ 10 }
-        totalItems={ 100 }
-        onNextPage={ () => {} }
-        onPreviousPage={ () => {} }
+        startNumber={1}
+        hasNextPage={true}
+        hasPreviousPage={false}
+        endNumber={10}
+        totalItems={100}
+        onNextPage={() => {}}
+        onPreviousPage={() => {}}
       />
     );
   }
@@ -34,7 +34,7 @@ export class ControlledTableWithNoItems extends React.Component {
     return (
       <KuiControlledTable>
         <KuiToolBar>
-          <KuiToolBarSearchBox onFilter={ () => {} } />
+          <KuiToolBarSearchBox onFilter={() => {}} />
 
           <KuiToolBarSection>
             <KuiButton buttonType="primary">

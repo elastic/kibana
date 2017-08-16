@@ -50,10 +50,6 @@ import ButtonGroupUnited from './button_group_united';
 const buttonGroupUnitedSource = require('!!raw!./button_group_united');
 const buttonGroupUnitedHtml = renderToHtml(ButtonGroupUnited);
 
-import InToolBar from './buttons_in_tool_bar';
-const inToolBarSource = require('!!raw!./buttons_in_tool_bar');
-const inToolBarHtml = renderToHtml(InToolBar);
-
 import Elements from './button_elements';
 const elementsSource = require('!!raw!./button_elements');
 const elementsHtml = renderToHtml(Elements);
@@ -96,7 +92,7 @@ export default props => (
       }]}
     >
       <GuideText>
-        Use the hollow Button when presenting a neutral action, e.g. a "Cancel" button.
+        Use the hollow Button when presenting a neutral action, e.g. a &ldquo;Cancel&rdquo; button.
       </GuideText>
 
       <GuideDemo>
@@ -115,7 +111,7 @@ export default props => (
       }]}
     >
       <GuideText>
-        Use the primary Button to represent the most common action. Generally, there won't be a
+        Use the primary Button to represent the most common action. Generally, there won&rsquo;t be a
         need to present more than one of these at a time.
       </GuideText>
 
@@ -135,7 +131,7 @@ export default props => (
       }]}
     >
       <GuideText>
-        Secondary buttons are usually used for actions ("do this") that are optional actions on a page.
+        Secondary buttons are usually used for actions (&ldquo;do this&rdquo;) that are optional actions on a page.
       </GuideText>
 
       <GuideDemo>
@@ -257,25 +253,6 @@ export default props => (
     </GuideSection>
 
     <GuideSection
-      title="In ToolBar"
-      source={[{
-        type: GuideSectionTypes.JS,
-        code: inToolBarSource,
-      }, {
-        type: GuideSectionTypes.HTML,
-        code: inToolBarHtml,
-      }]}
-    >
-      <GuideText>
-        This example verifies that Buttons are legible against the ToolBar's background.
-      </GuideText>
-
-      <GuideDemo>
-        <InToolBar />
-      </GuideDemo>
-    </GuideSection>
-
-    <GuideSection
       title="Element variations"
       source={[{
         type: GuideSectionTypes.JS,
@@ -286,7 +263,7 @@ export default props => (
       }]}
     >
       <GuideText>
-        You can create a Button using a button element, link, or input[type="submit"].
+        You can create a Button using a button element, link, or input[type=&ldquo;submit&rdquo;].
       </GuideText>
 
       <GuideDemo>

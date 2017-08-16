@@ -17,9 +17,9 @@ export class PagerButtons extends React.Component {
   getPage() {
     switch (this.state.item) {
       case 1:
-        return <div>I'm Page 1!</div>;
+        return <div>I&rsquo;m Page 1!</div>;
       case 2:
-        return <KuiButton>I'm a button</KuiButton>;
+        return <KuiButton>I&rsquo;m a button</KuiButton>;
       case 3:
         return <div>You are at the end</div>;
     }

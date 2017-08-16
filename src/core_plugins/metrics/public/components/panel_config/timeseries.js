@@ -1,7 +1,7 @@
 import React, { Component, PropTypes } from 'react';
 import SeriesEditor from '../series_editor';
 import AnnotationsEditor from '../annotations_editor';
-import IndexPattern from '../index_pattern';
+import { IndexPattern } from '../index_pattern';
 import Select from 'react-select';
 import createSelectHandler from '../lib/create_select_handler';
 import createTextHandler from '../lib/create_text_handler';
@@ -146,16 +146,19 @@ class TimeseriesPanelConfig extends Component {
           <div
             className={`kbnTabs__tab${selectedTab === 'data' && '-active' || ''}`}
             onClick={() => this.switchTab('data')}
+            tabIndex="0"
           >Data
           </div>
           <div
             className={`kbnTabs__tab${selectedTab === 'options' && '-active' || ''}`}
             onClick={() => this.switchTab('options')}
+            tabIndex="0"
           >Panel Options
           </div>
           <div
             className={`kbnTabs__tab${selectedTab === 'annotations' && '-active' || ''}`}
             onClick={() => this.switchTab('annotations')}
+            tabIndex="0"
           >Annotations
           </div>
         </div>

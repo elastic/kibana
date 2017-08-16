@@ -1,0 +1,37 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`KuiText is rendered 1`] = `
+<h1
+  aria-label="aria-label"
+  class="kuiText testClass1 testClass2"
+  data-test-subj="test subject string"
+>
+  Hello
+</h1>
+`;
+
+exports[`KuiTitle is rendered 1`] = `
+<h1
+  aria-label="aria-label"
+  class="kuiTitle testClass1 testClass2"
+  data-test-subj="test subject string"
+>
+  Hello
+</h1>
+`;
+
+exports[`KuiTitle renders size large 1`] = `
+<h1
+  class="kuiTitle kuiTitle--large"
+>
+  Hello
+</h1>
+`;
+
+exports[`KuiTitle renders size small 1`] = `
+<h1
+  class="kuiTitle kuiTitle--small"
+>
+  Hello
+</h1>
+`;

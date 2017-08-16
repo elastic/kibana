@@ -48,7 +48,7 @@ class MarkdownEditor extends Component {
             </a>
           </td>
           <td>
-            <code>"{ value }"</code>
+            <code>&ldquo;{ value }&rdquo;</code>
           </td>
         </tr>
       );
@@ -67,7 +67,7 @@ class MarkdownEditor extends Component {
             </a>
           </td>
           <td>
-            <code>[ [ "{date}", "{value}" ], ... ]</code>
+            <code>[ [ &ldquo;{date}&rdquo;, &ldquo;{value}&rdquo; ], ... ]</code>
           </td>
         </tr>
       );

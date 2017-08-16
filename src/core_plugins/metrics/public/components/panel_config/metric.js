@@ -1,6 +1,6 @@
 import React, { Component, PropTypes } from 'react';
 import SeriesEditor from '../series_editor';
-import IndexPattern from '../index_pattern';
+import { IndexPattern } from '../index_pattern';
 import createTextHandler from '../lib/create_text_handler';
 import ColorRules from '../color_rules';
 import YesNo from '../yes_no';
@@ -85,11 +85,13 @@ class MetricPanelConfig extends Component {
           <div
             className={`kbnTabs__tab${selectedTab === 'data' && '-active' || ''}`}
             onClick={() => this.switchTab('data')}
+            tabIndex="0"
           >Data
           </div>
           <div
             className={`kbnTabs__tab${selectedTab === 'options' && '-active' || ''}`}
             onClick={() => this.switchTab('options')}
+            tabIndex="0"
           >Panel Options
           </div>
         </div>

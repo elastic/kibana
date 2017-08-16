@@ -1,7 +1,7 @@
 import React, { PropTypes } from 'react';
 import ColorPicker from '../../color_picker';
 import AddDeleteButtons from '../../add_delete_buttons';
-import SeriesConfig from '../../series_config';
+import { SeriesConfig } from '../../series_config';
 import Sortable from 'react-anything-sortable';
 import Split from '../../split';
 import Tooltip from '../../tooltip';
@@ -120,13 +120,13 @@ function TopNSeries(props) {
     >
       <div className="vis_editor__container">
         <div className="vis_editor__series-details">
-          <div onClick={ props.toggleVisible }><i className={ caretClassName }/></div>
+          <div onClick={props.toggleVisible}><i className={caretClassName}/></div>
           { colorPicker }
           <div className="vis_editor__row vis_editor__row_item">
             <input
               className="vis_editor__input-grows"
               onChange={handleChange('label')}
-              placeholder='Label'
+              placeholder="Label"
               value={model.label}
             />
           </div>

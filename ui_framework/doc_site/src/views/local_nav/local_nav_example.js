@@ -61,7 +61,7 @@ export default props => (
       ]}
     >
       <GuideText>
-        Here's a simple LocalNav with a Title in the top left corner and Menu in the top right.
+        Here&rsquo;s a simple LocalNav with a Title in the top left corner and Menu in the top right.
       </GuideText>
 
       <GuideDemo>
