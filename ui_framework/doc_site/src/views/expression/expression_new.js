@@ -93,7 +93,7 @@ class KuiExpressionItemExample extends React.Component {
         <KuiExpressionItem key='example1'>
           <KuiExpressionItemButton
             description='when'
-            value={this.state.example1.value}
+            buttonValue={this.state.example1.value}
             isActive={this.state.activeButton === 'example1'}
             onClick={()=>this.setState({ activeButton:'example1' })}
           />
@@ -109,7 +109,7 @@ class KuiExpressionItemExample extends React.Component {
         <KuiExpressionItem key='example2'>
           <KuiExpressionItemButton
             description={this.state.example2.description}
-            value={this.state.example2.value}
+            buttonValue={this.state.example2.value}
             isActive={this.state.activeButton === 'example2'}
             onClick={()=>this.setState({ activeButton:'example2' })}
           />

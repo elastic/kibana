@@ -57,7 +57,7 @@ let KuiExpressionItemPopover = ({
   isVisible,
   children,
   rootRef,
-  align = 'left',
+  align,
   ...rest
 }) => {
   const classes = classNames('kuiExpressionItem__popover', className, {
@@ -78,6 +78,10 @@ let KuiExpressionItemPopover = ({
       </div>
     </div>
   );
+};
+
+KuiExpressionItemPopover.defaultProps = {
+  align: 'left',
 };
 
 KuiExpressionItemPopover.propTypes = {

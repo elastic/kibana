@@ -5,7 +5,7 @@ import classNames from 'classnames';
 export const KuiExpressionItemButton = ({
   className,
   description,
-  value,
+  buttonValue,
   isActive,
   onClick,
   ...rest
@@ -21,7 +21,7 @@ export const KuiExpressionItemButton = ({
       {...rest}
     >
       <span className="kuiExpressionItem__buttonDescription">{description}</span>{' '}
-      <span className="kuiExpression_buttonValue">{value}</span>
+      <span className="kuiExpressionItem__buttonValue">{buttonValue}</span>
     </button>
   );
 };
@@ -29,7 +29,7 @@ export const KuiExpressionItemButton = ({
 KuiExpressionItemButton.propTypes = {
   className: PropTypes.string,
   description: PropTypes.string.isRequired,
-  value: PropTypes.string.isRequired,
+  buttonValue: PropTypes.string.isRequired,
   isActive: PropTypes.bool.isRequired,
   onClick: PropTypes.func.isRequired,
 };
