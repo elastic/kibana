@@ -27,6 +27,10 @@ export default new Fn({
       help: 'A Lucene query string',
       default: '-_index:.kibana',
     },
+    sort: {
+      types: ['string'],
+      help: 'Sort directions as "field, direction". Eg "@timestamp, desc" or "bytes, asc"',
+    },
     // TODO: This doesn't work
     fields: {
       help: 'Comma seperated list of fields. Fewer fields will perform better.',
@@ -37,11 +41,20 @@ export default new Fn({
   type: 'datatable',
   help: 'Query elasticsearch and get back raw documents.',
   fn: (context, args) => {
+
+    function getSort() {
+      if (!args.sort) return;
+
+      const sort = args.sort.split(',').map(str => str.trim());
+      return [{ [sort[0]]: sort[1] }];
+    }
+
     return client.search(buildESRequest({
       index: args.index,
       q: args.q,
       body: {
         _source: args.fields ? args.fields.split(',').map(str => str.trim()) : undefined,
+        sort: getSort(),
       },
     }, context))
     .then(resp => {
