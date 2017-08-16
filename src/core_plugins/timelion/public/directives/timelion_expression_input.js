@@ -177,7 +177,7 @@ app.directive('timelionExpressionInput', function ($document, $http, $interval, 
             break;
 
           case comboBoxKeyCodes.ENTER:
-            if (e.metaKey) {
+            if (e.metaKey || e.ctrlKey) {
               // Re-render the chart when the user hits CMD+ENTER.
               e.preventDefault();
               scope.updateChart();
