@@ -76,7 +76,7 @@ const template = ({ args, updateArgs }) => {
             text="Document sort order, field and direction"
             placement="right"/>
           </label>
-          <ESFieldSelect value={sort[0]} onChange={(field) => setArg('sort', [field, sort[1]].join(', '))}/>
+          <ESFieldSelect index={index} value={sort[0]} onChange={(field) => setArg('sort', [field, sort[1]].join(', '))}/>
         </div>
 
         <div className="canvas__esdocs--sort-dir">
