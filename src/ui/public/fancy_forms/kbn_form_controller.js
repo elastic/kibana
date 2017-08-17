@@ -3,14 +3,16 @@ export function decorateFormController($delegate, $injector) {
   const FormController = directive.controller;
 
   class KbnFormController extends FormController {
-    // prevent inheriting $inject from FormController
+    // prevent inheriting FormController's static $inject property
+    // which is angular's cache of the DI arguments for a function
     static $inject = ['$scope', '$element'];
+
     constructor($scope, $element, ...superArgs) {
       super(...superArgs);
 
-      $element.on('submit', this._filterSubmits);
+      $element.on('submit', this._onSubmit);
       $scope.$on('$destroy', () => {
-        $element.off('submit', this._filterSubmits);
+        $element.off('submit', this._onSubmit);
       });
     }
 
@@ -35,7 +37,7 @@ export function decorateFormController($delegate, $injector) {
         .forEach(model => model.$setTouched());
     }
 
-    _onFilterSubmit = () => {
+    _onSubmit = () => {
       if (this.errorCount()) {
         event.preventDefault();
         event.stopImmediatePropagation();
