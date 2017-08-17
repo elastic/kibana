@@ -27,6 +27,10 @@
 
   .kuiModalHeader__title {
     font-size: $globalTitleFontSize;
+
+    @include darkTheme {
+      color: $globalTextColor--darkTheme;
+    }
   }
 
 .kuiModalHeaderCloseButton {
@@ -40,6 +44,10 @@
 
 .kuiModalBodyText {
   font-size: 14px;
+
+  @include darkTheme {
+    color: $globalTextColor--darkTheme;
+  }
 }
 
 .kuiModalFooter {
