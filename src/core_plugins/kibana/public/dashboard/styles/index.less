@@ -219,4 +219,12 @@ dashboard-panel {
       height: auto;
     }
   }
+
+  /**
+   * 1. We want the doc-table-container to scroll only when embedded in a dashboard panel
+   */
+  .doc-table-container {
+    flex: 1 1 0; /* 1 */
+    overflow: auto; /* 1 */
+  }
 }
