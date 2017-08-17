@@ -2,7 +2,7 @@
 
 /*
   This file contains all the global scope and bootstrap garbage that should be removed
-  when the UI framework is capable of implementing everything we need
+  when the UI framework implements everything we need
 */
 
 // Make the kibana main container stretch to the bottom
@@ -20,6 +20,10 @@
     margin-right: @spacingXS;
   }
 
+}
+
+select.form-control {
+  height: 30px; // So the lower border lines up with the inputs
 }
 
 .btn-primary {
