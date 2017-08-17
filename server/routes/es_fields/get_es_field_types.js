@@ -12,6 +12,10 @@ export function getESFieldTypes(index, fields) {
     fields: fields || '*',
   };
 
+  if (!fields || fields.length === 0) {
+    return Promise.resolve({});
+  }
+
   return client
     .fieldCaps(config)
     .then(resp => {
