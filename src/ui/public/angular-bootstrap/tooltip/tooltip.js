@@ -155,7 +155,11 @@ angular.module( 'ui.bootstrap.tooltip', [ 'ui.bootstrap.position', 'ui.bootstrap
                 // This happens if show is triggered multiple times before any hide is triggered.
                 if (!popupTimeout) {
                   popupTimeout = $timeout( show, ttScope.popupDelay, false );
-                  popupTimeout.then(function(reposition){reposition();});
+                  popupTimeout.then(reposition => reposition(), (error) => {
+                    if (error !== 'canceled') {
+                      throw error
+                    }
+                  });
                 }
               } else {
                 show()();
