@@ -13,7 +13,7 @@ export class Arg {
     // properties that can be passed in
     const defaultProps = {
       displayName: name,
-      description: name,
+      description: argType.description || name,
       multi: false,
       types: [],
       defaultValue: isUndefined(argType.defaultValue) ? '' : argType.defaultValue,
