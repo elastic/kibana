@@ -6,11 +6,14 @@
 
 /**
  * 1. Enforce pointer when there's no href.
+ * 2. Allow these styles to be applied to a button element.
  */
 @mixin link {
   color: $globalLinkColor;
   cursor: pointer; /* 1 */
   font-weight: 500;
+  background-color: transparent; /* 2 */
+  border: none; /* 2 */
 
   &:visited,
   &:active {
