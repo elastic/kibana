@@ -30,9 +30,6 @@ uiModules.get('apps/management')
 ) {
   const MAX_NUMBER_OF_MATCHING_INDICES = 20;
   const notify = new Notifier();
-  const loadingOption = {
-    display: 'Loading...',
-  };
   const disabledDividerOption = {
     isDisabled: true,
     display: '───',
@@ -48,13 +45,11 @@ uiModules.get('apps/management')
     id: $routeParams.id ? decodeURIComponent($routeParams.id) : undefined,
     name: '',
     expandWildcard: false,
-    timeFieldOption: loadingOption,
+    timeFieldOption: undefined,
   };
 
   // UI state.
-  this.timeFieldOptions = [
-    loadingOption,
-  ];
+  this.timeFieldOptions = [];
   this.wizardStep = 'indexPattern';
   this.isFetchingExistingIndices = true;
   this.isFetchingMatchingIndices = false;
@@ -226,8 +221,8 @@ uiModules.get('apps/management')
 
   this.fetchTimeFieldOptions = () => {
     this.isFetchingTimeFieldOptions = true;
-    this.formValues.timeFieldOption = loadingOption;
-    this.timeFieldOptions = [loadingOption];
+    this.formValues.timeFieldOption = undefined;
+    this.timeFieldOptions = [];
 
     Promise.all([
       indexPatterns.fieldsFetcher.fetchForWildcard(this.formValues.name),

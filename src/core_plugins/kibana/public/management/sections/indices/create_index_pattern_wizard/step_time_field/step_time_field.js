@@ -42,6 +42,18 @@ module.directive('stepTimeField', function () {
         && this.isFormValid()
       );
 
+      this.canShowMainSelect = () => (
+        !this.isFetchingTimeFieldOptions && this.hasTimeFieldOptions()
+      );
+
+      this.canShowLoadingSelect = () => (
+        this.isFetchingTimeFieldOptions
+      );
+
+      this.canShowNoTimeBasedFieldsMessage = () => (
+        !this.isFetchingTimeFieldOptions && !this.hasTimeFieldOptions()
+      );
+
       this.toggleAdvancedOptions = () => {
         this.showAdvancedOptions = !this.showAdvancedOptions;
       };

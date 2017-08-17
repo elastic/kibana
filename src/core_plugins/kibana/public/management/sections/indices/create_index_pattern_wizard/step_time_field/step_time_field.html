@@ -47,13 +47,13 @@
           <span
             aria-hidden="true"
             class="kuiIcon fa-spinner fa-spin"
-          ></span>f
+          ></span>
         </p>
       </div>
 
       <div class="kuiVerticalRhythmSmall kuiVerticalRhythm">
         <select
-          ng-show="stepTimeField.hasTimeFieldOptions()"
+          ng-show="stepTimeField.canShowMainSelect()"
           id="timeFilterFieldSelect"
           aria-describedby="timeFilterFieldSelectHelpText"
           class="kuiSelect kuiSelect--large"
@@ -63,8 +63,18 @@
           ng-options="option as option.display disable when option.isDisabled for option in stepTimeField.timeFieldOptions"
           ng-model="stepTimeField.selectedTimeFieldOption"
         ></select>
+        <select
+          ng-show="stepTimeField.canShowLoadingSelect()"
+          id="timeFilterFieldSelect"
+          aria-describedby="timeFilterFieldSelectHelpText"
+          class="kuiSelect kuiSelect--large"
+          data-test-subj="createIndexPatternTimeFieldSelect"
+          disabled="disabled"
+        >
+          <option>Loading...</option>
+        </select>
         <p
-          ng-if="!stepTimeField.hasTimeFieldOptions()"
+          ng-if="stepTimeField.canShowNoTimeBasedFieldsMessage()"
           class="kuiText kuiSubduedText"
         >
           The indices which match this index pattern don't contain any time fields.
