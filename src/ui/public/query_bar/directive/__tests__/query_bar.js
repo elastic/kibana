@@ -8,6 +8,7 @@ let $parentScope;
 let $elem;
 
 const markup = `<query-bar query="query" app-name="name" on-submit="submitHandler($query)"></query-bar>`;
+const cleanup = [];
 
 function init(query, name, isSwitchingEnabled = true) {
   ngMock.module('kibana');
@@ -25,13 +26,20 @@ function init(query, name, isSwitchingEnabled = true) {
     $parentScope.name = name;
     $parentScope.query = query;
     $elem = angular.element(markup);
+    angular.element('body').append($elem);
+    cleanup.push(() => $elem.remove());
 
     $compile($elem)($parentScope);
     $elem.scope().$digest();
   });
 }
 
+
 describe('queryBar directive', function () {
+  afterEach(() => {
+    cleanup.forEach(fn => fn());
+    cleanup.length = 0;
+  });
 
   describe('language selector', function () {
 
