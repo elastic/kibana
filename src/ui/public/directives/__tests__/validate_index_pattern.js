@@ -7,8 +7,8 @@ import 'ui/directives/validate_index_pattern';
 describe('Validate index pattern directive', function () {
   let $compile;
   let $rootScope;
-  const noWildcardHtml = '<input type="text" ng-model="indexName" validate-index-name />';
-  const requiredHtml = '<input type="text" ng-model="indexName" validate-index-name required />';
+  const noWildcardHtml = '<input type="text" ng-model="indexName" validate-index-pattern />';
+  const requiredHtml = '<input type="text" ng-model="indexName" validate-index-pattern required />';
   const allowWildcardHtml = '<input type="text" ng-model="indexName" validate-index-pattern validate-index-pattern-allow-wildcard />';
 
   beforeEach(ngMock.module('kibana'));
