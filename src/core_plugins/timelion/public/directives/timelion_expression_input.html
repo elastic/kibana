@@ -1,7 +1,16 @@
-<div class="timelionExpressionInputContainer">
+<div
+  class="timelionExpressionInputContainer"
+  role="combobox"
+  aria-expanded="{{functionSuggestions.isVisible}}"
+  aria-owns="timelionSuggestionList"
+  aria-haspopup="true"
+>
+  <!-- The `role=textbox` is required by VoiceOver to properly detect the autocompletion.
+       For some reasons it doesn't work without it (even though the default role of
+       the element is textbox anyway). -->
   <textarea
     data-expression-input
-    role="combobox"
+    role="textbox"
     rows="{{ rows }}"
     class="timelionExpressionInput kuiTextArea fullWidth"
     placeholder="Try a query with .es(*)"
@@ -13,8 +22,9 @@
     ng-mousedown="onMouseDownInput()"
     ng-mouseup="onMouseUpInput()"
     aria-label="Timelion expression"
+    aria-multiline="false"
     aria-autocomplete="list"
-    aria-owns="timelionSuggestionList"
+    aria-controls="timelionSuggestionList"
     aria-activedescendant="{{ getActiveSuggestionId() }}"
   ></textarea>
 

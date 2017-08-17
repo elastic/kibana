@@ -1,14 +1,14 @@
 <div
   id="timelionSuggestionList"
   class="suggestions"
-  role="list"
+  role="listbox"
   ng-class="{ 'suggestions-isPopover': shouldPopover === 'true' }"
   data-suggestions-list
 >
   <div
     class="suggestion"
     id="timelionSuggestion{{$index}}"
-    role="listitem"
+    role="option"
     tabindex="0"
     data-suggestion-list-item
     ng-class="{active: $index === selectedIndex}"
