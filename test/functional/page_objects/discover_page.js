@@ -269,6 +269,14 @@ export function DiscoverPageProvider({ getService, getPageObjects }) {
       .click();
     }
 
+    async selectIndexPattern(indexPattern) {
+      await PageObjects.common.sleep(1001);
+      await getRemote().findByClassName('index-pattern-selection').click();
+      //await indexPattern.click();
+      await PageObjects.common.sleep(3001);
+      await getRemote().findByClassName('ui-select-search').type(indexPattern + '\n');
+    }
+
     async removeAllFilters() {
       await testSubjects.click('showFilterActions');
       await testSubjects.click('removeAllFilters');
