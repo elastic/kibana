@@ -1,0 +1,4 @@
+You can customize the colors of your visualization by clicking the color dot next to each label to display the
+_color picker_.
+
+image::images/color-picker.png[An array of color dots that users can select]

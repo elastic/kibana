@@ -1,0 +1,130 @@
+[[kibana-plugins]]
+= Kibana Plugins
+
+[partintro]
+--
+Add-on functionality for Kibana is implemented with plug-in modules. You can use the `bin/kibana-plugin`
+command to manage these modules. You can also install a plugin manually by moving the plugin file to the
+`plugins` directory and unpacking the plugin files into a new directory.
+
+[IMPORTANT]
+.Plugin compatibility
+==============================================
+
+The Kibana plugin interfaces are in a state of constant development.  We cannot provide backwards compatibility for plugins due to the high rate of change.  Kibana enforces that the installed plugins match the version of Kibana itself.  Plugin developers will have to release a new version of their plugin for each new Kibana release as a result.
+
+==============================================
+--
+
+== Installing Plugins
+
+Use the following command to install a plugin:
+
+[source,shell]
+bin/kibana-plugin install <package name or URL>
+
+When you specify a plugin name without a URL, the plugin tool attempts to download an official Elastic plugin, such as:
+
+["source","shell",subs="attributes"]
+$ bin/kibana-plugin install x-pack
+
+
+[float]
+=== Installing Plugins from an Arbitrary URL
+
+You can download official Elastic plugins simply by specifying their name. You
+can alternatively specify a URL to a specific plugin, as in the following
+example:
+
+["source","shell",subs="attributes"]
+$ bin/kibana-plugin install https://artifacts.elastic.co/downloads/packs/x-pack/x-pack-{version}.zip
+
+You can specify URLs that use the HTTP, HTTPS, or `file` protocols.
+
+[float]
+=== Installing Plugins to an Arbitrary Directory
+
+Use the `-d` or `--plugin-dir` option after the `install` command to specify a directory for plugins, as in the following
+example:
+
+[source,shell]
+$ bin/kibana-plugin install file:///some/local/path/x-pack.zip -d path/to/directory
+
+NOTE: This command creates the specified directory if it does not already exist.
+
+[float]
+=== Installing Plugins with Linux packages
+
+The Kibana server needs to be able to write to files in the `optimize` directory.  If you're installing plugins using sudo or su you'll
+want to make sure these commands are ran as the user `kibana`.  This user is already added for you as part of the package installation.
+
+[source,shell]
+$ sudo -u kibana bin/kibana-plugin install x-pack
+
+If plugins were installed as a different user and the server is not starting, then you will need to change the owner of these files:
+
+[source,shell]
+$ chown -R kibana:kibana /path/to/kibana/optimize
+
+== Updating & Removing Plugins
+
+To update a plugin, remove the current version and reinstall the plugin.
+
+To remove a plugin, use the `remove` command, as in the following example:
+
+[source,shell]
+$ bin/kibana-plugin remove x-pack
+
+You can also remove a plugin manually by deleting the plugin's subdirectory under the `plugins/` directory.
+
+NOTE: Removing a plugin will result in an "optimize" run which will delay the next start of Kibana.
+
+== Disabling Plugins
+
+Use the following command to disable a plugin:
+
+[source,shell]
+-----------
+./bin/kibana --<plugin ID>.enabled=false <1>
+-----------
+
+NOTE: Disabling or enabling a plugin will result in an "optimize" run which will delay the start of Kibana.
+
+<1> You can find a plugin's plugin ID as the value of the `name` property in the plugin's `package.json` file.
+
+== Configuring the Plugin Manager
+
+By default, the plugin manager provides you with feedback on the status of the activity you've asked the plugin manager
+to perform. You can control the level of feedback for the `install` and `remove` commands with the `--quiet` and
+`--silent` options. Use the `--quiet` option to suppress all non-error output. Use the `--silent` option to suppress all
+output.
+
+By default, plugin manager installation requests do not time out. Use the `--timeout` option, followed by a time, to
+change this behavior, as in the following examples:
+
+[source,shell]
+.Waits for 30 seconds before failing
+bin/kibana-plugin install --timeout 30s sample-plugin
+
+[source,shell]
+.Waits for 1 minute before failing
+bin/kibana-plugin install --timeout 1m sample-plugin
+
+[float]
+=== Plugins and Custom Kibana Configurations
+
+Use the `-c` or `--config` options with the `install` and `remove` commands to specify the path to the configuration file
+used to start Kibana. By default, Kibana uses the configuration file `config/kibana.yml`. When you change your installed
+plugins, the `bin/kibana-plugin` command restarts the Kibana server. When you are using a customized configuration file,
+you must specify the path to that configuration file each time you use the `bin/kibana-plugin` command.
+
+[float]
+=== Plugin Manager Exit Codes
+
+[horizontal]
+0:: Success
+64:: Unknown command or incorrect option parameter
+74:: I/O error
+70:: Other error
+
+include::plugins/known-plugins.asciidoc[]

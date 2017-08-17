@@ -1,0 +1,139 @@
+[[tutorial-visualizing]]
+== データの可視化
+
+データの可視化を始めるには、サイドナビゲーションで*Visualize*をクリックします。 
+
+image::images/tutorial-visualize.png[]
+
+*Visualize*ツールを使用すると、複数の方法でデータを表示できます。 例として、長く利用されているビジュアライゼーション手法である円グラフを使用して、サンプル銀行口座データの口座残高を調べてみましょう。
+
+開始するには、ビジュアライゼーションのリストで*Pie chart*をクリックします。 保存した検索からビジュアライゼーションを作成するか、新規の検索基準を入力できます。新規の検索基準を入力するには、最初にIndex Patternを選択して、検索対象のインデックスを指定する必要があります。口座データを検索するので、Index Pattern `ba*`を選択します。
+
+デフォルトの検索は、すべてのドキュメントに一致します。最初は、1つの「スライス」が円全体を含んでいます。
+
+image::images/tutorial-visualize-pie-1.png[]
+
+グラフに表示するスライスを指定するには、Elasticsearch {es-ref}search-aggregations.html[バケット集約]を使用します。バケット集約は、検索基準に一致したドキュメントを別のカテゴリ（別名_buckets_）にシンプルにソートします。たとえば、口座データには各口座の残高が含まれます。バケット集約を使用して、複数の口座残高の範囲を定め、各範囲内にある口座の数を調べることができます。
+
+各範囲のバケットを定義するには、次の手順を実行します。
+
+. *Split Slices*バケットタイプをクリックします。 
+. *Aggregation*リストから*Range*を選択します。  
+. *Field*リストから*balance*フィールドを選択します。  
+. *Add Range*を4回クリックして、範囲の総数を6にします。  
+. 次の範囲を定義します。
++
+[source,text]
+0             999
+1000         2999
+3000         6999
+7000        14999
+15000       30999
+31000       50000
+
+. *Apply changes* image:images/apply-changes-button.png[] をクリックして、グラフを更新します。
+
+これで、各残高範囲にある1000個のアカウントの割合が表示されます。
+
+image::images/tutorial-visualize-pie-2.png[]
+
+では、口座名義人の年齢というデータの別の側面を調べてみましょう。 次のように別のバケット集約を追加して、各残高範囲内の口座名義人の年齢を表示します。
+
+. バケットリストの下にある*Add sub-buckets*をクリックします。 
+. バケットタイプリストの*Split Slices*をクリックします。  
+. 集約リストから*Terms*を選択します。 
+. フィールドリストから*age*を選択します。 
+. *Apply changes* image:images/apply-changes-button.png[] をクリックします。 
+
+これで、残高範囲を囲むリングに表示される口座名義人の年齢の内訳が表示されます。
+
+image::images/tutorial-visualize-pie-3.png[]
+
+後で使用できるようにこのグラフを保存するには、*Save*をクリックして、_Pie Example_と名前を入力します。 
+
+次に、シェークスピアデータセットのデータを調べます。戯曲をせりふのある場面数に関して比較する方法について調べ、情報を棒グラフに表示しましょう。
+
+. *New*をクリックして、*Vertical bar chart*を選択します。  
+. Index Pattern `shakes*`を選択します。バケットを定義していないため、デフォルトのワイルドカードクエリに一致するドキュメントの総数を示す大きな棒が1つ表示されます。
++
+image::images/tutorial-visualize-bar-1.png[]
+
+. Y軸に各戯曲につきせりふのある場面数を表示するには、Y軸 {es-ref}search-aggregations.html[メトリクス集約]を設定する必要があります。メトリクス集約は、検索結果から抽出された値に基づいてメトリクスを計算します。
+戯曲ごとのせりふのある場面数を得るには、*Unique Count*集約を選択して、フィールドリストから*speaker*を選択します。  軸に_Speaking Parts_というカスタムラベルを付けることもできます。
+
+. X軸に別の戯曲を表示するには、X軸バケットタイプを選択し、集約リストから*Terms*を選択して、フィールドリストから*play_name*を選択します。  アルファベット順に表示するには、*Ascending*を選択します。 軸に_Play Name_というカスタムラベルを付けることもできます。
+
+. *Apply changes* image:images/apply-changes-button.png[] をクリックして、結果を表示します。
+
+image::images/tutorial-visualize-bar-2.png[]
+
+別々の単語に分割されるのではなく、語句全体として個別の戯曲名が表示されます。これは、チュートリアルの始めに行ったマッピングによるものです。*play_name*フィールドを「分析対象外」としてマークしました。 
+
+各棒の上にマウスカーソルを移動すると、ツールチップに各戯曲のせりふのある場面数が表示されます。ツールチップをオフにして、ビジュアライゼーションに別のオプションを設定するには、Visualizationビルダーの*Options*タブを選択します。 
+
+これで、シェークスピア戯曲の最小の配役リストができました。指定した配役のせりふの最大数を表示して、1人の俳優にかかる負荷が最も高い戯曲はどれかを知ることもできます。 
+
+. *Add metrics*をクリックして、Y軸集約を追加します。 
+. *Max*集約を選択して、*speech_number*フィールドを選択します。  
+. *Options*をクリックして、*Bar Mode*から*grouped*に変更します。  
+. *Apply changes* image:images/apply-changes-button.png[] をクリックします。グラフは次のようになります。
+
+image::images/tutorial-visualize-bar-3.png[]
+
+表示されているように、他の戯曲に比べて、_Love's Labours Lost_のせりふの最大数が極端に多く、より優れた記憶力が俳優に求められるかもしれません。
+
+*Number of speaking parts* Y軸は0から始まっていますが、18までは同じです。Y軸の始点を最小値近くの値にして違いを目立たせるには、Optionで*Scale Y-Axis to data bounds*を選択します。
+
+このグラフを_Bar Example_という名前で保存します。
+
+次に、タイルマップグラフを使用して、ログファイルサンプルデータの地理情報を可視化します。 
+
+. *New*をクリックします。
+. *Tile map*を選択します。 
+. Index Pattern `logstash-*`を選択します。 
+. 調査するイベントの時間枠を設定します。
+. Kibanaツールバーで、日時指定コントロールをクリックします。
+. *Absolute*をクリックします。
+. 開始時間を2015年5月18日、終了時間を2015年5月20日に設定します。
++
+image::images/tutorial-timepicker.png[]
+
+. 時間範囲をセットアップしたら、*Go*ボタンをクリックし、右下隅にある小さな上矢印をクリックして日時指定コントロールを閉じます。  
+
+バケットを定義していないため、世界地図が表示されます。
+
+image::images/tutorial-visualize-map-1.png[]
+
+ログファイルの位置座標をマップするには、*Geo Coordinates*をバケットとして選択して、 *Apply changes* image:images/apply-changes-button.png[] をクリックします。
+グラフは次のようになります。
+
+image::images/tutorial-visualize-map-2.png[]
+
+クリックやドラッグでマップを移動したり、image:images/viz-zoom.png[]ボタンでズームしたりすることができます。また、*Fit Data Bounds*  image:images/viz-fit-bounds.png[] ボタンを押すと、すべてのポイントを含む最下層にズームすることもできます。さらに、*Latitude/Longitude Filter* image:images/viz-lat-long-filter.png[]ボタンをクリックし、マップ上で境界ボックスをドラッグして、四角い領域を含めたり除外したりできます。利用可能なフィルタはクエリバーの下に表示されます。フィルタの上にマウスカーソルを移動すると、フィルタの切り替え、ピン留め、反転、または削除を実行するコントロールが表示されます。 
+
+image::images/tutorial-visualize-map-3.png[]
+
+このグラフを_Map Example_という名前で保存します。
+
+最後に、Markdownウィジェットを作成して、追加情報を表示します。
+
+. *New*をクリックします。
+. *Markdown widget*を選択します。
+. フィールドに次のテキストを入力します。
++
+[source,markdown]
+# This is a tutorial dashboard!
+The Markdown widget uses **markdown** syntax.
+> Blockquotes in Markdown use the > character.
+
+. *Apply changes* image:images/apply-changes-button.png[]をクリックして、プレビューペインにMarkdownを描画します。
++
+image::images/tutorial-visualize-md-1.png[]
+
+
+
+
+
+image::images/tutorial-visualize-md-2.png[]
+
+このビジュアライゼーションを_Markdown Example_という名前で保存します。

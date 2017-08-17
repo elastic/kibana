@@ -1,0 +1,150 @@
+[[targz]]
+=== `.tar.gz`로 Kibana  설치
+
+Kibana는 Linux 또는 Darwin을 위해 `.tar.gz` 패키지의 형태로 제공됩니다. 이 패키지는 Kibana를 시험 사용할 때 가장 손쉽게 사용할 수 있는 형식입니다.
+
+Kibana의 최신 안정 버전은 link:/downloads/kibana[Kibana 다운로드] 페이지에서 구할 수 있습니다.
+다른 버전은 link:/downloads/past-releases[이전 릴리스 페이지]에서 구할 수 있습니다.
+
+
+[[install-linux64]]
+==== Linux 64비트 패키지 다운로드 및 설치
+
+ifeval::["{release-state}"=="unreleased"]
+
+Kibana {version} 버전은 아직 릴리스되지 않았습니다.
+
+endif::[]
+
+ifeval::["{release-state}"!="unreleased"]
+
+Kibana v{version}용 64비트 Linux 아카이브는 다음과 같이 다운로드하고 설치할 수 있습니다.
+
+["source","sh",subs="attributes"]
+--------------------------------------------
+wget https://artifacts.elastic.co/downloads/kibana/kibana-{version}-linux-x86_64.tar.gz
+sha1sum kibana-{version}-linux-x86_64.tar.gz <1>
+tar -xzf kibana-{version}-linux-x86_64.tar.gz
+cd kibana/ <2>
+--------------------------------------------
+<1> `sha1sum` 또는 `shasum`으로 생성된 SHA를 https://artifacts.elastic.co/downloads/kibana/kibana-{version}-linux-x86_64.tar.gz.sha1[published SHA]와 비교합니다.
+<2> 이 디렉토리는 `$KIBANA_HOME`입니다.
+
+endif::[]
+
+
+[[install-linux32]]
+==== Linux 32비트 패키지 다운로드 및 설치
+
+ifeval::["{release-state}"=="unreleased"]
+
+Kibana {version} 버전은 아직 릴리스되지 않았습니다.
+
+endif::[]
+
+ifeval::["{release-state}"!="unreleased"]
+
+Kibana v{version}용 32비트 Linux 아카이브는 다음과 같이 다운로드하고 설치할 수 있습니다.
+
+["source","sh",subs="attributes"]
+--------------------------------------------
+wget https://artifacts.elastic.co/downloads/kibana/kibana-{version}-linux-x86.tar.gz
+sha1sum kibana-{version}-linux-x86.tar.gz <1>
+tar -xzf kibana-{version}-linux-x86.tar.gz
+cd kibana/ <2>
+--------------------------------------------
+<1> `sha1sum` 또는 `shasum`으로 생성된 SHA를 https://artifacts.elastic.co/downloads/kibana/kibana-{version}-linux-x86.tar.gz.sha1[published SHA]와 비교합니다.
+<2> 이 디렉토리는 `$KIBANA_HOME`입니다.
+
+endif::[]
+
+
+[[install-darwin64]]
+==== Darwin 패키지 다운로드 및 설치
+
+ifeval::["{release-state}"=="unreleased"]
+
+Kibana {version} 버전은 아직 릴리스되지 않았습니다.
+
+endif::[]
+
+ifeval::["{release-state}"!="unreleased"]
+
+Kibana v{version}용 Darwin 아카이브는 다음과 같이 다운로드하고 설치할 수 있습니다.
+
+["source","sh",subs="attributes"]
+--------------------------------------------
+wget https://artifacts.elastic.co/downloads/kibana/kibana-{version}-darwin-x86_64.tar.gz
+shasum kibana-{version}-darwin-x86_64.tar.gz <1>
+tar -xzf kibana-{version}-darwin-x86_64.tar.gz
+cd kibana/ <2>
+--------------------------------------------
+<1> `sha1sum` 또는 `shasum`으로 생성된 SHA를 https://artifacts.elastic.co/downloads/kibana/kibana-{version}-darwin-x86_64.tar.gz.sha1[published SHA]와 비교합니다.
+<2> 이 디렉토리는 `$KIBANA_HOME`입니다.
+
+endif::[]
+
+
+[[targz-running]]
+==== 명령행에서 Kibana 실행
+
+Kibana는 다음과 같이 명령행에서 시작할 수 있습니다.
+
+[source,sh]
+--------------------------------------------
+./bin/kibana
+--------------------------------------------
+
+기본적으로 Kibana는 포그라운드에서 실행되고 표준 출력(`stdout`)에 로그를 출력합니다. 그리고 `Ctrl-C`를 눌러 중지할 수 있습니다.
+
+
+[[targz-configuring]]
+==== 구성 파일을 통해 Kibana 구성
+
+Kibana는 기본적으로 `$KIBANA_HOME/config/kibana.yml` 파일로부터 구성을 로드합니다. 이 구성 파일의 형식에 대해서는 {kibana-ref}/settings.html[설정]의 설명을 참조하십시오.
+
+
+[[targz-layout]]
+==== `.tar.gz` 아카이브의 디렉토리 레이아웃
+
+`.tar.gz` 패키지는 모두 완비된 상태입니다. 모든 파일 및 디렉토리는 기본적으로 `$KIBANA_HOME`에 있습니다. 이는 아카이브의 압축을 풀 때 생성되는 디렉토리입니다.
+
+따라서 Kibana 사용을 시작할 때 어떤 디렉토리로 만들 필요가 없으므로 매우 편리합니다. 또한 `$KIBANA_HOME` 디렉토리를 제거하는 손쉬운 방법으로 Kibana를 제거할 수 있습니다. 그러나 나중에 중요한 데이터를 삭제하지 않도록 구성 및 데이터 디렉토리의 기본 위치를 변경하는 것이 좋습니다.
+
+
+[cols="<h,<,<m,<m",options="header",]
+|=======================================================================
+| 유형 | 설명 | 기본 위치 | 설정
+| 홈
+  | Kibana 홈 디렉토리, 즉 `$KIBANA_HOME`
+ d| 아카이브의 압축을 풀 때 생성되는 디렉토리
+ d|
+
+| bin
+  |Kibana 서버를 시작하기 위한 `kibana` 
+    및 플러그인 설치를 위한 `kibana-plugin`을 포함하는 바이너리 스크립트
+  | $KIBANA_HOME\bin
+ d|
+
+| 구성
+  | `kibana.yml`을 포함하는 구성 파일
+  | $KIBANA_HOME\config
+ d|
+
+| 데이터
+  | Kibana 및 그 플러그인이 디스크에 기록하는 데이터 파일의 위치
+  | $KIBANA_HOME\data
+ d|
+
+| 최적화
+  | 트랜스컴파일된 소스 코드. 일부 관리 작업(예: 플러그인 설치)에서는
+    소스 코드가 즉시 다시 트랜스컴파일됩니다.
+  | $KIBANA_HOME\optimize
+ d|
+
+| 플러그인
+  | 플러그인 파일 위치. 각 플러그인은 하위 디렉토리에 위치합니다.
+  | $KIBANA_HOME\plugins
+ d|
+
+|=======================================================================

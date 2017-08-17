@@ -1,0 +1,126 @@
+[[release-notes-5.0.0]]
+== 5.0.0 Release Notes
+
+The lists below cover changes between 4.6.2 and 5.0.0 only.
+
+Also see <<breaking-changes-5.0>>.
+
+[float]
+[[enhancement-5.0.0]]
+=== Enhancements
+CLI::
+* New plugin installer: `bin/kibana-plugin` {pull}6402[#6402]
+* Ability to specify multiple config files as CLI arguments {pull}6825[#6825]
+* Display plugins versions {pull}7221[#7221]
+Core::
+* Bind Kibana server to localhost by default {pull}8013[#8013]
+* Only proxy whitelisted request headers to Elasticsearch {pull}6896[#6896]
+* Remove client node filtering in the Elasticsearch version check {pull}6840[#6840]
+* A new design  {pull}6239[#6239]
+* Friendly error message when Kibana is already running {pull}6735[#6735]
+* Logging configuration can be reloaded with `SIGHUP` {pull}6720[#6720]
+* Abortable timeout counter to notifications {pull}6364[#6364]
+* Upgrade Node.js to version 6.9.0 for improved memory use and a segfault fix {pull}8733[#8733]
+* Warn on startup if plugins don't support the version of Kibana {pull}8283[#8283]
+* Add additional verification to ensure supported Elasticsearch version {pull}8229[#8229]
+* Add unique instance identifier {pull}6378[#6378]
+* Add state:storeInSessionState option enabling shorter URLs and enhancing Internet Explorer support {pull}8022[#8022]
+* Improve user experience when query returns no results {pull}7286[#7286]
+* Display message when "Export All" request fails {pull}6976[#6976]
+Dashboard::
+* Dashboard refresh interval persisted on save {pull}7365[#7365]
+Dev Tools::
+* Add Dev Tools application, including Console (previously known as Sense) {pull}8171[#8171]
+Discover::
+* Default columns are configurable {pull}5696[#5696]
+* Render field type in tooltip when mousing over name {pull}6243[#6243]
+* Add field-exists filter button to doc table {pull}6166[#6166]
+* Enable better caching of time-based requests by Elasticsearch {pull}6643[#6643]
+Filters::
+* Automatic filter pinning option in advanced settings {pull}5730[#5730]
+Management::
+* Rename Settings to Management {pull}7284[#7284]
+* Add boolean field formatter {pull}7935[#7935]
+* Add painless support for scripted fields {pull}7700[#7700]
+* Custom notification banner configured via advanced settings {pull}6791[#6791]
+* Duration field formatter for numbers {pull}6499[#6499]
+* Title case field formatter for strings {pull}6413[#6413]
+Plugins::
+* Add support for apps to specify their order in the left navigation bar {pull}8767[#8767]
+* Separate plugin version and supported version of Kibana {pull}8222[#8222]
+* Expose the Kibana app base URL, no more hardcoding '/app/kibana' in urls {pull}8072[#8072]
+* Add requireDefaultIndex route option, enabling index pattern independent plugins {pull}7516[#7516]
+* Add plugin preInit extension point {pull}7069[#7069]
+* Plugins can prefix their config values {pull}6554[#6554]
+Server::
+* Add basePath to server's defaultRoute {pull}6953[#6953]
+* Do not render directory listings for static assets {pull}6764[#6764]
+* Automatically redirect http traffic to https {pull}5959[#5959]
+* Write process pid file as soon as it is known {pull}4680[#4680]
+* Log most events by default and only errors when in quiet mode {pull}5952[#5952]
+Sharing::
+* Improve user interface to emphasize difference between Original URLs and Snapshot URLs. {pull}8172[#8172]
+Status::
+* Emit new state and message, on status change {pull}7513[#7513]
+Timelion::
+* Add Timelion to Kibana core {pull}7994[#7994]
+Visualize::
+* Add y-axis logarithmic scale for bar charts {pull}7939[#7939]
+* Add option to set legend position {pull}7931[#7931]
+* Add legend tooltips {pull}7890[#7890]
+* Add x-axis title labels {pull}7845[#7845]
+
+[float]
+[[bug-5.0.0]]
+=== Bug fixes
+Core::
+* Fix alias support when fetching types {pull}8338[#8338]
+* Report useful error message when sessionStorage is unavailable {pull}8343[#8343]
+Dashboard::
+* Prevent dashboard title tooltip from being cut off {pull}6464[#6464]
+Discover::
+* Only display Visualize button when a field is aggregatable {pull}8694[#8694]
+Filters::
+* Use lt instead of lte for safer upper bound in range filter {pull}7129[#7129]
+* Fix date histogram filtering {pull}7126[#7126]
+Management::
+* No longer remove selection when refreshing fields {pull}8312[#8312]
+* Notify user of failures when deleting saved objects {pull}7345[#7345]
+* Add title to visState when the visualization is saved {pull}7185[#7185]
+* Back button now works {pull}5982[#5982]
+* Show no value instead of interpolating 'undefined' with empty values in URL string formatters {pull}6291[#6291]
+Server::
+* Console logs display date/time in UTC {pull}8534[#8534]
+Status::
+* Plugins without init function no longer show statuses {pull}7953[#7953]
+Timepicker::
+* Absolute time picker updates when time selection changes {pull}8383[#8383]
+* Prevent relative timepicker values from being negative {pull}6607[#6607]
+Visualize::
+* Remove average from standard deviation metrics {pull}7827[#7827]
+* Always set output.params.min_doc_count on Histograms {pull}8349[#8349]
+* Set minimum aggregation size to 1, Elasticsearch returns an error for 0 {pull}8339[#8339]
+* Add milliseconds to Date Histogram interval options {pull}6796[#6796]
+* Do not perform unnecessary round-trip to Elasticsearch when there are no changes in request parameters {pull}7960[#7960]
+* Tile map dots no longer shrink to extreme tiny size on some zooms {pull}8000[#8000]
+* Table visualizations display correctly when changing paging options {pull}8422[#8422]
+* Filter non-aggregatable fields from visualization editor {pull}8421[#8421]
+* Prevent charts from unnecessarily rendering twice {pull}8371[#8371]
+* Display custom label for percentile ranks aggregation {pull}7123[#7123]
+* Display custom label for percentile and median metric visualizations {pull}7021[#7021]
+* Back button now works {pull}5986[#5986]
+* Fix extraneous bounds for tilemap {pull}7068[#7068]
+* Median visualization properly shows value rather than `?` {pull}7003[#7003]
+* Map zoom is persisted when saving visualization {pull}6835[#6835]
+* Drag aggregations to sort {pull}6566[#6566]
+* Table sort is persisted on save {pull}5953[#5953]
+* Ignore extended bounds when "Show empty buckets" unselected {pull}5960[#5960]
+* Using custom label for standard deviation aggregation {pull}6407[#6407]
+
+[float]
+[[deprecation-5.0.0]]
+=== Deprecations & Removals
+Visualize::
+* Remove "Exclude Pattern Flags" and "Include Pattern Flags" from terms and significant terms aggregations {issue}6714[#6714]
+* Deprecate ascending sort for terms aggregations {pull}8167[#8167]
+* Deprecate split chart option for tile map visualization {pull}6001[#6001]

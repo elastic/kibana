@@ -1,0 +1,9 @@
+[[wrapping-up]]
+== まとめ
+
+これで、基本を把握しました。Kibanaを使用して、独自のデータの調査を開始できます。
+
+* データの検索とフィルタリングの詳細については、{kibana-ref}/discover.html[検出]を参照してください。
+* Kibanaが提供するすべてのビジュアライゼーションタイプについては、{kibana-ref}/visualize.html[ 可視化]を参照してください。
+* Kibanaの設定と保存したオブジェクトの管理については、{kibana-ref}/management.html[管理]を参照してください。
+* ElasticsearchへのRESTリクエストの送信に使用するインタラクティブなコンソールUIについては、{kibana-ref}/console-kibana.html[ コンソール]を参照してください。

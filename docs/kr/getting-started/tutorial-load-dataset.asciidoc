@@ -1,0 +1,167 @@
+[[tutorial-load-dataset]]
+== 샘플 데이터 로드
+
+이 섹션의 튜토리얼에서는 다음 데이터 집합을 사용합니다.
+
+* William Shakespeare의 전집이며 적합하게 필드로 파싱됩니다. 여기를 클릭하여 이 데이터 집합을 다운로드합니다.
+  https://download.elastic.co/demos/kibana/gettingstarted/shakespeare.json[shakespeare.json].
+* 임의로 생성된 데이터로 구성된 가상 계정의 집합. 여기를 클릭하여 이 데이터 집합을 다운로드합니다.
+  https://download.elastic.co/demos/kibana/gettingstarted/accounts.zip[accounts.zip]
+* 임의로 생성된 로그 파일의 집합. 여기를 클릭하여 이 데이터 집합을 다운로드합니다.
+  https://download.elastic.co/demos/kibana/gettingstarted/logs.jsonl.gz[logs.jsonl.gz]
+
+두 데이터 집합이 압축되어 있습니다. 다음 명령을 사용하여 파일을 추출합니다.
+
+[source,shell]
+unzip accounts.zip
+gunzip logs.jsonl.gz
+
+Shakespeare 데이터 집합은 다음 스키마로 구성되어 있습니다.
+
+[source,json]
+{
+    "line_id": INT,
+    "play_name": "String",
+    "speech_number": INT,
+    "line_number": "String",
+    "speaker": "String",
+    "text_entry": "String",
+}
+
+accounts 데이터 집합은 다음 스키마로 구성되어 있습니다.
+
+[source,json]
+{
+    "account_number": INT,
+    "balance": INT,
+    "firstname": "String",
+    "lastname": "String",
+    "age": INT,
+    "gender": "M or F",
+    "address": "String",
+    "employer": "String",
+    "email": "String",
+    "city": "String",
+    "state": "String"
+}
+
+로그 데이터 집합에 대한 스키마는 수십 개의 다양한 필드를 포함하지만 이 튜토리얼에서는 다음 중요 필드가 사용됩니다.
+
+[source,json]
+{
+    "memory": INT,
+    "geo.coordinates": "geo_point"
+    "@timestamp": "date"
+}
+
+Shakespeare 및 로그 데이터 집합을 로드하기 전에 이 필드에 대해 {es-ref}mapping.html[_맵핑_]을 설정해야 합니다.
+맵핑은 색인의 문서를 여러 논리적 그룹으로 나누고 필드의 특성, 이를테면 필드의 검색 가능성 또는 _토큰화_ 여부, 즉 별개의 단어로 분리되는지 여부 등을 지정합니다.
+
+터미널(예: `bash`)에서 다음 명령을 사용하여 Shakespeare 데이터 집합에 대한 맵핑을 설정합니다.
+
+[source,shell]
+curl -H 'Content-Type: application/json' -XPUT http://localhost:9200/shakespeare -d '
+{
+ "mappings" : {
+  "_default_" : {
+   "properties" : {
+    "speaker" : {"type": "string", "index" : "not_analyzed" },
+    "play_name" : {"type": "string", "index" : "not_analyzed" },
+    "line_id" : { "type" : "integer" },
+    "speech_number" : { "type" : "integer" }
+   }
+  }
+ }
+}
+';
+
+이 맵핑은 데이터 집합에 대해 다음 특성을 지정합니다.
+
+* _speaker_ 필드는 분석되지 않는 문자열입니다. 이 필드의 문자열은 필드에 여러 단어가 있더라도 하나의 단위로 처리됩니다.
+* _play_name_ 필드도 마찬가지입니다.
+* _line_id_ 및 _speech_number_ 필드는 정수입니다.
+
+로그 데이터 집합에서는 이 필드에 `geo_point` 유형을 적용하여 로그의 위도/경도 쌍을 지리적 위치로 레이블하는 맵핑이 필요합니다.
+
+다음 명령을 사용하여 로그에 대해 `geo_point` 맵핑을 설정합니다.
+
+[source,shell]
+curl -H 'Content-Type: application/json' -XPUT http://localhost:9200/logstash-2015.05.18 -d '
+{
+  "mappings": {
+    "log": {
+      "properties": {
+        "geo": {
+          "properties": {
+            "coordinates": {
+              "type": "geo_point"
+            }
+          }
+        }
+      }
+    }
+  }
+}
+';
+
+[source,shell]
+curl -H 'Content-Type: application/json' -XPUT http://localhost:9200/logstash-2015.05.19 -d '
+{
+  "mappings": {
+    "log": {
+      "properties": {
+        "geo": {
+          "properties": {
+            "coordinates": {
+              "type": "geo_point"
+            }
+          }
+        }
+      }
+    }
+  }
+}
+';
+
+[source,shell]
+curl -H 'Content-Type: application/json' -XPUT http://localhost:9200/logstash-2015.05.20 -d '
+{
+  "mappings": {
+    "log": {
+      "properties": {
+        "geo": {
+          "properties": {
+            "coordinates": {
+              "type": "geo_point"
+            }
+          }
+        }
+      }
+    }
+  }
+}
+';
+
+accounts 데이터 집합에는 어떤 맵핑도 필요하지 않으므로 이제 Elasticsearch {es-ref}docs-bulk.html[`bulk`] API를 사용하여 다음 명령으로 데이터 집합을 로드할 수 있습니다.
+
+[source,shell]
+curl -H 'Content-Type: application/x-ndjson' -XPOST 'localhost:9200/bank/account/_bulk?pretty' --data-binary @accounts.json
+curl -H 'Content-Type: application/x-ndjson' -XPOST 'localhost:9200/shakespeare/_bulk?pretty' --data-binary @shakespeare.json
+curl -H 'Content-Type: application/x-ndjson' -XPOST 'localhost:9200/_bulk?pretty' --data-binary @logs.jsonl
+
+사용 가능한 컴퓨팅 리소스에 따라 이 명령을 실행하는 데 다소 시간이 걸릴 수 있습니다.
+
+다음 명령으로 로딩이 성공했음을 확인합니다.
+
+[source,shell]
+curl 'localhost:9200/_cat/indices?v'
+
+다음과 비슷한 출력이 표시되어야 합니다.
+
+[source,shell]
+health status index               pri rep docs.count docs.deleted store.size pri.store.size
+yellow open   bank                  5   1       1000            0    418.2kb        418.2kb
+yellow open   shakespeare           5   1     111396            0     17.6mb         17.6mb
+yellow open   logstash-2015.05.18   5   1       4631            0     15.6mb         15.6mb
+yellow open   logstash-2015.05.19   5   1       4624            0     15.7mb         15.7mb
+yellow open   logstash-2015.05.20   5   1       4750            0     16.4mb         16.4mb

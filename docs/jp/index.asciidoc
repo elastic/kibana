@@ -1,0 +1,46 @@
+[[kibana-guide]]
+= Kibana User Guide
+
+//////////
+release-state can be: released | prerelease | unreleased
+//////////
+:release-state:  unreleased
+:version:        5.4.0
+:major-version:  5.x
+:branch:         5.x
+
+:docker-image:   docker.elastic.co/kibana/kibana:{version}
+:es-ref:         https://www.elastic.co/guide/en/elasticsearch/reference/{branch}/
+:xpack-ref:      https://www.elastic.co/guide/en/x-pack/current/
+:repo:           https://github.com/elastic/kibana/
+:issue:          {repo}issues/
+:pull:           {repo}pull/
+:commit:         {repo}commit/
+:security:       https://www.elastic.co/community/security/
+
+
+include::introduction.asciidoc[]
+
+include::setup.asciidoc[]
+
+include::migration.asciidoc[]
+
+include::getting-started.asciidoc[]
+
+include::discover.asciidoc[]
+
+include::visualize.asciidoc[]
+
+include::dashboard.asciidoc[]
+
+include::timelion.asciidoc[]
+
+include::console.asciidoc[]
+
+include::management.asciidoc[]
+
+include::plugins.asciidoc[]
+
+include::development.asciidoc[]
+
+include::release-notes.asciidoc[]

@@ -1,0 +1,6 @@
+[[configuring-console]]
+== Configuring Console
+
+You can add the following options in the `config/kibana.yml` file:
+
+`console.enabled`:: *Default: true* Set to false to disable Console. Toggling this will cause the server to regenerate assets on the next startup, which may cause a delay before pages start being served.

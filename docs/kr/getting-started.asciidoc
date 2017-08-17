@@ -1,0 +1,33 @@
+[[getting-started]]
+= 시작하기
+
+[partintro]
+--
+Kibana를 직접 경험할 준비가 되셨습니까? 
+이 튜토리얼은 다음을 실행할 수 있는 방법을 알려줍니다.
+
+* Elasticsearch에 샘플 데이터 집합 로드
+* 색인 패턴 정의
+* {kibana-ref}/discover.html[Discover]로 샘플 데이터 탐색
+* 샘플 데이터의 {kibana-ref}/visualize.html[_시각화_] 설정
+* {kibana-ref}/dashboard.html[대시보드]에 시각화 조합  시작하기 전에 <<install, Kibana를 설치>>하고 {kibana-ref}/connect-to-elasticsearch.html[Elasticsearch에 연결]한 상태여야 합니다.
+
+다음 동영상 튜토리얼도 도움이 될 수 있습니다.
+
+* https://www.elastic.co/blog/kibana-4-video-tutorials-part-1[High-level Kibana introduction, pie charts]
+* https://www.elastic.co/blog/kibana-4-video-tutorials-part-2[Data discovery, bar charts, and line charts]
+* https://www.elastic.co/blog/kibana-4-video-tutorials-part-3[Tile maps]
+* https://www.elastic.co/blog/kibana-4-video-tutorials-part-4[Embedding Kibana visualizations]
+--
+
+include::getting-started/tutorial-load-dataset.asciidoc[]
+
+include::getting-started/tutorial-define-index.asciidoc[]
+
+include::getting-started/tutorial-discovering.asciidoc[]
+
+include::getting-started/tutorial-visualizing.asciidoc[]
+
+include::getting-started/tutorial-dashboard.asciidoc[]
+
+include::getting-started/wrapping-up.asciidoc[]

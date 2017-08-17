@@ -1,0 +1,80 @@
+[[console-kibana]]
+= Console
+
+[partintro]
+--
+The Console plugin provides a UI to interact with the REST API of Elasticsearch. Console has two main areas: the *editor*,
+where you compose requests to Elasticsearch, and the *response* pane, which displays the responses to the request.
+Enter the address of your Elasticsearch server in the text box on the top of screen. The default value of this address
+is `localhost:9200`.
+
+.The Console UI
+image::images/introduction_screen.png[Screenshot]
+
+Console understands commands in a cURL-like syntax. For example the following Console command
+
+[source,js]
+----------------------------------
+GET /_search
+{
+  "query": {
+    "match_all": {}
+  }
+}
+----------------------------------
+
+is a simple `GET` request to Elasticsearch's `_search API`. Here is the equivalent command in cURL.
+
+[source,bash]
+----------------------------------
+curl -XGET "http://localhost:9200/_search" -d'
+{
+  "query": {
+    "match_all": {}
+  }
+}'
+----------------------------------
+
+In fact, you can paste the above command into Console and it will automatically be converted into the Console syntax.
+
+When typing a command, Console will make context sensitive <<suggestions,suggestions>>. These suggestions can help
+you explore parameters for each API, or to just speed up typing. Console will suggest APIs, indexes and field
+names.
+
+[[suggestions]]
+.API suggestions
+image::images/introduction_suggestion.png["Suggestions",width=400,align="center"]
+
+Once you have typed a command in to the left pane, you can submit it to Elasticsearch by clicking the little green
+triangle that appears next to the URL line of the request. Notice that as you move the cursor around, the little
+ triangle and wrench icons follow you around. We call this the <<action_menu,Action Menu>>. You can also select
+ multiple requests and submit them all at once.
+
+[[action_menu]]
+.The Action Menu
+image::images/introduction_action_menu.png["The Action Menu",width=400,align="center"]
+
+When the response come back, you should see it in the left hand panel:
+
+.The Output Pane
+image::images/introduction_output.png[Screenshot]
+
+[float]
+[[console-ui]]
+== The Console UI
+
+In this section you will find a more detailed description of UI of Console. The basic aspects of the UI are explained
+in the <<console-kibana>> section.
+--
+
+include::console/multi-requests.asciidoc[]
+
+include::console/auto-formatting.asciidoc[]
+
+include::console/keyboard-shortcuts.asciidoc[]
+
+include::console/history.asciidoc[]
+
+include::console/settings.asciidoc[]
+
+include::console/configuring-console.asciidoc[]

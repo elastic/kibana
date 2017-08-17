@@ -1,0 +1,17 @@
+[[release-notes-5.2.2]]
+== 5.2.2 Release Notes
+
+Also see <<breaking-changes-5.0>>.
+
+[float]
+[[bug-5.2.2]]
+=== Bug fixes
+Build::
+* Kibana builds now include a NOTICE file {issue}9652[#9652]
+Console::
+* Literal strings in JSON editor are now more clearly identifiable {pull}10244[#10244]
+Management::
+* Attempting to import a missing type now results in a warning {pull}10521[#10521]
+Visualize::
+* Fixed regression where include and exclude patterns triggered an error {issue}10153[#10153]
+* Fixed regression where grouped bar charts did not properly scale down their y-axis {issue}10295[#10295]
