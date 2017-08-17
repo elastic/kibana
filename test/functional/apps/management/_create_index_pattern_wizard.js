@@ -17,20 +17,18 @@ export default function ({ getService, getPageObjects }) {
     });
 
     describe('step 1 next button', function () {
-      it('is disabled by default', function () {
-        return PageObjects.settings.getCreateIndexPatternGoToStep2Button().isEnabled()
-        .then(function (isEnabled) {
-          expect(isEnabled).not.to.be.ok();
-        });
+      it('is disabled by default', async function () {
+        const btn = await PageObjects.settings.getCreateIndexPatternGoToStep2Button();
+        const isEnabled = await btn.isEnabled();
+        expect(isEnabled).not.to.be.ok();
       });
 
       it('is enabled once an index pattern with matching indices has been entered', async function () {
         await PageObjects.settings.setIndexPatternField();
         await PageObjects.common.sleep(2000);
-        return PageObjects.settings.getCreateIndexPatternGoToStep2Button().isEnabled()
-        .then(function (isEnabled) {
-          expect(isEnabled).to.be.ok();
-        });
+        const btn = await PageObjects.settings.getCreateIndexPatternGoToStep2Button();
+        const isEnabled = await btn.isEnabled();
+        expect(isEnabled).to.be.ok();
       });
     });
   });

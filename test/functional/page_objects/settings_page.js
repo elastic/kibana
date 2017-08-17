@@ -307,16 +307,17 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
 
     async setIndexPatternField(indexPatternName = 'logstash-*') {
       log.debug(`setIndexPatternField(${indexPatternName})`);
-      return this.getIndexPatternField()
-        .clearValue().type(indexPatternName);
+      const field = await this.getIndexPatternField();
+      await field.clearValue();
+      field.type(indexPatternName);
     }
 
-    getCreateIndexPatternGoToStep2Button() {
-      return testSubjects.find('createIndexPatternGoToStep2Button');
+    async getCreateIndexPatternGoToStep2Button() {
+      return await testSubjects.find('createIndexPatternGoToStep2Button');
     }
 
-    getCreateIndexPatternCreateButton() {
-      return testSubjects.find('createIndexPatternCreateButton');
+    async getCreateIndexPatternCreateButton() {
+      return await testSubjects.find('createIndexPatternCreateButton');
     }
 
     async removeIndexPattern() {
