@@ -5,6 +5,7 @@ import { getSimpleArg, setSimpleArg } from '../../../lib/arg_helpers';
 import { Datasource } from '../../datasource';
 import header from './header.png';
 import { ESFieldsSelect } from '../../../components/es_fields_select';
+import { TooltipIcon } from '../../../components/tooltip_icon';
 
 
 const template = ({ args, updateArgs }) => {
@@ -25,10 +26,14 @@ const template = ({ args, updateArgs }) => {
     return commas.split(',').map(str => str.trim());
   };
 
+  const fields = getFields();
+
   return (
     <div>
       <FormGroup controlId="formControlsSelect">
-        <ControlLabel>Query</ControlLabel>
+        <ControlLabel>
+          Query <TooltipIcon text="Lucene Query String syntax" placement="right"/>
+        </ControlLabel>
         <FormControl
           type="text"
           value={getQuery()}
@@ -36,8 +41,12 @@ const template = ({ args, updateArgs }) => {
         />
       </FormGroup>
 
-      <label>Fields</label>
-      <ESFieldsSelect onChange={(fields) => setArg('fields', fields.join(', '))} selected={getFields()}/>
+      <label>Fields &nbsp;
+        { fields.length > 10 &&
+          (<TooltipIcon icon="warning" text="This datasource performs best with less than 10 fields" placement="right"/>)
+        }
+      </label>
+      <ESFieldsSelect onChange={(fields) => setArg('fields', fields.join(', '))} selected={fields}/>
     </div>
   );
 };
