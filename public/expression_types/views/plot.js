@@ -14,6 +14,7 @@ export const plot = () => new View('plot', {
     }),
     new Arg('defaultStyle', {
       displayName: 'Default style',
+      description: 'Set the style to be used by default by every series, unless overridden.',
       argType: 'seriesStyle',
       defaultValue: 'seriesStyle(lines=1)',
     }),

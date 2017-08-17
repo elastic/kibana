@@ -9,6 +9,7 @@ export const markdown = () => new View('markdown', {
   args: [
     new Arg('_', {
       displayName: 'Markdown content',
+      description: 'Markdown formatted text',
       argType: 'textarea',
       options: {
         confirm: 'Apply',

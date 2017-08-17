@@ -29,7 +29,7 @@ wrappedTemplate.propTypes = {
 
 export const seriesStyle = () => new ArgType('seriesStyle', {
   displayName: 'Series Style',
-  description: 'Set the style for a particular series, mapped to column names',
+  description: 'Set the style for a selected named series',
   template: wrappedTemplate,
   simpleTemplate,
 });
