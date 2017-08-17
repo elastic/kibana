@@ -1,0 +1,15 @@
+[[core-development]]
+== Core Development
+
+* <<development-basepath>>
+* <<development-dependencies>>
+* <<development-modules>>
+* <<development-elasticsearch>>
+
+include::core/development-basepath.asciidoc[]
+
+include::core/development-dependencies.asciidoc[]
+
+include::core/development-modules.asciidoc[]
+
+include::plugin/development-elasticsearch.asciidoc[]

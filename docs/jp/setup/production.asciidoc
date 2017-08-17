@@ -1,0 +1,125 @@
+[[production]]
+== Using Kibana in a Production Environment
+
+* <<configuring-kibana-shield, Using Kibana with X-Pack>>
+* <<enabling-ssl, Enabling SSL>>
+* <<load-balancing, Load Balancing Across Multiple Elasticsearch Nodes>>
+
+How you deploy Kibana largely depends on your use case. If you are the only user,
+you can run Kibana on your local machine and configure it to point to whatever
+Elasticsearch instance you want to interact with. Conversely, if you have a large
+number of heavy Kibana users, you might need to load balance across multiple
+Kibana instances that are all connected to the same Elasticsearch instance.
+
+While Kibana isn't terribly resource intensive, we still recommend running Kibana
+separate from  your Elasticsearch data or master nodes. To distribute Kibana
+traffic across the nodes in your Elasticsearch cluster, you can run Kibana
+and an Elasticsearch client node on the same machine. For more information, see
+<<load-balancing, Load Balancing Across Multiple Elasticsearch Nodes>>.
+
+[float]
+[[configuring-kibana-shield]]
+=== Using Kibana with X-Pack
+
+You can use {xpack-ref}xpack-security.html[X-Pack Security] to control what
+Elasticsearch data users can access through Kibana.
+
+When you install X-Pack, Kibana users have to log in. They need to
+have the `kibana_user` role as well as access to the indices they
+will be working with in Kibana.
+
+If a user loads a Kibana dashboard that accesses data in an index that they
+are not authorized to view, they get an error that indicates the index does
+not exist. X-Pack Security does not currently provide a way to control which
+users can load which dashboards.
+
+For information about setting up Kibana users and how to configure Kibana
+to work with X-Pack, see {xpack-ref}kibana.html.
+
+[float]
+[[enabling-ssl]]
+=== Enabling SSL
+Kibana supports SSL encryption for both client requests and the requests the Kibana server
+sends to Elasticsearch.
+
+To encrypt communications between the browser and the Kibana server, you configure the `server.ssl.enabled`,
+`server.ssl.certificate` and `server.ssl.key` properties in `kibana.yml`:
+
+[source,text]
+----
+# SSL for outgoing requests from the Kibana Server (PEM formatted)
+server.ssl.enabled: true
+server.ssl.key: /path/to/your/server.key
+server.ssl.certificate: /path/to/your/server.crt
+----
+
+If you are using X-Pack Security or a proxy that provides an HTTPS endpoint for Elasticsearch,
+you can configure Kibana to access Elasticsearch via HTTPS so communications between
+the Kibana server and Elasticsearch are encrypted.
+
+To do this, you specify the HTTPS
+protocol when you configure the Elasticsearch URL in `kibana.yml`:
+
+[source,text]
+----
+elasticsearch.url: "https://<your_elasticsearch_host>.com:9200"
+----
+
+If you are using a self-signed certificate for Elasticsearch, set the `certificateAuthorities` property in
+`kibana.yml` to specify the location of the PEM file. Setting the `certificateAuthorities` property lets you use the
+default `verificationMode` option of `full`.
+
+[source,text]
+----
+# If you need to provide a CA certificate for your Elasticsearch instance, put
+# the path of the pem file here.
+elasticsearch.ssl.certificateAuthorities: [ "/path/to/your/ca/cacert.pem" ]
+----
+
+[float]
+[[load-balancing]]
+=== Load Balancing Across Multiple Elasticsearch Nodes
+If you have multiple nodes in your Elasticsearch cluster, the easiest way to distribute Kibana requests
+across the nodes is to run an Elasticsearch _Coordinating only_ node on the same machine as Kibana.
+Elasticsearch Coordinating only nodes are essentially smart load balancers that are part of the cluster. They
+process incoming HTTP requests, redirect operations to the other nodes in the cluster as needed, and
+gather and return the results. For more information, see
+{es-ref}modules-node.html[Node] in the Elasticsearch reference.
+
+To use a local client node to load balance Kibana requests:
+
+. Install Elasticsearch on the same machine as Kibana.
+. Configure the node as a Coordinating only node. In `elasticsearch.yml`, set `node.data`, `node.master` and `node.ingest` to `false`:
++
+--------
+# 3. You want this node to be neither master nor data node nor ingest node, but
+#    to act as a "search load balancer" (fetching data from nodes,
+#    aggregating results, etc.)
+#
+node.master: false
+node.data: false
+node.ingest: false 
+--------
+. Configure the client node to join your Elasticsearch cluster. In `elasticsearch.yml`, set the `cluster.name` to the
+name of your cluster.
++
+--------
+cluster.name: "my_cluster"
+--------
+. Check your transport and HTTP host configs in `elasticsearch.yml` under `network.host` and `transport.host`. The `transport.host` needs to be on the network reachable to the cluster members, the `network.host` is the network for the HTTP connection for Kibana (localhost:9200 by default).
++
+--------
+network.host: localhost
+http.port: 9200
+
+# by default transport.host refers to network.host
+transport.host: <external ip>
+transport.tcp.port: 9300 - 9400
+--------
+. Make sure Kibana is configured to point to your local client node. In `kibana.yml`, the `elasticsearch.url` should be set to
+`localhost:9200`.
++
+--------
+# The Elasticsearch instance to use for all your queries.
+elasticsearch.url: "http://localhost:9200"
+--------

@@ -1,0 +1,193 @@
+[[deb]]
+=== Debian 패키지로 Kibana 설치
+
+Kibana를 위한 Debian 패키지는 <<install-deb,웹사이트에서 다운로드>>하거나 <<deb-repo,APT 리포지토리>>에서 다운로드할 수 있습니다. Debian, Ubuntu 등 어떤 Debian 기반 시스템에서도 Kibana를 설치하는 데 사용할 수 있습니다.
+
+Kibana의 최신 안정 버전은 link:/downloads/kibana[Kibana 다운로드] 페이지에서 구할 수 있습니다. 다른 버전은 link:/downloads/past-releases[이전 릴리스 페이지]에서 구할 수 있습니다.
+
+[[deb-key]]
+==== Elastic PGP 키 가져오기
+
+include::key.asciidoc[]
+
+[source,sh]
+-------------------------
+wget -qO - https://artifacts.elastic.co/GPG-KEY-elasticsearch | sudo apt-key add -
+-------------------------
+
+[[deb-repo]]
+==== APT 리포지토리에서 설치
+
+ifeval::["{release-state}"=="unreleased"]
+
+Kibana {version} 버전은 아직 릴리스되지 않았습니다.
+
+endif::[]
+
+ifeval::["{release-state}"!="unreleased"]
+
+계속하기 전에 Debian에 `apt-transport-https` 패키지를 설치해야 할 수도 있습니다.
+
+[source,sh]
+--------------------------------------------------
+sudo apt-get install apt-transport-https
+--------------------------------------------------
+
+리포지토리 정의를 +/etc/apt/sources.list.d/elastic-{major-version}.list+에 저장합니다.
+
+ifeval::["{release-state}"=="released"]
+
+["source","sh",subs="attributes,callouts"]
+--------------------------------------------------
+echo "deb https://artifacts.elastic.co/packages/{major-version}/apt stable main" | sudo tee -a /etc/apt/sources.list.d/elastic-{major-version}.list
+--------------------------------------------------
+
+endif::[]
+
+ifeval::["{release-state}"=="prerelease"]
+
+["source","sh",subs="attributes,callouts"]
+--------------------------------------------------
+echo "deb https://artifacts.elastic.co/packages/{major-version}-prerelease/apt stable main" | sudo tee -a /etc/apt/sources.list.d/elastic-{major-version}.list
+--------------------------------------------------
+
+endif::[]
+
+
+[WARNING]
+==================================================
+
+`add-apt-repository`는 사용하지 마십시오. 이는 `deb-src` 항목도 추가하는데 소스 패키지가 제공되지 않습니다. `deb-src` 항목을 추가하면 다음과 같은 오류가 표시됩니다.
+
+    릴리스 파일에서 예상된 항목 'main/source/Sources'를 찾을 수 없음
+    (잘못된 sources.list 항목 또는 잘못된 형식의 파일)
+
+`/etc/apt/sources.list` 파일에서 `deb-src` 항목을 삭제하면 설치가 정상적으로 진행됩니다.
+==================================================
+
+다음 방법으로 Kibana Debian 패키지를 설치할 수 있습니다.
+
+[source,sh]
+--------------------------------------------------
+sudo apt-get update && sudo apt-get install kibana
+--------------------------------------------------
+
+[WARNING]
+==================================================
+동일한 Kibana 리포지토리에 대해 2개의 항목이 있을 경우 `apt-get update` 과정에서 다음과 같은 오류가 표시됩니다.
+
+["literal",subs="attributes,callouts"]
+
+sources.list 항목 중복 https://artifacts.elastic.co/packages/{major-version}/apt/ ...`
+
++/etc/apt/sources.list.d/kibana-{major-version}.list+에 중복되는 항목이 있는지 조사하거나 `/etc/apt/sources.list.d/`의 파일 및 `/etc/apt/sources.list` 파일에서 중복되는 항목을 찾으십시오.
+==================================================
+
+endif::[]
+
+
+[[install-deb]]
+==== Debian 패키지 다운로드 및 수동 설치
+
+ifeval::["{release-state}"=="unreleased"]
+
+Kibana {version} 버전은 아직 릴리스되지 않았습니다.
+
+endif::[]
+
+ifeval::["{release-state}"!="unreleased"]
+
+Kibana v{version} Debian 패키지는 다음과 같이 웹 사이트에서 다운로드하고 설치할 수 있습니다.
+
+*64비트:*
+["source","sh",subs="attributes"]
+--------------------------------------------
+wget https://artifacts.elastic.co/downloads/kibana/kibana-{version}-amd64.deb
+sha1sum kibana-{version}-amd64.deb <1>
+sudo dpkg -i kibana-{version}-amd64.deb
+--------------------------------------------
+<1> `sha1sum` 또는 `shasum`으로 생성된 SHA를 https://artifacts.elastic.co/downloads/kibana/kibana-{version}-amd64.deb.sha1[published SHA]와 비교합니다.
+
+*32비트:*
+["source","sh",subs="attributes"]
+--------------------------------------------
+wget https://artifacts.elastic.co/downloads/kibana/kibana-{version}-i386.deb
+sha1sum kibana-{version}-i386.deb <1>
+sudo dpkg -i kibana-{version}-i386.deb
+--------------------------------------------
+<1> `sha1sum` 또는 `shasum`으로 생성된 SHA를 https://artifacts.elastic.co/downloads/kibana/kibana-{version}-i386.deb.sha1[published SHA]와 비교합니다.
+
+endif::[]
+
+include::init-systemd.asciidoc[]
+
+[[deb-running-init]]
+==== SysV `init`로 Kibana 실행
+
+시스템이 부팅될 때 Kibana가 자동으로 시작하도록 구성하려면 `update-rc.d` 명령을 사용합니다.
+
+[source,sh]
+--------------------------------------------------
+sudo update-rc.d kibana defaults 95 10
+--------------------------------------------------
+
+Kibana는 `service` 명령을 사용하여 시작하고 중지할 수 있습니다.
+
+[source,sh]
+--------------------------------------------
+sudo -i service kibana start
+sudo -i service kibana stop
+--------------------------------------------
+
+어떤 이유로든 Kibana가 시작하지 못하면 실패 이유가 STDOUT에 출력됩니다. 로그 파일은 `/var/log/kibana/`에서 찾을 수 있습니다.
+
+[[deb-running-systemd]]
+include::systemd.asciidoc[]
+
+[[deb-configuring]]
+==== 구성 파일을 통해 Kibana 구성
+
+Kibana는 기본적으로 `/etc/kibana/kibana.yml` 파일로부터 구성을 로드합니다. 이 구성 파일의 형식에 대해서는 {kibana-ref}/settings.html[설정]의 설명을 참조하십시오.
+
+[[deb-layout]]
+==== Debian 패키지의 디렉토리 레이아웃
+
+Debian 패키지는 Debian 기반 시스템에 적합한 위치에 구성 파일, 로그, 데이터 디렉토리를 배치합니다.
+
+
+[cols="<h,<,<m,<m",options="header",]
+|=======================================================================
+| 유형 | 설명 | 기본 위치 | 설정
+| 홈
+  | Kibana 홈 디렉토리, 즉 `$KIBANA_HOME`
+  | /usr/share/kibana
+ d|
+
+| bin
+  | Kibana 서버를 시작하기 위한 `kibana` 
+    및 플러그인 설치를 위한 `kibana-plugin`을 포함하는 바이너리 스크립트
+  | /usr/share/kibana/bin
+ d|
+
+| 구성
+  | `kibana.yml`을 포함하는 구성 파일
+  | /etc/kibana
+ d|
+
+| 데이터
+  | Kibana 및 그 플러그인이 디스크에 기록하는 데이터 파일의 위치
+  | /var/lib/kibana
+ d|
+
+| 최적화
+  | 트랜스컴파일된 소스 코드. 일부 관리 작업(예: 플러그인 설치)에서는
+    소스 코드가 즉시 다시 트랜스컴파일됩니다.
+  | /usr/share/kibana/optimize
+ d|
+
+| 플러그인
+  | 플러그인 파일 위치. 각 플러그인은 하위 디렉토리에 위치합니다.
+  | /usr/share/kibana/plugins
+ d|
+
+|=======================================================================

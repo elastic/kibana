@@ -1,0 +1,192 @@
+[[deb]]
+=== DebianパッケージでのKibanaのインストール 
+KibanaのDebianパッケージは、<<install-deb,弊社のWebサイトからダウンロード>>するか、または<<deb-repo,APTリポジトリ>>からダウンロードできます。これを使って、DebianやUbuntuなど、DebianベースのシステムにKibanaをインストールできます。
+
+Kibanaの最新の安定バージョンは、link:/downloads/kibana[Kibanaのダウンロード]ページにあります。その他のバージョンは、link:/downloads/past-releases[過去のリリースページ]にあります。
+
+[[deb-key]]
+==== Elastic PGPキーのインポート
+
+include::key.asciidoc[]
+
+[source,sh]
+-------------------------
+wget -qO - https://artifacts.elastic.co/GPG-KEY-elasticsearch | sudo apt-key add -
+-------------------------
+
+[[deb-repo]]
+==== APTリポジトリからのインストール
+
+ifeval::["{release-state}"=="unreleased"]
+
+バージョン{version}のKibanaはまだリリースされていません。
+
+endif::[]
+
+ifeval::["{release-state}"!="unreleased"]
+
+場合によっては、先に進む前に、Debianに`apt-transport-https`パッケージをインストールする必要があります。
+
+[source,sh]
+--------------------------------------------------
+sudo apt-get install apt-transport-https
+--------------------------------------------------
+
+リポジトリ定義を+/etc/apt/sources.list.d/elastic-{major-version}.list+に保存します。
+
+ifeval::["{release-state}"=="released"]
+
+["source","sh",subs="attributes,callouts"]
+--------------------------------------------------
+echo "deb https://artifacts.elastic.co/packages/{major-version}/apt stable main" | sudo tee -a /etc/apt/sources.list.d/elastic-{major-version}.list
+--------------------------------------------------
+
+endif::[]
+
+ifeval::["{release-state}"=="prerelease"]
+
+["source","sh",subs="attributes,callouts"]
+--------------------------------------------------
+echo "deb https://artifacts.elastic.co/packages/{major-version}-prerelease/apt stable main" | sudo tee -a /etc/apt/sources.list.d/elastic-{major-version}.list
+--------------------------------------------------
+
+endif::[]
+
+
+[WARNING]
+==================================================
+
+`deb-src`エントリも追加されますが、ソースパッケージを提供していないため、`add-apt-repository`を使用しないでください。`deb-src`エントリを追加していない場合、次のようなエラーが表示されます。
+
+    Unable to find expected entry 'main/source/Sources' in Release file
+    (Wrong sources.list entry or malformed file)
+
+`/etc/apt/sources.list`ファイルから`deb-src`エントリを削除すると、インストールは正しく動作します。
+==================================================
+
+次のコマンドで、KibanaのDebianパッケージをインストールできます。
+
+[source,sh]
+--------------------------------------------------
+sudo apt-get update && sudo apt-get install kibana
+--------------------------------------------------
+
+[WARNING]
+==================================================
+同じKibanaリポジトリにエントリが2つあると、`apt-get update`の間に次のようなエラーが表示されます。
+
+["literal",subs="attributes,callouts"]
+
+Duplicate sources.list entry https://artifacts.elastic.co/packages/{major-version}/apt/ ...`
+
++/etc/apt/sources.list.d/kibana-{major-version}.list+で重複するエントリを調べるか、`/etc/apt/sources.list.d/`内のファイルと`/etc/apt/sources.list`ファイルの間で重複するエントリを特定します。
+==================================================
+
+endif::[]
+
+
+[[install-deb]]
+==== 手動によるDebianパッケージのダウンロードとインストール
+
+ifeval::["{release-state}"=="unreleased"]
+
+バージョン{version}のKibanaはまだリリースされていません。
+
+endif::[]
+
+ifeval::["{release-state}"!="unreleased"]
+
+Kibana v{version}のDebianパッケージは、次のようにWebサイトからダウンロードしてインストールします。
+
+*64ビット:*
+["source","sh",subs="attributes"]
+--------------------------------------------
+wget https://artifacts.elastic.co/downloads/kibana/kibana-{version}-amd64.deb
+sha1sum kibana-{version}-amd64.deb <1>
+sudo dpkg -i kibana-{version}-amd64.deb
+--------------------------------------------
+<1> `sha1sum`または`shasum`により生成されたSHAを https://artifacts.elastic.co/downloads/kibana/kibana-{version}-amd64.deb.sha1[published SHA]と比較します。
+
+*32ビット:*
+["source","sh",subs="attributes"]
+--------------------------------------------
+wget https://artifacts.elastic.co/downloads/kibana/kibana-{version}-i386.deb
+sha1sum kibana-{version}-i386.deb <1>
+sudo dpkg -i kibana-{version}-i386.deb
+--------------------------------------------
+<1> `sha1sum`または`shasum`により生成されたSHA を https://artifacts.elastic.co/downloads/kibana/kibana-{version}-i386.deb.sha1[published SHA]と比較します。
+
+endif::[]
+
+include::init-systemd.asciidoc[]
+
+[[deb-running-init]]
+==== SysV `init`でのKibanaの実行
+
+`update-rc.d`コマンドを使用して、システムの起動時に自動的に起動するようにKibanaを設定します。
+
+[source,sh]
+--------------------------------------------------
+sudo update-rc.d kibana defaults 95 10
+--------------------------------------------------
+
+`service`を使用して、Kibanaを起動および停止できます。
+
+[source,sh]
+--------------------------------------------
+sudo -i service kibana start
+sudo -i service kibana stop
+--------------------------------------------
+
+何らかの理由によりKibanaの起動に失敗した場合、失敗の理由がSTDOUTに出力されます。ログファイルは`/var/log/kibana/`にあります。
+
+[[deb-running-systemd]]
+include::systemd.asciidoc[]
+
+[[deb-configuring]]
+==== 設定ファイルによるKibanaの設定
+
+Kibanaは、デフォルトで`/etc/kibana/kibana.yml`ファイルから設定を読み込みます。この設定ファイルの形式については、{kibana-ref}/settings.html[設定]で説明しています。
+
+[[deb-layout]]
+==== Debianパッケージのディレクトリ構成
+
+Debianパッケージは、Debianベースシステムの適切な場所に設定ファイル、ログ、およびデータディレクトリを配置します。
+
+
+[cols="<h,<,<m,<m",options="header",]
+|=======================================================================
+| タイプ | 説明 | デフォルトの場所 | 設定
+| home
+  | Kibanaのホームディレクトリまたは`$KIBANA_HOME`
+  | /usr/share/kibana
+ d|
+
+| bin
+  | Kibanaサーバーを起動するための`kibana`およびプラグインをインストールするための`kibana-plugin`を含むバイナリスクリプト
+    
+  | /usr/share/kibana/bin
+ d|
+
+| config
+  | `kibana.yml`を含む設定ファイル
+  | /etc/kibana
+ d|
+
+| data
+  | Kibanaとそのプラグインによりディスクに書き込まれるデータファイルの場所
+  | /var/lib/kibana
+ d|
+
+| optimize
+  | トランスパイルされたソースコード。ある管理操作（プラグインのインストールなど）を行うと、その操作時にソースコードがトランスパイルされます。
+    
+  | /usr/share/kibana/optimize
+ d|
+
+| plugins
+  | プラグインファイルの場所。各プラグインは、サブディレクトリに格納されます。
+  | /usr/share/kibana/plugins
+ d|
+
+|=======================================================================

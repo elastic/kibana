@@ -1,0 +1,65 @@
+[[release-notes-5.3.0]]
+== 5.3.0 Release Notes
+
+Also see <<breaking-changes-5.0>>.
+
+[float]
+[[enhancement-5.3.0]]
+=== Enhancements
+Core::
+* Native confirmation modals have been replaced by more flexible and aesthetically pleasing custom modals {pull}9859[#9859]
+Dev Tools::
+* Deprecation headers from Elasticsearch are now rendered above responses in Console {pull}9874[#9874]
+* Add content-type when using copy-as-curl feature in Console {pull}10086[#10086]
+* Adding autocomplete rules for ingest APIs for Console {pull}10098[#10098]
+* Set multi-line json content type to application/x-ndjson for requests through Console {pull}10201[#10201]
+Dashboard::
+* Improved Dashboard landing page {pull}10003[#10003]
+* Reduced number of clicks necessary to add a visualization to a dashboard {issue}9554[#9554]
+* Ability to temporarily expand a visualization to the size of the full dashboard {pull}9666[#9666]
+* Improved performance on dashboard by making fewer HTTP requests and caching some of the results {pull}10081[#10081]
+Discover::
+* Improve highlighting by using highlight_query with all_fields enabled {pull}9671[#9671]
+* Click to filter values directly from doc tables {pull}9989[#9989]
+Management::
+* Default index pattern is now configurable in Advanced Settings {pull}6453[#6453]
+* Improved usability of index pattern creation form {pull}9991[#9991]
+* Title fields now appear at the top of saved object forms {pull}9992[#9992]
+* Scroll-to-top link at the bottom of certain paginated tables {pull}9997[#9997]
+Server::
+* Support for configuring SSL key passphrases, certificate authorities, supported protocols, and cipher suites {pull}9823[#9823]
+Timepicker::
+* Ability to step forward or backward in time via timepicker controls {pull}9253[#9253]
+* Close timepicker when a filter/interval is selected {pull}9618[#9618]
+Visualize::
+* Improved Visualize landing page {pull}9605[#9605]
+* Support for top_hits metric aggregation {pull}7302[#7302]
+
+
+[float]
+[[bug-5.3.0]]
+=== Bug fixes
+CLI::
+* Offline plugin install on Windows now properly supports 3 slashes {pull}10083[#10083]
+Dashboard::
+* Doc tables are now scrollable again in FireFox {pull}10592[#10592]
+Discover::
+* Fix highlight config so it doesn't require a refresh to apply {pull}10346[#10346]
+* Empty lines in saved search now has proper background color on dark theme {pull}10167[#10167]
+* Clicking fields with periods in the data no longer triggers an error in Discover {pull}9825[#9825]
+* Existing filters are now updated when negated via data tables {pull}10778[#10778]
+Management::
+* Unknown types are now handled more gracefully when importing saved objects {pull}10666[#10666]
+* Auto-filtering of fields in index pattern no longer has false-misses in certain circumstances {pull}10089[#10089]
+* Blank rows no longer appear at the bottom of index pattern tables {pull}9814[#9814]
+Visualize::
+* Tooltip is properly hidden when "show tooltip" checkbox is selected on tilemaps {pull}10260[#10260]
+* Selecting median metric no longer clears order-by {pull}9787[#9787]
+* 0 (zero) is now properly allowed for minimum Y-Axis extent {pull}10528[#10528]
+
+
+[float]
+[[deprecation-5.3.0]]
+=== Deprecations
+Server::
+* Multiple SSL configurations have been renamed and will now trigger a deprecation notice in logs. The old configurations will continue to work until 6.0. {pull}9823[#9823]

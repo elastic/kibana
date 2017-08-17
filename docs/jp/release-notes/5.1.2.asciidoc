@@ -1,0 +1,14 @@
+[[release-notes-5.1.2]]
+== 5.1.2 Release Notes
+
+Also see <<breaking-changes-5.0>>.
+
+[float]
+[[bug-5.1.2]]
+=== Bug fixes
+Discover::
+* Improve spy tab performance on Discover {issue}9464[#9464]
+Timepicker::
+* Timepicker now has a collapse button again {issue}9381[#9381]
+Visualize::
+* Using a secondary datetime field no longer triggers an error {issue}9458[#9458]

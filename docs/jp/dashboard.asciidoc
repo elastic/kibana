@@ -1,0 +1,165 @@
+[[dashboard]]
+= Dashboard
+
+[partintro]
+--
+A Kibana _dashboard_ displays a collection of saved visualizations.
+
+.Sample dashboard.
+image:images/tutorial-dashboard.png[Example dashboard]
+
+In edit mode you can arrange and resize the visualizations as needed and save dashboards so
+they be reloaded and shared.
+
+.Edit mode
+image:images/Dashboard-Tutorial-Edit-Mode.png[Example dashboard in edit mode]
+--
+
+[[dashboard-getting-started]]
+== Building a Dashboard
+
+To build a dashboard:
+
+. Click *Dashboard* in the side navigation. If you haven't previously viewed a
+dashboard, Kibana displays a landing page where you can click *+*.
+Otherwise, click the *Dashboard* breadcrumb to navigate back to the landing page.
++
+image:images/Dashboard-Landing-Page.png[Dashboard Landing Page]
+
+[[adding-visualizations-to-a-dashboard]]
+. To add a visualization to the dashboard, click *Edit* mode.
+Brand new dashboards will be in *Edit* mode automatically.
++
+image:images/Dashboard-View-Mode.png[Dashboard View Mode]
+
+. Once in Edit mode, click *Add* and select the
+visualization. If you have a large number of visualizations, you can enter a
+*Filter* string to filter the list.
++
+image:images/Dashboard-Edit-Mode.png[Dashboard Edit Mode]
++
+Kibana displays the selected visualization  in a container on the dashboard.
+If you see a message that the container is too small, you can
+<<resizing-containers,resize the visualization>>.
++
+NOTE: By default, Kibana dashboards use a light color theme. To use a dark color theme,
+click *Options* and select *Use dark theme*. To change the default theme, go
+to *Management/Kibana/Advanced Settings* and set `dashboard:defaultDarkTheme`
+to `true`.
+
+[[saving-dashboards]]
+. When you're done adding and arranging visualizations, click *Save* to save the 
+dashboard:
+.. Enter a name for the dashboard. 
+.. To store the time period specified in the time filter with the dashboard, select
+*Store time with dashboard*. 
+.. Click the *Save* button to store it as a Kibana saved object.
+
+[float]
+[[customizing-your-dashboard]]
+=== Arranging Dashboard Elements
+
+In *Edit Mode*, visualizations in your dashboard are stored in resizable, moveable containers.
+
+[float]
+[[moving-containers]]
+==== Moving Visualizations
+
+To reposition a visualization:
+
+. Hover over it to display the container controls.
+. Click and hold the *Move* button in the upper right corner of the container.
+. Drag the container to its new position. 
+. Release the *Move* button.
+
+[float]
+[[resizing-containers]]
+==== Resizing Visualizations
+
+To resize a visualization:
+
+. Hover over it to display the container controls.
+. Click and hold the *Resize* button in the bottom right corner of the container.
+. Drag to change the dimensions of the container. 
+. Release the *Resize* button.
+
+[float]
+[[removing-containers]]
+==== Removing Visualizations
+
+To remove a visualization from the dashboard:
+
+. Hover over it to display the container controls.
+. Click the *Delete* button in the upper right corner of the container.
++
+NOTE: Removing a visualization from a dashboard does _not_ delete the
+saved visualization.
+
+[float]
+[[viewing-detailed-information]]
+=== Viewing Visualization Data
+
+To display the raw data behind a visualization:
+
+. Hover over it to display the container controls.
+. Click the *Expand* button in the lower left corner of the container.
+This displays a table that contains the underlying data. You can also view
+the raw Elasticsearch request and response in JSON and the request statistics.
+The request statistics show the query duration, request duration, total number
+of matching records, and the index (or index pattern) that was searched.
++
+image:images/NYCTA-Table.jpg[]
+
+To export the data behind the visualization as a comma-separated-values
+(CSV) file, click the *Raw* or *Formatted* link at the bottom of the data 
+Table. *Raw* exports the data as it is stored in Elasticsearch. *Formatted*
+exports the results of any applicable Kibana <<managing-fields,field
+formatters>>.
+
+To return to the visualization, click the *Collapse* button in the lower left
+corner of the container.
+
+[float]
+[[changing-the-visualization]]
+=== Modifying a Visualization
+
+To open a visualization in the Visualization Editor:
+
+. Enter Edit Mode.
+. Hover over it to display the container controls.
+. Click the *Edit* button in the upper right corner of the container.
+
+
+[[loading-a-saved-dashboard]]
+== Loading a Dashboard
+
+To open a saved dashboard:
+
+. Click *Dashboard* in the side navigation. 
+. Click *Open* and select a dashboard. If you have a large number of
+dashboards, you can enter a *Filter* string to filter the list. 
++
+TIP: To import, export, and delete dashboards, click the *Manage Dashboards* link
+to open *Management/Kibana/Saved Objects/Dashboards*. 
+
+[[sharing-dashboards]]
+== Sharing a Dashboard
+
+You can either share a direct link to a Kibana dashboard with another user,
+or embed the dashboard in a web page. Users must have Kibana access
+to view embedded dashboards.
+
+[[embedding-dashboards]]
+To share a dashboard:
+
+. Click *Dashboard* in the side navigation. 
+. Open the dashboard you want to share.
+. Click  *Share*.
+. Copy the link you want to share or the iframe you want to embed. You can 
+share the live dashboard or a static snapshot of the current point in time. 
++
+TIP: When sharing a link to a dashboard snapshot, use the *Short URL*. Snapshot
+URLs are long and can be problematic for Internet Explorer users and other
+tools.
+
+

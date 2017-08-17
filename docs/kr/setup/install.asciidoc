@@ -1,0 +1,42 @@
+[[install]]
+== Kibana 설치
+
+Kibana는 다음 패키지 형태로 제공됩니다.
+
+[horizontal]
+`tar.gz`/`zip`::
+
+`tar.gz` 패키지는 Linux 및 Darwin에 설치할 수 있도록 제공되며 가장 손쉽게 Kibana를 시작할 수 있는 방법입니다.
++
+Windows에서는 `zip` 패키지만 지원됩니다.
++
+<<targz>> 또는 <<windows>>
+
+`deb`::
+
+`deb` 패키지는 Debian, Ubuntu, 기타 Debian 기반 시스템에 적합합니다. Debian 패키지는 Elastic 웹 사이트에서 또는 Debian 리포지토리에서 다운로드할 수 있습니다.
++
+<<deb>>
+
+`rpm`::
+
+`rpm` 패키지는 Red Hat, Centos, SLES, OpenSuSE, 기타 RPM 기반 시스템에 설치하기에 적합합니다. RPM은 Elastic 웹 사이트에서 또는 RPM 리포지토리에서 다운로드할 수 있습니다.
++
+<<rpm>>
+
+`docker`::
+
+Kibana를 Docker 컨테이너로 실행할 수 있도록 이미지가 제공됩니다. 미리 설치된 https://www.elastic.co/products/x-pack[X-Pack]과 함께 제공되며 Elastic Docker 레지스트리에서 사용할 수 있습니다.
++
+{kibana-ref}/docker.html[Kibana Docker]
+
+IMPORTANT: Elasticsearch 설치 환경이 {xpack-ref}xpack-security.html[X-Pack Security]의 보호를 받고 있는 경우 {xpack-ref}kibana.html[X-Pack Security와 함께 Kibana 사용]의 추가 설정 지침을 참조하십시오.
+
+
+include::install/targz.asciidoc[]
+
+include::install/deb.asciidoc[]
+
+include::install/rpm.asciidoc[]
+
+include::install/windows.asciidoc[]

@@ -1,0 +1,24 @@
+[[release-notes-5.0.1]]
+== 5.0.1 Release Notes
+
+Also see <<breaking-changes-5.0>>.
+
+[float]
+[[security-5.0.1]]
+=== Security fixes
+An Open Redirect vulnerability has been fixed with the short URL feature.
+Previously, a malicious user could use the internal API that powers the short
+URL feature to create a short URL in kibana that redirected to a different
+domain. +
+{security}[ESA-2016-08] ({commit}92ae3ae[92ae3ae])
+
+[float]
+[[bug-5.0.1]]
+=== Bug fixes
+Core::
+* Improved error message when sessionStorage is disabled in the browser {pull}8343[#8343]
+* Trailing slash redirects now include the basepath configuration {pull}8966[#8966]
+Sharing::
+* Share UI now properly honors the dark theme {issue}8819[#8819]
+Visualize::
+* Tile map bounding boxes no longer create filters with invalid bounds {issue}8946[#8946]

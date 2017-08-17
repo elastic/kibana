@@ -1,0 +1,92 @@
+[[windows]]
+=== WindowsへのKibanaのインストール
+
+`.zip`パッケージを使用して、WindowsにKibanaをインストールできます。
+
+Kibanaの最新の安定バージョンは、link:/downloads/kibana[Kibanaのダウンロード]ページにあります。
+その他のバージョンは、link:/downloads/past-releases[過去のリリースページ]にあります。
+
+[[install-windows]]
+==== 手動による`.zip`パッケージのダウンロードとインストール
+
+ifeval::["{release-state}"=="unreleased"]
+
+バージョン{version}のKibanaはまだリリースされていません。
+
+endif::[]
+
+ifeval::["{release-state}"!="unreleased"]
+
+Kibana v{version}の`.zip` Windowsアーカイブをダウンロードします。 https://artifacts.elastic.co/downloads/kibana/kibana-{version}-windows-x86.zip
+
+好みの解凍ツールで解凍します。これで、kibana-{version}-windows-x86フォルダが作成されます。このフォルダを`$KIBANA_HOME`と呼びます。ターミナルウィンドウで、次のように、`CD`を`$KIBANA_HOME`ディレクトリにします。
+
+
+["source","sh",subs="attributes"]
+----------------------------
+CD c:\kibana-{version}-windows-x86
+----------------------------
+
+endif::[]
+
+[[windows-running]]
+==== コマンドラインからのKibanaの実行
+
+Kibanaは、次のようにコマンドラインから起動できます。
+
+[source,sh]
+--------------------------------------------
+.\bin\kibana
+--------------------------------------------
+
+デフォルトでKibanaは、フォアグラウンドで実行し、そのログを`STDOUT`に出力します。`Ctrl-C`を押すと停止できます。
+
+[[windows-configuring]]
+==== 設定ファイルによるKibanaの設定
+
+Kibanaは、デフォルトで`$KIBANA_HOME/config/kibana.yml`ファイルから設定を読み込みます。この設定ファイルの形式については、{kibana-ref}/settings.html[設定]で説明しています。
+
+[[windows-layout]]
+==== `.zip`アーカイブのディレクトリ構成
+
+`.zip`パッケージは完全に自己解凍型です。デフォルトで、ファイルとディレクトリはすべて`$KIBANA_HOME`内に格納されます。このディレクトリは、アーカイブの解凍時に作成されます。
+
+ディレクトリを作成することなくKibanaの使用を開始でき、$KIBANA_HOME`ディレクトリを削除するのと同じくらい簡単にKibanaをアンインストールできるため、非常に便利です。ただし、後で重要なデータを削除しないように、configディレクトリとdataディレクトリのデフォルトの場所を変更することをお勧めします。
+
+
+[cols="<h,<,<m,<m",options="header",]
+|=======================================================================
+| タイプ | 説明 | デフォルトの場所 | 設定
+| home
+  | Kibanaのホームディレクトリまたは`$KIBANA_HOME`
+ d| アーカイブの解凍により作成されるディレクトリ
+ d|
+
+| bin
+  | Kibanaサーバーを起動するための`kibana`およびプラグインをインストールするための`kibana-plugin`を含むバイナリスクリプト
+    
+  | $KIBANA_HOME\bin
+ d|
+
+| config
+  | `kibana.yml`を含む設定ファイル
+  | $KIBANA_HOME\config
+ d|
+
+| data
+  | Kibanaとそのプラグインによりディスクに書き込まれるデータファイルの場所
+  | $KIBANA_HOME\data
+ d|
+
+| optimize
+  | トランスパイルされたソースコード。ある管理操作（プラグインのインストールなど）を行うと、その操作時にソースコードがトランスパイルされます。
+    
+  | $KIBANA_HOME\optimize
+ d|
+
+| plugins
+  | プラグインファイルの場所。各プラグインは、サブディレクトリに格納されます。
+  | $KIBANA_HOME\plugins
+ d|
+
+|=======================================================================

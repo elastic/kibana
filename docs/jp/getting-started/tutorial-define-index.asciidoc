@@ -1,0 +1,12 @@
+[[tutorial-define-index]]
+== Index Patternの定義
+
+Elasticsearchに読み込まれたデータの各セットには、Index Patternがあります。前のセクションで、シェイクスピアデータセットには`shakespeare`という名前のインデックスがあり、口座データセットには`bank`という名前のインデックスがありました。_index pattern_は、複数のインデックスに一致するオプションのワイルドカードを持つ文字列です。たとえば、一般的なロギング事例では、典型的なインデックス名はYYYY.MM.DD形式の日付が含まれ、5月のIndex Patternは`logstash-2015.05*`のようになります。
+
+このチュートリアルの場合、読み込んだインデックスの名前に一致するパターンが機能します。ブラウザを開き、`localhost:5601`に移動します。*Settings* タブをクリックしてから、*Indices* タブをクリックします。*Add New* をクリックして、新しいIndex Patternを定義します。2つのサンプルデータセット、シェイクスピアの戯曲と金融口座には、時系列データは含まれません。
+これらのデータセットのIndex Patternを作成するときは、*Index contains time-based events* ボックスがオフになっていることを確認してください。
+シェイクスピアデータセットのIndex Patternとして`shakes*`を指定し、*Create* をクリックしてIndex Patternを定義してから、`ba*`という名前の2つ目のIndex Patternを定義します。
+
+Logstashデータセットには時系列データが含まれるため、*Add New* をクリックしてこのデータセットのインデックスを定義した後、*Index contains time-based events* ボックスがオンになっていることを確認して、*Time-field name* ドロップダウンから`@timestamp`フィールドを選択してください。
+
+NOTE: Index Patternを定義するときは、そのパターンに一致するインデックスがElasticsearchに存在しなければなりません。そのインデックスには、データが含まれている必要があります。

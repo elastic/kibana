@@ -1,0 +1,5 @@
+모든 패키지는 Elastic Signing Key(PGP 키 https://pgp.mit.edu/pks/lookup?op=vindex&search=0xD27D666CD88E42B4[D88E42B4], https://pgp.mit.edu[https://pgp.mit.edu]에서 사용 가능)와 핑거프린트로 서명됩니다.
+
+    4609 5ACC 8548 582C 1A26 99A9 D27D 666C D88E 42B4
+
+공개 서명 키를 다운로드하고 설치합니다.

@@ -1,0 +1,167 @@
+[[tutorial-load-dataset]]
+== サンプルデータの読み込み
+
+このセクションのチュートリアルは、次のデータセットを基にしています。
+
+* 適切に解析されフィールドに入れられたウィリアムシェイクスピア全集。次をクリックして、このデータをダウンロードしてください。
+  https://download.elastic.co/demos/kibana/gettingstarted/shakespeare.json[shakespeare.json].
+* データがランダムに生成された架空口座のセット。次をクリックして、このデータをダウンロードしてください。
+  https://download.elastic.co/demos/kibana/gettingstarted/accounts.zip[accounts.zip]
+* ランダムに生成されたログファイルのセット。次をクリックして、このデータをダウンロードしてください。
+  https://download.elastic.co/demos/kibana/gettingstarted/logs.jsonl.gz[logs.jsonl.gz]
+
+2つのデータセットは圧縮されています。次のコマンドを使用して、ファイルを解凍します。
+
+[source,shell]
+unzip accounts.zip
+gunzip logs.jsonl.gz
+
+シェイクスピアデータセットは、次のスキーマに構成されています。
+
+[source,json]
+{
+    "line_id": INT,
+    "play_name": "String",
+    "speech_number": INT,
+    "line_number": "String",
+    "speaker": "String",
+    "text_entry": "String",
+}
+
+口座データセットは、次のスキーマに構成されています。
+
+[source,json]
+{
+    "account_number": INT,
+    "balance": INT,
+    "firstname": "String",
+    "lastname": "String",
+    "age": INT,
+    "gender": "M or F",
+    "address": "String",
+    "employer": "String",
+    "email": "String",
+    "city": "String",
+    "state": "String"
+}
+
+ログデータセットのスキーマには数多くの異なるフィールドが含まれていますが、このチュートリアルで使用される重要なフィールドは次のとおりです。
+
+[source,json]
+{
+    "memory": INT,
+    "geo.coordinates": "geo_point"
+    "@timestamp": "date"
+}
+
+シェイクスピアデータセットとログデータセットを読み込む前に、フィールドの {es-ref}mapping.html[_マッピング_]をセットアップする必要があります。
+マッピングは、インデックス内のドキュメントを論理グループに分け、フィールドの検索性、トークン化されているかどうか、または別々の単語に分割されているかどうかなど、フィールドの特性を指定します。
+
+ターミナル（`bash`など）で次のコマンドを使用して、シェークスピアデータセットのマッピングをセットアップします。
+
+[source,shell]
+curl -H 'Content-Type: application/json' -XPUT http://localhost:9200/shakespeare -d '
+{
+ "mappings" : {
+  "_default_" : {
+   "properties" : {
+    "speaker" : {"type": "string", "index" : "not_analyzed" },
+    "play_name" : {"type": "string", "index" : "not_analyzed" },
+    "line_id" : { "type" : "integer" },
+    "speech_number" : { "type" : "integer" }
+   }
+  }
+ }
+}
+';
+
+このマッピングは、データセットの次の属性を指定します。
+
+* _speaker_フィールドは、分析されない文字列です。このフィールド内の文字列は、フィールド内に複数の単語がある場合でも、単一ユニットとして扱われます。
+* これは_play_name_フィールドについても同様です。
+* _line_id_フィールドと_speech_number_フィールドは整数です。
+
+ログデータセットには、`geo_point`タイプをログのフィールドに適用して、ログ内の緯度/経度ペアを地理的位置としてラベル付けするマッピングが必要です。
+
+次のコマンドを使用して、ログの`geo_point`マッピングを定めます。
+
+[source,shell]
+curl -H 'Content-Type: application/json' -XPUT http://localhost:9200/logstash-2015.05.18 -d '
+{
+  "mappings": {
+    "log": {
+      "properties": {
+        "geo": {
+          "properties": {
+            "coordinates": {
+              "type": "geo_point"
+            }
+          }
+        }
+      }
+    }
+  }
+}
+';
+
+[source,shell]
+curl -H 'Content-Type: application/json' -XPUT http://localhost:9200/logstash-2015.05.19 -d '
+{
+  "mappings": {
+    "log": {
+      "properties": {
+        "geo": {
+          "properties": {
+            "coordinates": {
+              "type": "geo_point"
+            }
+          }
+        }
+      }
+    }
+  }
+}
+';
+
+[source,shell]
+curl -H 'Content-Type: application/json' -XPUT http://localhost:9200/logstash-2015.05.20 -d '
+{
+  "mappings": {
+    "log": {
+      "properties": {
+        "geo": {
+          "properties": {
+            "coordinates": {
+              "type": "geo_point"
+            }
+          }
+        }
+      }
+    }
+  }
+}
+';
+
+口座データセットにマッピングは必要ありません。そのため、現段階で、Elasticsearch {es-ref}docs-bulk.html[`bulk`]APIを使用して、次のコマンドでデータセットを読み込む準備ができています。
+
+[source,shell]
+curl -H 'Content-Type: application/x-ndjson' -XPOST 'localhost:9200/bank/account/_bulk?pretty' --data-binary @accounts.json
+curl -H 'Content-Type: application/x-ndjson' -XPOST 'localhost:9200/shakespeare/_bulk?pretty' --data-binary @shakespeare.json
+curl -H 'Content-Type: application/x-ndjson' -XPOST 'localhost:9200/_bulk?pretty' --data-binary @logs.jsonl
+
+これらのコマンドは、利用可能なコンピューティングリソースによって、実行に時間がかかる場合があります。
+
+次のコマンドを使用して、正常に読み込まれたことを検証します。
+
+[source,shell]
+curl 'localhost:9200/_cat/indices?v'
+
+次のようなoutputが表示されるはずです。
+
+[source,shell]
+health status index               pri rep docs.count docs.deleted store.size pri.store.size
+yellow open   bank                  5   1       1000            0    418.2kb        418.2kb
+yellow open   shakespeare           5   1     111396            0     17.6mb         17.6mb
+yellow open   logstash-2015.05.18   5   1       4631            0     15.6mb         15.6mb
+yellow open   logstash-2015.05.19   5   1       4624            0     15.7mb         15.7mb
+yellow open   logstash-2015.05.20   5   1       4750            0     16.4mb         16.4mb

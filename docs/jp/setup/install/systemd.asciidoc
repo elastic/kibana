@@ -1,0 +1,19 @@
+==== `systemd`でのKibanaの実行
+
+システムの起動時に自動的に起動するようにKibanaを設定するには、次のコマンドを実行します。
+
+[source,sh]
+--------------------------------------------------
+sudo /bin/systemctl daemon-reload
+sudo /bin/systemctl enable kibana.service
+--------------------------------------------------
+
+次のように、Kibanaを起動および停止できます。
+
+[source,sh]
+--------------------------------------------
+sudo systemctl start kibana.service
+sudo systemctl stop kibana.service
+--------------------------------------------
+
+これらのコマンドは、Kibanaが正常に起動されたかどうかについてのフィードバックを返しません。その代わり、この情報は`/var/log/kibana/`にあるログファイルに書き込まれます。

@@ -1,0 +1,27 @@
+[[tutorial-discovering]]
+== データの検出
+
+サイドナビゲーションで*Discover*をクリックして、Kibanaのデータ検出機能を表示します。 
+
+image::images/tutorial-discover.png[]
+
+クエリバーで、 {es-ref}query-dsl-query-string-query.html#query-string-syntax[Elasticsearchクエリ]を入力して、データを検索できます。Discoverで結果を調べて、Visualizeで保存した結果のビジュアライゼーションを作成できます。 
+
+現在のIndex Patternは、クエリバーの下に表示されます。Index Patternは、クエリを送信したときに検索されるインデックスを決定します。別のインデックスのセットを検索するには、ドロップダウンメニューから別のパターンを選択します。
+Index Patternを追加するには、*Management/Kibana/Index Patterns*に移動して、*Add New*をクリックします。 
+
+対象のフィールド名と値を使用して検索を構築できます。数値フィールドでは、より大きい（>）、より小さい（<）、または等しい（=）などの比較演算子を使用できます。論理演算子AND、OR、およびNOT（すべて大文字）で要素をつなぐことができます。
+
+試してみましょう。Index Pattern `ba*`を選択して、クエリバーに次のクエリ文字列を入力します。
+
+[source,text]
+account_number:<100 AND balance:>47500
+
+このクエリは、残高が47,500より多い0～99の口座番号をすべて返します。サンブルの銀行データを検索した場合、5つの結果が返ります。 
+Account numbers 8, 32, 78, 85, and 97.
+
+image::images/tutorial-discover-2.png[]
+
+デフォルトでは、すべてのフィールドが一致するドキュメントごとに表示されます。表示するドキュメントフィールドを選択するには、Available Fieldsリストの上にマウスカーソルを移動し、含める各フィールドの横にある*add*ボタンをクリックします。 たとえば、`account_number`のみを追加すると、5つの口座番号を示すシンプルなリストに表示が変わります。
+
+image::images/tutorial-discover-3.png[]

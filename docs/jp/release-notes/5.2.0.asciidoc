@@ -1,0 +1,48 @@
+[[release-notes-5.2.0]]
+== 5.2.0 Release Notes
+
+Also see <<breaking-changes-5.0>>.
+
+[float]
+[[enhancement-5.2.0]]
+=== Enhancements
+Console::
+* Scripts can now use proper syntax highlighting {pull}9433[#9433]
+Core::
+* Support for searching against tribe nodes {pull}9132[#9132]
+* Automatically select default index pattern if there is only one {pull}9679[#9679]
+* Remove "will be cached for next time" message from loading screen {pull}9383[#9383]
+Discover::
+* Improved consistency with the sidebar interface {pull}7958[#7958]
+Saved Objects::
+* Dashboards, visualizations, and saved searches can now be renamed while saving {pull}9087[#9087]
+* Improved UI when editing saved objects {pull}9543[#9543]
+* Improved UI when viewing saved objects {pull}9535[#9535]
+Status::
+* Status API now includes the Kibana version and build number {pull}9195[#9195]
+Timelion::
+* Timelion sheets can now be deleted {pull}9191[#9191]
+Visualize::
+* Heatmap visualization {pull}9403[#9403]
+* Line and area charts now support stepped lines {pull}9425[#9425]
+* Tilemap zoom capabilities are now determined automatically when using the default Elastic Tile Service {pull}8630[#8630]
+
+
+[float]
+[[bug-5.2.0]]
+=== Bug fixes
+Core::
+* The Kibana logo in the loading screen now shows properly in IE11 {pull}9921[#9921]
+* Browser-specific style overrides are now properly being handled for legacy browsers {pull}9899[#9899]
+Dev Tools::
+* The link to the Dev Tools app is now hidden when no developer tools are enabled {pull}9489[#9489]
+Discover::
+* Reduce lag experienced when expanding doc table rows {pull}9326[#9326]
+Plugins::
+* Calling another API route via .inject() no longer fails due to a missing socket {pull}9332[#9332]
+Timelion::
+* Specifying yaxis() no longer forces a minimum value of 0 {pull}9428[#9428]
+* Improved dark theme support for Timelion axis and legend labels {pull}9422[#9422]
+Visualize::
+* Metric visualizations now show scrollbars when the value overflows the container {pull}9481[#9481]
+* Axis custom extents now support decimal values {pull}9426[#9426]

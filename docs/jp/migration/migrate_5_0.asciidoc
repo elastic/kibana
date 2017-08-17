@@ -1,0 +1,136 @@
+[[breaking-changes-5.0]]
+== Breaking changes in 5.0
+
+This section discusses the changes that you need to be aware of when migrating
+your application to Kibana 5.0.
+
+[float]
+=== URL changes for DEB/RPM packages
+*Details:* The previous `packages.elastic.co` URL has been altered to `artifacts.elastic.co`.
+
+*Impact:* Ensure you update your repository files before running the upgrade process, or your operating system may not see the new
+packages.
+
+[float]
+=== Kibana binds to localhost by default
+{pull}8013[Pull Request 8013]
+
+*Details:* Kibana (like Elasticsearch) now binds to localhost for security purposes instead of 0.0.0.0 (all addresses). Previous binding to 0.0.0.0 also caused issues for Windows users.
+
+*Impact:* If you are running Kibana inside a container/environment that does not allow localhost binding, this will cause Kibana not to start up unless server.host is configured in the kibana.yml to a valid IP address/host, etc..
+
+[float]
+=== Markdown headers
+
+{pull}7855[Pull Request 7855]
+
+*Details:* As part of addressing the security issue https://www.elastic.co/community/security[ESA-2016-03] (CVE-2016-1000220) in the Kibana product, the markdown version has been bumped.
+
+*Impact:* As a result of the fix to ESA-2016-03, there is a slight change in the markdown format for headers.
+
+Previously, headers are defined using `###` followed by the title:
+
+ ###Packetbeat:
+    [Dashboard](/#/dashboard/Packetbeat-Dashboard)
+    [Web transactions](/#/dashboard/HTTP)
+
+It should now be defined as follows (with a space between ### and the title):
+
+ ### Packetbeat:
+     [Dashboard](/#/dashboard/Packetbeat-Dashboard)
+     [Web transactions](/#/dashboard/HTTP)
+
+[float]
+=== Linux package install directories
+
+{pull}7308[Pull Request 7308]
+
+*Details:* To align with the Elasticsearch packages, Kibana now installs binaries under `/usr/share/kibana` and configuration files under `/etc/kibana`. Previously they were both located under `/opt/kibana`.
+
+*Impact:* Apart from learning the new location of Kibana binaries and configuration files, you may have to update your automation scripts as needed.
+
+[float]
+=== The plugin installer now has its own executable
+
+{pull}6402[Pull Request 6402]
+
+*Details:* The new installer can be found at `/bin/kibana-plugin`. When installing/removing Kibana plugins, you will now call `kibana-plugin` instead of the main kibana script.
+
+*Impact:* You may have to update your automation scripts.
+
+[float]
+=== Only whitelisted client headers are sent to Elasticsearch
+
+{pull}6896[Pull Request 6896]
+
+*Details:* The only headers that are proxied from the browser client to Elasticsearch are the ones set via the `elasticsearch.requestHeadersWhitelist` server configuration.
+
+*Impact:* If you're relying on client headers in Elasticsearch, you will need to whitelist the specific headers in your `kibana.yml`.
+
+[float]
+=== `server.defaultRoute` is now always prefixed by `server.basePath`
+
+{pull}6953[Pull Request 6953]
+
+*Details:* The base path configuration now precedes the default route configuration when accessing the default route.
+
+*Impact:* If you were relying on both `defaultRoute` and `basePath` configurations, you will need to remove the hardcoded `basePath` from your `defaultRoute`.
+
+[float]
+=== Directory listings of static assets are no longer rendered
+
+{pull}6764[Pull Request 6764]
+
+*Details:* The server no longer renders a list of static files if you try to access a directory.
+
+*Impact:* If you were relying on this behavior before, you will need to expose underlying directory listings via a reverse proxy instead.
+
+[float]
+=== Console logs display date/time in UTC
+
+{pull}8534[Pull Request 8534]
+
+*Details:* All server logs now render in UTC rather than the server's local time.
+
+*Impact:* If you are parsing the timestamps of Kibana server logs in an automated way, make sure to update your automation to accomodate UTC values.
+
+[float]
+=== A column for Average no longer renders along with Standard Deviation
+
+{pull}7827[Pull Request 7827]
+
+*Details:* From the early days of Kibana, adding a standard deviation metric to a data table also resulted in an average column being added to that data table. This is no longer the case.
+
+*Impact:* If you want to have both standard deviation and average in the same data table, then add both columns just as you would any other metric.
+
+[float]
+=== Minimum size on terms aggregations has been changed from 0 to 1
+
+{pull}8339[Pull Request 8339]
+
+*Details:* Elasticsearch has removed the ability to specify a size of 0 for terms aggregations, so Kibana's minimum value has been adjusted to follow suit.
+
+*Impact:* Any saved visualization that relies on size=0 will need to be updated.
+
+[float]
+=== Dashboards created before 5.0
+
+*Details:* Loading a 4.x dashboard in Kibana 5.0 results in an internal change
+to the dashboard's metadata, which you can persist by saving the dashboard.
+
+*Impact:* This change will not affect the functionality of the dashboard itself,
+but you must save the dashboard before using certain features such as X-Pack reporting.
+
+[float]
+=== Saved objects with previously deprecated Elasticsearch features
+
+*Details:* Since Kibana 4.3, users have been able to arbitrarily modify filters
+via a generic JSON editor. If users took advantage of any deprecated Elasticsearch
+features in this way, then they will cause errors in Kibana since they're removed
+from Elasticsearch 5.0. Check the Elasticsearch
+{ref}/breaking_50_search_changes.html#_deprecated_queries_removed[breaking changes]
+documentation for more details.
+
+*Impact*: Discover, Visualize, and Dashboard will error for any saved objects that
+are relying on removed Elasticsearch functionality. Users will need to update the
+JSON of any affected filters.
