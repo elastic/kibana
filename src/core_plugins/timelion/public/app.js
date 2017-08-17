@@ -223,7 +223,7 @@ app.controller('timelion', function (
       }),
     })
     // data, status, headers, config
-    .success(function (resp) {
+    .then(function (resp) {
       dismissNotifications();
       $scope.stats = resp.stats;
       $scope.sheet = resp.sheet;
@@ -234,7 +234,7 @@ app.controller('timelion', function (
       });
       $scope.running = false;
     })
-    .error(function (resp) {
+    .catch(function (resp) {
       $scope.sheet = [];
       $scope.running = false;
 

@@ -26,7 +26,7 @@ export function getRoutes() {
   };
 }
 
-export function IndexPatternProvider(Private, $http, config, kbnIndex, Promise, confirmModalPromise, kbnUrl) {
+export function IndexPatternProvider(Private, config, Promise, confirmModalPromise, kbnUrl) {
   const fieldformats = Private(RegistryFieldFormatsProvider);
   const getConfig = (...args) => config.get(...args);
   const getIds = Private(IndexPatternsGetProvider)('id');

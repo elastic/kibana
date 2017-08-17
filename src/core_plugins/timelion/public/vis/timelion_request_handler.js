@@ -32,10 +32,10 @@ const TimelionRequestHandlerProvider = function (Private, Notifier, $http, $root
             timezone: timezone
           }),
         })
-          .success(function (resp) {
+          .then(function (resp) {
             resolve(resp);
           })
-          .error(function (resp) {
+          .catch(function (resp) {
             const err = new Error(resp.message);
             err.stack = resp.stack;
             notify.error(err);
