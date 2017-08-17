@@ -43,6 +43,7 @@ export default class LoadingButton extends Component {
         </KuiButton>
 
         <br />
+        <br />
 
         <KuiButton
           buttonType="primary"

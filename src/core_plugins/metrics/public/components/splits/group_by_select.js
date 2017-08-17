@@ -10,9 +10,9 @@ function GroupBySelect(props) {
   return (
     <Select
       clearable={false}
-      value={ props.value || 'everything' }
+      value={props.value || 'everything'}
       onChange={props.onChange}
-      options={ modeOptions }
+      options={modeOptions}
     />
   );
 

@@ -1,5 +1,5 @@
 import _ from 'lodash';
-import { SavedObjectNotFound, DuplicateField, IndexPatternAlreadyExists, IndexPatternMissingIndices } from 'ui/errors';
+import { SavedObjectNotFound, DuplicateField, IndexPatternMissingIndices } from 'ui/errors';
 import angular from 'angular';
 import { RegistryFieldFormatsProvider } from 'ui/registry/field_formats';
 import UtilsMappingSetupProvider from 'ui/utils/mapping_setup';
@@ -368,18 +368,17 @@ export function IndexPatternProvider(Private, $http, config, kbnIndex, Promise, 
 
           return confirmModalPromise(confirmMessage, { confirmButtonText: 'Edit existing pattern' })
             .then(() => {
-              kbnUrl.change('/management/kibana/indices/{{id}}', { id: duplicate.id });
+              kbnUrl.redirect('/management/kibana/indices/{{id}}', { id: duplicate.id });
               return true;
-            })
-            .catch(() => {
-              throw new IndexPatternAlreadyExists(this.title);
+            }).catch(() => {
+              return true;
             });
         });
     }
 
     create() {
-      return this.warnIfDuplicateTitle().then((duplicate) => {
-        if (duplicate) return;
+      return this.warnIfDuplicateTitle().then((isDuplicate) => {
+        if (isDuplicate) return;
 
         const body = this.prepBody();
 

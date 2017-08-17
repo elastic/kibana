@@ -47,7 +47,7 @@ function VisPicker(props) {
       <VisPickerItem
         key={item.type}
         onClick={handleChange}
-        selected={ item.type === model.type }
+        selected={item.type === model.type}
         {...item}
       />
     );

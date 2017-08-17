@@ -41,8 +41,8 @@ Docker registry.
 {kibana-ref}/docker.html[Running Kibana on Docker]
 
 IMPORTANT: If your Elasticsearch installation is protected by {xpack-ref}/xpack-security.html[X-Pack Security]
-see {xpack-ref}/kibana.html[Using Kibana with X-Pack Security] for additional setup
-instructions.
+see {kibana-ref}/using-kibana-with-security.html[Configuring Security in Kibana]
+for additional setup instructions.
 
 
 include::install/targz.asciidoc[]
