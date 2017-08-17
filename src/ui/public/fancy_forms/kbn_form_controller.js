@@ -1,74 +1,79 @@
-import _ from 'lodash';
+export function decorateFormController($delegate, $injector) {
+  const [directive] = $delegate;
+  const FormController = directive.controller;
 
-/**
- * Extension of Angular's FormController class
- * that provides helpers for error handling/validation.
- *
- * @param {$scope} $scope
- */
-export function KbnFormController($scope, $element) {
-  const self = this;
+  class KbnFormController extends FormController {
+    // prevent inheriting $inject from FormController
+    static $inject = ['$scope', '$element'];
+    constructor($scope, $element, ...superArgs) {
+      super(...superArgs);
 
-  self.errorCount = function () {
-    return self.$$invalidModels().length;
-  };
-
-  // same as error count, but filters out untouched and pristine models
-  self.softErrorCount = function () {
-    return self.$$invalidModels(function (model) {
-      return model.$touched || model.$dirty;
-    }).length;
-  };
-
-  self.describeErrors = function () {
-    const count = self.softErrorCount();
-    return count + ' Error' + (count === 1 ? '' : 's');
-  };
-
-  self.$$invalidModels = function (predicate) {
-    predicate = _.callback(predicate);
-
-    const invalid = [];
-
-    _.forOwn(self.$error, function collect(models) {
-      if (!models) return;
-
-      models.forEach(function (model) {
-        if (model.$$invalidModels) {
-          // recurse into child form
-          _.forOwn(model.$error, collect);
-        } else {
-          if (predicate(model)) {
-            // prevent dups
-            let len = invalid.length;
-            while (len--) if (invalid[len] === model) return;
-
-            invalid.push(model);
-          }
-        }
+      $element.on('submit', this._filterSubmits);
+      $scope.$on('$destroy', () => {
+        $element.off('submit', this._filterSubmits);
       });
-    });
+    }
 
-    return invalid;
-  };
+    errorCount() {
+      return this._getInvalidModels().length;
+    }
 
-  self.$setTouched = function () {
-    self.$$invalidModels().forEach(function (model) {
-      // only kbnModels have $setTouched
-      if (model.$setTouched) model.$setTouched();
-    });
-  };
+    // same as error count, but filters out untouched and pristine models
+    softErrorCount() {
+      return this._getInvalidModels()
+        .filter(model => model.$touched || model.$dirty)
+        .length;
+    }
 
-  function filterSubmits(event) {
-    if (self.errorCount()) {
-      event.preventDefault();
-      event.stopImmediatePropagation();
-      self.$setTouched();
+    describeErrors() {
+      const count = this.softErrorCount();
+      return `${count} Error${count === 1 ? '' : 's'}`;
+    }
+
+    $setTouched() {
+      this._getInvalidModels()
+        .forEach(model => model.$setTouched());
+    }
+
+    _onFilterSubmit = () => {
+      if (this.errorCount()) {
+        event.preventDefault();
+        event.stopImmediatePropagation();
+        this.$setTouched();
+      }
+    }
+
+    _getInvalidModels() {
+      return (function collect(modelGroup) {
+        return Object.values(modelGroup.$error).reduce((acc, models) => {
+          return [
+            ...acc,
+            ...(models || []).reduce((acc, model) => {
+              if (model.$$invalidModels) {
+                // this is another model group that has its own child models,
+                // like a nested ng-form, so recurse and keep going
+                return [
+                  ...acc,
+                  ...collect(model)
+                ];
+              }
+
+              return [...acc, model];
+            }, [])
+          ];
+        }, []);
+      }(this));
     }
   }
 
-  $element.on('submit', filterSubmits);
-  $scope.$on('$destroy', function () {
-    $element.off('submit', filterSubmits);
-  });
+  // replace controller with our wrapper
+  directive.controller = [
+    ...$injector.annotate(KbnFormController),
+    ...$injector.annotate(FormController),
+    (...args) => (
+      new KbnFormController(...args)
+    )
+  ];
+
+  return $delegate;
 }
