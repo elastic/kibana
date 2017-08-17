@@ -1,15 +1,24 @@
 @import (reference) "../../../style/main";
 
-.canvas__esdocs--index_query {
+.canvas__esdocs--top {
   display: flex;
+  margin-bottom: @spacingM;
 
   .canvas__esdocs--index {
     margin-right: @spacingM;
-    width: 150px;
+    width: @spacingXXXL * 3;
+  }
+
+  .canvas__esdocs--sort-field {
+    width: @spacingXXXL * 3;
+  }
+
+  .canvas__esdocs--sort-dir {
+    width: @spacingXXXXL;
   }
 
   .canvas__esdocs--query {
     flex-grow: 1;
+    margin-right: @spacingM;
   }
-
 }
