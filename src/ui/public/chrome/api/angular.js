@@ -33,11 +33,13 @@ export function initAngularApi(chrome, internals) {
       return a.href;
     }()))
     .config(chrome.$setupXsrfRequestInterceptor)
-    .config(['$compileProvider', function ($compileProvider) {
+    .config(function ($compileProvider, $locationProvider) {
       if (!internals.devMode) {
         $compileProvider.debugInfoEnabled(false);
       }
-    }])
+
+      $locationProvider.hashPrefix('');
+    })
     .run(($location, $rootScope, Private, config) => {
       chrome.getFirstPathSegment = () => {
         return $location.path().split('/')[1];
