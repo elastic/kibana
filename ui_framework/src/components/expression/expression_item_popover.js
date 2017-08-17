@@ -1,4 +1,4 @@
-import React from 'react';
+import React,{ cloneElement } from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
 
@@ -7,57 +7,52 @@ const POPOVER_ALIGN = [
   'right',
 ];
 
-/*
-With some modification copy-pasted from
-https://stackoverflow.com/questions/32553158/detect-click-outside-react-component
-*/
-const outsideClickNotifier = WrappedComponent => class extends React.Component {
-  constructor(props) {
-    super(props);
-
-    this.handleClickOutside = this.handleClickOutside.bind(this);
+class KuiOutsideClickDetector2 extends React.Component {
+  static propTypes = {
+    children: PropTypes.node.isRequired,
+    onOutsideClick: PropTypes.func.isRequired,
   }
 
-  componentDidMount() {
-    document.addEventListener('mousedown', this.handleClickOutside);
-  }
-
-  componentWillUnmount() {
-    document.removeEventListener('mousedown', this.handleClickOutside);
-  }
-
-  handleClickOutside(event) {
+  onClickOutside = event => {
     if (!this.wrapperRef) {
       return;
     }
 
-    if (!this.props.isVisible) {
+    if (this.wrapperRef === event.target) {
       return;
     }
 
-    if ((this.wrapperRef !== event.target) && !this.wrapperRef.contains(event.target)) {
-      this.props.onOutsideClick();
+    if (this.wrapperRef.contains(event.target)) {
+      return;
     }
+
+    this.props.onOutsideClick();
+  }
+
+  componentDidMount() {
+    document.addEventListener('click', this.onClickOutside);
+  }
+
+  componentWillUnmount() {
+    document.removeEventListener('click', this.onClickOutside);
   }
 
   render() {
-    const { onOutsideClick, ...rest } = this.props; //eslint-disable-line no-unused-vars
-    return <WrappedComponent rootRef={(node)=> this.wrapperRef = node} {...rest} />;
+    return cloneElement(this.props.children, {
+      ref: node => {
+        this.wrapperRef = node;
+      }
+    });
   }
+ }
 
-  static propTypes = {
-    onOutsideClick: PropTypes.func.isRequired,
-    isVisible: PropTypes.bool.isRequired,
-  };
-};
-
-let KuiExpressionItemPopover = ({
+const KuiExpressionItemPopover = ({
   className,
   title,
   isVisible,
   children,
-  rootRef,
   align,
+  onOutsideClick,
   ...rest
 }) => {
   const classes = classNames('kuiExpressionItem__popover', className, {
@@ -65,18 +60,19 @@ let KuiExpressionItemPopover = ({
     'kuiExpressionItem__popover--alignRight': align === 'right'
   });
   return (
-    <div
-      ref={rootRef}
-      className={classes}
-      {...rest}
-    >
-      <div className="kuiExpressionItem__popoverTitle">
-        {title}
+    <KuiOutsideClickDetector2 onOutsideClick={onOutsideClick}>
+      <div
+        className={classes}
+        {...rest}
+      >
+        <div className="kuiExpressionItem__popoverTitle">
+          {title}
+        </div>
+        <div className="kuiExpressionItem__popoverContent">
+          {children}
+        </div>
       </div>
-      <div className="kuiExpressionItem__popoverContent">
-        {children}
-      </div>
-    </div>
+    </KuiOutsideClickDetector2>
   );
 };
 
@@ -90,11 +86,8 @@ KuiExpressionItemPopover.propTypes = {
   isVisible: PropTypes.bool.isRequired,
   children: PropTypes.node,
   align: PropTypes.oneOf(POPOVER_ALIGN),
-  //only for outsideClickNotifier
-  rootRef: PropTypes.func.isRequired,
+  onOutsideClick: PropTypes.func.isRequired,
 };
-
-KuiExpressionItemPopover = outsideClickNotifier(KuiExpressionItemPopover);
 
 export {
   POPOVER_ALIGN,

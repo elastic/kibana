@@ -52,41 +52,11 @@ class KuiExpressionItemExample extends React.Component {
   }
 
   render() {
-    const example1PopoverContent = (
-      <select className="kuiSelect" value={this.state.example1.value} onChange={this.changeExample1}>
-        <option label="count()">count()</option>
-        <option label="average()">average()</option>
-        <option label="sum()">sum()</option>
-        <option label="median()">median()</option>
-        <option label="min()">min()</option>
-        <option label="max()">max()</option>
-      </select>
-    );
-    const example2PopoverContent = (
-      <div>
-        <select className="kuiSelect" value={this.state.example2.object} onChange={this.changeExample2Object}>
-          <option label="A">A</option>
-          <option label="B">B</option>
-          <option label="C">C</option>
-        </select>
-
-        <input
-          type="text"
-          className="kuiTextInput kuiTextInput--small"
-          value={this.state.example2.value}
-          onChange={this.changeExample2Value}
-        />
-
-        <select className="kuiSelect kuiSelect--large" value={this.state.example2.description} onChange={this.changeExample2Description}>
-          <option label="Is above">Is above</option>
-          <option label="Is below">Is below</option>
-          <option label="Is exactly">Is exactly</option>
-        </select>
-      </div>
-    );
-
     //Rise the popovers above GuidePageSideNav
     const popoverStyle = { zIndex:'200' };
+
+    const popover1 = (this.state.activeButton === 'example1') ? this.getPopover1(popoverStyle) : null;
+    const popover2 = (this.state.activeButton === 'example2') ? this.getPopover2(popoverStyle) : null;
 
     return (
       <div>
@@ -97,14 +67,7 @@ class KuiExpressionItemExample extends React.Component {
             isActive={this.state.activeButton === 'example1'}
             onClick={()=>this.setState({ activeButton:'example1' })}
           />
-          <KuiExpressionItemPopover
-            title='When'
-            isVisible={this.state.activeButton === 'example1'}
-            onOutsideClick={this.onOutsideClick}
-            style={popoverStyle}
-          >
-            {example1PopoverContent}
-          </KuiExpressionItemPopover>
+          {popover1}
         </KuiExpressionItem>
         <KuiExpressionItem key='example2'>
           <KuiExpressionItemButton
@@ -113,17 +76,62 @@ class KuiExpressionItemExample extends React.Component {
             isActive={this.state.activeButton === 'example2'}
             onClick={()=>this.setState({ activeButton:'example2' })}
           />
-          <KuiExpressionItemPopover
-            title={this.state.example2.description}
-            isVisible={this.state.activeButton === 'example2'}
-            onOutsideClick={this.onOutsideClick}
-            align='right'
-            style={popoverStyle}
-          >
-            {example2PopoverContent}
-          </KuiExpressionItemPopover>
+          {popover2}
         </KuiExpressionItem>
       </div>
+    );
+  }
+
+  getPopover1(popoverStyle) {
+    return (
+      <KuiExpressionItemPopover
+        title='When'
+        isVisible={this.state.activeButton === 'example1'}
+        onOutsideClick={this.onOutsideClick}
+        style={popoverStyle}
+      >
+        <select className="kuiSelect" value={this.state.example1.value} onChange={this.changeExample1}>
+          <option label="count()">count()</option>
+          <option label="average()">average()</option>
+          <option label="sum()">sum()</option>
+          <option label="median()">median()</option>
+          <option label="min()">min()</option>
+          <option label="max()">max()</option>
+        </select>
+      </KuiExpressionItemPopover>
+    );
+  }
+
+  getPopover2(popoverStyle) {
+    return (
+      <KuiExpressionItemPopover
+        title={this.state.example2.description}
+        isVisible={this.state.activeButton === 'example2'}
+        onOutsideClick={this.onOutsideClick}
+        align='right'
+        style={popoverStyle}
+      >
+        <div>
+          <select className="kuiSelect" value={this.state.example2.object} onChange={this.changeExample2Object}>
+            <option label="A">A</option>
+            <option label="B">B</option>
+            <option label="C">C</option>
+          </select>
+
+          <input
+            type="text"
+            className="kuiTextInput kuiTextInput--small"
+            value={this.state.example2.value}
+            onChange={this.changeExample2Value}
+          />
+
+          <select className="kuiSelect kuiSelect--large" value={this.state.example2.description} onChange={this.changeExample2Description}>
+            <option label="Is above">Is above</option>
+            <option label="Is below">Is below</option>
+            <option label="Is exactly">Is exactly</option>
+          </select>
+        </div>
+      </KuiExpressionItemPopover>
     );
   }
 }

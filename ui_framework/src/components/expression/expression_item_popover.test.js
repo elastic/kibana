@@ -14,7 +14,6 @@ describe('KuiExpressionItemPopover', () => {
         title={'title'}
         isVisible={true}
         align={'left'}
-        rootRef={()=>{}}
         onOutsideClick={()=>{}}
         {...requiredProps}
       />
@@ -31,7 +30,6 @@ describe('KuiExpressionItemPopover', () => {
             title={'title'}
             isVisible={true}
             align={'left'}
-            rootRef={()=>{}}
             onOutsideClick={()=>{}}
           >
             popover content
@@ -49,7 +47,6 @@ describe('KuiExpressionItemPopover', () => {
             title={'title'}
             isVisible={true}
             align={'left'}
-            rootRef={()=>{}}
             onOutsideClick={()=>{}}
           />
         );
@@ -63,7 +60,6 @@ describe('KuiExpressionItemPopover', () => {
             title={'title'}
             isVisible={false}
             align={'left'}
-            rootRef={()=>{}}
             onOutsideClick={()=>{}}
           />
         );
@@ -78,7 +74,6 @@ describe('KuiExpressionItemPopover', () => {
           <KuiExpressionItemPopover
             title={'title'}
             isVisible={true}
-            rootRef={()=>{}}
             onOutsideClick={()=>{}}
           />
         );
@@ -93,7 +88,6 @@ describe('KuiExpressionItemPopover', () => {
               title={'title'}
               isVisible={false}
               align={align}
-              rootRef={()=>{}}
               onOutsideClick={()=>{}}
             />
           );
