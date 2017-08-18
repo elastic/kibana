@@ -16,6 +16,7 @@ import rounddate from './rounddate/rounddate';
 import seriesStyle from './seriesStyle/seriesStyle';
 import size from './size/size';
 import sort from './sort/sort';
+import sleep from './sleep/sleep';
 
 export const commonFunctions = [
   alterColumn,
@@ -36,4 +37,5 @@ export const commonFunctions = [
   seriesStyle,
   size,
   sort,
+  sleep,
 ];
