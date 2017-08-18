@@ -43,6 +43,9 @@ export default props => (
             title="Confirm Modal Title"
           />
       </GuideDemo>
+      <GuideDemo isDarkTheme>
+        <StaticConfirmModal />
+      </GuideDemo>
     </GuideSection>
 
     <GuideSection
