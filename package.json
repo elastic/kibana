@@ -143,7 +143,7 @@
     "json-loader": "0.5.3",
     "json-stringify-safe": "5.0.1",
     "jstimezonedetect": "1.0.5",
-    "leaflet": "1.0.3",
+    "leaflet": "1.2.0",
     "leaflet-draw": "0.4.10",
     "leaflet-responsive-popup": "0.2.0",
     "leaflet.heat": "0.2.0",
