@@ -1581,12 +1581,20 @@ main {
 
 .kuiLink {
   color: #0079a5;
+  text-decoration: none;
   cursor: pointer;
   /* 1 */
-  font-weight: 500;
+  -webkit-appearance: none;
+     -moz-appearance: none;
+          appearance: none;
+  /* 2 */
   background-color: transparent;
   /* 2 */
   border: none;
+  /* 2 */
+  font-size: inherit;
+  /* 2 */
+  line-height: inherit;
   /* 2 */ }
   .kuiLink:visited, .kuiLink:active {
     color: #0079a5; }
@@ -1636,12 +1644,20 @@ main {
  */
 .kuiLocalBreadcrumb__link {
   color: #0079a5;
+  text-decoration: none;
   cursor: pointer;
   /* 1 */
-  font-weight: 500;
+  -webkit-appearance: none;
+     -moz-appearance: none;
+          appearance: none;
+  /* 2 */
   background-color: transparent;
   /* 2 */
   border: none;
+  /* 2 */
+  font-size: inherit;
+  /* 2 */
+  line-height: inherit;
   /* 2 */
   color: #0079a5;
   /* 1 */
