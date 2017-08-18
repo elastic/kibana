@@ -3,6 +3,7 @@ import expect from 'expect.js';
 import sinon from 'sinon';
 
 import { SavedObjectsClient } from '../saved_objects_client';
+import { decorateEsError } from '../lib';
 const { BadRequest } = elasticsearch.errors;
 
 describe('SavedObjectsClient', () => {
@@ -23,11 +24,11 @@ describe('SavedObjectsClient', () => {
 
     describe('#create', () => {
       it('falls back to single-type mapping', async () => {
-        const error = new BadRequest('[illegal_argument_exception] Rejecting mapping update to [.kibana-v6]', {
+        const error = decorateEsError(new BadRequest('[illegal_argument_exception] Rejecting mapping update to [.kibana-v6]', {
           body: {
             error: illegalArgumentException
           }
-        });
+        }));
 
         callAdminCluster
           .onFirstCall().throws(error)
@@ -49,11 +50,11 @@ describe('SavedObjectsClient', () => {
 
       it('prepends id for single-type', async () => {
         const id = 'foo';
-        const error = new BadRequest('[illegal_argument_exception] Rejecting mapping update to [.kibana-v6]', {
+        const error = decorateEsError(new BadRequest('[illegal_argument_exception] Rejecting mapping update to [.kibana-v6]', {
           body: {
             error: illegalArgumentException
           }
-        });
+        }));
 
         callAdminCluster
           .onFirstCall().throws(error)
@@ -154,13 +155,13 @@ describe('SavedObjectsClient', () => {
       const type = 'index-pattern';
       const version = 2;
       const attributes = { title: 'Testing' };
-      const error = new BadRequest('[document_missing_exception] [config][logstash-*]: document missing', {
+      const error = decorateEsError(new BadRequest('[document_missing_exception] [config][logstash-*]: document missing', {
         body: {
           error: {
             type: 'document_missing_exception'
           }
         }
-      });
+      }));
 
       beforeEach(() => {
         callAdminCluster

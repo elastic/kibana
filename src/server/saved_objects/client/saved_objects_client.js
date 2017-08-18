@@ -256,8 +256,14 @@ export class SavedObjectsClient {
     };
 
     return this._withKibanaIndex(method, params).catch(err => {
-      if (get(fallbacks, method, []).includes(get(err, 'data.type'))) {
-        return this._withKibanaIndex(method, Object.assign({}, params, fallbackParams));
+      const fallbackWhen = get(fallbacks, method, []);
+      const type = get(err, 'body.error.type');
+
+      if (type && fallbackWhen.includes(type)) {
+        return this._withKibanaIndex(method, {
+          ...params,
+          ...fallbackParams
+        });
       }
 
       throw err;
