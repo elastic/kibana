@@ -121,7 +121,7 @@ module.exports = class extends Generator {
 
       this.log(chalk.white('\n// Import component styles into the root index.scss.'));
       this.log(
-        `${chalk.magenta('@import')} ${chalk.cyan(`'./${this.config.name}/index'`)};`
+        `${chalk.magenta('@import')} ${chalk.cyan(`'${this.config.name}/index'`)};`
       );
     };
 
