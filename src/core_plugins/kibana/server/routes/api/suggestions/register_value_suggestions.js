@@ -21,17 +21,18 @@ export function registerValueSuggestions(server) {
 }
 
 function getBody({ field, query }) {
-  const include = query ? `.*${query}.*` : undefined;
   return {
     size: 0,
     terminate_after: 100000,
+    query: {
+      query_string: {
+        query: `*${query}*`,
+        analyze_wildcard: true
+      }
+    },
     aggs: {
       suggestions: {
-        terms: {
-          field,
-          include,
-          execution_hint: 'map'
-        }
+        terms: { field }
       }
     }
   };
