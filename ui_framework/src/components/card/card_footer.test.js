@@ -7,6 +7,6 @@ import {
 } from './card_footer';
 
 test('renders KuiCardFooter', () => {
-  const component = <KuiCardFooter { ...requiredProps }>children</KuiCardFooter>;
+  const component = <KuiCardFooter {...requiredProps}>children</KuiCardFooter>;
   expect(render(component)).toMatchSnapshot();
 });

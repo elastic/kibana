@@ -9,12 +9,12 @@ import {
 
 describe('KuiTab', () => {
   test('renders', () => {
-    const component = <KuiTab onClick={()=>{}} { ...requiredProps }>children</KuiTab>;
+    const component = <KuiTab onClick={()=>{}} {...requiredProps}>children</KuiTab>;
     expect(render(component)).toMatchSnapshot();
   });
 
   test('renders isSelected', () => {
-    const component = <KuiTab onClick={()=>{}} isSelected { ...requiredProps }>children</KuiTab>;
+    const component = <KuiTab onClick={()=>{}} isSelected {...requiredProps}>children</KuiTab>;
     expect(render(component)).toMatchSnapshot();
   });
 

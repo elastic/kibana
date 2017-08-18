@@ -20,7 +20,7 @@ export const HomeView = () => (
       </h1>
 
       <p className="guideText">
-        The Kibana team uses the UI Framework to build Kibana's user interface. Please see
+        The Kibana team uses the UI Framework to build Kibana&rsquo;s user interface. Please see
         the <a href="https://www.elastic.co/guide/en/kibana/current/index.html" className="guideLink">general Kibana docs</a> for information on how to use Kibana, and
         the <a href="https://www.elastic.co/guide/en/kibana/current/kibana-plugins.html" className="guideLink">plugin-specific section</a> for
         help developing Kibana plugins.
@@ -32,7 +32,7 @@ export const HomeView = () => (
       </p>
 
       <p className="guideText">
-        If you're just getting started with the UI Framework for the first time, you may
+        If you&rsquo;re just getting started with the UI Framework for the first time, you may
         be interested in some of the more commonly-used components:
       </p>
 

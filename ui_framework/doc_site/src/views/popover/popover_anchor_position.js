@@ -46,7 +46,7 @@ export default class extends Component {
       <div>
         <KuiPopover
           button={(
-            <KuiButton buttonType="basic" onClick={ this.onButtonClick1.bind(this) }>
+            <KuiButton buttonType="basic" onClick={this.onButtonClick1.bind(this)}>
               Popover anchored to the right.
             </KuiButton>
           )}
@@ -61,7 +61,7 @@ export default class extends Component {
 
         <KuiPopover
           button={(
-            <KuiButton buttonType="basic" onClick={ this.onButtonClick2.bind(this) }>
+            <KuiButton buttonType="basic" onClick={this.onButtonClick2.bind(this)}>
               Popover anchored to the right.
             </KuiButton>
           )}

@@ -2498,6 +2498,9 @@ main {
   border-radius: 4px;
   box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.1);
   z-index: 1001; }
+  .theme-dark .kuiModal {
+    background-color: #525252;
+    border-color: #000; }
 
 .kuiModalHeader {
   display: -webkit-box;
@@ -2515,9 +2518,13 @@ main {
   padding: 10px;
   padding-left: 20px;
   border-bottom: 1px solid #D9D9D9; }
+  .theme-dark .kuiModalHeader {
+    border-bottom-color: #000; }
 
 .kuiModalHeader__title {
   font-size: 18px; }
+  .theme-dark .kuiModalHeader__title {
+    color: #cecece; }
 
 .kuiModalHeaderCloseButton {
   display: inline-block;
@@ -2541,6 +2548,8 @@ main {
 
 .kuiModalBodyText {
   font-size: 14px; }
+  .theme-dark .kuiModalBodyText {
+    color: #cecece; }
 
 .kuiModalFooter {
   display: -webkit-box;

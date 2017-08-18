@@ -120,6 +120,10 @@ module.controller('VisualizeWizardStep1', function ($scope, $route, kbnUrl, time
     $scope.filteredVisTypeCategories = getVisTypeCategories();
   });
 
+  $scope.getVisTypeId = type => {
+    return _.camelCase(type.name);
+  };
+
   $scope.getVisTypeTooltip = type => {
     const prefix = type.isExperimental ? '(Experimental)' : '';
     return `${prefix} ${type.description}`;

@@ -21,7 +21,7 @@ export default props => (
       }]}
     >
       <GuideText>
-        <strong>Note:</strong> Don't use this. It's subject to change as we evolve our grid system.
+        <strong>Note:</strong> Don&rsquo;t use this. It&rsquo;s subject to change as we evolve our grid system.
       </GuideText>
 
       <GuideText>

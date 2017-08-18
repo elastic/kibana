@@ -4,7 +4,7 @@ import { KuiButton, KuiButtonIcon, KuiButtonGroup } from '../button';
 
 export function KuiPagerButtonGroup({ className, onPrevious, onNext, hasNext, hasPrevious, ...rest }) {
   return (
-    <KuiButtonGroup isUnited className={className} { ...rest }>
+    <KuiButtonGroup isUnited className={className} {...rest}>
       <KuiButton
         aria-label="Show previous page"
         data-test-subj="pagerPreviousButton"

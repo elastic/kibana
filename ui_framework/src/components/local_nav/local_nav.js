@@ -5,7 +5,7 @@ import React from 'react';
 export function KuiLocalNav({ className, children, ...rest }) {
   const classes = classnames('kuiLocalNav', className);
   return (
-    <div className={ classes } { ...rest }>
+    <div className={classes} {...rest}>
       { children }
     </div>
   );

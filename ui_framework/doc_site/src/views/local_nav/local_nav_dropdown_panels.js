@@ -48,7 +48,7 @@ export function LocalNavWithDropdownPanels() {
 
             {/* Help text */}
             <div className="kuiLocalDropdownHelpText">
-              Here's some help text to explain the purpose of the dropdown.
+              Here&rsquo;s some help text to explain the purpose of the dropdown.
             </div>
           </div>
 
@@ -59,7 +59,7 @@ export function LocalNavWithDropdownPanels() {
 
             {/* Help text */}
             <div className="kuiLocalDropdownHelpText">
-              Here's some help text to explain the purpose of the dropdown.
+              Here&rsquo;s some help text to explain the purpose of the dropdown.
             </div>
           </div>
         </div>

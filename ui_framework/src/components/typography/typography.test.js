@@ -11,7 +11,7 @@ import {
 describe('KuiTitle', () => {
   test('is rendered', () => {
     const component = render(
-      <KuiTitle { ...requiredProps }>
+      <KuiTitle {...requiredProps}>
         <h1>Hello</h1>
       </KuiTitle>
     );
@@ -39,7 +39,7 @@ describe('KuiTitle', () => {
 describe('KuiText', () => {
   test('is rendered', () => {
     const component = render(
-      <KuiText { ...requiredProps }>
+      <KuiText {...requiredProps}>
         <h1>Hello</h1>
       </KuiText>
     );

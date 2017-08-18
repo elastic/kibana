@@ -31,16 +31,16 @@ export default class extends Component {
   render() {
     return (
       <KuiPopover
-        button={ (
-          <KuiButton buttonType="basic" onClick={ this.onButtonClick.bind(this) }>
+        button={(
+          <KuiButton buttonType="basic" onClick={this.onButtonClick.bind(this)}>
             Custom class
           </KuiButton>
-        ) }
-        isOpen={ this.state.isPopoverOpen }
-        closePopover={ this.closePopover.bind(this) }
+        )}
+        isOpen={this.state.isPopoverOpen}
+        closePopover={this.closePopover.bind(this)}
         bodyClassName="yourClassNameHere"
       >
-        It's hard to tell but there's a custom class on this element
+        It&rsquo;s hard to tell but there&rsquo;s a custom class on this element
       </KuiPopover>
     );
   }

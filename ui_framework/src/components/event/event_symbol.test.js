@@ -7,6 +7,6 @@ import {
 } from './event_symbol';
 
 test('renders KuiEventSymbol', () => {
-  const component = <KuiEventSymbol { ...requiredProps }>children</KuiEventSymbol>;
+  const component = <KuiEventSymbol {...requiredProps}>children</KuiEventSymbol>;
   expect(render(component)).toMatchSnapshot();
 });

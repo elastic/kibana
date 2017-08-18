@@ -49,6 +49,7 @@ const body = JSON.parse(`
         }
     ],
     "timerange": {
+        "timezone": "UTC",
         "max": "2017-01-26T20:52:35.881Z",
         "min": "2017-01-26T20:37:35.881Z"
     }
@@ -104,6 +105,7 @@ describe('buildRequestBody(req)', () => {
                 'field': '@timestamp',
                 'interval': '10s',
                 'min_doc_count': 0,
+                'time_zone': 'UTC',
                 'extended_bounds': {
                   'min': 1485463055881,
                   'max': 1485463955881

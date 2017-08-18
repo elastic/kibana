@@ -1,5 +1,6 @@
 import { validateInterval } from '../lib/validate_interval';
 import { dashboardContextProvider } from 'plugins/kibana/dashboard/dashboard_context';
+import { timezoneProvider } from 'ui/vis/lib/timezone';
 
 const MetricsRequestHandlerProvider = function (Private, Notifier, config, timefilter, $http) {
   const dashboardContext = Private(dashboardContextProvider);
@@ -8,12 +9,13 @@ const MetricsRequestHandlerProvider = function (Private, Notifier, config, timef
   return {
     name: 'metrics',
     handler: function (vis , appState, uiState) {
+      const timezone = Private(timezoneProvider)();
       return new Promise((resolve) => {
         const panel = vis.params;
         const uiStateObj = uiState.get(panel.type, {});
         if (panel && panel.id) {
           const params = {
-            timerange: timefilter.getBounds(),
+            timerange: { timezone, ...timefilter.getBounds() },
             filters: [dashboardContext()],
             panels: [panel],
             state: uiStateObj

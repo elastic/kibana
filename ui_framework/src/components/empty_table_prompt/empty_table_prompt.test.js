@@ -25,7 +25,7 @@ test('renders KuiEmptyTablePrompt', () => {
       </KuiLinkButton>
     }
     message="Uh oh, You have no items!"
-    { ...requiredProps }
+    {...requiredProps}
   />);
   expect(render(component)).toMatchSnapshot();
 });
