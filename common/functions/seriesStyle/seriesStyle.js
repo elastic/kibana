@@ -41,10 +41,9 @@ export default new FnTypedObject({
       default: false,
     },
     stack: {
-      types: ['boolean', 'null'],
+      types: ['number', 'null'],
       displayName: 'Stack Series',
-      help: 'Should we stack the series?',
-      default: false,
+      help: 'Should we stack the series? This is the stack "id". Series with the same stack id will be stacked together',
     },
   },
 });
