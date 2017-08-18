@@ -9,6 +9,13 @@ import {
   KuiIcon,
 } from '../icon';
 
+import {
+  KuiPopoverTitle,
+  KuiFormRow,
+  KuiSwitch,
+  KuiButton,
+} from '../../components';
+
 export class KuiShiftNav extends Component {
   static propTypes = {
     children: PropTypes.node,
@@ -16,36 +23,71 @@ export class KuiShiftNav extends Component {
     navItems: PropTypes.object,
   }
 
+  componentDidMount(){
+    let { clientHeight } = this.refs.previous;
+    this.setState({height: clientHeight});
+  }
+
   constructor(props) {
     super(props);
 
     this.state = {
+      showNext: false,
+      showCurrent: false,
+      showPrevious: true,
+      title: null,
       previousItems: [
-        {text: 'Share this dashboard', icon: 'user', id: 1},
-        {text: 'Edit / add panels', icon: 'user', id: 2},
-        {text: 'Dashboard colors', icon: 'user', id: 3},
+        {text: 'Show fullscreen', icon: 'user', id: 1},
+        {text: 'Share this dasbhoard', icon: 'user', id: 2, next: true},
+        {text: 'Edit / add panels', icon: 'user', id: 3},
         {text: 'Display options', icon: 'user', id: 4},
-        {text: 'Edit raw JSON', icon: 'user', id: 5},
-        {text: 'Delete Dashboard', icon: 'user', id: 6},
       ],
       currentItems: [
-        {text: 'Share this dashboard', icon: 'user', id: 1, children: true},
-        {text: 'Edit / add panels', icon: 'user', id: 2},
-        {text: 'Dashboard colors', icon: 'user', id: 3},
-        {text: 'Display options', icon: 'user', id: 4},
-        {text: 'Edit raw JSON', icon: 'user', id: 5},
-        {text: 'Delete Dashboard', icon: 'user', id: 6},
+        {text: 'Share this dashboard', icon: 'arrowLeft', id: 1, previous: true},
+        {text: 'PDF reports', icon: 'user', id: 2},
+        {text: 'CSV reports', icon: 'user', id: 3},
+        {text: 'Embed code', icon: 'user', id: 4, next: true},
+        {text: 'Permalinks', icon: 'user', id: 5},
       ],
       nextItems: [
-        {text: 'Share this dashboard', icon: 'user', id: 1},
-        {text: 'Edit / add panels', icon: 'user', id: 2},
-        {text: 'Dashboard colors', icon: 'user', id: 3},
-        {text: 'Display options', icon: 'user', id: 4},
-        {text: 'Edit raw JSON', icon: 'user', id: 5},
-        {text: 'Delete Dashboard', icon: 'user', id: 6},
+        {text: 'Embed code', icon: 'arrowLeft', id: 1, previous: true},
       ],
     };
   }
+
+  showNext() {
+    let { clientHeight } = this.refs.next;
+
+    this.setState({
+      height: clientHeight,
+      showNext: true,
+      showCurrent: false,
+      showPrevious: false,
+    });
+  }
+
+  showPrevious() {
+    let { clientHeight } = this.refs.previous;
+
+    this.setState({
+      height: clientHeight,
+      showNext: false,
+      showCurrent: false,
+      showPrevious: true,
+    });
+  }
+
+  showCurrent() {
+    let { clientHeight } = this.refs.current;
+
+    this.setState({
+      height: clientHeight,
+      showNext: false,
+      showCurrent: true,
+      showPrevious: false,
+    });
+  }
+
 
   render() {
     const {
@@ -56,25 +98,162 @@ export class KuiShiftNav extends Component {
 
     const classes = classNames('kuiShiftNav', className);
 
+    let styles = {
+      height: this.state.height,
+    }
+
+    const previousClasses = classNames(
+      'kuiShiftNav__panel',
+      {
+        'kuiShiftNav__panel--previous': this.state.showCurrent || this.state.showNext,
+      },
+    );
+
+    const currentClasses = classNames(
+      'kuiShiftNav__panel',
+      {
+        'kuiShiftNav__panel--previous': this.state.showNext,
+        'kuiShiftNav__panel--next': this.state.showPrevious,
+      },
+    );
+
+    const nextClasses = classNames(
+      'kuiShiftNav__panel',
+      {
+        'kuiShiftNav__panel--next': this.state.showCurrent || this.state.showPrevious,
+      },
+    );
+
     return (
+
       <div
         className={classes}
+        style={styles}
         {...rest}
       >
-        {this.state.currentItems.map((option, index) => {
-          let childIcon = null;
-          if (option.children) {
-            childIcon = <KuiIcon type="arrowRight" size="medium" className="kuiShiftNav__arrow" />
-          }
+        <div ref="previous" className={previousClasses}>
+          {this.state.previousItems.map((option, index) => {
+            let buttonClasses = classNames(
+              'kuiShiftNav__option',
+              {
+                'kuiShiftNav__option--previous': option.previous,
+              },
+            )
 
-          return (
-            <button className="kuiShiftNav__option" key={option.id}>
-              <KuiIcon type={option.icon} size="medium" className="kuiShiftNav__icon" />
-              <span className="kuiShiftNav__text">{option.text}</span>
-              {childIcon}
-            </button>
-          );
-        })}
+            let button = null;
+            if (option.next) {
+              button = (
+                <button className={buttonClasses} key={option.id} onClick={this.showCurrent.bind(this)}>
+                  <KuiIcon type={option.icon} size="medium" className="kuiShiftNav__icon" />
+                  <span className="kuiShiftNav__text">{option.text}</span>
+                  <KuiIcon type="arrowRight" size="medium" className="kuiShiftNav__arrow" />
+                </button>
+              );
+            } else {
+              button = (
+                <button className={buttonClasses} key={option.id}>
+                  <KuiIcon type={option.icon} size="medium" className="kuiShiftNav__icon" />
+                  <span className="kuiShiftNav__text">{option.text}</span>
+                </button>
+              );
+            }
+
+            return (
+              <div>{button}</div>
+            );
+          })}
+        </div>
+        <div ref="current" className={currentClasses}>
+          {this.state.currentItems.map((option, index) => {
+            let buttonClasses = classNames(
+              'kuiShiftNav__option',
+              {
+                'kuiShiftNav__option--previous': option.previous,
+              },
+            )
+
+            let button = null;
+            if (option.next) {
+              button = (
+                <button className={buttonClasses} key={option.id} onClick={this.showNext.bind(this)}>
+                  <KuiIcon type={option.icon} size="medium" className="kuiShiftNav__icon" />
+                  <span className="kuiShiftNav__text">{option.text}</span>
+                  <KuiIcon type="arrowRight" size="medium" className="kuiShiftNav__arrow" />
+                </button>
+              );
+            } else if (option.previous) {
+              button = (
+                <button className={buttonClasses} key={option.id} onClick={this.showPrevious.bind(this)}>
+                  <KuiIcon type={option.icon} size="medium" className="kuiShiftNav__icon" />
+                  <span className="kuiShiftNav__text">{option.text}</span>
+                </button>
+              );
+            } else {
+              button = (
+                <button className={buttonClasses} key={option.id}>
+                  <KuiIcon type={option.icon} size="medium" className="kuiShiftNav__icon" />
+                  <span className="kuiShiftNav__text">{option.text}</span>
+                </button>
+              );
+            }
+
+            return (
+              <div>{button}</div>
+            );
+          })}
+        </div>
+        <div ref="next" className={nextClasses}>
+          {this.state.nextItems.map((option, index) => {
+            let buttonClasses = classNames(
+              'kuiShiftNav__option',
+              {
+                'kuiShiftNav__option--previous': option.previous,
+              },
+            )
+
+            let button = null;
+            if (option.previous) {
+              button = (
+                <button className={buttonClasses} key={option.id} onClick={this.showCurrent.bind(this)}>
+                  <KuiIcon type={option.icon} size="medium" className="kuiShiftNav__icon" />
+                  <span className="kuiShiftNav__text">{option.text}</span>
+                </button>
+              );
+            } else {
+              button = (
+                <button className={buttonClasses} key={option.id}>
+                  <KuiIcon type={option.icon} size="medium" className="kuiShiftNav__icon" />
+                  <span className="kuiShiftNav__text">{option.text}</span>
+                </button>
+              );
+            }
+
+            return (
+              <div>{button}</div>
+            );
+          })}
+          <div style={{padding: 16}}>
+            <KuiFormRow
+              label="Generate a public snapshot?"
+            >
+              <KuiSwitch
+                name="switch"
+                id="asdf"
+                label="Snapshot data"
+              />
+            </KuiFormRow>
+            <KuiFormRow
+              label="Include the following in the embed"
+            >
+              <KuiSwitch
+                name="switch"
+                id="asdf2"
+                label="Current time range"
+              />
+            </KuiFormRow>
+            <KuiButton fill>Copy iFrame code</KuiButton>
+          </div>
+        </div>
       </div>
     );
   }

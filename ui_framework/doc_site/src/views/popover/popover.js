@@ -4,6 +4,7 @@ import React, {
 
 import {
   KuiPopover,
+  KuiButton,
 } from '../../../../components';
 
 export default class extends Component {
@@ -29,9 +30,9 @@ export default class extends Component {
 
   render() {
     const button = (
-      <button onClick={this.onButtonClick.bind(this)}>
-        Click me
-      </button>
+      <KuiButton iconType="arrowDown" iconReverse onClick={this.onButtonClick.bind(this)}>
+        Show popover
+      </KuiButton>
     );
 
     return (

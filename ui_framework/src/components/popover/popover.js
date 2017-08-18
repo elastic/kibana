@@ -49,6 +49,7 @@ export class KuiPopover extends Component {
       bodyClassName,
       button,
       isOpen,
+      withTitle,
       children,
       className,
       closePopover, // eslint-disable-line no-unused-vars
@@ -61,6 +62,7 @@ export class KuiPopover extends Component {
       className,
       {
         'kuiPopover-isOpen': isOpen,
+        'kuiPopover--withTitle': withTitle,
       },
     );
 

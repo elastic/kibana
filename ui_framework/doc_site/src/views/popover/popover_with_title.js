@@ -3,8 +3,8 @@ import React, {
 } from 'react';
 
 import {
-  KuiShiftNav,
   KuiPopover,
+  KuiPopoverTitle,
   KuiButton,
 } from '../../../../components';
 
@@ -31,8 +31,8 @@ export default class extends Component {
 
   render() {
     const button = (
-      <KuiButton fill onClick={this.onButtonClick.bind(this)}>
-        Click me
+      <KuiButton iconType="arrowDown" iconReverse onClick={this.onButtonClick.bind(this)}>
+        Show popover with Title
       </KuiButton>
     );
 
@@ -43,8 +43,12 @@ export default class extends Component {
         closePopover={this.closePopover.bind(this)}
         withTitle
       >
-        <KuiShiftNav />
+        <div style={{ width: '300px' }}>
+          <KuiPopoverTitle>Hello, I'm a popover title</KuiPopoverTitle>
+          <p style={{ padding: 20 }}>Popover content that&rsquo;s wider than the default width</p>
+        </div>
       </KuiPopover>
     );
   }
 }
+

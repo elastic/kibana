@@ -100,6 +100,7 @@ export {
 
 export {
   KuiPopover,
+  KuiPopoverTitle,
 } from './popover';
 
 export {

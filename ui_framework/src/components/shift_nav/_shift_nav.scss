@@ -1,11 +1,22 @@
+$kuiShiftNavWidth: $kuiSize * 16;
+
 .kuiShiftNav {
-  width: $kuiSize * 16;
+  width: $kuiShiftNavWidth;
+  position: relative;
+  overflow: hidden;
+  transition: height $kuiAnimSpeedFast $kuiAnimSlightResistance;
+
 
   .kuiShiftNav__option {
     display: flex;
-    padding: $kuiSizeS;
+    padding: $kuiSizeM;
     width: 100%;
     text-align: left;
+  }
+
+  .kuiShiftNav__option--previous {
+    background-color: $kuiColorLightestShade;
+    border-bottom: $kuiBorderThin;
   }
 
   .kuiShiftNav__icon {
@@ -19,4 +30,32 @@
   .kuiShiftNav__arrow {
     align-self: flex-end;
   }
+
+  .kuiShiftNav--next, .kuiShiftNav--previous {
+    visibility: 0;
+    opacity: 0;
+  }
+
+  .kuiShiftNav__panel {
+    transform: translateX(0);
+    position: absolute;
+    width: 100%;
+    transition: all $kuiAnimSpeedNormal $kuiAnimSlightResistance;
+    visibility: visible;
+
+    &.kuiShiftNav__panel--next {
+      transform: translateX($kuiShiftNavWidth);
+      visibility: hidden;
+    }
+
+    &.kuiShiftNav__panel--previous {
+      transform: translateX(-$kuiShiftNavWidth);
+      visibility: hidden;
+    }
+  }
+
+  .kuiShiftNav__content {
+    padding: $kuiSizeS;
+  }
+
 }

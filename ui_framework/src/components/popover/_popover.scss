@@ -68,6 +68,9 @@
     }
   }
 
+.kuiPopover--withTitle .kuiPopover__body:after {
+  border-bottom-color: $kuiColorLightestShade;
+}
 
 // Positions the menu and arrow to the left of the parent.
 .kuiPopover--anchorLeft {
