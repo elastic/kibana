@@ -56,7 +56,7 @@ export default new Fn({
         stack: get(seriesStyle, 'stack'),
         lines: {
           show: get(seriesStyle, 'lines') > 0,
-          lineWidth: get(seriesStyle, 'line'),
+          lineWidth: get(seriesStyle, 'lines'),
           steps: get(seriesStyle, 'steps'),
           fillColor: get(seriesStyle, 'color'),
           fill: get(seriesStyle, 'fill') / 10,
