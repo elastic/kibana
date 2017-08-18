@@ -2926,31 +2926,51 @@ main {
   text-align: left;
   max-width: 20px;
   /* 1 */
-  padding: 7px 8px 8px;
   line-height: 1.5;
   color: #a7a7a7; }
 
 .kuiTableHeaderCell__liner {
-  display: inline-block; }
+  display: inline-block;
+  padding: 7px 8px 8px; }
 
 /**
  * 1. Prevent rapid clicking from selecting text.
+ * 2. Remove native button element styles.
+ * 3. Make buttons look and behave like table header cells.
  */
-.kuiTableHeaderCell--sortable {
+.kuiTableHeaderCell__liner--sortable {
   -webkit-user-select: none;
      -moz-user-select: none;
       -ms-user-select: none;
           user-select: none;
   /* 1 */
-  cursor: pointer; }
-  .kuiTableHeaderCell--sortable:hover:not(.kuiTableHeaderCell-isSorted) .kuiTableSortIcon {
+  cursor: pointer;
+  width: 100%;
+  -webkit-appearance: none;
+     -moz-appearance: none;
+          appearance: none;
+  /* 2 */
+  background-color: transparent;
+  /* 2 */
+  border: 0;
+  /* 2 */
+  color: inherit;
+  /* 3 */
+  line-height: inherit;
+  /* 3 */
+  font-size: inherit;
+  /* 3 */
+  text-align: inherit;
+  /* 3 */ }
+  .kuiTableHeaderCell__liner--sortable:hover:not(.kuiTableHeaderCell__liner-isSorted) .kuiTableSortIcon {
     opacity: 0.4; }
 
 .kuiTableHeaderCell--alignRight {
   text-align: right; }
 
 .kuiTableSortIcon {
-  pointer-events: none; }
+  pointer-events: none;
+  margin-left: 4px; }
 
 .kuiTableRow:hover .kuiTableRowHoverReveal {
   display: inline-block; }

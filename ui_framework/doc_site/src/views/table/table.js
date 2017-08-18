@@ -21,7 +21,7 @@ function sortColumn(column) {
     } else {
       // Otherwise, "deselect" the old column by hiding its icons.
       const $sortedColumn = $(sortedColumn);
-      $sortedColumn.removeClass('tableHeaderCell-isSorted');
+      $sortedColumn.removeClass('kuiTableHeaderCell__liner-isSorted');
       const ascendingIcon = $sortedColumn.find('[data-sort-icon-ascending]');
       const descendingIcon = $sortedColumn.find('[data-sort-icon-descending]');
 
@@ -41,7 +41,7 @@ function sortColumn(column) {
   // Update the visual state of the sortedColumn.
   sortedColumn = column;
   const $sortedColumn = $(sortedColumn);
-  $sortedColumn.addClass('tableHeaderCell-isSorted');
+  $sortedColumn.addClass('kuiTableHeaderCell__liner-isSorted');
 
   const ascendingIcon = $(sortedColumn).find('[data-sort-icon-ascending]');
   const descendingIcon = $(sortedColumn).find('[data-sort-icon-descending]');
