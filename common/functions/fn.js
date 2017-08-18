@@ -4,7 +4,11 @@ import Arg from './arg';
 export default function Fn(config) {
   // Required
   this.name = config.name; // Name of function
-  this.type = config.type; // Return type of function
+
+  // Return type of function.
+  // This SHOULD be supplied. We use it for UI and autocomplete hinting,
+  // We may also use it for optimizations in the future.
+  this.type = config.type;
   this.aliases = config.aliases || [];
 
   // Function to run function (context, args)

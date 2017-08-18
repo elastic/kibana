@@ -64,10 +64,10 @@ export function interpretProvider(config) {
 
     return fnDef.fn(acceptableContext, args).then(output => {
       // Validate that the function returned the type it said it would.
-      // This is really required, but it keeps function developers honest.
+      // This isn't really required, but it keeps function developers honest.
       const returnType = getType(output);
       const expectedType = fnDef.type;
-      if (returnType !== expectedType) {
+      if (expectedType && returnType !== expectedType) {
         throw new Error(`Function ${name} should return '${expectedType}', actually returned '${returnType}'`);
       }
 
