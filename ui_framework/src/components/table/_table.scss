@@ -140,10 +140,14 @@
 .kuiTableHeaderCell--checkBox,
 .kuiTableRowCell--checkBox {
   width: 28px; /* 1 */
-  padding-right: 0;
   line-height: 1; /* 2 */
 
   .kuiTableRowCell__liner {
     overflow: visible; /* 3 */
+  }
+
+  .kuiTableHeaderCell__liner,
+  .kuiTableRowCell__liner {
+    padding-right: 0;
   }
 }

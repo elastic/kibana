@@ -3032,13 +3032,17 @@ main {
 .kuiTableRowCell--checkBox {
   width: 28px;
   /* 1 */
-  padding-right: 0;
   line-height: 1;
   /* 2 */ }
   .kuiTableHeaderCell--checkBox .kuiTableRowCell__liner,
   .kuiTableRowCell--checkBox .kuiTableRowCell__liner {
     overflow: visible;
     /* 3 */ }
+  .kuiTableHeaderCell--checkBox .kuiTableHeaderCell__liner,
+  .kuiTableHeaderCell--checkBox .kuiTableRowCell__liner,
+  .kuiTableRowCell--checkBox .kuiTableHeaderCell__liner,
+  .kuiTableRowCell--checkBox .kuiTableRowCell__liner {
+    padding-right: 0; }
 
 .kuiTableInfo {
   padding: 30px;
