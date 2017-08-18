@@ -48,6 +48,7 @@
           ng-href="{{ getVisTypeUrl(type) }}"
           tooltip="{{ getVisTypeTooltip(type) }}"
           tooltip-placement="{{ getVisTypeTooltipPosition($parent.$index) }}"
+          aria-describedby="visDescription_{{ ::getVisTypeId(type) }}"
         >
           <div class="kuiGalleryButton__image">
             <img
@@ -76,6 +77,12 @@
             class="kuiGalleryButton__icon kuiIcon fa-flask"
             ng-if="type.isExperimental"
           ></div>
+
+          <span
+            class="sr-only"
+            aria-hidden="true"
+            id="visDescription_{{ ::getVisTypeId(type) }}"
+          >{{::getVisTypeTooltip(type)}}</span>
         </a>
       </div>
     </div>
