@@ -4,6 +4,14 @@ import reactcss from 'reactcss';
 import FlotChart from './flot_chart';
 import Annotation from './annotation';
 
+export function scaleUp(value) {
+  return window.devicePixelRatio * value;
+}
+
+export function scaleDown(value) {
+  return value / window.devicePixelRatio;
+}
+
 class TimeseriesChart extends Component {
 
   constructor(props) {
@@ -22,11 +30,11 @@ class TimeseriesChart extends Component {
   calculateLeftRight(item, plot) {
     const canvas = plot.getCanvas();
     const point = plot.pointOffset({ x: item.datapoint[0], y: item.datapoint[1] });
-    const edge = (point.left + 10) / canvas.width;
+    const edge = (scaleUp(point.left) + 10) / canvas.width;
     let right;
     let left;
     if (edge > 0.5) {
-      right = canvas.width - point.left;
+      right = scaleDown(canvas.width) - point.left;
       left = null;
     } else {
       right = null;
