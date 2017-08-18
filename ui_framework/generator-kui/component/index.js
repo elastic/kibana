@@ -27,6 +27,11 @@ module.exports = class extends Generator {
       default: true,
     }]).then(answers => {
       this.config = answers;
+
+      if (!answers.name || !answers.name.trim()) {
+        this.log.error('Sorry, please run this generator again and provide a component name.');
+        process.exit(1);
+      }
     });
   }
 
