@@ -277,10 +277,10 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
         await this.clickKibanaIndices();
         await this.setIndexPatternField(indexPatternName);
         await PageObjects.common.sleep(2000);
-        await this.getCreateIndexPatternGoToStep2Button().click();
+        await (await this.getCreateIndexPatternGoToStep2Button()).click();
         await PageObjects.common.sleep(2000);
         await this.selectTimeFieldOption(timefield);
-        await this.getCreateIndexPatternCreateButton().click();
+        await (await this.getCreateIndexPatternCreateButton()).click();
       });
       await PageObjects.header.waitUntilLoadingHasFinished();
       await retry.try(async () => {
@@ -305,7 +305,7 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
       return indexPatternId;
     }
 
-    async setIndexPatternField(indexPatternName = 'logstash-*') {
+    async setIndexPatternField(indexPatternName = 'logstash-') {
       log.debug(`setIndexPatternField(${indexPatternName})`);
       const field = await this.getIndexPatternField();
       await field.clearValue();
