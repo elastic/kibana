@@ -3,7 +3,6 @@ import { writeFile } from 'fs';
 
 import webpack from 'webpack';
 import Boom from 'boom';
-import DirectoryNameAsMain from '@elastic/webpack-directory-name-as-main';
 import ExtractTextPlugin from 'extract-text-webpack-plugin';
 import CommonsChunkPlugin from 'webpack/lib/optimize/CommonsChunkPlugin';
 import DefinePlugin from 'webpack/lib/DefinePlugin';
@@ -109,9 +108,6 @@ export default class BaseOptimizer {
       recordsPath: resolve(this.env.workingDir, 'webpack.records'),
 
       plugins: [
-        new webpack.ResolverPlugin([
-          new DirectoryNameAsMain()
-        ]),
         new webpack.NoErrorsPlugin(),
         new ExtractTextPlugin('[name].style.css', {
           allChunks: true
