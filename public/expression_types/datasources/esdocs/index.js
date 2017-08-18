@@ -14,7 +14,6 @@ import './esdocs.less';
 const template = ({ args, updateArgs }) => {
 
   const setArg = (name, value) => {
-    console.log('setting', name, value);
     updateArgs && updateArgs(Object.assign({},
       args,
       setSimpleArg(name, value),
@@ -39,8 +38,6 @@ const template = ({ args, updateArgs }) => {
   const fields = getFields();
   const sort = getSort();
   const index = getSimpleArg('index', args)[0];
-
-  console.log(fields);
 
   return (
     <div>
