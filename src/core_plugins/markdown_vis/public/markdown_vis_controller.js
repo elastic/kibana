@@ -1,18 +1,14 @@
-import marked from 'marked';
+import MarkdownIt from 'markdown-it';
 import { uiModules } from 'ui/modules';
 import 'angular-sanitize';
 
-marked.setOptions({
-  gfm: true, // Github-flavored markdown
-  sanitize: true // Sanitize HTML tags
-});
-
+const md = new MarkdownIt();
 
 const module = uiModules.get('kibana/markdown_vis', ['kibana', 'ngSanitize']);
 module.controller('KbnMarkdownVisController', function ($scope) {
   $scope.$watch('vis.params.markdown', function (html) {
     if (html) {
-      $scope.html = marked(html);
+      $scope.html = md.render(html);
     }
     $scope.renderComplete();
   });

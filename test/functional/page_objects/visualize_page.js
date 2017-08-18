@@ -118,6 +118,11 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
       await input.type(markdownTxt);
     }
 
+    async getMarkdownText() {
+      const markdownContainer = await testSubjects.find('markdownBody');
+      return markdownContainer.getVisibleText();
+    }
+
     async getMarkdownBodyDescendentText(selector) {
       const markdownContainer = await testSubjects.find('markdownBody');
       const element = await find.descendantDisplayedByCssSelector(selector, markdownContainer);
