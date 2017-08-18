@@ -1,13 +1,13 @@
-$kuiShiftNavWidth: $kuiSize * 16;
+$kuiContextMenuWidth: $kuiSize * 16;
 
-.kuiShiftNav {
-  width: $kuiShiftNavWidth;
+.kuiContextMenu {
+  width: $kuiContextMenuWidth;
   position: relative;
   overflow: hidden;
   transition: height $kuiAnimSpeedFast $kuiAnimSlightResistance;
 
 
-  .kuiShiftNav__option {
+  .kuiContextMenu__option {
     display: flex;
     padding: $kuiSizeM;
     width: 100%;
@@ -22,47 +22,47 @@ $kuiShiftNavWidth: $kuiSize * 16;
     }
   }
 
-  .kuiShiftNav__option--previous {
+  .kuiContextMenu__option--previous {
     background-color: $kuiColorLightestShade;
     border-bottom: $kuiBorderThin;
   }
 
-  .kuiShiftNav__icon {
+  .kuiContextMenu__icon {
     margin-right: $kuiSizeS;
   }
 
-  .kuiShiftNav__text {
+  .kuiContextMenu__text {
     flex-grow: 1;
   }
 
-  .kuiShiftNav__arrow {
+  .kuiContextMenu__arrow {
     align-self: flex-end;
   }
 
-  .kuiShiftNav--next, .kuiShiftNav--previous {
+  .kuiContextMenu--next, .kuiContextMenu--previous {
     visibility: 0;
     opacity: 0;
   }
 
-  .kuiShiftNav__panel {
+  .kuiContextMenu__panel {
     transform: translateX(0);
     position: absolute;
     width: 100%;
     transition: all $kuiAnimSpeedNormal $kuiAnimSlightResistance;
     visibility: visible;
 
-    &.kuiShiftNav__panel--next {
-      transform: translateX($kuiShiftNavWidth);
+    &.kuiContextMenu__panel--next {
+      transform: translateX($kuiContextMenuWidth);
       visibility: hidden;
     }
 
-    &.kuiShiftNav__panel--previous {
-      transform: translateX(-$kuiShiftNavWidth);
+    &.kuiContextMenu__panel--previous {
+      transform: translateX(-$kuiContextMenuWidth);
       visibility: hidden;
     }
   }
 
-  .kuiShiftNav__content {
+  .kuiContextMenu__content {
     padding: $kuiSizeS;
   }
 

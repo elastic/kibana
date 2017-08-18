@@ -16,7 +16,7 @@ import {
   KuiButton,
 } from '../../components';
 
-export class KuiShiftNav extends Component {
+export class KuiContextMenu extends Component {
   static propTypes = {
     children: PropTypes.node,
     className: PropTypes.string,
@@ -96,31 +96,31 @@ export class KuiShiftNav extends Component {
       ...rest,
     } = this.props;
 
-    const classes = classNames('kuiShiftNav', className);
+    const classes = classNames('kuiContextMenu', className);
 
     let styles = {
       height: this.state.height,
     }
 
     const previousClasses = classNames(
-      'kuiShiftNav__panel',
+      'kuiContextMenu__panel',
       {
-        'kuiShiftNav__panel--previous': this.state.showCurrent || this.state.showNext,
+        'kuiContextMenu__panel--previous': this.state.showCurrent || this.state.showNext,
       },
     );
 
     const currentClasses = classNames(
-      'kuiShiftNav__panel',
+      'kuiContextMenu__panel',
       {
-        'kuiShiftNav__panel--previous': this.state.showNext,
-        'kuiShiftNav__panel--next': this.state.showPrevious,
+        'kuiContextMenu__panel--previous': this.state.showNext,
+        'kuiContextMenu__panel--next': this.state.showPrevious,
       },
     );
 
     const nextClasses = classNames(
-      'kuiShiftNav__panel',
+      'kuiContextMenu__panel',
       {
-        'kuiShiftNav__panel--next': this.state.showCurrent || this.state.showPrevious,
+        'kuiContextMenu__panel--next': this.state.showCurrent || this.state.showPrevious,
       },
     );
 
@@ -134,9 +134,9 @@ export class KuiShiftNav extends Component {
         <div ref="previous" className={previousClasses}>
           {this.state.previousItems.map((option, index) => {
             let buttonClasses = classNames(
-              'kuiShiftNav__option',
+              'kuiContextMenu__option',
               {
-                'kuiShiftNav__option--previous': option.previous,
+                'kuiContextMenu__option--previous': option.previous,
               },
             )
 
@@ -144,16 +144,16 @@ export class KuiShiftNav extends Component {
             if (option.next) {
               button = (
                 <button className={buttonClasses} key={option.id} onClick={this.showCurrent.bind(this)}>
-                  <KuiIcon type={option.icon} size="medium" className="kuiShiftNav__icon" />
-                  <span className="kuiShiftNav__text">{option.text}</span>
-                  <KuiIcon type="arrowRight" size="medium" className="kuiShiftNav__arrow" />
+                  <KuiIcon type={option.icon} size="medium" className="kuiContextMenu__icon" />
+                  <span className="kuiContextMenu__text">{option.text}</span>
+                  <KuiIcon type="arrowRight" size="medium" className="kuiContextMenu__arrow" />
                 </button>
               );
             } else {
               button = (
                 <button className={buttonClasses} key={option.id}>
-                  <KuiIcon type={option.icon} size="medium" className="kuiShiftNav__icon" />
-                  <span className="kuiShiftNav__text">{option.text}</span>
+                  <KuiIcon type={option.icon} size="medium" className="kuiContextMenu__icon" />
+                  <span className="kuiContextMenu__text">{option.text}</span>
                 </button>
               );
             }
@@ -166,9 +166,9 @@ export class KuiShiftNav extends Component {
         <div ref="current" className={currentClasses}>
           {this.state.currentItems.map((option, index) => {
             let buttonClasses = classNames(
-              'kuiShiftNav__option',
+              'kuiContextMenu__option',
               {
-                'kuiShiftNav__option--previous': option.previous,
+                'kuiContextMenu__option--previous': option.previous,
               },
             )
 
@@ -176,23 +176,23 @@ export class KuiShiftNav extends Component {
             if (option.next) {
               button = (
                 <button className={buttonClasses} key={option.id} onClick={this.showNext.bind(this)}>
-                  <KuiIcon type={option.icon} size="medium" className="kuiShiftNav__icon" />
-                  <span className="kuiShiftNav__text">{option.text}</span>
-                  <KuiIcon type="arrowRight" size="medium" className="kuiShiftNav__arrow" />
+                  <KuiIcon type={option.icon} size="medium" className="kuiContextMenu__icon" />
+                  <span className="kuiContextMenu__text">{option.text}</span>
+                  <KuiIcon type="arrowRight" size="medium" className="kuiContextMenu__arrow" />
                 </button>
               );
             } else if (option.previous) {
               button = (
                 <button className={buttonClasses} key={option.id} onClick={this.showPrevious.bind(this)}>
-                  <KuiIcon type={option.icon} size="medium" className="kuiShiftNav__icon" />
-                  <span className="kuiShiftNav__text">{option.text}</span>
+                  <KuiIcon type={option.icon} size="medium" className="kuiContextMenu__icon" />
+                  <span className="kuiContextMenu__text">{option.text}</span>
                 </button>
               );
             } else {
               button = (
                 <button className={buttonClasses} key={option.id}>
-                  <KuiIcon type={option.icon} size="medium" className="kuiShiftNav__icon" />
-                  <span className="kuiShiftNav__text">{option.text}</span>
+                  <KuiIcon type={option.icon} size="medium" className="kuiContextMenu__icon" />
+                  <span className="kuiContextMenu__text">{option.text}</span>
                 </button>
               );
             }
@@ -205,9 +205,9 @@ export class KuiShiftNav extends Component {
         <div ref="next" className={nextClasses}>
           {this.state.nextItems.map((option, index) => {
             let buttonClasses = classNames(
-              'kuiShiftNav__option',
+              'kuiContextMenu__option',
               {
-                'kuiShiftNav__option--previous': option.previous,
+                'kuiContextMenu__option--previous': option.previous,
               },
             )
 
@@ -215,15 +215,15 @@ export class KuiShiftNav extends Component {
             if (option.previous) {
               button = (
                 <button className={buttonClasses} key={option.id} onClick={this.showCurrent.bind(this)}>
-                  <KuiIcon type={option.icon} size="medium" className="kuiShiftNav__icon" />
-                  <span className="kuiShiftNav__text">{option.text}</span>
+                  <KuiIcon type={option.icon} size="medium" className="kuiContextMenu__icon" />
+                  <span className="kuiContextMenu__text">{option.text}</span>
                 </button>
               );
             } else {
               button = (
                 <button className={buttonClasses} key={option.id}>
-                  <KuiIcon type={option.icon} size="medium" className="kuiShiftNav__icon" />
-                  <span className="kuiShiftNav__text">{option.text}</span>
+                  <KuiIcon type={option.icon} size="medium" className="kuiContextMenu__icon" />
+                  <span className="kuiContextMenu__text">{option.text}</span>
                 </button>
               );
             }

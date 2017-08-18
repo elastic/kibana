@@ -12,6 +12,9 @@ import ButtonExample
 import CallOutExample
   from '../../views/call_out/call_out_example';
 
+import ContextMenuExample
+  from '../../views/context_menu/context_menu_example';
+
 import FlexExample
   from '../../views/flex/flex_example';
 
@@ -48,9 +51,6 @@ import PopoverExample
 import SideNavExample
   from '../../views/side_nav/side_nav_example';
 
-import ShiftNavExample
-  from '../../views/shift_nav/shift_nav_example';
-
 import TableExample
   from '../../views/table/table_example';
 
@@ -79,6 +79,10 @@ const components = [{
 }, {
   name: 'CallOut',
   component: CallOutExample,
+  hasReact: true,
+}, {
+  name: 'ContextMenu',
+  component: ContextMenuExample,
   hasReact: true,
 }, {
   name: 'Flex',
@@ -123,10 +127,6 @@ const components = [{
 }, {
   name: 'SideNav',
   component: SideNavExample,
-  hasReact: true,
-}, {
-  name: 'ShiftNav',
-  component: ShiftNavExample,
   hasReact: true,
 }, {
   name: 'Table',

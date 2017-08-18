@@ -3,7 +3,7 @@ import React, {
 } from 'react';
 
 import {
-  KuiShiftNav,
+  KuiContextMenu,
   KuiPopover,
   KuiButton,
 } from '../../../../components';
@@ -43,7 +43,7 @@ export default class extends Component {
         closePopover={this.closePopover.bind(this)}
         withTitle
       >
-        <KuiShiftNav />
+        <KuiContextMenu />
       </KuiPopover>
     );
   }

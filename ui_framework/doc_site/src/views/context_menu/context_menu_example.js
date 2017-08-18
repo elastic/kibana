@@ -10,28 +10,28 @@ import {
   GuideText,
 } from '../../components';
 
-import ShiftNav from './shift_nav';
-const shiftNavSource = require('!!raw!./shift_nav');
-const shiftNavHtml = renderToHtml(ShiftNav);
+import ContextMenu from './context_menu';
+const contextMenuSource = require('!!raw!./context_menu');
+const contextMenuHtml = renderToHtml(ContextMenu);
 
 export default props => (
   <GuidePage title={props.route.name}>
     <GuideSection
-      title="ShiftNav"
+      title="Context Menu"
       source={[{
         type: GuideSectionTypes.JS,
-        code: shiftNavSource,
+        code: contextMenuSource,
       }, {
         type: GuideSectionTypes.HTML,
-        code: shiftNavHtml,
+        code: contextMenuHtml,
       }]}
     >
       <GuideText>
-        Description needed: how to use the ShiftNav component.
+        Description needed: how to use the ContextMenu component.
       </GuideText>
 
       <GuideDemo>
-        <ShiftNav />
+        <ContextMenu />
       </GuideDemo>
     </GuideSection>
   </GuidePage>

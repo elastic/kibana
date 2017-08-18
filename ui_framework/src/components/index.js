@@ -17,6 +17,10 @@ export {
 } from './call_out';
 
 export {
+  KuiContextMenu,
+} from './context_menu';
+
+export {
   KuiFlexGroup,
   KuiFlexGrid,
   KuiFlexItem,
@@ -102,10 +106,6 @@ export {
   KuiPopover,
   KuiPopoverTitle,
 } from './popover';
-
-export {
-  KuiShiftNav,
-} from './shift_nav';
 
 export {
   KuiTable,
