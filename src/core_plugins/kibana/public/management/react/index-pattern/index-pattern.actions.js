@@ -2,7 +2,7 @@
 import { es } from '../globals';
 import { sortBy, endsWith, startsWith } from 'lodash';
 
-const MAX_NUMBER_OF_MATCHING_INDICES = 10;
+const MAX_NUMBER_OF_MATCHING_INDICES = 500;
 
 async function getIndices(pattern, limit = MAX_NUMBER_OF_MATCHING_INDICES) {
   const params = {
@@ -72,4 +72,18 @@ export const excludeSystemIndices = () => {
   return {
     type: EXCLUDE_SYSTEM_INDICES,
   };
+};
+
+export const GOTO_NEXT_PAGE = 'GOTO_NEXT_PAGE';
+export const goToNextPage = () => {
+  return {
+    type: GOTO_NEXT_PAGE,
+  }
+};
+
+export const GOTO_PREVIOUS_PAGE = 'GOTO_PREVIOUS_PAGE';
+export const goToPreviousPage = () => {
+  return {
+    type: GOTO_PREVIOUS_PAGE,
+  }
 };

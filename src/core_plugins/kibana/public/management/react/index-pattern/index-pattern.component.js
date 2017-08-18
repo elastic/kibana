@@ -21,11 +21,16 @@ import {
 } from 'ui_framework/components';
 
 const IndexPattern = ({
+  filteredIndices,
   indices,
+  page,
+  perPage,
   includeSystemIndices,
   includeSystemIndicesAction,
   excludeSystemIndicesAction,
-  fetchIndicesAction
+  fetchIndicesAction,
+  goToNextPageAction,
+  goToPreviousPageAction,
 }) => {
   const indexRows = indices.map((index, key) => {
     return (
@@ -78,35 +83,52 @@ const IndexPattern = ({
             />
           </KuiFormRow>
         </KuiForm>
-        <KuiTitle>
-          <h3>...that will match these indices</h3>
-        </KuiTitle>
-        <KuiTable>
-          <KuiTableHeader>
-            <KuiTableHeaderCell>
-              Name
-            </KuiTableHeaderCell>
-            <KuiTableHeaderCell>
-              Fields
-            </KuiTableHeaderCell>
-          </KuiTableHeader>
-          <KuiTableBody>
-            {indexRows}
-          </KuiTableBody>
-        </KuiTable>
-        {indices.length > 0
+        { indices.length > 0
           ?
-            <div className="kuiVerticalRhythm">
-              <KuiIcon
-                type="arrowLeft"
-                size="medium"
-              />
-              <KuiIcon
-                type="arrowRight"
-                size="medium"
-              />
+            <div>
+              <KuiTitle>
+                <h3>...that will match these indices</h3>
+              </KuiTitle>
+              <KuiTable className="kuiVerticalRhythm">
+                <KuiTableHeader>
+                  <KuiTableHeaderCell>
+                    Name
+                  </KuiTableHeaderCell>
+                  <KuiTableHeaderCell>
+                    Fields
+                  </KuiTableHeaderCell>
+                </KuiTableHeader>
+                <KuiTableBody>
+                  {indexRows}
+                </KuiTableBody>
+              </KuiTable>
+              {filteredIndices.length > perPage
+                ?
+                  <div className="kuiVerticalRhythm">
+                    <KuiText>
+                      <span>
+                        {page}
+                        of
+                        {Math.ceil(filteredIndices.length / perPage)}
+                        &nbsp;
+                        &nbsp;
+                      </span>
+                    </KuiText>
+                    <KuiIcon
+                      type="arrowLeft"
+                      size="medium"
+                      onClick={goToPreviousPageAction}
+                    />
+                    <KuiIcon
+                      type="arrowRight"
+                      size="medium"
+                      onClick={goToNextPageAction}
+                    />
+                  </div>
+                : null
+              }
             </div>
-          : null
+          : false
         }
       </KuiPageContentBody>
     </KuiPageContent>

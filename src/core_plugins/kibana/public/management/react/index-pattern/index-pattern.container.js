@@ -7,18 +7,25 @@ import {
   fetchIndices,
   includeSystemIndices,
   excludeSystemIndices,
+  goToNextPage,
+  goToPreviousPage,
 } from './index-pattern.actions';
 
 export default connect(
   state => {
     return {
-      indices: state.indexPattern.whiteListIndices,
+      filteredIndices: state.indexPattern.filteredIndices,
+      indices: state.indexPattern.indices,
       includeSystemIndices: state.indexPattern.includeSystemIndices,
+      page: state.indexPattern.page,
+      perPage: state.indexPattern.perPage,
     };
   },
   dispatch => bindActionCreators({
     fetchIndicesAction: fetchIndices,
     includeSystemIndicesAction: includeSystemIndices,
     excludeSystemIndicesAction: excludeSystemIndices,
+    goToNextPageAction: goToNextPage,
+    goToPreviousPageAction: goToPreviousPage,
   }, dispatch)
 )(IndexPattern);
