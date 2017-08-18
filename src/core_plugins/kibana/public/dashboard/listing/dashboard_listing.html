@@ -125,72 +125,80 @@
     <!-- Table -->
     <table class="kuiTable" ng-if="listingController.items.length">
       <thead>
-      <tr>
-        <th class="kuiTableHeaderCell kuiTableHeaderCell--checkBox" ng-if="!listingController.hideWriteControls">
-          <input
-            type="checkbox"
-            class="kuiCheckBox"
-            ng-checked="listingController.areAllItemsChecked()"
-            ng-click="listingController.toggleAll()"
-          >
-        </th>
+        <tr>
+          <th class="kuiTableHeaderCell kuiTableHeaderCell--checkBox" ng-if="!listingController.hideWriteControls">
+            <div class="kuiTableHeaderCell__liner">
+              <input
+                type="checkbox"
+                class="kuiCheckBox"
+                ng-checked="listingController.areAllItemsChecked()"
+                ng-click="listingController.toggleAll()"
+              >
+            </div>
+          </th>
 
-        <th class="kuiTableHeaderCell" ng-click="listingController.sortOn('title')">
-          Name
-          <span
-            class="kuiIcon"
-            ng-show="listingController.getSortedProperty().name == 'title'"
-            ng-class="listingController.isAscending('title') ? 'fa-caret-up' : 'fa-caret-down'"
-          >
-          </span>
-        </th>
-        <th class="kuiTableHeaderCell" ng-click="listingController.sortOn('description')">
-          Description
-          <span
-            class="kuiIcon"
-            ng-show="listingController.getSortedProperty().name == 'description'"
-            ng-class="listingController.isAscending('description') ? 'fa-caret-up' : 'fa-caret-down'"
-          >
-          </span>
-        </th>
-      </tr>
+          <th class="kuiTableHeaderCell">
+            <button
+              class="kuiTableHeaderCell__liner kuiTableHeaderCell__liner--sortable"
+              ng-click="listingController.sortOn('title')"
+            >
+              Name<span
+                class="kuiTableSortIcon kuiIcon"
+                ng-show="listingController.getSortedProperty().name == 'title'"
+                ng-class="listingController.isAscending('title') ? 'fa-long-arrow-up' : 'fa-long-arrow-down'"
+              ></span>
+            </button>
+          </th>
+
+          <th class="kuiTableHeaderCell">
+            <button
+              class="kuiTableHeaderCell__liner kuiTableHeaderCell__liner--sortable"
+              ng-click="listingController.sortOn('description')"
+            >
+              Description<span
+                class="kuiTableSortIcon kuiIcon"
+                ng-show="listingController.getSortedProperty().name == 'description'"
+                ng-class="listingController.isAscending('description') ? 'fa-long-arrow-up' : 'fa-long-arrow-down'"
+              ></span>
+            </button>
+          </th>
+        </tr>
       </thead>
 
       <tbody>
-      <tr
-        ng-repeat="item in listingController.pageOfItems track by item.id"
-        class="kuiTableRow"
-      >
-        <td class="kuiTableRowCell kuiTableRowCell--checkBox" ng-if="!listingController.hideWriteControls">
-          <div class="kuiTableRowCell__liner">
-            <input
-              type="checkbox"
-              class="kuiCheckBox"
-              data-test-subj="dashboardListItemCheckbox"
-              ng-click="listingController.toggleItem(item)"
-              ng-checked="listingController.isItemChecked(item)"
-            >
-          </div>
-        </td>
+        <tr
+          ng-repeat="item in listingController.pageOfItems track by item.id"
+          class="kuiTableRow"
+        >
+          <td class="kuiTableRowCell kuiTableRowCell--checkBox" ng-if="!listingController.hideWriteControls">
+            <div class="kuiTableRowCell__liner">
+              <input
+                type="checkbox"
+                class="kuiCheckBox"
+                data-test-subj="dashboardListItemCheckbox"
+                ng-click="listingController.toggleItem(item)"
+                ng-checked="listingController.isItemChecked(item)"
+              >
+            </div>
+          </td>
 
-        <td class="kuiTableRowCell">
-          <div class="kuiTableRowCell__liner">
-            <a
-              class="kuiLink"
-              data-test-subj="dashboardListingTitleLink"
-              ng-href="{{ listingController.getUrlForItem(item) }}"
-            >
-              {{ item.title }}
-            </a>
-          </div>
-        </td>
-        <td class="kuiTableRowCell kuiTableRowCell--wrap">
-          <div class="kuiTableRowCell__liner">
-            {{ item.description }}
-          </div>
-        </td>
-      </tr>
-
+          <td class="kuiTableRowCell">
+            <div class="kuiTableRowCell__liner">
+              <a
+                class="kuiLink"
+                data-test-subj="dashboardListingTitleLink"
+                ng-href="{{ listingController.getUrlForItem(item) }}"
+              >
+                {{ item.title }}
+              </a>
+            </div>
+          </td>
+          <td class="kuiTableRowCell kuiTableRowCell--wrap">
+            <div class="kuiTableRowCell__liner">
+              {{ item.description }}
+            </div>
+          </td>
+        </tr>
       </tbody>
     </table>
 
