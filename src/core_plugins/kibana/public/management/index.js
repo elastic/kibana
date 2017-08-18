@@ -4,10 +4,13 @@ import 'ui/filters/start_from';
 import 'ui/field_editor';
 import uiRoutes from 'ui/routes';
 import { uiModules } from 'ui/modules';
-import appTemplate from 'plugins/kibana/management/app.html';
+// import appTemplate from 'plugins/kibana/management/app.html';
+import reactAppTemplate from 'plugins/kibana/management/react/app.html';
 import landingTemplate from 'plugins/kibana/management/landing.html';
 import { management } from 'ui/management';
 import 'ui/kbn_top_nav';
+
+import ReactApp from './react';
 
 uiRoutes
 .when('/management', {
@@ -25,10 +28,10 @@ require('ui/index_patterns/route_setup/load_default')({
 
 uiModules
 .get('apps/management')
-.directive('kbnManagementApp', function (Private, $location, timefilter) {
+.directive('kbnManagementApp', function (Private, $location, timefilter, kbnVersion, $injector) {
   return {
     restrict: 'E',
-    template: appTemplate,
+    template: reactAppTemplate,
     transclude: true,
     scope: {
       sectionName: '@section',
@@ -37,6 +40,7 @@ uiModules
     },
 
     link: function ($scope) {
+      ReactApp.init(kbnVersion, management, $injector);
       timefilter.enabled = false;
       $scope.sections = management.items.inOrder;
       $scope.section = management.getSection($scope.sectionName) || management;

@@ -1,0 +1,75 @@
+/* eslint-disable */
+import { es } from '../globals';
+import { sortBy, endsWith, startsWith } from 'lodash';
+
+const MAX_NUMBER_OF_MATCHING_INDICES = 10;
+
+async function getIndices(pattern, limit = MAX_NUMBER_OF_MATCHING_INDICES) {
+  const params = {
+    index: pattern,
+    ignore: [404],
+    body: {
+      size: 0, // no hits
+      aggs: {
+        indices: {
+          terms: {
+            field: '_index',
+            size: limit,
+          }
+        }
+      }
+    }
+  };
+
+  const response = await es.search(params);
+  if (!response || response.error || !response.aggregations) {
+    return [];
+  }
+
+  return sortBy(response.aggregations.indices.buckets.map(bucket => {
+    return {
+      name: bucket.key,
+      count: bucket.doc_count,
+    };
+  }), 'name');
+}
+
+export const FETCH_INDICES = 'FETCH_INDICES';
+export const fetchIndices = (pattern) => {
+  return async dispatch => {
+    let partialPattern = pattern;
+    if (!endsWith(partialPattern, '*')) {
+      partialPattern = `${partialPattern}*`;
+    }
+    if (!startsWith(partialPattern, '*')) {
+      partialPattern = `*${partialPattern}`;
+    }
+
+    const exactIndices = await getIndices(pattern);
+    const partialIndices = await getIndices(partialPattern);
+    const indices = exactIndices.concat(partialIndices);
+    dispatch(fetchedIndices(indices));
+  }
+};
+
+export const FETCHED_INDICES = 'FETCHED_INDICES';
+export const fetchedIndices = (indices) => {
+  return {
+    type: FETCHED_INDICES,
+    indices,
+  };
+};
+
+export const INCLUDE_SYSTEM_INDICES = 'INCLUDE_SYSTEM_INDICES';
+export const includeSystemIndices = () => {
+  return {
+    type: INCLUDE_SYSTEM_INDICES,
+  };
+};
+
+export const EXCLUDE_SYSTEM_INDICES = 'EXCLUDE_SYSTEM_INDICES';
+export const excludeSystemIndices = () => {
+  return {
+    type: EXCLUDE_SYSTEM_INDICES,
+  };
+};
