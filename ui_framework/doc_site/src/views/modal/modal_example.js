@@ -33,6 +33,9 @@ export default props => (
       <GuideDemo>
         <StaticConfirmModal />
       </GuideDemo>
+      <GuideDemo isDarkTheme>
+        <StaticConfirmModal />
+      </GuideDemo>
     </GuideSection>
 
     <GuideSection
