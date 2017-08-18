@@ -27,6 +27,7 @@ const template = ({ args, updateArgs }) => {
 
   const getFields = () => {
     const commas = getSimpleArg('fields', args)[0] || '';
+    if (commas.length === 0) return [];
     return commas.split(',').map(str => str.trim());
   };
 
@@ -39,6 +40,7 @@ const template = ({ args, updateArgs }) => {
   const sort = getSort();
   const index = getSimpleArg('index', args)[0];
 
+  console.log(fields);
 
   return (
     <div>
@@ -93,8 +95,6 @@ const template = ({ args, updateArgs }) => {
             </FormControl>
         </div>
       </div>
-
-
 
       <label>Fields &nbsp;
         { fields.length <= 10 ?
