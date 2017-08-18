@@ -16,7 +16,7 @@ module.run(function (Private, $rootScope) {
   };
 });
 
-module.controller('SenseController', function SenseController(Private, $scope, $timeout, $location, docTitle) {
+module.controller('SenseController', function SenseController(Private, $scope, $timeout, $location, docTitle, kbnUiAceKeyboardModeService) {
   docTitle.change('Console');
 
   $scope.topNavController = Private(SenseTopNavController);
@@ -28,6 +28,7 @@ module.controller('SenseController', function SenseController(Private, $scope, $
     output = initializeOutput($('#output'));
     input = initializeInput($('#editor'), $('#editor_actions'), $('#copy_as_curl'), output);
     init(input, output, $location.search().load_from);
+    kbnUiAceKeyboardModeService.initialize($scope, $('#editor'));
   });
 
   $scope.sendSelected = () => {

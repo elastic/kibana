@@ -19,7 +19,6 @@ export function FindProvider({ getService }) {
     async _ensureElement(getElementFunction) {
       return await retry.try(async () => {
         const element = await getElementFunction();
-        console.log('element is ', element);
         // Calling any method forces a staleness check
         element.isEnabled();
         return element;
