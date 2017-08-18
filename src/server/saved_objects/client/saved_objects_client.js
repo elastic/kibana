@@ -111,7 +111,7 @@ export class SavedObjectsClient {
     });
 
     if (get(response, 'deleted') === 0) {
-      throw Boom.notFound();
+      throw errors.decorateNotFoundError(Boom.notFound());
     }
   }
 
@@ -211,7 +211,7 @@ export class SavedObjectsClient {
     const [hit] = get(response, 'hits.hits', []);
 
     if (!hit) {
-      throw Boom.notFound();
+      throw errors.decorateNotFoundError(Boom.notFound());
     }
 
     return normalizeEsDoc(hit);
