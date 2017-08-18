@@ -113,36 +113,44 @@
       <thead>
         <tr>
           <th class="kuiTableHeaderCell kuiTableHeaderCell--checkBox">
-            <input
-              type="checkbox"
-              class="kuiCheckBox"
-              ng-checked="listingController.areAllItemsChecked()"
-              ng-click="listingController.toggleAll()"
+            <div class="kuiTableHeaderCell__liner">
+              <input
+                type="checkbox"
+                class="kuiCheckBox"
+                ng-checked="listingController.areAllItemsChecked()"
+                ng-click="listingController.toggleAll()"
+              >
+            </div>
+          </th>
+
+          <th
+            class="kuiTableHeaderCell"
+          >
+            <button
+              class="kuiTableHeaderCell__liner kuiTableHeaderCell__liner--sortable"
+              ng-click="listingController.sortOn('title')"
             >
+              Name<span
+                class="kuiTableSortIcon kuiIcon"
+                ng-show="listingController.getSortedProperty().name === 'title'"
+                ng-class="listingController.isAscending('title') ? 'fa-long-arrow-up' : 'fa-long-arrow-down'"
+              ></span>
+            </button>
           </th>
 
           <th
             class="kuiTableHeaderCell"
-            ng-click="listingController.sortOn('title')"
           >
-            Name
-            <span
-              class="kuiIcon"
-              ng-show="listingController.getSortedProperty().name === 'title'"
-              ng-class="listingController.isAscending('title') ? 'fa-caret-up' : 'fa-caret-down'"
-            ></span>
-          </th>
-
-          <th
-            class="kuiTableHeaderCell"
-            ng-click="listingController.sortOn('type')"
-          >
-            Type
-            <span
-              class="kuiIcon"
-              ng-show="listingController.getSortedProperty().name === 'type'"
-              ng-class="listingController.isAscending('type') ? 'fa-caret-up' : 'fa-caret-down'"
-            ></span>
+            <button
+              class="kuiTableHeaderCell__liner kuiTableHeaderCell__liner--sortable"
+              ng-click="listingController.sortOn('type')"
+            >
+              Type<span
+                class="kuiTableSortIcon kuiIcon"
+                ng-show="listingController.getSortedProperty().name === 'type'"
+                ng-class="listingController.isAscending('type') ? 'fa-long-arrow-up' : 'fa-long-arrow-down'"
+              ></span>
+            </button>
           </th>
         </tr>
       </thead>
