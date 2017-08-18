@@ -54,6 +54,10 @@ module.directive('stepTimeField', function () {
         !this.isFetchingTimeFieldOptions && !this.hasTimeFieldOptions()
       );
 
+      this.canShowHelpText = () => (
+        this.isFetchingTimeFieldOptions || this.hasTimeFieldOptions()
+      );
+
       this.toggleAdvancedOptions = () => {
         this.showAdvancedOptions = !this.showAdvancedOptions;
       };
