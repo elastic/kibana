@@ -44,7 +44,14 @@ export default props => (
           />
       </GuideDemo>
       <GuideDemo isDarkTheme>
-        <StaticConfirmModal />
+        <KuiConfirmModal
+          onCancel={() => {}}
+          onConfirm={() => {}}
+          confirmButtonText="Confirm"
+          cancelButtonText="Cancel"
+          message="This is a confirmation modal"
+          title="Confirm Modal Title"
+        />
       </GuideDemo>
     </GuideSection>
 
