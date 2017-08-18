@@ -3,6 +3,7 @@ import React from 'react';
 import { renderToHtml } from '../../services';
 
 import {
+  GuideCode,
   GuideDemo,
   GuidePage,
   GuideSection,
@@ -27,7 +28,7 @@ export default props => (
       }]}
     >
       <GuideText>
-        Description needed: how to use the <%= componentExampleName %> component.
+        Description needed: how to use the <GuideCode><%= componentExampleName %></GuideCode> component.
       </GuideText>
 
       <GuideDemo>
