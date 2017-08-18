@@ -232,8 +232,7 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
 
     async goToPage(pageNum) {
       await remote.setFindTimeout(defaultFindTimeout)
-        .findByCssSelector('ul.pagination-other-pages-list.pagination-sm.ng-scope li.ng-scope:nth-child(' +
-          (pageNum + 1) + ') a.ng-binding')
+        .findByCssSelector(`[data-test-subj="paginationControls"] li:nth-child(${pageNum + 1}) button`)
         .click();
       await PageObjects.header.waitUntilLoadingHasFinished();
     }

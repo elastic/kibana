@@ -7,7 +7,10 @@
   Scroll to top
 </button>
 
-<div class="pagination-other-pages">
+<div
+  class="pagination-other-pages"
+  data-test-subj="paginationControls"
+>
   <ul class="pagination-other-pages-list pagination-sm" ng-if="page.count > 1">
     <li ng-style="{'visibility':'hidden'}" ng-if="page.first">
       <button class="kuiLink" ng-click="paginate.goToPage(page.prev)">«</button>
