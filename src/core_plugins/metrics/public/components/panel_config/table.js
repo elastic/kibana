@@ -1,7 +1,7 @@
 import React, { Component, PropTypes } from 'react';
 import FieldSelect from '../aggs/field_select';
 import SeriesEditor from '../series_editor';
-import IndexPattern from '../index_pattern';
+import { IndexPattern } from '../index_pattern';
 import createTextHandler from '../lib/create_text_handler';
 import createSelectHandler from '../lib/create_select_handler';
 import uuid from 'uuid';

@@ -10,7 +10,7 @@ export default function processBucket(panel) {
       const result = first(processor([]));
       if (!result) return null;
       const data = get(result, 'data', []);
-      const linearRegression = regression('linear', data);
+      const linearRegression = regression.linear(data);
       result.last = getLastValue(data);
       result.slope = linearRegression.equation[0];
       return result;
