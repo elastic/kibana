@@ -2307,6 +2307,10 @@ table {
     padding: 12px;
     width: 100%;
     text-align: left; }
+    .kuiShiftNav .kuiShiftNav__option:hover, .kuiShiftNav .kuiShiftNav__option:focus {
+      text-decoration: underline; }
+    .kuiShiftNav .kuiShiftNav__option:focus {
+      background-color: #e6f2f6; }
   .kuiShiftNav .kuiShiftNav__option--previous {
     background-color: #F5F5F5;
     border-bottom: 1px solid #D9D9D9; }

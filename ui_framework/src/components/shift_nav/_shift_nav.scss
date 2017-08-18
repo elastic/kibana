@@ -12,6 +12,14 @@ $kuiShiftNavWidth: $kuiSize * 16;
     padding: $kuiSizeM;
     width: 100%;
     text-align: left;
+
+    &:hover, &:focus {
+      text-decoration: underline;
+    }
+
+    &:focus {
+      background-color: $kuiFocusBackgroundColor;
+    }
   }
 
   .kuiShiftNav__option--previous {
