@@ -20,7 +20,7 @@ export default new FnTypedObject({
       types: ['number', 'null'],
       displayName: 'Line width',
       help: 'Width of the line',
-      default: 2,
+      default: 0,
     },
     bars: {
       types: ['number', 'null'],
@@ -32,7 +32,7 @@ export default new FnTypedObject({
       types: ['number', 'null'],
       displayName: 'Show Points',
       help: 'Size of points on line',
-      default: 0,
+      default: 5,
     },
     fill: {
       types: ['boolean', 'null'],

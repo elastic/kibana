@@ -9,7 +9,7 @@ export default new Element('plot', {
   displayName: 'Coordinate plot',
   description: 'An customizable XY plot for making line, bar or dot charts from your data',
   image: header,
-  expression: 'demodata().pointseries(x="time", y="sum(price)", color="state").plot(defaultStyle=seriesStyle(lines=2)).render()',
+  expression: 'demodata().pointseries(x="time", y="sum(price)", color="state").plot(defaultStyle=seriesStyle(points=5)).render()',
   render(domNode, config, done, events) {
     // TODO: OH NOES
     if (!includes($.plot.plugins, size)) $.plot.plugins.push(size);

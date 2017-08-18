@@ -169,9 +169,6 @@ export default new Fn({
             mode: context.columns.y.type === 'date' ? 'time' : undefined,
           },
           series: Object.assign({
-            lines: {
-              lineWidth: 2,
-            },
             bubbles: {
               active: true,
               show: true,
