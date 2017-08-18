@@ -129,6 +129,7 @@
     "font-awesome": "4.4.0",
     "glob": "5.0.13",
     "glob-all": "3.0.1",
+    "gm": "1.23.0",
     "good-squeeze": "2.1.0",
     "gridster": "0.5.6",
     "h2o2": "5.1.1",
