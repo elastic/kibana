@@ -18,6 +18,7 @@ require('ui/chrome')
     QUnit.config.autostart = false;
     QUnit.init();
 
+    require('./src/content_type.js');
     require('./src/utils_tests.js');
     require('./src/url_autocomplete_tests.js');
     require('./src/url_params_tests.js');
