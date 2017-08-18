@@ -96,11 +96,11 @@ uiModules.get('apps/management')
           return [];
         }
 
-        return response.aggregations.indices.buckets.map(bucket => {
+        return _.sortBy(response.aggregations.indices.buckets.map(bucket => {
           return {
             name: bucket.key
           };
-        });
+        }), 'name');
       });
   }
 
@@ -153,8 +153,8 @@ uiModules.get('apps/management')
       partialMatchingIndicesResponse
     ]) => {
       if (thisFetchMatchingIndicesRequest === mostRecentFetchMatchingIndicesRequest) {
-        matchingIndices = matchingIndicesResponse.sort();
-        partialMatchingIndices = partialMatchingIndicesResponse.sort();
+        matchingIndices = matchingIndicesResponse;
+        partialMatchingIndices = partialMatchingIndicesResponse;
         updateWhiteListedIndices();
         this.isFetchingMatchingIndices = false;
       }
@@ -173,7 +173,7 @@ uiModules.get('apps/management')
     ])
     .then(([allIndicesResponse]) => {
       // Cache all indices.
-      allIndices = allIndicesResponse.sort();
+      allIndices = allIndicesResponse;
       updateWhiteListedIndices();
       this.isFetchingExistingIndices = false;
     }).catch(error => {
