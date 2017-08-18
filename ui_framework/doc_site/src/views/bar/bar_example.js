@@ -60,7 +60,7 @@ export default props => (
     >
       <GuideText>
         A Bar with one section will align it to the right, by default. To align it to the left,
-        just add another section and leave it empty, or don't use a Bar at all.
+        just add another section and leave it empty, or don&rsquo;t use a Bar at all.
       </GuideText>
 
       <GuideDemo>
@@ -79,7 +79,7 @@ export default props => (
       }]}
     >
       <GuideText>
-        Technically the Bar can contain three or more sections, but there's no established use-case
+        Technically the Bar can contain three or more sections, but there&rsquo;s no established use-case
         for this.
       </GuideText>
 

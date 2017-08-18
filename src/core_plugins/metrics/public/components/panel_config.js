@@ -19,7 +19,7 @@ function PanelConfig(props) {
   if (component) {
     return React.createElement(component, props);
   }
-  return (<div>Missing panel config for "{model.type}"</div>);
+  return (<div>Missing panel config for &ldquo;{model.type}&rdquo;</div>);
 }
 
 PanelConfig.propTypes = {

@@ -82,7 +82,7 @@ class ColorPicker extends Component {
                 onClick={this.handleClose}
               />
               <Picker
-                color={ value }
+                color={value}
                 onChangeComplete={this.handleChange}
               />
             </div>

@@ -1,8 +1,10 @@
 import { resolve } from 'path';
 
 import libesvm from 'libesvm';
+import elasticsearch from 'elasticsearch';
 
 import { esTestConfig } from './es_test_config';
+import { createCallCluster } from './create_call_cluster';
 
 const ESVM_DIR = resolve(__dirname, '../../../esvm/test_utils/es_test_cluster');
 const BRANCHES_DOWNLOADED = [];
@@ -33,10 +35,25 @@ export function createEsTestCluster(options = {}) {
 
   // assigned in use.start(), reassigned in use.stop()
   let cluster;
+  let client;
 
   return new class EsTestCluster {
     getStartTimeout() {
       return esTestConfig.getLibesvmStartTimeout();
+    }
+
+    getClient() {
+      if (!client) {
+        client = new elasticsearch.Client({
+          host: esTestConfig.getUrl()
+        });
+      }
+
+      return client;
+    }
+
+    getCallCluster() {
+      return createCallCluster(this.getClient());
     }
 
     async start() {
@@ -89,6 +106,12 @@ export function createEsTestCluster(options = {}) {
     }
 
     async stop() {
+      if (client) {
+        const c = client;
+        client = null;
+        await c.close();
+      }
+
       if (cluster) {
         const c = cluster;
         cluster = null;

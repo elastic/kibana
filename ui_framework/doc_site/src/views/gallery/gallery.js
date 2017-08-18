@@ -20,11 +20,11 @@ export default () => {
   return (
     <div>
       <div className="kuiVerticalRhythm">
-        <h2 className="kuiSubTitle">
+        <h2 className="kuiSubTitle kuiVerticalRhythmSmall">
           Some items
         </h2>
 
-        <KuiGallery>
+        <KuiGallery className="kuiVerticalRhythmSmall">
           <KuiGalleryButton href="#">
             <KuiGalleryButtonImage style={imageStyle}/>
 
@@ -70,11 +70,11 @@ export default () => {
       </div>
 
       <div className="kuiVerticalRhythm">
-        <div className="kuiSubTitle">
+        <div className="kuiSubTitle kuiVerticalRhythmSmall">
           Some more items
         </div>
 
-        <KuiGallery>
+        <KuiGallery className="kuiVerticalRhythmSmall">
           <KuiGalleryButton href="#">
             <KuiGalleryButtonImage style={imageStyle}/>
 

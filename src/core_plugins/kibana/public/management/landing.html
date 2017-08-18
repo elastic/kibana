@@ -9,7 +9,6 @@
     <div
       ng-if="section.visibleItems.length > 0"
       ng-repeat="section in sections"
-      ng-class="{ 'management-section-info-expanded': section.showInfo }"
       class="page-row"
     >
       <div class="kuiPanel management-panel">
@@ -20,15 +19,6 @@
             ></div>
             <div class="kuiPanelHeader__title">
               {{::section.display}}
-            </div>
-          </div>
-
-          <div class="kuiPanelHeaderSection" ng-if="section.info">
-            <div class="kuiText">
-              <span
-                class="fa fa-info-circle management-panel__heading-icon--secondary"
-                ng-click="section.showInfo = !!!section.showInfo"
-              ></span>
             </div>
           </div>
         </div>
@@ -54,10 +44,6 @@
                 </a>
               </li>
             </ul>
-          </div>
-
-          <div class="management-section-info">
-            {{::section.info}}
           </div>
         </div>
       </div>

@@ -11,7 +11,7 @@ import {
 
 export function FluidTable() {
   return (
-    <KuiTable shrinkToContent={ true }>
+    <KuiTable shrinkToContent={true}>
       <KuiTableHeader>
         <KuiTableHeaderCell>
               System

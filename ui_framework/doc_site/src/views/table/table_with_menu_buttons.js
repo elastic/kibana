@@ -48,7 +48,7 @@ export function TableWithMenuButtons() {
           <KuiTableRowCell>
             C
           </KuiTableRowCell>
-          <KuiTableRowCell align={ RIGHT_ALIGNMENT }>
+          <KuiTableRowCell align={RIGHT_ALIGNMENT}>
             <div className="kuiMenuButtonGroup kuiMenuButtonGroup--alignRight">
               <button className="kuiMenuButton kuiMenuButton--basic">
                 Acknowledge
@@ -76,7 +76,7 @@ export function TableWithMenuButtons() {
           <KuiTableRowCell>
             C
           </KuiTableRowCell>
-          <KuiTableRowCell align={ RIGHT_ALIGNMENT }>
+          <KuiTableRowCell align={RIGHT_ALIGNMENT}>
             <div className="kuiMenuButtonGroup kuiMenuButtonGroup--alignRight">
               <button className="kuiMenuButton kuiMenuButton--basic">
                 Acknowledge

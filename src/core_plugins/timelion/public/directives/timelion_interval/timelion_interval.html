@@ -5,6 +5,8 @@
   ng-class="{ 'timelion-interval-custom-compact': interval === 'other' }"
   ng-model="otherInterval"
 ><select
+  id="timelionInterval"
+  aria-label="Select interval"
   class="kuiSelect timelion-interval-presets"
   ng-options="intervalOption for intervalOption in intervalOptions"
   ng-class="{ 'timelion-interval-presets-compact': interval === 'other'}"

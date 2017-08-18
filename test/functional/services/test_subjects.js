@@ -1,4 +1,4 @@
-import testSubjSelector from '@spalger/test-subj-selector';
+import testSubjSelector from '@elastic/test-subj-selector';
 import {
   filter as filterAsync,
   map as mapAsync,
@@ -32,6 +32,10 @@ export function TestSubjectsProvider({ getService }) {
         await remote.moveMouseTo(element);
         await element.click();
       });
+    }
+
+    async findDescendant(selector, parentElement) {
+      return await find.descendantDisplayedByCssSelector(testSubjSelector(selector), parentElement);
     }
 
     async find(selector, timeout = defaultFindTimeout) {
