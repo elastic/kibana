@@ -1398,7 +1398,8 @@ table {
  */
 .kuiHeaderPopover {
   top: calc(100% - 16px) !important;
-  /* 1 */ }
+  /* 1 */
+  padding: 16px; }
 
 .kuiHeaderProfile {
   text-align: left;
@@ -1550,7 +1551,7 @@ table {
  * Dial menu is a phone like dial comprised of an svg icon and a title.
  */
 /**
- * 1. Default to grid of 3, account for padding.
+ * 1. Default to grid of 3
  */
 .kuiKeyPadMenu {
   display: -webkit-box;
@@ -1565,9 +1566,7 @@ table {
   -webkit-flex-wrap: wrap;
       -ms-flex-wrap: wrap;
           flex-wrap: wrap;
-  width: 320px;
-  /* 1 */
-  padding: 16px; }
+  width: 288px; }
 
 /**
  * 1. If this class is applied to a button, we need to override the Chrome default font.

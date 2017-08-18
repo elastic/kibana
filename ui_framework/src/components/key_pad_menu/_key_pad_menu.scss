@@ -3,14 +3,13 @@
  */
 
 /**
- * 1. Default to grid of 3, account for padding.
+ * 1. Default to grid of 3
  */
 .kuiKeyPadMenu {
   display: flex;
   flex-direction: row;
   flex-wrap: wrap;
-  width: $kuiKeyPadMenuSize * 3 + $kuiSizeXL; /* 1 */
-  padding: $kuiSize;
+  width: $kuiKeyPadMenuSize * 3;
 }
 
 /**
