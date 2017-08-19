@@ -46,25 +46,18 @@ export function decorateFormController($delegate, $injector) {
     }
 
     _getInvalidModels() {
-      return (function collect(modelGroup) {
-        return Object.values(modelGroup.$error).reduce((acc, models) => {
-          return [
-            ...acc,
-            ...(models || []).reduce((acc, model) => {
-              if (model.$$invalidModels) {
-                // this is another model group that has its own child models,
-                // like a nested ng-form, so recurse and keep going
-                return [
-                  ...acc,
-                  ...collect(model)
-                ];
-              }
+      return this.$$controls.reduce((acc, control) => {
+        // recurse into sub-form
+        if (typeof control._getInvalidModels === 'function') {
+          return [...acc, ...control._getInvalidModels()];
+        }
 
-              return [...acc, model];
-            }, [])
-          ];
-        }, []);
-      }(this));
+        if (control.$invalid) {
+          return [...acc, control];
+        }
+
+        return acc;
+      }, []);
     }
   }
 
