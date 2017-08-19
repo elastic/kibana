@@ -1,5 +1,6 @@
 /**
  * 1. Enforce pointer when there's no href.
+ * 2. Allow these styles to be applied to a button element.
  */
 /**
  * 1. Override Bootstrap styles.
@@ -1580,9 +1581,21 @@ main {
 
 .kuiLink {
   color: #0079a5;
+  text-decoration: none;
   cursor: pointer;
   /* 1 */
-  font-weight: 500; }
+  -webkit-appearance: none;
+     -moz-appearance: none;
+          appearance: none;
+  /* 2 */
+  background-color: transparent;
+  /* 2 */
+  border: none;
+  /* 2 */
+  font-size: inherit;
+  /* 2 */
+  line-height: inherit;
+  /* 2 */ }
   .kuiLink:visited, .kuiLink:active {
     color: #0079a5; }
   .kuiLink:hover {
@@ -1631,9 +1644,21 @@ main {
  */
 .kuiLocalBreadcrumb__link {
   color: #0079a5;
+  text-decoration: none;
   cursor: pointer;
   /* 1 */
-  font-weight: 500;
+  -webkit-appearance: none;
+     -moz-appearance: none;
+          appearance: none;
+  /* 2 */
+  background-color: transparent;
+  /* 2 */
+  border: none;
+  /* 2 */
+  font-size: inherit;
+  /* 2 */
+  line-height: inherit;
+  /* 2 */
   color: #0079a5;
   /* 1 */
   font-size: 14px; }
