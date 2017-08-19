@@ -1,0 +1,43 @@
+.kuiFlexGrid {
+  display: flex;
+  align-items: stretch;
+  flex-wrap: wrap;
+  margin: 0 -$kuiSizeM;
+
+  .kuiFlexItem {
+    flex-grow: 0;
+    padding: 0 $kuiSizeM;
+    margin-top: $kuiSizeL;
+  }
+
+  // Gutter Sizes
+  &.kuiFlexGrid--gutterSmall .kuiFlexItem + .kuiFlexItem {
+    padding: 0 $kuiSizeS / 2;
+  }
+
+  &.kuiFlexGrid--gutterMedium .kuiFlexItem + .kuiFlexItem {
+    padding: 0 $kuiSize / 2;
+  }
+
+  &.kuiFlexGrid--gutterLarge .kuiFlexItem + .kuiFlexItem {
+    padding: 0 $kuiSizeL / 2;
+  }
+
+  &.kuiFlexGrid--gutterExtraLarge .kuiFlexItem + .kuiFlexItem {
+    padding: 0 $kuiSizeXXL / 2;
+  }
+
+  &.kuiFlexGrid--flexBasisFourths .kuiFlexItem {
+    flex-basis: 25%;
+  }
+
+  &.kuiFlexGrid--flexBasisThirds .kuiFlexItem {
+    flex-basis: 33.33%;
+  }
+
+  &.kuiFlexGrid--flexBasisHalves .kuiFlexItem {
+    flex-basis: 50%;
+  }
+
+}
+

@@ -781,54 +781,47 @@ table {
     -webkit-justify-content: flex-end;
         -ms-flex-pack: end;
             justify-content: flex-end; }
-  .kuiFlexGroup.kuiFlexGroup--flexBasisFourths {
-    -webkit-flex-wrap: wrap;
-        -ms-flex-wrap: wrap;
-            flex-wrap: wrap;
-    margin: -12px; }
-    .kuiFlexGroup.kuiFlexGroup--flexBasisFourths .kuiFlexItem {
-      -webkit-box-flex: 0;
-      -webkit-flex-grow: 0;
-          -ms-flex-positive: 0;
-              flex-grow: 0;
-      -webkit-flex-basis: 25%;
-          -ms-flex-preferred-size: 25%;
-              flex-basis: 25%;
-      padding: 0 12px;
-      margin-left: 0 !important;
-      margin-top: 24px; }
-  .kuiFlexGroup.kuiFlexGroup--flexBasisThirds {
-    -webkit-flex-wrap: wrap;
-        -ms-flex-wrap: wrap;
-            flex-wrap: wrap;
-    margin: -12px; }
-    .kuiFlexGroup.kuiFlexGroup--flexBasisThirds .kuiFlexItem {
-      -webkit-box-flex: 0;
-      -webkit-flex-grow: 0;
-          -ms-flex-positive: 0;
-              flex-grow: 0;
-      -webkit-flex-basis: 33.33%;
-          -ms-flex-preferred-size: 33.33%;
-              flex-basis: 33.33%;
-      padding: 0 12px;
-      margin-left: 0 !important;
-      margin-top: 24px; }
-  .kuiFlexGroup.kuiFlexGroup--flexBasisHalves {
-    -webkit-flex-wrap: wrap;
-        -ms-flex-wrap: wrap;
-            flex-wrap: wrap;
-    margin: -12px; }
-    .kuiFlexGroup.kuiFlexGroup--flexBasisHalves .kuiFlexItem {
-      -webkit-box-flex: 0;
-      -webkit-flex-grow: 0;
-          -ms-flex-positive: 0;
-              flex-grow: 0;
-      -webkit-flex-basis: 50%;
-          -ms-flex-preferred-size: 50%;
-              flex-basis: 50%;
-      padding: 0 12px;
-      margin-left: 0 !important;
-      margin-top: 24px; }
+
+.kuiFlexGrid {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-align: stretch;
+  -webkit-align-items: stretch;
+      -ms-flex-align: stretch;
+          align-items: stretch;
+  -webkit-flex-wrap: wrap;
+      -ms-flex-wrap: wrap;
+          flex-wrap: wrap;
+  margin: -12px; }
+  .kuiFlexGrid .kuiFlexItem {
+    -webkit-box-flex: 0;
+    -webkit-flex-grow: 0;
+        -ms-flex-positive: 0;
+            flex-grow: 0;
+    padding: 0 12px;
+    margin-top: 24px; }
+  .kuiFlexGrid.kuiFlexGrid--gutterSmall .kuiFlexItem + .kuiFlexItem {
+    padding: 0 4px; }
+  .kuiFlexGrid.kuiFlexGrid--gutterMedium .kuiFlexItem + .kuiFlexItem {
+    padding: 0 8px; }
+  .kuiFlexGrid.kuiFlexGrid--gutterLarge .kuiFlexItem + .kuiFlexItem {
+    padding: 0 12px; }
+  .kuiFlexGrid.kuiFlexGrid--gutterExtraLarge .kuiFlexItem + .kuiFlexItem {
+    padding: 0 20px; }
+  .kuiFlexGrid.kuiFlexGrid--flexBasisFourths .kuiFlexItem {
+    -webkit-flex-basis: 25%;
+        -ms-flex-preferred-size: 25%;
+            flex-basis: 25%; }
+  .kuiFlexGrid.kuiFlexGrid--flexBasisThirds .kuiFlexItem {
+    -webkit-flex-basis: 33.33%;
+        -ms-flex-preferred-size: 33.33%;
+            flex-basis: 33.33%; }
+  .kuiFlexGrid.kuiFlexGrid--flexBasisHalves .kuiFlexItem {
+    -webkit-flex-basis: 50%;
+        -ms-flex-preferred-size: 50%;
+            flex-basis: 50%; }
 
 /**
  * 1. Override invalid state with focus state.

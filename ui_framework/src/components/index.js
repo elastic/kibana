@@ -18,6 +18,7 @@ export {
 
 export {
   KuiFlexGroup,
+  KuiFlexGrid,
   KuiFlexItem,
 } from './flex';
 

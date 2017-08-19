@@ -1,13 +1,13 @@
 import React from 'react';
 
 import {
-  KuiFlexGroup,
+  KuiFlexGrid,
   KuiFlexItem,
 } from '../../../../components';
 
 export default () => (
   <div>
-    <KuiFlexGroup wrapGridOf={3}>
+    <KuiFlexGrid wrapGridOf={3}>
       <KuiFlexItem><div>One</div></KuiFlexItem>
       <KuiFlexItem><div>Two</div></KuiFlexItem>
       <KuiFlexItem><div>Three</div></KuiFlexItem>
@@ -15,7 +15,7 @@ export default () => (
       <KuiFlexItem><div>Five</div></KuiFlexItem>
       <KuiFlexItem><div>Six</div></KuiFlexItem>
       <KuiFlexItem><div>Seven</div></KuiFlexItem>
-    </KuiFlexGroup>
+    </KuiFlexGrid>
   </div>
 );
 
