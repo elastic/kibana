@@ -11,5 +11,11 @@ export default () => (
       <KuiFlexItem>One here on the left</KuiFlexItem>
       <KuiFlexItem>The other over here on the right.</KuiFlexItem>
     </KuiFlexGroup>
+
+    <br/><br/>
+
+    <KuiFlexGroup growItems={false} justifyContent="spaceAround">
+      <KuiFlexItem>I'm a single centered item!</KuiFlexItem>
+    </KuiFlexGroup>
   </div>
 );

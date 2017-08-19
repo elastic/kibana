@@ -130,8 +130,8 @@ export default props => (
     >
       <GuideText>
         <GuideCode>FlexGroup</GuideCode>s can also use a <GuideCode>justifyContent</GuideCode> prop
-        that accepts normal flex-box paramenters.  Below is a common scenario, where you turn off
-        growing items, then justify them apart wth space-between.
+        that accepts normal flex-box paramenters.  Below are two common scenarios, where you need to
+        separate two items, or center align a single one.
       </GuideText>
 
       <GuideDemo>
