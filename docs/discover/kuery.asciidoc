@@ -17,7 +17,8 @@ Multiple search terms are separated by whitespace.
 
 `response:200 extension:php` will match documents where response matches 200 and extension matches php.
 
-All terms must match by default. The language supports boolean logic with and/or operators. The above query is equivalent to `response:200 and extension:php`.
+*All terms must match by default*. The language supports boolean logic with and/or operators. The above query is equivalent to `response:200 and extension:php`.
+This is a departure from the Lucene query syntax where all terms are optional by default.
 
 We can make terms optional by using `or`.
 

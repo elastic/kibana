@@ -1,5 +1,6 @@
 /**
  * 1. Enforce pointer when there's no href.
+ * 2. Allow these styles to be applied to a button element.
  */
 /**
  * 1. Override Bootstrap styles.
@@ -1580,9 +1581,21 @@ main {
 
 .kuiLink {
   color: #0079a5;
+  text-decoration: none;
   cursor: pointer;
   /* 1 */
-  font-weight: 500; }
+  -webkit-appearance: none;
+     -moz-appearance: none;
+          appearance: none;
+  /* 2 */
+  background-color: transparent;
+  /* 2 */
+  border: none;
+  /* 2 */
+  font-size: inherit;
+  /* 2 */
+  line-height: inherit;
+  /* 2 */ }
   .kuiLink:visited, .kuiLink:active {
     color: #0079a5; }
   .kuiLink:hover {
@@ -1631,9 +1644,21 @@ main {
  */
 .kuiLocalBreadcrumb__link {
   color: #0079a5;
+  text-decoration: none;
   cursor: pointer;
   /* 1 */
-  font-weight: 500;
+  -webkit-appearance: none;
+     -moz-appearance: none;
+          appearance: none;
+  /* 2 */
+  background-color: transparent;
+  /* 2 */
+  border: none;
+  /* 2 */
+  font-size: inherit;
+  /* 2 */
+  line-height: inherit;
+  /* 2 */
   color: #0079a5;
   /* 1 */
   font-size: 14px; }
@@ -2498,6 +2523,9 @@ main {
   border-radius: 4px;
   box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.1);
   z-index: 1001; }
+  .theme-dark .kuiModal {
+    background-color: #525252;
+    border-color: #000; }
 
 .kuiModalHeader {
   display: -webkit-box;
@@ -2515,9 +2543,13 @@ main {
   padding: 10px;
   padding-left: 20px;
   border-bottom: 1px solid #D9D9D9; }
+  .theme-dark .kuiModalHeader {
+    border-bottom-color: #000; }
 
 .kuiModalHeader__title {
   font-size: 18px; }
+  .theme-dark .kuiModalHeader__title {
+    color: #cecece; }
 
 .kuiModalHeaderCloseButton {
   display: inline-block;
@@ -2541,6 +2573,8 @@ main {
 
 .kuiModalBodyText {
   font-size: 14px; }
+  .theme-dark .kuiModalBodyText {
+    color: #cecece; }
 
 .kuiModalFooter {
   display: -webkit-box;

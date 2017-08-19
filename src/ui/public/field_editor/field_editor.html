@@ -69,7 +69,7 @@
         <i class="fa fa-warning text-warning"></i> Format Warning
       </h4>
 
-      <p>
+      <p id="scriptFieldWarningCopy">
         Formatting allows you to control the way that specific values are displayed. It can also cause values to be completely changed and prevent highlighting in Discover from working.
       </p>
     </div>
@@ -79,6 +79,7 @@
       id="scriptFieldFormat"
       ng-options="format.id as format.title for format in editor.fieldFormatTypes"
       class="form-control"
+      aria-describedby="scriptFieldWarningCopy"
       data-test-subj="editorSelectedFormatId">
     </select>
     <fieldset
