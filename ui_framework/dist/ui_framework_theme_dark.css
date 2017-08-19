@@ -729,6 +729,107 @@ table {
           transform: translateY(2px);
   /* 1 */ }
 
+.kuiFlexGroup {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-align: stretch;
+  -webkit-align-items: stretch;
+      -ms-flex-align: stretch;
+          align-items: stretch; }
+  .kuiFlexGroup .kuiFlexItem {
+    -webkit-box-flex: 1;
+    -webkit-flex-grow: 1;
+        -ms-flex-positive: 1;
+            flex-grow: 1;
+    -webkit-flex-basis: 0;
+        -ms-flex-preferred-size: 0;
+            flex-basis: 0; }
+  .kuiFlexGroup.kuiFlexGroup--gutterSmall .kuiFlexItem + .kuiFlexItem {
+    margin-left: 8px; }
+  .kuiFlexGroup.kuiFlexGroup--gutterMedium .kuiFlexItem + .kuiFlexItem {
+    margin-left: 16px; }
+  .kuiFlexGroup.kuiFlexGroup--gutterLarge .kuiFlexItem + .kuiFlexItem {
+    margin-left: 24px; }
+  .kuiFlexGroup.kuiFlexGroup--gutterExtraLarge .kuiFlexItem + .kuiFlexItem {
+    margin-left: 40px; }
+  .kuiFlexGroup.kuiFlexGroup--flexGrowZero .kuiFlexItem {
+    -webkit-box-flex: 0;
+    -webkit-flex-grow: 0;
+        -ms-flex-positive: 0;
+            flex-grow: 0;
+    -webkit-flex-basis: auto;
+        -ms-flex-preferred-size: auto;
+            flex-basis: auto; }
+  .kuiFlexGroup.kuiFlexGroup--justifyContentSpaceBetween {
+    -webkit-box-pack: justify;
+    -webkit-justify-content: space-between;
+        -ms-flex-pack: justify;
+            justify-content: space-between; }
+  .kuiFlexGroup.kuiFlexGroup--justifyContentSpaceAround {
+    -webkit-justify-content: space-around;
+        -ms-flex-pack: distribute;
+            justify-content: space-around; }
+  .kuiFlexGroup.kuiFlexGroup--justifyContentCenter {
+    -webkit-box-pack: center;
+    -webkit-justify-content: center;
+        -ms-flex-pack: center;
+            justify-content: center; }
+  .kuiFlexGroup.kuiFlexGroup--justifyContentFlexEnd {
+    -webkit-box-pack: end;
+    -webkit-justify-content: flex-end;
+        -ms-flex-pack: end;
+            justify-content: flex-end; }
+  .kuiFlexGroup.kuiFlexGroup--flexBasisFourths {
+    -webkit-flex-wrap: wrap;
+        -ms-flex-wrap: wrap;
+            flex-wrap: wrap;
+    margin: -12px; }
+    .kuiFlexGroup.kuiFlexGroup--flexBasisFourths .kuiFlexItem {
+      -webkit-box-flex: 0;
+      -webkit-flex-grow: 0;
+          -ms-flex-positive: 0;
+              flex-grow: 0;
+      -webkit-flex-basis: 25%;
+          -ms-flex-preferred-size: 25%;
+              flex-basis: 25%;
+      padding: 0 12px;
+      margin-left: 0 !important;
+      margin-top: 24px; }
+  .kuiFlexGroup.kuiFlexGroup--flexBasisThirds {
+    -webkit-flex-wrap: wrap;
+        -ms-flex-wrap: wrap;
+            flex-wrap: wrap;
+    margin: -12px; }
+    .kuiFlexGroup.kuiFlexGroup--flexBasisThirds .kuiFlexItem {
+      -webkit-box-flex: 0;
+      -webkit-flex-grow: 0;
+          -ms-flex-positive: 0;
+              flex-grow: 0;
+      -webkit-flex-basis: 33.33%;
+          -ms-flex-preferred-size: 33.33%;
+              flex-basis: 33.33%;
+      padding: 0 12px;
+      margin-left: 0 !important;
+      margin-top: 24px; }
+  .kuiFlexGroup.kuiFlexGroup--flexBasisHalves {
+    -webkit-flex-wrap: wrap;
+        -ms-flex-wrap: wrap;
+            flex-wrap: wrap;
+    margin: -12px; }
+    .kuiFlexGroup.kuiFlexGroup--flexBasisHalves .kuiFlexItem {
+      -webkit-box-flex: 0;
+      -webkit-flex-grow: 0;
+          -ms-flex-positive: 0;
+              flex-grow: 0;
+      -webkit-flex-basis: 50%;
+          -ms-flex-preferred-size: 50%;
+              flex-basis: 50%;
+      padding: 0 12px;
+      margin-left: 0 !important;
+      margin-top: 24px; }
+
 /**
  * 1. Override invalid state with focus state.
  */
