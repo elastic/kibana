@@ -3,12 +3,18 @@ import React from 'react';
 import { renderToHtml } from '../../services';
 
 import {
+  GuideCode,
   GuideDemo,
   GuidePage,
   GuideSection,
   GuideSectionTypes,
   GuideText,
 } from '../../components';
+
+import {
+  KuiCallOut,
+  KuiText,
+} from '../../../../components';
 
 import FlexGroup from './flex_group';
 const flexGroupSource = require('!!raw!./flex_group');
@@ -36,8 +42,26 @@ const flexWrapHtml = renderToHtml(FlexWrap);
 
 export default props => (
   <GuidePage title={props.route.name}>
+    <KuiCallOut
+      title="Coloring and padding exist for examples only"
+      type="warning"
+    >
+      <KuiText size="small">
+        <p>
+          Padding and background-color is added to all the <GuideCode>FlexItem</GuideCode> components on this
+          documentation page for illustrative purposes only. If you want padding or styling
+          on <GuideCode>FlexItems</GuideCode> you should always do so through components that are children
+          of <GuideCode>FlexItem</GuideCode> itself. To help you from breaking layouts,
+          <GuideCode>FlexItem</GuideCode> is unique in KUI and does not accept the usual
+          <GuideCode>className</GuideCode> prop.
+        </p>
+      </KuiText>
+    </KuiCallOut>
+    <br/>
+    <br/>
+
     <GuideSection
-      title="Flex Group"
+      title="FlexGroup is for a single row layout"
       source={[{
         type: GuideSectionTypes.JS,
         code: flexGroupSource,
@@ -47,8 +71,9 @@ export default props => (
       }]}
     >
       <GuideText>
-        Flex groups are useful for setting up layouts for a <strong>single row</strong> of
-        content. By default flex group items will stretch and grow to match their siblings.
+        <GuideCode>FlexGroup</GuideCode> is useful for setting up layouts for a <strong>single row</strong> of
+        content. By default any <GuideCode>FlexItem</GuideCode> within <GuideCode>FlexGroup</GuideCode> will
+        stretch and grow to match their siblings.
       </GuideText>
 
       <GuideDemo>
@@ -57,7 +82,7 @@ export default props => (
     </GuideSection>
 
     <GuideSection
-      title="Add as many items as you need"
+      title="FlexGroup accepts infinite items"
       source={[{
         type: GuideSectionTypes.JS,
         code: flexItemsSource,
@@ -67,7 +92,8 @@ export default props => (
       }]}
     >
       <GuideText>
-        Same code as above, but this one has more items inside.
+        Same code as above. Notice that <GuideCode>FlexItem</GuideCode> creates equal width items
+        no matter the number of siblings. <GuideCode>FlexGroup</GuideCode> never wraps.
       </GuideText>
 
       <GuideDemo>
@@ -76,26 +102,7 @@ export default props => (
     </GuideSection>
 
     <GuideSection
-      title="Gutter sizing"
-      source={[{
-        type: GuideSectionTypes.JS,
-        code: flexGutterSource,
-      }, {
-        type: GuideSectionTypes.HTML,
-        code: flexGutterHtml,
-      }]}
-    >
-      <GuideText>
-        Flex gutters can be configured or even removed.
-      </GuideText>
-
-      <GuideDemo>
-        <div className="guideDemo__highlightGrid"><FlexGutter /></div>
-      </GuideDemo>
-    </GuideSection>
-
-    <GuideSection
-      title="Turn off growing items"
+      title="FlexGroup can turn off stretching"
       source={[{
         type: GuideSectionTypes.JS,
         code: flexGrowSource,
@@ -105,7 +112,8 @@ export default props => (
       }]}
     >
       <GuideText>
-        You can disable the growth of items if you need, but they are on by default.
+        You can disable the growth of <GuideCode>FlexItem</GuideCode> components within
+        <GuideCode>FlexGroup</GuideCode> if you need, but it is set to true by default.
       </GuideText>
 
       <GuideDemo>
@@ -114,7 +122,7 @@ export default props => (
     </GuideSection>
 
     <GuideSection
-      title="Justify items"
+      title="FlexGroup can be justified"
       source={[{
         type: GuideSectionTypes.JS,
         code: flexJustifySource,
@@ -124,9 +132,9 @@ export default props => (
       }]}
     >
       <GuideText>
-        Items can also be jusitified using flex box rules. Most commonly you'd do
-        something like this, where you turn off growing items, and separate them
-        to the corners.
+        <GuideCode>FlexGroup</GuideCode>s can also use a <GuideCode>justifyContent</GuideCode> prop
+        that accepts normal flex-box paramenters.  Below is a common scenario, where you turn off
+        growing items, then justify them apart wth space-between.
       </GuideText>
 
       <GuideDemo>
@@ -135,7 +143,7 @@ export default props => (
     </GuideSection>
 
     <GuideSection
-      title="Wrapping grids"
+      title="FlexGrids are for repeatable grids"
       source={[{
         type: GuideSectionTypes.JS,
         code: flexWrapSource,
@@ -145,12 +153,35 @@ export default props => (
       }]}
     >
       <GuideText>
-        Grids with proper spacing can be easy set by using the wrapGridOf prop,
-        passing the number of columns you want per row, up to 4.
+        <GuideCode>FlexGrid</GuideCode> is a more rigid component that sets multiple, wrapping
+        rows of same width items. It only accpets a <GuideCode>columns</GuideCode> and
+        <GuideCode>gutterSize</GuideCode> prop. You can have anywhere between 2-4 columns. Any
+        more would likely break on laptop screens.
       </GuideText>
 
       <GuideDemo>
         <div className="guideDemo__highlightGridWrap"><FlexWrap /></div>
+      </GuideDemo>
+    </GuideSection>
+
+    <GuideSection
+      title="Gutter sizing can be used on either FlexGroups or FlexGrids"
+      source={[{
+        type: GuideSectionTypes.JS,
+        code: flexGutterSource,
+      }, {
+        type: GuideSectionTypes.HTML,
+        code: flexGutterHtml,
+      }]}
+    >
+      <GuideText>
+        The <GuideCode>gutterSize</GuideCode> prop can be applied to either a
+        <GuideCode>FlexGroup</GuideCode> or a <GuideCode>FlexGrid</GuideCode> to adjust the
+        spacing between FlexItems.
+      </GuideText>
+
+      <GuideDemo>
+        <div className="guideDemo__highlightGrid"><FlexGutter /></div>
       </GuideDemo>
     </GuideSection>
   </GuidePage>

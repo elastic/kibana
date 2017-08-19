@@ -7,7 +7,7 @@ import {
 
 export default () => (
   <div>
-    <KuiFlexGrid wrapGridOf={3}>
+    <KuiFlexGrid columns="3">
       <KuiFlexItem><div>One</div></KuiFlexItem>
       <KuiFlexItem><div>Two</div></KuiFlexItem>
       <KuiFlexItem><div>Three</div></KuiFlexItem>

@@ -12,19 +12,19 @@ const gutterSizeToClassNameMap = {
 
 export const GUTTER_SIZES = Object.keys(gutterSizeToClassNameMap);
 
-const wrapGridToClassNameMap = {
+const columnsToClassNameMap = {
   2: 'kuiFlexGrid--flexBasisHalves',
   3: 'kuiFlexGrid--flexBasisThirds',
   4: 'kuiFlexGrid--flexBasisFourths',
 };
 
-export const WRAP_GRIDS = Object.keys(wrapGridToClassNameMap);
+export const COLUMNS = Object.keys(columnsToClassNameMap);
 
-export const KuiFlexGrid = ({ children, className, gutterSize, wrapGridOf, ...rest }) => {
+export const KuiFlexGrid = ({ children, className, gutterSize, columns, ...rest }) => {
   const classes = classNames(
     'kuiFlexGrid',
     gutterSizeToClassNameMap[gutterSize],
-    wrapGridToClassNameMap[wrapGridOf],
+    columnsToClassNameMap[columns],
     className
   );
 
@@ -41,12 +41,12 @@ export const KuiFlexGrid = ({ children, className, gutterSize, wrapGridOf, ...re
 KuiFlexGrid.propTypes = {
   children: PropTypes.node,
   className: PropTypes.string,
-  gutterSize: PropTypes.string,
-  wrapGridOf: PropTypes.number,
+  gutterSize: PropTypes.oneOf(GUTTER_SIZES),
+  columns: PropTypes.oneOf(COLUMNS).isRequired,
 };
 
 KuiFlexGrid.defaultProps = {
   gutterSize: 'large',
-  wrapGridOf: null,
+  columns: null,
 };
 

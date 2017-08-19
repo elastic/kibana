@@ -29,23 +29,14 @@ const justifyContentToClassNameMap = {
   spaceAround: 'kuiFlexGroup--justifyContentSpaceAround',
 };
 
-export const JUSTIFIED_CONTENTS = Object.keys(alignItemsToClassNameMap);
+export const JUSTIFY_CONTENTS = Object.keys(alignItemsToClassNameMap);
 
-const wrapGridToClassNameMap = {
-  2: 'kuiFlexGroup--flexBasisHalves',
-  3: 'kuiFlexGroup--flexBasisThirds',
-  4: 'kuiFlexGroup--flexBasisFourths',
-};
-
-export const WRAP_GRIDS = Object.keys(wrapGridToClassNameMap);
-
-export const KuiFlexGroup = ({ children, className, gutterSize, alignItems, justifyContent, wrapGridOf, growItems, ...rest }) => {
+export const KuiFlexGroup = ({ children, className, gutterSize, alignItems, justifyContent, growItems, ...rest }) => {
   const classes = classNames(
     'kuiFlexGroup',
     gutterSizeToClassNameMap[gutterSize],
     alignItemsToClassNameMap[alignItems],
     justifyContentToClassNameMap[justifyContent],
-    wrapGridToClassNameMap[wrapGridOf],
     {
       'kuiFlexGroup--flexGrowZero': !growItems,
     },
@@ -65,10 +56,9 @@ export const KuiFlexGroup = ({ children, className, gutterSize, alignItems, just
 KuiFlexGroup.propTypes = {
   children: PropTypes.node,
   className: PropTypes.string,
-  gutterSize: PropTypes.string,
-  alignItems: PropTypes.string,
-  justifyContent: PropTypes.string,
-  columns: PropTypes.number,
+  gutterSize: PropTypes.oneOf(GUTTER_SIZES),
+  alignItems: PropTypes.oneOf(ALIGN_ITEMS),
+  justifyContent: PropTypes.oneOf(JUSTIFY_CONTENTS),
   growItems: PropTypes.bool,
 };
 
@@ -76,6 +66,5 @@ KuiFlexGroup.defaultProps = {
   gutterSize: 'large',
   alignItems: 'stretch',
   justifyContent: 'flex-start',
-  wrapGridOf: null,
   growItems: true,
 };

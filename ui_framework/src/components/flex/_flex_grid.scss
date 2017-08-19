@@ -2,31 +2,50 @@
   display: flex;
   align-items: stretch;
   flex-wrap: wrap;
-  margin: 0 -$kuiSizeM;
+  margin-bottom: 0;
 
   .kuiFlexItem {
     flex-grow: 0;
-    padding: 0 $kuiSizeM;
-    margin-top: $kuiSizeL;
   }
 
   // Gutter Sizes
-  &.kuiFlexGrid--gutterSmall .kuiFlexItem + .kuiFlexItem {
-    padding: 0 $kuiSizeS / 2;
+  &.kuiFlexGrid--gutterSmall {
+    margin: -($kuiSizeS / 2);
+
+    .kuiFlexItem {
+      padding: 0 $kuiSizeS / 2;
+      margin-top: $kuiSizeS;
+    }
   }
 
-  &.kuiFlexGrid--gutterMedium .kuiFlexItem + .kuiFlexItem {
-    padding: 0 $kuiSize / 2;
+  &.kuiFlexGrid--gutterMedium {
+    margin: -$kuiSize / 2;
+
+    .kuiFlexItem {
+      padding: 0 $kuiSize / 2;
+      margin-top: $kuiSize;
+    }
   }
 
-  &.kuiFlexGrid--gutterLarge .kuiFlexItem + .kuiFlexItem {
-    padding: 0 $kuiSizeL / 2;
+  &.kuiFlexGrid--gutterLarge {
+    margin: -$kuiSizeL / 2;
+
+    .kuiFlexItem {
+      padding: 0 $kuiSizeL / 2;
+      margin-top: $kuiSizeL;
+    }
   }
 
-  &.kuiFlexGrid--gutterExtraLarge .kuiFlexItem + .kuiFlexItem {
-    padding: 0 $kuiSizeXXL / 2;
+  &.kuiFlexGrid--gutterExtraLarge {
+    margin: -$kuiSizeXL / 2;
+
+    .kuiFlexItem {
+      padding: 0 $kuiSizeXL / 2;
+      margin-top: $kuiSizeXL;
+    }
   }
 
+  // Grid columns
   &.kuiFlexGrid--flexBasisFourths .kuiFlexItem {
     flex-basis: 25%;
   }
@@ -38,6 +57,5 @@
   &.kuiFlexGrid--flexBasisHalves .kuiFlexItem {
     flex-basis: 50%;
   }
-
 }
 

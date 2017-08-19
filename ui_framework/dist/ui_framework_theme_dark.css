@@ -794,22 +794,32 @@ table {
   -webkit-flex-wrap: wrap;
       -ms-flex-wrap: wrap;
           flex-wrap: wrap;
-  margin: -12px; }
+  margin-bottom: 0; }
   .kuiFlexGrid .kuiFlexItem {
     -webkit-box-flex: 0;
     -webkit-flex-grow: 0;
         -ms-flex-positive: 0;
-            flex-grow: 0;
-    padding: 0 12px;
-    margin-top: 24px; }
-  .kuiFlexGrid.kuiFlexGrid--gutterSmall .kuiFlexItem + .kuiFlexItem {
-    padding: 0 4px; }
-  .kuiFlexGrid.kuiFlexGrid--gutterMedium .kuiFlexItem + .kuiFlexItem {
-    padding: 0 8px; }
-  .kuiFlexGrid.kuiFlexGrid--gutterLarge .kuiFlexItem + .kuiFlexItem {
-    padding: 0 12px; }
-  .kuiFlexGrid.kuiFlexGrid--gutterExtraLarge .kuiFlexItem + .kuiFlexItem {
-    padding: 0 20px; }
+            flex-grow: 0; }
+  .kuiFlexGrid.kuiFlexGrid--gutterSmall {
+    margin: -4px; }
+    .kuiFlexGrid.kuiFlexGrid--gutterSmall .kuiFlexItem {
+      padding: 0 4px;
+      margin-top: 8px; }
+  .kuiFlexGrid.kuiFlexGrid--gutterMedium {
+    margin: -8px; }
+    .kuiFlexGrid.kuiFlexGrid--gutterMedium .kuiFlexItem {
+      padding: 0 8px;
+      margin-top: 16px; }
+  .kuiFlexGrid.kuiFlexGrid--gutterLarge {
+    margin: -12px; }
+    .kuiFlexGrid.kuiFlexGrid--gutterLarge .kuiFlexItem {
+      padding: 0 12px;
+      margin-top: 24px; }
+  .kuiFlexGrid.kuiFlexGrid--gutterExtraLarge {
+    margin: -16px; }
+    .kuiFlexGrid.kuiFlexGrid--gutterExtraLarge .kuiFlexItem {
+      padding: 0 16px;
+      margin-top: 32px; }
   .kuiFlexGrid.kuiFlexGrid--flexBasisFourths .kuiFlexItem {
     -webkit-flex-basis: 25%;
         -ms-flex-preferred-size: 25%;

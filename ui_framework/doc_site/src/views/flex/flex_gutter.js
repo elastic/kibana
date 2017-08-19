@@ -48,10 +48,10 @@ export default () => (
     <br/>
 
     <KuiFlexGroup gutterSize="extraLarge">
-      <KuiFlexItem>Medium</KuiFlexItem>
-      <KuiFlexItem>Medium</KuiFlexItem>
-      <KuiFlexItem>Medium</KuiFlexItem>
-      <KuiFlexItem>Medium</KuiFlexItem>
+      <KuiFlexItem>Extra Large</KuiFlexItem>
+      <KuiFlexItem>Extra Large</KuiFlexItem>
+      <KuiFlexItem>Extra Large</KuiFlexItem>
+      <KuiFlexItem>Extra Large</KuiFlexItem>
     </KuiFlexGroup>
   </div>
 );
