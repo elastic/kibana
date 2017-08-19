@@ -10,8 +10,11 @@
 
 <div class="checkbox" ng-if="editor.formatParams.type == 'a'">
   <label>
-    <input ng-model="editor.formatParams.openLinkInCurrentTab" class="ng-pristine ng-valid ng-touched" type="checkbox">
-    Open link in current tab
+    <input
+      type="checkbox"
+      ng-model="editor.formatParams.openLinkInCurrentTab">
+      Open link in current tab
+    </input>
   </label>
 </div>
 
