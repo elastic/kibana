@@ -782,6 +782,12 @@ table {
         -ms-flex-pack: end;
             justify-content: flex-end; }
 
+@media only screen and (max-width: 768px) {
+  .kuiFlexGroup {
+    -webkit-flex-wrap: wrap;
+        -ms-flex-wrap: wrap;
+            flex-wrap: wrap; } }
+
 .kuiFlexGrid {
   display: -webkit-box;
   display: -webkit-flex;
@@ -832,6 +838,15 @@ table {
     -webkit-flex-basis: 50%;
         -ms-flex-preferred-size: 50%;
             flex-basis: 50%; }
+
+@media only screen and (max-width: 768px) {
+  .kuiFlexItem {
+    width: 100% !important;
+    -webkit-flex-basis: 100% !important;
+        -ms-flex-preferred-size: 100% !important;
+            flex-basis: 100% !important;
+    margin-left: 0 !important;
+    margin-bottom: 16px !important; } }
 
 /**
  * 1. Override invalid state with focus state.

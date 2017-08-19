@@ -1,0 +1,10 @@
+// FlexItems are normally defined by Groups or Grids.
+// On mobile we force them to stack and act the same.
+@include screenXSmall {
+  .kuiFlexItem {
+    width: 100% !important;
+    flex-basis: 100% !important;
+    margin-left: 0 !important;
+    margin-bottom: $kuiSize !important;
+  }
+}

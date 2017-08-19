@@ -29,7 +29,7 @@ const justifyContentToClassNameMap = {
   spaceAround: 'kuiFlexGroup--justifyContentSpaceAround',
 };
 
-export const JUSTIFY_CONTENTS = Object.keys(alignItemsToClassNameMap);
+export const JUSTIFY_CONTENTS = Object.keys(justifyContentToClassNameMap);
 
 export const KuiFlexGroup = ({ children, className, gutterSize, alignItems, justifyContent, growItems, ...rest }) => {
   const classes = classNames(
@@ -65,6 +65,6 @@ KuiFlexGroup.propTypes = {
 KuiFlexGroup.defaultProps = {
   gutterSize: 'large',
   alignItems: 'stretch',
-  justifyContent: 'flex-start',
+  justifyContent: 'flexStart',
   growItems: true,
 };

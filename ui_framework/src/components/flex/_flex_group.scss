@@ -47,3 +47,10 @@
     justify-content: flex-end;
   }
 }
+
+
+@include screenXSmall {
+  .kuiFlexGroup {
+    flex-wrap: wrap;
+  }
+}

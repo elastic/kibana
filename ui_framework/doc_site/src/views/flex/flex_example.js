@@ -177,7 +177,7 @@ export default props => (
       <GuideText>
         The <GuideCode>gutterSize</GuideCode> prop can be applied to either a
         <GuideCode>FlexGroup</GuideCode> or a <GuideCode>FlexGrid</GuideCode> to adjust the
-        spacing between FlexItems.
+        spacing between <GuideCode>FlexItem</GuideCode>s.
       </GuideText>
 
       <GuideDemo>
