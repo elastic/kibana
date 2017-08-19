@@ -111,7 +111,7 @@ describe('paginated table', function () {
       const tableRows = $el.find('tbody tr');
       expect(tableRows.size()).to.be(perPageCount);
       // add 2 for the first and last page links
-      expect($el.find('paginate-controls a').size()).to.be(pageCount + 2);
+      expect($el.find('paginate-controls button').size()).to.be(pageCount + 2);
     });
 
     it('should not show blank rows on last page when so specified', function () {
