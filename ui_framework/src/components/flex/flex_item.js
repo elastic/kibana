@@ -1,12 +1,13 @@
 import React from 'react';
 import PropTypes from 'prop-types';
+import classNames from 'classnames';
 
-export const KuiFlexItem = ({ children, ...rest }) => {
+export const KuiFlexItem = ({ children, className, ...rest }) => {
+  const classes = classNames('kuiFlexItem', className);
 
-  // This component on purpose does not accept a classname prop.
   return (
     <div
-      className="kuiFlexItem"
+      className={classes}
       {...rest}
     >
       {children}

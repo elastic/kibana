@@ -48,12 +48,9 @@ export default props => (
     >
       <KuiText size="small">
         <p>
-          Padding and background-color is added to all the <GuideCode>FlexItem</GuideCode> components on this
-          documentation page for illustrative purposes only. If you want padding or styling
-          on <GuideCode>FlexItems</GuideCode> you should always do so through components that are children
-          of <GuideCode>FlexItem</GuideCode> itself. To help you from breaking layouts,
-          <GuideCode>FlexItem</GuideCode> is unique in KUI and does not accept the usual
-          <GuideCode>className</GuideCode> prop.
+          Padding and background-color are added to all the <GuideCode>FlexItem</GuideCode> components on this
+          documentation page for illustrative purposes only. You will need to add padding through additional
+          components or classes if you need it.
         </p>
       </KuiText>
     </KuiCallOut>
