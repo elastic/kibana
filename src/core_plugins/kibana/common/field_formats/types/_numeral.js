@@ -1,7 +1,12 @@
 import _ from 'lodash';
 import numeral from '@elastic/numeral';
+import numeralLanguages from '@elastic/numeral/languages';
 
 const numeralInst = numeral();
+
+numeralLanguages.forEach(function (numeralLanguage) {
+  numeral.language(numeralLanguage.id, numeralLanguage.lang);
+});
 
 export function createNumeralFormat(FieldFormat, opts) {
   class NumeralFormat extends FieldFormat {
@@ -11,7 +16,6 @@ export function createNumeralFormat(FieldFormat, opts) {
 
     constructor(params, getConfig) {
       super(params);
-
       this.getConfig = getConfig;
     }
 
@@ -34,7 +38,13 @@ export function createNumeralFormat(FieldFormat, opts) {
 
       if (isNaN(val)) return '';
 
+      const previousLocale = numeral.language();
+      const defaultLocale = this.getConfig && this.getConfig('format:number:defaultLocale') || 'en';
+      numeral.language(defaultLocale);
+
       const formatted = numeralInst.set(val).format(this.param('pattern'));
+
+      numeral.language(previousLocale);
 
       return opts.afterConvert
         ? opts.afterConvert.call(this, formatted)
