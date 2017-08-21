@@ -115,7 +115,6 @@ export function AggTypesBucketsGeoHashProvider(Private, config) {
           if (!lastMapCollar || lastMapCollar.zoom !== mapZoom || isOutsideCollar(mapBounds, lastMapCollar)) {
             mapCollar = scaleBounds(mapBounds);
             mapCollar.zoom = mapZoom;
-            vis.getUiState().set('mapCollar', mapCollar);
           } else {
             mapCollar = lastMapCollar;
           }
