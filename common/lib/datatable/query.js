@@ -9,9 +9,9 @@ export function queryDatatable(datatable, query) {
     datatable = Object.assign({}, datatable, { rows: datatable.rows.slice(0, query.size) });
   }
 
-  if (query.filters) {
+  if (query.and) {
     // Todo: figure out type of filters
-    query.filters.each(clause => {
+    query.and.forEach(clause => {
       console.log(clause);
     });
   }
