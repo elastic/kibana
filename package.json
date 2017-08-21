@@ -297,7 +297,7 @@
     "supertest-as-promised": "2.0.2",
     "tree-kill": "1.1.0",
     "ts-jest": "20.0.10",
-    "typescript": "2.4.2",
+    "typescript": "2.5.1",
     "webpack-dev-server": "1.14.1"
   },
   "engines": {
