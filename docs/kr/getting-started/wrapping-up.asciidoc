@@ -5,5 +5,5 @@
 
 * 데이터 검색 및 필터링에 대한 자세한 내용은 {kibana-ref}/discover.html[검색]을 참조하십시오.
 * Kibana에서 제공하는 모든 시각화 유형에 대한 자세한 내용은 {kibana-ref}/visualize.html[ 시각화]를 참조하십시오.
-* Kibana 구성 및 저장된 오브젝트 관리에 대한 자세한 내용은 {kibana-ref}//management.htm;[ 관리]를 참조하십시오. 
+* Kibana 구성 및 저장된 오브젝트 관리에 대한 자세한 내용은 {kibana-ref}//management.html[ 관리]를 참조하십시오.
 * Elasticsearch에 REST 요청을 제출할 때 사용할 수 있는 대화형 콘솔 UI에 대한 자세한 내용은 {kibana-ref}/console-kibana.html[ 콘솔]을 참조하십시오.
