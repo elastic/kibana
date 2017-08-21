@@ -21,6 +21,8 @@ import {
   KuiButtonEmpty,
 } from 'ui_framework/components';
 
+import { InputPatternInputField } from './lib/index-pattern-input-field';
+
 const IndexPattern = ({
   filteredIndices,
   indices,
@@ -80,9 +82,9 @@ const IndexPattern = ({
           <KuiFormRow
             helpText="Patterns allow you to define dynamic index names using * as a wildcard"
           >
-            <KuiFieldText
+            <InputPatternInputField
               placeholder="Please enter..."
-              onChange={(e) => fetchIndicesAction(e.target.value)}
+              onChange={fetchIndicesAction}
               name="pattern"
             />
           </KuiFormRow>
@@ -142,7 +144,9 @@ const IndexPattern = ({
                     <KuiText>
                       <span>
                         {page}
+                        &nbsp;
                         of
+                        &nbsp;
                         {Math.ceil(filteredIndices.length / perPage)}
                         &nbsp;
                         &nbsp;
