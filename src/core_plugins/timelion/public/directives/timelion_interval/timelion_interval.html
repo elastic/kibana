@@ -1,5 +1,6 @@
 <input
   input-focus
+  aria-label="Custom interval"
   class="kuiTextInput timelion-interval-custom"
   ng-show="interval === 'other'"
   ng-class="{ 'timelion-interval-custom-compact': interval === 'other' }"
@@ -8,7 +9,14 @@
   id="timelionInterval"
   aria-label="Select interval"
   class="kuiSelect timelion-interval-presets"
-  ng-options="intervalOption for intervalOption in intervalOptions"
   ng-class="{ 'timelion-interval-presets-compact': interval === 'other'}"
   ng-model="interval"
-></select>
+>
+  <option
+    ng-repeat="intervalOption in intervalOptions"
+    aria-label="{{::intervalLabels[intervalOption]}}"
+    value="{{::intervalOption}}"
+  >
+      {{::intervalOption}}
+  </option>
+</select>
