@@ -17,6 +17,12 @@ export {
 } from './call_out';
 
 export {
+  KuiFlexGroup,
+  KuiFlexGrid,
+  KuiFlexItem,
+} from './flex';
+
+export {
   KuiCheckboxGroup,
   KuiFieldNumber,
   KuiFieldPassword,
