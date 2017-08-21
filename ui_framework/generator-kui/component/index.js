@@ -27,6 +27,11 @@ module.exports = class extends Generator {
       default: true,
     }]).then(answers => {
       this.config = answers;
+
+      if (!answers.name || !answers.name.trim()) {
+        this.log.error('Sorry, please run this generator again and provide a component name.');
+        process.exit(1);
+      }
     });
   }
 
@@ -121,7 +126,7 @@ module.exports = class extends Generator {
 
       this.log(chalk.white('\n// Import component styles into the root index.scss.'));
       this.log(
-        `${chalk.magenta('@import')} ${chalk.cyan(`'./${this.config.name}/index'`)};`
+        `${chalk.magenta('@import')} ${chalk.cyan(`'${this.config.name}/index'`)};`
       );
     };
 
