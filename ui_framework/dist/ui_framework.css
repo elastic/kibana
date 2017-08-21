@@ -2938,7 +2938,7 @@ main {
  * 2. Remove native button element styles.
  * 3. Make buttons look and behave like table header cells.
  */
-.kuiTableHeaderCell__liner--sortable {
+.kuiTableHeaderCellButton {
   -webkit-user-select: none;
      -moz-user-select: none;
       -ms-user-select: none;
@@ -2954,6 +2954,8 @@ main {
   /* 2 */
   border: 0;
   /* 2 */
+  padding: 0;
+  /* 2 */
   color: inherit;
   /* 3 */
   line-height: inherit;
@@ -2962,15 +2964,29 @@ main {
   /* 3 */
   text-align: inherit;
   /* 3 */ }
-  .kuiTableHeaderCell__liner--sortable:hover:not(.kuiTableHeaderCell__liner-isSorted) .kuiTableSortIcon {
-    opacity: 0.4; }
+  .kuiTableHeaderCellButton:hover .kuiTableSortIcon {
+    display: block;
+    opacity: 1; }
+  .kuiTableHeaderCellButton .kuiTableHeaderCell__liner {
+    display: -webkit-box;
+    display: -webkit-flex;
+    display: -ms-flexbox;
+    display: flex;
+    -webkit-box-align: center;
+    -webkit-align-items: center;
+        -ms-flex-align: center;
+            align-items: center; }
 
 .kuiTableHeaderCell--alignRight {
   text-align: right; }
 
 .kuiTableSortIcon {
+  display: none;
   pointer-events: none;
   margin-left: 4px; }
+  .kuiTableHeaderCellButton-isSorted .kuiTableSortIcon {
+    display: block;
+    opacity: 0.4; }
 
 .kuiTableRow:hover .kuiTableRowHoverReveal {
   display: inline-block; }

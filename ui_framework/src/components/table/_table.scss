@@ -47,22 +47,29 @@
  * 2. Remove native button element styles.
  * 3. Make buttons look and behave like table header cells.
  */
-.kuiTableHeaderCell__liner--sortable {
+.kuiTableHeaderCellButton {
   user-select: none; /* 1 */
   cursor: pointer;
   width: 100%;
   appearance: none; /* 2 */
   background-color: transparent; /* 2 */
   border: 0; /* 2 */
+  padding: 0; /* 2 */
   color: inherit; /* 3 */
   line-height: inherit; /* 3 */
   font-size: inherit; /* 3 */
   text-align: inherit; /* 3 */
 
-  &:hover:not(.kuiTableHeaderCell__liner-isSorted) {
+  &:hover {
     .kuiTableSortIcon {
-      opacity: 0.4;
+      display: block;
+      opacity: 1;
     }
+  }
+
+  .kuiTableHeaderCell__liner {
+    display: flex;
+    align-items: center;
   }
 }
 
@@ -71,8 +78,14 @@
 }
 
 .kuiTableSortIcon {
+  display: none;
   pointer-events: none;
   margin-left: 4px;
+
+  .kuiTableHeaderCellButton-isSorted & {
+    display: block;
+    opacity: 0.4;
+  }
 }
 
 .kuiTableRow {

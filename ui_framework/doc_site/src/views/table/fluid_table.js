@@ -21,7 +21,6 @@ export class FluidTable extends Component {
 
     this.state = {
       sortedColumn: 'title',
-      isSortAscending: true,
     };
 
     this.items = [{
@@ -51,7 +50,6 @@ export class FluidTable extends Component {
 
     this.setState({
       sortedColumn: prop,
-      isSortAscending: this.sortableProperties.isCurrentSortAscending(),
     });
   }
 
@@ -84,7 +82,7 @@ export class FluidTable extends Component {
           <KuiTableHeaderCell
             onSort={this.onSort.bind(this, 'title')}
             isSorted={this.state.sortedColumn === 'title'}
-            isSortAscending={this.state.isSortAscending}
+            isSortAscending={this.sortableProperties.isAscendingByName('title')}
           >
             System
           </KuiTableHeaderCell>
@@ -92,7 +90,7 @@ export class FluidTable extends Component {
           <KuiTableHeaderCell
             onSort={this.onSort.bind(this, 'description')}
             isSorted={this.state.sortedColumn === 'description'}
-            isSortAscending={this.state.isSortAscending}
+            isSortAscending={this.sortableProperties.isAscendingByName('description')}
           >
             Description
           </KuiTableHeaderCell>

@@ -30,7 +30,7 @@ export class ControlledTable extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      rowToSelectedStateMap: new Map()
+      rowToSelectedStateMap: new Map(),
     };
 
     this.rows = [

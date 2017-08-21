@@ -11,37 +11,35 @@ export const KuiTableHeaderCell = ({
   ...rest,
 }) => {
   const classes = classNames('kuiTableHeaderCell', className);
-  const linerClasses = classNames('kuiTableHeaderCell__liner', {
-    'kuiTableHeaderCell__liner--sortable': onSort,
-    'kuiTableHeaderCell__liner-isSorted': isSorted,
-  });
 
   let liner;
 
   if (onSort) {
-    let sortIcon;
+    const sortIconClasses = classNames('kuiTableSortIcon kuiIcon', {
+      'fa-long-arrow-up': isSortAscending,
+      'fa-long-arrow-down': !isSortAscending,
+    });
 
-    if (isSorted) {
-      const sortIconClasses = classNames('kuiTableSortIcon kuiIcon', {
-        'fa-long-arrow-up': isSortAscending,
-        'fa-long-arrow-down': !isSortAscending,
-      });
+    const sortIcon = <span className={sortIconClasses} />;
 
-      sortIcon = <span className={sortIconClasses} />;
-    }
+    const buttonClasses = classNames('kuiTableHeaderCellButton', {
+      'kuiTableHeaderCellButton-isSorted': isSorted,
+    });
 
     liner = (
       <button
-        className={linerClasses}
+        className={buttonClasses}
         onClick={onSort}
       >
-        {children}
-        {sortIcon}
+        <span className="kuiTableHeaderCell__liner">
+          {children}
+          {sortIcon}
+        </span>
       </button>
     );
   } else {
     liner = (
-      <div className={linerClasses}>
+      <div className="kuiTableHeaderCell__liner">
         {children}
       </div>
     );
