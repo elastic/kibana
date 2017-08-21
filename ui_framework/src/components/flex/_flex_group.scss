@@ -1,0 +1,56 @@
+.kuiFlexGroup {
+  display: flex;
+  align-items: stretch;
+
+  .kuiFlexItem {
+    flex-grow: 1;
+    flex-basis: 0;
+  }
+
+  // Gutter Sizes
+  &.kuiFlexGroup--gutterSmall > .kuiFlexItem + .kuiFlexItem {
+    margin-left: $kuiSizeS;
+  }
+
+  &.kuiFlexGroup--gutterMedium > .kuiFlexItem + .kuiFlexItem {
+    margin-left: $kuiSize;
+  }
+
+  &.kuiFlexGroup--gutterLarge > .kuiFlexItem + .kuiFlexItem {
+    margin-left: $kuiSizeL;
+  }
+
+  &.kuiFlexGroup--gutterExtraLarge > .kuiFlexItem + .kuiFlexItem {
+    margin-left: $kuiSizeXXL;
+  }
+
+  // Turn off item growth
+  &.kuiFlexGroup--flexGrowZero > .kuiFlexItem {
+    flex-grow: 0;
+    flex-basis: auto;
+  }
+
+  // Justify the grid
+  &.kuiFlexGroup--justifyContentSpaceBetween {
+    justify-content: space-between;
+  }
+
+  &.kuiFlexGroup--justifyContentSpaceAround {
+    justify-content: space-around;
+  }
+
+  &.kuiFlexGroup--justifyContentCenter {
+    justify-content: center;
+  }
+
+  &.kuiFlexGroup--justifyContentFlexEnd {
+    justify-content: flex-end;
+  }
+}
+
+
+@include screenXSmall {
+  .kuiFlexGroup {
+    flex-wrap: wrap;
+  }
+}

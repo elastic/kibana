@@ -12,6 +12,9 @@ import ButtonExample
 import CallOutExample
   from '../../views/call_out/call_out_example';
 
+import FlexExample
+  from '../../views/flex/flex_example';
+
 import FormExample
   from '../../views/form/form_example';
 
@@ -73,6 +76,10 @@ const components = [{
 }, {
   name: 'CallOut',
   component: CallOutExample,
+  hasReact: true,
+}, {
+  name: 'Flex',
+  component: FlexExample,
   hasReact: true,
 }, {
   name: 'Form',
