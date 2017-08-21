@@ -21,14 +21,14 @@
       <!-- Title. -->
       <div
         data-transclude-slot="topLeftCorner"
+        class="kuiLocalBreadcrumbs"
+        data-test-subj="breadcrumbs"
       >
-        <div class="kuiLocalBreadcrumbs" data-test-subj="breadcrumbs">
-          <div class="kuiLocalBreadcrumb">
-            <a class="kuiLocalBreadcrumb__link" href="{{landingPageUrl()}}">Dashboard</a>
-          </div>
-          <div class="kuiLocalBreadcrumb">
-            {{ getDashTitle() }}
-          </div>
+        <div class="kuiLocalBreadcrumb">
+          <a class="kuiLocalBreadcrumb__link" href="{{landingPageUrl()}}">Dashboard</a>
+        </div>
+        <div class="kuiLocalBreadcrumb">
+          {{ getDashTitle() }}
         </div>
       </div>
 
