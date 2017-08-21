@@ -3,6 +3,7 @@ import pixelmatch from 'pixelmatch';
 import { KibanaMap } from '../kibana_map';
 import { GeohashLayer } from '../geohash_layer';
 import { GeoHashSampleData } from './geohash_sample_data';
+import heatmapPng from './heatmap.png';
 import scaledCircleMarkersPng from './scaledCircleMarkers.png';
 import shadedCircleMarkersPng from './shadedCircleMarkers.png';
 import shadedGeohashGridPng from './shadedGeohashGrid.png';
@@ -55,16 +56,25 @@ describe('kibana_map tests', function () {
 
     [
       {
-        options:  { 'mapType': 'Scaled Circle Markers' },
+        options:  { mapType: 'Scaled Circle Markers' },
         expected: scaledCircleMarkersPng
       },
       {
-        options: { 'mapType': 'Shaded Circle Markers' },
+        options: { mapType: 'Shaded Circle Markers' },
         expected: shadedCircleMarkersPng
       },
       {
-        options: { 'mapType': 'Shaded Geohash Grid' },
+        options: { mapType: 'Shaded Geohash Grid' },
         expected: shadedGeohashGridPng
+      },
+      {
+        options: {
+          mapType: 'Heatmap',
+          heatmap: {
+            heatClusterSize: '2'
+          }
+        },
+        expected: heatmapPng
       }
     ].forEach(function (test) {
 
