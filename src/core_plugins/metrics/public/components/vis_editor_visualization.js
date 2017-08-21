@@ -96,6 +96,7 @@ class VisEditorVisualization extends Component {
           <Visualization
             backgroundColor={visBackgroundColor}
             className="dashboard__visualization"
+            dateFormat={this.props.dateFormat}
             model={this.props.model}
             onBrush={this.props.onBrush}
             onChange={this.handleChange}
@@ -123,7 +124,8 @@ VisEditorVisualization.propTypes = {
   onToggleAutoApply: PropTypes.func,
   visData: PropTypes.object,
   dirty: PropTypes.bool,
-  autoApply: PropTypes.bool
+  autoApply: PropTypes.bool,
+  dateFormat: PropTypes.string
 };
 
 export default VisEditorVisualization;
