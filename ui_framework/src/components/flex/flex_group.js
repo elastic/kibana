@@ -14,9 +14,9 @@ export const GUTTER_SIZES = Object.keys(gutterSizeToClassNameMap);
 
 const alignItemsToClassNameMap = {
   stretch: '',
-  flexStart: 'kuiFlexGroup--alignItemsFlexStart',
-  flexEnd: 'kuiFlexGroup--alignItemsFlexEnd',
-  center: 'kuiFlexGroup--alignItemsFlexCenter',
+  flexStart: 'kuiFlexGroup--alignItemsStart',
+  flexEnd: 'kuiFlexGroup--alignItemsEnd',
+  center: 'kuiFlexGroup--alignItemsCenter',
 };
 
 export const ALIGN_ITEMS = Object.keys(alignItemsToClassNameMap);

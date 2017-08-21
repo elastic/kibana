@@ -1,0 +1,3 @@
+export {
+  KuiPagination,
+} from './pagination';

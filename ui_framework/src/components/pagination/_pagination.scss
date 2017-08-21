@@ -1,0 +1,17 @@
+.kuiPagination {
+  display: flex;
+
+  .kuiPagination__button {
+    font-size: $kuiFontSizeS;
+    padding: 0;
+    height: $kuiSizeL;
+    min-width: $kuiSizeL;
+    text-align: center;
+  }
+
+  .kuiPagination__button--active {
+    background-color: $kuiColorPrimary;
+    color: $kuiColorEmptyShade;
+    border-radius: $kuiBorderRadius;
+  }
+}

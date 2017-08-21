@@ -43,12 +43,16 @@ export const KuiButton = ({
   isDisabled,
   ...rest,
 }) => {
+
   const classes = classNames(
     'kuiButton',
     typeToClassNameMap[type],
     sizeToClassNameMap[size],
     iconSideToClassNameMap[iconSide],
     className,
+    {
+      'kuiButton--onlyIicon': iconType && !children,
+    },
     {
       'kuiButton--fill': fill,
     },
