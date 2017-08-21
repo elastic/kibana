@@ -21,6 +21,7 @@ const history = syncHistoryWithStore(hashHistory, store);
 const ReactApp = {
   init: (kbnVersion, managementConfig, $injector) => {
     globals.es = $injector.get('es');
+    globals.indexPatterns = $injector.get('indexPatterns');
     store.dispatch(initData(kbnVersion, managementConfig));
 
     render(

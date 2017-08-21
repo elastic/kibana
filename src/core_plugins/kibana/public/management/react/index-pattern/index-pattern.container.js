@@ -14,15 +14,7 @@ import {
 
 export default connect(
   state => {
-    return {
-      filteredIndices: state.indexPattern.filteredIndices,
-      indices: state.indexPattern.indices,
-      includeSystemIndices: state.indexPattern.includeSystemIndices,
-      page: state.indexPattern.page,
-      perPage: state.indexPattern.perPage,
-      sortBy: state.indexPattern.sortBy,
-      sortAsc: state.indexPattern.sortAsc,
-    };
+    return Object.assign({}, state.indexPattern);
   },
   dispatch => bindActionCreators({
     fetchIndicesAction: fetchIndices,

@@ -2,6 +2,7 @@
 import { chunk, sortBy as sortByLodash } from 'lodash';
 import {
   FETCHED_INDICES,
+  FETCHED_TIME_FIELDS,
   INCLUDE_SYSTEM_INDICES,
   EXCLUDE_SYSTEM_INDICES,
   GOTO_NEXT_PAGE,
@@ -13,6 +14,8 @@ const defaultState = {
   allIndices: [],
   filteredIndices: [],
   indices: [],
+  timeFields: [],
+  hasExactMatches: false,
   page: 1,
   perPage: 10,
   includeSystemIndices: false,
@@ -84,7 +87,13 @@ export default function indexPattern(state = defaultState, action) {
 
   switch (action.type) {
     case FETCHED_INDICES:
-      newState = Object.assign(newState, { allIndices: action.indices });
+      newState = Object.assign(newState, {
+        allIndices: action.indices,
+        hasExactMatches: action.hasExactMatches,
+      });
+      break;
+    case FETCHED_TIME_FIELDS:
+      newState = Object.assign(newState, { timeFields: action.timeFields });
       break;
     case INCLUDE_SYSTEM_INDICES:
       newState = Object.assign(newState, { includeSystemIndices: true });

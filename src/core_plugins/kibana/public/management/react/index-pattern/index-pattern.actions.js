@@ -1,5 +1,5 @@
 /* eslint-disable */
-import { es } from '../globals';
+import { es, indexPatterns } from '../globals';
 import { sortBy, endsWith, startsWith } from 'lodash';
 
 const MAX_NUMBER_OF_MATCHING_INDICES = 500;
@@ -34,6 +34,19 @@ async function getIndices(pattern, limit = MAX_NUMBER_OF_MATCHING_INDICES) {
   }), 'name');
 }
 
+async function getTimeFields(pattern) {
+  const fields = await indexPatterns.fieldsFetcher.fetchForWildcard(pattern);
+  const dateFields = fields.filter(field => field.type === 'date');
+  return [
+    ...dateFields.map(field => ({
+      text: field.name,
+      value: field.name
+    })),
+    { value: undefined, text: '-----' },
+    { value: undefined, text: 'I don\'t want to use the Time Filter.' },
+  ];
+}
+
 export const FETCH_INDICES = 'FETCH_INDICES';
 export const fetchIndices = (pattern) => {
   return async dispatch => {
@@ -48,16 +61,31 @@ export const fetchIndices = (pattern) => {
     const exactIndices = await getIndices(pattern);
     const partialIndices = await getIndices(partialPattern);
     const indices = exactIndices.concat(partialIndices);
-    dispatch(fetchedIndices(indices));
+    const hasExactMatches = exactIndices.length > 0;
+    dispatch(fetchedIndices(indices, hasExactMatches));
+
+    if (hasExactMatches) {
+      const timeFields = await getTimeFields(pattern);
+      dispatch(fetchedTimeFields(timeFields));
+    }
   }
 };
 
 export const FETCHED_INDICES = 'FETCHED_INDICES';
-export const fetchedIndices = (indices) => {
+export const fetchedIndices = (indices, hasExactMatches) => {
   return {
     type: FETCHED_INDICES,
     indices,
+    hasExactMatches,
   };
+};
+
+export const FETCHED_TIME_FIELDS = 'FETCHED_TIME_FIELDS';
+export const fetchedTimeFields = (timeFields) => {
+  return {
+    type: FETCHED_TIME_FIELDS,
+    timeFields,
+  }
 };
 
 export const INCLUDE_SYSTEM_INDICES = 'INCLUDE_SYSTEM_INDICES';
