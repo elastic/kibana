@@ -54,13 +54,17 @@
     <!-- drag handle -->
     <button
       draggable-handle
-      aria-label="Modify Priority by Dragging"
       ng-if="stats.count > 1"
       tooltip="Modify Priority by Dragging"
       tooltip-append-to-body="true"
       type="button"
+      keyboard-move="onPriorityReorder(direction)"
       class="kuiButton kuiButton--basic kuiButton--small">
       <i aria-hidden="true" class="fa fa-arrows-v"></i>
+      <span class="kuiScreenReaderOnly">
+        Use up and down key on this button to move this aggregation up and down
+        in the priority order.
+      </span>
     </button>
 
     <!-- remove button -->
