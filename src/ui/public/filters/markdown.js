@@ -1,14 +1,11 @@
-import marked from 'marked';
+import MarkdownIt from 'markdown-it';
 import { uiModules } from 'ui/modules';
 import 'angular-sanitize';
 
-marked.setOptions({
-  gfm: true, // GitHub-flavored markdown
-  sanitize: true // Sanitize HTML tags
-});
+const markdownIt = new MarkdownIt();
 
 uiModules
   .get('kibana', ['ngSanitize'])
   .filter('markdown', function ($sanitize) {
-    return md => md ? $sanitize(marked(md)) : '';
+    return md => md ? $sanitize(markdownIt.render(md)) : '';
   });
