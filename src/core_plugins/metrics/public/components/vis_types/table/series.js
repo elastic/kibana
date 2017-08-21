@@ -100,12 +100,12 @@ function TopNSeries(props) {
     >
       <div className="vis_editor__container">
         <div className="vis_editor__series-details">
-          <div onClick={ props.toggleVisible }><i className={ caretClassName }/></div>
+          <div onClick={props.toggleVisible}><i className={caretClassName}/></div>
           <div className="vis_editor__row vis_editor__row_item">
             <input
               className="vis_editor__input-grows"
               onChange={handleChange('label')}
-              placeholder='Label'
+              placeholder="Label"
               value={model.label}
             />
           </div>
