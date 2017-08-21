@@ -7,45 +7,28 @@ export default function ({ getService, getPageObjects }) {
   const PageObjects = getPageObjects(['common', 'visualize', 'header', 'settings']);
 
   describe('tile map visualize app', function describeIndexTests() {
-    before(function () {
+    before(async function () {
       const fromTime = '2015-09-19 06:31:44.000';
       const toTime = '2015-09-23 18:31:44.000';
 
       log.debug('navigateToApp visualize');
-      return PageObjects.common.navigateToUrl('visualize', 'new')
-      .then(function () {
-        log.debug('clickTileMap');
-        return PageObjects.visualize.clickTileMap();
-      })
-      .then(function () {
-        return PageObjects.visualize.clickNewSearch();
-      })
-      .then(function () {
-        log.debug('Set absolute time range from \"' + fromTime + '\" to \"' + toTime + '\"');
-        return PageObjects.header.setAbsoluteRange(fromTime, toTime);
-      })
-      .then(function () {
-        log.debug('select bucket Geo Coordinates');
-        return PageObjects.visualize.clickBucket('Geo Coordinates');
-      })
-      .then(function () {
-        log.debug('Click aggregation Geohash');
-        return PageObjects.visualize.selectAggregation('Geohash');
-      })
-      .then(function () {
-        log.debug('Click field geo.coordinates');
-        return retry.try(function tryingForTime() {
-          return PageObjects.visualize.selectField('geo.coordinates');
-        });
-      })
-      .then(function () {
-        return PageObjects.visualize.clickGo();
-      })
-      .then(function () {
-        return PageObjects.header.waitUntilLoadingHasFinished();
+      await PageObjects.common.navigateToUrl('visualize', 'new');
+      log.debug('clickTileMap');
+      await PageObjects.visualize.clickTileMap();
+      await PageObjects.visualize.clickNewSearch();
+      log.debug('Set absolute time range from \"' + fromTime + '\" to \"' + toTime + '\"');
+      await PageObjects.header.setAbsoluteRange(fromTime, toTime);
+      log.debug('select bucket Geo Coordinates');
+      await PageObjects.visualize.clickBucket('Geo Coordinates');
+      log.debug('Click aggregation Geohash');
+      await PageObjects.visualize.selectAggregation('Geohash');
+      log.debug('Click field geo.coordinates');
+      await retry.try(async function tryingForTime() {
+        await PageObjects.visualize.selectField('geo.coordinates');
       });
+      await PageObjects.visualize.clickGo();
+      await PageObjects.header.waitUntilLoadingHasFinished();
     });
-
 
     /**
      * manually compare data due to possible small difference in numbers. This is browser dependent.
@@ -87,9 +70,24 @@ export default function ({ getService, getPageObjects }) {
       expect(actual.map(tokenize)).to.eql(expected.map(tokenize));
     }
 
+    describe('Only request data around extent of map option', async () => {
+      before(async () => await PageObjects.visualize.openSpyPanel());
+
+      it('when checked adds filters to aggregation', async () => {
+        const tableHeaders = await PageObjects.visualize.getDataTableHeaders();
+        expect(tableHeaders.trim()).to.equal('filter geohash_grid Count Geo Centroid');
+      });
+
+      it('when not checked does not add filters to aggregation', async () => {
+        await PageObjects.visualize.toggleIsFilteredByCollarCheckbox();
+        const tableHeaders = await PageObjects.visualize.getDataTableHeaders();
+        expect(tableHeaders.trim()).to.equal('geohash_grid Count Geo Centroid');
+      });
+
+      after(async () => await PageObjects.visualize.closeSpyPanel());
+    });
 
     describe('tile map chart', function indexPatternCreation() {
-
       it('should show correct tile map data on default zoom level', async function () {
         const expectedTableData = ['9 5,787 { "lat": 37.22448418632405, "lon": -103.01935195013255 }',
           'd 5,600 { "lat": 37.44271478370398, "lon": -81.72692197253595 }',
@@ -308,40 +306,18 @@ export default function ({ getService, getPageObjects }) {
         });
       });
 
-      it('wms switch should change allow to zoom in further', function () {
-
-        return PageObjects.visualize.openSpyPanel()
-          .then(function () {
-            return PageObjects.visualize.clickOptions();
-          })
-          .then(function () {
-            return PageObjects.visualize.selectWMS();
-          })
-          .then(function () {
-            return PageObjects.visualize.clickGo();
-          })
-          .then(function () {
-            return PageObjects.header.waitUntilLoadingHasFinished();
-          })
-          .then(function () {
-            return PageObjects.common.sleep(2000);
-          })
-          .then(function () {
-            return PageObjects.visualize.getMapZoomInEnabled();
-          })
-          .then(function (enabled) {//should be able to zoom in again
-            expect(enabled).to.be(true);
-          })
-          .then(function () {
-            return PageObjects.visualize.clickMapZoomIn();
-          })
-          .then(function () {
-            return PageObjects.visualize.getMapZoomInEnabled();
-          })
-          .then(function (enabled) {//should be able to zoom in again
-            expect(enabled).to.be(true);
-          });
-
+      it('wms switch should change allow to zoom in further', async function () {
+        await PageObjects.visualize.openSpyPanel();
+        await PageObjects.visualize.clickOptions();
+        await PageObjects.visualize.selectWMS();
+        await PageObjects.visualize.clickGo();
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        await PageObjects.common.sleep(2000);
+        let enabled = await PageObjects.visualize.getMapZoomInEnabled();
+        expect(enabled).to.be(true);
+        await PageObjects.visualize.clickMapZoomIn();
+        enabled = await PageObjects.visualize.getMapZoomInEnabled();
+        expect(enabled).to.be(true);
       });
     });
   });
