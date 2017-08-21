@@ -9,6 +9,7 @@ import {
   excludeSystemIndices,
   goToNextPage,
   goToPreviousPage,
+  changeSort,
 } from './index-pattern.actions';
 
 export default connect(
@@ -19,6 +20,8 @@ export default connect(
       includeSystemIndices: state.indexPattern.includeSystemIndices,
       page: state.indexPattern.page,
       perPage: state.indexPattern.perPage,
+      sortBy: state.indexPattern.sortBy,
+      sortAsc: state.indexPattern.sortAsc,
     };
   },
   dispatch => bindActionCreators({
@@ -27,5 +30,6 @@ export default connect(
     excludeSystemIndicesAction: excludeSystemIndices,
     goToNextPageAction: goToNextPage,
     goToPreviousPageAction: goToPreviousPage,
+    changeSortAction: changeSort,
   }, dispatch)
 )(IndexPattern);

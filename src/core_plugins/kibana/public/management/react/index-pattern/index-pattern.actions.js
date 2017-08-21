@@ -87,3 +87,12 @@ export const goToPreviousPage = () => {
     type: GOTO_PREVIOUS_PAGE,
   }
 };
+
+export const CHANGE_SORT = 'CHANGE_SORT';
+export const changeSort = (sortBy, sortAsc = true) => {
+  return {
+    type: CHANGE_SORT,
+    sortBy,
+    sortAsc,
+  }
+}

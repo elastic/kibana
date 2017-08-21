@@ -18,6 +18,7 @@ import {
   KuiTableHeaderCell,
   KuiTableBody,
   KuiTableHeader,
+  KuiButtonEmpty,
 } from 'ui_framework/components';
 
 const IndexPattern = ({
@@ -25,12 +26,15 @@ const IndexPattern = ({
   indices,
   page,
   perPage,
+  sortBy,
+  sortAsc,
   includeSystemIndices,
   includeSystemIndicesAction,
   excludeSystemIndicesAction,
   fetchIndicesAction,
   goToNextPageAction,
   goToPreviousPageAction,
+  changeSortAction,
 }) => {
   const indexRows = indices.map((index, key) => {
     return (
@@ -92,10 +96,40 @@ const IndexPattern = ({
               <KuiTable className="kuiVerticalRhythm">
                 <KuiTableHeader>
                   <KuiTableHeaderCell>
-                    Name
+                    <KuiButtonEmpty
+                      onClick={() => changeSortAction('name')}
+                    >
+                      Name
+                      { sortBy === 'name'
+                        ?
+                          <span>
+                            &nbsp;
+                            <KuiIcon
+                              type={sortAsc ? 'arrowUp' : 'arrowDown'}
+                              size="medium"
+                            />
+                          </span>
+                        : null
+                      }
+                    </KuiButtonEmpty>
                   </KuiTableHeaderCell>
                   <KuiTableHeaderCell>
-                    Fields
+                    <KuiButtonEmpty
+                      onClick={() => changeSortAction('count')}
+                    >
+                      Doc Count
+                      { sortBy === 'count'
+                        ?
+                          <span>
+                            &nbsp;
+                            <KuiIcon
+                              type={sortAsc ? 'arrowUp' : 'arrowDown'}
+                              size="medium"
+                            />
+                          </span>
+                        : null
+                      }
+                    </KuiButtonEmpty>
                   </KuiTableHeaderCell>
                 </KuiTableHeader>
                 <KuiTableBody>

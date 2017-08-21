@@ -1,11 +1,12 @@
 /* eslint-disable */
-import { chunk } from 'lodash';
+import { chunk, sortBy as sortByLodash } from 'lodash';
 import {
   FETCHED_INDICES,
   INCLUDE_SYSTEM_INDICES,
   EXCLUDE_SYSTEM_INDICES,
   GOTO_NEXT_PAGE,
   GOTO_PREVIOUS_PAGE,
+  CHANGE_SORT,
 } from './index-pattern.actions';
 
 const defaultState = {
@@ -15,6 +16,8 @@ const defaultState = {
   page: 1,
   perPage: 10,
   includeSystemIndices: false,
+  sortBy: 'name',
+  sortAsc: true,
 };
 
 function getFilteredIndices(indices, includeSystemIndices) {
@@ -51,9 +54,24 @@ function getPreviousPage({ page, perPage, filteredIndices }) {
     : previousPage;
 }
 
-function getFilteredAndPaginatedIndices({ allIndices, includeSystemIndices, page, perPage }) {
-  const filteredIndices = getFilteredIndices(allIndices, includeSystemIndices);
+function getFilteredAndPaginatedIndices({
+  allIndices,
+  includeSystemIndices,
+  page,
+  perPage,
+  sortBy,
+  sortAsc,
+}) {
+  let filteredIndices = getFilteredIndices(allIndices, includeSystemIndices);
+  if (!!sortBy) {
+    filteredIndices = sortByLodash(filteredIndices, sortBy);
+    if (!sortAsc) {
+      filteredIndices.reverse();
+    }
+  }
+
   const indices = getPaginatedIndices(filteredIndices, page, perPage);
+
   return {
     filteredIndices,
     indices,
@@ -79,6 +97,12 @@ export default function indexPattern(state = defaultState, action) {
       break;
     case GOTO_PREVIOUS_PAGE:
       newState = Object.assign(newState, { page: getPreviousPage(state) });
+      break;
+    case CHANGE_SORT:
+      newState = Object.assign(newState, {
+        sortBy: action.sortBy,
+        sortAsc: state.sortBy === action.sortBy ? !state.sortAsc : action.sortAsc,
+      });
       break;
     default:
       return state;
