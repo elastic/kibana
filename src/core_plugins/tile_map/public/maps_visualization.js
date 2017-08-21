@@ -93,6 +93,8 @@ export function MapsVisualizationProvider(serviceSettings, Notifier, getAppState
       this._kibanaMap.addLegendControl();
       this._kibanaMap.persistUiStateForVisualization(this.vis);
 
+      this.vis.sessionState.mapBounds = this._kibanaMap.getUntrimmedBounds();
+
       let previousPrecision = this._kibanaMap.getAutoPrecision();
       let precisionChange = false;
       this._kibanaMap.on('zoomchange', () => {

@@ -49,6 +49,12 @@ export function AggTypesBucketsGeoHashProvider(Private, config) {
     return bounds && collar && !geoContains(collar, bounds);
   }
 
+  function getZoomLevel(vis) {
+    const savedMapZoom = vis.params.mapZoom;
+    const zoomFromUiState = vis.hasUiState() ? parseInt(vis.getUiState().get('mapZoom')) : null;
+    return zoomFromUiState || savedMapZoom || vis.type.visConfig.defaults.mapZoom;
+  }
+
   return new BucketAggType({
     name: 'geohash_grid',
     title: 'Geohash',
@@ -103,14 +109,10 @@ export function AggTypesBucketsGeoHashProvider(Private, config) {
 
       if (agg.params.isFilteredByCollar && agg.getField()) {
         const vis = agg.vis;
-        let mapBounds;
-        let mapZoom;
-        if (vis.hasUiState()) {
-          mapBounds = vis.uiStateVal('mapBounds');
-          mapZoom = vis.uiStateVal('mapZoom');
-        }
+        const mapBounds = vis.sessionState.mapBounds;
+        const mapZoom = getZoomLevel(vis);
         if (mapBounds && mapZoom) {
-          const lastMapCollar = vis.uiStateVal('mapCollar');
+          const lastMapCollar = vis.sessionState.mapCollar;
           let mapCollar;
           if (!lastMapCollar || lastMapCollar.zoom !== mapZoom || isOutsideCollar(mapBounds, lastMapCollar)) {
             mapCollar = scaleBounds(mapBounds);
@@ -121,6 +123,7 @@ export function AggTypesBucketsGeoHashProvider(Private, config) {
           const boundingBox = {};
           delete mapCollar.zoom; // zoom is not part of bounding box filter
           boundingBox[agg.getField().name] = mapCollar;
+          vis.sessionState.mapCollar = mapCollar;
           aggs.push(new AggConfig(agg.vis, {
             type: 'filter',
             id: 'filter_agg',
