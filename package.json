@@ -22,6 +22,7 @@
     "prepush": "gulp test"
   },
   "dependencies": {
+    "@elastic/datemath": "^2.3.0",
     "axios": "^0.16.1",
     "base64-js": "^1.2.1",
     "boom": "^5.2.0",
@@ -38,6 +39,7 @@
     "prop-types": "^15.5.8",
     "react": "^15.5.4",
     "react-bootstrap": "^0.31.0",
+    "react-datetime": "^2.9.0",
     "react-dom": "^15.5.4",
     "react-redux": "^5.0.4",
     "recompose": "^0.24.0",
