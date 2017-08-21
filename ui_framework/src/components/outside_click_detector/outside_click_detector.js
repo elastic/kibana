@@ -1,4 +1,5 @@
 import {
+  Children,
   cloneElement,
   Component,
 } from 'react';
@@ -41,6 +42,7 @@ export class KuiOutsideClickDetector extends Component {
       },
     });
 
-    return cloneElement(this.props.children, props);
+    const child = Children.only(this.props.children);
+    return cloneElement(child, props);
   }
 }
