@@ -8,24 +8,24 @@
   }
 
   // Gutter Sizes
-  &.kuiFlexGroup--gutterSmall .kuiFlexItem + .kuiFlexItem {
+  &.kuiFlexGroup--gutterSmall > .kuiFlexItem + .kuiFlexItem {
     margin-left: $kuiSizeS;
   }
 
-  &.kuiFlexGroup--gutterMedium .kuiFlexItem + .kuiFlexItem {
+  &.kuiFlexGroup--gutterMedium > .kuiFlexItem + .kuiFlexItem {
     margin-left: $kuiSize;
   }
 
-  &.kuiFlexGroup--gutterLarge .kuiFlexItem + .kuiFlexItem {
+  &.kuiFlexGroup--gutterLarge > .kuiFlexItem + .kuiFlexItem {
     margin-left: $kuiSizeL;
   }
 
-  &.kuiFlexGroup--gutterExtraLarge .kuiFlexItem + .kuiFlexItem {
+  &.kuiFlexGroup--gutterExtraLarge > .kuiFlexItem + .kuiFlexItem {
     margin-left: $kuiSizeXXL;
   }
 
-  // Turn off item grown
-  &.kuiFlexGroup--flexGrowZero .kuiFlexItem {
+  // Turn off item growth
+  &.kuiFlexGroup--flexGrowZero > .kuiFlexItem {
     flex-grow: 0;
     flex-basis: auto;
   }

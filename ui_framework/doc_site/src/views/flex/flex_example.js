@@ -40,6 +40,10 @@ import FlexWrap from './flex_wrap';
 const flexWrapSource = require('!!raw!./flex_wrap');
 const flexWrapHtml = renderToHtml(FlexWrap);
 
+import FlexNest from './flex_nest';
+const flexNestSource = require('!!raw!./flex_nest');
+const flexNestHtml = renderToHtml(FlexNest);
+
 export default props => (
   <GuidePage title={props.route.name}>
     <KuiCallOut
@@ -158,6 +162,27 @@ export default props => (
 
       <GuideDemo>
         <div className="guideDemo__highlightGridWrap"><FlexWrap /></div>
+      </GuideDemo>
+    </GuideSection>
+
+    <GuideSection
+      title="FlexGrids and FlexGroups can nest"
+      source={[{
+        type: GuideSectionTypes.JS,
+        code: flexNestSource,
+      }, {
+        type: GuideSectionTypes.HTML,
+        code: flexNestHtml,
+      }]}
+    >
+      <GuideText>
+        <GuideCode>FlexGroup</GuideCode> and <GuideCode>FlexGrid</GuideCode> can nest
+        within themselves indefinitely. For example, here we turn off the growth on a
+        <GuideCode>FlexGroup</GuideCode>, then nest a grid inside of it.
+      </GuideText>
+
+      <GuideDemo>
+        <div className="guideDemo__highlightGrid"><FlexNest /></div>
       </GuideDemo>
     </GuideSection>
 

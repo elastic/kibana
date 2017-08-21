@@ -7,15 +7,15 @@ const gutterSizeToClassNameMap = {
   small: 'kuiFlexGrid--gutterSmall',
   medium: 'kuiFlexGrid--gutterMedium',
   large: 'kuiFlexGrid--gutterLarge',
-  extraLarge: 'kuiFlexGrid--gutterExtraLarge',
+  extraLarge: 'kuiFlexGrid--gutterXLarge',
 };
 
 export const GUTTER_SIZES = Object.keys(gutterSizeToClassNameMap);
 
 const columnsToClassNameMap = {
-  2: 'kuiFlexGrid--flexBasisHalves',
-  3: 'kuiFlexGrid--flexBasisThirds',
-  4: 'kuiFlexGrid--flexBasisFourths',
+  2: 'kuiFlexGrid--halves',
+  3: 'kuiFlexGrid--thirds',
+  4: 'kuiFlexGrid--fourths',
 };
 
 export const COLUMNS = Object.keys(columnsToClassNameMap);

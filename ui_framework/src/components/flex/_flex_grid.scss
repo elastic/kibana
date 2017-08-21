@@ -4,57 +4,37 @@
   flex-wrap: wrap;
   margin-bottom: 0;
 
-  .kuiFlexItem {
+  > .kuiFlexItem {
     flex-grow: 0;
   }
+}
 
-  // Gutter Sizes
-  &.kuiFlexGrid--gutterSmall {
-    margin: -($kuiSizeS / 2);
+$gutterTypes: (
+  gutterSmall: $kuiSizeS,
+  gutterMedium: $kuiSize,
+  gutterLarge: $kuiSizeL,
+  gutterXLarge: $kuiSizeXL,
+);
 
-    .kuiFlexItem {
-      padding: 0 $kuiSizeS / 2;
-      margin-top: $kuiSizeS;
+$fractions: (
+  fourths: 25%,
+  thirds: 33.3%,
+  halves: 50%,
+);
+
+@each $gutterName, $gutterSize in $gutterTypes {
+  @each $fraction, $percentage in $fractions {
+    $halfGutterSize: $gutterSize * 0.5;
+
+    .kuiFlexGrid--#{$gutterName} {
+      margin: -$halfGutterSize;
+
+      &.kuiFlexGrid--#{$fraction} {
+        > .kuiFlexItem {
+          margin: $halfGutterSize;
+          flex-basis: calc(#{$percentage} - #{$gutterSize});
+        }
+      }
     }
-  }
-
-  &.kuiFlexGrid--gutterMedium {
-    margin: -$kuiSize / 2;
-
-    .kuiFlexItem {
-      padding: 0 $kuiSize / 2;
-      margin-top: $kuiSize;
-    }
-  }
-
-  &.kuiFlexGrid--gutterLarge {
-    margin: -$kuiSizeL / 2;
-
-    .kuiFlexItem {
-      padding: 0 $kuiSizeL / 2;
-      margin-top: $kuiSizeL;
-    }
-  }
-
-  &.kuiFlexGrid--gutterExtraLarge {
-    margin: -$kuiSizeXL / 2;
-
-    .kuiFlexItem {
-      padding: 0 $kuiSizeXL / 2;
-      margin-top: $kuiSizeXL;
-    }
-  }
-
-  // Grid columns
-  &.kuiFlexGrid--flexBasisFourths .kuiFlexItem {
-    flex-basis: 25%;
-  }
-
-  &.kuiFlexGrid--flexBasisThirds .kuiFlexItem {
-    flex-basis: 33.33%;
-  }
-
-  &.kuiFlexGrid--flexBasisHalves .kuiFlexItem {
-    flex-basis: 50%;
   }
 }
