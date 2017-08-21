@@ -68,9 +68,7 @@ export default function MetricVisType(Private) {
         name: 'metric',
         title: 'Metric',
         min: 1,
-        aggFilter: [
-          '!std_dev', '!geo_centroid', '!percentiles', '!percentile_ranks',
-          '!derivative', '!serial_diff', '!moving_avg', '!cumulative_sum'],
+        aggFilter: ['!derivative', '!geo_centroid'],
         defaults: [
           { schema: 'metric', type: 'count' }
         ]
