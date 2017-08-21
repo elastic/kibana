@@ -17,6 +17,7 @@ import seriesStyle from './seriesStyle/seriesStyle';
 import size from './size/size';
 import sort from './sort/sort';
 import sleep from './sleep/sleep';
+import timefilter from './timefilter/timefilter';
 
 export const commonFunctions = [
   alterColumn,
@@ -38,4 +39,5 @@ export const commonFunctions = [
   size,
   sort,
   sleep,
+  timefilter,
 ];
