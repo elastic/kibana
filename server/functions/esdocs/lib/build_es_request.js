@@ -1,3 +1,5 @@
+import { addFilter } from './add_filter';
+
 export function buildESRequest(esRequest, canvasQuery) {
 
   if (canvasQuery.sort) {
@@ -9,10 +11,10 @@ export function buildESRequest(esRequest, canvasQuery) {
     esRequest = Object.assign({}, esRequest, { size: canvasQuery.size });
   }
 
-  if (canvasQuery.filters) {
-    // Todo: figure out type of filters
-    canvasQuery.filters.each(clause => {
-      console.log(clause);
+  if (canvasQuery.and) {
+    canvasQuery.and.forEach(clause => {
+      if (clause.type !== 'filter') throw new Error('Only filter type clauses are supported right now');
+      addFilter(esRequest.body.query.bool.must, clause.value);
     });
   }
 
