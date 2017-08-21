@@ -97,6 +97,10 @@ export {
 } from './modal';
 
 export {
+  KuiOutsideClickDetector,
+} from './outside_click_detector';
+
+export {
   KuiPager,
   KuiPagerButtonGroup,
 } from './pager';
