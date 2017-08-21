@@ -19,6 +19,7 @@ export const KuiFieldText = ({
   className,
   icon,
   isInvalid,
+  inputRef,
   ...rest,
 }) => {
   const classes = classNames('kuiFieldText', className, {
@@ -39,6 +40,7 @@ export const KuiFieldText = ({
           placeholder={placeholder}
           className={classes}
           value={value}
+          ref={inputRef}
           {...rest}
         />
       </KuiValidatableControl>
@@ -53,6 +55,7 @@ KuiFieldText.propTypes = {
   value: PropTypes.string,
   icon: PropTypes.string,
   isInvalid: PropTypes.bool,
+  inputRef: PropTypes.func,
 };
 
 KuiFieldText.defaultProps = {
