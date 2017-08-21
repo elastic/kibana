@@ -28,7 +28,15 @@ export class KuiValidatableControl extends Component {
 
   render() {
     return cloneElement(this.props.children, {
-      ref: node => { this.control = node; },
+      ref: node => {
+        this.control = node;
+
+        // Call the original ref, if any
+        const { ref } = this.props.children;
+        if (typeof ref === 'function') {
+          ref(node);
+        }
+      },
     });
   }
 }
