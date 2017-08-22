@@ -1,17 +1,18 @@
 import { uiModules } from 'ui/modules';
 import _ from 'lodash';
-import marked from 'marked';
+import MarkdownIt from 'markdown-it';
 import { modifyUrl } from 'ui/url';
-marked.setOptions({
-  gfm: true, // Github-flavored markdown
-  sanitize: true // Sanitize HTML tags
+
+const markdownIt = new MarkdownIt({
+  html: false,
+  linkify: true
 });
 
 uiModules.get('kibana')
   .service('serviceSettings', function ($http, $sanitize, mapConfig, tilemapsConfig, kbnVersion) {
 
 
-    const attributionFromConfig = $sanitize(marked(tilemapsConfig.deprecated.config.options.attribution || ''));
+    const attributionFromConfig = $sanitize(markdownIt.render(tilemapsConfig.deprecated.config.options.attribution || ''));
     const tmsOptionsFromConfig = _.assign({}, tilemapsConfig.deprecated.config.options, { attribution: attributionFromConfig });
 
     const extendUrl = (url, props) => (
@@ -69,7 +70,7 @@ uiModules.get('kibana')
           const layers = manifest.data.layers.filter(layer => layer.format === 'geojson');
           layers.forEach((layer) => {
             layer.url = this._extendUrlWithParams(layer.url);
-            layer.attribution = $sanitize(marked(layer.attribution));
+            layer.attribution = $sanitize(markdownIt.render(layer.attribution));
           });
           return layers;
         });
@@ -93,7 +94,7 @@ uiModules.get('kibana')
           }
 
 
-          firstService.attribution = $sanitize(marked(firstService.attribution));
+          firstService.attribution = $sanitize(markdownIt.render(firstService.attribution));
           firstService.subdomains = firstService.subdomains || [];
           firstService.url = this._extendUrlWithParams(firstService.url);
           return firstService;
