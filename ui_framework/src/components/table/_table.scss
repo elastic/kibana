@@ -16,6 +16,10 @@
   .kuiTableRowCell__content {
     padding: $kuiTableCellPaddingCompressed;
   }
+
+  .kuiTableHeaderButton:focus {
+    outline: solid $kuiTableCellPaddingCompressed $kuiFocusBackgroundColor;
+  }
 }
 
 .kuiTableHeaderCell {
@@ -23,6 +27,10 @@
 
   padding: $kuiTableCellPadding;
   color: $kuiTitleColor;
+
+  .kuiTableHeaderButton {
+    text-align: left;
+  }
 }
 
   .kuiTableHeaderCell__content {
@@ -31,15 +39,42 @@
 
 .kuiTableHeaderCell--alignRight {
   text-align: right;
+
+  .kuiTableHeaderButton {
+    text-align: right;
+  }
+}
+
+.kuiTableHeaderButton {
+  @include kuiFontSizeS;
+  color: $kuiTitleColor;
+  width: 100%;
+
+  &:hover, &:focus {
+    color: $kuiColorPrimary;
+
+    .kuiTableHeaderButton__icon {
+      fill: $kuiColorPrimary;
+    }
+  }
+
+  &:focus {
+    background: $kuiFocusBackgroundColor;
+    outline: solid $kuiTableCellPadding $kuiFocusBackgroundColor;
+  }
+
+  .kuiTableHeaderButton__icon {
+    margin-left: $kuiSizeXS;
+  }
 }
 
 .kuiTableRow {
   &:hover {
-    background-color: rgba($kuiColorPrimary, 0.05);
+    background-color: tintOrShade($kuiColorLightestShade, 50%, 20%);
   }
 
   &.kuiTableRow-isSelected {
-    background-color: rgba($kuiColorHighlight, 0.05);
+    background-color: transparentize($kuiColorPrimary, .95);
   }
 }
 

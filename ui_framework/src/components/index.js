@@ -121,6 +121,7 @@ export {
   KuiTable,
   KuiTableBody,
   KuiTableHeader,
+  KuiTableHeaderButton,
   KuiTableHeaderCell,
   KuiTableRow,
   KuiTableRowCell,

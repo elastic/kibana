@@ -2624,24 +2624,47 @@ table {
 .kuiTable--compressed .kuiTableRowCell__content {
   padding: 8px; }
 
+.kuiTable--compressed .kuiTableHeaderButton:focus {
+  outline: solid 8px #e6f2f6; }
+
 .kuiTableHeaderCell {
   text-align: left;
   max-width: 20px;
   /* 1 */
   padding: 12px;
   color: #000; }
+  .kuiTableHeaderCell .kuiTableHeaderButton {
+    text-align: left; }
 
 .kuiTableHeaderCell__content {
   display: inline-block; }
 
 .kuiTableHeaderCell--alignRight {
   text-align: right; }
+  .kuiTableHeaderCell--alignRight .kuiTableHeaderButton {
+    text-align: right; }
+
+.kuiTableHeaderButton {
+  font-size: 14px;
+  font-size: 0.875rem;
+  line-height: 18px;
+  color: #000;
+  width: 100%; }
+  .kuiTableHeaderButton:hover, .kuiTableHeaderButton:focus {
+    color: #0079a5; }
+    .kuiTableHeaderButton:hover .kuiTableHeaderButton__icon, .kuiTableHeaderButton:focus .kuiTableHeaderButton__icon {
+      fill: #0079a5; }
+  .kuiTableHeaderButton:focus {
+    background: #e6f2f6;
+    outline: solid 12px #e6f2f6; }
+  .kuiTableHeaderButton .kuiTableHeaderButton__icon {
+    margin-left: 4px; }
 
 .kuiTableRow:hover {
-  background-color: rgba(0, 121, 165, 0.05); }
+  background-color: #fafafa; }
 
 .kuiTableRow.kuiTableRow-isSelected {
-  background-color: rgba(255, 255, 0, 0.05); }
+  background-color: rgba(0, 121, 165, 0.05); }
 
 .kuiTableRowCell {
   text-align: left;

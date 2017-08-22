@@ -22,6 +22,8 @@ import '!!svg-sprite!./assets/arrow_up.svg';
 import '!!svg-sprite!./assets/arrow_down.svg';
 import '!!svg-sprite!./assets/arrow_left.svg';
 import '!!svg-sprite!./assets/arrow_right.svg';
+import '!!svg-sprite!./assets/sort_up.svg';
+import '!!svg-sprite!./assets/sort_down.svg';
 
 const humanizeCamelCase = str => (
   // Put spaces between words in camel-cased strings.
@@ -48,6 +50,8 @@ const typeToIconMap = {
   arrowDown: 'arrow_down',
   arrowLeft: 'arrow_left',
   arrowRight: 'arrow_right',
+  sortUp: 'sort_up',
+  sortDown: 'sort_down',
 };
 
 export const TYPES = Object.keys(typeToIconMap);

@@ -10,6 +10,7 @@ import {
   KuiTableHeaderCell,
   KuiTableBody,
   KuiTableHeader,
+  KuiTableHeaderButton,
 } from '../../../../components';
 
 import {
@@ -65,8 +66,14 @@ export class Compressed extends Component {
       ],
     }];
 
+    const titleButton = (
+      <KuiTableHeaderButton iconType="sortUp">
+        Title
+      </KuiTableHeaderButton>
+    );
+
     this.columns = [{
-      label: 'Title',
+      label: titleButton,
       alignment: LEFT_ALIGNMENT,
     }, {
       label: 'Type',
