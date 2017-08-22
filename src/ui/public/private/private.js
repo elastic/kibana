@@ -93,7 +93,7 @@ function name(fn) {
   return fn.name || fn.toString().split('\n').shift();
 }
 
-uiModules.get('kibana')
+uiModules.get('kibana/private')
 .provider('Private', function () {
   const provider = this;
 
