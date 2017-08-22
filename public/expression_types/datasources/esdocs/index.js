@@ -35,6 +35,7 @@ const template = ({ args, updateArgs }) => {
     return commas.split(',').map(str => str.trim());
   };
 
+
   const fields = getFields();
   const sort = getSort();
   const index = getSimpleArg('index', args)[0];
@@ -47,7 +48,7 @@ const template = ({ args, updateArgs }) => {
         values on a chart.
       </p>
 
-      <div className="canvas__esdocs--top">
+      <div className="canvas__esdocs--row">
         <div className="canvas__esdocs--index">
           <label>Index &nbsp;
           <TooltipIcon
@@ -93,23 +94,26 @@ const template = ({ args, updateArgs }) => {
         </div>
       </div>
 
-      <label>Fields &nbsp;
-        { fields.length <= 10 ?
-          (<TooltipIcon
-            text="The fields to extract. Kibana scripted fields are not currently available"
-            placement="right"/>)
-          :
-          (<TooltipIcon
-            icon="warning"
-            text="This datasource performs best with 10 or fewer fields"
-            placement="right"/>)
-        }
-      </label>
-      <ESFieldsSelect
-        index={index}
-        onChange={(fields) => setArg('fields', fields.join(', '))}
-        selected={fields}
-      />
+
+      <div>
+        <label>Fields &nbsp;
+          { fields.length <= 10 ?
+            (<TooltipIcon
+              text="The fields to extract. Kibana scripted fields are not currently available"
+              placement="right"/>)
+            :
+            (<TooltipIcon
+              icon="warning"
+              text="This datasource performs best with 10 or fewer fields"
+              placement="right"/>)
+          }
+        </label>
+        <ESFieldsSelect
+          index={index}
+          onChange={(fields) => setArg('fields', fields.join(', '))}
+          selected={fields}
+        />
+      </div>
     </div>
   );
 };
