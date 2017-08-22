@@ -8,11 +8,10 @@ export const KuiTableHeaderCell = ({
   isSorted,
   isSortAscending,
   className,
+  ariaLabel,
   ...rest,
 }) => {
   const classes = classNames('kuiTableHeaderCell', className);
-
-  let liner;
 
   if (onSort) {
     const sortIconClasses = classNames('kuiTableSortIcon kuiIcon', {
@@ -20,37 +19,43 @@ export const KuiTableHeaderCell = ({
       'fa-long-arrow-down': !isSortAscending,
     });
 
-    const sortIcon = <span className={sortIconClasses} />;
+    const sortIcon = <span className={sortIconClasses} aria-hidden="true" />;
 
     const buttonClasses = classNames('kuiTableHeaderCellButton', {
       'kuiTableHeaderCellButton-isSorted': isSorted,
     });
 
-    liner = (
-      <button
-        className={buttonClasses}
-        onClick={onSort}
+    const columnTitle = ariaLabel ? ariaLabel : children;
+    const statefulAriaLabel = `Sort ${columnTitle} ${isSortAscending ? 'descending' : 'ascending'}`;
+
+    return (
+      <th
+        className={classes}
+        {...rest}
       >
-        <span className="kuiTableHeaderCell__liner">
-          {children}
-          {sortIcon}
-        </span>
-      </button>
-    );
-  } else {
-    liner = (
-      <div className="kuiTableHeaderCell__liner">
-        {children}
-      </div>
+        <button
+          className={buttonClasses}
+          onClick={onSort}
+          aria-label={statefulAriaLabel}
+        >
+          <span className="kuiTableHeaderCell__liner">
+            {children}
+            {sortIcon}
+          </span>
+        </button>
+      </th>
     );
   }
 
   return (
     <th
       className={classes}
+      aria-label={ariaLabel}
       {...rest}
     >
-      {liner}
+      <div className="kuiTableHeaderCell__liner">
+        {children}
+      </div>
     </th>
   );
 };
