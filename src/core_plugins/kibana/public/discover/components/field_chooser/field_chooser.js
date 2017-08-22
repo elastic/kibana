@@ -201,8 +201,8 @@ app.directive('discFieldChooser', function ($location, globalState, config, $rou
             vis: {
               type: type,
               aggs: [
+                { schema: 'metric', type: 'count', 'id': '2' },
                 agg,
-                { schema: 'metric', type: 'count', 'id': '2' }
               ]
             }
           })
