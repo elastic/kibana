@@ -2651,6 +2651,7 @@ table {
   color: #000;
   width: 100%; }
   .kuiTableHeaderButton:hover, .kuiTableHeaderButton:focus {
+    text-decoration: underline;
     color: #0079a5; }
     .kuiTableHeaderButton:hover .kuiTableHeaderButton__icon, .kuiTableHeaderButton:focus .kuiTableHeaderButton__icon {
       fill: #0079a5; }
@@ -2664,7 +2665,7 @@ table {
   background-color: #fafafa; }
 
 .kuiTableRow.kuiTableRow-isSelected {
-  background-color: rgba(0, 121, 165, 0.05); }
+  background-color: rgba(0, 166, 155, 0.05); }
 
 .kuiTableRowCell {
   text-align: left;

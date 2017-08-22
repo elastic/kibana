@@ -51,6 +51,7 @@
   width: 100%;
 
   &:hover, &:focus {
+    text-decoration: underline;
     color: $kuiColorPrimary;
 
     .kuiTableHeaderButton__icon {
@@ -74,7 +75,7 @@
   }
 
   &.kuiTableRow-isSelected {
-    background-color: transparentize($kuiColorPrimary, .95);
+    background-color: transparentize($kuiColorSecondary, .95);
   }
 }
 
