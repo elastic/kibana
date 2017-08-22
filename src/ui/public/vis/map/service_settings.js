@@ -3,7 +3,10 @@ import _ from 'lodash';
 import MarkdownIt from 'markdown-it';
 import { modifyUrl } from 'ui/url';
 
-const markdownIt = new MarkdownIt();
+const markdownIt = new MarkdownIt({
+  html: false,
+  linkify: true
+});
 
 uiModules.get('kibana')
   .service('serviceSettings', function ($http, $sanitize, mapConfig, tilemapsConfig, kbnVersion) {

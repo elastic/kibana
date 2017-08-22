@@ -11,7 +11,10 @@ import { VislibLibAxisProvider } from './axis/axis';
 import { VislibGridProvider } from './chart_grid';
 import { VislibVisualizationsVisTypesProvider } from '../visualizations/vis_types';
 
-const markdownIt = new MarkdownIt();
+const markdownIt = new MarkdownIt({
+  html: false,
+  linkify: true
+});
 
 export function VisHandlerProvider(Private) {
   const chartTypes = Private(VislibVisualizationsVisTypesProvider);
