@@ -5,5 +5,9 @@ import {
 } from '../../../../components';
 
 export default () => (
-  <KuiHorizontalRule />
+  <div>
+    <KuiHorizontalRule size="quarter"/>
+    <KuiHorizontalRule size="half"/>
+    <KuiHorizontalRule />
+  </div>
 );

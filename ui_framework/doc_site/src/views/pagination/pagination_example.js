@@ -108,7 +108,7 @@ export default props => (
     </GuideSection>
 
     <GuideSection
-      title="Pagination, with results"
+      title="Pagination layouts"
       source={[{
         type: GuideSectionTypes.JS,
         code: paginationLayoutsSource,

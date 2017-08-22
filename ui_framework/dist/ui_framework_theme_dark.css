@@ -1765,8 +1765,32 @@ table {
 .kuiHorizontalRule {
   border: none;
   height: 1px;
-  background-color: #444;
-  margin: 16px 0; }
+  background-color: #444; }
+  .kuiHorizontalRule.kuiHorizontalRule--full {
+    width: 100%; }
+  .kuiHorizontalRule.kuiHorizontalRule--half {
+    width: 50%;
+    margin-left: auto;
+    margin-right: auto; }
+  .kuiHorizontalRule.kuiHorizontalRule--quarter {
+    width: 25%;
+    margin-left: auto;
+    margin-right: auto; }
+
+.kuiHorizontalRule--marginSmall {
+  margin: 8px 0; }
+
+.kuiHorizontalRule--marginMedium {
+  margin: 12px 0; }
+
+.kuiHorizontalRule--marginLarge {
+  margin: 24px 0; }
+
+.kuiHorizontalRule--marginXLarge {
+  margin: 32px 0; }
+
+.kuiHorizontalRule--marginXXLarge {
+  margin: 40px 0; }
 
 .kuiIcon {
   display: inline-block;
