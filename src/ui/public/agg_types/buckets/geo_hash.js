@@ -120,10 +120,13 @@ export function AggTypesBucketsGeoHashProvider(Private, config) {
           } else {
             mapCollar = lastMapCollar;
           }
-          const boundingBox = {};
-          delete mapCollar.zoom; // zoom is not part of bounding box filter
-          boundingBox[agg.getField().name] = mapCollar;
           vis.sessionState.mapCollar = mapCollar;
+
+          const boundingBox = {};
+          boundingBox[agg.getField().name] = {
+            top_left: mapCollar.top_left,
+            bottom_right: mapCollar.bottom_right
+          };
           aggs.push(new AggConfig(agg.vis, {
             type: 'filter',
             id: 'filter_agg',
