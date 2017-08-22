@@ -8,6 +8,7 @@ import search from './server/routes/api/search';
 import settings from './server/routes/api/settings';
 import { importApi } from './server/routes/api/import';
 import { exportApi } from './server/routes/api/export';
+import { supportedFeaturesApi } from './server/routes/api/supported_features';
 import scripts from './server/routes/api/scripts';
 import { registerSuggestionsApi } from './server/routes/api/suggestions';
 import * as systemApi from './server/lib/system_api';
@@ -154,6 +155,7 @@ module.exports = function (kibana) {
       // routes
       search(server);
       settings(server);
+      supportedFeaturesApi(server);
       scripts(server);
       importApi(server);
       exportApi(server);

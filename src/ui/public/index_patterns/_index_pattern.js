@@ -15,6 +15,7 @@ import { IndexPatternsCalculateIndicesProvider } from './_calculate_indices';
 import { IndexPatternsPatternCacheProvider } from './_pattern_cache';
 import { FieldsFetcherProvider } from './fields_fetcher_provider';
 import { SavedObjectsClientProvider, findObjectByTitle } from 'ui/saved_objects';
+import { SupportedFeaturesProvider } from 'ui/supported_features';
 
 export function IndexPatternProvider(Private, $http, config, kbnIndex, Promise, confirmModalPromise, kbnUrl) {
   const fieldformats = Private(RegistryFieldFormatsProvider);
@@ -26,6 +27,7 @@ export function IndexPatternProvider(Private, $http, config, kbnIndex, Promise, 
   const flattenHit = Private(IndexPatternsFlattenHitProvider);
   const calculateIndices = Private(IndexPatternsCalculateIndicesProvider);
   const patternCache = Private(IndexPatternsPatternCacheProvider);
+  const supportedFeatures = Private(SupportedFeaturesProvider);
   const type = 'index-pattern';
   const notify = new Notifier();
   const configWatchers = new WeakMap();
@@ -274,27 +276,28 @@ export function IndexPatternProvider(Private, $http, config, kbnIndex, Promise, 
     }
 
     toDetailedIndexList(start, stop, sortDirection) {
-      return Promise.resolve().then(() => {
-        if (this.isTimeBasedInterval()) {
-          return intervals.toIndexList(
-            this.title, this.getInterval(), start, stop, sortDirection
-          );
-        }
-
-        if (this.isTimeBasedWildcard() && this.isIndexExpansionEnabled()) {
-          return calculateIndices(
-            this.title, this.timeFieldName, start, stop, sortDirection
-          );
-        }
-
-        return [
-          {
-            index: this.title,
-            min: -Infinity,
-            max: Infinity
+      return supportedFeatures.isFeatureSupported('field_stats_api')
+        .then((isFieldStatsApiSupported) => {
+          if (this.isTimeBasedInterval()) {
+            return intervals.toIndexList(
+              this.title, this.getInterval(), start, stop, sortDirection
+            );
           }
-        ];
-      });
+
+          if (this.isTimeBasedWildcard() && this.isIndexExpansionEnabled() && isFieldStatsApiSupported) {
+            return calculateIndices(
+              this.title, this.timeFieldName, start, stop, sortDirection
+            );
+          }
+
+          return [
+            {
+              index: this.title,
+              min: -Infinity,
+              max: Infinity
+            }
+          ];
+        });
     }
 
     isIndexExpansionEnabled() {
