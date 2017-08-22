@@ -1,9 +1,9 @@
 import { Observable, Subscription } from 'rxjs';
 import { noop } from 'lodash';
+import { LoggerFactory } from 'kbn-types';
 
 import { PidConfig } from './PidConfig';
 import { PidFile } from './PidFile';
-import { LoggerFactory } from '../../logging';
 
 export class PidService {
   private readonly pid$: Observable<undefined>;

@@ -1,6 +1,7 @@
 {
   "name": "kbn-types",
   "version": "0.0.1",
+  "main": "./lib",
   "types": "./types/packages/@elastic/kbn-types/index.d.ts",
   "scripts": {
     "build": "tsc",
