@@ -15,38 +15,74 @@ export const KuiPagination = ({
 }) => {
   const classes = classNames('kuiPagination', className);
 
+  // This button will always show in mobile layouts if available.
   let optionalPreviousButton = null;
-
   if (activePage !== 1) {
     optionalPreviousButton = (
-      <KuiButtonEmpty className="kuiPagination__button" iconType="arrowLeft" size="small">Previous</KuiButtonEmpty>
+      <KuiButtonEmpty
+        className="kuiPagination__button kuiPagination__button--keepMobile"
+        iconType="arrowLeft"
+        size="small"
+      >
+        Previous
+      </KuiButtonEmpty>
     );
   }
 
+  // This button will always show in mobile layouts if available.
   let optionalNextButton = null;
   if (activePage !== lastPage) {
     optionalNextButton = (
-      <KuiButtonEmpty className="kuiPagination__button" iconType="arrowRight" iconSide="right" size="small">Next</KuiButtonEmpty>
+      <KuiButtonEmpty
+        className="kuiPagination__button kuiPagination__button--keepMobile"
+        iconType="arrowRight"
+        iconSide="right"
+        size="small"
+      >
+        Next
+      </KuiButtonEmpty>
     );
   }
 
   let optionalFirstPage = null;
   if (pageList[0].number > 2) {
     optionalFirstPage = (
-      <span>
-        <KuiButtonEmpty className="kuiPagination__button" size="small">1</KuiButtonEmpty>
-        <KuiButtonEmpty className="kuiPagination__button" size="small" disabled>..</KuiButtonEmpty>
-      </span>
+      <div className="kuiPagination__flex">
+        <KuiButtonEmpty
+          className="kuiPagination__button"
+          size="small"
+        >
+          1
+        </KuiButtonEmpty>
+        <KuiButtonEmpty
+          className="kuiPagination__button"
+          size="small"
+          disabled
+        >
+          ..
+        </KuiButtonEmpty>
+      </div>
     );
   }
 
   let optionalLastPage = null;
   if (lastPage && (lastPage !== pageList[pageList.length -1].number)) {
     optionalLastPage = (
-      <span>
-        <KuiButtonEmpty className="kuiPagination__button" size="small" disabled>..</KuiButtonEmpty>
-        <KuiButtonEmpty className="kuiPagination__button" size="small">{lastPage}</KuiButtonEmpty>
-      </span>
+      <div className="kuiPagination__flex">
+        <KuiButtonEmpty
+          className="kuiPagination__button"
+          size="small"
+          disabled
+        >
+          ..
+        </KuiButtonEmpty>
+        <KuiButtonEmpty
+          className="kuiPagination__button"
+          size="small"
+        >
+          {lastPage}
+        </KuiButtonEmpty>
+      </div>
     );
   }
 
@@ -65,7 +101,13 @@ export const KuiPagination = ({
           },
         );
         return(
-          <KuiButtonEmpty  className={buttonClass} size="small" key={index}>{option.number}</KuiButtonEmpty>
+          <KuiButtonEmpty
+            className={buttonClass}
+            size="small"
+            key={index}
+          >
+            {option.number}
+          </KuiButtonEmpty>
         );
       })}
       {optionalLastPage}

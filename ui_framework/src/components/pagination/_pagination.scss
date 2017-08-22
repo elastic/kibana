@@ -1,6 +1,11 @@
 .kuiPagination {
   display: flex;
 
+  // This is a required to hinder wrapping when space is tight.
+  .kuiPagination__flex {
+    display: flex;
+  }
+
   .kuiPagination__button {
     font-size: $kuiFontSizeS;
     padding: 0;
@@ -13,5 +18,15 @@
     background-color: $kuiColorPrimary;
     color: $kuiColorEmptyShade;
     border-radius: $kuiBorderRadius;
+  }
+}
+
+@include screenXSmall {
+  .kuiPagination__button {
+    display: none;
+
+    &.kuiPagination__button--keepMobile {
+      display: inline-block;
+    }
   }
 }

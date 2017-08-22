@@ -44,7 +44,8 @@ export default props => (
       }]}
     >
       <GuideText>
-        Description needed: how to use the <GuideCode>Pagination</GuideCode> component.
+        Note that previous button or first/last page are not shown. We should only show
+        at most 5 pages.
       </GuideText>
 
       <GuideDemo>
@@ -62,7 +63,7 @@ export default props => (
       }]}
     >
       <GuideText>
-        Description needed: how to use the <GuideCode>Pagination</GuideCode> component.
+        In this example there are ONLY 5 pages in the list.
       </GuideText>
 
       <GuideDemo>
@@ -80,7 +81,7 @@ export default props => (
       }]}
     >
       <GuideText>
-        Description needed: how to use the <GuideCode>Pagination</GuideCode> component.
+        When the last page is active we don&rsquo;t show the last page skip or the next button.
       </GuideText>
 
       <GuideDemo>
@@ -99,7 +100,9 @@ export default props => (
       }]}
     >
       <GuideText>
-        Description needed: how to use the <GuideCode>Pagination</GuideCode> component.
+        When there are pages before or behind the current set of 5 pages, we should provide
+        a quick way to jump back to first or last page. This is doubly important for
+        accessibility.
       </GuideText>
 
       <GuideDemo>
@@ -118,7 +121,8 @@ export default props => (
       }]}
     >
       <GuideText>
-        Description needed: how to use the <GuideCode>Pagination</GuideCode> component.
+        Below are some common layout examples for pagination. In both cases we use
+        <GuideCode>FlexGroup</GuideCode> to set up the layout.
       </GuideText>
 
       <GuideDemo>

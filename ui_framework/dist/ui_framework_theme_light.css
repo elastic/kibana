@@ -2402,6 +2402,11 @@ table {
   display: -webkit-flex;
   display: -ms-flexbox;
   display: flex; }
+  .kuiPagination .kuiPagination__flex {
+    display: -webkit-box;
+    display: -webkit-flex;
+    display: -ms-flexbox;
+    display: flex; }
   .kuiPagination .kuiPagination__button {
     font-size: 14px;
     padding: 0;
@@ -2412,6 +2417,12 @@ table {
     background-color: #0079a5;
     color: #FFF;
     border-radius: 4px; }
+
+@media only screen and (max-width: 768px) {
+  .kuiPagination__button {
+    display: none; }
+    .kuiPagination__button.kuiPagination__button--keepMobile {
+      display: inline-block; } }
 
 .kuiPopover {
   display: inline-block;
