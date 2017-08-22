@@ -88,8 +88,8 @@ describe('kibana_map tests', function () {
 
     it('should get untrimmed map bounds', function () {
       const bounds = kibanaMap.getUntrimmedBounds(false);
-      expect(bounds.bottom_right.lon).to.equal(281.25);
-      expect(bounds.top_left.lon).to.equal(-281.25);
+      expect(bounds.bottom_right.lon.toFixed(2)).to.equal('281.25');
+      expect(bounds.top_left.lon.toFixed(2)).to.equal('-281.25');
     });
   });
 
