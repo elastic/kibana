@@ -215,7 +215,7 @@ export function MeterGaugeProvider() {
         .append('path')
         .attr('d', arc)
         .style('fill', function (d) {
-          return self.getColorBucket(d.y);
+          return self.getColorBucket(Math.max(d.y, 0));
         });
 
       const smallContainer = svg.node().getBBox().height < 70;
