@@ -8,13 +8,17 @@
   </select>
 </div>
 
-<div class="checkbox" ng-if="editor.formatParams.type == 'a'">
-  <label>
+<div ng-if="editor.formatParams.type == 'a'">
+  <label class="kuiCheckBoxLabel">
     <input
+      class="kuiCheckBox"
       type="checkbox"
-      ng-model="editor.formatParams.openLinkInCurrentTab">
+      ng-model="editor.formatParams.openLinkInCurrentTab"
+    ></input>
+    
+    <span class="kuiCheckBoxLabel__text">
       Open link in current tab
-    </input>
+    </span>
   </label>
 </div>
 
