@@ -741,7 +741,8 @@ table {
     display: flex;
     padding: 12px;
     width: 100%;
-    text-align: left; }
+    text-align: left;
+    color: #F5F5F5; }
     .kuiContextMenu .kuiContextMenu__option:hover, .kuiContextMenu .kuiContextMenu__option:focus {
       text-decoration: underline; }
     .kuiContextMenu .kuiContextMenu__option:focus {

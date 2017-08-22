@@ -12,6 +12,7 @@ $kuiContextMenuWidth: $kuiSize * 16;
     padding: $kuiSizeM;
     width: 100%;
     text-align: left;
+    color: $kuiTextColor;
 
     &:hover, &:focus {
       text-decoration: underline;
