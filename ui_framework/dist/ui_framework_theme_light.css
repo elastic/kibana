@@ -2412,7 +2412,10 @@ table {
     padding: 0;
     height: 24px;
     min-width: 24px;
-    text-align: center; }
+    text-align: center;
+    color: #3F3F3F; }
+    .kuiPagination .kuiPagination__button svg {
+      fill: #3F3F3F; }
   .kuiPagination .kuiPagination__button--active {
     background-color: #0079a5;
     color: #FFF;

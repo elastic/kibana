@@ -12,6 +12,11 @@
     height: $kuiSizeL;
     min-width: $kuiSizeL;
     text-align: center;
+    color: $kuiTextColor;
+
+    svg {
+      fill: $kuiTextColor;
+    }
   }
 
   .kuiPagination__button--active {
