@@ -33,17 +33,32 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
     }
 
     async getAdvancedSettings(propertyName) {
-      log.debug('in setAdvancedSettings');
+      log.debug('in getAdvancedSettings');
       return await testSubjects.getVisibleText(`advancedSetting-${propertyName}-currentValue`);
     }
 
-    async setAdvancedSettings(propertyName, propertyValue) {
+    async clearAdvancedSettings(propertyName) {
+      await testSubjects.click(`advancedSetting-${propertyName}-clearButton`);
+      await PageObjects.header.waitUntilLoadingHasFinished();
+    }
+
+    async setAdvancedSettingsSelect(propertyName, propertyValue) {
       await testSubjects.click(`advancedSetting-${propertyName}-editButton`);
       await PageObjects.header.waitUntilLoadingHasFinished();
       await PageObjects.common.sleep(1000);
       await remote.setFindTimeout(defaultFindTimeout)
         .findByCssSelector(`option[label="${propertyValue}"]`).click();
       await PageObjects.header.waitUntilLoadingHasFinished();
+      await testSubjects.click(`advancedSetting-${propertyName}-saveButton`);
+      await PageObjects.header.waitUntilLoadingHasFinished();
+    }
+
+    async setAdvancedSettingsInput(propertyName, propertyValue, inputSelector) {
+      await testSubjects.click(`advancedSetting-${propertyName}-editButton`);
+      await PageObjects.header.waitUntilLoadingHasFinished();
+      const input = await testSubjects.find(inputSelector);
+      await input.clearValue();
+      await input.type(propertyValue);
       await testSubjects.click(`advancedSetting-${propertyName}-saveButton`);
       await PageObjects.header.waitUntilLoadingHasFinished();
     }
