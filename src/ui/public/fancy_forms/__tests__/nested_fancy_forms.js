@@ -61,6 +61,16 @@ describe('fancy forms', function () {
       expect($scope.person.softErrorCount()).to.be(0);
     });
 
+    it('upgrades fields to regular errors on attempted submit', function () {
+      const { $scope, $el } = setup({ name: '' });
+
+      expect($scope.person.errorCount()).to.be(1);
+      expect($scope.person.softErrorCount()).to.be(0);
+      $el.findTestSubject('submit').click();
+      expect($scope.person.errorCount()).to.be(1);
+      expect($scope.person.softErrorCount()).to.be(1);
+    });
+
     it('prevents submit when there are errors', function () {
       const onSubmit = sinon.stub();
       const { $scope, $el } = setup({ name: '', onSubmit });
