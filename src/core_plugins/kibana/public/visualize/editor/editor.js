@@ -212,7 +212,7 @@ function VisEditor($scope, $route, timefilter, AppState, $window, kbnUrl, courie
       'searchSource.get("index").timeFieldName',
       'vis.type.options.showTimePicker',
     ], function ([timeField, requiresTimePicker]) {
-      timefilter.enabled = Boolean(timeField || requiresTimePicker);
+      timefilter.enabled = Boolean(timeField && requiresTimePicker);
     });
 
     // update the searchSource when filters update
