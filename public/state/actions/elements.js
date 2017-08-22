@@ -100,30 +100,6 @@ export const fetchContext = createThunk('fetchContext', ({ dispatch, getState },
   });
 });
 
-export const fetchRenderable = createThunk('fetchRenderable', ({ dispatch, getState }, element) => {
-  const argumentPath = [element.id, 'expressionRenderable'];
-  const ast = element.ast || fromExpression(element.expression);
-
-  dispatch(args.setLoading({
-    path: argumentPath,
-  }));
-
-  return runInterpreter(ast)
-  .then((renderable) => {
-    dispatch(args.setValue({
-      path: argumentPath,
-      value: renderable,
-    }));
-  })
-  .catch((err) => {
-    notify.error(err);
-    dispatch(args.setValue({
-      path: argumentPath,
-      value: err,
-    }));
-  });
-});
-
 export const fetchRenderableWithContext = createThunk('fetchRenderableWithContext', ({ dispatch }, element, ast, context) => {
   const argumentPath = [element.id, 'expressionRenderable'];
 
@@ -145,6 +121,11 @@ export const fetchRenderableWithContext = createThunk('fetchRenderableWithContex
       value: err,
     }));
   });
+});
+
+export const fetchRenderable = createThunk('fetchRenderable', ({ dispatch, getState }, element) => {
+  const ast = element.ast || fromExpression(element.expression);
+  dispatch(fetchRenderableWithContext(element, ast, null));
 });
 
 export const fetchAllRenderables = createThunk('fetchAllRenderables', ({ dispatch, getState }) => {
