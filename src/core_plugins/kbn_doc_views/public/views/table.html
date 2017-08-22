@@ -45,7 +45,7 @@
             ></i>
           </button>
         </span>
-        <span ng-if="!indexPattern.metaFields.includes(field)">
+        <span ng-if="!indexPattern.metaFields.includes(field) && !mapping[field].scripted">
           <button
             class="doc-viewer-button"
             ng-click="filter('_exists_', field, '+')"
@@ -57,6 +57,9 @@
           </button>
         </span>
         <span ng-if="indexPattern.metaFields.includes(field)" tooltip="Unable to filter for presence of meta fields">
+          <i class="fa fa-asterisk text-muted"></i>
+        </span>
+        <span ng-if="mapping[field].scripted" tooltip="Unable to filter for presence of scripted fields">
           <i class="fa fa-asterisk text-muted"></i>
         </span>
       </td>
