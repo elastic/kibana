@@ -37,6 +37,7 @@ describe('uiSettingsMixin()', () => {
     // mock hapi server
     const server = {
       log: sinon.stub(),
+      route: sinon.stub(),
       config: () => config,
       decorate: sinon.spy((type, name, value) => {
         decorations[type][name] = value;

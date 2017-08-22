@@ -5,11 +5,12 @@ import { get } from 'lodash';
 import {
   createFindQuery,
   createIdQuery,
-  handleEsError,
   v5BulkCreate,
   v6BulkCreate,
   normalizeEsDoc,
-  includedFields
+  includedFields,
+  decorateEsError,
+  errors,
 } from './lib';
 
 export const V6_TYPE = 'doc';
@@ -20,6 +21,9 @@ export class SavedObjectsClient {
     this._mappings = mappings;
     this._callAdminCluster = callAdminCluster;
   }
+
+  static errors = errors
+  errors = errors
 
   /**
    * Persists an object
@@ -107,7 +111,7 @@ export class SavedObjectsClient {
     });
 
     if (get(response, 'deleted') === 0) {
-      throw Boom.notFound();
+      throw errors.decorateNotFoundError(Boom.notFound());
     }
   }
 
@@ -207,7 +211,7 @@ export class SavedObjectsClient {
     const [hit] = get(response, 'hits.hits', []);
 
     if (!hit) {
-      throw Boom.notFound();
+      throw errors.decorateNotFoundError(Boom.notFound());
     }
 
     return normalizeEsDoc(hit);
@@ -252,8 +256,14 @@ export class SavedObjectsClient {
     };
 
     return this._withKibanaIndex(method, params).catch(err => {
-      if (get(fallbacks, method, []).includes(get(err, 'data.type'))) {
-        return this._withKibanaIndex(method, Object.assign({}, params, fallbackParams));
+      const fallbackWhen = get(fallbacks, method, []);
+      const type = get(err, 'body.error.type');
+
+      if (type && fallbackWhen.includes(type)) {
+        return this._withKibanaIndex(method, {
+          ...params,
+          ...fallbackParams
+        });
       }
 
       throw err;
@@ -267,7 +277,7 @@ export class SavedObjectsClient {
         index: this._kibanaIndex,
       });
     } catch (err) {
-      throw handleEsError(err);
+      throw decorateEsError(err);
     }
   }
 }
