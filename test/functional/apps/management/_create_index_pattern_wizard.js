@@ -25,7 +25,7 @@ export default function ({ getService, getPageObjects }) {
 
       it('is enabled once an index pattern with matching indices has been entered', async function () {
         await PageObjects.settings.setIndexPatternField();
-        await PageObjects.common.sleep(2000);
+        await PageObjects.common.sleep(1000);
         const btn = await PageObjects.settings.getCreateIndexPatternGoToStep2Button();
         const isEnabled = await btn.isEnabled();
         expect(isEnabled).to.be.ok();
