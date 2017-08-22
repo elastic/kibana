@@ -137,6 +137,7 @@
                   class="kuiCheckBox"
                   ng-checked="managementObjectsController.areAllRowsChecked()"
                   ng-click="toggleAll()"
+                  aria-label="{{managementObjectsController.areAllRowsChecked() ? 'Deselect all rows' : 'Select all rows'}}"
                 >
               </div>
             </th>
