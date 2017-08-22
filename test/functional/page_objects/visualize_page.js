@@ -282,6 +282,10 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
       await find.clickByPartialLinkText('Options');
     }
 
+    async clickData() {
+      await testSubjects.click('visualizeEditDataLink');
+    }
+
     async selectWMS() {
       await find.clickByCssSelector('input[name="wms.enabled"]');
     }
@@ -484,6 +488,10 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
       const dataTableHeader = await retry.try(
         async () => testSubjects.find('paginated-table-header'));
       return await dataTableHeader.getVisibleText();
+    }
+
+    async toggleIsFilteredByCollarCheckbox() {
+      await testSubjects.click('isFilteredByCollarCheckbox');
     }
 
     async getMarkdownData() {

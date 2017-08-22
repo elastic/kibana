@@ -29,6 +29,11 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
       return logstash;
     }
 
+    async clickEditVisualization() {
+      log.debug('clickEditVisualization');
+      await testSubjects.click('dashboardPanelEditLink');
+    }
+
     async clickFullScreenMode() {
       log.debug(`clickFullScreenMode`);
       await testSubjects.click('dashboardFullScreenMode');
