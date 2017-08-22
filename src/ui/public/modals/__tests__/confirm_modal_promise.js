@@ -86,7 +86,10 @@ describe('ui/modals/confirm_modal_promise', function () {
         $rootScope.$digest();
         sinon.assert.notCalled(confirmCallback);
         sinon.assert.calledOnce(cancelCallback);
-        expect(cancelCallback.firstCall.args[0]).to.have.property('message').contain('confirmation button text');
+        sinon.assert.calledWithExactly(
+          cancelCallback,
+          sinon.match.has('message', sinon.match(/confirmation button text/))
+        );
       });
     });
   });
