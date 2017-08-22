@@ -2,7 +2,7 @@ import _ from 'lodash';
 import semver from 'semver';
 
 
-export function checkFieldStatsApi(clusterInfo, featureFlags) {
+export function checkFieldStatsApi(clusterInfo) {
   const nodesWithoutFieldStats = _.filter(clusterInfo.nodes, ({ version }) => (
     semver.major(version) >= 6
   ));
@@ -12,10 +12,7 @@ export function checkFieldStatsApi(clusterInfo, featureFlags) {
   ));
 
   return {
-    ...featureFlags,
-    field_stats_api: {
-      reasons,
-      supported: reasons.length === 0,
-    }
+    reasons,
+    supported: reasons.length === 0,
   };
 }

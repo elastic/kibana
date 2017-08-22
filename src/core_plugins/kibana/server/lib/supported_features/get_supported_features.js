@@ -1,9 +1,10 @@
+import _ from 'lodash';
 import { checkFieldStatsApi } from './feature_checks';
 
 
-const featureChecks = [
-  checkFieldStatsApi,
-];
+const featureChecks = {
+  field_stats_api: checkFieldStatsApi,
+};
 
 export async function getSupportedFeatures(callWithRequest) {
   const { nodes: nodesInfo } = await callWithRequest('nodes.info', {
@@ -17,9 +18,9 @@ export async function getSupportedFeatures(callWithRequest) {
     nodes: nodesInfo,
   };
 
-  const featureFlags = featureChecks.reduce((featureFlags, featureCheck) => (
-    featureCheck(clusterInfo, featureFlags)
-  ), {});
+  const featureFlags = _.mapValues(featureChecks, (featureCheck) => (
+    featureCheck(clusterInfo)
+  ));
 
   return featureFlags;
 }
