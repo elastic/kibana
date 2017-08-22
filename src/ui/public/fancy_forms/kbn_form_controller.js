@@ -10,9 +10,13 @@ export function decorateFormController($delegate, $injector) {
     constructor($scope, $element, ...superArgs) {
       super(...superArgs);
 
-      $element.on('submit', this._onSubmit);
+      const onSubmit = () => {
+        this._markInvalidTouched();
+      };
+
+      $element.on('submit', onSubmit);
       $scope.$on('$destroy', () => {
-        $element.off('submit', this._onSubmit);
+        $element.off('submit', onSubmit);
       });
     }
 
@@ -37,7 +41,7 @@ export function decorateFormController($delegate, $injector) {
         .forEach(model => model.$setTouched());
     }
 
-    _onSubmit = (event) => {
+    _markInvalidTouched(event) {
       if (this.errorCount()) {
         event.preventDefault();
         event.stopImmediatePropagation();
