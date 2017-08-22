@@ -1,9 +1,10 @@
 import ngMock from 'ng_mock';
 import expect from 'expect.js';
+import sinon from 'sinon';
 import $ from 'jquery';
 
 const template = `
-  <form name="person">
+  <form name="person" ng-submit="onSubmit()">
     <input data-test-subj="name" ng-model="name" required/>
     <ul>
       <li ng-repeat="task in tasks">
@@ -13,11 +14,14 @@ const template = `
         </ng-form>
       </li>
     </ul>
+    <button data-test-subj="submit" type="submit">Submit</button>
   </form>
 `;
 
 describe('fancy forms', function () {
   let setup;
+  const trash = [];
+
   beforeEach(ngMock.module('kibana'));
   beforeEach(ngMock.inject(($injector) => {
     const $rootScope = $injector.get('$rootScope');
@@ -26,14 +30,17 @@ describe('fancy forms', function () {
     setup = function (options = {}) {
       const {
         name = 'person1',
-        tasks = []
+        tasks = [],
+        onSubmit = () => {},
       } = options;
 
-      const $el = $(template);
+      const $el = $(template).appendTo('body');
+      trash.push(() => $el.remove());
       const $scope = $rootScope.$new();
 
       $scope.name = name;
       $scope.tasks = tasks;
+      $scope.onSubmit = onSubmit;
 
       $compile($el)($scope);
       $scope.$apply();
@@ -45,11 +52,34 @@ describe('fancy forms', function () {
     };
   }));
 
+  afterEach(() => trash.splice(0).forEach(fn => fn()));
+
   describe('nested forms', function () {
     it('treats new fields as "soft" errors', function () {
       const { $scope } = setup({ name: '' });
       expect($scope.person.errorCount()).to.be(1);
       expect($scope.person.softErrorCount()).to.be(0);
+    });
+
+    it('prevents submit when there are errors', function () {
+      const onSubmit = sinon.stub();
+      const { $scope, $el } = setup({ name: '', onSubmit });
+
+      expect($scope.person.errorCount()).to.be(1);
+      sinon.assert.notCalled(onSubmit);
+      $el.findTestSubject('submit').click();
+      expect($scope.person.errorCount()).to.be(1);
+      sinon.assert.notCalled(onSubmit);
+
+      $scope.$apply(() => {
+        $scope.name = 'foo';
+      });
+
+      expect($scope.person.errorCount()).to.be(0);
+      sinon.assert.notCalled(onSubmit);
+      $el.findTestSubject('submit').click();
+      expect($scope.person.errorCount()).to.be(0);
+      sinon.assert.calledOnce(onSubmit);
     });
 
     it('new fields are no longer soft after blur', function () {

@@ -37,7 +37,7 @@ export function decorateFormController($delegate, $injector) {
         .forEach(model => model.$setTouched());
     }
 
-    _onSubmit = () => {
+    _onSubmit = (event) => {
       if (this.errorCount()) {
         event.preventDefault();
         event.stopImmediatePropagation();
