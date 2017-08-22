@@ -50,6 +50,7 @@ export TEST_ES_PASS=<password>
 node scripts/functional_test_runner
 ----------
 
+[float]
 ===== More about `node scripts/functional_test_runner`
 
 When run without any arguments the `FunctionalTestRunner` automatically loads the configuration in the standard location, but you can override that behavior with the `--config` flag.
