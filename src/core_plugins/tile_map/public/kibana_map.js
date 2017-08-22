@@ -100,7 +100,9 @@ export class KibanaMap extends EventEmitter {
       minZoom: options.minZoom,
       maxZoom: options.maxZoom,
       center: options.center ? options.center : [0, 0],
-      zoom: options.zoom ? options.zoom : 2
+      zoom: options.zoom ? options.zoom : 2,
+      renderer: L.canvas(),
+      zoomAnimation: false // Desaturate map tiles causes animation rendering artifacts
     };
 
     this._leafletMap = L.map(containerNode, leafletOptions);
@@ -164,7 +166,7 @@ export class KibanaMap extends EventEmitter {
           }
         });
       } else if (drawType === 'polygon') {
-        const latLongs = event.layer.getLatLngs();
+        const latLongs = event.layer.getLatLngs()[0];
         this.emit('drawCreated:polygon', {
           points: latLongs.map(leafletLatLng => {
             return {
@@ -198,7 +200,7 @@ export class KibanaMap extends EventEmitter {
       }
 
       if (!this._popup) {
-        this._popup = L.popup({ autoPan: false });
+        this._popup = L.responsivePopup({ autoPan: false });
         this._popup.setLatLng(event.position);
         this._popup.setContent(event.content);
         this._popup.openOn(this._leafletMap);
@@ -335,6 +337,20 @@ export class KibanaMap extends EventEmitter {
     return this._leafletMap.getBounds();
   }
 
+  getMetersPerPixel() {
+    const pointC = this._leafletMap.latLngToContainerPoint(this._leafletMap.getCenter()); // center (pixels)
+    const pointX = [pointC.x + 1, pointC.y]; // add one pixel to x
+    const pointY = [pointC.x, pointC.y + 1]; // add one pixel to y
+
+    const latLngC = this._leafletMap.containerPointToLatLng(pointC);
+    const latLngX = this._leafletMap.containerPointToLatLng(pointX);
+    const latLngY = this._leafletMap.containerPointToLatLng(pointY);
+
+    const distanceX = latLngC.distanceTo(latLngX); // calculate distance between c and x (latitude)
+    const distanceY = latLngC.distanceTo(latLngY); // calculate distance between c and y (longitude)
+    return _.min([distanceX, distanceY]);
+  }
+
   getBounds() {
 
     const bounds = this._leafletMap.getBounds();
@@ -415,19 +431,23 @@ export class KibanaMap extends EventEmitter {
   }
 
   addDrawControl() {
-    const shapeOptions = {
-      shapeOptions: {
-        stroke: false,
-        color: '#000'
-      }
-    };
+    const drawColor = '#000';
     const drawOptions = {
       draw: {
         polyline: false,
         marker: false,
         circle: false,
-        rectangle: shapeOptions,
-        polygon: shapeOptions
+        rectangle: {
+          shapeOptions: {
+            stroke: false,
+            color: drawColor
+          }
+        },
+        polygon: {
+          shapeOptions: {
+            color: drawColor
+          }
+        }
       }
     };
     this._leafletDrawControl = new L.Control.Draw(drawOptions);
