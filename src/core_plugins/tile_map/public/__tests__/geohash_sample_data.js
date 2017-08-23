@@ -1335,7 +1335,13 @@ const sampleData = `{
       "rectangle": [[16.875, -146.25], [16.875, -135], [22.5, -135], [22.5, -146.25]]
     }
   }],
-  "properties": {"min": 2, "max": 1418, "zoom": 3, "center": [39.57182223734374, -109.51171875]}
+  "properties": {
+    "min": 2,
+    "max": 1418,
+    "zoom": 3,
+    "center": [39.57182223734374, -109.51171875],
+    "geohashGridDimensionsAtEquator": [1252300, 624100]
+  }
 }`;
 
 export const GeoHashSampleData = JSON.parse(sampleData);

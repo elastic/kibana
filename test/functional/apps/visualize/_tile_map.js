@@ -118,61 +118,25 @@ export default function ({ getService, getPageObjects }) {
 
       // See https://github.com/elastic/kibana/issues/13137 if this test starts failing intermittently
       it('Fit data bounds should zoom to level 3', async function () {
-        const expectedPrecision2ZoomCircles = [
-          { color: '#750000', radius: 192 },
-          { color: '#750000', radius: 191 },
-          { color: '#750000', radius: 177 },
-          { color: '#a40000', radius: 168 },
-          { color: '#a40000', radius: 167 },
-          { color: '#a40000', radius: 159 },
-          { color: '#a40000', radius: 156 },
-          { color: '#b45100', radius: 136 },
-          { color: '#b67501', radius: 111 },
-          { color: '#b67501', radius: 109 },
-          { color: '#b67501', radius: 108 },
-          { color: '#b67501', radius: 104 },
-          { color: '#b67501', radius: 101 },
-          { color: '#b67501', radius: 101 },
-          { color: '#b99939', radius: 84 },
-          { color: '#b99939', radius: 84 },
-          { color: '#b99939', radius: 74 },
-          { color: '#b99939', radius: 73 },
-          { color: '#b99939', radius: 73 },
-          { color: '#b99939', radius: 66 },
-          { color: '#b99939', radius: 60 },
-          { color: '#b99939', radius: 57 },
-          { color: '#b99939', radius: 57 },
-          { color: '#b99939', radius: 47 },
-          { color: '#b99939', radius: 43 },
-          { color: '#b99939', radius: 43 },
-          { color: '#b99939', radius: 43 },
-          { color: '#b99939', radius: 38 },
-          { color: '#b99939', radius: 36 },
-          { color: '#b99939', radius: 35 },
-          { color: '#b99939', radius: 34 },
-          { color: '#b99939', radius: 34 },
-          { color: '#b99939', radius: 31 },
-          { color: '#b99939', radius: 30 },
-          { color: '#b99939', radius: 28 },
-          { color: '#b99939', radius: 27 },
-          { color: '#b99939', radius: 24 },
-          { color: '#b99939', radius: 22 },
-          { color: '#b99939', radius: 19 },
-          { color: '#b99939', radius: 19 },
-          { color: '#b99939', radius: 15 },
-          { color: '#b99939', radius: 15 },
-          { color: '#b99939', radius: 15 },
-          { color: '#b99939', radius: 12 },
-          { color: '#b99939', radius: 9 },
-          { color: '#b99939', radius: 9 }
+        const expectedPrecision2DataTable = [
+          '- dn 1,429 { "lat": 36.38058884214008, "lon": -84.78904345856186 }',
+          '- dp 1,418 { "lat": 41.64735764514311, "lon": -84.89821054446622 }',
+          '- 9y 1,215 { "lat": 36.45605112115542, "lon": -95.0664575824997 }',
+          '- 9z 1,099 { "lat": 42.18533764798381, "lon": -95.16736779696697 }',
+          '- dr 1,076 { "lat": 42.02351013780139, "lon": -73.98091798822212 }',
+          '- dj 982 { "lat": 31.672735499211466, "lon": -84.50815450245526 }',
+          '- 9v 938 { "lat": 31.380767446489873, "lon": -95.2705099188121 }',
+          '- 9q 722 { "lat": 36.51360723008776, "lon": -119.18302692440686 }',
+          '- 9w 475 { "lat": 36.39264289740669, "lon": -106.91102287667363 }',
+          '- cb 457 { "lat": 46.70940601270996, "lon": -95.81077801137022 }'
         ];
 
-        await retry.try(async() => {
-          await PageObjects.visualize.clickMapFitDataBounds();
-          const data = await PageObjects.visualize.getTileMapData();
-          expect(data).to.eql(expectedPrecision2ZoomCircles);
-          screenshots.take('map-at-zoom-3');
-        });
+        await PageObjects.visualize.clickMapFitDataBounds();
+        await PageObjects.visualize.openSpyPanel();
+        const data = await PageObjects.visualize.getDataTableData();
+        await compareTableData(expectedPrecision2DataTable, data.trim().split('\n'));
+        screenshots.take('map-at-zoom-3');
+        await PageObjects.visualize.closeSpyPanel();
       });
 
       /*
@@ -191,7 +155,8 @@ export default function ({ getService, getPageObjects }) {
           '- 9y7 73 { "lat": 35.87868071952197, "lon": -96.3330221912275 }',
           '- 9ys 71 { "lat": 37.31065319536228, "lon": -94.82038319412567 }',
           '- 9yn 71 { "lat": 34.57203017311617, "lon": -92.17198946946104 }',
-          '- 9q9 70 { "lat": 37.327310177098425, "lon": -121.70855726221842 }' ];
+          '- 9q9 70 { "lat": 37.327310177098425, "lon": -121.70855726221842 }'
+        ];
         const expectedTableDataZoomed = [
           '- c20g 16 { "lat": 45.59211894578766, "lon": -122.47455075674225 }',
           '- c28c 13 { "lat": 48.0181491561234, "lon": -122.43847891688347 }',
@@ -202,7 +167,8 @@ export default function ({ getService, getPageObjects }) {
           '- c2mq 9 { "lat": 47.547698873095214, "lon": -116.18850083090365 }',
           '- c27x 9 { "lat": 47.753206375055015, "lon": -118.7438936624676 }',
           '- c25p 9 { "lat": 46.30563497543335, "lon": -119.30418533273041 }',
-          '- c209 9 { "lat": 45.29028058052063, "lon": -122.9347869195044 }' ];
+          '- c209 9 { "lat": 45.29028058052063, "lon": -122.9347869195044 }'
+        ];
         const vizName1 = 'Visualization TileMap';
 
         return PageObjects.visualize.clickMapZoomIn()

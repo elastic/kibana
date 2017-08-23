@@ -59,25 +59,25 @@ angular.module('ui.bootstrap.tpls', [
   'template/typeahead/typeahead-popup.html'
 ]);
 
-import './accordion';
-import './alert';
-import './bindHtml';
-import './buttons';
-import './collapse';
-import './dateparser';
-import './datepicker';
-import './dropdown';
-import './modal';
-import './pagination';
-import './popover';
-import './position';
-import './progressbar';
-import './rating';
-import './tabs';
-import './timepicker';
-import './tooltip';
-import './transition';
-import './typeahead';
+import './accordion/accordion';
+import './alert/alert';
+import './bindHtml/bindHtml';
+import './buttons/buttons';
+import './collapse/collapse';
+import './dateparser/dateparser';
+import './datepicker/datepicker';
+import './dropdown/dropdown';
+import './modal/modal';
+import './pagination/pagination';
+import './popover/popover';
+import './position/position';
+import './progressbar/progressbar';
+import './rating/rating';
+import './tabs/tabs';
+import './timepicker/timepicker';
+import './tooltip/tooltip';
+import './transition/transition';
+import './typeahead/typeahead';
 
 import alert from './alert/alert.html';
 
@@ -210,4 +210,3 @@ import typeaheadPopup from './typeahead/typeahead-popup.html';
 angular.module('template/typeahead/typeahead-popup.html', []).run(['$templateCache', function($templateCache) {
   $templateCache.put('template/typeahead/typeahead-popup.html', typeaheadPopup);
 }]);
-

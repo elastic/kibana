@@ -1,0 +1,1 @@
+export { VislibComponentsLabelsLabelsProvider } from './labels';

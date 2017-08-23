@@ -145,7 +145,9 @@ export function MapsVisualizationProvider(serviceSettings, Notifier, getAppState
 
     _recreateGeohashLayer(esResponse) {
 
-      if (esResponse === this._chartData) {
+      // Only recreate geohash layer when there is new aggregation data
+      // Exception is Heatmap: which needs to be redrawn every zoom level because the clustering is based on meters per pixel
+      if (this._getMapsParams().mapType !== 'Heatmap' && esResponse === this._chartData) {
         return;
       }
 
@@ -247,10 +249,7 @@ export function MapsVisualizationProvider(serviceSettings, Notifier, getAppState
         isFilteredByCollar: this._isFilteredByCollar(),
         fetchBounds: this.getGeohashBounds.bind(this),
         heatmap: {
-          heatBlur: newParams.heatBlur,
-          heatMaxZoom: newParams.heatMaxZoom,
-          heatMinOpacity: newParams.heatMinOpacity,
-          heatRadius: newParams.heatRadius
+          heatClusterSize: newParams.heatClusterSize
         }
       };
     }
@@ -305,7 +304,7 @@ export function MapsVisualizationProvider(serviceSettings, Notifier, getAppState
 
     _getGeoHashAgg() {
       return this.vis.aggs.find((agg) => {
-        return agg.type.dslName === 'geohash_grid';
+        return _.get(agg, 'type.dslName') === 'geohash_grid';
       });
     }
 
