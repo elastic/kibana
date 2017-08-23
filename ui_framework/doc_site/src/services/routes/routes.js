@@ -21,6 +21,9 @@ import FlexExample
 import FormExample
   from '../../views/form/form_example';
 
+import FormGallerySandbox
+  from '../../views/form_gallery/form_gallery_sandbox';
+
 import IconExample
   from '../../views/icon/icon_example';
 
@@ -163,6 +166,10 @@ const components = [{
 const sandboxes = [{
   name: 'Kibana',
   component: KibanaSandbox,
+  hasReact: true,
+}, {
+  name: 'FormGallerySandbox',
+  component: FormGallerySandbox,
   hasReact: true,
 }];
 

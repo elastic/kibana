@@ -41,11 +41,18 @@ export class KuiFormRow extends Component {
       error,
       label,
       id,
+      addEmptyLabelSpace,
       className,
       ...rest,
     } = this.props;
 
-    const classes = classNames('kuiFormRow', className);
+    const classes = classNames(
+      'kuiFormRow',
+      {
+        'kuiFormRow--addEmptyLabelSpace': addEmptyLabelSpace,
+      },
+      className
+    );
 
     let optionalHelpText;
 
@@ -110,4 +117,9 @@ KuiFormRow.propTypes = {
   isInvalid: PropTypes.bool,
   error: PropTypes.oneOfType([PropTypes.string, PropTypes.arrayOf(PropTypes.string)]),
   helpText: PropTypes.string,
+  addEmptyLabelSpace: PropTypes.bool,
+};
+
+KuiFormRow.defaultProps = {
+  addEmptyLabelSpace: false,
 };

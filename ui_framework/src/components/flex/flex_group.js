@@ -7,7 +7,7 @@ const gutterSizeToClassNameMap = {
   small: 'kuiFlexGroup--gutterSmall',
   medium: 'kuiFlexGroup--gutterMedium',
   large: 'kuiFlexGroup--gutterLarge',
-  extraLarge: 'kuiFlexGroup--gutterXLarge',
+  extraLarge: 'kuiFlexGroup--gutterExtraLarge',
 };
 
 export const GUTTER_SIZES = Object.keys(gutterSizeToClassNameMap);
