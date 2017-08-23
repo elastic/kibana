@@ -2,7 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
 
-import { KuiIcon } from '../../components';
+import { KuiIcon, KuiPopoverTitle } from '../../components';
 
 const transitionDirectionAndTypeToClassNameMap = {
   next: {
@@ -41,15 +41,17 @@ export const KuiContextMenuPanel = ({
 
   if (title) {
     panelTitle = (
-      <button
-        className="kuiContextMenuPanelTitle"
-        onClick={onClose}
-      >
-        <span className="kuiContextMenu__itemLayout">
-          {arrow}
-          {title}
-        </span>
-      </button>
+      <KuiPopoverTitle>
+        <button
+          className="kuiContextMenuPanelTitle"
+          onClick={onClose}
+        >
+          <span className="kuiContextMenu__itemLayout">
+            {arrow}
+            {title}
+          </span>
+        </button>
+      </KuiPopoverTitle>
     );
   }
 

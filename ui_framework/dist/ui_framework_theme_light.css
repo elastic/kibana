@@ -88,7 +88,8 @@ button {
   padding: 0;
   margin: 0;
   outline: none;
-  font-size: 16px; }
+  font-size: 16px;
+  color: inherit; }
   button:hover {
     cursor: pointer; }
 
@@ -733,7 +734,8 @@ table {
   width: 256px;
   position: relative;
   overflow: hidden;
-  transition: height 150ms cubic-bezier(0.694, 0.0482, 0.335, 1); }
+  transition: height 150ms cubic-bezier(0.694, 0.0482, 0.335, 1);
+  border-radius: 4px; }
   .kuiContextMenu .kuiContextMenu__content {
     padding: 8px; }
 
@@ -754,7 +756,7 @@ table {
   position: absolute;
   width: 100%;
   visibility: visible;
-  background-color: #fff; }
+  background-color: #FFF; }
   .kuiContextMenuPanel.kuiContextMenuPanel-txInLeft {
     pointer-events: none;
     -webkit-animation: kuiContextMenuPanelTxInLeft 250ms cubic-bezier(0.694, 0.0482, 0.335, 1);
@@ -783,9 +785,6 @@ table {
   visibility: hidden; }
 
 .kuiContextMenuPanelTitle {
-  background-color: #F5F5F5;
-  border-bottom: 1px solid #D9D9D9;
-  padding: 12px;
   width: 100%;
   text-align: left; }
 
@@ -1557,11 +1556,14 @@ table {
 
 /**
  * 1. Override KeyPadMenu.
+ * 2. Override popover default.
  */
 .kuiHeaderPopover {
   top: calc(100% - 16px) !important;
   /* 1 */
-  padding: 16px; }
+  padding: 16px;
+  border-radius: 4px 0 4px 4px !important;
+  /* 2 */ }
 
 .kuiHeaderProfile {
   text-align: left;
@@ -2304,7 +2306,7 @@ table {
   top: 100%;
   left: 50%;
   border: 1px solid #D9D9D9;
-  border-radius: 4px 0 4px 4px;
+  border-radius: 4px;
   -webkit-transform: translateX(-50%) translateY(8px) translateZ(0);
           transform: translateX(-50%) translateY(8px) translateZ(0);
   -webkit-backface-visibility: hidden;
