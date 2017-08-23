@@ -5,8 +5,6 @@ export { keycodes };
 export {
   accessibleClickKeys,
   comboBoxKeyCodes,
-  ENTER_KEY,
-  SPACE_KEY,
 } from './accessibility';
 
 export { SortableProperties } from './sort';

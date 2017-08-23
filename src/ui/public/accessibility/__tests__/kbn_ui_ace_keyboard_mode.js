@@ -3,10 +3,7 @@ import sinon from 'sinon';
 import expect from 'expect.js';
 import ngMock from 'ng_mock';
 import '../kbn_ui_ace_keyboard_mode';
-import {
-  ENTER_KEY,
-  keycodes,
-} from 'ui_framework/services';
+import { keycodes } from 'ui_framework/services';
 
 describe('kbnUiAceKeyboardMode directive', () => {
   let element;
@@ -30,7 +27,7 @@ describe('kbnUiAceKeyboardMode directive', () => {
       const textarea = element.find('textarea');
       sinon.spy(textarea[0], 'focus');
       const ev = angular.element.Event('keydown'); // eslint-disable-line new-cap
-      ev.keyCode = ENTER_KEY;
+      ev.keyCode = keycodes.ENTER;
       element.find('.uiAceKeyboardHint').trigger(ev);
       expect(textarea[0].focus.called).to.be(true);
       expect(element.find('.uiAceKeyboardHint').hasClass('uiAceKeyboardHint-isInactive')).to.be(true);
@@ -80,7 +77,7 @@ describe('kbnUiAceKeyboardModeService', () => {
       const textarea = element.find('textarea');
       sinon.spy(textarea[0], 'focus');
       const ev = angular.element.Event('keydown'); // eslint-disable-line new-cap
-      ev.keyCode = ENTER_KEY;
+      ev.keyCode = keycodes.ENTER;
       element.find('.uiAceKeyboardHint').trigger(ev);
       expect(textarea[0].focus.called).to.be(true);
       expect(element.find('.uiAceKeyboardHint').hasClass('uiAceKeyboardHint-isInactive')).to.be(true);
