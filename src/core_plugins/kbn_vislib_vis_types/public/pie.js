@@ -20,7 +20,7 @@ export default function HistogramVisType(Private) {
         addTooltip: true,
         addLegend: true,
         legendPosition: 'right',
-        isDonut: false
+        isDonut: true
       },
     },
     editorConfig: {
