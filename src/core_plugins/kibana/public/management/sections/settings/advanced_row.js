@@ -33,7 +33,7 @@ uiModules.get('apps/management')
       };
 
       $scope.maybeCancel = function ($event, conf) {
-        if ($event.keyCode === keyCodes.ESC) {
+        if ($event.keyCode === keyCodes.ESCAPE) {
           $scope.cancelEdit(conf);
         }
       };
