@@ -33,17 +33,15 @@ const directionMapping = {
 };
 
 uiModules.get('kibana')
-.directive('keyboardMove', ($timeout) => ({
+.directive('keyboardMove', ($parse, $timeout) => ({
   restrict: 'A',
-  scope: {
-    keyboardMove: '&'
-  },
-  link(scope, el) {
+  link(scope, el, attr) {
+    const callbackFn = $parse(attr.keyboardMove);
     el.keydown((ev) => {
       if (ev.which in directionMapping) {
         ev.preventDefault();
         const direction = directionMapping[ev.which];
-        scope.$apply(() => scope.keyboardMove({ direction }));
+        scope.$apply(() => callbackFn(scope, { direction }));
         // Keep focus on that element, even though it might be attached somewhere
         // else in the DOM (e.g. because it has a new position in an ng-repeat).
         $timeout(() => el.focus());
