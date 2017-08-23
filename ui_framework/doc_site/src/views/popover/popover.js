@@ -30,7 +30,11 @@ export default class extends Component {
 
   render() {
     const button = (
-      <KuiButton iconType="arrowDown" iconReverse onClick={this.onButtonClick.bind(this)}>
+      <KuiButton
+        iconType="arrowDown"
+        iconSide="right"
+        onClick={this.onButtonClick.bind(this)}
+      >
         Show popover
       </KuiButton>
     );

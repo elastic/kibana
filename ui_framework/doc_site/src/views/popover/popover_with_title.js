@@ -31,7 +31,11 @@ export default class extends Component {
 
   render() {
     const button = (
-      <KuiButton iconType="arrowDown" iconReverse onClick={this.onButtonClick.bind(this)}>
+      <KuiButton
+        iconType="arrowDown"
+        iconSide="right"
+        onClick={this.onButtonClick.bind(this)}
+      >
         Show popover with Title
       </KuiButton>
     );
@@ -44,7 +48,7 @@ export default class extends Component {
         withTitle
       >
         <div style={{ width: '300px' }}>
-          <KuiPopoverTitle>Hello, I'm a popover title</KuiPopoverTitle>
+          <KuiPopoverTitle>Hello, I&rsquo;m a popover title</KuiPopoverTitle>
           <p style={{ padding: 20 }}>Popover content that&rsquo;s wider than the default width</p>
         </div>
       </KuiPopover>
