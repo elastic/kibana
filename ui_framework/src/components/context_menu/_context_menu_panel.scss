@@ -2,7 +2,7 @@
   position: absolute;
   width: 100%;
   visibility: visible;
-  background-color: #fff;
+  background-color: $kuiColorEmptyShade;
 
   &.kuiContextMenuPanel-txInLeft {
     pointer-events: none;
@@ -36,8 +36,6 @@
 }
 
 .kuiContextMenuPanelTitle {
-  @include kuiPopoverTitle;
-
   width: 100%;
   text-align: left;
 }
