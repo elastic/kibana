@@ -125,9 +125,9 @@ describe('kibana_map tests', function () {
     describe('no map width', function () {
       beforeEach(async function () {
         setupDOM('386px', '256px');
-        const noHeightNode = createDiv('0px', '256px');
-        domNode.appendChild(noHeightNode);
-        kibanaMap = new KibanaMap(noHeightNode, {
+        const noWidthNode = createDiv('0px', '256px');
+        domNode.appendChild(noWidthNode);
+        kibanaMap = new KibanaMap(noWidthNode, {
           minZoom: 1,
           maxZoom: 10,
           center: [0,0],
