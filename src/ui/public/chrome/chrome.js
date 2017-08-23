@@ -21,7 +21,7 @@ import themeApi from './api/theme';
 import translationsApi from './api/translations';
 import { initChromeXsrfApi } from './api/xsrf';
 
-const chrome = {};
+export const chrome = {};
 const internals = _.defaults(
   _.cloneDeep(metadata),
   {
@@ -50,6 +50,3 @@ chrome.bootstrap = function () {
   chrome.setupAngular();
   angular.bootstrap(document, ['kibana']);
 };
-
-// eslint-disable-next-line kibana-custom/no-default-export
-export default chrome;

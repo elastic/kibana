@@ -77,7 +77,6 @@
     "@elastic/numeral": "2.2.1",
     "@elastic/test-subj-selector": "0.2.1",
     "@elastic/ui-ace": "0.2.3",
-    "@elastic/webpack-directory-name-as-main": "2.0.2",
     "JSONStream": "1.1.1",
     "accept-language-parser": "1.2.0",
     "angular": "1.4.7",
