@@ -167,7 +167,7 @@
     "raw-loader": "0.5.1",
     "react": "15.4.2",
     "react-ace": "3.7.0",
-    "react-addons-test-utils": "15.4.2",
+    "react-test-renderer": "15.6.1",
     "react-anything-sortable": "1.6.1",
     "react-color": "2.11.1",
     "react-dom": "15.4.2",
