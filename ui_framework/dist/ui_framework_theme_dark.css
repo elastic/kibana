@@ -951,7 +951,7 @@ table {
   -webkit-align-items: stretch;
       -ms-flex-align: stretch;
           align-items: stretch; }
-  .kuiFlexGroup > .kuiFlexItem {
+  .kuiFlexGroup .kuiFlexItem {
     -webkit-box-flex: 1;
     -webkit-flex-grow: 1;
         -ms-flex-positive: 1;
@@ -959,6 +959,14 @@ table {
     -webkit-flex-basis: 0;
         -ms-flex-preferred-size: 0;
             flex-basis: 0; }
+  .kuiFlexGroup.kuiFlexGroup--gutterSmall > .kuiFlexItem + .kuiFlexItem {
+    margin-left: 8px; }
+  .kuiFlexGroup.kuiFlexGroup--gutterMedium > .kuiFlexItem + .kuiFlexItem {
+    margin-left: 16px; }
+  .kuiFlexGroup.kuiFlexGroup--gutterLarge > .kuiFlexItem + .kuiFlexItem {
+    margin-left: 24px; }
+  .kuiFlexGroup.kuiFlexGroup--gutterExtraLarge > .kuiFlexItem + .kuiFlexItem {
+    margin-left: 40px; }
   .kuiFlexGroup.kuiFlexGroup--flexGrowZero > .kuiFlexItem {
     -webkit-box-flex: 0;
     -webkit-flex-grow: 0;
@@ -1001,26 +1009,6 @@ table {
     -webkit-align-items: flex-end;
         -ms-flex-align: end;
             align-items: flex-end; }
-
-.kuiFlexGroup--gutterSmall {
-  margin: -4px; }
-  .kuiFlexGroup--gutterSmall > .kuiFlexItem {
-    margin: 4px; }
-
-.kuiFlexGroup--gutterMedium {
-  margin: -8px; }
-  .kuiFlexGroup--gutterMedium > .kuiFlexItem {
-    margin: 8px; }
-
-.kuiFlexGroup--gutterLarge {
-  margin: -12px; }
-  .kuiFlexGroup--gutterLarge > .kuiFlexItem {
-    margin: 12px; }
-
-.kuiFlexGroup--gutterXLarge {
-  margin: -20px; }
-  .kuiFlexGroup--gutterXLarge > .kuiFlexItem {
-    margin: 20px; }
 
 @media only screen and (max-width: 768px) {
   .kuiFlexGroup {
@@ -1376,6 +1364,7 @@ table {
 
 /**
  * 1. Coerce inline form elements to behave as block-level elements.
+ * 2. For inline forms, we need to add padding if the label doesn't exist.
  */
 .kuiFormRow {
   display: -webkit-box;
@@ -1392,6 +1381,9 @@ table {
   max-width: 400px; }
   .kuiFormRow + * {
     margin-top: 24px; }
+  .kuiFormRow.kuiFormRow--addEmptyLabelSpace {
+    padding-top: 20px;
+    /* 2 */ }
   .kuiFormRow .kuiFormRow__text + .kuiFormRow__text {
     padding-top: 0; }
 
