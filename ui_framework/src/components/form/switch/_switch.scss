@@ -51,7 +51,6 @@
     border-radius: 50%;
     border: $kuiBorderThin;
     transition: border-color $kuiAnimSpeedNormal $kuiAnimSlightBounce, background-color $kuiAnimSpeedNormal $kuiAnimSlightBounce, left $kuiAnimSpeedNormal $kuiAnimSlightBounce, transform $kuiAnimSpeedNormal $kuiAnimSlightBounce;
-    z-index: 1;
   }
 
   .kuiSwitch__track {

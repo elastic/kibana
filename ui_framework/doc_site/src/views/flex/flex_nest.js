@@ -13,7 +13,7 @@ export default () => (
       <KuiFlexItem>
         <div>Group Two</div>
         <br/><br/>
-        <KuiFlexGrid columns="3">
+        <KuiFlexGrid columns={3}>
           <KuiFlexItem>Nested Grid One</KuiFlexItem>
           <KuiFlexItem>Nested Grid Two</KuiFlexItem>
           <KuiFlexItem>Nested Grid Three</KuiFlexItem>

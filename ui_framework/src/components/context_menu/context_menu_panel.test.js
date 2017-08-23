@@ -2,12 +2,12 @@ import React from 'react';
 import { render } from 'enzyme';
 import { requiredProps } from '../../test/required_props';
 
-import { KuiFlexGrid } from './flex_grid';
+import { KuiContextMenuPanel } from './context_menu_panel';
 
-describe('KuiFlexGrid', () => {
+describe('KuiContextMenuPanel', () => {
   test('is rendered', () => {
     const component = render(
-      <KuiFlexGrid columns={2} {...requiredProps} />
+      <KuiContextMenuPanel {...requiredProps} />
     );
 
     expect(component)

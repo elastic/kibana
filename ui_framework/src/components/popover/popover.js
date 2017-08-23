@@ -17,6 +17,7 @@ export const KuiPopover = ({
   bodyClassName,
   button,
   isOpen,
+  withTitle,
   children,
   className,
   closePopover,
@@ -28,6 +29,7 @@ export const KuiPopover = ({
     className,
     {
       'kuiPopover-isOpen': isOpen,
+      'kuiPopover--withTitle': withTitle,
     },
   );
 
@@ -54,6 +56,7 @@ export const KuiPopover = ({
 
 KuiPopover.propTypes = {
   isOpen: PropTypes.bool,
+  withTitle: PropTypes.bool,
   closePopover: PropTypes.func.isRequired,
   button: PropTypes.node.isRequired,
   children: PropTypes.node,

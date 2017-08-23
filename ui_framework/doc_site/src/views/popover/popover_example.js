@@ -22,6 +22,10 @@ import PopoverBodyClassName from './popover_body_class_name';
 const popoverBodyClassNameSource = require('!!raw!./popover_body_class_name');
 const popoverBodyClassNameHtml = renderToHtml(PopoverBodyClassName);
 
+import PopoverWithTitle from './popover_with_title';
+const popoverWithTitleSource = require('!!raw!./popover_with_title');
+const popoverWithTitleHtml = renderToHtml(PopoverWithTitle);
+
 export default props => (
   <GuidePage title={props.route.name}>
     <GuideSection
@@ -40,6 +44,25 @@ export default props => (
 
       <GuideDemo>
         <Popover />
+      </GuideDemo>
+    </GuideSection>
+
+    <GuideSection
+      title="Popover with title"
+      source={[{
+        type: GuideSectionTypes.JS,
+        code: popoverWithTitleSource,
+      }, {
+        type: GuideSectionTypes.HTML,
+        code: popoverWithTitleHtml,
+      }]}
+    >
+      <GuideText>
+        Popovers often have need for titling.
+      </GuideText>
+
+      <GuideDemo>
+        <PopoverWithTitle />
       </GuideDemo>
     </GuideSection>
 

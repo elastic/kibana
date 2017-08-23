@@ -7,7 +7,7 @@ import { KuiCheckboxGroup } from './checkbox_group';
 describe('KuiCheckboxGroup', () => {
   test('is rendered', () => {
     const component = render(
-      <KuiCheckboxGroup {...requiredProps} />
+      <KuiCheckboxGroup onChange={() => {}} {...requiredProps} />
     );
 
     expect(component)
