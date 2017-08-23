@@ -168,6 +168,7 @@
     "react": "15.6.1",
     "react-ace": "3.7.0",
     "react-test-renderer": "15.6.1",
+    "react-addons-test-utils": "15.6.0",
     "react-anything-sortable": "1.6.1",
     "react-color": "2.11.1",
     "react-dom": "15.6.1",
