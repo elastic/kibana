@@ -67,12 +67,14 @@ function TableVisTypeProvider(Private) {
         {
           group: 'buckets',
           name: 'bucket',
-          title: 'Split Rows'
+          title: 'Split Rows',
+          aggFilter: ['!filter']
         },
         {
           group: 'buckets',
           name: 'split',
-          title: 'Split Table'
+          title: 'Split Table',
+          aggFilter: ['!filter']
         }
       ])
     },
