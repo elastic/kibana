@@ -24,6 +24,7 @@ import {
 } from '../filter_editor_utils';
 
 describe('FilterEditorUtils', function () {
+  require('test_utils/no_digest_promises').activateForSuite();
   beforeEach(ngMock.module('kibana'));
 
   let indexPattern;
