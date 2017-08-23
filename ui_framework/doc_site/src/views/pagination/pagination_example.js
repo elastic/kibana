@@ -11,21 +11,13 @@ import {
   GuideText,
 } from '../../components';
 
-import Pagination from './pagination';
-const paginationSource = require('!!raw!./pagination');
-const paginationHtml = renderToHtml(Pagination);
+import ManyPages from './many_pages';
+const manyPagesSource = require('!!raw!./many_pages');
+const manyPagesnHtml = renderToHtml(ManyPages);
 
-import PaginationNearStart from './pagination_near_start';
-const paginationNearStartSource = require('!!raw!./pagination_near_start');
-const paginationNearStartHtml = renderToHtml(PaginationNearStart);
-
-import PaginationAtEnd from './pagination_at_end';
-const paginationAtEndSource = require('!!raw!./pagination_at_end');
-const paginationAtEndHtml = renderToHtml(PaginationAtEnd);
-
-import PaginationLotsMiddle from './pagination_lots_middle';
-const paginationLotsMiddleSource = require('!!raw!./pagination_lots_middle');
-const paginationLotsMiddleHtml = renderToHtml(PaginationLotsMiddle);
+import FewPages from './few_pages';
+const fewPagesSource = require('!!raw!./few_pages');
+const fewPagesnHtml = renderToHtml(FewPages);
 
 import PaginationLayouts from './pagination_layouts';
 const paginationLayoutsSource = require('!!raw!./pagination_layouts');
@@ -34,79 +26,40 @@ const paginationLayoutsHtml = renderToHtml(PaginationLayouts);
 export default props => (
   <GuidePage title={props.route.name}>
     <GuideSection
-      title="Pagination, first page, low amount of pages"
+      title="Many pages"
       source={[{
         type: GuideSectionTypes.JS,
-        code: paginationSource,
+        code: manyPagesSource,
       }, {
         type: GuideSectionTypes.HTML,
-        code: paginationHtml,
+        code: manyPagesnHtml,
       }]}
     >
       <GuideText>
-        Note that previous button or first/last page are not shown. We should only show
-        at most 5 pages.
+        We only show at most 5 consecutive pages, with shortcuts to the first and/or last page.
       </GuideText>
 
       <GuideDemo>
-        <Pagination />
-      </GuideDemo>
-    </GuideSection>
-    <GuideSection
-      title="Pagination, second page, low amount of pages"
-      source={[{
-        type: GuideSectionTypes.JS,
-        code: paginationNearStartSource,
-      }, {
-        type: GuideSectionTypes.HTML,
-        code: paginationNearStartHtml,
-      }]}
-    >
-      <GuideText>
-        In this example there are ONLY 5 pages in the list.
-      </GuideText>
-
-      <GuideDemo>
-        <PaginationNearStart />
-      </GuideDemo>
-    </GuideSection>
-    <GuideSection
-      title="Pagination, last page, low amount of pages"
-      source={[{
-        type: GuideSectionTypes.JS,
-        code: paginationAtEndSource,
-      }, {
-        type: GuideSectionTypes.HTML,
-        code: paginationAtEndHtml,
-      }]}
-    >
-      <GuideText>
-        When the last page is active we don&rsquo;t show the last page skip or the next button.
-      </GuideText>
-
-      <GuideDemo>
-        <PaginationAtEnd />
+        <ManyPages />
       </GuideDemo>
     </GuideSection>
 
     <GuideSection
-      title="Pagination, lots of pages, in the middle"
+      title="Few pages"
       source={[{
         type: GuideSectionTypes.JS,
-        code: paginationLotsMiddleSource,
+        code: fewPagesSource,
       }, {
         type: GuideSectionTypes.HTML,
-        code: paginationLotsMiddleHtml,
+        code: fewPagesnHtml,
       }]}
     >
       <GuideText>
-        When there are pages before or behind the current set of 5 pages, we should provide
-        a quick way to jump back to first or last page. This is doubly important for
-        accessibility.
+        The UI simplifies when we have fewer than the maximum number of visible pages.
       </GuideText>
 
       <GuideDemo>
-        <PaginationLotsMiddle />
+        <FewPages />
       </GuideDemo>
     </GuideSection>
 

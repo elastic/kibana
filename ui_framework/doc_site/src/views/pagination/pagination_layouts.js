@@ -1,4 +1,6 @@
-import React from 'react';
+import React, {
+  Component,
+} from 'react';
 
 import {
   KuiPagination,
@@ -8,33 +10,53 @@ import {
   KuiText,
 } from '../../../../components';
 
-const pages = [
-  { number: 5, link: '#' },
-  { number: 6, link: '#' },
-  { number: 7, link: '#' },
-  { number: 8, link: '#' },
-  { number: 9, link: '#' },
-];
+export default class extends Component {
+  constructor(props) {
+    super(props);
 
-export default () => (
-  <div>
-    <KuiHorizontalRule />
+    this.state = {
+      activePage: 0
+    };
 
-    <KuiFlexGroup growItems={false} justifyContent="spaceAround">
-      <KuiFlexItem>
-        <KuiPagination pageList={pages} activePage={7} lastPage={42} />
-      </KuiFlexItem>
-    </KuiFlexGroup>
+    this.PAGE_COUNT = 10;
+  }
 
-    <KuiHorizontalRule />
+  goToPage = pageNumber => {
+    this.setState({
+      activePage: pageNumber,
+    });
+  }
 
-    <KuiFlexGroup growItems={false} justifyContent="spaceBetween" alignItems="center">
-      <KuiFlexItem>
-        <KuiText size="small"><p>5000 results, returned in 2.03 secs.</p></KuiText>
-      </KuiFlexItem>
-      <KuiFlexItem>
-        <KuiPagination pageList={pages} activePage={7} lastPage={42} />
-      </KuiFlexItem>
-    </KuiFlexGroup>
-  </div>
-);
+  render() {
+    return (
+      <div>
+        <KuiHorizontalRule />
+
+        <KuiFlexGroup growItems={false} justifyContent="spaceAround">
+          <KuiFlexItem>
+            <KuiPagination
+              pageCount={this.PAGE_COUNT}
+              activePage={this.state.activePage}
+              onPageClick={this.goToPage}
+            />
+          </KuiFlexItem>
+        </KuiFlexGroup>
+
+        <KuiHorizontalRule />
+
+        <KuiFlexGroup growItems={false} justifyContent="spaceBetween" alignItems="center">
+          <KuiFlexItem>
+            <KuiText size="small"><p>5000 results, returned in 2.03 secs.</p></KuiText>
+          </KuiFlexItem>
+          <KuiFlexItem>
+            <KuiPagination
+              pageCount={this.PAGE_COUNT}
+              activePage={this.state.activePage}
+              onPageClick={this.goToPage}
+            />
+          </KuiFlexItem>
+        </KuiFlexGroup>
+      </div>
+    );
+  }
+}

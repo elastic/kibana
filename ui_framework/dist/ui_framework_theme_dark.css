@@ -2401,31 +2401,37 @@ table {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
-  display: flex; }
-  .kuiPagination .kuiPagination__flex {
-    display: -webkit-box;
-    display: -webkit-flex;
-    display: -ms-flexbox;
-    display: flex; }
-  .kuiPagination .kuiPagination__button {
-    font-size: 14px;
-    padding: 0;
-    height: 24px;
-    min-width: 24px;
-    text-align: center;
-    color: #F5F5F5; }
-    .kuiPagination .kuiPagination__button svg {
-      fill: #F5F5F5; }
-  .kuiPagination .kuiPagination__button--active {
+  display: flex;
+  -webkit-box-align: center;
+  -webkit-align-items: center;
+      -ms-flex-align: center;
+          align-items: center; }
+
+.kuiPaginationButton {
+  font-size: 14px;
+  padding: 0;
+  height: 24px;
+  min-width: 32px;
+  text-align: center;
+  color: #F5F5F5; }
+  .kuiPaginationButton svg {
+    fill: #F5F5F5 !important; }
+
+.kuiPaginationButton-isActive {
+  pointer-events: none;
+  background-color: #4da1c0;
+  color: #222;
+  border-radius: 4px; }
+  .kuiPaginationButton-isActive:focus {
     background-color: #4da1c0;
-    color: #222;
-    border-radius: 4px; }
+    color: #222; }
+
+.kuiPaginationButton-isPlaceholder {
+  pointer-events: none; }
 
 @media only screen and (max-width: 768px) {
-  .kuiPagination__button {
-    display: none; }
-    .kuiPagination__button.kuiPagination__button--keepMobile {
-      display: inline-block; } }
+  .kuiPaginationButton--hideOnMobile {
+    display: none; } }
 
 .kuiPopover {
   display: inline-block;
