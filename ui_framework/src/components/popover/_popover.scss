@@ -26,7 +26,7 @@
     top: 100%;
     left: 50%;
     border: $kuiBorderThin;
-    border-radius: $kuiBorderRadius 0 $kuiBorderRadius $kuiBorderRadius;
+    border-radius: $kuiSizeXS;
     transform: translateX(-50%) translateY($kuiSizeS) translateZ(0);
     backface-visibility: hidden;
     transition:

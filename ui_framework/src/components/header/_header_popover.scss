@@ -1,7 +1,9 @@
 /**
  * 1. Override KeyPadMenu.
+ * 2. Override popover default.
  */
 .kuiHeaderPopover {
   top: calc(100% - #{$kuiSize}) !important; /* 1 */
   padding: $kuiSize;
+  border-radius: $kuiBorderRadius 0 $kuiBorderRadius $kuiBorderRadius !important; /* 2 */
 }
