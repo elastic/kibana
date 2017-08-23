@@ -5,6 +5,7 @@ $kuiContextMenuWidth: $kuiSize * 16;
   position: relative;
   overflow: hidden;
   transition: height $kuiAnimSpeedFast $kuiAnimSlightResistance;
+  border-radius: $kuiBorderRadius;
 
   .kuiContextMenu__content {
     padding: $kuiSizeS;
