@@ -2,7 +2,7 @@
   display: flex;
   align-items: stretch;
 
-  .kuiFlexItem {
+  > .kuiFlexItem {
     flex-grow: 1;
     flex-basis: 0;
   }

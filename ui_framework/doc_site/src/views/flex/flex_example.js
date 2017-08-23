@@ -113,8 +113,8 @@ export default props => (
       }]}
     >
       <GuideText>
-        You can disable the growth of <GuideCode>FlexItem</GuideCode> components within
-        <GuideCode>FlexGroup</GuideCode> if you need, but it is set to true by default.
+        You can turn off all <GuideCode>FlexItem</GuideCode> components within
+        <GuideCode>FlexGroup</GuideCode>, or turn them off individually as needed.
       </GuideText>
 
       <GuideDemo>

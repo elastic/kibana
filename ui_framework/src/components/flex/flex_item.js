@@ -2,8 +2,14 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
 
-export const KuiFlexItem = ({ children, className, ...rest }) => {
-  const classes = classNames('kuiFlexItem', className);
+export const KuiFlexItem = ({ children, className, grow, ...rest }) => {
+  const classes = classNames(
+    'kuiFlexItem',
+    {
+      'kuiFlexItem--flexGrowZero': !grow,
+    },
+    className
+  );
 
   return (
     <div
@@ -17,4 +23,9 @@ export const KuiFlexItem = ({ children, className, ...rest }) => {
 
 KuiFlexItem.propTypes = {
   children: PropTypes.node,
+  grow: PropTypes.bool,
+};
+
+KuiFlexItem.defaultProps = {
+  grow: true,
 };
