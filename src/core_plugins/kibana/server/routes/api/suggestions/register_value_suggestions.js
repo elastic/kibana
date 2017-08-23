@@ -24,44 +24,20 @@ function getBody({ field, query }) {
   return {
     size: 0,
     timeout: '1s',
-    query: {
-      query_string: {
-        default_field: field,
-        query: `${getEscapedQuery(query)}*`,
-        analyze_wildcard: true
-      }
-    },
+    terminate_after: 100000,
     aggs: {
       suggestions: {
-        terms: { field }
+        terms: {
+          field,
+          include: `${getEscapedQuery(query)}.*`,
+          execution_hint: 'map'
+        }
       }
     }
   };
 }
 
 function getEscapedQuery(query = '') {
-  // https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-query-string-query.html#_reserved_characters
-  return query
-    .replace(/\\/g, '\\\\')
-    .replace(/\+/g, '\\+')
-    .replace(/\-/g, '\\-')
-    .replace(/\=/g, '\\=')
-    .replace(/\&/g, '\\&')
-    .replace(/\|/g, '\\|')
-    .replace(/\>/g, '\\>')
-    .replace(/\</g, '\\<')
-    .replace(/\!/g, '\\!')
-    .replace(/\(/g, '\\(')
-    .replace(/\)/g, '\\)')
-    .replace(/\{/g, '\\{')
-    .replace(/\}/g, '\\}')
-    .replace(/\[/g, '\\[')
-    .replace(/\[/g, '\\]')
-    .replace(/\^/g, '\\^')
-    .replace(/\"/g, '\\"')
-    .replace(/\~/g, '\\~')
-    .replace(/\*/g, '\\*')
-    .replace(/\?/g, '\\?')
-    .replace(/\:/g, '\\:')
-    .replace(/\//g, '\\/');
+  // https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-regexp-query.html#_standard_operators
+  return query.replace(/[.?+*|{}[\]()"\\]/g, (match) => `\\${match}`);
 }
