@@ -8,7 +8,7 @@ export function VislibTypesPointSeries() {
     }) : null;
 
 
-    let interpolate = matchingSeriParams ? matchingSeriParams.interpolate : cfg.interpolate;
+    let interpolate = cfg.interpolate;
     // for backward compatibility when loading URLs or configs we need to check smoothLines
     if (cfg.smoothLines) interpolate = 'cardinal';
 
@@ -27,15 +27,7 @@ export function VislibTypesPointSeries() {
     }
 
     return {
-      show: matchingSeriParams.show,
-      type: matchingSeriParams.type,
-      mode: matchingSeriParams.mode,
-      interpolate: interpolate,
-      valueAxis: matchingSeriParams.valueAxis,
-      drawLinesBetweenPoints: matchingSeriParams.drawLinesBetweenPoints,
-      showCircles: matchingSeriParams.showCircles,
-      radiusRatio: cfg.radiusRatio,
-      lineWidth: matchingSeriParams.lineWidth,
+      ...matchingSeriParams,
       data: seri
     };
   };
