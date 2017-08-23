@@ -4,6 +4,7 @@ import React, {
 
 import {
   KuiPopover,
+  KuiPopoverTitle,
   KuiButton,
 } from '../../../../components';
 
@@ -35,7 +36,7 @@ export default class extends Component {
         iconSide="right"
         onClick={this.onButtonClick.bind(this)}
       >
-        Show popover
+        Show popover with Title
       </KuiButton>
     );
 
@@ -44,9 +45,14 @@ export default class extends Component {
         button={button}
         isOpen={this.state.isPopoverOpen}
         closePopover={this.closePopover.bind(this)}
+        withTitle
       >
-        <div style={{ width: '300px' }}>Popover content that&rsquo;s wider than the default width</div>
+        <div style={{ width: '300px' }}>
+          <KuiPopoverTitle>Hello, I&rsquo;m a popover title</KuiPopoverTitle>
+          <p style={{ padding: 20 }}>Popover content that&rsquo;s wider than the default width</p>
+        </div>
       </KuiPopover>
     );
   }
 }
+
