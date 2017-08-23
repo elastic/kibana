@@ -2,7 +2,7 @@ import React from 'react';
 import { render } from 'enzyme';
 import { requiredProps } from '../../test/required_props';
 
-import { KuiContextMenu } from './shift_nav';
+import { KuiContextMenu } from './context_menu';
 
 describe('KuiContextMenu', () => {
   test('is rendered', () => {

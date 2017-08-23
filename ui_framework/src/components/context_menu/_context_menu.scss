@@ -6,65 +6,16 @@ $kuiContextMenuWidth: $kuiSize * 16;
   overflow: hidden;
   transition: height $kuiAnimSpeedFast $kuiAnimSlightResistance;
 
-
-  .kuiContextMenu__option {
-    display: flex;
-    padding: $kuiSizeM;
-    width: 100%;
-    text-align: left;
-    color: $kuiTextColor;
-
-    &:hover, &:focus {
-      text-decoration: underline;
-    }
-
-    &:focus {
-      background-color: $kuiFocusBackgroundColor;
-    }
+  .kuiContextMenu__content {
+    padding: $kuiSizeS;
   }
-
-  .kuiContextMenu__option--previous {
-    background-color: $kuiColorLightestShade;
-    border-bottom: $kuiBorderThin;
-  }
+}
 
   .kuiContextMenu__icon {
     margin-right: $kuiSizeS;
   }
 
-  .kuiContextMenu__text {
-    flex-grow: 1;
+  .kuiContextMenu__itemLayout {
+    display: flex;
+    align-items: center;
   }
-
-  .kuiContextMenu__arrow {
-    align-self: flex-end;
-  }
-
-  .kuiContextMenu--next, .kuiContextMenu--previous {
-    visibility: 0;
-    opacity: 0;
-  }
-
-  .kuiContextMenu__panel {
-    transform: translateX(0);
-    position: absolute;
-    width: 100%;
-    transition: all $kuiAnimSpeedNormal $kuiAnimSlightResistance;
-    visibility: visible;
-
-    &.kuiContextMenu__panel--next {
-      transform: translateX($kuiContextMenuWidth);
-      visibility: hidden;
-    }
-
-    &.kuiContextMenu__panel--previous {
-      transform: translateX(-$kuiContextMenuWidth);
-      visibility: hidden;
-    }
-  }
-
-  .kuiContextMenu__content {
-    padding: $kuiSizeS;
-  }
-
-}

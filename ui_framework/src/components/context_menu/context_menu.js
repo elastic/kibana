@@ -4,256 +4,137 @@ import React, {
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
 
-import {
-  ICON_TYPES,
-  KuiIcon,
-} from '../icon';
-
-import {
-  KuiPopoverTitle,
-  KuiFormRow,
-  KuiSwitch,
-  KuiButton,
-} from '../../components';
+import { KuiContextMenuPanel } from './context_menu_panel';
+import { KuiContextMenuItem } from './context_menu_item';
 
 export class KuiContextMenu extends Component {
   static propTypes = {
     children: PropTypes.node,
     className: PropTypes.string,
-    navItems: PropTypes.object,
+    initialPanelId: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+    idToPanelMap: PropTypes.object,
+    idToPreviousPanelIdMap: PropTypes.object,
   }
 
-  componentDidMount(){
-    let { clientHeight } = this.refs.previous;
-    this.setState({height: clientHeight});
+  static defaultProps = {
+    idToPanelMap: {},
+    idToPreviousPanelIdMap: {},
   }
 
   constructor(props) {
     super(props);
 
+    this.resetTransitionId = undefined;
+
     this.state = {
-      showNext: false,
-      showCurrent: false,
-      showPrevious: true,
-      title: null,
-      previousItems: [
-        {text: 'Show fullscreen', icon: 'user', id: 1},
-        {text: 'Share this dasbhoard', icon: 'user', id: 2, next: true},
-        {text: 'Edit / add panels', icon: 'user', id: 3},
-        {text: 'Display options', icon: 'user', id: 4},
-      ],
-      currentItems: [
-        {text: 'Share this dashboard', icon: 'arrowLeft', id: 1, previous: true},
-        {text: 'PDF reports', icon: 'user', id: 2},
-        {text: 'CSV reports', icon: 'user', id: 3},
-        {text: 'Embed code', icon: 'user', id: 4, next: true},
-        {text: 'Permalinks', icon: 'user', id: 5},
-      ],
-      nextItems: [
-        {text: 'Embed code', icon: 'arrowLeft', id: 1, previous: true},
-      ],
+      outGoingPanelId: undefined,
+      currentPanelId: props.initialPanelId,
+      transitionDirection: undefined,
     };
   }
 
-  showNext() {
-    let { clientHeight } = this.refs.next;
+  showPanel(panelId, direction) {
+    clearTimeout(this.resetTransitionId);
 
     this.setState({
-      height: clientHeight,
-      showNext: true,
-      showCurrent: false,
-      showPrevious: false,
+      outGoingPanelId: this.state.currentPanelId,
+      currentPanelId: panelId,
+      transitionDirection: direction,
     });
+
+    // Queue the transition to reset.
+    this.resetTransitionId = setTimeout(() => {
+      this.setState({
+        transitionDirection: undefined,
+      });
+    }, 250);
   }
 
-  showPrevious() {
-    let { clientHeight } = this.refs.previous;
-
-    this.setState({
-      height: clientHeight,
-      showNext: false,
-      showCurrent: false,
-      showPrevious: true,
-    });
+  updateHeight() {
+    const height = this.currentPanel.clientHeight;
+    this.menu.setAttribute('style', `height: ${height}px`);
   }
 
-  showCurrent() {
-    let { clientHeight } = this.refs.current;
+  renderPanel(panelId, transitionType) {
+    const panel = this.props.idToPanelMap[panelId];
 
-    this.setState({
-      height: clientHeight,
-      showNext: false,
-      showCurrent: true,
-      showPrevious: false,
+    if (!panel) {
+      return;
+    }
+
+
+    const renderItems = items => items.map(item => {
+      let onClick;
+
+      if (item.onClick) {
+        onClick = item.onClick;
+      } else if (item.panel) {
+        onClick = this.showPanel.bind(this, item.panel.id, 'next');
+      }
+
+      return (
+        <KuiContextMenuItem
+          key={item.name}
+          icon={item.icon}
+          onClick={onClick}
+          hasPanel={Boolean(item.panel)}
+        >
+          {item.name}
+        </KuiContextMenuItem>
+      );
     });
+
+    const previousPanelId = this.props.idToPreviousPanelIdMap[panelId];
+
+    let onClose;
+
+    if (typeof previousPanelId === 'number') {
+      onClose = this.showPanel.bind(this, previousPanelId, 'previous');
+    }
+
+    return (
+      <KuiContextMenuPanel
+        panelRef={node => { this.currentPanel = node; }}
+        title={panel.title}
+        onClose={onClose}
+        transitionType={transitionType}
+        transitionDirection={this.state.transitionDirection}
+      >
+        {panel.content || renderItems(panel.items)}
+      </KuiContextMenuPanel>
+    );
   }
 
+  componentDidMount() {
+    this.updateHeight();
+  }
+
+  componentDidUpdate() {
+    this.updateHeight();
+  }
 
   render() {
     const {
-      children,
+      idToPanelMap, // eslint-disable-line no-unused-vars
+      idToPreviousPanelIdMap, // eslint-disable-line no-unused-vars
       className,
+      initialPanelId, // eslint-disable-line no-unused-vars
       ...rest,
     } = this.props;
 
+    const currentPanel = this.renderPanel(this.state.currentPanelId, 'in');
+    const outGoingPanel = this.renderPanel(this.state.outGoingPanelId, 'out');
+
     const classes = classNames('kuiContextMenu', className);
 
-    let styles = {
-      height: this.state.height,
-    }
-
-    const previousClasses = classNames(
-      'kuiContextMenu__panel',
-      {
-        'kuiContextMenu__panel--previous': this.state.showCurrent || this.state.showNext,
-      },
-    );
-
-    const currentClasses = classNames(
-      'kuiContextMenu__panel',
-      {
-        'kuiContextMenu__panel--previous': this.state.showNext,
-        'kuiContextMenu__panel--next': this.state.showPrevious,
-      },
-    );
-
-    const nextClasses = classNames(
-      'kuiContextMenu__panel',
-      {
-        'kuiContextMenu__panel--next': this.state.showCurrent || this.state.showPrevious,
-      },
-    );
-
     return (
-
       <div
+        ref={node => { this.menu = node; }}
         className={classes}
-        style={styles}
         {...rest}
       >
-        <div ref="previous" className={previousClasses}>
-          {this.state.previousItems.map((option, index) => {
-            let buttonClasses = classNames(
-              'kuiContextMenu__option',
-              {
-                'kuiContextMenu__option--previous': option.previous,
-              },
-            )
-
-            let button = null;
-            if (option.next) {
-              button = (
-                <button className={buttonClasses} key={option.id} onClick={this.showCurrent.bind(this)}>
-                  <KuiIcon type={option.icon} size="medium" className="kuiContextMenu__icon" />
-                  <span className="kuiContextMenu__text">{option.text}</span>
-                  <KuiIcon type="arrowRight" size="medium" className="kuiContextMenu__arrow" />
-                </button>
-              );
-            } else {
-              button = (
-                <button className={buttonClasses} key={option.id}>
-                  <KuiIcon type={option.icon} size="medium" className="kuiContextMenu__icon" />
-                  <span className="kuiContextMenu__text">{option.text}</span>
-                </button>
-              );
-            }
-
-            return (
-              <div>{button}</div>
-            );
-          })}
-        </div>
-        <div ref="current" className={currentClasses}>
-          {this.state.currentItems.map((option, index) => {
-            let buttonClasses = classNames(
-              'kuiContextMenu__option',
-              {
-                'kuiContextMenu__option--previous': option.previous,
-              },
-            )
-
-            let button = null;
-            if (option.next) {
-              button = (
-                <button className={buttonClasses} key={option.id} onClick={this.showNext.bind(this)}>
-                  <KuiIcon type={option.icon} size="medium" className="kuiContextMenu__icon" />
-                  <span className="kuiContextMenu__text">{option.text}</span>
-                  <KuiIcon type="arrowRight" size="medium" className="kuiContextMenu__arrow" />
-                </button>
-              );
-            } else if (option.previous) {
-              button = (
-                <button className={buttonClasses} key={option.id} onClick={this.showPrevious.bind(this)}>
-                  <KuiIcon type={option.icon} size="medium" className="kuiContextMenu__icon" />
-                  <span className="kuiContextMenu__text">{option.text}</span>
-                </button>
-              );
-            } else {
-              button = (
-                <button className={buttonClasses} key={option.id}>
-                  <KuiIcon type={option.icon} size="medium" className="kuiContextMenu__icon" />
-                  <span className="kuiContextMenu__text">{option.text}</span>
-                </button>
-              );
-            }
-
-            return (
-              <div>{button}</div>
-            );
-          })}
-        </div>
-        <div ref="next" className={nextClasses}>
-          {this.state.nextItems.map((option, index) => {
-            let buttonClasses = classNames(
-              'kuiContextMenu__option',
-              {
-                'kuiContextMenu__option--previous': option.previous,
-              },
-            )
-
-            let button = null;
-            if (option.previous) {
-              button = (
-                <button className={buttonClasses} key={option.id} onClick={this.showCurrent.bind(this)}>
-                  <KuiIcon type={option.icon} size="medium" className="kuiContextMenu__icon" />
-                  <span className="kuiContextMenu__text">{option.text}</span>
-                </button>
-              );
-            } else {
-              button = (
-                <button className={buttonClasses} key={option.id}>
-                  <KuiIcon type={option.icon} size="medium" className="kuiContextMenu__icon" />
-                  <span className="kuiContextMenu__text">{option.text}</span>
-                </button>
-              );
-            }
-
-            return (
-              <div>{button}</div>
-            );
-          })}
-          <div style={{padding: 16}}>
-            <KuiFormRow
-              label="Generate a public snapshot?"
-            >
-              <KuiSwitch
-                name="switch"
-                id="asdf"
-                label="Snapshot data"
-              />
-            </KuiFormRow>
-            <KuiFormRow
-              label="Include the following in the embed"
-            >
-              <KuiSwitch
-                name="switch"
-                id="asdf2"
-                label="Current time range"
-              />
-            </KuiFormRow>
-            <KuiButton fill>Copy iFrame code</KuiButton>
-          </div>
-        </div>
+        {outGoingPanel}
+        {currentPanel}
       </div>
     );
   }
