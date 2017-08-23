@@ -73,9 +73,16 @@ This is no longer the case. Now, only commas are a valid query separator: e.g. `
 
 *Impact:* No change is required for existing Kibana index patterns. Those previously configured with this option will gracefully use the new Elasticsearch optimizations instead, as will all new index patterns.
 
+
 [float]
 === Replace markdown parser `marked` with `markdown-it`
 *Details:* Starting in 6.0.0, Kibana will use `markdown-it` to parse markdown text. Kibana switched to `markdown-it` because `marked` is no longer actively maintained. Markdown-it supports CommonMark and GFM (GitHub Flavored Markdown) Tables and Strikethrough.
 
 *Impact:* There may be slight changes in parsed markdown. Review markdown as needed.
 
+
+[float]
+=== Simplified `Coordinate Map - Heatmap` configuration controls
+*Details:* Replaced `Coordinate Map - Heatmap` configuration controls `Radius`, `Blur`, `Maximum Zoom`, and `Minimum opacity` with a single control, `Cluster size`.
+
+*Impact:* No change is required for existing Coordinate Map visualizations, `Cluster size` will be set to the default value. `Cluster size` may need to be adjusted as needed.

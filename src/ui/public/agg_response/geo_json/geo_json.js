@@ -1,6 +1,7 @@
 import _ from 'lodash';
 import { convertRowsToFeatures } from 'ui/agg_response/geo_json/rows_to_features';
 import { TileMapTooltipFormatterProvider } from 'ui/agg_response/geo_json/_tooltip_formatter';
+import { gridDimensions } from './grid_dimensions';
 
 export function AggResponseGeoJsonProvider(Private) {
 
@@ -38,7 +39,9 @@ export function AggResponseGeoJsonProvider(Private) {
           min: _.min(values),
           max: _.max(values),
           zoom: geoAgg && geoAgg.vis.uiStateVal('mapZoom'),
-          center: geoAgg && geoAgg.vis.uiStateVal('mapCenter')
+          center: geoAgg && geoAgg.vis.uiStateVal('mapCenter'),
+          geohashPrecision: geoAgg && geoAgg.params.precision,
+          geohashGridDimensionsAtEquator: geoAgg && gridDimensions(geoAgg.params.precision)
         }
       }
     };
