@@ -73,7 +73,7 @@ that the `index.mapper.dynamic` setting in `elasticsearch.yml` is set to `false`
 . Create the `.kibana` index with dynamic mapping enabled just for that index:
 +
 [source,shell]
-PUT .kibana
+PUT .kibana/_settings
 {
   "index.mapper.dynamic": true
 }
