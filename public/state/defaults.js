@@ -19,6 +19,7 @@ export const getDefaultElement = () => {
       .pointseries(y="median(cost)", x=time, color="project")
       .plot(defaultStyle=seriesStyle(lines=1))
     `,
+    filter: null,
   };
 };
 
