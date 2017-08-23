@@ -951,7 +951,7 @@ table {
   -webkit-align-items: stretch;
       -ms-flex-align: stretch;
           align-items: stretch; }
-  .kuiFlexGroup .kuiFlexItem {
+  .kuiFlexGroup > .kuiFlexItem {
     -webkit-box-flex: 1;
     -webkit-flex-grow: 1;
         -ms-flex-positive: 1;
@@ -1046,6 +1046,14 @@ table {
     -webkit-flex-grow: 0;
         -ms-flex-positive: 0;
             flex-grow: 0; }
+    .kuiFlexGrid > .kuiFlexItem.kuiFlexItem--flexGrowZero {
+      -webkit-box-flex: 0 !important;
+      -webkit-flex-grow: 0 !important;
+          -ms-flex-positive: 0 !important;
+              flex-grow: 0 !important;
+      -webkit-flex-basis: auto !important;
+          -ms-flex-preferred-size: auto !important;
+              flex-basis: auto !important; }
 
 .kuiFlexGrid--gutterSmall {
   margin: -4px; }
@@ -1142,6 +1150,15 @@ table {
     -webkit-flex-basis: calc(50% - 32px);
         -ms-flex-preferred-size: calc(50% - 32px);
             flex-basis: calc(50% - 32px); }
+
+.kuiFlexItem.kuiFlexItem--flexGrowZero {
+  -webkit-box-flex: 0;
+  -webkit-flex-grow: 0;
+      -ms-flex-positive: 0;
+          flex-grow: 0;
+  -webkit-flex-basis: auto;
+      -ms-flex-preferred-size: auto;
+          flex-basis: auto; }
 
 @media only screen and (max-width: 768px) {
   .kuiFlexItem {
