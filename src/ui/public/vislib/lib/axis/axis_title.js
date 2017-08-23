@@ -28,7 +28,7 @@ export function VislibLibAxisTitleProvider() {
           const div = d3.select(el);
           const width = $(el).width();
           const height = $(el).height();
-          const titlePadding = 15;
+          const titlePadding = 12;
           const axisPrefix = config.isHorizontal() ? 'x' : 'y';
 
           const svg = div.append('svg')

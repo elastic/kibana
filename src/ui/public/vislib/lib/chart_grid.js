@@ -5,7 +5,7 @@ export function VislibGridProvider() {
 
   const defaults = {
     style: {
-      color: '#eee'
+      color: '#D9D9D9'
     },
     categoryLines: false,
     valueAxis: undefined,
@@ -34,7 +34,8 @@ export function VislibGridProvider() {
         })
         .attr('fill', 'none')
         .attr('stroke', this.get('style.color'))
-        .attr('stroke-width', 1);
+        .attr('stroke-width', 1)
+        .style('stroke-dasharray', '2 2');
     }
 
     drawCategoryLines(svg, width, height) {
@@ -46,7 +47,12 @@ export function VislibGridProvider() {
 
     drawValueLines(svg, width, height) {
       const axis = this._handler.valueAxes.find(axis => axis.axisConfig.get('id') === this.get('valueAxis'));
-      axis.getScale().ticks().forEach(tick => {
+      if (!axis) return;
+
+      const scale = axis.getScale();
+      if (!scale) return;
+
+      scale.ticks().forEach(tick => {
         this.drawLine(svg, tick, axis, width, height);
       });
     }

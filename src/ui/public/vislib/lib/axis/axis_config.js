@@ -20,12 +20,12 @@ export function VislibLibAxisConfigProvider() {
       mode: SCALE_MODES.NORMAL
     },
     style: {
-      color: '#ddd',
-      lineWidth: '1px',
+      color: '#D9D9D9',
+      lineWidth: '2px',
       opacity: 1,
-      tickColor: '#ddd',
-      tickWidth: '1px',
-      tickLength: '6px',
+      tickColor: '#D9D9D9',
+      tickWidth: '0px',
+      tickLength: '0px',
       rangePadding: 0.1,
       rangeOuterPadding: 0
     },
@@ -35,7 +35,7 @@ export function VislibLibAxisConfigProvider() {
       rotate: 0,
       rotateAnchor: 'center',
       filter: false,
-      color: '#ddd',
+      color: '#666',
       font: '"Open Sans", "Lato", "Helvetica Neue", Helvetica, Arial, sans-serif',
       fontSize: '8pt',
       truncate: 100

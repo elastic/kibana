@@ -118,7 +118,7 @@ export function VislibLibAxisProvider(Private) {
       const style = config.get('style');
       const chartEl = this.visConfig.get('el');
       const position = config.get('position');
-      const axisPadding = 5;
+      const axisPadding = 16;
 
       return function (selection) {
         const text = selection.selectAll('.tick text');
