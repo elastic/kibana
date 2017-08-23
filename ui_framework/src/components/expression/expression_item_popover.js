@@ -1,50 +1,12 @@
-import React,{ cloneElement } from 'react';
+import React from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
+import { KuiOutsideClickDetector } from '../outside_click_detector';
 
 const POPOVER_ALIGN = [
   'left',
   'right',
 ];
-
-class KuiOutsideClickDetector2 extends React.Component {
-  static propTypes = {
-    children: PropTypes.node.isRequired,
-    onOutsideClick: PropTypes.func.isRequired,
-  }
-
-  onClickOutside = event => {
-    if (!this.wrapperRef) {
-      return;
-    }
-
-    if (this.wrapperRef === event.target) {
-      return;
-    }
-
-    if (this.wrapperRef.contains(event.target)) {
-      return;
-    }
-
-    this.props.onOutsideClick();
-  }
-
-  componentDidMount() {
-    document.addEventListener('click', this.onClickOutside);
-  }
-
-  componentWillUnmount() {
-    document.removeEventListener('click', this.onClickOutside);
-  }
-
-  render() {
-    return cloneElement(this.props.children, {
-      ref: node => {
-        this.wrapperRef = node;
-      }
-    });
-  }
- }
 
 const KuiExpressionItemPopover = ({
   className,
@@ -60,7 +22,7 @@ const KuiExpressionItemPopover = ({
     'kuiExpressionItem__popover--alignRight': align === 'right'
   });
   return (
-    <KuiOutsideClickDetector2 onOutsideClick={onOutsideClick}>
+    <KuiOutsideClickDetector onOutsideClick={onOutsideClick}>
       <div
         className={classes}
         {...rest}
@@ -72,7 +34,7 @@ const KuiExpressionItemPopover = ({
           {children}
         </div>
       </div>
-    </KuiOutsideClickDetector2>
+    </KuiOutsideClickDetector>
   );
 };
 
