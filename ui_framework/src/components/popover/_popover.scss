@@ -27,7 +27,6 @@
     left: 50%;
     border: $kuiBorderThin;
     border-radius: $kuiBorderRadius 0 $kuiBorderRadius $kuiBorderRadius;
-    padding: $kuiSize;
     transform: translateX(-50%) translateY($kuiSizeS) translateZ(0);
     backface-visibility: hidden;
     transition:
@@ -69,6 +68,9 @@
     }
   }
 
+.kuiPopover--withTitle .kuiPopover__body:after {
+  border-bottom-color: $kuiColorLightestShade;
+}
 
 // Positions the menu and arrow to the left of the parent.
 .kuiPopover--anchorLeft {

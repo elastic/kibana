@@ -1,0 +1,9 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`KuiFlexItem is rendered 1`] = `
+<div
+  aria-label="aria-label"
+  class="kuiFlexItem testClass1 testClass2"
+  data-test-subj="test subject string"
+/>
+`;

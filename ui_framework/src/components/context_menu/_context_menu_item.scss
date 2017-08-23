@@ -1,0 +1,26 @@
+.kuiContextMenuItem {
+  padding: $kuiSizeM;
+  width: 100%;
+  text-align: left;
+  color: $kuiTextColor;
+
+  &:hover, &:focus {
+    text-decoration: underline;
+  }
+
+  &:focus {
+    background-color: $kuiFocusBackgroundColor;
+  }
+}
+
+  .kuiContextMenuItem__inner {
+    display: flex;
+  }
+
+  .kuiContextMenuItem__text {
+    flex-grow: 1;
+  }
+
+  .kuiContextMenuItem__arrow {
+    align-self: flex-end;
+  }

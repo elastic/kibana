@@ -1,13 +1,13 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`KuiText is rendered 1`] = `
-<p
+<h1
   aria-label="aria-label"
   class="kuiText testClass1 testClass2"
   data-test-subj="test subject string"
 >
   Hello
-</p>
+</h1>
 `;
 
 exports[`KuiText renders size small 1`] = `

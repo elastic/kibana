@@ -3,13 +3,13 @@
  */
 
 /**
- * 1. Default to grid of 3.
+ * 1. Default to grid of 3
  */
 .kuiKeyPadMenu {
   display: flex;
   flex-direction: row;
   flex-wrap: wrap;
-  width: $kuiKeyPadMenuSize * 3; /* 1 */
+  width: $kuiKeyPadMenuSize * 3;
 }
 
 /**
