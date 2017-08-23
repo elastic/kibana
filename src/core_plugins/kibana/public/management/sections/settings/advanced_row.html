@@ -53,6 +53,7 @@
           ng-model="conf.unsavedValue"
           ng-keyup="maybeCancel($event, conf)"
           elastic-textarea
+          data-test-subj="unsavedValueMarkdownTextArea"
         ></textarea>
 
         <textarea
@@ -170,6 +171,7 @@
           ng-hide="isDefaultValue(conf)"
           aria-label="Clear {{conf.ariaName}}"
           class="kuiMenuButton kuiMenuButton--danger kuiMenuButton--iconText"
+          data-test-subj="advancedSetting-{{conf.name}}-clearButton"
         >
           <span
             aria-hidden="true"
