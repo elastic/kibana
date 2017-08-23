@@ -165,6 +165,13 @@ export function IndexPatternProvider(Private, $http, config, kbnIndex, Promise, 
     });
   }
 
+  function isFieldStatsError(error) {
+    return (
+      error.statusCode === 400
+      && (error.message || '').includes('_field_stats')
+    );
+  }
+
   class IndexPattern {
     constructor(id) {
       setId(this, id);
@@ -273,28 +280,32 @@ export function IndexPatternProvider(Private, $http, config, kbnIndex, Promise, 
         });
     }
 
-    toDetailedIndexList(start, stop, sortDirection) {
-      return Promise.resolve().then(() => {
-        if (this.isTimeBasedInterval()) {
-          return intervals.toIndexList(
-            this.title, this.getInterval(), start, stop, sortDirection
-          );
-        }
+    async toDetailedIndexList(start, stop, sortDirection) {
+      if (this.isTimeBasedInterval()) {
+        return await intervals.toIndexList(
+          this.title, this.getInterval(), start, stop, sortDirection
+        );
+      }
 
-        if (this.isTimeBasedWildcard() && this.isIndexExpansionEnabled()) {
-          return calculateIndices(
+      if (this.isTimeBasedWildcard() && this.isIndexExpansionEnabled()) {
+        try {
+          return await calculateIndices(
             this.title, this.timeFieldName, start, stop, sortDirection
           );
-        }
-
-        return [
-          {
-            index: this.title,
-            min: -Infinity,
-            max: Infinity
+        } catch(error) {
+          if (!isFieldStatsError(error)) {
+            throw error;
           }
-        ];
-      });
+        }
+      }
+
+      return [
+        {
+          index: this.title,
+          min: -Infinity,
+          max: Infinity
+        }
+      ];
     }
 
     isIndexExpansionEnabled() {

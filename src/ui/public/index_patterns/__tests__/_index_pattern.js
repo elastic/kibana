@@ -35,12 +35,10 @@ describe('index pattern', function () {
   beforeEach(ngMock.module('kibana', StubIndexPatternsApiClientModule, (PrivateProvider) => {
     PrivateProvider.swap(IndexPatternsCalculateIndicesProvider, () => {
       // stub calculateIndices
-      calculateIndices = sinon.spy(function () {
-        return Promise.resolve([
+      calculateIndices = sinon.stub().returns(Promise.resolve([
           { index: 'foo', max: Infinity, min: -Infinity },
           { index: 'bar', max: Infinity, min: -Infinity }
-        ]);
-      });
+      ]));
 
       return calculateIndices;
     });
@@ -322,6 +320,26 @@ describe('index pattern', function () {
         const indexList = await indexPattern.toDetailedIndexList();
         expect(indexList[0].index).to.equal('foo');
         expect(indexList[1].index).to.equal('bar');
+      });
+    });
+
+    describe('when index pattern is a time-base wildcard but field_stats are not supported', function () {
+      beforeEach(function () {
+        calculateIndices.returns(Promise.reject({
+          message: '[illegal_argument_exception] request [/filebeat-**/_field_stats] contains unrecognized parameter: [level]',
+          statusCode: 400,
+        }));
+
+        indexPattern.id = 'randomID';
+        indexPattern.title = 'logstash-*';
+        indexPattern.timeFieldName = defaultTimeField.name;
+        indexPattern.intervalName = null;
+        indexPattern.notExpandable = false;
+      });
+
+      it('is fulfilled by title', async function () {
+        const indexList = await indexPattern.toDetailedIndexList();
+        expect(indexList.map(i => i.index)).to.eql([indexPattern.title]);
       });
     });
 
