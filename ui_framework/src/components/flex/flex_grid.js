@@ -18,7 +18,7 @@ const columnsToClassNameMap = {
   4: 'kuiFlexGrid--fourths',
 };
 
-export const COLUMNS = Object.keys(columnsToClassNameMap);
+export const COLUMNS = Object.keys(columnsToClassNameMap).map(columns => parseInt(columns, 10));
 
 export const KuiFlexGrid = ({ children, className, gutterSize, columns, ...rest }) => {
   const classes = classNames(
