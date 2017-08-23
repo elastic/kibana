@@ -8,8 +8,8 @@ import {
   GuideSectionTypes,
   GuideText,
 } from '../../components';
-const Expression = require('./expression');
 
+const Expression = require('./expression');
 const expressionSource = require('!!raw!./expression');
 const expressionHtml = renderToHtml(Expression);
 
