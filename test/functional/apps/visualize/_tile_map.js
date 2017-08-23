@@ -34,6 +34,8 @@ export default function ({ getService, getPageObjects }) {
      * manually compare data due to possible small difference in numbers. This is browser dependent.
      */
     function compareTableData(expected, actual) {
+      log.debug('comparing expected: ', expected);
+      log.debug('with actual: ', actual);
 
       expect(actual.length).to.eql(expected.length);
 
@@ -86,7 +88,12 @@ export default function ({ getService, getPageObjects }) {
         expect(tableHeaders.trim()).to.equal('geohash_grid Count Geo Centroid');
       });
 
-      after(async () => await PageObjects.visualize.closeSpyPanel());
+      after(async () => {
+        await PageObjects.visualize.closeSpyPanel();
+        await PageObjects.visualize.toggleIsFilteredByCollarCheckbox();
+        await PageObjects.visualize.clickGo();
+        await PageObjects.header.waitUntilLoadingHasFinished();
+      });
     });
 
     describe('tile map chart', function indexPatternCreation() {
@@ -144,9 +151,8 @@ export default function ({ getService, getPageObjects }) {
        ** check some data after we save the viz, then zoom in and check that the data
        ** changed, then open the saved viz and check that it's back to the original data.
        */
-      it('should save with zoom level and load, take screenshot', function () {
+      it('should save with zoom level and load, take screenshot', async function () {
         const expectedTableData = [
-          '- 9q5 91 { "lat": 34.2934322102855, "lon": -118.57068326651722 }',
           '- 9qc 89 { "lat": 38.64546895785822, "lon": -121.59105236401383 }',
           '- dp3 79 { "lat": 41.68207651723318, "lon": -87.98703769162958 }',
           '- dp8 77 { "lat": 43.00976789278256, "lon": -89.27605793496909 }',
@@ -154,8 +160,10 @@ export default function ({ getService, getPageObjects }) {
           '- 9qh 74 { "lat": 34.18319454366291, "lon": -117.426273193009 }',
           '- 9y7 73 { "lat": 35.87868071952197, "lon": -96.3330221912275 }',
           '- 9ys 71 { "lat": 37.31065319536228, "lon": -94.82038319412567 }',
-          '- 9yn 71 { "lat": 34.57203017311617, "lon": -92.17198946946104 }',
-          '- 9q9 70 { "lat": 37.327310177098425, "lon": -121.70855726221842 }'
+          '- 9q9 70 { "lat": 37.327310177098425, "lon": -121.70855726221842 }',
+          '- dn2 69 { "lat": 35.69518324898799, "lon": -89.3181892565411 }',
+          '- dp4 66 { "lat": 40.09276106847789, "lon": -86.27666343596171 }',
+          '- dn6 66 { "lat": 35.88069073538381, "lon": -86.4727119640023 }'
         ];
         const expectedTableDataZoomed = [
           '- c20g 16 { "lat": 45.59211894578766, "lon": -122.47455075674225 }',
@@ -171,72 +179,36 @@ export default function ({ getService, getPageObjects }) {
         ];
         const vizName1 = 'Visualization TileMap';
 
-        return PageObjects.visualize.clickMapZoomIn()
-        .then(function () {
-          return PageObjects.visualize.clickMapZoomIn();
-        })
-        .then(function () {
-          return PageObjects.visualize.saveVisualization(vizName1);
-        })
-        .then(function (message) {
-          log.debug('Saved viz message = ' + message);
-          expect(message).to.be('Visualization Editor: Saved Visualization \"' + vizName1 + '\"');
-        })
-        .then(function testVisualizeWaitForToastMessageGone() {
-          return PageObjects.header.waitForToastMessageGone();
-        })
-        .then(function () {
-          return PageObjects.visualize.openSpyPanel();
-        })
+        await PageObjects.visualize.clickMapZoomIn();
+        await PageObjects.visualize.clickMapZoomIn();
+        const message = await PageObjects.visualize.saveVisualization(vizName1);
+        log.debug('Saved viz message = ' + message);
+        expect(message).to.be('Visualization Editor: Saved Visualization \"' + vizName1 + '\"');
+        await PageObjects.header.waitForToastMessageGone();
+        await PageObjects.visualize.openSpyPanel();
         // we're not selecting page size all, so we only have to verify the first page of data
-        .then(function getDataTableData() {
-          log.debug('first get the zoom level 5 page data and verify it');
-          return PageObjects.visualize.getDataTableData();
-        })
-        .then(function showData(data) {
-          compareTableData(expectedTableData, data.trim().split('\n'));
-          return PageObjects.visualize.closeSpyPanel();
-        })
-        .then(function () {
-          // zoom to level 6, and make sure we go back to the saved level 5
-          return PageObjects.visualize.clickMapZoomIn();
-        })
-        .then(function () {
-          return PageObjects.visualize.openSpyPanel();
-        })
-        .then(function getDataTableData() {
-          log.debug('second get the zoom level 6 page data and verify it');
-          return PageObjects.visualize.getDataTableData();
-        })
-        .then(function showData(data) {
-          compareTableData(expectedTableDataZoomed, data.trim().split('\n'));
-          return PageObjects.visualize.closeSpyPanel();
-        })
-        .then(function () {
-          return PageObjects.visualize.loadSavedVisualization(vizName1);
-        })
-        .then(function waitForVisualization() {
-          return PageObjects.visualize.waitForVisualization();
-        })
+        log.debug('first get the zoom level 5 page data and verify it');
+        let data = await PageObjects.visualize.getDataTableData();
+        compareTableData(expectedTableData, data.trim().split('\n'));
+        await PageObjects.visualize.closeSpyPanel();
+        // zoom to level 6, and make sure we go back to the saved level 5
+        await PageObjects.visualize.clickMapZoomIn();
+        await PageObjects.visualize.openSpyPanel();
+        log.debug('second get the zoom level 6 page data and verify it');
+        data = await PageObjects.visualize.getDataTableData();
+        compareTableData(expectedTableDataZoomed, data.trim().split('\n'));
+        await PageObjects.visualize.closeSpyPanel();
+        await PageObjects.visualize.loadSavedVisualization(vizName1);
+        await PageObjects.visualize.waitForVisualization();
         // sleep a bit before taking the screenshot or it won't show data
-        .then(function sleep() {
-          return PageObjects.common.sleep(4000);
-        })
-        .then(function () {
-          return PageObjects.visualize.openSpyPanel();
-        })
-        .then(function getDataTableData() {
-          log.debug('third get the zoom level 5 page data and verify it');
-          return PageObjects.visualize.getDataTableData();
-        })
-        .then(function showData(data) {
-          compareTableData(expectedTableData, data.trim().split('\n'));
-          return PageObjects.visualize.closeSpyPanel();
-        })
-        .then(function takeScreenshot() {
-          log.debug('Take screenshot');
-          screenshots.take('Visualize-site-map');
-        });
+        await PageObjects.common.sleep(4000);
+        await PageObjects.visualize.openSpyPanel();
+        log.debug('third get the zoom level 5 page data and verify it');
+        await PageObjects.visualize.getDataTableData();
+        compareTableData(expectedTableData, data.trim().split('\n'));
+        await PageObjects.visualize.closeSpyPanel();
+        log.debug('Take screenshot');
+        await screenshots.take('Visualize-site-map');
       });
 
       it('should zoom in to level 10', function () {

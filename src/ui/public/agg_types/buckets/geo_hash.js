@@ -49,12 +49,6 @@ export function AggTypesBucketsGeoHashProvider(Private, config) {
     return bounds && collar && !geoContains(collar, bounds);
   }
 
-  function getZoomLevel(vis) {
-    const savedMapZoom = vis.params.mapZoom;
-    const zoomFromUiState = vis.hasUiState() ? parseInt(vis.getUiState().get('mapZoom')) : null;
-    return zoomFromUiState || savedMapZoom || vis.type.visConfig.defaults.mapZoom;
-  }
-
   return new BucketAggType({
     name: 'geohash_grid',
     title: 'Geohash',
@@ -110,18 +104,20 @@ export function AggTypesBucketsGeoHashProvider(Private, config) {
       if (agg.params.isFilteredByCollar && agg.getField()) {
         const vis = agg.vis;
         const mapBounds = vis.sessionState.mapBounds;
-        const mapZoom = getZoomLevel(vis);
+        let mapZoom;
+        if (vis.hasUiState()) {
+          mapZoom = parseInt(vis.uiStateVal('mapZoom'), 10);
+        }
         if (mapBounds && mapZoom) {
           const lastMapCollar = vis.sessionState.mapCollar;
           let mapCollar;
           if (!lastMapCollar || lastMapCollar.zoom !== mapZoom || isOutsideCollar(mapBounds, lastMapCollar)) {
             mapCollar = scaleBounds(mapBounds);
             mapCollar.zoom = mapZoom;
+            vis.sessionState.mapCollar = mapCollar;
           } else {
             mapCollar = lastMapCollar;
           }
-          vis.sessionState.mapCollar = mapCollar;
-
           const boundingBox = {};
           boundingBox[agg.getField().name] = {
             top_left: mapCollar.top_left,

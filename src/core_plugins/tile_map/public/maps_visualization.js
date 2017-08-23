@@ -88,12 +88,14 @@ export function MapsVisualizationProvider(serviceSettings, Notifier, getAppState
       options.center = centerFromUIState ? centerFromUIState : this.vis.type.visConfig.defaults.mapCenter;
 
       this._kibanaMap = new KibanaMap(containerElement, options);
+
+      uiState.set('mapZoom', this._kibanaMap.getZoomLevel());
+      this.vis.sessionState.mapBounds = this._kibanaMap.getUntrimmedBounds();
+
       this._kibanaMap.addDrawControl();
       this._kibanaMap.addFitControl();
       this._kibanaMap.addLegendControl();
       this._kibanaMap.persistUiStateForVisualization(this.vis);
-
-      this.vis.sessionState.mapBounds = this._kibanaMap.getUntrimmedBounds();
 
       let previousPrecision = this._kibanaMap.getAutoPrecision();
       let precisionChange = false;
