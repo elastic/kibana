@@ -24,6 +24,7 @@ export default function (input, output) {
       $resizer.addClass('active');
       var startWidth = $left.width();
       var startX = event.pageX;
+      input.markTopRow();
 
       function onMove(event) {
         setEditorWidth(startWidth + event.pageX - startX)
