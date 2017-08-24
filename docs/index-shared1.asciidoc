@@ -1,11 +1,5 @@
 
-//////////
-release-state can be: released | prerelease | unreleased
-//////////
-:release-state:  prerelease
-:version:        6.0.0-alpha2
-:major-version:  6.x
-:branch:         master
+include::{asciidoc-dir}/../../shared/versions.asciidoc[]
 
 :docker-image:   docker.elastic.co/kibana/kibana:{version}
 :repo:           https://github.com/elastic/kibana/

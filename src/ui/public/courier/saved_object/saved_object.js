@@ -107,7 +107,9 @@ export function SavedObjectProvider(Promise, Private, Notifier, confirmModalProm
 
       this.searchSource.set(_.defaults(state, fnProps));
 
-      this.searchSource.set('query', migrateLegacyQuery(this.searchSource.getOwn('query')));
+      if (!_.isUndefined(this.searchSource.getOwn('query'))) {
+        this.searchSource.set('query', migrateLegacyQuery(this.searchSource.getOwn('query')));
+      }
     };
 
     /**

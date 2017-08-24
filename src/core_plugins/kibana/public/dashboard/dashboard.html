@@ -1,16 +1,18 @@
 <dashboard-app class="app-container dashboard-container">
   <div class="fullScreenModePlaceholder">
-    <button
+    <div
+      aria-label="Exit full screen mode"
+      kbn-accessible-click
       ng-if="fullScreenMode"
       class="exitFullScreenMode"
       ng-click="exitFullScreenMode()"
     >
-      <span aria-hidden="true" class="exitFullScreenModeLogo"></span>
-      <span class="exitFullScreenModeText">
+      <span class="exitFullScreenModeLogo" data-test-subj="exitFullScreenModeLogo"></span>
+      <span class="exitFullScreenModeText" data-test-subj="exitFullScreenModeText">
         Exit full screen
-        <span aria-hidden="true" class="kuiIcon fa fa-angle-left"></span>
+        <span class="kuiIcon fa fa-angle-left"></span>
       </span>
-    </button>
+    </div>
   </div>
   <!-- Local nav. -->
   <kbn-top-nav name="dashboard" config="topNavMenu">
@@ -19,14 +21,14 @@
       <!-- Title. -->
       <div
         data-transclude-slot="topLeftCorner"
+        class="kuiLocalBreadcrumbs"
+        data-test-subj="breadcrumbs"
       >
-        <div class="kuiLocalBreadcrumbs" data-test-subj="breadcrumbs">
-          <div class="kuiLocalBreadcrumb">
-            <a class="kuiLocalBreadcrumb__link" href="{{landingPageUrl()}}">Dashboard</a>
-          </div>
-          <div class="kuiLocalBreadcrumb">
-            {{ getDashTitle() }}
-          </div>
+        <div class="kuiLocalBreadcrumb">
+          <a class="kuiLocalBreadcrumb__link" href="{{landingPageUrl()}}">Dashboard</a>
+        </div>
+        <div class="kuiLocalBreadcrumb">
+          {{ getDashTitle() }}
         </div>
       </div>
 
@@ -78,16 +80,10 @@
     on-panel-removed="onPanelRemoved"
     dashboard-view-mode="dashboardViewMode"
     panels="panels"
-    get-vis-click-handler="getFilterBarClickHandler"
-    get-vis-brush-handler="getBrushEvent"
     save-state="saveState"
-    app-state="appState"
     toggle-expand="toggleExpandPanel"
-    create-child-ui-state="createChildUiState"
-    toggle-expand="toggleExpandPanel"
-    register-panel-index-pattern="registerPanelIndexPattern"
     data-shared-items-count="{{panels.length}}"
-    on-filter="filter"
+    container-api="containerApi"
   ></dashboard-grid>
 
   <dashboard-panel
@@ -96,12 +92,7 @@
     is-full-screen-mode="!chrome.getVisible()"
     is-expanded="true"
     dashboard-view-mode="dashboardViewMode"
-    get-vis-click-handler="getFilterBarClickHandler"
-    get-vis-brush-handler="getBrushEvent"
-    save-state="saveState"
-    app-state="appState"
-    register-panel-index-pattern="registerPanelIndexPattern"
-    create-child-ui-state="createChildUiState"
+    container-api="containerApi"
     toggle-expand="toggleExpandPanel(expandedPanel.panelIndex)"
   ></dashboard-panel>
 

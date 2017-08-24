@@ -5,7 +5,11 @@ module.directive('focusOn', ($timeout) => ({
   restrict: 'A',
   link: function (scope, elem, attrs) {
     scope.$on(attrs.focusOn, () => {
-      $timeout(() => elem.find('input').addBack('input').focus());
+      $timeout(() => {
+        return elem.find('input,select')
+          .addBack('input,select')
+          .focus();
+      });
     });
   }
 }));

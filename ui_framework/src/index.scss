@@ -1,0 +1,11 @@
+// Configuration
+@import 'global_styling/variables/index';
+@import 'themes/light_theme/index';
+
+// Core
+@import 'global_styling/mixins/index';
+@import 'global_styling/reset/index';
+@import 'global_styling/utilities/index';
+
+// Components
+@import 'components/index';

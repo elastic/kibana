@@ -1,6 +1,7 @@
 import expect from 'expect.js';
 
-export default function ({ getPageObjects }) {
+export default function ({ getService, getPageObjects }) {
+  const retry = getService('retry');
   const PageObjects = getPageObjects(['dashboard', 'header', 'common']);
 
   describe('dashboard save', function describeIndexTests() {
@@ -88,8 +89,11 @@ export default function ({ getPageObjects }) {
       await PageObjects.dashboard.clickEdit();
       await PageObjects.dashboard.enterDashboardTitleAndClickSave(dashboardName.toUpperCase());
 
-      const isConfirmOpen = await PageObjects.common.isConfirmModalOpen();
-      expect(isConfirmOpen).to.equal(true);
+      // We expect isConfirmModalOpen to be open, hence the retry if not found.
+      await retry.try(async () => {
+        const isConfirmOpen = await PageObjects.common.isConfirmModalOpen();
+        expect(isConfirmOpen).to.equal(true);
+      });
 
       await PageObjects.common.clickCancelOnModal();
     });

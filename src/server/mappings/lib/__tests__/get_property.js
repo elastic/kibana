@@ -52,7 +52,7 @@ describe('getProperty(mappings, path)', () => {
       test('bar.baz.box', MAPPINGS.rootType.properties.bar.properties.baz.fields.box);
     });
   });
-  describe('string key', () => {
+  describe('array of string keys', () => {
     it('finds root properties', () => {
       test(['foo'], MAPPINGS.rootType.properties.foo);
     });

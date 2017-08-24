@@ -201,24 +201,21 @@ export function HeaderPageProvider({ getService, getPageObjects }) {
     }
 
     async isGlobalLoadingIndicatorVisible() {
-      return await testSubjects.find('globalLoadingIndicator', defaultFindTimeout / 5);
+      log.debug('isGlobalLoadingIndicatorVisible');
+      return await testSubjects.exists('globalLoadingIndicator');
     }
 
     async isGlobalLoadingIndicatorHidden() {
-      remote.setFindTimeout(defaultFindTimeout * 10);
-      return await remote.findByCssSelector('[data-test-subj="globalLoadingIndicator"].ng-hide');
+      log.debug('isGlobalLoadingIndicatorHidden');
+      return await find.byCssSelector('[data-test-subj="globalLoadingIndicator"].ng-hide', defaultFindTimeout * 10);
     }
 
     async getPrettyDuration() {
-      return await testSubjects.find('globalTimepickerRange').getVisibleText();
+      return await testSubjects.getVisibleText('globalTimepickerRange');
     }
 
     async isSharedTimefilterEnabled() {
-      const element = await remote
-      .setFindTimeout(defaultFindTimeout)
-      .findByCssSelector(`[shared-timefilter=true]`);
-
-      return !!element;
+      return await find.existsByCssSelector('[shared-timefilter=true]');
     }
   }
 

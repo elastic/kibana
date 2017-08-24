@@ -90,110 +90,53 @@ export default function ({ getService, getPageObjects }) {
 
     describe('tile map chart', function indexPatternCreation() {
 
-      it('should show correct tile map data on default zoom level', function () {
+      it('should show correct tile map data on default zoom level', async function () {
         const expectedTableData = ['9 5,787 { "lat": 37.22448418632405, "lon": -103.01935195013255 }',
           'd 5,600 { "lat": 37.44271478370398, "lon": -81.72692197253595 }',
           'c 1,319 { "lat": 47.72720855392425, "lon": -109.84745063951028 }',
           'b 999 { "lat": 62.04130042948433, "lon": -155.28087269195967 }',
           'f 187 { "lat": 45.656166475784175, "lon": -82.45831044201545 }',
           '8 108 { "lat": 18.85260305600241, "lon": -156.5148810390383 }'];
+        //level 1
+        await PageObjects.visualize.clickMapZoomOut();
+        //level 0
+        await PageObjects.visualize.clickMapZoomOut();
 
-        return PageObjects.visualize.openSpyPanel()
-        .then(function () {
-          //level 1
-          return PageObjects.visualize.clickMapZoomOut();
-        })
-        .then(function () {
-          //level 0
-          return PageObjects.visualize.clickMapZoomOut();
-        })
-        .then(function () {
-          return PageObjects.settings.setPageSize('All');
-        })
-        .then(function getDataTableData() {
-          return PageObjects.visualize.getDataTableData()
-          .then(function showData(actualTableData) {
-            compareTableData(expectedTableData, actualTableData.trim().split('\n'));
-            return PageObjects.visualize.closeSpyPanel();
-          });
-        });
+        await PageObjects.visualize.openSpyPanel();
+        await PageObjects.settings.setPageSize('All');
+        const actualTableData = await PageObjects.visualize.getDataTableData();
+        compareTableData(expectedTableData, actualTableData.trim().split('\n'));
+        await PageObjects.visualize.closeSpyPanel();
       });
 
-      it('should not be able to zoom out beyond 0', function () {
-        return PageObjects.visualize.getMapZoomOutEnabled()
-        // we can tell we're at level 1 because zoom out is disabled
-        .then(function () {
-          return retry.try(function tryingForTime() {
-            return PageObjects.visualize.getMapZoomOutEnabled()
-            .then(function (enabled) {
-              //should be able to zoom more as current config has 0 as min level.
-              expect(enabled).to.be(false);
-            });
-          });
-        })
-        .then(function takeScreenshot() {
-          log.debug('Take screenshot (success)');
-          screenshots.take('map-at-zoom-0');
-        });
+      it('should not be able to zoom out beyond 0', async function () {
+        await PageObjects.visualize.zoomAllTheWayOut();
+        const enabled = await PageObjects.visualize.getMapZoomOutEnabled();
+        expect(enabled).to.be(false);
+        screenshots.take('map-at-zoom-0');
       });
 
-      it('Fit data bounds should zoom to level 3', function () {
-        const expectedPrecision2ZoomCircles = [
-          { color: '#750000', radius: 192 },
-          { color: '#750000', radius: 191 },
-          { color: '#750000', radius: 177 },
-          { color: '#a40000', radius: 168 },
-          { color: '#a40000', radius: 167 },
-          { color: '#a40000', radius: 159 },
-          { color: '#a40000', radius: 156 },
-          { color: '#b45100', radius: 136 },
-          { color: '#b67501', radius: 111 },
-          { color: '#b67501', radius: 109 },
-          { color: '#b67501', radius: 108 },
-          { color: '#b67501', radius: 104 },
-          { color: '#b67501', radius: 101 },
-          { color: '#b67501', radius: 101 },
-          { color: '#b99939', radius: 84 },
-          { color: '#b99939', radius: 84 },
-          { color: '#b99939', radius: 74 },
-          { color: '#b99939', radius: 73 },
-          { color: '#b99939', radius: 73 },
-          { color: '#b99939', radius: 66 },
-          { color: '#b99939', radius: 60 },
-          { color: '#b99939', radius: 57 },
-          { color: '#b99939', radius: 57 },
-          { color: '#b99939', radius: 47 },
-          { color: '#b99939', radius: 43 },
-          { color: '#b99939', radius: 43 },
-          { color: '#b99939', radius: 43 },
-          { color: '#b99939', radius: 38 },
-          { color: '#b99939', radius: 36 },
-          { color: '#b99939', radius: 35 },
-          { color: '#b99939', radius: 34 },
-          { color: '#b99939', radius: 34 },
-          { color: '#b99939', radius: 31 },
-          { color: '#b99939', radius: 30 },
-          { color: '#b99939', radius: 28 },
-          { color: '#b99939', radius: 27 },
-          { color: '#b99939', radius: 24 },
-          { color: '#b99939', radius: 22 },
-          { color: '#b99939', radius: 19 },
-          { color: '#b99939', radius: 19 },
-          { color: '#b99939', radius: 15 },
-          { color: '#b99939', radius: 15 },
-          { color: '#b99939', radius: 15 },
-          { color: '#b99939', radius: 12 },
-          { color: '#b99939', radius: 9 },
-          { color: '#b99939', radius: 9 }
+      // See https://github.com/elastic/kibana/issues/13137 if this test starts failing intermittently
+      it('Fit data bounds should zoom to level 3', async function () {
+        const expectedPrecision2DataTable = [
+          '- dn 1,429 { "lat": 36.38058884214008, "lon": -84.78904345856186 }',
+          '- dp 1,418 { "lat": 41.64735764514311, "lon": -84.89821054446622 }',
+          '- 9y 1,215 { "lat": 36.45605112115542, "lon": -95.0664575824997 }',
+          '- 9z 1,099 { "lat": 42.18533764798381, "lon": -95.16736779696697 }',
+          '- dr 1,076 { "lat": 42.02351013780139, "lon": -73.98091798822212 }',
+          '- dj 982 { "lat": 31.672735499211466, "lon": -84.50815450245526 }',
+          '- 9v 938 { "lat": 31.380767446489873, "lon": -95.2705099188121 }',
+          '- 9q 722 { "lat": 36.51360723008776, "lon": -119.18302692440686 }',
+          '- 9w 475 { "lat": 36.39264289740669, "lon": -106.91102287667363 }',
+          '- cb 457 { "lat": 46.70940601270996, "lon": -95.81077801137022 }'
         ];
 
-        return PageObjects.visualize.clickMapFitDataBounds()
-        .then(function () {
-          return PageObjects.visualize.getTileMapData();
-        })
-        .then(function (data) {
-          expect(data).to.eql(expectedPrecision2ZoomCircles);
-        });
+        await PageObjects.visualize.clickMapFitDataBounds();
+        await PageObjects.visualize.openSpyPanel();
+        const data = await PageObjects.visualize.getDataTableData();
+        await compareTableData(expectedPrecision2DataTable, data.trim().split('\n'));
+        screenshots.take('map-at-zoom-3');
+        await PageObjects.visualize.closeSpyPanel();
       });
 
       /*
@@ -212,7 +155,8 @@ export default function ({ getService, getPageObjects }) {
           '- 9y7 73 { "lat": 35.87868071952197, "lon": -96.3330221912275 }',
           '- 9ys 71 { "lat": 37.31065319536228, "lon": -94.82038319412567 }',
           '- 9yn 71 { "lat": 34.57203017311617, "lon": -92.17198946946104 }',
-          '- 9q9 70 { "lat": 37.327310177098425, "lon": -121.70855726221842 }' ];
+          '- 9q9 70 { "lat": 37.327310177098425, "lon": -121.70855726221842 }'
+        ];
         const expectedTableDataZoomed = [
           '- c20g 16 { "lat": 45.59211894578766, "lon": -122.47455075674225 }',
           '- c28c 13 { "lat": 48.0181491561234, "lon": -122.43847891688347 }',
@@ -223,7 +167,8 @@ export default function ({ getService, getPageObjects }) {
           '- c2mq 9 { "lat": 47.547698873095214, "lon": -116.18850083090365 }',
           '- c27x 9 { "lat": 47.753206375055015, "lon": -118.7438936624676 }',
           '- c25p 9 { "lat": 46.30563497543335, "lon": -119.30418533273041 }',
-          '- c209 9 { "lat": 45.29028058052063, "lon": -122.9347869195044 }' ];
+          '- c209 9 { "lat": 45.29028058052063, "lon": -122.9347869195044 }'
+        ];
         const vizName1 = 'Visualization TileMap';
 
         return PageObjects.visualize.clickMapZoomIn()
@@ -238,7 +183,7 @@ export default function ({ getService, getPageObjects }) {
           expect(message).to.be('Visualization Editor: Saved Visualization \"' + vizName1 + '\"');
         })
         .then(function testVisualizeWaitForToastMessageGone() {
-          return PageObjects.visualize.waitForToastMessageGone();
+          return PageObjects.header.waitForToastMessageGone();
         })
         .then(function () {
           return PageObjects.visualize.openSpyPanel();

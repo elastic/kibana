@@ -128,7 +128,7 @@ describe('AggConfig', function () {
       expect(objs[3]).to.have.property('id', '4');
     });
 
-    it('assigns ids relative to the other items in the list', function () {
+    it('assigns ids relative to the other only item in the list', function () {
       const objs = [
         { id: '100' },
         {},

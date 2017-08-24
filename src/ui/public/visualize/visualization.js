@@ -98,12 +98,10 @@ uiModules
       });
 
       const Visualization = $scope.vis.type.visualization;
-
-      //todo: make this not a jquery element
       const visualization = new Visualization(getVisEl()[0], $scope.vis);
 
-
       const renderFunction = _.debounce(() => {
+        $scope.vis.size = [$el.width(), $el.height()];
         const status = getUpdateStatus($scope);
         visualization.render($scope.visData, status)
           .then(() => {

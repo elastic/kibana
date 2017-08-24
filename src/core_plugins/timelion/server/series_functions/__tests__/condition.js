@@ -39,19 +39,19 @@ describe(filename, function () {
       });
     });
 
-    it('eq', function () {
+    it('gt', function () {
       return  invoke(fn, [seriesList, 'gt', 17, 0]).then(function (r) {
         expect(_.map(r.output.list[0].data, 1)).to.eql([-51, 17, 0, 0]);
       });
     });
 
-    it('eq', function () {
+    it('lt', function () {
       return  invoke(fn, [seriesList, 'lt', 17, 0]).then(function (r) {
         expect(_.map(r.output.list[0].data, 1)).to.eql([0, 17, 82, 20]);
       });
     });
 
-    it('eq', function () {
+    it('lte', function () {
       return  invoke(fn, [seriesList, 'lte', 17, 0]).then(function (r) {
         expect(_.map(r.output.list[0].data, 1)).to.eql([0, 0, 82, 20]);
       });

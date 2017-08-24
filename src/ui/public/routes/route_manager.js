@@ -1,4 +1,4 @@
-import { defaultsDeep, wrap } from 'lodash';
+import { cloneDeep, defaultsDeep, wrap } from 'lodash';
 
 import { wrapRouteWithPrep } from './wrap_route_with_prep';
 import { RouteSetupManager } from './route_setup_manager';
@@ -19,7 +19,7 @@ export default function RouteManager() {
 
       defaults.forEach(def => {
         if (def.regex.test(path)) {
-          defaultsDeep(route, def.value);
+          defaultsDeep(route, cloneDeep(def.value));
         }
       });
 

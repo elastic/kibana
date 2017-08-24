@@ -123,16 +123,17 @@ class Timeseries extends Component {
             <TimeseriesChart
               crosshair={this.props.crosshair}
               onBrush={this.props.onBrush}
-              plothover={ this.plothover}
+              plothover={this.plothover}
               reversed={this.props.reversed}
               series={this.props.series}
               annotations={this.props.annotations}
-              show={ this.state.show }
-              showGrid={ this.props.showGrid }
+              show={this.state.show}
+              showGrid={this.props.showGrid}
               tickFormatter={this.props.tickFormatter}
               options={this.props.options}
               xaxisLabel={this.props.xaxisLabel}
-              yaxes={this.props.yaxes} />
+              yaxes={this.props.yaxes}
+            />
           </div>
           <Legend
             legendPosition={this.props.legendPosition}
@@ -142,7 +143,8 @@ class Timeseries extends Component {
             showLegend={this.state.showLegend}
             seriesValues={this.state.values}
             seriesFilter={this.state.show}
-            tickFormatter={this.props.tickFormatter} />
+            tickFormatter={this.props.tickFormatter}
+          />
         </div>
       </div>
     );

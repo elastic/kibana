@@ -2,11 +2,31 @@ import Wreck from 'wreck';
 import Progress from '../progress';
 import { fromNode as fn } from 'bluebird';
 import { createWriteStream } from 'fs';
+import HttpProxyAgent from 'http-proxy-agent';
+import { getProxyForUrl } from 'proxy-from-env';
 
-function sendRequest({ sourceUrl, timeout }) {
+function getProxyAgent(sourceUrl, logger) {
+  const proxy = getProxyForUrl(sourceUrl);
+
+  if (!proxy) {
+    return null;
+  }
+
+  logger.log(`Picked up proxy ${proxy} from environment variable.`);
+  return new HttpProxyAgent(proxy);
+}
+
+function sendRequest({ sourceUrl, timeout }, logger) {
   const maxRedirects = 11; //Because this one goes to 11.
   return fn(cb => {
-    const req = Wreck.request('GET', sourceUrl, { timeout, redirects: maxRedirects }, (err, resp) => {
+    const reqOptions = { timeout, redirects: maxRedirects };
+    const proxyAgent = getProxyAgent(sourceUrl, logger);
+
+    if (proxyAgent) {
+      reqOptions.agent = proxyAgent;
+    }
+
+    const req = Wreck.request('GET', sourceUrl, reqOptions, (err, resp) => {
       if (err) {
         if (err.code === 'ECONNREFUSED') {
           err = new Error('ENOTFOUND');
@@ -50,7 +70,7 @@ Responsible for managing http transfers
 */
 export default async function downloadUrl(logger, sourceUrl, targetPath, timeout) {
   try {
-    const { req, resp } = await sendRequest({ sourceUrl, timeout });
+    const { req, resp } = await sendRequest({ sourceUrl, timeout }, logger);
 
     try {
       const totalSize = parseFloat(resp.headers['content-length']) || 0;

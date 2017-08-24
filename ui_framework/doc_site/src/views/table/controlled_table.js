@@ -36,25 +36,25 @@ export class ControlledTable extends React.Component {
     this.rows = [
       [
         <a className="kuiLink" href="#">Alligator</a>,
-        <div className="kuiIcon kuiIcon--success fa-check"></div>,
+        <div className="kuiIcon kuiIcon--success fa-check" />,
         'Tue Dec 06 2016 12:56:15 GMT-0800 (PST)',
         '1'
       ],
       [
         <a className="kuiLink" href="#">Boomerang</a>,
-        <div className="kuiIcon kuiIcon--success fa-check"></div>,
+        <div className="kuiIcon kuiIcon--success fa-check" />,
         'Tue Dec 06 2016 12:56:15 GMT-0800 (PST)',
         '10'
       ],
       [
         <a className="kuiLink" href="#">Celebration</a>,
-        <div className="kuiIcon kuiIcon--warning fa-bolt"></div>,
+        <div className="kuiIcon kuiIcon--warning fa-bolt" />,
         'Tue Dec 06 2016 12:56:15 GMT-0800 (PST)',
         '100'
       ],
       [
         <a className="kuiLink" href="#">Dog</a>,
-        <div className="kuiIcon kuiIcon--error fa-warning"></div>,
+        <div className="kuiIcon kuiIcon--error fa-warning" />,
         'Tue Dec 06 2016 12:56:15 GMT-0800 (PST)',
         '1000'
       ]
@@ -64,13 +64,13 @@ export class ControlledTable extends React.Component {
   renderPager() {
     return (
       <KuiPager
-        startNumber={ 1 }
-        hasNextPage={ true }
-        hasPreviousPage={ false }
-        endNumber={ 10 }
-        totalItems={ 100 }
-        onNextPage={ () => {} }
-        onPreviousPage={ () => {} }
+        startNumber={1}
+        hasNextPage={true}
+        hasPreviousPage={false}
+        endNumber={10}
+        totalItems={100}
+        onNextPage={() => {}}
+        onPreviousPage={() => {}}
       />
     );
   }
@@ -92,14 +92,14 @@ export class ControlledTable extends React.Component {
       return (
         <KuiTableRow>
           <KuiTableRowCheckBoxCell
-            isChecked={ this.isItemChecked(rowData) }
-            onChange={ () => this.toggleItem(rowData) }
+            isChecked={this.isItemChecked(rowData)}
+            onChange={() => this.toggleItem(rowData)}
           />
           {
             rowData.map((cellData, index) => {
               const align = index === rowData.length - 1 ? RIGHT_ALIGNMENT : LEFT_ALIGNMENT;
               return (
-                <KuiTableRowCell align={ align }>
+                <KuiTableRowCell align={align}>
                   { cellData }
                 </KuiTableRowCell>
               );
@@ -114,7 +114,7 @@ export class ControlledTable extends React.Component {
     return (
       <KuiControlledTable>
         <KuiToolBar>
-          <KuiToolBarSearchBox onFilter={ () => {} } />
+          <KuiToolBarSearchBox onFilter={() => {}} />
 
           <KuiToolBarSection>
             <KuiButton buttonType="primary">
@@ -140,8 +140,8 @@ export class ControlledTable extends React.Component {
         <KuiTable>
           <KuiTableHeader>
             <KuiTableHeaderCheckBoxCell
-              isChecked={ this.isItemChecked('header') }
-              onChange={ () => this.toggleItem('header') }
+              isChecked={this.isItemChecked('header')}
+              onChange={() => this.toggleItem('header')}
             />
             <KuiTableHeaderCell>
               Title
@@ -158,7 +158,7 @@ export class ControlledTable extends React.Component {
           </KuiTableHeader>
 
           <KuiTableBody>
-          {
+            {
             this.renderTableRows()
           }
           </KuiTableBody>

@@ -1,7 +1,7 @@
 require('angular');
 require('ui/angular-bootstrap');
 var uiModules = require('ui/modules').uiModules;
-var chrome = require('../src/ui/public/chrome/chrome');
+var chrome = require('ui/chrome');
 
 var kibana = uiModules.get('kibana', ['ui.bootstrap', 'pascalprecht.translate']);
 

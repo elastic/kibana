@@ -5,12 +5,12 @@
       <span ng-if="!field.details.error">
         <a
           href=""
-          ng-show="!indexPattern.metaFields.includes(field.name)"
+          ng-show="!field.indexPattern.metaFields.includes(field.name) && !field.scripted"
           ng-click="onAddFilter('_exists_', field.name, '+')">
           {{::field.details.exists}}
         </a>
         <span
-          ng-show="indexPattern.metaFields.includes(field.name)">
+          ng-show="field.indexPattern.metaFields.includes(field.name) || field.scripted">
           {{::field.details.exists}}
         </span>
         / {{::field.details.total}} records

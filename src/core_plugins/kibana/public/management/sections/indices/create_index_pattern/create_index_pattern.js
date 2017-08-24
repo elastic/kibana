@@ -30,7 +30,6 @@ uiModules.get('apps/management')
 
   // Configure the new index pattern we're going to create.
   this.formValues = {
-    id: $routeParams.id ? decodeURIComponent($routeParams.id) : undefined,
     name: config.get('indexPattern:placeholder'),
     timeFieldOption: null,
   };
@@ -38,7 +37,15 @@ uiModules.get('apps/management')
   // UI state.
   this.timeFieldOptions = [];
   this.timeFieldOptionsError = null;
-  this.showAdvancedOptions = $routeParams.id || false;
+  this.showAdvancedOptions = false;
+
+  // fills index-pattern ID based on query param.
+  if ($routeParams.id) {
+    this.formValues.id = decodeURIComponent($routeParams.id);
+    this.formValues.name = '';
+
+    this.showAdvancedOptions = true;
+  }
 
   const getTimeFieldOptions = () => {
     loadingCount += 1;
@@ -57,7 +64,7 @@ uiModules.get('apps/management')
         return {
           options: [
             {
-              display: $translate.instant('KIBANA-INDICES_DONT_CONTAIN_TIME_FIELDS')
+              display: `The indices which match this index pattern don't contain any time fields.`
             }
           ]
         };
@@ -66,7 +73,7 @@ uiModules.get('apps/management')
       return {
         options: [
           {
-            display: $translate.instant('KIBANA-NO_DATE_FIELD_DESIRED')
+            display: `I don't want to use the Time Filter`
           },
           ...dateFields.map(field => ({
             display: field.name,
@@ -78,7 +85,7 @@ uiModules.get('apps/management')
     .catch(err => {
       if (err instanceof IndexPatternMissingIndices) {
         return {
-          error: $translate.instant('KIBANA-INDICES_MATCH_PATTERN')
+          error: 'Unable to fetch mapping. Do you have indices matching the pattern?'
         };
       }
 
@@ -221,7 +228,7 @@ uiModules.get('apps/management')
       loadingCount = Infinity;
     }).catch(err => {
       if (err instanceof IndexPatternMissingIndices) {
-        return notify.error($translate.instant('KIBANA-NO_INDICES_MATCHING_PATTERN'));
+        return notify.error('Could not locate any indices matching that pattern. Please add the index to Elasticsearch');
       }
 
       notify.fatal(err);

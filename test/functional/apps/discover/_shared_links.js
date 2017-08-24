@@ -115,7 +115,7 @@ export default function ({ getService, getPageObjects }) {
       });
 
       // NOTE: This test has to run immediately after the test above
-      it('should show toast message for copy to clipboard', function () {
+      it('should show toast message for copy to clipboard of short URL', function () {
         return PageObjects.discover.clickCopyToClipboard()
         .then(function () {
           return PageObjects.header.getToastMessage();

@@ -13,7 +13,7 @@ export function FilterBarProvider({ getService }) {
     async toggleFilterEnabled(key) {
       const filterElement = await testSubjects.find(`filter & filter-key-${key}`);
       await remote.moveMouseTo(filterElement);
-      await testSubjects.find(`filter & filter-key-${key} disableFilter-${key}`).click();
+      await testSubjects.click(`filter & filter-key-${key} disableFilter-${key}`);
     }
   }
 

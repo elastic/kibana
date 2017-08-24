@@ -21,9 +21,8 @@ export function PointSeriesPageProvider({ getService }) {
         .click();
     }
 
-    clickAddAxis() {
-      return testSubjects.find('visualizeAddYAxisButton')
-        .click();
+    async clickAddAxis() {
+      return await testSubjects.click('visualizeAddYAxisButton');
     }
 
     getValueAxesCount() {

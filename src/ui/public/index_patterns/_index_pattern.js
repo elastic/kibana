@@ -1,5 +1,5 @@
 import _ from 'lodash';
-import { SavedObjectNotFound, DuplicateField, IndexPatternAlreadyExists, IndexPatternMissingIndices } from 'ui/errors';
+import { SavedObjectNotFound, DuplicateField, IndexPatternMissingIndices } from 'ui/errors';
 import angular from 'angular';
 import { RegistryFieldFormatsProvider } from 'ui/registry/field_formats';
 import UtilsMappingSetupProvider from 'ui/utils/mapping_setup';
@@ -7,7 +7,7 @@ import { Notifier } from 'ui/notify';
 
 import { getComputedFields } from './_get_computed_fields';
 import { formatHit } from './_format_hit';
-import { IndexPatternsGetIdsProvider } from './_get_ids';
+import { IndexPatternsGetProvider } from './_get';
 import { IndexPatternsIntervalsProvider } from './_intervals';
 import { IndexPatternsFieldListProvider } from './_field_list';
 import { IndexPatternsFlattenHitProvider } from './_flatten_hit';
@@ -29,7 +29,7 @@ export function getRoutes() {
 export function IndexPatternProvider(Private, $http, config, kbnIndex, Promise, confirmModalPromise, kbnUrl) {
   const fieldformats = Private(RegistryFieldFormatsProvider);
   const getConfig = (...args) => config.get(...args);
-  const getIds = Private(IndexPatternsGetIdsProvider);
+  const getIds = Private(IndexPatternsGetProvider)('id');
   const fieldsFetcher = Private(FieldsFetcherProvider);
   const intervals = Private(IndexPatternsIntervalsProvider);
   const mappingSetup = Private(UtilsMappingSetupProvider);
@@ -368,18 +368,17 @@ export function IndexPatternProvider(Private, $http, config, kbnIndex, Promise, 
 
           return confirmModalPromise(confirmMessage, { confirmButtonText: 'Edit existing pattern' })
             .then(() => {
-              kbnUrl.change('/management/kibana/indices/{{id}}', { id: duplicate.id });
+              kbnUrl.redirect('/management/kibana/indices/{{id}}', { id: duplicate.id });
               return true;
-            })
-            .catch(() => {
-              throw new IndexPatternAlreadyExists(this.title);
+            }).catch(() => {
+              return true;
             });
         });
     }
 
     create() {
-      return this.warnIfDuplicateTitle().then((duplicate) => {
-        if (duplicate) return;
+      return this.warnIfDuplicateTitle().then((isDuplicate) => {
+        if (isDuplicate) return;
 
         const body = this.prepBody();
 

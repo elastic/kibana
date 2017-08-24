@@ -12,28 +12,32 @@ export default () => (
       Button element
     </KuiButton>
 
-    &nbsp;
+    <br />
+    <br />
 
     <form onSubmit={e => {
       e.preventDefault();
       window.alert('Submit');
-    }}>
+    }}
+    >
       <KuiSubmitButton buttonType="basic">
         Submit input element
       </KuiSubmitButton>
     </form>
 
+    <br />
 
     <form onSubmit={e => {
       e.preventDefault();
       window.alert('Submit');
-    }}>
+    }}
+    >
       <KuiSubmitButton buttonType="basic" disabled>
         Submit input element, disabled
       </KuiSubmitButton>
     </form>
 
-    &nbsp;
+    <br />
 
     <KuiLinkButton
       buttonType="basic"
@@ -43,7 +47,8 @@ export default () => (
       Anchor element
     </KuiLinkButton>
 
-    &nbsp;
+    <br />
+    <br />
 
     <KuiLinkButton
       buttonType="basic"

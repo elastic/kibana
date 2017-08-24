@@ -8,6 +8,7 @@ let $parentScope;
 let $elem;
 
 const markup = `<query-bar query="query" app-name="name" on-submit="submitHandler($query)"></query-bar>`;
+const cleanup = [];
 
 function init(query, name, isSwitchingEnabled = true) {
   ngMock.module('kibana');
@@ -25,13 +26,20 @@ function init(query, name, isSwitchingEnabled = true) {
     $parentScope.name = name;
     $parentScope.query = query;
     $elem = angular.element(markup);
+    angular.element('body').append($elem);
+    cleanup.push(() => $elem.remove());
 
     $compile($elem)($parentScope);
     $elem.scope().$digest();
   });
 }
 
+
 describe('queryBar directive', function () {
+  afterEach(() => {
+    cleanup.forEach(fn => fn());
+    cleanup.length = 0;
+  });
 
   describe('language selector', function () {
 
@@ -118,20 +126,6 @@ describe('queryBar directive', function () {
       const submitButton = $elem.find('.kuiLocalSearchButton');
       submitButton.click();
       expectDeepEqual($parentScope.submitHandler.getCall(0).args[0], { query: 'bar', language: 'lucene' });
-    });
-
-    it('should customize the input element for each language', function () {
-      init({ query: 'foo', language: 'lucene' }, 'discover', true);
-      const luceneInput = $elem.find('.kuiLocalSearchInput');
-      expect(luceneInput.attr('placeholder')).to.be('Search... (e.g. status:200 AND extension:PHP)');
-
-      const helpLink = $elem.find('.kuiLocalSearchAssistedInput__assistance .kuiLink');
-      expect(helpLink.text().trim()).to.be('Uses lucene query syntax');
-
-      $parentScope.query = { query: 'foo', language: 'kuery' };
-      $parentScope.$digest();
-      const kueryInput = $elem.find('.kuiLocalSearchInput');
-      expect(kueryInput.attr('placeholder')).to.be('Search with kuery...');
     });
 
   });
