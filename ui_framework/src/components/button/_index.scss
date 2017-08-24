@@ -13,6 +13,10 @@ $kuiButtonColorDisabled: tintOrShade($kuiTextColor, 70%, 80%);
   transition: all $kuiAnimSpeedNormal $kuiAnimSlightBounce;
   whitespace: nowrap;
 
+  &:hover {
+    transform: translateY(-1px);
+  }
+
   &:hover, &:focus {
     text-decoration: underline;
   }
