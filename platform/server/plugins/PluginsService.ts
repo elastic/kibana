@@ -57,7 +57,7 @@ export class PluginsService implements CoreService {
     return readDirAsObservable(this.pluginsDir)
       .mergeMap(dirs => dirs)
       .map(name => {
-        const pluginPath = `${this.pluginsDir}/${name}/`;
+        const pluginPath = `${this.pluginsDir}/${name}/target/dist/`;
         const json = require(pluginPath);
 
         if (!('plugin' in json)) {

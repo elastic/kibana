@@ -1,0 +1,13 @@
+{
+  "name": "kbn-types",
+  "version": "0.0.1",
+  "main": "./lib",
+  "types": "./types/packages/kbn-types/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "start": "tsc --watch"
+  },
+  "devDependencies": {
+    "typescript": "2.5.1"
+  }
+}

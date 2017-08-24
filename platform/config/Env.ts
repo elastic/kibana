@@ -24,11 +24,8 @@ export class Env {
    * @internal
    */
   constructor(readonly homeDir: string, private readonly argv: WithConfig) {
-    // TODO Fix path, should not be `ts-tmp`, that was only to get stuff running
-    const platformDir = resolve(this.homeDir, 'ts-tmp');
-
     this.configDir = resolve(this.homeDir, 'config');
-    this.pluginsDir = resolve(platformDir, 'plugins');
+    this.pluginsDir = resolve(this.homeDir, 'core_plugins');
     this.binDir = resolve(this.homeDir, 'bin');
     this.logDir = resolve(this.homeDir, 'log');
     this.staticFilesDir = resolve(this.homeDir, 'ui');

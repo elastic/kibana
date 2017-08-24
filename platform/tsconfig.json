@@ -1,0 +1,10 @@
+{
+  "compilerOptions": {
+    "outDir": "../target/platform"
+  },
+  "extends": "../tsconfig",
+  "include": [
+    "**/*.ts",
+    "../types/index.d.ts"
+  ]
+}
