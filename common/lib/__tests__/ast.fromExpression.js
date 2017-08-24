@@ -16,7 +16,7 @@ describe('ast fromExpression', () => {
 
   describe('single item expression', () => {
     it('is a chain', () => {
-      const expression = 'whatever()';
+      const expression = 'whatever';
       expect(fromExpression(expression)).to.have.property('chain');
     });
 
@@ -26,7 +26,7 @@ describe('ast fromExpression', () => {
       let block;
 
       beforeEach(() => {
-        expression = 'csv()';
+        expression = 'csv';
         astObject = fromExpression(expression);
         block = astObject.chain[0];
       });
@@ -50,7 +50,7 @@ describe('ast fromExpression', () => {
       let block;
 
       beforeEach(() => {
-        expression = 'elasticsearch(index="logstash-*", oranges=bananas)';
+        expression = 'elasticsearch index="logstash-*" oranges=bananas';
         astObject = fromExpression(expression);
         block = astObject.chain[0];
       });
@@ -82,7 +82,7 @@ describe('ast fromExpression', () => {
       let block;
 
       beforeEach(() => {
-        expression = 'it(exampleFunction=someFunction(q="do something"))';
+        expression = 'it exampleFunction={someFunction q="do something"}';
         astObject = fromExpression(expression);
         block = astObject.chain[0];
       });
@@ -115,7 +115,7 @@ describe('ast fromExpression', () => {
       let block;
 
       beforeEach(() => {
-        expression = 'it(examplePartial=.somePartialFunction(q="do something"))';
+        expression = 'it examplePartial=.{somePartialFunction q="do something"}';
         astObject = fromExpression(expression);
         block = astObject.chain[0];
       });
