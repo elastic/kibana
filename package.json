@@ -150,6 +150,7 @@
     "less-loader": "2.2.3",
     "lodash": "3.10.1",
     "markdown-it": "8.3.2",
+    "mathjs": "3.16.2",
     "minimatch": "2.0.10",
     "mkdirp": "0.5.1",
     "moment": "2.13.0",

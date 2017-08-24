@@ -20,6 +20,7 @@ export default function calculateLabel(metric, metrics) {
 
   if (metric.type === 'count') return 'Count';
   if (metric.type === 'calculation') return 'Calculation';
+  if (metric.type === 'math') return 'Math';
   if (metric.type === 'series_agg') return `Series Agg (${metric.function})`;
   if (metric.type === 'filter_ratio') return 'Filter Ratio';
   if (metric.type === 'static') return `Static Value of ${metric.value}`;
