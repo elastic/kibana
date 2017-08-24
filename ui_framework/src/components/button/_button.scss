@@ -1,7 +1,7 @@
 // Our base button
 .kuiButton {
   @include kuiButton;
-  @include kuiBottomShadowMedium;
+  @include kuiSlightShadow;
 
   border-radius: $kuiBorderRadius;
   min-width: $kuiSize * 7;
@@ -24,6 +24,7 @@
 
   &:hover, &:focus {
     background-color: transparentize($kuiColorPrimary, .9);
+    @include kuiSlightShadowFocus;
   }
 
   &:disabled {
