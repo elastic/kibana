@@ -10,7 +10,6 @@ export const AdvancedFailureComponent = (props) => {
     onValueChange,
     defaultValue,
     argExpression,
-    argValueAst,
     updateArgExpression,
     resetErrorState,
   } = props;
@@ -19,7 +18,7 @@ export const AdvancedFailureComponent = (props) => {
     ev.preventDefault();
 
     resetErrorState(); // when setting a new value, attempt to reset the error state
-    return onValueChange(fromExpressionString(argExpression, argValueAst.type));
+    return onValueChange(fromExpressionString(argExpression.trim()));
   };
 
   const confirmReset = (ev) => {
@@ -27,13 +26,8 @@ export const AdvancedFailureComponent = (props) => {
 
     resetErrorState(); // when setting a new value, attempt to reset the error state
     // TODO: fix this! Super hacky... we try the default as an expression first, and then fall back to a string
-    try {
-      const newArgValue = fromExpressionString(defaultValue, 'expression');
-      onValueChange(newArgValue);
-    } catch (e) {
-      const newArgValue = fromExpressionString(defaultValue);
-      onValueChange(newArgValue);
-    }
+    const newArgValue = fromExpressionString(defaultValue, 'expression');
+    onValueChange(newArgValue);
   };
 
   return (
@@ -62,21 +56,15 @@ export const AdvancedFailureComponent = (props) => {
 AdvancedFailureComponent.propTypes = {
   onValueChange: PropTypes.func.isRequired,
   defaultValue: PropTypes.string.isRequired,
-  argValueAst: PropTypes.object.isRequired,
   argExpression: PropTypes.string.isRequired,
   updateArgExpression: PropTypes.func.isRequired,
   resetErrorState: PropTypes.func.isRequired,
 };
 
 export const AdvancedFailure = compose(
-  withProps(({ argValue }) => {
-    const argValueAst = toExpressionAst(argValue);
-
-    return {
-      argValueAst,
-      argExpression: toExpressionString(argValueAst),
-    };
-  }),
+  withProps(({ argValue }) => ({
+    argExpression: toExpressionString(toExpressionAst(argValue)),
+  })),
   statefulProp('argExpression', 'updateArgExpression')
 )(AdvancedFailureComponent);
 

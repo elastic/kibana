@@ -7,3 +7,11 @@ export function getType(node) {
 
   return typeof node;
 }
+
+export function getStringType(str) {
+  if (typeof str !== 'string') return getType(str);
+  if (str == null) return 'null';
+  if (str === 'true' || str === 'false') return 'boolean';
+  if (!isNaN(Number(str))) return 'number';
+  return 'string';
+}

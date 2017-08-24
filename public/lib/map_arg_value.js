@@ -1,6 +1,6 @@
 import { parse } from 'mathjs';
 import { toExpression, fromExpression } from '../../common/lib/ast';
-import { getType } from '../../common/types/get_type';
+import { getStringType } from '../../common/types/get_type';
 
 function isExpressionOrPartial(arg) {
   return arg.type === 'expression' || arg.type === 'partial';
@@ -100,11 +100,22 @@ export function toExpressionAst(argValue, batch = true) {
 export function toExpressionString(argValue) {
   if (!argValue) return '';
   if (isExpressionOrPartial(argValue)) return toExpression(argValue);
-  return argValue.value;
+  return `"${argValue.value}"`;
 }
 
-// type here should be a value type, taken from an expression AST, not an interface AST
-export function fromExpressionString(argExpression, type) {
-  if (type === 'function' || type === 'expression' || type === 'partial') return fromExpression(argExpression);
-  return { type: type || getType(argExpression), value: argExpression };
+// the value should be quoted if it is not supposed to go through the expression parser
+export function fromExpressionString(argExpression) {
+  // if value is quoted, strip quotes and set type to string
+  if (argExpression.match(/^\".+\"$/)) {
+    const value = argExpression.substr(1, argExpression.length - 2);
+    return { type: 'string', value };
+  }
+
+  try {
+    // attempt to parse the expression into an ast
+    return fromExpression(argExpression);
+  } catch (e) {
+    // fall back to simple type checking
+    return { type: getStringType(argExpression), value: argExpression };
+  }
 }
