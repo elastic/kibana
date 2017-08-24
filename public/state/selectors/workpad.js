@@ -1,4 +1,4 @@
-import { get, find, findIndex } from 'lodash';
+import { get, find, findIndex, map } from 'lodash';
 import { fromExpression } from '../../../common/lib/ast';
 
 // workpad getters
@@ -35,6 +35,14 @@ export function getWorkpadName(state) {
 
 export function getWorkpadColors(state) {
   return get(state, 'persistent.workpad.colors');
+}
+
+export function getAllElements(state) {
+  return getPages(state).reduce((elements, page) => elements.concat(page.elements), []);
+}
+
+export function getGlobalFilterExpression(state) {
+  return map(getAllElements(state), 'filter').filter(str => str != null && str.length).join('.');
 }
 
 // element getters

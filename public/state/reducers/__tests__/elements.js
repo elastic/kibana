@@ -23,7 +23,7 @@ describe('elements reducer', () => {
           expression: '',
         }, {
           id: 'element-1',
-          expression: 'demodata()',
+          expression: 'demodata',
         }],
       }],
     };

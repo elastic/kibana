@@ -8,7 +8,7 @@ export default new Element('table', {
   displayName: 'Data Table',
   description: 'A scrollable grid for displaying data in a tabluar format',
   image: header,
-  expression: 'demodata().render()',
+  expression: 'demodata | render',
   render(domNode, config, done) {
     ReactDOM.render((<Datatable datatable={config}/>), domNode);
     done();

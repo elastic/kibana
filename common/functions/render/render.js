@@ -13,7 +13,7 @@ export default new Fn({
   args: {
     as: {
       types: ['string', 'null'],
-      help: 'The element type to use in rendering. You probably want a specialized function instead, such as plot() or grid()',
+      help: 'The element type to use in rendering. You probably want a specialized function instead, such as plot or grid',
     },
     css: {
       types: ['string', 'null'],

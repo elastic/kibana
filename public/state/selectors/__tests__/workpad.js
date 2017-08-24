@@ -46,7 +46,7 @@ describe('workpad selectors', () => {
               expression: '',
             }, {
               id: 'element-1',
-              expression: 'demodata()',
+              expression: 'demodata',
             }],
           }],
         },
