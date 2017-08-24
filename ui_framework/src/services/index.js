@@ -1,6 +1,6 @@
-// Export all keycodes under a `keycodes` named variable
-import * as keycodes from './key_codes';
-export { keycodes };
+// Export all keyCodes under a `keyCodes` named variable
+import * as keyCodes from './key_codes';
+export { keyCodes };
 
 export {
   accessibleClickKeys,

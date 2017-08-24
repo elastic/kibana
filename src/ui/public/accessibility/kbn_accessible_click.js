@@ -20,7 +20,7 @@
 
 import {
   accessibleClickKeys,
-  keycodes,
+  keyCodes,
 } from 'ui_framework/services';
 import { uiModules } from 'ui/modules';
 
@@ -31,7 +31,7 @@ uiModules.get('kibana')
     controller: $element => {
       $element.on('keydown', e => {
         // Prevent a scroll from occurring if the user has hit space.
-        if (e.keyCode === keycodes.SPACE) {
+        if (e.keyCode === keyCodes.SPACE) {
           e.preventDefault();
         }
       });

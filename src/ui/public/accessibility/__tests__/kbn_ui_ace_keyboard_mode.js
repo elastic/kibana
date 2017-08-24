@@ -3,7 +3,7 @@ import sinon from 'sinon';
 import expect from 'expect.js';
 import ngMock from 'ng_mock';
 import '../kbn_ui_ace_keyboard_mode';
-import { keycodes } from 'ui_framework/services';
+import { keyCodes } from 'ui_framework/services';
 
 describe('kbnUiAceKeyboardMode directive', () => {
   let element;
@@ -27,7 +27,7 @@ describe('kbnUiAceKeyboardMode directive', () => {
       const textarea = element.find('textarea');
       sinon.spy(textarea[0], 'focus');
       const ev = angular.element.Event('keydown'); // eslint-disable-line new-cap
-      ev.keyCode = keycodes.ENTER;
+      ev.keyCode = keyCodes.ENTER;
       element.find('.uiAceKeyboardHint').trigger(ev);
       expect(textarea[0].focus.called).to.be(true);
       expect(element.find('.uiAceKeyboardHint').hasClass('uiAceKeyboardHint-isInactive')).to.be(true);
@@ -38,7 +38,7 @@ describe('kbnUiAceKeyboardMode directive', () => {
       const hint = element.find('.uiAceKeyboardHint');
       sinon.spy(hint[0], 'focus');
       const ev = angular.element.Event('keydown'); // eslint-disable-line new-cap
-      ev.keyCode = keycodes.ESCAPE;
+      ev.keyCode = keyCodes.ESCAPE;
       textarea.trigger(ev);
       expect(hint[0].focus.called).to.be(true);
       expect(hint.hasClass('uiAceKeyboardHint-isInactive')).to.be(false);
@@ -77,7 +77,7 @@ describe('kbnUiAceKeyboardModeService', () => {
       const textarea = element.find('textarea');
       sinon.spy(textarea[0], 'focus');
       const ev = angular.element.Event('keydown'); // eslint-disable-line new-cap
-      ev.keyCode = keycodes.ENTER;
+      ev.keyCode = keyCodes.ENTER;
       element.find('.uiAceKeyboardHint').trigger(ev);
       expect(textarea[0].focus.called).to.be(true);
       expect(element.find('.uiAceKeyboardHint').hasClass('uiAceKeyboardHint-isInactive')).to.be(true);
@@ -88,7 +88,7 @@ describe('kbnUiAceKeyboardModeService', () => {
       const hint = element.find('.uiAceKeyboardHint');
       sinon.spy(hint[0], 'focus');
       const ev = angular.element.Event('keydown'); // eslint-disable-line new-cap
-      ev.keyCode = keycodes.ESCAPE;
+      ev.keyCode = keyCodes.ESCAPE;
       textarea.trigger(ev);
       expect(hint[0].focus.called).to.be(true);
       expect(hint.hasClass('uiAceKeyboardHint-isInactive')).to.be(false);

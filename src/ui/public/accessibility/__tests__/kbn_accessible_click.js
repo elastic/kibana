@@ -3,7 +3,7 @@ import sinon from 'sinon';
 import expect from 'expect.js';
 import ngMock from 'ng_mock';
 import '../kbn_accessible_click';
-import { keycodes } from 'ui_framework/services';
+import { keyCodes } from 'ui_framework/services';
 
 describe('kbnAccessibleClick directive', () => {
   let $compile;
@@ -89,14 +89,14 @@ describe('kbnAccessibleClick directive', () => {
 
     it(`on ENTER keyup`, () => {
       const e = angular.element.Event('keyup'); // eslint-disable-line new-cap
-      e.keyCode = keycodes.ENTER;
+      e.keyCode = keyCodes.ENTER;
       element.trigger(e);
       sinon.assert.calledOnce(scope.handleClick);
     });
 
     it(`on SPACE keyup`, () => {
       const e = angular.element.Event('keyup'); // eslint-disable-line new-cap
-      e.keyCode = keycodes.SPACE;
+      e.keyCode = keyCodes.SPACE;
       element.trigger(e);
       sinon.assert.calledOnce(scope.handleClick);
     });
