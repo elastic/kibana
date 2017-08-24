@@ -21,7 +21,7 @@ $kuiButtonColorDisabled: tintOrShade($kuiTextColor, 70%, 80%);
     text-decoration: underline;
   }
 
-  &:focus {
+  &:focus, &:active {
     animation: kuiButtonFocus $kuiAnimSpeedNormal $kuiAnimSlightBounce;
   }
 }
