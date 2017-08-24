@@ -1,7 +1,7 @@
 import expect from 'expect.js';
-import { toInterfaceValue } from '../map_arg_value';
+import { toInterfaceAst } from '../map_arg_value';
 
-describe('mapArgValue.toInterfaceValue', () => {
+describe('mapArgValue.toInterfaceAst', () => {
   describe('expressions', () => {
     it('turns "expression" chain into parsed expression string', () => {
       const argValue = {
@@ -18,7 +18,7 @@ describe('mapArgValue.toInterfaceValue', () => {
         }],
       };
 
-      expect(toInterfaceValue(argValue)).to.eql({
+      expect(toInterfaceAst(argValue)).to.eql({
         type: 'expression',
         value: 'csv "stuff\nthings"',
         function: null,
@@ -43,7 +43,7 @@ describe('mapArgValue.toInterfaceValue', () => {
         }],
       };
 
-      expect(toInterfaceValue(argValue)).to.eql({
+      expect(toInterfaceAst(argValue)).to.eql({
         type: 'partial',
         value: 'partial "i am a partial"',
         function: null,
@@ -63,12 +63,12 @@ describe('mapArgValue.toInterfaceValue', () => {
     });
 
     it('is a math type', () => {
-      expect(toInterfaceValue(argValue)).to.have.property('type', 'math');
+      expect(toInterfaceAst(argValue)).to.have.property('type', 'math');
     });
 
     it('extracts column and function', () => {
-      expect(toInterfaceValue(argValue)).to.have.property('value', 'cost');
-      expect(toInterfaceValue(argValue)).to.have.property('function', 'median');
+      expect(toInterfaceAst(argValue)).to.have.property('value', 'cost');
+      expect(toInterfaceAst(argValue)).to.have.property('function', 'median');
     });
   });
 
@@ -83,12 +83,12 @@ describe('mapArgValue.toInterfaceValue', () => {
     });
 
     it('is a math type', () => {
-      expect(toInterfaceValue(argValue)).to.have.property('type', 'math');
+      expect(toInterfaceAst(argValue)).to.have.property('type', 'math');
     });
 
     it('does not extract the column or function', () => {
-      expect(toInterfaceValue(argValue)).to.have.property('value', 'median(cost + 100)');
-      expect(toInterfaceValue(argValue)).to.have.property('function', null);
+      expect(toInterfaceAst(argValue)).to.have.property('value', 'median(cost + 100)');
+      expect(toInterfaceAst(argValue)).to.have.property('function', null);
     });
 
     it('handles parens values', () => {
@@ -97,7 +97,7 @@ describe('mapArgValue.toInterfaceValue', () => {
         value: '(testing)',
       };
 
-      expect(toInterfaceValue(value)).to.eql({
+      expect(toInterfaceAst(value)).to.eql({
         type: 'math',
         value: '(testing)',
         function: null,

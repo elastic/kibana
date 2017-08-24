@@ -5,15 +5,12 @@ import { ArgType } from '../arg_type';
 
 const template = ({ typeInstance, onValueChange, argValue }) => {
   // Why is this neccesary? Does the dialog really need to know what parameter it is setting?
-  const { name } = typeInstance;
   const choices = typeInstance.options.choices;
 
   function handleChange(ev) {
     onValueChange({
-      [name]: [{
-        type: 'string',
-        value: ev.target.value,
-      }],
+      type: 'string',
+      value: ev.target.value,
     });
   }
 

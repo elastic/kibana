@@ -28,22 +28,20 @@ export const extendedTemplate = (props) => {
   return (
     <Form onSubmit={() => false}>
       <div className="canvas__argtype--seriesStyle">
-        {name !== 'defaultStyle' &&
-          (
-            <FormGroup>
-              <FormControl
-                componentClass="select"
-                placeholder="Select Series"
-                value={selectedSeries}
-                onChange={ev => handleChange('label', ev)}
-              >
-                <option value={null} disabled>Select a Series Label</option>
-                { labels.sort().map(val => <option key={val} value={val}>{val}</option>) }
-              </FormControl>
-              <ControlLabel>Series Identifier</ControlLabel>
-            </FormGroup>
-          )
-        }
+        {name !== 'defaultStyle' && (
+          <FormGroup>
+            <FormControl
+              componentClass="select"
+              placeholder="Select Series"
+              value={selectedSeries}
+              onChange={ev => handleChange('label', ev)}
+            >
+              <option value={null} disabled>Select a Series Label</option>
+              { labels.sort().map(val => <option key={val} value={val}>{val}</option>) }
+            </FormControl>
+            <ControlLabel>Series Identifier</ControlLabel>
+          </FormGroup>
+        )}
         <FormGroup>
           <div className="canvas__argtype--seriesStyle--properties">
             <LabeledSelect label="Line" argName="lines" value={get(chainArgs, 'lines.0.value', 0)} onChange={handleChange} />
@@ -61,5 +59,5 @@ extendedTemplate.propTypes = {
   argValue: PropTypes.object.isRequired,
   typeInstance: PropTypes.object,
   labels: PropTypes.array.isRequired,
-  setLabel: PropTypes.func.isRequired,
+  renderError: PropTypes.func,
 };
