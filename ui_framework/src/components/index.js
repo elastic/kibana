@@ -6,6 +6,7 @@ export {
 export {
   KuiButton,
   KuiButtonEmpty,
+  KuiButtonIcon,
 } from './button';
 
 export {
@@ -45,6 +46,7 @@ export {
   KuiValidatableControl,
 } from './form';
 
+
 export {
   KuiHeader,
   KuiHeaderBreadcrumb,
@@ -55,6 +57,10 @@ export {
   KuiHeaderSectionItem,
   KuiHeaderSectionItemButton,
 } from './header';
+
+export {
+  KuiHorizontalRule,
+} from './horizontal_rule';
 
 export {
   ICON_TYPES,
@@ -105,6 +111,10 @@ export {
   KuiPageHeaderSection,
   KuiPageSideBar,
 } from './page';
+
+export {
+  KuiPagination,
+} from './pagination';
 
 export {
   KuiPopover,

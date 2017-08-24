@@ -1,0 +1,35 @@
+.kuiHorizontalRule {
+  border: none;
+  height: 1px;
+  background-color: $kuiBorderColor;
+
+  &.kuiHorizontalRule--full {
+    width: 100%;
+  }
+
+  &.kuiHorizontalRule--half {
+    width: 50%;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  &.kuiHorizontalRule--quarter {
+    width: 25%;
+    margin-left: auto;
+    margin-right: auto;
+  }
+}
+
+$ruleMargins: (
+  marginSmall: $kuiSizeS,
+  marginMedium: $kuiSizeM,
+  marginLarge: $kuiSizeL,
+  marginXLarge: $kuiSizeXL,
+  marginXXLarge: $kuiSizeXXL,
+);
+
+@each $name, $size in $ruleMargins {
+  .kuiHorizontalRule--#{$name} {
+    margin: $size 0;
+  }
+}
