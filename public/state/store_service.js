@@ -1,12 +1,10 @@
-import { createStore } from 'redux';
 import { uiModules } from 'ui/modules';
-import getInitialState from './initial_state';
-import middleware from './middleware';
-import getRootReducer from './reducers';
 import { historyProvider } from '../lib/history_provider';
 import { onStart } from './on_start';
 import { uniqBy } from 'lodash';
 import { functions as clientFunctionsRegistry } from '../lib/functions';
+import getInitialState from './initial_state';
+import { setStore } from './store';
 
 const app = uiModules.get('apps/canvas');
 
@@ -24,8 +22,7 @@ app.service('$store', (kbnVersion, basePath, serverFunctions) => {
     ready: true,
   };
 
-  const rootReducer = getRootReducer(initialState);
-  const store = createStore(rootReducer, initialState, middleware);
+  const store = setStore(initialState);
 
   // replace history, to ensure back always works correctly
   const { persistent } = store.getState();
@@ -33,7 +30,7 @@ app.service('$store', (kbnVersion, basePath, serverFunctions) => {
   history.replace(persistent);
 
   // debugging
-  window.store = store;
+  window.canvasStore = store;
   onStart(store);
 
   return store;
