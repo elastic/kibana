@@ -27,6 +27,9 @@ import IconExample
 import HeaderExample
   from '../../views/header/header_example';
 
+import HorizontalRuleExample
+  from '../../views/horizontal_rule/horizontal_rule_example';
+
 import KeyPadMenuExample
   from '../../views/key_pad_menu/key_pad_menu_example';
 
@@ -41,6 +44,9 @@ import ModalExample
 
 import PageExample
   from '../../views/page/page_example';
+
+import PaginationExample
+  from '../../views/pagination/pagination_example';
 
 import LoadingExample
   from '../../views/loading/loading_example';
@@ -97,6 +103,10 @@ const components = [{
   component: HeaderExample,
   hasReact: true,
 }, {
+  name: 'HorizontalRule',
+  component: HorizontalRuleExample,
+  hasReact: true,
+}, {
   name: 'Icon',
   component: IconExample,
   hasReact: true,
@@ -119,6 +129,10 @@ const components = [{
 }, {
   name: 'Page',
   component: PageExample,
+  hasReact: true,
+}, {
+  name: 'Pagination',
+  component: PaginationExample,
   hasReact: true,
 }, {
   name: 'Popover',

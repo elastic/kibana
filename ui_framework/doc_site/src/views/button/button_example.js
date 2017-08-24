@@ -27,6 +27,10 @@ import ButtonOptionFlush from './button_empty_flush';
 const buttonOptionFlushSource = require('!!raw!./button_empty_flush');
 const buttonOptionFlushHtml = renderToHtml(ButtonOptionFlush);
 
+import ButtonIcon from './button_icon';
+const buttonIconSource = require('!!raw!./button_icon');
+const buttonIconHtml = renderToHtml(ButtonIcon);
+
 export default props => (
   <GuidePage title={props.route.name}>
     <GuideSection
@@ -102,6 +106,24 @@ export default props => (
 
       <GuideDemo>
         <ButtonOptionFlush />
+      </GuideDemo>
+    </GuideSection>
+    <GuideSection
+      title="Button Icon"
+      source={[{
+        type: GuideSectionTypes.JS,
+        code: buttonIconSource,
+      }, {
+        type: GuideSectionTypes.HTML,
+        code: buttonIconHtml,
+      }]}
+    >
+      <GuideText>
+        Button icons are buttons that only contain an icon (no text).
+      </GuideText>
+
+      <GuideDemo>
+        <ButtonIcon />
       </GuideDemo>
     </GuideSection>
   </GuidePage>

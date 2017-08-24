@@ -29,6 +29,19 @@
   &.kuiFlexGroup--justifyContentFlexEnd {
     justify-content: flex-end;
   }
+
+  // Align Items
+  &.kuiFlexGroup--alignItemsStart {
+    align-items: flex-start;
+  }
+
+  &.kuiFlexGroup--alignItemsCenter {
+    align-items: center;
+  }
+
+  &.kuiFlexGroup--alignItemsFlexEnd {
+    align-items: flex-end;
+  }
 }
 
 $gutterTypes: (

@@ -1,0 +1,54 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`KuiPagination is rendered 1`] = `
+<div
+  aria-label="aria-label"
+  class="kuiPagination testClass1 testClass2"
+  data-test-subj="test subject string"
+>
+  <button
+    class="kuiButtonEmpty kuiButtonEmpty--primary kuiButtonEmpty--small kuiPaginationButton"
+  >
+    <span
+      class="kuiButtonEmpty__content"
+    >
+      <svg
+        aria-hidden="true"
+        class="kuiIcon kuiButtonEmpty__icon kuiIcon--medium"
+      >
+        <title>
+          arrow left icon
+        </title>
+        <use
+          href="#arrow_left"
+        />
+      </svg>
+      <span>
+        Previous
+      </span>
+    </span>
+  </button>
+  <button
+    class="kuiButtonEmpty kuiButtonEmpty--primary kuiButtonEmpty--small kuiButtonEmpty--iconRight kuiPaginationButton"
+  >
+    <span
+      class="kuiButtonEmpty__content"
+    >
+      <svg
+        aria-hidden="true"
+        class="kuiIcon kuiButtonEmpty__icon kuiIcon--medium"
+      >
+        <title>
+          arrow right icon
+        </title>
+        <use
+          href="#arrow_right"
+        />
+      </svg>
+      <span>
+        Next
+      </span>
+    </span>
+  </button>
+</div>
+`;
