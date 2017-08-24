@@ -15,7 +15,7 @@
 import angular from 'angular';
 import { uiModules } from 'ui/modules';
 import './kbn_ui_ace_keyboard_mode.less';
-import { ESC_KEY_CODE, ENTER_KEY } from 'ui_framework/services';
+import { keyCodes } from 'ui_framework/services';
 
 let aceKeyboardModeId = 0;
 
@@ -53,7 +53,7 @@ uiModules.get('kibana')
     }
 
     hint.keydown((ev) => {
-      if (ev.keyCode === ENTER_KEY) {
+      if (ev.keyCode === keyCodes.ENTER) {
         ev.preventDefault();
         startEditing();
       }
@@ -64,7 +64,7 @@ uiModules.get('kibana')
     });
 
     uiAceTextbox.keydown((ev) => {
-      if (ev.keyCode === ESC_KEY_CODE) {
+      if (ev.keyCode === keyCodes.ESCAPE) {
         ev.preventDefault();
         ev.stopPropagation();
         enableOverlay();
