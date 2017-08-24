@@ -1,7 +1,5 @@
-import {
-  cloneElement,
-  PropTypes,
-} from 'react';
+import PropTypes from 'prop-types';
+import { cloneElement } from 'react';
 import classNames from 'classnames';
 
 
