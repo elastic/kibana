@@ -18,6 +18,7 @@ export class FunctionForm extends BaseForm {
   renderArg(props, dataArg) {
     const { onValueRemove, onValueChange, ...passedProps } = props;
     const { arg, argValues, skipRender } = dataArg;
+    const { argType, expressionIndex } = passedProps;
 
     // TODO: show some information to the user than an argument was skipped
     if (!arg || skipRender) return null;
@@ -25,6 +26,7 @@ export class FunctionForm extends BaseForm {
     // If value in expression, render the argument's template, wrapped in a remove control
     return argValues && argValues.map((argValue, valueIndex) =>
       arg.render({
+        key: `${argType}-${expressionIndex}-${arg.name}-${valueIndex}`,
         ...passedProps,
         valueIndex,
         argValue,
@@ -82,9 +84,10 @@ export class FunctionForm extends BaseForm {
     try {
       // allow a hook to override the data args
       const resolvedDataArgs = dataArgs.map(d => ({ ...d, ...this.resolveArg(d, props) }));
+
       return resolvedDataArgs
-        .map(d => this.renderArg(props, d)) // Argument forms
-        .concat(resolvedDataArgs.map(d => this.renderAddArg(props, d))); // Buttons for adding more arguments
+      .map(d => this.renderArg(props, d)) // Argument forms
+      .concat(resolvedDataArgs.map(d => this.renderAddArg(props, d))); // Buttons for adding more arguments
     } catch (e) {
       return (<Alert bsStyle="danger">
         <h4>Expression rendering error</h4>

@@ -47,4 +47,5 @@ export const simpleTemplate = (props) => {
 simpleTemplate.propTypes = {
   onValueChange: PropTypes.func.isRequired,
   argValue: PropTypes.object.isRequired,
+  renderError: PropTypes.func,
 };

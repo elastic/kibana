@@ -4,14 +4,11 @@ import PropTypes from 'prop-types';
 import './function_form.less';
 
 // compose the above branch components, to short-circuit rending this ArgType component
-export const FunctionFormComponent = (props) => {
-  const { expressionType, ...passedProps } = props;
-  return (
-    <div className="canvas__function">
-      { expressionType.render(passedProps) }
-    </div>
-  );
-};
+export const FunctionFormComponent = ({ expressionType, ...passedProps }) => (
+  <div className="canvas__function">
+    { expressionType.render(passedProps) }
+  </div>
+);
 
 FunctionFormComponent.propTypes = {
   args: PropTypes.object.isRequired,

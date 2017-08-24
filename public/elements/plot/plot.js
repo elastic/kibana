@@ -14,8 +14,6 @@ export default new Element('plot', {
     // TODO: OH NOES
     if (!includes($.plot.plugins, size)) $.plot.plugins.push(size);
 
-    console.log(config);
-
     config.options.legend.labelBoxBorderColor = 'transparent';
     const plot = $.plot($(domNode), config.data, config.options);
 

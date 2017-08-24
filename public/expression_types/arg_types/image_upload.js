@@ -14,10 +14,8 @@ const template = ({ typeInstance, onValueChange, setLoading, isLoading }) => {
     encode(upload).then((res) => {
       setLoading(false);
       onValueChange({
-        [name]: [{
-          type: 'string',
-          value: res,
-        }],
+        type: 'string',
+        value: res,
       });
     });
   }

@@ -1,8 +1,8 @@
-import React from 'react';
+import { createEagerElement } from 'recompose';
 import { pick, isUndefined } from 'lodash';
 import { ArgForm } from '../components/arg_form';
 import { argTypeRegistry } from './arg_type';
-import { toInterfaceValue } from '../lib/map_arg_value';
+import { toInterfaceAst } from '../lib/map_arg_value';
 
 export class Arg {
   constructor(name, props) {
@@ -27,26 +27,25 @@ export class Arg {
     });
   }
 
-  // TODO: Document what these props are. Maybe make them named arguments?
-  render({ onValueChange, onValueRemove, argValue, ...props }) {
-
+  // TODO: Document what these otherProps are. Maybe make them named arguments?
+  render({ onValueChange, onValueRemove, argValue, key, ...otherProps }) {
     // This is everything the template needs to render
     const templateProps = {
-      ...props,
-      ...this.resolve(props),
+      ...otherProps,
+      ...this.resolve(otherProps),
       onValueChange,
-      argValue: toInterfaceValue(argValue, this.multi),
+      argValue: toInterfaceAst(argValue, this.multi),
       typeInstance: this,
     };
 
-    return (
-      <ArgForm
-        argTypeInstance={this}
-        onValueChange={onValueChange}
-        onValueRemove={onValueRemove}
-        templateProps={templateProps}/>
-    );
+    const formProps = {
+      key,
+      argTypeInstance: this,
+      onValueChange,
+      onValueRemove,
+      templateProps,
+    };
 
-
+    return createEagerElement(ArgForm, formProps);
   }
 }

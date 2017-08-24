@@ -1,7 +1,7 @@
 import expect from 'expect.js';
-import { toAstValue } from '../map_arg_value';
+import { toExpressionAst } from '../map_arg_value';
 
-describe('mapArgValue.toAstValue', () => {
+describe('mapArgValue.toExpressionAst', () => {
   describe('expressions and partials', () => {
     it('returns the "expression" value as the ast', () => {
       const argValue = {
@@ -10,7 +10,7 @@ describe('mapArgValue.toAstValue', () => {
         function: null,
       };
 
-      expect(toAstValue(argValue)).to.eql({
+      expect(toExpressionAst(argValue)).to.eql({
         type: 'expression',
         chain: [{
           type: 'function',
@@ -32,7 +32,7 @@ describe('mapArgValue.toAstValue', () => {
         function: null,
       };
 
-      expect(toAstValue(argValue)).to.eql({
+      expect(toExpressionAst(argValue)).to.eql({
         type: 'partial',
         chain: [{
           type: 'function',
@@ -58,7 +58,7 @@ describe('mapArgValue.toAstValue', () => {
         function: null,
       }];
 
-      expect(toAstValue(argValue)).to.eql([{
+      expect(toExpressionAst(argValue)).to.eql([{
         type: 'expression',
         chain: [{
           type: 'function',
@@ -94,7 +94,7 @@ describe('mapArgValue.toAstValue', () => {
         function: 'median',
       };
 
-      expect(toAstValue(argValue)).to.eql({
+      expect(toExpressionAst(argValue)).to.eql({
         type: 'string',
         value: 'median(cost)',
         function: null,
@@ -108,7 +108,7 @@ describe('mapArgValue.toAstValue', () => {
         function: null,
       };
 
-      expect(toAstValue(argValue)).to.eql({
+      expect(toExpressionAst(argValue)).to.eql({
         type: 'string',
         value: 'sum(cost + 100)',
         function: null,
@@ -122,7 +122,7 @@ describe('mapArgValue.toAstValue', () => {
         function: '',
       };
 
-      expect(toAstValue(argValue)).to.eql({
+      expect(toExpressionAst(argValue)).to.eql({
         type: 'string',
         value: 'sum(cost + 100)',
         function: null,
@@ -144,7 +144,7 @@ describe('mapArgValue.toAstValue', () => {
         function: '',
       }];
 
-      expect(toAstValue(argValue)).to.eql([{
+      expect(toExpressionAst(argValue)).to.eql([{
         type: 'string',
         value: 'median(cost)',
         function: null,

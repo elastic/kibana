@@ -1,5 +1,10 @@
 import { parse } from 'mathjs';
 import { toExpression, fromExpression } from '../../common/lib/ast';
+import { getType } from '../../common/types/get_type';
+
+function isExpressionOrPartial(arg) {
+  return arg.type === 'expression' || arg.type === 'partial';
+}
 
 function mapToMathValue(mathObj, { value, function: fn }) {
   // if there's a single SymbolNode argument, map to the value
@@ -41,15 +46,11 @@ function mapFromMathValue(argValue) {
 }
 
 function mapFromFunctionValue(argValue) {
-  const isExpression = argValue.type === 'expression';
-  const isPartial = argValue.type === 'partial';
-
-  if (!isExpression && !isPartial) return argValue;
-
+  if (!isExpressionOrPartial(argValue)) return argValue;
   return fromExpression(argValue.value);
 }
 
-export function toInterfaceValue(argValue) {
+export function toInterfaceAst(argValue) {
   if (argValue == null) {
     return {
       type: 'string',
@@ -61,7 +62,7 @@ export function toInterfaceValue(argValue) {
   const { function: fn, type, value, chain } = argValue;
 
   // if argValue is a function, set the value to its expression string
-  if (argValue.type === 'expression' || argValue.type === 'partial') {
+  if (isExpressionOrPartial(argValue)) {
     return {
       type,
       chain,
@@ -89,11 +90,21 @@ export function toInterfaceValue(argValue) {
   };
 }
 
-export function toAstValue(argValue) {
-  if (Array.isArray(argValue)) {
-    const values = argValue.map(mapFromMathValue);
-    return values.map(mapFromFunctionValue);
-  }
+export function toExpressionAst(argValue, batch = true) {
+  if (batch && Array.isArray(argValue)) return argValue.map(val => toExpressionAst(val, false));
 
   return mapFromFunctionValue(mapFromMathValue(argValue));
+}
+
+// function assumes an expression AST, an interface AST will not work correctly here
+export function toExpressionString(argValue) {
+  if (!argValue) return '';
+  if (isExpressionOrPartial(argValue)) return toExpression(argValue);
+  return argValue.value;
+}
+
+// type here should be a value type, taken from an expression AST, not an interface AST
+export function fromExpressionString(argExpression, type) {
+  if (type === 'function' || type === 'expression' || type === 'partial') return fromExpression(argExpression);
+  return { type: type || getType(argExpression), value: argExpression };
 }

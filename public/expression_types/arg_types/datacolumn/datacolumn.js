@@ -3,14 +3,14 @@ import PropTypes from 'prop-types';
 import { FormControl } from 'react-bootstrap';
 import { MathExpression } from './math_expression';
 import { ArgType } from '../../arg_type';
-import { toAstValue } from '../../../lib/map_arg_value';
+import { toExpressionAst } from '../../../lib/map_arg_value';
 import './datacolumn.less';
 
 const simpleTemplate = ({ onValueChange, columns, argValue }) => {
   const inputRefs = {};
 
-  const updateValue = (valueType) => () => {
-    onValueChange(toAstValue({
+  const updateFunctionValue = (valueType) => () => {
+    onValueChange(toExpressionAst({
       type: valueType,
       value: inputRefs.value.value,
       function: inputRefs.fn.value,
@@ -26,14 +26,14 @@ const simpleTemplate = ({ onValueChange, columns, argValue }) => {
             <MathExpression
               value={argVal.function}
               inputRef={ref => inputRefs.fn = ref}
-              onChange={updateValue(argVal.type)}
+              onChange={updateFunctionValue(argVal.type)}
             />
             <FormControl
               componentClass="select"
               placeholder="select"
               value={argVal.value}
               inputRef={ref => inputRefs.value = ref}
-              onChange={updateValue(argVal.type)}
+              onChange={updateFunctionValue(argVal.type)}
             >
               <option value="select" disabled>select column</option>
               { columns.map(column => <option key={column.name} value={column.name}>{column.name}</option>) }
