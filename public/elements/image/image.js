@@ -7,7 +7,7 @@ export default new Element('image', {
   displayName: 'Image',
   description: 'A static image.',
   image: header,
-  expression: 'image(mode="contain").render()',
+  expression: 'image mode="contain" | render',
   render(domNode, config, done) {
     ReactDOM.render(<div style={{
       height: '100%',

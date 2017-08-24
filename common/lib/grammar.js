@@ -200,8 +200,8 @@ function peg$parse(input, options) {
       peg$c27 = function(chars) { return chars.join(''); },
       peg$c28 = "'",
       peg$c29 = peg$literalExpectation("'", false),
-      peg$c30 = /^[^"'(){}<>[\]!@#$%\^&*+-\/`|= \t\n\r]/,
-      peg$c31 = peg$classExpectation(["\"", "'", "(", ")", "{", "}", "<", ">", "[", "]", "!", "@", "#", "$", "%", "^", "&", "*", ["+", "/"], "`", "|", "=", " ", "\t", "\n", "\r"], true, false),
+      peg$c30 = /^[^"'(){}<>[\]!@$%\^&*+-\/`|= \t\n\r]/,
+      peg$c31 = peg$classExpectation(["\"", "'", "(", ")", "{", "}", "<", ">", "[", "]", "!", "@", "$", "%", "^", "&", "*", ["+", "/"], "`", "|", "=", " ", "\t", "\n", "\r"], true, false),
       peg$c32 = function(string) { // this also matches numbers via Number()
          var result = string.join('');
          // Sort of hacky, but PEG doesn't have backtracking so

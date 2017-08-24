@@ -20,7 +20,7 @@ describe('mapArgValue.toInterfaceValue', () => {
 
       expect(toInterfaceValue(argValue)).to.eql({
         type: 'expression',
-        value: 'csv("stuff\nthings")',
+        value: 'csv "stuff\nthings"',
         function: null,
         chain: argValue.chain,
       });
@@ -45,7 +45,7 @@ describe('mapArgValue.toInterfaceValue', () => {
 
       expect(toInterfaceValue(argValue)).to.eql({
         type: 'partial',
-        value: '.partial("i am a partial")',
+        value: 'partial "i am a partial"',
         function: null,
         chain: argValue.chain,
       });

@@ -26,7 +26,7 @@ function runInterpreter(ast, context = null, retry = false) {
     if (getType(renderable) === 'render') {
       return renderable;
     } else if (!context && !retry) {
-      return runInterpreter(fromExpression('render()'), renderable || context, true);
+      return runInterpreter(fromExpression('render'), renderable || context, true);
     }
 
     return new Error(`Ack! I don't know how to render a '${getType(renderable)}'`);
@@ -227,7 +227,7 @@ export const deleteArgumentAtIndex = createThunk('deleteArgumentAtIndex', ({ dis
 });
 
 /*
-  payload: element defaults. Eg {expression: 'foo()'}
+  payload: element defaults. Eg {expression: 'foo'}
 */
 export const addElement = createThunk('addElement', ({ dispatch }, pageId, element) => {
   const newElement = Object.assign({}, getDefaultElement(), omit(element, 'id'));

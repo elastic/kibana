@@ -27,8 +27,6 @@ The below is based on the flot bubble plugin, but with all the complex overlay l
 
 */
 
-// demodata().pointseries(x=time, y=project, size=.math('median(age)'), color='state').plot(palette=palette('#FF6F69', #FFCC5C, #79BD8F))
-
 const pluginName = 'simpleBubble';
 const pluginVersion = '0.1.0';
 

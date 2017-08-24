@@ -6,7 +6,7 @@ describe('mapArgValue.toAstValue', () => {
     it('returns the "expression" value as the ast', () => {
       const argValue = {
         type: 'expression',
-        value: 'csv("stuff\nthings")',
+        value: 'csv "stuff\nthings"',
         function: null,
       };
 
@@ -28,7 +28,7 @@ describe('mapArgValue.toAstValue', () => {
     it('returns the "partial" value as the ast', () => {
       const argValue = {
         type: 'expression',
-        value: '.partial("i am a partial")',
+        value: '.{partial "i am a partial"}',
         function: null,
       };
 
@@ -50,11 +50,11 @@ describe('mapArgValue.toAstValue', () => {
     it('returns array of values with asts', () => {
       const argValue = [{
         type: 'expression',
-        value: 'csv("stuff\nthings")',
+        value: 'csv "stuff\nthings"',
         function: null,
       }, {
         type: 'expression',
-        value: '.partial("i am a partial")',
+        value: '.{partial "i am a partial"}',
         function: null,
       }];
 

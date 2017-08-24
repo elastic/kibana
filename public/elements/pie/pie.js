@@ -7,7 +7,7 @@ export default new Element('pie', {
   displayName: 'Pie chart',
   description: 'An customizable element for making pie charts from your data',
   image: header,
-  expression: 'demodata().pointseries(x="time", y="sum(price)", color="state").pie().render()',
+  expression: 'demodata | pointseries x="time" y="sum(price)" color="state" | pie | render',
   render(domNode, config, done, events) {
     config.options.legend.labelBoxBorderColor = 'transparent';
     const plot = $.plot($(domNode), config.data, config.options);

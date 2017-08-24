@@ -7,7 +7,7 @@ export default new Element('debug', {
   displayName: 'Debug',
   description: 'Just dumps the configuration of the element',
   image: header,
-  expression: 'demodata().render(as=debug)',
+  expression: 'demodata | render as=debug',
   render(domNode, config, done) {
     ReactDOM.render(
       <div style={{ overflow: 'auto', height: '100%' }}>
