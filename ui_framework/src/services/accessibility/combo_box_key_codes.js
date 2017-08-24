@@ -10,7 +10,7 @@
 import {
   DOWN,
   ENTER,
-  ESCAPE as ESC,
+  ESCAPE,
   TAB,
   UP,
 } from '../key_codes';
@@ -18,7 +18,7 @@ import {
 export const comboBoxKeyCodes = {
   DOWN,
   ENTER,
-  ESC,
+  ESCAPE,
   TAB,
   UP,
 };
