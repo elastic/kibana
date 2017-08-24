@@ -431,7 +431,7 @@ table {
             transform: translateY(-1px); }
   .kuiButton:hover, .kuiButton:focus {
     text-decoration: underline; }
-  .kuiButton:focus {
+  .kuiButton:focus, .kuiButton:active {
     -webkit-animation: kuiButtonFocus 250ms cubic-bezier(0.34, 1.61, 0.7, 1);
             animation: kuiButtonFocus 250ms cubic-bezier(0.34, 1.61, 0.7, 1); }
   .kuiButton .kuiButton__content {
@@ -579,7 +579,7 @@ table {
             transform: translateY(-1px); }
   .kuiButtonEmpty:hover, .kuiButtonEmpty:focus {
     text-decoration: underline; }
-  .kuiButtonEmpty:focus {
+  .kuiButtonEmpty:focus, .kuiButtonEmpty:active {
     -webkit-animation: kuiButtonFocus 250ms cubic-bezier(0.34, 1.61, 0.7, 1);
             animation: kuiButtonFocus 250ms cubic-bezier(0.34, 1.61, 0.7, 1); }
   .kuiButtonEmpty .kuiButtonEmpty__content {
@@ -687,7 +687,7 @@ table {
             transform: translateY(-1px); }
   .kuiButtonIcon:hover, .kuiButtonIcon:focus {
     text-decoration: underline; }
-  .kuiButtonIcon:focus {
+  .kuiButtonIcon:focus, .kuiButtonIcon:active {
     -webkit-animation: kuiButtonFocus 250ms cubic-bezier(0.34, 1.61, 0.7, 1);
             animation: kuiButtonFocus 250ms cubic-bezier(0.34, 1.61, 0.7, 1); }
   .kuiButtonIcon .kuiButtonIcon__icon {
