@@ -1,9 +1,11 @@
-import clientdata from '../functions/clientdata/clientdata';
-import location from '../functions/location/location';
-import navigator from '../functions/navigator/navigator';
+import clientdata from './clientdata/clientdata';
+import location from './location/location';
+import navigator from './navigator/navigator';
+import filters from './filters/filters';
 
 export const clientFunctions = [
   clientdata,
   location,
   navigator,
+  filters,
 ];
