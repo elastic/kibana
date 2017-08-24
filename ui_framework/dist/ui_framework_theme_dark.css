@@ -2416,6 +2416,8 @@ table {
   color: #F5F5F5; }
   .kuiPaginationButton svg {
     fill: #F5F5F5 !important; }
+  .kuiPaginationButton:not(:focus):hover {
+    background-color: transparent; }
 
 .kuiPaginationButton-isActive {
   pointer-events: none;
@@ -2427,7 +2429,8 @@ table {
     color: #222; }
 
 .kuiPaginationButton-isPlaceholder {
-  pointer-events: none; }
+  pointer-events: none;
+  color: #555; }
 
 @media only screen and (max-width: 768px) {
   .kuiPaginationButton--hideOnMobile {

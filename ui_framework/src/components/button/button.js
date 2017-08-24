@@ -51,9 +51,6 @@ export const KuiButton = ({
     iconSideToClassNameMap[iconSide],
     className,
     {
-      'kuiButton--onlyIicon': iconType && !children,
-    },
-    {
       'kuiButton--fill': fill,
     },
   );
