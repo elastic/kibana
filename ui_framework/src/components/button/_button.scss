@@ -24,7 +24,6 @@
 
   &:hover, &:focus {
     background-color: transparentize($kuiColorPrimary, .9);
-    @include kuiSlightShadowFocus;
   }
 
   &:disabled {
