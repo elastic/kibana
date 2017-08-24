@@ -31,6 +31,8 @@ export default class UiBundlerEnv {
       ui: fromRoot('src/ui/public'),
       test_harness: fromRoot('src/test_harness/public'),
       querystring: 'querystring-browser',
+      moment$: fromRoot('webpackShims/moment'),
+      'moment-timezone$': fromRoot('webpackShims/moment-timezone')
     };
 
     // map of which plugins created which aliases

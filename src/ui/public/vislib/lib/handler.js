@@ -1,7 +1,7 @@
 import d3 from 'd3';
 import _ from 'lodash';
 import $ from 'jquery';
-import marked from 'marked';
+import MarkdownIt from 'markdown-it';
 import { NoResults } from 'ui/errors';
 import { Binder } from 'ui/binder';
 import { VislibLibLayoutLayoutProvider } from './layout/layout';
@@ -10,6 +10,11 @@ import { VislibLibAlertsProvider } from './alerts';
 import { VislibLibAxisProvider } from './axis/axis';
 import { VislibGridProvider } from './chart_grid';
 import { VislibVisualizationsVisTypesProvider } from '../visualizations/vis_types';
+
+const markdownIt = new MarkdownIt({
+  html: false,
+  linkify: true
+});
 
 export function VisHandlerProvider(Private) {
   const chartTypes = Private(VislibVisualizationsVisTypesProvider);
@@ -204,7 +209,7 @@ export function VisHandlerProvider(Private) {
 
         div.append('div').attr('class', 'item bottom');
       } else {
-        div.append('h4').text(marked.inlineLexer(message, []));
+        div.append('h4').text(markdownIt.renderInline(message));
       }
 
       $(this.el).trigger('renderComplete');

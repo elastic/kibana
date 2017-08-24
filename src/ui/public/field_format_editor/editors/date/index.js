@@ -1,0 +1,1 @@
+export { dateEditor } from './date';

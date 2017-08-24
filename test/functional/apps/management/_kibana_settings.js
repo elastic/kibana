@@ -23,7 +23,7 @@ export default function ({ getService, getPageObjects }) {
 
     it('should allow setting advanced settings', async function () {
       await PageObjects.settings.clickKibanaSettings();
-      await PageObjects.settings.setAdvancedSettings('dateFormat:tz', 'America/Phoenix');
+      await PageObjects.settings.setAdvancedSettingsSelect('dateFormat:tz', 'America/Phoenix');
       const advancedSetting = await PageObjects.settings.getAdvancedSettings('dateFormat:tz');
       expect(advancedSetting).to.be('America/Phoenix');
     });
@@ -80,9 +80,24 @@ export default function ({ getService, getPageObjects }) {
       });
     });
 
+    describe('notifications:banner', () => {
+      it('Should convert notification banner markdown into HTML', async function () {
+        await PageObjects.settings.clickKibanaSettings();
+        await PageObjects.settings.setAdvancedSettingsInput('notifications:banner', '# Welcome to Kibana', 'unsavedValueMarkdownTextArea');
+        const bannerValue = await PageObjects.settings.getAdvancedSettings('notifications:banner');
+        expect(bannerValue).to.equal('Welcome to Kibana');
+      });
+
+      after('navigate to settings page and clear notifications:banner', async () => {
+        await PageObjects.settings.navigateTo();
+        await PageObjects.settings.clickKibanaSettings();
+        await PageObjects.settings.clearAdvancedSettings('notifications:banner');
+      });
+    });
+
     after(async function () {
       await PageObjects.settings.clickKibanaSettings();
-      await PageObjects.settings.setAdvancedSettings('dateFormat:tz', 'UTC');
+      await PageObjects.settings.setAdvancedSettingsSelect('dateFormat:tz', 'UTC');
     });
   });
 }
