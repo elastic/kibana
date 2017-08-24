@@ -6,6 +6,7 @@ import {
   KuiFormRow,
   KuiButton,
   KuiFieldText,
+  KuiFieldNumber,
   KuiPageBody,
   KuiPageContent,
   KuiPageContentBody,
@@ -13,6 +14,7 @@ import {
   KuiPageContentHeaderSection,
   KuiTitle,
   KuiText,
+  KuiHorizontalRule,
 } from '../../../../components/';
 
 function makeId() {
@@ -28,27 +30,27 @@ export default () => (
       <KuiPageContentHeader>
         <KuiPageContentHeaderSection>
           <KuiTitle>
-            <h2>Inline form</h2>
+            <h2>Apply width to FlexItems if you need</h2>
           </KuiTitle>
         </KuiPageContentHeaderSection>
       </KuiPageContentHeader>
       <KuiPageContentBody>
-        <KuiText className="kuiVerticalRhythm--large">
+        <KuiText>
           <p>
-            Inline forms can be made with FlexGroup. Apply grow=false on any
-            of the items you want to collapse (like this button). Note that the button
-            FormRow component also requires an additional prop because it&rsquo;s missing a label.
+            When you need to make a field smaller, always apply the width to the
+            FlexItem, not the input. The input inside will resize as needed.
           </p>
         </KuiText>
+        <KuiHorizontalRule />
         <KuiFlexGroup>
-          <KuiFlexItem>
-            <KuiFormRow label="First name"  id={idPrefix} helpText="I am helpful help text!">
-              <KuiFieldText />
+          <KuiFlexItem grow={false} style={{ width: 100 }}>
+            <KuiFormRow label="Age"  id={idPrefix}>
+              <KuiFieldNumber max={10} placeholder={42} />
             </KuiFormRow>
           </KuiFlexItem>
           <KuiFlexItem>
-            <KuiFormRow label="Last name" id={idPrefix}>
-              <KuiFieldText />
+            <KuiFormRow label="Full name" id={idPrefix}>
+              <KuiFieldText icon="user" placeholder="John Doe" />
             </KuiFormRow>
           </KuiFlexItem>
           <KuiFlexItem grow={false}>
