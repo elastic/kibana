@@ -7,7 +7,6 @@ function getExpressionArgs(block) {
 
   const argKeys = Object.keys(args);
   return argKeys.map((argKey) => {
-    // return getExpressionArgs(argKey, args[argKey]);
     const multiArgs = args[argKey];
 
     return multiArgs.reduce((acc, arg) => {
@@ -21,13 +20,11 @@ function getExpressionArgs(block) {
         return acc.concat(`${argKey}=${arg.value}`);
       }
 
-      if (arg.type === 'expression' || arg.type === 'partial') {
-        if (!arg.chain) throw new Error('expression and partial arguments must contain a chain');
-        return acc.concat(`${argKey}=${getExpression(arg.chain, arg.type)}`);
-      }
+      if (arg.type === 'expression') return acc.concat(`${argKey}={${getExpression(arg.chain)}}`);
+      if (arg.type === 'partial') return acc.concat(`${argKey}=.{${getExpression(arg.chain)}}`);
 
       throw new Error(`Invalid argument type in AST: ${arg.type}`);
-    }, []).join(', ');
+    }, []).join(' ');
   });
 }
 
@@ -35,25 +32,26 @@ function hasValidateArgs(args) {
   return (typeof args === 'object' && args != null && !Array.isArray(args));
 }
 
-function joinArgs(fnName, args) {
-  return `${fnName}(${args.join(', ')})`;
+function fnWithArgs(fnName, args) {
+  if (!args || args.length === 0) return fnName;
+  return `${fnName} ${args.join(' ')}`;
 }
 
-function getExpression(chain, expType = 'expression', exp = '') {
-  return chain.reduce((expression, chainObj) => {
+function getExpression(chain) {
+  if (!chain) throw new Error('expression and partial arguments must contain a chain');
+
+  return chain.map(chainObj => {
     const type = chainObj.type;
 
     if (type === 'function' || type === 'partial') {
       const fn = chainObj.function;
-      const fnName = (expType === 'partial' || expression.length > 0) ? `.${fn}` : fn;
-
       if (!fn || fn.length === 0) throw new Error('Functions and partials must have a function name');
 
       const expArgs = getExpressionArgs(chainObj);
 
-      return `${expression}${joinArgs(fnName, expArgs)}`;
+      return fnWithArgs(fn, expArgs);
     }
-  }, exp);
+  }, []).join(' | ');
 }
 
 export function fromExpression(expression) {
@@ -75,9 +73,9 @@ export function toExpression(astObj) {
     if (!Array.isArray(astObj.chain)) {
       throw new Error('Partials or expressions must contain a chain');
     }
-    return getExpression(astObj.chain, astObj.type);
+    return getExpression(astObj.chain);
   }
 
   const expArgs = getExpressionArgs(astObj);
-  return joinArgs(astObj.function, expArgs);
+  return fnWithArgs(astObj.function, expArgs);
 }

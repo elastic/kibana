@@ -130,7 +130,7 @@ describe('ast toExpression', () => {
       };
 
       const expression = toExpression(astObj);
-      expect(expression).to.equal('csv()');
+      expect(expression).to.equal('csv');
     });
 
     it('single expression with string argument', () => {
@@ -149,7 +149,7 @@ describe('ast toExpression', () => {
       };
 
       const expression = toExpression(astObj);
-      expect(expression).to.equal('csv(input="stuff\nthings")');
+      expect(expression).to.equal('csv input="stuff\nthings"');
     });
 
     it('single expression with number argument', () => {
@@ -168,7 +168,7 @@ describe('ast toExpression', () => {
       };
 
       const expression = toExpression(astObj);
-      expect(expression).to.equal('series(input=1234)');
+      expect(expression).to.equal('series input=1234');
     });
 
     it('single expression with boolean argument', () => {
@@ -187,7 +187,7 @@ describe('ast toExpression', () => {
       };
 
       const expression = toExpression(astObj);
-      expect(expression).to.equal('series(input=true)');
+      expect(expression).to.equal('series input=true');
     });
 
     it('single expression with null argument', () => {
@@ -206,7 +206,7 @@ describe('ast toExpression', () => {
       };
 
       const expression = toExpression(astObj);
-      expect(expression).to.equal('series(input=null)');
+      expect(expression).to.equal('series input=null');
     });
 
     it('single expression with multiple arguments', () => {
@@ -229,7 +229,7 @@ describe('ast toExpression', () => {
       };
 
       const expression = toExpression(astObj);
-      expect(expression).to.equal('csv(input="stuff\nthings", separator="\\n")');
+      expect(expression).to.equal('csv input="stuff\nthings" separator="\\n"');
     });
 
     it('single expression with multiple and repeated arguments', () => {
@@ -255,7 +255,7 @@ describe('ast toExpression', () => {
       };
 
       const expression = toExpression(astObj);
-      expect(expression).to.equal('csv(input="stuff\nthings", input="more,things\nmore,stuff", separator="\\n")');
+      expect(expression).to.equal('csv input="stuff\nthings" input="more,things\nmore,stuff" separator="\\n"');
     });
 
     it('single expression with expression argument', () => {
@@ -282,7 +282,7 @@ describe('ast toExpression', () => {
       };
 
       const expression = toExpression(astObj);
-      expect(expression).to.equal('csv(calc=getcalc(), input="stuff\nthings")');
+      expect(expression).to.equal('csv calc={getcalc} input="stuff\nthings"');
     });
 
     it('single expression with partial argument', () => {
@@ -309,7 +309,7 @@ describe('ast toExpression', () => {
       };
 
       const expression = toExpression(astObj);
-      expect(expression).to.equal('csv(calc=.partcalc(), input="stuff\nthings")');
+      expect(expression).to.equal('csv calc=.{partcalc} input="stuff\nthings"');
     });
 
     it('single expression with partial and expression arguments, with arguments', () => {
@@ -354,7 +354,7 @@ describe('ast toExpression', () => {
       };
 
       const expression = toExpression(astObj);
-      expect(expression).to.equal('csv(sep=.partcalc(type="comma"), input="stuff\nthings", break=setBreak(type="newline"))');
+      expect(expression).to.equal('csv sep=.{partcalc type="comma"} input="stuff\nthings" break={setBreak type="newline"}');
     });
   });
 
@@ -420,10 +420,10 @@ describe('ast toExpression', () => {
 
       const expression = toExpression(astObj);
       const expected = [
-        'csv(input="year,make,model,price',
+        'csv input="year,make,model,price',
         '2016,honda,cr-v,23845',
         '2016,honda,fit,15890,',
-        '2016,honda,civic,18640").line(x=.distinct(f="year"), y=.sum(f="price"), colors=.distinct(f="model"))',
+        '2016,honda,civic,18640" | line x=.{distinct f="year"} y=.{sum f="price"} colors=.{distinct f="model"}',
       ];
       expect(expression).to.equal(expected.join('\n'));
     });
@@ -507,11 +507,11 @@ describe('ast toExpression', () => {
 
       const expression = toExpression(astObj);
       const expected = [
-        'csv(input="year,make,model,price',
+        'csv input="year,make,model,price',
         '2016,honda,cr-v,23845',
         '2016,honda,fit,15890,',
-        '2016,honda,civic,18640").pointseries(x=.distinct(f="year"), y=.sum(f="price"), ' +
-          'colors=.distinct(f="model")).line(pallette=getColorPallette(name="elastic"))',
+        '2016,honda,civic,18640" | pointseries x=.{distinct f="year"} y=.{sum f="price"} ' +
+          'colors=.{distinct f="model"} | line pallette={getColorPallette name="elastic"}',
       ];
       expect(expression).to.equal(expected.join('\n'));
     });
@@ -539,7 +539,7 @@ describe('ast toExpression', () => {
           }],
         },
       };
-      expect(toExpression(astObj)).to.equal('pointseries(x="time", y=.math("sum(price)"))');
+      expect(toExpression(astObj)).to.equal('pointseries x="time" y=.{math "sum(price)"}');
     });
   });
 
@@ -566,7 +566,7 @@ describe('ast toExpression', () => {
       };
 
       const expression = toExpression(astObj);
-      expect(expression).to.equal('list("one", "two", "three")');
+      expect(expression).to.equal('list "one" "two" "three"');
     });
 
     it('named and unnamed', () => {
@@ -599,7 +599,7 @@ describe('ast toExpression', () => {
       };
 
       const expression = toExpression(astObj);
-      expect(expression).to.equal('both(named="example", another="item", "one", "two", "three")');
+      expect(expression).to.equal('both named="example" another="item" "one" "two" "three"');
     });
   });
 });
