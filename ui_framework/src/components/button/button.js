@@ -43,6 +43,7 @@ export const KuiButton = ({
   isDisabled,
   ...rest,
 }) => {
+
   const classes = classNames(
     'kuiButton',
     typeToClassNameMap[type],
