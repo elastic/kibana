@@ -21,6 +21,7 @@
  * }
  */
 import { uiModules } from 'ui/modules';
+import { keyCodes } from 'ui_framework/services';
 
 export const Direction = {
   up: 'up',
@@ -28,8 +29,8 @@ export const Direction = {
 };
 
 const directionMapping = {
-  38: Direction.up,
-  40: Direction.down
+  [keyCodes.UP]: Direction.up,
+  [keyCodes.DOWN]: Direction.down
 };
 
 uiModules.get('kibana')

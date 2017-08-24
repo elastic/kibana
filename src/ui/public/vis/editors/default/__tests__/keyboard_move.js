@@ -3,11 +3,7 @@ import expect from 'expect.js';
 import ngMock from 'ng_mock';
 import sinon from 'sinon';
 import { Direction } from '../keyboard_move';
-
-const keycodes = {
-  up: 38,
-  down: 40
-};
+import { keyCodes } from 'ui_framework/services';
 
 describe('keyboardMove directive', () => {
 
@@ -35,14 +31,14 @@ describe('keyboardMove directive', () => {
   it('should call the callback when pressing up', () => {
     const spy = sinon.spy();
     const button = createTestButton(spy);
-    button.trigger(createKeydownEvent(keycodes.up));
+    button.trigger(createKeydownEvent(keyCodes.UP));
     expect(spy.calledWith(Direction.up)).to.be(true);
   });
 
   it('should call the callback when pressing down', () => {
     const spy = sinon.spy();
     const button = createTestButton(spy);
-    button.trigger(createKeydownEvent(keycodes.down));
+    button.trigger(createKeydownEvent(keyCodes.DOWN));
     expect(spy.calledWith(Direction.down)).to.be(true);
   });
 });
