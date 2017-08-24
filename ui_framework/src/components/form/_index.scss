@@ -2,7 +2,6 @@ $kuiFormMaxWidth: 400px;
 $kuiFormBackgroundColor: tintOrShade($kuiColorLightestShade, 60%, 25%);
 
 @mixin kuiFormControlSize {
-  min-width: $kuiSize * 16;
   max-width: $kuiFormMaxWidth;
   width: 100%;
 }
