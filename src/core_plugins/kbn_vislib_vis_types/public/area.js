@@ -144,7 +144,7 @@ export default function PointSeriesVisType(Private) {
           title: 'X-Axis',
           min: 0,
           max: 1,
-          aggFilter: '!geohash_grid'
+          aggFilter: ['!geohash_grid', '!filter']
         },
         {
           group: 'buckets',
@@ -152,7 +152,7 @@ export default function PointSeriesVisType(Private) {
           title: 'Split Series',
           min: 0,
           max: 1,
-          aggFilter: '!geohash_grid'
+          aggFilter: ['!geohash_grid', '!filter']
         },
         {
           group: 'buckets',
@@ -160,7 +160,7 @@ export default function PointSeriesVisType(Private) {
           title: 'Split Chart',
           min: 0,
           max: 1,
-          aggFilter: '!geohash_grid'
+          aggFilter: ['!geohash_grid', '!filter']
         }
       ])
     }

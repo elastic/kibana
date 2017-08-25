@@ -1,93 +1,201 @@
-/* eslint-disable */
+import React, {
+  Component,
+} from 'react';
 
-// Hide all icons initially.
-$('[data-sort-icon-ascending]').hide();
-$('[data-sort-icon-descending]').hide();
+import classNames from 'classnames';
 
-const demoSortableColumns = $('[data-demo-sortable-column]');
+import {
+  KuiTable,
+  KuiTableBody,
+  KuiTableHeader,
+  KuiTableHeaderCell,
+  KuiTableHeaderCheckBoxCell,
+  KuiTableRow,
+  KuiTableRowCell,
+  KuiTableRowCheckBoxCell,
+} from '../../../../components';
 
-if (!demoSortableColumns.length) {
-  throw new Error('demoSortableColumns missing');
-}
+import {
+  SortableProperties,
+} from '../../../../services';
 
-let sortedColumn;
-let isSortAscending = true;
+const statusToIconClassNameMap = {
+  success: 'kuiIcon--success fa-check',
+  warning: 'kuiIcon--warning fa-bolt',
+  danger: 'kuiIcon--error fa-warning',
+};
 
-function sortColumn(column) {
-  if (sortedColumn) {
-    if (column === sortedColumn) {
-      // If we clicked the currently selected one, then reverse the sort.
-      isSortAscending = !isSortAscending;
-    } else {
-      // Otherwise, "deselect" the old column by hiding its icons.
-      const $sortedColumn = $(sortedColumn);
-      $sortedColumn.removeClass('tableHeaderCell-isSorted');
-      const ascendingIcon = $sortedColumn.find('[data-sort-icon-ascending]');
-      const descendingIcon = $sortedColumn.find('[data-sort-icon-descending]');
+export class Table extends Component {
+  constructor(props) {
+    super(props);
 
-      if (!ascendingIcon.length) {
-        throw new Error('ascendingIcon missing');
+    this.state = {
+      sortedColumn: 'title',
+      rowToSelectedStateMap: new Map(),
+    };
+
+    this.items = [{
+      title: 'Alligator',
+      isLink: true,
+      status: 'success',
+      dateCreated: 'Tue Dec 06 2016 12:56:15 GMT-0800 (PST)',
+      dateModified: 'Tue Dec 06 2016 12:56:15 GMT-0800 (PST)',
+    }, {
+      title: 'Boomerang',
+      isLink: false,
+      status: 'success',
+      dateCreated: 'Tue Dec 06 2016 12:56:15 GMT-0800 (PST)',
+      dateModified: 'Tue Dec 06 2016 12:56:15 GMT-0800 (PST)',
+      details: 'All kinds of crazy information about boomerangs could go in here.',
+    }, {
+      title: 'Celebration of some very long content that will affect cell width and should eventually become truncated',
+      isLink: true,
+      status: 'warning',
+      dateCreated: 'Tue Dec 06 2016 12:56:15 GMT-0800 (PST)',
+      dateModified: 'Tue Dec 06 2016 12:56:15 GMT-0800 (PST)',
+    }, {
+      title: 'You can also specify that really long content wraps instead of becoming truncated with an ellipsis (which is the default behavior)', // eslint-disable-line max-len
+      isLink: true,
+      isWrapped: true,
+      status: 'danger',
+      dateCreated: 'Tue Dec 06 2016 12:56:15 GMT-0800 (PST)',
+      dateModified: 'Tue Dec 06 2016 12:56:15 GMT-0800 (PST)',
+    }];
+
+    this.sortableProperties = new SortableProperties([{
+      name: 'title',
+      getValue: item => item.title.toLowerCase(),
+      isAscending: true,
+    }, {
+      name: 'status',
+      getValue: item => item.status.toLowerCase(),
+      isAscending: true,
+    }], this.state.sortedColumn);
+  }
+
+  onSort = prop => {
+    this.sortableProperties.sortOn(prop);
+
+    this.setState({
+      sortedColumn: prop,
+    });
+  }
+
+  toggleItem = item => {
+    this.setState(previousState => {
+      const rowToSelectedStateMap = new Map(previousState.rowToSelectedStateMap);
+      rowToSelectedStateMap.set(item, !rowToSelectedStateMap.get(item));
+      return { rowToSelectedStateMap };
+    });
+  };
+
+  isItemChecked = item => {
+    return this.state.rowToSelectedStateMap.get(item);
+  };
+
+  renderStatusIcon(status) {
+    const iconClasses = classNames('kuiIcon', statusToIconClassNameMap[status]);
+    return <div className={iconClasses} />;
+  }
+
+  renderRows() {
+    const rows = [];
+
+    this.items.forEach(item => {
+      const classes = classNames({
+        'kuiTableRowCell--wrap': item.isWrapped,
+      });
+
+      let title;
+
+      if (item.isLink) {
+        title = <a href="">{item.title}</a>;
+      } else {
+        title = item.title;
       }
 
-      if (!descendingIcon.length) {
-        throw new Error('descendingIcon missing');
+      rows.push(
+        <KuiTableRow key={item.title}>
+          <KuiTableRowCheckBoxCell
+            isChecked={this.isItemChecked(item)}
+            onChange={() => this.toggleItem(item)}
+          />
+
+          <KuiTableRowCell className={classes}>
+            {title}
+          </KuiTableRowCell>
+
+          <KuiTableRowCell>
+            {this.renderStatusIcon(item.status)}
+          </KuiTableRowCell>
+
+          <KuiTableRowCell>
+            {item.dateCreated}
+          </KuiTableRowCell>
+
+          <KuiTableRowCell>
+            {item.dateModified}
+          </KuiTableRowCell>
+        </KuiTableRow>
+      );
+
+      if (item.details) {
+        rows.push(
+          <KuiTableRow key={`${item.title}Details`}>
+            <KuiTableRowCell className="kuiTableRowCell--expanded" colSpan="5">
+              <h3 className="kuiSubTitle">
+                {item.title}
+              </h3>
+              <p className="kuiText">
+                {item.details}
+              </p>
+            </KuiTableRowCell>
+          </KuiTableRow>
+        );
       }
+    });
 
-      ascendingIcon.hide();
-      descendingIcon.hide();
-    }
+    return rows;
   }
 
-  // Update the visual state of the sortedColumn.
-  sortedColumn = column;
-  const $sortedColumn = $(sortedColumn);
-  $sortedColumn.addClass('tableHeaderCell-isSorted');
+  render() {
+    return (
+      <KuiTable>
+        <KuiTableHeader>
+          <KuiTableHeaderCheckBoxCell
+            isChecked={this.isItemChecked('header')}
+            onChange={() => this.toggleItem('header')}
+          />
 
-  const ascendingIcon = $(sortedColumn).find('[data-sort-icon-ascending]');
-  const descendingIcon = $(sortedColumn).find('[data-sort-icon-descending]');
+          <KuiTableHeaderCell
+            onSort={this.onSort.bind(this, 'title')}
+            isSorted={this.state.sortedColumn === 'title'}
+            isSortAscending={this.sortableProperties.isAscendingByName('title')}
+          >
+            Title
+          </KuiTableHeaderCell>
 
-  if (!ascendingIcon.length) {
-    throw new Error('ascendingIcon missing');
-  }
+          <KuiTableHeaderCell
+            onSort={this.onSort.bind(this, 'status')}
+            isSorted={this.state.sortedColumn === 'status'}
+            isSortAscending={this.sortableProperties.isAscendingByName('status')}
+          >
+            Status
+          </KuiTableHeaderCell>
 
-  if (!descendingIcon.length) {
-    throw new Error('descendingIcon missing');
-  }
+          <KuiTableHeaderCell>
+            Date created
+          </KuiTableHeaderCell>
 
-  if (isSortAscending) {
-    ascendingIcon.show();
-    descendingIcon.hide();
-  } else {
-    ascendingIcon.hide();
-    descendingIcon.show();
+          <KuiTableHeaderCell>
+            Date last modified
+          </KuiTableHeaderCell>
+        </KuiTableHeader>
+
+        <KuiTableBody>
+          {this.renderRows()}
+        </KuiTableBody>
+      </KuiTable>
+    );
   }
 }
-
-// Sort on the first column by default.
-sortColumn(demoSortableColumns[0]);
-
-$(demoSortableColumns).on('click', event => {
-  sortColumn(event.currentTarget);
-});
-
-$(demoSortableColumns).on('mouseover', event => {
-  const column = event.currentTarget;
-  if (column !== sortedColumn) {
-    const icon =
-      isSortAscending
-      ? $(column).find('[data-sort-icon-ascending]')
-      : $(column).find('[data-sort-icon-descending]');
-    icon.show();
-  }
-});
-
-$(demoSortableColumns).on('mouseout', event => {
-  const column = event.currentTarget;
-  if (column !== sortedColumn) {
-    const icon =
-      isSortAscending
-      ? $(column).find('[data-sort-icon-ascending]')
-      : $(column).find('[data-sort-icon-descending]');
-    icon.hide();
-  }
-});

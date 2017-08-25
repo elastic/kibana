@@ -49,47 +49,11 @@ export default function ({ getService, getPageObjects }) {
 
     describe('vector map', function indexPatternCreation() {
 
-      it('should show results after clicking play (join on states)', function () {
-
-        const expectedColors = [{ color: 'rgb(253,209,109)' }, { color: 'rgb(164,0,37)' }];
-
-
-        return PageObjects.visualize.getVectorMapData()
-          .then(function (data) {
-
-            log.debug('Actual data-----------------------');
-            log.debug(data);
-            log.debug('---------------------------------');
-
-            expect(data).to.eql(expectedColors);
-          });
-      });
-
-      it('should change color ramp', function () {
-        return PageObjects.visualize.clickOptions()
-          .then(function () {
-            return PageObjects.visualize.selectFieldById('Blues', 'colorSchema');
-          })
-          .then(function () {
-            return PageObjects.visualize.clickGo();
-          })
-          .then(function () {
-            return PageObjects.header.waitUntilLoadingHasFinished();
-          })
-          .then(function () {
-            //this should visualize right away, without re-requesting data
-            return PageObjects.visualize.getVectorMapData();
-          })
-          .then(function (data) {
-
-            log.debug('Actual data-----------------------');
-            log.debug(data);
-            log.debug('---------------------------------');
-
-            const expectedColors = [{ color: 'rgb(190,215,236)' }, { color: 'rgb(7,67,136)' }];
-
-            expect(data).to.eql(expectedColors);
-          });
+      it('should show results after clicking play (join on states)', async function () {
+        const expectedData = 'CN,2,592,IN,2,373,US,1,194,ID,489,BR,415';
+        await PageObjects.visualize.openSpyPanel();
+        const data = await PageObjects.visualize.getDataTableData();
+        expect(data.trim().split('\n').join(',')).to.eql(expectedData);
       });
 
     });

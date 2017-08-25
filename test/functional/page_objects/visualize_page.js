@@ -112,6 +112,23 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
         defaultFindTimeout * 2);
     }
 
+    async setMarkdownTxt(markdownTxt) {
+      const input = await testSubjects.find('markdownTextarea');
+      await input.clearValue();
+      await input.type(markdownTxt);
+    }
+
+    async getMarkdownText() {
+      const markdownContainer = await testSubjects.find('markdownBody');
+      return markdownContainer.getVisibleText();
+    }
+
+    async getMarkdownBodyDescendentText(selector) {
+      const markdownContainer = await testSubjects.find('markdownBody');
+      const element = await find.descendantDisplayedByCssSelector(selector, markdownContainer);
+      return element.getVisibleText();
+    }
+
     async setFromTime(timeString) {
       const input = await find.byCssSelector('input[ng-model="absolute.from"]', defaultFindTimeout * 2);
       await input.clearValue();
