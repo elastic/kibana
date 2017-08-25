@@ -11,7 +11,7 @@ export default new Element('grid', {
   description: 'A colorable, sizable, grid for displaying a point series',
   image: header,
   expression: 'demodata | pointseries x="project" y="state" size="median(price)" | grid | render',
-  render(domNode, config, done) {
+  render(domNode, config, handlers) {
 
     const { summary, columns, rows } = config;
 
@@ -99,6 +99,6 @@ export default new Element('grid', {
     );
 
     ReactDOM.render(table, domNode);
-    done();
+    handlers.done();
   },
 });

@@ -8,7 +8,7 @@ export default new Element('image', {
   description: 'A static image.',
   image: header,
   expression: 'image mode="contain" | render',
-  render(domNode, config, done) {
+  render(domNode, config, handlers) {
     ReactDOM.render(<div style={{
       height: '100%',
       backgroundImage: `url(${config.dataurl})`,
@@ -16,6 +16,6 @@ export default new Element('image', {
       backgroundPosition: 'center center',
       backgroundSize: config.mode,
     }} />, domNode);
-    done();
+    handlers.done();
   },
 });
