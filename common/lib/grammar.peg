@@ -56,7 +56,7 @@ function_name
  /* ----- Arguments ----- */
 
 argument
- = space name:function_name space? '=' space? value:arg_type {
+ = space? name:function_name space? '=' space? value:arg_type {
   return {name: name, value: value};
  }
  / value:arg_type {return {name: '_', value: value}}
