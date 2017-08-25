@@ -64,4 +64,5 @@ ElementContent.propTypes = {
   renderable: PropTypes.object,
   state: PropTypes.string,
   size: PropTypes.object,
+  handlers: PropTypes.object,
 };

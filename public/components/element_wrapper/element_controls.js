@@ -58,4 +58,5 @@ ElementControls.propTypes = {
   renderable: PropTypes.object,
   size: PropTypes.object,
   state: PropTypes.string,
+  handlers: PropTypes.object,
 };
