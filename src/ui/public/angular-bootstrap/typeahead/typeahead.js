@@ -379,8 +379,8 @@ angular.module('ui.bootstrap.typeahead', ['ui.bootstrap.position', 'ui.bootstrap
       },
       link:function (scope, element, attrs) {
         var tplUrl = $parse(attrs.templateUrl)(scope.$parent) || 'template/typeahead/typeahead-match.html';
-        $http.get(tplUrl, {cache: $templateCache}).then(function(tplContent){
-           element.replaceWith($compile(tplContent.trim())(scope));
+        $http.get(tplUrl, {cache: $templateCache}).then(function(resp){
+           element.replaceWith($compile(resp.data.trim())(scope));
         });
       }
     };

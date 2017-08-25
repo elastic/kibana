@@ -6,7 +6,11 @@ const FetchFieldsProvider = (Notifier, $http) => {
       const fields = {};
 
       Promise.all(indexPatterns.map(pattern => {
-        return $http.get(`../api/metrics/fields?index=${pattern}`)
+        const httpResult = $http.get(`../api/metrics/fields?index=${pattern}`)
+          .then(resp => resp.data)
+          .catch(resp => { throw resp.data; });
+
+        return httpResult
           .then(resp => {
             if (resp.length && pattern) {
               fields[pattern] = resp;

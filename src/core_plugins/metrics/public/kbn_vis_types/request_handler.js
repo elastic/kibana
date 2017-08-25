@@ -23,7 +23,11 @@ const MetricsRequestHandlerProvider = function (Private, Notifier, config, timef
           try {
             const maxBuckets = config.get('metrics:max_buckets');
             validateInterval(timefilter, panel, maxBuckets);
-            return $http.post('../api/metrics/vis/data', params)
+            const httpResult = $http.post('../api/metrics/vis/data', params)
+              .then(resp => resp.data)
+              .catch(resp => { throw resp.data; });
+
+            return httpResult
               .then(resolve)
               .catch(resp => {
                 resolve({});
