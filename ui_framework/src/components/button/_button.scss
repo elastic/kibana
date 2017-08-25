@@ -22,6 +22,14 @@
     }
   }
 
+  &:hover {
+    @include kuiSlightShadowHover;
+  }
+
+  &:active {
+    @include kuiSlightShadowActive;
+  }
+
   &:hover, &:focus {
     background-color: transparentize($kuiColorPrimary, .9);
   }

@@ -101,7 +101,7 @@ export default class extends Component {
                 </KuiFormRow>
               </KuiFlexItem>
               <KuiFlexItem grow={false}>
-                <KuiFormRow addEmptyLabelSpace>
+                <KuiFormRow hasEmptyLabelSpace>
                   <KuiButton>Save</KuiButton>
                 </KuiFormRow>
               </KuiFlexItem>
