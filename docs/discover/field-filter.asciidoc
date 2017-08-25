@@ -62,7 +62,8 @@ The following operators can be selected:
 `is not between`:: Filter where the value for the field is not in the given range.
 `exists`:: Filter where any value is present for the field.
 `does not exist`:: Filter where no value is present for the field.
-. Choose the value(s) for your filter.
+. Choose the value(s) for your filter. Values from your indices may be suggested
+as selections if you are filtering against an aggregatable field.
 +
 image::images/add_filter_value.png[]
 . (Optional) Specify a label for the filter. If you specify a label, it will be
@@ -70,9 +71,8 @@ displayed below the query bar instead of the filter definition.
 . Click *Save*. The filter will be applied to your search and be displayed below
 the query bar.
 
-NOTE: To make the filter editor more user-friendly, you can enable the `filterEditor:suggestValues` advanced setting.
-Enabling this will cause the editor to suggest values from your indices if you are filtering against an aggregatable
-field. However, this is not recommended for extremely large datasets, as it can result in long queries.
+NOTE: If you are experiencing long-running queries as a result of the value suggestions, you can
+turn off the suggestions by setting the advanced setting, `filterEditor:suggestValues`, to `false`.
 
 [float]
 [[filter-pinning]]
