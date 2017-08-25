@@ -630,9 +630,5 @@ export default function SenseEditor($el) {
 
   editor.getSession().on("changeScrollTop", editor.updateActionsBar);
 
-  editor.markTopRow = function () {
-    editor.peggedRow = editor.renderer.layerConfig.firstRow;
-  }
-
   return editor;
 }
