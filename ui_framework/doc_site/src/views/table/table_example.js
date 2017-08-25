@@ -49,10 +49,6 @@ export default props => (
         code: compressedSource,
       }]}
     >
-      <GuideText>
-        This example lacks the interaction of the above example.
-      </GuideText>
-
       <GuideDemo>
         <Compressed />
       </GuideDemo>

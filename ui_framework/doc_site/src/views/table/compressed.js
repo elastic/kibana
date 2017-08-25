@@ -100,8 +100,34 @@ export class Compressed extends Component {
     }];
   }
 
+  toggleItem = itemId => {
+    const newItemIdToSelectedMap = Object.assign({}, this.state.itemIdToSelectedMap, {
+      [itemId]: !this.state.itemIdToSelectedMap[itemId],
+    });
+
+    this.setState({
+      itemIdToSelectedMap: newItemIdToSelectedMap,
+    });
+  }
+
+  toggleAll = () => {
+    const allSelected = this.areAllItemsSelected();
+    const newItemIdToSelectedMap = {};
+    this.items.forEach(item => newItemIdToSelectedMap[item.id] = !allSelected);
+
+
+    this.setState({
+      itemIdToSelectedMap: newItemIdToSelectedMap,
+    });
+  }
+
   isItemSelected = itemId => {
     return this.state.itemIdToSelectedMap[itemId];
+  }
+
+  areAllItemsSelected = () => {
+    const indexOfUnselectedItem = this.items.findIndex(item => !this.isItemSelected(item.id));
+    return indexOfUnselectedItem === -1;
   }
 
   renderHeaderCells() {
@@ -114,8 +140,8 @@ export class Compressed extends Component {
           >
             <KuiCheckbox
               id="selectAllCheckbox"
-              checked={false}
-              onChange={() => {}}
+              checked={this.areAllItemsSelected()}
+              onChange={this.toggleAll.bind(this)}
             />
           </KuiTableHeaderCellCheckbox>
         );
@@ -146,7 +172,7 @@ export class Compressed extends Component {
               <KuiCheckbox
                 id={`${item.id}-checkbox`}
                 checked={this.isItemSelected(item.id)}
-                onChange={() => {}}
+                onChange={this.toggleItem.bind(this, item.id)}
               />
             </KuiTableRowCellCheckbox>
           );
