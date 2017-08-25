@@ -8,7 +8,7 @@ export default new Element('pie', {
   description: 'An customizable element for making pie charts from your data',
   image: header,
   expression: 'demodata | pointseries x="time" y="sum(price)" color="state" | pie | render',
-  render(domNode, config, done, events) {
+  render(domNode, config, handlers) {
     config.options.legend.labelBoxBorderColor = 'transparent';
     const plot = $.plot($(domNode), config.data, config.options);
 
@@ -21,9 +21,9 @@ export default new Element('pie', {
       plot.shutdown();
     }
 
-    events.on('destroy', destroy);
-    events.on('resize', debounce(resize, 40, { maxWait: 40 })); // 1000 / 40 = 25fps
+    handlers.onDestroy(destroy);
+    handlers.onResize(debounce(resize, 40, { maxWait: 40 })); // 1000 / 40 = 25fps
 
-    return done(plot);
+    return handlers.done(plot);
   },
 });

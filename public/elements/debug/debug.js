@@ -8,11 +8,11 @@ export default new Element('debug', {
   description: 'Just dumps the configuration of the element',
   image: header,
   expression: 'demodata | render as=debug',
-  render(domNode, config, done) {
+  render(domNode, config, handlers) {
     ReactDOM.render(
       <div style={{ overflow: 'auto', height: '100%' }}>
         <pre>{JSON.stringify(config, null, ' ')}</pre>
       </div>, domNode);
-    done();
+    handlers.done();
   },
 });

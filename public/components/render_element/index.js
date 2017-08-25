@@ -2,23 +2,29 @@ import { compose, withState, lifecycle, withProps } from 'recompose';
 import { RenderElement as Component } from './render_element';
 import PropTypes from 'prop-types';
 import { isEqual } from 'lodash';
-import { Events } from '../../lib/events';
+import { ElementHandlers } from './lib/handlers';
 
 export const RenderElement = compose(
   withState('domNode', 'setDomNode'), // Still don't like this, seems to be the only way todo it.
-  withProps({ events: new Events() }),
+  withProps({
+    handlers: (function () {
+      const handlers = new ElementHandlers();
+      handlers.done = () => {};
+      return handlers;
+    }()),
+  }),
   lifecycle({
     componentDidUpdate(prevProps) {
-      const { events, config, domNode, done, size, renderFn } = this.props;
+      const { handlers, config, domNode, size, renderFn } = this.props;
 
       // Config changes
       if (this.shouldFullRerender(prevProps)) {
-        this.destroy();
-        return renderFn(domNode, config, done || (() => {}), events);
+        this.props.handlers.e.destroy();
+        return renderFn(domNode, config, handlers);
       }
 
       // Size changes
-      if (!isEqual(size, prevProps.size)) return events.emit('resize', size);
+      if (!isEqual(size, prevProps.size)) return handlers.e.resize(size);
     },
 
     shouldComponentUpdate(prevProps) {
@@ -26,7 +32,7 @@ export const RenderElement = compose(
     },
 
     componentWillUnmount() {
-      this.destroy();
+      this.props.handlers.e.destroy();
     },
 
     shouldFullRerender(prevProps) {
@@ -38,11 +44,7 @@ export const RenderElement = compose(
     },
 
     destroy() {
-      const { events } = this.props;
-      events.emit('destroy');
-
-      events.off('destroy');
-      events.off('resize');
+      this.props.handlers.e.destroy();
     },
   }),
 )(Component);
@@ -50,7 +52,6 @@ export const RenderElement = compose(
 RenderElement.propTypes = {
   renderFn: PropTypes.func.isRequired,
   destroyFn: PropTypes.func,
-  done: PropTypes.func,
   config: PropTypes.object,
   size: PropTypes.object,
   css: PropTypes.string,

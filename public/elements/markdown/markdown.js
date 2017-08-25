@@ -6,8 +6,8 @@ export default new Element('markdown', {
   description: 'Markup from Markdown',
   image: header,
   expression: 'markdown "Your Text Here"',
-  render(domNode, config, done) {
+  render(domNode, config, handlers) {
     domNode.innerHTML = config.markup;
-    done();
+    handlers.done();
   },
 });

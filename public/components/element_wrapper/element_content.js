@@ -51,7 +51,6 @@ export const ElementContent = compose(
           renderFn={elementTypeDefintion.render}
           config={renderable.value}
           css={renderable.css} // This is an actual CSS stylesheet string, it will be scoped by RenderElement
-          done={() => {}} // TODO: Make done() actually do something
           size={size} // Size is only passed for the purpose of triggering the resize event, it isn't really used otherwise
         />
       </div>
