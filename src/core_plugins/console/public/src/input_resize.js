@@ -24,6 +24,8 @@ module.exports = function (input, output) {
       $resizer.addClass('active');
       var startWidth = $left.width();
       var startX = event.pageX;
+      input.resize.topRow = input.renderer.layerConfig.firstRow;
+      output.resize.topRow = output.renderer.layerConfig.firstRow;
 
       function onMove(event) {
         setEditorWidth(startWidth + event.pageX - startX)
