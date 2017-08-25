@@ -8,6 +8,7 @@ export const ElementControls = pure((props) => {
     select,
     remove,
     isSelected,
+    handlers,
 
     // We could pull off the relevant properties of the following two objects,
     // but since they aren't used in the parent it would actually make this more
@@ -25,11 +26,19 @@ export const ElementControls = pure((props) => {
     <div
       className={`canvas__workpad--element ${selectedClassName}`}
       onClick={select}>
+
+      {/*
+        Yeah, in theory we could put RenderElement in here, but the ElementContent component actually contains a
+        bunch of logic for error handling. Its actually pretty nice to keep them seperate.
+      */}
+
       <ElementContent
          state={state}
          renderable={renderable}
          elementTypeDefintion={elementTypeDefintion}
-         size={size}/>
+         size={size}
+         handlers={handlers}
+       />
 
       {!isSelected ? null :
         (<i

@@ -1,4 +1,4 @@
-import { compose, withState, lifecycle, withProps } from 'recompose';
+import { compose, withState, lifecycle, withPropsOnChange } from 'recompose';
 import { RenderElement as Component } from './render_element';
 import PropTypes from 'prop-types';
 import { isEqual } from 'lodash';
@@ -6,25 +6,27 @@ import { ElementHandlers } from './lib/handlers';
 
 export const RenderElement = compose(
   withState('domNode', 'setDomNode'), // Still don't like this, seems to be the only way todo it.
-  withProps({
+  withPropsOnChange(() => false, ({ handlers }) => ({
     handlers: (function () {
-      const handlers = new ElementHandlers();
-      handlers.done = () => {};
-      return handlers;
+      return Object.assign(
+        new ElementHandlers(),
+        handlers,
+        { done: () => {} },
+      );
     }()),
-  }),
+  })),
   lifecycle({
     componentDidUpdate(prevProps) {
       const { handlers, config, domNode, size, renderFn } = this.props;
 
       // Config changes
       if (this.shouldFullRerender(prevProps)) {
-        this.props.handlers.e.destroy();
+        this.props.handlers.destroy();
         return renderFn(domNode, config, handlers);
       }
 
       // Size changes
-      if (!isEqual(size, prevProps.size)) return handlers.e.resize(size);
+      if (!isEqual(size, prevProps.size)) return handlers.resize(size);
     },
 
     shouldComponentUpdate(prevProps) {
@@ -32,7 +34,7 @@ export const RenderElement = compose(
     },
 
     componentWillUnmount() {
-      this.props.handlers.e.destroy();
+      this.props.handlers.destroy();
     },
 
     shouldFullRerender(prevProps) {
@@ -44,7 +46,7 @@ export const RenderElement = compose(
     },
 
     destroy() {
-      this.props.handlers.e.destroy();
+      this.props.handlers.destroy();
     },
   }),
 )(Component);

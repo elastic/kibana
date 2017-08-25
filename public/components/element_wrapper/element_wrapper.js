@@ -15,13 +15,21 @@ export const ElementWrapper = (props) => {
     position,
     setPosition,
     state,
+    handlers,
   } = props;
 
   return (
     <Positionable position={position} onChange={setPosition} interact={isSelected}>
       {/*
+        This is why we need this janky ElementControls thing:
+
         Size will be passed to PositionableChild by Positionable
         size={{ width: position.width, height: position.height }}
+
+        This keeps things fast, allowing Positionable to maintain a cache of the state without
+        writing it back to redux.
+
+        Its crap, I agree. I'm open to better solutions.
       */}
       <ElementControls
         select={select}
@@ -30,6 +38,7 @@ export const ElementWrapper = (props) => {
         elementTypeDefintion={elementTypeDefintion}
         renderable={renderable}
         state={state}
+        handlers={handlers}
       />
     </Positionable>
   );
@@ -45,4 +54,5 @@ ElementWrapper.propTypes = {
   renderable: PropTypes.object,
   position: PropTypes.object,
   setPosition: PropTypes.func,
+  handlers: PropTypes.object,
 };

@@ -43,7 +43,7 @@ export const ElementContent = compose(
   loadingBranch,
   invalidRenderTypeBranch,
   invalidExpressionBranch
-)(({ elementTypeDefintion, renderable, size }) => {
+)(({ elementTypeDefintion, renderable, size, handlers }) => {
   return Style.it(renderable.css,
     <div style={Object.assign({}, renderable.containerStyle, size)}>
       <div className="canvas__element--content">
@@ -52,6 +52,7 @@ export const ElementContent = compose(
           config={renderable.value}
           css={renderable.css} // This is an actual CSS stylesheet string, it will be scoped by RenderElement
           size={size} // Size is only passed for the purpose of triggering the resize event, it isn't really used otherwise
+          handlers={handlers}
         />
       </div>
     </div>

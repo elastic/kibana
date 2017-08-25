@@ -1,22 +1,14 @@
-export function ElementHandlers() {}
-
-ElementHandlers.prototype = {
-  e: {
-    resize: () => {},
-    destroy: () => {},
-  },
+export class ElementHandlers {
+  constructor() {
+    this.resize = () => {};
+    this.destroy = () => {};
+  }
 
   onResize(fn) {
-    const e = this.e || (this.e = {});
-    if (fn) e.resize = fn;
-
-    return this;
-  },
+    this.resize = fn;
+  }
 
   onDestroy(fn) {
-    const e = this.e || (this.e = {});
-    if (fn) e.destroy = fn;
-
-    return this;
-  },
-};
+    this.destroy = fn;
+  }
+}
