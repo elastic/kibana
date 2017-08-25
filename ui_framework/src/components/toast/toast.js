@@ -8,6 +8,10 @@ import {
   KuiIcon,
 } from '../icon';
 
+import {
+  KuiText,
+} from '../../components';
+
 const typeToClassNameMap = {
   info: 'kuiToast--info',
   success: 'kuiToast--success',
@@ -69,7 +73,9 @@ export const KuiToast = ({ title, type, iconType, onClose, children, className, 
       </div>
 
       {closeButton}
-      {children}
+      <KuiText size="small">
+        <span>{children}</span>
+      </KuiText>
     </div>
   );
 };

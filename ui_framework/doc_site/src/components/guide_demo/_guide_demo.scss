@@ -19,6 +19,12 @@
   }
 }
 
+.guideDemo__highlightSpacer {
+  .kuiSpacer {
+    background: transparentize(#0096CC, .9);
+  }
+}
+
 .guideDemo__highlightGrid {
   .kuiFlexItem {
     background: transparentize(#0096CC, .9);

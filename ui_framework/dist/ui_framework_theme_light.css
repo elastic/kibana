@@ -167,7 +167,7 @@ table {
 .kui--fontSizeSmall {
   font-size: 14px;
   font-size: 0.875rem;
-  line-height: 18px; }
+  line-height: 1.5; }
 
 .kui--codeFont {
   font-family: "Roboto Mono", monospace; }
@@ -791,7 +791,7 @@ table {
 .kuiCallOutHeader {
   font-size: 16px;
   font-size: 1rem;
-  line-height: 24px;
+  line-height: 1.5;
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -994,14 +994,6 @@ table {
     margin-left: 24px; }
   .kuiFlexGroup.kuiFlexGroup--gutterExtraLarge > .kuiFlexItem + .kuiFlexItem {
     margin-left: 40px; }
-  .kuiFlexGroup.kuiFlexGroup--flexGrowZero > .kuiFlexItem {
-    -webkit-box-flex: 0;
-    -webkit-flex-grow: 0;
-        -ms-flex-positive: 0;
-            flex-grow: 0;
-    -webkit-flex-basis: auto;
-        -ms-flex-preferred-size: auto;
-            flex-basis: auto; }
   .kuiFlexGroup.kuiFlexGroup--justifyContentSpaceBetween {
     -webkit-box-pack: justify;
     -webkit-justify-content: space-between;
@@ -1336,7 +1328,7 @@ table {
 .kuiForm__error {
   font-size: 14px;
   font-size: 0.875rem;
-  line-height: 18px;
+  line-height: 1.5;
   list-style: disc;
   margin-left: 32px; }
 
@@ -1659,19 +1651,19 @@ table {
   font-weight: 500;
   font-size: 16px;
   font-size: 1rem;
-  line-height: 24px;
+  line-height: 1.5;
   padding-right: 24px; }
 
 .kuiHeaderAlert__text {
   font-size: 12px;
   font-size: 0.75rem;
-  line-height: 18px;
+  line-height: 1.5;
   margin-bottom: 8px; }
 
 .kuiHeaderAlert__action {
   font-size: 12px;
   font-size: 0.75rem;
-  line-height: 18px;
+  line-height: 1.5;
   color: #0079a5; }
   .kuiHeaderAlert__action:focus {
     outline: solid 6px #e6f2f6; }
@@ -1679,7 +1671,7 @@ table {
 .kuiHeaderAlert__date {
   font-size: 12px;
   font-size: 0.75rem;
-  line-height: 18px;
+  line-height: 1.5;
   color: #666;
   text-align: right; }
 
@@ -1947,7 +1939,7 @@ table {
 .kuiKeyPadMenuItem__label {
   font-size: 14px;
   font-size: 0.875rem;
-  line-height: 18px;
+  line-height: 1.5;
   text-align: center; }
 
 .kuiLink {
@@ -2271,7 +2263,7 @@ table {
 .kuiModalHeader__title {
   font-size: 24px;
   font-size: 1.5rem;
-  line-height: 36px; }
+  line-height: 1.5; }
 
 .kuiModalBody {
   padding: 32px 0; }
@@ -2616,7 +2608,7 @@ table {
 .kuiSideNavItem {
   font-size: 14px;
   font-size: 0.875rem;
-  line-height: 18px;
+  line-height: 1.5;
   display: block;
   width: 100%;
   text-align: left;
@@ -2643,7 +2635,7 @@ table {
 .kuiSideNavTitle {
   font-size: 16px;
   font-size: 1rem;
-  line-height: 24px;
+  line-height: 1.5;
   font-weight: 500;
   margin-bottom: 8px;
   margin-top: 16px;
@@ -2655,6 +2647,24 @@ table {
     margin-top: 0;
     /* 1 */ }
 
+.kuiSpacer--xs {
+  height: 4px; }
+
+.kuiSpacer--s {
+  height: 8px; }
+
+.kuiSpacer--m {
+  height: 16px; }
+
+.kuiSpacer--l {
+  height: 24px; }
+
+.kuiSpacer--xl {
+  height: 32px; }
+
+.kuiSpacer--xxl {
+  height: 40px; }
+
 /**
  * 1. Prevent cells from expanding based on content size. This substitutes for table-layout: fixed.
  */
@@ -2665,7 +2675,7 @@ table {
 .kuiTable {
   font-size: 14px;
   font-size: 0.875rem;
-  line-height: 18px;
+  line-height: 1.5;
   width: 100%;
   border: none;
   border-collapse: collapse;
@@ -2696,7 +2706,7 @@ table {
 .kuiTableHeaderButton {
   font-size: 14px;
   font-size: 0.875rem;
-  line-height: 18px;
+  line-height: 1.5;
   color: inherit;
   width: 100%; }
   .kuiTableHeaderButton:hover, .kuiTableHeaderButton:focus {
@@ -2786,7 +2796,7 @@ table {
 .kuiTab {
   font-size: 16px;
   font-size: 1rem;
-  line-height: 24px;
+  line-height: 1.5;
   position: relative;
   cursor: pointer;
   padding: 12px 16px;
@@ -2980,7 +2990,7 @@ table {
 .kuiToastHeader {
   font-size: 16px;
   font-size: 1rem;
-  line-height: 24px;
+  line-height: 1.5;
   padding-right: 24px;
   /* 3 */
   display: -webkit-box;
@@ -3017,48 +3027,86 @@ table {
   margin-bottom: 12px; }
 
 .kuiTitle {
+  color: #000;
+  font-weight: 300;
   font-size: 24px;
   font-size: 1.5rem;
-  line-height: 36px;
-  color: #000;
-  font-weight: 300; }
+  line-height: 1.5; }
 
 .kuiTitle--small {
   font-size: 16px;
   font-size: 1rem;
-  line-height: 24px; }
+  line-height: 1.5; }
 
 .kuiTitle--large {
   font-size: 32px;
   font-size: 2rem;
-  line-height: 48px; }
+  line-height: 1.5; }
 
 .kuiText {
+  color: #3F3F3F;
+  font-weight: 400;
   font-size: 16px;
   font-size: 1rem;
-  line-height: 24px;
-  color: #3F3F3F;
-  font-weight: 400; }
+  line-height: 1.5; }
+  .kuiText img {
+    display: block;
+    width: 100%; }
+  .kuiText p,
+  .kuiText ul,
+  .kuiText ol,
+  .kuiText img {
+    margin-bottom: 24px; }
+  .kuiText ul {
+    list-style: disc;
+    margin-left: 24px; }
+  .kuiText ol {
+    list-style: decimal;
+    margin-left: 24px; }
+  .kuiText * + h1,
+  .kuiText * + h2,
+  .kuiText * + h3,
+  .kuiText * + h4,
+  .kuiText * + h5,
+  .kuiText * + h6 {
+    margin-top: 32px; }
+  .kuiText h1, .kuiText h2, .kuiText h3, .kuiText h4, .kuiText h5, .kuiText h6 {
+    color: #000;
+    font-weight: 300;
+    margin-bottom: 8px; }
+  .kuiText h1 {
+    font-size: 200%; }
+  .kuiText h2 {
+    font-size: 150%;
+    line-height: 32px; }
+  .kuiText h3 {
+    font-weight: 500; }
+  .kuiText.kuiText--small {
+    font-size: 14px;
+    font-size: 0.875rem;
+    line-height: 1.5; }
+    .kuiText.kuiText--small * + h1,
+    .kuiText.kuiText--small * + h2,
+    .kuiText.kuiText--small * + h3,
+    .kuiText.kuiText--small * + h4,
+    .kuiText.kuiText--small * + h5,
+    .kuiText.kuiText--small * + h6 {
+      margin-top: 24px; }
+    .kuiText.kuiText--small p,
+    .kuiText.kuiText--small ul,
+    .kuiText.kuiText--small ol,
+    .kuiText.kuiText--small h1,
+    .kuiText.kuiText--small h2,
+    .kuiText.kuiText--small h3,
+    .kuiText.kuiText--small h4,
+    .kuiText.kuiText--small h5,
+    .kuiText.kuiText--small h6,
+    .kuiText.kuiText--small img {
+      margin-bottom: 14px; }
+  .kuiText > :last-child {
+    margin-bottom: 0 !important; }
 
-.kuiText--small {
-  font-size: 14px;
-  font-size: 0.875rem;
-  line-height: 18px; }
-
-.kuiVerticalRhythm {
-  margin-bottom: 12px; }
-
-.kuiVerticalRhythm--xSmall {
-  margin-bottom: 9px; }
-
-.kuiVerticalRhythm--small {
-  margin-bottom: 9px; }
-
-.kuiVerticalRhythm--large {
-  margin-bottom: 18px; }
-
-.kuiVerticalRhythm--xLarge {
-  margin-bottom: 24px; }
-
-.kuiVerticalRhythm--xxLarge {
-  margin-bottom: 36px; }
+.kuiTypography__lines {
+  background-color: #fff;
+  background-image: linear-gradient(#e6f2f6 1px, transparent 1px);
+  background-size: 100% 8px; }

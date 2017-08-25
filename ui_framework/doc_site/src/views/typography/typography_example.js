@@ -11,9 +11,9 @@ import {
   GuideText,
 } from '../../components';
 
-import Typography from './typography';
-const typographySource = require('!!raw!./typography');
-const typographyHtml = renderToHtml(Typography);
+import {
+  KuiCallOut,
+} from '../../../../components';
 
 import LargeTitle from './large_title';
 const pageTitleSource = require('!!raw!./large_title');
@@ -37,26 +37,23 @@ const smallTextHtml = renderToHtml(SmallText);
 
 export default props => (
   <GuidePage title={props.route.name}>
-    <GuideSection
-      title="Typography"
-      source={[{
-        type: GuideSectionTypes.JS,
-        code: typographySource,
-      }, {
-        type: GuideSectionTypes.HTML,
-        code: typographyHtml,
-      }]}
+    <KuiCallOut
+      title="When to use KuiText and when to use KuiTitle?"
+      type="info"
     >
-      <GuideText>
-        You can set the <GuideCode>verticalRhythm</GuideCode> prop to automatically create vertical
-        spacing between typographic components.
-      </GuideText>
-
-      <GuideDemo>
-        <Typography />
-      </GuideDemo>
-    </GuideSection>
-
+      <p>
+        <GuideCode>KuiText</GuideCode> is a catchall component that will style
+        any text content you throw at it, headings included. Think of it how a markdown
+        renderer works, but for raw HTML. That means it excells at quickly
+        styling <strong>articles of text</strong> (like this callout, a toast
+        noticiation or instruction text above a form), but is terrible for styling
+        titles within page layouts (where you do not want the margins). When
+        building a layout, you should always use <GuideCode>KuiTitle</GuideCode>
+        instead because it does not try to automatically set margins for you.
+      </p>
+    </KuiCallOut>
+    <br/>
+    <br/>
     <GuideSection
       title="Large Title"
       source={[{
