@@ -1,3 +1,4 @@
+import advancedFilter from './advanced_filter/advanced_filter';
 import debug from './debug/debug';
 import grid from './grid/grid';
 import image from './image/image';
@@ -7,6 +8,7 @@ import pie from './pie/pie';
 import table from './table/table';
 
 export const elementSpecs = [
+  advancedFilter,
   debug,
   grid,
   image,
