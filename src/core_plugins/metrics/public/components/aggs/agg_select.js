@@ -78,7 +78,7 @@ class AggSelectOption extends Component {
           onMouseEnter={this.handleMouseEnter}
           onMouseDown={this.handleMouseDown}
           onMouseMove={this.handleMouseMove}
-          ariaLabel={label}
+          aria-label={label}
         >
           <span className="Select-value-label" style={style}>
             <strong>{label}</strong>
@@ -93,7 +93,7 @@ class AggSelectOption extends Component {
         onMouseEnter={this.handleMouseEnter}
         onMouseDown={this.handleMouseDown}
         onMouseMove={this.handleMouseMove}
-        ariaLabel={label}
+        aria-label={label}
       >
         <span className="Select-value-label" style={style}>
           { this.props.children }
