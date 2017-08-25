@@ -30,7 +30,8 @@ export default props => (
       }]}
     >
       <GuideText>
-        Here&rsquo;s the basic Table.
+        Here&rsquo;s the basic Table. This example has sortable headers which respond to mouse
+        interaction and exhibit the desired behavior, and selectable rows.
       </GuideText>
 
       <GuideDemo>

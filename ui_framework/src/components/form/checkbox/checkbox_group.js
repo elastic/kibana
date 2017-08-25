@@ -1,55 +1,43 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import classNames from 'classnames';
 
-export const KuiCheckboxGroup = ({ options, onChange, className, ...rest }) => {
-  const classes = classNames('kuiCheckbox kuiCheckboxGroup__item', className);
+import { KuiCheckbox } from './checkbox';
 
-  return (
-    <div>
-      {options.map((option, index) => {
-        return (
-          <div
-            className={classes}
-            key={index}
-            {...rest}
-          >
-            <input
-              className="kuiCheckbox__input"
-              type="checkbox"
-              id={option.id}
-              checked={option.checked || false}
-              onChange={onChange.bind(null, option)}
-            />
-
-            <div className="kuiCheckbox__square">
-              <div className="kuiCheckbox__check" />
-            </div>
-
-            <label
-              className="kuiCheckbox__label"
-              htmlFor={option.id}
-            >
-              {option.label}
-            </label>
-          </div>
-        );
-      })}
-    </div>
-  );
-};
+export const KuiCheckboxGroup = ({
+  options,
+  idToSelectedMap,
+  onChange,
+  className,
+  ...rest,
+}) => (
+  <div className={className} {...rest}>
+    {options.map((option, index) => {
+      return (
+        <KuiCheckbox
+          className="kuiCheckboxGroup__item"
+          key={index}
+          id={option.id}
+          checked={idToSelectedMap[option.id]}
+          label={option.label}
+          onChange={onChange.bind(null, option.id)}
+        />
+      );
+    })}
+  </div>
+);
 
 KuiCheckboxGroup.propTypes = {
   options: PropTypes.arrayOf(
     PropTypes.shape({
       id: PropTypes.string,
-      checked: PropTypes.bool,
       label: PropTypes.string,
     }),
   ).isRequired,
+  idToSelectedMap: PropTypes.objectOf(PropTypes.bool).isRequired,
   onChange: PropTypes.func.isRequired,
 };
 
 KuiCheckboxGroup.defaultProps = {
   options: [],
+  idToSelectedMap: {},
 };

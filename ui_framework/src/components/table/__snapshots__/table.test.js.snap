@@ -11,12 +11,20 @@ exports[`renders KuiTable 1`] = `
       <th
         class="kuiTableHeaderCell"
       >
-        Hi Title
+        <div
+          class="kuiTableCellContent"
+        >
+          Hi Title
+        </div>
       </th>
       <th
         class="kuiTableHeaderCell"
       >
-        Bye Title
+        <div
+          class="kuiTableCellContent"
+        >
+          Bye Title
+        </div>
       </th>
     </tr>
   </thead>
@@ -28,9 +36,13 @@ exports[`renders KuiTable 1`] = `
         class="kuiTableRowCell"
       >
         <div
-          class="kuiTableRowCell__content"
+          class="kuiTableCellContent"
         >
-          Hi
+          <span
+            class="kuiTableCellContent__text"
+          >
+            Hi
+          </span>
         </div>
       </td>
     </tr>
@@ -41,9 +53,13 @@ exports[`renders KuiTable 1`] = `
         class="kuiTableRowCell"
       >
         <div
-          class="kuiTableRowCell__content"
+          class="kuiTableCellContent"
         >
-          Bye
+          <span
+            class="kuiTableCellContent__text"
+          >
+            Bye
+          </span>
         </div>
       </td>
     </tr>

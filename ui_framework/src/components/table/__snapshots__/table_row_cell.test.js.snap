@@ -5,18 +5,26 @@ exports[`align defaults to left 1`] = `
   class="kuiTableRowCell"
 >
   <div
-    class="kuiTableRowCell__content"
-  />
+    class="kuiTableCellContent"
+  >
+    <span
+      class="kuiTableCellContent__text"
+    />
+  </div>
 </td>
 `;
 
 exports[`align renders right when specified 1`] = `
 <td
-  class="kuiTableRowCell kuiTableRowCell--alignRight"
+  class="kuiTableRowCell"
 >
   <div
-    class="kuiTableRowCell__content"
-  />
+    class="kuiTableCellContent kuiTableCellContent--alignRight"
+  >
+    <span
+      class="kuiTableCellContent__text"
+    />
+  </div>
 </td>
 `;
 
@@ -27,19 +35,27 @@ exports[`renders KuiTableRowCell 1`] = `
   data-test-subj="test subject string"
 >
   <div
-    class="kuiTableRowCell__content"
+    class="kuiTableCellContent testClass1 testClass2"
   >
-    children
+    <span
+      class="kuiTableCellContent__text"
+    >
+      children
+    </span>
   </div>
 </td>
 `;
 
 exports[`wrapText is rendered when specified 1`] = `
 <td
-  class="kuiTableRowCell kuiTableRowCell--wrapText"
+  class="kuiTableRowCell"
 >
   <div
-    class="kuiTableRowCell__content"
-  />
+    class="kuiTableCellContent kuiTableCellContent--wrapText"
+  >
+    <span
+      class="kuiTableCellContent__text"
+    />
+  </div>
 </td>
 `;

@@ -16,6 +16,8 @@ const iconTypes = [
   'arrowDown',
   'arrowLeft',
   'arrowRight',
+  'sortUp',
+  'sortDown',
 ];
 
 export default () => (

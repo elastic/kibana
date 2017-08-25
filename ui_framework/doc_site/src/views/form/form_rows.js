@@ -51,9 +51,9 @@ export default class extends Component {
     });
   }
 
-  onCheckboxChange = option => {
+  onCheckboxChange = optionId => {
     const newCheckboxIdToSelectedMap = Object.assign({}, this.state.checkboxIdToSelectedMap, {
-      [option.id]: !this.state.checkboxIdToSelectedMap[option.id],
+      [optionId]: !this.state.checkboxIdToSelectedMap[optionId],
     });
 
     this.setState({
@@ -157,9 +157,8 @@ export default class extends Component {
           label="Checkboxes"
         >
           <KuiCheckboxGroup
-            options={this.state.checkboxes.map(checkbox => Object.assign({}, checkbox, {
-              checked: this.state.checkboxIdToSelectedMap[checkbox.id],
-            }))}
+            options={this.state.checkboxes}
+            idToSelectedMap={this.state.checkboxIdToSelectedMap}
             onChange={this.onCheckboxChange}
           />
         </KuiFormRow>

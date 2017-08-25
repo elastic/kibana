@@ -2,12 +2,12 @@ import React from 'react';
 import { render } from 'enzyme';
 import { requiredProps } from '../../test/required_props';
 
-import { KuiFlexGrid } from './flex_grid';
+import { KuiTableHeaderButton } from './table_header_button';
 
-describe('KuiFlexGrid', () => {
+describe('KuiTableHeaderButton', () => {
   test('is rendered', () => {
     const component = render(
-      <KuiFlexGrid columns={3} {...requiredProps} />
+      <KuiTableHeaderButton {...requiredProps} />
     );
 
     expect(component)
