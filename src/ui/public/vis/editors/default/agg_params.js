@@ -52,7 +52,7 @@ uiModules
       let $aggParamEditors; //  container for agg type param editors
       let $aggParamEditorsScope;
 
-      function updateAggParamEditor(newType, oldType) {
+      function updateAggParamEditor() {
         if ($aggParamEditors) {
           $aggParamEditors.remove();
           $aggParamEditors = null;
@@ -64,33 +64,23 @@ uiModules
           $aggParamEditorsScope = null;
         }
 
+        if (!$scope.agg || !$scope.agg.type) {
+          return;
+        }
+
         // create child scope, used in the editors
         $aggParamEditorsScope = $scope.$new();
         $aggParamEditorsScope.indexedFields = $scope.agg.getFieldOptions();
-
-        const agg = $scope.agg;
-        if (!agg) return;
-
-        const type = $scope.agg.type;
-
-        if (newType !== oldType) {
-          // don't reset on initial load, the
-          // saved params should persist
-          agg.resetParams();
-        }
-
-        if (!type) return;
-
         const aggParamHTML = {
           basic: [],
           advanced: []
         };
 
         // build collection of agg params html
-        type.params.forEach(function (param, i) {
+        $scope.agg.type.params.forEach(function (param, i) {
           let aggParam;
           let fields;
-          if (agg.schema.hideCustomLabel && param.name === 'customLabel') {
+          if ($scope.agg.schema.hideCustomLabel && param.name === 'customLabel') {
             return;
           }
           // if field param exists, compute allowed fields
