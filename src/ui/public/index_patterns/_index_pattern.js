@@ -366,7 +366,7 @@ export function IndexPatternProvider(Private, $http, config, kbnIndex, Promise, 
           const confirmMessage =
             `An index pattern with the title '${this.title}' already exists.`;
 
-          return confirmModalPromise(confirmMessage, { confirmButtonText: 'Edit existing pattern' })
+          return confirmModalPromise(confirmMessage, { confirmButtonText: 'Go to existing pattern' })
             .then(() => {
               kbnUrl.redirect('/management/kibana/indices/{{id}}', { id: duplicate.id });
               return true;
