@@ -215,15 +215,18 @@ app.controller('timelion', function (
     $scope.state.save();
     $scope.running = true;
 
-    $http.post('../api/timelion/run', {
+    const httpResult = $http.post('../api/timelion/run', {
       sheet: $scope.state.sheet,
       time: _.extend(timefilter.time, {
         interval: $scope.state.interval,
         timezone: timezone
       }),
     })
-    // data, status, headers, config
-    .success(function (resp) {
+    .then(resp => resp.data)
+    .catch(resp => { throw resp.data; });
+
+    httpResult
+    .then(function (resp) {
       dismissNotifications();
       $scope.stats = resp.stats;
       $scope.sheet = resp.sheet;
@@ -234,7 +237,7 @@ app.controller('timelion', function (
       });
       $scope.running = false;
     })
-    .error(function (resp) {
+    .catch(function (resp) {
       $scope.sheet = [];
       $scope.running = false;
 
