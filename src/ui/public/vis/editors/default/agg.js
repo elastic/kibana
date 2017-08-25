@@ -1,5 +1,6 @@
 import './agg_params';
 import './agg_add';
+import { Direction } from './keyboard_move';
 import _ from 'lodash';
 import { uiModules } from 'ui/modules';
 import aggTemplate from './agg.html';
@@ -50,6 +51,18 @@ uiModules
         $scope.editorOpen = $scope.editorWasOpen;
         $scope.$emit('agg-drag-end', $scope.agg);
       });
+
+      /**
+       * Move aggregations down/up in the priority list by pressing arrow keys.
+       */
+      $scope.onPriorityReorder = function (direction) {
+        const positionOffset = direction === Direction.down ? 1 : -1;
+
+        const currentPosition = $scope.group.indexOf($scope.agg);
+        const newPosition = Math.max(0, Math.min(currentPosition + positionOffset, $scope.group.length - 1));
+        _.move($scope.group, currentPosition, newPosition);
+        $scope.$emit('agg-reorder');
+      };
 
       $scope.remove = function (agg) {
         const aggs = $scope.vis.aggs;
