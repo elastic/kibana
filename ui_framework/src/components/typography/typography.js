@@ -1,31 +1,21 @@
-import {
+import React, {
   cloneElement,
-  PropTypes,
 } from 'react';
 import classNames from 'classnames';
+import PropTypes from 'prop-types';
 
 const titleSizeToClassNameMap = {
   small: 'kuiTitle--small',
   large: 'kuiTitle--large',
 };
 
-const titleSizeToVerticalRhythmClassNameMap = {
-  small: 'kuiVerticalRhythm',
-  large: 'kuiVerticalRhythm--xLarge',
-};
-
 export const TITLE_SIZES = Object.keys(titleSizeToClassNameMap);
 
-export const KuiTitle = ({ size, verticalRhythm, children, className, ...rest }) => {
-  const verticalRhythmClass =
-    verticalRhythm
-    ? titleSizeToVerticalRhythmClassNameMap[size] || 'kuiVerticalRhythm--large'
-    : undefined;
+export const KuiTitle = ({ size, children, className, ...rest }) => {
 
   const classes = classNames(
     'kuiTitle',
     titleSizeToClassNameMap[size],
-    verticalRhythmClass,
     className
   );
 
@@ -40,42 +30,57 @@ export const KuiTitle = ({ size, verticalRhythm, children, className, ...rest })
 KuiTitle.propTypes = {
   children: PropTypes.element.isRequired,
   size: PropTypes.oneOf(TITLE_SIZES),
-  verticalRhythm: PropTypes.bool,
 };
 
 const textSizeToClassNameMap = {
   small: 'kuiText--small',
 };
 
-const textSizeToVerticalRhythmClassNameMap = {
-  small: 'kuiVerticalRhythm--small',
-};
-
 export const TEXT_SIZES = Object.keys(textSizeToClassNameMap);
 
-export const KuiText = ({ size, verticalRhythm, children, className, ...rest }) => {
-  const verticalRhythmClass =
-    verticalRhythm
-    ? textSizeToVerticalRhythmClassNameMap[size] || 'kuiVerticalRhythm'
-    : undefined;
+export const KuiText = ({ size, children, className, ...rest }) => {
 
   const classes = classNames(
     'kuiText',
     textSizeToClassNameMap[size],
-    verticalRhythmClass,
     className
   );
 
-  const props = {
-    className: classes,
-    ...rest,
-  };
+  return (
+    <div className={classes} {...rest}>
+      {children}
+    </div>
+  );
+};
 
-  return cloneElement(children, props);
+const typographicElements = (props, propName, componentName) => {
+  if (!props.children) {
+    throw new Error(`${componentName} requires typographic elements, but none were found.`);
+  }
+
+  const children = Array.isArray(props.children) ? props.children : [props.children];
+
+  children.forEach(child => {
+    if (![
+      'h1',
+      'h2',
+      'h3',
+      'h4',
+      'h5',
+      'h6',
+      'p',
+      'small',
+      'ol',
+      'ul',
+      'img',
+    ].includes(child.type)) {
+      throw new Error(`${componentName} requires typographic elements, but instead got a ${child.type}.`);
+    }
+  });
 };
 
 KuiText.propTypes = {
-  children: PropTypes.element.isRequired,
+  children: typographicElements,
+  className: PropTypes.string,
   size: PropTypes.oneOf(TEXT_SIZES),
-  verticalRhythm: PropTypes.bool,
 };

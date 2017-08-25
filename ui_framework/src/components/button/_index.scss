@@ -2,6 +2,7 @@ $kuiButtonHeightSmall: $kuiSizeXL;
 $kuiButtonColorDisabled: tintOrShade($kuiTextColor, 70%, 80%);
 
 @mixin kuiButton {
+
   display: inline-block;
   appearance: none;
   cursor: pointer;
@@ -13,12 +14,20 @@ $kuiButtonColorDisabled: tintOrShade($kuiTextColor, 70%, 80%);
   transition: all $kuiAnimSpeedNormal $kuiAnimSlightBounce;
   whitespace: nowrap;
 
+  &:hover {
+    transform: translateY(-1px);
+  }
+
   &:hover, &:focus {
     text-decoration: underline;
   }
 
   &:focus {
-    animation: kuiButtonFocus $kuiAnimSpeedNormal $kuiAnimSlightBounce;
+    animation: kuiButtonActive $kuiAnimSpeedNormal $kuiAnimSlightBounce;
+  }
+
+  &:active {
+    transform: translateY(1px);
   }
 }
 
@@ -48,9 +57,9 @@ $kuiButtonColorDisabled: tintOrShade($kuiTextColor, 70%, 80%);
   }
 }
 
-@keyframes kuiButtonFocus {
+@keyframes kuiButtonActive {
   50% {
-    transform: translateY($kuiSizeXS / 2);
+    transform: translateY(1px);
   }
 }
 

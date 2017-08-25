@@ -21,6 +21,9 @@ import FlexExample
 import FormExample
   from '../../views/form/form_example';
 
+import FormGallerySandbox
+  from '../../views/form_gallery/form_gallery_sandbox';
+
 import IconExample
   from '../../views/icon/icon_example';
 
@@ -57,6 +60,9 @@ import PopoverExample
 import SideNavExample
   from '../../views/side_nav/side_nav_example';
 
+import SpacerExample
+  from '../../views/spacer/spacer_example';
+
 import TableExample
   from '../../views/table/table_example';
 
@@ -68,6 +74,9 @@ import ToastExample
 
 import TypographyExample
   from '../../views/typography/typography_example';
+
+import TypographyScalesSandbox
+  from '../../views/typography_scales/typography_scales_sandbox';
 
 // Component route names should match the component name exactly.
 const components = [{
@@ -143,6 +152,10 @@ const components = [{
   component: SideNavExample,
   hasReact: true,
 }, {
+  name: 'Spacer',
+  component: SpacerExample,
+  hasReact: true,
+}, {
   name: 'Table',
   component: TableExample,
   hasReact: true,
@@ -163,6 +176,14 @@ const components = [{
 const sandboxes = [{
   name: 'Kibana',
   component: KibanaSandbox,
+  hasReact: true,
+}, {
+  name: 'FormGallerySandbox',
+  component: FormGallerySandbox,
+  hasReact: true,
+}, {
+  name: 'TypographyScalesSandbox',
+  component: TypographyScalesSandbox,
   hasReact: true,
 }];
 

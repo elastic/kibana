@@ -13,7 +13,6 @@ import {
 
 import {
   KuiCallOut,
-  KuiText,
 } from '../../../../components';
 
 import FlexGroup from './flex_group';
@@ -50,13 +49,11 @@ export default props => (
       title="Coloring and padding exist for examples only"
       type="warning"
     >
-      <KuiText size="small">
-        <p>
-          Padding and background-color are added to all the <GuideCode>FlexItem</GuideCode> components on this
-          documentation page for illustrative purposes only. You will need to add padding through additional
-          components or classes if you need it.
-        </p>
-      </KuiText>
+      <p>
+        Padding and background-color are added to all the <GuideCode>FlexItem</GuideCode> components on this
+        documentation page for illustrative purposes only. You will need to add padding through additional
+        components or classes if you need it.
+      </p>
     </KuiCallOut>
     <br/>
     <br/>
@@ -113,8 +110,8 @@ export default props => (
       }]}
     >
       <GuideText>
-        You can disable the growth of <GuideCode>FlexItem</GuideCode> components within
-        <GuideCode>FlexGroup</GuideCode> if you need, but it is set to true by default.
+        Sometimes you do not want a <GuideCode>FlexItem</GuideCode> to grow. It
+        can be turned off on each item individually.
       </GuideText>
 
       <GuideDemo>
