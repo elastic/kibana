@@ -137,13 +137,13 @@ export const fetchAllRenderables = createThunk('fetchAllRenderables', ({ dispatc
   });
 });
 
-export const setExpression = createThunk('setExpression', ({ dispatch, getState }, expression, element, pageId, doRender = true) => {
+export const setExpression = createThunk('setExpression', ({ dispatch, getState }, expression, elementId, pageId, doRender = true) => {
   // dispatch action to update the element in state
   const _setExpression = createAction('setExpression');
-  dispatch(_setExpression({ expression, element, pageId }));
+  dispatch(_setExpression({ expression, elementId, pageId }));
 
   // read updated element from state and fetch renderable
-  const updatedElement = getElementById(getState(), element.id, pageId);
+  const updatedElement = getElementById(getState(), elementId, pageId);
   if (doRender === true) dispatch(fetchRenderable(updatedElement));
 });
 
@@ -151,6 +151,7 @@ export const setAst = createThunk('setAst', ({ dispatch }, ast, element, pageId,
   const expression = astToExpression(ast, element);
   dispatch(setExpression(expression, element, pageId, doRender));
 });
+
 
 // index here is the top-level argument in the expression. for example in the expression
 // demodata().pointseries().plot(), demodata is 0, pointseries is 1, and plot is 2

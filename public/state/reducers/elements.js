@@ -3,26 +3,26 @@ import { get, findIndex } from 'lodash';
 import { assign, push, del } from 'object-path-immutable';
 import * as actions from '../actions/elements';
 
+
+function assignElementProperties(workpadState, pageId, elementId, props) {
+  const pageIndex = findIndex(get(workpadState, 'pages'), { id: pageId });
+  const elementsPath = ['pages', pageIndex, 'elements'];
+  const elementIndex = findIndex(get(workpadState, elementsPath), { id: elementId });
+
+  if (pageIndex === -1 || elementIndex === -1) return workpadState;
+  return assign(workpadState, elementsPath.concat(elementIndex), props);
+}
+
 export default handleActions({
   // TODO: This takes the entire element, which is not neccesary, it could just take the id.
   [actions.setExpression]: (workpadState, { payload }) => {
-    const { expression, pageId, element } = payload;
-    const pageIndex = findIndex(get(workpadState, 'pages'), { id: pageId });
-    const elementsPath = ['pages', pageIndex, 'elements'];
-    const elementIndex = findIndex(get(workpadState, elementsPath), { id: element.id });
-
-    if (pageIndex === -1 || elementIndex === -1) return workpadState;
-    return assign(workpadState, elementsPath.concat(elementIndex), { expression });
+    const { expression, pageId, elementId } = payload;
+    return assignElementProperties(workpadState, pageId, elementId, { expression });
   },
   // This take elementId, not the full element, otherwise it is 80% the same as the above reducer
   [actions.setPosition]: (workpadState, { payload }) => {
     const { position, pageId, elementId } = payload;
-    const pageIndex = findIndex(get(workpadState, 'pages'), { id: pageId });
-    const elementsPath = ['pages', pageIndex, 'elements'];
-    const elementIndex = findIndex(get(workpadState, elementsPath), { id: elementId });
-
-    if (pageIndex === -1 || elementIndex === -1) return workpadState;
-    return assign(workpadState, elementsPath.concat(elementIndex), { position });
+    return assignElementProperties(workpadState, pageId, elementId, { position });
   },
   [actions.addElement]: (workpadState, { payload: { pageId, element } }) => {
     // find the index of the given pageId
