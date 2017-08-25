@@ -2,6 +2,7 @@ import 'ui/pager_control';
 import 'ui/pager';
 import { last } from 'lodash';
 import { uiModules } from 'ui/modules';
+import { callAfterBindingsWorkaround } from 'ui/compat';
 import './matching_indices_list.less';
 import template from './matching_indices_list.html';
 
@@ -33,7 +34,7 @@ module.directive('matchingIndicesList', function ($filter, pagerFactory) {
         }
       });
     },
-    controller: function () {
+    controller: callAfterBindingsWorkaround(function () {
       this.pageOfIndices = [];
 
       this.calculateItemsOnPage = () => {
@@ -57,6 +58,6 @@ module.directive('matchingIndicesList', function ($filter, pagerFactory) {
         this.pager.previousPage();
         this.calculateItemsOnPage();
       };
-    },
+    }),
   };
 });
