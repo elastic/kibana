@@ -2620,46 +2620,39 @@ table {
   border-collapse: collapse;
   background-color: #222; }
 
-.kuiTable--compressed .kuiTableHeaderCell,
-.kuiTable--compressed .kuiTableRowCell__content {
+.kuiTable--compressed .kuiTableCellContent {
   padding: 8px; }
 
 .kuiTable--compressed .kuiTableHeaderButton:focus {
   outline: solid 8px #275160; }
 
 .kuiTableHeaderCell {
-  text-align: left;
   max-width: 20px;
   /* 1 */
-  padding: 12px;
   color: #FFF; }
   .kuiTableHeaderCell .kuiTableHeaderButton {
     text-align: left; }
-
-.kuiTableHeaderCell__content {
-  display: inline-block; }
-
-.kuiTableHeaderCell--alignRight {
-  text-align: right; }
-  .kuiTableHeaderCell--alignRight .kuiTableHeaderButton {
-    text-align: right; }
 
 .kuiTableHeaderButton {
   font-size: 14px;
   font-size: 0.875rem;
   line-height: 18px;
-  color: #FFF;
+  color: inherit;
   width: 100%; }
   .kuiTableHeaderButton:hover, .kuiTableHeaderButton:focus {
     text-decoration: underline;
     color: #4da1c0; }
-    .kuiTableHeaderButton:hover .kuiTableHeaderButton__icon, .kuiTableHeaderButton:focus .kuiTableHeaderButton__icon {
+    .kuiTableHeaderButton:hover .kuiTableSortIcon, .kuiTableHeaderButton:focus .kuiTableSortIcon {
+      display: block;
       fill: #4da1c0; }
   .kuiTableHeaderButton:focus {
-    background: #275160;
-    outline: solid 12px #275160; }
-  .kuiTableHeaderButton .kuiTableHeaderButton__icon {
-    margin-left: 4px; }
+    background: #275160; }
+
+.kuiTableSortIcon {
+  margin-left: 4px;
+  fill: #4d4d4d; }
+  .kuiTableHeaderButton-isSorted .kuiTableSortIcon {
+    fill: #FFF; }
 
 .kuiTableRow:hover {
   background-color: #292929; }
@@ -2668,7 +2661,6 @@ table {
   background-color: rgba(0, 166, 155, 0.05); }
 
 .kuiTableRowCell {
-  text-align: left;
   max-width: 20px;
   /* 1 */
   color: #F5F5F5;
@@ -2676,11 +2668,19 @@ table {
   border-bottom: 1px solid #444; }
 
 /**
-   * 1. Vertically align all children.
-   * 2. Truncate text with an ellipsis. The padding on this div allows the ellipsis to show. If
-   *    the padding was on the cell, the ellipsis would be cropped.
-   */
-.kuiTableRowCell__content {
+ * 1. Vertically align all children.
+ * 2. Truncate text with an ellipsis. The padding on this div allows the ellipsis to show. If
+ *    the padding was on the cell, the ellipsis would be cropped.
+ */
+.kuiTableCellContent {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-align: center;
+  -webkit-align-items: center;
+      -ms-flex-align: center;
+          align-items: center;
   white-space: nowrap;
   /* 2 */
   overflow: hidden;
@@ -2689,14 +2689,19 @@ table {
   /* 2 */
   padding: 12px;
   /* 2 */ }
-  .kuiTableRowCell__content > * {
-    vertical-align: middle;
-    /* 1 */ }
 
-.kuiTableRowCell--alignRight .kuiTableRowCell__content {
-  text-align: right; }
+.kuiTableCellContent__text {
+  overflow: hidden;
+  min-width: 0;
+  text-overflow: ellipsis; }
 
-.kuiTableRowCell--wrapText .kuiTableRowCell__content {
+.kuiTableCellContent--alignRight {
+  -webkit-box-pack: end;
+  -webkit-justify-content: flex-end;
+      -ms-flex-pack: end;
+          justify-content: flex-end; }
+
+.kuiTableCellContent--wrapText {
   white-space: normal; }
 
 .kuiTabs {

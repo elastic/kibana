@@ -12,8 +12,7 @@
 }
 
 .kuiTable--compressed {
-  .kuiTableHeaderCell,
-  .kuiTableRowCell__content {
+  .kuiTableCellContent {
     padding: $kuiTableCellPaddingCompressed;
   }
 
@@ -25,7 +24,6 @@
 .kuiTableHeaderCell {
   @include kuiTableCell;
 
-  padding: $kuiTableCellPadding;
   color: $kuiTitleColor;
 
   .kuiTableHeaderButton {
@@ -33,39 +31,33 @@
   }
 }
 
-  .kuiTableHeaderCell__content {
-    display: inline-block;
-  }
-
-.kuiTableHeaderCell--alignRight {
-  text-align: right;
-
-  .kuiTableHeaderButton {
-    text-align: right;
-  }
-}
-
 .kuiTableHeaderButton {
   @include kuiFontSizeS;
-  color: $kuiTitleColor;
+
+  color: inherit;
   width: 100%;
 
   &:hover, &:focus {
     text-decoration: underline;
     color: $kuiColorPrimary;
 
-    .kuiTableHeaderButton__icon {
+    .kuiTableSortIcon {
+      display: block;
       fill: $kuiColorPrimary;
     }
   }
 
   &:focus {
     background: $kuiFocusBackgroundColor;
-    outline: solid $kuiTableCellPadding $kuiFocusBackgroundColor;
   }
+}
 
-  .kuiTableHeaderButton__icon {
-    margin-left: $kuiSizeXS;
+.kuiTableSortIcon {
+  margin-left: $kuiSizeXS;
+  fill: tintOrShade($kuiTitleColor, 80%, 70%);
+
+  .kuiTableHeaderButton-isSorted & {
+    fill: $kuiTitleColor;
   }
 }
 
@@ -87,30 +79,30 @@
   border-bottom: $kuiBorderThin;
 }
 
-  /**
-   * 1. Vertically align all children.
-   * 2. Truncate text with an ellipsis. The padding on this div allows the ellipsis to show. If
-   *    the padding was on the cell, the ellipsis would be cropped.
-   */
-  .kuiTableRowCell__content {
-    white-space: nowrap; /* 2 */
-    overflow: hidden; /* 2 */
-    text-overflow: ellipsis; /* 2 */
-    padding: $kuiTableCellPadding; /* 2 */
-
-    & > * {
-      vertical-align: middle; /* 1 */
-    }
-  }
-
-.kuiTableRowCell--alignRight {
-  .kuiTableRowCell__content {
-    text-align: right;
-  }
+/**
+ * 1. Vertically align all children.
+ * 2. Truncate text with an ellipsis. The padding on this div allows the ellipsis to show. If
+ *    the padding was on the cell, the ellipsis would be cropped.
+ */
+.kuiTableCellContent {
+  display: flex;
+  align-items: center;
+  white-space: nowrap; /* 2 */
+  overflow: hidden; /* 2 */
+  text-overflow: ellipsis; /* 2 */
+  padding: $kuiTableCellPadding; /* 2 */
 }
 
-.kuiTableRowCell--wrapText {
-  .kuiTableRowCell__content {
-    white-space: normal;
+  .kuiTableCellContent__text {
+    overflow: hidden;
+    min-width: 0;
+    text-overflow: ellipsis;
   }
+
+.kuiTableCellContent--alignRight {
+  justify-content: flex-end;
+}
+
+.kuiTableCellContent--wrapText {
+  white-space: normal;
 }
