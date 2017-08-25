@@ -31,7 +31,7 @@ export default props => (
     >
       <GuideText>
         Here&rsquo;s the basic Table. This example has sortable headers which respond to mouse
-        interaction and exhibit the desired behavior.
+        interaction and exhibit the desired behavior, and selectable rows.
       </GuideText>
 
       <GuideDemo>
@@ -49,6 +49,10 @@ export default props => (
         code: compressedSource,
       }]}
     >
+      <GuideText>
+        This example lacks the interaction of the above example.
+      </GuideText>
+
       <GuideDemo>
         <Compressed />
       </GuideDemo>

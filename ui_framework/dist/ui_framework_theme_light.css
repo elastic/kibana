@@ -1157,16 +1157,32 @@ table {
  */
 .kuiCheckbox {
   position: relative;
-  height: 24px; }
-  .kuiCheckbox .kuiCheckbox__label {
+  height: 24px;
+  /**
+   * 1. Float above the visual checkbox and match its dimension, so that when users try to click it
+   *    they actually click this input.
+   */ }
+  .kuiCheckbox .kuiCheckbox__input {
     position: absolute;
-    padding-left: 32px;
-    line-height: 24px;
-    display: block;
-    font-weight: 400;
-    z-index: 2;
-    font-size: 14px;
-    cursor: pointer; }
+    /* 1 */
+    opacity: 0;
+    /* 1 */
+    height: 24px;
+    /* 1 */
+    width: 24px;
+    /* 1 */
+    z-index: 1;
+    /* 1 */
+    margin: 0;
+    /* 1 */ }
+    .kuiCheckbox .kuiCheckbox__input:checked ~ .kuiCheckbox__square .kuiCheckbox__check {
+      background-color: #3F3F3F;
+      -webkit-mask: url("../src/components/icon/assets/check.svg") center center no-repeat;
+              mask: url("../src/components/icon/assets/check.svg") center center no-repeat; }
+    .kuiCheckbox .kuiCheckbox__input:focus ~ .kuiCheckbox__square,
+    .kuiCheckbox .kuiCheckbox__input:active ~ .kuiCheckbox__square {
+      background-color: #e6f2f6;
+      border-color: #0079a5; }
   .kuiCheckbox .kuiCheckbox__square {
     position: absolute;
     height: 24px;
@@ -1178,17 +1194,15 @@ table {
   .kuiCheckbox .kuiCheckbox__check {
     height: 100%;
     width: 100%; }
-  .kuiCheckbox .kuiCheckbox__input {
+  .kuiCheckbox .kuiCheckbox__label {
     position: absolute;
-    opacity: 0; }
-    .kuiCheckbox .kuiCheckbox__input:checked ~ .kuiCheckbox__square .kuiCheckbox__check {
-      background-color: #3F3F3F;
-      -webkit-mask: url("../src/components/icon/assets/check.svg") center center no-repeat;
-              mask: url("../src/components/icon/assets/check.svg") center center no-repeat; }
-    .kuiCheckbox .kuiCheckbox__input:focus ~ .kuiCheckbox__square,
-    .kuiCheckbox .kuiCheckbox__input:active ~ .kuiCheckbox__square {
-      background-color: #e6f2f6;
-      border-color: #0079a5; }
+    padding-left: 32px;
+    line-height: 24px;
+    display: block;
+    font-weight: 400;
+    z-index: 2;
+    font-size: 14px;
+    cursor: pointer; }
 
 .kuiCheckboxGroup__item + .kuiCheckboxGroup__item {
   margin-top: 8px; }
@@ -2629,9 +2643,18 @@ table {
 .kuiTableHeaderCell {
   max-width: 20px;
   /* 1 */
+  vertical-align: middle;
   color: #000; }
   .kuiTableHeaderCell .kuiTableHeaderButton {
     text-align: left; }
+
+.kuiTableHeaderCellCheckbox {
+  width: 36px;
+  vertical-align: middle; }
+  .kuiTableHeaderCellCheckbox .kuiTableCellContent {
+    padding-right: 0;
+    padding-top: 0;
+    padding-bottom: 0; }
 
 .kuiTableHeaderButton {
   font-size: 14px;
@@ -2663,9 +2686,20 @@ table {
 .kuiTableRowCell {
   max-width: 20px;
   /* 1 */
+  vertical-align: middle;
   color: #3F3F3F;
   border-top: 1px solid #D9D9D9;
   border-bottom: 1px solid #D9D9D9; }
+
+.kuiTableRowCellCheckbox {
+  width: 36px;
+  vertical-align: middle;
+  border-top: 1px solid #D9D9D9;
+  border-bottom: 1px solid #D9D9D9; }
+  .kuiTableRowCellCheckbox .kuiTableCellContent {
+    padding-right: 0;
+    padding-top: 0;
+    padding-bottom: 0; }
 
 /**
  * 1. Vertically align all children.

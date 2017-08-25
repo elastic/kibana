@@ -3,13 +3,21 @@
 exports[`align defaults to left 1`] = `
 <th
   class="kuiTableHeaderCell"
-/>
+>
+  <div
+    class="kuiTableCellContent"
+  />
+</th>
 `;
 
 exports[`align renders right when specified 1`] = `
 <th
-  class="kuiTableHeaderCell kuiTableHeaderCell--alignRight"
-/>
+  class="kuiTableHeaderCell"
+>
+  <div
+    class="kuiTableCellContent kuiTableCellContent--alignRight"
+  />
+</th>
 `;
 
 exports[`renders KuiTableHeaderCell 1`] = `
@@ -18,6 +26,10 @@ exports[`renders KuiTableHeaderCell 1`] = `
   class="kuiTableHeaderCell testClass1 testClass2"
   data-test-subj="test subject string"
 >
-  children
+  <div
+    class="kuiTableCellContent testClass1 testClass2"
+  >
+    children
+  </div>
 </th>
 `;

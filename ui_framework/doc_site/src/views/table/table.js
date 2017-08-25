@@ -3,14 +3,17 @@ import React, {
 } from 'react';
 
 import {
+  KuiCheckbox,
   KuiIcon,
   KuiLink,
   KuiTable,
   KuiTableBody,
   KuiTableHeader,
   KuiTableHeaderCell,
+  KuiTableHeaderCellCheckbox,
   KuiTableRow,
   KuiTableRowCell,
+  KuiTableRowCellCheckbox,
 } from '../../../../components';
 
 import {
@@ -22,12 +25,12 @@ import {
 export class Table extends Component {
   constructor(props) {
     super(props);
+
     this.state = {
-      idToSelectedMap: {
+      itemIdToSelectedMap: {
         2: true,
       },
       sortedColumn: 'title',
-      rowToSelectedStateMap: new Map(),
     };
 
     this.items = [{
@@ -89,6 +92,10 @@ export class Table extends Component {
     }], this.state.sortedColumn);
 
     this.columns = [{
+      id: 'checkbox',
+      isCheckbox: true,
+      width: '20px',
+    }, {
       id: 'title',
       label: 'Title',
       alignment: LEFT_ALIGNMENT,
@@ -120,31 +127,66 @@ export class Table extends Component {
     });
   }
 
-  toggleItem = item => {
-    this.setState(previousState => {
-      const rowToSelectedStateMap = new Map(previousState.rowToSelectedStateMap);
-      rowToSelectedStateMap.set(item, !rowToSelectedStateMap.get(item));
-      return { rowToSelectedStateMap };
+  toggleItem = itemId => {
+    const newItemIdToSelectedMap = Object.assign({}, this.state.itemIdToSelectedMap, {
+      [itemId]: !this.state.itemIdToSelectedMap[itemId],
+    });
+
+    this.setState({
+      itemIdToSelectedMap: newItemIdToSelectedMap,
     });
   }
 
-  isItemChecked = item => {
-    return this.state.rowToSelectedStateMap.get(item);
+  toggleAll = () => {
+    const allSelected = this.areAllItemsSelected();
+    const newItemIdToSelectedMap = {};
+    this.items.forEach(item => newItemIdToSelectedMap[item.id] = !allSelected);
+
+
+    this.setState({
+      itemIdToSelectedMap: newItemIdToSelectedMap,
+    });
+  }
+
+  isItemSelected = itemId => {
+    return this.state.itemIdToSelectedMap[itemId];
+  }
+
+  areAllItemsSelected = () => {
+    const indexOfUnselectedItem = this.items.findIndex(item => !this.isItemSelected(item.id));
+    return indexOfUnselectedItem === -1;
   }
 
   renderHeaderCells() {
-    return this.columns.map((column, columnIndex) => (
-      <KuiTableHeaderCell
-        key={columnIndex}
-        align={this.columns[columnIndex].alignment}
-        width={column.width}
-        onSort={column.isSortable ? this.onSort.bind(this, column.id) : undefined}
-        isSorted={this.state.sortedColumn === column.id}
-        isSortAscending={this.sortableProperties.isAscendingByName(column.id)}
-      >
-        {column.label}
-      </KuiTableHeaderCell>
-    ));
+    return this.columns.map((column, columnIndex) => {
+      if (column.isCheckbox) {
+        return (
+          <KuiTableHeaderCellCheckbox
+            key={column.id}
+            width={column.width}
+          >
+            <KuiCheckbox
+              id="selectAllCheckbox"
+              checked={this.areAllItemsSelected()}
+              onChange={this.toggleAll.bind(this)}
+            />
+          </KuiTableHeaderCellCheckbox>
+        );
+      }
+
+      return (
+        <KuiTableHeaderCell
+          key={column.id}
+          align={this.columns[columnIndex].alignment}
+          width={column.width}
+          onSort={column.isSortable ? this.onSort.bind(this, column.id) : undefined}
+          isSorted={this.state.sortedColumn === column.id}
+          isSortAscending={this.sortableProperties.isAscendingByName(column.id)}
+        >
+          {column.label}
+        </KuiTableHeaderCell>
+      );
+    });
   }
 
   renderRows() {
@@ -154,7 +196,17 @@ export class Table extends Component {
 
         let child;
 
-        if (column.cellProvider) {
+        if (column.isCheckbox) {
+          return (
+            <KuiTableRowCellCheckbox key={column.id}>
+              <KuiCheckbox
+                id={`${item.id}-checkbox`}
+                checked={this.isItemSelected(item.id)}
+                onChange={this.toggleItem.bind(this, item.id)}
+              />
+            </KuiTableRowCellCheckbox>
+          );
+        } else if (column.cellProvider) {
           child = column.cellProvider(cell);
         } else if (cell.isLink) {
           child = <KuiLink href="">{cell.value}</KuiLink>;
@@ -178,7 +230,7 @@ export class Table extends Component {
       return (
         <KuiTableRow
           key={item.id}
-          isSelected={this.state.idToSelectedMap[item.id]}
+          isSelected={this.isItemSelected(item.id)}
         >
           {cells}
         </KuiTableRow>

@@ -31,6 +31,10 @@
   }
 }
 
+.kuiTableHeaderCellCheckbox {
+  @include kuiTableCellCheckbox;
+}
+
 .kuiTableHeaderButton {
   @include kuiFontSizeS;
 
@@ -75,6 +79,13 @@
   @include kuiTableCell;
 
   color: $kuiTextColor;
+  border-top: $kuiBorderThin;
+  border-bottom: $kuiBorderThin;
+}
+
+.kuiTableRowCellCheckbox {
+  @include kuiTableCellCheckbox;
+
   border-top: $kuiBorderThin;
   border-bottom: $kuiBorderThin;
 }
