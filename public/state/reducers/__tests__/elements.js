@@ -37,7 +37,7 @@ describe('elements reducer', () => {
     };
     const action = actionCreator('setExpression')({
       expression,
-      element: { id: 'element-1' },
+      elementId: 'element-1',
       pageId: 'page-1',
     });
 
