@@ -54,7 +54,7 @@ export default () => (
             </KuiFormRow>
           </KuiFlexItem>
           <KuiFlexItem grow={false}>
-            <KuiFormRow addEmptyLabelSpace>
+            <KuiFormRow hasEmptyLabelSpace>
               <KuiButton>Save</KuiButton>
             </KuiFormRow>
           </KuiFlexItem>

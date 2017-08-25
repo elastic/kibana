@@ -38,3 +38,10 @@
     padding: 16px;
   }
 }
+
+.guideDemo__textLines {
+  background-color: #fff;
+  background-image:
+  linear-gradient($kuiFocusBackgroundColor 1px, transparent 1px);
+  background-size: 100% 8px;
+}

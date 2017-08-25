@@ -2,7 +2,6 @@ $kuiButtonHeightSmall: $kuiSizeXL;
 $kuiButtonColorDisabled: tintOrShade($kuiTextColor, 70%, 80%);
 
 @mixin kuiButton {
-  @include kuiSlightShadow;
 
   display: inline-block;
   appearance: none;
@@ -17,7 +16,6 @@ $kuiButtonColorDisabled: tintOrShade($kuiTextColor, 70%, 80%);
 
   &:hover {
     transform: translateY(-1px);
-    @include kuiSlightShadowHover;
   }
 
   &:hover, &:focus {
@@ -30,7 +28,6 @@ $kuiButtonColorDisabled: tintOrShade($kuiTextColor, 70%, 80%);
 
   &:active {
     transform: translateY(1px);
-    @include kuiSlightShadowActive;
   }
 }
 

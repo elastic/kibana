@@ -74,7 +74,7 @@ export default () => (
 
     <KuiFlexGroup>
       <KuiFlexItem>
-        <KuiPageContent className="kuiTypography__lines" style={{ padding: 32 }}>
+        <KuiPageContent className="guideDemo__textLines" style={{ padding: 32 }}>
           <KuiPageContentBody>
 
             <KuiText>
@@ -85,7 +85,7 @@ export default () => (
         </KuiPageContent>
       </KuiFlexItem>
       <KuiFlexItem>
-        <KuiPageContent className="kuiTypography__lines" style={{ padding: 32 }}>
+        <KuiPageContent className="guideDemo__textLines" style={{ padding: 32 }}>
           <KuiPageContentBody>
 
             <KuiText size="small">

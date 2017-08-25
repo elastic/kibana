@@ -8,7 +8,6 @@ $spacerSizes: (
 );
 
 @each $name, $size in $spacerSizes {
-  @debug 'hi';
   .kuiSpacer--#{$name} {
     height: $size;
   }
