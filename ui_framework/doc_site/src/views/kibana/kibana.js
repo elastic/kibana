@@ -5,6 +5,8 @@ import React, {
 
 import {
   KuiButton,
+  KuiFlexGroup,
+  KuiFlexItem,
   KuiHeader,
   KuiHeaderBreadcrumb,
   KuiHeaderBreadcrumbCollapsed,
@@ -36,6 +38,10 @@ import {
   KuiToast,
   KuiTitle,
 } from '../../../../components';
+
+import {
+  Table,
+} from '../../views/table/table'
 
 const TOAST_LIFE_TIME_MS = 4000;
 const TOAST_FADE_OUT_MS = 250;
@@ -465,34 +471,29 @@ export default class extends Component {
                 </KuiTitle>
               </KuiPageContentHeaderSection>
               <KuiPageContentHeaderSection>
-                <KuiButton
-                  fill
-                  iconType="arrowDown"
-                  onClick={() => window.alert('Button clicked')}
-                  iconSide="right"
-                >
-                  Create new watch
-                </KuiButton>
+                <KuiFlexGroup gutterSize="medium">
+                  <KuiFlexItem>
+                    <KuiButton
+                      onClick={this.onAddToastClick.bind(this)}
+                      size="small"
+                    >
+                      Add toast
+                    </KuiButton>
+                  </KuiFlexItem>
+                  <KuiFlexItem>
+                    <KuiButton
+                      type="danger"
+                      onClick={this.onDeleteAllToasts.bind(this)}
+                      size="small"
+                    >
+                      Clear toasts
+                    </KuiButton>
+                  </KuiFlexItem>
+                </KuiFlexGroup>
               </KuiPageContentHeaderSection>
             </KuiPageContentHeader>
             <KuiPageContentBody>
-              <KuiButton
-                onClick={this.onAddToastClick.bind(this)}
-                size="small"
-              >
-                Add toast
-              </KuiButton>
-
-              <br />
-              <br />
-
-              <KuiButton
-                type="danger"
-                onClick={this.onDeleteAllToasts.bind(this)}
-                size="small"
-              >
-                Clear toasts
-              </KuiButton>
+              <Table />
             </KuiPageContentBody>
           </KuiPageContent>
         </KuiPageBody>
@@ -596,4 +597,3 @@ export default class extends Component {
     );
   }
 }
-

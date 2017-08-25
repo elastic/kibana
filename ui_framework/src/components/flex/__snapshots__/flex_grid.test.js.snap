@@ -3,7 +3,7 @@
 exports[`KuiFlexGrid is rendered 1`] = `
 <div
   aria-label="aria-label"
-  class="kuiFlexGrid kuiFlexGrid--gutterLarge testClass1 testClass2"
+  class="kuiFlexGrid kuiFlexGrid--gutterLarge kuiFlexGrid--thirds testClass1 testClass2"
   data-test-subj="test subject string"
 />
 `;
