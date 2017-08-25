@@ -1,5 +1,6 @@
 import 'ui/toggle_panel';
 import { uiModules } from 'ui/modules';
+import { callAfterBindingsWorkaround } from 'ui/compat';
 import './step_time_field.less';
 import template from './step_time_field.html';
 
@@ -22,7 +23,7 @@ module.directive('stepTimeField', function () {
       goToPreviousStep: '&',
       createIndexPattern: '&',
     },
-    controller: function () {
+    controller: callAfterBindingsWorkaround(function () {
       this.isTimeFieldSelectDisabled = () => (
         this.isFetchingTimeFieldOptions
         || this.timeFieldOptionsError
@@ -63,6 +64,6 @@ module.directive('stepTimeField', function () {
       };
 
       this.showAdvancedOptions = !!this.indexPatternId;
-    },
+    }),
   };
 });
