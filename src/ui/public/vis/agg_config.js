@@ -19,12 +19,16 @@ export function VisAggConfigProvider(Private) {
     self._opts = opts = (opts || {});
     self.enabled = typeof opts.enabled === 'boolean' ? opts.enabled : true;
 
+    // start with empty params so that checks in type/schema setters don't freak
+    // because self.params is undefined
+    self.params = {};
+
     // setters
     self.type = opts.type;
     self.schema = opts.schema;
 
-    // resolve the params
-    self.fillDefaults(opts.params);
+    // set the params to the values from opts, or just to the defaults
+    self.setParams(opts.params || {});
   }
 
   /**
@@ -82,6 +86,15 @@ export function VisAggConfigProvider(Private) {
         }
 
         this.__type = type;
+
+        // clear out the previous params except for a few special ones
+        this.setParams({
+          // split row/columns is "outside" of the agg, so don't reset it
+          row: this.params.row,
+
+          // almost every agg has fields, so we try to persist that when type changes
+          field: _.get(this.getFieldOptions(), ['byName', this.getField()])
+        });
       }
     },
     schema: {
@@ -105,7 +118,7 @@ export function VisAggConfigProvider(Private) {
    *                         used when initializing
    * @return {undefined}
    */
-  AggConfig.prototype.fillDefaults = function (from) {
+  AggConfig.prototype.setParams = function (from) {
     const self = this;
     from = from || self.params || {};
     const to = self.params = {};
@@ -141,22 +154,6 @@ export function VisAggConfigProvider(Private) {
 
       to[aggParam.name] = _.cloneDeep(val);
     });
-  };
-
-  /**
-   * Clear the parameters for this aggConfig
-   *
-   * @return {object} the new params object
-   */
-  AggConfig.prototype.resetParams = function () {
-    let field;
-    const fieldOptions = this.getFieldOptions();
-
-    if (fieldOptions) {
-      field = fieldOptions.byName[this.fieldName()] || null;
-    }
-
-    return this.fillDefaults({ row: this.params.row, field: field });
   };
 
   AggConfig.prototype.write = function () {
