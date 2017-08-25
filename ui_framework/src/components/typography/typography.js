@@ -9,23 +9,13 @@ const titleSizeToClassNameMap = {
   large: 'kuiTitle--large',
 };
 
-const titleSizeToVerticalRhythmClassNameMap = {
-  small: 'kuiVerticalRhythm',
-  large: 'kuiVerticalRhythm--xLarge',
-};
-
 export const TITLE_SIZES = Object.keys(titleSizeToClassNameMap);
 
-export const KuiTitle = ({ size, verticalRhythm, children, className, ...rest }) => {
-  const verticalRhythmClass =
-    verticalRhythm
-    ? titleSizeToVerticalRhythmClassNameMap[size] || 'kuiVerticalRhythm--large'
-    : undefined;
+export const KuiTitle = ({ size, children, className, ...rest }) => {
 
   const classes = classNames(
     'kuiTitle',
     titleSizeToClassNameMap[size],
-    verticalRhythmClass,
     className
   );
 
@@ -40,29 +30,19 @@ export const KuiTitle = ({ size, verticalRhythm, children, className, ...rest })
 KuiTitle.propTypes = {
   children: PropTypes.element.isRequired,
   size: PropTypes.oneOf(TITLE_SIZES),
-  verticalRhythm: PropTypes.bool,
 };
 
 const textSizeToClassNameMap = {
   small: 'kuiText--small',
 };
 
-const textSizeToVerticalRhythmClassNameMap = {
-  small: 'kuiVerticalRhythm--small',
-};
-
 export const TEXT_SIZES = Object.keys(textSizeToClassNameMap);
 
-export const KuiText = ({ size, verticalRhythm, children, className, ...rest }) => {
-  const verticalRhythmClass =
-    verticalRhythm
-    ? textSizeToVerticalRhythmClassNameMap[size] || 'kuiVerticalRhythm'
-    : undefined;
+export const KuiText = ({ size, children, className, ...rest }) => {
 
   const classes = classNames(
     'kuiText',
     textSizeToClassNameMap[size],
-    verticalRhythmClass,
     className
   );
 
@@ -77,5 +57,4 @@ export const KuiText = ({ size, verticalRhythm, children, className, ...rest }) 
 KuiText.propTypes = {
   children: PropTypes.element.isRequired,
   size: PropTypes.oneOf(TEXT_SIZES),
-  verticalRhythm: PropTypes.bool,
 };

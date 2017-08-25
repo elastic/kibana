@@ -24,12 +24,6 @@
     margin-left: $kuiSizeXXL;
   }
 
-  // Turn off item growth
-  &.kuiFlexGroup--flexGrowZero > .kuiFlexItem {
-    flex-grow: 0;
-    flex-basis: auto;
-  }
-
   // Justify the grid
   &.kuiFlexGroup--justifyContentSpaceBetween {
     justify-content: space-between;

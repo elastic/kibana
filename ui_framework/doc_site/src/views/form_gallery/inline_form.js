@@ -13,6 +13,7 @@ import {
   KuiPageContentHeaderSection,
   KuiTitle,
   KuiText,
+  KuiHorizontalRule,
 } from '../../../../components/';
 
 function makeId() {
@@ -33,13 +34,14 @@ export default () => (
         </KuiPageContentHeaderSection>
       </KuiPageContentHeader>
       <KuiPageContentBody>
-        <KuiText className="kuiVerticalRhythm--large">
+        <KuiText>
           <p>
             Inline forms can be made with FlexGroup. Apply grow=false on any
             of the items you want to collapse (like this button). Note that the button
             FormRow component also requires an additional prop because it&rsquo;s missing a label.
           </p>
         </KuiText>
+        <KuiHorizontalRule />
         <KuiFlexGroup>
           <KuiFlexItem>
             <KuiFormRow label="First name"  id={idPrefix} helpText="I am helpful help text!">

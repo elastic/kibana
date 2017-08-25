@@ -123,6 +123,10 @@ export {
 } from './popover';
 
 export {
+  KuiSpacer,
+} from './spacer';
+
+export {
   KuiTable,
   KuiTableBody,
   KuiTableHeader,
