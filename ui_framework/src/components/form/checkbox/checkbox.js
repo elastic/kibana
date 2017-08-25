@@ -8,9 +8,16 @@ export const KuiCheckbox = ({
   checked,
   label,
   onChange,
+  alternateStyle,
   ...rest,
 }) => {
-  const classes = classNames('kuiCheckbox', className);
+  const classes = classNames(
+    'kuiCheckbox',
+    {
+      'kuiCheckbox--alternate': alternateStyle,
+    },
+    className
+  );
 
   let optionalLabel;
 
@@ -53,8 +60,10 @@ KuiCheckbox.propTypes = {
   checked: PropTypes.bool.isRequired,
   label: PropTypes.string,
   onChange: PropTypes.func.isRequired,
+  alternateStyle: PropTypes.bool,
 };
 
 KuiCheckbox.defaultProps = {
   checked: false,
+  alternateStyle: false,
 };

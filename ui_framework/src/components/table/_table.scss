@@ -66,12 +66,13 @@
 }
 
 .kuiTableRow {
+  transition: background-color $kuiAnimSpeedFast $kuiAnimSlightResistance;
   &:hover {
     background-color: tintOrShade($kuiColorLightestShade, 50%, 20%);
   }
 
   &.kuiTableRow-isSelected {
-    background-color: transparentize($kuiColorSecondary, .95);
+    background-color: transparentize($kuiColorPrimary, .95);
   }
 }
 

@@ -75,6 +75,87 @@ export class Table extends Component {
       type: 'user',
       dateCreated: 'Tue Dec 13 2016 12:56:15 GMT-0800 (PST)',
       magnitude: 1000,
+    }, {
+      id: 5,
+      title: {
+        value: 'Dragon',
+        isLink: true,
+      },
+      type: 'user',
+      dateCreated: 'Tue Dec 11 2016 12:56:15 GMT-0800 (PST)',
+      magnitude: 10000,
+    }, {
+      id: 6,
+      title: {
+        value: 'Bear',
+        isLink: true,
+      },
+      type: 'user',
+      dateCreated: 'Tue Dec 11 2016 12:56:15 GMT-0800 (PST)',
+      magnitude: 10000,
+    }, {
+      id: 7,
+      title: {
+        value: 'Dinosaur',
+        isLink: true,
+      },
+      type: 'user',
+      dateCreated: 'Tue Dec 11 2016 12:56:15 GMT-0800 (PST)',
+      magnitude: 10000,
+    }, {
+      id: 8,
+      title: {
+        value: 'Spider',
+        isLink: true,
+      },
+      type: 'user',
+      dateCreated: 'Tue Dec 11 2016 12:56:15 GMT-0800 (PST)',
+      magnitude: 10000,
+    }, {
+      id: 9,
+      title: {
+        value: 'Bugbear',
+        isLink: true,
+      },
+      type: 'user',
+      dateCreated: 'Tue Dec 11 2016 12:56:15 GMT-0800 (PST)',
+      magnitude: 10000,
+    }, {
+      id: 10,
+      title: {
+        value: 'Bear',
+        isLink: true,
+      },
+      type: 'user',
+      dateCreated: 'Tue Dec 11 2016 12:56:15 GMT-0800 (PST)',
+      magnitude: 10000,
+    }, {
+      id: 11,
+      title: {
+        value: 'Dinosaur',
+        isLink: true,
+      },
+      type: 'user',
+      dateCreated: 'Tue Dec 11 2016 12:56:15 GMT-0800 (PST)',
+      magnitude: 10000,
+    }, {
+      id: 12,
+      title: {
+        value: 'Spider',
+        isLink: true,
+      },
+      type: 'user',
+      dateCreated: 'Tue Dec 11 2016 12:56:15 GMT-0800 (PST)',
+      magnitude: 10000,
+    }, {
+      id: 13,
+      title: {
+        value: 'Bugbear',
+        isLink: true,
+      },
+      type: 'user',
+      dateCreated: 'Tue Dec 11 2016 12:56:15 GMT-0800 (PST)',
+      magnitude: 10000,
     }];
 
     this.sortableProperties = new SortableProperties([{
@@ -169,6 +250,7 @@ export class Table extends Component {
               id="selectAllCheckbox"
               checked={this.areAllItemsSelected()}
               onChange={this.toggleAll.bind(this)}
+              alternateStyle
             />
           </KuiTableHeaderCellCheckbox>
         );
@@ -203,6 +285,7 @@ export class Table extends Component {
                 id={`${item.id}-checkbox`}
                 checked={this.isItemSelected(item.id)}
                 onChange={this.toggleItem.bind(this, item.id)}
+                alternateStyle
               />
             </KuiTableRowCellCheckbox>
           );

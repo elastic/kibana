@@ -48,8 +48,7 @@ $kuiColorFullShade: #000 !default;
 
 // Every color below must be based mathmatically on the set above.
 
-$kuiTextColor: $kuiColorDarkestShade;
-$kuiTitleColor: $kuiColorFullShade;
-$kuiLinkColor: $kuiColorPrimary;
-$kuiFocusBackgroundColor: tintOrShade($kuiColorPrimary, 90%, 50%);
-
+$kuiTextColor: $kuiColorDarkestShade !default;
+$kuiTitleColor: $kuiColorFullShade !default;
+$kuiLinkColor: $kuiColorPrimary !default;
+$kuiFocusBackgroundColor: tintOrShade($kuiColorPrimary, 90%, 50%) !default;

@@ -13,6 +13,7 @@
     width: $kuiSizeL; /* 1 */
     z-index: 1; /* 1 */
     margin: 0; /* 1 */
+    cursor: pointer;
 
     &:checked ~ .kuiCheckbox__square {
       .kuiCheckbox__check {
@@ -52,5 +53,19 @@
     z-index: 2;
     font-size: $kuiFontSizeS;
     cursor: pointer;
+  }
+
+  &.kuiCheckbox--alternate .kuiCheckbox__input {
+    &:checked ~ .kuiCheckbox__square {
+      background: $kuiColorPrimary;
+      border-color: $kuiColorPrimary;
+
+      .kuiCheckbox__check {
+        background-color: $kuiColorEmptyShade;
+      }
+    }
+    &:focus:checked ~.kuiCheckbox__square {
+      background: tintOrShade($kuiColorPrimary, 20%, 20%);
+    }
   }
 }

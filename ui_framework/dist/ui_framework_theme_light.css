@@ -1174,7 +1174,8 @@ table {
     z-index: 1;
     /* 1 */
     margin: 0;
-    /* 1 */ }
+    /* 1 */
+    cursor: pointer; }
     .kuiCheckbox .kuiCheckbox__input:checked ~ .kuiCheckbox__square .kuiCheckbox__check {
       background-color: #3F3F3F;
       -webkit-mask: url("../src/components/icon/assets/check.svg") center center no-repeat;
@@ -1203,6 +1204,13 @@ table {
     z-index: 2;
     font-size: 14px;
     cursor: pointer; }
+  .kuiCheckbox.kuiCheckbox--alternate .kuiCheckbox__input:checked ~ .kuiCheckbox__square {
+    background: #0079a5;
+    border-color: #0079a5; }
+    .kuiCheckbox.kuiCheckbox--alternate .kuiCheckbox__input:checked ~ .kuiCheckbox__square .kuiCheckbox__check {
+      background-color: #FFF; }
+  .kuiCheckbox.kuiCheckbox--alternate .kuiCheckbox__input:focus:checked ~ .kuiCheckbox__square {
+    background: #3394b7; }
 
 .kuiCheckboxGroup__item + .kuiCheckboxGroup__item {
   margin-top: 8px; }
@@ -2677,11 +2685,12 @@ table {
   .kuiTableHeaderButton-isSorted .kuiTableSortIcon {
     fill: #000; }
 
-.kuiTableRow:hover {
-  background-color: #fafafa; }
-
-.kuiTableRow.kuiTableRow-isSelected {
-  background-color: rgba(0, 166, 155, 0.05); }
+.kuiTableRow {
+  transition: background-color 150ms cubic-bezier(0.694, 0.0482, 0.335, 1); }
+  .kuiTableRow:hover {
+    background-color: #fafafa; }
+  .kuiTableRow.kuiTableRow-isSelected {
+    background-color: rgba(0, 121, 165, 0.05); }
 
 .kuiTableRowCell {
   max-width: 20px;
