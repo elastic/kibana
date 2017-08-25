@@ -52,7 +52,7 @@ export const KuiCallOut = ({ title, type, iconType, children, className, ...rest
       </div>
 
       <KuiText size="small">
-        <span>{children}</span>
+        {children}
       </KuiText>
     </div>
   );
