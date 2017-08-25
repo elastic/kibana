@@ -5,7 +5,7 @@ export default function ({ getService }) {
     it('should return 200 with a regex', () => (
       supertest
         .post('/api/kibana/suggestions/values/*')
-        .query({
+        .send({
           field: 'bar.keyword',
           query: '<something?with:lots&of^ bad characters'
         })
