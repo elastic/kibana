@@ -1,8 +1,8 @@
-import {
+import React, {
   cloneElement,
-  PropTypes,
 } from 'react';
 import classNames from 'classnames';
+import PropTypes from 'prop-types';
 
 const titleSizeToClassNameMap = {
   small: 'kuiTitle--small',
@@ -46,15 +46,41 @@ export const KuiText = ({ size, children, className, ...rest }) => {
     className
   );
 
-  const props = {
-    className: classes,
-    ...rest,
-  };
+  return (
+    <div className={classes} {...rest}>
+      {children}
+    </div>
+  );
+};
 
-  return cloneElement(children, props);
+const typographicElements = (props, propName, componentName) => {
+  if (!props.children) {
+    throw new Error(`${componentName} requires typographic elements, but none were found.`);
+  }
+
+  const children = Array.isArray(props.children) ? props.children : [props.children];
+
+  children.forEach(child => {
+    if (![
+      'h1',
+      'h2',
+      'h3',
+      'h4',
+      'h5',
+      'h6',
+      'p',
+      'small',
+      'ol',
+      'ul',
+      'img',
+    ].includes(child.type)) {
+      throw new Error(`${componentName} requires typographic elements, but instead got a ${child.type}.`);
+    }
+  });
 };
 
 KuiText.propTypes = {
-  children: PropTypes.element.isRequired,
+  children: typographicElements,
+  className: PropTypes.string,
   size: PropTypes.oneOf(TEXT_SIZES),
 };

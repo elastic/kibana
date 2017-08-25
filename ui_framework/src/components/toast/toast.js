@@ -58,6 +58,16 @@ export const KuiToast = ({ title, type, iconType, onClose, children, className, 
     );
   }
 
+  let optionalBody;
+
+  if (children) {
+    optionalBody = (
+      <KuiText size="small">
+        {children}
+      </KuiText>
+    );
+  }
+
   return (
     <div
       className={classes}
@@ -69,13 +79,10 @@ export const KuiToast = ({ title, type, iconType, onClose, children, className, 
         <span className="kuiToastHeader__title">
           {title}
         </span>
-
       </div>
 
       {closeButton}
-      <KuiText size="small">
-        <span>{children}</span>
-      </KuiText>
+      {optionalBody}
     </div>
   );
 };
