@@ -1,11 +1,13 @@
-export function createHandlers(element, dispatch) {
+import { setFilter } from '../../../state/actions/elements';
+
+export function createHandlers(element, pageId, dispatch) {
   return {
-    setFilter() {
-      console.log(dispatch);
+    setFilter(text) {
+      dispatch(setFilter(text, element.id, pageId, true));
     },
 
     getFilter() {
-      console.log(element);
+      return element.filter;
     },
   };
 }

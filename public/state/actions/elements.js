@@ -57,7 +57,6 @@ function getSiblingContext(state, elementId, checkIndex) {
   return getSiblingContext(state, elementId, prevContextIndex);
 }
 
-export const removeElement = createAction('removeElement', (elementId, pageId) => ({ pageId, elementId }));
 export const setPosition = createAction('setPosition', (elementId, pageId, position) => ({ pageId, elementId, position }));
 
 export const fetchContext = createThunk('fetchContext', ({ dispatch, getState }, index, element, fullRefresh = false) => {
@@ -137,6 +136,23 @@ export const fetchAllRenderables = createThunk('fetchAllRenderables', ({ dispatc
   });
 });
 
+export const removeElement = createThunk('removeElement', ({ dispatch, getState }, elementId, pageId) => {
+  const element = getElementById(getState(), elementId, pageId);
+  const shouldRefresh = element.filter != null && element.filter.length > 0;
+
+  const _removeElement = createAction('removeElement', (elementId, pageId) => ({ pageId, elementId }));
+  dispatch(_removeElement(elementId, pageId));
+
+  if (shouldRefresh) dispatch(fetchAllRenderables());
+});
+
+export const setFilter = createThunk('setFilter', ({ dispatch, getState }, filter, elementId, pageId, doRender = true) => {
+  const _setFilter = createAction('setFilter');
+  dispatch(_setFilter({ filter, elementId, pageId }));
+
+  if (doRender === true) dispatch(fetchAllRenderables());
+});
+
 export const setExpression = createThunk('setExpression', ({ dispatch, getState }, expression, elementId, pageId, doRender = true) => {
   // dispatch action to update the element in state
   const _setExpression = createAction('setExpression');
@@ -149,7 +165,7 @@ export const setExpression = createThunk('setExpression', ({ dispatch, getState 
 
 export const setAst = createThunk('setAst', ({ dispatch }, ast, element, pageId, doRender = true) => {
   const expression = astToExpression(ast, element);
-  dispatch(setExpression(expression, element, pageId, doRender));
+  dispatch(setExpression(expression, element.id, pageId, doRender));
 });
 
 

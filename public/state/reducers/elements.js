@@ -19,6 +19,10 @@ export default handleActions({
     const { expression, pageId, elementId } = payload;
     return assignElementProperties(workpadState, pageId, elementId, { expression });
   },
+  [actions.setFilter]: (workpadState, { payload }) => {
+    const { filter, pageId, elementId } = payload;
+    return assignElementProperties(workpadState, pageId, elementId, { filter });
+  },
   // This take elementId, not the full element, otherwise it is 80% the same as the above reducer
   [actions.setPosition]: (workpadState, { payload }) => {
     const { position, pageId, elementId } = payload;

@@ -13,7 +13,7 @@ export default new Fn({
     const filterExpression = getGlobalFilterExpression(getState());
 
     if (filterExpression && filterExpression.length) {
-      const filterAST = fromExpression();
+      const filterAST = fromExpression(filterExpression);
       return interpretAst(filterAST);
     } else {
       return query.from(null);

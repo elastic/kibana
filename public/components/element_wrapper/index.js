@@ -30,7 +30,7 @@ const mapDispatchToProps = (dispatch, { element }) => ({
     dispatch(setPosition(element.id, pageId, position));
   },
 
-  handlers: createHandlers(dispatch),
+  handlers: (pageId) => createHandlers(element, pageId, dispatch),
 });
 
 const mergeProps = (stateProps, dispatchProps, { element }) => {
@@ -40,7 +40,7 @@ const mergeProps = (stateProps, dispatchProps, { element }) => {
     position: element.position,
     setPosition: dispatchProps.setPosition(stateProps.selectedPage),
     remove: dispatchProps.removeElementFromPage(stateProps.selectedPage),
-    handlers: dispatchProps.handlers,
+    handlers: dispatchProps.handlers(stateProps.selectedPage),
     select: dispatchProps.select,
     isSelected: stateProps.isSelected,
     elementTypeDefintion: elementsRegistry.get(get(renderable, 'as')),
