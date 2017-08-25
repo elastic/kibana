@@ -6,8 +6,11 @@ import { ArgType } from '../../arg_type';
 import { toExpressionAst } from '../../../lib/map_arg_value';
 import './datacolumn.less';
 
-const simpleTemplate = ({ onValueChange, columns, argValue }) => {
+const simpleTemplate = ({ onValueChange, columns, argValue, renderError }) => {
   const inputRefs = {};
+
+  // use fallback when given a type we can't handle
+  if (argValue.type !== 'string' && argValue.type !== 'math') return renderError();
 
   const updateFunctionValue = (valueType) => () => {
     onValueChange(toExpressionAst({
@@ -17,40 +20,25 @@ const simpleTemplate = ({ onValueChange, columns, argValue }) => {
     }));
   };
 
-  const formControl = (argVal) => {
-    switch (argVal.type) {
-      case 'string':
-      case 'math':
-        return (
-          <div className="canvas__argtype--datacolumn">
-            <MathExpression
-              value={argVal.function}
-              inputRef={ref => inputRefs.fn = ref}
-              onChange={updateFunctionValue(argVal.type)}
-            />
-            <FormControl
-              componentClass="select"
-              placeholder="select"
-              value={argVal.value}
-              inputRef={ref => inputRefs.value = ref}
-              onChange={updateFunctionValue(argVal.type)}
-            >
-              <option value="select" disabled>select column</option>
-              { columns.map(column => <option key={column.name} value={column.name}>{column.name}</option>) }
-            </FormControl>
-          </div>
-        );
-
-      default:
-        return (
-          <div className="canvas__argtype--datacolumn">
-            <FormControl componentClass="textarea" placeholder="textarea" defaultValue={argVal.value} />
-          </div>
-        );
-    }
-  };
-
-  return formControl(argValue);
+  return (
+    <div className="canvas__argtype--datacolumn">
+      <MathExpression
+        value={argValue.function}
+        inputRef={ref => inputRefs.fn = ref}
+        onChange={updateFunctionValue(argValue.type)}
+      />
+      <FormControl
+        componentClass="select"
+        placeholder="select"
+        value={argValue.value}
+        inputRef={ref => inputRefs.value = ref}
+        onChange={updateFunctionValue(argValue.type)}
+      >
+        <option value="select" disabled>select column</option>
+        { columns.map(column => <option key={column.name} value={column.name}>{column.name}</option>) }
+      </FormControl>
+    </div>
+  );
 };
 
 simpleTemplate.propTypes = {
@@ -58,6 +46,7 @@ simpleTemplate.propTypes = {
   onValueChange: PropTypes.func.isRequired,
   argValue: PropTypes.object.isRequired,
   typeInstance: PropTypes.object.isRequired,
+  renderError: PropTypes.func.isRequired,
 };
 
 export const datacolumn = () => new ArgType('datacolumn', {

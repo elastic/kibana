@@ -1,6 +1,9 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { Modal, Button } from 'react-bootstrap';
+import {
+  KuiModalOverlay,
+  KuiConfirmModal,
+} from 'ui_framework/components';
 
 export const ConfirmModal = (props) => {
   const {
@@ -21,31 +24,20 @@ export const ConfirmModal = (props) => {
     onCancel && onCancel(ev);
   };
 
+  if (!isOpen) return null;
+
   return (
-    <div className="modal in modal__confirm">
-      {isOpen && (
-        <Modal
-          show={isOpen}
-          keyboard
-        >
-          {title && (
-            <Modal.Header closeButton>
-              <Modal.Title>{title}</Modal.Title>
-            </Modal.Header>
-          )}
-
-          <Modal.Body>
-            {message}
-          </Modal.Body>
-
-          <Modal.Footer>
-            <Button onClick={cancel}>{cancelButtonText || 'Cancel'}</Button>
-            &nbsp;
-            <Button bsStyle="danger" onClick={confirm}>{confirmButtonText || 'Confirm'}</Button>
-          </Modal.Footer>
-        </Modal>
-      )}
-    </div>
+    <KuiModalOverlay>
+      <KuiConfirmModal
+        message={message}
+        title={title}
+        onCancel={cancel}
+        onConfirm={confirm}
+        cancelButtonText={cancelButtonText || 'Cancel'}
+        confirmButtonText={confirmButtonText || 'Confirm'}
+        defaultFocusedButton="confirm"
+      />
+    </KuiModalOverlay>
   );
 };
 
