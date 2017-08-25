@@ -19,15 +19,19 @@ export const KuiTableRowCell = ({
   wrapText,
   ...rest,
 }) => {
-  const classes = classNames('kuiTableRowCell', className, {
-    'kuiTableRowCell--alignRight': align === RIGHT_ALIGNMENT,
-    'kuiTableRowCell--wrapText': wrapText,
+  const classes = classNames('kuiTableRowCell', className);
+
+  const contentClasses = classNames('kuiTableCellContent', className, {
+    'kuiTableCellContent--alignRight': align === RIGHT_ALIGNMENT,
+    'kuiTableCellContent--wrapText': wrapText,
   });
 
   return (
     <td className={classes} {...rest} >
-      <div className="kuiTableRowCell__content">
-        {children}
+      <div className={contentClasses}>
+        <span className="kuiTableCellContent__text">
+          {children}
+        </span>
       </div>
     </td>
   );

@@ -1157,16 +1157,33 @@ table {
  */
 .kuiCheckbox {
   position: relative;
-  height: 24px; }
-  .kuiCheckbox .kuiCheckbox__label {
+  height: 24px;
+  /**
+   * 1. Float above the visual checkbox and match its dimension, so that when users try to click it
+   *    they actually click this input.
+   */ }
+  .kuiCheckbox .kuiCheckbox__input {
     position: absolute;
-    padding-left: 32px;
-    line-height: 24px;
-    display: block;
-    font-weight: 400;
-    z-index: 2;
-    font-size: 14px;
+    /* 1 */
+    opacity: 0;
+    /* 1 */
+    height: 24px;
+    /* 1 */
+    width: 24px;
+    /* 1 */
+    z-index: 1;
+    /* 1 */
+    margin: 0;
+    /* 1 */
     cursor: pointer; }
+    .kuiCheckbox .kuiCheckbox__input:checked ~ .kuiCheckbox__square .kuiCheckbox__check {
+      background-color: #3F3F3F;
+      -webkit-mask: url("../src/components/icon/assets/check.svg") center center no-repeat;
+              mask: url("../src/components/icon/assets/check.svg") center center no-repeat; }
+    .kuiCheckbox .kuiCheckbox__input:focus ~ .kuiCheckbox__square,
+    .kuiCheckbox .kuiCheckbox__input:active ~ .kuiCheckbox__square {
+      background-color: #e6f2f6;
+      border-color: #0079a5; }
   .kuiCheckbox .kuiCheckbox__square {
     position: absolute;
     height: 24px;
@@ -1178,17 +1195,22 @@ table {
   .kuiCheckbox .kuiCheckbox__check {
     height: 100%;
     width: 100%; }
-  .kuiCheckbox .kuiCheckbox__input {
+  .kuiCheckbox .kuiCheckbox__label {
     position: absolute;
-    opacity: 0; }
-    .kuiCheckbox .kuiCheckbox__input:checked ~ .kuiCheckbox__square .kuiCheckbox__check {
-      background-color: #3F3F3F;
-      -webkit-mask: url("../src/components/icon/assets/check.svg") center center no-repeat;
-              mask: url("../src/components/icon/assets/check.svg") center center no-repeat; }
-    .kuiCheckbox .kuiCheckbox__input:focus ~ .kuiCheckbox__square,
-    .kuiCheckbox .kuiCheckbox__input:active ~ .kuiCheckbox__square {
-      background-color: #e6f2f6;
-      border-color: #0079a5; }
+    padding-left: 32px;
+    line-height: 24px;
+    display: block;
+    font-weight: 400;
+    z-index: 2;
+    font-size: 14px;
+    cursor: pointer; }
+  .kuiCheckbox.kuiCheckbox--alternate .kuiCheckbox__input:checked ~ .kuiCheckbox__square {
+    background: #0079a5;
+    border-color: #0079a5; }
+    .kuiCheckbox.kuiCheckbox--alternate .kuiCheckbox__input:checked ~ .kuiCheckbox__square .kuiCheckbox__check {
+      background-color: #FFF; }
+  .kuiCheckbox.kuiCheckbox--alternate .kuiCheckbox__input:focus:checked ~ .kuiCheckbox__square {
+    background: #3394b7; }
 
 .kuiCheckboxGroup__item + .kuiCheckboxGroup__item {
   margin-top: 8px; }
@@ -2620,43 +2642,88 @@ table {
   border-collapse: collapse;
   background-color: #FFF; }
 
-.kuiTable--compressed .kuiTableHeaderCell,
-.kuiTable--compressed .kuiTableRowCell__content {
+.kuiTable--compressed .kuiTableCellContent {
   padding: 8px; }
 
+.kuiTable--compressed .kuiTableHeaderButton:focus {
+  outline: solid 8px #e6f2f6; }
+
 .kuiTableHeaderCell {
-  text-align: left;
   max-width: 20px;
   /* 1 */
-  padding: 12px;
+  vertical-align: middle;
   color: #000; }
+  .kuiTableHeaderCell .kuiTableHeaderButton {
+    text-align: left; }
 
-.kuiTableHeaderCell__content {
-  display: inline-block; }
+.kuiTableHeaderCellCheckbox {
+  width: 36px;
+  vertical-align: middle; }
+  .kuiTableHeaderCellCheckbox .kuiTableCellContent {
+    padding-right: 0;
+    padding-top: 0;
+    padding-bottom: 0; }
 
-.kuiTableHeaderCell--alignRight {
-  text-align: right; }
+.kuiTableHeaderButton {
+  font-size: 14px;
+  font-size: 0.875rem;
+  line-height: 18px;
+  color: inherit;
+  width: 100%; }
+  .kuiTableHeaderButton:hover, .kuiTableHeaderButton:focus {
+    text-decoration: underline;
+    color: #0079a5; }
+    .kuiTableHeaderButton:hover .kuiTableSortIcon, .kuiTableHeaderButton:focus .kuiTableSortIcon {
+      display: block;
+      fill: #0079a5; }
+  .kuiTableHeaderButton:focus {
+    background: #e6f2f6; }
 
-.kuiTableRow:hover {
-  background-color: rgba(0, 121, 165, 0.05); }
+.kuiTableSortIcon {
+  margin-left: 4px;
+  fill: #cccccc; }
+  .kuiTableHeaderButton-isSorted .kuiTableSortIcon {
+    fill: #000; }
 
-.kuiTableRow.kuiTableRow-isSelected {
-  background-color: rgba(255, 255, 0, 0.05); }
+.kuiTableRow {
+  transition: background-color 150ms cubic-bezier(0.694, 0.0482, 0.335, 1); }
+  .kuiTableRow:hover {
+    background-color: #fafafa; }
+  .kuiTableRow.kuiTableRow-isSelected {
+    background-color: rgba(0, 121, 165, 0.05); }
 
 .kuiTableRowCell {
-  text-align: left;
   max-width: 20px;
   /* 1 */
+  vertical-align: middle;
   color: #3F3F3F;
   border-top: 1px solid #D9D9D9;
   border-bottom: 1px solid #D9D9D9; }
 
+.kuiTableRowCellCheckbox {
+  width: 36px;
+  vertical-align: middle;
+  border-top: 1px solid #D9D9D9;
+  border-bottom: 1px solid #D9D9D9; }
+  .kuiTableRowCellCheckbox .kuiTableCellContent {
+    padding-right: 0;
+    padding-top: 0;
+    padding-bottom: 0; }
+
 /**
-   * 1. Vertically align all children.
-   * 2. Truncate text with an ellipsis. The padding on this div allows the ellipsis to show. If
-   *    the padding was on the cell, the ellipsis would be cropped.
-   */
-.kuiTableRowCell__content {
+ * 1. Vertically align all children.
+ * 2. Truncate text with an ellipsis. The padding on this div allows the ellipsis to show. If
+ *    the padding was on the cell, the ellipsis would be cropped.
+ */
+.kuiTableCellContent {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-align: center;
+  -webkit-align-items: center;
+      -ms-flex-align: center;
+          align-items: center;
   white-space: nowrap;
   /* 2 */
   overflow: hidden;
@@ -2665,14 +2732,19 @@ table {
   /* 2 */
   padding: 12px;
   /* 2 */ }
-  .kuiTableRowCell__content > * {
-    vertical-align: middle;
-    /* 1 */ }
 
-.kuiTableRowCell--alignRight .kuiTableRowCell__content {
-  text-align: right; }
+.kuiTableCellContent__text {
+  overflow: hidden;
+  min-width: 0;
+  text-overflow: ellipsis; }
 
-.kuiTableRowCell--wrapText .kuiTableRowCell__content {
+.kuiTableCellContent--alignRight {
+  -webkit-box-pack: end;
+  -webkit-justify-content: flex-end;
+      -ms-flex-pack: end;
+          justify-content: flex-end; }
+
+.kuiTableCellContent--wrapText {
   white-space: normal; }
 
 .kuiTabs {

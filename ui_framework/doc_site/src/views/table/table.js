@@ -3,114 +3,317 @@ import React, {
 } from 'react';
 
 import {
+  KuiCheckbox,
   KuiIcon,
+  KuiLink,
   KuiTable,
-  KuiTableRow,
-  KuiTableRowCell,
-  KuiTableHeaderCell,
   KuiTableBody,
   KuiTableHeader,
+  KuiTableHeaderCell,
+  KuiTableHeaderCellCheckbox,
+  KuiTableRow,
+  KuiTableRowCell,
+  KuiTableRowCellCheckbox,
 } from '../../../../components';
 
 import {
   LEFT_ALIGNMENT,
   RIGHT_ALIGNMENT,
+  SortableProperties,
 } from '../../../../services';
 
 export class Table extends Component {
   constructor(props) {
     super(props);
+
     this.state = {
-      rowIndexToSelectedMap: {
+      itemIdToSelectedMap: {
         2: true,
       },
+      sortedColumn: 'title',
     };
 
-    this.rows = [{
-      children: [
-        <span>A very long line which will not wrap on narrower screens and instead will become truncated and replaced by an ellipsis</span>,
-        <KuiIcon type="user" size="medium" />,
-        <span>Tue Dec 06 2016 12:56:15 GMT-0800 (PST)</span>,
-        <span>1</span>,
-      ],
+    this.items = [{
+      id: 0,
+      title: 'A very long line which will not wrap on narrower screens and instead will become truncated and replaced by an ellipsis',
+      type: 'user',
+      dateCreated: 'Tue Dec 06 2016 12:56:15 GMT-0800 (PST)',
+      magnitude: 1,
     }, {
-      children: [
-        <span>A very long line which will wrap on narrower screens and <em>not</em> become truncated and replaced by an ellipsis</span>,
-        <KuiIcon type="user" size="medium" />,
-        <span>Tue Dec 06 2016 12:56:15 GMT-0800 (PST)</span>,
-        <span>1</span>,
-      ],
-      wrapText: true,
+      id: 1,
+      title: {
+        value: 'A very long line which will wrap on narrower screens and NOT become truncated and replaced by an ellipsis',
+        isWrapped: true,
+      },
+      type: 'user',
+      dateCreated: 'Tue Dec 01 2016 12:56:15 GMT-0800 (PST)',
+      magnitude: 1,
     }, {
-      children: [
-        <a className="kuiLink" href="#">Boomerang</a>,
-        <KuiIcon type="user" size="medium" />,
-        <span>Tue Dec 06 2016 12:56:15 GMT-0800 (PST)</span>,
-        <span>10</span>,
-      ],
-      isSelected: true,
+      id: 2,
+      title: {
+        value: 'Boomerang',
+        isLink: true,
+      },
+      type: 'user',
+      dateCreated: 'Tue Dec 28 2016 12:56:15 GMT-0800 (PST)',
+      magnitude: 10,
     }, {
-      children: [
-        <a className="kuiLink" href="#">Celebration</a>,
-        <KuiIcon type="user" size="medium" />,
-        <span>Tue Dec 06 2016 12:56:15 GMT-0800 (PST)</span>,
-        <span>100</span>,
-      ],
+      id: 3,
+      title: {
+        value: 'Celebration',
+        isLink: true,
+      },
+      type: 'user',
+      dateCreated: 'Tue Dec 16 2016 12:56:15 GMT-0800 (PST)',
+      magnitude: 100,
     }, {
-      children: [
-        <a className="kuiLink" href="#">Dog</a>,
-        <KuiIcon type="user" size="medium" />,
-        <span>Tue Dec 06 2016 12:56:15 GMT-0800 (PST)</span>,
-        <span>1000</span>,
-      ],
+      id: 4,
+      title: {
+        value: 'Dog',
+        isLink: true,
+      },
+      type: 'user',
+      dateCreated: 'Tue Dec 13 2016 12:56:15 GMT-0800 (PST)',
+      magnitude: 1000,
+    }, {
+      id: 5,
+      title: {
+        value: 'Dragon',
+        isLink: true,
+      },
+      type: 'user',
+      dateCreated: 'Tue Dec 11 2016 12:56:15 GMT-0800 (PST)',
+      magnitude: 10000,
+    }, {
+      id: 6,
+      title: {
+        value: 'Bear',
+        isLink: true,
+      },
+      type: 'user',
+      dateCreated: 'Tue Dec 11 2016 12:56:15 GMT-0800 (PST)',
+      magnitude: 10000,
+    }, {
+      id: 7,
+      title: {
+        value: 'Dinosaur',
+        isLink: true,
+      },
+      type: 'user',
+      dateCreated: 'Tue Dec 11 2016 12:56:15 GMT-0800 (PST)',
+      magnitude: 10000,
+    }, {
+      id: 8,
+      title: {
+        value: 'Spider',
+        isLink: true,
+      },
+      type: 'user',
+      dateCreated: 'Tue Dec 11 2016 12:56:15 GMT-0800 (PST)',
+      magnitude: 10000,
+    }, {
+      id: 9,
+      title: {
+        value: 'Bugbear',
+        isLink: true,
+      },
+      type: 'user',
+      dateCreated: 'Tue Dec 11 2016 12:56:15 GMT-0800 (PST)',
+      magnitude: 10000,
+    }, {
+      id: 10,
+      title: {
+        value: 'Bear',
+        isLink: true,
+      },
+      type: 'user',
+      dateCreated: 'Tue Dec 11 2016 12:56:15 GMT-0800 (PST)',
+      magnitude: 10000,
+    }, {
+      id: 11,
+      title: {
+        value: 'Dinosaur',
+        isLink: true,
+      },
+      type: 'user',
+      dateCreated: 'Tue Dec 11 2016 12:56:15 GMT-0800 (PST)',
+      magnitude: 10000,
+    }, {
+      id: 12,
+      title: {
+        value: 'Spider',
+        isLink: true,
+      },
+      type: 'user',
+      dateCreated: 'Tue Dec 11 2016 12:56:15 GMT-0800 (PST)',
+      magnitude: 10000,
+    }, {
+      id: 13,
+      title: {
+        value: 'Bugbear',
+        isLink: true,
+      },
+      type: 'user',
+      dateCreated: 'Tue Dec 11 2016 12:56:15 GMT-0800 (PST)',
+      magnitude: 10000,
     }];
 
+    this.sortableProperties = new SortableProperties([{
+      name: 'title',
+      getValue: item => item.title.toLowerCase(),
+      isAscending: true,
+    }, {
+      name: 'dateCreated',
+      getValue: item => item.dateCreated.toLowerCase(),
+      isAscending: true,
+    }, {
+      name: 'magnitude',
+      getValue: item => item.magnitude.toLowerCase(),
+      isAscending: true,
+    }], this.state.sortedColumn);
+
     this.columns = [{
+      id: 'checkbox',
+      isCheckbox: true,
+      width: '20px',
+    }, {
+      id: 'title',
       label: 'Title',
       alignment: LEFT_ALIGNMENT,
+      isSortable: true,
     }, {
+      id: 'type',
       label: 'Type',
       alignment: LEFT_ALIGNMENT,
       width: '60px',
+      cellProvider: cell => <KuiIcon type={cell} size="medium" />,
     }, {
+      id: 'dateCreated',
       label: 'Date created',
       alignment: LEFT_ALIGNMENT,
+      isSortable: true,
     }, {
+      id: 'magnitude',
       label: 'Orders of magnitude',
       alignment: RIGHT_ALIGNMENT,
+      isSortable: true,
     }];
   }
 
-  renderHeaderCells() {
-    return this.columns.map((column, columnIndex) => (
-      <KuiTableHeaderCell
-        key={columnIndex}
-        align={this.columns[columnIndex].alignment}
-        width={column.width}
-      >
-        {column.label}
-      </KuiTableHeaderCell>
-    ));
+  onSort = prop => {
+    this.sortableProperties.sortOn(prop);
+
+    this.setState({
+      sortedColumn: prop,
+    });
   }
 
-  renderTableRows() {
-    return this.rows.map((row, rowIndex) => {
-      const cells = row.children.map((cell, cellIndex) => {
+  toggleItem = itemId => {
+    const newItemIdToSelectedMap = Object.assign({}, this.state.itemIdToSelectedMap, {
+      [itemId]: !this.state.itemIdToSelectedMap[itemId],
+    });
+
+    this.setState({
+      itemIdToSelectedMap: newItemIdToSelectedMap,
+    });
+  }
+
+  toggleAll = () => {
+    const allSelected = this.areAllItemsSelected();
+    const newItemIdToSelectedMap = {};
+    this.items.forEach(item => newItemIdToSelectedMap[item.id] = !allSelected);
+
+
+    this.setState({
+      itemIdToSelectedMap: newItemIdToSelectedMap,
+    });
+  }
+
+  isItemSelected = itemId => {
+    return this.state.itemIdToSelectedMap[itemId];
+  }
+
+  areAllItemsSelected = () => {
+    const indexOfUnselectedItem = this.items.findIndex(item => !this.isItemSelected(item.id));
+    return indexOfUnselectedItem === -1;
+  }
+
+  renderHeaderCells() {
+    return this.columns.map((column, columnIndex) => {
+      if (column.isCheckbox) {
+        return (
+          <KuiTableHeaderCellCheckbox
+            key={column.id}
+            width={column.width}
+          >
+            <KuiCheckbox
+              id="selectAllCheckbox"
+              checked={this.areAllItemsSelected()}
+              onChange={this.toggleAll.bind(this)}
+              alternateStyle
+            />
+          </KuiTableHeaderCellCheckbox>
+        );
+      }
+
+      return (
+        <KuiTableHeaderCell
+          key={column.id}
+          align={this.columns[columnIndex].alignment}
+          width={column.width}
+          onSort={column.isSortable ? this.onSort.bind(this, column.id) : undefined}
+          isSorted={this.state.sortedColumn === column.id}
+          isSortAscending={this.sortableProperties.isAscendingByName(column.id)}
+        >
+          {column.label}
+        </KuiTableHeaderCell>
+      );
+    });
+  }
+
+  renderRows() {
+    return this.items.map(item => {
+      const cells = this.columns.map(column => {
+        const cell = item[column.id];
+
+        let child;
+
+        if (column.isCheckbox) {
+          return (
+            <KuiTableRowCellCheckbox key={column.id}>
+              <KuiCheckbox
+                id={`${item.id}-checkbox`}
+                checked={this.isItemSelected(item.id)}
+                onChange={this.toggleItem.bind(this, item.id)}
+                alternateStyle
+              />
+            </KuiTableRowCellCheckbox>
+          );
+        } else if (column.cellProvider) {
+          child = column.cellProvider(cell);
+        } else if (cell.isLink) {
+          child = <KuiLink href="">{cell.value}</KuiLink>;
+        } else if (cell.isWrapped) {
+          child = cell.value;
+        } else {
+          child = cell;
+        }
+
         return (
           <KuiTableRowCell
-            key={cellIndex}
-            align={this.columns[cellIndex].alignment}
-            wrapText={row.wrapText}
+            key={column.id}
+            align={column.alignment}
+            wrapText={cell && cell.isWrapped}
           >
-            {cell}
+            {child}
           </KuiTableRowCell>
         );
       });
 
       return (
         <KuiTableRow
-          isSelected={this.state.rowIndexToSelectedMap[rowIndex]}
-          key={rowIndex}
+          key={item.id}
+          isSelected={this.isItemSelected(item.id)}
         >
           {cells}
         </KuiTableRow>
@@ -126,7 +329,7 @@ export class Table extends Component {
         </KuiTableHeader>
 
         <KuiTableBody>
-          {this.renderTableRows()}
+          {this.renderRows()}
         </KuiTableBody>
       </KuiTable>
     );
