@@ -265,9 +265,8 @@ export function getUiSettingDefaults() {
       description: 'Whether the filters should have a global state (be pinned) by default'
     },
     'filterEditor:suggestValues': {
-      value: false,
-      description: 'Set this property to `true` to have the filter editor suggest values for fields, ' +
-        'instead of just providing a text input. This may result in heavy queries to Elasticsearch.'
+      value: true,
+      description: 'Set this property to `false` to prevent the filter editor from suggesting values for fields.'
     },
     'notifications:banner': {
       type: 'markdown',
