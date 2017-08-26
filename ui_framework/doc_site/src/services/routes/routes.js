@@ -75,8 +75,8 @@ import ToastExample
 import TypographyExample
   from '../../views/typography/typography_example';
 
-import TypographyScalesSandbox
-  from '../../views/typography_scales/typography_scales_sandbox';
+import TextScalingSandbox
+  from '../../views/text_scaling/text_scaling_sandbox';
 
 // Component route names should match the component name exactly.
 const components = [{
@@ -182,8 +182,8 @@ const sandboxes = [{
   component: FormGallerySandbox,
   hasReact: true,
 }, {
-  name: 'TypographyScalesSandbox',
-  component: TypographyScalesSandbox,
+  name: 'TextScalingSandbox',
+  component: TextScalingSandbox,
   hasReact: true,
 }];
 

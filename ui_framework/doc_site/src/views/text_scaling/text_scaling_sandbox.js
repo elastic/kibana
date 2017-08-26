@@ -9,24 +9,24 @@ import {
   GuideSectionTypes,
 } from '../../components';
 
-import TypographyScales from './typography_scales';
-const typographyScalesSource = require('!!raw!./typography_scales');
-const typographyScalesHtml = renderToHtml(TypographyScales);
+import TextScaling from './text_scaling';
+const textScalingSource = require('!!raw!./text_scaling');
+const textScalingHtml = renderToHtml(TextScaling);
 
 export default props => (
   <GuideSandbox>
     <GuideDemo isFullScreen={true}>
-      <TypographyScales />
+      <TextScaling />
     </GuideDemo>
 
     <GuideSandboxCodeToggle
       title={props.route.name}
       source={[{
         type: GuideSectionTypes.JS,
-        code: typographyScalesSource,
+        code: textScalingSource,
       }, {
         type: GuideSectionTypes.HTML,
-        code: typographyScalesHtml,
+        code: textScalingHtml,
       }]}
     />
   </GuideSandbox>
