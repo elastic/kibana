@@ -10,12 +10,12 @@ export const KuiCode = ({
   const classes = classNames('kuiCode', className);
 
   return (
-    <pre
+    <code
       className={classes}
       {...rest}
     >
       {children}
-    </pre>
+    </code>
   );
 };
 

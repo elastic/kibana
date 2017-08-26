@@ -1,5 +1,9 @@
 import React from 'react';
 
+import {
+  KuiCode,
+} from '../../../../components';
+
 export const GuideCode = props => (
-  <code className="guideCode">{props.children}</code>
+  <KuiCode>{props.children}</KuiCode>
 );

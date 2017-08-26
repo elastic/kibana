@@ -3,7 +3,6 @@ import React from 'react';
 import { renderToHtml } from '../../services';
 
 import {
-  GuideCode,
   GuideDemo,
   GuideLink,
   GuidePage,
@@ -11,6 +10,11 @@ import {
   GuideSectionTypes,
   GuideText,
 } from '../../components';
+
+import {
+  KuiCode,
+} from '../../../../components';
+
 
 import KeyboardAccessible from './keyboard_accessible';
 import ScreenReaderOnly from './screen_reader';
@@ -35,8 +39,8 @@ export default props => (
     >
       <GuideText>
         You can make interactive elements keyboard-accessible with this component. This is necessary
-        for non-button elements and <GuideCode>a</GuideCode> tags without
-        <GuideCode>href</GuideCode> attributes.
+        for non-button elements and <KuiCode>a</KuiCode> tags without
+        <KuiCode>href</KuiCode> attributes.
       </GuideText>
 
       <GuideDemo>

@@ -822,8 +822,8 @@ table {
   background: #F5F5F5;
   color: #DD0A73;
   border: 1px solid #D9D9D9;
-  font-size: 14px;
-  padding: 4px; }
+  font-size: 12px;
+  padding: 0 4px; }
 
 .kuiContextMenu {
   width: 256px;

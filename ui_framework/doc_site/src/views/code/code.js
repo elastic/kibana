@@ -2,10 +2,11 @@ import React from 'react';
 
 import {
   KuiCode,
+  KuiText,
 } from '../../../../components';
 
 export default () => (
-  <div>
+  <KuiText>
     <p>Sometimes you need to highlight <KuiCode>code</KuiCode> like this.</p>
-  </div>
+  </KuiText>
 );
