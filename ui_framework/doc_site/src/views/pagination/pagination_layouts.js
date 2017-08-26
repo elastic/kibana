@@ -32,8 +32,8 @@ export default class extends Component {
       <div>
         <KuiHorizontalRule />
 
-        <KuiFlexGroup growItems={false} justifyContent="spaceAround">
-          <KuiFlexItem>
+        <KuiFlexGroup justifyContent="spaceAround">
+          <KuiFlexItem grow={false}>
             <KuiPagination
               pageCount={this.PAGE_COUNT}
               activePage={this.state.activePage}
@@ -44,11 +44,11 @@ export default class extends Component {
 
         <KuiHorizontalRule />
 
-        <KuiFlexGroup growItems={false} justifyContent="spaceBetween" alignItems="center">
-          <KuiFlexItem>
+        <KuiFlexGroup justifyContent="spaceBetween" alignItems="center">
+          <KuiFlexItem grow={false}>
             <KuiText size="small"><p>5000 results, returned in 2.03 secs.</p></KuiText>
           </KuiFlexItem>
-          <KuiFlexItem>
+          <KuiFlexItem grow={false}>
             <KuiPagination
               pageCount={this.PAGE_COUNT}
               activePage={this.state.activePage}

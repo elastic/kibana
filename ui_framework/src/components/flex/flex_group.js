@@ -7,7 +7,7 @@ const gutterSizeToClassNameMap = {
   small: 'kuiFlexGroup--gutterSmall',
   medium: 'kuiFlexGroup--gutterMedium',
   large: 'kuiFlexGroup--gutterLarge',
-  extraLarge: 'kuiFlexGroup--gutterXLarge',
+  extraLarge: 'kuiFlexGroup--gutterExtraLarge',
 };
 
 export const GUTTER_SIZES = Object.keys(gutterSizeToClassNameMap);
@@ -31,15 +31,12 @@ const justifyContentToClassNameMap = {
 
 export const JUSTIFY_CONTENTS = Object.keys(justifyContentToClassNameMap);
 
-export const KuiFlexGroup = ({ children, className, gutterSize, alignItems, justifyContent, growItems, ...rest }) => {
+export const KuiFlexGroup = ({ children, className, gutterSize, alignItems, justifyContent, ...rest }) => {
   const classes = classNames(
     'kuiFlexGroup',
     gutterSizeToClassNameMap[gutterSize],
     alignItemsToClassNameMap[alignItems],
     justifyContentToClassNameMap[justifyContent],
-    {
-      'kuiFlexGroup--flexGrowZero': !growItems,
-    },
     className
   );
 
@@ -59,12 +56,10 @@ KuiFlexGroup.propTypes = {
   gutterSize: PropTypes.oneOf(GUTTER_SIZES),
   alignItems: PropTypes.oneOf(ALIGN_ITEMS),
   justifyContent: PropTypes.oneOf(JUSTIFY_CONTENTS),
-  growItems: PropTypes.bool,
 };
 
 KuiFlexGroup.defaultProps = {
   gutterSize: 'large',
   alignItems: 'stretch',
   justifyContent: 'flexStart',
-  growItems: true,
 };

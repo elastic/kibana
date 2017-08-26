@@ -7,10 +7,21 @@
     flex-basis: 0;
   }
 
-  // Turn off item growth
-  &.kuiFlexGroup--flexGrowZero > .kuiFlexItem {
-    flex-grow: 0;
-    flex-basis: auto;
+  // Gutter Sizes
+  &.kuiFlexGroup--gutterSmall > .kuiFlexItem + .kuiFlexItem {
+    margin-left: $kuiSizeS;
+  }
+
+  &.kuiFlexGroup--gutterMedium > .kuiFlexItem + .kuiFlexItem {
+    margin-left: $kuiSize;
+  }
+
+  &.kuiFlexGroup--gutterLarge > .kuiFlexItem + .kuiFlexItem {
+    margin-left: $kuiSizeL;
+  }
+
+  &.kuiFlexGroup--gutterExtraLarge > .kuiFlexItem + .kuiFlexItem {
+    margin-left: $kuiSizeXXL;
   }
 
   // Justify the grid
@@ -44,24 +55,6 @@
   }
 }
 
-$gutterTypes: (
-  gutterSmall: $kuiSizeS,
-  gutterMedium: $kuiSize,
-  gutterLarge: $kuiSizeL,
-  gutterXLarge: $kuiSizeXXL,
-);
-
-@each $gutterName, $gutterSize in $gutterTypes {
-  $halfGutterSize: $gutterSize * 0.5;
-
-  .kuiFlexGroup--#{$gutterName} {
-    margin: -$halfGutterSize;
-
-    & > .kuiFlexItem {
-      margin: $halfGutterSize;
-    }
-  }
-}
 
 @include screenXSmall {
   .kuiFlexGroup {

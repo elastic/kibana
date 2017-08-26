@@ -34,23 +34,8 @@ $kuiFontSizeXXL:    48px;
 
 // Line height
 
-$kuiLineHeight:     1.5 * $kuiFontSize;
+$kuiLineHeight:     1.5;
 
-$kuiLineHeightXS:   $kuiLineHeight * 0.75;
-$kuiLineHeightS:    $kuiLineHeight * 0.75;
-$kuiLineHeightM:    $kuiLineHeight;
-$kuiLineHeightL:    $kuiLineHeight * 1.5;
-$kuiLineHeightXL:   $kuiLineHeight * 2;
-$kuiLineHeightXXL:  $kuiLineHeight * 3;
-
-// Vertical rhythm
-
-$kuiVerticalRhythmXS: $kuiLineHeightXS * 0.5;
-$kuiVerticalRhythmS: $kuiLineHeightS * 0.5;
-$kuiVerticalRhythmM: $kuiLineHeightM * 0.5;
-$kuiVerticalRhythmL: $kuiLineHeightL * 0.5;
-$kuiVerticalRhythmXL: $kuiLineHeightXL * 0.5;
-$kuiVerticalRhythmXXL: $kuiLineHeightXXL * 0.5;
 
 // Font weights
 
@@ -69,6 +54,16 @@ $kuiFontWeightMedium:   500;
   font-family: $kuiCodeFontFamily;
 }
 
+@mixin kuiTitle {
+  color: $kuiTitleColor;
+  font-weight: $kuiFontWeightLight;
+}
+
+@mixin kuiText {
+  color: $kuiTextColor;
+  font-weight: $kuiFontWeightRegular;
+}
+
 // Font sizing extends, using rem mixin
 
 @mixin kuiFontSize {
@@ -78,30 +73,30 @@ $kuiFontWeightMedium:   500;
 
 @mixin kuiFontSizeXS {
   @include fontSize($kuiFontSizeXS);
-  line-height: $kuiLineHeightXS;
+  line-height: $kuiLineHeight;
 }
 
 @mixin kuiFontSizeS {
   @include fontSize($kuiFontSizeS);
-  line-height: $kuiLineHeightS;
+  line-height: $kuiLineHeight;
 }
 
 @mixin kuiFontSizeM {
   @include fontSize($kuiFontSizeM);
-  line-height: $kuiLineHeightM;
+  line-height: $kuiLineHeight;
 }
 
 @mixin kuiFontSizeL {
   @include fontSize($kuiFontSizeL);
-  line-height: $kuiLineHeightL;
+  line-height: $kuiLineHeight;
 }
 
 @mixin kuiFontSizeXL {
   @include fontSize($kuiFontSizeXL);
-  line-height: $kuiLineHeightXL;
+  line-height: $kuiLineHeight;
 }
 
 @mixin kuiFontSizeXXL {
   @include fontSize($kuiFontSizeXXL);
-  line-height: $kuiLineHeightXXL;
+  line-height: $kuiLineHeight;
 }

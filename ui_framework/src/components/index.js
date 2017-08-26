@@ -123,6 +123,10 @@ export {
 } from './popover';
 
 export {
+  KuiSpacer,
+} from './spacer';
+
+export {
   KuiTable,
   KuiTableBody,
   KuiTableHeader,
@@ -153,5 +157,8 @@ export {
 
 export {
   KuiTitle,
+} from './title';
+
+export {
   KuiText,
-} from './typography';
+} from './text';
