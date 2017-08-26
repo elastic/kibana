@@ -40,7 +40,7 @@ import {
 
 import {
   Table,
-} from '../../views/table/table'
+} from '../../views/table/table';
 
 const TOAST_LIFE_TIME_MS = 4000;
 const TOAST_FADE_OUT_MS = 250;

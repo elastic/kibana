@@ -7,7 +7,7 @@ import { KuiRange } from './range';
 describe('KuiRange', () => {
   test('is rendered', () => {
     const component = render(
-      <KuiRange { ...requiredProps } />
+      <KuiRange {...requiredProps} />
     );
 
     expect(component)

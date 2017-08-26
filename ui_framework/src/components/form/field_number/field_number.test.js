@@ -7,7 +7,7 @@ import { KuiFieldNumber } from './field_number';
 describe('KuiFieldNumber', () => {
   test('is rendered', () => {
     const component = render(
-      <KuiFieldNumber { ...requiredProps } />
+      <KuiFieldNumber {...requiredProps} />
     );
 
     expect(component)

@@ -7,7 +7,7 @@ import { KuiToast } from './toast';
 describe('KuiToast', () => {
   test('is rendered', () => {
     const component = render(
-      <KuiToast { ...requiredProps } />
+      <KuiToast {...requiredProps} />
     );
 
     expect(component)

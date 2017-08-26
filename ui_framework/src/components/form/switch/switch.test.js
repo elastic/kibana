@@ -7,7 +7,7 @@ import { KuiSwitch } from './switch';
 describe('KuiSwitch', () => {
   test('is rendered', () => {
     const component = render(
-      <KuiSwitch { ...requiredProps } />
+      <KuiSwitch {...requiredProps} />
     );
 
     expect(component)

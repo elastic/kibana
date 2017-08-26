@@ -7,7 +7,7 @@ import { KuiFieldPassword } from './field_password';
 describe('KuiFieldPassword', () => {
   test('is rendered', () => {
     const component = render(
-      <KuiFieldPassword { ...requiredProps } />
+      <KuiFieldPassword {...requiredProps} />
     );
 
     expect(component)
