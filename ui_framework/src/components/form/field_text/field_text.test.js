@@ -7,7 +7,7 @@ import { KuiFieldText } from './field_text';
 describe('KuiFieldText', () => {
   test('is rendered', () => {
     const component = render(
-      <KuiFieldText { ...requiredProps } />
+      <KuiFieldText {...requiredProps} />
     );
 
     expect(component)

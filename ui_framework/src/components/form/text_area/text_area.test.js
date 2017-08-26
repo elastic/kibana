@@ -7,7 +7,7 @@ import { KuiTextArea } from './text_area';
 describe('KuiTextArea', () => {
   test('is rendered', () => {
     const component = render(
-      <KuiTextArea { ...requiredProps } />
+      <KuiTextArea {...requiredProps} />
     );
 
     expect(component)
