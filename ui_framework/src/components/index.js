@@ -157,5 +157,8 @@ export {
 
 export {
   KuiTitle,
+} from './title';
+
+export {
   KuiText,
-} from './typography';
+} from './text';

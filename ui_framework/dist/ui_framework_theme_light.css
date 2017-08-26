@@ -2842,6 +2842,23 @@ table {
     -webkit-transform: scaleX(1);
             transform: scaleX(1); } }
 
+.kuiTitle {
+  color: #000;
+  font-weight: 300;
+  font-size: 24px;
+  font-size: 1.5rem;
+  line-height: 1.5; }
+
+.kuiTitle--small {
+  font-size: 16px;
+  font-size: 1rem;
+  line-height: 1.5; }
+
+.kuiTitle--large {
+  font-size: 32px;
+  font-size: 2rem;
+  line-height: 1.5; }
+
 /**
  * 1. Allow list to expand as items are added, but cap it at the screen height.
  * 2. Only show the scroll on hover. Generally, scrolling is bad for toasts.
@@ -3020,23 +3037,6 @@ table {
 
 .kuiToastHeader--withBody {
   margin-bottom: 12px; }
-
-.kuiTitle {
-  color: #000;
-  font-weight: 300;
-  font-size: 24px;
-  font-size: 1.5rem;
-  line-height: 1.5; }
-
-.kuiTitle--small {
-  font-size: 16px;
-  font-size: 1rem;
-  line-height: 1.5; }
-
-.kuiTitle--large {
-  font-size: 32px;
-  font-size: 2rem;
-  line-height: 1.5; }
 
 .kuiText {
   color: #3F3F3F;

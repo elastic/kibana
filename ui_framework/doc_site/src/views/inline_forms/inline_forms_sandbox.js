@@ -9,24 +9,24 @@ import {
   GuideSectionTypes,
 } from '../../components';
 
-import FormGallery from './form_gallery';
-const formGallerySource = require('!!raw!./form_gallery');
-const formGalleryHtml = renderToHtml(FormGallery);
+import InlineForms from './inline_forms';
+const inlineFormsSource = require('!!raw!./inline_forms');
+const inlineFormsHtml = renderToHtml(InlineForms);
 
 export default props => (
   <GuideSandbox>
     <GuideDemo isFullScreen={true}>
-      <FormGallery />
+      <InlineForms />
     </GuideDemo>
 
     <GuideSandboxCodeToggle
       title={props.route.name}
       source={[{
         type: GuideSectionTypes.JS,
-        code: formGallerySource,
+        code: inlineFormsSource,
       }, {
         type: GuideSectionTypes.HTML,
-        code: formGalleryHtml,
+        code: inlineFormsHtml,
       }]}
     />
   </GuideSandbox>

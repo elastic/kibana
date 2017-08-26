@@ -54,6 +54,16 @@ $kuiFontWeightMedium:   500;
   font-family: $kuiCodeFontFamily;
 }
 
+@mixin kuiTitle {
+  color: $kuiTitleColor;
+  font-weight: $kuiFontWeightLight;
+}
+
+@mixin kuiText {
+  color: $kuiTextColor;
+  font-weight: $kuiFontWeightRegular;
+}
+
 // Font sizing extends, using rem mixin
 
 @mixin kuiFontSize {

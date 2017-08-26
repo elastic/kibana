@@ -1,27 +1,3 @@
-@mixin kuiTitle {
-  color: $kuiTitleColor;
-  font-weight: $kuiFontWeightLight;
-}
-
-@mixin kuiText {
-  color: $kuiTextColor;
-  font-weight: $kuiFontWeightRegular;
-}
-
-
-.kuiTitle {
-  @include kuiTitle;
-  @include kuiFontSizeL;
-}
-
-.kuiTitle--small {
-  @include kuiFontSizeM;
-}
-
-.kuiTitle--large {
-  @include kuiFontSizeXL;
-}
-
 .kuiText {
   @include kuiText;
   @include kuiFontSizeM;

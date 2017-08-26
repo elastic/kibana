@@ -21,8 +21,8 @@ import FlexExample
 import FormExample
   from '../../views/form/form_example';
 
-import FormGallerySandbox
-  from '../../views/form_gallery/form_gallery_sandbox';
+import InlineFormsSandbox
+  from '../../views/inline_forms/inline_forms_sandbox';
 
 import IconExample
   from '../../views/icon/icon_example';
@@ -69,11 +69,14 @@ import TableExample
 import TabsExample
   from '../../views/tabs/tabs_example';
 
+import TextExample
+  from '../../views/text/text_example';
+
 import ToastExample
   from '../../views/toast/toast_example';
 
-import TypographyExample
-  from '../../views/typography/typography_example';
+import TitleExample
+  from '../../views/title/title_example';
 
 import TextScalingSandbox
   from '../../views/text_scaling/text_scaling_sandbox';
@@ -164,12 +167,16 @@ const components = [{
   component: TabsExample,
   hasReact: true,
 }, {
+  name: 'Text',
+  component: TextExample,
+  hasReact: true,
+}, {
   name: 'Toast',
   component: ToastExample,
   hasReact: true,
 }, {
-  name: 'Typography',
-  component: TypographyExample,
+  name: 'Title',
+  component: TitleExample,
   hasReact: true,
 }];
 
@@ -178,8 +185,8 @@ const sandboxes = [{
   component: KibanaSandbox,
   hasReact: true,
 }, {
-  name: 'FormGallerySandbox',
-  component: FormGallerySandbox,
+  name: 'InlineFormsSandbox',
+  component: InlineFormsSandbox,
   hasReact: true,
 }, {
   name: 'TextScalingSandbox',

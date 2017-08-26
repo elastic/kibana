@@ -5,7 +5,7 @@ import {
 } from '../../../../components';
 
 export default () => (
-  <KuiText size="small">
+  <KuiText>
     <h1>This is Heading One</h1>
     <p>
       Far out in the uncharted backwaters of the unfashionable end of
