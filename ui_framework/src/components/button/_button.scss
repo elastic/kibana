@@ -1,7 +1,7 @@
 // Our base button
 .kuiButton {
   @include kuiButton;
-  @include kuiBottomShadowMedium;
+  @include kuiSlightShadow;
 
   border-radius: $kuiBorderRadius;
   min-width: $kuiSize * 7;
@@ -20,6 +20,14 @@
     .kuiButton__content {
       @include kuiButtonContent($isReverse: true);
     }
+  }
+
+  &:hover {
+    @include kuiSlightShadowHover;
+  }
+
+  &:active {
+    @include kuiSlightShadowActive;
   }
 
   &:hover, &:focus {

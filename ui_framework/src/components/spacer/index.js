@@ -1,0 +1,3 @@
+export {
+  KuiSpacer,
+} from './spacer';

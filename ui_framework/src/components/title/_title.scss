@@ -1,0 +1,12 @@
+.kuiTitle {
+  @include kuiTitle;
+  @include kuiFontSizeL;
+}
+
+.kuiTitle--small {
+  @include kuiFontSizeM;
+}
+
+.kuiTitle--large {
+  @include kuiFontSizeXL;
+}

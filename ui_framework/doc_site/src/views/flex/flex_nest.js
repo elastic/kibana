@@ -8,9 +8,9 @@ import {
 
 export default () => (
   <div>
-    <KuiFlexGroup growItems={false}>
-      <KuiFlexItem>Group One</KuiFlexItem>
-      <KuiFlexItem>
+    <KuiFlexGroup>
+      <KuiFlexItem grow={false}>Group One</KuiFlexItem>
+      <KuiFlexItem grow={false}>
         <div>Group Two</div>
         <br/><br/>
         <KuiFlexGrid columns={3}>

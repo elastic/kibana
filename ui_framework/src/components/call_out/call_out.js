@@ -9,6 +9,10 @@ import {
   KuiIcon,
 } from '../icon';
 
+import {
+  KuiText,
+} from '../../components/';
+
 const typeToClassNameMap = {
   info: 'kuiCallOut--info',
   success: 'kuiCallOut--success',
@@ -47,7 +51,9 @@ export const KuiCallOut = ({ title, type, iconType, children, className, ...rest
         </span>
       </div>
 
-      {children}
+      <KuiText size="small">
+        {children}
+      </KuiText>
     </div>
   );
 };

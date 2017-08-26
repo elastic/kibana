@@ -1,4 +1,9 @@
-// FlexItems are normally defined by Groups or Grids.
+// FlexItem can be manually set to not grow if needed.
+.kuiFlexItem.kuiFlexItem--flexGrowZero {
+  flex-grow: 0;
+  flex-basis: auto;
+}
+
 // On mobile we force them to stack and act the same.
 @include screenXSmall {
   .kuiFlexItem {

@@ -19,6 +19,12 @@
   }
 }
 
+.guideDemo__highlightSpacer {
+  .kuiSpacer {
+    background: transparentize(#0096CC, .9);
+  }
+}
+
 .guideDemo__highlightGrid {
   .kuiFlexItem {
     background: transparentize(#0096CC, .9);
@@ -31,4 +37,9 @@
     background: transparentize(#0096CC, .9);
     padding: 16px;
   }
+}
+
+.guideDemo__textLines {
+  background-image: linear-gradient($kuiFocusBackgroundColor 1px, transparent 1px) !important;
+  background-size: 100% 8px !important;
 }

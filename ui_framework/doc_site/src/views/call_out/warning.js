@@ -3,7 +3,6 @@ import React from 'react';
 import {
   KuiCallOut,
   KuiLink,
-  KuiText,
 } from '../../../../components';
 
 export default () => (
@@ -12,10 +11,8 @@ export default () => (
     type="warning"
     iconType="help"
   >
-    <KuiText size="small">
-      <p>
-        Here be dragons. Don&rsquo;t wanna mess with no dragons. And <KuiLink href="#">here&rsquo;s a link</KuiLink>.
-      </p>
-    </KuiText>
+    <p>
+      Here be dragons. Don&rsquo;t wanna mess with no dragons. And <KuiLink href="#">here&rsquo;s a link</KuiLink>.
+    </p>
   </KuiCallOut>
 );

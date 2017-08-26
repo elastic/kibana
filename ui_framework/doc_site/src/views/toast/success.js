@@ -1,7 +1,6 @@
 import React from 'react';
 
 import {
-  KuiText,
   KuiToast,
 } from '../../../../components';
 
@@ -11,18 +10,14 @@ export default () => (
     type="success"
     iconType="user"
   >
-    <KuiText size="small" verticalRhythm>
-      <p>
-        While the layout will adjust properly for wrapping titles, they don't look particularly good.
-        Similarily, don't use a whole lot of text in your body either. At a certain point people won't
-        have enough time to read these things. Like, you probably aren't even reading this now.
-      </p>
-    </KuiText>
+    <p>
+      While the layout will adjust properly for wrapping titles, they do not look particularly good.
+      Similarily, do not use a whole lot of text in your body either. At a certain point people will not
+      have enough time to read these things. Like, you probably are not even reading this now.
+    </p>
 
-    <KuiText size="small">
-      <p>
-        You shouldn't even need a second paragraph. Again, we're getting long winded here.
-      </p>
-    </KuiText>
+    <p>
+      You should not even need a second paragraph. Again, we are getting long winded here.
+    </p>
   </KuiToast>
 );

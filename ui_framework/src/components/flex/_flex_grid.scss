@@ -6,6 +6,11 @@
 
   > .kuiFlexItem {
     flex-grow: 0;
+
+    &.kuiFlexItem--flexGrowZero {
+      flex-grow: 0 !important;
+      flex-basis: auto !important;
+    }
   }
 }
 

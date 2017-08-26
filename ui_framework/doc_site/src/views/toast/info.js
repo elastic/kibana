@@ -1,7 +1,6 @@
 import React from 'react';
 
 import {
-  KuiText,
   KuiToast,
 } from '../../../../components';
 
@@ -12,12 +11,9 @@ export default () => (
     iconType="user"
     onClose={() => window.alert('Dismiss toast')}
   >
-    <KuiText size="small">
-      <p>
-        Icons should be used rarely. They're good for warnings, but when paired with
-        long titles they look out of place.
-      </p>
-    </KuiText>
-
+    <p>
+      Icons should be used rarely. They are good for warnings, but when paired with
+      long titles they look out of place.
+    </p>
   </KuiToast>
 );

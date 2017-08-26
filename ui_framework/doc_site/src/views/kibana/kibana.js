@@ -34,7 +34,6 @@ import {
   KuiSideNav,
   KuiSideNavItem,
   KuiSideNavTitle,
-  KuiText,
   KuiToast,
   KuiTitle,
 } from '../../../../components';
@@ -511,18 +510,13 @@ export default class extends Component {
         type="info"
         onClose={dismissToast}
       >
-        <KuiText size="small" verticalRhythm>
-          <p>
-            Here&rsquo;s some stuff that you need to know. We can make this text really long so that,
-            when viewed within a browser that&rsquo;s fairly narrow, it will wrap, too.
-          </p>
-        </KuiText>
-
-        <KuiText size="small">
-          <p>
-            And some other stuff on another line, just for kicks. And <KuiLink href="#">here&rsquo;s a link</KuiLink>.
-          </p>
-        </KuiText>
+        <p>
+          Here&rsquo;s some stuff that you need to know. We can make this text really long so that,
+          when viewed within a browser that&rsquo;s fairly narrow, it will wrap, too.
+        </p>
+        <p>
+          And some other stuff on another line, just for kicks. And <KuiLink href="#">here&rsquo;s a link</KuiLink>.
+        </p>
       </KuiToast>
     ), (
       <KuiToast
@@ -530,11 +524,9 @@ export default class extends Component {
         type="success"
         onClose={dismissToast}
       >
-        <KuiText size="small">
-          <p>
-            Thanks for your patience!
-          </p>
-        </KuiText>
+        <p>
+          Thanks for your patience!
+        </p>
       </KuiToast>
     ), (
       <KuiToast
@@ -543,17 +535,12 @@ export default class extends Component {
         iconType="user"
         onClose={dismissToast}
       >
-        <KuiText size="small" verticalRhythm>
-          <p>
-            This is a security measure.
-          </p>
-        </KuiText>
-
-        <KuiText size="small">
-          <p>
-            Please move your mouse to show that you&rsquo;re still using Kibana.
-          </p>
-        </KuiText>
+        <p>
+          This is a security measure.
+        </p>
+        <p>
+          Please move your mouse to show that you&rsquo;re still using Kibana.
+        </p>
       </KuiToast>
     ), (
       <KuiToast
@@ -562,11 +549,9 @@ export default class extends Component {
         iconType="help"
         onClose={dismissToast}
       >
-        <KuiText size="small">
-          <p>
-            Sorry. We&rsquo;ll try not to let it happen it again.
-          </p>
-        </KuiText>
+        <p>
+          Sorry. We&rsquo;ll try not to let it happen it again.
+        </p>
       </KuiToast>
     )];
 
