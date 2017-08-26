@@ -7,7 +7,7 @@ import { KuiModalHeader } from './modal_header';
 import { KuiModalHeaderTitle } from './modal_header_title';
 import { KuiModalBody } from './modal_body';
 import { KuiModalBodyText } from './modal_body_text';
-import { ESC_KEY_CODE } from '../../services';
+import { keyCodes } from '../../services';
 
 export const CONFIRM_BUTTON = 'confirm';
 export const CANCEL_BUTTON = 'cancel';
@@ -29,9 +29,9 @@ export function KuiConfirmModal({
     ...rest,
   }) {
 
-  const onKeyDown = (event) => {
+  const onKeyDown = event => {
     // Treat the 'esc' key as a cancel indicator.
-    if (event.keyCode === ESC_KEY_CODE) {
+    if (event.keyCode === keyCodes.ESCAPE) {
       onCancel();
     }
   };
