@@ -3,11 +3,6 @@ import React, {
   PropTypes,
 } from 'react';
 
-import {
-  GuidePageSideNav,
-  GuidePageSideNavItem,
-} from '../';
-
 export class GuidePage extends Component {
   constructor(props) {
     super(props);
@@ -22,31 +17,10 @@ export class GuidePage extends Component {
     }, 250);
   }
 
-  renderSideNavMenu() {
-    // Traverse sections and build side nav from it.
-    return this.props.sections.map((section, index) => {
-      return (
-        <GuidePageSideNavItem
-          key={index}
-          id={section.id}
-          onClick={this.onClickLink}
-        >
-          {section.name}
-        </GuidePageSideNavItem>
-      );
-    });
-  }
-
   render() {
     return (
-      <div className="guidePage">
-        <GuidePageSideNav title={this.props.title}>
-          {this.renderSideNavMenu()}
-        </GuidePageSideNav>
-
-        <div className="guidePageBody">
-          {this.props.children}
-        </div>
+      <div>
+        {this.props.children}
       </div>
     );
   }

@@ -7,25 +7,28 @@ import {
   Link,
 } from 'react-router';
 
-import classNames from 'classnames';
-
 import {
   getTheme,
   applyTheme,
 } from '../../services';
 
+import {
+  KuiSideNav,
+  KuiSideNavItem,
+  KuiSideNavTitle,
+  KuiFieldSearch,
+  KuiFlexGroup,
+  KuiFlexItem,
+  KuiTitle,
+  KuiSpacer,
+} from '../../../../components';
+
 export class GuideNav extends Component {
   constructor(props) {
     super(props);
 
-    const currentRoute = props.routes[1];
-    const nextRoute = this.props.getNextRoute(currentRoute.name);
-    const previousRoute = this.props.getPreviousRoute(currentRoute.name);
-
     this.state = {
       search: '',
-      nextRoute,
-      previousRoute,
       theme: getTheme(),
     };
 
@@ -48,17 +51,6 @@ export class GuideNav extends Component {
   onSearchChange(event) {
     this.setState({
       search: event.target.value,
-    });
-  }
-
-  componentWillReceiveProps(nextProps) {
-    const currentRoute = nextProps.routes[1];
-    const nextRoute = this.props.getNextRoute(currentRoute.name);
-    const previousRoute = this.props.getPreviousRoute(currentRoute.name);
-
-    this.setState({
-      nextRoute,
-      previousRoute,
     });
   }
 
@@ -95,62 +87,22 @@ export class GuideNav extends Component {
       </button>
     );
 
-    const previousClasses = classNames('guideNavPaginationButton', {
-      'guideNavPaginationButton-isDisabled': !this.state.previousRoute,
-    });
-
-    const previousButton = (
-      <Link
-        className={previousClasses}
-        to={this.state.previousRoute ? this.state.previousRoute.path : ''}
-      >
-        <span className="fa fa-angle-left" />
-      </Link>
-    );
-
-    const nextClasses = classNames('guideNavPaginationButton', {
-      'guideNavPaginationButton-isDisabled': !this.state.nextRoute,
-    });
-
-    const nextButton = (
-      <Link
-        className={nextClasses}
-        to={this.state.nextRoute ? this.state.nextRoute.path : ''}
-      >
-        <span className="fa fa-angle-right" />
-      </Link>
-    );
-
     return (
       <div className="guideNavPaginationButtons">
         {hideChromeButton}
         {themeButton}
-        {previousButton}
-        {nextButton}
       </div>
     );
   }
 
   render() {
-    const classes = classNames('guideNav', {
-      'is-guide-nav-open': this.props.isNavOpen,
-      'is-chrome-hidden': !this.props.isChromeVisible,
-    });
-
-    const buttonClasses = classNames('guideNav__menu fa fa-bars', {
-      'is-menu-button-pinned': this.props.isNavOpen,
-    });
 
     const componentNavItems =
       this.props.components.filter(item => (
         item.name.toLowerCase().indexOf(this.state.search.toLowerCase()) !== -1
       )).map((item, index) => {
-        const icon =
-          item.hasReact
-          ? <div className="guideNavItem__reactLogo" />
-          : undefined;
         return (
-          <div key={`componentNavItem-${index}`} className="guideNavItem">
+          <KuiSideNavItem key={`componentNavItem-${index}`}>
             <Link
               className="guideNavItem__link"
               to={item.path}
@@ -158,9 +110,7 @@ export class GuideNav extends Component {
             >
               {item.name}
             </Link>
-
-            {icon}
-          </div>
+          </KuiSideNavItem>
         );
       });
 
@@ -168,12 +118,8 @@ export class GuideNav extends Component {
       this.props.sandboxes.filter(item => (
         item.name.toLowerCase().indexOf(this.state.search.toLowerCase()) !== -1
       )).map((item, index) => {
-        const icon =
-          item.hasReact
-          ? <div className="guideNavItem__reactLogo" />
-          : undefined;
         return (
-          <div key={`sandboxNavItem-${index}`} className="guideNavItem">
+          <KuiSideNavItem key={`sandboxNavItem-${index}`}>
             <Link
               className="guideNavItem__link"
               to={item.path}
@@ -181,56 +127,50 @@ export class GuideNav extends Component {
             >
               {item.name}
             </Link>
-
-            {icon}
-          </div>
+          </KuiSideNavItem>
         );
       });
 
     return (
-      <div className={classes}>
-        <div className="guideNav__header">
-          <div
-            className={buttonClasses}
-            onClick={this.props.onToggleNav}
-          />
-          <Link
-            className="guideNav__title"
-            to="/"
-            onClick={this.props.onClickNavItem}
-          >
-            Kibana UI Framework <span className="guideNav__version">{this.props.version}</span>
-          </Link>
-          <a href="http://elastic.co" className="guideNav__elasticLogo" aria-label="Go to the Elastic website" />
+      <KuiSideNav
+        mobileTitle="Navigate within $APP_NAME"
+      >
+        <Link
+          className="guideNav__title"
+          to="/"
+          onClick={this.props.onClickNavItem}
+        >
+          <KuiFlexGroup justifyContent="spaceBetween" alignItems="center">
+            <KuiFlexItem grow={false}>
+              <KuiTitle><h1>KUI</h1></KuiTitle>
+            </KuiFlexItem>
+            <KuiFlexItem grow={false}>
+              <span className="guideNav__version">{this.props.version}</span>
+            </KuiFlexItem>
+          </KuiFlexGroup>
+        </Link>
 
-          {this.renderPagination()}
-        </div>
+        <KuiFieldSearch
+          placeholder="Search..."
+          value={this.state.search}
+          onChange={this.onSearchChange}
+        />
 
-        <div>
-          <input
-            type="text"
-            placeholder="Search components and sandboxes"
-            className="guideNavSearch"
-            value={this.state.search}
-            onChange={this.onSearchChange}
-          />
-        </div>
+        <KuiSpacer size="m" />
 
-        <div className="guideNavItemsContainer">
-          <div className="guideNavItems">
-            <div className="guideNavSectionTitle">
-              Components
-            </div>
+        <KuiSideNavTitle>
+          Components
+        </KuiSideNavTitle>
 
-            { componentNavItems.length ? componentNavItems : this.renderNoItems('components') }
+        {componentNavItems}
 
-            <div className="guideNavSectionTitle">
-              Sandboxes
-            </div>
+        <KuiSideNavTitle>
+          Sandboxes
+        </KuiSideNavTitle>
 
-            { sandboxNavItems.length ? sandboxNavItems : this.renderNoItems('sandboxes') }
-          </div>
-        </div>
+        {sandboxNavItems}
+
+        {this.renderPagination()}
 
         <button
           className="guideLink guideNav__showButton"
@@ -238,14 +178,13 @@ export class GuideNav extends Component {
         >
           Show chrome
         </button>
-      </div>
+      </KuiSideNav>
     );
   }
 }
 
 GuideNav.propTypes = {
   isChromeVisible: PropTypes.bool,
-  isNavOpen: PropTypes.bool,
   isSandbox: PropTypes.bool,
   onToggleNav: PropTypes.func,
   onHideChrome: PropTypes.func,
@@ -253,7 +192,6 @@ GuideNav.propTypes = {
   onClickNavItem: PropTypes.func,
   version: PropTypes.string,
   routes: PropTypes.array,
-  getNextRoute: PropTypes.func,
   getPreviousRoute: PropTypes.func,
   components: PropTypes.array,
   sandboxes: PropTypes.array,

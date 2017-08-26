@@ -14,6 +14,14 @@ import {
   GuideNav,
 } from '../components';
 
+import {
+  KuiPage,
+  KuiPageBody,
+  KuiPageContent,
+  KuiPageContentBody,
+  KuiPageSideBar,
+} from '../../../components';
+
 // Inject version into header.
 const pkg = require('../../../../package.json');
 
@@ -81,26 +89,35 @@ export class AppView extends Component {
 
     return (
       <div className="guide">
-        <GuideNav
-          isChromeVisible={this.state.isChromeVisible}
-          isNavOpen={this.state.isNavOpen}
-          isSandbox={this.props.isSandbox}
-          onHideChrome={this.onHideChrome}
-          onShowChrome={this.onShowChrome}
-          onToggleNav={this.onToggleNav}
-          onClickNavItem={this.onClickNavItem}
-          version={pkg.version}
-          routes={this.props.routes}
-          getNextRoute={Routes.getNextRoute}
-          getPreviousRoute={Routes.getPreviousRoute}
-          components={Routes.components}
-          sandboxes={Routes.sandboxes}
-        />
 
-        <div className={contentClasses}>
-          {this.props.children}
-        </div>
-
+        <KuiPage>
+          <KuiPageBody>
+            <KuiPageSideBar>
+              <GuideNav
+                isChromeVisible={this.state.isChromeVisible}
+                isNavOpen={this.state.isNavOpen}
+                isSandbox={this.props.isSandbox}
+                onHideChrome={this.onHideChrome}
+                onShowChrome={this.onShowChrome}
+                onToggleNav={this.onToggleNav}
+                onClickNavItem={this.onClickNavItem}
+                version={pkg.version}
+                routes={this.props.routes}
+                getNextRoute={Routes.getNextRoute}
+                getPreviousRoute={Routes.getPreviousRoute}
+                components={Routes.components}
+                sandboxes={Routes.sandboxes}
+              />
+            </KuiPageSideBar>
+            <KuiPageContent>
+              <KuiPageContentBody>
+                <div className={contentClasses}>
+                  {this.props.children}
+                </div>
+              </KuiPageContentBody>
+            </KuiPageContent>
+          </KuiPageBody>
+        </KuiPage>
         <GuideCodeViewer
           isOpen={this.props.isCodeViewerOpen}
           onClose={this.onCloseCodeViewer}
