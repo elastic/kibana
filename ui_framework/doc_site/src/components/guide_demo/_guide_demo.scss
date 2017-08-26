@@ -40,8 +40,6 @@
 }
 
 .guideDemo__textLines {
-  background-color: #fff;
-  background-image:
-  linear-gradient($kuiFocusBackgroundColor 1px, transparent 1px);
-  background-size: 100% 8px;
+  background-image: linear-gradient($kuiFocusBackgroundColor 1px, transparent 1px) !important;
+  background-size: 100% 8px !important;
 }
