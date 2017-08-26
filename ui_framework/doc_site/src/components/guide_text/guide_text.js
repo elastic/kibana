@@ -1,5 +1,9 @@
 import React from 'react';
 
+import {
+  KuiText,
+} from '../../../../components';
+
 export const GuideText = props => (
-  <div className="guideText">{props.children}</div>
+  <KuiText>{props.children}</KuiText>
 );

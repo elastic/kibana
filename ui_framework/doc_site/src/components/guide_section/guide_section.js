@@ -3,6 +3,14 @@ import React, {
   PropTypes,
 } from 'react';
 
+import {
+  KuiFlexGroup,
+  KuiFlexItem,
+  KuiTitle,
+  KuiSpacer,
+  KuiButton,
+} from '../../../../components';
+
 import Slugify from '../../services/string/slugify';
 
 export class GuideSection extends Component {
@@ -29,22 +37,23 @@ export class GuideSection extends Component {
 
   render() {
     return (
-      <div
-        id={this.getId()}
-        className="guideSection"
-      >
-        <div className="guideSection__header">
-          <div className="guideSection__title">
-            {this.props.title}
-          </div>
-          <button
-            className="guideSection__sourceButton"
-            onClick={this.onClickSource}
-          >
-            <span className="fa fa-code" />
-          </button>
-        </div>
-
+      <div className="guideSection">
+        <KuiFlexGroup id={this.getId()} justifyContent="spaceBetween">
+          <KuiFlexItem grow={false}>
+            <KuiTitle>
+              <h2>{this.props.title}</h2>
+            </KuiTitle>
+          </KuiFlexItem>
+          <KuiFlexItem grow={false}>
+            <KuiButton
+              size="small"
+              onClick={this.onClickSource}
+            >
+              View code
+            </KuiButton>
+          </KuiFlexItem>
+        </KuiFlexGroup>
+        <KuiSpacer size="m" />
         {this.props.children}
       </div>
     );

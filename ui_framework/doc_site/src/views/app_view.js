@@ -82,7 +82,7 @@ export class AppView extends Component {
   }
 
   render() {
-    const contentClasses = classNames('guideContent', {
+    const contentClasses = classNames({
       'is-code-viewer-open': this.props.isCodeViewerOpen,
       'is-chrome-hidden': !this.state.isChromeVisible,
     });

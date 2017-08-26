@@ -1,20 +1,14 @@
 .guideSection {
-  margin-bottom: 40px;
+  border-top: solid 1px $kuiBorderColor;
+  padding-top: 24px;
+  margin-top: 24px;
+
+  &:first-child {
+    padding-top: 0;
+    margin-top: 0;
+    border-top: none;
+  }
 }
-
-  .guideSection__header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding-bottom: 2px;
-    line-height: $guideLineHeight;
-  }
-
-  .guideSection__title {
-    font-size: 18px;
-    font-weight: 700;
-  }
-
   .guideSection__sourceButton {
     appearance: none;
     border: none;
