@@ -815,6 +815,16 @@ table {
           transform: translateY(2px);
   /* 1 */ }
 
+.kuiCode {
+  font-family: "Roboto Mono", monospace;
+  display: inline-block;
+  white-space: pre;
+  background: #F5F5F5;
+  color: #DD0A73;
+  border: 1px solid #D9D9D9;
+  font-size: 14px;
+  padding: 4px; }
+
 .kuiContextMenu {
   width: 256px;
   position: relative;

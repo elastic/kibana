@@ -55,8 +55,6 @@ export default props => (
         components or classes if you need it.
       </p>
     </KuiCallOut>
-    <br/>
-    <br/>
 
     <GuideSection
       title="FlexGroup is for a single row layout"

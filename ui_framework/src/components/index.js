@@ -18,6 +18,10 @@ export {
 } from './call_out';
 
 export {
+  KuiCode,
+} from './code';
+
+export {
   KuiContextMenu,
 } from './context_menu';
 

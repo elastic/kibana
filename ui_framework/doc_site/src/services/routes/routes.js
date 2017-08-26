@@ -12,6 +12,9 @@ import ButtonExample
 import CallOutExample
   from '../../views/call_out/call_out_example';
 
+import CodeExample
+  from '../../views/code/code_example';
+
 import ContextMenuExample
   from '../../views/context_menu/context_menu_example';
 
@@ -97,6 +100,10 @@ const components = [{
 }, {
   name: 'CallOut',
   component: CallOutExample,
+  hasReact: true,
+}, {
+  name: 'Code',
+  component: CodeExample,
   hasReact: true,
 }, {
   name: 'ContextMenu',
