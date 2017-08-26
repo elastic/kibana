@@ -7,7 +7,7 @@ import { KuiSelect } from './select';
 describe('KuiSelect', () => {
   test('is rendered', () => {
     const component = render(
-      <KuiSelect { ...requiredProps } />
+      <KuiSelect {...requiredProps} />
     );
 
     expect(component)

@@ -7,7 +7,7 @@ import { KuiCallOut } from './call_out';
 describe('KuiCallOut', () => {
   test('is rendered', () => {
     const component = render(
-      <KuiCallOut { ...requiredProps } />
+      <KuiCallOut {...requiredProps} />
     );
 
     expect(component)

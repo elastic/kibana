@@ -7,7 +7,7 @@ import { KuiForm } from './form';
 describe('KuiForm', () => {
   test('is rendered', () => {
     const component = render(
-      <KuiForm { ...requiredProps } />
+      <KuiForm {...requiredProps} />
     );
 
     expect(component)

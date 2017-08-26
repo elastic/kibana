@@ -7,7 +7,7 @@ import { KuiFieldSearch } from './field_search';
 describe('KuiFieldSearch', () => {
   test('is rendered', () => {
     const component = render(
-      <KuiFieldSearch { ...requiredProps } />
+      <KuiFieldSearch {...requiredProps} />
     );
 
     expect(component)

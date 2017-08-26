@@ -7,7 +7,7 @@ import { KuiLoadingChart } from './loading_chart';
 describe('KuiLoadingChart', () => {
   test('is rendered', () => {
     const component = render(
-      <KuiLoadingChart { ...requiredProps } />
+      <KuiLoadingChart {...requiredProps} />
     );
 
     expect(component)
