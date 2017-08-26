@@ -138,18 +138,6 @@ export default class extends Component {
     });
   }
 
-  renderContextMenu() {
-    if (this.state.isPopoverOpen) {
-      return (
-        <KuiContextMenu
-          initialPanelId={0}
-          idToPanelMap={this.idToPanelMap}
-          idToPreviousPanelIdMap={this.idToPreviousPanelIdMap}
-        />
-      );
-    }
-  }
-
   render() {
     const button = (
       <KuiButton fill onClick={this.onButtonClick.bind(this)}>
@@ -164,7 +152,12 @@ export default class extends Component {
         closePopover={this.closePopover.bind(this)}
         withTitle
       >
-        {this.renderContextMenu()}
+        <KuiContextMenu
+          initialPanelId={0}
+          isVisible={this.state.isPopoverOpen}
+          idToPanelMap={this.idToPanelMap}
+          idToPreviousPanelIdMap={this.idToPreviousPanelIdMap}
+        />
       </KuiPopover>
     );
   }

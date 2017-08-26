@@ -12,6 +12,7 @@ export class KuiContextMenu extends Component {
     children: PropTypes.node,
     className: PropTypes.string,
     initialPanelId: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+    isVisible: PropTypes.bool.isRequired,
     idToPanelMap: PropTypes.object,
     idToPreviousPanelIdMap: PropTypes.object,
   }
@@ -19,6 +20,7 @@ export class KuiContextMenu extends Component {
   static defaultProps = {
     idToPanelMap: {},
     idToPreviousPanelIdMap: {},
+    isVisible: true,
   }
 
   constructor(props) {
@@ -55,6 +57,17 @@ export class KuiContextMenu extends Component {
     this.menu.setAttribute('style', `height: ${height}px`);
   }
 
+  componentWillReceiveProps(nextProps) {
+    // If the user is opening the context menu, reset the state.
+    if (nextProps.isVisible && !this.props.isVisible) {
+      this.setState({
+        outGoingPanelId: undefined,
+        currentPanelId: nextProps.initialPanelId,
+        transitionDirection: undefined,
+      });
+    }
+  }
+
   renderPanel(panelId, transitionType) {
     const panel = this.props.idToPanelMap[panelId];
 
@@ -69,7 +82,11 @@ export class KuiContextMenu extends Component {
       if (item.onClick) {
         onClick = item.onClick;
       } else if (item.panel) {
-        onClick = this.showPanel.bind(this, item.panel.id, 'next');
+        onClick = () => {
+          // This component is commonly wrapped in a KuiOutsideClickDetector, which means we'll
+          // need to wait for that logic to complete before re-rendering the DOM via showPanel.
+          window.requestAnimationFrame(this.showPanel.bind(this, item.panel.id, 'next'));
+        };
       }
 
       return (
@@ -119,6 +136,7 @@ export class KuiContextMenu extends Component {
       idToPreviousPanelIdMap, // eslint-disable-line no-unused-vars
       className,
       initialPanelId, // eslint-disable-line no-unused-vars
+      isVisible, // eslint-disable-line no-unused-vars
       ...rest,
     } = this.props;
 
