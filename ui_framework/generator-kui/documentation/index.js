@@ -131,15 +131,13 @@ module.exports = class extends Generator {
         `    type: GuideSectionTypes.HTML,\n` +
         `    code: ${componentExamplePrefix}Html,\n` +
         `  }]}\n` +
-        `>\n` +
-        `  <GuideText>\n` +
-        `    Description needed: how to use the ${componentExampleName} component.\n` +
-        `  </GuideText>\n` +
-        `\n` +
-        `  <GuideDemo>\n` +
+        `  text={\n` +
+        `    <p>Description needed: how to use the ${componentExampleName} component.</p>\n` +
+        ` }\n` +
+        `  demo={\n` +
         `    <${componentExampleName} />\n` +
-        `  </GuideDemo>\n` +
-        `</GuideSection>\n`
+        ` }\n` +
+        `/>\n`
       );
     };
 

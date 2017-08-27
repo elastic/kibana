@@ -5,4 +5,3 @@ export { GuidePageContainer as GuidePage } from './guide_page/guide_page_contain
 export { GuideSandboxHeader } from './guide_sandbox/guide_sandbox_header';
 export { GuideSectionContainer as GuideSection } from './guide_section/guide_section_container';
 export { GuideSectionTypes } from './guide_section/guide_section_types';
-export { GuideText } from './guide_text/guide_text';
