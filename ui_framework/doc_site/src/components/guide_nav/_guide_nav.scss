@@ -41,8 +41,7 @@
     transition: all $kuiAnimSpeedNormal $kuiAnimSlightResistance;
 
     &:hover {
-      background: transparentize($kuiColorFullShade, .3);
-      border-color: transparentize($kuiColorFullShade, .2);
+      border-color: $kuiColorPrimary;
     }
   }
 

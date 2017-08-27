@@ -32,10 +32,8 @@
 }
 
 .guide__hasNoChrome {
-  .guideSection {
-    margin-top: $kuiSizeXL;
-  }
   .guideSection__text {
+    margin-top: $kuiSizeXL;
     padding: 0 $kuiSizeL;
   }
   .guideSection__space {

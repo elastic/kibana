@@ -7,6 +7,8 @@ import {
   KuiFlexItem,
 } from '../../../../components';
 
+const pkg = require('../../../../../package.json');
+
 const colors = [
   {
     color: 'kuiColorPrimary',
@@ -69,9 +71,10 @@ const grays = [
 ];
 
 export const HomeView = () => (
-  <div>
+  <div className="guideSection__text">
     <KuiText>
       <h1>Kibana UI Framework</h1>
+      <p>Version: <strong>{pkg.version}</strong></p>
       <p>
         The Kibana team uses the UI Framework to build Kibana&rsquo;s user interface. Please see
         the <a href="https://www.elastic.co/guide/en/kibana/current/index.html">general Kibana docs</a> for information on how to use Kibana, and

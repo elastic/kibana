@@ -5,6 +5,8 @@ import React, {
 
 import {
   Routes,
+  getTheme,
+  applyTheme,
 } from '../services';
 
 import {
@@ -20,9 +22,6 @@ import {
   KuiPageSideBar,
 } from '../../../components';
 
-// Inject version into header.
-const pkg = require('../../../../package.json');
-
 export class AppView extends Component {
   constructor(props) {
     super(props);
@@ -30,36 +29,29 @@ export class AppView extends Component {
     this.state = {
       isNavOpen: false,
       isChromeVisible: true,
-      // isChromeVisible: props.isSandbox,
+      theme: getTheme(),
     };
 
-    this.onClickNavItem = this.onClickNavItem.bind(this);
-    this.onToggleNav = this.onToggleNav.bind(this);
-    this.onCloseCodeViewer = this.onCloseCodeViewer.bind(this);
     this.onHideChrome = this.onHideChrome.bind(this);
     this.onShowChrome = this.onShowChrome.bind(this);
+    this.onToggleTheme = this.onToggleTheme.bind(this);
   }
 
-  onClickNavItem() {
+  onToggleTheme() {
+    if (getTheme() === 'light') {
+      applyTheme('dark');
+    } else {
+      applyTheme('light');
+    }
+
     this.setState({
-      isNavOpen: false,
-    });
-  }
-
-  onCloseCodeViewer() {
-    this.props.closeCodeViewer();
-  }
-
-  onToggleNav() {
-    this.setState({
-      isNavOpen: !this.state.isNavOpen,
+      theme: getTheme(),
     });
   }
 
   onHideChrome() {
     this.setState({
       isChromeVisible: false,
-      isNavOpen: false,
     });
 
     this.props.closeCodeViewer();
@@ -94,8 +86,7 @@ export class AppView extends Component {
                 onHideChrome={this.onHideChrome}
                 onShowChrome={this.onShowChrome}
                 onToggleNav={this.onToggleNav}
-                onClickNavItem={this.onClickNavItem}
-                version={pkg.version}
+                onToggleTheme={this.onToggleTheme}
                 routes={this.props.routes}
                 getNextRoute={Routes.getNextRoute}
                 getPreviousRoute={Routes.getPreviousRoute}
@@ -121,8 +112,7 @@ export class AppView extends Component {
             onHideChrome={this.onHideChrome}
             onShowChrome={this.onShowChrome}
             onToggleNav={this.onToggleNav}
-            onClickNavItem={this.onClickNavItem}
-            version={pkg.version}
+            onToggleTheme={this.onToggleTheme}
             routes={this.props.routes}
             getNextRoute={Routes.getNextRoute}
             getPreviousRoute={Routes.getPreviousRoute}
@@ -148,10 +138,6 @@ export class AppView extends Component {
 AppView.propTypes = {
   children: PropTypes.any,
   routes: PropTypes.array.isRequired,
-  isSandbox: PropTypes.bool,
-  openCodeViewer: PropTypes.func,
-  closeCodeViewer: PropTypes.func,
-  isCodeViewerOpen: PropTypes.bool,
   registerSection: PropTypes.func,
   unregisterSection: PropTypes.func,
   sections: PropTypes.array,

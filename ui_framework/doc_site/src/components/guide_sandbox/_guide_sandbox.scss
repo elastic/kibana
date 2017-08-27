@@ -1,26 +1,14 @@
-.guideSandbox {
-  width: 100%;
-  height: 100%;
-}
-
-.guideSandboxCodeToggle {
-  position: fixed;
-  top: 70px;
-  right: 10px;
-}
-
 .guideSandbox__header {
   background: #222;
   color: #FFF !important;
-  height: $kuiSizeXL;
+  height: $kuiSizeXXL;
   border-bottom: $kuiBorderThin;
-  line-height: $kuiSizeXL;
+  line-height: $kuiSizeXXL;
   padding-left: $kuiSizeS;
 }
 
 .guideSandbox__link {
   color: #FFF;
-  font-size: $kuiFontSizeS;
 }
 
 .guideSandbox__appListIcon {

@@ -8,11 +8,6 @@ import {
 } from 'react-router';
 
 import {
-  getTheme,
-  applyTheme,
-} from '../../services';
-
-import {
   KuiIcon,
   KuiFlexGroup,
   KuiFlexItem,
@@ -24,44 +19,8 @@ export class GuideSandboxHeader extends Component {
 
     this.state = {
       search: '',
-      theme: getTheme(),
     };
 
-    this.onToggleTheme = this.onToggleTheme.bind(this);
-  }
-
-  onToggleTheme() {
-    if (getTheme() === 'light') {
-      applyTheme('dark');
-    } else {
-      applyTheme('light');
-    }
-
-    this.setState({
-      theme: getTheme(),
-    });
-  }
-
-  renderPagination() {
-    let hideChromeButton;
-
-    if (this.props.isSandbox) {
-      hideChromeButton = (
-        <button
-          className="guideLink"
-          style={{ marginRight: '10px' }}
-          onClick={this.props.onHideChrome}
-        >
-          Hide chrome
-        </button>
-      );
-    }
-
-    return (
-      <div className="guideNavPaginationButtons">
-        {hideChromeButton}
-      </div>
-    );
   }
 
   render() {
@@ -70,18 +29,20 @@ export class GuideSandboxHeader extends Component {
       <div className="guideSandbox__header">
         <KuiFlexGroup alignItems="center" gutterSize="small">
           <KuiFlexItem grow={false}>
-            <button onClick={this.onToggleTheme}>
-              <KuiIcon type="kibanaLogo" size="medium" />
-            </button>
-          </KuiFlexItem>
-          <KuiFlexItem grow={false}>
             <Link
               to="/"
-              onClick={this.props.onClickNavItem}
+              onClick={this.props.onShowChrome}
+            >
+              <KuiIcon type="kibanaLogo" size="medium" />
+            </Link>
+          </KuiFlexItem>
+          <KuiFlexItem grow={false}>
+            <button
+              onClick={this.props.onToggleTheme}
               className="guideSandbox__link"
             >
-              {this.props.version}
-            </Link>
+              Theme
+            </button>
           </KuiFlexItem>
           <KuiFlexItem grow={false}>
             <button
@@ -103,7 +64,6 @@ GuideSandboxHeader.propTypes = {
   onHideChrome: PropTypes.func,
   onShowChrome: PropTypes.func,
   onClickNavItem: PropTypes.func,
-  version: PropTypes.string,
   routes: PropTypes.array,
   getPreviousRoute: PropTypes.func,
   components: PropTypes.array,

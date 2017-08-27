@@ -8,11 +8,6 @@ import {
 } from 'react-router';
 
 import {
-  getTheme,
-  applyTheme,
-} from '../../services';
-
-import {
   KuiSideNav,
   KuiIcon,
   KuiSideNavItem,
@@ -30,12 +25,10 @@ export class GuideNav extends Component {
 
     this.state = {
       search: '',
-      theme: getTheme(),
       isSideNavOpenOnMobile: false,
     };
 
     this.onSearchChange = this.onSearchChange.bind(this);
-    this.onToggleTheme = this.onToggleTheme.bind(this);
   }
 
   toggleOpenOnMobile() {
@@ -44,30 +37,10 @@ export class GuideNav extends Component {
     });
   }
 
-  onToggleTheme() {
-    if (getTheme() === 'light') {
-      applyTheme('dark');
-    } else {
-      applyTheme('light');
-    }
-
-    this.setState({
-      theme: getTheme(),
-    });
-  }
-
   onSearchChange(event) {
     this.setState({
       search: event.target.value,
     });
-  }
-
-  renderNoItems(name) {
-    return (
-      <p className="guideNavNoItems">
-        { `No ${name} match your search` }
-      </p>
-    );
   }
 
   render() {
@@ -80,7 +53,7 @@ export class GuideNav extends Component {
             <Link
               className="guideNavItem__link"
               to={item.path}
-              onClick={this.props.onClickNavItem}
+              onClick={this.props.onShowChrome}
             >
               {item.name}
             </Link>
@@ -97,7 +70,7 @@ export class GuideNav extends Component {
             <Link
               className="guideNavItem__link"
               to={item.path}
-              onClick={this.props.onClickNavItem}
+              onClick={this.props.onHideChrome}
             >
               {item.name}
             </Link>
@@ -113,19 +86,23 @@ export class GuideNav extends Component {
       >
         <KuiFlexGroup alignItems="center" gutterSize="small">
           <KuiFlexItem grow={false}>
-            <button className="guideNav__logo" onClick={this.onToggleTheme}>
+            <Link
+              to="/"
+              className="guideNav__logo"
+              onClick={this.props.onShowChrome}
+            >
               <KuiIcon type="kibanaLogo" size="large" />
-            </button>
+            </Link>
           </KuiFlexItem>
           <KuiFlexItem grow={false}>
             <KuiText size="small">
-              <Link
+              <button
                 to="/"
-                onClick={this.props.onClickNavItem}
+                onClick={this.props.onToggleTheme}
                 className="kuiLink"
               >
-                {this.props.version}
-              </Link>
+                Theme
+              </button>
             </KuiText>
           </KuiFlexItem>
           <KuiFlexItem grow={false}>
@@ -170,8 +147,6 @@ GuideNav.propTypes = {
   onToggleNav: PropTypes.func,
   onHideChrome: PropTypes.func,
   onShowChrome: PropTypes.func,
-  onClickNavItem: PropTypes.func,
-  version: PropTypes.string,
   routes: PropTypes.array,
   getPreviousRoute: PropTypes.func,
   components: PropTypes.array,

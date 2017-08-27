@@ -6,6 +6,7 @@ import {
   GuidePage,
   GuideSection,
   GuideSectionTypes,
+  GuideCode,
 } from '../../components';
 
 import TextScaling from './text_scaling';
@@ -25,10 +26,10 @@ export default props => (
       }]}
       text={
         <p>
-          This demo shows off text scaling in both the default and small sizes.
-          The goal is that the bottom of every text line should hit one of
-          the 8px grid lines. This is for development only. Do not copy
-          this code into a production environment.
+          This demo shows off <GuideCode>KuiText</GuideCode> scaling in both
+          the default and small sizes. The goal is that the bottom of
+          every text line should hit one of the 8px grid lines. This is
+          for development only. Do not copy this code into a production environment.
         </p>
       }
       demo={
