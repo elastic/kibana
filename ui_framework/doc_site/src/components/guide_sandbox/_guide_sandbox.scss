@@ -8,3 +8,21 @@
   top: 70px;
   right: 10px;
 }
+
+.guideSandbox__header {
+  background: #222;
+  color: #FFF !important;
+  height: $kuiSizeXL;
+  border-bottom: $kuiBorderThin;
+  line-height: $kuiSizeXL;
+  padding-left: $kuiSizeS;
+}
+
+.guideSandbox__link {
+  color: #FFF;
+  font-size: $kuiFontSizeS;
+}
+
+.guideSandbox__appListIcon {
+  fill: #FFF !important;
+}

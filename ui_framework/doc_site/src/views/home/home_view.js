@@ -89,7 +89,7 @@ export const HomeView = () => (
         <li><KuiCode>KUI is themable</KuiCode>. Theming should involve changing
           less than a dozen lines of code. This means strict variable usage.
         </li>
-        <li><KuiCode>KUI is responsive.</KuiCode>. Currently we target
+        <li><KuiCode>KUI is responsive</KuiCode>. Currently we target
           mobile, laptop, desktop and wide desktop breakpoints.
         </li>
         <li><KuiCode>KUI is playful</KuiCode>. Consistent use of animation can

@@ -8,6 +8,7 @@ import {
 } from '../services';
 
 import {
+  GuideSandboxHeader,
   GuideNav,
 } from '../components';
 
@@ -113,6 +114,21 @@ export class AppView extends Component {
     } else {
       return (
         <div>
+          <GuideSandboxHeader
+            isChromeVisible={this.state.isChromeVisible}
+            isNavOpen={this.state.isNavOpen}
+            isSandbox={this.props.isSandbox}
+            onHideChrome={this.onHideChrome}
+            onShowChrome={this.onShowChrome}
+            onToggleNav={this.onToggleNav}
+            onClickNavItem={this.onClickNavItem}
+            version={pkg.version}
+            routes={this.props.routes}
+            getNextRoute={Routes.getNextRoute}
+            getPreviousRoute={Routes.getPreviousRoute}
+            components={Routes.components}
+            sandboxes={Routes.sandboxes}
+          />
           {this.props.children}
         </div>
       );

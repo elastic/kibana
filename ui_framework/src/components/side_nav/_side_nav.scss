@@ -1,3 +1,6 @@
+.kuiSideNav {
+  position: relative;
+}
 // These mobile children are hidden in everything but mobile view.
 .kuiSideNav__mobileToggle {
   display: none;
@@ -26,6 +29,20 @@
 .kuiSideNav__mobileTitle {
   flex-grow: 1;
   color: $kuiColorPrimary;
+}
+
+.kuiSideNav__hideButton {
+  width: $kuiSizeL;
+  height: $kuiSizeL;
+  border-radius: $kuiBorderRadius;
+  border: $kuiBorderThin;
+  background: $kuiColorEmptyShade;
+  position: absolute;
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  right: -$kuiSizeXXL;
+  top: $kuiSizeXL;
 }
 
 @include screenXSmall {

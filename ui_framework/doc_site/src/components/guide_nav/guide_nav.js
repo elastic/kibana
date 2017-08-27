@@ -63,28 +63,6 @@ export class GuideNav extends Component {
     );
   }
 
-  renderPagination() {
-    let hideChromeButton;
-
-    if (this.props.isSandbox) {
-      hideChromeButton = (
-        <button
-          className="guideLink"
-          style={{ marginRight: '10px' }}
-          onClick={this.props.onHideChrome}
-        >
-          Hide chrome
-        </button>
-      );
-    }
-
-    return (
-      <div className="guideNavPaginationButtons">
-        {hideChromeButton}
-      </div>
-    );
-  }
-
   render() {
     const componentNavItems =
       this.props.components.filter(item => (
@@ -141,6 +119,13 @@ export class GuideNav extends Component {
               </Link>
             </KuiText>
           </KuiFlexItem>
+          <KuiFlexItem grow={false}>
+            <button
+              onClick={this.props.onHideChrome}
+            >
+              <KuiIcon type="fullScreen" size="medium" />
+            </button>
+          </KuiFlexItem>
         </KuiFlexGroup>
 
         <KuiSpacer size="m" />
@@ -165,14 +150,6 @@ export class GuideNav extends Component {
 
         {sandboxNavItems}
 
-        {this.renderPagination()}
-
-        <button
-          className="guideLink guideNav__showButton"
-          onClick={this.props.onShowChrome}
-        >
-          Show chrome
-        </button>
       </KuiSideNav>
     );
   }

@@ -7,6 +7,7 @@ export { GuidePageContainer as GuidePage } from './guide_page/guide_page_contain
 export { GuidePageSideNav } from './guide_page_side_nav/guide_page_side_nav';
 export { GuidePageSideNavItem } from './guide_page_side_nav/guide_page_side_nav_item';
 export { GuideSandbox } from './guide_sandbox/guide_sandbox';
+export { GuideSandboxHeader } from './guide_sandbox/guide_sandbox_header';
 export {
   GuideSandboxCodeToggleContainer as GuideSandboxCodeToggle
 } from './guide_sandbox/guide_sandbox_code_toggle_container';
