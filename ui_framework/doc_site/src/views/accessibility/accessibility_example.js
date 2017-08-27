@@ -3,7 +3,6 @@ import React from 'react';
 import { renderToHtml } from '../../services';
 
 import {
-  GuideLink,
   GuidePage,
   GuideSection,
   GuideSectionTypes,
@@ -11,6 +10,7 @@ import {
 
 import {
   KuiCode,
+  KuiLink,
 } from '../../../../components';
 
 
@@ -60,11 +60,11 @@ export default props => (
           <p>
             This class can be useful to add accessibility to older designs that are
             still in use, but it shouldn&rsquo;t be a permanent solution. See {(
-              <GuideLink
+              <KuiLink
                 href="http://webaim.org/techniques/css/invisiblecontent/"
               >
                 http://webaim.org/techniques/css/invisiblecontent/
-              </GuideLink>
+              </KuiLink>
             )} for more information.
           </p>
           <p>
