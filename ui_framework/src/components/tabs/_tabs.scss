@@ -10,7 +10,7 @@
   cursor: pointer;
   padding: $kuiSizeM $kuiSize;
   color: $kuiColorDarkShade;
-  background-color: $kuiColorEmptyShade;
+  background-color: transparent;
   transition: all $kuiAnimSpeedNormal $kuiAnimSlightResistance;
 
   &:hover:not(.kuiTab-isSelected) {

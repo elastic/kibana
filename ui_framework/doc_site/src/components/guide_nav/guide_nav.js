@@ -31,10 +31,17 @@ export class GuideNav extends Component {
     this.state = {
       search: '',
       theme: getTheme(),
+      isSideNavOpenOnMobile: false,
     };
 
     this.onSearchChange = this.onSearchChange.bind(this);
     this.onToggleTheme = this.onToggleTheme.bind(this);
+  }
+
+  toggleOpenOnMobile() {
+    this.setState({
+      isSideNavOpenOnMobile: !this.state.isSideNavOpenOnMobile,
+    });
   }
 
   onToggleTheme() {
@@ -100,7 +107,9 @@ export class GuideNav extends Component {
 
     return (
       <KuiSideNav
-        mobileTitle="Navigate within $APP_NAME"
+        mobileTitle="Navigate components"
+        toggleOpenOnMobile={this.toggleOpenOnMobile.bind(this)}
+        isOpenOnMobile={this.state.isSideNavOpenOnMobile}
       >
         <KuiFlexGroup alignItems="center" gutterSize="small">
           <KuiFlexItem grow={false}>

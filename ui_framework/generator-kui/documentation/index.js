@@ -93,30 +93,6 @@ module.exports = class extends Generator {
       );
     };
 
-    const writeSandbox = () => {
-      const fileName = config.name;
-      const componentExampleName = utils.makeComponentName(fileName, false);
-      const componentExamplePrefix = utils.lowerCaseFirstLetter(componentExampleName);
-
-      const path = DOCUMENTATION_PAGE_PATH;
-
-      const vars = config.documentationVars = {
-        componentExampleName,
-        componentExamplePrefix,
-        fileName,
-      };
-
-      const sandboxPath
-        = config.documentationPageDemoPath
-        = `${path}/${config.name}/${fileName}`;
-
-      this.fs.copyTpl(
-        this.templatePath('documentation_sandbox.js'),
-        this.destinationPath(`${sandboxPath}_sandbox.js`),
-        vars
-      );
-    };
-
     switch (this.fileType) {
       case 'documentation':
         writeDocumentationPage();
@@ -125,11 +101,6 @@ module.exports = class extends Generator {
 
       case 'demo':
         writeDocumentationPageDemo(config.demoName, config.folderName);
-        break;
-
-      case 'sandbox':
-        writeSandbox();
-        writeDocumentationPageDemo(config.name, config.name);
         break;
     }
   }
@@ -204,10 +175,6 @@ module.exports = class extends Generator {
 
       case 'demo':
         showImportDemoSnippet();
-        break;
-
-      case 'sandbox':
-        showImportRouteSnippet('Sandbox', true);
         break;
     }
     this.log('------------------------------------------------');

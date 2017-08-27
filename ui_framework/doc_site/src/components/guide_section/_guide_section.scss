@@ -3,6 +3,7 @@
     margin-top: 64px;
   }
 }
+
   .guideSection__sourceButton {
     appearance: none;
     border: none;
@@ -25,3 +26,19 @@
       transform: translateX(60px);
     }
   }
+
+.guideSection__space {
+  height: $kuiSizeL;
+}
+
+.guide__hasNoChrome {
+  .guideSection {
+    margin-top: $kuiSizeXL;
+  }
+  .guideSection__text {
+    padding: 0 $kuiSizeL;
+  }
+  .guideSection__space {
+    height: 0;
+  }
+}

@@ -108,7 +108,7 @@ export class GuideSection extends Component {
     if (this.props.demo && (this.state.selectedTabId === 'demo')) {
       return (
         <div>
-          <KuiSpacer size="l" />
+          <div className="guideSection__space" />
           {this.props.demo}
         </div>
       );
@@ -123,11 +123,13 @@ export class GuideSection extends Component {
 
     return (
       <div className="guideSection">
-        <KuiTitle>
-          <h2>{this.props.title}</h2>
-        </KuiTitle>
-        <KuiSpacer size="m" />
-        <KuiText>{this.props.text}</KuiText>
+        <div className="guideSection__text">
+          <KuiTitle>
+            <h2>{this.props.title}</h2>
+          </KuiTitle>
+          <KuiSpacer size="m" />
+          <KuiText>{this.props.text}</KuiText>
+        </div>
         <KuiSpacer size="m" />
         <KuiTabs>
           {this.renderTabs()}

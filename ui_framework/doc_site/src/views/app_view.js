@@ -113,7 +113,7 @@ export class AppView extends Component {
       );
     } else {
       return (
-        <div>
+        <div className="guide__hasNoChrome">
           <GuideSandboxHeader
             isChromeVisible={this.state.isChromeVisible}
             isNavOpen={this.state.isNavOpen}
