@@ -65,17 +65,20 @@ export default props => (
         type: GuideSectionTypes.HTML,
         code: flexGroupHtml,
       }]}
-    >
-      <GuideText>
-        <GuideCode>FlexGroup</GuideCode> is useful for setting up layouts for a <strong>single row</strong> of
-        content. By default any <GuideCode>FlexItem</GuideCode> within <GuideCode>FlexGroup</GuideCode> will
-        stretch and grow to match their siblings.
-      </GuideText>
+      text={
+        <GuideText>
+          <GuideCode>FlexGroup</GuideCode> is useful for setting up layouts for a <strong>single row</strong> of
+          content. By default any <GuideCode>FlexItem</GuideCode> within <GuideCode>FlexGroup</GuideCode> will
+          stretch and grow to match their siblings.
+        </GuideText>
+      }
+      demo={
+        <GuideDemo>
+          <div className="guideDemo__highlightGrid"><FlexGroup /></div>
+        </GuideDemo>
+      }
+    />
 
-      <GuideDemo>
-        <div className="guideDemo__highlightGrid"><FlexGroup /></div>
-      </GuideDemo>
-    </GuideSection>
 
     <GuideSection
       title="FlexGroup accepts infinite items"
@@ -86,16 +89,18 @@ export default props => (
         type: GuideSectionTypes.HTML,
         code: flexItemsHtml,
       }]}
-    >
-      <GuideText>
-        Same code as above. Notice that <GuideCode>FlexItem</GuideCode> creates equal width items
-        no matter the number of siblings. <GuideCode>FlexGroup</GuideCode> never wraps.
-      </GuideText>
-
-      <GuideDemo>
-        <div className="guideDemo__highlightGrid"><FlexItems /></div>
-      </GuideDemo>
-    </GuideSection>
+      text={
+        <GuideText>
+          Same code as above. Notice that <GuideCode>FlexItem</GuideCode> creates equal width items
+          no matter the number of siblings. <GuideCode>FlexGroup</GuideCode> never wraps.
+        </GuideText>
+      }
+      demo={
+        <GuideDemo>
+          <div className="guideDemo__highlightGrid"><FlexItems /></div>
+        </GuideDemo>
+      }
+    />
 
     <GuideSection
       title="FlexGroup can turn off stretching"
@@ -106,16 +111,18 @@ export default props => (
         type: GuideSectionTypes.HTML,
         code: flexGrowHtml,
       }]}
-    >
-      <GuideText>
-        Sometimes you do not want a <GuideCode>FlexItem</GuideCode> to grow. It
-        can be turned off on each item individually.
-      </GuideText>
-
-      <GuideDemo>
-        <div className="guideDemo__highlightGrid"><FlexGrow /></div>
-      </GuideDemo>
-    </GuideSection>
+      text={
+        <GuideText>
+          Sometimes you do not want a <GuideCode>FlexItem</GuideCode> to grow. It
+          can be turned off on each item individually.
+        </GuideText>
+      }
+      demo={
+        <GuideDemo>
+          <div className="guideDemo__highlightGrid"><FlexGrow /></div>
+        </GuideDemo>
+      }
+    />
 
     <GuideSection
       title="FlexGroup can be justified"
@@ -126,17 +133,20 @@ export default props => (
         type: GuideSectionTypes.HTML,
         code: flexJustifyHtml,
       }]}
-    >
-      <GuideText>
-        <GuideCode>FlexGroup</GuideCode>s can also use a <GuideCode>justifyContent</GuideCode> prop
-        that accepts normal flex-box paramenters.  Below are two common scenarios, where you need to
-        separate two items, or center align a single one.
-      </GuideText>
+      text={
+        <GuideText>
+          <GuideCode>FlexGroup</GuideCode>s can also use a <GuideCode>justifyContent</GuideCode> prop
+          that accepts normal flex-box paramenters.  Below are two common scenarios, where you need to
+          separate two items, or center align a single one.
+        </GuideText>
+      }
+      demo={
+        <GuideDemo>
+          <div className="guideDemo__highlightGrid"><FlexJustify /></div>
+        </GuideDemo>
+      }
+    />
 
-      <GuideDemo>
-        <div className="guideDemo__highlightGrid"><FlexJustify /></div>
-      </GuideDemo>
-    </GuideSection>
 
     <GuideSection
       title="FlexGrids are for repeatable grids"
@@ -147,18 +157,20 @@ export default props => (
         type: GuideSectionTypes.HTML,
         code: flexWrapHtml,
       }]}
-    >
-      <GuideText>
-        <GuideCode>FlexGrid</GuideCode> is a more rigid component that sets multiple, wrapping
-        rows of same width items. It only accpets a <GuideCode>columns</GuideCode> and
-        <GuideCode>gutterSize</GuideCode> prop. You can have anywhere between 2-4 columns. Any
-        more would likely break on laptop screens.
-      </GuideText>
-
-      <GuideDemo>
-        <div className="guideDemo__highlightGridWrap"><FlexWrap /></div>
-      </GuideDemo>
-    </GuideSection>
+      text={
+        <GuideText>
+          <GuideCode>FlexGrid</GuideCode> is a more rigid component that sets multiple, wrapping
+          rows of same width items. It only accpets a <GuideCode>columns</GuideCode> and
+          <GuideCode>gutterSize</GuideCode> prop. You can have anywhere between 2-4 columns. Any
+          more would likely break on laptop screens.
+        </GuideText>
+      }
+      demo={
+        <GuideDemo>
+          <div className="guideDemo__highlightGridWrap"><FlexWrap /></div>
+        </GuideDemo>
+      }
+    />
 
     <GuideSection
       title="FlexGrids and FlexGroups can nest"
@@ -169,17 +181,19 @@ export default props => (
         type: GuideSectionTypes.HTML,
         code: flexNestHtml,
       }]}
-    >
-      <GuideText>
-        <GuideCode>FlexGroup</GuideCode> and <GuideCode>FlexGrid</GuideCode> can nest
-        within themselves indefinitely. For example, here we turn off the growth on a
-        <GuideCode>FlexGroup</GuideCode>, then nest a grid inside of it.
-      </GuideText>
-
-      <GuideDemo>
-        <div className="guideDemo__highlightGrid"><FlexNest /></div>
-      </GuideDemo>
-    </GuideSection>
+      text={
+        <GuideText>
+          <GuideCode>FlexGroup</GuideCode> and <GuideCode>FlexGrid</GuideCode> can nest
+          within themselves indefinitely. For example, here we turn off the growth on a
+          <GuideCode>FlexGroup</GuideCode>, then nest a grid inside of it.
+        </GuideText>
+      }
+      demo={
+        <GuideDemo>
+          <div className="guideDemo__highlightGrid"><FlexNest /></div>
+        </GuideDemo>
+      }
+    />
 
     <GuideSection
       title="Gutter sizing can be used on either FlexGroups or FlexGrids"
@@ -190,16 +204,19 @@ export default props => (
         type: GuideSectionTypes.HTML,
         code: flexGutterHtml,
       }]}
-    >
-      <GuideText>
-        The <GuideCode>gutterSize</GuideCode> prop can be applied to either a
-        <GuideCode>FlexGroup</GuideCode> or a <GuideCode>FlexGrid</GuideCode> to adjust the
-        spacing between <GuideCode>FlexItem</GuideCode>s.
-      </GuideText>
+      text={
+        <GuideText>
+          The <GuideCode>gutterSize</GuideCode> prop can be applied to either a
+          <GuideCode>FlexGroup</GuideCode> or a <GuideCode>FlexGrid</GuideCode> to adjust the
+          spacing between <GuideCode>FlexItem</GuideCode>s.
+        </GuideText>
+      }
+      demo={
+        <GuideDemo>
+          <div className="guideDemo__highlightGrid"><FlexGutter /></div>
+        </GuideDemo>
+      }
+    />
 
-      <GuideDemo>
-        <div className="guideDemo__highlightGrid"><FlexGutter /></div>
-      </GuideDemo>
-    </GuideSection>
   </GuidePage>
 );

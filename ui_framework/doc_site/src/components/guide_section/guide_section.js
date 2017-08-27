@@ -3,12 +3,13 @@ import React, {
   PropTypes,
 } from 'react';
 
+import hljs from 'highlight.js';
+
 import {
-  KuiFlexGroup,
-  KuiFlexItem,
   KuiTitle,
   KuiSpacer,
-  KuiButton,
+  KuiTabs,
+  KuiTab,
 } from '../../../../components';
 
 import Slugify from '../../services/string/slugify';
@@ -17,6 +18,27 @@ export class GuideSection extends Component {
   constructor(props) {
     super(props);
     this.onClickSource = this.onClickSource.bind(this);
+
+    this.tabs = [{
+      id: 'demo',
+      name: 'Demo',
+    }, {
+      id: 'javascript',
+      name: 'JavaScript',
+    }, {
+      id: 'html',
+      name: 'HTML',
+    }];
+
+    this.state = {
+      selectedTabId: 'demo',
+    };
+  }
+
+  onSelectedTabChanged = id => {
+    this.setState({
+      selectedTabId: id,
+    });
   }
 
   getId() {
@@ -35,26 +57,79 @@ export class GuideSection extends Component {
     this.props.unregisterSection(this.getId());
   }
 
+  componentDidUpdate() {
+    if (this.refs.html) {
+      hljs.highlightBlock(this.refs.html);
+    }
+
+    if (this.refs.javascript) {
+      hljs.highlightBlock(this.refs.javascript);
+    }
+  }
+
+  renderTabs() {
+    return this.tabs.map((tab,index) => (
+      <KuiTab
+        onClick={() => this.onSelectedTabChanged(tab.id)}
+        isSelected={tab.id === this.state.selectedTabId}
+        key={index}
+      >
+        {tab.name}
+      </KuiTab>
+    ));
+  }
+
+  renderSection(type, code) {
+    const typeToCodeClassMap = {
+      JavaScript: 'javascript',
+      HTML: 'html',
+    };
+
+    const codeClass = typeToCodeClassMap[type];
+
+    if (code && (codeClass === this.state.selectedTabId)) {
+      return (
+        <div className="guideCodeViewer__section" key={type} ref={type}>
+          <pre className="guideCodeViewer__content">
+            <code
+              ref={codeClass}
+              className={codeClass}
+            >
+              {code}
+            </code>
+          </pre>
+        </div>
+      );
+    }
+  }
+
+  renderDemo() {
+    if (this.props.demo && (this.state.selectedTabId === 'demo')) {
+      return (
+        <div>{this.props.demo}</div>
+      );
+    }
+  }
+
   render() {
+
+    const codeSections = this.props.source.map(sourceObject => (
+      this.renderSection(sourceObject.type, sourceObject.code)
+    ));
+
     return (
       <div className="guideSection">
-        <KuiFlexGroup id={this.getId()} justifyContent="spaceBetween">
-          <KuiFlexItem grow={false}>
-            <KuiTitle>
-              <h2>{this.props.title}</h2>
-            </KuiTitle>
-          </KuiFlexItem>
-          <KuiFlexItem grow={false}>
-            <KuiButton
-              size="small"
-              onClick={this.onClickSource}
-            >
-              View code
-            </KuiButton>
-          </KuiFlexItem>
-        </KuiFlexGroup>
+        <KuiTitle>
+          <h2>{this.props.title}</h2>
+        </KuiTitle>
         <KuiSpacer size="m" />
-        {this.props.children}
+        {this.props.text}
+        <KuiSpacer size="m" />
+        <KuiTabs>
+          {this.renderTabs()}
+        </KuiTabs>
+        {this.renderDemo()}
+        {codeSections}
       </div>
     );
   }
