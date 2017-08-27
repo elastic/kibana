@@ -6,6 +6,7 @@ import React, {
 import hljs from 'highlight.js';
 
 import {
+  KuiText,
   KuiTitle,
   KuiSpacer,
   KuiTabs,
@@ -106,7 +107,10 @@ export class GuideSection extends Component {
   renderDemo() {
     if (this.props.demo && (this.state.selectedTabId === 'demo')) {
       return (
-        <div>{this.props.demo}</div>
+        <div>
+          <KuiSpacer size="l" />
+          {this.props.demo}
+        </div>
       );
     }
   }
@@ -123,7 +127,7 @@ export class GuideSection extends Component {
           <h2>{this.props.title}</h2>
         </KuiTitle>
         <KuiSpacer size="m" />
-        {this.props.text}
+        <KuiText>{this.props.text}</KuiText>
         <KuiSpacer size="m" />
         <KuiTabs>
           {this.renderTabs()}

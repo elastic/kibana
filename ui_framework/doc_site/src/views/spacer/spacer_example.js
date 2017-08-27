@@ -4,11 +4,9 @@ import { renderToHtml } from '../../services';
 
 import {
   GuideCode,
-  GuideDemo,
   GuidePage,
   GuideSection,
   GuideSectionTypes,
-  GuideText,
 } from '../../components';
 
 import {
@@ -47,17 +45,17 @@ export default props => (
         type: GuideSectionTypes.HTML,
         code: spacerHtml,
       }]}
-    >
-      <GuideText>
-        The <GuideCode>Spacer</GuideCode> component is a fancy break tag. Use
-        it to add vertical space between items.
-      </GuideText>
-
-      <GuideDemo>
+      text={
+        <p>
+          The <GuideCode>Spacer</GuideCode> component is a fancy break tag. Use
+          it to add vertical space between items. Please do not stack them.
+        </p>
+      }
+      demo={
         <div className="guideDemo__highlightSpacer">
           <Spacer />
         </div>
-      </GuideDemo>
-    </GuideSection>
+      }
+    />
   </GuidePage>
 );

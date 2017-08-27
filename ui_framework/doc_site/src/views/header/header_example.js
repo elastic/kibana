@@ -3,10 +3,8 @@ import React from 'react';
 import { renderToHtml } from '../../services';
 
 import {
-  GuideDemo,
   GuidePage,
   GuideSection,
-  GuideText,
   GuideSectionTypes,
 } from '../../components';
 
@@ -25,14 +23,14 @@ export default props => (
         type: GuideSectionTypes.HTML,
         code: headerHtml,
       }]}
-    >
-      <GuideText>
-        Global navigation, user state, and controls.
-      </GuideText>
-
-      <GuideDemo>
+      text={
+        <p>
+          The header is made up of several individual components.
+        </p>
+      }
+      demo={
         <Header />
-      </GuideDemo>
-    </GuideSection>
+      }
+    />
   </GuidePage>
 );

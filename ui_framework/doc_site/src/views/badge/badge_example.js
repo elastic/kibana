@@ -3,11 +3,9 @@ import React from 'react';
 import { renderToHtml } from '../../services';
 
 import {
-  GuideDemo,
   GuidePage,
   GuideSection,
   GuideSectionTypes,
-  GuideText,
 } from '../../components';
 
 import Badge from './badge';
@@ -29,15 +27,15 @@ export default props => (
         type: GuideSectionTypes.HTML,
         code: badgeHtml,
       }]}
-    >
-      <GuideText>
-        Badges are used to focus on important bits of information.
-      </GuideText>
-
-      <GuideDemo>
+      text={
+        <p>
+          Badges are used to focus on important bits of information.
+        </p>
+      }
+      demo={
         <Badge />
-      </GuideDemo>
-    </GuideSection>
+      }
+    />
 
     <GuideSection
       title="Badge with Icon"
@@ -48,14 +46,14 @@ export default props => (
         type: GuideSectionTypes.HTML,
         code: badgeWithIconHtml,
       }]}
-    >
-      <GuideText>
-        Badges can use icons on the left and right (default) sides.
-      </GuideText>
-
-      <GuideDemo>
+      text={
+        <p>
+          Badges can use icons on the left and right (default) sides.
+        </p>
+      }
+      demo={
         <BadgeWithIcon />
-      </GuideDemo>
-    </GuideSection>
+      }
+    />
   </GuidePage>
 );

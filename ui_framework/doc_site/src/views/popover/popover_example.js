@@ -3,11 +3,10 @@ import React from 'react';
 import { renderToHtml } from '../../services';
 
 import {
-  GuideDemo,
+  GuideCode,
   GuidePage,
   GuideSection,
   GuideSectionTypes,
-  GuideText,
 } from '../../components';
 
 import Popover from './popover';
@@ -37,15 +36,15 @@ export default props => (
         type: GuideSectionTypes.HTML,
         code: popoverHtml,
       }]}
-    >
-      <GuideText>
-        Use the Popover component to hide controls or options behind a clickable element.
-      </GuideText>
-
-      <GuideDemo>
+      text={
+        <p>
+          Use the Popover component to hide controls or options behind a clickable element.
+        </p>
+      }
+      demo={
         <Popover />
-      </GuideDemo>
-    </GuideSection>
+      }
+    />
 
     <GuideSection
       title="Popover with title"
@@ -56,15 +55,18 @@ export default props => (
         type: GuideSectionTypes.HTML,
         code: popoverWithTitleHtml,
       }]}
-    >
-      <GuideText>
-        Popovers often have need for titling.
-      </GuideText>
-
-      <GuideDemo>
+      text={
+        <p>
+          Popovers often have need for titling. This can be applied through
+          a prop or used separately as its own component
+          <GuideCode>KuiPopoverTitle</GuideCode> nested somwhere in the child
+          prop.
+        </p>
+      }
+      demo={
         <PopoverWithTitle />
-      </GuideDemo>
-    </GuideSection>
+      }
+    />
 
     <GuideSection
       title="Anchor position"
@@ -75,11 +77,16 @@ export default props => (
         type: GuideSectionTypes.HTML,
         code: popoverAnchorPositionHtml,
       }]}
-    >
-      <GuideDemo>
+      text={
+        <p>
+          The alignment and arrow on your popover can be set with
+          the <GuideCode>anchorPostion</GuideCode> prop.
+        </p>
+      }
+      demo={
         <PopoverAnchorPosition />
-      </GuideDemo>
-    </GuideSection>
+      }
+    />
 
     <GuideSection
       title="Body class name"
@@ -90,10 +97,15 @@ export default props => (
         type: GuideSectionTypes.HTML,
         code: popoverBodyClassNameHtml,
       }]}
-    >
-      <GuideDemo>
+      text={
+        <p>
+          Use the <GuideCode>bodyClassName</GuideCode> prop to pass a class to the body
+          inside a popover. Most commonly this is done to set the width and padding.
+        </p>
+      }
+      demo={
         <PopoverBodyClassName />
-      </GuideDemo>
-    </GuideSection>
+      }
+    />
   </GuidePage>
 );

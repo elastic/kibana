@@ -1,12 +1,6 @@
 .guideSection {
-  border-top: solid 1px $kuiBorderColor;
-  padding-top: 24px;
-  margin-top: 24px;
-
-  &:first-child {
-    padding-top: 0;
-    margin-top: 0;
-    border-top: none;
+  & + .guideSection {
+    margin-top: 64px;
   }
 }
   .guideSection__sourceButton {

@@ -3,11 +3,10 @@ import React from 'react';
 import { renderToHtml } from '../../services';
 
 import {
-  GuideDemo,
   GuidePage,
+  GuideCode,
   GuideSection,
   GuideSectionTypes,
-  GuideText,
 } from '../../components';
 
 import SideNav from './side_nav';
@@ -25,19 +24,15 @@ export default props => (
         type: GuideSectionTypes.HTML,
         code: sideNavHtml,
       }]}
-    >
-      <GuideText>
-        The SideNav is a responsive menu system that usually sits on the left side of a page layout.
-        It will exapand to the width of its container.
-      </GuideText>
-
-      <GuideText>
-        SideNavItems accept both button and anchor elements.
-      </GuideText>
-
-      <GuideDemo>
+      text={
+        <p>
+          <GuideCode>KuiSideNav</GuideCode> is a responsive menu system that usually sits on the left side of a page layout.
+          It will exapand to the width of its container.
+        </p>
+      }
+      demo={
         <SideNav />
-      </GuideDemo>
-    </GuideSection>
+      }
+    />
   </GuidePage>
 );

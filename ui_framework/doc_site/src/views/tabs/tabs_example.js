@@ -2,11 +2,9 @@ import React from 'react';
 import { renderToHtml } from '../../services';
 
 import {
-  GuideDemo,
   GuidePage,
   GuideSection,
   GuideSectionTypes,
-  GuideText,
   GuideCode
 } from '../../components';
 
@@ -25,15 +23,15 @@ export default props => (
         type: GuideSectionTypes.HTML,
         code: tabsHtml,
       }]}
-    >
-      <GuideText>
-        The <GuideCode>KuiTabs</GuideCode> component should have <GuideCode>KuiTab</GuideCode>
-        components as children.
-      </GuideText>
-
-      <GuideDemo>
+      text={
+        <p>
+          The <GuideCode>KuiTabs</GuideCode> component should have <GuideCode>KuiTab</GuideCode>
+          components as children.
+        </p>
+      }
+      demo={
         <Tabs />
-      </GuideDemo>
-    </GuideSection>
+      }
+    />
   </GuidePage>
 );

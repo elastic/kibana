@@ -3,8 +3,8 @@ import React from 'react';
 import { renderToHtml } from '../../services';
 
 import {
-  GuideDemo,
   GuidePage,
+  GuideCode,
   GuideSection,
   GuideSectionTypes,
 } from '../../components';
@@ -24,10 +24,15 @@ export default props => (
         type: GuideSectionTypes.HTML,
         code: linkHtml,
       }]}
-    >
-      <GuideDemo>
+      text={
+        <p>
+          <GuideCode>KuiLink</GuideCode> will apply the correct styling onto
+          links and make sure the are accessible.
+        </p>
+      }
+      demo={
         <Link />
-      </GuideDemo>
-    </GuideSection>
+      }
+    />
   </GuidePage>
 );

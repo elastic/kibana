@@ -3,10 +3,9 @@ import React from 'react';
 import { renderToHtml } from '../../services';
 
 import {
-  GuideDemo,
   GuidePage,
+  GuideCode,
   GuideSection,
-  GuideText,
   GuideSectionTypes,
 } from '../../components';
 
@@ -41,23 +40,28 @@ export default props => (
         type: GuideSectionTypes.HTML,
         code: defaultHtml,
       }]}
-    >
-      <GuideDemo>
-        <GuideText>
+      text={
+        <div>
           <p>
-            Toasts are small notes that appear in the bottom right of the screen. They should be used for
-            emphemeral, live actions (think "save complete" or "something just finished right now"). They
-            should not be used for historical actions ("your report built 30 minutes ago"). This means that
-            a user should never be greated with toasts when starting a session. Toasts should be brief and
-            avoid long paragraphs of text or titling.
+            <GuideCode>KuiToast</GuideCode> allows for small notes that appear in
+            the bottom right of the screen. They should be used for emphemeral,
+            live actions (think <strong>save complete</strong> or
+            <strong>something just finished right now</strong>).
           </p>
-          <br/>
-        </GuideText>
+          <p>They should not be used for historical actions
+            (<strong>your report built 30 minutes ago</strong>).
+            This means that a user should never be greated with toasts when
+            starting a session. Toasts should be brief and avoid long paragraphs
+            of text or titling.
+          </p>
+        </div>
+      }
+      demo={
         <div style={{ width: 320 }}>
           <Default />
         </div>
-      </GuideDemo>
-    </GuideSection>
+      }
+    />
 
     <GuideSection
       title="Info"
@@ -68,13 +72,17 @@ export default props => (
         type: GuideSectionTypes.HTML,
         code: infoHtml,
       }]}
-    >
-      <GuideDemo>
+      text={
+        <p>
+          Setting <GuideCode>type=&quot;info&quot;</GuideCode>.
+        </p>
+      }
+      demo={
         <div style={{ width: 320 }}>
           <Info />
         </div>
-      </GuideDemo>
-    </GuideSection>
+      }
+    />
 
     <GuideSection
       title="Success"
@@ -85,13 +93,17 @@ export default props => (
         type: GuideSectionTypes.HTML,
         code: successHtml,
       }]}
-    >
-      <GuideDemo>
+      text={
+        <p>
+          Setting <GuideCode>type=&quot;success&quot;</GuideCode>.
+        </p>
+      }
+      demo={
         <div style={{ width: 320 }}>
           <Success />
         </div>
-      </GuideDemo>
-    </GuideSection>
+      }
+    />
 
     <GuideSection
       title="Warning"
@@ -102,13 +114,17 @@ export default props => (
         type: GuideSectionTypes.HTML,
         code: warningHtml,
       }]}
-    >
-      <GuideDemo>
+      text={
+        <p>
+          Setting <GuideCode>type=&quot;warning&quot;</GuideCode>.
+        </p>
+      }
+      demo={
         <div style={{ width: 320 }}>
           <Warning />
         </div>
-      </GuideDemo>
-    </GuideSection>
+      }
+    />
 
     <GuideSection
       title="Danger"
@@ -119,12 +135,16 @@ export default props => (
         type: GuideSectionTypes.HTML,
         code: dangerHtml,
       }]}
-    >
-      <GuideDemo>
+      text={
+        <p>
+          Setting <GuideCode>type=&quot;danger&quot;</GuideCode>.
+        </p>
+      }
+      demo={
         <div style={{ width: 320 }}>
           <Danger />
         </div>
-      </GuideDemo>
-    </GuideSection>
+      }
+    />
   </GuidePage>
 );

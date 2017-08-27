@@ -3,11 +3,10 @@ import React from 'react';
 import { renderToHtml } from '../../services';
 
 import {
-  GuideDemo,
   GuidePage,
+  GuideCode,
   GuideSection,
   GuideSectionTypes,
-  GuideText,
 } from '../../components';
 
 import Info from './info';
@@ -37,15 +36,16 @@ export default props => (
         type: GuideSectionTypes.HTML,
         code: infoHtml,
       }]}
-    >
-      <GuideText>
-        Use this CallOut to communicate general information to the user.
-      </GuideText>
-
-      <GuideDemo>
+      text={
+        <p>
+          Use <GuideCode>KuiCallOut</GuideCode> to communicate general information to the user.
+          Note that the <GuideCode>Icon</GuideCode> prop is optional.
+        </p>
+      }
+      demo={
         <Info />
-      </GuideDemo>
-    </GuideSection>
+      }
+    />
 
     <GuideSection
       title="Success"
@@ -56,15 +56,15 @@ export default props => (
         type: GuideSectionTypes.HTML,
         code: successHtml,
       }]}
-    >
-      <GuideText>
-        Use this CallOut to notify the user of a succesfully completed action.
-      </GuideText>
-
-      <GuideDemo>
+      text={
+        <p>
+          Use this CallOut to notify the user of a succesfully completed action.
+        </p>
+      }
+      demo={
         <Success />
-      </GuideDemo>
-    </GuideSection>
+      }
+    />
 
     <GuideSection
       title="Warning"
@@ -75,15 +75,15 @@ export default props => (
         type: GuideSectionTypes.HTML,
         code: warningHtml,
       }]}
-    >
-      <GuideText>
-        Use this CallOut to warn the user against decisions they might regret.
-      </GuideText>
-
-      <GuideDemo>
+      text={
+        <p>
+          Use this CallOut to warn the user against decisions they might regret.
+        </p>
+      }
+      demo={
         <Warning />
-      </GuideDemo>
-    </GuideSection>
+      }
+    />
 
     <GuideSection
       title="Danger"
@@ -94,14 +94,14 @@ export default props => (
         type: GuideSectionTypes.HTML,
         code: dangerHtml,
       }]}
-    >
-      <GuideText>
-        Use this CallOut to let the user know something went wrong.
-      </GuideText>
-
-      <GuideDemo>
+      text={
+        <p>
+          Use this CallOut to let the user know something went wrong.
+        </p>
+      }
+      demo={
         <Danger />
-      </GuideDemo>
-    </GuideSection>
+      }
+    />
   </GuidePage>
 );

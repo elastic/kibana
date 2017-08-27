@@ -4,11 +4,9 @@ import { renderToHtml } from '../../services';
 
 import {
   GuideCode,
-  GuideDemo,
   GuidePage,
   GuideSection,
   GuideSectionTypes,
-  GuideText,
 } from '../../components';
 
 import Code from './code';
@@ -26,14 +24,14 @@ export default props => (
         type: GuideSectionTypes.HTML,
         code: codeHtml,
       }]}
-    >
-      <GuideText>
-        Description needed: how to use the <GuideCode>Code</GuideCode> component.
-      </GuideText>
-
-      <GuideDemo>
+      text={
+        <p>
+          Description needed: how to use the <GuideCode>Code</GuideCode> component.
+        </p>
+      }
+      demo={
         <Code />
-      </GuideDemo>
-    </GuideSection>
+      }
+    />
   </GuidePage>
 );

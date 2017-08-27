@@ -3,11 +3,10 @@ import React from 'react';
 import { renderToHtml } from '../../services';
 
 import {
-  GuideDemo,
+  GuideCode,
   GuidePage,
   GuideSection,
   GuideSectionTypes,
-  GuideText,
 } from '../../components';
 
 import ContextMenu from './context_menu';
@@ -25,14 +24,16 @@ export default props => (
         type: GuideSectionTypes.HTML,
         code: contextMenuHtml,
       }]}
-    >
-      <GuideText>
-        Description needed: how to use the ContextMenu component.
-      </GuideText>
-
-      <GuideDemo>
+      text={
+        <p>
+          <GuideCode>KuiContextMenu</GuideCode> is a nested menu system useful
+          for navigating complicated trees. It lives within a <GuideCode>KuiPopover</GuideCode>
+          which itself can be wrapped around any component (like a button in this example).
+        </p>
+      }
+      demo={
         <ContextMenu />
-      </GuideDemo>
-    </GuideSection>
+      }
+    />
   </GuidePage>
 );

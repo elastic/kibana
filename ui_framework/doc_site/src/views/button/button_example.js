@@ -4,11 +4,9 @@ import { renderToHtml } from '../../services';
 
 import {
   GuideCode,
-  GuideDemo,
   GuidePage,
   GuideSection,
   GuideSectionTypes,
-  GuideText,
 } from '../../components';
 
 import Button from './button';
@@ -42,16 +40,17 @@ export default props => (
         type: GuideSectionTypes.HTML,
         code: buttonHtml,
       }]}
-    >
-      <GuideText>
-        Button <GuideCode>type</GuideCode> defines the color of the button.
-        <GuideCode>fill</GuideCode> can be optionally added to add more focus to an action.
-      </GuideText>
-
-      <GuideDemo>
+      text={
+        <p>
+          Button <GuideCode>type</GuideCode> defines the color of the button.
+          <GuideCode>fill</GuideCode> can be optionally added to add more focus to an action.
+        </p>
+      }
+      demo={
         <Button />
-      </GuideDemo>
-    </GuideSection>
+      }
+    />
+
     <GuideSection
       title="Button with Icon"
       source={[{
@@ -61,17 +60,17 @@ export default props => (
         type: GuideSectionTypes.HTML,
         code: buttonWithIconHtml,
       }]}
-    >
-      <GuideText>
-        The passed icon needs to come from our list of svg icons. Can be flipped {
-          // eslint-disable-next-line react/no-unescaped-entities
-        } to the other side by passing <GuideCode>iconSide="right"</GuideCode>.
-      </GuideText>
-
-      <GuideDemo>
+      text={
+        <p>
+          The passed icon needs to come from our list of svg icons. Can be flipped {
+            // eslint-disable-next-line react/no-unescaped-entities
+          } to the other side by passing <GuideCode>iconSide="right"</GuideCode>.
+        </p>
+      }
+      demo={
         <ButtonWithIcon />
-      </GuideDemo>
-    </GuideSection>
+      }
+    />
 
     <GuideSection
       title="ButtonEmpty"
@@ -82,11 +81,17 @@ export default props => (
         type: GuideSectionTypes.HTML,
         code: buttonOptionHtml,
       }]}
-    >
-      <GuideDemo>
+      text={
+        <p>
+          <GuideCode>KuiButtonEmpty</GuideCode> is used when you want to make
+          a button look like a regular link, but still want to align it to
+          the rest of the buttons.
+        </p>
+      }
+      demo={
         <ButtonOption />
-      </GuideDemo>
-    </GuideSection>
+      }
+    />
 
     <GuideSection
       title="Flush ButtonEmpty"
@@ -97,17 +102,18 @@ export default props => (
         type: GuideSectionTypes.HTML,
         code: buttonOptionFlushHtml,
       }]}
-    >
-      <GuideText>
-        When aligning <GuideCode>KuiButtonEmpty</GuideCode> components to the left or the right,
-        you should make sure they&rsquo;re flush with the edge of their container, so that they&rsquo;re
-        horizontally-aligned with the other content in the container.
-      </GuideText>
-
-      <GuideDemo>
+      text={
+        <p>
+          When aligning <GuideCode>KuiButtonEmpty</GuideCode> components to the left or the right,
+          you should make sure they&rsquo;re flush with the edge of their container, so that they&rsquo;re
+          horizontally-aligned with the other content in the container.
+        </p>
+      }
+      demo={
         <ButtonOptionFlush />
-      </GuideDemo>
-    </GuideSection>
+      }
+    />
+
     <GuideSection
       title="Button Icon"
       source={[{
@@ -117,14 +123,14 @@ export default props => (
         type: GuideSectionTypes.HTML,
         code: buttonIconHtml,
       }]}
-    >
-      <GuideText>
-        Button icons are buttons that only contain an icon (no text).
-      </GuideText>
-
-      <GuideDemo>
+      text={
+        <p>
+          Button icons are buttons that only contain an icon (no text).
+        </p>
+      }
+      demo={
         <ButtonIcon />
-      </GuideDemo>
-    </GuideSection>
+      }
+    />
   </GuidePage>
 );

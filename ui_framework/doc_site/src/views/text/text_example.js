@@ -4,11 +4,9 @@ import { renderToHtml } from '../../services';
 
 import {
   GuideCode,
-  GuideDemo,
   GuidePage,
   GuideSection,
   GuideSectionTypes,
-  GuideText,
 } from '../../components';
 
 import Text from './text';
@@ -26,18 +24,18 @@ export default props => (
         type: GuideSectionTypes.HTML,
         code: textHtml,
       }]}
-    >
-      <GuideText>
-        <GuideCode>Text</GuideCode> is a generic catchall wrapper that will apply
+      text={
+        <p>
+          <GuideCode>KuiText</GuideCode> is a generic catchall wrapper that will apply
           our standard typography styling and spacing to naked HTML. Because of
           its forced style it <strong>only accepts raw HTML</strong> and can
           not / should not be used to wrap React components (which would break
           their styling).
-      </GuideText>
-
-      <GuideDemo>
+        </p>
+      }
+      demo={
         <Text />
-      </GuideDemo>
-    </GuideSection>
+      }
+    />
   </GuidePage>
 );
