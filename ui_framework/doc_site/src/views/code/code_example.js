@@ -3,11 +3,14 @@ import React from 'react';
 import { renderToHtml } from '../../services';
 
 import {
-  GuideCode,
   GuidePage,
   GuideSection,
   GuideSectionTypes,
 } from '../../components';
+
+import {
+  KuiCode,
+} from '../../../../components';
 
 import Code from './code';
 const codeSource = require('!!raw!./code');
@@ -26,7 +29,7 @@ export default props => (
       }]}
       text={
         <p>
-          Description needed: how to use the <GuideCode>Code</GuideCode> component.
+          Description needed: how to use the <KuiCode>Code</KuiCode> component.
         </p>
       }
       demo={

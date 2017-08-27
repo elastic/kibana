@@ -3,11 +3,14 @@ import React from 'react';
 import { renderToHtml } from '../../services';
 
 import {
-  GuideCode,
   GuidePage,
   GuideSection,
   GuideSectionTypes,
 } from '../../components';
+
+import {
+  KuiCode,
+} from '../../../../components';
 
 import Button from './button';
 const buttonSource = require('!!raw!./button');
@@ -42,8 +45,8 @@ export default props => (
       }]}
       text={
         <p>
-          Button <GuideCode>type</GuideCode> defines the color of the button.
-          <GuideCode>fill</GuideCode> can be optionally added to add more focus to an action.
+          Button <KuiCode>type</KuiCode> defines the color of the button.
+          <KuiCode>fill</KuiCode> can be optionally added to add more focus to an action.
         </p>
       }
       demo={
@@ -64,7 +67,7 @@ export default props => (
         <p>
           The passed icon needs to come from our list of svg icons. Can be flipped {
             // eslint-disable-next-line react/no-unescaped-entities
-          } to the other side by passing <GuideCode>iconSide="right"</GuideCode>.
+          } to the other side by passing <KuiCode>iconSide="right"</KuiCode>.
         </p>
       }
       demo={
@@ -83,7 +86,7 @@ export default props => (
       }]}
       text={
         <p>
-          <GuideCode>KuiButtonEmpty</GuideCode> is used when you want to make
+          <KuiCode>KuiButtonEmpty</KuiCode> is used when you want to make
           a button look like a regular link, but still want to align it to
           the rest of the buttons.
         </p>
@@ -104,7 +107,7 @@ export default props => (
       }]}
       text={
         <p>
-          When aligning <GuideCode>KuiButtonEmpty</GuideCode> components to the left or the right,
+          When aligning <KuiCode>KuiButtonEmpty</KuiCode> components to the left or the right,
           you should make sure they&rsquo;re flush with the edge of their container, so that they&rsquo;re
           horizontally-aligned with the other content in the container.
         </p>

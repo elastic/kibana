@@ -3,11 +3,14 @@ import React from 'react';
 import { renderToHtml } from '../../services';
 
 import {
-  GuideCode,
   GuidePage,
   GuideSection,
   GuideSectionTypes,
 } from '../../components';
+
+import {
+  KuiCode,
+} from '../../../../components';
 
 import Icons from './icons';
 const iconsSource = require('!!raw!./icons');
@@ -43,13 +46,13 @@ export default props => (
       text={
         <div>
           <p>
-            <GuideCode>KuiIcon</GuideCode> can build out an icon from our SVG
+            <KuiCode>KuiIcon</KuiCode> can build out an icon from our SVG
             icon library. Icons can be resized and recolored (through a
-            CSS <GuideCode>Fill</GuideCode>) decleration.
+            CSS <KuiCode>Fill</KuiCode>) decleration.
           </p>
           <p>
             New icons should be placed in the
-            <GuideCode>/icons/assets/</GuideCode> folder on a 16x16 empty canvas.
+            <KuiCode>/icons/assets/</KuiCode> folder on a 16x16 empty canvas.
             Icons should in the general set should be mono-color and the code
             itself should not contain any fill attributes. Use the SVGO plugin
             for Sketch when exporting to compress / clean your SVG of junk.
@@ -108,7 +111,7 @@ export default props => (
       }]}
       text={
         <p>
-          Use the <GuideCode>size</GuideCode> prop to automatically size your icons.
+          Use the <KuiCode>size</KuiCode> prop to automatically size your icons.
           Medium is the most common, and will output a 16x16 icons.
         </p>
       }
@@ -128,8 +131,8 @@ export default props => (
       }]}
       text={
         <p>
-          By default, this component will use a human-readable version of the <GuideCode>type</GuideCode>
-          to title the SVG. You can specify a <GuideCode>title</GuideCode> prop to override this.
+          By default, this component will use a human-readable version of the <KuiCode>type</KuiCode>
+          to title the SVG. You can specify a <KuiCode>title</KuiCode> prop to override this.
         </p>
       }
       demo={

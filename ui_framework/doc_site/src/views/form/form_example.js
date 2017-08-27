@@ -3,11 +3,14 @@ import React from 'react';
 import { renderToHtml } from '../../services';
 
 import {
-  GuideCode,
   GuidePage,
   GuideSection,
   GuideSectionTypes,
 } from '../../components';
+
+import {
+  KuiCode,
+} from '../../../../components';
 
 import FormControls from './form_controls';
 const formControlsSource = require('!!raw!./form_controls');
@@ -51,7 +54,7 @@ export default props => (
       text={
         <p>
           These are the base inputs without their labels. If you need labels
-          then use the <GuideCode>FormRow</GuideCode> wrapper as explained
+          then use the <KuiCode>FormRow</KuiCode> wrapper as explained
           in the next example.
         </p>
       }
@@ -71,7 +74,7 @@ export default props => (
       }]}
       text={
         <p>
-          Use the <GuideCode>FormRow</GuideCode> component to easily associate form components with
+          Use the <KuiCode>FormRow</KuiCode> component to easily associate form components with
           labels, help text, and error text.
         </p>
       }
@@ -91,7 +94,7 @@ export default props => (
       }]}
       text={
         <p>
-          Forms can be placed within <GuideCode>KuiPopover</GuideCode> and
+          Forms can be placed within <KuiCode>KuiPopover</KuiCode> and
           should scale accordingly.
         </p>
       }
@@ -111,9 +114,9 @@ export default props => (
       }]}
       text={
         <p>
-          Validation is achieved by applying <GuideCode>isInvalid</GuideCode>
-          and optionally <GuideCode>error</GuideCode> props
-          onto the <GuideCode>KuiForm</GuideCode> or <GuideCode>KuiFormRow</GuideCode>
+          Validation is achieved by applying <KuiCode>isInvalid</KuiCode>
+          and optionally <KuiCode>error</KuiCode> props
+          onto the <KuiCode>KuiForm</KuiCode> or <KuiCode>KuiFormRow</KuiCode>
           components. Errors are optional and are passed as an array in case you
           need to list many errors.
         </p>
@@ -133,8 +136,8 @@ export default props => (
       }]}
       text={
         <p>
-          Inline forms can be made with <GuideCode>FlexGroup</GuideCode>. Apply
-          <GuideCode>grow=false</GuideCode> on any of the items you want to collapse
+          Inline forms can be made with <KuiCode>FlexGroup</KuiCode>. Apply
+          <KuiCode>grow=false</KuiCode> on any of the items you want to collapse
           (like this button). Note that the button FormRow component also requires
           an additional prop because it&rsquo;s missing a label.
         </p>

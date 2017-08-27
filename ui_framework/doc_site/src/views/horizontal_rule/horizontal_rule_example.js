@@ -3,11 +3,14 @@ import React from 'react';
 import { renderToHtml } from '../../services';
 
 import {
-  GuideCode,
   GuidePage,
   GuideSection,
   GuideSectionTypes,
 } from '../../components';
+
+import {
+  KuiCode,
+} from '../../../../components';
 
 import HorizontalRule from './horizontal_rule';
 const horizontalRuleSource = require('!!raw!./horizontal_rule');
@@ -30,7 +33,7 @@ export default props => (
       }]}
       text={
         <p>
-          <GuideCode>HorizontalRule</GuideCode> can carry a size. By default it will be full.
+          <KuiCode>HorizontalRule</KuiCode> can carry a size. By default it will be full.
         </p>
       }
       demo={
@@ -49,7 +52,7 @@ export default props => (
       }]}
       text={
         <p>
-          <GuideCode>HorizontalRule</GuideCode> margins can also be defined. Don&rsquo;t forget that
+          <KuiCode>HorizontalRule</KuiCode> margins can also be defined. Don&rsquo;t forget that
           margins will collapse against items that proceed / follow.
         </p>
       }

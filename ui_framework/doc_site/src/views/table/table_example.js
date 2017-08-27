@@ -2,11 +2,14 @@ import React from 'react';
 import { renderToHtml } from '../../services';
 
 import {
-  GuideCode,
   GuidePage,
   GuideSection,
   GuideSectionTypes,
 } from '../../components';
+
+import {
+  KuiCode,
+} from '../../../../components';
 
 import { Table } from './table';
 const tableSource = require('!!raw!./table');
@@ -29,7 +32,7 @@ export default props => (
       }]}
       text={
         <p>
-          <GuideCode>KuiTable</GuideCode>. This example has sortable headers which respond to mouse
+          <KuiCode>KuiTable</KuiCode>. This example has sortable headers which respond to mouse
           interaction and exhibit the desired behavior, and selectable rows.
         </p>
       }
@@ -48,7 +51,7 @@ export default props => (
         code: compressedSource,
       }]}
       text={
-        <p>Use the <GuideCode>compressed</GuideCode> prop to lower the font size and padding.</p>
+        <p>Use the <KuiCode>compressed</KuiCode> prop to lower the font size and padding.</p>
       }
       demo={
         <Compressed />

@@ -3,11 +3,14 @@ import React from 'react';
 import { renderToHtml } from '../../services';
 
 import {
-  GuideCode,
   GuidePage,
   GuideSection,
   GuideSectionTypes,
 } from '../../components';
+
+import {
+  KuiCode,
+} from '../../../../components';
 
 import Title from './title';
 const titleSource = require('!!raw!./title');
@@ -26,9 +29,9 @@ export default props => (
       }]}
       text={
         <p>
-          <GuideCode>KuiTitle</GuideCode> style the page, section and content
+          <KuiCode>KuiTitle</KuiCode> style the page, section and content
           headings we use in Kibana. They can contain any markup, but usually
-          contain a heading tag of some sort. Unlike <GuideCode>KuiText</GuideCode>
+          contain a heading tag of some sort. Unlike <KuiCode>KuiText</KuiCode>
           they are margin neutral and more suitable for general layout design.
         </p>
       }

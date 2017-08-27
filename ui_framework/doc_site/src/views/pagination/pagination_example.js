@@ -3,11 +3,14 @@ import React from 'react';
 import { renderToHtml } from '../../services';
 
 import {
-  GuideCode,
   GuidePage,
   GuideSection,
   GuideSectionTypes,
 } from '../../components';
+
+import {
+  KuiCode,
+} from '../../../../components';
 
 import ManyPages from './many_pages';
 const manyPagesSource = require('!!raw!./many_pages');
@@ -73,7 +76,7 @@ export default props => (
       text={
         <p>
           Below are some common layout examples for pagination. In both cases we use
-          <GuideCode>FlexGroup</GuideCode> to set up the layout.
+          <KuiCode>FlexGroup</KuiCode> to set up the layout.
         </p>
       }
       demo={

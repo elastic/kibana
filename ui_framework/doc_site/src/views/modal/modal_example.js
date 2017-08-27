@@ -3,11 +3,14 @@ import React from 'react';
 import { renderToHtml } from '../../services';
 
 import {
-  GuideCode,
   GuidePage,
   GuideSection,
   GuideSectionTypes,
 } from '../../components';
+
+import {
+  KuiCode,
+} from '../../../../components';
 
 import { StaticConfirmModal } from './static';
 const staticConfirmModalSource = require('!!raw!./static');
@@ -31,7 +34,7 @@ export default props => (
       }]}
       text={
         <p>
-          <GuideCode>KuiConfirmModal</GuideCode> loaded staticly onto the page. More
+          <KuiCode>KuiConfirmModal</KuiCode> loaded staticly onto the page. More
           likely you want the popup version, shown in the next example.
         </p>
       }
@@ -51,7 +54,7 @@ export default props => (
       }]}
       text={
         <p>
-          A fixed <GuideCode>KuiConfirmModal</GuideCode> loaded with a mask through
+          A fixed <KuiCode>KuiConfirmModal</KuiCode> loaded with a mask through
           click events.
         </p>
       }

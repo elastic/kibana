@@ -4,10 +4,13 @@ import { renderToHtml } from '../../services';
 
 import {
   GuidePage,
-  GuideCode,
   GuideSection,
   GuideSectionTypes,
 } from '../../components';
+
+import {
+  KuiCode,
+} from '../../../../components';
 
 import SideNav from './side_nav';
 const sideNavSource = require('!!raw!./side_nav');
@@ -26,7 +29,7 @@ export default props => (
       }]}
       text={
         <p>
-          <GuideCode>KuiSideNav</GuideCode> is a responsive menu system that usually sits on the left side of a page layout.
+          <KuiCode>KuiSideNav</KuiCode> is a responsive menu system that usually sits on the left side of a page layout.
           It will exapand to the width of its container.
         </p>
       }

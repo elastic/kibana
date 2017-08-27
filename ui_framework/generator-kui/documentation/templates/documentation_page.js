@@ -3,11 +3,14 @@ import React from 'react';
 import { renderToHtml } from '../../services';
 
 import {
-  GuideCode,
   GuidePage,
   GuideSection,
   GuideSectionTypes,
 } from '../../components';
+
+import {
+  KuiCode,
+} from '../../../../components';
 
 import <%= componentExampleName %> from './<%= fileName %>';
 const <%= componentExamplePrefix %>Source = require('!!raw!./<%= fileName %>');
@@ -26,7 +29,7 @@ export default props => (
       }]}
       type={
         <p>
-          Description needed: how to use the <GuideCode><%= componentExampleName %></GuideCode> component.
+          Description needed: how to use the <KuiCode><%= componentExampleName %></KuiCode> component.
         </p>
       demo={
         <<%= componentExampleName %> />

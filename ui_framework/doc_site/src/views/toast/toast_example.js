@@ -4,10 +4,13 @@ import { renderToHtml } from '../../services';
 
 import {
   GuidePage,
-  GuideCode,
   GuideSection,
   GuideSectionTypes,
 } from '../../components';
+
+import {
+  KuiCode,
+} from '../../../../components';
 
 import Default from './default';
 const defaultSource = require('!!raw!./default');
@@ -43,7 +46,7 @@ export default props => (
       text={
         <div>
           <p>
-            <GuideCode>KuiToast</GuideCode> allows for small notes that appear in
+            <KuiCode>KuiToast</KuiCode> allows for small notes that appear in
             the bottom right of the screen. They should be used for emphemeral,
             live actions (think <strong>save complete</strong> or
             <strong>something just finished right now</strong>).
@@ -74,7 +77,7 @@ export default props => (
       }]}
       text={
         <p>
-          Setting <GuideCode>type=&quot;info&quot;</GuideCode>.
+          Setting <KuiCode>type=&quot;info&quot;</KuiCode>.
         </p>
       }
       demo={
@@ -95,7 +98,7 @@ export default props => (
       }]}
       text={
         <p>
-          Setting <GuideCode>type=&quot;success&quot;</GuideCode>.
+          Setting <KuiCode>type=&quot;success&quot;</KuiCode>.
         </p>
       }
       demo={
@@ -116,7 +119,7 @@ export default props => (
       }]}
       text={
         <p>
-          Setting <GuideCode>type=&quot;warning&quot;</GuideCode>.
+          Setting <KuiCode>type=&quot;warning&quot;</KuiCode>.
         </p>
       }
       demo={
@@ -137,7 +140,7 @@ export default props => (
       }]}
       text={
         <p>
-          Setting <GuideCode>type=&quot;danger&quot;</GuideCode>.
+          Setting <KuiCode>type=&quot;danger&quot;</KuiCode>.
         </p>
       }
       demo={

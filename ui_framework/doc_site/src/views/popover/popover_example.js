@@ -3,11 +3,14 @@ import React from 'react';
 import { renderToHtml } from '../../services';
 
 import {
-  GuideCode,
   GuidePage,
   GuideSection,
   GuideSectionTypes,
 } from '../../components';
+
+import {
+  KuiCode,
+} from '../../../../components';
 
 import Popover from './popover';
 const popoverSource = require('!!raw!./popover');
@@ -59,7 +62,7 @@ export default props => (
         <p>
           Popovers often have need for titling. This can be applied through
           a prop or used separately as its own component
-          <GuideCode>KuiPopoverTitle</GuideCode> nested somwhere in the child
+          <KuiCode>KuiPopoverTitle</KuiCode> nested somwhere in the child
           prop.
         </p>
       }
@@ -80,7 +83,7 @@ export default props => (
       text={
         <p>
           The alignment and arrow on your popover can be set with
-          the <GuideCode>anchorPostion</GuideCode> prop.
+          the <KuiCode>anchorPostion</KuiCode> prop.
         </p>
       }
       demo={
@@ -99,7 +102,7 @@ export default props => (
       }]}
       text={
         <p>
-          Use the <GuideCode>bodyClassName</GuideCode> prop to pass a class to the body
+          Use the <KuiCode>bodyClassName</KuiCode> prop to pass a class to the body
           inside a popover. Most commonly this is done to set the width and padding.
         </p>
       }

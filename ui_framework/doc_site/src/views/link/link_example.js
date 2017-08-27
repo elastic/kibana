@@ -4,10 +4,13 @@ import { renderToHtml } from '../../services';
 
 import {
   GuidePage,
-  GuideCode,
   GuideSection,
   GuideSectionTypes,
 } from '../../components';
+
+import {
+  KuiCode,
+} from '../../../../components';
 
 import Link from './link';
 const linkSource = require('!!raw!./link');
@@ -26,7 +29,7 @@ export default props => (
       }]}
       text={
         <p>
-          <GuideCode>KuiLink</GuideCode> will apply the correct styling onto
+          <KuiCode>KuiLink</KuiCode> will apply the correct styling onto
           links and make sure the are accessible.
         </p>
       }

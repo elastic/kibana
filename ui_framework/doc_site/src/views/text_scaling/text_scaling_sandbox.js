@@ -6,8 +6,11 @@ import {
   GuidePage,
   GuideSection,
   GuideSectionTypes,
-  GuideCode,
 } from '../../components';
+
+import {
+  KuiCode,
+} from '../../../../components';
 
 import TextScaling from './text_scaling';
 const textScalingSource = require('!!raw!./text_scaling');
@@ -26,7 +29,7 @@ export default props => (
       }]}
       text={
         <p>
-          This demo shows off <GuideCode>KuiText</GuideCode> scaling in both
+          This demo shows off <KuiCode>KuiText</KuiCode> scaling in both
           the default and small sizes. The goal is that the bottom of
           every text line should hit one of the 8px grid lines. This is
           for development only. Do not copy this code into a production environment.

@@ -5,8 +5,11 @@ import {
   GuidePage,
   GuideSection,
   GuideSectionTypes,
-  GuideCode
 } from '../../components';
+
+import {
+  KuiCode,
+} from '../../../../components';
 
 import Tabs from './tabs';
 const tabsSource = require('!!raw!./tabs');
@@ -25,7 +28,7 @@ export default props => (
       }]}
       text={
         <p>
-          The <GuideCode>KuiTabs</GuideCode> component should have <GuideCode>KuiTab</GuideCode>
+          The <KuiCode>KuiTabs</KuiCode> component should have <KuiCode>KuiTab</KuiCode>
           components as children.
         </p>
       }

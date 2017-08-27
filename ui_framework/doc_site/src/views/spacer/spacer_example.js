@@ -3,7 +3,6 @@ import React from 'react';
 import { renderToHtml } from '../../services';
 
 import {
-  GuideCode,
   GuidePage,
   GuideSection,
   GuideSectionTypes,
@@ -12,6 +11,7 @@ import {
 import {
   KuiCallOut,
   KuiText,
+  KuiCode,
   KuiSpacer,
 } from '../../../../components';
 
@@ -47,7 +47,7 @@ export default props => (
       }]}
       text={
         <p>
-          The <GuideCode>Spacer</GuideCode> component is a fancy break tag. Use
+          The <KuiCode>Spacer</KuiCode> component is a fancy break tag. Use
           it to add vertical space between items. Please do not stack them.
         </p>
       }

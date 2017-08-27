@@ -4,10 +4,13 @@ import { renderToHtml } from '../../services';
 
 import {
   GuidePage,
-  GuideCode,
   GuideSection,
   GuideSectionTypes,
 } from '../../components';
+
+import {
+  KuiCode,
+} from '../../../../components';
 
 import Info from './info';
 const infoSource = require('!!raw!./info');
@@ -38,8 +41,8 @@ export default props => (
       }]}
       text={
         <p>
-          Use <GuideCode>KuiCallOut</GuideCode> to communicate general information to the user.
-          Note that the <GuideCode>Icon</GuideCode> prop is optional.
+          Use <KuiCode>KuiCallOut</KuiCode> to communicate general information to the user.
+          Note that the <KuiCode>Icon</KuiCode> prop is optional.
         </p>
       }
       demo={

@@ -3,7 +3,6 @@ import React from 'react';
 import { renderToHtml } from '../../services';
 
 import {
-  GuideCode,
   GuidePage,
   GuideSection,
   GuideSectionTypes,
@@ -12,6 +11,7 @@ import {
 import {
   KuiCallOut,
   KuiSpacer,
+  KuiCode,
 } from '../../../../components';
 
 import FlexGroup from './flex_group';
@@ -49,7 +49,7 @@ export default props => (
       type="warning"
     >
       <p>
-        Padding and background-color are added to all the <GuideCode>FlexItem</GuideCode> components on this
+        Padding and background-color are added to all the <KuiCode>FlexItem</KuiCode> components on this
         documentation page for illustrative purposes only. You will need to add padding through additional
         components or classes if you need it.
       </p>
@@ -68,8 +68,8 @@ export default props => (
       }]}
       text={
         <p>
-          <GuideCode>FlexGroup</GuideCode> is useful for setting up layouts for a <strong>single row</strong> of
-          content. By default any <GuideCode>FlexItem</GuideCode> within <GuideCode>FlexGroup</GuideCode> will
+          <KuiCode>FlexGroup</KuiCode> is useful for setting up layouts for a <strong>single row</strong> of
+          content. By default any <KuiCode>FlexItem</KuiCode> within <KuiCode>FlexGroup</KuiCode> will
           stretch and grow to match their siblings.
         </p>
       }
@@ -90,8 +90,8 @@ export default props => (
       }]}
       text={
         <p>
-          Same code as above. Notice that <GuideCode>FlexItem</GuideCode> creates equal width items
-          no matter the number of siblings. <GuideCode>FlexGroup</GuideCode> never wraps.
+          Same code as above. Notice that <KuiCode>FlexItem</KuiCode> creates equal width items
+          no matter the number of siblings. <KuiCode>FlexGroup</KuiCode> never wraps.
         </p>
       }
       demo={
@@ -110,7 +110,7 @@ export default props => (
       }]}
       text={
         <p>
-          Sometimes you do not want a <GuideCode>FlexItem</GuideCode> to grow. It
+          Sometimes you do not want a <KuiCode>FlexItem</KuiCode> to grow. It
           can be turned off on each item individually.
         </p>
       }
@@ -130,7 +130,7 @@ export default props => (
       }]}
       text={
         <p>
-          <GuideCode>FlexGroup</GuideCode>s can also use a <GuideCode>justifyContent</GuideCode> prop
+          <KuiCode>FlexGroup</KuiCode>s can also use a <KuiCode>justifyContent</KuiCode> prop
           that accepts normal flex-box paramenters.  Below are two common scenarios, where you need to
           separate two items, or center align a single one.
         </p>
@@ -152,9 +152,9 @@ export default props => (
       }]}
       text={
         <p>
-          <GuideCode>FlexGrid</GuideCode> is a more rigid component that sets multiple, wrapping
-          rows of same width items. It only accpets a <GuideCode>columns</GuideCode> and
-          <GuideCode>gutterSize</GuideCode> prop. You can have anywhere between 2-4 columns. Any
+          <KuiCode>FlexGrid</KuiCode> is a more rigid component that sets multiple, wrapping
+          rows of same width items. It only accpets a <KuiCode>columns</KuiCode> and
+          <KuiCode>gutterSize</KuiCode> prop. You can have anywhere between 2-4 columns. Any
           more would likely break on laptop screens.
         </p>
       }
@@ -174,9 +174,9 @@ export default props => (
       }]}
       text={
         <p>
-          <GuideCode>FlexGroup</GuideCode> and <GuideCode>FlexGrid</GuideCode> can nest
+          <KuiCode>FlexGroup</KuiCode> and <KuiCode>FlexGrid</KuiCode> can nest
           within themselves indefinitely. For example, here we turn off the growth on a
-          <GuideCode>FlexGroup</GuideCode>, then nest a grid inside of it.
+          <KuiCode>FlexGroup</KuiCode>, then nest a grid inside of it.
         </p>
       }
       demo={
@@ -195,9 +195,9 @@ export default props => (
       }]}
       text={
         <p>
-          The <GuideCode>gutterSize</GuideCode> prop can be applied to either a
-          <GuideCode>FlexGroup</GuideCode> or a <GuideCode>FlexGrid</GuideCode> to adjust the
-          spacing between <GuideCode>FlexItem</GuideCode>s.
+          The <KuiCode>gutterSize</KuiCode> prop can be applied to either a
+          <KuiCode>FlexGroup</KuiCode> or a <KuiCode>FlexGrid</KuiCode> to adjust the
+          spacing between <KuiCode>FlexItem</KuiCode>s.
         </p>
       }
       demo={

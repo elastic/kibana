@@ -3,11 +3,14 @@ import React from 'react';
 import { renderToHtml } from '../../services';
 
 import {
-  GuideCode,
   GuidePage,
   GuideSection,
   GuideSectionTypes,
 } from '../../components';
+
+import {
+  KuiCode,
+} from '../../../../components';
 
 import KeyPadMenu from './key_pad_menu';
 const keyPadMenuSource = require('!!raw!./key_pad_menu');
@@ -51,7 +54,7 @@ export default props => (
       text={
         <p>
           The KeyPadMenuItem component is a link by default, but you can swap it out for a
-          KeyPadMenuItemButton if you want <GuideCode>onClick</GuideCode> behavior.
+          KeyPadMenuItemButton if you want <KuiCode>onClick</KuiCode> behavior.
         </p>
       }
       demo={
