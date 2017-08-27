@@ -3,9 +3,8 @@ import React from 'react';
 import { renderToHtml } from '../../services';
 
 import {
-  GuideDemo,
-  GuideSandbox,
-  GuideSandboxCodeToggle,
+  GuidePage,
+  GuideSection,
   GuideSectionTypes,
 } from '../../components';
 
@@ -14,12 +13,8 @@ const textScalingSource = require('!!raw!./text_scaling');
 const textScalingHtml = renderToHtml(TextScaling);
 
 export default props => (
-  <GuideSandbox>
-    <GuideDemo isFullScreen={true}>
-      <TextScaling />
-    </GuideDemo>
-
-    <GuideSandboxCodeToggle
+  <GuidePage title={props.route.name}>
+    <GuideSection
       title={props.route.name}
       source={[{
         type: GuideSectionTypes.JS,
@@ -28,6 +23,17 @@ export default props => (
         type: GuideSectionTypes.HTML,
         code: textScalingHtml,
       }]}
+      text={
+        <p>
+          This demo shows off text scaling in both the default and small sizes.
+          The goal is that the bottom of every text line should hit one of
+          the 8px grid lines. This is for development only. Do not copy
+          this code into a production environment.
+        </p>
+      }
+      demo={
+        <TextScaling />
+      }
     />
-  </GuideSandbox>
+  </GuidePage>
 );

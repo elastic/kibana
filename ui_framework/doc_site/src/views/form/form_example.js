@@ -25,6 +25,18 @@ import FormPopover from './form_popover';
 const formPopoverSource = require('!!raw!./form_popover');
 const formPopoverHtml = renderToHtml(FormPopover);
 
+import InlineForm from './inline_form';
+const inlineFormSource = require('!!raw!./inline_form');
+const inlineFormHtml = renderToHtml(InlineForm);
+
+import InlineFormSizing from './inline_form_sizing';
+const inlineFormSizingSource = require('!!raw!./inline_form_sizing');
+const inlineFormSizingHtml = renderToHtml(InlineForm);
+
+import InlineFormPopover from './inline_form_popover';
+const inlineFormPopoverSource = require('!!raw!./inline_form_popover');
+const inlineFormPopoverHtml = renderToHtml(InlineFormPopover);
+
 export default props => (
   <GuidePage title={props.route.name}>
     <GuideSection
@@ -108,6 +120,66 @@ export default props => (
       }
       demo={
         <Validation />
+      }
+    />
+    <GuideSection
+      title="Inline form"
+      source={[{
+        type: GuideSectionTypes.JS,
+        code: inlineFormSource,
+      }, {
+        type: GuideSectionTypes.HTML,
+        code: inlineFormHtml,
+      }]}
+      text={
+        <p>
+          Inline forms can be made with <GuideCode>FlexGroup</GuideCode>. Apply
+          <GuideCode>grow=false</GuideCode> on any of the items you want to collapse
+          (like this button). Note that the button FormRow component also requires
+          an additional prop because it&rsquo;s missing a label.
+        </p>
+      }
+      demo={
+        <InlineForm />
+      }
+    />
+    <GuideSection
+      title="Apply width to FlexItem to size individual controls"
+      source={[{
+        type: GuideSectionTypes.JS,
+        code: inlineFormSizingSource,
+      }, {
+        type: GuideSectionTypes.HTML,
+        code: inlineFormSizingHtml,
+      }]}
+      text={
+        <p>
+          When you need to make a field smaller, always apply the width to the
+          FlexItem, not the input. The input inside will resize as needed.
+        </p>
+      }
+      demo={
+        <InlineFormSizing />
+      }
+    />
+    <GuideSection
+      title="Inline forms can live in popovers, or any container"
+      source={[{
+        type: GuideSectionTypes.JS,
+        code: inlineFormPopoverSource,
+      }, {
+        type: GuideSectionTypes.HTML,
+        code: inlineFormPopoverHtml,
+      }]}
+      text={
+        <p>
+          Because forms auto-size to their wrapping elements, it means you
+          can do fun things with them like stuff them in popovers and
+          they&rsquo;ll still work perfectly.
+        </p>
+      }
+      demo={
+        <InlineFormPopover />
       }
     />
   </GuidePage>

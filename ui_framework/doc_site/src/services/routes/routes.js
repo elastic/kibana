@@ -24,9 +24,6 @@ import FlexExample
 import FormExample
   from '../../views/form/form_example';
 
-import InlineFormsSandbox
-  from '../../views/inline_forms/inline_forms_sandbox';
-
 import IconExample
   from '../../views/icon/icon_example';
 
@@ -190,10 +187,6 @@ const components = [{
 const sandboxes = [{
   name: 'Kibana',
   component: KibanaSandbox,
-  hasReact: true,
-}, {
-  name: 'InlineFormsSandbox',
-  component: InlineFormsSandbox,
   hasReact: true,
 }, {
   name: 'TextScalingSandbox',
