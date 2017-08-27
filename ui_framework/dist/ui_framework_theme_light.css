@@ -3054,6 +3054,11 @@ table {
   font-size: 16px;
   font-size: 1rem;
   line-height: 1.5; }
+  .kuiText a {
+    color: #0079a5; }
+    .kuiText a:hover {
+      color: #005472;
+      text-decoration: underline; }
   .kuiText img {
     display: block;
     width: 100%; }

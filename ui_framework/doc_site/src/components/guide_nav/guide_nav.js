@@ -86,13 +86,12 @@ export class GuideNav extends Component {
   }
 
   render() {
-
     const componentNavItems =
       this.props.components.filter(item => (
         item.name.toLowerCase().indexOf(this.state.search.toLowerCase()) !== -1
       )).map((item, index) => {
         return (
-          <KuiSideNavItem key={`componentNavItem-${index}`}>
+          <KuiSideNavItem key={`componentNavItem-${index}`} isSelected={this.props.routes[1].name === item.name}>
             <Link
               className="guideNavItem__link"
               to={item.path}
