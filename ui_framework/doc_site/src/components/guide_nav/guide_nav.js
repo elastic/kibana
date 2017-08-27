@@ -88,7 +88,7 @@ export class GuideNav extends Component {
           <KuiFlexItem grow={false}>
             <Link
               to="/"
-              className="guideNav__logo"
+              className="guideLogo"
               onClick={this.props.onShowChrome}
             >
               <KuiIcon type="kibanaLogo" size="large" />
