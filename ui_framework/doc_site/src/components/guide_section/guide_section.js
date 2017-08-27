@@ -90,8 +90,8 @@ export class GuideSection extends Component {
 
     if (code && (codeClass === this.state.selectedTabId)) {
       return (
-        <div className="KuiCodeViewer__section" key={type} ref={type}>
-          <pre className="KuiCodeViewer__content">
+        <div key={type} ref={type}>
+          <pre>
             <code
               ref={codeClass}
               className={codeClass}
