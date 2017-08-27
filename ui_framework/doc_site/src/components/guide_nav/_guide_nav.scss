@@ -28,6 +28,24 @@
   }
 }
 
+  .guideNav__logo {
+    width: 40px;
+    height: 40px;
+    background: $kuiColorEmptyShade;
+    border-radius: 40px;
+    margin: auto;
+    border: $kuiBorderThin;
+    display: flex;
+    align-items: center;
+    justify-content: space-around;
+    transition: all $kuiAnimSpeedNormal $kuiAnimSlightResistance;
+
+    &:hover {
+      background: transparentize($kuiColorFullShade, .3);
+      border-color: transparentize($kuiColorFullShade, .2);
+    }
+  }
+
   .guideNav__showButton {
     position: fixed;
     z-index: 9999;

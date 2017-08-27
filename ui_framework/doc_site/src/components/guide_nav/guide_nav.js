@@ -14,12 +14,13 @@ import {
 
 import {
   KuiSideNav,
+  KuiIcon,
   KuiSideNavItem,
   KuiSideNavTitle,
   KuiFieldSearch,
   KuiFlexGroup,
   KuiFlexItem,
-  KuiTitle,
+  KuiText,
   KuiSpacer,
 } from '../../../../components';
 
@@ -77,20 +78,9 @@ export class GuideNav extends Component {
       );
     }
 
-    const themeButton = (
-      <button
-        className="guideLink"
-        style={{ marginRight: '10px' }}
-        onClick={this.onToggleTheme}
-      >
-        {this.state.theme === 'light' ? 'Dark theme' : 'Light theme'}
-      </button>
-    );
-
     return (
       <div className="guideNavPaginationButtons">
         {hideChromeButton}
-        {themeButton}
       </div>
     );
   }
@@ -135,20 +125,26 @@ export class GuideNav extends Component {
       <KuiSideNav
         mobileTitle="Navigate within $APP_NAME"
       >
-        <Link
-          className="guideNav__title"
-          to="/"
-          onClick={this.props.onClickNavItem}
-        >
-          <KuiFlexGroup justifyContent="spaceBetween" alignItems="center">
-            <KuiFlexItem grow={false}>
-              <KuiTitle><h1>KUI</h1></KuiTitle>
-            </KuiFlexItem>
-            <KuiFlexItem grow={false}>
-              <span className="guideNav__version">{this.props.version}</span>
-            </KuiFlexItem>
-          </KuiFlexGroup>
-        </Link>
+        <KuiFlexGroup alignItems="center" gutterSize="small">
+          <KuiFlexItem grow={false}>
+            <button className="guideNav__logo" onClick={this.onToggleTheme}>
+              <KuiIcon type="kibanaLogo" size="large" />
+            </button>
+          </KuiFlexItem>
+          <KuiFlexItem grow={false}>
+            <KuiText size="small">
+              <Link
+                to="/"
+                onClick={this.props.onClickNavItem}
+                className="kuiLink"
+              >
+                {this.props.version}
+              </Link>
+            </KuiText>
+          </KuiFlexItem>
+        </KuiFlexGroup>
+
+        <KuiSpacer size="m" />
 
         <KuiFieldSearch
           placeholder="Search..."

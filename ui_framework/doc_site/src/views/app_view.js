@@ -3,14 +3,11 @@ import React, {
   PropTypes,
 } from 'react';
 
-import classNames from 'classnames';
-
 import {
   Routes,
 } from '../services';
 
 import {
-  GuideCodeViewer,
   GuideNav,
 } from '../components';
 
@@ -31,7 +28,8 @@ export class AppView extends Component {
 
     this.state = {
       isNavOpen: false,
-      isChromeVisible: !props.isSandbox,
+      isChromeVisible: true,
+      // isChromeVisible: props.isSandbox,
     };
 
     this.onClickNavItem = this.onClickNavItem.bind(this);
@@ -81,15 +79,10 @@ export class AppView extends Component {
     }
   }
 
-  render() {
-    const contentClasses = classNames({
-      'is-code-viewer-open': this.props.isCodeViewerOpen,
-      'is-chrome-hidden': !this.state.isChromeVisible,
-    });
+  renderChrome() {
 
-    return (
-      <div className="guide">
-
+    if (this.state.isChromeVisible) {
+      return (
         <KuiPage>
           <KuiPageBody>
             <KuiPageSideBar>
@@ -111,19 +104,26 @@ export class AppView extends Component {
             </KuiPageSideBar>
             <KuiPageContent>
               <KuiPageContentBody>
-                <div className={contentClasses}>
-                  {this.props.children}
-                </div>
+                {this.props.children}
               </KuiPageContentBody>
             </KuiPageContent>
           </KuiPageBody>
         </KuiPage>
-        <GuideCodeViewer
-          isOpen={this.props.isCodeViewerOpen}
-          onClose={this.onCloseCodeViewer}
-          title={this.props.title}
-          source={this.props.source}
-        />
+      );
+    } else {
+      return (
+        <div>
+          {this.props.children}
+        </div>
+      );
+    }
+  }
+
+  render() {
+
+    return (
+      <div className="guide">
+        {this.renderChrome()}
       </div>
     );
   }
