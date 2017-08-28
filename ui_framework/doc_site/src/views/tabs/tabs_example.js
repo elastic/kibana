@@ -2,13 +2,14 @@ import React from 'react';
 import { renderToHtml } from '../../services';
 
 import {
-  GuideDemo,
   GuidePage,
   GuideSection,
   GuideSectionTypes,
-  GuideText,
-  GuideCode
 } from '../../components';
+
+import {
+  KuiCode,
+} from '../../../../components';
 
 import Tabs from './tabs';
 const tabsSource = require('!!raw!./tabs');
@@ -25,15 +26,15 @@ export default props => (
         type: GuideSectionTypes.HTML,
         code: tabsHtml,
       }]}
-    >
-      <GuideText>
-        The <GuideCode>KuiTabs</GuideCode> component should have <GuideCode>KuiTab</GuideCode>
-        components as children.
-      </GuideText>
-
-      <GuideDemo>
+      text={
+        <p>
+          The <KuiCode>KuiTabs</KuiCode> component should have <KuiCode>KuiTab</KuiCode>
+          components as children.
+        </p>
+      }
+      demo={
         <Tabs />
-      </GuideDemo>
-    </GuideSection>
+      }
+    />
   </GuidePage>
 );

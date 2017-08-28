@@ -1,19 +1,24 @@
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 
-import classNames from 'classnames';
-
 import {
   Routes,
+  getTheme,
+  applyTheme,
 } from '../services';
 
 import {
-  GuideCodeViewer,
+  GuideHeader,
   GuideNav,
 } from '../components';
 
-// Inject version into header.
-const pkg = require('../../../../package.json');
+import {
+  KuiPage,
+  KuiPageBody,
+  KuiPageContent,
+  KuiPageContentBody,
+  KuiPageSideBar,
+} from '../../../components';
 
 export class AppView extends Component {
   constructor(props) {
@@ -21,36 +26,30 @@ export class AppView extends Component {
 
     this.state = {
       isNavOpen: false,
-      isChromeVisible: !props.isSandbox,
+      isChromeVisible: true,
+      theme: getTheme(),
     };
 
-    this.onClickNavItem = this.onClickNavItem.bind(this);
-    this.onToggleNav = this.onToggleNav.bind(this);
-    this.onCloseCodeViewer = this.onCloseCodeViewer.bind(this);
     this.onHideChrome = this.onHideChrome.bind(this);
     this.onShowChrome = this.onShowChrome.bind(this);
+    this.onToggleTheme = this.onToggleTheme.bind(this);
   }
 
-  onClickNavItem() {
+  onToggleTheme() {
+    if (getTheme() === 'light') {
+      applyTheme('dark');
+    } else {
+      applyTheme('light');
+    }
+
     this.setState({
-      isNavOpen: false,
-    });
-  }
-
-  onCloseCodeViewer() {
-    this.props.closeCodeViewer();
-  }
-
-  onToggleNav() {
-    this.setState({
-      isNavOpen: !this.state.isNavOpen,
+      theme: getTheme(),
     });
   }
 
   onHideChrome() {
     this.setState({
       isChromeVisible: false,
-      isNavOpen: false,
     });
 
     this.props.closeCodeViewer();
@@ -62,49 +61,58 @@ export class AppView extends Component {
     });
   }
 
-  componentWillReceiveProps(nextProps) {
-    // Only force the chrome to be hidden if we're navigating from a non-sandbox to a sandbox.
-    if (!this.props.isSandbox && nextProps.isSandbox) {
-      this.setState({
-        isChromeVisible: false,
-      });
+  renderChrome() {
+
+    if (this.state.isChromeVisible) {
+      return (
+        <KuiPage>
+          <KuiPageBody>
+            <KuiPageSideBar>
+              <GuideNav
+                isChromeVisible={this.state.isChromeVisible}
+                isNavOpen={this.state.isNavOpen}
+                isSandbox={this.props.isSandbox}
+                onHideChrome={this.onHideChrome}
+                onShowChrome={this.onShowChrome}
+                onToggleNav={this.onToggleNav}
+                onToggleTheme={this.onToggleTheme}
+                routes={this.props.routes}
+                components={Routes.components}
+                sandboxes={Routes.sandboxes}
+              />
+            </KuiPageSideBar>
+            <KuiPageContent>
+              <KuiPageContentBody>
+                {this.props.children}
+              </KuiPageContentBody>
+            </KuiPageContent>
+          </KuiPageBody>
+        </KuiPage>
+      );
+    } else {
+      return (
+        <div className="guide__hasNoChrome">
+          <GuideHeader
+            isChromeVisible={this.state.isChromeVisible}
+            isNavOpen={this.state.isNavOpen}
+            onHideChrome={this.onHideChrome}
+            onShowChrome={this.onShowChrome}
+            onToggleNav={this.onToggleNav}
+            onToggleTheme={this.onToggleTheme}
+            routes={this.props.routes}
+            components={Routes.components}
+          />
+          {this.props.children}
+        </div>
+      );
     }
   }
 
   render() {
-    const contentClasses = classNames('guideContent', {
-      'is-code-viewer-open': this.props.isCodeViewerOpen,
-      'is-chrome-hidden': !this.state.isChromeVisible,
-    });
 
     return (
       <div className="guide">
-        <GuideNav
-          isChromeVisible={this.state.isChromeVisible}
-          isNavOpen={this.state.isNavOpen}
-          isSandbox={this.props.isSandbox}
-          onHideChrome={this.onHideChrome}
-          onShowChrome={this.onShowChrome}
-          onToggleNav={this.onToggleNav}
-          onClickNavItem={this.onClickNavItem}
-          version={pkg.version}
-          routes={this.props.routes}
-          getNextRoute={Routes.getNextRoute}
-          getPreviousRoute={Routes.getPreviousRoute}
-          components={Routes.components}
-          sandboxes={Routes.sandboxes}
-        />
-
-        <div className={contentClasses}>
-          {this.props.children}
-        </div>
-
-        <GuideCodeViewer
-          isOpen={this.props.isCodeViewerOpen}
-          onClose={this.onCloseCodeViewer}
-          title={this.props.title}
-          source={this.props.source}
-        />
+        {this.renderChrome()}
       </div>
     );
   }
@@ -113,10 +121,6 @@ export class AppView extends Component {
 AppView.propTypes = {
   children: PropTypes.any,
   routes: PropTypes.array.isRequired,
-  isSandbox: PropTypes.bool,
-  openCodeViewer: PropTypes.func,
-  closeCodeViewer: PropTypes.func,
-  isCodeViewerOpen: PropTypes.bool,
   registerSection: PropTypes.func,
   unregisterSection: PropTypes.func,
   sections: PropTypes.array,

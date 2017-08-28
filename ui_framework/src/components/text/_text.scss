@@ -2,6 +2,15 @@
   @include kuiText;
   @include kuiFontSizeM;
 
+  a {
+    color: $kuiLinkColor;
+
+    &:hover {
+      color: darken($kuiLinkColor, 10%);
+      text-decoration: underline;
+    }
+  }
+
   img {
     display: block;
     width: 100%;

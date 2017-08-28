@@ -5,41 +5,33 @@ import {
   Link,
 } from 'react-router';
 
-import classNames from 'classnames';
-
 import {
-  getTheme,
-  applyTheme,
-} from '../../services';
+  KuiSideNav,
+  KuiIcon,
+  KuiSideNavItem,
+  KuiSideNavTitle,
+  KuiFieldSearch,
+  KuiFlexGroup,
+  KuiFlexItem,
+  KuiText,
+  KuiSpacer,
+} from '../../../../components';
 
 export class GuideNav extends Component {
   constructor(props) {
     super(props);
 
-    const currentRoute = props.routes[1];
-    const nextRoute = this.props.getNextRoute(currentRoute.name);
-    const previousRoute = this.props.getPreviousRoute(currentRoute.name);
-
     this.state = {
       search: '',
-      nextRoute,
-      previousRoute,
-      theme: getTheme(),
+      isSideNavOpenOnMobile: false,
     };
 
     this.onSearchChange = this.onSearchChange.bind(this);
-    this.onToggleTheme = this.onToggleTheme.bind(this);
   }
 
-  onToggleTheme() {
-    if (getTheme() === 'light') {
-      applyTheme('dark');
-    } else {
-      applyTheme('light');
-    }
-
+  toggleOpenOnMobile() {
     this.setState({
-      theme: getTheme(),
+      isSideNavOpenOnMobile: !this.state.isSideNavOpenOnMobile,
     });
   }
 
@@ -49,116 +41,21 @@ export class GuideNav extends Component {
     });
   }
 
-  componentWillReceiveProps(nextProps) {
-    const currentRoute = nextProps.routes[1];
-    const nextRoute = this.props.getNextRoute(currentRoute.name);
-    const previousRoute = this.props.getPreviousRoute(currentRoute.name);
-
-    this.setState({
-      nextRoute,
-      previousRoute,
-    });
-  }
-
-  renderNoItems(name) {
-    return (
-      <p className="guideNavNoItems">
-        { `No ${name} match your search` }
-      </p>
-    );
-  }
-
-  renderPagination() {
-    let hideChromeButton;
-
-    if (this.props.isSandbox) {
-      hideChromeButton = (
-        <button
-          className="guideLink"
-          style={{ marginRight: '10px' }}
-          onClick={this.props.onHideChrome}
-        >
-          Hide chrome
-        </button>
-      );
-    }
-
-    const themeButton = (
-      <button
-        className="guideLink"
-        style={{ marginRight: '10px' }}
-        onClick={this.onToggleTheme}
-      >
-        {this.state.theme === 'light' ? 'Dark theme' : 'Light theme'}
-      </button>
-    );
-
-    const previousClasses = classNames('guideNavPaginationButton', {
-      'guideNavPaginationButton-isDisabled': !this.state.previousRoute,
-    });
-
-    const previousButton = (
-      <Link
-        className={previousClasses}
-        to={this.state.previousRoute ? this.state.previousRoute.path : ''}
-      >
-        <span className="fa fa-angle-left" />
-      </Link>
-    );
-
-    const nextClasses = classNames('guideNavPaginationButton', {
-      'guideNavPaginationButton-isDisabled': !this.state.nextRoute,
-    });
-
-    const nextButton = (
-      <Link
-        className={nextClasses}
-        to={this.state.nextRoute ? this.state.nextRoute.path : ''}
-      >
-        <span className="fa fa-angle-right" />
-      </Link>
-    );
-
-    return (
-      <div className="guideNavPaginationButtons">
-        {hideChromeButton}
-        {themeButton}
-        {previousButton}
-        {nextButton}
-      </div>
-    );
-  }
-
   render() {
-    const classes = classNames('guideNav', {
-      'is-guide-nav-open': this.props.isNavOpen,
-      'is-chrome-hidden': !this.props.isChromeVisible,
-    });
-
-    const buttonClasses = classNames('guideNav__menu fa fa-bars', {
-      'is-menu-button-pinned': this.props.isNavOpen,
-    });
-
     const componentNavItems =
       this.props.components.filter(item => (
         item.name.toLowerCase().indexOf(this.state.search.toLowerCase()) !== -1
       )).map((item, index) => {
-        const icon =
-          item.hasReact
-          ? <div className="guideNavItem__reactLogo" />
-          : undefined;
         return (
-          <div key={`componentNavItem-${index}`} className="guideNavItem">
+          <KuiSideNavItem key={`componentNavItem-${index}`} isSelected={this.props.routes[1].name === item.name}>
             <Link
               className="guideNavItem__link"
               to={item.path}
-              onClick={this.props.onClickNavItem}
+              onClick={this.props.onShowChrome}
             >
               {item.name}
             </Link>
-
-            {icon}
-          </div>
+          </KuiSideNavItem>
         );
       });
 
@@ -166,76 +63,79 @@ export class GuideNav extends Component {
       this.props.sandboxes.filter(item => (
         item.name.toLowerCase().indexOf(this.state.search.toLowerCase()) !== -1
       )).map((item, index) => {
-        const icon =
-          item.hasReact
-          ? <div className="guideNavItem__reactLogo" />
-          : undefined;
         return (
-          <div key={`sandboxNavItem-${index}`} className="guideNavItem">
+          <KuiSideNavItem key={`sandboxNavItem-${index}`}>
             <Link
               className="guideNavItem__link"
               to={item.path}
-              onClick={this.props.onClickNavItem}
+              onClick={this.props.onHideChrome}
             >
               {item.name}
             </Link>
-
-            {icon}
-          </div>
+          </KuiSideNavItem>
         );
       });
 
     return (
-      <div className={classes}>
-        <div className="guideNav__header">
-          <div
-            className={buttonClasses}
-            onClick={this.props.onToggleNav}
-          />
-          <Link
-            className="guideNav__title"
-            to="/"
-            onClick={this.props.onClickNavItem}
-          >
-            Kibana UI Framework <span className="guideNav__version">{this.props.version}</span>
-          </Link>
-          <a href="http://elastic.co" className="guideNav__elasticLogo" aria-label="Go to the Elastic website" />
+      <div>
+        <KuiFlexGroup alignItems="center" gutterSize="small">
+          <KuiFlexItem grow={false}>
+            <Link
+              to="/"
+              className="guideLogo"
+              onClick={this.props.onShowChrome}
+            >
+              <KuiIcon type="kibanaLogo" size="large" />
+            </Link>
+          </KuiFlexItem>
+          <KuiFlexItem grow={false}>
+            <KuiText size="small">
+              <button
+                to="/"
+                onClick={this.props.onToggleTheme}
+                className="kuiLink"
+              >
+                Theme
+              </button>
+            </KuiText>
+          </KuiFlexItem>
+          <KuiFlexItem grow={false}>
+            <button
+              onClick={this.props.onHideChrome}
+            >
+              <KuiIcon type="fullScreen" size="medium" />
+            </button>
+          </KuiFlexItem>
+        </KuiFlexGroup>
 
-          {this.renderPagination()}
-        </div>
+        <KuiSpacer size="m" />
 
-        <div>
-          <input
-            type="text"
-            placeholder="Search components and sandboxes"
-            className="guideNavSearch"
+        <KuiSideNav
+          mobileTitle="Navigate components"
+          toggleOpenOnMobile={this.toggleOpenOnMobile.bind(this)}
+          isOpenOnMobile={this.state.isSideNavOpenOnMobile}
+        >
+          <KuiFieldSearch
+            placeholder="Search..."
             value={this.state.search}
             onChange={this.onSearchChange}
           />
-        </div>
 
-        <div className="guideNavItemsContainer">
-          <div className="guideNavItems">
-            <div className="guideNavSectionTitle">
-              Components
-            </div>
+          <KuiSpacer size="m" />
 
-            { componentNavItems.length ? componentNavItems : this.renderNoItems('components') }
+          <KuiSideNavTitle>
+            Components
+          </KuiSideNavTitle>
 
-            <div className="guideNavSectionTitle">
-              Sandboxes
-            </div>
+          {componentNavItems}
 
-            { sandboxNavItems.length ? sandboxNavItems : this.renderNoItems('sandboxes') }
-          </div>
-        </div>
+          <KuiSideNavTitle>
+            Sandboxes
+          </KuiSideNavTitle>
 
-        <button
-          className="guideLink guideNav__showButton"
-          onClick={this.props.onShowChrome}
-        >
-          Show chrome
-        </button>
+          {sandboxNavItems}
+
+        </KuiSideNav>
       </div>
     );
   }
@@ -243,15 +143,11 @@ export class GuideNav extends Component {
 
 GuideNav.propTypes = {
   isChromeVisible: PropTypes.bool,
-  isNavOpen: PropTypes.bool,
   isSandbox: PropTypes.bool,
   onToggleNav: PropTypes.func,
   onHideChrome: PropTypes.func,
   onShowChrome: PropTypes.func,
-  onClickNavItem: PropTypes.func,
-  version: PropTypes.string,
   routes: PropTypes.array,
-  getNextRoute: PropTypes.func,
   getPreviousRoute: PropTypes.func,
   components: PropTypes.array,
   sandboxes: PropTypes.array,

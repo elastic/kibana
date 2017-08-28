@@ -12,6 +12,9 @@ import ButtonExample
 import CallOutExample
   from '../../views/call_out/call_out_example';
 
+import CodeExample
+  from '../../views/code/code_example';
+
 import ContextMenuExample
   from '../../views/context_menu/context_menu_example';
 
@@ -20,9 +23,6 @@ import FlexExample
 
 import FormExample
   from '../../views/form/form_example';
-
-import InlineFormsSandbox
-  from '../../views/inline_forms/inline_forms_sandbox';
 
 import IconExample
   from '../../views/icon/icon_example';
@@ -97,6 +97,10 @@ const components = [{
 }, {
   name: 'CallOut',
   component: CallOutExample,
+  hasReact: true,
+}, {
+  name: 'Code',
+  component: CodeExample,
   hasReact: true,
 }, {
   name: 'ContextMenu',
@@ -183,10 +187,6 @@ const components = [{
 const sandboxes = [{
   name: 'Kibana',
   component: KibanaSandbox,
-  hasReact: true,
-}, {
-  name: 'InlineFormsSandbox',
-  component: InlineFormsSandbox,
   hasReact: true,
 }, {
   name: 'TextScalingSandbox',

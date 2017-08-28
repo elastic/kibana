@@ -4,6 +4,9 @@ import React, {
 
 import {
   KuiPopover,
+  KuiButton,
+  KuiFlexGroup,
+  KuiFlexItem,
 } from '../../../../components';
 
 export default class extends Component {
@@ -42,35 +45,36 @@ export default class extends Component {
 
   render() {
     return (
-      <div>
-        <KuiPopover
-          button={(
-            <button onClick={this.onButtonClick1.bind(this)}>
-              Popover anchored to the right.
-            </button>
-          )}
-          isOpen={this.state.isPopoverOpen1}
-          closePopover={this.closePopover1.bind(this)}
-          anchorPosition="right"
-        >
-          Popover content
-        </KuiPopover>
-
-        &nbsp;
-
-        <KuiPopover
-          button={(
-            <button onClick={this.onButtonClick2.bind(this)}>
-              Popover anchored to the left.
-            </button>
-          )}
-          isOpen={this.state.isPopoverOpen2}
-          closePopover={this.closePopover2.bind(this)}
-          anchorPosition="left"
-        >
-          Popover content
-        </KuiPopover>
-      </div>
+      <KuiFlexGroup>
+        <KuiFlexItem grow={false}>
+          <KuiPopover
+            button={(
+              <KuiButton iconType="arrowDown" iconSide="right" onClick={this.onButtonClick1.bind(this)}>
+                Popover anchored to the right.
+              </KuiButton>
+            )}
+            isOpen={this.state.isPopoverOpen1}
+            closePopover={this.closePopover1.bind(this)}
+            anchorPosition="right"
+          >
+            Popover content
+          </KuiPopover>
+        </KuiFlexItem>
+        <KuiFlexItem grow={false}>
+          <KuiPopover
+            button={(
+              <KuiButton iconType="arrowDown" iconSide="right" onClick={this.onButtonClick2.bind(this)}>
+                Popover anchored to the left.
+              </KuiButton>
+            )}
+            isOpen={this.state.isPopoverOpen2}
+            closePopover={this.closePopover2.bind(this)}
+            anchorPosition="left"
+          >
+            Popover content
+          </KuiPopover>
+        </KuiFlexItem>
+      </KuiFlexGroup>
     );
   }
 }

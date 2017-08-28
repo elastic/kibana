@@ -3,7 +3,6 @@ import React from 'react';
 import {
   KuiText,
   KuiFlexGroup,
-  KuiPage,
   KuiPageContent,
   KuiPageContentBody,
   KuiFlexItem,
@@ -69,31 +68,28 @@ const text = [
 ];
 
 export default () => (
-  <KuiPage>
+  <KuiFlexGroup>
+    <KuiFlexItem>
+      <KuiPageContent className="guideDemo__textLines" style={{ padding: 32 }}>
+        <KuiPageContentBody>
 
-    <KuiFlexGroup>
-      <KuiFlexItem>
-        <KuiPageContent className="guideDemo__textLines" style={{ padding: 32 }}>
-          <KuiPageContentBody>
+          <KuiText>
+            {text}
+          </KuiText>
 
-            <KuiText>
-              {text}
-            </KuiText>
+        </KuiPageContentBody>
+      </KuiPageContent>
+    </KuiFlexItem>
+    <KuiFlexItem>
+      <KuiPageContent className="guideDemo__textLines" style={{ padding: 32 }}>
+        <KuiPageContentBody>
 
-          </KuiPageContentBody>
-        </KuiPageContent>
-      </KuiFlexItem>
-      <KuiFlexItem>
-        <KuiPageContent className="guideDemo__textLines" style={{ padding: 32 }}>
-          <KuiPageContentBody>
+          <KuiText size="small">
+            {text}
+          </KuiText>
 
-            <KuiText size="small">
-              {text}
-            </KuiText>
-
-          </KuiPageContentBody>
-        </KuiPageContent>
-      </KuiFlexItem>
-    </KuiFlexGroup>
-  </KuiPage>
+        </KuiPageContentBody>
+      </KuiPageContent>
+    </KuiFlexItem>
+  </KuiFlexGroup>
 );

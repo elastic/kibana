@@ -141,7 +141,7 @@ export default class extends Component {
   render() {
     const button = (
       <KuiButton fill onClick={this.onButtonClick.bind(this)}>
-        Click me
+        Click me to load a context menu
       </KuiButton>
     );
 

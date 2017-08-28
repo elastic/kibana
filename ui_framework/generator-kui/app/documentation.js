@@ -14,9 +14,6 @@ module.exports = class extends Generator {
       }, {
         name: 'Page demo',
         value: 'demo',
-      }, {
-        name: 'Sandbox',
-        value: 'sandbox',
       }],
     }]).then(answers => {
       this.config = answers;

@@ -3,13 +3,14 @@ import React from 'react';
 import { renderToHtml } from '../../services';
 
 import {
-  GuideCode,
-  GuideDemo,
   GuidePage,
   GuideSection,
   GuideSectionTypes,
-  GuideText,
 } from '../../components';
+
+import {
+  KuiCode,
+} from '../../../../components';
 
 import HorizontalRule from './horizontal_rule';
 const horizontalRuleSource = require('!!raw!./horizontal_rule');
@@ -30,15 +31,15 @@ export default props => (
         type: GuideSectionTypes.HTML,
         code: horizontalRuleHtml,
       }]}
-    >
-      <GuideText>
-        <GuideCode>HorizontalRule</GuideCode> can carry a size. By default it will be full.
-      </GuideText>
-
-      <GuideDemo>
+      text={
+        <p>
+          <KuiCode>HorizontalRule</KuiCode> can carry a size. By default it will be full.
+        </p>
+      }
+      demo={
         <HorizontalRule />
-      </GuideDemo>
-    </GuideSection>
+      }
+    />
 
     <GuideSection
       title="HorizontalRule margins"
@@ -49,15 +50,15 @@ export default props => (
         type: GuideSectionTypes.HTML,
         code: horizontalRuleMarginHtml,
       }]}
-    >
-      <GuideText>
-        <GuideCode>HorizontalRule</GuideCode> margins can also be defined. Don&rsquo;t forget that
-        margins will collapse against items that proceed / follow.
-      </GuideText>
-
-      <GuideDemo>
+      text={
+        <p>
+          <KuiCode>HorizontalRule</KuiCode> margins can also be defined. Don&rsquo;t forget that
+          margins will collapse against items that proceed / follow.
+        </p>
+      }
+      demo={
         <HorizontalRuleMargin />
-      </GuideDemo>
-    </GuideSection>
+      }
+    />
   </GuidePage>
 );

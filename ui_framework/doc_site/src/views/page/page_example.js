@@ -3,11 +3,9 @@ import React from 'react';
 import { renderToHtml } from '../../services';
 
 import {
-  GuideDemo,
   GuidePage,
   GuideSection,
   GuideSectionTypes,
-  GuideText,
 } from '../../components';
 
 import Page from './page';
@@ -41,17 +39,17 @@ export default props => (
         type: GuideSectionTypes.HTML,
         code: pageHtml,
       }]}
-    >
-      <GuideText>
-        Page layouts are modular and have the ability to add or remove components
-        as needed for the design. These examples are colored for illustrative
-        purposes only.
-      </GuideText>
-
-      <GuideDemo>
+      text={
+        <p>
+          Page layouts are modular and have the ability to add or remove components
+          as needed for the design. These examples are colored for illustrative
+          purposes only.
+        </p>
+      }
+      demo={
         <div className="guideDemo__highlightLayout"><Page /></div>
-      </GuideDemo>
-    </GuideSection>
+      }
+    />
 
     <GuideSection
       title="Simple page with title"
@@ -62,16 +60,16 @@ export default props => (
         type: GuideSectionTypes.HTML,
         code: pageSimpleHtml,
       }]}
-    >
-      <GuideText>
-        Most pages don&rsquo;t have sidebars. A lot of our pages don&rsquo;t have extra abilities next to the title.
-        Simply exclude those components and everything will still line up.
-      </GuideText>
-
-      <GuideDemo>
+      text={
+        <p>
+          Most pages don&rsquo;t have sidebars. A lot of our pages don&rsquo;t have extra abilities next to the title.
+          Simply exclude those components and everything will still line up.
+        </p>
+      }
+      demo={
         <div className="guideDemo__highlightLayout"><PageSimple /></div>
-      </GuideDemo>
-    </GuideSection>
+      }
+    />
 
     <GuideSection
       title="Page with content only"
@@ -82,15 +80,15 @@ export default props => (
         type: GuideSectionTypes.HTML,
         code: pageContentOnlyHtml,
       }]}
-    >
-      <GuideText>
-        We can further simplify pages by only showing the content.
-      </GuideText>
-
-      <GuideDemo>
+      text={
+        <p>
+          We can further simplify pages by only showing the content.
+        </p>
+      }
+      demo={
         <div className="guideDemo__highlightLayout"><PageContentOnly /></div>
-      </GuideDemo>
-    </GuideSection>
+      }
+    />
 
     <GuideSection
       title="Page content centered"
@@ -101,16 +99,16 @@ export default props => (
         type: GuideSectionTypes.HTML,
         code: pageContentCenterHtml,
       }]}
-    >
-      <GuideText>
-        The page content can be optionally centered either vertically
-        or horizontally. This is useful for various empty states.
-      </GuideText>
-
-      <GuideDemo>
+      text={
+        <p>
+          The page content can be optionally centered either vertically
+          or horizontally. This is useful for various empty states.
+        </p>
+      }
+      demo={
         <div className="guideDemo__highlightLayout"><PageContentCenter /></div>
-      </GuideDemo>
-    </GuideSection>
+      }
+    />
 
     <GuideSection
       title="Page content centered in a full layout"
@@ -121,16 +119,16 @@ export default props => (
         type: GuideSectionTypes.HTML,
         code: PageContentCenterWithSideBarHtml,
       }]}
-    >
-      <GuideText>
-        Centering the content can happen regardless of layout configuration.
-        In this example, we&rsquo;re cetnering within a complex sidebar layout.
-      </GuideText>
-
-      <GuideDemo>
+      text={
+        <p>
+          Centering the content can happen regardless of layout configuration.
+          In this example, we&rsquo;re cetnering within a complex sidebar layout.
+        </p>
+      }
+      demo={
         <div className="guideDemo__highlightLayout"><PageContentCenterWithSideBar /></div>
-      </GuideDemo>
-    </GuideSection>
+      }
+    />
 
   </GuidePage>
 );

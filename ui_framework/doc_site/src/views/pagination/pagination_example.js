@@ -3,13 +3,14 @@ import React from 'react';
 import { renderToHtml } from '../../services';
 
 import {
-  GuideCode,
-  GuideDemo,
   GuidePage,
   GuideSection,
   GuideSectionTypes,
-  GuideText,
 } from '../../components';
+
+import {
+  KuiCode,
+} from '../../../../components';
 
 import ManyPages from './many_pages';
 const manyPagesSource = require('!!raw!./many_pages');
@@ -34,15 +35,15 @@ export default props => (
         type: GuideSectionTypes.HTML,
         code: manyPagesnHtml,
       }]}
-    >
-      <GuideText>
-        We only show at most 5 consecutive pages, with shortcuts to the first and/or last page.
-      </GuideText>
-
-      <GuideDemo>
+      text={
+        <p>
+          We only show at most 5 consecutive pages, with shortcuts to the first and/or last page.
+        </p>
+      }
+      demo={
         <ManyPages />
-      </GuideDemo>
-    </GuideSection>
+      }
+    />
 
     <GuideSection
       title="Few pages"
@@ -53,15 +54,15 @@ export default props => (
         type: GuideSectionTypes.HTML,
         code: fewPagesnHtml,
       }]}
-    >
-      <GuideText>
-        The UI simplifies when we have fewer than the maximum number of visible pages.
-      </GuideText>
-
-      <GuideDemo>
+      text={
+        <p>
+          The UI simplifies when we have fewer than the maximum number of visible pages.
+        </p>
+      }
+      demo={
         <FewPages />
-      </GuideDemo>
-    </GuideSection>
+      }
+    />
 
     <GuideSection
       title="Pagination layouts"
@@ -72,15 +73,15 @@ export default props => (
         type: GuideSectionTypes.HTML,
         code: paginationLayoutsHtml,
       }]}
-    >
-      <GuideText>
-        Below are some common layout examples for pagination. In both cases we use
-        <GuideCode>FlexGroup</GuideCode> to set up the layout.
-      </GuideText>
-
-      <GuideDemo>
+      text={
+        <p>
+          Below are some common layout examples for pagination. In both cases we use
+          <KuiCode>FlexGroup</KuiCode> to set up the layout.
+        </p>
+      }
+      demo={
         <PaginationLayouts />
-      </GuideDemo>
-    </GuideSection>
+      }
+    />
   </GuidePage>
 );
