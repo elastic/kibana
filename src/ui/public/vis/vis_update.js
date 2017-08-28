@@ -4,21 +4,19 @@ const updateVisualizationConfig = (stateConfig, config) => {
 
   // update value axis options
   const isUserDefinedYAxis = config.setYExtents;
-  let mode = config.mode || 'normal';
-  if (['stacked', 'overlap'].includes(mode)) mode = 'normal';
+  const mode = ['stacked', 'overlap'].includes(config.mode) ? 'normal' : config.mode || 'normal';
   config.valueAxes[0].scale = {
     ...config.valueAxes[0].scale,
     type: config.scale || 'linear',
     setYExtents: config.setYExtents || false,
-    defaultYExtents: config.defaultYExtents || true,
+    defaultYExtents: config.defaultYExtents || false,
     min: isUserDefinedYAxis ? config.yAxis.min : undefined,
     max: isUserDefinedYAxis ? config.yAxis.max : undefined,
     mode: mode
   };
 
   // update series options
-  let interpolate = config.interpolate;
-  if (config.smoothLines) interpolate = 'cardinal';
+  const interpolate = config.smoothLines ? 'cardinal' : config.interpolate;
   const stacked = ['stacked', 'percentage', 'wiggle', 'silhouette'].includes(config.mode);
   config.seriesParams[0] = {
     ...config.seriesParams[0],
