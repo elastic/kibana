@@ -87,6 +87,14 @@ class Gauge extends Component {
     };
 
     let metrics;
+    let additionalLabel;
+    if (this.props.additionalLabel) {
+      additionalLabel = (
+        <div className="thorGauge_additionalLabel">
+          {this.props.additionalLabel}
+        </div>
+      );
+    }
     if (type === 'half') {
       metrics = (
         <div
@@ -99,7 +107,10 @@ class Gauge extends Component {
           <div
             className="thorHalfGauge__value"
             style={styles.value}
-            ref="label">{ formatter(value) }</div>
+            ref="label"
+          >{ formatter(value) }
+          </div>
+          {additionalLabel}
         </div>
       );
     } else {
@@ -114,7 +125,10 @@ class Gauge extends Component {
             ref="label">{ formatter(value) }</div>
           <div
             className="thorCircleGauge__label"
-            ref="title">{ title }</div>
+            ref="title"
+          >{ title }
+          </div>
+          {additionalLabel}
         </div>
       );
     }
@@ -149,6 +163,7 @@ Gauge.propTypes = {
   reversed: PropTypes.bool,
   type: PropTypes.oneOf(['half', 'circle']),
   valueColor: PropTypes.string,
+  additionalLabel: PropTypes.string
 };
 
 export default Gauge;
