@@ -5,6 +5,7 @@ import {
   KuiCode,
   KuiFlexGroup,
   KuiFlexItem,
+  KuiSpacer,
 } from '../../../../components';
 
 const pkg = require('../../../../../package.json');
@@ -70,6 +71,60 @@ const grays = [
   },
 ];
 
+const sizes = [
+  {
+    name: 'Extra small',
+    size: 4,
+  },
+  {
+    name: 'Small',
+    size: 8,
+  },
+  {
+    name: 'Medium',
+    size: 12,
+  },
+  {
+    name: 'default',
+    size: 16,
+  },
+  {
+    name: 'Large',
+    size: 24,
+  },
+  {
+    name: 'Extra large',
+    size: 32,
+  },
+  {
+    name: 'Extra extra large',
+    size: 40,
+  },
+];
+
+const fontSizes = [
+  {
+    name: 'Extra small',
+    size: 12,
+  },
+  {
+    name: 'Small',
+    size: 14,
+  },
+  {
+    name: 'Default',
+    size: 16,
+  },
+  {
+    name: 'Large',
+    size: 24,
+  },
+  {
+    name: 'Extra extra large',
+    size: 32,
+  },
+];
+
 export const HomeView = () => (
   <div className="guideSection__text">
     <KuiText>
@@ -105,6 +160,9 @@ export const HomeView = () => (
       <h2>Colors</h2>
       <p>The UI Framework uses a very limited palette. Every color is calculated using math from one of the below.</p>
     </KuiText>
+
+    <KuiSpacer size="m" />
+
     <KuiFlexGroup gutterSize="small">
       {colors.map((item, index) => {
         return (
@@ -125,5 +183,46 @@ export const HomeView = () => (
         );
       })}
     </KuiFlexGroup>
+
+    <KuiSpacer size="xl" />
+
+    <KuiText>
+      <h2>Spacing and sizing</h2>
+      <p>
+        <KuiCode>KUI</KuiCode> is a minimalist design and as such needs to be very precise
+        with the spacing and padding between and around items. <KuiCode>16px</KuiCode> is our
+        magic number. It is our default font-size and our default spacing size.
+        Larger numbers can be used, but must always be
+        a <KuiCode>multiple of 16px</KuiCode> beyond these sizes below.
+      </p>
+
+      <p>Sizing when passed as values to props should always be <KuiCode>xs / s / m / l / xl ...etc</KuiCode></p>
+
+      <h3>Element sizes</h3>
+    </KuiText>
+
+    <KuiSpacer size="l" />
+
+    <KuiFlexGroup gutterSize="small" alignItems="flex-end" className="guideDemo__sizeGrid">
+      {sizes.map((item, index) => {
+        return (
+          <KuiFlexItem key={index}>
+            <p>{item.name} ({item.size}px)</p>
+            <div className="guideDemo__size" style={{ height: item.size, width: item.size }} />
+          </KuiFlexItem>
+        );
+      })}
+    </KuiFlexGroup>
+
+    <KuiText><h3>Font sizes</h3></KuiText>
+
+    {fontSizes.map((item, index) => {
+      return (
+        <div style={{ fontSize: item.size, marginTop: 24 }} key={index}>
+          {item.name} is {item.size}: Something about a lazy fox?
+        </div>
+      );
+    })}
+
   </div>
 );

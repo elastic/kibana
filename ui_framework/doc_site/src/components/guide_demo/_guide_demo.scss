@@ -35,3 +35,15 @@
     font-size: $kuiFontSize;
   }
 }
+
+.guideDemo__size {
+  margin-top: $kuiSizeS;
+  background: $kuiTextColor;
+}
+.guideDemo__verticalSize {
+  background: $kuiTextColor;
+}
+
+.guideDemo__sizeGrid {
+  font-size: $kuiFontSizeS;
+}
