@@ -7,7 +7,7 @@ import { KuiLoadingKibana } from './loading_kibana';
 describe('KuiLoadingKibana', () => {
   test('is rendered', () => {
     const component = render(
-      <KuiLoadingKibana { ...requiredProps } />
+      <KuiLoadingKibana {...requiredProps} />
     );
 
     expect(component)
