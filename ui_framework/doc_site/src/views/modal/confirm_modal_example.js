@@ -29,7 +29,7 @@ export class ConfirmModalExample extends Component {
   render() {
     return (
       <div>
-        <KuiButton fill onClick={this.showModal}>
+        <KuiButton onClick={this.showModal}>
           Click me to load a modal
         </KuiButton>
         {

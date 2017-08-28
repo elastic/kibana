@@ -1,3 +1,8 @@
+.guideDemo__highlightLayout {
+  div {
+    background: transparentize(#0096CC, .9);
+  }
+}
 .guideDemo__highlightSpacer {
   .kuiSpacer {
     background: transparentize(#0096CC, .9);
@@ -38,9 +43,6 @@
 
 .guideDemo__size {
   margin-top: $kuiSizeS;
-  background: $kuiTextColor;
-}
-.guideDemo__verticalSize {
   background: $kuiTextColor;
 }
 

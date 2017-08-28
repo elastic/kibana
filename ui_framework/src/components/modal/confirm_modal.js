@@ -7,6 +7,7 @@ import { KuiModalHeader } from './modal_header';
 import { KuiModalHeaderTitle } from './modal_header_title';
 import { KuiModalBody } from './modal_body';
 import { KuiModalBodyText } from './modal_body_text';
+import { KuiButton, KuiButtonEmpty } from '../../components/';
 import { keyCodes } from '../../services';
 
 export const CONFIRM_BUTTON = 'confirm';
@@ -62,20 +63,24 @@ export function KuiConfirmModal({
       </KuiModalBody>
 
       <KuiModalFooter>
-        <button
+        <KuiButtonEmpty
           autoFocus={defaultFocusedButton === CANCEL_BUTTON}
           data-test-subj="confirmModalCancelButton"
           onClick={onCancel}
+          type="danger"
+          size="small"
         >
           {cancelButtonText}
-        </button>
-        <button
+        </KuiButtonEmpty>
+        <KuiButton
           autoFocus={defaultFocusedButton === CONFIRM_BUTTON}
           data-test-subj="confirmModalConfirmButton"
           onClick={onConfirm}
+          size="small"
+          fill
         >
           {confirmButtonText}
-        </button>
+        </KuiButton>
       </KuiModalFooter>
     </KuiModal>
   );

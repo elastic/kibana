@@ -203,7 +203,7 @@ export const HomeView = () => (
 
     <KuiSpacer size="l" />
 
-    <KuiFlexGroup gutterSize="small" alignItems="flex-end" className="guideDemo__sizeGrid">
+    <KuiFlexGroup gutterSize="small" className="guideDemo__sizeGrid">
       {sizes.map((item, index) => {
         return (
           <KuiFlexItem key={index}>
