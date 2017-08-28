@@ -4,8 +4,10 @@ import {
   KuiText,
   KuiCode,
   KuiFlexGroup,
+  KuiFlexGrid,
   KuiFlexItem,
   KuiSpacer,
+  KuiHorizontalRule,
 } from '../../../../components';
 
 const pkg = require('../../../../../package.json');
@@ -42,32 +44,39 @@ const colors = [
 
 const grays = [
   {
-    color: 'Empty Shade',
+    color: 'kuiColorEmptyShade',
     hex: '#FFF',
+    textColor: '#222'
   },
   {
-    color: 'Lightest Shade',
+    color: 'kuiColorLightestShade',
     hex: '#F5F5F5',
+    textColor: '#222'
   },
   {
-    color: 'Light Shade',
+    color: 'kuiColorLightShade',
     hex: '#D9D9D9',
+    textColor: '#222'
   },
   {
-    color: 'Medium Shade',
+    color: 'kuiColorMediumShade',
     hex: '#999999',
+    textColor: '#FFF'
   },
   {
-    color: 'Dark Shade',
+    color: 'kuiColorDarkShade',
     hex: '#666666',
+    textColor: '#FFF'
   },
   {
-    color: 'Darkest Shade',
+    color: 'kuiColorDarkestShade',
     hex: '#3F3F3F',
+    textColor: '#FFF'
   },
   {
-    color: 'Full Shade',
+    color: 'kuiColorFullShade',
     hex: '#000000',
+    textColor: '#FFF'
   },
 ];
 
@@ -157,31 +166,52 @@ export const HomeView = () => (
           the code is friendly to the novice and expert alike.
         </li>
       </ol>
-      <h2>Colors</h2>
-      <p>The UI Framework uses a very limited palette. Every color is calculated using math from one of the below.</p>
     </KuiText>
 
-    <KuiSpacer size="m" />
+    <KuiHorizontalRule size="large" />
 
-    <KuiFlexGroup gutterSize="small">
-      {colors.map((item, index) => {
-        return (
-          <KuiFlexItem className="guideDemo__color" style={{ background: item.hex }} key={index}>
-            <p>{item.color}</p>
-            <p className="guideDemo__colorHex">{item.hex}</p>
-          </KuiFlexItem>
-        );
-      })}
-    </KuiFlexGroup>
-    <KuiFlexGroup gutterSize="small">
-      {grays.map((item, index) => {
-        return (
-          <KuiFlexItem className="guideDemo__color" style={{ background: item.hex }} key={index}>
-            <p>{item.color}</p>
-            <p className="guideDemo__colorHex">{item.hex}</p>
-          </KuiFlexItem>
-        );
-      })}
+    <KuiFlexGroup>
+      <KuiFlexItem>
+        <KuiText>
+          <h2>Colors</h2>
+          <p>
+            The UI Framework uses a very limited palette. Every color is
+            calculated using Sass color from one of the below.
+          </p>
+          <h3>Theming</h3>
+          <p>
+            Theming is achieved by overwriting these twelve colors with
+            a different set. This is why it is very important <KuiCode>never to use hex colors</KuiCode> in
+            KUI outside of the global variable files.
+          </p>
+          <h3>Accessibility</h3>
+          <p>
+            We aim to be at least AA compliant in our design. That means that only some of the colors
+            to the right should be used for text.
+          </p>
+        </KuiText>
+      </KuiFlexItem>
+      <KuiFlexItem>
+        <KuiFlexGrid columns={2} gutterSize="small">
+          {colors.map((item, index) => {
+            return (
+              <KuiFlexItem className="guideDemo__color" style={{ background: item.hex }} key={index}>
+                <p>${item.color}</p>
+                <p className="guideDemo__colorHex">{item.hex}</p>
+              </KuiFlexItem>
+            );
+          })}
+
+          {grays.map((item, index) => {
+            return (
+              <KuiFlexItem className="guideDemo__color" style={{ background: item.hex, color: item.textColor }} key={index}>
+                <p>${item.color}</p>
+                <p className="guideDemo__colorHex">{item.hex}</p>
+              </KuiFlexItem>
+            );
+          })}
+        </KuiFlexGrid>
+      </KuiFlexItem>
     </KuiFlexGroup>
 
     <KuiSpacer size="xl" />
@@ -198,7 +228,7 @@ export const HomeView = () => (
 
       <p>Sizing when passed as values to props should always be <KuiCode>xs / s / m / l / xl ...etc</KuiCode></p>
 
-      <h3>Element sizes</h3>
+      <h3>Element sizes / paddings / margins</h3>
     </KuiText>
 
     <KuiSpacer size="l" />
@@ -207,7 +237,10 @@ export const HomeView = () => (
       {sizes.map((item, index) => {
         return (
           <KuiFlexItem key={index}>
-            <p>{item.name} ({item.size}px)</p>
+            <p className="guideDemo__sizeText">
+              {item.size}px<br/>
+              {item.name}
+            </p>
             <div className="guideDemo__size" style={{ height: item.size, width: item.size }} />
           </KuiFlexItem>
         );
