@@ -52,7 +52,7 @@ const template = ({ args, updateArgs }) => {
         <div className="canvas__esdocs--index">
           <label>Index &nbsp;
           <TooltipIcon
-            text="The index to query, as well as the field available in the selector below"
+            text="The index pattern to query. Time filters will apply to the timefield from this pattern."
             placement="right"/>
           </label>
           <ESIndexSelect value={index} onChange={index => setArg('index', index)}/>

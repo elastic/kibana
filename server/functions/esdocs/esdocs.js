@@ -37,30 +37,20 @@ export default new Fn({
       types: ['string'],
       default: '',
     },
-    filter: {
-      help: 'A filter to be applied while querying elasticsearch',
-      multi: true,
-      types: ['filter', 'null'],
-    },
   },
   type: 'datatable',
   help: 'Query elasticsearch and get back raw documents.',
   fn: (context, args) => {
 
-    // I think i wrote this to be backwards compatible when we introduce more filters
-    // Basically, esdocs() has a filter argument, that is effectively merged with the filters
-    // from context.
-    if (args.filter) {
-      context.and = context.and
-        .concat(args.filter) // Filters
-        .concat([{ // q
-          type: 'filter',
-          value: {
-            type: 'luceneQueryString',
-            query: args.q,
-          },
-        }]);
-    }
+    context.and = context.and
+      .concat([{ // q
+        type: 'filter',
+        value: {
+          type: 'luceneQueryString',
+          query: args.q,
+        },
+      }]);
+
 
     function getSort() {
       if (!args.sort) return;
