@@ -91,7 +91,7 @@ export class GuideSection extends Component {
     if (code && (codeClass === this.state.selectedTabId)) {
       return (
         <div key={type} ref={type}>
-          <pre>
+          <pre style={{ whiteSpace: 'pre-wrap' }}>
             <code
               ref={codeClass}
               className={codeClass}

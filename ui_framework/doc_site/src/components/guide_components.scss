@@ -54,9 +54,10 @@
   line-height: 1.5;
   font-family: 'Roboto Mono', monospace;
   font-weight: 400;
-  overflow-x: auto;
   background: #2B2B2D;
   color: #CDD3D8;
+  max-height: 400px;
+  overflow: auto;
 }
 
 .hljs > *::selection {
