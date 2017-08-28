@@ -14,6 +14,7 @@ module.directive('queryBar', function () {
       query: '=',
       appName: '=?',
       onSubmit: '&',
+      disableAutoFocus: '='
     },
     controllerAs: 'queryBar',
     bindToController: true,
