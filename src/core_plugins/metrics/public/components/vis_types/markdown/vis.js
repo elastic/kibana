@@ -7,9 +7,9 @@ import replaceVars from '../../lib/replace_vars';
 import convertSeriesToVars from '../../lib/convert_series_to_vars';
 
 function MarkdownVisualization(props) {
-  const { backgroundColor, model, visData } = props;
+  const { backgroundColor, model, visData, dateFormat } = props;
   const series = _.get(visData, `${model.id}.series`, []);
-  const variables = convertSeriesToVars(series, model);
+  const variables = convertSeriesToVars(series, model, dateFormat);
   const style = { };
   let reversed = props.reversed;
   const panelBackgroundColor = model.background_color || backgroundColor;
@@ -54,7 +54,8 @@ MarkdownVisualization.propTypes = {
   onBrush: PropTypes.func,
   onChange: PropTypes.func,
   reversed: PropTypes.bool,
-  visData: PropTypes.object
+  visData: PropTypes.object,
+  dateFormat: PropTypes.string
 };
 
 export default MarkdownVisualization;

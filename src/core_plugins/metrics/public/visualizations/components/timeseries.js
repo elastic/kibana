@@ -122,6 +122,7 @@ class Timeseries extends Component {
         <div style={styles.content} className="rhythm_chart__content">
           <div className="rhythm_chart__visualization">
             <TimeseriesChart
+              dateFormat={this.props.dateFormat}
               crosshair={this.props.crosshair}
               onBrush={this.props.onBrush}
               plothover={this.plothover}
@@ -170,7 +171,8 @@ Timeseries.propTypes = {
   options: PropTypes.object,
   tickFormatter: PropTypes.func,
   showGrid: PropTypes.bool,
-  xaxisLabel: PropTypes.string
+  xaxisLabel: PropTypes.string,
+  dateFormat: PropTypes.string
 };
 
 export default Timeseries;
