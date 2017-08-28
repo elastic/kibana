@@ -33,8 +33,8 @@ module.controller('KbnRegionMapController', function ($scope, $element, Private,
 
   $scope.$watch('esResponse', async function (response) {
     kibanaMapReady.then(() => {
-      const metricsAgg = _.first($scope.vis.aggs.bySchemaName.metric);
-      const termAggId = _.first(_.pluck($scope.vis.aggs.bySchemaName.segment, 'id'));
+      const metricsAgg = _.first($scope.vis.getAggConfig().bySchemaName.metric);
+      const termAggId = _.first(_.pluck($scope.vis.getAggConfig().bySchemaName.segment, 'id'));
 
       let results;
       if (!response || !response.aggregations) {
@@ -112,9 +112,9 @@ module.controller('KbnRegionMapController', function ($scope, $element, Private,
   }
 
   function setTooltipFormatter() {
-    const metricsAgg = _.first($scope.vis.aggs.bySchemaName.metric);
-    if ($scope.vis.aggs.bySchemaName.segment && $scope.vis.aggs.bySchemaName.segment[0]) {
-      const fieldName = $scope.vis.aggs.bySchemaName.segment[0].makeLabel();
+    const metricsAgg = _.first($scope.vis.getAggConfig().bySchemaName.metric);
+    if ($scope.vis.getAggConfig().bySchemaName.segment && $scope.vis.getAggConfig().bySchemaName.segment[0]) {
+      const fieldName = $scope.vis.getAggConfig().bySchemaName.segment[0].makeLabel();
       choroplethLayer.setTooltipFormatter(tooltipFormatter, metricsAgg, fieldName);
     } else {
       choroplethLayer.setTooltipFormatter(tooltipFormatter, metricsAgg, null);
@@ -135,7 +135,7 @@ module.controller('KbnRegionMapController', function ($scope, $element, Private,
       choroplethLayer.setMetrics(previousMetrics, previousMetricsAgg);
     }
     choroplethLayer.on('select', function (event) {
-      const aggs = $scope.vis.aggs.getResponseAggs();
+      const aggs = $scope.vis.getAggConfig().getResponseAggs();
       const aggConfigResult = new AggConfigResult(aggs[0], false, event, event);
       $scope.vis.API.events.filter({ point: { aggConfigResult: aggConfigResult } });
     });

@@ -16,11 +16,11 @@ module.directive('vislibCategoryAxis', function () {
 
       let lastAxisTitle = '';
       $scope.$watch(() => {
-        return $scope.vis.aggs.map(agg => {
+        return $scope.vis.getAggConfig().map(agg => {
           return agg.params.field ? agg.makeLabel() : '';
         }).join();
       }, () => {
-        const agg = $scope.vis.aggs.find(agg => agg.schema.name === 'segment');
+        const agg = $scope.vis.getAggConfig().find(agg => agg.schema.name === 'segment');
         const label = agg ? agg.makeLabel() : '';
         if (lastAxisTitle !== label) {
           lastAxisTitle = label;

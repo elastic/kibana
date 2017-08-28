@@ -62,7 +62,7 @@ export const ParentPipelineAggHelperProvider = function (Private) {
       if (agg.params.customMetric) {
         subAgg = agg.params.customMetric;
       } else {
-        subAgg = agg.vis.aggs.byId[agg.params.metricAgg];
+        subAgg = agg.vis.getAggConfig().byId[agg.params.metricAgg];
       }
       return subAgg.type.getFormat(subAgg);
     }
