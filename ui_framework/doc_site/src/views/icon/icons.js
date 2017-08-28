@@ -10,8 +10,6 @@ import {
 const iconTypes = [
   'apps',
   'arrowDown',
-  'arrowDown',
-  'arrowLeft',
   'arrowLeft',
   'arrowRight',
   'arrowUp',

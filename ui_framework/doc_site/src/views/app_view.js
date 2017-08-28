@@ -10,7 +10,7 @@ import {
 } from '../services';
 
 import {
-  GuideSandboxHeader,
+  GuideHeader,
   GuideNav,
 } from '../components';
 
@@ -63,15 +63,6 @@ export class AppView extends Component {
     });
   }
 
-  componentWillReceiveProps(nextProps) {
-    // Only force the chrome to be hidden if we're navigating from a non-sandbox to a sandbox.
-    if (!this.props.isSandbox && nextProps.isSandbox) {
-      this.setState({
-        isChromeVisible: false,
-      });
-    }
-  }
-
   renderChrome() {
 
     if (this.state.isChromeVisible) {
@@ -88,8 +79,6 @@ export class AppView extends Component {
                 onToggleNav={this.onToggleNav}
                 onToggleTheme={this.onToggleTheme}
                 routes={this.props.routes}
-                getNextRoute={Routes.getNextRoute}
-                getPreviousRoute={Routes.getPreviousRoute}
                 components={Routes.components}
                 sandboxes={Routes.sandboxes}
               />
@@ -105,19 +94,15 @@ export class AppView extends Component {
     } else {
       return (
         <div className="guide__hasNoChrome">
-          <GuideSandboxHeader
+          <GuideHeader
             isChromeVisible={this.state.isChromeVisible}
             isNavOpen={this.state.isNavOpen}
-            isSandbox={this.props.isSandbox}
             onHideChrome={this.onHideChrome}
             onShowChrome={this.onShowChrome}
             onToggleNav={this.onToggleNav}
             onToggleTheme={this.onToggleTheme}
             routes={this.props.routes}
-            getNextRoute={Routes.getNextRoute}
-            getPreviousRoute={Routes.getPreviousRoute}
             components={Routes.components}
-            sandboxes={Routes.sandboxes}
           />
           {this.props.children}
         </div>

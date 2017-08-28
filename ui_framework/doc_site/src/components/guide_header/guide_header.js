@@ -13,7 +13,7 @@ import {
   KuiFlexItem,
 } from '../../../../components';
 
-export class GuideSandboxHeader extends Component {
+export class GuideHeader extends Component {
   constructor(props) {
     super(props);
 
@@ -26,7 +26,7 @@ export class GuideSandboxHeader extends Component {
   render() {
 
     return (
-      <div className="guideSandbox__header">
+      <div className="guideHeader">
         <KuiFlexGroup alignItems="center" gutterSize="small">
           <KuiFlexItem grow={false}>
             <Link
@@ -39,7 +39,7 @@ export class GuideSandboxHeader extends Component {
           <KuiFlexItem grow={false}>
             <button
               onClick={this.props.onToggleTheme}
-              className="guideSandbox__link"
+              className="guideHeader__link"
             >
               Theme
             </button>
@@ -48,7 +48,7 @@ export class GuideSandboxHeader extends Component {
             <button
               onClick={this.props.onShowChrome}
             >
-              <KuiIcon type="list" size="medium" className="guideSandbox__appListIcon" />
+              <KuiIcon type="list" size="medium" className="guideHeader__appListIcon" />
             </button>
           </KuiFlexItem>
         </KuiFlexGroup>
@@ -57,9 +57,8 @@ export class GuideSandboxHeader extends Component {
   }
 }
 
-GuideSandboxHeader.propTypes = {
+GuideHeader.propTypes = {
   isChromeVisible: PropTypes.bool,
-  isSandbox: PropTypes.bool,
   onToggleNav: PropTypes.func,
   onHideChrome: PropTypes.func,
   onShowChrome: PropTypes.func,
@@ -67,5 +66,4 @@ GuideSandboxHeader.propTypes = {
   routes: PropTypes.array,
   getPreviousRoute: PropTypes.func,
   components: PropTypes.array,
-  sandboxes: PropTypes.array,
 };

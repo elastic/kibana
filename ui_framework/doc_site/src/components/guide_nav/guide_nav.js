@@ -79,11 +79,7 @@ export class GuideNav extends Component {
       });
 
     return (
-      <KuiSideNav
-        mobileTitle="Navigate components"
-        toggleOpenOnMobile={this.toggleOpenOnMobile.bind(this)}
-        isOpenOnMobile={this.state.isSideNavOpenOnMobile}
-      >
+      <div>
         <KuiFlexGroup alignItems="center" gutterSize="small">
           <KuiFlexItem grow={false}>
             <Link
@@ -116,27 +112,33 @@ export class GuideNav extends Component {
 
         <KuiSpacer size="m" />
 
-        <KuiFieldSearch
-          placeholder="Search..."
-          value={this.state.search}
-          onChange={this.onSearchChange}
-        />
+        <KuiSideNav
+          mobileTitle="Navigate components"
+          toggleOpenOnMobile={this.toggleOpenOnMobile.bind(this)}
+          isOpenOnMobile={this.state.isSideNavOpenOnMobile}
+        >
+          <KuiFieldSearch
+            placeholder="Search..."
+            value={this.state.search}
+            onChange={this.onSearchChange}
+          />
 
-        <KuiSpacer size="m" />
+          <KuiSpacer size="m" />
 
-        <KuiSideNavTitle>
-          Components
-        </KuiSideNavTitle>
+          <KuiSideNavTitle>
+            Components
+          </KuiSideNavTitle>
 
-        {componentNavItems}
+          {componentNavItems}
 
-        <KuiSideNavTitle>
-          Sandboxes
-        </KuiSideNavTitle>
+          <KuiSideNavTitle>
+            Sandboxes
+          </KuiSideNavTitle>
 
-        {sandboxNavItems}
+          {sandboxNavItems}
 
-      </KuiSideNav>
+        </KuiSideNav>
+      </div>
     );
   }
 }

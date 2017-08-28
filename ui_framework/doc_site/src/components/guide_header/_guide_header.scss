@@ -1,4 +1,4 @@
-.guideSandbox__header {
+.guideHeader {
   background: #222;
   color: #FFF !important;
   height: $kuiSizeXXL;
@@ -7,10 +7,10 @@
   padding-left: $kuiSizeS;
 }
 
-.guideSandbox__link {
+.guideHeader__link {
   color: #FFF;
 }
 
-.guideSandbox__appListIcon {
+.guideHeader__appListIcon {
   fill: #FFF !important;
 }
