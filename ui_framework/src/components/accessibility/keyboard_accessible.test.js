@@ -7,10 +7,7 @@ import sinon from 'sinon';
 
 import { KuiKeyboardAccessible } from './keyboard_accessible';
 
-import {
-  ENTER_KEY,
-  SPACE_KEY,
-} from '../../services';
+import { keyCodes } from '../../services';
 
 describe('KuiKeyboardAccessible', () => {
   describe('throws an error', () => {
@@ -176,7 +173,7 @@ describe('KuiKeyboardAccessible', () => {
       );
 
       $button.find('[data-div]').simulate('keyup', {
-        keyCode: ENTER_KEY
+        keyCode: keyCodes.ENTER
       });
 
       sinon.assert.calledOnce(onClickHandler);
@@ -192,7 +189,7 @@ describe('KuiKeyboardAccessible', () => {
       );
 
       $button.find('[data-div]').simulate('keyup', {
-        keyCode: SPACE_KEY
+        keyCode: keyCodes.SPACE
       });
 
       sinon.assert.calledOnce(onClickHandler);

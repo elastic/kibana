@@ -94,7 +94,7 @@ export function VisProvider(Private, indexPatterns, timefilter, getAppState) {
     }
 
     updateState() {
-      this.setState(this.getCurrentState());
+      this.setState(this.getCurrentState(true));
       this.emit('update');
     }
 
@@ -130,6 +130,10 @@ export function VisProvider(Private, indexPatterns, timefilter, getAppState) {
 
     getEnabledState() {
       return this.getStateInternal(false);
+    }
+
+    getAggConfig() {
+      return new AggConfigs(this, this.aggs.raw.filter(agg => agg.enabled));
     }
 
     getState() {

@@ -121,7 +121,7 @@ typeahead.directive('kbnTypeahead', function () {
         }
 
         // hide on escape
-        if (_.contains([comboBoxKeyCodes.ESC], keyCode)) {
+        if (_.contains([comboBoxKeyCodes.ESCAPE], keyCode)) {
           self.hidden = true;
           self.active = false;
         }

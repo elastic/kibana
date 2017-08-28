@@ -8,17 +8,17 @@
  */
 
 import {
-  DOWN_KEY_CODE,
-  ENTER_KEY_CODE,
-  ESC_KEY_CODE,
-  TAB_KEY_CODE,
-  UP_KEY_CODE,
+  DOWN,
+  ENTER,
+  ESCAPE,
+  TAB,
+  UP,
 } from '../key_codes';
 
 export const comboBoxKeyCodes = {
-  DOWN: DOWN_KEY_CODE,
-  ENTER: ENTER_KEY_CODE,
-  ESC: ESC_KEY_CODE,
-  TAB: TAB_KEY_CODE,
-  UP: UP_KEY_CODE,
+  DOWN,
+  ENTER,
+  ESCAPE,
+  TAB,
+  UP,
 };

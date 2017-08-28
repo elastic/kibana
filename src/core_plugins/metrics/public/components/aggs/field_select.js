@@ -1,4 +1,5 @@
-import React, { PropTypes } from 'react';
+import PropTypes from 'prop-types';
+import React from 'react';
 import Select from 'react-select';
 import generateByTypeFilter from '../lib/generate_by_type_filter';
 

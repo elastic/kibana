@@ -398,15 +398,46 @@ export class KibanaMap extends EventEmitter {
 
     const southEast = bounds.getSouthEast();
     const northWest = bounds.getNorthWest();
-    const southEastLng = southEast.lng;
-    const northWestLng = northWest.lng;
-    const southEastLat = southEast.lat;
-    const northWestLat = northWest.lat;
+    let southEastLng = southEast.lng;
+    let northWestLng = northWest.lng;
+    let southEastLat = southEast.lat;
+    let northWestLat = northWest.lat;
 
-    //Bounds cannot be created unless they form a box with larger than 0 dimensions
-    //Invalid areas are rejected by ES.
+    // When map has not width or height, calculate map dimensions based on parent dimensions
     if (southEastLat === northWestLat || southEastLng === northWestLng) {
-      return;
+      let parent = this._containerNode.parentElement;
+      while (parent && (parent.clientWidth === 0 || parent.clientHeight === 0)) {
+        parent = parent.parentNode;
+      }
+      let width = 512;
+      let height = 512;
+      if (parent && parent.clientWidth !== 0) {
+        width = parent.clientWidth;
+      }
+      if (parent && parent.clientHeight !== 0) {
+        height = parent.clientHeight;
+      }
+
+      let top = 0;
+      let left = 0;
+      let bottom = height;
+      let right = width;
+      // no height - top is center of map and needs to be adjusted
+      if (southEastLat === northWestLat) {
+        top = height / 2 * -1;
+        bottom = height / 2;
+      }
+      // no width - left is center of map and needs to be adjusted
+      if (southEastLng === northWestLng) {
+        left = width / 2 * -1;
+        right = width / 2;
+      }
+      const containerSouthEast = this._leafletMap.layerPointToLatLng(L.point(right, bottom));
+      const containerNorthWest = this._leafletMap.layerPointToLatLng(L.point(left, top));
+      southEastLng = containerSouthEast.lng;
+      northWestLng = containerNorthWest.lng;
+      southEastLat = containerSouthEast.lat;
+      northWestLat = containerNorthWest.lat;
     }
 
     return {

@@ -1,4 +1,5 @@
-import React, { PropTypes } from 'react';
+import PropTypes from 'prop-types';
+import React from 'react';
 import Select from 'react-select';
 import DataFormatPicker from '../../data_format_picker';
 import createSelectHandler from '../../lib/create_select_handler';

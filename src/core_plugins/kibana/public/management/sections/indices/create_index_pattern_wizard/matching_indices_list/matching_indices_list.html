@@ -1,0 +1,61 @@
+<div>
+  <div
+    ng-if="matchingIndicesList.isLoading"
+    class="kuiPanel kuiPanel--prompt kuiVerticalRhythm matchingIndicesListLoadingPrompt"
+  >
+    <div class="kuiPanelBody">
+      <p class="kuiSubTitle kuiSubduedText kuiVerticalRhythm">
+        Looking for matching indices
+      </p>
+
+      <div class="kuiVerticalRhythm">
+        <p class="kuiText kuiSubduedText kuiVerticalRhythmSmall">
+          Just a sec...
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <div
+    ng-if="!matchingIndicesList.isLoading"
+    class="kuiControlledTable"
+  >
+    <!-- ToolBar -->
+    <div class="kuiToolBar">
+      <div class="kuiToolBarSection">
+        <p class="kuiText">
+          <ng-transclude></ng-transclude>
+        </p>
+      </div>
+
+      <div class="kuiToolBarSection">
+        <!-- Pagination -->
+        <tool-bar-pager-text
+          start-item="matchingIndicesList.pager.startItem"
+          end-item="matchingIndicesList.pager.endItem"
+          total-items="matchingIndicesList.pager.totalItems"
+          ng-if="matchingIndicesList.hasMultiplePages()"
+        ></tool-bar-pager-text>
+
+        <tool-bar-pager-buttons
+          has-previous-page="matchingIndicesList.pager.hasPreviousPage"
+          has-next-page="matchingIndicesList.pager.hasNextPage"
+          on-page-next="matchingIndicesList.onPageNext"
+          on-page-previous="matchingIndicesList.onPagePrevious"
+          ng-if="matchingIndicesList.hasMultiplePages()"
+        ></tool-bar-pager-buttons>
+      </div>
+    </div>
+
+    <!-- Indices list -->
+    <ul class="kuiMenu kuiMenu--contained">
+      <li
+        class="kuiMenuItem"
+        ng-repeat="index in matchingIndicesList.pageOfIndices"
+      >
+        <p class="kuiText" ng-bind-html="index.name | highlight:matchingIndicesList.formattedPattern">
+        </p>
+      </li>
+    </ul>
+  </div>
+</div>
