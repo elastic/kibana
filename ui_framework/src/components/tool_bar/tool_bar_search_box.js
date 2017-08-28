@@ -1,3 +1,4 @@
+import PropTypes from 'prop-types';
 import React from 'react';
 import classNames from 'classnames';
 
@@ -27,8 +28,8 @@ export function KuiToolBarSearchBox({ filter, onFilter, placeholder, className, 
 }
 
 KuiToolBarSearchBox.propTypes = {
-  filter: React.PropTypes.string,
-  onFilter: React.PropTypes.func.isRequired
+  filter: PropTypes.string,
+  onFilter: PropTypes.func.isRequired
 };
 
 KuiToolBarSearchBox.defaultProps = {
