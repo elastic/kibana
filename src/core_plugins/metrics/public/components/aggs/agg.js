@@ -1,4 +1,5 @@
-import React, { PropTypes } from 'react';
+import PropTypes from 'prop-types';
+import React from 'react';
 import StdAgg from './std_agg';
 import aggToComponent from '../lib/agg_to_component';
 import { sortable } from 'react-anything-sortable';

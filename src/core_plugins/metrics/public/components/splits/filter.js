@@ -1,7 +1,8 @@
 import createTextHandler from '../lib/create_text_handler';
 import createSelectHandler from '../lib/create_select_handler';
 import GroupBySelect from './group_by_select';
-import React, { PropTypes } from 'react';
+import PropTypes from 'prop-types';
+import React from 'react';
 
 export const SplitByFilter = props => {
   const { onChange } = props;

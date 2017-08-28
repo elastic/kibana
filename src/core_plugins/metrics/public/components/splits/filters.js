@@ -1,7 +1,8 @@
 import createSelectHandler from '../lib/create_select_handler';
 import GroupBySelect from './group_by_select';
 import FilterItems from './filter_items';
-import React, { PropTypes } from 'react';
+import PropTypes from 'prop-types';
+import React from 'react';
 function SplitByFilters(props) {
   const { onChange, model } = props;
   const handleSelectChange = createSelectHandler(onChange);
