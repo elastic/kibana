@@ -1,0 +1,11 @@
+<div class="form-group">
+  <label for="scriptFieldTransformString">Transform</label>
+  <select
+    id="scriptFieldTransformString"
+    ng-model="editor.formatParams.transform"
+    ng-options="opt.id as opt.name for opt in cntrl.transformOpts"
+    class="form-control">
+  </select>
+</div>
+
+<field-format-editor-samples inputs="cntrl.sampleInputs"></field-format-editor-samples>

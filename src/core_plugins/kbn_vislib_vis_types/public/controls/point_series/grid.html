@@ -37,7 +37,7 @@
             id="gridAxis"
             class="kuiSelect kuiSideBarSelect"
             ng-model="vis.params.grid.valueAxis"
-            ng-options="axis.id as axis.name for axis in vis.params.valueAxes"
+            ng-options="axis.id as axis.name for axis in vis.params.valueAxes track by axis.id"
           >
             <option value="">Don't show</option>
           </select>

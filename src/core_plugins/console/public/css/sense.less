@@ -60,16 +60,16 @@ sense-history-viewer,
   display: flex;
   flex: 0 0 13px;
   cursor: ew-resize;
-  background-color: #e4e4e4;
+  background-color: @globalColorLightestGray;
   align-items: center;
   margin: -10px 0;
 
   &:hover {
-    background-color: darken(#e4e4e4, 10%);
+    background-color: lighten(@globalColorBlue, 50%);
   }
 
   &.active {
-    background-color: darken(#e4e4e4, 40%);;
+    background-color: @globalColorBlue;
   }
 }
 
@@ -93,9 +93,9 @@ sense-history-viewer,
 
   .editor_action {
     padding: 2px 4px;
-    &:hover {
-      text-decoration: none;
-    }
+    appearance: none;
+    border: none;
+    background: none;
   }
 
   .fa-wrench {

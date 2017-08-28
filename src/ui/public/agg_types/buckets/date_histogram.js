@@ -62,6 +62,9 @@ export function AggTypesBucketsDateHistogramProvider(timefilter, config, Private
         }
       };
     },
+    getFormat: function (agg) {
+      return agg.buckets.getScaledDateFormatter();
+    },
     params: [
       {
         name: 'field',
@@ -112,8 +115,8 @@ export function AggTypesBucketsDateHistogramProvider(timefilter, config, Private
 
           const scaleMetrics = interval.scaled && interval.scale < 1;
           if (scaleMetrics) {
-            const all = _.every(agg.vis.aggs.bySchemaGroup.metrics, function (agg) {
-              return agg.type && (agg.type.name === 'count' || agg.type.name === 'sum');
+            const all = _.every(agg.vis.getAggConfig().bySchemaGroup.metrics, function (agg) {
+              return agg.type && agg.type.isScalable();
             });
             if (all) {
               output.metricScale = interval.scale;

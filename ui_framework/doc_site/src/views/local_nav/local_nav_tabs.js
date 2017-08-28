@@ -14,14 +14,14 @@ export function LocalNavWithTabs() {
       <KuiLocalNavRow>
         <KuiLocalNavRowSection>
           <div className="kuiLocalBreadcrumbs">
-            <div className="kuiLocalBreadcrumb">
+            <h1 tabIndex="0" id="kui_local_breadcrumb" className="kuiLocalBreadcrumb">
               <a className="kuiLocalBreadcrumb__link" href="#">
                 Discover
               </a>
-            </div>
-            <div className="kuiLocalBreadcrumb">
+            </h1>
+            <h1 tabIndex="0" id="kui_local_breadcrumb" className="kuiLocalBreadcrumb">
               <span className="kuiLocalBreadcrumb__emphasis">0</span> hits
-            </div>
+            </h1>
           </div>
         </KuiLocalNavRowSection>
         <KuiLocalNavRowSection>
@@ -30,7 +30,7 @@ export function LocalNavWithTabs() {
             <div className="kuiLocalMenuItem">Save</div>
             <div className="kuiLocalMenuItem">Open</div>
             <button className="kuiLocalMenuItem">
-              <div className="kuiLocalMenuItem__icon kuiIcon fa-clock-o"></div>
+              <div className="kuiLocalMenuItem__icon kuiIcon fa-clock-o" />
               Last 5 minutes
             </button>
           </div>

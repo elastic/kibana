@@ -10,7 +10,8 @@ const tickFormatters = {
   'percent':'percent',
   'custom':'custom(:prefix:suffix)'
 };
-module.exports = new Chainable('yaxis', {
+
+export default new Chainable('yaxis', {
   args: [
     {
       name: 'inputSeries',

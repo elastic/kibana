@@ -12,19 +12,28 @@
     position: absolute;
     top: 32px;
     z-index: @zindex-typeahead;
+    box-shadow: 0px 4px 8px rgba(0,0,0,.1);
     width: 100%;
+    border-radius: 4px;
 
     .typeahead-item {
       border-bottom: 1px solid;
-      border-bottom-color: @typeahead-item-border;
+      border-bottom-color: @globalColorLightestGray;
       padding: @padding-base-vertical @padding-base-horizontal;
     }
 
     .typeahead-item:last-child {
       border-bottom: 0px;
+      border-radius: 0 0 4px 4px;
+    }
+
+    .typeahead-item:first-child {
+      border-bottom: 0px;
+      border-radius: 4px 4px 0 0;
     }
 
     .typeahead-item.active {
+      color: @globalColorWhite;
       background-color: @typeahead-item-active-bg;
     }
   }

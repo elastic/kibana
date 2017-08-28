@@ -1,6 +1,6 @@
 import _ from 'lodash';
 import { VisAggConfigProvider } from 'ui/vis/agg_config';
-import { VisSchemasProvider } from 'ui/vis/schemas';
+import { VisSchemasProvider } from 'ui/vis/editors/default/schemas';
 
 import { siblingPipelineAggController } from './sibling_pipeline_agg_controller';
 import { siblingPipelineAggWritter } from './sibling_pipeline_agg_writter';
@@ -83,6 +83,9 @@ export const SiblingPipelineAggHelperProvider = function (Private) {
           write: siblingPipelineAggWritter
         }
       ];
+    },
+    getFormat: function (agg) {
+      return agg.params.customMetric.type.getFormat(agg.params.customMetric);
     }
   };
 

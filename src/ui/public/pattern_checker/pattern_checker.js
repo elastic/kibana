@@ -1,4 +1,5 @@
 import { uiModules } from 'ui/modules';
+import { callAfterBindingsWorkaround } from 'ui/compat';
 import template from './pattern_checker.html';
 import './pattern_checker.less';
 import chrome from 'ui/chrome';
@@ -14,7 +15,7 @@ module.directive('patternChecker', function () {
     scope: {
       pattern: '='
     },
-    controller: function (Notifier, $scope, $timeout, $http) {
+    controller: callAfterBindingsWorkaround(function (Notifier, $scope, $timeout, $http) {
       let validationTimeout;
 
       const notify = new Notifier({
@@ -46,7 +47,6 @@ module.directive('patternChecker', function () {
       });
 
       this.validateInstall();
-    }
+    })
   };
 });
-

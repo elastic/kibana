@@ -1,0 +1,19 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`contained prop 1`] = `
+<ul
+  class="kuiMenu kuiMenu--contained"
+>
+  children
+</ul>
+`;
+
+exports[`renders KuiMenu 1`] = `
+<ul
+  aria-label="aria-label"
+  class="kuiMenu testClass1 testClass2"
+  data-test-subj="test subject string"
+>
+  children
+</ul>
+`;

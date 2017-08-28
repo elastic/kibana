@@ -66,29 +66,21 @@ describe('parse-query directive', function () {
       expect(fromUser({ foo: 'bar' })).to.eql({ foo: 'bar' });
     });
 
-    it('unless the object is empty, that implies a *', function () {
-      expect(fromUser({})).to.eql({ query_string: { query: '*' } });
+    it('unless the object is empty, then convert it to an empty string', function () {
+      expect(fromUser({})).to.eql('');
     });
 
-    it('should treat an empty string as a *', function () {
-      expect(fromUser('')).to.eql({ query_string: { query: '*' } });
+    it('should pass through input strings that not start with {', function () {
+      expect(fromUser('foo')).to.eql('foo');
+      expect(fromUser('400')).to.eql('400');
+      expect(fromUser('true')).to.eql('true');
     });
 
-    it('should merge in the query string options', function () {
-      config.set('query:queryString:options', { analyze_wildcard: true });
-      expect(fromUser('foo')).to.eql({ query_string: { query: 'foo', analyze_wildcard: true } });
-      expect(fromUser('')).to.eql({ query_string: { query: '*', analyze_wildcard: true } });
-    });
-
-    it('should treat input that does not start with { as a query string', function () {
-      expect(fromUser('foo')).to.eql({ query_string: { query: 'foo' } });
-      expect(fromUser('400')).to.eql({ query_string: { query: '400' } });
-      expect(fromUser('true')).to.eql({ query_string: { query: 'true' } });
-    });
-
-    it('should parse valid JSON', function () {
+    it('should parse valid JSON and return the object instead of a string', function () {
       expect(fromUser('{}')).to.eql({});
-      expect(fromUser('{a:b}')).to.eql({ query_string: { query: '{a:b}' } });
+
+      // invalid json remains a string
+      expect(fromUser('{a:b}')).to.eql('{a:b}');
     });
   });
 

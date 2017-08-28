@@ -1,10 +1,10 @@
 [[search]]
 == Searching Your Data
 You can search the indices that match the current index pattern by entering
-your search criteria in the Query bar. You can perform a simple text search,
-use the Lucene https://lucene.apache.org/core/2_9_4/queryparsersyntax.html[
-query syntax], or use the full JSON-based {es-ref}query-dsl.html[Elasticsearch
-Query DSL].
+your search criteria in the Query bar. You can use the Lucene
+https://lucene.apache.org/core/2_9_4/queryparsersyntax.html[
+query syntax], the full JSON-based {ref}/query-dsl.html[Elasticsearch
+Query DSL] or Kuery, an experimental new query language built specifically for Kibana.
 
 When you submit a search request, the histogram, Documents table, and Fields
 list are updated to reflect the search results. The total number of hits
@@ -19,6 +19,17 @@ To search your data, enter your search criteria in the Query bar and
 press *Enter* or click *Search* image:images/search-button.jpg[] to submit
 the request to Elasticsearch.
 
+[NOTE]
+===========
+By default, Kibana will accept either the Lucene query syntax or the
+Elasticsearch Query DSL in the Query bar. In order to use the new Kuery
+language you must enable language switching in *Management > Advanced Settings*
+via the `search:queryLanguage:switcher:enable` option. You can also change the 
+default language with the `search:queryLanguage` setting.
+===========
+
+[[lucene-query]]
+=== Lucene Query Syntax
 * To perform a free text search, simply enter a text string. For example, if
 you're searching web server logs, you could enter `safari` to search all
 fields for the term `safari`.
@@ -36,54 +47,56 @@ status codes, you could enter `status:[400 TO 499]`.
 codes and have an extension of `php` or `html`, you could enter `status:[400 TO
 499] AND (extension:php OR extension:html)`.
 
-NOTE: These examples use the Lucene query syntax. You can also submit queries
-using the Elasticsearch Query DSL. For examples, see 
-{es-ref}query-dsl-query-string-query.html#query-string-syntax[query string syntax]
-in the Elasticsearch Reference.
+For more detailed information about the Lucene query syntax, see the
+{ref}/query-dsl-query-string-query.html#query-string-syntax[Query String Query]
+docs.
 
-[float]
-[[save-search]]
-=== Saving a Search
+NOTE: These examples use the Lucene query syntax. When lucene is selected as your
+query language you can also submit queries using the {ref}/query-dsl.html[Elasticsearch Query DSL].
+
+include::kuery.asciidoc[]
+
+[[save-open-search]]
+=== Saving and Opening Searches
 Saving searches enables you to reload them into Discover and use them as the basis
 for <<visualize, visualizations>>. Saving a search saves both the search query string
 and the currently selected index pattern.
 
+==== Saving a Search
 To save the current search:
 
 . Click *Save* in the Kibana toolbar.
 . Enter a name for the search and click *Save*.
 
-You can import, export and delete saved searches from *Management/Kibana/Saved Objects*. 
+You can import, export and delete saved searches from *Management/Kibana/Saved Objects*.
 
-[float]
-[[load-search]]
-=== Opening a Saved Search
+==== Opening a Saved Search
 To load a saved search into Discover:
 
 . Click *Open* in the Kibana toolbar.
 . Select the search you want to open.
 
 If the saved search is associated with a different index pattern than is currently
-selected, opening the saved search also changes the selected index pattern.
+selected, opening the saved search changes the selected index pattern. The query language
+used for the saved search will also be automatically selected.
 
-[float]
+
 [[select-pattern]]
 === Changing Which Indices You're Searching
 When you submit a search request, the indices that match the currently-selected
 index pattern are searched. The current index pattern is shown below the toolbar.
 To change which indices you are searching, click the index pattern and select a
-different index pattern. 
+different index pattern.
 
 For more information about index patterns, see <<settings-create-pattern,
 Creating an Index Pattern>>.
 
-[float]
 [[autorefresh]]
 === Refreshing the Search Results
 As more documents are added to the indices you're searching, the search results
 shown in Discover and used to display visualizations get stale. You can
 configure a refresh interval to periodically resubmit your searches to
-retrieve the latest results.  
+retrieve the latest results.
 
 To enable auto refresh:
 
@@ -100,5 +113,3 @@ click *Pause*.
 
 NOTE: If auto refresh is not enabled, you can manually refresh visualizations
 by clicking *Refresh*.
-
-

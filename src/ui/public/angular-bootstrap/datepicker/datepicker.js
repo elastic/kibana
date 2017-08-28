@@ -119,6 +119,7 @@ angular.module('ui.bootstrap.datepicker', ['ui.bootstrap.dateparser', 'ui.bootst
     } else {
       self.activeDate = date;
       $scope.datepickerMode = self.modes[ self.modes.indexOf( $scope.datepickerMode ) - 1 ];
+      focusElement();
     }
   };
 
@@ -137,6 +138,7 @@ angular.module('ui.bootstrap.datepicker', ['ui.bootstrap.dateparser', 'ui.bootst
     }
 
     $scope.datepickerMode = self.modes[ self.modes.indexOf( $scope.datepickerMode ) + direction ];
+    focusElement();
   };
 
   // Key event mapper
@@ -150,31 +152,6 @@ angular.module('ui.bootstrap.datepicker', ['ui.bootstrap.dateparser', 'ui.bootst
 
   // Listen for focus requests from popup directive
   $scope.$on('datepicker.focus', focusElement);
-
-  $scope.keydown = function( evt ) {
-    var key = $scope.keys[evt.which];
-
-    if ( !key || evt.shiftKey || evt.altKey ) {
-      return;
-    }
-
-    evt.preventDefault();
-    evt.stopPropagation();
-
-    if (key === 'enter' || key === 'space') {
-      if ( self.isDisabled(self.activeDate)) {
-        return; // do nothing
-      }
-      $scope.select(self.activeDate);
-      focusElement();
-    } else if (evt.ctrlKey && (key === 'up' || key === 'down')) {
-      $scope.toggleMode(key === 'up' ? 1 : -1);
-      focusElement();
-    } else {
-      self.handleKeyDown(key, evt);
-      self.refreshView();
-    }
-  };
 }])
 
 .directive( 'datepicker', function () {
@@ -388,6 +365,7 @@ angular.module('ui.bootstrap.datepicker', ['ui.bootstrap.dateparser', 'ui.bootst
 
         scope.title = [years[0].label, years[range - 1].label].join(' - ');
         scope.rows = ctrl.split(years, 5);
+        scope.yearRange = ctrl.yearRange;
       };
 
       ctrl.compare = function(date1, date2) {

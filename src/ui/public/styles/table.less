@@ -35,12 +35,13 @@ kbn-table, .kbn-table, tbody[kbn-rows] {
     }
 
     dt {
-      background-color: rgba(108, 135, 142, 0.15); /* 1 */
+      background-color: fadeout(darken(@globalColorBlue, 20%), 90%);
       color: @table-dt-color;
       padding: @padding-xs-vertical @padding-xs-horizontal;
       margin-right: @padding-xs-horizontal;
       font-family: monospace;
       word-break: normal;
+      border-radius: 2px;
     }
   }
 
@@ -52,11 +53,15 @@ table {
       color: @table-sort-color;
     }
 
+    button.fa-sort-asc,
+    button.fa-sort-down,
     i.fa-sort-asc,
     i.fa-sort-down {
       color: @table-sort-asc-color;
     }
 
+    button.fa-sort-desc,
+    button.fa-sort-up,
     i.fa-sort-desc,
     i.fa-sort-up {
       color: @table-sort-desc-color;

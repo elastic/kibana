@@ -1,0 +1,4 @@
+extends: '../.eslintrc'
+
+rules:
+  no-var: 0

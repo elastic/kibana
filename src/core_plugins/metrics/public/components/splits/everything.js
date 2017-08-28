@@ -1,6 +1,7 @@
 import createSelectHandler from '../lib/create_select_handler';
 import GroupBySelect from './group_by_select';
-import React, { PropTypes } from 'react';
+import PropTypes from 'prop-types';
+import React from 'react';
 
 function SplitByEverything(props) {
   const { onChange, model } = props;
@@ -11,7 +12,8 @@ function SplitByEverything(props) {
       <div className="vis_editor__split-selects">
         <GroupBySelect
           value={model.split_mode}
-          onChange={handleSelectChange('split_mode')} />
+          onChange={handleSelectChange('split_mode')}
+        />
       </div>
     </div>
   );

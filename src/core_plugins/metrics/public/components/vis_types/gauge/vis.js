@@ -1,7 +1,10 @@
-import React, { PropTypes } from 'react';
+import PropTypes from 'prop-types';
+import React from 'react';
+import { visWithSplits } from '../../vis_with_splits';
 import tickFormatter from '../../lib/tick_formatter';
 import _ from 'lodash';
-import { Gauge, getLastValue } from 'plugins/metrics/visualizations';
+import Gauge from 'plugins/metrics/visualizations/components/gauge';
+import getLastValue from 'plugins/metrics/visualizations/lib/get_last_value';
 import color from 'color';
 
 function getColors(props) {
@@ -27,6 +30,7 @@ function GaugeVisualization(props) {
   const { backgroundColor, model, visData } = props;
   const colors = getColors(props);
   const series = _.get(visData, `${model.id}.series`, [])
+    .filter(row => row)
     .map((row, i) => {
       const seriesDef = model.series.find(s => _.includes(row.id, s.id));
       const newProps = {};
@@ -39,7 +43,8 @@ function GaugeVisualization(props) {
   const params = {
     metric: series[0],
     type: model.gauge_style || 'half',
-    reversed: props.reversed
+    reversed: props.reversed,
+    additionalLabel: props.additionalLabel
   };
 
   if (colors.text) {
@@ -68,6 +73,7 @@ function GaugeVisualization(props) {
 GaugeVisualization.propTypes = {
   backgroundColor: PropTypes.string,
   className: PropTypes.string,
+  additionalLabel: PropTypes.string,
   model: PropTypes.object,
   onBrush: PropTypes.func,
   onChange: PropTypes.func,
@@ -75,4 +81,4 @@ GaugeVisualization.propTypes = {
   visData: PropTypes.object
 };
 
-export default GaugeVisualization;
+export default visWithSplits(GaugeVisualization);

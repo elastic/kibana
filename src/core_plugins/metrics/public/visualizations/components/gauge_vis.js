@@ -1,4 +1,5 @@
-import React, { Component, PropTypes } from 'react';
+import PropTypes from 'prop-types';
+import React, { Component } from 'react';
 import _ from 'lodash';
 import reactcss from 'reactcss';
 import calculateCorrdinates from '../lib/calculate_corrdinates';
@@ -137,7 +138,8 @@ class GaugeVis extends Component {
     return (
       <div
         ref={(el) => this.resize = el}
-        style={styles.resize}>
+        style={styles.resize}
+      >
         <div style={styles.svg} ref={(el) => this.inner = el}>
           {svg}
         </div>

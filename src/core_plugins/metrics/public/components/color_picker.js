@@ -1,7 +1,7 @@
-import React, { Component, PropTypes } from 'react';
+import PropTypes from 'prop-types';
+import React, { Component } from 'react';
 import Tooltip from './tooltip';
-import CustomColorPicker from './custom_color_picker';
-const Picker = CustomColorPicker;
+import Picker from './custom_color_picker';
 
 class ColorPicker extends Component {
 
@@ -44,14 +44,16 @@ class ColorPicker extends Component {
       return (
         <div
           className="vis_editor__color_picker-swatch-empty"
-          onClick={this.handleClick}/>
+          onClick={this.handleClick}
+        />
       );
     }
     return (
       <div
         style={{ backgroundColor: this.props.value }}
         className="vis_editor__color_picker-swatch"
-        onClick={this.handleClick}/>
+        onClick={this.handleClick}
+      />
     );
   }
 
@@ -72,13 +74,21 @@ class ColorPicker extends Component {
       <div className="vis_editor__color_picker">
         { swatch }
         { clear }
-        { this.state.displayPicker ? <div className="vis_editor__color_picker-popover">
-          <div className="vis_editor__color_picker-cover"
-            onClick={this.handleClose}/>
-          <Picker
-            color={ value }
-            onChangeComplete={this.handleChange} />
-        </div> : null }
+        {
+          this.state.displayPicker
+          ? (
+            <div className="vis_editor__color_picker-popover">
+              <div
+                className="vis_editor__color_picker-cover"
+                onClick={this.handleClose}
+              />
+              <Picker
+                color={value}
+                onChangeComplete={this.handleChange}
+              />
+            </div>
+          ) : null
+        }
       </div>
     );
   }

@@ -1,17 +1,17 @@
 import _ from 'lodash';
 import { Scanner } from 'ui/utils/scanner';
 import { StringUtils } from 'ui/utils/string_utils';
+import { SavedObjectsClient } from 'ui/saved_objects';
 
 export class SavedObjectLoader {
-  constructor(SavedObjectClass, kbnIndex, esAdmin, kbnUrl) {
+  constructor(SavedObjectClass, kbnIndex, kbnUrl, $http) {
     this.type = SavedObjectClass.type;
     this.Class = SavedObjectClass;
     this.lowercaseType = this.type.toLowerCase();
     this.kbnIndex = kbnIndex;
     this.kbnUrl = kbnUrl;
-    this.esAdmin = esAdmin;
 
-    this.scanner = new Scanner(esAdmin, {
+    this.scanner = new Scanner($http, {
       index: kbnIndex,
       type: this.lowercaseType
     });
@@ -21,6 +21,8 @@ export class SavedObjectLoader {
       noun: StringUtils.upperFirst(this.type),
       nouns: `${ this.lowercaseType }s`,
     };
+
+    this.savedObjectsClient = new SavedObjectsClient($http);
   }
 
   /**
@@ -49,15 +51,15 @@ export class SavedObjectLoader {
   }
 
   /**
-   * Updates hit._source to contain an id and url field, and returns the updated
+   * Updates source to contain an id and url field, and returns the updated
    * source object.
-   * @param hit
-   * @returns {hit._source} The modified hit._source object, with an id and url field.
+   * @param source
+   * @param id
+   * @returns {source} The modified source object, with an id and url field.
    */
-  mapHits(hit) {
-    const source = hit._source;
-    source.id = hit._id;
-    source.url = this.urlFor(hit._id);
+  mapHitSource(source, id) {
+    source.id = id;
+    source.url = this.urlFor(id);
     return source;
   }
 
@@ -65,7 +67,17 @@ export class SavedObjectLoader {
     return this.scanner.scanAndMap(queryString, {
       pageSize,
       docCount: Infinity
-    }, (hit) => this.mapHits(hit));
+    });
+  }
+
+  /**
+   * Updates hit.attributes to contain an id and url field, and returns the updated
+   * attributes object.
+   * @param hit
+   * @returns {hit.attributes} The modified hit.attributes object, with an id and url field.
+   */
+  mapSavedObjectApiHits(hit) {
+    return this.mapHitSource(hit.attributes, hit.id);
   }
 
   /**
@@ -76,32 +88,18 @@ export class SavedObjectLoader {
    * @param size
    * @returns {Promise}
    */
-  find(searchString, size = 100) {
-    let body;
-    if (searchString) {
-      body = {
-        query: {
-          simple_query_string: {
-            query: searchString + '*',
-            fields: ['title^3', 'description'],
-            default_operator: 'AND'
-          }
-        }
-      };
-    } else {
-      body = { query: { match_all: {} } };
-    }
-
-    return this.esAdmin.search({
-      index: this.kbnIndex,
-      type: this.lowercaseType,
-      body,
-      size
-    })
-      .then((resp) => {
+  find(search = '', size = 100) {
+    return this.savedObjectsClient.find(
+      {
+        type: this.lowercaseType,
+        search: search ? `${search}*` : undefined,
+        perPage: size,
+        page: 1,
+        searchFields: ['title^3', 'description']
+      }).then((resp) => {
         return {
-          total: resp.hits.total,
-          hits: resp.hits.hits.map((hit) => this.mapHits(hit))
+          total: resp.total,
+          hits: resp.savedObjects.map((savedObject) => this.mapSavedObjectApiHits(savedObject))
         };
       });
   }

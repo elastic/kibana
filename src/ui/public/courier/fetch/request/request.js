@@ -13,6 +13,12 @@ export function AbstractRequestProvider(Private, Promise) {
       this.source = source;
       this.defer = defer || Promise.defer();
       this.abortedDefer = Promise.defer();
+
+      this.setErrorHandler((...args) => {
+        this.retry();
+        return requestErrorHandler(...args);
+      });
+
       requestQueue.push(this);
     }
 
@@ -89,8 +95,7 @@ export function AbstractRequestProvider(Private, Promise) {
     handleFailure(error) {
       this.success = false;
       this.resp = error && error.resp;
-      this.retry();
-      return requestErrorHandler(this, error);
+      return this.errorHandler(this, error);
     }
 
     isIncomplete() {
@@ -142,6 +147,10 @@ export function AbstractRequestProvider(Private, Promise) {
 
     clone() {
       return new this.constructor(this.source, this.defer);
+    }
+
+    setErrorHandler(errorHandler) {
+      this.errorHandler = errorHandler;
     }
   };
 }

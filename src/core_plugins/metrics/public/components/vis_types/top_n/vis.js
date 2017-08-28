@@ -1,10 +1,14 @@
 import tickFormatter from '../../lib/tick_formatter';
 import _ from 'lodash';
-import { TopN, getLastValue } from 'plugins/metrics/visualizations';
+import TopN from 'plugins/metrics/visualizations/components/top_n';
+import getLastValue from 'plugins/metrics/visualizations/lib/get_last_value';
+
 import color from 'color';
 import replaceVars from '../../lib/replace_vars';
 
-import React, { PropTypes } from 'react';
+import PropTypes from 'prop-types';
+
+import React from 'react';
 function TopNVisualization(props) {
   const { backgroundColor, model, visData } = props;
 

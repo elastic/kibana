@@ -4,7 +4,7 @@ import moment from 'moment-timezone';
 import { DocTitleProvider } from 'ui/doc_title';
 import { SavedObjectRegistryProvider } from 'ui/saved_objects/saved_object_registry';
 import { notify } from 'ui/notify';
-import 'ui/accessibility/kbn_accessible_click';
+import { timezoneProvider } from 'ui/vis/lib/timezone';
 
 require('plugins/timelion/directives/cells/cells');
 require('plugins/timelion/directives/fixed_element');
@@ -24,8 +24,6 @@ const app = require('ui/modules').get('apps/timelion', []);
 require('plugins/timelion/services/saved_sheets');
 require('plugins/timelion/services/_saved_sheet');
 
-require('plugins/kibana/visualize/saved_visualizations/saved_visualizations');
-require('plugins/kibana/discover/saved_searches/saved_searches');
 require('./vis');
 
 SavedObjectRegistryProvider.register(require('plugins/timelion/services/saved_sheet_register'));
@@ -61,7 +59,6 @@ app.controller('timelion', function (
     kbnUrl,
     Notifier,
     Private,
-    savedVisualizations,
     timefilter
   ) {
 
@@ -78,7 +75,8 @@ app.controller('timelion', function (
     location: 'Timelion'
   });
 
-  const timezone = Private(require('plugins/timelion/services/timezone'))();
+  const savedVisualizations = Private(SavedObjectRegistryProvider).byLoaderPropertiesName.visualizations;
+  const timezone = Private(timezoneProvider)();
   const docTitle = Private(DocTitleProvider);
 
   const defaultExpression = '.es(*)';
@@ -217,15 +215,18 @@ app.controller('timelion', function (
     $scope.state.save();
     $scope.running = true;
 
-    $http.post('../api/timelion/run', {
+    const httpResult = $http.post('../api/timelion/run', {
       sheet: $scope.state.sheet,
       time: _.extend(timefilter.time, {
         interval: $scope.state.interval,
         timezone: timezone
       }),
     })
-    // data, status, headers, config
-    .success(function (resp) {
+    .then(resp => resp.data)
+    .catch(resp => { throw resp.data; });
+
+    httpResult
+    .then(function (resp) {
       dismissNotifications();
       $scope.stats = resp.stats;
       $scope.sheet = resp.sheet;
@@ -236,7 +237,7 @@ app.controller('timelion', function (
       });
       $scope.running = false;
     })
-    .error(function (resp) {
+    .catch(function (resp) {
       $scope.sheet = [];
       $scope.running = false;
 

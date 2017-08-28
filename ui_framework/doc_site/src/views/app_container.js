@@ -3,11 +3,14 @@ import { connect } from 'react-redux';
 
 import {
   getIsCodeViewerOpen,
+  getIsSandbox,
   getSections,
   getSource,
   getTitle,
 } from '../store';
+
 import { AppView } from './app_view';
+
 import {
   openCodeViewer,
   closeCodeViewer,
@@ -19,6 +22,7 @@ function mapStateToProps(state, ownProps) {
   return {
     routes: ownProps.routes,
     isCodeViewerOpen: getIsCodeViewerOpen(state),
+    isSandbox: getIsSandbox(state),
     source: getSource(state),
     title: getTitle(state),
     sections: getSections(state),

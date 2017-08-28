@@ -81,20 +81,6 @@ export function createIndexPatternsApiClient($http, basePath) {
         request('GET', url).then(resp => resp.fields)
       ));
     }
-
-    testTimePattern(options = {}) {
-      const {
-        pattern
-      } = options;
-
-      const url = getUrl(['_test_time_pattern'], {
-        pattern,
-      });
-
-      return notify.event(`testTimePattern(${pattern})`, () => (
-        request('GET', url)
-      ));
-    }
   }
 
   return new IndexPatternsApiClient();

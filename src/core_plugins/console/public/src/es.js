@@ -1,44 +1,25 @@
 import { stringify as formatQueryString } from 'querystring'
-
 import $ from 'jquery';
 
 let esVersion = [];
 
-module.exports.getVersion = function () {
+export function getVersion() {
   return esVersion;
-};
+}
 
-module.exports.send = function (method, path, data) {
+export function getContentType(body) {
+  if (!body) return;
+  return 'application/json';
+}
+
+export function send(method, path, data) {
   var wrappedDfd = $.Deferred();
 
   console.log("Calling " + path);
-  if (data && method == "GET") {
-    method = "POST";
-  }
-
-  let contentType;
-  if (data) {
-    try {
-      JSON.parse(data);
-      contentType = 'application/json';
-    }
-    catch (e) {
-      try {
-        data.split('\n').forEach(line => {
-          if (!line) return;
-          JSON.parse(line);
-        });
-        contentType = 'application/x-ndjson';
-      } catch (e){
-        contentType = 'text/plain';
-      }
-    }
-  }
-
   var options = {
     url: '../api/console/proxy?' + formatQueryString({ path, method }),
     data,
-    contentType,
+    contentType: getContentType(data),
     cache: false,
     crossDomain: true,
     type: 'POST',
@@ -57,10 +38,10 @@ module.exports.send = function (method, path, data) {
       wrappedDfd.rejectWith(this, [jqXHR, textStatus, errorThrown]);
     });
   return wrappedDfd;
-};
+}
 
-module.exports.constructESUrl = function (baseUri, path) {
+export function constructESUrl(baseUri, path) {
   baseUri = baseUri.replace(/\/+$/, '');
   path = path.replace(/^\/+/, '');
   return baseUri + '/' + path;
-};
+}

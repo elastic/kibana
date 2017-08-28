@@ -1,4 +1,5 @@
-import React, { PropTypes } from 'react';
+import PropTypes from 'prop-types';
+import React from 'react';
 import Select from 'react-select';
 function GroupBySelect(props) {
   const modeOptions = [
@@ -10,9 +11,10 @@ function GroupBySelect(props) {
   return (
     <Select
       clearable={false}
-      value={ props.value || 'everything' }
+      value={props.value || 'everything'}
       onChange={props.onChange}
-      options={ modeOptions }/>
+      options={modeOptions}
+    />
   );
 
 }

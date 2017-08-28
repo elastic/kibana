@@ -8,7 +8,7 @@
         id="gaugeType"
         class="kuiSelect kuiSideBarSelect"
         ng-model="vis.params.gauge.gaugeType"
-        ng-options="mode for mode in vis.type.params.gaugeTypes"
+        ng-options="mode for mode in collections.gaugeTypes"
       ></select>
     </div>
   </div>
@@ -97,16 +97,17 @@
         <table class="vis-editor-agg-editor-ranges form-group" ng-show="vis.params.gauge.colorsRange.length">
           <tr>
             <th>
-              <label>From</label>
+              <label id="gaugeOptionsCustomRangeFrom">From</label>
             </th>
             <th colspan="2">
-              <label>To</label>
+              <label id="gaugeOptionsCustomRangeTo">To</label>
             </th>
           </tr>
 
           <tr ng-repeat="range in vis.params.gauge.colorsRange track by $index">
             <td>
               <input
+                aria-labelledby="gaugeOptionsCustomRangeFrom"
                 ng-model="range.from"
                 type="number"
                 class="form-control"
@@ -117,6 +118,7 @@
             </td>
             <td>
               <input
+                aria-labelledby="gaugeOptionsCustomRangeTo"
                 ng-model="range.to"
                 type="number"
                 class="form-control"
@@ -183,7 +185,7 @@
               id="colorSchema"
               class="kuiSelect kuiSideBarSelect"
               ng-model="vis.params.gauge.colorSchema"
-              ng-options="mode for mode in vis.type.params.colorSchemas"
+              ng-options="mode for mode in collections.colorSchemas"
             ></select>
           </div>
           <div class="text-info text-center" ng-show="customColors" ng-click="resetColors()">reset colors</div>
@@ -255,7 +257,7 @@
                 id="gaugeColorMode"
                 class="kuiSelect kuiSideBarSelect"
                 ng-model="vis.params.gauge.gaugeColorMode"
-                ng-options="mode for mode in vis.type.params.gaugeColorMode"
+                ng-options="mode for mode in collections.gaugeColorMode"
               ></select>
             </div>
           </div>

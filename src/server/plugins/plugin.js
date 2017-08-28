@@ -48,7 +48,7 @@ const defaultConfigSchema = Joi.object({
  *    the root of the plugin. Set this to false to disable exposure of a
  *    public directory
  */
-module.exports = class Plugin {
+export default class Plugin {
   constructor(kbnServer, path, pkg, opts) {
     this.kbnServer = kbnServer;
     this.pkg = pkg;
@@ -117,9 +117,9 @@ module.exports = class Plugin {
     const asyncRegister = async (server, options) => {
       this.server = server;
 
-      await Promise.all(this[extendInitFns].map(async fn => {
+      for (const fn of this[extendInitFns]) {
         await fn.call(this, server, options);
-      }));
+      }
 
       server.log(['plugins', 'debug'], {
         tmpl: 'Initializing plugin <%= plugin.toString() %>',
@@ -172,4 +172,4 @@ module.exports = class Plugin {
   toString() {
     return `${this.id}@${this.version}`;
   }
-};
+}

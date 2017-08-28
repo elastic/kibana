@@ -12,14 +12,6 @@ doc-table {
   flex: 1 1 100%;
   flex-direction: column; /* 1 */
 
-  /**
-   * 1. Allow user to scroll table when its constrained by a fixed container height.
-   */
-  .doc-table-container {
-    flex: 1 1 0; /* 1 */
-    overflow: auto; /* 1 */
-  }
-
   .discover-table-datafield {
     white-space: pre-wrap;
 
@@ -40,7 +32,6 @@ doc-table {
 
       .table-cell-filter {
         position: absolute;
-        background-color: @panel-bg;
         white-space: nowrap;
         right: 0;
       }
@@ -50,6 +41,13 @@ doc-table {
           opacity: 1;
         }
       }
+    }
+  }
+
+  .discover-table-row--highlight {
+    td,
+    .docTableRowFilterButton {
+      background-color: #E2F1F6;
     }
   }
 
@@ -74,19 +72,21 @@ doc-table {
  */
 .docTableRowFilterButton {
   appearance: none;
-  background-color: transparent;
+  background-color: @panel-bg;
   border: none;
-  padding: 0;
+  padding: 0 3px;
   font-size: 14px;
   line-height: 1; /* 1 */
   display: inline-block;
   opacity: 0; /* 2 */
 
-  & + & {
-    margin-left: 5px;
-  }
-
   &:focus {
     opacity: 1; /* 3 */
   }
+}
+
+.docTableHeaderButton {
+  border: none;
+  background: none;
+  padding: 0;
 }

@@ -1,7 +1,7 @@
 import _ from 'lodash';
 import sinon from 'sinon';
 import Promise from 'bluebird';
-import { IndexPatternProvider } from 'ui/index_patterns/_index_pattern';
+import { IndexPatternProvider, getRoutes } from 'ui/index_patterns/_index_pattern';
 import { formatHit } from 'ui/index_patterns/_format_hit';
 import { getComputedFields } from 'ui/index_patterns/_get_computed_fields';
 import { RegistryFieldFormatsProvider } from 'ui/registry/field_formats';
@@ -23,7 +23,7 @@ export default function (Private) {
     this.getSourceFiltering = sinon.stub();
     this.metaFields = ['_id', '_type', '_source'];
     this.fieldFormatMap = {};
-    this.routes = IndexPatternProvider.routes;
+    this.routes = getRoutes();
 
     this.toIndexList = _.constant(Promise.resolve(pattern.split(',')));
     this.toDetailedIndexList = _.constant(Promise.resolve(pattern.split(',').map(index => ({

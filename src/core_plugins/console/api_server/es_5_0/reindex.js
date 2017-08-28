@@ -1,4 +1,4 @@
-module.exports = function (api) {
+export default function (api) {
 
   api.addEndpointDescription('_post_reindex', {
     methods: [ 'POST' ],
@@ -54,4 +54,4 @@ module.exports = function (api) {
       'script': { __scope_link: 'GLOBAL.script' },
     }
   })
-};
+}

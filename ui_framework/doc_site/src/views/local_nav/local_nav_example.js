@@ -1,3 +1,4 @@
+/* eslint import/no-duplicates: 0, import/default: 0 */
 import React from 'react';
 
 import { renderToHtml } from '../../services';
@@ -60,7 +61,7 @@ export default props => (
       ]}
     >
       <GuideText>
-        Here's a simple LocalNav with a Title in the top left corner and Menu in the top right.
+        Here&rsquo;s a simple LocalNav with a Title in the top left corner and Menu in the top right.
       </GuideText>
 
       <GuideDemo>

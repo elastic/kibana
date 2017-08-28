@@ -2,8 +2,8 @@ export function DocTableProvider({ getService }) {
   const testSubjects = getService('testSubjects');
 
   class DocTable {
-    getTable() {
-      return testSubjects.find('docTable');
+    async getTable() {
+      return await testSubjects.find('docTable');
     }
 
     async getBodyRows(table) {

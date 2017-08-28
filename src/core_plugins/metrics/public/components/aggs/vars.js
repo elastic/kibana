@@ -1,7 +1,8 @@
-import React, { Component, PropTypes } from 'react';
+import PropTypes from 'prop-types';
+import React, { Component } from 'react';
 import _ from 'lodash';
 import AddDeleteButtons from '../add_delete_buttons';
-import collectionActions from '../lib/collection_actions';
+import * as collectionActions from '../lib/collection_actions';
 import MetricSelect from './metric_select';
 
 class CalculationVars extends Component {
@@ -31,7 +32,8 @@ class CalculationVars extends Component {
             className="vis_editor__input-grows-100"
             type="text"
             onChange={this.handleChange(row, 'name')}
-            value={row.name} />
+            value={row.name}
+          />
         </div>
         <div className="vis_editor__calc_vars-var">
           <MetricSelect
@@ -39,13 +41,15 @@ class CalculationVars extends Component {
             exclude={['percentile']}
             metrics={this.props.metrics}
             metric={this.props.model}
-            value={row.field}/>
+            value={row.field}
+          />
         </div>
         <div className="vis_editor__calc_vars-control">
           <AddDeleteButtons
             onAdd={handleAdd}
             onDelete={handleDelete}
-            disableDelete={items.length < 2}/>
+            disableDelete={items.length < 2}
+          />
         </div>
       </div>
     );

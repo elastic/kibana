@@ -9,6 +9,7 @@ import {
   unhashUrl,
 } from 'ui/state_management/state_hashing';
 import { notify } from 'ui/notify';
+import { SubUrlRouteFilterProvider } from './sub_url_route_filter';
 
 export function kbnChromeProvider(chrome, internals) {
 
@@ -37,18 +38,27 @@ export function kbnChromeProvider(chrome, internals) {
         const getUnhashableStates = Private(getUnhashableStatesProvider);
 
         // are we showing the embedded version of the chrome?
-        internals.setVisibleDefault(!$location.search().embed);
+        if (Boolean($location.search().embed)) {
+          internals.permanentlyHideChrome();
+        }
 
-        // listen for route changes, propogate to tabs
-        const onRouteChange = function () {
+        const subUrlRouteFilter = Private(SubUrlRouteFilterProvider);
+
+        function updateSubUrls() {
           const urlWithHashes = window.location.href;
           const urlWithStates = unhashUrl(urlWithHashes, getUnhashableStates());
           internals.trackPossibleSubUrl(urlWithStates);
-        };
+        }
+
+        function onRouteChange($event) {
+          if (subUrlRouteFilter($event)) {
+            updateSubUrls();
+          }
+        }
 
         $rootScope.$on('$routeChangeSuccess', onRouteChange);
         $rootScope.$on('$routeUpdate', onRouteChange);
-        onRouteChange();
+        updateSubUrls(); // initialize sub urls
 
         const allPendingHttpRequests = () => $http.pendingRequests;
         const removeSystemApiRequests = (pendingHttpRequests = []) => remove(pendingHttpRequests, isSystemApiRequest);

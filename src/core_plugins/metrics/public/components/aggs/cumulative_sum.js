@@ -1,4 +1,5 @@
-import React, { PropTypes } from 'react';
+import PropTypes from 'prop-types';
+import React from 'react';
 import AggRow from './agg_row';
 import AggSelect from './agg_select';
 import MetricSelect from './metric_select';
@@ -10,18 +11,20 @@ function CumlativeSumAgg(props) {
   const handleChange = createChangeHandler(props.onChange, model);
   const handleSelectChange = createSelectHandler(handleChange);
   return (
-      <AggRow
-        disableDelete={props.disableDelete}
-        model={props.model}
-        onAdd={props.onAdd}
-        onDelete={props.onDelete}
-        siblings={props.siblings}>
+    <AggRow
+      disableDelete={props.disableDelete}
+      model={props.model}
+      onAdd={props.onAdd}
+      onDelete={props.onDelete}
+      siblings={props.siblings}
+    >
       <div className="vis_editor__row_item">
         <div className="vis_editor__label">Aggregation</div>
         <AggSelect
           siblings={props.siblings}
           value={model.type}
-          onChange={handleSelectChange('type')}/>
+          onChange={handleSelectChange('type')}
+        />
       </div>
       <div className="vis_editor__row_item">
         <div className="vis_editor__label">Metric</div>
@@ -29,7 +32,8 @@ function CumlativeSumAgg(props) {
           onChange={handleSelectChange('field')}
           metrics={siblings}
           metric={model}
-          value={model.field}/>
+          value={model.field}
+        />
       </div>
     </AggRow>
   );

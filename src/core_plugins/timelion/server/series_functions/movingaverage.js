@@ -3,7 +3,7 @@ import _ from 'lodash';
 import Chainable from '../lib/classes/chainable';
 import toMS from '../lib/to_milliseconds.js';
 
-module.exports = new Chainable('movingaverage', {
+export default new Chainable('movingaverage', {
   args: [
     {
       name: 'inputSeries',

@@ -6,10 +6,12 @@ export default function dateHistogram(req, panel, annotation) {
     const timeField = annotation.time_field;
     const { bucketSize, intervalString } = getBucketSize(req, 'auto');
     const { from, to } = getTimerange(req);
+    const { timezone:time_zone } = req.payload.timerange;
     _.set(doc, `aggs.${annotation.id}.date_histogram`, {
       field: timeField,
       interval: intervalString,
       min_doc_count: 0,
+      time_zone,
       extended_bounds: {
         min: from.valueOf(),
         max: to.valueOf() - (bucketSize * 1000)

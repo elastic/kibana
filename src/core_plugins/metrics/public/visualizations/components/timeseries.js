@@ -1,4 +1,5 @@
-import React, { Component, PropTypes } from 'react';
+import PropTypes from 'prop-types';
+import React, { Component } from 'react';
 import _ from 'lodash';
 import getLastValue from '../lib/get_last_value';
 import TimeseriesChart from './timeseries_chart';
@@ -121,17 +122,20 @@ class Timeseries extends Component {
         <div style={styles.content} className="rhythm_chart__content">
           <div className="rhythm_chart__visualization">
             <TimeseriesChart
+              dateFormat={this.props.dateFormat}
               crosshair={this.props.crosshair}
               onBrush={this.props.onBrush}
-              plothover={ this.plothover}
+              plothover={this.plothover}
               reversed={this.props.reversed}
               series={this.props.series}
               annotations={this.props.annotations}
-              show={ this.state.show }
+              show={this.state.show}
+              showGrid={this.props.showGrid}
               tickFormatter={this.props.tickFormatter}
               options={this.props.options}
               xaxisLabel={this.props.xaxisLabel}
-              yaxes={this.props.yaxes} />
+              yaxes={this.props.yaxes}
+            />
           </div>
           <Legend
             legendPosition={this.props.legendPosition}
@@ -141,7 +145,8 @@ class Timeseries extends Component {
             showLegend={this.state.showLegend}
             seriesValues={this.state.values}
             seriesFilter={this.state.show}
-            tickFormatter={this.props.tickFormatter} />
+            tickFormatter={this.props.tickFormatter}
+          />
         </div>
       </div>
     );
@@ -152,7 +157,8 @@ class Timeseries extends Component {
 }
 
 Timeseries.defaultProps = {
-  legned: true
+  legned: true,
+  showGrid: true
 };
 
 Timeseries.propTypes = {
@@ -164,7 +170,9 @@ Timeseries.propTypes = {
   reversed: PropTypes.bool,
   options: PropTypes.object,
   tickFormatter: PropTypes.func,
-  xaxisLabel: PropTypes.string
+  showGrid: PropTypes.bool,
+  xaxisLabel: PropTypes.string,
+  dateFormat: PropTypes.string
 };
 
 export default Timeseries;

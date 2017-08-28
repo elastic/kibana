@@ -1,6 +1,6 @@
 import _, { keys } from 'lodash';
 
-import visualRegression from '../utilities/visual_regression';
+import { run } from '../utilities/visual_regression';
 
 module.exports = function (grunt) {
   grunt.registerTask(
@@ -8,15 +8,13 @@ module.exports = function (grunt) {
     'Compare screenshots and generate diff images.',
     function () {
       const done = this.async();
-      visualRegression.run(done);
+      run(done);
     }
   );
 
   grunt.registerTask('test:server', [
     'checkPlugins',
-    'esvm:test',
     'simplemocha:all',
-    'esvm_shutdown:test',
   ]);
 
   grunt.registerTask('test:browser', [
@@ -92,7 +90,7 @@ module.exports = function (grunt) {
   ]);
 
   grunt.registerTask('test:api:runner', () => {
-    grunt.fail.fatal('test:api:runner has moved, use: `node scripts/function_test_runner --config test/api_integration/config.js`');
+    grunt.fail.fatal('test:api:runner has moved, use: `node scripts/functional_test_runner --config test/api_integration/config.js`');
   });
 
   grunt.registerTask('test', subTask => {

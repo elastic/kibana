@@ -1,4 +1,5 @@
-import React, { Component, PropTypes } from 'react';
+import PropTypes from 'prop-types';
+import React, { Component } from 'react';
 import _ from 'lodash';
 import getLastValue from '../lib/get_last_value';
 import reactcss from 'reactcss';
@@ -35,13 +36,17 @@ class TopN extends Component {
         }
       }, this.props);
       return (
-        <tr key={key}
+        <tr
+          key={key}
           onClick={this.handleClick({ lastValue, ...item })}
-          style={styles.row}>
+          style={styles.row}
+        >
           <td width="1*" className="rhythm_top_n__label">{ item.label }</td>
           <td width="100%" className="rhythm_top_n__bar">
-            <div className="rhythm_top_n__inner-bar"
-              style={styles.innerBar}/>
+            <div
+              className="rhythm_top_n__inner-bar"
+              style={styles.innerBar}
+            />
           </td>
           <td width="1*" className="rhythm_top_n__value">{ value }</td>
         </tr>

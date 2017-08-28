@@ -1,5 +1,4 @@
 import { union } from 'lodash';
-import { getDefaultSettings } from '../../ui/ui_settings/defaults';
 import findSourceFiles from './find_source_files';
 import { fromRoot } from '../../utils';
 
@@ -51,13 +50,17 @@ export default (kibana) => {
 
         if (config.get('tests_bundle.instrument')) {
           env.addPostLoader({
-            test: /\.jsx?$/,
+            test: /\.js$/,
             exclude: /[\/\\](__tests__|node_modules|bower_components|webpackShims)[\/\\]/,
             loader: 'istanbul-instrumenter'
           });
         }
 
-        env.defaultUiSettings = getDefaultSettings();
+        env.defaultUiSettings = plugins.kbnServer.uiExports.consumers
+          // find the first uiExportsConsumer that has a getUiSettingDefaults method
+          // See src/ui/ui_settings/ui_exports_consumer.js
+          .find(consumer => typeof consumer.getUiSettingDefaults === 'function')
+          .getUiSettingDefaults();
 
         return new UiBundle({
           id: 'tests',

@@ -1,5 +1,22 @@
 //== Colors
 //
+
+// KUI coloring =====================================================================
+
+@globalColorBlue: #0079a5;
+@globalColorLightBlue: #006E8A;
+@globalColorRed: #A30000;
+@globalColorLightestGray: #F5F5F5;
+@globalColorLightGray: #D9D9D9;
+@globalColorLighterGray: #a7a7a7;
+@globalColorMediumGray: #999;
+@globalColorDarkGray: #666;
+@globalColorDarkestGray: #3F3F3F;
+@globalColorBlack: #000;
+@globalColorWhite: #FFF;
+@globalColorTeal: #00A69B;
+@globalColorOrange: #E5830E;
+
 //## Gray and brand colors for use across Bootstrap.
 
 @white:                                 #ffffff;
@@ -24,7 +41,7 @@
 @gray-dark:                             #7b8a8b;
 @gray:                                  #95a5a6;
 @gray-light:                            #b4bcc2;
-@gray-lighter:                          #ecf0f1;
+@gray-lighter:                          @globalColorLightGray;
 
 @esGreen:                               #94C63D;
 @esGreen2:                              darken(@esGreen, 25%);
@@ -33,7 +50,7 @@
 @brand-success:                         #31C471;
 @brand-info:                            #1F6B7A;
 @brand-warning:                         #F39C12;
-@brand-danger:                          #E74C3C;
+@brand-danger:                          @globalColorRed;
 
 @kibanaGray1:                           #2D2D2D;
 @kibanaGray2:                           #5A5A5A;
@@ -43,9 +60,9 @@
 @kibanaGray6:                           #F6F6F6;
 @kibanaGray7:                           #FFFFFF;
 
-@kibanaBlue1:                           #105A73;
-@kibanaBlue2:                           #328CAA;
-@kibanaBlue3:                           #6EADC1;
+@kibanaBlue1:                           darken(@kibanaBlue2, 10%);
+@kibanaBlue2:                           @globalColorBlue;
+@kibanaBlue3:                           @globalColorBlue;
 @kibanaBlue4:                           #9DD0E0;
 @kibanaBlue5:                           #CEE8F0;
 @kibanaBlue6:                           #f5fafb;

@@ -8,9 +8,14 @@ import { uiModules } from 'ui/modules';
 
 const chrome = require('ui/chrome')
 .setRootTemplate(require('plugins/status_page/status_page.html'))
-.setRootController('ui', function ($http) {
+.setRootController('ui', function ($http, buildNum, buildSha) {
   const ui = this;
   ui.loading = false;
+
+  ui.buildInfo = {
+    num: buildNum,
+    sha: buildSha.substr(0, 8)
+  };
 
   ui.refresh = function () {
     ui.loading = true;

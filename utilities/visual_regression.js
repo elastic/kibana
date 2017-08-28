@@ -1,4 +1,3 @@
-
 import bluebird, {
   fromNode,
   promisify,
@@ -14,7 +13,6 @@ import SimpleGit from 'simple-git';
 const readDirAsync = promisify(fs.readdir);
 const readFileAsync = promisify(fs.readFile);
 const writeFileAsync = promisify(fs.writeFile);
-
 
 Handlebars.registerHelper('lte', function lessThanEquals(value, threshold, options) {
   if (value <= threshold) {
@@ -124,16 +122,14 @@ async function compareScreenshots() {
   });
 }
 
-module.exports = {
-  run: done => {
-    compareScreenshots().then(screenshotComparisons => {
-      // Once all of the data has been loaded, we can build the gallery.
-      buildGallery(screenshotComparisons).then(() => {
-        done();
-      });
-    }, error => {
-      console.error(error);
-      done(false);
+export function run(done) {
+  compareScreenshots().then(screenshotComparisons => {
+    // Once all of the data has been loaded, we can build the gallery.
+    buildGallery(screenshotComparisons).then(() => {
+      done();
     });
-  }
-};
+  }, error => {
+    console.error(error);
+    done(false);
+  });
+}

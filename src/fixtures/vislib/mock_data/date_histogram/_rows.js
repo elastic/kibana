@@ -1,6 +1,6 @@
 import moment from 'moment';
 
-module.exports = {
+export default {
   'rows': [
     {
       'label': '0.0-1000.0: bytes',

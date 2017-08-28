@@ -1,10 +1,10 @@
 import _ from 'lodash';
-import { fromNode } from 'bluebird';
+import { fromNode, each } from 'bluebird';
 import { readdir, stat } from 'fs';
 import { resolve } from 'path';
-import { each } from 'bluebird';
 import PluginCollection from './plugin_collection';
-module.exports = async (kbnServer, server, config) => {
+
+export default async (kbnServer, server, config) => {
 
   const plugins = kbnServer.plugins = new PluginCollection(kbnServer);
 

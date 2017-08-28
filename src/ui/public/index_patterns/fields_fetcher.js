@@ -3,16 +3,10 @@ export function createFieldsFetcher(apiClient, config) {
     fetch(indexPattern) {
       if (indexPattern.isTimeBasedInterval()) {
         const interval = indexPattern.getInterval().name;
-        return this.fetchForTimePattern(indexPattern.id, interval);
+        return this.fetchForTimePattern(indexPattern.title, interval);
       }
 
-      return this.fetchForWildcard(indexPattern.id);
-    }
-
-    testTimePattern(indexPatternId) {
-      return apiClient.testTimePattern({
-        pattern: indexPatternId
-      });
+      return this.fetchForWildcard(indexPattern.title);
     }
 
     fetchForTimePattern(indexPatternId) {

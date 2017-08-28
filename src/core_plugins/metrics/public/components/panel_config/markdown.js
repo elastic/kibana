@@ -1,6 +1,7 @@
-import React, { Component, PropTypes } from 'react';
+import PropTypes from 'prop-types';
+import React, { Component } from 'react';
 import SeriesEditor from '../series_editor';
-import IndexPattern from '../index_pattern';
+import { IndexPattern } from '../index_pattern';
 import AceEditor from 'react-ace';
 import 'brace/mode/less';
 import Select from 'react-select';
@@ -60,7 +61,8 @@ class MarkdownPanelConfig extends Component {
           fields={this.props.fields}
           model={this.props.model}
           name={this.props.name}
-          onChange={this.props.onChange} />
+          onChange={this.props.onChange}
+        />
       );
     } else {
       view = (
@@ -68,31 +70,36 @@ class MarkdownPanelConfig extends Component {
           <IndexPattern
             fields={this.props.fields}
             model={this.props.model}
-            onChange={this.props.onChange}/>
+            onChange={this.props.onChange}
+          />
           <div className="vis_editor__vis_config-row">
             <div className="vis_editor__label">Background Color</div>
             <ColorPicker
               onChange={this.props.onChange}
               name="background_color"
-              value={model.background_color}/>
+              value={model.background_color}
+            />
             <div className="vis_editor__label">Panel Filter</div>
             <input
               className="vis_editor__input-grows"
               type="text"
               onChange={handleTextChange('filter')}
-              value={model.filter} />
+              value={model.filter}
+            />
             <div className="vis_editor__label">Ignore Global Filter</div>
             <YesNo
               value={model.ignore_global_filter}
               name="ignore_global_filter"
-              onChange={this.props.onChange}/>
+              onChange={this.props.onChange}
+            />
           </div>
           <div className="vis_editor__vis_config-row">
             <div className="vis_editor__label">Show Scrollbars</div>
             <YesNo
               value={model.markdown_scrollbars}
               name="markdown_scrollbars"
-              onChange={this.props.onChange}/>
+              onChange={this.props.onChange}
+            />
             <div className="vis_editor__label">Vertical Alignment</div>
             <div className="vis_editor__row_item">
               <Select
@@ -100,12 +107,13 @@ class MarkdownPanelConfig extends Component {
                 clearable={false}
                 options={alignOptions}
                 value={model.markdown_vertical_align}
-                onChange={handleSelectChange('markdown_vertical_align')}/>
+                onChange={handleSelectChange('markdown_vertical_align')}
+              />
             </div>
           </div>
           <div className="vis_editor__vis_config-row">
             <div className="vis_editor__label">Custom CSS (supports Less)</div>
-        </div>
+          </div>
           <div className="vis_editor__ace-editor">
             <AceEditor
               mode="less"
@@ -113,8 +121,9 @@ class MarkdownPanelConfig extends Component {
               width="100%"
               name={`ace-css-${model.id}`}
               setOptions={{ fontSize: '14px' }}
-              value={ model.markdown_less}
-              onChange={this.handleCSSChange}/>
+              value={model.markdown_less}
+              onChange={this.handleCSSChange}
+            />
           </div>
         </div>
       );
@@ -122,12 +131,21 @@ class MarkdownPanelConfig extends Component {
     return (
       <div>
         <div className="kbnTabs">
-          <div className={`kbnTabs__tab${selectedTab === 'markdown' && '-active' || ''}`}
-            onClick={() => this.switchTab('markdown')}>Markdown</div>
-          <div className={`kbnTabs__tab${selectedTab === 'data' && '-active' || ''}`}
-            onClick={() => this.switchTab('data')}>Data</div>
-          <div className={`kbnTabs__tab${selectedTab === 'options' && '-active' || ''}`}
-            onClick={() => this.switchTab('options')}>Panel Options</div>
+          <div
+            className={`kbnTabs__tab${selectedTab === 'markdown' && '-active' || ''}`}
+            onClick={() => this.switchTab('markdown')}
+          >Markdown
+          </div>
+          <div
+            className={`kbnTabs__tab${selectedTab === 'data' && '-active' || ''}`}
+            onClick={() => this.switchTab('data')}
+          >Data
+          </div>
+          <div
+            className={`kbnTabs__tab${selectedTab === 'options' && '-active' || ''}`}
+            onClick={() => this.switchTab('options')}
+          >Panel Options
+          </div>
         </div>
         {view}
       </div>
@@ -140,6 +158,7 @@ MarkdownPanelConfig.propTypes = {
   model: PropTypes.object,
   onChange: PropTypes.func,
   visData: PropTypes.object,
+  dateFormat: PropTypes.string
 };
 
 export default MarkdownPanelConfig;

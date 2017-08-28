@@ -4,8 +4,7 @@ let x_json = require('./x_json_highlight_rules');
 var oop = ace.require("ace/lib/oop");
 var TextHighlightRules = ace.require("ace/mode/text_highlight_rules").TextHighlightRules;
 
-var InputHighlightRules = function () {
-
+export function InputHighlightRules() {
   function mergeTokens(/* ... */) {
     return [].concat.apply([], arguments);
   }
@@ -66,9 +65,6 @@ var InputHighlightRules = function () {
     this.normalizeRules();
   }
 
-};
+}
 
 oop.inherits(InputHighlightRules, TextHighlightRules);
-
-
-module.exports.InputHighlightRules = InputHighlightRules;

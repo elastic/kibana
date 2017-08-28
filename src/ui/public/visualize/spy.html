@@ -19,9 +19,10 @@
   <div class="kuiBar kuiVerticalRhythm">
     <div class="kuiBarSection">
       <select
-        class="kuiSelect"
+        class="kuiSelect visualize-fixed-position"
         ng-model="selectedModeName"
         ng-change="onSpyModeChange()"
+        data-test-subj="spyModeSelect"
       >
         <option
           ng-repeat="mode in modes.inOrder"

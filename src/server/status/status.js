@@ -1,7 +1,7 @@
-import states from './states';
+import * as states from './states';
 import { EventEmitter } from 'events';
 
-class Status extends EventEmitter {
+export default class Status extends EventEmitter {
   constructor(id, server) {
     super();
 
@@ -85,5 +85,3 @@ states.all.forEach(function (state) {
     this.emit('change', previous, previousMsg, this.state, this.message);
   };
 });
-
-module.exports = Status;

@@ -3,7 +3,7 @@ import WeirdControlFlow from './weird_control_flow';
 import { once } from 'lodash';
 import { join } from 'path';
 
-module.exports = class LazyOptimizer extends BaseOptimizer {
+export default class LazyOptimizer extends BaseOptimizer {
   constructor(opts) {
     super(opts);
     this.log = opts.log || (() => null);
@@ -112,4 +112,4 @@ module.exports = class LazyOptimizer extends BaseOptimizer {
       err: err
     });
   }
-};
+}

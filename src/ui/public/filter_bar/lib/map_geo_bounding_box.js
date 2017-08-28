@@ -10,11 +10,11 @@ export function FilterBarLibMapGeoBoundingBoxProvider(Promise, courier) {
         const key = _.keys(filter.geo_bounding_box)
           .filter(key => key !== 'ignore_unmapped')[0];
         const field = indexPattern.fields.byName[key];
-        const geoBoundingBox = filter.geo_bounding_box[key];
-        const topLeft = field.format.convert(geoBoundingBox.top_left);
-        const bottomRight = field.format.convert(geoBoundingBox.bottom_right);
+        const params = filter.geo_bounding_box[key];
+        const topLeft = field.format.convert(params.top_left);
+        const bottomRight = field.format.convert(params.bottom_right);
         const value = topLeft + ' to ' + bottomRight;
-        return { type, key, value };
+        return { type, key, value, params };
       });
     }
     return Promise.reject(filter);

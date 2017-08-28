@@ -6,10 +6,9 @@
           ng-if="editingId"
           href="#/management/kibana/index"
           class="kuiButton kuiButton--primary kuiButton--small"
-          aria-label="{{ 'KIBANA-ADD_NEW' | translate }}"
         >
           <span aria-hidden="true" class="kuiIcon fa-plus"></span>
-          <span translate="KIBANA-ADD_NEW"></span>
+          <span>Create Index Pattern</span>
         </a>
       </h5>
     </div>
@@ -19,19 +18,21 @@
         class="sidebar-item"
       >
         <div class="sidebar-item-title full-title">
-          <span class="label label-warning" translate="KIBANA-WARNING"></span>
-          <p translate="KIBANA-NO_DEFAULT_INDEX_PATTERN"></p>
+          <span class="label label-warning">Warning</span>
+          <p>
+            No default index pattern. You must select or create one to continue.
+          </p>
         </div>
       </li>
 
       <li
-        ng-repeat="pattern in indexPatternList | orderBy:['-default','id'] track by pattern.id "
+        ng-repeat="pattern in indexPatternList | orderBy:['-default','title'] track by pattern.id"
         class="sidebar-item"
       >
-        <a href="{{::pattern.url}}">
+        <a href="{{::pattern.url}}" class="show">
           <div class="{{::pattern.class}}">
             <i aria-hidden="true" ng-if="pattern.default" class="fa fa-star"></i>
-            <span ng-bind="::pattern.id"></span>
+            <span ng-bind="::pattern.title"></span>
           </div>
         </a>
       </li>

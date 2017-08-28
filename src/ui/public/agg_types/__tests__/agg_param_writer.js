@@ -3,11 +3,15 @@ import { VisProvider } from 'ui/vis';
 import { AggTypesIndexProvider } from 'ui/agg_types/index';
 import { VisTypesRegistryProvider } from 'ui/registry/vis_types';
 import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
-module.exports = function AggParamWriterHelper(Private) {
+import { VisAggConfigProvider } from 'ui/vis/agg_config';
+
+// eslint-disable-next-line kibana-custom/no-default-export
+export default function AggParamWriterHelper(Private) {
   const Vis = Private(VisProvider);
   const aggTypes = Private(AggTypesIndexProvider);
   const visTypes = Private(VisTypesRegistryProvider);
   const stubbedLogstashIndexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
+  const AggConfig = Private(VisAggConfigProvider);
 
   /**
    * Helper object for writing aggParams. Specify an aggType and it will find a vis & schema, and
@@ -64,7 +68,7 @@ module.exports = function AggParamWriterHelper(Private) {
     }
 
     self.vis = new Vis(self.indexPattern, {
-      type: self.visType
+      type: self.visType.name
     });
   }
 
@@ -77,17 +81,26 @@ module.exports = function AggParamWriterHelper(Private) {
       if (self.aggType.type === 'metrics') {
         paramValues.field = _.sample(self.indexPattern.fields.byType.number);
       } else {
-        paramValues.field = _.sample(self.indexPattern.fields.byType.string);
+        const type = self.aggType.params.byName.field.filterFieldTypes || 'string';
+        let field;
+        do {
+          field = _.sample(self.indexPattern.fields.byType[type]);
+        } while (!field.aggregatable);
+        paramValues.field = field.name;
       }
     }
 
+
+    const agg = new AggConfig(self.vis, {
+      id: 1,
+      schema: self.visAggSchema.name,
+      type: self.aggType.name,
+      params: paramValues
+    });
+
     self.vis.setState({
       type: self.vis.type.name,
-      aggs: [{
-        type: self.aggType,
-        schema: self.visAggSchema,
-        params: paramValues
-      }]
+      aggs: [agg.toJSON()]
     });
 
     const aggConfig = _.find(self.vis.aggs, function (aggConfig) {
@@ -105,4 +118,4 @@ module.exports = function AggParamWriterHelper(Private) {
 
   return AggParamWriter;
 
-};
+}

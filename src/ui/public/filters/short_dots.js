@@ -1,4 +1,5 @@
 import _ from 'lodash';
+import { shortenDottedString } from '../../../core_plugins/kibana/common/utils/shorten_dotted_string';
 import { uiModules } from 'ui/modules';
 // Shorts dot notated strings
 // eg: foo.bar.baz becomes f.b.baz
@@ -18,7 +19,7 @@ function shortDotsFilterProvider(config) {
   return wrapper;
 
   function updateFilter(enabled) {
-    filter = enabled ? _.shortenDottedString : _.identity;
+    filter = enabled ? shortenDottedString : _.identity;
   }
   function wrapper(str) {
     return filter(str);

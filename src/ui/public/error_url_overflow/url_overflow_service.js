@@ -1,6 +1,6 @@
 const URL_MAX_IE = 2000;
 const URL_MAX_OTHERS = 25000;
-const IE_REGEX = /(;MSIE |Edge\/\d)/;
+export const IE_REGEX = /(; ?MSIE |Edge\/\d|Trident\/[\d+\.]+;.*rv:*11\.\d+)/;
 
 export class UrlOverflowService {
   constructor() {

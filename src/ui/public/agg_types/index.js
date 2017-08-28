@@ -10,6 +10,7 @@ import { AggTypesMetricsTopHitProvider } from 'ui/agg_types/metrics/top_hit';
 import { AggTypesMetricsStdDeviationProvider } from 'ui/agg_types/metrics/std_deviation';
 import { AggTypesMetricsCardinalityProvider } from 'ui/agg_types/metrics/cardinality';
 import { AggTypesMetricsPercentilesProvider } from 'ui/agg_types/metrics/percentiles';
+import { AggTypesMetricsGeoBoundsProvider } from 'ui/agg_types/metrics/geo_bounds';
 import { AggTypesMetricsGeoCentroidProvider } from 'ui/agg_types/metrics/geo_centroid';
 import { AggTypesMetricsPercentileRanksProvider } from 'ui/agg_types/metrics/percentile_ranks';
 import { AggTypesMetricsDerivativeProvider } from 'ui/agg_types/metrics/derivative';
@@ -22,6 +23,7 @@ import { AggTypesBucketsRangeProvider } from 'ui/agg_types/buckets/range';
 import { AggTypesBucketsDateRangeProvider } from 'ui/agg_types/buckets/date_range';
 import { AggTypesBucketsIpRangeProvider } from 'ui/agg_types/buckets/ip_range';
 import { AggTypesBucketsTermsProvider } from 'ui/agg_types/buckets/terms';
+import { AggTypesBucketsFilterProvider } from 'ui/agg_types/buckets/filter';
 import { AggTypesBucketsFiltersProvider } from 'ui/agg_types/buckets/filters';
 import { AggTypesBucketsSignificantTermsProvider } from 'ui/agg_types/buckets/significant_terms';
 import { AggTypesBucketsGeoHashProvider } from 'ui/agg_types/buckets/geo_hash';
@@ -54,6 +56,7 @@ export function AggTypesIndexProvider(Private) {
       Private(AggTypesMetricsBucketSumProvider),
       Private(AggTypesMetricsBucketMinProvider),
       Private(AggTypesMetricsBucketMaxProvider),
+      Private(AggTypesMetricsGeoBoundsProvider),
       Private(AggTypesMetricsGeoCentroidProvider)
     ],
     buckets: [
@@ -63,6 +66,7 @@ export function AggTypesIndexProvider(Private) {
       Private(AggTypesBucketsDateRangeProvider),
       Private(AggTypesBucketsIpRangeProvider),
       Private(AggTypesBucketsTermsProvider),
+      Private(AggTypesBucketsFilterProvider),
       Private(AggTypesBucketsFiltersProvider),
       Private(AggTypesBucketsSignificantTermsProvider),
       Private(AggTypesBucketsGeoHashProvider),

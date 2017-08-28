@@ -22,9 +22,17 @@ import Primary from './button_primary';
 const primarySource = require('!!raw!./button_primary');
 const primaryHtml = renderToHtml(Primary);
 
+import Secondary from './button_secondary';
+const secondarySource = require('!!raw!./button_secondary');
+const secondaryHtml = renderToHtml(Secondary);
+
 import Danger from './button_danger';
 const dangerSource = require('!!raw!./button_danger');
 const dangerHtml = renderToHtml(Danger);
+
+import Warning from './button_warning';
+const warningSource = require('!!raw!./button_danger');
+const warningHtml = renderToHtml(Warning);
 
 import Loading from './button_loading';
 const loadingSource = require('!!raw!./button_loading');
@@ -41,10 +49,6 @@ const buttonGroupHtml = renderToHtml(ButtonGroup);
 import ButtonGroupUnited from './button_group_united';
 const buttonGroupUnitedSource = require('!!raw!./button_group_united');
 const buttonGroupUnitedHtml = renderToHtml(ButtonGroupUnited);
-
-import InToolBar from './buttons_in_tool_bar';
-const inToolBarSource = require('!!raw!./buttons_in_tool_bar');
-const inToolBarHtml = renderToHtml(InToolBar);
 
 import Elements from './button_elements';
 const elementsSource = require('!!raw!./button_elements');
@@ -65,7 +69,7 @@ export default props => (
       }]}
     >
       <GuideText>
-        Use the basic Button in most situations.
+        Use the basic button for navigation elements or controls that are not the primary focus of the page (ex: pagination, toggles...etc).
       </GuideText>
 
       <GuideDemo>
@@ -88,7 +92,7 @@ export default props => (
       }]}
     >
       <GuideText>
-        Use the hollow Button when presenting a neutral action, e.g. a "Cancel" button.
+        Use the hollow Button when presenting a neutral action, e.g. a &ldquo;Cancel&rdquo; button.
       </GuideText>
 
       <GuideDemo>
@@ -107,12 +111,31 @@ export default props => (
       }]}
     >
       <GuideText>
-        Use the primary Button to represent the most common action. Generally, there won't be a
+        Use the primary Button to represent the most common action. Generally, there won&rsquo;t be a
         need to present more than one of these at a time.
       </GuideText>
 
       <GuideDemo>
         <Primary />
+      </GuideDemo>
+    </GuideSection>
+
+    <GuideSection
+      title="Secondary Button"
+      source={[{
+        type: GuideSectionTypes.JS,
+        code: secondarySource,
+      }, {
+        type: GuideSectionTypes.HTML,
+        code: secondaryHtml,
+      }]}
+    >
+      <GuideText>
+        Secondary buttons are usually used for actions (&ldquo;do this&rdquo;) that are optional actions on a page.
+      </GuideText>
+
+      <GuideDemo>
+        <Secondary />
       </GuideDemo>
     </GuideSection>
 
@@ -132,6 +155,25 @@ export default props => (
 
       <GuideDemo>
         <Danger />
+      </GuideDemo>
+    </GuideSection>
+
+    <GuideSection
+      title="Warning Button"
+      source={[{
+        type: GuideSectionTypes.JS,
+        code: warningSource,
+      }, {
+        type: GuideSectionTypes.HTML,
+        code: warningHtml,
+      }]}
+    >
+      <GuideText>
+        Warning Buttons represent potentially notable actions.
+      </GuideText>
+
+      <GuideDemo>
+        <Warning />
       </GuideDemo>
     </GuideSection>
 
@@ -211,25 +253,6 @@ export default props => (
     </GuideSection>
 
     <GuideSection
-      title="In ToolBar"
-      source={[{
-        type: GuideSectionTypes.JS,
-        code: inToolBarSource,
-      }, {
-        type: GuideSectionTypes.HTML,
-        code: inToolBarHtml,
-      }]}
-    >
-      <GuideText>
-        This example verifies that Buttons are legible against the ToolBar's background.
-      </GuideText>
-
-      <GuideDemo>
-        <InToolBar />
-      </GuideDemo>
-    </GuideSection>
-
-    <GuideSection
       title="Element variations"
       source={[{
         type: GuideSectionTypes.JS,
@@ -240,7 +263,7 @@ export default props => (
       }]}
     >
       <GuideText>
-        You can create a Button using a button element, link, or input[type="submit"].
+        You can create a Button using a button element, link, or input[type=&ldquo;submit&rdquo;].
       </GuideText>
 
       <GuideDemo>

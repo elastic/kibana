@@ -1,6 +1,7 @@
-import React, { Component, PropTypes } from 'react';
+import PropTypes from 'prop-types';
+import React, { Component } from 'react';
 import _ from 'lodash';
-import uuid from 'node-uuid';
+import uuid from 'uuid';
 import AggRow from './agg_row';
 import AggSelect from './agg_select';
 
@@ -35,21 +36,24 @@ class CalculationAgg extends Component {
         model={this.props.model}
         onAdd={this.props.onAdd}
         onDelete={this.props.onDelete}
-        siblings={this.props.siblings}>
+        siblings={this.props.siblings}
+      >
         <div className="vis_editor__row_item">
           <div>
             <div className="vis_editor__label">Aggregation</div>
             <AggSelect
               siblings={this.props.siblings}
               value={model.type}
-              onChange={handleSelectChange('type')}/>
+              onChange={handleSelectChange('type')}
+            />
             <div className="vis_editor__variables">
               <div className="vis_editor__label">Variables</div>
               <Vars
                 metrics={siblings}
                 onChange={handleChange}
                 name="variables"
-                model={model}/>
+                model={model}
+              />
             </div>
             <div className="vis_editor__row_item">
               <div className="vis_editor__label">
@@ -60,7 +64,8 @@ class CalculationAgg extends Component {
                 className="vis_editor__input-grows-100"
                 type="text"
                 onChange={handleTextChange('script')}
-                value={model.script}/>
+                value={model.script}
+              />
             </div>
           </div>
         </div>

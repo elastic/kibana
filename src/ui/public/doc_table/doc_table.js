@@ -24,14 +24,19 @@ uiModules.get('kibana')
       infiniteScroll: '=?',
       filter: '=?',
       filters: '=?',
+      minimumVisibleRows: '=?',
       onAddColumn: '=?',
       onChangeSortOrder: '=?',
       onMoveColumn: '=?',
       onRemoveColumn: '=?',
     },
-    link: function ($scope) {
+    link: function ($scope, $el) {
       const notify = new Notifier();
-      $scope.limit = 50;
+
+      $scope.$watch('minimumVisibleRows', (minimumVisibleRows) => {
+        $scope.limit = Math.max(minimumVisibleRows || 50, $scope.limit || 50);
+      });
+
       $scope.persist = {
         sorting: $scope.sorting,
         columns: $scope.columns
@@ -114,6 +119,9 @@ uiModules.get('kibana')
           if ($scope.searchSource !== $scope.searchSource) return;
 
           $scope.hits = resp.hits.hits;
+          if ($scope.hits.length === 0) {
+            $el.trigger('renderComplete');
+          }
           // We limit the number of returned results, but we want to show the actual number of hits, not
           // just how many we retrieved.
           $scope.totalHitCount = resp.hits.total;

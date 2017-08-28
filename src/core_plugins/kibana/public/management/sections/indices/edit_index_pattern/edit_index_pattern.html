@@ -15,12 +15,13 @@
 
       <p ng-if="indexPattern.timeFieldName" class="kuiText kuiVerticalRhythm">
         <span class="label label-success">
-          <i class="fa fa-clock-o"></i><span translate="KIBANA-TIME_FILTER_FIELD_NAME"></span>: {{indexPattern.timeFieldName}}
+          <span class="kuiIcon fa-clock-o"></span>
+          <span>Time Filter field name</span>: {{indexPattern.timeFieldName}}
         </span>
       </p>
 
       <p class="kuiText kuiVerticalRhythm">
-        This page lists every field in the <strong>{{::indexPattern.id}}</strong>
+        This page lists every field in the <strong>{{::indexPattern.title}}</strong>
         index and the field's associated core type as recorded by Elasticsearch.
         While this list allows you to view the core type of each field, changing
         field types must be done using Elasticsearch's
@@ -32,19 +33,21 @@
 
       <!-- Alerts -->
       <div
-        ng-if="indexPattern.timeFieldName && indexPattern.intervalName"
-        class="kuiInfoPanel kuiInfoPanel--warning kuiVerticalRhythm"
+        ng-if="indexPattern.isUnsupportedTimePattern()"
+        class="kuiInfoPanel kuiInfoPanel--error kuiVerticalRhythm"
       >
         <div class="kuiInfoPanelHeader">
-          <span class="kuiInfoPanelHeader__icon kuiIcon kuiIcon--warning fa-bolt"></span>
+          <span class="kuiInfoPanelHeader__icon kuiIcon kuiIcon--error fa-warning"></span>
           <span class="kuiInfoPanelHeader__title">
-            Repeating index pattern
+            Support for repeating index patterns removed
           </span>
         </div>
 
         <div class="kuiInfoPanelBody">
           <div class="kuiInfoPanelBody__message">
-            This index uses a <strong>time-based index pattern</strong> which repeats <span ng-bind="::indexPattern.getInterval().display"></span>
+            Support for time-interval based index patterns has been removed! In the next major
+            version of Kibana this index patterns will stop working. Migrate saved objects that
+            use this index pattern to a wildcard pattern and delete this one.
           </div>
         </div>
       </div>

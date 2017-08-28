@@ -2,14 +2,18 @@ import angular from 'angular';
 import expect from 'expect.js';
 import ngMock from 'ng_mock';
 import 'plugins/kibana/dashboard/saved_dashboard/saved_dashboard';
+import { DashboardContainerAPI } from '../dashboard_container_api';
+import { DashboardState } from '../dashboard_state';
 import { DEFAULT_PANEL_WIDTH, DEFAULT_PANEL_HEIGHT } from 'plugins/kibana/dashboard/panel/panel_state';
 
 describe('dashboard panels', function () {
   let $scope;
   let $el;
+  let AppState;
 
   function compile(dashboard) {
-    ngMock.inject(($rootScope, $controller, $compile, $route) => {
+    ngMock.inject(($injector, $rootScope, $controller, $compile, $route) => {
+      AppState = $injector.get('AppState');
       $scope = $rootScope.$new();
       $route.current = {
         locals: {
@@ -18,6 +22,8 @@ describe('dashboard panels', function () {
         params: {}
       };
 
+      const dashboardState = new DashboardState(dashboard, AppState, false);
+      $scope.containerApi = new DashboardContainerAPI(dashboardState);
       $el = angular.element(`
         <dashboard-app>
           <dashboard-grid
@@ -25,12 +31,9 @@ describe('dashboard panels', function () {
             ng-if="!hasExpandedPanel()"
             on-panel-removed="onPanelRemoved"
             panels="panels"
-            get-vis-click-handler="filterBarClickHandler"
-            get-vis-brush-handler="brushEvent"
             save-state="saveState"
             toggle-expand="toggleExpandPanel"
-            create-child-ui-state="createChildUiState"
-            toggle-expand="toggleExpandPanel"
+            container-api="containerApi"
            ></dashboard-grid>
         </dashboard-app>`);
       $compile($el)($scope);

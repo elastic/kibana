@@ -6,12 +6,7 @@ describe('generateByTypeFilter()', () => {
   describe('numeric', () => {
     const fn = generateByTypeFilter('numeric');
     [
-      'scaled_float',
-      'half_float',
-      'integer',
-      'float',
-      'long',
-      'double'
+      'number'
     ].forEach((type) => {
       it(`should return true for ${type}`, () => expect(fn({ type })).to.equal(true));
     });
@@ -34,12 +29,7 @@ describe('generateByTypeFilter()', () => {
   describe('all', () => {
     const fn = generateByTypeFilter('all');
     [
-      'scaled_float',
-      'half_float',
-      'integer',
-      'float',
-      'long',
-      'double',
+      'number',
       'string',
       'text',
       'keyword',

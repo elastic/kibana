@@ -20,12 +20,13 @@ before(() => {
 
 beforeEach(function () {
   if (Notifier.prototype._notifs.length) {
+    const notifs = JSON.stringify(Notifier.prototype._notifs);
     Notifier.prototype._notifs.length = 0;
-    throw new Error('notifications were left in the notifier');
+    throw new Error('notifications were left in the notifier: ' + notifs);
   }
 });
 
 // Kick off mocha, called at the end of test entry files
-exports.bootstrap = () => {
+export function bootstrap() {
   chrome.setupAngular();
-};
+}

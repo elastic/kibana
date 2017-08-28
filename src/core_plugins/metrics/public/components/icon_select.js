@@ -1,4 +1,5 @@
-import React, { Component, PropTypes } from 'react';
+import PropTypes from 'prop-types';
+import React, { Component } from 'react';
 import Select from 'react-select';
 
 class IconOption extends Component {
@@ -29,7 +30,8 @@ class IconOption extends Component {
     const icon = this.props.option.value;
     const label = this.props.option.label;
     return (
-      <div className={this.props.className}
+      <div
+        className={this.props.className}
         onMouseEnter={this.handleMouseEnter}
         onMouseDown={this.handleMouseDown}
         onMouseMove={this.handleMouseMove}
@@ -41,7 +43,7 @@ class IconOption extends Component {
           <span
             className={`vis_editor__icon_select-option kuiIcon ${icon}`}
             aria-hidden="true"
-          ></span>
+          />
           { this.props.children }
         </span>
       </div>
@@ -71,7 +73,7 @@ function IconValue(props) {
         className="Select-value-label"
         aria-label={`${label} icon`}
       >
-        <span className={`vis_editor__icon_select-value kuiIcon ${icon}`}></span>
+        <span className={`vis_editor__icon_select-value kuiIcon ${icon}`} />
         { props.children }
       </span>
     </div>
@@ -92,7 +94,8 @@ function IconSelect(props) {
       value={props.value}
       optionComponent={IconOption}
       valueComponent={IconValue}
-      options={props.icons} />
+      options={props.icons}
+    />
   );
 }
 

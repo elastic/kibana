@@ -1,11 +1,17 @@
 import _ from 'lodash';
 
 export function AggResponseBucketsProvider() {
-  function Buckets(aggResp) {
-    aggResp = aggResp || false;
-    this.buckets = aggResp.buckets || [];
-    this.objectMode = _.isPlainObject(this.buckets);
 
+  function Buckets(aggResp) {
+    if (_.has(aggResp, 'buckets')) {
+      this.buckets = aggResp.buckets;
+    } else {
+      // Some Bucket Aggs only return a single bucket (like filter).
+      // In those instances, the aggResp is the content of the single bucket.
+      this.buckets = [aggResp];
+    }
+
+    this.objectMode = _.isPlainObject(this.buckets);
     if (this.objectMode) {
       this._keys = _.keys(this.buckets);
       this.length = this._keys.length;

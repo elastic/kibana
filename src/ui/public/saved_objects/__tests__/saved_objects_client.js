@@ -9,14 +9,15 @@ describe('SavedObjectsClient', () => {
   const doc = {
     id: 'AVwSwFxtcMV38qjDZoQg',
     type: 'config',
-    attributes: { title: 'Example title' }
+    attributes: { title: 'Example title' },
+    version: 2
   };
 
   let savedObjectsClient;
   let $http;
 
   beforeEach(() => {
-    $http = sandbox.stub().returns(Promise.resolve({}));
+    $http = sandbox.stub();
     savedObjectsClient = new SavedObjectsClient($http, basePath);
   });
 
@@ -98,10 +99,10 @@ describe('SavedObjectsClient', () => {
   describe('#get', () => {
     beforeEach(() => {
       $http.withArgs({
-        method: 'GET',
-        url: `${basePath}/api/saved_objects/index-pattern/logstash-*`,
-        data: undefined
-      }).returns(Promise.resolve({ data: doc }));
+        method: 'POST',
+        url: `${basePath}/api/saved_objects/bulk_get`,
+        data: sinon.match.any
+      }).returns(Promise.resolve({ data: { saved_objects: [doc] } }));
     });
 
     it('returns a promise', () => {
@@ -127,15 +128,15 @@ describe('SavedObjectsClient', () => {
     });
 
     it('resolves with instantiated SavedObject', async () => {
-      const response = await savedObjectsClient.get('index-pattern', 'logstash-*');
+      const response = await savedObjectsClient.get(doc.type, doc.id);
       expect(response).to.be.a(SavedObject);
       expect(response.type).to.eql('config');
       expect(response.get('title')).to.eql('Example title');
       expect(response._client).to.be.a(SavedObjectsClient);
     });
 
-    it('makes HTTP call', () => {
-      savedObjectsClient.get('index-pattern', 'logstash-*');
+    it('makes HTTP call', async () => {
+      await savedObjectsClient.get(doc.type, doc.id);
       sinon.assert.calledOnce($http);
     });
   });
@@ -144,7 +145,8 @@ describe('SavedObjectsClient', () => {
     beforeEach(() => {
       $http.withArgs({
         method: 'DELETE',
-        url: `${basePath}/api/saved_objects/index-pattern/logstash-*`
+        url: `${basePath}/api/saved_objects/index-pattern/logstash-*`,
+        data: undefined
       }).returns(Promise.resolve({ data: 'api-response' }));
     });
 
@@ -231,7 +233,7 @@ describe('SavedObjectsClient', () => {
   });
 
   describe('#create', () => {
-    const requireMessage = 'requires type and body';
+    const requireMessage = 'requires type and attributes';
 
     beforeEach(() => {
       $http.withArgs({
@@ -254,21 +256,27 @@ describe('SavedObjectsClient', () => {
       }
     });
 
-    it('requires body', async () => {
-      try {
-        await savedObjectsClient.create('index-pattern');
-        expect().throw('should have error');
-      } catch (e) {
-        expect(e.message).to.be(requireMessage);
-      }
+    it('allows for id to be provided', () => {
+      const attributes = { foo: 'Foo', bar: 'Bar' };
+      const url = `${basePath}/api/saved_objects/index-pattern/myId`;
+      $http.withArgs({
+        method: 'POST',
+        url,
+        data: sinon.match.any
+      }).returns(Promise.resolve({ data: 'api-response' }));
+
+      savedObjectsClient.create('index-pattern', attributes, { id: 'myId' });
+
+      sinon.assert.calledOnce($http);
+      expect($http.getCall(0).args[0].url).to.eql(url);
     });
 
     it('makes HTTP call', () => {
-      const body = { foo: 'Foo', bar: 'Bar', id: 'logstash-*' };
-      savedObjectsClient.create('index-pattern', body);
+      const attributes = { foo: 'Foo', bar: 'Bar' };
+      savedObjectsClient.create('index-pattern', attributes);
 
       sinon.assert.calledOnce($http);
-      expect($http.getCall(0).args[0].data).to.eql(body);
+      expect($http.getCall(0).args[0].data.attributes).to.eql(attributes);
     });
   });
 
@@ -290,7 +298,7 @@ describe('SavedObjectsClient', () => {
       expect($http.calledOnce).to.be(true);
 
       const options = $http.getCall(0).args[0];
-      expect(options.url).to.eql(`${basePath}/api/saved_objects/index-pattern?type=index-pattern&invalid=true`);
+      expect(options.url).to.eql(`${basePath}/api/saved_objects/?type=index-pattern&invalid=true`);
     });
 
     it('accepts fields', () => {

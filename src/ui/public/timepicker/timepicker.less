@@ -1,5 +1,13 @@
 @import '../styles/bootstrap/variables.less';
 .kbn-timepicker {
+  display: flex;
+  justify-content: flex-end;
+
+  .kbn-timepicker-content {
+    width: 100%;
+    max-width: 600px;
+  }
+
   [kbn-time-input] {
     text-align: center;
   }
@@ -8,7 +16,34 @@
   }
   .kbn-timepicker-section {
     float: left;
-    padding: 0px 15px;
+    width: 25%;
+
+    & + .kbn-timepicker-section {
+      padding-left: 15px;
+    }
+  }
+  .kbn-timepicker-body {
+    display: flex;
+    align-itmes: top;
+    justify-content: stretch;
+    width: 100%;
+
+    @media (max-width: 660px) {
+      flex-direction: column;
+    }
+  }
+  .kbn-timepicker-body-column {
+    width: 100%;
+  }
+  .kbn-timepicker-form-header {
+    margin-bottom: 0 !important;
+  }
+  .kbn-timepicker-actions {
+    display: flex;
+    justify-content: flex-end;
+  }
+  .kbn-timepicker-submit-button {
+    min-width: 100px;
   }
   .kbn-refresh-section {
     float: left;
@@ -19,5 +54,23 @@
   }
   .kbn-timepicker-error {
     color: @brand-danger;
+  }
+  .kbn-timepicker-title {
+    display: flex;
+    justify-content: space-between;
+  }
+  .kbn-timepicker-title__section {
+    display: flex;
+    align-items: center;
+  }
+  .kbn-timerpicker-nav-button {
+    padding: 3px 10px;
+    font-size: 14px;
+  }
+  /**
+   * Avoid last nav overlaping collapse button
+   */
+  .nav:last-child {
+    margin-right: 24px;
   }
 }

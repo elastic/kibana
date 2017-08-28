@@ -98,4 +98,4 @@ utils.splitOnUnquotedCommaSpace = function (s) {
   return arr;
 }
 
-module.exports = utils;
+export default utils;

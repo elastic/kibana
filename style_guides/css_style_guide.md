@@ -1,6 +1,22 @@
 
 # CSS Style Guide
 
+## Original style guide
+
+Our style guide is an extension of [CSS Guidelines by Harry Roberts](https://cssguidelin.es/). The rules we especially focus on are:
+
+* [Multiple files](https://cssguidelin.es/#multiple-files)
+* [Indenting](https://cssguidelin.es/#indenting)
+* [Commenting](https://cssguidelin.es/#commenting)
+* [Naming conventions](https://cssguidelin.es/#naming-conventions) (see "Naming convention", below, for exceptions)
+* [CSS selectors](https://cssguidelin.es/#css-selectors)
+* [Specificity](https://cssguidelin.es/#specificity)
+* [Architectural principles](https://cssguidelin.es/#architectural-principles)
+
+Please see the [SCSS Style Guide](scss_style_guide.md) for additional rules pertaining to SCSS.
+
+## Contents
+
 - [CSS Style Guide](#css-style-guide)
   - [Selecting elements](#selecting-elements)
   - [Using the preprocessor](#using-the-preprocessor)
@@ -15,6 +31,7 @@
     - [Don't use multiple modifier classes together](#dont-use-multiple-modifier-classes-together)
     - [How to apply DRY](#how-to-apply-dry)
       - [Compelling reasons for using mixins](#compelling-reasons-for-using-mixins)
+    - [The Open/Closed Principle](#the-openclosed-principle)
 
 ## Selecting elements
 
@@ -103,6 +120,8 @@ Our CSS naming convention is based on BEM:
 
 * [BEM 101 (CSS Tricks)](https://css-tricks.com/bem-101/)
 * [Getting your head around BEM syntax (CSS Wizardry)](http://csswizardry.com/2013/01/mindbemding-getting-your-head-round-bem-syntax/)
+* [CSS for BEM (bem.info)](https://en.bem.info/methodology/css/)
+* [CSS Guidelines](https://cssguidelin.es/)
 
 ## Concepts
 
@@ -461,3 +480,115 @@ border-radius changes for all buttons, you only need to change it there. Or if
 the designers anticipate that all new types of buttons should have the same
 border-radius, then you can just extend this mixin when you create a new button
 base class.
+
+### The Open/Closed Principle
+
+References:
+
+* [The Open/Closed Principle on bem.info](https://en.bem.info/methodology/css/#openclosed-principle)
+* [The Open/Closed Principle in CSS Guidelines](https://cssguidelin.es/#the-openclosed-principle)
+* [The Open/Closed Principle on Wikipedia](https://en.wikipedia.org/wiki/Open/closed_principle)
+
+Formally the open/closed principle reads
+
+> Software entities (classes, modules, functions, etc.) should be **open for 
+> extension**, but **closed for modification**.
+
+Applied to CSS, this means that CSS rulesets should be treated as immutable. 
+Once a declaration block for a specific selector has been defined, its style 
+should not be overridden in a different ruleset using the same selector:
+
+```css
+// BAD
+.button {
+  color: blue;
+  font-size: 1.5em;
+  padding: 16px;
+}
+
+.header .button {
+  font-size: 1em;
+  padding: 4px;
+}
+```
+
+Not only does this example violate the semantics of a BEM block, it also 
+**modifies** the meaning of `.button` depending on the context. Instead, this 
+could be expressed using a block modifier or a completely separate class which 
+is kept DRY using mixins:
+
+```css
+// GOOD
+.button {
+  color: blue;
+  font-size: 1.5em;
+}
+
+  .button--small {
+    font-size: 1em;
+    padding: 4px;
+  }
+```
+
+#### Exception: Block Groups
+
+It is a common occurrence that groups of blocks within a container should be 
+styled differently that single blocks in order to indicate their association. 
+But using pure BEM mixes of blocks and group modifiers would sometimes require 
+a large number of modifiers to be applied to multiple elements to achieve that, 
+e.g.:
+
+```css
+.kuiCard { /* ... */ }
+
+  .kuiCard__description { /* ... */ }
+
+.kuiCardGroup { /* ... */ }
+
+  .kuiCardGroup__card { /* ... */ }
+
+  .kuiCardGroup__cardDescription { /* ... */ }
+```
+
+```html
+<div class="kuiCardGroup">
+  <div class="kuiCard kuiCardGroup__card">
+    <div class="kuiCard__description kuiCardGroup__cardDescription">
+      Card Description
+    </div>
+  </div>
+</div>
+```
+
+To avoid the combinatorial explosion of classes with such groupings and thier 
+modifiers, it is permissible to nest a block's selector under another block's 
+selector if:
+
+* The relationship is of a very narrow "`element` to `elementGroup`" kind that 
+  is apparent from the block names.
+* The rulesets are colocated in the same component directory.
+
+```css
+.kuiCard { /* ... */ }
+
+  .kuiCard__description { /* ... */ }
+
+.kuiCardGroup { /* ... */ }
+
+.kuiCardGroup .kuiCard { /* ... */ }
+
+.kuiCardGroup .kuiCard__description { /* ... */ }
+```
+
+#### Exception: Normalization/Reset
+
+We cannot control the selectors introduced by third-party stylesheets and these 
+selectors may not adhere to our styleguide, e.g. `a` or `input[type="text"]`. 
+In these cases, we are forced to duplicate these selectors within our own 
+stylesheets and override those styles to control their look and feel.
+
+When this happens, it is important to add comments that make it clear why these 
+selectors exist and which third-party dependencies they override. We should 
+also define these selectors in files which refer back to the dependency, e.g. a 
+file named `ui_select_overrides.less` will contain styles overriding those 
+introduced by the `ui-select` dependency.

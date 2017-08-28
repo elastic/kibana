@@ -45,7 +45,7 @@
   border: 1px solid @dropdown-fallback-border; // IE8 fallback
   border: 1px solid @dropdown-border;
   border-radius: @border-radius-base;
-  .box-shadow(0 6px 12px rgba(0,0,0,.175));
+  box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.1);
   background-clip: padding-box;
 
   // Aligns the dropdown menu to right
@@ -62,7 +62,8 @@
   }
 
   // Links within the dropdown menu
-  > li > a {
+  > li > a,
+  > li > button {
     display: block;
     padding: 3px 20px;
     clear: both;
@@ -71,10 +72,19 @@
     color: @dropdown-link-color;
     white-space: nowrap; // prevent links from randomly breaking onto new lines
   }
+
+  > li > button {
+    appearance: none;
+    background: none;
+    border: none;
+    width: 100%;
+    text-align: left;
+  }
 }
 
 // Hover/Focus state
-.dropdown-menu > li > a {
+.dropdown-menu > li > a,
+.dropdown-menu > li > button {
   &:hover,
   &:focus {
     text-decoration: none;
@@ -84,6 +94,7 @@
 }
 
 // Active state
+.dropdown-menu > .active > button,
 .dropdown-menu > .active > a {
   &,
   &:hover,

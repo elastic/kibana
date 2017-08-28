@@ -1,9 +1,11 @@
 import _ from 'lodash';
 
+import { callAfterBindingsWorkaround } from 'ui/compat';
 import { uiModules } from 'ui/modules';
 import contextAppTemplate from './app.html';
 import './components/loading_button';
 import './components/size_picker/size_picker';
+import { getFirstSortableField } from './api/utils/sorting';
 import {
   createInitialQueryParametersState,
   QueryParameterActionsProvider,
@@ -11,6 +13,7 @@ import {
 } from './query_parameters';
 import {
   createInitialLoadingStatusState,
+  FAILURE_REASONS,
   LOADING_STATUS,
   QueryActionsProvider,
 } from './query';
@@ -26,7 +29,7 @@ const module = uiModules.get('apps/context', [
 module.directive('contextApp', function ContextApp() {
   return {
     bindToController: true,
-    controller: ContextAppController,
+    controller: callAfterBindingsWorkaround(ContextAppController),
     controllerAs: 'contextApp',
     restrict: 'E',
     scope: {
@@ -52,6 +55,7 @@ function ContextAppController($scope, config, Private, timefilter) {
 
   this.state = createInitialState(
     parseInt(config.get('context:step'), 10),
+    getFirstSortableField(this.indexPattern, config.get('context:tieBreakerFields')),
     this.discoverUrl,
   );
 
@@ -62,6 +66,7 @@ function ContextAppController($scope, config, Private, timefilter) {
   ), (action) => (...args) => action(this.state)(...args));
 
   this.constants = {
+    FAILURE_REASONS,
     LOADING_STATUS,
   };
 
@@ -111,9 +116,9 @@ function ContextAppController($scope, config, Private, timefilter) {
   );
 }
 
-function createInitialState(defaultStepSize, discoverUrl) {
+function createInitialState(defaultStepSize, tieBreakerField, discoverUrl) {
   return {
-    queryParameters: createInitialQueryParametersState(defaultStepSize),
+    queryParameters: createInitialQueryParametersState(defaultStepSize, tieBreakerField),
     rows: {
       all: [],
       anchor: null,

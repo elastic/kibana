@@ -15,8 +15,7 @@ export default function ({ getService, loadTestFile }) {
       await esArchiver.unload('empty_kibana');
     });
 
-    loadTestFile(require.resolve('./_initial_state'));
-    loadTestFile(require.resolve('./_creation_form_changes'));
+    loadTestFile(require.resolve('./_create_index_pattern_wizard'));
     loadTestFile(require.resolve('./_index_pattern_create_delete'));
     loadTestFile(require.resolve('./_index_pattern_results_sort'));
     loadTestFile(require.resolve('./_index_pattern_popularity'));
@@ -24,7 +23,6 @@ export default function ({ getService, loadTestFile }) {
     loadTestFile(require.resolve('./_scripted_fields'));
     loadTestFile(require.resolve('./_index_pattern_filter'));
     loadTestFile(require.resolve('./_scripted_fields_filter'));
-    loadTestFile(require.resolve('./_getting_started'));
   });
 
 }

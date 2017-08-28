@@ -60,7 +60,7 @@ export default function ({ getService, getPageObjects }) {
         // sleep a bit before trying to get the chart data
         return PageObjects.common.sleep(3000)
         .then(function () {
-          return PageObjects.visualize.getLineChartData('fill="#6eadc1"')
+          return PageObjects.visualize.getLineChartData('fill="#00a69b"')
           .then(function showData(data) {
             log.debug('data=' + data);
             screenshots.take('Visualize-line-chart');
@@ -90,7 +90,7 @@ export default function ({ getService, getPageObjects }) {
         })
         .then(function () {
           return retry.try(function () {
-            return PageObjects.visualize.getLineChartData('fill="#6eadc1"')
+            return PageObjects.visualize.getLineChartData('fill="#00a69b"')
             .then(function showData(data) {
               log.debug('data=' + data);
               screenshots.take('Visualize-line-chart');
@@ -112,7 +112,7 @@ export default function ({ getService, getPageObjects }) {
 
         const expectedChartData = ['png', '1,373', 'php', '445', 'jpg', '9,109', 'gif', '918', 'css', '2,159'];
 
-        return PageObjects.visualize.collapseChart()
+        return PageObjects.visualize.toggleSpyPanel()
         .then(function getDataTableData() {
           return PageObjects.visualize.getDataTableData();
         })
@@ -131,7 +131,7 @@ export default function ({ getService, getPageObjects }) {
           expect(message).to.be('Visualization Editor: Saved Visualization \"' + vizName1 + '\"');
         })
         .then(function testVisualizeWaitForToastMessageGone() {
-          return PageObjects.visualize.waitForToastMessageGone();
+          return PageObjects.header.waitForToastMessageGone();
         })
         .then(function () {
           return PageObjects.visualize.loadSavedVisualization(vizName1);

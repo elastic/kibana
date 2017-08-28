@@ -1,17 +1,17 @@
 import semver from 'semver';
 const rcVersionRegex = /(\d+\.\d+\.\d+)\-rc(\d+)/i;
 
-module.exports = function (server, doc) {
+export default function (server, configSavedObject) {
   const config = server.config();
-  if (/alpha|beta|snapshot/i.test(doc._id)) return false;
-  if (!doc._id) return false;
-  if (doc._id === config.get('pkg.version')) return false;
+  if (/alpha|beta|snapshot/i.test(configSavedObject.id)) return false;
+  if (!configSavedObject.id) return false;
+  if (configSavedObject.id === config.get('pkg.version')) return false;
 
   let packageRcRelease = Infinity;
   let rcRelease = Infinity;
   let packageVersion = config.get('pkg.version');
-  let version = doc._id;
-  const matches = doc._id.match(rcVersionRegex);
+  let version = configSavedObject.id;
+  const matches = configSavedObject.id.match(rcVersionRegex);
   const packageMatches = config.get('pkg.version').match(rcVersionRegex);
 
   if (matches) {
@@ -30,4 +30,4 @@ module.exports = function (server, doc) {
     return false;
   }
   return true;
-};
+}

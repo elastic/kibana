@@ -1,4 +1,4 @@
-import uuid from 'node-uuid';
+import uuid from 'uuid';
 import { expect } from 'chai';
 import reIdSeries from '../re_id_series';
 

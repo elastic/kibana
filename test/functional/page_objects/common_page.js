@@ -2,11 +2,12 @@ import { delay } from 'bluebird';
 
 import getUrl from '../../../src/test_utils/get_url';
 
-export function CommonPageProvider({ getService, getPageObjects, getPageObject }) {
+export function CommonPageProvider({ getService, getPageObjects }) {
   const log = getService('log');
   const config = getService('config');
   const remote = getService('remote');
   const retry = getService('retry');
+  const find = getService('find');
   const testSubjects = getService('testSubjects');
   const kibanaServer = getService('kibanaServer');
   const PageObjects = getPageObjects(['shield']);
@@ -87,11 +88,6 @@ export function CommonPageProvider({ getService, getPageObjects, getPageObject }
 
             if (currentUrl.includes('app/kibana')) {
               await testSubjects.find('kibanaChrome');
-              const gettingStartedPage = getPageObject('gettingStarted');
-              if (await gettingStartedPage.doesContainerExist()) {
-                await gettingStartedPage.optOut();
-                throw new Error('Retrying after receiving Getting Started page');
-              }
             }
           })
           .then(async function () {
@@ -205,10 +201,7 @@ export function CommonPageProvider({ getService, getPageObjects, getPageObject }
     }
 
     async getSharedItemTitleAndDescription() {
-      const element = await remote
-        .setFindTimeout(defaultFindTimeout)
-        .findByCssSelector('[data-shared-item]');
-
+      const element = await find.byCssSelector('[data-shared-item]');
       return {
         title: await element.getAttribute('data-title'),
         description: await element.getAttribute('data-description')
@@ -244,12 +237,8 @@ export function CommonPageProvider({ getService, getPageObjects, getPageObject }
     }
 
     async isConfirmModalOpen() {
-      const isOpen = await testSubjects
-      .find('confirmModalCancelButton', 2000)
-      .then(() => true, () => false);
-
-      await remote.setFindTimeout(defaultFindTimeout);
-      return isOpen;
+      log.debug('isConfirmModalOpen');
+      return await testSubjects.exists('confirmModalCancelButton', 2000);
     }
 
     async doesCssSelectorExist(selector) {
@@ -268,7 +257,9 @@ export function CommonPageProvider({ getService, getPageObjects, getPageObject }
     }
 
     async isChromeVisible() {
-      return await testSubjects.exists('kibanaChrome');
+      const globalNavShown = await testSubjects.exists('globalNav');
+      const topNavShown = await testSubjects.exists('top-nav');
+      return globalNavShown && topNavShown;
     }
 
     async waitForTopNavToBeVisible() {

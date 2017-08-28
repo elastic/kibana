@@ -5,74 +5,38 @@
     <div data-transclude-slots>
       <!-- Breadcrumbs. -->
       <div data-transclude-slot="topLeftCorner" class="kuiLocalBreadcrumbs">
-        <div class="kuiLocalBreadcrumb">
+        <h1 tabindex="0" id="kui_local_breadcrumb" class="kuiLocalBreadcrumb">
           <span ng-show="opts.savedSearch.id" class="kuiLocalBreadcrumb__emphasis">
             <span data-test-subj="discoverCurrentQuery" ng-bind="opts.savedSearch.lastSavedTitle"></span>
-            <i aria-label="Reload Saved Search" tooltip="Reload Saved Search" ng-click="resetQuery();" class="fa fa-undo small"></i>&nbsp;
+            <i id="reload_saved_search" tabindex="0" aria-label="Reload Saved Search" tooltip="Reload Saved Search" ng-click="resetQuery();" class="fa fa-undo small"></i>&nbsp;
           </span>
           <span data-test-subj="discoverQueryHits" class="kuiLocalBreadcrumb__emphasis">{{(hits || 0) | number:0}}</span>
           <ng-pluralize count="hits" when="{'1':'hit', 'other':'hits'}"></ng-pluralize>
-        </div>
+        </h1>
       </div>
 
       <!-- Search. -->
-      <form
-        data-transclude-slot="bottomRow"
-        class="fullWidth"
-        role="form"
-        name="discoverSearch"
-        ng-submit="fetch()"
-      >
-        <div class="typeahead" kbn-typeahead="discover" on-select="fetch()">
-          <div class="kuiLocalSearch">
-            <div class="kuiLocalSearchAssistedInput">
-              <input
-                parse-query
-                input-focus
-                kbn-typeahead-input
-                ng-model="state.query"
-                placeholder="Search... (e.g. status:200 AND extension:PHP)"
-                aria-label="Search input"
-                type="text"
-                class="kuiLocalSearchInput kuiLocalSearchInput--lucene"
-                ng-class="{'kuiLocalSearchInput-isInvalid': discoverSearch.$invalid}"
-              >
-              <div class="kuiLocalSearchAssistedInput__assistance">
-                <p class="kuiText">
-                  <a
-                    class="kuiLink"
-                    ng-href="{{queryDocLinks.luceneQuerySyntax}}"
-                    target="_blank"
-                  >
-                    Uses lucene query syntax
-                  </a>
-                </p>
-              </div>
-            </div>
-            <button
-              type="submit"
-              aria-label="Search"
-              class="kuiLocalSearchButton"
-              ng-disabled="discoverSearch.$invalid"
-            >
-              <span class="kuiIcon fa-search" aria-hidden="true"></span>
-            </button>
-          </div>
-          <kbn-typeahead-items></kbn-typeahead-items>
-        </div>
-      </form>
+      <div data-transclude-slot="bottomRow" class="fullWidth">
+        <query-bar
+          query="state.query"
+          app-name="'discover'"
+          on-submit="updateQuery($query)"
+        >
+        </query-bar>
+      </div>
     </div>
   </kbn-top-nav>
 
-  <div class="container-fluid" role="main">
+  <main class="container-fluid">
     <div class="row">
       <filter-bar
         state="state"
         index-patterns="[indexPattern]"
+        ng-if="state.query.language === 'lucene'"
       ></filter-bar>
     </div>
     <div class="row">
-      <div class="col-md-2 sidebar-container collapsible-sidebar">
+      <div class="col-md-2 sidebar-container collapsible-sidebar" id="discover-sidebar">
         <disc-field-chooser
           columns="state.columns"
           hits="rows"
@@ -101,7 +65,17 @@
 
           <!-- result -->
           <div class="results" ng-show="resultState === 'ready'">
-            <div class="discover-timechart" ng-if="opts.timefield">
+            <button
+              class="kuiButton kuiButton--basic kuiButton--iconText discover-skip-button"
+              ng-click="showAllRows(); scrollToBottom()"
+            >
+              <span class="kuiButton__inner">
+                <span aria-hidden="true" class="kuiButton__icon kuiIcon fa-chevron-down"></span>
+                <span>Skip to bottom</span>
+              </span>
+            </button>
+
+            <section aria-label="Histogram of found documents" class="discover-timechart" ng-if="opts.timefield">
               <header>
                 <center class="small">
                   <span tooltip="To change the time, click the clock icon in the navigation bar">{{timeRange.from | moment}} - {{timeRange.to | moment}}</span>
@@ -130,16 +104,19 @@
 
               </header>
 
-              <visualize
+              <visualization
                  ng-if="vis && rows.length != 0"
                  vis="vis"
                  ui-state="uiState"
-                 es-resp="mergedEsResp"
-                 search-source="searchSource">
-               </visualize>
-            </div>
+                 vis-data="visData"
+                 show-spy-panel="true"
+                 search-source="searchSource"
+                 style="height: 200px"
+                >
+              </visualization>
+            </section>
 
-            <div class="discover-table" fixed-scroll>
+            <section class="discover-table" fixed-scroll aria-label="Documents">
               <doc-table
                 hits="rows"
                 index-pattern="indexPattern"
@@ -151,6 +128,7 @@
                 data-shared-item
                 data-title="{{opts.savedSearch.lastSavedTitle}}"
                 data-description="{{opts.savedSearch.description}}"
+                minimum-visible-rows="minimumVisibleRows"
                 render-counter
                 on-add-column="addColumn"
                 on-change-sort-order="setSortOrder"
@@ -158,15 +136,17 @@
                 on-remove-column="removeColumn"
               ></doc-table>
 
+              <a tabindex="0" id="discoverBottomMarker"></a>
+
               <div ng-if="rows.length == opts.sampleSize" class="discover-table-footer">
                 These are the first {{opts.sampleSize}} documents matching
                 your search, refine your search to see others.
-                <a ng-click="toTop()">Back to top.</a>
+                <a kbn-accessible-click ng-click="scrollToTop()">Back to top.</a>
               </div>
-            </div>
+            </section>
           </div>
         </div>
       </div>
     </div>
-  </div>
+  </main>
 </discover-app>

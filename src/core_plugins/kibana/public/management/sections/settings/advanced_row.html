@@ -53,6 +53,7 @@
           ng-model="conf.unsavedValue"
           ng-keyup="maybeCancel($event, conf)"
           elastic-textarea
+          data-test-subj="unsavedValueMarkdownTextArea"
         ></textarea>
 
         <textarea
@@ -122,7 +123,7 @@
   </td>
 
   <!-- Actions -->
-  <td class="kuiTableRowCell">
+  <td class="kuiTableRowCell advancedSettingsTableRowActionsCell">
     <div class="kuiTableRowCell__liner">
       <div class="kuiMenuButtonGroup kuiMenuButtonGroup--alignRight">
         <!-- Edit -->
@@ -131,6 +132,7 @@
           ng-click="edit(conf)"
           class="kuiMenuButton kuiMenuButton--basic kuiMenuButton--iconText"
           ng-disabled="conf.tooComplex"
+          aria-label="Edit {{conf.ariaName}}"
           data-test-subj="advancedSetting-{{conf.name}}-editButton"
         >
           <span
@@ -146,6 +148,7 @@
           ng-click="save(conf)"
           class="kuiMenuButton kuiMenuButton--primary kuiMenuButton--iconText"
           ng-disabled="conf.loading || conf.tooComplex || forms.configEdit.$invalid"
+          aria-label="Save edit"
           data-test-subj="advancedSetting-{{conf.name}}-saveButton"
         >
           <span
@@ -166,7 +169,9 @@
           ng-if="!conf.editing"
           ng-click="clear(conf)"
           ng-hide="isDefaultValue(conf)"
+          aria-label="Clear {{conf.ariaName}}"
           class="kuiMenuButton kuiMenuButton--danger kuiMenuButton--iconText"
+          data-test-subj="advancedSetting-{{conf.name}}-clearButton"
         >
           <span
             aria-hidden="true"

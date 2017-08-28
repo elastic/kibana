@@ -5,7 +5,7 @@ const grammar = fs.readFileSync(path.resolve(__dirname, '../../../public/chain.p
 import PEG from 'pegjs';
 const Parser = PEG.buildParser(grammar);
 
-module.exports = function parseSheet(sheet) {
+export default function parseSheet(sheet) {
   return _.map(sheet, function (plot) {
     try {
       return Parser.parse(plot).tree;
@@ -17,4 +17,4 @@ module.exports = function parseSheet(sheet) {
       }
     }
   });
-};
+}

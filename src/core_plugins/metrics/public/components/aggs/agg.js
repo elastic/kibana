@@ -1,4 +1,5 @@
-import React, { PropTypes } from 'react';
+import PropTypes from 'prop-types';
+import React from 'react';
 import StdAgg from './std_agg';
 import aggToComponent from '../lib/agg_to_component';
 import { sortable } from 'react-anything-sortable';
@@ -15,7 +16,8 @@ function Agg(props) {
       className={props.className}
       style={style}
       onMouseDown={props.onMouseDown}
-      onTouchStart={props.onTouchStart}>
+      onTouchStart={props.onTouchStart}
+    >
       <Component
         fields={props.fields}
         disableDelete={props.disableDelete}
@@ -25,7 +27,8 @@ function Agg(props) {
         onDelete={props.onDelete}
         panel={props.panel}
         series={props.series}
-        siblings={props.siblings}/>
+        siblings={props.siblings}
+      />
     </div>
   );
 

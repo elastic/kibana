@@ -1,8 +1,9 @@
-import React, { Component, PropTypes } from 'react';
-import uuid from 'node-uuid';
+import PropTypes from 'prop-types';
+import React, { Component } from 'react';
+import uuid from 'uuid';
 
-import SplitByTerms from './splits/terms';
-import SplitByFilter from './splits/filter';
+import { SplitByTerms } from './splits/terms';
+import { SplitByFilter } from './splits/filter';
 import SplitByFilters from './splits/filters';
 import SplitByEverything from './splits/everything';
 
@@ -28,14 +29,16 @@ class Split extends Component {
       return (
         <SplitByFilter
           model={model}
-          onChange={this.props.onChange} />
+          onChange={this.props.onChange}
+        />
       );
     }
     if (model.split_mode === 'filters') {
       return (
         <SplitByFilters
           model={model}
-          onChange={this.props.onChange} />
+          onChange={this.props.onChange}
+        />
       );
     }
     if (model.split_mode === 'terms') {
@@ -44,13 +47,15 @@ class Split extends Component {
           model={model}
           indexPattern={indexPattern}
           fields={this.props.fields}
-          onChange={this.props.onChange} />
+          onChange={this.props.onChange}
+        />
       );
     }
     return (
       <SplitByEverything
         model={model}
-        onChange={this.props.onChange} />
+        onChange={this.props.onChange}
+      />
     );
   }
 

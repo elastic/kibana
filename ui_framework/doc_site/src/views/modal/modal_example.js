@@ -9,16 +9,13 @@ import {
   GuideSectionTypes,
 } from '../../components';
 
-import {
-  KuiConfirmModal,
-} from '../../../../components';
+import { StaticConfirmModal } from './static';
+const staticConfirmModalSource = require('!!raw!./static');
+const staticConfirmModalHtml = renderToHtml(StaticConfirmModal);
 
 import { ConfirmModalExample } from './confirm_modal_example';
 const showConfirmModalSource = require('!!raw!./confirm_modal_example');
 const showConfirmModalHtml = renderToHtml(ConfirmModalExample);
-
-const kuiConfirmModalSource = require('!!raw!../../../../components/modal/confirm_modal');
-const kuiConfirmModalHtml = renderToHtml(KuiConfirmModal);
 
 export default props => (
   <GuidePage title={props.route.name}>
@@ -27,21 +24,17 @@ export default props => (
       title="Confirmation Modal"
       source={[{
         type: GuideSectionTypes.JS,
-        code: kuiConfirmModalSource,
+        code: staticConfirmModalSource,
       }, {
         type: GuideSectionTypes.HTML,
-        code: kuiConfirmModalHtml,
+        code: staticConfirmModalHtml,
       }]}
     >
       <GuideDemo>
-          <KuiConfirmModal
-            onCancel={() => {}}
-            onConfirm={() => {}}
-            confirmButtonText="Confirm"
-            cancelButtonText="Cancel"
-            message="This is a confirmation modal"
-            title="Confirm Modal Title"
-          />
+        <StaticConfirmModal />
+      </GuideDemo>
+      <GuideDemo isDarkTheme>
+        <StaticConfirmModal />
       </GuideDemo>
     </GuideSection>
 

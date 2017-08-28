@@ -22,7 +22,9 @@ compatible with other configuration settings. Deleting a custom setting removes 
 .Kibana Settings Reference
 [horizontal]
 `query:queryString:options`:: Options for the Lucene query string parser.
-`sort:options`:: Options for the Elasticsearch {es-ref}search-request-sort.html[sort] parameter.
+`search:queryLanguage`:: Default is `lucene`. Query language used by the query bar. Choose between the lucene query syntax and kuery, an experimental new language built specifically for Kibana.
+`search:queryLanguage:switcher:enable`:: Show or hide the query language switcher in the query bar.
+`sort:options`:: Options for the Elasticsearch {ref}/search-request-sort.html[sort] parameter.
 `dateFormat`:: The format to use for displaying pretty-formatted dates.
 `dateFormat:tz`:: The timezone that Kibana uses. The default value of `Browser` uses the timezone detected by the browser.
 `dateFormat:scaled`:: These values define the format used to render ordered time-based data. Formatted timestamps must
@@ -33,11 +35,9 @@ adapt to the interval between measurements. Keys are http://en.wikipedia.org/wik
 `metaFields`:: An array of fields outside of `_source`. Kibana merges these fields into the document when displaying the
 document.
 `discover:sampleSize`:: The number of rows to show in the Discover table.
-`discover:aggs:terms:size`:: Determines how many terms will be visualized when clicking the "visualize" button, in the field drop downs, in the discover sidebar. The default value is `20`. 
+`discover:aggs:terms:size`:: Determines how many terms will be visualized when clicking the "visualize" button, in the field drop downs, in the discover sidebar. The default value is `20`.
 `doc_table:highlight`:: Highlight results in Discover and Saved Searches Dashboard. Highlighting makes request slow when
 working on big documents. Set this property to `false` to disable highlighting.
-`doc_table:highlight:all_fields`:: Improves highlighting by using a separate `highlight_query` that uses `all_fields` mode on
-`query_string` queries. Set to `false` if you are using a `default_field` in your index.
 `courier:maxSegmentCount`:: Kibana splits requests in the Discover app into segments to limit the size of requests sent to
 the Elasticsearch cluster. This setting constrains the length of the segment list. Long segment lists can significantly
 increase request processing time.
@@ -47,11 +47,12 @@ increase request processing time.
 `histogram:maxBars`:: Date histograms are not generated with more bars than the value of this property, scaling values
 when necessary.
 `visualization:tileMap:maxPrecision`:: The maximum geoHash precision displayed on tile maps: 7 is high, 10 is very high,
-12 is the maximum. {es-ref}search-aggregations-bucket-geohashgrid-aggregation.html#_cell_dimensions_at_the_equator[Explanation of cell dimensions].
+12 is the maximum. {ref}/search-aggregations-bucket-geohashgrid-aggregation.html#_cell_dimensions_at_the_equator[Explanation of cell dimensions].
 `visualization:tileMap:WMSdefaults`:: Default properties for the WMS map server support in the coordinate map.
 `visualization:colorMapping`:: Maps values to specified colors within visualizations.
 `visualization:loadingDelay`:: Time to wait before dimming visualizations during query.
 `visualization:dimmingOpacity`:: When part of a visualization is highlighted, by hovering over it for example, ths is the opacity applied to the other elements. A higher number means other elements will be less opaque.
+`visualization:regionmap:showWarnings`:: Whether the region map show a warning when terms cannot be joined to a shape on the map.
 `csv:separator`:: A string that serves as the separator for exported values.
 `csv:quoteValues`:: Set this property to `true` to quote exported values.
 `history:limit`:: In fields that have history, such as query inputs, the value of this property limits how many recent
@@ -73,6 +74,7 @@ mentioned use "_default_".
 `timepicker:refreshIntervalDefaults`:: The time filter's default refresh interval.
 `dashboard:defaultDarkTheme`:: Set this property to `true` to make new dashboards use the dark theme by default.
 `filters:pinnedByDefault`:: Set this property to `true` to make filters have a global state by default.
+`filterEditor:suggestValues`:: Set this property to `false` to prevent the filter editor from suggesting values for fields.
 `notifications:banner`:: You can specify a custom banner to display temporary notices to all users. This field supports
 Markdown.
 `notifications:lifetime:banner`:: Specifies the duration in milliseconds for banner notification displays. The default value is 3000000. Set this field to `Infinity` to disable banner notifications.
@@ -92,3 +94,4 @@ Markdown.
 `state:storeInSessionStorage`:: [experimental] Kibana tracks UI state in the URL, which can lead to problems when there is a lot of information there and the URL gets very long. Enabling this will store parts of the state in your browser session instead, to keep the URL shorter.
 `context:defaultSize`:: Specifies the initial number of surrounding entries to display in the context view. The default value is 5.
 `context:step`:: Specifies the number to increment or decrement the context size by when using the buttons in the context view. The default value is 5.
+`context:tieBreakerFields`:: A comma-separated list of fields to use for tiebreaking between documents that have the same timestamp value. From this list the first field that is present and sortable in the current index pattern is used.

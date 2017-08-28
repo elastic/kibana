@@ -5,6 +5,7 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
   const retry = getService('retry');
   const config = getService('config');
   const remote = getService('remote');
+  const find = getService('find');
   const testSubjects = getService('testSubjects');
   const PageObjects = getPageObjects(['header', 'common']);
 
@@ -31,19 +32,33 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
       await this.clickLinkText('Index Patterns');
     }
 
-    getAdvancedSettings(propertyName) {
-      log.debug('in setAdvancedSettings');
-      return testSubjects.find(`advancedSetting-${propertyName}-currentValue`)
-      .getVisibleText();
+    async getAdvancedSettings(propertyName) {
+      log.debug('in getAdvancedSettings');
+      return await testSubjects.getVisibleText(`advancedSetting-${propertyName}-currentValue`);
     }
 
-    async setAdvancedSettings(propertyName, propertyValue) {
+    async clearAdvancedSettings(propertyName) {
+      await testSubjects.click(`advancedSetting-${propertyName}-clearButton`);
+      await PageObjects.header.waitUntilLoadingHasFinished();
+    }
+
+    async setAdvancedSettingsSelect(propertyName, propertyValue) {
       await testSubjects.click(`advancedSetting-${propertyName}-editButton`);
       await PageObjects.header.waitUntilLoadingHasFinished();
       await PageObjects.common.sleep(1000);
       await remote.setFindTimeout(defaultFindTimeout)
         .findByCssSelector(`option[label="${propertyValue}"]`).click();
       await PageObjects.header.waitUntilLoadingHasFinished();
+      await testSubjects.click(`advancedSetting-${propertyName}-saveButton`);
+      await PageObjects.header.waitUntilLoadingHasFinished();
+    }
+
+    async setAdvancedSettingsInput(propertyName, propertyValue, inputSelector) {
+      await testSubjects.click(`advancedSetting-${propertyName}-editButton`);
+      await PageObjects.header.waitUntilLoadingHasFinished();
+      const input = await testSubjects.find(inputSelector);
+      await input.clearValue();
+      await input.type(propertyValue);
       await testSubjects.click(`advancedSetting-${propertyName}-saveButton`);
       await PageObjects.header.waitUntilLoadingHasFinished();
     }
@@ -62,58 +77,56 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
       await PageObjects.common.navigateToApp('settings');
     }
 
-    getTimeBasedIndexPatternCheckbox() {
-      // fail faster since we're sometimes checking that it doesn't exist
-      return testSubjects.find('createIndexPatternNameIsPatternCheckBox');
+    async getIndexPatternField() {
+      return await testSubjects.find('createIndexPatternNameInput');
     }
 
-    getIndexPatternField() {
-      return testSubjects.find('createIndexPatternNameInput');
+    async clickTimeFieldNameField() {
+      return await testSubjects.click('createIndexPatternTimeFieldSelect');
     }
 
-    getTimeFieldNameField() {
-      return testSubjects.find('createIndexPatternTimeFieldSelect');
+    async getTimeFieldNameField() {
+      return await testSubjects.find('createIndexPatternTimeFieldSelect');
     }
 
     async selectTimeFieldOption(selection) {
       // open dropdown
-      (await this.getTimeFieldNameField()).click();
+      await this.clickTimeFieldNameField();
       // close dropdown, keep focus
-      (await this.getTimeFieldNameField()).click();
+      await this.clickTimeFieldNameField();
       await PageObjects.header.waitUntilLoadingHasFinished();
-      await retry.try(async () => {
+      return await retry.try(async () => {
         log.debug(`selectTimeFieldOption(${selection})`);
-        (await this.getTimeFieldOption(selection)).click();
-        const selected = (await this.getTimeFieldOption(selection)).isSelected();
+        const timeFieldOption = await this.getTimeFieldOption(selection);
+        await timeFieldOption.click();
+        const selected = await timeFieldOption.isSelected();
         if (!selected) throw new Error('option not selected: ' + selected);
       });
     }
 
-    getTimeFieldOption(selection) {
-      return remote.setFindTimeout(defaultFindTimeout)
-        .findDisplayedByCssSelector('option[label="' + selection + '"]');
+    async getTimeFieldOption(selection) {
+      return await find.displayedByCssSelector('option[label="' + selection + '"]');
     }
 
-    getCreateIndexPatternButton() {
-      return testSubjects.find('createIndexPatternCreateButton');
+    async getCreateIndexPatternButton() {
+      return await testSubjects.find('createIndexPatternCreateButton');
     }
 
-    getCreateButton() {
-      return remote.setFindTimeout(defaultFindTimeout)
-        .findDisplayedByCssSelector('[type="submit"]');
+    async getCreateButton() {
+      return await find.displayedByCssSelector('[type="submit"]');
     }
 
     async clickDefaultIndexButton() {
-      await testSubjects.find('setDefaultIndexPatternButton').click();
+      await testSubjects.click('setDefaultIndexPatternButton');
       await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
     async clickDeletePattern() {
-      await testSubjects.find('deleteIndexPatternButton').click();
+      await testSubjects.click('deleteIndexPatternButton');
     }
 
-    getIndexPageHeading() {
-      return testSubjects.find('indexPatternTitle');
+    async getIndexPageHeading() {
+      return await testSubjects.find('indexPatternTitle');
     }
 
     getConfigureHeader() {
@@ -156,14 +169,11 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
         );
     }
 
-    getFieldsTabCount() {
-      return retry.try(() => {
-        return testSubjects.find('tab-count-indexedFields')
-          .getVisibleText()
-          .then((theText) => {
-          // the value has () around it, remove them
-            return theText.replace(/\((.*)\)/, '$1');
-          });
+    async getFieldsTabCount() {
+      return await retry.try(async () => {
+        const text = await testSubjects.getVisibleText('tab-count-indexedFields');
+        // the value has () around it, remove them
+        return text.replace(/\((.*)\)/, '$1');
       });
     }
 
@@ -237,8 +247,7 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
 
     async goToPage(pageNum) {
       await remote.setFindTimeout(defaultFindTimeout)
-        .findByCssSelector('ul.pagination-other-pages-list.pagination-sm.ng-scope li.ng-scope:nth-child(' +
-          (pageNum + 1) + ') a.ng-binding')
+        .findByCssSelector(`[data-test-subj="paginationControls"] li:nth-child(${pageNum + 1}) button`)
         .click();
       await PageObjects.header.waitUntilLoadingHasFinished();
     }
@@ -277,13 +286,16 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
       await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
-    async createIndexPattern(indexPatternName = 'logstash-*', timefield = '@timestamp') {
+    async createIndexPattern(indexPatternName, timefield = '@timestamp') {
       await retry.try(async () => {
         await this.navigateTo();
         await this.clickKibanaIndices();
         await this.setIndexPatternField(indexPatternName);
+        await PageObjects.common.sleep(2000);
+        await (await this.getCreateIndexPatternGoToStep2Button()).click();
+        await PageObjects.common.sleep(2000);
         await this.selectTimeFieldOption(timefield);
-        await this.getCreateButton().click();
+        await (await this.getCreateIndexPatternCreateButton()).click();
       });
       await PageObjects.header.waitUntilLoadingHasFinished();
       await retry.try(async () => {
@@ -295,14 +307,33 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
           log.debug('Index pattern created: ' + currentUrl);
         }
       });
+
+      return await this.getIndexPatternIdFromUrl();
     }
 
-    async setIndexPatternField(pattern) {
-      log.debug(`setIndexPatternField(${pattern})`);
-      return testSubjects.find('createIndexPatternNameInput')
-        .clearValue().type(pattern);
+    async getIndexPatternIdFromUrl() {
+      const currentUrl = await remote.getCurrentUrl();
+      const indexPatternId = currentUrl.match(/.*\/(.*)/)[1];
+
+      log.debug('index pattern ID: ', indexPatternId);
+
+      return indexPatternId;
     }
 
+    async setIndexPatternField(indexPatternName = 'logstash-') {
+      log.debug(`setIndexPatternField(${indexPatternName})`);
+      const field = await this.getIndexPatternField();
+      await field.clearValue();
+      field.type(indexPatternName);
+    }
+
+    async getCreateIndexPatternGoToStep2Button() {
+      return await testSubjects.find('createIndexPatternGoToStep2Button');
+    }
+
+    async getCreateIndexPatternCreateButton() {
+      return await testSubjects.find('createIndexPatternCreateButton');
+    }
 
     async removeIndexPattern() {
       let alertText;
@@ -312,7 +343,7 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
       });
       await retry.try(async () => {
         log.debug('getAlertText');
-        alertText = await testSubjects.find('confirmModalBodyText').getVisibleText();
+        alertText = await testSubjects.getVisibleText('confirmModalBodyText');
       });
       await retry.try(async () => {
         log.debug('acceptConfirmation');
@@ -386,7 +417,7 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
 
     async setScriptedFieldName(name) {
       log.debug('set scripted field name = ' + name);
-      await testSubjects.find('editorFieldName').type(name);
+      await testSubjects.setValue('editorFieldName', name);
     }
 
     async setScriptedFieldLanguage(language) {
@@ -447,12 +478,12 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
 
     async setScriptedFieldPopularity(popularity) {
       log.debug('set scripted field popularity = ' + popularity);
-      await testSubjects.find('editorFieldCount').type(popularity);
+      await testSubjects.setValue('editorFieldCount', popularity);
     }
 
     async setScriptedFieldScript(script) {
       log.debug('set scripted field script = ' + script);
-      await testSubjects.find('editorFieldScript').type(script);
+      await testSubjects.setValue('editorFieldScript', script);
     }
   }
 

@@ -1,10 +1,11 @@
-import React, { Component, PropTypes } from 'react';
+import PropTypes from 'prop-types';
+import React, { Component } from 'react';
 import SeriesEditor from '../series_editor';
-import IndexPattern from '../index_pattern';
+import { IndexPattern } from '../index_pattern';
 import createTextHandler from '../lib/create_text_handler';
 import ColorRules from '../color_rules';
 import YesNo from '../yes_no';
-import uuid from 'node-uuid';
+import uuid from 'uuid';
 
 class MetricPanelConfig extends Component {
 
@@ -40,7 +41,8 @@ class MetricPanelConfig extends Component {
           limit={2}
           model={this.props.model}
           name={this.props.name}
-          onChange={this.props.onChange} />
+          onChange={this.props.onChange}
+        />
       );
     } else {
       view = (
@@ -48,19 +50,22 @@ class MetricPanelConfig extends Component {
           <IndexPattern
             fields={this.props.fields}
             model={this.props.model}
-            onChange={this.props.onChange}/>
+            onChange={this.props.onChange}
+          />
           <div className="vis_editor__vis_config-row">
             <div className="vis_editor__label">Panel Filter</div>
             <input
               className="vis_editor__input-grows"
               type="text"
               onChange={handleTextChange('filter')}
-              value={model.filter}/>
+              value={model.filter}
+            />
             <div className="vis_editor__label">Ignore Global Filter</div>
             <YesNo
               value={model.ignore_global_filter}
               name="ignore_global_filter"
-              onChange={this.props.onChange}/>
+              onChange={this.props.onChange}
+            />
           </div>
           <div>
             <div className="vis_editor__label">Color Rules</div>
@@ -69,7 +74,8 @@ class MetricPanelConfig extends Component {
             <ColorRules
               model={model}
               onChange={this.props.onChange}
-              name="background_color_rules"/>
+              name="background_color_rules"
+            />
           </div>
         </div>
       );
@@ -77,10 +83,18 @@ class MetricPanelConfig extends Component {
     return (
       <div>
         <div className="kbnTabs">
-          <div className={`kbnTabs__tab${selectedTab === 'data' && '-active' || ''}`}
-            onClick={() => this.switchTab('data')}>Data</div>
-          <div className={`kbnTabs__tab${selectedTab === 'options' && '-active' || ''}`}
-            onClick={() => this.switchTab('options')}>Panel Options</div>
+          <div
+            className={`kbnTabs__tab${selectedTab === 'data' && '-active' || ''}`}
+            onClick={() => this.switchTab('data')}
+            tabIndex="0"
+          >Data
+          </div>
+          <div
+            className={`kbnTabs__tab${selectedTab === 'options' && '-active' || ''}`}
+            onClick={() => this.switchTab('options')}
+            tabIndex="0"
+          >Panel Options
+          </div>
         </div>
         {view}
       </div>

@@ -61,24 +61,6 @@ const init = function () {
 
 describe('typeahead directive', function () {
   describe('typeahead requirements', function () {
-    describe('missing input', function () {
-      const goodMarkup = markup;
-
-      before(function () {
-        markup = `<div class="typeahead" kbn-typeahead="${typeaheadName}" on-select="selectItem()">
-                    <kbn-typeahead-items></kbn-typeahead-items>
-                  </div>`;
-      });
-
-      after(function () {
-        markup = goodMarkup;
-      });
-
-      it('should throw with message', function () {
-        expect(init).to.throwException(/kbn-typeahead-input must be defined/);
-      });
-    });
-
     describe('missing on-select attribute', function () {
       const goodMarkup = markup;
 
@@ -130,7 +112,10 @@ describe('typeahead directive', function () {
     describe('controller scope', function () {
       it('should contain the input model', function () {
         expect($typeaheadScope.inputModel).to.be.an('object');
-        expect($typeaheadScope.inputModel).to.have.keys(['$viewValue', '$modelValue', '$setViewValue']);
+        expect($typeaheadScope.inputModel)
+          .to.have.property('$viewValue')
+          .and.have.property('$modelValue')
+          .and.have.property('$setViewValue').a('function');
       });
 
       it('should save data to the scope', function () {

@@ -1,15 +1,13 @@
-module.exports = function (server, mappings) {
+export default function (server) {
   const { callWithInternalUser } = server.plugins.elasticsearch.getCluster('admin');
   const index = server.config().get('kibana.index');
   return callWithInternalUser('indices.create', {
     index: index,
     body: {
       settings: {
-        number_of_shards: 1,
-        'index.mapper.dynamic': false,
-        'index.mapping.single_type': false
+        number_of_shards: 1
       },
-      mappings
+      mappings: server.getKibanaIndexMappingsDsl()
     }
   })
   .catch(() => {
@@ -24,4 +22,4 @@ module.exports = function (server, mappings) {
       throw new Error(`Waiting for Kibana index "${index}" to come online failed.`);
     });
   });
-};
+}

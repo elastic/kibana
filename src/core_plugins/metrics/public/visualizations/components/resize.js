@@ -1,4 +1,5 @@
-import React, { Component, PropTypes } from 'react';
+import PropTypes from 'prop-types';
+import React, { Component } from 'react';
 import { findDOMNode } from 'react-dom';
 class Resize extends Component {
 
@@ -29,7 +30,7 @@ class Resize extends Component {
     const el = findDOMNode(this.el);
     const currentWidth = el.parentNode.clientWidth;
     const currentHeight = el.parentNode.clientHeight;
-    this.setState({ currentHeight, currentWidth });
+    this.setState({ currentHeight, currentWidth }); // eslint-disable-line react/no-did-mount-set-state
     this.checkSize();
   }
 
@@ -48,7 +49,8 @@ class Resize extends Component {
       <div
         style={style}
         className={className}
-        ref={(el) => this.el = el} >
+        ref={(el) => this.el = el}
+      >
         {this.props.children}
       </div>
     );

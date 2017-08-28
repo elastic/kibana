@@ -1,4 +1,5 @@
-import React, { PropTypes } from 'react';
+import PropTypes from 'prop-types';
+import React from 'react';
 import _ from 'lodash';
 import AddDeleteButtons from '../add_delete_buttons';
 import Tooltip from '../tooltip';
@@ -18,7 +19,7 @@ function AggRow(props) {
       <div>
         <Tooltip text="Sort">
           <div className="vis_editor__agg_sort thor__button-outlined-default sm">
-            <i className="fa fa-sort"></i>
+            <i className="fa fa-sort" />
           </div>
         </Tooltip>
       </div>
@@ -29,7 +30,7 @@ function AggRow(props) {
     <div className="vis_editor__agg_row">
       <div className="vis_editor__agg_row-item">
         <div className={iconRowClassName}>
-          <i className={iconClassName}></i>
+          <i className={iconClassName} />
         </div>
         {props.children}
         { dragHandle }
@@ -38,7 +39,8 @@ function AggRow(props) {
           deleteTooltip="Delete Metric"
           onAdd={props.onAdd}
           onDelete={props.onDelete}
-          disableDelete={props.disableDelete}/>
+          disableDelete={props.disableDelete}
+        />
       </div>
     </div>
   );

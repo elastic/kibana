@@ -58,6 +58,7 @@ describe('Controller', function () {
 
     $rootScope.vis = vis;
     $rootScope.uiState = new AppState({ uiState: {} }).makeStateful('uiState');
+    $rootScope.renderComplete = () => {};
     $rootScope.newScope = function (scope) { $scope = scope; };
 
     $el = $('<div>')
@@ -132,32 +133,6 @@ describe('Controller', function () {
 
     expect($scope.hasSomeRows).to.be(false);
     expect(!$scope.tableGroups).to.be.ok();
-  });
-
-  it('passes partialRows:true to tabify based on the vis params', function () {
-    // spy on the tabify private module
-    const spiedTabify = sinon.spy(Private(AggResponseTabifyProvider));
-    Private.stub(AggResponseTabifyProvider, spiedTabify);
-
-    const vis = new OneRangeVis({ showPartialRows: true });
-    initController(vis);
-    attachEsResponseToScope(fixtures.oneRangeBucket);
-
-    expect(spiedTabify).to.have.property('callCount', 1);
-    expect(spiedTabify.firstCall.args[2]).to.have.property('partialRows', true);
-  });
-
-  it('passes partialRows:false to tabify based on the vis params', function () {
-    // spy on the tabify private module
-    const spiedTabify = sinon.spy(Private(AggResponseTabifyProvider));
-    Private.stub(AggResponseTabifyProvider, spiedTabify);
-
-    const vis = new OneRangeVis({ showPartialRows: false });
-    initController(vis);
-    attachEsResponseToScope(fixtures.oneRangeBucket);
-
-    expect(spiedTabify).to.have.property('callCount', 1);
-    expect(spiedTabify.firstCall.args[2]).to.have.property('partialRows', false);
   });
 
   it('passes partialRows:true to tabify based on the vis params', function () {

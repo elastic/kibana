@@ -1,4 +1,5 @@
-import React, { Component, PropTypes } from 'react';
+import PropTypes from 'prop-types';
+import React, { Component } from 'react';
 import _ from 'lodash';
 import getLastValue from '../lib/get_last_value';
 import reactcss from 'reactcss';
@@ -116,17 +117,28 @@ class Metric extends Component {
       );
     }
 
+    let additionalLabel;
+    if (this.props.additionalLabel) {
+      additionalLabel = (
+        <div className="rhythm_metric__additionalLabel">
+          {this.props.additionalLabel}
+        </div>
+      );
+    }
+
     return (
       <div className="rhythm_metric" style={styles.container}>
         <div
           ref={(el) => this.resize = el}
-          className="rhythm_metric__resize">
+          className="rhythm_metric__resize"
+        >
           <div ref={(el) => this.inner = el} className="rhythm_metric__inner" style={styles.inner}>
             <div className="rhythm_metric__primary">
               { primaryLabel }
               <div style={styles.primary_value} className="rhythm_metric__primary-value">{ primaryValue }</div>
             </div>
             { secondarySnippet }
+            {additionalLabel}
           </div>
         </div>
       </div>
@@ -139,7 +151,8 @@ Metric.propTypes = {
   backgroundColor: PropTypes.string,
   metric: PropTypes.object,
   secondary: PropTypes.object,
-  reversed: PropTypes.bool
+  reversed: PropTypes.bool,
+  additionalLabel: PropTypes.string
 };
 
 export default Metric;

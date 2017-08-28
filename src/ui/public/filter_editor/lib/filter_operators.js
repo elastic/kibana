@@ -15,11 +15,13 @@ export const FILTER_OPERATORS = [
     name: 'is one of',
     type: 'phrases',
     negate: false,
+    fieldTypes: ['string', 'number', 'date', 'ip', 'geo_point', 'geo_shape']
   },
   {
     name: 'is not one of',
     type: 'phrases',
     negate: true,
+    fieldTypes: ['string', 'number', 'date', 'ip', 'geo_point', 'geo_shape']
   },
   {
     name: 'is between',

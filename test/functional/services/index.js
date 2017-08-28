@@ -1,4 +1,4 @@
-export { RetryProvider } from './retry';
+export { QueryBarProvider } from './query_bar';
 export { FilterBarProvider } from './filter_bar';
 export { FindProvider } from './find';
 export { TestSubjectsProvider } from './test_subjects';

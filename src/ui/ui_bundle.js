@@ -6,7 +6,7 @@ const write = promisify(require('fs').writeFile);
 const unlink = promisify(require('fs').unlink);
 const stat = promisify(require('fs').stat);
 
-module.exports = class UiBundle {
+export default class UiBundle {
   constructor(opts) {
 
     opts = opts || {};
@@ -65,4 +65,4 @@ module.exports = class UiBundle {
       outputPath: this.outputPath
     };
   }
-};
+}

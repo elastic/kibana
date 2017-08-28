@@ -20,9 +20,7 @@ import url from 'url';
 * @return {string}
 */
 
-module.exports = getUrl;
-
-function getUrl(config, app) {
+export default function getUrl(config, app) {
   return url.format(_.assign({}, config, app));
 }
 

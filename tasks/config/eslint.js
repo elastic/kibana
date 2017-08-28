@@ -9,9 +9,11 @@ export default grunt => ({
       'scripts',
       'tasks',
       'test',
-      'ui_framework/components',
-      'ui_framework/doc_site',
+      'ui_framework/src',
+      'ui_framework/doc_site/src',
+      'ui_framework/generator_kui',
       'utilities',
+      'webpackShims',
     ],
   },
 

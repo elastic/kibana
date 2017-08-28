@@ -2,6 +2,7 @@ import expect from 'expect.js';
 
 import { initChromeNavApi } from 'ui/chrome/api/nav';
 import StubBrowserStorage from 'test_utils/stub_browser_storage';
+import { KibanaParsedUrl } from 'ui/url/kibana_parsed_url';
 
 const basePath = '/someBasePath';
 
@@ -125,6 +126,33 @@ describe('chrome nav apis', function () {
 
       expect(internals.nav[2].lastSubUrl).to.be('https://localhost:9200/app/kibana#dashboard?_g=globalstate');
       expect(internals.nav[2].active).to.be(true);
+    });
+  });
+
+  describe('internals.trackSubUrlForApp()', function () {
+    it('injects a manual app url', function () {
+      const appUrlStore = new StubBrowserStorage();
+      const nav = [
+        {
+          id: 'kibana:visualize',
+          url: 'https://localhost:9200/app/kibana#visualize',
+          lastSubUrl: 'https://localhost:9200/app/kibana#visualize',
+          subUrlBase: 'https://localhost:9200/app/kibana#visualize'
+        }
+      ];
+
+      const { chrome, internals } = init({ appUrlStore, nav });
+
+      const basePath = '/xyz';
+      const appId = 'kibana';
+      const appPath = 'visualize/1234?_g=globalstate';
+      const hostname = 'localhost';
+      const port = '9200';
+      const protocol = 'https';
+
+      const kibanaParsedUrl = new KibanaParsedUrl({ basePath, appId, appPath, hostname, port, protocol });
+      chrome.trackSubUrlForApp('kibana:visualize', kibanaParsedUrl);
+      expect(internals.nav[0].lastSubUrl).to.be('https://localhost:9200/xyz/app/kibana#visualize/1234?_g=globalstate');
     });
   });
 });

@@ -3,7 +3,7 @@ import _ from 'lodash';
 
 import indexArguments from '../../../handlers/lib/index_arguments';
 
-module.exports = function invokeSeriesFn(fnDef, args, tlConfigOverrides) {
+export default function invokeSeriesFn(fnDef, args, tlConfigOverrides) {
   const tlConfig = _.merge(require('../fixtures/tlConfig')(), tlConfigOverrides);
 
   return Promise.all(args).then(function (args) {
@@ -20,4 +20,4 @@ module.exports = function invokeSeriesFn(fnDef, args, tlConfigOverrides) {
       return result;
     });
   });
-};
+}

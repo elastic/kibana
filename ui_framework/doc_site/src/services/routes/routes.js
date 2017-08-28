@@ -21,6 +21,9 @@ import CardExample
 import CollapseButtonExample
   from '../../views/collapse_button/collapse_button_example';
 
+import ColorPickerExample
+  from '../../views/color_picker/color_picker_example';
+
 import ColumnExample
   from '../../views/column/column_example';
 
@@ -84,6 +87,12 @@ import PagerExample
 import PanelExample
   from '../../views/panel/panel_example';
 
+import PopoverExample
+  from '../../views/popover/popover_example';
+
+import EmptyTablePromptExample
+  from '../../views/empty_table_prompt/empty_table_prompt_example';
+
 import StatusTextExample
   from '../../views/status_text/status_text_example';
 
@@ -116,12 +125,14 @@ const components = [{
 }, {
   name: 'ActionItem',
   component: ActionItemExample,
+  hasReact: true,
 }, {
   name: 'Badge',
   component: BadgeExample,
 }, {
   name: 'Bar',
   component: BarExample,
+  hasReact: true,
 }, {
   name: 'Button',
   component: ButtonExample,
@@ -129,15 +140,26 @@ const components = [{
 }, {
   name: 'Card',
   component: CardExample,
+  hasReact: true,
+}, {
+  name: 'ColorPicker',
+  component: ColorPickerExample,
+  hasReact: true,
 }, {
   name: 'Column',
   component: ColumnExample,
 }, {
   name: 'CollapseButton',
   component: CollapseButtonExample,
+  hasReact: true,
+}, {
+  name: 'EmptyTablePrompt',
+  component: EmptyTablePromptExample,
+  hasReact: true,
 }, {
   name: 'Event',
   component: EventExample,
+  hasReact: true,
 }, {
   name: 'Expression',
   component: ExpressionExample,
@@ -147,12 +169,15 @@ const components = [{
 }, {
   name: 'FormLayout',
   component: FormLayoutExample,
+  hasReact: true,
 }, {
   name: 'Gallery',
   component: GalleryExample,
+  hasReact: true,
 }, {
   name: 'HeaderBar',
   component: HeaderBarExample,
+  hasReact: true,
 }, {
   name: 'Icon',
   component: IconExample,
@@ -173,6 +198,7 @@ const components = [{
 }, {
   name: 'Menu',
   component: MenuExample,
+  hasReact: true,
 }, {
   name: 'MenuButton',
   component: MenuButtonExample,
@@ -191,14 +217,20 @@ const components = [{
   name: 'Panel',
   component: PanelExample,
 }, {
+  name: 'Popover',
+  component: PopoverExample,
+  hasReact: true,
+}, {
   name: 'StatusText',
   component: StatusTextExample,
 }, {
   name: 'Table',
   component: TableExample,
+  hasReact: true,
 }, {
   name: 'Tabs',
   component: TabsExample,
+  hasReact: true,
 }, {
   name: 'ToggleButton',
   component: ToggleButtonExample,

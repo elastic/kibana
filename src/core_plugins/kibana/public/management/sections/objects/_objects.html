@@ -67,7 +67,10 @@
       <!-- ToolBar -->
       <div class="kuiToolBar">
         <div class="kuiToolBarSearch">
-          <div class="kuiToolBarSearchBox">
+          <div
+            class="kuiToolBarSearchBox"
+            role="search"
+          >
             <div class="kuiToolBarSearchBox__icon kuiIcon fa-search"></div>
             <input
               class="kuiToolBarSearchBox__input"
@@ -114,7 +117,7 @@
 
       <!-- NoResults -->
       <div
-        class="kuiPanel kuiPanel--centered kuiPanel--withHeader"
+        class="kuiPanel kuiPanel--centered kuiPanel--withToolBar"
         ng-if="!service.data.length"
       >
         <div class="kuiTableInfo">
@@ -127,15 +130,22 @@
         <thead>
           <tr>
             <th class="kuiTableHeaderCell kuiTableHeaderCell--checkBox">
-              <input
-                type="checkbox"
-                class="kuiCheckBox"
-                ng-checked="managementObjectsController.areAllRowsChecked()"
-                ng-click="toggleAll()"
-              >
+              <div class="kuiTableHeaderCell__liner">
+                <input
+                  type="checkbox"
+                  aria-label="Select All"
+                  class="kuiCheckBox"
+                  ng-checked="managementObjectsController.areAllRowsChecked()"
+                  ng-click="toggleAll()"
+                  aria-label="{{managementObjectsController.areAllRowsChecked() ? 'Deselect all rows' : 'Select all rows'}}"
+                >
+              </div>
             </th>
+
             <th class="kuiTableHeaderCell">
-              Title
+              <div class="kuiTableHeaderCell__liner">
+                Title
+              </div>
             </th>
           </tr>
         </thead>

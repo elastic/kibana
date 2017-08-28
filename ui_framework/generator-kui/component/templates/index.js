@@ -1,0 +1,3 @@
+export {
+  <%= componentName %>,
+} from './<%= fileName %>';

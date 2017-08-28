@@ -26,7 +26,7 @@ describe('formatMsg', function () {
       data: {
         statusCode: 403,
         error: 'Forbidden',
-        message: '[security_exception] action [indices:data/read/mget] is unauthorized for user [user]'
+        message: '[security_exception] action [indices:data/read/msearch] is unauthorized for user [user]'
       },
       status: 403,
       config: {},
@@ -34,7 +34,7 @@ describe('formatMsg', function () {
     };
     const actual = formatMsg(err);
 
-    expect(actual).to.equal('Error 403 Forbidden: [security_exception] action [indices:data/read/mget] is unauthorized for user [user]');
+    expect(actual).to.equal('Error 403 Forbidden: [security_exception] action [indices:data/read/msearch] is unauthorized for user [user]');
   });
 
   it('should handle an extended elasticsearch error', function () {

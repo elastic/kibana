@@ -1,6 +1,8 @@
-import numeral from '@spalger/numeral';
-import _ from 'lodash';
+import numeral from '@elastic/numeral';
 import handlebars from 'handlebars/dist/handlebars';
+import { durationInputOptions } from './durations';
+import { DurationFormat } from '../../../../kibana/common/field_formats/types/duration';
+import { capitalize, isNumber } from 'lodash';
 
 const formatLookup = {
   'bytes': '0.0b',
@@ -8,19 +10,37 @@ const formatLookup = {
   'percent': '0.[00]%'
 };
 
+const durationsLookup = durationInputOptions.reduce((acc, row) => {
+  acc[row.value] = row.label;
+  return acc;
+}, {});
+
 export default (format = '0,0.[00]', template) => {
   if (!template) template = '{{value}}';
   const render = handlebars.compile(template);
+  const durationFormatTest = /[pnumshdwMY]+,[pnumshdwMY]+,\d+/;
   return (val) => {
     const formatString = formatLookup[format] || format;
     let value;
-    if (!_.isNumber(val)) {
+    if (!isNumber(val)) {
       value = 0;
     } else {
-      try {
-        value = numeral(val).format(formatString);
-      } catch (e) {
-        value = val;
+      if (durationFormatTest.test(format)) {
+        const [from, to, decimals] = format.split(',');
+        const inputFormat = durationsLookup[from];
+        const outputFormat = `as${capitalize(durationsLookup[to])}`;
+        const formatter = new DurationFormat({
+          inputFormat,
+          outputFormat,
+          outputPrecision: decimals
+        });
+        value = formatter.convert(val, 'text');
+      } else {
+        try {
+          value = numeral(val).format(formatString);
+        } catch (e) {
+          value = val;
+        }
       }
     }
     try {

@@ -152,7 +152,7 @@ export default function ({ getService, getPageObjects }) {
 
         it('when the query is edited and applied', async function () {
           const originalQuery = await PageObjects.dashboard.getQuery();
-          await PageObjects.dashboard.appendQuery('extra stuff');
+          await PageObjects.dashboard.setQuery(`${originalQuery} and extra stuff`);
           await PageObjects.dashboard.clickFilterButton();
 
           await PageObjects.dashboard.clickCancelOutOfEditMode();
@@ -184,8 +184,7 @@ export default function ({ getService, getPageObjects }) {
           await originalFilters[0].click();
           await originalFilters[0].click();
 
-          const removeFilterButton = await testSubjects.find('removeFilter-memory');
-          await removeFilterButton.click();
+          await testSubjects.click('removeFilter-memory');
 
           const noFilters = await PageObjects.dashboard.getFilters(1000);
           expect(noFilters.length).to.equal(0);
@@ -288,7 +287,7 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.dashboard.gotoDashboardEditMode(dashboardName);
 
         const originalQuery = await PageObjects.dashboard.getQuery();
-        await PageObjects.dashboard.appendQuery('extra stuff');
+        await PageObjects.dashboard.setQuery(`${originalQuery} extra stuff`);
 
         await PageObjects.dashboard.clickCancelOutOfEditMode();
 

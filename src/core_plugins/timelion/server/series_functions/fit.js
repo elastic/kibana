@@ -4,7 +4,7 @@ import Chainable from '../lib/classes/chainable';
 import loadFunctions from '../lib/load_functions.js';
 const fitFunctions  = loadFunctions('fit_functions');
 
-module.exports = new Chainable('fit', {
+export default new Chainable('fit', {
   args: [
     {
       name: 'inputSeries',

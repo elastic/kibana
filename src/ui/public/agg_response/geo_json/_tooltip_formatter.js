@@ -17,7 +17,7 @@ export function TileMapTooltipFormatterProvider($compile, $rootScope, Private) {
     const vis = acr.aggConfig.vis;
 
     const metricAgg = acr.aggConfig;
-    let geoFormat = _.get(vis.aggs, 'byTypeName.geohash_grid[0].format');
+    let geoFormat = _.get(vis.getAggConfig(), 'byTypeName.geohash_grid[0].format');
     if (!geoFormat) geoFormat = fieldFormats.getDefaultInstance('geo_point');
 
     $tooltipScope.details = [

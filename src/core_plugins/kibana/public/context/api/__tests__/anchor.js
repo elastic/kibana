@@ -27,19 +27,19 @@ describe('context app', function () {
       fetchAnchor = Private(fetchAnchorProvider);
     }));
 
-    it('should use the `fetch` method of the SearchSource', function () {
+    it('should use the `fetchAsRejectablePromise` method of the SearchSource', function () {
       const searchSourceStub = new SearchSourceStub();
 
-      return fetchAnchor('INDEX_PATTERN_ID', 'UID', { '@timestamp': 'desc' })
+      return fetchAnchor('INDEX_PATTERN_ID', 'UID', [{ '@timestamp': 'desc' }, { '_doc': 'asc' }])
         .then(() => {
-          expect(searchSourceStub.fetch.calledOnce).to.be(true);
+          expect(searchSourceStub.fetchAsRejectablePromise.calledOnce).to.be(true);
         });
     });
 
     it('should configure the SearchSource to not inherit from the implicit root', function () {
       const searchSourceStub = new SearchSourceStub();
 
-      return fetchAnchor('INDEX_PATTERN_ID', 'UID', { '@timestamp': 'desc' })
+      return fetchAnchor('INDEX_PATTERN_ID', 'UID', [{ '@timestamp': 'desc' }, { '_doc': 'asc' }])
         .then(() => {
           const inheritsSpy = searchSourceStub.inherits;
           expect(inheritsSpy.calledOnce).to.be(true);
@@ -50,7 +50,7 @@ describe('context app', function () {
     it('should set the SearchSource index pattern', function () {
       const searchSourceStub = new SearchSourceStub();
 
-      return fetchAnchor('INDEX_PATTERN_ID', 'UID', { '@timestamp': 'desc' })
+      return fetchAnchor('INDEX_PATTERN_ID', 'UID', [{ '@timestamp': 'desc' }, { '_doc': 'asc' }])
         .then(() => {
           const setIndexSpy = searchSourceStub.set.withArgs('index');
           expect(setIndexSpy.calledOnce).to.be(true);
@@ -61,7 +61,7 @@ describe('context app', function () {
     it('should set the SearchSource version flag to true', function () {
       const searchSourceStub = new SearchSourceStub();
 
-      return fetchAnchor('INDEX_PATTERN_ID', 'UID', { '@timestamp': 'desc' })
+      return fetchAnchor('INDEX_PATTERN_ID', 'UID', [{ '@timestamp': 'desc' }, { '_doc': 'asc' }])
         .then(() => {
           const setVersionSpy = searchSourceStub.set.withArgs('version');
           expect(setVersionSpy.calledOnce).to.be(true);
@@ -72,7 +72,7 @@ describe('context app', function () {
     it('should set the SearchSource size to 1', function () {
       const searchSourceStub = new SearchSourceStub();
 
-      return fetchAnchor('INDEX_PATTERN_ID', 'UID', { '@timestamp': 'desc' })
+      return fetchAnchor('INDEX_PATTERN_ID', 'UID', [{ '@timestamp': 'desc' }, { '_doc': 'asc' }])
         .then(() => {
           const setSizeSpy = searchSourceStub.set.withArgs('size');
           expect(setSizeSpy.calledOnce).to.be(true);
@@ -83,14 +83,17 @@ describe('context app', function () {
     it('should set the SearchSource query to a _uid terms query', function () {
       const searchSourceStub = new SearchSourceStub();
 
-      return fetchAnchor('INDEX_PATTERN_ID', 'UID', { '@timestamp': 'desc' })
+      return fetchAnchor('INDEX_PATTERN_ID', 'UID', [{ '@timestamp': 'desc' }, { '_doc': 'asc' }])
         .then(() => {
           const setQuerySpy = searchSourceStub.set.withArgs('query');
           expect(setQuerySpy.calledOnce).to.be(true);
           expect(setQuerySpy.firstCall.args[1]).to.eql({
-            terms: {
-              _uid: ['UID'],
+            query: {
+              terms: {
+                _uid: ['UID'],
+              }
             },
+            language: 'lucene'
           });
         });
     });
@@ -98,13 +101,13 @@ describe('context app', function () {
     it('should set the SearchSource sort order', function () {
       const searchSourceStub = new SearchSourceStub();
 
-      return fetchAnchor('INDEX_PATTERN_ID', 'UID', { '@timestamp': 'desc' })
+      return fetchAnchor('INDEX_PATTERN_ID', 'UID', [{ '@timestamp': 'desc' }, { '_doc': 'asc' }])
         .then(() => {
           const setSortSpy = searchSourceStub.set.withArgs('sort');
           expect(setSortSpy.calledOnce).to.be(true);
           expect(setSortSpy.firstCall.args[1]).to.eql([
             { '@timestamp': 'desc' },
-            { '_uid': 'asc' },
+            { '_doc': 'asc' },
           ]);
         });
     });
@@ -113,7 +116,7 @@ describe('context app', function () {
       const searchSourceStub = new SearchSourceStub();
       searchSourceStub._stubHits = [];
 
-      return fetchAnchor('INDEX_PATTERN_ID', 'UID', { '@timestamp': 'desc' })
+      return fetchAnchor('INDEX_PATTERN_ID', 'UID', [{ '@timestamp': 'desc' }, { '_doc': 'asc' }])
         .then(
           () => {
             expect().fail('expected the promise to be rejected');
@@ -131,7 +134,7 @@ describe('context app', function () {
         { property2: 'value2' },
       ];
 
-      return fetchAnchor('INDEX_PATTERN_ID', 'UID', { '@timestamp': 'desc' })
+      return fetchAnchor('INDEX_PATTERN_ID', 'UID', [{ '@timestamp': 'desc' }, { '_doc': 'asc' }])
         .then((anchorDocument) => {
           expect(anchorDocument).to.have.property('property1', 'value1');
           expect(anchorDocument).to.have.property('$$_isAnchor', true);
@@ -159,7 +162,7 @@ function createSearchSourceStubProvider(hits) {
   searchSourceStub.filter = sinon.stub().returns(searchSourceStub);
   searchSourceStub.inherits = sinon.stub().returns(searchSourceStub);
   searchSourceStub.set = sinon.stub().returns(searchSourceStub);
-  searchSourceStub.fetch = sinon.spy(() => Promise.resolve({
+  searchSourceStub.fetchAsRejectablePromise = sinon.spy(() => Promise.resolve({
     hits: {
       hits: searchSourceStub._stubHits,
       total: searchSourceStub._stubHits.length,

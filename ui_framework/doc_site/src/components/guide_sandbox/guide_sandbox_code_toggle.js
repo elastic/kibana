@@ -1,7 +1,5 @@
-import React, {
-  Component,
-  PropTypes,
-} from 'react';
+import PropTypes from 'prop-types';
+import React, { Component } from 'react';
 
 export class GuideSandboxCodeToggle extends Component {
   constructor(props) {
@@ -19,7 +17,7 @@ export class GuideSandboxCodeToggle extends Component {
         className="guideSandboxCodeToggle guideSection__sourceButton"
         onClick={this.onClickSource}
       >
-        <span className="fa fa-code"></span>
+        <span className="fa fa-code" />
       </button>
     );
   }

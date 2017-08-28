@@ -9,14 +9,16 @@ import { handleShortUrlError } from './short_url_error';
 import { shortUrlAssertValid } from './short_url_assert_valid';
 import shortUrlLookupProvider from './short_url_lookup';
 import setupConnectionMixin from './setup_connection';
+import setupRedirectMixin from './setup_redirect_server';
 import registerHapiPluginsMixin from './register_hapi_plugins';
 import xsrfMixin from './xsrf';
 
-module.exports = async function (kbnServer, server, config) {
+export default async function (kbnServer, server, config) {
   server = kbnServer.server = new Hapi.Server();
 
   const shortUrlLookup = shortUrlLookupProvider(server);
   await kbnServer.mixin(setupConnectionMixin);
+  await kbnServer.mixin(setupRedirectMixin);
   await kbnServer.mixin(registerHapiPluginsMixin);
 
   // provide a simple way to expose static directories
@@ -73,12 +75,21 @@ module.exports = async function (kbnServer, server, config) {
   server.ext('onPreResponse', function (req, reply) {
     const response = req.response;
 
+    const customHeaders = {
+      ...config.get('server.customResponseHeaders'),
+      'kbn-name': kbnServer.name,
+      'kbn-version': kbnServer.version,
+    };
+
     if (response.isBoom) {
-      response.output.headers['kbn-name'] = kbnServer.name;
-      response.output.headers['kbn-version'] = kbnServer.version;
+      response.output.headers = {
+        ...response.output.headers,
+        ...customHeaders
+      };
     } else {
-      response.header('kbn-name', kbnServer.name);
-      response.header('kbn-version', kbnServer.version);
+      Object.keys(customHeaders).forEach(name => {
+        response.header(name, customHeaders[name]);
+      });
     }
 
     return reply.continue();
@@ -120,8 +131,8 @@ module.exports = async function (kbnServer, server, config) {
         const url = await shortUrlLookup.getUrl(request.params.urlId, request);
         shortUrlAssertValid(url);
 
-        const uiSettings = server.uiSettings();
-        const stateStoreInSessionStorage = await uiSettings.get(request, 'state:storeInSessionStorage');
+        const uiSettings = request.getUiSettingsService();
+        const stateStoreInSessionStorage = await uiSettings.get('state:storeInSessionStorage');
         if (!stateStoreInSessionStorage) {
           reply().redirect(config.get('server.basePath') + url);
           return;

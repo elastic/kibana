@@ -1,4 +1,5 @@
-import React, { Component, PropTypes } from 'react';
+import PropTypes from 'prop-types';
+import React, { Component } from 'react';
 import { findDOMNode } from 'react-dom';
 import Visualization from './visualization';
 import Toggle from 'react-toggle';
@@ -61,19 +62,22 @@ class VisEditorVisualization extends Component {
     if (autoApply) applyMessage = 'The changes will be automatically applied.';
     const applyButton = (
       <div className="vis_editor__dirty_controls">
-        <div className="vis_editor__dirty_controls-toggle-label">Auto Apply</div>
+        <div className="vis_editor__dirty_controls-toggle-label" id="tsvbAutoApply">Auto Apply</div>
         <div className="vis_editor__dirty_controls-toggle">
           <Toggle
             defaultChecked={autoApply}
             icons={false}
-            onChange={this.props.onToggleAutoApply} />
+            onChange={this.props.onToggleAutoApply}
+          />
         </div>
         <div className="vis_editor__dirty_controls-button">
           <button
             disabled={!dirty}
             onClick={this.props.onCommit}
-            className={`${applyButtonClassName} md`}>
-            <i className="fa fa-play"></i> Apply Changes</button>
+            className={`${applyButtonClassName} md`}
+          >
+            <i className="fa fa-play" /> Apply Changes
+          </button>
         </div>
         <div className={`vis_editor__dirty_controls-message${dirty ? '-dirty' : ''}`}>
           {applyMessage}
@@ -88,21 +92,25 @@ class VisEditorVisualization extends Component {
           style={style}
           data-shared-item={true}
           ref={(el) => this.visDiv = el}
-          className="vis_editor__visualization">
+          className="vis_editor__visualization"
+        >
           <Visualization
             backgroundColor={visBackgroundColor}
             className="dashboard__visualization"
+            dateFormat={this.props.dateFormat}
             model={this.props.model}
             onBrush={this.props.onBrush}
             onChange={this.handleChange}
-            visData={this.props.visData} />
+            visData={this.props.visData}
+          />
         </div>
         {applyButton}
         <div
           className="vis_editor__visualization-draghandle"
           onMouseDown={this.handleMouseDown}
-          onMouseUp={this.handleMouseUp}>
-          <i className="fa fa-ellipsis-h"></i>
+          onMouseUp={this.handleMouseUp}
+        >
+          <i className="fa fa-ellipsis-h" />
         </div>
       </div>
     );
@@ -117,7 +125,8 @@ VisEditorVisualization.propTypes = {
   onToggleAutoApply: PropTypes.func,
   visData: PropTypes.object,
   dirty: PropTypes.bool,
-  autoApply: PropTypes.bool
+  autoApply: PropTypes.bool,
+  dateFormat: PropTypes.string
 };
 
 export default VisEditorVisualization;

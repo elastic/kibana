@@ -2,7 +2,7 @@ import alter from '../lib/alter.js';
 import _ from 'lodash';
 import Chainable from '../lib/classes/chainable';
 
-module.exports = new Chainable('trim', {
+export default new Chainable('trim', {
   args: [
     {
       name: 'inputSeries',

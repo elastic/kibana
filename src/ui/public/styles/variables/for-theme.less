@@ -1,18 +1,17 @@
 @tilemap-leaflet-footer-bg: red;
 @font-size-smaller: ceil((@font-size-base * 0.75));
-@input-border-width: 2px;
+@input-border-width: 1px;
 
-@action-add: desaturate(@btn-success-bg, 30%);
-@action-remove: desaturate(@btn-danger-bg, 30%);
+@action-add: @globalColorBlue;
+@action-remove: @globalColorRed;
 
 @field-collapse-toggle-color: #999;
 
-@mark-bg: #fce571;
-
+@mark-bg: @globalColorTeal;
 
 // Sidebar =====================================================================
 @sidebar-color: @text-color;
-@sidebar-bg: @well-bg;
+@sidebar-bg: @globalColorLightGray;
 @sidebar-border: @well-border;
 
 @sidebar-well-bg: darken(@sidebar-bg, 5%);
@@ -39,8 +38,8 @@
 @discover-link-color: @link-color;
 @discover-link-btn-color: @text-color;
 
-@discover-table-footer-bg: @well-bg;
-@discover-field-filter-bg: @well-bg;
+@discover-table-footer-bg: @globalColorLightGray;
+@discover-field-filter-bg: @globalColorLightGray;
 
 @discover-shard-failures-color: @brand-danger;
 @discover-shard-failures-bg: lighten(@discover-shard-failures-color, 40%);
@@ -48,7 +47,7 @@
 
 @discover-field-details-border: @kibanaGray4;
 @discover-field-details-color: @kibanaGray2;
-@discover-field-details-bg: @kibanaGray5;
+@discover-field-details-bg: shade(@globalColorLightestGray, 5%);
 @discover-field-details-progress-bar-bg: @gray;
 
 @discover-table-highlight-bg: #faebcc;
@@ -81,10 +80,10 @@
 
 
 // table =======================================================================
-@table-dt-color: @brand-primary;
+@table-dt-color: @globalColorBlack;
 @table-cell-hover-bg: white;
 @table-cell-hover-hover-bg: @gray-lighter;
-@table-row-hover-bg: lighten(@gray-lighter, 4%);
+@table-row-hover-bg: darken(@globalColorLightestGray, 2%);
 @table-nested-bg: @body-bg;
 
 @table-sort-color: @gray-light;
@@ -143,7 +142,7 @@
 @visualize-show-spy-hover-bg: @gray-lighter;
 @visualize-show-spy-hover-color: @gray3;
 
-@visualize-info-bg: @well-bg;
+@visualize-info-bg: @globalColorLightGray;
 
 
 // Vis Editor ==================================================================
@@ -157,7 +156,7 @@
 @vis-editor-navbar-modal-color: @kibanaGray1;
 @vis-editor-navbar-modal-link-color: @kibanaGray1;
 
-@vis-editor-sidebar-bg: @body-bg;
+@vis-editor-sidebar-bg: @globalColorLightestGray;
 @vis-editor-sidebar-border: @sidebar-bg;
 @vis-editor-sidebar-title-bg: @gray-lighter;
 @vis-editor-sidebar-title-hover-bg: @vis-editor-sidebar-title-bg;
@@ -183,8 +182,8 @@
 // List Group Menu =============================================================
 @list-group-menu-item-color: @link-color;
 @list-group-menu-item-select-color: @link-color;
-@list-group-menu-item-active-bg: @well-bg;
-@list-group-menu-item-hover-bg: @kibanaGray5;
+@list-group-menu-item-active-bg: @globalColorLightGray;
+@list-group-menu-item-hover-bg: tint(@globalColorBlue, 90%);
 
 
 // Hint Box ====================================================================
@@ -200,9 +199,9 @@
 @filter-bar-confirm-border: #ccc;
 @filter-bar-confirm-filter-bg: @gray-light;
 
-@filter-bar-bar-bg: @gray-lighter;
-@filter-bar-bar-border: #ccc;
-@filter-bar-bar-condensed-bg: darken(@filter-bar-bar-bg, 5%);
+@filter-bar-bar-bg: @globalColorLightestGray;
+@filter-bar-bar-border: @globalColorLightGray;
+@filter-bar-bar-condensed-bg: tint(@globalColorBlue, 90%);
 
 @filter-bar-bar-filter-bg: @action-add;
 @filter-bar-bar-filter-color: @white;
@@ -213,7 +212,7 @@
 @config-border: darken(@body-bg, 10%);
 @config-bg: @kibanaGray6;
 
-@config-close-bg: @well-bg;
+@config-close-bg: @globalColorLightGray;
 
 
 // Hintbox =====================================================================
@@ -255,14 +254,14 @@
 
 
 // Typeahead ===================================================================
-@typeahead-items-border: @popover-border-color;
+@typeahead-items-border: @globalColorLightGray;
 @typeahead-items-color: @text-color;
 @typeahead-items-bg: @body-bg;
 
 @typeahead-item-color: @text-color;
-@typeahead-item-border: lighten(@popover-border-color, 60%);
+@typeahead-item-border: @globalColorLightGray;
 @typeahead-item-bg: @body-bg;
-@typeahead-item-active-bg: @well-bg;
+@typeahead-item-active-bg: @globalColorBlue;
 
 
 // Alerts ======================================================================
@@ -308,8 +307,8 @@
 @tooltip-space: 8px;
 @tooltip-space-tight: @tooltip-space / 2;
 
-@tooltip-bg: fadeout(@gray-darker, 7%);
-@tooltip-color: @gray-lighter;
+@tooltip-bg: fadeout(darken(@globalColorBlue, 30%), 10%);
+@tooltip-color: @globalColorWhite;
 
 @tooltip-table-border: @gray;
 @tooltip-bold: 600;
@@ -335,5 +334,5 @@
 @global-nav-closed-width: 53px;
 @app-icon-height: 38px;
 @app-line-height: 24px;
-@app-links-wrapper-background: #3caed2;
-@app-links-active-background: #2f99c1;
+@app-links-wrapper-background: @globalColorDarkGray;
+@app-links-active-background: darken(@app-links-wrapper-background, 5%);

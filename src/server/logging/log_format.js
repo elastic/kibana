@@ -1,7 +1,7 @@
 import Stream from 'stream';
 import moment from 'moment';
 import _ from 'lodash';
-import numeral from '@spalger/numeral';
+import numeral from '@elastic/numeral';
 import ansicolors from 'ansicolors';
 import stringify from 'json-stringify-safe';
 import querystring from 'querystring';
@@ -26,7 +26,7 @@ const levelColor = function (code) {
 };
 
 
-module.exports = class TransformObjStream extends Stream.Transform {
+export default class TransformObjStream extends Stream.Transform {
   constructor(config) {
     super({
       readableObjectMode: false,
@@ -137,4 +137,4 @@ module.exports = class TransformObjStream extends Stream.Transform {
     }
     return data;
   }
-};
+}

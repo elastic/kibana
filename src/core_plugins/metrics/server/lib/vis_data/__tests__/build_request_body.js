@@ -49,6 +49,7 @@ const body = JSON.parse(`
         }
     ],
     "timerange": {
+        "timezone": "UTC",
         "max": "2017-01-26T20:52:35.881Z",
         "min": "2017-01-26T20:37:35.881Z"
     }
@@ -72,7 +73,7 @@ describe('buildRequestBody(req)', () => {
               'range': {
                 '@timestamp': {
                   'gte': 1485463055881,
-                  'lte': 1485463945881,
+                  'lte': 1485463955881,
                   'format': 'epoch_millis'
                 }
               }
@@ -104,9 +105,10 @@ describe('buildRequestBody(req)', () => {
                 'field': '@timestamp',
                 'interval': '10s',
                 'min_doc_count': 0,
+                'time_zone': 'UTC',
                 'extended_bounds': {
                   'min': 1485463055881,
-                  'max': 1485463945881
+                  'max': 1485463955881
                 }
               },
               'aggs': {

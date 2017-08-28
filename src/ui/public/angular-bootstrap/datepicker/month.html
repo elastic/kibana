@@ -1,5 +1,5 @@
 <table
-  class="kuiDatePicker"
+  class="kuiDatePicker fullWidth"
   role="grid"
   aria-labelledby="{{uniqueId}}-title"
   aria-activedescendant="{{activeDateId}}"
@@ -15,6 +15,7 @@
             type="button"
             class="kuiDatePickerNavigationButton"
             ng-click="move(-1)"
+            aria-label="Previous year"
           >
             <span class="kuiIcon fa-chevron-left"></span>
           </button>
@@ -35,6 +36,7 @@
             type="button"
             class="kuiDatePickerNavigationButton"
             ng-click="move(1)"
+            aria-label="Next year"
           >
             <span class="kuiIcon fa-chevron-right"></span>
           </button>
@@ -48,7 +50,6 @@
         ng-repeat="dt in row track by dt.date"
         class="kuiDatePickerRowCell"
         ng-class="{'kuiDatePickerRowCell-isBlocked': dt.disabled && !dt.secondary}"
-        role="gridcell"
         id="{{dt.uid}}"
         aria-disabled="{{!!dt.disabled}}"
       >

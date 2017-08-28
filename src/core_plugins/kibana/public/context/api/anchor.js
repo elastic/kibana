@@ -15,13 +15,16 @@ function fetchAnchorProvider(courier, Private) {
       .set('version', true)
       .set('size', 1)
       .set('query', {
-        terms: {
-          _uid: [uid],
+        query: {
+          terms: {
+            _uid: [uid],
+          }
         },
+        language: 'lucene'
       })
-      .set('sort', [sort, { _uid: 'asc' }]);
+      .set('sort', sort);
 
-    const response = await searchSource.fetch();
+    const response = await searchSource.fetchAsRejectablePromise();
 
     if (_.get(response, ['hits', 'total'], 0) < 1) {
       throw new Error('Failed to load anchor document.');

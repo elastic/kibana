@@ -1,6 +1,6 @@
 import { chain, get, noop, once, pick } from 'lodash';
 
-class UiApp {
+export default class UiApp {
   constructor(uiExports, spec) {
     this.uiExports = uiExports;
     this.spec = spec || {};
@@ -16,6 +16,7 @@ class UiApp {
     this.description = this.spec.description;
     this.icon = this.spec.icon;
     this.hidden = !!this.spec.hidden;
+    this.linkToLastSubUrl = this.spec.linkToLastSubUrl;
     this.listed = this.spec.listed == null ? !this.hidden : this.spec.listed;
     this.templateName = this.spec.templateName || 'ui_app';
 
@@ -27,7 +28,8 @@ class UiApp {
         order: this.order,
         description: this.description,
         icon: this.icon,
-        url: this.spec.url || `/app/${this.id}`
+        url: this.spec.url || `/app/${this.id}`,
+        linkToLastSubUrl: this.linkToLastSubUrl
       });
 
       if (!this.listed) {
@@ -62,8 +64,6 @@ class UiApp {
   }
 
   toJSON() {
-    return pick(this, ['id', 'title', 'description', 'icon', 'main', 'navLink']);
+    return pick(this, ['id', 'title', 'description', 'icon', 'main', 'navLink', 'linkToLastSubUrl']);
   }
 }
-
-module.exports = UiApp;

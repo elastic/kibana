@@ -3,7 +3,7 @@ import _ from 'lodash';
 import { fetchAnchorProvider } from '../api/anchor';
 import { fetchContextProvider } from '../api/context';
 import { QueryParameterActionsProvider } from '../query_parameters';
-import { LOADING_STATUS } from './constants';
+import { FAILURE_REASONS, LOADING_STATUS } from './constants';
 
 
 export function QueryActionsProvider(courier, Notifier, Private, Promise) {
@@ -21,26 +21,48 @@ export function QueryActionsProvider(courier, Notifier, Private, Promise) {
     location: 'Context',
   });
 
-  const setLoadingStatus = (state) => (subject, status) => (
-    state.loadingStatus[subject] = status
+  const setFailedStatus = (state) => (subject, details = {}) => (
+    state.loadingStatus[subject] = {
+      status: LOADING_STATUS.FAILED,
+      reason: FAILURE_REASONS.UNKNOWN,
+      ...details,
+    }
+  );
+
+  const setLoadedStatus = (state) => (subject) => (
+    state.loadingStatus[subject] = {
+      status: LOADING_STATUS.LOADED,
+    }
+  );
+
+  const setLoadingStatus = (state) => (subject) => (
+    state.loadingStatus[subject] = {
+      status: LOADING_STATUS.LOADING,
+    }
   );
 
   const fetchAnchorRow = (state) => () => {
-    const { queryParameters: { indexPatternId, anchorUid, sort } } = state;
+    const { queryParameters: { indexPatternId, anchorUid, sort, tieBreakerField } } = state;
 
-    setLoadingStatus(state)('anchor', LOADING_STATUS.LOADING);
+    if (!tieBreakerField) {
+      return Promise.reject(setFailedStatus(state)('anchor', {
+        reason: FAILURE_REASONS.INVALID_TIEBREAKER
+      }));
+    }
+
+    setLoadingStatus(state)('anchor');
 
     return Promise.try(() => (
-      fetchAnchor(indexPatternId, anchorUid, _.zipObject([sort]))
+      fetchAnchor(indexPatternId, anchorUid, [_.zipObject([sort]), { [tieBreakerField]: 'asc' }])
     ))
       .then(
         (anchorDocument) => {
-          setLoadingStatus(state)('anchor', LOADING_STATUS.LOADED);
+          setLoadedStatus(state)('anchor');
           state.rows.anchor = anchorDocument;
           return anchorDocument;
         },
         (error) => {
-          setLoadingStatus(state)('anchor', LOADING_STATUS.FAILED);
+          setFailedStatus(state)('anchor', { error });
           notifier.error(error);
           throw error;
         }
@@ -49,23 +71,29 @@ export function QueryActionsProvider(courier, Notifier, Private, Promise) {
 
   const fetchPredecessorRows = (state) => () => {
     const {
-      queryParameters: { indexPatternId, filters, predecessorCount, sort },
+      queryParameters: { indexPatternId, filters, predecessorCount, sort, tieBreakerField },
       rows: { anchor },
     } = state;
 
-    setLoadingStatus(state)('predecessors', LOADING_STATUS.LOADING);
+    if (!tieBreakerField) {
+      return Promise.reject(setFailedStatus(state)('predecessors', {
+        reason: FAILURE_REASONS.INVALID_TIEBREAKER
+      }));
+    }
+
+    setLoadingStatus(state)('predecessors');
 
     return Promise.try(() => (
-      fetchPredecessors(indexPatternId, anchor, _.zipObject([sort]), predecessorCount, filters)
+      fetchPredecessors(indexPatternId, anchor, [_.zipObject([sort]), { [tieBreakerField]: 'asc' }], predecessorCount, filters)
     ))
       .then(
         (predecessorDocuments) => {
-          setLoadingStatus(state)('predecessors', LOADING_STATUS.LOADED);
+          setLoadedStatus(state)('predecessors');
           state.rows.predecessors = predecessorDocuments;
           return predecessorDocuments;
         },
         (error) => {
-          setLoadingStatus(state)('predecessors', LOADING_STATUS.FAILED);
+          setFailedStatus(state)('predecessors', { error });
           notifier.error(error);
           throw error;
         },
@@ -74,23 +102,29 @@ export function QueryActionsProvider(courier, Notifier, Private, Promise) {
 
   const fetchSuccessorRows = (state) => () => {
     const {
-      queryParameters: { indexPatternId, filters, sort, successorCount },
+      queryParameters: { indexPatternId, filters, sort, successorCount, tieBreakerField },
       rows: { anchor },
     } = state;
 
-    setLoadingStatus(state)('successors', LOADING_STATUS.LOADING);
+    if (!tieBreakerField) {
+      return Promise.reject(setFailedStatus(state)('successors', {
+        reason: FAILURE_REASONS.INVALID_TIEBREAKER
+      }));
+    }
+
+    setLoadingStatus(state)('successors');
 
     return Promise.try(() => (
-      fetchSuccessors(indexPatternId, anchor, _.zipObject([sort]), successorCount, filters)
+      fetchSuccessors(indexPatternId, anchor, [_.zipObject([sort]), { [tieBreakerField]: 'asc' }], successorCount, filters)
     ))
       .then(
         (successorDocuments) => {
-          setLoadingStatus(state)('successors', LOADING_STATUS.LOADED);
+          setLoadedStatus(state)('successors');
           state.rows.successors = successorDocuments;
           return successorDocuments;
         },
         (error) => {
-          setLoadingStatus(state)('successors', LOADING_STATUS.FAILED);
+          setFailedStatus(state)('successors', { error });
           notifier.error(error);
           throw error;
         },

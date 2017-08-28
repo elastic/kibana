@@ -101,7 +101,7 @@ var jsonRules = function (root) {
  return rules;
 };
 
-module.exports.addToRules = function (otherRules, embedUnder) {
+export function addToRules(otherRules, embedUnder) {
   otherRules.$rules = _.defaultsDeep(otherRules.$rules, jsonRules(embedUnder));
   otherRules.embedRules(ScriptHighlightRules, "script-", [{
      token: "punctuation.end_triple_quote",

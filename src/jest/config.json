@@ -1,0 +1,46 @@
+{
+  "rootDir": "../../",
+  "roots": [
+    "<rootDir>/src/core_plugins/kibana/public/dashboard",
+    "<rootDir>/ui_framework/"
+  ],
+  "collectCoverageFrom": [
+    "ui_framework/src/components/**/*.js",
+    "!ui_framework/src/components/index.js",
+    "!ui_framework/src/components/**/*/index.js",
+    "ui_framework/src/services/**/*.js",
+    "!ui_framework/src/services/index.js",
+    "!ui_framework/src/services/**/*/index.js"
+  ],
+  "moduleNameMapper": {
+    "^ui_framework/components": "<rootDir>/ui_framework/components",
+    "^ui_framework/services": "<rootDir>/ui_framework/services",
+    "\\.(jpg|jpeg|png|gif|eot|otf|webp|svg|ttf|woff|woff2|mp4|webm|wav|mp3|m4a|aac|oga)$": "<rootDir>/src/jest/file_mock.js",
+    "\\.(css|less|scss)$": "<rootDir>/src/jest/style_mock.js"
+  },
+  "coverageDirectory": "<rootDir>/target/jest-coverage",
+  "coverageReporters": [
+    "html"
+  ],
+  "moduleFileExtensions": [
+    "js",
+    "json"
+  ],
+  "testMatch": [
+    "**/*.test.js"
+  ],
+  "testPathIgnorePatterns": [
+    "<rootDir>/ui_framework/dist/",
+    "<rootDir>/ui_framework/doc_site/",
+    "<rootDir>/ui_framework/generator-kui/"
+  ],
+  "transform": {
+    "^.+\\.js$": "<rootDir>/src/jest/babelTransform.js"
+  },
+  "transformIgnorePatterns": [
+    "[/\\\\]node_modules[/\\\\].+\\.js$"
+  ],
+  "snapshotSerializers": [
+    "<rootDir>/node_modules/enzyme-to-json/serializer"
+  ]
+}

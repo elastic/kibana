@@ -1,4 +1,5 @@
-import React, { Component, PropTypes } from 'react';
+import PropTypes from 'prop-types';
+import React, { Component } from 'react';
 import reIdSeries from './lib/re_id_series';
 import Series from './series';
 import {
@@ -37,7 +38,8 @@ class SeriesEditor extends Component {
         onDelete={handleDelete.bind(null, props, row)}
         model={row}
         panel={model}
-        sortData={row.id} />
+        sortData={row.id}
+      />
     );
   }
 
@@ -56,7 +58,8 @@ class SeriesEditor extends Component {
           dynamic={true}
           direction="vertical"
           onSort={handleSort}
-          sortHandle="vis_editor__sort">
+          sortHandle="vis_editor__sort"
+        >
           { series }
         </Sortable>
       </div>

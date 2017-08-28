@@ -1,7 +1,7 @@
 import parseDateMath from '../../lib/date_math.js';
 import toMS from '../../lib/to_milliseconds.js';
 
-module.exports = function validateTime(time, tlConfig) {
+export default function validateTime(time, tlConfig) {
   const span = parseDateMath(time.to, true) - parseDateMath(time.from);
   const interval = toMS(time.interval);
   const bucketCount = span / interval;
@@ -12,4 +12,4 @@ module.exports = function validateTime(time, tlConfig) {
       'Choose a larger interval or a shorter time span');
   }
   return true;
-};
+}

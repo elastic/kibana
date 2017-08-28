@@ -16,10 +16,11 @@ module.controller('KbnTagCloudController', function ($scope, $element, Private, 
   tagCloud.on('select', (event) => {
     const appState = getAppState();
     const clickHandler = filterBarClickHandler(appState);
-    const aggs = $scope.vis.aggs.getResponseAggs();
+    const aggs = $scope.vis.getAggConfig().getResponseAggs();
     const aggConfigResult = new AggConfigResult(aggs[0], false, event, event);
     clickHandler({ point: { aggConfigResult: aggConfigResult } });
   });
+
   tagCloud.on('renderComplete', () => {
 
     const truncatedMessage = containerNode.querySelector('.tagcloud-truncated-message');
@@ -33,13 +34,9 @@ module.controller('KbnTagCloudController', function ($scope, $element, Private, 
 
     const bucketName = containerNode.querySelector('.tagcloud-custom-label');
     bucketName.innerHTML = `${$scope.vis.aggs[0].makeLabel()} - ${$scope.vis.aggs[1].makeLabel()}`;
-
-
     truncatedMessage.style.display = truncated ? 'block' : 'none';
 
-
     const status = tagCloud.getStatus();
-
     if (TagCloud.STATUS.COMPLETE === status) {
       incompleteMessage.style.display = 'none';
     } else if (TagCloud.STATUS.INCOMPLETE === status) {
@@ -47,7 +44,7 @@ module.controller('KbnTagCloudController', function ($scope, $element, Private, 
     }
 
 
-    $element.trigger('renderComplete');
+    $scope.renderComplete();
   });
 
   $scope.$watch('esResponse', async function (response) {
@@ -57,13 +54,13 @@ module.controller('KbnTagCloudController', function ($scope, $element, Private, 
       return;
     }
 
-    const tagsAggId = _.first(_.pluck($scope.vis.aggs.bySchemaName.segment, 'id'));
+    const tagsAggId = _.first(_.pluck($scope.vis.getAggConfig().bySchemaName.segment, 'id'));
     if (!tagsAggId || !response.aggregations) {
       tagCloud.setData([]);
       return;
     }
 
-    const metricsAgg = _.first($scope.vis.aggs.bySchemaName.metric);
+    const metricsAgg = _.first($scope.vis.getAggConfig().bySchemaName.metric);
     const buckets = response.aggregations[tagsAggId].buckets;
 
     const tags = buckets.map((bucket) => {
@@ -87,14 +84,9 @@ module.controller('KbnTagCloudController', function ($scope, $element, Private, 
 
   $scope.$watch('vis.params', (options) => tagCloud.setOptions(options));
 
-  $scope.$watch(getContainerSize, _.debounce(() => {
+  $scope.$watch('resize', () => {
     tagCloud.resize();
-  }, 1000, { trailing: true }), true);
-
-
-  function getContainerSize() {
-    return { width: $element.width(), height: $element.height() };
-  }
+  });
 
   function getValue(metricsAgg, bucket) {
     let size = metricsAgg.getValue(bucket);

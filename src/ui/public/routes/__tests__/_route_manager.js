@@ -113,4 +113,71 @@ describe('routes/route_manager', function () {
       expect($rp.when.lastCall.args[1]).to.have.property('requireDefaultIndex', true);
     });
   });
+
+  describe('#defaults()', () => {
+    it('adds defaults to routes with matching paths', () => {
+      routes.when('/foo', { name: 'foo' });
+      routes.when('/bar', { name: 'bar' });
+      routes.when('/baz', { name: 'baz' });
+      routes.defaults(/^\/ba/, {
+        withDefaults: true
+      });
+      routes.config($rp);
+
+      sinon.assert.calledWithExactly($rp.when, '/foo', sinon.match({ name: 'foo', withDefaults: undefined }));
+      sinon.assert.calledWithExactly($rp.when, '/bar', sinon.match({ name: 'bar', withDefaults: true }));
+      sinon.assert.calledWithExactly($rp.when, '/baz', sinon.match({ name: 'baz', withDefaults: true }));
+    });
+
+    it('does not override values specified in the route', () => {
+      routes.when('/foo', { name: 'foo' });
+      routes.defaults(/./, { name: 'bar' });
+      routes.config($rp);
+
+      sinon.assert.calledWithExactly($rp.when, '/foo', sinon.match({ name: 'foo' }));
+    });
+
+    // See https://github.com/elastic/kibana/issues/13294
+    it('does not assign defaults by reference, to prevent accidentally merging unrelated defaults together', () => {
+      routes.when('/foo', { name: 'foo' });
+      routes.when('/bar', { name: 'bar' });
+      routes.when('/baz', { name: 'baz', funcs: { bazFunc() {} } });
+
+      // multiple defaults must be defined that, when applied correctly, will
+      // create a new object property on all routes that is unique to all of them
+      routes.defaults(/./, { funcs: { all() {} } });
+      routes.defaults(/^\/foo/, { funcs: { fooFunc() {} } });
+      routes.defaults(/^\/bar/, { funcs: { barFunc() {} } });
+      routes.config($rp);
+
+      sinon.assert.calledThrice($rp.when);
+      sinon.assert.calledWithExactly($rp.when, '/foo', sinon.match({
+        name: 'foo',
+        funcs: sinon.match({
+          all: sinon.match.func,
+          fooFunc: sinon.match.func,
+          barFunc: undefined,
+          bazFunc: undefined,
+        })
+      }));
+      sinon.assert.calledWithExactly($rp.when, '/bar', sinon.match({
+        name: 'bar',
+        funcs: sinon.match({
+          all: sinon.match.func,
+          fooFunc: undefined,
+          barFunc: sinon.match.func,
+          bazFunc: undefined,
+        })
+      }));
+      sinon.assert.calledWithExactly($rp.when, '/baz', sinon.match({
+        name: 'baz',
+        funcs: sinon.match({
+          all: sinon.match.func,
+          fooFunc: undefined,
+          barFunc: undefined,
+          bazFunc: sinon.match.func,
+        })
+      }));
+    });
+  });
 });

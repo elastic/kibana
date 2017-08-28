@@ -21,23 +21,25 @@ export default function ({ getService, getPageObjects }) {
     });
 
     describe('index pattern creation', function indexPatternCreation() {
+      let indexPatternId;
+
       before(function () {
-        return PageObjects.settings.createIndexPattern();
+        return PageObjects.settings.createIndexPattern()
+          .then(id => indexPatternId = id);
       });
 
-      it('should have index pattern in page header', function () {
-        return PageObjects.settings.getIndexPageHeading().getVisibleText()
-        .then(function (patternName) {
-          screenshots.take('Settings-indices-new-index-pattern');
-          expect(patternName).to.be('logstash-*');
-        });
+      it('should have index pattern in page header', async function () {
+        const indexPageHeading = await PageObjects.settings.getIndexPageHeading();
+        const patternName = await indexPageHeading.getVisibleText();
+        screenshots.take('Settings-indices-new-index-pattern');
+        expect(patternName).to.be('logstash-*');
       });
 
       it('should have index pattern in url', function url() {
         return retry.try(function tryingForTime() {
           return remote.getCurrentUrl()
           .then(function (currentUrl) {
-            expect(currentUrl).to.contain('logstash-*');
+            expect(currentUrl).to.contain(indexPatternId);
           });
         });
       });
@@ -82,7 +84,7 @@ export default function ({ getService, getPageObjects }) {
 
       it('should return to index pattern creation page', function returnToPage() {
         return retry.try(function tryingForTime() {
-          return PageObjects.settings.getCreateButton();
+          return PageObjects.settings.getCreateIndexPatternGoToStep2Button();
         });
       });
 

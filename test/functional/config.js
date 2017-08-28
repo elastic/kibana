@@ -10,14 +10,13 @@ import {
   SettingsPageProvider,
   MonitoringPageProvider,
   PointSeriesPageProvider,
-  GettingStartedPageProvider
 } from './page_objects';
 
 import {
   RemoteProvider,
   FilterBarProvider,
+  QueryBarProvider,
   FindProvider,
-  RetryProvider,
   TestSubjectsProvider,
   DocTableProvider,
   ScreenshotsProvider,
@@ -49,16 +48,17 @@ export default async function ({ readConfigFile }) {
       settings: SettingsPageProvider,
       monitoring: MonitoringPageProvider,
       pointSeries: PointSeriesPageProvider,
-      gettingStarted: GettingStartedPageProvider,
     },
     services: {
       es: commonConfig.get('services.es'),
       esArchiver: commonConfig.get('services.esArchiver'),
       kibanaServer: commonConfig.get('services.kibanaServer'),
+      kibanaIndex: commonConfig.get('services.kibanaIndex'),
+      retry: commonConfig.get('services.retry'),
       remote: RemoteProvider,
       filterBar: FilterBarProvider,
+      queryBar: QueryBarProvider,
       find: FindProvider,
-      retry: RetryProvider,
       testSubjects: TestSubjectsProvider,
       docTable: DocTableProvider,
       screenshots: ScreenshotsProvider,

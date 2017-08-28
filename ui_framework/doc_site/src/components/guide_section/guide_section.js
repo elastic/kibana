@@ -1,7 +1,5 @@
-import React, {
-  Component,
-  PropTypes,
-} from 'react';
+import PropTypes from 'prop-types';
+import React, { Component } from 'react';
 
 import Slugify from '../../services/string/slugify';
 
@@ -41,7 +39,7 @@ export class GuideSection extends Component {
             className="guideSection__sourceButton"
             onClick={this.onClickSource}
           >
-            <span className="fa fa-code"></span>
+            <span className="fa fa-code" />
           </button>
         </div>
 

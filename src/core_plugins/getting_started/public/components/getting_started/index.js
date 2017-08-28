@@ -1,1 +1,0 @@
-import './getting_started';

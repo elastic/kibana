@@ -1,4 +1,5 @@
-import React, { PropTypes } from 'react';
+import PropTypes from 'prop-types';
+import React from 'react';
 import AggSelect from './agg_select';
 import FieldSelect from './field_select';
 import AggRow from './agg_row';
@@ -23,24 +24,32 @@ function StandardAgg(props) {
       model={props.model}
       onAdd={props.onAdd}
       onDelete={props.onDelete}
-      siblings={props.siblings}>
+      siblings={props.siblings}
+    >
       <div className="vis_editor__item">
         <div className="vis_editor__label">Aggregation</div>
         <AggSelect
           siblings={props.siblings}
           value={model.type}
-          onChange={handleSelectChange('type')}/>
+          onChange={handleSelectChange('type')}
+        />
       </div>
-      { model.type !== 'count' ? (<div className="vis_editor__item">
-        <div className="vis_editor__label">Field</div>
-        <FieldSelect
-          fields={fields}
-          type={model.type}
-          restrict={restrict}
-          indexPattern={indexPattern}
-          value={model.field}
-          onChange={handleSelectChange('field')}/>
-      </div>) : null }
+      {
+        model.type !== 'count'
+        ? (
+          <div className="vis_editor__item">
+            <div className="vis_editor__label">Field</div>
+            <FieldSelect
+              fields={fields}
+              type={model.type}
+              restrict={restrict}
+              indexPattern={indexPattern}
+              value={model.field}
+              onChange={handleSelectChange('field')}
+            />
+          </div>
+        ) : null
+      }
     </AggRow>
   );
 

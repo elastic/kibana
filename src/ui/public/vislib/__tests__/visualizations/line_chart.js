@@ -149,21 +149,6 @@ describe('Vislib Line Chart', function () {
         });
       });
 
-      describe('containerTooSmall error', function () {
-        beforeEach(function () {
-          $(vis.el).height(0);
-          $(vis.el).width(0);
-        });
-
-        it('should throw an error', function () {
-          vis.handler.charts.forEach(function (chart) {
-            expect(function () {
-              chart.render();
-            }).to.throwError();
-          });
-        });
-      });
-
       describe('defaultYExtents is true', function () {
         beforeEach(function () {
           vis.visConfigArgs.defaultYExtents = true;

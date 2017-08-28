@@ -1,7 +1,8 @@
 import createSelectHandler from '../lib/create_select_handler';
 import GroupBySelect from './group_by_select';
 import FilterItems from './filter_items';
-import React, { PropTypes } from 'react';
+import PropTypes from 'prop-types';
+import React from 'react';
 function SplitByFilters(props) {
   const { onChange, model } = props;
   const handleSelectChange = createSelectHandler(onChange);
@@ -12,7 +13,8 @@ function SplitByFilters(props) {
         <div className="vis_editor__split-selects">
           <GroupBySelect
             value={model.split_mode}
-            onChange={handleSelectChange('split_mode')} />
+            onChange={handleSelectChange('split_mode')}
+          />
         </div>
       </div>
       <div className="vis_editor__split-container">
@@ -20,7 +22,8 @@ function SplitByFilters(props) {
           <FilterItems
             name="split_filters"
             model={model}
-            onChange={onChange} />
+            onChange={onChange}
+          />
         </div>
       </div>
     </div>
