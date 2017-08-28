@@ -18,7 +18,8 @@ export default function PointSeriesVisType(Private) {
       defaults: {
         type: 'histogram',
         grid: {
-          categoryLines: false,
+          categoryLines: true,
+          valueAxis: 'ValueAxis-1',
           style: {
             color: '#eee'
           }
@@ -77,7 +78,7 @@ export default function PointSeriesVisType(Private) {
           },
           valueAxis: 'ValueAxis-1',
           drawLinesBetweenPoints: true,
-          showCircles: true
+          showCircles: false
         }],
         addTooltip: true,
         addLegend: true,

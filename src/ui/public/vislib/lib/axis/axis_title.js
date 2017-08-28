@@ -28,7 +28,7 @@ export function VislibLibAxisTitleProvider() {
           const div = d3.select(el);
           const width = $(el).width();
           const height = $(el).height();
-          const titlePadding = 12;
+          const titlePadding = 16;
           const axisPrefix = config.isHorizontal() ? 'x' : 'y';
 
           const svg = div.append('svg')
@@ -37,16 +37,16 @@ export function VislibLibAxisTitleProvider() {
             .attr('class', `axis-title ${axisPrefix}-axis-title`);
 
           const bbox = svg.append('text')
-          .attr('transform', function () {
-            if (config.isHorizontal()) {
-              return `translate(${width / 2},${titlePadding})`;
-            }
-            return `translate(${titlePadding},${height / 2}) rotate(270)`;
-          })
-          .attr('text-anchor', 'middle')
-          .text(config.get('title.text'))
-          .node()
-          .getBBox();
+            .text(config.get('title.text'))
+            .attr('text-anchor', 'middle')
+            .attr('transform', function () {
+              if (config.isHorizontal()) {
+                return `translate(${width / 2},${titlePadding})`;
+              }
+              return `translate(${titlePadding},${height / 2}) rotate(270)`;
+            })
+            .node()
+            .getBBox();
 
           if (config.isHorizontal()) {
             svg.attr('height', bbox.height);

@@ -37,7 +37,7 @@ export function VislibLibAxisConfigProvider() {
       filter: false,
       color: '#666',
       font: '"Open Sans", "Lato", "Helvetica Neue", Helvetica, Arial, sans-serif',
-      fontSize: '8pt',
+      fontSize: '14px',
       truncate: 100
     },
     title: {
